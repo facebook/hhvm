@@ -29,10 +29,10 @@ where
     V: SyntaxValueType<PositionedToken> + ToOcaml,
 {
     fn make_end_of_file(ctx: &C, arg0: Self) -> Self {
-      let children = [
-          &arg0.value
+      let children = &[
+          arg0.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::EndOfFile,
@@ -45,10 +45,10 @@ where
     }
 
     fn make_script(ctx: &C, arg0: Self) -> Self {
-      let children = [
-          &arg0.value
+      let children = &[
+          arg0.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::Script,
@@ -61,10 +61,10 @@ where
     }
 
     fn make_qualified_name(ctx: &C, arg0: Self) -> Self {
-      let children = [
-          &arg0.value
+      let children = &[
+          arg0.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::QualifiedName,
@@ -77,10 +77,10 @@ where
     }
 
     fn make_simple_type_specifier(ctx: &C, arg0: Self) -> Self {
-      let children = [
-          &arg0.value
+      let children = &[
+          arg0.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::SimpleTypeSpecifier,
@@ -93,10 +93,10 @@ where
     }
 
     fn make_literal_expression(ctx: &C, arg0: Self) -> Self {
-      let children = [
-          &arg0.value
+      let children = &[
+          arg0.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::LiteralExpression,
@@ -109,11 +109,11 @@ where
     }
 
     fn make_prefixed_string_expression(ctx: &C, arg0: Self, arg1: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value
+      let children = &[
+          arg0.value, 
+          arg1.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::PrefixedStringExpression,
@@ -127,13 +127,13 @@ where
     }
 
     fn make_prefixed_code_expression(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value, 
-          &arg3.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value, 
+          arg3.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::PrefixedCodeExpression,
@@ -149,10 +149,10 @@ where
     }
 
     fn make_variable_expression(ctx: &C, arg0: Self) -> Self {
-      let children = [
-          &arg0.value
+      let children = &[
+          arg0.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::VariableExpression,
@@ -165,10 +165,10 @@ where
     }
 
     fn make_pipe_variable_expression(ctx: &C, arg0: Self) -> Self {
-      let children = [
-          &arg0.value
+      let children = &[
+          arg0.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::PipeVariableExpression,
@@ -181,14 +181,14 @@ where
     }
 
     fn make_file_attribute_specification(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self, arg4: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value, 
-          &arg3.value, 
-          &arg4.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value, 
+          arg3.value, 
+          arg4.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::FileAttributeSpecification,
@@ -205,20 +205,20 @@ where
     }
 
     fn make_enum_declaration(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self, arg4: Self, arg5: Self, arg6: Self, arg7: Self, arg8: Self, arg9: Self, arg10: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value, 
-          &arg3.value, 
-          &arg4.value, 
-          &arg5.value, 
-          &arg6.value, 
-          &arg7.value, 
-          &arg8.value, 
-          &arg9.value, 
-          &arg10.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value, 
+          arg3.value, 
+          arg4.value, 
+          arg5.value, 
+          arg6.value, 
+          arg7.value, 
+          arg8.value, 
+          arg9.value, 
+          arg10.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::EnumDeclaration,
@@ -241,13 +241,13 @@ where
     }
 
     fn make_enumerator(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value, 
-          &arg3.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value, 
+          arg3.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::Enumerator,
@@ -263,18 +263,18 @@ where
     }
 
     fn make_record_declaration(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self, arg4: Self, arg5: Self, arg6: Self, arg7: Self, arg8: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value, 
-          &arg3.value, 
-          &arg4.value, 
-          &arg5.value, 
-          &arg6.value, 
-          &arg7.value, 
-          &arg8.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value, 
+          arg3.value, 
+          arg4.value, 
+          arg5.value, 
+          arg6.value, 
+          arg7.value, 
+          arg8.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::RecordDeclaration,
@@ -295,13 +295,13 @@ where
     }
 
     fn make_record_field(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value, 
-          &arg3.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value, 
+          arg3.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::RecordField,
@@ -317,17 +317,17 @@ where
     }
 
     fn make_alias_declaration(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self, arg4: Self, arg5: Self, arg6: Self, arg7: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value, 
-          &arg3.value, 
-          &arg4.value, 
-          &arg5.value, 
-          &arg6.value, 
-          &arg7.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value, 
+          arg3.value, 
+          arg4.value, 
+          arg5.value, 
+          arg6.value, 
+          arg7.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::AliasDeclaration,
@@ -347,14 +347,14 @@ where
     }
 
     fn make_property_declaration(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self, arg4: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value, 
-          &arg3.value, 
-          &arg4.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value, 
+          arg3.value, 
+          arg4.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::PropertyDeclaration,
@@ -371,11 +371,11 @@ where
     }
 
     fn make_property_declarator(ctx: &C, arg0: Self, arg1: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value
+      let children = &[
+          arg0.value, 
+          arg1.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::PropertyDeclarator,
@@ -389,11 +389,11 @@ where
     }
 
     fn make_namespace_declaration(ctx: &C, arg0: Self, arg1: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value
+      let children = &[
+          arg0.value, 
+          arg1.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::NamespaceDeclaration,
@@ -407,11 +407,11 @@ where
     }
 
     fn make_namespace_declaration_header(ctx: &C, arg0: Self, arg1: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value
+      let children = &[
+          arg0.value, 
+          arg1.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::NamespaceDeclarationHeader,
@@ -425,12 +425,12 @@ where
     }
 
     fn make_namespace_body(ctx: &C, arg0: Self, arg1: Self, arg2: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::NamespaceBody,
@@ -445,10 +445,10 @@ where
     }
 
     fn make_namespace_empty_body(ctx: &C, arg0: Self) -> Self {
-      let children = [
-          &arg0.value
+      let children = &[
+          arg0.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::NamespaceEmptyBody,
@@ -461,13 +461,13 @@ where
     }
 
     fn make_namespace_use_declaration(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value, 
-          &arg3.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value, 
+          arg3.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::NamespaceUseDeclaration,
@@ -483,16 +483,16 @@ where
     }
 
     fn make_namespace_group_use_declaration(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self, arg4: Self, arg5: Self, arg6: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value, 
-          &arg3.value, 
-          &arg4.value, 
-          &arg5.value, 
-          &arg6.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value, 
+          arg3.value, 
+          arg4.value, 
+          arg5.value, 
+          arg6.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::NamespaceGroupUseDeclaration,
@@ -511,13 +511,13 @@ where
     }
 
     fn make_namespace_use_clause(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value, 
-          &arg3.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value, 
+          arg3.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::NamespaceUseClause,
@@ -533,12 +533,12 @@ where
     }
 
     fn make_function_declaration(ctx: &C, arg0: Self, arg1: Self, arg2: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::FunctionDeclaration,
@@ -553,21 +553,21 @@ where
     }
 
     fn make_function_declaration_header(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self, arg4: Self, arg5: Self, arg6: Self, arg7: Self, arg8: Self, arg9: Self, arg10: Self, arg11: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value, 
-          &arg3.value, 
-          &arg4.value, 
-          &arg5.value, 
-          &arg6.value, 
-          &arg7.value, 
-          &arg8.value, 
-          &arg9.value, 
-          &arg10.value, 
-          &arg11.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value, 
+          arg3.value, 
+          arg4.value, 
+          arg5.value, 
+          arg6.value, 
+          arg7.value, 
+          arg8.value, 
+          arg9.value, 
+          arg10.value, 
+          arg11.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::FunctionDeclarationHeader,
@@ -591,12 +591,12 @@ where
     }
 
     fn make_capability(ctx: &C, arg0: Self, arg1: Self, arg2: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::Capability,
@@ -611,15 +611,15 @@ where
     }
 
     fn make_capability_provisional(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self, arg4: Self, arg5: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value, 
-          &arg3.value, 
-          &arg4.value, 
-          &arg5.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value, 
+          arg3.value, 
+          arg4.value, 
+          arg5.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::CapabilityProvisional,
@@ -637,11 +637,11 @@ where
     }
 
     fn make_where_clause(ctx: &C, arg0: Self, arg1: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value
+      let children = &[
+          arg0.value, 
+          arg1.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::WhereClause,
@@ -655,12 +655,12 @@ where
     }
 
     fn make_where_constraint(ctx: &C, arg0: Self, arg1: Self, arg2: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::WhereConstraint,
@@ -675,13 +675,13 @@ where
     }
 
     fn make_methodish_declaration(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value, 
-          &arg3.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value, 
+          arg3.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::MethodishDeclaration,
@@ -697,14 +697,14 @@ where
     }
 
     fn make_methodish_trait_resolution(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self, arg4: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value, 
-          &arg3.value, 
-          &arg4.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value, 
+          arg3.value, 
+          arg4.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::MethodishTraitResolution,
@@ -721,21 +721,21 @@ where
     }
 
     fn make_classish_declaration(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self, arg4: Self, arg5: Self, arg6: Self, arg7: Self, arg8: Self, arg9: Self, arg10: Self, arg11: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value, 
-          &arg3.value, 
-          &arg4.value, 
-          &arg5.value, 
-          &arg6.value, 
-          &arg7.value, 
-          &arg8.value, 
-          &arg9.value, 
-          &arg10.value, 
-          &arg11.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value, 
+          arg3.value, 
+          arg4.value, 
+          arg5.value, 
+          arg6.value, 
+          arg7.value, 
+          arg8.value, 
+          arg9.value, 
+          arg10.value, 
+          arg11.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::ClassishDeclaration,
@@ -759,12 +759,12 @@ where
     }
 
     fn make_classish_body(ctx: &C, arg0: Self, arg1: Self, arg2: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::ClassishBody,
@@ -779,12 +779,12 @@ where
     }
 
     fn make_trait_use_precedence_item(ctx: &C, arg0: Self, arg1: Self, arg2: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::TraitUsePrecedenceItem,
@@ -799,13 +799,13 @@ where
     }
 
     fn make_trait_use_alias_item(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value, 
-          &arg3.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value, 
+          arg3.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::TraitUseAliasItem,
@@ -821,14 +821,14 @@ where
     }
 
     fn make_trait_use_conflict_resolution(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self, arg4: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value, 
-          &arg3.value, 
-          &arg4.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value, 
+          arg3.value, 
+          arg4.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::TraitUseConflictResolution,
@@ -845,12 +845,12 @@ where
     }
 
     fn make_trait_use(ctx: &C, arg0: Self, arg1: Self, arg2: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::TraitUse,
@@ -865,13 +865,13 @@ where
     }
 
     fn make_require_clause(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value, 
-          &arg3.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value, 
+          arg3.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::RequireClause,
@@ -887,14 +887,14 @@ where
     }
 
     fn make_const_declaration(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self, arg4: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value, 
-          &arg3.value, 
-          &arg4.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value, 
+          arg3.value, 
+          arg4.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::ConstDeclaration,
@@ -911,11 +911,11 @@ where
     }
 
     fn make_constant_declarator(ctx: &C, arg0: Self, arg1: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value
+      let children = &[
+          arg0.value, 
+          arg1.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::ConstantDeclarator,
@@ -929,19 +929,19 @@ where
     }
 
     fn make_type_const_declaration(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self, arg4: Self, arg5: Self, arg6: Self, arg7: Self, arg8: Self, arg9: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value, 
-          &arg3.value, 
-          &arg4.value, 
-          &arg5.value, 
-          &arg6.value, 
-          &arg7.value, 
-          &arg8.value, 
-          &arg9.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value, 
+          arg3.value, 
+          arg4.value, 
+          arg5.value, 
+          arg6.value, 
+          arg7.value, 
+          arg8.value, 
+          arg9.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::TypeConstDeclaration,
@@ -963,11 +963,11 @@ where
     }
 
     fn make_decorated_expression(ctx: &C, arg0: Self, arg1: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value
+      let children = &[
+          arg0.value, 
+          arg1.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::DecoratedExpression,
@@ -981,15 +981,15 @@ where
     }
 
     fn make_parameter_declaration(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self, arg4: Self, arg5: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value, 
-          &arg3.value, 
-          &arg4.value, 
-          &arg5.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value, 
+          arg3.value, 
+          arg4.value, 
+          arg5.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::ParameterDeclaration,
@@ -1007,12 +1007,12 @@ where
     }
 
     fn make_variadic_parameter(ctx: &C, arg0: Self, arg1: Self, arg2: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::VariadicParameter,
@@ -1027,12 +1027,12 @@ where
     }
 
     fn make_old_attribute_specification(ctx: &C, arg0: Self, arg1: Self, arg2: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::OldAttributeSpecification,
@@ -1047,10 +1047,10 @@ where
     }
 
     fn make_attribute_specification(ctx: &C, arg0: Self) -> Self {
-      let children = [
-          &arg0.value
+      let children = &[
+          arg0.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::AttributeSpecification,
@@ -1063,11 +1063,11 @@ where
     }
 
     fn make_attribute(ctx: &C, arg0: Self, arg1: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value
+      let children = &[
+          arg0.value, 
+          arg1.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::Attribute,
@@ -1081,11 +1081,11 @@ where
     }
 
     fn make_inclusion_expression(ctx: &C, arg0: Self, arg1: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value
+      let children = &[
+          arg0.value, 
+          arg1.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::InclusionExpression,
@@ -1099,11 +1099,11 @@ where
     }
 
     fn make_inclusion_directive(ctx: &C, arg0: Self, arg1: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value
+      let children = &[
+          arg0.value, 
+          arg1.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::InclusionDirective,
@@ -1117,12 +1117,12 @@ where
     }
 
     fn make_compound_statement(ctx: &C, arg0: Self, arg1: Self, arg2: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::CompoundStatement,
@@ -1137,11 +1137,11 @@ where
     }
 
     fn make_expression_statement(ctx: &C, arg0: Self, arg1: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value
+      let children = &[
+          arg0.value, 
+          arg1.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::ExpressionStatement,
@@ -1155,11 +1155,11 @@ where
     }
 
     fn make_markup_section(ctx: &C, arg0: Self, arg1: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value
+      let children = &[
+          arg0.value, 
+          arg1.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::MarkupSection,
@@ -1173,11 +1173,11 @@ where
     }
 
     fn make_markup_suffix(ctx: &C, arg0: Self, arg1: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value
+      let children = &[
+          arg0.value, 
+          arg1.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::MarkupSuffix,
@@ -1191,14 +1191,14 @@ where
     }
 
     fn make_unset_statement(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self, arg4: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value, 
-          &arg3.value, 
-          &arg4.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value, 
+          arg3.value, 
+          arg4.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::UnsetStatement,
@@ -1215,15 +1215,15 @@ where
     }
 
     fn make_using_statement_block_scoped(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self, arg4: Self, arg5: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value, 
-          &arg3.value, 
-          &arg4.value, 
-          &arg5.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value, 
+          arg3.value, 
+          arg4.value, 
+          arg5.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::UsingStatementBlockScoped,
@@ -1241,13 +1241,13 @@ where
     }
 
     fn make_using_statement_function_scoped(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value, 
-          &arg3.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value, 
+          arg3.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::UsingStatementFunctionScoped,
@@ -1263,14 +1263,14 @@ where
     }
 
     fn make_while_statement(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self, arg4: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value, 
-          &arg3.value, 
-          &arg4.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value, 
+          arg3.value, 
+          arg4.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::WhileStatement,
@@ -1287,16 +1287,16 @@ where
     }
 
     fn make_if_statement(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self, arg4: Self, arg5: Self, arg6: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value, 
-          &arg3.value, 
-          &arg4.value, 
-          &arg5.value, 
-          &arg6.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value, 
+          arg3.value, 
+          arg4.value, 
+          arg5.value, 
+          arg6.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::IfStatement,
@@ -1315,14 +1315,14 @@ where
     }
 
     fn make_elseif_clause(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self, arg4: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value, 
-          &arg3.value, 
-          &arg4.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value, 
+          arg3.value, 
+          arg4.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::ElseifClause,
@@ -1339,11 +1339,11 @@ where
     }
 
     fn make_else_clause(ctx: &C, arg0: Self, arg1: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value
+      let children = &[
+          arg0.value, 
+          arg1.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::ElseClause,
@@ -1357,13 +1357,13 @@ where
     }
 
     fn make_try_statement(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value, 
-          &arg3.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value, 
+          arg3.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::TryStatement,
@@ -1379,15 +1379,15 @@ where
     }
 
     fn make_catch_clause(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self, arg4: Self, arg5: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value, 
-          &arg3.value, 
-          &arg4.value, 
-          &arg5.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value, 
+          arg3.value, 
+          arg4.value, 
+          arg5.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::CatchClause,
@@ -1405,11 +1405,11 @@ where
     }
 
     fn make_finally_clause(ctx: &C, arg0: Self, arg1: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value
+      let children = &[
+          arg0.value, 
+          arg1.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::FinallyClause,
@@ -1423,16 +1423,16 @@ where
     }
 
     fn make_do_statement(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self, arg4: Self, arg5: Self, arg6: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value, 
-          &arg3.value, 
-          &arg4.value, 
-          &arg5.value, 
-          &arg6.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value, 
+          arg3.value, 
+          arg4.value, 
+          arg5.value, 
+          arg6.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::DoStatement,
@@ -1451,18 +1451,18 @@ where
     }
 
     fn make_for_statement(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self, arg4: Self, arg5: Self, arg6: Self, arg7: Self, arg8: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value, 
-          &arg3.value, 
-          &arg4.value, 
-          &arg5.value, 
-          &arg6.value, 
-          &arg7.value, 
-          &arg8.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value, 
+          arg3.value, 
+          arg4.value, 
+          arg5.value, 
+          arg6.value, 
+          arg7.value, 
+          arg8.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::ForStatement,
@@ -1483,19 +1483,19 @@ where
     }
 
     fn make_foreach_statement(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self, arg4: Self, arg5: Self, arg6: Self, arg7: Self, arg8: Self, arg9: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value, 
-          &arg3.value, 
-          &arg4.value, 
-          &arg5.value, 
-          &arg6.value, 
-          &arg7.value, 
-          &arg8.value, 
-          &arg9.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value, 
+          arg3.value, 
+          arg4.value, 
+          arg5.value, 
+          arg6.value, 
+          arg7.value, 
+          arg8.value, 
+          arg9.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::ForeachStatement,
@@ -1517,16 +1517,16 @@ where
     }
 
     fn make_switch_statement(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self, arg4: Self, arg5: Self, arg6: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value, 
-          &arg3.value, 
-          &arg4.value, 
-          &arg5.value, 
-          &arg6.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value, 
+          arg3.value, 
+          arg4.value, 
+          arg5.value, 
+          arg6.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::SwitchStatement,
@@ -1545,12 +1545,12 @@ where
     }
 
     fn make_switch_section(ctx: &C, arg0: Self, arg1: Self, arg2: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::SwitchSection,
@@ -1565,11 +1565,11 @@ where
     }
 
     fn make_switch_fallthrough(ctx: &C, arg0: Self, arg1: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value
+      let children = &[
+          arg0.value, 
+          arg1.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::SwitchFallthrough,
@@ -1583,12 +1583,12 @@ where
     }
 
     fn make_case_label(ctx: &C, arg0: Self, arg1: Self, arg2: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::CaseLabel,
@@ -1603,11 +1603,11 @@ where
     }
 
     fn make_default_label(ctx: &C, arg0: Self, arg1: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value
+      let children = &[
+          arg0.value, 
+          arg1.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::DefaultLabel,
@@ -1621,12 +1621,12 @@ where
     }
 
     fn make_return_statement(ctx: &C, arg0: Self, arg1: Self, arg2: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::ReturnStatement,
@@ -1641,11 +1641,11 @@ where
     }
 
     fn make_goto_label(ctx: &C, arg0: Self, arg1: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value
+      let children = &[
+          arg0.value, 
+          arg1.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::GotoLabel,
@@ -1659,12 +1659,12 @@ where
     }
 
     fn make_goto_statement(ctx: &C, arg0: Self, arg1: Self, arg2: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::GotoStatement,
@@ -1679,12 +1679,12 @@ where
     }
 
     fn make_throw_statement(ctx: &C, arg0: Self, arg1: Self, arg2: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::ThrowStatement,
@@ -1699,11 +1699,11 @@ where
     }
 
     fn make_break_statement(ctx: &C, arg0: Self, arg1: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value
+      let children = &[
+          arg0.value, 
+          arg1.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::BreakStatement,
@@ -1717,11 +1717,11 @@ where
     }
 
     fn make_continue_statement(ctx: &C, arg0: Self, arg1: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value
+      let children = &[
+          arg0.value, 
+          arg1.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::ContinueStatement,
@@ -1735,12 +1735,12 @@ where
     }
 
     fn make_echo_statement(ctx: &C, arg0: Self, arg1: Self, arg2: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::EchoStatement,
@@ -1755,11 +1755,11 @@ where
     }
 
     fn make_concurrent_statement(ctx: &C, arg0: Self, arg1: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value
+      let children = &[
+          arg0.value, 
+          arg1.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::ConcurrentStatement,
@@ -1773,11 +1773,11 @@ where
     }
 
     fn make_simple_initializer(ctx: &C, arg0: Self, arg1: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value
+      let children = &[
+          arg0.value, 
+          arg1.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::SimpleInitializer,
@@ -1791,18 +1791,18 @@ where
     }
 
     fn make_anonymous_class(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self, arg4: Self, arg5: Self, arg6: Self, arg7: Self, arg8: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value, 
-          &arg3.value, 
-          &arg4.value, 
-          &arg5.value, 
-          &arg6.value, 
-          &arg7.value, 
-          &arg8.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value, 
+          arg3.value, 
+          arg4.value, 
+          arg5.value, 
+          arg6.value, 
+          arg7.value, 
+          arg8.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::AnonymousClass,
@@ -1823,20 +1823,20 @@ where
     }
 
     fn make_anonymous_function(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self, arg4: Self, arg5: Self, arg6: Self, arg7: Self, arg8: Self, arg9: Self, arg10: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value, 
-          &arg3.value, 
-          &arg4.value, 
-          &arg5.value, 
-          &arg6.value, 
-          &arg7.value, 
-          &arg8.value, 
-          &arg9.value, 
-          &arg10.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value, 
+          arg3.value, 
+          arg4.value, 
+          arg5.value, 
+          arg6.value, 
+          arg7.value, 
+          arg8.value, 
+          arg9.value, 
+          arg10.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::AnonymousFunction,
@@ -1859,13 +1859,13 @@ where
     }
 
     fn make_anonymous_function_use_clause(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value, 
-          &arg3.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value, 
+          arg3.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::AnonymousFunctionUseClause,
@@ -1881,14 +1881,14 @@ where
     }
 
     fn make_lambda_expression(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self, arg4: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value, 
-          &arg3.value, 
-          &arg4.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value, 
+          arg3.value, 
+          arg4.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::LambdaExpression,
@@ -1905,15 +1905,15 @@ where
     }
 
     fn make_lambda_signature(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self, arg4: Self, arg5: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value, 
-          &arg3.value, 
-          &arg4.value, 
-          &arg5.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value, 
+          arg3.value, 
+          arg4.value, 
+          arg5.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::LambdaSignature,
@@ -1931,13 +1931,13 @@ where
     }
 
     fn make_cast_expression(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value, 
-          &arg3.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value, 
+          arg3.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::CastExpression,
@@ -1953,12 +1953,12 @@ where
     }
 
     fn make_scope_resolution_expression(ctx: &C, arg0: Self, arg1: Self, arg2: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::ScopeResolutionExpression,
@@ -1973,12 +1973,12 @@ where
     }
 
     fn make_member_selection_expression(ctx: &C, arg0: Self, arg1: Self, arg2: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::MemberSelectionExpression,
@@ -1993,12 +1993,12 @@ where
     }
 
     fn make_safe_member_selection_expression(ctx: &C, arg0: Self, arg1: Self, arg2: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::SafeMemberSelectionExpression,
@@ -2013,12 +2013,12 @@ where
     }
 
     fn make_embedded_member_selection_expression(ctx: &C, arg0: Self, arg1: Self, arg2: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::EmbeddedMemberSelectionExpression,
@@ -2033,11 +2033,11 @@ where
     }
 
     fn make_yield_expression(ctx: &C, arg0: Self, arg1: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value
+      let children = &[
+          arg0.value, 
+          arg1.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::YieldExpression,
@@ -2051,11 +2051,11 @@ where
     }
 
     fn make_prefix_unary_expression(ctx: &C, arg0: Self, arg1: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value
+      let children = &[
+          arg0.value, 
+          arg1.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::PrefixUnaryExpression,
@@ -2069,11 +2069,11 @@ where
     }
 
     fn make_postfix_unary_expression(ctx: &C, arg0: Self, arg1: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value
+      let children = &[
+          arg0.value, 
+          arg1.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::PostfixUnaryExpression,
@@ -2087,12 +2087,12 @@ where
     }
 
     fn make_binary_expression(ctx: &C, arg0: Self, arg1: Self, arg2: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::BinaryExpression,
@@ -2107,12 +2107,12 @@ where
     }
 
     fn make_is_expression(ctx: &C, arg0: Self, arg1: Self, arg2: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::IsExpression,
@@ -2127,12 +2127,12 @@ where
     }
 
     fn make_as_expression(ctx: &C, arg0: Self, arg1: Self, arg2: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::AsExpression,
@@ -2147,12 +2147,12 @@ where
     }
 
     fn make_nullable_as_expression(ctx: &C, arg0: Self, arg1: Self, arg2: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::NullableAsExpression,
@@ -2167,14 +2167,14 @@ where
     }
 
     fn make_conditional_expression(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self, arg4: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value, 
-          &arg3.value, 
-          &arg4.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value, 
+          arg3.value, 
+          arg4.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::ConditionalExpression,
@@ -2191,13 +2191,13 @@ where
     }
 
     fn make_eval_expression(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value, 
-          &arg3.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value, 
+          arg3.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::EvalExpression,
@@ -2213,13 +2213,13 @@ where
     }
 
     fn make_define_expression(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value, 
-          &arg3.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value, 
+          arg3.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::DefineExpression,
@@ -2235,13 +2235,13 @@ where
     }
 
     fn make_isset_expression(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value, 
-          &arg3.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value, 
+          arg3.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::IssetExpression,
@@ -2257,14 +2257,14 @@ where
     }
 
     fn make_function_call_expression(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self, arg4: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value, 
-          &arg3.value, 
-          &arg4.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value, 
+          arg3.value, 
+          arg4.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::FunctionCallExpression,
@@ -2281,11 +2281,11 @@ where
     }
 
     fn make_function_pointer_expression(ctx: &C, arg0: Self, arg1: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value
+      let children = &[
+          arg0.value, 
+          arg1.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::FunctionPointerExpression,
@@ -2299,12 +2299,12 @@ where
     }
 
     fn make_parenthesized_expression(ctx: &C, arg0: Self, arg1: Self, arg2: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::ParenthesizedExpression,
@@ -2319,12 +2319,12 @@ where
     }
 
     fn make_braced_expression(ctx: &C, arg0: Self, arg1: Self, arg2: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::BracedExpression,
@@ -2339,12 +2339,12 @@ where
     }
 
     fn make_embedded_braced_expression(ctx: &C, arg0: Self, arg1: Self, arg2: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::EmbeddedBracedExpression,
@@ -2359,13 +2359,13 @@ where
     }
 
     fn make_list_expression(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value, 
-          &arg3.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value, 
+          arg3.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::ListExpression,
@@ -2381,13 +2381,13 @@ where
     }
 
     fn make_collection_literal_expression(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value, 
-          &arg3.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value, 
+          arg3.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::CollectionLiteralExpression,
@@ -2403,11 +2403,11 @@ where
     }
 
     fn make_object_creation_expression(ctx: &C, arg0: Self, arg1: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value
+      let children = &[
+          arg0.value, 
+          arg1.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::ObjectCreationExpression,
@@ -2421,13 +2421,13 @@ where
     }
 
     fn make_constructor_call(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value, 
-          &arg3.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value, 
+          arg3.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::ConstructorCall,
@@ -2443,13 +2443,13 @@ where
     }
 
     fn make_record_creation_expression(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value, 
-          &arg3.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value, 
+          arg3.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::RecordCreationExpression,
@@ -2465,14 +2465,14 @@ where
     }
 
     fn make_darray_intrinsic_expression(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self, arg4: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value, 
-          &arg3.value, 
-          &arg4.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value, 
+          arg3.value, 
+          arg4.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::DarrayIntrinsicExpression,
@@ -2489,14 +2489,14 @@ where
     }
 
     fn make_dictionary_intrinsic_expression(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self, arg4: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value, 
-          &arg3.value, 
-          &arg4.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value, 
+          arg3.value, 
+          arg4.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::DictionaryIntrinsicExpression,
@@ -2513,14 +2513,14 @@ where
     }
 
     fn make_keyset_intrinsic_expression(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self, arg4: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value, 
-          &arg3.value, 
-          &arg4.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value, 
+          arg3.value, 
+          arg4.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::KeysetIntrinsicExpression,
@@ -2537,14 +2537,14 @@ where
     }
 
     fn make_varray_intrinsic_expression(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self, arg4: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value, 
-          &arg3.value, 
-          &arg4.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value, 
+          arg3.value, 
+          arg4.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::VarrayIntrinsicExpression,
@@ -2561,14 +2561,14 @@ where
     }
 
     fn make_vector_intrinsic_expression(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self, arg4: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value, 
-          &arg3.value, 
-          &arg4.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value, 
+          arg3.value, 
+          arg4.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::VectorIntrinsicExpression,
@@ -2585,12 +2585,12 @@ where
     }
 
     fn make_element_initializer(ctx: &C, arg0: Self, arg1: Self, arg2: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::ElementInitializer,
@@ -2605,13 +2605,13 @@ where
     }
 
     fn make_subscript_expression(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value, 
-          &arg3.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value, 
+          arg3.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::SubscriptExpression,
@@ -2627,13 +2627,13 @@ where
     }
 
     fn make_embedded_subscript_expression(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value, 
-          &arg3.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value, 
+          arg3.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::EmbeddedSubscriptExpression,
@@ -2649,12 +2649,12 @@ where
     }
 
     fn make_awaitable_creation_expression(ctx: &C, arg0: Self, arg1: Self, arg2: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::AwaitableCreationExpression,
@@ -2669,12 +2669,12 @@ where
     }
 
     fn make_xhp_children_declaration(ctx: &C, arg0: Self, arg1: Self, arg2: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::XHPChildrenDeclaration,
@@ -2689,12 +2689,12 @@ where
     }
 
     fn make_xhp_children_parenthesized_list(ctx: &C, arg0: Self, arg1: Self, arg2: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::XHPChildrenParenthesizedList,
@@ -2709,12 +2709,12 @@ where
     }
 
     fn make_xhp_category_declaration(ctx: &C, arg0: Self, arg1: Self, arg2: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::XHPCategoryDeclaration,
@@ -2729,13 +2729,13 @@ where
     }
 
     fn make_xhp_enum_type(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value, 
-          &arg3.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value, 
+          arg3.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::XHPEnumType,
@@ -2751,11 +2751,11 @@ where
     }
 
     fn make_xhp_lateinit(ctx: &C, arg0: Self, arg1: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value
+      let children = &[
+          arg0.value, 
+          arg1.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::XHPLateinit,
@@ -2769,11 +2769,11 @@ where
     }
 
     fn make_xhp_required(ctx: &C, arg0: Self, arg1: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value
+      let children = &[
+          arg0.value, 
+          arg1.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::XHPRequired,
@@ -2787,12 +2787,12 @@ where
     }
 
     fn make_xhp_class_attribute_declaration(ctx: &C, arg0: Self, arg1: Self, arg2: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::XHPClassAttributeDeclaration,
@@ -2807,13 +2807,13 @@ where
     }
 
     fn make_xhp_class_attribute(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value, 
-          &arg3.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value, 
+          arg3.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::XHPClassAttribute,
@@ -2829,10 +2829,10 @@ where
     }
 
     fn make_xhp_simple_class_attribute(ctx: &C, arg0: Self) -> Self {
-      let children = [
-          &arg0.value
+      let children = &[
+          arg0.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::XHPSimpleClassAttribute,
@@ -2845,12 +2845,12 @@ where
     }
 
     fn make_xhp_simple_attribute(ctx: &C, arg0: Self, arg1: Self, arg2: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::XHPSimpleAttribute,
@@ -2865,13 +2865,13 @@ where
     }
 
     fn make_xhp_spread_attribute(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value, 
-          &arg3.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value, 
+          arg3.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::XHPSpreadAttribute,
@@ -2887,13 +2887,13 @@ where
     }
 
     fn make_xhp_open(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value, 
-          &arg3.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value, 
+          arg3.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::XHPOpen,
@@ -2909,12 +2909,12 @@ where
     }
 
     fn make_xhp_expression(ctx: &C, arg0: Self, arg1: Self, arg2: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::XHPExpression,
@@ -2929,12 +2929,12 @@ where
     }
 
     fn make_xhp_close(ctx: &C, arg0: Self, arg1: Self, arg2: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::XHPClose,
@@ -2949,12 +2949,12 @@ where
     }
 
     fn make_type_constant(ctx: &C, arg0: Self, arg1: Self, arg2: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::TypeConstant,
@@ -2969,12 +2969,12 @@ where
     }
 
     fn make_pu_access(ctx: &C, arg0: Self, arg1: Self, arg2: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::PUAccess,
@@ -2989,14 +2989,14 @@ where
     }
 
     fn make_vector_type_specifier(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self, arg4: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value, 
-          &arg3.value, 
-          &arg4.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value, 
+          arg3.value, 
+          arg4.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::VectorTypeSpecifier,
@@ -3013,14 +3013,14 @@ where
     }
 
     fn make_keyset_type_specifier(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self, arg4: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value, 
-          &arg3.value, 
-          &arg4.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value, 
+          arg3.value, 
+          arg4.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::KeysetTypeSpecifier,
@@ -3037,13 +3037,13 @@ where
     }
 
     fn make_tuple_type_explicit_specifier(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value, 
-          &arg3.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value, 
+          arg3.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::TupleTypeExplicitSpecifier,
@@ -3059,14 +3059,14 @@ where
     }
 
     fn make_varray_type_specifier(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self, arg4: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value, 
-          &arg3.value, 
-          &arg4.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value, 
+          arg3.value, 
+          arg4.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::VarrayTypeSpecifier,
@@ -3083,15 +3083,15 @@ where
     }
 
     fn make_type_parameter(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self, arg4: Self, arg5: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value, 
-          &arg3.value, 
-          &arg4.value, 
-          &arg5.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value, 
+          arg3.value, 
+          arg4.value, 
+          arg5.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::TypeParameter,
@@ -3109,11 +3109,11 @@ where
     }
 
     fn make_type_constraint(ctx: &C, arg0: Self, arg1: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value
+      let children = &[
+          arg0.value, 
+          arg1.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::TypeConstraint,
@@ -3127,16 +3127,16 @@ where
     }
 
     fn make_darray_type_specifier(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self, arg4: Self, arg5: Self, arg6: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value, 
-          &arg3.value, 
-          &arg4.value, 
-          &arg5.value, 
-          &arg6.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value, 
+          arg3.value, 
+          arg4.value, 
+          arg5.value, 
+          arg6.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::DarrayTypeSpecifier,
@@ -3155,13 +3155,13 @@ where
     }
 
     fn make_dictionary_type_specifier(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value, 
-          &arg3.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value, 
+          arg3.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::DictionaryTypeSpecifier,
@@ -3177,18 +3177,18 @@ where
     }
 
     fn make_closure_type_specifier(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self, arg4: Self, arg5: Self, arg6: Self, arg7: Self, arg8: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value, 
-          &arg3.value, 
-          &arg4.value, 
-          &arg5.value, 
-          &arg6.value, 
-          &arg7.value, 
-          &arg8.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value, 
+          arg3.value, 
+          arg4.value, 
+          arg5.value, 
+          arg6.value, 
+          arg7.value, 
+          arg8.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::ClosureTypeSpecifier,
@@ -3209,11 +3209,11 @@ where
     }
 
     fn make_closure_parameter_type_specifier(ctx: &C, arg0: Self, arg1: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value
+      let children = &[
+          arg0.value, 
+          arg1.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::ClosureParameterTypeSpecifier,
@@ -3227,14 +3227,14 @@ where
     }
 
     fn make_classname_type_specifier(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self, arg4: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value, 
-          &arg3.value, 
-          &arg4.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value, 
+          arg3.value, 
+          arg4.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::ClassnameTypeSpecifier,
@@ -3251,13 +3251,13 @@ where
     }
 
     fn make_field_specifier(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value, 
-          &arg3.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value, 
+          arg3.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::FieldSpecifier,
@@ -3273,12 +3273,12 @@ where
     }
 
     fn make_field_initializer(ctx: &C, arg0: Self, arg1: Self, arg2: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::FieldInitializer,
@@ -3293,14 +3293,14 @@ where
     }
 
     fn make_shape_type_specifier(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self, arg4: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value, 
-          &arg3.value, 
-          &arg4.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value, 
+          arg3.value, 
+          arg4.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::ShapeTypeSpecifier,
@@ -3317,13 +3317,13 @@ where
     }
 
     fn make_shape_expression(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value, 
-          &arg3.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value, 
+          arg3.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::ShapeExpression,
@@ -3339,13 +3339,13 @@ where
     }
 
     fn make_tuple_expression(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value, 
-          &arg3.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value, 
+          arg3.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::TupleExpression,
@@ -3361,11 +3361,11 @@ where
     }
 
     fn make_generic_type_specifier(ctx: &C, arg0: Self, arg1: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value
+      let children = &[
+          arg0.value, 
+          arg1.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::GenericTypeSpecifier,
@@ -3379,11 +3379,11 @@ where
     }
 
     fn make_nullable_type_specifier(ctx: &C, arg0: Self, arg1: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value
+      let children = &[
+          arg0.value, 
+          arg1.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::NullableTypeSpecifier,
@@ -3397,11 +3397,11 @@ where
     }
 
     fn make_like_type_specifier(ctx: &C, arg0: Self, arg1: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value
+      let children = &[
+          arg0.value, 
+          arg1.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::LikeTypeSpecifier,
@@ -3415,11 +3415,11 @@ where
     }
 
     fn make_soft_type_specifier(ctx: &C, arg0: Self, arg1: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value
+      let children = &[
+          arg0.value, 
+          arg1.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::SoftTypeSpecifier,
@@ -3433,11 +3433,11 @@ where
     }
 
     fn make_attributized_specifier(ctx: &C, arg0: Self, arg1: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value
+      let children = &[
+          arg0.value, 
+          arg1.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::AttributizedSpecifier,
@@ -3451,11 +3451,11 @@ where
     }
 
     fn make_reified_type_argument(ctx: &C, arg0: Self, arg1: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value
+      let children = &[
+          arg0.value, 
+          arg1.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::ReifiedTypeArgument,
@@ -3469,12 +3469,12 @@ where
     }
 
     fn make_type_arguments(ctx: &C, arg0: Self, arg1: Self, arg2: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::TypeArguments,
@@ -3489,12 +3489,12 @@ where
     }
 
     fn make_type_parameters(ctx: &C, arg0: Self, arg1: Self, arg2: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::TypeParameters,
@@ -3509,12 +3509,12 @@ where
     }
 
     fn make_tuple_type_specifier(ctx: &C, arg0: Self, arg1: Self, arg2: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::TupleTypeSpecifier,
@@ -3529,12 +3529,12 @@ where
     }
 
     fn make_union_type_specifier(ctx: &C, arg0: Self, arg1: Self, arg2: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::UnionTypeSpecifier,
@@ -3549,12 +3549,12 @@ where
     }
 
     fn make_intersection_type_specifier(ctx: &C, arg0: Self, arg1: Self, arg2: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::IntersectionTypeSpecifier,
@@ -3569,10 +3569,10 @@ where
     }
 
     fn make_error(ctx: &C, arg0: Self) -> Self {
-      let children = [
-          &arg0.value
+      let children = &[
+          arg0.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::ErrorSyntax,
@@ -3585,11 +3585,11 @@ where
     }
 
     fn make_list_item(ctx: &C, arg0: Self, arg1: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value
+      let children = &[
+          arg0.value, 
+          arg1.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::ListItem,
@@ -3603,11 +3603,11 @@ where
     }
 
     fn make_pocket_atom_expression(ctx: &C, arg0: Self, arg1: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value
+      let children = &[
+          arg0.value, 
+          arg1.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::PocketAtomExpression,
@@ -3621,14 +3621,14 @@ where
     }
 
     fn make_pocket_identifier_expression(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self, arg4: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value, 
-          &arg3.value, 
-          &arg4.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value, 
+          arg3.value, 
+          arg4.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::PocketIdentifierExpression,
@@ -3645,15 +3645,15 @@ where
     }
 
     fn make_pocket_atom_mapping_declaration(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self, arg4: Self, arg5: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value, 
-          &arg3.value, 
-          &arg4.value, 
-          &arg5.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value, 
+          arg3.value, 
+          arg4.value, 
+          arg5.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::PocketAtomMappingDeclaration,
@@ -3671,16 +3671,16 @@ where
     }
 
     fn make_pocket_enum_declaration(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self, arg4: Self, arg5: Self, arg6: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value, 
-          &arg3.value, 
-          &arg4.value, 
-          &arg5.value, 
-          &arg6.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value, 
+          arg3.value, 
+          arg4.value, 
+          arg5.value, 
+          arg6.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::PocketEnumDeclaration,
@@ -3699,13 +3699,13 @@ where
     }
 
     fn make_pocket_field_type_expr_declaration(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value, 
-          &arg3.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value, 
+          arg3.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::PocketFieldTypeExprDeclaration,
@@ -3721,13 +3721,13 @@ where
     }
 
     fn make_pocket_field_type_declaration(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value, 
-          &arg3.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value, 
+          arg3.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::PocketFieldTypeDeclaration,
@@ -3743,11 +3743,11 @@ where
     }
 
     fn make_pocket_mapping_id_declaration(ctx: &C, arg0: Self, arg1: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value
+      let children = &[
+          arg0.value, 
+          arg1.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::PocketMappingIdDeclaration,
@@ -3761,13 +3761,13 @@ where
     }
 
     fn make_pocket_mapping_type_declaration(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value, 
-          &arg3.value
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value, 
+          arg3.value
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::PocketMappingTypeDeclaration,

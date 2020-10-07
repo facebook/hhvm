@@ -619,7 +619,7 @@ module GenerateFFRustSyntax = struct
         let syntax = SyntaxVariant::%s(Box::new(%sChildren {
             %s,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }\n\n"
       x.type_name
@@ -1521,18 +1521,16 @@ module GenerateOcamlSyntax = struct
     let args = List.mapi x.fields ~f:(fun i _ -> sprintf "arg%d: Self" i) in
     let args = comma_sep args in
     let params f = List.mapi x.fields ~f:(fun i _ -> f (sprintf "arg%d" i)) in
-    let param_values =
-      newline_sep "          " (params (sprintf "&%s.value"))
-    in
+    let param_values = newline_sep "          " (params (sprintf "%s.value")) in
     let param_nodes =
       newline_sep "              " (params (sprintf "%s.syntax"))
     in
     sprintf
       "    fn make_%s(ctx: &C, %s) -> Self {
-      let children = [
+      let children = &[
           %s
       ];
-      let value = V::from_values(&children);
+      let value = V::from_values(children.iter());
       let syntax = Self::make(
           ctx,
           SyntaxKind::%s,

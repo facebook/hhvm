@@ -20,8 +20,10 @@ pub trait SyntaxValueType<T>
 where
     Self: Sized,
 {
-    fn from_syntax(syntax: &SyntaxVariant<T, Self>) -> Self;
-    fn from_values(ndoes: &[&Self]) -> Self;
+    fn from_values<'a>(child_values: impl Iterator<Item = &'a Self>) -> Self
+    where
+        Self: 'a;
+
     fn from_children(kind: SyntaxKind, offset: usize, nodes: &[&Self]) -> Self;
     fn from_token(token: &T) -> Self;
 

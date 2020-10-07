@@ -29,7 +29,7 @@ where
         let syntax = SyntaxVariant::EndOfFile(Box::new(EndOfFileChildren {
             end_of_file_token,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -37,7 +37,7 @@ where
         let syntax = SyntaxVariant::Script(Box::new(ScriptChildren {
             script_declarations,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -45,7 +45,7 @@ where
         let syntax = SyntaxVariant::QualifiedName(Box::new(QualifiedNameChildren {
             qualified_name_parts,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -53,7 +53,7 @@ where
         let syntax = SyntaxVariant::SimpleTypeSpecifier(Box::new(SimpleTypeSpecifierChildren {
             simple_type_specifier,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -61,7 +61,7 @@ where
         let syntax = SyntaxVariant::LiteralExpression(Box::new(LiteralExpressionChildren {
             literal_expression,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -70,7 +70,7 @@ where
             prefixed_string_name,
             prefixed_string_str,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -81,7 +81,7 @@ where
             prefixed_code_expression,
             prefixed_code_right_backtick,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -89,7 +89,7 @@ where
         let syntax = SyntaxVariant::VariableExpression(Box::new(VariableExpressionChildren {
             variable_expression,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -97,7 +97,7 @@ where
         let syntax = SyntaxVariant::PipeVariableExpression(Box::new(PipeVariableExpressionChildren {
             pipe_variable_expression,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -109,7 +109,7 @@ where
             file_attribute_specification_attributes,
             file_attribute_specification_right_double_angle,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -127,7 +127,7 @@ where
             enum_enumerators,
             enum_right_brace,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -138,7 +138,7 @@ where
             enumerator_value,
             enumerator_semicolon,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -154,7 +154,7 @@ where
             record_fields,
             record_right_brace,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -165,7 +165,7 @@ where
             record_field_init,
             record_field_semi,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -180,7 +180,7 @@ where
             alias_type,
             alias_semicolon,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -192,7 +192,7 @@ where
             property_declarators,
             property_semicolon,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -201,7 +201,7 @@ where
             property_name,
             property_initializer,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -210,7 +210,7 @@ where
             namespace_header,
             namespace_body,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -219,7 +219,7 @@ where
             namespace_keyword,
             namespace_name,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -229,7 +229,7 @@ where
             namespace_declarations,
             namespace_right_brace,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -237,7 +237,7 @@ where
         let syntax = SyntaxVariant::NamespaceEmptyBody(Box::new(NamespaceEmptyBodyChildren {
             namespace_semicolon,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -248,7 +248,7 @@ where
             namespace_use_clauses,
             namespace_use_semicolon,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -262,7 +262,7 @@ where
             namespace_group_use_right_brace,
             namespace_group_use_semicolon,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -273,7 +273,7 @@ where
             namespace_use_as,
             namespace_use_alias,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -283,7 +283,7 @@ where
             function_declaration_header,
             function_body,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -302,7 +302,7 @@ where
             function_type,
             function_where_clause,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -312,7 +312,7 @@ where
             capability_types,
             capability_right_bracket,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -325,7 +325,7 @@ where
             capability_provisional_unsafe_type,
             capability_provisional_right_brace,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -334,7 +334,7 @@ where
             where_clause_keyword,
             where_clause_constraints,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -344,7 +344,7 @@ where
             where_constraint_operator,
             where_constraint_right_type,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -355,7 +355,7 @@ where
             methodish_function_body,
             methodish_semicolon,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -367,7 +367,7 @@ where
             methodish_trait_name,
             methodish_trait_semicolon,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -386,7 +386,7 @@ where
             classish_where_clause,
             classish_body,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -396,7 +396,7 @@ where
             classish_body_elements,
             classish_body_right_brace,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -406,7 +406,7 @@ where
             trait_use_precedence_item_keyword,
             trait_use_precedence_item_removed_names,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -417,7 +417,7 @@ where
             trait_use_alias_item_modifiers,
             trait_use_alias_item_aliased_name,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -429,7 +429,7 @@ where
             trait_use_conflict_resolution_clauses,
             trait_use_conflict_resolution_right_brace,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -439,7 +439,7 @@ where
             trait_use_names,
             trait_use_semicolon,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -450,7 +450,7 @@ where
             require_name,
             require_semicolon,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -462,7 +462,7 @@ where
             const_declarators,
             const_semicolon,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -471,7 +471,7 @@ where
             constant_declarator_name,
             constant_declarator_initializer,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -488,7 +488,7 @@ where
             type_const_type_specifier,
             type_const_semicolon,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -497,7 +497,7 @@ where
             decorated_expression_decorator,
             decorated_expression_expression,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -510,7 +510,7 @@ where
             parameter_name,
             parameter_default_value,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -520,7 +520,7 @@ where
             variadic_parameter_type,
             variadic_parameter_ellipsis,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -530,7 +530,7 @@ where
             old_attribute_specification_attributes,
             old_attribute_specification_right_double_angle,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -538,7 +538,7 @@ where
         let syntax = SyntaxVariant::AttributeSpecification(Box::new(AttributeSpecificationChildren {
             attribute_specification_attributes,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -547,7 +547,7 @@ where
             attribute_at,
             attribute_attribute_name,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -556,7 +556,7 @@ where
             inclusion_require,
             inclusion_filename,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -565,7 +565,7 @@ where
             inclusion_expression,
             inclusion_semicolon,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -575,7 +575,7 @@ where
             compound_statements,
             compound_right_brace,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -584,7 +584,7 @@ where
             expression_statement_expression,
             expression_statement_semicolon,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -593,7 +593,7 @@ where
             markup_text,
             markup_suffix,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -602,7 +602,7 @@ where
             markup_suffix_less_than_question,
             markup_suffix_name,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -614,7 +614,7 @@ where
             unset_right_paren,
             unset_semicolon,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -627,7 +627,7 @@ where
             using_block_right_paren,
             using_block_body,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -638,7 +638,7 @@ where
             using_function_expression,
             using_function_semicolon,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -650,7 +650,7 @@ where
             while_right_paren,
             while_body,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -664,7 +664,7 @@ where
             if_elseif_clauses,
             if_else_clause,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -676,7 +676,7 @@ where
             elseif_right_paren,
             elseif_statement,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -685,7 +685,7 @@ where
             else_keyword,
             else_statement,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -696,7 +696,7 @@ where
             try_catch_clauses,
             try_finally_clause,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -709,7 +709,7 @@ where
             catch_right_paren,
             catch_body,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -718,7 +718,7 @@ where
             finally_keyword,
             finally_body,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -732,7 +732,7 @@ where
             do_right_paren,
             do_semicolon,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -748,7 +748,7 @@ where
             for_right_paren,
             for_body,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -765,7 +765,7 @@ where
             foreach_right_paren,
             foreach_body,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -779,7 +779,7 @@ where
             switch_sections,
             switch_right_brace,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -789,7 +789,7 @@ where
             switch_section_statements,
             switch_section_fallthrough,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -798,7 +798,7 @@ where
             fallthrough_keyword,
             fallthrough_semicolon,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -808,7 +808,7 @@ where
             case_expression,
             case_colon,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -817,7 +817,7 @@ where
             default_keyword,
             default_colon,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -827,7 +827,7 @@ where
             return_expression,
             return_semicolon,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -836,7 +836,7 @@ where
             goto_label_name,
             goto_label_colon,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -846,7 +846,7 @@ where
             goto_statement_label_name,
             goto_statement_semicolon,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -856,7 +856,7 @@ where
             throw_expression,
             throw_semicolon,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -865,7 +865,7 @@ where
             break_keyword,
             break_semicolon,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -874,7 +874,7 @@ where
             continue_keyword,
             continue_semicolon,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -884,7 +884,7 @@ where
             echo_expressions,
             echo_semicolon,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -893,7 +893,7 @@ where
             concurrent_keyword,
             concurrent_statement,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -902,7 +902,7 @@ where
             simple_initializer_equal,
             simple_initializer_value,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -918,7 +918,7 @@ where
             anonymous_class_implements_list,
             anonymous_class_body,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -936,7 +936,7 @@ where
             anonymous_use,
             anonymous_body,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -947,7 +947,7 @@ where
             anonymous_use_variables,
             anonymous_use_right_paren,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -959,7 +959,7 @@ where
             lambda_arrow,
             lambda_body,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -972,7 +972,7 @@ where
             lambda_colon,
             lambda_type,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -983,7 +983,7 @@ where
             cast_right_paren,
             cast_operand,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -993,7 +993,7 @@ where
             scope_resolution_operator,
             scope_resolution_name,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1003,7 +1003,7 @@ where
             member_operator,
             member_name,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1013,7 +1013,7 @@ where
             safe_member_operator,
             safe_member_name,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1023,7 +1023,7 @@ where
             embedded_member_operator,
             embedded_member_name,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1032,7 +1032,7 @@ where
             yield_keyword,
             yield_operand,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1041,7 +1041,7 @@ where
             prefix_unary_operator,
             prefix_unary_operand,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1050,7 +1050,7 @@ where
             postfix_unary_operand,
             postfix_unary_operator,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1060,7 +1060,7 @@ where
             binary_operator,
             binary_right_operand,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1070,7 +1070,7 @@ where
             is_operator,
             is_right_operand,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1080,7 +1080,7 @@ where
             as_operator,
             as_right_operand,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1090,7 +1090,7 @@ where
             nullable_as_operator,
             nullable_as_right_operand,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1102,7 +1102,7 @@ where
             conditional_colon,
             conditional_alternative,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1113,7 +1113,7 @@ where
             eval_argument,
             eval_right_paren,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1124,7 +1124,7 @@ where
             define_argument_list,
             define_right_paren,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1135,7 +1135,7 @@ where
             isset_argument_list,
             isset_right_paren,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1147,7 +1147,7 @@ where
             function_call_argument_list,
             function_call_right_paren,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1156,7 +1156,7 @@ where
             function_pointer_receiver,
             function_pointer_type_args,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1166,7 +1166,7 @@ where
             parenthesized_expression_expression,
             parenthesized_expression_right_paren,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1176,7 +1176,7 @@ where
             braced_expression_expression,
             braced_expression_right_brace,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1186,7 +1186,7 @@ where
             embedded_braced_expression_expression,
             embedded_braced_expression_right_brace,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1197,7 +1197,7 @@ where
             list_members,
             list_right_paren,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1208,7 +1208,7 @@ where
             collection_literal_initializers,
             collection_literal_right_brace,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1217,7 +1217,7 @@ where
             object_creation_new_keyword,
             object_creation_object,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1228,7 +1228,7 @@ where
             constructor_call_argument_list,
             constructor_call_right_paren,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1239,7 +1239,7 @@ where
             record_creation_members,
             record_creation_right_bracket,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1251,7 +1251,7 @@ where
             darray_intrinsic_members,
             darray_intrinsic_right_bracket,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1263,7 +1263,7 @@ where
             dictionary_intrinsic_members,
             dictionary_intrinsic_right_bracket,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1275,7 +1275,7 @@ where
             keyset_intrinsic_members,
             keyset_intrinsic_right_bracket,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1287,7 +1287,7 @@ where
             varray_intrinsic_members,
             varray_intrinsic_right_bracket,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1299,7 +1299,7 @@ where
             vector_intrinsic_members,
             vector_intrinsic_right_bracket,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1309,7 +1309,7 @@ where
             element_arrow,
             element_value,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1320,7 +1320,7 @@ where
             subscript_index,
             subscript_right_bracket,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1331,7 +1331,7 @@ where
             embedded_subscript_index,
             embedded_subscript_right_bracket,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1341,7 +1341,7 @@ where
             awaitable_async,
             awaitable_compound_statement,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1351,7 +1351,7 @@ where
             xhp_children_expression,
             xhp_children_semicolon,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1361,7 +1361,7 @@ where
             xhp_children_list_xhp_children,
             xhp_children_list_right_paren,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1371,7 +1371,7 @@ where
             xhp_category_categories,
             xhp_category_semicolon,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1382,7 +1382,7 @@ where
             xhp_enum_values,
             xhp_enum_right_brace,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1391,7 +1391,7 @@ where
             xhp_lateinit_at,
             xhp_lateinit_keyword,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1400,7 +1400,7 @@ where
             xhp_required_at,
             xhp_required_keyword,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1410,7 +1410,7 @@ where
             xhp_attribute_attributes,
             xhp_attribute_semicolon,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1421,7 +1421,7 @@ where
             xhp_attribute_decl_initializer,
             xhp_attribute_decl_required,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1429,7 +1429,7 @@ where
         let syntax = SyntaxVariant::XHPSimpleClassAttribute(Box::new(XHPSimpleClassAttributeChildren {
             xhp_simple_class_attribute_type,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1439,7 +1439,7 @@ where
             xhp_simple_attribute_equal,
             xhp_simple_attribute_expression,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1450,7 +1450,7 @@ where
             xhp_spread_attribute_expression,
             xhp_spread_attribute_right_brace,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1461,7 +1461,7 @@ where
             xhp_open_attributes,
             xhp_open_right_angle,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1471,7 +1471,7 @@ where
             xhp_body,
             xhp_close,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1481,7 +1481,7 @@ where
             xhp_close_name,
             xhp_close_right_angle,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1491,7 +1491,7 @@ where
             type_constant_separator,
             type_constant_right_type,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1501,7 +1501,7 @@ where
             pu_access_separator,
             pu_access_right_type,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1513,7 +1513,7 @@ where
             vector_type_trailing_comma,
             vector_type_right_angle,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1525,7 +1525,7 @@ where
             keyset_type_trailing_comma,
             keyset_type_right_angle,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1536,7 +1536,7 @@ where
             tuple_type_types,
             tuple_type_right_angle,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1548,7 +1548,7 @@ where
             varray_trailing_comma,
             varray_right_angle,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1561,7 +1561,7 @@ where
             type_param_params,
             type_constraints,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1570,7 +1570,7 @@ where
             constraint_keyword,
             constraint_type,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1584,7 +1584,7 @@ where
             darray_trailing_comma,
             darray_right_angle,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1595,7 +1595,7 @@ where
             dictionary_type_members,
             dictionary_type_right_angle,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1611,7 +1611,7 @@ where
             closure_return_type,
             closure_outer_right_paren,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1620,7 +1620,7 @@ where
             closure_parameter_call_convention,
             closure_parameter_type,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1632,7 +1632,7 @@ where
             classname_trailing_comma,
             classname_right_angle,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1643,7 +1643,7 @@ where
             field_arrow,
             field_type,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1653,7 +1653,7 @@ where
             field_initializer_arrow,
             field_initializer_value,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1665,7 +1665,7 @@ where
             shape_type_ellipsis,
             shape_type_right_paren,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1676,7 +1676,7 @@ where
             shape_expression_fields,
             shape_expression_right_paren,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1687,7 +1687,7 @@ where
             tuple_expression_items,
             tuple_expression_right_paren,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1696,7 +1696,7 @@ where
             generic_class_type,
             generic_argument_list,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1705,7 +1705,7 @@ where
             nullable_question,
             nullable_type,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1714,7 +1714,7 @@ where
             like_tilde,
             like_type,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1723,7 +1723,7 @@ where
             soft_at,
             soft_type,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1732,7 +1732,7 @@ where
             attributized_specifier_attribute_spec,
             attributized_specifier_type,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1741,7 +1741,7 @@ where
             reified_type_argument_reified,
             reified_type_argument_type,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1751,7 +1751,7 @@ where
             type_arguments_types,
             type_arguments_right_angle,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1761,7 +1761,7 @@ where
             type_parameters_parameters,
             type_parameters_right_angle,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1771,7 +1771,7 @@ where
             tuple_types,
             tuple_right_paren,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1781,7 +1781,7 @@ where
             union_types,
             union_right_paren,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1791,7 +1791,7 @@ where
             intersection_types,
             intersection_right_paren,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1799,7 +1799,7 @@ where
         let syntax = SyntaxVariant::ErrorSyntax(Box::new(ErrorSyntaxChildren {
             error_error,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1808,7 +1808,7 @@ where
             list_item,
             list_separator,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1817,7 +1817,7 @@ where
             pocket_atom_glyph,
             pocket_atom_expression,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1829,7 +1829,7 @@ where
             pocket_identifier_operator,
             pocket_identifier_name,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1842,7 +1842,7 @@ where
             pocket_atom_mapping_right_paren,
             pocket_atom_mapping_semicolon,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1856,7 +1856,7 @@ where
             pocket_enum_fields,
             pocket_enum_right_brace,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1867,7 +1867,7 @@ where
             pocket_field_type_expr_name,
             pocket_field_type_expr_semicolon,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1878,7 +1878,7 @@ where
             pocket_field_type_type_parameter,
             pocket_field_type_semicolon,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1887,7 +1887,7 @@ where
             pocket_mapping_id_name,
             pocket_mapping_id_initializer,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1898,7 +1898,7 @@ where
             pocket_mapping_type_equal,
             pocket_mapping_type_type,
         }));
-        let value = V::from_syntax(&syntax);
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 

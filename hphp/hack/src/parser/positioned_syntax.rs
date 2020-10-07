@@ -188,12 +188,8 @@ impl SyntaxValueWithKind for PositionedValue {
 }
 
 impl SyntaxValueType<PositionedToken> for PositionedValue {
-    fn from_values(values: &[&Self]) -> Self {
-        Self::from_(values.iter().map(|v| *v))
-    }
-
-    fn from_syntax(variant: &SyntaxVariant<PositionedToken, Self>) -> Self {
-        Self::from_(variant.iter_children().map(|child| &child.value))
+    fn from_values<'a>(child_values: impl Iterator<Item = &'a Self>) -> Self {
+        Self::from_(child_values)
     }
 
     fn from_children(_: SyntaxKind, offset: usize, nodes: &[&Self]) -> Self {

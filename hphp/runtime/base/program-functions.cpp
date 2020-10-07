@@ -2427,7 +2427,6 @@ void hphp_process_init() {
   if (!apcExtension::PrimeLibrary.empty()) {
     apcLoadingThread = std::make_unique<std::thread>([&] {
         hphp_thread_init();
-        ProfileNonVMThread nonVM;
         hphp_session_init(Treadmill::SessionKind::APCPrime);
         SCOPE_EXIT {
           hphp_context_exit();

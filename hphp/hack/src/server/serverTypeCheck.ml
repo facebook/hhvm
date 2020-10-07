@@ -1402,6 +1402,7 @@ functor
       in
 
       (* TYPE CHECKING *********************************************************)
+      let type_check_start_t = Unix.gettimeofday () in
 
       (* For a full check, typecheck everything which may be affected by the
        changes. For a lazy check, typecheck only the affected files which are
@@ -1620,7 +1621,7 @@ functor
         ~started_count:to_recheck_count
         ~count:total_rechecked_count
         ~experiments:genv.local_config.ServerLocalConfig.experiments
-        ~start_t:t;
+        ~start_t:type_check_start_t;
 
       (env, { reparse_count; total_rechecked_count }, telemetry)
   end

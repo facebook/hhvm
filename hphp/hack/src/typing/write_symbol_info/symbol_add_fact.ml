@@ -366,22 +366,17 @@ let add_decl_loc_fact pos decl_json progress =
   in
   add_fact DeclarationLocation json_fact progress
 
-let add_decl_comment_fact doc pos decl_json progress =
+let add_decl_comment_fact pos decl_json progress =
   let filepath = Relative_path.to_absolute (Pos.filename pos) in
-  let base_fields =
-    [
-      ("declaration", decl_json);
-      ("file", build_file_json_nested filepath);
-      ("span", build_bytespan_json pos);
-    ]
+  let json_fact =
+    JSON_Object
+      [
+        ("declaration", decl_json);
+        ("file", build_file_json_nested filepath);
+        ("span", build_bytespan_json pos);
+      ]
   in
-  let json_fields =
-    if phys_equal (String.length doc) 0 then
-      base_fields
-    else
-      ("comment", build_comment_json_nested doc) :: base_fields
-  in
-  add_fact DeclarationComment (JSON_Object json_fields) progress
+  add_fact DeclarationComment json_fact progress
 
 let add_decl_span_fact pos decl_json progress =
   let filepath = Relative_path.to_absolute (Pos.filename pos) in

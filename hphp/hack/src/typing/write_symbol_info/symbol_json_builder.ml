@@ -23,8 +23,8 @@ encountering symbols of a given type. *)
 let process_doc_comment comment decl_ref_json prog =
   match comment with
   | None -> prog
-  | Some (pos, doc) ->
-    let (_, prog) = add_decl_comment_fact doc pos decl_ref_json prog in
+  | Some (pos, _doc) ->
+    let (_, prog) = add_decl_comment_fact pos decl_ref_json prog in
     prog
 
 let process_decl_loc

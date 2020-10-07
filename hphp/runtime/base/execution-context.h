@@ -510,7 +510,7 @@ public:
 
 private:
   TypedValue invokeFuncImpl(const Func* f, ObjectData* thiz, Class* cls,
-                            uint32_t numArgsInclUnpack, Array&& generics,
+                            uint32_t numArgsInclUnpack, bool hasGenerics,
                             bool dynamic, bool allowDynCallNoPointer);
 
   struct ExcLoggerHook final : LoggerHook {

@@ -220,6 +220,17 @@ void beginInlining(IRGS& env,
 
   FTRACE(1, "[[[ begin inlining: {}\n", target->fullName()->data());
 
+  auto const callFlags = cns(env, CallFlags(
+    fca.hasGenerics(),
+    dynamicCall,
+    returnTarget.asyncEagerOffset != kInvalidOffset,
+    0, // call offset unused by the logic below
+    0
+  ).value());
+
+  // Callee checks.
+  emitCalleeGenericsChecks(env, target, callFlags, fca.hasGenerics());
+
   auto const closure = target->isClosureBody()
     ? gen(env, AssertType, Type::ExactObj(target->implCls()), ctx)
     : nullptr;
@@ -261,18 +272,12 @@ void beginInlining(IRGS& env,
     return gen(env, AssertType, ty, ctx);
   }();
 
-  auto const generics = [&]() -> SSATmp* {
-    if (!fca.hasGenerics()) return nullptr;
-    if (target->hasReifiedGenerics()) return popC(env);
-    popDecRef(env, DataTypeGeneric);
-    return nullptr;
-  }();
-
-  auto const numArgs = fca.numArgs + (fca.hasUnpack() ? 1 : 0);
-  jit::vector<SSATmp*> params{numArgs + 1};
-
-  for (unsigned i = 0; i < numArgs; ++i) {
-    params[numArgs - i - 1] = popC(env);
+  auto const numArgs = fca.numArgs + (fca.hasUnpack() ? 1U : 0U);
+  auto const numTotalInputs =
+    numArgs + (target->hasReifiedGenerics() ? 1U : 0U);
+  jit::vector<SSATmp*> inputs{numTotalInputs};
+  for (auto i = 0; i < numTotalInputs; ++i) {
+    inputs[numTotalInputs - i - 1] = popC(env);
   }
 
   // NB: Now that we've popped the callee's arguments off the stack
@@ -321,27 +326,17 @@ void beginInlining(IRGS& env,
 
   if (!(ctx->type() <= TNullptr)) gen(env, StFrameCtx, fp(env), ctx);
 
-  for (unsigned i = 0; i < numArgs; ++i) {
-    stLocRaw(env, i, calleeFP, params[i]);
+  for (auto i = 0; i < numTotalInputs; ++i) {
+    stLocRaw(env, i, calleeFP, inputs[i]);
   }
-  if (generics != nullptr) stLocRaw(env, numArgs, calleeFP, generics);
 
   // All the code below may reenter, so update the marker so we don't
   // accidentally overwrite the locals.
   updateMarker(env);
   env.irb->exceptionStackBoundary();
 
-  auto const callFlags = cns(env, CallFlags(
-    generics != nullptr,
-    dynamicCall,
-    returnTarget.asyncEagerOffset != kInvalidOffset,
-    0, // call offset unused by the logic below
-    0
-  ).value());
+  emitPrologueLocals(env, target, numArgs, closure);
 
-  emitPrologueLocals(env, target, numArgs, callFlags, closure);
-
-  emitGenericsMismatchCheck(env, target, callFlags);
   emitCalleeDynamicCallCheck(env, target, callFlags);
   emitImplicitContextCheck(env, target);
 

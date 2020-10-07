@@ -1,8 +1,8 @@
-Warning: Generic at index 0 to Function f must be reified, erased given in %s on line 4
+Warning: Generic at index 0 to Function f must be reified, erased given in %s on line 20
 ok
 
-Warning: Generic at index 0 to Function C::fs must be reified, erased given in %s on line 12
+Warning: Generic at index 0 to Function C::fs must be reified, erased given in %s on line 21
 ok
 
-Warning: Generic at index 0 to Function C::f must be reified, erased given in %s on line 9
+Warning: Generic at index 0 to Function C::f must be reified, erased given in %s on line 22
 ok

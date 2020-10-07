@@ -96,24 +96,33 @@ StackCheck stack_check_kind(const Func* func, uint32_t argc) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void emitGenericsMismatchCheck(IRGS& env, const Func* callee,
-                               SSATmp* callFlags) {
-  if (!callee->hasReifiedGenerics()) return;
+void emitCalleeGenericsChecks(IRGS& env, const Func* callee, SSATmp* callFlags,
+                              bool pushed) {
+  if (!callee->hasReifiedGenerics()) {
+    // FIXME: leaks memory if generics were given but not expected nor pushed.
+    if (pushed) {
+      popDecRef(env);
+      updateMarker(env);
+      env.irb->exceptionStackBoundary();
+    }
+    return;
+  }
 
   // Fail if generics were not passed.
   ifThenElse(
     env,
     [&] (Block* taken) {
+      if (pushed) return;
       auto constexpr flag = 1 << CallFlags::Flags::HasGenerics;
       auto const hasGenerics = gen(env, AndInt, callFlags, cns(env, flag));
       gen(env, JmpZero, taken, hasGenerics);
     },
     [&] {
-      // Fail on generics count/wildcard mismatch.
+      // Generics were passed. Make them visible on the stack.
       auto const type = RuntimeOption::EvalHackArrDVArrs ? TVec : TVArr;
-      auto const local = LocalId{callee->numParams()};
-      gen(env, AssertLoc, type, local, fp(env));
-      auto const generics = gen(env, LdLoc, type, local, fp(env));
+      auto const generics = pushed ? topC(env) : apparate(env, type);
+      updateMarker(env);
+      env.irb->exceptionStackBoundary();
 
       // Generics may be known if we are inlining.
       if (generics->hasConstVal(type)) {
@@ -136,36 +145,49 @@ void emitGenericsMismatchCheck(IRGS& env, const Func* callee,
         }
       }
 
+      // Fail on generics count/wildcard mismatch.
       ifThen(
         env,
         [&] (Block* taken) {
-          auto const fd = FuncData { callee };
           auto const match =
-            gen(env, IsFunReifiedGenericsMatched, fd, callFlags);
+            gen(env, IsFunReifiedGenericsMatched, FuncData{callee}, callFlags);
           gen(env, JmpZero, taken, match);
         },
         [&] {
           hint(env, Block::Hint::Unlikely);
-          updateMarker(env);
-          env.irb->exceptionStackBoundary();
           gen(env, CheckFunReifiedGenericMismatch, cns(env, callee), generics);
         }
       );
     },
     [&] {
       hint(env, Block::Hint::Unlikely);
+
+      // FIXME: ifThenElse() doesn't save/restore marker and stack boundary.
       updateMarker(env);
       env.irb->exceptionStackBoundary();
-      if (areAllGenericsSoft(callee->getReifiedGenericsInfo())) {
-        gen(
-          env,
-          RaiseWarning,
-          cns(env, makeStaticString(folly::sformat(
-            "Generic at index 0 to Function {} must be reified, erased given",
-            callee->fullName()->data()))));
+
+      if (pushed) {
+        gen(env, Unreachable, ASSERT_REASON);
         return;
       }
-      gen(env, ThrowCallReifiedFunctionWithoutGenerics, cns(env, callee));
+
+      // Generics not given. We will either fail or raise a warning.
+      if (!areAllGenericsSoft(callee->getReifiedGenericsInfo())) {
+        gen(env, ThrowCallReifiedFunctionWithoutGenerics, cns(env, callee));
+        return;
+      }
+
+      auto const errMsg = makeStaticString(folly::sformat(
+        "Generic at index 0 to Function {} must be reified, erased given",
+        callee->fullName()->data()));
+      gen(env, RaiseWarning, cns(env, errMsg));
+
+      // Push an empty array, as the remainder of the prologue assumes generics
+      // are on the stack.
+      arrprov::TagOverride ap_override{arrprov::tagFromSK(env.bcState)};
+      push(env, cns(env, ArrayData::CreateVArray()));
+      updateMarker(env);
+      env.irb->exceptionStackBoundary();
     }
   );
 }
@@ -233,12 +255,12 @@ void emitImplicitContextCheck(IRGS& env, const Func* callee) {
 
 namespace {
 
-void emitPrologueEntry(IRGS& env, const Func* callee, uint32_t argc) {
-  // Emit debug code.
-  if (Trace::moduleEnabled(Trace::ringbuffer)) {
-    auto msg = RBMsgData { Trace::RBTypeFuncPrologue, callee->fullName() };
-    gen(env, RBTraceMsg, msg);
-  }
+void emitPrologueEntry(IRGS& env, const Func* callee, uint32_t argc,
+                       TransID transID) {
+  gen(env, EnterPrologue);
+
+  // Update marker with the stublogue bit.
+  updateMarker(env);
 
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
     // Make sure we are at the right function.
@@ -252,14 +274,28 @@ void emitPrologueEntry(IRGS& env, const Func* callee, uint32_t argc) {
     gen(env, JmpZero, makeUnreachable(env, ASSERT_REASON), numArgsOK);
   }
 
-  gen(env, EnterPrologue);
+  // Emit debug code.
+  if (Trace::moduleEnabled(Trace::ringbuffer)) {
+    auto msg = RBMsgData { Trace::RBTypeFuncPrologue, callee->fullName() };
+    gen(env, RBTraceMsg, msg);
+  }
 
-  // Update marker with the stublogue bit.
-  updateMarker(env);
+  // Increment profiling counter.
+  if (isProfiling(env.context.kind)) {
+    gen(env, IncProfCounter, TransIDData{transID});
+    profData()->setProfiling(callee->getFuncId());
+  }
+}
+
+void emitCalleeChecks(IRGS& env, const Func* callee, uint32_t argc,
+                      SSATmp* callFlags) {
+  // Generics are special and need to be checked first, as they may or may not
+  // be on the stack. This check makes sure they materialize on the stack
+  // if we expect them.
+  emitCalleeGenericsChecks(env, callee, callFlags, false);
 
   // Emit early stack overflow check if necessary.
   if (stack_check_kind(callee, argc) == StackCheck::Early) {
-    env.irb->exceptionStackBoundary();
     gen(env, CheckStackOverflow, sp(env));
   }
 }
@@ -270,8 +306,7 @@ void emitPrologueEntry(IRGS& env, const Func* callee, uint32_t argc) {
  * Set un-passed parameters to Uninit and set up the variadic capture parameter
  * as neeeded.
  */
-void init_params(IRGS& env, const Func* func, uint32_t argc,
-                 SSATmp* callFlags) {
+void init_params(IRGS& env, const Func* func, uint32_t argc) {
   // Reified generics are not supported on closures yet.
   assertx(!func->hasReifiedGenerics() || !func->isClosureBody());
 
@@ -279,52 +314,24 @@ void init_params(IRGS& env, const Func* func, uint32_t argc,
   auto constexpr kMaxParamsInitUnroll = 5;
   auto const nparams = func->numNonVariadicParams();
 
-  // If generics were expected and given, but not enough args were provided,
-  // move generics to the correct slot ($0ReifiedGenerics is the first
-  // non-parameter local).
-  // FIXME: leaks memory if generics were given but not expected.
-  if (func->hasReifiedGenerics()) {
-    ifThenElse(
-      env,
-      [&] (Block* taken) {
-        auto constexpr flag = 1 << CallFlags::Flags::HasGenerics;
-        auto const hasGenerics = gen(env, AndInt, callFlags, cns(env, flag));
-        gen(env, JmpNZero, taken, hasGenerics);
-      },
-      [&] {
-        arrprov::TagOverride ap_override{arrprov::tagFromSK(env.bcState)};
-        // Generics not given. We will either fail later or raise a warning.
-        // Write empty array so that the local is properly initialized.
-        auto const emptyArr =
-          RuntimeOption::EvalHackArrDVArrs ? ArrayData::CreateVec()
-                                           : ArrayData::CreateVArray();
-        gen(
-          env,
-          StLoc,
-          LocalId{func->numParams()},
-          fp(env),
-          cns(env, emptyArr));
-      },
-      [&] {
-        // Already at the correct slot.
-        if (argc == func->numParams()) return;
-
-        auto const type = RuntimeOption::EvalHackArrDVArrs ? TVec : TVArr;
-        auto const generics = [&] {
-          if (argc < func->numParams()) {
-            gen(env, AssertLoc, type, LocalId{argc}, fp(env));
-            return gen(env, LdLoc, type, LocalId{argc}, fp(env));
-          } else {
-            assertx(!isInlining(env));
-            auto const genericsOff = IRSPRelOffsetData(offsetFromIRSP(
-              env, BCSPRelOffset{func->numSlotsInFrame() - int32_t(argc) - 1}));
-            gen(env, AssertStk, type, genericsOff, sp(env));
-            return gen(env, LdStk, type, genericsOff, sp(env));
-          }
-        }();
-        gen(env, StLoc, LocalId{func->numParams()}, fp(env), generics);
+  // Reified generics were initialized by emitCalleeGenericsChecks(). If not
+  // enough args were provided, move generics to the correct slot
+  // ($0ReifiedGenerics is the first non-parameter local).
+  if (func->hasReifiedGenerics() && argc != func->numParams()) {
+    auto const type = RuntimeOption::EvalHackArrDVArrs ? TVec : TVArr;
+    auto const generics = [&] {
+      if (argc < func->numParams()) {
+        gen(env, AssertLoc, type, LocalId{argc}, fp(env));
+        return gen(env, LdLoc, type, LocalId{argc}, fp(env));
+      } else {
+        assertx(!isInlining(env));
+        auto const genericsOff = IRSPRelOffsetData(offsetFromIRSP(
+          env, BCSPRelOffset{func->numSlotsInFrame() - int32_t(argc) - 1}));
+        gen(env, AssertStk, type, genericsOff, sp(env));
+        return gen(env, LdStk, type, genericsOff, sp(env));
       }
-    );
+    }();
+    gen(env, StLoc, LocalId{func->numParams()}, fp(env), generics);
   }
 
   if (argc < nparams) {
@@ -445,8 +452,8 @@ void init_locals(IRGS& env, const Func* func) {
 } // namespace
 
 void emitPrologueLocals(IRGS& env, const Func* callee, uint32_t argc,
-                        SSATmp* callFlags, SSATmp* closure) {
-  init_params(env, callee, argc, callFlags);
+                        SSATmp* closure) {
+  init_params(env, callee, argc);
 
   assertx(callee->isClosureBody() == (closure != nullptr));
   if (callee->isClosureBody()) {
@@ -460,13 +467,7 @@ void emitPrologueLocals(IRGS& env, const Func* callee, uint32_t argc,
 namespace {
 
 void emitPrologueBody(IRGS& env, const Func* callee, uint32_t argc,
-                      TransID transID, SSATmp* callFlags, SSATmp* closure) {
-  // Increment profiling counter.
-  if (isProfiling(env.context.kind)) {
-    gen(env, IncProfCounter, TransIDData{transID});
-    profData()->setProfiling(callee->getFuncId());
-  }
-
+                      SSATmp* callFlags, SSATmp* closure) {
   // Increment the count for the latest call for optimized translations if we're
   // going to serialize the profile data.
   if (env.context.kind == TransKind::OptPrologue && isJitSerializing() &&
@@ -491,7 +492,7 @@ void emitPrologueBody(IRGS& env, const Func* callee, uint32_t argc,
 
   // Initialize params, locals, and---if we have a closure---the closure's
   // bound class context and use vars.
-  emitPrologueLocals(env, callee, argc, callFlags, closure);
+  emitPrologueLocals(env, callee, argc, closure);
 
   env.irb->exceptionStackBoundary();
 
@@ -502,7 +503,6 @@ void emitPrologueBody(IRGS& env, const Func* callee, uint32_t argc,
     gen(env, RaiseTooManyArg, FuncData { callee }, unpackArgsForTooManyArgs);
   }
 
-  emitGenericsMismatchCheck(env, callee, callFlags);
   emitCalleeDynamicCallCheck(env, callee, callFlags);
   emitImplicitContextCheck(env, callee);
 
@@ -575,9 +575,10 @@ void emitFuncPrologue(IRGS& env, const Func* callee, uint32_t argc,
     : cns(env, nullptr);
   auto const closure = callee->isClosureBody() ? prologueCtx : nullptr;
 
-  emitPrologueEntry(env, callee, argc);
+  emitPrologueEntry(env, callee, argc, transID);
+  emitCalleeChecks(env, callee, argc, callFlags);
   emitSpillFrame(env, callee, argc, callFlags, prologueCtx);
-  emitPrologueBody(env, callee, argc, transID, callFlags, closure);
+  emitPrologueBody(env, callee, argc, callFlags, closure);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

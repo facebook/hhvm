@@ -906,7 +906,7 @@ uint32_t prepareUnpackArgs(const Func* func, uint32_t numArgs,
   return numParams + 1;
 }
 
-static void prepareFuncEntry(ActRec *ar, Array&& generics) {
+static void prepareFuncEntry(ActRec *ar) {
   assertx(!isResumed(ar));
   const Func* func = ar->func();
   Offset firstDVInitializer = kInvalidOffset;
@@ -914,6 +914,7 @@ static void prepareFuncEntry(ActRec *ar, Array&& generics) {
   const int nparams = func->numNonVariadicParams();
   auto& stack = vmStack();
 
+  auto generics = GenericsSaver::pop(func->hasReifiedGenerics());
   auto const nargs = (TypedValue*)ar - stack.top();
 
   if (UNLIKELY(nargs > nparams)) {
@@ -963,20 +964,12 @@ static void prepareFuncEntry(ActRec *ar, Array&& generics) {
   }
 
   if (ar->func()->hasReifiedGenerics()) {
-    ARRPROV_USE_RUNTIME_LOCATION();
     // Currently does not work with closures
     assertx(!func->isClosureBody());
+    assertx(!generics.isNull());
     // push for first local
-    auto const ad = generics.isNull() ? ArrayData::CreateVArray()
-                                      : generics.detach();
-    if (RuntimeOption::EvalHackArrDVArrs) {
-      stack.pushVecNoRc(ad);
-    } else {
-      stack.pushArrayNoRc(ad);
-    }
+    GenericsSaver::push(std::move(generics));
     nlocals++;
-  } else {
-    generics.reset();
   }
 
   pushFrameSlots(func, nlocals);
@@ -996,21 +989,6 @@ static void prepareFuncEntry(ActRec *ar, Array&& generics) {
 }
 
 namespace {
-// Check whether the location of reified generics matches the one we expect
-void checkForReifiedGenericsErrors(const ActRec* ar, bool hasGenerics) {
-  if (!ar->func()->hasReifiedGenerics()) return;
-  if (!hasGenerics) {
-    if (areAllGenericsSoft(ar->func()->getReifiedGenericsInfo())) {
-      raise_warning_for_soft_reified(0, true, ar->func()->fullName());
-      return;
-    }
-    throw_call_reified_func_without_generics(ar->func());
-  }
-  auto const generics = frame_local(ar, ar->func()->numParams());
-  assertx(tvIsHAMSafeVArray(generics));
-  checkFunReifiedGenericMismatch(ar->func(), val(generics).parr);
-}
-
 void checkImplicitContextErrors(const ActRec* ar) {
   if (!RO::EvalEnableImplicitContext ||
       !ar->func()->hasNoContextAttr() ||
@@ -1025,17 +1003,15 @@ void checkImplicitContextErrors(const ActRec* ar) {
 
 static void dispatch();
 
-void enterVMAtFunc(ActRec* enterFnAr, Array&& generics, bool hasInOut,
-                   bool dynamicCall, bool allowDynCallNoPointer) {
+void enterVMAtFunc(ActRec* enterFnAr, bool hasInOut, bool dynamicCall,
+                   bool allowDynCallNoPointer) {
   assertx(enterFnAr);
   assertx(!isResumed(enterFnAr));
   ARRPROV_USE_VMPC();
   Stats::inc(Stats::VMEnter);
 
-  auto const hasGenerics = !generics.isNull();
-  prepareFuncEntry(enterFnAr, std::move(generics));
+  prepareFuncEntry(enterFnAr);
 
-  checkForReifiedGenericsErrors(enterFnAr, hasGenerics);
   calleeDynamicCallChecks(enterFnAr->func(), dynamicCall,
                           allowDynCallNoPointer);
   checkImplicitContextErrors(enterFnAr);
@@ -3672,6 +3648,10 @@ bool doFCall(CallFlags callFlags, const Func* func, uint32_t numArgsInclUnpack,
   assertx(kNumActRecCells == 3);
   ActRec* ar = vmStack().indA(
     numArgsInclUnpack + (callFlags.hasGenerics() ? 1 : 0));
+
+  // Callee checks.
+  calleeGenericsChecks(func, callFlags.hasGenerics());
+
   ar->m_sfp = vmfp();
   ar->setJitReturn(retAddr);
   ar->setFunc(func);
@@ -3683,9 +3663,8 @@ bool doFCall(CallFlags callFlags, const Func* func, uint32_t numArgsInclUnpack,
   ar->setThisOrClassAllowNull(ctx);
 
   try {
-    prepareFuncEntry(ar, GenericsSaver::pop(callFlags.hasGenerics()));
+    prepareFuncEntry(ar);
 
-    checkForReifiedGenericsErrors(ar, callFlags.hasGenerics());
     calleeDynamicCallChecks(ar->func(), callFlags.isDynamicCall());
     checkImplicitContextErrors(ar);
     return EventHook::FunctionCall(ar, EventHook::NormalFunc);
@@ -3708,7 +3687,10 @@ bool doFCall(CallFlags callFlags, const Func* func, uint32_t numArgsInclUnpack,
       // Unwind live frame.
       vmfp() = ar->m_sfp;
       vmpc() = vmfp()->func()->entry() + ar->callOffset();
-      assertx(vmStack().top() + func->numSlotsInFrame() == (void*)ar);
+      assertx(vmStack().top() + func->numSlotsInFrame() <= (void*)ar);
+      while (vmStack().top() + func->numSlotsInFrame() != (void*)ar) {
+        vmStack().popTV();
+      }
       frame_free_locals_inl_no_hook(ar, func->numLocals());
       vmStack().ndiscard(func->numSlotsInFrame());
       vmStack().discardAR();

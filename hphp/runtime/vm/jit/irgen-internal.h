@@ -560,6 +560,16 @@ inline SSATmp* topC(IRGS& env, BCSPRelOffset i = BCSPRelOffset{0},
   return assertType(top(env, i, gc), TCell);
 }
 
+/*
+ * Make the value of a given type magically appear on the stack.
+ */
+inline SSATmp* apparate(IRGS& env, Type type) {
+  env.irb->fs().incBCSPDepth();
+  auto const offset = offsetFromIRSP(env, BCSPRelOffset{0});
+  gen(env, AssertStk, type, IRSPRelOffsetData{offset}, sp(env));
+  return top(env, BCSPRelOffset{0}, DataTypeGeneric);
+}
+
 //////////////////////////////////////////////////////////////////////
 
 inline BCMarker makeMarker(IRGS& env, Offset bcOff) {

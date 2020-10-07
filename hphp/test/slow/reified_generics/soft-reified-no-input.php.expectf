@@ -1,8 +1,8 @@
 functions
 
-Warning: Generic at index 0 to Function f must be reified, erased given in %s on line 7
+Warning: Generic at index 0 to Function f must be reified, erased given in %s on line 12
 
-Warning: Generic at index 0 to Function f must be reified, erased given in %s on line 7
+Warning: Generic at index 0 to Function f must be reified, erased given in %s on line 13
 
 classes
 

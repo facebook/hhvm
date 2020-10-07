@@ -6,6 +6,6 @@ varray(1) {
 }
 ---------------
 
-Fatal error: Uncaught exception 'BadMethodCallException' with message 'Function bar requires 1 generics but 2 given' in %s:11
+Fatal error: Uncaught exception 'BadMethodCallException' with message 'Function bar requires 1 generics but 2 given' in %s:18
 Stack trace:
 %A

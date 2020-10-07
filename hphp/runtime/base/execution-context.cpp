@@ -1481,7 +1481,7 @@ ALWAYS_INLINE
 TypedValue ExecutionContext::invokeFuncImpl(const Func* f,
                                             ObjectData* thiz, Class* cls,
                                             uint32_t numArgsInclUnpack,
-                                            Array&& generics, bool dynamic,
+                                            bool hasGenerics, bool dynamic,
                                             bool allowDynCallNoPointer) {
   assertx(f);
   // If `f' is a regular function, `thiz' and `cls' must be null.
@@ -1491,12 +1491,15 @@ TypedValue ExecutionContext::invokeFuncImpl(const Func* f,
   // If `f' is a static method, thiz must be null.
   assertx(IMPLIES(f->isStaticInPrologue(), !thiz));
 
-  if (thiz != nullptr) thiz->incRefCount();
+  ActRec* ar = vmStack().indA(numArgsInclUnpack + (hasGenerics ? 1 : 0));
 
-  ActRec* ar = vmStack().indA(numArgsInclUnpack);
+  // Callee checks.
+  calleeGenericsChecks(f, hasGenerics);
+
   ar->setReturnVMExit();
   ar->setFunc(f);
   if (thiz) {
+    thiz->incRefCount();
     ar->setThis(thiz);
   } else if (cls) {
     ar->setClass(cls);
@@ -1519,7 +1522,7 @@ TypedValue ExecutionContext::invokeFuncImpl(const Func* f,
 #endif
 
   auto const reentrySP =
-    vmStack().top() + numArgsInclUnpack + kNumActRecCells + f->numInOutParams();
+    reinterpret_cast<TypedValue*>(ar) + kNumActRecCells + f->numInOutParams();
   pushVMState(reentrySP);
   SCOPE_EXIT {
     assert_flog(
@@ -1532,8 +1535,7 @@ TypedValue ExecutionContext::invokeFuncImpl(const Func* f,
 
   enterVM(ar, [&] {
     exception_handler([&] {
-      enterVMAtFunc(ar, std::move(generics), f->takesInOutParams(), dynamic,
-                    allowDynCallNoPointer);
+      enterVMAtFunc(ar, f->takesInOutParams(), dynamic, allowDynCallNoPointer);
     });
   });
 
@@ -1566,8 +1568,7 @@ TypedValue ExecutionContext::invokeFunc(const Func* f,
                                         bool checkRefAnnot /* = false */,
                                         bool allowDynCallNoPointer
                                                               /* = false */,
-                                        Array&& reifiedGenerics
-                                                              /* = Array() */) {
+                                        Array&& generics /* = Array() */) {
   VMRegAnchor _;
 
   // We must do a stack overflow check for leaf functions on re-entry,
@@ -1599,11 +1600,15 @@ TypedValue ExecutionContext::invokeFunc(const Func* f,
     numArgs = prepareUnpackArgs(f, 0, checkRefAnnot);
   }
 
+  // Push generics.
+  auto const hasGenerics = !generics.isNull();
+  GenericsSaver::push(std::move(generics));
+
   // Caller checks.
   if (dynamic) callerDynamicCallChecks(f, allowDynCallNoPointer);
 
-  return invokeFuncImpl(f, thiz, cls, numArgs, std::move(reifiedGenerics),
-                        dynamic, allowDynCallNoPointer);
+  return invokeFuncImpl(f, thiz, cls, numArgs, hasGenerics, dynamic,
+                        allowDynCallNoPointer);
 }
 
 TypedValue ExecutionContext::invokeFuncFew(
@@ -1654,7 +1659,7 @@ TypedValue ExecutionContext::invokeFuncFew(
   if (dynamic) callerDynamicCallChecks(f, allowDynCallNoPointer);
 
   return invokeFuncImpl(f, thisOrCls.left(), thisOrCls.right(), numArgs,
-                        Array(), dynamic, false);
+                        false /* hasGenerics */, dynamic, false);
 }
 
 static void prepareAsyncFuncEntry(ActRec* enterFnAr,

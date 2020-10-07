@@ -110,7 +110,7 @@ ArrayData* maybeMakeLoggingArray(ArrayData* ad) {
   auto const shouldEmitBespoke = [&] {
     if (shouldTestBespokeArrayLikes()) {
       FTRACE(5, "Observe rid: {}\n", requestCount());
-      return !jit::mcgen::retranslateAllEnabled() || requestCount() % 2 == 1;
+      return true;
     } else {
       if (RO::EvalEmitLoggingArraySampleRate == 0) return false;
 

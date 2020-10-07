@@ -793,6 +793,32 @@ ArrayData* MonotypeVec::SetLegacyArray(MonotypeVec* madIn,
   return mad;
 }
 
+ArrayData* maybeMonoify(ArrayData* ad) {
+  if (!ad->isVecType() && !ad->isVArray()) return ad;
+
+  auto const et = EntryTypes::ForArray(ad);
+  if (et.valueTypes != ValueTypes::Monotype &&
+      et.valueTypes != ValueTypes::Empty) {
+    return ad;
+  }
+
+  SCOPE_EXIT { ad->decRefAndRelease(); };
+
+  if (et.valueTypes == ValueTypes::Empty) {
+    if (ad->isVecType()) {
+      return EmptyMonotypeVec::GetVec(ad->isLegacyArray());
+    } else {
+      return EmptyMonotypeVec::GetVArray(ad->isLegacyArray());
+    }
+  }
+
+  auto const dt = dt_modulo_persistence(et.valueDatatype);
+  auto const hk = ad->isVecType() ? HeaderKind::BespokeVec
+                                  : HeaderKind::BespokeVArray;
+  return MonotypeVec::Make(dt, ad->size(), packedData(ad), hk,
+                           ad->isLegacyArray(), ad->isStatic());
+}
+
 //////////////////////////////////////////////////////////////////////////////
 // Layouts
 //////////////////////////////////////////////////////////////////////////////

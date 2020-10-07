@@ -42,6 +42,8 @@ struct LayoutFunctions;
 // Maybe wrap this array in a LoggingArray, based on runtime options.
 ArrayData* maybeMakeLoggingArray(ArrayData*);
 const ArrayData* maybeMakeLoggingArray(const ArrayData*);
+ArrayData* maybeMonoify(ArrayData*);
+ArrayData* makeBespokeForTesting(ArrayData*);
 void setLoggingEnabled(bool);
 void exportProfiles();
 void waitOnExportProfiles();

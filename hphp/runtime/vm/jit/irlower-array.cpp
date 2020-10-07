@@ -223,8 +223,15 @@ void cgAKExistsObj(IRLS& env, const IRInstruction* inst) {
 // Array creation.
 
 void cgNewLoggingArray(IRLS& env, const IRInstruction* inst) {
-  auto const target = CallSpec::direct(
-    static_cast<ArrayData*(*)(ArrayData*)>(&bespoke::maybeMakeLoggingArray));
+  auto const target = [&] {
+    if (shouldTestBespokeArrayLikes()) {
+      return CallSpec::direct(
+        static_cast<ArrayData*(*)(ArrayData*)>(bespoke::makeBespokeForTesting));
+    } else {
+      return CallSpec::direct(
+        static_cast<ArrayData*(*)(ArrayData*)>(bespoke::maybeMakeLoggingArray));
+    }
+  }();
   cgCallHelper(vmain(env), env, target, callDest(env, inst),
                SyncOptions::Sync, argGroup(env, inst).ssa(0));
 }

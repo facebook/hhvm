@@ -28,6 +28,11 @@ struct EmptyMonotypeVec;
 struct MonotypeVec : public BespokeArray {
   static constexpr size_t kMinSizeIndex = 2;
 
+  /**
+   * Create a new MonotypeVec. Note that the staticArr option is used to create
+   * a non-deduplicated static MonotypeVec. This is only for temporary use to
+   * satisfy static RATs while GetScalarArray is unimplemented.
+   */
   static MonotypeVec* Make(DataType type, uint32_t size,
                            const TypedValue* values, HeaderKind hk,
                            bool legacy, bool staticArr);

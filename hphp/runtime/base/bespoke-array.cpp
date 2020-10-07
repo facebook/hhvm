@@ -23,6 +23,8 @@
 #include "hphp/runtime/base/sort-flags.h"
 #include "hphp/runtime/base/tv-refcount.h"
 
+#include "hphp/runtime/vm/jit/mcgen-translate.h"
+
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////////////
@@ -259,6 +261,20 @@ ArrayData* BespokeArray::ToHackArr(ArrayData* ad, bool copy) {
 }
 ArrayData* BespokeArray::SetLegacyArray(ArrayData* ad, bool copy, bool legacy) {
   return asBespoke(ad)->vtable()->fnSetLegacyArray(ad, copy, legacy);
+}
+
+// testing
+namespace bespoke {
+ArrayData* makeBespokeForTesting(ArrayData* ad) {
+  if (!jit::mcgen::retranslateAllEnabled()) {
+    return bespoke::maybeMakeLoggingArray(ad);
+  }
+
+  auto const mod = requestCount() % 3;
+  if (mod == 1) return bespoke::maybeMakeLoggingArray(ad);
+  if (mod == 2) return bespoke::maybeMonoify(ad);
+  return ad;
+}
 }
 
 //////////////////////////////////////////////////////////////////////////////

@@ -30,7 +30,7 @@ pub trait FlattenOp {
 }
 
 pub trait FlattenSmartConstructors<'src, State>
-: SmartConstructors<State> + FlattenOp<S=<Self as SmartConstructors<State>>::R>
+: SmartConstructors<State = State> + FlattenOp<S=<Self as SmartConstructors>::R>
 {
     fn make_missing(&mut self, _: usize) -> Self::R {
        Self::zero(SyntaxKind::Missing)

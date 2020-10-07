@@ -16,9 +16,9 @@ use parser_core_types::syntax_error::{self as Errors, SyntaxError};
 use parser_core_types::token_kind::TokenKind;
 use parser_core_types::trivia_kind::TriviaKind;
 
-pub struct StatementParser<'a, S, T>
+pub struct StatementParser<'a, S>
 where
-    S: SmartConstructors<T>,
+    S: SmartConstructors,
     S::R: NodeType,
 {
     lexer: Lexer<'a, S::Token>,
@@ -28,9 +28,9 @@ where
     sc: S,
 }
 
-impl<'a, S, T: Clone> Clone for StatementParser<'a, S, T>
+impl<'a, S> Clone for StatementParser<'a, S>
 where
-    S: SmartConstructors<T>,
+    S: SmartConstructors,
     S::R: NodeType,
 {
     fn clone(&self) -> Self {
@@ -44,9 +44,9 @@ where
     }
 }
 
-impl<'a, S, T: Clone> ParserTrait<'a, S, T> for StatementParser<'a, S, T>
+impl<'a, S> ParserTrait<'a, S> for StatementParser<'a, S>
 where
-    S: SmartConstructors<T>,
+    S: SmartConstructors,
     S::R: NodeType,
 {
     fn make(
@@ -84,7 +84,7 @@ where
         &mut self.lexer
     }
 
-    fn continue_from<P: ParserTrait<'a, S, T>>(&mut self, other: P) {
+    fn continue_from<P: ParserTrait<'a, S>>(&mut self, other: P) {
         let (lexer, context, errors, sc) = other.into_parts();
         self.lexer = lexer;
         self.context = context;
@@ -121,16 +121,16 @@ where
     }
 }
 
-impl<'a, S, T: Clone> StatementParser<'a, S, T>
+impl<'a, S> StatementParser<'a, S>
 where
-    S: SmartConstructors<T>,
+    S: SmartConstructors,
     S::R: NodeType,
 {
     fn with_type_parser<F, U>(&mut self, f: F) -> U
     where
-        F: Fn(&mut TypeParser<'a, S, T>) -> U,
+        F: Fn(&mut TypeParser<'a, S>) -> U,
     {
-        let mut type_parser: TypeParser<S, T> = TypeParser::make(
+        let mut type_parser: TypeParser<S> = TypeParser::make(
             self.lexer.clone(),
             self.env.clone(),
             self.context.clone(),
@@ -143,14 +143,14 @@ where
     }
 
     fn parse_type_specifier(&mut self) -> S::R {
-        self.with_type_parser(|x: &mut TypeParser<'a, S, T>| x.parse_type_specifier(false, true))
+        self.with_type_parser(|x: &mut TypeParser<'a, S>| x.parse_type_specifier(false, true))
     }
 
     fn with_expression_parser<F, U>(&mut self, f: F) -> U
     where
-        F: Fn(&mut ExpressionParser<'a, S, T>) -> U,
+        F: Fn(&mut ExpressionParser<'a, S>) -> U,
     {
-        let mut expression_parser: ExpressionParser<S, T> = ExpressionParser::make(
+        let mut expression_parser: ExpressionParser<S> = ExpressionParser::make(
             self.lexer.clone(),
             self.env.clone(),
             self.context.clone(),
@@ -164,9 +164,9 @@ where
 
     fn with_decl_parser<F, U>(&mut self, f: F) -> U
     where
-        F: Fn(&mut DeclarationParser<'a, S, T>) -> U,
+        F: Fn(&mut DeclarationParser<'a, S>) -> U,
     {
-        let mut decl_parser: DeclarationParser<S, T> = DeclarationParser::make(
+        let mut decl_parser: DeclarationParser<S> = DeclarationParser::make(
             self.lexer.clone(),
             self.env.clone(),
             self.context.clone(),
@@ -299,7 +299,7 @@ where
             | (TokenKind::Async, TokenKind::LeftBrace) // Async block
                 => self.parse_expression_statement(),
             | _ => {
-                let missing = self.with_decl_parser(|x: &mut DeclarationParser<'a, S, T>| {
+                let missing = self.with_decl_parser(|x: &mut DeclarationParser<'a, S>| {
                     let missing = S!(make_missing, x, x.pos());
                     x.parse_function_declaration(missing)
                 });
@@ -370,7 +370,7 @@ where
         let foreach_left_paren = self.require_left_paren();
         self.expect_in_new_scope(ExpectedTokens::RightParen);
         let foreach_collection_name =
-            self.with_expression_parser(|x: &mut ExpressionParser<'a, S, T>| {
+            self.with_expression_parser(|x: &mut ExpressionParser<'a, S>| {
                 x.with_as_expressions(false, |x| x.parse_expression())
             });
         let await_token = self.optional_token(TokenKind::Await);
@@ -473,7 +473,7 @@ where
         //
         let mut parser1 = self.clone();
         let expr = if token_kind == TokenKind::LeftParen {
-            parser1.with_expression_parser(|p: &mut ExpressionParser<'a, S, T>| {
+            parser1.with_expression_parser(|p: &mut ExpressionParser<'a, S>| {
                 p.parse_cast_or_parenthesized_or_lambda_expression()
             })
         } else {
@@ -1083,6 +1083,6 @@ where
     }
 
     fn parse_expression(&mut self) -> S::R {
-        self.with_expression_parser(|p: &mut ExpressionParser<'a, S, T>| p.parse_expression())
+        self.with_expression_parser(|p: &mut ExpressionParser<'a, S>| p.parse_expression())
     }
 }

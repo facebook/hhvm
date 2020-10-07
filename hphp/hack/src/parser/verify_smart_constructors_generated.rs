@@ -31,8 +31,9 @@ macro_rules! arg_kinds {
     );
 }
 
-impl<'src> SmartConstructors<State> for VerifySmartConstructors
+impl<'src> SmartConstructors for VerifySmartConstructors
 {
+    type State = State;
     type Token = PositionedToken;
     type R = PositionedSyntax;
 
@@ -64,7 +65,7 @@ impl<'src> SmartConstructors<State> for VerifySmartConstructors
             self.state_mut().push(r.kind());
             r
         } else {
-            <Self as SmartConstructors<State>>::make_missing(self, offset)
+            <Self as SmartConstructors>::make_missing(self, offset)
         }
     }
 

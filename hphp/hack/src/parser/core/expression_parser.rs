@@ -35,9 +35,9 @@ impl<P> BinaryExpressionPrefixKind<P> {
     }
 }
 
-pub struct ExpressionParser<'a, S, T>
+pub struct ExpressionParser<'a, S>
 where
-    S: SmartConstructors<T>,
+    S: SmartConstructors,
     S::R: NodeType,
 {
     lexer: Lexer<'a, S::Token>,
@@ -51,9 +51,9 @@ where
     _phantom: PhantomData<S>,
 }
 
-impl<'a, S, T: Clone> std::clone::Clone for ExpressionParser<'a, S, T>
+impl<'a, S> std::clone::Clone for ExpressionParser<'a, S>
 where
-    S: SmartConstructors<T>,
+    S: SmartConstructors,
     S::R: NodeType,
 {
     fn clone(&self) -> Self {
@@ -71,9 +71,9 @@ where
     }
 }
 
-impl<'a, S, T: Clone> ParserTrait<'a, S, T> for ExpressionParser<'a, S, T>
+impl<'a, S> ParserTrait<'a, S> for ExpressionParser<'a, S>
 where
-    S: SmartConstructors<T>,
+    S: SmartConstructors,
     S::R: NodeType,
 {
     fn make(
@@ -115,7 +115,7 @@ where
         &mut self.lexer
     }
 
-    fn continue_from<P: ParserTrait<'a, S, T>>(&mut self, other: P) {
+    fn continue_from<P: ParserTrait<'a, S>>(&mut self, other: P) {
         let (lexer, context, errors, sc) = other.into_parts();
         self.lexer = lexer;
         self.context = context;
@@ -152,9 +152,9 @@ where
     }
 }
 
-impl<'a, S, T: Clone> ExpressionParser<'a, S, T>
+impl<'a, S> ExpressionParser<'a, S>
 where
-    S: SmartConstructors<T>,
+    S: SmartConstructors,
     S::R: NodeType,
 {
     fn allow_as_expressions(&self) -> bool {
@@ -178,9 +178,9 @@ where
 
     fn with_type_parser<F, U>(&mut self, f: F) -> U
     where
-        F: Fn(&mut TypeParser<'a, S, T>) -> U,
+        F: Fn(&mut TypeParser<'a, S>) -> U,
     {
-        let mut type_parser: TypeParser<S, T> = TypeParser::make(
+        let mut type_parser: TypeParser<S> = TypeParser::make(
             self.lexer.clone(),
             self.env.clone(),
             self.context.clone(),
@@ -193,7 +193,7 @@ where
     }
 
     fn parse_remaining_type_specifier(&mut self, name: S::R) -> S::R {
-        let mut type_parser: TypeParser<S, T> = TypeParser::make(
+        let mut type_parser: TypeParser<S> = TypeParser::make(
             self.lexer.clone(),
             self.env.clone(),
             self.context.clone(),
@@ -211,9 +211,9 @@ where
 
     fn with_decl_parser<F, U>(&mut self, f: F) -> U
     where
-        F: Fn(&mut DeclarationParser<'a, S, T>) -> U,
+        F: Fn(&mut DeclarationParser<'a, S>) -> U,
     {
-        let mut decl_parser: DeclarationParser<S, T> = DeclarationParser::make(
+        let mut decl_parser: DeclarationParser<S> = DeclarationParser::make(
             self.lexer.clone(),
             self.env.clone(),
             self.context.clone(),
@@ -227,9 +227,9 @@ where
 
     fn with_statement_parser<F, U>(&mut self, f: F) -> U
     where
-        F: Fn(&mut StatementParser<'a, S, T>) -> U,
+        F: Fn(&mut StatementParser<'a, S>) -> U,
     {
-        let mut statement_parser: StatementParser<S, T> = StatementParser::make(
+        let mut statement_parser: StatementParser<S> = StatementParser::make(
             self.lexer.clone(),
             self.env.clone(),
             self.context.clone(),
@@ -1864,7 +1864,7 @@ where
         } else {
             let (left, params, right) = self.parse_parameter_list_opt();
             let capability =
-                self.with_type_parser(|p: &mut TypeParser<'a, S, T>| p.parse_capability_opt());
+                self.with_type_parser(|p: &mut TypeParser<'a, S>| p.parse_capability_opt());
             let (colon, return_type) = self.parse_optional_return();
             S!(
                 make_lambda_signature,
@@ -1954,8 +1954,8 @@ where
         F: Fn(&mut Self, S::R, S::R, S::R) -> S::R,
     {
         let op = self.assert_token(kw);
-        let right = self
-            .with_type_parser(|p: &mut TypeParser<'a, S, T>| p.parse_type_specifier(false, true));
+        let right =
+            self.with_type_parser(|p: &mut TypeParser<'a, S>| p.parse_type_specifier(false, true));
         let result = f(self, left, op, right);
         self.parse_remaining_expression(result)
     }

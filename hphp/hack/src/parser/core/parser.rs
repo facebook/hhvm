@@ -14,9 +14,9 @@ use crate::{
 use parser_core_types::{source_text::SourceText, syntax_error::SyntaxError};
 use stack_limit::StackLimit;
 
-pub struct Parser<'a, S, T>
+pub struct Parser<'a, S>
 where
-    S: SmartConstructors<T>,
+    S: SmartConstructors,
     S::R: NodeType,
 {
     lexer: Lexer<'a, S::Token>,
@@ -25,9 +25,9 @@ where
     sc: S,
 }
 
-impl<'a, S, T: Clone> Parser<'a, S, T>
+impl<'a, S> Parser<'a, S>
 where
-    S: SmartConstructors<T>,
+    S: SmartConstructors,
     S::R: NodeType,
 {
     pub fn new(source: &SourceText<'a>, env: ParserEnv, sc: S) -> Self {
@@ -50,7 +50,7 @@ where
         sc: S,
     ) -> Option<<S::R as NodeType>::R> {
         let (lexer, errors, env, sc) = Self::new(text, env, sc).into_parts();
-        let mut decl_parser: DeclarationParser<S, T> =
+        let mut decl_parser: DeclarationParser<S> =
             DeclarationParser::make(lexer, env, Context::empty(None), errors, sc);
         decl_parser
             .parse_leading_markup_section()
@@ -58,7 +58,7 @@ where
     }
 
     pub fn parse_script(&mut self, stack_limit: Option<&'a StackLimit>) -> <S::R as NodeType>::R {
-        let mut decl_parser: DeclarationParser<S, T> = DeclarationParser::make(
+        let mut decl_parser: DeclarationParser<S> = DeclarationParser::make(
             self.lexer.clone(),
             self.env.clone(),
             Context::empty(stack_limit),
@@ -81,11 +81,11 @@ where
         res
     }
 
-    pub fn sc_state(&mut self) -> &T {
+    pub fn sc_state(&mut self) -> &S::State {
         self.sc.state_mut()
     }
 
-    pub fn into_sc_state(self) -> T {
+    pub fn into_sc_state(self) -> S::State {
         self.sc.into_state()
     }
 }

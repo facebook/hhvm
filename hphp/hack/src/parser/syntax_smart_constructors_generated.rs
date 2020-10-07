@@ -21,7 +21,7 @@ use smart_constructors::{NoState, SmartConstructors};
 use crate::StateType;
 
 pub trait SyntaxSmartConstructors<S: SyntaxType<State>, State = NoState>:
-    SmartConstructors<State, R=S, Token=S::Token>
+    SmartConstructors<State = State, R=S, Token=S::Token>
 where
     State: StateType<S>,
 {

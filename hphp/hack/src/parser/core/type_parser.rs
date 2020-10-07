@@ -16,9 +16,9 @@ use parser_core_types::lexable_token::LexableToken;
 use parser_core_types::syntax_error::{self as Errors, SyntaxError};
 use parser_core_types::token_kind::TokenKind;
 
-pub struct TypeParser<'a, S, T>
+pub struct TypeParser<'a, S>
 where
-    S: SmartConstructors<T>,
+    S: SmartConstructors,
     S::R: NodeType,
 {
     lexer: Lexer<'a, S::Token>,
@@ -28,9 +28,9 @@ where
     sc: S,
 }
 
-impl<'a, S, T: Clone> std::clone::Clone for TypeParser<'a, S, T>
+impl<'a, S> std::clone::Clone for TypeParser<'a, S>
 where
-    S: SmartConstructors<T>,
+    S: SmartConstructors,
     S::R: NodeType,
 {
     fn clone(&self) -> Self {
@@ -44,9 +44,9 @@ where
     }
 }
 
-impl<'a, S, T: Clone> ParserTrait<'a, S, T> for TypeParser<'a, S, T>
+impl<'a, S> ParserTrait<'a, S> for TypeParser<'a, S>
 where
-    S: SmartConstructors<T>,
+    S: SmartConstructors,
     S::R: NodeType,
 {
     fn make(
@@ -86,7 +86,7 @@ where
         &mut self.lexer
     }
 
-    fn continue_from<P: ParserTrait<'a, S, T>>(&mut self, other: P) {
+    fn continue_from<P: ParserTrait<'a, S>>(&mut self, other: P) {
         let (mut lexer, context, errors, sc) = other.into_parts();
         lexer.set_in_type(true);
         self.lexer = lexer;
@@ -124,18 +124,18 @@ where
     }
 }
 
-impl<'a, S, T: Clone> TypeParser<'a, S, T>
+impl<'a, S> TypeParser<'a, S>
 where
-    S: SmartConstructors<T>,
+    S: SmartConstructors,
     S::R: NodeType,
 {
     fn with_expression_parser<F, U>(&mut self, f: F) -> U
     where
-        F: Fn(&mut ExpressionParser<'a, S, T>) -> U,
+        F: Fn(&mut ExpressionParser<'a, S>) -> U,
     {
         let mut lexer = self.lexer.clone();
         lexer.set_in_type(false);
-        let mut expression_parser: ExpressionParser<S, T> = ExpressionParser::make(
+        let mut expression_parser: ExpressionParser<S> = ExpressionParser::make(
             lexer,
             self.env.clone(),
             self.context.clone(),
@@ -148,17 +148,17 @@ where
     }
 
     fn parse_expression(&mut self) -> S::R {
-        self.with_expression_parser(|p: &mut ExpressionParser<'a, S, T>| p.parse_expression())
+        self.with_expression_parser(|p: &mut ExpressionParser<'a, S>| p.parse_expression())
     }
 
     fn with_decl_parser<F, U>(&mut self, f: F) -> U
     where
-        F: Fn(&mut DeclarationParser<'a, S, T>) -> U,
+        F: Fn(&mut DeclarationParser<'a, S>) -> U,
     {
         let mut lexer = self.lexer.clone();
         lexer.set_in_type(false);
 
-        let mut declaration_parser: DeclarationParser<S, T> = DeclarationParser::make(
+        let mut declaration_parser: DeclarationParser<S> = DeclarationParser::make(
             lexer,
             self.env.clone(),
             self.context.clone(),
@@ -398,7 +398,7 @@ where
     // https://github.com/hhvm/hack-langspec/issues/83
     // TODO: Update the spec with reified
     pub fn parse_type_parameter(&mut self) -> S::R {
-        let attributes = self.with_decl_parser(|x: &mut DeclarationParser<'a, S, T>| {
+        let attributes = self.with_decl_parser(|x: &mut DeclarationParser<'a, S>| {
             x.parse_attribute_specification_opt()
         });
         let reified = self.optional_token(TokenKind::Reify);
@@ -942,7 +942,7 @@ where
         // SPEC
         // attributized-specifier:
         // attribute-specification-opt type-specifier
-        let attribute_spec_opt = self.with_decl_parser(|x: &mut DeclarationParser<'a, S, T>| {
+        let attribute_spec_opt = self.with_decl_parser(|x: &mut DeclarationParser<'a, S>| {
             x.parse_attribute_specification_opt()
         });
         let attributized_type = self.parse_type_specifier(false, true);

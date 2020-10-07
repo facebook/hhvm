@@ -37,8 +37,9 @@ impl<S> WithKind<S> {
     }
 }
 
-impl<S, State> SmartConstructors<State> for WithKind<S>
-where S: SmartConstructors<State> {
+impl<S, State> SmartConstructors for WithKind<S>
+where S: SmartConstructors<State = State> {
+    type State = State;
     type Token = S::Token;
     type R = (SyntaxKind, S::R);
 

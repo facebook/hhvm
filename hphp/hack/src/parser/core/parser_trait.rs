@@ -111,10 +111,10 @@ impl<'a, T> Context<'a, T> {
     }
 }
 
-pub trait ParserTrait<'a, S, T: Clone>: Clone
+pub trait ParserTrait<'a, S>: Clone
 where
-    S: SmartConstructors<T>,
-    <S as SmartConstructors<T>>::R: NodeType,
+    S: SmartConstructors,
+    <S as SmartConstructors>::R: NodeType,
 {
     fn make(
         _: Lexer<'a, S::Token>,
@@ -134,7 +134,7 @@ where
     );
     fn lexer(&self) -> &Lexer<'a, S::Token>;
     fn lexer_mut(&mut self) -> &mut Lexer<'a, S::Token>;
-    fn continue_from<P: ParserTrait<'a, S, T>>(&mut self, _: P);
+    fn continue_from<P: ParserTrait<'a, S>>(&mut self, _: P);
 
     fn env(&self) -> &ParserEnv;
 

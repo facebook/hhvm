@@ -20,12 +20,13 @@ use parser_core_types::{
   lexable_token::LexableToken,
 };
 
-pub trait SmartConstructors<State>: Clone {
+pub trait SmartConstructors: Clone {
+    type State;
     type Token: LexableToken;
     type R;
 
-    fn state_mut(&mut self) -> &mut State;
-    fn into_state(self) -> State;
+    fn state_mut(&mut self) -> &mut Self::State;
+    fn into_state(self) -> Self::State;
 
     fn make_missing(&mut self, offset : usize) -> Self::R;
     fn make_token(&mut self, arg0: Self::Token) -> Self::R;

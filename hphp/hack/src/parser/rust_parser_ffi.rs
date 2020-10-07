@@ -27,7 +27,7 @@ pub trait ParseScript<'a, Sc, ScState> {
         stack_limit: Option<&'a StackLimit>,
     ) -> (<Sc::R as NodeType>::R, Vec<SyntaxError>, ScState)
     where
-        Sc: SmartConstructors<ScState>,
+        Sc: SmartConstructors<State = ScState>,
         Sc::R: NodeType,
         <Sc::R as NodeType>::R: ToOcaml,
         ScState: Clone + ToOcaml;
@@ -39,7 +39,7 @@ pub fn parse<'a, Sc, ScState, ParseFun>(
 ) -> UnsafeOcamlPtr
 where
     ParseFun: ParseScript<'a, Sc, ScState>,
-    Sc: SmartConstructors<ScState>,
+    Sc: SmartConstructors<State = ScState>,
     Sc::R: NodeType,
     <Sc::R as NodeType>::R: ToOcaml,
     ScState: Clone + ToOcaml,
@@ -169,30 +169,30 @@ macro_rules! parse {
             ocamlrep_ocamlpool::catch_unwind(|| {
                 use ocamlrep::{ptr::UnsafeOcamlPtr, FromOcamlRep};
                 use oxidized::full_fidelity_parser_env::FullFidelityParserEnv;
-                use smart_constructors::NodeType;
-                use parser_core_types::source_text::SourceText;
                 use parser_core_types::parser_env::ParserEnv;
-                use stack_limit::StackLimit;
+                use parser_core_types::source_text::SourceText;
                 use parser_core_types::syntax_error::SyntaxError;
                 use rust_to_ocaml::ToOcaml;
+                use smart_constructors::NodeType;
+                use stack_limit::StackLimit;
 
                 struct ParseFun;
                 impl<'a> $crate::ParseScript<'a, $sc, $scstate> for ParseFun {
-
-                        fn parse_script(
-                            source: &SourceText<'a>,
-                            env: ParserEnv,
-                            stack_limit: Option<&'a StackLimit>,
-                        ) -> (<<$sc as smart_constructors::SmartConstructors<$scstate>>::R as NodeType>::R , Vec<SyntaxError>, $scstate)
-                        {
-                            $parse_script(source, env, stack_limit)
-                        }
-
-
+                    fn parse_script(
+                        source: &SourceText<'a>,
+                        env: ParserEnv,
+                        stack_limit: Option<&'a StackLimit>,
+                    ) -> (
+                        <<$sc as smart_constructors::SmartConstructors>::R as NodeType>::R,
+                        Vec<SyntaxError>,
+                        $scstate,
+                    ) {
+                        $parse_script(source, env, stack_limit)
+                    }
                 }
                 let ocaml_source_text = unsafe { UnsafeOcamlPtr::new(ocaml_source_text) };
                 let env = unsafe { FullFidelityParserEnv::from_ocaml(env).unwrap() };
-                $crate::parse::<'a, $sc, $scstate, ParseFun, >(ocaml_source_text, env).as_usize()
+                $crate::parse::<'a, $sc, $scstate, ParseFun>(ocaml_source_text, env).as_usize()
             })
         }
     };

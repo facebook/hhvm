@@ -41,12 +41,13 @@ where
     S::Token: LexableToken,
 {}
 
-impl<S, State> SmartConstructors<State> for PositionedSmartConstructors<S, State>
+impl<S, State> SmartConstructors for PositionedSmartConstructors<S, State>
 where
     S::Token: LexableToken,
     S: SyntaxType<State> + Clone,
     State: StateType<S>,
 {
+    type State = State;
     type Token = S::Token;
     type R = S;
 

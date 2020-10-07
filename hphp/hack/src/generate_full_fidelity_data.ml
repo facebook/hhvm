@@ -1012,12 +1012,13 @@ use parser_core_types::{
   lexable_token::LexableToken,
 };
 
-pub trait SmartConstructors<State>: Clone {
+pub trait SmartConstructors: Clone {
+    type State;
     type Token: LexableToken;
     type R;
 
-    fn state_mut(&mut self) -> &mut State;
-    fn into_state(self) -> State;
+    fn state_mut(&mut self) -> &mut Self::State;
+    fn into_state(self) -> Self::State;
 
     fn make_missing(&mut self, offset : usize) -> Self::R;
     fn make_token(&mut self, arg0: Self::Token) -> Self::R;
@@ -1076,15 +1077,16 @@ impl<'src> SyntaxSmartConstructors<MinimalSyntax, NoState>
     for MinimalSmartConstructors
 {}
 
-impl<'src> SmartConstructors<NoState> for MinimalSmartConstructors {
+impl<'src> SmartConstructors for MinimalSmartConstructors {
+    type State = NoState;
     type Token = MinimalToken;
     type R = MinimalSyntax;
 
-    fn state_mut(&mut self) -> &mut NoState {
+    fn state_mut(&mut self) -> &mut Self::State {
         &mut self.dummy_state
     }
 
-    fn into_state(self) -> NoState {
+    fn into_state(self) -> Self::State {
       self.dummy_state
     }
 
@@ -1157,12 +1159,13 @@ where
     S::Token: LexableToken,
 {}
 
-impl<S, State> SmartConstructors<State> for PositionedSmartConstructors<S, State>
+impl<S, State> SmartConstructors for PositionedSmartConstructors<S, State>
 where
     S::Token: LexableToken,
     S: SyntaxType<State> + Clone,
     State: StateType<S>,
 {
+    type State = State;
     type Token = S::Token;
     type R = S;
 
@@ -1237,8 +1240,9 @@ macro_rules! arg_kinds {
     );
 }
 
-impl<'src> SmartConstructors<State> for VerifySmartConstructors
+impl<'src> SmartConstructors for VerifySmartConstructors
 {
+    type State = State;
     type Token = PositionedToken;
     type R = PositionedSyntax;
 
@@ -1270,7 +1274,7 @@ impl<'src> SmartConstructors<State> for VerifySmartConstructors
             self.state_mut().push(r.kind());
             r
         } else {
-            <Self as SmartConstructors<State>>::make_missing(self, offset)
+            <Self as SmartConstructors>::make_missing(self, offset)
         }
     }
 
@@ -1402,7 +1406,7 @@ use smart_constructors::{NoState, SmartConstructors};
 use crate::StateType;
 
 pub trait SyntaxSmartConstructors<S: SyntaxType<State>, State = NoState>:
-    SmartConstructors<State, R=S, Token=S::Token>
+    SmartConstructors<State = State, R=S, Token=S::Token>
 where
     State: StateType<S>,
 {
@@ -1536,12 +1540,13 @@ use smart_constructors::SmartConstructors;
 use syntax_smart_constructors::SyntaxSmartConstructors;
 
 impl<'src, Token, Value>
-SmartConstructors<State<'src, Syntax<Token, Value>>>
+SmartConstructors
     for DeclModeSmartConstructors<'src, Syntax<Token, Value>, Token, Value>
 where
     Token: LexableToken,
     Value: SyntaxValueType<Token>,
 {
+    type State = State<'src, Syntax<Token, Value>>;
     type Token = Token;
     type R = Syntax<Token, Value>;
 
@@ -1622,7 +1627,7 @@ pub trait FlattenOp {
 }
 
 pub trait FlattenSmartConstructors<'src, State>
-: SmartConstructors<State> + FlattenOp<S=<Self as SmartConstructors<State>>::R>
+: SmartConstructors<State = State> + FlattenOp<S=<Self as SmartConstructors>::R>
 {
     fn make_missing(&mut self, _: usize) -> Self::R {
        Self::zero(SyntaxKind::Missing)
@@ -1678,7 +1683,8 @@ use crate::*;
 pub struct FactsSmartConstructors<'src> {
     pub state: HasScriptContent<'src>,
 }
-impl<'src> SmartConstructors<HasScriptContent<'src>> for FactsSmartConstructors<'src> {
+impl<'src> SmartConstructors for FactsSmartConstructors<'src> {
+    type State = HasScriptContent<'src>;
     type Token = PositionedToken;
     type R = Node;
 
@@ -1755,7 +1761,8 @@ use crate::{State, Node};
 pub struct DirectDeclSmartConstructors<'src> {
     pub state: State<'src>,
 }
-impl<'src> SmartConstructors<State<'src>> for DirectDeclSmartConstructors<'src> {
+impl<'src> SmartConstructors for DirectDeclSmartConstructors<'src> {
+    type State = State<'src>;
     type Token = CompactToken;
     type R = Node<'src>;
 
@@ -1895,8 +1902,9 @@ impl<S> WithKind<S> {
     }
 }
 
-impl<S, State> SmartConstructors<State> for WithKind<S>
-where S: SmartConstructors<State> {
+impl<S, State> SmartConstructors for WithKind<S>
+where S: SmartConstructors<State = State> {
+    type State = State;
     type Token = S::Token;
     type R = (SyntaxKind, S::R);
 

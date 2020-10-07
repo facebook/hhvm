@@ -28,12 +28,13 @@ use smart_constructors::SmartConstructors;
 use syntax_smart_constructors::SyntaxSmartConstructors;
 
 impl<'src, Token, Value>
-SmartConstructors<State<'src, Syntax<Token, Value>>>
+SmartConstructors
     for DeclModeSmartConstructors<'src, Syntax<Token, Value>, Token, Value>
 where
     Token: LexableToken,
     Value: SyntaxValueType<Token>,
 {
+    type State = State<'src, Syntax<Token, Value>>;
     type Token = Token;
     type R = Syntax<Token, Value>;
 

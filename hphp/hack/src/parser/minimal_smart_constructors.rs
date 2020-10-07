@@ -38,15 +38,16 @@ impl<'src> SyntaxSmartConstructors<MinimalSyntax, NoState>
     for MinimalSmartConstructors
 {}
 
-impl<'src> SmartConstructors<NoState> for MinimalSmartConstructors {
+impl<'src> SmartConstructors for MinimalSmartConstructors {
+    type State = NoState;
     type Token = MinimalToken;
     type R = MinimalSyntax;
 
-    fn state_mut(&mut self) -> &mut NoState {
+    fn state_mut(&mut self) -> &mut Self::State {
         &mut self.dummy_state
     }
 
-    fn into_state(self) -> NoState {
+    fn into_state(self) -> Self::State {
       self.dummy_state
     }
 

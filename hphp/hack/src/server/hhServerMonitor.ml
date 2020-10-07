@@ -165,6 +165,7 @@ let start () =
     Sys_utils.set_signal Sys.sigusr1 Sys.Signal_ignore;
     Sys_utils.set_signal Sys.sigusr2 Sys.Signal_ignore;
     Daemon.check_entry_point ();
+    Startup_initializer.init ();
 
     (* this call might not return *)
     let proc_stack =

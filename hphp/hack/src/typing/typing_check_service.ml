@@ -380,7 +380,7 @@ let process_files
         in
         let categories =
           if check_info.profile_total_typecheck_duration then
-            Decl_accessors :: Typecheck :: categories
+            Typecheck :: Decling :: categories
           else
             categories
         in

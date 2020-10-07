@@ -15,6 +15,7 @@ module Category = struct
 
   type t =
     | Decl_accessors
+    | Decling
     | Disk_cat
     | Get_ast
     | Typecheck
@@ -25,6 +26,7 @@ module Category = struct
   let to_string (category : t) : string =
     match category with
     | Decl_accessors -> "decl_accessors"
+    | Decling -> "decling"
     | Disk_cat -> "disk_cat"
     | Get_ast -> "get_ast"
     | Typecheck -> "typecheck"
@@ -82,6 +84,7 @@ let get_time (category : Category.t) : unit -> time_in_sec =
     | Disk_cat -> (* Wall-clock time *) Unix.gettimeofday
     | Typecheck
     | Decl_accessors
+    | Decling
     | Get_ast ->
       (* CPU time, excluding I/O *) Sys.time)
 

@@ -9,6 +9,7 @@
 module Category : sig
   type t =
     | Decl_accessors
+    | Decling
     | Disk_cat
     | Get_ast
     | Typecheck
@@ -30,6 +31,8 @@ val reset : enabled_categories:CategorySet.t -> t
 
 (** restores global mutable state to what it was before you called 'reset' *)
 val restore_state : t -> unit
+
+val count : Category.t -> (unit -> 'a) -> 'a
 
 val count_decl_accessor : (unit -> 'a) -> 'a
 

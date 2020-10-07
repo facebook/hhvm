@@ -86,6 +86,7 @@
   (modules
     decl_provider)
   (libraries
+    counters
     decl_class
     decl_service_client
     provider_backend

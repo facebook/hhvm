@@ -19,6 +19,8 @@
 use flatten_smart_constructors::*;
 use smart_constructors::SmartConstructors;
 use parser_core_types::compact_token::CompactToken;
+use parser_core_types::compact_trivia::CompactTrivia;
+use parser_core_types::token_kind::TokenKind;
 
 use crate::{State, Node};
 
@@ -37,6 +39,17 @@ impl<'src> SmartConstructors for DirectDeclSmartConstructors<'src> {
 
     fn into_state(self) -> State<'src> {
       self.state
+    }
+
+    fn create_token(
+        &mut self,
+        kind: TokenKind,
+        offset: usize,
+        width: usize,
+        leading: CompactTrivia,
+        trailing: CompactTrivia,
+    ) -> Self::Token {
+        CompactToken::new(kind, offset, width, leading, trailing)
     }
 
     fn make_missing(&mut self, offset: usize) -> Self::R {

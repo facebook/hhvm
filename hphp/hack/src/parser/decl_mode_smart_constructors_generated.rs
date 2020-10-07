@@ -17,11 +17,12 @@
  *
  */
 use parser_core_types::{
-  lexable_token::LexableToken,
+  lexable_token::{LexableToken, TokenBuilder},
   syntax::{
     Syntax,
     SyntaxValueType,
   },
+  token_kind::TokenKind
 };
 use crate::*;
 use smart_constructors::SmartConstructors;
@@ -31,12 +32,30 @@ impl<'src, Token, Value>
 SmartConstructors
     for DeclModeSmartConstructors<'src, Syntax<Token, Value>, Token, Value>
 where
-    Token: LexableToken,
+    Token: LexableToken + TokenBuilder<State<'src, Syntax<Token, Value>>, <Token as LexableToken>::Trivia>,
     Value: SyntaxValueType<Token>,
 {
     type State = State<'src, Syntax<Token, Value>>;
     type Token = Token;
     type R = Syntax<Token, Value>;
+
+    fn create_token(
+        &mut self,
+        kind: TokenKind,
+        offset: usize,
+        width: usize,
+        leading: <Self::Token as LexableToken>::Trivia,
+        trailing: <Self::Token as LexableToken>::Trivia,
+    ) -> Self::Token {
+        Token::make(
+            self.state_mut(),
+            kind,
+            offset,
+            width,
+            leading,
+            trailing,
+        )
+    }
 
     fn state_mut(&mut self) -> &mut State<'src, Syntax<Token, Value>> {
         &mut self.state

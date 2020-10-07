@@ -19,19 +19,13 @@ pub struct MinimalToken {
     pub trailing: MinimalTrivia,
 }
 
-impl LexableToken for MinimalToken {
-    type Trivia = MinimalTrivia;
-
-    fn kind(&self) -> TokenKind {
-        self.kind
-    }
-
-    fn make(
+impl MinimalToken {
+    pub fn make(
         kind: TokenKind,
         _offset: usize,
         width: usize,
-        leading: Self::Trivia,
-        trailing: Self::Trivia,
+        leading: MinimalTrivia,
+        trailing: MinimalTrivia,
     ) -> Self {
         Self {
             kind,
@@ -39,6 +33,14 @@ impl LexableToken for MinimalToken {
             trailing,
             width,
         }
+    }
+}
+
+impl LexableToken for MinimalToken {
+    type Trivia = MinimalTrivia;
+
+    fn kind(&self) -> TokenKind {
+        self.kind
     }
 
     fn width(&self) -> usize {

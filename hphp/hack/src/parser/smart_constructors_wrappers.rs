@@ -23,6 +23,7 @@
 use parser_core_types::{
   lexable_token::LexableToken,
   syntax_kind::SyntaxKind,
+  token_kind::TokenKind,
 };
 use crate::SmartConstructors;
 
@@ -49,6 +50,17 @@ where S: SmartConstructors<State = State> {
 
     fn into_state(self) -> State {
       self.s.into_state()
+    }
+
+    fn create_token(
+        &mut self,
+        kind: TokenKind,
+        offset: usize,
+        width: usize,
+        leading: <Self::Token as LexableToken>::Trivia,
+        trailing: <Self::Token as LexableToken>::Trivia,
+    ) -> Self::Token {
+        self.s.create_token(kind, offset, width, leading, trailing)
     }
 
     fn make_token(&mut self, token: Self::Token) -> Self::R {

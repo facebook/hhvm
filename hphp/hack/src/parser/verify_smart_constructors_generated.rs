@@ -18,7 +18,9 @@
  */
 use crate::*;
 use parser_core_types::positioned_syntax::PositionedSyntax;
-use parser_core_types::positioned_token::PositionedToken;
+use parser_core_types::positioned_token::{PositionedToken, new};
+use parser_core_types::positioned_trivia::PositionedTrivia;
+use parser_core_types::token_kind::TokenKind;
 use smart_constructors::SmartConstructors;
 use syntax_smart_constructors::SyntaxSmartConstructors;
 
@@ -43,6 +45,23 @@ impl<'src> SmartConstructors for VerifySmartConstructors
 
     fn into_state(self) -> State {
       self.state
+    }
+
+    fn create_token(
+        &mut self,
+        kind: TokenKind,
+        offset: usize,
+        width: usize,
+        leading: PositionedTrivia,
+        trailing: PositionedTrivia,
+    ) -> Self::Token {
+        new(
+            kind,
+            offset,
+            width,
+            leading,
+            trailing,
+        )
     }
 
     fn make_missing(&mut self, offset: usize) -> Self::R {

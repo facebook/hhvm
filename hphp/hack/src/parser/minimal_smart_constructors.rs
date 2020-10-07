@@ -19,6 +19,8 @@
 use parser_core_types::{
   minimal_syntax::MinimalSyntax,
   minimal_token::MinimalToken,
+  minimal_trivia::MinimalTrivia,
+  token_kind::TokenKind,
 };
 use smart_constructors::{NoState, SmartConstructors};
 use syntax_smart_constructors::SyntaxSmartConstructors;
@@ -49,6 +51,23 @@ impl<'src> SmartConstructors for MinimalSmartConstructors {
 
     fn into_state(self) -> Self::State {
       self.dummy_state
+    }
+
+    fn create_token(
+        &mut self,
+        kind: TokenKind,
+        offset: usize,
+        width: usize,
+        leading: MinimalTrivia,
+        trailing: MinimalTrivia,
+    ) -> Self::Token {
+        MinimalToken::make(
+            kind,
+            offset,
+            width,
+            leading,
+            trailing,
+        )
     }
 
     fn make_missing(&mut self, offset: usize) -> Self::R {

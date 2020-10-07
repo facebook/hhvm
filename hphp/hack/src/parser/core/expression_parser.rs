@@ -40,7 +40,7 @@ where
     S: SmartConstructors,
     S::R: NodeType,
 {
-    lexer: Lexer<'a, S::Token>,
+    lexer: Lexer<'a, S>,
     env: ParserEnv,
     context: Context<'a, S::Token>,
     errors: Vec<SyntaxError>,
@@ -77,7 +77,7 @@ where
     S::R: NodeType,
 {
     fn make(
-        lexer: Lexer<'a, S::Token>,
+        lexer: Lexer<'a, S>,
         env: ParserEnv,
         context: Context<'a, S::Token>,
         errors: Vec<SyntaxError>,
@@ -96,22 +96,15 @@ where
         }
     }
 
-    fn into_parts(
-        self,
-    ) -> (
-        Lexer<'a, S::Token>,
-        Context<'a, S::Token>,
-        Vec<SyntaxError>,
-        S,
-    ) {
+    fn into_parts(self) -> (Lexer<'a, S>, Context<'a, S::Token>, Vec<SyntaxError>, S) {
         (self.lexer, self.context, self.errors, self.sc)
     }
 
-    fn lexer(&self) -> &Lexer<'a, S::Token> {
+    fn lexer(&self) -> &Lexer<'a, S> {
         &self.lexer
     }
 
-    fn lexer_mut(&mut self) -> &mut Lexer<'a, S::Token> {
+    fn lexer_mut(&mut self) -> &mut Lexer<'a, S> {
         &mut self.lexer
     }
 
@@ -818,7 +811,7 @@ where
         //
         //
 
-        let merge = |token: S::Token, head: Option<S::Token>| {
+        let merge = |parser: &mut Self, token: S::Token, head: Option<S::Token>| {
             // TODO: Assert that new head has no leading trivia, old head has no
             // trailing trivia.
             // Invariant: A token inside a list of string fragments is always a head,
@@ -863,7 +856,7 @@ where
                     let (l, _, _) = head.into_trivia_and_width();
                     let (_, _, t) = token.into_trivia_and_width();
                     // TODO: Make a "position" type that is a tuple of source and offset.
-                    Some(S::Token::make(k, o, w, l, t))
+                    Some(parser.sc_mut().create_token(k, o, w, l, t))
                 }
                 None => {
                     let token = match token.kind() {
@@ -1007,7 +1000,7 @@ where
                     // TODO: Give an error.
                     // We got a { not followed by a $. Ignore it.
                     // TODO: Give a warning?
-                    merge(left_brace, head)
+                    merge(parser, left_brace, head)
                 }
             }
         };
@@ -1046,7 +1039,7 @@ where
                     _ => {
                         // We got a $ not followed by a { or variable name. Ignore it.
                         // TODO: Give a warning?
-                        merge(dollar, head)
+                        merge(parser, dollar, head)
                     }
                 }
             };
@@ -1058,7 +1051,7 @@ where
             let token = self.next_token_in_string(&literal_kind);
             match token.kind() {
                 TokenKind::HeredocStringLiteralTail | TokenKind::DoubleQuotedStringLiteralTail => {
-                    let head = merge(token, head);
+                    let head = merge(self, token, head);
                     put_opt(self, head, &mut acc);
                     break;
                 }
@@ -1070,7 +1063,7 @@ where
                     acc.push(expr)
                 }
                 TokenKind::Dollar => head = handle_dollar(self, token, head, &mut acc),
-                _ => head = merge(token, head),
+                _ => head = merge(self, token, head),
             }
         }
 

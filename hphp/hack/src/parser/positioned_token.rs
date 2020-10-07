@@ -7,7 +7,7 @@
 use ocamlrep::rc::RcOc;
 
 use crate::{
-    lexable_token::{LexablePositionedToken, LexableToken},
+    lexable_token::{LexablePositionedToken, LexableToken, TokenBuilder},
     lexable_trivia::LexableTrivia,
     positioned_trivia::{PositionedTrivia, PositionedTrivium},
     source_text::SourceText,
@@ -34,29 +34,41 @@ pub struct PositionedTokenImpl {
 // counted pointer to the actual shared struct
 pub type PositionedToken = RcOc<PositionedTokenImpl>;
 
-impl LexableToken for PositionedToken {
-    type Trivia = PositionedTrivia;
+pub fn new(
+    kind: TokenKind,
+    offset: usize,
+    width: usize,
+    leading: PositionedTrivia,
+    trailing: PositionedTrivia,
+) -> PositionedToken {
+    let leading_width = leading.iter().map(|x| x.width).sum();
+    let trailing_width = trailing.iter().map(|x| x.width).sum();
+    RcOc::new(PositionedTokenImpl {
+        kind,
+        offset,
+        leading_width,
+        width,
+        trailing_width,
+        leading,
+        trailing,
+    })
+}
 
+impl<State> TokenBuilder<State, PositionedTrivia> for PositionedToken {
     fn make(
+        _: &mut State,
         kind: TokenKind,
         offset: usize,
         width: usize,
-        leading: Self::Trivia,
-        trailing: Self::Trivia,
+        leading: PositionedTrivia,
+        trailing: PositionedTrivia,
     ) -> Self {
-        let leading_width = leading.iter().map(|x| x.width).sum();
-        let trailing_width = trailing.iter().map(|x| x.width).sum();
-
-        RcOc::new(PositionedTokenImpl {
-            kind,
-            offset,
-            leading_width,
-            width,
-            trailing_width,
-            leading,
-            trailing,
-        })
+        new(kind, offset, width, leading, trailing)
     }
+}
+
+impl LexableToken for PositionedToken {
+    type Trivia = PositionedTrivia;
 
     fn kind(&self) -> TokenKind {
         self.kind

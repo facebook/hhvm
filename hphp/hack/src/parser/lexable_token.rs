@@ -11,16 +11,22 @@ use crate::{
     token_kind::TokenKind, trivia_kind::TriviaKind,
 };
 
-pub trait LexableToken: Clone {
-    type Trivia: LexableTrivia;
+pub trait TokenBuilder<State, Trivia> {
+    //type Trivia;
 
     fn make(
+        state: &mut State,
         kind: TokenKind,
         offset: usize,
         width: usize,
-        leading: Self::Trivia,
-        trailing: Self::Trivia,
+        leading: Trivia,
+        trailing: Trivia,
     ) -> Self;
+}
+
+pub trait LexableToken: Clone {
+    type Trivia: LexableTrivia;
+
     fn kind(&self) -> TokenKind;
 
     /// Returns the leading offset if meaningful

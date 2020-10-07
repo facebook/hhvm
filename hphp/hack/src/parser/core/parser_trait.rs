@@ -117,23 +117,16 @@ where
     <S as SmartConstructors>::R: NodeType,
 {
     fn make(
-        _: Lexer<'a, S::Token>,
+        _: Lexer<'a, S>,
         _: ParserEnv,
         _: Context<'a, S::Token>,
         _: Vec<SyntaxError>,
         _: S,
     ) -> Self;
     fn add_error(&mut self, _: SyntaxError);
-    fn into_parts(
-        self,
-    ) -> (
-        Lexer<'a, S::Token>,
-        Context<'a, S::Token>,
-        Vec<SyntaxError>,
-        S,
-    );
-    fn lexer(&self) -> &Lexer<'a, S::Token>;
-    fn lexer_mut(&mut self) -> &mut Lexer<'a, S::Token>;
+    fn into_parts(self) -> (Lexer<'a, S>, Context<'a, S::Token>, Vec<SyntaxError>, S);
+    fn lexer(&self) -> &Lexer<'a, S>;
+    fn lexer_mut(&mut self) -> &mut Lexer<'a, S>;
     fn continue_from<P: ParserTrait<'a, S>>(&mut self, _: P);
 
     fn env(&self) -> &ParserEnv;
@@ -192,7 +185,7 @@ where
 
     fn next_token_with_tokenizer<F>(&mut self, tokenizer: F) -> S::Token
     where
-        F: Fn(&mut Lexer<'a, S::Token>) -> S::Token,
+        F: Fn(&mut Lexer<'a, S>) -> S::Token,
     {
         let token = tokenizer(self.lexer_mut());
         if !self.skipped_tokens().is_empty() {
@@ -294,9 +287,10 @@ where
         let attr2 = lexer.peek_char(2);
         if tparam_open == '<' && attr1 == '<' && attr2 == '<' {
             lexer.advance(1);
-            let token = S::Token::make(
+            let start = lexer.start();
+            let token = self.sc_mut().create_token(
                 TokenKind::LessThan,
-                lexer.start(),
+                start,
                 1,
                 <S::Token as LexableToken>::Trivia::new(),
                 <S::Token as LexableToken>::Trivia::new(),
@@ -309,9 +303,7 @@ where
     }
 
     fn assert_xhp_body_token(&mut self, kind: TokenKind) -> S::R {
-        self.assert_token_with_tokenizer(kind, |x: &mut Lexer<'a, S::Token>| {
-            x.next_xhp_body_token()
-        })
+        self.assert_token_with_tokenizer(kind, |x: &mut Lexer<'a, S>| x.next_xhp_body_token())
     }
 
     fn peek_token_with_lookahead(&self, lookahead: usize) -> S::Token {
@@ -347,7 +339,7 @@ where
 
     fn assert_token_with_tokenizer<F>(&mut self, kind: TokenKind, tokenizer: F) -> S::R
     where
-        F: Fn(&mut Lexer<'a, S::Token>) -> S::Token,
+        F: Fn(&mut Lexer<'a, S>) -> S::Token,
     {
         let token = self.next_token_with_tokenizer(tokenizer);
         if token.kind() != kind {
@@ -361,7 +353,7 @@ where
     }
 
     fn assert_token(&mut self, kind: TokenKind) -> S::R {
-        self.assert_token_with_tokenizer(kind, |x: &mut Lexer<S::Token>| x.next_token())
+        self.assert_token_with_tokenizer(kind, |x: &mut Lexer<S>| x.next_token())
     }
 
     fn token_text(&self, token: &S::Token) -> &'a str {

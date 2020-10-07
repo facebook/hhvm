@@ -18,6 +18,7 @@
  */
 use parser_core_types::{
   lexable_token::LexableToken,
+  token_kind::TokenKind,
 };
 
 pub trait SmartConstructors: Clone {
@@ -27,6 +28,15 @@ pub trait SmartConstructors: Clone {
 
     fn state_mut(&mut self) -> &mut Self::State;
     fn into_state(self) -> Self::State;
+
+    fn create_token(
+        &mut self,
+        kind: TokenKind,
+        offset: usize,
+        width: usize,
+        leading: <Self::Token as LexableToken>::Trivia,
+        trailing: <Self::Token as LexableToken>::Trivia,
+    ) -> Self::Token;
 
     fn make_missing(&mut self, offset : usize) -> Self::R;
     fn make_token(&mut self, arg0: Self::Token) -> Self::R;

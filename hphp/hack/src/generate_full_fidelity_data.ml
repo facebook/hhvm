@@ -1010,6 +1010,7 @@ module GenerateFFRustSmartConstructors = struct
     ^ "
 use parser_core_types::{
   lexable_token::LexableToken,
+  token_kind::TokenKind,
 };
 
 pub trait SmartConstructors: Clone {
@@ -1019,6 +1020,15 @@ pub trait SmartConstructors: Clone {
 
     fn state_mut(&mut self) -> &mut Self::State;
     fn into_state(self) -> Self::State;
+
+    fn create_token(
+        &mut self,
+        kind: TokenKind,
+        offset: usize,
+        width: usize,
+        leading: <Self::Token as LexableToken>::Trivia,
+        trailing: <Self::Token as LexableToken>::Trivia,
+    ) -> Self::Token;
 
     fn make_missing(&mut self, offset : usize) -> Self::R;
     fn make_token(&mut self, arg0: Self::Token) -> Self::R;
@@ -1058,6 +1068,8 @@ module GenerateFFRustMinimalSmartConstructors = struct
 use parser_core_types::{
   minimal_syntax::MinimalSyntax,
   minimal_token::MinimalToken,
+  minimal_trivia::MinimalTrivia,
+  token_kind::TokenKind,
 };
 use smart_constructors::{NoState, SmartConstructors};
 use syntax_smart_constructors::SyntaxSmartConstructors;
@@ -1088,6 +1100,23 @@ impl<'src> SmartConstructors for MinimalSmartConstructors {
 
     fn into_state(self) -> Self::State {
       self.dummy_state
+    }
+
+    fn create_token(
+        &mut self,
+        kind: TokenKind,
+        offset: usize,
+        width: usize,
+        leading: MinimalTrivia,
+        trailing: MinimalTrivia,
+    ) -> Self::Token {
+        MinimalToken::make(
+            kind,
+            offset,
+            width,
+            leading,
+            trailing,
+        )
     }
 
     fn make_missing(&mut self, offset: usize) -> Self::R {
@@ -1136,7 +1165,7 @@ module GenerateFFRustPositionedSmartConstructors = struct
     ^ "
 
 
-use parser_core_types::{syntax::*, lexable_token::LexableToken};
+use parser_core_types::{syntax::*, lexable_token::{LexableToken, TokenBuilder}, token_kind::TokenKind};
 use smart_constructors::SmartConstructors;
 use syntax_smart_constructors::{SyntaxSmartConstructors, StateType};
 
@@ -1156,12 +1185,12 @@ impl<S, State> SyntaxSmartConstructors<S, State> for PositionedSmartConstructors
 where
     State: StateType<S>,
     S: SyntaxType<State> + Clone,
-    S::Token: LexableToken,
+    S::Token: LexableToken + TokenBuilder<State, <S::Token as LexableToken>::Trivia>,
 {}
 
 impl<S, State> SmartConstructors for PositionedSmartConstructors<S, State>
 where
-    S::Token: LexableToken,
+    S::Token: LexableToken + TokenBuilder<State, <S::Token as LexableToken>::Trivia>,
     S: SyntaxType<State> + Clone,
     State: StateType<S>,
 {
@@ -1175,6 +1204,24 @@ where
 
     fn into_state(self) -> State {
       self.state
+    }
+
+    fn create_token(
+        &mut self,
+        kind: TokenKind,
+        offset: usize,
+        width: usize,
+        leading: <Self::Token as LexableToken>::Trivia,
+        trailing: <Self::Token as LexableToken>::Trivia,
+    ) -> Self::Token {
+        S::Token::make(
+            self.state_mut(),
+            kind,
+            offset,
+            width,
+            leading,
+            trailing,
+        )
     }
 
     fn make_missing(&mut self, offset: usize) -> Self::R {
@@ -1227,7 +1274,9 @@ module GenerateFFRustVerifySmartConstructors = struct
     ^ "
 use crate::*;
 use parser_core_types::positioned_syntax::PositionedSyntax;
-use parser_core_types::positioned_token::PositionedToken;
+use parser_core_types::positioned_token::{PositionedToken, new};
+use parser_core_types::positioned_trivia::PositionedTrivia;
+use parser_core_types::token_kind::TokenKind;
 use smart_constructors::SmartConstructors;
 use syntax_smart_constructors::SyntaxSmartConstructors;
 
@@ -1252,6 +1301,23 @@ impl<'src> SmartConstructors for VerifySmartConstructors
 
     fn into_state(self) -> State {
       self.state
+    }
+
+    fn create_token(
+        &mut self,
+        kind: TokenKind,
+        offset: usize,
+        width: usize,
+        leading: PositionedTrivia,
+        trailing: PositionedTrivia,
+    ) -> Self::Token {
+        new(
+            kind,
+            offset,
+            width,
+            leading,
+            trailing,
+        )
     }
 
     fn make_missing(&mut self, offset: usize) -> Self::R {
@@ -1529,11 +1595,12 @@ module GenerateFFRustDeclModeSmartConstructors = struct
     make_header CStyle ""
     ^ "
 use parser_core_types::{
-  lexable_token::LexableToken,
+  lexable_token::{LexableToken, TokenBuilder},
   syntax::{
     Syntax,
     SyntaxValueType,
   },
+  token_kind::TokenKind
 };
 use crate::*;
 use smart_constructors::SmartConstructors;
@@ -1543,12 +1610,30 @@ impl<'src, Token, Value>
 SmartConstructors
     for DeclModeSmartConstructors<'src, Syntax<Token, Value>, Token, Value>
 where
-    Token: LexableToken,
+    Token: LexableToken + TokenBuilder<State<'src, Syntax<Token, Value>>, <Token as LexableToken>::Trivia>,
     Value: SyntaxValueType<Token>,
 {
     type State = State<'src, Syntax<Token, Value>>;
     type Token = Token;
     type R = Syntax<Token, Value>;
+
+    fn create_token(
+        &mut self,
+        kind: TokenKind,
+        offset: usize,
+        width: usize,
+        leading: <Self::Token as LexableToken>::Trivia,
+        trailing: <Self::Token as LexableToken>::Trivia,
+    ) -> Self::Token {
+        Token::make(
+            self.state_mut(),
+            kind,
+            offset,
+            width,
+            leading,
+            trailing,
+        )
+    }
 
     fn state_mut(&mut self) -> &mut State<'src, Syntax<Token, Value>> {
         &mut self.state
@@ -1675,7 +1760,8 @@ module GenerateRustFactsSmartConstructors = struct
     ^ "
 use flatten_smart_constructors::*;
 use smart_constructors::SmartConstructors;
-use parser_core_types::positioned_token::PositionedToken;
+use parser_core_types::positioned_token::{PositionedToken, new};
+use parser_core_types::positioned_trivia::PositionedTrivia;
 
 use crate::*;
 
@@ -1694,6 +1780,23 @@ impl<'src> SmartConstructors for FactsSmartConstructors<'src> {
 
     fn into_state(self) -> HasScriptContent<'src> {
       self.state
+    }
+
+    fn create_token(
+        &mut self,
+        kind: TokenKind,
+        offset: usize,
+        width: usize,
+        leading: PositionedTrivia,
+        trailing: PositionedTrivia,
+    ) -> Self::Token {
+        new(
+            kind,
+            offset,
+            width,
+            leading,
+            trailing,
+        )
     }
 
     fn make_missing(&mut self, offset: usize) -> Self::R {
@@ -1754,6 +1857,8 @@ module GenerateRustDirectDeclSmartConstructors = struct
 use flatten_smart_constructors::*;
 use smart_constructors::SmartConstructors;
 use parser_core_types::compact_token::CompactToken;
+use parser_core_types::compact_trivia::CompactTrivia;
+use parser_core_types::token_kind::TokenKind;
 
 use crate::{State, Node};
 
@@ -1772,6 +1877,17 @@ impl<'src> SmartConstructors for DirectDeclSmartConstructors<'src> {
 
     fn into_state(self) -> State<'src> {
       self.state
+    }
+
+    fn create_token(
+        &mut self,
+        kind: TokenKind,
+        offset: usize,
+        width: usize,
+        leading: CompactTrivia,
+        trailing: CompactTrivia,
+    ) -> Self::Token {
+        CompactToken::new(kind, offset, width, leading, trailing)
     }
 
     fn make_missing(&mut self, offset: usize) -> Self::R {
@@ -1888,6 +2004,7 @@ module GenerateFFRustSmartConstructorsWrappers = struct
 use parser_core_types::{
   lexable_token::LexableToken,
   syntax_kind::SyntaxKind,
+  token_kind::TokenKind,
 };
 use crate::SmartConstructors;
 
@@ -1914,6 +2031,17 @@ where S: SmartConstructors<State = State> {
 
     fn into_state(self) -> State {
       self.s.into_state()
+    }
+
+    fn create_token(
+        &mut self,
+        kind: TokenKind,
+        offset: usize,
+        width: usize,
+        leading: <Self::Token as LexableToken>::Trivia,
+        trailing: <Self::Token as LexableToken>::Trivia,
+    ) -> Self::Token {
+        self.s.create_token(kind, offset, width, leading, trailing)
     }
 
     fn make_token(&mut self, token: Self::Token) -> Self::R {

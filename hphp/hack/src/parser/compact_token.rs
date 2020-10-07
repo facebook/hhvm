@@ -206,16 +206,6 @@ impl CompactToken {
 impl LexableToken for CompactToken {
     type Trivia = CompactTrivia;
 
-    fn make(
-        kind: TokenKind,
-        offset: usize,
-        width: usize,
-        leading: Self::Trivia,
-        trailing: Self::Trivia,
-    ) -> Self {
-        Self::new(kind, offset, width, leading, trailing)
-    }
-
     fn kind(&self) -> TokenKind {
         self.kind()
     }

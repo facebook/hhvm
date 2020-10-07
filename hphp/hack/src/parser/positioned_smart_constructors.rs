@@ -18,7 +18,7 @@
  */
 
 
-use parser_core_types::{syntax::*, lexable_token::LexableToken};
+use parser_core_types::{syntax::*, lexable_token::{LexableToken, TokenBuilder}, token_kind::TokenKind};
 use smart_constructors::SmartConstructors;
 use syntax_smart_constructors::{SyntaxSmartConstructors, StateType};
 
@@ -38,12 +38,12 @@ impl<S, State> SyntaxSmartConstructors<S, State> for PositionedSmartConstructors
 where
     State: StateType<S>,
     S: SyntaxType<State> + Clone,
-    S::Token: LexableToken,
+    S::Token: LexableToken + TokenBuilder<State, <S::Token as LexableToken>::Trivia>,
 {}
 
 impl<S, State> SmartConstructors for PositionedSmartConstructors<S, State>
 where
-    S::Token: LexableToken,
+    S::Token: LexableToken + TokenBuilder<State, <S::Token as LexableToken>::Trivia>,
     S: SyntaxType<State> + Clone,
     State: StateType<S>,
 {
@@ -57,6 +57,24 @@ where
 
     fn into_state(self) -> State {
       self.state
+    }
+
+    fn create_token(
+        &mut self,
+        kind: TokenKind,
+        offset: usize,
+        width: usize,
+        leading: <Self::Token as LexableToken>::Trivia,
+        trailing: <Self::Token as LexableToken>::Trivia,
+    ) -> Self::Token {
+        S::Token::make(
+            self.state_mut(),
+            kind,
+            offset,
+            width,
+            leading,
+            trailing,
+        )
     }
 
     fn make_missing(&mut self, offset: usize) -> Self::R {

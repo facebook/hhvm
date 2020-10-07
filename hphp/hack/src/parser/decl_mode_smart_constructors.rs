@@ -8,7 +8,10 @@ mod decl_mode_smart_constructors_generated;
 
 use ocaml::core::mlvalues::Value;
 use parser_core_types::{
-    lexable_token::LexableToken, lexable_trivia::LexableTrivia, source_text::SourceText, syntax::*,
+    lexable_token::{LexableToken, TokenBuilder},
+    lexable_trivia::LexableTrivia,
+    source_text::SourceText,
+    syntax::*,
     token_kind::TokenKind,
 };
 use rust_to_ocaml::{SerializationContext, ToOcaml};
@@ -104,7 +107,8 @@ impl<'src, Token, Value>
     SyntaxSmartConstructors<Syntax<Token, Value>, State<'src, Syntax<Token, Value>>>
     for DeclModeSmartConstructors<'src, Syntax<Token, Value>, Token, Value>
 where
-    Token: LexableToken,
+    Token: LexableToken
+        + TokenBuilder<State<'src, Syntax<Token, Value>>, <Token as LexableToken>::Trivia>,
     Value: SyntaxValueType<Token>,
 {
     fn make_yield_expression(&mut self, _r1: Self::R, _r2: Self::R) -> Self::R {
@@ -122,7 +126,7 @@ where
         body: Self::R,
     ) -> Self::R {
         let saw_yield = self.state.pop_n(5);
-        let body = replace_body(&self.state, body, saw_yield);
+        let body = replace_body(&mut self.state, body, saw_yield);
         self.state.push(false);
         Self::R::make_lambda_expression(&self.state, r1, r2, r3, r4, body)
     }
@@ -142,7 +146,7 @@ where
         body: Self::R,
     ) -> Self::R {
         let saw_yield = self.state.pop_n(11);
-        let body = replace_body(&self.state, body, saw_yield);
+        let body = replace_body(&mut self.state, body, saw_yield);
         self.state.push(false);
         Self::R::make_anonymous_function(&self.state, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, body)
     }
@@ -154,7 +158,7 @@ where
         body: Self::R,
     ) -> Self::R {
         let saw_yield = self.state.pop_n(3);
-        let body = replace_body(&self.state, body, saw_yield);
+        let body = replace_body(&mut self.state, body, saw_yield);
         self.state.push(false);
         Self::R::make_awaitable_creation_expression(&self.state, r1, r2, body)
     }
@@ -168,32 +172,34 @@ where
     ) -> Self::R {
         self.state.pop_n(1);
         let saw_yield = self.state.pop_n(3);
-        let body = replace_body(&self.state, body, saw_yield);
+        let body = replace_body(&mut self.state, body, saw_yield);
         self.state.push(false);
         Self::R::make_methodish_declaration(&self.state, r1, r2, body, r3)
     }
 
     fn make_function_declaration(&mut self, r1: Self::R, r2: Self::R, body: Self::R) -> Self::R {
         let saw_yield = self.state.pop_n(3);
-        let body = replace_body(&self.state, body, saw_yield);
+        let body = replace_body(&mut self.state, body, saw_yield);
         self.state.push(false);
         Self::R::make_function_declaration(&self.state, r1, r2, body)
     }
 }
 
 fn replace_body<'a, Token, Value>(
-    st: &State<'a, Syntax<Token, Value>>,
+    st: &mut State<'a, Syntax<Token, Value>>,
     body: Syntax<Token, Value>,
     saw_yield: bool,
 ) -> Syntax<Token, Value>
 where
-    Token: LexableToken,
+    Token: LexableToken
+        + TokenBuilder<State<'a, Syntax<Token, Value>>, <Token as LexableToken>::Trivia>,
     Value: SyntaxValueType<Token>,
 {
     match body.syntax {
         SyntaxVariant::CompoundStatement(children) => {
             let stmts = if saw_yield {
                 let token = Token::make(
+                    st,
                     TokenKind::Yield,
                     0,
                     0,

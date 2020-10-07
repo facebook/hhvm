@@ -1412,6 +1412,7 @@ public:
   // fb303 server
   static bool EnableFb303Server;
   static int Fb303ServerPort;
+  static std::string Fb303ServerIP;
   static int Fb303ServerThreadStackSizeMb;
   static int Fb303ServerWorkerThreads;
   static int Fb303ServerPoolThreads;

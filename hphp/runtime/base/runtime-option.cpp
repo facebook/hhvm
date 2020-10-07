@@ -1176,6 +1176,7 @@ int RuntimeOption::ProfilerMaxTraceBuffer = 0;
 #ifdef FACEBOOK
 bool RuntimeOption::EnableFb303Server = false;
 int RuntimeOption::Fb303ServerPort = 0;
+std::string RuntimeOption::Fb303ServerIP;
 int RuntimeOption::Fb303ServerThreadStackSizeMb = 8;
 int RuntimeOption::Fb303ServerWorkerThreads = 1;
 int RuntimeOption::Fb303ServerPoolThreads = 1;
@@ -2628,6 +2629,7 @@ void RuntimeOption::Load(
     Config::Bind(EnableFb303Server, ini, config, "Fb303Server.Enable",
                  EnableFb303Server);
     Config::Bind(Fb303ServerPort, ini, config, "Fb303Server.Port", 0);
+    Config::Bind(Fb303ServerIP, ini, config, "Fb303Server.IP");
     Config::Bind(Fb303ServerThreadStackSizeMb, ini, config,
                  "Fb303Server.ThreadStackSizeMb", 8);
     Config::Bind(Fb303ServerWorkerThreads, ini, config,

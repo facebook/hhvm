@@ -1146,6 +1146,7 @@ and expr
     ?(is_using_clause = false)
     ?(valkind = `other)
     ?(check_defined = true)
+    ?in_await
     env
     ((p, _) as e) =
   try
@@ -1169,6 +1170,7 @@ and expr
       ~is_using_clause
       ~valkind
       ~check_defined
+      ?in_await
       ?expected
       env
       e
@@ -1184,6 +1186,7 @@ and raw_expr
     ?lhs_of_null_coalesce
     ?(valkind = `other)
     ?(check_defined = true)
+    ?in_await
     env
     e =
   debug_last_pos := fst e;
@@ -1192,6 +1195,7 @@ and raw_expr
     ~is_using_clause
     ?expected
     ?lhs_of_null_coalesce
+    ?in_await
     ~valkind
     ~check_defined
     env
@@ -1231,7 +1235,7 @@ and loop_forever env =
 (* $x ?? 0 is handled similarly to $x ?: 0, except that the latter will also
  * look for sketchy null checks in the condition. *)
 (* TODO TAST: type refinement should be made explicit in the typed AST *)
-and eif env ~(expected : ExpectedTy.t option) p c e1 e2 =
+and eif env ~(expected : ExpectedTy.t option) ?in_await p c e1 e2 =
   let condition = condition ~lhs_of_null_coalesce:false in
   let (env, tc, tyc) = raw_expr ~lhs_of_null_coalesce:false env c in
   let parent_lenv = env.lenv in
@@ -1242,13 +1246,13 @@ and eif env ~(expected : ExpectedTy.t option) p c e1 e2 =
       let (env, ty) = Typing_solver.non_null env p tyc in
       (env, None, ty)
     | Some e1 ->
-      let (env, te1, ty1) = expr ?expected env e1 in
+      let (env, te1, ty1) = expr ?expected ?in_await env e1 in
       (env, Some te1, ty1)
   in
   let lenv1 = env.lenv in
   let env = { env with lenv = parent_lenv } in
   let (env, _lset) = condition env false tc in
-  let (env, te2, ty2) = expr ?expected env e2 in
+  let (env, te2, ty2) = expr ?expected ?in_await env e2 in
   let lenv2 = env.lenv in
   let env = LEnv.union_lenvs env parent_lenv lenv1 lenv2 in
   let (env, ty) = Union.union env ty1 ty2 in
@@ -1318,6 +1322,7 @@ and expr_
     ?(accept_using_var = false)
     ?(is_using_clause = false)
     ?lhs_of_null_coalesce
+    ?in_await
     ~(valkind : [> `lvalue | `lvalue_subexpr | `other ])
     ~check_defined
     env
@@ -1399,6 +1404,7 @@ and expr_
   let check_call
       ~is_using_clause
       ~(expected : ExpectedTy.t option)
+      ?in_await
       env
       p
       e
@@ -1409,6 +1415,7 @@ and expr_
       dispatch_call
         ~is_using_clause
         ~expected
+        ?in_await
         p
         env
         e
@@ -1428,7 +1435,7 @@ and expr_
     let ty = Typing_utils.mk_tany env p in
     make_result env p Aast.Omitted ty
   | ParenthesizedExpr e ->
-    let (env, te, ty) = expr env e in
+    let (env, te, ty) = expr ?in_await env e in
     make_result env p (Aast.ParenthesizedExpr te) ty
   | Any -> expr_error env (Reason.Rwitness p) outer
   | Varray (th, el)
@@ -2049,6 +2056,7 @@ and expr_
       check_call
         ~is_using_clause
         ~expected
+        ?in_await
         env
         p
         e
@@ -2181,7 +2189,7 @@ and expr_
     let (env, te, ty) = raw_expr env e in
     let env = might_throw env in
     Typing_arithmetic.unop p env uop te ty
-  | Eif (c, e1, e2) -> eif env ~expected p c e1 e2
+  | Eif (c, e1, e2) -> eif env ~expected ?in_await p c e1 e2
   | Class_const ((p, CI sid), pstr)
     when String.equal (snd pstr) "class" && Env.is_typedef env (snd sid) ->
     begin
@@ -2399,7 +2407,9 @@ and expr_
   | Await e ->
     let env = might_throw env in
     (* Await is permitted in a using clause e.g. using (await make_handle()) *)
-    let (env, te, rty) = expr ~is_using_clause env e in
+    let (env, te, rty) =
+      expr ~is_using_clause ~in_await:(Reason.Rwitness p) env e
+    in
     let (env, ty) = Async.overload_extract_from_awaitable env p rty in
     make_result env p (Aast.Await te) ty
   | Suspend e ->
@@ -2489,7 +2499,7 @@ and expr_
 
     expr_error env (Reason.Rwitness p) outer
   | Cast (hint, e) ->
-    let (env, te, ty2) = expr env e in
+    let (env, te, ty2) = expr ?in_await env e in
     let env = might_throw env in
     let env =
       if
@@ -4127,6 +4137,7 @@ and call_parent_construct pos env el unpacked_element =
 and dispatch_call
     ~(expected : ExpectedTy.t option)
     ~is_using_clause
+    ?in_await
     p
     env
     ((fpos, fun_expr) as e)
@@ -4813,6 +4824,7 @@ and dispatch_call
              ~is_static:false
              receiver_ty
              (snd meth))
+        ?in_await
         p
         env
         method_ty
@@ -5908,6 +5920,7 @@ and call
     ~(expected : ExpectedTy.t option)
     ?(method_call_info : TR.method_call_info option)
     ?(nullsafe : Pos.t option = None)
+    ?in_await
     pos
     env
     fty
@@ -5986,11 +5999,19 @@ and call
           in
           (env, (tel, None, ty))
         | (_, Tunion [ty]) ->
-          call ~expected ~nullsafe pos env ty el unpacked_element
+          call ~expected ~nullsafe ?in_await pos env ty el unpacked_element
         | (r, Tunion tyl) ->
           let (env, resl) =
             List.map_env env tyl (fun env ty ->
-                call ~expected ~nullsafe pos env ty el unpacked_element)
+                call
+                  ~expected
+                  ~nullsafe
+                  ?in_await
+                  pos
+                  env
+                  ty
+                  el
+                  unpacked_element)
           in
           let retl = List.map resl ~f:(fun (_, _, x) -> x) in
           let (env, ty) = Union.union_list env r retl in
@@ -6005,7 +6026,15 @@ and call
         | (r, Tintersection tyl) ->
           let (env, resl) =
             TUtils.run_on_intersection env tyl ~f:(fun env ty ->
-                call ~expected ~nullsafe pos env ty el unpacked_element)
+                call
+                  ~expected
+                  ~nullsafe
+                  ?in_await
+                  pos
+                  env
+                  ty
+                  el
+                  unpacked_element)
           in
           let retl = List.map resl ~f:(fun (_, _, x) -> x) in
           let (env, ty) = Inter.intersect_list env r retl in
@@ -6296,6 +6325,11 @@ and call
               { capability }
             in
             let (env, return_ty) = Env.fresh_type env pos in
+            let return_ty =
+              match in_await with
+              | None -> return_ty
+              | Some r -> MakeType.awaitable r return_ty
+            in
             let ft_ret = MakeType.enforced return_ty in
             (* A non-reactive supertype is most permissive: *)
             let ft_reactive = Nonreactive in

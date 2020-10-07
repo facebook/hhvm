@@ -47,8 +47,6 @@ module Dep = struct
 
   type dependency
 
-  (* Consider writing by hand a `equal_variant` *)
-
   (** NOTE: keep in sync with `typing_deps.rs`. *)
   type _ variant =
     | GConst : string -> 'a variant

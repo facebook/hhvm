@@ -324,59 +324,39 @@ void emitCalleeChecks(IRGS& env, const Func* callee, uint32_t argc,
   }
 }
 
-/*
- * Initialize parameters.
- *
- * Set un-passed parameters to Uninit and set up the variadic capture parameter
- * as neeeded.
- */
-void init_params(IRGS& env, const Func* func, uint32_t argc) {
-  // Reified generics are not supported on closures yet.
-  assertx(!func->hasReifiedGenerics() || !func->isClosureBody());
+} // namespace
 
-  // Maximum number of default-value parameter initializations to unroll.
-  auto constexpr kMaxParamsInitUnroll = 5;
-  auto const nparams = func->numNonVariadicParams();
+void emitInitFuncInputs(IRGS& env, const Func* callee, uint32_t argc) {
+  // Reified generics were initialized by emitCalleeGenericsChecks().
+  auto const generics = callee->hasReifiedGenerics()
+    ? popC(env, DataTypeGeneric) : nullptr;
 
-  // Reified generics were initialized by emitCalleeGenericsChecks(). If not
-  // enough args were provided, move generics to the correct slot
-  // ($0ReifiedGenerics is the first non-parameter local).
-  if (func->hasReifiedGenerics() && argc != func->numParams()) {
-    auto const type = RuntimeOption::EvalHackArrDVArrs ? TVec : TVArr;
-    auto const generics = [&] {
-      if (argc < func->numParams()) {
-        gen(env, AssertLoc, type, LocalId{argc}, fp(env));
-        return gen(env, LdLoc, type, LocalId{argc}, fp(env));
-      } else {
-        assertx(!isInlining(env));
-        auto const genericsOff = IRSPRelOffsetData(offsetFromIRSP(
-          env, BCSPRelOffset{func->numSlotsInFrame() - int32_t(argc) - 1}));
-        gen(env, AssertStk, type, genericsOff, sp(env));
-        return gen(env, LdStk, type, genericsOff, sp(env));
-      }
-    }();
-    gen(env, StLoc, LocalId{func->numParams()}, fp(env), generics);
+  // Push Uninit for un-passed arguments.
+  auto const numParams = callee->numNonVariadicParams();
+  while (argc < numParams) {
+    push(env, cns(env, TUninit));
+    ++argc;
   }
 
-  if (argc < nparams) {
-    // Too few arguments; set everything else to Uninit.
-    if (nparams - argc <= kMaxParamsInitUnroll || isInlining(env)) {
-      for (auto i = argc; i < nparams; ++i) {
-        gen(env, StLoc, LocalId{i}, fp(env), cns(env, TUninit));
-      }
-    } else {
-      gen(env, StLocRange, LocalIdRange{argc, nparams},
-          fp(env), cns(env, TUninit));
-    }
-  }
-
-  if (argc <= nparams && func->hasVariadicCaptureParam()) {
+  if (argc < callee->numParams()) {
+    // Push an empty array for `...$args'.
     ARRPROV_USE_RUNTIME_LOCATION();
-    // Need to initialize `...$args'.
-    gen(env, StLoc, LocalId{nparams}, fp(env),
-        cns(env, ArrayData::CreateVArray()));
+    assertx(callee->hasVariadicCaptureParam());
+    push(env, cns(env, ArrayData::CreateVArray()));
+    ++argc;
+  } else if (argc > callee->numParams()) {
+    // Extra arguments already popped by emitCalleeArgumentArityChecks().
+    assertx(!callee->hasVariadicCaptureParam());
+    --argc;
   }
+
+  assertx(argc == callee->numParams());
+
+  // Place generics in the correct position.
+  if (generics != nullptr) push(env, generics);
 }
+
+namespace {
 
 void emitSpillFrame(IRGS& env, const Func* callee, uint32_t argc,
                     SSATmp* callFlags, SSATmp* prologueCtx) {
@@ -475,10 +455,7 @@ void init_locals(IRGS& env, const Func* func) {
 
 } // namespace
 
-void emitPrologueLocals(IRGS& env, const Func* callee, uint32_t argc,
-                        SSATmp* closure) {
-  init_params(env, callee, argc);
-
+void emitPrologueLocals(IRGS& env, const Func* callee, SSATmp* closure) {
   assertx(callee->isClosureBody() == (closure != nullptr));
   if (callee->isClosureBody()) {
     init_use_vars(env, callee, closure);
@@ -501,7 +478,7 @@ void emitPrologueBody(IRGS& env, const Func* callee, uint32_t argc,
 
   // Initialize params, locals, and---if we have a closure---the closure's
   // bound class context and use vars.
-  emitPrologueLocals(env, callee, argc, closure);
+  emitPrologueLocals(env, callee, closure);
 
   // Check surprise flags in the same place as the interpreter: after setting
   // up the callee's frame but before executing any of its code.
@@ -574,6 +551,7 @@ void emitFuncPrologue(IRGS& env, const Func* callee, uint32_t argc,
 
   emitPrologueEntry(env, callee, argc, transID);
   emitCalleeChecks(env, callee, argc, callFlags);
+  emitInitFuncInputs(env, callee, argc);
   emitSpillFrame(env, callee, argc, callFlags, prologueCtx);
   emitPrologueBody(env, callee, argc, closure);
 }

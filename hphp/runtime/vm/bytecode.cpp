@@ -906,50 +906,19 @@ uint32_t prepareUnpackArgs(const Func* func, uint32_t numArgs,
   return numParams + 1;
 }
 
-static void prepareFuncEntry(ActRec *ar) {
+static void prepareFuncEntry(ActRec *ar, uint32_t numArgsInclUnpack) {
   assertx(!isResumed(ar));
+  assertx(
+    reinterpret_cast<TypedValue*>(ar) - vmStack().top() ==
+      ar->func()->numParams() + (ar->func()->hasReifiedGenerics() ? 1U : 0U)
+  );
+
   const Func* func = ar->func();
-  Offset firstDVInitializer = kInvalidOffset;
-  const int nparams = func->numNonVariadicParams();
-  auto& stack = vmStack();
-
-  auto generics = GenericsSaver::pop(func->hasReifiedGenerics());
-  auto const nargs = (TypedValue*)ar - stack.top();
-
-  if (UNLIKELY(nargs > nparams)) {
-    // All extra arguments are expected to be packed in a varray.
-    assertx(nargs == nparams + 1);
-    assertx(tvIsHAMSafeVArray(stack.topC()));
-    assertx(func->hasVariadicCaptureParam());
-  } else {
-    if (nargs < nparams) {
-      // This is where we are going to enter, assuming we don't fail on
-      // a missing argument check.
-      firstDVInitializer = func->params()[nargs].funcletOff;
-
-      // Push uninitialized nulls for missing arguments. They will end up
-      // getting default-initialized, but regardless, we need to make space
-      // for them on the stack.
-      for (int i = nargs; i < nparams; ++i) {
-        stack.pushUninit();
-      }
-    }
-    if (UNLIKELY(func->hasVariadicCaptureParam())) {
-      ARRPROV_USE_RUNTIME_LOCATION();
-      auto const ad = ArrayData::CreateVArray();
-      if (RuntimeOption::EvalHackArrDVArrs) {
-        stack.pushVecNoRc(ad);
-      } else {
-        stack.pushArrayNoRc(ad);
-      }
-    }
-  }
-
   int nlocals = func->numParams();
   if (UNLIKELY(func->isClosureBody())) {
-    int nuse = c_Closure::initActRecFromClosure(ar, stack.top());
+    int nuse = c_Closure::initActRecFromClosure(ar, vmStack().top());
     // initActRecFromClosure doesn't move stack
-    stack.nalloc(nuse);
+    vmStack().nalloc(nuse);
     nlocals += nuse;
     func = ar->func();
   }
@@ -957,30 +926,25 @@ static void prepareFuncEntry(ActRec *ar) {
   if (ar->func()->hasReifiedGenerics()) {
     // Currently does not work with closures
     assertx(!func->isClosureBody());
-    assertx(!generics.isNull());
-    // push for first local
-    GenericsSaver::push(std::move(generics));
     nlocals++;
   }
 
   pushFrameSlots(func, nlocals);
 
   vmfp() = ar;
-  vmpc() = firstDVInitializer != kInvalidOffset
-    ? func->unit()->entry() + firstDVInitializer
-    : func->entry();
+  vmpc() = func->unit()->entry() + func->getEntryForNumArgs(numArgsInclUnpack);
   vmJitReturnAddr() = nullptr;
 }
 
 static void dispatch();
 
-void enterVMAtFunc(ActRec* enterFnAr) {
+void enterVMAtFunc(ActRec* enterFnAr, uint32_t numArgsInclUnpack) {
   assertx(enterFnAr);
   assertx(!isResumed(enterFnAr));
   ARRPROV_USE_VMPC();
   Stats::inc(Stats::VMEnter);
 
-  prepareFuncEntry(enterFnAr);
+  prepareFuncEntry(enterFnAr, numArgsInclUnpack);
 
   if (!EventHook::FunctionCall(enterFnAr, EventHook::NormalFunc)) return;
   checkStack(vmStack(), enterFnAr->func(), 0);
@@ -3616,11 +3580,12 @@ bool doFCall(CallFlags callFlags, const Func* func, uint32_t numArgsInclUnpack,
   ActRec* ar = vmStack().indA(
     numArgsInclUnpack + (callFlags.hasGenerics() ? 1 : 0));
 
-  // Callee checks.
+  // Callee checks and input initialization.
   calleeGenericsChecks(func, callFlags.hasGenerics());
   calleeArgumentArityChecks(func, numArgsInclUnpack);
   calleeDynamicCallChecks(func, callFlags.isDynamicCall());
   calleeImplicitContextChecks(func);
+  initFuncInputs(func, numArgsInclUnpack);
 
   ar->m_sfp = vmfp();
   ar->setJitReturn(retAddr);
@@ -3633,7 +3598,7 @@ bool doFCall(CallFlags callFlags, const Func* func, uint32_t numArgsInclUnpack,
   ar->setThisOrClassAllowNull(ctx);
 
   try {
-    prepareFuncEntry(ar);
+    prepareFuncEntry(ar, numArgsInclUnpack);
 
     return EventHook::FunctionCall(ar, EventHook::NormalFunc);
   } catch (...) {

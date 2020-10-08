@@ -48,8 +48,9 @@ void emitCalleeDynamicCallChecks(IRGS& env, const Func* callee,
 
 void emitCalleeImplicitContextChecks(IRGS& env, const Func* callee);
 
-void emitPrologueLocals(IRGS& env, const Func* callee, uint32_t argc,
-                        SSATmp* closureOpt);
+void emitInitFuncInputs(IRGS& env, const Func* callee, uint32_t argc);
+
+void emitPrologueLocals(IRGS& env, const Func* callee, SSATmp* closureOpt);
 
 void emitFuncPrologue(IRGS& env, const Func* callee, uint32_t argc,
                       TransID transID);

@@ -221,6 +221,7 @@ void beginInlining(IRGS& env,
 
   FTRACE(1, "[[[ begin inlining: {}\n", target->fullName()->data());
 
+  auto const numArgsInclUnpack = fca.numArgs + (fca.hasUnpack() ? 1U : 0U);
   auto const callFlags = cns(env, CallFlags(
     fca.hasGenerics(),
     dynamicCall,
@@ -229,10 +230,11 @@ void beginInlining(IRGS& env,
     0
   ).value());
 
-  // Callee checks.
+  // Callee checks and input initialization.
   emitCalleeGenericsChecks(env, target, callFlags, fca.hasGenerics());
   emitCalleeDynamicCallChecks(env, target, callFlags);
   emitCalleeImplicitContextChecks(env, target);
+  emitInitFuncInputs(env, target, numArgsInclUnpack);
 
   auto const closure = target->isClosureBody()
     ? gen(env, AssertType, Type::ExactObj(target->implCls()), ctx)
@@ -275,9 +277,8 @@ void beginInlining(IRGS& env,
     return gen(env, AssertType, ty, ctx);
   }();
 
-  auto const numArgs = fca.numArgs + (fca.hasUnpack() ? 1U : 0U);
   auto const numTotalInputs =
-    numArgs + (target->hasReifiedGenerics() ? 1U : 0U);
+    target->numParams() + (target->hasReifiedGenerics() ? 1U : 0U);
   jit::vector<SSATmp*> inputs{numTotalInputs};
   for (auto i = 0; i < numTotalInputs; ++i) {
     inputs[numTotalInputs - i - 1] = popC(env);
@@ -295,14 +296,14 @@ void beginInlining(IRGS& env,
   auto const calleeFP = gen(
     env,
     BeginInlining,
-    BeginInliningData{calleeAROff, target, cost, int(numArgs)},
+    BeginInliningData{calleeAROff, target, cost, int(numArgsInclUnpack)},
     sp(env),
     fp(env)
   );
 
   StFrameMetaData meta;
   meta.callBCOff     = callBcOffset;
-  meta.numArgs       = numArgs;
+  meta.numArgs       = numArgsInclUnpack;
   meta.asyncEagerReturn = returnTarget.asyncEagerOffset != kInvalidOffset;
 
   gen(env, StFrameMeta, meta, calleeFP);
@@ -313,7 +314,7 @@ void beginInlining(IRGS& env,
   data.syncVmpc = nullptr;
 
   assertx(startSk.func() == target &&
-          startSk.offset() == target->getEntryForNumArgs(numArgs) &&
+          startSk.offset() == target->getEntryForNumArgs(numArgsInclUnpack) &&
           startSk.resumeMode() == ResumeMode::None);
 
   env.inlineState.depth++;
@@ -338,7 +339,7 @@ void beginInlining(IRGS& env,
   updateMarker(env);
   env.irb->exceptionStackBoundary();
 
-  emitPrologueLocals(env, target, numArgs, closure);
+  emitPrologueLocals(env, target, closure);
 
   assertx(startSk.hasThis() == startSk.func()->hasThisInBody());
   assertx(

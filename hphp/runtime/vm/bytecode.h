@@ -680,7 +680,7 @@ Array getDefinedVariables(const ActRec*);
  * level frame, in which case vmfp()/vmpc() are set to nullptr, or by throwing
  * an exception, which callers usually process via exception_handler().
  */
-void enterVMAtFunc(ActRec* enterFnAr);
+void enterVMAtFunc(ActRec* enterFnAr, uint32_t numArgsInclUnpack);
 void enterVMAtCurPC();
 uint32_t prepareUnpackArgs(const Func* func, uint32_t numArgs,
                            bool checkInOutAnnot);

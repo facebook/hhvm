@@ -232,6 +232,34 @@ inline void calleeImplicitContextChecks(const Func* callee) {
     "but is marked with __NoContext"));
 }
 
+inline void initFuncInputs(const Func* callee, uint32_t numArgsInclUnpack) {
+  assertx(numArgsInclUnpack <= callee->numNonVariadicParams() + 1);
+
+  // All arguments already initialized. Extra arguments already popped
+  // by calleeArgumentArityChecks().
+  if (LIKELY(numArgsInclUnpack >= callee->numParams())) return;
+
+  GenericsSaver gs{callee->hasReifiedGenerics()};
+  auto const numParams = callee->numNonVariadicParams();
+  while (numArgsInclUnpack < numParams) {
+    vmStack().pushUninit();
+    ++numArgsInclUnpack;
+  }
+
+  if (callee->hasVariadicCaptureParam()) {
+    ARRPROV_USE_RUNTIME_LOCATION();
+    auto const ad = ArrayData::CreateVArray();
+    if (RuntimeOption::EvalHackArrDVArrs) {
+      vmStack().pushVecNoRc(ad);
+    } else {
+      vmStack().pushArrayNoRc(ad);
+    }
+    ++numArgsInclUnpack;
+  }
+
+  assertx(numArgsInclUnpack == callee->numParams());
+}
+
 /*
  * This helper only does a stack overflow check for the native stack.
  * Both native and VM stack overflows are independently possible.

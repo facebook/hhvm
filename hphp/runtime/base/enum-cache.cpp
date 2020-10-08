@@ -153,7 +153,8 @@ const EnumValues* EnumCache::loadEnumValues(
       value = klass->clsCnsGet(consts[i].name);
     }
     assertx(value.m_type != KindOfUninit);
-    if (UNLIKELY(!(isIntType(value.m_type) || tvIsString(&value)))) {
+    bool isEnumClass = klass->attrs() & AttrEnumClass;
+    if (!isEnumClass && !(isIntType(value.m_type) || tvIsString(&value))) {
       // Enum values must be ints or strings. We can't get a static value here.
       if (require_static) return nullptr;
       std::string msg;
@@ -162,7 +163,14 @@ const EnumValues* EnumCache::loadEnumValues(
       EnumCache::failLookup(msg);
     }
     values.set(StrNR(consts[i].name), tvAsCVarRef(value));
-
+    if (isEnumClass) {
+      // The enum values of enum classes are objects. This makes it
+      // such that we can't build `names` (which requires enum values be
+      // either int or string as they serve as array keys there).
+      continue; // So, the `names` member of the calculated
+                // `EnumValues` will be empty. This is OK, since we
+                // don't care to support `getNames` for enum classes.
+    }
     // Manually perform int-like key coercion even if names is a dict for
     // backwards compatibility.
     int64_t n;

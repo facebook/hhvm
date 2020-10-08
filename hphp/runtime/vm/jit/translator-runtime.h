@@ -157,10 +157,6 @@ const Func* lookupClsMethodHelper(const Class* cls, const StringData* methName,
 void trimExtraArgs(ActRec* ar);
 void shuffleExtraArgsVariadic(ActRec* ar);
 
-[[noreturn]] void throwMissingArgument(const Func* func, int got);
-void raiseTooManyArguments(const Func* func, int got);
-void raiseTooManyArgumentsPrologue(const Func* func, ArrayData* unpackArgs);
-
 Class* lookupClsRDS(const StringData* name);
 
 /* Check if a method of the given name exists on the class. */

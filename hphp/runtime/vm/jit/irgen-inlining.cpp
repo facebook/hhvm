@@ -214,6 +214,7 @@ void beginInlining(IRGS& env,
   assertx((!curFunc(env) ||
           curFunc(env)->base() + callBcOffset < curFunc(env)->past()) &&
          "callBcOffset past end of caller");
+  assertx(fca.numArgs >= target->numRequiredParams());
   assertx(fca.numArgs <= target->numNonVariadicParams());
   assertx(!fca.hasUnpack() || fca.numArgs == target->numNonVariadicParams());
   assertx(!fca.hasUnpack() || target->hasVariadicCaptureParam());

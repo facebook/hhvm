@@ -910,7 +910,6 @@ static void prepareFuncEntry(ActRec *ar) {
   assertx(!isResumed(ar));
   const Func* func = ar->func();
   Offset firstDVInitializer = kInvalidOffset;
-  folly::Optional<uint32_t> raiseTooManyArgumentsWarnings;
   const int nparams = func->numNonVariadicParams();
   auto& stack = vmStack();
 
@@ -921,15 +920,7 @@ static void prepareFuncEntry(ActRec *ar) {
     // All extra arguments are expected to be packed in a varray.
     assertx(nargs == nparams + 1);
     assertx(tvIsHAMSafeVArray(stack.topC()));
-    if (!func->hasVariadicCaptureParam()) {
-      // Record the number of args for the warning before dropping extra args.
-      auto const unpackArgs = stack.topC()->m_data.parr;
-      if (!unpackArgs->empty()) {
-        raiseTooManyArgumentsWarnings = nparams + unpackArgs->size();
-      }
-      stack.popC();
-      ar->setNumArgs(nparams);
-    }
+    assertx(func->hasVariadicCaptureParam());
   } else {
     if (nargs < nparams) {
       // This is where we are going to enter, assuming we don't fail on
@@ -979,13 +970,6 @@ static void prepareFuncEntry(ActRec *ar) {
     ? func->unit()->entry() + firstDVInitializer
     : func->entry();
   vmJitReturnAddr() = nullptr;
-
-  if (nargs < func->numRequiredParams()) {
-    HPHP::jit::throwMissingArgument(func, nargs);
-  }
-  if (raiseTooManyArgumentsWarnings) {
-    HPHP::jit::raiseTooManyArguments(func, *raiseTooManyArgumentsWarnings);
-  }
 }
 
 namespace {
@@ -3651,6 +3635,7 @@ bool doFCall(CallFlags callFlags, const Func* func, uint32_t numArgsInclUnpack,
 
   // Callee checks.
   calleeGenericsChecks(func, callFlags.hasGenerics());
+  calleeArgumentArityChecks(func, numArgsInclUnpack);
 
   ar->m_sfp = vmfp();
   ar->setJitReturn(retAddr);
@@ -3659,7 +3644,7 @@ bool doFCall(CallFlags callFlags, const Func* func, uint32_t numArgsInclUnpack,
     callFlags.callOffset(),
     callFlags.asyncEagerReturn() ? (1 << ActRec::AsyncEagerRet) : 0
   );
-  ar->setNumArgs(numArgsInclUnpack);
+  ar->setNumArgs(std::min(numArgsInclUnpack, func->numParams()));
   ar->setThisOrClassAllowNull(ctx);
 
   try {

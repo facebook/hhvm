@@ -1495,6 +1495,7 @@ TypedValue ExecutionContext::invokeFuncImpl(const Func* f,
 
   // Callee checks.
   calleeGenericsChecks(f, hasGenerics);
+  calleeArgumentArityChecks(f, numArgsInclUnpack);
 
   ar->setReturnVMExit();
   ar->setFunc(f);
@@ -1506,7 +1507,7 @@ TypedValue ExecutionContext::invokeFuncImpl(const Func* f,
   } else {
     ar->trashThis();
   }
-  ar->setNumArgs(numArgsInclUnpack);
+  ar->setNumArgs(std::min(numArgsInclUnpack, f->numParams()));
 
 #ifdef HPHP_TRACE
   if (vmfp() == nullptr) {

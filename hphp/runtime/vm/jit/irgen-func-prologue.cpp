@@ -195,12 +195,33 @@ void emitCalleeGenericsChecks(IRGS& env, const Func* callee, SSATmp* callFlags,
 namespace {
 
 /*
- * Emit raise-warnings for any missing arguments.
+ * Check for too few or too many arguments and trim extra args.
  */
-void warnOnMissingArgs(IRGS& env, const Func* callee, uint32_t argc) {
+void emitCalleeArgumentArityChecks(IRGS& env, const Func* callee,
+                                   uint32_t argc) {
   if (argc < callee->numRequiredParams()) {
-    env.irb->exceptionStackBoundary();
     gen(env, ThrowMissingArg, FuncArgData { callee, argc });
+  }
+
+  if (argc > callee->numParams()) {
+    assertx(!callee->hasVariadicCaptureParam());
+    assertx(argc == callee->numNonVariadicParams() + 1);
+
+    // Pop unpack args, skipping generics (we already know their type).
+    auto const generics = callee->hasReifiedGenerics()
+      ? popC(env, DataTypeGeneric) : nullptr;
+    auto const unpackArgs = pop(env, DataTypeGeneric);
+    if (generics != nullptr) push(env, generics);
+
+    // We have updated the stack.
+    updateMarker(env);
+    env.irb->exceptionStackBoundary();
+
+    // Pass unpack args to the raiseTooManyArgumentsPrologue() helper, which
+    // will use them to report the correct number and also take care of decref.
+    auto const type = RuntimeOption::EvalHackArrDVArrs ? TVec : TVArr;
+    auto const unpackArgsArr = gen(env, AssertType, type, unpackArgs);
+    gen(env, RaiseTooManyArg, FuncData { callee }, unpackArgsArr);
   }
 }
 
@@ -293,6 +314,7 @@ void emitCalleeChecks(IRGS& env, const Func* callee, uint32_t argc,
   // be on the stack. This check makes sure they materialize on the stack
   // if we expect them.
   emitCalleeGenericsChecks(env, callee, callFlags, false);
+  emitCalleeArgumentArityChecks(env, callee, argc);
 
   // Emit early stack overflow check if necessary.
   if (stack_check_kind(callee, argc) == StackCheck::Early) {
@@ -475,33 +497,11 @@ void emitPrologueBody(IRGS& env, const Func* callee, uint32_t argc,
     gen(env, IncCallCounter, fp(env));
   }
 
-  auto const unpackArgsForTooManyArgs = [&]() -> SSATmp* {
-    if (argc <= callee->numParams()) return nullptr;
-
-    // If too many arguments were passed, load the array containing the unpack
-    // args, as it is about to get overridden by emitPrologueLocals(). Need to
-    // use LdStk instead of LdLoc, as there may be no such local.
-    assertx(!callee->hasVariadicCaptureParam());
-    assertx(argc == callee->numNonVariadicParams() + 1);
-    auto const type = RuntimeOption::EvalHackArrDVArrs ? TVec : TVArr;
-    auto const unpackOff = IRSPRelOffsetData(offsetFromIRSP(
-      env, BCSPRelOffset{callee->numSlotsInFrame() - int32_t(argc)}));
-    gen(env, AssertStk, type, unpackOff, sp(env));
-    return gen(env, LdStk, type, unpackOff, sp(env));
-  }();
-
   // Initialize params, locals, and---if we have a closure---the closure's
   // bound class context and use vars.
   emitPrologueLocals(env, callee, argc, closure);
 
   env.irb->exceptionStackBoundary();
-
-  warnOnMissingArgs(env, callee, argc);
-  if (unpackArgsForTooManyArgs != nullptr) {
-    // RaiseTooManyArg will free unpackArgsForTooManyArgs and also use it to
-    // report the correct numbers.
-    gen(env, RaiseTooManyArg, FuncData { callee }, unpackArgsForTooManyArgs);
-  }
 
   emitCalleeDynamicCallCheck(env, callee, callFlags);
   emitImplicitContextCheck(env, callee);

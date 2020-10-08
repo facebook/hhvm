@@ -1,23 +1,23 @@
 
-Warning: f() expects exactly 0 parameters, 2 given in %s on line 4
+Warning: f() expects exactly 0 parameters, 2 given in %s on line 9
 done
 
-Warning: f() expects exactly 0 parameters, 2 given in %s on line 4
+Warning: f() expects exactly 0 parameters, 2 given in %s on line 10
 done
 
-Warning: f() expects exactly 0 parameters, 2 given in %s on line 4
+Warning: f() expects exactly 0 parameters, 2 given in %s on line 11
 done
 
-Warning: f() expects exactly 0 parameters, 2 given in %s on line 4
+Warning: f() expects exactly 0 parameters, 2 given in %s on line 12
 done
 
-Warning: f() expects exactly 0 parameters, 1 given in %s on line 4
+Warning: f() expects exactly 0 parameters, 1 given in %s on line 14
 done
 
-Warning: f() expects exactly 0 parameters, 1 given in %s on line 4
+Warning: f() expects exactly 0 parameters, 1 given in %s on line 15
 done
 
-Warning: f() expects exactly 0 parameters, 1 given in %s on line 4
+Warning: f() expects exactly 0 parameters, 1 given in %s on line 16
 done
 done
 done

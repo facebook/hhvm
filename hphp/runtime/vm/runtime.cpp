@@ -230,6 +230,58 @@ void throwInvalidUnpackArgs() {
     "Only containers may be unpacked");
 }
 
+namespace {
+
+std::string formatArgumentErrMsg(const Func* func, const char* amount,
+                                 uint32_t expected, uint32_t got) {
+  return folly::sformat(
+    "{}() expects {} {} parameter{}, {} given",
+    func->fullName()->data(),
+    amount,
+    expected,
+    expected == 1 ? "" : "s",
+    got
+  );
+}
+
+}
+
+void throwMissingArgument(const Func* func, int got) {
+  auto const expected = func->numRequiredParams();
+  assertx(got < expected);
+  auto const amount = expected < func->numParams() ? "at least" : "exactly";
+  auto const errMsg = formatArgumentErrMsg(func, amount, expected, got);
+  SystemLib::throwRuntimeExceptionObject(Variant(errMsg));
+}
+
+void raiseTooManyArguments(const Func* func, int got) {
+  assertx(!func->hasVariadicCaptureParam());
+
+  if (!RuntimeOption::EvalWarnOnTooManyArguments && !func->isCPPBuiltin()) {
+    return;
+  }
+
+  auto const total = func->numNonVariadicParams();
+  assertx(got > total);
+  auto const amount = func->numRequiredParams() < total ? "at most" : "exactly";
+  auto const errMsg = formatArgumentErrMsg(func, amount, total, got);
+
+  if (RuntimeOption::EvalWarnOnTooManyArguments > 1 || func->isCPPBuiltin()) {
+    SystemLib::throwRuntimeExceptionObject(Variant(errMsg));
+  } else {
+    raise_warning(errMsg);
+  }
+}
+
+void raiseTooManyArgumentsPrologue(const Func* func, ArrayData* unpackArgs) {
+  SCOPE_EXIT { decRefArr(unpackArgs); };
+  if (unpackArgs->empty()) return;
+  auto const got = func->numNonVariadicParams() + unpackArgs->size();
+  raiseTooManyArguments(func, got);
+}
+
+//////////////////////////////////////////////////////////////////////
+
 void raiseRxCallViolation(const ActRec* caller, const Func* callee) {
   assertx(RuntimeOption::EvalPureEnforceCalls > 0);
   auto const callerIsPure = caller->func()->rxLevel() == RxLevel::Pure;

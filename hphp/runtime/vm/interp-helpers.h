@@ -196,6 +196,31 @@ inline void calleeGenericsChecks(const Func* callee, bool hasGenerics) {
 }
 
 /*
+ * Check for too few or too many arguments and trim extra args.
+ */
+inline void calleeArgumentArityChecks(const Func* callee,
+                                      uint32_t numArgsInclUnpack) {
+  if (numArgsInclUnpack < callee->numRequiredParams()) {
+    throwMissingArgument(callee, numArgsInclUnpack);
+  }
+
+  if (numArgsInclUnpack > callee->numParams()) {
+    assertx(!callee->hasVariadicCaptureParam());
+    assertx(numArgsInclUnpack == callee->numNonVariadicParams() + 1);
+
+    GenericsSaver gs{callee->hasReifiedGenerics()};
+
+    assertx(tvIsHAMSafeVArray(vmStack().topC()));
+    auto const numUnpackArgs = vmStack().topC()->m_data.parr->size();
+    vmStack().popC();
+
+    if (numUnpackArgs != 0) {
+      raiseTooManyArguments(callee, numArgsInclUnpack + numUnpackArgs - 1);
+    }
+  }
+}
+
+/*
  * This helper only does a stack overflow check for the native stack.
  * Both native and VM stack overflows are independently possible.
  */

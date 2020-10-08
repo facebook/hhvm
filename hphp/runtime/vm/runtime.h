@@ -58,6 +58,10 @@ std::string formatParamInOutMismatch(const char* fname, uint32_t index,
                                                unsigned firstBit, uint64_t mask,
                                                uint64_t vals);
 [[noreturn]] void throwInvalidUnpackArgs();
+[[noreturn]] void throwMissingArgument(const Func* func, int got);
+void raiseTooManyArguments(const Func* func, int got);
+void raiseTooManyArgumentsPrologue(const Func* func, ArrayData* unpackArgs);
+
 void raiseRxCallViolation(const ActRec* caller, const Func* callee);
 
 inline Iter*

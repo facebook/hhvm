@@ -229,90 +229,79 @@ constexpr LayoutFunctions fromArray() {
 struct Layout {
   Layout(const std::string& description,
          const LayoutFunctions* vtable = nullptr);
+  Layout(LayoutIndex index, const std::string& description,
+         const LayoutFunctions* vtable = nullptr);
   virtual ~Layout() {}
 
-  /* bespoke indexes are 15 bits wide--when we store them in m_extra of
-   * ArrayData we always set the sign bit--this allows us to test
-   * (size>=constant * && vanilla()) in one go */
-  static uint16_t constexpr kMaxIndex = (1 << 15) - 1;
+  /*
+   * Bespoke indexes are 15 bits wide. When we store them in m_extra of
+   * ArrayData, we always set the sign bit, which allows us to test that
+   * (m_size >= constant && isVanilla()) in a single comparison.
+   */
+  static constexpr LayoutIndex kMaxIndex = {(1 << 15) - 1};
 
-  uint16_t index() const { return m_index; }
+  LayoutIndex index() const { return m_index; }
   const std::string& describe() const { return m_description; }
   const LayoutFunctions* vtable() const { return m_vtable; }
 
-  //////////////////////////////////////////////////////////////////////
-  // JIT support
-  //////////////////////////////////////////////////////////////////////
+  /*
+   * In order to support efficient layout type tests in the JIT, we let
+   * layout initializers reserve aligned blocks of indices to populate.
+   *
+   *   @precondition:  `size` must be a power of two.
+   *   @postcondition: The result is a multiple of size.
+   */
+  static LayoutIndex ReserveIndices(size_t size);
+
+  static const Layout* FromIndex(LayoutIndex index);
+
+  ///////////////////////////////////////////////////////////////////////////
+
+  /*
+   * JIT support
+   *
+   * In all the irgen emit helpers below, `arr` is guaranteed to be an array
+   * matching this BespokeLayout's type class.
+   *
+   * For those methods that take `key`, it is guaranteed to be a valid key
+   * for the base's type. For example, if `arr` is a dict, then `key` is an
+   * arraykey, and if `arr` is a vec, `key` is an int. (We make no claims
+   * about whether `key` matches tighter per-layout type constraints.)
+   */
 
   using SSATmp = jit::SSATmp;
   using Block = jit::Block;
   using IRGS = jit::irgen::IRGS;
 
   /*
-   * Generate a new bespoke array by setting key to value in `base`, CoWing or
-   * escalating as necessary.
-   *
-   * `base` is guaranteed to be bespoke, use the recipient's layout, and support
-   * SetElem (i.e. is not a keyset)
-   *
-   * `key` is guaranteed to be valid for `base`'s array kind.
-   */
-  virtual SSATmp* emitSet(
-    IRGS& env,
-    SSATmp* base,
-    SSATmp* key,
-    SSATmp* val
-  ) const;
-
-  /*
-   * Generate a new bespoke array by appending `val` (CoWing or escalating as
-   * necessary.)
-   *
-   * `base` is guaranteed to be bespoke and use the recipient's layout
-   *
-   * `val` is guaranteed to be valid for `base`'s array kind.
-   */
-  virtual SSATmp* emitAppend(
-    IRGS& env,
-    SSATmp* base,
-    SSATmp* val
-  ) const;
-
-  /*
-   * Return the value at `key` in `base`, branching to `missing` if the key is
-   * not present in the array.
-   *
-   * `base` is guaranteed to be bespoke and use the recipient's layout.
-   *
-   * `key` is guaranteed to be valid for `base`'s array kind.
+   * Return the value at `key` in `arr`, branching to `taken` if the key is
+   * not present. This operation does no refcounting.
    */
   virtual SSATmp* emitGet(
-    IRGS& env,
-    SSATmp* base,
-    SSATmp* key,
-    Block* taken
-  ) const;
+      IRGS& env, SSATmp* arr, SSATmp* key, Block* taken) const;
 
   /*
-   * Return `true` iff the key `key` is present in `base`.
-   *
-   * `base` is guaranteed to be bespoke and use the recipient's layout
-   *
-   * `key` is guaranteed to an arraykey (i.e. Str or Int)
+   * Create a new array by setting `arr[key] = val`, CoWing or escalating as
+   * needed. This op consumes a ref on `arr` and produces a ref on the result.
    */
-  virtual SSATmp* emitIsset(
-    IRGS& env,
-    SSATmp* base,
-    SSATmp* key
-  ) const;
+  virtual SSATmp* emitSet(
+      IRGS& env, SSATmp* arr, SSATmp* key, SSATmp* val) const;
+
+  /*
+   * Create a new array by setting `arr[] = val`, CoWing or escalating as
+   * needed. This op consumes a ref on `arr` and produces a ref on the result.
+   */
+  virtual SSATmp* emitAppend(
+    IRGS& env, SSATmp* arr, SSATmp* val) const;
 
 private:
-  uint16_t m_index;
+  struct Initializer;
+  static Initializer s_initializer;
+
+  LayoutIndex m_index;
   std::string m_description;
   const LayoutFunctions* m_vtable;
 };
-
-const Layout* layoutForIndex(uint16_t index);
 
 }}
 

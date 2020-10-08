@@ -29,22 +29,24 @@ namespace HPHP { namespace bespoke {
 struct LoggingProfile;
 
 struct LoggingArray : BespokeArray {
+  static void InitializeLayouts();
+  static LayoutIndex GetLayoutIndex();
+
   static LoggingArray* As(ArrayData* ad);
   static const LoggingArray* As(const ArrayData* ad);
   static LoggingArray* Make(ArrayData* ad, LoggingProfile* profile,
                             EntryTypes ms);
   static LoggingArray* MakeStatic(ArrayData* ad, LoggingProfile* profile);
   static void FreeStatic(LoggingArray* lad);
-  static const Layout* layout();
 
-  // Update synced fields after doing a mutation on the wrapped array.
-  void updateKindAndLegacy();
-  void updateSize();
+  bool checkInvariants() const;
 
   // Record that this array reached a given profiling tracelet.
   void logReachEvent(TransID transId, uint32_t guardIdx);
 
-  bool checkInvariants() const;
+  // Update synced fields after doing a mutation on the wrapped array.
+  void updateKindAndLegacy();
+  void updateSize();
 
 #define X(Return, Name, Args...) static Return Name(Args);
   BESPOKE_LAYOUT_FUNCTIONS(LoggingArray)

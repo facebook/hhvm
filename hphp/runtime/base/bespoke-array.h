@@ -48,6 +48,13 @@ void setLoggingEnabled(bool);
 void exportProfiles();
 void waitOnExportProfiles();
 
+// Type-safe layout index, so that we can't mix it up with other ints.
+struct LayoutIndex {
+  bool operator==(LayoutIndex o) const { return raw == o.raw; }
+  bool operator!=(LayoutIndex o) const { return raw != o.raw; }
+  uint16_t raw;
+};
+
 }
 
 /*
@@ -67,7 +74,7 @@ struct BespokeArray : ArrayData {
    * is so (on little-endian systems) we can do a single comparison to test both
    * (size >= some constant) and bespoke-ness together.
    */
-  static constexpr uint16_t kExtraMagicBit = (1 << 15);
+  static constexpr bespoke::LayoutIndex kExtraMagicBit = {1 << 15};
 
   static BespokeArray* asBespoke(ArrayData*);
   static const BespokeArray* asBespoke(const ArrayData*);
@@ -75,9 +82,9 @@ struct BespokeArray : ArrayData {
   BespokeLayout layout() const;
 
 protected:
-  const bespoke::Layout* layoutRaw() const;
+  bespoke::LayoutIndex layoutIndex() const;
   const bespoke::LayoutFunctions* vtable() const;
-  void setLayoutRaw(const bespoke::Layout*);
+  void setLayoutIndex(bespoke::LayoutIndex index);
 
 public:
   size_t heapSize() const;

@@ -149,8 +149,8 @@ ArraySpec ArraySpec::operator&(const ArraySpec& rhs) const {
 }
 
 std::optional<BespokeLayout> ArraySpec::bespokeLayout() const {
-  if (auto const idx = bespokeIndex()) {
-    return BespokeLayout::LayoutFromIndex(*idx);
+  if (auto const index = bespokeIndex()) {
+    return BespokeLayout::FromIndex(*index);
   } else {
     return {};
   }

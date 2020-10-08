@@ -49,8 +49,8 @@ static_assert(kSizeIndex == 0 ||
               kSizeIndex2Size[kSizeIndex - 1] < sizeof(LoggingArray),
               "kSizeIndex must be the smallest size for LoggingArray");
 
+constexpr LayoutIndex kLayoutIndex = {0};
 auto const s_vtable = fromArray<LoggingArray>();
-Layout* s_layout = new Layout("LoggingLayout", &s_vtable);
 std::atomic<bool> g_emitLoggingArrays;
 
 // The bespoke kind for a vanilla kind.
@@ -144,8 +144,22 @@ const ArrayData* maybeMakeLoggingArray(const ArrayData* ad) {
 
 //////////////////////////////////////////////////////////////////////////////
 
-const Layout* LoggingArray::layout() {
-  return s_layout;
+void LoggingArray::InitializeLayouts() {
+  auto const layout = new Layout("LoggingLayout", &s_vtable);
+  always_assert(layout->index() == kLayoutIndex);
+}
+
+bespoke::LayoutIndex LoggingArray::GetLayoutIndex() {
+  return kLayoutIndex;
+}
+
+LoggingArray* LoggingArray::As(ArrayData* ad) {
+  auto const result = reinterpret_cast<LoggingArray*>(ad);
+  assertx(result->checkInvariants());
+  return result;
+}
+const LoggingArray* LoggingArray::As(const ArrayData* ad) {
+  return LoggingArray::As(const_cast<ArrayData*>(ad));
 }
 
 LoggingArray* LoggingArray::Make(ArrayData* ad, LoggingProfile* profile,
@@ -155,7 +169,7 @@ LoggingArray* LoggingArray::Make(ArrayData* ad, LoggingProfile* profile,
   auto lad = static_cast<LoggingArray*>(tl_heap->objMallocIndex(kSizeIndex));
   lad->initHeader_16(getBespokeKind(ad->kind()), OneReference, ad->auxBits());
   lad->m_size = ad->size();
-  lad->setLayoutRaw(s_layout);
+  lad->setLayoutIndex(kLayoutIndex);
   lad->wrapped = ad;
   lad->profile = profile;
   lad->entryTypes = ms;
@@ -172,7 +186,7 @@ LoggingArray* LoggingArray::MakeStatic(ArrayData* ad, LoggingProfile* profile) {
       RO::EvalLowStaticArrays ? low_malloc(size) : uncounted_malloc(size));
   lad->initHeader_16(getBespokeKind(ad->kind()), StaticValue, ad->auxBits());
   lad->m_size = ad->size();
-  lad->setLayoutRaw(s_layout);
+  lad->setLayoutIndex(kLayoutIndex);
   lad->wrapped = ad;
   lad->profile = profile;
   lad->entryTypes = EntryTypes::ForArray(ad);
@@ -190,19 +204,14 @@ bool LoggingArray::checkInvariants() const {
   assertx(wrapped->kindIsValid());
   assertx(wrapped->size() == size());
   assertx(wrapped->toDataType() == toDataType());
-  assertx(layoutRaw() == s_layout);
+  assertx(layoutIndex() == kLayoutIndex);
   assertx(m_kind == getBespokeKind(wrapped->kind()));
   assertx(isLegacyArray() == wrapped->isLegacyArray());
   return true;
 }
 
-LoggingArray* LoggingArray::As(ArrayData* ad) {
-  auto const result = reinterpret_cast<LoggingArray*>(ad);
-  assertx(result->checkInvariants());
-  return result;
-}
-const LoggingArray* LoggingArray::As(const ArrayData* ad) {
-  return LoggingArray::As(const_cast<ArrayData*>(ad));
+void LoggingArray::logReachEvent(TransID transId, uint32_t guardIdx) {
+  profile->logReach(transId, guardIdx);
 }
 
 void LoggingArray::updateKindAndLegacy() {
@@ -217,10 +226,6 @@ void LoggingArray::updateSize() {
     m_size = wrapped->size();
   }
   assertx(checkInvariants());
-}
-
-void LoggingArray::logReachEvent(TransID transId, uint32_t guardIdx) {
-  profile->logReach(transId, guardIdx);
 }
 
 //////////////////////////////////////////////////////////////////////////////

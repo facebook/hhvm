@@ -16,11 +16,14 @@
 
 #include "hphp/runtime/base/bespoke/layout.h"
 
+#include "hphp/runtime/base/bespoke/logging-array.h"
+#include "hphp/runtime/base/bespoke/monotype-vec.h"
 #include "hphp/runtime/vm/jit/irgen.h"
 #include "hphp/runtime/vm/jit/punt.h"
 
 #include <atomic>
 #include <array>
+#include <folly/lang/Bits.h>
 
 namespace HPHP { namespace bespoke {
 
@@ -28,38 +31,64 @@ using namespace jit;
 using namespace jit::irgen;
 
 namespace {
-std::array<Layout*, Layout::kMaxIndex + 1> s_layoutTable;
+std::atomic<size_t> s_layoutTableIndex;
+std::array<Layout*, Layout::kMaxIndex.raw + 1> s_layoutTable;
 }
 
-Layout::Layout(const std::string& description,
+Layout::Layout(const std::string& description, const LayoutFunctions* vtable)
+    : m_index(ReserveIndices(1)), m_description(description), m_vtable(vtable) {
+  assertx(s_layoutTable[m_index.raw] == nullptr);
+  s_layoutTable[m_index.raw] = this;
+}
+
+Layout::Layout(LayoutIndex index, const std::string& description,
                const LayoutFunctions* vtable)
-    : m_description(description), m_vtable(vtable) {
-  static std::atomic<uint64_t> s_layoutTableIndex;
-  m_index = s_layoutTableIndex++;
-  always_assert(m_index < kMaxIndex);
-  s_layoutTable[m_index] = this;
+    : m_index(index), m_description(description), m_vtable(vtable) {
+  assertx(s_layoutTable[m_index.raw] == nullptr);
+  s_layoutTable[m_index.raw] = this;
 }
 
-const Layout* layoutForIndex(uint16_t index) {
-  auto const layout = s_layoutTable[index];
+LayoutIndex Layout::ReserveIndices(size_t count) {
+  assertx(folly::isPowTwo(count));
+  auto const padded_count = 2 * count - 1;
+  auto const base = s_layoutTableIndex.fetch_add(padded_count);
+  always_assert(base + padded_count <= kMaxIndex.raw + 1);
+  for (auto i = 0; i < padded_count; i++) {
+    s_layoutTable[base + i] = nullptr;
+  }
+  auto const result = (base + count - 1) & ~(count - 1);
+  assertx(result % count == 0);
+  return {safe_cast<uint16_t>(result)};
+}
+
+const Layout* Layout::FromIndex(LayoutIndex index) {
+  auto const layout = s_layoutTable[index.raw];
+  assertx(layout != nullptr);
   assertx(layout->index() == index);
   return layout;
 }
 
-SSATmp* Layout::emitSet(IRGS& env, SSATmp* base, SSATmp* key, SSATmp* val) const {
-  PUNT(unimpl_bespoke_emitSet);
-}
-
-SSATmp* Layout::emitAppend(IRGS& env, SSATmp* base, SSATmp* val) const {
-  PUNT(unimpl_bespoke_emitAppend);
-}
-
-SSATmp* Layout::emitGet(IRGS& env, SSATmp* base, SSATmp* key, Block* taken) const {
+SSATmp* Layout::emitGet(
+    IRGS& env, SSATmp* arr, SSATmp* key, Block* taken) const {
   PUNT(unimpl_bespoke_emitGet);
 }
 
-SSATmp* Layout::emitIsset(IRGS& env, SSATmp* base, SSATmp* key) const {
-  PUNT(unimpl_bespoke_emitIsset);
+SSATmp* Layout::emitSet(
+    IRGS& env, SSATmp* arr, SSATmp* key, SSATmp* val) const {
+  PUNT(unimpl_bespoke_emitSet);
 }
+
+SSATmp* Layout::emitAppend(IRGS& env, SSATmp* arr, SSATmp* val) const {
+  PUNT(unimpl_bespoke_emitAppend);
+}
+
+struct Layout::Initializer {
+  Initializer() {
+    assertx(s_layoutTableIndex.load(std::memory_order_relaxed) == 0);
+    LoggingArray::InitializeLayouts();
+    MonotypeVec::InitializeLayouts();
+  }
+};
+Layout::Initializer Layout::s_initializer;
 
 }}

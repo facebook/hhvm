@@ -29,6 +29,12 @@ struct MonotypeVec : public BespokeArray {
   static constexpr size_t kMinSizeIndex = 2;
 
   /**
+   * Initializes layouts for MonotypeVec and for EmptyMonotypeVec.
+   * Also initializes the static values of the EmptyMonotypeVec.
+   */
+  static void InitializeLayouts();
+
+  /**
    * Create a new MonotypeVec. Note that the staticArr option is used to create
    * a non-deduplicated static MonotypeVec. This is only for temporary use to
    * satisfy static RATs while GetScalarArray is unimplemented.
@@ -44,9 +50,6 @@ struct MonotypeVec : public BespokeArray {
 #undef X
 
 private:
-  struct Initializer;
-  static Initializer s_initializer;
-
   static MonotypeVec* MakeReserve(uint32_t cap, HeaderKind hk, bool legacy,
                                   bool staticArr);
 
@@ -79,20 +82,19 @@ struct EmptyMonotypeVec : public BespokeArray {
 #undef X
 
 private:
-  struct Initializer;
-  static Initializer s_initializer;
-
   static MonotypeVec* escalateToTyped(EmptyMonotypeVec* adIn, DataType type);
 
   bool checkInvariants() const;
+
+  friend MonotypeVec;
 };
 
 struct EmptyMonotypeVecLayout : public Layout {
-  EmptyMonotypeVecLayout();
+  explicit EmptyMonotypeVecLayout(LayoutIndex index);
 };
 
 struct MonotypeVecLayout : public Layout {
-  explicit MonotypeVecLayout(DataType type);
+  MonotypeVecLayout(LayoutIndex index, DataType type);
   static std::string makeDescription(DataType type);
   DataType m_fixedType;
 };

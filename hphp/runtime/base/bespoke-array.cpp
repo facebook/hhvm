@@ -29,8 +29,6 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////////////
 
-static_assert(bespoke::Layout::kMaxIndex < BespokeArray::kExtraMagicBit);
-
 BespokeArray* BespokeArray::asBespoke(ArrayData* ad) {
   auto ret = reinterpret_cast<BespokeArray*>(ad);
   assertx(ret->checkInvariants());
@@ -41,19 +39,20 @@ const BespokeArray* BespokeArray::asBespoke(const ArrayData* ad) {
 }
 
 BespokeLayout BespokeArray::layout() const {
-  return BespokeLayout{layoutRaw()};
+  return BespokeLayout{bespoke::Layout::FromIndex(layoutIndex())};
 }
 
-const bespoke::Layout* BespokeArray::layoutRaw() const {
-  return bespoke::layoutForIndex(m_extra_hi16 & ~(1 << 15));
+bespoke::LayoutIndex BespokeArray::layoutIndex() const {
+  return {safe_cast<uint16_t>(m_extra_hi16 & ~kExtraMagicBit.raw)};
 }
 
 const bespoke::LayoutFunctions* BespokeArray::vtable() const {
-  return layoutRaw()->vtable();
+  return bespoke::Layout::FromIndex(layoutIndex())->vtable();
 }
 
-void BespokeArray::setLayoutRaw(const bespoke::Layout* layout) {
-  m_extra_hi16 = kExtraMagicBit | layout->index();
+void BespokeArray::setLayoutIndex(bespoke::LayoutIndex index) {
+  static_assert(bespoke::Layout::kMaxIndex.raw < kExtraMagicBit.raw);
+  m_extra_hi16 = index.raw | kExtraMagicBit.raw;
 }
 
 size_t BespokeArray::heapSize() const {
@@ -64,19 +63,19 @@ void BespokeArray::scan(type_scan::Scanner& scan) const {
 }
 
 ArrayData* BespokeArray::ToVanilla(const ArrayData* ad, const char* reason) {
-  return BespokeArray::asBespoke(ad)->vtable()->fnEscalateToVanilla(ad, reason);
+  return asBespoke(ad)->vtable()->fnEscalateToVanilla(ad, reason);
 }
 
 void BespokeArray::logReachEvent(TransID transId, uint32_t guardIdx) {
-  if (layoutRaw() != bespoke::LoggingArray::layout()) return;
+  if (layoutIndex() != bespoke::LoggingArray::GetLayoutIndex()) return;
   bespoke::LoggingArray::As(this)->logReachEvent(transId, guardIdx);
 }
 
 bool BespokeArray::checkInvariants() const {
   assertx(!isVanilla());
   assertx(kindIsValid());
-  assertx(vtable());
-  assertx(m_extra_hi16 & kExtraMagicBit);
+  assertx(vtable() != nullptr);
+  assertx(m_extra_hi16 & kExtraMagicBit.raw);
   return true;
 }
 
@@ -97,8 +96,7 @@ ArrayData* BespokeArray::MakeUncounted(ArrayData* ad, bool hasApcTv,
   if (APCStats::IsCreated()) {
     APCStats::getAPCStats().addAPCUncountedBlock();
   }
-  auto const layout = BespokeArray::asBespoke(ad)->layoutRaw();
-  auto const vtable = layout->vtable();
+  auto const vtable = asBespoke(ad)->vtable();
   auto const extra = uncountedAllocExtra(ad, hasApcTv);
   auto const bytes = vtable->fnHeapSize(ad);
   assertx(extra % vtable->fnAlign(ad) == 0);
@@ -110,7 +108,7 @@ ArrayData* BespokeArray::MakeUncounted(ArrayData* ad, bool hasApcTv,
           reinterpret_cast<char*>(ad), bytes);
   auto const aux = ad->m_aux16 | (hasApcTv ? ArrayData::kHasApcTv : 0);
   result->initHeader_16(HeaderKind(ad->kind()), UncountedValue, aux);
-  assertx(BespokeArray::asBespoke(result)->layoutRaw() == layout);
+  assertx(asBespoke(result)->layoutIndex() == asBespoke(ad)->layoutIndex());
 
   vtable->fnConvertToUncounted(result, seen);
   if (updateSeen) (*seen)[ad] = result;
@@ -119,7 +117,7 @@ ArrayData* BespokeArray::MakeUncounted(ArrayData* ad, bool hasApcTv,
 
 void BespokeArray::ReleaseUncounted(ArrayData* ad) {
   if (!ad->uncountedDecRef()) return;
-  auto const vtable = BespokeArray::asBespoke(ad)->vtable();
+  auto const vtable = asBespoke(ad)->vtable();
   vtable->fnReleaseUncounted(ad);
   if (APCStats::IsCreated()) {
     APCStats::getAPCStats().removeAPCUncountedBlock();

@@ -42,8 +42,7 @@ namespace bespoke { struct Layout; }
  * arrays of that layout
  */
 struct BespokeLayout {
-  explicit BespokeLayout(const bespoke::Layout* layout)
-    : m_layout(layout) {
+  explicit BespokeLayout(const bespoke::Layout* layout) : m_layout(layout) {
     assertx(layout);
   }
 
@@ -58,10 +57,10 @@ struct BespokeLayout {
   uint16_t index() const;
 
   /* retrieve a layout by index */
-  static BespokeLayout LayoutFromIndex(uint16_t idx);
+  static BespokeLayout FromIndex(uint16_t index);
 
   /* get a human-readable string describing the layout */
-  std::string describe() const ;
+  std::string describe() const;
 
   /****************************************************************************
    * access to arraydata methods
@@ -73,10 +72,9 @@ struct BespokeLayout {
   using IRInstruction = jit::IRInstruction;
   using IRGS = jit::irgen::IRGS;
 
-  SSATmp* emitSet(IRGS& env, SSATmp* base, SSATmp* key, SSATmp* val) const;
-  SSATmp* emitAppend(IRGS& env, SSATmp* base, SSATmp* val) const;
-  SSATmp* emitGet(IRGS& env, SSATmp* base, SSATmp* key, Block* taken) const;
-  SSATmp* emitIsset(IRGS& env, SSATmp* base, SSATmp* key) const;
+  SSATmp* emitGet(IRGS& env, SSATmp* arr, SSATmp* key, Block* taken) const;
+  SSATmp* emitSet(IRGS& env, SSATmp* arr, SSATmp* key, SSATmp* val) const;
+  SSATmp* emitAppend(IRGS& env, SSATmp* arr, SSATmp* val) const;
 
 private:
   const bespoke::Layout* m_layout{nullptr};
@@ -85,6 +83,3 @@ private:
 } // namespace HPHP
 
 #endif // HPHP_BESPOKE_LAYOUT_H_
-
-
-

@@ -330,16 +330,14 @@ void beginInlining(IRGS& env,
 
   if (!(ctx->type() <= TNullptr)) gen(env, StFrameCtx, fp(env), ctx);
 
-  for (auto i = 0; i < numTotalInputs; ++i) {
-    stLocRaw(env, i, calleeFP, inputs[i]);
-  }
-
-  // All the code below may reenter, so update the marker so we don't
-  // accidentally overwrite the locals.
+  // We have entered a new frame.
   updateMarker(env);
   env.irb->exceptionStackBoundary();
 
-  emitPrologueLocals(env, target, closure);
+  for (auto i = 0; i < numTotalInputs; ++i) {
+    stLocRaw(env, i, calleeFP, inputs[i]);
+  }
+  emitInitFuncLocals(env, target, closure);
 
   assertx(startSk.hasThis() == startSk.func()->hasThisInBody());
   assertx(
@@ -374,6 +372,10 @@ void conjureBeginInlining(IRGS& env,
   for (auto const argType : args) {
     push(env, conjure(argType));
   }
+
+  // beginInlining() assumes synced state.
+  updateMarker(env);
+  env.irb->exceptionStackBoundary();
 
   auto const flags = hasUnpack
     ? FCallArgs::Flags::HasUnpack : FCallArgs::Flags::None;

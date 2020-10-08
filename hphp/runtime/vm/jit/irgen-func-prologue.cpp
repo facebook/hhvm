@@ -373,7 +373,7 @@ void emitSpillFrame(IRGS& env, const Func* callee, uint32_t argc,
     return closureThis;
   }();
 
-  // If we don't have variadics, unpack arg will be dropped.
+  // If we don't have variadics, unpack arg was dropped.
   auto const arNumArgs = std::min(argc, callee->numParams());
 
   gen(env, DefFuncEntryFP, FuncData { callee },
@@ -382,113 +382,83 @@ void emitSpillFrame(IRGS& env, const Func* callee, uint32_t argc,
   auto const bcSPOff = FPInvOffset { callee->numSlotsInFrame() };
   gen(env, DefFrameRelSP, DefStackData { irSPOff, bcSPOff }, fp(env));
 
-  // Stack was reconfigured, so update the marker and exception stack boundary.
+  // We have updated stack and entered the context of the callee.
   updateMarker(env);
   env.irb->exceptionStackBoundary();
-}
 
-/*
- * Copy the closure's use variables from the closure object's properties onto
- * the stack.
- */
-void init_use_vars(IRGS& env, const Func* func, SSATmp* closure) {
-  auto const cls = func->implCls();
-  auto const nparams = func->numParams();
-
-  assertx(func->isClosureBody());
-
-  // Closure object properties are the use vars.
-  auto const nuse = cls->numDeclProperties();
-
-  for (auto i = 0; i < nuse; ++i) {
-    auto const ty =
-      typeFromRAT(cls->declPropRepoAuthType(i), func->cls()) & TCell;
-    auto const addr = gen(
-      env,
-      LdPropAddr,
-      IndexData { cls->propSlotToIndex(i) },
-      ty.lval(Ptr::Prop),
-      closure
-    );
-    auto const prop = gen(env, LdMem, ty, addr);
-    gen(env, StLoc, LocalId{nparams + i}, fp(env), prop);
-    gen(env, IncRef, prop);
-  }
-}
-
-/*
- * Set locals to Uninit.
- */
-void init_locals(IRGS& env, const Func* func) {
-  /*
-   * Maximum number of local initializations to unroll.
-   *
-   * The actual crossover point in terms of code size is 6 (just like for the
-   * params init unroll limit); 9 was determined by experiment to be the
-   * optimal point in certain benchmarks.
-   */
-  constexpr auto kMaxLocalsInitUnroll = 9;
-
-  auto const nlocals = func->numLocals();
-
-  auto num_inited = func->numParams();
-
-  if (func->isClosureBody()) {
-    auto const nuse = func->implCls()->numDeclProperties();
-    num_inited += nuse;
-  }
-
-  if (func->hasReifiedGenerics()) num_inited++;
-
-  // We set to Uninit all locals beyond any params and any closure use vars.
-  if (num_inited < nlocals) {
-    if (nlocals - num_inited <= kMaxLocalsInitUnroll) {
-      for (auto i = num_inited; i < nlocals; ++i) {
-        gen(env, StLoc, LocalId{i}, fp(env), cns(env, TUninit));
-      }
-    } else {
-      gen(env, StLocRange, LocalIdRange{num_inited, (uint32_t)nlocals},
-          fp(env), cns(env, TUninit));
-    }
-  }
-}
-
-} // namespace
-
-void emitPrologueLocals(IRGS& env, const Func* callee, SSATmp* closure) {
-  assertx(callee->isClosureBody() == (closure != nullptr));
-  if (callee->isClosureBody()) {
-    init_use_vars(env, callee, closure);
-    decRef(env, closure);
-  }
-
-  init_locals(env, callee);
-}
-
-namespace {
-
-void emitPrologueBody(IRGS& env, const Func* callee, uint32_t argc,
-                      SSATmp* closure) {
   // Increment the count for the latest call for optimized translations if we're
   // going to serialize the profile data.
   if (env.context.kind == TransKind::OptPrologue && isJitSerializing() &&
       RuntimeOption::EvalJitPGOOptCodeCallGraph) {
     gen(env, IncCallCounter, fp(env));
   }
+}
 
-  // Initialize params, locals, and---if we have a closure---the closure's
-  // bound class context and use vars.
-  emitPrologueLocals(env, callee, closure);
+} // namespace
 
+/*
+ * Set non-input locals to Uninit.
+ */
+void emitInitFuncLocals(IRGS& env, const Func* callee, SSATmp* prologueCtx) {
+  /*
+   * Maximum number of local initializations to unroll.
+   *
+   * The actual crossover point in terms of code size is 6 (just like for the
+   * params init unroll limit); 9 was determined by experiment to be the
+   * optimal point in certain benchmarks.
+   *
+   * FIXME: revisit this once these stores are elidable in the func body
+   */
+  constexpr auto kMaxLocalsInitUnroll = 9;
+
+  // Parameters, generics and closure use variables are already initialized.
+  auto numInited = callee->numParams();
+  if (callee->hasReifiedGenerics()) ++numInited;
+
+  // Push the closure's use variables (stored in closure object properties).
+  if (callee->isClosureBody()) {
+    auto const cls = callee->implCls();
+    auto const numUses = cls->numDeclProperties();
+
+    for (auto i = 0; i < numUses; ++i) {
+      auto const ty =
+        typeFromRAT(cls->declPropRepoAuthType(i), callee->cls()) & TCell;
+      auto const addr = gen(env, LdPropAddr,
+                            IndexData { cls->propSlotToIndex(i) },
+                            ty.lval(Ptr::Prop), prologueCtx);
+      auto const prop = gen(env, LdMem, ty, addr);
+      gen(env, IncRef, prop);
+      gen(env, StLoc, LocalId{numInited + i}, fp(env), prop);
+    }
+
+    decRef(env, prologueCtx);
+    numInited += numUses;
+  }
+
+  auto const numLocals = callee->numLocals();
+  assertx(numInited <= numLocals);
+
+  // Set all remaining uninitialized locals to Uninit.
+  if (numLocals - numInited <= kMaxLocalsInitUnroll) {
+    for (auto i = numInited; i < numLocals; ++i) {
+      gen(env, StLoc, LocalId{i}, fp(env), cns(env, TUninit));
+    }
+  } else {
+    auto const range = LocalIdRange{numInited, (uint32_t)numLocals};
+    gen(env, StLocRange, range, fp(env), cns(env, TUninit));
+  }
+}
+
+namespace {
+
+void emitJmpFuncBody(IRGS& env, const Func* callee, uint32_t argc) {
   // Check surprise flags in the same place as the interpreter: after setting
   // up the callee's frame but before executing any of its code.
-  env.irb->exceptionStackBoundary();
   if (stack_check_kind(callee, argc) == StackCheck::Combine) {
     gen(env, CheckSurpriseAndStack, FuncEntryData { callee, argc }, fp(env));
   } else {
     gen(env, CheckSurpriseFlagsEnter, FuncEntryData { callee, argc }, fp(env));
   }
-
 
   // Emit the bindjmp for the function body.
   gen(
@@ -547,13 +517,13 @@ void emitFuncPrologue(IRGS& env, const Func* callee, uint32_t argc,
   auto const prologueCtx = (callee->isClosureBody() || callee->cls())
     ? gen(env, DefCallCtx, prologueCtxType(callee))
     : cns(env, nullptr);
-  auto const closure = callee->isClosureBody() ? prologueCtx : nullptr;
 
   emitPrologueEntry(env, callee, argc, transID);
   emitCalleeChecks(env, callee, argc, callFlags);
   emitInitFuncInputs(env, callee, argc);
   emitSpillFrame(env, callee, argc, callFlags, prologueCtx);
-  emitPrologueBody(env, callee, argc, closure);
+  emitInitFuncLocals(env, callee, prologueCtx);
+  emitJmpFuncBody(env, callee, argc);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

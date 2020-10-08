@@ -972,23 +972,9 @@ static void prepareFuncEntry(ActRec *ar) {
   vmJitReturnAddr() = nullptr;
 }
 
-namespace {
-void checkImplicitContextErrors(const ActRec* ar) {
-  if (!RO::EvalEnableImplicitContext ||
-      !ar->func()->hasNoContextAttr() ||
-      *ImplicitContext::activeCtx == nullptr) {
-    return;
-  }
-  throw_implicit_context_exception(folly::to<std::string>(
-    "Function ", ar->func()->fullName()->data(), " has implicit context "
-    "but is marked with __NoContext"));
-}
-} // namespace
-
 static void dispatch();
 
-void enterVMAtFunc(ActRec* enterFnAr, bool hasInOut, bool dynamicCall,
-                   bool allowDynCallNoPointer) {
+void enterVMAtFunc(ActRec* enterFnAr) {
   assertx(enterFnAr);
   assertx(!isResumed(enterFnAr));
   ARRPROV_USE_VMPC();
@@ -996,9 +982,6 @@ void enterVMAtFunc(ActRec* enterFnAr, bool hasInOut, bool dynamicCall,
 
   prepareFuncEntry(enterFnAr);
 
-  calleeDynamicCallChecks(enterFnAr->func(), dynamicCall,
-                          allowDynCallNoPointer);
-  checkImplicitContextErrors(enterFnAr);
   if (!EventHook::FunctionCall(enterFnAr, EventHook::NormalFunc)) return;
   checkStack(vmStack(), enterFnAr->func(), 0);
   assertx(vmfp()->func()->contains(vmpc()));
@@ -3636,6 +3619,8 @@ bool doFCall(CallFlags callFlags, const Func* func, uint32_t numArgsInclUnpack,
   // Callee checks.
   calleeGenericsChecks(func, callFlags.hasGenerics());
   calleeArgumentArityChecks(func, numArgsInclUnpack);
+  calleeDynamicCallChecks(func, callFlags.isDynamicCall());
+  calleeImplicitContextChecks(func);
 
   ar->m_sfp = vmfp();
   ar->setJitReturn(retAddr);
@@ -3650,8 +3635,6 @@ bool doFCall(CallFlags callFlags, const Func* func, uint32_t numArgsInclUnpack,
   try {
     prepareFuncEntry(ar);
 
-    calleeDynamicCallChecks(ar->func(), callFlags.isDynamicCall());
-    checkImplicitContextErrors(ar);
     return EventHook::FunctionCall(ar, EventHook::NormalFunc);
   } catch (...) {
     // Manually unwind the pre-live or live frame, as we may be called from JIT

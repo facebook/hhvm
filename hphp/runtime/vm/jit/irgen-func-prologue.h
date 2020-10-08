@@ -43,10 +43,10 @@ struct IRGS;
 void emitCalleeGenericsChecks(IRGS& env, const Func* callee, SSATmp* callFlags,
                               bool pushed);
 
-void emitCalleeDynamicCallCheck(IRGS& env, const Func* callee,
+void emitCalleeDynamicCallChecks(IRGS& env, const Func* callee,
                                 SSATmp* callFlags);
 
-void emitImplicitContextCheck(IRGS& env, const Func* callee);
+void emitCalleeImplicitContextChecks(IRGS& env, const Func* callee);
 
 void emitPrologueLocals(IRGS& env, const Func* callee, uint32_t argc,
                         SSATmp* closureOpt);

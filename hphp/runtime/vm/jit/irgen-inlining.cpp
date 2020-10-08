@@ -231,6 +231,8 @@ void beginInlining(IRGS& env,
 
   // Callee checks.
   emitCalleeGenericsChecks(env, target, callFlags, fca.hasGenerics());
+  emitCalleeDynamicCallChecks(env, target, callFlags);
+  emitCalleeImplicitContextChecks(env, target);
 
   auto const closure = target->isClosureBody()
     ? gen(env, AssertType, Type::ExactObj(target->implCls()), ctx)
@@ -337,9 +339,6 @@ void beginInlining(IRGS& env,
   env.irb->exceptionStackBoundary();
 
   emitPrologueLocals(env, target, numArgs, closure);
-
-  emitCalleeDynamicCallCheck(env, target, callFlags);
-  emitImplicitContextCheck(env, target);
 
   assertx(startSk.hasThis() == startSk.func()->hasThisInBody());
   assertx(

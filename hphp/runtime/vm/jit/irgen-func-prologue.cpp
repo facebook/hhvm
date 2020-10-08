@@ -227,8 +227,8 @@ void emitCalleeArgumentArityChecks(IRGS& env, const Func* callee,
 
 } // namespace
 
-void emitCalleeDynamicCallCheck(IRGS& env, const Func* callee,
-                                SSATmp* callFlags) {
+void emitCalleeDynamicCallChecks(IRGS& env, const Func* callee,
+                                 SSATmp* callFlags) {
   if (!RuntimeOption::EvalNoticeOnBuiltinDynamicCalls || !callee->isBuiltin()) {
     return;
   }
@@ -253,7 +253,7 @@ void emitCalleeDynamicCallCheck(IRGS& env, const Func* callee,
   );
 }
 
-void emitImplicitContextCheck(IRGS& env, const Func* callee) {
+void emitCalleeImplicitContextChecks(IRGS& env, const Func* callee) {
   if (!RO::EvalEnableImplicitContext || !callee->hasNoContextAttr()) return;
   ifElse(
     env,
@@ -315,6 +315,8 @@ void emitCalleeChecks(IRGS& env, const Func* callee, uint32_t argc,
   // if we expect them.
   emitCalleeGenericsChecks(env, callee, callFlags, false);
   emitCalleeArgumentArityChecks(env, callee, argc);
+  emitCalleeDynamicCallChecks(env, callee, callFlags);
+  emitCalleeImplicitContextChecks(env, callee);
 
   // Emit early stack overflow check if necessary.
   if (stack_check_kind(callee, argc) == StackCheck::Early) {
@@ -489,7 +491,7 @@ void emitPrologueLocals(IRGS& env, const Func* callee, uint32_t argc,
 namespace {
 
 void emitPrologueBody(IRGS& env, const Func* callee, uint32_t argc,
-                      SSATmp* callFlags, SSATmp* closure) {
+                      SSATmp* closure) {
   // Increment the count for the latest call for optimized translations if we're
   // going to serialize the profile data.
   if (env.context.kind == TransKind::OptPrologue && isJitSerializing() &&
@@ -500,11 +502,6 @@ void emitPrologueBody(IRGS& env, const Func* callee, uint32_t argc,
   // Initialize params, locals, and---if we have a closure---the closure's
   // bound class context and use vars.
   emitPrologueLocals(env, callee, argc, closure);
-
-  env.irb->exceptionStackBoundary();
-
-  emitCalleeDynamicCallCheck(env, callee, callFlags);
-  emitImplicitContextCheck(env, callee);
 
   // Check surprise flags in the same place as the interpreter: after setting
   // up the callee's frame but before executing any of its code.
@@ -578,7 +575,7 @@ void emitFuncPrologue(IRGS& env, const Func* callee, uint32_t argc,
   emitPrologueEntry(env, callee, argc, transID);
   emitCalleeChecks(env, callee, argc, callFlags);
   emitSpillFrame(env, callee, argc, callFlags, prologueCtx);
-  emitPrologueBody(env, callee, argc, callFlags, closure);
+  emitPrologueBody(env, callee, argc, closure);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

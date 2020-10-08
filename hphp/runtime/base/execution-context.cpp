@@ -1496,6 +1496,8 @@ TypedValue ExecutionContext::invokeFuncImpl(const Func* f,
   // Callee checks.
   calleeGenericsChecks(f, hasGenerics);
   calleeArgumentArityChecks(f, numArgsInclUnpack);
+  calleeDynamicCallChecks(f, dynamic, allowDynCallNoPointer);
+  calleeImplicitContextChecks(f);
 
   ar->setReturnVMExit();
   ar->setFunc(f);
@@ -1536,7 +1538,7 @@ TypedValue ExecutionContext::invokeFuncImpl(const Func* f,
 
   enterVM(ar, [&] {
     exception_handler([&] {
-      enterVMAtFunc(ar, f->takesInOutParams(), dynamic, allowDynCallNoPointer);
+      enterVMAtFunc(ar);
     });
   });
 

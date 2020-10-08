@@ -1618,7 +1618,7 @@ class Status {
                              'start_time' => $stime,
                              'end_time' => $etime,
                              'time' => $time];
-    self::send(self::MSG_TEST_PASS, varray[$test, $time, $stime, $etime]);
+    self::send(self::MSG_TEST_PASS, vec[$test, $time, $stime, $etime]);
   }
 
   public static function skip($test, $reason, $time, $stime, $etime) {
@@ -1634,7 +1634,7 @@ class Status {
       'time' => $time,
     ];
     self::send(self::MSG_TEST_SKIP,
-               varray[$test, $reason, $time, $stime, $etime]);
+               vec[$test, $reason, $time, $stime, $etime]);
   }
 
   public static function fail($test, $time, $stime, $etime, $diff) {
@@ -1646,7 +1646,7 @@ class Status {
       'end_time' => $etime,
       'time' => $time
     ];
-    self::send(self::MSG_TEST_FAIL, varray[$test, $time, $stime, $etime]);
+    self::send(self::MSG_TEST_FAIL, vec[$test, $time, $stime, $etime]);
   }
 
   public static function handle_message($type, $message) {

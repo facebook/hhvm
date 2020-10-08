@@ -87,6 +87,8 @@ LinkTable s_linkTable;
 using RevLinkTable = tbb::concurrent_hash_map<Handle,Symbol>;
 RevLinkTable s_handleTable;
 
+__thread std::atomic<bool> s_hasFullInit{false};
+
 //////////////////////////////////////////////////////////////////////
 
 /*
@@ -654,11 +656,13 @@ void threadInit(bool shouldRegister) {
   header()->currentGen = 1;
   if (shouldRegister) {
     local::init();
+    s_hasFullInit.store(true, std::memory_order_release);
   }
 }
 
 void threadExit(bool shouldUnregister) {
   if (shouldUnregister) {
+    s_hasFullInit.store(false, std::memory_order_release);
     local::fini(true);
     Guard g(s_tlBaseListLock);
     auto it = std::find(begin(s_tlBaseList), end(s_tlBaseList), tl_base);
@@ -687,6 +691,10 @@ void threadExit(bool shouldUnregister) {
   } else {
     do_unmap();
   }
+}
+
+bool isFullyInitialized() {
+  return s_hasFullInit.load(std::memory_order_acquire);
 }
 
 void recordRds(Handle h, size_t size,

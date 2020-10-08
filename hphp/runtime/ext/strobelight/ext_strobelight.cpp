@@ -57,7 +57,7 @@ void onStrobelightSignal(int signo) {
 
   if (signo == strobelight::kSignumCurrent) {
     // sets on only current thread
-    if (rds::header()) {
+    if (rds::isFullyInitialized()) {
       // Ignore threads that are not serving requests, otherwise this segfaults
       if (!Strobelight::isXenonActive()) {
         // Do not set the flag if Xenon is actively profiling this request
@@ -158,7 +158,7 @@ void Strobelight::init() {
 }
 
 bool Strobelight::active() {
-  if (rds::header() && isXenonActive()) {
+  if (rds::isFullyInitialized() && isXenonActive()) {
     // if Xenon owns this request, back off
     return false;
   }

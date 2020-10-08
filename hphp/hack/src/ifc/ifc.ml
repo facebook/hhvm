@@ -673,6 +673,25 @@ and expr ~pos renv (env : Env.expr_env) (((_, ety), e) : Tast.expr) =
     let (env, ty1) = expr env e1 in
     let (env, ty2) = expr env e2 in
     binop ~pos renv env ty1 ty2
+  | A.Unop (op, e) ->
+    begin
+      match op with
+      (* Operators that mutate *)
+      | Ast_defs.Uincr
+      | Ast_defs.Udecr
+      | Ast_defs.Upincr
+      | Ast_defs.Updecr ->
+        assign ~pos renv env None e e
+      (* Prim operators that don't mutate *)
+      | Ast_defs.Utild
+      | Ast_defs.Unot
+      | Ast_defs.Uplus
+      | Ast_defs.Uminus ->
+        expr env e
+      | Ast_defs.Usilence ->
+        Errors.unknown_information_flow pos "silence (@) operator";
+        expr env e
+    end
   | A.Lvar (_pos, lid) -> refresh_local_type ~pos renv env lid ety
   | A.Obj_get (obj, (_, A.Id (_, property)), _) ->
     let (env, obj_ptype) = expr env obj in
@@ -878,7 +897,6 @@ and expr ~pos renv (env : Env.expr_env) (((_, ety), e) : Tast.expr) =
   | A.Suspend _
   | A.Expr_list _
   | A.Cast (_, _)
-  | A.Unop (_, _)
   | A.Pipe (_, _, _)
   | A.Eif (_, _, _)
   | A.Is (_, _)

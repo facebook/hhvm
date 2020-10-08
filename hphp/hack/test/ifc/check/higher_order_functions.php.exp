@@ -1,3 +1,4 @@
+=== IFC analysis results for higher_order_functions.php
 Analyzing __construct:
   Failure: unknown function '\A#__construct'
 

@@ -1,3 +1,4 @@
+=== IFC analysis results for pass_external.php
 File "pass_external.php", line 37, characters 3-8:
 Context-implicit policy leaks into `A_lump` via `A`. (Typing[4380])
   File "pass_external.php", line 24, characters 12-14:

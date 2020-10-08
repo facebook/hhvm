@@ -1,3 +1,4 @@
+=== IFC analysis results for recursive_class.php
 Analyzing __construct:
 * pc: pc
 * This: \R<R, R_lump>

@@ -1,48 +1,49 @@
+=== IFC analysis results for catch_multi.php
 File "catch_multi.php", line 47, characters 5-14:
 Data with policy `A` appears in context `B`. (Typing[4379])
-File "catch_multi.php", line 6, characters 14-19:
-This may be the data source with policy `A`
-File "catch_multi.php", line 9, characters 14-19:
-This may be the data sink with policy `B`
-File "catch_multi.php", line 43, characters 9-17:
-Another program point contributing to the illegal flow
+  File "catch_multi.php", line 6, characters 14-19:
+  This may be the data source with policy `A`
+  File "catch_multi.php", line 9, characters 14-19:
+  This may be the data sink with policy `B`
+  File "catch_multi.php", line 43, characters 9-17:
+  Another program point contributing to the illegal flow
 File "catch_multi.php", line 45, characters 5-14:
 Data with policy `A` appears in context `B`. (Typing[4379])
-File "catch_multi.php", line 6, characters 14-19:
-This may be the data source with policy `A`
-File "catch_multi.php", line 9, characters 14-19:
-This may be the data sink with policy `B`
-File "catch_multi.php", line 43, characters 9-17:
-Another program point contributing to the illegal flow
+  File "catch_multi.php", line 6, characters 14-19:
+  This may be the data source with policy `A`
+  File "catch_multi.php", line 9, characters 14-19:
+  This may be the data sink with policy `B`
+  File "catch_multi.php", line 43, characters 9-17:
+  Another program point contributing to the illegal flow
 File "catch_multi.php", line 61, characters 5-17:
 Data with policy `A` appears in context `B`. (Typing[4379])
-File "catch_multi.php", line 6, characters 14-19:
-This may be the data source with policy `A`
-File "catch_multi.php", line 9, characters 14-19:
-This may be the data sink with policy `B`
-File "catch_multi.php", line 55, characters 7-19:
-Another program point contributing to the illegal flow
+  File "catch_multi.php", line 6, characters 14-19:
+  This may be the data source with policy `A`
+  File "catch_multi.php", line 9, characters 14-19:
+  This may be the data sink with policy `B`
+  File "catch_multi.php", line 55, characters 7-19:
+  Another program point contributing to the illegal flow
 File "catch_multi.php", line 20, characters 3-12:
 Data with policy `A` appears in context `B`. (Typing[4379])
-File "catch_multi.php", line 6, characters 14-19:
-This may be the data source with policy `A`
-File "catch_multi.php", line 9, characters 14-19:
-This may be the data sink with policy `B`
-File "catch_multi.php", line 17, characters 9-17:
-Another program point contributing to the illegal flow
+  File "catch_multi.php", line 6, characters 14-19:
+  This may be the data source with policy `A`
+  File "catch_multi.php", line 9, characters 14-19:
+  This may be the data sink with policy `B`
+  File "catch_multi.php", line 17, characters 9-17:
+  Another program point contributing to the illegal flow
 File "catch_multi.php", line 72, characters 3-14:
 Data with policy `A` appears in context `B`. (Typing[4379])
-File "catch_multi.php", line 6, characters 14-19:
-This may be the data source with policy `A`
-File "catch_multi.php", line 9, characters 14-19:
-This may be the data sink with policy `B`
-File "catch_multi.php", line 67, characters 9-13:
-Another program point contributing to the illegal flow
+  File "catch_multi.php", line 6, characters 14-19:
+  This may be the data source with policy `A`
+  File "catch_multi.php", line 9, characters 14-19:
+  This may be the data sink with policy `B`
+  File "catch_multi.php", line 67, characters 9-13:
+  Another program point contributing to the illegal flow
 File "catch_multi.php", line 100, characters 5-17:
 Data with policy `A` appears in context `B`. (Typing[4379])
-File "catch_multi.php", line 6, characters 14-19:
-This may be the data source with policy `A`
-File "catch_multi.php", line 9, characters 14-19:
-This may be the data sink with policy `B`
-File "catch_multi.php", line 95, characters 5-17:
-Another program point contributing to the illegal flow
+  File "catch_multi.php", line 6, characters 14-19:
+  This may be the data source with policy `A`
+  File "catch_multi.php", line 9, characters 14-19:
+  This may be the data sink with policy `B`
+  File "catch_multi.php", line 95, characters 5-17:
+  Another program point contributing to the illegal flow

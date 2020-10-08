@@ -1,3 +1,4 @@
+=== IFC analysis results for property_inheritance.php
 Decls:
   class \A: { policied_props = [aPri:PUBLIC, aPro:PUBLIC, aPub:PUBLIC] }
   class \B: { policied_props = [aPro:PUBLIC, aPub:PUBLIC, bPri:PUBLIC,

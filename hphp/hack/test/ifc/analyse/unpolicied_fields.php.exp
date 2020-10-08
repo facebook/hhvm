@@ -1,3 +1,4 @@
+=== IFC analysis results for unpolicied_fields.php
 Analyzing __construct:
 * pc: pc
 * This: \C<C, C_lump>

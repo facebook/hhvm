@@ -1,3 +1,4 @@
+=== IFC analysis results for array_subtyping.php
 File "array_subtyping.php", line 24, characters 5-39:
 Data with policy `VALUE` appears in context `KEYED_CONTAINER`. (Typing[4379])
   File "array_subtyping.php", line 5, characters 39-54:

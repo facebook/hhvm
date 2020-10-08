@@ -1,3 +1,4 @@
+=== IFC analysis results for external_args.php
 File "external_args.php", line 50, characters 3-24:
 Context-implicit policy leaks into `A_lump` via `pc`. (Typing[4380])
 File "external_args.php", line 50, characters 3-24:

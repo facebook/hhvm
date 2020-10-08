@@ -1,3 +1,4 @@
+=== IFC analysis results for generics.php
 File "generics.php", line 45, characters 24-25:
 Data with policy `B` appears in context `A`. (Typing[4379])
   File "generics.php", line 9, characters 14-19:

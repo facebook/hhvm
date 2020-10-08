@@ -1,3 +1,4 @@
+=== IFC analysis results for while.php
 File "while.php", line 36, characters 3-15:
 Data with policy `PRIVATE` appears in context `PUBLIC`. (Typing[4379])
   File "while.php", line 5, characters 17-25:

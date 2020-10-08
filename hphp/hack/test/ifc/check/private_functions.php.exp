@@ -1,3 +1,4 @@
+=== IFC analysis results for private_functions.php
 File "private_functions.php", line 30, characters 3-7:
 Context-implicit policy leaks into `exn_lump` via `Exception_lump`. (Typing[4380])
 File "private_functions.php", line 30, characters 3-7:

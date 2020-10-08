@@ -181,7 +181,10 @@ let parse_options () =
       mode := x
   in
   let ifc_mode = ref "" in
-  let set_ifc lattice = set_mode (Ifc (!ifc_mode, lattice)) () in
+  let set_ifc lattice =
+    set_mode (Ifc (!ifc_mode, lattice)) ();
+    batch_mode := true
+  in
   let set_ai x = set_mode (Ai (Ai_options.prepare ~server:false x)) () in
   let error_format = ref Errors.Highlighted in
   let forbid_nullable_cast = ref false in
@@ -1295,26 +1298,40 @@ let handle_mode
   let iter_over_files f : unit = List.iter filenames f in
   match mode with
   | Ifc (mode, lattice) ->
-    let print_errors errors = List.iter ~f:(print_error error_format) errors in
-    if not (List.is_empty parse_errors) then
-      print_errors parse_errors
-    else
-      let errors =
-        check_file ~verbosity ctx [] files_info error_format max_errors
+    let ifc_opts =
+      match Ifc_options.parse ~mode ~lattice with
+      | Ok opts -> opts
+      | Error e -> die ("could not parse IFC options: " ^ e)
+    in
+    let print_errors = List.iter ~f:(print_error ~oc:stdout error_format) in
+    let process_file filename =
+      Printf.printf
+        "=== IFC analysis results for %s\n%!"
+        (Relative_path.to_absolute filename);
+      let files_contents = Multifile.file_to_files filename in
+      let (parse_errors, file_info) = parse_name_and_decl ctx files_contents in
+      let check_errors =
+        let error_list = Errors.get_sorted_error_list parse_errors in
+        check_file ~verbosity ctx error_list file_info error_format max_errors
       in
-      if not (List.is_empty errors) then
-        print_errors errors
+      if not (List.is_empty check_errors) then
+        print_errors check_errors
       else
-        let opts =
-          match Ifc_options.parse ~mode ~lattice with
-          | Ok opts -> opts
-          | Error e -> die ("Could not parse IFC options: " ^ e)
-        in
-        let ifc_errors = Ifc.do_ opts files_info ctx in
-        if not @@ List.is_empty ifc_errors then begin
-          print_errors ifc_errors;
-          exit 2
-        end
+        try
+          let ifc_errors = Ifc.do_ ifc_opts file_info ctx in
+          if not (List.is_empty ifc_errors) then print_errors ifc_errors
+        with exc ->
+          (* get the backtrace before doing anything else to be sure
+             to get the one corresponding to exc *)
+          let backtrace = Stdlib.Printexc.get_backtrace () in
+          Printf.printf
+            "Uncaught exception: %s\n%s"
+            (Stdlib.Printexc.to_string exc)
+            backtrace
+    in
+    iter_over_files (fun filename ->
+        Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
+            process_file filename))
   | Ai ai_options ->
     if not (List.is_empty parse_errors) then
       List.iter ~f:(print_error error_format) parse_errors

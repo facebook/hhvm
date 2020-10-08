@@ -29,7 +29,7 @@ function nondeterministic_context()[non_det]: void {
 
   ()[rx] ==> {
     // the type-checker shouldn't close over the non_det capability
-    () ==> nondeterministic_context(); // error FIXME(coeffects)
+    () ==> nondeterministic_context(); // error
 
     () ==> rx_context(); // ok (since rx is in the enclosing scope / inherited)
   };

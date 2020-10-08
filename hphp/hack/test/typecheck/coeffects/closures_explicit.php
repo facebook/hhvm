@@ -10,7 +10,7 @@ function rx_context()[rx]: void {
 
   $less_permissive = ()[pure] ==> {
     $more_permissive(); // error (missing non_det)
-    rx_context(); // error (pure </: rx) FIXME(coeffects)
+    rx_context(); // error (pure </: rx)
   };
 
   $equally_permissive = ()[rx] ==> {
@@ -22,7 +22,7 @@ function rx_context()[rx]: void {
 
 function nondeterministic_context()[non_det]: void {
   // the type-checker shouldn't close over the non_det capability
-  ()[rx] ==> nondeterministic_context(); // error FIXME(coeffects)
+  ()[rx] ==> nondeterministic_context(); // error
 }
 
 function nesting_test()[]: void {
@@ -33,9 +33,9 @@ function nesting_test()[]: void {
   ()[non_det] ==> {
     $call_lp = ()[] ==> $least_permissive();
     $call_rx = ()[rx] ==> {
-      $rx_lambda(); // ok FIXME(coeffects)
+      $rx_lambda(); // ok
       $least_permissive(); // ok
-      $nondeterministic(); // error FIXME(coeffects)
+      $nondeterministic(); // error
     };
     ()[] ==> {
       $rx_lambda(); // error

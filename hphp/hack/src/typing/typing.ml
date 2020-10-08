@@ -2614,6 +2614,29 @@ and expr_
       | _ -> ()
     end;
 
+    (* Extract capabilities from AAST and add them to the environment *)
+    let env =
+      match (hint_of_type_hint f.f_cap, hint_of_type_hint f.f_unsafe_cap) with
+      | (None, None) ->
+        (* if the closure has no explicit coeffect annotations,
+           do _not_ insert (unsafe) capabilities into the environment;
+           instead, rely on the fact that a capability from an enclosing
+           scope can simply be captured, which has the same semantics
+           as redeclaring and shadowing with another same-typed capability.
+           This avoid unnecessary overhead in the most common case, i.e.,
+           when a closure does not need a different (usually smaller)
+           set of capabilities. *)
+        env
+      | (_, _) ->
+        let (env, f_cap, f_unsafe_cap) =
+          type_capability env f.f_cap f.f_unsafe_cap (fst f.f_name)
+        in
+        Typing_coeffects.register_capabilities
+          env
+          (fst f_cap)
+          (fst f_unsafe_cap)
+    in
+
     (* Is the return type declared? *)
     let is_explicit_ret = Option.is_some (hint_of_type_hint f.f_ret) in
     let reactivity =

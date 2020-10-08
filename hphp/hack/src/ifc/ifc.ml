@@ -854,6 +854,9 @@ and expr ~pos renv (env : Env.expr_env) (((_, ety), e) : Tast.expr) =
     in
     (env, ty)
   | A.Await e -> expr env e
+  | A.List es ->
+    let (env, ptys) = List.map_env env es ~f:(fun env e -> expr env e) in
+    (env, Ttuple ptys)
   (* --- expressions below are not yet supported *)
   | A.Darray (_, _)
   | A.Varray (_, _)
@@ -873,7 +876,6 @@ and expr ~pos renv (env : Env.expr_env) (((_, ety), e) : Tast.expr) =
   | A.Yield _
   | A.Yield_break
   | A.Suspend _
-  | A.List _
   | A.Expr_list _
   | A.Cast (_, _)
   | A.Unop (_, _)

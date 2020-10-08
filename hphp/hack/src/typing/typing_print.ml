@@ -442,7 +442,13 @@ module Full = struct
       to_doc s ^^ list "<" k tyl ">"
     | Tdependent (dep, cstr) ->
       let cstr_info =
-        if !debug_mode then
+        if
+          !debug_mode
+          ||
+          match dep with
+          | DTexpr _ -> true
+          | _ -> false
+        then
           Concat [Space; text "as"; Space; k cstr]
         else
           Nothing

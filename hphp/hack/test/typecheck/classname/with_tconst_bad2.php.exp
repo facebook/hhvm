@@ -1,8 +1,8 @@
 File "with_tconst_bad2.php", line 13, characters 29-34:
 Wrong type hint (Typing[4338])
-File "with_tconst_bad2.php", line 12, characters 19-19:
-Expected `C`
-File "with_tconst_bad2.php", line 13, characters 19-26:
-  resulting from expanding the type constant `this::Ti`
-File "with_tconst_bad2.php", line 13, characters 38-45:
-But got `stdClass`
+  File "with_tconst_bad2.php", line 12, characters 19-19:
+  Expected `C`
+  File "with_tconst_bad2.php", line 13, characters 19-26:
+    resulting from expanding the type constant `this::Ti`
+  File "with_tconst_bad2.php", line 13, characters 38-45:
+  But got `stdClass`

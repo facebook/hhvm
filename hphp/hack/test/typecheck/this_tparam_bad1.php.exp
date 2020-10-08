@@ -1,12 +1,12 @@
 File "this_tparam_bad1.php", line 36, characters 13-21:
 Invalid argument (Typing[4110])
-File "this_tparam_bad1.php", line 34, characters 14-16:
-Expected `<expr#1>`
-File "this_tparam_bad1.php", line 36, characters 3-6:
-  where `<expr#1>` is a reference to this expression
-File "this_tparam_bad1.php", line 36, characters 17-19:
-But got `Foo`
-File "this_tparam_bad1.php", line 34, characters 14-16:
-Since `Foo` is not final
-File "this_tparam_bad1.php", line 36, characters 17-19:
-this might not be a `Foo`
+  File "this_tparam_bad1.php", line 34, characters 14-16:
+  Expected `<expr#1> as Foo`
+  File "this_tparam_bad1.php", line 36, characters 3-6:
+    where `<expr#1>` is a reference to this expression
+  File "this_tparam_bad1.php", line 36, characters 17-19:
+  But got `Foo`
+  File "this_tparam_bad1.php", line 34, characters 14-16:
+  Since `Foo` is not final
+  File "this_tparam_bad1.php", line 36, characters 17-19:
+  this might not be a `Foo`

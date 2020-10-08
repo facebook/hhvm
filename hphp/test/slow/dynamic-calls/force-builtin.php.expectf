@@ -1,0 +1,20 @@
+string(3) "foo"
+string(3) "bar"
+Caught: Function reified_fun is reified
+
+Warning: Function soft_reified_fun is reified and cannot be used with dynamic_fun in %s on line %d
+
+Warning: Generic at index 0 to Function soft_reified_fun must be reified, erased given in %s on line %d
+string(16) "soft_reified_fun"
+string(8) "Cls::foo"
+string(8) "Cls::bar"
+string(9) "Cls::prot"
+string(9) "Cls::priv"
+Caught: Method Cls::inst is not static
+Caught: Method Cls::abstr is abstract
+Caught: Method Cls::reified_meth is reified
+
+Warning: Method Cls::soft_reified_meth is reified and cannot be used with dynamic_class_meth in %s on line %d
+
+Warning: Generic at index 0 to Function Cls::soft_reified_meth must be reified, erased given in %s on line %d
+string(22) "Cls::soft_reified_meth"

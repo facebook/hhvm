@@ -2,12 +2,18 @@
 
 function no_dyn() { echo __FUNCTION__."\n"; }
 <<__DynamicallyCallable>> function dyn() { echo __FUNCTION__."\n"; }
+<<__DynamicallyCallable>> function reified_fun<reify T>() {
+  echo __FUNCTION__."\n";
+}
 
 class Cls {
   static function static_no_dyn() { echo __METHOD__."\n"; }
   function inst_no_dyn() { echo __METHOD__."\n"; }
   <<__DynamicallyCallable>> static function static_dyn() {echo __METHOD__."\n";}
   <<__DynamicallyCallable>> function inst_dyn() { echo __METHOD__."\n"; }
+  <<__DynamicallyCallable>> static function reified_dyn<reify T>() {
+    echo __METHOD__."\n";
+  }
 }
 
 function test_it($fname, $cname = null) {
@@ -36,4 +42,7 @@ function main() {
   test_it('bad_func_name');
   test_it('bad_meth_name', 'Cls');
   test_it('static_dyn', 'BadClassName');
+
+  test_it('reified_fun');
+  test_it('reified_dyn', 'Cls');
 }

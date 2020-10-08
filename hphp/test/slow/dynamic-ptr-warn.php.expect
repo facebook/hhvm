@@ -9,3 +9,9 @@ Caught: Method Cls::inst_no_dyn is not static
 Caught: Unable to find function bad_func_name
 Caught: Unable to find method Cls::bad_meth_name
 Caught: Unable to find class BadClassName
+Warning: Function soft_reified_fun is reified and cannot be used with dynamic_fun
+Warning: Generic at index 0 to Function soft_reified_fun must be reified, erased given
+soft_reified_fun
+Warning: Method Cls::soft_reified_meth is reified and cannot be used with dynamic_class_meth
+Warning: Generic at index 0 to Function Cls::soft_reified_meth must be reified, erased given
+Cls::soft_reified_meth

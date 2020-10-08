@@ -3,11 +3,19 @@
 function no_dyn() { echo __FUNCTION__."\n"; }
 <<__DynamicallyCallable>> function dyn() { echo __FUNCTION__."\n"; }
 
+<<__DynamicallyCallable>>
+function soft_reified_fun<<<__Soft>> reify T>() { echo __FUNCTION__."\n"; }
+
 class Cls {
   static function static_no_dyn() { echo __METHOD__."\n"; }
   function inst_no_dyn() { echo __METHOD__."\n"; }
   <<__DynamicallyCallable>> static function static_dyn() {echo __METHOD__."\n";}
   <<__DynamicallyCallable>> function inst_dyn() { echo __METHOD__."\n"; }
+
+  <<__DynamicallyCallable>>
+  static function soft_reified_meth<<<__Soft>> reify T>() {
+    echo __METHOD__."\n";
+  }
 }
 
 function test_it($fname, $cname = null) {
@@ -36,4 +44,7 @@ function main() {
   test_it('bad_func_name');
   test_it('bad_meth_name', 'Cls');
   test_it('static_dyn', 'BadClassName');
+
+  test_it('soft_reified_fun');
+  test_it('soft_reified_meth', 'Cls');
 }

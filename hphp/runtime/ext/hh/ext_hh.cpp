@@ -825,6 +825,18 @@ TypedValue dynamicFun(const StringData* fun) {
       folly::sformat("Unable to find function {}", fun->data())
     );
   }
+  if (func->hasReifiedGenerics()) {
+    if (func->getReifiedGenericsInfo().allGenericsSoft()) {
+      raise_warning(
+        "Function %s is reified and cannot be used with dynamic_fun",
+        fun->data()
+      );
+    } else {
+      SystemLib::throwInvalidArgumentExceptionObject(
+        folly::sformat("Function {} is reified", fun->data())
+      );
+    }
+  }
   if (!func->isDynamicallyCallable() && DA == DynamicAttr::Require) {
     auto const level = RuntimeOption::EvalDynamicFunLevel;
     if (level == 2) {
@@ -887,6 +899,19 @@ TypedValue dynamicClassMeth(const StringData* cls, const StringData* meth) {
                          cls->data(), meth->data())
         );
       }
+    }
+  }
+  if (func->hasReifiedGenerics()) {
+    if (func->getReifiedGenericsInfo().allGenericsSoft()) {
+      raise_warning(
+        "Method %s::%s is reified and cannot be used with dynamic_class_meth",
+        cls->data(),
+        meth->data()
+      );
+    } else {
+      SystemLib::throwInvalidArgumentExceptionObject(
+        folly::sformat("Method {}::{} is reified", cls->data(), meth->data())
+      );
     }
   }
   if (!func->isDynamicallyCallable() && DA == DynamicAttr::Require) {

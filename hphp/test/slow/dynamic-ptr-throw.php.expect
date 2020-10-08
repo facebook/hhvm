@@ -7,3 +7,5 @@ Caught: Method Cls::inst_no_dyn is not static
 Caught: Unable to find function bad_func_name
 Caught: Unable to find method Cls::bad_meth_name
 Caught: Unable to find class BadClassName
+Caught: Function reified_fun is reified
+Caught: Method Cls::reified_dyn is reified

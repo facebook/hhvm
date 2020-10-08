@@ -5,7 +5,9 @@
 
 use arena_collections::list::List;
 use arena_trait::TrivialDrop;
+use ocamlrep::slab::OwnedSlab;
 use ocamlrep_derive::{FromOcamlRepIn, ToOcamlRep};
+use oxidized::file_info::NameType;
 use serde::Serialize;
 
 use crate::{shallow_decl_defs, typing_defs};
@@ -31,6 +33,22 @@ pub struct Decls<'a> {
     pub consts: SMap<'a, &'a typing_defs::ConstDecl<'a>>,
 }
 impl<'a> TrivialDrop for Decls<'a> {}
+impl<'a> Decls<'a> {
+    pub fn get_slab(&self, kind: NameType, symbol: &str) -> Option<OwnedSlab> {
+        match kind {
+            NameType::Fun => Some(Self::decl_to_slab(self.funs.get(symbol)?)),
+            NameType::Class => Some(Self::decl_to_slab(self.classes.get(symbol)?)),
+            NameType::RecordDef => unimplemented!(),
+            NameType::Typedef => Some(Self::decl_to_slab(self.typedefs.get(symbol)?)),
+            NameType::Const => Some(Self::decl_to_slab(self.consts.get(symbol)?)),
+        }
+    }
+
+    pub fn decl_to_slab(decl: &impl ocamlrep::ToOcamlRep) -> OwnedSlab {
+        ocamlrep::slab::to_slab(decl)
+            .expect("Got immediate value, but decls should always be block values")
+    }
+}
 
 #[derive(
     Clone,

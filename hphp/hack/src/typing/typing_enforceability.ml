@@ -70,16 +70,18 @@ let is_enforceable (env : env) (ty : decl_ty) =
           end
         | None -> true
       end
-    | Tgeneric (name, []) ->
-      begin
-        match (Env.get_reified env name, Env.get_enforceable env name) with
-        | (Aast.Erased, _) -> false
-        | (Aast.SoftReified, _) -> false
-        | (Aast.Reified, false) -> false
-        | (Aast.Reified, true) -> true
-      end
-    | Tgeneric (_name, _) ->
-      (* HK generics (i.e., with type arguments) cannot be enforcable at the moment *)
+    | Tgeneric _ ->
+      (* Previously we allowed dynamic ~> T when T is an __Enforceable generic,
+       * that is, when it's valid on the RHS of an `is` or `as` expression.
+       * However, `is` / `as` checks have different behavior than runtime checks
+       * for `tuple`s and `shapes`s; `is` / `as` will shallow-ly check declared
+       * fields but typehint enforcement only checks that we have the right
+       * array type (`varray` for `tuple`, `darray` for `shape`). This means
+       * it's unsound to allow this coercion.
+       *
+       * Additionally, higher kinded generics (i.e., with type arguments) cannot
+       * be enforced at the moment; they are disallowed to have upper bounds.
+       *)
       false
     | Taccess _ -> false
     | Tlike _ -> false

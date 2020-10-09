@@ -4023,6 +4023,37 @@ where
                 })
             };
 
+            // Only "regular" class names are allowed in `__Sealed()`
+            // attributes.
+            for node in Self::attr_spec_to_node_list(&cd.classish_attribute) {
+                if (self.attr_name(node)) == Some(sn::user_attributes::SEALED) {
+                    match self.attr_args(node) {
+                        Some(args) => {
+                            for arg in args {
+                                match &arg.syntax {
+                                    ScopeResolutionExpression(x) => {
+                                        let txt = self.text(&x.scope_resolution_qualifier);
+                                        let excludes = vec![
+                                            sn::classes::SELF,
+                                            sn::classes::PARENT,
+                                            sn::classes::STATIC,
+                                        ];
+                                        if excludes.iter().any(|&e| txt == e) {
+                                            self.errors.push(Self::make_error_from_node(
+                                                &x.scope_resolution_qualifier,
+                                                errors::sealed_qualifier_invalid,
+                                            ));
+                                        }
+                                    }
+                                    _ => {}
+                                }
+                            }
+                        }
+                        None => {}
+                    }
+                }
+            }
+
             let classish_is_sealed = self.attr_spec_contains_sealed(&cd.classish_attribute);
 
             // Given a ClassishDeclaration node, test whether or not length of

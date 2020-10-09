@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<5c9e38818bda491ac73f9b27d3f6a836>>
+// @generated SignedSource<<762707e94832b9f45ee87c39af696574>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -32,7 +32,7 @@ pub use typing_defs::*;
 )]
 pub struct ShallowClassConst<'a> {
     pub abstract_: bool,
-    pub name: aast::Sid<'a>,
+    pub name: ast_defs::Id<'a>,
     pub type_: Ty<'a>,
 }
 impl<'a> TrivialDrop for ShallowClassConst<'a> {}
@@ -52,7 +52,7 @@ impl<'a> TrivialDrop for ShallowClassConst<'a> {}
 pub struct ShallowTypeconst<'a> {
     pub abstract_: TypeconstAbstractKind<'a>,
     pub constraint: Option<Ty<'a>>,
-    pub name: aast::Sid<'a>,
+    pub name: ast_defs::Id<'a>,
     pub type_: Option<Ty<'a>>,
     pub enforceable: (&'a pos::Pos<'a>, bool),
     pub reifiable: Option<&'a pos::Pos<'a>>,
@@ -72,9 +72,9 @@ impl<'a> TrivialDrop for ShallowTypeconst<'a> {}
     ToOcamlRep
 )]
 pub struct ShallowPuMember<'a> {
-    pub atom: aast::Sid<'a>,
-    pub types: &'a [(aast::Sid<'a>, Ty<'a>)],
-    pub exprs: &'a [aast::Sid<'a>],
+    pub atom: ast_defs::Id<'a>,
+    pub types: &'a [(ast_defs::Id<'a>, Ty<'a>)],
+    pub exprs: &'a [ast_defs::Id<'a>],
 }
 impl<'a> TrivialDrop for ShallowPuMember<'a> {}
 
@@ -91,10 +91,10 @@ impl<'a> TrivialDrop for ShallowPuMember<'a> {}
     ToOcamlRep
 )]
 pub struct ShallowPuEnum<'a> {
-    pub name: aast::Sid<'a>,
+    pub name: ast_defs::Id<'a>,
     pub is_final: bool,
     pub case_types: &'a [&'a Tparam<'a>],
-    pub case_values: &'a [(aast::Sid<'a>, Ty<'a>)],
+    pub case_values: &'a [(ast_defs::Id<'a>, Ty<'a>)],
     pub members: &'a [&'a ShallowPuMember<'a>],
 }
 impl<'a> TrivialDrop for ShallowPuEnum<'a> {}
@@ -116,11 +116,11 @@ pub struct ShallowProp<'a> {
     pub xhp_attr: Option<XhpAttr>,
     pub lateinit: bool,
     pub lsb: bool,
-    pub name: aast::Sid<'a>,
+    pub name: ast_defs::Id<'a>,
     pub needs_init: bool,
     pub type_: Option<Ty<'a>>,
     pub abstract_: bool,
-    pub visibility: oxidized::aast::Visibility,
+    pub visibility: oxidized::aast_defs::Visibility,
 }
 impl<'a> TrivialDrop for ShallowProp<'a> {}
 
@@ -140,12 +140,12 @@ pub struct ShallowMethod<'a> {
     pub abstract_: bool,
     pub final_: bool,
     pub memoizelsb: bool,
-    pub name: aast::Sid<'a>,
+    pub name: ast_defs::Id<'a>,
     pub override_: bool,
     pub dynamicallycallable: bool,
     pub reactivity: Option<decl_defs::MethodReactivity<'a>>,
     pub type_: Ty<'a>,
-    pub visibility: oxidized::aast::Visibility,
+    pub visibility: oxidized::aast_defs::Visibility,
     pub deprecated: Option<&'a str>,
 }
 impl<'a> TrivialDrop for ShallowMethod<'a> {}
@@ -168,7 +168,7 @@ pub struct ShallowClass<'a> {
     pub is_xhp: bool,
     pub has_xhp_keyword: bool,
     pub kind: oxidized::ast_defs::ClassKind,
-    pub name: aast::Sid<'a>,
+    pub name: ast_defs::Id<'a>,
     pub tparams: &'a [&'a Tparam<'a>],
     pub where_constraints: &'a [&'a WhereConstraint<'a>],
     pub extends: &'a [Ty<'a>],

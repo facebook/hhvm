@@ -241,14 +241,22 @@ let find_refs
     |> List.filter ~f:(fun symbol -> not symbol.SymbolOccurrence.is_declaration)
     |> List.fold ~init:Pos.Map.empty ~f:(fold_one_tast ctx target)
   in
+  (* [files] can legitimately refer to non-existent files, e.g.
+  if they've been deleted since the depgraph was created.
+  This is how we'll filter them out. *)
+  let is_entry_valid entry =
+    entry |> Provider_context.get_file_contents_if_present |> Option.is_some
+  in
   (* These are the tasts for all the 'fileinfo_l' passed in *)
   let tasts_of_files : (Relative_path.t * Tast.program) list =
-    List.map files ~f:(fun path ->
+    List.filter_map files ~f:(fun path ->
         let (_ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in
-        let { Tast_provider.Compute_tast.tast; _ } =
-          Tast_provider.compute_tast_unquarantined ~ctx ~entry
-        in
-        (path, tast))
+        try
+          let { Tast_provider.Compute_tast.tast; _ } =
+            Tast_provider.compute_tast_unquarantined ~ctx ~entry
+          in
+          Some (path, tast)
+        with _ when not (is_entry_valid entry) -> None)
   in
   Hh_logger.debug "find_refs.target: %s" (action_internal_to_string target);
   if Hh_logger.Level.passes_min_level Hh_logger.Level.Debug then

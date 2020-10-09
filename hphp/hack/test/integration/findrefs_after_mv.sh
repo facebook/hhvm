@@ -91,7 +91,8 @@ mv d.php e.php || err 70 "failed to move file"
 # --find-class-refs C. Current buggy behavior is that it crashes
 "$hh_client" --find-class-refs C 1>out.log 2>err.log
 status="$?"
-[[ "$status" == 6 ]] || err 80 "Current expected buggy behavior is to exit with code 6, not $status"
+[[ "$status" == 0 ]] || err 80 "Expected second hh_client --find-class-refs to exit with error code 0 not $status"
+<"out.log" grep -i '1 total results' > /dev/null || err 81 "second --find-class-refs results incomplete - $tempdir/out.log"
 
 "$hh_client" stop # incidentally, "hh_client <dir> stop" doesn't seem to stop it; hence why we did "cd" earlier
 

@@ -82,7 +82,7 @@ let make_local_server_api
         in
         HackEventLogger.remote_scheduler_get_dirty_files_end telemetry t;
         changed_files
-      | None -> Future.of_error "Expected a non-empty mergebase"
+      | None -> Future.of_value []
 
     let write_changed_files
         (changed_files : string list) ~(destination_path : string) : unit =

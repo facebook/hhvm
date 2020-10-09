@@ -133,6 +133,8 @@ type delegate_env = {
   (* The amount of time to wait between heartbeat checks, in seconds *)
   heartbeat_period: int;
   init_id: string;
+  (* Whether to use mergebase to calculate changed files or not *)
+  use_mergebase: bool;
   mergebase: Hg.hg_rev option;
   num_workers: int;
   recheck_id: string;

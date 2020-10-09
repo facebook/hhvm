@@ -144,20 +144,6 @@ struct UniqueStubs {
   TCA fcallHelperThunk;
 
   /*
-   * Look up or emit a func body entry point and jump to it---or, failing that,
-   * fall back to the interpreter.
-   *
-   * This func body is just the translation for Func::base(), for functions
-   * with no DV init funclets.  For functions with DV funclets, the func body
-   * first dispatches to any necessary funclets before jumping to the base()
-   * translation.
-   *
-   * @reached:  call from enterTCHelper$callTC
-   * @context:  func body
-   */
-  TCA funcBodyHelperThunk;
-
-  /*
    * Call EventHook::onFunctionCall() and handle the case where it requests
    * that we skip the function.
    *
@@ -265,7 +251,7 @@ struct UniqueStubs {
    *
    * Expects that all VM registers are synced.
    *
-   * @reached:  jmp from funcBodyHelperThunk
+   * @reached:  entry from jit::enterTC
    *            jmp from fcallHelperThunk
    *            call from enterTCHelper
    * @context:  func body

@@ -64,9 +64,9 @@ TCA handleBindCall(TCA toSmash, Func* func, int32_t numArgs);
 TCA handleResume(bool interpFirst);
 
 /*
- * Look up (or create) the translation for the body of fp.func().
+ * Look up (or create) the translation for the body of func.
  */
-TCA funcBodyHelper(ActRec* fp);
+TCA getFuncBody(const Func* func);
 
 }}}
 

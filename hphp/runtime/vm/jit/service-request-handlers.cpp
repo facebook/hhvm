@@ -177,27 +177,6 @@ TCA getTranslation(TransArgs args) {
   return mcgen::retranslate(args, getContext(args.sk, args.kind == TransKind::Profile));
 }
 
-TCA getFuncBody(Func* func) {
-  auto tca = func->getFuncBody();
-  if (tca != tc::ustubs().funcBodyHelperThunk) return tca;
-
-  LeaseHolder writer(func, TransKind::Profile);
-  if (!writer) return nullptr;
-
-  tca = func->getFuncBody();
-  if (tca != tc::ustubs().funcBodyHelperThunk) return tca;
-
-  if (func->numRequiredParams() != func->numNonVariadicParams()) {
-    tca = tc::ustubs().resumeHelper;
-  } else {
-    SrcKey sk(func, func->base(), ResumeMode::None);
-    tca = getTranslation(TransArgs{sk});
-  }
-
-  if (tca) func->setFuncBody(tca);
-  return tca;
-}
-
 /*
  * Runtime service handler that patches a jmp to the translation of u:dest from
  * toSmash.
@@ -216,50 +195,29 @@ TCA bindJmp(TCA toSmash, SrcKey destSk, ServiceRequest req, TransFlags trflags,
   return tc::bindJmp(toSmash, destSk, trflags, smashed);
 }
 
-void syncFuncBodyVMRegs(ActRec* fp, void* sp) {
-  auto& regs = vmRegsUnsafe();
-  regs.fp = fp;
-  regs.stack.top() = (TypedValue*)sp;
-  regs.jitReturnAddr = nullptr;
-
-  auto const nargs = fp->numArgs();
-  auto const nparams = fp->func()->numNonVariadicParams();
-  auto const& paramInfo = fp->func()->params();
-
-  auto firstDVI = kInvalidOffset;
-
-  for (auto i = nargs; i < nparams; ++i) {
-    auto const dvi = paramInfo[i].funcletOff;
-    if (dvi != kInvalidOffset) {
-      firstDVI = dvi;
-      break;
-    }
-  }
-  if (firstDVI != kInvalidOffset) {
-    regs.pc = fp->func()->unit()->entry() + firstDVI;
-  } else {
-    regs.pc = fp->func()->entry();
-  }
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 }
 
-TCA funcBodyHelper(ActRec* fp) {
-  assert_native_stack_aligned();
-  void* const sp = reinterpret_cast<TypedValue*>(fp) - fp->func()->numSlotsInFrame();
-  syncFuncBodyVMRegs(fp, sp);
-  tl_regState = VMRegState::CLEAN;
+TCA getFuncBody(const Func* func) {
+  auto tca = func->getFuncBody();
+  if (tca != nullptr) return tca;
 
-  auto const func = const_cast<Func*>(fp->func());
-  auto tca = getFuncBody(func);
-  if (!tca) {
+  LeaseHolder writer(func, TransKind::Profile);
+  if (!writer) return tc::ustubs().resumeHelper;
+
+  tca = func->getFuncBody();
+  if (tca != nullptr) return tca;
+
+  if (func->numRequiredParams() != func->numNonVariadicParams()) {
     tca = tc::ustubs().resumeHelper;
+  } else {
+    SrcKey sk(func, func->base(), ResumeMode::None);
+    tca = getTranslation(TransArgs{sk});
   }
 
-  tl_regState = VMRegState::DIRTY;
-  return tca;
+  if (tca) const_cast<Func*>(func)->setFuncBody(tca);
+  return tca != nullptr ? tca : tc::ustubs().resumeHelper;
 }
 
 TCA handleServiceRequest(ReqInfo& info) noexcept {

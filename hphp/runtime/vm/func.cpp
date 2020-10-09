@@ -214,6 +214,7 @@ Func* Func::clone(Class* cls, const StringData* name) const {
 
   f->m_cloned.flag.test_and_set();
   f->initPrologues(numParams);
+  f->m_funcBody = nullptr;
   f->m_funcId = InvalidFuncId;
   if (name) f->m_name = name;
   f->m_u.setCls(cls);
@@ -264,7 +265,6 @@ void Func::initPrologues(int numParams) {
   int numPrologues = numProloguesForNumParams(numParams);
 
   if (!jit::mcgen::initialized()) {
-    m_funcBody = nullptr;
     for (int i = 0; i < numPrologues; i++) {
       m_prologueTable[i] = nullptr;
     }
@@ -272,8 +272,6 @@ void Func::initPrologues(int numParams) {
   }
 
   auto const& stubs = jit::tc::ustubs();
-
-  m_funcBody = stubs.funcBodyHelperThunk;
 
   TRACE(4, "initPrologues func %p %d\n", this, numPrologues);
   for (int i = 0; i < numPrologues; i++) {
@@ -543,8 +541,7 @@ void Func::resetPrologue(int numParams) {
 }
 
 void Func::resetFuncBody() {
-  auto const& stubs = jit::tc::ustubs();
-  m_funcBody = stubs.funcBodyHelperThunk;
+  m_funcBody = nullptr;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

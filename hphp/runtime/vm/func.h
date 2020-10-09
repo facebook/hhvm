@@ -1479,7 +1479,7 @@ private:
   // For asserts only.
   int m_magic;
 #endif
-  AtomicLowPtr<uint8_t> m_funcBody;
+  AtomicLowPtr<uint8_t> m_funcBody{nullptr};
   mutable rds::Link<LowPtr<Func>, rds::Mode::NonLocal> m_cachedFunc;
   FuncId m_funcId{InvalidFuncId};
   mutable AtomicLowPtr<const StringData> m_fullName{nullptr};

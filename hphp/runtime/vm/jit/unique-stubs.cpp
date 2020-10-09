@@ -503,17 +503,6 @@ TCA emitFCallHelperThunk(CodeBlock& main, CodeBlock& cold, DataBlock& data,
   return start;
 }
 
-TCA emitFuncBodyHelperThunk(CodeBlock& cb, DataBlock& data) {
-  alignJmpTarget(cb);
-
-  return vwrap(cb, data, [] (Vout& v) {
-    TCA (*helper)(ActRec*) = &svcreq::funcBodyHelper;
-    auto const dest = v.makeReg();
-    v << simplecall(v, helper, rvmfp(), dest);
-    v << jmpr{dest};
-  });
-}
-
 TCA emitFunctionEnterHelper(CodeBlock& main, CodeBlock& cold,
                             DataBlock& data, UniqueStubs& us) {
   alignCacheLine(main);
@@ -1242,7 +1231,6 @@ void UniqueStubs::emitAll(CodeCache& code, Debug::DebugInfo& dbg) {
   ADD(funcPrologueRedispatchUnpack,
       hotView(),
       emitFuncPrologueRedispatchUnpack(hot(), cold, data, *this));
-  ADD(funcBodyHelperThunk,    view, emitFuncBodyHelperThunk(cold, data));
   ADD(functionEnterHelper,
       hotView(),
       emitFunctionEnterHelper(hot(), cold, data, *this));

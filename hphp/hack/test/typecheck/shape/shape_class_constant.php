@@ -10,9 +10,9 @@ class A {
   const string BAZ_KEY = 'baz';
   const FooShape
     FOO = shape(
+      self::BAZ_KEY => varray['a', 'b', 'c'],
       'foo' => 2,
       'bar' => null,
-      self::BAZ_KEY => varray['a', 'b', 'c'],
     );
 
   public static function getBaz(): varray<string> {

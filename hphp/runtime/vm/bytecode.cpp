@@ -2222,7 +2222,11 @@ OPTBLD_INLINE TCA ret(PC& pc) {
   assertx(!suspended || vmfp()->func()->isAsyncFunction());
   assertx(!suspended || !isResumed(vmfp()));
 
-  auto const jitReturn = jitReturnPre(vmfp());
+  // Grab info from callee's ActRec.
+  auto const fp = vmfp();
+  auto const func = fp->func();
+  auto const sfp = fp->sfp();
+  auto const jitReturn = jitReturnPre(fp);
 
   // Get the return value.
   TypedValue retval = *vmStack().topTV();
@@ -2236,17 +2240,13 @@ OPTBLD_INLINE TCA ret(PC& pc) {
   // value must be removed from the stack, or the unwinder would try to free it
   // if the hook throws---but the event hook routine decrefs the return value
   // in that case if necessary.
-  frame_free_locals_inl(vmfp(), vmfp()->func()->numLocals(), &retval);
+  frame_free_locals_inl(fp, func->numLocals(), &retval);
 
-  // Grab caller info from ActRec.
-  ActRec* sfp = vmfp()->sfp();
-  Offset callOff = vmfp()->callOffset();
-
-  if (LIKELY(!isResumed(vmfp()))) {
+  if (LIKELY(!isResumed(fp))) {
     // If in an eagerly executed async function, wrap the return value into
     // succeeded StaticWaitHandle. Async eager return requests are currently
     // not respected, as we don't have a way to obtain the async eager offset.
-    if (UNLIKELY(vmfp()->func()->isAsyncFunction()) && !suspended) {
+    if (UNLIKELY(func->isAsyncFunction()) && !suspended) {
       auto const& retvalCell = *tvAssertPlausible(&retval);
       // Heads up that we're assuming CreateSucceeded can't throw, or we won't
       // decref the return value.  (It can't right now.)
@@ -2255,23 +2255,23 @@ OPTBLD_INLINE TCA ret(PC& pc) {
     }
 
     // Free ActRec and store the return value.
-    vmStack().ndiscard(vmfp()->func()->numSlotsInFrame());
+    vmStack().ndiscard(func->numSlotsInFrame());
     vmStack().ret();
     *vmStack().topTV() = retval;
-    assertx(vmStack().topTV() == vmfp()->retSlot());
+    assertx(vmStack().topTV() == fp->retSlot());
     // In case async eager return was requested by the caller, pretend that
     // we did not finish eagerly as we already boxed the value.
     vmStack().topTV()->m_aux.u_asyncEagerReturnFlag = 0;
-  } else if (vmfp()->func()->isAsyncFunction()) {
+  } else if (func->isAsyncFunction()) {
     // Mark the async function as succeeded and store the return value.
     assertx(!sfp);
-    auto wh = frame_afwh(vmfp());
+    auto wh = frame_afwh(fp);
     wh->ret(retval);
     decRefObj(wh);
-  } else if (vmfp()->func()->isAsyncGenerator()) {
+  } else if (func->isAsyncGenerator()) {
     // Mark the async generator as finished.
     assertx(isNullType(retval.m_type));
-    auto const gen = frame_async_generator(vmfp());
+    auto const gen = frame_async_generator(fp);
     auto const eagerResult = gen->ret();
     if (eagerResult) {
       // Eager execution => return StaticWaitHandle.
@@ -2281,9 +2281,9 @@ OPTBLD_INLINE TCA ret(PC& pc) {
       // Resumed execution => return control to the scheduler.
       assertx(!sfp);
     }
-  } else if (vmfp()->func()->isNonAsyncGenerator()) {
+  } else if (func->isNonAsyncGenerator()) {
     // Mark the generator as finished and store the return value.
-    frame_generator(vmfp())->ret(retval);
+    frame_generator(fp)->ret(retval);
 
     // Push return value of next()/send()/raise().
     vmStack().pushNull();
@@ -2292,7 +2292,7 @@ OPTBLD_INLINE TCA ret(PC& pc) {
   }
 
   // Return control to the caller.
-  returnToCaller(pc, sfp, callOff);
+  returnToCaller(pc, sfp, jitReturn.callOff);
 
   return jitReturnPost(jitReturn);
 }

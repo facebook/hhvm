@@ -98,6 +98,11 @@ and uop =
   | Upincr
   | Updecr
   | Usilence
+
+and visibility =
+  | Private [@visitors.name "visibility_Private"]
+  | Public [@visitors.name "visibility_Public"]
+  | Protected [@visitors.name "visibility_Protected"]
 [@@deriving
   show { with_path = false },
     eq,

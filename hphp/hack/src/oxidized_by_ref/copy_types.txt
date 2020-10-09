@@ -73,6 +73,7 @@ oxidized::ast_defs::OgNullFlavor
 oxidized::ast_defs::ParamKind
 oxidized::ast_defs::Uop
 oxidized::ast_defs::Variance
+oxidized::ast_defs::Visibility
 oxidized::error_codes::Init
 oxidized::error_codes::Naming
 oxidized::error_codes::NastCheck

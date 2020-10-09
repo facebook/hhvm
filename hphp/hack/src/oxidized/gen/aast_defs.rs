@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d4c3ac7465a9b6f1d17f23256c3aff34>>
+// @generated SignedSource<<ba3e1d693766763083709ccf2dbeee07>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -24,6 +24,7 @@ pub use ast_defs::OgNullFlavor;
 pub use ast_defs::Pos;
 pub use ast_defs::PositionedByteString;
 pub use ast_defs::Pstring;
+pub use ast_defs::Visibility;
 pub use local_id::LocalId;
 pub use shape_map::ShapeMap;
 
@@ -371,28 +372,6 @@ pub enum VcKind {
     Keyset,
 }
 impl TrivialDrop for VcKind {}
-
-#[derive(
-    Clone,
-    Copy,
-    Debug,
-    Deserialize,
-    Eq,
-    FromOcamlRep,
-    FromOcamlRepIn,
-    Hash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-pub enum Visibility {
-    Private,
-    Public,
-    Protected,
-}
-impl TrivialDrop for Visibility {}
 
 #[derive(
     Clone,

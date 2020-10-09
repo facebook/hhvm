@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b8e4cf87a5906712a525612777fbc1ba>>
+// @generated SignedSource<<5a34b126777480a09e31e29701579de3>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -24,6 +24,8 @@ pub use ast_defs::PositionedByteString;
 pub use ast_defs::Pstring;
 pub use local_id::LocalId;
 pub use shape_map::ShapeMap;
+
+pub use oxidized::aast_defs::Visibility;
 
 #[derive(
     Clone,
@@ -245,8 +247,6 @@ impl<'a> TrivialDrop for NastShapeInfo<'a> {}
 pub use oxidized::aast_defs::KvcKind;
 
 pub use oxidized::aast_defs::VcKind;
-
-pub use oxidized::aast_defs::Visibility;
 
 pub use oxidized::aast_defs::UseAsVisibility;
 

@@ -2427,11 +2427,14 @@ void hphp_process_init() {
   if (!apcExtension::PrimeLibrary.empty()) {
     apcLoadingThread = std::make_unique<std::thread>([&] {
         hphp_thread_init();
+        SCOPE_EXIT {
+          hphp_thread_exit();
+        };
+        ProfileNonVMThread nonVM;
         hphp_session_init(Treadmill::SessionKind::APCPrime);
         SCOPE_EXIT {
           hphp_context_exit();
           hphp_session_exit();
-          hphp_thread_exit();
         };
         UnlimitSerializationScope unlimit;
         // TODO(9755792): Add real execution mode for snapshot generation.

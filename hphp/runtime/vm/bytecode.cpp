@@ -4842,18 +4842,16 @@ OPTBLD_INLINE void iopVerifyRetNonNullC() {
 }
 
 OPTBLD_INLINE TCA iopNativeImpl(PC& pc) {
-  auto const jitReturn = jitReturnPre(vmfp());
+  auto const fp = vmfp();
   auto const func = vmfp()->func();
+  auto const sfp = fp->sfp();
+  auto const jitReturn = jitReturnPre(fp);
   auto const native = func->arFuncPtr();
   assertx(native != nullptr);
   // Actually call the native implementation. This will handle freeing the
   // locals in the normal case. In the case of an exception, the VM unwinder
   // will take care of it.
-  native(vmfp());
-
-  // Grab caller info from ActRec.
-  ActRec* sfp = vmfp()->sfp();
-  Offset callOff = vmfp()->callOffset();
+  native(fp);
 
   // Adjust the stack; the native implementation put the return value in the
   // right place for us already
@@ -4861,7 +4859,7 @@ OPTBLD_INLINE TCA iopNativeImpl(PC& pc) {
   vmStack().ret();
 
   // Return control to the caller.
-  returnToCaller(pc, sfp, callOff);
+  returnToCaller(pc, sfp, jitReturn.callOff);
   return jitReturnPost(jitReturn);
 }
 

@@ -48,14 +48,9 @@ let test () =
   let { Tast_provider.Compute_tast.tast; _ } =
     Tast_provider.compute_tast_quarantined ~ctx ~entry
   in
-  let executes_ok =
-    try
-      let _symbols = IdentifySymbolService.all_symbols ctx tast in
-      true
-    with _ -> false
-  in
-  Asserter.Bool_asserter.assert_equals
-    false
-    executes_ok
-    "This test asserts that IdentifySymbolService currently has an exception";
+  let symbols = IdentifySymbolService.all_symbols ctx tast in
+  Asserter.Int_asserter.assert_equals
+    5
+    (List.length symbols)
+    "symbol count for error file";
   ()

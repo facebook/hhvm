@@ -348,7 +348,8 @@ let visitor =
       self#plus acc (super#on_user_attribute env ua)
   end
 
-let all_symbols ctx tast = visitor#go ctx tast |> Result_set.elements
+let all_symbols ctx tast =
+  Errors.ignore_ (fun () -> visitor#go ctx tast |> Result_set.elements)
 
 let all_symbols_ctx
     ~(ctx : Provider_context.t) ~(entry : Provider_context.entry) :

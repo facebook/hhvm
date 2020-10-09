@@ -556,24 +556,6 @@ const ArrayFunctions g_array_funcs = {
   DISPATCH(Pop)
 
   /*
-   * ArrayData* Dequeue(ArrayData*, Variant& value)
-   *
-   *   Remove the first element from the array and assign it to `value'.  This
-   *   function may return a new array if it decided to COW due to
-   *   cowCheck().
-   */
-  DISPATCH(Dequeue)
-
-  /*
-   * ArrayData* Prepend(ArrayData*, TypedValue v)
-   *
-   *   Insert `v' as the first element of the array.  Then renumber
-   *   integer keys.  This function has copy/grow semantics.  `v' must
-   *   not be KindOfUninit.
-   */
-  DISPATCH(Prepend)
-
-  /*
    * ArrayData* ToDVArray(ArrayData*, bool copy)
    *
    *   Convert the given {vec, dict} to a {varray, darray}. If copy is false,

@@ -439,21 +439,9 @@ ArrayData* LoggingArray::Append(LoggingArray* lad, TypedValue v) {
   logEvent(lad, ms, ArrayOp::Append, v);
   return mutate(lad, ms, [&](ArrayData* w) { return w->append(v); });
 }
-ArrayData* LoggingArray::Prepend(LoggingArray* lad, TypedValue v) {
-  if (type(v) == KindOfUninit) type(v) = KindOfNull;
-  // NOTE: This key isn't always correct, but it's close enough for profiling.
-  auto const k = make_tv<KindOfInt64>(lad->wrapped->size());
-  auto const ms = lad->entryTypes.with(k, v);
-  logEvent(lad, ms, ArrayOp::Prepend, v);
-  return mutate(lad, ms, [&](ArrayData* w) { return w->prepend(v); });
-}
 ArrayData* LoggingArray::Pop(LoggingArray* lad, Variant& ret) {
   logEvent(lad, ArrayOp::Pop);
   return mutate(lad, [&](ArrayData* w) { return w->pop(ret); });
-}
-ArrayData* LoggingArray::Dequeue(LoggingArray* lad, Variant& ret) {
-  logEvent(lad, ArrayOp::Dequeue);
-  return mutate(lad, [&](ArrayData* w) { return w->dequeue(ret); });
 }
 
 //////////////////////////////////////////////////////////////////////////////

@@ -480,26 +480,9 @@ public:
 
   /*
    * Remove the first or last element of the array, and assign it to `value'.
-   *
-   * These implement:
-   *  - dequeue(): array_shift()
-   *  - pop(): array_pop()
-   *
-   * Return `this' if copy/escalation are not needed, or a copied/escalated
-   * array data.
+   * Return a copied/escalated array if necessary, or `this` otherwise.
    */
-  ArrayData* dequeue(Variant& value);
   ArrayData* pop(Variant& value);
-
-  /*
-   * Prepend `v' to the array, making a copy first if cowCheck() returns true.
-   *
-   * This implements array_unshift().
-   *
-   * Return `this' if copy/escalation are not needed, or a copied/escalated
-   * array data.
-   */
-  ArrayData* prepend(TypedValue v);
 
   /*
    * Comparisons.
@@ -816,8 +799,6 @@ struct ArrayFunctions {
   ArrayData* (*copyStatic[NK])(const ArrayData*);
   ArrayData* (*append[NK])(ArrayData*, TypedValue v);
   ArrayData* (*pop[NK])(ArrayData*, Variant& value);
-  ArrayData* (*dequeue[NK])(ArrayData*, Variant& value);
-  ArrayData* (*prepend[NK])(ArrayData*, TypedValue v);
   ArrayData* (*toDVArray[NK])(ArrayData*, bool copy);
   ArrayData* (*toHackArr[NK])(ArrayData*, bool copy);
   void (*onSetEvalScalar[NK])(ArrayData*);

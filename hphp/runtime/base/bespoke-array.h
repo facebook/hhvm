@@ -170,9 +170,7 @@ public:
 
   // high-level ops
   static ArrayData* Append(ArrayData* ad, TypedValue v);
-  static ArrayData* Prepend(ArrayData* ad, TypedValue v);
   static ArrayData* Pop(ArrayData* ad, Variant& out);
-  static ArrayData* Dequeue(ArrayData* ad, Variant& out);
   static void OnSetEvalScalar(ArrayData* ad);
 
   // copies and conversions

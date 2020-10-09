@@ -401,8 +401,6 @@ public:
   static ArrayData* CopyStatic(const ArrayData*);
   static ArrayData* Append(ArrayData*, TypedValue);
   static ArrayData* Pop(ArrayData*, Variant&);
-  static ArrayData* Dequeue(ArrayData*, Variant&);
-  static ArrayData* Prepend(ArrayData*, TypedValue);
   static ArrayData* ToDVArray(ArrayData*, bool copy);
   static ArrayData* ToHackArr(ArrayData*, bool copy);
   static void OnSetEvalScalar(ArrayData*);

@@ -63,9 +63,7 @@ struct EntryTypes;
   X(IterAdvance,        true)  \
   X(IterRewind,         true)  \
   X(Append,             false) \
-  X(Prepend,            false) \
   X(Pop,                false) \
-  X(Dequeue,            false) \
   X(ToDVArray,          true)  \
   X(ToHackArr,          true)  \
   X(SetLegacyArray,     true)

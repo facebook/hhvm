@@ -784,25 +784,6 @@ ArrayData* PackedArray::Pop(ArrayData* adIn, Variant& value) {
   return ad;
 }
 
-ArrayData* PackedArray::Dequeue(ArrayData* adIn, Variant& value) {
-  assertx(checkInvariants(adIn));
-
-  auto const ad = adIn->cowCheck() ? Copy(adIn) : adIn;
-  if (UNLIKELY(ad->m_size == 0)) {
-    value = uninit_null();
-    return ad;
-  }
-
-  // This is O(N), but so is Dequeue on a mixed array, because it
-  // needs to renumber keys.  So it makes sense to stay packed.
-  auto const size = ad->m_size - 1;
-  auto const data = packedData(ad);
-  value = std::move(tvAsVariant(data)); // no incref+decref
-  std::memmove(data, data + 1, size * sizeof *data);
-  ad->m_size = size;
-  return ad;
-}
-
 ArrayData* PackedArray::Prepend(ArrayData* adIn, TypedValue v) {
   assertx(checkInvariants(adIn));
 

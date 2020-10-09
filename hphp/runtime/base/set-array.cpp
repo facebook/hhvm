@@ -663,55 +663,6 @@ ArrayData* SetArray::Pop(ArrayData* ad, Variant& value) {
   return a;
 }
 
-ArrayData* SetArray::Dequeue(ArrayData* ad, Variant& value) {
-  auto a = asSet(ad);
-  if (a->cowCheck()) a = a->copySet();
-  if (a->m_size) {
-    ssize_t pos = a->getIterBegin();
-    tvDup(a->getElm(pos), *value.asTypedValue());
-    auto const pelm = &a->data()[pos];
-    auto const loc = a->findForRemove(pelm->hash(),
-      [pelm] (const Elm& e) { return &e == pelm; }
-    );
-    assertx(loc.valid());
-    a->erase(loc);
-  } else {
-    value = uninit_null();
-  }
-  return a;
-}
-
-ArrayData* SetArray::Prepend(ArrayData* ad, TypedValue v) {
-  Elm e;
-  assertx(ClearElms(&e, 1));
-  auto a = [&]{
-    if (isIntType(v.m_type)) {
-      e.setIntKey(v.m_data.num, hash_int64(v.m_data.num));
-      return asSet(RemoveInt(ad, v.m_data.num));
-    } else if (isStringType(v.m_type)) {
-      e.setStrKey(v.m_data.pstr, v.m_data.pstr->hash());
-      return asSet(RemoveStr(ad, v.m_data.pstr));
-    } else {
-      throwInvalidArrayKeyException(&v, ad);
-    }
-  }();
-  if (a->cowCheck()) a = a->copySet();
-
-  auto elms = a->data();
-  if (!elms[0].isTombstone()) {
-    a = a->prepareForInsert(false);
-    elms = a->data();
-    memmove(&elms[1], &elms[0], a->m_used * sizeof(Elm));
-    ++a->m_used;
-  }
-
-  ++a->m_size;
-  elms[0] = e;
-  assertx(!elms[0].isInvalid());
-  a->compact(); // Rebuild the hash table.
-  return a;
-}
-
 ArrayData* SetArray::ToDVArray(ArrayData* ad, bool copy) {
   always_assert(false);
 }

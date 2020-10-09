@@ -234,14 +234,8 @@ ArrayData* BespokeArray::EscalateForSort(ArrayData* ad, SortFunction sf) {
 ArrayData* BespokeArray::Append(ArrayData* ad, TypedValue v) {
   return asBespoke(ad)->vtable()->fnAppend(ad, v);
 }
-ArrayData* BespokeArray::Prepend(ArrayData* ad, TypedValue v) {
-  return asBespoke(ad)->vtable()->fnPrepend(ad, v);
-}
 ArrayData* BespokeArray::Pop(ArrayData* ad, Variant& out) {
   return asBespoke(ad)->vtable()->fnPop(ad, out);
-}
-ArrayData* BespokeArray::Dequeue(ArrayData* ad, Variant& out) {
-  return asBespoke(ad)->vtable()->fnDequeue(ad, out);
 }
 void BespokeArray::OnSetEvalScalar(ArrayData*) {
   always_assert(false);

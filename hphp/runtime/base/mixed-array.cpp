@@ -1392,54 +1392,6 @@ ArrayData* MixedArray::Pop(ArrayData* ad, Variant& value) {
   return a;
 }
 
-ArrayData* MixedArray::Dequeue(ArrayData* adInput, Variant& value) {
-  auto a = asMixed(adInput);
-  if (a->cowCheck()) a = a->copyMixed();
-  auto elms = a->data();
-  if (a->m_size) {
-    ssize_t pos = a->nextElm(elms, -1);
-    assertx(pos >= 0 && pos < a->m_used);
-    auto& e = elms[pos];
-    assertx(!isTombstone(e.data.m_type));
-    value = tvAsCVarRef(&e.data);
-    auto pos2 = e.hasStrKey() ? a->findForRemove(e.skey, e.hash())
-                              : a->findForRemove(e.ikey, e.hash());
-    if (!e.hasStrKey()) {
-      a->updateNextKI(e.ikey, false);
-    }
-    assertx(pos2.elmIdx == pos);
-    a->erase(pos2);
-  } else {
-    value = uninit_null();
-  }
-  // Even if the array is empty, for PHP5 conformity we need call
-  // compact() because it has side-effects that are important
-  a->compact(true);
-  return a;
-}
-
-ArrayData* MixedArray::Prepend(ArrayData* adInput, TypedValue v) {
-  auto a = asMixed(adInput)->prepareForInsert(adInput->cowCheck());
-
-  auto elms = a->data();
-  if (a->m_used > 0 && !isTombstone(elms[0].data.m_type)) {
-    // Move the existing elements to make element 0 available.
-    memmove(&elms[1], &elms[0], a->m_used * sizeof(*elms));
-    ++a->m_used;
-  }
-
-  // Prepend.
-  ++a->m_size;
-  auto& e = elms[0];
-  e.setIntKey(0, hash_int64(0));
-  a->mutableKeyTypes()->recordInt();
-  tvDup(v, e.data);
-
-  // Renumber.
-  a->compact(true);
-  return a;
-}
-
 ArrayData* MixedArray::ToDVArray(ArrayData* adIn, bool copy) {
   assertx(MixedArray::asMixed(adIn));
   if (adIn->empty()) return ArrayData::CreateDArray();

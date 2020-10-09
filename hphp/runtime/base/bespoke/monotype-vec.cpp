@@ -306,19 +306,7 @@ ArrayData* EmptyMonotypeVec::Append(EmptyMonotypeVec* eadIn, TypedValue v) {
   return res;
 }
 
-ArrayData* EmptyMonotypeVec::Prepend(EmptyMonotypeVec* eadIn, TypedValue v) {
-  auto const mad = escalateToTyped(eadIn, type(v));
-  auto const res = MonotypeVec::Prepend(mad, v);
-  assertx(mad == res);
-  return res;
-}
-
 ArrayData* EmptyMonotypeVec::Pop(EmptyMonotypeVec* ead, Variant& value) {
-  value = uninit_null();
-  return ead;
-}
-
-ArrayData* EmptyMonotypeVec::Dequeue(EmptyMonotypeVec* ead, Variant& value) {
   value = uninit_null();
   return ead;
 }
@@ -714,24 +702,6 @@ ArrayData* MonotypeVec::Append(MonotypeVec* madIn, TypedValue v) {
   return mad;
 }
 
-ArrayData* MonotypeVec::Prepend(MonotypeVec* madIn, TypedValue v) {
-  if (madIn->type() != dt_modulo_persistence(v.m_type)) {
-    // Type doesn't match; escalate to vanilla
-    auto const ad = madIn->escalateWithCapacity(madIn->size() + 1);
-    auto const res = PackedArray::Prepend(ad, v);
-    assertx(ad == res);
-    return res;
-  }
-
-  auto const mad = madIn->prepareForInsert();
-  memmove(mad->rawData() + 1, mad->rawData(), mad->size() * sizeof(Value));
-  mad->valueRefUnchecked(0) = val(v);
-  tvIncRefGen(v);
-  mad->m_size++;
-
-  return mad;
-}
-
 ArrayData* MonotypeVec::Pop(MonotypeVec* madIn, Variant& value) {
   auto const mad = madIn->cowCheck() ? madIn->copy() : madIn;
   if (UNLIKELY(mad->m_size) == 0) {
@@ -745,24 +715,6 @@ ArrayData* MonotypeVec::Pop(MonotypeVec* madIn, Variant& value) {
   tv.m_type = mad->type();
   value = Variant::wrap(tv);
   tvDecRefGen(tv);
-  mad->m_size = newSize;
-
-  return mad;
-}
-
-ArrayData* MonotypeVec::Dequeue(MonotypeVec* madIn, Variant& value) {
-  auto const mad = madIn->cowCheck() ? madIn->copy() : madIn;
-  if (UNLIKELY(mad->m_size) == 0) {
-    value = uninit_null();
-    return mad;
-  }
-
-  auto const newSize = mad->size() - 1;
-  TypedValue tv;
-  tv.m_data = mad->valueRefUnchecked(0);
-  tv.m_type = mad->type();
-  value = Variant::attach(tv);
-  std::memmove(mad->rawData(), mad->rawData() + 1, newSize * sizeof(Value));
   mad->m_size = newSize;
 
   return mad;

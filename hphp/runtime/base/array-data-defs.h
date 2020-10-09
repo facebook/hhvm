@@ -216,15 +216,6 @@ inline ArrayData* ArrayData::pop(Variant& value) {
   return g_array_funcs.pop[kind()](this, value);
 }
 
-inline ArrayData* ArrayData::dequeue(Variant& value) {
-  return g_array_funcs.dequeue[kind()](this, value);
-}
-
-inline ArrayData* ArrayData::prepend(TypedValue v) {
-  assertx(v.m_type != KindOfUninit);
-  return g_array_funcs.prepend[kind()](this, v);
-}
-
 inline void ArrayData::onSetEvalScalar() {
   return g_array_funcs.onSetEvalScalar[kind()](this);
 }

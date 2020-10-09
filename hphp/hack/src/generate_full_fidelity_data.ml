@@ -22,6 +22,12 @@ let rust_keywords =
     "async"; "await"; "dyn" ]
   [@@ocamlformat "disable"]
 
+let escape_rust_keyword field_name =
+  if List.mem rust_keywords field_name ~equal:String.equal then
+    sprintf "%s_" field_name
+  else
+    field_name
+
 type comment_style =
   | CStyle
   | MLStyle
@@ -501,6 +507,187 @@ end
           };
         ]
       ~filename:(full_fidelity_path_prefix ^ "full_fidelity_syntax_type.ml")
+      ~template:full_fidelity_syntax_template
+      ()
+end
+
+module GenerateFFRustSyntaxVariantByRef = struct
+  let to_syntax_variant_children x =
+    let mapper (f, _) =
+      sprintf "    pub %s: Syntax<'a, T, V>," (escape_rust_keyword f)
+    in
+    let fields = map_and_concat_separated "\n" mapper x.fields in
+    sprintf
+      "#[derive(Debug, Clone)]\npub struct %sChildren<'a, T, V> {\n%s\n}\n\n"
+      x.kind_name
+      fields
+
+  let to_syntax_variant x =
+    sprintf "    %s(&'a %sChildren<'a, T, V>),\n" x.kind_name x.kind_name
+
+  let full_fidelity_syntax_template =
+    make_header CStyle ""
+    ^ "
+use super::{
+    syntax::Syntax,
+    syntax_children_iterator::SyntaxChildrenIterator,
+};
+
+#[derive(Debug, Clone)]
+pub enum SyntaxVariant<'a, T, V> {
+    Token(T),
+    Missing,
+    SyntaxList(&'a [Syntax<'a, T, V>]),
+SYNTAX_VARIANT}
+
+SYNTAX_CHILDREN
+
+impl<'a, T, V> SyntaxVariant<'a, T, V> {
+    pub fn iter_children(&'a self) -> SyntaxChildrenIterator<'a, T, V> {
+        SyntaxChildrenIterator {
+            syntax: &self,
+            index: 0,
+            index_back: 0,
+        }
+    }
+}
+"
+
+  let full_fidelity_syntax =
+    Full_fidelity_schema.make_template_file
+      ~transformations:
+        [
+          { pattern = "SYNTAX_VARIANT"; func = to_syntax_variant };
+          { pattern = "SYNTAX_CHILDREN"; func = to_syntax_variant_children };
+        ]
+      ~filename:
+        (full_fidelity_path_prefix ^ "syntax_by_ref/syntax_variant_generated.rs")
+      ~template:full_fidelity_syntax_template
+      ()
+end
+
+module GenerateSyntaxChildrenIterator = struct
+  let to_iter_children x =
+    let index = ref 0 in
+    let mapper (f, _) =
+      let res = sprintf "%d => Some(&x.%s)," !index (escape_rust_keyword f) in
+      let () = incr index in
+      res
+    in
+    let fields =
+      map_and_concat_separated "\n                    " mapper x.fields
+    in
+    sprintf
+      "            %s(x) => {
+                get_index(%d).and_then(|index| { match index {
+                        %s
+                        _ => None,
+                    }
+                })
+            },\n"
+      x.kind_name
+      (List.length x.fields)
+      fields
+
+  let full_fidelity_syntax_template =
+    make_header CStyle ""
+    ^ "
+use super::{
+    syntax_children_iterator::*,
+    syntax_variant_generated::*,
+    syntax::*
+};
+
+impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
+    pub fn next_impl(&mut self, direction : bool) -> Option<&'a Syntax<'a, T, V>> {
+        use SyntaxVariant::*;
+        let get_index = |len| {
+            let back_index_plus_1 = len - self.index_back;
+            if back_index_plus_1 <= self.index {
+                return None
+            }
+            if direction {
+                Some (self.index)
+            } else {
+                Some (back_index_plus_1 - 1)
+            }
+        };
+        let res = match self.syntax {
+            Missing => None,
+            Token (_) => None,
+            SyntaxList(elems) => {
+                get_index(elems.len()).and_then(|x| elems.get(x))
+            },
+ITER_CHILDREN
+        };
+        if res.is_some() {
+            if direction {
+                self.index = self.index + 1
+            } else {
+                self.index_back = self.index_back + 1
+            }
+        }
+        res
+    }
+}
+    "
+
+  let full_fidelity_syntax =
+    Full_fidelity_schema.make_template_file
+      ~transformations:[{ pattern = "ITER_CHILDREN"; func = to_iter_children }]
+      ~filename:
+        ( full_fidelity_path_prefix
+        ^ "syntax_by_ref/syntax_children_iterator_generated.rs" )
+      ~template:full_fidelity_syntax_template
+      ()
+end
+
+module GenerateSyntaxTypeImpl = struct
+  let to_syntax_constructors x =
+    let mapper (f, _) = sprintf "%s: Self" (escape_rust_keyword f) in
+    let args = map_and_concat_separated ", " mapper x.fields in
+    let mapper (f, _) = sprintf "%s" (escape_rust_keyword f) in
+    let fields = map_and_concat_separated ",\n            " mapper x.fields in
+    sprintf
+      "    fn make_%s(ctx: &C, %s) -> Self {
+        let syntax = SyntaxVariant::%s(ctx.get_arena().alloc(%sChildren {
+            %s,
+        }));
+        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        Self::make(syntax, value)
+    }\n\n"
+      x.type_name
+      args
+      x.kind_name
+      x.kind_name
+      fields
+
+  let full_fidelity_syntax_template =
+    make_header CStyle ""
+    ^ "
+use super::{
+    syntax::*,
+    syntax_variant_generated::*,
+    has_arena::HasArena,
+    positioned_token::PositionedToken,
+    positioned_value::PositionedValue
+};
+use crate::syntax::SyntaxType;
+
+impl<'a, C> SyntaxType<C> for Syntax<'a, PositionedToken<'a>, PositionedValue<'a>>
+where
+    C: HasArena<'a>,
+{
+SYNTAX_CONSTRUCTORS }
+"
+
+  let full_fidelity_syntax =
+    Full_fidelity_schema.make_template_file
+      ~transformations:
+        [{ pattern = "SYNTAX_CONSTRUCTORS"; func = to_syntax_constructors }]
+      ~filename:
+        ( full_fidelity_path_prefix
+        ^ "syntax_by_ref/syntax_type_impl_generated.rs" )
       ~template:full_fidelity_syntax_template
       ()
 end
@@ -1767,18 +1954,14 @@ end
 
 module GenerateRustDirectDeclSmartConstructors = struct
   let to_constructor_methods x =
-    let as_local_var field_name =
-      if List.mem rust_keywords field_name ~equal:String.equal then
-        sprintf "%s_" field_name
-      else
-        field_name
-    in
     let args =
       List.map x.fields ~f:(fun (name, _) ->
-          sprintf "%s: Self::R" (as_local_var name))
+          sprintf "%s: Self::R" (escape_rust_keyword name))
     in
     let args = String.concat ~sep:", " args in
-    let fwd_args = List.map x.fields ~f:(fun (name, _) -> as_local_var name) in
+    let fwd_args =
+      List.map x.fields ~f:(fun (name, _) -> escape_rust_keyword name)
+    in
     let fwd_args = String.concat ~sep:", " fwd_args in
     sprintf
       "    fn make_%s(&mut self, %s) -> Self::R {
@@ -2996,4 +3179,7 @@ let templates =
     GenerateFFRustSmartConstructorsWrappers
     .full_fidelity_smart_constructors_wrappers;
     GenerateOcamlSyntax.ocaml_syntax;
+    GenerateFFRustSyntaxVariantByRef.full_fidelity_syntax;
+    GenerateSyntaxTypeImpl.full_fidelity_syntax;
+    GenerateSyntaxChildrenIterator.full_fidelity_syntax;
   ]

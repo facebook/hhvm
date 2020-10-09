@@ -48,7 +48,7 @@ pub struct Syntax<T, V> {
 
 pub trait SyntaxTypeBase<C> {
     type Token: LexableToken;
-    type Value: SyntaxValueType<Self::Token>;
+    type Value;
 
     fn make_missing(ctx: &C, offset: usize) -> Self;
     fn make_token(ctx: &C, arg: Self::Token) -> Self;

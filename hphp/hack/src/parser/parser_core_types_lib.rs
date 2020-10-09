@@ -29,6 +29,7 @@ pub mod positioned_token;
 pub mod positioned_trivia;
 pub mod source_text;
 pub mod syntax;
+pub mod syntax_by_ref;
 pub mod syntax_error;
 mod syntax_generated;
 pub mod syntax_kind;

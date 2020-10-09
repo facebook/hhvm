@@ -2033,6 +2033,7 @@ name = "parser_core_types"
 version = "0.0.0"
 dependencies = [
  "bitflags 1.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "bumpalo 3.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "itertools 0.8.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "line_break_map 0.0.0",
  "ocamlrep 0.0.0",

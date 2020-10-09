@@ -201,7 +201,7 @@ where
                 leading.extend(t_trailing);
             }
             leading.extend(token.clone_leading());
-            token.with_leading(leading)
+            self.sc_mut().token_factory().with_leading(token, leading)
         } else {
             token
         }

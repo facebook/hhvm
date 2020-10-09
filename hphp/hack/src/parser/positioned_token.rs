@@ -65,6 +65,28 @@ impl SimpleTokenFactory for PositionedToken {
     ) -> Self {
         new(kind, offset, width, leading, trailing)
     }
+
+    // Tricky: the with_ functions that modify tokens can be very cheap (when ref count is 1), or
+    // possibly expensive (when make_mut has to perform a clone of underlying token that is shared).
+    // Fortunately, they are used only in lexer/parser BEFORE the tokens are embedded in syntax, so
+    // before any sharing occurs
+    fn with_leading(mut self, leading: PositionedTrivia) -> Self {
+        let mut token = RcOc::make_mut(&mut self);
+        token.leading = leading;
+        self
+    }
+
+    fn with_trailing(mut self, trailing: PositionedTrivia) -> Self {
+        let mut token = RcOc::make_mut(&mut self);
+        token.trailing = trailing;
+        self
+    }
+
+    fn with_kind(mut self, kind: TokenKind) -> Self {
+        let mut token = RcOc::make_mut(&mut self);
+        token.kind = kind;
+        self
+    }
 }
 
 impl LexableToken for PositionedToken {
@@ -108,28 +130,6 @@ impl LexableToken for PositionedToken {
 
     fn trailing_is_empty(&self) -> bool {
         self.trailing.is_empty()
-    }
-
-    // Tricky: the with_ functions that modify tokens can be very cheap (when ref count is 1), or
-    // possibly expensive (when make_mut has to perform a clone of underlying token that is shared).
-    // Fortunately, they are used only in lexer/parser BEFORE the tokens are embedded in syntax, so
-    // before any sharing occurs
-    fn with_leading(mut self, leading: Self::Trivia) -> Self {
-        let mut token = RcOc::make_mut(&mut self);
-        token.leading = leading;
-        self
-    }
-
-    fn with_trailing(mut self, trailing: Self::Trivia) -> Self {
-        let mut token = RcOc::make_mut(&mut self);
-        token.trailing = trailing;
-        self
-    }
-
-    fn with_kind(mut self, kind: TokenKind) -> Self {
-        let mut token = RcOc::make_mut(&mut self);
-        token.kind = kind;
-        self
     }
 
     fn has_leading_trivia_kind(&self, kind: TriviaKind) -> bool {

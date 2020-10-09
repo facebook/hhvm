@@ -21,6 +21,18 @@ pub trait TokenFactory: Clone {
         leading: Trivia<Self>,
         trailing: Trivia<Self>,
     ) -> Self::Token;
+
+    fn with_leading(
+        &mut self,
+        token: Self::Token,
+        trailing: <Self::Token as LexableToken>::Trivia,
+    ) -> Self::Token;
+    fn with_trailing(
+        &mut self,
+        token: Self::Token,
+        trailing: <Self::Token as LexableToken>::Trivia,
+    ) -> Self::Token;
+    fn with_kind(&mut self, token: Self::Token, kind: TokenKind) -> Self::Token;
 }
 
 pub trait SimpleTokenFactory: LexableToken {
@@ -31,6 +43,10 @@ pub trait SimpleTokenFactory: LexableToken {
         leading: <Self as LexableToken>::Trivia,
         trailing: <Self as LexableToken>::Trivia,
     ) -> Self;
+
+    fn with_leading(self, leading: <Self as LexableToken>::Trivia) -> Self;
+    fn with_trailing(self, trailing: <Self as LexableToken>::Trivia) -> Self;
+    fn with_kind(self, kind: TokenKind) -> Self;
 }
 
 #[derive(Clone)]
@@ -54,5 +70,25 @@ impl<T: SimpleTokenFactory> TokenFactory for SimpleTokenFactoryImpl<T> {
         trailing: Trivia<Self>,
     ) -> Self::Token {
         T::make(kind, offset, width, leading, trailing)
+    }
+
+    fn with_leading(
+        &mut self,
+        token: Self::Token,
+        leading: <Self::Token as LexableToken>::Trivia,
+    ) -> Self::Token {
+        token.with_leading(leading)
+    }
+
+    fn with_trailing(
+        &mut self,
+        token: Self::Token,
+        trailing: <Self::Token as LexableToken>::Trivia,
+    ) -> Self::Token {
+        token.with_trailing(trailing)
+    }
+
+    fn with_kind(&mut self, token: Self::Token, kind: TokenKind) -> Self::Token {
+        token.with_kind(kind)
     }
 }

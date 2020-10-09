@@ -247,70 +247,6 @@ impl LexableToken for CompactToken {
         self.trailing_is_empty()
     }
 
-    fn with_leading(mut self, leading: Self::Trivia) -> Self {
-        match &mut self.repr {
-            Large(token) => {
-                token.leading_width = leading.width;
-                token.leading = leading.kinds;
-            }
-            Small(token) => {
-                if let Ok(leading_width) = leading.width.try_into() {
-                    token.leading_width = leading_width;
-                    token.leading = leading.kinds;
-                } else {
-                    return Self {
-                        repr: Large(Box::new(LargeToken {
-                            kind: token.kind,
-                            offset: token.offset as usize,
-                            leading_width: leading.width,
-                            width: token.width as usize,
-                            trailing_width: token.trailing_width as usize,
-                            leading: leading.kinds,
-                            trailing: token.trailing,
-                        })),
-                    };
-                }
-            }
-        }
-        self
-    }
-
-    fn with_trailing(mut self, trailing: Self::Trivia) -> Self {
-        match &mut self.repr {
-            Large(token) => {
-                token.trailing_width = trailing.width;
-                token.trailing = trailing.kinds;
-            }
-            Small(token) => {
-                if let Ok(trailing_width) = trailing.width.try_into() {
-                    token.trailing_width = trailing_width;
-                    token.trailing = trailing.kinds;
-                } else {
-                    return Self {
-                        repr: Large(Box::new(LargeToken {
-                            kind: token.kind,
-                            offset: token.offset as usize,
-                            leading_width: token.leading_width as usize,
-                            width: token.width as usize,
-                            trailing_width: trailing.width,
-                            leading: token.leading,
-                            trailing: trailing.kinds,
-                        })),
-                    };
-                }
-            }
-        }
-        self
-    }
-
-    fn with_kind(mut self, kind: TokenKind) -> Self {
-        match &mut self.repr {
-            Small(t) => t.kind = kind,
-            Large(t) => t.kind = kind,
-        }
-        self
-    }
-
     fn has_leading_trivia_kind(&self, kind: TriviaKind) -> bool {
         self.has_leading_trivia_kind(kind)
     }
@@ -344,6 +280,70 @@ impl SimpleTokenFactory for CompactToken {
         trailing: CompactTrivia,
     ) -> Self {
         Self::new(kind, offset, width, leading, trailing)
+    }
+
+    fn with_leading(mut self, leading: CompactTrivia) -> Self {
+        match &mut self.repr {
+            Large(token) => {
+                token.leading_width = leading.width;
+                token.leading = leading.kinds;
+            }
+            Small(token) => {
+                if let Ok(leading_width) = leading.width.try_into() {
+                    token.leading_width = leading_width;
+                    token.leading = leading.kinds;
+                } else {
+                    return Self {
+                        repr: Large(Box::new(LargeToken {
+                            kind: token.kind,
+                            offset: token.offset as usize,
+                            leading_width: leading.width,
+                            width: token.width as usize,
+                            trailing_width: token.trailing_width as usize,
+                            leading: leading.kinds,
+                            trailing: token.trailing,
+                        })),
+                    };
+                }
+            }
+        }
+        self
+    }
+
+    fn with_trailing(mut self, trailing: CompactTrivia) -> Self {
+        match &mut self.repr {
+            Large(token) => {
+                token.trailing_width = trailing.width;
+                token.trailing = trailing.kinds;
+            }
+            Small(token) => {
+                if let Ok(trailing_width) = trailing.width.try_into() {
+                    token.trailing_width = trailing_width;
+                    token.trailing = trailing.kinds;
+                } else {
+                    return Self {
+                        repr: Large(Box::new(LargeToken {
+                            kind: token.kind,
+                            offset: token.offset as usize,
+                            leading_width: token.leading_width as usize,
+                            width: token.width as usize,
+                            trailing_width: trailing.width,
+                            leading: token.leading,
+                            trailing: trailing.kinds,
+                        })),
+                    };
+                }
+            }
+        }
+        self
+    }
+
+    fn with_kind(mut self, kind: TokenKind) -> Self {
+        match &mut self.repr {
+            Small(t) => t.kind = kind,
+            Large(t) => t.kind = kind,
+        }
+        self
     }
 }
 

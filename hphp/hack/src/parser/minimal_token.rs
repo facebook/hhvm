@@ -51,6 +51,21 @@ impl SimpleTokenFactory for MinimalToken {
             width,
         }
     }
+
+    fn with_trailing(mut self, trailing: MinimalTrivia) -> Self {
+        self.trailing = trailing;
+        self
+    }
+
+    fn with_leading(mut self, leading: MinimalTrivia) -> Self {
+        self.leading = leading;
+        self
+    }
+
+    fn with_kind(mut self, kind: TokenKind) -> Self {
+        self.kind = kind;
+        self
+    }
 }
 
 impl LexableToken for MinimalToken {
@@ -94,21 +109,6 @@ impl LexableToken for MinimalToken {
 
     fn trailing_is_empty(&self) -> bool {
         self.trailing.is_empty()
-    }
-
-    fn with_trailing(mut self, trailing: Self::Trivia) -> Self {
-        self.trailing = trailing;
-        self
-    }
-
-    fn with_leading(mut self, leading: Self::Trivia) -> Self {
-        self.leading = leading;
-        self
-    }
-
-    fn with_kind(mut self, kind: TokenKind) -> Self {
-        self.kind = kind;
-        self
     }
 
     fn has_leading_trivia_kind(&self, kind: TriviaKind) -> bool {

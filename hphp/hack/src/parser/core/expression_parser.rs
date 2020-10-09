@@ -864,7 +864,10 @@ where
                         TokenKind::StringLiteralBody
                         | TokenKind::HeredocStringLiteralTail
                         | TokenKind::DoubleQuotedStringLiteralTail => token,
-                        _ => token.with_kind(TokenKind::StringLiteralBody),
+                        _ => parser
+                            .sc_mut()
+                            .token_factory()
+                            .with_kind(token, TokenKind::StringLiteralBody),
                     };
                     Some(token)
                 }

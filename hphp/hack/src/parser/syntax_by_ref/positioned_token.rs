@@ -26,21 +26,10 @@ pub struct PositionedTokenImpl {
     pub trailing: TriviaKinds,
 }
 
-/// Safety:
-///    `RefCell` bypasses compile time mutable reference rule. We need
-///    enforce following rule to avoid runtime crash,
-///    - the inner field `RefCell<..>` is only visible to current mod,
-///    - lifetime of RefMut<..> should never overlap.
-///
-///    In the following counterexample, the secound call of `borrow_mut()`
-///    will crash at runtime.
-///    ```
-///    let r1 = positioned_token.borrow_mut();
-///    let r2 = positioned_token.borrow_mut();
-///    ```
 #[derive(Debug, Clone, Copy)]
-pub struct PositionedToken<'a>(&'a std::cell::RefCell<PositionedTokenImpl>);
+pub struct PositionedToken<'a>(&'a PositionedTokenImpl);
 
+#[allow(dead_code)]
 impl PositionedTokenImpl {
     fn start_offset(&self) -> usize {
         self.offset + self.leading_width
@@ -63,40 +52,28 @@ impl PositionedTokenImpl {
     fn trailing_text<'s>(&self, source_text: &SourceText<'s>) -> &'s [u8] {
         source_text.sub(self.end_offset() + 1, self.trailing_width)
     }
+
+    fn clone(x: &Self) -> Self {
+        Self {
+            kind: x.kind,
+            offset: x.offset,
+            leading_width: x.leading_width,
+            width: x.width,
+            trailing_width: x.trailing_width,
+            leading: x.leading,
+            trailing: x.trailing,
+        }
+    }
 }
 
 #[allow(dead_code)]
 impl<'a> PositionedToken<'a> {
-    pub fn kind(&self) -> TokenKind {
-        self.0.borrow().kind
-    }
-
-    pub fn offset(&self) -> usize {
-        self.0.borrow().offset
-    }
-
-    pub fn width(&self) -> usize {
-        self.0.borrow().width
-    }
-
     pub fn start_offset(&self) -> usize {
-        self.0.borrow().start_offset()
+        self.0.start_offset()
     }
 
     pub fn end_offset(&self) -> usize {
-        self.0.borrow().end_offset()
-    }
-
-    pub fn leading_start_offset(&self) -> Option<usize> {
-        self.0.borrow().leading_start_offset()
-    }
-
-    pub fn leading_text<'s>(&self, source_text: &SourceText<'s>) -> &'s [u8] {
-        self.0.borrow().leading_text(source_text)
-    }
-
-    pub fn trailing_text<'s>(&self, source_text: &SourceText<'s>) -> &'s [u8] {
-        self.0.borrow().trailing_text(source_text)
+        self.0.end_offset()
     }
 
     pub fn inner_ptr_eq(x: &Self, y: &Self) -> bool {
@@ -108,93 +85,69 @@ impl<'a> LexableToken for PositionedToken<'a> {
     type Trivia = CompactTrivia;
 
     fn kind(&self) -> TokenKind {
-        self.0.borrow().kind
+        self.0.kind
     }
 
     fn leading_start_offset(&self) -> Option<usize> {
-        Some(self.offset())
+        Some(self.0.offset)
     }
 
     fn width(&self) -> usize {
-        self.0.borrow().width
+        self.0.width
     }
 
     fn leading_width(&self) -> usize {
-        self.0.borrow().leading_width
+        self.0.leading_width
     }
 
     fn trailing_width(&self) -> usize {
-        self.0.borrow().trailing_width
+        self.0.trailing_width
     }
 
     fn full_width(&self) -> usize {
-        self.leading_width() + self.width() + self.trailing_width()
+        self.0.leading_width + self.0.width + self.0.trailing_width
     }
 
     fn clone_leading(&self) -> Self::Trivia {
         CompactTrivia {
-            kinds: self.0.borrow().leading,
-            width: self.0.borrow().leading_width,
+            kinds: self.0.leading,
+            width: self.0.leading_width,
         }
     }
 
     fn clone_trailing(&self) -> Self::Trivia {
         CompactTrivia {
-            kinds: self.0.borrow().trailing,
-            width: self.0.borrow().trailing_width,
+            kinds: self.0.trailing,
+            width: self.0.trailing_width,
         }
     }
 
     fn leading_is_empty(&self) -> bool {
-        self.0.borrow().leading.is_empty()
+        self.0.leading.is_empty()
     }
 
     fn trailing_is_empty(&self) -> bool {
-        self.0.borrow().trailing.is_empty()
-    }
-
-    // Tricky: the with_ functions that modify tokens can be very cheap (when ref count is 1), or
-    // possibly expensive (when make_mut has to perform a clone of underlying token that is shared).
-    // Fortunately, they are used only in lexer/parser BEFORE the tokens are embedded in syntax, so
-    // before any sharing occurs
-    fn with_leading(self, leading: Self::Trivia) -> Self {
-        let mut mut_self = self.0.borrow_mut();
-        mut_self.leading_width = leading.width;
-        mut_self.leading = leading.kinds;
-        self
-    }
-
-    fn with_trailing(self, trailing: Self::Trivia) -> Self {
-        let mut mut_self = self.0.borrow_mut();
-        mut_self.trailing_width = trailing.width;
-        mut_self.trailing = trailing.kinds;
-        self
-    }
-
-    fn with_kind(self, kind: TokenKind) -> Self {
-        let mut mut_self = self.0.borrow_mut();
-        mut_self.kind = kind;
-        self
+        self.0.trailing.is_empty()
     }
 
     fn has_leading_trivia_kind(&self, kind: TriviaKind) -> bool {
-        self.0.borrow().leading.has_kind(kind)
+        self.0.leading.has_kind(kind)
     }
 
     fn has_trailing_trivia_kind(&self, kind: TriviaKind) -> bool {
-        self.0.borrow().trailing.has_kind(kind)
+        self.0.trailing.has_kind(kind)
     }
 
     fn into_trivia_and_width(self) -> (Self::Trivia, usize, Self::Trivia) {
         (
             CompactTrivia {
-                kinds: self.0.borrow().leading,
-                width: self.0.borrow().leading_width,
+                kinds: self.0.leading,
+                width: self.0.leading_width,
             },
             self.width(),
             CompactTrivia {
-                kinds: self.0.borrow().trailing,
-                width: self.0.borrow().trailing_width,
+                kinds: self.0.trailing,
+                width: self.0.trailing_width,
             },
         )
     }
@@ -213,31 +166,48 @@ impl<'a> token_factory::TokenFactory for TokenFactory<'a> {
         kind: TokenKind,
         offset: usize,
         width: usize,
-        leading: <Self::Token as LexableToken>::Trivia,
-        trailing: <Self::Token as LexableToken>::Trivia,
+        leading: CompactTrivia,
+        trailing: CompactTrivia,
     ) -> Self::Token {
-        PositionedToken(
-            self.arena
-                .alloc(std::cell::RefCell::new(PositionedTokenImpl {
-                    kind,
-                    offset,
-                    leading_width: leading.width,
-                    width,
-                    trailing_width: trailing.width,
-                    leading: leading.kinds,
-                    trailing: trailing.kinds,
-                })),
-        )
+        PositionedToken(self.arena.alloc(PositionedTokenImpl {
+            kind,
+            offset,
+            leading_width: leading.width,
+            width,
+            trailing_width: trailing.width,
+            leading: leading.kinds,
+            trailing: trailing.kinds,
+        }))
+    }
+
+    fn with_leading(&mut self, token: Self::Token, leading: CompactTrivia) -> Self::Token {
+        let mut new = PositionedTokenImpl::clone(token.0);
+        new.leading = leading.kinds;
+        new.leading_width = leading.width;
+        PositionedToken(self.arena.alloc(new))
+    }
+
+    fn with_trailing(&mut self, token: Self::Token, trailing: CompactTrivia) -> Self::Token {
+        let mut new = PositionedTokenImpl::clone(token.0);
+        new.trailing = trailing.kinds;
+        new.trailing_width = trailing.width;
+        PositionedToken(self.arena.alloc(new))
+    }
+
+    fn with_kind(&mut self, token: Self::Token, kind: TokenKind) -> Self::Token {
+        let mut new = PositionedTokenImpl::clone(token.0);
+        new.kind = kind;
+        PositionedToken(self.arena.alloc(new))
     }
 }
 
 impl<'a> LexablePositionedToken for PositionedToken<'a> {
     fn text<'b>(&self, source_text: &'b SourceText) -> &'b str {
-        source_text.sub_as_str(self.0.borrow().start_offset(), self.width())
+        source_text.sub_as_str(self.0.start_offset(), self.0.width)
     }
 
     fn text_raw<'b>(&self, source_text: &'b SourceText) -> &'b [u8] {
-        source_text.sub(self.0.borrow().start_offset(), self.width())
+        source_text.sub(self.0.start_offset(), self.0.width)
     }
 
     fn clone_value(&self) -> Self {

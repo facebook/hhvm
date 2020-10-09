@@ -31,10 +31,6 @@ pub trait LexableToken: Clone {
     fn leading_is_empty(&self) -> bool;
     fn trailing_is_empty(&self) -> bool;
 
-    fn with_leading(self, trailing: Self::Trivia) -> Self;
-    fn with_trailing(self, trailing: Self::Trivia) -> Self;
-    fn with_kind(self, kind: TokenKind) -> Self;
-
     fn has_leading_trivia_kind(&self, kind: TriviaKind) -> bool;
     fn has_trailing_trivia_kind(&self, kind: TriviaKind) -> bool;
     fn has_trivia_kind(&self, kind: TriviaKind) -> bool {

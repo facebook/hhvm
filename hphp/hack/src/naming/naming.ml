@@ -351,19 +351,21 @@ let check_name (p, name) =
 let convert_shape_name env = function
   | Ast_defs.SFlit_int (pos, s) -> Ast_defs.SFlit_int (pos, s)
   | Ast_defs.SFlit_str (pos, s) -> Ast_defs.SFlit_str (pos, s)
-  | Ast_defs.SFclass_const (x, (pos, y)) ->
+  | Ast_defs.SFclass_const ((class_pos, class_name), (const_pos, const_name)) ->
+    (* e.g. Foo::BAR or self::BAR. The first tuple is the use of Foo, second is the use of BAR *)
+    (* We will resolve class-name 'self' *)
     let class_name =
-      if String.equal (snd x) SN.Classes.cSelf then (
+      if String.equal class_name SN.Classes.cSelf then (
         match (fst env).current_cls with
-        | Some (cid, _, _) -> cid
+        | Some ((_class_decl_pos, class_name), _, _) -> class_name
         | None ->
-          Errors.self_outside_class pos;
-          (pos, SN.Classes.cUnknown)
+          Errors.self_outside_class class_pos;
+          SN.Classes.cUnknown
       ) else
-        let () = check_name x in
-        x
+        let () = check_name (class_pos, class_name) in
+        class_name
     in
-    Ast_defs.SFclass_const (class_name, (pos, y))
+    Ast_defs.SFclass_const ((class_pos, class_name), (const_pos, const_name))
 
 let arg_unpack_unexpected = function
   | None -> ()

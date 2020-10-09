@@ -11,19 +11,6 @@ use crate::{
     token_kind::TokenKind, trivia_kind::TriviaKind,
 };
 
-pub trait TokenBuilder<State, Trivia> {
-    //type Trivia;
-
-    fn make(
-        state: &mut State,
-        kind: TokenKind,
-        offset: usize,
-        width: usize,
-        leading: Trivia,
-        trailing: Trivia,
-    ) -> Self;
-}
-
 pub trait LexableToken: Clone {
     type Trivia: LexableTrivia;
 

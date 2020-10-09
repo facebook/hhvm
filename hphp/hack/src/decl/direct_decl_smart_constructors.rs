@@ -38,7 +38,7 @@ use oxidized_by_ref::{
 };
 use parser_core_types::{
     compact_token::CompactToken, indexed_source_text::IndexedSourceText, source_text::SourceText,
-    syntax_kind::SyntaxKind, token_kind::TokenKind,
+    syntax_kind::SyntaxKind, token_factory::SimpleTokenFactoryImpl, token_kind::TokenKind,
 };
 
 mod direct_decl_smart_constructors_generated;
@@ -53,6 +53,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
     pub fn new(src: &SourceText<'a>, file_mode: Mode, arena: &'a Bump) -> Self {
         Self {
             state: State::new(IndexedSourceText::new(src.clone()), file_mode, arena),
+            token_factory: SimpleTokenFactoryImpl::new(),
         }
     }
 
@@ -1736,7 +1737,7 @@ impl<'a> FlattenOp for DirectDeclSmartConstructors<'a> {
 }
 
 impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors<'a> {
-    fn make_token(&mut self, token: Self::Token) -> Self::R {
+    fn make_token(&mut self, token: CompactToken) -> Self::R {
         let token_text = |this: &Self| this.str_from_utf8(this.token_bytes(&token));
         let token_pos = |this: &Self| {
             let start = this

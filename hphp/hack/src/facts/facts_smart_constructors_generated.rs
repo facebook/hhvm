@@ -18,18 +18,19 @@
  */
 use flatten_smart_constructors::*;
 use smart_constructors::SmartConstructors;
-use parser_core_types::positioned_token::{PositionedToken, new};
-use parser_core_types::positioned_trivia::PositionedTrivia;
+use parser_core_types::positioned_token::PositionedToken;
+use parser_core_types::token_factory::SimpleTokenFactoryImpl;
 
 use crate::*;
 
 #[derive(Clone)]
 pub struct FactsSmartConstructors<'src> {
     pub state: HasScriptContent<'src>,
+    pub token_factory: SimpleTokenFactoryImpl<PositionedToken>,
 }
 impl<'src> SmartConstructors for FactsSmartConstructors<'src> {
     type State = HasScriptContent<'src>;
-    type Token = PositionedToken;
+    type TF = SimpleTokenFactoryImpl<PositionedToken>;
     type R = Node;
 
     fn state_mut(&mut self) -> &mut HasScriptContent<'src> {
@@ -40,28 +41,15 @@ impl<'src> SmartConstructors for FactsSmartConstructors<'src> {
       self.state
     }
 
-    fn create_token(
-        &mut self,
-        kind: TokenKind,
-        offset: usize,
-        width: usize,
-        leading: PositionedTrivia,
-        trailing: PositionedTrivia,
-    ) -> Self::Token {
-        new(
-            kind,
-            offset,
-            width,
-            leading,
-            trailing,
-        )
+    fn token_factory(&mut self) -> &mut Self::TF {
+        &mut self.token_factory
     }
 
     fn make_missing(&mut self, offset: usize) -> Self::R {
         <Self as FlattenSmartConstructors<'src, HasScriptContent<'src>>>::make_missing(self, offset)
     }
 
-    fn make_token(&mut self, token: Self::Token) -> Self::R {
+    fn make_token(&mut self, token: PositionedToken) -> Self::R {
         <Self as FlattenSmartConstructors<'src, HasScriptContent<'src>>>::make_token(self, token)
     }
 

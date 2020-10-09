@@ -11,8 +11,8 @@ mod facts_smart_constructors_generated;
 use escaper::{extract_unquoted_string, unescape_double, unescape_single};
 use flatten_smart_constructors::{FlattenOp, FlattenSmartConstructors};
 use parser_core_types::{
-    lexable_token::LexableToken, source_text::SourceText, syntax_kind::SyntaxKind,
-    token_kind::TokenKind,
+    lexable_token::LexableToken, positioned_token::PositionedToken, source_text::SourceText,
+    syntax_kind::SyntaxKind, token_factory::SimpleTokenFactoryImpl, token_kind::TokenKind,
 };
 
 pub use crate::facts_smart_constructors_generated::*;
@@ -23,6 +23,7 @@ impl<'src> FactsSmartConstructors<'src> {
     pub fn new(src: &SourceText<'src>) -> Self {
         Self {
             state: (false, src.clone()),
+            token_factory: SimpleTokenFactoryImpl::new(),
         }
     }
 }
@@ -168,7 +169,7 @@ impl<'a> FlattenOp for FactsSmartConstructors<'_> {
 }
 
 impl<'a> FlattenSmartConstructors<'a, HasScriptContent<'a>> for FactsSmartConstructors<'a> {
-    fn make_token(&mut self, token: Self::Token) -> Self::R {
+    fn make_token(&mut self, token: PositionedToken) -> Self::R {
         let token_text = || {
             self.state
                 .1

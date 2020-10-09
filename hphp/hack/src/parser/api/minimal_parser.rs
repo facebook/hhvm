@@ -21,9 +21,10 @@
 use minimal_smart_constructors::MinimalSmartConstructors;
 use parser::{
     compact_token::CompactToken, lexer::Lexer, minimal_syntax::MinimalSyntax,
-    minimal_trivia::MinimalTrivium, parser::Parser, parser_env::ParserEnv,
-    smart_constructors::NoState, smart_constructors_wrappers::WithKind, source_text::SourceText,
-    syntax_error::SyntaxError, token_kind::TokenKind,
+    minimal_token::MinimalToken, minimal_trivia::MinimalTrivium, parser::Parser,
+    parser_env::ParserEnv, smart_constructors::NoState, smart_constructors_wrappers::WithKind,
+    source_text::SourceText, syntax_error::SyntaxError, token_factory::SimpleTokenFactoryImpl,
+    token_kind::TokenKind,
 };
 use stack_limit::StackLimit;
 
@@ -51,8 +52,8 @@ pub fn parse_header_only<'a>(env: ParserEnv, source: &SourceText<'a>) -> Option<
 fn trivia_lexer<'a>(
     source_text: &SourceText<'a>,
     offset: usize,
-) -> Lexer<'a, MinimalSmartConstructors> {
-    Lexer::make_at(source_text, offset, MinimalSmartConstructors::new())
+) -> Lexer<'a, SimpleTokenFactoryImpl<MinimalToken>> {
+    Lexer::make_at(source_text, offset, SimpleTokenFactoryImpl::new())
 }
 
 pub fn scan_leading_xhp_trivia(source_text: SourceText, offset: usize) -> Vec<MinimalTrivium> {

@@ -7,10 +7,11 @@
 use ocamlrep::rc::RcOc;
 
 use crate::{
-    lexable_token::{LexablePositionedToken, LexableToken, TokenBuilder},
+    lexable_token::{LexablePositionedToken, LexableToken},
     lexable_trivia::LexableTrivia,
     positioned_trivia::{PositionedTrivia, PositionedTrivium},
     source_text::SourceText,
+    token_factory::SimpleTokenFactory,
     token_kind::TokenKind,
     trivia_kind::TriviaKind,
 };
@@ -54,9 +55,8 @@ pub fn new(
     })
 }
 
-impl<State> TokenBuilder<State, PositionedTrivia> for PositionedToken {
+impl SimpleTokenFactory for PositionedToken {
     fn make(
-        _: &mut State,
         kind: TokenKind,
         offset: usize,
         width: usize,

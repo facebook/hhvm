@@ -8,10 +8,11 @@ mod decl_mode_smart_constructors_generated;
 
 use ocaml::core::mlvalues::Value;
 use parser_core_types::{
-    lexable_token::{LexableToken, TokenBuilder},
+    lexable_token::LexableToken,
     lexable_trivia::LexableTrivia,
     source_text::SourceText,
     syntax::*,
+    token_factory::{SimpleTokenFactory, SimpleTokenFactoryImpl},
     token_kind::TokenKind,
 };
 use rust_to_ocaml::{SerializationContext, ToOcaml};
@@ -77,38 +78,44 @@ impl<S> StateType<S> for State<'_, S> {
 
 pub use crate::decl_mode_smart_constructors_generated::*;
 
-pub struct DeclModeSmartConstructors<'src, S, Token, Value> {
+pub struct DeclModeSmartConstructors<'src, S, Token: SimpleTokenFactory, Value> {
     pub state: State<'src, S>,
-    phantom_token: std::marker::PhantomData<*const Token>,
+    pub token_factory: SimpleTokenFactoryImpl<Token>,
     phantom_value: std::marker::PhantomData<*const Value>,
 }
 
-impl<'a, Token, Value> DeclModeSmartConstructors<'a, Syntax<Token, Value>, Token, Value> {
+impl<'a, Token: SimpleTokenFactory, Value>
+    DeclModeSmartConstructors<'a, Syntax<Token, Value>, Token, Value>
+{
     pub fn new(src: &SourceText<'a>) -> Self {
         Self {
             state: State::new(src),
-            phantom_token: std::marker::PhantomData,
+            token_factory: SimpleTokenFactoryImpl::new(),
             phantom_value: std::marker::PhantomData,
         }
     }
 }
 
-impl<'a, S, Token, Value> Clone for DeclModeSmartConstructors<'a, S, Token, Value> {
+impl<'a, S, Token: SimpleTokenFactory, Value> Clone
+    for DeclModeSmartConstructors<'a, S, Token, Value>
+{
     fn clone(&self) -> Self {
         Self {
             state: self.state.clone(),
-            phantom_token: self.phantom_token,
+            token_factory: self.token_factory.clone(),
             phantom_value: self.phantom_value,
         }
     }
 }
 
 impl<'src, Token, Value>
-    SyntaxSmartConstructors<Syntax<Token, Value>, State<'src, Syntax<Token, Value>>>
-    for DeclModeSmartConstructors<'src, Syntax<Token, Value>, Token, Value>
+    SyntaxSmartConstructors<
+        Syntax<Token, Value>,
+        SimpleTokenFactoryImpl<Token>,
+        State<'src, Syntax<Token, Value>>,
+    > for DeclModeSmartConstructors<'src, Syntax<Token, Value>, Token, Value>
 where
-    Token: LexableToken
-        + TokenBuilder<State<'src, Syntax<Token, Value>>, <Token as LexableToken>::Trivia>,
+    Token: LexableToken + SimpleTokenFactory,
     Value: SyntaxValueType<Token>,
 {
     fn make_yield_expression(&mut self, _r1: Self::R, _r2: Self::R) -> Self::R {
@@ -191,15 +198,13 @@ fn replace_body<'a, Token, Value>(
     saw_yield: bool,
 ) -> Syntax<Token, Value>
 where
-    Token: LexableToken
-        + TokenBuilder<State<'a, Syntax<Token, Value>>, <Token as LexableToken>::Trivia>,
+    Token: LexableToken + SimpleTokenFactory,
     Value: SyntaxValueType<Token>,
 {
     match body.syntax {
         SyntaxVariant::CompoundStatement(children) => {
             let stmts = if saw_yield {
-                let token = Token::make(
-                    st,
+                let token = <Token as SimpleTokenFactory>::make(
                     TokenKind::Yield,
                     0,
                     0,

@@ -12,11 +12,12 @@ use crate::lexer::{Lexer, StringLiteralKind};
 use crate::operator::{Assoc, Operator};
 use crate::parser_env::ParserEnv;
 use crate::parser_trait::{Context, ParserTrait};
-use crate::smart_constructors::{NodeType, SmartConstructors};
+use crate::smart_constructors::{NodeType, SmartConstructors, Token};
 use crate::statement_parser::StatementParser;
 use crate::type_parser::TypeParser;
 use parser_core_types::lexable_token::LexableToken;
 use parser_core_types::syntax_error::{self as Errors, SyntaxError};
+use parser_core_types::token_factory::TokenFactory;
 use parser_core_types::token_kind::TokenKind;
 
 #[derive(PartialEq)]
@@ -40,9 +41,9 @@ where
     S: SmartConstructors,
     S::R: NodeType,
 {
-    lexer: Lexer<'a, S>,
+    lexer: Lexer<'a, S::TF>,
     env: ParserEnv,
-    context: Context<'a, S::Token>,
+    context: Context<'a, Token<S>>,
     errors: Vec<SyntaxError>,
     sc: S,
     precedence: usize,
@@ -77,9 +78,9 @@ where
     S::R: NodeType,
 {
     fn make(
-        lexer: Lexer<'a, S>,
+        lexer: Lexer<'a, S::TF>,
         env: ParserEnv,
-        context: Context<'a, S::Token>,
+        context: Context<'a, Token<S>>,
         errors: Vec<SyntaxError>,
         sc: S,
     ) -> Self {
@@ -96,15 +97,15 @@ where
         }
     }
 
-    fn into_parts(self) -> (Lexer<'a, S>, Context<'a, S::Token>, Vec<SyntaxError>, S) {
+    fn into_parts(self) -> (Lexer<'a, S::TF>, Context<'a, Token<S>>, Vec<SyntaxError>, S) {
         (self.lexer, self.context, self.errors, self.sc)
     }
 
-    fn lexer(&self) -> &Lexer<'a, S> {
+    fn lexer(&self) -> &Lexer<'a, S::TF> {
         &self.lexer
     }
 
-    fn lexer_mut(&mut self) -> &mut Lexer<'a, S> {
+    fn lexer_mut(&mut self) -> &mut Lexer<'a, S::TF> {
         &mut self.lexer
     }
 
@@ -128,19 +129,19 @@ where
         &mut self.sc
     }
 
-    fn drain_skipped_tokens(&mut self) -> std::vec::Drain<S::Token> {
+    fn drain_skipped_tokens(&mut self) -> std::vec::Drain<Token<S>> {
         self.context.skipped_tokens.drain(..)
     }
 
-    fn skipped_tokens(&self) -> &[S::Token] {
+    fn skipped_tokens(&self) -> &[Token<S>] {
         &self.context.skipped_tokens
     }
 
-    fn context_mut(&mut self) -> &mut Context<'a, S::Token> {
+    fn context_mut(&mut self) -> &mut Context<'a, Token<S>> {
         &mut self.context
     }
 
-    fn context(&self) -> &Context<'a, S::Token> {
+    fn context(&self) -> &Context<'a, Token<S>> {
         &self.context
     }
 }
@@ -562,13 +563,13 @@ where
 
     fn parse_double_quoted_like_string(
         &mut self,
-        head: S::Token,
+        head: Token<S>,
         literal_kind: StringLiteralKind,
     ) -> S::R {
         self.parse_string_literal(head, literal_kind)
     }
 
-    fn parse_heredoc_string(&mut self, head: S::Token, name: &[u8]) -> S::R {
+    fn parse_heredoc_string(&mut self, head: Token<S>, name: &[u8]) -> S::R {
         self.parse_string_literal(
             head,
             StringLiteralKind::LiteralHeredoc {
@@ -579,7 +580,7 @@ where
 
     fn parse_braced_expression_in_string(
         &mut self,
-        left_brace: S::Token,
+        left_brace: Token<S>,
         dollar_inside_braces: bool,
     ) -> S::R {
         // We are parsing something like "abc{$x}def" or "abc${x}def", and we
@@ -752,7 +753,7 @@ where
         )
     }
 
-    fn parse_string_literal(&mut self, head: S::Token, literal_kind: StringLiteralKind) -> S::R {
+    fn parse_string_literal(&mut self, head: Token<S>, literal_kind: StringLiteralKind) -> S::R {
         // SPEC
         //
         // Double-quoted string literals and heredoc string literals use basically
@@ -811,7 +812,7 @@ where
         //
         //
 
-        let merge = |parser: &mut Self, token: S::Token, head: Option<S::Token>| {
+        let merge = |parser: &mut Self, token: Token<S>, head: Option<Token<S>>| {
             // TODO: Assert that new head has no leading trivia, old head has no
             // trailing trivia.
             // Invariant: A token inside a list of string fragments is always a head,
@@ -856,7 +857,7 @@ where
                     let (l, _, _) = head.into_trivia_and_width();
                     let (_, _, t) = token.into_trivia_and_width();
                     // TODO: Make a "position" type that is a tuple of source and offset.
-                    Some(parser.sc_mut().create_token(k, o, w, l, t))
+                    Some(parser.sc_mut().token_factory().make(k, o, w, l, t))
                 }
                 None => {
                     let token = match token.kind() {
@@ -870,14 +871,14 @@ where
             }
         };
 
-        let put_opt = |parser: &mut Self, head: Option<S::Token>, acc: &mut Vec<S::R>| {
+        let put_opt = |parser: &mut Self, head: Option<Token<S>>, acc: &mut Vec<S::R>| {
             if let Some(h) = head {
                 let token = S!(make_token, parser, h);
                 acc.push(token)
             }
         };
 
-        let parse_embedded_expression = |parser: &mut Self, token: S::Token| {
+        let parse_embedded_expression = |parser: &mut Self, token: Token<S>| {
             let token = S!(make_token, parser, token);
             let var_expr = S!(make_variable_expression, parser, token);
             let mut parser1 = parser.clone();
@@ -974,8 +975,8 @@ where
 
         let handle_left_brace = |
             parser: &mut Self,
-            left_brace: S::Token,
-            head: Option<S::Token>,
+            left_brace: Token<S>,
+            head: Option<Token<S>>,
             acc: &mut Vec<S::R>,
         | {
             // Note that here we use next_token_in_string because we need to know
@@ -1006,7 +1007,7 @@ where
         };
 
         let handle_dollar =
-            |parser: &mut Self, dollar, head: Option<S::Token>, acc: &mut Vec<S::R>| {
+            |parser: &mut Self, dollar, head: Option<Token<S>>, acc: &mut Vec<S::R>| {
                 // We need to parse ${x} as though it was {$x}
                 // TODO: This should be an error in strict mode.
                 // We must not have trivia between the $ and the {, but we can have
@@ -1517,7 +1518,7 @@ where
         }
     }
 
-    fn parse_start_of_type_specifier(&mut self, start_token: S::Token) -> Option<S::R> {
+    fn parse_start_of_type_specifier(&mut self, start_token: Token<S>) -> Option<S::R> {
         let name = if start_token.kind() == TokenKind::Backslash {
             let missing = S!(make_missing, self, self.pos());
             let backslash = S!(make_token, self, start_token);
@@ -2658,11 +2659,11 @@ where
         )
     }
 
-    fn next_xhp_element_token(&mut self, no_trailing: bool) -> (S::Token, &[u8]) {
+    fn next_xhp_element_token(&mut self, no_trailing: bool) -> (Token<S>, &[u8]) {
         self.lexer_mut().next_xhp_element_token(no_trailing)
     }
 
-    fn next_xhp_body_token(&mut self) -> S::Token {
+    fn next_xhp_body_token(&mut self) -> Token<S> {
         self.lexer_mut().next_xhp_body_token()
     }
 
@@ -2887,7 +2888,7 @@ where
         }
     }
 
-    fn parse_possible_xhp_expression(&mut self, in_xhp_body: bool, less_than: S::Token) -> S::R {
+    fn parse_possible_xhp_expression(&mut self, in_xhp_body: bool, less_than: Token<S>) -> S::R {
         // We got a < token where an expression was expected.
         //println!("assert_xhp_body_token start {}|", self.lexer().offset_as_string());
         let less_than = S!(make_token, self, less_than);

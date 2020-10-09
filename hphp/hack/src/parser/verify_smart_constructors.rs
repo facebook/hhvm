@@ -5,7 +5,10 @@
 
 mod verify_smart_constructors_generated;
 
-use parser_core_types::{positioned_syntax::PositionedSyntax, syntax_kind::SyntaxKind};
+use parser_core_types::{
+    positioned_syntax::PositionedSyntax, positioned_token::PositionedToken,
+    syntax_kind::SyntaxKind, token_factory::SimpleTokenFactoryImpl,
+};
 use syntax_smart_constructors::{StateType, SyntaxSmartConstructors};
 
 use ocaml::core::mlvalues::Value;
@@ -62,17 +65,22 @@ pub use crate::verify_smart_constructors_generated::*;
 #[derive(Clone)]
 pub struct VerifySmartConstructors {
     pub state: State,
+    pub token_factory: SimpleTokenFactoryImpl<PositionedToken>,
 }
 
 impl VerifySmartConstructors {
     pub fn new() -> Self {
         Self {
             state: State::new(),
+            token_factory: SimpleTokenFactoryImpl::new(),
         }
     }
 }
 
-impl SyntaxSmartConstructors<PositionedSyntax, State> for VerifySmartConstructors {}
+impl SyntaxSmartConstructors<PositionedSyntax, SimpleTokenFactoryImpl<PositionedToken>, State>
+    for VerifySmartConstructors
+{
+}
 
 impl ToOcaml for State {
     unsafe fn to_ocaml(&self, context: &SerializationContext) -> Value {

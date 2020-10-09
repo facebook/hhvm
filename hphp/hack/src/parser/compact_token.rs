@@ -10,6 +10,7 @@ use crate::{
     compact_trivia::{CompactTrivia, TriviaKinds},
     lexable_token::LexableToken,
     source_text::SourceText,
+    token_factory::SimpleTokenFactory,
     token_kind::TokenKind,
     trivia_kind::TriviaKind,
 };
@@ -331,6 +332,18 @@ impl LexableToken for CompactToken {
                 CompactTrivia::make(t.trailing, t.trailing_width),
             ),
         }
+    }
+}
+
+impl SimpleTokenFactory for CompactToken {
+    fn make(
+        kind: TokenKind,
+        offset: usize,
+        width: usize,
+        leading: CompactTrivia,
+        trailing: CompactTrivia,
+    ) -> Self {
+        Self::new(kind, offset, width, leading, trailing)
     }
 }
 

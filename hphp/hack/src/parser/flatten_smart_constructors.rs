@@ -20,6 +20,7 @@ use smart_constructors::SmartConstructors;
 use parser_core_types::{
   lexable_token::LexableToken,
   syntax_kind::SyntaxKind,
+  token_factory::TokenFactory,
 };
 
 pub trait FlattenOp {
@@ -36,7 +37,7 @@ pub trait FlattenSmartConstructors<'src, State>
        Self::zero(SyntaxKind::Missing)
     }
 
-    fn make_token(&mut self, token: Self::Token) -> Self::R {
+    fn make_token(&mut self, token: <Self::TF as TokenFactory>::Token) -> Self::R {
         Self::zero(SyntaxKind::Token(token.kind()))
     }
 

@@ -19,7 +19,7 @@ where
     S: SmartConstructors,
     S::R: NodeType,
 {
-    lexer: Lexer<'a, S>,
+    lexer: Lexer<'a, S::TF>,
     errors: Vec<SyntaxError>,
     env: ParserEnv,
     sc: S,
@@ -30,17 +30,17 @@ where
     S: SmartConstructors,
     S::R: NodeType,
 {
-    pub fn new(source: &SourceText<'a>, env: ParserEnv, sc: S) -> Self {
+    pub fn new(source: &SourceText<'a>, env: ParserEnv, mut sc: S) -> Self {
         let source = source.clone();
         Self {
-            lexer: Lexer::make(&source, sc.clone()),
+            lexer: Lexer::make(&source, sc.token_factory().clone()),
             errors: vec![],
             env,
             sc,
         }
     }
 
-    pub fn into_parts(self) -> (Lexer<'a, S>, Vec<SyntaxError>, ParserEnv, S) {
+    pub fn into_parts(self) -> (Lexer<'a, S::TF>, Vec<SyntaxError>, ParserEnv, S) {
         (self.lexer, self.errors, self.env, self.sc)
     }
 

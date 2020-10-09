@@ -6,10 +6,11 @@
 
 use crate::lexer::{self, Lexer};
 use crate::parser_env::ParserEnv;
-use crate::smart_constructors::{NodeType, SmartConstructors};
+use crate::smart_constructors::{NodeType, SmartConstructors, Token, Trivia};
 use parser_core_types::lexable_token::LexableToken;
 use parser_core_types::lexable_trivia::LexableTrivia;
 use parser_core_types::syntax_error::{self as Errors, Error, SyntaxError};
+use parser_core_types::token_factory::TokenFactory;
 use parser_core_types::token_kind::TokenKind;
 use stack_limit::StackLimit;
 
@@ -117,33 +118,33 @@ where
     <S as SmartConstructors>::R: NodeType,
 {
     fn make(
-        _: Lexer<'a, S>,
+        _: Lexer<'a, S::TF>,
         _: ParserEnv,
-        _: Context<'a, S::Token>,
+        _: Context<'a, Token<S>>,
         _: Vec<SyntaxError>,
         _: S,
     ) -> Self;
     fn add_error(&mut self, _: SyntaxError);
-    fn into_parts(self) -> (Lexer<'a, S>, Context<'a, S::Token>, Vec<SyntaxError>, S);
-    fn lexer(&self) -> &Lexer<'a, S>;
-    fn lexer_mut(&mut self) -> &mut Lexer<'a, S>;
+    fn into_parts(self) -> (Lexer<'a, S::TF>, Context<'a, Token<S>>, Vec<SyntaxError>, S);
+    fn lexer(&self) -> &Lexer<'a, S::TF>;
+    fn lexer_mut(&mut self) -> &mut Lexer<'a, S::TF>;
     fn continue_from<P: ParserTrait<'a, S>>(&mut self, _: P);
 
     fn env(&self) -> &ParserEnv;
 
     fn sc_mut(&mut self) -> &mut S;
 
-    fn skipped_tokens(&self) -> &[S::Token];
-    fn drain_skipped_tokens(&mut self) -> std::vec::Drain<S::Token>;
+    fn skipped_tokens(&self) -> &[Token<S>];
+    fn drain_skipped_tokens(&mut self) -> std::vec::Drain<Token<S>>;
 
-    fn context_mut(&mut self) -> &mut Context<'a, S::Token>;
-    fn context(&self) -> &Context<'a, S::Token>;
+    fn context_mut(&mut self) -> &mut Context<'a, Token<S>>;
+    fn context(&self) -> &Context<'a, Token<S>>;
 
     fn pos(&self) -> usize {
         self.lexer().offset()
     }
 
-    fn add_skipped_token(&mut self, token: S::Token) {
+    fn add_skipped_token(&mut self, token: Token<S>) {
         self.context_mut().skipped_tokens.push(token)
     }
 
@@ -183,22 +184,20 @@ where
         self.with_error_impl(true, message)
     }
 
-    fn next_token_with_tokenizer<F>(&mut self, tokenizer: F) -> S::Token
+    fn next_token_with_tokenizer<F>(&mut self, tokenizer: F) -> Token<S>
     where
-        F: Fn(&mut Lexer<'a, S>) -> S::Token,
+        F: Fn(&mut Lexer<'a, S::TF>) -> Token<S>,
     {
         let token = tokenizer(self.lexer_mut());
         if !self.skipped_tokens().is_empty() {
             // SourceText is just an Rc, so this clone is just a refcount bump.
             let source = self.lexer().source().clone();
             let start = self.lexer().start();
-            let mut leading = <S::Token as LexableToken>::Trivia::new();
+            let mut leading = Trivia::<S>::new();
             for t in self.drain_skipped_tokens() {
                 let (t_leading, t_width, t_trailing) = t.into_trivia_and_width();
                 leading.extend(t_leading);
-                leading.push(<S::Token as LexableToken>::Trivia::make_extra_token_error(
-                    &source, start, t_width,
-                ));
+                leading.push(Trivia::<S>::make_extra_token_error(&source, start, t_width));
                 leading.extend(t_trailing);
             }
             leading.extend(token.clone_leading());
@@ -208,19 +207,19 @@ where
         }
     }
 
-    fn next_token(&mut self) -> S::Token {
+    fn next_token(&mut self) -> Token<S> {
         self.next_token_with_tokenizer(|x| x.next_token())
     }
 
-    fn next_token_no_trailing(&mut self) -> S::Token {
+    fn next_token_no_trailing(&mut self) -> Token<S> {
         self.lexer_mut().next_token_no_trailing()
     }
 
-    fn next_docstring_header(&mut self) -> (S::Token, &'a [u8]) {
+    fn next_docstring_header(&mut self) -> (Token<S>, &'a [u8]) {
         self.lexer_mut().next_docstring_header()
     }
 
-    fn next_token_in_string(&mut self, literal_kind: &lexer::StringLiteralKind) -> S::Token {
+    fn next_token_in_string(&mut self, literal_kind: &lexer::StringLiteralKind) -> Token<S> {
         self.lexer_mut().next_token_in_string(literal_kind)
     }
 
@@ -240,7 +239,7 @@ where
         }
     }
 
-    fn next_xhp_children_name_or_other(&mut self) -> S::Token {
+    fn next_xhp_children_name_or_other(&mut self) -> Token<S> {
         if self.is_next_xhp_category_name() {
             self.next_xhp_category_name()
         } else if self.env().enable_xhp_class_modifier {
@@ -288,12 +287,12 @@ where
         if tparam_open == '<' && attr1 == '<' && attr2 == '<' {
             lexer.advance(1);
             let start = lexer.start();
-            let token = self.sc_mut().create_token(
+            let token = self.sc_mut().token_factory().make(
                 TokenKind::LessThan,
                 start,
                 1,
-                <S::Token as LexableToken>::Trivia::new(),
-                <S::Token as LexableToken>::Trivia::new(),
+                Trivia::<S>::new(),
+                Trivia::<S>::new(),
             );
             S!(make_token, self, token)
         } else {
@@ -303,10 +302,10 @@ where
     }
 
     fn assert_xhp_body_token(&mut self, kind: TokenKind) -> S::R {
-        self.assert_token_with_tokenizer(kind, |x: &mut Lexer<'a, S>| x.next_xhp_body_token())
+        self.assert_token_with_tokenizer(kind, |x: &mut Lexer<'a, S::TF>| x.next_xhp_body_token())
     }
 
-    fn peek_token_with_lookahead(&self, lookahead: usize) -> S::Token {
+    fn peek_token_with_lookahead(&self, lookahead: usize) -> Token<S> {
         let mut lexer = self.lexer().clone();
         let mut i = 0;
         loop {
@@ -320,7 +319,7 @@ where
         }
     }
 
-    fn peek_token(&self) -> S::Token {
+    fn peek_token(&self) -> Token<S> {
         self.lexer().peek_next_token()
     }
 
@@ -339,7 +338,7 @@ where
 
     fn assert_token_with_tokenizer<F>(&mut self, kind: TokenKind, tokenizer: F) -> S::R
     where
-        F: Fn(&mut Lexer<'a, S>) -> S::Token,
+        F: Fn(&mut Lexer<'a, S::TF>) -> Token<S>,
     {
         let token = self.next_token_with_tokenizer(tokenizer);
         if token.kind() != kind {
@@ -353,10 +352,10 @@ where
     }
 
     fn assert_token(&mut self, kind: TokenKind) -> S::R {
-        self.assert_token_with_tokenizer(kind, |x: &mut Lexer<S>| x.next_token())
+        self.assert_token_with_tokenizer(kind, |x: &mut Lexer<S::TF>| x.next_token())
     }
 
-    fn token_text(&self, token: &S::Token) -> &'a str {
+    fn token_text(&self, token: &Token<S>) -> &'a str {
         match token.leading_start_offset() {
             None => "", // unavailable for minimal tokens
             Some(leading_start_offset) => unsafe {
@@ -373,7 +372,7 @@ where
         self.token_text(&self.peek_token())
     }
     // If the next token is a name or keyword, scan it as a name.
-    fn next_token_as_name(&mut self) -> S::Token {
+    fn next_token_as_name(&mut self) -> Token<S> {
         // TODO: This isn't right.  Pass flags to the lexer.
         self.lexer_mut().next_token_as_name()
     }
@@ -470,12 +469,12 @@ where
     // NB: A "reserved" keyword is in practice a keyword that cannot be used
     // as a class name or function name, for example, control flow keywords or
     // declaration keywords are reserved.
-    fn next_token_non_reserved_as_name(&mut self) -> S::Token {
+    fn next_token_non_reserved_as_name(&mut self) -> Token<S> {
         // TODO: This isn't right.  Pass flags to the lexer.
         self.lexer_mut().next_token_non_reserved_as_name()
     }
 
-    fn scan_header(&mut self) -> (S::Token, Option<(S::Token, Option<S::Token>)>) {
+    fn scan_header(&mut self) -> (Token<S>, Option<(Token<S>, Option<Token<S>>)>) {
         self.lexer_mut().scan_header()
     }
 
@@ -728,7 +727,7 @@ where
         }
     }
 
-    fn next_xhp_category_name(&mut self) -> S::Token {
+    fn next_xhp_category_name(&mut self) -> Token<S> {
         self.lexer_mut().next_xhp_category_name()
     }
 
@@ -739,17 +738,17 @@ where
         self.lexer().is_next_name()
     }
 
-    fn next_xhp_name(&mut self) -> S::Token {
+    fn next_xhp_name(&mut self) -> Token<S> {
         assert!(self.is_next_name());
         self.lexer_mut().next_xhp_name()
     }
 
-    fn next_xhp_class_name(&mut self) -> S::Token {
+    fn next_xhp_class_name(&mut self) -> Token<S> {
         assert!(self.is_next_xhp_class_name());
         self.lexer_mut().next_xhp_class_name()
     }
 
-    fn next_xhp_modifier_class_name(&mut self) -> S::Token {
+    fn next_xhp_modifier_class_name(&mut self) -> Token<S> {
         self.lexer_mut().next_xhp_modifier_class_name()
     }
 
@@ -959,7 +958,7 @@ where
         self.lexer().is_next_xhp_class_name()
     }
 
-    fn next_xhp_modifier_class_name_or_other_token(&mut self) -> S::Token {
+    fn next_xhp_modifier_class_name_or_other_token(&mut self) -> Token<S> {
         if self.is_next_name() {
             self.next_xhp_modifier_class_name()
         } else {
@@ -967,7 +966,7 @@ where
         }
     }
 
-    fn next_xhp_class_name_or_other_token(&mut self) -> S::Token {
+    fn next_xhp_class_name_or_other_token(&mut self) -> Token<S> {
         if self.is_next_xhp_class_name() {
             self.next_xhp_class_name()
         } else {
@@ -1422,7 +1421,7 @@ where
         }
     }
 
-    fn require_and_return_token(&mut self, kind: TokenKind, error: Error) -> Option<S::Token> {
+    fn require_and_return_token(&mut self, kind: TokenKind, error: Error) -> Option<Token<S>> {
         if self.peek_token_kind() == kind {
             Some(self.next_token())
         } else {
@@ -1468,7 +1467,7 @@ where
         self.require_token(TokenKind::RightParen, Errors::error1011)
     }
 
-    fn require_semicolon_token(&mut self, saw_type_name: bool) -> Option<S::Token> {
+    fn require_semicolon_token(&mut self, saw_type_name: bool) -> Option<Token<S>> {
         match self.peek_token_kind() {
             TokenKind::Variable if saw_type_name => self
                 .require_and_return_token(TokenKind::Semicolon, Errors::local_variable_with_type),

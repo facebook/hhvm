@@ -19,18 +19,18 @@
 use flatten_smart_constructors::*;
 use smart_constructors::SmartConstructors;
 use parser_core_types::compact_token::CompactToken;
-use parser_core_types::compact_trivia::CompactTrivia;
-use parser_core_types::token_kind::TokenKind;
+use parser_core_types::token_factory::SimpleTokenFactoryImpl;
 
 use crate::{State, Node};
 
 #[derive(Clone)]
 pub struct DirectDeclSmartConstructors<'src> {
     pub state: State<'src>,
+    pub token_factory: SimpleTokenFactoryImpl<CompactToken>,
 }
 impl<'src> SmartConstructors for DirectDeclSmartConstructors<'src> {
     type State = State<'src>;
-    type Token = CompactToken;
+    type TF = SimpleTokenFactoryImpl<CompactToken>;
     type R = Node<'src>;
 
     fn state_mut(&mut self) -> &mut State<'src> {
@@ -41,22 +41,15 @@ impl<'src> SmartConstructors for DirectDeclSmartConstructors<'src> {
       self.state
     }
 
-    fn create_token(
-        &mut self,
-        kind: TokenKind,
-        offset: usize,
-        width: usize,
-        leading: CompactTrivia,
-        trailing: CompactTrivia,
-    ) -> Self::Token {
-        CompactToken::new(kind, offset, width, leading, trailing)
+    fn token_factory(&mut self) -> &mut Self::TF {
+        &mut self.token_factory
     }
 
     fn make_missing(&mut self, offset: usize) -> Self::R {
         <Self as FlattenSmartConstructors<'src, State<'src>>>::make_missing(self, offset)
     }
 
-    fn make_token(&mut self, token: Self::Token) -> Self::R {
+    fn make_token(&mut self, token: CompactToken) -> Self::R {
         <Self as FlattenSmartConstructors<'src, State<'src>>>::make_token(self, token)
     }
 

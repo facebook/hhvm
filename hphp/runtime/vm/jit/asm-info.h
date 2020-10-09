@@ -102,6 +102,8 @@ struct AsmInfo {
                             AreaIndex area,
                             TCA start,
                             TCA end) {
+    if (inst == nullptr) return;
+
     if (start != end) {
       auto newRange = updateRange(instRangesForArea(area),
                                   inst->id(),
@@ -325,4 +327,3 @@ struct AsmInfo {
 };
 
 }}
-

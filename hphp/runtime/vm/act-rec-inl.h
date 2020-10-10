@@ -76,14 +76,6 @@ inline void ActRec::setLocalsDecRefd() {
   m_callOffAndFlags |= 1 << LocalsDecRefd;
 }
 
-inline int32_t ActRec::numArgs() const {
-  return m_numArgs;
-}
-
-inline void ActRec::setNumArgs(uint32_t numArgs) {
-  m_numArgs = numArgs;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 inline void ActRec::setThisOrClass(void* objOrCls) {

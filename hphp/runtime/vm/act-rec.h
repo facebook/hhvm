@@ -79,16 +79,15 @@ struct ActRec {
 #else
   FuncId m_funcId;
 #endif
-  uint32_t m_thrash_DONT_USE1;
   // bit 0: LocalsDecRefd
   // bit 1: AsyncEagerRet
   // bits 2-31: bc offset of call opcode from caller func entry
   uint32_t m_callOffAndFlags;
-  uint32_t m_numArgs;
   union {
     ObjectData* m_thisUnsafe; // This.
     Class* m_clsUnsafe;       // Late bound class.
   };
+  uint64_t m_thrash_DONT_USE1;
   uint64_t m_thrash_DONT_USE2;
 
   TYPE_SCAN_CUSTOM_FIELD(m_thisUnsafe) {
@@ -184,16 +183,6 @@ struct ActRec {
    * Combine offset with flags.
    */
   static uint32_t encodeCallOffsetAndFlags(Offset offset, uint32_t flags);
-
-  /*
-   * Number of arguments passed for this invocation.
-   */
-  int32_t numArgs() const;
-
-  /*
-   * Set the number of arguments.
-   */
-  void setNumArgs(uint32_t numArgs);
 
   /*
    * Flags setters.

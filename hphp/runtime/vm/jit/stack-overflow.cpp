@@ -47,7 +47,7 @@ bool checkCalleeStackOverflow(const TypedValue* calleeFP, const Func* callee) {
 void handleStackOverflow(ActRec* calleeAR) {
   // We didn't finish setting up the prologue, so let the unwinder know that
   // locals are already freed so it doesn't try to decref the garbage. Do not
-  // bother decrefing numArgs, as we are going to fail the request anyway.
+  // bother decrefing arguments, as we are going to fail the request anyway.
   calleeAR->setLocalsDecRefd();
 
   // sync_regstate in unwind-itanium.cpp doesn't have enough context to properly
@@ -92,13 +92,8 @@ void handlePossibleStackOverflow(ActRec* calleeAR) {
    * up so it will), but it doesn't care how many args (or what types of args)
    * are below it on the stack.
    *
-   * So, all that boils down to this: we set calleeAR->m_numArgs to indicate
-   * how many things are actually on the stack (so handleStackOverflow knows
-   * what to set the vmsp to)---we just set it to the function's numLocals,
-   * which might mean decreffing some uninits unnecessarily, but that's ok.
    */
 
-  calleeAR->setNumArgs(calleeAR->func()->numLocals());
   handleStackOverflow(calleeAR);
 }
 

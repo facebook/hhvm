@@ -68,8 +68,7 @@ void cgDefFuncEntryFP(IRLS& env, const IRInstruction* inst) {
   auto const prevFP = srcLoc(env, inst, 0).reg();
   auto const newFP = srcLoc(env, inst, 1).reg();
   auto const callFlags = srcLoc(env, inst, 2).reg();
-  auto const numArgs = srcLoc(env, inst, 3).reg();
-  auto const ctx = srcLoc(env, inst, 4).reg();
+  auto const ctx = srcLoc(env, inst, 3).reg();
   auto const dst = dstLoc(env, inst, 0).reg();
   auto& v = vmain(env);
 
@@ -96,10 +95,6 @@ void cgDefFuncEntryFP(IRLS& env, const IRInstruction* inst) {
   v << movtql{callFlags, callFlagsLow32};
   v << shrli{flagsDelta, callFlagsLow32, callOffAndFlags, v.makeReg()};
   v << storel{callOffAndFlags, newFP + AROFF(m_callOffAndFlags)};
-
-  auto const numArgs32 = v.makeReg();
-  v << movtql{numArgs, numArgs32};
-  v << storel{numArgs32, newFP + AROFF(m_numArgs)};
 
   if (func->cls()) {
     v << store{ctx, newFP + AROFF(m_thisUnsafe)};
@@ -182,9 +177,6 @@ void cgStFrameMeta(IRLS& env, const IRInstruction* inst) {
     extra->asyncEagerReturn ? (1 << ActRec::AsyncEagerRet) : 0
   ));
   v << storeli{coaf, fp[AROFF(m_callOffAndFlags)]};
-
-  // Set m_numArgs.
-  v << storeli{safe_cast<int32_t>(extra->numArgs), fp[AROFF(m_numArgs)]};
 }
 
 void cgStFrameFunc(IRLS& env, const IRInstruction* inst) {

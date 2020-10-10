@@ -65,7 +65,6 @@ BTContext::BTContext() {
   fakeAR[0].m_sfp = &fakeAR[1];
   fakeAR[1].m_sfp = &fakeAR[0];
   fakeAR[0].m_savedRip = fakeAR[1].m_savedRip = handler;
-  fakeAR[0].m_numArgs = fakeAR[1].m_numArgs = 0;
   fakeAR[0].m_callOffAndFlags = fakeAR[1].m_callOffAndFlags =
     ActRec::encodeCallOffsetAndFlags(0, flags);
 }

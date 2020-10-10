@@ -788,13 +788,11 @@ struct StFrameMetaData : IRExtraData {
   std::string show() const {
     return folly::to<std::string>(
       callBCOff, ',',
-      numArgs, ',',
       asyncEagerReturn
     );
   }
 
   Offset callBCOff;
-  uint32_t numArgs;
   bool asyncEagerReturn;
 };
 

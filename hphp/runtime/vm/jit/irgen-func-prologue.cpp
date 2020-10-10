@@ -373,11 +373,8 @@ void emitSpillFrame(IRGS& env, const Func* callee, uint32_t argc,
     return closureThis;
   }();
 
-  // If we don't have variadics, unpack arg was dropped.
-  auto const arNumArgs = std::min(argc, callee->numParams());
-
   gen(env, DefFuncEntryFP, FuncData { callee },
-      fp(env), sp(env), callFlags, cns(env, arNumArgs), ctx);
+      fp(env), sp(env), callFlags, ctx);
   auto const irSPOff = FPInvOffset { 0 };
   auto const bcSPOff = FPInvOffset { callee->numSlotsInFrame() };
   gen(env, DefFrameRelSP, DefStackData { irSPOff, bcSPOff }, fp(env));

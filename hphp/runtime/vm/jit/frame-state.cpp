@@ -325,7 +325,7 @@ void FrameStateMgr::update(const IRInstruction* inst) {
 
   case DefFuncEntryFP:
     cur().fpValue = inst->dst();
-    cur().ctx = inst->src(4);
+    cur().ctx = inst->src(3);
     cur().stublogue = false;
     break;
 

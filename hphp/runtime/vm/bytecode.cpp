@@ -3595,7 +3595,6 @@ bool doFCall(CallFlags callFlags, const Func* func, uint32_t numArgsInclUnpack,
     callFlags.callOffset(),
     callFlags.asyncEagerReturn() ? (1 << ActRec::AsyncEagerRet) : 0
   );
-  ar->setNumArgs(std::min(numArgsInclUnpack, func->numParams()));
   ar->setThisOrClassAllowNull(ctx);
 
   try {

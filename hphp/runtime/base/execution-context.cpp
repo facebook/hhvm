@@ -1510,7 +1510,6 @@ TypedValue ExecutionContext::invokeFuncImpl(const Func* f,
   } else {
     ar->trashThis();
   }
-  ar->setNumArgs(std::min(numArgsInclUnpack, f->numParams()));
 
 #ifdef HPHP_TRACE
   if (vmfp() == nullptr) {
@@ -2148,7 +2147,6 @@ void ExecutionContext::enterDebuggerDummyEnv() {
   ActRec* ar = vmStack().allocA();
   ar->setFunc(s_debuggerDummy->lookupFuncId(0));
   assertx(ar->func() && ar->func()->name()->equal(s_include.get()));
-  ar->setNumArgs(0);
   for (int i = 0; i < ar->func()->numLocals(); ++i) vmStack().pushInt(1);
   ar->trashThis();
   ar->setReturnVMExit();

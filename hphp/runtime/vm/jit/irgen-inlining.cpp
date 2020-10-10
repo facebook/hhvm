@@ -303,7 +303,6 @@ void beginInlining(IRGS& env,
 
   StFrameMetaData meta;
   meta.callBCOff     = callBcOffset;
-  meta.numArgs       = numArgsInclUnpack;
   meta.asyncEagerReturn = returnTarget.asyncEagerOffset != kInvalidOffset;
 
   gen(env, StFrameMeta, meta, calleeFP);

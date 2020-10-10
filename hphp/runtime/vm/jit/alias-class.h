@@ -168,8 +168,7 @@ inline AIter aiter_all(SSATmp* fp, uint32_t id,
 /*
  * These singleton values are each associated with a given frame. AFContext
  * is the m_thisUnsafe field of ActRec, AFFunc is m_func, AFMeta holds the
- * flags, numArgs, hardware, and VM return fields (m_savedRip, m_numArgs, and
- * m_callOffAndFlags),
+ * flags, hardware, and VM return fields (m_savedRip and m_callOffAndFlags).
  */
 FRAME_RELATIVE0(AFContext);
 FRAME_RELATIVE0(AFFunc);

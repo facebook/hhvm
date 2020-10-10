@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c8bd1cb29f3e2c9a15e01bedbe15770d>>
+// @generated SignedSource<<aade859d7e8afed88d8257d3e15b6502>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -488,7 +488,7 @@ pub enum Typing {
     InvalidNewableTypeArgument = 4307,
     InvalidNewableTypeParamConstraints = 4308,
     NewWithoutNewable = 4309,
-    NewStaticClassReified = 4310,
+    NewClassReified = 4310,
     MemoizeReified = 4311,
     ConsistentConstructReified = 4312,
     MethodVariance = 4313,

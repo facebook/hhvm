@@ -585,7 +585,7 @@ let hard_banned_codes =
       Typing.err_code Typing.InvalidNewableTypeArgument;
       Typing.err_code Typing.InvalidNewableTypeParamConstraints;
       Typing.err_code Typing.NewWithoutNewable;
-      Typing.err_code Typing.NewStaticClassReified;
+      Typing.err_code Typing.NewClassReified;
       Typing.err_code Typing.MemoizeReified;
       Typing.err_code Typing.ClassGetReified;
     ]
@@ -3768,11 +3768,21 @@ let invalid_reified_argument_reifiable (def_pos, def_name) arg_pos ty_pos ty_msg
       (def_pos, Markdown_lite.md_codify def_name ^ " is reified");
     ]
 
-let new_static_class_reified pos =
+let new_class_reified pos class_type suggested_class =
+  let suggestion =
+    match suggested_class with
+    | Some s ->
+      let s = strip_ns s in
+      sprintf ". Try `new %s` instead." s
+    | None -> ""
+  in
   add
-    (Typing.err_code Typing.NewStaticClassReified)
+    (Typing.err_code Typing.NewClassReified)
     pos
-    "Cannot call `new static` because the current class has reified generics"
+    (sprintf
+       "Cannot call `new %s` because the current class has reified generics%s"
+       class_type
+       suggestion)
 
 let class_get_reified pos =
   add

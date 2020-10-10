@@ -53,6 +53,8 @@ let get_self_id = Typing_env.get_self_id
 
 let get_self_ty = Typing_env.get_self_ty
 
+let get_parent_id = Typing_env.get_parent_id
+
 let get_self_ty_exn env =
   match get_self_ty env with
   | Some self_ty -> self_ty

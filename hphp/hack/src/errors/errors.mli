@@ -1314,7 +1314,7 @@ val invalid_reified_argument :
 val invalid_reified_argument_reifiable :
   Pos.t * string -> Pos.t -> Pos.t -> string -> unit
 
-val new_static_class_reified : Pos.t -> unit
+val new_class_reified : Pos.t -> string -> string option -> unit
 
 val class_get_reified : Pos.t -> unit
 

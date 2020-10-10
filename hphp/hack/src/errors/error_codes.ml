@@ -579,7 +579,7 @@ module Typing = struct
     | InvalidNewableTypeArgument [@value 4307]
     | InvalidNewableTypeParamConstraints [@value 4308]
     | NewWithoutNewable [@value 4309]
-    | NewStaticClassReified [@value 4310]
+    | NewClassReified [@value 4310]
     | MemoizeReified [@value 4311]
     | ConsistentConstructReified [@value 4312]
     | MethodVariance [@value 4313]

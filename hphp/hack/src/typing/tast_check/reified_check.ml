@@ -221,7 +221,8 @@ let handler =
             let class_pos = Cls.pos cls in
             verify_call_targs env pos class_pos tparams targs
           | None -> ()))
-      | ((pos, _), New ((_, CIstatic), _, _, _, _)) ->
+      | ( (pos, _),
+          New ((_, ((CIstatic | CIself | CIparent) as cid)), _, _, _, _) ) ->
         Option.(
           let t =
             Env.get_self_id env
@@ -230,8 +231,15 @@ let handler =
             >>| tparams_has_reified
           in
           Option.iter t ~f:(fun has_reified ->
-              if has_reified then Errors.new_static_class_reified pos))
-      | (_, New ((_, (CIself | CIparent)), _, _, _, _)) -> ()
+              if has_reified then
+                let (class_type, suggested_class) =
+                  match cid with
+                  | CIstatic -> ("static", None)
+                  | CIself -> ("self", Env.get_self_id env)
+                  | CIparent -> ("parent", Env.get_parent_id env)
+                  | _ -> failwith "Unexpected match"
+                in
+                Errors.new_class_reified pos class_type suggested_class))
       | ((pos, _), New (((_, ty), _), targs, _, _, _)) ->
         let (env, ty) = Env.expand_type env ty in
         begin

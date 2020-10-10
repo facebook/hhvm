@@ -2,4 +2,7 @@ File "new_self_new_parent.php", line 8, characters 5-15:
   exact C<[unresolved]>
 File "new_self_new_parent.php", line 10, characters 5-15:
   exact A<[unresolved]>
-No errors
+File "new_self_new_parent.php", line 7, characters 10-19:
+Cannot call `new self` because the current class has reified generics. Try `new C` instead. (Typing[4310])
+File "new_self_new_parent.php", line 9, characters 10-21:
+Cannot call `new parent` because the current class has reified generics. Try `new A` instead. (Typing[4310])

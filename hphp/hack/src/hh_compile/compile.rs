@@ -3,30 +3,28 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use ::anyhow::{self, anyhow, Context};
-use rayon::prelude::*;
-use structopt::StructOpt;
-
-use compile_rust as compile;
-
-use compile::{Env, EnvFlags, Profile};
+use crate::utils;
+use ::anyhow::anyhow;
+use compile_lib::{Env, EnvFlags, Profile};
+use compile_rust as compile_lib;
 use multifile_rust as multifile;
 use options::Options;
 use oxidized::relative_path::{self, RelativePath};
+use rayon::prelude::*;
 use stack_limit::{StackLimit, KI, MI};
+use structopt::StructOpt;
 
 use std::{
     fs::File,
-    io::{self, stdout, BufRead, Read, Write},
-    iter::{Iterator, Map},
+    io::{self, stdout, Read, Write},
+    iter::Iterator,
     path::{Path, PathBuf},
     sync::{Arc, Mutex},
-    vec::IntoIter,
 };
 
 #[derive(StructOpt, Clone, Debug)]
 #[structopt(no_version)] // don't consult CARGO_PKG_VERSION (Buck doesn't set it)
-struct Opts {
+pub struct Opts {
     /// " Configuration: Server.Port=<value> "
     ///     Allows overriding config options passed on a file
     #[structopt(short = "v")]
@@ -65,12 +63,54 @@ struct Opts {
     disable_toplevel_elaboration: bool,
 }
 
-fn read_file(filepath: &Path) -> anyhow::Result<Vec<u8>> {
-    let mut text: Vec<u8> = Vec::new();
-    File::open(filepath)
-        .with_context(|| format!("cannot open input file: {}", filepath.display()))?
-        .read_to_end(&mut text)?;
-    Ok(text)
+pub fn run(opts: Opts) -> anyhow::Result<()> {
+    type SyncWrite = Mutex<Box<dyn Write + Sync + Send>>;
+
+    if opts.verbosity > 1 {
+        eprintln!("hh_compile options/flags: {:#?}", opts);
+    }
+    let config = Config::new(&opts);
+
+    if opts.daemon {
+        unimplemented!("TODO(hrust) handlers for daemon (HHVM) mode");
+    } else {
+        config.dump_if_needed(&opts);
+
+        let writer: SyncWrite = match &opts.output_file {
+            None => Mutex::new(Box::new(stdout())),
+            Some(output_file) => Mutex::new(Box::new(File::create(output_file)?)),
+        };
+
+        let files: Vec<_> = match &opts.input_file_list {
+            Some(filename) => utils::read_file_list(&filename)?.collect(),
+            None => vec![
+                opts.filename
+                    .as_ref()
+                    .cloned()
+                    .ok_or_else(|| anyhow! {"TODO(hrust) support stdin"})?,
+            ],
+        };
+
+        files.par_iter().try_for_each(|f| {
+            let content = utils::read_file(f)?;
+            let files = multifile::to_files(f, content)?;
+            for (f, content) in files {
+                let f = f.as_ref();
+                match process_single_file(&opts, f.into(), content) {
+                    Err(e) => write!(
+                        writer.lock().unwrap(),
+                        "Error in file {}: {}",
+                        f.display(),
+                        e
+                    )?,
+                    Ok((output, _profile)) => {
+                        writer.lock().unwrap().write_all(output.as_bytes())?
+                    }
+                }
+            }
+            Ok(())
+        })
+    }
 }
 
 fn process_single_file_impl(
@@ -96,7 +136,7 @@ fn process_single_file_impl(
         flags,
     };
     let mut output = String::new();
-    let profile = compile::from_text(&env, stack_limit, &mut output, content)?;
+    let profile = compile_lib::from_text(&env, stack_limit, &mut output, content)?;
     Ok((output, profile))
 }
 
@@ -153,24 +193,6 @@ fn process_single_file(
     }
 }
 
-fn read_file_list(input_path: &Option<PathBuf>) -> anyhow::Result<impl Iterator<Item = PathBuf>> {
-    fn read_lines(r: impl Read) -> anyhow::Result<Map<IntoIter<String>, fn(String) -> PathBuf>> {
-        Ok(io::BufReader::new(r)
-            .lines()
-            .collect::<std::io::Result<Vec<_>>>()
-            .context("could not read line from input file list")?
-            .into_iter()
-            .map(|l| PathBuf::from(l.trim())))
-    }
-    match input_path.as_ref() {
-        None => read_lines(io::stdin()),
-        Some(path) => read_lines(
-            File::open(path)
-                .with_context(|| format!("Could not open input file: {}", path.display()))?,
-        ),
-    }
-}
-
 fn assert_regular_file(filepath: impl AsRef<Path>) {
     let filepath = filepath.as_ref();
     if !filepath.is_file() {
@@ -223,56 +245,5 @@ impl Config {
             print!("===CONFIG===\n{}\n\n", hhbc_options.to_string());
             io::stdout().flush().expect("flushing stdout failed");
         }
-    }
-}
-
-fn main() -> anyhow::Result<()> {
-    type SyncWrite = Mutex<Box<dyn Write + Sync + Send>>;
-
-    let opts = Opts::from_args();
-    if opts.verbosity > 1 {
-        eprintln!("hh_compile options/flags: {:#?}", opts);
-    }
-    let config = Config::new(&opts);
-
-    if opts.daemon {
-        unimplemented!("TODO(hrust) handlers for daemon (HHVM) mode");
-    } else {
-        config.dump_if_needed(&opts);
-
-        let writer: SyncWrite = match &opts.output_file {
-            None => Mutex::new(Box::new(stdout())),
-            Some(output_file) => Mutex::new(Box::new(File::create(output_file)?)),
-        };
-
-        let files: Vec<_> = match &opts.input_file_list {
-            Some(filename) => read_file_list(&filename)?.collect(),
-            None => vec![
-                opts.filename
-                    .as_ref()
-                    .cloned()
-                    .ok_or_else(|| anyhow! {"TODO(hrust) support stdin"})?,
-            ],
-        };
-
-        files.par_iter().try_for_each(|f| {
-            let content = read_file(f)?;
-            let files = multifile::to_files(f, content)?;
-            for (f, content) in files {
-                let f = f.as_ref();
-                match process_single_file(&opts, f.into(), content) {
-                    Err(e) => write!(
-                        writer.lock().unwrap(),
-                        "Error in file {}: {}",
-                        f.display(),
-                        e
-                    )?,
-                    Ok((output, _profile)) => {
-                        writer.lock().unwrap().write_all(output.as_bytes())?
-                    }
-                }
-            }
-            Ok(())
-        })
     }
 }

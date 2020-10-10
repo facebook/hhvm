@@ -1,6 +1,6 @@
 [workspace]
 members = [
-    "src/cargo/hh_compile",
+    "src/hh_compile",
     "src/decl/decl_rust",
     "src/decl/direct_decl_smart_constructors",
     "src/decl/ffi",

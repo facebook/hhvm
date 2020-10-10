@@ -35,7 +35,7 @@ inline bool strEqual(const StringData* sd1, const StringData* sd2, bool raise) {
   if (CaseSensitive) return false;
   // If keys are same case insensitively, raise a notice
   if (sd1->isame(sd2)) {
-    if (RO::EvalRaiseOnCaseInsensitiveLookup && raise &&
+    if (RO::EvalRaiseOnCaseInsensitiveLookupV2 && raise &&
         is_in_request_context()) {
       raise_notice("Invalid case sensitive method lookup: "
                    "Searching for %s using %s\n",

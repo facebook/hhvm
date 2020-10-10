@@ -1586,7 +1586,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdLazyClsName:
     return IrrelevantEffects {};
   case MethodExists:
-    if (!RO::EvalRaiseOnCaseInsensitiveLookup) return IrrelevantEffects {};
+    if (!RO::EvalRaiseOnCaseInsensitiveLookupV2) return IrrelevantEffects {};
     return may_load_store(AHeapAny, AHeapAny);
 
   case StClosureArg:

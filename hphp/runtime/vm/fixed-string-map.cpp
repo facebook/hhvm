@@ -14,12 +14,19 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/vm/fixed-string-map.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-namespace FSM { const StringData* null_key; }
+namespace FSM {
+  const StringData* null_key;
+
+  bool is_in_request_context() {
+    return !g_context.isNull();
+  }
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 }

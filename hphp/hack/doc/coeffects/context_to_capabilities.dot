@@ -1,0 +1,75 @@
+digraph G {
+  subgraph cluster_legend {
+    label="Legend: semantic model"
+
+    Cap2 -> Cap1 [label="extends"];
+    
+    context [shape="rect", color=lightsteelblue1, style=filled];
+    context -> Cap1 [label="alias", style=dashed, color=blue];
+    context -> Cap2 [label="unsafe alias", color=red];
+    
+    intersect_context [shape="rect", color=lightsteelblue1, style=filled];
+    intersect_context -> Cap3 [label="alias to (Cap3 & Cap4)", style=dashed, color=blue];
+    intersect_context -> Cap4 [style=dashed, color=blue];
+  };
+
+  "defaults"    [shape="rect", color=lightsteelblue1, style=filled];
+  "pure"        [shape="rect", color=lightsteelblue1, style=filled];
+  "rx"          [shape="rect", color=lightsteelblue1, style=filled];
+  "rx_shallow"  [shape="rect", color=lightsteelblue1, style=filled];
+  "rx_local"    [shape="rect", color=lightsteelblue1, style=filled];
+  "cipp_global" [shape="rect", color=lightsteelblue1, style=filled];
+  "cipp<T>"     [shape="rect", color=lightsteelblue1, style=filled];
+  "bloks"       [shape="rect", color=lightsteelblue1, style=filled];
+  
+  "Client" -> "⊤"
+  "Server" -> "⊤"
+  
+  // cipp domain
+  "CippGlobal" -> "Server"
+  "Cipp<T>" -> "CippGlobal"
+  
+  // reactive domain
+  "Rx" -> "Server"
+  "RxShallow" -> "Rx"
+  "RxLocal" -> "RxShallow"
+
+  // unsafe relations
+  "rx_local" -> "defaults"    [color="red"];
+  "rx_shallow" -> "rx_local"  [color="red"];
+
+  // defaults intersection
+  "defaults" -> "rx_local"    [color="blue", style="dashed"];
+  "defaults" -> "cipp_global" [color="blue", style="dashed"];
+
+  // The following clusters pair up type aliases with individual interfaces
+  subgraph cluster_pure {
+    "pure" -> "Server" [color="blue", style="dashed"];
+  };
+  
+  // reactive domain
+  subgraph cluster_rx {
+    "rx" -> "Rx" [color="blue", style="dashed"];
+  };   
+  subgraph cluster_rxl {
+    "rx_local" -> "RxLocal" [color="blue", style="dashed"];
+  };
+  subgraph cluster_rxs {
+    "rx_shallow" -> "RxShallow" [color="blue", style="dashed"];
+  };
+
+  // cipp domain
+  subgraph cluster_cippt {
+    "cipp<T>" -> "Cipp<T>" [color="blue", style="dashed"];
+  };
+  subgraph cluster_cippglob {
+      "cipp_global" -> "CippGlobal" [color="blue", style="dashed"];
+  };
+
+  subgraph cluster_bloks {
+    "bloks" -> "Client" [color="blue", style="dashed"];
+  };
+
+  // makes arrows point bottom to top
+  rankdir = "BT" 
+}

@@ -3921,8 +3921,9 @@ void fcallObjMethodImpl(PC origpc, PC& pc, const FCallArgs& fca,
                         StringData* methName) {
   const Func* func;
   LookupResult res;
-  assertx(tvIsObject(vmStack().indC(fca.numInputs() + 2)));
-  auto const obj = vmStack().indC(fca.numInputs() + 2)->m_data.pobj;
+  assertx(tvIsObject(vmStack().indC(fca.numInputs() + (kNumActRecCells - 1))));
+  auto const obj =
+    vmStack().indC(fca.numInputs() + (kNumActRecCells - 1))->m_data.pobj;
   auto cls = obj->getVMClass();
   auto const ctx = [&] {
     if (!fca.context) return arGetContextClass(vmfp());
@@ -3945,7 +3946,7 @@ void fcallObjMethodImpl(PC origpc, PC& pc, const FCallArgs& fca,
 
   // fcallImpl() will do further checks before spilling the ActRec. If any
   // of these checks fail, make sure it gets decref'd only via ctx.
-  tvWriteNull(*vmStack().indC(fca.numInputs() + 2));
+  tvWriteNull(*vmStack().indC(fca.numInputs() + (kNumActRecCells - 1)));
   fcallImpl<dynamic>(origpc, pc, fca, func, Object::attach(obj));
 }
 
@@ -3974,7 +3975,9 @@ static void throw_call_non_object(const char* methodName,
 ALWAYS_INLINE bool
 fcallObjMethodHandleInput(const FCallArgs& fca, ObjMethodOp op,
                           const StringData* methName, bool extraStk) {
-  TypedValue* obj = vmStack().indC(fca.numInputs() + 2 + (extraStk ? 1 : 0));
+  TypedValue* obj = vmStack().indC(fca.numInputs()
+                                   + (kNumActRecCells - 1)
+                                   + (extraStk ? 1 : 0));
   if (LIKELY(isObjectType(obj->m_type))) return false;
 
   if (UNLIKELY(op == ObjMethodOp::NullThrows || !isNullType(obj->m_type))) {
@@ -4408,8 +4411,9 @@ OPTBLD_INLINE void iopFCallCtor(PC origpc, PC& pc, FCallArgs fca,
                                 const StringData*) {
   assertx(fca.numRets == 1);
   assertx(fca.asyncEagerOffset == kInvalidOffset);
-  assertx(tvIsObject(vmStack().indC(fca.numInputs() + 2)));
-  auto const obj = vmStack().indC(fca.numInputs() + 2)->m_data.pobj;
+  assertx(tvIsObject(vmStack().indC(fca.numInputs() + (kNumActRecCells - 1))));
+  auto const obj =
+    vmStack().indC(fca.numInputs() + (kNumActRecCells - 1))->m_data.pobj;
 
   const Func* func;
   auto const ctx = arGetContextClass(vmfp());
@@ -4419,7 +4423,7 @@ OPTBLD_INLINE void iopFCallCtor(PC origpc, PC& pc, FCallArgs fca,
 
   // fcallImpl() will do further checks before spilling the ActRec. If any
   // of these checks fail, make sure it gets decref'd only via ctx.
-  tvWriteNull(*vmStack().indC(fca.numInputs() + 2));
+  tvWriteNull(*vmStack().indC(fca.numInputs() + (kNumActRecCells - 1)));
   fcallImpl<false>(origpc, pc, fca, func, Object::attach(obj));
 }
 

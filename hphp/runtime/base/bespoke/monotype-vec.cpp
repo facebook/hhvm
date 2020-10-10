@@ -385,12 +385,11 @@ Value* MonotypeVec::rawData() {
 }
 
 const Value* MonotypeVec::rawData() const {
-  return reinterpret_cast<const Value*>(this + 1);
+  return const_cast<MonotypeVec*>(this)->rawData();
 }
 
 Value& MonotypeVec::valueRefUnchecked(uint32_t idx) {
-  auto const values = reinterpret_cast<Value*>(rawData());
-  return values[idx];
+  return rawData()[idx];
 }
 
 const Value& MonotypeVec::valueRefUnchecked(uint32_t idx) const {
@@ -510,8 +509,7 @@ size_t MonotypeVec::Align(const MonotypeVec*) {
 void MonotypeVec::Scan(const MonotypeVec* mad, type_scan::Scanner& scan) {
   if (isRefcountedType(mad->type())) {
     static_assert(sizeof(MaybeCountable*) == sizeof(Value));
-    scan.scan(*reinterpret_cast<const MaybeCountable*>(mad->rawData()),
-              mad->size() * sizeof(Value));
+    scan.scan(mad->rawData()->pcnt, mad->size() * sizeof(Value));
   }
 }
 

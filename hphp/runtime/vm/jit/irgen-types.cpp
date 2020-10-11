@@ -440,6 +440,7 @@ const StaticString s_FUNC_CONVERSION(Strings::FUNC_TO_STRING);
 const StaticString s_FUNC_IS_STRING("Func used in is_string");
 const StaticString s_CLASS_CONVERSION(Strings::CLASS_TO_STRING);
 const StaticString s_CLASS_IS_STRING("Class used in is_string");
+const StaticString s_TYPE_STRUCT_NOT_DARR("Type-structure is not a darray");
 
 SSATmp* isStrImpl(IRGS& env, SSATmp* src) {
   MultiCond mc{env};
@@ -1606,7 +1607,24 @@ void emitVerifyParamTypeTS(IRGS& env, int32_t paramId) {
   auto const cell = ldLoc(env, paramId, nullptr, DataTypeSpecific);
   auto const reified = tcCouldBeReified(curFunc(env), paramId);
   if (cell->isA(TObj) || reified) {
-    gen(env, VerifyReifiedLocalType, ParamData { paramId }, ts);
+    cond(
+      env,
+      [&] (Block* taken) {
+        return
+        gen(env,
+            CheckType,
+            RuntimeOption::EvalHackArrDVArrs ? TDict : TDArr,
+            taken, ts);
+      },
+      [&] (SSATmp* dts) {
+        gen(env, VerifyReifiedLocalType, ParamData { paramId }, dts);
+        return nullptr;
+      },
+      [&] {
+        gen(env, RaiseError, cns(env, s_TYPE_STRUCT_NOT_DARR.get()));
+        return nullptr;
+      }
+    );
   } else if (cell->type().maybe(TObj)) {
     // Meaning we did not not guard on the stack input correctly
     PUNT(VerifyReifiedLocalType-UnguardedObj);

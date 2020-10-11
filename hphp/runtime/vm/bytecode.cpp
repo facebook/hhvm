@@ -1251,12 +1251,18 @@ OPTBLD_INLINE void iopNewKeysetArray(uint32_t n) {
   vmStack().pushKeysetNoRc(bespoke::maybeMakeLoggingArray(ad));
 }
 
-OPTBLD_INLINE void iopNewVArray(uint32_t n) {
-  assertx(!RuntimeOption::EvalHackArrDVArrs);
+namespace {
+void newVArrayImpl(uint32_t n) {
   // This constructor moves values, no inc/decref is necessary.
   auto const ad = PackedArray::MakeVArray(n, vmStack().topC());
   vmStack().ndiscard(n);
-  vmStack().pushArrayNoRc(bespoke::maybeMakeLoggingArray(ad));
+  vmStack().pushArrayLikeNoRc(bespoke::maybeMakeLoggingArray(ad));
+}
+}
+
+OPTBLD_INLINE void iopNewVArray(uint32_t n) {
+  assertx(!RuntimeOption::EvalHackArrDVArrs);
+  newVArrayImpl(n);
 }
 
 OPTBLD_INLINE void iopNewDArray(uint32_t capacity) {
@@ -3663,11 +3669,7 @@ void fcallImpl(PC origpc, PC& pc, const FCallArgs& fca, const Func* func,
 
     if (UNLIKELY(fca.numArgs > func->numNonVariadicParams())) {
       GenericsSaver gs{fca.hasGenerics()};
-      if (RuntimeOption::EvalHackArrDVArrs) {
-        iopNewVec(fca.numArgs - func->numNonVariadicParams());
-      } else {
-        iopNewVArray(fca.numArgs - func->numNonVariadicParams());
-      }
+      newVArrayImpl(fca.numArgs - func->numNonVariadicParams());
       return func->numNonVariadicParams() + 1;
     }
 

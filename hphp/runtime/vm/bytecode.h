@@ -384,6 +384,14 @@ public:
   }
 
   ALWAYS_INLINE
+  void pushArrayLikeNoRc(ArrayData* a) {
+    assertx(RuntimeOption::EvalHackArrDVArrs || a->isPHPArrayType());
+    assertx(m_top != m_elms);
+    m_top--;
+    *m_top = make_array_like_tv(a);
+  }
+
+  ALWAYS_INLINE
   void pushVecNoRc(ArrayData* a) {
     assertx(a->isVecType());
     assertx(m_top != m_elms);

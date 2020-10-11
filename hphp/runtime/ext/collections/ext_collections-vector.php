@@ -66,8 +66,10 @@ final class Vector implements \MutableVector {
   /** Returns the number of values in the Vector.
    * @return int
    */
-  <<__Native, __Pure, __MaybeMutable>>
-  public function count(): int;
+  <<__Pure, __MaybeMutable>>
+  public function count(): int {
+    return \count(vec($this));
+  }
 
   /** Returns an Iterable that produces the values from this Vector.
    * @return object
@@ -80,8 +82,10 @@ final class Vector implements \MutableVector {
   /** Returns a Vector built from the keys of this Vector.
    * @return object
    */
-  <<__Native, __Pure, __MutableReturn, __MaybeMutable>>
-  public function keys(): object;
+  <<__Pure, __MutableReturn, __MaybeMutable>>
+  public function keys(): this {
+    return new self($this->toKeysArray());
+  }
 
   /** Returns a copy of this Vector.
    * @return object
@@ -104,16 +108,20 @@ final class Vector implements \MutableVector {
    * @param mixed $key
    * @return mixed
    */
-  <<__Native, __Pure, __MaybeMutable>>
-  public function at(mixed $key): mixed;
+  <<__Pure, __MaybeMutable>>
+  public function at(mixed $key): mixed {
+    return $this[$key];
+  }
 
   /** Returns the value at the specified key. If the key is not present, null is
    * returned.
    * @param mixed $key
    * @return mixed
    */
-  <<__Native, __Pure, __MaybeMutable>>
-  public function get(mixed $key): mixed;
+  <<__Pure, __MaybeMutable>>
+  public function get(mixed $key): mixed {
+    return idx($this, $key);
+  }
 
   /** Stores a value into the Vector with the specified key, overwriting any
    * previous value that was associated with the key; if the key is outside the
@@ -122,9 +130,12 @@ final class Vector implements \MutableVector {
    * @param mixed $value
    * @return object
    */
-  <<__Native, __Pure, __Mutable, __ReturnsVoidToRx>>
-  public function set(mixed $key,
-                      mixed $value): object;
+  <<__Pure, __Mutable, __ReturnsVoidToRx>>
+  public function set(mixed $key, mixed $value): this {
+    $result = $this;
+    $result[$key] = $value;
+    return $result;
+  }
 
   /** Stores each value produced by the specified KeyedIterable into the Vector
    * using its corresponding key, overwriting any previous value that was
@@ -133,8 +144,16 @@ final class Vector implements \MutableVector {
    * @param mixed $iterable
    * @return object
    */
-  <<__Native, __Pure, __Mutable, __AtMostRxAsArgs, __ReturnsVoidToRx>>
-  public function setAll(<<__MaybeMutable, __OnlyRxIfImpl(Rx\KeyedTraversable::class)>> mixed $iterable): object;
+  <<__Pure, __Mutable, __AtMostRxAsArgs, __ReturnsVoidToRx>>
+  public function setAll(<<__MaybeMutable, __OnlyRxIfImpl(Rx\KeyedTraversable::class)>> mixed $iterable): this {
+    if ($iterable === null) {
+      return $this;
+    }
+    foreach ($iterable as $key => $value) {
+      $this->set($key, $value);
+    }
+    return $this;
+  }
 
   /** Removes all values from the Vector.
    * @return object
@@ -182,47 +201,67 @@ final class Vector implements \MutableVector {
   <<__Native, __Pure, __Mutable, __ReturnsVoidToRx>>
   public function removeKey(mixed $key): object;
 
-  /** @param mixed $val
+  /** @param mixed $value
    * @return object
    */
-  <<__Native>>
-  public function append(mixed $val): object;
+  public function append(mixed $value): this {
+    $result = $this;
+    $result[] = $value;
+    return $result;
+  }
 
   /** Adds the specified value to the end of this Vector using the next available
    * integer key.
-   * @param mixed $val
+   * @param mixed $value
    * @return object
    */
-  <<__Native, __Pure, __Mutable, __ReturnsVoidToRx>>
-  public function add(mixed $val): object;
+  <<__Pure, __Mutable, __ReturnsVoidToRx>>
+  public function add(mixed $value): this {
+    return $this->append($value);
+  }
 
   /** Adds the values produced by the specified Iterable to the end of this
    * Vector using the next available integer keys.
    * @param mixed $iterable
    * @return object
    */
-  <<__Native, __Pure, __Mutable, __AtMostRxAsArgs, __ReturnsVoidToRx>>
-  public function addAll(<<__MaybeMutable, __OnlyRxIfImpl(Rx\Traversable::class)>> mixed $iterable): object;
+  <<__Pure, __Mutable, __AtMostRxAsArgs, __ReturnsVoidToRx>>
+  public function addAll(<<__MaybeMutable, __OnlyRxIfImpl(Rx\Traversable::class)>> mixed $iterable): this {
+    if ($iterable === null) {
+      return $this;
+    }
+    foreach ($iterable as $value) {
+      $this->append($value);
+    }
+    return $this;
+  }
 
   /** Adds the keys of the specified KeyedContainer to the end of this Vector
    * using the next available integer keys.
    * @param mixed $container
    * @return object
    */
-  <<__Native, __Pure, __Mutable, __ReturnsVoidToRx>>
-  public function addAllKeysOf(mixed $container): object;
+  <<__Pure, __Mutable, __ReturnsVoidToRx>>
+  public function addAllKeysOf(mixed $container): this {
+    if ($container === null) {
+      return $this;
+    }
+    foreach ($container as $key => $_) {
+      $this->append($key);
+    }
+    return $this;
+  }
 
   /** @return mixed
    */
   <<__Native, __Pure, __Mutable>>
   public function pop(): mixed;
 
-  /** @param mixed $sz
+  /** @param mixed $size
    * @param mixed $value
    */
   <<__Native, __Pure, __Mutable>>
-  public function resize(mixed $sz,
-                         mixed $value): void;
+  public function resize(mixed $size, mixed $value): void;
 
   /** Instructs this Vector to grow its capacity to accommodate the given number
    * of elements. The caller is expected to make the appropriate add/addAll
@@ -235,57 +274,71 @@ final class Vector implements \MutableVector {
   /** Returns a varray built from the values from this Vector.
    * @return varray
    */
-  <<__Native, __Pure, __MaybeMutable>>
-  public function toVArray(): varray;
+  <<__Pure, __MaybeMutable>>
+  public function toVArray(): varray {
+    return varray($this);
+  }
 
-  <<__Native, __Pure, __MaybeMutable>>
-  public function toDArray(): darray;
+  <<__Pure, __MaybeMutable>>
+  public function toDArray(): darray {
+    return darray($this);
+  }
 
   /** Returns a copy of this Vector.
    * @return object
    */
   <<__Pure, __MutableReturn, __MaybeMutable>>
-  public function toVector(): this {
+  public function toVector(): Vector {
     return new self($this);
   }
 
   /** Returns a ImmVector built from the values of this Vector.
    * @return object
    */
-  <<__Native, __Pure, __MaybeMutable>>
-  public function toImmVector(): object;
+  <<__Pure, __MaybeMutable>>
+  public function toImmVector(): ImmVector {
+    return new ImmVector($this);
+  }
 
   /** Returns an immutable version of this collection.
    * @return object
    */
   <<__Pure, __MaybeMutable>>
-  public function immutable(): \HH\ImmVector {
+  public function immutable(): ImmVector {
     return $this->toImmVector();
   }
 
   /** Returns a Map built from the keys and values of this Vector.
    * @return object
    */
-  <<__Native, __Pure, __MutableReturn, __MaybeMutable>>
-  public function toMap(): object;
+  <<__Pure, __MutableReturn, __MaybeMutable>>
+  public function toMap(): Map {
+    return new Map($this);
+  }
 
   /** Returns a ImmMap built from the keys and values of this Vector.
    * @return object
    */
-  <<__Native, __Pure, __MaybeMutable>>
-  public function toImmMap(): object;
+  <<__Pure, __MaybeMutable>>
+  public function toImmMap(): ImmMap {
+    return new ImmMap($this);
+  }
 
   /** Returns a Set built from the values of this Vector.
    * @return object
    */
-  <<__Native, __Pure, __MutableReturn, __MaybeMutable>>
-  public function toSet(): object;
+  <<__Pure, __MutableReturn, __MaybeMutable>>
+  public function toSet(): Set {
+    return new Set($this);
+  }
 
   /** Returns a ImmSet built from the values of this Vector.
    * @return object
    */
-  <<__Native, __Pure, __MaybeMutable>>
-  public function toImmSet(): object;
+  <<__Pure, __MaybeMutable>>
+  public function toImmSet(): ImmSet {
+    return new ImmSet($this);
+  }
 
   /** Returns a varray built from the keys from this Vector.
    * @return varray
@@ -316,12 +369,12 @@ final class Vector implements \MutableVector {
    * @return object
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable, __ProvenanceSkipFrame>>
-  public function map(<<__AtMostRxAsFunc>> mixed $callback): \HH\Vector {
+  public function map(<<__AtMostRxAsFunc>> mixed $callback): Vector {
     $ret = vec[];
     foreach ($this as $v) {
       $ret[] = $callback($v);
     }
-    return new \HH\Vector($ret);
+    return new Vector($ret);
   }
 
   /** Returns a Vector of the values produced by applying the specified callback
@@ -330,12 +383,12 @@ final class Vector implements \MutableVector {
    * @return object
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable, __ProvenanceSkipFrame>>
-  public function mapWithKey(<<__AtMostRxAsFunc>> mixed $callback): \HH\Vector {
+  public function mapWithKey(<<__AtMostRxAsFunc>> mixed $callback): Vector {
     $ret = vec[];
     foreach ($this as $k => $v) {
       $ret[] = $callback($k, $v);
     }
-    return new \HH\Vector($ret);
+    return new Vector($ret);
   }
 
   /** Returns a Vector of all the values from this Vector for which the specified
@@ -344,14 +397,14 @@ final class Vector implements \MutableVector {
    * @return object
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function filter(<<__AtMostRxAsFunc>> mixed $callback): \HH\Vector {
+  public function filter(<<__AtMostRxAsFunc>> mixed $callback): Vector {
     $ret = vec[];
     foreach ($this as $v) {
       if ($callback($v)) {
         $ret[] = $v;
       }
     }
-    return new \HH\Vector($ret);
+    return new Vector($ret);
   }
 
   /** Returns a Vector of all the values from this Vector for which the specified
@@ -360,14 +413,14 @@ final class Vector implements \MutableVector {
    * @return object
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function filterWithKey(<<__AtMostRxAsFunc>> mixed $callback): \HH\Vector {
+  public function filterWithKey(<<__AtMostRxAsFunc>> mixed $callback): Vector {
     $ret = vec[];
     foreach ($this as $k => $v) {
       if ($callback($k, $v)) {
         $ret[] = $v;
       }
     }
-    return new \HH\Vector($ret);
+    return new Vector($ret);
   }
 
   /** Returns a KeyedIterable produced by combined the specified Iterables
@@ -375,15 +428,38 @@ final class Vector implements \MutableVector {
    * @param mixed $iterable
    * @return object
    */
-  <<__Native, __Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function zip(<<__MaybeMutable, __OnlyRxIfImpl(Rx\Traversable::class)>> mixed $iterable): object;
+  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function zip(<<__MaybeMutable, __OnlyRxIfImpl(Rx\Traversable::class)>> mixed $iterable): this {
+    $i = 0;
+    $result = vec[];
+    $count = $this->count();
+    foreach ($iterable as $value) {
+      if ($i === $count) {
+        break;
+      }
+      $result[] = Pair { $this[$i], $value };
+      $i++;
+    }
+    return new self($result);
+  }
 
   /** Returns a Vector containing the first n values of this Vector.
    * @param mixed $n
    * @return object
    */
-  <<__Native, __Pure, __MutableReturn, __MaybeMutable>>
-  public function take(mixed $n): object;
+  <<__Pure, __MutableReturn, __MaybeMutable>>
+  public function take(mixed $n): this {
+    if (!($n is int)) {
+      throw new InvalidArgumentException("Parameter n must be an integer");
+    }
+    $count = $this->count();
+    $n = $n < 0 ? 0 : ($n > $count ? $count : $n);
+    $result = vec[];
+    for ($i = 0; $i < $n; $i++) {
+      $result[] = $this[$i];
+    }
+    return new self($result);
+  }
 
   /** Returns a Vector containing the values of this Vector up to but not
    * including the first value that produces false when passed to the specified
@@ -392,7 +468,7 @@ final class Vector implements \MutableVector {
    * @return object
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function takeWhile(<<__AtMostRxAsFunc>> mixed $callback): \HH\Vector {
+  public function takeWhile(<<__AtMostRxAsFunc>> mixed $callback): Vector {
     $ret = vec[];
     foreach ($this as $v) {
       if (!$callback($v)) {
@@ -400,7 +476,7 @@ final class Vector implements \MutableVector {
       }
       $ret[] = $v;
     }
-    return new \HH\Vector($ret);
+    return new Vector($ret);
   }
 
   /** Returns a Vector containing all the values except the first n of this
@@ -408,8 +484,19 @@ final class Vector implements \MutableVector {
    * @param mixed $n
    * @return object
    */
-  <<__Native, __Pure, __MutableReturn, __MaybeMutable>>
-  public function skip(mixed $n): object;
+  <<__Pure, __MutableReturn, __MaybeMutable>>
+  public function skip(mixed $n): this {
+    if (!($n is int)) {
+      throw new InvalidArgumentException("Parameter n must be an integer");
+    }
+    $count = $this->count();
+    $n = $n < 0 ? 0 : ($n > $count ? $count : $n);
+    $result = vec[];
+    for ($i = $n; $i < $count; $i++) {
+      $result[] = $this[$i];
+    }
+    return new self($result);
+  }
 
   /** Returns a Vector containing the values of this Vector excluding the first
    * values that produces true when passed to the specified callback.
@@ -417,7 +504,7 @@ final class Vector implements \MutableVector {
    * @return object
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function skipWhile(<<__AtMostRxAsFunc>> mixed $fn): \HH\Vector {
+  public function skipWhile(<<__AtMostRxAsFunc>> mixed $fn): Vector {
     $ret = vec[];
     $skipping = true;
     foreach ($this as $v) {
@@ -429,7 +516,7 @@ final class Vector implements \MutableVector {
       }
       $ret[] = $v;
     }
-    return new \HH\Vector($ret);
+    return new Vector($ret);
   }
 
   /** Returns a Vector containing the specified range of values from this Vector.
@@ -439,23 +526,47 @@ final class Vector implements \MutableVector {
    * @param mixed $len
    * @return object
    */
-  <<__Native, __Pure, __MutableReturn, __MaybeMutable>>
-  public function slice(mixed $start,
-                        mixed $len): object;
+  <<__Pure, __MutableReturn, __MaybeMutable>>
+  public function slice(mixed $start, mixed $len): this {
+    if (!($start is int) || $start < 0) {
+      throw new InvalidArgumentException(
+        "Parameter start must be a non-negative integer");
+    }
+    if (!($len is int) || $len < 0) {
+      throw new InvalidArgumentException(
+        "Parameter len must be a non-negative integer");
+    }
+    $count = $this->count();
+    $skip = $start < $count ? $start : $count;
+    $size = $len < $count - $skip ? $len : $count - $skip;
+    $result = vec[];
+    for ($i = $skip; $i < $skip + $size; $i++) {
+      $result[] = $this[$i];
+    }
+    return new self($result);
+  }
 
   /** Builds a new Vector by concatenating the elements of this Vector with the
    * elements of the specified Iterable.
    * @param mixed $iterable
    * @return object
    */
-  <<__Native, __Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function concat(<<__MaybeMutable, __OnlyRxIfImpl(Rx\Traversable::class)>> mixed $iterable): object;
+  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function concat(<<__MaybeMutable, __OnlyRxIfImpl(Rx\Traversable::class)>> mixed $iterable): this {
+    $result = vec($this);
+    foreach ($iterable as $value) {
+      $result[] = $value;
+    }
+    return new self($result);
+  }
 
   /** Returns the first value from this Vector, or null if this Vector is empty.
    * @return mixed
    */
-  <<__Native, __Pure, __MaybeMutable>>
-  public function firstValue(): mixed;
+  <<__Pure, __MaybeMutable>>
+  public function firstValue(): mixed {
+    return idx($this, 0);
+  }
 
   /** Returns the first key from this Vector, or null if this Vector is empty.
    * @return mixed
@@ -468,8 +579,11 @@ final class Vector implements \MutableVector {
   /** Returns the last value from this Vector, or null if this Vector is empty.
    * @return mixed
    */
-  <<__Native, __Pure, __MaybeMutable>>
-  public function lastValue(): mixed;
+  <<__Pure, __MaybeMutable>>
+  public function lastValue(): mixed {
+    $count = $this->count();
+    return $count ? $this[$count - 1] : null;
+  }
 
   /** Returns the last key from this Vector, or null if this Vector is empty.
    * @return mixed
@@ -500,8 +614,15 @@ final class Vector implements \MutableVector {
    * @param mixed $search_value
    * @return int
    */
-  <<__Native, __Pure, __MaybeMutable>>
-  public function linearSearch(mixed $search_value): int;
+  <<__Pure, __MaybeMutable>>
+  public function linearSearch(mixed $search_value): int {
+    foreach (vec($this) as $i => $value) {
+      if ($value === $search_value) {
+        return $i;
+      }
+    }
+    return -1;
+  }
 
   /** Shuffles the values of the Vector randomly in place.
    */
@@ -517,22 +638,31 @@ final class Vector implements \MutableVector {
    * @param mixed $iterable
    * @return object
    */
-  <<__Native, __Pure, __AtMostRxAsArgs, __MutableReturn>>
-  public static function fromItems(<<__MaybeMutable, __OnlyRxIfImpl(Rx\Traversable::class)>> mixed $iterable): object;
+  <<__Pure, __AtMostRxAsArgs, __MutableReturn>>
+  public static function fromItems(<<__MaybeMutable, __OnlyRxIfImpl(Rx\Traversable::class)>> mixed $iterable): this {
+    return new self($iterable);
+  }
 
   /** Returns a Vector built from the keys of the specified container.
    * @param mixed $container
    * @return object
    */
-  <<__Native, __Pure, __MutableReturn>>
-  public static function fromKeysOf(mixed $container): object;
+  <<__Pure, __MutableReturn>>
+  public static function fromKeysOf(mixed $container): this {
+    $result = vec[];
+    foreach ($container as $key => $_) {
+      $result[] = $key;
+    }
+    return new self($result);
+  }
 
   /** Returns a Vector built from the values from the specified array.
    * @param mixed $arr
    * @return object
    */
-  <<__Native>>
-  public static function fromArray(mixed $arr): object;
+  public static function fromArray(mixed $arr): this {
+    return new self($arr);
+  }
 }
 
 /** An immutable ordered collection where values are keyed using integers 0
@@ -552,15 +682,23 @@ final class ImmVector implements \ConstVector {
    * @param mixed $iterable
    * @return object
    */
-  <<__Native, __Pure, __AtMostRxAsArgs>>
-  public static function fromItems(<<__MaybeMutable, __OnlyRxIfImpl(Rx\Traversable::class)>> mixed $iterable): object;
+  <<__Pure, __AtMostRxAsArgs>>
+  public static function fromItems(<<__MaybeMutable, __OnlyRxIfImpl(Rx\Traversable::class)>> mixed $iterable): this {
+    return new self($iterable);
+  }
 
   /** Returns a ImmVector built from the keys of the specified container.
    * @param mixed $container
    * @return object
    */
-  <<__Native, __Pure>>
-  public static function fromKeysOf(mixed $container): object;
+  <<__Pure>>
+  public static function fromKeysOf(mixed $container): this {
+    $result = vec[];
+    foreach ($container as $key => $_) {
+      $result[] = $key;
+    }
+    return new self($result);
+  }
 
   /** Returns true if the ImmVector is empty, false otherwise.
    * @return bool
@@ -573,8 +711,10 @@ final class ImmVector implements \ConstVector {
   /** Returns the number of values in the ImmVector.
    * @return int
    */
-  <<__Native, __Pure, __MaybeMutable>>
-  public function count(): int;
+  <<__Pure, __MaybeMutable>>
+  public function count(): int {
+    return \count(vec($this));
+  }
 
   /** Returns an Iterable that produces the values from this ImmVector.
    * @return object
@@ -604,16 +744,20 @@ final class ImmVector implements \ConstVector {
    * @param mixed $key
    * @return mixed
    */
-  <<__Native, __Pure, __MaybeMutable>>
-  public function at(mixed $key): mixed;
+  <<__Pure, __MaybeMutable>>
+  public function at(mixed $key): mixed {
+    return $this[$key];
+  }
 
   /** Returns the value at the specified key. If the key is not present, null is
    * returned.
    * @param mixed $key
    * @return mixed
    */
-  <<__Native, __Pure, __MaybeMutable>>
-  public function get(mixed $key): mixed;
+  <<__Pure, __MaybeMutable>>
+  public function get(mixed $key): mixed {
+    return idx($this, $key);
+  }
 
   /** Returns an iterator that points to beginning of this ImmVector.
    * @return object
@@ -627,12 +771,12 @@ final class ImmVector implements \ConstVector {
    * @return object
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable, __ProvenanceSkipFrame>>
-  public function map(<<__AtMostRxAsFunc>> mixed $callback): \HH\ImmVector {
+  public function map(<<__AtMostRxAsFunc>> mixed $callback): ImmVector {
     $ret = vec[];
     foreach ($this as $v) {
       $ret[] = $callback($v);
     }
-    return new \HH\ImmVector($ret);
+    return new ImmVector($ret);
   }
 
   /** Returns a Vector of the values produced by applying the specified callback
@@ -641,12 +785,12 @@ final class ImmVector implements \ConstVector {
    * @return object
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable, __ProvenanceSkipFrame>>
-  public function mapWithKey(<<__AtMostRxAsFunc>> mixed $callback): \HH\ImmVector {
+  public function mapWithKey(<<__AtMostRxAsFunc>> mixed $callback): ImmVector {
     $ret = vec[];
     foreach ($this as $k => $v) {
       $ret[] = $callback($k, $v);
     }
-    return new \HH\ImmVector($ret);
+    return new ImmVector($ret);
   }
 
   /** Returns a Vector of all the values from this ImmVector for which the
@@ -655,14 +799,14 @@ final class ImmVector implements \ConstVector {
    * @return object
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function filter(<<__AtMostRxAsFunc>> mixed $callback): \HH\ImmVector {
+  public function filter(<<__AtMostRxAsFunc>> mixed $callback): ImmVector {
     $ret = vec[];
     foreach ($this as $v) {
       if ($callback($v)) {
         $ret[] = $v;
       }
     }
-    return new \HH\ImmVector($ret);
+    return new ImmVector($ret);
   }
 
   /** Returns a Vector of all the values from this ImmVector for which the
@@ -671,14 +815,14 @@ final class ImmVector implements \ConstVector {
    * @return object
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function filterWithKey(<<__AtMostRxAsFunc>> mixed $callback): \HH\ImmVector {
+  public function filterWithKey(<<__AtMostRxAsFunc>> mixed $callback): ImmVector {
     $ret = vec[];
     foreach ($this as $k => $v) {
       if ($callback($k, $v)) {
         $ret[] = $v;
       }
     }
-    return new \HH\ImmVector($ret);
+    return new ImmVector($ret);
   }
 
   /** Returns a KeyedIterable produced by combined the specified Iterables
@@ -686,15 +830,38 @@ final class ImmVector implements \ConstVector {
    * @param mixed $iterable
    * @return object
    */
-  <<__Native, __Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function zip(<<__MaybeMutable, __OnlyRxIfImpl(Rx\Traversable::class)>> mixed $iterable): object;
+  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function zip(<<__MaybeMutable, __OnlyRxIfImpl(Rx\Traversable::class)>> mixed $iterable): this {
+    $i = 0;
+    $result = vec[];
+    $count = $this->count();
+    foreach ($iterable as $value) {
+      if ($i === $count) {
+        break;
+      }
+      $result[] = Pair { $this[$i], $value };
+      $i++;
+    }
+    return new self($result);
+  }
 
   /** Returns a ImmVector containing the first n values of this ImmVector.
    * @param mixed $n
    * @return object
    */
-  <<__Native, __Pure, __MutableReturn, __MaybeMutable>>
-  public function take(mixed $n): object;
+  <<__Pure, __MutableReturn, __MaybeMutable>>
+  public function take(mixed $n): this {
+    if (!($n is int)) {
+      throw new InvalidArgumentException("Parameter n must be an integer");
+    }
+    $count = $this->count();
+    $n = $n < 0 ? 0 : ($n > $count ? $count : $n);
+    $result = vec[];
+    for ($i = 0; $i < $n; $i++) {
+      $result[] = $this[$i];
+    }
+    return new self($result);
+  }
 
   /** Returns a ImmVector containing the values of this ImmVector up to but not
    * including the first value that produces false when passed to the specified
@@ -703,7 +870,7 @@ final class ImmVector implements \ConstVector {
    * @return object
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function takeWhile(<<__AtMostRxAsFunc>> mixed $callback): \HH\ImmVector {
+  public function takeWhile(<<__AtMostRxAsFunc>> mixed $callback): ImmVector {
     $ret = vec[];
     foreach ($this as $v) {
       if (!$callback($v)) {
@@ -711,7 +878,7 @@ final class ImmVector implements \ConstVector {
       }
       $ret[] = $v;
     }
-    return new \HH\ImmVector($ret);
+    return new ImmVector($ret);
   }
 
   /** Returns a ImmVector containing all values except the first n of this
@@ -719,8 +886,19 @@ final class ImmVector implements \ConstVector {
    * @param mixed $n
    * @return object
    */
-  <<__Native, __Pure, __MutableReturn, __MaybeMutable>>
-  public function skip(mixed $n): object;
+  <<__Pure, __MutableReturn, __MaybeMutable>>
+  public function skip(mixed $n): this {
+    if (!($n is int)) {
+      throw new InvalidArgumentException("Parameter n must be an integer");
+    }
+    $count = $this->count();
+    $n = $n < 0 ? 0 : ($n > $count ? $count : $n);
+    $result = vec[];
+    for ($i = $n; $i < $count; $i++) {
+      $result[] = $this[$i];
+    }
+    return new self($result);
+  }
 
   /** Returns a ImmVector containing the values of this ImmVector excluding the
    * first values that produces true when passed to the specified callback.
@@ -728,7 +906,7 @@ final class ImmVector implements \ConstVector {
    * @return object
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function skipWhile(<<__AtMostRxAsFunc>> mixed $fn): \HH\ImmVector {
+  public function skipWhile(<<__AtMostRxAsFunc>> mixed $fn): ImmVector {
     $ret = vec[];
     $skipping = true;
     foreach ($this as $v) {
@@ -740,7 +918,7 @@ final class ImmVector implements \ConstVector {
       }
       $ret[] = $v;
     }
-    return new \HH\ImmVector($ret);
+    return new ImmVector($ret);
   }
 
   /** Returns an ImmVector containing the specified range of values from this
@@ -750,24 +928,48 @@ final class ImmVector implements \ConstVector {
    * @param mixed $len
    * @return object
    */
-  <<__Native, __Pure, __MutableReturn, __MaybeMutable>>
-  public function slice(mixed $start,
-                        mixed $len): object;
+  <<__Pure, __MutableReturn, __MaybeMutable>>
+  public function slice(mixed $start, mixed $len): ImmVector {
+    if (!($start is int) || $start < 0) {
+      throw new InvalidArgumentException(
+        "Parameter start must be a non-negative integer");
+    }
+    if (!($len is int) || $len < 0) {
+      throw new InvalidArgumentException(
+        "Parameter len must be a non-negative integer");
+    }
+    $count = $this->count();
+    $skip = $start < $count ? $start : $count;
+    $size = $len < $count - $skip ? $len : $count - $skip;
+    $result = vec[];
+    for ($i = $skip; $i < $skip + $size; $i++) {
+      $result[] = $this[$i];
+    }
+    return new self($result);
+  }
 
   /** Builds a new ImmVector by concatenating the elements of this ImmVector with
    * the elements of the specified Iterable.
    * @param mixed $iterable
    * @return object
    */
-  <<__Native, __Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function concat(<<__MaybeMutable, __OnlyRxIfImpl(Rx\Traversable::class)>> mixed $iterable): object;
+  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function concat(<<__MaybeMutable, __OnlyRxIfImpl(Rx\Traversable::class)>> mixed $iterable): this {
+    $result = vec($this);
+    foreach ($iterable as $value) {
+      $result[] = $value;
+    }
+    return new self($result);
+  }
 
   /** Returns the first value from this ImmVector, or null if this ImmVector is
    * empty.
    * @return mixed
    */
-  <<__Native, __Pure, __MaybeMutable>>
-  public function firstValue(): mixed;
+  <<__Pure, __MaybeMutable>>
+  public function firstValue(): mixed {
+    return idx($this, 0);
+  }
 
   /** Returns the first key from this ImmVector, or null if this ImmVector is
    * empty.
@@ -782,8 +984,11 @@ final class ImmVector implements \ConstVector {
    * empty.
    * @return mixed
    */
-  <<__Native, __Pure, __MaybeMutable>>
-  public function lastValue(): mixed;
+  <<__Pure, __MaybeMutable>>
+  public function lastValue(): mixed {
+    $count = $this->count();
+    return $count ? $this[$count - 1] : null;
+  }
 
   /** Returns the last key from this ImmVector, or null if this ImmVector is
    * empty.
@@ -798,8 +1003,10 @@ final class ImmVector implements \ConstVector {
   /** Returns an Iterable that produces the keys from this ImmVector.
    * @return object
    */
-  <<__Native, __Pure, __MutableReturn, __MaybeMutable>>
-  public function keys(): object;
+  <<__Pure, __MutableReturn, __MaybeMutable>>
+  public function keys(): this {
+    return new self($this->toKeysArray());
+  }
 
   /** @return string
    */
@@ -809,8 +1016,10 @@ final class ImmVector implements \ConstVector {
   /** Returns a Vector built from the values of this ImmVector.
    * @return object
    */
-  <<__Native, __Pure, __MutableReturn, __MaybeMutable>>
-  public function toVector(): object;
+  <<__Pure, __MutableReturn, __MaybeMutable>>
+  public function toVector(): Vector {
+    return new Vector($this);
+  }
 
   /** Returns an immutable version of this collection.
    * @return object
@@ -823,26 +1032,34 @@ final class ImmVector implements \ConstVector {
   /** Returns a Map built from the keys and values of this ImmVector.
    * @return object
    */
-  <<__Native, __Pure, __MutableReturn, __MaybeMutable>>
-  public function toMap(): object;
+  <<__Pure, __MutableReturn, __MaybeMutable>>
+  public function toMap(): Map {
+    return new Map($this);
+  }
 
   /** Returns a ImmMap built from the keys and values of this ImmVector.
    * @return object
    */
-  <<__Native, __Pure, __MaybeMutable>>
-  public function toImmMap(): object;
+  <<__Pure, __MaybeMutable>>
+  public function toImmMap(): ImmMap {
+    return new ImmMap($this);
+  }
 
   /** Returns a Set built from the values of this ImmVector.
    * @return object
    */
-  <<__Native, __Pure, __MutableReturn, __MaybeMutable>>
-  public function toSet(): object;
+  <<__Pure, __MutableReturn, __MaybeMutable>>
+  public function toSet(): Set {
+    return new Set($this);
+  }
 
   /** Returns a ImmSet built from the values of this ImmVector.
    * @return object
    */
-  <<__Native, __Pure, __MaybeMutable>>
-  public function toImmSet(): object;
+  <<__Pure, __MaybeMutable>>
+  public function toImmSet(): ImmSet {
+    return new ImmSet($this);
+  }
 
   /** Returns an immutable version of this collection.
    * @return object
@@ -871,11 +1088,15 @@ final class ImmVector implements \ConstVector {
   /** Returns a varray built from the values from this ImmVector.
    * @return varray
    */
-  <<__Native, __Pure, __MaybeMutable>>
-  public function toVArray(): varray;
+  <<__Pure, __MaybeMutable>>
+  public function toVArray(): varray {
+    return varray($this);
+  }
 
-  <<__Native, __Pure, __MaybeMutable>>
-  public function toDArray(): darray;
+  <<__Pure, __MaybeMutable>>
+  public function toDArray(): darray {
+    return darray($this);
+  }
 
   /** Returns a varray built from the keys from this ImmVector.
    * @return varray
@@ -898,8 +1119,15 @@ final class ImmVector implements \ConstVector {
    * @param mixed $search_value
    * @return int
    */
-  <<__Native, __Pure, __MaybeMutable>>
-  public function linearSearch(mixed $search_value): int;
+  <<__Pure, __MaybeMutable>>
+  public function linearSearch(mixed $search_value): int {
+    foreach (vec($this) as $i => $value) {
+      if ($value === $search_value) {
+        return $i;
+      }
+    }
+    return -1;
+  }
 }
 
 } // namespace HH

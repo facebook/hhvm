@@ -1,0 +1,44 @@
+
+=============================
+Testing: varray[]
+bool(false)
+bool(true)
+bool(false)
+
+=============================
+Testing: varray[new C()]
+bool(false)
+bool(true)
+
+Notice: Hack Array Compat: Casting marked varray to Hack array in %s/cast_marked_collection.php on line 10
+bool(false)
+
+=============================
+Testing: darray[]
+bool(false)
+bool(true)
+bool(false)
+
+=============================
+Testing: darray[17 => new C()]
+bool(false)
+bool(true)
+
+Notice: Hack Array Compat: Casting marked darray to Hack array in %s/cast_marked_collection.php on line 20
+bool(false)
+
+=============================
+Testing: static marked varray
+bool(true)
+
+Notice: Hack Array Compat: Casting marked varray to Hack array in %s/cast_marked_collection.php on line 35
+bool(false)
+bool(false)
+
+=============================
+Testing: static marked darray
+bool(true)
+bool(false)
+
+Notice: Hack Array Compat: Casting marked darray to Hack array in %s/cast_marked_collection.php on line 42
+bool(false)

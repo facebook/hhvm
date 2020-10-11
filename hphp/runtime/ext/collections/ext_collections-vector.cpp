@@ -186,17 +186,30 @@ void BaseVector::addAllImpl(const Variant& t) {
     *t.asTypedValue(),
     [&, this](ArrayData* adata) {
       if (adata->empty()) return true;
-      if (!m_size && adata->isVecKind()) {
-        dropImmCopy();
-        auto oldAd = arrayData();
-        m_arr = adata;
-        adata->incRefCount();
-        m_size = arrayData()->m_size;
-        decRefArr(oldAd);
-        return true;
+      if (m_size) {
+        reserve(m_size + adata->size());
+        return false;
       }
-      reserve(m_size + adata->size());
-      return false;
+      // We have to do two orthogonal escalations. Careful with refcounting:
+      // we should not dec-ref the original adata, but we should dec-ref any
+      // intermediate values we create here.
+      auto array = adata;
+      if (!array->isVanilla()) {
+        array = BespokeArray::ToVanilla(array, "BaseVector::addAllImpl");
+      }
+      if (!array->isVecKind()) {
+        auto const vec = array->toVec(array->cowCheck());
+        if (array != adata && array != vec) decRefArr(array);
+        array = vec;
+      }
+      if (array == adata) {
+        array->incRefCount();
+      }
+      dropImmCopy();
+      decRefArr(m_arr);
+      m_arr = array;
+      m_size = array->size();
+      return true;
     },
     [this](TypedValue v) {
       addRaw(v);

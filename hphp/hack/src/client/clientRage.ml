@@ -530,6 +530,28 @@ let main (env : env) : Exit_status.t Lwt.t =
   add_fn "hhconfig.txt" hhconfig_file;
   add_fn "hh_conf.txt" ServerLocalConfig.path;
 
+  (* sandcastle *)
+  begin
+    match Sys.getenv_opt "SANDCASTLE_NEXUS" with
+    | None -> ()
+    | Some sandcastle_nexus ->
+      let dir = Filename.concat sandcastle_nexus "variables" in
+      let fns = (try Sys.readdir dir with _ -> [||]) in
+      let fns =
+        fns |> Array.to_list |> List.map ~f:(fun fn -> Filename.concat dir fn)
+      in
+      let fns = "/tmp/sandcastle.capabilities" :: fns in
+      let contents =
+        List.map fns ~f:(fun fn ->
+            let content =
+              try Sys_utils.cat fn |> String_utils.truncate 10240
+              with e -> e |> Exception.wrap |> Exception.to_string
+            in
+            Printf.sprintf "%s\n%s" fn content)
+      in
+      add ("sandcastle", String.concat contents ~sep:"\n\n")
+  end;
+
   (* version *)
   let%lwt hash_and_config = Config_file_lwt.parse_hhconfig hhconfig_file in
   let hhconfig_version_raw =

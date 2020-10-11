@@ -45,7 +45,6 @@ TransRec::TransRec(SrcKey                      _src,
   , aLen(_aLen)
   , acoldLen(_acoldLen)
   , afrozenLen(_afrozenLen)
-  , bcStart(_src.offset())
   , id(transID)
   , kind(_kind)
   , hasLoop(_hasLoop)
@@ -174,15 +173,10 @@ std::string TransRec::print() const {
     &ret,
     "Translation {} {{\n"
     "  src.sha1 = {}\n"
-    "  src.funcId = {}\n"
     "  src.funcName = {}\n"
-    "  src.resumeMode = {}\n"
-    "  src.bcStart = {}\n"
+    "  src.key = {}\n"
     "  src.blocks = {}\n",
-    id, sha1, src.funcID(),
-    funcName.empty() ? "Pseudo-main" : funcName,
-    (int32_t)src.resumeMode(),
-    src.offset(),
+    id, sha1, funcName, src.toAtomicInt(),
     blocks.size());
 
   for (auto const& block : blocks) {

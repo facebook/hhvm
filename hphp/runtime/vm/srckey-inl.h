@@ -58,22 +58,6 @@ inline SrcKey::SrcKey(const Func* f, Offset off, PrologueTag)
   assertx((uint32_t)off >> 31 == 0);
 }
 
-inline SrcKey::SrcKey(const Func* f, PC pc, PrologueTag)
-  : m_funcID{f->getFuncId()}
-  , m_offset{(uint32_t)f->offsetOf(pc)}
-  , m_resumeModeAndPrologue{encodePrologue()}
-{
-  assertx((uint32_t)f->offsetOf(pc) >> 31 == 0);
-}
-
-inline SrcKey::SrcKey(FuncId funcId, Offset off, PrologueTag)
-  : m_funcID{funcId}
-  , m_offset{(uint32_t)off}
-  , m_resumeModeAndPrologue{encodePrologue()}
-{
-  assertx((uint32_t)off >> 31 == 0);
-}
-
 inline SrcKey::SrcKey(SrcKey other, Offset off)
   : m_funcID{other.funcID()}
   , m_offset{(uint32_t)off}

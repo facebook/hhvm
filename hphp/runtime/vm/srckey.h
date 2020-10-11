@@ -67,8 +67,6 @@ struct SrcKey : private boost::totally_ordered<SrcKey> {
   SrcKey(FuncId funcId, Offset off, ResumeMode resumeMode);
 
   SrcKey(const Func* f, Offset off, PrologueTag);
-  SrcKey(const Func* f, PC pc, PrologueTag);
-  SrcKey(FuncId funcId, Offset off, PrologueTag);
 
   SrcKey(SrcKey other, Offset off);
 

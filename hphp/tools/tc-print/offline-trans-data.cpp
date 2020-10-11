@@ -66,10 +66,9 @@ void OfflineTransData::loadTCData(string dumpDir) {
   // Read translations
   for (uint32_t tid = 0; tid < nTranslations; tid++) {
     TransRec  tRec;
-    SHA1Str    sha1Str;
+    SHA1Str   sha1Str;
     uint32_t  kind;
-    FuncId    funcId;
-    int32_t   resumeMode;
+    uint64_t  srcKeyInt;
     uint64_t  annotationsCount;
     size_t    numBCMappings = 0;
     size_t    numBlocks = 0;
@@ -84,11 +83,10 @@ void OfflineTransData::loadTCData(string dumpDir) {
     }
     READ(" src.sha1 = %s", sha1Str);
     tRec.sha1 = SHA1(sha1Str);
-    READ(" src.funcId = %u", &funcId);
     READ(" src.funcName = %s", funcName);
     tRec.funcName = funcName;
-    READ(" src.resumeMode = %d", &resumeMode);
-    READ(" src.bcStart = %d", &tRec.bcStart);
+    READ(" src.key = %" PRIu64 "", &srcKeyInt);
+    tRec.src = SrcKey::fromAtomicInt(srcKeyInt);
 
     READ(" src.blocks = %lu", &numBlocks);
     for (size_t i = 0; i < numBlocks; ++i) {
@@ -194,14 +192,6 @@ void OfflineTransData::loadTCData(string dumpDir) {
     READ_EMPTY();
     READ_EMPTY();
     tRec.kind = (TransKind)kind;
-    if (isPrologue(tRec.kind)) {
-      tRec.src = SrcKey { funcId, tRec.bcStart, SrcKey::PrologueTag{} };
-    } else {
-      tRec.src = SrcKey {
-        funcId, tRec.bcStart,
-        static_cast<ResumeMode>(resumeMode)
-      };
-    }
     always_assert_flog(tid == tRec.id,
                        "Translation {} has id {}", tid, tRec.id);
     addTrans(tRec);

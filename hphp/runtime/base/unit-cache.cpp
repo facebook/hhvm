@@ -18,12 +18,14 @@
 #include "hphp/runtime/base/autoload-handler.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/file-stream-wrapper.h"
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/plain-file.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/stat-cache.h"
+#include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/system-profiler.h"
 #include "hphp/runtime/base/vm-worker.h"
@@ -300,18 +302,28 @@ bool isChanged(
          stressUnitCache();
 }
 
-folly::Optional<std::string> readFileAsString(const StringData* path) {
+folly::Optional<String> readFileAsString(const StringData* path,
+                                         Stream::Wrapper* w) {
   tracing::Block _{
     "read-file", [&] { return tracing::Props{}.add("path", path); }
   };
   // If the file is too large it may OOM the request
   MemoryManager::SuppressOOM so(*tl_heap);
-  std::string contents;
-  if (!folly::readFile(path->data(), contents)) return folly::none;
-  return contents;
+  if (w) {
+    // We only allow normal file streams, which cannot re-enter
+    assertx(w->isNormalFileStream());
+    if (auto const f = w->open(StrNR(path), "r", 0, nullptr)) return f->read();
+    return folly::none;
+  }
+
+  auto const fd = open(path->data(), O_RDONLY);
+  if (fd < 0) return folly::none;
+  auto file = req::make<PlainFile>(fd);
+  return file->read();
 }
 
 CachedUnitWithFreePtr createUnitFromFile(const StringData* const path,
+                                         Stream::Wrapper* wrapper,
                                          Unit** releaseUnit,
                                          OptLog& ent,
                                          const Native::FuncTable& nativeFuncs,
@@ -321,14 +333,15 @@ CachedUnitWithFreePtr createUnitFromFile(const StringData* const path,
                                          CachedUnitWithFreePtr orig) {
   LogTimer readUnitTimer("read_unit_ms", ent);
 
-  auto const contents = readFileAsString(path);
+  auto const contents = readFileAsString(path, wrapper);
   if (!contents) return CachedUnitWithFreePtr{};
 
   readUnitTimer.stop();
 
   LogTimer generateSha1Timer("generate_sha1_ms", ent);
-  auto const sha1 =
-    SHA1{mangleUnitSha1(string_sha1(*contents), path->slice(), options)};
+  auto const sha1 = SHA1{
+    mangleUnitSha1(string_sha1(contents->slice()), path->slice(), options)
+  };
   generateSha1Timer.stop();
 
   // The stat may have indicated that the file was touched, but the
@@ -377,17 +390,29 @@ CachedUnitWithFreePtr createUnitFromFile(const StringData* const path,
 // When running via the CLI server special access checks may need to be
 // performed, and in the event that the server is unable to load the file an
 // alternative per client cache may be used.
-NonRepoUnitCache& getNonRepoCache(uid_t uid, const StringData* rpath) {
-  auto const unit_check_quarantine = [&] () -> NonRepoUnitCache& {
-    if (!RuntimeOption::EvalUnixServerQuarantineUnits) {
-      return s_nonRepoUnitCache;
+std::pair<NonRepoUnitCache*, Stream::Wrapper*>
+getNonRepoCacheWithWrapper(const StringData* rpath) {
+  auto const uc = get_cli_ucred();
+  // If this isn't a CLI server request, this is a normal file access
+  if (!uc) return std::make_pair(&s_nonRepoUnitCache, nullptr);
+
+  auto wrapper = Stream::getWrapperFromURI(StrNR{rpath});
+  if (!wrapper || !wrapper->isNormalFileStream()) {
+    return std::make_pair(nullptr, nullptr);
+  }
+
+  auto const unit_check_quarantine = [&] {
+    if (RuntimeOption::EvalUnixServerQuarantineUnits) {
+      auto iter = s_perUserUnitCaches.find(uc->uid);
+      if (iter != s_perUserUnitCaches.end()) {
+        return std::make_pair(iter->second, wrapper);
+      }
+      auto cache = new NonRepoUnitCache;
+      auto res = s_perUserUnitCaches.insert(uc->uid, cache);
+      if (!res.second) delete cache;
+      return std::make_pair(res.first->second, wrapper);
     }
-    auto iter = s_perUserUnitCaches.find(uid);
-    if (iter != s_perUserUnitCaches.end()) return *iter->second;
-    auto cache = new NonRepoUnitCache;
-    auto res = s_perUserUnitCaches.insert(uid, cache);
-    if (!res.second) delete cache;
-    return *res.first->second;
+    return std::make_pair(&s_nonRepoUnitCache, wrapper);
   };
 
   // If the server cannot access rpath attempt to open the unit on the
@@ -402,12 +427,12 @@ NonRepoUnitCache& getNonRepoCache(uid_t uid, const StringData* rpath) {
   // and using fstat the server verifies that the file it sees is identical
   // to the unit opened by the client.
   if (RuntimeOption::EvalUnixServerVerifyExeAccess) {
+    // We only allow normal file streams, which cannot re-enter.
     struct stat local, remote;
-    auto const fd = open(rpath->data(), O_RDONLY);
-    SCOPE_EXIT { close(fd); };
-    if (fd < 0 ||
-        fcntl(fd, F_GETFL) != O_RDONLY ||
-        fstat(fd, &remote) != 0 ||
+    auto remoteFile = wrapper->open(StrNR{rpath}, "r", 0, nullptr);
+    if (!remoteFile ||
+        fcntl(remoteFile->fd(), F_GETFL) != O_RDONLY ||
+        fstat(remoteFile->fd(), &remote) != 0 ||
         stat(rpath->data(), &local) != 0 ||
         remote.st_dev != local.st_dev ||
         remote.st_ino != local.st_ino) {
@@ -415,14 +440,9 @@ NonRepoUnitCache& getNonRepoCache(uid_t uid, const StringData* rpath) {
     }
   }
 
-  return s_nonRepoUnitCache;
-}
-
-NonRepoUnitCache& getNonRepoCache(const StringData* rpath) {
-  if (auto const uc = get_cli_ucred()) {
-    return getNonRepoCache(uc->uid, rpath);
-  }
-  return s_nonRepoUnitCache;
+  // When the server is able to read the file prefer to access it that way,
+  // in all modes units loaded by the server are cached for all clients.
+  return std::make_pair(&s_nonRepoUnitCache, nullptr);
 }
 
 std::pair<const StringData*, const StringData*>
@@ -620,7 +640,9 @@ CachedUnit loadUnitNonRepoAuth(StringData* requestedPath,
   auto const [path, rpath] =
     resolveRequestedPath(requestedPath, alreadyRealpath);
 
-  auto& cache = getNonRepoCache(rpath);
+  auto [cache, wrapper] = getNonRepoCacheWithWrapper(rpath);
+  if (!cache) return CachedUnit{};
+  assertx(!wrapper || wrapper->isNormalFileStream());
 
   // Freeing a unit while holding the tbb lock would cause a rank violation when
   // recycle-tc is enabled as reclaiming dead functions requires that the code
@@ -648,10 +670,10 @@ CachedUnit loadUnitNonRepoAuth(StringData* requestedPath,
   // The C++ standard has a defect when it comes to capturing
   // destructured names into lambdas. Work around it with a capture
   // expression.
-  auto ptr = [&, rpath = rpath] {
+  auto ptr = [&, cache = cache, wrapper = wrapper, rpath = rpath] {
     NonRepoUnitCache::const_accessor rpathAcc;
 
-    cache.insert(rpathAcc, rpath);
+    cache->insert(rpathAcc, rpath);
     auto& cachedUnit = rpathAcc->second.cachedUnit;
     if (auto const tmp = cachedUnit.copy()) {
       if (!isChanged(tmp, statInfo, options)) {
@@ -684,7 +706,7 @@ CachedUnit loadUnitNonRepoAuth(StringData* requestedPath,
         auto orig = RuntimeOption::EvalCheckUnitSHA1
           ? cachedUnit.copy()
           : CachedUnitWithFreePtr{};
-        return createUnitFromFile(rpath, &releaseUnit, ent,
+        return createUnitFromFile(rpath, wrapper, &releaseUnit, ent,
                                   nativeFuncs, options, flags,
                                   statInfo, std::move(orig));
       }();
@@ -714,7 +736,7 @@ CachedUnit loadUnitNonRepoAuth(StringData* requestedPath,
   auto const cu = ptr->cu;
 
   NonRepoUnitCache::const_accessor pathAcc;
-  cache.insert(pathAcc, path);
+  cache->insert(pathAcc, path);
   auto& cachedUnit = pathAcc->second.cachedUnit;
   if (auto const tmp = cachedUnit.copy(); tmp != ptr) {
     cachedUnit.lock_for_update();
@@ -786,7 +808,7 @@ struct ResolveIncludeContext {
 };
 
 bool findFile(const StringData* path, struct stat* s, bool allow_dir,
-              const Native::FuncTable& nativeFuncs) {
+              Stream::Wrapper* w, const Native::FuncTable& nativeFuncs) {
   // We rely on this side-effect in RepoAuthoritative mode right now, since the
   // stat information is an output-param of resolveVmInclude, but we aren't
   // really going to call stat.
@@ -797,9 +819,15 @@ bool findFile(const StringData* path, struct stat* s, bool allow_dir,
   }
 
   if (StatCache::stat(path->data(), s) == 0) {
-    // The call explicitly populates the struct for dirs, but returns false for
-    // them because it is geared toward file includes.
+    // The call explicitly populates the struct for dirs, but returns
+    // false for them because it is geared toward file includes.
     return allow_dir || !S_ISDIR(s->st_mode);
+  }
+
+  if (w && w != &s_file_stream_wrapper) {
+    // We only allow normal file streams, which cannot re-enter.
+    assertx(w->isNormalFileStream());
+    if (w->stat(StrNR(path), s) == 0) return allow_dir || !S_ISDIR(s->st_mode);
   }
 
   return false;
@@ -809,12 +837,15 @@ bool findFileWrapper(const String& file, void* ctx) {
   auto const context = static_cast<ResolveIncludeContext*>(ctx);
   assertx(context->path.isNull());
 
+  auto wrapper = Stream::getWrapperFromURI(file);
+  if (!wrapper || !wrapper->isNormalFileStream()) return false;
+
   // TranslatePath() will canonicalize the path and also check
   // whether the file is in an allowed directory.
   String translatedPath = File::TranslatePathKeepRelative(file);
   if (!FileUtil::isAbsolutePath(file.toCppString())) {
     if (findFile(translatedPath.get(), context->s, context->allow_dir,
-                 context->nativeFuncs)) {
+                 wrapper, context->nativeFuncs)) {
       context->path = translatedPath;
       return true;
     }
@@ -822,7 +853,7 @@ bool findFileWrapper(const String& file, void* ctx) {
   }
   if (RuntimeOption::SandboxMode || !RuntimeOption::AlwaysUseRelativePath) {
     if (findFile(translatedPath.get(), context->s, context->allow_dir,
-                 context->nativeFuncs)) {
+                 wrapper, context->nativeFuncs)) {
       context->path = translatedPath;
       return true;
     }
@@ -837,7 +868,7 @@ bool findFileWrapper(const String& file, void* ctx) {
   }
   String rel_path(FileUtil::relativePath(server_root, translatedPath.data()));
   if (findFile(rel_path.get(), context->s, context->allow_dir,
-               context->nativeFuncs)) {
+               wrapper, context->nativeFuncs)) {
     context->path = rel_path;
     return true;
   }
@@ -1237,11 +1268,11 @@ void prefetchUnit(StringData* requestedPath,
   // against any loading unit, to see if we can short-circuit.
   if (loadingUnit && path == loadingUnit->filepath()) return;
 
-  // Looking up any per-use caches requires the canonicalized path,
-  // but might not have it yet. Grab any cli uid now so we can do the
-  // lookup in the worker thread.
-  folly::Optional<uid_t> uid;
-  if (auto const uc = get_cli_ucred()) uid = uc->uid;
+  // We can only do prefetching if the file is accessible normally. We
+  // can't support CLI wrappers because the request that its
+  // associated with will be gone.
+  auto [cache, wrapper] = getNonRepoCacheWithWrapper(path);
+  if (!cache || wrapper) return;
 
   // We're definitely going to enqueue this request. Bump the gate if
   // provided.
@@ -1255,7 +1286,7 @@ void prefetchUnit(StringData* requestedPath,
     // NB: This lambda is executed at some later point in another
     // thread, so you need to be careful about the lifetime of what
     // you capture here.
-    [path, fileStat, uid,
+    [path, fileStat, cache = cache,
      loadingUnitPath = loadingUnit ? loadingUnit->filepath() : nullptr,
      gate = std::move(gate)] () mutable {
       SCOPE_EXIT {
@@ -1324,13 +1355,10 @@ void prefetchUnit(StringData* requestedPath,
 
       auto const& options = RepoOptions::forFile(path->data());
 
-      // Lookup any per-use cache with the stored uid (if any).
-      auto& cache = uid ? getNonRepoCache(*uid, rpath) : s_nonRepoUnitCache;
-
       auto ptr = [&, rpath = rpath] () -> CachedUnitWithFreePtr {
         NonRepoUnitCache::const_accessor rpathAcc;
 
-        cache.insert(rpathAcc, rpath);
+        cache->insert(rpathAcc, rpath);
         auto& cachedUnit = rpathAcc->second.cachedUnit;
 
         // NB: It might be tempting to check if the file has changed
@@ -1372,7 +1400,8 @@ void prefetchUnit(StringData* requestedPath,
             : CachedUnitWithFreePtr{};
           FileLoadFlags flags;
           OptLog optLog;
-          return createUnitFromFile(rpath, &releaseUnit, optLog,
+          return createUnitFromFile(rpath, nullptr,
+                                    &releaseUnit, optLog,
                                     Native::s_noNativeFuncs,
                                     options, flags,
                                     fileStat.get_pointer(), std::move(orig));
@@ -1399,7 +1428,7 @@ void prefetchUnit(StringData* requestedPath,
       if (!ptr || path == rpath) return;
 
       NonRepoUnitCache::const_accessor pathAcc;
-      cache.insert(pathAcc, path);
+      cache->insert(pathAcc, path);
       auto& cachedUnit = pathAcc->second.cachedUnit;
       if (cachedUnit.try_lock_for_update()) {
         updateAndUnlock(cachedUnit, std::move(ptr));

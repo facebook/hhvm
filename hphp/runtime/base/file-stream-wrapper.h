@@ -70,6 +70,8 @@ struct FileStreamWrapper final : Stream::Wrapper {
   int mkdir_recursive(const String& path, int mode);
 };
 
+extern FileStreamWrapper s_file_stream_wrapper;
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 

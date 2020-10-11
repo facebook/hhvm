@@ -35,6 +35,8 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+FileStreamWrapper s_file_stream_wrapper;
+
 req::ptr<MemFile> FileStreamWrapper::openFromCache(const String& filename,
                                                    const String& mode) {
   if (!StaticContentCache::TheFileCache) {

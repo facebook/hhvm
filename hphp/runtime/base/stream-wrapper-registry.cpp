@@ -115,7 +115,6 @@ Wrapper* getWrapperFromURI(const String& uri,
   return getWrapper(getWrapperProtocol(uri.data(), pathIndex), warn);
 }
 
-static FileStreamWrapper s_file_stream_wrapper;
 static PhpStreamWrapper  s_php_stream_wrapper;
 static HttpStreamWrapper s_http_stream_wrapper;
 static DataStreamWrapper s_data_stream_wrapper;

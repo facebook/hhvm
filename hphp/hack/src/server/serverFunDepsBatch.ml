@@ -93,6 +93,10 @@ let collect_in_decl =
         | T.Method_id (((p, ty), _), mid) ->
           process_function (p, SN.AutoimportedFunctions.inst_meth)
           + process_method env ty mid
+        | T.FunctionPointer (T.FP_id id, _targs) -> process_function id
+        | T.FunctionPointer (T.FP_class_const (((_pos, ty), _cid), mid), _targs)
+          ->
+          process_method env ty mid
         | _ -> self#zero
       in
       acc + super#on_expr env expr

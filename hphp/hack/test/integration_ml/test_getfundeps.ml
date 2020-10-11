@@ -225,9 +225,10 @@ let tests =
     ( (fst f7, 2, 10),
       {|{"position":{"file":"/f7.php","line":2,"character":10},"deps":[{"name":"$a","kind":"local","position":{"filename":"/f7.php","line":2,"char_start":33,"char_end":34}},{"name":"$b","kind":"local","position":{"filename":"/f7.php","line":4,"char_start":3,"char_end":4}}]}|}
     );
-    (* first-class function pointers. THIS TEST EMBODIES THE CURRENTLY BUGGY BEHAVIOR. *)
+    (* first-class function pointers *)
     ( (fst f8, 3, 10),
-      {|{"position":{"file":"/f8.php","line":3,"character":10},"deps":[]}|} );
+      {|{"position":{"file":"/f8.php","line":3,"character":10},"deps":[{"name":"f8f","kind":"function","position":{"filename":"/f8.php","line":8,"char_start":10,"char_end":12}},{"name":"C8::sf8","kind":"method","position":{"filename":"/f8.php","line":9,"char_start":35,"char_end":37}}]}|}
+    );
   ]
 
 let test () =

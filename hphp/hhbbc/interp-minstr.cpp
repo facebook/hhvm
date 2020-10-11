@@ -261,6 +261,11 @@ folly::Optional<Type> array_do_elem(ISS& env,
       }
       break;
     case ThrowMode::BadOperation:
+      // isset($a["abc"]) does not throw if $a is a vec, so we need to be
+      // conservative here.
+      if (nullOnMissing && base.subtypeOf(BVec) && key.couldBe(TStr)) {
+        res->first |= TInitNull;
+      }
       break;
   }
 

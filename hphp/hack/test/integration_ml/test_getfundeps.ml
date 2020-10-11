@@ -169,7 +169,21 @@ function f7f((function(): void) $a): void {
 |}
   )
 
-let files = [f1; f2; f3; f4; f5; f6; f7]
+let f8 =
+  ( "f8.php",
+    {|<?hh
+
+function f8main(): void {
+  $_ = f8f<>;
+  $_ = C8::sf8<>;
+}
+
+function f8f(): void {}
+class C8 { public static function sf8(): void {} }
+|}
+  )
+
+let files = [f1; f2; f3; f4; f5; f6; f7; f8]
 
 let tests =
   [
@@ -211,6 +225,9 @@ let tests =
     ( (fst f7, 2, 10),
       {|{"position":{"file":"/f7.php","line":2,"character":10},"deps":[{"name":"$a","kind":"local","position":{"filename":"/f7.php","line":2,"char_start":33,"char_end":34}},{"name":"$b","kind":"local","position":{"filename":"/f7.php","line":4,"char_start":3,"char_end":4}}]}|}
     );
+    (* first-class function pointers. THIS TEST EMBODIES THE CURRENTLY BUGGY BEHAVIOR. *)
+    ( (fst f8, 3, 10),
+      {|{"position":{"file":"/f8.php","line":3,"character":10},"deps":[]}|} );
   ]
 
 let test () =

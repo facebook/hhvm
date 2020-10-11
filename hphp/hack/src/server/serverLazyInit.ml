@@ -37,10 +37,15 @@ type deptable =
   | SQLiteDeptable of string
   | CustomDeptable of string
 
-let deptable_with_sqlite_file (genv : genv) (sqlite_fn : string) : deptable =
+let deptable_with_filename (genv : genv) ~(is_64bit : bool) (fn : string) :
+    deptable =
   match ServerArgs.with_dep_graph_v2 genv.options with
-  | None -> SQLiteDeptable sqlite_fn
   | Some fn -> CustomDeptable fn
+  | None ->
+    if is_64bit then
+      CustomDeptable fn
+    else
+      SQLiteDeptable fn
 
 let lock_and_load_deptable
     (deptable : deptable) ~(ignore_hh_version : bool) ~(fail_if_missing : bool)
@@ -133,7 +138,10 @@ let merge_saved_state_futures
       in
       let fail_if_missing = not genv.local_config.SLC.can_skip_deptable in
       let deptable =
-        deptable_with_sqlite_file genv result.State_loader.deptable_fn
+        deptable_with_filename
+          genv
+          ~is_64bit:result.State_loader.deptable_is_64bit
+          result.State_loader.deptable_fn
       in
       lock_and_load_deptable deptable ~ignore_hh_version ~fail_if_missing;
       let load_decls = genv.local_config.SLC.load_decls_from_saved_state in
@@ -278,7 +286,7 @@ let use_precomputed_state_exn
   in
   let ignore_hh_version = ServerArgs.ignore_hh_version genv.ServerEnv.options in
   let fail_if_missing = not genv.local_config.SLC.can_skip_deptable in
-  let deptable = deptable_with_sqlite_file genv deptable_fn in
+  let deptable = deptable_with_filename genv ~is_64bit:false deptable_fn in
   lock_and_load_deptable deptable ~ignore_hh_version ~fail_if_missing;
   let changes = Relative_path.set_of_list changes in
   let naming_changes = Relative_path.set_of_list naming_changes in

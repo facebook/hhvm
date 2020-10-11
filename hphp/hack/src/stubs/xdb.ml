@@ -12,9 +12,11 @@ let hack_db_name = ""
 
 let saved_states_table = ""
 
-let find_nearest ~db ~db_table ~global_rev ~hh_version ~hhconfig_hash =
+let find_nearest
+    ~db ~db_table ~load_64bit ~global_rev ~hh_version ~hhconfig_hash =
   ignore db;
   ignore db_table;
+  ignore load_64bit;
   ignore global_rev;
   ignore hh_version;
   ignore hhconfig_hash;

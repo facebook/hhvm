@@ -39,7 +39,9 @@ module State_loader_prefetcher_real = struct
       ^ Option.value environment ~default:"N/A"
     in
     let future =
+      (* TODO(hverr): Support 64-bit *)
       State_loader.fetch_saved_state
+        ~load_64bit:false
         ~cache_limit
         ~config:State_loader_config.default_timeouts
         ~config_hash:hhconfig_hash
@@ -159,9 +161,11 @@ module Revision_map = struct
             else
               Some Build_id.build_revision
           in
+          (* TODO(hverr): Support 64-bit state *)
           Xdb.find_nearest
             ~db:Xdb.hack_db_name
             ~db_table:Xdb.saved_states_table
+            ~load_64bit:false
             ~global_rev
             ~hh_version
             ~hhconfig_hash
@@ -194,7 +198,12 @@ module Revision_map = struct
         }
       in
       let cached_state =
-        State_loader.cached_state ~saved_state_handle ~config_hash ~rev
+        (* TODO(hverr): Support 64-bit state *)
+        State_loader.cached_state
+          ~load_64bit:false
+          ~saved_state_handle
+          ~config_hash
+          ~rev
       in
       match cached_state with
       | Some _ ->

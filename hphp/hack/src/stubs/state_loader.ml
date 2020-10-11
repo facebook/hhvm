@@ -6,6 +6,7 @@ type native_load_result = {
   is_cached: bool;
   state_distance: int;
   deptable_fn: string;
+  deptable_is_64bit: bool;
   dirty_files: (Relative_path.t list * Relative_path.t list) Future.t;
 }
 
@@ -33,11 +34,12 @@ let error_string_verbose _ =
     environment = None;
   }
 
-let cached_state ?saved_state_handle:_ ~config_hash:_ ~rev:_ = None
+let cached_state ~load_64bit:_ ?saved_state_handle:_ ~config_hash:_ ~rev:_ =
+  None
 
 exception Not_supported
 
-let fetch_saved_state ~cache_limit:_ ~config:_ ~config_hash:_ _ =
+let fetch_saved_state ~load_64bit:_ ~cache_limit:_ ~config:_ ~config_hash:_ _ =
   raise Not_supported
 
 let mk_state_future

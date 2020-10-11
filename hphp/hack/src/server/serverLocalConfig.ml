@@ -376,6 +376,7 @@ type t = {
       (** Prefer using Ocaml implementation over load script. *)
   (* in seconds *)
   load_state_natively: bool;
+  load_state_natively_64bit: bool;
   type_decl_bucket_size: int;
   extend_fast_bucket_size: int;
   enable_on_nfs: bool;
@@ -507,6 +508,7 @@ let default =
     require_saved_state = false;
     load_state_script_timeout = 20;
     load_state_natively = false;
+    load_state_natively_64bit = false;
     type_decl_bucket_size = 1000;
     extend_fast_bucket_size = 2000;
     enable_on_nfs = false;
@@ -751,6 +753,12 @@ let load_ fn ~silent ~current_version overrides =
     bool_if_version
       "load_state_natively_v4"
       ~default:default.load_state_natively
+      config
+  in
+  let load_state_natively_64bit =
+    bool_if_version
+      "load_state_natively_64bit"
+      ~default:default.load_state_natively_64bit
       config
   in
   let state_loader_timeouts =
@@ -1019,6 +1027,7 @@ let load_ fn ~silent ~current_version overrides =
     require_saved_state;
     load_state_script_timeout;
     load_state_natively;
+    load_state_natively_64bit;
     max_purgatory_clients;
     type_decl_bucket_size;
     extend_fast_bucket_size;

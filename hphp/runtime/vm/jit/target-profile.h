@@ -120,12 +120,10 @@ template<class T>
 struct TargetProfile {
   TargetProfile(const TransIDSet& profTransIDs,
                 TransKind kind,
-                Offset bcOff,
+                SrcKey sk,
                 const StringData* name,
                 size_t extraSize = 0)
-    : m_kind(kind)
-    , m_links(createLinks(profTransIDs, kind, bcOff, name, extraSize))
-    , m_keys(createKeys(profTransIDs, bcOff, name))
+    : TargetProfile(profTransIDs, kind, bcOffForProfileKey(sk), name, extraSize)
   {}
 
   TargetProfile(const TransContext& context,
@@ -135,10 +133,18 @@ struct TargetProfile {
     : TargetProfile(context.kind == TransKind::Profile ? context.transIDs
                                                        : marker.profTransIDs(),
                     context.kind,
-                    marker.bcOff(),
+                    marker.sk(),
                     name,
                     extraSize)
   {}
+
+  static TargetProfile deserialize(const TransIDSet& profTransIDs,
+                                   TransKind kind,
+                                   Offset bcOff,
+                                   const StringData* name,
+                                   size_t extraSize) {
+    return TargetProfile{profTransIDs, kind, bcOff, name, extraSize};
+  }
 
   /*
    * Calls T::reduce to fold the data from each local RDS slot.
@@ -218,6 +224,26 @@ struct TargetProfile {
   }
 
 private:
+  TargetProfile(const TransIDSet& profTransIDs,
+                TransKind kind,
+                Offset bcOff,
+                const StringData* name,
+                size_t extraSize)
+    : m_kind(kind)
+    , m_links(createLinks(profTransIDs, kind, bcOff, name, extraSize))
+    , m_keys(createKeys(profTransIDs, bcOff, name))
+  {}
+
+  static constexpr Offset kPrologueOffset = -1;
+
+  static Offset bcOffForProfileKey(SrcKey sk) {
+    // Use a placeholder value for prologues, as they are not part of a bytecode
+    // at any offset. Profiling of prologues for different number of arguments
+    // is still differentiated by profTransID.
+    if (sk.prologue()) return kPrologueOffset;
+    return sk.offset();
+  }
+
   static rds::Link<T, rds::Mode::Local>
   createLink(TransID profTransID,
              TransKind kind,

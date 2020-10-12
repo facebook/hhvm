@@ -952,11 +952,8 @@ struct SymbolFixup : boost::static_visitor<void> {
 
   template<typename T>
   void go(rds::Profile& pt) {
-    TargetProfile<T> prof({pt.transId},
-                          TransKind::Profile,
-                          pt.bcOff,
-                          name,
-                          size - sizeof(T));
+    auto prof = TargetProfile<T>::deserialize(
+      {pt.transId}, TransKind::Profile, pt.bcOff, name, size - sizeof(T));
 
     if (size == sizeof(T)) {
       read_maybe_serializable(ser, prof.value());

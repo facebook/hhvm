@@ -99,7 +99,7 @@ private:
     assertx(sk.op() == OpSwitch);
     TargetProfile<SwitchProfile> profile({tid},
                                          TransKind::Optimize,
-                                         sk.offset(),
+                                         sk,
                                          s_switchProfile.get());
     assertx(!profile.profiling());
     if (!profile.optimizing()) {

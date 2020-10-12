@@ -10,12 +10,12 @@ use typing_defs_rust::typing_make_type::TypeBuilder;
 pub fn make_locl<'a>(
     bld: &'a TypeBuilder<'a>,
     tparams: impl IntoIterator<Item = &'a Tparam<'a>>,
-    mut targs: impl Iterator<Item = Ty<'a>>,
-) -> SMap<'a, Ty<'a>> {
+    mut targs: impl Iterator<Item = &'a Ty<'a>>,
+) -> SMap<'a, &'a Ty<'a>> {
     // TODO(hrust)
     let mut substs = SMap::empty();
     for tparam in tparams {
-        let targ_ty: Ty = match targs.next() {
+        let targ_ty: &Ty = match targs.next() {
             Some(ty) => ty,
             None => bld.any(bld.mk_rnone()),
         };

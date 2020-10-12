@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<fb9cfa112d26bb1685be82f399487ec1>>
+// @generated SignedSource<<7526ce3e70c4cebe72ea1350adaa5e56>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -32,7 +32,7 @@ pub type ExpressionId = ident::Ident;
     Serialize,
     ToOcamlRep
 )]
-pub struct Local<'a>(pub Ty<'a>, pub &'a pos::Pos<'a>, pub &'a ExpressionId);
+pub struct Local<'a>(pub &'a Ty<'a>, pub &'a pos::Pos<'a>, pub &'a ExpressionId);
 impl<'a> TrivialDrop for Local<'a> {}
 
 pub type TypingLocalTypes<'a> = local_id::map::Map<'a, &'a Local<'a>>;

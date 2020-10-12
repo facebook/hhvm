@@ -224,21 +224,21 @@ fn strip_dollar_prefix<'a>(name: &'a str) -> &'a str {
 }
 
 const TANY_: Ty_<'_> = Ty_::Tany(oxidized_by_ref::tany_sentinel::TanySentinel);
-const TANY: Ty<'_> = Ty(Reason::none(), &TANY_);
+const TANY: &Ty<'_> = &Ty(Reason::none(), TANY_);
 
-fn tany() -> Ty<'static> {
+fn tany() -> &'static Ty<'static> {
     TANY
 }
 
-fn tarraykey<'a>(arena: &'a Bump) -> Ty<'a> {
-    Ty(
+fn tarraykey<'a>(arena: &'a Bump) -> &'a Ty<'a> {
+    arena.alloc(Ty(
         Reason::none(),
-        arena.alloc(Ty_::Tprim(arena.alloc(aast::Tprim::Tarraykey))),
-    )
+        Ty_::Tprim(arena.alloc(aast::Tprim::Tarraykey)),
+    ))
 }
 
-fn default_capability<'a>(arena: &'a Bump, r: Reason<'a>) -> Ty<'a> {
-    Ty(arena.alloc(r), arena.alloc(Ty_::Tunion(&[])))
+fn default_capability<'a>(arena: &'a Bump, r: Reason<'a>) -> &'a Ty<'a> {
+    arena.alloc(Ty(arena.alloc(r), Ty_::Tunion(&[])))
 }
 
 #[derive(Debug)]
@@ -601,7 +601,7 @@ pub enum Node<'a> {
     BooleanLiteral(&'a (&'a str, &'a Pos<'a>)), // For const expressions.
     Null(&'a Pos<'a>),                          // For const expressions.
     Ty(&'a Ty<'a>),
-    TypeconstAccess(&'a (Cell<&'a Pos<'a>>, Ty<'a>, RefCell<Vec<'a, Id<'a>>>)),
+    TypeconstAccess(&'a (Cell<&'a Pos<'a>>, &'a Ty<'a>, RefCell<Vec<'a, Id<'a>>>)),
     Backslash(&'a Pos<'a>), // This needs a pos since it shows up in names.
     ListItem(&'a (Node<'a>, Node<'a>)),
     Const(&'a ShallowClassConst<'a>),
@@ -885,28 +885,25 @@ impl<'a> DirectDeclSmartConstructors<'a> {
         Some(self.alloc(aast::Expr(pos, expr_)))
     }
 
-    fn node_to_ty(&self, node: Node<'a>) -> Option<Ty<'a>> {
+    fn node_to_ty(&self, node: Node<'a>) -> Option<&'a Ty<'a>> {
         match node {
-            Node::Ty(&ty) => Some(ty),
+            Node::Ty(ty) => Some(ty),
             Node::TypeconstAccess((pos, ty, names)) => {
                 let pos = pos.get();
                 let names = self.slice(names.borrow().iter().copied());
-                Some(Ty(
+                Some(self.alloc(Ty(
                     self.alloc(Reason::hint(pos)),
-                    self.alloc(Ty_::Taccess(
-                        self.alloc(typing_defs::TaccessType(*ty, names)),
-                    )),
-                ))
+                    Ty_::Taccess(self.alloc(typing_defs::TaccessType(*ty, names))),
+                )))
             }
-            Node::Varray(pos) => Some(Ty(
+            Node::Varray(pos) => {
+                Some(self.alloc(Ty(self.alloc(Reason::hint(pos)), Ty_::Tvarray(tany()))))
+            }
+            Node::Darray(pos) => Some(self.alloc(Ty(
                 self.alloc(Reason::hint(pos)),
-                self.alloc(Ty_::Tvarray(tany())),
-            )),
-            Node::Darray(pos) => Some(Ty(
-                self.alloc(Reason::hint(pos)),
-                self.alloc(Ty_::Tdarray(self.alloc((tany(), tany())))),
-            )),
-            Node::This(pos) => Some(Ty(self.alloc(Reason::hint(pos)), self.alloc(Ty_::Tthis))),
+                Ty_::Tdarray(self.alloc((tany(), tany()))),
+            ))),
+            Node::This(pos) => Some(self.alloc(Ty(self.alloc(Reason::hint(pos)), Ty_::Tthis))),
             Node::Expr(expr) => {
                 fn expr_to_ty<'a>(arena: &'a Bump, expr: &'a nast::Expr<'a>) -> Option<Ty_<'a>> {
                     use aast::Expr_::*;
@@ -936,31 +933,31 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                     }
                 }
 
-                Some(Ty(
+                Some(self.alloc(Ty(
                     self.alloc(Reason::witness(expr.0)),
-                    self.alloc(expr_to_ty(self.state.arena, expr)?),
-                ))
+                    expr_to_ty(self.state.arena, expr)?,
+                )))
             }
-            Node::IntLiteral((_, pos)) => Some(Ty(
+            Node::IntLiteral((_, pos)) => Some(self.alloc(Ty(
                 self.alloc(Reason::witness(pos)),
-                self.alloc(Ty_::Tprim(self.alloc(aast::Tprim::Tint))),
-            )),
-            Node::FloatingLiteral((_, pos)) => Some(Ty(
+                Ty_::Tprim(self.alloc(aast::Tprim::Tint)),
+            ))),
+            Node::FloatingLiteral((_, pos)) => Some(self.alloc(Ty(
                 self.alloc(Reason::witness(pos)),
-                self.alloc(Ty_::Tprim(self.alloc(aast::Tprim::Tfloat))),
-            )),
-            Node::StringLiteral((_, pos)) => Some(Ty(
+                Ty_::Tprim(self.alloc(aast::Tprim::Tfloat)),
+            ))),
+            Node::StringLiteral((_, pos)) => Some(self.alloc(Ty(
                 self.alloc(Reason::witness(pos)),
-                self.alloc(Ty_::Tprim(self.alloc(aast::Tprim::Tstring))),
-            )),
-            Node::BooleanLiteral((_, pos)) => Some(Ty(
+                Ty_::Tprim(self.alloc(aast::Tprim::Tstring)),
+            ))),
+            Node::BooleanLiteral((_, pos)) => Some(self.alloc(Ty(
                 self.alloc(Reason::witness(pos)),
-                self.alloc(Ty_::Tprim(self.alloc(aast::Tprim::Tbool))),
-            )),
-            Node::Null(pos) => Some(Ty(
+                Ty_::Tprim(self.alloc(aast::Tprim::Tbool)),
+            ))),
+            Node::Null(pos) => Some(self.alloc(Ty(
                 self.alloc(Reason::hint(pos)),
-                self.alloc(Ty_::Tprim(self.alloc(aast::Tprim::Tnull))),
-            )),
+                Ty_::Tprim(self.alloc(aast::Tprim::Tnull)),
+            ))),
             Node::XhpEnumType(enum_values) => {
                 enum_values.iter().next().map(|x| self.node_to_ty(*x))?
             }
@@ -985,7 +982,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                         }
                     }
                 };
-                Some(Ty(reason, self.alloc(ty_)))
+                Some(self.alloc(Ty(reason, ty_)))
             }
         }
     }
@@ -1018,10 +1015,10 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                 name: Id(_, "__OnlyRxIfImpl"),
                 classname_params: &[class_name],
                 ..
-            }) => Some(Ty(
+            }) => Some(self.alloc(Ty(
                 self.alloc(Reason::hint(class_name.0)),
-                self.alloc(Ty_::Tapply(self.alloc((class_name, &[][..])))),
-            )),
+                Ty_::Tapply(self.alloc((class_name, &[][..]))),
+            ))),
             _ => None,
         });
 
@@ -1105,7 +1102,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
     }
 
     // Limited version of node_to_ty that matches behavior of Decl_utils.infer_const
-    fn infer_const(&self, name: Node<'a>, node: Node<'a>) -> Option<Ty<'a>> {
+    fn infer_const(&self, name: Node<'a>, node: Node<'a>) -> Option<&'a Ty<'a>> {
         match node {
             Node::StringLiteral(_)
             | Node::BooleanLiteral(_)
@@ -1130,30 +1127,30 @@ impl<'a> DirectDeclSmartConstructors<'a> {
         }
     }
 
-    fn ret_from_fun_kind(&self, kind: FunKind, type_: Ty<'a>) -> Ty<'a> {
+    fn ret_from_fun_kind(&self, kind: FunKind, type_: &'a Ty<'a>) -> &'a Ty<'a> {
         let pos = type_.get_pos().unwrap_or_else(|| Pos::none());
         match kind {
-            FunKind::FAsyncGenerator => Ty(
+            FunKind::FAsyncGenerator => self.alloc(Ty(
                 self.alloc(Reason::RretFunKind(self.alloc((pos, kind)))),
-                self.alloc(Ty_::Tapply(self.alloc((
+                Ty_::Tapply(self.alloc((
                     Id(pos, naming_special_names::classes::ASYNC_GENERATOR),
                     self.alloc([type_, type_, type_]),
-                )))),
-            ),
-            FunKind::FGenerator => Ty(
+                ))),
+            )),
+            FunKind::FGenerator => self.alloc(Ty(
                 self.alloc(Reason::RretFunKind(self.alloc((pos, kind)))),
-                self.alloc(Ty_::Tapply(self.alloc((
+                Ty_::Tapply(self.alloc((
                     Id(pos, naming_special_names::classes::GENERATOR),
                     self.alloc([type_, type_, type_]),
-                )))),
-            ),
-            FunKind::FAsync => Ty(
+                ))),
+            )),
+            FunKind::FAsync => self.alloc(Ty(
                 self.alloc(Reason::RretFunKind(self.alloc((pos, kind)))),
-                self.alloc(Ty_::Tapply(self.alloc((
+                Ty_::Tapply(self.alloc((
                     Id(pos, naming_special_names::classes::AWAITABLE),
                     self.alloc([type_]),
-                )))),
-            ),
+                ))),
+            )),
             _ => type_,
         }
     }
@@ -1205,7 +1202,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
         attributes: Node<'a>,
         header: &'a FunctionHeader<'a>,
         body: Node,
-    ) -> Option<(Id<'a>, Ty<'a>, &'a [ShallowProp<'a>])> {
+    ) -> Option<(Id<'a>, &'a Ty<'a>, &'a [ShallowProp<'a>])> {
         let id_opt = match (is_method, header.name) {
             (true, Node::Construct(pos)) => {
                 Some(Id(pos, naming_special_names::members::__CONSTRUCT))
@@ -1219,10 +1216,10 @@ impl<'a> DirectDeclSmartConstructors<'a> {
         let implicit_params = self.as_fun_implicit_params(header.capability, f_pos);
 
         let type_ = match header.name {
-            Node::Construct(pos) => Ty(
+            Node::Construct(pos) => self.alloc(Ty(
                 self.alloc(Reason::witness(pos)),
-                self.alloc(Ty_::Tprim(self.alloc(aast::Tprim::Tvoid))),
-            ),
+                Ty_::Tprim(self.alloc(aast::Tprim::Tvoid)),
+            )),
             _ => self
                 .node_to_ty(header.ret_hint)
                 .unwrap_or_else(|| self.tany_with_pos(f_pos)),
@@ -1288,7 +1285,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
             flags,
         });
 
-        let ty = Ty(self.alloc(Reason::witness(id.0)), self.alloc(Ty_::Tfun(ft)));
+        let ty = self.alloc(Ty(self.alloc(Reason::witness(id.0)), Ty_::Tfun(ft)));
         Some((id, ty, properties))
     }
 
@@ -1347,25 +1344,22 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                                 tany()
                             } else {
                                 self.node_to_ty(hint).map(|ty| match ty {
-                                    Ty(r, &Ty_::Tfun(ref fun_type))
-                                        if attributes.at_most_rx_as_func =>
-                                    {
+                                    Ty(r, Ty_::Tfun(fun_type)) if attributes.at_most_rx_as_func => {
                                         let mut fun_type = (*fun_type).clone();
                                         fun_type.reactive = Reactivity::RxVar(None);
-                                        Ty(r, self.alloc(Ty_::Tfun(self.alloc(fun_type))))
+                                        self.alloc(Ty(r, Ty_::Tfun(self.alloc(fun_type))))
                                     }
-                                    Ty(r, &Ty_::Toption(Ty(r1, &Ty_::Tfun(ref fun_type))))
+                                    Ty(r, Ty_::Toption(Ty(r1, Ty_::Tfun(fun_type))))
                                         if attributes.at_most_rx_as_func =>
                                     {
                                         let mut fun_type = (*fun_type).clone();
                                         fun_type.reactive = Reactivity::RxVar(None);
-                                        Ty(
+                                        self.alloc(Ty(
                                             r,
-                                            self.alloc(Ty_::Toption(Ty(
-                                                r1,
-                                                self.alloc(Ty_::Tfun(self.alloc(fun_type))),
-                                            ))),
-                                        )
+                                            Ty_::Toption(
+                                                self.alloc(Ty(r1, Ty_::Tfun(self.alloc(fun_type)))),
+                                            ),
+                                        ))
                                     }
                                     ty => ty,
                                 })?
@@ -1504,15 +1498,15 @@ impl<'a> DirectDeclSmartConstructors<'a> {
     }
 
     fn hint_ty(&self, pos: &'a Pos<'a>, ty_: Ty_<'a>) -> Node<'a> {
-        Node::Ty(self.alloc(Ty(self.alloc(Reason::hint(pos)), self.alloc(ty_))))
+        Node::Ty(self.alloc(Ty(self.alloc(Reason::hint(pos)), ty_)))
     }
 
     fn prim_ty(&self, tprim: aast::Tprim<'a>, pos: &'a Pos<'a>) -> Node<'a> {
         self.hint_ty(pos, Ty_::Tprim(self.alloc(tprim)))
     }
 
-    fn tany_with_pos(&self, pos: &'a Pos<'a>) -> Ty<'a> {
-        Ty(self.alloc(Reason::witness(pos)), &TANY_)
+    fn tany_with_pos(&self, pos: &'a Pos<'a>) -> &'a Ty<'a> {
+        self.alloc(Ty(self.alloc(Reason::witness(pos)), TANY_))
     }
 
     fn source_text_at_pos(&self, pos: &'a Pos<'a>) -> &'a [u8] {
@@ -1526,8 +1520,8 @@ impl<'a> DirectDeclSmartConstructors<'a> {
     // reference type parameters which we have not parsed yet. When constructing
     // a type parameter list, we use this function to rewrite the type of each
     // constraint, considering the full list of type parameters to be in scope.
-    fn convert_tapply_to_tgeneric(&self, ty: Ty<'a>) -> Ty<'a> {
-        let ty_ = match *ty.1 {
+    fn convert_tapply_to_tgeneric(&self, ty: &'a Ty<'a>) -> &'a Ty<'a> {
+        let ty_ = match ty.1 {
             Ty_::Tapply(&(id, targs)) => {
                 let converted_targs = self.slice(
                     targs
@@ -1604,7 +1598,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
             ),
             _ => return ty,
         };
-        Ty(ty.0, self.alloc(ty_))
+        self.alloc(Ty(ty.0, ty_))
     }
 
     // This is the logic for determining if convert_tapply_to_tgeneric should turn
@@ -1840,10 +1834,9 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             ),
             TokenKind::Num => self.prim_ty(aast::Tprim::Tnum, token_pos(self)),
             TokenKind::Bool => self.prim_ty(aast::Tprim::Tbool, token_pos(self)),
-            TokenKind::Mixed => Node::Ty(self.alloc(Ty(
-                self.alloc(Reason::hint(token_pos(self))),
-                self.alloc(Ty_::Tmixed),
-            ))),
+            TokenKind::Mixed => {
+                Node::Ty(self.alloc(Ty(self.alloc(Reason::hint(token_pos(self))), Ty_::Tmixed)))
+            }
             TokenKind::Void => self.prim_ty(aast::Tprim::Tvoid, token_pos(self)),
             TokenKind::Arraykey => self.prim_ty(aast::Tprim::Tarraykey, token_pos(self)),
             TokenKind::Noreturn => self.prim_ty(aast::Tprim::Tnoreturn, token_pos(self)),
@@ -3314,7 +3307,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             s.push_str(msg);
             s.into_bump_str()
         });
-        fn get_condition_type_name<'a>(ty_opt: Option<Ty<'a>>) -> Option<&'a str> {
+        fn get_condition_type_name<'a>(ty_opt: Option<&'a Ty<'a>>) -> Option<&'a str> {
             ty_opt.and_then(|ty| {
                 let Ty(_, ty_) = ty;
                 match *ty_ {
@@ -4009,7 +4002,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                         };
                         let reason = self.alloc(Reason::hint(self_pos));
                         let ty_ = Ty_::Tapply(self.alloc((Id(id_pos, name), &[][..])));
-                        Ty(reason, self.alloc(ty_))
+                        self.alloc(Ty(reason, ty_))
                     }
                     _ => match self.node_to_ty(ty) {
                         Some(ty) => ty,
@@ -4034,7 +4027,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         // Use the type of the hint as-is (i.e., throw away the knowledge that
         // we had a soft type specifier here--the typechecker does not use it).
         // Replace its Reason with one including the position of the `@` token.
-        self.hint_ty(pos, *hint.1)
+        self.hint_ty(pos, hint.1)
     }
 
     // A type specifier preceded by an attribute list. At the time of writing,
@@ -4059,7 +4052,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                     Some(ty) => ty,
                     None => return Node::Ignored(SK::AttributizedSpecifier),
                 };
-                self.hint_ty(self.merge(attributes_pos, hint_pos), *hint.1)
+                self.hint_ty(self.merge(attributes_pos, hint_pos), hint.1)
             }
             _ => hint,
         }

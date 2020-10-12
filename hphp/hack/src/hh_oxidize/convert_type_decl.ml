@@ -163,8 +163,6 @@ let unbox_field ty =
   | Configuration.ByRef ->
     ty = "tany_sentinel::TanySentinel"
     || ty = "ident::Ident"
-    || ty = "Ty<'a>"
-    || ty = "Option<Ty<'a>>"
     || ty = "ConditionTypeName<'a>"
     || ty = "ConstraintType<'a>"
     || (String.is_prefix ty ~prefix:"Option<" && Convert_type.is_ty_copy ty)

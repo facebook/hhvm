@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<e04364f44185600440e7d24fbd194a0e>>
+// @generated SignedSource<<b66a132f12c2f880dd9468610043035c>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -63,7 +63,7 @@ pub struct Env<'a> {
     pub in_try: bool,
     pub in_case: bool,
     pub inside_constructor: bool,
-    pub et_spliced_types: Option<i_map::IMap<'a, (&'a tast::Expr<'a>, typing_defs::Ty<'a>)>>,
+    pub et_spliced_types: Option<i_map::IMap<'a, (&'a tast::Expr<'a>, &'a typing_defs::Ty<'a>)>>,
     pub global_tpenv: &'a type_parameter_env::TypeParameterEnv<'a>,
     pub log_levels: s_map::SMap<'a, isize>,
     pub inference_env: &'a typing_inference_env::TypingInferenceEnv<'a>,
@@ -85,10 +85,10 @@ impl<'a> TrivialDrop for Env<'a> {}
 pub struct Genv<'a> {
     pub tcopt: &'a typechecker_options::TypecheckerOptions<'a>,
     pub return_: &'a typing_env_return_info::TypingEnvReturnInfo<'a>,
-    pub params: local_id::map::Map<'a, (Ty<'a>, &'a pos::Pos<'a>, ParamMode)>,
-    pub condition_types: s_map::SMap<'a, Ty<'a>>,
-    pub parent: Option<&'a (&'a str, Ty<'a>)>,
-    pub self_: Option<&'a (&'a str, Ty<'a>)>,
+    pub params: local_id::map::Map<'a, (&'a Ty<'a>, &'a pos::Pos<'a>, ParamMode)>,
+    pub condition_types: s_map::SMap<'a, &'a Ty<'a>>,
+    pub parent: Option<&'a (&'a str, &'a Ty<'a>)>,
+    pub self_: Option<&'a (&'a str, &'a Ty<'a>)>,
     pub static_: bool,
     pub fun_kind: oxidized::ast_defs::FunKind,
     pub val_kind: typing_defs::ValKind,

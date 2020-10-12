@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<6416e973d10f8f60b055a6606a3ba473>>
+// @generated SignedSource<<a0e676cd5b0f5f81f178dd593a3eb51e>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -62,7 +62,7 @@ pub use typing_defs::*;
     ToOcamlRep
 )]
 pub struct SubstContext<'a> {
-    pub subst: s_map::SMap<'a, Ty<'a>>,
+    pub subst: s_map::SMap<'a, &'a Ty<'a>>,
     pub class_context: &'a str,
     pub from_req_extends: bool,
 }
@@ -176,7 +176,7 @@ pub struct DeclClassType<'a> {
     pub methods: s_map::SMap<'a, &'a Element<'a>>,
     pub smethods: s_map::SMap<'a, &'a Element<'a>>,
     pub construct: (Option<&'a Element<'a>>, ConsistentKind),
-    pub ancestors: s_map::SMap<'a, Ty<'a>>,
+    pub ancestors: s_map::SMap<'a, &'a Ty<'a>>,
     pub req_ancestors: &'a [&'a Requirement<'a>],
     pub req_ancestors_extends: s_set::SSet<'a>,
     pub extends: s_set::SSet<'a>,

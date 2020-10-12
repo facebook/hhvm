@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b7a520741845cf1befac01d221c85af3>>
+// @generated SignedSource<<36d069afb6a4c240d9956731500b8c46>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -47,13 +47,13 @@ pub struct TyvarConstraints<'a> {
     /// Whenever we localize "T1::T" in a constraint, we add a fresh type variable
     /// indexed by "T" in the type_constants of the type variable representing T1.
     /// This allows to properly check constraints on "T1::T".
-    pub type_constants: s_map::SMap<'a, (aast::Sid<'a>, Ty<'a>)>,
+    pub type_constants: s_map::SMap<'a, (aast::Sid<'a>, &'a Ty<'a>)>,
     /// Map associating PU information to each instance of
     /// #v:@T
     /// when the type variable #v is not resolved yet. We introduce a new type
     /// variable to 'postpone' the checking of this expression until the end,
     /// when #v will be known.
-    pub pu_accesses: s_map::SMap<'a, (aast::Sid<'a>, Ty<'a>)>,
+    pub pu_accesses: s_map::SMap<'a, (aast::Sid<'a>, &'a Ty<'a>)>,
 }
 impl<'a> TrivialDrop for TyvarConstraints<'a> {}
 
@@ -72,7 +72,7 @@ impl<'a> TrivialDrop for TyvarConstraints<'a> {}
 )]
 pub enum SolvingInfo<'a> {
     /// when the type variable is bound to a type
-    TVIType(Ty<'a>),
+    TVIType(&'a Ty<'a>),
     /// when the type variable is still unsolved
     TVIConstraints(&'a TyvarConstraints<'a>),
 }

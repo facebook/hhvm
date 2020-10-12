@@ -47,17 +47,17 @@ and is_ty_copy ty =
 let add_indirection_between () =
   [
     ("typing_defs_core", "ConstraintType", "ConstraintType_");
-    ("typing_defs_core", "Ty", "Ty_");
     ("aast_defs", "Hint", "Hint_");
   ]
   @
   match Configuration.mode () with
-  | Configuration.ByBox -> []
+  | Configuration.ByBox -> [("typing_defs_core", "Ty", "Ty_")]
   | Configuration.ByRef ->
     [
       ("aast", "Expr_", "Expr");
       ("aast", "Expr_", "Afield");
       ("aast", "Expr_", "AssertExpr");
+      ("typing_defs_core", "Ty_", "Ty");
     ]
 
 let should_add_indirection ~seen_indirection ty targs =
@@ -112,7 +112,7 @@ let rec core_type ?(seen_indirection = false) ct =
     | _ -> false
   in
   match ct.ptyp_desc with
-  | Ptyp_var "ty" when is_by_ref -> "Ty<'a>"
+  | Ptyp_var "ty" when is_by_ref -> "&'a Ty<'a>"
   | Ptyp_var name -> convert_type_name name
   | Ptyp_alias (_, name) -> convert_type_name name
   | Ptyp_tuple tys -> tuple tys

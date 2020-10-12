@@ -33,71 +33,70 @@ impl PartialOrd for Ty<'_> {
 }
 impl Ord for Ty<'_> {
     fn cmp(&self, other: &Self) -> Ordering {
-        self.1.cmp(other.1)
+        self.1.cmp(&other.1)
     }
 }
 
 impl<'a> Ty<'a> {
-    pub fn mk(reason: &'a Reason<'a>, ty_: &'a Ty_<'a>) -> Ty<'a> {
+    pub fn mk(reason: &'a Reason<'a>, ty_: Ty_<'a>) -> Ty<'a> {
         Ty(reason, ty_)
     }
-    pub fn unpack(self) -> (&'a Reason<'a>, &'a Ty_<'a>) {
+    pub fn unpack(&self) -> (&'a Reason<'a>, Ty_<'a>) {
         (self.0, self.1)
     }
-    pub fn get_node(self) -> &'a Ty_<'a> {
-        let Ty(_r, t) = self;
-        t
+    pub fn get_node(&self) -> Ty_<'a> {
+        self.1
     }
-    pub fn get_reason(self) -> &'a Reason<'a> {
+    pub fn get_reason(&self) -> &'a Reason<'a> {
         let Ty(r, _t) = self;
         r
     }
-    pub fn get_pos(self) -> Option<&'a Pos<'a>> {
+    pub fn get_pos(&self) -> Option<&'a Pos<'a>> {
         self.get_reason().pos()
     }
-    pub fn is_tyvar(self) -> bool {
+    pub fn is_tyvar(&self) -> bool {
         match self.get_node() {
             Ty_::Tvar(_) => true,
             _ => false,
         }
     }
-    pub fn is_generic(self) -> bool {
+    pub fn is_generic(&self) -> bool {
         match self.get_node() {
             Ty_::Tgeneric(_) => true,
             _ => false,
         }
     }
-    pub fn is_dynamic(self) -> bool {
+    pub fn is_dynamic(&self) -> bool {
         match self.get_node() {
             Ty_::Tdynamic => true,
             _ => false,
         }
     }
-    pub fn is_nonnull(self) -> bool {
+    pub fn is_nonnull(&self) -> bool {
         match self.get_node() {
             Ty_::Tnonnull => true,
             _ => false,
         }
     }
-    pub fn is_any(self) -> bool {
+    pub fn is_any(&self) -> bool {
         match self.get_node() {
             Ty_::Tany(_) => true,
             _ => false,
         }
     }
-    pub fn is_prim(self, kind: Tprim) -> bool {
+    pub fn is_prim(&self, kind: Tprim) -> bool {
         match self.get_node() {
-            Ty_::Tprim(k) => &kind == &**k,
+            Ty_::Tprim(k) => &kind == &*k,
             _ => false,
         }
     }
-    pub fn is_union(self) -> bool {
+    pub fn is_union(&self) -> bool {
         match self.get_node() {
             Ty_::Tunion(_) => true,
             _ => false,
         }
     }
-    pub fn is_intersection(self) -> bool {
+    pub fn is_intersection(&self) -> bool {
         match self.get_node() {
             Ty_::Tintersection(_) => true,
             _ => false,
@@ -108,7 +107,7 @@ impl<'a> Ty<'a> {
 impl Ty<'_> {
     pub fn get_var(&self) -> Option<Ident> {
         match self.get_node() {
-            Ty_::Tvar(v) => Some(*v),
+            Ty_::Tvar(v) => Some(v),
             _ => None,
         }
     }
@@ -192,7 +191,7 @@ impl Ord for ConstraintType<'_> {
 }
 
 impl<'a> InternalType<'a> {
-    pub fn get_locl_type_opt(self) -> Option<Ty<'a>> {
+    pub fn get_locl_type_opt(self) -> Option<&'a Ty<'a>> {
         match self {
             InternalType::LoclType(ty) => Some(ty),
             InternalType::ConstraintType(_) => None,

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<92014d20b22d860e20a10736cc8fb897>>
+// @generated SignedSource<<e5721242a415c19d8cbcae13f16b93fa>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -33,7 +33,7 @@ pub use typing_defs::*;
 pub struct ShallowClassConst<'a> {
     pub abstract_: bool,
     pub name: ast_defs::Id<'a>,
-    pub type_: Ty<'a>,
+    pub type_: &'a Ty<'a>,
 }
 impl<'a> TrivialDrop for ShallowClassConst<'a> {}
 
@@ -51,9 +51,9 @@ impl<'a> TrivialDrop for ShallowClassConst<'a> {}
 )]
 pub struct ShallowTypeconst<'a> {
     pub abstract_: TypeconstAbstractKind<'a>,
-    pub constraint: Option<Ty<'a>>,
+    pub constraint: Option<&'a Ty<'a>>,
     pub name: ast_defs::Id<'a>,
-    pub type_: Option<Ty<'a>>,
+    pub type_: Option<&'a Ty<'a>>,
     pub enforceable: (&'a pos::Pos<'a>, bool),
     pub reifiable: Option<&'a pos::Pos<'a>>,
 }
@@ -73,7 +73,7 @@ impl<'a> TrivialDrop for ShallowTypeconst<'a> {}
 )]
 pub struct ShallowPuMember<'a> {
     pub atom: ast_defs::Id<'a>,
-    pub types: &'a [(ast_defs::Id<'a>, Ty<'a>)],
+    pub types: &'a [(ast_defs::Id<'a>, &'a Ty<'a>)],
     pub exprs: &'a [ast_defs::Id<'a>],
 }
 impl<'a> TrivialDrop for ShallowPuMember<'a> {}
@@ -94,7 +94,7 @@ pub struct ShallowPuEnum<'a> {
     pub name: ast_defs::Id<'a>,
     pub is_final: bool,
     pub case_types: &'a [&'a Tparam<'a>],
-    pub case_values: &'a [(ast_defs::Id<'a>, Ty<'a>)],
+    pub case_values: &'a [(ast_defs::Id<'a>, &'a Ty<'a>)],
     pub members: &'a [&'a ShallowPuMember<'a>],
 }
 impl<'a> TrivialDrop for ShallowPuEnum<'a> {}
@@ -118,7 +118,7 @@ pub struct ShallowProp<'a> {
     pub lsb: bool,
     pub name: ast_defs::Id<'a>,
     pub needs_init: bool,
-    pub type_: Option<Ty<'a>>,
+    pub type_: Option<&'a Ty<'a>>,
     pub abstract_: bool,
     pub visibility: oxidized::ast_defs::Visibility,
 }
@@ -144,7 +144,7 @@ pub struct ShallowMethod<'a> {
     pub override_: bool,
     pub dynamicallycallable: bool,
     pub reactivity: Option<decl_defs::MethodReactivity<'a>>,
-    pub type_: Ty<'a>,
+    pub type_: &'a Ty<'a>,
     pub visibility: oxidized::ast_defs::Visibility,
     pub deprecated: Option<&'a str>,
 }
@@ -171,12 +171,12 @@ pub struct ShallowClass<'a> {
     pub name: ast_defs::Id<'a>,
     pub tparams: &'a [&'a Tparam<'a>],
     pub where_constraints: &'a [&'a WhereConstraint<'a>],
-    pub extends: &'a [Ty<'a>],
-    pub uses: &'a [Ty<'a>],
-    pub xhp_attr_uses: &'a [Ty<'a>],
-    pub req_extends: &'a [Ty<'a>],
-    pub req_implements: &'a [Ty<'a>],
-    pub implements: &'a [Ty<'a>],
+    pub extends: &'a [&'a Ty<'a>],
+    pub uses: &'a [&'a Ty<'a>],
+    pub xhp_attr_uses: &'a [&'a Ty<'a>],
+    pub req_extends: &'a [&'a Ty<'a>],
+    pub req_implements: &'a [&'a Ty<'a>],
+    pub implements: &'a [&'a Ty<'a>],
     pub consts: &'a [&'a ShallowClassConst<'a>],
     pub typeconsts: &'a [&'a ShallowTypeconst<'a>],
     pub pu_enums: &'a [&'a ShallowPuEnum<'a>],

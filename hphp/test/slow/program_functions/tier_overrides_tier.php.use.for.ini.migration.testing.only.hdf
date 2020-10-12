@@ -52,7 +52,6 @@ Tiers {
   westcoast {
     tier = /^westcoast$/
     overwrite {
-      ResourceLimit.RSS=400000000
       Server.EnableKeepAlive = false
       Server.RequestTimeoutSeconds = 360
       Server.Upload.UploadMaxFileSize = 200MB

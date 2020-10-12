@@ -159,6 +159,10 @@ let set_local_type env lid pty =
   let k_vars = LMap.add lid pty env.e_nxt.k_vars in
   { env with e_nxt = { env.e_nxt with k_vars } }
 
+let set_local_type_opt env lid pty =
+  let k_vars = LMap.update lid (fun _ -> pty) env.e_nxt.k_vars in
+  { env with e_nxt = { env.e_nxt with k_vars } }
+
 (* - Outcomes - *)
 
 let merge_out out1 out2 = KMap.merge (fun _ -> merge_cont_opt) out1 out2

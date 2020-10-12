@@ -876,6 +876,14 @@ and expr ~pos renv (env : Env.expr_env) (((_, ety), e) : Tast.expr) =
   | A.List es ->
     let (env, ptys) = List.map_env env es ~f:(fun env e -> expr env e) in
     (env, Ttuple ptys)
+  | A.Pipe ((_, dollardollar), e1, e2) ->
+    let (env, t1) = expr env e1 in
+    let dd_old = Env.get_local_type env dollardollar in
+    let env = Env.set_local_type env dollardollar t1 in
+    let (env, t2) = expr env e2 in
+    let env = Env.set_local_type_opt env dollardollar dd_old in
+    (env, t2)
+  | A.Dollardollar (_, lid) -> refresh_local_type ~pos renv env lid ety
   (* --- expressions below are not yet supported *)
   | A.Darray (_, _)
   | A.Varray (_, _)
@@ -884,7 +892,6 @@ and expr ~pos renv (env : Env.expr_env) (((_, ety), e) : Tast.expr) =
   | A.KeyValCollection (_, _, _)
   | A.Omitted
   | A.Id _
-  | A.Dollardollar _
   | A.Clone _
   | A.Obj_get (_, _, _)
   | A.Class_get (_, _)
@@ -897,7 +904,6 @@ and expr ~pos renv (env : Env.expr_env) (((_, ety), e) : Tast.expr) =
   | A.Suspend _
   | A.Expr_list _
   | A.Cast (_, _)
-  | A.Pipe (_, _, _)
   | A.Eif (_, _, _)
   | A.Is (_, _)
   | A.As (_, _, _)

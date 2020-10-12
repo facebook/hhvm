@@ -106,6 +106,10 @@ val get_local_type : (yes, 'a) env -> Local_id.t -> ptype option
 
 val set_local_type : (yes, 'a) env -> Local_id.t -> ptype -> (yes, 'a) env
 
+(* Update or remove a local from the env *)
+val set_local_type_opt :
+  (yes, 'a) env -> Local_id.t -> ptype option -> (yes, 'a) env
+
 (* - Outcomes - *)
 
 val empty_cont : cont

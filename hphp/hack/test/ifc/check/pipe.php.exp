@@ -1,0 +1,49 @@
+=== IFC analysis results for pipe.php
+File "pipe.php", line 13, characters 3-22:
+Data with policy `B` appears in context `A`. (Typing[4379])
+  File "pipe.php", line 9, characters 14-19:
+  This may be the data source with policy `B`
+  File "pipe.php", line 6, characters 14-19:
+  This may be the data sink with policy `A`
+File "pipe.php", line 33, characters 3-68:
+Data with policy `B` appears in context `A`. (Typing[4379])
+  File "pipe.php", line 9, characters 14-19:
+  This may be the data source with policy `B`
+  File "pipe.php", line 6, characters 14-19:
+  This may be the data sink with policy `A`
+  File "pipe.php", line 32, characters 3-30:
+  Another program point contributing to the illegal flow
+  File "pipe.php", line 32, characters 25-29:
+  Another program point contributing to the illegal flow
+File "pipe.php", line 27, characters 3-38:
+Data with policy `B` appears in context `A`. (Typing[4379])
+  File "pipe.php", line 9, characters 14-19:
+  This may be the data source with policy `B`
+  File "pipe.php", line 6, characters 14-19:
+  This may be the data sink with policy `A`
+  File "pipe.php", line 17, characters 3-90:
+  Another program point contributing to the illegal flow
+  File "pipe.php", line 18, characters 9-14:
+  Another program point contributing to the illegal flow
+  File "pipe.php", line 21, characters 5-13:
+  Another program point contributing to the illegal flow
+  File "pipe.php", line 23, characters 3-42:
+  Another program point contributing to the illegal flow
+  File "pipe.php", line 24, characters 5-15:
+  Another program point contributing to the illegal flow
+File "pipe.php", line 27, characters 3-38:
+Data with policy `B` appears in context `A`. (Typing[4379])
+  File "pipe.php", line 9, characters 14-19:
+  This may be the data source with policy `B`
+  File "pipe.php", line 6, characters 14-19:
+  This may be the data sink with policy `A`
+  File "pipe.php", line 17, characters 3-90:
+  Another program point contributing to the illegal flow
+  File "pipe.php", line 18, characters 9-14:
+  Another program point contributing to the illegal flow
+  File "pipe.php", line 19, characters 7-15:
+  Another program point contributing to the illegal flow
+  File "pipe.php", line 23, characters 3-42:
+  Another program point contributing to the illegal flow
+  File "pipe.php", line 24, characters 5-15:
+  Another program point contributing to the illegal flow

@@ -75,4 +75,47 @@ abstract class BuiltinEnum<+T> {
 
 type enumname<T> = classname<BuiltinEnum<T>>;
 
+/* Experimental section for Enum Classes. This is bound to evolve with
+ * the HIP process.
+ */
+
+/**
+ * Base helper class for the enum class feature
+ */
+final class Elt<-TPhantom, +T> {
+  public function __construct(private string $name, private T $data) {}
+
+  <<__Pure>>
+  public function name(): string {
+    return $this->name;
+  }
+
+  <<__Pure>>
+  public function unwrap(): T {
+    return $this->data;
+  }
+}
+
+/**
+ * BuiltinEnumClass contains the utility methods provided by enum classes.
+ * Under the hood, an enum class Foo : Bar will extend
+ * BuiltinEnumClass<HH\Elt<this, Bar>>.
+ *
+ * HHVM provides a native implementation for this class. The PHP class
+ * definition below is not actually used at run time; it is simply
+ * provided for the typechecker and for developer reference.
+ */
+<<__EnumClass>>
+abstract class BuiltinEnumClass<+T> {
+  /**
+   * Get the values of the public consts defined on this class,
+   * indexed by the string name of those consts.
+   *
+   * @return array ('CONST_NAME' => $value, ....)
+   */
+  <<__Native, __Pure>>
+  final public static function getValues(): darray<string, T>;
+}
+
+
 }

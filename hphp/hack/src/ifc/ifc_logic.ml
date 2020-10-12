@@ -48,14 +48,14 @@ end
 (* Compute the meet of two policies, returns None if
    one of the two policies is a variable. *)
 let policy_meet p1 p2 =
-  let pos = PosSet.union (pos_of p1) (pos_of p2) in
+  let pos = PosSet.union (pos_set_of_policy p1) (pos_set_of_policy p2) in
   match (p1, p2) with
   | (Ptop _, p)
   | (p, Ptop _) ->
-    Some (set_pos pos p)
+    Some (set_pos_set_of_policy pos p)
   | (Ppurpose (_, n1), Ppurpose (_, n2)) ->
     if String.equal n1 n2 then
-      Some (set_pos pos p1)
+      Some (set_pos_set_of_policy pos p1)
     else
       Some (Pbot pos)
   | (Pbot _, _)
@@ -64,17 +64,17 @@ let policy_meet p1 p2 =
   | _ -> None
 
 let policy_join p1 p2 =
-  let pos = PosSet.union (pos_of p1) (pos_of p2) in
+  let pos = PosSet.union (pos_set_of_policy p1) (pos_set_of_policy p2) in
   match (p1, p2) with
   | (Ptop _, _)
   | (_, Ptop _) ->
     Some (Ptop pos)
   | (Pbot _, p)
   | (p, Pbot _) ->
-    Some (set_pos pos p)
+    Some (set_pos_set_of_policy pos p)
   | (Ppurpose (_, n1), Ppurpose (_, n2)) ->
     if String.equal n1 n2 then
-      Some (set_pos pos p1)
+      Some (set_pos_set_of_policy pos p1)
     else
       Some (Ptop pos)
   | _ -> None

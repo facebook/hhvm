@@ -1377,7 +1377,8 @@ let check opts tast =
       Logic.entailment_violations opts.opt_security_lattice simple
     in
     let to_err node =
-      (PosSet.elements (pos_of node), Format.asprintf "%a" Pp.policy node)
+      ( PosSet.elements (pos_set_of_policy node),
+        Format.asprintf "%a" Pp.policy node )
     in
     let illegal_information_flow (poss, source, sink) =
       (* Separate error positions that are not in the result and filter out

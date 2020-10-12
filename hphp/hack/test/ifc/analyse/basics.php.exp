@@ -9,7 +9,7 @@ Analyzing \binop:
 * Final environment:
   Deps: {}
   Constraints:
-    [$x < bop, lit < bop, bop < ret]
+    [4:3-17] $x < bop, lit < bop, bop < ret
   Locals:
     { $x -> <$x>; $y -> <$y> }
 
@@ -23,7 +23,9 @@ Analyzing \assign0:
 * Final environment:
   Deps: {}
   Constraints:
-    [$arg < $x, lit < $x'1, $x'1 < ret]
+    [8:3-13] $arg < $x
+    [9:3-11] lit < $x'1
+    [10:3-13] $x'1 < ret
   Locals:
     { $arg -> <$arg>; $x -> <$x'1> }
 
@@ -37,7 +39,9 @@ Analyzing \assign1:
 * Final environment:
   Deps: {}
   Constraints:
-    [$arg < $x, $x < bop, lit < bop, bop < $x'1, $x'1 < ret]
+    [14:3-13] $arg < $x
+    [15:3-16] $x < bop, lit < bop, bop < $x'1
+    [16:3-13] $x'1 < ret
   Locals:
     { $arg -> <$arg>; $x -> <$x'1> }
 
@@ -51,8 +55,10 @@ Analyzing \condition:
 * Final environment:
   Deps: {}
   Constraints:
-    [$a2 < bop, lit < bop, bop < $x, $a0 < $x, bop < $x'1, $a1 < $x'1,
-     $x < $x'2, $x'1 < $x'2, $x'2 < ret]
+    [20:7-14] $a2 < bop, lit < bop
+    [21:5-14] bop < $x, $a0 < $x
+    [23:5-14] bop < $x'1, $a1 < $x'1
+    [25:3-13] $x < $x'2, $x'1 < $x'2, $x'2 < ret
   Locals:
     { $a0 -> <$a0>; $a1 -> <$a1>; $a2 -> <$a2>; $x -> <$x'2> }
 

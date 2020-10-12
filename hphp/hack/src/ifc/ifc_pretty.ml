@@ -17,6 +17,8 @@ let comma_sep fmt () = fprintf fmt ",@ "
 
 let blank_sep fmt () = fprintf fmt "@ "
 
+let newline_sep fmt () = fprintf fmt "@,"
+
 let rec list pp_sep pp fmt = function
   | [] -> ()
   | [x] -> fprintf fmt "%a" pp x
@@ -76,10 +78,23 @@ let fun_proto fmt fp =
   fprintf fmt "%s%a" fp.fp_name fun_ fp.fp_type
 
 let prop =
+  let is_symmetric = function
+    | (Cflow (_, a, b), Cflow (_, c, d)) -> equal_policy a d && equal_policy b c
+    | _ -> false
+  in
+  let equate a b =
+    if Policy.compare a b <= 0 then
+      `q (a, b)
+    else
+      `q (b, a)
+  in
   let rec conjuncts = function
-    | Cconj (Cflow (_, a, b), Cflow (_, c, d))
-      when equal_policy a d && equal_policy b c ->
-      [`q (a, b)]
+    | Cconj ((Cflow (_, a, b) as f1), Cconj ((Cflow _ as f2), prop))
+      when is_symmetric (f1, f2) ->
+      equate a b :: conjuncts prop
+    | Cconj ((Cflow (_, a, b) as f1), (Cflow _ as f2)) when is_symmetric (f1, f2)
+      ->
+      [equate a b]
     | Cconj (cl, cr) -> conjuncts cl @ conjuncts cr
     | Ctrue -> []
     | c -> [`c c]
@@ -125,7 +140,7 @@ let prop =
     | [`c (Chole (_, fp))] -> fprintf fmt "@[<h>{%a}@]" fun_proto fp
     | l ->
       let pp = list comma_sep (fun fmt c -> aux b fmt [c]) in
-      fprintf fmt "[@[<hov>%a@]]" pp l
+      fprintf fmt "@[<hov>%a@]" pp l
   in
   (fun fmt c -> aux 0 fmt (conjuncts c))
 
@@ -146,10 +161,37 @@ let renv fmt renv =
   pp_close_box fmt ()
 
 let env fmt env =
+  let rec flatten = function
+    | Cconj (p1, p2) -> flatten p1 @ flatten p2
+    | prop -> [prop]
+  in
+  let rec group_by_line =
+    let has_same_pos p1 p2 =
+      Option.equal Pos.equal (unique_pos_of_prop p1) (unique_pos_of_prop p2)
+    in
+    function
+    | [] -> []
+    | prop :: props ->
+      let (group, rest) = List.partition_tf ~f:(has_same_pos prop) props in
+      let pos_opt = unique_pos_of_prop prop in
+      let prop = Logic.conjoin (prop :: group) in
+      (pos_opt, prop) :: group_by_line rest
+  in
+  let group fmt (pos_opt, p) =
+    match pos_opt with
+    | Some pos -> fprintf fmt "@[<hov2>%a@ %a@]" Pos.pp pos prop p
+    | None -> fprintf fmt "@[<hov2>[no pos]@ %a@]" prop p
+  in
+  let groups = list newline_sep group in
+
   pp_open_vbox fmt 0;
   fprintf fmt "@[<hov2>Deps:@ %a@]" SSet.pp (Env.get_deps env);
-  let p = Logic.conjoin (Env.get_constraints env) in
-  fprintf fmt "@,Constraints:@,  @[<v>%a@]" prop p;
+  let props = List.concat_map ~f:flatten (Env.get_constraints env) in
+  let prop_groups =
+    let compare (pos1, _) (pos2, _) = Option.compare Pos.compare pos1 pos2 in
+    group_by_line props |> List.sort ~compare
+  in
+  fprintf fmt "@,Constraints:@,  @[<v>%a@]" groups prop_groups;
   pp_close_box fmt ()
 
 let class_decl fmt { cd_policied_properties = props; _ } =

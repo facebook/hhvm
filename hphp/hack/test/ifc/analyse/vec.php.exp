@@ -9,7 +9,7 @@ Analyzing \empty:
 * Final environment:
   Deps: {}
   Constraints:
-    [key'1 < key, Vec < ret, len'1 < len]
+    [4:3-16] key'1 < key, Vec < ret, len'1 < len
   Locals:
     {}
 
@@ -23,7 +23,7 @@ Analyzing \collection:
 * Final environment:
   Deps: {}
   Constraints:
-    [lit < Vec, lit'1 < Vec, key'1 < key, Vec < ret, len'1 < len]
+    [8:3-29] lit < Vec, lit'1 < Vec, key'1 < key, Vec < ret, len'1 < len
   Locals:
     {}
 
@@ -37,8 +37,9 @@ Analyzing \add:
 * Final environment:
   Deps: {}
   Constraints:
-    [key < weak, $vec < weak'1, len < weak'2, lit < weak'1, weak < key'1,
-     weak'1 < $vec'1, weak'2 < len'1]
+    [12:3-14]
+      key < weak, $vec < weak'1, len < weak'2, lit < weak'1, weak < key'1,
+      weak'1 < $vec'1, weak'2 < len'1
   Locals:
     { $vec -> vec<<key'1> => <$vec'1>; |len'1|> }
 
@@ -52,9 +53,10 @@ Analyzing \retElem:
 * Final environment:
   Deps: {}
   Constraints:
-    [lit < key, OutOfBoundsException_lump = exn_lump,
-     OutOfBoundsException < exn, len < exn, lit < exn, $vec < ret, len < ret,
-     lit < ret]
+    [16:3-18]
+      lit < key, OutOfBoundsException_lump = exn_lump,
+      OutOfBoundsException < exn, len < exn, lit < exn, $vec < ret,
+      len < ret, lit < ret
   Locals:
     { $vec -> vec<<key> => <$vec>; |len|> }
     pc: len, lit

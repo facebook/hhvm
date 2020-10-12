@@ -100,10 +100,15 @@ struct TCRangeInfo {
       return folly::sformat("{}", static_cast<void*>(x));
     };
 
+    auto const offset = [&]() -> folly::dynamic {
+      if (!sk) return dynamic();
+      return sk->offset();
+    }();
+
     // TODO(T52857125) - maybe also include func and unit info?
     dynamic info = dynamic::object("start", formatTCA(start))
                                   ("end", formatTCA(end))
-                                  ("bc", bc ? *bc : dynamic())
+                                  ("bc", offset)
                                   ("sha1", sha1 ? sha1->toString() : dynamic())
                                   ("instrStr", instrStr ? *instrStr : dynamic())
                                   ("lineNum", lineNum ? *lineNum : dynamic())
@@ -127,9 +132,9 @@ struct TCRangeInfo {
    */
   std::pair<TCRangeInfo, TCRangeInfo> split(const TCA pos) const {
     always_assert(start <= pos && pos <= end);
-    auto const firstRange = TCRangeInfo{start, pos, bc, sha1, func, instrStr,
+    auto const firstRange = TCRangeInfo{start, pos, sk, sha1, func, instrStr,
                                         lineNum, unit, annotation};
-    auto const secondRange = TCRangeInfo{pos, end, bc, sha1, func, instrStr,
+    auto const secondRange = TCRangeInfo{pos, end, sk, sha1, func, instrStr,
                                          lineNum, unit, annotation};
     return std::pair<TCRangeInfo, TCRangeInfo>(firstRange, secondRange);
   }
@@ -137,7 +142,7 @@ struct TCRangeInfo {
   TCA start;
   TCA end;
 
-  folly::Optional<Offset> bc;
+  folly::Optional<SrcKey> sk;
   folly::Optional<SHA1> sha1;
 
   folly::Optional<const Func*> func;

@@ -26,7 +26,7 @@ namespace HPHP { namespace jit {
  */
 struct TransBCMapping {
   SHA1   sha1;
-  Offset bcStart;
+  SrcKey sk;
   TCA    aStart;
   TCA    acoldStart;
   TCA    afrozenStart;

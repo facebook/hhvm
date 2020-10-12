@@ -295,8 +295,9 @@ void OfflineCode::printRangeInfo(std::ostream& os,
                                  const bool printAddr,
                                  const bool printBinary) {
   if (rangeInfo.disasm.empty()) return;
-  if (rangeInfo.bc && rangeInfo.disasm[0].ip == rangeInfo.start) {
-    auto const currBC = *rangeInfo.bc;
+  if (rangeInfo.sk && !rangeInfo.sk->prologue() &&
+      rangeInfo.disasm[0].ip == rangeInfo.start) {
+    auto const currBC = rangeInfo.sk->offset();
     if (rangeInfo.unit) {
       auto const currUnit = *rangeInfo.unit;
       auto const func = currUnit->getFunc(currBC);
@@ -436,17 +437,26 @@ OfflineCode::getRanges(const BCMappingInfo& bcMappingInfo,
 }
 
 TCRangeInfo OfflineCode::getRangeInfo(const TransBCMapping& transBCMap,
-                                       const TCA start,
-                                       const TCA end) {
-  TCRangeInfo rangeInfo{start, end, transBCMap.bcStart, transBCMap.sha1};
+                                      const TCA start,
+                                      const TCA end) {
+  TCRangeInfo rangeInfo{start, end, transBCMap.sk, transBCMap.sha1};
 
   if (auto const currUnit = g_repo->getUnit(transBCMap.sha1)) {
-   rangeInfo.unit = currUnit;
-   auto const func = currUnit->getFunc(transBCMap.bcStart);
-   rangeInfo.func = func;
-   rangeInfo.instrStr = instrToString(func->at(transBCMap.bcStart), func);
-   auto const lineNum = currUnit->getLineNumber(transBCMap.bcStart);
-   if (lineNum != -1) rangeInfo.lineNum = lineNum;
+    auto const sk = transBCMap.sk;
+    rangeInfo.unit = currUnit;
+    if (sk.prologue()) {
+      auto const func = currUnit->getFunc(sk.offset());
+      auto const lineNum = func->line1();
+      rangeInfo.func = func;
+      rangeInfo.instrStr = "Prologue";
+      if (lineNum != -1) rangeInfo.lineNum = lineNum;
+    } else {
+      auto const func = currUnit->getFunc(sk.offset());
+      auto const lineNum = currUnit->getLineNumber(sk.offset());
+      rangeInfo.func = func;
+      rangeInfo.instrStr = instrToString(func->at(sk.offset()), func);
+      if (lineNum != -1) rangeInfo.lineNum = lineNum;
+    }
   }
 
   return rangeInfo;

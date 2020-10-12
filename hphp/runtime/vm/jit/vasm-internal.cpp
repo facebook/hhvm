@@ -72,12 +72,10 @@ void IRMetadataUpdater::register_inst(const Vinstr& inst) {
   // Update HHBC mappings for the TransDB.
   if (m_bcmap && m_origin) {
     auto const sk = inst.origin->marker().sk();
-    if (m_bcmap->empty() ||
-        m_bcmap->back().sha1 != sk.unit()->sha1() ||
-        m_bcmap->back().bcStart != sk.offset()) {
+    if (m_bcmap->empty() || m_bcmap->back().sk != sk) {
       m_bcmap->push_back(TransBCMapping{
         sk.unit()->sha1(),
-        sk.offset(),
+        sk,
         m_env.text.main().code.frontier(),
         m_env.text.cold().code.frontier(),
         m_env.text.frozen().code.frontier()

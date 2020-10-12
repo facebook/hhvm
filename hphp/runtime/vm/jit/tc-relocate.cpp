@@ -239,9 +239,8 @@ void relocateTranslation(
   if (!bc_map.empty()) {
     TRACE(1, "bcmaps before relocation\n");
     for (UNUSED auto const& map : bc_map) {
-      TRACE(1, "%s %-6d %p %p %p\n",
-            map.sha1.toString().c_str(),
-            map.bcStart,
+      TRACE(1, "%s %p %p %p\n",
+            showShort(map.sk).c_str(),
             map.aStart,
             map.acoldStart,
             map.afrozenStart);

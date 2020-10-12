@@ -231,7 +231,7 @@ std::string TransRec::print() const {
     folly::format(
       &ret,
       "    {} {} {} {} {}\n",
-      info.sha1, info.bcStart,
+      info.sha1, info.sk.toAtomicInt(),
       info.aStart, info.acoldStart, info.afrozenStart);
   }
 

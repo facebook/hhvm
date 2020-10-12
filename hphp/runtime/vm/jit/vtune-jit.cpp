@@ -55,28 +55,29 @@ void reportTraceletToVtune(const Unit* unit,
   // aStart field of tr.bcmapping may point to cold range, so we need to
   // explicitly form mappings for main code and cold
 
-  size_t bcSize = tr.bcMapping.size();
   std::vector<LineNumberInfo> mainLineMap, coldLineMap;
 
-  for (size_t i = 0; i < bcSize; i++) {
+  for (auto& mapping : tr.bcMapping) {
     LineNumberInfo info;
 
-    info.LineNumber = unit->getLineNumber(tr.bcMapping[i].bcStart);
+    info.LineNumber = mapping.sk.prologue()
+      ? unit->getLineNumber(mapping.sk.func()->line1())
+      : unit->getLineNumber(mapping.sk.offset());
 
     // Note that main code may be generated in the cold code range (see
     // emitBlock in code-gen-x64 genCodeImpl()) so we need to explicitly check
     // the aStart value.
-    if (tr.bcMapping[i].aStart >= tr.aStart &&
-        tr.bcMapping[i].aStart < tr.aStart + tr.aLen) {
-      info.Offset = tr.bcMapping[i].aStart - tr.aStart;
+    if (mapping.aStart >= tr.aStart &&
+        mapping.aStart < tr.aStart + tr.aLen) {
+      info.Offset = mapping.aStart - tr.aStart;
       mainLineMap.push_back(info);
-    } else if (tr.bcMapping[i].aStart >= tr.acoldStart &&
-               tr.bcMapping[i].aStart < tr.acoldStart + tr.acoldLen) {
-      info.Offset = tr.bcMapping[i].aStart - tr.acoldStart;
+    } else if (mapping.aStart >= tr.acoldStart &&
+               mapping.aStart < tr.acoldStart + tr.acoldLen) {
+      info.Offset = mapping.aStart - tr.acoldStart;
       coldLineMap.push_back(info);
     }
 
-    info.Offset = tr.bcMapping[i].acoldStart - tr.acoldStart;
+    info.Offset = mapping.acoldStart - tr.acoldStart;
     coldLineMap.push_back(info);
   }
 

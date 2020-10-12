@@ -163,10 +163,11 @@ void OfflineTransData::loadTCData(string dumpDir) {
     for (size_t i = 0; i < numBCMappings; i++) {
       TransBCMapping bcMap;
       SHA1Str sha1Tmp;
+      uint64_t srcKeyIntTmp;
 
       if (gzgets(file, buf, BUFLEN) == Z_NULL ||
-          sscanf(buf, "%s %d %p %p %p",
-                 sha1Tmp, &bcMap.bcStart,
+          sscanf(buf, "%s %" PRIu64 " %p %p %p",
+                 sha1Tmp, &srcKeyIntTmp,
                  (void**)&bcMap.aStart,
                  (void**)&bcMap.acoldStart,
                  (void**)&bcMap.afrozenStart) != 5) {
@@ -179,11 +180,12 @@ void OfflineTransData::loadTCData(string dumpDir) {
       }
 
       bcMap.sha1 = SHA1(sha1Tmp);
+      bcMap.sk = SrcKey::fromAtomicInt(srcKeyIntTmp);
       tRec.bcMapping.push_back(bcMap);
     }
 
     // push a sentinel bcMapping so that we can figure out stop offsets later on
-    const TransBCMapping sentinel { tRec.sha1, 0,
+    const TransBCMapping sentinel { tRec.sha1, SrcKey {},
                                     tRec.aStart + tRec.aLen,
                                     tRec.acoldStart + tRec.acoldLen,
                                     tRec.afrozenStart + tRec.afrozenLen };

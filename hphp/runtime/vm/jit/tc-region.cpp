@@ -242,15 +242,11 @@ void publishTranslationMeta(TransMetaInfo& info) {
   assertx(checkLimit(info, srcRec->numTrans()));
 
   if (RuntimeOption::EvalProfileBC) {
-    auto const vmUnit = sk.unit();
     TransBCMapping prev{};
     for (auto& cur : fixups.bcMap) {
       if (!cur.aStart) continue;
       if (prev.aStart) {
-        if (prev.bcStart < vmUnit->bclen()) {
-          recordBCInstr(uint32_t(sk.func()->getOp(prev.bcStart)),
-                        prev.aStart, cur.aStart, false);
-        }
+        recordBCInstr(uint32_t(prev.sk.op()), prev.aStart, cur.aStart, false);
       } else {
         recordBCInstr(OpTraceletGuard, loc.mainStart(), cur.aStart, false);
       }

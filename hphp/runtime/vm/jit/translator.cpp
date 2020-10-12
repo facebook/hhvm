@@ -479,7 +479,7 @@ int64_t getStackPopped(PC pc) {
     case Op::FCallObjMethodD: {
       auto const fca = getImm(pc, 0).u_FCA;
       auto const nin = countOperands(getInstrInfo(op).in);
-      return nin + fca.numInputs() + kNumActRecCells - 1 + fca.numRets;
+      return nin + fca.numInputs() + (kNumActRecCells - 1) + fca.numRets;
     }
 
     case Op::QueryM:
@@ -497,7 +497,7 @@ int64_t getStackPopped(PC pc) {
       return getImm(pc, 0).u_IVA + getImm(pc, 2).u_IVA;
 
     case Op::PopFrame:
-      return getImm(pc, 0).u_IVA + 3;
+      return getImm(pc, 0).u_IVA + kNumActRecCells;
 
     case Op::SetM:
     case Op::SetOpM:
@@ -711,7 +711,7 @@ InputInfoVec getInputs(const NormalizedInstruction& ni, FPInvOffset bcSPOff) {
       case Op::ConcatN:
         return ni.imm[0].u_IVA;
       case Op::PopFrame:
-        return ni.imm[0].u_IVA + 3;
+        return ni.imm[0].u_IVA + kNumActRecCells;
       default:
         return ni.immVec.numStackValues();
       }
@@ -740,7 +740,7 @@ InputInfoVec getInputs(const NormalizedInstruction& ni, FPInvOffset bcSPOff) {
 
     if (fca.hasGenerics()) inputs.emplace_back(Location::Stack { stackOff-- });
     if (fca.hasUnpack()) inputs.emplace_back(Location::Stack { stackOff-- });
-    stackOff -= fca.numArgs + 2;
+    stackOff -= fca.numArgs + (kNumActRecCells - 1);
 
     switch (ni.op()) {
       case Op::FCallCtor:

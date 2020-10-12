@@ -739,9 +739,9 @@ void finish_builtin(ISS& env, const php::Func* func, const FCallArgs& fca) {
   if (fca.numRets() != 1) {
     repl.emplace_back(bc::PopFrame { fca.numRets() });
   } else {
-    repl.emplace_back(bc::PopU2 {});
-    repl.emplace_back(bc::PopU2 {});
-    repl.emplace_back(bc::PopU2 {});
+    for (int i = 0; i < kNumActRecCells; ++i) {
+      repl.emplace_back(bc::PopU2 {});
+    }
   }
 
   reduce(env, std::move(repl));

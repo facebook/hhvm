@@ -1261,7 +1261,7 @@ void emitNewObjS(IRGS& env, SpecialClsRef ref) {
 void emitFCallCtor(IRGS& env, FCallArgs fca, const StringData* clsHint) {
   assertx(fca.numRets == 1);
   assertx(fca.asyncEagerOffset == kInvalidOffset);
-  auto const objPos = static_cast<int32_t>(fca.numInputs() + 2);
+  auto const objPos = static_cast<int32_t>(fca.numInputs() + (kNumActRecCells - 1));
   auto const obj = topC(env, BCSPRelOffset{objPos});
   if (!obj->isA(TObj)) PUNT(FCallCtor-NonObj);
 
@@ -1296,7 +1296,8 @@ void fcallObjMethod(IRGS& env, const FCallArgs& fca, const StringData* clsHint,
                     ObjMethodOp subop, SSATmp* methodName, bool dynamicCall,
                     bool extraInput) {
   assertx(methodName->isA(TStr));
-  auto const objPos = fca.numInputs() + (extraInput ? 3 : 2);
+  auto const offset = kNumActRecCells - 1;
+  auto const objPos = fca.numInputs() + (extraInput ? (offset + 1) : offset);
   auto const obj = topC(env, BCSPRelOffset { static_cast<int32_t>(objPos) });
 
   if (obj->type() <= TObj) {
@@ -1305,15 +1306,14 @@ void fcallObjMethod(IRGS& env, const FCallArgs& fca, const StringData* clsHint,
     return;
   }
 
-  // null?->method(...), pop extra stack input, all arguments and two uninits,
+  // null?->method(...), pop extra stack input, all arguments and uninits,
   // the null "object" and all uninits for inout returns, then push null.
   if (obj->type() <= TInitNull && subop == ObjMethodOp::NullSafe) {
     if (extraInput) popDecRef(env, DataTypeGeneric);
     if (fca.hasGenerics()) popDecRef(env, DataTypeGeneric);
     if (fca.hasUnpack()) popDecRef(env, DataTypeGeneric);
     for (uint32_t i = 0; i < fca.numArgs; ++i) popDecRef(env, DataTypeGeneric);
-    popU(env);
-    popU(env);
+    for (uint32_t i = 0; i < kNumActRecCells - 1; ++i) popU(env);
     popDecRef(env, DataTypeGeneric);
     for (uint32_t i = 0; i < fca.numRets - 1; ++i) popU(env);
     push(env, cns(env, TInitNull));

@@ -91,8 +91,8 @@ val acc : ('a, 'b) env -> (prop list -> prop list) -> ('a, 'b) env
 val get_constraints : ('a, 'b) env -> prop list
 
 (* throw registers that the expression currently being checked
-   can throw an exception; the exception may or may not be thrown 
-   depending on the value of some data subject to the policies 
+   can throw an exception; the exception may or may not be thrown
+   depending on the value of some data subject to the policies
    passed as second argument *)
 val throw : expr_env -> PSet.t -> expr_env
 

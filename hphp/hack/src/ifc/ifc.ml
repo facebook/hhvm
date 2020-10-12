@@ -1017,6 +1017,7 @@ and stmt renv (env : Env.stmt_env) ((pos, s) : Tast.stmt) =
     (env, out)
   | A.Break -> Env.close_stmt env K.Break
   | A.Continue -> Env.close_stmt env K.Continue
+  | A.Fallthrough -> Env.close_stmt env K.Fallthrough
   | A.Return e ->
     let (env, ethrow) =
       match e with
@@ -1106,6 +1107,42 @@ and stmt renv (env : Env.stmt_env) ((pos, s) : Tast.stmt) =
         (env, Env.merge_out out_finally out))
       out_try_catch
       (env, KMap.empty)
+  | A.Switch (e, cl) ->
+    let pos = fst (fst e) in
+    let (env, ety, ethrow) = expr ~pos renv env e in
+    let (env, out_cond) = Env.close_stmt ~merge:ethrow env K.Fallthrough in
+    let case (env, (out, deps)) c =
+      let out = Env.merge_out out_cond out in
+      let (out, ft_cont_opt) = Env.strip_cont out K.Fallthrough in
+      (* out_cond has a Fallthrough so ft_cont_opt cannot be None *)
+      let env = Env.prep_stmt env (Option.value_exn ft_cont_opt) in
+      Env.with_pc_deps env deps @@ fun env ->
+      let (env, out, new_deps, b) =
+        match c with
+        | A.Default (_, b) -> (env, out, PSet.empty, b)
+        | A.Case (e, b) ->
+          let pos = fst (fst e) in
+          let (env, ety, ethrow) = expr ~pos renv env e in
+          let out = Env.merge_out out ethrow in
+          (env, out, object_policy ety, b)
+      in
+      Env.with_pc_deps env new_deps @@ fun env ->
+      let (env, out_blk) = block renv env b in
+      let out = Env.merge_out out out_blk in
+      (* deps is accumulated monotonically because going
+         through each 'case' reveals increasingly more
+         information about the scrutinee and the cases *)
+      (env, (out, PSet.union deps new_deps))
+    in
+    let (env, (out, _final_deps)) =
+      let initial_deps = object_policy ety in
+      List.fold ~f:case ~init:(env, (out_cond, initial_deps)) cl
+    in
+    let out = Env.merge_in_next out K.Continue in
+    let out = Env.merge_in_next out K.Break in
+    let out = Env.merge_in_next out K.Fallthrough in
+    let out = clear_pc_deps out in
+    (env, out)
   | A.Noop -> Env.close_stmt env K.Next
   | _ ->
     Errors.unknown_information_flow pos "statement";

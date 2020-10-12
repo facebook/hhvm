@@ -225,6 +225,9 @@ inline Venv::Venv(Vunit& unit, Vtext& text, CGMeta& meta)
 }
 
 inline void Venv::record_inline_stack(TCA addr) {
+  // Do not record stack if we are not inlining or the code is unreachable.
+  if (frame <= 0) return;
+
   uint32_t callOff = 0;
   auto const func = unit.frames[frame].func;
   auto const in_builtin = func && func->isCPPBuiltin();

@@ -37,6 +37,7 @@ let default_derives () =
       (None, "Ord");
       (None, "PartialEq");
       (None, "PartialOrd");
+      (Some "no_pos_hash", "NoPosHash");
       (Some "ocamlrep_derive", "ToOcamlRep");
       (Some "serde", "Serialize");
     ]
@@ -68,11 +69,11 @@ let derive_blacklist ty =
   | "errors::Error_" -> ["Ord"; "PartialOrd"]
   (* GlobalOptions contains a couple floats, which only implement PartialEq
        and PartialOrd, and do not implement Hash. *)
-  | "global_options::GlobalOptions" -> ["Eq"; "Hash"; "Ord"]
+  | "global_options::GlobalOptions" -> ["Eq"; "Hash"; "NoPosHash"; "Ord"]
   (* And GlobalOptions is used in Genv which is used in Env. We
    * don't care about comparison or hashing on environments *)
-  | "typing_env_types::Env" -> ["Eq"; "Hash"; "Ord"]
-  | "typing_env_types::Genv" -> ["Eq"; "Hash"; "Ord"]
+  | "typing_env_types::Env" -> ["Eq"; "Hash"; "NoPosHash"; "Ord"]
+  | "typing_env_types::Genv" -> ["Eq"; "Hash"; "NoPosHash"; "Ord"]
   | "ast_defs::Id" when is_by_ref -> ["Debug"]
   | "errors::Errors" when is_by_ref -> ["Debug"]
   | "typing_defs_core::Ty" when is_by_ref ->

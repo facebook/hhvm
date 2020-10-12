@@ -6,6 +6,7 @@
 use serde::Serialize;
 
 use crate::gen::ast_defs::Pstring;
+use no_pos_hash::NoPosHash;
 use ocamlrep_derive::{FromOcamlRepIn, ToOcamlRep};
 
 #[derive(
@@ -15,6 +16,7 @@ use ocamlrep_derive::{FromOcamlRepIn, ToOcamlRep};
     Eq,
     FromOcamlRepIn,
     Hash,
+    NoPosHash,
     Ord,
     PartialEq,
     PartialOrd,

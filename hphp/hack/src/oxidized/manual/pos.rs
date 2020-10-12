@@ -479,6 +479,11 @@ impl std::fmt::Display for PosString<'_> {
     }
 }
 
+// NoPosHash is meant to be position-insensitive, so don't do anything!
+impl no_pos_hash::NoPosHash for Pos {
+    fn hash<H: std::hash::Hasher>(&self, _state: &mut H) {}
+}
+
 // TODO(hrust) eventually move this into a separate file used by Small & Large
 trait FilePos {
     fn offset(&self) -> usize;

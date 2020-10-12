@@ -3,12 +3,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ffb9bc0d08429086d717c99de5b0c0ab>>
+// @generated SignedSource<<5fb86c77850e2f75b6c2aaf4992b45f2>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
 
 use arena_trait::TrivialDrop;
+use no_pos_hash::NoPosHash;
 use ocamlrep_derive::FromOcamlRep;
 use ocamlrep_derive::FromOcamlRepIn;
 use ocamlrep_derive::ToOcamlRep;
@@ -26,6 +27,7 @@ pub use crate::typing_reason as reason;
     Eq,
     FromOcamlRepIn,
     Hash,
+    NoPosHash,
     Ord,
     PartialEq,
     PartialOrd,
@@ -47,6 +49,7 @@ impl<'a> TrivialDrop for Visibility<'a> {}
     FromOcamlRep,
     FromOcamlRepIn,
     Hash,
+    NoPosHash,
     Ord,
     PartialEq,
     PartialOrd,
@@ -67,6 +70,7 @@ impl TrivialDrop for Exact {}
     FromOcamlRep,
     FromOcamlRepIn,
     Hash,
+    NoPosHash,
     Ord,
     PartialEq,
     PartialOrd,
@@ -88,6 +92,7 @@ impl TrivialDrop for ValKind {}
     FromOcamlRep,
     FromOcamlRepIn,
     Hash,
+    NoPosHash,
     Ord,
     PartialEq,
     PartialOrd,
@@ -109,6 +114,7 @@ impl TrivialDrop for ParamMutability {}
     FromOcamlRep,
     FromOcamlRepIn,
     Hash,
+    NoPosHash,
     Ord,
     PartialEq,
     PartialOrd,
@@ -137,6 +143,7 @@ impl TrivialDrop for FunTparamsKind {}
     FromOcamlRep,
     FromOcamlRepIn,
     Hash,
+    NoPosHash,
     Ord,
     PartialEq,
     PartialOrd,
@@ -157,6 +164,7 @@ impl TrivialDrop for ShapeKind {}
     FromOcamlRep,
     FromOcamlRepIn,
     Hash,
+    NoPosHash,
     Ord,
     PartialEq,
     PartialOrd,
@@ -177,6 +185,7 @@ impl TrivialDrop for ParamMode {}
     FromOcamlRep,
     FromOcamlRepIn,
     Hash,
+    NoPosHash,
     Ord,
     PartialEq,
     PartialOrd,
@@ -196,6 +205,7 @@ impl TrivialDrop for XhpAttrTag {}
     Eq,
     FromOcamlRepIn,
     Hash,
+    NoPosHash,
     Ord,
     PartialEq,
     PartialOrd,
@@ -223,6 +233,7 @@ impl TrivialDrop for XhpAttr {}
     FromOcamlRep,
     FromOcamlRepIn,
     Hash,
+    NoPosHash,
     Ord,
     PartialEq,
     PartialOrd,
@@ -243,6 +254,7 @@ impl TrivialDrop for ConsistentKind {}
     Eq,
     FromOcamlRepIn,
     Hash,
+    NoPosHash,
     Ord,
     PartialEq,
     PartialOrd,
@@ -264,6 +276,7 @@ impl<'a> TrivialDrop for DependentType<'a> {}
     FromOcamlRep,
     FromOcamlRepIn,
     Hash,
+    NoPosHash,
     Ord,
     PartialEq,
     PartialOrd,
@@ -282,6 +295,7 @@ impl TrivialDrop for DestructureKind {}
     Eq,
     FromOcamlRepIn,
     Hash,
+    NoPosHash,
     Ord,
     PartialEq,
     PartialOrd,
@@ -300,6 +314,7 @@ impl<'a> TrivialDrop for UserAttribute<'a> {}
     Eq,
     FromOcamlRepIn,
     Hash,
+    NoPosHash,
     Ord,
     PartialEq,
     PartialOrd,
@@ -322,6 +337,7 @@ impl<'a> TrivialDrop for Tparam<'a> {}
     Eq,
     FromOcamlRepIn,
     Hash,
+    NoPosHash,
     Ord,
     PartialEq,
     PartialOrd,
@@ -335,7 +351,7 @@ pub struct WhereConstraint<'a>(
 );
 impl<'a> TrivialDrop for WhereConstraint<'a> {}
 
-#[derive(Clone, Debug, FromOcamlRepIn, Hash, Serialize, ToOcamlRep)]
+#[derive(Clone, Debug, FromOcamlRepIn, Hash, NoPosHash, Serialize, ToOcamlRep)]
 pub struct Ty<'a>(pub &'a reason::Reason<'a>, pub Ty_<'a>);
 impl<'a> TrivialDrop for Ty<'a> {}
 
@@ -354,6 +370,7 @@ impl<'a> TrivialDrop for Ty<'a> {}
     Eq,
     FromOcamlRepIn,
     Hash,
+    NoPosHash,
     Ord,
     PartialEq,
     PartialOrd,
@@ -372,6 +389,7 @@ impl<'a> TrivialDrop for ShapeFieldType<'a> {}
     Eq,
     FromOcamlRepIn,
     Hash,
+    NoPosHash,
     Ord,
     PartialEq,
     PartialOrd,
@@ -532,6 +550,7 @@ impl<'a> TrivialDrop for Ty_<'a> {}
     Eq,
     FromOcamlRepIn,
     Hash,
+    NoPosHash,
     Ord,
     PartialEq,
     PartialOrd,
@@ -553,6 +572,7 @@ impl<'a> TrivialDrop for ConstraintType_<'a> {}
     Eq,
     FromOcamlRepIn,
     Hash,
+    NoPosHash,
     Ord,
     PartialEq,
     PartialOrd,
@@ -576,6 +596,7 @@ impl<'a> TrivialDrop for HasMember<'a> {}
     Eq,
     FromOcamlRepIn,
     Hash,
+    NoPosHash,
     Ord,
     PartialEq,
     PartialOrd,
@@ -605,7 +626,16 @@ pub struct Destructure<'a> {
 }
 impl<'a> TrivialDrop for Destructure<'a> {}
 
-#[derive(Clone, Copy, Debug, FromOcamlRepIn, Hash, Serialize, ToOcamlRep)]
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Serialize,
+    ToOcamlRep
+)]
 pub struct ConstraintType<'a>(pub &'a reason::Reason<'a>, pub &'a ConstraintType_<'a>);
 impl<'a> TrivialDrop for ConstraintType<'a> {}
 
@@ -616,6 +646,7 @@ impl<'a> TrivialDrop for ConstraintType<'a> {}
     Eq,
     FromOcamlRepIn,
     Hash,
+    NoPosHash,
     Ord,
     PartialEq,
     PartialOrd,
@@ -634,6 +665,7 @@ impl<'a> TrivialDrop for InternalType<'a> {}
     Eq,
     FromOcamlRepIn,
     Hash,
+    NoPosHash,
     Ord,
     PartialEq,
     PartialOrd,
@@ -665,6 +697,7 @@ impl<'a> TrivialDrop for TaccessType<'a> {}
     Eq,
     FromOcamlRepIn,
     Hash,
+    NoPosHash,
     Ord,
     PartialEq,
     PartialOrd,
@@ -694,6 +727,7 @@ impl<'a> TrivialDrop for Reactivity<'a> {}
     Eq,
     FromOcamlRepIn,
     Hash,
+    NoPosHash,
     Ord,
     PartialEq,
     PartialOrd,
@@ -713,6 +747,7 @@ impl<'a> TrivialDrop for FunImplicitParams<'a> {}
     Eq,
     FromOcamlRepIn,
     Hash,
+    NoPosHash,
     Ord,
     PartialEq,
     PartialOrd,
@@ -742,6 +777,7 @@ impl<'a> TrivialDrop for FunType<'a> {}
     Eq,
     FromOcamlRepIn,
     Hash,
+    NoPosHash,
     Ord,
     PartialEq,
     PartialOrd,
@@ -763,6 +799,7 @@ impl<'a> TrivialDrop for FunArity<'a> {}
     Eq,
     FromOcamlRepIn,
     Hash,
+    NoPosHash,
     Ord,
     PartialEq,
     PartialOrd,
@@ -781,6 +818,7 @@ impl<'a> TrivialDrop for ParamRxAnnotation<'a> {}
     Eq,
     FromOcamlRepIn,
     Hash,
+    NoPosHash,
     Ord,
     PartialEq,
     PartialOrd,
@@ -800,6 +838,7 @@ impl<'a> TrivialDrop for PossiblyEnforcedTy<'a> {}
     Eq,
     FromOcamlRepIn,
     Hash,
+    NoPosHash,
     Ord,
     PartialEq,
     PartialOrd,

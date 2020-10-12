@@ -132,6 +132,12 @@ impl std::hash::Hash for GlobalOptions<'_> {
     }
 }
 
+impl no_pos_hash::NoPosHash for GlobalOptions<'_> {
+    fn hash<H>(&self, _: &mut H) {
+        unimplemented!()
+    }
+}
+
 impl Ord for GlobalOptions<'_> {
     fn cmp(&self, _: &Self) -> std::cmp::Ordering {
         unimplemented!()

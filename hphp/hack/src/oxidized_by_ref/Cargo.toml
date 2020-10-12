@@ -11,6 +11,7 @@ path = "lib.rs"
 [dependencies]
 arena_collections = { path = "../arena_collections" }
 arena_trait = { path = "../arena_trait" }
+no_pos_hash = { path = "../utils/no_pos_hash" }
 ocamlrep = { path = "../ocamlrep" }
 ocamlrep_derive = { path = "../ocamlrep_derive" }
 oxidized = { path = "../oxidized" }

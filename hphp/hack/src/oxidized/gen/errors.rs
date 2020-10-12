@@ -3,12 +3,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<caa89e7892df09061a41d221e88b084d>>
+// @generated SignedSource<<6168d852c4bef2a6798df881088272ae>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
 
 use arena_trait::TrivialDrop;
+use no_pos_hash::NoPosHash;
 use ocamlrep_derive::FromOcamlRep;
 use ocamlrep_derive::FromOcamlRepIn;
 use ocamlrep_derive::ToOcamlRep;
@@ -38,6 +39,7 @@ pub type Message<A> = (A, String);
     FromOcamlRep,
     FromOcamlRepIn,
     Hash,
+    NoPosHash,
     Ord,
     PartialEq,
     PartialOrd,
@@ -62,6 +64,7 @@ impl TrivialDrop for Phase {}
     FromOcamlRep,
     FromOcamlRepIn,
     Hash,
+    NoPosHash,
     Ord,
     PartialEq,
     PartialOrd,
@@ -83,6 +86,7 @@ impl TrivialDrop for Severity {}
     FromOcamlRep,
     FromOcamlRepIn,
     Hash,
+    NoPosHash,
     Ord,
     PartialEq,
     PartialOrd,
@@ -105,6 +109,7 @@ impl TrivialDrop for Format {}
     FromOcamlRep,
     FromOcamlRepIn,
     Hash,
+    NoPosHash,
     Ord,
     PartialEq,
     PartialOrd,
@@ -135,6 +140,7 @@ pub type FilesT<A> = relative_path::map::Map<FileT<A>>;
     Eq,
     FromOcamlRep,
     Hash,
+    NoPosHash,
     PartialEq,
     Serialize,
     ToOcamlRep
@@ -154,6 +160,7 @@ pub type Error = Error_<pos::Pos>;
     Eq,
     FromOcamlRep,
     Hash,
+    NoPosHash,
     Ord,
     PartialEq,
     PartialOrd,
@@ -169,6 +176,7 @@ pub struct AppliedFixme(pub pos::Pos, pub isize);
     Eq,
     FromOcamlRep,
     Hash,
+    NoPosHash,
     Ord,
     PartialEq,
     PartialOrd,

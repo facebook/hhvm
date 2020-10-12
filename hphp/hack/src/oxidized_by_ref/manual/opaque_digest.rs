@@ -5,6 +5,7 @@
 
 use serde::{Deserialize, Serialize};
 
+use no_pos_hash::NoPosHash;
 use ocamlrep_derive::{FromOcamlRepIn, ToOcamlRep};
 
 #[derive(
@@ -15,6 +16,7 @@ use ocamlrep_derive::{FromOcamlRepIn, ToOcamlRep};
     Eq,
     FromOcamlRepIn,
     Hash,
+    NoPosHash,
     Ord,
     PartialEq,
     PartialOrd,

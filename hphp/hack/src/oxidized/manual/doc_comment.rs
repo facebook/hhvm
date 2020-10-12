@@ -6,6 +6,7 @@
 use std::rc::Rc;
 
 use crate::gen::ast_defs::Pstring;
+use no_pos_hash::NoPosHash;
 use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
 use serde::{Deserialize, Serialize};
 
@@ -15,6 +16,7 @@ use serde::{Deserialize, Serialize};
     Deserialize,
     Eq,
     Hash,
+    NoPosHash,
     FromOcamlRep,
     ToOcamlRep,
     Ord,

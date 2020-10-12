@@ -66,6 +66,12 @@ impl<'a> ocamlrep::FromOcamlRepIn<'a> for FunTypeFlags {
     }
 }
 
+impl no_pos_hash::NoPosHash for FunTypeFlags {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        std::hash::Hash::hash(self, state);
+    }
+}
+
 impl serde::Serialize for FunTypeFlags {
     fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         serializer.serialize_u16(self.bits())
@@ -109,6 +115,12 @@ impl<'a> ocamlrep::FromOcamlRepIn<'a> for FunParamFlags {
     ) -> Result<Self, ocamlrep::FromError> {
         use ocamlrep::FromOcamlRep;
         Self::from_ocamlrep(value)
+    }
+}
+
+impl no_pos_hash::NoPosHash for FunParamFlags {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        std::hash::Hash::hash(self, state);
     }
 }
 

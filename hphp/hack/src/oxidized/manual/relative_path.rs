@@ -7,6 +7,7 @@ use std::convert::TryFrom;
 use std::fmt::{self, Display};
 use std::path::{Path, PathBuf};
 
+use no_pos_hash::NoPosHash;
 use ocamlrep_derive::{FromOcamlRep, FromOcamlRepIn, ToOcamlRep};
 use serde::{Deserialize, Serialize};
 
@@ -20,6 +21,7 @@ use serde::{Deserialize, Serialize};
     FromOcamlRep,
     FromOcamlRepIn,
     ToOcamlRep,
+    NoPosHash,
     Ord,
     PartialEq,
     PartialOrd,
@@ -97,6 +99,7 @@ impl Prefix {
     Hash,
     FromOcamlRep,
     ToOcamlRep,
+    NoPosHash,
     Ord,
     PartialEq,
     PartialOrd

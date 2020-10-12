@@ -3,8 +3,10 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use ocamlrep_derive::{FromOcamlRep, FromOcamlRepIn, ToOcamlRep};
 use serde::{Deserialize, Serialize};
+
+use no_pos_hash::NoPosHash;
+use ocamlrep_derive::{FromOcamlRep, FromOcamlRepIn, ToOcamlRep};
 
 #[derive(
     Copy,
@@ -13,6 +15,7 @@ use serde::{Deserialize, Serialize};
     Deserialize,
     Eq,
     Hash,
+    NoPosHash,
     Ord,
     PartialEq,
     PartialOrd,

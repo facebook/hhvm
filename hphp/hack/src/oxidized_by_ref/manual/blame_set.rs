@@ -7,11 +7,22 @@ use std::cmp::Ordering;
 
 use serde::Serialize;
 
+use no_pos_hash::NoPosHash;
 use ocamlrep_derive::{FromOcamlRepIn, ToOcamlRep};
 
 use crate::{local_id::LocalId, typing_reason::Blame};
 
-#[derive(Clone, Debug, Eq, FromOcamlRepIn, Hash, Ord, Serialize, ToOcamlRep)]
+#[derive(
+    Clone,
+    Debug,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    Serialize,
+    ToOcamlRep
+)]
 pub struct IdWithBlame<'a>(pub LocalId<'a>, Blame<'a>);
 
 impl arena_trait::TrivialDrop for IdWithBlame<'_> {}

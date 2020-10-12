@@ -525,6 +525,11 @@ impl std::fmt::Display for PosString<'_> {
     }
 }
 
+// NoPosHash is meant to be position-insensitive, so don't do anything!
+impl no_pos_hash::NoPosHash for Pos<'_> {
+    fn hash<H: std::hash::Hasher>(&self, _state: &mut H) {}
+}
+
 trait FilePos: Copy {
     fn offset(self) -> usize;
     fn line_column_beg(self) -> (usize, usize, usize);
@@ -664,5 +669,20 @@ mod tests {
             ),
             "should reject merges with different filenames"
         );
+    }
+
+    #[test]
+    fn position_insensitive_hash() {
+        use crate::ast_defs::Id;
+
+        let b = &bumpalo::Bump::new();
+        let hash = no_pos_hash::position_insensitive_hash;
+        let none = Pos::none();
+        let pos = Pos::from_line_cols_offset(b, RelativePath::empty(), 2, 2..10, 17);
+
+        assert_eq!(hash(&Id(pos, "foo")), hash(&Id(pos, "foo")));
+        assert_eq!(hash(&Id(none, "foo")), hash(&Id(pos, "foo")));
+
+        assert_ne!(hash(&Id(pos, "foo")), hash(&Id(pos, "bar")));
     }
 }

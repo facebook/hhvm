@@ -9,6 +9,7 @@ use std::path::{Path, PathBuf};
 use bumpalo::Bump;
 use serde::{Deserialize, Serialize};
 
+use no_pos_hash::NoPosHash;
 use ocamlrep::ToOcamlRep;
 
 pub use oxidized::relative_path::{Prefix, PrefixPathMap};
@@ -20,7 +21,7 @@ pub const EMPTY: RelativePath<'_> = RelativePath {
     path: None,
 };
 
-#[derive(Copy, Clone, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Copy, Clone, Eq, Hash, NoPosHash, Ord, PartialEq, PartialOrd)]
 pub struct RelativePath<'a> {
     prefix: Prefix,
     // Invariant: if Some, the path has length > 0. The use of Option here is

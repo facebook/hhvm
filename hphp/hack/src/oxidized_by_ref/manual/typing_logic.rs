@@ -3,8 +3,10 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use ocamlrep_derive::{FromOcamlRepIn, ToOcamlRep};
 use serde::Serialize;
+
+use no_pos_hash::NoPosHash;
+use ocamlrep_derive::{FromOcamlRepIn, ToOcamlRep};
 
 use crate::typing_defs::*;
 
@@ -18,6 +20,7 @@ use crate::typing_defs::*;
     Eq,
     FromOcamlRepIn,
     Hash,
+    NoPosHash,
     Ord,
     PartialEq,
     PartialOrd,

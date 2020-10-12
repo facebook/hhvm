@@ -3,12 +3,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<36d069afb6a4c240d9956731500b8c46>>
+// @generated SignedSource<<9c2db0b3b48a4830c325974f3173b9ad>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
 
 use arena_trait::TrivialDrop;
+use no_pos_hash::NoPosHash;
 use ocamlrep_derive::FromOcamlRepIn;
 use ocamlrep_derive::ToOcamlRep;
 use serde::Serialize;
@@ -28,6 +29,7 @@ pub use crate::typing_tyvar_occurrences as occ;
     Eq,
     FromOcamlRepIn,
     Hash,
+    NoPosHash,
     Ord,
     PartialEq,
     PartialOrd,
@@ -64,6 +66,7 @@ impl<'a> TrivialDrop for TyvarConstraints<'a> {}
     Eq,
     FromOcamlRepIn,
     Hash,
+    NoPosHash,
     Ord,
     PartialEq,
     PartialOrd,
@@ -84,6 +87,7 @@ impl<'a> TrivialDrop for SolvingInfo<'a> {}
     Eq,
     FromOcamlRepIn,
     Hash,
+    NoPosHash,
     Ord,
     PartialEq,
     PartialOrd,
@@ -108,6 +112,7 @@ pub type Tvenv<'a> = i_map::IMap<'a, &'a TyvarInfo<'a>>;
     Eq,
     FromOcamlRepIn,
     Hash,
+    NoPosHash,
     Ord,
     PartialEq,
     PartialOrd,
@@ -129,6 +134,7 @@ impl<'a> TrivialDrop for TypingInferenceEnv<'a> {}
     Eq,
     FromOcamlRepIn,
     Hash,
+    NoPosHash,
     Ord,
     PartialEq,
     PartialOrd,
@@ -151,6 +157,7 @@ pub type TGlobal<'a> = GlobalTvenv<'a>;
     Eq,
     FromOcamlRepIn,
     Hash,
+    NoPosHash,
     Ord,
     PartialEq,
     PartialOrd,

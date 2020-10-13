@@ -729,13 +729,6 @@ struct RuntimeOption {
   F(bool, EnablePerRepoOptions,        true)                            \
   F(bool, CachePerRepoOptionsPath,     true)                            \
   F(bool, RaiseOnCaseInsensitiveLookup,true)                            \
-  /* ThrowOnNonExhaustiveSwitch
-   * Generates warnings when switch statements are non exhaustive.
-   *  0 - Nothing
-   *  1 - Raise Warning
-   * >1 - Throw Exception
-   */                                                                   \
-  F(uint32_t, ThrowOnNonExhaustiveSwitch, 1)                            \
   /*
     CheckPropTypeHints:
     0 - No checks or enforcement of property type hints.

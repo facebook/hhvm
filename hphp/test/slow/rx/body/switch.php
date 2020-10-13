@@ -11,10 +11,12 @@ function test_switch_with_default(int $x): int {
 
 <<__Rx>>
 function test_switch_no_default(int $x): int {
-  switch ($x) {
-    case 0: return 5;
-    case 1: return 6;
-  }
+  try {
+    switch ($x) {
+      case 0: return 5;
+      case 1: return 6;
+    }
+  } catch (Exception $_) {}
   return -1;
 }
 

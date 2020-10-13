@@ -1068,8 +1068,7 @@ bool instrBreaksProfileBB(const NormalizedInstruction& inst) {
       op == OpAwait || // may branch to scheduler and suspend execution
       op == OpAwaitAll || // similar to Await
       op == OpClsCnsD || // side exits if misses in the RDS
-      (op == OpThrowNonExhaustiveSwitch && // control flow breaks bb
-       RuntimeOption::EvalThrowOnNonExhaustiveSwitch > 1) ||
+      op == OpThrowNonExhaustiveSwitch || // control flow breaks bb
       op == OpVerifyParamTypeTS || // avoids combinatorial explosion
       op == OpVerifyParamType) {   // with nullable types
     return true;

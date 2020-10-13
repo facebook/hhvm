@@ -922,9 +922,8 @@ bool breaksRegion(SrcKey sk) {
     case Op::Throw:
     case Op::Eval:
     case Op::NativeImpl:
-      return true;
     case Op::ThrowNonExhaustiveSwitch:
-      return RuntimeOption::EvalThrowOnNonExhaustiveSwitch > 1;
+      return true;
 
     case Op::Await:
     case Op::AwaitAll:

@@ -2372,17 +2372,7 @@ OPTBLD_INLINE void iopThrow(PC&) {
 }
 
 OPTBLD_INLINE void iopThrowNonExhaustiveSwitch() {
-  switch (RuntimeOption::EvalThrowOnNonExhaustiveSwitch) {
-    case 0:
-      return;
-    case 1:
-      raise_warning(Strings::NONEXHAUSTIVE_SWITCH);
-      return;
-    default:
-      SystemLib::throwRuntimeExceptionObject(
-        String(Strings::NONEXHAUSTIVE_SWITCH));
-  }
-  not_reached();
+  SystemLib::throwRuntimeExceptionObject(String(Strings::NONEXHAUSTIVE_SWITCH));
 }
 
 OPTBLD_INLINE void iopRaiseClassStringConversionWarning() {

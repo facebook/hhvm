@@ -649,6 +649,12 @@ final class Vector implements \MutableVector {
    */
   <<__Pure, __MutableReturn>>
   public static function fromKeysOf(mixed $container): this {
+    if ($container is null) {
+      return new self();
+    } else if (!($container is KeyedContainer<_,_>)) {
+      throw new \InvalidArgumentException(
+        "Parameter must be a container (array or collection)");
+    }
     $result = vec[];
     foreach ($container as $key => $_) {
       $result[] = $key;
@@ -693,6 +699,12 @@ final class ImmVector implements \ConstVector {
    */
   <<__Pure>>
   public static function fromKeysOf(mixed $container): this {
+    if ($container is null) {
+      return new self();
+    } else if (!($container is KeyedContainer<_,_>)) {
+      throw new \InvalidArgumentException(
+        "Parameter must be a container (array or collection)");
+    }
     $result = vec[];
     foreach ($container as $key => $_) {
       $result[] = $key;

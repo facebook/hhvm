@@ -67,6 +67,7 @@ namespace HPHP { namespace SystemLib {
 #define SYSTEMLIB_HH_CLASSES(x) \
   x(Traversable)                \
   x(Iterator)                   \
+  x(Elt)                        \
 /* */
 
 extern bool s_inited;

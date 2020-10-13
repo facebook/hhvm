@@ -116,3 +116,5 @@ hphp/system/php/experimental_parser_utils.php
 
 # This provides a temporary workaround for renamed lz4 methods
 hphp/system/php/zlib/ext_zlib.php
+
+hphp/system/php/elt.ns.php

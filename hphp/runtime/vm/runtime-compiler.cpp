@@ -64,8 +64,10 @@ Unit* compile_string(const char* s,
 Unit* compile_systemlib_string(const char* s, size_t sz, const char* fname,
                                const Native::FuncTable& nativeFuncs) {
   assertx(fname[0] == '/' && fname[1] == ':');
-  if (auto u = lookupSyslibUnit(makeStaticString(fname), nativeFuncs)) {
-    return u;
+  if (RuntimeOption::RepoAuthoritative) {
+    if (auto u = lookupSyslibUnit(makeStaticString(fname), nativeFuncs)) {
+      return u;
+    }
   }
   return compile_string(s, sz, fname, nativeFuncs, RepoOptions::defaults());
 }

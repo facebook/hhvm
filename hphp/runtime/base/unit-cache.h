@@ -66,7 +66,8 @@ Unit* lookupUnit(StringData* path, const char* currentDir, bool* initial_opt,
                  const Native::FuncTable&, bool alreadyRealpath);
 
 /*
- * As above, but for system units.
+ * As above, but for system units. Only appropriate in
+ * RepoAuthoritative mode, as we do not cache system units otherwise.
  */
 Unit* lookupSyslibUnit(StringData* path, const Native::FuncTable&);
 

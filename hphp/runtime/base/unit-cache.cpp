@@ -754,9 +754,11 @@ CachedUnit lookupUnitNonRepoAuth(StringData* requestedPath,
                                  bool alreadyRealpath) {
   tracing::BlockNoTrace _{"lookup-unit-non-repo-auth"};
 
-  auto const& options = RepoOptions::forFile(requestedPath->data());
+  // Shouldn't be getting systemlib units here
+  assertx(strncmp(requestedPath->data(), "/:", 2));
 
-  if (!g_context.isNull() && strncmp(requestedPath->data(), "/:", 2)) {
+  auto const& options = RepoOptions::forFile(requestedPath->data());
+  if (!g_context.isNull()) {
     g_context->onLoadWithOptions(requestedPath->data(), options);
   }
 
@@ -1156,12 +1158,8 @@ Unit* lookupUnit(StringData* path, const char* currentDir, bool* initial_opt,
 }
 
 Unit* lookupSyslibUnit(StringData* path, const Native::FuncTable& nativeFuncs) {
-  if (RuntimeOption::RepoAuthoritative) {
-    return lookupUnitRepoAuth(path, nativeFuncs).unit;
-  }
-  OptLog ent;
-  FileLoadFlags flags;
-  return lookupUnitNonRepoAuth(path, nullptr, ent, nativeFuncs, flags, true).unit;
+  assertx(RuntimeOption::RepoAuthoritative);
+  return lookupUnitRepoAuth(path, nativeFuncs).unit;
 }
 
 //////////////////////////////////////////////////////////////////////

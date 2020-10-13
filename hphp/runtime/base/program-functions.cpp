@@ -1796,6 +1796,11 @@ static int execute_program_impl(int argc, char** argv) {
       mangleUnitSha1(string_sha1(str), file, RepoOptions::defaults())
     };
 
+    if (!registrationComplete) {
+      folly::SingletonVault::singleton()->registrationComplete();
+      registrationComplete = true;
+    }
+
     compilers_start();
     hphp_thread_init();
     g_context.getCheck();

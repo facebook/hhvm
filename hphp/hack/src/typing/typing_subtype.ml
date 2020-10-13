@@ -2280,8 +2280,11 @@ and simplify_subtype_reactivity
     | _ -> invalid_env env
   in
   match (r_sub, r_super) with
-  (* anything is a subtype of nonreactive functions *)
-  | (_, Nonreactive) -> valid env
+  (* anything reactive is a subtype of nonreactive functions *)
+  | ( ( Nonreactive | Local _ | Shallow _ | Reactive _ | Pure _
+      | MaybeReactive _ | RxVar _ | CippLocal _ ),
+      Nonreactive ) ->
+    valid env
   (* to compare two maybe reactive values we need to unwrap them *)
   | (MaybeReactive sub, MaybeReactive super) ->
     simplify_subtype_reactivity

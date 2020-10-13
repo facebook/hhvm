@@ -1,1 +1,6 @@
-No errors
+File "cipp_inheritance.php", line 27, characters 19-19:
+The method `f` has the wrong type (Typing[4341])
+  File "cipp_inheritance.php", line 22, characters 19-19:
+  This function is normal.
+  File "cipp_inheritance.php", line 27, characters 19-19:
+  This function is cipp_global.

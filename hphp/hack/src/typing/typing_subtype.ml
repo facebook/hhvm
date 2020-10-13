@@ -1003,10 +1003,18 @@ and simplify_subtype_i
          * derived rules.
          *)
         | (r, Toption t) ->
-          let ty_null = MakeType.null r in
-          env
-          |> simplify_subtype ~subtype_env ~this_ty t ty_super
-          &&& simplify_subtype ~subtype_env ~this_ty ty_null ty_super
+          let (env, t) = Env.expand_type env t in
+          (match get_node t with
+          (* We special case on `mixed <: Tvar _`, adding the entire `mixed` type
+             as a lower bound. This enables clearer error messages when upper bounds
+             are added to the type variable: transitive closure picks up the
+             entire `mixed` type, and not separately consider `null` and `nonnull` *)
+          | Tnonnull -> default env
+          | _ ->
+            let ty_null = MakeType.null r in
+            env
+            |> simplify_subtype ~subtype_env ~this_ty t ty_super
+            &&& simplify_subtype ~subtype_env ~this_ty ty_null ty_super)
         | (_, Tvar var_sub) when Ident.equal var_sub var_super -> valid env
         | _ when subtype_env.treat_dynamic_as_bottom ->
           (env, TL.Coerce (ty_sub, ty_super))

@@ -1,36 +1,40 @@
 File "super_constraint_9.php", line 7, characters 10-10:
 Invalid return type (Typing[4336])
-File "super_constraint_9.php", line 7, characters 10-10:
-Expected `void` because this function does not always return a value
-File "super_constraint_9.php", line 7, characters 59-66:
-But got `Foo<Tk2>`
+  File "super_constraint_9.php", line 7, characters 10-10:
+  Expected `void` because this function does not always return a value
+  File "super_constraint_9.php", line 7, characters 59-66:
+  But got `Foo<Tk2>`
 File "super_constraint_9.php", line 7, characters 10-10:
 Invalid return type (Typing[4336])
-File "super_constraint_9.php", line 7, characters 59-66:
-Expected `Foo<Tk2>`
-File "super_constraint_9.php", line 7, characters 10-10:
-But got `void` because this function does not always return a value
+  File "super_constraint_9.php", line 7, characters 59-66:
+  Expected `Foo<Tk2>`
+  File "super_constraint_9.php", line 7, characters 10-10:
+  But got `void` because this function does not always return a value
 File "super_constraint_9.php", line 12, characters 16-17:
 Invalid argument (Typing[4110])
-File "super_constraint_9.php", line 10, characters 32-34:
-Expected `int`
-File "super_constraint_9.php", line 10, characters 46-50:
-But got `nonnull`
+  File "super_constraint_9.php", line 10, characters 32-34:
+  Expected `int`
+  File "super_constraint_9.php", line 10, characters 46-50:
+  But got `mixed`
+  File "super_constraint_9.php", line 10, characters 46-50:
+  Considering that this type argument is invariant with respect to `Foo`
 File "super_constraint_9.php", line 16, characters 10-12:
 Invalid return type (Typing[4336])
-File "super_constraint_9.php", line 16, characters 10-12:
-Expected `void` because this function does not always return a value
-File "super_constraint_9.php", line 16, characters 17-24:
-But got `Foo<int>`
+  File "super_constraint_9.php", line 16, characters 10-12:
+  Expected `void` because this function does not always return a value
+  File "super_constraint_9.php", line 16, characters 17-24:
+  But got `Foo<int>`
 File "super_constraint_9.php", line 16, characters 10-12:
 Invalid return type (Typing[4336])
-File "super_constraint_9.php", line 16, characters 17-24:
-Expected `Foo<int>`
-File "super_constraint_9.php", line 16, characters 10-12:
-But got `void` because this function does not always return a value
+  File "super_constraint_9.php", line 16, characters 17-24:
+  Expected `Foo<int>`
+  File "super_constraint_9.php", line 16, characters 10-12:
+  But got `void` because this function does not always return a value
 File "super_constraint_9.php", line 21, characters 16-20:
 Invalid argument (Typing[4110])
-File "super_constraint_9.php", line 16, characters 21-23:
-Expected `int`
-File "super_constraint_9.php", line 19, characters 33-37:
-But got `nonnull`
+  File "super_constraint_9.php", line 16, characters 21-23:
+  Expected `int`
+  File "super_constraint_9.php", line 19, characters 33-37:
+  But got `mixed`
+  File "super_constraint_9.php", line 19, characters 33-37:
+  Considering that this type argument is invariant with respect to `Foo`

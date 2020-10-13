@@ -905,7 +905,7 @@ bool opcodeMayRaise(Opcode opc) {
     return false;
   case MethodExists:
   case ProfileMethod:
-    return RO::EvalRaiseOnCaseInsensitiveLookupV2;
+    return RO::EvalRaiseOnCaseInsensitiveLookup;
   }
   not_reached();
 }

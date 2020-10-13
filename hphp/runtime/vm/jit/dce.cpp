@@ -701,7 +701,7 @@ bool canDCE(IRInstruction* inst) {
   case NSameArrLike:
     return !inst->mayRaiseErrorWithSources();
   case MethodExists:
-    return !RO::EvalRaiseOnCaseInsensitiveLookupV2;
+    return !RO::EvalRaiseOnCaseInsensitiveLookup;
   }
   not_reached();
 }

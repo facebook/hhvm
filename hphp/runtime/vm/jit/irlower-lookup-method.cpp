@@ -152,7 +152,7 @@ void cgProfileMethod(IRLS& env, const IRInstruction* inst) {
     .ssa(0)
     .ssa(1);
 
-  auto const sync = RO::EvalRaiseOnCaseInsensitiveLookupV2
+  auto const sync = RO::EvalRaiseOnCaseInsensitiveLookup
                           ? SyncOptions::Sync : SyncOptions::None;
 
   cgCallHelper(vmain(env), env, CallSpec::method(&MethProfile::reportMeth),

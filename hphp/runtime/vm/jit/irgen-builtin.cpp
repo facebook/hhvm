@@ -171,7 +171,7 @@ SSATmp* opt_is_subclass_of(IRGS& env, const ParamPrep& params) {
 
 SSATmp* opt_method_exists(IRGS& env, const ParamPrep& params) {
   // We might need to raise a notice, so lets not optimize
-  if (RO::EvalRaiseOnCaseInsensitiveLookupV2) return nullptr;
+  if (RO::EvalRaiseOnCaseInsensitiveLookup) return nullptr;
   if (params.size() != 2) return nullptr;
 
   auto const meth = params[1].value;

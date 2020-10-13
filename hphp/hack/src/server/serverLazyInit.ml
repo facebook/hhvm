@@ -444,13 +444,14 @@ let names_to_deps (names : FileInfo.names) : DepSet.t =
     the current versions of dirty files. This lets us check a smaller set of
     files than the set we'd check if old declarations were not available.
     To be used only when load_decls_from_saved_state is enabled. *)
-let get_files_to_recheck
+let get_files_to_undecl_and_recheck
     (genv : ServerEnv.genv)
     (env : ServerEnv.env)
     (old_naming_table : Naming_table.t)
     (new_fast : FileInfo.names Relative_path.Map.t)
     (dirty_fast : FileInfo.names Relative_path.Map.t)
-    (files_to_redeclare : Relative_path.Set.t) : Relative_path.Set.t =
+    (files_to_redeclare : Relative_path.Set.t) :
+    Relative_path.Set.t * Relative_path.Set.t =
   let bucket_size = genv.local_config.SLC.type_decl_bucket_size in
   let fast =
     Relative_path.Set.fold
@@ -498,7 +499,9 @@ let get_files_to_recheck
   Decl_redecl_service.remove_old_defs ctx ~bucket_size genv.workers dirty_names;
   let deps = Typing_deps.add_all_deps to_redecl in
   let deps = Typing_deps.DepSet.union deps to_recheck in
-  Typing_deps.Files.get_files deps
+  let files_to_undecl = Typing_deps.Files.get_files to_redecl in
+  let files_to_recheck = Typing_deps.Files.get_files deps in
+  (files_to_undecl, files_to_recheck)
 
 (* We start off with a list of files that have changed since the state was
  * saved (dirty_files), and two maps of the class / function declarations
@@ -565,23 +568,23 @@ let type_check_dirty
   (* Include similar_files in the dirty_fast used to determine which loaded
      declarations to oldify. This is necessary because the positions of
      declarations may have changed, which affects error messages and FIXMEs. *)
-  let get_files_to_recheck =
-    get_files_to_recheck genv env old_naming_table new_fast
+  let get_files_to_undecl_and_recheck =
+    get_files_to_undecl_and_recheck genv env old_naming_table new_fast
     @@ extend_fast
          genv
          dirty_changed_fast
          env.naming_table
          dirty_files_unchanged_hash
   in
-  let (env, to_recheck) =
+  let (env, to_undecl, to_recheck) =
     if use_prechecked_files genv then
       (* Start with dirty files and fan-out of local changes only *)
-      let to_recheck =
+      let (to_undecl, to_recheck) =
         if genv.local_config.SLC.load_decls_from_saved_state then
-          get_files_to_recheck dirty_local_files_changed_hash
+          get_files_to_undecl_and_recheck dirty_local_files_changed_hash
         else
           let deps = Typing_deps.add_all_deps local_deps in
-          Typing_deps.Files.get_files deps
+          (Relative_path.Set.empty, Typing_deps.Files.get_files deps)
       in
       ( ServerPrecheckedFiles.set
           env
@@ -592,18 +595,19 @@ let type_check_dirty
                dirty_master_deps = master_deps;
                clean_local_deps = Typing_deps.(DepSet.make ());
              }),
+        to_undecl,
         to_recheck )
     else
       (* Start with full fan-out immediately *)
-      let to_recheck =
+      let (to_undecl, to_recheck) =
         if genv.local_config.SLC.load_decls_from_saved_state then
-          get_files_to_recheck dirty_files_changed_hash
+          get_files_to_undecl_and_recheck dirty_files_changed_hash
         else
           let deps = Typing_deps.DepSet.union master_deps local_deps in
           let deps = Typing_deps.add_all_deps deps in
-          Typing_deps.Files.get_files deps
+          (Relative_path.Set.empty, Typing_deps.Files.get_files deps)
       in
-      (env, to_recheck)
+      (env, to_undecl, to_recheck)
   in
   (* We still need to typecheck files whose declarations did not change *)
   let to_recheck =
@@ -629,6 +633,27 @@ let type_check_dirty
          ]);
     exit 0
   ) else
+    (* In case we saw that any hot decls had become invalid, we have to remove them.
+  Note: we don't need to do a full "redecl" of them since their fanout has
+  already been encompassed by to_recheck. *)
+    let names_to_undecl =
+      Relative_path.Set.fold
+        to_undecl
+        ~init:FileInfo.empty_names
+        ~f:(fun file acc ->
+          match Naming_table.get_file_info old_naming_table file with
+          | None -> acc
+          | Some info ->
+            let names = FileInfo.simplify info in
+            FileInfo.merge_names acc names)
+    in
+    let ctx = Provider_utils.ctx_from_server_env env in
+    Decl_redecl_service.remove_defs
+      ctx
+      names_to_undecl
+      SMap.empty
+      ~collect_garbage:false;
+
     let env = { env with changed_files = dirty_files_changed_hash } in
     let init_telemetry =
       telemetry

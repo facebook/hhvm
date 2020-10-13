@@ -382,8 +382,6 @@ let remove_defs
   if collect_garbage then SharedMem.collect `gentle;
   ()
 
-let intersection_nonempty s1 mem_f s2 = SSet.exists s1 ~f:(mem_f s2)
-
 let is_dependent_class_of_any ctx classes (c : string) : bool =
   if SSet.mem classes c then
     true
@@ -396,15 +394,13 @@ let is_dependent_class_of_any ctx classes (c : string) : bool =
      * check for the purpose of invalidating things from the heap
      * - if it's already not there, then we don't care. *)
     | Some c ->
-      intersection_nonempty classes SMap.mem c.Decl_defs.dc_ancestors
-      || intersection_nonempty classes SSet.mem c.Decl_defs.dc_extends
-      || intersection_nonempty classes SSet.mem c.Decl_defs.dc_xhp_attr_deps
-      || intersection_nonempty classes SSet.mem c.Decl_defs.dc_condition_types
-      || intersection_nonempty
-           classes
-           SSet.mem
-           c.Decl_defs.dc_req_ancestors_extends
-      || intersection_nonempty classes SSet.mem c.Decl_defs.dc_condition_types
+      let intersection_nonempty s1 s2 = SSet.exists s1 ~f:(SSet.mem s2) in
+      SMap.exists c.Decl_defs.dc_ancestors ~f:(fun c _ -> SSet.mem classes c)
+      || intersection_nonempty c.Decl_defs.dc_extends classes
+      || intersection_nonempty c.Decl_defs.dc_xhp_attr_deps classes
+      || intersection_nonempty c.Decl_defs.dc_condition_types classes
+      || intersection_nonempty c.Decl_defs.dc_req_ancestors_extends classes
+      || intersection_nonempty c.Decl_defs.dc_condition_types classes
 
 let get_maybe_dependent_classes
     (get_classes : Relative_path.t -> SSet.t)

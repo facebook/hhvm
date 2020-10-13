@@ -13,18 +13,22 @@ digraph G {
     intersect_context -> Cap4 [style=dashed, color=blue];
   };
 
-  "defaults"    [shape="rect", color=lightsteelblue1, style=filled];
-  "pure"        [shape="rect", color=lightsteelblue1, style=filled];
-  "rx"          [shape="rect", color=lightsteelblue1, style=filled];
-  "rx_shallow"  [shape="rect", color=lightsteelblue1, style=filled];
-  "rx_local"    [shape="rect", color=lightsteelblue1, style=filled];
-  "cipp_global" [shape="rect", color=lightsteelblue1, style=filled];
-  "cipp<T>"     [shape="rect", color=lightsteelblue1, style=filled];
-  "bloks"       [shape="rect", color=lightsteelblue1, style=filled];
+  "defaults"        [shape="rect", color=orange, style=filled];
+  "pure"            [shape="rect", color=lightsteelblue1, style=filled];
+  "rx"              [shape="rect", color=lightsteelblue1, style=filled];
+  "rx_shallow"      [shape="rect", color=lightsteelblue1, style=filled];
+  "rx_local"        [shape="rect", color=lightsteelblue1, style=filled];
+  "cipp_global"     [shape="rect", color=lightsteelblue1, style=filled];
+  "cipp<T>"         [shape="rect", color=lightsteelblue1, style=filled];
+  "bloks"           [shape="rect", color=lightsteelblue1, style=filled];
+  "schema_example"  [shape="rect", color=lightsteelblue1, style=filled];
   
-  "Client" -> "⊤"
-  "Server" -> "⊤"
+  "Client" -> "mixed"
+  "Server" -> "mixed"
   
+  "IO" -> "Server"
+  "Globals" -> "Server"
+  "UnrestrictedMutation" -> "Server"
   // cipp domain
   "CippGlobal" -> "Server"
   "Cipp<T>" -> "CippGlobal"
@@ -34,13 +38,27 @@ digraph G {
   "RxShallow" -> "Rx"
   "RxLocal" -> "RxShallow"
 
+  // examples
+  "schema_example" -> UnrestrictedMutation [color="blue", style="dashed"];
+
   // unsafe relations
-  "rx_local" -> "defaults"    [color="red"];
-  "rx_shallow" -> "rx_local"  [color="red"];
+  "rx_local" -> "defaults"   [color="red"];
+  "rx_shallow" -> "RxLocal"  [color="red"];
+
+  "rx_shallow" -> "rx"        [color="blue", style="dashed"];
+  "rx_local" -> "rx_shallow"  [color="blue", style="dashed"];
 
   // defaults intersection
   "defaults" -> "rx_local"    [color="blue", style="dashed"];
   "defaults" -> "cipp_global" [color="blue", style="dashed"];
+
+  "defaults" -> "UnrestrictedMutation" [color="blue", style="dashed"];
+
+  // we could expand the type aliases, but the graph gets messier
+  "cipp<T>" -> "cipp_global"[color="blue", style="dashed"];
+  "cipp_global" -> "Globals"[color="blue", style="dashed"];
+  "cipp_global" -> "IO"[color="blue", style="dashed"];
+  "rx" -> "IO"[color="blue", style="dashed"];
 
   // The following clusters pair up type aliases with individual interfaces
   subgraph cluster_pure {

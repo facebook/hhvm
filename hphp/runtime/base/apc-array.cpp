@@ -227,7 +227,7 @@ APCHandle::Pair APCArray::MakeHash(ArrayData* arr, APCKind kind,
     );
   } catch (...) {
     ret->~APCArray();
-    apc_sized_free(p, allocSize);
+    apc_sized_free(p - prov_off, allocSize);
     throw;
   }
 
@@ -319,7 +319,7 @@ APCHandle::Pair APCArray::MakePacked(ArrayData* arr, APCKind kind,
   } catch (...) {
     ret->m_size = i;
     ret->~APCArray();
-    apc_sized_free(p, allocSize);
+    apc_sized_free(p - prov_off, allocSize);
     throw;
   }
 

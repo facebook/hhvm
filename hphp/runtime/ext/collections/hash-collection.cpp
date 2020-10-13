@@ -13,9 +13,11 @@ namespace HPHP {
 HashCollection::HashCollection(Class* cls, HeaderKind kind, uint32_t cap)
   : ObjectData(cls, NoInit{}, ObjectData::NoAttrs, kind)
   , m_unusedAndSize(0)
-  , m_arr(cap == 0 ? CreateDictAsMixed() :
-          MixedArray::asMixed(MixedArray::MakeReserveDict(cap)))
-{}
+{
+  setArrayData(cap > 0
+    ? MixedArray::asMixed(MixedArray::MakeReserveDict(cap))
+    : CreateDictAsMixed());
+}
 
 NEVER_INLINE
 void HashCollection::throwTooLarge() {
@@ -218,9 +220,9 @@ void HashCollection::resizeHelper(uint32_t newCap) {
   // all the elements (without copying over tombstones).
   auto ad = arrayData()->isStatic() && arrayData()->empty() ?
     MixedArray::asMixed(MixedArray::MakeReserveDict(newCap)) :
-    MixedArray::CopyReserve(m_arr, newCap);
-  decRefArr(m_arr);
-  m_arr = ad;
+    MixedArray::CopyReserve(arrayData(), newCap);
+  decRefArr(arrayData());
+  setArrayData(ad);
   assertx(canMutateBuffer());
 }
 
@@ -232,7 +234,7 @@ void HashCollection::grow(uint32_t newScale) {
   auto oldAd = arrayData();
   dropImmCopy();
   if (m_size > 0 && !oldAd->cowCheck()) {
-    m_arr = MixedArray::Grow(oldAd, newScale, false);
+    setArrayData(MixedArray::Grow(oldAd, newScale, false));
     decRefArr(oldAd);
   } else {
     // For cases where m_size is zero or the buffer's refcount is
@@ -275,8 +277,8 @@ void HashCollection::shrink(uint32_t oldCap /* = 0 */) {
     assertx(newCap == computeMaxElms(folly::nextPowTwo<uint64_t>(newCap) - 1));
   } else {
     if (m_size == 0 && nextKI() == 0) {
-      decRefArr(m_arr);
-      m_arr = CreateDictAsMixed();
+      decRefArr(arrayData());
+      setArrayData(CreateDictAsMixed());
       return;
     }
     // If no old capacity was provided, we compute the largest capacity
@@ -294,9 +296,10 @@ void HashCollection::shrink(uint32_t oldCap /* = 0 */) {
     auto oldBuf = data();
     auto oldUsed = posLimit();
     auto oldNextKI = nextKI();
-    m_arr = MixedArray::asMixed(MixedArray::MakeReserveDict(newCap));
-    m_arr->m_size = m_size;
-    m_arr->mutableKeyTypes()->copyFrom(oldAd->keyTypes(), /*compact=*/true);
+    auto const arr = MixedArray::asMixed(MixedArray::MakeReserveDict(newCap));
+    setArrayData(arr);
+    arr->m_size = m_size;
+    arr->mutableKeyTypes()->copyFrom(oldAd->keyTypes(), /*compact=*/true);
     auto data = this->data();
     auto table = hashTab();
     auto table_mask = tableMask();
@@ -349,7 +352,7 @@ void HashCollection::mutateImpl() {
     return;
   }
   auto* oldAd = arrayData();
-  m_arr = MixedArray::asMixed(MixedArray::Copy(oldAd));
+  setArrayData(MixedArray::asMixed(MixedArray::Copy(oldAd)));
   assertx(oldAd->hasMultipleRefs());
   oldAd->decRefCount();
 }

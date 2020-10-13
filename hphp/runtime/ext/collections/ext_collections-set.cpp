@@ -283,7 +283,7 @@ Object c_Set::getImmutableCopy() {
   if (m_immCopy.isNull()) {
     auto set = req::make<c_ImmSet>();
     set->m_size = m_size;
-    set->m_arr = m_arr;
+    set->setArrayData(arrayData());
     m_immCopy = std::move(set);
     arrayData()->incRefCount();
   }
@@ -321,7 +321,7 @@ BaseSet::Clone(ObjectData* obj) {
   }
   thiz->arrayData()->incRefCount();
   target->m_size = thiz->m_size;
-  target->m_arr = thiz->m_arr;
+  target->setArrayData(thiz->arrayData());
   return target.detach();
 }
 
@@ -522,7 +522,7 @@ BaseSet::php_concat(const Variant& iterable) {
     if (isTombstone(i)) {
       continue;
     }
-    tvDup(data()[i].data, vec->dataAt(j));
+    tvDup(data()[i].data, vec->lvalAt(j));
     ++j;
   }
   for (; iter; ++iter) {
@@ -543,7 +543,7 @@ Object BaseSet::getIterator() {
 void c_Set::clear() {
   dropImmCopy();
   decRefArr(arrayData());
-  m_arr = CreateDictAsMixed();
+  setArrayData(CreateDictAsMixed());
   m_size = 0;
 }
 

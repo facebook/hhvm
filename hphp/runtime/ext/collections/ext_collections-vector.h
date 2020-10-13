@@ -32,43 +32,31 @@ protected:
   explicit BaseVector(Class* cls, HeaderKind kind)
     : ObjectData(cls, NoInit{}, ObjectData::NoAttrs, kind)
     , m_unusedAndSize(0)
-    , m_arr(ArrayData::CreateVec())
-  {}
+  {
+    setArrayData(ArrayData::CreateVec());
+  }
   explicit BaseVector(Class* cls, HeaderKind kind, ArrayData* arr)
     : ObjectData(cls, NoInit{}, ObjectData::NoAttrs, kind)
     , m_unusedAndSize(arr->m_size)
-    , m_arr(arr)
   {
-    assertx(arr->isVecKind());
+    setArrayData(arr);
   }
   explicit BaseVector(Class* cls, HeaderKind kind, uint32_t cap)
     : ObjectData(cls, NoInit{}, ObjectData::NoAttrs, kind)
     , m_unusedAndSize(0)
-    , m_arr(PackedArray::MakeReserveVec(cap))
-  {}
+  {
+    setArrayData(PackedArray::MakeReserveVec(cap));
+  }
   ~BaseVector();
 
 public:
-  Variant firstValue() const {
-    if (!m_size) return init_null_variant;
-    const auto tv = *dataAt(0);
-    return Variant(tvAsCVarRef(&tv));
+  ArrayData* arrayData() { return m_arr; }
+  const ArrayData* arrayData() const { return m_arr; }
+  void setArrayData(ArrayData* arr) {
+    assertx(arr->isVecKind());
+    m_arr = arr;
   }
 
-  Variant lastValue() const {
-    if (!m_size) return init_null_variant;
-    const auto tv = *dataAt(m_size-1);
-    return Variant(tvAsCVarRef(&tv));
-  }
-
-  ArrayData* arrayData() {
-    assertx(m_arr->isVecKind());
-    return m_arr;
-  }
-  const ArrayData* arrayData() const {
-    assertx(m_arr->isVecKind());
-    return m_arr;
-  }
   void setSize(uint32_t sz) {
     assertx(canMutateBuffer());
     assertx(sz <= PackedArray::capacity(arrayData()));
@@ -90,7 +78,7 @@ public:
   tv_lval appendForUnserialize(int64_t k) {
     assertx(k == m_size);
     incSize();
-    return dataAt(k);
+    return lvalAt(k);
   }
 
   template <IntishCast intishCast = IntishCast::None>
@@ -126,7 +114,7 @@ public:
       collections::throwOOB(key);
       return nullptr;
     }
-    return dataAt(key);
+    return lvalAt(key);
   }
   tv_lval at(const TypedValue* key) {
     if (LIKELY(key->m_type == KindOfInt64)) {
@@ -141,7 +129,7 @@ public:
     if ((uint64_t)key >= (uint64_t)m_size) {
       return nullptr;
     }
-    return dataAt(key);
+    return lvalAt(key);
   }
   tv_lval get(const TypedValue* key) {
     if (LIKELY(key->m_type == KindOfInt64)) {
@@ -221,7 +209,7 @@ public:
     if (UNLIKELY((uint64_t)key >= (uint64_t)m_size)) {
       collections::throwOOB(key);
     }
-    tvMove(val, dataAt(key));
+    tvMove(val, lvalAt(key));
   }
 
   /**
@@ -265,7 +253,7 @@ public:
   }
 
   void scan(type_scan::Scanner& scanner) const {
-    scanner.scan(m_arr);
+    scanner.scan(arrayData());
     scanner.scan(m_immCopy);
   }
 
@@ -275,8 +263,12 @@ protected:
     std::is_base_of<BaseVector, TVector>::value, TVector*>::type
   static Clone(ObjectData* obj);
 
-  tv_lval dataAt(int64_t index) const {
-    return PackedArray::LvalUncheckedInt(m_arr, index);
+  // Get a (mutable or const) ref to the value. `index` must be a valid index.
+  tv_lval lvalAt(int64_t index) {
+    return PackedArray::LvalUncheckedInt(arrayData(), index);
+  }
+  tv_rval rvalAt(int64_t index) const {
+    return const_cast<BaseVector*>(this)->lvalAt(index);
   }
 
   // Returns the value at k, with no refcount change. Requires contains(k).
@@ -291,12 +283,12 @@ protected:
     auto oldAd = arrayData();
     if (raw) {
       assertx(canMutateBuffer());
-      m_arr = PackedArray::AppendInPlace(oldAd, tv);
+      setArrayData(PackedArray::AppendInPlace(oldAd, tv));
     } else {
       dropImmCopy();
-      m_arr = PackedArray::Append(oldAd, tv);
+      setArrayData(PackedArray::Append(oldAd, tv));
     }
-    if (m_arr != oldAd) {
+    if (arrayData() != oldAd) {
       decRefArr(oldAd);
     }
     m_size = arrayData()->m_size;
@@ -326,10 +318,8 @@ protected:
     int64_t m_unusedAndSize;
   };
 
-
-  // The ArrayData's element area can be computed from m_arr via the
-  // packedData() helper function. When capacity is non-zero, m_arr points
-  // to a Vec.
+  // The vec backing this collection. See setArrayData() for a list of the
+  // invariants that this vec must satisfy.
   ArrayData* m_arr;
 
   // m_immCopy is a smart pointer to an ImmVector that is an up-to-date
@@ -401,16 +391,16 @@ struct c_Vector : BaseVector {
   struct SortTmp {
     SortTmp(c_Vector* v, SortFunction sf) : m_v(v) {
       if (hasUserDefinedCmp(sf)) {
-        m_ad = PackedArray::Copy(m_v->m_arr);
+        m_ad = PackedArray::Copy(m_v->arrayData());
       } else {
         m_v->mutate();
-        m_ad = m_v->m_arr;
+        m_ad = m_v->arrayData();
       }
     }
     ~SortTmp() {
-      if (m_v->m_arr != m_ad) {
-        Array tmp = Array::attach(m_v->m_arr);
-        m_v->m_arr = m_ad;
+      if (m_v->arrayData() != m_ad) {
+        Array tmp = Array::attach(m_v->arrayData());
+        m_v->setArrayData(m_ad);
       }
     }
     ArrayData* operator->() { return m_ad; }
@@ -516,7 +506,7 @@ struct VectorIterator {
     if (m_pos >= vec->m_size) {
       throw_iterator_not_valid();
     }
-    const auto tv = *vec->dataAt(m_pos);
+    const auto tv = *vec->rvalAt(m_pos);
     return Variant(tvAsCVarRef(&tv));
   }
 

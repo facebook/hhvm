@@ -263,7 +263,7 @@ protected:
     int64_t out = 0;
     auto* eLimit = elmLimit();
     for (auto* e = firstElm(); e != eLimit; e = nextElm(e, eLimit), ++out) {
-      tvDup(e->data, target->dataAt(out));
+      tvDup(e->data, target->lvalAt(out));
     }
     return Object{std::move(target)};
   }
@@ -278,10 +278,10 @@ protected:
     int64_t j = 0;
     for (; e != eLimit; e = nextElm(e, eLimit), vec->incSize(), ++j) {
       if (e->hasIntKey()) {
-        tvCopy(make_tv<KindOfInt64>(e->ikey), vec->dataAt(j));
+        tvCopy(make_tv<KindOfInt64>(e->ikey), vec->lvalAt(j));
       } else {
         assertx(e->hasStrKey());
-        tvDup(make_tv<KindOfString>(e->skey), vec->dataAt(j));
+        tvDup(make_tv<KindOfString>(e->skey), vec->lvalAt(j));
       }
     }
     return Object{std::move(vec)};

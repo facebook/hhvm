@@ -18,13 +18,15 @@ struct HashCollection : ObjectData {
   explicit HashCollection(Class* cls, HeaderKind kind)
     : ObjectData(cls, NoInit{}, ObjectData::NoAttrs, kind)
     , m_unusedAndSize(0)
-    , m_arr(CreateDictAsMixed())
-  {}
+  {
+    setArrayData(CreateDictAsMixed());
+  }
   explicit HashCollection(Class* cls, HeaderKind kind, ArrayData* arr)
     : ObjectData(cls, NoInit{}, ObjectData::NoAttrs, kind)
     , m_unusedAndSize(arr->m_size)
-    , m_arr(MixedArray::asMixed(arr))
-  {}
+  {
+    setArrayData(MixedArray::asMixed(arr));
+  }
   explicit HashCollection(Class* cls, HeaderKind kind, uint32_t cap);
 
   using Elm = MixedArray::Elm;
@@ -413,32 +415,32 @@ struct HashCollection : ObjectData {
   }
 
   ssize_t find(int64_t ki, inthash_t h) const {
-    return m_arr->find(ki, h);
+    return arrayData()->find(ki, h);
   }
 
   ssize_t find(const StringData* s, strhash_t h) const {
-    return m_arr->find(s, h);
+    return arrayData()->find(s, h);
   }
 
   auto findForRemove(int64_t k, inthash_t h) const {
-    return m_arr->findForRemove(k, h);
+    return arrayData()->findForRemove(k, h);
   }
 
   auto findForRemove(const StringData* s, strhash_t h) const {
-    return m_arr->findForRemove(s, h);
+    return arrayData()->findForRemove(s, h);
   }
 
   MixedArray::Inserter findForInsert(int64_t ki, inthash_t h) const {
-    return m_arr->findForInsertUpdate(ki, h);
+    return arrayData()->findForInsertUpdate(ki, h);
   }
 
   MixedArray::Inserter findForInsert(const StringData* s, strhash_t h) const {
-    return m_arr->findForInsertUpdate(s, h);
+    return arrayData()->findForInsertUpdate(s, h);
   }
 
   MixedArray::Inserter findForNewInsert(int32_t* table, size_t mask,
                                         hash_t h0) const {
-    return m_arr->findForNewInsert(table, mask, h0);
+    return arrayData()->findForNewInsert(table, mask, h0);
   }
 
   static void copyElm(const Elm& frE, Elm& toE) {
@@ -454,25 +456,30 @@ struct HashCollection : ObjectData {
 
   MixedArray* arrayData() { return m_arr; }
   const MixedArray* arrayData() const { return m_arr; }
+  void setArrayData(MixedArray* arr) {
+    assertx(arr->isDictKind());
+    m_arr = arr;
+  }
 
   /**
    * Copy the buffer and reset the immutable copy.
    */
   void mutateImpl();
 
-  Elm* data() { return m_arr->data(); }
-  const Elm* data() const { return m_arr->data(); }
-  int32_t* hashTab() const { return m_arr->hashTab(); }
+  Elm* data() { return arrayData()->data(); }
+  const Elm* data() const { return arrayData()->data(); }
+  int32_t* hashTab() const { return arrayData()->hashTab(); }
 
   void setSize(uint32_t sz) {
     assertx(sz <= cap());
-    if (m_arr->isStatic() && m_arr->empty()) {
+    auto const arr = arrayData();
+    if (arr->isStatic() && arr->empty()) {
       assertx(sz == 0);
       return;
     }
-    assertx(!arrayData()->hasMultipleRefs());
+    assertx(!arr->hasMultipleRefs());
     m_size = sz;
-    arrayData()->m_size = sz;
+    arr->m_size = sz;
   }
   void incSize() {
     assertx(m_size + 1 <= cap());
@@ -609,24 +616,24 @@ struct HashCollection : ObjectData {
   void warnOnStrIntDup() const;
 
   void scan(type_scan::Scanner& scanner) const {
-    scanner.scan(m_arr);
+    scanner.scan(arrayData());
     scanner.scan(m_immCopy);
   }
 
   struct SortTmp {
     SortTmp(HashCollection* h, SortFunction sf) : m_h(h) {
       if (hasUserDefinedCmp(sf)) {
-        m_ad = MixedArray::Copy(m_h->m_arr);
+        m_ad = MixedArray::Copy(m_h->arrayData());
       } else {
         m_h->mutate();
-        m_ad = m_h->m_arr;
+        m_ad = m_h->arrayData();
       }
     }
     ~SortTmp() {
-      if (m_h->m_arr != m_ad) {
-        Array tmp = Array::attach(m_h->m_arr);
+      if (m_h->arrayData() != m_ad) {
+        Array tmp = Array::attach(m_h->arrayData());
         assertx(m_ad->isDictKind());
-        m_h->m_arr = static_cast<MixedArray*>(m_ad);
+        m_h->setArrayData(static_cast<MixedArray*>(m_ad));
       }
     }
     ArrayData* operator->() { return m_ad; }
@@ -637,12 +644,11 @@ struct HashCollection : ObjectData {
 
  protected:
 
-  // Replace the m_arr field with a new MixedArray. The array must be known to
-  // *not* contain any references.
+  // Replace the backing array with a new MixedArray.
   void replaceArray(ArrayData* adata) {
-    auto* oldAd = m_arr;
+    auto* oldAd = arrayData();
     dropImmCopy();
-    m_arr = MixedArray::asMixed(adata);
+    setArrayData(MixedArray::asMixed(adata));
     adata->incRefCount();
     m_size = adata->size();
     decRefArr(oldAd);
@@ -656,7 +662,9 @@ struct HashCollection : ObjectData {
     int64_t m_unusedAndSize;
   };
 
-  MixedArray* m_arr;      // Elm store.
+  // The dict backing this collection. See setArrayData() for a list of the
+  // invariants that this dict must satisfy.
+  MixedArray* m_arr;
 
   // A pointer to an immutable collection that shares its buffer with
   // this collection.

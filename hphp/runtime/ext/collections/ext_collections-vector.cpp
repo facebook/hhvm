@@ -103,8 +103,8 @@ void BaseVector::addAllImpl(const Variant& t) {
         array->incRefCount();
       }
       dropImmCopy();
-      decRefArr(m_arr);
-      m_arr = array;
+      decRefArr(arrayData());
+      setArrayData(array);
       m_size = array->size();
       return true;
     },
@@ -154,8 +154,8 @@ bool BaseVector::Equals(const ObjectData* obj1, const ObjectData* obj2) {
 void BaseVector::addFront(TypedValue tv) {
   dropImmCopy();
   auto oldAd = arrayData();
-  m_arr = PackedArray::Prepend(oldAd, tv);
-  if (m_arr != oldAd) {
+  setArrayData(PackedArray::Prepend(oldAd, tv));
+  if (arrayData() != oldAd) {
     decRefArr(oldAd);
   }
   m_size = arrayData()->m_size;
@@ -172,11 +172,12 @@ Variant BaseVector::popFront() {
 TypedValue BaseVector::removeKeyImpl(int64_t k) {
   assertx(contains(k));
   mutate();
-  const auto result = *dataAt(k);
+  const auto result = *lvalAt(k);
   if (k+1 < m_size) {
     static_assert(PackedArray::stores_typed_values, "");
     size_t bytes = (m_size-(k+1)) * sizeof(TypedValue);
-    std::memmove(&packedData(m_arr)[k], &packedData(m_arr)[k+1], bytes);
+    std::memmove(&packedData(arrayData())[k],
+                 &packedData(arrayData())[k+1], bytes);
   }
   decSize();
   return result;
@@ -184,14 +185,15 @@ TypedValue BaseVector::removeKeyImpl(int64_t k) {
 
 void BaseVector::reserveImpl(uint32_t newCap) {
   auto oldAd = arrayData();
-  m_arr = PackedArray::MakeReserveVec(newCap);
-  arrayData()->m_size = m_size;
+  auto const arr = PackedArray::MakeReserveVec(newCap);
+  setArrayData(arr);
+  arr->m_size = m_size;
   if (LIKELY(!oldAd->cowCheck())) {
     assertx(oldAd->isVecKind());
     if (m_size > 0) {
       static_assert(PackedArray::stores_typed_values, "");
       size_t bytes = m_size * sizeof(TypedValue);
-      std::memcpy(packedData(m_arr), packedData(oldAd), bytes);
+      std::memcpy(packedData(arr), packedData(oldAd), bytes);
       // Mark oldAd as having 0 elements so that the array release logic doesn't
       // decRef the elements (since we teleported the elements to a new array)
       oldAd->m_size = 0;
@@ -199,7 +201,7 @@ void BaseVector::reserveImpl(uint32_t newCap) {
     decRefArr(oldAd);
   } else {
     if (m_size > 0) {
-      copySlice(oldAd, m_arr, 0, 0, m_size);
+      copySlice(oldAd, arr, 0, 0, m_size);
     }
     assertx(!oldAd->decWillRelease());
     oldAd->decRefCount();
@@ -228,7 +230,7 @@ BaseVector::~BaseVector() {
 
 void BaseVector::mutateImpl() {
   auto oldAd = arrayData();
-  m_arr = PackedArray::Copy(oldAd);
+  setArrayData(PackedArray::Copy(oldAd));
   assertx(!oldAd->decWillRelease());
   oldAd->decRefCount();
 }
@@ -271,7 +273,7 @@ Class* c_Vector::s_cls;
 void c_Vector::clear() {
   dropImmCopy();
   decRefArr(arrayData());
-  m_arr = ArrayData::CreateVec();
+  setArrayData(ArrayData::CreateVec());
   m_size = 0;
 }
 
@@ -286,7 +288,7 @@ Variant c_Vector::pop() {
   }
   mutate();
   decSize();
-  const auto tv = *dataAt(m_size);
+  const auto tv = *lvalAt(m_size);
   return Variant(tvAsCVarRef(&tv), Variant::TVCopy());
 }
 
@@ -297,7 +299,7 @@ void c_Vector::resize(uint32_t sz, const TypedValue* val) {
   if (sz == 0) {
     dropImmCopy();
     decRefArr(arrayData());
-    m_arr = ArrayData::CreateVec();
+    setArrayData(ArrayData::CreateVec());
     m_size = 0;
   } else if (m_size > sz) {
     // If there were any objects in the part that's being resized away, their
@@ -306,15 +308,16 @@ void c_Vector::resize(uint32_t sz, const TypedValue* val) {
     // keeping into a new vec, swap them, and decref the old one.
     dropImmCopy();
     auto oldAd = arrayData();
-    m_arr = PackedArray::MakeReserveVec(sz);
-    copySlice(oldAd, m_arr, 0, 0, sz);
+    auto const arr = PackedArray::MakeReserveVec(sz);
+    setArrayData(arr);
+    copySlice(oldAd, arr, 0, 0, sz);
     arrayData()->m_size = m_size = sz;
     decRefArr(oldAd);
   } else {
     reserve(sz);
     uint32_t i = m_size;
     do {
-      tvDup(*val, dataAt(i));
+      tvDup(*val, lvalAt(i));
     } while (++i < sz);
     setSize(sz);
   }
@@ -326,7 +329,7 @@ void c_Vector::reverse() {
   uint32_t i = 0;
   uint32_t j = m_size - 1;
   do {
-    tvSwap(dataAt(i), dataAt(j));
+    tvSwap(lvalAt(i), lvalAt(j));
   } while (++i < --j);
 }
 
@@ -339,12 +342,13 @@ void c_Vector::splice(int64_t startPos, int64_t endPos) {
   uint32_t sz = m_size - (endPos - startPos);
   dropImmCopy();
   auto oldAd = arrayData();
-  m_arr = PackedArray::MakeReserveVec(sz);
+  auto const arr = PackedArray::MakeReserveVec(sz);
+  setArrayData(arr);
   if (startPos > 0) {
-    copySlice(oldAd, m_arr, 0, 0, startPos);
+    copySlice(oldAd, arr, 0, 0, startPos);
   }
   if (sz > startPos) {
-    copySlice(oldAd, m_arr, endPos, startPos, sz - startPos);
+    copySlice(oldAd, arr, endPos, startPos, sz - startPos);
   }
   arrayData()->m_size = m_size = sz;
   decRefArr(oldAd);
@@ -397,7 +401,7 @@ void c_Vector::shuffle() {
   uint32_t i = 1;
   do {
     const uint32_t j = math_mt_rand(0, i);
-    tvSwap(dataAt(i), dataAt(j));
+    tvSwap(lvalAt(i), lvalAt(j));
   } while (++i < m_size);
 }
 
@@ -421,7 +425,7 @@ Object c_Vector::fromArray(const Class*, const Variant& arr) {
   ssize_t pos = ad->iter_begin();
   do {
     assertx(pos != ad->iter_end());
-    tvDup(ad->nvGetVal(pos), target->dataAt(i));
+    tvDup(ad->nvGetVal(pos), target->lvalAt(i));
     pos = ad->iter_advance(pos);
   } while (++i < sz);
   return Object{std::move(target)};
@@ -467,8 +471,6 @@ void CollectionsExtension::initVector() {
   HHVM_NAMED_ME(HH\\ImmVector, mn, impl);
   BASE_ME(__construct,  &BaseVector::init);
   BASE_ME(getIterator,  &BaseVector::getIterator);
-  BASE_ME(firstValue,   &BaseVector::firstValue);
-  BASE_ME(lastValue,    &BaseVector::lastValue);
 #undef BASE_ME
 
   // Vector specific

@@ -203,7 +203,7 @@ void deepCopy(tv_lval lval) {
           vec->mutate();
           int64_t i = 0;
           do {
-            deepCopy(vec->dataAt(i));
+            deepCopy(vec->lvalAt(i));
           } while (++i < size);
         }
         return vec;

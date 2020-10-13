@@ -198,6 +198,13 @@ where
         self.parse_terminated_list(|x: &mut Self| x.parse_enumerator(), TokenKind::RightBrace)
     }
 
+    fn parse_enum_class_enumerator_list_opt(&mut self) -> S::R {
+        self.parse_terminated_list(
+            |x: &mut Self| x.parse_enum_class_enumerator(),
+            TokenKind::RightBrace,
+        )
+    }
+
     fn parse_enum_declaration(&mut self, attrs: S::R) -> S::R {
         // enum-name-list-nonempty:
         //   :  enum-name enum-name-list
@@ -240,6 +247,40 @@ where
             enumerators,
             right_brace,
         )
+    }
+
+    fn parse_enum_class_declaration(&mut self, attrs: S::R) -> S::R {
+        // enum-class-declaration:
+        //   attribute-specification-opt enum class name : base { enum-class-enumerator-list-opt }
+        let enum_kw = self.assert_token(TokenKind::Enum);
+        let class_kw = self.assert_token(TokenKind::Class);
+        let name = self.require_class_name();
+        let colon = self.require_colon();
+        let base =
+            self.parse_type_specifier(false /* allow_var */, false /* allow_attr */);
+        let left_brace = self.require_left_brace();
+        let enumerators = self.parse_enum_class_enumerator_list_opt();
+        let right_brace = self.require_right_brace();
+        S!(
+            make_enum_class_declaration,
+            self,
+            attrs,
+            enum_kw,
+            class_kw,
+            name,
+            colon,
+            base,
+            left_brace,
+            enumerators,
+            right_brace
+        )
+    }
+
+    fn parse_enum_or_enum_class_declaration(&mut self, attrs: S::R) -> S::R {
+        match self.peek_token_kind_with_lookahead(1) {
+            TokenKind::Class => self.parse_enum_class_declaration(attrs),
+            _ => self.parse_enum_declaration(attrs),
+        }
     }
 
     fn parse_record_field(&mut self) -> S::R {
@@ -2120,7 +2161,7 @@ where
         };
 
         match self.peek_token_kind() {
-            TokenKind::Enum => self.parse_enum_declaration(attribute_specification),
+            TokenKind::Enum => self.parse_enum_or_enum_class_declaration(attribute_specification),
             TokenKind::Type | TokenKind::Newtype => {
                 self.parse_alias_declaration(attribute_specification)
             }
@@ -2323,6 +2364,35 @@ where
         S!(make_enumerator, self, name, equal, value, semicolon)
     }
 
+    fn parse_enum_class_enumerator(&mut self) -> S::R {
+        // SPEC
+        // enum-class-enumerator:
+        //   name < type-specifier > ( expression ) ;
+        // Taken from parse_enumerator:
+        // TODO: We must allow TRUE to be a legal enum member name; here we allow
+        // any keyword.  Consider making this more strict.
+        let name = self.require_name_allow_all_keywords();
+        let left_angle = self.require_left_angle();
+        let ty = self.parse_type_specifier(/*allow_var*/ false, /*allow_attr*/ true);
+        let right_angle = self.require_right_angle();
+        let left_paren = self.require_left_paren();
+        let initial_value = self.parse_expression();
+        let right_paren = self.require_right_paren();
+        let semicolon = self.require_semicolon();
+        S!(
+            make_enum_class_enumerator,
+            self,
+            name,
+            left_angle,
+            ty,
+            right_angle,
+            left_paren,
+            initial_value,
+            right_paren,
+            semicolon
+        )
+    }
+
     fn parse_inclusion_directive(&mut self) -> S::R {
         // SPEC:
         // inclusion-directive:
@@ -2372,7 +2442,7 @@ where
             }
             TokenKind::Enum => {
                 let missing = S!(make_missing, self, self.pos());
-                self.parse_enum_declaration(missing)
+                self.parse_enum_or_enum_class_declaration(missing)
             }
             TokenKind::RecordDec => {
                 let missing = S!(make_missing, self, self.pos());

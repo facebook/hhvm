@@ -76,6 +76,7 @@ enum UnstableFeatures {
     PocketUniverses,
     CoeffectsProvisional,
     EnumSupertyping,
+    EnumClass,
 }
 
 use BinopAllowsAwaitInPositions::*;
@@ -5750,6 +5751,9 @@ where
                 Token(_) => self.check_can_use_feature(node, &UnstableFeatures::EnumSupertyping),
                 _ => {}
             },
+            EnumClassDeclaration(_) | EnumClassEnumerator(_) => {
+                self.check_can_use_feature(node, &UnstableFeatures::EnumClass)
+            }
 
             _ => {}
         }

@@ -113,6 +113,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | Syntax.EndOfFile _ -> tag validate_end_of_file (fun x -> TLDEndOfFile x) x
     | Syntax.FileAttributeSpecification _ -> tag validate_file_attribute_specification (fun x -> TLDFileAttributeSpecification x) x
     | Syntax.EnumDeclaration _ -> tag validate_enum_declaration (fun x -> TLDEnum x) x
+    | Syntax.EnumClassDeclaration _ -> tag validate_enum_class_declaration (fun x -> TLDEnumClass x) x
     | Syntax.RecordDeclaration _ -> tag validate_record_declaration (fun x -> TLDRecord x) x
     | Syntax.AliasDeclaration _ -> tag validate_alias_declaration (fun x -> TLDAlias x) x
     | Syntax.NamespaceDeclaration _ -> tag validate_namespace_declaration (fun x -> TLDNamespace x) x
@@ -150,6 +151,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | TLDEndOfFile                    thing -> invalidate_end_of_file                    (value, thing)
     | TLDFileAttributeSpecification   thing -> invalidate_file_attribute_specification   (value, thing)
     | TLDEnum                         thing -> invalidate_enum_declaration               (value, thing)
+    | TLDEnumClass                    thing -> invalidate_enum_class_declaration         (value, thing)
     | TLDRecord                       thing -> invalidate_record_declaration             (value, thing)
     | TLDAlias                        thing -> invalidate_alias_declaration              (value, thing)
     | TLDNamespace                    thing -> invalidate_namespace_declaration          (value, thing)
@@ -880,6 +882,60 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
       ; enumerator_equal = invalidate_token x.enumerator_equal
       ; enumerator_value = invalidate_expression x.enumerator_value
       ; enumerator_semicolon = invalidate_token x.enumerator_semicolon
+      }
+    ; Syntax.value = v
+    }
+  and validate_enum_class_declaration : enum_class_declaration validator = function
+  | { Syntax.syntax = Syntax.EnumClassDeclaration x; value = v } -> v,
+    { enum_class_right_brace = validate_token x.enum_class_right_brace
+    ; enum_class_elements = validate_list_with (validate_enum_class_enumerator) x.enum_class_elements
+    ; enum_class_left_brace = validate_token x.enum_class_left_brace
+    ; enum_class_base = validate_specifier x.enum_class_base
+    ; enum_class_colon = validate_token x.enum_class_colon
+    ; enum_class_name = validate_token x.enum_class_name
+    ; enum_class_class_keyword = validate_token x.enum_class_class_keyword
+    ; enum_class_enum_keyword = validate_token x.enum_class_enum_keyword
+    ; enum_class_attribute_spec = validate_option_with (validate_attribute_specification) x.enum_class_attribute_spec
+    }
+  | s -> validation_fail (Some SyntaxKind.EnumClassDeclaration) s
+  and invalidate_enum_class_declaration : enum_class_declaration invalidator = fun (v, x) ->
+    { Syntax.syntax =
+      Syntax.EnumClassDeclaration
+      { enum_class_attribute_spec = invalidate_option_with (invalidate_attribute_specification) x.enum_class_attribute_spec
+      ; enum_class_enum_keyword = invalidate_token x.enum_class_enum_keyword
+      ; enum_class_class_keyword = invalidate_token x.enum_class_class_keyword
+      ; enum_class_name = invalidate_token x.enum_class_name
+      ; enum_class_colon = invalidate_token x.enum_class_colon
+      ; enum_class_base = invalidate_specifier x.enum_class_base
+      ; enum_class_left_brace = invalidate_token x.enum_class_left_brace
+      ; enum_class_elements = invalidate_list_with (invalidate_enum_class_enumerator) x.enum_class_elements
+      ; enum_class_right_brace = invalidate_token x.enum_class_right_brace
+      }
+    ; Syntax.value = v
+    }
+  and validate_enum_class_enumerator : enum_class_enumerator validator = function
+  | { Syntax.syntax = Syntax.EnumClassEnumerator x; value = v } -> v,
+    { enum_class_enumerator_semicolon = validate_token x.enum_class_enumerator_semicolon
+    ; enum_class_enumerator_right_paren = validate_token x.enum_class_enumerator_right_paren
+    ; enum_class_enumerator_initial_value = validate_expression x.enum_class_enumerator_initial_value
+    ; enum_class_enumerator_left_paren = validate_token x.enum_class_enumerator_left_paren
+    ; enum_class_enumerator_right_angle = validate_token x.enum_class_enumerator_right_angle
+    ; enum_class_enumerator_type = validate_specifier x.enum_class_enumerator_type
+    ; enum_class_enumerator_left_angle = validate_token x.enum_class_enumerator_left_angle
+    ; enum_class_enumerator_name = validate_token x.enum_class_enumerator_name
+    }
+  | s -> validation_fail (Some SyntaxKind.EnumClassEnumerator) s
+  and invalidate_enum_class_enumerator : enum_class_enumerator invalidator = fun (v, x) ->
+    { Syntax.syntax =
+      Syntax.EnumClassEnumerator
+      { enum_class_enumerator_name = invalidate_token x.enum_class_enumerator_name
+      ; enum_class_enumerator_left_angle = invalidate_token x.enum_class_enumerator_left_angle
+      ; enum_class_enumerator_type = invalidate_specifier x.enum_class_enumerator_type
+      ; enum_class_enumerator_right_angle = invalidate_token x.enum_class_enumerator_right_angle
+      ; enum_class_enumerator_left_paren = invalidate_token x.enum_class_enumerator_left_paren
+      ; enum_class_enumerator_initial_value = invalidate_expression x.enum_class_enumerator_initial_value
+      ; enum_class_enumerator_right_paren = invalidate_token x.enum_class_enumerator_right_paren
+      ; enum_class_enumerator_semicolon = invalidate_token x.enum_class_enumerator_semicolon
       }
     ; Syntax.value = v
     }

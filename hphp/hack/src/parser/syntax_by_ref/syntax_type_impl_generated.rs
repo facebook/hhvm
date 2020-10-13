@@ -146,6 +146,37 @@ where
         Self::make(syntax, value)
     }
 
+    fn make_enum_class_declaration(ctx: &C, attribute_spec: Self, enum_keyword: Self, class_keyword: Self, name: Self, colon: Self, base: Self, left_brace: Self, elements: Self, right_brace: Self) -> Self {
+        let syntax = SyntaxVariant::EnumClassDeclaration(ctx.get_arena().alloc(EnumClassDeclarationChildren {
+            attribute_spec,
+            enum_keyword,
+            class_keyword,
+            name,
+            colon,
+            base,
+            left_brace,
+            elements,
+            right_brace,
+        }));
+        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        Self::make(syntax, value)
+    }
+
+    fn make_enum_class_enumerator(ctx: &C, name: Self, left_angle: Self, type_: Self, right_angle: Self, left_paren: Self, initial_value: Self, right_paren: Self, semicolon: Self) -> Self {
+        let syntax = SyntaxVariant::EnumClassEnumerator(ctx.get_arena().alloc(EnumClassEnumeratorChildren {
+            name,
+            left_angle,
+            type_,
+            right_angle,
+            left_paren,
+            initial_value,
+            right_paren,
+            semicolon,
+        }));
+        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        Self::make(syntax, value)
+    }
+
     fn make_record_declaration(ctx: &C, attribute_spec: Self, modifier: Self, keyword: Self, name: Self, extends_keyword: Self, extends_opt: Self, left_brace: Self, fields: Self, right_brace: Self) -> Self {
         let syntax = SyntaxVariant::RecordDeclaration(ctx.get_arena().alloc(RecordDeclarationChildren {
             attribute_spec,

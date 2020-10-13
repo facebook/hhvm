@@ -38,6 +38,8 @@ pub enum SyntaxVariant<'a, T, V> {
     FileAttributeSpecification(&'a FileAttributeSpecificationChildren<'a, T, V>),
     EnumDeclaration(&'a EnumDeclarationChildren<'a, T, V>),
     Enumerator(&'a EnumeratorChildren<'a, T, V>),
+    EnumClassDeclaration(&'a EnumClassDeclarationChildren<'a, T, V>),
+    EnumClassEnumerator(&'a EnumClassEnumeratorChildren<'a, T, V>),
     RecordDeclaration(&'a RecordDeclarationChildren<'a, T, V>),
     RecordField(&'a RecordFieldChildren<'a, T, V>),
     AliasDeclaration(&'a AliasDeclarationChildren<'a, T, V>),
@@ -280,6 +282,31 @@ pub struct EnumeratorChildren<'a, T, V> {
     pub name: Syntax<'a, T, V>,
     pub equal: Syntax<'a, T, V>,
     pub value: Syntax<'a, T, V>,
+    pub semicolon: Syntax<'a, T, V>,
+}
+
+#[derive(Debug, Clone)]
+pub struct EnumClassDeclarationChildren<'a, T, V> {
+    pub attribute_spec: Syntax<'a, T, V>,
+    pub enum_keyword: Syntax<'a, T, V>,
+    pub class_keyword: Syntax<'a, T, V>,
+    pub name: Syntax<'a, T, V>,
+    pub colon: Syntax<'a, T, V>,
+    pub base: Syntax<'a, T, V>,
+    pub left_brace: Syntax<'a, T, V>,
+    pub elements: Syntax<'a, T, V>,
+    pub right_brace: Syntax<'a, T, V>,
+}
+
+#[derive(Debug, Clone)]
+pub struct EnumClassEnumeratorChildren<'a, T, V> {
+    pub name: Syntax<'a, T, V>,
+    pub left_angle: Syntax<'a, T, V>,
+    pub type_: Syntax<'a, T, V>,
+    pub right_angle: Syntax<'a, T, V>,
+    pub left_paren: Syntax<'a, T, V>,
+    pub initial_value: Syntax<'a, T, V>,
+    pub right_paren: Syntax<'a, T, V>,
     pub semicolon: Syntax<'a, T, V>,
 }
 

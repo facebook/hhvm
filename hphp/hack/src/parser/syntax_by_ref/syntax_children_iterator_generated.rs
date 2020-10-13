@@ -147,6 +147,35 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                     }
                 })
             },
+            EnumClassDeclaration(x) => {
+                get_index(9).and_then(|index| { match index {
+                        0 => Some(&x.attribute_spec),
+                    1 => Some(&x.enum_keyword),
+                    2 => Some(&x.class_keyword),
+                    3 => Some(&x.name),
+                    4 => Some(&x.colon),
+                    5 => Some(&x.base),
+                    6 => Some(&x.left_brace),
+                    7 => Some(&x.elements),
+                    8 => Some(&x.right_brace),
+                        _ => None,
+                    }
+                })
+            },
+            EnumClassEnumerator(x) => {
+                get_index(8).and_then(|index| { match index {
+                        0 => Some(&x.name),
+                    1 => Some(&x.left_angle),
+                    2 => Some(&x.type_),
+                    3 => Some(&x.right_angle),
+                    4 => Some(&x.left_paren),
+                    5 => Some(&x.initial_value),
+                    6 => Some(&x.right_paren),
+                    7 => Some(&x.semicolon),
+                        _ => None,
+                    }
+                })
+            },
             RecordDeclaration(x) => {
                 get_index(9).and_then(|index| { match index {
                         0 => Some(&x.attribute_spec),

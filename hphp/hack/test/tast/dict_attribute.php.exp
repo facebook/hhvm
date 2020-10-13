@@ -694,7 +694,7 @@
          ];
        c_enum =
        (Some { e_base = ([33:10-13], (Hprim Tint)); e_constraint = None;
-               e_includes = [] });
+               e_includes = []; e_enum_class = false });
        c_pu_enums = []; c_doc_comment = None; c_emit_id = None });
   (Typedef
      { t_annotation = (); t_name = ([36:6-8], "\\tt"); t_tparams = [];

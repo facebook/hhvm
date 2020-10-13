@@ -115,9 +115,18 @@ fn make_86method<'a>(
     })
 }
 
-fn from_extends(is_enum: bool, extends: &Vec<tast::Hint>) -> Option<hhbc_id::class::Type> {
+fn from_extends(
+    is_enum: bool,
+    is_enum_class: bool,
+    extends: &Vec<tast::Hint>,
+) -> Option<hhbc_id::class::Type> {
     if is_enum {
-        Some(hhbc_id::class::from_raw_string("HH\\BuiltinEnum"))
+        // Do not use special_names:: as there's a prefix \ which breaks HHVM
+        if is_enum_class {
+            Some(hhbc_id::class::from_raw_string("HH\\BuiltinEnumClass"))
+        } else {
+            Some(hhbc_id::class::from_raw_string("HH\\BuiltinEnum"))
+        }
     } else {
         extends.first().map(|x| emit_type_hint::hint_to_class(x))
     }
@@ -528,6 +537,14 @@ pub fn emit_class<'a>(emitter: &mut Emitter, ast_class: &'a tast::Class_) -> Res
     } else {
         None
     };
+    let is_enum_class = if ast_class.kind == tast::ClassKind::Cenum {
+        match &ast_class.enum_ {
+            Some(info) => info.enum_class,
+            None => false,
+        }
+    } else {
+        false
+    };
     let xhp_attributes: Vec<_> = ast_class
         .xhp_attrs
         .iter()
@@ -560,7 +577,7 @@ pub fn emit_class<'a>(emitter: &mut Emitter, ast_class: &'a tast::Class_) -> Res
     let base = if is_interface {
         None
     } else {
-        from_extends(enum_type.is_some(), &ast_class.extends)
+        from_extends(enum_type.is_some(), is_enum_class, &ast_class.extends)
     };
 
     if base

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<bac3e2bc279a808a983514e119207cc4>>
+// @generated SignedSource<<fd7bdf3243108e5e482570f4b32e84a5>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -452,6 +452,7 @@ pub struct Enum_ {
     pub base: Hint,
     pub constraint: Option<Hint>,
     pub includes: Vec<Hint>,
+    pub enum_class: bool,
 }
 
 #[derive(

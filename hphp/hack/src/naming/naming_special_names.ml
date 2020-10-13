@@ -34,6 +34,8 @@ module Classes = struct
 
   let cHH_BuiltinEnum = "\\HH\\BuiltinEnum"
 
+  let cHH_BuiltinEnumClass = "\\HH\\BuiltinEnumClass"
+
   let cThrowable = "\\Throwable"
 
   let cStdClass = "\\stdClass"
@@ -59,6 +61,8 @@ module Classes = struct
   let cIDisposable = "\\IDisposable"
 
   let cIAsyncDisposable = "\\IAsyncDisposable"
+
+  let cElt = "\\HH\\Elt"
 end
 
 module Collections = struct
@@ -314,6 +318,8 @@ module UserAttributes = struct
 
   let uaEnableUnstableFeatures = "__EnableUnstableFeatures"
 
+  let uaEnumClass = "__EnumClass"
+
   let as_map =
     AttributeKinds.(
       SMap.of_list
@@ -363,6 +369,7 @@ module UserAttributes = struct
           (uaDisableTypecheckerInternal, [fn; mthd]);
           (uaPu, [cls]);
           (uaEnableUnstableFeatures, [file]);
+          (uaEnumClass, [cls; enum]);
         ])
 
   (* These are names which are allowed in the systemlib but not in normal programs *)

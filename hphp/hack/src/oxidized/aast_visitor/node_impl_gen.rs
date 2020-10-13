@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<a8a528a0c792c37bd96ebba68744e4e3>>
+// @generated SignedSource<<f1d00575e4203c8f7dd707cede252775>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -630,6 +630,7 @@ impl<P: Params> Node<P> for Enum_ {
         self.base.accept(c, v)?;
         self.constraint.accept(c, v)?;
         self.includes.accept(c, v)?;
+        self.enum_class.accept(c, v)?;
         Ok(())
     }
 }

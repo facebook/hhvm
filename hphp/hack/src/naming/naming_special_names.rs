@@ -37,6 +37,8 @@ pub mod classes {
 
     pub const HH_BUILTIN_ENUM: &str = "\\HH\\BuiltinEnum";
 
+    pub const HH_BUILTIN_ENUM_CLASS: &str = "\\HH\\BuiltinEnumClass";
+
     pub const THROWABLE: &str = "\\Throwable";
 
     pub const STD_CLASS: &str = "\\stdClass";
@@ -62,6 +64,8 @@ pub mod classes {
     pub const IDISPOSABLE: &str = "\\IDisposable";
 
     pub const IASYNC_DISPOSABLE: &str = "\\IAsyncDisposable";
+
+    pub const ELT: &str = "\\HH\\Elt";
 }
 
 pub mod collections {
@@ -336,6 +340,7 @@ pub mod user_attributes {
             REIFIABLE,
             NEVER_INLINE,
             ENABLE_UNSTABLE_FEATURES,
+            ENUM_CLASS,
         ]
         .into_iter()
         .collect();

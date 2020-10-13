@@ -1,6 +1,6 @@
 { "description" :
   "@generated JSON schema of the Hack Full Fidelity Parser AST",
-  "version" : "2020-10-02-0000",
+  "version" : "2020-10-13-0000",
   "trivia" : [
     { "trivia_kind_name" : "WhiteSpace",
       "trivia_type_name" : "whitespace" },
@@ -541,6 +541,35 @@
         { "field_name" : "name" },
         { "field_name" : "equal" },
         { "field_name" : "value" },
+        { "field_name" : "semicolon" }
+      ] },
+    { "kind_name" : "EnumClassDeclaration",
+      "type_name" : "enum_class_declaration",
+      "description" : "enum_class_declaration",
+      "prefix" : "enum_class",
+      "fields" : [
+        { "field_name" : "attribute_spec" },
+        { "field_name" : "enum_keyword" },
+        { "field_name" : "class_keyword" },
+        { "field_name" : "name" },
+        { "field_name" : "colon" },
+        { "field_name" : "base" },
+        { "field_name" : "left_brace" },
+        { "field_name" : "elements" },
+        { "field_name" : "right_brace" }
+      ] },
+    { "kind_name" : "EnumClassEnumerator",
+      "type_name" : "enum_class_enumerator",
+      "description" : "enum_class_enumerator",
+      "prefix" : "enum_class_enumerator",
+      "fields" : [
+        { "field_name" : "name" },
+        { "field_name" : "left_angle" },
+        { "field_name" : "type" },
+        { "field_name" : "right_angle" },
+        { "field_name" : "left_paren" },
+        { "field_name" : "initial_value" },
+        { "field_name" : "right_paren" },
         { "field_name" : "semicolon" }
       ] },
     { "kind_name" : "RecordDeclaration",

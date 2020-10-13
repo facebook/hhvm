@@ -1,0 +1,4 @@
+(11,17)-(11,17) A left parenthesis `(` is expected here.
+(11,18)-(12,1) An expression is expected here.
+(11,18)-(12,1) A right parenthesis `)` is expected here.
+(11,18)-(12,1) A semicolon `;` is expected here.

@@ -343,7 +343,8 @@ let check_name (p, name) =
   (* We perform this check here because currently, naming edits the AST to add
    * a parent node of this class to enums during the AST transform *)
   if
-    String.equal name SN.Classes.cHH_BuiltinEnum
+    ( String.equal name SN.Classes.cHH_BuiltinEnum
+    || String.equal name SN.Classes.cHH_BuiltinEnumClass )
     && not (string_ends_with (Relative_path.suffix (Pos.filename p)) ".hhi")
   then
     Errors.using_internal_class p (strip_ns name)
@@ -907,22 +908,28 @@ let rec class_ ctx c =
   let xhp_attrs = List.map ~f:(xhp_attribute_decl env) c.Aast.c_xhp_attrs in
   (* These would be out of order with the old attributes, but that shouldn't matter? *)
   let props = props @ xhp_attrs in
+  let (enum_bound, enum, in_enum_class) =
+    match c.Aast.c_enum with
+    | Some enum -> enum_ env name enum
+    | None -> (None, None, false)
+  in
   let parents = List.map c.Aast.c_extends (hint ~allow_retonly:false env) in
   let parents =
-    match c.Aast.c_kind with
-    (* Make enums implicitly extend the BuiltinEnum class in order to provide
-     * utility methods. *)
-    | Ast_defs.Cenum ->
+    match enum_bound with
+    (* Make enums implicitly extend the BuiltinEnum/BuiltinEnumClass classes in
+     * order to provide utility methods.
+     *)
+    | Some bound ->
       let pos = fst name in
-      let enum_type = (pos, N.Happly (name, [])) in
-      let parent =
-        ( pos,
-          N.Happly
-            ((pos, Naming_special_names.Classes.cHH_BuiltinEnum), [enum_type])
-        )
+      let builtin =
+        if in_enum_class then
+          SN.Classes.cHH_BuiltinEnumClass
+        else
+          SN.Classes.cHH_BuiltinEnum
       in
+      let parent = (pos, N.Happly ((pos, builtin), [bound])) in
       parent :: parents
-    | _ -> parents
+    | None -> parents
   in
   let methods = List.map ~f:(method_ (fst env)) methods in
   let uses = List.map ~f:(hint env) c.Aast.c_uses in
@@ -948,7 +955,7 @@ let rec class_ ctx c =
    * so lets forbid it for now.
    *)
   let tparam_l = type_paraml ~forbid_this:true env c.Aast.c_tparams in
-  let consts = List.map ~f:(class_const env) c.Aast.c_consts in
+  let consts = List.map ~f:(class_const env ~in_enum_class) c.Aast.c_consts in
   let typeconsts = List.map ~f:(typeconst env) c.Aast.c_typeconsts in
   let implements =
     List.map ~f:(hint ~allow_retonly:false env) c.Aast.c_implements
@@ -957,7 +964,6 @@ let rec class_ ctx c =
   let (constructor, methods, smethods) =
     interface c constructor methods smethods
   in
-  let enum = Option.map c.Aast.c_enum (enum_ env) in
   let file_attributes =
     file_attributes ctx c.Aast.c_mode c.Aast.c_file_attributes
   in
@@ -1111,12 +1117,30 @@ and xhp_attribute_decl env (h, cv, tag, maybe_enum) =
     N.cv_span = cv.Aast.cv_span;
   }
 
-and enum_ env e =
-  {
-    N.e_base = hint env e.Aast.e_base;
-    N.e_constraint = Option.map e.Aast.e_constraint (hint env);
-    N.e_includes = List.map ~f:(hint env) e.Aast.e_includes;
-  }
+and enum_ env enum_name e =
+  let open Aast in
+  let pos = fst enum_name in
+  let enum_hint = (pos, Happly (enum_name, [])) in
+  let is_enum_class = e.e_enum_class in
+  let old_base = e.e_base in
+  let new_base = hint env old_base in
+  let bound =
+    if is_enum_class then
+      (* Turn the base type of the enum class into Elt<E, base> *)
+      let elt = (pos, SN.Classes.cElt) in
+      (pos, Happly (elt, [enum_hint; old_base]))
+    else
+      enum_hint
+  in
+  let enum =
+    {
+      N.e_base = new_base;
+      N.e_constraint = Option.map e.e_constraint (hint env);
+      N.e_includes = List.map ~f:(hint env) e.e_includes;
+      N.e_enum_class = is_enum_class;
+    }
+  in
+  (Some bound, Some enum, is_enum_class)
 
 and type_paraml ?(forbid_this = false) env tparams =
   List.map tparams ~f:(type_param ~forbid_this env)
@@ -1266,6 +1290,15 @@ and class_prop_non_static env ?(const = None) cv =
     N.cv_span = cv.Aast.cv_span;
   }
 
+and check_constant_expression env ~in_enum_class (pos, e) =
+  match e with
+  | Aast.New _ when in_enum_class ->
+    (* TODO(T77095784) sync with HHVM to see what restrictions we should check
+     * for
+     *)
+    true
+  | _ -> check_constant_expr env (pos, e)
+
 and check_constant_expr env (pos, e) =
   match e with
   | Aast.Id _
@@ -1346,16 +1379,18 @@ and check_afield_constant_expr env afield =
   | Aast.AFkvalue (e1, e2) ->
     check_constant_expr env e1 && check_constant_expr env e2
 
-and constant_expr env e =
-  let valid_constant_expression = check_constant_expr env e in
+and constant_expr env ~in_enum_class e =
+  let valid_constant_expression =
+    check_constant_expression env ~in_enum_class e
+  in
   if valid_constant_expression then
     expr env e
   else
     (fst e, N.Any)
 
-and class_const env cc =
+and class_const env ~in_enum_class cc =
   let h = Option.map cc.Aast.cc_type (hint env) in
-  let e = Option.map cc.Aast.cc_expr (constant_expr env) in
+  let e = Option.map cc.Aast.cc_expr (constant_expr env ~in_enum_class) in
   {
     N.cc_type = h;
     N.cc_id = cc.Aast.cc_id;
@@ -2557,7 +2592,7 @@ let global_const ctx cst =
       cst
   in
   let hint = Option.map cst.Aast.cst_type (hint env) in
-  let e = constant_expr env cst.Aast.cst_value in
+  let e = constant_expr env false cst.Aast.cst_value in
   {
     N.cst_annotation = ();
     cst_mode = cst.Aast.cst_mode;

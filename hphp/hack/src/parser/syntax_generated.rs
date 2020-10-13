@@ -142,6 +142,37 @@ where
         Self::make(syntax, value)
     }
 
+    fn make_enum_class_declaration(_: &C, enum_class_attribute_spec: Self, enum_class_enum_keyword: Self, enum_class_class_keyword: Self, enum_class_name: Self, enum_class_colon: Self, enum_class_base: Self, enum_class_left_brace: Self, enum_class_elements: Self, enum_class_right_brace: Self) -> Self {
+        let syntax = SyntaxVariant::EnumClassDeclaration(Box::new(EnumClassDeclarationChildren {
+            enum_class_attribute_spec,
+            enum_class_enum_keyword,
+            enum_class_class_keyword,
+            enum_class_name,
+            enum_class_colon,
+            enum_class_base,
+            enum_class_left_brace,
+            enum_class_elements,
+            enum_class_right_brace,
+        }));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
+        Self::make(syntax, value)
+    }
+
+    fn make_enum_class_enumerator(_: &C, enum_class_enumerator_name: Self, enum_class_enumerator_left_angle: Self, enum_class_enumerator_type: Self, enum_class_enumerator_right_angle: Self, enum_class_enumerator_left_paren: Self, enum_class_enumerator_initial_value: Self, enum_class_enumerator_right_paren: Self, enum_class_enumerator_semicolon: Self) -> Self {
+        let syntax = SyntaxVariant::EnumClassEnumerator(Box::new(EnumClassEnumeratorChildren {
+            enum_class_enumerator_name,
+            enum_class_enumerator_left_angle,
+            enum_class_enumerator_type,
+            enum_class_enumerator_right_angle,
+            enum_class_enumerator_left_paren,
+            enum_class_enumerator_initial_value,
+            enum_class_enumerator_right_paren,
+            enum_class_enumerator_semicolon,
+        }));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
+        Self::make(syntax, value)
+    }
+
     fn make_record_declaration(_: &C, record_attribute_spec: Self, record_modifier: Self, record_keyword: Self, record_name: Self, record_extends_keyword: Self, record_extends_opt: Self, record_left_brace: Self, record_fields: Self, record_right_brace: Self) -> Self {
         let syntax = SyntaxVariant::RecordDeclaration(Box::new(RecordDeclarationChildren {
             record_attribute_spec,
@@ -2004,6 +2035,31 @@ where
                 let acc = f(enumerator_semicolon, acc);
                 acc
             },
+            SyntaxVariant::EnumClassDeclaration(x) => {
+                let EnumClassDeclarationChildren { enum_class_attribute_spec, enum_class_enum_keyword, enum_class_class_keyword, enum_class_name, enum_class_colon, enum_class_base, enum_class_left_brace, enum_class_elements, enum_class_right_brace } = *x;
+                let acc = f(enum_class_attribute_spec, acc);
+                let acc = f(enum_class_enum_keyword, acc);
+                let acc = f(enum_class_class_keyword, acc);
+                let acc = f(enum_class_name, acc);
+                let acc = f(enum_class_colon, acc);
+                let acc = f(enum_class_base, acc);
+                let acc = f(enum_class_left_brace, acc);
+                let acc = f(enum_class_elements, acc);
+                let acc = f(enum_class_right_brace, acc);
+                acc
+            },
+            SyntaxVariant::EnumClassEnumerator(x) => {
+                let EnumClassEnumeratorChildren { enum_class_enumerator_name, enum_class_enumerator_left_angle, enum_class_enumerator_type, enum_class_enumerator_right_angle, enum_class_enumerator_left_paren, enum_class_enumerator_initial_value, enum_class_enumerator_right_paren, enum_class_enumerator_semicolon } = *x;
+                let acc = f(enum_class_enumerator_name, acc);
+                let acc = f(enum_class_enumerator_left_angle, acc);
+                let acc = f(enum_class_enumerator_type, acc);
+                let acc = f(enum_class_enumerator_right_angle, acc);
+                let acc = f(enum_class_enumerator_left_paren, acc);
+                let acc = f(enum_class_enumerator_initial_value, acc);
+                let acc = f(enum_class_enumerator_right_paren, acc);
+                let acc = f(enum_class_enumerator_semicolon, acc);
+                acc
+            },
             SyntaxVariant::RecordDeclaration(x) => {
                 let RecordDeclarationChildren { record_attribute_spec, record_modifier, record_keyword, record_name, record_extends_keyword, record_extends_opt, record_left_brace, record_fields, record_right_brace } = *x;
                 let acc = f(record_attribute_spec, acc);
@@ -3299,6 +3355,8 @@ where
             SyntaxVariant::FileAttributeSpecification {..} => SyntaxKind::FileAttributeSpecification,
             SyntaxVariant::EnumDeclaration {..} => SyntaxKind::EnumDeclaration,
             SyntaxVariant::Enumerator {..} => SyntaxKind::Enumerator,
+            SyntaxVariant::EnumClassDeclaration {..} => SyntaxKind::EnumClassDeclaration,
+            SyntaxVariant::EnumClassEnumerator {..} => SyntaxKind::EnumClassEnumerator,
             SyntaxVariant::RecordDeclaration {..} => SyntaxKind::RecordDeclaration,
             SyntaxVariant::RecordField {..} => SyntaxKind::RecordField,
             SyntaxVariant::AliasDeclaration {..} => SyntaxKind::AliasDeclaration,
@@ -3535,6 +3593,29 @@ where
                  enumerator_value: ts.pop().unwrap(),
                  enumerator_equal: ts.pop().unwrap(),
                  enumerator_name: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::EnumClassDeclaration, 9) => SyntaxVariant::EnumClassDeclaration(Box::new(EnumClassDeclarationChildren {
+                 enum_class_right_brace: ts.pop().unwrap(),
+                 enum_class_elements: ts.pop().unwrap(),
+                 enum_class_left_brace: ts.pop().unwrap(),
+                 enum_class_base: ts.pop().unwrap(),
+                 enum_class_colon: ts.pop().unwrap(),
+                 enum_class_name: ts.pop().unwrap(),
+                 enum_class_class_keyword: ts.pop().unwrap(),
+                 enum_class_enum_keyword: ts.pop().unwrap(),
+                 enum_class_attribute_spec: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::EnumClassEnumerator, 8) => SyntaxVariant::EnumClassEnumerator(Box::new(EnumClassEnumeratorChildren {
+                 enum_class_enumerator_semicolon: ts.pop().unwrap(),
+                 enum_class_enumerator_right_paren: ts.pop().unwrap(),
+                 enum_class_enumerator_initial_value: ts.pop().unwrap(),
+                 enum_class_enumerator_left_paren: ts.pop().unwrap(),
+                 enum_class_enumerator_right_angle: ts.pop().unwrap(),
+                 enum_class_enumerator_type: ts.pop().unwrap(),
+                 enum_class_enumerator_left_angle: ts.pop().unwrap(),
+                 enum_class_enumerator_name: ts.pop().unwrap(),
                  
              })),
              (SyntaxKind::RecordDeclaration, 9) => SyntaxVariant::RecordDeclaration(Box::new(RecordDeclarationChildren {
@@ -4733,6 +4814,31 @@ pub struct EnumeratorChildren<T, V> {
     pub enumerator_equal: Syntax<T, V>,
     pub enumerator_value: Syntax<T, V>,
     pub enumerator_semicolon: Syntax<T, V>,
+}
+
+#[derive(Debug, Clone)]
+pub struct EnumClassDeclarationChildren<T, V> {
+    pub enum_class_attribute_spec: Syntax<T, V>,
+    pub enum_class_enum_keyword: Syntax<T, V>,
+    pub enum_class_class_keyword: Syntax<T, V>,
+    pub enum_class_name: Syntax<T, V>,
+    pub enum_class_colon: Syntax<T, V>,
+    pub enum_class_base: Syntax<T, V>,
+    pub enum_class_left_brace: Syntax<T, V>,
+    pub enum_class_elements: Syntax<T, V>,
+    pub enum_class_right_brace: Syntax<T, V>,
+}
+
+#[derive(Debug, Clone)]
+pub struct EnumClassEnumeratorChildren<T, V> {
+    pub enum_class_enumerator_name: Syntax<T, V>,
+    pub enum_class_enumerator_left_angle: Syntax<T, V>,
+    pub enum_class_enumerator_type: Syntax<T, V>,
+    pub enum_class_enumerator_right_angle: Syntax<T, V>,
+    pub enum_class_enumerator_left_paren: Syntax<T, V>,
+    pub enum_class_enumerator_initial_value: Syntax<T, V>,
+    pub enum_class_enumerator_right_paren: Syntax<T, V>,
+    pub enum_class_enumerator_semicolon: Syntax<T, V>,
 }
 
 #[derive(Debug, Clone)]
@@ -6027,6 +6133,8 @@ pub enum SyntaxVariant<T, V> {
     FileAttributeSpecification(Box<FileAttributeSpecificationChildren<T, V>>),
     EnumDeclaration(Box<EnumDeclarationChildren<T, V>>),
     Enumerator(Box<EnumeratorChildren<T, V>>),
+    EnumClassDeclaration(Box<EnumClassDeclarationChildren<T, V>>),
+    EnumClassEnumerator(Box<EnumClassEnumeratorChildren<T, V>>),
     RecordDeclaration(Box<RecordDeclarationChildren<T, V>>),
     RecordField(Box<RecordFieldChildren<T, V>>),
     AliasDeclaration(Box<AliasDeclarationChildren<T, V>>),
@@ -6312,6 +6420,35 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                     1 => Some(&x.enumerator_equal),
                     2 => Some(&x.enumerator_value),
                     3 => Some(&x.enumerator_semicolon),
+                        _ => None,
+                    }
+                })
+            },
+            EnumClassDeclaration(x) => {
+                get_index(9).and_then(|index| { match index {
+                        0 => Some(&x.enum_class_attribute_spec),
+                    1 => Some(&x.enum_class_enum_keyword),
+                    2 => Some(&x.enum_class_class_keyword),
+                    3 => Some(&x.enum_class_name),
+                    4 => Some(&x.enum_class_colon),
+                    5 => Some(&x.enum_class_base),
+                    6 => Some(&x.enum_class_left_brace),
+                    7 => Some(&x.enum_class_elements),
+                    8 => Some(&x.enum_class_right_brace),
+                        _ => None,
+                    }
+                })
+            },
+            EnumClassEnumerator(x) => {
+                get_index(8).and_then(|index| { match index {
+                        0 => Some(&x.enum_class_enumerator_name),
+                    1 => Some(&x.enum_class_enumerator_left_angle),
+                    2 => Some(&x.enum_class_enumerator_type),
+                    3 => Some(&x.enum_class_enumerator_right_angle),
+                    4 => Some(&x.enum_class_enumerator_left_paren),
+                    5 => Some(&x.enum_class_enumerator_initial_value),
+                    6 => Some(&x.enum_class_enumerator_right_paren),
+                    7 => Some(&x.enum_class_enumerator_semicolon),
                         _ => None,
                     }
                 })

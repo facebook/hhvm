@@ -33,6 +33,8 @@ type t =
   | FileAttributeSpecification
   | EnumDeclaration
   | Enumerator
+  | EnumClassDeclaration
+  | EnumClassEnumerator
   | RecordDeclaration
   | RecordField
   | AliasDeclaration
@@ -215,6 +217,8 @@ let to_string kind =
   | FileAttributeSpecification        -> "file_attribute_specification"
   | EnumDeclaration                   -> "enum_declaration"
   | Enumerator                        -> "enumerator"
+  | EnumClassDeclaration              -> "enum_class_declaration"
+  | EnumClassEnumerator               -> "enum_class_enumerator"
   | RecordDeclaration                 -> "record_declaration"
   | RecordField                       -> "record_field"
   | AliasDeclaration                  -> "alias_declaration"

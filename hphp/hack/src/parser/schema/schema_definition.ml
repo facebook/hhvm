@@ -187,6 +187,45 @@ let schema : schema_node list =
         ];
     };
     {
+      kind_name = "EnumClassDeclaration";
+      type_name = "enum_class_declaration";
+      func_name = "enum_class_declaration";
+      description = "enum_class_declaration";
+      prefix = "enum_class";
+      aggregates = [TopLevelDeclaration];
+      fields =
+        [
+          ("attribute_spec", ZeroOrOne (Aggregate AttributeSpecification));
+          ("enum_keyword", Token);
+          ("class_keyword", Token);
+          ("name", Token);
+          ("colon", Token);
+          ("base", Aggregate Specifier);
+          ("left_brace", Token);
+          ("elements", ZeroOrMore (Just "EnumClassEnumerator"));
+          ("right_brace", Token);
+        ];
+    };
+    {
+      kind_name = "EnumClassEnumerator";
+      type_name = "enum_class_enumerator";
+      func_name = "enum_class_enumerator";
+      description = "enum_class_enumerator";
+      prefix = "enum_class_enumerator";
+      aggregates = [];
+      fields =
+        [
+          ("name", Token);
+          ("left_angle", Token);
+          ("type", Aggregate Specifier);
+          ("right_angle", Token);
+          ("left_paren", Token);
+          ("initial_value", Aggregate Expression);
+          ("right_paren", Token);
+          ("semicolon", Token);
+        ];
+    };
+    {
       kind_name = "RecordDeclaration";
       type_name = "record_declaration";
       func_name = "record_declaration";

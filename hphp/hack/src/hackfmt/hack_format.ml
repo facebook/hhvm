@@ -2450,7 +2450,62 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           SplitWith Cost.Base;
           Nest [t env type_specifier];
         ]
-    | Syntax.ErrorSyntax _ -> raise Hackfmt_error.InvalidSyntax)
+    | Syntax.ErrorSyntax _ -> raise Hackfmt_error.InvalidSyntax
+    | Syntax.EnumClassDeclaration
+        {
+          enum_class_attribute_spec = attr_spec;
+          enum_class_enum_keyword = enum_kw;
+          enum_class_class_keyword = class_kw;
+          enum_class_name = name;
+          enum_class_colon = colon;
+          enum_class_base = base;
+          enum_class_left_brace = left_brace;
+          enum_class_elements = elements;
+          enum_class_right_brace = right_brace;
+        } ->
+      Concat
+        [
+          t env attr_spec;
+          when_present attr_spec newline;
+          t env enum_kw;
+          Space;
+          t env class_kw;
+          Space;
+          t env name;
+          t env colon;
+          Space;
+          SplitWith Cost.Base;
+          Nest [Space; t env base; Space];
+          braced_block_nest
+            env
+            left_brace
+            right_brace
+            [handle_possible_list env elements];
+          Newline;
+        ]
+    | Syntax.EnumClassEnumerator
+        {
+          enum_class_enumerator_name = name;
+          enum_class_enumerator_left_angle = left_angle;
+          enum_class_enumerator_type = type_;
+          enum_class_enumerator_right_angle = right_angle;
+          enum_class_enumerator_left_paren = left_paren;
+          enum_class_enumerator_initial_value = initial_value;
+          enum_class_enumerator_right_paren = right_paren;
+          enum_class_enumerator_semicolon = semicolon;
+        } ->
+      Concat
+        [
+          t env name;
+          t env left_angle;
+          t env type_;
+          t env right_angle;
+          t env left_paren;
+          t env initial_value;
+          t env right_paren;
+          t env semicolon;
+          Newline;
+        ])
 
 and when_present node f =
   match Syntax.syntax node with

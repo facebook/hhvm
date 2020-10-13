@@ -262,6 +262,68 @@ where
       Self { syntax, value }
     }
 
+    fn make_enum_class_declaration(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self, arg4: Self, arg5: Self, arg6: Self, arg7: Self, arg8: Self) -> Self {
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value, 
+          arg3.value, 
+          arg4.value, 
+          arg5.value, 
+          arg6.value, 
+          arg7.value, 
+          arg8.value
+      ];
+      let value = V::from_values(children.iter());
+      let syntax = Self::make(
+          ctx,
+          SyntaxKind::EnumClassDeclaration,
+          &value,
+          &[
+              arg0.syntax, 
+              arg1.syntax, 
+              arg2.syntax, 
+              arg3.syntax, 
+              arg4.syntax, 
+              arg5.syntax, 
+              arg6.syntax, 
+              arg7.syntax, 
+              arg8.syntax
+          ],
+      );
+      Self { syntax, value }
+    }
+
+    fn make_enum_class_enumerator(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self, arg4: Self, arg5: Self, arg6: Self, arg7: Self) -> Self {
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value, 
+          arg3.value, 
+          arg4.value, 
+          arg5.value, 
+          arg6.value, 
+          arg7.value
+      ];
+      let value = V::from_values(children.iter());
+      let syntax = Self::make(
+          ctx,
+          SyntaxKind::EnumClassEnumerator,
+          &value,
+          &[
+              arg0.syntax, 
+              arg1.syntax, 
+              arg2.syntax, 
+              arg3.syntax, 
+              arg4.syntax, 
+              arg5.syntax, 
+              arg6.syntax, 
+              arg7.syntax
+          ],
+      );
+      Self { syntax, value }
+    }
+
     fn make_record_declaration(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self, arg4: Self, arg5: Self, arg6: Self, arg7: Self, arg8: Self) -> Self {
       let children = &[
           arg0.value, 

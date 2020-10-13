@@ -1,0 +1,6 @@
+(11,4)-(11,4) An opening angle bracket `<` is expected here.
+(11,5)-(11,8) A type specifier is expected here.
+(11,9)-(11,9) A right parenthesis `)` or comma `,` is expected here.
+(11,9)-(11,9) A closing angle bracket `>` is expected here.
+(11,9)-(11,12) Encountered unexpected token `Box`.
+(11,19)-(11,20) Encountered unexpected token `)`.

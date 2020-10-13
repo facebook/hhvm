@@ -709,7 +709,7 @@ and expr ~pos renv (env : Env.expr_env) (((_, ety), e) : Tast.expr) =
     | None -> fail "encountered $this outside of a class context")
   | A.ET_Splice e
   | A.ExpressionTree (_, e, _)
-  | A.BracedExpr e ->
+  | A.ParenthesizedExpr e ->
     expr env e
   (* TODO(T68414656): Support calls with type arguments *)
   | A.Call (e, _type_args, args, _extra_args) ->
@@ -910,9 +910,6 @@ and expr ~pos renv (env : Env.expr_env) (((_, ety), e) : Tast.expr) =
   | A.Record (_, _)
   | A.Xml (_, _, _)
   | A.Callconv (_, _)
-  | A.Import (_, _)
-  | A.Collection (_, _, _)
-  | A.ParenthesizedExpr _
   | A.Lplaceholder _
   | A.Fun_id _
   | A.Method_id (_, _)
@@ -925,6 +922,10 @@ and expr ~pos renv (env : Env.expr_env) (((_, ety), e) : Tast.expr) =
   | A.Any ->
     Errors.unknown_information_flow pos "expression";
     (env, Lift.ty renv ety)
+  | A.Import _
+  | A.Collection _
+  | A.BracedExpr _ ->
+    failwith "AST should not contain these nodes"
 
 and stmt renv (env : Env.stmt_env) ((pos, s) : Tast.stmt) =
   let expr_ = expr

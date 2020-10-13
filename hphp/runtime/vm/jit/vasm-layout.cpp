@@ -590,10 +590,11 @@ bool usedVasmBlockCounters(const Vunit& unit) {
 }
 
 jit::vector<Vlabel> pgoLayout(Vunit& unit) {
-  // Make sure block weights are consistent.
-  auto const skip = usedVasmBlockCounters(unit) &&
-                    RO::EvalJitPGOVasmBlockCountersSkipFixWeights;
-  if (!skip) fixBlockWeights(unit);
+  // Make sure block weights are consistent if they didn't come from
+  // VasmBlockCounters.
+  if (!usedVasmBlockCounters(unit)) {
+    fixBlockWeights(unit);
+  }
 
   // Compute arc weights.
   Scale scale(unit);

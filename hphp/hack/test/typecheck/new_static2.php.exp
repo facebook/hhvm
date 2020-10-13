@@ -1,8 +1,16 @@
 File "new_static2.php", line 19, characters 9-11:
 No method `xxx` in `A` (Typing[4053])
-File "new_static2.php", line 15, characters 19-21:
-Did you mean `foo` instead?
-File "new_static2.php", line 18, characters 14-19:
-This is why I think it is an object of type A
-File "new_static2.php", line 13, characters 16-16:
-Declaration of `A` is here
+  File "new_static2.php", line 15, characters 19-21:
+  Did you mean `foo` instead?
+  File "new_static2.php", line 13, characters 16-16:
+  This is why I think it is an object of type A
+  File "new_static2.php", line 13, characters 16-16:
+  Declaration of `A` is here
+File "new_static2.php", line 23, characters 12-23:
+Invalid return type (Typing[4110])
+  File "new_static2.php", line 22, characters 35-37:
+  Expected `int`
+  File "new_static2.php", line 22, characters 35-37:
+  Considering that this type argument is invariant with respect to `A`
+  File "new_static2.php", line 13, characters 18-18:
+  But got `T`

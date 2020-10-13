@@ -3578,8 +3578,9 @@ and new_object
     let obj_ty = mk (r_witness, obj_ty_) in
     let c_ty =
       match cid with
-      | CIstatic -> mk (r_witness, TUtils.this_of obj_ty)
-      | CIexpr _ -> mk (r_witness, get_node c_ty)
+      | CIstatic
+      | CIexpr _ ->
+        mk (r_witness, get_node c_ty)
       | _ -> obj_ty
     in
     let (env, new_ty) =

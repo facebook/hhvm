@@ -10,12 +10,16 @@
  */
 
 <<__ConsistentConstruct>>
-abstract class A {
+abstract class A<T> {
 
   public function foo(): void {}
 
   public static function bar(): void {
     $x = new static();
     $x->xxx();
+  }
+
+  public static function baz(): A<int> {
+    return new static(); // Error - A<T> isn't subtype of A<int>
   }
 }

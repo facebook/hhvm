@@ -660,7 +660,8 @@ module Typing = struct
     | IncompatibleEnumInclusion [@value 4388]
     | RedeclaringClassishConstant [@value 4389]
     | CallCoeffects [@value 4390]
-    | AbstractFunctionPointer [@value 4391] (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
+    | AbstractFunctionPointer [@value 4391]
+    | UnnecessaryAttribute [@value 4392] (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum

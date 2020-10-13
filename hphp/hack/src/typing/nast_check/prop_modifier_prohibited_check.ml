@@ -29,6 +29,17 @@ let error_if_nonstatic_prop_with_lsb cv =
     in
     Option.iter lsb_pos Errors.nonstatic_property_with_lsb
 
+let unnecessary_lsb c cv =
+  let attr = SN.UserAttributes.uaLSB in
+  match Naming_attributes.mem_pos attr cv.cv_user_attributes with
+  | None -> ()
+  | Some pos ->
+    let (pos_class, name_class) = c.c_name in
+    let name_class = Utils.strip_ns name_class in
+    let reason = (pos_class, sprintf "the class `%s` is final" name_class) in
+    let suggestion = None in
+    Errors.unnecessary_attribute pos ~attr ~reason ~suggestion
+
 let handler =
   object
     inherit Nast_visitor.handler_base
@@ -39,5 +50,6 @@ let handler =
         error_if_nonstatic_prop_with_lsb cv;
         ()
       in
-      List.iter cv.c_vars check_vars
+      List.iter cv.c_vars check_vars;
+      if cv.c_final then List.iter cv.c_vars (unnecessary_lsb cv)
   end

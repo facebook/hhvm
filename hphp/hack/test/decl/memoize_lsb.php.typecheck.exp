@@ -1,1 +1,6 @@
-No errors
+File "memoize_lsb.php", line 4, characters 5-16:
+The attribute `__MemoizeLSB` is unnecessary (Typing[4392])
+  File "memoize_lsb.php", line 3, characters 13-13:
+  It is unnecessary because the class `C` is final
+  File "memoize_lsb.php", line 4, characters 5-16:
+  Try using the attribute `__Memoize` instead

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<6ac250b98a88c291dfb81c78bcf7ca88>>
+// @generated SignedSource<<e15ad0d92fa01ba2e93e761ca9ed7831>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -572,6 +572,7 @@ pub enum Typing {
     RedeclaringClassishConstant = 4389,
     CallCoeffects = 4390,
     AbstractFunctionPointer = 4391,
+    UnnecessaryAttribute = 4392,
 }
 impl TrivialDrop for Typing {}
 

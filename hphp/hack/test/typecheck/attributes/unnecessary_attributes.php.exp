@@ -1,0 +1,12 @@
+File "unnecessary_attributes.php", line 4, characters 5-9:
+The attribute `__LSB` is unnecessary (Typing[4392])
+  File "unnecessary_attributes.php", line 3, characters 13-13:
+  It is unnecessary because the class `C` is final
+  File "unnecessary_attributes.php", line 4, characters 5-9:
+  Try deleting this attribute
+File "unnecessary_attributes.php", line 7, characters 5-16:
+The attribute `__MemoizeLSB` is unnecessary (Typing[4392])
+  File "unnecessary_attributes.php", line 3, characters 13-13:
+  It is unnecessary because the class `C` is final
+  File "unnecessary_attributes.php", line 7, characters 5-16:
+  Try using the attribute `__Memoize` instead

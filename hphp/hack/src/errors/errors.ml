@@ -5554,6 +5554,22 @@ let abstract_function_pointer cname meth_name call_pos decl_pos =
       (decl_pos, "Declaration is here");
     ]
 
+let unnecessary_attribute pos ~attr ~reason ~suggestion =
+  let attr = strip_ns attr in
+  let (reason_pos, reason_msg) = reason in
+  let suggestion =
+    match suggestion with
+    | None -> "Try deleting this attribute"
+    | Some s -> s
+  in
+  add_list
+    (Typing.err_code Typing.UnnecessaryAttribute)
+    [
+      (pos, sprintf "The attribute `%s` is unnecessary" attr);
+      (reason_pos, "It is unnecessary because " ^ reason_msg);
+      (pos, suggestion);
+    ]
+
 (*****************************************************************************)
 (* Printing *)
 (*****************************************************************************)

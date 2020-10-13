@@ -341,7 +341,7 @@ let profile_log
         "discover-decl-deps"
       else
         "type-check" )
-      (Unix.gettimeofday () -. start_time)
+      (Option.value duration_second_run ~default:duration)
       ( if SharedMem.hh_log_level () > 0 then
         "\n" ^ Telemetry.to_string telemetry
       else

@@ -458,6 +458,7 @@ struct HashCollection : ObjectData {
   const MixedArray* arrayData() const { return m_arr; }
   void setArrayData(MixedArray* arr) {
     assertx(arr->isDictKind());
+    assertx(!arr->isLegacyArray());
     m_arr = arr;
   }
 

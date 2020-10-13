@@ -72,12 +72,17 @@ void BaseMap::addAllImpl(const Variant& iterable) {
         mutate();
         return false;
       }
-      // We have to do two orthogonal escalations. Careful with refcounting:
-      // we should not dec-ref the original adata, but we should dec-ref any
-      // intermediate values we create here.
+      // The ArrayData backing a Map must be a vanilla, unmarked dict.
+      // Do all three escalations here. Dec-ref any intermediate values we
+      // create along the way, but do not dec-ref the original adata.
       auto array = adata;
       if (!array->isVanilla()) {
         array = BespokeArray::ToVanilla(array, "BaseMap::addAllImpl");
+      }
+      if (array->hasVanillaMixedLayout() && array->isLegacyArray()) {
+        auto const tmp = array->setLegacyArray(array->cowCheck(), false);
+        if (array != adata && array != tmp) decRefArr(array);
+        array = tmp;
       }
       if (!array->isDictKind()) {
         auto const dict = array->toDict(array->cowCheck());

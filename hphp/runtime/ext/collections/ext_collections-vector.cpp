@@ -87,12 +87,17 @@ void BaseVector::addAllImpl(const Variant& t) {
         reserve(m_size + adata->size());
         return false;
       }
-      // We have to do two orthogonal escalations. Careful with refcounting:
-      // we should not dec-ref the original adata, but we should dec-ref any
-      // intermediate values we create here.
+      // The ArrayData backing a Vector must be a vanilla, unmarked vec.
+      // Do all three escalations here. Dec-ref any intermediate values we
+      // create along the way, but do not dec-ref the original adata.
       auto array = adata;
       if (!array->isVanilla()) {
         array = BespokeArray::ToVanilla(array, "BaseVector::addAllImpl");
+      }
+      if (array->hasVanillaPackedLayout() && array->isLegacyArray()) {
+        auto const tmp = array->setLegacyArray(array->cowCheck(), false);
+        if (array != adata && array != tmp) decRefArr(array);
+        array = tmp;
       }
       if (!array->isVecKind()) {
         auto const vec = array->toVec(array->cowCheck());

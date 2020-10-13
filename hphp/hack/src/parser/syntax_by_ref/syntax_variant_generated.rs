@@ -293,6 +293,8 @@ pub struct EnumClassDeclarationChildren<'a, T, V> {
     pub name: Syntax<'a, T, V>,
     pub colon: Syntax<'a, T, V>,
     pub base: Syntax<'a, T, V>,
+    pub extends: Syntax<'a, T, V>,
+    pub extends_list: Syntax<'a, T, V>,
     pub left_brace: Syntax<'a, T, V>,
     pub elements: Syntax<'a, T, V>,
     pub right_brace: Syntax<'a, T, V>,

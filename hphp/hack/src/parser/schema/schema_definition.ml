@@ -201,6 +201,8 @@ let schema : schema_node list =
           ("name", Token);
           ("colon", Token);
           ("base", Aggregate Specifier);
+          ("extends", ZeroOrOne Token);
+          ("extends_list", ZeroOrMore (Aggregate Specifier));
           ("left_brace", Token);
           ("elements", ZeroOrMore (Just "EnumClassEnumerator"));
           ("right_brace", Token);

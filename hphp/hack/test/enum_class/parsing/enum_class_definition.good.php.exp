@@ -1633,6 +1633,8 @@
               }
             }
           },
+          "enum_class_extends":{"kind":"missing"},
+          "enum_class_extends_list":{"kind":"missing"},
           "enum_class_left_brace":{
             "kind":"token",
             "token":{

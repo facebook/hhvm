@@ -258,6 +258,7 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
                             ];
                         ] );
                 ]);
+          Space;
           braced_block_nest
             env
             left_b
@@ -2459,10 +2460,18 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           enum_class_name = name;
           enum_class_colon = colon;
           enum_class_base = base;
+          enum_class_extends = extends_kw;
+          enum_class_extends_list = extends_list;
           enum_class_left_brace = left_brace;
           enum_class_elements = elements;
           enum_class_right_brace = right_brace;
         } ->
+      let after_each_ancestor is_last =
+        if is_last then
+          Nothing
+        else
+          space_split ()
+      in
       Concat
         [
           t env attr_spec;
@@ -2476,6 +2485,34 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           Space;
           SplitWith Cost.Base;
           Nest [Space; t env base; Space];
+          when_present extends_kw (fun () ->
+              Nest
+                [
+                  Space;
+                  Split;
+                  t env extends_kw;
+                  WithRule
+                    ( Rule.Parental,
+                      Nest
+                        [
+                          Span
+                            [
+                              Space;
+                              ( if list_length extends_list = 1 then
+                                SplitWith Cost.Base
+                              else
+                                Split );
+                              Nest
+                                [
+                                  handle_possible_list
+                                    env
+                                    ~after_each:after_each_ancestor
+                                    extends_list;
+                                ];
+                            ];
+                        ] );
+                ]);
+          Space;
           braced_block_nest
             env
             left_brace

@@ -258,6 +258,7 @@ where
         let colon = self.require_colon();
         let base =
             self.parse_type_specifier(false /* allow_var */, false /* allow_attr */);
+        let (classish_extends, classish_extends_list) = self.parse_extends_opt();
         let left_brace = self.require_left_brace();
         let enumerators = self.parse_enum_class_enumerator_list_opt();
         let right_brace = self.require_right_brace();
@@ -270,6 +271,8 @@ where
             name,
             colon,
             base,
+            classish_extends,
+            classish_extends_list,
             left_brace,
             enumerators,
             right_brace

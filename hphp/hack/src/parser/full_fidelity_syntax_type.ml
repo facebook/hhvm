@@ -209,6 +209,8 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; enum_class_name                                    : t
     ; enum_class_colon                                   : t
     ; enum_class_base                                    : t
+    ; enum_class_extends                                 : t
+    ; enum_class_extends_list                            : t
     ; enum_class_left_brace                              : t
     ; enum_class_elements                                : t
     ; enum_class_right_brace                             : t
@@ -1521,6 +1523,8 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; enum_class_name: Token.t value
     ; enum_class_colon: Token.t value
     ; enum_class_base: specifier value
+    ; enum_class_extends: Token.t option value
+    ; enum_class_extends_list: specifier listesque value
     ; enum_class_left_brace: Token.t value
     ; enum_class_elements: enum_class_enumerator listesque value
     ; enum_class_right_brace: Token.t value

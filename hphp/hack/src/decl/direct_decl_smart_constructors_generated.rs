@@ -105,8 +105,8 @@ impl<'src> SmartConstructors for DirectDeclSmartConstructors<'src> {
         <Self as FlattenSmartConstructors<'src, State<'src>>>::make_enumerator(self, name, equal, value, semicolon)
     }
 
-    fn make_enum_class_declaration(&mut self, attribute_spec: Self::R, enum_keyword: Self::R, class_keyword: Self::R, name: Self::R, colon: Self::R, base: Self::R, left_brace: Self::R, elements: Self::R, right_brace: Self::R) -> Self::R {
-        <Self as FlattenSmartConstructors<'src, State<'src>>>::make_enum_class_declaration(self, attribute_spec, enum_keyword, class_keyword, name, colon, base, left_brace, elements, right_brace)
+    fn make_enum_class_declaration(&mut self, attribute_spec: Self::R, enum_keyword: Self::R, class_keyword: Self::R, name: Self::R, colon: Self::R, base: Self::R, extends: Self::R, extends_list: Self::R, left_brace: Self::R, elements: Self::R, right_brace: Self::R) -> Self::R {
+        <Self as FlattenSmartConstructors<'src, State<'src>>>::make_enum_class_declaration(self, attribute_spec, enum_keyword, class_keyword, name, colon, base, extends, extends_list, left_brace, elements, right_brace)
     }
 
     fn make_enum_class_enumerator(&mut self, name: Self::R, left_angle: Self::R, type_: Self::R, right_angle: Self::R, left_paren: Self::R, initial_value: Self::R, right_paren: Self::R, semicolon: Self::R) -> Self::R {

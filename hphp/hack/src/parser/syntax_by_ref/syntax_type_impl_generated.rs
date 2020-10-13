@@ -146,7 +146,7 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_enum_class_declaration(ctx: &C, attribute_spec: Self, enum_keyword: Self, class_keyword: Self, name: Self, colon: Self, base: Self, left_brace: Self, elements: Self, right_brace: Self) -> Self {
+    fn make_enum_class_declaration(ctx: &C, attribute_spec: Self, enum_keyword: Self, class_keyword: Self, name: Self, colon: Self, base: Self, extends: Self, extends_list: Self, left_brace: Self, elements: Self, right_brace: Self) -> Self {
         let syntax = SyntaxVariant::EnumClassDeclaration(ctx.get_arena().alloc(EnumClassDeclarationChildren {
             attribute_spec,
             enum_keyword,
@@ -154,6 +154,8 @@ where
             name,
             colon,
             base,
+            extends,
+            extends_list,
             left_brace,
             elements,
             right_brace,

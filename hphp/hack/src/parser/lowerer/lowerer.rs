@@ -4911,6 +4911,8 @@ where
                     ast::Hint::new(p.clone(), full_type)
                 };
 
+                let extends = Self::could_map(Self::p_hint, &c.enum_class_extends_list, env)?;
+
                 let mut enum_class = ast::Class_ {
                     annotation: (),
                     mode: env.file_mode(),
@@ -4922,7 +4924,7 @@ where
                     has_xhp_keyword: false,
                     name,
                     tparams: vec![],
-                    extends: vec![],
+                    extends: extends.clone(),
                     implements: vec![],
                     where_constraints: vec![],
                     consts: vec![],
@@ -4931,7 +4933,7 @@ where
                     enum_: Some(ast::Enum_ {
                         base: base_type,
                         constraint: None,
-                        includes: vec![],
+                        includes: extends,
                         enum_class: true,
                     }),
                     doc_comment: doc_comment_opt,

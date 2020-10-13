@@ -616,6 +616,8 @@ module WithToken(Token: TokenType) = struct
         enum_class_name;
         enum_class_colon;
         enum_class_base;
+        enum_class_extends;
+        enum_class_extends_list;
         enum_class_left_brace;
         enum_class_elements;
         enum_class_right_brace;
@@ -626,6 +628,8 @@ module WithToken(Token: TokenType) = struct
          let acc = f acc enum_class_name in
          let acc = f acc enum_class_colon in
          let acc = f acc enum_class_base in
+         let acc = f acc enum_class_extends in
+         let acc = f acc enum_class_extends_list in
          let acc = f acc enum_class_left_brace in
          let acc = f acc enum_class_elements in
          let acc = f acc enum_class_right_brace in
@@ -2505,6 +2509,8 @@ module WithToken(Token: TokenType) = struct
         enum_class_name;
         enum_class_colon;
         enum_class_base;
+        enum_class_extends;
+        enum_class_extends_list;
         enum_class_left_brace;
         enum_class_elements;
         enum_class_right_brace;
@@ -2515,6 +2521,8 @@ module WithToken(Token: TokenType) = struct
         enum_class_name;
         enum_class_colon;
         enum_class_base;
+        enum_class_extends;
+        enum_class_extends_list;
         enum_class_left_brace;
         enum_class_elements;
         enum_class_right_brace;
@@ -4395,6 +4403,8 @@ module WithToken(Token: TokenType) = struct
         enum_class_name;
         enum_class_colon;
         enum_class_base;
+        enum_class_extends;
+        enum_class_extends_list;
         enum_class_left_brace;
         enum_class_elements;
         enum_class_right_brace;
@@ -4405,6 +4415,8 @@ module WithToken(Token: TokenType) = struct
         "enum_class_name";
         "enum_class_colon";
         "enum_class_base";
+        "enum_class_extends";
+        "enum_class_extends_list";
         "enum_class_left_brace";
         "enum_class_elements";
         "enum_class_right_brace";
@@ -6352,6 +6364,8 @@ module WithToken(Token: TokenType) = struct
           enum_class_name;
           enum_class_colon;
           enum_class_base;
+          enum_class_extends;
+          enum_class_extends_list;
           enum_class_left_brace;
           enum_class_elements;
           enum_class_right_brace;
@@ -6363,6 +6377,8 @@ module WithToken(Token: TokenType) = struct
           enum_class_name;
           enum_class_colon;
           enum_class_base;
+          enum_class_extends;
+          enum_class_extends_list;
           enum_class_left_brace;
           enum_class_elements;
           enum_class_right_brace;
@@ -8493,6 +8509,8 @@ module WithToken(Token: TokenType) = struct
         enum_class_name
         enum_class_colon
         enum_class_base
+        enum_class_extends
+        enum_class_extends_list
         enum_class_left_brace
         enum_class_elements
         enum_class_right_brace
@@ -8504,6 +8522,8 @@ module WithToken(Token: TokenType) = struct
           enum_class_name;
           enum_class_colon;
           enum_class_base;
+          enum_class_extends;
+          enum_class_extends_list;
           enum_class_left_brace;
           enum_class_elements;
           enum_class_right_brace;

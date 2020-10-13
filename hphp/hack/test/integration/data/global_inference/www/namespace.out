@@ -1,0 +1,10 @@
+<?hh //partial
+
+namespace Foo\Bar;
+
+class MyClass {
+}
+
+function buildermyclass() : <<__Soft>> \Foo\Bar\MyClass {
+  return new MyClass();
+}

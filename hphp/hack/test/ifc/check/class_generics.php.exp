@@ -1,0 +1,37 @@
+=== IFC analysis results for class_generics.php
+File "class_generics.php", line 38, characters 3-23:
+Data with policy `A` appears in context `B`. (Typing[4379])
+  File "class_generics.php", line 7, characters 14-15:
+  This may be the data source with policy `A`
+  File "class_generics.php", line 14, characters 14-15:
+  This may be the data sink with policy `B`
+  File "class_generics.php", line 14, characters 14-15:
+  Another program point contributing to the illegal flow
+File "class_generics.php", line 37, characters 3-23:
+Data with policy `B` appears in context `A`. (Typing[4379])
+  File "class_generics.php", line 14, characters 14-15:
+  This may be the data source with policy `B`
+  File "class_generics.php", line 7, characters 14-15:
+  This may be the data sink with policy `A`
+  File "class_generics.php", line 7, characters 14-15:
+  Another program point contributing to the illegal flow
+File "class_generics.php", line 31, characters 3-25:
+Data with policy `B` appears in context `A`. (Typing[4379])
+  File "class_generics.php", line 14, characters 14-15:
+  This may be the data source with policy `B`
+  File "class_generics.php", line 7, characters 14-15:
+  This may be the data sink with policy `A`
+  File "class_generics.php", line 20, characters 3-17:
+  Another program point contributing to the illegal flow
+  File "class_generics.php", line 7, characters 14-15:
+  Another program point contributing to the illegal flow
+File "class_generics.php", line 26, characters 3-28:
+Data with policy `A` appears in context `B`. (Typing[4379])
+  File "class_generics.php", line 7, characters 14-15:
+  This may be the data source with policy `A`
+  File "class_generics.php", line 14, characters 14-15:
+  This may be the data sink with policy `B`
+  File "class_generics.php", line 21, characters 3-15:
+  Another program point contributing to the illegal flow
+  File "class_generics.php", line 14, characters 14-15:
+  Another program point contributing to the illegal flow

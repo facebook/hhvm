@@ -51,7 +51,6 @@ std::mutex usdt_mutex;
 void onStrobelightSignal(int signo) {
   if (!RuntimeOption::StrobelightEnabled) {
     // Handle the signal so we don't crash, but do nothing.
-    TRACE(1, "Strobelight signaled, but disabled\n");
     return;
   }
 
@@ -64,12 +63,18 @@ void onStrobelightSignal(int signo) {
         setSurpriseFlag(XenonSignalFlag);
       }
     }
-  } else if (signo == strobelight::kSignumAll) {
-    // sets on ALL threads
-    Strobelight::getInstance().surpriseAll();
   }
 
-  FOLLY_SDT(hhvm, hhvm_surprise);
+  // surpriseAll currently has an issue where the isXenonActive() check will
+  // try to access s_xenonData->getIsProfiledRequest() to check if the current
+  // request is profiling. The problem is that you really want to check if the
+  // request t is profiling. The current thread may not even be a request thread.
+  // If we ever want to start using this signal for profiling,
+  // we will need to figure out how to work around that problem.
+  // if (signo == strobelight::kSignumAll) {
+  //  // sets on ALL threads
+  //  Strobelight::getInstance().surpriseAll();
+  // }
 }
 
 /**
@@ -168,19 +173,15 @@ bool Strobelight::active() {
 }
 
 bool Strobelight::isXenonActive() {
-  TRACE(1, "Strobelight::isXenonActive\n");
   if (RuntimeOption::XenonForceAlwaysOn) {
-    TRACE(2, "Strobelight::isXenonActive => true, forced\n");
     return true;
   }
 
   bool xenonProfiled = Xenon::getInstance().getIsProfiledRequest();
   if (xenonProfiled) {
-    TRACE(2, "Strobelight::isXenonActive => true, profiled\n");
     return true;
   }
 
-  TRACE(2, "Strobelight::isXenonActive => false\n");
   return false;
 }
 
@@ -211,12 +212,12 @@ void Strobelight::log(c_WaitableWaitHandle* wh) const {
 }
 
 void Strobelight::surpriseAll() {
-  TRACE(1, "Strobelight::surpriseAll\n");
-
   RequestInfo::ExecutePerRequest(
     [] (RequestInfo* t) {
       // TODO: get a dedicated surprise flag to avoid colliding with xenon
       // Set the strobelight flag to collect a sample
+      // TODO: isXenonActive() needs to check the request thread and not the
+      // current thread (which may not even be a request)
       if (!isXenonActive()) {
         // Xenon has first crack at profiling requests. If a request
         // is marked as being profiled, we do not allow strobelight to

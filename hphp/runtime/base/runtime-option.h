@@ -729,6 +729,7 @@ struct RuntimeOption {
   F(bool, EnablePerRepoOptions,        true)                            \
   F(bool, CachePerRepoOptionsPath,     true)                            \
   F(bool, RaiseOnCaseInsensitiveLookup,true)                            \
+  F(uint32_t, RaiseOnCaseInsensitiveLookupSampleRate, 1)                \
   /*
     CheckPropTypeHints:
     0 - No checks or enforcement of property type hints.

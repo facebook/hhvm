@@ -182,7 +182,8 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
     hasReifiedGenerics ||
     hasParamsWithMultiUBs ||
     hasReturnWithMultiUBs ||
-    dynCallSampleRate;
+    dynCallSampleRate ||
+    !coeffectRules.empty();
 
   f->m_shared.reset(
     needsExtendedSharedData
@@ -204,6 +205,11 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
     ex->m_allFlags.m_returnByValue = false;
     ex->m_allFlags.m_isMemoizeWrapper = false;
     ex->m_allFlags.m_isMemoizeWrapperLSB = false;
+
+    if (!coeffectRules.empty()) {
+      ex->m_coeffectRules = coeffectRules;
+      f->shared()->m_allFlags.m_hasCoeffectRules = true;
+    }
   }
 
   std::vector<Func::ParamInfo> fParams;
@@ -537,6 +543,7 @@ void FuncEmitter::serdeMetaData(SerDe& sd) {
     (retUserType)
     (retUpperBounds)
     (originalFilename)
+    (coeffectRules)
     ;
 
   if (SerDe::deserializing) {

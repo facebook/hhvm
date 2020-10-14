@@ -168,6 +168,7 @@ struct Func final {
   using EHEntVec = VMFixedVector<EHEnt>;
   using UpperBoundVec = VMCompactVector<TypeConstraint>;
   using ParamUBMap = vm_flat_map<uint32_t, UpperBoundVec>;
+  using CoeffectRules = VMFixedVector<CoeffectRule>;
 
   /////////////////////////////////////////////////////////////////////////////
   // Creation and destruction.
@@ -787,7 +788,7 @@ struct Func final {
   bool isResumable() const;
 
   /////////////////////////////////////////////////////////////////////////////
-  // Reactivity.                                                        [const]
+  // Coeffects.                                                        [const]
 
   /*
    * What is the level of reactivity of this function?
@@ -804,6 +805,16 @@ struct Func final {
    * Is this function conditionally reactive?
    */
   bool isRxConditional() const;
+
+  /*
+   * Does this function have coeffect rules?
+   */
+  bool hasCoeffectRules() const;
+
+  /*
+   * List of rules for enforcing coeffects
+   */
+  const CoeffectRules& getCoeffectRules() const;
 
   /////////////////////////////////////////////////////////////////////////////
   // Methods.                                                           [const]
@@ -1251,6 +1262,7 @@ private:
         bool m_isRxDisabled : true;
         bool m_hasParamsWithMultiUBs : true;
         bool m_hasReturnWithMultiUBs : true;
+        bool m_hasCoeffectRules : true;
       };
       uint32_t m_allFlags;
     };
@@ -1307,6 +1319,7 @@ private:
     ReifiedGenericsInfo m_reifiedGenericsInfo;
     ParamUBMap m_paramUBs;
     UpperBoundVec m_returnUBs;
+    CoeffectRules m_coeffectRules;
     Offset m_past;  // Only read if SharedData::m_pastDelta is kSmallDeltaLimit
     int m_line2;    // Only read if SharedData::m_line2 is kSmallDeltaLimit
     int64_t m_dynCallSampleRate;

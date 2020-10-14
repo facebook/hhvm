@@ -1842,6 +1842,41 @@ void parse_declvars(AsmState& as) {
   as.in.expectWs(';');
 }
 
+/*
+ * directive-rx_cond_rx_of_arg : integer ';'
+ *                             ;
+ */
+void parse_rx_cond_rx_of_arg(AsmState& as) {
+  auto const pos = read_opcode_arg<uint32_t>(as);
+  as.fe->coeffectRules.emplace_back(
+    CoeffectRule(CoeffectRule::CondRxArg{}, pos));
+  as.in.expectWs(';');
+}
+
+/*
+ * directive-rx_cond_implements : name ';'
+ *                              ;
+ */
+void parse_rx_cond_implements(AsmState& as) {
+  auto const name = makeStaticString(read_litstr(as));
+  as.fe->coeffectRules.emplace_back(
+    CoeffectRule(CoeffectRule::CondRxImpl{}, name));
+  as.in.expectWs(';');
+}
+
+/*
+ * directive-rx_cond_arg_implements : integer name ';'
+ *                                  ;
+ */
+void parse_rx_cond_arg_implements(AsmState& as) {
+  auto const pos = read_opcode_arg<uint32_t>(as);
+  as.in.skipWhitespace();
+  auto const name = makeStaticString(read_litstr(as));
+  as.fe->coeffectRules.emplace_back(
+    CoeffectRule(CoeffectRule::CondRxArgImpl{}, pos, name));
+  as.in.expectWs(';');
+}
+
 void parse_function_body(AsmState&, int nestLevel = 0);
 
 /*
@@ -2135,6 +2170,18 @@ void parse_function_body(AsmState& as, int nestLevel /* = 0 */) {
       if (word == ".try") { parse_try_catch(as, nestLevel); continue; }
       if (word == ".srcloc") { parse_srcloc(as, nestLevel); continue; }
       if (word == ".doc") { parse_func_doccomment(as); continue; }
+      if (word == ".rx_cond_rx_of_arg") {
+        parse_rx_cond_rx_of_arg(as);
+        continue;
+      }
+      if (word == ".rx_cond_implements") {
+        parse_rx_cond_implements(as);
+        continue;
+      }
+      if (word == ".rx_cond_arg_implements") {
+        parse_rx_cond_arg_implements(as);
+        continue;
+      }
       as.error("unrecognized directive `" + word + "' in function");
     }
     if (as.in.peek() == ':') {

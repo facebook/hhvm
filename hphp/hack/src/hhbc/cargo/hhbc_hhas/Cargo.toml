@@ -12,6 +12,7 @@ path = "../../print.rs"
 ast_class_expr_rust = { path = "../ast_class_expr" }
 ast_scope_rust = { path = "../ast_scope" }
 core_utils_rust = { path = "../../../utils/core" }
+emit_body_rust = { path = "../emit_body" }
 emit_type_hint_rust = { path = "../emit_type_hint" }
 env = { path = "../env" }
 escaper = { path = "../../../utils/escaper" }

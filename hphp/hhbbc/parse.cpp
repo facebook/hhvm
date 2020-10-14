@@ -690,6 +690,8 @@ std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
     return false;
   }();
 
+  for (auto& rule : fe.coeffectRules) ret->coeffectRules.push_back(rule);
+
   ret->sampleDynamicCalls = [&] {
     if (!(fe.attrs & AttrDynamicallyCallable)) return false;
 

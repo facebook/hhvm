@@ -546,7 +546,7 @@ inline bool Func::isResumable() const {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// Reactivity.
+// Coeffects.
 
 inline RxLevel Func::rxLevel() const {
   return rxLevelFromAttr(m_attrs);
@@ -558,6 +558,16 @@ inline bool Func::isRxDisabled() const {
 
 inline bool Func::isRxConditional() const {
   return rxConditionalFromAttr(m_attrs);
+}
+
+inline bool Func::hasCoeffectRules() const {
+  return shared()->m_allFlags.m_hasCoeffectRules;
+}
+
+inline const Func::CoeffectRules& Func::getCoeffectRules() const {
+  assertx(extShared());
+  assertx(hasCoeffectRules());
+  return extShared()->m_coeffectRules;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -738,6 +738,7 @@ Func::SharedData::SharedData(PreClass* preClass, Offset base, Offset past,
   m_allFlags.m_isRxDisabled = false;
   m_allFlags.m_hasParamsWithMultiUBs = false;
   m_allFlags.m_hasReturnWithMultiUBs = false;
+  m_allFlags.m_hasCoeffectRules = false;
 
   m_pastDelta = std::min<uint32_t>(past - base, kSmallDeltaLimit);
   m_line2Delta = std::min<uint32_t>(line2 - line1, kSmallDeltaLimit);

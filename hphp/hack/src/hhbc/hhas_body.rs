@@ -20,4 +20,6 @@ pub struct HhasBody<'a> {
     pub return_type_info: Option<hhas_type::Info>,
     pub doc_comment: Option<DocComment>,
     pub env: Option<Env<'a>>,
+    pub rx_cond_rx_of_arg: Vec<usize>,
+    pub rx_cond_arg_implements: Vec<(usize, String)>,
 }

@@ -35,6 +35,7 @@
 #include "hphp/runtime/vm/litstr-table.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/repo-global-data.h"
+#include "hphp/runtime/vm/rx.h"
 
 #include "hphp/util/compact-vector.h"
 

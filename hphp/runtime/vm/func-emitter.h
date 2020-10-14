@@ -73,6 +73,8 @@ struct FuncEmitter {
   typedef std::vector<ParamInfo> ParamInfoVec;
   typedef std::vector<EHEnt> EHEntVec;
 
+  using CoeffectRuleVec = std::vector<CoeffectRule>;
+
   /////////////////////////////////////////////////////////////////////////////
   // Initialization and execution.
 
@@ -266,6 +268,7 @@ public:
   TypeConstraint retTypeConstraint;
   LowStringPtr retUserType;
   UpperBoundVec retUpperBounds;
+  CoeffectRuleVec coeffectRules;
 
   EHEntVec ehtab;
 

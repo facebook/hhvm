@@ -424,6 +424,11 @@ void print_func_directives(Output& out, const FuncInfo& finfo) {
     }
     out.fmtln(".declvars {};", folly::join(" ", locals));
   }
+  if (func->hasCoeffectRules()) {
+    for (auto const& rule : func->getCoeffectRules()) {
+      out.fmtln(rule.getDirectiveString());
+    }
+  }
 }
 
 std::string get_srcloc_str(SourceLoc loc) {

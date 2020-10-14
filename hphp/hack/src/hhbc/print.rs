@@ -13,6 +13,7 @@ use ast_class_expr_rust::ClassExpr;
 use ast_scope_rust as ast_scope;
 use context::Context;
 use core_utils_rust::add_ns;
+use emit_body_rust::extract_rx_if_impl_attr;
 use emit_type_hint_rust as emit_type_hint;
 use env::{iterator::Id as IterId, local::Type as Local, Env as BodyEnv};
 use escaper::{escape, escape_by, is_lit_printable};
@@ -434,7 +435,7 @@ fn print_fun_def<W: Write>(
     }
     w.write(" ")?;
     braces(w, |w| {
-        ctx.block(w, |c, w| print_body(c, w, body))?;
+        ctx.block(w, |c, w| print_body(c, w, body, &fun_def.attributes))?;
         newline(w)
     })?;
     newline(w)
@@ -830,7 +831,7 @@ fn print_method_def<W: Write>(
     }
     w.write(" ")?;
     braces(w, |w| {
-        ctx.block(w, |c, w| print_body(c, w, body))?;
+        ctx.block(w, |c, w| print_body(c, w, body, &method_def.attributes))?;
         newline(w)?;
         w.write("  ")
     })
@@ -1115,7 +1116,12 @@ fn is_bareword_char(c: &u8) -> bool {
     }
 }
 
-fn print_body<W: Write>(ctx: &mut Context, w: &mut W, body: &HhasBody) -> Result<(), W::Error> {
+fn print_body<W: Write>(
+    ctx: &mut Context,
+    w: &mut W,
+    body: &HhasBody,
+    attrs: &Vec<HhasAttribute>,
+) -> Result<(), W::Error> {
     print_doc_comment(ctx, w, &body.doc_comment)?;
     if body.is_memoize_wrapper {
         ctx.newline(w)?;
@@ -1140,6 +1146,27 @@ fn print_body<W: Write>(ctx: &mut Context, w: &mut W, body: &HhasBody) -> Result
             }
         })?;
         w.write(";")?;
+    }
+    for i in body.rx_cond_rx_of_arg.iter() {
+        ctx.newline(w)?;
+        concat_str(w, [".rx_cond_rx_of_arg ", i.to_string().as_ref(), ";"])?;
+    }
+    if let Some((_, s)) = extract_rx_if_impl_attr(0, attrs) {
+        ctx.newline(w)?;
+        concat_str(w, [".rx_cond_implements \"", escape(&s).as_ref(), "\";"])?;
+    }
+    for (i, s) in body.rx_cond_arg_implements.iter() {
+        ctx.newline(w)?;
+        concat_str(
+            w,
+            [
+                ".rx_cond_arg_implements ",
+                i.to_string().as_ref(),
+                " \"",
+                escape(s).as_ref(),
+                "\";",
+            ],
+        )?;
     }
     print_instructions(ctx, w, &body.body_instrs)
 }

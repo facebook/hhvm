@@ -1129,6 +1129,8 @@ void emit_finish_func(EmitUnitState& state, FuncEmitter& fe,
   fe.hasParamsWithMultiUBs = func.hasParamsWithMultiUBs;
   fe.hasReturnWithMultiUBs = func.hasReturnWithMultiUBs;
 
+  for (auto& rule : func.coeffectRules) fe.coeffectRules.push_back(rule);
+
   auto const retTy = state.index.lookup_return_type_raw(&func);
   if (!retTy.subtypeOf(BBottom)) {
     auto const rat = make_repo_type(*state.index.array_table_builder(), retTy);

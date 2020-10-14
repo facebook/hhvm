@@ -17,6 +17,7 @@
 #pragma once
 
 #include "hphp/runtime/base/attr.h"
+#include "hphp/runtime/vm/class.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -74,6 +75,87 @@ constexpr bool funcAttrIsPure(Attr a) {
 
 bool rxEnforceCallsInLevel(RxLevel level);
 RxLevel rxRequiredCalleeLevel(RxLevel level);
+
+///////////////////////////////////////////////////////////////////////////////
+
+struct CoeffectRule final {
+  struct CondRxArg {};
+  struct CondRxImpl {};
+  struct CondRxArgImpl {};
+
+  CoeffectRule() = default;
+
+  CoeffectRule(CondRxArg, uint32_t index)
+    : m_type(Type::ConditionalReactiveArg)
+    , m_index(index)
+  {}
+
+  CoeffectRule(CondRxImpl, const StringData* name)
+    : m_type(Type::ConditionalReactiveImplements)
+    , m_name(name)
+    , m_ne(NamedEntity::get(name))
+  { assertx(name); }
+
+  CoeffectRule(CondRxArgImpl, uint32_t index, const StringData* name)
+    : m_type(Type::ConditionalReactiveArgImplements)
+    , m_index(index)
+    , m_name(name)
+    , m_ne(NamedEntity::get(name))
+  { assertx(name); }
+
+  std::string getDirectiveString() const {
+    switch (m_type) {
+      case Type::ConditionalReactiveArg:
+        return folly::sformat(".rx_cond_rx_of_arg {};", m_index);
+      case Type::ConditionalReactiveImplements:
+        return folly::sformat(".rx_cond_implements \"{}\";",
+                              folly::cEscape<std::string>(
+                                m_name->toCppString()));
+      case Type::ConditionalReactiveArgImplements:
+        return folly::sformat(".rx_cond_implements_arg {} \"{}\";",
+                              m_index,
+                              folly::cEscape<std::string>(
+                                m_name->toCppString()));
+      case Type::Invalid:
+        always_assert(false);
+    }
+    not_reached();
+  }
+
+  template<class SerDe>
+  void serde(SerDe& sd) {
+    sd(m_type)
+      (m_index)
+      (m_name)
+    ;
+
+    if (SerDe::deserializing) {
+      switch (m_type) {
+        case Type::ConditionalReactiveImplements:
+        case Type::ConditionalReactiveArgImplements:
+          m_ne = NamedEntity::get(m_name);
+          break;
+        case Type::ConditionalReactiveArg:
+          break;
+        case Type::Invalid:
+          always_assert(false);
+      }
+    }
+  }
+
+private:
+  enum class Type {
+    Invalid = 0,
+    ConditionalReactiveArg,
+    ConditionalReactiveImplements,
+    ConditionalReactiveArgImplements
+  };
+
+  Type m_type{Type::Invalid};
+  uint32_t m_index{0};
+  LowPtr<const StringData> m_name{nullptr};
+  LowPtr<const NamedEntity> m_ne{nullptr};
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -32,10 +32,14 @@ pub fn emit_body<'a>(
     body_instrs.and_then(|body_instrs| {
         params.and_then(|params| {
             return_type_info.and_then(|rti| {
+                let (rx_cond_rx_of_arg, rx_cond_arg_implements) =
+                    emit_body::extract_rx_conds(&params);
                 Ok(HhasBody {
                     body_instrs,
                     params,
                     return_type_info: Some(rti),
+                    rx_cond_rx_of_arg,
+                    rx_cond_arg_implements,
                     ..HhasBody::default()
                 })
             })

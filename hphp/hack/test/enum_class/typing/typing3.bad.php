@@ -1,6 +1,11 @@
 <?hh
 <<file: __EnableUnstableFeatures('enum_class')>>
 
+// User code
+function expect_int(int $_): void {}
+function expect_string(string $_): void {}
+function expect_num(num $_): void {}
+
 interface ExBox {}
 
 class Box<T> implements ExBox {
@@ -19,8 +24,18 @@ abstract final class Helper {
   }
 }
 
+// Enum Class user code
 enum class E: ExBox {
   A<Box<string>>(new Box('bli'));
   B<IBox>(Helper::ibox());
-  C<Box<int>>(new Box(42));
+  B2<Box<int>>(new Box(42));
+}
+
+function generic2<TEnum as E, TBox as IBox>(HH\Elt<TEnum, TBox> $param): int {
+  $param->unwrap()->add(42);
+  return $param->unwrap()->data;
+}
+
+function testit2(): void {
+  expect_int(generic2(E::B2)); // errors as it should
 }

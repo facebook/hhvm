@@ -1,0 +1,8 @@
+File "typing6.bad.php", line 12, characters 26-27:
+Invalid argument (Typing[4110])
+  File "typing6.bad.php", line 12, characters 9-14:
+  Expected `string`
+  File "typing6.bad.php", line 12, characters 9-14:
+  Considering that this type argument is invariant with respect to `Box`
+  File "typing6.bad.php", line 12, characters 26-27:
+  But got `int`

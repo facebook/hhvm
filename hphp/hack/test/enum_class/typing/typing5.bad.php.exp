@@ -1,0 +1,18 @@
+File "typing5.bad.php", line 11, characters 22-22:
+Unbound name: `T` (Naming[2049])
+File "typing5.bad.php", line 11, characters 22-22:
+Unbound name: `T` (an object type) (Naming[2049])
+File "typing5.bad.php", line 11, characters 12-12:
+Enum classes base type must be an interface without generic parameters, not `ExBox<T>` (Typing[4024])
+File "typing5.bad.php", line 12, characters 3-3:
+Constant does not match the type of the enum it is in (Typing[4328])
+  File "typing5.bad.php", line 11, characters 22-22:
+  Expected `T`
+  File "typing5.bad.php", line 11, characters 22-22:
+  Considering that this type argument is invariant with respect to `ExBox`
+  File "typing5.bad.php", line 12, characters 9-14:
+  But got `string`
+  File "typing5.bad.php", line 12, characters 9-14:
+  Considering that this type argument is invariant with respect to `Box`
+  File "typing5.bad.php", line 6, characters 31-31:
+    via this generic `T`

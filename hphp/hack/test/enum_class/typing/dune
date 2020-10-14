@@ -1,0 +1,29 @@
+(alias
+    (name enum_class_typing_good)
+    (deps %{exe:../../../src/hh_single_type_check.exe}
+          %{project_root}/test/verify.py
+          %{project_root}/test/review.sh
+          (glob_files %{project_root}/test/enum_class/typing/*.good.php)
+          (glob_files %{project_root}/test/enum_class/typing/*.good.php.exp))
+    (action (run %{project_root}/test/verify.py %{project_root}/test/enum_class/typing
+    --program %{exe:../../../src/hh_single_type_check.exe}
+    --in-extension .good.php
+    )))
+
+(alias
+    (name enum_class_typing_bad)
+    (deps %{exe:../../../src/hh_single_type_check.exe}
+          %{project_root}/test/verify.py
+          %{project_root}/test/review.sh
+          (glob_files %{project_root}/test/enum_class/typing/*.bad.php)
+          (glob_files %{project_root}/test/enum_class/typing/*.bad.php.exp))
+    (action (run %{project_root}/test/verify.py %{project_root}/test/enum_class/typing
+    --program %{exe:../../../src/hh_single_type_check.exe}
+    --in-extension .bad.php --flags
+    --error-format raw)))
+
+(alias
+    (name runtest)
+    (deps
+        (alias enum_class_typing_good)
+        (alias enum_class_typing_bad)))

@@ -309,6 +309,7 @@ struct
       te_base = ty te.te_base;
       te_constraint = ty_opt te.te_constraint;
       te_includes = List.map te.te_includes ty;
+      te_enum_class = te.te_enum_class;
     }
 
   and typedef tdef =

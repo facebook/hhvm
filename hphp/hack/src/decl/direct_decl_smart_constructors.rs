@@ -3457,6 +3457,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 base: hint,
                 constraint,
                 includes,
+                enum_class: false,
             })),
         });
         self.add_class(key, cls);

@@ -1248,7 +1248,7 @@ and add_signature_dependencies ctx env obj =
         List.iter (Class.all_ancestor_reqs cls) (fun (_, ty) -> add_dep ty);
         Option.iter
           (Class.enum_type cls)
-          ~f:(fun { te_base; te_constraint; te_includes } ->
+          ~f:(fun { te_base; te_constraint; te_includes; te_enum_class = _ } ->
             add_dep te_base;
             Option.iter te_constraint ~f:add_dep;
             List.iter te_includes ~f:add_dep)

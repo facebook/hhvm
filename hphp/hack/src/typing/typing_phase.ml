@@ -451,26 +451,38 @@ and localize_class_instantiation ~ety_env env r sid tyargs class_info =
     let (env, tyl) = List.map_env env tyargs (localize ~ety_env) in
     (env, mk (r, Tclass (sid, Nonexact, tyl)))
   | Some class_info ->
-    if Option.is_some (Cls.enum_type class_info) then
-      (* if argl <> [], nastInitCheck would have raised an error *)
-      match Typing_defs.has_expanded ety_env name with
-      | Some _ ->
-        Errors.cyclic_enum_constraint pos;
-        (env, mk (r, Typing_utils.tany env))
-      | None ->
-        let type_expansions = (false, pos, name) :: ety_env.type_expansions in
-        let ety_env = { ety_env with type_expansions } in
-        let (env, cstr) =
-          match Env.get_enum_constraint env name with
-          (* If not specified, default bound is arraykey *)
-          | None ->
-            ( env,
-              MakeType.arraykey (Reason.Rimplicit_upper_bound (pos, "arraykey"))
-            )
-          | Some ty -> localize ~ety_env env ty
-        in
-        (env, mk (r, Tnewtype (name, [], cstr)))
-    else
+    (match Cls.enum_type class_info with
+    | Some enum_info ->
+      begin
+        (* if argl <> [], nastInitCheck would have raised an error *)
+        match Typing_defs.has_expanded ety_env name with
+        | Some _ ->
+          Errors.cyclic_enum_constraint pos;
+          (env, mk (r, Typing_utils.tany env))
+        | None ->
+          if enum_info.te_enum_class then
+            (* Enum classes no longer has the ambiguity between the type of
+             * the enum set and the type of elements, so the enum class
+             * itself is seen as a Tclass
+             *)
+            (env, mk (r, Tclass (sid, Nonexact, [])))
+          else
+            let type_expansions =
+              (false, pos, name) :: ety_env.type_expansions
+            in
+            let ety_env = { ety_env with type_expansions } in
+            let (env, cstr) =
+              match Env.get_enum_constraint env name with
+              (* If not specified, default bound is arraykey *)
+              | None ->
+                ( env,
+                  MakeType.arraykey
+                    (Reason.Rimplicit_upper_bound (pos, "arraykey")) )
+              | Some ty -> localize ~ety_env env ty
+            in
+            (env, mk (r, Tnewtype (name, [], cstr)))
+      end
+    | None ->
       let tparams = Cls.tparams class_info in
       let nkinds = KindDefs.Simple.named_kinds_of_decl_tparams tparams in
       let (env, tyl) =
@@ -480,15 +492,16 @@ and localize_class_instantiation ~ety_env env r sid tyargs class_info =
           && List.is_empty tyargs
         then
           (* In this case we will infer the missing type parameters *)
-          (* FIXME: I guess in global inference mode, we should just reject classes
-             with missing type args if they have any HK parameters? *)
+          (* FIXME: I guess in global inference mode, we should just reject
+           * classes with missing type args if they have any HK parameters ?
+           *)
           localize_missing_tparams_class env r sid class_info
         else
           let def_pos = Cls.pos class_info in
           let use_pos = Reason.to_pos r in
           localize_tparams_by_kind ~ety_env ~def_pos ~use_pos env tyargs nkinds
       in
-      (env, mk (r, Tclass (sid, Nonexact, tyl)))
+      (env, mk (r, Tclass (sid, Nonexact, tyl))))
 
 and localize_typedef_instantiation ~ety_env env r type_name tyargs =
   match Env.get_typedef env type_name with

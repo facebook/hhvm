@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<1187473a101c82a5f51ff1b8cb04b523>>
+// @generated SignedSource<<654255742d5d381d62f1891b581be832>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -316,6 +316,7 @@ pub struct EnumType<'a> {
     pub base: &'a Ty<'a>,
     pub constraint: Option<&'a Ty<'a>>,
     pub includes: &'a [&'a Ty<'a>],
+    pub enum_class: bool,
 }
 impl<'a> TrivialDrop for EnumType<'a> {}
 

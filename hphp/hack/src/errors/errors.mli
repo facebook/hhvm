@@ -765,7 +765,7 @@ val missing_constructor : Pos.t -> typing_error_callback -> unit
 
 val enum_constant_type_bad : Pos.t -> Pos.t -> string -> Pos.t list -> unit
 
-val enum_type_bad : Pos.t -> string -> Pos.t list -> unit
+val enum_type_bad : Pos.t -> bool -> string -> Pos.t list -> unit
 
 val enum_type_typedef_nonnull : Pos.t -> unit
 

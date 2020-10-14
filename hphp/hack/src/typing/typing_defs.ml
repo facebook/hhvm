@@ -245,6 +245,7 @@ and enum_type = {
   te_base: decl_ty;
   te_constraint: decl_ty option;
   te_includes: decl_ty list;
+  te_enum_class: bool;
 }
 
 and record_field_req =

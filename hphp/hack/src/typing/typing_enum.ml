@@ -47,7 +47,7 @@ let member_type env member_ce =
              (Cls.get_ancestor tc)
          with
         | None -> default_result
-        | Some (_base, enum_ty, _constraint) ->
+        | Some (_base, enum_ty, _constraint, _interface) ->
           let ty = mk (get_reason default_result, get_node enum_ty) in
           ty))
     | _ -> default_result
@@ -62,13 +62,43 @@ let enum_check_const ty_exp env cc t =
     ty_exp
     Errors.constant_does_not_match_enum_type
 
-(* Check that the `as` bound or the underlying type of an enum is a subtype of arraykey *)
-let enum_check_type env pos ur ty _on_error =
+(* Check that the `as` bound or the underlying type of an enum is a subtype of
+ * arraykey. For enum class, check that it is an interface withtout type
+ * parameters.
+ *)
+let enum_check_type env pos ur ty_interface ty _on_error =
   let ty_arraykey =
     MakeType.arraykey (Reason.Rimplicit_upper_bound (pos, "arraykey"))
   in
-  Typing_ops.sub_type pos ur env ty ty_arraykey (fun ?code:_ _ ->
-      Errors.enum_type_bad pos (Typing_print.full_strip_ns env ty) [])
+  match ty_interface with
+  | Some interface ->
+    begin
+      match get_node interface with
+      | Tclass ((_, name), _, []) ->
+        let cls = Typing_env.get_class env name in
+        let kind = Option.map ~f:(fun cls -> Cls.kind cls) cls in
+        let is_interface = Option.map ~f:Ast_defs.is_c_interface kind in
+        if Option.value ~default:false is_interface then
+          env
+        else (
+          Errors.enum_type_bad
+            pos
+            true
+            (Typing_print.full_strip_ns env interface)
+            [];
+          env
+        )
+      | _ ->
+        Errors.enum_type_bad
+          pos
+          true
+          (Typing_print.full_strip_ns env interface)
+          [];
+        env
+    end
+  | None ->
+    Typing_ops.sub_type pos ur env ty ty_arraykey (fun ?code:_ _ ->
+        Errors.enum_type_bad pos false (Typing_print.full_strip_ns env ty) [])
 
 (* Check an enum declaration of the form
  *    enum E : <ty_exp> as <ty_constraint>
@@ -92,15 +122,23 @@ let enum_class_check env tc consts const_types =
       (Cls.get_ancestor tc)
   in
   match enum_info_opt with
-  | Some (ty_exp, _, ty_constraint) ->
+  | Some (ty_exp, _, ty_constraint, ty_interface) ->
     let ety_env = Phase.env_with_self env in
     let (env, ty_exp) = Phase.localize ~ety_env env ty_exp in
+    let (env, ty_interface) =
+      match ty_interface with
+      | Some dty ->
+        let (env, lty) = Phase.localize ~ety_env env dty in
+        (env, Some lty)
+      | None -> (env, None)
+    in
     (* Check that ty_exp <: arraykey *)
     let env =
       enum_check_type
         env
         pos
         Reason.URenum_underlying
+        ty_interface
         ty_exp
         Errors.enum_underlying_type_must_be_arraykey
     in
@@ -115,6 +153,7 @@ let enum_class_check env tc consts const_types =
             env
             pos
             Reason.URenum_cstr
+            None (* Enum classes do not have constraints *)
             ty
             Errors.enum_constraint_must_be_arraykey
         in

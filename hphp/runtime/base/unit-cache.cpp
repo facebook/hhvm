@@ -199,7 +199,9 @@ struct CachedUnitWithFree {
   explicit CachedUnitWithFree(const CachedUnitWithFree&) = delete;
   CachedUnitWithFree& operator=(const CachedUnitWithFree&) = delete;
 
-  explicit CachedUnitWithFree(
+  // Create a new CachedUnit entry, with a new created Unit (no cache
+  // entry).
+  CachedUnitWithFree(
     const CachedUnit& src,
     const struct stat* statInfo,
     const RepoOptions& options
@@ -216,11 +218,44 @@ struct CachedUnitWithFree {
       ino        = statInfo->st_ino;
       devId      = statInfo->st_dev;
     }
+    if (cu.unit) {
+      assertx(!cu.unit->hasCacheRef());
+      cu.unit->acquireCacheRefCount();
+    }
   }
+
+  // Create a new CachedUnit entry, sharing a Unit with another one,
+  // but with a new stat info.
+  CachedUnitWithFree(const CachedUnitWithFree& o,
+                     const struct stat* statInfo)
+    : cu{o.cu}
+    , repoOptionsHash(o.repoOptionsHash)
+  {
+    if (statInfo) {
+#ifdef _MSC_VER
+      mtime      = statInfo->st_mtime;
+#else
+      mtime      = statInfo->st_mtim;
+      ctime      = statInfo->st_ctim;
+#endif
+      ino        = statInfo->st_ino;
+      devId      = statInfo->st_dev;
+    }
+    if (cu.unit) {
+      // Since this is sharing it, we should already have a ref.
+      assertx(cu.unit->hasCacheRef());
+      cu.unit->acquireCacheRefCount();
+    }
+  }
+
   ~CachedUnitWithFree() {
     if (!cu.unit) return;
+    // Only delete the Unit if this is the last reference to it in the
+    // cache.
+    if (!cu.unit->releaseCacheRefCount()) return;
     Treadmill::enqueue([u = cu.unit] { delete u; });
   }
+
   CachedUnit cu;
 
 #ifdef _MSC_VER
@@ -348,7 +383,9 @@ CachedUnitWithFreePtr createUnitFromFile(const StringData* const path,
   // contents may not have actually changed. In that case, the hash we
   // just calculated may be the same as the pre-existing Unit's
   // hash. In that case, we just use the old unit.
-  if (orig && orig->cu.unit && sha1 == orig->cu.unit->sha1()) return orig;
+  if (orig && orig->cu.unit && sha1 == orig->cu.unit->sha1()) {
+    return CachedUnitWithFreePtr{*orig, statInfo};
+  }
 
   auto const check = [&] (Unit* unit) {
     // Similar check as above, but on the hashed HHAS (as
@@ -357,7 +394,7 @@ CachedUnitWithFreePtr createUnitFromFile(const StringData* const path,
     if (orig && orig->cu.unit && unit &&
         unit->bcSha1() == orig->cu.unit->bcSha1()) {
       delete unit;
-      return orig;
+      return CachedUnitWithFreePtr{*orig, statInfo};
     }
     flags = FileLoadFlags::kEvicted;
     return CachedUnitWithFreePtr{
@@ -651,11 +688,7 @@ CachedUnit loadUnitNonRepoAuth(StringData* requestedPath,
   SCOPE_EXIT { if (releaseUnit) delete releaseUnit; };
 
   auto const updateAndUnlock = [] (auto& cachedUnit, CachedUnitWithFreePtr p) {
-    // The ptr is unchanged... nothing to do
-    if (cachedUnit.copy() == p) {
-      cachedUnit.unlock();
-      return;
-    }
+    assertx(cachedUnit.copy() != p);
     // Otherwise update the entry. Defer the destruction of the
     // old copy_ptr using the Treadmill. Other threads may be
     // reading the entry simultaneously so the ref-count cannot
@@ -1307,11 +1340,7 @@ void prefetchUnit(StringData* requestedPath,
       // delete the old Unit.
       auto const updateAndUnlock = [] (auto& cachedUnit,
                                        CachedUnitWithFreePtr p) {
-        // The ptr is unchanged... nothing to do
-        if (cachedUnit.copy() == p) {
-          cachedUnit.unlock();
-          return;
-        }
+        assertx(cachedUnit.copy() != p);
         // Otherwise update the entry. Defer the destruction of the
         // old copy_ptr using the Treadmill. Other threads may be
         // reading the entry simultaneously so the ref-count cannot

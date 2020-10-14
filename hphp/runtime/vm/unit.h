@@ -266,6 +266,29 @@ public:
   bool isICE() const;
 
   /////////////////////////////////////////////////////////////////////////////
+  // Unit cache ref-counting
+
+  /*
+   * Mark that this Unit is referenced by a cache entry. Only valid
+   * for non-RepoAuth mode.
+   */
+  void acquireCacheRefCount();
+
+  /*
+   * Mark that this Unit is no longer referenced by a cache
+   * entry. Only valid for non-RepoAuth mode. Returns true if the Unit
+   * is no longer referenced by an entries and should be deleted,
+   * false otherwise.
+   */
+  bool releaseCacheRefCount();
+
+  /*
+   * Whether this Unit is referenced by a cache entry. Only valid for
+   * non-RepoAuth mode.
+   */
+  bool hasCacheRef() const;
+
+  /////////////////////////////////////////////////////////////////////////////
   // Bytecode.                                                          [const]
 
   /*
@@ -726,6 +749,8 @@ struct UnitExtended : Unit {
 
   SymbolRefs m_symbolRefsForPrefetch;
   std::atomic_flag m_symbolRefsPrefetched;
+
+  std::atomic<int64_t> m_cacheRefCount{0};
 };
 
 ///////////////////////////////////////////////////////////////////////////////

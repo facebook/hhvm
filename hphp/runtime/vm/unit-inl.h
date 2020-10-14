@@ -108,6 +108,28 @@ inline bool Unit::isICE() const {
   return m_ICE;
 }
 
+/////////////////////////////////////////////////////////////////////////////
+// Unit cache ref-counting
+
+inline void Unit::acquireCacheRefCount() {
+  assertx(!RuntimeOption::RepoAuthoritative);
+  assertx(m_extended);
+  ++getExtended()->m_cacheRefCount;
+}
+
+inline bool Unit::releaseCacheRefCount() {
+  assertx(!RuntimeOption::RepoAuthoritative);
+  assertx(m_extended);
+  assertx(getExtended()->m_cacheRefCount > 0);
+  return !(--getExtended()->m_cacheRefCount);
+}
+
+inline bool Unit::hasCacheRef() const {
+  assertx(!RuntimeOption::RepoAuthoritative);
+  assertx(m_extended);
+  return getExtended()->m_cacheRefCount > 0;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Bytecode.
 

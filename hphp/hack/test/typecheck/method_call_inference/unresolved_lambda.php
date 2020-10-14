@@ -24,5 +24,5 @@ function test() : void {
   $lambda($c);
   $func($a);
   $func($b); // Error - B doesn't implement method foo
-  $lambda($c);
+  $func($c);
 }

@@ -140,9 +140,9 @@ let widen_class_for_obj_get ~is_method ~nullsafe ~on_error member_name env ty =
  *
  * For properties, just make the type nullable.
  * For methods, we expect a function type, and make the return type nullable.
- * But in the case that we have type dynamic, or err, or any, or nothing, we
- * just use the type `null`. The `call` helper will deal appropriately
- * with it.
+ * But in the case that we have type nothing, we just use the type `null`.
+ * The `call` helper will deal appropriately with it.
+ * Similarly if we have dynamic, or err, or any, we leave as dynamic/err/any respectively.
  *)
 let rec make_nullable_member_type env ~is_method id_pos pos ty =
   if is_method then

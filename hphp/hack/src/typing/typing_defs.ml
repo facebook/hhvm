@@ -383,6 +383,11 @@ let is_constraint_type_union t =
   | (_, TCunion _) -> true
   | _ -> false
 
+let is_has_member t =
+  match deref_constraint_type t with
+  | (_, Thas_member _) -> true
+  | _ -> false
+
 let show_phase_ty _ = "<phase_ty>"
 
 let pp_phase_ty _ _ = Printf.printf "%s\n" "<phase_ty>"

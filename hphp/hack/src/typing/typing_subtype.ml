@@ -679,6 +679,9 @@ and simplify_subtype_i
   match ety_super with
   (* First deal with internal constraint types *)
   | ConstraintType cty_super ->
+    let using_new_method_call_inference =
+      TypecheckerOptions.method_call_inference (Env.get_tcopt env)
+    in
     begin
       match deref_constraint_type cty_super with
       | (_, TCintersection (lty, cty)) ->
@@ -690,6 +693,27 @@ and simplify_subtype_i
           env
           |> simplify_subtype_i ~subtype_env ty_sub (LoclType lty)
           &&& simplify_subtype_i ~subtype_env ty_sub (ConstraintType cty))
+      | (_, TCunion (maybe_null, maybe_has_member))
+        when using_new_method_call_inference
+             && is_has_member maybe_has_member
+             &&
+             let (_, maybe_null) = Env.expand_type env maybe_null in
+             is_prim Aast.Tnull maybe_null ->
+        (* `LHS <: Thas_member(...) | null` is morally a null-safe object access *)
+        let (env, null_ty) = Env.expand_type env maybe_null in
+        let r_null = get_reason null_ty in
+        let (r, has_member_ty) = deref_constraint_type maybe_has_member in
+        (match has_member_ty with
+        | Thas_member has_member_ty ->
+          simplify_subtype_has_member
+            ~subtype_env
+            ~this_ty
+            ~nullsafe:r_null
+            ~fail
+            ety_sub
+            (r, has_member_ty)
+            env
+        | _ -> invalid_env env (* Not possible due to guard in parent match *))
       | (_, TCunion (lty_super, cty_super)) ->
         (match ety_sub with
         | ConstraintType cty when is_constraint_type_union cty ->
@@ -881,91 +905,14 @@ and simplify_subtype_i
                            subtype_env.on_error)
               end)
         end
-      | ( r,
-          Thas_member
-            {
-              hm_name = name;
-              hm_type = member_ty;
-              hm_class_id = class_id;
-              hm_explicit_targs = explicit_targs;
-            } ) ->
-        (match ety_sub with
-        | ConstraintType cty ->
-          begin
-            match deref_constraint_type cty with
-            | ( _,
-                Thas_member
-                  {
-                    hm_name = name_sub;
-                    hm_type = ty_sub;
-                    hm_class_id = cid_sub;
-                    hm_explicit_targs = explicit_targs_sub;
-                  } ) ->
-              if
-                let targ_equal (_, (_, hint1)) (_, (_, hint2)) =
-                  Aast_defs.equal_hint_ hint1 hint2
-                in
-                String.equal (snd name_sub) (snd name)
-                && class_id_equal cid_sub class_id
-                && Option.equal
-                     (List.equal ~equal:targ_equal)
-                     explicit_targs_sub
-                     explicit_targs
-              then
-                simplify_subtype ~subtype_env ~this_ty ty_sub member_ty env
-              else
-                invalid_env env
-            | _ -> default_subtype env
-          end
-        | LoclType ty_sub ->
-          (match deref ty_sub with
-          | (_, (Tvar _ | Tunion _ | Terr)) -> default_subtype env
-          | (_, Tintersection tyl)
-            when let (_, non_ty_opt, _) =
-                   find_type_with_exact_negation env tyl
-                 in
-                 Option.is_some non_ty_opt ->
-            default_subtype env
-          (* Ideally, we'd want this case to come after the case with an intersection
-            on the left, to deal properly with (#1 & A) <: Thas_member(#2) by potentially
-            adding an upper bound to #1, but that would result in a disjunction
-            which we don't handle very well at the moment.
-            TODO: when we have a better treatment of disjunctions, move that case after
-            the case with an intersection on the left.
-            For now, if there is an intersection on the left here,
-            we rely on how obj_get itself treats intersections. If that
-            intersection contains a type variable, this type variable will be eagerly
-            solved. Once this case is moved, we can clean up obj_get from the Tvar and
-            Tintersection cases *)
-          | _ ->
-            let (is_method, explicit_targs) =
-              match explicit_targs with
-              | None -> (false, [])
-              | Some targs -> (true, targs)
-            in
-            let (obj_get_ty, error_prop) =
-              Errors.try_with_result
-                (fun () ->
-                  let (env, (obj_get_ty, _tal)) =
-                    Typing_object_get.obj_get
-                      ~obj_pos:(Reason.to_pos r)
-                      ~is_method
-                      ~coerce_from_ty:None
-                      ~nullsafe:None
-                      ~explicit_targs
-                      env
-                      ty_sub
-                      class_id
-                      name
-                      subtype_env.on_error
-                  in
-                  (obj_get_ty, valid env))
-                (fun (obj_get_ty, (env, _)) error ->
-                  ( obj_get_ty,
-                    invalid_env_with env (fun () -> Errors.add_error error) ))
-            in
-            error_prop
-            &&& simplify_subtype ~subtype_env ~this_ty obj_get_ty member_ty))
+      | (r, Thas_member has_member_ty) ->
+        simplify_subtype_has_member
+          ~subtype_env
+          ~this_ty
+          ~fail
+          ety_sub
+          (r, has_member_ty)
+          env
     end
   (* Next deal with all locl types *)
   | LoclType ty_super ->
@@ -1968,6 +1915,227 @@ and simplify_subtype_shape
          (r_super, shape_kind_super, fdm_super))
       (ShapeSet.of_list (ShapeMap.keys fdm_sub @ ShapeMap.keys fdm_super))
       (env, TL.valid)
+
+and simplify_subtype_has_member
+    ~subtype_env
+    ~this_ty
+    ~fail
+    ?(nullsafe : Reason.t option)
+    ty_sub
+    (r, has_member_ty)
+    env =
+  let using_new_method_call_inference =
+    TypecheckerOptions.method_call_inference (Env.get_tcopt env)
+  in
+  let {
+    hm_name = name;
+    hm_type = member_ty;
+    hm_class_id = class_id;
+    hm_explicit_targs = explicit_targs;
+  } =
+    has_member_ty
+  in
+  let is_method = Option.is_some explicit_targs in
+  (* If `nullsafe` is `Some _`, we are allowing the object type on LHS to be nullable. *)
+  let mk_maybe_nullable env ty =
+    match nullsafe with
+    | None -> (env, ty)
+    | Some r_null ->
+      let null_ty = MakeType.null r_null in
+      Typing_union.union_i env r_null ty null_ty
+  in
+  let (env, maybe_nullable_ty_super) =
+    let ty_super = mk_constraint_type (r, Thas_member has_member_ty) in
+    mk_maybe_nullable env (ConstraintType ty_super)
+  in
+
+  log_subtype_i
+    ~level:2
+    ~this_ty
+    ~function_name:"simplify_subtype_has_member"
+    env
+    ty_sub
+    maybe_nullable_ty_super;
+  let (env, ety_sub) = Env.expand_internal_type env ty_sub in
+  let default_subtype env =
+    default_subtype
+      ~subtype_env
+      ~this_ty
+      ~fail
+      env
+      ety_sub
+      maybe_nullable_ty_super
+  in
+  match ety_sub with
+  | ConstraintType cty ->
+    (match deref_constraint_type cty with
+    | ( _,
+        Thas_member
+          {
+            hm_name = name_sub;
+            hm_type = ty_sub;
+            hm_class_id = cid_sub;
+            hm_explicit_targs = explicit_targs_sub;
+          } ) ->
+      if
+        let targ_equal (_, (_, hint1)) (_, (_, hint2)) =
+          Aast_defs.equal_hint_ hint1 hint2
+        in
+        String.equal (snd name_sub) (snd name)
+        && class_id_equal cid_sub class_id
+        && Option.equal
+             (List.equal ~equal:targ_equal)
+             explicit_targs_sub
+             explicit_targs
+      then
+        simplify_subtype ~subtype_env ~this_ty ty_sub member_ty env
+      else
+        invalid ~fail env
+    | _ -> default_subtype env)
+  | LoclType ty_sub ->
+    (match deref ty_sub with
+    | (_, (Tvar _ | Tunion _ | Terr)) -> default_subtype env
+    | (r_null, Tprim Aast.Tnull) when using_new_method_call_inference ->
+      if Option.is_some nullsafe then
+        valid env
+      else
+        invalid env ~fail:(fun () ->
+            Errors.null_member_read
+              ~is_method
+              (snd name)
+              (fst name)
+              (Reason.to_string "This can be null" r_null))
+    | (r_option, Toption option_ty) when using_new_method_call_inference ->
+      if Option.is_some nullsafe then
+        simplify_subtype_has_member
+          ~subtype_env
+          ~this_ty
+          ~fail
+          ?nullsafe
+          (LoclType option_ty)
+          (r, has_member_ty)
+          env
+      else
+        let (env, option_ty) = Env.expand_type env option_ty in
+        (match get_node option_ty with
+        | Tnonnull ->
+          invalid env ~fail:(fun () ->
+              Errors.top_member_read
+                ~is_method
+                ~is_nullable:true
+                (snd name)
+                (fst name)
+                (Typing_print.error env ty_sub)
+                (Reason.to_pos r_option))
+        | _ ->
+          invalid env ~fail:(fun () ->
+              Errors.null_member_read
+                ~is_method
+                (snd name)
+                (fst name)
+                (Reason.to_string "This can be null" r_option)))
+    | (_, Tintersection tyl)
+      when let (_, non_ty_opt, _) = find_type_with_exact_negation env tyl in
+           Option.is_some non_ty_opt ->
+      (* use default_subtype to perform: A & B <: C <=> A <: C | !B *)
+      default_subtype env
+    | (r_inter, Tintersection []) ->
+      (* Tintersection [] = mixed *)
+      invalid env ~fail:(fun () ->
+          Errors.top_member_read
+            ~is_method
+            ~is_nullable:true
+            (snd name)
+            (fst name)
+            (Typing_print.error env ty_sub)
+            (Reason.to_pos r_inter))
+    | (r_inter, Tintersection tyl) when using_new_method_call_inference ->
+      let (env, tyl) = List.map_env ~f:Env.expand_type env tyl in
+      let subtype_fresh_has_member_ty env ty_sub =
+        let (env, fresh_tyvar) = Env.fresh_type env (get_pos member_ty) in
+        let env = Env.set_tyvar_variance env fresh_tyvar in
+        let fresh_has_member_ty =
+          mk_constraint_type
+            (r, Thas_member { has_member_ty with hm_type = fresh_tyvar })
+        in
+        let (env, maybe_nullable_fresh_has_member_ty) =
+          mk_maybe_nullable env (ConstraintType fresh_has_member_ty)
+        in
+        let (env, succeeded) =
+          sub_type_inner
+            env
+            ~subtype_env
+            ~this_ty
+            (LoclType ty_sub)
+            maybe_nullable_fresh_has_member_ty
+        in
+        if succeeded then
+          let env =
+            match get_var fresh_tyvar with
+            | Some var ->
+              Typing_solver.solve_to_equal_bound_or_wrt_variance
+                env
+                Reason.Rnone
+                var
+                subtype_env.on_error
+            | None -> env
+          in
+          (env, Some fresh_tyvar)
+        else
+          (env, None)
+      in
+      let (env, fresh_tyvar_opts) =
+        TUtils.run_on_intersection env tyl ~f:subtype_fresh_has_member_ty
+      in
+      let fresh_tyvars = List.filter_map ~f:Fn.id fresh_tyvar_opts in
+      if List.is_empty fresh_tyvars then
+        (* TUtils.run_on_intersection has already added errors - no need to add more *)
+        invalid ~fail:(fun () -> ()) env
+      else
+        let (env, intersection_ty) =
+          Inter.intersect_list env r_inter fresh_tyvars
+        in
+        simplify_subtype ~subtype_env ~this_ty intersection_ty member_ty env
+    | (_, Tnewtype (_, _, newtype_ty)) ->
+      simplify_subtype_has_member
+        ~subtype_env
+        ~this_ty
+        ~fail
+        ?nullsafe
+        (LoclType newtype_ty)
+        (r, has_member_ty)
+        env
+    (* TODO
+    | (_, Tdependent _) ->
+    | (_, Tgeneric _) ->
+    *)
+    | _ ->
+      let explicit_targs =
+        match explicit_targs with
+        | None -> []
+        | Some targs -> targs
+      in
+      let (obj_get_ty, error_prop) =
+        Errors.try_with_result
+          (fun () ->
+            let (env, (obj_get_ty, _tal)) =
+              Typing_object_get.obj_get
+                ~obj_pos:(Reason.to_pos r)
+                ~is_method
+                ~coerce_from_ty:None
+                ~nullsafe
+                ~explicit_targs
+                env
+                ty_sub
+                class_id
+                name
+                subtype_env.on_error
+            in
+            (obj_get_ty, valid env))
+          (fun (obj_get_ty, (env, _)) error ->
+            (obj_get_ty, invalid env ~fail:(fun () -> Errors.add_error error)))
+      in
+      error_prop &&& simplify_subtype ~subtype_env ~this_ty obj_get_ty member_ty)
 
 and simplify_subtype_variance
     ~(subtype_env : subtype_env)

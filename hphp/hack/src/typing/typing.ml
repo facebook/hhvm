@@ -4787,27 +4787,26 @@ and dispatch_call
         ~class_id:(CIexpr receiver)
         ~explicit_targs:(Some explicit_targs)
     in
-    (* Define the receiver type to use in LHS of subtyping *)
-    let (env, receiver_sub_ty) =
+    let env = Env.set_tyvar_variance env method_ty in
+    let (env, has_method_super_ty) =
       if Option.is_none nullsafe then
-        (env, receiver_ty)
+        (env, has_method_ty)
       else
-        (* If nullsafe, then check `receiver & nonnull <: Thas_member(...).
-           We want a bare `Thas_member(...)` on RHS of subtyping, to ensure
-           we call through to `Typing_object_get` without making any incomplete
-           steps in subtyping (e.g. with intersection on LHS) *)
-        let r = Reason.Rnone in
-        let nonnull_ty = MakeType.nonnull r in
-        let (env, inter_ty) = Inter.intersect ~r env receiver_ty nonnull_ty in
-        (env, with_reason inter_ty (get_reason receiver_ty))
+        (* If null-safe, then `receiver_ty` <: `?Thas_member(m, #1)`,
+           but *unlike* property access typing in `expr_`, we still use `#1` as
+           our "result" if `receiver_ty` is nullable  (as opposed to `?#1`),
+           deferring null-safety handling to after `call` *)
+        let r = Reason.Rnullsafe_op p in
+        let null_ty = MakeType.null r in
+        Union.union_i env r has_method_ty null_ty
     in
     let env =
       Type.sub_type_i
         (fst receiver)
         Reason.URnone
         env
-        (LoclType receiver_sub_ty)
-        has_method_ty
+        (LoclType receiver_ty)
+        has_method_super_ty
         Errors.unify_error
     in
     (* Perhaps solve for `method_ty`. Opening and closing a scope is too coarse
@@ -4816,7 +4815,6 @@ and dispatch_call
        Once we typecheck all function calls with a subtyping of function types,
        we should not need to solve early at all - transitive closure of
        subtyping should give enough information. *)
-    let env = Env.set_tyvar_variance env method_ty in
     let env =
       match get_var method_ty with
       | Some var ->
@@ -4859,7 +4857,7 @@ and dispatch_call
           Inter.intersect env ~r null_ty receiver_ty
         in
         let (env, ret_option_ty) = Union.union env null_or_nothing_ty ret_ty in
-        (env, with_reason ret_option_ty r)
+        (env, ret_option_ty)
       else
         (env, ret_ty)
     in

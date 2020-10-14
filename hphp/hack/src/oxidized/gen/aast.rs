@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<93ac99f790b62bfcd396240aa5eb6619>>
+// @generated SignedSource<<8bd1f90afd43fecd48fdade09a73a0c7>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -597,7 +597,7 @@ pub struct Fun_<Ex, Fb, En, Hi> {
     pub ret: TypeHint<Hi>,
     pub name: Sid,
     pub tparams: Vec<Tparam<Ex, Fb, En, Hi>>,
-    pub where_constraints: Vec<WhereConstraint>,
+    pub where_constraints: Vec<WhereConstraintHint>,
     pub variadic: FunVariadicity<Ex, Fb, En, Hi>,
     pub params: Vec<FunParam<Ex, Fb, En, Hi>>,
     pub cap: TypeHint<Hi>,
@@ -835,7 +835,7 @@ pub struct Class_<Ex, Fb, En, Hi> {
     pub xhp_category: Option<(Pos, Vec<Pstring>)>,
     pub reqs: Vec<(ClassHint, IsExtends)>,
     pub implements: Vec<ClassHint>,
-    pub where_constraints: Vec<WhereConstraint>,
+    pub where_constraints: Vec<WhereConstraintHint>,
     pub consts: Vec<ClassConst<Ex, Fb, En, Hi>>,
     pub typeconsts: Vec<ClassTypeconst<Ex, Fb, En, Hi>>,
     pub vars: Vec<ClassVar<Ex, Fb, En, Hi>>,
@@ -1103,7 +1103,7 @@ pub struct Method_<Ex, Fb, En, Hi> {
     pub visibility: Visibility,
     pub name: Sid,
     pub tparams: Vec<Tparam<Ex, Fb, En, Hi>>,
-    pub where_constraints: Vec<WhereConstraint>,
+    pub where_constraints: Vec<WhereConstraintHint>,
     pub variadic: FunVariadicity<Ex, Fb, En, Hi>,
     pub params: Vec<FunParam<Ex, Fb, En, Hi>>,
     pub cap: TypeHint<Hi>,

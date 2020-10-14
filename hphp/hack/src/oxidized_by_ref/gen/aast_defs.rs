@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c08a908f609f4e60ea92d69dad957b41>>
+// @generated SignedSource<<26550ecc75450cad04afa07a272cb695>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -295,9 +295,9 @@ impl<'a> TrivialDrop for Enum_<'a> {}
     Serialize,
     ToOcamlRep
 )]
-pub struct WhereConstraint<'a>(
+pub struct WhereConstraintHint<'a>(
     pub &'a Hint<'a>,
     pub oxidized::ast_defs::ConstraintKind,
     pub &'a Hint<'a>,
 );
-impl<'a> TrivialDrop for WhereConstraint<'a> {}
+impl<'a> TrivialDrop for WhereConstraintHint<'a> {}

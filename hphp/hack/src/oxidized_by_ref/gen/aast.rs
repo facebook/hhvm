@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ff38864607400c44860e1477be65d2b6>>
+// @generated SignedSource<<fe9495903f7b9d3b08004dbd983ada64>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -710,7 +710,7 @@ pub struct Fun_<'a, Ex, Fb, En, Hi> {
     pub ret: &'a TypeHint<'a, Hi>,
     pub name: Sid<'a>,
     pub tparams: &'a [&'a Tparam<'a, Ex, Fb, En, Hi>],
-    pub where_constraints: &'a [&'a WhereConstraint<'a>],
+    pub where_constraints: &'a [&'a WhereConstraintHint<'a>],
     pub variadic: FunVariadicity<'a, Ex, Fb, En, Hi>,
     pub params: &'a [&'a FunParam<'a, Ex, Fb, En, Hi>],
     pub cap: &'a TypeHint<'a, Hi>,
@@ -944,7 +944,7 @@ pub struct Class_<'a, Ex, Fb, En, Hi> {
     pub xhp_category: Option<&'a (&'a Pos<'a>, &'a [&'a Pstring<'a>])>,
     pub reqs: &'a [(&'a ClassHint<'a>, &'a oxidized::aast::IsExtends)],
     pub implements: &'a [&'a ClassHint<'a>],
-    pub where_constraints: &'a [&'a WhereConstraint<'a>],
+    pub where_constraints: &'a [&'a WhereConstraintHint<'a>],
     pub consts: &'a [&'a ClassConst<'a, Ex, Fb, En, Hi>],
     pub typeconsts: &'a [&'a ClassTypeconst<'a, Ex, Fb, En, Hi>],
     pub vars: &'a [&'a ClassVar<'a, Ex, Fb, En, Hi>],
@@ -1198,7 +1198,7 @@ pub struct Method_<'a, Ex, Fb, En, Hi> {
     pub visibility: oxidized::aast::Visibility,
     pub name: Sid<'a>,
     pub tparams: &'a [&'a Tparam<'a, Ex, Fb, En, Hi>],
-    pub where_constraints: &'a [&'a WhereConstraint<'a>],
+    pub where_constraints: &'a [&'a WhereConstraintHint<'a>],
     pub variadic: FunVariadicity<'a, Ex, Fb, En, Hi>,
     pub params: &'a [&'a FunParam<'a, Ex, Fb, En, Hi>],
     pub cap: &'a TypeHint<'a, Hi>,

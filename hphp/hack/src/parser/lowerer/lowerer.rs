@@ -98,7 +98,7 @@ pub enum TokenOp {
 pub struct FunHdr {
     suspension_kind: SuspensionKind,
     name: ast::Sid,
-    constrs: Vec<ast::WhereConstraint>,
+    constrs: Vec<ast::WhereConstraintHint>,
     type_parameters: Vec<ast::Tparam>,
     parameters: Vec<ast::FunParam>,
     capability: Option<ast::Hint>,
@@ -4543,11 +4543,11 @@ where
         parent: &Syntax<T, V>,
         node: &Syntax<T, V>,
         env: &mut Env,
-    ) -> Result<Vec<ast::WhereConstraint>> {
+    ) -> Result<Vec<ast::WhereConstraintHint>> {
         match &node.syntax {
             Missing => Ok(vec![]),
             WhereClause(c) => {
-                let f = |n: &Syntax<T, V>, e: &mut Env| -> Result<ast::WhereConstraint> {
+                let f = |n: &Syntax<T, V>, e: &mut Env| -> Result<ast::WhereConstraintHint> {
                     match &n.syntax {
                         WhereConstraint(c) => {
                             use ast::ConstraintKind::*;
@@ -4560,7 +4560,7 @@ where
                                 _ => Self::missing_syntax("constraint operator", o, e)?,
                             };
                             let r = Self::p_hint(&c.where_constraint_right_type, e)?;
-                            Ok(ast::WhereConstraint(l, o, r))
+                            Ok(ast::WhereConstraintHint(l, o, r))
                         }
                         _ => Self::missing_syntax("where constraint", n, e),
                     }

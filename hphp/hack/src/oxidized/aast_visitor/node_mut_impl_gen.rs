@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<374480464b7cab1b8f292dc5dd223c2c>>
+// @generated SignedSource<<9ee05b840bd69c5d7468bfae688741af>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -2157,13 +2157,13 @@ impl<P: Params> NodeMut<P> for Visibility {
         }
     }
 }
-impl<P: Params> NodeMut<P> for WhereConstraint {
+impl<P: Params> NodeMut<P> for WhereConstraintHint {
     fn accept<'node>(
         &'node mut self,
         c: &mut P::Context,
         v: &mut dyn VisitorMut<'node, P = P>,
     ) -> Result<(), P::Error> {
-        v.visit_where_constraint(c, self)
+        v.visit_where_constraint_hint(c, self)
     }
     fn recurse<'node>(
         &'node mut self,

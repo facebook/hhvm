@@ -195,7 +195,7 @@ and enum_ = {
   e_enum_class: bool;
 }
 
-and where_constraint = hint * Ast_defs.constraint_kind * hint
+and where_constraint_hint = hint * Ast_defs.constraint_kind * hint
 [@@deriving
   show { with_path = false },
     eq,

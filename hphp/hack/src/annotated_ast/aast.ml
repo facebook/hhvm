@@ -283,7 +283,7 @@ and ('ex, 'fb, 'en, 'hi) fun_ = {
   f_ret: 'hi type_hint;
   f_name: sid;
   f_tparams: ('ex, 'fb, 'en, 'hi) tparam list;
-  f_where_constraints: where_constraint list;
+  f_where_constraints: where_constraint_hint list;
   f_variadic: ('ex, 'fb, 'en, 'hi) fun_variadicity;
   f_params: ('ex, 'fb, 'en, 'hi) fun_param list;
   f_cap: 'hi type_hint;
@@ -378,7 +378,7 @@ and ('ex, 'fb, 'en, 'hi) class_ = {
   c_xhp_category: (pos * pstring list) option;
   c_reqs: (class_hint * is_extends) list;
   c_implements: class_hint list;
-  c_where_constraints: where_constraint list;
+  c_where_constraints: where_constraint_hint list;
   c_consts: ('ex, 'fb, 'en, 'hi) class_const list;
   c_typeconsts: ('ex, 'fb, 'en, 'hi) class_typeconst list;
   c_vars: ('ex, 'fb, 'en, 'hi) class_var list;
@@ -481,7 +481,7 @@ and ('ex, 'fb, 'en, 'hi) method_ = {
   m_visibility: visibility;
   m_name: sid;
   m_tparams: ('ex, 'fb, 'en, 'hi) tparam list;
-  m_where_constraints: where_constraint list;
+  m_where_constraints: where_constraint_hint list;
   m_variadic: ('ex, 'fb, 'en, 'hi) fun_variadicity;
   m_params: ('ex, 'fb, 'en, 'hi) fun_param list;
   m_cap: 'hi type_hint;

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<42d7a6e928abe6bed9a357b3c905eaee>>
+// @generated SignedSource<<dec03809d27816d696fc80dd0145d838>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -743,10 +743,10 @@ pub trait VisitorMut<'node> {
     ) -> Result<(), <Self::P as Params>::Error> {
         p.recurse(c, self.object())
     }
-    fn visit_where_constraint(
+    fn visit_where_constraint_hint(
         &mut self,
         c: &mut <Self::P as Params>::Context,
-        p: &'node mut WhereConstraint,
+        p: &'node mut WhereConstraintHint,
     ) -> Result<(), <Self::P as Params>::Error> {
         p.recurse(c, self.object())
     }

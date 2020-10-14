@@ -273,17 +273,27 @@ TCA handleServiceRequest(ReqInfo& info) noexcept {
       break;
     }
 
-    case REQ_POST_INTERP_RET: {
+    case REQ_POST_INTERP_RET:
+    case REQ_POST_INTERP_RET_GENITER: {
       // This is only responsible for the control-flow aspect of the Ret:
       // getting to the destination's translation, if any.
-      auto ar = info.args[0].ar;
+      auto const ar = info.args[0].ar;
       auto const caller = info.args[1].ar;
+      UNUSED auto const func = ar->func();
+      auto const callOff = ar->callOffset();
+      auto const isAER = ar->isAsyncEagerReturn();
       assertx(caller == vmfp());
       auto const destFunc = caller->func();
       // Set PC so logging code in getTranslation doesn't get confused.
-      vmpc() = skipCall(
-        destFunc->at(destFunc->base() + ar->callOffset()));
-      if (ar->isAsyncEagerReturn()) {
+      vmpc() = skipCall(destFunc->at(destFunc->base() + callOff));
+      if (info.req == REQ_POST_INTERP_RET) {
+        TypedValue rv;
+        rv.m_data = info.args[2].tvData;
+        rv.m_type = info.args[3].tvType;
+        rv.m_aux = info.args[3].tvAux;
+        *ar->retSlot() = rv;
+      }
+      if (isAER) {
         // When returning to the interpreted FCall, the execution continues at
         // the next opcode, not honoring the request for async eager return.
         // If the callee returned eagerly, we need to wrap the result into
@@ -296,9 +306,10 @@ TCA handleServiceRequest(ReqInfo& info) noexcept {
         }
       }
       assertx(caller == vmfp());
-      TRACE(3, "REQ_POST_INTERP_RET: from %s to %s\n",
-            ar->func()->fullName()->data(),
-            destFunc->fullName()->data());
+      FTRACE(3, "REQ_POST_INTERP_RET{}: from {} to {}\n",
+             info.req == REQ_POST_INTERP_RET ? "" : "_GENITER",
+             func->fullName()->data(),
+             destFunc->fullName()->data());
       sk = liveSK();
       start = getTranslation(TransArgs{sk});
       break;

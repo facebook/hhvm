@@ -96,13 +96,17 @@ struct CGMeta;
   REQ(RETRANSLATE_OPT)    \
                           \
   /*
-   * post_interp_ret(ActRec* arg, ActRec* caller)
+   * post_interp_ret(ActRec* arg, ActRec* caller, Value tvData, DataType tvType)
+   * post_interp_ret_geniter(ActRec* arg, ActRec* caller)
    *
    * post_interp_ret is invoked in the case that translated code in the TC
    * executes the return for a frame that was pushed by the interpreter---since
    * there is no TCA to return to.
+   * The non geniter version takes the return value as inputs and writes it
+   * on to the stack.
    */                     \
-  REQ(POST_INTERP_RET)
+  REQ(POST_INTERP_RET)    \
+  REQ(POST_INTERP_RET_GENITER)
 
 /*
  * Service request types.
@@ -343,6 +347,11 @@ struct ReqInfo {
     TransID transID;
     bool boolVal;
     ActRec* ar;
+    Value tvData;
+    struct {
+      DataType tvType;
+      AuxUnion tvAux;
+    };
   } args[kMaxArgs];
 };
 

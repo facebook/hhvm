@@ -130,7 +130,7 @@ RepoStatus LitstrRepoProxy::GetLitstrsStmt::get() {
           litstrId == index++ && "LitstrId needs to be from 1 to N"
         );
         StringData* litstr; /**/ query.getStaticString(1, litstr);
-        table.setLitstr(index, litstr);
+        table.setLitstr(litstrId, litstr);
       }
     } while (!query.done());
   } catch (RepoExc& re) {

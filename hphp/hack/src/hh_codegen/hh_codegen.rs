@@ -9,6 +9,7 @@ mod gen_enum_helper;
 mod gen_visitor;
 mod quote_helper;
 
+use anyhow::{anyhow, Result};
 use common::*;
 use md5::{Digest, Md5};
 use std::{fs, fs::File, io::prelude::*, path::PathBuf, process::Command};
@@ -104,9 +105,7 @@ fn sign(file: &PathBuf) -> Result<()> {
 
     let contents = fs::read_to_string(file).expect("signing failed: could not read file");
     if !contents.contains(&expected) {
-        let error = "signing failed: input does not contain marker";
-        eprintln!("{}", error);
-        return Err(error.into());
+        return Err(anyhow!("signing failed: input does not contain marker"));
     }
 
     let mut digest = Md5::new();

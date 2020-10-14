@@ -6,7 +6,7 @@
 
 use std::fmt::Write;
 
-pub type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
+pub use anyhow::Result;
 
 pub fn to_snake(s: &str) -> String {
     let mut r = String::new();

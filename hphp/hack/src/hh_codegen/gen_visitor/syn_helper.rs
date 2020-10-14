@@ -4,7 +4,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::common::Result;
+use anyhow::{anyhow, Result};
 use quote::format_ident;
 use std::collections::HashSet;
 use syn::*;
@@ -22,7 +22,7 @@ pub fn get_ty_def_name(i: &Item) -> Result<String> {
         Enum(ItemEnum { ident, .. })
         | Struct(ItemStruct { ident, .. })
         | Type(ItemType { ident, .. }) => Ok(ident.to_string()),
-        _ => Err(format!("Not supported {:?}", i).into()),
+        _ => Err(anyhow!("Not supported {:?}", i)),
     }
 }
 
@@ -32,7 +32,7 @@ pub fn get_ty_params(i: &Item) -> Result<Vec<String>> {
         Enum(ItemEnum { generics, .. })
         | Struct(ItemStruct { generics, .. })
         | Type(ItemType { generics, .. }) => Ok(TypeParamCollector::on_generics(generics)),
-        _ => Err(format!("Not supported {:?}", i).into()),
+        _ => Err(anyhow!("Not supported {:?}", i)),
     }
 }
 
@@ -61,7 +61,7 @@ pub fn get_dep_tys(defined_types: &HashSet<&str>, i: &Item) -> Result<Vec<String
         Struct(ItemStruct { fields, .. }) => {
             Ok(LeafTyCellector::on_fields(Some(defined_types), fields).collect())
         }
-        _ => Err(format!("Not supported {:?}", i).into()),
+        _ => Err(anyhow!("Not supported {:?}", i)),
     }
 }
 

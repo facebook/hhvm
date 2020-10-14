@@ -6,8 +6,9 @@
 
 mod ref_kind;
 
-use crate::{common, common::*, quote_helper::*};
+use crate::{common::*, quote_helper::*};
 
+use anyhow::{anyhow, Result};
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
 use ref_kind::RefKind;
@@ -31,7 +32,7 @@ pub struct Args {
     output: PathBuf,
 }
 
-pub fn run(args: &Args) -> common::Result<Vec<(PathBuf, String)>> {
+pub fn run(args: &Args) -> Result<Vec<(PathBuf, String)>> {
     let inputs = &args.input;
     let output_dir = &args.output;
     let mut result = vec![];
@@ -42,7 +43,7 @@ pub fn run(args: &Args) -> common::Result<Vec<(PathBuf, String)>> {
         eprintln!("Uses: {:?}", uses);
         let mut output_filename = Path::new(file)
             .file_stem()
-            .ok_or("Unable to get file stem")?
+            .ok_or_else(|| anyhow!("Unable to get file stem"))?
             .to_os_string();
         output_filename.push("_impl_gen");
         mods.push(output_filename.clone().into_string().unwrap());
@@ -66,7 +67,7 @@ pub fn run(args: &Args) -> common::Result<Vec<(PathBuf, String)>> {
     Ok(result)
 }
 
-fn mk_mod_file(mods: Vec<String>) -> common::Result<String> {
+fn mk_mod_file(mods: Vec<String>) -> Result<String> {
     let mods = mods.into_iter().map(|m| format_ident!("{}", m));
     let content = quote! {
       #(pub mod #mods;)*

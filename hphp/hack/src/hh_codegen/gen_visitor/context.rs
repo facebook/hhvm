@@ -4,7 +4,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 use super::{gen_helper, syn_helper::*};
-use crate::common::Result;
+use anyhow::{anyhow, Result};
 use proc_macro2::TokenStream;
 use quote::format_ident;
 use std::{
@@ -42,7 +42,7 @@ impl<'a> Context<'a> {
             for i in f.items.iter() {
                 if let Ok(name) = get_ty_def_name(i) {
                     if let Some(old) = defs.insert(name, i) {
-                        return Err(format!("Type {:?} already exists, file {:?}", old, f).into());
+                        return Err(anyhow!("Type {:?} already exists, file {:?}", old, f));
                     }
                 }
             }
@@ -51,7 +51,7 @@ impl<'a> Context<'a> {
         }
         let root_item = defs
             .get(root)
-            .ok_or_else(|| format!("Root {} not found", root))?;
+            .ok_or_else(|| anyhow!("Root {} not found", root))?;
         let root_ty_params = get_ty_params(root_item)?;
         let types = Self::get_all_tys(&defs, root)?;
         Ok(Self {
@@ -128,7 +128,7 @@ impl<'a> Context<'a> {
         while let Some(ty) = q.pop_front() {
             let item = defs
                 .get(&ty)
-                .ok_or_else(|| format!("Type {} not found", ty))?;
+                .ok_or_else(|| anyhow!("Type {} not found", ty))?;
             visited.insert(get_ty_def_name(&item)?);
             let deps = get_dep_tys(&defined_types, item)?;
             for d in deps.into_iter() {

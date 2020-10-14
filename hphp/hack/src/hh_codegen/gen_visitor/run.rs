@@ -7,7 +7,7 @@ use super::{
     context::Context, generator::Generator, node_impl_generator::*, node_trait_generator::*,
     type_params_generator::*, visitor_trait_generator::*,
 };
-use crate::common::*;
+use anyhow::Result;
 use std::{
     fs::File,
     io::Read,

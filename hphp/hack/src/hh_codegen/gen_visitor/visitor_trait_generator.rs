@@ -6,6 +6,7 @@
 
 use super::{context::Context, gen_helper::*, generator::Generator, syn_helper::*};
 use crate::{common::*, impl_generator};
+use anyhow::{anyhow, Result};
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
 
@@ -78,7 +79,7 @@ pub trait VisitorTrait {
             let def = ctx
                 .defs
                 .get(ty)
-                .ok_or_else(|| format!("Type {} not found", ty))?;
+                .ok_or_else(|| anyhow!("Type {} not found", ty))?;
             let ty_params = get_ty_param_idents(def)?;
             let ty_args = gen_ty_params_with_self(ty_params);
             let name = gen_visit_fn_name(ty);

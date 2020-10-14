@@ -7,7 +7,8 @@
 use super::{
     context::Context, gen_helper::*, generator::Generator, syn_helper::*, visitor_trait_generator,
 };
-use crate::{common::*, impl_generator};
+use crate::impl_generator;
+use anyhow::{anyhow, Result};
 use proc_macro2::{Ident, TokenStream};
 use quote::{format_ident, quote};
 
@@ -27,7 +28,7 @@ pub trait NodeImpl {
                 let item = ctx
                     .defs
                     .get(ty)
-                    .ok_or_else(|| format!("Type {} not found", ty))?;
+                    .ok_or_else(|| anyhow!("Type {} not found", ty))?;
                 Self::gen_node_impl(ctx, ty, item)
             })
             .collect::<Result<Vec<_>>>()?;
@@ -139,11 +140,10 @@ pub trait NodeImpl {
                     let ty_name = format_ident!("{}", ty_name);
                     match fields {
                         Fields::Named(_fields) => {
-                            return Err(format!(
+                            return Err(anyhow!(
                                 "Enum with named fields not supported yet. Enum {:?}",
                                 ty_name
-                            )
-                            .into());
+                            ));
                         }
                         Fields::Unnamed(fields) => {
                             let mut pattern = vec![];

@@ -6317,13 +6317,20 @@ and call
           let mk_function_supertype
               env pos (type_of_el, type_of_unpacked_element) =
             let mk_fun_param ty =
-              let flags = 0 in
+              let flags =
+                (* Keep supertype as permissive as possible: *)
+                make_fp_flags
+                  ~mode:FPnormal (* TODO: deal with `inout` parameters *)
+                  ~accept_disposable:false (* TODO: deal with disposables *)
+                  ~mutability:(Some Param_maybe_mutable)
+                  ~has_default:false
+              in
               {
-                fp_pos = pos (* TODO *);
-                fp_name = None (* TODO? *);
+                fp_pos = pos;
+                fp_name = None;
                 fp_type = MakeType.enforced ty;
-                fp_rx_annotation = None (* TODO *);
-                fp_flags = flags (* TODO *);
+                fp_rx_annotation = None;
+                fp_flags = flags;
               }
             in
             let ft_arity =
@@ -6333,8 +6340,9 @@ and call
                 Fvariadic fun_param
               | None -> Fstandard
             in
-            let ft_tparams = [] (* TODO *) in
-            let ft_where_constraints = [] (* TODO *) in
+            (* TODO: ensure `ft_params`/`ft_where_constraints` don't affect subtyping *)
+            let ft_tparams = [] in
+            let ft_where_constraints = [] in
             let ft_params = List.map ~f:mk_fun_param type_of_el in
             let ft_implicit_params =
               let capability =
@@ -6351,7 +6359,15 @@ and call
             let ft_ret = MakeType.enforced return_ty in
             (* A non-reactive supertype is most permissive: *)
             let ft_reactive = Nonreactive in
-            let ft_flags = 0 (* TODO *) in
+            let ft_flags =
+              (* Keep supertype as permissive as possible: *)
+              make_ft_flags
+                Ast_defs.FSync (* `FSync` fun can still return `Awaitable<_>` *)
+                (Some Param_maybe_mutable)
+                ~return_disposable:false (* TODO: deal with disposable return *)
+                ~returns_mutable:false
+                ~returns_void_to_rx:false
+            in
             let fun_locl_type =
               {
                 ft_arity;

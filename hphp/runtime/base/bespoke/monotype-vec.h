@@ -50,6 +50,16 @@ struct MonotypeVec : public BespokeArray {
 #undef X
 
 private:
+  /**
+   * Call `c` for each Countable value of the MonotypeVec and `mc` for each
+   * MaybeCountable value. `c` takes a DataType and a Countable*, while `mc`
+   * takes a DataType and a MaybeCountable*.
+   */
+  template <typename CountableFn, typename MaybeCountableFn>
+  void forEachCountableValue(CountableFn c, MaybeCountableFn mc);
+  void decRefValues();
+  void incRefValues();
+
   static MonotypeVec* MakeReserve(uint32_t cap, HeaderKind hk, bool legacy,
                                   bool staticArr);
 
@@ -59,6 +69,7 @@ private:
   const Value* rawData() const;
   Value& valueRefUnchecked(uint32_t idx);
   const Value& valueRefUnchecked(uint32_t idx) const;
+  TypedValue typedValueUnchecked(uint32_t idx) const;
   MonotypeVec* prepareForInsert();
   MonotypeVec* copyHelper(uint8_t newSizeIndex, bool incRef) const;
   MonotypeVec* copy() const;

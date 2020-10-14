@@ -338,6 +338,35 @@ ArrayData* EmptyMonotypeVec::SetLegacyArray(EmptyMonotypeVec* eadIn,
 // MonotypeVec
 //////////////////////////////////////////////////////////////////////////////
 
+template <typename CountableFn, typename MaybeCountableFn>
+void MonotypeVec::forEachCountableValue(CountableFn c, MaybeCountableFn mc) {
+  auto const dt = type();
+  if (static_cast<data_type_t>(dt) & kHasPersistentMask) {
+    assertx(isRefcountedType(dt));
+    for (auto i = 0; i < m_size; i++) {
+      mc(dt, valueRefUnchecked(i).pcnt);
+    }
+  } else if (isRefcountedType(dt)) {
+    for (auto i = 0; i < m_size; i++) {
+      c(dt, reinterpret_cast<Countable*>(valueRefUnchecked(i).pcnt));
+    }
+  }
+}
+
+void MonotypeVec::decRefValues() {
+  forEachCountableValue(
+    [&](auto t, auto v) { if (v->decReleaseCheck()) destructorForType(t)(v); },
+    [&](auto t, auto v) { if (v->decReleaseCheck()) destructorForType(t)(v); }
+  );
+}
+
+void MonotypeVec::incRefValues() {
+  forEachCountableValue(
+    [&](auto t, auto v) { v->incRefCount(); },
+    [&](auto t, auto v) { v->incRefCount(); }
+  );
+}
+
 MonotypeVec* MonotypeVec::MakeReserve(uint32_t cap, HeaderKind hk,
                                       bool legacy, bool staticArr) {
   assertx(hk == HeaderKind::BespokeVec || hk == HeaderKind::BespokeVArray);
@@ -364,8 +393,8 @@ MonotypeVec* MonotypeVec::MakeReserve(uint32_t cap, HeaderKind hk,
 }
 
 MonotypeVec* MonotypeVec::Make(DataType type, uint32_t size,
-                                   const TypedValue* values, HeaderKind hk,
-                                   bool legacy, bool staticArr) {
+                               const TypedValue* values, HeaderKind hk,
+                               bool legacy, bool staticArr) {
   assertx(type == dt_modulo_persistence(type));
   auto const mad = MakeReserve(size, hk, legacy, staticArr);
   mad->m_size = size;
@@ -396,6 +425,10 @@ const Value& MonotypeVec::valueRefUnchecked(uint32_t idx) const {
   return const_cast<MonotypeVec*>(this)->valueRefUnchecked(idx);
 }
 
+TypedValue MonotypeVec::typedValueUnchecked(uint32_t idx) const {
+  return { valueRefUnchecked(idx), type() };
+}
+
 uint8_t MonotypeVec::sizeIndex() const {
   return m_aux16 >> 8;
 }
@@ -407,19 +440,17 @@ size_t MonotypeVec::capacity() const {
 MonotypeVec* MonotypeVec::copyHelper(uint8_t newSizeIndex, bool incRef) const {
   auto const mad =
     static_cast<MonotypeVec*>(tl_heap->objMallocIndex(newSizeIndex));
-  static_assert(sizeof(MonotypeVec) % 8 == 0);
-  memcpy8(mad, this, sizeof(MonotypeVec) + m_size * sizeof(Value));
+
+  // Copy elements 16 bytes at a time. We may copy an extra value this way,
+  // but our heap allocations are in multiples of 16 bytes, so it is safe.
+  assertx(HeapSize(this) % 16 == 0);
+  auto const bytes = sizeof(MonotypeVec) + m_size * sizeof(Value);
+  memcpy16_inline(mad, this, size_t(bytes + 15) & ~size_t(15));
+
   mad->initHeader_16(m_kind, OneReference,
                      packSizeIndexAndAuxBits(newSizeIndex, auxBits()));
 
-  if (incRef) {
-    for (uint32_t i = 0; i < m_size; i++) {
-      TypedValue tv;
-      tv.m_data = valueRefUnchecked(i);
-      tv.m_type = type();
-      tvIncRefGen(tv);
-    }
-  }
+  if (incRef) mad->incRefValues();
 
   return mad;
 }
@@ -432,7 +463,6 @@ MonotypeVec* MonotypeVec::grow() {
   auto const cow = cowCheck();
   auto const mad = copyHelper(sizeIndex() + kSizeClassesPerDoubling, cow);
   if (!cow) m_size = 0;
-
   return mad;
 }
 
@@ -456,9 +486,7 @@ ArrayData* MonotypeVec::escalateWithCapacity(size_t capacity) const {
   auto const ad = isVecType() ? PackedArray::MakeReserveVec(capacity)
                               : PackedArray::MakeReserveVArray(capacity);
   for (uint32_t i = 0; i < size(); i++) {
-    TypedValue tv;
-    tv.m_data = valueRefUnchecked(i);
-    tv.m_type = type();
+    auto const tv = typedValueUnchecked(i);
     tvIncRefGen(tv);
     packedData(ad)[i] = tv;
   }
@@ -477,10 +505,7 @@ bool MonotypeVec::checkInvariants() const {
   assertx(isRealType(type()));
   assertx(type() == dt_modulo_persistence(type()));
   if (size() > 0) {
-    TypedValue tv;
-    tv.m_data = valueRefUnchecked(0);
-    tv.m_type = type();
-    assertx(tvIsPlausible(tv));
+    assertx(tvIsPlausible(typedValueUnchecked(0)));
   }
 
   return true;
@@ -519,7 +544,7 @@ ArrayData* MonotypeVec::EscalateToVanilla(const MonotypeVec* mad,
 }
 
 void MonotypeVec::ConvertToUncounted(MonotypeVec* madIn,
-                                    DataWalker::PointerMap* seen) {
+                                     DataWalker::PointerMap* seen) {
   auto const oldType = madIn->type();
   for (uint32_t i = 0; i < madIn->size(); i++) {
     DataType dt = oldType;
@@ -532,9 +557,7 @@ void MonotypeVec::ConvertToUncounted(MonotypeVec* madIn,
 void MonotypeVec::ReleaseUncounted(MonotypeVec* mad) {
   if (!mad->uncountedDecRef()) return;
   for (uint32_t i = 0; i < mad->size(); i++) {
-    TypedValue tv;
-    tv.m_data = mad->valueRefUnchecked(i);
-    tv.m_type = mad->type();
+    auto tv = mad->typedValueUnchecked(i);
     ReleaseUncountedTv(&tv);
   }
 }
@@ -543,12 +566,7 @@ void MonotypeVec::Release(MonotypeVec* mad) {
   mad->fixCountForRelease();
   assertx(mad->isRefCounted());
   assertx(mad->hasExactlyOneRef());
-  for (uint32_t i = 0; i < mad->size(); i ++) {
-    TypedValue tv;
-    tv.m_data = mad->valueRefUnchecked(i);
-    tv.m_type = mad->type();
-    tvDecRefGen(tv);
-  }
+  mad->decRefValues();
   tl_heap->objFreeIndex(mad, mad->sizeIndex());
 }
 
@@ -558,11 +576,7 @@ bool MonotypeVec::IsVectorData(const MonotypeVec* mad) {
 
 TypedValue MonotypeVec::GetInt(const MonotypeVec* mad, int64_t k) {
   if (size_t(k) >= mad->size()) return make_tv<KindOfUninit>();
-
-  TypedValue tv;
-  tv.m_data = mad->valueRefUnchecked(k);
-  tv.m_type = mad->type();
-  return tv;
+  return mad->typedValueUnchecked(k);
 }
 
 TypedValue MonotypeVec::GetStr(const MonotypeVec* mad, const StringData*) {
@@ -575,11 +589,8 @@ TypedValue MonotypeVec::GetKey(const MonotypeVec* mad, ssize_t pos) {
 }
 
 TypedValue MonotypeVec::GetVal(const MonotypeVec* mad, ssize_t pos) {
-  assertx(pos < mad->size());
-  TypedValue tv;
-  tv.m_data = mad->valueRefUnchecked(pos);
-  tv.m_type = mad->type();
-  return tv;
+  assertx(size_t(pos) < mad->size());
+  return mad->typedValueUnchecked(pos);
 }
 
 ssize_t MonotypeVec::GetIntPos(const MonotypeVec* mad, int64_t k) {
@@ -646,10 +657,7 @@ ArrayData* MonotypeVec::RemoveInt(MonotypeVec* madIn, int64_t k) {
   if (LIKELY(size_t(k) + 1 == madIn->m_size)) {
     auto const mad = madIn->cowCheck() ? madIn->copy() : madIn;
     mad->m_size--;
-    TypedValue tv;
-    tv.m_data = mad->valueRefUnchecked(mad->m_size);
-    tv.m_type = mad->type();
-    tvDecRefGen(tv);
+    tvDecRefGen(mad->typedValueUnchecked(mad->m_size));
     return mad;
   }
 
@@ -745,6 +753,7 @@ ArrayData* MonotypeVec::SetLegacyArray(MonotypeVec* madIn,
 }
 
 ArrayData* maybeMonoify(ArrayData* ad) {
+  assertx(ad->isVanilla());
   if (!ad->isVecType() && !ad->isVArray()) return ad;
 
   auto const et = EntryTypes::ForArray(ad);

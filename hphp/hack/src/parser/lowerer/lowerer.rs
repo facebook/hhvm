@@ -4958,20 +4958,19 @@ where
                         // TODO(T77095784): check pos and span usage
                         EnumClassEnumerator(c) => {
                             // we turn:
-                            // - NaMe<type>(args)
+                            // - name<type>(args)
                             // into
-                            // - const Elt<enum_name, type> NaMe = new Elt('name', args)
+                            // - const Elt<enum_name, type> name = new Elt('name', args)
                             let span = Self::p_pos(n, env);
                             let name = Self::pos_name(&c.enum_class_enumerator_name, env)?;
                             let pos = &name.0;
-                            let lower_name =
-                                ast::Expr_::mk_string(BString::from(name.1.to_lowercase()));
-                            let lower_name_expr = ast::Expr::new(pos.clone(), lower_name);
+                            let string_name = ast::Expr_::mk_string(BString::from(name.1.clone()));
+                            let string_name_expr = ast::Expr::new(pos.clone(), string_name);
                             let elt_type = Self::p_hint(&c.enum_class_enumerator_type, env)?;
                             let full_type = build_elt(pos.clone(), elt_type);
                             let initial_value =
                                 Self::p_expr(&c.enum_class_enumerator_initial_value, env)?;
-                            let elt_arguments = vec![lower_name_expr, initial_value];
+                            let elt_arguments = vec![string_name_expr, initial_value];
                             let elt_id = ast::Id(pos.clone(), special_classes::ELT.to_string());
                             let elt_name = E_::mk_id(elt_id.clone());
                             let elt_expr = ast::Expr::new(span.clone(), elt_name);

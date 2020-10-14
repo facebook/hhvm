@@ -3,8 +3,6 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-#[macro_use]
-extern crate clap;
 
 mod common;
 mod gen_enum_helper;
@@ -14,33 +12,44 @@ mod quote_helper;
 use common::*;
 use md5::{Digest, Md5};
 use std::{fs, fs::File, io::prelude::*, path::PathBuf, process::Command};
+use structopt::StructOpt;
+
+#[derive(Debug, StructOpt)]
+#[structopt(no_version)] // don't consult CARGO_PKG_VERSION (buck doesn't set it)
+struct Opts {
+    /// Command to regenerate the output. This text will be included in generated file headers.
+    #[structopt(long)]
+    regen_cmd: Option<String>,
+
+    /// Path to a Rust formatter binary, which will be used on the generated output.
+    #[structopt(long)]
+    rustfmt: Option<String>,
+
+    /// The codegen task to run.
+    #[structopt(subcommand)]
+    subcommand: Subcommand,
+}
+
+#[derive(Debug, StructOpt)]
+enum Subcommand {
+    /// Generate convenient factory functions and predicates for enum types.
+    EnumHelpers(gen_enum_helper::Args),
+    /// Generate Visitor and VisitorMut traits.
+    Visitor(gen_visitor::Args),
+}
 
 fn main() -> Result<()> {
-    let matches = clap_app!(myapp =>
-        (@arg regencmd: --("regen-cmd") +takes_value "command to re-genreate the output, this text will be included in file header")
-        (@arg rustfmt: -f --rustfmt +takes_value "Rust formatter")
-        (@subcommand enum_helpers =>
-            (@arg input: -i --input +required +takes_value ... "Rust file contains enums")
-            (@arg output: -o --output +takes_value "mod output path")
-        )
-        (@subcommand visitor =>
-            (@arg input: -i --input +required +takes_value ... "Rust file contains all types")
-            (@arg root: -r --root +required +takes_value "root type")
-            (@arg output: -o --output +takes_value "mod output path")
-        )
-    )
-    .get_matches();
+    let opts = Opts::from_args();
 
-    let formatter = matches.value_of("rustfmt");
+    let formatter = opts.rustfmt.as_deref();
     eprintln!("Rust formatter set to {:?}", formatter);
 
-    let regencmd = matches.value_of("regencmd");
+    let regencmd = opts.regen_cmd.as_deref();
     eprintln!("Re-generate cmd set to {:?}", regencmd);
 
-    let files = match matches.subcommand() {
-        ("enum_helpers", Some(sub_m)) => gen_enum_helper::run(sub_m)?,
-        ("visitor", Some(sub_m)) => gen_visitor::run(sub_m)?,
-        _ => vec![],
+    let files = match opts.subcommand {
+        Subcommand::EnumHelpers(args) => gen_enum_helper::run(&args)?,
+        Subcommand::Visitor(args) => gen_visitor::run(&args)?,
     };
 
     let output_files = files

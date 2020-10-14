@@ -10,10 +10,10 @@ name = "hh_codegen"
 path = "hh_codegen.rs"
 
 [dependencies]
-clap = "2.33"
 hex = "0.4"
 itertools = "0.8"
 md-5 = "0.8"
 proc-macro2 = "1.0"
 quote = "1.0"
+structopt = "0.3.7"
 syn = { version = "1.0", features = ["full", "visit", "visit-mut", "fold", "extra-traits"] }

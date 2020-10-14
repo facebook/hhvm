@@ -3,13 +3,11 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-extern crate proc_macro;
 
 mod ref_kind;
 
 use crate::{common, common::*, quote_helper::*};
 
-use clap::ArgMatches;
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
 use ref_kind::RefKind;
@@ -19,11 +17,23 @@ use std::{
     io::Read,
     path::{Path, PathBuf},
 };
+use structopt::StructOpt;
 use syn::*;
 
-pub fn run(m: &ArgMatches) -> common::Result<Vec<(PathBuf, String)>> {
-    let inputs = m.values_of("input").ok_or("missing input files")?;
-    let output_dir = Path::new(m.value_of("output").ok_or("missing output path")?);
+#[derive(Debug, StructOpt)]
+pub struct Args {
+    /// Rust files containing the enum types for which codegen will be performed.
+    #[structopt(short, long)]
+    input: Vec<String>,
+
+    /// The directory to which generated files will be written.
+    #[structopt(short, long, parse(from_os_str))]
+    output: PathBuf,
+}
+
+pub fn run(args: &Args) -> common::Result<Vec<(PathBuf, String)>> {
+    let inputs = &args.input;
+    let output_dir = &args.output;
     let mut result = vec![];
     let mut mods = vec![];
     for input in inputs {

@@ -15,6 +15,7 @@ cd "$FBCODE_ROOT"
 RUSTFMT_PATH="${RUSTFMT_PATH:-"$(realpath ../tools/third-party/rustfmt/rustfmt)"}"
 
 BUILD_AND_RUN="hphp/hack/scripts/build_and_run.sh"
+
 "${BUILD_AND_RUN}" src/hh_oxidize hh_oxidize                                  \
   --out-dir hphp/hack/src/oxidized/gen                                        \
   --regen-command "$REGEN_COMMAND"                                            \
@@ -38,7 +39,7 @@ BUILD_AND_RUN="hphp/hack/scripts/build_and_run.sh"
 "${BUILD_AND_RUN}" src/hh_codegen hh_codegen                                  \
   --regen-cmd "$REGEN_COMMAND"                                                \
   --rustfmt "$RUSTFMT_PATH"                                                   \
-  enum_helpers                                                                \
+  enum-helpers                                                                \
   --input "hphp/hack/src/oxidized/gen/aast.rs|crate::ast_defs|crate::aast::*|crate::LocalIdMap" \
   --input "hphp/hack/src/oxidized/gen/aast_defs.rs|crate::aast_defs::*"       \
   --input "hphp/hack/src/oxidized/gen/ast_defs.rs|crate::ast_defs::*"         \

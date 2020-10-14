@@ -8,18 +8,37 @@ use super::{
     type_params_generator::*, visitor_trait_generator::*,
 };
 use crate::common::*;
-use clap::ArgMatches;
 use std::{
     fs::File,
     io::Read,
     path::{Path, PathBuf},
 };
+use structopt::StructOpt;
 
-pub fn run(m: &ArgMatches) -> Result<Vec<(PathBuf, String)>> {
-    let inputs = m.values_of("input").ok_or("missing input files")?;
-    let output_dir = Path::new(m.value_of("output").ok_or("missing output path")?);
-    let root = m.value_of("root").ok_or("missing root")?;
+#[derive(Debug, StructOpt)]
+pub struct Args {
+    /// Rust files containing the types for which codegen will be performed.
+    /// All types reachable from the given root type must be defined in one of
+    /// the files provided as `--input` or `--extern-input`.
+    #[structopt(short, long, parse(from_os_str))]
+    input: Vec<PathBuf>,
+
+    /// The root type of the AST. All types reachable from this type will be
+    /// visited by the generated visitor.
+    #[structopt(short, long)]
+    root: String,
+
+    /// The directory to which generated files will be written.
+    #[structopt(short, long, parse(from_os_str))]
+    output: PathBuf,
+}
+
+pub fn run(args: &Args) -> Result<Vec<(PathBuf, String)>> {
+    let inputs = &args.input;
+    let output_dir = &args.output;
+    let root = &args.root;
     let files = inputs
+        .iter()
         .map(|file| -> Result<(syn::File, &Path)> {
             let file_path = Path::new(file);
             let mut file = File::open(file)?;

@@ -291,7 +291,9 @@ std::pair<std::vector<FuncId>, uint64_t> hfsortFuncs() {
     }
   }
   if (auto const extra = cg.targets.size() - seen.size()) {
-    Logger::Info("retranslateAll: %lu functions had no samples!", extra);
+    if (serverMode) {
+      Logger::Info("retranslateAll: %lu functions had no samples!", extra);
+    }
     for (int i = 0; i < cg.targets.size(); ++i) {
       if (!seen.count(i)) {
         addFuncId(i);

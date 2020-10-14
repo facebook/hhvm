@@ -196,6 +196,11 @@ and enum_ = {
 }
 
 and where_constraint_hint = hint * Ast_defs.constraint_kind * hint
+
+and reify_kind =
+  | Erased
+  | SoftReified
+  | Reified
 [@@deriving
   show { with_path = false },
     eq,

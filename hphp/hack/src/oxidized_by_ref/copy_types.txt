@@ -1,4 +1,5 @@
 aast_defs::Hint_
+aast_defs::ReifyKind
 aast_defs::Sid
 aast_defs::Tprim
 aast_defs::XhpChild
@@ -15,6 +16,7 @@ aast::Def
 aast::Expr_
 aast::FunctionPtrId
 aast::FunVariadicity
+aast::ReifyKind
 aast::Sid
 aast::Stmt_
 aast::TypeconstAbstractKind
@@ -41,6 +43,7 @@ oxidized::aast_defs::FuncReactive
 oxidized::aast_defs::ImportFlavor
 oxidized::aast_defs::KvcKind
 oxidized::aast_defs::ParamMutability
+oxidized::aast_defs::ReifyKind
 oxidized::aast_defs::TypedefVisibility
 oxidized::aast_defs::UseAsVisibility
 oxidized::aast_defs::VcKind
@@ -57,6 +60,7 @@ oxidized::aast::NsKind
 oxidized::aast::OgNullFlavor
 oxidized::aast::ParamKind
 oxidized::aast::ParamMutability
+oxidized::aast::ReifyKind
 oxidized::aast::ReifyKind
 oxidized::aast::TypedefVisibility
 oxidized::aast::Uop

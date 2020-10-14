@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<88792975533b8bc9fc5cc700ca81bc1b>>
+// @generated SignedSource<<1667714d87f446debdeb00089bccb4d1>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -1026,6 +1026,35 @@ impl TypedefVisibility {
     pub fn is_opaque(&self) -> bool {
         match self {
             TypedefVisibility::Opaque => true,
+            _ => false,
+        }
+    }
+}
+impl ReifyKind {
+    pub fn mk_erased() -> Self {
+        ReifyKind::Erased
+    }
+    pub fn mk_soft_reified() -> Self {
+        ReifyKind::SoftReified
+    }
+    pub fn mk_reified() -> Self {
+        ReifyKind::Reified
+    }
+    pub fn is_erased(&self) -> bool {
+        match self {
+            ReifyKind::Erased => true,
+            _ => false,
+        }
+    }
+    pub fn is_soft_reified(&self) -> bool {
+        match self {
+            ReifyKind::SoftReified => true,
+            _ => false,
+        }
+    }
+    pub fn is_reified(&self) -> bool {
+        match self {
+            ReifyKind::Reified => true,
             _ => false,
         }
     }

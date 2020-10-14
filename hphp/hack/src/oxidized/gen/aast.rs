@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<8bd1f90afd43fecd48fdade09a73a0c7>>
+// @generated SignedSource<<76df3b41c55ac9a428ed15aad5841cbc>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -1341,29 +1341,6 @@ pub enum NsKind {
     NSConst,
 }
 impl TrivialDrop for NsKind {}
-
-#[derive(
-    Clone,
-    Copy,
-    Debug,
-    Deserialize,
-    Eq,
-    FromOcamlRep,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-pub enum ReifyKind {
-    Erased,
-    SoftReified,
-    Reified,
-}
-impl TrivialDrop for ReifyKind {}
 
 #[derive(
     Clone,

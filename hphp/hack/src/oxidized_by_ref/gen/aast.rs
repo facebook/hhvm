@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<fe9495903f7b9d3b08004dbd983ada64>>
+// @generated SignedSource<<7cfaf3a38d82c49f41cd1840dcff5620>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -1436,7 +1436,5 @@ impl<'a, Ex: TrivialDrop, Fb: TrivialDrop, En: TrivialDrop, Hi: TrivialDrop> Tri
 }
 
 pub use oxidized::aast::NsKind;
-
-pub use oxidized::aast::ReifyKind;
 
 pub use oxidized::aast::BreakContinueLevel;

@@ -604,11 +604,6 @@ and ns_kind =
   | NSFun
   | NSConst
 
-and reify_kind =
-  | Erased
-  | SoftReified
-  | Reified
-
 and doc_comment = (Doc_comment.t[@visitors.opaque])
 
 let is_erased = function

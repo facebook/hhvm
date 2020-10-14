@@ -7,6 +7,7 @@ oxidized::aast_defs::KvcKind
 oxidized::aast_defs::MutableReturn
 oxidized::aast_defs::ParamMutability
 oxidized::aast_defs::PuLoc
+oxidized::aast_defs::ReifyKind
 oxidized::aast_defs::TypedefVisibility
 oxidized::aast_defs::UseAsVisibility
 oxidized::aast_defs::VcKind
@@ -22,6 +23,7 @@ oxidized::aast::IsVariadic
 oxidized::aast::KvcKind
 oxidized::aast::NsKind
 oxidized::aast::OgNullFlavor
+oxidized::aast::ReifyKind
 oxidized::aast::ReifyKind
 oxidized::aast::TypedefVisibility
 oxidized::aast::UseAsVisibility

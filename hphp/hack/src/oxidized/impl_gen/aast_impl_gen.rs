@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<40cdbf8caf658a9c41094042e8057b00>>
+// @generated SignedSource<<72485e8e9219c949317f6a8e26521446>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -3567,35 +3567,6 @@ impl NsKind {
     pub fn is_nsconst(&self) -> bool {
         match self {
             NsKind::NSConst => true,
-            _ => false,
-        }
-    }
-}
-impl ReifyKind {
-    pub fn mk_erased() -> Self {
-        ReifyKind::Erased
-    }
-    pub fn mk_soft_reified() -> Self {
-        ReifyKind::SoftReified
-    }
-    pub fn mk_reified() -> Self {
-        ReifyKind::Reified
-    }
-    pub fn is_erased(&self) -> bool {
-        match self {
-            ReifyKind::Erased => true,
-            _ => false,
-        }
-    }
-    pub fn is_soft_reified(&self) -> bool {
-        match self {
-            ReifyKind::SoftReified => true,
-            _ => false,
-        }
-    }
-    pub fn is_reified(&self) -> bool {
-        match self {
-            ReifyKind::Reified => true,
             _ => false,
         }
     }

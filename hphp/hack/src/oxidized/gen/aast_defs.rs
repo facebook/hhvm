@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<249023b9b9dbf027162d79720fc52ba6>>
+// @generated SignedSource<<5397b8d95654b0da0c9a3369fd05b240>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -470,3 +470,26 @@ pub struct Enum_ {
     ToOcamlRep
 )]
 pub struct WhereConstraintHint(pub Hint, pub ast_defs::ConstraintKind, pub Hint);
+
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRep,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+pub enum ReifyKind {
+    Erased,
+    SoftReified,
+    Reified,
+}
+impl TrivialDrop for ReifyKind {}

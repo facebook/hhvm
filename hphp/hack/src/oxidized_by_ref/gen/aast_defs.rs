@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<26550ecc75450cad04afa07a272cb695>>
+// @generated SignedSource<<955cbe59363c1ab8fdb1b9f731aec3d3>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -301,3 +301,5 @@ pub struct WhereConstraintHint<'a>(
     pub &'a Hint<'a>,
 );
 impl<'a> TrivialDrop for WhereConstraintHint<'a> {}
+
+pub use oxidized::aast_defs::ReifyKind;

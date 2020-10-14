@@ -3593,14 +3593,7 @@ and new_object
     let env = Env.set_tyvar_variance env new_ty in
     let (env, tel, typed_unpack_element, ctor_fty) =
       let env = check_expected_ty "New" env new_ty expected in
-      call_construct
-        p
-        env
-        class_info
-        (explicit_targs, params)
-        el
-        unpacked_element
-        cid
+      call_construct p env class_info params el unpacked_element cid new_ty
     in
     ( if equal_consistent_kind (snd (Cls.construct class_info)) Inconsistent then
       match cid with
@@ -5505,6 +5498,7 @@ and class_id_for_new
   let (env, tal, te, cid_ty) =
     static_class_id
       ~check_targs_well_kinded:true
+      ~check_explicit_targs:true
       ~exact
       ~check_constraints:false
       p
@@ -5778,22 +5772,12 @@ and static_class_id
     let (env, result_ty) = resolve_ety env ty in
     make_result env [] (Aast.CIexpr te) result_ty
 
-and call_construct p env class_ (explicit_targs, params) el unpacked_element cid
-    =
-  let cid =
+and call_construct p env class_ params el unpacked_element cid cid_ty =
+  let (cid, cid_ty) =
     if Nast.equal_class_id_ cid CIparent then
-      CIstatic
+      (CIstatic, mk (Reason.Rwitness p, TUtils.this_of (Env.get_self env)))
     else
-      cid
-  in
-  let (env, _tal, _tcid, cid_ty) =
-    static_class_id
-      ~check_constraints:false
-      ~check_explicit_targs:true
-      p
-      env
-      explicit_targs
-      cid
+      (cid, cid_ty)
   in
   let ety_env =
     {

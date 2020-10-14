@@ -48,3 +48,99 @@ pub fn insert_header(s: &str, command: &str) -> Result<String> {
     )?;
     Ok(content)
 }
+
+pub mod gen_helpers {
+    use proc_macro2::TokenStream;
+    use quote::{format_ident, quote};
+
+    pub fn gen_module_uses(ms: impl Iterator<Item = impl AsRef<str>>) -> TokenStream {
+        let mods = ms.map(|m| format_ident!("{}", m.as_ref()));
+        quote! {
+            use crate::{#(#mods::*,)*};
+        }
+    }
+}
+
+pub mod syn_helpers {
+    use std::collections::HashSet;
+
+    use anyhow::{anyhow, Result};
+    use syn::*;
+
+    pub fn get_ty_def_name(i: &Item) -> Result<String> {
+        use Item::*;
+        match i {
+            Enum(ItemEnum { ident, .. })
+            | Struct(ItemStruct { ident, .. })
+            | Type(ItemType { ident, .. }) => Ok(ident.to_string()),
+            _ => Err(anyhow!("Not supported {:?}", i)),
+        }
+    }
+
+    pub fn get_dep_tys(defined_types: &HashSet<&str>, i: &Item) -> Result<Vec<String>> {
+        use Item::*;
+        match i {
+            Enum(ItemEnum { variants, .. }) => Ok(variants
+                .iter()
+                .fold(HashSet::<String>::new(), |mut a, v| {
+                    for ty in LeafTyCollector::on_fields(Some(defined_types), &v.fields) {
+                        a.insert(ty);
+                    }
+                    a
+                })
+                .into_iter()
+                .collect()),
+            Type(ItemType { ty, .. }) => {
+                Ok(LeafTyCollector::on_type(Some(defined_types), ty.as_ref()).collect())
+            }
+            Struct(ItemStruct { fields, .. }) => {
+                Ok(LeafTyCollector::on_fields(Some(defined_types), fields).collect())
+            }
+            _ => Err(anyhow!("Not supported {:?}", i)),
+        }
+    }
+
+    struct LeafTyCollector {
+        discovered_types: HashSet<String>,
+    }
+
+    impl LeafTyCollector {
+        pub fn new() -> Self {
+            Self {
+                discovered_types: HashSet::new(),
+            }
+        }
+
+        pub fn on_type<'a>(
+            filter: Option<&'a HashSet<&'a str>>,
+            ty: &Type,
+        ) -> impl Iterator<Item = String> + 'a {
+            let mut collector = Self::new();
+            visit::visit_type(&mut collector, ty);
+            collector
+                .discovered_types
+                .into_iter()
+                .filter(move |s| filter.map_or(true, |f| f.contains(s.as_str())))
+        }
+
+        pub fn on_fields<'a>(
+            filter: Option<&'a HashSet<&'a str>>,
+            fields: &Fields,
+        ) -> impl Iterator<Item = String> + 'a {
+            let mut collector = Self::new();
+            visit::visit_fields(&mut collector, fields);
+            collector
+                .discovered_types
+                .into_iter()
+                .filter(move |s| filter.map_or(true, |f| f.contains(s.as_str())))
+        }
+    }
+
+    impl<'ast> visit::Visit<'ast> for LeafTyCollector {
+        fn visit_path_segment(&mut self, node: &'ast PathSegment) {
+            let ty = node.ident.to_string();
+            self.discovered_types.insert(ty);
+            visit::visit_path_segment(self, node);
+        }
+    }
+}

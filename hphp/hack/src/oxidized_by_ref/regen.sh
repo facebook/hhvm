@@ -15,6 +15,7 @@ cd "$FBCODE_ROOT"
 RUSTFMT_PATH="${RUSTFMT_PATH:-"$(realpath ../tools/third-party/rustfmt/rustfmt)"}"
 
 BUILD_AND_RUN="hphp/hack/scripts/build_and_run.sh"
+
 "${BUILD_AND_RUN}" src/hh_oxidize hh_oxidize                                  \
   --out-dir hphp/hack/src/oxidized_by_ref/gen                                 \
   --regen-command "$REGEN_COMMAND"                                            \
@@ -54,6 +55,24 @@ BUILD_AND_RUN="hphp/hack/scripts/build_and_run.sh"
   hphp/hack/src/typing/typing_reason.ml                                       \
   hphp/hack/src/typing/typing_tyvar_occurrences.ml                            \
   hphp/hack/src/utils/core/prim_defs.ml                                       \
+
+"${BUILD_AND_RUN}" src/hh_codegen hh_codegen                                  \
+  --regen-cmd "$REGEN_COMMAND"                                                \
+  --rustfmt "$RUSTFMT_PATH"                                                   \
+  by-ref-decl-visitor                                                         \
+  --input "hphp/hack/src/oxidized_by_ref/gen/aast_defs.rs"                    \
+  --input "hphp/hack/src/oxidized_by_ref/gen/ast_defs.rs"                     \
+  --input "hphp/hack/src/oxidized_by_ref/gen/decl_defs.rs"                    \
+  --input "hphp/hack/src/oxidized_by_ref/gen/shallow_decl_defs.rs"            \
+  --input "hphp/hack/src/oxidized_by_ref/gen/typing_defs_core.rs"             \
+  --input "hphp/hack/src/oxidized_by_ref/gen/typing_defs.rs"                  \
+  --input "hphp/hack/src/oxidized_by_ref/gen/typing_reason.rs"                \
+  --input "hphp/hack/src/oxidized_by_ref/manual/direct_decl_parser.rs"        \
+  --input "hphp/hack/src/oxidized_by_ref/manual/shape_map.rs"                 \
+  --extern-input "hphp/hack/src/oxidized/gen/aast_defs.rs"                    \
+  --extern-input "hphp/hack/src/oxidized/gen/ast_defs.rs"                     \
+  --output "hphp/hack/src/oxidized_by_ref/decl_visitor/"                      \
+  --root "Decls"                                                              \
 
 # Re-export generated modules (listed in gen/mod.rs) in the crate root, lib.rs
 cd "$(dirname "${REGEN_COMMAND}")"

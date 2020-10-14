@@ -30,6 +30,8 @@ pub use manual::typing_defs_flags;
 pub use manual::typing_logic;
 pub use manual::typing_set;
 
+pub mod decl_visitor;
+
 mod gen;
 
 pub use gen::aast;

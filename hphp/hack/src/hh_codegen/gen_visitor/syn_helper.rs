@@ -6,23 +6,14 @@
 
 use anyhow::{anyhow, Result};
 use quote::format_ident;
-use std::collections::HashSet;
 use syn::*;
+
+pub use crate::common::syn_helpers::{get_dep_tys, get_ty_def_name};
 
 pub fn is_alias(i: &Item) -> bool {
     match i {
         Item::Type(_) => true,
         _ => false,
-    }
-}
-
-pub fn get_ty_def_name(i: &Item) -> Result<String> {
-    use Item::*;
-    match i {
-        Enum(ItemEnum { ident, .. })
-        | Struct(ItemStruct { ident, .. })
-        | Type(ItemType { ident, .. }) => Ok(ident.to_string()),
-        _ => Err(anyhow!("Not supported {:?}", i)),
     }
 }
 
@@ -42,29 +33,6 @@ pub fn get_ty_param_idents(i: &Item) -> Result<impl Iterator<Item = Ident>> {
         .map(|t| format_ident!("{}", t)))
 }
 
-pub fn get_dep_tys(defined_types: &HashSet<&str>, i: &Item) -> Result<Vec<String>> {
-    use Item::*;
-    match i {
-        Enum(ItemEnum { variants, .. }) => Ok(variants
-            .iter()
-            .fold(HashSet::<String>::new(), |mut a, v| {
-                for ty in LeafTyCellector::on_fields(Some(defined_types), &v.fields) {
-                    a.insert(ty);
-                }
-                a
-            })
-            .into_iter()
-            .collect()),
-        Type(ItemType { ty, .. }) => {
-            Ok(LeafTyCellector::on_type(Some(defined_types), ty.as_ref()).collect())
-        }
-        Struct(ItemStruct { fields, .. }) => {
-            Ok(LeafTyCellector::on_fields(Some(defined_types), fields).collect())
-        }
-        _ => Err(anyhow!("Not supported {:?}", i)),
-    }
-}
-
 pub fn get_field_and_type_from_named<'a>(
     FieldsNamed { named, .. }: &'a FieldsNamed,
 ) -> Vec<(String, &'a Type)> {
@@ -78,50 +46,6 @@ pub fn get_field_and_type_from_unnamed(
     FieldsUnnamed { unnamed, .. }: &FieldsUnnamed,
 ) -> impl Iterator<Item = (usize, &Type)> {
     itertools::enumerate(unnamed.into_iter().map(|f| &f.ty))
-}
-
-pub struct LeafTyCellector {
-    pub discovered_types: HashSet<String>,
-}
-
-impl LeafTyCellector {
-    pub fn new() -> Self {
-        Self {
-            discovered_types: HashSet::new(),
-        }
-    }
-
-    pub fn on_type<'a>(
-        filter: Option<&'a HashSet<&'a str>>,
-        ty: &Type,
-    ) -> impl Iterator<Item = String> + 'a {
-        let mut collector = Self::new();
-        visit::visit_type(&mut collector, ty);
-        collector
-            .discovered_types
-            .into_iter()
-            .filter(move |s| filter.map_or(true, |f| f.contains(s.as_str())))
-    }
-
-    pub fn on_fields<'a>(
-        filter: Option<&'a HashSet<&'a str>>,
-        fields: &Fields,
-    ) -> impl Iterator<Item = String> + 'a {
-        let mut collector = Self::new();
-        visit::visit_fields(&mut collector, fields);
-        collector
-            .discovered_types
-            .into_iter()
-            .filter(move |s| filter.map_or(true, |f| f.contains(s.as_str())))
-    }
-}
-
-impl<'ast> visit::Visit<'ast> for LeafTyCellector {
-    fn visit_path_segment(&mut self, node: &'ast PathSegment) {
-        let ty = node.ident.to_string();
-        self.discovered_types.insert(ty);
-        visit::visit_path_segment(self, node);
-    }
 }
 
 struct TypeParamCollector(Vec<String>);

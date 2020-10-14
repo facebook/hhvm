@@ -251,139 +251,136 @@ let check_call env method_info pos reason ft arg_types =
   if TypecheckerOptions.unsafe_rx (Env.get_tcopt env) then
     env
   else
-    match env_reactivity env with
-    (* non reactive and locally reactive functions can call pretty much anything
-     - do nothing *)
-    | Nonreactive
-    | Local _ ->
-      env
-    | _ ->
-      (* check steps:
+    (* check steps:
      1. ensure that conditions for all parameters (including receiver) are met
      2. check that reactivity of the callee matches reactivity of the caller with
        stripped condition types (they were checked on step 1) *)
-      let caller_reactivity =
-        let rec go = function
-          | Pure (Some _)
-          | MaybeReactive (Pure (Some _)) ->
-            MaybeReactive (Pure None)
-          | Reactive (Some _)
-          | MaybeReactive (Reactive (Some _)) ->
-            MaybeReactive (Reactive None)
-          | Shallow (Some _)
-          | MaybeReactive (Shallow (Some _)) ->
-            MaybeReactive (Shallow None)
-          | Local (Some _)
-          | MaybeReactive (Local (Some _)) ->
-            MaybeReactive (Local None)
-          | MaybeReactive (RxVar (Some v)) ->
-            MaybeReactive (RxVar (Some (go v)))
-          | r -> r
-        in
-        go (env_reactivity env)
+    let caller_reactivity =
+      let rec go = function
+        | Pure (Some _)
+        | MaybeReactive (Pure (Some _)) ->
+          MaybeReactive (Pure None)
+        | Reactive (Some _)
+        | MaybeReactive (Reactive (Some _)) ->
+          MaybeReactive (Reactive None)
+        | Shallow (Some _)
+        | MaybeReactive (Shallow (Some _)) ->
+          MaybeReactive (Shallow None)
+        | Local (Some _)
+        | MaybeReactive (Local (Some _)) ->
+          MaybeReactive (Local None)
+        | MaybeReactive (RxVar (Some v)) -> MaybeReactive (RxVar (Some (go v)))
+        | r -> r
       in
-      (* check that all conditions are met if we are calling something
+      go (env_reactivity env)
+    in
+    (* check that all conditions are met if we are calling something
      conditionally reactive *)
-      let callee_is_conditionally_reactive =
-        (* receiver is conditionally reactive *)
-        Option.is_some (condition_type_from_reactivity ft.ft_reactive)
-        || (* one of arguments is conditionally reactive *)
-        List.exists ft.ft_params ~f:(function
-            | { fp_rx_annotation = Some (Param_rx_if_impl _); _ } -> true
-            | _ -> false)
-      in
-      let env =
-        if callee_is_conditionally_reactive then
-          (* check that condition for receiver is met *)
-          let env =
-            match
-              (condition_type_from_reactivity ft.ft_reactive, method_info)
-            with
-            | ( Some cond_ty,
-                Some { receiver_type; receiver_is_self = is_self; _ } ) ->
+    let callee_is_conditionally_reactive =
+      (* receiver is conditionally reactive *)
+      Option.is_some (condition_type_from_reactivity ft.ft_reactive)
+      || (* one of arguments is conditionally reactive *)
+      List.exists ft.ft_params ~f:(function
+          | { fp_rx_annotation = Some (Param_rx_if_impl _); _ } -> true
+          | _ -> false)
+    in
+    let do_conditional_check =
+      match env_reactivity env with
+      | Local _
+      | Nonreactive ->
+        false
+      | _ -> true
+    in
+    let env =
+      if callee_is_conditionally_reactive && do_conditional_check then
+        (* check that condition for receiver is met *)
+        let env =
+          match
+            (condition_type_from_reactivity ft.ft_reactive, method_info)
+          with
+          | (Some cond_ty, Some { receiver_type; receiver_is_self = is_self; _ })
+            ->
+            check_only_rx_if_impl
+              env
+              ~is_receiver:true
+              ~is_self
+              pos
+              reason
+              receiver_type
+              cond_ty
+          | _ -> env
+        in
+        (* check that conditions for all arguments are met *)
+        let rec check_params env ft_params arg_types =
+          match (ft_params, arg_types) with
+          | ([], _) -> env
+          | ( { fp_rx_annotation = Some (Param_rx_if_impl ty); fp_type; _ } :: tl,
+              arg_ty :: arg_tl ) ->
+            let ty =
+              if Typing_utils.is_option env fp_type.et_type then
+                MakeType.nullable_decl (get_reason ty) ty
+              else
+                ty
+            in
+            (* check if argument type matches condition *)
+            let env =
               check_only_rx_if_impl
                 env
-                ~is_receiver:true
-                ~is_self
+                ~is_receiver:false
+                ~is_self:false
                 pos
                 reason
-                receiver_type
-                cond_ty
-            | _ -> env
-          in
-          (* check that conditions for all arguments are met *)
-          let rec check_params env ft_params arg_types =
-            match (ft_params, arg_types) with
-            | ([], _) -> env
-            | ( { fp_rx_annotation = Some (Param_rx_if_impl ty); fp_type; _ }
-                :: tl,
-                arg_ty :: arg_tl ) ->
-              let ty =
-                if Typing_utils.is_option env fp_type.et_type then
-                  MakeType.nullable_decl (get_reason ty) ty
-                else
-                  ty
-              in
-              (* check if argument type matches condition *)
-              let env =
-                check_only_rx_if_impl
-                  env
-                  ~is_receiver:false
-                  ~is_self:false
-                  pos
-                  reason
-                  arg_ty
-                  ty
-              in
-              (* check the rest of arguments *)
-              check_params env tl arg_tl
-            | ( { fp_rx_annotation = Some (Param_rx_if_impl ty); fp_type; _ }
-                :: tl,
-                [] )
-              when Typing_utils.is_option env fp_type.et_type ->
-              (* if there are more parameters than actual arguments - assume that remaining parameters
+                arg_ty
+                ty
+            in
+            (* check the rest of arguments *)
+            check_params env tl arg_tl
+          | ( { fp_rx_annotation = Some (Param_rx_if_impl ty); fp_type; _ } :: tl,
+              [] )
+            when Typing_utils.is_option env fp_type.et_type ->
+            (* if there are more parameters than actual arguments - assume that remaining parameters
             have default values (actual arity check is performed elsewhere).  *)
-              let ty = MakeType.nullable_decl (get_reason ty) ty in
-              (* Treat missing arguments as if null was provided explicitly *)
-              let arg_ty = MakeType.null Reason.none in
-              let env =
-                check_only_rx_if_impl
-                  env
-                  ~is_receiver:false
-                  ~is_self:false
-                  pos
-                  reason
-                  arg_ty
-                  ty
-              in
-              check_params env tl []
-            | ({ fp_rx_annotation = Some (Param_rx_if_impl _); _ } :: _, []) ->
-              (* Missing argument for non-nulalble RxIfImpl parameter - no reasonable defaults are expected.
+            let ty = MakeType.nullable_decl (get_reason ty) ty in
+            (* Treat missing arguments as if null was provided explicitly *)
+            let arg_ty = MakeType.null Reason.none in
+            let env =
+              check_only_rx_if_impl
+                env
+                ~is_receiver:false
+                ~is_self:false
+                pos
+                reason
+                arg_ty
+                ty
+            in
+            check_params env tl []
+          | ({ fp_rx_annotation = Some (Param_rx_if_impl _); _ } :: _, []) ->
+            (* Missing argument for non-nulalble RxIfImpl parameter - no reasonable defaults are expected.
             TODO: add check that type of parameter annotated with RxIfImpl is class or interface *)
-              env
-            (*false*)
-            | (_ :: tl, _ :: arg_tl) -> check_params env tl arg_tl
-            | (_ :: tl, []) -> check_params env tl []
-          in
-          check_params env ft.ft_params arg_types
-        else
-          env
-      in
-      (* if call is not allowed - this means that that at least one of conditions
+            env
+          (*false*)
+          | (_ :: tl, _ :: arg_tl) -> check_params env tl arg_tl
+          | (_ :: tl, []) -> check_params env tl []
+        in
+        check_params env ft.ft_params arg_types
+      else
+        env
+    in
+    (* if call is not allowed - this means that that at least one of conditions
      was not met and since errors were already reported we can bail out. Otherwise
      we need to verify that reactivities for callee and caller are in agreement. *)
-      let env =
-        (* pick the function we are trying to invoke *)
-        match try_get_reactivity_from_condition_type env method_info with
-        | None ->
-          let (env, r, opt_pos) =
-            get_effective_reactivity env ft.ft_reactive ft arg_types
-          in
-          check_reactivity_matches env pos reason caller_reactivity (r, opt_pos)
-        | Some r ->
-          check_reactivity_matches env pos reason caller_reactivity (r, None)
-      in
-      env
+    let env =
+      (* pick the function we are trying to invoke *)
+      match try_get_reactivity_from_condition_type env method_info with
+      | None ->
+        let (env, r, opt_pos) =
+          get_effective_reactivity env ft.ft_reactive ft arg_types
+        in
+        check_reactivity_matches env pos reason caller_reactivity (r, opt_pos)
+      | Some r ->
+        check_reactivity_matches env pos reason caller_reactivity (r, None)
+    in
+    env
 
 let disallow_atmost_rx_as_rxfunc_on_non_functions env param param_ty =
   let module UA = Naming_special_names.UserAttributes in

@@ -185,11 +185,6 @@ void cgLdRetVal(IRLS& env, const IRInstruction* inst) {
   loadTV(v, inst->dst(), dstLoc(env, inst, 0), fp[kArRetOff]);
 }
 
-void cgDbgTrashRetVal(IRLS& env, const IRInstruction* inst) {
-  auto& v = vmain(env);
-  trashFullTV(v, srcLoc(env, inst, 0).reg()[kArRetOff], kTVTrashJITRetVal);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 void cgGenericRetDecRefs(IRLS& env, const IRInstruction* inst) {

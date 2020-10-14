@@ -215,10 +215,6 @@ void implAwaitE(IRGS& env, SSATmp* child, Offset suspendOffset,
 
     if (RO::EvalEnableImplicitContext) gen(env, StImplicitContext, waitHandle);
 
-    if (RuntimeOption::EvalHHIRGenerateAsserts) {
-      gen(env, DbgTrashRetVal, fp(env));
-    }
-
     if (isInlining(env)) {
       suspendFromInlined(env, waitHandle);
       return;
@@ -669,9 +665,6 @@ void emitCreateCont(IRGS& env) {
 
   // Grab caller info from the ActRec, free the ActRec, and return control to
   // the caller.
-  if (RuntimeOption::EvalHHIRGenerateAsserts) {
-    gen(env, DbgTrashRetVal, fp(env));
-  }
   auto const spAdjust = offsetToReturnSlot(env);
   auto const retData = RetCtrlData { spAdjust, false, AuxUnion{0} };
   gen(env, RetCtrl, retData, sp(env), fp(env), cont);

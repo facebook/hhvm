@@ -578,7 +578,6 @@ bool opcodeMayRaise(Opcode opc) {
   case DbgTraceCall:
   case DbgTrashFrame:
   case DbgTrashMem:
-  case DbgTrashRetVal:
   case DbgTrashStk:
   case DblAsBits:
   case DebugBacktrace:

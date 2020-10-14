@@ -1675,11 +1675,6 @@ To string conversions:
   into the dest.  This is used by NativeImpl.  TODO(#7150575): We want to make
   NativeImpl return a TypedValue in the C++ ABI registers.
 
-| DbgTrashRetVal, ND, S(FramePtr), NF
-
-  For debugging purposes.  Store kTVTrashJITRetVal to the return value slot on
-  the activation record pointed to by S0.
-
 | GenericRetDecRefs, ND, S(FramePtr), NF
 
   Does decrefs of all the current function's locals, where S0 is a pointer to

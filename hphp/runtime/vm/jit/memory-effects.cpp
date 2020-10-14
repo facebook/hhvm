@@ -1950,8 +1950,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       AEmpty, AEmpty, AEmpty,
       pointee(inst.src(0))
     };
-  case DbgTrashRetVal:
-    return IrrelevantEffects {};
 
   //////////////////////////////////////////////////////////////////////
 

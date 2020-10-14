@@ -92,10 +92,6 @@ void freeLocalsAndThis(IRGS& env) {
 }
 
 void normalReturn(IRGS& env, SSATmp* retval, bool suspended) {
-  if (RuntimeOption::EvalHHIRGenerateAsserts) {
-    gen(env, DbgTrashRetVal, fp(env));
-  }
-
   // If we're on the eager side of an async function, we have to zero-out the
   // TV aux of the return value, because it might be used as a flag if async
   // eager return was requested.

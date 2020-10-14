@@ -156,12 +156,6 @@ let get_vc_inst vc_kind ty =
     Some vty
   | _ -> get_value_collection_inst ty
 
-(* Is this type array<vty> or a supertype for some vty? *)
-let get_akvarray_inst ty =
-  match get_node ty with
-  | Tvarray vty -> Some vty
-  | _ -> get_value_collection_inst ty
-
 (* Is this type one of the three key-value collection types
  * e.g. dict<kty,vty> or a supertype for some kty and vty? *)
 let get_kvc_inst p kvc_kind ty =
@@ -4449,7 +4443,7 @@ and dispatch_call
         let (env, _tx, x) = expr env x in
         let (env, output_container) = build_output_container env x in
         begin
-          match get_akvarray_inst funty.ft_ret.et_type with
+          match get_varray_inst funty.ft_ret.et_type with
           | None -> (env, fty)
           | Some elem_ty ->
             let (env, elem_ty) = output_container env elem_ty in
@@ -6934,7 +6928,7 @@ and safely_refine_is_array env ty p pred_name arg_expr =
         | `HackVec -> MakeType.vec r tfresh
         | `HackKeyset -> MakeType.keyset r tarrkey
         | `PHPArray -> array_ty
-        | `AnyArray -> MakeType.keyed_container r tarrkey tfresh
+        | `AnyArray -> MakeType.any_array r tarrkey tfresh
         | `HackDictOrDArray ->
           MakeType.union
             r

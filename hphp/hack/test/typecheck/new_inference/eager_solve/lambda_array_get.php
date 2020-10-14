@@ -139,7 +139,7 @@ function testvec(ConstVector<string> $cv):void {
     vec["a"],
     $y ==> { return $y[1]; }
   );
-  expect<Contra<KeyedContainer<int,string>>>($x1[1]);
+  expect<Contra<AnyArray<int,string>>>($x1[1]);
   $x2 = applyAndReturn(
     $cv,
     $y ==> { return $y[1]; }

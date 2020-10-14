@@ -1,16 +1,18 @@
 File "lambda_bad_pos.php", line 26, characters 34-35:
 Invalid return type (Typing[4323])
-File "lambda_bad_pos.php", line 6, characters 27-34:
-Some type constraint(s) are violated here
-File "lambda_bad_pos.php", line 6, characters 21-22:
-`Tv` is a constrained type parameter
-File "lambda_bad_pos.php", line 6, characters 27-34:
-Expected `arraykey`
-File "lambda_bad_pos.php", line 25, characters 22-22:
-But got `C`
-File "hackarray.hhi", line 15, characters 61-61:
-  via this generic `T`
-File "interfaces.hhi", line 118, characters 84-85:
-  via this generic `Tv`
-File "rx/interfaces.hhi", line 35, characters 63-64:
-  via this generic `Tv`
+  File "lambda_bad_pos.php", line 6, characters 27-34:
+  Some type constraint(s) are violated here
+  File "lambda_bad_pos.php", line 6, characters 21-22:
+  `Tv` is a constrained type parameter
+  File "lambda_bad_pos.php", line 6, characters 27-34:
+  Expected `arraykey`
+  File "lambda_bad_pos.php", line 25, characters 22-22:
+  But got `C`
+  File "hackarray.hhi", line 18, characters 52-52:
+    via this generic `T`
+  File "hackarray.hhi", line 14, characters 77-78:
+    via this generic `Tv`
+  File "interfaces.hhi", line 118, characters 84-85:
+    via this generic `Tv`
+  File "rx/interfaces.hhi", line 35, characters 63-64:
+    via this generic `Tv`

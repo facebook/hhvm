@@ -71,6 +71,7 @@ let rec array_get ~array_pos ~expr_pos ~index_pos env array_ty index_ty =
          || cn = SN.Collections.cConstMap
          || cn = SN.Collections.cImmMap
          || cn = SN.Collections.cKeyedContainer
+         || cn = SN.Collections.cAnyArray
          || cn = SN.Collections.cDict
          || cn = SN.Collections.cKeyset ->
     type_index env index_ty key_ty (Reason.index_class cn)

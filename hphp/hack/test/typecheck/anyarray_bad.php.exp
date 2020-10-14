@@ -1,0 +1,54 @@
+File "anyarray_bad.php", line 35, characters 5-17:
+  AnyArray<arraykey, mixed>
+File "anyarray_bad.php", line 10, characters 15-20:
+Invalid argument (Typing[4110])
+  File "anyarray_bad.php", line 3, characters 22-39:
+  Expected `AnyArray<int, int>`
+  File "anyarray_bad.php", line 10, characters 15-20:
+  But got `Map<[unresolved], [unresolved]>`
+File "anyarray_bad.php", line 11, characters 15-20:
+Invalid argument (Typing[4110])
+  File "anyarray_bad.php", line 3, characters 22-39:
+  Expected `AnyArray<int, int>`
+  File "anyarray_bad.php", line 11, characters 15-20:
+  But got `Set<[unresolved]>`
+File "anyarray_bad.php", line 12, characters 15-26:
+Invalid argument (Typing[4110])
+  File "anyarray_bad.php", line 3, characters 22-39:
+  Expected `AnyArray<int, int>`
+  File "anyarray_bad.php", line 12, characters 15-26:
+  But got `ImmVector<nothing>`
+File "anyarray_bad.php", line 13, characters 38-50:
+Invalid argument (Typing[4110])
+  File "anyarray_bad.php", line 13, characters 30-35:
+  Expected `string`
+  File "anyarray_bad.php", line 6, characters 16-17:
+    via this generic `Tv`
+  File "anyarray_bad.php", line 4, characters 39-41:
+  But got `int`
+File "anyarray_bad.php", line 17, characters 3-13:
+You cannot mutate this (Typing[4011])
+  File "anyarray_bad.php", line 4, characters 25-42:
+  This is an object of type AnyArray<int, int>
+File "anyarray_bad.php", line 25, characters 19-21:
+The method `foo` has the wrong type (Typing[4341])
+  File "anyarray_bad.php", line 25, characters 32-34:
+  Expected `int`
+  File "anyarray_bad.php", line 21, characters 32-39:
+  But got `arraykey`
+File "anyarray_bad.php", line 38, characters 10-13:
+Invalid return type (Typing[4110])
+  File "anyarray_bad.php", line 29, characters 42-49:
+  Expected `arraykey`
+  File "anyarray_bad.php", line 29, characters 42-49:
+  Considering that this type argument is invariant with respect to `Set`
+  File "anyarray_bad.php", line 32, characters 10-24:
+  But got `mixed` from the argument to this \HH\is_any_array test
+  File "hackarray.hhi", line 14, characters 77-78:
+    via this generic `Tv`
+  File "interfaces.hhi", line 118, characters 84-85:
+    via this generic `Tv`
+  File "rx/interfaces.hhi", line 35, characters 33-34:
+    via this generic `Tv`
+  File "rx/interfaces.hhi", line 26, characters 52-53:
+    via this generic `Tv`

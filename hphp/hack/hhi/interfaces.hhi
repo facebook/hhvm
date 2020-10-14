@@ -114,7 +114,7 @@ interface Container<+Tv> extends \HH\Rx\Traversable<Tv> {}
  * @guide /hack/collections/interfaces
  * @guide /hack/collections/read-write
  */
-<<__Sealed(\ConstVector::class, \ConstMap::class, \ConstSet::class, dict::class, keyset::class, vec::class)>>
+<<__Sealed(\ConstVector::class, \ConstMap::class, \ConstSet::class, AnyArray::class)>>
 interface KeyedContainer<+Tk as arraykey, +Tv> extends \HH\Rx\KeyedTraversable<Tk, Tv>, Container<Tv> {}
 
 /**

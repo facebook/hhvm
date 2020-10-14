@@ -1,14 +1,16 @@
 File "unpack_call12_infer.php", line 18, characters 21-22:
 Invalid argument (Typing[4110])
-File "unpack_call12_infer.php", line 22, characters 32-34:
-Expected `int`
-File "unpack_call12_infer.php", line 15, characters 16-20:
-But got `string`
-File "hackarray.hhi", line 15, characters 61-61:
-  via this generic `T`
-File "interfaces.hhi", line 118, characters 84-85:
-  via this generic `Tv`
-File "rx/interfaces.hhi", line 35, characters 33-34:
-  via this generic `Tv`
-File "rx/interfaces.hhi", line 26, characters 52-53:
-  via this generic `Tv`
+  File "unpack_call12_infer.php", line 22, characters 32-34:
+  Expected `int`
+  File "unpack_call12_infer.php", line 15, characters 16-20:
+  But got `string`
+  File "hackarray.hhi", line 18, characters 52-52:
+    via this generic `T`
+  File "hackarray.hhi", line 14, characters 77-78:
+    via this generic `Tv`
+  File "interfaces.hhi", line 118, characters 84-85:
+    via this generic `Tv`
+  File "rx/interfaces.hhi", line 35, characters 33-34:
+    via this generic `Tv`
+  File "rx/interfaces.hhi", line 26, characters 52-53:
+    via this generic `Tv`

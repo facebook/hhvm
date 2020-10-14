@@ -46,6 +46,8 @@ let keyset r ty = class_type r SN.Collections.cKeyset [ty]
 
 let vec r ty = class_type r SN.Collections.cVec [ty]
 
+let any_array r kty vty = class_type r SN.Collections.cAnyArray [kty; vty]
+
 let container r ty = class_type r SN.Collections.cContainer [ty]
 
 let throwable r = class_type r SN.Classes.cThrowable []

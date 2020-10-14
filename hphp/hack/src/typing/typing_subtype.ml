@@ -1816,7 +1816,8 @@ and simplify_subtype_i
           | (Nonexact, [tk_super; tv_super])
             when String.equal class_name SN.Collections.cKeyedTraversable
                  || String.equal class_name SN.Rx.cKeyedTraversable
-                 || String.equal class_name SN.Collections.cKeyedContainer ->
+                 || String.equal class_name SN.Collections.cKeyedContainer
+                 || String.equal class_name SN.Collections.cAnyArray ->
             (match get_node ty_sub with
             | Tvarray _ ->
               env
@@ -1835,7 +1836,8 @@ and simplify_subtype_i
           | (Nonexact, [])
             when String.equal class_name SN.Collections.cKeyedTraversable
                  || String.equal class_name SN.Rx.cKeyedTraversable
-                 || String.equal class_name SN.Collections.cKeyedContainer ->
+                 || String.equal class_name SN.Collections.cKeyedContainer
+                 || String.equal class_name SN.Collections.cAnyArray ->
             (* All arrays are subtypes of the untyped KeyedContainer / Traversables *)
             valid env
           | (_, _) -> default_subtype env)

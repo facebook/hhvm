@@ -98,6 +98,8 @@ module Collections = struct
 
   let cConstCollection = "\\ConstCollection"
 
+  let cAnyArray = "\\HH\\AnyArray"
+
   let cDict = "\\HH\\dict"
 
   let cVec = "\\HH\\vec"

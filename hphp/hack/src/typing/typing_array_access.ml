@@ -70,6 +70,7 @@ let widen_for_array_get ~lhs_of_null_coalesce ~expr_pos index_expr env ty =
          || cn = SN.Collections.cConstMap
          || cn = SN.Collections.cImmMap
          || cn = SN.Collections.cKeyedContainer
+         || cn = SN.Collections.cAnyArray
          || cn = SN.Collections.cConstVector
          || cn = SN.Collections.cImmVector ->
     let (env, element_ty) = Env.fresh_invariant_type_var env expr_pos in
@@ -308,7 +309,8 @@ let rec array_get
       | Tclass (((_, cn) as id), _, argl)
         when String.equal cn SN.Collections.cConstMap
              || String.equal cn SN.Collections.cImmMap
-             || String.equal cn SN.Collections.cKeyedContainer ->
+             || String.equal cn SN.Collections.cKeyedContainer
+             || String.equal cn SN.Collections.cAnyArray ->
         if is_lvalue then
           error_const_mutation env expr_pos ty1
         else
@@ -734,6 +736,7 @@ let assign_array_get ~array_pos ~expr_pos ur env ty1 key tkey ty2 =
         when String.equal cn SN.Collections.cConstMap
              || String.equal cn SN.Collections.cImmMap
              || String.equal cn SN.Collections.cKeyedContainer
+             || String.equal cn SN.Collections.cAnyArray
              || String.equal cn SN.Collections.cConstVector
              || String.equal cn SN.Collections.cImmVector
              || String.equal cn SN.Collections.cPair ->

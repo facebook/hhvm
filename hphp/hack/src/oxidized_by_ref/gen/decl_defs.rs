@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d32fc00908cd2454934482f2221c9a29>>
+// @generated SignedSource<<875756161141535232a03946a68cf13a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -213,7 +213,7 @@ pub struct Element<'a> {
     pub flags: isize,
     pub reactivity: Option<MethodReactivity<'a>>,
     pub origin: &'a str,
-    pub visibility: &'a Visibility<'a>,
+    pub visibility: CeVisibility<'a>,
     pub deprecated: Option<&'a str>,
 }
 impl<'a> TrivialDrop for Element<'a> {}

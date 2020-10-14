@@ -108,7 +108,7 @@ val get_concrete_supertypes : env -> Tast.ty -> env * Tast.ty list
     {!get_self}) to access its members with the given {visibility}. *)
 val is_visible :
   env ->
-  Typing_defs.visibility * bool ->
+  Typing_defs.ce_visibility * bool ->
   Nast.class_id_ option ->
   Decl_provider.class_decl ->
   bool

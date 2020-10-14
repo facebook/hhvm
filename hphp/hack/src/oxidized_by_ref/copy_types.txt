@@ -98,6 +98,7 @@ tast::Reactivity
 tast::TypeParamMutability
 tast::ValKind
 typing_cont_key::TypingContKey
+typing_defs_core::CeVisibility
 typing_defs_core::ConsistentKind
 typing_defs_core::ConstraintType
 typing_defs_core::ConstraintType_
@@ -114,11 +115,11 @@ typing_defs_core::Reactivity
 typing_defs_core::ShapeKind
 typing_defs_core::Ty_
 typing_defs_core::ValKind
-typing_defs_core::Visibility
 typing_defs_core::XhpAttr
 typing_defs_core::XhpAttrTag
 typing_defs_flags::FunParamFlags
 typing_defs_flags::FunTypeFlags
+typing_defs::CeVisibility
 typing_defs::ConsistentKind
 typing_defs::ConstraintType
 typing_defs::DeserializationError

@@ -797,7 +797,7 @@ and static_prop_decl
   acc
 
 and visibility (cid : string) (visibility : Aast_defs.visibility) :
-    Typing_defs.visibility =
+    Typing_defs.ce_visibility =
   match visibility with
   | Public -> Vpublic
   | Protected -> Vprotected cid

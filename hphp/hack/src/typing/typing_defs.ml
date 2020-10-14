@@ -132,7 +132,7 @@ type const_decl = {
 }
 
 type class_elt = {
-  ce_visibility: visibility;
+  ce_visibility: ce_visibility;
   ce_type: decl_ty Lazy.t;
   ce_origin: string;  (** identifies the class from which this elt originates *)
   ce_deprecated: string option;

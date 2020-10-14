@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<654255742d5d381d62f1891b581be832>>
+// @generated SignedSource<<64785250bfd8e7e1772943966e746c35>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -74,7 +74,7 @@ impl<'a> TrivialDrop for ConstDecl<'a> {}
     ToOcamlRep
 )]
 pub struct ClassElt<'a> {
-    pub visibility: &'a Visibility<'a>,
+    pub visibility: CeVisibility<'a>,
     pub type_: &'a lazy::Lazy<&'a Ty<'a>>,
     /// identifies the class from which this elt originates
     pub origin: &'a str,

@@ -214,7 +214,7 @@ and element = {
   elt_flags: int;
   elt_reactivity: method_reactivity option;
   elt_origin: string;
-  elt_visibility: visibility;
+  elt_visibility: ce_visibility;
   elt_deprecated: string option;
 }
 

@@ -14,22 +14,22 @@ val check_class_access :
   use_pos:Pos.t ->
   def_pos:Pos.t ->
   env ->
-  visibility * bool ->
+  ce_visibility * bool ->
   Nast.class_id_ ->
   Decl_provider.class_decl ->
   unit
 
 val check_obj_access :
-  use_pos:Pos.t -> def_pos:Pos.t -> env -> visibility -> unit
+  use_pos:Pos.t -> def_pos:Pos.t -> env -> ce_visibility -> unit
 
 val check_inst_meth_access :
-  use_pos:Pos.t -> def_pos:Pos.t -> visibility -> unit
+  use_pos:Pos.t -> def_pos:Pos.t -> ce_visibility -> unit
 
 val check_deprecated : use_pos:Pos.t -> def_pos:Pos.t -> string option -> unit
 
 val is_visible :
   env ->
-  visibility * bool ->
+  ce_visibility * bool ->
   Nast.class_id_ option ->
   Decl_provider.class_decl ->
   bool

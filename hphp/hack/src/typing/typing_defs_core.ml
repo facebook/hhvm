@@ -10,7 +10,7 @@
 module Reason = Typing_reason
 module SN = Naming_special_names
 
-type visibility =
+type ce_visibility =
   | Vpublic
   | Vprivate of string
   | Vprotected of string

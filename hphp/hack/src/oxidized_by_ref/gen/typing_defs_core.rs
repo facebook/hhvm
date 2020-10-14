@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<5fb86c77850e2f75b6c2aaf4992b45f2>>
+// @generated SignedSource<<7ce6f0d3d97549669b6bebd337bf40bb>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -34,12 +34,12 @@ pub use crate::typing_reason as reason;
     Serialize,
     ToOcamlRep
 )]
-pub enum Visibility<'a> {
+pub enum CeVisibility<'a> {
     Vpublic,
     Vprivate(&'a str),
     Vprotected(&'a str),
 }
-impl<'a> TrivialDrop for Visibility<'a> {}
+impl<'a> TrivialDrop for CeVisibility<'a> {}
 
 #[derive(
     Clone,

@@ -459,8 +459,10 @@ struct StringData final : MaybeCountable,
 
   /*
    * Returns: case insensitive hash value for this string.
+   * hashStatic() requires isStatic() as a precondition.
    */
   strhash_t hash() const;
+  strhash_t hashStatic() const;
   NEVER_INLINE strhash_t hashHelper() const;
   static strhash_t hash(const char* s, size_t len);
   static strhash_t hash_unsafe(const char* s, size_t len);

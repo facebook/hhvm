@@ -155,6 +155,13 @@ inline strhash_t StringData::hash() const {
   return h ? h : hashHelper();
 }
 
+inline strhash_t StringData::hashStatic() const {
+  assertx(isStatic());
+  const strhash_t h = m_hash & STRHASH_MASK;
+  assertx(h);
+  return h;
+}
+
 inline bool StringData::same(const StringData* s) const {
   assertx(s);
   if (m_len != s->m_len) return false;

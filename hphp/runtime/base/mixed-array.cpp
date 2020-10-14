@@ -228,7 +228,7 @@ MixedArray* MixedArray::MakeStructImpl(uint32_t size,
   for (uint32_t i = 0; i < size; i++) {
     assertx(keys[i]->isStatic());
     auto k = keys[i];
-    auto h = k->hash();
+    auto h = k->hashStatic();
     data[i].setStaticKey(const_cast<StringData*>(k), h);
     const auto& tv = values[size - i - 1];
     data[i].data.m_data = tv.m_data;

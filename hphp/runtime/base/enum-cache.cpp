@@ -142,8 +142,14 @@ const EnumValues* EnumCache::loadEnumValues(
     if (consts[i].isAbstract() || consts[i].isType()) {
       continue;
     }
-    if (consts[i].cls != klass && !recurse) {
-      continue;
+    // The outer condition below enables caching of enum constants defined
+    // in enums included by the current class.
+    if (!(isEnum(klass)
+        && klass->hasIncludedEnums()
+        && klass->allIncludedEnums().contains(consts[i].cls->name()))) {
+      if (consts[i].cls != klass && !recurse) {
+        continue;
+      }
     }
     TypedValue value = consts[i].val;
     // Handle dynamically set constants. We can't get a static value here.

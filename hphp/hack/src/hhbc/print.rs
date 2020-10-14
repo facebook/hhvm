@@ -764,6 +764,25 @@ fn print_implements<W: Write>(
     w.write(")")
 }
 
+fn print_enum_includes<W: Write>(
+    w: &mut W,
+    enum_includes: &Vec<class::Type<'_>>,
+) -> Result<(), W::Error> {
+    if enum_includes.is_empty() {
+        return Ok(());
+    }
+    w.write(" enum_includes (")?;
+    concat_str_by(
+        w,
+        " ",
+        enum_includes
+            .iter()
+            .map(|x| x.to_raw_string())
+            .collect::<Vec<_>>(),
+    )?;
+    w.write(")")
+}
+
 fn print_shadowed_tparams<W: Write>(
     w: &mut W,
     shadowed_tparams: &[String],
@@ -881,6 +900,7 @@ fn print_class_def<W: Write>(
     print_span(w, &class_def.span)?;
     print_extends(w, class_def.base.as_ref().map(|x| x.to_raw_string()))?;
     print_implements(w, &class_def.implements)?;
+    print_enum_includes(w, &class_def.enum_includes)?;
     w.write(" {")?;
     ctx.block(w, |c, w| {
         print_doc_comment(c, w, &class_def.doc_comment)?;

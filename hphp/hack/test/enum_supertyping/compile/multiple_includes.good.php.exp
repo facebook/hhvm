@@ -1,0 +1,20 @@
+# multiple_includes.good.php starts here
+
+.filepath "multiple_includes.good.php";
+
+
+.class {} [enum final] E1 (8,8) extends HH\BuiltinEnum {
+  .enum_ty <"HH\\int" extended_hint>;
+}
+
+.class {} [enum final] E2 (10,10) extends HH\BuiltinEnum {
+  .enum_ty <"HH\\int" extended_hint>;
+}
+
+.class {} [enum final] F (12,12) extends HH\BuiltinEnum enum_includes (E1 E2) {
+  .enum_ty <"HH\\int" extended_hint>;
+}
+
+.file_attributes ["__EnableUnstableFeatures"("""y:1:{s:16:\"enum_supertyping\";}""")] ;
+
+# multiple_includes.good.php ends here

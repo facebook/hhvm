@@ -1251,6 +1251,7 @@ void emit_class(EmitUnitState& state, UnitEmitter& ue, PreClassEmitter* pce,
   pce->setUserAttributes(cls.userAttributes);
 
   for (auto& x : cls.interfaceNames)     pce->addInterface(x);
+  for (auto& x : cls.includedEnums)      pce->addEnumInclude(x);
   for (auto& x : cls.usedTraitNames)     pce->addUsedTrait(x);
   for (auto& x : cls.requirements)       pce->addClassRequirement(x);
   for (auto& x : cls.traitPrecRules)     pce->addTraitPrecRule(x);

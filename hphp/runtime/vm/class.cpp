@@ -1927,6 +1927,8 @@ Class::Class(PreClass* preClass, Class* parent,
   setSpecial();       // must run before setRTAttributes
   setRTAttributes();
   setInterfaces();
+  setEnumType();
+  setIncludedEnums();
   setConstants();
   setProperties();    // must run before setInitializers
   setReifiedData();
@@ -2142,6 +2144,33 @@ void Class::setConstants() {
     }
   }
 
+  // Copy in constants off included enums
+  if (m_extra) {
+    for (int i = 0, size = m_extra->m_includedEnums.size(); i < size; ++i) {
+      const Class* includedEnum = m_extra->m_includedEnums[i];
+
+      for (Slot slot = 0; slot < includedEnum->m_constants.size(); ++slot) {
+        auto const eConst = includedEnum->m_constants[slot];
+        auto const existing = builder.find(eConst.name);
+
+        if (existing == builder.end()) {
+          builder.add(eConst.name, eConst);
+          continue;
+        } else {
+          auto& existingConst = builder[existing->second];
+          if (existingConst.cls != eConst.cls) {
+            raise_error("%s cannot inherit the constant %s from %s, because "
+                        "it was previously inherited from %s",
+                        m_preClass->name()->data(),
+                        eConst.name->data(),
+                        eConst.cls->name()->data(),
+                        existingConst.cls->name()->data());
+          }
+        }
+      }
+    }
+  }
+
   // Copy in interface constants.
   for (int i = 0, size = m_interfaces.size(); i < size; ++i) {
     const Class* iface = m_interfaces[i];
@@ -2220,7 +2249,19 @@ void Class::setConstants() {
           }
         }
       }
-
+      // Forbid redefining constants from included enums
+      if ((definingClass->attrs() & AttrEnum) && m_extra) {
+        for (int j = 0, size = m_extra->m_includedEnums.size(); j < size; ++j) {
+          const Class* includedEnum = m_extra->m_includedEnums[j];
+          if (includedEnum->hasConstant(preConst->name())) {
+            raise_error("Cannot override previously defined constant "
+                        "%s::%s in %s",
+                        builder[it2->second].cls->name()->data(),
+                        preConst->name()->data(),
+                        m_preClass->name()->data());
+          }
+        }
+      }
       if (preConst->isAbstract() &&
           !builder[it2->second].isAbstract()) {
         raise_error("Cannot re-declare as abstract previously defined "
@@ -3550,6 +3591,48 @@ void Class::setEnumType() {
                   m_preClass->name()->data());
     }
   }
+}
+
+void Class::setIncludedEnums() {
+  IncludedEnumMap::Builder includedEnumsBuilder;
+
+  if (!isEnum(this) || m_preClass->includedEnums().empty()) {
+    return;
+  }
+
+  allocExtraData();
+
+  for (auto it = m_preClass->includedEnums().begin();
+       it != m_preClass->includedEnums().end(); ++it) {
+    auto cp = Class::load(*it);
+    if (cp == nullptr) {
+      raise_error("Undefined enum: %s", (*it)->data());
+    }
+    if (!isEnum(cp)) {
+      raise_error("%s cannot include %s - it is not an enum",
+                  m_preClass->name()->data(), cp->name()->data());
+    }
+    auto cp_baseType = cp->m_enumBaseTy;
+    if (m_enumBaseTy &&
+        (!cp_baseType ||
+         isIntType(*cp_baseType) != isIntType(*m_enumBaseTy) ||
+         isStringType(*cp_baseType) != isStringType(*m_enumBaseTy))) {
+      raise_error("%s cannot include %s - base type mismatch",
+                  m_preClass->name()->data(), cp->name()->data());
+    }
+    if (!includedEnumsBuilder.contains(cp->name())) {
+      includedEnumsBuilder.add(cp->name(), LowPtr<Class>(cp));
+    }
+    int size = cp->m_extra->m_includedEnums.size();
+    for (int i = 0; i < size; i++) {
+      auto includedEnum = cp->m_extra->m_includedEnums[i];
+      if (!includedEnumsBuilder.contains(includedEnum->name())) {
+        includedEnumsBuilder.add(includedEnum->name(), includedEnum);
+      }
+    }
+  }
+
+  m_extra->m_includedEnums.create(includedEnumsBuilder);
 }
 
 void Class::setLSBMemoCacheInfo() {

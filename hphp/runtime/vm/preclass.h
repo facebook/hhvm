@@ -280,6 +280,7 @@ private:
 
 public:
   typedef VMFixedVector<LowStringPtr> InterfaceVec;
+  typedef VMFixedVector<LowStringPtr> IncludedEnumsVec;
   typedef VMFixedVector<LowStringPtr> UsedTraitVec;
   typedef VMFixedVector<ClassRequirement> ClassRequirementsVec;
   typedef VMFixedVector<TraitPrecRule> TraitPrecRuleVec;
@@ -342,6 +343,7 @@ public:
    * Accessors for vectory data.
    */
   const InterfaceVec& interfaces()           const { return m_interfaces; }
+  const IncludedEnumsVec& includedEnums()    const { return m_includedEnums; }
   const UsedTraitVec& usedTraits()           const { return m_usedTraits; }
   const ClassRequirementsVec& requirements() const { return m_requirements; }
   const TraitPrecRuleVec& traitPrecRules()   const { return m_traitPrecRules; }
@@ -459,6 +461,7 @@ private:
   Slot m_ifaceVtableSlot{kInvalidSlot};
   TypeConstraint m_enumBaseTy;
   InterfaceVec m_interfaces;
+  IncludedEnumsVec m_includedEnums;
   UsedTraitVec m_usedTraits;
   ClassRequirementsVec m_requirements;
   TraitPrecRuleVec m_traitPrecRules;

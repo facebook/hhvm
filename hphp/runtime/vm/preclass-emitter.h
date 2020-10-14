@@ -215,6 +215,10 @@ struct PreClassEmitter {
   const std::vector<LowStringPtr>& interfaces() const {
     return m_interfaces;
   }
+  void addEnumInclude(const StringData* n);
+  const std::vector<LowStringPtr>& enumIncludes() const {
+    return m_enumIncludes;
+  }
   bool addMethod(FuncEmitter* method);
   void renameMethod(const StringData* oldName, const StringData *newName);
   bool addProperty(const StringData* n,
@@ -294,6 +298,7 @@ struct PreClassEmitter {
   int m_memoizeInstanceSerial{0};
 
   std::vector<LowStringPtr> m_interfaces;
+  std::vector<LowStringPtr> m_enumIncludes;
   std::vector<LowStringPtr> m_usedTraits;
   std::vector<PreClass::ClassRequirement> m_requirements;
   std::vector<PreClass::TraitPrecRule> m_traitPrecRules;

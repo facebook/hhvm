@@ -3220,6 +3220,16 @@ void parse_class(AsmState& as) {
     as.in.expect(')');
   }
 
+  std::vector<std::string> enum_includes;
+  if (as.in.tryConsume("enum_includes")) {
+    as.in.expectWs('(');
+    std::string word;
+    while (as.in.readname(word)) {
+      enum_includes.push_back(word);
+    }
+    as.in.expect(')');
+  }
+
   as.pce = as.ue->newBarePreClassEmitter(name, PreClass::MaybeHoistable);
   as.pce->init(line0,
                line1,
@@ -3228,6 +3238,9 @@ void parse_class(AsmState& as) {
                staticEmptyString());
   for (auto const& iface : ifaces) {
     as.pce->addInterface(makeStaticString(iface));
+  }
+  for (auto const& enum_include : enum_includes) {
+    as.pce->addEnumInclude(makeStaticString(enum_include));
   }
   as.pce->setUserAttributes(userAttrs);
 

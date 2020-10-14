@@ -138,6 +138,10 @@ void PreClassEmitter::addInterface(const StringData* n) {
   m_interfaces.push_back(n);
 }
 
+void PreClassEmitter::addEnumInclude(const StringData* n) {
+  m_enumIncludes.push_back(n);
+}
+
 bool PreClassEmitter::addMethod(FuncEmitter* method) {
   MethodMap::const_iterator it = m_methodMap.find(method->name);
   if (it != m_methodMap.end()) {
@@ -282,6 +286,7 @@ PreClass* PreClassEmitter::create(Unit& unit) const {
     attrs, m_parent, m_docComment, m_id,
     m_hoistable);
   pc->m_interfaces = m_interfaces;
+  pc->m_includedEnums = m_enumIncludes;
   pc->m_usedTraits = m_usedTraits;
   pc->m_requirements = m_requirements;
   pc->m_traitPrecRules = m_traitPrecRules;
@@ -392,6 +397,7 @@ template<class SerDe> void PreClassEmitter::serdeMetaData(SerDe& sd) {
     (m_ifaceVtableSlot)
 
     (m_interfaces)
+    (m_enumIncludes)
     (m_usedTraits)
     (m_requirements)
     (m_traitPrecRules)

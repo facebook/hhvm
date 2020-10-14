@@ -1,0 +1,16 @@
+# single_includes.good.php starts here
+
+.filepath "single_includes.good.php";
+
+
+.class {} [enum final] E (8,8) extends HH\BuiltinEnum {
+  .enum_ty <"HH\\int" extended_hint>;
+}
+
+.class {} [enum final] F (10,10) extends HH\BuiltinEnum enum_includes (E) {
+  .enum_ty <"HH\\int" extended_hint>;
+}
+
+.file_attributes ["__EnableUnstableFeatures"("""y:1:{s:16:\"enum_supertyping\";}""")] ;
+
+# single_includes.good.php ends here

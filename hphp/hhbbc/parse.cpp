@@ -910,6 +910,9 @@ std::unique_ptr<php::Class> parse_class(ParseUnitState& puState,
   for (auto& iface : pce.interfaces()) {
     ret->interfaceNames.push_back(iface);
   }
+  for (auto& enumInclude : pce.enumIncludes()) {
+    ret->includedEnums.push_back(enumInclude);
+  }
 
   copy(ret->usedTraitNames,  pce.usedTraits());
   copy(ret->traitPrecRules,  pce.traitPrecRules());

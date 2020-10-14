@@ -517,6 +517,11 @@ struct Class : ClassBase {
   CompactVector<LowStringPtr> interfaceNames;
 
   /*
+   * Names of included enums.
+   */
+  CompactVector<LowStringPtr> includedEnums;
+
+  /*
    * Names of used traits, number of declared (i.e., non-trait, non-inherited)
    * methods, trait alias/precedence rules (if any).
    *

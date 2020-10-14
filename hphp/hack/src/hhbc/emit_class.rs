@@ -139,6 +139,13 @@ fn from_implements(implements: &Vec<tast::Hint>) -> Vec<hhbc_id::class::Type> {
         .collect()
 }
 
+fn from_includes(includes: &Vec<tast::Hint>) -> Vec<hhbc_id::class::Type> {
+    includes
+        .iter()
+        .map(|x| emit_type_hint::hint_to_class(x))
+        .collect()
+}
+
 fn from_type_constant<'a>(
     emitter: &mut Emitter,
     tc: &'a tast::ClassTypeconst,
@@ -596,6 +603,14 @@ pub fn emit_class<'a>(emitter: &mut Emitter, ast_class: &'a tast::Class_) -> Res
         &ast_class.implements
     };
     let implements = from_implements(implements);
+    let enum_includes = if ast_class.kind == tast::ClassKind::Cenum {
+        match &ast_class.enum_ {
+            None => vec![],
+            Some(enum_) => from_includes(&enum_.includes),
+        }
+    } else {
+        vec![]
+    };
     let span = Span::from_pos(&ast_class.span);
     let mut additional_methods: Vec<HhasMethod> = vec![];
     if let Some(cats) = xhp_categories {
@@ -777,6 +792,7 @@ pub fn emit_class<'a>(emitter: &mut Emitter, ast_class: &'a tast::Class_) -> Res
         attributes,
         base,
         implements,
+        enum_includes,
         name,
         span,
         flags,

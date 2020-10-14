@@ -25,6 +25,7 @@ pub struct HhasClass<'a> {
     pub attributes: Vec<HhasAttribute>,
     pub base: Option<class::Type<'a>>,
     pub implements: Vec<class::Type<'a>>,
+    pub enum_includes: Vec<class::Type<'a>>,
     pub name: class::Type<'a>,
     pub span: Span,
     pub uses: Vec<&'a str>,

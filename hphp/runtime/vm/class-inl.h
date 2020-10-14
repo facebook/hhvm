@@ -210,6 +210,13 @@ inline bool Class::classof(const Class* cls) const {
     return this == cls ||
       m_interfaces.lookupDefault(cls->m_preClass->name(), nullptr) == cls;
   }
+  if (UNLIKELY(cls->attrs() & this->attrs() & AttrEnum)) {
+    if (this == cls) {
+      return true;
+    } else if (cls->m_extra && cls->m_extra->m_includedEnums.size() != 0) {
+      cls->m_extra->m_includedEnums.lookupDefault(this->m_preClass->name(), nullptr) == this;
+    }
+  }
   return classofNonIFace(cls);
 }
 
@@ -539,6 +546,14 @@ inline folly::Range<const ClassPtr*> Class::declInterfaces() const {
 
 inline const Class::InterfaceMap& Class::allInterfaces() const {
   return m_interfaces;
+}
+
+inline const bool Class::hasIncludedEnums() const {
+  return m_extra && (m_extra->m_includedEnums.size() != 0);
+}
+
+inline const Class::IncludedEnumMap& Class::allIncludedEnums() const {
+  return m_extra->m_includedEnums;
 }
 
 inline Slot Class::traitsBeginIdx() const {

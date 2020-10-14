@@ -390,6 +390,7 @@ struct Class : AtomicCountable {
   using MethodMap         = FixedStringMap<Slot, false, Slot>;
   using MethodMapBuilder  = FixedStringMapBuilder<Func*, Slot, false, Slot>;
   using InterfaceMap      = IndexedStringMap<LowPtr<Class>, true, int>;
+  using IncludedEnumMap   = IndexedStringMap<LowPtr<Class>, true, int>;
   using RequirementMap    = IndexedStringMap<
                               const PreClass::ClassRequirement*, true, int>;
   using TraitAliasVec     = vm_vector<PreClass::TraitAliasRule::NamePair>;
@@ -1083,6 +1084,12 @@ public:
   const InterfaceMap& allInterfaces() const;
 
   /*
+   * All enums directly or transitively included by this enum
+   */
+  const bool hasIncludedEnums() const;
+  const IncludedEnumMap& allIncludedEnums() const;
+
+  /*
    * Start and end offsets in m_methods of methods that come from used traits.
    *
    * The trait methods are precisely in [m_traitsBeginIdx, m_traitsEndIdx).
@@ -1533,6 +1540,11 @@ private:
      * check.
      */
     mutable rds::Link<bool, rds::Mode::Normal> m_checkedPropInitialValues;
+
+    /*
+     * List of enums included by an enum class
+     */
+    mutable IncludedEnumMap m_includedEnums;
   };
 
   /*
@@ -1616,6 +1628,7 @@ private:
   void setFuncVec(MethodMapBuilder& builder);
   void setRequirements();
   void setEnumType();
+  void setIncludedEnums();
   void checkRequirementConstraints() const;
   void raiseUnsatisfiedRequirement(const PreClass::ClassRequirement*) const;
   void setNativeDataInfo();

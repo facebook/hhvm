@@ -57,6 +57,7 @@ type conn = {
   conn_progress_callback: (string option -> unit) option;
   conn_root: Path.t;
   conn_deadline: float option;
+  from: string;
 }
 
 let get_finale_data (server_finale_file : string) : Exit.finale_data option =
@@ -344,6 +345,7 @@ let rec connect
           conn_progress_callback = env.progress_callback;
           conn_root = env.root;
           conn_deadline = env.deadline;
+          from = env.from;
         }
   | Error e ->
     log
@@ -513,10 +515,18 @@ let rpc : type a. conn -> a ServerCommandTypes.t -> (a * Telemetry.t) Lwt.t =
        conn_progress_callback = progress_callback;
        conn_root;
        conn_deadline = deadline;
+       from;
      }
      cmd ->
   let t_ready_to_send_cmd = Unix.gettimeofday () in
-  Marshal.to_channel oc (ServerCommandTypes.Rpc cmd) [];
+  let metadata =
+    {
+      ServerCommandTypes.from;
+      desc = ServerCommandTypesUtils.debug_describe_t cmd;
+    }
+  in
+  (* TODO(ljw): come up with a better desc *)
+  Marshal.to_channel oc (ServerCommandTypes.Rpc (metadata, cmd)) [];
   Out_channel.flush oc;
   let t_sent_cmd = Unix.gettimeofday () in
   with_server_hung_up @@ fun () ->

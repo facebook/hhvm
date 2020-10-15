@@ -341,6 +341,12 @@ type _ t =
       -> ServerGlobalInferenceTypes.result t
   | VERBOSE : bool -> unit t
 
+type cmd_metadata = {
+  from: string;
+  (* a short human-readable string, used in "hh_server is busy [desc]" *)
+  desc: string;
+}
+
 let is_disconnect_rpc : type a. a t -> bool = function
   | DISCONNECT -> true
   | _ -> false
@@ -359,7 +365,7 @@ let is_critical_rpc : type a. a t -> bool = function
   | _ -> false
 
 type 'a command =
-  | Rpc of 'a t
+  | Rpc of cmd_metadata * 'a t
   | Debug
 
 and streamed =

@@ -179,7 +179,9 @@ let send_push_message_to_client _ x = record_push_message x
 
 let client_has_message _ = Option.is_some (get_mocked_client_request Persistent)
 
-let read_client_msg c = Rpc (Utils.unsafe_opt (get_mocked_client_request c))
+let read_client_msg c =
+  let metadata = { ServerCommandTypes.from = "test"; desc = "cmd" } in
+  Rpc (metadata, Utils.unsafe_opt (get_mocked_client_request c))
 
 let get_channels _ = not_implemented ()
 

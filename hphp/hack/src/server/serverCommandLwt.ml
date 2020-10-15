@@ -48,7 +48,14 @@ let rpc_persistent :
   try%lwt
     let fd = Unix.descr_of_out_channel oc in
     let oc = Lwt_io.of_unix_fd fd ~mode:Lwt_io.Output in
-    let buffer = Marshal.to_string (Rpc cmd) [] in
+    let metadata =
+      {
+        ServerCommandTypes.from = "HackIDE";
+        desc = ServerCommandTypesUtils.debug_describe_t cmd;
+      }
+    in
+    (* TODO(ljw): get a better description *)
+    let buffer = Marshal.to_string (Rpc (metadata, cmd)) [] in
     let%lwt () = Lwt_io.write oc buffer in
     let%lwt () = Lwt_io.flush oc in
     let%lwt response =

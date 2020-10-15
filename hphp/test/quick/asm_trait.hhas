@@ -58,7 +58,6 @@
 .function ["__EntryPoint"("""y:0:{}""")] main() {
   NewObjD "UseFrob"
   Dup
-
   NullUninit
   FCallCtor <LockWhileUnwinding> 0 1 "" - "" ""
   PopC
@@ -68,13 +67,11 @@
 
   CGetL $obj
   NullUninit
-
   FCallObjMethodD <> 0 1 "" - "" "" NullThrows "frob"
   PopC
 
   NewObjD "AliasFrob"
   Dup
-
   NullUninit
   FCallCtor <LockWhileUnwinding> 0 1 "" - "" ""
   PopC
@@ -84,13 +81,11 @@
 
   CGetL $obj
   NullUninit
-
   FCallObjMethodD <> 0 1 "" - "" "" NullThrows "heh"
   PopC
 
   NewObjD "Publicize"
   Dup
-
   NullUninit
   FCallCtor <LockWhileUnwinding> 0 1 "" - "" ""
   PopC
@@ -100,13 +95,11 @@
 
   CGetL $obj
   NullUninit
-
   FCallObjMethodD <> 0 1 "" - "" "" NullThrows "foo"
   PopC
 
   NewObjD "Resolution"
   Dup
-
   NullUninit
   FCallCtor <LockWhileUnwinding> 0 1 "" - "" ""
   PopC
@@ -116,13 +109,11 @@
 
   CGetL $obj
   NullUninit
-
   FCallObjMethodD <> 0 1 "" - "" "" NullThrows "frob"
   PopC
 
   CGetL $obj
   NullUninit
-
   FCallObjMethodD <> 0 1 "" - "" "" NullThrows "yo"
   PopC
 

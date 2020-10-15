@@ -10,9 +10,7 @@
   NewStructDArray <"one" "two" "three" "four">
   SetL $arr
   PopC
-
   NullUninit
-
   NullUninit
   CGetL $arr
   FCallFuncD <> 1 1 "" - "" "var_dump"

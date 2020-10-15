@@ -9,7 +9,6 @@
 .function ["__EntryPoint"("""y:0:{}""")] main() {
   .declvars $z;
   NullUninit
-
   NullUninit
   Int 3
   Int 2
@@ -35,7 +34,6 @@
   Silence _3 End
   Silence _8 End
   NullUninit
-
   NullUninit
   Int 1
   FCallFuncD <> 1 1 "" - "" "var_dump"
@@ -46,7 +44,6 @@ L0:
   Silence _2 End
   Silence _9 End
   NullUninit
-
   NullUninit
   Int 2
   FCallFuncD <> 1 1 "" - "" "var_dump"

@@ -7,7 +7,6 @@
     .try {
       NewObjD "Exception"
       Dup
-
       NullUninit
       String "ex"
       FCallCtor <LockWhileUnwinding> 1 1 "" - "" ""
@@ -31,7 +30,6 @@
 .function ["__EntryPoint"("""y:0:{}""")] main() {
   .try {
     NullUninit
-
     NullUninit
     FCallFuncD <> 0 1 "" - "" "foo"
     RetC

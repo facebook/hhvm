@@ -28,12 +28,10 @@ L4:
   NullUninit
   NullUninit
 
-
   String "a"
   String "b"
   String "c"
   FCallFuncD <> 3 1 "" - "" "test"
-
   NullUninit
   NullUninit
   Null

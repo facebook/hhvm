@@ -13,11 +13,8 @@
   Int 20
   SetL $x
   PopC
-
   NullUninit
-
   NullUninit
-
   CUGetL $x
   CreateCl 1 0
 

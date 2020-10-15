@@ -71,7 +71,6 @@
   ClassGetC
   NewObj
   Dup
-
   NullUninit
   FCallCtor <LockWhileUnwinding> 0 1 "" - "" ""
   PopC
@@ -93,7 +92,6 @@
 
 .function init_test {
   NullUninit
-
   NullUninit
     String "Init"
   FCallFuncD <> 1 1 "" - "" "do_test"
@@ -102,7 +100,6 @@
 
 .function uninit_test {
   NullUninit
-
   NullUninit
     String "Uninit"
   FCallFuncD <> 1 1 "" - "" "do_test"
@@ -111,13 +108,10 @@
 
 .function ["__EntryPoint"("""y:0:{}""")] main() {
   NullUninit
-
   NullUninit
   FCallFuncD <> 0 1 "" - "" "init_test"
   PopC
-
   NullUninit
-
   NullUninit
   FCallFuncD <> 0 1 "" - "" "uninit_test"
   PopC

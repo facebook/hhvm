@@ -10,7 +10,6 @@
 
 .function ["__EntryPoint"("""y:0:{}""")] main() {
   NullUninit
-
   NullUninit
   FCallFuncD <> 0 1 "" - "" "parse_str"
   PopC

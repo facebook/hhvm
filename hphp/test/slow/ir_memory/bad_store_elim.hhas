@@ -1,27 +1,22 @@
 .function ["__EntryPoint"("""y:0:{}""")] main() {
   NullUninit
   NullUninit
-
   FCallFuncD <> 0 1 "" - "" "test"
   PopC
   NullUninit
   NullUninit
-
   FCallFuncD <> 0 1 "" - "" "test"
   PopC
   NullUninit
   NullUninit
-
   FCallFuncD <> 0 1 "" - "" "test"
   PopC
   NullUninit
   NullUninit
-
   FCallFuncD <> 0 1 "" - "" "test"
   PopC
   NullUninit
   NullUninit
-
   FCallFuncD <> 0 1 "" - "" "test"
   PopC
 
@@ -198,10 +193,8 @@
   CGetL $x
   CGetL $x
   CGetL $x
-
   NullUninit
   NullUninit
-
   FCallFuncD <> 0 1 "" - "" "callee"
   AssertRATStk 0 Int
   PopC

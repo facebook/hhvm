@@ -29,7 +29,6 @@
 .function ["__EntryPoint"("""y:0:{}""")] main() {
   NewObjD "Foo"
   Dup
-
   NullUninit
   FCallCtor <LockWhileUnwinding> 0 1 "" - "" ""
   PopC
@@ -39,10 +38,8 @@
 
   CGetL $object
   NullUninit
-
    NewObjD "Foo"
    Dup
-
    NullUninit
    FCallCtor <LockWhileUnwinding> 0 1 "" - "" ""
    PopC
@@ -52,7 +49,6 @@
 
   CGetL $object
   NullUninit
-
    Null
   FCallObjMethodD <> 1 1 "" - "" "" NullThrows "main"
   PopC

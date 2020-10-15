@@ -1,7 +1,6 @@
 .function ["__EntryPoint"("""y:0:{}""")] main() {
   NewObjD "Exception"
   Dup
-
   NullUninit
   String "foo"
   FCallCtor <LockWhileUnwinding> 1 1 "" - "" ""
@@ -9,7 +8,6 @@
   LockObj
   Throw
   NullUninit
-
   NullUninit
   FCallFuncD <> 0 1 "" - "" "bar"
   PopC

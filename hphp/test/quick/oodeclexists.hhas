@@ -2,7 +2,6 @@
 
 .function ["__EntryPoint"("""y:0:{}""")] main() {
   NullUninit
-
   NullUninit
   String "abc"
   String "asdfasdf"

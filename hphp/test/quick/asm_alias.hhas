@@ -35,14 +35,11 @@
 
 .function ["__EntryPoint"("""y:0:{}""")] main() {
   NullUninit
-
   NullUninit
   Int 0
   FCallFuncD <> 1 1 "" - "" "foo"
   PopC
-
   NullUninit
-
   NullUninit
   String "hi"
   FCallFuncD <> 1 1 "" - "" "foo"
@@ -50,72 +47,53 @@
 
   NewObjD "C"
   Dup
-
   NullUninit
   FCallCtor <LockWhileUnwinding> 0 1 "" - "" ""
   PopC
   LockObj
   SetL $x
   PopC
-
   NullUninit
-
   NullUninit
   CGetL $x
   FCallFuncD <> 1 1 "" - "" "bar"
   PopC
-
   NullUninit
-
   NullUninit
   String "hi"
   FCallFuncD <> 1 1 "" - "" "bar"
   PopC
-
   NullUninit
-
   NullUninit
   Null
   FCallFuncD <> 1 1 "" - "" "bar"
   PopC
-
   NullUninit
-
   NullUninit
   CGetL $x
   FCallFuncD <> 1 1 "" - "" "baz"
   PopC
-
   NullUninit
-
   NullUninit
   String "hi"
   FCallFuncD <> 1 1 "" - "" "baz"
   PopC
-
   NullUninit
-
   NullUninit
   Null
   FCallFuncD <> 1 1 "" - "" "baz"
   PopC
-
   NullUninit
-
   NullUninit
   CGetL $x
   FCallFuncD <> 1 1 "" - "" "quux"
   PopC
-
   NullUninit
-
   NullUninit
   String "hi"
   FCallFuncD <> 1 1 "" - "" "quux"
   PopC
-
   NullUninit
-
   NullUninit
   Null
   FCallFuncD <> 1 1 "" - "" "quux"

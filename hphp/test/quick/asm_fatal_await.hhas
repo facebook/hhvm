@@ -5,7 +5,6 @@
 .function foo() isAsync {
   NewObjD "heh"
   Dup
-
   NullUninit
   FCallCtor <LockWhileUnwinding> 0 1 "" - "" ""
   PopC
@@ -23,10 +22,8 @@
 
 .function ["__EntryPoint"("""y:0:{}""")] main() {
   NullUninit
-
   NullUninit
   NullUninit
-
   NullUninit
   FCallFuncD <> 0 1 "" - "" "foo"
   FCallFuncD <> 1 1 "" - "" "HH\\Asio\\join"

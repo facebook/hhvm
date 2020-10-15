@@ -1458,7 +1458,9 @@ void prefetchUnit(StringData* requestedPath,
       cache->insert(pathAcc, path);
       auto& cachedUnit = pathAcc->second.cachedUnit;
       if (cachedUnit.try_lock_for_update()) {
-        updateAndUnlock(cachedUnit, std::move(ptr));
+        if (cachedUnit.copy() != ptr) {
+          updateAndUnlock(cachedUnit, std::move(ptr));
+        }
       }
     },
     // Use high priority for prefetch requests. Medium priority is

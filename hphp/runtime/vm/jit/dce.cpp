@@ -611,6 +611,8 @@ bool canDCE(IRInstruction* inst) {
   case DictSet:
   case MapSet:
   case VectorSet:
+  case BespokeSet:
+  case BespokeAppend:
   case SetElem:
   case SetRange:
   case SetRangeRev:
@@ -632,6 +634,7 @@ bool canDCE(IRInstruction* inst) {
   case ProfileSubClsCns:
   case CheckVecBounds:
   case CheckVecBoundsLA:
+  case BespokeGet:
   case LdVectorSize:
   case BeginCatch:
   case EndCatch:

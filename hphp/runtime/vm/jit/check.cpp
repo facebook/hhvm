@@ -413,6 +413,24 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* /*unit*/) {
     return true;
   };
 
+  auto const checkBespokeArr = [&] () {
+    auto const t = src()->type();
+    check(t.isKnownDataType() && t <= TArrLike, t, "Known ArrLike");
+
+    auto const srcLayout = t.arrSpec().bespokeLayout();
+    check(srcLayout.has_value(), t, "Bespoke ArrLike");
+
+    auto const givenLayout = inst->extra<BespokeLayoutData>()->layout;
+    if (givenLayout) {
+      auto const expected = BespokeLayout(givenLayout);
+      auto const errMsg =
+        folly::sformat("Bespoke with Layout={}", expected.describe()).c_str();
+      check(expected == *srcLayout, t, errMsg);
+    }
+
+    ++curSrc;
+  };
+
   auto checkArr = [&] (bool is_kv, bool is_const) {
     auto const t = src()->type();
     auto const cond_type = RuntimeOption::EvalHackArrDVArrs
@@ -496,6 +514,7 @@ using TypeNames::TCA;
                       }
 #define SVArr         checkArr(false /* is_kv */, false /* is_const */);
 #define SDArr         checkArr(true  /* is_kv */, false /* is_const */);
+#define SBespokeArr   checkBespokeArr();
 #define CDArr         checkArr(true  /* is_kv */, true  /* is_const */);
 #define ND
 #define DMulti
@@ -563,6 +582,7 @@ using TypeNames::TCA;
 #undef SVArr
 #undef SVArrOrNull
 #undef SDArr
+#undef SBespokeArr
 #undef CDArr
 
 #undef ND

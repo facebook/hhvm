@@ -278,6 +278,8 @@ bool opcodeMayRaise(Opcode opc) {
   case AllocObj:
   case AllocObjReified:
   case BaseG:
+  case BespokeSet:
+  case BespokeAppend:
   case Call:
   case CallBuiltin:
   case CGetElem:
@@ -499,6 +501,7 @@ bool opcodeMayRaise(Opcode opc) {
   case AsyncSwitchFast:
   case BeginCatch:
   case BeginInlining:
+  case BespokeGet:
   case Ceil:
   case CheckArrayCOW:
   case CheckCold:

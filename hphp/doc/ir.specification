@@ -2985,6 +2985,28 @@ fields of that struct for holding intermediate values.
   Set element with key S1 in S0 to S2. The dest will be a new Dict that should
   replace S0.
 
+| BespokeGet<T,Layout>, DParam(Cell), SBespokeArr S(Int,Str), B
+
+  Get element of type T with key S1 in bespoke array S0 using the GetInt/GetStr
+  implementations on the layout provided. If no layout is provided, the general
+  BespokeArray dispatch is used.
+
+| BespokeSet<T,Layout>, DParam(ArrLike), SBespokeArr S(Int,Str) S(Cell), PRc|CRc
+
+  Set element with key S1 in bespoke array S0 to S2, returning an array of type
+  T.
+
+  NB: Currently, the layout provided is unused and generic BespokeArray
+  dispatch is performed. This will be rectified when a suitable
+  SetIntMove/SetStrMove layout method is available.
+
+| BespokeAppend<T,Layout>, DParam(ArrLike), SBespokeArr S(Cell), PRc|CRc
+
+  Append element S1 to bespoke array S0 using the Append implementation on the
+  layout provided, returning an array of type T. If no layout is provided, the
+  general BespokeArray dispatch is used.
+
+
 | MapSet, ND, S(Obj) S(Int,Str) S(Cell), CRc
 
   Set element with key S1 in S0 to S2.

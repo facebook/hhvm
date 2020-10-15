@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/bespoke/layout.h"
 #include "hphp/runtime/base/bespoke/logging-array.h"
 #include "hphp/runtime/base/bespoke-array.h"
+#include "hphp/runtime/vm/jit/ssa-tmp.h"
 
 namespace HPHP {
 
@@ -37,17 +38,30 @@ std::string BespokeLayout::describe() const {
   return m_layout->describe();
 }
 
+namespace {
+bool checkLayoutMatches(const bespoke::Layout* layout, SSATmp* arr) {
+  auto const DEBUG_ONLY layoutType =
+    arr->type().unspecialize().narrowToBespokeLayout(BespokeLayout(layout));
+  assertx(arr->type() <= layoutType);
+
+  return true;
+}
+}
+
 SSATmp* BespokeLayout::emitGet(
     IRGS& env, SSATmp* arr, SSATmp* key, Block* taken) const {
+  assertx(checkLayoutMatches(m_layout, arr));
   return m_layout->emitGet(env, arr, key, taken);
 }
 
 SSATmp* BespokeLayout::emitSet(
     IRGS& env, SSATmp* arr, SSATmp* key, SSATmp* val) const {
+  assertx(checkLayoutMatches(m_layout, arr));
   return m_layout->emitSet(env, arr, key, val);
 }
 
 SSATmp* BespokeLayout::emitAppend(IRGS& env, SSATmp* arr, SSATmp* val) const {
+  assertx(checkLayoutMatches(m_layout, arr));
   return m_layout->emitAppend(env, arr, val);
 }
 

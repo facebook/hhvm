@@ -1067,6 +1067,18 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     };
   }
 
+  case BespokeGet: {
+    auto const base = inst.src(0);
+    auto const key  = inst.src(1);
+    if (key->isA(TInt)) {
+      return PureLoad {
+        key->hasConstVal() ? AElemI { base, key->intVal() } : AElemIAny
+      };
+    } else {
+      return PureLoad { AElemAny };
+    }
+  }
+
   case InitVecElemLoop:
     {
       auto const extra = inst.extra<InitVecElemLoop>();
@@ -1859,6 +1871,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case KeysetGet:
   case VecSet:
   case DictSet:
+  case BespokeSet:
+  case BespokeAppend:
   case ConcatStrStr:
   case PrintStr:
   case PrintBool:

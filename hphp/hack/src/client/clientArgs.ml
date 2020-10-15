@@ -134,13 +134,18 @@ let parse_check_args cmd =
   let version = ref false in
   let watchman_debug_logging = ref false in
   let allow_non_opt_build = ref false in
+  let desc = ref "check" in
   (* custom behaviors *)
+  let current_option = ref None in
   let set_from x () = from := x in
   let set_mode ?(validate = true) x =
     if validate && Option.is_some !mode then
       raise (Arg.Bad "only a single mode should be specified")
-    else
-      mode := Some x
+    else begin
+      mode := Some x;
+      Option.iter !current_option ~f:(fun option -> desc := option);
+      ()
+    end
   in
   (* parse args *)
   let usage =
@@ -705,6 +710,37 @@ let parse_check_args cmd =
       (* Please keep these sorted in the alphabetical order *)
     ]
   in
+  (* If the user typed an option like "--type-at-pos" which set a mode which triggered
+  a command, we want to be able to show "hh_server is busy [--type-at-pos]" to show that
+  hh_server is currently busy with something that the user typed. The string
+  description that appears inside the square brackets must go into args.desc.
+  Unfortunately this isn't well supported by the Arg library, so we have to hack it up
+  ourselves: (1) For any option that takes say Arg.Unit(callback), we'll change it into
+  Arg.Unit(modified_callback) where modified_callback sets 'current_option' to the
+  option string being handled and then calls the original callback. (2) If the original
+  callback calls set_mode, then set_mode will take the opportunity to do desc := current_option.
+  *)
+  let modify_callback : type a. string -> (a -> unit) -> a -> unit =
+   fun option callback value ->
+    current_option := Some option;
+    callback value;
+    current_option := None
+  in
+  let rec modify_spec ~option spec =
+    match spec with
+    | Arg.Unit callback -> Arg.Unit (modify_callback option callback)
+    | Arg.Bool callback -> Arg.Bool (modify_callback option callback)
+    | Arg.String callback -> Arg.String (modify_callback option callback)
+    | Arg.Int callback -> Arg.Int (modify_callback option callback)
+    | Arg.Float callback -> Arg.Float (modify_callback option callback)
+    | Arg.Rest callback -> Arg.Rest (modify_callback option callback)
+    | Arg.Tuple specs -> Arg.Tuple (List.map specs ~f:(modify_spec ~option))
+    | spec -> spec
+  in
+  let options =
+    List.map options ~f:(fun (option, spec, text) ->
+        (option, modify_spec ~option spec, text))
+  in
   let args = parse_without_command options usage "check" in
   if !version then (
     if !output_json then
@@ -801,6 +837,7 @@ let parse_check_args cmd =
       deadline = Option.map ~f:(fun t -> Unix.time () +. t) !timeout;
       watchman_debug_logging = !watchman_debug_logging;
       allow_non_opt_build = !allow_non_opt_build;
+      desc = !desc;
     }
 
 let parse_start_env command =

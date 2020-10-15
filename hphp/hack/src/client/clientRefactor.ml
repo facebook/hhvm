@@ -165,13 +165,14 @@ let print_patches_json patches = print_endline (patches_to_json_string patches)
 
 let go_ide
     (conn : unit -> ClientConnect.conn Lwt.t)
+    ~(desc : string)
     (args : client_check_env)
     (filename : string)
     (line : int)
     (char : int)
     (new_name : string) : unit Lwt.t =
   let%lwt patches =
-    ClientConnect.rpc_with_retry conn
+    ClientConnect.rpc_with_retry conn ~desc
     @@ ServerCommandTypes.IDE_REFACTOR
          { ServerCommandTypes.Ide_refactor_type.filename; line; char; new_name }
   in
@@ -188,6 +189,7 @@ let go_ide
 
 let go
     (conn : unit -> ClientConnect.conn Lwt.t)
+    ~(desc : string)
     (args : client_check_env)
     (mode : string)
     (before : string)
@@ -236,7 +238,8 @@ let go
     | _ -> failwith "Unexpected Mode"
   in
   let%lwt patches =
-    ClientConnect.rpc_with_retry conn @@ ServerCommandTypes.REFACTOR command
+    ClientConnect.rpc_with_retry conn ~desc
+    @@ ServerCommandTypes.REFACTOR command
   in
   if args.output_json then
     print_patches_json patches

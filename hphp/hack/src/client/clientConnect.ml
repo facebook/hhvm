@@ -504,7 +504,9 @@ let connect (env : env) : conn Lwt.t =
     HackEventLogger.client_establish_connection_exception e;
     Caml.Printexc.raise_with_backtrace e backtrace
 
-let rpc : type a. conn -> a ServerCommandTypes.t -> (a * Telemetry.t) Lwt.t =
+let rpc :
+    type a.
+    conn -> desc:string -> a ServerCommandTypes.t -> (a * Telemetry.t) Lwt.t =
  fun {
        connection_log_id;
        t_connected_to_monitor;
@@ -517,15 +519,10 @@ let rpc : type a. conn -> a ServerCommandTypes.t -> (a * Telemetry.t) Lwt.t =
        conn_deadline = deadline;
        from;
      }
+     ~desc
      cmd ->
   let t_ready_to_send_cmd = Unix.gettimeofday () in
-  let metadata =
-    {
-      ServerCommandTypes.from;
-      desc = ServerCommandTypesUtils.debug_describe_t cmd;
-    }
-  in
-  (* TODO(ljw): come up with a better desc *)
+  let metadata = { ServerCommandTypes.from; desc } in
   Marshal.to_channel oc (ServerCommandTypes.Rpc (metadata, cmd)) [];
   Out_channel.flush oc;
   let t_sent_cmd = Unix.gettimeofday () in
@@ -562,9 +559,10 @@ let rpc : type a. conn -> a ServerCommandTypes.t -> (a * Telemetry.t) Lwt.t =
 
 let rpc_with_retry
     (conn_f : unit -> conn Lwt.t)
+    ~(desc : string)
     (cmd : 'a ServerCommandTypes.Done_or_retry.t ServerCommandTypes.t) :
     'a Lwt.t =
   ServerCommandTypes.Done_or_retry.call ~f:(fun () ->
       let%lwt conn = conn_f () in
-      let%lwt (result, _telemetry) = rpc conn cmd in
+      let%lwt (result, _telemetry) = rpc conn ~desc cmd in
       Lwt.return result)

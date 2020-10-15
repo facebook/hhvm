@@ -124,6 +124,7 @@ let connect ?(use_priority_pipe = false) args =
     replace_state_after_saving = _;
     sort_results = _;
     stdin_name = _;
+    desc = _;
   } =
     args
   in
@@ -162,13 +163,14 @@ type connect_fun = unit -> ClientConnect.conn Lwt.t
 let rpc
     (args : ClientEnv.client_check_env)
     (command : 'a ServerCommandTypes.t)
-    (call : connect_fun -> 'a ServerCommandTypes.t -> 'b Lwt.t) : 'b Lwt.t =
+    (call : connect_fun -> desc:string -> 'a ServerCommandTypes.t -> 'b Lwt.t) :
+    'b Lwt.t =
   let use_priority_pipe =
     (not @@ ServerCommand.rpc_command_needs_full_check command)
     && (not @@ ServerCommand.rpc_command_needs_writes command)
   in
   let conn () = connect args ~use_priority_pipe in
-  let%lwt result = call conn @@ command in
+  let%lwt result = call conn ~desc:args.desc @@ command in
   Lwt.return result
 
 let rpc_with_retry
@@ -180,9 +182,9 @@ let rpc_with_retry
 
 let rpc (args : ClientEnv.client_check_env) (command : 'a ServerCommandTypes.t)
     : ('a * Telemetry.t) Lwt.t =
-  rpc args command (fun conn_f command ->
+  rpc args command (fun conn_f ~desc command ->
       let%lwt conn = conn_f () in
-      let%lwt (result, telemetry) = ClientConnect.rpc conn command in
+      let%lwt (result, telemetry) = ClientConnect.rpc conn ~desc command in
       Lwt.return (result, telemetry))
 
 let parse_positions positions =
@@ -323,11 +325,13 @@ let main (args : client_check_env) : Exit_status.t Lwt.t =
       Lwt.return (Exit_status.No_error, telemetry)
     | MODE_DUMP_SYMBOL_INFO files ->
       let%lwt conn = connect args in
-      let%lwt () = ClientSymbolInfo.go conn files expand_path in
+      let%lwt () = ClientSymbolInfo.go conn ~desc:args.desc files expand_path in
       Lwt.return (Exit_status.No_error, Telemetry.create ())
     | MODE_REFACTOR (ref_mode, before, after) ->
       let conn () = connect args in
-      let%lwt () = ClientRefactor.go conn args ref_mode before after in
+      let%lwt () =
+        ClientRefactor.go conn ~desc:args.desc args ref_mode before after
+      in
       Lwt.return (Exit_status.No_error, Telemetry.create ())
     | MODE_IDE_REFACTOR arg ->
       let conn () = connect args in
@@ -344,7 +348,14 @@ let main (args : client_check_env) : Exit_status.t Lwt.t =
           raise Exit_status.(Exit_with Input_error)
       in
       let%lwt () =
-        ClientRefactor.go_ide conn args filename line char new_name
+        ClientRefactor.go_ide
+          conn
+          ~desc:args.desc
+          args
+          filename
+          line
+          char
+          new_name
       in
       Lwt.return (Exit_status.No_error, Telemetry.create ())
     | MODE_EXTRACT_STANDALONE name ->
@@ -721,7 +732,7 @@ let main (args : client_check_env) : Exit_status.t Lwt.t =
        *)
       let%lwt conn = connect args in
       let%lwt (response, telemetry) =
-        ClientConnect.rpc conn @@ Rpc.REMOVE_DEAD_FIXMES codes
+        ClientConnect.rpc conn ~desc:args.desc @@ Rpc.REMOVE_DEAD_FIXMES codes
       in
       begin
         match response with
@@ -738,7 +749,8 @@ let main (args : client_check_env) : Exit_status.t Lwt.t =
     | MODE_REWRITE_LAMBDA_PARAMETERS files ->
       let%lwt conn = connect args in
       let%lwt (patches, telemetry) =
-        ClientConnect.rpc conn @@ Rpc.REWRITE_LAMBDA_PARAMETERS files
+        ClientConnect.rpc conn ~desc:args.desc
+        @@ Rpc.REWRITE_LAMBDA_PARAMETERS files
       in
       if args.output_json then
         print_patches_json patches
@@ -748,7 +760,8 @@ let main (args : client_check_env) : Exit_status.t Lwt.t =
     | MODE_REWRITE_TYPE_PARAMS_TYPE files ->
       let%lwt conn = connect args in
       let%lwt (patches, telemetry) =
-        ClientConnect.rpc conn @@ Rpc.REWRITE_TYPE_PARAMS_TYPE files
+        ClientConnect.rpc conn ~desc:args.desc
+        @@ Rpc.REWRITE_TYPE_PARAMS_TYPE files
       in
       if args.output_json then
         print_patches_json patches
@@ -842,7 +855,8 @@ let main (args : client_check_env) : Exit_status.t Lwt.t =
     | MODE_GLOBAL_INFERENCE (submode, files) ->
       let%lwt conn = connect args in
       let%lwt (results, telemetry) =
-        ClientConnect.rpc conn @@ Rpc.GLOBAL_INFERENCE (submode, files)
+        ClientConnect.rpc conn ~desc:args.desc
+        @@ Rpc.GLOBAL_INFERENCE (submode, files)
       in
       (match results with
       | ServerGlobalInferenceTypes.RError error -> print_endline error

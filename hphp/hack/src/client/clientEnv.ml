@@ -99,6 +99,8 @@ type client_check_env = {
   deadline: float option;
   watchman_debug_logging: bool;
   allow_non_opt_build: bool;
+      (** desc is a human-readable string description, to appear in "hh_server busy [desc]" *)
+  desc: string;
 }
 
 let mode_to_string = function

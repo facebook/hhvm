@@ -77,8 +77,8 @@ my %banned_flags = map {$_ => 1} qw/
 /;
 sub testok {
         # only look at tests that have no typing errors
-        my ($_) = @_;
-        if (/\.php$/ and open my $fh, "<", "$_.exp") {
+        my ($test) = @_;
+        if ($test =~ /\.php$/ and open my $fh, "<", "$test.exp") {
                 return <$fh> eq "No errors\n"
         }
         return 0;

@@ -2,7 +2,9 @@ use crate::lowerer::Env;
 use bstr::BString;
 use ocamlrep::rc::RcOc;
 use oxidized::{
-    aast, ast,
+    aast,
+    aast_visitor::{AstParams, NodeMut, VisitorMut},
+    ast,
     ast::{Expr, Expr_, Stmt, Stmt_},
     ast_defs::*,
     file_info,
@@ -11,10 +13,27 @@ use oxidized::{
 
 /// Convert an expression tree body to `(NameOfVisitor $v) ==> { return $v->...; }`.
 pub fn desugar(hint: &aast::Hint, e: &Expr, env: &Env) -> Expr {
+    let (e, extracted_splices) = extract_and_replace_splices(&e);
+
+    let mut assignments: Vec<Stmt> = extracted_splices
+        .into_iter()
+        .enumerate()
+        .map(|(i, expr)| {
+            Stmt::new(
+                expr.0.clone(),
+                Stmt_::Expr(Box::new(Expr::new(
+                    expr.0.clone(),
+                    Expr_::Binop(Box::new((Bop::Eq(None), temp_lvar(&expr.0, i), expr))),
+                ))),
+            )
+        })
+        .collect();
+
     let visitor_expr = rewrite_expr(&e);
+    assignments.push(wrap_return(visitor_expr, &e.0));
 
     let body = ast::FuncBody {
-        ast: vec![wrap_return(visitor_expr, &e.0)],
+        ast: assignments,
         annotation: (),
     };
 
@@ -246,4 +265,53 @@ fn merge_positions(positions: &[&Pos]) -> Pos {
             None => Some((*pos).clone()),
         })
         .unwrap_or(Pos::make_none())
+}
+
+/// Extracts all the expression tree splices and replaces them with
+/// placeholder variables.
+///
+/// ```
+/// $c = Code`__splice__($x->foo()) + __splice__($y);
+/// $c_after = Code`$__splice_1 + $__splice_2`;
+/// ```
+///
+/// Returns the updated Expr and a vec of the extracted spliced expr
+/// representing `vec![$x->foo(), $y]`.
+fn extract_and_replace_splices(e: &Expr) -> (Expr, Vec<Expr>) {
+    let mut e_copy = e.clone();
+
+    let mut visitor = SpliceExtractor {
+        extracted_splices: vec![],
+    };
+    visitor.visit_expr(&mut (), &mut e_copy).unwrap();
+    return (e_copy, visitor.extracted_splices);
+}
+
+struct SpliceExtractor {
+    extracted_splices: Vec<Expr>,
+}
+
+impl<'ast> VisitorMut<'ast> for SpliceExtractor {
+    type P = AstParams<(), ()>;
+
+    fn object(&mut self) -> &mut dyn VisitorMut<'ast, P = Self::P> {
+        self
+    }
+
+    fn visit_expr_(&mut self, env: &mut (), e: &mut Expr_) -> Result<(), ()> {
+        use aast::Expr_::*;
+        match e {
+            ETSplice(ex) => {
+                let len = self.extracted_splices.len();
+                self.extracted_splices.push((**ex).clone());
+                *e = ETSplice(Box::new(temp_lvar(&ex.0, len)));
+            }
+            _ => e.recurse(env, self.object())?,
+        }
+        Ok(())
+    }
+}
+
+fn temp_lvar(pos: &Pos, num: usize) -> Expr {
+    Expr::mk_lvar(pos, &(format!("$__{}", num.to_string())))
 }

@@ -10,6 +10,7 @@ val rpc_persistent :
   Timeout.in_channel * Core_kernel.Out_channel.t ->
   's ->
   ('s -> ServerCommandTypes.push -> 's) ->
+  desc:string ->
   'a ServerCommandTypes.t ->
   ('s * 'a * Connection_tracker.t, 's * Utils.callstack * exn) result Lwt.t
 

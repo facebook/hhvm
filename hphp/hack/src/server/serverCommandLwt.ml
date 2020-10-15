@@ -38,9 +38,10 @@ let rpc_persistent :
     Timeout.in_channel * Out_channel.t ->
     s ->
     (s -> push -> s) ->
+    desc:string ->
     a t ->
     (s * a * Connection_tracker.t, s * Utils.callstack * exn) result Lwt.t =
- fun (_, oc) state callback cmd ->
+ fun (_, oc) state callback ~desc cmd ->
   let stack =
     Caml.Printexc.get_callstack 100 |> Caml.Printexc.raw_backtrace_to_string
   in
@@ -48,13 +49,7 @@ let rpc_persistent :
   try%lwt
     let fd = Unix.descr_of_out_channel oc in
     let oc = Lwt_io.of_unix_fd fd ~mode:Lwt_io.Output in
-    let metadata =
-      {
-        ServerCommandTypes.from = "HackIDE";
-        desc = ServerCommandTypesUtils.debug_describe_t cmd;
-      }
-    in
-    (* TODO(ljw): get a better description *)
+    let metadata = { ServerCommandTypes.from = "HackIDE"; desc } in
     let buffer = Marshal.to_string (Rpc (metadata, cmd)) [] in
     let%lwt () = Lwt_io.write oc buffer in
     let%lwt () = Lwt_io.flush oc in

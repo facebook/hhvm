@@ -136,8 +136,8 @@ let parse_check_args cmd =
   let allow_non_opt_build = ref false in
   (* custom behaviors *)
   let set_from x () = from := x in
-  let set_mode x =
-    if Option.is_some !mode then
+  let set_mode ?(validate = true) x =
+    if validate && Option.is_some !mode then
       raise (Arg.Bad "only a single mode should be specified")
     else
       mode := Some x
@@ -211,14 +211,15 @@ let parse_check_args cmd =
         Arg.Rest
           begin
             fun fn ->
-            mode :=
-              match !mode with
+            set_mode
+              ~validate:false
+              (match !mode with
               | None
               | Some (MODE_CST_SEARCH None) ->
-                Some (MODE_CST_SEARCH (Some [fn]))
+                MODE_CST_SEARCH (Some [fn])
               | Some (MODE_CST_SEARCH (Some fnl)) ->
-                Some (MODE_CST_SEARCH (Some (fn :: fnl)))
-              | _ -> raise (Arg.Bad "only a single mode should be specified")
+                MODE_CST_SEARCH (Some (fn :: fnl))
+              | _ -> raise (Arg.Bad "only a single mode should be specified"))
           end,
         " Run CST search on this set of files,"
         ^ " rather than all the files in the codebase." );
@@ -307,12 +308,13 @@ let parse_check_args cmd =
         Arg.Rest
           begin
             fun position ->
-            mode :=
-              match !mode with
-              | None -> Some (MODE_FUN_DEPS_AT_POS_BATCH [position])
+            set_mode
+              ~validate:false
+              (match !mode with
+              | None -> MODE_FUN_DEPS_AT_POS_BATCH [position]
               | Some (MODE_FUN_DEPS_AT_POS_BATCH positions) ->
-                Some (MODE_FUN_DEPS_AT_POS_BATCH (position :: positions))
-              | _ -> raise (Arg.Bad "only a single mode should be specified")
+                MODE_FUN_DEPS_AT_POS_BATCH (position :: positions)
+              | _ -> raise (Arg.Bad "only a single mode should be specified"))
           end,
         " (mode) for each entry in input list get list of function dependencies [file:line:character list]"
       );
@@ -320,13 +322,13 @@ let parse_check_args cmd =
         Arg.Rest
           begin
             fun position ->
-            mode :=
-              match !mode with
-              | None -> Some (MODE_FUN_IS_LOCALLABLE_AT_POS_BATCH [position])
+            set_mode
+              ~validate:false
+              (match !mode with
+              | None -> MODE_FUN_IS_LOCALLABLE_AT_POS_BATCH [position]
               | Some (MODE_FUN_IS_LOCALLABLE_AT_POS_BATCH positions) ->
-                Some
-                  (MODE_FUN_IS_LOCALLABLE_AT_POS_BATCH (position :: positions))
-              | _ -> raise (Arg.Bad "only a single mode should be specified")
+                MODE_FUN_IS_LOCALLABLE_AT_POS_BATCH (position :: positions)
+              | _ -> raise (Arg.Bad "only a single mode should be specified"))
           end,
         " (mode) for each entry in input list checks if function at position can be made RxLocal [file:line:character list]"
       );
@@ -374,8 +376,9 @@ let parse_check_args cmd =
         Arg.Rest
           begin
             fun fn ->
-            mode :=
-              match !mode with
+            set_mode
+              ~validate:false
+              (match !mode with
               | None ->
                 let submode =
                   (*
@@ -395,10 +398,10 @@ let parse_check_args cmd =
                       (Arg.Bad
                          ("No " ^ fn ^ " submode supported for global inference"))
                 in
-                Some (MODE_GLOBAL_INFERENCE (submode, []))
+                MODE_GLOBAL_INFERENCE (submode, [])
               | Some (MODE_GLOBAL_INFERENCE (submode, fnl)) ->
-                Some (MODE_GLOBAL_INFERENCE (submode, fn :: fnl))
-              | _ -> raise (Arg.Bad "only a single mode should be specified")
+                MODE_GLOBAL_INFERENCE (submode, fn :: fnl)
+              | _ -> raise (Arg.Bad "only a single mode should be specified"))
           end,
         " (mode) global inference operations, Usage: --global-inference "
         ^ "[\"merge\", \"solve\", \"export-json\", \"rewrite\"] files..." );
@@ -427,14 +430,13 @@ let parse_check_args cmd =
         Arg.Rest
           begin
             fun class_ ->
-            mode :=
-              match !mode with
-              | None ->
-                Some (MODE_METHOD_JUMP_ANCESTORS_BATCH ([class_], "Class"))
+            set_mode
+              ~validate:false
+              (match !mode with
+              | None -> MODE_METHOD_JUMP_ANCESTORS_BATCH ([class_], "Class")
               | Some (MODE_METHOD_JUMP_ANCESTORS_BATCH (classes, "Class")) ->
-                Some
-                  (MODE_METHOD_JUMP_ANCESTORS_BATCH (class_ :: classes, "Class"))
-              | _ -> raise (Arg.Bad "only a single mode should be specified")
+                MODE_METHOD_JUMP_ANCESTORS_BATCH (class_ :: classes, "Class")
+              | _ -> raise (Arg.Bad "only a single mode should be specified"))
           end,
         " (mode) prints a list of classes that these classes extend" );
       ( "--inheritance-ancestor-interfaces",
@@ -445,16 +447,14 @@ let parse_check_args cmd =
         Arg.Rest
           begin
             fun class_ ->
-            mode :=
-              match !mode with
-              | None ->
-                Some (MODE_METHOD_JUMP_ANCESTORS_BATCH ([class_], "Interface"))
+            set_mode
+              ~validate:false
+              (match !mode with
+              | None -> MODE_METHOD_JUMP_ANCESTORS_BATCH ([class_], "Interface")
               | Some (MODE_METHOD_JUMP_ANCESTORS_BATCH (classes, "Interface"))
                 ->
-                Some
-                  (MODE_METHOD_JUMP_ANCESTORS_BATCH
-                     (class_ :: classes, "Interface"))
-              | _ -> raise (Arg.Bad "only a single mode should be specified")
+                MODE_METHOD_JUMP_ANCESTORS_BATCH (class_ :: classes, "Interface")
+              | _ -> raise (Arg.Bad "only a single mode should be specified"))
           end,
         " (mode) prints a list of interfaces that these classes implement" );
       ( "--inheritance-ancestor-traits",
@@ -464,14 +464,13 @@ let parse_check_args cmd =
         Arg.Rest
           begin
             fun class_ ->
-            mode :=
-              match !mode with
-              | None ->
-                Some (MODE_METHOD_JUMP_ANCESTORS_BATCH ([class_], "Trait"))
+            set_mode
+              ~validate:false
+              (match !mode with
+              | None -> MODE_METHOD_JUMP_ANCESTORS_BATCH ([class_], "Trait")
               | Some (MODE_METHOD_JUMP_ANCESTORS_BATCH (classes, "Trait")) ->
-                Some
-                  (MODE_METHOD_JUMP_ANCESTORS_BATCH (class_ :: classes, "Trait"))
-              | _ -> raise (Arg.Bad "only a single mode should be specified")
+                MODE_METHOD_JUMP_ANCESTORS_BATCH (class_ :: classes, "Trait")
+              | _ -> raise (Arg.Bad "only a single mode should be specified"))
           end,
         " (mode) prints a list of traits that these classes use" );
       ( "--inheritance-ancestors",
@@ -552,12 +551,13 @@ let parse_check_args cmd =
         Arg.Int
           begin
             fun code ->
-            mode :=
-              match !mode with
-              | None -> Some (MODE_REMOVE_DEAD_FIXMES [code])
+            set_mode
+              ~validate:false
+              (match !mode with
+              | None -> MODE_REMOVE_DEAD_FIXMES [code]
               | Some (MODE_REMOVE_DEAD_FIXMES codel) ->
-                Some (MODE_REMOVE_DEAD_FIXMES (code :: codel))
-              | _ -> raise (Arg.Bad "only a single mode should be specified")
+                MODE_REMOVE_DEAD_FIXMES (code :: codel)
+              | _ -> raise (Arg.Bad "only a single mode should be specified"))
           end,
         " (mode) remove dead HH_FIXME for specified error code "
         ^ "(first do hh_client restart --no-load)" );
@@ -587,12 +587,13 @@ let parse_check_args cmd =
         Arg.Rest
           begin
             fun fn ->
-            mode :=
-              match !mode with
-              | None -> Some (MODE_REWRITE_LAMBDA_PARAMETERS [fn])
+            set_mode
+              ~validate:false
+              (match !mode with
+              | None -> MODE_REWRITE_LAMBDA_PARAMETERS [fn]
               | Some (MODE_REWRITE_LAMBDA_PARAMETERS fnl) ->
-                Some (MODE_REWRITE_LAMBDA_PARAMETERS (fn :: fnl))
-              | _ -> raise (Arg.Bad "only a single mode should be specified")
+                MODE_REWRITE_LAMBDA_PARAMETERS (fn :: fnl)
+              | _ -> raise (Arg.Bad "only a single mode should be specified"))
           end,
         " (mode) rewrite lambdas in the files from the given list"
         ^ " with suggested parameter types" );
@@ -600,12 +601,13 @@ let parse_check_args cmd =
         Arg.Rest
           begin
             fun fn ->
-            mode :=
-              match !mode with
-              | None -> Some (MODE_REWRITE_TYPE_PARAMS_TYPE [fn])
+            set_mode
+              ~validate:false
+              (match !mode with
+              | None -> MODE_REWRITE_TYPE_PARAMS_TYPE [fn]
               | Some (MODE_REWRITE_TYPE_PARAMS_TYPE fnl) ->
-                Some (MODE_REWRITE_TYPE_PARAMS_TYPE (fn :: fnl))
-              | _ -> raise (Arg.Bad "only a single mode should be specified")
+                MODE_REWRITE_TYPE_PARAMS_TYPE (fn :: fnl)
+              | _ -> raise (Arg.Bad "only a single mode should be specified"))
           end,
         " (mode) add missing type parameters in the type hints for function"
         ^ " parameters (e.g.: C $x -> C<int> $x) in the files from the given list"
@@ -669,24 +671,26 @@ let parse_check_args cmd =
         Arg.Rest
           begin
             fun position ->
-            mode :=
-              match !mode with
-              | None -> Some (MODE_TYPE_AT_POS_BATCH (false, [position]))
+            set_mode
+              ~validate:false
+              (match !mode with
+              | None -> MODE_TYPE_AT_POS_BATCH (false, [position])
               | Some (MODE_TYPE_AT_POS_BATCH (_, positions)) ->
-                Some (MODE_TYPE_AT_POS_BATCH (false, position :: positions))
-              | _ -> raise (Arg.Bad "only a single mode should be specified")
+                MODE_TYPE_AT_POS_BATCH (false, position :: positions)
+              | _ -> raise (Arg.Bad "only a single mode should be specified"))
           end,
         " (mode) show types at multiple positions [file:line:character list]" );
       ( "--type-at-pos-batch-ex",
         Arg.Rest
           begin
             fun position ->
-            mode :=
-              match !mode with
-              | None -> Some (MODE_TYPE_AT_POS_BATCH (true, [position]))
+            set_mode
+              ~validate:false
+              (match !mode with
+              | None -> MODE_TYPE_AT_POS_BATCH (true, [position])
               | Some (MODE_TYPE_AT_POS_BATCH (_, positions)) ->
-                Some (MODE_TYPE_AT_POS_BATCH (true, position :: positions))
-              | _ -> raise (Arg.Bad "only a single mode should be specified")
+                MODE_TYPE_AT_POS_BATCH (true, position :: positions)
+              | _ -> raise (Arg.Bad "only a single mode should be specified"))
           end,
         " (mode) show types at multiple positions [file:line:character list] -- experimental"
       );

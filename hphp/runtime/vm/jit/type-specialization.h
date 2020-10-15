@@ -93,7 +93,7 @@ struct ArraySpec {
   bool vanilla() const;
 
   /*
-   * Retrieve and lookup the bespoke layout for this ArraySpec, if presentj
+   * Retrieve and lookup the bespoke layout for this ArraySpec, if present
    */
   std::optional<BespokeLayout> bespokeLayout() const;
 

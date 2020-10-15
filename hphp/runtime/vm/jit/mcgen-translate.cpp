@@ -532,10 +532,6 @@ TCA retranslate(TransArgs args, const RegionContext& ctx) {
   if (RID().isJittingDisabled()) {
     SKTRACE(2, args.sk, "punting because jitting code was disabled\n");
     return nullptr;
-  } else if (LIKELY(!RO::EvalAllowBespokesInLiveTypes) && ctx.liveBespoke) {
-    assertx(args.kind != TransKind::Profile);
-    SKTRACE(2, args.sk, "punting because region includes a live bespoke\n");
-    return nullptr;
   }
 
   auto sr = tc::findSrcRec(args.sk);
@@ -690,7 +686,7 @@ void checkRetranslateAll(bool force) {
     return;
   }
 
-  if (allowBespokeArrayLikes() && !shouldTestBespokeArrayLikes()) {
+  if (allowBespokeArrayLikes()) {
     bespoke::setLoggingEnabled(false);
     Treadmill::enqueue([] { bespoke::exportProfiles(); });
   }

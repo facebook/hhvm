@@ -457,9 +457,7 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* /*unit*/) {
   // Otherwise, assume that non-layout-agnostic ops taking an S(Arr) actually
   // take an S(VanillaArr), and likewise for other array-likes.
   auto const checkLayoutFlags = [&] (std::vector<Type> types) {
-    if (allowBespokeArrayLikes() &&
-        !inst->isLayoutAgnostic() &&
-        LIKELY(!RO::EvalAllowBespokesInLiveTypes)) {
+    if (allowBespokeArrayLikes() && !inst->isLayoutAgnostic()) {
       for (auto& type : types) type = type.narrowToVanilla();
     }
     return types;

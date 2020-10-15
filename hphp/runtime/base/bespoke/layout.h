@@ -96,7 +96,10 @@ struct LayoutFunctionDispatcher {
   }
 
   static size_t HeapSize(const ArrayData* ad) {
-    return Array::HeapSize(Cast(ad));
+    // NB: The garbage collector relies on this being computable even if
+    // objects referenced by ad have been freed. As a result, we don't check
+    // invariants.
+    return Array::HeapSize(reinterpret_cast<const Array*>(ad));
   }
   static size_t Align(const ArrayData* ad) {
     return Array::Align(Cast(ad));

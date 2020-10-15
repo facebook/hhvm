@@ -1085,6 +1085,8 @@ bool instrBreaksProfileBB(const NormalizedInstruction& inst) {
 
 //////////////////////////////////////////////////////////////////////
 
+namespace {
+
 #define IMM_BLA(n)     ni.immVec
 #define IMM_SLA(n)     ni.immVec
 #define IMM_VSA(n)     ni.immVec
@@ -1114,8 +1116,8 @@ bool instrBreaksProfileBB(const NormalizedInstruction& inst) {
 #define SIX(x0,x1,x2,x3,x4,x5) , IMM_##x0(0), IMM_##x1(1), IMM_##x2(2), IMM_##x3(3), IMM_##x4(4), IMM_##x5(5)
 #define NA                   /*  */
 
-static void translateDispatch(irgen::IRGS& irgs,
-                              const NormalizedInstruction& ni) {
+void translateDispatch(irgen::IRGS& irgs,
+                       const NormalizedInstruction& ni) {
 #define O(nm, imms, ...) case Op::nm: irgen::emit##nm(irgs imms); return;
   switch (ni.op()) { OPCODES }
 #undef O
@@ -1151,8 +1153,6 @@ static void translateDispatch(irgen::IRGS& irgs,
 #undef IMM_FCA
 
 //////////////////////////////////////////////////////////////////////
-
-namespace {
 
 Type flavorToType(FlavorDesc f) {
   switch (f) {
@@ -1199,12 +1199,14 @@ void translateInstr(irgen::IRGS& irgs, const NormalizedInstruction& ni) {
 
   if (isAlwaysNop(ni)) return;
 
-  handleBespokeInputs(irgs, ni.source, [&](irgen::IRGS& env) {
-    if (ni.interp || RuntimeOption::EvalJitAlwaysInterpOne) {
-      irgen::interpOne(env);
-      return;
-    }
-    if (ni.forceSurpriseCheck) surpriseCheck(env);
+  if (ni.interp || RuntimeOption::EvalJitAlwaysInterpOne) {
+    irgen::interpOne(irgs);
+    return;
+  }
+
+  if (ni.forceSurpriseCheck) surpriseCheck(irgs);
+
+  handleBespokeInputs(irgs, ni, [&](irgen::IRGS& env) {
     translateDispatch(env, ni);
     handleVanillaOutputs(env, ni.source);
   });

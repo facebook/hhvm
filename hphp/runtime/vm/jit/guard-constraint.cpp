@@ -71,11 +71,7 @@ bool typeFitsConstraint(Type t, GuardConstraint gc) {
         auto const recSpec = t.recSpec();
         return recSpec && recSpec.rec()->recordDescOf(gc.desiredRecord());
       } else if (gc.isArrayLayoutSensitive()) {
-        if (LIKELY(!RO::EvalAllowBespokesInLiveTypes)) {
-          return t.arrSpec().vanilla();
-        } else{
-          return t.arrSpec().vanilla() || t.arrSpec().bespokeLayout();
-        }
+        return t.arrSpec().vanilla() || t.arrSpec().bespokeLayout();
       }
       return false;
   }

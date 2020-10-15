@@ -243,6 +243,7 @@ void emitGuards(irgen::IRGS& irgs,
       auto const isVanillaGuard = origType.arrSpec().vanilla();
       auto const type = isVanillaGuard ? origType.unspecialize() : origType;
       auto const loc  = preCond.location;
+      assertx(!type.arrSpec().bespokeLayout());
       irgen::checkType(irgs, loc, type, bcOff);
       if (isVanillaGuard) {
         arrayReachLocs.push_back(ArrayReachInfo {loc, i});

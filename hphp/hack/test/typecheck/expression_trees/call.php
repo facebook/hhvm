@@ -57,6 +57,12 @@ class Code {
 }
 function bar(mixed $_): int { return 1; }
 
+final class ExprTree<TVisitor, TResult>{
+  public function __construct(
+    private (function(TVisitor): TResult) $x,
+  ) {}
+}
+
 function foo(): void {
   $fun_call = Code`bar("baz")`;
 }

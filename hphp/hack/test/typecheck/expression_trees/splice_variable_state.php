@@ -67,6 +67,12 @@ class Code {
   }
 }
 
+final class ExprTree<TVisitor, TResult>{
+  public function __construct(
+    private (function(TVisitor): TResult) $x,
+  ) {}
+}
+
 class Foo {
   public ?int $x;
   public function reset(): int {

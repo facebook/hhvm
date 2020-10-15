@@ -5,17 +5,31 @@ use oxidized::{
     aast,
     aast_visitor::{AstParams, NodeMut, VisitorMut},
     ast,
-    ast::{Expr, Expr_, Stmt, Stmt_},
+    ast::{ClassId, ClassId_, Expr, Expr_, Stmt, Stmt_},
     ast_defs::*,
     file_info,
     pos::Pos,
 };
 
-/// Convert an expression tree body to `(NameOfVisitor $v) ==> { return $v->...; }`.
+/// Convert an expression tree to
+/// ```
+/// # Outer thunk
+/// (() ==> {
+///   # Spliced assignments
+///   return new ExprTree(
+///     # Metadata
+///     # AST as smart constructor calls function
+///     function (VisitorType $v) { $v->... },
+///   );
+/// )();
+/// ```
 pub fn desugar(hint: &aast::Hint, e: &Expr, env: &Env) -> Expr {
-    let (e, extracted_splices) = extract_and_replace_splices(&e);
+    let (e, extracted_splices) = extract_and_replace_splices(e);
+    let temp_pos = e.0.clone();
 
-    let mut assignments: Vec<Stmt> = extracted_splices
+    // Create assignments of extracted splices
+    // `$__1 = spliced_expr;`
+    let mut thunk_body: Vec<Stmt> = extracted_splices
         .into_iter()
         .enumerate()
         .map(|(i, expr)| {
@@ -29,14 +43,12 @@ pub fn desugar(hint: &aast::Hint, e: &Expr, env: &Env) -> Expr {
         })
         .collect();
 
-    let visitor_expr = rewrite_expr(&e);
-    assignments.push(wrap_return(visitor_expr, &e.0));
-
-    let body = ast::FuncBody {
-        ast: assignments,
+    // Make anonymous function of smart constructor calls
+    let visitor_expr = wrap_return(rewrite_expr(&e), &temp_pos.clone());
+    let visitor_body = ast::FuncBody {
+        ast: vec![visitor_expr],
         annotation: (),
     };
-
     let param = ast::FunParam {
         annotation: hint.0.clone(),
         type_hint: ast::TypeHint((), Some(hint.clone())),
@@ -48,8 +60,56 @@ pub fn desugar(hint: &aast::Hint, e: &Expr, env: &Env) -> Expr {
         user_attributes: vec![],
         visibility: None,
     };
-    let visitor_fun = ast::Fun_ {
-        span: e.0.clone(),
+    let visitor_fun_ = wrap_fun_(visitor_body, vec![param], temp_pos.clone(), env);
+    let visitor_lambda = Expr::new(temp_pos.clone(), Expr_::mk_lfun(visitor_fun_, vec![]));
+
+    // Make `return new ExprTree(...et_construct_args)`
+    let et_construct_args = vec![visitor_lambda];
+    let new_et_expr = Expr::new(
+        temp_pos.clone(),
+        Expr_::New(Box::new((
+            ClassId(
+                temp_pos.clone(),
+                ClassId_::CIexpr(Expr::new(
+                    temp_pos.clone(),
+                    Expr_::Id(Box::new(Id(temp_pos.clone(), "ExprTree".to_string()))),
+                )),
+            ),
+            vec![],
+            et_construct_args,
+            None,
+            temp_pos.clone(),
+        ))),
+    );
+    let return_stmt = wrap_return(new_et_expr, &temp_pos.clone());
+
+    // Add to the body of the thunk after the splice assignments
+    thunk_body.push(return_stmt);
+
+    // Create the thunk
+    let thunk_func_body = ast::FuncBody {
+        ast: thunk_body,
+        annotation: (),
+    };
+    let thunk_fun_ = wrap_fun_(thunk_func_body, vec![], temp_pos.clone(), env);
+    let thunk = Expr::new(temp_pos.clone(), Expr_::mk_lfun(thunk_fun_, vec![]));
+
+    // Call the thunk
+    Expr::new(
+        temp_pos.clone(),
+        Expr_::Call(Box::new((thunk, vec![], vec![], None))),
+    )
+}
+
+/// Convert `foo` to `return foo;`.
+fn wrap_return(e: Expr, pos: &Pos) -> Stmt {
+    Stmt::new(pos.clone(), Stmt_::Return(Box::new(Some(e))))
+}
+
+/// Wrap a FuncBody into an anonymous Fun_
+fn wrap_fun_(body: ast::FuncBody, params: Vec<ast::FunParam>, pos: Pos, env: &Env) -> ast::Fun_ {
+    ast::Fun_ {
+        span: pos,
         annotation: (),
         mode: file_info::Mode::Mstrict,
         ret: ast::TypeHint((), None),
@@ -57,7 +117,7 @@ pub fn desugar(hint: &aast::Hint, e: &Expr, env: &Env) -> Expr {
         tparams: vec![],
         where_constraints: vec![],
         variadic: aast::FunVariadicity::FVnonVariadic,
-        params: vec![param],
+        params,
         body,
         fun_kind: ast::FunKind::FSync,
         cap: ast::TypeHint((), None),        // TODO(T70095684)
@@ -68,14 +128,7 @@ pub fn desugar(hint: &aast::Hint, e: &Expr, env: &Env) -> Expr {
         doc_comment: None,
         namespace: RcOc::clone(&env.empty_ns_env),
         static_: false,
-    };
-    let visitor_lambda = Expr_::mk_lfun(visitor_fun, vec![]);
-    Expr::new(e.0.clone(), visitor_lambda)
-}
-
-/// Convert `foo` to `return foo;`.
-fn wrap_return(e: Expr, pos: &Pos) -> Stmt {
-    Stmt::new(pos.clone(), Stmt_::Return(Box::new(Some(e))))
+    }
 }
 
 /// Convert expression tree expressions to method calls.

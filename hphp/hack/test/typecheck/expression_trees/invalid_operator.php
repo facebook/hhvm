@@ -64,6 +64,12 @@ class Foo {
   public static function bar(): int { return 1; }
 }
 
+final class ExprTree<TVisitor, TResult>{
+  public function __construct(
+    private (function(TVisitor): TResult) $x,
+  ) {}
+}
+
 const int MY_CONST = 1;
 
 function foo(): void {

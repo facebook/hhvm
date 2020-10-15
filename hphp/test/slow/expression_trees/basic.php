@@ -31,13 +31,23 @@ public function call(string $name, vec<mixed> $args): string {
   }
 }
 
+final class ExprTree<TVisitor, TResult>{
+  public function __construct(
+    private (function(TVisitor): TResult) $ast,
+  ) {}
+
+  public function construct(TVisitor $v): TResult {
+    return ($this->ast)($v);
+  }
+}
+
 <<__EntryPoint>>
 function test(): void {
   $et = MyVisitor`1 + foo("bar")`;
 
   $visitor = new MyVisitor();
 
-  $res = $et($visitor);
+  $res = $et->construct($visitor);
 
   echo($res);
 }

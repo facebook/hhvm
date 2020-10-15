@@ -74,6 +74,12 @@ class Code {
   }
 }
 
+final class ExprTree<TVisitor, TResult>{
+  public function __construct(
+    private (function(TVisitor): TResult) $x,
+  ) {}
+}
+
 // This technically shouldn't throw an error.
 // It currently is due to typechecking the current desugaring
 // So, for the moment, allow this error to be thrown and fix the desugaring

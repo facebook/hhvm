@@ -56,6 +56,12 @@ class Code {
   }
 }
 
+final class ExprTree<TVisitor, TResult>{
+  public function __construct(
+    private (function(TVisitor): TResult) $x,
+  ) {}
+}
+
 function foo(): void {
   $if = Code`($x) ==> { if($x) { return 1; } return 2; }`;
 

@@ -14,6 +14,12 @@ final class Code {
   }
 }
 
+final class ExprTree<TVisitor, TResult>{
+  public function __construct(
+    private (function(TVisitor): TResult) $x,
+  ) {}
+}
+
 function test(): void {
   Code`__splice__(Code`4`)`;
 }

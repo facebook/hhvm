@@ -57,6 +57,12 @@ class Code {
 }
 function bar(): void {}
 
+final class ExprTree<TVisitor, TResult>{
+  public function __construct(
+    private (function(TVisitor): TResult) $x,
+  ) {}
+}
+
 function foo(): void {
   $loop = Code`($x) ==> { while(true) { bar(); } }`;
 }

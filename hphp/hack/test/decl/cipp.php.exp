@@ -1,0 +1,201 @@
+Parsed decls:
+
+{ Direct_decl_parser.classes =
+  { "\\C" ->
+    { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
+      sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
+      sc_name = ([3:7-8], "\\C"); sc_tparams = []; sc_where_constraints = [];
+      sc_extends = []; sc_uses = []; sc_xhp_attr_uses = [];
+      sc_req_extends = []; sc_req_implements = []; sc_implements = [];
+      sc_consts = []; sc_typeconsts = []; sc_pu_enums = []; sc_props = [];
+      sc_sprops = []; sc_constructor = None; sc_static_methods = [];
+      sc_methods =
+      [{ Shallow_decl_defs.sm_abstract = false; sm_final = false;
+         sm_memoizelsb = false; sm_name = ([5:19-30], "cipp_method");
+         sm_override = false; sm_dynamicallycallable = false;
+         sm_reactivity = None;
+         sm_type =
+         (Rwitness (root|cipp.php line 5, characters 19-29),
+          (Tfun
+             { ft_arity = (Fstandard ()); ft_tparams = [];
+               ft_where_constraints = []; ft_params = [];
+               ft_implicit_params =
+               { capability =
+                 (Rhint (root|cipp.php line 5, characters 19-29), (Tunion []))
+                 };
+               ft_ret =
+               { et_enforced = false;
+                 et_type =
+                 (Rhint (root|cipp.php line 5, characters 34-37),
+                  (Tprim Tvoid))
+                 };
+               ft_flags =
+               (make_ft_flags sync none ~return_disposable:false
+                 ~returns_mutable:false ~returns_void_to_rx:false);
+               ft_reactive = Cipp {\C} }));
+         sm_visibility = Public; sm_deprecated = None };
+        { Shallow_decl_defs.sm_abstract = false; sm_final = false;
+          sm_memoizelsb = false; sm_name = ([8:19-37], "cipp_global_method");
+          sm_override = false; sm_dynamicallycallable = false;
+          sm_reactivity = None;
+          sm_type =
+          (Rwitness (root|cipp.php line 8, characters 19-36),
+           (Tfun
+              { ft_arity = (Fstandard ()); ft_tparams = [];
+                ft_where_constraints = []; ft_params = [];
+                ft_implicit_params =
+                { capability =
+                  (Rhint (root|cipp.php line 8, characters 19-36),
+                   (Tunion []))
+                  };
+                ft_ret =
+                { et_enforced = false;
+                  et_type =
+                  (Rhint (root|cipp.php line 8, characters 41-44),
+                   (Tprim Tvoid))
+                  };
+                ft_flags =
+                (make_ft_flags sync none ~return_disposable:false
+                  ~returns_mutable:false ~returns_void_to_rx:false);
+                ft_reactive = CippGlobal }));
+          sm_visibility = Public; sm_deprecated = None };
+        { Shallow_decl_defs.sm_abstract = false; sm_final = false;
+          sm_memoizelsb = false; sm_name = ([11:19-36], "cipp_local_method");
+          sm_override = false; sm_dynamicallycallable = false;
+          sm_reactivity = None;
+          sm_type =
+          (Rwitness (root|cipp.php line 11, characters 19-35),
+           (Tfun
+              { ft_arity = (Fstandard ()); ft_tparams = [];
+                ft_where_constraints = []; ft_params = [];
+                ft_implicit_params =
+                { capability =
+                  (Rhint (root|cipp.php line 11, characters 19-35),
+                   (Tunion []))
+                  };
+                ft_ret =
+                { et_enforced = false;
+                  et_type =
+                  (Rhint (root|cipp.php line 11, characters 40-43),
+                   (Tprim Tvoid))
+                  };
+                ft_flags =
+                (make_ft_flags sync none ~return_disposable:false
+                  ~returns_mutable:false ~returns_void_to_rx:false);
+                ft_reactive = CippLocal {a} }));
+          sm_visibility = Public; sm_deprecated = None };
+        { Shallow_decl_defs.sm_abstract = false; sm_final = false;
+          sm_memoizelsb = false; sm_name = ([14:19-33], "cipp_rx_method");
+          sm_override = false; sm_dynamicallycallable = false;
+          sm_reactivity = None;
+          sm_type =
+          (Rwitness (root|cipp.php line 14, characters 19-32),
+           (Tfun
+              { ft_arity = (Fstandard ()); ft_tparams = [];
+                ft_where_constraints = []; ft_params = [];
+                ft_implicit_params =
+                { capability =
+                  (Rhint (root|cipp.php line 14, characters 19-32),
+                   (Tunion []))
+                  };
+                ft_ret =
+                { et_enforced = false;
+                  et_type =
+                  (Rhint (root|cipp.php line 14, characters 37-40),
+                   (Tprim Tvoid))
+                  };
+                ft_flags =
+                (make_ft_flags sync none ~return_disposable:false
+                  ~returns_mutable:false ~returns_void_to_rx:false);
+                ft_reactive = CippRx }));
+          sm_visibility = Public; sm_deprecated = None }
+        ];
+      sc_user_attributes = []; sc_enum_type = None } };
+  funs =
+  { "\\cipp_function" ->
+    { fe_pos = [18:10-23];
+      fe_type =
+      (Rwitness (root|cipp.php line 18, characters 10-22),
+       (Tfun
+          { ft_arity = (Fstandard ()); ft_tparams = [];
+            ft_where_constraints = []; ft_params = [];
+            ft_implicit_params =
+            { capability =
+              (Rhint (root|cipp.php line 18, characters 10-22), (Tunion []))
+              };
+            ft_ret =
+            { et_enforced = false;
+              et_type =
+              (Rhint (root|cipp.php line 18, characters 27-30), (Tprim Tvoid))
+              };
+            ft_flags =
+            (make_ft_flags sync none ~return_disposable:false
+              ~returns_mutable:false ~returns_void_to_rx:false);
+            ft_reactive = Cipp {b} }));
+      fe_deprecated = None;  };
+    "\\cipp_global_function" ->
+    { fe_pos = [21:10-30];
+      fe_type =
+      (Rwitness (root|cipp.php line 21, characters 10-29),
+       (Tfun
+          { ft_arity = (Fstandard ()); ft_tparams = [];
+            ft_where_constraints = []; ft_params = [];
+            ft_implicit_params =
+            { capability =
+              (Rhint (root|cipp.php line 21, characters 10-29), (Tunion []))
+              };
+            ft_ret =
+            { et_enforced = false;
+              et_type =
+              (Rhint (root|cipp.php line 21, characters 34-37), (Tprim Tvoid))
+              };
+            ft_flags =
+            (make_ft_flags sync none ~return_disposable:false
+              ~returns_mutable:false ~returns_void_to_rx:false);
+            ft_reactive = CippGlobal }));
+      fe_deprecated = None;  };
+    "\\cipp_local_function" ->
+    { fe_pos = [24:10-29];
+      fe_type =
+      (Rwitness (root|cipp.php line 24, characters 10-28),
+       (Tfun
+          { ft_arity = (Fstandard ()); ft_tparams = [];
+            ft_where_constraints = []; ft_params = [];
+            ft_implicit_params =
+            { capability =
+              (Rhint (root|cipp.php line 24, characters 10-28), (Tunion []))
+              };
+            ft_ret =
+            { et_enforced = false;
+              et_type =
+              (Rhint (root|cipp.php line 24, characters 33-36), (Tprim Tvoid))
+              };
+            ft_flags =
+            (make_ft_flags sync none ~return_disposable:false
+              ~returns_mutable:false ~returns_void_to_rx:false);
+            ft_reactive = CippLocal {\C} }));
+      fe_deprecated = None;  };
+    "\\cipp_rx_function" ->
+    { fe_pos = [27:10-26];
+      fe_type =
+      (Rwitness (root|cipp.php line 27, characters 10-25),
+       (Tfun
+          { ft_arity = (Fstandard ()); ft_tparams = [];
+            ft_where_constraints = []; ft_params = [];
+            ft_implicit_params =
+            { capability =
+              (Rhint (root|cipp.php line 27, characters 10-25), (Tunion []))
+              };
+            ft_ret =
+            { et_enforced = false;
+              et_type =
+              (Rhint (root|cipp.php line 27, characters 30-33), (Tprim Tvoid))
+              };
+            ft_flags =
+            (make_ft_flags sync none ~return_disposable:false
+              ~returns_mutable:false ~returns_void_to_rx:false);
+            ft_reactive = CippRx }));
+      fe_deprecated = None;  } };
+  typedefs = {}; consts = {} }
+
+They matched!

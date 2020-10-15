@@ -567,7 +567,7 @@ pub struct ShapeFieldNode<'a> {
 pub struct UserAttributeNode<'a> {
     name: Id<'a>,
     classname_params: &'a [Id<'a>],
-    string_literal_params: &'a [&'a BStr], // this is only used for __Deprecated attribute message
+    string_literal_params: &'a [&'a BStr], // this is only used for __Deprecated attribute message and Cipp parameters
 }
 
 #[derive(Copy, Clone, Debug)]
@@ -1022,6 +1022,14 @@ impl<'a> DirectDeclSmartConstructors<'a> {
             _ => None,
         });
 
+        let string_or_classname_arg = |attribute: &'a UserAttributeNode| {
+            attribute
+                .string_literal_params
+                .first()
+                .map(|&x| self.str_from_utf8(x))
+                .or_else(|| attribute.classname_params.first().map(|x| x.1))
+        };
+
         for attribute in node.iter() {
             if let Node::Attribute(attribute) = attribute {
                 match attribute.name.1.as_ref() {
@@ -1039,6 +1047,19 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                     }
                     "__Pure" => {
                         attributes.reactivity = Reactivity::Pure(reactivity_condition_type);
+                    }
+                    "__Cipp" => {
+                        attributes.reactivity = Reactivity::Cipp(string_or_classname_arg(attribute))
+                    }
+                    "__CippGlobal" => {
+                        attributes.reactivity = Reactivity::CippGlobal;
+                    }
+                    "__CippLocal" => {
+                        attributes.reactivity =
+                            Reactivity::CippLocal(string_or_classname_arg(attribute))
+                    }
+                    "__CippRx" => {
+                        attributes.reactivity = Reactivity::CippRx;
                     }
                     "__Mutable" => {
                         attributes.param_mutability = Some(ParamMutability::ParamBorrowedMutable)
@@ -3735,7 +3756,10 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             _ => None,
         }));
 
-        let string_literal_params = if name.1 == "__Deprecated" {
+        let string_literal_params = if match name.1 {
+            "__Deprecated" | "__Cipp" | "__CippLocal" => true,
+            _ => false,
+        } {
             fn fold_string_concat<'a>(expr: &nast::Expr<'a>, acc: &mut Vec<'a, u8>) {
                 match expr {
                     &aast::Expr(_, aast::Expr_::String(val)) => acc.extend_from_slice(val),

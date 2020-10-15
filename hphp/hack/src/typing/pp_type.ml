@@ -244,10 +244,6 @@ and pp_dependent_type : Format.formatter -> dependent_type -> unit =
   Format.fprintf fmt "(@[";
   match a0 with
   | DTthis -> Format.pp_print_string fmt "DTthis"
-  | DTcls x ->
-    Format.fprintf fmt "DTcls (@[<hov>";
-    Format.fprintf fmt "%S" x;
-    Format.fprintf fmt "@])"
   | DTexpr x ->
     Format.fprintf fmt "DTexpr (@[<hov>";
     Ident.pp fmt x;

@@ -106,13 +106,6 @@ type consistent_kind =
 type dependent_type =
   (* Type that is the subtype of the late bound type within a class. *)
   | DTthis
-  (* A class name, new type, or generic, i.e.
-   *
-   * abstract class C { abstract const type T }
-   *
-   * The type C::T is (`cls '\C', ['T'])
-   *)
-  | DTcls of string
   (* A reference to some expression. For example:
    *
    *  $x->foo()

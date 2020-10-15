@@ -802,7 +802,7 @@ module ErrorString = struct
     | Tnewtype (x, _, _) when String.equal x SN.Classes.cTypename ->
       "a typename string"
     | Tnewtype (x, tyl, _) -> "a value of type " ^ strip_ns x ^ inst env tyl
-    | Tdependent (dep, cstr) -> dependent env dep cstr
+    | Tdependent (dep, _cstr) -> dependent dep
     | Tclass ((_, x), Exact, tyl) ->
       "an object of exactly the class " ^ strip_ns x ^ inst env tyl
     | Tclass ((_, x), Nonexact, tyl) ->
@@ -839,14 +839,9 @@ module ErrorString = struct
               (List.map tyl ~f:(Full.to_string_strip_ns ~ty:Full.locl_ty env))
           ^ ">")
 
-  and dependent env dep cstr =
+  and dependent dep =
     let x = strip_ns @@ DependentKind.to_string dep in
     match dep with
-    | DTcls c ->
-      to_string env cstr
-      ^ " (known to be exactly the class '"
-      ^ strip_ns c
-      ^ "')"
     | DTthis
     | DTexpr _ ->
       "the expression dependent type " ^ x
@@ -967,11 +962,6 @@ module Json = struct
       obj @@ kind p "enum" @ name s @ as_type ty
     | (p, Tnewtype (s, tys, ty)) ->
       obj @@ kind p "newtype" @ name s @ args tys @ as_type ty
-    | (p, Tdependent (DTcls c, ty)) ->
-      obj
-      @@ kind p "path"
-      @ [("type", obj @@ kind (get_pos ty) "class" @ name c @ args [])]
-      @ as_type ty
     | (p, Tdependent (DTexpr _, ty)) ->
       obj
       @@ kind p "path"
@@ -1147,11 +1137,6 @@ module Json = struct
           ids >>= fun _ids ->
           begin
             match path_kind with
-            | "class" ->
-              get_string "name" (type_json, type_keytrace)
-              >>= fun (class_name, _class_name_keytrace) ->
-              aux_as json ~keytrace >>= fun as_ty ->
-              ty (Tdependent (DTcls class_name, as_ty))
             | "expr" ->
               not_supported
                 ~message:

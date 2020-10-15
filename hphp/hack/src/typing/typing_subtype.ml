@@ -1169,11 +1169,7 @@ and simplify_subtype_i
             if String.equal x y then
               fun () ->
             let p = Reason.to_pos r_sub in
-            fail_with_suffix
-              ( if equal_dependent_type d_sup (DTcls x) then
-                Errors.exact_class_final id p
-              else
-                Errors.this_final id p )
+            fail_with_suffix (Errors.this_final id p)
             else
               fail
           in

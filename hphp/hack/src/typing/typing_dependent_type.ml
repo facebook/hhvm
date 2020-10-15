@@ -15,9 +15,14 @@ module ExprDepTy = struct
   module Env = Typing_env
   module TUtils = Typing_utils
 
+  type dep =
+    | Dep_This
+    | Dep_Cls of string
+    | Dep_Expr of Ident.t
+
   let new_ () =
     let eid = Ident.tmp () in
-    (Reason.ERexpr eid, DTexpr eid)
+    (Reason.ERexpr eid, Dep_Expr eid)
 
   let from_cid env reason cid =
     let pos = Reason.to_pos reason in
@@ -25,19 +30,19 @@ module ExprDepTy = struct
       match cid with
       | N.CIparent ->
         (match Env.get_parent_id env with
-        | Some cls -> (pos, Reason.ERparent cls, DTcls cls)
+        | Some cls -> (pos, Reason.ERparent cls, Dep_Cls cls)
         | None ->
           let (ereason, dep) = new_ () in
           (pos, ereason, dep))
       | N.CIself ->
         (match get_node (Env.get_self env) with
-        | Tclass ((_, cls), _, _) -> (pos, Reason.ERself cls, DTcls cls)
+        | Tclass ((_, cls), _, _) -> (pos, Reason.ERself cls, Dep_Cls cls)
         | _ ->
           let (ereason, dep) = new_ () in
           (pos, ereason, dep))
-      | N.CI (p, cls) -> (p, Reason.ERclass cls, DTcls cls)
-      | N.CIstatic -> (pos, Reason.ERstatic, DTthis)
-      | N.CIexpr (p, N.This) -> (p, Reason.ERstatic, DTthis)
+      | N.CI (p, cls) -> (p, Reason.ERclass cls, Dep_Cls cls)
+      | N.CIstatic -> (pos, Reason.ERstatic, Dep_This)
+      | N.CIexpr (p, N.This) -> (p, Reason.ERstatic, Dep_This)
       (* If it is a local variable then we look up the expression id associated
        * with it. If one doesn't exist we generate a new one. We are being
        * conservative here because the new expression id we create isn't
@@ -46,7 +51,7 @@ module ExprDepTy = struct
       | N.CIexpr (p, N.Lvar (_, x)) ->
         let (ereason, dep) =
           match Env.get_local_expr_id env x with
-          | Some eid -> (Reason.ERexpr eid, DTexpr eid)
+          | Some eid -> (Reason.ERexpr eid, Dep_Expr eid)
           | None -> new_ ()
         in
         (p, ereason, dep)
@@ -80,7 +85,15 @@ module ExprDepTy = struct
   (****************************************************************************)
   let make env ~cid ty =
     let (r_dep_ty, dep_ty) = from_cid env (get_reason ty) cid in
-    let apply env ty = (env, mk (r_dep_ty, Tdependent (dep_ty, ty))) in
+    let apply env ty =
+      let dep_ty =
+        match dep_ty with
+        | Dep_Cls _ -> DTexpr (Ident.tmp ())
+        | Dep_This -> DTthis
+        | Dep_Expr id -> DTexpr id
+      in
+      (env, mk (r_dep_ty, Tdependent (dep_ty, ty)))
+    in
     let rec make env ty =
       let (env, ety) = Env.expand_type env ty in
       match deref ety with
@@ -98,7 +111,7 @@ module ExprDepTy = struct
           (env, ty)
         else (
           match dep_ty with
-          | DTcls n when String.equal n x ->
+          | Dep_Cls n when String.equal n x ->
             (env, mk (r_dep_ty, Tclass (c, Exact, tyl)))
           | _ -> apply env ty
         )

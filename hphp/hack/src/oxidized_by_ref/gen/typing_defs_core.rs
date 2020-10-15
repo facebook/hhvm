@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<7ce6f0d3d97549669b6bebd337bf40bb>>
+// @generated SignedSource<<d26c0f5e1f93f8f5e0a712d6edecbac6>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -261,12 +261,11 @@ impl TrivialDrop for ConsistentKind {}
     Serialize,
     ToOcamlRep
 )]
-pub enum DependentType<'a> {
+pub enum DependentType {
     DTthis,
-    DTcls(&'a str),
     DTexpr(ident::Ident),
 }
-impl<'a> TrivialDrop for DependentType<'a> {}
+impl TrivialDrop for DependentType {}
 
 #[derive(
     Clone,
@@ -520,7 +519,7 @@ pub enum Ty_<'a> {
     /// Which means that my_type is abstract, but is subtype of int as well.
     Tnewtype(&'a (&'a str, &'a [&'a Ty<'a>], &'a Ty<'a>)),
     /// see dependent_type
-    Tdependent(&'a (DependentType<'a>, &'a Ty<'a>)),
+    Tdependent(&'a (DependentType, &'a Ty<'a>)),
     /// Tobject is an object type compatible with all objects. This type is also
     /// compatible with some string operations (since a class might implement
     /// __toString), but not with string type hints.

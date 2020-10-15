@@ -205,7 +205,6 @@ let rec expand ctx env root : _ * result =
   | Tany _
   | Terr ->
     (env, Exact root)
-  | Tdependent (DTcls name, ty)
   | Tnewtype (name, _, ty) ->
     let ctx =
       let base = Some (Option.value ctx.base ~default:root) in

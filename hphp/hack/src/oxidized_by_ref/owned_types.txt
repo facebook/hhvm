@@ -8,6 +8,7 @@ shallow_decl_defs::Visibility
 shallow_decl_defs::XhpAttr
 tany_sentinel::TanySentinel
 typing_defs_core::ConsistentKind
+typing_defs_core::DependentType
 typing_defs_core::DestructureKind
 typing_defs_core::Exact
 typing_defs_core::FunTparamsKind

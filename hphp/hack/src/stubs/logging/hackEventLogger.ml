@@ -203,6 +203,8 @@ let client_connect_once _ = ()
 
 let client_connect_once_busy _ = ()
 
+let client_connect_autostart () = ()
+
 let check_response _ = ()
 
 let got_client_channels _ = ()

@@ -390,6 +390,7 @@ let rec connect
         } =
           env
         in
+        HackEventLogger.client_connect_autostart ();
         ClientStart.(
           start_server
             {

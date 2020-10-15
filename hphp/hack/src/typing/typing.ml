@@ -3412,8 +3412,8 @@ and expression_tree env p visitor_class e desugared_expr =
   let env = { env with et_spliced_types = None } in
   match desugared_expr with
   | Some desugared_expr ->
-    let (env, te2, _ty2) = expr env desugared_expr in
-    make_result env p (Aast.ExpressionTree (visitor_class, te, Some te2)) ty
+    let (env, te2, ty2) = expr env desugared_expr in
+    make_result env p (Aast.ExpressionTree (visitor_class, te, Some te2)) ty2
   | None -> make_result env p (Aast.ExpressionTree (visitor_class, te, None)) ty
 
 and et_splice env p e =

@@ -1,0 +1,1 @@
+Fatal error: F cannot inherit the constant A from E2, because it was previously inherited from E1 in %s/bad_conflict_siblings.php on line 16

@@ -1,0 +1,1 @@
+Fatal error: Cannot override previously defined constant E::A in F in %s/bad_conflict_parent.php on line 12

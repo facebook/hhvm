@@ -1,0 +1,1 @@
+Fatal error: E cannot include C - it is not an enum in %s/bad_not_an_enum.php on line 10

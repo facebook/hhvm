@@ -5401,108 +5401,99 @@
                     }
                   },
                   "for_control":{
-                    "kind":"list",
-                    "elements":[
-                      {
-                        "kind":"list_item",
-                        "list_item":{
-                          "kind":"parenthesized_expression",
-                          "parenthesized_expression_left_paren":{
-                            "kind":"token",
-                            "token":{
-                              "kind":"(",
-                              "text":"(",
-                              "offset":821,
-                              "leading_width":0,
-                              "width":1,
-                              "trailing_width":0,
-                              "leading":[],
-                              "trailing":[],
-                              "line_number":30
-                            }
-                          },
-                          "parenthesized_expression_expression":{
-                            "kind":"prefix_unary_expression",
-                            "prefix_unary_operator":{
-                              "kind":"token",
-                              "token":{
-                                "kind":"await",
-                                "text":"await",
-                                "offset":822,
-                                "leading_width":0,
-                                "width":5,
-                                "trailing_width":1,
-                                "leading":[],
-                                "trailing":[{"kind":"whitespace","text":" ","offset":827,"width":1}],
-                                "line_number":30
-                              }
-                            },
-                            "prefix_unary_operand":{
-                              "kind":"function_call_expression",
-                              "function_call_receiver":{
-                                "kind":"token",
-                                "token":{
-                                  "kind":"name",
-                                  "text":"genx",
-                                  "offset":828,
-                                  "leading_width":0,
-                                  "width":4,
-                                  "trailing_width":0,
-                                  "leading":[],
-                                  "trailing":[],
-                                  "line_number":30
-                                }
-                              },
-                              "function_call_type_args":{"kind":"missing"},
-                              "function_call_left_paren":{
-                                "kind":"token",
-                                "token":{
-                                  "kind":"(",
-                                  "text":"(",
-                                  "offset":832,
-                                  "leading_width":0,
-                                  "width":1,
-                                  "trailing_width":0,
-                                  "leading":[],
-                                  "trailing":[],
-                                  "line_number":30
-                                }
-                              },
-                              "function_call_argument_list":{"kind":"missing"},
-                              "function_call_right_paren":{
-                                "kind":"token",
-                                "token":{
-                                  "kind":")",
-                                  "text":")",
-                                  "offset":833,
-                                  "leading_width":0,
-                                  "width":1,
-                                  "trailing_width":0,
-                                  "leading":[],
-                                  "trailing":[],
-                                  "line_number":30
-                                }
-                              }
-                            }
-                          },
-                          "parenthesized_expression_right_paren":{
-                            "kind":"token",
-                            "token":{
-                              "kind":")",
-                              "text":")",
-                              "offset":834,
-                              "leading_width":0,
-                              "width":1,
-                              "trailing_width":0,
-                              "leading":[],
-                              "trailing":[],
-                              "line_number":30
-                            }
+                    "kind":"parenthesized_expression",
+                    "parenthesized_expression_left_paren":{
+                      "kind":"token",
+                      "token":{
+                        "kind":"(",
+                        "text":"(",
+                        "offset":821,
+                        "leading_width":0,
+                        "width":1,
+                        "trailing_width":0,
+                        "leading":[],
+                        "trailing":[],
+                        "line_number":30
+                      }
+                    },
+                    "parenthesized_expression_expression":{
+                      "kind":"prefix_unary_expression",
+                      "prefix_unary_operator":{
+                        "kind":"token",
+                        "token":{
+                          "kind":"await",
+                          "text":"await",
+                          "offset":822,
+                          "leading_width":0,
+                          "width":5,
+                          "trailing_width":1,
+                          "leading":[],
+                          "trailing":[{"kind":"whitespace","text":" ","offset":827,"width":1}],
+                          "line_number":30
+                        }
+                      },
+                      "prefix_unary_operand":{
+                        "kind":"function_call_expression",
+                        "function_call_receiver":{
+                          "kind":"token",
+                          "token":{
+                            "kind":"name",
+                            "text":"genx",
+                            "offset":828,
+                            "leading_width":0,
+                            "width":4,
+                            "trailing_width":0,
+                            "leading":[],
+                            "trailing":[],
+                            "line_number":30
                           }
                         },
-                        "list_separator":{"kind":"missing"}
+                        "function_call_type_args":{"kind":"missing"},
+                        "function_call_left_paren":{
+                          "kind":"token",
+                          "token":{
+                            "kind":"(",
+                            "text":"(",
+                            "offset":832,
+                            "leading_width":0,
+                            "width":1,
+                            "trailing_width":0,
+                            "leading":[],
+                            "trailing":[],
+                            "line_number":30
+                          }
+                        },
+                        "function_call_argument_list":{"kind":"missing"},
+                        "function_call_right_paren":{
+                          "kind":"token",
+                          "token":{
+                            "kind":")",
+                            "text":")",
+                            "offset":833,
+                            "leading_width":0,
+                            "width":1,
+                            "trailing_width":0,
+                            "leading":[],
+                            "trailing":[],
+                            "line_number":30
+                          }
+                        }
                       }
-                    ]
+                    },
+                    "parenthesized_expression_right_paren":{
+                      "kind":"token",
+                      "token":{
+                        "kind":")",
+                        "text":")",
+                        "offset":834,
+                        "leading_width":0,
+                        "width":1,
+                        "trailing_width":0,
+                        "leading":[],
+                        "trailing":[],
+                        "line_number":30
+                      }
+                    }
                   },
                   "for_second_semicolon":{
                     "kind":"token",
@@ -5696,30 +5687,21 @@
                     }
                   },
                   "for_control":{
-                    "kind":"list",
-                    "elements":[
-                      {
-                        "kind":"list_item",
-                        "list_item":{
-                          "kind":"literal",
-                          "literal_expression":{
-                            "kind":"token",
-                            "token":{
-                              "kind":"decimal_literal",
-                              "text":"42",
-                              "offset":859,
-                              "leading_width":0,
-                              "width":2,
-                              "trailing_width":0,
-                              "leading":[],
-                              "trailing":[],
-                              "line_number":31
-                            }
-                          }
-                        },
-                        "list_separator":{"kind":"missing"}
+                    "kind":"literal",
+                    "literal_expression":{
+                      "kind":"token",
+                      "token":{
+                        "kind":"decimal_literal",
+                        "text":"42",
+                        "offset":859,
+                        "leading_width":0,
+                        "width":2,
+                        "trailing_width":0,
+                        "leading":[],
+                        "trailing":[],
+                        "line_number":31
                       }
-                    ]
+                    }
                   },
                   "for_second_semicolon":{
                     "kind":"token",
@@ -7289,5 +7271,5 @@
     }
   },
   "program_text":"<?hh\n\nasync function foo(): Awaitable<void> {\n  $x = 1 ? (await genx()) : 2;\n  $x = 1 ? 2 : (await genx());\n  $x = $y?->foo(await genx());\n  $x = (false && (await genx()));\n  $x = (true || (await genx()));\n  $x = true ?: (await genx());\n  $x = $y ?? (await genx());\n  $x[(await genx())] = 42;\n  $x[(await genx())] += 42;\n  $x[(await genx())] -= 42;\n  $x[(await genx())] *= 42;\n  $x[(await genx())] /= 42;\n  $x[(await genx())] **= 42;\n  $x[(await genx())] .= 42;\n  $x[(await genx())] %= 42;\n  $x[(await genx())] ^= 42;\n  $x[(await genx())] |= 42;\n  $x[(await genx())] &= 42;\n  $x[(await genx())] <<= 42;\n  $x[(await genx())] >>= 42;\n  $x[(await genx())] ??= 42;\n  $x ??= (await genx());\n  $x = true |> await f($$);\n  $x = 42 |> f(await $$);\n  $x = true |> (await f(42)) + $$;\n  $x = (await (await genx()));\n  for ($i = 0; (await genx()); 43) {}\n  for ($i = 0; 42; (await genx())) {}\n  while (await genx()) {}\n  do {} while (await genx());\n  require (await genx());\n  require_once (await genx());\n  include (await genx());\n  include_once (await genx());\n  ++$a[(await genx())];\n  --$a[(await genx())];\n  foo(inout (await genx()));\n}\n",
-  "version":"2020-09-14-0000"
+  "version":"2020-10-01-0000"
 }

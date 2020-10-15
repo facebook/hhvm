@@ -11,5 +11,4 @@ function foo() {
   for(;$y;) {}
   for(;;$z) {}
   for($x, $y;;) {}
-  for(;$x, $y, $z;) {}
 }

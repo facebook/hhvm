@@ -318,9 +318,13 @@ where
         //   for   (   for-initializer-opt   ;   for-control-opt   ;    \
         //     for-end-of-loop-opt   )   statement
         //
-        // Each clause is an optional, comma-separated list of expressions.
+        // The initialize and end-of-loop clauses are optional,
+        // comma-separated lists of expressions. The control clause is
+        // an optional single expression.
+        //
         // Note that unlike most such lists in Hack, it may *not* have a trailing
         // comma.
+        //
         // TODO: There is no compelling reason to not allow a trailing comma
         // from the grammatical point of view. Each clause unambiguously ends in
         // either a semi or a paren, so we can allow a trailing comma without
@@ -332,10 +336,10 @@ where
                 x.parse_expression()
             });
         let for_first_semicolon = self.require_semicolon();
-        let for_control_expr =
-            self.parse_comma_list_opt(TokenKind::Semicolon, Errors::error1015, |x| {
-                x.parse_expression()
-            });
+        let for_control_expr = match self.peek_token_kind() {
+            TokenKind::Semicolon => S!(make_missing, self, self.pos()),
+            _ => self.parse_expression(),
+        };
         let for_second_semicolon = self.require_semicolon();
         let for_end_of_loop_expr =
             self.parse_comma_list_opt(TokenKind::RightParen, Errors::error1015, |x| {

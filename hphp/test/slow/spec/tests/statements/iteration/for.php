@@ -35,7 +35,7 @@ for (;;)
 
 //  use groups of expressions
 
-for ($a = 100, $i = 1; ++$i, $i <= 10; ++$i, $a -= 10)
+for ($a = 100, $i = 2; $i <= 10; $i += 2, $a -= 10)
 {
     echo "$i\t$a\n";
 }

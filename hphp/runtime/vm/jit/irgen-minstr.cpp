@@ -1440,6 +1440,9 @@ SSATmp* setNewElemImpl(IRGS& env, uint32_t nDiscard) {
     gen(env, SetNewElemDict, makeCatchSet(env, nDiscard), basePtr, value);
   } else if (baseType <= TKeyset) {
     constrainBase(env);
+    if (!value->type().isKnownDataType()) {
+      PUNT(SetM-NewElem-Keyset-ValueNotKnown);
+    }
     value = convertClassKey(env, value);
     if (!value->isA(TInt | TStr)) {
       auto const base = extractBase(env);
@@ -1514,22 +1517,25 @@ SSATmp* setElemImpl(IRGS& env, uint32_t nDiscard, SSATmp* key) {
 }
 
 SSATmp* memberKey(IRGS& env, MemberKey mk) {
-  switch (mk.mcode) {
-    case MW:
-      return nullptr;
-    case MEL: case MPL:
-      return convertClassKey(
-          env,
-          ldLocWarn(env, mk.local, nullptr, DataTypeSpecific)
-      );
-    case MEC: case MPC:
-      return convertClassKey(env, topC(env, BCSPRelOffset{int32_t(mk.iva)}));
-    case MEI:
-      return cns(env, mk.int64);
-    case MET: case MPT: case MQT:
-      return cns(env, mk.litstr);
-  }
-  not_reached();
+  auto const res = [&] () -> SSATmp* {
+    switch (mk.mcode) {
+      case MW:
+        return nullptr;
+      case MEL: case MPL:
+        return ldLocWarn(env, mk.local, nullptr, DataTypeSpecific);
+      case MEC: case MPC:
+        return topC(env, BCSPRelOffset{int32_t(mk.iva)});
+      case MEI:
+        return cns(env, mk.int64);
+      case MET: case MPT: case MQT:
+        return cns(env, mk.litstr);
+    }
+    not_reached();
+  }();
+  if (!res) return nullptr;
+
+  if (!res->type().isKnownDataType()) PUNT(MInstr-KeyNotKnown);
+  return convertClassKey(env, res);
 }
 
 //////////////////////////////////////////////////////////////////////

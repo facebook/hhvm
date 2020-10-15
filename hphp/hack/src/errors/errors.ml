@@ -2943,7 +2943,7 @@ let self_abstract_call meth_name call_pos decl_pos =
     (Typing.err_code Typing.AbstractCall)
     [
       ( call_pos,
-        "Cannot call self::"
+        "Cannot call "
         ^ Markdown_lite.md_codify ("self::" ^ meth_name ^ "()")
         ^ "; it is abstract. Did you mean "
         ^ Markdown_lite.md_codify ("static::" ^ meth_name ^ "()")

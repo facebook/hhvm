@@ -466,7 +466,7 @@ int instrNumPops(PC pc) {
   if (n <= -20) {
     auto const fca = getImm(pc, 0).u_FCA;
     auto const nin = -n - 20;
-    return nin + fca.numInputs() + 1 + fca.numRets;
+    return nin + fca.numInputs() + (kNumActRecCells - 1) + fca.numRets;
   }
   // Other final member operations pop their first immediate + n
   if (n <= -10) return getImm(pc, 0).u_IVA - n - 10;

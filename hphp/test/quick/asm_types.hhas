@@ -34,11 +34,11 @@
 
 .function ["__EntryPoint"("""y:0:{}""")] main() {
   NullUninit
-  NullUninit
+
   NullUninit
   NewObjD "C"
   Dup
-  NullUninit
+
   NullUninit
   FCallCtor <LockWhileUnwinding> 0 1 "" - "" ""
   PopC
@@ -47,63 +47,63 @@
   PopC
 
   NullUninit
-  NullUninit
+
   NullUninit
   Null
   FCallFuncD <> 1 1 "" - "" "use_class"
   PopC
 
   NullUninit
-  NullUninit
+
   NullUninit
   Int 5
   FCallFuncD <> 1 1 "" - "" "use_int_soft"
   PopC
 
   NullUninit
-  NullUninit
+
   NullUninit
   Array @A_0
   FCallFuncD <> 1 1 "" - "" "use_int_soft"
   PopC
 
   NullUninit
-  NullUninit
+
   NullUninit
   Null
   FCallFuncD <> 1 1 "" - "" "use_int_soft"
   PopC
 
   NullUninit
-  NullUninit
+
   NullUninit
   Int 6
   FCallFuncD <> 1 1 "" - "" "use_int_nullable"
   PopC
 
   NullUninit
-  NullUninit
+
   NullUninit
   Null
   FCallFuncD <> 1 1 "" - "" "use_int_nullable"
   PopC
 
   NullUninit
-  NullUninit
+
   NullUninit
   Int 5
   FCallFuncD <> 1 1 "" - "" "use_int"
   PopC
 
   NullUninit
-  NullUninit
+
   NullUninit
   Array @A_0
   FCallFuncD <> 1 1 "" - "" "use_mixed"
   PopC
 
   NullUninit
-  NullUninit
+
   NullUninit
   Array @A_0
   FCallFuncD <> 1 1 "" - "" "use_int"

@@ -21,7 +21,6 @@
     .srcloc 27:10,27:22;
     NullUninit
     NullUninit
-    NullUninit
     .srcloc 27:20,27:21;
     CGetL $x
     .srcloc 27:10,27:22;
@@ -54,7 +53,6 @@ L0:
   .srcloc 34:8,34:22;
   NullUninit
   NullUninit
-  NullUninit
   .srcloc 34:8,34:22;
   FCallClsMethodD <> 0 1 "" - "" "" "C" "pu$E$Members"
   .srcloc 34:3,34:22;
@@ -62,7 +60,6 @@ L0:
   .srcloc 34:3,34:23;
   PopC
   .srcloc 35:3,35:9;
-  NullUninit
   NullUninit
   NullUninit
   .srcloc 35:7,35:8;
@@ -138,7 +135,6 @@ L0:
     NewObjD "Exception"
     Dup
     NullUninit
-    NullUninit
     .srcloc 8:8,8:8;
     String "\\C:@E::val unknown atom access: "
     .srcloc 8:8,8:8;
@@ -162,7 +158,6 @@ L0:
   L0:
     NullUninit
     NullUninit
-    NullUninit
     FCallClsMethodD <> 0 1 "" - "" "" "C" "pu$E$Members$memoize_impl"
     MemoSet L:0+0
     RetC
@@ -177,7 +172,6 @@ L0:
     MemoGet L0 L:1+1
     RetC
   L0:
-    NullUninit
     NullUninit
     NullUninit
     CGetL $atom

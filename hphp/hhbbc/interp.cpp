@@ -828,7 +828,7 @@ void in(ISS& env, const bc::PopFrame& op) {
   for (auto i = op.arg1; i > 0; --i) {
     vals[i - 1] = {popC(env), topStkEquiv(env)};
   }
-  for (uint32_t i = 0; i < 3; i++) popU(env);
+  for (uint32_t i = 0; i < 2; i++) popU(env);
   for (auto& p : vals) {
     push(
       env, std::move(p.first), p.second != StackDupId ? p.second : NoLocalId);
@@ -2735,7 +2735,6 @@ void in(ISS& env, const bc::GetMemoKeyL& op) {
           env,
           bc::CGetL { op.nloc1 },
           bc::NullUninit {},
-          bc::NullUninit {},
           bc::FCallObjMethodD {
             FCallArgs(0),
             staticEmptyString(),
@@ -2757,7 +2756,6 @@ void in(ISS& env, const bc::GetMemoKeyL& op) {
         return reduce(
           env,
           bc::CGetL { op.nloc1 },
-          bc::NullUninit {},
           bc::NullUninit {},
           bc::FCallObjMethodD {
             FCallArgs(0),
@@ -3618,7 +3616,6 @@ bool fcallOptimizeChecks(
           bc::NewObjD { exCls },
           bc::Dup {},
           bc::NullUninit {},
-          bc::NullUninit {},
           bc::String { err },
           bc::FCallCtor { FCallArgs(1), staticEmptyString() },
           bc::PopC {},
@@ -3701,11 +3698,10 @@ bool fcallTryFold(
     for (uint32_t i = 0; i < numExtraInputs; ++i) repl.push_back(bc::PopC {});
     for (uint32_t i = 0; i < fca.numArgs(); ++i) repl.push_back(bc::PopC {});
     repl.push_back(bc::PopU {});
-    repl.push_back(bc::PopU {});
-    if (topT(env, fca.numArgs() + 2 + numExtraInputs).subtypeOf(TInitCell)) {
+    if (topT(env, fca.numArgs() + 1 + numExtraInputs).subtypeOf(TInitCell)) {
       repl.push_back(bc::PopC {});
     } else {
-      assertx(topT(env, fca.numArgs() + 2 + numExtraInputs).subtypeOf(TUninit));
+      assertx(topT(env, fca.numArgs() + 1 + numExtraInputs).subtypeOf(TUninit));
       repl.push_back(bc::PopU {});
     }
     repl.push_back(gen_constant(*v));
@@ -3812,7 +3808,6 @@ void fcallKnownImpl(
   if (fca.hasUnpack()) popC(env);
   for (auto i = uint32_t{0}; i < numArgs; ++i) popCV(env);
   popU(env);
-  popU(env);
   popCU(env);
   pushCallReturnType(env, std::move(returnType), fca);
 }
@@ -3823,7 +3818,6 @@ void fcallUnknownImpl(ISS& env, const FCallArgs& fca) {
   auto const numArgs = fca.numArgs();
   auto const numRets = fca.numRets();
   for (auto i = uint32_t{0}; i < numArgs; ++i) popCV(env);
-  popU(env);
   popU(env);
   popCU(env);
   if (fca.asyncEagerTarget() != NoBlockId) {
@@ -4066,7 +4060,6 @@ void fcallObjMethodNullsafe(ISS& env, const FCallArgs& fca, bool extraInput) {
     repl.push_back(bc::PopC {});
   }
   repl.push_back(bc::PopU {});
-  repl.push_back(bc::PopU {});
   repl.push_back(bc::PopC {});
   auto const numRets = fca.numRets();
   for (uint32_t i = 0; i < numRets - 1; ++i) {
@@ -4081,7 +4074,7 @@ template <typename Op, class UpdateBC>
 void fcallObjMethodImpl(ISS& env, const Op& op, SString methName, bool dynamic,
                         bool extraInput, UpdateBC updateBC) {
   auto const nullThrows = op.subop3 == ObjMethodOp::NullThrows;
-  auto const inputPos = op.fca.numInputs() + (extraInput ? 3 : 2);
+  auto const inputPos = op.fca.numInputs() + (extraInput ? 2 : 1);
   auto const input = topC(env, inputPos);
   auto const location = topStkEquiv(env, inputPos);
   auto const mayCallMethod = input.couldBe(BObj);
@@ -4154,7 +4147,7 @@ void in(ISS& env, const bc::FCallObjMethodD& op) {
       return unreachable(env);
     }
 
-    auto const input = topC(env, op.fca.numInputs() + 2);
+    auto const input = topC(env, op.fca.numInputs() + 1);
     auto const clsTy = objcls(intersection_of(input, TObj));
     auto const rfunc = env.index.resolve_method(env.ctx, clsTy, op.str4);
     if (!rfunc.couldHaveReifiedGenerics()) {
@@ -4182,7 +4175,7 @@ void in(ISS& env, const bc::FCallObjMethod& op) {
     return;
   }
 
-  auto const input = topC(env, op.fca.numInputs() + 3);
+  auto const input = topC(env, op.fca.numInputs() + 2);
   auto const clsTy = objcls(intersection_of(input, TObj));
   auto const rfunc = env.index.resolve_method(env.ctx, clsTy, methName);
   if (!rfunc.mightCareAboutDynCalls()) {
@@ -4480,7 +4473,7 @@ bool objMightHaveConstProps(const Type& t) {
 }
 
 void in(ISS& env, const bc::FCallCtor& op) {
-  auto const obj = topC(env, op.fca.numInputs() + 2);
+  auto const obj = topC(env, op.fca.numInputs() + 1);
   assertx(op.fca.numRets() == 1);
 
   if (!is_specialized_obj(obj)) {

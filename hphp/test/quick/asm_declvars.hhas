@@ -30,7 +30,7 @@
 
 .function ["__EntryPoint"("""y:0:{}""")] main() {
   NullUninit
-  NullUninit
+
   NullUninit
   Int 12
   FCallFuncD <> 1 1 "" - "" "foo"

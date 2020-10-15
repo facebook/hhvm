@@ -278,7 +278,6 @@ pub fn wrap_array_mark_legacy(e: &Emitter, ins: InstrSeq) -> InstrSeq {
         InstrSeq::gather(vec![
             instr::nulluninit(),
             instr::nulluninit(),
-            instr::nulluninit(),
             ins,
             instr::fcallfuncd(
                 FcallArgs::new(FcallFlags::default(), 1, vec![], None, 1, None),
@@ -909,7 +908,6 @@ fn inline_gena_call(emitter: &mut Emitter, env: &Env, arg: &tast::Expr) -> Resul
         let inner = InstrSeq::gather(vec![
             instr::nulluninit(),
             instr::nulluninit(),
-            instr::nulluninit(),
             instr::cgetl(arr_local.clone()),
             instr::fcallclsmethodd(
                 FcallArgs::new(
@@ -1180,7 +1178,6 @@ fn emit_static_collection(
         if arrprov_enabled && env.scope.has_function_attribute("__ProvenanceSkipFrame") {
             InstrSeq::gather(vec![
                 emit_pos(pos),
-                instr::nulluninit(),
                 instr::nulluninit(),
                 instr::nulluninit(),
                 instr::typedvalue(tv),
@@ -1754,7 +1751,6 @@ fn emit_special_function_assert(
     Ok(InstrSeq::gather(vec![
         instr::nulluninit(),
         instr::nulluninit(),
-        instr::nulluninit(),
         instr::string("zend.assertions"),
         instr::fcallfuncd(
             FcallArgs::new(FcallFlags::default(), 1, vec![], None, 1, None),
@@ -1900,7 +1896,7 @@ fn emit_call_lhs_and_fcall(
                     let generics = emit_generics(e, env, &mut fcall_args)?;
                     let null_flavor = from_ast_null_flavor(*null_flavor);
                     Ok((
-                        InstrSeq::gather(vec![obj, instr::nulluninit(), instr::nulluninit()]),
+                        InstrSeq::gather(vec![obj, instr::nulluninit()]),
                         InstrSeq::gather(vec![
                             generics,
                             instr::fcallobjmethodd(fcall_args, name, null_flavor),
@@ -1929,7 +1925,6 @@ fn emit_call_lhs_and_fcall(
                     Ok((
                         InstrSeq::gather(vec![
                             obj,
-                            instr::nulluninit(),
                             instr::nulluninit(),
                             emit_expr(e, env, method_expr)?,
                             instr::popl(tmp.clone()),
@@ -1960,11 +1955,7 @@ fn emit_call_lhs_and_fcall(
                     emit_symbol_refs::State::add_class(e, cid.clone());
                     let generics = emit_generics(e, env, &mut fcall_args)?;
                     (
-                        InstrSeq::gather(vec![
-                            instr::nulluninit(),
-                            instr::nulluninit(),
-                            instr::nulluninit(),
-                        ]),
+                        InstrSeq::gather(vec![instr::nulluninit(), instr::nulluninit()]),
                         InstrSeq::gather(vec![
                             generics,
                             instr::fcallclsmethodd(fcall_args, method_id, cid),
@@ -1974,11 +1965,7 @@ fn emit_call_lhs_and_fcall(
                 ClassExpr::Special(clsref) => {
                     let generics = emit_generics(e, env, &mut fcall_args)?;
                     (
-                        InstrSeq::gather(vec![
-                            instr::nulluninit(),
-                            instr::nulluninit(),
-                            instr::nulluninit(),
-                        ]),
+                        InstrSeq::gather(vec![instr::nulluninit(), instr::nulluninit()]),
                         InstrSeq::gather(vec![
                             generics,
                             instr::fcallclsmethodsd(fcall_args, clsref, method_id),
@@ -1988,11 +1975,7 @@ fn emit_call_lhs_and_fcall(
                 ClassExpr::Expr(expr) => {
                     let generics = emit_generics(e, env, &mut fcall_args)?;
                     (
-                        InstrSeq::gather(vec![
-                            instr::nulluninit(),
-                            instr::nulluninit(),
-                            instr::nulluninit(),
-                        ]),
+                        InstrSeq::gather(vec![instr::nulluninit(), instr::nulluninit()]),
                         InstrSeq::gather(vec![
                             generics,
                             instr::string(method_id.to_raw_string()),
@@ -2009,7 +1992,6 @@ fn emit_call_lhs_and_fcall(
                     let tmp = e.local_gen_mut().get_unnamed();
                     (
                         InstrSeq::gather(vec![
-                            instr::nulluninit(),
                             instr::nulluninit(),
                             instr::nulluninit(),
                             instrs,
@@ -2050,7 +2032,6 @@ fn emit_call_lhs_and_fcall(
                         InstrSeq::gather(vec![
                             instr::nulluninit(),
                             instr::nulluninit(),
-                            instr::nulluninit(),
                             emit_meth_name(e)?,
                             instr::popl(tmp.clone()),
                         ]),
@@ -2070,7 +2051,6 @@ fn emit_call_lhs_and_fcall(
                         InstrSeq::gather(vec![
                             instr::nulluninit(),
                             instr::nulluninit(),
-                            instr::nulluninit(),
                             emit_meth_name(e)?,
                             instr::popl(tmp.clone()),
                         ]),
@@ -2085,7 +2065,6 @@ fn emit_call_lhs_and_fcall(
                     let meth = e.local_gen_mut().get_unnamed();
                     (
                         InstrSeq::gather(vec![
-                            instr::nulluninit(),
                             instr::nulluninit(),
                             instr::nulluninit(),
                             emit_expr(e, env, &expr)?,
@@ -2109,7 +2088,6 @@ fn emit_call_lhs_and_fcall(
                     let meth = e.local_gen_mut().get_unnamed();
                     (
                         InstrSeq::gather(vec![
-                            instr::nulluninit(),
                             instr::nulluninit(),
                             instr::nulluninit(),
                             instrs,
@@ -2146,11 +2124,7 @@ fn emit_call_lhs_and_fcall(
             };
             let generics = emit_generics(e, env, &mut fcall_args)?;
             Ok((
-                InstrSeq::gather(vec![
-                    instr::nulluninit(),
-                    instr::nulluninit(),
-                    instr::nulluninit(),
-                ]),
+                InstrSeq::gather(vec![instr::nulluninit(), instr::nulluninit()]),
                 InstrSeq::gather(vec![generics, instr::fcallfuncd(fcall_args, fq_id)]),
             ))
         }
@@ -2159,11 +2133,7 @@ fn emit_call_lhs_and_fcall(
             let fq_id = s.to_string().into();
             let generics = emit_generics(e, env, &mut fcall_args)?;
             Ok((
-                InstrSeq::gather(vec![
-                    instr::nulluninit(),
-                    instr::nulluninit(),
-                    instr::nulluninit(),
-                ]),
+                InstrSeq::gather(vec![instr::nulluninit(), instr::nulluninit()]),
                 InstrSeq::gather(vec![generics, instr::fcallfuncd(fcall_args, fq_id)]),
             ))
         }
@@ -2171,7 +2141,6 @@ fn emit_call_lhs_and_fcall(
             let tmp = e.local_gen_mut().get_unnamed();
             Ok((
                 InstrSeq::gather(vec![
-                    instr::nulluninit(),
                     instr::nulluninit(),
                     instr::nulluninit(),
                     emit_expr(e, env, &expr)?,
@@ -3218,7 +3187,6 @@ fn emit_new(
             InstrSeq::gather(vec![
                 newobj_instrs,
                 instr::dup(),
-                instr::nulluninit(),
                 instr::nulluninit(),
                 instr_args,
                 instr_uargs,

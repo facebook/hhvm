@@ -1807,8 +1807,8 @@ FCall* opcodes
   LockWhileUnwinding: whether to lock newly constructed objects if unwinding the
   constructor call.
 
-FCallFunc <fca>                 [U U U C|V..C|V C]  ->  [C..C]
-FCallFuncD <fca> <litstr id>    [U U U C|V..C|V]  ->  [C..C]
+FCallFunc <fca>                 [U U C|V..C|V C]  ->  [C..C]
+FCallFuncD <fca> <litstr id>    [U U C|V..C|V]  ->  [C..C]
 
   Call a callable. First, these instructions load a value into x as given by
   the following table:
@@ -1839,9 +1839,9 @@ FCallFuncD <fca> <litstr id>    [U U U C|V..C|V]  ->  [C..C]
   throws a fatal error.
 
 FCallObjMethod <fca> <class hint> <nullsafe>
-  [C U U C|V..C|V C]  ->  [C..C]
+  [C U C|V..C|V C]  ->  [C..C]
 FCallObjMethodD <fca> <class hint> <nullsafe> <litstr id>
-  [C U U C|V..C|V]  ->  [C..C]
+  [C U C|V..C|V]  ->  [C..C]
 
   Call an instance method. First, these instructions load values into x
   and y as given by the following table:
@@ -1863,13 +1863,13 @@ FCallObjMethodD <fca> <class hint> <nullsafe> <litstr id>
   the class name with the implementation of method y that will be called.
 
 FCallClsMethod <fca> <class hint> <op>
-  [U U U C|V..C|V C C:Class]  ->  [C..C]
+  [U U C|V..C|V C C:Class]  ->  [C..C]
 FCallClsMethodD <fca> <class hint> <litstr id> <litstr id>
-  [U U U C|V..C|V]    ->  [C..C]
+  [U U C|V..C|V]    ->  [C..C]
 FCallClsMethodS <fca> <class hint> <mode>
-  [U U U C|V..C|V C]  ->  [C..C]
+  [U U C|V..C|V C]  ->  [C..C]
 FCallClsMethodSD <fca> <class hint> <mode> <litstr id>
-  [U U U C|V..C|V]    ->  [C..C]
+  [U U C|V..C|V]    ->  [C..C]
 
   Call a static method. First, these instructions load values into x and
   y as given by the following table:
@@ -1902,7 +1902,7 @@ FCallClsMethodSD <fca> <class hint> <mode> <litstr id>
   If op is DontLogAsDynamicCall all logging set up for dynamic calls will be
   skipped.
 
-FCallCtor <fca> <class hint>  [C:Obj U U C|V..C|V]  ->  [C]
+FCallCtor <fca> <class hint>  [C:Obj U C|V..C|V]  ->  [C]
 
   This instruction calls a constructor for class of the object given by
   $(num args + has unpack + 3).

@@ -214,7 +214,6 @@ fn make_memoize_function_with_params_code(
         instr::label(notfound),
         instr::nulluninit(),
         instr::nulluninit(),
-        instr::nulluninit(),
         emit_memoize_helpers::param_code_gets(hhas_params),
         reified_get,
         instr::fcallfuncd(fcall_args, renamed_id),
@@ -270,7 +269,6 @@ fn make_memoize_function_no_params_code(
             InstrSeq::gather(vec![instr::memoget(notfound.clone(), None), instr::retc()])
         },
         instr::label(notfound),
-        instr::nulluninit(),
         instr::nulluninit(),
         instr::nulluninit(),
         instr::fcallfuncd(fcall_args, renamed_id),

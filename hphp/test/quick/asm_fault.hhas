@@ -12,7 +12,7 @@
 
     NewObjD "Exception"
     Dup
-    NullUninit
+
     NullUninit
     CGetL $msg
     FCallCtor <LockWhileUnwinding> 1 1 "" - "" ""
@@ -38,7 +38,7 @@
     PopC
 
     NullUninit
-    NullUninit
+
     NullUninit
     String "the message"
     FCallFuncD <> 1 1 "" - "" "throw_stuff"
@@ -76,7 +76,7 @@ repeat:
 
 make_one:    NewObjD "One"
              Dup
-             NullUninit
+
              NullUninit
              FCallCtor <LockWhileUnwinding> 0 1 "" - "" ""
              PopC
@@ -84,7 +84,7 @@ make_one:    NewObjD "One"
              Throw
 make_two:    NewObjD "Two"
              Dup
-             NullUninit
+
              NullUninit
              FCallCtor <LockWhileUnwinding> 0 1 "" - "" ""
              PopC
@@ -92,7 +92,7 @@ make_two:    NewObjD "Two"
              Throw
 make_three:  NewObjD "Three"
              Dup
-             NullUninit
+
              NullUninit
              String "third exception from throw_various"
              FCallCtor <LockWhileUnwinding> 1 1 "" - "" ""
@@ -138,7 +138,7 @@ on_three:    String "three\n"
          SetL $ever_caught
          PopC
          NullUninit
-         NullUninit
+
          NullUninit
          String "foo"
 
@@ -152,7 +152,7 @@ resume:  .try {
            String "top-level catch handler got: "
            PushL $ex
            NullUninit
-           NullUninit
+
            FCallObjMethodD <> 0 1 "" - "" "" NullThrows "getMessage"
            Concat
            String "\n"
@@ -166,7 +166,7 @@ resume:  .try {
            PopC
            JmpNZ resume2
            NullUninit
-           NullUninit
+
            NullUninit
            String "throw_various"
            Jmp resume

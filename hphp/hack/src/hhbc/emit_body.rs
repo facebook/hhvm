@@ -693,7 +693,6 @@ pub fn emit_deprecation_info(
                 InstrSeq::gather(vec![
                     instr::nulluninit(),
                     instr::nulluninit(),
-                    instr::nulluninit(),
                     trait_instrs,
                     instr::string(deprecation_string),
                     concat_instruction,

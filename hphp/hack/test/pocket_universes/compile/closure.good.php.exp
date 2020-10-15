@@ -13,7 +13,6 @@
     .srcloc 14:10,14:41;
     NullUninit
     NullUninit
-    NullUninit
     .srcloc 14:35,14:40;
     CGetL $field
     .srcloc 14:10,14:41;
@@ -40,7 +39,6 @@
     MemoGet L0 L:0+0
     RetC
   L0:
-    NullUninit
     NullUninit
     NullUninit
     FCallClsMethodD <> 0 1 "" - "" "" "C" "pu$Entry$Members$memoize_impl"

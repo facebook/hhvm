@@ -45,7 +45,7 @@
   .declvars $x;
   NewObjD "A"
   Dup
-  NullUninit
+
   NullUninit
   String "foo"
   FCallCtor <LockWhileUnwinding> 1 1 "" - "" ""
@@ -55,16 +55,16 @@
   PopC
   CGetL $x
   NullUninit
-  NullUninit
+
   String "bar"
   FCallObjMethodD <> 1 1 "" - "" "" NullThrows "set"
   PopC
   NullUninit
-  NullUninit
+
   NullUninit
   CGetL $x
   NullUninit
-  NullUninit
+
   FCallObjMethodD <> 0 1 "" - "" "" NullThrows "get"
   FCallFuncD <> 1 1 "" - "" "var_dump"
   PopC

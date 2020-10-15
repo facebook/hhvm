@@ -425,7 +425,7 @@ int instrNumPops(PC pc) {
 #define MFINAL -3
 #define C_MFINAL(n) -10 - (n)
 #define CUMANY -3
-#define CMANY_U3 C_MFINAL(3)
+#define CMANY_U2 C_MFINAL(2)
 #define CALLNATIVE -5
 #define FCALL(nin, nobj) -20 - (nin)
 #define CMANY -3
@@ -442,7 +442,7 @@ int instrNumPops(PC pc) {
 #undef MFINAL
 #undef C_MFINAL
 #undef CUMANY
-#undef CMANY_U3
+#undef CMANY_U2
 #undef CALLNATIVE
 #undef FCALL
 #undef CMANY
@@ -462,11 +462,11 @@ int instrNumPops(PC pc) {
     return getImm(pc, 0).u_IVA + getImm(pc, 2).u_IVA;
   }
   // FCall* opcodes pop number of opcode specific inputs, unpack, numArgs,
-  // 3 cells/uninits reserved for ActRec and (numRets - 1) uninit values.
+  // 2 cells/uninits reserved for ActRec and (numRets - 1) uninit values.
   if (n <= -20) {
     auto const fca = getImm(pc, 0).u_FCA;
     auto const nin = -n - 20;
-    return nin + fca.numInputs() + 2 + fca.numRets;
+    return nin + fca.numInputs() + 1 + fca.numRets;
   }
   // Other final member operations pop their first immediate + n
   if (n <= -10) return getImm(pc, 0).u_IVA - n - 10;
@@ -576,7 +576,7 @@ FlavorDesc instrInputFlavor(PC op, uint32_t idx) {
 #define MFINAL return manyFlavor(op, idx, CV);
 #define C_MFINAL(n) return manyFlavor(op, idx, CV);
 #define CUMANY return manyFlavor(op, idx, CUV);
-#define CMANY_U3 return manyFlavor(op, idx, CUV);
+#define CMANY_U2 return manyFlavor(op, idx, CUV);
 #define CALLNATIVE return fcallBuiltinFlavor(op, idx);
 #define FCALL(nin, nobj) return fcallFlavor<nin, nobj>(op, idx);
 #define CMANY return manyFlavor(op, idx, CV);
@@ -596,7 +596,7 @@ FlavorDesc instrInputFlavor(PC op, uint32_t idx) {
 #undef MFINAL
 #undef C_MFINAL
 #undef CUMANY
-#undef CMANY_U3
+#undef CMANY_U2
 #undef CALLNATIVE
 #undef FCALL
 #undef CMANY

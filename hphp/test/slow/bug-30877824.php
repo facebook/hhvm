@@ -14,6 +14,7 @@ class C {
     }
     var_dump($bt);
   }
+  <<__NEVER_INLINE>>
   function f() {
     $this->g();
   }

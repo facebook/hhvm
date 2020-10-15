@@ -14,7 +14,6 @@
   .srcloc 41:12,41:26;
   NullUninit
   NullUninit
-  NullUninit
   .srcloc 41:12,41:26;
   FCallClsMethodD <> 0 1 "" - "" "" "C" "pu$E$Members"
   .srcloc 41:12,41:26;
@@ -27,7 +26,6 @@
     CGetL2 $member
     Concat
     .srcloc 42:24,42:43;
-    NullUninit
     NullUninit
     NullUninit
     .srcloc 42:36,42:42;
@@ -86,7 +84,6 @@ L0:
     NewObjD "Exception"
     Dup
     NullUninit
-    NullUninit
     .srcloc 8:8,8:8;
     String "\\MyTraitA:@E::value unknown atom access: "
     .srcloc 8:8,8:8;
@@ -110,7 +107,6 @@ L0:
   L0:
     NullUninit
     NullUninit
-    NullUninit
     FCallClsMethodSD <> 0 1 "" - "" "" Self "pu$E$Members$memoize_impl"
     MemoSet L:0+0
     RetC
@@ -125,7 +121,6 @@ L0:
     MemoGet L0 L:1+1
     RetC
   L0:
-    NullUninit
     NullUninit
     NullUninit
     CGetL $atom
@@ -164,7 +159,6 @@ L0:
     NewObjD "Exception"
     Dup
     NullUninit
-    NullUninit
     .srcloc 17:8,17:8;
     String "\\MyTraitB:@E::value unknown atom access: "
     .srcloc 17:8,17:8;
@@ -188,7 +182,6 @@ L0:
   L0:
     NullUninit
     NullUninit
-    NullUninit
     FCallClsMethodSD <> 0 1 "" - "" "" Self "pu$E$Members$memoize_impl"
     MemoSet L:0+0
     RetC
@@ -203,7 +196,6 @@ L0:
     MemoGet L0 L:1+1
     RetC
   L0:
-    NullUninit
     NullUninit
     NullUninit
     CGetL $atom
@@ -241,7 +233,6 @@ L0:
         NewObjD "ReflectionClass"
         Dup
         NullUninit
-        NullUninit
         .srcloc 29:8,29:8;
         CGetL $traits_class
         .srcloc 29:8,29:8;
@@ -255,7 +246,6 @@ L0:
         .srcloc 29:8,29:8;
         CGetL $class
         NullUninit
-        NullUninit
         .srcloc 29:8,29:8;
         String "pu$E$Members"
         .srcloc 29:8,29:8;
@@ -266,7 +256,6 @@ L0:
         PopC
         .srcloc 29:8,29:8;
         CGetL $method
-        NullUninit
         NullUninit
         .srcloc 29:8,29:8;
         Null
@@ -362,7 +351,6 @@ L0:
         NewObjD "ReflectionClass"
         Dup
         NullUninit
-        NullUninit
         .srcloc 29:8,29:8;
         CGetL $trait_class
         .srcloc 29:8,29:8;
@@ -376,7 +364,6 @@ L0:
         .srcloc 29:8,29:8;
         CGetL $class
         NullUninit
-        NullUninit
         .srcloc 29:8,29:8;
         String "pu$E$value"
         .srcloc 29:8,29:8;
@@ -387,7 +374,6 @@ L0:
         PopC
         .srcloc 29:8,29:8;
         CGetL $method
-        NullUninit
         NullUninit
         .srcloc 29:8,29:8;
         Null
@@ -424,7 +410,6 @@ L0:
     NewObjD "Exception"
     Dup
     NullUninit
-    NullUninit
     .srcloc 29:8,29:8;
     String "\\C:@E::value unknown atom access: "
     .srcloc 29:8,29:8;
@@ -448,7 +433,6 @@ L0:
   L0:
     NullUninit
     NullUninit
-    NullUninit
     FCallClsMethodD <> 0 1 "" - "" "" "C" "pu$E$Members$memoize_impl"
     MemoSet L:0+0
     RetC
@@ -463,7 +447,6 @@ L0:
     MemoGet L0 L:1+1
     RetC
   L0:
-    NullUninit
     NullUninit
     NullUninit
     CGetL $atom

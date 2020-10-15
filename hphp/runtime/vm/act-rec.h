@@ -87,8 +87,6 @@ struct ActRec {
     ObjectData* m_thisUnsafe; // This.
     Class* m_clsUnsafe;       // Late bound class.
   };
-  uint64_t m_thrash_DONT_USE1;
-  uint64_t m_thrash_DONT_USE2;
 
   TYPE_SCAN_CUSTOM_FIELD(m_thisUnsafe) {
     if (func()->implCls()) scanner.scan(m_thisUnsafe);

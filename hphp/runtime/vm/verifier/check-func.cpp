@@ -705,7 +705,7 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   static const FlavorDesc inputSigs[][kMaxHhbcImms] = {
   #define NOV { },
   #define CUMANY { },
-  #define CMANY_U3 { },
+  #define CMANY_U2 { },
   #define CALLNATIVE { },
   #define FCALL(nin, nobj) { nobj ? CV : UV },
   #define CMANY { },
@@ -724,7 +724,7 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   #undef MFINAL
   #undef C_MFINAL
   #undef CUMANY
-  #undef CMANY_U3
+  #undef CMANY_U2
   #undef CALLNATIVE
   #undef FCALL
   #undef CMANY
@@ -764,7 +764,6 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
     for (int i = 0; i < fca.numRets - 1; ++i) m_tmp_sig[idx++] = UV;
     m_tmp_sig[idx++] = inputSigs[size_t(peek_op(pc))][0];
     m_tmp_sig[idx++] = UV;
-    m_tmp_sig[idx++] = UV;
     for (int i = 0; i < fca.numArgs; ++i) m_tmp_sig[idx++] = CV;
     if (fca.hasUnpack()) m_tmp_sig[idx++] = CV;
     if (fca.hasGenerics()) m_tmp_sig[idx++] = CV;
@@ -785,7 +784,7 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
     return m_tmp_sig;
   }
   case Op::CreateCl:  // TWO(IVA,SA),  CUMANY,   ONE(CV)
-  case Op::PopFrame:  // ONE(IVA),     CMANY_U3, CMANY
+  case Op::PopFrame:  // ONE(IVA),     CMANY_U2, CMANY
     for (int i = 0, n = instrNumPops(pc); i < n; ++i) {
       m_tmp_sig[i] = CUV;
     }
@@ -1414,7 +1413,7 @@ bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
   FlavorDesc *outs = &cur->stk[cur->stklen];
   cur->stklen += pushes;
   if (op == OpPopFrame) {
-    for (int i = 0; i < pushes; ++i) outs[i] = outs[i + 3];
+    for (int i = 0; i < pushes; ++i) outs[i] = outs[i + kNumActRecCells];
   } else if (isFCall(op) || op == OpFCallBuiltin) {
     for (int i = 0; i < pushes; ++i) {
       outs[i] = CV;

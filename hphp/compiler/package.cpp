@@ -433,7 +433,6 @@ std::unique_ptr<UnitEmitter> Package::createSymlinkWrapper(
          << "  PopC\n"
          << "  NullUninit\n"
          << "  NullUninit\n"
-         << "  NullUninit\n"
          << "  FCallFuncD <> 0 1 \"\" - \"\" \"" << escaped_name << "\"\n"
          << "  PopC\n"
          << "  Null\n"

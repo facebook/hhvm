@@ -1096,11 +1096,10 @@ OPTBLD_INLINE void iopPopU2() {
 OPTBLD_INLINE void iopPopFrame(uint32_t nout) {
   assertx(vmStack().indC(nout + 0)->m_type == KindOfUninit);
   assertx(vmStack().indC(nout + 1)->m_type == KindOfUninit);
-  assertx(vmStack().indC(nout + 2)->m_type == KindOfUninit);
   for (int32_t i = nout - 1; i >= 0; --i) {
-    *vmStack().indC(i + 3) = *vmStack().indC(i);
+    *vmStack().indC(i + kNumActRecCells) = *vmStack().indC(i);
   }
-  vmStack().ndiscard(3);
+  vmStack().ndiscard(kNumActRecCells);
 }
 
 OPTBLD_INLINE void iopPopL(tv_lval to) {
@@ -3573,7 +3572,7 @@ bool doFCall(CallFlags callFlags, const Func* func, uint32_t numArgsInclUnpack,
         int(vmfp()->func()->base()));
 
   assertx(numArgsInclUnpack <= func->numNonVariadicParams() + 1);
-  assertx(kNumActRecCells == 3);
+  assertx(kNumActRecCells == 2);
   ActRec* ar = vmStack().indA(
     numArgsInclUnpack + (callFlags.hasGenerics() ? 1 : 0));
 
@@ -3984,7 +3983,6 @@ fcallObjMethodHandleInput(const FCallArgs& fca, ObjMethodOp op,
   if (fca.hasGenerics()) stack.popC();
   if (fca.hasUnpack()) stack.popC();
   for (uint32_t i = 0; i < fca.numArgs; ++i) stack.popTV();
-  stack.popU();
   stack.popU();
   stack.popC();
   for (uint32_t i = 0; i < fca.numRets - 1; ++i) stack.popU();

@@ -1113,7 +1113,6 @@ void dce(Env& env, const bc::PopFrame& op) {
 
   // Pop the Uninits from the frame
   pop(env, Use::Not, DceActionMap {});
-  pop(env, Use::Not|Use::Linked, DceActionMap {});
   pop(env, Use::Not|Use::Linked, DceActionMap {{ env.id, DceAction::Kill }});
 
   for (auto it = uis.rbegin(); it != uis.rend(); it++) {
@@ -2227,7 +2226,7 @@ dce_visit(VisitContext& visit, BlockId bid, const State& stateIn,
 
     // We're now at the state before this instruction, so the stack
     // sizes must line up.
-    assert(dceState.stack.size() == states[idx].first.stack.size());
+    assertx(dceState.stack.size() == states[idx].first.stack.size());
   }
 
   dceState.minstrUI.reset();
@@ -2426,12 +2425,12 @@ void dce_perform(php::WideFunc& func, const DceActionMap& actionMap) {
             b->hhbcs.erase(b->hhbcs.begin() + id.idx);
             b->hhbcs.insert(
               b->hhbcs.begin() + id.idx,
-              3,
+              2,
               remaining == 0
                 ? Bytecode{ bc::PopU {} }
                 : Bytecode{ bc::PopU2 {} }
             );
-            setloc(srcLoc, b->hhbcs.begin() + id.idx, 3);
+            setloc(srcLoc, b->hhbcs.begin() + id.idx, 2);
           }
         }
         break;

@@ -38,7 +38,7 @@
   PopC
 
   NullUninit
-  NullUninit
+
   NullUninit
     PushL $a
     PushL $b

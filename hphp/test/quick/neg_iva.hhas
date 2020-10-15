@@ -22,7 +22,7 @@
   SetM -1 PC:1
   PopC
   NullUninit
-  NullUninit
+
   NullUninit
   CGetL $foo
   FCallFuncD <> 1 1 "" - "" "var_dump"

@@ -73,7 +73,6 @@
     NewObjD "Exception"
     Dup
     NullUninit
-    NullUninit
     .srcloc 17:8,17:12;
     String "\\C:@Field::default_value unknown atom access: "
     .srcloc 17:8,17:12;
@@ -119,7 +118,6 @@
     .srcloc 17:8,17:12;
     NewObjD "Exception"
     Dup
-    NullUninit
     NullUninit
     .srcloc 17:8,17:12;
     String "\\C:@Field::name unknown atom access: "
@@ -167,7 +165,6 @@
     NewObjD "Exception"
     Dup
     NullUninit
-    NullUninit
     .srcloc 17:8,17:12;
     String "\\C:@Field::stuff unknown atom access: "
     .srcloc 17:8,17:12;
@@ -191,7 +188,6 @@
   L0:
     NullUninit
     NullUninit
-    NullUninit
     FCallClsMethodD <> 0 1 "" - "" "" "C" "pu$Field$Members$memoize_impl"
     MemoSet L:0+0
     RetC
@@ -206,7 +202,6 @@
     MemoGet L0 L:1+1
     RetC
   L0:
-    NullUninit
     NullUninit
     NullUninit
     CGetL $atom
@@ -226,7 +221,6 @@
   L0:
     NullUninit
     NullUninit
-    NullUninit
     CGetL $atom
     FCallClsMethodD <> 1 1 "" - "" "" "C" "pu$Field$name$memoize_impl"
     MemoSet L:1+1
@@ -242,7 +236,6 @@
     MemoGet L0 L:1+1
     RetC
   L0:
-    NullUninit
     NullUninit
     NullUninit
     CGetL $atom

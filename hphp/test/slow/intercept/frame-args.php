@@ -5,12 +5,15 @@ function handler($name, $obj, inout $args, $data, inout $done) {
   var_dump($args);
 }
 
+<<__NEVER_INLINE>>
 function f(int $x, int $y = 20, int $z = 30) {}
 
+<<__NEVER_INLINE>>
 function g(int $x, ...$y) {
   var_dump($x, $y);
 }
 
+<<__NEVER_INLINE>>
 function h(int $x, int $y = 20, ...$z) {
   var_dump($x, $y, $z);
 }

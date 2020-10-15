@@ -3,7 +3,7 @@
 .function ["__EntryPoint"("""y:0:{}""")] main() {
   Int 1
   NullUninit
-  NullUninit
+
   NullUninit
   Int 2
   JmpNZ target_label

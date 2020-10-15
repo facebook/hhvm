@@ -375,7 +375,6 @@ fn emit_reified_init_body<'a>(
         let call_parent = InstrSeq::gather(vec![
             instr::nulluninit(),
             instr::nulluninit(),
-            instr::nulluninit(),
             generic_arr,
             instr::fcallclsmethodsd(
                 FcallArgs::new(FcallFlags::default(), 1, vec![], None, 1, None),

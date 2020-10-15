@@ -261,7 +261,7 @@ struct FCallArgsShort {
 
   template<int nin>
   uint32_t numPop() const {
-    return nin + numInputs() + 2 + numRets;
+    return nin + numInputs() + 1 + numRets;
   }
   template<int nin, int nobj>
   Flavor popFlavor(uint32_t i) const {
@@ -278,7 +278,7 @@ struct FCallArgsShort {
     }
     if (i < numArgs) return Flavor::C;
     i -= numArgs;
-    if (i == 2 && nobj) return Flavor::C;
+    if (i == 1 && nobj) return Flavor::C;
     return Flavor::U;
   }
   FCallArgsBase base() const {
@@ -376,7 +376,7 @@ struct FCallArgsLong : FCallArgsBase {
   }
   template<int nin>
   uint32_t numPop() const {
-    return nin + numInputs() + 2 + numRets;
+    return nin + numInputs() + 1 + numRets;
   }
   template<int nin, int nobj>
   Flavor popFlavor(uint32_t i) const {
@@ -393,7 +393,7 @@ struct FCallArgsLong : FCallArgsBase {
     }
     if (i < numArgs) return Flavor::C;
     i -= numArgs;
-    if (i == 2 && nobj) return Flavor::C;
+    if (i == 1 && nobj) return Flavor::C;
     return Flavor::U;
   }
   FCallArgsBase base() const { return *this; }
@@ -988,8 +988,8 @@ namespace imm {
                       return Flavor::CU;                      \
                     }
 
-#define POP_CMANY_U3                                              \
-                    uint32_t numPop() const { return arg1 + 3; }  \
+#define POP_CMANY_U2                                              \
+                    uint32_t numPop() const { return arg1 + 2; }  \
                     Flavor popFlavor(uint32_t i) const {          \
                       assert(i < numPop());                       \
                       return i < arg1 ? Flavor::C : Flavor::U;    \
@@ -1088,7 +1088,7 @@ OPCODES
 #undef POP_CMANY
 #undef POP_SMANY
 #undef POP_CUMANY
-#undef POP_CMANY_U3
+#undef POP_CMANY_U2
 #undef POP_CALLNATIVE
 #undef POP_FCALL
 

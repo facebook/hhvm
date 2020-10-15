@@ -492,7 +492,6 @@ fn emit_using(e: &mut Emitter, env: &mut Env, pos: &Pos, using: &tast::UsingStmt
                 InstrSeq::gather(vec![
                     instr::cgetl(local.clone()),
                     instr::nulluninit(),
-                    instr::nulluninit(),
                     instr::fcallobjmethodd(
                         FcallArgs::new(
                             FcallFlags::empty(),
@@ -1006,7 +1005,6 @@ fn emit_foreach_await(
         let iterate = InstrSeq::gather(vec![
             instr::label(next_label.clone()),
             instr::cgetl(iter_temp_local.clone()),
-            instr::nulluninit(),
             instr::nulluninit(),
             instr::fcallobjmethodd(
                 FcallArgs::new(

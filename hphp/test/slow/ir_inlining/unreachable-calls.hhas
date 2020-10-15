@@ -21,7 +21,7 @@
   CGetL $obj
   AssertRATStk 0 Obj=Cls1
   NullUninit
-  NullUninit
+
   CGetL $x
   CGetL $x
   CGetL $x
@@ -34,7 +34,7 @@ cls2:
   CGetL $obj
   AssertRATStk 0 Obj=Cls2
   NullUninit
-  NullUninit
+
   CGetL $x
   CGetL $x
   CGetL $x
@@ -54,14 +54,14 @@ end:
   NewObjD "Cls1"
   Dup
   NullUninit
-  NullUninit
+
   FCallCtor <LockWhileUnwinding> 0 1 "" - "" ""
   PopC
   LockObj
   SetL $obj
   PopC
   NullUninit
-  NullUninit
+
   NullUninit
   CGetL $obj
   CGetL $type
@@ -73,7 +73,7 @@ cls2:
   NewObjD "Cls2"
   Dup
   NullUninit
-  NullUninit
+
   FCallCtor <LockWhileUnwinding> 0 1 "" - "" ""
   PopC
   LockObj
@@ -81,7 +81,7 @@ cls2:
   PopC
   NullUninit
   NullUninit
-  NullUninit
+
   CGetL $obj
   CGetL $type
   CGetL $x
@@ -102,7 +102,7 @@ header:
 
   NullUninit
   NullUninit
-  NullUninit
+
   CGetL $type
   Int 1
   FCallFuncD <> 2 1 "" - "" "test_outer"
@@ -119,7 +119,7 @@ end:
 
 .function ["__EntryPoint"("""y:0:{}""")] main() {
   NullUninit
-  NullUninit
+
   NullUninit
   False
   Int 40
@@ -127,7 +127,7 @@ end:
   PopC
 
   NullUninit
-  NullUninit
+
   NullUninit
   True
   Int 100

@@ -318,7 +318,6 @@ fn make_memoize_method_with_params_code(
             instr::this()
         },
         instr::nulluninit(),
-        instr::nulluninit(),
         emit_memoize_helpers::param_code_gets(hhas_params),
         reified_get,
         if args.method.static_ {
@@ -386,7 +385,6 @@ fn make_memoize_method_no_params_code(emitter: &mut Emitter, args: &Args) -> Res
         } else {
             instr::this()
         },
-        instr::nulluninit(),
         instr::nulluninit(),
         if args.method.static_ {
             call_cls_method(fcall_args, args)

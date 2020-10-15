@@ -4,7 +4,7 @@
 .function thrower() {
   NewObjD "Exception"
   Dup
-  NullUninit
+
   NullUninit
     String "hi"
   FCallCtor <LockWhileUnwinding> 1 1 "" - "" ""
@@ -38,7 +38,7 @@
 .function make_obj($id) {
   NewObjD "DtorPrinter"
   Dup
-  NullUninit
+
   NullUninit
     CGetL $id
   FCallCtor <LockWhileUnwinding> 1 1 "" - "" ""
@@ -64,21 +64,21 @@
 
 .function test_unwind_dirty_stack_regs() {
   NullUninit
-  NullUninit
+
   NullUninit
     Int 0
   FCallFuncD <> 1 1 "" - "" "make_obj"
   SetL $k_0
   PopC
   NullUninit
-  NullUninit
+
   NullUninit
     Int 1
   FCallFuncD <> 1 1 "" - "" "make_obj"
   SetL $k_1
   PopC
   NullUninit
-  NullUninit
+
   NullUninit
     Int 2
   FCallFuncD <> 1 1 "" - "" "make_obj"
@@ -90,7 +90,7 @@
   CGetL $k_2
 
   NullUninit
-  NullUninit
+
   NullUninit
   FCallFuncD <> 0 1 "" - "" "get_undefined_var"
   PopC
@@ -107,7 +107,7 @@
 
 .function ["__EntryPoint"("""y:0:{}""")] main() {
   NullUninit
-  NullUninit
+
   NullUninit
     String "thrower"
   FCallFuncD <> 1 1 "" - "" "set_error_handler"
@@ -119,7 +119,7 @@
   # ignore args. If this happens the exception will keep the DtorPrinter objects
   # alive past the end of test_unwind_dirty_stack_regs.
   NullUninit
-  NullUninit
+
   NullUninit
     CnsE "DEBUG_BACKTRACE_IGNORE_ARGS"
   FCallClsMethodD <> 1 1 "" - "" "" "Exception" "setTraceOptions"
@@ -127,7 +127,7 @@
 
   .try {
     NullUninit
-    NullUninit
+
     NullUninit
     FCallFuncD <> 0 1 "" - "" "test_unwind_dirty_stack_regs"
     RetC
@@ -137,7 +137,7 @@
     String "Received exception:  "
     PushL _1
     NullUninit
-    NullUninit
+
     FCallObjMethodD <> 0 1 "" - "" "" NullThrows "getMessage"
     Concat
     String "\n"

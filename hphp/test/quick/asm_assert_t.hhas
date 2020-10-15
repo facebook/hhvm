@@ -33,7 +33,7 @@
 .function make_bar() {
   NewObjD "Bar"
   Dup
-  NullUninit
+
   NullUninit
   FCallCtor <LockWhileUnwinding> 0 1 "" - "" ""
   AssertRATStk 0 InitNull
@@ -48,7 +48,7 @@
 
 .function obj_type2() {
   NullUninit
-  NullUninit
+
   NullUninit
   FCallFuncD <> 0 1 "" - "" "make_bar"
   AssertRATStk 0 Obj
@@ -70,7 +70,7 @@ out:
 stuff:
   NewObjD "Foo"
   Dup
-  NullUninit
+
   NullUninit
   FCallCtor <LockWhileUnwinding> 0 1 "" - "" ""
   PopC
@@ -80,7 +80,7 @@ stuff:
 
   CGetL $obj
   NullUninit
-  NullUninit
+
   FCallObjMethodD <> 0 1 "" - "" "" NullThrows "returns_int"
   AssertRATStk 0 Int
   Int 0
@@ -92,14 +92,14 @@ stuff:
 
 .function ["__EntryPoint"("""y:0:{}""")] main() {
   NullUninit
-  NullUninit
+
   NullUninit
   FCallFuncD <> 0 1 "" - "" "foo"
   PopC
 
   NewObjD "Foo"
   Dup
-  NullUninit
+
   NullUninit
   FCallCtor <LockWhileUnwinding> 0 1 "" - "" ""
   PopC
@@ -109,7 +109,7 @@ stuff:
 
   NewObjD "Bar"
   Dup
-  NullUninit
+
   NullUninit
   FCallCtor <LockWhileUnwinding> 0 1 "" - "" ""
   PopC
@@ -118,7 +118,7 @@ stuff:
   PopC
 
   NullUninit
-  NullUninit
+
   NullUninit
   CGetL $x
   CGetL $y
@@ -126,7 +126,7 @@ stuff:
   PopC
 
   NullUninit
-  NullUninit
+
   NullUninit
   FCallFuncD <> 0 1 "" - "" "obj_type2"
   PopC

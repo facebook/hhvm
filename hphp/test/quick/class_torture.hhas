@@ -36,7 +36,7 @@
 
   NewObjD "A"
   Dup
-  NullUninit
+
   NullUninit
   String "foo"
   FCallCtor <LockWhileUnwinding> 1 1 "" - "" ""
@@ -46,7 +46,7 @@
 
   NewObjD "B"
   Dup
-  NullUninit
+
   NullUninit
   String "foo"
   FCallCtor <LockWhileUnwinding> 1 1 "" - "" ""
@@ -56,7 +56,7 @@
 
   NewObjD "C"
   Dup
-  NullUninit
+
   NullUninit
   String "foo"
   FCallCtor <LockWhileUnwinding> 1 1 "" - "" ""
@@ -66,7 +66,7 @@
 
   NewObjD "E"
   Dup
-  NullUninit
+
   NullUninit
   String "foo"
   FCallCtor <LockWhileUnwinding> 1 1 "" - "" ""
@@ -76,7 +76,7 @@
 
   NewObjD "G"
   Dup
-  NullUninit
+
   NullUninit
   String "foo"
   FCallCtor <LockWhileUnwinding> 1 1 "" - "" ""

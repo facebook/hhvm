@@ -13,7 +13,6 @@
   .srcloc 44:8,44:23;
   NullUninit
   NullUninit
-  NullUninit
   .srcloc 44:20,44:22;
   String "K"
   .srcloc 44:8,44:23;
@@ -29,7 +28,6 @@
   .srcloc 45:8,45:23;
   NullUninit
   NullUninit
-  NullUninit
   .srcloc 45:20,45:22;
   String "J"
   .srcloc 45:8,45:23;
@@ -43,7 +41,6 @@
   .srcloc 45:3,45:29;
   PopC
   .srcloc 46:8,46:23;
-  NullUninit
   NullUninit
   NullUninit
   .srcloc 46:20,46:22;
@@ -92,7 +89,6 @@
     NewObjD "Exception"
     Dup
     NullUninit
-    NullUninit
     .srcloc 8:8,8:8;
     String "\\MyTraitB:@E::value unknown atom access: "
     .srcloc 8:8,8:8;
@@ -116,7 +112,6 @@
   L0:
     NullUninit
     NullUninit
-    NullUninit
     FCallClsMethodSD <> 0 1 "" - "" "" Self "pu$E$Members$memoize_impl"
     MemoSet L:0+0
     RetC
@@ -131,7 +126,6 @@
     MemoGet L0 L:1+1
     RetC
   L0:
-    NullUninit
     NullUninit
     NullUninit
     CGetL $atom
@@ -169,7 +163,6 @@
         NewObjD "ReflectionClass"
         Dup
         NullUninit
-        NullUninit
         .srcloc 19:8,19:8;
         CGetL $traits_class
         .srcloc 19:8,19:8;
@@ -183,7 +176,6 @@
         .srcloc 19:8,19:8;
         CGetL $class
         NullUninit
-        NullUninit
         .srcloc 19:8,19:8;
         String "pu$E$Members"
         .srcloc 19:8,19:8;
@@ -194,7 +186,6 @@
         PopC
         .srcloc 19:8,19:8;
         CGetL $method
-        NullUninit
         NullUninit
         .srcloc 19:8,19:8;
         Null
@@ -290,7 +281,6 @@
         NewObjD "ReflectionClass"
         Dup
         NullUninit
-        NullUninit
         .srcloc 19:8,19:8;
         CGetL $trait_class
         .srcloc 19:8,19:8;
@@ -304,7 +294,6 @@
         .srcloc 19:8,19:8;
         CGetL $class
         NullUninit
-        NullUninit
         .srcloc 19:8,19:8;
         String "pu$E$value"
         .srcloc 19:8,19:8;
@@ -315,7 +304,6 @@
         PopC
         .srcloc 19:8,19:8;
         CGetL $method
-        NullUninit
         NullUninit
         .srcloc 19:8,19:8;
         Null
@@ -352,7 +340,6 @@
     NewObjD "Exception"
     Dup
     NullUninit
-    NullUninit
     .srcloc 19:8,19:8;
     String "\\MyTraitA:@E::value unknown atom access: "
     .srcloc 19:8,19:8;
@@ -376,7 +363,6 @@
   L0:
     NullUninit
     NullUninit
-    NullUninit
     FCallClsMethodSD <> 0 1 "" - "" "" Self "pu$E$Members$memoize_impl"
     MemoSet L:0+0
     RetC
@@ -391,7 +377,6 @@
     MemoGet L0 L:1+1
     RetC
   L0:
-    NullUninit
     NullUninit
     NullUninit
     CGetL $atom
@@ -429,7 +414,6 @@
         NewObjD "ReflectionClass"
         Dup
         NullUninit
-        NullUninit
         .srcloc 30:8,30:8;
         CGetL $traits_class
         .srcloc 30:8,30:8;
@@ -443,7 +427,6 @@
         .srcloc 30:8,30:8;
         CGetL $class
         NullUninit
-        NullUninit
         .srcloc 30:8,30:8;
         String "pu$E$Members"
         .srcloc 30:8,30:8;
@@ -454,7 +437,6 @@
         PopC
         .srcloc 30:8,30:8;
         CGetL $method
-        NullUninit
         NullUninit
         .srcloc 30:8,30:8;
         Null
@@ -550,7 +532,6 @@
         NewObjD "ReflectionClass"
         Dup
         NullUninit
-        NullUninit
         .srcloc 30:8,30:8;
         CGetL $trait_class
         .srcloc 30:8,30:8;
@@ -564,7 +545,6 @@
         .srcloc 30:8,30:8;
         CGetL $class
         NullUninit
-        NullUninit
         .srcloc 30:8,30:8;
         String "pu$E$value"
         .srcloc 30:8,30:8;
@@ -575,7 +555,6 @@
         PopC
         .srcloc 30:8,30:8;
         CGetL $method
-        NullUninit
         NullUninit
         .srcloc 30:8,30:8;
         Null
@@ -612,7 +591,6 @@
     NewObjD "Exception"
     Dup
     NullUninit
-    NullUninit
     .srcloc 30:8,30:8;
     String "\\C:@E::value unknown atom access: "
     .srcloc 30:8,30:8;
@@ -636,7 +614,6 @@
   L0:
     NullUninit
     NullUninit
-    NullUninit
     FCallClsMethodD <> 0 1 "" - "" "" "C" "pu$E$Members$memoize_impl"
     MemoSet L:0+0
     RetC
@@ -651,7 +628,6 @@
     MemoGet L0 L:1+1
     RetC
   L0:
-    NullUninit
     NullUninit
     NullUninit
     CGetL $atom

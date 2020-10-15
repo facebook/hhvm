@@ -14,7 +14,7 @@
 
 .function ["__EntryPoint"("""y:0:{}""")] main() {
   NullUninit
-  NullUninit
+
   NullUninit
   Array @A_0
   FCallFuncD <Generics> 0 1 "" - "" "f"

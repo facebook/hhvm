@@ -18,7 +18,6 @@
   .srcloc 36:12,36:26;
   NullUninit
   NullUninit
-  NullUninit
   .srcloc 36:12,36:26;
   FCallClsMethodD <> 0 1 "" - "" "" "C" "pu$E$Members"
   .srcloc 36:12,36:26;
@@ -52,7 +51,6 @@ L0:
   .srcloc 41:3,41:25;
   PopC
   .srcloc 42:12,42:27;
-  NullUninit
   NullUninit
   NullUninit
   .srcloc 42:12,42:27;
@@ -96,7 +94,6 @@ L2:
   .srcloc 49:12,49:26;
   NullUninit
   NullUninit
-  NullUninit
   .srcloc 49:12,49:26;
   FCallClsMethodD <> 0 1 "" - "" "" "D" "pu$E$Members"
   .srcloc 49:12,49:26;
@@ -130,7 +127,6 @@ L4:
   .srcloc 53:3,53:18;
   PopC
   .srcloc 54:12,54:26;
-  NullUninit
   NullUninit
   NullUninit
   .srcloc 54:12,54:26;
@@ -193,7 +189,6 @@ L6:
     NewObjD "Exception"
     Dup
     NullUninit
-    NullUninit
     .srcloc 8:8,8:8;
     String "\\C:@E::val unknown atom access: "
     .srcloc 8:8,8:8;
@@ -217,7 +212,6 @@ L6:
   L0:
     NullUninit
     NullUninit
-    NullUninit
     FCallClsMethodD <> 0 1 "" - "" "" "C" "pu$E$Members$memoize_impl"
     MemoSet L:0+0
     RetC
@@ -232,7 +226,6 @@ L6:
     MemoGet L0 L:1+1
     RetC
   L0:
-    NullUninit
     NullUninit
     NullUninit
     CGetL $atom
@@ -260,7 +253,6 @@ L6:
       NewObjD "ReflectionClass"
       Dup
       NullUninit
-      NullUninit
       .srcloc 19:8,19:8;
       String "XX"
       .srcloc 19:8,19:8;
@@ -274,7 +266,6 @@ L6:
       .srcloc 19:8,19:8;
       CGetL $class
       NullUninit
-      NullUninit
       .srcloc 19:8,19:8;
       String "pu$E$Members"
       .srcloc 19:8,19:8;
@@ -285,7 +276,6 @@ L6:
       PopC
       .srcloc 19:8,19:8;
       CGetL $method
-      NullUninit
       NullUninit
       .srcloc 19:8,19:8;
       Null
@@ -357,7 +347,6 @@ L6:
     .srcloc 19:8,19:8;
     NullUninit
     NullUninit
-    NullUninit
     .srcloc 19:8,19:8;
     CGetL $atom
     .srcloc 19:8,19:8;
@@ -382,7 +371,6 @@ L6:
       NewObjD "ReflectionClass"
       Dup
       NullUninit
-      NullUninit
       .srcloc 24:8,24:8;
       String "XX"
       .srcloc 24:8,24:8;
@@ -396,7 +384,6 @@ L6:
       .srcloc 24:8,24:8;
       CGetL $class
       NullUninit
-      NullUninit
       .srcloc 24:8,24:8;
       String "pu$F$Members"
       .srcloc 24:8,24:8;
@@ -407,7 +394,6 @@ L6:
       PopC
       .srcloc 24:8,24:8;
       CGetL $method
-      NullUninit
       NullUninit
       .srcloc 24:8,24:8;
       Null
@@ -479,7 +465,6 @@ L6:
     .srcloc 24:8,24:8;
     NullUninit
     NullUninit
-    NullUninit
     .srcloc 24:8,24:8;
     CGetL $atom
     .srcloc 24:8,24:8;
@@ -498,7 +483,6 @@ L6:
   L0:
     NullUninit
     NullUninit
-    NullUninit
     FCallClsMethodD <> 0 1 "" - "" "" "D" "pu$E$Members$memoize_impl"
     MemoSet L:0+0
     RetC
@@ -515,7 +499,6 @@ L6:
   L0:
     NullUninit
     NullUninit
-    NullUninit
     CGetL $atom
     FCallClsMethodD <> 1 1 "" - "" "" "D" "pu$E$val$memoize_impl"
     MemoSet L:1+1
@@ -527,7 +510,6 @@ L6:
     MemoGet L0 L:0+0
     RetC
   L0:
-    NullUninit
     NullUninit
     NullUninit
     FCallClsMethodD <> 0 1 "" - "" "" "D" "pu$F$Members$memoize_impl"
@@ -544,7 +526,6 @@ L6:
     MemoGet L0 L:1+1
     RetC
   L0:
-    NullUninit
     NullUninit
     NullUninit
     CGetL $atom

@@ -27,14 +27,14 @@
 
 # two registers
   NullUninit
+
   NullUninit
   NullUninit
-  NullUninit
-  NullUninit
+
   NullUninit
   FCallFuncD <> 0 1 "" - "" "g_false"
   NullUninit
-  NullUninit
+
   NullUninit
   FCallFuncD <> 0 1 "" - "" "g_true"
   Add
@@ -42,14 +42,14 @@
   PopC
 
   NullUninit
+
   NullUninit
   NullUninit
-  NullUninit
-  NullUninit
+
   NullUninit
   FCallFuncD <> 0 1 "" - "" "g_true"
   NullUninit
-  NullUninit
+
   NullUninit
   FCallFuncD <> 0 1 "" - "" "g_false"
   Add
@@ -57,14 +57,14 @@
   PopC
 
   NullUninit
+
   NullUninit
   NullUninit
-  NullUninit
-  NullUninit
+
   NullUninit
   FCallFuncD <> 0 1 "" - "" "g_true"
   NullUninit
-  NullUninit
+
   NullUninit
   FCallFuncD <> 0 1 "" - "" "g_true"
   Add
@@ -72,14 +72,14 @@
   PopC
 
   NullUninit
+
   NullUninit
   NullUninit
-  NullUninit
-  NullUninit
+
   NullUninit
   FCallFuncD <> 0 1 "" - "" "g_false"
   NullUninit
-  NullUninit
+
   NullUninit
   FCallFuncD <> 0 1 "" - "" "g_false"
   Add
@@ -87,14 +87,14 @@
   PopC
 
   NullUninit
+
   NullUninit
   NullUninit
-  NullUninit
-  NullUninit
+
   NullUninit
   FCallFuncD <> 0 1 "" - "" "g_false"
   NullUninit
-  NullUninit
+
   NullUninit
   FCallFuncD <> 0 1 "" - "" "g_true"
   Sub
@@ -102,14 +102,14 @@
   PopC
 
   NullUninit
+
   NullUninit
   NullUninit
-  NullUninit
-  NullUninit
+
   NullUninit
   FCallFuncD <> 0 1 "" - "" "g_true"
   NullUninit
-  NullUninit
+
   NullUninit
   FCallFuncD <> 0 1 "" - "" "g_false"
   Sub
@@ -117,14 +117,14 @@
   PopC
 
   NullUninit
+
   NullUninit
   NullUninit
-  NullUninit
-  NullUninit
+
   NullUninit
   FCallFuncD <> 0 1 "" - "" "g_true"
   NullUninit
-  NullUninit
+
   NullUninit
   FCallFuncD <> 0 1 "" - "" "g_true"
   Sub
@@ -132,14 +132,14 @@
   PopC
 
   NullUninit
+
   NullUninit
   NullUninit
-  NullUninit
-  NullUninit
+
   NullUninit
   FCallFuncD <> 0 1 "" - "" "g_false"
   NullUninit
-  NullUninit
+
   NullUninit
   FCallFuncD <> 0 1 "" - "" "g_false"
   Sub
@@ -147,14 +147,14 @@
   PopC
 
   NullUninit
+
   NullUninit
   NullUninit
-  NullUninit
-  NullUninit
+
   NullUninit
   FCallFuncD <> 0 1 "" - "" "g_false"
   NullUninit
-  NullUninit
+
   NullUninit
   FCallFuncD <> 0 1 "" - "" "g_true"
   BitOr
@@ -162,14 +162,14 @@
   PopC
 
   NullUninit
+
   NullUninit
   NullUninit
-  NullUninit
-  NullUninit
+
   NullUninit
   FCallFuncD <> 0 1 "" - "" "g_true"
   NullUninit
-  NullUninit
+
   NullUninit
   FCallFuncD <> 0 1 "" - "" "g_false"
   BitOr
@@ -177,14 +177,14 @@
   PopC
 
   NullUninit
+
   NullUninit
   NullUninit
-  NullUninit
-  NullUninit
+
   NullUninit
   FCallFuncD <> 0 1 "" - "" "g_true"
   NullUninit
-  NullUninit
+
   NullUninit
   FCallFuncD <> 0 1 "" - "" "g_true"
   BitOr
@@ -192,14 +192,14 @@
   PopC
 
   NullUninit
+
   NullUninit
   NullUninit
-  NullUninit
-  NullUninit
+
   NullUninit
   FCallFuncD <> 0 1 "" - "" "g_false"
   NullUninit
-  NullUninit
+
   NullUninit
   FCallFuncD <> 0 1 "" - "" "g_false"
   BitOr
@@ -207,14 +207,14 @@
   PopC
 
   NullUninit
+
   NullUninit
   NullUninit
-  NullUninit
-  NullUninit
+
   NullUninit
   FCallFuncD <> 0 1 "" - "" "g_false"
   NullUninit
-  NullUninit
+
   NullUninit
   FCallFuncD <> 0 1 "" - "" "g_true"
   BitAnd
@@ -222,14 +222,14 @@
   PopC
 
   NullUninit
+
   NullUninit
   NullUninit
-  NullUninit
-  NullUninit
+
   NullUninit
   FCallFuncD <> 0 1 "" - "" "g_true"
   NullUninit
-  NullUninit
+
   NullUninit
   FCallFuncD <> 0 1 "" - "" "g_false"
   BitAnd
@@ -237,14 +237,14 @@
   PopC
 
   NullUninit
+
   NullUninit
   NullUninit
-  NullUninit
-  NullUninit
+
   NullUninit
   FCallFuncD <> 0 1 "" - "" "g_true"
   NullUninit
-  NullUninit
+
   NullUninit
   FCallFuncD <> 0 1 "" - "" "g_true"
   BitAnd
@@ -252,14 +252,14 @@
   PopC
 
   NullUninit
+
   NullUninit
   NullUninit
-  NullUninit
-  NullUninit
+
   NullUninit
   FCallFuncD <> 0 1 "" - "" "g_false"
   NullUninit
-  NullUninit
+
   NullUninit
   FCallFuncD <> 0 1 "" - "" "g_false"
   BitAnd
@@ -267,14 +267,14 @@
   PopC
 
   NullUninit
+
   NullUninit
   NullUninit
-  NullUninit
-  NullUninit
+
   NullUninit
   FCallFuncD <> 0 1 "" - "" "g_false"
   NullUninit
-  NullUninit
+
   NullUninit
   FCallFuncD <> 0 1 "" - "" "g_true"
   BitXor
@@ -282,14 +282,14 @@
   PopC
 
   NullUninit
+
   NullUninit
   NullUninit
-  NullUninit
-  NullUninit
+
   NullUninit
   FCallFuncD <> 0 1 "" - "" "g_true"
   NullUninit
-  NullUninit
+
   NullUninit
   FCallFuncD <> 0 1 "" - "" "g_false"
   BitXor
@@ -297,14 +297,14 @@
   PopC
 
   NullUninit
+
   NullUninit
   NullUninit
-  NullUninit
-  NullUninit
+
   NullUninit
   FCallFuncD <> 0 1 "" - "" "g_true"
   NullUninit
-  NullUninit
+
   NullUninit
   FCallFuncD <> 0 1 "" - "" "g_true"
   BitXor
@@ -312,14 +312,14 @@
   PopC
 
   NullUninit
+
   NullUninit
   NullUninit
-  NullUninit
-  NullUninit
+
   NullUninit
   FCallFuncD <> 0 1 "" - "" "g_false"
   NullUninit
-  NullUninit
+
   NullUninit
   FCallFuncD <> 0 1 "" - "" "g_false"
   BitXor
@@ -327,14 +327,14 @@
   PopC
 
   NullUninit
+
   NullUninit
   NullUninit
-  NullUninit
-  NullUninit
+
   NullUninit
   FCallFuncD <> 0 1 "" - "" "g_false"
   NullUninit
-  NullUninit
+
   NullUninit
   FCallFuncD <> 0 1 "" - "" "g_true"
   Mul
@@ -342,14 +342,14 @@
   PopC
 
   NullUninit
+
   NullUninit
   NullUninit
-  NullUninit
-  NullUninit
+
   NullUninit
   FCallFuncD <> 0 1 "" - "" "g_true"
   NullUninit
-  NullUninit
+
   NullUninit
   FCallFuncD <> 0 1 "" - "" "g_false"
   Mul
@@ -357,14 +357,14 @@
   PopC
 
   NullUninit
+
   NullUninit
   NullUninit
-  NullUninit
-  NullUninit
+
   NullUninit
   FCallFuncD <> 0 1 "" - "" "g_true"
   NullUninit
-  NullUninit
+
   NullUninit
   FCallFuncD <> 0 1 "" - "" "g_true"
   Mul
@@ -372,14 +372,14 @@
   PopC
 
   NullUninit
+
   NullUninit
   NullUninit
-  NullUninit
-  NullUninit
+
   NullUninit
   FCallFuncD <> 0 1 "" - "" "g_false"
   NullUninit
-  NullUninit
+
   NullUninit
   FCallFuncD <> 0 1 "" - "" "g_false"
   Mul
@@ -387,14 +387,14 @@
   PopC
 
   NullUninit
+
   NullUninit
   NullUninit
-  NullUninit
-  NullUninit
+
   NullUninit
   FCallFuncD <> 0 1 "" - "" "g_false"
   NullUninit
-  NullUninit
+
   NullUninit
   FCallFuncD <> 0 1 "" - "" "g_true"
   Div
@@ -404,14 +404,14 @@
 # exclude divide by zero
 
   NullUninit
+
   NullUninit
   NullUninit
-  NullUninit
-  NullUninit
+
   NullUninit
   FCallFuncD <> 0 1 "" - "" "g_true"
   NullUninit
-  NullUninit
+
   NullUninit
   FCallFuncD <> 0 1 "" - "" "g_true"
   Div
@@ -423,11 +423,11 @@
 # try a few cases with one register and one immediate
 
   NullUninit
-  NullUninit
+
   NullUninit
   False
   NullUninit
-  NullUninit
+
   NullUninit
   FCallFuncD <> 0 1 "" - "" "g_true"
   Add
@@ -435,10 +435,10 @@
   PopC
 
   NullUninit
+
   NullUninit
   NullUninit
-  NullUninit
-  NullUninit
+
   NullUninit
   FCallFuncD <> 0 1 "" - "" "g_false"
   True
@@ -447,10 +447,10 @@
   PopC
 
   NullUninit
+
   NullUninit
   NullUninit
-  NullUninit
-  NullUninit
+
   NullUninit
   FCallFuncD <> 0 1 "" - "" "g_true"
   False
@@ -459,10 +459,10 @@
   PopC
 
   NullUninit
+
   NullUninit
   NullUninit
-  NullUninit
-  NullUninit
+
   NullUninit
   FCallFuncD <> 0 1 "" - "" "g_true"
   True
@@ -471,10 +471,10 @@
   PopC
 
   NullUninit
+
   NullUninit
   NullUninit
-  NullUninit
-  NullUninit
+
   NullUninit
   FCallFuncD <> 0 1 "" - "" "g_false"
   False
@@ -483,10 +483,10 @@
   PopC
 
   NullUninit
+
   NullUninit
   NullUninit
-  NullUninit
-  NullUninit
+
   NullUninit
   FCallFuncD <> 0 1 "" - "" "g_true"
   True
@@ -497,7 +497,7 @@
 # HHIRSimplification == false to test two immediates
 
   NullUninit
-  NullUninit
+
   NullUninit
   True
   True
@@ -506,7 +506,7 @@
   PopC
 
   NullUninit
-  NullUninit
+
   NullUninit
   True
   False
@@ -515,7 +515,7 @@
   PopC
 
   NullUninit
-  NullUninit
+
   NullUninit
   False
   False
@@ -524,7 +524,7 @@
   PopC
 
   NullUninit
-  NullUninit
+
   NullUninit
   False
   True
@@ -533,7 +533,7 @@
   PopC
 
   NullUninit
-  NullUninit
+
   NullUninit
   True
   False
@@ -542,7 +542,7 @@
   PopC
 
   NullUninit
-  NullUninit
+
   NullUninit
   False
   True

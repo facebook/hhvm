@@ -15,84 +15,75 @@
 0xXX+88: NewObjD Bar
 0xXX+93: Dup
 0xXX+94: NullUninit
-0xXX+95: NullUninit
-0xXX+96: FCallCtor <LockWhileUnwinding> 0 1
-0xXX+103: AssertRATStk 0 InitNull
-0xXX+106: AssertRATStk 1 Obj
-0xXX+109: AssertRATStk 1 ExactObj
-0xXX+117: PopC
-0xXX+118: AssertRATStk 0 ExactObj
-0xXX+126: LockObj
-0xXX+127: AssertRATStk 0 ExactObj
-0xXX+135: RetC
+0xXX+95: FCallCtor <LockWhileUnwinding> 0 1
+0xXX+102: AssertRATStk 0 InitNull
+0xXX+105: AssertRATStk 1 Obj
+0xXX+108: AssertRATStk 1 ExactObj
+0xXX+116: PopC
+0xXX+117: AssertRATStk 0 ExactObj
+0xXX+125: LockObj
+0xXX+126: AssertRATStk 0 ExactObj
+0xXX+134: RetC
+0xXX+135: NullUninit
 0xXX+136: NullUninit
-0xXX+137: NullUninit
-0xXX+138: NullUninit
-0xXX+139: FCallFuncD <> 0 1 make_bar
-0xXX+146: AssertRATStk 0 Obj
-0xXX+149: AssertRATStk 0 ExactObj
-0xXX+157: AssertRATL 0 Uninit
-0xXX+160: AssertRATStk 0 Obj
-0xXX+163: SetL 0
-0xXX+165: PopC
-0xXX+166: Int 1
-0xXX+175: RetC
-0xXX+176: Jmp 7
-0xXX+181: Null
-0xXX+182: RetC
-0xXX+183: NewObjD Foo
-0xXX+188: Dup
-0xXX+189: NullUninit
-0xXX+190: NullUninit
-0xXX+191: FCallCtor <LockWhileUnwinding> 0 1
-0xXX+198: PopC
-0xXX+199: LockObj
-0xXX+200: SetL 0
-0xXX+202: PopC
-0xXX+203: CGetL 0 (name: 0)
-0xXX+206: NullUninit
-0xXX+207: NullUninit
-0xXX+208: FCallObjMethodD <> 0 1  0 returns_int
-0xXX+220: AssertRATStk 0 Int
-0xXX+223: Int 0
-0xXX+232: Add
-0xXX+233: SetL 1
-0xXX+235: PopC
-0xXX+236: Jmp -55
-0xXX+241: NullUninit
-0xXX+242: NullUninit
-0xXX+243: NullUninit
-0xXX+244: FCallFuncD <> 0 1 foo
-0xXX+251: PopC
-0xXX+252: NewObjD Foo
-0xXX+257: Dup
-0xXX+258: NullUninit
-0xXX+259: NullUninit
-0xXX+260: FCallCtor <LockWhileUnwinding> 0 1
-0xXX+267: PopC
-0xXX+268: LockObj
-0xXX+269: SetL 0
-0xXX+271: PopC
-0xXX+272: NewObjD Bar
-0xXX+277: Dup
-0xXX+278: NullUninit
-0xXX+279: NullUninit
-0xXX+280: FCallCtor <LockWhileUnwinding> 0 1
-0xXX+287: PopC
-0xXX+288: LockObj
-0xXX+289: SetL 1
-0xXX+291: PopC
-0xXX+292: NullUninit
-0xXX+293: NullUninit
-0xXX+294: NullUninit
-0xXX+295: CGetL 0 (name: 0)
-0xXX+298: CGetL 1 (name: 1)
-0xXX+301: FCallFuncD <> 2 1 obj_type
-0xXX+308: PopC
-0xXX+309: NullUninit
-0xXX+310: NullUninit
-0xXX+311: NullUninit
-0xXX+312: FCallFuncD <> 0 1 obj_type2
-0xXX+319: PopC
-0xXX+320: Int 1
-0xXX+329: RetC
+0xXX+137: FCallFuncD <> 0 1 make_bar
+0xXX+144: AssertRATStk 0 Obj
+0xXX+147: AssertRATStk 0 ExactObj
+0xXX+155: AssertRATL 0 Uninit
+0xXX+158: AssertRATStk 0 Obj
+0xXX+161: SetL 0
+0xXX+163: PopC
+0xXX+164: Int 1
+0xXX+173: RetC
+0xXX+174: Jmp 7
+0xXX+179: Null
+0xXX+180: RetC
+0xXX+181: NewObjD Foo
+0xXX+186: Dup
+0xXX+187: NullUninit
+0xXX+188: FCallCtor <LockWhileUnwinding> 0 1
+0xXX+195: PopC
+0xXX+196: LockObj
+0xXX+197: SetL 0
+0xXX+199: PopC
+0xXX+200: CGetL 0 (name: 0)
+0xXX+203: NullUninit
+0xXX+204: FCallObjMethodD <> 0 1  0 returns_int
+0xXX+216: AssertRATStk 0 Int
+0xXX+219: Int 0
+0xXX+228: Add
+0xXX+229: SetL 1
+0xXX+231: PopC
+0xXX+232: Jmp -53
+0xXX+237: NullUninit
+0xXX+238: NullUninit
+0xXX+239: FCallFuncD <> 0 1 foo
+0xXX+246: PopC
+0xXX+247: NewObjD Foo
+0xXX+252: Dup
+0xXX+253: NullUninit
+0xXX+254: FCallCtor <LockWhileUnwinding> 0 1
+0xXX+261: PopC
+0xXX+262: LockObj
+0xXX+263: SetL 0
+0xXX+265: PopC
+0xXX+266: NewObjD Bar
+0xXX+271: Dup
+0xXX+272: NullUninit
+0xXX+273: FCallCtor <LockWhileUnwinding> 0 1
+0xXX+280: PopC
+0xXX+281: LockObj
+0xXX+282: SetL 1
+0xXX+284: PopC
+0xXX+285: NullUninit
+0xXX+286: NullUninit
+0xXX+287: CGetL 0 (name: 0)
+0xXX+290: CGetL 1 (name: 1)
+0xXX+293: FCallFuncD <> 2 1 obj_type
+0xXX+300: PopC
+0xXX+301: NullUninit
+0xXX+302: NullUninit
+0xXX+303: FCallFuncD <> 0 1 obj_type2
+0xXX+310: PopC
+0xXX+311: Int 1
+0xXX+320: RetC

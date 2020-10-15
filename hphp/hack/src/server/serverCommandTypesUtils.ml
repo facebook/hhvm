@@ -74,6 +74,14 @@ let debug_describe_cmd : type a. a command -> string = function
   | Rpc rpc -> debug_describe_t rpc
   | Debug -> "Debug"
 
+(** This returns a string that's shown "hh_server is busy [STATUS]".
+The intent is that users understand what command hh_server is currently busy with.
+For command-line commands, we show the "--" option that the user used, e.g. --type-at-pos.
+For IDE commands like hover, we show a description like "hover". *)
+let status_describe_cmd : type a. a command -> string =
+ (* TODO(ljw): come up with a better description! *)
+ (fun cmd -> debug_describe_cmd cmd)
+
 let debug_describe_message_type : type a. a message_type -> string = function
   | Push _ -> "Push"
   | Response _ -> "Response"

@@ -651,7 +651,6 @@ let generate_and_update_recheck_id env =
 let serve_one_iteration genv env client_provider =
   let (env, recheck_id) = generate_and_update_recheck_id env in
   ServerMonitorUtils.exit_if_parent_dead ();
-  ServerProgress.send_to_monitor (MonitorRpc.PROGRESS "ready");
   let client_kind =
     let has_default_client_pending =
       Option.is_some env.default_client_pending_command_needs_full_check
@@ -678,6 +677,35 @@ let serve_one_iteration genv env client_provider =
         ~idle_gc_slice:genv.local_config.ServerLocalConfig.idle_gc_slice
         client_kind
   in
+
+  (* We'll now update any waiting clients with our status.
+  (Or more precisely, we'll tell the monitor, so any waiting clients
+  will know when next they poll the monitor.)
+
+  By updating status now at the start of the serve_one_iteration,
+  it means there's no obligation on the "doing work" part of the previous
+  iteration to clean up its own status-reporting once done.
+  Caveat: that's not quite true, since ClientProvider.sleep_and_check will
+  wait up to 1s if there are no pending requests. So theoretically we
+  won't update our status for up to 1s after the previous work is done.
+  That doesn't really matter, since (1) if there are no pending requests
+  then no client will even ask for status, and (2) it's worth it to
+  keep the code clean and simple.
+
+  Note: the message here might soon be replaced. If we discover disk changes
+  that prompt a typecheck, then typechecking sends its own status updates.
+  And if the select_outcome was a request, then once we discover the nature
+  of that request then ServerCommand.handle will send its own status updates too.
+  *)
+  ServerProgress.send_to_monitor
+    (MonitorRpc.PROGRESS
+       (match select_outcome with
+       | ClientProvider.Select_nothing ->
+         if env.ide_idle then
+           "ready"
+         else
+           "HackIDE:active"
+       | _ -> "working"));
   let env =
     match select_outcome with
     | ClientProvider.Select_nothing ->

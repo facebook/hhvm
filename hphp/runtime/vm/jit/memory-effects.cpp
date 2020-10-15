@@ -1080,7 +1080,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
 
   case NewLoggingArray:
     // May read any data referenced by the input array, but not locals/stack.
-    return may_load_store(AHeapAny, AEmpty);
+    return may_load_store(AHeapAny | livefp(inst), AEmpty);
 
   case NewKeysetArray:
     {

@@ -691,7 +691,9 @@ SrcKey getSrcKey() {
     return SrcKey();
   }
   auto const fp = vmfp();
-  return SrcKey(vmfp()->func(), vmpc(), resumeModeFromActRec(fp));
+  auto const func = fp->func();
+  if (!func->contains(vmpc())) return SrcKey();
+  return SrcKey(func, vmpc(), resumeModeFromActRec(fp));
 }
 
 //////////////////////////////////////////////////////////////////////////////

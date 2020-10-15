@@ -1,14 +1,14 @@
 File "assign_vector_bad.php", line 5, characters 3-12:
 Invalid assignment (Typing[4110])
-File "assign_vector_bad.php", line 4, characters 22-27:
-Expected `string`
-File "assign_vector_bad.php", line 5, characters 11-12:
-But got `int`
+  File "assign_vector_bad.php", line 4, characters 22-27:
+  Expected `string`
+  File "assign_vector_bad.php", line 5, characters 11-12:
+  But got `int`
 File "assign_vector_bad.php", line 6, characters 10-11:
 Invalid return type (Typing[4110])
-File "assign_vector_bad.php", line 4, characters 22-27:
-Expected `string`
-File "assign_vector_bad.php", line 4, characters 42-49:
-But got `arraykey`
-File "assign_vector_bad.php", line 4, characters 42-49:
-Considering that this type argument is invariant with respect to `Vector`
+  File "assign_vector_bad.php", line 4, characters 22-27:
+  Expected `string`
+  File "assign_vector_bad.php", line 4, characters 42-49:
+  But got `arraykey`
+  File "assign_vector_bad.php", line 4, characters 42-49:
+  This type argument to `Vector` must match exactly (it is invariant)

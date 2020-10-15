@@ -41,7 +41,7 @@ Invalid return type (Typing[4110])
   File "anyarray_bad.php", line 29, characters 42-49:
   Expected `arraykey`
   File "anyarray_bad.php", line 29, characters 42-49:
-  Considering that this type argument is invariant with respect to `Set`
+  This type argument to `Set` must match exactly (it is invariant)
   File "anyarray_bad.php", line 32, characters 10-24:
   But got `mixed` from the argument to this \HH\is_any_array test
   File "hackarray.hhi", line 14, characters 77-78:

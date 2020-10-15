@@ -27,8 +27,8 @@ Invalid return type (Typing[4110])
   File "map_from_keys.php--file2.php", line 4, characters 55-66:
   Expected `classname<C>`
   File "map_from_keys.php--file2.php", line 4, characters 55-66:
-  Considering that this type argument is invariant with respect to `Map`
+  This type argument to `Map` must match exactly (it is invariant)
   File "map_from_keys.php--file2.php", line 4, characters 47-52:
   But got `string`
   File "map_from_keys.php--file2.php", line 4, characters 47-52:
-  Considering that this type argument is invariant with respect to `Map`
+  This type argument to `Map` must match exactly (it is invariant)

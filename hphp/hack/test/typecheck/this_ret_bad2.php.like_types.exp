@@ -9,7 +9,7 @@ Invalid argument (Typing[4110])
   File "this_ret_bad2.php", line 25, characters 27-29:
   But got `Bar`
   File "this_ret_bad2.php", line 25, characters 27-29:
-  Considering that this type argument is invariant with respect to `Foo`
+  This type argument to `Foo` must match exactly (it is invariant)
   File "this_ret_bad2.php", line 33, characters 15-17:
   Since `Bar` is not final
   File "this_ret_bad2.php", line 25, characters 27-29:

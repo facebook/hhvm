@@ -17,7 +17,7 @@ Invalid argument (Typing[4110])
   File "super_constraint_9.php", line 10, characters 46-50:
   But got `mixed`
   File "super_constraint_9.php", line 10, characters 46-50:
-  Considering that this type argument is invariant with respect to `Foo`
+  This type argument to `Foo` must match exactly (it is invariant)
 File "super_constraint_9.php", line 16, characters 10-12:
 Invalid return type (Typing[4336])
   File "super_constraint_9.php", line 16, characters 10-12:
@@ -37,4 +37,4 @@ Invalid argument (Typing[4110])
   File "super_constraint_9.php", line 19, characters 33-37:
   But got `mixed`
   File "super_constraint_9.php", line 19, characters 33-37:
-  Considering that this type argument is invariant with respect to `Foo`
+  This type argument to `Foo` must match exactly (it is invariant)

@@ -425,15 +425,17 @@ let rec to_string prefix r =
     to_string prefix r_orig
     @ [
         ( p,
-          "Considering that this type argument is contravariant with respect to "
-          ^ (strip_ns class_name |> Markdown_lite.md_codify) );
+          "This type argument to "
+          ^ (strip_ns class_name |> Markdown_lite.md_codify)
+          ^ " only allows supertypes (it is contravariant)" );
       ]
   | Rinvariant_generic (r_orig, class_name) ->
     to_string prefix r_orig
     @ [
         ( p,
-          "Considering that this type argument is invariant with respect to "
-          ^ (strip_ns class_name |> Markdown_lite.md_codify) );
+          "This type argument to "
+          ^ (strip_ns class_name |> Markdown_lite.md_codify)
+          ^ " must match exactly (it is invariant)" );
       ]
   | Rregex _ -> [(p, prefix ^ " resulting from this regex pattern")]
   | Rimplicit_upper_bound (_, cstr) ->

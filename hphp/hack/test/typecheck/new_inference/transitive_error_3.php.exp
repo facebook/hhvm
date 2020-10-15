@@ -1,12 +1,12 @@
 File "transitive_error_3.php", line 18, characters 10-11:
 Invalid return type (Typing[4323])
-File "transitive_error_3.php", line 10, characters 17-22:
-Some type constraint(s) are violated here
-File "transitive_error_3.php", line 10, characters 12-12:
-`T` is a constrained type parameter
-File "transitive_error_3.php", line 10, characters 17-22:
-Expected `string`
-File "transitive_error_3.php", line 14, characters 22-24:
-But got `int`
-File "transitive_error_3.php", line 14, characters 22-24:
-Considering that this type argument is invariant with respect to `Inv`
+  File "transitive_error_3.php", line 10, characters 17-22:
+  Some type constraint(s) are violated here
+  File "transitive_error_3.php", line 10, characters 12-12:
+  `T` is a constrained type parameter
+  File "transitive_error_3.php", line 10, characters 17-22:
+  Expected `string`
+  File "transitive_error_3.php", line 14, characters 22-24:
+  But got `int`
+  File "transitive_error_3.php", line 14, characters 22-24:
+  This type argument to `Inv` must match exactly (it is invariant)

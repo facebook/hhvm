@@ -1,28 +1,28 @@
 File "class_tparam_substitution_conflicts_with_method_tparam2.php", line 22, characters 10-42:
 Invalid return type (Typing[4110])
-File "class_tparam_substitution_conflicts_with_method_tparam2.php", line 21, characters 33-33:
-Expected `B`
-File "class_tparam_substitution_conflicts_with_method_tparam2.php", line 15, characters 38-42:
-  via this generic `Tnext`
-File "class_tparam_substitution_conflicts_with_method_tparam2.php", line 12, characters 24-27:
-  via this generic `Tout`
-File "class_tparam_substitution_conflicts_with_method_tparam2.php", line 6, characters 39-40:
-  via this generic `Tv`
-File "class_tparam_substitution_conflicts_with_method_tparam2.php", line 21, characters 57-57:
-But got `C`
-File "class_tparam_substitution_conflicts_with_method_tparam2.php", line 21, characters 57-57:
-Considering that this type argument is invariant with respect to `BaseIterable`
+  File "class_tparam_substitution_conflicts_with_method_tparam2.php", line 21, characters 33-33:
+  Expected `B`
+  File "class_tparam_substitution_conflicts_with_method_tparam2.php", line 15, characters 38-42:
+    via this generic `Tnext`
+  File "class_tparam_substitution_conflicts_with_method_tparam2.php", line 12, characters 24-27:
+    via this generic `Tout`
+  File "class_tparam_substitution_conflicts_with_method_tparam2.php", line 6, characters 39-40:
+    via this generic `Tv`
+  File "class_tparam_substitution_conflicts_with_method_tparam2.php", line 21, characters 57-57:
+  But got `C`
+  File "class_tparam_substitution_conflicts_with_method_tparam2.php", line 21, characters 57-57:
+  This type argument to `BaseIterable` must match exactly (it is invariant)
 File "class_tparam_substitution_conflicts_with_method_tparam2.php", line 22, characters 34-41:
 Invalid argument (Typing[4110])
-File "class_tparam_substitution_conflicts_with_method_tparam2.php", line 21, characters 33-33:
-Expected `B`
-File "class_tparam_substitution_conflicts_with_method_tparam2.php", line 15, characters 38-42:
-  via this generic `Tnext`
-File "class_tparam_substitution_conflicts_with_method_tparam2.php", line 12, characters 24-27:
-  via this generic `Tout`
-File "class_tparam_substitution_conflicts_with_method_tparam2.php", line 6, characters 39-40:
-  via this generic `Tv`
-File "class_tparam_substitution_conflicts_with_method_tparam2.php", line 22, characters 34-34:
-But got `C`
-File "class_tparam_substitution_conflicts_with_method_tparam2.php", line 22, characters 34-34:
-  where the class `C` was referenced here
+  File "class_tparam_substitution_conflicts_with_method_tparam2.php", line 21, characters 33-33:
+  Expected `B`
+  File "class_tparam_substitution_conflicts_with_method_tparam2.php", line 15, characters 38-42:
+    via this generic `Tnext`
+  File "class_tparam_substitution_conflicts_with_method_tparam2.php", line 12, characters 24-27:
+    via this generic `Tout`
+  File "class_tparam_substitution_conflicts_with_method_tparam2.php", line 6, characters 39-40:
+    via this generic `Tv`
+  File "class_tparam_substitution_conflicts_with_method_tparam2.php", line 22, characters 34-34:
+  But got `C`
+  File "class_tparam_substitution_conflicts_with_method_tparam2.php", line 22, characters 34-34:
+    where the class `C` was referenced here

@@ -273,8 +273,8 @@ impl<'src> SmartConstructors for DirectDeclSmartConstructors<'src> {
         <Self as FlattenSmartConstructors<'src, State<'src>>>::make_expression_statement(self, expression, semicolon)
     }
 
-    fn make_markup_section(&mut self, text: Self::R, suffix: Self::R) -> Self::R {
-        <Self as FlattenSmartConstructors<'src, State<'src>>>::make_markup_section(self, text, suffix)
+    fn make_markup_section(&mut self, hashbang: Self::R, suffix: Self::R) -> Self::R {
+        <Self as FlattenSmartConstructors<'src, State<'src>>>::make_markup_section(self, hashbang, suffix)
     }
 
     fn make_markup_suffix(&mut self, less_than_question: Self::R, name: Self::R) -> Self::R {

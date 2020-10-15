@@ -586,7 +586,7 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
             },
             MarkupSection(x) => {
                 get_index(2).and_then(|index| { match index {
-                        0 => Some(&x.text),
+                        0 => Some(&x.hashbang),
                     1 => Some(&x.suffix),
                         _ => None,
                     }

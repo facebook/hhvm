@@ -640,7 +640,7 @@ pub struct ExpressionStatementChildren<'a, T, V> {
 
 #[derive(Debug, Clone)]
 pub struct MarkupSectionChildren<'a, T, V> {
-    pub text: Syntax<'a, T, V>,
+    pub hashbang: Syntax<'a, T, V>,
     pub suffix: Syntax<'a, T, V>,
 }
 

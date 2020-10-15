@@ -806,7 +806,8 @@ let schema : schema_node list =
       description = "markup_section";
       prefix = "markup";
       aggregates = [TopLevelDeclaration; Statement];
-      fields = [("text", Token); ("suffix", ZeroOrOne (Just "MarkupSuffix"))];
+      fields =
+        [("hashbang", Token); ("suffix", ZeroOrOne (Just "MarkupSuffix"))];
     };
     {
       kind_name = "MarkupSuffix";

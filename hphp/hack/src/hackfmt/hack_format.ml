@@ -140,7 +140,8 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
     | Syntax.PrefixedStringExpression
         { prefixed_string_name = name; prefixed_string_str = str } ->
       Concat [t env name; t env str]
-    | Syntax.MarkupSection { markup_text = text; markup_suffix = suffix; _ } ->
+    | Syntax.MarkupSection
+        { markup_hashbang = hashbang; markup_suffix = suffix; _ } ->
       let is_hh_script =
         match Syntax.syntax suffix with
         | Syntax.MarkupSuffix
@@ -160,7 +161,7 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
         | _ -> false
       in
       let text_contains_only_whitespaces =
-        match Syntax.syntax text with
+        match Syntax.syntax hashbang with
         | Syntax.Token t -> all_whitespaces (Token.text t) 0
         | _ -> false
       in

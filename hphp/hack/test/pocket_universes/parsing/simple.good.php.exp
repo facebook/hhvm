@@ -6,10 +6,10 @@
       "elements":[
         {
           "kind":"markup_section",
-          "markup_text":{
+          "markup_hashbang":{
             "kind":"token",
             "token":{
-              "kind":"markup",
+              "kind":"hashbang",
               "text":"",
               "offset":0,
               "leading_width":0,
@@ -3378,5 +3378,5 @@
     }
   },
   "program_text":"<?hh // strict\n<<file:__EnableUnstableFeatures(\n    'pocket_universes',\n)>>\n\nabstract class Foo {\n  enum Field {\n    case type T;\n    case string ident;\n    case T default_value;\n  }\n\n  public function get<TF as this:@Field>(TF $f): TF:@T {\n    return static:@Field::default_value($f);\n  }\n\n  public function getID<TF as this:@Field>(TF $f): string {\n    return static:@Field::ident($f);\n  }\n\n\n  public static function introspect_fields(): void {\n    foreach (static:@Field::Members() as $member) {\n      \\var_dump($member);\n    }\n  }\n}\n\nclass Bar extends Foo {\n  enum Field {\n    :@toto(\n      type T = int,\n      ident = \"toto\",\n      default_value = 42\n    );\n  }\n\n  public function Toto(): int {\n    return $this->get(:@toto);\n  }\n}\n\nclass TestReify {\n  enum XXX {\n    case type reify S;\n    case S expr;\n\n    :@A(\n      type S = int,\n      S = 42\n    );\n  }\n}\n",
-  "version":"2020-09-14-0000"
+  "version":"2020-10-01-0000"
 }

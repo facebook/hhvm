@@ -2240,9 +2240,9 @@ where
         self.scan_token_and_trivia(&scanner, KwSet::NoKeywords)
     }
 
-    fn make_markup_token(&mut self) -> TF::Token {
+    fn make_hashbang_token(&mut self) -> TF::Token {
         self.token_factory.make(
-            TokenKind::Markup,
+            TokenKind::Hashbang,
             self.start,
             self.width(),
             Trivia::<TF>::new(),
@@ -2273,8 +2273,8 @@ where
         (markup_text, Some((less_than_question_token, Some(name))))
     }
 
-    fn make_markup_and_suffix(&mut self) -> (TF::Token, Option<(TF::Token, Option<TF::Token>)>) {
-        let markup_text = self.make_markup_token();
+    fn make_hashbang_and_suffix(&mut self) -> (TF::Token, Option<(TF::Token, Option<TF::Token>)>) {
+        let hashbang = self.make_hashbang_token();
         let less_than_question_token = self.token_factory.make(
             TokenKind::LessThanQuestion,
             self.offset,
@@ -2289,13 +2289,13 @@ where
         let ch1 = self.peek_char(1).to_ascii_lowercase();
         match (ch0, ch1) {
             ('h', 'h') => {
-                self.make_long_tag(name_token_offset, 2, markup_text, less_than_question_token)
+                self.make_long_tag(name_token_offset, 2, hashbang, less_than_question_token)
             }
-            _ => (markup_text, Some((less_than_question_token, (None)))),
+            _ => (hashbang, Some((less_than_question_token, (None)))),
         }
     }
 
-    fn skip_to_end_of_markup(&mut self) -> (TF::Token, Option<(TF::Token, Option<TF::Token>)>) {
+    fn skip_to_end_of_header(&mut self) -> (TF::Token, Option<(TF::Token, Option<TF::Token>)>) {
         let start_offset = {
             // if leading section starts with #! - it should span the entire line
             let index = self.offset;
@@ -2316,15 +2316,15 @@ where
         };
         if self.peek(start_offset) == '<' && self.peek_def(start_offset + 1, INVALID) == '?' {
             self.with_offset(start_offset);
-            self.make_markup_and_suffix()
+            self.make_hashbang_and_suffix()
         } else {
-            (self.make_markup_token(), None)
+            (self.make_hashbang_token(), None)
         }
     }
 
     pub fn scan_header(&mut self) -> (TF::Token, Option<(TF::Token, Option<TF::Token>)>) {
         self.start_new_lexeme();
-        self.skip_to_end_of_markup()
+        self.skip_to_end_of_header()
     }
 
     pub fn is_next_xhp_category_name(&self) -> bool {

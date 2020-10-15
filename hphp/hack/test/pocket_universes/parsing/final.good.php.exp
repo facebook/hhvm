@@ -6,10 +6,10 @@
       "elements":[
         {
           "kind":"markup_section",
-          "markup_text":{
+          "markup_hashbang":{
             "kind":"token",
             "token":{
-              "kind":"markup",
+              "kind":"hashbang",
               "text":"",
               "offset":0,
               "leading_width":0,
@@ -583,5 +583,5 @@
     }
   },
   "program_text":"<?hh // strict\n<<file:__EnableUnstableFeatures(\n    'pocket_universes',\n)>>\n\nclass Foo {\n  final enum Field {\n    case type T;\n    case string ident;\n    case T default_value;\n  }\n}\n",
-  "version":"2020-08-17-0000"
+  "version":"2020-10-01-0000"
 }

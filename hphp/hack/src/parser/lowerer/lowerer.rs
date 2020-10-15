@@ -3174,7 +3174,7 @@ where
     fn p_markup(node: &Syntax<T, V>, env: &mut Env) -> Result<ast::Stmt> {
         match &node.syntax {
             MarkupSection(c) => {
-                let markup_text = &c.markup_text;
+                let markup_hashbang = &c.markup_hashbang;
                 let pos = Self::p_pos(node, env);
                 let f = pos.filename();
                 if f.has_extension("hack") || f.has_extension("hackpartial") {
@@ -3184,10 +3184,10 @@ where
                         env,
                         &syntax_error::error1060(&ext.to_str().unwrap()),
                     );
-                } else if markup_text.width() > 0 && !Self::is_hashbang(&markup_text, env) {
+                } else if markup_hashbang.width() > 0 && !Self::is_hashbang(&markup_hashbang, env) {
                     Self::raise_parsing_error(node, env, &syntax_error::error1001);
                 }
-                let stmt_ = ast::Stmt_::mk_markup((pos.clone(), Self::text(&markup_text, env)));
+                let stmt_ = ast::Stmt_::mk_markup((pos.clone(), Self::text(&markup_hashbang, env)));
                 Ok(ast::Stmt::new(pos, stmt_))
             }
             _ => Self::failwith("invalid node"),

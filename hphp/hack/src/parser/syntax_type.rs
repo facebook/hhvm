@@ -74,7 +74,7 @@ pub trait SyntaxType<C>: SyntaxTypeBase<C>
     fn make_inclusion_directive(ctx: &C, inclusion_expression: Self, inclusion_semicolon: Self) -> Self;
     fn make_compound_statement(ctx: &C, compound_left_brace: Self, compound_statements: Self, compound_right_brace: Self) -> Self;
     fn make_expression_statement(ctx: &C, expression_statement_expression: Self, expression_statement_semicolon: Self) -> Self;
-    fn make_markup_section(ctx: &C, markup_text: Self, markup_suffix: Self) -> Self;
+    fn make_markup_section(ctx: &C, markup_hashbang: Self, markup_suffix: Self) -> Self;
     fn make_markup_suffix(ctx: &C, markup_suffix_less_than_question: Self, markup_suffix_name: Self) -> Self;
     fn make_unset_statement(ctx: &C, unset_keyword: Self, unset_left_paren: Self, unset_variables: Self, unset_right_paren: Self, unset_semicolon: Self) -> Self;
     fn make_using_statement_block_scoped(ctx: &C, using_block_await_keyword: Self, using_block_using_keyword: Self, using_block_left_paren: Self, using_block_expressions: Self, using_block_right_paren: Self, using_block_body: Self) -> Self;

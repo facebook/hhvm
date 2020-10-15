@@ -621,9 +621,9 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_markup_section(_: &C, markup_text: Self, markup_suffix: Self) -> Self {
+    fn make_markup_section(_: &C, markup_hashbang: Self, markup_suffix: Self) -> Self {
         let syntax = SyntaxVariant::MarkupSection(Box::new(MarkupSectionChildren {
-            markup_text,
+            markup_hashbang,
             markup_suffix,
         }));
         let value = V::from_values(syntax.iter_children().map(|child| &child.value));
@@ -2391,8 +2391,8 @@ where
                 acc
             },
             SyntaxVariant::MarkupSection(x) => {
-                let MarkupSectionChildren { markup_text, markup_suffix } = *x;
-                let acc = f(markup_text, acc);
+                let MarkupSectionChildren { markup_hashbang, markup_suffix } = *x;
+                let acc = f(markup_hashbang, acc);
                 let acc = f(markup_suffix, acc);
                 acc
             },
@@ -3912,7 +3912,7 @@ where
              })),
              (SyntaxKind::MarkupSection, 2) => SyntaxVariant::MarkupSection(Box::new(MarkupSectionChildren {
                  markup_suffix: ts.pop().unwrap(),
-                 markup_text: ts.pop().unwrap(),
+                 markup_hashbang: ts.pop().unwrap(),
                  
              })),
              (SyntaxKind::MarkupSuffix, 2) => SyntaxVariant::MarkupSuffix(Box::new(MarkupSuffixChildren {
@@ -5177,7 +5177,7 @@ pub struct ExpressionStatementChildren<T, V> {
 
 #[derive(Debug, Clone)]
 pub struct MarkupSectionChildren<T, V> {
-    pub markup_text: Syntax<T, V>,
+    pub markup_hashbang: Syntax<T, V>,
     pub markup_suffix: Syntax<T, V>,
 }
 
@@ -6871,7 +6871,7 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
             },
             MarkupSection(x) => {
                 get_index(2).and_then(|index| { match index {
-                        0 => Some(&x.markup_text),
+                        0 => Some(&x.markup_hashbang),
                     1 => Some(&x.markup_suffix),
                         _ => None,
                     }

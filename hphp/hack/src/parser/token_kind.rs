@@ -232,7 +232,7 @@ pub enum TokenKind {
     XHPStringLiteral,
     XHPBody,
     XHPComment,
-    Markup,
+    Hashbang,
 }
 
 impl TokenKind {
@@ -448,7 +448,7 @@ impl TokenKind {
             TokenKind::XHPStringLiteral => "XHP_string_literal",
             TokenKind::XHPBody => "XHP_body",
             TokenKind::XHPComment => "XHP_comment",
-            TokenKind::Markup => "markup",
+            TokenKind::Hashbang => "hashbang",
         }
     }
 
@@ -855,7 +855,7 @@ impl TokenKind {
             TokenKind::XHPStringLiteral => 204,
             TokenKind::XHPBody => 205,
             TokenKind::XHPComment => 206,
-            TokenKind::Markup => 207,
+            TokenKind::Hashbang => 207,
         }
     }
 }

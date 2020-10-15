@@ -625,9 +625,9 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_markup_section(ctx: &C, text: Self, suffix: Self) -> Self {
+    fn make_markup_section(ctx: &C, hashbang: Self, suffix: Self) -> Self {
         let syntax = SyntaxVariant::MarkupSection(ctx.get_arena().alloc(MarkupSectionChildren {
-            text,
+            hashbang,
             suffix,
         }));
         let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));

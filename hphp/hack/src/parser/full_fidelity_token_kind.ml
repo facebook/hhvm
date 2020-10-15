@@ -228,7 +228,7 @@ type t =
   | XHPStringLiteral
   | XHPBody
   | XHPComment
-  | Markup
+  | Hashbang
 
   [@@deriving show, eq]
 
@@ -632,7 +632,7 @@ let to_string kind =
   | XHPStringLiteral              -> "XHP_string_literal"
   | XHPBody                       -> "XHP_body"
   | XHPComment                    -> "XHP_comment"
-  | Markup                        -> "markup"
+  | Hashbang                      -> "hashbang"
 
 
 let is_variable_text kind =
@@ -661,5 +661,5 @@ let is_variable_text kind =
   | XHPStringLiteral -> true
   | XHPBody -> true
   | XHPComment -> true
-  | Markup -> true
+  | Hashbang -> true
   | _ -> false

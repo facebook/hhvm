@@ -2013,7 +2013,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             | TokenKind::XHPStringLiteral
             | TokenKind::XHPBody
             | TokenKind::XHPComment
-            | TokenKind::Markup => Node::Ignored(SK::Token(kind)),
+            | TokenKind::Hashbang => Node::Ignored(SK::Token(kind)),
         };
         self.state.previous_token_kind = kind;
         result

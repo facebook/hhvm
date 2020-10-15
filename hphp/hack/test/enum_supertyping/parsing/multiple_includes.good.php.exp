@@ -6,10 +6,10 @@
       "elements":[
         {
           "kind":"markup_section",
-          "markup_text":{
+          "markup_hashbang":{
             "kind":"token",
             "token":{
-              "kind":"markup",
+              "kind":"hashbang",
               "text":"",
               "offset":0,
               "leading_width":0,
@@ -594,5 +594,5 @@
     }
   },
   "program_text":"<?hh\n// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.\n\n<<file:__EnableUnstableFeatures(\n  'enum_supertyping',\n)>>\n\nenum E1 : int {}\n\nenum E2 : int {}\n\nenum F : int includes E1, E2 {}\n",
-  "version":"2020-08-17-0000"
+  "version":"2020-10-01-0000"
 }

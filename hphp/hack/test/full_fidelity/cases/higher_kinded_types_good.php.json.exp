@@ -6,10 +6,10 @@
       "elements":[
         {
           "kind":"markup_section",
-          "markup_text":{
+          "markup_hashbang":{
             "kind":"token",
             "token":{
-              "kind":"markup",
+              "kind":"hashbang",
               "text":"",
               "offset":0,
               "leading_width":0,
@@ -2156,5 +2156,5 @@
     }
   },
   "program_text":"<?hh // strict\n\nfunction test1<T1<_>>() : void {}\n\nclass Test1<T1<X>> {}\n\ntype foo<T1<X> as SomeClass> = bool;\n\nfunction test2<T1<TX as Foo<X>>>() : void {}\n\nfunction test3<T1<TX as Foo<TX>> as Foo<TX>>() : void {}\n\nfunction test4<T1<+TX>, T2>() : void {}\n\nfunction test5<C<_>, T2>() : void {}\n",
-  "version":"2020-09-14-0000"
+  "version":"2020-10-01-0000"
 }

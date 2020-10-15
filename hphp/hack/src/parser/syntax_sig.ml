@@ -358,7 +358,7 @@ module type Syntax_S = sig
     ; expression_statement_semicolon                     : t
     }
   | MarkupSection                     of
-    { markup_text                                        : t
+    { markup_hashbang                                    : t
     ; markup_suffix                                      : t
     }
   | MarkupSuffix                      of

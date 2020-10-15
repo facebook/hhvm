@@ -224,9 +224,9 @@ impl<'a> FlattenSmartConstructors<'a, HasScriptContent<'a>> for FactsSmartConstr
             TokenKind::Static => Node::Static,
             _ => Node::Ignored,
         };
-        // assume file has script content if it has any tokens besides markup or EOF
+        // assume file has script content if it has any tokens besides !# or EOF
         self.state.0 |= match kind {
-            TokenKind::EndOfFile | TokenKind::Markup => false,
+            TokenKind::EndOfFile | TokenKind::Hashbang => false,
             _ => true,
         };
         result

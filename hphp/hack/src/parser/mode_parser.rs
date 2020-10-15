@@ -25,7 +25,7 @@ pub fn parse_mode(text: &SourceText) -> (Language, Option<Mode>) {
         match header.syntax {
             SyntaxVariant::MarkupSection(section_children) => {
                 if let syntax::MarkupSectionChildren {
-                    markup_text: txt,
+                    markup_hashbang: hashbang,
                     markup_suffix:
                         syntax::Syntax {
                             syntax: SyntaxVariant::MarkupSuffix(suffix_children),
@@ -46,7 +46,7 @@ pub fn parse_mode(text: &SourceText) -> (Language, Option<Mode>) {
                             if text.file_path().has_extension("hhi") {
                                 (Language::Hack, Some(Mode::Mdecl))
                             } else {
-                                let skip_length = txt.value.full_width
+                                let skip_length = hashbang.value.full_width
                                     + ltq.value.full_width
                                     + name.leading_width()
                                     + name.width();

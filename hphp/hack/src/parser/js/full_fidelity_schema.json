@@ -432,7 +432,7 @@
       "token_text" : null },
     { "token_kind" : "XHPComment",
       "token_text" : null },
-    { "token_kind" : "Markup",
+    { "token_kind" : "Hashbang",
       "token_text" : null },
 
     { "token_kind" : "EndOfFile",
@@ -985,7 +985,7 @@
       "description" : "markup_section",
       "prefix" : "markup",
       "fields" : [
-        { "field_name" : "text" },
+        { "field_name" : "hashbang" },
         { "field_name" : "suffix" }
       ] },
     { "kind_name" : "MarkupSuffix",

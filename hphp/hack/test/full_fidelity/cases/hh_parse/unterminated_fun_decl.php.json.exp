@@ -7,10 +7,10 @@
       "elements":[
         {
           "kind":"markup_section",
-          "markup_text":{
+          "markup_hashbang":{
             "kind":"token",
             "token":{
-              "kind":"markup",
+              "kind":"hashbang",
               "text":"",
               "offset":0,
               "leading_width":0,

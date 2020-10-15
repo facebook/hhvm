@@ -5015,8 +5015,8 @@ where
                         for decl in Self::syntax_to_list_no_separators(syntax_list) {
                             match &decl.syntax {
                                 MarkupSection(x) => {
-                                    if x.markup_text.width() == 0
-                                        || self.is_hashbang(&x.markup_text)
+                                    if x.markup_hashbang.width() == 0
+                                        || self.is_hashbang(&x.markup_hashbang)
                                     {
                                         continue;
                                     } else {
@@ -5036,8 +5036,8 @@ where
                             && Self::syntax_to_list_no_separators(syntax_list).any(|decl| {
                                 match &decl.syntax {
                                     MarkupSection(x) => {
-                                        !(x.markup_text.width() == 0
-                                            || self.is_hashbang(&x.markup_text))
+                                        !(x.markup_hashbang.width() == 0
+                                            || self.is_hashbang(&x.markup_hashbang))
                                     }
                                     NamespaceDeclaration(_)
                                     | FileAttributeSpecification(_)

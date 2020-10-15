@@ -1106,10 +1106,10 @@ module WithToken(Token: TokenType) = struct
          let acc = f acc expression_statement_semicolon in
          acc
       | MarkupSection {
-        markup_text;
+        markup_hashbang;
         markup_suffix;
       } ->
-         let acc = f acc markup_text in
+         let acc = f acc markup_hashbang in
          let acc = f acc markup_suffix in
          acc
       | MarkupSuffix {
@@ -2999,10 +2999,10 @@ module WithToken(Token: TokenType) = struct
         expression_statement_semicolon;
       ]
       | MarkupSection {
-        markup_text;
+        markup_hashbang;
         markup_suffix;
       } -> [
-        markup_text;
+        markup_hashbang;
         markup_suffix;
       ]
       | MarkupSuffix {
@@ -4893,10 +4893,10 @@ module WithToken(Token: TokenType) = struct
         "expression_statement_semicolon";
       ]
       | MarkupSection {
-        markup_text;
+        markup_hashbang;
         markup_suffix;
       } -> [
-        "markup_text";
+        "markup_hashbang";
         "markup_suffix";
       ]
       | MarkupSuffix {
@@ -6896,11 +6896,11 @@ module WithToken(Token: TokenType) = struct
           expression_statement_semicolon;
         }
       | (SyntaxKind.MarkupSection, [
-          markup_text;
+          markup_hashbang;
           markup_suffix;
         ]) ->
         MarkupSection {
-          markup_text;
+          markup_hashbang;
           markup_suffix;
         }
       | (SyntaxKind.MarkupSuffix, [
@@ -9167,11 +9167,11 @@ module WithToken(Token: TokenType) = struct
         make syntax value
 
       let make_markup_section
-        markup_text
+        markup_hashbang
         markup_suffix
       =
         let syntax = MarkupSection {
-          markup_text;
+          markup_hashbang;
           markup_suffix;
         } in
         let value = ValueBuilder.value_from_syntax syntax in

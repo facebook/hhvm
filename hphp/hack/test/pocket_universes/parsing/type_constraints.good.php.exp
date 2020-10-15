@@ -6,10 +6,10 @@
       "elements":[
         {
           "kind":"markup_section",
-          "markup_text":{
+          "markup_hashbang":{
             "kind":"token",
             "token":{
-              "kind":"markup",
+              "kind":"hashbang",
               "text":"",
               "offset":0,
               "leading_width":0,
@@ -1470,5 +1470,5 @@
     }
   },
   "program_text":"<?hh\n<<file:__EnableUnstableFeatures(\n    'pocket_universes',\n)>>\n\nclass U {}\nclass D {}\nclass E {}\n\nclass C {\n  enum E {\n    case type T0;\n    case type reify T1;\n    case type T2 as U;\n    case type reify T3 as U;\n    case type T4 super D;\n    case type reify T5 super D;\n    case type T6 as E super E;\n    case type reify T7 as E super E;\n  }\n}\n",
-  "version":"2020-08-17-0000"
+  "version":"2020-10-01-0000"
 }

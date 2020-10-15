@@ -188,8 +188,8 @@ watchman_init_timeout = 1
         new_file = os.path.join(self.test_driver.repo_dir, "class_3b.php")
         self.add_file_that_depends_on_class_a(new_file)
         self.test_driver.check_cmd(["No errors!"], assert_loaded_saved_state=False)
-        new_saved_state: SaveStateResult = (
-            self.test_driver.dump_saved_state(assert_edges_added=True)
+        new_saved_state: SaveStateResult = self.test_driver.dump_saved_state(
+            assert_edges_added=True
         )
         assert new_saved_state.returned_values.get_edges_added() > 0
 

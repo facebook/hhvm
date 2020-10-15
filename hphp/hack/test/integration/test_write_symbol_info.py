@@ -165,7 +165,7 @@ max_workers = 2
         saved_state_path: Optional[str] = None,
         args: Optional[List[str]] = None,
     ) -> None:
-        """ Start an hh_server. changed_files is ignored here (as it
+        """Start an hh_server. changed_files is ignored here (as it
         has no meaning) and is only exposed in this API for the derived
         classes.
         """

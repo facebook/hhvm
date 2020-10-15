@@ -133,7 +133,7 @@ void fill_record(const Func* func, const void* addr,
 
 void fill_record(const Unit* unit, const void* addr,
                  StructuredLogEntry& record) {
-  record.setStr("name", unit->filepath()->data());
+  record.setStr("name", unit->origFilepath()->data());
   try_member(unit, addr, record);
 }
 

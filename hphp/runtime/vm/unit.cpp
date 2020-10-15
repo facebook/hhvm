@@ -318,7 +318,7 @@ void Unit::enableCoverage() {
     assertx(!RO::RepoAuthoritative && RO::EvalEnablePerFileCoverage);
     m_coverage.bind(
       rds::Mode::Normal,
-      rds::LinkName{"UnitCoverage", filepath()}
+      rds::LinkName{"UnitCoverage", origFilepath()}
     );
   }
   if (m_coverage.isInit()) return;
@@ -883,7 +883,7 @@ void Unit::initialMerge() {
     auto const index = s_loadedUnits.fetch_add(1, std::memory_order_relaxed);
     if (index < nrecord) {
       StructuredLogEntry ent;
-      ent.setStr("path", m_filepath->data());
+      ent.setStr("path", m_origFilepath->data());
       ent.setInt("index", index);
       StructuredLog::log("hhvm_first_units", ent);
     }
@@ -979,7 +979,7 @@ void Unit::initialMerge() {
   if (!RO::RepoAuthoritative && RO::EvalEnablePerFileCoverage) {
     m_coverage.bind(
       rds::Mode::Normal,
-      rds::LinkName{"UnitCoverage", filepath()}
+      rds::LinkName{"UnitCoverage", origFilepath()}
     );
   }
   m_mergeState.store(MergeState::Merged | state, std::memory_order_relaxed);
@@ -1127,7 +1127,7 @@ void Unit::mergeImpl(MergeInfo* mi) {
   autoTypecheck(this);
 
   FTRACE(1, "Merging unit {} ({} elements to define)\n",
-         this->m_filepath->data(), mi->m_mergeablesSize);
+         this->m_origFilepath->data(), mi->m_mergeablesSize);
 
   Func** it = mi->funcBegin();
   Func** fend = mi->funcEnd();

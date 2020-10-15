@@ -778,7 +778,8 @@ void HHVM_FUNCTION(prefetch_units, const Array& paths, bool hint) {
           "",
           nullptr,
           Native::s_noNativeFuncs,
-          false
+          false,
+          true
         );
       }
     );

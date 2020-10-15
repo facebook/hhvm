@@ -1465,6 +1465,11 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdARFlags:
     return PureLoad { AFMeta { inst.src(0) }};
 
+  case LdUnitPerRequestFilepath:
+    return PureLoad {
+      ARds { inst.extra<LdUnitPerRequestFilepath>()->handle },
+    };
+
   //////////////////////////////////////////////////////////////////////
   // Instructions that never read or write memory locations tracked by this
   // module.
@@ -1596,6 +1601,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ProfileProp:
   case ProfileIsTypeStruct:
   case LdLazyClsName:
+  case DirFromFilepath:
     return IrrelevantEffects {};
   case MethodExists:
     if (!RO::EvalRaiseOnCaseInsensitiveLookup) return IrrelevantEffects {};

@@ -456,7 +456,7 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
       [&](StructuredLogEntry& cols) {
         auto const func = unit.context().initSrcKey.func();
         cols.setStr("func", func->fullName()->slice());
-        cols.setStr("filename", func->unit()->filepath()->slice());
+        cols.setStr("filename", func->unit()->origFilepath()->slice());
         cols.setStr("hhir_unit", show(unit));
       }
     );

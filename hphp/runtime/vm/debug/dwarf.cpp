@@ -87,8 +87,8 @@ void DwarfBuf::dwarf_cfa_offset_extended_sf(uint8_t reg, int8_t offset) {
 
 const char *DwarfInfo::lookupFile(const Unit *unit) {
   const char *file = nullptr;
-  if (unit && unit->filepath()) {
-    file = unit->filepath()->data();
+  if (unit && unit->origFilepath()) {
+    file = unit->origFilepath()->data();
   }
   if (file == nullptr || strlen(file) == 0) {
     return "anonFile";

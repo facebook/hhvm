@@ -16,10 +16,13 @@
 
 #include "hphp/runtime/vm/jit/irlower-internal.h"
 
+#include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/tv-mutate.h"
+
 #include "hphp/runtime/ext/hh/ext_hh.h"
+
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/memo-cache.h"
 #include "hphp/runtime/vm/resumable.h"
@@ -934,6 +937,46 @@ void cgCheckCold(IRLS& env, const IRInstruction* inst) {
   } else {
     v << jcc{CC_LE, sf, {label(env, inst->next()), label(env, inst->taken())}};
   }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void cgLdUnitPerRequestFilepath(IRLS& env, const IRInstruction* inst) {
+  assertx(!RuntimeOption::RepoAuthoritative);
+  assertx(RuntimeOption::EvalReuseUnitsByHash);
+
+  auto const handle = inst->extra<LdUnitPerRequestFilepath>()->handle;
+  assertx(rds::isNormalHandle(handle));
+
+  auto& v = vmain(env);
+  auto const dst = dstLoc(env, inst, 0).reg();
+
+  // During a request, the per-request filepath should always be
+  // initialized. Verify that this is the case in debug builds.
+  if (debug) {
+    auto const sf = checkRDSHandleInitialized(v, handle);
+    unlikelyIfThen(
+      v, vcold(env), CC_NE, sf,
+      [&] (Vout& v) { v << trap{TRAP_REASON}; }
+    );
+  }
+  emitLdLowPtr(v, rvmtl()[handle], dst, sizeof(LowStringPtr));
+}
+
+static StringData* dirFromFilepathImpl(const StringData* filepath) {
+  assertx(filepath->isStatic());
+  return makeStaticString(FileUtil::dirname(StrNR{filepath}));
+}
+
+void cgDirFromFilepath(IRLS& env, const IRInstruction* inst) {
+  cgCallHelper(
+    vmain(env),
+    env,
+    CallSpec::direct(dirFromFilepathImpl),
+    callDest(env, inst),
+    SyncOptions::None,
+    argGroup(env, inst).ssa(0)
+  );
 }
 
 ///////////////////////////////////////////////////////////////////////////////

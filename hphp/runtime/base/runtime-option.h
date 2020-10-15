@@ -1277,6 +1277,7 @@ struct RuntimeOption {
   F(uint64_t, RecordFirstUnits, 0)                                      \
   /* More aggresively reuse already compiled units based on SHA1     */ \
   F(bool, CheckUnitSHA1, true)                                          \
+  F(bool, ReuseUnitsByHash, false)                                      \
   /* When dynamic_fun is called on a function not marked as
      __DynamicallyCallable:
 

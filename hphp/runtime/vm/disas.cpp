@@ -879,7 +879,7 @@ void print_fatal(Output& out, const Unit* unit) {
 void print_unit_metadata(Output& out, const Unit* unit) {
   out.nl();
 
-  out.fmtln(".filepath {};", escaped(unit->filepath()));
+  out.fmtln(".filepath {};", escaped(unit->origFilepath()));
   print_fatal(out, unit);
   if (!unit->fileAttributes().empty()) {
     out.nl();
@@ -909,7 +909,7 @@ void print_unit_metadata(Output& out, const Unit* unit) {
 }
 
 void print_unit(Output& out, const Unit* unit) {
-  out.fmtln("# {} starts here", unit->filepath());
+  out.fmtln("# {} starts here", unit->origFilepath());
   out.nl();
   print_unit_metadata(out, unit);
   for (auto* func : unit->funcs())        print_func(out, func);
@@ -917,7 +917,7 @@ void print_unit(Output& out, const Unit* unit) {
   for (auto& rec : unit->prerecords())    print_rec(out, rec.get());
   for (auto& alias : unit->typeAliases()) print_alias(out, alias);
   for (auto& c : unit->constants())       print_constant(out, c);
-  out.fmtln("# {} ends here", unit->filepath());
+  out.fmtln("# {} ends here", unit->origFilepath());
 }
 
 //////////////////////////////////////////////////////////////////////

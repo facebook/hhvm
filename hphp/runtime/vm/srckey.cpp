@@ -31,8 +31,8 @@ std::string show(SrcKey sk) {
   auto func = sk.func();
   auto unit = sk.unit();
   const char *filepath = "*anonFile*";
-  if (unit->filepath()->data() && unit->filepath()->size()) {
-    filepath = unit->filepath()->data();
+  if (unit->origFilepath()->data() && unit->origFilepath()->size()) {
+    filepath = unit->origFilepath()->data();
   }
   return folly::sformat("{}:{} in {}(id 0x{:#x})@{: >6}{}{}",
                         filepath, unit->getLineNumber(sk.offset()),

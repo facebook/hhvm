@@ -455,7 +455,7 @@ dynamic getBlock(const Block* block,
 dynamic getSrcKey(const SrcKey& sk) {
   auto const unit = sk.unit();
   return dynamic::object("func", sk.func()->name()->slice())
-                        ("unit", unit->filepath()->slice())
+                        ("unit", unit->origFilepath()->slice())
                         ("prologue", sk.prologue())
                         ("offset", sk.offset())
                         ("resumeMode", resumeModeShortName(sk.resumeMode()))

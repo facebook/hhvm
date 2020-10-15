@@ -77,7 +77,7 @@ void addTranslation(const TransRec& transRec) {
       "New translation: %" PRId64 " %s %u %u %d\n",
       HPHP::Timer::GetCurrentTimeMicros() - mcgen::jitInitTime(),
       folly::format("{}:{}:{}",
-                    transRec.src.unit()->filepath(),
+                    transRec.src.unit()->origFilepath(),
                     transRec.src.funcID(),
                     transRec.src.offset()).str().c_str(),
       transRec.aLen,

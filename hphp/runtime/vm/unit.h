@@ -255,15 +255,60 @@ public:
   SHA1 bcSha1() const;
 
   /*
-   * File and directory paths.
-   */
-  const StringData* filepath() const;
-  const StringData* dirpath() const;
-
-  /*
    * Was this unit created in response to an internal compiler error?
    */
   bool isICE() const;
+
+  /////////////////////////////////////////////////////////////////////////////
+  // File paths.
+
+  /*
+   * Obtain the filepath this Unit was original created from. This is
+   * guaranteed to be the same across all requests and never
+   * change. Use this when you're using the path as a key that
+   * shouldn't change.
+   */
+  const StringData* origFilepath() const;
+
+  /*
+   * Obtain the filepath this Unit is currently bound to in this
+   * request, or nullptr if none.
+   */
+  const StringData* perRequestFilepath() const;
+
+  /*
+   * If this Unit has a per-request filepath bound to it, return
+   * it. Otherwise return origFilepath(). Use this for displaying the
+   * path to the user.
+   */
+  const StringData* filepath() const;
+
+  /*
+   * If this Unit is using per-request file paths, return the
+   * rds::Handle where the path is bound. If you're in an active
+   * request, the handle is guaranteed to be initialized.
+   */
+  rds::Handle perRequestFilepathHandle() const;
+
+  /*
+   * If this Unit is using per-request file paths, return true. False
+   * otherwise.
+   */
+  bool hasPerRequestFilepath() const;
+
+  /*
+   * Bind the given filepath as the Unit's pre-request filepath. The
+   * Unit should not have an already bound filepath and
+   * EvalReuseUnitsByHash should be set.
+   */
+  void bindPerRequestFilepath(const StringData*);
+
+  /*
+   * Mark this Unit as having per-request filepaths. This allocates a
+   * new rds handle to store the path. EvalReuseUnitsByHash must be
+   * set.
+   */
+  void makeFilepathPerRequest();
 
   /////////////////////////////////////////////////////////////////////////////
   // Unit cache ref-counting
@@ -694,7 +739,7 @@ private:
 private:
   unsigned char const* m_bc{nullptr};
   Offset m_bclen{0};
-  LowStringPtr m_filepath{nullptr};
+  LowStringPtr m_origFilepath{nullptr};
   std::atomic<MergeInfo*> m_mergeInfo{nullptr};
 
   int8_t m_repoId{-1};
@@ -707,7 +752,6 @@ private:
   bool m_extended : 1;
   bool m_serialized : 1;
   bool m_ICE : 1; // was this unit the result of an internal compiler error
-  LowStringPtr m_dirpath{nullptr};
 
   PreClassPtrVec m_preClasses;
   TypeAliasVec m_typeAliases;
@@ -751,6 +795,8 @@ struct UnitExtended : Unit {
   std::atomic_flag m_symbolRefsPrefetched;
 
   std::atomic<int64_t> m_cacheRefCount{0};
+
+  rds::Link<LowStringPtr, rds::Mode::Normal> m_perRequestFilepath;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

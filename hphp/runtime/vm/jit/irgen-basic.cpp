@@ -23,6 +23,7 @@
 #include "hphp/runtime/vm/jit/irgen-minstr.h"
 #include "hphp/runtime/vm/reified-generics.h"
 #include "hphp/runtime/vm/unit-util.h"
+#include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/set-array.h"
@@ -524,8 +525,33 @@ void emitPopFrame(IRGS& env, uint32_t nout) {
   for (auto tmp : v) push(env, tmp);
 }
 
-void emitDir(IRGS& env)    { push(env, cns(env, curUnit(env)->dirpath())); }
-void emitFile(IRGS& env)   { push(env, cns(env, curUnit(env)->filepath())); }
+void emitDir(IRGS& env) {
+  auto const unit = curUnit(env);
+  auto const handle = unit->perRequestFilepathHandle();
+  if (handle != rds::kUninitHandle) {
+    assertx(!RuntimeOption::RepoAuthoritative);
+    assertx(RuntimeOption::EvalReuseUnitsByHash);
+    auto const filepath =
+      gen(env, LdUnitPerRequestFilepath, RDSHandleData { handle });
+    push(env, gen(env, DirFromFilepath, filepath));
+    return;
+  }
+  auto const filepath = unit->origFilepath();
+  push(env, cns(env, makeStaticString(FileUtil::dirname(StrNR{filepath}))));
+}
+
+void emitFile(IRGS& env) {
+  auto const unit = curUnit(env);
+  auto const handle = unit->perRequestFilepathHandle();
+  if (handle != rds::kUninitHandle) {
+    assertx(!RuntimeOption::RepoAuthoritative);
+    assertx(RuntimeOption::EvalReuseUnitsByHash);
+    push(env, gen(env, LdUnitPerRequestFilepath, RDSHandleData { handle }));
+    return;
+  }
+  push(env, cns(env, unit->origFilepath()));
+}
+
 void emitMethod(IRGS& env) { push(env, cns(env, curFunc(env)->fullName())); }
 void emitDup(IRGS& env)    { pushIncRef(env, topC(env)); }
 

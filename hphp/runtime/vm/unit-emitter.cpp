@@ -597,8 +597,7 @@ std::unique_ptr<Unit> UnitEmitter::create(bool saveLineTable) const {
   u->m_sn = m_sn;
   u->m_bc = allocateBCRegion(m_bc, m_bclen);
   u->m_bclen = m_bclen;
-  u->m_filepath = m_filepath;
-  u->m_dirpath = makeStaticString(FileUtil::dirname(StrNR{m_filepath}));
+  u->m_origFilepath = m_filepath;
   u->m_sha1 = m_sha1;
   u->m_bcSha1 = m_bcSha1;
   u->m_arrays = m_arrays;

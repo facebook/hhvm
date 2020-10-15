@@ -94,18 +94,61 @@ inline SHA1 Unit::bcSha1() const {
   return m_bcSha1;
 }
 
-inline const StringData* Unit::filepath() const {
-  assertx(m_filepath);
-  return m_filepath;
-}
-
-inline const StringData* Unit::dirpath() const {
-  assertx(m_dirpath);
-  return m_dirpath;
-}
-
 inline bool Unit::isICE() const {
   return m_ICE;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// File paths.
+
+inline const StringData* Unit::origFilepath() const {
+  assertx(m_origFilepath);
+  return m_origFilepath;
+}
+
+inline const StringData* Unit::perRequestFilepath() const {
+  if (!m_extended) return nullptr;
+  auto const u = getExtended();
+  if (!u->m_perRequestFilepath.bound()) return nullptr;
+  assertx(!RuntimeOption::RepoAuthoritative);
+  assertx(RuntimeOption::EvalReuseUnitsByHash);
+  if (!u->m_perRequestFilepath.isInit()) return nullptr;
+  return *u->m_perRequestFilepath;
+}
+
+inline const StringData* Unit::filepath() const {
+  if (auto const p = perRequestFilepath()) return p;
+  return origFilepath();
+}
+
+inline rds::Handle Unit::perRequestFilepathHandle() const {
+  if (!m_extended) return rds::kUninitHandle;
+  return getExtended()->m_perRequestFilepath.maybeHandle();
+}
+
+inline bool Unit::hasPerRequestFilepath() const {
+  return perRequestFilepathHandle() != rds::kUninitHandle;
+}
+
+inline void Unit::bindPerRequestFilepath(const StringData* p) {
+  assertx(p);
+  assertx(p->isStatic());
+  assertx(!RuntimeOption::RepoAuthoritative);
+  assertx(RuntimeOption::EvalReuseUnitsByHash);
+  assertx(m_extended);
+  auto u = getExtended();
+  assertx(u->m_perRequestFilepath.bound());
+  assertx(!u->m_perRequestFilepath.isInit());
+  u->m_perRequestFilepath.initWith(p);
+}
+
+inline void Unit::makeFilepathPerRequest() {
+  assertx(!RuntimeOption::RepoAuthoritative);
+  assertx(RuntimeOption::EvalReuseUnitsByHash);
+  assertx(m_extended);
+  auto u = getExtended();
+  assertx(!u->m_perRequestFilepath.bound());
+  u->m_perRequestFilepath = rds::alloc<LowStringPtr>();
 }
 
 /////////////////////////////////////////////////////////////////////////////

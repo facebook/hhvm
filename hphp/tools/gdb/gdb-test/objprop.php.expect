@@ -1,6 +1,0 @@
-$1 = Object of class "A" @ 0xXX = {"foo" = { HPHP::DataType::Int64, 42 }, "foo2" = { HPHP::DataType::Int64, 44 }, "foo3" = { HPHP::DataType::Int64, 45 }, "foo4" = { HPHP::DataType::Int64, 46 }, "foo5" = { HPHP::DataType::Int64, 47 }, "foo6" = { HPHP::DataType::Int64, 49 }, "foo7" = { HPHP::DataType::Null }, "foo8" = { HPHP::DataType::PersistentString, "foo" }}
-#0  HPHP::f_var_dump(HPHP::Variant const&, HPHP::Array const&) (expression={ HPHP::DataType::Object, 0xXX ("A") }, _argv=(HPHP::Array::Ptr) 0xXX <HPHP::s_theEmptyVArray>) at hphp/runtime/ext/std/ext_std_variable.cpp
-#1  0xXX in [PHP] var_dump(arg1, argv) (arg1={ HPHP::DataType::Object, 0xXX ("A") }, argv={ HPHP::DataType::PersistentVArray, 0xXX <HPHP::s_theEmptyVArray> })
-#2  0xXX in [PHP] g(u, v, w, x) (u={ HPHP::DataType::Object, 0xXX ("A") }, v={ HPHP::DataType::Boolean, True }, w={ HPHP::DataType::Boolean, False }, x={ HPHP::DataType::Object, 0xXX ("A") })
-#3  0xXX in [PHP] f(a, b) (a={ HPHP::DataType::Object, 0xXX ("A") }, b={ HPHP::DataType::Boolean, True })
-#4  0xXX in [PHP] main() ()

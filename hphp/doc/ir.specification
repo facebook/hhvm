@@ -2308,6 +2308,17 @@ To string conversions:
   that this cannot be used for CLOCK_THREAD_CPUTIME_ID, as HHVM provides
   different semantics for that counter.
 
+| LdUnitPerRequestFilepath<handle>, D(StaticStr), NA, NF
+
+  Returns the filepath currently bound to the current unit (stored in the given
+  RDS handle). The RDS handle must be an initialized normal handle. Only valid
+  when Eval.ReuseUnitsByHash is enabled.
+
+| DirFromFilepath, D(StaticStr), S(StaticStr), NF
+
+  Given a string representing a filepath in S0, return only the directory
+  portion of the path.
+
 14. Generators & Closures
 
 | LdClosureCls, DParam(Cls), S(Obj), NF

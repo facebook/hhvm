@@ -297,6 +297,8 @@ bool supportsGVN(const IRInstruction* inst) {
   case LookupSPropSlot:
   case ConvPtrToLval:
   case RaiseErrorOnInvalidIsAsExpressionType:
+  case LdUnitPerRequestFilepath:
+  case DirFromFilepath:
     return true;
 
   case EqArrLike:

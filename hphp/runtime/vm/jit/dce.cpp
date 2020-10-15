@@ -285,6 +285,8 @@ bool canDCE(IRInstruction* inst) {
   case LdPtrIterKey:
   case LdPtrIterVal:
   case EqPtrIter:
+  case LdUnitPerRequestFilepath:
+  case DirFromFilepath:
     assertx(!inst->isControlFlow());
     return true;
 

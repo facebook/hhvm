@@ -150,7 +150,7 @@ void read_container(ProfDataDeserializer& ser, F f) {
 }
 
 void write_unit_preload(ProfDataSerializer& ser, Unit* unit) {
-  write_raw_string(ser, unit->filepath());
+  write_raw_string(ser, unit->origFilepath());
 }
 
 struct UnitPreloader : JobQueueWorker<StringData*, void*> {
@@ -166,7 +166,7 @@ struct UnitPreloader : JobQueueWorker<StringData*, void*> {
     auto& nativeFuncs = Native::s_noNativeFuncs;
     DEBUG_ONLY auto unit = lookupUnit(path, "", nullptr, nativeFuncs, false);
     FTRACE(2, "Preloaded unit with path {}\n", path->data());
-    assertx(unit->filepath() == path);  // both static
+    assertx(unit->origFilepath() == path);  // both static
   }
 };
 using UnitPreloadDispatcher = JobQueueDispatcher<UnitPreloader>;
@@ -189,7 +189,7 @@ void write_units_preload(ProfDataSerializer& ser) {
   auto const check_unit =
     [] (Unit* unit) -> bool {
       if (!unit) return false;
-      auto const filepath = unit->filepath();
+      auto const filepath = unit->origFilepath();
       if (filepath->empty()) return false;
       // skip systemlib
       if (filepath->size() >= 2 && filepath->data()[1] == ':') return false;
@@ -454,13 +454,13 @@ bool write_named_type(ProfDataSerializer& ser, const NamedEntity* ne) {
   if (!ne) return false;
   if (auto const cls = ne->clsList()) {
     if (!(cls->attrs() & AttrUnique)) return false;
-    auto const filepath = cls->preClass()->unit()->filepath();
+    auto const filepath = cls->preClass()->unit()->origFilepath();
     if (!filepath || filepath->empty()) return false;
     if (!cls->wasSerialized()) write_class(ser, cls);
     return true;
   } else if (auto const rec = ne->recordList()) {
     if (!(rec->attrs() & AttrUnique)) return false;
-    auto const filepath = rec->preRecordDesc()->unit()->filepath();
+    auto const filepath = rec->preRecordDesc()->unit()->origFilepath();
     if (!filepath || filepath->empty()) return false;
     if (!rec->wasSerialized()) write_record(ser, rec);
     return true;
@@ -777,8 +777,8 @@ void maybe_output_prof_trans_rec_trace(
     const char *filePath = "";
     if (func->originalFilename() && func->originalFilename()->size()) {
       filePath = func->originalFilename()->data();
-    } else if (unit->filepath()->data() && unit->filepath()->size()) {
-      filePath = unit->filepath()->data();
+    } else if (unit->origFilepath()->data() && unit->origFilepath()->size()) {
+      filePath = unit->origFilepath()->data();
     }
     folly::dynamic blocks = folly::dynamic::array;
     for (const auto& block : profTransRec->region()->blocks()) {
@@ -928,8 +928,8 @@ void maybe_output_target_profile_trace(
         const char *filePath = "";
         if (func->originalFilename() && func->originalFilename()->size()) {
           filePath = func->originalFilename()->data();
-        } else if (unit->filepath()->data() && unit->filepath()->size()) {
-          filePath = unit->filepath()->data();
+        } else if (unit->origFilepath()->data() && unit->origFilepath()->size()) {
+          filePath = unit->origFilepath()->data();
         }
         folly::dynamic targetProfileInfo = folly::dynamic::object;
         targetProfileInfo["trans_id"] = pt.transId;
@@ -1306,9 +1306,9 @@ ArrayData* read_array(ProfDataDeserializer& ser) {
 
 void write_unit(ProfDataSerializer& ser, const Unit* unit) {
   if (!ser.serialize(unit)) return write_raw(ser, unit);
-  ITRACE(2, "Unit: {}\n", unit->filepath());
+  ITRACE(2, "Unit: {}\n", unit->origFilepath());
   write_serialized_ptr(ser, unit);
-  write_string(ser, unit->filepath());
+  write_string(ser, unit->origFilepath());
 }
 
 Unit* read_unit(ProfDataDeserializer& ser) {

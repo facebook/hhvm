@@ -476,7 +476,7 @@ bool reachedTranslationLimit(TransKind kind, SrcKey sk, const SrcRec& srcRec) {
     auto srLock = srcRec.readlock();
     const auto& tns = srcRec.translations();
     TRACE(1, "Too many (%zd) translations: %s, BC offset %d\n",
-          tns.size(), sk.unit()->filepath()->data(),
+          tns.size(), sk.unit()->origFilepath()->data(),
           sk.offset());
     SKTRACE(2, sk, "{\n");
     TCA topTrans = srcRec.getTopTranslation();

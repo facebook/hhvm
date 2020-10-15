@@ -1140,8 +1140,10 @@ OPTBLD_INLINE void iopFile() {
 }
 
 OPTBLD_INLINE void iopDir() {
-  auto s = vmfp()->func()->unit()->dirpath();
-  vmStack().pushStaticString(s);
+  auto const filepath = vmfp()->func()->unit()->filepath();
+  vmStack().pushStaticString(
+    makeStaticString(FileUtil::dirname(StrNR{filepath}))
+  );
 }
 
 OPTBLD_INLINE void iopMethod() {

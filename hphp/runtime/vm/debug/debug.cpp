@@ -310,7 +310,7 @@ std::string lookupFunction(const Func* f,
   // TODO: mangle the namespace and name?
   std::string fname("PHP::");
   if (pseudoWithFileName) {
-    fname += f->unit()->filepath()->data();
+    fname += f->unit()->origFilepath()->data();
     fname += "::";
   }
   if (!strcmp(f->name()->data(), "")) {

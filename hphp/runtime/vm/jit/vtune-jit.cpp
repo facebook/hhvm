@@ -50,7 +50,8 @@ void reportTraceletToVtune(const Unit* unit,
     methodInfo.method_name = const_cast<char *>("unknown");
   }
 
-  methodInfo.source_file_name = const_cast<char *>(unit->filepath()->data());
+  methodInfo.source_file_name =
+    const_cast<char *>(unit->origFilepath()->data());
 
   // aStart field of tr.bcmapping may point to cold range, so we need to
   // explicitly form mappings for main code and cold

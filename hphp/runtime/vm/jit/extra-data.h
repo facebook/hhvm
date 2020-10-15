@@ -1835,6 +1835,7 @@ X(LdRecDescCachedSafe,          RecNameData);
 X(BespokeGet,                   BespokeLayoutData);
 X(BespokeSet,                   BespokeLayoutData);
 X(BespokeAppend,                BespokeLayoutData);
+X(LdUnitPerRequestFilepath,     RDSHandleData);
 
 #undef X
 

@@ -505,31 +505,31 @@ bool opcodeMayRaise(Opcode opc) {
   case Ceil:
   case CheckArrayCOW:
   case CheckCold:
+  case CheckDictKeys:
   case CheckDictOffset:
   case CheckDictOffsetLA:
   case CheckImplicitContextNull:
   case CheckInit:
   case CheckInitMem:
+  case CheckInOuts:
   case CheckIter:
   case CheckKeysetOffset:
   case CheckLoc:
   case CheckMBase:
-  case CheckDictKeys:
-  case CheckMixedArrayOffset:
   case CheckMissingKeyInArrLike:
+  case CheckMixedArrayOffset:
   case CheckNonNull:
   case CheckNullptr:
-  case CheckVecBounds:
-  case CheckVecBoundsLA:
   case CheckRange:
   case CheckRDSInitialized:
-  case CheckInOuts:
   case CheckSmashableClass:
   case CheckStk:
   case CheckSubClsCns:
   case CheckSurpriseFlags:
   case CheckType:
   case CheckTypeMem:
+  case CheckVecBounds:
+  case CheckVecBoundsLA:
   case ChrInt:
   case CmpBool:
   case CmpDbl:
@@ -559,12 +559,12 @@ bool opcodeMayRaise(Opcode opc) {
   case ConvIntToBool:
   case ConvIntToDbl:
   case ConvIntToStr:
+  case ConvPtrToLval:
   case ConvResToDbl:
   case ConvResToInt:
   case ConvStrToBool:
   case ConvStrToDbl:
   case ConvStrToInt:
-  case ConvPtrToLval:
   case CountCollection:
   case CountDict:
   case CountKeyset:
@@ -587,15 +587,15 @@ bool opcodeMayRaise(Opcode opc) {
   case DebugBacktraceFast:
   case DecRef:
   case DecRefNZ:
+  case DefCallCtx:
   case DefCallFlags:
   case DefCallFunc:
   case DefCallNumArgs:
-  case DefCallCtx:
   case DefConst:
   case DefFP:
+  case DefFrameRelSP:
   case DefFuncEntryFP:
   case DefLabel:
-  case DefFrameRelSP:
   case DefRegSP:
   case DictFirst:
   case DictFirstKey:
@@ -605,6 +605,7 @@ bool opcodeMayRaise(Opcode opc) {
   case DictIsset:
   case DictLast:
   case DictLastKey:
+  case DirFromFilepath:
   case DivDbl:
   case DivInt:
   case EagerSyncVMRegs:
@@ -620,11 +621,11 @@ bool opcodeMayRaise(Opcode opc) {
   case EqArrayDataPtr:
   case EqBool:
   case EqCls:
-  case EqRecDesc:
   case EqDbl:
   case EqFunc:
   case EqInt:
   case EqPtrIter:
+  case EqRecDesc:
   case EqRes:
   case EqStr:
   case EqStrInt:
@@ -635,11 +636,11 @@ bool opcodeMayRaise(Opcode opc) {
   case FuncCred:
   case FuncHasAttr:
   case GenericRetDecRefs:
-  case GetMemoKeyScalar:
   case GetDictPtrIter:
-  case GetVecPtrIter:
+  case GetMemoKeyScalar:
   case GetTime:
   case GetTimeNs:
+  case GetVecPtrIter:
   case GtBool:
   case GtDbl:
   case GteBool:
@@ -659,11 +660,11 @@ bool opcodeMayRaise(Opcode opc) {
   case IncRef:
   case IncStat:
   case InitDictElem:
-  case InitObjProps:
   case InitObjMemoSlots:
+  case InitObjProps:
+  case InitThrowableFileAndLine:
   case InitVecElem:
   case InitVecElemLoop:
-  case InitThrowableFileAndLine:
   case InlineCall:
   case InlineReturn:
   case InstanceOf:
@@ -677,8 +678,8 @@ bool opcodeMayRaise(Opcode opc) {
   case InterfaceSupportsStr:
   case InterpOneCF:
   case IsCol:
-  case IsFunReifiedGenericsMatched:
   case IsClsDynConstructible:
+  case IsFunReifiedGenericsMatched:
   case IsNType:
   case IsNTypeMem:
   case IsType:
@@ -688,10 +689,10 @@ bool opcodeMayRaise(Opcode opc) {
   case IterFree:
   case Jmp:
   case JmpNZero:
+  case JmpPlaceholder:
   case JmpSSwitchDest:
   case JmpSwitchDest:
   case JmpZero:
-  case JmpPlaceholder:
   case KeysetFirst:
   case KeysetGetK:
   case KeysetGetQuiet:
@@ -705,7 +706,6 @@ bool opcodeMayRaise(Opcode opc) {
   case LdClosureCls:
   case LdClosureThis:
   case LdClsCachedSafe:
-  case LdRecDescCachedSafe:
   case LdClsCns:
   case LdClsCnsVecLen:
   case LdClsFromClsMeth:
@@ -717,7 +717,6 @@ bool opcodeMayRaise(Opcode opc) {
   case LdClsMethodCacheFunc:
   case LdClsMethodFCacheFunc:
   case LdClsName:
-  case LdLazyClsName:
   case LdCns:
   case LdColDict:
   case LdColVec:
@@ -726,44 +725,45 @@ bool opcodeMayRaise(Opcode opc) {
   case LdContArValue:
   case LdContField:
   case LdContResumeAddr:
-  case LdFuncCls:
   case LdFrameCls:
   case LdFrameThis:
+  case LdFuncCls:
   case LdFuncFromClsMeth:
   case LdFuncFromRClsMeth:
   case LdFuncFromRFunc:
-  case LdFuncNumParams:
   case LdFuncName:
+  case LdFuncNumParams:
   case LdFuncRxLevel:
   case LdFuncVecLen:
-  case LdGenericsFromRFunc:
   case LdGenericsFromRClsMeth:
+  case LdGenericsFromRFunc:
   case LdIfaceMethod:
   case LdInitPropAddr:
   case LdInitRDSAddr:
   case LdIterBase:
-  case LdIterPos:
   case LdIterEnd:
+  case LdIterPos:
+  case LdLazyClsName:
   case LdLoc:
   case LdLocAddr:
   case LdMBase:
   case LdMem:
   case LdMethCallerName:
   case LdMIStateAddr:
-  case LdPtrIterKey:
-  case LdPtrIterVal:
-  case LdRecDesc:
   case LdObjClass:
   case LdObjInvoke:
   case LdOutAddr:
-  case LdVecElemAddr:
   case LdPairElem:
   case LdPropAddr:
+  case LdPtrIterKey:
+  case LdPtrIterVal:
   case LdRDSAddr:
+  case LdRecDesc:
+  case LdRecDescCachedSafe:
   case LdRetVal:
-  case LdSSwitchDestFast:
   case LdSmashable:
   case LdSmashableFunc:
+  case LdSSwitchDestFast:
   case LdStk:
   case LdStkAddr:
   case LdStrLen:
@@ -773,8 +773,10 @@ bool opcodeMayRaise(Opcode opc) {
   case LdSwitchStrIndex:
   case LdTVAux:
   case LdTypeCns:
+  case LdUnitPerRequestFilepath:
   case LdUnwinderValue:
   case LdVecElem:
+  case LdVecElemAddr:
   case LdVectorSize:
   case LdWHNotDone:
   case LdWHResult:
@@ -866,29 +868,27 @@ bool opcodeMayRaise(Opcode opc) {
   case Select:
   case SetLegacyDict:
   case SetLegacyVec:
-  case UnsetLegacyDict:
-  case UnsetLegacyVec:
   case Shl:
   case Shr:
   case Sqrt:
   case StArResumeAddr:
-  case StClosureArg:
   case StClsInitElem:
+  case StClosureArg:
   case StContArKey:
   case StContArState:
   case StContArValue:
   case StFrameCtx:
   case StFrameFunc:
   case StFrameMeta:
+  case StImplicitContext:
   case StIterBase:
-  case StIterType:
-  case StIterPos:
   case StIterEnd:
+  case StIterPos:
+  case StIterType:
   case StLoc:
   case StLocRange:
   case StMBase:
   case StMem:
-  case StImplicitContext:
   case StOutValue:
   case StrictlyIntegerConv:
   case StringIsset:
@@ -898,6 +898,8 @@ bool opcodeMayRaise(Opcode opc) {
   case SubIntO:
   case Unreachable:
   case UnwindCheckSideExit:
+  case UnsetLegacyDict:
+  case UnsetLegacyVec:
   case VecFirst:
   case VecLast:
   case VectorIsset:

@@ -199,7 +199,7 @@ static void logFrame(const Vunit& unit, const size_t frame) {
   auto impl_classes = MAP(f->implCls() ? f->implCls()->name()->data() : "");
   auto base_classes = MAP(f->baseCls() ? f->baseCls()->name()->data() : "");
   auto ctx_classes = MAP(f->cls() ? f->cls()->name()->data() : "");
-  auto files = MAP(f->unit()->filepath()->data());
+  auto files = MAP(f->unit()->origFilepath()->data());
 
 #undef MAP
 

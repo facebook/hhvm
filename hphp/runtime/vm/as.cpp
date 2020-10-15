@@ -3363,7 +3363,6 @@ void parse_record(AsmState& as) {
  */
 void parse_filepath(AsmState& as) {
   auto const str = read_litstr(as);
-  // We don't want to use file path from cached data
   as.ue->m_filepath = str;
   as.in.expectWs(';');
 }

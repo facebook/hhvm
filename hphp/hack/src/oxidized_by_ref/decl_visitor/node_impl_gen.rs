@@ -3,12 +3,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<a20cd470cf4f0a9448e515e60adcdd65>>
+// @generated SignedSource<<6a6d1a8a9a818dde6a638db650181e83>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
 
 #![allow(unused_variables)]
+#![allow(unused_braces)]
 use super::node::Node;
 use super::visitor::Visitor;
 use crate::{

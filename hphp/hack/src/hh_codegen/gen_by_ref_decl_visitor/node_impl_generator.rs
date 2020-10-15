@@ -18,6 +18,7 @@ pub fn gen(ctx: &Context) -> TokenStream {
 
     quote! {
         #![allow(unused_variables)]
+        #![allow(unused_braces)]
 
         use super::node::Node;
         use super::visitor::Visitor;

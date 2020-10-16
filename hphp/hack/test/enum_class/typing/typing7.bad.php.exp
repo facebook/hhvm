@@ -1,0 +1,2 @@
+File "typing7.bad.php", line 11, characters 12-12:
+Enum classes base type must be an interface without generic parameters, not `ExBox` (Typing[4024])

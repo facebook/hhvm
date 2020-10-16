@@ -4325,11 +4325,16 @@ let wrong_extend_kind
     ~parent_pos
     ~parent_kind
     ~parent_name
+    ~parent_is_enum_class
     ~child_pos
     ~child_kind
     ~child_name
     ~child_is_enum_class =
-  let parent_kind_str = Ast_defs.string_of_class_kind parent_kind in
+  let parent_kind_str =
+    Ast_defs.string_of_class_kind
+      parent_kind
+      ~is_enum_class:parent_is_enum_class
+  in
   let parent_name = strip_ns parent_name in
   let child_name = strip_ns child_name in
   let use_msg =

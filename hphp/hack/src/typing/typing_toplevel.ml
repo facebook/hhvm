@@ -792,7 +792,18 @@ let check_consistent_enum_inclusion included_cls dest_cls =
         (Cls.pos dest_cls)
         (Cls.name dest_cls)
         (Cls.name included_cls)
-    | (_, _) -> ())
+    | (_, _) -> ());
+    (* ensure normal enums can't include enum classes *)
+    if included_e.te_enum_class && not dest_e.te_enum_class then
+      Errors.wrong_extend_kind
+        ~parent_pos:(Cls.pos included_cls)
+        ~parent_kind:Ast_defs.Cenum
+        ~parent_name:(Cls.name included_cls)
+        ~parent_is_enum_class:true
+        ~child_pos:(Cls.pos dest_cls)
+        ~child_kind:Ast_defs.Cenum
+        ~child_name:(Cls.name dest_cls)
+        ~child_is_enum_class:false
   | (None, _) ->
     Errors.enum_inclusion_not_enum
       (Cls.pos dest_cls)

@@ -194,12 +194,17 @@ let is_f_async_or_generator = function
     true
   | _ -> false
 
-let string_of_class_kind = function
+let string_of_class_kind kind ~is_enum_class =
+  match kind with
   | Cabstract -> "an abstract class"
   | Cnormal -> "a class"
   | Cinterface -> "an interface"
   | Ctrait -> "a trait"
-  | Cenum -> "an enum"
+  | Cenum ->
+    if is_enum_class then
+      "an enum class"
+    else
+      "an enum"
 
 let string_of_param_kind = function
   | Pinout -> "inout"

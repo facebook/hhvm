@@ -25,7 +25,11 @@ let check_is_class env (p, h) =
         | Ast_defs.(Cabstract | Cnormal) ->
           if Cls.final cls then Errors.requires_final_class p name
         | _ ->
-          Errors.requires_non_class p name (Ast_defs.string_of_class_kind kind))
+          let is_enum_class = Typing_defs.is_enum_class (Cls.enum_type cls) in
+          Errors.requires_non_class
+            p
+            name
+            (Ast_defs.string_of_class_kind kind is_enum_class))
     end
   | Aast.Habstr (name, _) -> Errors.requires_non_class p name "a generic"
   | _ -> Errors.requires_non_class p "This" "an invalid type hint"
@@ -54,7 +58,11 @@ let check_is_trait env (p, h) =
       | Some cls ->
         let name = Cls.name cls in
         let kind = Cls.kind cls in
-        Errors.uses_non_trait p name (Ast_defs.string_of_class_kind kind)
+        let is_enum_class = Typing_defs.is_enum_class (Cls.enum_type cls) in
+        Errors.uses_non_trait
+          p
+          name
+          (Ast_defs.string_of_class_kind kind is_enum_class)
     end
   | _ -> failwith "assertion failure: trait isn't an Happly"
 

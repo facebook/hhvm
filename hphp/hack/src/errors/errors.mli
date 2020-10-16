@@ -631,6 +631,7 @@ val wrong_extend_kind :
   parent_pos:Pos.t ->
   parent_kind:Ast_defs.class_kind ->
   parent_name:string ->
+  parent_is_enum_class:bool ->
   child_pos:Pos.t ->
   child_kind:Ast_defs.class_kind ->
   child_name:string ->

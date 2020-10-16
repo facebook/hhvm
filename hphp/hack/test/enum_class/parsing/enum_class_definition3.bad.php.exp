@@ -1,0 +1,6 @@
+(15,7)-(15,7) An opening angle bracket `<` is expected here.
+(15,14)-(15,14) A closing angle bracket `>` is expected here.
+(15,14)-(15,14) A left parenthesis `(` is expected here.
+(15,15)-(16,1) An expression is expected here.
+(15,15)-(16,1) A right parenthesis `)` is expected here.
+(15,15)-(16,1) A semicolon `;` is expected here.

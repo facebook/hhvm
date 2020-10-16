@@ -121,6 +121,7 @@ let check_extend_kind
           ~parent_pos
           ~parent_kind
           ~parent_name
+          ~parent_is_enum_class
           ~child_pos
           ~child_kind
           ~child_name
@@ -130,6 +131,7 @@ let check_extend_kind
         ~parent_pos
         ~parent_kind
         ~parent_name
+        ~parent_is_enum_class
         ~child_pos
         ~child_kind
         ~child_name

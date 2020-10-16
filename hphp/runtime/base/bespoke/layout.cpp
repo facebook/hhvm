@@ -19,7 +19,9 @@
 #include "hphp/runtime/base/bespoke/logging-array.h"
 #include "hphp/runtime/base/bespoke/logging-profile.h"
 #include "hphp/runtime/base/bespoke/monotype-vec.h"
+#include "hphp/runtime/base/packed-array-defs.h"
 #include "hphp/runtime/vm/jit/irgen.h"
+#include "hphp/runtime/vm/jit/mcgen-translate.h"
 #include "hphp/runtime/vm/jit/punt.h"
 #include "hphp/util/trace.h"
 
@@ -28,6 +30,8 @@
 #include <folly/lang/Bits.h>
 
 namespace HPHP { namespace bespoke {
+
+//////////////////////////////////////////////////////////////////////////////
 
 using namespace jit;
 using namespace jit::irgen;
@@ -93,11 +97,54 @@ struct Layout::Initializer {
 };
 Layout::Initializer Layout::s_initializer;
 
+//////////////////////////////////////////////////////////////////////////////
+
 void logBespokeDispatch(const ArrayData* ad, const char* fn) {
   DEBUG_ONLY auto const sk = getSrcKey();
   DEBUG_ONLY auto const layout = BespokeArray::asBespoke(ad)->layout();
   TRACE_MOD(Trace::bespoke, 6, "Bespoke dispatch: %s: %s::%s\n",
             sk.getSymbol().data(), layout.describe().data(), fn);
 }
+
+namespace {
+ArrayData* maybeMonoify(ArrayData* ad) {
+  assertx(ad->isVanilla());
+  if (!ad->isVecType() && !ad->isVArray()) return ad;
+
+  auto const et = EntryTypes::ForArray(ad);
+  if (et.valueTypes != ValueTypes::Monotype &&
+      et.valueTypes != ValueTypes::Empty) {
+    return ad;
+  }
+
+  SCOPE_EXIT { ad->decRefAndRelease(); };
+
+  if (et.valueTypes == ValueTypes::Empty) {
+    if (ad->isVecType()) {
+      return EmptyMonotypeVec::GetVec(ad->isLegacyArray());
+    } else {
+      return EmptyMonotypeVec::GetVArray(ad->isLegacyArray());
+    }
+  }
+
+  auto const dt = dt_modulo_persistence(et.valueDatatype);
+  auto const hk = ad->isVecType() ? HeaderKind::BespokeVec
+                                  : HeaderKind::BespokeVArray;
+  return MonotypeVec::Make(dt, ad->size(), packedData(ad), hk,
+                           ad->isLegacyArray(), ad->isStatic());
+}
+}
+
+ArrayData* makeBespokeForTesting(ArrayData* ad) {
+  if (!jit::mcgen::retranslateAllEnabled()) {
+    return bespoke::maybeMakeLoggingArray(ad);
+  }
+  auto const mod = requestCount() % 3;
+  if (mod == 1) return bespoke::maybeMakeLoggingArray(ad);
+  if (mod == 2) return bespoke::maybeMonoify(ad);
+  return ad;
+}
+
+//////////////////////////////////////////////////////////////////////////////
 
 }}

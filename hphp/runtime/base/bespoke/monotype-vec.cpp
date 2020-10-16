@@ -21,7 +21,6 @@
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/memory-manager.h"
-#include "hphp/runtime/base/packed-array-defs.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/tv-refcount.h"
@@ -483,8 +482,8 @@ ArrayData* MonotypeVec::escalateWithCapacity(size_t capacity) const {
                               : PackedArray::MakeReserveVArray(capacity);
   for (uint32_t i = 0; i < size(); i++) {
     auto const tv = typedValueUnchecked(i);
+    tvCopy(tv, PackedArray::LvalUncheckedInt(ad, i));
     tvIncRefGen(tv);
-    packedData(ad)[i] = tv;
   }
   ad->setLegacyArrayInPlace(isLegacyArray());
   ad->m_size = size();
@@ -742,33 +741,6 @@ ArrayData* MonotypeVec::SetLegacyArray(MonotypeVec* madIn,
   auto const mad = copy ? madIn->copy() : madIn;
   mad->setLegacyArrayInPlace(legacy);
   return mad;
-}
-
-ArrayData* maybeMonoify(ArrayData* ad) {
-  assertx(ad->isVanilla());
-  if (!ad->isVecType() && !ad->isVArray()) return ad;
-
-  auto const et = EntryTypes::ForArray(ad);
-  if (et.valueTypes != ValueTypes::Monotype &&
-      et.valueTypes != ValueTypes::Empty) {
-    return ad;
-  }
-
-  SCOPE_EXIT { ad->decRefAndRelease(); };
-
-  if (et.valueTypes == ValueTypes::Empty) {
-    if (ad->isVecType()) {
-      return EmptyMonotypeVec::GetVec(ad->isLegacyArray());
-    } else {
-      return EmptyMonotypeVec::GetVArray(ad->isLegacyArray());
-    }
-  }
-
-  auto const dt = dt_modulo_persistence(et.valueDatatype);
-  auto const hk = ad->isVecType() ? HeaderKind::BespokeVec
-                                  : HeaderKind::BespokeVArray;
-  return MonotypeVec::Make(dt, ad->size(), packedData(ad), hk,
-                           ad->isLegacyArray(), ad->isStatic());
 }
 
 }}

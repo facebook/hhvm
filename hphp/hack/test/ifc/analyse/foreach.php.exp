@@ -1,0 +1,95 @@
+=== IFC analysis results for foreach.php
+Analyzing \dict_lit_flow:
+* pc: pc
+* This: None
+* Return: <ret>
+* Exception: \Exception<exn, exn_lump>
+* Params:
+  {}
+* Final environment:
+  Deps: {}
+  Constraints:
+    [4:12-30] dict < $value, dict'1 < $key
+  Locals:
+    { $#capability -> nothing; $#local_capability -> nothing }
+
+Analyzing \dict_var_flow:
+* pc: pc
+* This: None
+* Return: <ret>
+* Exception: \Exception<exn, exn_lump>
+* Params:
+  { $dict -> dict<<$dict'1> => <$dict>; |len|> }
+* Final environment:
+  Deps: {}
+  Constraints:
+    [8:12-17]
+      $dict'1 < $dict'3, $dict < $dict'2, len < len'1, $dict'2 < $value,
+      $dict'3 < $key
+  Locals:
+    { $#capability -> nothing;
+      $#local_capability -> nothing;
+      $dict -> dict<<$dict'3> => <$dict'2>; |len'1|> }
+
+Analyzing \vec_lit_flow:
+* pc: pc
+* This: None
+* Return: <ret>
+* Exception: \Exception<exn, exn_lump>
+* Params:
+  {}
+* Final environment:
+  Deps: {}
+  Constraints:
+    [12:12-22] Vec < $value
+  Locals:
+    { $#capability -> nothing; $#local_capability -> nothing }
+
+Analyzing \vec_var_flow:
+* pc: pc
+* This: None
+* Return: <ret>
+* Exception: \Exception<exn, exn_lump>
+* Params:
+  { $vec -> vec<<key> => <$vec>; |len|> }
+* Final environment:
+  Deps: {}
+  Constraints:
+    [16:12-16] key < key'1, $vec < $vec'1, len < len'1, $vec'1 < $value
+  Locals:
+    { $#capability -> nothing;
+      $#local_capability -> nothing;
+      $vec -> vec<<key'1> => <$vec'1>; |len'1|> }
+
+Analyzing \keyset_lit_flow:
+* pc: pc
+* This: None
+* Return: <ret>
+* Exception: \Exception<exn, exn_lump>
+* Params:
+  {}
+* Final environment:
+  Deps: {}
+  Constraints:
+    [20:12-25] Keyset < $value
+  Locals:
+    { $#capability -> nothing; $#local_capability -> nothing }
+
+Analyzing \keyset_var_flow:
+* pc: pc
+* This: None
+* Return: <ret>
+* Exception: \Exception<exn, exn_lump>
+* Params:
+  { $keyset -> keyset<<$keyset> => <$keyset>; |len|> }
+* Final environment:
+  Deps: {}
+  Constraints:
+    [24:12-19]
+      $keyset < $keyset'1, $keyset < $keyset'1, len < len'1,
+      $keyset'1 < $value
+  Locals:
+    { $#capability -> nothing;
+      $#local_capability -> nothing;
+      $keyset -> keyset<<$keyset'1> => <$keyset'1>; |len'1|> }
+

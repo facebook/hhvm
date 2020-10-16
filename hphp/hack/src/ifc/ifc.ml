@@ -944,6 +944,29 @@ and stmt renv (env : Env.stmt_env) ((pos, s) : Tast.stmt) =
     else
       out
   in
+  let refresh_with_tymap ~pos renv env tymap =
+    let refresh var (_, lty) env =
+      fst @@ refresh_local_type ~force:true ~pos renv env var lty
+    in
+    Local_id.Map.fold refresh tymap env
+  in
+  let loop_the_env ~pos env out_blk beg_locals =
+    (* issue a subtype call between the type of the locals at
+       the end of loop and their invariant type; this constrains
+       their IFC type to indeed be invariant and spares us from
+       running a more classic fixpoint computation *)
+    Env.acc env
+    @@
+    match KMap.find_opt K.Next out_blk with
+    | None -> Utils.identity
+    | Some { k_vars = end_locals; _ } ->
+      let update_lid lid end_type =
+        match LMap.find_opt lid beg_locals with
+        | None -> Utils.identity
+        | Some beg_type -> subtype ~pos end_type beg_type
+      in
+      LMap.fold update_lid end_locals
+  in
   match s with
   | A.AssertEnv (A.Refinement, tymap) ->
     (* The typechecker refined the type of some locals due
@@ -979,40 +1002,60 @@ and stmt renv (env : Env.stmt_env) ((pos, s) : Tast.stmt) =
     (env, out)
   | A.While (cond, (_, A.AssertEnv (A.Join, tymap)) :: blk) ->
     let pos = fst (fst cond) in
-    (* build the environment with the invariant types we will
-       use to check the loop body *)
-    let env =
-      Local_id.Map.fold
-        (fun var (_, lty) env ->
-          fst (refresh_local_type ~force:true ~pos renv env var lty))
-        tymap
-        env
-    in
+    let env = refresh_with_tymap ~pos renv env tymap in
     let beg_locals = Env.get_locals env in
+    (* TODO: pc_pols should also flow into cty because the condition is evaluated
+       unconditionally only the first time around the loop. *)
     let (env, cty, cthrow) = expr ~pos renv env cond in
-    (* TODO: constrain pc with cty *)
-    Env.with_pc_deps env (object_policy cty) @@ fun env ->
+
+    let pc_policies = object_policy cty in
+    Env.with_pc_deps env pc_policies @@ fun env ->
     let tainted_lpc = Env.get_lpc env in
     let (env, out_blk) = block renv env blk in
     let out_blk = Env.merge_out out_blk cthrow in
     let out_blk = Env.merge_in_next out_blk K.Continue in
-    let env =
-      (* issue a subtype call between the type of the locals at
-         the end of loop and their invariant type; this constrains
-         their IFC type to indeed be invariant and spares us from
-         running a more classic fixpoint computation *)
-      Env.acc env
-      @@
-      match KMap.find_opt K.Next out_blk with
-      | None -> Utils.identity
-      | Some { k_vars = end_locals; _ } ->
-        LMap.fold
-          (fun lid end_type ->
-            match LMap.find_opt lid beg_locals with
-            | None -> Utils.identity
-            | Some beg_type -> subtype ~pos end_type beg_type)
-          end_locals
+    let env = loop_the_env ~pos env out_blk beg_locals in
+    let out =
+      (* overwrite the Next outcome to use the type for local
+         variables as they are at the beginning of the loop,
+         then merge the Break outcome in Next *)
+      let next = { k_pc = tainted_lpc; k_vars = beg_locals } in
+      Env.merge_in_next (KMap.add K.Next next out_blk) K.Break
     in
+    let out = clear_pc_deps out in
+    (env, out)
+  | A.Foreach (collection, as_exp, (_, A.AssertEnv (A.Join, tymap)) :: blk) ->
+    let pos = fst (fst collection) in
+    let env = refresh_with_tymap ~pos renv env tymap in
+    let beg_locals = Env.get_locals env in
+
+    (* TODO: pc should also flow into cty because the condition is evaluated
+       unconditionally only the first time around the loop. *)
+    let (env, array_pty, cthrow) = expr ~pos renv env collection in
+    let array = cow_array ~pos renv array_pty in
+
+    let env = Env.prep_expr env in
+    let expr = expr_ ~pos renv in
+    let env =
+      match as_exp with
+      | Aast.As_v value
+      | Aast.Await_as_v (_, value) ->
+        asn ~expr ~pos renv env value array.a_value
+      | Aast.As_kv (key, value)
+      | Aast.Await_as_kv (_, key, value) ->
+        let env = asn ~expr ~pos renv env value array.a_value in
+        asn ~expr ~pos renv env key array.a_key
+    in
+
+    let pc_policies = PSet.singleton array.a_length in
+    let (env, ethrow) = Env.close_expr env in
+    if not @@ KMap.is_empty ethrow then fail "foreach collection threw";
+    Env.with_pc_deps env pc_policies @@ fun env ->
+    let tainted_lpc = Env.get_lpc env in
+    let (env, out_blk) = block renv env blk in
+    let out_blk = Env.merge_out out_blk cthrow in
+    let out_blk = Env.merge_in_next out_blk K.Continue in
+    let env = loop_the_env ~pos env out_blk beg_locals in
     let out =
       (* overwrite the Next outcome to use the type for local
          variables as they are at the beginning of the loop,

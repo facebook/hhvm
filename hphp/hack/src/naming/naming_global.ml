@@ -28,44 +28,20 @@ let category = "naming_global"
 
 module GEnv = struct
   let get_full_pos ctx (pos, name) =
-    try
-      match pos with
-      | FileInfo.Full p -> (p, name)
-      | FileInfo.File (FileInfo.Class, fn) ->
-        let res = unsafe_opt (Ast_provider.find_class_in_file ctx fn name) in
-        let (p', _) = res.Aast.c_name in
-        (p', name)
-      | FileInfo.File (FileInfo.RecordDef, fn) ->
-        let res =
-          unsafe_opt (Ast_provider.find_record_def_in_file ctx fn name)
-        in
-        let (p', _) = res.Aast.rd_name in
-        (p', name)
-      | FileInfo.File (FileInfo.Typedef, fn) ->
-        let res = unsafe_opt (Ast_provider.find_typedef_in_file ctx fn name) in
-        let (p', _) = res.Aast.t_name in
-        (p', name)
-      | FileInfo.File (FileInfo.Const, fn) ->
-        let res = unsafe_opt (Ast_provider.find_gconst_in_file ctx fn name) in
-        let (p', _) = res.Aast.cst_name in
-        (p', name)
-      | FileInfo.File (FileInfo.Fun, fn) ->
-        let res = unsafe_opt (Ast_provider.find_fun_in_file ctx fn name) in
-        let (p', _) = res.Aast.f_name in
-        (p', name)
+    try (unsafe_opt (Naming_provider.get_full_pos ctx (pos, name)), name)
     with Invalid_argument _ ->
       (* We looked for a file in the file heap, but it was deleted
-        before we could get it. This occurs with highest probability when we
-        have multiple large rebases in quick succession, and the typechecker
-         doesn't get updates from watchman while checking. For now, we restart
-        gracefully, but in future versions we'll be restarting the server on
-        large rebases anyhow, so this is sufficient behavior.
+          before we could get it. This occurs with highest probability when we
+          have multiple large rebases in quick succession, and the typechecker
+            doesn't get updates from watchman while checking. For now, we restart
+          gracefully, but in future versions we'll be restarting the server on
+          large rebases anyhow, so this is sufficient behavior.
 
-        TODO(jjwu): optimize this. Instead of forcing a server restart,
-        catch the exception in the recheck look and start another recheck cycle
-        by adding more files to the unprocessed/partially-processed set in
-        the previous loop.
-      *)
+          TODO(jjwu): optimize this. Instead of forcing a server restart,
+          catch the exception in the recheck look and start another recheck cycle
+          by adding more files to the unprocessed/partially-processed set in
+          the previous loop.
+        *)
       let fn = FileInfo.get_pos_filename pos in
       Hh_logger.log "File missing: %s" (Relative_path.to_absolute fn);
       Hh_logger.log "Name missing: %s" name;

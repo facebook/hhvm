@@ -34,6 +34,9 @@ val fun_exists : Provider_context.t -> string -> bool
 the reverse naming table. *)
 val get_fun_path : Provider_context.t -> string -> Relative_path.t option
 
+(** Retrieve the full position of a given name and its corresponding FileInfo. *)
+val get_full_pos : Provider_context.t -> FileInfo.pos * string -> Pos.t option
+
 (** Look up the position at which the given global function was declared in
 the reverse naming table. *)
 val get_fun_pos : Provider_context.t -> string -> FileInfo.pos option

@@ -175,6 +175,57 @@ let remove_const_batch (backend : Provider_backend.t) (names : SSet.t) : unit =
         ~f:(fun name acc -> SMap.add acc ~key:name ~data:Deleted)
   | Provider_backend.Decl_service _ as backend -> not_implemented backend
 
+let get_full_pos ctx (pos, name) =
+  match Provider_context.get_backend ctx with
+  | Provider_backend.Decl_service { decl = decl_service; _ } ->
+    (match pos with
+    | FileInfo.Full p -> Some p
+    | FileInfo.File (FileInfo.Class, _) ->
+      Decl_service_client.rpc_get_class decl_service name
+      |> Option.map ~f:(fun shallow_class ->
+             match shallow_class.Shallow_decl_defs.sc_name with
+             | (p, _) -> p)
+    | FileInfo.File (FileInfo.RecordDef, _) ->
+      Decl_service_client.rpc_get_record_def decl_service name
+      |> Option.map ~f:(fun record_def -> record_def.Typing_defs.rdt_pos)
+    | FileInfo.File (FileInfo.Typedef, _) ->
+      Decl_service_client.rpc_get_typedef decl_service name
+      |> Option.map ~f:(fun typedef -> typedef.Typing_defs.td_pos)
+    | FileInfo.File (FileInfo.Const, _) ->
+      Decl_service_client.rpc_get_gconst decl_service name
+      |> Option.map ~f:(fun const -> Typing_defs.get_pos const)
+    | FileInfo.File (FileInfo.Fun, _) ->
+      Decl_service_client.rpc_get_fun decl_service name
+      |> Option.map ~f:(fun fun_def -> fun_def.Typing_defs.fe_pos))
+  | _ ->
+    (match pos with
+    | FileInfo.Full p -> Some p
+    | FileInfo.File (FileInfo.Class, fn) ->
+      Ast_provider.find_class_in_file ctx fn name
+      |> Option.map ~f:(fun res ->
+             match res.Aast.c_name with
+             | (p', _) -> p')
+    | FileInfo.File (FileInfo.RecordDef, fn) ->
+      Ast_provider.find_record_def_in_file ctx fn name
+      |> Option.map ~f:(fun res ->
+             match res.Aast.rd_name with
+             | (p', _) -> p')
+    | FileInfo.File (FileInfo.Typedef, fn) ->
+      Ast_provider.find_typedef_in_file ctx fn name
+      |> Option.map ~f:(fun res ->
+             match res.Aast.t_name with
+             | (p', _) -> p')
+    | FileInfo.File (FileInfo.Const, fn) ->
+      Ast_provider.find_gconst_in_file ctx fn name
+      |> Option.map ~f:(fun res ->
+             match res.Aast.cst_name with
+             | (p', _) -> p')
+    | FileInfo.File (FileInfo.Fun, fn) ->
+      Ast_provider.find_fun_in_file ctx fn name
+      |> Option.map ~f:(fun res ->
+             match res.Aast.f_name with
+             | (p', _) -> p'))
+
 let get_fun_pos (ctx : Provider_context.t) (name : string) : FileInfo.pos option
     =
   let open Option.Monad_infix in

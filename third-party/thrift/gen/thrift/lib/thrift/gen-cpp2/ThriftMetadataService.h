@@ -38,6 +38,8 @@ class ThriftMetadataServiceSvIf : public ThriftMetadataServiceSvAsyncIf, public 
  public:
   typedef ThriftMetadataServiceAsyncProcessor ProcessorType;
   std::unique_ptr<apache::thrift::AsyncProcessor> getProcessor() override;
+
+
   virtual void getThriftServiceMetadata( ::apache::thrift::metadata::ThriftServiceMetadataResponse& /*_return*/);
   folly::Future<std::unique_ptr< ::apache::thrift::metadata::ThriftServiceMetadataResponse>> future_getThriftServiceMetadata() override;
   folly::SemiFuture<std::unique_ptr< ::apache::thrift::metadata::ThriftServiceMetadataResponse>> semifuture_getThriftServiceMetadata() override;
@@ -67,7 +69,7 @@ class ThriftMetadataServiceAsyncProcessor : public ::apache::thrift::GeneratedAs
   static const ThriftMetadataServiceAsyncProcessor::ProcessMap& getCompactProtocolProcessMap();
  private:
   static const ThriftMetadataServiceAsyncProcessor::ProcessMap binaryProcessMap_;
-   static const ThriftMetadataServiceAsyncProcessor::ProcessMap compactProcessMap_;
+  static const ThriftMetadataServiceAsyncProcessor::ProcessMap compactProcessMap_;
  private:
   template <typename ProtocolIn_, typename ProtocolOut_>
   void _processInThread_getThriftServiceMetadata(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm);

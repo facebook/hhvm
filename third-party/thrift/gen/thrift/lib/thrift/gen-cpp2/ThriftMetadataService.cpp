@@ -27,7 +27,6 @@ folly::Future<std::unique_ptr< ::apache::thrift::metadata::ThriftServiceMetadata
   return apache::thrift::detail::si::future(semifuture_getThriftServiceMetadata(), getThreadManager());
 }
 
-
 void ThriftMetadataServiceSvIf::async_tm_getThriftServiceMetadata(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr< ::apache::thrift::metadata::ThriftServiceMetadataResponse>>> callback) {
   apache::thrift::detail::si::async_tm(this, std::move(callback), [&] {
     return future_getThriftServiceMetadata();
@@ -35,6 +34,8 @@ void ThriftMetadataServiceSvIf::async_tm_getThriftServiceMetadata(std::unique_pt
 }
 
 void ThriftMetadataServiceSvNull::getThriftServiceMetadata( ::apache::thrift::metadata::ThriftServiceMetadataResponse& /*_return*/) {}
+
+
 
 const char* ThriftMetadataServiceAsyncProcessor::getServiceName() {
   return "ThriftMetadataService";

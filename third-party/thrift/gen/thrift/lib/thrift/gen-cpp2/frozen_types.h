@@ -122,9 +122,9 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   Field& operator=(const Field&) = default;
 THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
- public:
+ private:
   int16_t layoutId;
- public:
+ private:
   int16_t offset;
 
  public:
@@ -280,13 +280,13 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   Layout& operator=(const Layout&) = default;
 THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
- public:
+ private:
   int32_t size;
- public:
+ private:
   int16_t bits;
- public:
+ private:
   ::std::map<int16_t,  ::apache::thrift::frozen::schema::Field> fields;
- public:
+ private:
   ::std::string typeName;
 
  public:
@@ -517,13 +517,13 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   Schema& operator=(const Schema&) = default;
 THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
- public:
+ private:
   int32_t fileVersion;
- public:
+ private:
   bool relaxTypeChecks;
- public:
+ private:
   ::std::map<int16_t,  ::apache::thrift::frozen::schema::Layout> layouts;
- public:
+ private:
   int16_t rootLayout;
 
  public:

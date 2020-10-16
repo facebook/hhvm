@@ -200,15 +200,15 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ~StructField();
 
- public:
+ private:
   bool isRequired;
- public:
+ private:
   int64_t type;
- public:
+ private:
   ::std::string name;
  private:
   std::unordered_map<::std::string, ::std::string> annotations;
- public:
+ private:
   int16_t order;
 
  public:
@@ -476,7 +476,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ~DataType();
 
- public:
+ private:
   ::std::string name;
  private:
   std::unordered_map<int16_t,  ::apache::thrift::reflection::StructField> fields;
@@ -758,9 +758,9 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   Schema& operator=(const Schema&) = default;
 THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
- public:
+ private:
   std::unordered_map<int64_t,  ::apache::thrift::reflection::DataType> dataTypes;
- public:
+ private:
   std::unordered_map<::std::string, int64_t> names;
 
  public:

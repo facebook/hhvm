@@ -689,7 +689,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ThriftEnumType& operator=(const ThriftEnumType&) = default;
 THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
- public:
+ private:
   ::std::string name;
 
  public:
@@ -813,7 +813,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ThriftStructType& operator=(const ThriftStructType&) = default;
 THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
- public:
+ private:
   ::std::string name;
 
  public:
@@ -937,7 +937,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ThriftUnionType& operator=(const ThriftUnionType&) = default;
 THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
- public:
+ private:
   ::std::string name;
 
  public:
@@ -1059,7 +1059,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ThriftTypedefType& operator=(const ThriftTypedefType& src);
 THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
- public:
+ private:
   ::std::string name;
  public:
   std::unique_ptr< ::apache::thrift::metadata::ThriftType> underlyingType;
@@ -2261,8 +2261,8 @@ class ThriftType final  {
     (&val)->~T();
   }
 
-  std::underlying_type_t<Type> type_;
   storage_type value_;
+  std::underlying_type_t<Type> type_;
 
  private:
   template <class Protocol_>
@@ -2313,9 +2313,9 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ThriftEnum& operator=(const ThriftEnum&) = default;
 THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
- public:
+ private:
   ::std::string name;
- public:
+ private:
   ::std::map<int32_t, ::std::string> elements;
 
  public:
@@ -2475,13 +2475,13 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ThriftField& operator=(const ThriftField&) = default;
 THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
- public:
+ private:
   int32_t id;
- public:
+ private:
    ::apache::thrift::metadata::ThriftType type;
- public:
+ private:
   ::std::string name;
- public:
+ private:
   bool is_optional;
 
  public:
@@ -2710,11 +2710,11 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ThriftStruct& operator=(const ThriftStruct&) = default;
 THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
- public:
+ private:
   ::std::string name;
- public:
+ private:
   ::std::vector< ::apache::thrift::metadata::ThriftField> fields;
- public:
+ private:
   bool is_union;
 
  public:
@@ -2907,9 +2907,9 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ThriftException& operator=(const ThriftException&) = default;
 THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
- public:
+ private:
   ::std::string name;
- public:
+ private:
   ::std::vector< ::apache::thrift::metadata::ThriftField> fields;
 
  public:
@@ -3071,15 +3071,15 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   ~ThriftFunction();
 
- public:
+ private:
   ::std::string name;
- public:
+ private:
    ::apache::thrift::metadata::ThriftType return_type;
- public:
+ private:
   ::std::vector< ::apache::thrift::metadata::ThriftField> arguments;
- public:
+ private:
   ::std::vector< ::apache::thrift::metadata::ThriftField> exceptions;
- public:
+ private:
   bool is_oneway;
 
  public:
@@ -3340,9 +3340,9 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ThriftService& operator=(const ThriftService&) = default;
 THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
- public:
+ private:
   ::std::string name;
- public:
+ private:
   ::std::vector< ::apache::thrift::metadata::ThriftFunction> functions;
  private:
   ::std::string parent;
@@ -3543,7 +3543,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ThriftModuleContext& operator=(const ThriftModuleContext&) = default;
 THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
- public:
+ private:
   ::std::string name;
 
  public:
@@ -3667,9 +3667,9 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ThriftServiceContext& operator=(const ThriftServiceContext&) = default;
 THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
- public:
+ private:
    ::apache::thrift::metadata::ThriftService service_info;
- public:
+ private:
    ::apache::thrift::metadata::ThriftModuleContext module;
 
  public:
@@ -3821,13 +3821,13 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ThriftMetadata& operator=(const ThriftMetadata&) = default;
 THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
- public:
+ private:
   ::std::map<::std::string,  ::apache::thrift::metadata::ThriftEnum> enums;
- public:
+ private:
   ::std::map<::std::string,  ::apache::thrift::metadata::ThriftStruct> structs;
- public:
+ private:
   ::std::map<::std::string,  ::apache::thrift::metadata::ThriftException> exceptions;
- public:
+ private:
   ::std::map<::std::string,  ::apache::thrift::metadata::ThriftService> services;
 
  public:
@@ -4047,9 +4047,9 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ThriftServiceMetadataResponse& operator=(const ThriftServiceMetadataResponse&) = default;
 THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
- public:
+ private:
    ::apache::thrift::metadata::ThriftServiceContext context;
- public:
+ private:
    ::apache::thrift::metadata::ThriftMetadata metadata;
 
  public:

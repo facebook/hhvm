@@ -102,7 +102,6 @@ void ThriftMetadataServiceAsyncClient::sync_getThriftServiceMetadata(apache::thr
 }
 
 
-
 folly::Future< ::apache::thrift::metadata::ThriftServiceMetadataResponse> ThriftMetadataServiceAsyncClient::future_getThriftServiceMetadata() {
   ::apache::thrift::RpcOptions rpcOptions;
   return future_getThriftServiceMetadata(rpcOptions);
@@ -142,6 +141,7 @@ folly::SemiFuture<std::pair< ::apache::thrift::metadata::ThriftServiceMetadataRe
   getThriftServiceMetadata(rpcOptions, std::move(callback));
   return std::move(callbackAndFuture.second);
 }
+
 void ThriftMetadataServiceAsyncClient::getThriftServiceMetadata(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback) {
   getThriftServiceMetadata(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)));
 }
@@ -192,5 +192,6 @@ void ThriftMetadataServiceAsyncClient::recv_instance_getThriftServiceMetadata( :
 folly::exception_wrapper ThriftMetadataServiceAsyncClient::recv_instance_wrapped_getThriftServiceMetadata( ::apache::thrift::metadata::ThriftServiceMetadataResponse& _return, ::apache::thrift::ClientReceiveState& state) {
   return recv_wrapped_getThriftServiceMetadata(_return, state);
 }
+
 
 }}} // apache::thrift::metadata

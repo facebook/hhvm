@@ -26,13 +26,17 @@ class ThriftMetadataServiceAsyncClient : public apache::thrift::GeneratedAsyncCl
     return "ThriftMetadataService";
   }
 
+
+
   virtual void getThriftServiceMetadata(std::unique_ptr<apache::thrift::RequestCallback> callback);
   virtual void getThriftServiceMetadata(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:
   void getThriftServiceMetadataImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback);
  public:
+
   virtual void sync_getThriftServiceMetadata( ::apache::thrift::metadata::ThriftServiceMetadataResponse& _return);
   virtual void sync_getThriftServiceMetadata(apache::thrift::RpcOptions& rpcOptions,  ::apache::thrift::metadata::ThriftServiceMetadataResponse& _return);
+
   virtual folly::Future< ::apache::thrift::metadata::ThriftServiceMetadataResponse> future_getThriftServiceMetadata();
   virtual folly::SemiFuture< ::apache::thrift::metadata::ThriftServiceMetadataResponse> semifuture_getThriftServiceMetadata();
   virtual folly::Future< ::apache::thrift::metadata::ThriftServiceMetadataResponse> future_getThriftServiceMetadata(apache::thrift::RpcOptions& rpcOptions);
@@ -63,8 +67,22 @@ class ThriftMetadataServiceAsyncClient : public apache::thrift::GeneratedAsyncCl
       co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(_task)));
     }
   }
+  template <int = 0>
+  folly::coro::Task<std::pair< ::apache::thrift::metadata::ThriftServiceMetadataResponse, std::unique_ptr<apache::thrift::transport::THeader>>> header_co_getThriftServiceMetadata(apache::thrift::RpcOptions& rpcOptions) {
+    auto _task = header_semifuture_getThriftServiceMetadata(rpcOptions);
+    const folly::CancellationToken& cancelToken =
+        co_await folly::coro::co_current_cancellation_token;
+    if (cancelToken.canBeCancelled()) {
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(_task))));
+    } else {
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(_task)));
+    }
+  }
 #endif // FOLLY_HAS_COROUTINES
+
   virtual void getThriftServiceMetadata(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback);
+
+
   static folly::exception_wrapper recv_wrapped_getThriftServiceMetadata( ::apache::thrift::metadata::ThriftServiceMetadataResponse& _return, ::apache::thrift::ClientReceiveState& state);
   static void recv_getThriftServiceMetadata( ::apache::thrift::metadata::ThriftServiceMetadataResponse& _return, ::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method

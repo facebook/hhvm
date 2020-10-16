@@ -63,4 +63,5 @@ void ThriftMetadataServiceAsyncProcessor::throw_wrapped_getThriftServiceMetadata
   }
 }
 
+
 }}} // apache::thrift::metadata

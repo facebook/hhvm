@@ -68,6 +68,8 @@ struct opaque;
 struct interfaceKind;
 struct minVersion;
 struct maxVersion;
+struct dscpToReflect;
+struct markToReflect;
 struct otherMetadata;
 struct compression;
 } // namespace tag
@@ -287,6 +289,14 @@ APACHE_THRIFT_DEFINE_ACCESSOR(minVersion);
 #ifndef APACHE_THRIFT_ACCESSOR_maxVersion
 #define APACHE_THRIFT_ACCESSOR_maxVersion
 APACHE_THRIFT_DEFINE_ACCESSOR(maxVersion);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_dscpToReflect
+#define APACHE_THRIFT_ACCESSOR_dscpToReflect
+APACHE_THRIFT_DEFINE_ACCESSOR(dscpToReflect);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_markToReflect
+#define APACHE_THRIFT_ACCESSOR_markToReflect
+APACHE_THRIFT_DEFINE_ACCESSOR(markToReflect);
 #endif
 #ifndef APACHE_THRIFT_ACCESSOR_otherMetadata
 #define APACHE_THRIFT_ACCESSOR_otherMetadata
@@ -1090,8 +1100,8 @@ class CodecConfig final  {
     (&val)->~T();
   }
 
-  std::underlying_type_t<Type> type_;
   storage_type value_;
+  std::underlying_type_t<Type> type_;
 
  private:
   template <class Protocol_>
@@ -1430,9 +1440,9 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   InteractionCreate& operator=(const InteractionCreate&) = default;
 THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
- public:
+ private:
   int64_t interactionId;
- public:
+ private:
   ::std::string interactionName;
 
  public:
@@ -1592,7 +1602,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   InteractionTerminate& operator=(const InteractionTerminate&) = default;
 THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
- public:
+ private:
   int64_t interactionId;
 
  public:
@@ -3437,8 +3447,8 @@ class PayloadExceptionMetadata final  {
     (&val)->~T();
   }
 
-  std::underlying_type_t<Type> type_;
   storage_type value_;
+  std::underlying_type_t<Type> type_;
 
  private:
   template <class Protocol_>
@@ -3938,8 +3948,8 @@ class PayloadMetadata final  {
     (&val)->~T();
   }
 
-  std::underlying_type_t<Type> type_;
   storage_type value_;
+  std::underlying_type_t<Type> type_;
 
  private:
   template <class Protocol_>
@@ -4918,14 +4928,12 @@ class RequestSetupMetadata final  {
 
  public:
 
+  RequestSetupMetadata();
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
-  RequestSetupMetadata() :
-      interfaceKind( ::apache::thrift::InterfaceKind::USER),
-      minVersion(0),
-      maxVersion(0) {}
+
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  RequestSetupMetadata(apache::thrift::FragileConstructor, apache::thrift::MetadataOpaqueMap<::std::string, ::std::string> opaque__arg,  ::apache::thrift::InterfaceKind interfaceKind__arg, int32_t minVersion__arg, int32_t maxVersion__arg);
+  RequestSetupMetadata(apache::thrift::FragileConstructor, apache::thrift::MetadataOpaqueMap<::std::string, ::std::string> opaque__arg,  ::apache::thrift::InterfaceKind interfaceKind__arg, int32_t minVersion__arg, int32_t maxVersion__arg, int32_t dscpToReflect__arg, int32_t markToReflect__arg);
 
   RequestSetupMetadata(RequestSetupMetadata&&) = default;
 
@@ -4937,6 +4945,9 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   RequestSetupMetadata& operator=(const RequestSetupMetadata&) = default;
 THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
+
+  ~RequestSetupMetadata();
+
  private:
   apache::thrift::MetadataOpaqueMap<::std::string, ::std::string> opaque;
  private:
@@ -4945,6 +4956,10 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   int32_t minVersion;
  private:
   int32_t maxVersion;
+ private:
+  int32_t dscpToReflect;
+ private:
+  int32_t markToReflect;
 
  public:
   [[deprecated("__isset field is deprecated in Thrift struct. Use _ref() accessors instead.")]]
@@ -4953,6 +4968,8 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
     bool interfaceKind;
     bool minVersion;
     bool maxVersion;
+    bool dscpToReflect;
+    bool markToReflect;
   } __isset = {};
   bool operator==(const RequestSetupMetadata& rhs) const;
 #ifndef SWIG
@@ -5060,6 +5077,50 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     return {std::move(this->maxVersion), __isset.maxVersion};
   }
 THRIFT_IGNORE_ISSET_USE_WARNING_END
+
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+  template <typename..., typename T = int32_t>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> dscpToReflect_ref() const& {
+    return {this->dscpToReflect, __isset.dscpToReflect};
+  }
+
+  template <typename..., typename T = int32_t>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&&> dscpToReflect_ref() const&& {
+    return {std::move(this->dscpToReflect), __isset.dscpToReflect};
+  }
+
+  template <typename..., typename T = int32_t>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<T&> dscpToReflect_ref() & {
+    return {this->dscpToReflect, __isset.dscpToReflect};
+  }
+
+  template <typename..., typename T = int32_t>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> dscpToReflect_ref() && {
+    return {std::move(this->dscpToReflect), __isset.dscpToReflect};
+  }
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+  template <typename..., typename T = int32_t>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> markToReflect_ref() const& {
+    return {this->markToReflect, __isset.markToReflect};
+  }
+
+  template <typename..., typename T = int32_t>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&&> markToReflect_ref() const&& {
+    return {std::move(this->markToReflect), __isset.markToReflect};
+  }
+
+  template <typename..., typename T = int32_t>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<T&> markToReflect_ref() & {
+    return {this->markToReflect, __isset.markToReflect};
+  }
+
+  template <typename..., typename T = int32_t>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> markToReflect_ref() && {
+    return {std::move(this->markToReflect), __isset.markToReflect};
+  }
+THRIFT_IGNORE_ISSET_USE_WARNING_END
   const apache::thrift::MetadataOpaqueMap<::std::string, ::std::string>* get_opaque() const&;
   apache::thrift::MetadataOpaqueMap<::std::string, ::std::string>* get_opaque() &;
   apache::thrift::MetadataOpaqueMap<::std::string, ::std::string>* get_opaque() && = delete;
@@ -5122,6 +5183,40 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.maxVersion = true;
 THRIFT_IGNORE_ISSET_USE_WARNING_END
     return maxVersion;
+  }
+
+  const int32_t* get_dscpToReflect() const& {
+    return dscpToReflect_ref() ? std::addressof(dscpToReflect) : nullptr;
+  }
+
+  int32_t* get_dscpToReflect() & {
+    return dscpToReflect_ref() ? std::addressof(dscpToReflect) : nullptr;
+  }
+  int32_t* get_dscpToReflect() && = delete;
+
+  int32_t& set_dscpToReflect(int32_t dscpToReflect_) {
+    dscpToReflect = dscpToReflect_;
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+    __isset.dscpToReflect = true;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+    return dscpToReflect;
+  }
+
+  const int32_t* get_markToReflect() const& {
+    return markToReflect_ref() ? std::addressof(markToReflect) : nullptr;
+  }
+
+  int32_t* get_markToReflect() & {
+    return markToReflect_ref() ? std::addressof(markToReflect) : nullptr;
+  }
+  int32_t* get_markToReflect() && = delete;
+
+  int32_t& set_markToReflect(int32_t markToReflect_) {
+    markToReflect = markToReflect_;
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+    __isset.markToReflect = true;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+    return markToReflect;
   }
 
   template <class Protocol_>

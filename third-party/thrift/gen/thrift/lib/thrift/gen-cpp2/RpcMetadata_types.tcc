@@ -3751,6 +3751,36 @@ _readField_maxVersion:
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
           4,
+          5,
+          apache::thrift::protocol::T_I32))) {
+    goto _loop;
+  }
+_readField_dscpToReflect:
+  {
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int32_t>::readWithContext(*iprot, this->dscpToReflect, _readState);
+    THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+    this->__isset.dscpToReflect = true;
+    THRIFT_IGNORE_ISSET_USE_WARNING_END
+  }
+
+  if (UNLIKELY(!_readState.advanceToNextField(
+          iprot,
+          5,
+          6,
+          apache::thrift::protocol::T_I32))) {
+    goto _loop;
+  }
+_readField_markToReflect:
+  {
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int32_t>::readWithContext(*iprot, this->markToReflect, _readState);
+    THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+    this->__isset.markToReflect = true;
+    THRIFT_IGNORE_ISSET_USE_WARNING_END
+  }
+
+  if (UNLIKELY(!_readState.advanceToNextField(
+          iprot,
+          6,
           0,
           apache::thrift::protocol::T_STOP))) {
     goto _loop;
@@ -3803,6 +3833,22 @@ _loop:
         goto _skip;
       }
     }
+    case 5:
+    {
+      if (LIKELY(_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_I32))) {
+        goto _readField_dscpToReflect;
+      } else {
+        goto _skip;
+      }
+    }
+    case 6:
+    {
+      if (LIKELY(_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_I32))) {
+        goto _readField_markToReflect;
+      } else {
+        goto _skip;
+      }
+    }
     default:
     {
 _skip:
@@ -3834,6 +3880,14 @@ uint32_t RequestSetupMetadata::serializedSize(Protocol_ const* prot_) const {
     xfer += prot_->serializedFieldSize("maxVersion", apache::thrift::protocol::T_I32, 4);
     xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int32_t>::serializedSize<false>(*prot_, this->maxVersion);
   }
+  if (this->dscpToReflect_ref().has_value()) {
+    xfer += prot_->serializedFieldSize("dscpToReflect", apache::thrift::protocol::T_I32, 5);
+    xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int32_t>::serializedSize<false>(*prot_, this->dscpToReflect);
+  }
+  if (this->markToReflect_ref().has_value()) {
+    xfer += prot_->serializedFieldSize("markToReflect", apache::thrift::protocol::T_I32, 6);
+    xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int32_t>::serializedSize<false>(*prot_, this->markToReflect);
+  }
   xfer += prot_->serializedSizeStop();
   return xfer;
 }
@@ -3857,6 +3911,14 @@ uint32_t RequestSetupMetadata::serializedSizeZC(Protocol_ const* prot_) const {
   if (this->maxVersion_ref().has_value()) {
     xfer += prot_->serializedFieldSize("maxVersion", apache::thrift::protocol::T_I32, 4);
     xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int32_t>::serializedSize<false>(*prot_, this->maxVersion);
+  }
+  if (this->dscpToReflect_ref().has_value()) {
+    xfer += prot_->serializedFieldSize("dscpToReflect", apache::thrift::protocol::T_I32, 5);
+    xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int32_t>::serializedSize<false>(*prot_, this->dscpToReflect);
+  }
+  if (this->markToReflect_ref().has_value()) {
+    xfer += prot_->serializedFieldSize("markToReflect", apache::thrift::protocol::T_I32, 6);
+    xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int32_t>::serializedSize<false>(*prot_, this->markToReflect);
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -3884,6 +3946,16 @@ uint32_t RequestSetupMetadata::write(Protocol_* prot_) const {
   if (this->maxVersion_ref().has_value()) {
     xfer += prot_->writeFieldBegin("maxVersion", apache::thrift::protocol::T_I32, 4);
     xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int32_t>::write(*prot_, this->maxVersion);
+    xfer += prot_->writeFieldEnd();
+  }
+  if (this->dscpToReflect_ref().has_value()) {
+    xfer += prot_->writeFieldBegin("dscpToReflect", apache::thrift::protocol::T_I32, 5);
+    xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int32_t>::write(*prot_, this->dscpToReflect);
+    xfer += prot_->writeFieldEnd();
+  }
+  if (this->markToReflect_ref().has_value()) {
+    xfer += prot_->writeFieldBegin("markToReflect", apache::thrift::protocol::T_I32, 6);
+    xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int32_t>::write(*prot_, this->markToReflect);
     xfer += prot_->writeFieldEnd();
   }
   xfer += prot_->writeFieldStop();

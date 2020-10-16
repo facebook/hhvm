@@ -1202,60 +1202,38 @@ void ThriftType::__clear() {
   if (type_ == Type::__EMPTY__) { return; }
   switch(type_) {
     case Type::t_primitive:
-    {
       destruct(value_.t_primitive);
       break;
-    }
     case Type::t_list:
-    {
       destruct(value_.t_list);
       break;
-    }
     case Type::t_set:
-    {
       destruct(value_.t_set);
       break;
-    }
     case Type::t_map:
-    {
       destruct(value_.t_map);
       break;
-    }
     case Type::t_enum:
-    {
       destruct(value_.t_enum);
       break;
-    }
     case Type::t_struct:
-    {
       destruct(value_.t_struct);
       break;
-    }
     case Type::t_union:
-    {
       destruct(value_.t_union);
       break;
-    }
     case Type::t_typedef:
-    {
       destruct(value_.t_typedef);
       break;
-    }
     case Type::t_stream:
-    {
       destruct(value_.t_stream);
       break;
-    }
     case Type::t_sink:
-    {
       destruct(value_.t_sink);
       break;
-    }
     default:
-    {
       assert(false);
       break;
-    }
   }
   type_ = Type::__EMPTY__;
 }
@@ -1264,49 +1242,27 @@ bool ThriftType::operator==(const ThriftType& rhs) const {
   if (type_ != rhs.type_) { return false; }
   switch(type_) {
     case Type::t_primitive:
-    {
       return value_.t_primitive == rhs.value_.t_primitive;
-    }
     case Type::t_list:
-    {
       return value_.t_list == rhs.value_.t_list;
-    }
     case Type::t_set:
-    {
       return value_.t_set == rhs.value_.t_set;
-    }
     case Type::t_map:
-    {
       return value_.t_map == rhs.value_.t_map;
-    }
     case Type::t_enum:
-    {
       return value_.t_enum == rhs.value_.t_enum;
-    }
     case Type::t_struct:
-    {
       return value_.t_struct == rhs.value_.t_struct;
-    }
     case Type::t_union:
-    {
       return value_.t_union == rhs.value_.t_union;
-    }
     case Type::t_typedef:
-    {
       return value_.t_typedef == rhs.value_.t_typedef;
-    }
     case Type::t_stream:
-    {
       return value_.t_stream == rhs.value_.t_stream;
-    }
     case Type::t_sink:
-    {
       return value_.t_sink == rhs.value_.t_sink;
-    }
     default:
-    {
       return true;
-    }
   }
 }
 

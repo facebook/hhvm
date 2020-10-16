@@ -448,20 +448,14 @@ void CodecConfig::__clear() {
   if (type_ == Type::__EMPTY__) { return; }
   switch(type_) {
     case Type::zlibConfig:
-    {
       destruct(value_.zlibConfig);
       break;
-    }
     case Type::zstdConfig:
-    {
       destruct(value_.zstdConfig);
       break;
-    }
     default:
-    {
       assert(false);
       break;
-    }
   }
   type_ = Type::__EMPTY__;
 }
@@ -470,17 +464,11 @@ bool CodecConfig::operator==(const CodecConfig& rhs) const {
   if (type_ != rhs.type_) { return false; }
   switch(type_) {
     case Type::zlibConfig:
-    {
       return value_.zlibConfig == rhs.value_.zlibConfig;
-    }
     case Type::zstdConfig:
-    {
       return value_.zstdConfig == rhs.value_.zstdConfig;
-    }
     default:
-    {
       return true;
-    }
   }
 }
 
@@ -1692,35 +1680,23 @@ void PayloadExceptionMetadata::__clear() {
   if (type_ == Type::__EMPTY__) { return; }
   switch(type_) {
     case Type::declaredException:
-    {
       destruct(value_.declaredException);
       break;
-    }
     case Type::proxyException:
-    {
       destruct(value_.proxyException);
       break;
-    }
     case Type::proxiedException:
-    {
       destruct(value_.proxiedException);
       break;
-    }
     case Type::appClientException:
-    {
       destruct(value_.appClientException);
       break;
-    }
     case Type::appServerException:
-    {
       destruct(value_.appServerException);
       break;
-    }
     default:
-    {
       assert(false);
       break;
-    }
   }
   type_ = Type::__EMPTY__;
 }
@@ -1729,29 +1705,17 @@ bool PayloadExceptionMetadata::operator==(const PayloadExceptionMetadata& rhs) c
   if (type_ != rhs.type_) { return false; }
   switch(type_) {
     case Type::declaredException:
-    {
       return value_.declaredException == rhs.value_.declaredException;
-    }
     case Type::proxyException:
-    {
       return value_.proxyException == rhs.value_.proxyException;
-    }
     case Type::proxiedException:
-    {
       return value_.proxiedException == rhs.value_.proxiedException;
-    }
     case Type::appClientException:
-    {
       return value_.appClientException == rhs.value_.appClientException;
-    }
     case Type::appServerException:
-    {
       return value_.appServerException == rhs.value_.appServerException;
-    }
     default:
-    {
       return true;
-    }
   }
 }
 
@@ -2047,20 +2011,14 @@ void PayloadMetadata::__clear() {
   if (type_ == Type::__EMPTY__) { return; }
   switch(type_) {
     case Type::responseMetadata:
-    {
       destruct(value_.responseMetadata);
       break;
-    }
     case Type::exceptionMetadata:
-    {
       destruct(value_.exceptionMetadata);
       break;
-    }
     default:
-    {
       assert(false);
       break;
-    }
   }
   type_ = Type::__EMPTY__;
 }
@@ -2069,17 +2027,11 @@ bool PayloadMetadata::operator==(const PayloadMetadata& rhs) const {
   if (type_ != rhs.type_) { return false; }
   switch(type_) {
     case Type::responseMetadata:
-    {
       return value_.responseMetadata == rhs.value_.responseMetadata;
-    }
     case Type::exceptionMetadata:
-    {
       return value_.exceptionMetadata == rhs.value_.exceptionMetadata;
-    }
     default:
-    {
       return true;
-    }
   }
 }
 
@@ -2695,21 +2647,27 @@ void TccStructTraits<::apache::thrift::RequestSetupMetadata>::translateFieldName
     FOLLY_MAYBE_UNUSED int16_t& fid,
     FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) noexcept {
   using TType = apache::thrift::protocol::TType;
-  constexpr size_t _size = 4;
+  constexpr size_t _size = 6;
   static constexpr folly::StringPiece _names[] = {
     "opaque",
     "interfaceKind",
     "minVersion",
     "maxVersion",
+    "dscpToReflect",
+    "markToReflect",
   };
   static constexpr int16_t _ids[] = {
     1,
     2,
     3,
     4,
+    5,
+    6,
   };
   static constexpr TType _types[] = {
     TType::T_MAP,
+    TType::T_I32,
+    TType::T_I32,
     TType::T_I32,
     TType::T_I32,
     TType::T_I32,
@@ -2726,15 +2684,31 @@ void TccStructTraits<::apache::thrift::RequestSetupMetadata>::translateFieldName
 namespace apache { namespace thrift {
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
-RequestSetupMetadata::RequestSetupMetadata(apache::thrift::FragileConstructor, apache::thrift::MetadataOpaqueMap<::std::string, ::std::string> opaque__arg,  ::apache::thrift::InterfaceKind interfaceKind__arg, int32_t minVersion__arg, int32_t maxVersion__arg) :
+RequestSetupMetadata::RequestSetupMetadata() :
+      interfaceKind( ::apache::thrift::InterfaceKind::USER),
+      minVersion(0),
+      maxVersion(0),
+      dscpToReflect(0),
+      markToReflect(0) {}
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+
+
+RequestSetupMetadata::~RequestSetupMetadata() {}
+
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+RequestSetupMetadata::RequestSetupMetadata(apache::thrift::FragileConstructor, apache::thrift::MetadataOpaqueMap<::std::string, ::std::string> opaque__arg,  ::apache::thrift::InterfaceKind interfaceKind__arg, int32_t minVersion__arg, int32_t maxVersion__arg, int32_t dscpToReflect__arg, int32_t markToReflect__arg) :
     opaque(std::move(opaque__arg)),
     interfaceKind(std::move(interfaceKind__arg)),
     minVersion(std::move(minVersion__arg)),
-    maxVersion(std::move(maxVersion__arg)) {
+    maxVersion(std::move(maxVersion__arg)),
+    dscpToReflect(std::move(dscpToReflect__arg)),
+    markToReflect(std::move(markToReflect__arg)) {
   __isset.opaque = true;
   __isset.interfaceKind = true;
   __isset.minVersion = true;
   __isset.maxVersion = true;
+  __isset.dscpToReflect = true;
+  __isset.markToReflect = true;
 }
 THRIFT_IGNORE_ISSET_USE_WARNING_END
 void RequestSetupMetadata::__clear() {
@@ -2743,6 +2717,8 @@ void RequestSetupMetadata::__clear() {
   interfaceKind =  ::apache::thrift::InterfaceKind::USER;
   minVersion = 0;
   maxVersion = 0;
+  dscpToReflect = 0;
+  markToReflect = 0;
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
 THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -2764,6 +2740,12 @@ bool RequestSetupMetadata::operator==(const RequestSetupMetadata& rhs) const {
   if (lhs.maxVersion_ref() != rhs.maxVersion_ref()) {
     return false;
   }
+  if (lhs.dscpToReflect_ref() != rhs.dscpToReflect_ref()) {
+    return false;
+  }
+  if (lhs.markToReflect_ref() != rhs.markToReflect_ref()) {
+    return false;
+  }
   return true;
 }
 
@@ -2782,6 +2764,8 @@ void swap(RequestSetupMetadata& a, RequestSetupMetadata& b) {
   swap(a.interfaceKind_ref().value_unchecked(), b.interfaceKind_ref().value_unchecked());
   swap(a.minVersion_ref().value_unchecked(), b.minVersion_ref().value_unchecked());
   swap(a.maxVersion_ref().value_unchecked(), b.maxVersion_ref().value_unchecked());
+  swap(a.dscpToReflect_ref().value_unchecked(), b.dscpToReflect_ref().value_unchecked());
+  swap(a.markToReflect_ref().value_unchecked(), b.markToReflect_ref().value_unchecked());
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
 THRIFT_IGNORE_ISSET_USE_WARNING_END

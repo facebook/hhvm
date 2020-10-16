@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/base/bespoke/logging-array.h"
 #include "hphp/runtime/base/bespoke/logging-profile.h"
+#include "hphp/runtime/base/bespoke/monotype-dict.h"
 #include "hphp/runtime/base/bespoke/monotype-vec.h"
 #include "hphp/runtime/base/packed-array-defs.h"
 #include "hphp/runtime/vm/jit/irgen.h"
@@ -93,6 +94,7 @@ struct Layout::Initializer {
     assertx(s_layoutTableIndex.load(std::memory_order_relaxed) == 0);
     LoggingArray::InitializeLayouts();
     MonotypeVec::InitializeLayouts();
+    EmptyMonotypeDict::InitializeLayouts();
   }
 };
 Layout::Initializer Layout::s_initializer;
@@ -109,25 +111,44 @@ void logBespokeDispatch(const ArrayData* ad, const char* fn) {
 namespace {
 ArrayData* maybeMonoify(ArrayData* ad) {
   assertx(ad->isVanilla());
-  if (!ad->isVecType() && !ad->isVArray()) return ad;
+  if (ad->isKeysetType()) return ad;
 
   auto const et = EntryTypes::ForArray(ad);
-  if (et.valueTypes != ValueTypes::Monotype &&
-      et.valueTypes != ValueTypes::Empty) {
+  auto const monotype_keys =
+    et.keyTypes == KeyTypes::Ints ||
+    et.keyTypes == KeyTypes::Strings ||
+    et.keyTypes == KeyTypes::StaticStrings ||
+    et.keyTypes == KeyTypes::Empty;
+  auto const monotype_vals =
+    et.valueTypes == ValueTypes::Monotype ||
+    et.valueTypes == ValueTypes::Empty;
+
+  assertx(IMPLIES(ad->isVArray() || ad->isVecType(), monotype_keys));
+
+  if (!(monotype_keys && monotype_vals)) {
     return ad;
   }
 
   SCOPE_EXIT { ad->decRefAndRelease(); };
 
+  auto const legacy = ad->isLegacyArray();
+
   if (et.valueTypes == ValueTypes::Empty) {
-    if (ad->isVecType()) {
-      return EmptyMonotypeVec::GetVec(ad->isLegacyArray());
-    } else {
-      return EmptyMonotypeVec::GetVArray(ad->isLegacyArray());
+    switch (ad->toDataType()) {
+      case KindOfVArray: return EmptyMonotypeVec::GetVArray(legacy);
+      case KindOfVec:    return EmptyMonotypeVec::GetVec(legacy);
+      case KindOfDArray: return EmptyMonotypeDict::GetDArray(legacy);
+      case KindOfDict:   return EmptyMonotypeDict::GetDict(legacy);
+      default: always_assert(false);
     }
   }
 
   auto const dt = dt_modulo_persistence(et.valueDatatype);
+  if (ad->isDArray() || ad->isDictType()) {
+    return MakeMonotypeDictFromVanilla(ad, dt, et.keyTypes);
+  }
+
+  assertx(ad->isVArray() || ad->isVecType());
   auto const hk = ad->isVecType() ? HeaderKind::BespokeVec
                                   : HeaderKind::BespokeVArray;
   return MonotypeVec::Make(dt, ad->size(), packedData(ad), hk,

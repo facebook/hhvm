@@ -187,14 +187,10 @@ void EmptyMonotypeVec::Scan(const EmptyMonotypeVec* ead, type_scan::Scanner&) {
 
 ArrayData* EmptyMonotypeVec::EscalateToVanilla(const EmptyMonotypeVec* ead,
                                                const char* reason) {
-  auto const ad = ead->isVecType() ? ArrayData::CreateVec()
-                                   : ArrayData::CreateVArray();
-  if (ead->isLegacyArray() && ad->cowCheck()) {
-    auto const adNew = PackedArray::Copy(ad);
-    adNew->setLegacyArrayInPlace(true);
-    return adNew;
-  }
-  return ad;
+  auto const legacy = ead->isLegacyArray();
+  return ead->isVecType()
+    ? (legacy ? staticEmptyMarkedVec() : staticEmptyVec())
+    : (legacy ? staticEmptyMarkedVArray() : staticEmptyVArray());
 }
 
 void EmptyMonotypeVec::ConvertToUncounted(EmptyMonotypeVec*,
@@ -546,7 +542,6 @@ void MonotypeVec::ConvertToUncounted(MonotypeVec* madIn,
 }
 
 void MonotypeVec::ReleaseUncounted(MonotypeVec* mad) {
-  if (!mad->uncountedDecRef()) return;
   for (uint32_t i = 0; i < mad->size(); i++) {
     auto tv = mad->typedValueUnchecked(i);
     ReleaseUncountedTv(&tv);

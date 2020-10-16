@@ -202,6 +202,17 @@ fn rewrite_expr(e: &Expr) -> Expr {
                 &e.0,
             ),
         },
+        Unop(uop) => match &**uop {
+            // Convert `!...` to `$v->exclamationMark($v->...)`.
+            (Uop::Unot, operand) => {
+                meth_call("exclamationMark", vec![rewrite_expr(&operand)], &e.0)
+            }
+            _ => meth_call(
+                "unsupportedSyntax",
+                vec![string_literal("bad unary operator")],
+                &e.0,
+            ),
+        },
         // Convert `foo(...)` to `$v->call('foo', vec[...])`.
         Call(call) => match &**call {
             (recv, _, args, _) => match &recv.1 {

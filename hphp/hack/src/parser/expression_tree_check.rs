@@ -117,6 +117,11 @@ impl<'ast> Visitor<'ast> for Checker {
                     (Bop::Barbar, _, _) => true,
                     _ => false,
                 },
+                Unop(uop) => match **uop {
+                    // Allow boolean not operator !$x
+                    (Uop::Unot, _) => true,
+                    _ => false,
+                },
                 // Allow simple function calls.
                 Call(call) => match &**call {
                     // Ban variadic calls foo(...$x);

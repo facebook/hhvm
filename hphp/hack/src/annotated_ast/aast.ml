@@ -689,17 +689,20 @@ let get_break_continue_level level_opt =
   | _ -> Level_non_literal
   | exception _ -> Level_non_literal
 
+(* extract the hint from a type annotation *)
+let hint_of_type_hint : 'hi. 'hi type_hint -> type_hint_ = snd
+
+(* extract the type from a type annotation *)
+let type_of_type_hint : 'hi. 'hi type_hint -> 'hi = fst
+
 (* map a function over the second part of a type annotation *)
 let type_hint_option_map ~f ta =
   let mapped_hint =
-    match snd ta with
+    match hint_of_type_hint ta with
     | Some hint -> Some (f hint)
     | None -> None
   in
-  (fst ta, mapped_hint)
-
-(* extract an hint from a type annotation *)
-let hint_of_type_hint = snd
+  (type_of_type_hint ta, mapped_hint)
 
 (* helper function to access the list of enums included by an enum *)
 let enum_includes_map ?(default = []) ~f includes =

@@ -2609,7 +2609,7 @@ and expr_
     end;
 
     (* Extract capabilities from AAST and add them to the environment *)
-    let env =
+    let (env, capability) =
       match (hint_of_type_hint f.f_cap, hint_of_type_hint f.f_unsafe_cap) with
       | (None, None) ->
         (* if the closure has no explicit coeffect annotations,
@@ -2620,15 +2620,15 @@ and expr_
            This avoid unnecessary overhead in the most common case, i.e.,
            when a closure does not need a different (usually smaller)
            set of capabilities. *)
-        env
+        (env, Env.get_local env Typing_coeffects.local_capability_id)
       | (_, _) ->
         let (env, f_cap, f_unsafe_cap) =
           type_capability env f.f_cap f.f_unsafe_cap (fst f.f_name)
         in
         Typing_coeffects.register_capabilities
           env
-          (fst f_cap)
-          (fst f_unsafe_cap)
+          (type_of_type_hint f_cap)
+          (type_of_type_hint f_unsafe_cap)
     in
 
     (* Is the return type declared? *)
@@ -2646,6 +2646,7 @@ and expr_
         {
           ft with
           ft_reactive = reactivity;
+          ft_implicit_params = { capability };
           ft_flags =
             Typing_defs_flags.(
               set_bit ft_flags_is_coroutine is_coroutine ft.ft_flags);
@@ -2738,16 +2739,12 @@ and expr_
                 f.f_variadic
                 declared_ft.ft_arity
                 expected_ft.ft_arity;
-          }
-        in
-        let expected_ft =
-          {
-            expected_ft with
             ft_params =
               replace_non_declared_types
                 f.f_params
                 declared_ft.ft_params
                 expected_ft.ft_params;
+            ft_implicit_params = declared_ft.ft_implicit_params;
           }
         in
         (* Don't bother passing in `void` if there is no explicit return *)
@@ -6156,7 +6153,7 @@ and call
               let env_capability =
                 Env.get_local_check_defined
                   env
-                  (pos, Local_id.make_unscoped SN.Coeffects.capability)
+                  (pos, Typing_coeffects.capability_id)
               in
               Type.sub_type
                 pos

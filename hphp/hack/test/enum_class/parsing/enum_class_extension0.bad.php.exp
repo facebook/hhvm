@@ -1,7 +1,7 @@
-(29,21)-(29,21) A left brace `{` is expected here.
-(29,30)-(29,30) An opening angle bracket `<` is expected here.
-(29,32)-(29,32) A closing angle bracket `>` is expected here.
-(29,32)-(29,32) A left parenthesis `(` is expected here.
-(29,33)-(30,1) An expression is expected here.
-(29,33)-(30,1) A right parenthesis `)` is expected here.
-(29,33)-(30,1) A semicolon `;` is expected here.
+(30,21)-(30,21) A left brace `{` is expected here.
+(30,30)-(30,30) An opening angle bracket `<` is expected here.
+(30,32)-(30,32) A closing angle bracket `>` is expected here.
+(30,32)-(30,32) A left parenthesis `(` is expected here.
+(30,33)-(31,1) An expression is expected here.
+(30,33)-(31,1) A right parenthesis `)` is expected here.
+(30,33)-(31,1) A semicolon `;` is expected here.

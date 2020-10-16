@@ -4322,7 +4322,13 @@ let php_lambda_disallowed pos =
 (*****************************************************************************)
 
 let wrong_extend_kind
-    ~parent_pos ~parent_kind ~parent_name ~child_pos ~child_kind ~child_name =
+    ~parent_pos
+    ~parent_kind
+    ~parent_name
+    ~child_pos
+    ~child_kind
+    ~child_name
+    ~child_is_enum_class =
   let parent_kind_str = Ast_defs.string_of_class_kind parent_kind in
   let parent_name = strip_ns parent_name in
   let child_name = strip_ns child_name in
@@ -4356,9 +4362,12 @@ let wrong_extend_kind
       in
       extends_msg ^ suggestion
     | Ast_defs.Cenum ->
-      (* This case should never happen, as the type checker will have already caught
+      if child_is_enum_class then
+        "Enum classes can only extend other enum classes."
+      else
+        (* This case should never happen, as the type checker will have already caught
           it with EnumTypeBad. But just in case, report this error here too. *)
-      "Enums can only extend int, string, or arraykey."
+        "Enums can only extend int, string, or arraykey."
     | Ast_defs.Ctrait ->
       (* This case should never happen, as the parser will have caught it before
           we get here. *)

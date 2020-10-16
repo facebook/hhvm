@@ -98,7 +98,14 @@ let check_if_cyclic ctx cls =
     Errors.cyclic_class_def classes (Cls.pos cls)
 
 let check_extend_kind
-    parent_pos parent_kind parent_name child_pos child_kind child_name =
+    parent_pos
+    parent_kind
+    parent_name
+    parent_is_enum_class
+    child_pos
+    child_kind
+    child_name
+    child_is_enum_class =
   Ast_defs.(
     match (parent_kind, child_kind) with
     | ((Cabstract | Cnormal), (Cabstract | Cnormal))
@@ -106,6 +113,18 @@ let check_extend_kind
     | (Ctrait, Ctrait)
     | (Cinterface, Cinterface) ->
       ()
+    | (Ast_defs.Cenum, Ast_defs.Cenum) ->
+      if parent_is_enum_class && child_is_enum_class then
+        ()
+      else
+        Errors.wrong_extend_kind
+          ~parent_pos
+          ~parent_kind
+          ~parent_name
+          ~child_pos
+          ~child_kind
+          ~child_name
+          ~child_is_enum_class
     | _ ->
       Errors.wrong_extend_kind
         ~parent_pos
@@ -113,7 +132,8 @@ let check_extend_kind
         ~parent_name
         ~child_pos
         ~child_kind
-        ~child_name)
+        ~child_name
+        ~child_is_enum_class)
 
 let check_extend_kinds ctx shallow_class =
   let class_pos = fst shallow_class.sc_name in
@@ -124,13 +144,17 @@ let check_extend_kinds ctx shallow_class =
       match Shallow_classes_provider.get ctx parent_name with
       | None -> ()
       | Some parent ->
+        let parent_is_enum_class = is_enum_class parent.sc_enum_type in
+        let class_is_enum_class = is_enum_class shallow_class.sc_enum_type in
         check_extend_kind
           parent_pos
           parent.sc_kind
           (snd parent.sc_name)
+          parent_is_enum_class
           class_pos
           class_kind
-          class_name)
+          class_name
+          class_is_enum_class)
 
 let disallow_trait_reuse env =
   TypecheckerOptions.disallow_trait_reuse (Env.get_tcopt env)

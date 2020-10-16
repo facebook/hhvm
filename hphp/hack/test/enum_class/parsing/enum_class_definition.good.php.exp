@@ -6,10 +6,10 @@
       "elements":[
         {
           "kind":"markup_section",
-          "markup_text":{
+          "markup_hashbang":{
             "kind":"token",
             "token":{
-              "kind":"markup",
+              "kind":"hashbang",
               "text":"",
               "offset":0,
               "leading_width":0,
@@ -2376,5 +2376,5 @@
     }
   },
   "program_text":"<?hh\n<<file: __EnableUnstableFeatures('enum_class')>>\n\ninterface ExBox {}\n\nclass Box<T> implements ExBox {\n  public function __construct(public T $data) {}\n}\n\nclass IBox extends Box<int> {\n  public function add(int $x): void {\n    $this->data = $this->data + $x;\n  }\n}\n\nabstract final class Helper {\n  public static function ibox(): IBox {\n    return new IBox(42);\n  }\n}\n\nenum class E: ExBox {\n  A<Box<string>>(new Box('bli'));\n  B<IBox>(Helper::ibox());\n  C<Box<int>>(new Box(42));\n}\n",
-  "version":"2020-10-12-0000"
+  "version":"2020-10-13-0001"
 }

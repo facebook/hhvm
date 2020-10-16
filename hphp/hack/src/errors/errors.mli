@@ -634,6 +634,7 @@ val wrong_extend_kind :
   child_pos:Pos.t ->
   child_kind:Ast_defs.class_kind ->
   child_name:string ->
+  child_is_enum_class:bool ->
   unit
 
 val unsatisfied_req : Pos.t -> string -> Pos.t -> unit

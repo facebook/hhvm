@@ -9,8 +9,8 @@ Constant does not match the type of the enum it is in (Typing[4328])
   File "typing4.bad.php", line 11, characters 20-20:
   Expected `T`
   File "typing4.bad.php", line 11, characters 20-20:
-  Considering that this type argument is invariant with respect to `Box`
+  This type argument to `Box` must match exactly (it is invariant)
   File "typing4.bad.php", line 12, characters 9-14:
   But got `string`
   File "typing4.bad.php", line 12, characters 9-14:
-  Considering that this type argument is invariant with respect to `Box`
+  This type argument to `Box` must match exactly (it is invariant)

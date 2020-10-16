@@ -35,9 +35,11 @@ let check_extend_kind
     (parent_pos : Pos.t)
     (parent_kind : Ast_defs.class_kind)
     (parent_name : string)
+    (parent_is_enum_class : bool)
     (child_pos : Pos.t)
     (child_kind : Ast_defs.class_kind)
-    (child_name : string) : unit =
+    (child_name : string)
+    (child_is_enum_class : bool) : unit =
   match (parent_kind, child_kind) with
   (* What is allowed *)
   | ( (Ast_defs.Cabstract | Ast_defs.Cnormal),
@@ -47,6 +49,18 @@ let check_extend_kind
   | (Ast_defs.Ctrait, Ast_defs.Ctrait)
   | (Ast_defs.Cinterface, Ast_defs.Cinterface) ->
     ()
+  | (Ast_defs.Cenum, Ast_defs.Cenum) ->
+    if parent_is_enum_class && child_is_enum_class then
+      ()
+    else
+      Errors.wrong_extend_kind
+        ~parent_pos
+        ~parent_kind
+        ~parent_name
+        ~child_pos
+        ~child_kind
+        ~child_name
+        ~child_is_enum_class
   | _ ->
     (* What is disallowed *)
     Errors.wrong_extend_kind
@@ -56,6 +70,7 @@ let check_extend_kind
       ~child_pos
       ~child_kind
       ~child_name
+      ~child_is_enum_class
 
 (*****************************************************************************)
 (* Functions used retrieve everything implemented in parent classes
@@ -115,19 +130,25 @@ let add_grand_parents_or_traits
     (parent_pos : Pos.t)
     (shallow_class : Shallow_decl_defs.shallow_class)
     (acc : SSet.t * bool * [> `Extends_pass | `Xhp_pass ])
-    (parent_type : Decl_defs.decl_class_type) : SSet.t * bool * 'a =
+    (parent_type : Decl_defs.decl_class_type)
+    (parent_enum_type : enum_type option) : SSet.t * bool * 'a =
   let (extends, is_complete, pass) = acc in
   let class_pos = fst shallow_class.sc_name in
   let class_kind = shallow_class.sc_kind in
   let class_name = snd shallow_class.sc_name in
+  let class_enum_type = shallow_class.sc_enum_type in
+  let parent_is_enum_class = is_enum_class parent_enum_type in
+  let class_is_enum_class = is_enum_class class_enum_type in
   if phys_equal pass `Extends_pass then
     check_extend_kind
       parent_pos
       parent_type.dc_kind
       parent_type.dc_name
+      parent_is_enum_class
       class_pos
       class_kind
-      class_name;
+      class_name
+      class_is_enum_class;
 
   (* If we are crawling the xhp attribute deps, we need to merge their xhp deps
    * as well *)
@@ -174,6 +195,7 @@ let get_class_parent_or_trait
       shallow_class
       acc
       parent_type
+      parent_type.dc_enum_type
 
 let get_class_parents_and_traits
     (env : Decl_env.env) (shallow_class : Shallow_decl_defs.shallow_class) :

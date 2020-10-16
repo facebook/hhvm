@@ -276,6 +276,10 @@ and decl_where_constraint = decl_ty where_constraint
 
 and locl_where_constraint = locl_ty where_constraint
 
+let is_enum_class = function
+  | None -> false
+  | Some info -> info.te_enum_class
+
 type phase_ty =
   | DeclTy of decl_ty
   | LoclTy of locl_ty

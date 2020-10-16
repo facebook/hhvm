@@ -75,6 +75,7 @@ list(REMOVE_ITEM files
   ${FOLLY_DIR}/experimental/io/IoUringBackend.cpp
   ${FOLLY_DIR}/experimental/io/HugePageUtil.cpp
   ${FOLLY_DIR}/experimental/io/PollIoBackend.cpp
+  ${FOLLY_DIR}/experimental/io/SimpleAsyncIO.cpp
   ${FOLLY_DIR}/experimental/symbolizer/SignalHandler.cpp
   ${FOLLY_DIR}/init/Init.cpp
   ${FOLLY_DIR}/logging/BridgeFromGoogleLogging.cpp
@@ -96,6 +97,7 @@ list(REMOVE_ITEM hfiles
   ${FOLLY_DIR}/experimental/io/IoUring.h
   ${FOLLY_DIR}/experimental/io/IoUringBackend.h
   ${FOLLY_DIR}/experimental/io/PollIoBackend.h
+  ${FOLLY_DIR}/experimental/io/SimpleAsyncIO.h
   ${FOLLY_DIR}/experimental/symbolizer/ElfCache.h
   ${FOLLY_DIR}/experimental/symbolizer/SignalHandler.h
   ${FOLLY_DIR}/init/Init.h

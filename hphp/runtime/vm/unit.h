@@ -791,11 +791,13 @@ struct UnitExtended : Unit {
   ArrayTypeTable m_arrayTypeTable;
   FuncTable m_funcTable;
 
+  // Used by Unit prefetcher:
   SymbolRefs m_symbolRefsForPrefetch;
   std::atomic_flag m_symbolRefsPrefetched;
 
   std::atomic<int64_t> m_cacheRefCount{0};
 
+  // Used by Eval.ReuseUnitsByHash:
   rds::Link<LowStringPtr, rds::Mode::Normal> m_perRequestFilepath;
 };
 

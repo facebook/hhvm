@@ -194,18 +194,17 @@ CachedUnit lookupUnitRepoAuth(const StringData* path,
 //////////////////////////////////////////////////////////////////////
 // Non-repo mode unit caching
 
-struct CachedUnitWithFree {
-  CachedUnitWithFree() = delete;
-  explicit CachedUnitWithFree(const CachedUnitWithFree&) = delete;
-  CachedUnitWithFree& operator=(const CachedUnitWithFree&) = delete;
+void releaseFromHashCache(Unit*);
 
-  // Create a new CachedUnit entry, with a new created Unit (no cache
-  // entry).
-  CachedUnitWithFree(
-    const CachedUnit& src,
-    const struct stat* statInfo,
-    const RepoOptions& options
-  ) : cu(src)
+struct CachedFile {
+  CachedFile() = delete;
+  explicit CachedFile(const CachedFile&) = delete;
+  CachedFile& operator=(const CachedFile&) = delete;
+
+  CachedFile(const CachedUnit& src,
+             const struct stat* statInfo,
+             const RepoOptions& options)
+    : cu(src)
     , repoOptionsHash(options.cacheKeySha1())
   {
     if (statInfo) {
@@ -218,16 +217,12 @@ struct CachedUnitWithFree {
       ino        = statInfo->st_ino;
       devId      = statInfo->st_dev;
     }
-    if (cu.unit) {
-      assertx(!cu.unit->hasCacheRef());
-      cu.unit->acquireCacheRefCount();
-    }
+    if (cu.unit) cu.unit->acquireCacheRefCount();
   }
 
-  // Create a new CachedUnit entry, sharing a Unit with another one,
+  // Create a new CachedFile entry, sharing a Unit with another one,
   // but with a new stat info.
-  CachedUnitWithFree(const CachedUnitWithFree& o,
-                     const struct stat* statInfo)
+  CachedFile(const CachedFile& o, const struct stat* statInfo)
     : cu{o.cu}
     , repoOptionsHash(o.repoOptionsHash)
   {
@@ -248,12 +243,17 @@ struct CachedUnitWithFree {
     }
   }
 
-  ~CachedUnitWithFree() {
+  ~CachedFile() {
     if (!cu.unit) return;
-    // Only delete the Unit if this is the last reference to it in the
-    // cache.
-    if (!cu.unit->releaseCacheRefCount()) return;
-    Treadmill::enqueue([u = cu.unit] { delete u; });
+    if (cu.unit->hasPerRequestFilepath()) {
+      // Units with per-request filepaths are backed by the per-hash
+      // cache and need special handling while deleting.
+      releaseFromHashCache(cu.unit);
+    } else if (cu.unit->releaseCacheRefCount()) {
+      // Otherwise, only delete the Unit if this is the last reference
+      // to it.
+      Treadmill::enqueue([u = cu.unit] { delete u; });
+    }
   }
 
   CachedUnit cu;
@@ -270,7 +270,7 @@ struct CachedUnitWithFree {
   SHA1 repoOptionsHash;
 };
 
-using CachedUnitWithFreePtr = copy_ptr<CachedUnitWithFree>;
+using CachedFilePtr = copy_ptr<CachedFile>;
 
 struct CachedUnitNonRepo {
   CachedUnitNonRepo() = default;
@@ -278,7 +278,7 @@ struct CachedUnitNonRepo {
       cachedUnit{other.cachedUnit.copy()} {}
   CachedUnitNonRepo& operator=(const CachedUnitNonRepo&) = delete;
 
-  mutable LockFreePtrWrapper<CachedUnitWithFreePtr> cachedUnit;
+  mutable LockFreePtrWrapper<CachedFilePtr> cachedUnit;
 };
 
 using NonRepoUnitCache = RankedCHM<
@@ -297,6 +297,42 @@ NonRepoUnitCache s_nonRepoUnitCache;
 using PerUserCache = folly::AtomicHashMap<uid_t, NonRepoUnitCache*>;
 PerUserCache s_perUserUnitCaches(10);
 
+struct CachedByHashUnit {
+  CachedByHashUnit() = default;
+  CachedByHashUnit(const CachedByHashUnit& other) : unit{other.unit.copy()} {}
+  CachedByHashUnit& operator=(const CachedByHashUnit&) = delete;
+
+  mutable LockFreePtrWrapper<Unit*> unit;
+};
+
+struct SHA1HashCompare {
+  bool equal(const SHA1& a, const SHA1& b) const { return a == b; }
+  size_t hash(const SHA1& a) const { return a.hash(); }
+};
+
+using UnitByHashCache = RankedCHM<
+  SHA1,
+  CachedByHashUnit,
+  SHA1HashCompare,
+  RankUnitHashCache
+>;
+UnitByHashCache s_unitByHashCache;
+
+//////////////////////////////////////////////////////////////////////
+
+namespace {
+
+ServiceData::ExportedCounter* s_unitCompileAttempts =
+  ServiceData::createCounter("vm.unit-compile-attempts");
+ServiceData::ExportedCounter* s_unitActualCompiles =
+  ServiceData::createCounter("vm.unit-actual-compiles");
+ServiceData::ExportedCounter* s_unitsPrefetched =
+  ServiceData::createCounter("vm.units-prefetched");
+
+}
+
+//////////////////////////////////////////////////////////////////////
+
 #ifndef _MSC_VER
 int64_t timespecCompare(const struct timespec& l,
                         const struct timespec& r) {
@@ -314,7 +350,7 @@ bool stressUnitCache() {
 }
 
 bool isChanged(
-  CachedUnitWithFreePtr cachedUnit,
+  const CachedFilePtr& cachedUnit,
   const struct stat* s,
   const RepoOptions& options
 ) {
@@ -339,15 +375,22 @@ bool isChanged(
 
 // Returns true if the given unit has no bound path, or it has already
 // been bound with the given path.
-bool canBeBoundToPath(const CachedUnitWithFreePtr& cachedUnit,
+bool canBeBoundToPath(const Unit* unit, const StringData* path) {
+  assertx(unit);
+  assertx(path->isStatic());
+  if (!RuntimeOption::EvalReuseUnitsByHash) return true;
+  auto const p = unit->perRequestFilepath();
+  if (!p) return true;
+  assertx(p->isStatic());
+  return p == path;
+}
+
+bool canBeBoundToPath(const CachedFilePtr& cachedUnit,
                       const StringData* path) {
   assertx(path->isStatic());
   if (!RuntimeOption::EvalReuseUnitsByHash) return true;
   if (!cachedUnit || !cachedUnit->cu.unit) return true;
-  auto const p = cachedUnit->cu.unit->perRequestFilepath();
-  if (!p) return true;
-  assertx(p->isStatic());
-  return p == path;
+  return canBeBoundToPath(cachedUnit->cu.unit, path);
 }
 
 folly::Optional<String> readFileAsString(const StringData* path,
@@ -370,19 +413,126 @@ folly::Optional<String> readFileAsString(const StringData* path,
   return file->read();
 }
 
-CachedUnitWithFreePtr createUnitFromFile(const StringData* const path,
-                                         Stream::Wrapper* wrapper,
-                                         Unit** releaseUnit,
-                                         OptLog& ent,
-                                         const Native::FuncTable& nativeFuncs,
-                                         const RepoOptions& options,
-                                         FileLoadFlags& flags,
-                                         const struct stat* statInfo,
-                                         CachedUnitWithFreePtr orig) {
+/*
+ * When a Unit is backed by the per-hash cache (which is equivalent to
+ * it having a per-request filepath), we cannot just treadmill it
+ * immediately when its cache ref-count drops to zero (like
+ * normal). We need to remove it from the per-hash cache first.
+ *
+ * However, this has a race:
+ *
+ * - This thread decrements the cache ref-count on the Unit and drops
+ *   it to zero. It enters the function below and prepares to remove
+ *   the Unit from the per-hash cache.
+ *
+ * - Simultaneously another thread is accessing the same Unit in the
+ *   per-hash cache. That thread increments the ref-count (bringing it
+ *   from 0 back to 1). The Unit is now alive again.
+ *
+ * - This thread removes the Unit from the cache (not a big deal) and
+ *   puts it on the treadmill (more problematic).
+ *
+ * We can work around this by the following:
+ *
+ * - We require that all inc-refs (but not dec-refs) of the cache
+ *   ref-count occur while holding the per-hash cache accessor. When
+ *   we go to remove the Unit from the cache, we use an exclusive
+ *   (non-const) accessor which guarantees no other thread is holding
+ *   an accessor on that key. Since inc-refs can only happen while
+ *   holding an accessor, we are guarded against a dead Unit
+ *   (ref-count of zero) resurrecting.
+ *
+ * - Once we hold the exclusive accessor, we check the ref-count
+ *   again. If its still zero, its safe to remove (since at this point
+ *   it cannot go back up).
+ *
+ * - Multiple threads can still see the ref-count go to zero (if
+ *   there's been inc-refs in between), so multiple threads can
+ *   attempt to acquire the accessor and free the entry. Therefore,
+ *   once we acquire the accessor, we confirm that the Unit still
+ *   exists in the cache (along with its ref-count). The first thread
+ *   which gets the accessor will remove it, and the rest will do
+ *   nothing.
+ *
+ * - Note: there's still technically a hazard here where the cache
+ *   entry could be replaced with another Unit at an identical memory
+ *   address. This is exceedingly unlikely, and harmless. If that
+ *   happens and the new Unit's ref-count happens to be zero, this
+ *   thread will just free that Unit instead on behalf of some other
+ *   thread.
+ *
+ * NB: We never erase the cache entries, just null them out. This
+ * makes it safe to iterate over the cache.
+ */
+
+void releaseFromHashCache(Unit* unit) {
+  assertx(unit);
+  assertx(!RuntimeOption::RepoAuthoritative);
+  assertx(RuntimeOption::EvalReuseUnitsByHash);
+  assertx(unit->hasPerRequestFilepath());
+
+  // Capture the SHA1 first from the Unit. If the release drops the
+  // ref-count to zero, another thread may delete it, so we can't
+  // access the Unit after this.
+  auto const sha1 = unit->sha1();
+  // If this isn't the last reference, nothing more to do.
+  if (!unit->releaseCacheRefCount()) return;
+  // NB: unit may be already freed at this point, so don't access it
+  // until we acquire the cache accessor.
+
+  tracing::BlockNoTrace _{"unit-hash-cache-erase"};
+
+  // Note the non-const accessor, which guarantees exclusivity.
+  UnitByHashCache::accessor acc;
+  // We never remove keys from the cache and since this Unit existed
+  // in the cache, the key should always be there.
+  always_assert(s_unitByHashCache.find(acc, sha1));
+
+  auto& cached = acc->second.unit;
+
+  // While we're holding the exclusive accessor, the ref-count cannot
+  // go back up. The Unit may have been freed while we were waiting
+  // for the accessor. Check if the entry for the hash is the same
+  // Unit. If it is, the Unit still exists and we can access it
+  // safely.
+  if (cached.copy() != unit) return;
+  // Check if the ref-count went back up since we decremented it. If
+  // so, freeing it will happen later and be some other thread's
+  // responsibility.
+  if (unit->hasCacheRef()) return;
+
+  // Acquire the entry lock. This is probably pedantic since nobody
+  // else should have an accessor on this entry.
+  cached.lock_for_update();
+  // Since we have an exclusive accessor, the ref-count should be
+  // unchanged.
+  assertx(!unit->hasCacheRef());
+
+  // Null out the entry in the cache. The "old" Unit should be our
+  // Unit since we already checked that. Treadmill the Unit and we're
+  // done. Once we release the accessor, any other thread waiting to
+  // delete this Unit will see that the entry is gone.
+  auto const DEBUG_ONLY old = cached.update_and_unlock(nullptr);
+  assertx(old == unit);
+  Treadmill::enqueue([unit] { delete unit; });
+}
+
+CachedFilePtr createUnitFromFile(const StringData* const path,
+                                 Stream::Wrapper* wrapper,
+                                 Unit** releaseUnit,
+                                 OptLog& ent,
+                                 const Native::FuncTable& nativeFuncs,
+                                 const RepoOptions& options,
+                                 FileLoadFlags& flags,
+                                 const struct stat* statInfo,
+                                 CachedFilePtr orig,
+                                 bool forPrefetch) {
   LogTimer readUnitTimer("read_unit_ms", ent);
 
+  tracing::BlockNoTrace _{"create-unit-from-file"};
+
   auto const contents = readFileAsString(path, wrapper);
-  if (!contents) return CachedUnitWithFreePtr{};
+  if (!contents) return CachedFilePtr{};
 
   readUnitTimer.stop();
 
@@ -392,60 +542,155 @@ CachedUnitWithFreePtr createUnitFromFile(const StringData* const path,
   };
   generateSha1Timer.stop();
 
+  s_unitCompileAttempts->increment();
+
   // The stat may have indicated that the file was touched, but the
   // contents may not have actually changed. In that case, the hash we
   // just calculated may be the same as the pre-existing Unit's
   // hash. In that case, we just use the old unit.
   if (orig && orig->cu.unit && sha1 == orig->cu.unit->sha1()) {
-    return CachedUnitWithFreePtr{*orig, statInfo};
+    return CachedFilePtr{*orig, statInfo};
   }
 
-  auto const check = [&] (Unit* unit) {
-    // Similar check as above, but on the hashed HHAS (as
-    // opposed to the file contents). If they turn out identical
-    // to the old Unit, keep the old Unit.
-    if (orig && orig->cu.unit && unit &&
-        unit->bcSha1() == orig->cu.unit->bcSha1()) {
-      delete unit;
-      return CachedUnitWithFreePtr{*orig, statInfo};
+  // Compile a new Unit from contents
+  auto const compileNew = [&] {
+    s_unitActualCompiles->increment();
+
+    // Try the repo; if it's not already there, invoke the compiler.
+    if (auto unit = Repo::get().loadUnit(path->slice(), sha1, nativeFuncs)) {
+      flags = FileLoadFlags::kHitDisk;
+      return unit.release();
     }
-    flags = FileLoadFlags::kEvicted;
-    if (RuntimeOption::EvalReuseUnitsByHash && unit) {
-      assertx(unit->origFilepath()->isStatic());
-      // For things like HHAS files, the filepath in the Unit may not
-      // match what we requested during compilation. In that case we
-      // can't use per-request filepaths because the filepath of the
-      // Unit has no relation to anyone else.
-      if (unit->origFilepath() == path) {
-        // Create a RDS slot to store the per-request file paths.
-        unit->makeFilepathPerRequest();
-      }
-    }
-    return CachedUnitWithFreePtr{
+
+    LogTimer compileTimer("compile_ms", ent);
+    rqtrace::EventGuard trace{"COMPILE_UNIT"};
+    trace.annotate("file_size", folly::to<std::string>(contents->size()));
+    flags = FileLoadFlags::kCompiled;
+    return compile_file(
+      contents->data(),
+      contents->size(),
+      sha1,
+      path->data(),
+      nativeFuncs, options, releaseUnit
+    );
+  };
+
+  // If orig is provided, check if the given Unit has the same bcSha1
+  // as it.
+  auto const sameBC = [&] (Unit* unit) {
+    return
+      orig && orig->cu.unit && unit &&
+      unit->bcSha1() == orig->cu.unit->bcSha1();
+  };
+
+  auto const makeCachedFilePtr = [&] (Unit* unit) {
+    return CachedFilePtr{
       CachedUnit { unit, unit ? rds::allocBit() : -1 },
       statInfo,
       options
     };
   };
 
-  // Try the repo; if it's not already there, invoke the compiler.
-  if (auto unit = Repo::get().loadUnit(path->slice(), sha1, nativeFuncs)) {
-    flags = FileLoadFlags::kHitDisk;
-    return check(unit.release());
+  if (RuntimeOption::EvalReuseUnitsByHash) {
+    // We're re-using Units according to their hash:
+
+    auto const cachedFilePtr = [&] {
+      tracing::BlockNoTrace _{"unit-hash-cache"};
+
+      UnitByHashCache::const_accessor acc;
+      s_unitByHashCache.insert(acc, sha1);
+
+      auto& cached = acc->second.unit;
+
+      auto const hit = [&] (Unit* unit) {
+        assertx(unit->sha1() == sha1);
+        assertx(unit->hasPerRequestFilepath());
+        // Try to re-use the old Unit if we can:
+        if (sameBC(unit)) return CachedFilePtr{*orig, statInfo};
+        if (forPrefetch || canBeBoundToPath(unit, path)) {
+          // We can bind the path so it can be used.
+          return makeCachedFilePtr(unit);
+        }
+        // Otherwise the Unit has an already bound (and incompatible)
+        // filepath. We'll just create a new Unit instead.
+        return CachedFilePtr{};
+      };
+
+      // First check before acquiring the lock
+      if (auto const unit = cached.copy()) return hit(unit);
+
+      // No entry, so acquire the lock:
+      if (!cached.try_lock_for_update()) {
+        tracing::BlockNoTrace _{"unit-hash-cache-lock-acquire"};
+        cached.lock_for_update();
+      }
+      SCOPE_FAIL { cached.unlock(); };
+
+      // Try again now that we have the lock
+      if (auto const unit = cached.copy()) {
+        // NB: Its safe to unlock first. The Unit can only be freed by
+        // releaseFromHashCache() which acquires an exclusive lock on
+        // this table slot first (so cannot happen concurrently).
+        cached.unlock();
+        return hit(unit);
+      }
+
+      // There's no Unit, compile a new one and store it in the cache.
+      auto unit = compileNew();
+      if (!unit) {
+        cached.unlock();
+        return makeCachedFilePtr(nullptr);
+      }
+      assertx(unit->sha1() == sha1);
+      assertx(!unit->hasCacheRef());
+      assertx(!unit->hasPerRequestFilepath());
+
+      // Try to re-use the original Unit if possible
+      if (sameBC(unit)) {
+        cached.unlock();
+        delete unit;
+        return CachedFilePtr{*orig, statInfo};
+      }
+
+      // For things like HHAS files, the filepath in the Unit may not
+      // match what we requested during compilation. In that case we
+      // can't use per-request filepaths because the filepath of the
+      // Unit has no relation to anything else. Units without
+      // per-request filepaths cannot be stored in this cache.
+      assertx(unit->origFilepath()->isStatic());
+      if (unit->origFilepath() != path) {
+        cached.unlock();
+        return makeCachedFilePtr(unit);
+      }
+      unit->makeFilepathPerRequest();
+
+      // Store the Unit in the cache.
+      auto const DEBUG_ONLY old = cached.update_and_unlock(std::move(unit));
+      assertx(!old);
+      return makeCachedFilePtr(unit);
+    }();
+    if (cachedFilePtr) {
+      if (!orig || cachedFilePtr->cu.unit != orig->cu.unit) {
+        flags = FileLoadFlags::kEvicted;
+      }
+      return cachedFilePtr;
+    }
   }
 
-  LogTimer compileTimer("compile_ms", ent);
-  rqtrace::EventGuard trace{"COMPILE_UNIT"};
-  trace.annotate("file_size", folly::to<std::string>(contents->size()));
-  flags = FileLoadFlags::kCompiled;
-  auto const unit = compile_file(
-    contents->data(),
-    contents->size(),
-    sha1,
-    path->data(),
-    nativeFuncs, options, releaseUnit
-  );
-  return check(unit);
+  // We're not reusing Units by hash, or one existed but already had a
+  // bound path. Compile a new Unit.
+  auto const unit = compileNew();
+  if (sameBC(unit)) {
+    // If the new Unit has the same bcSha1 as the old one, just re-use
+    // the old one. This saves any JIT work we've already done on the
+    // orig Unit.
+    delete unit;
+    return CachedFilePtr{*orig, statInfo};
+  }
+  flags = FileLoadFlags::kEvicted;
+  assertx(!unit || !unit->hasCacheRef());
+  assertx(!unit || !unit->hasPerRequestFilepath());
+  return makeCachedFilePtr(unit);
 }
 
 // When running via the CLI server special access checks may need to be
@@ -735,10 +980,10 @@ CachedUnit loadUnitNonRepoAuth(const StringData* rpath,
     auto ptr = [&] {
       auto orig = (RuntimeOption::EvalCheckUnitSHA1 && !forceNewUnit)
         ? cachedUnit.copy()
-        : CachedUnitWithFreePtr{};
+        : CachedFilePtr{};
       return createUnitFromFile(rpath, wrapper, &releaseUnit, ent,
                                 nativeFuncs, options, flags,
-                                statInfo, std::move(orig));
+                                statInfo, std::move(orig), forPrefetch);
     }();
     if (UNLIKELY(!ptr)) {
       cachedUnit.unlock();
@@ -1096,6 +1341,36 @@ std::vector<Unit*> loadedUnitsRepoAuth() {
   return units;
 }
 
+std::vector<std::pair<const StringData*, Unit*>> nonRepoUnitCacheUnits() {
+  std::vector<std::pair<const StringData*, Unit*>> paths;
+
+  // NB: Technically its not safe to iterate over a
+  // tbb::concurrent_hash_map concurrently. However we never delete
+  // entries from the cache which prevents us from accessing freed
+  // memory. This is technically safe, but we might visit an entry
+  // more than once or skip one. This is fine since this function is
+  // meant for debugging.
+  for (auto const& p : s_nonRepoUnitCache) {
+    assertx(p.first->isStatic());
+    auto const cached = p.second.cachedUnit.copy();
+    if (!cached || !cached->cu.unit) continue;
+    paths.emplace_back(p.first, cached->cu.unit);
+  }
+  return paths;
+}
+
+std::vector<std::pair<SHA1, Unit*>> nonRepoUnitHashCacheUnits() {
+  std::vector<std::pair<SHA1, Unit*>> hashes;
+
+  // NB: See above explanation why this is safe.
+  for (auto const& p : s_unitByHashCache) {
+    auto const unit = p.second.unit.copy();
+    if (!unit) continue;
+    hashes.emplace_back(p.first, unit);
+  }
+  return hashes;
+}
+
 void invalidateUnit(StringData* path) {
   always_assert(!RuntimeOption::RepoAuthoritative);
 
@@ -1109,14 +1384,13 @@ void invalidateUnit(StringData* path) {
       // but not yet inc-ref'd it. If we just erase the entry, we
       // could dec-ref it (and free it) before the other thread has a
       // chance to inc-ref it. We need to defer the dec-ref using the
-      // treadmill. Manually move the copy_ptr onto the treadmill,
-      // replace it with a null copy_ptr, and then erase the entry.
+      // treadmill. Manually move the copy_ptr onto the treadmill, and
+      // then replace it with a null copy_ptr.
       auto& cached = acc->second.cachedUnit;
       cached.lock_for_update();
       if (auto old = cached.update_and_unlock({})) {
         Treadmill::enqueue([o = std::move(old)] {});
       }
-      cache.erase(acc);
     }
   };
   erase(s_nonRepoUnitCache);
@@ -1434,14 +1708,14 @@ void prefetchUnit(StringData* requestedPath,
       auto ptr = [&] {
         auto orig = RuntimeOption::EvalCheckUnitSHA1
           ? cachedUnit.copy()
-          : CachedUnitWithFreePtr{};
+          : CachedFilePtr{};
         FileLoadFlags flags;
         OptLog optLog;
         return createUnitFromFile(rpath, nullptr, &releaseUnit, optLog,
                                   Native::s_noNativeFuncs,
                                   options, flags,
                                   fileStat.get_pointer(),
-                                  std::move(orig));
+                                  std::move(orig), true);
       }();
 
       // We don't want to prefetch ICE units (they can be
@@ -1466,6 +1740,8 @@ void prefetchUnit(StringData* requestedPath,
         // destructor will take care of it.
         Treadmill::enqueue([o = std::move(old)] {});
       }
+
+      s_unitsPrefetched->increment();
     },
     // Use high priority for prefetch requests. Medium priority is
     // used for drain blocks. Low priority is used internally by the
@@ -1531,6 +1807,7 @@ namespace {
 ServiceData::CounterCallback s_counters(
   [](std::map<std::string, int64_t>& counters) {
     counters["vm.path-unit-cache-size"] = numLoadedUnits();
+    counters["vm.hash-unit-cache-size"] = s_unitByHashCache.size();
     counters["vm.eval-unit-cache-size"] = s_evaledUnits.size();
     counters["vm.live-units"] = Unit::liveUnitCount();
   }

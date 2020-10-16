@@ -52,6 +52,8 @@ enum Rank {
   RankUnitCache,
   RankStatCacheNode = RankUnitCache,
 
+  RankUnitHashCache,
+
   RankInstanceBitsInit,
 
   RankTreadmill,
@@ -79,4 +81,3 @@ extern void insertRank(Rank r);
 #endif
 
 }
-

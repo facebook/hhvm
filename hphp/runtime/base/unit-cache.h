@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include "hphp/util/sha1.h"
+
 #include <string>
 #include <vector>
 
@@ -93,6 +95,13 @@ size_t numLoadedUnits();
  * Precondition: RepoAuthoritative
  */
 std::vector<Unit*> loadedUnitsRepoAuth();
+
+/*
+ * Return the current entires in the non-repo Unit cache or the
+ * per-hash Unit cache. Used for debugging.
+ */
+std::vector<std::pair<const StringData*, Unit*>> nonRepoUnitCacheUnits();
+std::vector<std::pair<SHA1, Unit*>> nonRepoUnitHashCacheUnits();
 
 /*
  * Resolve an include path, for the supplied path and directory, using the same

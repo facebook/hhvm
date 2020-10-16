@@ -17,9 +17,11 @@
 #include "hphp/runtime/base/bespoke/layout.h"
 
 #include "hphp/runtime/base/bespoke/logging-array.h"
+#include "hphp/runtime/base/bespoke/logging-profile.h"
 #include "hphp/runtime/base/bespoke/monotype-vec.h"
 #include "hphp/runtime/vm/jit/irgen.h"
 #include "hphp/runtime/vm/jit/punt.h"
+#include "hphp/util/trace.h"
 
 #include <atomic>
 #include <array>
@@ -90,5 +92,12 @@ struct Layout::Initializer {
   }
 };
 Layout::Initializer Layout::s_initializer;
+
+void logBespokeDispatch(const ArrayData* ad, const char* fn) {
+  DEBUG_ONLY auto const sk = getSrcKey();
+  DEBUG_ONLY auto const layout = BespokeArray::asBespoke(ad)->layout();
+  TRACE_MOD(Trace::bespoke, 6, "Bespoke dispatch: %s: %s::%s\n",
+            sk.getSymbol().data(), layout.describe().data(), fn);
+}
 
 }}

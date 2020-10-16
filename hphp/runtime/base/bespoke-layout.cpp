@@ -34,7 +34,7 @@ uint16_t BespokeLayout::index() const {
   return m_layout->index().raw;
 }
 
-std::string BespokeLayout::describe() const {
+const std::string& BespokeLayout::describe() const {
   return m_layout->describe();
 }
 

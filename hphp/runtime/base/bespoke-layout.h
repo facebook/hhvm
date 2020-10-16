@@ -60,7 +60,7 @@ struct BespokeLayout {
   static BespokeLayout FromIndex(uint16_t index);
 
   /* get a human-readable string describing the layout */
-  std::string describe() const;
+  const std::string& describe() const;
 
   /****************************************************************************
    * access to arraydata methods

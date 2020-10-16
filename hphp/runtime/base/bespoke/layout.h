@@ -36,6 +36,8 @@ namespace irgen { struct IRGS; }
 
 namespace bespoke {
 
+void logBespokeDispatch(const ArrayData* ad, const char* fn);
+
 #define BESPOKE_LAYOUT_FUNCTIONS(T) \
   X(size_t, HeapSize, const T* ad) \
   X(size_t, Align, const T* ad) \
@@ -87,11 +89,12 @@ struct LayoutFunctions {
  */
 template <typename Array>
 struct LayoutFunctionDispatcher {
-  ALWAYS_INLINE static Array* Cast(ArrayData* ad) {
+  ALWAYS_INLINE static Array* Cast(ArrayData* ad, const char* fn) {
+    logBespokeDispatch(ad, fn);
     return Array::As(ad);
   }
-
-  ALWAYS_INLINE static const Array* Cast(const ArrayData* ad) {
+  ALWAYS_INLINE static const Array* Cast(const ArrayData* ad, const char* fn) {
+    logBespokeDispatch(ad, fn);
     return Array::As(ad);
   }
 
@@ -102,100 +105,99 @@ struct LayoutFunctionDispatcher {
     return Array::HeapSize(reinterpret_cast<const Array*>(ad));
   }
   static size_t Align(const ArrayData* ad) {
-    return Array::Align(Cast(ad));
+    return Array::Align(Cast(ad, __func__));
   }
   static void Scan(const ArrayData* ad, type_scan::Scanner& scanner) {
-    return Array::Scan(Cast(ad), scanner);
+    return Array::Scan(Cast(ad, __func__), scanner);
   }
   static ArrayData* EscalateToVanilla(const ArrayData* ad, const char* reason) {
-    return Array::EscalateToVanilla(Cast(ad), reason);
+    return Array::EscalateToVanilla(Cast(ad, __func__), reason);
   }
   static void ConvertToUncounted(ArrayData* ad, DataWalker::PointerMap* seen) {
-    return Array::ConvertToUncounted(Cast(ad), seen);
+    return Array::ConvertToUncounted(Cast(ad, __func__), seen);
   }
   static void ReleaseUncounted(ArrayData* ad) {
-    return Array::ReleaseUncounted(Cast(ad));
+    return Array::ReleaseUncounted(Cast(ad, __func__));
   }
   static void Release(ArrayData* ad) {
-    return Array::Release(Cast(ad));
+    return Array::Release(Cast(ad, __func__));
   }
   static bool IsVectorData(const ArrayData* ad) {
-    return Array::IsVectorData(Cast(ad));
+    return Array::IsVectorData(Cast(ad, __func__));
   }
   static TypedValue GetInt(const ArrayData* ad, int64_t k) {
-    return Array::GetInt(Cast(ad), k);
+    return Array::GetInt(Cast(ad, __func__), k);
   }
   static TypedValue GetStr(const ArrayData* ad, const StringData* k) {
-    return Array::GetStr(Cast(ad), k);
+    return Array::GetStr(Cast(ad, __func__), k);
   }
   static TypedValue GetKey(const ArrayData* ad, ssize_t pos) {
-    return Array::GetKey(Cast(ad), pos);
+    return Array::GetKey(Cast(ad, __func__), pos);
   }
   static TypedValue GetVal(const ArrayData* ad, ssize_t pos) {
-    return Array::GetVal(Cast(ad), pos);
+    return Array::GetVal(Cast(ad, __func__), pos);
   }
   static ssize_t GetIntPos(const ArrayData* ad, int64_t k) {
-    return Array::GetIntPos(Cast(ad), k);
+    return Array::GetIntPos(Cast(ad, __func__), k);
   }
   static ssize_t GetStrPos(const ArrayData* ad, const StringData* k) {
-    return Array::GetStrPos(Cast(ad), k);
+    return Array::GetStrPos(Cast(ad, __func__), k);
   }
   static arr_lval LvalInt(ArrayData* ad, int64_t k) {
-    return Array::LvalInt(Cast(ad), k);
+    return Array::LvalInt(Cast(ad, __func__), k);
   }
   static arr_lval LvalStr(ArrayData* ad, StringData* k) {
-    return Array::LvalStr(Cast(ad), k);
+    return Array::LvalStr(Cast(ad, __func__), k);
   }
   static arr_lval ElemInt(ArrayData* ad, int64_t k) {
-    return Array::ElemInt(Cast(ad), k);
+    return Array::ElemInt(Cast(ad, __func__), k);
   }
   static arr_lval ElemStr(ArrayData* ad, StringData* k) {
-    return Array::ElemStr(Cast(ad), k);
+    return Array::ElemStr(Cast(ad, __func__), k);
   }
   static ArrayData* SetInt(ArrayData* ad, int64_t k, TypedValue v) {
-    return Array::SetInt(Cast(ad), k, v);
+    return Array::SetInt(Cast(ad, __func__), k, v);
   }
   static ArrayData* SetStr(ArrayData* ad, StringData* k, TypedValue v){
-    return Array::SetStr(Cast(ad), k, v);
+    return Array::SetStr(Cast(ad, __func__), k, v);
   }
   static ArrayData* RemoveInt(ArrayData* ad, int64_t k) {
-    return Array::RemoveInt(Cast(ad), k);
+    return Array::RemoveInt(Cast(ad, __func__), k);
   }
   static ArrayData* RemoveStr(ArrayData* ad, const StringData* k) {
-    return Array::RemoveStr(Cast(ad), k);
+    return Array::RemoveStr(Cast(ad, __func__), k);
   }
   static ssize_t IterBegin(const ArrayData* ad) {
-    return Array::IterBegin(Cast(ad));
+    return Array::IterBegin(Cast(ad, __func__));
   }
   static ssize_t IterLast(const ArrayData* ad) {
-    return Array::IterLast(Cast(ad));
+    return Array::IterLast(Cast(ad, __func__));
   }
   static ssize_t IterEnd(const ArrayData* ad) {
-    return Array::IterEnd(Cast(ad));
+    return Array::IterEnd(Cast(ad, __func__));
   }
   static ssize_t IterAdvance(const ArrayData* ad, ssize_t pos) {
-    return Array::IterAdvance(Cast(ad), pos);
+    return Array::IterAdvance(Cast(ad, __func__), pos);
   }
   static ssize_t IterRewind(const ArrayData* ad, ssize_t pos) {
-    return Array::IterRewind(Cast(ad), pos);
+    return Array::IterRewind(Cast(ad, __func__), pos);
   }
   static ArrayData* Append(ArrayData* ad, TypedValue v) {
-    return Array::Append(Cast(ad), v);
+    return Array::Append(Cast(ad, __func__), v);
   }
   static ArrayData* Pop(ArrayData* ad, Variant& v) {
-    return Array::Pop(Cast(ad), v);
+    return Array::Pop(Cast(ad, __func__), v);
   }
   static ArrayData* ToDVArray(ArrayData* ad, bool copy) {
-    return Array::ToDVArray(Cast(ad), copy);
+    return Array::ToDVArray(Cast(ad, __func__), copy);
   }
   static ArrayData* ToHackArr(ArrayData* ad, bool copy) {
-    return Array::ToHackArr(Cast(ad), copy);
+    return Array::ToHackArr(Cast(ad, __func__), copy);
   }
   static ArrayData* SetLegacyArray(ArrayData* ad, bool copy, bool legacy) {
-    return Array::SetLegacyArray(Cast(ad), copy, legacy);
+    return Array::SetLegacyArray(Cast(ad, __func__), copy, legacy);
   }
 };
-
 
 template <typename Array>
 constexpr LayoutFunctions fromArray() {

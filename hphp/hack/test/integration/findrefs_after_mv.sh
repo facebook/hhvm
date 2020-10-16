@@ -21,7 +21,7 @@ test -x "$hh_server" || err 12 'hh_client is not executable'
 cd "/" || err 15 'cannot go to /'
 
 # make new directory for test case
-tempdir="$(mktemp -d)"
+tempdir="$(mktemp /tmp/hhtest_repo_XXXX -d)"
 test -d "$tempdir" || err 20 'cannot create tempdir'
 cd "$tempdir" || err 21 'cannot change to tempdir'
 
@@ -30,6 +30,11 @@ cd "$tempdir" || err 21 'cannot change to tempdir'
 # ... abort: unknown revision 'master'"
 mkdir ".hg"
 test -d ".hg" || err 22 'cannot create tempdir/.hg'
+
+# We'll use this instead of /tmp/hh_server
+hh_tmpdir="$(mktemp /tmp/hhtest_hh_tmpdir_XXXX -d)"
+test -d "$hh_tmpdir" || err 23 'cannot create hh_tmpdir'
+export HH_TMPDIR="$hh_tmpdir"
 
 # write files
 cat <<EOF > "c.php"
@@ -99,4 +104,5 @@ status="$?"
 2>&1 echo "success!"
 cd "/" || err 90 'cannot go to /'
 rm -rf "$tempdir"
+rm -rf "$hh_tmpdir"
 exit 0

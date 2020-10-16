@@ -38,8 +38,13 @@ test -x "$hh_server" || err 110 'hh_server is not executable'
 cd "/" || err 20 'cannot go to /'
 
 # make new directory for test case
-tempdir="$(mktemp -d)"
+tempdir="$(mktemp /tmp/hhtest_repo_XXXX -d)"
 test -d "$tempdir" || err 20 'cannot create tempdir'
+
+# We'll use this instead of /tmp/hh_server
+hh_tmpdir="$(mktemp /tmp/hhtest_hh_tmpdir_XXXX -d)"
+test -d "$hh_tmpdir" || err 23 'cannot create hh_tmpdir'
+export HH_TMPDIR="$hh_tmpdir"
 
 # write file with gratuitous type error
 cat <<EOF > "$tempdir"/type_error.php
@@ -80,4 +85,5 @@ test -f "$tempdir"/savestate.sql || err 60 'savestate.sql was not created'
 <"$tempdir"/out.log grep -i '^file.*line.*character' || err 90 'no reported errors on stdout'
 
 2>&1 echo "success!"
+rm -fr "$hh_tmpdir"
 exit 0

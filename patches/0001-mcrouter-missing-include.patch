@@ -1,0 +1,24 @@
+From 5da5b2019db6e3891e4c19be3be71645760e2a75 Mon Sep 17 00:00:00 2001
+From: jjergus <jjergus@fb.com>
+Date: Fri, 16 Oct 2020 14:02:58 -0700
+Subject: [PATCH] mcrouter missing include
+
+---
+ mcrouter/RequestAclChecker.h | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/third-party/mcrouter/src/mcrouter/RequestAclChecker.h b/third-party/mcrouter/src/mcrouter/RequestAclChecker.h
+index f8a99527..f63d7ef1 100644
+--- a/third-party/mcrouter/src/mcrouter/RequestAclChecker.h
++++ b/third-party/mcrouter/src/mcrouter/RequestAclChecker.h
+@@ -9,6 +9,7 @@
+ 
+ #include "mcrouter/ExternalStatsHandler.h"
+ #include "mcrouter/StandaloneConfig.h"
++#include "mcrouter/lib/Reply.h"
+ #include "mcrouter/lib/carbon/Result.h"
+ #include "mcrouter/lib/network/gen/MemcacheRouterInfo.h"
+ 
+-- 
+2.17.1
+

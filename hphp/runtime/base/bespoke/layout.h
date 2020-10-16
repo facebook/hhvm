@@ -40,7 +40,6 @@ void logBespokeDispatch(const ArrayData* ad, const char* fn);
 
 #define BESPOKE_LAYOUT_FUNCTIONS(T) \
   X(size_t, HeapSize, const T* ad) \
-  X(size_t, Align, const T* ad) \
   X(void, Scan, const T* ad, type_scan::Scanner& scanner) \
   X(ArrayData*, EscalateToVanilla, const T*, const char* reason) \
   X(void, ConvertToUncounted, T*, DataWalker::PointerMap* seen) \
@@ -103,9 +102,6 @@ struct LayoutFunctionDispatcher {
     // objects referenced by ad have been freed. As a result, we don't check
     // invariants.
     return Array::HeapSize(reinterpret_cast<const Array*>(ad));
-  }
-  static size_t Align(const ArrayData* ad) {
-    return Array::Align(Cast(ad, __func__));
   }
   static void Scan(const ArrayData* ad, type_scan::Scanner& scanner) {
     return Array::Scan(Cast(ad, __func__), scanner);

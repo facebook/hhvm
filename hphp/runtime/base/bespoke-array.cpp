@@ -99,7 +99,7 @@ ArrayData* BespokeArray::MakeUncounted(ArrayData* ad, bool hasApcTv,
   auto const vtable = asBespoke(ad)->vtable();
   auto const extra = uncountedAllocExtra(ad, hasApcTv);
   auto const bytes = vtable->fnHeapSize(ad);
-  assertx(extra % vtable->fnAlign(ad) == 0);
+  assertx(extra % 16 == 0);
 
   // "Help" out by copying the array's raw bytes to an uncounted allocation.
   auto const mem = static_cast<char*>(uncounted_malloc(bytes + extra));

@@ -183,10 +183,6 @@ size_t EmptyMonotypeVec::HeapSize(const EmptyMonotypeVec* ead) {
   return sizeof(EmptyMonotypeVec);
 }
 
-size_t EmptyMonotypeVec::Align(const EmptyMonotypeVec*) {
-  return alignof(EmptyMonotypeVec);
-}
-
 void EmptyMonotypeVec::Scan(const EmptyMonotypeVec* ead, type_scan::Scanner&) {
 }
 
@@ -525,10 +521,6 @@ const MonotypeVec* MonotypeVec::As(const ArrayData* ad) {
 
 size_t MonotypeVec::HeapSize(const MonotypeVec* mad) {
   return MemoryManager::sizeIndex2Size(mad->sizeIndex());
-}
-
-size_t MonotypeVec::Align(const MonotypeVec*) {
-  return alignof(MonotypeVec);
 }
 
 void MonotypeVec::Scan(const MonotypeVec* mad, type_scan::Scanner& scan) {

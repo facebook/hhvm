@@ -234,10 +234,6 @@ size_t LoggingArray::HeapSize(const LoggingArray*) {
   return sizeof(LoggingArray);
 }
 
-size_t LoggingArray::Align(const LoggingArray*) {
-  return alignof(LoggingArray);
-}
-
 void LoggingArray::Scan(const LoggingArray* lad, type_scan::Scanner& scanner) {
   logEvent(lad, ArrayOp::Scan);
   scanner.scan(lad->wrapped);

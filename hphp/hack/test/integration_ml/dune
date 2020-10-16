@@ -48,6 +48,7 @@
     test_gconst_file
     test_get_dependent_classes
     test_getfundeps
+    test_identify
     test_ignore_fixme_hhi
     test_infer_type
     test_interrupt
@@ -184,6 +185,11 @@
   (name getfundeps)
   (deps test_all.exe)
   (action (run ./test_all.exe getfundeps)))
+
+(alias
+  (name identify)
+  (deps test_all.exe)
+  (action (run ./test_all.exe identify)))
 
 (alias
   (name isfunlocallable)
@@ -339,6 +345,7 @@
     (alias get_dependent_classes)
     (alias infer_type)
     (alias getfundeps)
+    (alias identify)
     (alias isfunlocallable)
     (alias server_hover)
     (alias failed_naming)

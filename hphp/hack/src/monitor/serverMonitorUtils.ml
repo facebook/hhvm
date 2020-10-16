@@ -134,8 +134,12 @@ type connection_state =
   (* the sequence of constructors here is part of the binary protocol  *)
   (* we want to support between mismatched versions of client_server.  *)
   | Build_id_mismatch
-  (* Build_id_mismatch_ex *is* used. *)
+  (* Build_id_mismatch_ex *is* used. Ex stands for 'extended' *)
   | Build_id_mismatch_ex of build_mismatch_info
+  (* Build_id_mismatch_v3 isn't used yet, but might be *)
+  | Build_id_mismatch_v3 of build_mismatch_info * string
+  (* Connection_ok_v2 isn't used yet, but might be *)
+  | Connection_ok_v2 of string
 
 (* Result of a shutdown monitor RPC. *)
 type shutdown_result =

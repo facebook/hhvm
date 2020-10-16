@@ -119,8 +119,11 @@ let get_cstate
 
 let verify_cstate ~tracker ic cstate =
   match cstate with
-  | Connection_ok -> Ok ()
-  | Build_id_mismatch_ex mismatch_info ->
+  | Connection_ok
+  | Connection_ok_v2 _ ->
+    Ok ()
+  | Build_id_mismatch_ex mismatch_info
+  | Build_id_mismatch_v3 (mismatch_info, _) ->
     (* The server is out of date and is going to exit. Subsequent calls
      * to connect on the Unix Domain Socket might succeed, connecting to
      * the server that is about to die, and eventually we will be hung

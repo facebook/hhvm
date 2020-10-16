@@ -93,7 +93,7 @@ module Sent_fds_collector = struct
       ()
 end
 
-exception Malformed_build_id
+exception Malformed_build_id of string
 
 exception Send_fd_failure of int
 
@@ -264,14 +264,18 @@ struct
       start_new_server ?target_saved_state env exit_status
 
   let read_version fd =
-    let client_build_id : string = Marshal_tools.from_fd_with_preamble fd in
+    let s : string = Marshal_tools.from_fd_with_preamble fd in
     let newline_byte = Bytes.create 1 in
     let _ = Unix.read fd newline_byte 0 1 in
-    if not (String.equal (Bytes.to_string newline_byte) "\n") then (
-      Hh_logger.log "Did not find newline character after version";
-      raise Malformed_build_id
-    );
-    client_build_id
+    if not (String.equal (Bytes.to_string newline_byte) "\n") then
+      raise (Malformed_build_id "missing newline after version");
+    (* Newer clients send version in a json object.
+    Older clients sent just a client_version string *)
+    if String_utils.string_starts_with s "{" then
+      try Hh_json.json_of_string s
+      with e -> raise (Malformed_build_id (Exn.to_string e))
+    else
+      Hh_json.JSON_Object [("client_version", Hh_json.JSON_String s)]
 
   let rec handle_monitor_rpc env client_fd =
     let cmd : MonitorRpc.command =
@@ -463,7 +467,12 @@ struct
 
   and ack_and_handoff_client env client_fd =
     try
-      let client_version = read_version client_fd in
+      let json = read_version client_fd in
+      let client_version =
+        match Hh_json_helpers.Jget.string_opt (Some json) "client_version" with
+        | Some client_version -> client_version
+        | None -> raise (Malformed_build_id "Missing client_version")
+      in
       if
         (not env.ignore_hh_version)
         && not (String.equal client_version Build_id.build_revision)
@@ -473,11 +482,11 @@ struct
         msg_to_channel client_fd Connection_ok;
         handle_monitor_rpc env client_fd
       )
-    with Malformed_build_id as e ->
-      let stack = Caml.Printexc.get_raw_backtrace () in
-      HackEventLogger.malformed_build_id ();
-      Hh_logger.log "Malformed Build ID";
-      Caml.Printexc.raise_with_backtrace e stack
+    with Malformed_build_id _ as exn ->
+      let e = Exception.wrap exn in
+      HackEventLogger.malformed_build_id e;
+      Hh_logger.log "Malformed Build ID - %s" (Exception.to_string e);
+      Exception.reraise e
 
   and push_purgatory_clients env =
     (* We create a queue and transfer all the purgatory clients to it before

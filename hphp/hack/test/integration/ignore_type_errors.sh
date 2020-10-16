@@ -59,7 +59,7 @@ test -f "$tempdir"/.hhconfig || err 40 'cannot create empty .hhconfig'
 # type errors (because its job is to produce a saved state)
 (
     cd "$tempdir" || exit 50
-    "$hh_server" --gen-saved-ignore-type-errors --save-mini savestate --max-procs 2 . \
+    "$hh_server" . --gen-saved-ignore-type-errors --save-mini savestate --max-procs 2 --config symbolindex_search_provider=NoIndex \
       1>"$tempdir"/out.log 2>"$tempdir"/err.log
 )
 status="$?"

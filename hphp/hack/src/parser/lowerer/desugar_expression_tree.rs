@@ -188,6 +188,14 @@ fn rewrite_expr(e: &Expr) -> Expr {
             (Bop::Eq(None), lhs, rhs) => {
                 meth_call("assign", vec![rewrite_expr(&lhs), rewrite_expr(&rhs)], &e.0)
             }
+            // Convert `... && ...` to `$v->ampamp($v->..., $v->...)`.
+            (Bop::Ampamp, lhs, rhs) => {
+                meth_call("ampamp", vec![rewrite_expr(&lhs), rewrite_expr(&rhs)], &e.0)
+            }
+            // Convert `... || ...` to `$v->barbar($v->..., $v->...)`.
+            (Bop::Barbar, lhs, rhs) => {
+                meth_call("barbar", vec![rewrite_expr(&lhs), rewrite_expr(&rhs)], &e.0)
+            }
             _ => meth_call(
                 "unsupportedSyntax",
                 vec![string_literal("bad binary operator")],

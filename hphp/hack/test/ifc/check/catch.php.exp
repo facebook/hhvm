@@ -21,5 +21,5 @@ Data with policy `A` appears in context `B`. (Typing[4379])
   This may be the data source with policy `A`
   File "catch.php", line 9, characters 14-19:
   This may be the data sink with policy `B`
-  File "catch.php", line 45, characters 9-13:
+  File "catch.php", line 45, characters 9-17:
   Another program point contributing to the illegal flow

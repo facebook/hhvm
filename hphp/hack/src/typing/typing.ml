@@ -208,12 +208,24 @@ let refinement_annot_map env lset =
       Some map
   | None -> None
 
-let add_block_annots ~pos ?join_map ?refinement_map blk =
-  let mk_join_annot map = (pos, Aast.AssertEnv (Aast.Join, map)) in
-  let mk_refinement_annot map = (pos, Aast.AssertEnv (Aast.Refinement, map)) in
-  Option.to_list (Option.map ~f:mk_join_annot join_map)
-  @ Option.to_list (Option.map ~f:mk_refinement_annot refinement_map)
-  @ blk
+let assert_env_blk ~pos ~at annotation_kind env_map_opt blk =
+  let mk_assert map = (pos, Aast.AssertEnv (annotation_kind, map)) in
+  let annot_blk = Option.to_list (Option.map ~f:mk_assert env_map_opt) in
+  match at with
+  | `Start -> annot_blk @ blk
+  | `End -> blk @ annot_blk
+
+let assert_env_stmt ~pos ~at annotation_kind env_map_opt stmt =
+  let mk_assert map = (pos, Aast.AssertEnv (annotation_kind, map)) in
+  match env_map_opt with
+  | Some env_map ->
+    let blk =
+      match at with
+      | `Start -> [mk_assert env_map; (pos, stmt)]
+      | `End -> [(pos, stmt); mk_assert env_map]
+    in
+    Aast.Block blk
+  | None -> stmt
 
 let set_tcopt_unstable_features env { fa_user_attributes; _ } =
   match
@@ -601,16 +613,25 @@ and stmt_ env pos st =
     in
     (env, Aast.Expr te)
   | If (e, b1, b2) ->
+    let assert_refinement_env =
+      assert_env_blk ~pos ~at:`Start Aast.Refinement
+    in
     let (env, te, _) = expr env e in
     let (env, tb1, tb2) =
       branch
         env
         (fun env ->
-          let (env, _lset) = condition env true te in
-          block env b1)
+          let (env, lset) = condition env true te in
+          let refinement_map = refinement_annot_map env lset in
+          let (env, b1) = block env b1 in
+          let b1 = assert_refinement_env refinement_map b1 in
+          (env, b1))
         (fun env ->
-          let (env, _lset) = condition env false te in
-          block env b2)
+          let (env, lset) = condition env false te in
+          let refinement_map = refinement_annot_map env lset in
+          let (env, b2) = block env b2 in
+          let b2 = assert_refinement_env refinement_map b2 in
+          (env, b2))
     in
     (* TODO TAST: annotate with joined types *)
     (env, Aast.If (te, tb1, tb2))
@@ -730,7 +751,7 @@ and stmt_ env pos st =
     in
     (env, Aast.Do (tb, te))
   | While (e, b) ->
-    let (env, (te, tb)) =
+    let (env, (te, tb, refinement_map)) =
       LEnv.stash_and_do env [C.Continue; C.Break] (fun env ->
           let env = LEnv.save_and_merge_next_in_cont env C.Continue in
           let (env, tb) =
@@ -746,16 +767,29 @@ and stmt_ env pos st =
                 let refinement_map = refinement_annot_map env lset in
                 (* TODO TAST: avoid repeated generation of block *)
                 let (env, tb) = block env b in
-                let tb = add_block_annots ~pos ?join_map ?refinement_map tb in
+
+                (* Annotate loop body with join and refined environments *)
+                let at = `Start in
+                let tb =
+                  assert_env_blk ~pos ~at Aast.Refinement refinement_map tb
+                in
+                let tb = assert_env_blk ~pos ~at Aast.Join join_map tb in
+
                 (env, tb))
           in
           let env = LEnv.update_next_from_conts env [C.Continue; C.Next] in
           let (env, te, _) = expr env e in
-          let (env, _lset) = condition env false te in
+          let (env, lset) = condition env false te in
+          let refinement_map_at_exit = refinement_annot_map env lset in
           let env = LEnv.update_next_from_conts env [C.Break; C.Next] in
-          (env, (te, tb)))
+          (env, (te, tb, refinement_map_at_exit)))
     in
-    (env, Aast.While (te, tb))
+    let while_st = Aast.While (te, tb) in
+    (* Export the refined environment after the exit condition holds *)
+    let while_st =
+      assert_env_stmt ~pos ~at:`End Aast.Refinement refinement_map while_st
+    in
+    (env, while_st)
   | Using
       {
         us_has_await = has_await;
@@ -836,8 +870,11 @@ and stmt_ env pos st =
                 let env =
                   LEnv.update_next_from_conts env [C.Continue; C.Next]
                 in
+                let join_map = annot_map env in
                 let (env, te2) = bind_as_expr env (fst e1) tk tv e2 in
                 let (env, tb) = block env b in
+                (* Export the join environment *)
+                let tb = assert_env_blk ~pos ~at:`Start Aast.Join join_map tb in
                 (env, (te2, tb)))
           in
           let env =

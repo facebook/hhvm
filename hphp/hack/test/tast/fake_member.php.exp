@@ -30,14 +30,17 @@
                  (Obj_get ((([7:9-14], this), This),
                     (([7:16-19], ?int), (Id ([7:16-19], "foo"))),
                     OG_nullthrows))),
-                [([8:7-18],
-                  (Expr
-                     (([8:7-17], int),
-                      (Obj_get ((([8:7-12], this), This),
-                         (([8:14-17], int), (Id ([8:14-17], "foo"))),
-                         OG_nullthrows)))))
+                [([7:5-9:6], (AssertEnv (Refinement, {$this->foo})));
+                  ([8:7-18],
+                   (Expr
+                      (([8:7-17], int),
+                       (Obj_get ((([8:7-12], this), This),
+                          (([8:14-17], int), (Id ([8:14-17], "foo"))),
+                          OG_nullthrows)))))
                   ],
-                [([Pos.none], Noop)])))
+                [([7:5-9:6], (AssertEnv (Refinement, {$this->foo})));
+                  ([Pos.none], Noop)]
+                )))
              ];
            fb_annotation = () };
          m_fun_kind = FSync; m_user_attributes = [];

@@ -57,23 +57,27 @@
                       [], [], None, ([10:12-13], _))))
                   )))));
            ([11:3-13:4],
-            (While ((([11:10-12], ?A), (Lvar ([11:10-12], $x))),
+            (Block
                [([11:3-13:4],
-                 (AssertEnv (Join, {$#capability $#local_capability $x})));
-                 ([11:3-13:4], (AssertEnv (Refinement, {$x})));
-                 ([12:5-22],
-                  (Expr
-                     (([12:5-21], ?A),
-                      (Binop ((Eq None),
-                         (([12:5-7], ?A), (Lvar ([12:5-7], $x))),
-                         (([12:10-21], ?A),
-                          (Call (
-                             (([12:10-19], (function(): ?A)),
-                              (Id ([12:10-19], "\\get_A_opt"))),
-                             [], [], None)))
-                         )))))
-                 ]
-               )))
+                 (While ((([11:10-12], ?A), (Lvar ([11:10-12], $x))),
+                    [([11:3-13:4],
+                      (AssertEnv (Join, {$#capability $#local_capability $x}
+                         )));
+                      ([11:3-13:4], (AssertEnv (Refinement, {$x})));
+                      ([12:5-22],
+                       (Expr
+                          (([12:5-21], ?A),
+                           (Binop ((Eq None),
+                              (([12:5-7], ?A), (Lvar ([12:5-7], $x))),
+                              (([12:10-21], ?A),
+                               (Call (
+                                  (([12:10-19], (function(): ?A)),
+                                   (Id ([12:10-19], "\\get_A_opt"))),
+                                  [], [], None)))
+                              )))))
+                      ]
+                    )));
+                 ([11:3-13:4], (AssertEnv (Refinement, {$x})))]))
            ];
          fb_annotation = () };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];

@@ -42,7 +42,7 @@ function throw_in_catch(X $x, Exception $e): void {
   try {
     throw $e;
   } catch (Exception $_) {
-    if ($x->a) throw $e;
+    if ($x->a > 0) throw $e;
   }
   $x->b = 1;
 }

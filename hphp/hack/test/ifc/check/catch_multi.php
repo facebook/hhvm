@@ -64,7 +64,7 @@ function no_catch(X $x, E1 $e, bool $b): void {
 
 function throw_in_catch(X $x, E1 $e): void {
   try {
-    if ($x->a) throw $e;
+    if ($x->a > 0) throw $e;
   } catch (Exception $e) {
     throw $e;
   } finally {}

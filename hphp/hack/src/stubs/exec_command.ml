@@ -17,6 +17,7 @@ type t =
   | Pgrep
   | Ps
   | Pstack
+  | Strobeclient
   | Watchman
 
 let to_string = function
@@ -30,4 +31,5 @@ let to_string = function
   | Pgrep -> "pgrep"
   | Ps -> "ps"
   | Pstack -> "pstack"
+  | Strobeclient -> "strobeclient"
   | Watchman -> "watchman"

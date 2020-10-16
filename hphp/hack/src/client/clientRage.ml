@@ -91,6 +91,59 @@ let pgrep pattern =
     Lwt.return pids
   | Error _ -> Lwt.return []
 
+let rage_strobelight () : string Lwt.t =
+  (* We'll run strobelight on each hh_server ServerMain process *)
+  let%lwt pids = pgrep "hh_server" in
+  let pids =
+    List.filter_map pids ~f:(fun (pid, reason) ->
+        Option.some_if
+          (String_utils.is_substring "ServerMain" reason)
+          (Some (pid, reason)))
+  in
+  (* We'll also run strobelight without specifying a pid *)
+  let pids = None :: pids in
+  (* Strobelight doesn't support parallel execution, so we do it in sequence *)
+  let%lwt results =
+    Lwt_list.map_s
+      (fun pid ->
+        let common_args =
+          [
+            "run";
+            "--profile";
+            "fastbpf";
+            "--event";
+            "cpu-clock";
+            "--sample-rate";
+            "10000000";
+            "--duration-ms";
+            "10000";
+          ]
+        in
+        let (pid_args, reason) =
+          match pid with
+          | None -> ([], "ALL PROCESSES")
+          | Some (pid, reason) ->
+            ( ["--pid"; string_of_int pid],
+              Printf.sprintf "PROCESS %d - %s" pid reason )
+        in
+        let%lwt result =
+          Lwt_utils.exec_checked
+            ~timeout:30.0
+            Exec_command.Strobeclient
+            (common_args @ pid_args |> Array.of_list)
+        in
+        let result =
+          match result with
+          | Ok { Lwt_utils.Process_success.stdout; stderr; _ } ->
+            reason ^ "\n" ^ stdout ^ "\n" ^ stderr
+          | Error failure -> reason ^ format_failure "" failure
+        in
+        Lwt.return result)
+      pids
+  in
+  let results = String.concat results ~sep:"\n\n\n" in
+  Lwt.return results
+
 let rage_pstacks (env : env) : string Lwt.t =
   (* We'll look at all relevant pids: all those from the hh_server
   binary, and the hh_client binary, and all those in the server pids_file.
@@ -517,6 +570,11 @@ let main (env : env) : Exit_status.t Lwt.t =
     let contents = (try Sys_utils.cat fn with e -> Exn.to_string e) in
     if Sys.file_exists fn then add (name, contents)
   in
+
+  (* strobelight *)
+  eprintf "Strobelight (this takes 30s...)";
+  let%lwt strobelight = rage_strobelight () in
+  add ("strobelight", strobelight);
 
   (* stacks of processes *)
   eprintf "Fetching pstacks (this takes a minute...)";

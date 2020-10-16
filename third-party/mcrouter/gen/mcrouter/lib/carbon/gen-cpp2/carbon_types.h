@@ -16,25 +16,15 @@
 // END declare_enums
 // BEGIN struct_indirection
 namespace carbon { namespace thrift {
-struct apache_thrift_indirection_module_IOBufKey {
-  template <typename T> static auto&& get(T&& x) {
-    return std::forward<T>(x).rawUnsafe();
-  }
 
-  template <typename T> static auto&& get(T const&& x) {
-    return std::forward<T>(x).rawUnsafe();
-  }
-};
+FBTHRIFT_DETAIL_CPP_DEFINE_INDIRECTION_FN(
+    apache_thrift_indirection_module_IOBufKey,
+    .rawUnsafe());
 
-struct apache_thrift_indirection_module_StringKey {
-  template <typename T> static auto&& get(T&& x) {
-    return std::forward<T>(x).rawUnsafe();
-  }
 
-  template <typename T> static auto&& get(T const&& x) {
-    return std::forward<T>(x).rawUnsafe();
-  }
-};
+FBTHRIFT_DETAIL_CPP_DEFINE_INDIRECTION_FN(
+    apache_thrift_indirection_module_StringKey,
+    .rawUnsafe());
 
 
 }} // carbon::thrift

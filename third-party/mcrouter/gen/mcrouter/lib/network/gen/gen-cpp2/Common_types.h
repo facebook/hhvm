@@ -210,7 +210,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   virtual ~McVersionRequest() {}
 
- public:
+ private:
    ::carbon::thrift::IOBufKey key;
 
  public:
@@ -352,13 +352,13 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   virtual ~McVersionReply() {}
 
- public:
+ private:
    ::carbon::Result result;
- public:
+ private:
   folly::IOBuf value;
- public:
+ private:
   ::std::string message;
- public:
+ private:
   int16_t appSpecificErrorCode;
 
  public:
@@ -608,7 +608,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   virtual ~McStatsRequest() {}
 
- public:
+ private:
    ::carbon::thrift::IOBufKey key;
 
  public:
@@ -750,13 +750,13 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   virtual ~McStatsReply() {}
 
- public:
+ private:
    ::carbon::Result result;
- public:
+ private:
   ::std::string message;
- public:
+ private:
   ::std::vector<::std::string> stats;
- public:
+ private:
   int16_t appSpecificErrorCode;
 
  public:
@@ -1000,7 +1000,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   virtual ~McShutdownRequest() {}
 
- public:
+ private:
    ::carbon::thrift::IOBufKey key;
 
  public:
@@ -1142,11 +1142,11 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   virtual ~McShutdownReply() {}
 
- public:
+ private:
    ::carbon::Result result;
- public:
+ private:
   ::std::string message;
- public:
+ private:
   int16_t appSpecificErrorCode;
 
  public:
@@ -1356,7 +1356,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   virtual ~McQuitRequest() {}
 
- public:
+ private:
    ::carbon::thrift::IOBufKey key;
 
  public:
@@ -1498,11 +1498,11 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   virtual ~McQuitReply() {}
 
- public:
+ private:
    ::carbon::Result result;
- public:
+ private:
   ::std::string message;
- public:
+ private:
   int16_t appSpecificErrorCode;
 
  public:
@@ -1712,7 +1712,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   virtual ~McExecRequest() {}
 
- public:
+ private:
    ::carbon::thrift::IOBufKey key;
 
  public:
@@ -1854,13 +1854,13 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   virtual ~McExecReply() {}
 
- public:
+ private:
    ::carbon::Result result;
- public:
+ private:
   ::std::string response;
- public:
+ private:
   ::std::string message;
- public:
+ private:
   int16_t appSpecificErrorCode;
 
  public:
@@ -2204,9 +2204,9 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   virtual ~GoAwayRequest() {}
 
- public:
+ private:
    ::carbon::Result result;
- public:
+ private:
   ::std::string reason;
 
  public:

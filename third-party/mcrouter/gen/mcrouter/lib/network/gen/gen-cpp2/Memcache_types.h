@@ -788,9 +788,9 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   virtual ~McGetRequest() {}
 
- public:
+ private:
    ::carbon::thrift::IOBufKey key;
- public:
+ private:
   uint64_t flags;
 
  public:
@@ -966,15 +966,15 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   virtual ~McGetReply();
 
- public:
+ private:
    ::carbon::Result result;
  private:
   folly::IOBuf value;
- public:
+ private:
   uint64_t flags;
- public:
+ private:
   ::std::string message;
- public:
+ private:
   int16_t appSpecificErrorCode;
 
  public:
@@ -1262,13 +1262,13 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   virtual ~McSetRequest() {}
 
- public:
+ private:
    ::carbon::thrift::IOBufKey key;
- public:
+ private:
   int32_t exptime;
- public:
+ private:
   uint64_t flags;
- public:
+ private:
   folly::IOBuf value;
 
  public:
@@ -1519,15 +1519,15 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   virtual ~McSetReply();
 
- public:
+ private:
    ::carbon::Result result;
- public:
+ private:
   uint64_t flags;
- public:
+ private:
   folly::IOBuf value;
- public:
+ private:
   ::std::string message;
- public:
+ private:
   int16_t appSpecificErrorCode;
 
  public:
@@ -1813,15 +1813,15 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   virtual ~McDeleteRequest();
 
- public:
+ private:
    ::carbon::thrift::IOBufKey key;
- public:
+ private:
   uint64_t flags;
- public:
+ private:
   int32_t exptime;
- public:
+ private:
   folly::IOBuf value;
- public:
+ private:
   std::unordered_map<std::string, uint64_t> attributes;
 
  public:
@@ -2106,15 +2106,15 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   virtual ~McDeleteReply();
 
- public:
+ private:
    ::carbon::Result result;
- public:
+ private:
   uint64_t flags;
- public:
+ private:
   folly::IOBuf value;
- public:
+ private:
   ::std::string message;
- public:
+ private:
   int16_t appSpecificErrorCode;
 
  public:
@@ -2400,9 +2400,9 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   virtual ~McLeaseGetRequest() {}
 
- public:
+ private:
    ::carbon::thrift::IOBufKey key;
- public:
+ private:
   uint64_t flags;
 
  public:
@@ -2578,17 +2578,17 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   virtual ~McLeaseGetReply();
 
- public:
+ private:
    ::carbon::Result result;
- public:
+ private:
   int64_t leaseToken;
  private:
   folly::IOBuf value;
- public:
+ private:
   uint64_t flags;
- public:
+ private:
   ::std::string message;
- public:
+ private:
   int16_t appSpecificErrorCode;
 
  public:
@@ -2910,15 +2910,15 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   virtual ~McLeaseSetRequest();
 
- public:
+ private:
    ::carbon::thrift::IOBufKey key;
- public:
+ private:
   int32_t exptime;
- public:
+ private:
   uint64_t flags;
- public:
+ private:
   folly::IOBuf value;
- public:
+ private:
   int64_t leaseToken;
 
  public:
@@ -3205,11 +3205,11 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   virtual ~McLeaseSetReply() {}
 
- public:
+ private:
    ::carbon::Result result;
- public:
+ private:
   ::std::string message;
- public:
+ private:
   int16_t appSpecificErrorCode;
 
  public:
@@ -3421,13 +3421,13 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   virtual ~McAddRequest() {}
 
- public:
+ private:
    ::carbon::thrift::IOBufKey key;
- public:
+ private:
   int32_t exptime;
- public:
+ private:
   uint64_t flags;
- public:
+ private:
   folly::IOBuf value;
 
  public:
@@ -3679,11 +3679,11 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   virtual ~McAddReply() {}
 
- public:
+ private:
    ::carbon::Result result;
- public:
+ private:
   ::std::string message;
- public:
+ private:
   int16_t appSpecificErrorCode;
 
  public:
@@ -3895,13 +3895,13 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   virtual ~McReplaceRequest() {}
 
- public:
+ private:
    ::carbon::thrift::IOBufKey key;
- public:
+ private:
   int32_t exptime;
- public:
+ private:
   uint64_t flags;
- public:
+ private:
   folly::IOBuf value;
 
  public:
@@ -4153,11 +4153,11 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   virtual ~McReplaceReply() {}
 
- public:
+ private:
    ::carbon::Result result;
- public:
+ private:
   ::std::string message;
- public:
+ private:
   int16_t appSpecificErrorCode;
 
  public:
@@ -4368,9 +4368,9 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   virtual ~McGetsRequest() {}
 
- public:
+ private:
    ::carbon::thrift::IOBufKey key;
- public:
+ private:
   uint64_t flags;
 
  public:
@@ -4546,17 +4546,17 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   virtual ~McGetsReply();
 
- public:
+ private:
    ::carbon::Result result;
- public:
+ private:
   uint64_t casToken;
  private:
   folly::IOBuf value;
- public:
+ private:
   uint64_t flags;
- public:
+ private:
   ::std::string message;
- public:
+ private:
   int16_t appSpecificErrorCode;
 
  public:
@@ -4878,15 +4878,15 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   virtual ~McCasRequest();
 
- public:
+ private:
    ::carbon::thrift::IOBufKey key;
- public:
+ private:
   int32_t exptime;
- public:
+ private:
   uint64_t flags;
- public:
+ private:
   folly::IOBuf value;
- public:
+ private:
   uint64_t casToken;
 
  public:
@@ -5173,11 +5173,11 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   virtual ~McCasReply() {}
 
- public:
+ private:
    ::carbon::Result result;
- public:
+ private:
   ::std::string message;
- public:
+ private:
   int16_t appSpecificErrorCode;
 
  public:
@@ -5388,9 +5388,9 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   virtual ~McIncrRequest() {}
 
- public:
+ private:
    ::carbon::thrift::IOBufKey key;
- public:
+ private:
   int64_t delta;
 
  public:
@@ -5568,13 +5568,13 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   virtual ~McIncrReply() {}
 
- public:
+ private:
    ::carbon::Result result;
- public:
+ private:
   int64_t delta;
- public:
+ private:
   ::std::string message;
- public:
+ private:
   int16_t appSpecificErrorCode;
 
  public:
@@ -5820,9 +5820,9 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   virtual ~McDecrRequest() {}
 
- public:
+ private:
    ::carbon::thrift::IOBufKey key;
- public:
+ private:
   int64_t delta;
 
  public:
@@ -6000,13 +6000,13 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   virtual ~McDecrReply() {}
 
- public:
+ private:
    ::carbon::Result result;
- public:
+ private:
   int64_t delta;
- public:
+ private:
   ::std::string message;
- public:
+ private:
   int16_t appSpecificErrorCode;
 
  public:
@@ -6251,7 +6251,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   virtual ~McMetagetRequest() {}
 
- public:
+ private:
    ::carbon::thrift::IOBufKey key;
 
  public:
@@ -6392,19 +6392,19 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   virtual ~McMetagetReply();
 
- public:
+ private:
    ::carbon::Result result;
- public:
+ private:
   int32_t age;
- public:
+ private:
   int32_t exptime;
- public:
+ private:
   int16_t ipv;
- public:
+ private:
   ::std::string ipAddress;
- public:
+ private:
   ::std::string message;
- public:
+ private:
   int16_t appSpecificErrorCode;
 
  public:
@@ -6761,13 +6761,13 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   virtual ~McAppendRequest() {}
 
- public:
+ private:
    ::carbon::thrift::IOBufKey key;
- public:
+ private:
   int32_t exptime;
- public:
+ private:
   uint64_t flags;
- public:
+ private:
   folly::IOBuf value;
 
  public:
@@ -7019,11 +7019,11 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   virtual ~McAppendReply() {}
 
- public:
+ private:
    ::carbon::Result result;
- public:
+ private:
   ::std::string message;
- public:
+ private:
   int16_t appSpecificErrorCode;
 
  public:
@@ -7235,13 +7235,13 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   virtual ~McPrependRequest() {}
 
- public:
+ private:
    ::carbon::thrift::IOBufKey key;
- public:
+ private:
   int32_t exptime;
- public:
+ private:
   uint64_t flags;
- public:
+ private:
   folly::IOBuf value;
 
  public:
@@ -7493,11 +7493,11 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   virtual ~McPrependReply() {}
 
- public:
+ private:
    ::carbon::Result result;
- public:
+ private:
   ::std::string message;
- public:
+ private:
   int16_t appSpecificErrorCode;
 
  public:
@@ -7708,9 +7708,9 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   virtual ~McTouchRequest() {}
 
- public:
+ private:
    ::carbon::thrift::IOBufKey key;
- public:
+ private:
   int32_t exptime;
 
  public:
@@ -7887,11 +7887,11 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   virtual ~McTouchReply() {}
 
- public:
+ private:
    ::carbon::Result result;
- public:
+ private:
   ::std::string message;
- public:
+ private:
   int16_t appSpecificErrorCode;
 
  public:
@@ -8101,7 +8101,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   virtual ~McFlushReRequest() {}
 
- public:
+ private:
    ::carbon::thrift::IOBufKey key;
 
  public:
@@ -8243,11 +8243,11 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   virtual ~McFlushReReply() {}
 
- public:
+ private:
    ::carbon::Result result;
- public:
+ private:
   ::std::string message;
- public:
+ private:
   int16_t appSpecificErrorCode;
 
  public:
@@ -8458,9 +8458,9 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   virtual ~McFlushAllRequest() {}
 
- public:
+ private:
    ::carbon::thrift::IOBufKey key;
- public:
+ private:
   int32_t delay;
 
  public:
@@ -8637,11 +8637,11 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   virtual ~McFlushAllReply() {}
 
- public:
+ private:
    ::carbon::Result result;
- public:
+ private:
   ::std::string message;
- public:
+ private:
   int16_t appSpecificErrorCode;
 
  public:
@@ -8852,9 +8852,9 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   virtual ~McGatRequest() {}
 
- public:
+ private:
   int32_t exptime;
- public:
+ private:
    ::carbon::thrift::IOBufKey key;
 
  public:
@@ -9030,15 +9030,15 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   virtual ~McGatReply();
 
- public:
+ private:
    ::carbon::Result result;
  private:
   folly::IOBuf value;
- public:
+ private:
   uint64_t flags;
- public:
+ private:
   ::std::string message;
- public:
+ private:
   int16_t appSpecificErrorCode;
 
  public:
@@ -9325,9 +9325,9 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   virtual ~McGatsRequest() {}
 
- public:
+ private:
   int32_t exptime;
- public:
+ private:
    ::carbon::thrift::IOBufKey key;
 
  public:
@@ -9503,17 +9503,17 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   virtual ~McGatsReply();
 
- public:
+ private:
    ::carbon::Result result;
- public:
+ private:
   uint64_t casToken;
  private:
   folly::IOBuf value;
- public:
+ private:
   uint64_t flags;
- public:
+ private:
   ::std::string message;
- public:
+ private:
   int16_t appSpecificErrorCode;
 
  public:

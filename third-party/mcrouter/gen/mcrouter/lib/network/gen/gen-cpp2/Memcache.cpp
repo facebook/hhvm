@@ -15,105 +15,87 @@ std::unique_ptr<apache::thrift::AsyncProcessor> MemcacheSvIf::getProcessor() {
 }
 
 
-
 void MemcacheSvIf::async_eb_mcAdd(std::unique_ptr<apache::thrift::HandlerCallback<facebook::memcache::McAddReply>> callback, const facebook::memcache::McAddRequest& /*request*/) {
   callback->exception(apache::thrift::TApplicationException("Function mcAdd is unimplemented"));
 }
-
 
 void MemcacheSvIf::async_eb_mcAppend(std::unique_ptr<apache::thrift::HandlerCallback<facebook::memcache::McAppendReply>> callback, const facebook::memcache::McAppendRequest& /*request*/) {
   callback->exception(apache::thrift::TApplicationException("Function mcAppend is unimplemented"));
 }
 
-
 void MemcacheSvIf::async_eb_mcCas(std::unique_ptr<apache::thrift::HandlerCallback<facebook::memcache::McCasReply>> callback, const facebook::memcache::McCasRequest& /*request*/) {
   callback->exception(apache::thrift::TApplicationException("Function mcCas is unimplemented"));
 }
-
 
 void MemcacheSvIf::async_eb_mcDecr(std::unique_ptr<apache::thrift::HandlerCallback<facebook::memcache::McDecrReply>> callback, const facebook::memcache::McDecrRequest& /*request*/) {
   callback->exception(apache::thrift::TApplicationException("Function mcDecr is unimplemented"));
 }
 
-
 void MemcacheSvIf::async_eb_mcDelete(std::unique_ptr<apache::thrift::HandlerCallback<facebook::memcache::McDeleteReply>> callback, const facebook::memcache::McDeleteRequest& /*request*/) {
   callback->exception(apache::thrift::TApplicationException("Function mcDelete is unimplemented"));
 }
-
 
 void MemcacheSvIf::async_eb_mcFlushAll(std::unique_ptr<apache::thrift::HandlerCallback<facebook::memcache::McFlushAllReply>> callback, const facebook::memcache::McFlushAllRequest& /*request*/) {
   callback->exception(apache::thrift::TApplicationException("Function mcFlushAll is unimplemented"));
 }
 
-
 void MemcacheSvIf::async_eb_mcFlushRe(std::unique_ptr<apache::thrift::HandlerCallback<facebook::memcache::McFlushReReply>> callback, const facebook::memcache::McFlushReRequest& /*request*/) {
   callback->exception(apache::thrift::TApplicationException("Function mcFlushRe is unimplemented"));
 }
-
 
 void MemcacheSvIf::async_eb_mcGat(std::unique_ptr<apache::thrift::HandlerCallback<facebook::memcache::McGatReply>> callback, const facebook::memcache::McGatRequest& /*request*/) {
   callback->exception(apache::thrift::TApplicationException("Function mcGat is unimplemented"));
 }
 
-
 void MemcacheSvIf::async_eb_mcGats(std::unique_ptr<apache::thrift::HandlerCallback<facebook::memcache::McGatsReply>> callback, const facebook::memcache::McGatsRequest& /*request*/) {
   callback->exception(apache::thrift::TApplicationException("Function mcGats is unimplemented"));
 }
-
 
 void MemcacheSvIf::async_eb_mcGet(std::unique_ptr<apache::thrift::HandlerCallback<facebook::memcache::McGetReply>> callback, const facebook::memcache::McGetRequest& /*request*/) {
   callback->exception(apache::thrift::TApplicationException("Function mcGet is unimplemented"));
 }
 
-
 void MemcacheSvIf::async_eb_mcGets(std::unique_ptr<apache::thrift::HandlerCallback<facebook::memcache::McGetsReply>> callback, const facebook::memcache::McGetsRequest& /*request*/) {
   callback->exception(apache::thrift::TApplicationException("Function mcGets is unimplemented"));
 }
-
 
 void MemcacheSvIf::async_eb_mcIncr(std::unique_ptr<apache::thrift::HandlerCallback<facebook::memcache::McIncrReply>> callback, const facebook::memcache::McIncrRequest& /*request*/) {
   callback->exception(apache::thrift::TApplicationException("Function mcIncr is unimplemented"));
 }
 
-
 void MemcacheSvIf::async_eb_mcLeaseGet(std::unique_ptr<apache::thrift::HandlerCallback<facebook::memcache::McLeaseGetReply>> callback, const facebook::memcache::McLeaseGetRequest& /*request*/) {
   callback->exception(apache::thrift::TApplicationException("Function mcLeaseGet is unimplemented"));
 }
-
 
 void MemcacheSvIf::async_eb_mcLeaseSet(std::unique_ptr<apache::thrift::HandlerCallback<facebook::memcache::McLeaseSetReply>> callback, const facebook::memcache::McLeaseSetRequest& /*request*/) {
   callback->exception(apache::thrift::TApplicationException("Function mcLeaseSet is unimplemented"));
 }
 
-
 void MemcacheSvIf::async_eb_mcMetaget(std::unique_ptr<apache::thrift::HandlerCallback<facebook::memcache::McMetagetReply>> callback, const facebook::memcache::McMetagetRequest& /*request*/) {
   callback->exception(apache::thrift::TApplicationException("Function mcMetaget is unimplemented"));
 }
-
 
 void MemcacheSvIf::async_eb_mcPrepend(std::unique_ptr<apache::thrift::HandlerCallback<facebook::memcache::McPrependReply>> callback, const facebook::memcache::McPrependRequest& /*request*/) {
   callback->exception(apache::thrift::TApplicationException("Function mcPrepend is unimplemented"));
 }
 
-
 void MemcacheSvIf::async_eb_mcReplace(std::unique_ptr<apache::thrift::HandlerCallback<facebook::memcache::McReplaceReply>> callback, const facebook::memcache::McReplaceRequest& /*request*/) {
   callback->exception(apache::thrift::TApplicationException("Function mcReplace is unimplemented"));
 }
-
 
 void MemcacheSvIf::async_eb_mcSet(std::unique_ptr<apache::thrift::HandlerCallback<facebook::memcache::McSetReply>> callback, const facebook::memcache::McSetRequest& /*request*/) {
   callback->exception(apache::thrift::TApplicationException("Function mcSet is unimplemented"));
 }
 
-
 void MemcacheSvIf::async_eb_mcTouch(std::unique_ptr<apache::thrift::HandlerCallback<facebook::memcache::McTouchReply>> callback, const facebook::memcache::McTouchRequest& /*request*/) {
   callback->exception(apache::thrift::TApplicationException("Function mcTouch is unimplemented"));
 }
 
-
 void MemcacheSvIf::async_eb_mcVersion(std::unique_ptr<apache::thrift::HandlerCallback<facebook::memcache::McVersionReply>> callback, const facebook::memcache::McVersionRequest& /*request*/) {
   callback->exception(apache::thrift::TApplicationException("Function mcVersion is unimplemented"));
 }
+
+
 
 const char* MemcacheAsyncProcessor::getServiceName() {
   return "Memcache";

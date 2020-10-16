@@ -58,6 +58,8 @@ class MemcacheSvIf : public MemcacheSvAsyncIf, public apache::thrift::ServerInte
  public:
   typedef MemcacheAsyncProcessor ProcessorType;
   std::unique_ptr<apache::thrift::AsyncProcessor> getProcessor() override;
+
+
   void async_eb_mcAdd(std::unique_ptr<apache::thrift::HandlerCallback<facebook::memcache::McAddReply>> callback, const facebook::memcache::McAddRequest& request) override;
   void async_eb_mcAppend(std::unique_ptr<apache::thrift::HandlerCallback<facebook::memcache::McAppendReply>> callback, const facebook::memcache::McAppendRequest& request) override;
   void async_eb_mcCas(std::unique_ptr<apache::thrift::HandlerCallback<facebook::memcache::McCasReply>> callback, const facebook::memcache::McCasRequest& request) override;
@@ -102,7 +104,7 @@ class MemcacheAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcessor 
   static const MemcacheAsyncProcessor::ProcessMap& getCompactProtocolProcessMap();
  private:
   static const MemcacheAsyncProcessor::ProcessMap binaryProcessMap_;
-   static const MemcacheAsyncProcessor::ProcessMap compactProcessMap_;
+  static const MemcacheAsyncProcessor::ProcessMap compactProcessMap_;
  private:
   template <typename ProtocolIn_, typename ProtocolOut_>
   void process_mcAdd(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx,folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm);

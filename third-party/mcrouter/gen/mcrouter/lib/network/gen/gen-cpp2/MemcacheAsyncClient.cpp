@@ -350,7 +350,6 @@ void MemcacheAsyncClient::sync_mcAdd(apache::thrift::RpcOptions& rpcOptions, fac
 }
 
 
-
 folly::Future<facebook::memcache::McAddReply> MemcacheAsyncClient::future_mcAdd(const facebook::memcache::McAddRequest& request) {
   ::apache::thrift::RpcOptions rpcOptions;
   return future_mcAdd(rpcOptions, request);
@@ -390,6 +389,7 @@ folly::SemiFuture<std::pair<facebook::memcache::McAddReply, std::unique_ptr<apac
   mcAdd(rpcOptions, std::move(callback), request);
   return std::move(callbackAndFuture.second);
 }
+
 void MemcacheAsyncClient::mcAdd(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const facebook::memcache::McAddRequest& request) {
   mcAdd(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)), request);
 }
@@ -518,7 +518,6 @@ void MemcacheAsyncClient::sync_mcAppend(apache::thrift::RpcOptions& rpcOptions, 
 }
 
 
-
 folly::Future<facebook::memcache::McAppendReply> MemcacheAsyncClient::future_mcAppend(const facebook::memcache::McAppendRequest& request) {
   ::apache::thrift::RpcOptions rpcOptions;
   return future_mcAppend(rpcOptions, request);
@@ -558,6 +557,7 @@ folly::SemiFuture<std::pair<facebook::memcache::McAppendReply, std::unique_ptr<a
   mcAppend(rpcOptions, std::move(callback), request);
   return std::move(callbackAndFuture.second);
 }
+
 void MemcacheAsyncClient::mcAppend(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const facebook::memcache::McAppendRequest& request) {
   mcAppend(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)), request);
 }
@@ -686,7 +686,6 @@ void MemcacheAsyncClient::sync_mcCas(apache::thrift::RpcOptions& rpcOptions, fac
 }
 
 
-
 folly::Future<facebook::memcache::McCasReply> MemcacheAsyncClient::future_mcCas(const facebook::memcache::McCasRequest& request) {
   ::apache::thrift::RpcOptions rpcOptions;
   return future_mcCas(rpcOptions, request);
@@ -726,6 +725,7 @@ folly::SemiFuture<std::pair<facebook::memcache::McCasReply, std::unique_ptr<apac
   mcCas(rpcOptions, std::move(callback), request);
   return std::move(callbackAndFuture.second);
 }
+
 void MemcacheAsyncClient::mcCas(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const facebook::memcache::McCasRequest& request) {
   mcCas(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)), request);
 }
@@ -854,7 +854,6 @@ void MemcacheAsyncClient::sync_mcDecr(apache::thrift::RpcOptions& rpcOptions, fa
 }
 
 
-
 folly::Future<facebook::memcache::McDecrReply> MemcacheAsyncClient::future_mcDecr(const facebook::memcache::McDecrRequest& request) {
   ::apache::thrift::RpcOptions rpcOptions;
   return future_mcDecr(rpcOptions, request);
@@ -894,6 +893,7 @@ folly::SemiFuture<std::pair<facebook::memcache::McDecrReply, std::unique_ptr<apa
   mcDecr(rpcOptions, std::move(callback), request);
   return std::move(callbackAndFuture.second);
 }
+
 void MemcacheAsyncClient::mcDecr(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const facebook::memcache::McDecrRequest& request) {
   mcDecr(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)), request);
 }
@@ -1022,7 +1022,6 @@ void MemcacheAsyncClient::sync_mcDelete(apache::thrift::RpcOptions& rpcOptions, 
 }
 
 
-
 folly::Future<facebook::memcache::McDeleteReply> MemcacheAsyncClient::future_mcDelete(const facebook::memcache::McDeleteRequest& request) {
   ::apache::thrift::RpcOptions rpcOptions;
   return future_mcDelete(rpcOptions, request);
@@ -1062,6 +1061,7 @@ folly::SemiFuture<std::pair<facebook::memcache::McDeleteReply, std::unique_ptr<a
   mcDelete(rpcOptions, std::move(callback), request);
   return std::move(callbackAndFuture.second);
 }
+
 void MemcacheAsyncClient::mcDelete(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const facebook::memcache::McDeleteRequest& request) {
   mcDelete(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)), request);
 }
@@ -1190,7 +1190,6 @@ void MemcacheAsyncClient::sync_mcFlushAll(apache::thrift::RpcOptions& rpcOptions
 }
 
 
-
 folly::Future<facebook::memcache::McFlushAllReply> MemcacheAsyncClient::future_mcFlushAll(const facebook::memcache::McFlushAllRequest& request) {
   ::apache::thrift::RpcOptions rpcOptions;
   return future_mcFlushAll(rpcOptions, request);
@@ -1230,6 +1229,7 @@ folly::SemiFuture<std::pair<facebook::memcache::McFlushAllReply, std::unique_ptr
   mcFlushAll(rpcOptions, std::move(callback), request);
   return std::move(callbackAndFuture.second);
 }
+
 void MemcacheAsyncClient::mcFlushAll(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const facebook::memcache::McFlushAllRequest& request) {
   mcFlushAll(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)), request);
 }
@@ -1358,7 +1358,6 @@ void MemcacheAsyncClient::sync_mcFlushRe(apache::thrift::RpcOptions& rpcOptions,
 }
 
 
-
 folly::Future<facebook::memcache::McFlushReReply> MemcacheAsyncClient::future_mcFlushRe(const facebook::memcache::McFlushReRequest& request) {
   ::apache::thrift::RpcOptions rpcOptions;
   return future_mcFlushRe(rpcOptions, request);
@@ -1398,6 +1397,7 @@ folly::SemiFuture<std::pair<facebook::memcache::McFlushReReply, std::unique_ptr<
   mcFlushRe(rpcOptions, std::move(callback), request);
   return std::move(callbackAndFuture.second);
 }
+
 void MemcacheAsyncClient::mcFlushRe(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const facebook::memcache::McFlushReRequest& request) {
   mcFlushRe(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)), request);
 }
@@ -1526,7 +1526,6 @@ void MemcacheAsyncClient::sync_mcGat(apache::thrift::RpcOptions& rpcOptions, fac
 }
 
 
-
 folly::Future<facebook::memcache::McGatReply> MemcacheAsyncClient::future_mcGat(const facebook::memcache::McGatRequest& request) {
   ::apache::thrift::RpcOptions rpcOptions;
   return future_mcGat(rpcOptions, request);
@@ -1566,6 +1565,7 @@ folly::SemiFuture<std::pair<facebook::memcache::McGatReply, std::unique_ptr<apac
   mcGat(rpcOptions, std::move(callback), request);
   return std::move(callbackAndFuture.second);
 }
+
 void MemcacheAsyncClient::mcGat(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const facebook::memcache::McGatRequest& request) {
   mcGat(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)), request);
 }
@@ -1694,7 +1694,6 @@ void MemcacheAsyncClient::sync_mcGats(apache::thrift::RpcOptions& rpcOptions, fa
 }
 
 
-
 folly::Future<facebook::memcache::McGatsReply> MemcacheAsyncClient::future_mcGats(const facebook::memcache::McGatsRequest& request) {
   ::apache::thrift::RpcOptions rpcOptions;
   return future_mcGats(rpcOptions, request);
@@ -1734,6 +1733,7 @@ folly::SemiFuture<std::pair<facebook::memcache::McGatsReply, std::unique_ptr<apa
   mcGats(rpcOptions, std::move(callback), request);
   return std::move(callbackAndFuture.second);
 }
+
 void MemcacheAsyncClient::mcGats(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const facebook::memcache::McGatsRequest& request) {
   mcGats(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)), request);
 }
@@ -1862,7 +1862,6 @@ void MemcacheAsyncClient::sync_mcGet(apache::thrift::RpcOptions& rpcOptions, fac
 }
 
 
-
 folly::Future<facebook::memcache::McGetReply> MemcacheAsyncClient::future_mcGet(const facebook::memcache::McGetRequest& request) {
   ::apache::thrift::RpcOptions rpcOptions;
   return future_mcGet(rpcOptions, request);
@@ -1902,6 +1901,7 @@ folly::SemiFuture<std::pair<facebook::memcache::McGetReply, std::unique_ptr<apac
   mcGet(rpcOptions, std::move(callback), request);
   return std::move(callbackAndFuture.second);
 }
+
 void MemcacheAsyncClient::mcGet(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const facebook::memcache::McGetRequest& request) {
   mcGet(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)), request);
 }
@@ -2030,7 +2030,6 @@ void MemcacheAsyncClient::sync_mcGets(apache::thrift::RpcOptions& rpcOptions, fa
 }
 
 
-
 folly::Future<facebook::memcache::McGetsReply> MemcacheAsyncClient::future_mcGets(const facebook::memcache::McGetsRequest& request) {
   ::apache::thrift::RpcOptions rpcOptions;
   return future_mcGets(rpcOptions, request);
@@ -2070,6 +2069,7 @@ folly::SemiFuture<std::pair<facebook::memcache::McGetsReply, std::unique_ptr<apa
   mcGets(rpcOptions, std::move(callback), request);
   return std::move(callbackAndFuture.second);
 }
+
 void MemcacheAsyncClient::mcGets(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const facebook::memcache::McGetsRequest& request) {
   mcGets(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)), request);
 }
@@ -2198,7 +2198,6 @@ void MemcacheAsyncClient::sync_mcIncr(apache::thrift::RpcOptions& rpcOptions, fa
 }
 
 
-
 folly::Future<facebook::memcache::McIncrReply> MemcacheAsyncClient::future_mcIncr(const facebook::memcache::McIncrRequest& request) {
   ::apache::thrift::RpcOptions rpcOptions;
   return future_mcIncr(rpcOptions, request);
@@ -2238,6 +2237,7 @@ folly::SemiFuture<std::pair<facebook::memcache::McIncrReply, std::unique_ptr<apa
   mcIncr(rpcOptions, std::move(callback), request);
   return std::move(callbackAndFuture.second);
 }
+
 void MemcacheAsyncClient::mcIncr(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const facebook::memcache::McIncrRequest& request) {
   mcIncr(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)), request);
 }
@@ -2366,7 +2366,6 @@ void MemcacheAsyncClient::sync_mcLeaseGet(apache::thrift::RpcOptions& rpcOptions
 }
 
 
-
 folly::Future<facebook::memcache::McLeaseGetReply> MemcacheAsyncClient::future_mcLeaseGet(const facebook::memcache::McLeaseGetRequest& request) {
   ::apache::thrift::RpcOptions rpcOptions;
   return future_mcLeaseGet(rpcOptions, request);
@@ -2406,6 +2405,7 @@ folly::SemiFuture<std::pair<facebook::memcache::McLeaseGetReply, std::unique_ptr
   mcLeaseGet(rpcOptions, std::move(callback), request);
   return std::move(callbackAndFuture.second);
 }
+
 void MemcacheAsyncClient::mcLeaseGet(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const facebook::memcache::McLeaseGetRequest& request) {
   mcLeaseGet(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)), request);
 }
@@ -2534,7 +2534,6 @@ void MemcacheAsyncClient::sync_mcLeaseSet(apache::thrift::RpcOptions& rpcOptions
 }
 
 
-
 folly::Future<facebook::memcache::McLeaseSetReply> MemcacheAsyncClient::future_mcLeaseSet(const facebook::memcache::McLeaseSetRequest& request) {
   ::apache::thrift::RpcOptions rpcOptions;
   return future_mcLeaseSet(rpcOptions, request);
@@ -2574,6 +2573,7 @@ folly::SemiFuture<std::pair<facebook::memcache::McLeaseSetReply, std::unique_ptr
   mcLeaseSet(rpcOptions, std::move(callback), request);
   return std::move(callbackAndFuture.second);
 }
+
 void MemcacheAsyncClient::mcLeaseSet(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const facebook::memcache::McLeaseSetRequest& request) {
   mcLeaseSet(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)), request);
 }
@@ -2702,7 +2702,6 @@ void MemcacheAsyncClient::sync_mcMetaget(apache::thrift::RpcOptions& rpcOptions,
 }
 
 
-
 folly::Future<facebook::memcache::McMetagetReply> MemcacheAsyncClient::future_mcMetaget(const facebook::memcache::McMetagetRequest& request) {
   ::apache::thrift::RpcOptions rpcOptions;
   return future_mcMetaget(rpcOptions, request);
@@ -2742,6 +2741,7 @@ folly::SemiFuture<std::pair<facebook::memcache::McMetagetReply, std::unique_ptr<
   mcMetaget(rpcOptions, std::move(callback), request);
   return std::move(callbackAndFuture.second);
 }
+
 void MemcacheAsyncClient::mcMetaget(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const facebook::memcache::McMetagetRequest& request) {
   mcMetaget(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)), request);
 }
@@ -2870,7 +2870,6 @@ void MemcacheAsyncClient::sync_mcPrepend(apache::thrift::RpcOptions& rpcOptions,
 }
 
 
-
 folly::Future<facebook::memcache::McPrependReply> MemcacheAsyncClient::future_mcPrepend(const facebook::memcache::McPrependRequest& request) {
   ::apache::thrift::RpcOptions rpcOptions;
   return future_mcPrepend(rpcOptions, request);
@@ -2910,6 +2909,7 @@ folly::SemiFuture<std::pair<facebook::memcache::McPrependReply, std::unique_ptr<
   mcPrepend(rpcOptions, std::move(callback), request);
   return std::move(callbackAndFuture.second);
 }
+
 void MemcacheAsyncClient::mcPrepend(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const facebook::memcache::McPrependRequest& request) {
   mcPrepend(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)), request);
 }
@@ -3038,7 +3038,6 @@ void MemcacheAsyncClient::sync_mcReplace(apache::thrift::RpcOptions& rpcOptions,
 }
 
 
-
 folly::Future<facebook::memcache::McReplaceReply> MemcacheAsyncClient::future_mcReplace(const facebook::memcache::McReplaceRequest& request) {
   ::apache::thrift::RpcOptions rpcOptions;
   return future_mcReplace(rpcOptions, request);
@@ -3078,6 +3077,7 @@ folly::SemiFuture<std::pair<facebook::memcache::McReplaceReply, std::unique_ptr<
   mcReplace(rpcOptions, std::move(callback), request);
   return std::move(callbackAndFuture.second);
 }
+
 void MemcacheAsyncClient::mcReplace(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const facebook::memcache::McReplaceRequest& request) {
   mcReplace(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)), request);
 }
@@ -3206,7 +3206,6 @@ void MemcacheAsyncClient::sync_mcSet(apache::thrift::RpcOptions& rpcOptions, fac
 }
 
 
-
 folly::Future<facebook::memcache::McSetReply> MemcacheAsyncClient::future_mcSet(const facebook::memcache::McSetRequest& request) {
   ::apache::thrift::RpcOptions rpcOptions;
   return future_mcSet(rpcOptions, request);
@@ -3246,6 +3245,7 @@ folly::SemiFuture<std::pair<facebook::memcache::McSetReply, std::unique_ptr<apac
   mcSet(rpcOptions, std::move(callback), request);
   return std::move(callbackAndFuture.second);
 }
+
 void MemcacheAsyncClient::mcSet(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const facebook::memcache::McSetRequest& request) {
   mcSet(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)), request);
 }
@@ -3374,7 +3374,6 @@ void MemcacheAsyncClient::sync_mcTouch(apache::thrift::RpcOptions& rpcOptions, f
 }
 
 
-
 folly::Future<facebook::memcache::McTouchReply> MemcacheAsyncClient::future_mcTouch(const facebook::memcache::McTouchRequest& request) {
   ::apache::thrift::RpcOptions rpcOptions;
   return future_mcTouch(rpcOptions, request);
@@ -3414,6 +3413,7 @@ folly::SemiFuture<std::pair<facebook::memcache::McTouchReply, std::unique_ptr<ap
   mcTouch(rpcOptions, std::move(callback), request);
   return std::move(callbackAndFuture.second);
 }
+
 void MemcacheAsyncClient::mcTouch(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const facebook::memcache::McTouchRequest& request) {
   mcTouch(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)), request);
 }
@@ -3542,7 +3542,6 @@ void MemcacheAsyncClient::sync_mcVersion(apache::thrift::RpcOptions& rpcOptions,
 }
 
 
-
 folly::Future<facebook::memcache::McVersionReply> MemcacheAsyncClient::future_mcVersion(const facebook::memcache::McVersionRequest& request) {
   ::apache::thrift::RpcOptions rpcOptions;
   return future_mcVersion(rpcOptions, request);
@@ -3582,6 +3581,7 @@ folly::SemiFuture<std::pair<facebook::memcache::McVersionReply, std::unique_ptr<
   mcVersion(rpcOptions, std::move(callback), request);
   return std::move(callbackAndFuture.second);
 }
+
 void MemcacheAsyncClient::mcVersion(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const facebook::memcache::McVersionRequest& request) {
   mcVersion(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)), request);
 }
@@ -3632,5 +3632,6 @@ void MemcacheAsyncClient::recv_instance_mcVersion(facebook::memcache::McVersionR
 folly::exception_wrapper MemcacheAsyncClient::recv_instance_wrapped_mcVersion(facebook::memcache::McVersionReply& _return, ::apache::thrift::ClientReceiveState& state) {
   return recv_wrapped_mcVersion(_return, state);
 }
+
 
 }}} // facebook::memcache::thrift

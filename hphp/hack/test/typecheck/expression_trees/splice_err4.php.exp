@@ -1,0 +1,4 @@
+File "splice_err4.php", line 80, characters 17-30:
+Expected `ExprTree<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
+  File "splice_err4.php", line 76, characters 10-10:
+  But got `int`

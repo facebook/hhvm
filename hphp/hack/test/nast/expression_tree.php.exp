@@ -200,7 +200,80 @@
                                                            false };
                                                          f_doc_comment = None;
                                                          f_static = false },
-                                                       [])))
+                                                       [])));
+                                                    ([4:8-19],
+                                                     (Lfun (
+                                                        { f_span = [4:8-19];
+                                                          f_annotation = ();
+                                                          f_mode = Mstrict;
+                                                          f_ret = ((), None);
+                                                          f_name =
+                                                          ([Pos.none],
+                                                           ";anonymous");
+                                                          f_tparams = [];
+                                                          f_where_constraints =
+                                                          [];
+                                                          f_variadic =
+                                                          FVnonVariadic;
+                                                          f_params = [];
+                                                          f_cap = ((), None);
+                                                          f_unsafe_cap =
+                                                          ((), None);
+                                                          f_body =
+                                                          { fb_ast =
+                                                            [([4:8-19],
+                                                              (Return
+                                                                 (Some (
+                                                                 [4:8-19],
+                                                                 (Binop (
+                                                                    Plus,
+                                                                    (
+                                                                    [4:8-14],
+                                                                    (
+                                                                    Binop (
+                                                                    Plus,
+                                                                    ([4:8-9],
+                                                                    (Int "4")),
+                                                                    ([4:12-14],
+                                                                    (Int "10"))
+                                                                    ))),
+                                                                    (
+                                                                    [4:17-19],
+                                                                    (
+                                                                    Lvar
+                                                                    ([4:17-19],
+                                                                    $x)))))))))
+                                                              ];
+                                                            fb_annotation =
+                                                            Named };
+                                                          f_fun_kind = FSync;
+                                                          f_user_attributes =
+                                                          [];
+                                                          f_file_attributes =
+                                                          [];
+                                                          f_external = false;
+                                                          f_namespace =
+                                                          { Namespace_env.ns_ns_uses =
+                                                            <opaque>;
+                                                            ns_class_uses =
+                                                            <opaque>;
+                                                            ns_record_def_uses =
+                                                            <opaque>;
+                                                            ns_fun_uses =
+                                                            <opaque>;
+                                                            ns_const_uses =
+                                                            <opaque>;
+                                                            ns_name = None;
+                                                            ns_auto_ns_map =
+                                                            [];
+                                                            ns_is_codegen =
+                                                            false;
+                                                            ns_disable_xhp_element_mangling =
+                                                            false };
+                                                          f_doc_comment =
+                                                          None;
+                                                          f_static = false },
+                                                        [([4:17-19], $x)])))
                                                     ],
                                                   None, [4:8-19]))))))
                                      ];
@@ -217,7 +290,7 @@
                                    ns_is_codegen = false;
                                    ns_disable_xhp_element_mangling = false };
                                  f_doc_comment = None; f_static = false },
-                               []))),
+                               [([4:17-19], $x)]))),
                            [], [], None))))
                  )))))
           ];

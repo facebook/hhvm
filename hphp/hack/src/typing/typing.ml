@@ -3461,7 +3461,15 @@ and et_splice env p e =
     begin
       match v with
       | None -> error
-      | Some (te, ty) -> make_result env p (Aast.ET_Splice te) ty
+      | Some (te, ty) ->
+        let (env, ty_visitor) = Env.fresh_type env p in
+        let (env, ty_res) = Env.fresh_type env p in
+        let (env, ty_infer) = Env.fresh_type env p in
+        let expr_tree_type =
+          MakeType.expr_tree (Reason.Rsplice p) ty_visitor ty_res ty_infer
+        in
+        let env = SubType.sub_type env ty expr_tree_type Errors.unify_error in
+        make_result env p (Aast.ET_Splice te) ty_infer
     end
   | _ -> error
 

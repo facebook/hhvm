@@ -63,6 +63,8 @@ module Classes = struct
   let cIAsyncDisposable = "\\IAsyncDisposable"
 
   let cElt = "\\HH\\Elt"
+
+  let cExprTree = "\\ExprTree"
 end
 
 module Collections = struct

@@ -10,9 +10,10 @@ final class Code {
   }
 }
 
-final class ExprTree<TVisitor, TResult>{
+final class ExprTree<TVisitor, TResult, TInfer>{
   public function __construct(
     private (function(TVisitor): TResult) $x,
+    private (function(): TInfer) $err,
   ) {}
 }
 

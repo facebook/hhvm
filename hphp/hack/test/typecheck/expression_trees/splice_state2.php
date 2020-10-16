@@ -74,10 +74,15 @@ class Code {
   }
 }
 
-final class ExprTree<TVisitor, TResult>{
+final class ExprTree<TVisitor, TResult, TInfer>{
   public function __construct(
     private (function(TVisitor): TResult) $x,
+    private (function(): TInfer) $err,
   ) {}
+}
+
+function lift<T>(T $_): ExprTree<Code, Code::TAst, T> {
+  throw new Exception();
 }
 
 function test(): void {
@@ -85,9 +90,9 @@ function test(): void {
 
   if ($x->x !== null) {
     $_ = Code`() ==> {
-      __splice__($x->reset());
+      __splice__(lift($x->reset()));
       // We should think that $x->x could be null
-      __splice__($x->x + 1);
+      __splice__(lift($x->x + 1));
       return;
     }`;
   }

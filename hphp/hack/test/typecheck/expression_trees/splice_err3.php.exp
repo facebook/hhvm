@@ -1,0 +1,6 @@
+File "splice_err3.php", line 80, characters 13-30:
+Typing error (Typing[4110])
+  File "splice_err3.php", line 80, characters 17-30:
+  Expected `num` because this is used in an arithmetic operation
+  File "splice_err3.php", line 74, characters 15-21:
+  But got `string`

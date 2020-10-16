@@ -62,6 +62,8 @@ let const_collection r ty = class_type r SN.Collections.cConstCollection [ty]
 
 let collection r ty = class_type r SN.Collections.cCollection [ty]
 
+let expr_tree r ty1 ty2 ty3 = class_type r SN.Classes.cExprTree [ty1; ty2; ty3]
+
 let varray_or_darray r kty vty = mk (r, Tvarray_or_darray (kty, vty))
 
 let varray r ty = mk (r, Tvarray ty)

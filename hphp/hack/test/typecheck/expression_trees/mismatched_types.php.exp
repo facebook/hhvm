@@ -1,6 +1,6 @@
-File "mismatched_types.php", line 68, characters 5-10:
+File "mismatched_types.php", line 69, characters 5-10:
 Typing error (Typing[4110])
-  File "mismatched_types.php", line 68, characters 5-6:
+  File "mismatched_types.php", line 69, characters 5-6:
   Expected `num` because this is used in an arithmetic operation
-  File "mismatched_types.php", line 67, characters 10-16:
+  File "mismatched_types.php", line 68, characters 10-16:
   But got `string`

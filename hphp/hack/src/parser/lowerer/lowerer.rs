@@ -149,7 +149,7 @@ const EXP_RECUSION_LIMIT: usize = 30_000;
 
 #[derive(Debug, Clone)]
 pub struct Env<'a> {
-    codegen: bool,
+    pub codegen: bool,
     pub keep_errors: bool,
     quick_mode: bool,
     /// Show errors even in quick mode. Does not override keep_errors. Hotfix

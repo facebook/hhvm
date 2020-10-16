@@ -109,6 +109,7 @@ type t =
   | Rglobal_class_prop of Pos.t
   | Rglobal_fun_param of Pos.t
   | Rglobal_fun_ret of Pos.t
+  | Rsplice of Pos.t
 [@@deriving eq]
 
 (** Translate a reason to a (pos, string) list, suitable for error_l. This

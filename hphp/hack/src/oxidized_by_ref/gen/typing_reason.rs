@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ae8774909f2a906b652de616ee68b917>>
+// @generated SignedSource<<7a9b7bad36d15de37725b54c00f39e6a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -115,6 +115,7 @@ pub enum Reason<'a> {
     RglobalClassProp(&'a pos::Pos<'a>),
     RglobalFunParam(&'a pos::Pos<'a>),
     RglobalFunRet(&'a pos::Pos<'a>),
+    Rsplice(&'a pos::Pos<'a>),
 }
 impl<'a> TrivialDrop for Reason<'a> {}
 

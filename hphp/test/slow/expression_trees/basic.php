@@ -31,9 +31,10 @@ public function call(string $name, vec<mixed> $args): string {
   }
 }
 
-final class ExprTree<TVisitor, TResult>{
+final class ExprTree<TVisitor, TResult, TInfer>{
   public function __construct(
     private (function(TVisitor): TResult) $ast,
+    private (function(): TInfer) $err,
   ) {}
 
   public function construct(TVisitor $v): TResult {

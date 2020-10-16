@@ -28,12 +28,15 @@ final class Code {
   }
 }
 
-final class ExprTree<TVisitor, TResult>{
+final class ExprTree<TVisitor, TResult, TInfer>{
   public function __construct(
     private (function(TVisitor): TResult) $x,
+    private (function(): TInfer) $err,
   ) {}
 }
 
 function test(): void {
-  Code`__splice__(4) + __splice__(5)`;
+  $x = Code`4`;
+  $y = Code`5`;
+  Code`__splice__($x) + __splice__($y)`;
 }

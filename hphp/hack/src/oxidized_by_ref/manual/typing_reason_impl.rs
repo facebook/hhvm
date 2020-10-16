@@ -93,7 +93,8 @@ impl<'a> Reason<'a> {
             | RkeyValueCollectionKey(p)
             | RglobalClassProp(p)
             | RglobalFunParam(p)
-            | RglobalFunRet(p) => Some(p),
+            | RglobalFunRet(p)
+            | Rsplice(p) => Some(p),
             RlostInfo((_, r, _))
             | Rinstantiate((_, _, r))
             | Rtypeconst((r, _, _, _))

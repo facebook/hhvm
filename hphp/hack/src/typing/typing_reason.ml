@@ -90,6 +90,7 @@ type t =
   | Rglobal_class_prop of Pos.t
   | Rglobal_fun_param of Pos.t
   | Rglobal_fun_ret of Pos.t
+  | Rsplice of Pos.t
 
 and arg_position =
   | Aonly
@@ -478,6 +479,10 @@ let rec to_string prefix r =
   | Rglobal_class_prop p -> [(p, prefix)]
   | Rglobal_fun_param p -> [(p, prefix)]
   | Rglobal_fun_ret p -> [(p, prefix)]
+  | Rsplice p ->
+    [
+      (p, prefix ^ " because this is being spliced into another Expression Tree");
+    ]
 
 and to_pos r =
   if !Errors.report_pos_from_reason then
@@ -561,6 +566,7 @@ and to_raw_pos r =
   | Rglobal_class_prop p -> p
   | Rglobal_fun_param p -> p
   | Rglobal_fun_ret p -> p
+  | Rsplice p -> p
 
 (* This is a mapping from internal expression ids to a standardized int.
  * Used for outputting cleaner error messages to users
@@ -674,6 +680,7 @@ let to_constructor_string r =
   | Rglobal_class_prop _ -> "Rglobal_class_prop"
   | Rglobal_fun_param _ -> "Rglobal_fun_param"
   | Rglobal_fun_ret _ -> "Rglobal_fun_ret"
+  | Rsplice _ -> "Rsplice"
 
 let pp fmt r =
   let pos = to_raw_pos r in

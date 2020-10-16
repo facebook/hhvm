@@ -67,9 +67,10 @@ class Code {
   }
 }
 
-final class ExprTree<TVisitor, TResult>{
+final class ExprTree<TVisitor, TResult, TInfer>{
   public function __construct(
     private (function(TVisitor): TResult) $x,
+    private (function(): TInfer) $err,
   ) {}
 }
 
@@ -80,10 +81,14 @@ class Foo {
   }
 }
 
+function lift<T>(T $_): ExprTree<Code, Code::TAst, T> {
+  throw new Exception();
+}
+
 function test(): void {
   $x = 1;
 
   // Expression Trees do not inherit local variables from the outer scope
   // But splices do
-  $_ = Code`__splice__($x + 1)`;
+  $_ = Code`__splice__(lift($x + 1))`;
 }

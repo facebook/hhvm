@@ -63,8 +63,41 @@ pub fn desugar(hint: &aast::Hint, e: &Expr, env: &Env) -> Expr {
     let visitor_fun_ = wrap_fun_(visitor_body, vec![param], temp_pos.clone(), env);
     let visitor_lambda = Expr::new(temp_pos.clone(), Expr_::mk_lfun(visitor_fun_, vec![]));
 
+    // Make anonymous function for typing purposes
+    let typing_fun = if env.codegen {
+        // throw new Exception()
+        Stmt::new(
+            temp_pos.clone(),
+            Stmt_::Throw(Box::new(Expr::new(
+                temp_pos.clone(),
+                Expr_::New(Box::new((
+                    ClassId(
+                        temp_pos.clone(),
+                        ClassId_::CIexpr(Expr::new(
+                            temp_pos.clone(),
+                            Expr_::Id(Box::new(Id(temp_pos.clone(), "Exception".to_string()))),
+                        )),
+                    ),
+                    vec![],
+                    vec![],
+                    None,
+                    temp_pos.clone(),
+                ))),
+            ))),
+        )
+    } else {
+        // The original expression to be inferred
+        wrap_return(e, &temp_pos.clone())
+    };
+    let typing_fun_body = ast::FuncBody {
+        ast: vec![typing_fun],
+        annotation: (),
+    };
+    let typing_fun_ = wrap_fun_(typing_fun_body, vec![], temp_pos.clone(), env);
+    let typing_lambda = Expr::new(temp_pos.clone(), Expr_::mk_lfun(typing_fun_, vec![]));
+
     // Make `return new ExprTree(...et_construct_args)`
-    let et_construct_args = vec![visitor_lambda];
+    let et_construct_args = vec![visitor_lambda, typing_lambda];
     let new_et_expr = Expr::new(
         temp_pos.clone(),
         Expr_::New(Box::new((

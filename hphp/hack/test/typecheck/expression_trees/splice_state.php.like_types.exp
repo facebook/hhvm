@@ -1,0 +1,13 @@
+File "splice_state.php", line 97, characters 7-33:
+Expected `ExprTree<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
+  File "splice_state.php", line 84, characters 25-53:
+  But got `dynamic` because it is an unenforceable type
+File "splice_state.php", line 97, characters 23-31:
+Typing error (Typing[4110])
+  File "splice_state.php", line 97, characters 23-27:
+  Expected `num` because this is used in an arithmetic operation
+  File "splice_state.php", line 6, characters 10-13:
+  But got `?int`
+  File "splice_state.php", line 97, characters 18-32:
+  All the local information about `$x->x` has been invalidated during this call.
+This is a limitation of the type-checker; use a local if that's the problem.

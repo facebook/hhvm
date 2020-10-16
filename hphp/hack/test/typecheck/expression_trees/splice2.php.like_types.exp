@@ -1,0 +1,4 @@
+File "splice2.php", line 25, characters 8-31:
+Expected `ExprTree<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
+  File "splice2.php", line 20, characters 25-53:
+  But got `dynamic` because it is an unenforceable type

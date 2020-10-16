@@ -106,6 +106,7 @@ struct
     | Rglobal_class_prop p -> Rglobal_class_prop (pos p)
     | Rglobal_fun_param p -> Rglobal_fun_param (pos p)
     | Rglobal_fun_ret p -> Rglobal_fun_ret (pos p)
+    | Rsplice p -> Rsplice (pos p)
 
   let rec ty t =
     let (p, x) = deref t in

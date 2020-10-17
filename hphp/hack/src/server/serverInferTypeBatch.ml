@@ -87,20 +87,9 @@ let helper ctx acc pos_list =
       in
       result_to_string result pos :: acc)
 
-(** This parallel_helper divides pos_list amongst all the workers.
-It might end up with several workers all working on positions
-for the same file. *)
-let parallel_helper workers ctx pos_list =
-  MultiWorker.call
-    workers
-    ~job:(helper ctx)
-    ~neutral:[]
-    ~merge:List.rev_append
-    ~next:(MultiWorker.next workers pos_list)
-
-(** This parallel_helper_ex divides files amongst all the workers.
+(** This divides files amongst all the workers.
 No file is handled by more than one worker. *)
-let parallel_helper_ex
+let parallel_helper
     (workers : MultiWorker.worker list option)
     (ctx : Provider_context.t)
     (pos_list : pos list) : string list =
@@ -130,11 +119,10 @@ let parallel_helper_ex
 (* Entry Point *)
 let go :
     MultiWorker.worker list option ->
-    bool ->
     (string * int * int * (int * int) option) list ->
     ServerEnv.env ->
     string list =
- fun workers experimental pos_list env ->
+ fun workers pos_list env ->
   let pos_list =
     pos_list
     (* Sort, so that many queries on the same file will (generally) be
@@ -160,13 +148,10 @@ let go :
     ~start_time
     ~num_files
     ~num_positions
-    ~experimental
     ~results:None;
   let results =
     if num_positions < 10 then
       helper ctx [] pos_list
-    else if experimental then
-      parallel_helper_ex workers ctx pos_list
     else
       parallel_helper workers ctx pos_list
   in
@@ -174,6 +159,5 @@ let go :
     ~start_time
     ~num_files
     ~num_positions
-    ~experimental
     ~results:(Some (List.length results));
   results

@@ -6,9 +6,8 @@
 use oxidized::{i_set::ISet, pos::Pos, prim_defs::Comment, scoured_comments::ScouredComments};
 use parser_core_types::{
     indexed_source_text::IndexedSourceText, lexable_token::LexablePositionedToken,
-    lexable_trivia::LexableTrivium, positioned_syntax::PositionedSyntaxTrait,
-    positioned_trivia::PositionedTrivium, source_text::SourceText, syntax::SyntaxVariant::*,
-    syntax::*, trivia_kind::TriviaKind,
+    lexable_trivia::LexableTrivium, positioned_trivia::PositionedTrivium, source_text::SourceText,
+    syntax::SyntaxVariant::*, syntax::*, syntax_trait::SyntaxTrait, trivia_kind::TriviaKind,
 };
 use regex::bytes::Regex;
 
@@ -33,7 +32,7 @@ impl<'src, T, V> ScourComment<'src, T, V>
 where
     T: LexablePositionedToken,
     V: SyntaxValueType<T>,
-    Syntax<T, V>: PositionedSyntaxTrait,
+    Syntax<T, V>: SyntaxTrait,
 {
     pub fn scour_comments<'a>(&self, top_node: &'a Syntax<T, V>) -> ScouredComments {
         let mut acc = ScouredComments::new();

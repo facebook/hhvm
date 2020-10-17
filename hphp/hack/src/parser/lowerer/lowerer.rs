@@ -29,9 +29,8 @@ use oxidized::{
 };
 use parser_core_types::{
     indexed_source_text::IndexedSourceText, lexable_token::LexablePositionedToken,
-    positioned_syntax::PositionedSyntaxTrait, positioned_syntax::PositionedValue,
-    positioned_token::PositionedToken, source_text::SourceText, syntax::*, syntax_error,
-    syntax_kind, syntax_trait::SyntaxTrait, token_kind::TokenKind as TK,
+    positioned_syntax::PositionedValue, positioned_token::PositionedToken, source_text::SourceText,
+    syntax::*, syntax_error, syntax_kind, syntax_trait::SyntaxTrait, token_kind::TokenKind as TK,
 };
 use regex::bytes::Regex;
 use stack_limit::StackLimit;
@@ -374,7 +373,7 @@ use parser_core_types::syntax::SyntaxVariant::*;
 trait Lowerer<'a, T, V>
 where
     T: LexablePositionedToken,
-    Syntax<T, V>: PositionedSyntaxTrait,
+    Syntax<T, V>: SyntaxTrait,
     V: SyntaxValueWithKind + SyntaxValueType<T> + std::fmt::Debug,
 {
     fn p_pos(node: &Syntax<T, V>, env: &Env) -> Pos {

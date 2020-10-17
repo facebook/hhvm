@@ -101,14 +101,19 @@ where
     T: LexableToken,
     V: SyntaxValueType<T>,
 {
-    pub fn make(syntax: SyntaxVariant<T, V>, value: V) -> Self {
-        Self { syntax, value }
-    }
-
     pub fn make_token(arg: T) -> Self {
         let value = V::from_token(&arg);
         let syntax = SyntaxVariant::Token(Box::new(arg));
         Self::make(syntax, value)
+    }
+}
+
+impl<T, V> Syntax<T, V>
+where
+    T: LexableToken,
+{
+    pub fn make(syntax: SyntaxVariant<T, V>, value: V) -> Self {
+        Self { syntax, value }
     }
 
     fn is_specific_token(&self, kind: TokenKind) -> bool {
@@ -311,22 +316,6 @@ where
         };
         let syntax = std::mem::replace(&mut self.syntax, SyntaxVariant::Missing);
         Self::fold_over_children_owned(&f, vec![], syntax)
-    }
-
-    pub fn replace_children(
-        &mut self,
-        kind: SyntaxKind,
-        children: Vec<Self>,
-        children_changed: bool,
-    ) {
-        if !children_changed {
-            self.syntax = Syntax::from_children(kind, children);
-        } else {
-            let children_values = &children.iter().map(|x| &x.value).collect::<Vec<_>>();
-            let value = V::from_children(kind, 0, children_values);
-            let syntax = Syntax::from_children(kind, children);
-            *self = Self::make(syntax, value);
-        }
     }
 
     pub fn get_token(&self) -> Option<&T> {

@@ -5,7 +5,10 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use super::positioned_token::PositionedToken;
-use crate::{lexable_token::LexableToken, token_kind::TokenKind};
+use crate::{
+    lexable_token::LexableToken, syntax::SyntaxValueType, syntax_kind::SyntaxKind,
+    token_kind::TokenKind,
+};
 
 #[derive(Debug, Clone)]
 pub enum PositionedValue<'a> {
@@ -102,8 +105,10 @@ impl<'a> PositionedValue<'a> {
             _ => panic!(),
         }
     }
+}
 
-    pub fn from_values<'b>(child_values: impl Iterator<Item = &'b Self>) -> Self
+impl<'a> SyntaxValueType<PositionedToken<'a>> for PositionedValue<'a> {
+    fn from_values<'b>(child_values: impl Iterator<Item = &'b Self>) -> Self
     where
         'a: 'b,
     {
@@ -159,7 +164,7 @@ impl<'a> PositionedValue<'a> {
         }
     }
 
-    pub fn from_token(token: PositionedToken<'a>) -> Self {
+    fn from_token(token: PositionedToken<'a>) -> Self {
         if token.kind() == TokenKind::EndOfFile || token.full_width() == 0 {
             PositionedValue::Missing {
                 offset: token.end_offset(),
@@ -169,7 +174,14 @@ impl<'a> PositionedValue<'a> {
         }
     }
 
-    pub fn from_children(offset: usize, nodes: impl Iterator<Item = &'a Self>) -> Self {
+    fn from_children<'b>(
+        _: SyntaxKind,
+        offset: usize,
+        nodes: impl Iterator<Item = &'b Self>,
+    ) -> Self
+    where
+        'a: 'b,
+    {
         // We need to determine the offset, leading, middle and trailing widths of
         // the node to be constructed based on its children.  If the children are
         // all of zero width -- including the case where there are no children at

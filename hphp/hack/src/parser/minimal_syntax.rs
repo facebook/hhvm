@@ -26,7 +26,11 @@ impl SyntaxValueType<MinimalToken> for MinimalValue {
         Self { full_width }
     }
 
-    fn from_children(_: SyntaxKind, _offser: usize, nodes: &[&Self]) -> Self {
+    fn from_children<'a>(
+        _: SyntaxKind,
+        _offset: usize,
+        nodes: impl Iterator<Item = &'a Self>,
+    ) -> Self {
         let mut full_width = 0;
         for node in nodes {
             let w = node.full_width;
@@ -35,14 +39,10 @@ impl SyntaxValueType<MinimalToken> for MinimalValue {
         Self { full_width }
     }
 
-    fn from_token(token: &MinimalToken) -> Self {
+    fn from_token(token: MinimalToken) -> Self {
         Self {
             full_width: token.full_width(),
         }
-    }
-
-    fn text_range(&self) -> Option<(usize, usize)> {
-        None
     }
 }
 

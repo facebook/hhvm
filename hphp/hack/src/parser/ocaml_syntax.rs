@@ -10,6 +10,7 @@ mod ocaml_syntax_generated;
 use ocaml::core::mlvalues::Value;
 use ocaml::core::mlvalues::Value as OcamlValue;
 use ocamlpool_rust::utils::*;
+use ocamlrep::rc::RcOc;
 use parser_core_types::{
     lexable_token::LexableToken,
     positioned_token::PositionedToken,
@@ -17,6 +18,7 @@ use parser_core_types::{
     syntax_kind::SyntaxKind,
 };
 use rust_to_ocaml::*;
+use std::iter::empty;
 
 pub use crate::ocaml_context_state::*;
 pub use crate::ocaml_syntax_generated::*;
@@ -65,7 +67,7 @@ where
 
     fn make_missing(ctx: &C, offset: usize) -> Self {
         unsafe {
-            let value = V::from_children(SyntaxKind::Missing, offset, &[]);
+            let value = V::from_children(SyntaxKind::Missing, offset, empty());
             let ocaml_value = value.to_ocaml(ctx.serialization_context());
             let kind = u8_to_ocaml(SyntaxKind::Missing.ocaml_tag());
             let node = reserve_block(0, 2);
@@ -80,7 +82,7 @@ where
 
     fn make_token(ctx: &C, arg: Self::Token) -> Self {
         unsafe {
-            let value = V::from_token(&arg);
+            let value = V::from_token(RcOc::clone(&arg));
             let ocaml_value = value.to_ocaml(ctx.serialization_context());
             let syntax = reserve_block(SyntaxKind::Token(arg.kind()).ocaml_tag().into(), 1);
             caml_set_field(syntax, 0, arg.to_ocaml(ctx.serialization_context()));
@@ -100,7 +102,7 @@ where
                 Self::make_missing(ctx, offset)
             } else {
                 // TODO: avoid creating Vec
-                let lst_slice = &args.iter().map(|x| &x.value).collect::<Vec<_>>();
+                let lst_slice = args.iter().map(|x| &x.value);
                 let value = V::from_children(SyntaxKind::SyntaxList, offset, lst_slice);
                 let ocaml_value = value.to_ocaml(ctx.serialization_context());
                 let syntax = reserve_block(SyntaxKind::SyntaxList.ocaml_tag().into(), 1);

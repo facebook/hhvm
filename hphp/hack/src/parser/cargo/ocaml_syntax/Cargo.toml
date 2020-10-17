@@ -10,6 +10,7 @@ path = "../../ocaml_syntax.rs"
 
 [dependencies]
 ocamlpool_rust = { path = "../../../utils/ocamlpool_rust" }
+ocamlrep = { path = "../../../ocamlrep" }
 parser_core_types = { path = "../core_types" }
 rust_to_ocaml = { path = "../rust_to_ocaml" }
 smart_constructors = { path = "../smart_constructors" }

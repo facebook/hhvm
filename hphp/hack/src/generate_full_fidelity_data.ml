@@ -672,7 +672,7 @@ use super::{
     positioned_token::PositionedToken,
     positioned_value::PositionedValue
 };
-use crate::syntax::SyntaxType;
+use crate::syntax::{SyntaxType, SyntaxValueType};
 
 impl<'a, C> SyntaxType<C> for Syntax<'a, PositionedToken<'a>, PositionedValue<'a>>
 where

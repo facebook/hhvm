@@ -8,10 +8,12 @@ use crate::lexable_token::LexableToken;
 use crate::syntax_kind::SyntaxKind;
 use crate::token_kind::TokenKind;
 
-use std::fmt::Debug;
-use std::marker::Sized;
-
 use itertools::Either::{Left, Right};
+use std::{
+    fmt::Debug,
+    iter::{empty, once},
+    marker::Sized,
+};
 
 pub use crate::syntax_generated::*;
 pub use crate::syntax_type::*;
@@ -24,12 +26,14 @@ where
     where
         Self: 'a;
 
-    fn from_children(kind: SyntaxKind, offset: usize, nodes: &[&Self]) -> Self;
-    fn from_token(token: &T) -> Self;
-
-    /// Returns a range [inclusive, exclusive] for the corresponding text if meaningful
-    /// (note: each implementor will either always return Some(range) or always return None).
-    fn text_range(&self) -> Option<(usize, usize)>; // corresponds to extract_text in OCaml impl.
+    fn from_children<'a>(
+        kind: SyntaxKind,
+        offset: usize,
+        nodes: impl Iterator<Item = &'a Self>,
+    ) -> Self
+    where
+        Self: 'a;
+    fn from_token(token: T) -> Self;
 }
 
 pub trait SyntaxValueWithKind
@@ -68,7 +72,7 @@ where
     type Value = V;
 
     fn make_missing(_: &C, offset: usize) -> Self {
-        let value = V::from_children(SyntaxKind::Missing, offset, &[]);
+        let value = V::from_children(SyntaxKind::Missing, offset, empty());
         let syntax = SyntaxVariant::Missing;
         Self::make(syntax, value)
     }
@@ -83,8 +87,7 @@ where
         if arg.is_empty() {
             Self::make_missing(ctx, offset)
         } else {
-            // todo: pass iter directly
-            let nodes = &arg.iter().map(|x| &x.value).collect::<Vec<_>>();
+            let nodes = arg.iter().map(|x| &x.value);
             let value = V::from_children(SyntaxKind::SyntaxList, offset, nodes);
             let syntax = SyntaxVariant::SyntaxList(arg);
             Self::make(syntax, value)
@@ -102,7 +105,7 @@ where
     V: SyntaxValueType<T>,
 {
     pub fn make_token(arg: T) -> Self {
-        let value = V::from_token(&arg);
+        let value = V::from_token(arg.clone());
         let syntax = SyntaxVariant::Token(Box::new(arg));
         Self::make(syntax, value)
     }
@@ -264,7 +267,6 @@ where
     }
 
     pub fn syntax_node_to_list<'a>(&'a self) -> impl DoubleEndedIterator<Item = &'a Self> {
-        use std::iter::{empty, once};
         match &self.syntax {
             SyntaxVariant::SyntaxList(x) => Left(x.iter()),
             SyntaxVariant::Missing => Right(Left(empty())),
@@ -273,7 +275,6 @@ where
     }
 
     pub fn syntax_node_into_list(self) -> impl DoubleEndedIterator<Item = Self> {
-        use std::iter::{empty, once};
         match self.syntax {
             SyntaxVariant::SyntaxList(x) => Left(x.into_iter()),
             SyntaxVariant::Missing => Right(Left(empty())),
@@ -284,7 +285,6 @@ where
     pub fn syntax_node_to_list_skip_separator<'a>(
         &'a self,
     ) -> impl DoubleEndedIterator<Item = &'a Self> {
-        use std::iter::{empty, once};
         match &self.syntax {
             SyntaxVariant::SyntaxList(l) => Left(l.iter().map(|n| match &n.syntax {
                 SyntaxVariant::ListItem(i) => &i.list_item,

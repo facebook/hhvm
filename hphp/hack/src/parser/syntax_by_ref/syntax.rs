@@ -4,11 +4,17 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::iter::empty;
+
 use super::{
-    has_arena::HasArena, positioned_token::PositionedToken, positioned_value::PositionedValue,
-    syntax_children_iterator::SyntaxChildrenIterator, syntax_variant_generated::SyntaxVariant,
+    has_arena::HasArena, syntax_children_iterator::SyntaxChildrenIterator,
+    syntax_variant_generated::SyntaxVariant,
 };
-use crate::syntax::SyntaxTypeBase;
+use crate::{
+    lexable_token::LexableToken,
+    syntax::{SyntaxTypeBase, SyntaxValueType},
+    syntax_kind::SyntaxKind,
+};
 use bumpalo::collections::Vec;
 
 #[derive(Debug, Clone)]
@@ -31,21 +37,23 @@ impl<'a, T, V> Syntax<'a, T, V> {
     }
 }
 
-impl<'a, C> SyntaxTypeBase<C> for Syntax<'a, PositionedToken<'a>, PositionedValue<'a>>
+impl<'a, C, T, V> SyntaxTypeBase<C> for Syntax<'a, T, V>
 where
+    T: LexableToken + Copy,
+    V: SyntaxValueType<T>,
     C: HasArena<'a>,
 {
-    type Token = PositionedToken<'a>;
-    type Value = PositionedValue<'a>;
+    type Token = T;
+    type Value = V;
 
     fn make_missing(_: &C, offset: usize) -> Self {
-        let value = PositionedValue::Missing { offset };
+        let value = V::from_children(SyntaxKind::Missing, offset, empty());
         let syntax = SyntaxVariant::Missing;
         Self::make(syntax, value)
     }
 
-    fn make_token(_: &C, arg: PositionedToken<'a>) -> Self {
-        let value = PositionedValue::from_token(arg);
+    fn make_token(_: &C, arg: T) -> Self {
+        let value = V::from_token(arg);
         let syntax = SyntaxVariant::Token(arg);
         Self::make(syntax, value)
     }
@@ -60,7 +68,7 @@ where
             list.extend(arg.into_iter());
             let list = list.into_bump_slice();
             let nodes = list.iter().map(|x| &x.value);
-            let value = PositionedValue::from_children(offset, nodes);
+            let value = V::from_children(SyntaxKind::SyntaxList, offset, nodes);
             let syntax = SyntaxVariant::SyntaxList(list);
             Self::make(syntax, value)
         }

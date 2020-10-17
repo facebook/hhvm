@@ -189,33 +189,32 @@ impl SyntaxValueType<PositionedToken> for PositionedValue {
         Self::from_(child_values)
     }
 
-    fn from_children(_: SyntaxKind, offset: usize, nodes: &[&Self]) -> Self {
+    fn from_children<'a>(
+        _: SyntaxKind,
+        offset: usize,
+        nodes: impl Iterator<Item = &'a Self>,
+    ) -> Self {
         // We need to determine the offset, leading, middle and trailing widths of
         // the node to be constructed based on its children.  If the children are
         // all of zero width -- including the case where there are no children at
         // all -- then we make a zero-width value at the given offset.
         // Otherwise, we can determine the associated value from the first and last
         // children that have width.
-        let mut have_width = nodes.iter().filter(|x| x.width() > 0).peekable();
+        let mut have_width = nodes.filter(|x| x.width() > 0).peekable();
         match have_width.peek() {
             None => PositionedValue::Missing { offset },
             Some(first) => Self::value_from_outer_children(first, have_width.last().unwrap()),
         }
     }
 
-    fn from_token(token: &PositionedToken) -> Self {
+    fn from_token(token: PositionedToken) -> Self {
         if token.kind() == TokenKind::EndOfFile || token.full_width() == 0 {
             PositionedValue::Missing {
                 offset: token.end_offset(),
             }
         } else {
-            PositionedValue::TokenValue(RcOc::clone(&token))
+            PositionedValue::TokenValue(token)
         }
-    }
-
-    fn text_range(&self) -> Option<(usize, usize)> {
-        let beg = self.start_offset();
-        Some((beg, beg + self.width()))
     }
 }
 

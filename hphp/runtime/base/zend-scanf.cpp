@@ -679,7 +679,8 @@ int string_sscanf(const char *string, const char *format, int numVars,
     switch (*ch) {
     case 'n':
       if (!(flags & SCAN_SUPPRESS)) {
-        returnArray.append((int)(string - baseString));
+        auto const key = safe_cast<int64_t>(returnArray.size());
+        returnArray.set(key, (int)(string - baseString));
       }
       nconversions++;
       continue;
@@ -790,7 +791,8 @@ int string_sscanf(const char *string, const char *format, int numVars,
         }
       }
       if (!(flags & SCAN_SUPPRESS)) {
-        returnArray.append(String(string, end-string, CopyString));
+        auto const key = safe_cast<int64_t>(returnArray.size());
+        returnArray.set(key, String(string, end-string, CopyString));
       }
       string = end;
       break;
@@ -823,7 +825,8 @@ int string_sscanf(const char *string, const char *format, int numVars,
         goto done;
       }
       if (!(flags & SCAN_SUPPRESS)) {
-        returnArray.append(String(string, end-string, CopyString));
+        auto const key = safe_cast<int64_t>(returnArray.size());
+        returnArray.set(key, String(string, end-string, CopyString));
       }
       string = end;
       break;
@@ -946,11 +949,12 @@ int string_sscanf(const char *string, const char *format, int numVars,
       if (!(flags & SCAN_SUPPRESS)) {
         *end = '\0';
         value = (int64_t) (*fn)(buf, nullptr, base);
+        auto const key = safe_cast<int64_t>(returnArray.size());
         if ((flags & SCAN_UNSIGNED) && (value < 0)) {
           snprintf(buf, sizeof(buf), "%lu", (long)value); /* INTL: ISO digit */
-          returnArray.append(String(buf, CopyString));
+          returnArray.set(key, String(buf, CopyString));
         } else {
-          returnArray.append(value);
+          returnArray.set(key, value);
         }
       }
       break;
@@ -1047,7 +1051,8 @@ int string_sscanf(const char *string, const char *format, int numVars,
         double dvalue;
         *end = '\0';
         dvalue = strtod(buf, nullptr);
-        returnArray.append(dvalue);
+        auto const key = safe_cast<int64_t>(returnArray.size());
+        returnArray.set(key, dvalue);
       }
       break;
     } /* switch (op) */

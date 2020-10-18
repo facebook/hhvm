@@ -658,13 +658,14 @@ bool Array::MultiSort(std::vector<SortData> &data) {
     SortData &opaque = data[ki];
     const Array& arr = *opaque.array;
     Array sorted;
+    int64_t nextKI = 0;
     for (int i = 0; i < count; i++) {
       ssize_t pos = opaque.positions[indices[i]];
       Variant k(arr->getKey(pos));
       if (k.isInteger()) {
-        sorted.append(arr->nvGetVal(pos));
+        sorted.set(nextKI++, arr->nvGetVal(pos));
       } else {
-        sorted.set(k, arr->nvGetVal(pos));
+        sorted.set(k, arr->nvGetVal(pos), true);
       }
     }
     *opaque.original = sorted;

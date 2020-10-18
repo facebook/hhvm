@@ -82,8 +82,9 @@ Array makeReserveLike(DataType type, size_t size) {
 // Appends all keys and values in the ArrayIter `it` to the array `array`.
 // If `array` is a keyset, we preserve int keys; otherwise, we renumber them.
 //
-// `array` must be the same type of array that `it` iterates over - we use
-// this fact for optimizations here.
+// `array` must be the same type of array that `it` iterates over. If `array`
+// is a dict or darray, it must have vector-like keys. We use both constraints
+// for optimizations in the loops below.
 void appendKeysAndVals(Array& array, ArrayIter& it) {
   assertx(array->toDataType() == it.getArrayData()->toDataType());
   if (array.isVArray() || array.isVec() || array.isKeyset()) {
@@ -91,10 +92,12 @@ void appendKeysAndVals(Array& array, ArrayIter& it) {
       array.append(it.secondVal());
     }
   } else {
+    assertx(array->isVectorData());
+    auto nextKI = safe_cast<int64_t>(array->size());
     for (; it; ++it) {
       auto const key = it.nvFirst();
       if (tvIsInt(key)) {
-        array.append(it.secondVal());
+        array.set(nextKI++, it.secondVal());
       } else {
         auto const str = StrNR(val(key).pstr);
         array.set(str.asString(), it.secondVal(), true);

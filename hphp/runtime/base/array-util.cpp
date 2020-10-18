@@ -38,9 +38,11 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // compositions
 
-Variant ArrayUtil::Splice(const Array& input, int offset, int64_t length /* = 0 */,
-                          const Variant& replacement /* = uninit_variant */,
-                          Array *removed /* = NULL */) {
+Variant ArrayUtil::Splice(const Array& input, int offset, int64_t length,
+                          const Variant& replacement, Array& removed) {
+  assertx(!removed.isNull());
+  assertx(removed.empty());
+
   int num_in = input.size();
   if (offset > num_in) {
     offset = num_in;
@@ -56,26 +58,26 @@ Variant ArrayUtil::Splice(const Array& input, int offset, int64_t length /* = 0 
 
   Array out_hash = Array::CreateDArray();
   int pos = 0;
+  int64_t nextKI = 0;
   ArrayIter iter(input);
   for (; pos < offset && iter; ++pos, ++iter) {
     Variant key(iter.first());
     auto const v = iter.secondVal();
     if (key.isNumeric()) {
-      out_hash.append(v);
+      out_hash.set(nextKI++, v);
     } else {
       out_hash.set(key, v, true);
     }
   }
 
+  int64_t removedNextKI = 0;
   for (; pos < offset + length && iter; ++pos, ++iter) {
-    if (removed) {
-      Variant key(iter.first());
-      auto const v = iter.secondVal();
-      if (key.isNumeric()) {
-        removed->append(v);
-      } else {
-        removed->set(key, v, true);
-      }
+    Variant key(iter.first());
+    auto const v = iter.secondVal();
+    if (key.isNumeric()) {
+      removed.set(removedNextKI++, v);
+    } else {
+      removed.set(key, v, true);
     }
   }
 
@@ -83,7 +85,7 @@ Variant ArrayUtil::Splice(const Array& input, int offset, int64_t length /* = 0 
   if (!arr.empty()) {
     for (ArrayIter iterb(arr); iterb; ++iterb) {
       auto const v = iterb.secondVal();
-      out_hash.append(v);
+      out_hash.set(nextKI++, v);
     }
   }
 
@@ -91,7 +93,7 @@ Variant ArrayUtil::Splice(const Array& input, int offset, int64_t length /* = 0 
     Variant key(iter.first());
     auto const v = iter.secondVal();
     if (key.isNumeric()) {
-      out_hash.append(v);
+      out_hash.set(nextKI++, v);
     } else {
       out_hash.set(key, v, true);
     }
@@ -297,13 +299,14 @@ Variant ArrayUtil::Reverse(const Array& input, bool preserve_keys /* = false */)
 
   auto ret = Array::CreateDArray();
   auto pos_limit = input->iter_end();
+  int64_t nextKI = 0;
   for (ssize_t pos = input->iter_last(); pos != pos_limit;
        pos = input->iter_rewind(pos)) {
     auto const key = input->nvGetKey(pos);
     if (preserve_keys || isStringType(key.m_type)) {
       ret.set(key, input->nvGetVal(pos), true);
     } else {
-      ret.append(input->nvGetVal(pos));
+      ret.set(nextKI++, input->nvGetVal(pos));
     }
   }
   return ret;

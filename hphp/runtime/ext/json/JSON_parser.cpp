@@ -310,10 +310,24 @@ int dehexchar(char c) {
 }
 
 NEVER_INLINE
-static void tvDecRefRange(TypedValue* begin, TypedValue* end) {
+void tvDecRefRange(TypedValue* begin, TypedValue* end) {
   assertx(begin <= end);
   for (auto tv = begin; tv != end; ++tv) {
     tvDecRefGen(tv);
+  }
+}
+
+void appendToContainer(JSONContainerType container_type,
+                       Variant& base, Variant& value) {
+  if (container_type == JSONContainerType::COLLECTIONS) {
+    collections::append(base.getObjectData(), value.asTypedValue());
+  } else {
+    auto& arr = base.asArrRef();
+    if (arr.isDict() || arr.isDArray()) {
+      arr.set(safe_cast<int64_t>(arr.size()), value);
+    } else {
+      arr.append(value);
+    }
   }
 }
 
@@ -1059,11 +1073,7 @@ static void attach_zval(json_parser *json,
   auto up_mode = json->stack[json->top - 1].mode;
 
   if (up_mode == Mode::ARRAY) {
-    if (container_type == JSONContainerType::COLLECTIONS) {
-      collections::append(root.getObjectData(), child.asTypedValue());
-    } else {
-      root.asArrRef().append(child);
-    }
+    appendToContainer(container_type, root, child);
   } else if (up_mode == Mode::OBJECT) {
     object_set(json, root, key, child, assoc, container_type);
   }
@@ -1391,11 +1401,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
             Variant mval;
             json_create_zval(mval, *buf, type, options);
             auto& top = json->stack[json->top].val;
-            if (container_type == JSONContainerType::COLLECTIONS) {
-              collections::append(top.getObjectData(), mval.asTypedValue());
-            } else {
-              top.asArrRef().append(mval);
-            }
+            appendToContainer(container_type, top, mval);
             buf->clear();
             reset_type();
           }
@@ -1475,11 +1481,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
           case Mode::ARRAY:
             if (type != kInvalidDataType) {
               auto& top = json->stack[json->top].val;
-              if (container_type == JSONContainerType::COLLECTIONS) {
-                collections::append(top.getObjectData(), mval.asTypedValue());
-              } else {
-                top.asArrRef().append(mval);
-              }
+              appendToContainer(container_type, top, mval);
             }
             state = 28;
             break;

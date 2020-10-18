@@ -149,7 +149,7 @@ TypedValue HHVM_FUNCTION(array_chunk,
     if (preserve_keys) {
       chunk.set(iter.first(), iter.secondValPlus(), true);
     } else {
-      chunk.append(iter.secondValPlus());
+      chunk.set(safe_cast<int64_t>(chunk.size()), iter.secondValPlus());
     }
     if ((++current % chunkSize) == 0) {
       ret.append(chunk);
@@ -1057,7 +1057,7 @@ Variant array_splice(Variant& input, int offset,
   getCheckedArrayVariant(input);
   Array ret = Array::CreateDArray();
   int64_t len = length.isNull() ? 0x7FFFFFFF : length.toInt64();
-  input = ArrayUtil::Splice(arr_input, offset, len, replacement, &ret);
+  input = ArrayUtil::Splice(arr_input, offset, len, replacement, ret);
   return ret;
 }
 
@@ -1176,9 +1176,17 @@ TypedValue HHVM_FUNCTION(array_unshift,
   if (isArrayLikeType(dt)) {
     auto const size = val(cell_array).parr->size() + args.size() + 1;
     auto newArray = makeReserveLike(dt, size);
-    newArray.append(var);
-    if (!args.empty()) {
-      IterateVNoInc(args.get(), [&](auto val) { newArray.append(val); });
+    if (isDictOrDArrayType(dt)) {
+      int64_t i = 0;
+      newArray.set(i++, var);
+      if (!args.empty()) {
+        IterateVNoInc(args.get(), [&](auto val) { newArray.set(i++, val); });
+      }
+    } else {
+      newArray.append(var);
+      if (!args.empty()) {
+        IterateVNoInc(args.get(), [&](auto val) { newArray.append(val); });
+      }
     }
     Array& arr_array = array.asArrRef();
     ArrayIter it(arr_array.detach(), ArrayIter::noInc);

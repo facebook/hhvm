@@ -1226,13 +1226,25 @@ ArrayData* MixedArray::AppendImpl(ArrayData* ad, TypedValue v, bool copy) {
   assertx(copy || ad->notCyclic(v));
   auto a = asMixed(ad);
 
-  if (a->m_nextKI != a->m_size && RO::EvalHackArrCompatNotices) {
+  // Append is an O(n) operation because we iterate to choose an index to set.
+  // We have to be careful about overflow, so we compute the max non-negative
+  // integer key first, then compute nextKI with an overflowing add.
+  auto maxIntKey = int64_t{-1};
+  auto cur = a->data();
+  auto const end = cur + a->m_used;
+  for (; cur != end; cur++) {
+    if (cur->isTombstone() || !cur->hasIntKey()) continue;
+    maxIntKey = std::max(maxIntKey, cur->intKey());
+  }
+  auto const nextKI = int64_t(uint64_t(maxIntKey) + 1);
+
+  if (nextKI != a->m_nextKI && RO::EvalDictDArrayAppendNotices) {
     // Try to eliminate the internal index used for "append", replacing it
     // with a simple set of the key equal to the array's size. If we can make
     // this change now, we can drop appends completely as a follow-up.
     auto const dt = getDataTypeString(a->toDataType());
-    raise_notice("Hack Array Compat: append to %s at index %s count",
-                 dt.data(), a->m_nextKI < a->m_size ? "<" : ">");
+    raise_notice("Hack Array Compat: append to %s at index %s (maxIntKey + 1)",
+                 dt.data(), a->m_nextKI > nextKI ? ">" : "<");
   }
 
   if (UNLIKELY(a->m_nextKI < 0)) {

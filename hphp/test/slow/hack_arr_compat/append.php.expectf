@@ -1,7 +1,3 @@
-
-Notice: Hack Array Compat: append to dict at index < count in %s/append.php on line 10
-
-Notice: Hack Array Compat: append to dict at index > count in %s/append.php on line 12
 dict(5) {
   [0]=>
   object(C) (0) {
@@ -16,6 +12,16 @@ dict(5) {
   object(C) (0) {
   }
   [18]=>
+  object(C) (0) {
+  }
+}
+
+Notice: Hack Array Compat: append to dict at index > (maxIntKey + 1) in %s/append.php on line 21
+dict(2) {
+  [0]=>
+  object(C) (0) {
+  }
+  [3]=>
   object(C) (0) {
   }
 }

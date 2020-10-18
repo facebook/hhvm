@@ -1129,6 +1129,9 @@ struct RuntimeOption {
   /* What fraction of array provenance diagnostics should be logged?    \
    * Set to 0 to disable diagnostics entirely */                        \
   F(uint32_t, LogArrayProvenanceDiagnosticsSampleRate, 0)               \
+  /* Raise a notice when the result of appending to a dict or darray    \
+   * is affected by removing keys from that array-like. */              \
+  F(bool, DictDArrayAppendNotices, true)                                \
   /* Warn if is expression are used with type aliases that cannot be    |
    * resolved */                                                        \
   F(bool, IsExprEnableUnresolvedWarning, false)                         \

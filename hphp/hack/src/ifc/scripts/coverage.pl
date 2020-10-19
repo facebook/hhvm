@@ -117,7 +117,7 @@ Log("found $ntests tests");
 # step 4 - run the ifc analysis in parallel
 # we take care to use the typechecker flags
 # in the HH_FLAGS files
-my $ifc_args = "--error-format raw --shallow-class-decl --ifc check ''";
+my $ifc_args = "--error-format raw --shallow-class-decl --ifc time ''";
 my $nproc = 20; # number of parallel workers
 # when computing the number of tests per worker we
 # round with ceil to avoid leftovers in case $nproc
@@ -183,13 +183,13 @@ my %stats = (
         skipped => {count => 0}
 );
 my %skipped = map {$_->[1] => 1} @tests;
-my ($state, $name, $detail, $result);
+my ($state, $name, $detail, $result, $duration);
 sub testdone {
         return unless defined $name;
         delete $skipped{$name};
         my $cnts = $stats{$result};
         $cnts->{count}++;
-        push @{$cnts->{tests}}, $name;
+        push @{$cnts->{tests}}, [ $name, $duration ];
         push @{$cnts->{detail}{$detail}}, $name
           if defined $detail;
 }
@@ -217,6 +217,10 @@ for my $id (1..$nproc) {
                         $name = $1;
                         $detail = undef;
                         $result = 'ok';
+                        $duration = -1;
+                }
+                if (/^Duration: (.*)$/) {
+                        $duration = $1;
                 }
                 if (/^Uncaught exception: (.*)$/) {
                         $detail = $1;
@@ -237,7 +241,7 @@ for my $id (1..$nproc) {
         }
         testdone;
 }
-$stats{skipped}{tests} = [keys %skipped];
+$stats{skipped}{tests} = [map {[$_, 0]} keys %skipped];
 $stats{skipped}{count} = @{$stats{skipped}{tests}};
 Log("parsed all test results");
 # sort details by number of affected tests
@@ -249,6 +253,11 @@ for (values %stats) {
                 sort {$#{$h{$b}} <=> $#{$h{$a}}}
                 keys %h
         ];
+}
+# sort tests in descending time to complete
+for (values %stats) {
+        next unless exists $_->{tests};
+        $_->{tests} = [sort {$b->[1] <=> $a->[1]} @{$_->{tests}}];
 }
 
 # step 6 - write the results
@@ -278,7 +287,7 @@ sub json {
                 }
                 print $fh ("\n", " " x $indent, "]");
         }
-        elsif ($val =~ /^\d+$/) {
+        elsif ($val =~ /^-?\d+(\.\d+)?$/) {
                 print $fh ($val);
         }
         else {

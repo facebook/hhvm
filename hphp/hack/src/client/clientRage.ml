@@ -110,7 +110,7 @@ let rage_strobelight () : string Lwt.t =
           [
             "run";
             "--profile";
-            "fastbpf";
+            "bpf";
             "--event";
             "cpu-clock";
             "--sample-rate";
@@ -128,7 +128,7 @@ let rage_strobelight () : string Lwt.t =
         in
         let%lwt result =
           Lwt_utils.exec_checked
-            ~timeout:30.0
+            ~timeout:60.0
             Exec_command.Strobeclient
             (common_args @ pid_args |> Array.of_list)
         in
@@ -572,7 +572,7 @@ let main (env : env) : Exit_status.t Lwt.t =
   in
 
   (* strobelight *)
-  eprintf "Strobelight (this takes 30s...)";
+  eprintf "Strobelight (this takes a minute...)";
   let%lwt strobelight = rage_strobelight () in
   add ("strobelight", strobelight);
 

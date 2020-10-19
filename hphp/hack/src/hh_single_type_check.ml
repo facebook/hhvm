@@ -1298,10 +1298,25 @@ let handle_mode
   let iter_over_files f : unit = List.iter filenames f in
   match mode with
   | Ifc (mode, lattice) ->
+    (* Timing mode is same as check except we print out the time it takes to
+       analyse the file. *)
+    let (mode, should_time) =
+      if String.equal mode "time" then
+        ("check", true)
+      else
+        (mode, false)
+    in
     let ifc_opts =
       match Ifc_options.parse ~mode ~lattice with
       | Ok opts -> opts
       | Error e -> die ("could not parse IFC options: " ^ e)
+    in
+    let time f =
+      let start_time = Unix.gettimeofday () in
+      let result = Lazy.force f in
+      let elapsed_time = Unix.gettimeofday () -. start_time in
+      if should_time then Printf.printf "Duration: %f\n" elapsed_time;
+      result
     in
     let print_errors = List.iter ~f:(print_error ~oc:stdout error_format) in
     let process_file filename =
@@ -1318,7 +1333,7 @@ let handle_mode
         print_errors check_errors
       else
         try
-          let ifc_errors = Ifc.do_ ifc_opts file_info ctx in
+          let ifc_errors = time @@ lazy (Ifc.do_ ifc_opts file_info ctx) in
           if not (List.is_empty ifc_errors) then print_errors ifc_errors
         with exc ->
           (* get the backtrace before doing anything else to be sure

@@ -11,7 +11,6 @@ open Hh_prelude
 open Decl_defs
 open Decl_heap
 open Reordered_argument_collections
-open Pp_type
 open Typing_defs
 
 module CEKMap = struct

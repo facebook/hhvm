@@ -5,7 +5,11 @@ Parsed decls:
     { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
       sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
       sc_name = ([3:7-10], "\\Bag");
-      sc_tparams = [(Invariant, ([3:11-12], "T"), [], Erased)];
+      sc_tparams =
+      [{ Typing_defs_core.tp_variance = Invariant;
+         tp_name = ([3:11-12], "T"); tp_tparams = []; tp_constraints = [];
+         tp_reified = Erased; tp_user_attributes = [] }
+        ];
       sc_where_constraints = []; sc_extends = []; sc_uses = [];
       sc_xhp_attr_uses = []; sc_req_extends = []; sc_req_implements = [];
       sc_implements = []; sc_consts = []; sc_typeconsts = [];
@@ -39,8 +43,8 @@ Parsed decls:
                         (Tgeneric ("T", [])))
                      };
                     fp_flags =
-                    (make_fp_flags ~mutability:none ~accept_disposable:false
-                      ~has_default:false ~mode:FPnormal);
+                    (make_fp_flags ~mutability:None ~accept_disposable:false
+                      ~has_default:false ~mode:Typing_defs_core.FPnormal);
                      }
                   ];
                 ft_implicit_params =
@@ -55,7 +59,7 @@ Parsed decls:
                    (Tprim Tvoid))
                   };
                 ft_flags =
-                (make_ft_flags sync none ~return_disposable:false
+                (make_ft_flags FSync None ~return_disposable:false
                   ~returns_mutable:false ~returns_void_to_rx:false);
                 ft_reactive = Nonreactive }));
     sm_visibility = Public; sm_deprecated = None });
@@ -82,7 +86,7 @@ Parsed decls:
                 (Tgeneric ("T", [])))
              };
            ft_flags =
-           (make_ft_flags sync none ~return_disposable:false
+           (make_ft_flags FSync None ~return_disposable:false
              ~returns_mutable:false ~returns_void_to_rx:false);
            ft_reactive = Nonreactive }));
       sm_visibility = Public; sm_deprecated = None }
@@ -92,7 +96,11 @@ Parsed decls:
 { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false; sc_is_xhp = false;
   sc_has_xhp_keyword = false; sc_kind = Cnormal;
   sc_name = ([15:7-23], "\\ContravariantBag");
-  sc_tparams = [(Contravariant, ([15:25-26], "T"), [], Erased)];
+  sc_tparams =
+  [{ Typing_defs_core.tp_variance = Contravariant;
+     tp_name = ([15:25-26], "T"); tp_tparams = []; tp_constraints = [];
+     tp_reified = Erased; tp_user_attributes = [] }
+    ];
   sc_where_constraints = []; sc_extends = []; sc_uses = [];
   sc_xhp_attr_uses = []; sc_req_extends = []; sc_req_implements = [];
   sc_implements = []; sc_consts = []; sc_typeconsts = []; sc_pu_enums = [];
@@ -125,8 +133,8 @@ sc_constructor =
                     (Tgeneric ("T", [])))
                  };
                 fp_flags =
-                (make_fp_flags ~mutability:none ~accept_disposable:false
-                  ~has_default:false ~mode:FPnormal);
+                (make_fp_flags ~mutability:None ~accept_disposable:false
+                  ~has_default:false ~mode:Typing_defs_core.FPnormal);
                  }
               ];
             ft_implicit_params =
@@ -141,7 +149,7 @@ sc_constructor =
                (Tprim Tvoid))
               };
             ft_flags =
-            (make_ft_flags sync none ~return_disposable:false
+            (make_ft_flags FSync None ~return_disposable:false
               ~returns_mutable:false ~returns_void_to_rx:false);
             ft_reactive = Nonreactive }));
 sm_visibility = Public; sm_deprecated = None }); sc_static_methods = [];
@@ -150,7 +158,11 @@ sc_methods = []; sc_user_attributes = []; sc_enum_type = None };
 { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false; sc_is_xhp = false;
   sc_has_xhp_keyword = false; sc_kind = Cnormal;
   sc_name = ([23:7-19], "\\CovariantBag");
-  sc_tparams = [(Covariant, ([23:21-22], "T"), [], Erased)];
+  sc_tparams =
+  [{ Typing_defs_core.tp_variance = Covariant; tp_name = ([23:21-22], "T");
+     tp_tparams = []; tp_constraints = []; tp_reified = Erased;
+     tp_user_attributes = [] }
+    ];
   sc_where_constraints = []; sc_extends = []; sc_uses = [];
   sc_xhp_attr_uses = []; sc_req_extends = []; sc_req_implements = [];
   sc_implements = []; sc_consts = []; sc_typeconsts = []; sc_pu_enums = [];
@@ -183,8 +195,8 @@ sc_constructor =
                     (Tgeneric ("T", [])))
                  };
                 fp_flags =
-                (make_fp_flags ~mutability:none ~accept_disposable:false
-                  ~has_default:false ~mode:FPnormal);
+                (make_fp_flags ~mutability:None ~accept_disposable:false
+                  ~has_default:false ~mode:Typing_defs_core.FPnormal);
                  }
               ];
             ft_implicit_params =
@@ -199,7 +211,7 @@ sc_constructor =
                (Tprim Tvoid))
               };
             ft_flags =
-            (make_ft_flags sync none ~return_disposable:false
+            (make_ft_flags FSync None ~return_disposable:false
               ~returns_mutable:false ~returns_void_to_rx:false);
             ft_reactive = Nonreactive }));
 sm_visibility = Public; sm_deprecated = None }); sc_static_methods = [];
@@ -224,7 +236,7 @@ sc_methods =
             (Tgeneric ("T", [])))
          };
        ft_flags =
-       (make_ft_flags sync none ~return_disposable:false
+       (make_ft_flags FSync None ~return_disposable:false
          ~returns_mutable:false ~returns_void_to_rx:false);
        ft_reactive = Nonreactive }));
   sm_visibility = Public; sm_deprecated = None }

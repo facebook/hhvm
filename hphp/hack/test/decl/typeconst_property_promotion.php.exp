@@ -9,8 +9,8 @@ Parsed decls:
       sc_req_extends = []; sc_req_implements = []; sc_implements = [];
       sc_consts = [];
       sc_typeconsts =
-      [{ Shallow_decl_defs.stc_abstract = TCConcrete; stc_constraint = None;
-         stc_name = ([4:14-15], "T");
+      [{ Shallow_decl_defs.stc_abstract = Typing_defs.TCConcrete;
+         stc_constraint = None; stc_name = ([4:14-15], "T");
          stc_type =
          (Some (Rhint (root|typeconst_property_promotion.php line 4, characters 18-20),
                 (Tprim Tint)));
@@ -52,9 +52,9 @@ Parsed decls:
                               [([6:19-20], "T")])))
                          };
                        fp_flags =
-                       (make_fp_flags ~mutability:none
+                       (make_fp_flags ~mutability:None
                          ~accept_disposable:false ~has_default:false
-                         ~mode:FPnormal);
+                         ~mode:Typing_defs_core.FPnormal);
                         }
                       ];
                     ft_implicit_params =
@@ -69,7 +69,7 @@ Parsed decls:
                        (Tprim Tvoid))
                       };
                     ft_flags =
-                    (make_ft_flags sync none ~return_disposable:false
+                    (make_ft_flags FSync None ~return_disposable:false
                       ~returns_mutable:false ~returns_void_to_rx:false);
                     ft_reactive = Nonreactive }));
               sm_visibility = Public; sm_deprecated = None });

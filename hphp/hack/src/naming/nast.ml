@@ -88,7 +88,7 @@ type pu_case_value = Aast.pu_case_value
 
 type targ = unit Aast.targ
 
-type sid = Aast.sid
+type sid = Aast.sid [@@deriving show]
 
 type shape_field_name = Ast_defs.shape_field_name
 

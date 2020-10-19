@@ -11,125 +11,18 @@ open Hh_prelude
 open Typing_defs_flags
 include Typing_defs_core
 
-let get_ft_return_disposable ft = is_set ft.ft_flags ft_flags_return_disposable
-
-let get_ft_returns_void_to_rx ft =
-  is_set ft.ft_flags ft_flags_returns_void_to_rx
-
-let get_ft_returns_mutable ft = is_set ft.ft_flags ft_flags_returns_mutable
-
-let get_ft_is_coroutine ft = is_set ft.ft_flags ft_flags_is_coroutine
-
-let get_ft_async ft = is_set ft.ft_flags ft_flags_async
-
-let get_ft_generator ft = is_set ft.ft_flags ft_flags_generator
-
-let get_ft_ftk ft =
-  if is_set ft.ft_flags ft_flags_instantiated_targs then
-    FTKinstantiated_targs
-  else
-    FTKtparams
-
-let set_ft_ftk ft ftk =
-  {
-    ft with
-    ft_flags =
-      set_bit
-        ft_flags_instantiated_targs
-        (match ftk with
-        | FTKinstantiated_targs -> true
-        | FTKtparams -> false)
-        ft.ft_flags;
-  }
-
-let set_ft_is_function_pointer ft is_fp =
-  { ft with ft_flags = set_bit ft_flags_is_function_pointer is_fp ft.ft_flags }
-
-let get_ft_is_function_pointer ft =
-  is_set ft.ft_flags ft_flags_is_function_pointer
-
-let get_ft_fun_kind ft =
-  if get_ft_is_coroutine ft then
-    Ast_defs.FCoroutine
-  else
-    match (get_ft_async ft, get_ft_generator ft) with
-    | (false, false) -> Ast_defs.FSync
-    | (true, false) -> Ast_defs.FAsync
-    | (false, true) -> Ast_defs.FGenerator
-    | (true, true) -> Ast_defs.FAsyncGenerator
-
-let from_mutable_flags flags =
-  let masked = Int.bit_and flags mutable_flags_mask in
-  if Int.equal masked mutable_flags_owned then
-    Some Param_owned_mutable
-  else if Int.equal masked mutable_flags_borrowed then
-    Some Param_borrowed_mutable
-  else if Int.equal masked mutable_flags_maybe then
-    Some Param_maybe_mutable
-  else
-    None
-
-let to_mutable_flags m =
-  match m with
-  | None -> 0x0
-  | Some Param_owned_mutable -> mutable_flags_owned
-  | Some Param_borrowed_mutable -> mutable_flags_borrowed
-  | Some Param_maybe_mutable -> mutable_flags_maybe
-
-let get_ft_param_mutable ft = from_mutable_flags ft.ft_flags
-
-let get_fp_mutability fp = from_mutable_flags fp.fp_flags
-
-let fun_kind_to_flags kind =
-  match kind with
-  | Ast_defs.FSync -> 0
-  | Ast_defs.FAsync -> ft_flags_async
-  | Ast_defs.FGenerator -> ft_flags_generator
-  | Ast_defs.FAsyncGenerator -> Int.bit_or ft_flags_async ft_flags_generator
-  | Ast_defs.FCoroutine -> ft_flags_is_coroutine
-
-let make_ft_flags
-    kind param_mutable ~return_disposable ~returns_mutable ~returns_void_to_rx =
-  let flags =
-    Int.bit_or (to_mutable_flags param_mutable) (fun_kind_to_flags kind)
-  in
-  let flags = set_bit ft_flags_return_disposable return_disposable flags in
-  let flags = set_bit ft_flags_returns_mutable returns_mutable flags in
-  let flags = set_bit ft_flags_returns_void_to_rx returns_void_to_rx flags in
-  flags
-
-let mode_to_flags mode =
-  match mode with
-  | FPnormal -> 0x0
-  | FPinout -> fp_flags_inout
-
-let make_fp_flags ~mode ~accept_disposable ~mutability ~has_default =
-  let flags = mode_to_flags mode in
-  let flags = Int.bit_or (to_mutable_flags mutability) flags in
-  let flags = set_bit fp_flags_accept_disposable accept_disposable flags in
-  let flags = set_bit fp_flags_has_default has_default flags in
-  flags
-
-let get_fp_accept_disposable fp = is_set fp.fp_flags fp_flags_accept_disposable
-
-let get_fp_has_default fp = is_set fp.fp_flags fp_flags_has_default
-
-let get_fp_mode fp =
-  if is_set fp.fp_flags fp_flags_inout then
-    FPinout
-  else
-    FPnormal
-
 (* Identifies the class and PU enum from which this element originates *)
 type pu_origin = {
   pu_class: string;
   pu_enum: string;
 }
+[@@deriving show]
 
 type const_decl = {
   cd_pos: Pos.t;
   cd_type: decl_ty;
 }
+[@@deriving show]
 
 type class_elt = {
   ce_visibility: ce_visibility;
@@ -139,15 +32,17 @@ type class_elt = {
   ce_pos: Pos.t Lazy.t;
   ce_flags: int;
 }
+[@@deriving show]
 
-and fun_elt = {
+type fun_elt = {
   fe_deprecated: string option;
   fe_type: decl_ty;
   fe_pos: Pos.t;
   fe_php_std_lib: bool;
 }
+[@@deriving show]
 
-and class_const = {
+type class_const = {
   cc_synthesized: bool;
   cc_abstract: bool;
   cc_pos: Pos.t;
@@ -155,6 +50,21 @@ and class_const = {
   cc_origin: string;
       (** identifies the class from which this const originates *)
 }
+[@@deriving show]
+
+type record_field_req =
+  | ValueRequired
+  | HasDefaultValue
+[@@deriving show]
+
+type record_def_type = {
+  rdt_name: Nast.sid;
+  rdt_extends: Nast.sid option;
+  rdt_fields: (Nast.sid * record_field_req) list;
+  rdt_abstract: bool;
+  rdt_pos: Pos.t;
+}
+[@@deriving show]
 
 (** The position is that of the hint in the `use` / `implements` AST node
  * that causes a class to have this requirement applied to it. E.g.
@@ -170,7 +80,7 @@ and class_const = {
  * }
  * ```
  *)
-and requirement = Pos.t * decl_ty
+type requirement = Pos.t * decl_ty
 
 and class_type = {
   tc_need_init: bool;
@@ -208,7 +118,7 @@ and class_type = {
   tc_extends: SSet.t;
   tc_enum_type: enum_type option;
   tc_sealed_whitelist: SSet.t option;
-  tc_decl_errors: Errors.t option;
+  tc_decl_errors: Errors.t option; [@opaque]
 }
 
 and typeconst_abstract_kind =
@@ -247,34 +157,16 @@ and enum_type = {
   te_includes: decl_ty list;
   te_enum_class: bool;
 }
+[@@deriving show]
 
-and record_field_req =
-  | ValueRequired
-  | HasDefaultValue
-
-and record_def_type = {
-  rdt_name: Nast.sid;
-  rdt_extends: Nast.sid option;
-  rdt_fields: (Nast.sid * record_field_req) list;
-  rdt_abstract: bool;
-  rdt_pos: Pos.t;
-}
-
-and typedef_type = {
+type typedef_type = {
   td_pos: Pos.t;
   td_vis: Aast.typedef_visibility;
   td_tparams: decl_tparam list;
   td_constraint: decl_ty option;
   td_type: decl_ty;
 }
-
-and decl_tparam = decl_ty tparam
-
-and locl_tparam = locl_ty tparam
-
-and decl_where_constraint = decl_ty where_constraint
-
-and locl_where_constraint = locl_ty where_constraint
+[@@deriving show]
 
 let is_enum_class = function
   | None -> false

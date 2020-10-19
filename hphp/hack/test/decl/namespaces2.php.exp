@@ -14,7 +14,7 @@ Parsed decls:
   funs = {};
   typedefs =
   { "\\MyFileNamespace\\MyFileNamespaceType" ->
-    { td_pos = [5:6-25]; td_vis = Transparent; td_tparams = [];
+    { Typing_defs.td_pos = [5:6-25]; td_vis = Transparent; td_tparams = [];
       td_constraint = None;
       td_type =
       (Rhint (root|namespaces2.php line 5, characters 28-33), (Tprim Tstring))

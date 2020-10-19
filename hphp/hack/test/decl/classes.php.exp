@@ -73,7 +73,7 @@ Parsed decls:
                        (Tprim Tvoid))
                       };
                     ft_flags =
-                    (make_ft_flags sync none ~return_disposable:false
+                    (make_ft_flags FSync None ~return_disposable:false
                       ~returns_mutable:false ~returns_void_to_rx:false);
                     ft_reactive = Nonreactive }));
               sm_visibility = Public; sm_deprecated = None });
@@ -100,7 +100,7 @@ Parsed decls:
                   (Tprim Tvoid))
                  };
                ft_flags =
-               (make_ft_flags sync none ~return_disposable:false
+               (make_ft_flags FSync None ~return_disposable:false
                  ~returns_mutable:false ~returns_void_to_rx:false);
                ft_reactive = Nonreactive }));
          sm_visibility = Private; sm_deprecated = None };
@@ -125,7 +125,7 @@ Parsed decls:
                    (Tprim Tvoid))
                   };
                 ft_flags =
-                (make_ft_flags sync none ~return_disposable:false
+                (make_ft_flags FSync None ~return_disposable:false
                   ~returns_mutable:false ~returns_void_to_rx:false);
                 ft_reactive = Nonreactive }));
           sm_visibility = Public; sm_deprecated = None };
@@ -150,7 +150,7 @@ Parsed decls:
                    (Tprim Tvoid))
                   };
                 ft_flags =
-                (make_ft_flags sync none ~return_disposable:false
+                (make_ft_flags FSync None ~return_disposable:false
                   ~returns_mutable:false ~returns_void_to_rx:false);
                 ft_reactive = Nonreactive }));
           sm_visibility = Protected; sm_deprecated = None };
@@ -172,8 +172,8 @@ Parsed decls:
                       (Tprim Tstring))
                      };
                    fp_flags =
-                   (make_fp_flags ~mutability:none ~accept_disposable:false
-                     ~has_default:false ~mode:FPnormal);
+                   (make_fp_flags ~mutability:None ~accept_disposable:false
+                     ~has_default:false ~mode:Typing_defs_core.FPnormal);
                     };
                   { fp_pos = [16:9-14]; fp_name = (Some "$arg2");
                     fp_type =
@@ -183,8 +183,8 @@ Parsed decls:
                        (Tprim Tint))
                       };
                     fp_flags =
-                    (make_fp_flags ~mutability:none ~accept_disposable:false
-                      ~has_default:false ~mode:FPnormal);
+                    (make_fp_flags ~mutability:None ~accept_disposable:false
+                      ~has_default:false ~mode:Typing_defs_core.FPnormal);
                      }
                   ];
                 ft_implicit_params =
@@ -207,7 +207,7 @@ Parsed decls:
                       )))
                   };
                 ft_flags =
-                (make_ft_flags async generator none ~return_disposable:false
+                (make_ft_flags FAsyncGenerator None ~return_disposable:false
                   ~returns_mutable:false ~returns_void_to_rx:false);
                 ft_reactive = Nonreactive }));
           sm_visibility = Public; sm_deprecated = None };
@@ -232,7 +232,7 @@ Parsed decls:
                    (Tprim Tvoid))
                   };
                 ft_flags =
-                (make_ft_flags sync none ~return_disposable:false
+                (make_ft_flags FSync None ~return_disposable:false
                   ~returns_mutable:false ~returns_void_to_rx:false);
                 ft_reactive = Reactive {} }));
           sm_visibility = Public; sm_deprecated = None };
@@ -258,7 +258,7 @@ Parsed decls:
                    (Tprim Tvoid))
                   };
                 ft_flags =
-                (make_ft_flags sync none ~return_disposable:false
+                (make_ft_flags FSync None ~return_disposable:false
                   ~returns_mutable:false ~returns_void_to_rx:false);
                 ft_reactive = Shallow {} }));
           sm_visibility = Public; sm_deprecated = None };
@@ -284,7 +284,7 @@ Parsed decls:
                    (Tprim Tvoid))
                   };
                 ft_flags =
-                (make_ft_flags sync none ~return_disposable:false
+                (make_ft_flags FSync None ~return_disposable:false
                   ~returns_mutable:false ~returns_void_to_rx:false);
                 ft_reactive = Local {} }));
           sm_visibility = Public; sm_deprecated = None };
@@ -307,9 +307,10 @@ Parsed decls:
                       (Tapply (([33:19-26], "\\MyClass"), [])))
                      };
                    fp_flags =
-                   (make_fp_flags ~mutability:mutable
+                   (make_fp_flags
+                     ~mutability:(Some Typing_defs_core.Param_borrowed_mutable)
                      ~accept_disposable:false ~has_default:false
-                     ~mode:FPnormal);
+                     ~mode:Typing_defs_core.FPnormal);
                     };
                   { fp_pos = [34:32-34]; fp_name = (Some "$b");
                     fp_type =
@@ -319,9 +320,10 @@ Parsed decls:
                        (Tapply (([34:24-31], "\\MyClass"), [])))
                       };
                     fp_flags =
-                    (make_fp_flags ~mutability:maybe-mutable
+                    (make_fp_flags
+                      ~mutability:(Some Typing_defs_core.Param_maybe_mutable)
                       ~accept_disposable:false ~has_default:false
-                      ~mode:FPnormal);
+                      ~mode:Typing_defs_core.FPnormal);
                      };
                   { fp_pos = [35:32-34]; fp_name = (Some "$c");
                     fp_type =
@@ -331,9 +333,10 @@ Parsed decls:
                        (Tapply (([35:24-31], "\\MyClass"), [])))
                       };
                     fp_flags =
-                    (make_fp_flags ~mutability:owned mutable
+                    (make_fp_flags
+                      ~mutability:(Some Typing_defs_core.Param_owned_mutable)
                       ~accept_disposable:false ~has_default:false
-                      ~mode:FPnormal);
+                      ~mode:Typing_defs_core.FPnormal);
                      }
                   ];
                 ft_implicit_params =
@@ -348,7 +351,7 @@ Parsed decls:
                    (Tprim Tvoid))
                   };
                 ft_flags =
-                (make_ft_flags sync none ~return_disposable:false
+                (make_ft_flags FSync None ~return_disposable:false
                   ~returns_mutable:false ~returns_void_to_rx:false);
                 ft_reactive = Reactive {} }));
           sm_visibility = Public; sm_deprecated = None };
@@ -373,7 +376,7 @@ Parsed decls:
                    (Tapply (([40:37-44], "\\MyClass"), [])))
                   };
                 ft_flags =
-                (make_ft_flags sync none ~return_disposable:false
+                (make_ft_flags FSync None ~return_disposable:false
                   ~returns_mutable:true ~returns_void_to_rx:false);
                 ft_reactive = Reactive {} }));
           sm_visibility = Public; sm_deprecated = None }
@@ -437,9 +440,9 @@ Parsed decls:
                           (Tprim Tstring))
                          };
                        fp_flags =
-                       (make_fp_flags ~mutability:none
+                       (make_fp_flags ~mutability:None
                          ~accept_disposable:false ~has_default:false
-                         ~mode:FPnormal);
+                         ~mode:Typing_defs_core.FPnormal);
                         };
                       { fp_pos = [52:22-32]; fp_name = (Some "$protected");
                         fp_type =
@@ -449,9 +452,9 @@ Parsed decls:
                            (Tprim Tstring))
                           };
                         fp_flags =
-                        (make_fp_flags ~mutability:none
+                        (make_fp_flags ~mutability:None
                           ~accept_disposable:false ~has_default:false
-                          ~mode:FPnormal);
+                          ~mode:Typing_defs_core.FPnormal);
                          };
                       { fp_pos = [53:19-26]; fp_name = (Some "$public");
                         fp_type =
@@ -461,9 +464,9 @@ Parsed decls:
                            (Tprim Tstring))
                           };
                         fp_flags =
-                        (make_fp_flags ~mutability:none
+                        (make_fp_flags ~mutability:None
                           ~accept_disposable:false ~has_default:false
-                          ~mode:FPnormal);
+                          ~mode:Typing_defs_core.FPnormal);
                          };
                       { fp_pos = [54:19-30]; fp_name = (Some "$hasDefault");
                         fp_type =
@@ -473,9 +476,9 @@ Parsed decls:
                            (Tprim Tstring))
                           };
                         fp_flags =
-                        (make_fp_flags ~mutability:none
+                        (make_fp_flags ~mutability:None
                           ~accept_disposable:false ~has_default:true
-                          ~mode:FPnormal);
+                          ~mode:Typing_defs_core.FPnormal);
                          }
                       ];
                     ft_implicit_params =
@@ -490,7 +493,7 @@ Parsed decls:
                        (Tprim Tvoid))
                       };
                     ft_flags =
-                    (make_ft_flags sync none ~return_disposable:false
+                    (make_ft_flags FSync None ~return_disposable:false
                       ~returns_mutable:false ~returns_void_to_rx:false);
                     ft_reactive = Nonreactive }));
               sm_visibility = Public; sm_deprecated = None });

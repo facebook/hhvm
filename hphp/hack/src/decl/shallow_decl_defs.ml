@@ -8,7 +8,6 @@
  *)
 
 open Typing_defs
-open Pp_type
 
 type shallow_class_const = {
   scc_abstract: bool;

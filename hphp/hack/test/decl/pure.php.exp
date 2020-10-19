@@ -30,7 +30,7 @@ Parsed decls:
                   (Tprim Tvoid))
                  };
                ft_flags =
-               (make_ft_flags sync none ~return_disposable:false
+               (make_ft_flags FSync None ~return_disposable:false
                  ~returns_mutable:false ~returns_void_to_rx:false);
                ft_reactive = Pure {} }));
          sm_visibility = Public; sm_deprecated = None }
@@ -38,7 +38,7 @@ Parsed decls:
       sc_user_attributes = []; sc_enum_type = None } };
   funs =
   { "\\pure" ->
-    { fe_pos = [4:10-14];
+    { Typing_defs.fe_deprecated = None;
       fe_type =
       (Rwitness (root|pure.php line 4, characters 10-13),
        (Tfun
@@ -53,10 +53,10 @@ Parsed decls:
               (Rhint (root|pure.php line 4, characters 18-21), (Tprim Tvoid))
               };
             ft_flags =
-            (make_ft_flags sync none ~return_disposable:false
+            (make_ft_flags FSync None ~return_disposable:false
               ~returns_mutable:false ~returns_void_to_rx:false);
             ft_reactive = Pure {} }));
-      fe_deprecated = None;  } };
+      fe_pos = [4:10-14]; fe_php_std_lib = false } };
   typedefs = {}; consts = {} }
 
 They matched!

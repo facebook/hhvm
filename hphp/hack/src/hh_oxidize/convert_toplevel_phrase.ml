@@ -13,6 +13,28 @@ open Utils
 open Output
 open Convert_longident
 
+module Env : sig
+  type t
+
+  val empty : t
+
+  val add_defined_module : t -> string -> t
+
+  val is_defined_submodule : t -> string -> bool
+end = struct
+  type t = { defined_submodules: SSet.t }
+
+  let empty = { defined_submodules = SSet.empty }
+
+  let add_defined_module (env : t) (module_name : string) : t =
+    let module_name = String.uncapitalize module_name in
+    { defined_submodules = SSet.add module_name env.defined_submodules }
+
+  let is_defined_submodule (env : t) (module_name : string) : bool =
+    let module_name = String.uncapitalize module_name in
+    SSet.mem module_name env.defined_submodules
+end
+
 (* HACK: These modules are not used in any type declarations, so importing them
    will result in an "unused import" warning or an "unresolved import" error in
    Rust. *)
@@ -84,19 +106,21 @@ let string_of_module_desc = function
   | Pmod_extension _ -> "Pmod_extension"
   | Pmod_ident _ -> "Pmod_ident"
 
-let structure_item si =
+let structure_item (env : Env.t) (si : structure_item) : Env.t =
   match si.pstr_desc with
   (* A type declaration. The list type_decls will contain multiple items in the
      event of `type ... and`. *)
   | Pstr_type (_, type_decls) ->
-    List.iter type_decls Convert_type_decl.type_declaration
+    List.iter type_decls Convert_type_decl.type_declaration;
+    env
   (* Convert `open Foo` to `use crate::foo::*;` *)
   | Pstr_open { popen_lid = id; _ } ->
     let mod_name = longident_to_string id.txt ~for_open:true in
     if blacklisted mod_name then
       log "Not opening %s: it is blacklisted" mod_name
     else
-      add_glob_use mod_name
+      add_glob_use mod_name;
+    env
   (* Convert `module F = Foo` to `use crate::foo as f;` *)
   | Pstr_module
       {
@@ -115,15 +139,21 @@ let structure_item si =
         ( if is_enum_module_import id.txt then
           alias
         else
-          convert_module_name alias )
+          convert_module_name alias );
+    env
   (* Convert `include Foo` to explicit re-exports (`pub use`) for every type
      exported by Foo (see {!Stringify.get_includes}). *)
   | Pstr_include { pincl_mod = { pmod_desc = Pmod_ident id; _ }; _ } ->
     let mod_name = longident_to_string id.txt ~for_open:true in
     if blacklisted mod_name then
       log "Not including %s: it is blacklisted" mod_name
+    else if Env.is_defined_submodule env mod_name then
+      log
+        "Not including %s: its definition is local and hasn't been converted."
+        mod_name
     else
-      add_include mod_name
+      add_include mod_name;
+    env
   | Pstr_module
       {
         pmb_name = { txt = mod_name; _ };
@@ -136,7 +166,8 @@ let structure_item si =
       "Not converting submodule %s: importing crate::%s instead"
       mod_name
       rust_mod_name;
-    add_alias ("crate::" ^ rust_mod_name) rust_mod_name
+    add_alias ("crate::" ^ rust_mod_name) rust_mod_name;
+    env
   | Pstr_module
       {
         pmb_name = { txt = mod_name; _ };
@@ -163,30 +194,54 @@ let structure_item si =
         ptype_name = { enum_type.ptype_name with txt = mod_name };
       }
     in
-    Convert_type_decl.type_declaration enum_type
+    Convert_type_decl.type_declaration enum_type;
+    env
   | Pstr_module { pmb_name = { txt = name; _ }; pmb_expr = { pmod_desc; _ }; _ }
     ->
     let kind = string_of_module_desc pmod_desc in
-    log "Not converting submodule %s: %s not supported" name kind
+    log "Not converting submodule %s: %s not supported" name kind;
+    let env = Env.add_defined_module env name in
+    env
   | Pstr_include { pincl_mod = { pmod_desc; _ }; _ } ->
     let kind = string_of_module_desc pmod_desc in
-    log "Not converting include: %s not supported" kind
+    log "Not converting include: %s not supported" kind;
+    env
   | Pstr_exception { pext_name = { txt = name; _ }; _ } ->
-    log "Not converting exception %s" name
-  | Pstr_eval _ -> log "Not converting Pstr_eval"
-  | Pstr_primitive _ -> log "Not converting Pstr_primitive"
-  | Pstr_typext _ -> log "Not converting Pstr_typext"
-  | Pstr_recmodule _ -> log "Not converting Pstr_recmodule"
-  | Pstr_modtype _ -> log "Not converting Pstr_modtype"
-  | Pstr_class _ -> log "Not converting Pstr_class"
-  | Pstr_class_type _ -> log "Not converting Pstr_class_type"
-  | Pstr_extension _ -> log "Not converting Pstr_extension"
+    log "Not converting exception %s" name;
+    env
+  | Pstr_eval _ ->
+    log "Not converting Pstr_eval";
+    env
+  | Pstr_primitive _ ->
+    log "Not converting Pstr_primitive";
+    env
+  | Pstr_typext _ ->
+    log "Not converting Pstr_typext";
+    env
+  | Pstr_recmodule _ ->
+    log "Not converting Pstr_recmodule";
+    env
+  | Pstr_modtype _ ->
+    log "Not converting Pstr_modtype";
+    env
+  | Pstr_class _ ->
+    log "Not converting Pstr_class";
+    env
+  | Pstr_class_type _ ->
+    log "Not converting Pstr_class_type";
+    env
+  | Pstr_extension _ ->
+    log "Not converting Pstr_extension";
+    env
   (* Doc comments on files are represented with Pstr_attribute, so silently
      ignore them. *)
-  | Pstr_attribute _ -> ()
+  | Pstr_attribute _ -> env
   (* Our goal is to convert types only, so silently ignore values. *)
-  | Pstr_value _ -> ()
+  | Pstr_value _ -> env
 
-let toplevel_phrase = function
-  | Ptop_def items -> List.iter items structure_item
-  | Ptop_dir _ -> log "Not converting toplevel directive"
+let toplevel_phrase : Env.t -> toplevel_phrase -> Env.t =
+ fun env -> function
+  | Ptop_def items -> List.fold items ~f:structure_item ~init:env
+  | Ptop_dir _ ->
+    log "Not converting toplevel directive";
+    env

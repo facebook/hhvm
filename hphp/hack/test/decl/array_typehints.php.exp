@@ -3,7 +3,7 @@ Parsed decls:
 { Direct_decl_parser.classes = {};
   funs =
   { "\\a2" ->
-    { fe_pos = [3:10-12];
+    { Typing_defs.fe_deprecated = None;
       fe_type =
       (Rwitness (root|array_typehints.php line 3, characters 10-11),
        (Tfun
@@ -26,12 +26,12 @@ Parsed decls:
                   )))
               };
             ft_flags =
-            (make_ft_flags sync none ~return_disposable:false
+            (make_ft_flags FSync None ~return_disposable:false
               ~returns_mutable:false ~returns_void_to_rx:false);
             ft_reactive = Nonreactive }));
-      fe_deprecated = None;  };
+      fe_pos = [3:10-12]; fe_php_std_lib = false };
     "\\d0" ->
-    { fe_pos = [15:10-12];
+    { Typing_defs.fe_deprecated = None;
       fe_type =
       (Rwitness (root|array_typehints.php line 15, characters 10-11),
        (Tfun
@@ -50,12 +50,12 @@ Parsed decls:
                   (Rnone (| line 0, characters 0-0), Tany))))
               };
             ft_flags =
-            (make_ft_flags sync none ~return_disposable:false
+            (make_ft_flags FSync None ~return_disposable:false
               ~returns_mutable:false ~returns_void_to_rx:false);
             ft_reactive = Nonreactive }));
-      fe_deprecated = None;  };
+      fe_pos = [15:10-12]; fe_php_std_lib = false };
     "\\d2" ->
-    { fe_pos = [19:10-12];
+    { Typing_defs.fe_deprecated = None;
       fe_type =
       (Rwitness (root|array_typehints.php line 19, characters 10-11),
        (Tfun
@@ -78,12 +78,12 @@ Parsed decls:
                   )))
               };
             ft_flags =
-            (make_ft_flags sync none ~return_disposable:false
+            (make_ft_flags FSync None ~return_disposable:false
               ~returns_mutable:false ~returns_void_to_rx:false);
             ft_reactive = Nonreactive }));
-      fe_deprecated = None;  };
+      fe_pos = [19:10-12]; fe_php_std_lib = false };
     "\\v0" ->
-    { fe_pos = [7:10-12];
+    { Typing_defs.fe_deprecated = None;
       fe_type =
       (Rwitness (root|array_typehints.php line 7, characters 10-11),
        (Tfun
@@ -101,12 +101,12 @@ Parsed decls:
                (Tvarray (Rnone (| line 0, characters 0-0), Tany)))
               };
             ft_flags =
-            (make_ft_flags sync none ~return_disposable:false
+            (make_ft_flags FSync None ~return_disposable:false
               ~returns_mutable:false ~returns_void_to_rx:false);
             ft_reactive = Nonreactive }));
-      fe_deprecated = None;  };
+      fe_pos = [7:10-12]; fe_php_std_lib = false };
     "\\v1" ->
-    { fe_pos = [11:10-12];
+    { Typing_defs.fe_deprecated = None;
       fe_type =
       (Rwitness (root|array_typehints.php line 11, characters 10-11),
        (Tfun
@@ -126,12 +126,12 @@ Parsed decls:
                    (Tprim Tint))))
               };
             ft_flags =
-            (make_ft_flags sync none ~return_disposable:false
+            (make_ft_flags FSync None ~return_disposable:false
               ~returns_mutable:false ~returns_void_to_rx:false);
             ft_reactive = Nonreactive }));
-      fe_deprecated = None;  };
+      fe_pos = [11:10-12]; fe_php_std_lib = false };
     "\\vd0" ->
-    { fe_pos = [23:10-13];
+    { Typing_defs.fe_deprecated = None;
       fe_type =
       (Rwitness (root|array_typehints.php line 23, characters 10-12),
        (Tfun
@@ -151,12 +151,12 @@ Parsed decls:
                   (Rnone (| line 0, characters 0-0), Tany)))
               };
             ft_flags =
-            (make_ft_flags sync none ~return_disposable:false
+            (make_ft_flags FSync None ~return_disposable:false
               ~returns_mutable:false ~returns_void_to_rx:false);
             ft_reactive = Nonreactive }));
-      fe_deprecated = None;  };
+      fe_pos = [23:10-13]; fe_php_std_lib = false };
     "\\vd1" ->
-    { fe_pos = [27:10-13];
+    { Typing_defs.fe_deprecated = None;
       fe_type =
       (Rwitness (root|array_typehints.php line 27, characters 10-12),
        (Tfun
@@ -177,12 +177,12 @@ Parsed decls:
                    (Tprim Tint))))
               };
             ft_flags =
-            (make_ft_flags sync none ~return_disposable:false
+            (make_ft_flags FSync None ~return_disposable:false
               ~returns_mutable:false ~returns_void_to_rx:false);
             ft_reactive = Nonreactive }));
-      fe_deprecated = None;  };
+      fe_pos = [27:10-13]; fe_php_std_lib = false };
     "\\vd2" ->
-    { fe_pos = [31:10-13];
+    { Typing_defs.fe_deprecated = None;
       fe_type =
       (Rwitness (root|array_typehints.php line 31, characters 10-12),
        (Tfun
@@ -204,12 +204,12 @@ Parsed decls:
                    (Tprim Tstring))))
               };
             ft_flags =
-            (make_ft_flags sync none ~return_disposable:false
+            (make_ft_flags FSync None ~return_disposable:false
               ~returns_mutable:false ~returns_void_to_rx:false);
             ft_reactive = Nonreactive }));
-      fe_deprecated = None;  };
+      fe_pos = [31:10-13]; fe_php_std_lib = false };
     "\\vd3" ->
-    { fe_pos = [35:10-13];
+    { Typing_defs.fe_deprecated = None;
       fe_type =
       (Rwitness (root|array_typehints.php line 35, characters 10-12),
        (Tfun
@@ -227,10 +227,10 @@ Parsed decls:
                Tany)
               };
             ft_flags =
-            (make_ft_flags sync none ~return_disposable:false
+            (make_ft_flags FSync None ~return_disposable:false
               ~returns_mutable:false ~returns_void_to_rx:false);
             ft_reactive = Nonreactive }));
-      fe_deprecated = None;  } };
+      fe_pos = [35:10-13]; fe_php_std_lib = false } };
   typedefs = {}; consts = {} }
 
 They matched!

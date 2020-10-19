@@ -23,7 +23,7 @@ Parsed decls:
       sc_enum_type = None } };
   funs =
   { "\\f" ->
-    { fe_pos = [9:10-11];
+    { Typing_defs.fe_deprecated = None;
       fe_type =
       (Rwitness (root|denotable_unions.php line 9, characters 10-10),
        (Tfun
@@ -43,8 +43,8 @@ Parsed decls:
                        ]))
                  };
                fp_flags =
-               (make_fp_flags ~mutability:none ~accept_disposable:false
-                 ~has_default:false ~mode:FPnormal);
+               (make_fp_flags ~mutability:None ~accept_disposable:false
+                 ~has_default:false ~mode:Typing_defs_core.FPnormal);
                 }
               ];
             ft_implicit_params =
@@ -59,12 +59,12 @@ Parsed decls:
                (Tprim Tvoid))
               };
             ft_flags =
-            (make_ft_flags sync none ~return_disposable:false
+            (make_ft_flags FSync None ~return_disposable:false
               ~returns_mutable:false ~returns_void_to_rx:false);
             ft_reactive = Nonreactive }));
-      fe_deprecated = None;  };
+      fe_pos = [9:10-11]; fe_php_std_lib = false };
     "\\g" ->
-    { fe_pos = [10:10-11];
+    { Typing_defs.fe_deprecated = None;
       fe_type =
       (Rwitness (root|denotable_unions.php line 10, characters 10-10),
        (Tfun
@@ -84,8 +84,8 @@ Parsed decls:
                        ]))
                  };
                fp_flags =
-               (make_fp_flags ~mutability:none ~accept_disposable:false
-                 ~has_default:false ~mode:FPnormal);
+               (make_fp_flags ~mutability:None ~accept_disposable:false
+                 ~has_default:false ~mode:Typing_defs_core.FPnormal);
                 }
               ];
             ft_implicit_params =
@@ -100,10 +100,10 @@ Parsed decls:
                (Tprim Tvoid))
               };
             ft_flags =
-            (make_ft_flags sync none ~return_disposable:false
+            (make_ft_flags FSync None ~return_disposable:false
               ~returns_mutable:false ~returns_void_to_rx:false);
             ft_reactive = Nonreactive }));
-      fe_deprecated = None;  } };
+      fe_pos = [10:10-11]; fe_php_std_lib = false } };
   typedefs = {}; consts = {} }
 
 They matched!

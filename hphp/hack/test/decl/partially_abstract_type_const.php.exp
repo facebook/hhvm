@@ -9,7 +9,7 @@ Parsed decls:
       sc_xhp_attr_uses = []; sc_req_extends = []; sc_req_implements = [];
       sc_implements = []; sc_consts = [];
       sc_typeconsts =
-      [{ Shallow_decl_defs.stc_abstract = TCPartiallyAbstract;
+      [{ Shallow_decl_defs.stc_abstract = Typing_defs.TCPartiallyAbstract;
          stc_constraint =
          (Some (Rhint (root|partially_abstract_type_const.php line 4, characters 19-23),
                 Tmixed));

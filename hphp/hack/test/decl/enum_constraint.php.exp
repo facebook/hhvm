@@ -18,13 +18,13 @@ Parsed decls:
       sc_constructor = None; sc_static_methods = []; sc_methods = [];
       sc_user_attributes = [];
       sc_enum_type =
-      (Some { te_base =
+      (Some { Typing_defs.te_base =
               (Rhint (root|enum_constraint.php line 3, characters 10-15),
                (Tprim Tstring));
               te_constraint =
               (Some (Rhint (root|enum_constraint.php line 3, characters 20-25),
-                     (Tprim Tstring)))
-              })
+                     (Tprim Tstring)));
+              te_includes = []; te_enum_class = false })
       };
     "\\B" ->
     { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -43,7 +43,7 @@ Parsed decls:
       sc_constructor = None; sc_static_methods = []; sc_methods = [];
       sc_user_attributes = [];
       sc_enum_type =
-      (Some { te_base =
+      (Some { Typing_defs.te_base =
               (Rhint (root|enum_constraint.php line 5, characters 10-12),
                (Tprim Tint));
               te_constraint =
@@ -51,8 +51,8 @@ Parsed decls:
                      (Tapply (([5:17-21], "\\IdOf"),
                         [(Rhint (root|enum_constraint.php line 5, characters 22-22),
                           (Tapply (([5:22-23], "\\X"), [])))]
-                        ))))
-              })
+                        ))));
+              te_includes = []; te_enum_class = false })
       } };
   funs = {}; typedefs = {}; consts = {} }
 

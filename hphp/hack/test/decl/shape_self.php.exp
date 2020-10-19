@@ -17,11 +17,11 @@ Parsed decls:
          }
         ];
       sc_typeconsts =
-      [{ Shallow_decl_defs.stc_abstract = TCConcrete; stc_constraint = None;
-         stc_name = ([6:14-24], "TClassType");
+      [{ Shallow_decl_defs.stc_abstract = Typing_defs.TCConcrete;
+         stc_constraint = None; stc_name = ([6:14-24], "TClassType");
          stc_type =
          (Some (Rhint (root|shape_self.php line 6, characters 27-58),
-                (Tshape (Closed_shape,
+                (Tshape (Typing_defs_core.Closed_shape,
                    { (SFclass_const (([7:5-9], "\\TestClass"),
                         ([7:11-14], "KEY"))) ->
                      { sft_optional = false;

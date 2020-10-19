@@ -4,7 +4,6 @@
   (modules
     coverage_level_defs
     deferred_decl
-    pp_type
     typing_defs
     typing_defs_core
     typing_defs_flags

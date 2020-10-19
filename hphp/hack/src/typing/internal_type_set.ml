@@ -15,7 +15,7 @@ open Hh_prelude
 open Typing_defs
 
 module Ty_ = struct
-  type t = internal_type
+  type t = internal_type [@@deriving show]
 
   let compare ty1 ty2 =
     match (ty1, ty2) with
@@ -40,12 +40,9 @@ let pp fmt t =
   Format.fprintf fmt "@[<hv 2>{";
   ignore
     (List.fold_left
-       ~f:(fun sep _ty ->
+       ~f:(fun sep ty ->
          if sep then Format.fprintf fmt ";@ ";
-
-         (* TODO
-        Pp_type.pp_ty () fmt ty;
-        *)
+         Ty_.pp fmt ty;
          true)
        ~init:false
        (elements t));

@@ -15,7 +15,7 @@ open Hh_prelude
 open Typing_defs
 
 module Ty_ = struct
-  type t = locl_ty
+  type t = locl_ty [@@deriving show]
 
   let compare r1 r2 = Typing_defs.ty_compare r1 r2
 end
@@ -28,7 +28,7 @@ let pp fmt t =
     (List.fold_left
        ~f:(fun sep ty ->
          if sep then Format.fprintf fmt ";@ ";
-         Pp_type.pp_ty () fmt ty;
+         Ty_.pp fmt ty;
          true)
        ~init:false
        (elements t));

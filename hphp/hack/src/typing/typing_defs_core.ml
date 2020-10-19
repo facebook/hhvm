@@ -7,6 +7,7 @@
  *
  *)
 
+open Hh_prelude
 module Reason = Typing_reason
 module SN = Naming_special_names
 
@@ -19,7 +20,7 @@ type ce_visibility =
 type exact =
   | Exact
   | Nonexact
-[@@deriving eq, ord]
+[@@deriving eq, ord, show]
 
 (* All the possible types, reason is a trace of why a type
    was inferred in a certain way.
@@ -29,9 +30,9 @@ type exact =
    inferred via local inference.
 *)
 (* create private types to represent the different type phases *)
-type decl_phase = private DeclPhase [@@deriving eq]
+type decl_phase = private DeclPhase [@@deriving eq, show]
 
-type locl_phase = private LoclPhase [@@deriving eq]
+type locl_phase = private LoclPhase [@@deriving eq, show]
 
 type val_kind =
   | Lval
@@ -43,7 +44,7 @@ type param_mutability =
   | Param_owned_mutable
   | Param_borrowed_mutable
   | Param_maybe_mutable
-[@@deriving eq]
+[@@deriving eq, show]
 
 type fun_tparams_kind =
   | FTKtparams
@@ -61,12 +62,12 @@ type fun_tparams_kind =
 type shape_kind =
   | Closed_shape
   | Open_shape
-[@@deriving eq, ord]
+[@@deriving eq, ord, show]
 
 type param_mode =
   | FPnormal
   | FPinout
-[@@deriving eq]
+[@@deriving eq, show]
 
 type xhp_attr_tag =
   | Required
@@ -90,7 +91,7 @@ type consistent_kind =
   | Inconsistent
   | ConsistentConstruct
   | FinalClass
-[@@deriving eq]
+[@@deriving eq, show]
 
 (* A dependent type consists of a base kind which indicates what the type is
  * dependent on. It is either dependent on:
@@ -114,12 +115,7 @@ type dependent_type =
    *  The expression $x->foo() would have a different one
    *)
   | DTexpr of Ident.t
-[@@deriving eq, ord]
-
-type destructure_kind =
-  | ListDestructure
-  | SplatUnpack
-[@@deriving eq, ord]
+[@@deriving eq, ord, show]
 
 type user_attribute = {
   ua_name: Aast.sid;
@@ -137,15 +133,14 @@ type 'ty tparam = {
 }
 [@@deriving eq, show]
 
-type 'ty where_constraint = 'ty * Ast_defs.constraint_kind * 'ty [@@deriving eq]
+type 'ty where_constraint = 'ty * Ast_defs.constraint_kind * 'ty
+[@@deriving eq, show]
 
 type 'phase ty = Reason.t * 'phase ty_
 
 and decl_ty = decl_phase ty
 
 and locl_ty = locl_phase ty
-
-and locl_ty_ = locl_phase ty_
 
 (** A shape may specify whether or not fields are required. For example, consider
  * this typedef:
@@ -315,61 +310,6 @@ and _ ty_ =
        * - second parameter is the name of the type to project
        *)
 
-and constraint_type_ =
-  | Thas_member of has_member
-  | Tdestructure of destructure
-      (** The type of container destructuring via list() or splat `...` *)
-  | TCunion of locl_ty * constraint_type
-  | TCintersection of locl_ty * constraint_type
-
-and has_member = {
-  hm_name: Nast.sid;
-  hm_type: locl_ty;
-  hm_class_id: Nast.class_id_;
-      (** This is required to check ambiguous object access, where sometimes
-  HHVM would access the private member of a parent class instead of the
-  one from the current class. *)
-  hm_explicit_targs: Nast.targ list option;
-      (* - For a "has-property" constraint, this is `None`
-       * - For a "has-method" constraint, this is `Some targs`, where targs
-       *   is the list of explicit type arguments provided to the method call.
-       *   Note that this list can be empty (i.e. `Some []`) in the case of a
-       *   method not taking type arguments, or when we leave them implicit
-       *
-       * We need to know if this is a "has-property" or "has-method" to pass
-       * the correct `is_method` parameter to `Typing_object_get.obj_get`.
-       *)
-}
-
-and destructure = {
-  d_required: locl_ty list;
-      (** This represents the standard parameters of a function or the fields in a list
-       * destructuring assignment. Example:
-       *
-       * function take(bool $b, float $f = 3.14, arraykey ...$aks): void {}
-       * function f((bool, float, int, string) $tup): void {
-       *   take(...$tup);
-       * }
-       *
-       * corresponds to the subtyping assertion
-       *
-       * (bool, float, int, string) <: splat([#1], [opt#2], ...#3)
-       *)
-  d_optional: locl_ty list;
-      (** Represents the optional parameters in a function, only used for splats *)
-  d_variadic: locl_ty option;
-      (** Represents a function's variadic parameter, also only used for splats *)
-  d_kind: destructure_kind;
-      (** list() destructuring allows for partial matches on lists, even when the operation
-       * might throw i.e. list($a) = vec[]; *)
-}
-
-and constraint_type = Reason.t * constraint_type_
-
-and internal_type =
-  | LoclType of locl_ty
-  | ConstraintType of constraint_type
-
 and taccess_type = decl_ty * Nast.sid list
 
 (** represents reactivity of function
@@ -419,10 +359,6 @@ and 'ty fun_type = {
   ft_flags: Typing_defs_flags.fun_type_flags;
 }
 
-and decl_fun_type = decl_ty fun_type
-
-and locl_fun_type = locl_ty fun_type
-
 (** Arity information for a fun_type; indicating the minimum number of
  * args expected by the function and the maximum number of args for
  * standard, non-variadic functions or the type of variadic argument taken *)
@@ -431,10 +367,6 @@ and 'ty fun_arity =
   | Fvariadic of 'ty fun_param
       (** PHP5.6-style ...$args finishes the func declaration.
           min ; variadic param type *)
-
-and decl_fun_arity = decl_ty fun_arity
-
-and locl_fun_arity = locl_ty fun_arity
 
 and param_rx_annotation =
   | Param_rx_var
@@ -446,10 +378,6 @@ and 'ty possibly_enforced_ty = {
   et_type: 'ty;
 }
 
-and decl_possibly_enforced_ty = decl_ty possibly_enforced_ty
-
-and locl_possibly_enforced_ty = locl_ty possibly_enforced_ty
-
 and 'ty fun_param = {
   fp_pos: Pos.t;
   fp_name: string option;
@@ -458,15 +386,735 @@ and 'ty fun_param = {
   fp_flags: Typing_defs_flags.fun_param_flags;
 }
 
-and decl_fun_param = decl_ty fun_param
-
-and locl_fun_param = locl_ty fun_param
-
 and 'ty fun_params = 'ty fun_param list
 
-and decl_fun_params = decl_ty fun_params
+module Flags = struct
+  open Typing_defs_flags
 
-and locl_fun_params = locl_ty fun_params
+  let get_ft_return_disposable ft =
+    is_set ft.ft_flags ft_flags_return_disposable
+
+  let get_ft_returns_void_to_rx ft =
+    is_set ft.ft_flags ft_flags_returns_void_to_rx
+
+  let get_ft_returns_mutable ft = is_set ft.ft_flags ft_flags_returns_mutable
+
+  let get_ft_is_coroutine ft = is_set ft.ft_flags ft_flags_is_coroutine
+
+  let get_ft_async ft = is_set ft.ft_flags ft_flags_async
+
+  let get_ft_generator ft = is_set ft.ft_flags ft_flags_generator
+
+  let get_ft_ftk ft =
+    if is_set ft.ft_flags ft_flags_instantiated_targs then
+      FTKinstantiated_targs
+    else
+      FTKtparams
+
+  let set_ft_ftk ft ftk =
+    {
+      ft with
+      ft_flags =
+        set_bit
+          ft_flags_instantiated_targs
+          (match ftk with
+          | FTKinstantiated_targs -> true
+          | FTKtparams -> false)
+          ft.ft_flags;
+    }
+
+  let set_ft_is_function_pointer ft is_fp =
+    {
+      ft with
+      ft_flags = set_bit ft_flags_is_function_pointer is_fp ft.ft_flags;
+    }
+
+  let get_ft_is_function_pointer ft =
+    is_set ft.ft_flags ft_flags_is_function_pointer
+
+  let get_ft_fun_kind ft =
+    if get_ft_is_coroutine ft then
+      Ast_defs.FCoroutine
+    else
+      match (get_ft_async ft, get_ft_generator ft) with
+      | (false, false) -> Ast_defs.FSync
+      | (true, false) -> Ast_defs.FAsync
+      | (false, true) -> Ast_defs.FGenerator
+      | (true, true) -> Ast_defs.FAsyncGenerator
+
+  let from_mutable_flags flags =
+    let masked = Int.bit_and flags mutable_flags_mask in
+    if Int.equal masked mutable_flags_owned then
+      Some Param_owned_mutable
+    else if Int.equal masked mutable_flags_borrowed then
+      Some Param_borrowed_mutable
+    else if Int.equal masked mutable_flags_maybe then
+      Some Param_maybe_mutable
+    else
+      None
+
+  let to_mutable_flags m =
+    match m with
+    | None -> 0x0
+    | Some Param_owned_mutable -> mutable_flags_owned
+    | Some Param_borrowed_mutable -> mutable_flags_borrowed
+    | Some Param_maybe_mutable -> mutable_flags_maybe
+
+  let get_ft_param_mutable ft = from_mutable_flags ft.ft_flags
+
+  let get_fp_mutability fp = from_mutable_flags fp.fp_flags
+
+  let fun_kind_to_flags kind =
+    match kind with
+    | Ast_defs.FSync -> 0
+    | Ast_defs.FAsync -> ft_flags_async
+    | Ast_defs.FGenerator -> ft_flags_generator
+    | Ast_defs.FAsyncGenerator -> Int.bit_or ft_flags_async ft_flags_generator
+    | Ast_defs.FCoroutine -> ft_flags_is_coroutine
+
+  let make_ft_flags
+      kind param_mutable ~return_disposable ~returns_mutable ~returns_void_to_rx
+      =
+    let flags =
+      Int.bit_or (to_mutable_flags param_mutable) (fun_kind_to_flags kind)
+    in
+    let flags = set_bit ft_flags_return_disposable return_disposable flags in
+    let flags = set_bit ft_flags_returns_mutable returns_mutable flags in
+    let flags = set_bit ft_flags_returns_void_to_rx returns_void_to_rx flags in
+    flags
+
+  let mode_to_flags mode =
+    match mode with
+    | FPnormal -> 0x0
+    | FPinout -> fp_flags_inout
+
+  let make_fp_flags ~mode ~accept_disposable ~mutability ~has_default =
+    let flags = mode_to_flags mode in
+    let flags = Int.bit_or (to_mutable_flags mutability) flags in
+    let flags = set_bit fp_flags_accept_disposable accept_disposable flags in
+    let flags = set_bit fp_flags_has_default has_default flags in
+    flags
+
+  let get_fp_accept_disposable fp =
+    is_set fp.fp_flags fp_flags_accept_disposable
+
+  let get_fp_has_default fp = is_set fp.fp_flags fp_flags_has_default
+
+  let get_fp_mode fp =
+    if is_set fp.fp_flags fp_flags_inout then
+      FPinout
+    else
+      FPnormal
+end
+
+include Flags
+
+module Pp = struct
+  let rec pp_ty : type a. Format.formatter -> a ty -> unit =
+   fun fmt t ->
+    let (a0, a1) = t in
+    Format.fprintf fmt "(@[";
+    Reason.pp fmt a0;
+    Format.fprintf fmt ",@ ";
+    pp_ty_ fmt a1;
+    Format.fprintf fmt "@])"
+
+  and pp_ty_ : type a. Format.formatter -> a ty_ -> unit =
+   fun fmt ty ->
+    match ty with
+    | Tany _ -> Format.pp_print_string fmt "Tany"
+    | Terr -> Format.pp_print_string fmt "Terr"
+    | Tthis -> Format.pp_print_string fmt "Tthis"
+    | Tmixed -> Format.pp_print_string fmt "Tmixed"
+    | Tdynamic -> Format.pp_print_string fmt "Tdynamic"
+    | Tnonnull -> Format.pp_print_string fmt "Tnonnull"
+    | Tapply (a0, a1) ->
+      Format.fprintf fmt "(@[<2>Tapply (@,";
+      let () = Aast.pp_sid fmt a0 in
+      Format.fprintf fmt ",@ ";
+      Format.fprintf fmt "@[<2>[";
+      ignore
+        (List.fold_left
+           ~f:(fun sep x ->
+             if sep then Format.fprintf fmt ";@ ";
+             pp_ty fmt x;
+             true)
+           ~init:false
+           a1);
+      Format.fprintf fmt "@,]@]";
+      Format.fprintf fmt "@,))@]"
+    | Tgeneric (a0, a1) ->
+      Format.fprintf fmt "(@[<2>Tgeneric (@,";
+      Format.fprintf fmt "%S" a0;
+      Format.fprintf fmt ",@ ";
+      pp_ty_list fmt a1;
+      Format.fprintf fmt "@,)@]"
+    | Tunapplied_alias a0 ->
+      Format.fprintf fmt "(@[<2>Tunappliedalias@ ";
+      Format.fprintf fmt "%S" a0;
+      Format.fprintf fmt "@])"
+    | Taccess a0 ->
+      Format.fprintf fmt "(@[<2>Taccess@ ";
+      pp_taccess_type fmt a0;
+      Format.fprintf fmt "@])"
+    | Tarray (a0, a1) ->
+      Format.fprintf fmt "(@[<2>Tarray (@,";
+      (match a0 with
+      | None -> Format.pp_print_string fmt "None"
+      | Some x ->
+        Format.pp_print_string fmt "(Some ";
+        pp_ty fmt x;
+        Format.pp_print_string fmt ")");
+      Format.fprintf fmt ",@ ";
+      (match a1 with
+      | None -> Format.pp_print_string fmt "None"
+      | Some x ->
+        Format.pp_print_string fmt "(Some ";
+        pp_ty fmt x;
+        Format.pp_print_string fmt ")");
+      Format.fprintf fmt "@,))@]"
+    | Tdarray (a0, a1) ->
+      Format.fprintf fmt "(@[<2>Tdarray (@,";
+      pp_ty fmt a0;
+      Format.fprintf fmt ",@ ";
+      pp_ty fmt a1;
+      Format.fprintf fmt "@,))@]"
+    | Tvarray a0 ->
+      Format.fprintf fmt "(@[<2>Tvarray@ ";
+      pp_ty fmt a0;
+      Format.fprintf fmt "@])"
+    | Tvarray_or_darray (a0, a1) ->
+      Format.fprintf fmt "(@[<2>Tvarray_or_darray@ ";
+      pp_ty fmt a0;
+      Format.fprintf fmt ",@ ";
+      pp_ty fmt a1;
+      Format.fprintf fmt "@])"
+    | Toption a0 ->
+      Format.fprintf fmt "(@[<2>Toption@ ";
+      pp_ty fmt a0;
+      Format.fprintf fmt "@])"
+    | Tlike a0 ->
+      Format.fprintf fmt "(@[<2>Tlike@ ";
+      pp_ty fmt a0;
+      Format.fprintf fmt "@])"
+    | Tprim a0 ->
+      Format.fprintf fmt "(@[<2>Tprim@ ";
+      Aast.pp_tprim fmt a0;
+      Format.fprintf fmt "@])"
+    | Tfun a0 ->
+      Format.fprintf fmt "(@[<2>Tfun@ ";
+      pp_fun_type fmt a0;
+      Format.fprintf fmt "@])"
+    | Ttuple a0 ->
+      Format.fprintf fmt "(@[<2>Ttuple@ ";
+      Format.fprintf fmt "@[<2>[";
+      ignore
+        (List.fold_left
+           ~f:(fun sep x ->
+             if sep then Format.fprintf fmt ";@ ";
+             pp_ty fmt x;
+             true)
+           ~init:false
+           a0);
+      Format.fprintf fmt "@,]@]";
+      Format.fprintf fmt "@])"
+    | Tshape (a0, a1) ->
+      Format.fprintf fmt "(@[<2>Tshape (@,";
+      pp_shape_kind fmt a0;
+      Format.fprintf fmt ",@ ";
+      Nast.ShapeMap.pp pp_shape_field_type fmt a1;
+      Format.fprintf fmt "@,))@]"
+    | Tvar a0 ->
+      Format.fprintf fmt "(@[<2>Tvar@ ";
+      Ident.pp fmt a0;
+      Format.fprintf fmt "@])"
+    | Tnewtype (a0, a1, a2) ->
+      Format.fprintf fmt "(@[<2>Tnewtype (@,";
+      Format.fprintf fmt "%S" a0;
+      Format.fprintf fmt ",@ ";
+      Format.fprintf fmt "@[<2>[";
+      ignore
+        (List.fold_left
+           ~f:(fun sep x ->
+             if sep then Format.fprintf fmt ";@ ";
+             pp_ty fmt x;
+             true)
+           ~init:false
+           a1);
+      Format.fprintf fmt "@,]@]";
+      Format.fprintf fmt ",@ ";
+      pp_ty fmt a2;
+      Format.fprintf fmt "@,))@]"
+    | Tdependent (a0, a1) ->
+      Format.fprintf fmt "(@[<2>Tdependent@ ";
+      pp_dependent_type fmt a0;
+      Format.fprintf fmt ",@ ";
+      pp_ty fmt a1;
+      Format.fprintf fmt "@])"
+    | Tunion tyl ->
+      Format.fprintf fmt "(@[<2>Tunion@ ";
+      pp_ty_list fmt tyl
+    | Tintersection tyl ->
+      Format.fprintf fmt "(@[<2>Tintersection@ ";
+      pp_ty_list fmt tyl
+    | Tobject -> Format.pp_print_string fmt "Tobject"
+    | Tclass (a0, a2, a1) ->
+      Format.fprintf fmt "(@[<2>Tclass (@,";
+      Aast.pp_sid fmt a0;
+      Format.fprintf fmt ",@ ";
+      pp_exact fmt a2;
+      Format.fprintf fmt ",@ ";
+      Format.fprintf fmt "@[<2>[";
+      ignore
+        (List.fold_left
+           ~f:(fun sep x ->
+             if sep then Format.fprintf fmt ";@ ";
+             pp_ty fmt x;
+             true)
+           ~init:false
+           a1);
+      Format.fprintf fmt "@,]@]";
+      Format.fprintf fmt "@,))@]"
+    | Tpu (base, enum) ->
+      Format.fprintf fmt "(@[<2>Tpu (%a@,,%a)@])" pp_ty base Aast.pp_sid enum;
+      Format.fprintf fmt "@])"
+    | Tpu_access (base, sid) ->
+      Format.fprintf fmt "(@[<2>Tpu_access (@,";
+      pp_ty fmt base;
+      Format.fprintf fmt ",@ ";
+      Aast.pp_sid fmt sid;
+      Format.fprintf fmt "@,))@]"
+    | Tpu_type_access (member, tyname) ->
+      Format.fprintf
+        fmt
+        "(@[<2>Tpu_type_access (%a@,,%a)@])"
+        Aast.pp_sid
+        member
+        Aast.pp_sid
+        tyname;
+      Format.fprintf fmt "@])"
+
+  and pp_ty_list : type a. Format.formatter -> a ty list -> unit =
+   fun fmt tyl ->
+    Format.fprintf fmt "@[<2>[";
+    ignore
+      (List.fold_left
+         ~f:(fun sep x ->
+           if sep then Format.fprintf fmt ";@ ";
+           pp_ty fmt x;
+           true)
+         ~init:false
+         tyl);
+    Format.fprintf fmt "@,]@]";
+    Format.fprintf fmt "@])"
+
+  and pp_taccess_type : Format.formatter -> taccess_type -> unit =
+   fun fmt (a0, a1) ->
+    Format.fprintf fmt "(@[";
+    pp_ty fmt a0;
+    Format.fprintf fmt ",@ ";
+    Format.fprintf fmt "@[<2>[";
+    ignore
+      (List.fold_left
+         ~f:(fun sep x ->
+           if sep then Format.fprintf fmt ";@ ";
+           Aast.pp_sid fmt x;
+           true)
+         ~init:false
+         a1);
+    Format.fprintf fmt "@,]@]";
+    Format.fprintf fmt "@])"
+
+  and pp_reactivity : Format.formatter -> reactivity -> unit =
+   fun fmt r ->
+    match r with
+    (* Nonreactive functions are printed in error messages as "normal", *)
+    (* But for this printing purpose, we print the same as the ast structure *)
+    | Nonreactive -> Format.pp_print_string fmt "Nonreactive"
+    | RxVar v ->
+      Format.pp_print_string fmt "RxVar {";
+      Option.iter v (pp_reactivity fmt);
+      Format.pp_print_string fmt "}"
+    | MaybeReactive v ->
+      Format.pp_print_string fmt "MaybeReactive {";
+      pp_reactivity fmt v;
+      Format.pp_print_string fmt "}"
+    | Local None -> Format.pp_print_string fmt "Local {}"
+    | Local (Some ty) ->
+      Format.pp_print_string fmt "Local {";
+      pp_ty fmt ty;
+      Format.pp_print_string fmt "}"
+    | Shallow None -> Format.pp_print_string fmt "Shallow {}"
+    | Shallow (Some ty) ->
+      Format.pp_print_string fmt "Shallow {";
+      pp_ty fmt ty;
+      Format.pp_print_string fmt "}"
+    | Reactive None -> Format.pp_print_string fmt "Reactive {}"
+    | Reactive (Some ty) ->
+      Format.pp_print_string fmt "Reactive {";
+      pp_ty fmt ty;
+      Format.pp_print_string fmt "}"
+    | Pure None -> Format.pp_print_string fmt "Pure {}"
+    | Pure (Some ty) ->
+      Format.pp_print_string fmt "Pure {";
+      pp_ty fmt ty;
+      Format.pp_print_string fmt "}"
+    | Cipp None -> Format.pp_print_string fmt "Cipp {}"
+    | Cipp (Some s) ->
+      Format.pp_print_string fmt "Cipp {";
+      Format.pp_print_string fmt s;
+      Format.pp_print_string fmt "}"
+    | CippLocal None -> Format.pp_print_string fmt "CippLocal {}"
+    | CippLocal (Some s) ->
+      Format.pp_print_string fmt "CippLocal {";
+      Format.pp_print_string fmt s;
+      Format.pp_print_string fmt "}"
+    | CippGlobal -> Format.pp_print_string fmt "CippGlobal"
+    | CippRx -> Format.pp_print_string fmt "CippRx"
+
+  and pp_possibly_enforced_ty :
+      type a. Format.formatter -> a ty possibly_enforced_ty -> unit =
+   fun fmt x ->
+    Format.fprintf fmt "@[<2>{ ";
+
+    Format.fprintf fmt "@[%s =@ " "et_enforced";
+    Format.fprintf fmt "%B" x.et_enforced;
+    Format.fprintf fmt "@]";
+    Format.fprintf fmt ";@ ";
+
+    Format.fprintf fmt "@[%s =@ " "et_type";
+    pp_ty fmt x.et_type;
+    Format.fprintf fmt "@]";
+    Format.fprintf fmt "@ }@]"
+
+  and pp_fun_implicit_params :
+      type a. Format.formatter -> a ty fun_implicit_params -> unit =
+   fun fmt x ->
+    Format.fprintf fmt "@[<2>{ ";
+
+    Format.fprintf fmt "@[%s =@ " "capability";
+    pp_ty fmt x.capability;
+    Format.fprintf fmt "@]";
+
+    Format.fprintf fmt "@ }@]"
+
+  and pp_shape_field_type :
+      type a. Format.formatter -> a shape_field_type -> unit =
+   fun fmt x ->
+    Format.fprintf fmt "@[<2>{ ";
+    Format.fprintf fmt "@[%s =@ " "sft_optional";
+    Format.fprintf fmt "%B" x.sft_optional;
+    Format.fprintf fmt "@]";
+    Format.fprintf fmt ";@ ";
+    Format.fprintf fmt "@[%s =@ " "sft_ty";
+    pp_ty fmt x.sft_ty;
+    Format.fprintf fmt "@]";
+    Format.fprintf fmt "@ }@]"
+
+  and pp_fun_type : type a. Format.formatter -> a ty fun_type -> unit =
+   fun fmt x ->
+    Format.fprintf fmt "@[<2>{ ";
+
+    Format.fprintf fmt "@[%s =@ " "ft_arity";
+    pp_fun_arity fmt x.ft_arity;
+    Format.fprintf fmt "@]";
+    Format.fprintf fmt ";@ ";
+
+    Format.fprintf fmt "@[%s =@ " "ft_tparams";
+    Format.fprintf fmt "@[<2>[";
+    ignore
+      (List.fold_left
+         ~f:(fun sep x ->
+           if sep then Format.fprintf fmt ";@ ";
+           pp_tparam_ fmt x;
+           true)
+         ~init:false
+         x.ft_tparams);
+    Format.fprintf fmt "@,]@]";
+    Format.fprintf fmt "@]";
+    Format.fprintf fmt ";@ ";
+
+    Format.fprintf fmt "@[%s =@ " "ft_where_constraints";
+    Format.fprintf fmt "@[<2>[";
+    ignore
+      (List.fold_left
+         ~f:(fun sep x ->
+           if sep then Format.fprintf fmt ";@ ";
+           pp_where_constraint_ fmt x;
+           true)
+         ~init:false
+         x.ft_where_constraints);
+    Format.fprintf fmt "@,]@]";
+    Format.fprintf fmt "@]";
+    Format.fprintf fmt ";@ ";
+
+    Format.fprintf fmt "@[%s =@ " "ft_params";
+    pp_fun_params fmt x.ft_params;
+    Format.fprintf fmt "@]";
+    Format.fprintf fmt ";@ ";
+
+    Format.fprintf fmt "@[%s =@ " "ft_implicit_params";
+    pp_fun_implicit_params fmt x.ft_implicit_params;
+    Format.fprintf fmt "@]";
+    Format.fprintf fmt ";@ ";
+
+    Format.fprintf fmt "@[%s =@ " "ft_ret";
+    pp_possibly_enforced_ty fmt x.ft_ret;
+    Format.fprintf fmt "@]";
+    Format.fprintf fmt ";@ ";
+
+    let pp_ft_flags fmt ft =
+      Format.fprintf fmt "@[<2>(%s@ " "make_ft_flags";
+
+      Format.fprintf fmt "@[";
+      Format.fprintf fmt "%s" (Ast_defs.show_fun_kind (get_ft_fun_kind ft));
+      Format.fprintf fmt "@]";
+      Format.fprintf fmt "@ ";
+
+      Format.fprintf fmt "@[";
+      Format.fprintf
+        fmt
+        "%s"
+        ([%show: param_mutability option] (get_ft_param_mutable ft));
+      Format.fprintf fmt "@]";
+      Format.fprintf fmt "@ ";
+
+      Format.fprintf fmt "@[~%s:" "return_disposable";
+      Format.fprintf fmt "%B" (get_ft_return_disposable ft);
+      Format.fprintf fmt "@]";
+      Format.fprintf fmt "@ ";
+
+      Format.fprintf fmt "@[~%s:" "returns_mutable";
+      Format.fprintf fmt "%B" (get_ft_returns_mutable ft);
+      Format.fprintf fmt "@]";
+      Format.fprintf fmt "@ ";
+
+      Format.fprintf fmt "@[~%s:" "returns_void_to_rx";
+      Format.fprintf fmt "%B" (get_ft_returns_void_to_rx ft);
+      Format.fprintf fmt "@]";
+
+      Format.fprintf fmt ")@]"
+    in
+
+    Format.fprintf fmt "@[%s =@ " "ft_flags";
+    pp_ft_flags fmt x;
+    Format.fprintf fmt "@]";
+    Format.fprintf fmt ";@ ";
+
+    Format.fprintf fmt "@[%s =@ " "ft_reactive";
+    pp_reactivity fmt x.ft_reactive;
+    Format.fprintf fmt "@]";
+
+    Format.fprintf fmt "@ }@]"
+
+  and pp_fun_arity : type a. Format.formatter -> a ty fun_arity -> unit =
+   fun fmt fa ->
+    match fa with
+    | Fstandard ->
+      Format.fprintf fmt "(@[<2>Fstandard (@,";
+      Format.fprintf fmt "@,))@]"
+    | Fvariadic a1 ->
+      Format.fprintf fmt "(@[<2>Fvariadic (@,";
+      pp_fun_param fmt a1;
+      Format.fprintf fmt "@,))@]"
+
+  and pp_where_constraint_ :
+      type a. Format.formatter -> a ty where_constraint -> unit =
+   (fun fmt whcstr -> pp_where_constraint pp_ty fmt whcstr)
+
+  and pp_fun_param : type a. Format.formatter -> a ty fun_param -> unit =
+    let pp_fp_flags fmt fp =
+      Format.fprintf fmt "@[<2>(%s@ " "make_fp_flags";
+
+      Format.fprintf fmt "@[~%s:" "mutability";
+      Format.fprintf
+        fmt
+        "%s"
+        ([%show: param_mutability option] (get_fp_mutability fp));
+      Format.fprintf fmt "@]";
+      Format.fprintf fmt "@ ";
+
+      Format.fprintf fmt "@[~%s:" "accept_disposable";
+      Format.fprintf fmt "%B" (get_fp_accept_disposable fp);
+      Format.fprintf fmt "@]";
+      Format.fprintf fmt "@ ";
+
+      Format.fprintf fmt "@[~%s:" "has_default";
+      Format.fprintf fmt "%B" (get_fp_has_default fp);
+      Format.fprintf fmt "@]";
+      Format.fprintf fmt "@ ";
+
+      Format.fprintf fmt "@[~%s:" "mode";
+      Format.fprintf fmt "%s" (show_param_mode (get_fp_mode fp));
+      Format.fprintf fmt "@]";
+
+      Format.fprintf fmt ")@]"
+    in
+
+    fun fmt x ->
+      Format.fprintf fmt "@[<2>{ ";
+
+      Format.fprintf fmt "@[%s =@ " "fp_pos";
+      Pos.pp fmt x.fp_pos;
+      Format.fprintf fmt "@]";
+      Format.fprintf fmt ";@ ";
+
+      Format.fprintf fmt "@[%s =@ " "fp_name";
+      (match x.fp_name with
+      | None -> Format.pp_print_string fmt "None"
+      | Some x ->
+        Format.pp_print_string fmt "(Some ";
+        Format.fprintf fmt "%S" x;
+        Format.pp_print_string fmt ")");
+      Format.fprintf fmt "@]";
+      Format.fprintf fmt ";@ ";
+
+      Format.fprintf fmt "@[%s =@ " "fp_type";
+      pp_possibly_enforced_ty fmt x.fp_type;
+      Format.fprintf fmt "@]";
+      Format.fprintf fmt ";@ ";
+
+      Format.fprintf fmt "@[%s =@ " "fp_flags";
+      pp_fp_flags fmt x;
+      Format.fprintf fmt "@]";
+      Format.fprintf fmt ";@ ";
+
+      Format.fprintf fmt "@ }@]"
+
+  and pp_fun_params : type a. Format.formatter -> a ty fun_params -> unit =
+   fun fmt x ->
+    Format.fprintf fmt "@[<2>[";
+    ignore
+      (List.fold_left
+         ~f:(fun sep x ->
+           if sep then Format.fprintf fmt ";@ ";
+           pp_fun_param fmt x;
+           true)
+         ~init:false
+         x);
+    Format.fprintf fmt "@,]@]"
+
+  and pp_tparam_ : type a. Format.formatter -> a ty tparam -> unit =
+   (fun fmt tparam -> pp_tparam pp_ty fmt tparam)
+
+  let pp_possibly_enforced_ty :
+      type a.
+      (Format.formatter -> a ty -> unit) ->
+      Format.formatter ->
+      a ty possibly_enforced_ty ->
+      unit =
+   (fun _ fmt x -> pp_possibly_enforced_ty fmt x)
+
+  let pp_decl_ty : Format.formatter -> decl_ty -> unit =
+   (fun fmt ty -> pp_ty fmt ty)
+
+  let pp_locl_ty : Format.formatter -> locl_ty -> unit =
+   (fun fmt ty -> pp_ty fmt ty)
+
+  let show_ty : type a. a ty -> string = (fun x -> Format.asprintf "%a" pp_ty x)
+
+  let show_decl_ty x = show_ty x
+
+  let show_locl_ty x = show_ty x
+
+  let show_reactivity : reactivity -> string =
+   (fun x -> Format.asprintf "%a" pp_reactivity x)
+end
+
+include Pp
+
+type locl_ty_ = locl_phase ty_
+
+type decl_tparam = decl_ty tparam [@@deriving show]
+
+type locl_tparam = locl_ty tparam
+
+type decl_where_constraint = decl_ty where_constraint [@@deriving show]
+
+type locl_where_constraint = locl_ty where_constraint
+
+type decl_fun_type = decl_ty fun_type
+
+type locl_fun_type = locl_ty fun_type
+
+type decl_fun_arity = decl_ty fun_arity
+
+type locl_fun_arity = locl_ty fun_arity
+
+type decl_possibly_enforced_ty = decl_ty possibly_enforced_ty
+
+type locl_possibly_enforced_ty = locl_ty possibly_enforced_ty [@@deriving show]
+
+type decl_fun_param = decl_ty fun_param
+
+type locl_fun_param = locl_ty fun_param
+
+type decl_fun_params = decl_ty fun_params
+
+type locl_fun_params = locl_ty fun_params
+
+type destructure_kind =
+  | ListDestructure
+  | SplatUnpack
+[@@deriving eq, ord, show]
+
+type destructure = {
+  d_required: locl_ty list;
+      (** This represents the standard parameters of a function or the fields in a list
+       * destructuring assignment. Example:
+       *
+       * function take(bool $b, float $f = 3.14, arraykey ...$aks): void {}
+       * function f((bool, float, int, string) $tup): void {
+       *   take(...$tup);
+       * }
+       *
+       * corresponds to the subtyping assertion
+       *
+       * (bool, float, int, string) <: splat([#1], [opt#2], ...#3)
+       *)
+  d_optional: locl_ty list;
+      (** Represents the optional parameters in a function, only used for splats *)
+  d_variadic: locl_ty option;
+      (** Represents a function's variadic parameter, also only used for splats *)
+  d_kind: destructure_kind;
+      (** list() destructuring allows for partial matches on lists, even when the operation
+       * might throw i.e. list($a) = vec[]; *)
+}
+[@@deriving show]
+
+type has_member = {
+  hm_name: Nast.sid;
+  hm_type: locl_ty;
+  hm_class_id: Nast.class_id_; [@opaque]
+      (** This is required to check ambiguous object access, where sometimes
+  HHVM would access the private member of a parent class instead of the
+  one from the current class. *)
+  hm_explicit_targs: Nast.targ list option; [@opaque]
+      (* - For a "has-property" constraint, this is `None`
+       * - For a "has-method" constraint, this is `Some targs`, where targs
+       *   is the list of explicit type arguments provided to the method call.
+       *   Note that this list can be empty (i.e. `Some []`) in the case of a
+       *   method not taking type arguments, or when we leave them implicit
+       *
+       * We need to know if this is a "has-property" or "has-method" to pass
+       * the correct `is_method` parameter to `Typing_object_get.obj_get`.
+       *)
+}
+[@@deriving show]
+
+type constraint_type_ =
+  | Thas_member of has_member
+  | Tdestructure of destructure
+      (** The type of container destructuring via list() or splat `...` *)
+  | TCunion of locl_ty * constraint_type
+  | TCintersection of locl_ty * constraint_type
+
+and constraint_type = Reason.t * constraint_type_ [@@deriving show]
+
+type internal_type =
+  | LoclType of locl_ty
+  | ConstraintType of constraint_type
+[@@deriving show]
 
 (* [@@deriving ord] doesn't support GADT. If we want to get
  * rid of this one, we will have to write it *)

@@ -206,7 +206,7 @@ Parsed decls:
          scc_name = ([36:47-53], "CSHAPE");
          scc_type =
          (Rhint (root|classes_const_keyword.php line 36, characters 9-45),
-          (Tshape (Open_shape,
+          (Tshape (Typing_defs_core.Open_shape,
              { (SFlit_str ([36:15-18], "a")) ->
                { sft_optional = false;
                  sft_ty =

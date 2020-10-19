@@ -7,13 +7,9 @@
 
 type decls = {
   classes: Shallow_decl_defs.shallow_class SMap.t;
-      [@printer (fun fmt -> SMap.pp Shallow_decl_defs.pp_shallow_class fmt)]
   funs: Typing_defs.fun_elt SMap.t;
-      [@printer (fun fmt -> SMap.pp Pp_type.pp_fun_elt fmt)]
   typedefs: Typing_defs.typedef_type SMap.t;
-      [@printer (fun fmt -> SMap.pp Pp_type.pp_typedef_type fmt)]
   consts: Typing_defs.const_decl SMap.t;
-      [@printer (fun fmt -> SMap.pp Pp_type.pp_const_decl fmt)]
 }
 [@@deriving show]
 

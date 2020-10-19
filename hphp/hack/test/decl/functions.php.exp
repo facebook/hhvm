@@ -13,7 +13,7 @@ Parsed decls:
       sc_enum_type = None } };
   funs =
   { "\\function_with_args" ->
-    { fe_pos = [11:10-28];
+    { Typing_defs.fe_deprecated = None;
       fe_type =
       (Rwitness (root|functions.php line 11, characters 10-27),
        (Tfun
@@ -28,8 +28,8 @@ Parsed decls:
                   (Tprim Tint))
                  };
                fp_flags =
-               (make_fp_flags ~mutability:none ~accept_disposable:false
-                 ~has_default:false ~mode:FPnormal);
+               (make_fp_flags ~mutability:None ~accept_disposable:false
+                 ~has_default:false ~mode:Typing_defs_core.FPnormal);
                 };
               { fp_pos = [11:46-51]; fp_name = (Some "$arg2");
                 fp_type =
@@ -39,8 +39,8 @@ Parsed decls:
                    (Tprim Tfloat))
                   };
                 fp_flags =
-                (make_fp_flags ~mutability:none ~accept_disposable:false
-                  ~has_default:false ~mode:FPnormal);
+                (make_fp_flags ~mutability:None ~accept_disposable:false
+                  ~has_default:false ~mode:Typing_defs_core.FPnormal);
                  }
               ];
             ft_implicit_params =
@@ -55,12 +55,12 @@ Parsed decls:
                (Tprim Tvoid))
               };
             ft_flags =
-            (make_ft_flags sync none ~return_disposable:false
+            (make_ft_flags FSync None ~return_disposable:false
               ~returns_mutable:false ~returns_void_to_rx:false);
             ft_reactive = Nonreactive }));
-      fe_deprecated = None;  };
+      fe_pos = [11:10-28]; fe_php_std_lib = false };
     "\\function_with_non_primitive_args" ->
-    { fe_pos = [14:10-42];
+    { Typing_defs.fe_deprecated = None;
       fe_type =
       (Rwitness (root|functions.php line 14, characters 10-41),
        (Tfun
@@ -75,8 +75,8 @@ Parsed decls:
                   (Tapply (([14:43-50], "\\Typedef"), [])))
                  };
                fp_flags =
-               (make_fp_flags ~mutability:none ~accept_disposable:false
-                 ~has_default:false ~mode:FPnormal);
+               (make_fp_flags ~mutability:None ~accept_disposable:false
+                 ~has_default:false ~mode:Typing_defs_core.FPnormal);
                 }
               ];
             ft_implicit_params =
@@ -91,12 +91,12 @@ Parsed decls:
                (Tapply (([14:59-66], "\\Typedef"), [])))
               };
             ft_flags =
-            (make_ft_flags sync none ~return_disposable:false
+            (make_ft_flags FSync None ~return_disposable:false
               ~returns_mutable:false ~returns_void_to_rx:false);
             ft_reactive = Nonreactive }));
-      fe_deprecated = None;  };
+      fe_pos = [14:10-42]; fe_php_std_lib = false };
     "\\in_out" ->
-    { fe_pos = [35:10-16];
+    { Typing_defs.fe_deprecated = None;
       fe_type =
       (Rwitness (root|functions.php line 35, characters 10-15),
        (Tfun
@@ -111,8 +111,8 @@ Parsed decls:
                   (Tprim Tint))
                  };
                fp_flags =
-               (make_fp_flags ~mutability:none ~accept_disposable:false
-                 ~has_default:false ~mode:FPinout);
+               (make_fp_flags ~mutability:None ~accept_disposable:false
+                 ~has_default:false ~mode:Typing_defs_core.FPinout);
                 }
               ];
             ft_implicit_params =
@@ -127,12 +127,12 @@ Parsed decls:
                (Tprim Tvoid))
               };
             ft_flags =
-            (make_ft_flags sync none ~return_disposable:false
+            (make_ft_flags FSync None ~return_disposable:false
               ~returns_mutable:false ~returns_void_to_rx:false);
             ft_reactive = Nonreactive }));
-      fe_deprecated = None;  };
+      fe_pos = [35:10-16]; fe_php_std_lib = false };
     "\\local_reactive_function" ->
-    { fe_pos = [57:10-33];
+    { Typing_defs.fe_deprecated = None;
       fe_type =
       (Rwitness (root|functions.php line 57, characters 10-32),
        (Tfun
@@ -150,12 +150,12 @@ Parsed decls:
                (Tprim Tvoid))
               };
             ft_flags =
-            (make_ft_flags sync none ~return_disposable:false
+            (make_ft_flags FSync None ~return_disposable:false
               ~returns_mutable:false ~returns_void_to_rx:false);
             ft_reactive = Local {} }));
-      fe_deprecated = None;  };
+      fe_pos = [57:10-33]; fe_php_std_lib = false };
     "\\make" ->
-    { fe_pos = [70:10-14];
+    { Typing_defs.fe_deprecated = None;
       fe_type =
       (Rwitness (root|functions.php line 70, characters 10-13),
        (Tfun
@@ -173,12 +173,12 @@ Parsed decls:
                (Tapply (([70:18-19], "\\C"), [])))
               };
             ft_flags =
-            (make_ft_flags sync none ~return_disposable:false
+            (make_ft_flags FSync None ~return_disposable:false
               ~returns_mutable:true ~returns_void_to_rx:false);
             ft_reactive = Reactive {} }));
-      fe_deprecated = None;  };
+      fe_pos = [70:10-14]; fe_php_std_lib = false };
     "\\noreturn_type_hint" ->
-    { fe_pos = [82:10-28];
+    { Typing_defs.fe_deprecated = None;
       fe_type =
       (Rwitness (root|functions.php line 82, characters 10-27),
        (Tfun
@@ -196,23 +196,26 @@ Parsed decls:
                (Tprim Tnoreturn))
               };
             ft_flags =
-            (make_ft_flags sync none ~return_disposable:false
+            (make_ft_flags FSync None ~return_disposable:false
               ~returns_mutable:false ~returns_void_to_rx:false);
             ft_reactive = Nonreactive }));
-      fe_deprecated = None;  };
+      fe_pos = [82:10-28]; fe_php_std_lib = false };
     "\\null_type_hint" ->
-    { fe_pos = [74:10-24];
+    { Typing_defs.fe_deprecated = None;
       fe_type =
       (Rwitness (root|functions.php line 74, characters 10-23),
        (Tfun
           { ft_arity = (Fstandard ());
             ft_tparams =
-            [(Invariant, ([74:25-26], "T"),
-              [(Constraint_as,
-                (Rhint (root|functions.php line 74, characters 30-36),
-                 (Tunion [])))
-                ],
-              Erased)];
+            [{ Typing_defs_core.tp_variance = Invariant;
+               tp_name = ([74:25-26], "T"); tp_tparams = [];
+               tp_constraints =
+               [(Constraint_as,
+                 (Rhint (root|functions.php line 74, characters 30-36),
+                  (Tunion [])))
+                 ];
+               tp_reified = Erased; tp_user_attributes = [] }
+              ];
             ft_where_constraints = [];
             ft_params =
             [{ fp_pos = [74:42-44]; fp_name = (Some "$x");
@@ -225,8 +228,8 @@ Parsed decls:
                       (Tgeneric ("T", [])))))
                };
               fp_flags =
-              (make_fp_flags ~mutability:none ~accept_disposable:false
-                ~has_default:false ~mode:FPnormal);
+              (make_fp_flags ~mutability:None ~accept_disposable:false
+                ~has_default:false ~mode:Typing_defs_core.FPnormal);
                }
             ];
           ft_implicit_params =
@@ -241,12 +244,12 @@ Parsed decls:
              (Tprim Tnull))
             };
           ft_flags =
-          (make_ft_flags sync none ~return_disposable:false
+          (make_ft_flags FSync None ~return_disposable:false
             ~returns_mutable:false ~returns_void_to_rx:false);
           ft_reactive = Nonreactive }));
-    fe_deprecated = None;  };
+    fe_pos = [74:10-24]; fe_php_std_lib = false };
   "\\reactive_function" ->
-  { fe_pos = [51:10-27];
+  { Typing_defs.fe_deprecated = None;
     fe_type =
     (Rwitness (root|functions.php line 51, characters 10-26),
      (Tfun
@@ -264,12 +267,12 @@ Parsed decls:
              (Tprim Tvoid))
             };
           ft_flags =
-          (make_ft_flags sync none ~return_disposable:false
+          (make_ft_flags FSync None ~return_disposable:false
             ~returns_mutable:false ~returns_void_to_rx:false);
           ft_reactive = Reactive {} }));
-    fe_deprecated = None;  };
+    fe_pos = [51:10-27]; fe_php_std_lib = false };
   "\\reactive_function_mutable_args" ->
-  { fe_pos = [60:10-40];
+  { Typing_defs.fe_deprecated = None;
     fe_type =
     (Rwitness (root|functions.php line 60, characters 10-39),
      (Tfun
@@ -284,8 +287,10 @@ Parsed decls:
                 (Tapply (([61:17-24], "\\Typedef"), [])))
                };
              fp_flags =
-             (make_fp_flags ~mutability:mutable ~accept_disposable:false
-               ~has_default:false ~mode:FPnormal);
+             (make_fp_flags
+               ~mutability:(Some Typing_defs_core.Param_borrowed_mutable)
+               ~accept_disposable:false ~has_default:false
+               ~mode:Typing_defs_core.FPnormal);
               };
             { fp_pos = [62:30-32]; fp_name = (Some "$b");
               fp_type =
@@ -295,8 +300,10 @@ Parsed decls:
                  (Tapply (([62:22-29], "\\Typedef"), [])))
                 };
               fp_flags =
-              (make_fp_flags ~mutability:maybe-mutable
-                ~accept_disposable:false ~has_default:false ~mode:FPnormal);
+              (make_fp_flags
+                ~mutability:(Some Typing_defs_core.Param_maybe_mutable)
+                ~accept_disposable:false ~has_default:false
+                ~mode:Typing_defs_core.FPnormal);
                };
             { fp_pos = [63:30-32]; fp_name = (Some "$c");
               fp_type =
@@ -306,8 +313,10 @@ Parsed decls:
                  (Tapply (([63:22-29], "\\Typedef"), [])))
                 };
               fp_flags =
-              (make_fp_flags ~mutability:owned mutable
-                ~accept_disposable:false ~has_default:false ~mode:FPnormal);
+              (make_fp_flags
+                ~mutability:(Some Typing_defs_core.Param_owned_mutable)
+                ~accept_disposable:false ~has_default:false
+                ~mode:Typing_defs_core.FPnormal);
                }
             ];
           ft_implicit_params =
@@ -322,12 +331,12 @@ Parsed decls:
              (Tprim Tvoid))
             };
           ft_flags =
-          (make_ft_flags sync none ~return_disposable:false
+          (make_ft_flags FSync None ~return_disposable:false
             ~returns_mutable:false ~returns_void_to_rx:false);
           ft_reactive = Reactive {} }));
-    fe_deprecated = None;  };
+    fe_pos = [60:10-40]; fe_php_std_lib = false };
   "\\resource_type_hint" ->
-  { fe_pos = [78:10-28];
+  { Typing_defs.fe_deprecated = None;
     fe_type =
     (Rwitness (root|functions.php line 78, characters 10-27),
      (Tfun
@@ -342,8 +351,8 @@ Parsed decls:
                 (Tprim Tresource))
                };
              fp_flags =
-             (make_fp_flags ~mutability:none ~accept_disposable:false
-               ~has_default:false ~mode:FPnormal);
+             (make_fp_flags ~mutability:None ~accept_disposable:false
+               ~has_default:false ~mode:Typing_defs_core.FPnormal);
               }
             ];
           ft_implicit_params =
@@ -358,12 +367,12 @@ Parsed decls:
              (Tprim Tresource))
             };
           ft_flags =
-          (make_ft_flags sync none ~return_disposable:false
+          (make_ft_flags FSync None ~return_disposable:false
             ~returns_mutable:false ~returns_void_to_rx:false);
           ft_reactive = Nonreactive }));
-    fe_deprecated = None;  };
+    fe_pos = [78:10-28]; fe_php_std_lib = false };
   "\\shallow_reactive_function" ->
-  { fe_pos = [54:10-35];
+  { Typing_defs.fe_deprecated = None;
     fe_type =
     (Rwitness (root|functions.php line 54, characters 10-34),
      (Tfun
@@ -381,12 +390,12 @@ Parsed decls:
              (Tprim Tvoid))
             };
           ft_flags =
-          (make_ft_flags sync none ~return_disposable:false
+          (make_ft_flags FSync None ~return_disposable:false
             ~returns_mutable:false ~returns_void_to_rx:false);
           ft_reactive = Shallow {} }));
-    fe_deprecated = None;  };
+    fe_pos = [54:10-35]; fe_php_std_lib = false };
   "\\simple_function" ->
-  { fe_pos = [3:10-25];
+  { Typing_defs.fe_deprecated = None;
     fe_type =
     (Rwitness (root|functions.php line 3, characters 10-24),
      (Tfun
@@ -403,12 +412,12 @@ Parsed decls:
              (Tprim Tvoid))
             };
           ft_flags =
-          (make_ft_flags sync none ~return_disposable:false
+          (make_ft_flags FSync None ~return_disposable:false
             ~returns_mutable:false ~returns_void_to_rx:false);
           ft_reactive = Nonreactive }));
-    fe_deprecated = None;  };
+    fe_pos = [3:10-25]; fe_php_std_lib = false };
   "\\simple_function_with_body" ->
-  { fe_pos = [7:10-35];
+  { Typing_defs.fe_deprecated = None;
     fe_type =
     (Rwitness (root|functions.php line 7, characters 10-34),
      (Tfun
@@ -425,12 +434,12 @@ Parsed decls:
              (Tprim Tfloat))
             };
           ft_flags =
-          (make_ft_flags sync none ~return_disposable:false
+          (make_ft_flags FSync None ~return_disposable:false
             ~returns_mutable:false ~returns_void_to_rx:false);
           ft_reactive = Nonreactive }));
-    fe_deprecated = None;  };
+    fe_pos = [7:10-35]; fe_php_std_lib = false };
   "\\simple_int_function" ->
-  { fe_pos = [4:10-29];
+  { Typing_defs.fe_deprecated = None;
     fe_type =
     (Rwitness (root|functions.php line 4, characters 10-28),
      (Tfun
@@ -447,12 +456,12 @@ Parsed decls:
              (Tprim Tint))
             };
           ft_flags =
-          (make_ft_flags sync none ~return_disposable:false
+          (make_ft_flags FSync None ~return_disposable:false
             ~returns_mutable:false ~returns_void_to_rx:false);
           ft_reactive = Nonreactive }));
-    fe_deprecated = None;  };
+    fe_pos = [4:10-29]; fe_php_std_lib = false };
   "\\takes_optional" ->
-  { fe_pos = [33:10-24];
+  { Typing_defs.fe_deprecated = None;
     fe_type =
     (Rwitness (root|functions.php line 33, characters 10-23),
      (Tfun
@@ -469,8 +478,8 @@ Parsed decls:
                     (Tprim Tint))))
                };
              fp_flags =
-             (make_fp_flags ~mutability:none ~accept_disposable:false
-               ~has_default:false ~mode:FPnormal);
+             (make_fp_flags ~mutability:None ~accept_disposable:false
+               ~has_default:false ~mode:Typing_defs_core.FPnormal);
               }
             ];
           ft_implicit_params =
@@ -485,12 +494,12 @@ Parsed decls:
              (Tprim Tvoid))
             };
           ft_flags =
-          (make_ft_flags sync none ~return_disposable:false
+          (make_ft_flags FSync None ~return_disposable:false
             ~returns_mutable:false ~returns_void_to_rx:false);
           ft_reactive = Nonreactive }));
-    fe_deprecated = None;  };
+    fe_pos = [33:10-24]; fe_php_std_lib = false };
   "\\takes_returns_dict" ->
-  { fe_pos = [46:10-28];
+  { Typing_defs.fe_deprecated = None;
     fe_type =
     (Rwitness (root|functions.php line 46, characters 10-27),
      (Tfun
@@ -511,8 +520,8 @@ Parsed decls:
                    )))
                };
              fp_flags =
-             (make_fp_flags ~mutability:none ~accept_disposable:false
-               ~has_default:false ~mode:FPnormal);
+             (make_fp_flags ~mutability:None ~accept_disposable:false
+               ~has_default:false ~mode:Typing_defs_core.FPnormal);
               }
             ];
           ft_implicit_params =
@@ -533,17 +542,22 @@ Parsed decls:
                 )))
             };
           ft_flags =
-          (make_ft_flags sync none ~return_disposable:false
+          (make_ft_flags FSync None ~return_disposable:false
             ~returns_mutable:false ~returns_void_to_rx:false);
           ft_reactive = Nonreactive }));
-    fe_deprecated = None;  };
+    fe_pos = [46:10-28]; fe_php_std_lib = false };
   "\\takes_returns_function_type" ->
-  { fe_pos = [37:10-37];
+  { Typing_defs.fe_deprecated = None;
     fe_type =
     (Rwitness (root|functions.php line 37, characters 10-36),
      (Tfun
         { ft_arity = (Fstandard ());
-          ft_tparams = [(Invariant, ([37:38-40], "Tu"), [], Erased)];
+          ft_tparams =
+          [{ Typing_defs_core.tp_variance = Invariant;
+             tp_name = ([37:38-40], "Tu"); tp_tparams = [];
+             tp_constraints = []; tp_reified = Erased;
+             tp_user_attributes = [] }
+            ];
           ft_where_constraints = [];
           ft_params =
           [{ fp_pos = [38:6-8]; fp_name = (Some "$x");
@@ -554,8 +568,8 @@ Parsed decls:
                 (Tgeneric ("Tu", [])))
              };
             fp_flags =
-            (make_fp_flags ~mutability:none ~accept_disposable:false
-              ~has_default:false ~mode:FPnormal);
+            (make_fp_flags ~mutability:None ~accept_disposable:false
+              ~has_default:false ~mode:Typing_defs_core.FPnormal);
              };
           { fp_pos = [39:24-31]; fp_name = (Some "$unused");
             fp_type =
@@ -574,9 +588,9 @@ Parsed decls:
                           (Tgeneric ("Tu", [])))
                        };
                       fp_flags =
-                      (make_fp_flags ~mutability:none
+                      (make_fp_flags ~mutability:None
                         ~accept_disposable:false ~has_default:false
-                        ~mode:FPnormal);
+                        ~mode:Typing_defs_core.FPnormal);
                        }
                     ];
                   ft_implicit_params =
@@ -591,13 +605,13 @@ Parsed decls:
                      (Tprim Tvoid))
                     };
                   ft_flags =
-                  (make_ft_flags sync none ~return_disposable:false
+                  (make_ft_flags FSync None ~return_disposable:false
                     ~returns_mutable:false ~returns_void_to_rx:false);
                   ft_reactive = Nonreactive }))
             };
           fp_flags =
-          (make_fp_flags ~mutability:none ~accept_disposable:false
-            ~has_default:false ~mode:FPnormal);
+          (make_fp_flags ~mutability:None ~accept_disposable:false
+            ~has_default:false ~mode:Typing_defs_core.FPnormal);
            }];
      ft_implicit_params =
      { capability =
@@ -627,9 +641,9 @@ Parsed decls:
                               (Tgeneric ("Tu", [])))
                            };
                           fp_flags =
-                          (make_fp_flags ~mutability:none
+                          (make_fp_flags ~mutability:None
                             ~accept_disposable:false ~has_default:false
-                            ~mode:FPnormal);
+                            ~mode:Typing_defs_core.FPnormal);
                            }
                         ];
                       ft_implicit_params =
@@ -644,13 +658,13 @@ Parsed decls:
                          (Tprim Tvoid))
                         };
                       ft_flags =
-                      (make_ft_flags sync none ~return_disposable:false
+                      (make_ft_flags FSync None ~return_disposable:false
                         ~returns_mutable:false ~returns_void_to_rx:false);
                       ft_reactive = Nonreactive }))
                 };
                fp_flags =
-               (make_fp_flags ~mutability:none ~accept_disposable:false
-                 ~has_default:false ~mode:FPnormal);
+               (make_fp_flags ~mutability:None ~accept_disposable:false
+                 ~has_default:false ~mode:Typing_defs_core.FPnormal);
                 }
              ];
            ft_implicit_params =
@@ -665,34 +679,38 @@ Parsed decls:
               (Tprim Tvoid))
              };
            ft_flags =
-           (make_ft_flags sync none ~return_disposable:false
+           (make_ft_flags FSync None ~return_disposable:false
              ~returns_mutable:false ~returns_void_to_rx:false);
            ft_reactive = Nonreactive }))
      };
     ft_flags =
-    (make_ft_flags sync none ~return_disposable:false ~returns_mutable:false
+    (make_ft_flags FSync None ~return_disposable:false ~returns_mutable:false
       ~returns_void_to_rx:false);
     ft_reactive = Nonreactive }));
-  fe_deprecated = None;  };
+  fe_pos = [37:10-37]; fe_php_std_lib = false };
 "\\test_constrained_generic_fun" ->
-{ fe_pos = [22:10-38];
+{ Typing_defs.fe_deprecated = None;
   fe_type =
   (Rwitness (root|functions.php line 22, characters 10-37),
    (Tfun
       { ft_arity = (Fstandard ());
         ft_tparams =
-        [(Invariant, ([22:39-41], "T1"),
-          [(Constraint_super,
-            (Rhint (root|functions.php line 22, characters 48-50),
-             (Tprim Tint)))
-            ],
-          Erased);
-          (Invariant, ([22:53-55], "T2"),
-           [(Constraint_as,
-             (Rhint (root|functions.php line 22, characters 59-64),
-              (Tprim Tstring)))
-             ],
-           Erased)
+        [{ Typing_defs_core.tp_variance = Invariant;
+           tp_name = ([22:39-41], "T1"); tp_tparams = [];
+           tp_constraints =
+           [(Constraint_super,
+             (Rhint (root|functions.php line 22, characters 48-50),
+              (Tprim Tint)))
+             ];
+           tp_reified = Erased; tp_user_attributes = [] };
+          { Typing_defs_core.tp_variance = Invariant;
+            tp_name = ([22:53-55], "T2"); tp_tparams = [];
+            tp_constraints =
+            [(Constraint_as,
+              (Rhint (root|functions.php line 22, characters 59-64),
+               (Tprim Tstring)))
+              ];
+            tp_reified = Erased; tp_user_attributes = [] }
           ];
         ft_where_constraints = [];
         ft_params =
@@ -704,8 +722,8 @@ Parsed decls:
               (Tgeneric ("T1", [])))
            };
           fp_flags =
-          (make_fp_flags ~mutability:none ~accept_disposable:false
-            ~has_default:false ~mode:FPnormal);
+          (make_fp_flags ~mutability:None ~accept_disposable:false
+            ~has_default:false ~mode:Typing_defs_core.FPnormal);
            };
         { fp_pos = [24:6-11]; fp_name = (Some "$arg2");
           fp_type =
@@ -715,8 +733,8 @@ Parsed decls:
              (Tgeneric ("T2", [])))
           };
         fp_flags =
-        (make_fp_flags ~mutability:none ~accept_disposable:false
-          ~has_default:false ~mode:FPnormal);
+        (make_fp_flags ~mutability:None ~accept_disposable:false
+          ~has_default:false ~mode:Typing_defs_core.FPnormal);
          }];
    ft_implicit_params =
    { capability =
@@ -728,16 +746,21 @@ Parsed decls:
       (Tgeneric ("T1", [])))
    };
   ft_flags =
-  (make_ft_flags sync none ~return_disposable:false ~returns_mutable:false
+  (make_ft_flags FSync None ~return_disposable:false ~returns_mutable:false
     ~returns_void_to_rx:false);
-  ft_reactive = Nonreactive })); fe_deprecated = None;  };
+  ft_reactive = Nonreactive })); fe_pos = [22:10-38]; fe_php_std_lib = false
+};
 "\\test_generic_fun" ->
-{ fe_pos = [18:10-26];
+{ Typing_defs.fe_deprecated = None;
   fe_type =
   (Rwitness (root|functions.php line 18, characters 10-25),
    (Tfun
       { ft_arity = (Fstandard ());
-        ft_tparams = [(Invariant, ([18:27-28], "T"), [], Erased)];
+        ft_tparams =
+        [{ Typing_defs_core.tp_variance = Invariant;
+           tp_name = ([18:27-28], "T"); tp_tparams = []; tp_constraints = [];
+           tp_reified = Erased; tp_user_attributes = [] }
+          ];
         ft_where_constraints = [];
         ft_params =
         [{ fp_pos = [18:32-37]; fp_name = (Some "$arg1");
@@ -748,8 +771,8 @@ Parsed decls:
               (Tgeneric ("T", [])))
            };
           fp_flags =
-          (make_fp_flags ~mutability:none ~accept_disposable:false
-            ~has_default:false ~mode:FPnormal);
+          (make_fp_flags ~mutability:None ~accept_disposable:false
+            ~has_default:false ~mode:Typing_defs_core.FPnormal);
            }
         ];
       ft_implicit_params =
@@ -762,11 +785,12 @@ Parsed decls:
          (Tgeneric ("T", [])))
       };
    ft_flags =
-   (make_ft_flags sync none ~return_disposable:false ~returns_mutable:false
+   (make_ft_flags FSync None ~return_disposable:false ~returns_mutable:false
      ~returns_void_to_rx:false);
-   ft_reactive = Nonreactive })); fe_deprecated = None;  };
+   ft_reactive = Nonreactive })); fe_pos = [18:10-26]; fe_php_std_lib = false
+};
 "\\test_returns_generic" ->
-{ fe_pos = [29:10-30];
+{ Typing_defs.fe_deprecated = None;
   fe_type =
   (Rwitness (root|functions.php line 29, characters 10-29),
    (Tfun
@@ -786,12 +810,12 @@ Parsed decls:
               )))
           };
         ft_flags =
-        (make_ft_flags sync none ~return_disposable:false
+        (make_ft_flags FSync None ~return_disposable:false
           ~returns_mutable:false ~returns_void_to_rx:false);
         ft_reactive = Nonreactive }));
-  fe_deprecated = None;  };
+  fe_pos = [29:10-30]; fe_php_std_lib = false };
 "\\variadic_function" ->
-{ fe_pos = [87:10-27];
+{ Typing_defs.fe_deprecated = None;
   fe_type =
   (Rwitness (root|functions.php line 87, characters 10-26),
    (Tfun
@@ -804,8 +828,8 @@ Parsed decls:
                (Rhint (root|functions.php line 87, characters 28-32), Tmixed)
                };
              fp_flags =
-             (make_fp_flags ~mutability:none ~accept_disposable:false
-               ~has_default:false ~mode:FPnormal);
+             (make_fp_flags ~mutability:None ~accept_disposable:false
+               ~has_default:false ~mode:Typing_defs_core.FPnormal);
               }
            ));
         ft_tparams = []; ft_where_constraints = []; ft_params = [];
@@ -820,13 +844,13 @@ Parsed decls:
            (Tprim Tvoid))
           };
         ft_flags =
-        (make_ft_flags sync none ~return_disposable:false
+        (make_ft_flags FSync None ~return_disposable:false
           ~returns_mutable:false ~returns_void_to_rx:false);
         ft_reactive = Nonreactive }));
-  fe_deprecated = None;  } };
+  fe_pos = [87:10-27]; fe_php_std_lib = false } };
 typedefs =
 { "\\Typedef" ->
-  { td_pos = [13:6-13]; td_vis = Transparent; td_tparams = [];
+  { Typing_defs.td_pos = [13:6-13]; td_vis = Transparent; td_tparams = [];
     td_constraint = None;
     td_type =
     (Rhint (root|functions.php line 13, characters 16-21), (Tprim Tstring)) } };

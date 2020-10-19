@@ -34,7 +34,7 @@ Parsed decls:
                   (Tprim Tvoid))
                  };
                ft_flags =
-               (make_ft_flags sync none ~return_disposable:false
+               (make_ft_flags FSync None ~return_disposable:false
                  ~returns_mutable:false ~returns_void_to_rx:false);
                ft_reactive = Nonreactive }));
          sm_visibility = Public; sm_deprecated = None }
@@ -42,7 +42,7 @@ Parsed decls:
       sc_user_attributes = []; sc_enum_type = None } };
   funs =
   { "\\gen" ->
-    { fe_pos = [8:16-19];
+    { Typing_defs.fe_deprecated = None;
       fe_type =
       (Rwitness (root|return_disposable.php line 8, characters 16-18),
        (Tfun
@@ -63,10 +63,10 @@ Parsed decls:
                   )))
               };
             ft_flags =
-            (make_ft_flags async none ~return_disposable:true
+            (make_ft_flags FAsync None ~return_disposable:true
               ~returns_mutable:false ~returns_void_to_rx:false);
             ft_reactive = Nonreactive }));
-      fe_deprecated = None;  } };
+      fe_pos = [8:16-19]; fe_php_std_lib = false } };
   typedefs = {}; consts = {} }
 
 They matched!

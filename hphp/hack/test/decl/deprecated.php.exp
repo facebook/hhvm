@@ -32,7 +32,7 @@ Parsed decls:
                   (Tprim Tvoid))
                  };
                ft_flags =
-               (make_ft_flags sync none ~return_disposable:false
+               (make_ft_flags FSync None ~return_disposable:false
                  ~returns_mutable:false ~returns_void_to_rx:false);
                ft_reactive = Nonreactive }));
          sm_visibility = Public;
@@ -59,7 +59,7 @@ Parsed decls:
                    (Tprim Tvoid))
                   };
                 ft_flags =
-                (make_ft_flags sync none ~return_disposable:false
+                (make_ft_flags FSync None ~return_disposable:false
                   ~returns_mutable:false ~returns_void_to_rx:false);
                 ft_reactive = Nonreactive }));
           sm_visibility = Public; sm_deprecated = None };
@@ -84,7 +84,7 @@ Parsed decls:
                    (Tprim Tvoid))
                   };
                 ft_flags =
-                (make_ft_flags sync none ~return_disposable:false
+                (make_ft_flags FSync None ~return_disposable:false
                   ~returns_mutable:false ~returns_void_to_rx:false);
                 ft_reactive = Nonreactive }));
           sm_visibility = Public; sm_deprecated = None };
@@ -109,7 +109,7 @@ Parsed decls:
                    (Tprim Tvoid))
                   };
                 ft_flags =
-                (make_ft_flags sync none ~return_disposable:false
+                (make_ft_flags FSync None ~return_disposable:false
                   ~returns_mutable:false ~returns_void_to_rx:false);
                 ft_reactive = Nonreactive }));
           sm_visibility = Public;
@@ -119,7 +119,7 @@ Parsed decls:
       sc_user_attributes = []; sc_enum_type = None } };
   funs =
   { "\\bar" ->
-    { fe_pos = [21:10-13];
+    { Typing_defs.fe_deprecated = None;
       fe_type =
       (Rwitness (root|deprecated.php line 21, characters 10-12),
        (Tfun
@@ -137,12 +137,12 @@ Parsed decls:
                (Tprim Tvoid))
               };
             ft_flags =
-            (make_ft_flags sync none ~return_disposable:false
+            (make_ft_flags FSync None ~return_disposable:false
               ~returns_mutable:false ~returns_void_to_rx:false);
             ft_reactive = Nonreactive }));
-      fe_deprecated = None;  };
+      fe_pos = [21:10-13]; fe_php_std_lib = false };
     "\\baz" ->
-    { fe_pos = [24:10-13];
+    { Typing_defs.fe_deprecated = None;
       fe_type =
       (Rwitness (root|deprecated.php line 24, characters 10-12),
        (Tfun
@@ -160,12 +160,13 @@ Parsed decls:
                (Tprim Tvoid))
               };
             ft_flags =
-            (make_ft_flags sync none ~return_disposable:false
+            (make_ft_flags FSync None ~return_disposable:false
               ~returns_mutable:false ~returns_void_to_rx:false);
             ft_reactive = Nonreactive }));
-      fe_deprecated = None;  };
+      fe_pos = [24:10-13]; fe_php_std_lib = false };
     "\\foo" ->
-    { fe_pos = [18:10-13];
+    { Typing_defs.fe_deprecated =
+      (Some "The function foo is deprecated: use bar() instead");
       fe_type =
       (Rwitness (root|deprecated.php line 18, characters 10-12),
        (Tfun
@@ -183,13 +184,13 @@ Parsed decls:
                (Tprim Tvoid))
               };
             ft_flags =
-            (make_ft_flags sync none ~return_disposable:false
+            (make_ft_flags FSync None ~return_disposable:false
               ~returns_mutable:false ~returns_void_to_rx:false);
             ft_reactive = Nonreactive }));
-      fe_deprecated =
-      (Some "The function foo is deprecated: use bar() instead");  };
+      fe_pos = [18:10-13]; fe_php_std_lib = false };
     "\\foo2" ->
-    { fe_pos = [27:10-14];
+    { Typing_defs.fe_deprecated =
+      (Some "The function foo2 is deprecated: use bar2() instead");
       fe_type =
       (Rwitness (root|deprecated.php line 27, characters 10-13),
        (Tfun
@@ -207,11 +208,10 @@ Parsed decls:
                (Tprim Tvoid))
               };
             ft_flags =
-            (make_ft_flags sync none ~return_disposable:false
+            (make_ft_flags FSync None ~return_disposable:false
               ~returns_mutable:false ~returns_void_to_rx:false);
             ft_reactive = Nonreactive }));
-      fe_deprecated =
-      (Some "The function foo2 is deprecated: use bar2() instead");  } };
+      fe_pos = [27:10-14]; fe_php_std_lib = false } };
   typedefs = {}; consts = {} }
 
 They matched!

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d26c0f5e1f93f8f5e0a712d6edecbac6>>
+// @generated SignedSource<<199b4da64021c782302f7e6e8c10614f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -269,27 +269,6 @@ impl TrivialDrop for DependentType {}
 
 #[derive(
     Clone,
-    Copy,
-    Debug,
-    Eq,
-    FromOcamlRep,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-pub enum DestructureKind {
-    ListDestructure,
-    SplatUnpack,
-}
-impl TrivialDrop for DestructureKind {}
-
-#[derive(
-    Clone,
     Debug,
     Eq,
     FromOcamlRepIn,
@@ -544,122 +523,6 @@ impl<'a> TrivialDrop for Ty_<'a> {}
 
 #[derive(
     Clone,
-    Copy,
-    Debug,
-    Eq,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-pub enum ConstraintType_<'a> {
-    ThasMember(&'a HasMember<'a>),
-    /// The type of container destructuring via list() or splat `...`
-    Tdestructure(&'a Destructure<'a>),
-    TCunion(&'a (&'a Ty<'a>, ConstraintType<'a>)),
-    TCintersection(&'a (&'a Ty<'a>, ConstraintType<'a>)),
-}
-impl<'a> TrivialDrop for ConstraintType_<'a> {}
-
-#[derive(
-    Clone,
-    Debug,
-    Eq,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-pub struct HasMember<'a> {
-    pub name: nast::Sid<'a>,
-    pub type_: &'a Ty<'a>,
-    /// This is required to check ambiguous object access, where sometimes
-    /// HHVM would access the private member of a parent class instead of the
-    /// one from the current class.
-    pub class_id: &'a nast::ClassId_<'a>,
-    pub explicit_targs: Option<&'a [&'a nast::Targ<'a>]>,
-}
-impl<'a> TrivialDrop for HasMember<'a> {}
-
-#[derive(
-    Clone,
-    Debug,
-    Eq,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-pub struct Destructure<'a> {
-    /// This represents the standard parameters of a function or the fields in a list
-    /// destructuring assignment. Example:
-    ///
-    /// function take(bool $b, float $f = 3.14, arraykey ...$aks): void {}
-    /// function f((bool, float, int, string) $tup): void {
-    ///   take(...$tup);
-    /// }
-    ///
-    /// corresponds to the subtyping assertion
-    ///
-    /// (bool, float, int, string) <: splat([#1], [opt#2], ...#3)
-    pub required: &'a [&'a Ty<'a>],
-    /// Represents the optional parameters in a function, only used for splats
-    pub optional: &'a [&'a Ty<'a>],
-    /// Represents a function's variadic parameter, also only used for splats
-    pub variadic: Option<&'a Ty<'a>>,
-    /// list() destructuring allows for partial matches on lists, even when the operation
-    /// might throw i.e. list($a) = vec[];
-    pub kind: DestructureKind,
-}
-impl<'a> TrivialDrop for Destructure<'a> {}
-
-#[derive(
-    Clone,
-    Copy,
-    Debug,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Serialize,
-    ToOcamlRep
-)]
-pub struct ConstraintType<'a>(pub &'a reason::Reason<'a>, pub &'a ConstraintType_<'a>);
-impl<'a> TrivialDrop for ConstraintType<'a> {}
-
-#[derive(
-    Clone,
-    Copy,
-    Debug,
-    Eq,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-pub enum InternalType<'a> {
-    LoclType(&'a Ty<'a>),
-    ConstraintType(ConstraintType<'a>),
-}
-impl<'a> TrivialDrop for InternalType<'a> {}
-
-#[derive(
-    Clone,
     Debug,
     Eq,
     FromOcamlRepIn,
@@ -854,3 +717,140 @@ pub struct FunParam<'a> {
 impl<'a> TrivialDrop for FunParam<'a> {}
 
 pub type FunParams<'a> = [&'a FunParam<'a>];
+
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    FromOcamlRep,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+pub enum DestructureKind {
+    ListDestructure,
+    SplatUnpack,
+}
+impl TrivialDrop for DestructureKind {}
+
+#[derive(
+    Clone,
+    Debug,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+pub struct Destructure<'a> {
+    /// This represents the standard parameters of a function or the fields in a list
+    /// destructuring assignment. Example:
+    ///
+    /// function take(bool $b, float $f = 3.14, arraykey ...$aks): void {}
+    /// function f((bool, float, int, string) $tup): void {
+    ///   take(...$tup);
+    /// }
+    ///
+    /// corresponds to the subtyping assertion
+    ///
+    /// (bool, float, int, string) <: splat([#1], [opt#2], ...#3)
+    pub required: &'a [&'a Ty<'a>],
+    /// Represents the optional parameters in a function, only used for splats
+    pub optional: &'a [&'a Ty<'a>],
+    /// Represents a function's variadic parameter, also only used for splats
+    pub variadic: Option<&'a Ty<'a>>,
+    /// list() destructuring allows for partial matches on lists, even when the operation
+    /// might throw i.e. list($a) = vec[];
+    pub kind: DestructureKind,
+}
+impl<'a> TrivialDrop for Destructure<'a> {}
+
+#[derive(
+    Clone,
+    Debug,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+pub struct HasMember<'a> {
+    pub name: nast::Sid<'a>,
+    pub type_: &'a Ty<'a>,
+    /// This is required to check ambiguous object access, where sometimes
+    /// HHVM would access the private member of a parent class instead of the
+    /// one from the current class.
+    pub class_id: &'a nast::ClassId_<'a>,
+    pub explicit_targs: Option<&'a [&'a nast::Targ<'a>]>,
+}
+impl<'a> TrivialDrop for HasMember<'a> {}
+
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+pub enum ConstraintType_<'a> {
+    ThasMember(&'a HasMember<'a>),
+    /// The type of container destructuring via list() or splat `...`
+    Tdestructure(&'a Destructure<'a>),
+    TCunion(&'a (&'a Ty<'a>, ConstraintType<'a>)),
+    TCintersection(&'a (&'a Ty<'a>, ConstraintType<'a>)),
+}
+impl<'a> TrivialDrop for ConstraintType_<'a> {}
+
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Serialize,
+    ToOcamlRep
+)]
+pub struct ConstraintType<'a>(pub &'a reason::Reason<'a>, pub &'a ConstraintType_<'a>);
+impl<'a> TrivialDrop for ConstraintType<'a> {}
+
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+pub enum InternalType<'a> {
+    LoclType(&'a Ty<'a>),
+    ConstraintType(ConstraintType<'a>),
+}
+impl<'a> TrivialDrop for InternalType<'a> {}

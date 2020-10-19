@@ -13,7 +13,7 @@ Parsed decls:
       sc_enum_type = None } };
   funs =
   { "\\my_partial_function" ->
-    { fe_pos = [5:10-29];
+    { Typing_defs.fe_deprecated = None;
       fe_type =
       (Rwitness (root|file_mode.php line 5, characters 10-28),
        (Tfun
@@ -31,22 +31,24 @@ Parsed decls:
                (Tprim Tvoid))
               };
             ft_flags =
-            (make_ft_flags sync none ~return_disposable:false
+            (make_ft_flags FSync None ~return_disposable:false
               ~returns_mutable:false ~returns_void_to_rx:false);
             ft_reactive = Nonreactive }));
-      fe_deprecated = None;  } };
+      fe_pos = [5:10-29]; fe_php_std_lib = false } };
   typedefs =
   { "\\MyPartialType" ->
-    { td_pos = [7:6-19]; td_vis = Transparent; td_tparams = [];
+    { Typing_defs.td_pos = [7:6-19]; td_vis = Transparent; td_tparams = [];
       td_constraint = None;
       td_type =
       (Rhint (root|file_mode.php line 7, characters 22-27), (Tprim Tstring))
       } };
   consts =
   { "\\MY_PARTIAL_CONST" ->
-    ([9:21-37],
-     (Rhint (root|file_mode.php line 9, characters 7-19),
-      (Tapply (([9:7-20], "\\MyPartialType"), [])))) }
+    { Typing_defs.cd_pos = [9:21-37];
+      cd_type =
+      (Rhint (root|file_mode.php line 9, characters 7-19),
+       (Tapply (([9:7-20], "\\MyPartialType"), [])))
+      } }
   }
 
 They matched!

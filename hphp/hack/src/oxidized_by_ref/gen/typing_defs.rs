@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<64785250bfd8e7e1772943966e746c35>>
+// @generated SignedSource<<1ef6697eb20ebf991abfe9978b74ec3b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -127,6 +127,49 @@ pub struct ClassConst<'a> {
     pub origin: &'a str,
 }
 impl<'a> TrivialDrop for ClassConst<'a> {}
+
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    FromOcamlRep,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+pub enum RecordFieldReq {
+    ValueRequired,
+    HasDefaultValue,
+}
+impl TrivialDrop for RecordFieldReq {}
+
+#[derive(
+    Clone,
+    Debug,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+pub struct RecordDefType<'a> {
+    pub name: nast::Sid<'a>,
+    pub extends: Option<nast::Sid<'a>>,
+    pub fields: &'a [(nast::Sid<'a>, RecordFieldReq)],
+    pub abstract_: bool,
+    pub pos: &'a pos::Pos<'a>,
+}
+impl<'a> TrivialDrop for RecordDefType<'a> {}
 
 /// The position is that of the hint in the `use` / `implements` AST node
 /// that causes a class to have this requirement applied to it. E.g.
@@ -319,49 +362,6 @@ pub struct EnumType<'a> {
     pub enum_class: bool,
 }
 impl<'a> TrivialDrop for EnumType<'a> {}
-
-#[derive(
-    Clone,
-    Copy,
-    Debug,
-    Eq,
-    FromOcamlRep,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-pub enum RecordFieldReq {
-    ValueRequired,
-    HasDefaultValue,
-}
-impl TrivialDrop for RecordFieldReq {}
-
-#[derive(
-    Clone,
-    Debug,
-    Eq,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-pub struct RecordDefType<'a> {
-    pub name: nast::Sid<'a>,
-    pub extends: Option<nast::Sid<'a>>,
-    pub fields: &'a [(nast::Sid<'a>, RecordFieldReq)],
-    pub abstract_: bool,
-    pub pos: &'a pos::Pos<'a>,
-}
-impl<'a> TrivialDrop for RecordDefType<'a> {}
 
 #[derive(
     Clone,

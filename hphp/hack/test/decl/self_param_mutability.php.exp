@@ -31,8 +31,10 @@ Parsed decls:
                   (Tprim Tvoid))
                  };
                ft_flags =
-               (make_ft_flags sync mutable ~return_disposable:false
-                 ~returns_mutable:false ~returns_void_to_rx:false);
+               (make_ft_flags FSync
+                 (Some Typing_defs_core.Param_borrowed_mutable)
+                 ~return_disposable:false ~returns_mutable:false
+                 ~returns_void_to_rx:false);
                ft_reactive = Reactive {} }));
          sm_visibility = Public; sm_deprecated = None };
         { Shallow_decl_defs.sm_abstract = false; sm_final = false;
@@ -56,8 +58,10 @@ Parsed decls:
                    (Tprim Tvoid))
                   };
                 ft_flags =
-                (make_ft_flags sync maybe-mutable ~return_disposable:false
-                  ~returns_mutable:false ~returns_void_to_rx:false);
+                (make_ft_flags FSync
+                  (Some Typing_defs_core.Param_maybe_mutable)
+                  ~return_disposable:false ~returns_mutable:false
+                  ~returns_void_to_rx:false);
                 ft_reactive = Reactive {} }));
           sm_visibility = Public; sm_deprecated = None }
         ];

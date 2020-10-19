@@ -34,23 +34,23 @@ type type_param_mutability = Typing_defs.param_mutability
 
 type val_kind = Typing_defs.val_kind
 
-let pp_ty = Pp_type.pp_locl_ty
+let pp_ty = Typing_defs.pp_locl_ty
 
-let show_ty = Pp_type.show_locl_ty
+let show_ty = Typing_defs.show_locl_ty
 
-let pp_decl_ty = Pp_type.pp_decl_ty
+let pp_decl_ty = Typing_defs.pp_decl_ty
 
-let show_decl_ty = Pp_type.show_decl_ty
+let show_decl_ty = Typing_defs.show_decl_ty
 
-let pp_reactivity fmt r = Pp_type.pp_reactivity fmt r
+let pp_reactivity fmt r = Typing_defs.pp_reactivity fmt r
 
-let show_reactivity r = Pp_type.show_reactivity r
+let show_reactivity r = Typing_defs.show_reactivity r
 
 let show_mutability_env _ = "<mutability-env>"
 
 let pp_mutability_env fmt _ = Format.fprintf fmt "<mutability-env>"
 
-let show_param_mutability = Pp_type.show_param_mutability
+let show_param_mutability = Typing_defs.show_param_mutability
 
 let pp_type_param_mutability fmt v =
   Format.fprintf fmt "%s" (show_param_mutability v)

@@ -9,14 +9,14 @@ Parsed decls:
       sc_req_extends = []; sc_req_implements = []; sc_implements = [];
       sc_consts = [];
       sc_typeconsts =
-      [{ Shallow_decl_defs.stc_abstract = TCConcrete; stc_constraint = None;
-         stc_name = ([5:14-15], "T");
+      [{ Shallow_decl_defs.stc_abstract = Typing_defs.TCConcrete;
+         stc_constraint = None; stc_name = ([5:14-15], "T");
          stc_type =
          (Some (Rhint (root|classes_typeconst.php line 5, characters 18-20),
                 (Tprim Tint)));
          stc_enforceable = ([Pos.none], false); stc_reifiable = None };
-        { Shallow_decl_defs.stc_abstract = TCConcrete; stc_constraint = None;
-          stc_name = ([15:14-16], "T2");
+        { Shallow_decl_defs.stc_abstract = Typing_defs.TCConcrete;
+          stc_constraint = None; stc_name = ([15:14-16], "T2");
           stc_type =
           (Some (Rhint (root|classes_typeconst.php line 15, characters 19-24),
                  (Tprim Tstring)));
@@ -49,7 +49,7 @@ Parsed decls:
                       [([7:30-31], "T")])))
                  };
                ft_flags =
-               (make_ft_flags sync none ~return_disposable:false
+               (make_ft_flags FSync None ~return_disposable:false
                  ~returns_mutable:false ~returns_void_to_rx:false);
                ft_reactive = Nonreactive }));
          sm_visibility = Public; sm_deprecated = None };
@@ -77,7 +77,7 @@ Parsed decls:
                        [([11:30-32], "T2")])))
                   };
                 ft_flags =
-                (make_ft_flags sync none ~return_disposable:false
+                (make_ft_flags FSync None ~return_disposable:false
                   ~returns_mutable:false ~returns_void_to_rx:false);
                 ft_reactive = Nonreactive }));
           sm_visibility = Public; sm_deprecated = None }
@@ -91,7 +91,7 @@ Parsed decls:
       sc_xhp_attr_uses = []; sc_req_extends = []; sc_req_implements = [];
       sc_implements = []; sc_consts = [];
       sc_typeconsts =
-      [{ Shallow_decl_defs.stc_abstract = TCAbstract {};
+      [{ Shallow_decl_defs.stc_abstract = (Typing_defs.TCAbstract None);
          stc_constraint =
          (Some (Rhint (root|classes_typeconst.php line 19, characters 37-37),
                 (Tapply (([19:37-38], "\\C"), []))));
@@ -122,8 +122,8 @@ Parsed decls:
                          [([20:46-56], "TConstType"); ([20:58-59], "T")])))
                     };
                   fp_flags =
-                  (make_fp_flags ~mutability:none ~accept_disposable:false
-                    ~has_default:false ~mode:FPnormal);
+                  (make_fp_flags ~mutability:None ~accept_disposable:false
+                    ~has_default:false ~mode:Typing_defs_core.FPnormal);
                    }
                  ];
                ft_implicit_params =
@@ -141,7 +141,7 @@ Parsed decls:
                       [([20:77-87], "TConstType")])))
                  };
                ft_flags =
-               (make_ft_flags sync none ~return_disposable:false
+               (make_ft_flags FSync None ~return_disposable:false
                  ~returns_mutable:false ~returns_void_to_rx:false);
                ft_reactive = Nonreactive }));
          sm_visibility = Public; sm_deprecated = None }

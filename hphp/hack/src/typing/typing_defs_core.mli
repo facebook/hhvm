@@ -19,7 +19,7 @@ type ce_visibility =
 type exact =
   | Exact
   | Nonexact
-[@@deriving eq, ord]
+[@@deriving eq, ord, show]
 
 (* All the possible types, reason is a trace of why a type
    was inferred in a certain way.
@@ -29,9 +29,9 @@ type exact =
    inferred via local inference.
 *)
 (* create private types to represent the different type phases *)
-type decl_phase = private DeclPhase [@@deriving eq]
+type decl_phase = private DeclPhase [@@deriving eq, show]
 
-type locl_phase = private LoclPhase [@@deriving eq]
+type locl_phase = private LoclPhase [@@deriving eq, show]
 
 type val_kind =
   | Lval
@@ -43,7 +43,7 @@ type param_mutability =
   | Param_owned_mutable
   | Param_borrowed_mutable
   | Param_maybe_mutable
-[@@deriving eq]
+[@@deriving eq, show]
 
 type fun_tparams_kind =
   | FTKtparams
@@ -61,12 +61,12 @@ type fun_tparams_kind =
 type shape_kind =
   | Closed_shape
   | Open_shape
-[@@deriving eq, ord]
+[@@deriving eq, ord, show]
 
 type param_mode =
   | FPnormal
   | FPinout
-[@@deriving eq]
+[@@deriving eq, show]
 
 type xhp_attr_tag =
   | Required
@@ -90,7 +90,7 @@ type consistent_kind =
   | Inconsistent
   | ConsistentConstruct
   | FinalClass
-[@@deriving eq]
+[@@deriving eq, show]
 
 (* A dependent type consists of a base kind which indicates what the type is
  * dependent on. It is either dependent on:
@@ -114,12 +114,7 @@ type dependent_type =
    *  The expression $x->foo() would have a different one
    *)
   | DTexpr of Ident.t
-[@@deriving eq, ord]
-
-type destructure_kind =
-  | ListDestructure
-  | SplatUnpack
-[@@deriving eq, ord]
+[@@deriving eq, ord, show]
 
 type user_attribute = {
   ua_name: Aast.sid;
@@ -137,7 +132,8 @@ type 'ty tparam = {
 }
 [@@deriving eq, show]
 
-type 'ty where_constraint = 'ty * Ast_defs.constraint_kind * 'ty [@@deriving eq]
+type 'ty where_constraint = 'ty * Ast_defs.constraint_kind * 'ty
+[@@deriving eq, show]
 
 (* = Reason.t * 'phase ty_ *)
 type 'phase ty
@@ -145,8 +141,6 @@ type 'phase ty
 and decl_ty = decl_phase ty
 
 and locl_ty = locl_phase ty
-
-and locl_ty_ = locl_phase ty_
 
 (* A shape may specify whether or not fields are required. For example, consider
    this typedef:
@@ -318,63 +312,6 @@ and _ ty_ =
        * - second parameter is the name of the type to project
        *)
 
-and constraint_type_ =
-  | Thas_member of has_member
-  (* The type of a list destructuring assignment.
-   * Implements valid destructuring operations via subtyping *)
-  | Tdestructure of destructure
-  | TCunion of locl_ty * constraint_type
-  | TCintersection of locl_ty * constraint_type
-
-and has_member = {
-  hm_name: Nast.sid;
-  hm_type: locl_ty;
-  hm_class_id: Nast.class_id_;
-      (** This is required to check ambiguous object access, where sometimes
-  HHVM would access the private member of a parent class instead of the
-  one from the current class. *)
-  hm_explicit_targs: Nast.targ list option;
-      (* - For a "has-property" constraint, this is `None`
-       * - For a "has-method" constraint, this is `Some targs`, where targs
-       *   is the list of explicit type arguments provided to the method call.
-       *   Note that this list can be empty (i.e. `Some []`) in the case of a
-       *   method not taking type arguments, or when we leave them implicit
-       *
-       * We need to know if this is a "has-property" or "has-method" to pass
-       * the correct `is_method` parameter to `Typing_object_get.obj_get`.
-       *)
-}
-
-and destructure = {
-  (* This represents the standard parameters of a function or the fields in a list
-   * destructuring assignment. Example:
-   *
-   * function take(bool $b, float $f = 3.14, arraykey ...$aks): void {}
-   * function f((bool, float, int, string) $tup): void {
-   *   take(...$tup);
-   * }
-   *
-   * corresponds to the subtyping assertion
-   *
-   * (bool, float, int, string) <: splat([#1], [opt#2], ...#3)
-   *)
-  d_required: locl_ty list;
-  (* Represents the optional parameters in a function, only used for splats *)
-  d_optional: locl_ty list;
-  (* Represents a function's variadic parameter, also only used for splats *)
-  d_variadic: locl_ty option;
-  (* list() destructuring allows for partial matches on lists, even when the operation
-   * might throw i.e. list($a) = vec[]; *)
-  d_kind: destructure_kind;
-}
-
-(* = Reason.t * constraint_type_ *)
-and constraint_type
-
-and internal_type =
-  | LoclType of locl_ty
-  | ConstraintType of constraint_type
-
 and taccess_type = decl_ty * Nast.sid list
 
 (* represents reactivity of function
@@ -420,10 +357,6 @@ and 'ty fun_type = {
   ft_flags: int;
 }
 
-and decl_fun_type = decl_ty fun_type
-
-and locl_fun_type = locl_ty fun_type
-
 (* Arity information for a fun_type; indicating the minimum number of
  * args expected by the function and the maximum number of args for
  * standard, non-variadic functions or the type of variadic argument taken *)
@@ -433,10 +366,6 @@ and 'ty fun_arity =
   (* PHP5.6-style ...$args finishes the func declaration.
      min ; variadic param type *)
   | Fvariadic of 'ty fun_param
-
-and decl_fun_arity = decl_ty fun_arity
-
-and locl_fun_arity = locl_ty fun_arity
 
 and param_rx_annotation =
   | Param_rx_var
@@ -448,10 +377,6 @@ and 'ty possibly_enforced_ty = {
   et_type: 'ty;
 }
 
-and decl_possibly_enforced_ty = decl_ty possibly_enforced_ty
-
-and locl_possibly_enforced_ty = locl_ty possibly_enforced_ty
-
 and 'ty fun_param = {
   fp_pos: Pos.t;
   fp_name: string option;
@@ -460,15 +385,205 @@ and 'ty fun_param = {
   fp_flags: int;
 }
 
-and decl_fun_param = decl_ty fun_param
-
-and locl_fun_param = locl_ty fun_param
-
 and 'ty fun_params = 'ty fun_param list
 
-and decl_fun_params = decl_ty fun_params
+module Flags : sig
+  val get_ft_return_disposable : 'a fun_type -> bool
 
-and locl_fun_params = locl_ty fun_params
+  val get_ft_returns_void_to_rx : 'a fun_type -> bool
+
+  val get_ft_returns_mutable : 'a fun_type -> bool
+
+  val get_ft_is_coroutine : 'a fun_type -> bool
+
+  val get_ft_async : 'a fun_type -> bool
+
+  val get_ft_generator : 'a fun_type -> bool
+
+  val get_ft_ftk : 'a fun_type -> fun_tparams_kind
+
+  val set_ft_ftk : 'a fun_type -> fun_tparams_kind -> 'a fun_type
+
+  val set_ft_is_function_pointer : 'a fun_type -> bool -> 'a fun_type
+
+  val get_ft_is_function_pointer : 'a fun_type -> bool
+
+  val get_ft_fun_kind : 'a fun_type -> Ast_defs.fun_kind
+
+  val from_mutable_flags : Hh_prelude.Int.t -> param_mutability option
+
+  val to_mutable_flags : param_mutability option -> Hh_prelude.Int.t
+
+  val get_ft_param_mutable : 'a fun_type -> param_mutability option
+
+  val get_fp_mutability : 'a fun_param -> param_mutability option
+
+  val fun_kind_to_flags : Ast_defs.fun_kind -> Hh_prelude.Int.t
+
+  val make_ft_flags :
+    Ast_defs.fun_kind ->
+    param_mutability option ->
+    return_disposable:bool ->
+    returns_mutable:bool ->
+    returns_void_to_rx:bool ->
+    Hh_prelude.Int.t
+
+  val mode_to_flags : param_mode -> int
+
+  val make_fp_flags :
+    mode:param_mode ->
+    accept_disposable:bool ->
+    mutability:param_mutability option ->
+    has_default:bool ->
+    Hh_prelude.Int.t
+
+  val get_fp_accept_disposable : 'a fun_param -> bool
+
+  val get_fp_has_default : 'a fun_param -> bool
+
+  val get_fp_mode : 'a fun_param -> param_mode
+end
+
+include module type of Flags
+
+module Pp : sig
+  val pp_ty : Format.formatter -> 'a ty -> unit
+
+  val pp_decl_ty : Format.formatter -> decl_ty -> unit
+
+  val pp_locl_ty : Format.formatter -> locl_ty -> unit
+
+  val pp_ty_ : Format.formatter -> 'a ty_ -> unit
+
+  val pp_ty_list : Format.formatter -> 'a ty list -> unit
+
+  val pp_taccess_type : Format.formatter -> taccess_type -> unit
+
+  val pp_reactivity : Format.formatter -> reactivity -> unit
+
+  val pp_possibly_enforced_ty :
+    (Format.formatter -> 'a ty -> unit) ->
+    Format.formatter ->
+    'a ty possibly_enforced_ty ->
+    unit
+
+  val pp_fun_implicit_params :
+    Format.formatter -> 'a ty fun_implicit_params -> unit
+
+  val pp_shape_field_type : Format.formatter -> 'a shape_field_type -> unit
+
+  val pp_fun_type : Format.formatter -> 'a ty fun_type -> unit
+
+  val pp_fun_arity : Format.formatter -> 'a ty fun_arity -> unit
+
+  val pp_fun_param : Format.formatter -> 'a ty fun_param -> unit
+
+  val pp_fun_params : Format.formatter -> 'a ty fun_params -> unit
+
+  val show_decl_ty : decl_ty -> string
+
+  val show_locl_ty : locl_ty -> string
+
+  val show_reactivity : reactivity -> string
+end
+
+include module type of Pp
+
+type locl_ty_ = locl_phase ty_
+
+type decl_tparam = decl_ty tparam [@@deriving show]
+
+type locl_tparam = locl_ty tparam
+
+type decl_where_constraint = decl_ty where_constraint [@@deriving show]
+
+type locl_where_constraint = locl_ty where_constraint
+
+type decl_fun_type = decl_ty fun_type
+
+type locl_fun_type = locl_ty fun_type
+
+type decl_fun_arity = decl_ty fun_arity
+
+type locl_fun_arity = locl_ty fun_arity
+
+type decl_possibly_enforced_ty = decl_ty possibly_enforced_ty
+
+type locl_possibly_enforced_ty = locl_ty possibly_enforced_ty [@@deriving show]
+
+type decl_fun_param = decl_ty fun_param
+
+type locl_fun_param = locl_ty fun_param
+
+type decl_fun_params = decl_ty fun_params
+
+type locl_fun_params = locl_ty fun_params
+
+type has_member = {
+  hm_name: Nast.sid;
+  hm_type: locl_ty;
+  hm_class_id: Nast.class_id_;
+      (** This is required to check ambiguous object access, where sometimes
+  HHVM would access the private member of a parent class instead of the
+  one from the current class. *)
+  hm_explicit_targs: Nast.targ list option;
+      (* - For a "has-property" constraint, this is `None`
+       * - For a "has-method" constraint, this is `Some targs`, where targs
+       *   is the list of explicit type arguments provided to the method call.
+       *   Note that this list can be empty (i.e. `Some []`) in the case of a
+       *   method not taking type arguments, or when we leave them implicit
+       *
+       * We need to know if this is a "has-property" or "has-method" to pass
+       * the correct `is_method` parameter to `Typing_object_get.obj_get`.
+       *)
+}
+[@@deriving show]
+
+type destructure_kind =
+  | ListDestructure
+  | SplatUnpack
+[@@deriving eq, ord, show]
+
+type destructure = {
+  (* This represents the standard parameters of a function or the fields in a list
+   * destructuring assignment. Example:
+   *
+   * function take(bool $b, float $f = 3.14, arraykey ...$aks): void {}
+   * function f((bool, float, int, string) $tup): void {
+   *   take(...$tup);
+   * }
+   *
+   * corresponds to the subtyping assertion
+   *
+   * (bool, float, int, string) <: splat([#1], [opt#2], ...#3)
+   *)
+  d_required: locl_ty list;
+  (* Represents the optional parameters in a function, only used for splats *)
+  d_optional: locl_ty list;
+  (* Represents a function's variadic parameter, also only used for splats *)
+  d_variadic: locl_ty option;
+  (* list() destructuring allows for partial matches on lists, even when the operation
+   * might throw i.e. list($a) = vec[]; *)
+  d_kind: destructure_kind;
+}
+[@@deriving show]
+
+(* = Reason.t * constraint_type_ *)
+type constraint_type [@@deriving show]
+
+type constraint_type_ =
+  | Thas_member of has_member
+  (* The type of a list destructuring assignment.
+   * Implements valid destructuring operations via subtyping *)
+  | Tdestructure of destructure
+  | TCunion of locl_ty * constraint_type
+  | TCintersection of locl_ty * constraint_type
+[@@deriving show]
+
+type internal_type =
+  | LoclType of locl_ty
+  | ConstraintType of constraint_type
+[@@deriving show]
 
 (* Abstraction *)
 val compare_decl_ty : decl_ty -> decl_ty -> int

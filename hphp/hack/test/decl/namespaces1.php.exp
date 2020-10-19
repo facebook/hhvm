@@ -24,13 +24,13 @@ Parsed decls:
   funs = {};
   typedefs =
   { "\\MyAnonymousNamespaceType" ->
-    { td_pos = [4:8-32]; td_vis = Transparent; td_tparams = [];
+    { Typing_defs.td_pos = [4:8-32]; td_vis = Transparent; td_tparams = [];
       td_constraint = None;
       td_type =
       (Rhint (root|namespaces1.php line 4, characters 35-40), (Tprim Tstring))
       };
     "\\MyNamespace\\MyNamespaceType" ->
-    { td_pos = [9:8-23]; td_vis = Transparent; td_tparams = [];
+    { Typing_defs.td_pos = [9:8-23]; td_vis = Transparent; td_tparams = [];
       td_constraint = None;
       td_type =
       (Rhint (root|namespaces1.php line 9, characters 26-31), (Tprim Tstring))

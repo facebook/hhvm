@@ -9,7 +9,7 @@ Parsed decls:
       sc_xhp_attr_uses = []; sc_req_extends = []; sc_req_implements = [];
       sc_implements = []; sc_consts = [];
       sc_typeconsts =
-      [{ Shallow_decl_defs.stc_abstract = TCAbstract {};
+      [{ Shallow_decl_defs.stc_abstract = (Typing_defs.TCAbstract None);
          stc_constraint =
          (Some (Rhint (root|like_types.php line 11, characters 28-31),
                 (Tlike
@@ -42,8 +42,8 @@ Parsed decls:
                          [([13:27-28], "T")])))
                     };
                   fp_flags =
-                  (make_fp_flags ~mutability:none ~accept_disposable:false
-                    ~has_default:false ~mode:FPnormal);
+                  (make_fp_flags ~mutability:None ~accept_disposable:false
+                    ~has_default:false ~mode:Typing_defs_core.FPnormal);
                    }
                  ];
                ft_implicit_params =
@@ -58,7 +58,7 @@ Parsed decls:
                   (Tprim Tvoid))
                  };
                ft_flags =
-               (make_ft_flags sync none ~return_disposable:false
+               (make_ft_flags FSync None ~return_disposable:false
                  ~returns_mutable:false ~returns_void_to_rx:false);
                ft_reactive = Nonreactive }));
          sm_visibility = Public; sm_deprecated = None }
@@ -66,7 +66,7 @@ Parsed decls:
       sc_user_attributes = []; sc_enum_type = None } };
   funs =
   { "\\expect_int" ->
-    { fe_pos = [4:10-20];
+    { Typing_defs.fe_deprecated = None;
       fe_type =
       (Rwitness (root|like_types.php line 4, characters 10-19),
        (Tfun
@@ -81,8 +81,8 @@ Parsed decls:
                   (Tprim Tint))
                  };
                fp_flags =
-               (make_fp_flags ~mutability:none ~accept_disposable:false
-                 ~has_default:false ~mode:FPnormal);
+               (make_fp_flags ~mutability:None ~accept_disposable:false
+                 ~has_default:false ~mode:Typing_defs_core.FPnormal);
                 }
               ];
             ft_implicit_params =
@@ -97,25 +97,28 @@ Parsed decls:
                (Tprim Tvoid))
               };
             ft_flags =
-            (make_ft_flags sync none ~return_disposable:false
+            (make_ft_flags FSync None ~return_disposable:false
               ~returns_mutable:false ~returns_void_to_rx:false);
             ft_reactive = Nonreactive }));
-      fe_deprecated = None;  };
+      fe_pos = [4:10-20]; fe_php_std_lib = false };
     "\\f" ->
-    { fe_pos = [6:10-11];
+    { Typing_defs.fe_deprecated = None;
       fe_type =
       (Rwitness (root|like_types.php line 6, characters 10-10),
        (Tfun
           { ft_arity = (Fstandard ());
             ft_tparams =
-            [(Invariant, ([6:12-13], "T"),
-              [(Constraint_as,
-                (Rhint (root|like_types.php line 6, characters 17-20),
-                 (Tlike
-                    (Rhint (root|like_types.php line 6, characters 18-20),
-                     (Tprim Tint)))))
-                ],
-              Erased)];
+            [{ Typing_defs_core.tp_variance = Invariant;
+               tp_name = ([6:12-13], "T"); tp_tparams = [];
+               tp_constraints =
+               [(Constraint_as,
+                 (Rhint (root|like_types.php line 6, characters 17-20),
+                  (Tlike
+                     (Rhint (root|like_types.php line 6, characters 18-20),
+                      (Tprim Tint)))))
+                 ];
+               tp_reified = Erased; tp_user_attributes = [] }
+              ];
             ft_where_constraints = [];
             ft_params =
             [{ fp_pos = [6:25-27]; fp_name = (Some "$t");
@@ -126,8 +129,8 @@ Parsed decls:
                   (Tgeneric ("T", [])))
                };
               fp_flags =
-              (make_fp_flags ~mutability:none ~accept_disposable:false
-                ~has_default:false ~mode:FPnormal);
+              (make_fp_flags ~mutability:None ~accept_disposable:false
+                ~has_default:false ~mode:Typing_defs_core.FPnormal);
                }
             ];
           ft_implicit_params =
@@ -142,10 +145,11 @@ Parsed decls:
              (Tprim Tvoid))
             };
           ft_flags =
-          (make_ft_flags sync none ~return_disposable:false
+          (make_ft_flags FSync None ~return_disposable:false
             ~returns_mutable:false ~returns_void_to_rx:false);
           ft_reactive = Nonreactive }));
-    fe_deprecated = None;  } }; typedefs = {}; consts = {}
+    fe_pos = [6:10-11]; fe_php_std_lib = false } }; typedefs = {};
+consts = {}
 }
 
 They matched!

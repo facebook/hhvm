@@ -35,10 +35,10 @@ Parsed decls:
           ua_classname_params = [] }
         ];
       sc_enum_type =
-      (Some { te_base =
+      (Some { Typing_defs.te_base =
               (Rhint (root|enum_user_attributes.php line 4, characters 10-15),
                (Tprim Tstring));
-              te_constraint = None })
+              te_constraint = None; te_includes = []; te_enum_class = false })
       } };
   funs = {}; typedefs = {}; consts = {} }
 

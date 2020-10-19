@@ -38,9 +38,9 @@ Parsed decls:
                           (Tprim Tstring))
                          };
                        fp_flags =
-                       (make_fp_flags ~mutability:none
+                       (make_fp_flags ~mutability:None
                          ~accept_disposable:false ~has_default:false
-                         ~mode:FPnormal);
+                         ~mode:Typing_defs_core.FPnormal);
                         }
                       ];
                     ft_implicit_params =
@@ -55,7 +55,7 @@ Parsed decls:
                        (Tprim Tvoid))
                       };
                     ft_flags =
-                    (make_ft_flags sync none ~return_disposable:false
+                    (make_ft_flags FSync None ~return_disposable:false
                       ~returns_mutable:false ~returns_void_to_rx:false);
                     ft_reactive = Nonreactive }));
               sm_visibility = Public; sm_deprecated = None });

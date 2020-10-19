@@ -31,7 +31,7 @@ Parsed decls:
                   (Tprim Tvoid))
                  };
                ft_flags =
-               (make_ft_flags sync none ~return_disposable:false
+               (make_ft_flags FSync None ~return_disposable:false
                  ~returns_mutable:false ~returns_void_to_rx:false);
                ft_reactive =
                Reactive {(Rhint (root|only_rx_if_impl_method.php line 6, characters 26-28),

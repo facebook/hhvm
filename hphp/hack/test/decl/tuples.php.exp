@@ -3,12 +3,17 @@ Parsed decls:
 { Direct_decl_parser.classes = {};
   funs =
   { "\\generic_tuple" ->
-    { fe_pos = [13:10-23];
+    { Typing_defs.fe_deprecated = None;
       fe_type =
       (Rwitness (root|tuples.php line 13, characters 10-22),
        (Tfun
           { ft_arity = (Fstandard ());
-            ft_tparams = [(Invariant, ([13:24-25], "T"), [], Erased)];
+            ft_tparams =
+            [{ Typing_defs_core.tp_variance = Invariant;
+               tp_name = ([13:24-25], "T"); tp_tparams = [];
+               tp_constraints = []; tp_reified = Erased;
+               tp_user_attributes = [] }
+              ];
             ft_where_constraints = [];
             ft_params =
             [{ fp_pos = [13:34-39]; fp_name = (Some "$arg1");
@@ -24,8 +29,8 @@ Parsed decls:
                   ]))
                };
             fp_flags =
-            (make_fp_flags ~mutability:none ~accept_disposable:false
-              ~has_default:false ~mode:FPnormal);
+            (make_fp_flags ~mutability:None ~accept_disposable:false
+              ~has_default:false ~mode:Typing_defs_core.FPnormal);
              }];
        ft_implicit_params =
        { capability =
@@ -42,12 +47,12 @@ Parsed decls:
           ]))
        };
       ft_flags =
-      (make_ft_flags sync none ~return_disposable:false
+      (make_ft_flags FSync None ~return_disposable:false
         ~returns_mutable:false ~returns_void_to_rx:false);
       ft_reactive = Nonreactive }));
-  fe_deprecated = None;  };
+  fe_pos = [13:10-23]; fe_php_std_lib = false };
 "\\returns_tuple" ->
-{ fe_pos = [9:10-23];
+{ Typing_defs.fe_deprecated = None;
   fe_type =
   (Rwitness (root|tuples.php line 9, characters 10-22),
    (Tfun
@@ -62,8 +67,8 @@ Parsed decls:
               (Tapply (([9:24-34], "\\Coordinate"), [])))
              };
            fp_flags =
-           (make_fp_flags ~mutability:none ~accept_disposable:false
-             ~has_default:false ~mode:FPnormal);
+           (make_fp_flags ~mutability:None ~accept_disposable:false
+             ~has_default:false ~mode:Typing_defs_core.FPnormal);
             }
           ];
         ft_implicit_params =
@@ -81,12 +86,12 @@ Parsed decls:
                 ]))
           };
         ft_flags =
-        (make_ft_flags sync none ~return_disposable:false
+        (make_ft_flags FSync None ~return_disposable:false
           ~returns_mutable:false ~returns_void_to_rx:false);
         ft_reactive = Nonreactive }));
-  fe_deprecated = None;  };
+  fe_pos = [9:10-23]; fe_php_std_lib = false };
 "\\takes_tuple" ->
-{ fe_pos = [5:10-21];
+{ Typing_defs.fe_deprecated = None;
   fe_type =
   (Rwitness (root|tuples.php line 5, characters 10-20),
    (Tfun
@@ -106,8 +111,8 @@ Parsed decls:
                    ]))
              };
            fp_flags =
-           (make_fp_flags ~mutability:none ~accept_disposable:false
-             ~has_default:false ~mode:FPnormal);
+           (make_fp_flags ~mutability:None ~accept_disposable:false
+             ~has_default:false ~mode:Typing_defs_core.FPnormal);
             }
           ];
         ft_implicit_params =
@@ -120,13 +125,13 @@ Parsed decls:
            (Tapply (([5:45-55], "\\Coordinate"), [])))
           };
         ft_flags =
-        (make_ft_flags sync none ~return_disposable:false
+        (make_ft_flags FSync None ~return_disposable:false
           ~returns_mutable:false ~returns_void_to_rx:false);
         ft_reactive = Nonreactive }));
-  fe_deprecated = None;  } };
+  fe_pos = [5:10-21]; fe_php_std_lib = false } };
 typedefs =
 { "\\Coordinate" ->
-  { td_pos = [3:6-16]; td_vis = Transparent; td_tparams = [];
+  { Typing_defs.td_pos = [3:6-16]; td_vis = Transparent; td_tparams = [];
     td_constraint = None;
     td_type =
     (Rhint (root|tuples.php line 3, characters 19-32),

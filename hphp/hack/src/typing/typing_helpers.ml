@@ -75,7 +75,6 @@ end = struct
     pos: Pos.t;
     reason: Typing_reason.ureason;
     ty: locl_possibly_enforced_ty;
-        [@printer Pp_type.pp_possibly_enforced_ty Pp_type.pp_locl]
   }
   [@@deriving show]
 

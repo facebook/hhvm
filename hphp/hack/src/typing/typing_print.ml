@@ -1635,10 +1635,8 @@ module PrintClass = struct
         let ty_str = Full.to_string_decl ctx v in
         "\n" ^ indent ^ sigil ^ " " ^ ty_str ^ kind ^ acc)
 
-  let constructor tcopt (ce_opt, consist) =
-    let consist_str =
-      Format.asprintf "(%a)" Pp_type.pp_consistent_kind consist
-    in
+  let constructor tcopt (ce_opt, (consist : consistent_kind)) =
+    let consist_str = Format.asprintf "(%a)" pp_consistent_kind consist in
     let ce_str =
       match ce_opt with
       | None -> ""

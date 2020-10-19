@@ -3,7 +3,7 @@ Parsed decls:
 { Direct_decl_parser.classes = {}; funs = {};
   typedefs =
   { "\\A" ->
-    { td_pos = [4:8-9]; td_vis = Transparent; td_tparams = [];
+    { Typing_defs.td_pos = [4:8-9]; td_vis = Transparent; td_tparams = [];
       td_constraint = None;
       td_type =
       (Rhint (root|autoimport_in_namespace.php line 4, characters 12-27),
@@ -13,7 +13,7 @@ Parsed decls:
           )))
       };
     "\\B" ->
-    { td_pos = [5:8-9]; td_vis = Transparent; td_tparams = [];
+    { Typing_defs.td_pos = [5:8-9]; td_vis = Transparent; td_tparams = [];
       td_constraint = None;
       td_type =
       (Rhint (root|autoimport_in_namespace.php line 5, characters 12-28),
@@ -23,7 +23,7 @@ Parsed decls:
           )))
       };
     "\\NS\\A" ->
-    { td_pos = [8:10-11]; td_vis = Transparent; td_tparams = [];
+    { Typing_defs.td_pos = [8:10-11]; td_vis = Transparent; td_tparams = [];
       td_constraint = None;
       td_type =
       (Rhint (root|autoimport_in_namespace.php line 8, characters 14-29),
@@ -33,7 +33,7 @@ Parsed decls:
           )))
       };
     "\\NS\\B" ->
-    { td_pos = [9:10-11]; td_vis = Transparent; td_tparams = [];
+    { Typing_defs.td_pos = [9:10-11]; td_vis = Transparent; td_tparams = [];
       td_constraint = None;
       td_type =
       (Rhint (root|autoimport_in_namespace.php line 9, characters 14-30),

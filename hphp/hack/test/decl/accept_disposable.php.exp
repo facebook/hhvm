@@ -34,7 +34,7 @@ Parsed decls:
                   (Tprim Tvoid))
                  };
                ft_flags =
-               (make_ft_flags sync none ~return_disposable:false
+               (make_ft_flags FSync None ~return_disposable:false
                  ~returns_mutable:false ~returns_void_to_rx:false);
                ft_reactive = Nonreactive }));
          sm_visibility = Public; sm_deprecated = None };
@@ -59,7 +59,7 @@ Parsed decls:
                    (Tprim Tvoid))
                   };
                 ft_flags =
-                (make_ft_flags sync none ~return_disposable:false
+                (make_ft_flags FSync None ~return_disposable:false
                   ~returns_mutable:false ~returns_void_to_rx:false);
                 ft_reactive = Nonreactive }));
           sm_visibility = Public; sm_deprecated = None }
@@ -67,7 +67,7 @@ Parsed decls:
       sc_user_attributes = []; sc_enum_type = None } };
   funs =
   { "\\f" ->
-    { fe_pos = [9:10-11];
+    { Typing_defs.fe_deprecated = None;
       fe_type =
       (Rwitness (root|accept_disposable.php line 9, characters 10-10),
        (Tfun
@@ -82,8 +82,8 @@ Parsed decls:
                   (Tapply (([9:35-41], "\\Handle"), [])))
                  };
                fp_flags =
-               (make_fp_flags ~mutability:none ~accept_disposable:true
-                 ~has_default:false ~mode:FPnormal);
+               (make_fp_flags ~mutability:None ~accept_disposable:true
+                 ~has_default:false ~mode:Typing_defs_core.FPnormal);
                 }
               ];
             ft_implicit_params =
@@ -98,10 +98,10 @@ Parsed decls:
                (Tprim Tvoid))
               };
             ft_flags =
-            (make_ft_flags sync none ~return_disposable:false
+            (make_ft_flags FSync None ~return_disposable:false
               ~returns_mutable:false ~returns_void_to_rx:false);
             ft_reactive = Nonreactive }));
-      fe_deprecated = None;  } };
+      fe_pos = [9:10-11]; fe_php_std_lib = false } };
   typedefs = {}; consts = {} }
 
 They matched!

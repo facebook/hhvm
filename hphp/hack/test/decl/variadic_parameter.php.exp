@@ -3,7 +3,7 @@ Parsed decls:
 { Direct_decl_parser.classes = {};
   funs =
   { "\\test" ->
-    { fe_pos = [3:10-14];
+    { Typing_defs.fe_deprecated = None;
       fe_type =
       (Rwitness (root|variadic_parameter.php line 3, characters 10-13),
        (Tfun
@@ -26,9 +26,9 @@ Parsed decls:
                                Tmixed)
                               };
                             fp_flags =
-                            (make_fp_flags ~mutability:none
+                            (make_fp_flags ~mutability:None
                               ~accept_disposable:false ~has_default:false
-                              ~mode:FPnormal);
+                              ~mode:Typing_defs_core.FPnormal);
                              }
                           ));
                        ft_tparams = []; ft_where_constraints = [];
@@ -45,13 +45,13 @@ Parsed decls:
                           (Tprim Tvoid))
                          };
                        ft_flags =
-                       (make_ft_flags sync none ~return_disposable:false
+                       (make_ft_flags FSync None ~return_disposable:false
                          ~returns_mutable:false ~returns_void_to_rx:false);
                        ft_reactive = Nonreactive }))
                  };
                fp_flags =
-               (make_fp_flags ~mutability:none ~accept_disposable:false
-                 ~has_default:false ~mode:FPnormal);
+               (make_fp_flags ~mutability:None ~accept_disposable:false
+                 ~has_default:false ~mode:Typing_defs_core.FPnormal);
                 }
               ];
             ft_implicit_params =
@@ -66,10 +66,10 @@ Parsed decls:
                (Tprim Tvoid))
               };
             ft_flags =
-            (make_ft_flags sync none ~return_disposable:false
+            (make_ft_flags FSync None ~return_disposable:false
               ~returns_mutable:false ~returns_void_to_rx:false);
             ft_reactive = Nonreactive }));
-      fe_deprecated = None;  } };
+      fe_pos = [3:10-14]; fe_php_std_lib = false } };
   typedefs = {}; consts = {} }
 
 They matched!

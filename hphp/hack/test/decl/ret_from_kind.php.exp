@@ -3,7 +3,7 @@ Parsed decls:
 { Direct_decl_parser.classes = {};
   funs =
   { "\\no_hint_async" ->
-    { fe_pos = [3:16-29];
+    { Typing_defs.fe_deprecated = None;
       fe_type =
       (Rwitness (root|ret_from_kind.php line 3, characters 16-28),
        (Tfun
@@ -24,12 +24,12 @@ Parsed decls:
                   )))
               };
             ft_flags =
-            (make_ft_flags async none ~return_disposable:false
+            (make_ft_flags FAsync None ~return_disposable:false
               ~returns_mutable:false ~returns_void_to_rx:false);
             ft_reactive = Nonreactive }));
-      fe_deprecated = None;  };
+      fe_pos = [3:16-29]; fe_php_std_lib = false };
     "\\no_hint_async_generator" ->
-    { fe_pos = [9:16-39];
+    { Typing_defs.fe_deprecated = None;
       fe_type =
       (Rwitness (root|ret_from_kind.php line 9, characters 16-38),
        (Tfun
@@ -55,12 +55,12 @@ Parsed decls:
                   )))
               };
             ft_flags =
-            (make_ft_flags async generator none ~return_disposable:false
+            (make_ft_flags FAsyncGenerator None ~return_disposable:false
               ~returns_mutable:false ~returns_void_to_rx:false);
             ft_reactive = Nonreactive }));
-      fe_deprecated = None;  };
+      fe_pos = [9:16-39]; fe_php_std_lib = false };
     "\\no_hint_generator" ->
-    { fe_pos = [5:10-27];
+    { Typing_defs.fe_deprecated = None;
       fe_type =
       (Rwitness (root|ret_from_kind.php line 5, characters 10-26),
        (Tfun
@@ -86,10 +86,10 @@ Parsed decls:
                   )))
               };
             ft_flags =
-            (make_ft_flags generator none ~return_disposable:false
+            (make_ft_flags FGenerator None ~return_disposable:false
               ~returns_mutable:false ~returns_void_to_rx:false);
             ft_reactive = Nonreactive }));
-      fe_deprecated = None;  } };
+      fe_pos = [5:10-27]; fe_php_std_lib = false } };
   typedefs = {}; consts = {} }
 
 They matched!

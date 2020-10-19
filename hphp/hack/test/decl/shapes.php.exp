@@ -3,12 +3,17 @@ Parsed decls:
 { Direct_decl_parser.classes = {};
   funs =
   { "\\generic_shape" ->
-    { fe_pos = [15:10-23];
+    { Typing_defs.fe_deprecated = None;
       fe_type =
       (Rwitness (root|shapes.php line 15, characters 10-22),
        (Tfun
           { ft_arity = (Fstandard ());
-            ft_tparams = [(Invariant, ([15:24-25], "T"), [], Erased)];
+            ft_tparams =
+            [{ Typing_defs_core.tp_variance = Invariant;
+               tp_name = ([15:24-25], "T"); tp_tparams = [];
+               tp_constraints = []; tp_reified = Erased;
+               tp_user_attributes = [] }
+              ];
             ft_where_constraints = [];
             ft_params =
             [{ fp_pos = [15:34-39]; fp_name = (Some "$arg1");
@@ -24,8 +29,8 @@ Parsed decls:
                   ]))
                };
             fp_flags =
-            (make_fp_flags ~mutability:none ~accept_disposable:false
-              ~has_default:false ~mode:FPnormal);
+            (make_fp_flags ~mutability:None ~accept_disposable:false
+              ~has_default:false ~mode:Typing_defs_core.FPnormal);
              }];
        ft_implicit_params =
        { capability =
@@ -42,12 +47,12 @@ Parsed decls:
           ]))
        };
       ft_flags =
-      (make_ft_flags sync none ~return_disposable:false
+      (make_ft_flags FSync None ~return_disposable:false
         ~returns_mutable:false ~returns_void_to_rx:false);
       ft_reactive = Nonreactive }));
-  fe_deprecated = None;  };
+  fe_pos = [15:10-23]; fe_php_std_lib = false };
 "\\returns_shape" ->
-{ fe_pos = [9:10-23];
+{ Typing_defs.fe_deprecated = None;
   fe_type =
   (Rwitness (root|shapes.php line 9, characters 10-22),
    (Tfun
@@ -62,8 +67,8 @@ Parsed decls:
               (Tapply (([10:3-13], "\\Coordinate"), [])))
              };
            fp_flags =
-           (make_fp_flags ~mutability:none ~accept_disposable:false
-             ~has_default:false ~mode:FPnormal);
+           (make_fp_flags ~mutability:None ~accept_disposable:false
+             ~has_default:false ~mode:Typing_defs_core.FPnormal);
             }
           ];
         ft_implicit_params =
@@ -73,7 +78,7 @@ Parsed decls:
         { et_enforced = false;
           et_type =
           (Rhint (root|shapes.php line 11, characters 4-41),
-           (Tshape (Open_shape,
+           (Tshape (Typing_defs_core.Open_shape,
               { (SFlit_str ([11:10-13], "x")) ->
                 { sft_optional = false;
                   sft_ty =
@@ -89,12 +94,12 @@ Parsed decls:
               )))
           };
         ft_flags =
-        (make_ft_flags sync none ~return_disposable:false
+        (make_ft_flags FSync None ~return_disposable:false
           ~returns_mutable:false ~returns_void_to_rx:false);
         ft_reactive = Nonreactive }));
-  fe_deprecated = None;  };
+  fe_pos = [9:10-23]; fe_php_std_lib = false };
 "\\takes_shape" ->
-{ fe_pos = [5:10-21];
+{ Typing_defs.fe_deprecated = None;
   fe_type =
   (Rwitness (root|shapes.php line 5, characters 10-20),
    (Tfun
@@ -106,7 +111,7 @@ Parsed decls:
            { et_enforced = false;
              et_type =
              (Rhint (root|shapes.php line 5, characters 22-54),
-              (Tshape (Closed_shape,
+              (Tshape (Typing_defs_core.Closed_shape,
                  { (SFlit_str ([5:28-31], "x")) ->
                    { sft_optional = false;
                      sft_ty =
@@ -122,8 +127,8 @@ Parsed decls:
                  )))
              };
            fp_flags =
-           (make_fp_flags ~mutability:none ~accept_disposable:false
-             ~has_default:false ~mode:FPnormal);
+           (make_fp_flags ~mutability:None ~accept_disposable:false
+             ~has_default:false ~mode:Typing_defs_core.FPnormal);
             }
           ];
         ft_implicit_params =
@@ -136,17 +141,17 @@ Parsed decls:
            (Tapply (([5:64-74], "\\Coordinate"), [])))
           };
         ft_flags =
-        (make_ft_flags sync none ~return_disposable:false
+        (make_ft_flags FSync None ~return_disposable:false
           ~returns_mutable:false ~returns_void_to_rx:false);
         ft_reactive = Nonreactive }));
-  fe_deprecated = None;  } };
+  fe_pos = [5:10-21]; fe_php_std_lib = false } };
 typedefs =
 { "\\Coordinate" ->
-  { td_pos = [3:6-16]; td_vis = Transparent; td_tparams = [];
+  { Typing_defs.td_pos = [3:6-16]; td_vis = Transparent; td_tparams = [];
     td_constraint = None;
     td_type =
     (Rhint (root|shapes.php line 3, characters 19-56),
-     (Tshape (Open_shape,
+     (Tshape (Typing_defs_core.Open_shape,
         { (SFlit_str ([3:25-28], "x")) ->
           { sft_optional = false;
             sft_ty =
@@ -160,16 +165,16 @@ typedefs =
         )))
     };
   "\\TaggedCoordinate" ->
-  { td_pos = [19:6-22]; td_vis = Transparent; td_tparams = [];
+  { Typing_defs.td_pos = [19:6-22]; td_vis = Transparent; td_tparams = [];
     td_constraint = None;
     td_type =
     (Rhint (root|shapes.php line 20, characters 3-71),
-     (Tshape (Closed_shape,
+     (Tshape (Typing_defs_core.Closed_shape,
         { (SFlit_str ([20:27-34], "coord")) ->
           { sft_optional = false;
             sft_ty =
             (Rhint (root|shapes.php line 20, characters 38-70),
-             (Tshape (Closed_shape,
+             (Tshape (Typing_defs_core.Closed_shape,
                 { (SFlit_str ([20:44-47], "x")) ->
                   { sft_optional = false;
                     sft_ty =

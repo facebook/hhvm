@@ -32,9 +32,9 @@ Parsed decls:
       sc_constructor = None; sc_static_methods = []; sc_methods = [];
       sc_user_attributes = [];
       sc_enum_type =
-      (Some { te_base =
+      (Some { Typing_defs.te_base =
               (Rhint (root|enums.php line 3, characters 11-13), (Tprim Tint));
-              te_constraint = None })
+              te_constraint = None; te_includes = []; te_enum_class = false })
       } };
   funs = {}; typedefs = {}; consts = {} }
 

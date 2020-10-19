@@ -3,7 +3,7 @@ Parsed decls:
 { Direct_decl_parser.classes = {};
   funs =
   { "\\X\\a" ->
-    { fe_pos = [4:12-13];
+    { Typing_defs.fe_deprecated = None;
       fe_type =
       (Rwitness (root|namespace_body_plus_declarations_outside_body.php line 4, characters 12-12),
        (Tfun
@@ -21,12 +21,12 @@ Parsed decls:
                (Tprim Tvoid))
               };
             ft_flags =
-            (make_ft_flags sync none ~return_disposable:false
+            (make_ft_flags FSync None ~return_disposable:false
               ~returns_mutable:false ~returns_void_to_rx:false);
             ft_reactive = Nonreactive }));
-      fe_deprecated = None;  };
+      fe_pos = [4:12-13]; fe_php_std_lib = false };
     "\\b" ->
-    { fe_pos = [9:10-11];
+    { Typing_defs.fe_deprecated = None;
       fe_type =
       (Rwitness (root|namespace_body_plus_declarations_outside_body.php line 9, characters 10-10),
        (Tfun
@@ -44,10 +44,10 @@ Parsed decls:
                (Tprim Tvoid))
               };
             ft_flags =
-            (make_ft_flags sync none ~return_disposable:false
+            (make_ft_flags FSync None ~return_disposable:false
               ~returns_mutable:false ~returns_void_to_rx:false);
             ft_reactive = Nonreactive }));
-      fe_deprecated = None;  } };
+      fe_pos = [9:10-11]; fe_php_std_lib = false } };
   typedefs = {}; consts = {} }
 
 They matched!

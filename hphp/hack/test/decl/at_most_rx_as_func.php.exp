@@ -3,12 +3,17 @@ Parsed decls:
 { Direct_decl_parser.classes = {};
   funs =
   { "\\f" ->
-    { fe_pos = [4:10-11];
+    { Typing_defs.fe_deprecated = None;
       fe_type =
       (Rwitness (root|at_most_rx_as_func.php line 4, characters 10-10),
        (Tfun
           { ft_arity = (Fstandard ());
-            ft_tparams = [(Invariant, ([4:12-13], "T"), [], Erased)];
+            ft_tparams =
+            [{ Typing_defs_core.tp_variance = Invariant;
+               tp_name = ([4:12-13], "T"); tp_tparams = [];
+               tp_constraints = []; tp_reified = Erased;
+               tp_user_attributes = [] }
+              ];
             ft_where_constraints = [];
             ft_params =
             [{ fp_pos = [5:44-46]; fp_name = (Some "$g");
@@ -28,9 +33,9 @@ Parsed decls:
                              (Tgeneric ("T", [])))
                           };
                          fp_flags =
-                         (make_fp_flags ~mutability:none
+                         (make_fp_flags ~mutability:None
                            ~accept_disposable:false ~has_default:false
-                           ~mode:FPnormal);
+                           ~mode:Typing_defs_core.FPnormal);
                           }
                        ];
                      ft_implicit_params =
@@ -45,13 +50,13 @@ Parsed decls:
                         (Tprim Tbool))
                        };
                      ft_flags =
-                     (make_ft_flags sync none ~return_disposable:false
+                     (make_ft_flags FSync None ~return_disposable:false
                        ~returns_mutable:false ~returns_void_to_rx:false);
                      ft_reactive = RxVar {} }))
                };
               fp_flags =
-              (make_fp_flags ~mutability:none ~accept_disposable:false
-                ~has_default:false ~mode:FPnormal);
+              (make_fp_flags ~mutability:None ~accept_disposable:false
+                ~has_default:false ~mode:Typing_defs_core.FPnormal);
                };
             { fp_pos = [6:5-7]; fp_name = (Some "$x");
               fp_type =
@@ -61,8 +66,8 @@ Parsed decls:
                  (Tgeneric ("T", [])))
               };
             fp_flags =
-            (make_fp_flags ~mutability:none ~accept_disposable:false
-              ~has_default:false ~mode:FPnormal);
+            (make_fp_flags ~mutability:None ~accept_disposable:false
+              ~has_default:false ~mode:Typing_defs_core.FPnormal);
              }];
        ft_implicit_params =
        { capability =
@@ -76,11 +81,11 @@ Parsed decls:
           (Tprim Tbool))
          };
        ft_flags =
-       (make_ft_flags sync none ~return_disposable:false
+       (make_ft_flags FSync None ~return_disposable:false
          ~returns_mutable:false ~returns_void_to_rx:false);
        ft_reactive = Reactive {} }));
-    fe_deprecated = None;
-    
+    fe_pos = [4:10-11];
+    fe_php_std_lib = false
     } }; typedefs = {}; consts = {}
 }
 

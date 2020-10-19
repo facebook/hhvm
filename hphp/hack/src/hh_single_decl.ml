@@ -174,19 +174,19 @@ let compare_decl ctx verbosity fn =
         "typedef(s)"
         (Decl.declare_typedef_in_file ~write_shmem:true)
         Typing_defs.equal_typedef_type
-        Pp_type.show_typedef_type
+        Typing_defs.show_typedef_type
         decls.typedefs;
       compare
         "constant(s)"
         (fun ctx a b -> Decl.declare_const_in_file ~write_shmem:true ctx a b)
         Typing_defs.equal_decl_ty
-        Pp_type.show_decl_ty
+        Typing_defs.show_decl_ty
         (SMap.map (fun cd -> cd.Typing_defs.cd_type) decls.consts);
       compare
         "function(s)"
         (Decl.declare_fun_in_file ~write_shmem:true)
         Typing_defs.equal_fun_elt
-        Pp_type.show_fun_elt
+        Typing_defs.show_fun_elt
         decls.funs;
       compare
         "class(es)"

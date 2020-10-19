@@ -9,7 +9,6 @@
 
 open Hh_prelude
 open Typing_defs
-open Pp_type
 
 (** Exception representing not finding a class during decl *)
 exception Decl_not_found of string

@@ -6,37 +6,46 @@ Parsed decls:
       sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cinterface;
       sc_name = ([6:11-12], "\\I");
       sc_tparams =
-      [(Invariant, ([7:3-5], "Ta"),
-        [(Constraint_as,
-          (Rhint (root|constraints_with_fully_qualified_name.php line 7, characters 9-16),
-           (Tprim Tarraykey)))
-          ],
-        Erased);
-        (Invariant, ([8:3-5], "Tb"),
+      [{ Typing_defs_core.tp_variance = Invariant; tp_name = ([7:3-5], "Ta");
+         tp_tparams = [];
+         tp_constraints =
          [(Constraint_as,
-           (Rhint (root|constraints_with_fully_qualified_name.php line 8, characters 9-19),
-            (Tapply (([8:9-12], "\\HH\\Map"),
-               [(Rhint (root|constraints_with_fully_qualified_name.php line 8, characters 13-14),
-                 (Tgeneric ("Ta", [])));
-               (Rhint (root|constraints_with_fully_qualified_name.php line 8, characters 17-18),
-                (Tgeneric ("Td", [])))
-            ]
-           ))))
-        ],
-      Erased);
-      (Invariant, ([9:3-5], "Tc"),
-       [(Constraint_as,
-         (Rhint (root|constraints_with_fully_qualified_name.php line 9, characters 9-21),
-          (Tapply (([9:9-12], "\\HH\\Map"),
-             [(Rhint (root|constraints_with_fully_qualified_name.php line 9, characters 13-15),
-               (Tapply (([9:13-16], "\\Ta"), [])));
-               (Rhint (root|constraints_with_fully_qualified_name.php line 9, characters 18-20),
-                (Tapply (([9:18-21], "\\Td"), [])))
-               ]
-             ))))
-         ],
-       Erased);
-      (Invariant, ([10:3-5], "Td"), [], Erased)];
+           (Rhint (root|constraints_with_fully_qualified_name.php line 7, characters 9-16),
+            (Tprim Tarraykey)))
+           ];
+         tp_reified = Erased; tp_user_attributes = [] };
+        { Typing_defs_core.tp_variance = Invariant;
+          tp_name = ([8:3-5], "Tb"); tp_tparams = [];
+          tp_constraints =
+          [(Constraint_as,
+            (Rhint (root|constraints_with_fully_qualified_name.php line 8, characters 9-19),
+             (Tapply (([8:9-12], "\\HH\\Map"),
+                [(Rhint (root|constraints_with_fully_qualified_name.php line 8, characters 13-14),
+                  (Tgeneric ("Ta", [])));
+                (Rhint (root|constraints_with_fully_qualified_name.php line 8, characters 17-18),
+                 (Tgeneric ("Td", [])))
+             ]
+            ))))
+          ];
+      tp_reified = Erased; tp_user_attributes = [] };
+      { Typing_defs_core.tp_variance = Invariant; tp_name = ([9:3-5], "Tc");
+        tp_tparams = [];
+        tp_constraints =
+        [(Constraint_as,
+          (Rhint (root|constraints_with_fully_qualified_name.php line 9, characters 9-21),
+           (Tapply (([9:9-12], "\\HH\\Map"),
+              [(Rhint (root|constraints_with_fully_qualified_name.php line 9, characters 13-15),
+                (Tapply (([9:13-16], "\\Ta"), [])));
+                (Rhint (root|constraints_with_fully_qualified_name.php line 9, characters 18-20),
+                 (Tapply (([9:18-21], "\\Td"), [])))
+                ]
+              ))))
+          ];
+        tp_reified = Erased; tp_user_attributes = [] };
+      { Typing_defs_core.tp_variance = Invariant; tp_name = ([10:3-5], "Td");
+        tp_tparams = []; tp_constraints = []; tp_reified = Erased;
+        tp_user_attributes = [] }
+      ];
     sc_where_constraints = [];
     sc_extends = [];
     sc_uses = [];
@@ -57,14 +66,14 @@ Parsed decls:
     } }; funs = {};
 typedefs =
 { "\\Ta" ->
-  { td_pos = [3:6-8]; td_vis = Transparent; td_tparams = [];
+  { Typing_defs.td_pos = [3:6-8]; td_vis = Transparent; td_tparams = [];
     td_constraint = None;
     td_type =
     (Rhint (root|constraints_with_fully_qualified_name.php line 3, characters 11-13),
      (Tprim Tint))
     };
   "\\Td" ->
-  { td_pos = [4:6-8]; td_vis = Transparent; td_tparams = [];
+  { Typing_defs.td_pos = [4:6-8]; td_vis = Transparent; td_tparams = [];
     td_constraint = None;
     td_type =
     (Rhint (root|constraints_with_fully_qualified_name.php line 4, characters 11-16),

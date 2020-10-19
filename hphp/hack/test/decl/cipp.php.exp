@@ -30,7 +30,7 @@ Parsed decls:
                   (Tprim Tvoid))
                  };
                ft_flags =
-               (make_ft_flags sync none ~return_disposable:false
+               (make_ft_flags FSync None ~return_disposable:false
                  ~returns_mutable:false ~returns_void_to_rx:false);
                ft_reactive = Cipp {\C} }));
          sm_visibility = Public; sm_deprecated = None };
@@ -55,7 +55,7 @@ Parsed decls:
                    (Tprim Tvoid))
                   };
                 ft_flags =
-                (make_ft_flags sync none ~return_disposable:false
+                (make_ft_flags FSync None ~return_disposable:false
                   ~returns_mutable:false ~returns_void_to_rx:false);
                 ft_reactive = CippGlobal }));
           sm_visibility = Public; sm_deprecated = None };
@@ -80,7 +80,7 @@ Parsed decls:
                    (Tprim Tvoid))
                   };
                 ft_flags =
-                (make_ft_flags sync none ~return_disposable:false
+                (make_ft_flags FSync None ~return_disposable:false
                   ~returns_mutable:false ~returns_void_to_rx:false);
                 ft_reactive = CippLocal {a} }));
           sm_visibility = Public; sm_deprecated = None };
@@ -105,7 +105,7 @@ Parsed decls:
                    (Tprim Tvoid))
                   };
                 ft_flags =
-                (make_ft_flags sync none ~return_disposable:false
+                (make_ft_flags FSync None ~return_disposable:false
                   ~returns_mutable:false ~returns_void_to_rx:false);
                 ft_reactive = CippRx }));
           sm_visibility = Public; sm_deprecated = None }
@@ -113,7 +113,7 @@ Parsed decls:
       sc_user_attributes = []; sc_enum_type = None } };
   funs =
   { "\\cipp_function" ->
-    { fe_pos = [18:10-23];
+    { Typing_defs.fe_deprecated = None;
       fe_type =
       (Rwitness (root|cipp.php line 18, characters 10-22),
        (Tfun
@@ -129,12 +129,12 @@ Parsed decls:
               (Rhint (root|cipp.php line 18, characters 27-30), (Tprim Tvoid))
               };
             ft_flags =
-            (make_ft_flags sync none ~return_disposable:false
+            (make_ft_flags FSync None ~return_disposable:false
               ~returns_mutable:false ~returns_void_to_rx:false);
             ft_reactive = Cipp {b} }));
-      fe_deprecated = None;  };
+      fe_pos = [18:10-23]; fe_php_std_lib = false };
     "\\cipp_global_function" ->
-    { fe_pos = [21:10-30];
+    { Typing_defs.fe_deprecated = None;
       fe_type =
       (Rwitness (root|cipp.php line 21, characters 10-29),
        (Tfun
@@ -150,12 +150,12 @@ Parsed decls:
               (Rhint (root|cipp.php line 21, characters 34-37), (Tprim Tvoid))
               };
             ft_flags =
-            (make_ft_flags sync none ~return_disposable:false
+            (make_ft_flags FSync None ~return_disposable:false
               ~returns_mutable:false ~returns_void_to_rx:false);
             ft_reactive = CippGlobal }));
-      fe_deprecated = None;  };
+      fe_pos = [21:10-30]; fe_php_std_lib = false };
     "\\cipp_local_function" ->
-    { fe_pos = [24:10-29];
+    { Typing_defs.fe_deprecated = None;
       fe_type =
       (Rwitness (root|cipp.php line 24, characters 10-28),
        (Tfun
@@ -171,12 +171,12 @@ Parsed decls:
               (Rhint (root|cipp.php line 24, characters 33-36), (Tprim Tvoid))
               };
             ft_flags =
-            (make_ft_flags sync none ~return_disposable:false
+            (make_ft_flags FSync None ~return_disposable:false
               ~returns_mutable:false ~returns_void_to_rx:false);
             ft_reactive = CippLocal {\C} }));
-      fe_deprecated = None;  };
+      fe_pos = [24:10-29]; fe_php_std_lib = false };
     "\\cipp_rx_function" ->
-    { fe_pos = [27:10-26];
+    { Typing_defs.fe_deprecated = None;
       fe_type =
       (Rwitness (root|cipp.php line 27, characters 10-25),
        (Tfun
@@ -192,10 +192,10 @@ Parsed decls:
               (Rhint (root|cipp.php line 27, characters 30-33), (Tprim Tvoid))
               };
             ft_flags =
-            (make_ft_flags sync none ~return_disposable:false
+            (make_ft_flags FSync None ~return_disposable:false
               ~returns_mutable:false ~returns_void_to_rx:false);
             ft_reactive = CippRx }));
-      fe_deprecated = None;  } };
+      fe_pos = [27:10-26]; fe_php_std_lib = false } };
   typedefs = {}; consts = {} }
 
 They matched!

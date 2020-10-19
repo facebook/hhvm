@@ -3,27 +3,34 @@ Parsed decls:
 { Direct_decl_parser.classes = {}; funs = {}; typedefs = {};
   consts =
   { "\\MY_CONST" ->
-    ([6:14-22],
-     (Rhint (root|constants.php line 6, characters 7-12), (Tprim Tstring)));
+    { Typing_defs.cd_pos = [6:14-22];
+      cd_type =
+      (Rhint (root|constants.php line 6, characters 7-12), (Tprim Tstring)) };
     "\\MY_CONST2" ->
-    ([7:11-20],
-     (Rhint (root|constants.php line 7, characters 7-9), (Tprim Tint)));
+    { Typing_defs.cd_pos = [7:11-20];
+      cd_type =
+      (Rhint (root|constants.php line 7, characters 7-9), (Tprim Tint)) };
     "\\MY_CONST3" ->
-    ([8:13-22],
-     (Rhint (root|constants.php line 8, characters 7-11), (Tprim Tfloat)));
+    { Typing_defs.cd_pos = [8:13-22];
+      cd_type =
+      (Rhint (root|constants.php line 8, characters 7-11), (Tprim Tfloat)) };
     "\\MY_CONST5" ->
-    ([9:11-20],
-     (Rhint (root|constants.php line 9, characters 7-9), (Tprim Tnum)));
+    { Typing_defs.cd_pos = [9:11-20];
+      cd_type =
+      (Rhint (root|constants.php line 9, characters 7-9), (Tprim Tnum)) };
     "\\MY_CONST6" ->
-    ([10:12-21],
-     (Rhint (root|constants.php line 10, characters 7-10), (Tprim Tbool)));
+    { Typing_defs.cd_pos = [10:12-21];
+      cd_type =
+      (Rhint (root|constants.php line 10, characters 7-10), (Tprim Tbool)) };
     "\\MY_VEC" ->
-    ([11:16-22],
-     (Rhint (root|constants.php line 11, characters 7-14),
-      (Tapply (([11:7-10], "\\HH\\vec"),
-         [(Rhint (root|constants.php line 11, characters 11-13), (Tprim Tint))
-           ]
-         )))) }
+    { Typing_defs.cd_pos = [11:16-22];
+      cd_type =
+      (Rhint (root|constants.php line 11, characters 7-14),
+       (Tapply (([11:7-10], "\\HH\\vec"),
+          [(Rhint (root|constants.php line 11, characters 11-13),
+            (Tprim Tint))]
+          )))
+      } }
   }
 
 They matched!

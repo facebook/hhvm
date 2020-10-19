@@ -543,8 +543,8 @@ let genv_as_value env genv =
     @
     match fun_mutable with
     | None -> []
-    | Some pm ->
-      [("fun_mutable", string_as_value (Pp_type.show_param_mutability pm))] )
+    | Some pm -> [("fun_mutable", string_as_value (show_param_mutability pm))]
+    )
 
 let env_as_value env =
   let {

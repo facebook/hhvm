@@ -15,63 +15,63 @@ Parsed decls:
   funs = {};
   typedefs =
   { "\\MyNamespace\\InnerNamespace\\MyDoubleNamespacedType" ->
-    { td_pos = [15:10-32]; td_vis = Transparent; td_tparams = [];
+    { Typing_defs.td_pos = [15:10-32]; td_vis = Transparent; td_tparams = [];
       td_constraint = None;
       td_type =
       (Rhint (root|nested_namespaces.php line 15, characters 35-63),
        (Tapply (([15:35-64], "\\MyNamespace\\MyNamespacedType"), [])))
       };
     "\\MyNamespace\\InnerNamespace\\MyInnerType" ->
-    { td_pos = [14:10-21]; td_vis = Transparent; td_tparams = [];
+    { Typing_defs.td_pos = [14:10-21]; td_vis = Transparent; td_tparams = [];
       td_constraint = None;
       td_type =
       (Rhint (root|nested_namespaces.php line 14, characters 24-29),
        (Tprim Tstring))
       };
     "\\MyNamespace\\MyBool" ->
-    { td_pos = [9:8-14]; td_vis = Transparent; td_tparams = [];
+    { Typing_defs.td_pos = [9:8-14]; td_vis = Transparent; td_tparams = [];
       td_constraint = None;
       td_type =
       (Rhint (root|nested_namespaces.php line 9, characters 17-20),
        (Tprim Tbool))
       };
     "\\MyNamespace\\MyFloat" ->
-    { td_pos = [7:8-15]; td_vis = Transparent; td_tparams = [];
+    { Typing_defs.td_pos = [7:8-15]; td_vis = Transparent; td_tparams = [];
       td_constraint = None;
       td_type =
       (Rhint (root|nested_namespaces.php line 7, characters 18-22),
        (Tprim Tfloat))
       };
     "\\MyNamespace\\MyInt" ->
-    { td_pos = [6:8-13]; td_vis = Transparent; td_tparams = [];
+    { Typing_defs.td_pos = [6:8-13]; td_vis = Transparent; td_tparams = [];
       td_constraint = None;
       td_type =
       (Rhint (root|nested_namespaces.php line 6, characters 16-18),
        (Tprim Tint))
       };
     "\\MyNamespace\\MyNamespacedType" ->
-    { td_pos = [11:8-24]; td_vis = Transparent; td_tparams = [];
+    { Typing_defs.td_pos = [11:8-24]; td_vis = Transparent; td_tparams = [];
       td_constraint = None;
       td_type =
       (Rhint (root|nested_namespaces.php line 11, characters 27-47),
        (Tapply (([11:27-48], "\\MyNamespace\\MyString"), [])))
       };
     "\\MyNamespace\\MyNum" ->
-    { td_pos = [8:8-13]; td_vis = Transparent; td_tparams = [];
+    { Typing_defs.td_pos = [8:8-13]; td_vis = Transparent; td_tparams = [];
       td_constraint = None;
       td_type =
       (Rhint (root|nested_namespaces.php line 8, characters 16-18),
        (Tprim Tnum))
       };
     "\\MyNamespace\\MyString" ->
-    { td_pos = [5:8-16]; td_vis = Transparent; td_tparams = [];
+    { Typing_defs.td_pos = [5:8-16]; td_vis = Transparent; td_tparams = [];
       td_constraint = None;
       td_type =
       (Rhint (root|nested_namespaces.php line 5, characters 19-24),
        (Tprim Tstring))
       };
     "\\MyNamespace\\MyVeryInnerNamespaceType" ->
-    { td_pos = [23:8-32]; td_vis = Transparent; td_tparams = [];
+    { Typing_defs.td_pos = [23:8-32]; td_vis = Transparent; td_tparams = [];
       td_constraint = None;
       td_type =
       (Rhint (root|nested_namespaces.php line 23, characters 35-79),
@@ -81,7 +81,7 @@ Parsed decls:
           [])))
       };
     "\\MyNamespace\\Very\\Inner\\Namespace\\MyVeryInnerNamespaceType" ->
-    { td_pos = [19:10-34]; td_vis = Transparent; td_tparams = [];
+    { Typing_defs.td_pos = [19:10-34]; td_vis = Transparent; td_tparams = [];
       td_constraint = None;
       td_type =
       (Rhint (root|nested_namespaces.php line 19, characters 37-42),
@@ -89,9 +89,11 @@ Parsed decls:
       } };
   consts =
   { "\\MyNamespace\\hello" ->
-    ([24:34-39],
-     (Rhint (root|nested_namespaces.php line 24, characters 9-32),
-      (Tapply (([24:9-33], "\\MyNamespace\\MyVeryInnerNamespaceType"), [])))) }
+    { Typing_defs.cd_pos = [24:34-39];
+      cd_type =
+      (Rhint (root|nested_namespaces.php line 24, characters 9-32),
+       (Tapply (([24:9-33], "\\MyNamespace\\MyVeryInnerNamespaceType"), [])))
+      } }
   }
 
 They matched!

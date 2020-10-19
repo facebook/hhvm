@@ -43,7 +43,11 @@ let oxidize filename =
   let oxidized_module =
     Utils.with_log_indent (fun () ->
         Output.with_output_context ~module_name (fun () ->
-            List.iter phrases Convert_toplevel_phrase.toplevel_phrase))
+            let _env =
+              Convert_toplevel_phrase.(
+                List.fold phrases ~f:toplevel_phrase ~init:Env.empty)
+            in
+            ()))
   in
   (module_name, oxidized_module)
 

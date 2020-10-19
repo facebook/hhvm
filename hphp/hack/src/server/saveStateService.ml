@@ -14,6 +14,9 @@ let get_errors_filename (filename : string) : string = filename ^ ".err"
 
 let get_legacy_decls_filename (filename : string) : string = filename ^ ".decls"
 
+let get_shallow_decls_filename (filename : string) : string =
+  filename ^ ".shallowdecls"
+
 (* Writes some OCaml object to a file with the given filename. *)
 let save_contents (output_filename : string) (contents : 'a) : unit =
   let chan = Stdlib.open_out_bin output_filename in
@@ -57,7 +60,10 @@ let load_class_decls ~(shallow_decls : bool) ~(base_filename : string) : unit =
   try
     let (filename, num_classes) =
       if shallow_decls then
-        ("[skipped-due-to-shallow]", 0)
+        let shallow_filename = get_shallow_decls_filename base_filename in
+        ( shallow_filename,
+          load_contents_unsafe shallow_filename
+          |> Decl_export.restore_shallow_decls )
       else
         let legacy_filename = get_legacy_decls_filename base_filename in
         ( legacy_filename,
@@ -138,12 +144,18 @@ let dump_class_decls ctx ~base_filename =
   Hh_logger.log "Begin saving class declarations";
   try
     let hot_classes_filename = get_hot_classes_filename () in
-    Hh_logger.log "Reading hot class names from %s" hot_classes_filename;
     let classes = get_hot_classes hot_classes_filename in
-    Hh_logger.log "Exporting %d class declarations..." @@ SSet.cardinal classes;
+    Hh_logger.log
+      "Read %d hot class names from %s"
+      (SSet.cardinal classes)
+      hot_classes_filename;
+    Hh_logger.log "Collecting legacy class decls";
     let legacy_decls = Decl_export.collect_legacy_decls ctx classes in
+    Hh_logger.log "Collecting shallow class decls";
+    let shallow_decls = Decl_export.collect_shallow_decls ctx classes in
     Hh_logger.log "Marshalling class declarations...";
     save_contents (get_legacy_decls_filename base_filename) legacy_decls;
+    save_contents (get_shallow_decls_filename base_filename) shallow_decls;
     HackEventLogger.save_decls_end start_t;
     ignore @@ Hh_logger.log_duration "Saved class declarations" start_t
   with exn ->

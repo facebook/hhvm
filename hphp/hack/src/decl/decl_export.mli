@@ -12,3 +12,9 @@ type saved_legacy_decls [@@deriving show]
 val collect_legacy_decls : Provider_context.t -> SSet.t -> saved_legacy_decls
 
 val restore_legacy_decls : saved_legacy_decls -> int
+
+type saved_shallow_decls [@@deriving show]
+
+val collect_shallow_decls : Provider_context.t -> SSet.t -> saved_shallow_decls
+
+val restore_shallow_decls : saved_shallow_decls -> int

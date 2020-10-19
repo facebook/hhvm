@@ -10,18 +10,21 @@
 open Hh_prelude
 open Shallow_decl_defs
 
+module Capacity = struct
+  let capacity = 1000
+end
+
+module Class = struct
+  type t = shallow_class
+
+  let prefix = Prefix.make ()
+
+  let description = "Decl_ShallowClass"
+end
+
 module Classes =
-  SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey)
-    (struct
-      type t = shallow_class
-
-      let prefix = Prefix.make ()
-
-      let description = "Decl_ShallowClass"
-    end)
-    (struct
-      let capacity = 1000
-    end)
+  SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey) (Class)
+    (Capacity)
 
 let push_local_changes = Classes.LocalChanges.push_stack
 

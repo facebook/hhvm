@@ -47,3 +47,20 @@ val oldify_batch : SSet.t -> unit
 val remove_old_batch : SSet.t -> unit
 
 val remove_batch : SSet.t -> unit
+
+module Capacity : sig
+  val capacity : int
+end
+
+module Class : sig
+  type t = shallow_class
+
+  val prefix : Prefix.t
+
+  val description : string
+end
+
+module Classes :
+    module type of
+      SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey) (Class)
+        (Capacity)

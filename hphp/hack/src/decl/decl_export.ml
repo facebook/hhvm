@@ -87,9 +87,9 @@ let rec collect_legacy_class
         | Exit
         | Decl_defs.Decl_not_found _ ->
           if not @@ SSet.mem requested_classes cid then
-            failwith @@ "Missing ancestor class " ^ cid
+            failwith @@ "Missing legacy ancestor class " ^ cid
           else (
-            Hh_logger.log "Missing requested class %s" cid;
+            Hh_logger.log "Missing legacy requested class %s" cid;
             if Decl_heap.Typedefs.mem cid then
               Hh_logger.log "(It may have been changed to a typedef)"
             else
@@ -196,3 +196,34 @@ let restore_legacy_decls decls =
 
 let collect_legacy_decls ctx classes =
   collect_legacy_classes ctx classes empty_legacy_decls classes
+
+type saved_shallow_decls = { classes: Shallow_decl_defs.shallow_class SMap.t }
+[@@deriving show]
+
+let collect_shallow_decls ctx classes =
+  (* We're only going to fetch the shallow-decls that were explicitly listed;
+  we won't look for ancestors. *)
+  let classes =
+    SSet.fold classes ~init:SMap.empty ~f:(fun cid classes ->
+        if SMap.mem classes cid then
+          classes
+        else
+          let ast_opt =
+            match Naming_provider.get_class_path ctx cid with
+            | None -> None
+            | Some file -> Ast_provider.find_class_in_file ctx file cid
+          in
+          match ast_opt with
+          | None ->
+            Hh_logger.log "Missing shallow requested class %s" cid;
+            classes
+          | Some ast ->
+            let data = Shallow_classes_heap.class_naming_and_decl ctx ast in
+            SMap.add classes ~key:cid ~data)
+  in
+  { classes }
+
+let restore_shallow_decls decls =
+  SMap.iter decls.classes Shallow_classes_heap.Classes.add;
+  (* return the number of classes that we restored *)
+  SMap.cardinal decls.classes

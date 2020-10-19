@@ -12,6 +12,7 @@ open Ifc_types
 module Env = Ifc_env
 module Logic = Ifc_logic
 module Utils = Ifc_utils
+module T = Typing_defs
 
 let comma_sep fmt () = fprintf fmt ",@ "
 
@@ -66,6 +67,16 @@ let rec ptype fmt ty =
   | Tcow_array { a_key; a_value; a_length; a_kind } ->
     fprintf fmt "%a" array_kind a_kind;
     fprintf fmt "<%a => %a; |%a|>" ptype a_key ptype a_value policy a_length
+  | Tshape (kind, m) ->
+    let field fmt f =
+      if f.sft_optional then fprintf fmt "?";
+      ptype fmt f.sft_ty
+    in
+    fprintf fmt "shape(";
+    Nast.ShapeMap.pp field fmt m;
+    (match kind with
+    | T.Closed_shape -> fprintf fmt ")"
+    | T.Open_shape -> fprintf fmt ", ...)")
 
 (* Format: <pc, self>(arg1, arg2, ...): ret [exn] *)
 and fun_ fmt fn =

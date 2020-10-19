@@ -82,6 +82,7 @@ type ptype =
   | Tclass of class_
   | Tfun of fun_
   | Tcow_array of cow_array
+  | Tshape of Type.shape_kind * shape_field_type Nast.ShapeMap.t
 
 (* Copy-on-write indexed collection used for Hack arrays i.e. vec, dict, and
    keyset *)
@@ -90,6 +91,11 @@ and cow_array = {
   a_key: ptype;
   a_value: ptype;
   a_length: policy;
+}
+
+and shape_field_type = {
+  sft_optional: bool;
+  sft_ty: ptype;
 }
 
 and fun_ = {

@@ -34,6 +34,9 @@ let rec ptype fty fpol = function
         a_value = fty a_value;
         a_length = fpol a_length;
       }
+  | Tshape (kind, fs) ->
+    let field sft = { sft with sft_ty = ptype fty fpol sft.sft_ty } in
+    Tshape (kind, Nast.ShapeMap.map field fs)
 
 and fun_ fty fpol f =
   let ptype = ptype fty fpol in
@@ -69,6 +72,15 @@ let iter_ptype2 fty fpol pt1 pt2 =
     flist f1.f_args f2.f_args;
     fty f1.f_ret f2.f_ret;
     fty f1.f_exn f2.f_exn
+  | (Tshape (_k1, s1), Tshape (_k2, s2)) ->
+    let combine _ f1 f2 =
+      match (f1, f2) with
+      | (Some t1, Some t2) ->
+        fty t1.sft_ty t2.sft_ty;
+        None
+      | _ -> invalid_arg "iter_ptype2"
+    in
+    ignore (Nast.ShapeMap.merge combine s1 s2)
   | _ -> invalid_arg "iter_ptype2"
 
 (* "fprop: int -> prop -> prop" takes as first argument the

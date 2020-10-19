@@ -65,6 +65,9 @@ let rec policy_occurrences pty =
         policy_occurrences a_key;
         policy_occurrences a_value;
       ]
+  | Tshape (_, m) ->
+    let f sft = policy_occurrences sft.sft_ty in
+    Nast.ShapeMap.values m |> List.map ~f |> on_list
 
 exception SubtypeFailure of string * ptype * ptype
 
@@ -135,6 +138,42 @@ let rec subtype ~pos t1 t2 acc =
     acc
     |> L.(PSet.elements cov <* [cl.c_self]) ~pos
     |> L.(PSet.elements inv =* [cl.c_lump]) ~pos
+  | (Tshape (k1, s1), Tshape (k2, s2)) ->
+    begin
+      match (k1, k2) with
+      | (T.Open_shape, T.Closed_shape) ->
+        err "An open shape cannot subtype a closed shape"
+      | _ ->
+        let preprocess shape_kind = function
+          (* A missing field of an open shape becomes an optional field of type mixed *)
+          | None when T.equal_shape_kind shape_kind T.Open_shape ->
+            Some { sft_optional = true; sft_ty = Tinter [] }
+          (* If a field is optional with type nothing, consider it missing *)
+          | Some { sft_ty = Tunion []; sft_optional = true } -> None
+          | sft -> sft
+        in
+        let process_field acc _ f1 f2 =
+          let f1 = preprocess k1 f1 in
+          let f2 = preprocess k2 f2 in
+          match (f1, f2) with
+          | (Some { sft_optional = true; _ }, Some { sft_optional = false; _ })
+            ->
+            err "optional field cannot be subtype of required"
+          | (Some { sft_ty = t1; _ }, Some { sft_ty = t2; _ }) ->
+            (subtype t1 t2 acc, None)
+          | (Some _, None) -> err "missing field"
+          | (None, Some { sft_optional; _ }) ->
+            if sft_optional then
+              (acc, None)
+            else
+              err "missing field"
+          | (None, None) -> (acc, None)
+        in
+        let (acc, _) =
+          Nast.ShapeMap.merge_env ~combine:process_field acc s1 s2
+        in
+        acc
+    end
   | (Tunion tl, _) ->
     List.fold tl ~init:acc ~f:(fun acc t1 -> subtype t1 t2 acc)
   | (_, Tinter tl) ->
@@ -359,6 +398,13 @@ let adjust_ptype ?prefix ~pos ~adjustment renv env ty =
       let (env, a_value) = freshen_cov env arr.a_value in
       let (env, a_length) = freshen_pol_cov env arr.a_length in
       (env, Tcow_array { a_kind = arr.a_kind; a_key; a_value; a_length })
+    | Tshape (k, s) ->
+      let f env _ sft =
+        let (env, ty) = freshen_cov env sft.sft_ty in
+        (env, { sft with sft_ty = ty })
+      in
+      let (env, s) = Nast.ShapeMap.map_env f env s in
+      (env, Tshape (k, s))
   in
   freshen adjustment env ty
 
@@ -378,6 +424,9 @@ let rec object_policy = function
   | Tcow_array { a_key; a_value; a_length; _ } ->
     PSet.union (object_policy a_key) (object_policy a_value)
     |> PSet.add a_length
+  | Tshape (_, s) ->
+    let f _ sft acc = PSet.union (object_policy sft.sft_ty) acc in
+    Nast.ShapeMap.fold f s PSet.empty
 
 let add_dependencies pl t = L.(pl <* PSet.elements (object_policy t))
 
@@ -884,10 +933,17 @@ and expr ~pos renv (env : Env.expr_env) (((_, ety), e) : Tast.expr) =
     let env = Env.set_local_type_opt env dollardollar dd_old in
     (env, t2)
   | A.Dollardollar (_, lid) -> refresh_local_type ~pos renv env lid ety
+  | A.Shape s ->
+    let f (env, m) (key, e) =
+      let (env, t) = expr env e in
+      let sft = { sft_ty = t; sft_optional = false } in
+      (env, Nast.ShapeMap.add key sft m)
+    in
+    let (env, s) = List.fold ~f ~init:(env, Nast.ShapeMap.empty) s in
+    (env, Tshape (T.Closed_shape, s))
   (* --- expressions below are not yet supported *)
   | A.Darray (_, _)
   | A.Varray (_, _)
-  | A.Shape _
   | A.ValCollection (_, _, _)
   | A.KeyValCollection (_, _, _)
   | A.Omitted

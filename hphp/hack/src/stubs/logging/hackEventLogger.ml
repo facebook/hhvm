@@ -306,9 +306,9 @@ let state_loader_dirty_files _ = ()
 
 let changed_while_parsing_end _ = ()
 
-let save_decls_end _ = ()
+let save_decls_end _ _ = ()
 
-let save_decls_failure _ _ = ()
+let save_decls_failure _ = ()
 
 let load_decls_end _ = ()
 

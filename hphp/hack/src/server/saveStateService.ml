@@ -141,27 +141,37 @@ let get_hot_classes (filename : string) : SSet.t =
 
 let dump_class_decls ctx ~base_filename =
   let start_t = Unix.gettimeofday () in
-  Hh_logger.log "Begin saving class declarations";
+  let hot_classes_filename = get_hot_classes_filename () in
+  Hh_logger.log
+    "Begin saving class declarations to %s based on %s"
+    base_filename
+    hot_classes_filename;
   try
-    let hot_classes_filename = get_hot_classes_filename () in
     let classes = get_hot_classes hot_classes_filename in
-    Hh_logger.log
-      "Read %d hot class names from %s"
-      (SSet.cardinal classes)
-      hot_classes_filename;
-    Hh_logger.log "Collecting legacy class decls";
+    let t1 = Unix.gettimeofday () in
     let legacy_decls = Decl_export.collect_legacy_decls ctx classes in
-    Hh_logger.log "Collecting shallow class decls";
+    let t2 = Unix.gettimeofday () in
     let shallow_decls = Decl_export.collect_shallow_decls ctx classes in
-    Hh_logger.log "Marshalling class declarations...";
+    let t3 = Unix.gettimeofday () in
     save_contents (get_legacy_decls_filename base_filename) legacy_decls;
     save_contents (get_shallow_decls_filename base_filename) shallow_decls;
-    HackEventLogger.save_decls_end start_t;
-    ignore @@ Hh_logger.log_duration "Saved class declarations" start_t
-  with exn ->
-    let stack = Printexc.get_backtrace () in
-    HackEventLogger.save_decls_failure exn stack;
-    Hh_logger.exc exn ~stack ~prefix:"Failed to save class declarations: "
+    let t4 = Unix.gettimeofday () in
+    let telemetry =
+      Telemetry.create ()
+      |> Telemetry.int_ ~key:"count" ~value:(SSet.cardinal classes)
+      |> Telemetry.float_ ~key:"load_classnames" ~value:(t1 -. start_t)
+      |> Telemetry.float_ ~key:"collect_legacy" ~value:(t2 -. t1)
+      |> Telemetry.float_ ~key:"collect_shallow" ~value:(t3 -. t2)
+      |> Telemetry.float_ ~key:"save" ~value:(t4 -. t3)
+    in
+    HackEventLogger.save_decls_end start_t telemetry;
+    Hh_logger.log "Saved class declarations: %s" (Telemetry.to_string telemetry)
+  with e ->
+    let e = Exception.wrap e in
+    HackEventLogger.save_decls_failure e;
+    Hh_logger.error
+      "Failed to save class declarations:\n%s"
+      (Exception.to_string e)
 
 (** Dumps the naming-table (a saveable form of FileInfo), and errors if any,
 and hot class decls. *)

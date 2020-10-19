@@ -511,6 +511,39 @@ end
       ()
 end
 
+module GenerateFFRustSyntaxImplByRef = struct
+  let to_kind x =
+    sprintf
+      "            SyntaxVariant::%s {..} => SyntaxKind::%s,\n"
+      x.kind_name
+      x.kind_name
+
+  let template =
+    make_header CStyle ""
+    ^ "
+use crate::{syntax_kind::SyntaxKind, lexable_token::LexableToken};
+use super::{syntax::Syntax, syntax_variant_generated::SyntaxVariant};
+
+impl<T: LexableToken, V> Syntax<'_, T, V> {
+    pub fn kind(&self) -> SyntaxKind {
+        match &self.children {
+            SyntaxVariant::Missing => SyntaxKind::Missing,
+            SyntaxVariant::Token (t) => SyntaxKind::Token(t.kind()),
+            SyntaxVariant::SyntaxList (_) => SyntaxKind::SyntaxList,
+TO_KIND        }
+    }
+}
+    "
+
+  let full_fidelity_syntax =
+    Full_fidelity_schema.make_template_file
+      ~transformations:[{ pattern = "TO_KIND"; func = to_kind }]
+      ~filename:
+        (full_fidelity_path_prefix ^ "syntax_by_ref/syntax_impl_generated.rs")
+      ~template
+      ()
+end
+
 module GenerateFFRustSyntaxVariantByRef = struct
   let to_syntax_variant_children x =
     let mapper (f, _) =
@@ -3182,4 +3215,5 @@ let templates =
     GenerateFFRustSyntaxVariantByRef.full_fidelity_syntax;
     GenerateSyntaxTypeImpl.full_fidelity_syntax;
     GenerateSyntaxChildrenIterator.full_fidelity_syntax;
+    GenerateFFRustSyntaxImplByRef.full_fidelity_syntax;
   ]

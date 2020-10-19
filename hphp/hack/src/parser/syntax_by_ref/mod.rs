@@ -10,5 +10,6 @@ pub mod positioned_value;
 pub mod syntax;
 mod syntax_children_iterator;
 mod syntax_children_iterator_generated;
+mod syntax_impl_generated;
 mod syntax_type_impl_generated;
 mod syntax_variant_generated;

@@ -72,6 +72,11 @@ let iter_ptype2 fty fpol pt1 pt2 =
     flist f1.f_args f2.f_args;
     fty f1.f_ret f2.f_ret;
     fty f1.f_exn f2.f_exn
+  | (Tcow_array a1, Tcow_array a2) ->
+    (* Assume the array kinds are ok *)
+    fty a1.a_key a2.a_key;
+    fty a1.a_value a2.a_value;
+    fpol a1.a_length a2.a_length
   | (Tshape (_k1, s1), Tshape (_k2, s2)) ->
     let combine _ f1 f2 =
       match (f1, f2) with

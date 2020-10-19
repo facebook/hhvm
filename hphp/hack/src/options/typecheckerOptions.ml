@@ -64,6 +64,10 @@ let experimental_forbid_nullable_cast =
 
 let experimental_coroutines = GlobalOptions.tco_experimental_coroutines
 
+let experimental_ifc = GlobalOptions.tco_experimental_ifc
+
+let experimental_infer_flows = GlobalOptions.tco_experimental_infer_flows
+
 let experimental_disallow_static_memoized =
   GlobalOptions.tco_experimental_disallow_static_memoized
 

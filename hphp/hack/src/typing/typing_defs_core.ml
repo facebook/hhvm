@@ -17,8 +17,10 @@ type ce_visibility =
   | Vprotected of string
 [@@deriving eq, show]
 
-(* Represents <<Policied()>> attribute *)
-type ifc_fun_decl = FDPolicied of string option
+(* Represents <<__Policied()>> or <<__InferFlows>> attribute *)
+type ifc_fun_decl =
+  | FDPolicied of string option
+  | FDInferFlows
 
 (* The default policy is the public one, use a # to prevent class collisions *)
 let default_ifc_fun_decl = FDPolicied (Some "#PUBLIC")
@@ -821,6 +823,7 @@ module Pp = struct
   and pp_ifc_fun_decl : Format.formatter -> ifc_fun_decl -> unit =
    fun fmt r ->
     match r with
+    | FDInferFlows -> Format.pp_print_string fmt "FDInferFlows"
     | FDPolicied None -> Format.pp_print_string fmt "FDPolicied {}"
     | FDPolicied (Some s) ->
       Format.pp_print_string fmt "FDPolicied {";

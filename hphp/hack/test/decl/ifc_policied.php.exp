@@ -62,23 +62,73 @@ Parsed decls:
                 }));
           sm_visibility = Public; sm_deprecated = None };
         { Shallow_decl_defs.sm_abstract = false; sm_final = false;
-          sm_memoizelsb = false; sm_name = ([13:19-28], "classname");
+          sm_memoizelsb = false; sm_name = ([13:19-27], "implicit");
           sm_override = false; sm_dynamicallycallable = false;
           sm_reactivity = None;
           sm_type =
-          (Rwitness (root|ifc_policied.php line 13, characters 19-27),
+          (Rwitness (root|ifc_policied.php line 13, characters 19-26),
            (Tfun
               { ft_arity = (Fstandard ()); ft_tparams = [];
                 ft_where_constraints = []; ft_params = [];
                 ft_implicit_params =
                 { capability =
-                  (Rhint (root|ifc_policied.php line 13, characters 19-27),
+                  (Rhint (root|ifc_policied.php line 13, characters 19-26),
                    (Tunion []))
                   };
                 ft_ret =
                 { et_enforced = false;
                   et_type =
-                  (Rhint (root|ifc_policied.php line 13, characters 32-35),
+                  (Rhint (root|ifc_policied.php line 13, characters 31-34),
+                   (Tprim Tvoid))
+                  };
+                ft_flags =
+                (make_ft_flags FSync None ~return_disposable:false
+                  ~returns_mutable:false ~returns_void_to_rx:false);
+                ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {} }));
+          sm_visibility = Public; sm_deprecated = None };
+        { Shallow_decl_defs.sm_abstract = false; sm_final = false;
+          sm_memoizelsb = false; sm_name = ([16:19-29], "inferflows");
+          sm_override = false; sm_dynamicallycallable = false;
+          sm_reactivity = None;
+          sm_type =
+          (Rwitness (root|ifc_policied.php line 16, characters 19-28),
+           (Tfun
+              { ft_arity = (Fstandard ()); ft_tparams = [];
+                ft_where_constraints = []; ft_params = [];
+                ft_implicit_params =
+                { capability =
+                  (Rhint (root|ifc_policied.php line 16, characters 19-28),
+                   (Tunion []))
+                  };
+                ft_ret =
+                { et_enforced = false;
+                  et_type =
+                  (Rhint (root|ifc_policied.php line 16, characters 33-36),
+                   (Tprim Tvoid))
+                  };
+                ft_flags =
+                (make_ft_flags FSync None ~return_disposable:false
+                  ~returns_mutable:false ~returns_void_to_rx:false);
+                ft_reactive = Nonreactive; ft_ifc_decl = FDInferFlows }));
+          sm_visibility = Public; sm_deprecated = None };
+        { Shallow_decl_defs.sm_abstract = false; sm_final = false;
+          sm_memoizelsb = false; sm_name = ([19:19-28], "classname");
+          sm_override = false; sm_dynamicallycallable = false;
+          sm_reactivity = None;
+          sm_type =
+          (Rwitness (root|ifc_policied.php line 19, characters 19-27),
+           (Tfun
+              { ft_arity = (Fstandard ()); ft_tparams = [];
+                ft_where_constraints = []; ft_params = [];
+                ft_implicit_params =
+                { capability =
+                  (Rhint (root|ifc_policied.php line 19, characters 19-27),
+                   (Tunion []))
+                  };
+                ft_ret =
+                { et_enforced = false;
+                  et_type =
+                  (Rhint (root|ifc_policied.php line 19, characters 32-35),
                    (Tprim Tvoid))
                   };
                 ft_flags =
@@ -88,23 +138,23 @@ Parsed decls:
                 }));
           sm_visibility = Public; sm_deprecated = None };
         { Shallow_decl_defs.sm_abstract = false; sm_final = false;
-          sm_memoizelsb = false; sm_name = ([16:19-20], "h");
+          sm_memoizelsb = false; sm_name = ([22:19-27], "defaults");
           sm_override = false; sm_dynamicallycallable = false;
           sm_reactivity = None;
           sm_type =
-          (Rwitness (root|ifc_policied.php line 16, characters 19-19),
+          (Rwitness (root|ifc_policied.php line 22, characters 19-26),
            (Tfun
               { ft_arity = (Fstandard ()); ft_tparams = [];
                 ft_where_constraints = []; ft_params = [];
                 ft_implicit_params =
                 { capability =
-                  (Rhint (root|ifc_policied.php line 16, characters 19-19),
+                  (Rhint (root|ifc_policied.php line 22, characters 19-26),
                    (Tunion []))
                   };
                 ft_ret =
                 { et_enforced = false;
                   et_type =
-                  (Rhint (root|ifc_policied.php line 16, characters 24-27),
+                  (Rhint (root|ifc_policied.php line 22, characters 31-34),
                    (Tprim Tvoid))
                   };
                 ft_flags =

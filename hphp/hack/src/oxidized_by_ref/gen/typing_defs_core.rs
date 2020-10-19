@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<71635f1c3be905b13bc9f68c7addef4c>>
+// @generated SignedSource<<84b4fb28cfbf7f50ca152922f471e85c>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -57,6 +57,7 @@ impl<'a> TrivialDrop for CeVisibility<'a> {}
 )]
 pub enum IfcFunDecl<'a> {
     FDPolicied(Option<&'a str>),
+    FDInferFlows,
 }
 impl<'a> TrivialDrop for IfcFunDecl<'a> {}
 

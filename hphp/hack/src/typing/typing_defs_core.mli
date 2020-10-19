@@ -16,8 +16,10 @@ type ce_visibility =
   | Vprotected of string
 [@@deriving eq, show]
 
-(* Represents <<Policied()>> attribute *)
-type ifc_fun_decl = FDPolicied of string option
+(* Represents <<Policied()>> or <<InferFlows>> attribute *)
+type ifc_fun_decl =
+  | FDPolicied of string option
+  | FDInferFlows
 
 val default_ifc_fun_decl : ifc_fun_decl
 

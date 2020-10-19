@@ -9,9 +9,15 @@ class C {
   <<__Policied("Public")>>
   public function g(): void {}
 
+  <<__Policied>>
+  public function implicit(): void {}
+
+  <<__InferFlows>>
+  public function inferflows(): void {}
+
   <<__Policied(Policy::class)>>
   public function classname(): void {}
 
   // should be default
-  public function h(): void {}
+  public function defaults(): void {}
 }

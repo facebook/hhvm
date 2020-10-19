@@ -152,6 +152,19 @@ let tco_experimental_type_param_shadowing = "type_param_shadowing"
 let tco_experimental_abstract_type_const_with_default =
   "abstract_type_const_with_default"
 
+(*
+* Turn on information flow control attributes (i.e. Governed) in
+* the typechecker
+*)
+let tco_experimental_ifc = "ifc_enabled"
+
+(*
+* Allow typechecker to do global inference and infer IFC flows
+* with the <<InferFlows>> flag
+*
+*)
+let tco_experimental_infer_flows = "ifc_infer_flows"
+
 let tco_experimental_all =
   SSet.empty
   |> List.fold_right
@@ -163,6 +176,8 @@ let tco_experimental_all =
          tco_experimental_coroutines;
          tco_experimental_disallow_static_memoized;
          tco_experimental_abstract_type_const_with_default;
+         tco_experimental_ifc;
+         tco_experimental_infer_flows;
        ]
 
 let tco_migration_flags_all =

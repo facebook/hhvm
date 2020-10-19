@@ -471,6 +471,10 @@ val tco_experimental_type_param_shadowing : string
 
 val tco_experimental_abstract_type_const_with_default : string
 
+val tco_experimental_ifc : string
+
+val tco_experimental_infer_flows : string
+
 val tco_experimental_all : SSet.t
 
 val tco_migration_flags_all : SSet.t

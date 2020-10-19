@@ -326,6 +326,8 @@ module UserAttributes = struct
 
   let uaPolicied = "__Policied"
 
+  let uaInferFlows = "__InferFlows"
+
   let as_map =
     AttributeKinds.(
       SMap.of_list
@@ -377,6 +379,7 @@ module UserAttributes = struct
           (uaEnableUnstableFeatures, [file]);
           (uaEnumClass, [cls; enum]);
           (uaPolicied, [fn; mthd]);
+          (uaInferFlows, [fn; mthd]);
         ])
 
   (* These are names which are allowed in the systemlib but not in normal programs *)

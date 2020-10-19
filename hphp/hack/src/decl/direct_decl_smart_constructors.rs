@@ -1133,6 +1133,9 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                                 |&x| Some(x.1),        // f
                             ));
                     }
+                    "__InferFlows" => {
+                        attributes.policied = IfcFunDecl::FDInferFlows;
+                    }
                     _ => {}
                 }
             } else {

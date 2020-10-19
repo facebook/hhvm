@@ -200,26 +200,39 @@ let collect_legacy_decls ctx classes =
 type saved_shallow_decls = { classes: Shallow_decl_defs.shallow_class SMap.t }
 [@@deriving show]
 
-let collect_shallow_decls ctx _workers classes =
+let collect_shallow_decls ctx workers classnames =
+  let classnames = SSet.elements classnames in
   (* We're only going to fetch the shallow-decls that were explicitly listed;
   we won't look for ancestors. *)
+  let job (init : 'a SMap.t) (classnames : string list) : 'a SMap.t =
+    List.fold classnames ~init ~f:(fun acc cid ->
+        let ast_opt =
+          match Naming_provider.get_class_path ctx cid with
+          | None -> None
+          | Some file -> Ast_provider.find_class_in_file ctx file cid
+        in
+        match ast_opt with
+        | None ->
+          Hh_logger.log "Missing shallow requested class %s" cid;
+          acc
+        | Some ast ->
+          let data = Shallow_classes_heap.class_naming_and_decl ctx ast in
+          SMap.add acc ~key:cid ~data)
+  in
+  (* The 'classnames' came from a SSet, and therefore all elements are unique.
+  So we can safely assume there will be no merge collisions. *)
   let classes =
-    SSet.fold classes ~init:SMap.empty ~f:(fun cid classes ->
-        if SMap.mem classes cid then
-          classes
-        else
-          let ast_opt =
-            match Naming_provider.get_class_path ctx cid with
-            | None -> None
-            | Some file -> Ast_provider.find_class_in_file ctx file cid
-          in
-          match ast_opt with
-          | None ->
-            Hh_logger.log "Missing shallow requested class %s" cid;
-            classes
-          | Some ast ->
-            let data = Shallow_classes_heap.class_naming_and_decl ctx ast in
-            SMap.add classes ~key:cid ~data)
+    MultiWorker.call
+      workers
+      ~job
+      ~neutral:SMap.empty
+      ~merge:
+        (SMap.merge ~f:(fun _key a b ->
+             if Option.is_some a then
+               a
+             else
+               b))
+      ~next:(MultiWorker.next workers classnames)
   in
   { classes }
 

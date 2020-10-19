@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<7cfaf3a38d82c49f41cd1840dcff5620>>
+// @generated SignedSource<<2b2fedb77f0cfa5d8246f2a1f3cced66>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -88,9 +88,9 @@ pub enum Stmt_<'a, Ex, Fb, En, Hi> {
     Using(&'a UsingStmt<'a, Ex, Fb, En, Hi>),
     For(
         &'a (
-            &'a Expr<'a, Ex, Fb, En, Hi>,
-            &'a Expr<'a, Ex, Fb, En, Hi>,
-            &'a Expr<'a, Ex, Fb, En, Hi>,
+            &'a [&'a Expr<'a, Ex, Fb, En, Hi>],
+            Option<&'a Expr<'a, Ex, Fb, En, Hi>>,
+            &'a [&'a Expr<'a, Ex, Fb, En, Hi>],
             &'a Block<'a, Ex, Fb, En, Hi>,
         ),
     ),

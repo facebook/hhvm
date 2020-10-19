@@ -814,12 +814,17 @@ and stmt_ env pos st =
             us_is_block_scoped;
           } )
   | For (e1, e2, e3, b) ->
+    let e2 =
+      match e2 with
+      | Some e2 -> e2
+      | None -> (Pos.none, True)
+    in
     let (env, (te1, te2, te3, tb)) =
       LEnv.stash_and_do env [C.Continue; C.Break] (fun env ->
           (* For loops leak their initalizer, but nothing that's defined in the
            body
          *)
-          let (env, te1, _) = expr env e1 in
+          let (env, te1, _) = exprs env e1 in
           (* initializer *)
           let env = LEnv.save_and_merge_next_in_cont env C.Continue in
           let (env, (tb, te3)) =
@@ -832,7 +837,7 @@ and stmt_ env pos st =
                 let env =
                   LEnv.update_next_from_conts env [C.Continue; C.Next]
                 in
-                let (env, te3, _) = expr env e3 in
+                let (env, te3, _) = exprs env e3 in
                 (env, (tb, te3)))
           in
           let env = LEnv.update_next_from_conts env [C.Continue; C.Next] in
@@ -841,7 +846,7 @@ and stmt_ env pos st =
           let env = LEnv.update_next_from_conts env [C.Break; C.Next] in
           (env, (te1, te2, te3, tb)))
     in
-    (env, Aast.For (te1, te2, te3, tb))
+    (env, Aast.For (te1, Some te2, te3, tb))
   | Switch (((pos, _) as e), cl) ->
     let (env, te, ty) = expr env e in
     (* NB: A 'continue' inside a 'switch' block is equivalent to a 'break'.

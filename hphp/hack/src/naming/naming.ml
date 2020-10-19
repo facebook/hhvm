@@ -1711,13 +1711,13 @@ and using_stmt env has_await e b =
 and for_stmt env e1 e2 e3 b =
   (* The initialization and condition expression should be in the outer scope,
    * as they are always executed. *)
-  let e1 = expr env e1 in
-  let e2 = expr env e2 in
+  let e1 = exprl env e1 in
+  let e2 = oexpr env e2 in
   Env.scope env (fun env ->
       (* The third expression (iteration step) should have the same scope as the
        * block, as it is not always executed. *)
       let b = block ~new_scope:false env b in
-      let e3 = expr env e3 in
+      let e3 = exprl env e3 in
       N.For (e1, e2, e3, b))
 
 and switch_stmt env e cl =

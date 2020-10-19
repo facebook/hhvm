@@ -1284,8 +1284,11 @@ where
         Ok(result)
     }
 
-    fn p_expr_l(node: &Syntax<T, V>, env: &mut Env) -> Result<ast::Expr> {
-        Self::p_expr_l_with_loc(ExprLocation::TopLevel, node, env)
+    fn p_expr_l(node: &Syntax<T, V>, env: &mut Env) -> Result<Vec<ast::Expr>> {
+        let p_expr = |n: &Syntax<T, V>, e: &mut Env| -> Result<ast::Expr> {
+            Self::p_expr_with_loc(ExprLocation::TopLevel, n, e)
+        };
+        Self::could_map(p_expr, node, env)
     }
 
     fn p_expr_l_with_loc(
@@ -2937,7 +2940,7 @@ where
             ForStatement(c) => {
                 let f = |e: &mut Env| -> Result<ast::Stmt> {
                     let ini = Self::p_expr_l(&c.for_initializer, e)?;
-                    let ctr = Self::p_expr_l(&c.for_control, e)?;
+                    let ctr = Self::mp_optional(Self::p_expr, &c.for_control, e)?;
                     let eol = Self::p_expr_l(&c.for_end_of_loop, e)?;
                     let blk = Self::p_block(true, &c.for_body, e)?;
                     Ok(S::new(pos, S_::mk_for(ini, ctr, eol, blk)))

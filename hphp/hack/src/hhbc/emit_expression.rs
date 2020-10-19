@@ -4933,13 +4933,23 @@ fn emit_base_(
     }
 }
 
+pub fn emit_ignored_exprs(
+    emitter: &mut Emitter,
+    env: &Env,
+    pos: &Pos,
+    exprs: &[tast::Expr],
+) -> Result {
+    exprs
+        .iter()
+        .map(|e| emit_ignored_expr(emitter, env, pos, e))
+        .collect::<Result<Vec<_>>>()
+        .map(InstrSeq::gather)
+}
+
 // TODO(hrust): change pos from &Pos to Option<&Pos>, since Pos::make_none() still allocate mem.
 pub fn emit_ignored_expr(emitter: &mut Emitter, env: &Env, pos: &Pos, expr: &tast::Expr) -> Result {
     if let Some(es) = expr.1.as_expr_list() {
-        es.iter()
-            .map(|e| emit_ignored_expr(emitter, env, pos, e))
-            .collect::<Result<Vec<_>>>()
-            .map(InstrSeq::gather)
+        emit_ignored_exprs(emitter, env, pos, es)
     } else {
         Ok(InstrSeq::gather(vec![
             emit_expr(emitter, env, expr)?,

@@ -70,9 +70,9 @@ and ('ex, 'fb, 'en, 'hi) stmt_ =
   | While of ('ex, 'fb, 'en, 'hi) expr * ('ex, 'fb, 'en, 'hi) block
   | Using of ('ex, 'fb, 'en, 'hi) using_stmt
   | For of
-      ('ex, 'fb, 'en, 'hi) expr
-      * ('ex, 'fb, 'en, 'hi) expr
-      * ('ex, 'fb, 'en, 'hi) expr
+      ('ex, 'fb, 'en, 'hi) expr list
+      * ('ex, 'fb, 'en, 'hi) expr option
+      * ('ex, 'fb, 'en, 'hi) expr list
       * ('ex, 'fb, 'en, 'hi) block
   | Switch of ('ex, 'fb, 'en, 'hi) expr * ('ex, 'fb, 'en, 'hi) case list
   (* Dropped the Pos.t option *)

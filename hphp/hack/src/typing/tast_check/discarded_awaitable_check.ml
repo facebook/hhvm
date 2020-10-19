@@ -193,9 +193,9 @@ let visitor =
         this#on_expr (env, disallow_due_to_cast ctx env) e;
         this#on_block (env, ctx) b
       | For (e1, e2, e3, b) ->
-        this#on_expr (env, ctx) e1;
-        this#on_expr (env, disallow_due_to_cast ctx env) e2;
-        this#on_expr (env, ctx) e3;
+        List.iter e1 ~f:(this#on_expr (env, ctx));
+        Option.iter e2 ~f:(this#on_expr (env, disallow_due_to_cast ctx env));
+        List.iter e3 ~f:(this#on_expr (env, ctx));
         this#on_block (env, ctx) b
       | Switch (e, casel) ->
         this#on_expr (env, disallow_awaitable) e;

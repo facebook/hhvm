@@ -418,7 +418,7 @@ module Visitor_DEPRECATED = struct
 
       method on_expr_ : 'a -> expr_ -> 'a
 
-      method on_for : 'a -> expr -> expr -> expr -> block -> 'a
+      method on_for : 'a -> expr list -> expr option -> expr list -> block -> 'a
 
       method on_foreach :
         'a -> expr -> (Pos.t, func_body_ann, unit, unit) as_expr -> block -> 'a
@@ -696,9 +696,15 @@ module Visitor_DEPRECATED = struct
         acc
 
       method on_for acc e1 e2 e3 b =
-        let acc = this#on_expr acc e1 in
-        let acc = this#on_expr acc e2 in
-        let acc = this#on_expr acc e3 in
+        let on_expr_list acc es = List.fold_left es ~f:this#on_expr ~init:acc in
+
+        let acc = on_expr_list acc e1 in
+        let acc = on_expr_list acc e3 in
+        let acc =
+          match e2 with
+          | None -> acc
+          | Some e -> this#on_expr acc e
+        in
         let acc = this#on_block acc b in
         acc
 

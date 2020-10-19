@@ -211,7 +211,7 @@ pub fn emit_stmt(e: &mut Emitter, env: &mut Env, stmt: &tast::Stmt) -> Result {
         a::Stmt_::Break => Ok(emit_break(e, env, pos)),
         a::Stmt_::Continue => Ok(emit_continue(e, env, pos)),
         a::Stmt_::Do(x) => emit_do(e, env, &x.0, &x.1),
-        a::Stmt_::For(x) => emit_for(e, env, pos, &x.0, &x.1, &x.2, &x.3),
+        a::Stmt_::For(x) => emit_for(e, env, &x.0, &x.1, &x.2, &x.3),
         a::Stmt_::Throw(x) => Ok(InstrSeq::gather(vec![
             emit_expr::emit_expr(e, env, x)?,
             emit_pos(pos),
@@ -1349,10 +1349,9 @@ fn emit_while(e: &mut Emitter, env: &mut Env, cond: &tast::Expr, body: &tast::Bl
 fn emit_for(
     e: &mut Emitter,
     env: &mut Env,
-    pos: &Pos,
-    e1: &tast::Expr,
-    e2: &tast::Expr,
-    e3: &tast::Expr,
+    e1: &Vec<tast::Expr>,
+    e2: &Option<tast::Expr>,
+    e3: &Vec<tast::Expr>,
     body: &tast::Block,
 ) -> Result {
     let break_label = e.label_gen_mut().next_regular();
@@ -1361,69 +1360,27 @@ fn emit_for(
     fn emit_cond(
         emitter: &mut Emitter,
         env: &mut Env,
-        pos: &Pos,
         jmpz: bool,
         label: &Label,
-        cond: &tast::Expr,
+        cond: &Option<tast::Expr>,
     ) -> Result {
-        fn final_(
-            emitter: &mut Emitter,
-            env: &mut Env,
-            jmpz: bool,
-            label: &Label,
-            cond: &tast::Expr,
-        ) -> Result {
-            Ok(if jmpz {
-                emit_expr::emit_jmpz(emitter, env, cond, label)
-            } else {
-                emit_expr::emit_jmpnz(emitter, env, cond, label)
-            }?
-            .instrs)
-        }
-        fn expr_list(
-            emitter: &mut Emitter,
-            env: &mut Env,
-            pos: &Pos,
-            jmpz: bool,
-            label: &Label,
-            fst: &tast::Expr,
-            tl: &[tast::Expr],
-        ) -> Result<Vec<InstrSeq>> {
-            match tl.split_first() {
-                None => Ok(vec![final_(
-                    emitter,
-                    env,
-                    jmpz,
-                    label,
-                    &tast::Expr(
-                        Pos::make_none(),
-                        tast::Expr_::mk_expr_list(vec![fst.clone()]),
-                    ),
-                )?]),
-                Some((snd, tl)) => {
-                    let mut res = vec![emit_expr::emit_ignored_expr(emitter, env, pos, fst)?];
-                    res.extend_from_slice(
-                        expr_list(emitter, env, pos, jmpz, label, snd, tl)?.as_slice(),
-                    );
-                    Ok(res)
+        Ok(match cond {
+            None => {
+                if jmpz {
+                    instr::empty()
+                } else {
+                    instr::jmp(label.clone())
                 }
             }
-        }
-        match cond.1.as_expr_list() {
-            Some(es) => Ok(match es.split_first() {
-                None => {
-                    if jmpz {
-                        instr::empty()
-                    } else {
-                        instr::jmp(label.clone())
-                    }
-                }
-                Some((hd, tl)) => {
-                    InstrSeq::gather(expr_list(emitter, env, pos, jmpz, label, hd, tl)?)
-                }
-            }),
-            None => final_(emitter, env, jmpz, label, cond),
-        }
+            Some(cond) => {
+                if jmpz {
+                    emit_expr::emit_jmpz(emitter, env, cond, label)
+                } else {
+                    emit_expr::emit_jmpnz(emitter, env, cond, label)
+                }?
+                .instrs
+            }
+        })
     }
     // TODO: this is bizarre codegen for a "for" loop.
     //  This should be codegen'd as
@@ -1436,8 +1393,8 @@ fn emit_for(
     //  emit_ignored_expr increment;
     //  instr_jmp start_label;
     //  instr_label break_label;
-    let i5 = emit_cond(e, env, pos, false, &start_label, e2)?;
-    let i4 = emit_expr::emit_ignored_expr(e, env, &Pos::make_none(), e3)?;
+    let i5 = emit_cond(e, env, false, &start_label, e2)?;
+    let i4 = emit_expr::emit_ignored_exprs(e, env, &Pos::make_none(), e3)?;
     let i3 = env.do_in_loop_body(
         e,
         break_label.clone(),
@@ -1446,8 +1403,8 @@ fn emit_for(
         body,
         emit_block,
     )?;
-    let i2 = emit_cond(e, env, pos, true, &break_label, e2)?;
-    let i1 = emit_expr::emit_ignored_expr(e, env, &Pos::make_none(), e1)?;
+    let i2 = emit_cond(e, env, true, &break_label, e2)?;
+    let i1 = emit_expr::emit_ignored_exprs(e, env, &Pos::make_none(), e1)?;
     Ok(InstrSeq::gather(vec![
         i1,
         i2,

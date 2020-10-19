@@ -429,7 +429,7 @@ and stmt env acc st =
   | Using us ->
     let acc = expr acc us.us_expr in
     block acc us.us_block
-  | For (e1, _, _, _) -> expr acc e1
+  | For (e1, _, _, _) -> exprl env acc e1
   | Switch (e, cl) ->
     let acc = expr acc e in
     (* Filter out cases that fallthrough *)

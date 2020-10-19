@@ -213,10 +213,16 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
         let b = self#on_block env b in
         Foreach (e, ae, b)
       | For (e1, e2, e3, b) ->
-        let e1 = self#on_expr env e1 in
-        let e2 = self#on_expr env e2 in
+        let on_expr_list env exprs = List.map exprs ~f:(self#on_expr env) in
+
+        let e1 = on_expr_list env e1 in
+        let e2 =
+          match e2 with
+          | Some e2 -> Some (self#on_expr env e2)
+          | None -> None
+        in
         let (env, b) = self#on_block_helper env b in
-        let e3 = self#on_expr env e3 in
+        let e3 = on_expr_list env e3 in
         For (e1, e2, e3, b)
       | Do (b, e) ->
         let (env, b) = self#on_block_helper env b in

@@ -1080,10 +1080,18 @@ impl<'ast, 'a> VisitorMut<'ast> for ClosureConvertVisitor<'a> {
             }
             Stmt_::For(x) => {
                 let (e1, e2, e3, b) = (&mut x.0, &mut x.1, &mut x.2, &mut x.3);
-                self.visit_expr(env, e1)?;
-                self.visit_expr(env, e2)?;
+
+                for e in e1 {
+                    self.visit_expr(env, e)?;
+                }
+                if let Some(e) = e2 {
+                    self.visit_expr(env, e)?;
+                }
                 env.with_in_using(false, |env| visit_mut(self, env, b))?;
-                self.visit_expr(env, e3)
+                for e in e3 {
+                    self.visit_expr(env, e)?;
+                }
+                Ok(())
             }
             Stmt_::Switch(x) => {
                 let (e, cl) = (&mut x.0, &mut x.1);

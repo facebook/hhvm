@@ -2133,54 +2133,13 @@ let do_rageFB (state : state) : RageFB.result Lwt.t =
   in
   let%lwt current_version_and_switch = read_hhconfig_version_and_switch () in
 
-  (* spawn hh rage --rageid <rageid>, and write <rageid> in our own rage output *)
-  let rageid = Random_id.short_string () in
-  let devnull = Unix.openfile Sys_utils.null_path [Unix.O_RDWR] 0 in
-  let rage =
-    try
-      let (_pid : int) =
-        Unix.create_process
-          (Exec_command.to_string Exec_command.Hh)
-          [|
-            Exec_command.to_string Exec_command.Hh;
-            "rage";
-            "--rageid";
-            rageid;
-            "--from";
-            !from;
-            "--desc";
-            "lsp_rage";
-            get_root_exn () |> Path.to_string;
-          |]
-          devnull
-          devnull
-          devnull
-      in
-      Printf.sprintf
-        ( "Detailed hack information can't be included here for technical reasons.\n"
-        ^^ "Please look it up by rageid. (This will take several minutes to be ready.)\n"
-        ^^ "rageid: %s\nlook up rageid: %s\n" )
-        rageid
-        (HackEventLogger.Rage.get_telemetry_url rageid)
-    with e -> Exception.wrap e |> Exception.to_string
-  in
-
-  (* We kicked off a potentially long-running `hh rage` command. What happens if we ourselves
-  die before it has finished? Will it be allowed to finish?
-  Unix behavior is that the worst that can happen is that the rage process gets reparented onto
-  parent pid 1, and its stdin/out/err get closed, and it gets sent SIGHUP. The behavior of
-  hh rage when it receives the `--rageid` argument is to ignore all these things. Hence it
-  will run to completion. *)
-
   (* that's it! *)
   let data =
     Printf.sprintf
       ( "%s\n\n"
-      ^^ "%s\n\n"
       ^^ "version previously read from .hhconfig and switch: %s\n"
       ^^ "version in .hhconfig and switch: %s\n\n"
       ^^ "clientLsp belief of hh_server_state:\n%s\n" )
-      rage
       (state_to_rage state)
       !hhconfig_version_and_switch
       current_version_and_switch

@@ -513,22 +513,21 @@ void emitAddElemC(IRGS& env) {
   auto const kt = topC(env, BCSPRelOffset{1}, DataTypeGeneric)->type();
   auto const at = topC(env, BCSPRelOffset{2}, DataTypeGeneric)->type();
 
-  if (!at.subtypeOfAny(TArr, TDict)) {
+  // This operation is not defined for TKeyset, TVec, and TVArr
+  if (!at.subtypeOfAny(TDict, TDArr)) {
     PUNT(AddElemC-BadArr);
   } else if (!kt.subtypeOfAny(TInt, TStr, TCls, TLazyCls)) {
-    auto const type = (at <= TArr) ? TArr : TDict;
-    interpOne(env, type, 3);
+    interpOne(env, at.unspecialize(), 3);
     return;
   }
 
-  // VecSet and DictSet teleport the value from the stack into the base,
-  // and they dec-ref the old base on copy / escalation, so we only need to
-  // to do refcount ops on the key.
-  auto const op = at.subtypeOfAny(TDict, TDArr) ? DictSet : VecSet;
+  // DictSet teleports the value from the stack into the base, and dec-refs the
+  // old base on copy / escalation, so we only need to to do refcount ops on
+  // the key.
   auto const val = popC(env, DataTypeGeneric);
   auto const key = convertClassKey(env, popC(env));
   auto const arr = popC(env);
-  push(env, gen(env, op, arr, key, val));
+  push(env, gen(env, DictSet, arr, key, val));
   decRef(env, key);
 }
 

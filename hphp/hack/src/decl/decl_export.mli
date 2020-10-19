@@ -7,8 +7,8 @@
  *
  *)
 
-type saved_decls [@@deriving show]
+type saved_legacy_decls [@@deriving show]
 
-val export_class_decls : Provider_context.t -> SSet.t -> saved_decls
+val collect_legacy_decls : Provider_context.t -> SSet.t -> saved_legacy_decls
 
-val import_class_decls : saved_decls -> SSet.t
+val restore_legacy_decls : saved_legacy_decls -> int

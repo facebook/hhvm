@@ -19,7 +19,7 @@ module CEKMap = struct
   let pp ppd = make_pp (fun fmt (c, m) -> Format.fprintf fmt "(%S, %S)" c m) ppd
 end
 
-type saved_decls = {
+type saved_legacy_decls = {
   classes: decl_class_type SMap.t;
   props: decl_ty CEKMap.t;
   sprops: decl_ty CEKMap.t;
@@ -31,7 +31,7 @@ type saved_decls = {
 }
 [@@deriving show]
 
-let empty_decls =
+let empty_legacy_decls =
   {
     classes = SMap.empty;
     props = CEKMap.empty;
@@ -46,12 +46,12 @@ let empty_decls =
 let keys_to_sset smap =
   SMap.fold smap ~init:SSet.empty ~f:(fun k _ s -> SSet.add s k)
 
-let rec collect_class
+let rec collect_legacy_class
     ?(fail_if_missing = false)
     (ctx : Provider_context.t)
     (requested_classes : SSet.t)
     (cid : string)
-    (decls : saved_decls) : saved_decls =
+    (decls : saved_legacy_decls) : saved_legacy_decls =
   if SMap.mem decls.classes cid then
     decls
   else
@@ -78,7 +78,12 @@ let rec collect_class
             let (_ : Decl_defs.decl_class_type option) =
               Decl.declare_class_in_file ~sh:SharedMem.Uses ctx filename cid
             in
-            collect_class ctx requested_classes cid decls ~fail_if_missing:true
+            collect_legacy_class
+              ctx
+              requested_classes
+              cid
+              decls
+              ~fail_if_missing:true
         with
         | Exit
         | Decl_not_found _ ->
@@ -170,12 +175,12 @@ let rec collect_class
         |> SSet.union data.dc_xhp_attr_deps
         |> SSet.union data.dc_req_ancestors_extends
       in
-      collect_classes ctx requested_classes decls ancestors
+      collect_legacy_classes ctx requested_classes decls ancestors
 
-and collect_classes ctx requested_classes decls =
-  SSet.fold ~init:decls ~f:(collect_class ctx requested_classes)
+and collect_legacy_classes ctx requested_classes decls =
+  SSet.fold ~init:decls ~f:(collect_legacy_class ctx requested_classes)
 
-let restore_decls decls =
+let restore_legacy_decls decls =
   let { classes; props; sprops; meths; smeths; cstrs; fixmes; decl_fixmes } =
     decls
   in
@@ -186,11 +191,9 @@ let restore_decls decls =
   CEKMap.iter smeths StaticMethods.add;
   SMap.iter cstrs Constructors.add;
   Relative_path.Map.iter fixmes Fixme_provider.provide_hh_fixmes;
-  Relative_path.Map.iter decl_fixmes Fixme_provider.provide_decl_hh_fixmes
+  Relative_path.Map.iter decl_fixmes Fixme_provider.provide_decl_hh_fixmes;
+  (* return the number of classes that we restored *)
+  SMap.cardinal classes
 
-let export_class_decls ctx classes =
-  collect_classes ctx classes empty_decls classes
-
-let import_class_decls decls =
-  restore_decls decls;
-  keys_to_sset decls.classes
+let collect_legacy_decls ctx classes =
+  collect_legacy_classes ctx classes empty_legacy_decls classes

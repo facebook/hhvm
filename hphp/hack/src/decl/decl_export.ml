@@ -8,19 +8,17 @@
  *)
 
 open Hh_prelude
-open Decl_defs
-open Decl_heap
 open Reordered_argument_collections
 open Typing_defs
 
 module CEKMap = struct
-  include Reordered_argument_map (WrappedMap.Make (ClassEltKey))
+  include Reordered_argument_map (WrappedMap.Make (Decl_heap.ClassEltKey))
 
   let pp ppd = make_pp (fun fmt (c, m) -> Format.fprintf fmt "(%S, %S)" c m) ppd
 end
 
 type saved_legacy_decls = {
-  classes: decl_class_type SMap.t;
+  classes: Decl_defs.decl_class_type SMap.t;
   props: decl_ty CEKMap.t;
   sprops: decl_ty CEKMap.t;
   meths: fun_elt CEKMap.t;
@@ -52,6 +50,7 @@ let rec collect_legacy_class
     (requested_classes : SSet.t)
     (cid : string)
     (decls : saved_legacy_decls) : saved_legacy_decls =
+  let open Decl_defs in
   if SMap.mem decls.classes cid then
     decls
   else
@@ -61,7 +60,7 @@ let rec collect_legacy_class
       else
         "ancestor"
     in
-    match Classes.get cid with
+    match Decl_heap.Classes.get cid with
     | None ->
       if fail_if_missing then
         failwith @@ "Missing " ^ kind ^ " class " ^ cid ^ " after declaration"
@@ -86,12 +85,12 @@ let rec collect_legacy_class
               ~fail_if_missing:true
         with
         | Exit
-        | Decl_not_found _ ->
+        | Decl_defs.Decl_not_found _ ->
           if not @@ SSet.mem requested_classes cid then
             failwith @@ "Missing ancestor class " ^ cid
           else (
             Hh_logger.log "Missing requested class %s" cid;
-            if Typedefs.mem cid then
+            if Decl_heap.Typedefs.mem cid then
               Hh_logger.log "(It may have been changed to a typedef)"
             else
               Hh_logger.log "(It may have been renamed or deleted)";
@@ -109,25 +108,25 @@ let rec collect_legacy_class
       let collect_elts elts init f = SMap.fold elts ~init ~f:(collect_elt f) in
       let decls =
         collect_elts data.dc_props decls @@ fun decls cid mid ->
-        match Props.get (cid, mid) with
+        match Decl_heap.Props.get (cid, mid) with
         | None -> failwith @@ "Missing property " ^ cid ^ "::" ^ mid
         | Some x -> { decls with props = CEKMap.add decls.props (cid, mid) x }
       in
       let decls =
         collect_elts data.dc_sprops decls @@ fun decls cid mid ->
-        match StaticProps.get (cid, mid) with
+        match Decl_heap.StaticProps.get (cid, mid) with
         | None -> failwith @@ "Missing static property " ^ cid ^ "::" ^ mid
         | Some x -> { decls with sprops = CEKMap.add decls.sprops (cid, mid) x }
       in
       let decls =
         collect_elts data.dc_methods decls @@ fun decls cid mid ->
-        match Methods.get (cid, mid) with
+        match Decl_heap.Methods.get (cid, mid) with
         | None -> failwith @@ "Missing method " ^ cid ^ "::" ^ mid
         | Some x -> { decls with meths = CEKMap.add decls.meths (cid, mid) x }
       in
       let decls =
         collect_elts data.dc_smethods decls @@ fun decls cid mid ->
-        match StaticMethods.get (cid, mid) with
+        match Decl_heap.StaticMethods.get (cid, mid) with
         | None -> failwith @@ "Missing static method " ^ cid ^ "::" ^ mid
         | Some x -> { decls with smeths = CEKMap.add decls.smeths (cid, mid) x }
       in
@@ -137,7 +136,7 @@ let rec collect_legacy_class
                if String.( <> ) cid elt_origin then
                  decls
                else
-                 match Constructors.get cid with
+                 match Decl_heap.Constructors.get cid with
                  | None -> failwith @@ "Missing constructor " ^ cid
                  | Some x -> { decls with cstrs = SMap.add decls.cstrs cid x })
       in
@@ -184,12 +183,12 @@ let restore_legacy_decls decls =
   let { classes; props; sprops; meths; smeths; cstrs; fixmes; decl_fixmes } =
     decls
   in
-  SMap.iter classes Classes.add;
-  CEKMap.iter props Props.add;
-  CEKMap.iter sprops StaticProps.add;
-  CEKMap.iter meths Methods.add;
-  CEKMap.iter smeths StaticMethods.add;
-  SMap.iter cstrs Constructors.add;
+  SMap.iter classes Decl_heap.Classes.add;
+  CEKMap.iter props Decl_heap.Props.add;
+  CEKMap.iter sprops Decl_heap.StaticProps.add;
+  CEKMap.iter meths Decl_heap.Methods.add;
+  CEKMap.iter smeths Decl_heap.StaticMethods.add;
+  SMap.iter cstrs Decl_heap.Constructors.add;
   Relative_path.Map.iter fixmes Fixme_provider.provide_hh_fixmes;
   Relative_path.Map.iter decl_fixmes Fixme_provider.provide_decl_hh_fixmes;
   (* return the number of classes that we restored *)

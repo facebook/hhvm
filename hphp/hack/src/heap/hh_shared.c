@@ -1898,7 +1898,7 @@ CAMLprim value get_hash_ocaml(value key) {
 static value write_at(unsigned int slot, value data) {
   CAMLparam1(data);
   CAMLlocal1(result);
-  result = caml_alloc_tuple(2);
+  result = caml_alloc_tuple(3);
   // Try to write in a value to indicate that the data is being written.
   if(
      __sync_bool_compare_and_swap(

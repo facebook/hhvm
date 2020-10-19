@@ -139,7 +139,8 @@ let get_hot_classes (filename : string) : SSet.t =
     |> List.map ~f:Hh_json.get_string_exn
     |> SSet.of_list
 
-let dump_class_decls ctx ~base_filename =
+let dump_class_decls genv env ~base_filename =
+  let ctx = Provider_utils.ctx_from_server_env env in
   let start_t = Unix.gettimeofday () in
   let hot_classes_filename = get_hot_classes_filename () in
   Hh_logger.log
@@ -151,7 +152,9 @@ let dump_class_decls ctx ~base_filename =
     let t1 = Unix.gettimeofday () in
     let legacy_decls = Decl_export.collect_legacy_decls ctx classes in
     let t2 = Unix.gettimeofday () in
-    let shallow_decls = Decl_export.collect_shallow_decls ctx classes in
+    let shallow_decls =
+      Decl_export.collect_shallow_decls ctx genv.ServerEnv.workers classes
+    in
     let t3 = Unix.gettimeofday () in
     save_contents (get_legacy_decls_filename base_filename) legacy_decls;
     save_contents (get_shallow_decls_filename base_filename) shallow_decls;
@@ -177,7 +180,8 @@ let dump_class_decls ctx ~base_filename =
 and hot class decls. *)
 let dump_naming_errors_decls
     ~(save_decls : bool)
-    (ctx : Provider_context.t)
+    (genv : ServerEnv.genv)
+    (env : ServerEnv.env)
     (output_filename : string)
     (naming_table : Naming_table.t)
     (errors : Errors.t) : unit =
@@ -204,10 +208,11 @@ let dump_naming_errors_decls
     in
     save_contents (get_errors_filename output_filename) errors_in_phases );
 
-  if save_decls then dump_class_decls ctx ~base_filename:output_filename
+  if save_decls then dump_class_decls genv env ~base_filename:output_filename
 
 let update_save_state
     ~(save_decls : bool)
+    (genv : ServerEnv.genv)
     (env : ServerEnv.env)
     (output_filename : string)
     (replace_state_after_saving : bool) : save_state_result =
@@ -217,8 +222,13 @@ let update_save_state
     failwith "Given existing save state SQL file missing";
   let naming_table = env.ServerEnv.naming_table in
   let errors = env.ServerEnv.errorl in
-  let ctx = Provider_utils.ctx_from_server_env env in
-  dump_naming_errors_decls ~save_decls ctx output_filename naming_table errors;
+  dump_naming_errors_decls
+    ~save_decls
+    genv
+    env
+    output_filename
+    naming_table
+    errors;
   let dep_table_edges_added =
     SharedMem.update_dep_table_sqlite
       db_name
@@ -233,6 +243,7 @@ let update_save_state
 * edges dumped into the database. *)
 let save_state
     ~(save_decls : bool)
+    (genv : ServerEnv.genv)
     (env : ServerEnv.env)
     (output_filename : string)
     ~(replace_state_after_saving : bool) : save_state_result =
@@ -256,8 +267,13 @@ let save_state
     let naming_table = env.ServerEnv.naming_table in
     let errors = env.ServerEnv.errorl in
     let t = Unix.gettimeofday () in
-    let ctx = Provider_utils.ctx_from_server_env env in
-    dump_naming_errors_decls ~save_decls ctx output_filename naming_table errors;
+    dump_naming_errors_decls
+      ~save_decls
+      genv
+      env
+      output_filename
+      naming_table
+      errors;
 
     let dep_table_edges_added =
       SharedMem.save_dep_table_sqlite
@@ -277,7 +293,12 @@ let save_state
     let (_ : float) =
       Hh_logger.log_duration "Made disk copy of loaded saved state. Took" t
     in
-    update_save_state ~save_decls env output_filename replace_state_after_saving
+    update_save_state
+      ~save_decls
+      genv
+      env
+      output_filename
+      replace_state_after_saving
 
 let get_in_memory_dep_table_entry_count () : (int, string) result =
   Utils.try_with_stack (fun () ->
@@ -306,9 +327,15 @@ let go_naming (naming_table : Naming_table.t) (output_filename : string) :
 (* TODO: write some other stats, e.g., the number of names, the number of errors, etc. *)
 let go
     ~(save_decls : bool)
+    (genv : ServerEnv.genv)
     (env : ServerEnv.env)
     (output_filename : string)
     ~(replace_state_after_saving : bool) : (save_state_result, string) result =
   Utils.try_with_stack (fun () ->
-      save_state ~save_decls env output_filename ~replace_state_after_saving)
+      save_state
+        ~save_decls
+        genv
+        env
+        output_filename
+        ~replace_state_after_saving)
   |> Result.map_error ~f:(fun (exn, _stack) -> Exn.to_string exn)

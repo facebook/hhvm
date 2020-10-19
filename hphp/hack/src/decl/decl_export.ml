@@ -200,7 +200,7 @@ let collect_legacy_decls ctx classes =
 type saved_shallow_decls = { classes: Shallow_decl_defs.shallow_class SMap.t }
 [@@deriving show]
 
-let collect_shallow_decls ctx classes =
+let collect_shallow_decls ctx _workers classes =
   (* We're only going to fetch the shallow-decls that were explicitly listed;
   we won't look for ancestors. *)
   let classes =

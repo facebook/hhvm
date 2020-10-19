@@ -73,6 +73,7 @@ let save_state
     let result =
       SaveStateService.save_state
         ~save_decls
+        genv
         env
         output_filename
         ~replace_state_after_saving

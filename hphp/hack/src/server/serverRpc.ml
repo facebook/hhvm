@@ -318,8 +318,12 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         genv.local_config.ServerLocalConfig.store_decls_in_saved_state
       in
       ( env,
-        SaveStateService.go ~save_decls env filename ~replace_state_after_saving
-      )
+        SaveStateService.go
+          ~save_decls
+          genv
+          env
+          filename
+          ~replace_state_after_saving )
     else
       (env, Error "There are typecheck errors; cannot generate saved state.")
   | SEARCH (query, type_) ->

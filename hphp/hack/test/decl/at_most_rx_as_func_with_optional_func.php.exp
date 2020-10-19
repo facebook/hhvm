@@ -54,7 +54,8 @@ Parsed decls:
                          ft_flags =
                          (make_ft_flags FSync None ~return_disposable:false
                            ~returns_mutable:false ~returns_void_to_rx:false);
-                         ft_reactive = RxVar {} }))))
+                         ft_reactive = RxVar {};
+                         ft_ifc_decl = FDPolicied {#PUBLIC} }))))
                };
               fp_flags =
               (make_fp_flags ~mutability:None ~accept_disposable:false
@@ -75,7 +76,7 @@ Parsed decls:
           ft_flags =
           (make_ft_flags FSync None ~return_disposable:false
             ~returns_mutable:false ~returns_void_to_rx:false);
-          ft_reactive = Reactive {} }));
+          ft_reactive = Reactive {}; ft_ifc_decl = FDPolicied {#PUBLIC} }));
     fe_pos = [4:10-11]; fe_php_std_lib = false } }; typedefs = {};
 consts = {}
 }

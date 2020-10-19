@@ -146,6 +146,7 @@ let transform_special_fun_ty fty id nargs =
                      };
                    ft_flags = fty.ft_flags;
                    ft_reactive = fty.ft_reactive;
+                   ft_ifc_decl = fty.ft_ifc_decl;
                  } ))
       in
       let param_rest =

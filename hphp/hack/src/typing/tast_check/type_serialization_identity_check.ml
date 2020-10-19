@@ -73,6 +73,7 @@ let rec strip_ty ty =
           ft_where_constraints = [];
           ft_flags = 0;
           ft_reactive = Nonreactive;
+          ft_ifc_decl = default_ifc_fun_decl;
         }
     | Tshape (shape_kind, shape_fields) ->
       let strip_field { sft_optional; sft_ty } =

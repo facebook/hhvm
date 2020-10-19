@@ -52,7 +52,7 @@ Parsed decls:
           ft_flags =
           (make_ft_flags FSync None ~return_disposable:false
             ~returns_mutable:false ~returns_void_to_rx:false);
-          ft_reactive = Nonreactive }));
+          ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {#PUBLIC} }));
       sm_visibility = Public; sm_deprecated = None };
       { Shallow_decl_defs.sm_abstract = false; sm_final = false;
         sm_memoizelsb = false; sm_name = ([8:19-20], "g");
@@ -96,7 +96,7 @@ Parsed decls:
          ft_flags =
          (make_ft_flags FSync None ~return_disposable:false
            ~returns_mutable:false ~returns_void_to_rx:false);
-         ft_reactive = Nonreactive }));
+         ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {#PUBLIC} }));
     sm_visibility = Public; sm_deprecated = None }
     ];
   sc_user_attributes = []; sc_enum_type = None } }; funs = {}; typedefs = {};

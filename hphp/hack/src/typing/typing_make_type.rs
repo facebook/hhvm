@@ -401,6 +401,7 @@ impl<'a> TypeBuilder<'a> {
             where_constraints: &[],
             reactive: Reactivity::Nonreactive,
             flags: FunTypeFlags::empty(),
+            ifc_decl: IfcFunDecl::FDPolicied(Some("#PUBLIC")),
         })
     }
 }

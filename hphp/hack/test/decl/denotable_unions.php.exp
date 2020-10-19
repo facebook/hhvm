@@ -61,7 +61,7 @@ Parsed decls:
             ft_flags =
             (make_ft_flags FSync None ~return_disposable:false
               ~returns_mutable:false ~returns_void_to_rx:false);
-            ft_reactive = Nonreactive }));
+            ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {#PUBLIC} }));
       fe_pos = [9:10-11]; fe_php_std_lib = false };
     "\\g" ->
     { Typing_defs.fe_deprecated = None;
@@ -102,7 +102,7 @@ Parsed decls:
             ft_flags =
             (make_ft_flags FSync None ~return_disposable:false
               ~returns_mutable:false ~returns_void_to_rx:false);
-            ft_reactive = Nonreactive }));
+            ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {#PUBLIC} }));
       fe_pos = [10:10-11]; fe_php_std_lib = false } };
   typedefs = {}; consts = {} }
 

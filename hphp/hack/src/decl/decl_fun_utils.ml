@@ -29,16 +29,16 @@ let condition_type_from_attributes env user_attributes =
   Naming_attributes.find SN.UserAttributes.uaOnlyRxIfImpl user_attributes
   |> Option.map ~f:(conditionally_reactive_attribute_to_hint env)
 
+let get_classname_or_literal_attribute_param = function
+  | [(_, String s)] -> Some s
+  | [(_, Class_const ((_, CI (_, s)), (_, name)))]
+    when String.equal name SN.Members.mClass ->
+    Some s
+  | _ -> None
+
 let fun_reactivity_opt env user_attributes =
   let module UA = SN.UserAttributes in
   let rx_condition = condition_type_from_attributes env user_attributes in
-  let get_cipp_param = function
-    | [(_, String s)] -> Some s
-    | [(_, Class_const ((_, CI (_, s)), (_, name)))]
-      when String.equal name SN.Members.mClass ->
-      Some s
-    | _ -> None
-  in
   let rec go = function
     | [] -> None
     | { Aast.ua_name = (_, n); ua_params } :: tl ->
@@ -53,9 +53,9 @@ let fun_reactivity_opt env user_attributes =
       else if String.equal n UA.uaNonRx then
         Some Nonreactive
       else if String.equal n UA.uaCipp then
-        Some (Cipp (get_cipp_param ua_params))
+        Some (Cipp (get_classname_or_literal_attribute_param ua_params))
       else if String.equal n UA.uaCippLocal then
-        Some (CippLocal (get_cipp_param ua_params))
+        Some (CippLocal (get_classname_or_literal_attribute_param ua_params))
       else if String.equal n UA.uaCippGlobal then
         Some CippGlobal
       else if String.equal n UA.uaCippRx then
@@ -67,6 +67,14 @@ let fun_reactivity_opt env user_attributes =
 
 let fun_reactivity env user_attributes =
   fun_reactivity_opt env user_attributes |> Option.value ~default:Nonreactive
+
+let find_policied_attribute user_attributes : ifc_fun_decl =
+  match Naming_attributes.find SN.UserAttributes.uaPolicied user_attributes with
+  | Some { ua_params; _ } ->
+    (match get_classname_or_literal_attribute_param ua_params with
+    | Some s -> FDPolicied (Some s)
+    | None -> FDPolicied None)
+  | None -> default_ifc_fun_decl
 
 let has_accept_disposable_attribute user_attributes =
   Naming_attributes.mem SN.UserAttributes.uaAcceptDisposable user_attributes

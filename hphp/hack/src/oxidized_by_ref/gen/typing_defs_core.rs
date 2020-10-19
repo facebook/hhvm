@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<199b4da64021c782302f7e6e8c10614f>>
+// @generated SignedSource<<71635f1c3be905b13bc9f68c7addef4c>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -40,6 +40,25 @@ pub enum CeVisibility<'a> {
     Vprotected(&'a str),
 }
 impl<'a> TrivialDrop for CeVisibility<'a> {}
+
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+pub enum IfcFunDecl<'a> {
+    FDPolicied(Option<&'a str>),
+}
+impl<'a> TrivialDrop for IfcFunDecl<'a> {}
 
 #[derive(
     Clone,
@@ -626,6 +645,7 @@ pub struct FunType<'a> {
     pub ret: &'a PossiblyEnforcedTy<'a>,
     pub reactive: Reactivity<'a>,
     pub flags: typing_defs_flags::FunTypeFlags,
+    pub ifc_decl: IfcFunDecl<'a>,
 }
 impl<'a> TrivialDrop for FunType<'a> {}
 

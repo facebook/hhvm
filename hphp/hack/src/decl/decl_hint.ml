@@ -145,6 +145,8 @@ and hint_ p env = function
             ~returns_void_to_rx:false
             ~returns_mutable:mut_ret;
         ft_reactive = reactivity;
+        (* TODO: handle function parameters with <<CanCall>> *)
+        ft_ifc_decl = default_ifc_fun_decl;
       }
   | Happly (((_p, c) as id), argl) ->
     Decl_env.add_wclass env c;

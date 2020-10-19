@@ -111,6 +111,7 @@ typing_defs_core::DestructureKind
 typing_defs_core::Exact
 typing_defs_core::FunArity
 typing_defs_core::FunTparamsKind
+typing_defs_core::IfcFunDecl
 typing_defs_core::InternalType
 typing_defs_core::ParamMode
 typing_defs_core::ParamMutability

@@ -32,7 +32,7 @@ Parsed decls:
                ft_flags =
                (make_ft_flags FSync None ~return_disposable:false
                  ~returns_mutable:false ~returns_void_to_rx:false);
-               ft_reactive = Cipp {\C} }));
+               ft_reactive = Cipp {\C}; ft_ifc_decl = FDPolicied {#PUBLIC} }));
          sm_visibility = Public; sm_deprecated = None };
         { Shallow_decl_defs.sm_abstract = false; sm_final = false;
           sm_memoizelsb = false; sm_name = ([8:19-37], "cipp_global_method");
@@ -57,7 +57,8 @@ Parsed decls:
                 ft_flags =
                 (make_ft_flags FSync None ~return_disposable:false
                   ~returns_mutable:false ~returns_void_to_rx:false);
-                ft_reactive = CippGlobal }));
+                ft_reactive = CippGlobal; ft_ifc_decl = FDPolicied {#PUBLIC}
+                }));
           sm_visibility = Public; sm_deprecated = None };
         { Shallow_decl_defs.sm_abstract = false; sm_final = false;
           sm_memoizelsb = false; sm_name = ([11:19-36], "cipp_local_method");
@@ -82,7 +83,8 @@ Parsed decls:
                 ft_flags =
                 (make_ft_flags FSync None ~return_disposable:false
                   ~returns_mutable:false ~returns_void_to_rx:false);
-                ft_reactive = CippLocal {a} }));
+                ft_reactive = CippLocal {a};
+                ft_ifc_decl = FDPolicied {#PUBLIC} }));
           sm_visibility = Public; sm_deprecated = None };
         { Shallow_decl_defs.sm_abstract = false; sm_final = false;
           sm_memoizelsb = false; sm_name = ([14:19-33], "cipp_rx_method");
@@ -107,7 +109,7 @@ Parsed decls:
                 ft_flags =
                 (make_ft_flags FSync None ~return_disposable:false
                   ~returns_mutable:false ~returns_void_to_rx:false);
-                ft_reactive = CippRx }));
+                ft_reactive = CippRx; ft_ifc_decl = FDPolicied {#PUBLIC} }));
           sm_visibility = Public; sm_deprecated = None }
         ];
       sc_user_attributes = []; sc_enum_type = None } };
@@ -131,7 +133,7 @@ Parsed decls:
             ft_flags =
             (make_ft_flags FSync None ~return_disposable:false
               ~returns_mutable:false ~returns_void_to_rx:false);
-            ft_reactive = Cipp {b} }));
+            ft_reactive = Cipp {b}; ft_ifc_decl = FDPolicied {#PUBLIC} }));
       fe_pos = [18:10-23]; fe_php_std_lib = false };
     "\\cipp_global_function" ->
     { Typing_defs.fe_deprecated = None;
@@ -152,7 +154,7 @@ Parsed decls:
             ft_flags =
             (make_ft_flags FSync None ~return_disposable:false
               ~returns_mutable:false ~returns_void_to_rx:false);
-            ft_reactive = CippGlobal }));
+            ft_reactive = CippGlobal; ft_ifc_decl = FDPolicied {#PUBLIC} }));
       fe_pos = [21:10-30]; fe_php_std_lib = false };
     "\\cipp_local_function" ->
     { Typing_defs.fe_deprecated = None;
@@ -173,7 +175,8 @@ Parsed decls:
             ft_flags =
             (make_ft_flags FSync None ~return_disposable:false
               ~returns_mutable:false ~returns_void_to_rx:false);
-            ft_reactive = CippLocal {\C} }));
+            ft_reactive = CippLocal {\C}; ft_ifc_decl = FDPolicied {#PUBLIC}
+            }));
       fe_pos = [24:10-29]; fe_php_std_lib = false };
     "\\cipp_rx_function" ->
     { Typing_defs.fe_deprecated = None;
@@ -194,7 +197,7 @@ Parsed decls:
             ft_flags =
             (make_ft_flags FSync None ~return_disposable:false
               ~returns_mutable:false ~returns_void_to_rx:false);
-            ft_reactive = CippRx }));
+            ft_reactive = CippRx; ft_ifc_decl = FDPolicied {#PUBLIC} }));
       fe_pos = [27:10-26]; fe_php_std_lib = false } };
   typedefs = {}; consts = {} }
 

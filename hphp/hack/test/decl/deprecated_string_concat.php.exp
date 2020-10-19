@@ -24,7 +24,7 @@ Parsed decls:
             ft_flags =
             (make_ft_flags FSync None ~return_disposable:false
               ~returns_mutable:false ~returns_void_to_rx:false);
-            ft_reactive = Nonreactive }));
+            ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {#PUBLIC} }));
       fe_pos = [7:10-22]; fe_php_std_lib = false };
     "\\heredoc" ->
     { Typing_defs.fe_deprecated =
@@ -48,7 +48,7 @@ Parsed decls:
             ft_flags =
             (make_ft_flags FSync None ~return_disposable:false
               ~returns_mutable:false ~returns_void_to_rx:false);
-            ft_reactive = Nonreactive }));
+            ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {#PUBLIC} }));
       fe_pos = [19:10-17]; fe_php_std_lib = false };
     "\\nowdoc" ->
     { Typing_defs.fe_deprecated =
@@ -72,7 +72,7 @@ Parsed decls:
             ft_flags =
             (make_ft_flags FSync None ~return_disposable:false
               ~returns_mutable:false ~returns_void_to_rx:false);
-            ft_reactive = Nonreactive }));
+            ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {#PUBLIC} }));
       fe_pos = [25:10-16]; fe_php_std_lib = false };
     "\\singledouble" ->
     { Typing_defs.fe_deprecated =
@@ -96,7 +96,7 @@ Parsed decls:
             ft_flags =
             (make_ft_flags FSync None ~return_disposable:false
               ~returns_mutable:false ~returns_void_to_rx:false);
-            ft_reactive = Nonreactive }));
+            ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {#PUBLIC} }));
       fe_pos = [10:10-22]; fe_php_std_lib = false };
     "\\singledoublesingle" ->
     { Typing_defs.fe_deprecated =
@@ -120,7 +120,7 @@ Parsed decls:
             ft_flags =
             (make_ft_flags FSync None ~return_disposable:false
               ~returns_mutable:false ~returns_void_to_rx:false);
-            ft_reactive = Nonreactive }));
+            ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {#PUBLIC} }));
       fe_pos = [13:10-28]; fe_php_std_lib = false };
     "\\singlesingle" ->
     { Typing_defs.fe_deprecated =
@@ -144,7 +144,7 @@ Parsed decls:
             ft_flags =
             (make_ft_flags FSync None ~return_disposable:false
               ~returns_mutable:false ~returns_void_to_rx:false);
-            ft_reactive = Nonreactive }));
+            ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {#PUBLIC} }));
       fe_pos = [4:10-22]; fe_php_std_lib = false } };
   typedefs = {}; consts = {} }
 

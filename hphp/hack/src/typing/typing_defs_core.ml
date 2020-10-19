@@ -17,6 +17,12 @@ type ce_visibility =
   | Vprotected of string
 [@@deriving eq, show]
 
+(* Represents <<Policied()>> attribute *)
+type ifc_fun_decl = FDPolicied of string option
+
+(* The default policy is the public one, use a # to prevent class collisions *)
+let default_ifc_fun_decl = FDPolicied (Some "#PUBLIC")
+
 type exact =
   | Exact
   | Nonexact
@@ -357,6 +363,7 @@ and 'ty fun_type = {
       (** Carries through the sync/async information from the aast *)
   ft_reactive: reactivity;
   ft_flags: Typing_defs_flags.fun_type_flags;
+  ft_ifc_decl: ifc_fun_decl;
 }
 
 (** Arity information for a fun_type; indicating the minimum number of
@@ -811,6 +818,15 @@ module Pp = struct
     Format.fprintf fmt "@]";
     Format.fprintf fmt "@ }@]"
 
+  and pp_ifc_fun_decl : Format.formatter -> ifc_fun_decl -> unit =
+   fun fmt r ->
+    match r with
+    | FDPolicied None -> Format.pp_print_string fmt "FDPolicied {}"
+    | FDPolicied (Some s) ->
+      Format.pp_print_string fmt "FDPolicied {";
+      Format.pp_print_string fmt s;
+      Format.pp_print_string fmt "}"
+
   and pp_fun_type : type a. Format.formatter -> a ty fun_type -> unit =
    fun fmt x ->
     Format.fprintf fmt "@[<2>{ ";
@@ -903,6 +919,11 @@ module Pp = struct
 
     Format.fprintf fmt "@[%s =@ " "ft_reactive";
     pp_reactivity fmt x.ft_reactive;
+    Format.fprintf fmt "@]";
+    Format.fprintf fmt ";@ ";
+
+    Format.fprintf fmt "@[%s =@ " "ft_ifc_decl";
+    pp_ifc_fun_decl fmt x.ft_ifc_decl;
     Format.fprintf fmt "@]";
 
     Format.fprintf fmt "@ }@]"

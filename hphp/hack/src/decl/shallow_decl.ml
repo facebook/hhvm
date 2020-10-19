@@ -172,6 +172,7 @@ let method_type env m =
   check_params m.m_params;
   let reactivity = fun_reactivity env m.m_user_attributes in
   let mut = get_param_mutability m.m_user_attributes in
+  let ifc_decl = find_policied_attribute m.m_user_attributes in
   let returns_mutable = fun_returns_mutable m.m_user_attributes in
   let returns_void_to_rx = fun_returns_void_to_rx m.m_user_attributes in
   let return_disposable = has_return_disposable_attribute m.m_user_attributes in
@@ -221,6 +222,7 @@ let method_type env m =
         ~returns_mutable
         ~return_disposable
         ~returns_void_to_rx;
+    ft_ifc_decl = ifc_decl;
   }
 
 let method_ env m =

@@ -16,6 +16,11 @@ type ce_visibility =
   | Vprotected of string
 [@@deriving eq, show]
 
+(* Represents <<Policied()>> attribute *)
+type ifc_fun_decl = FDPolicied of string option
+
+val default_ifc_fun_decl : ifc_fun_decl
+
 type exact =
   | Exact
   | Nonexact
@@ -355,6 +360,7 @@ and 'ty fun_type = {
   ft_reactive: reactivity;
   (* Carries through the sync/async information from the aast *)
   ft_flags: int;
+  ft_ifc_decl: ifc_fun_decl;
 }
 
 (* Arity information for a fun_type; indicating the minimum number of
@@ -485,6 +491,8 @@ module Pp : sig
   val show_locl_ty : locl_ty -> string
 
   val show_reactivity : reactivity -> string
+
+  val pp_ifc_fun_decl : Format.formatter -> ifc_fun_decl -> unit
 end
 
 include module type of Pp

@@ -1794,6 +1794,7 @@ and expr_
             (* propagate 'is_coroutine' from the method being called*)
             ft_flags = fty.ft_flags;
             ft_reactive = fty.ft_reactive;
+            ft_ifc_decl = fty.ft_ifc_decl;
           }
         in
         make_result
@@ -2882,6 +2883,9 @@ and expr_
               let env =
                 Env.set_tyvar_variance env (mk (Reason.Rnone, Tfun declared_ft))
               in
+              (* TODO(jjwu): the declared_ft here is set to public,
+                but is actually inferred from the surrounding context
+                (don't think this matters in practice, since we check lambdas separately) *)
               check_body_under_known_params
                 env
                 ~ret_ty:declared_ft.ft_ret.et_type
@@ -5034,6 +5038,7 @@ and dispatch_call
               ft_ret = { et_enforced = false; et_type = ft_ret };
               ft_reactive = Nonreactive;
               ft_flags = 0;
+              ft_ifc_decl = Typing_defs_core.default_ifc_fun_decl;
             }
           in
           let reason = Reason.Rwitness fpos in
@@ -6392,6 +6397,7 @@ and call
                 ~returns_mutable:false
                 ~returns_void_to_rx:false
             in
+            let ft_ifc_decl = Typing_defs_core.default_ifc_fun_decl in
             let fun_locl_type =
               {
                 ft_arity;
@@ -6402,6 +6408,7 @@ and call
                 ft_ret;
                 ft_reactive;
                 ft_flags;
+                ft_ifc_decl;
               }
             in
             let fun_type = mk (r, Tfun fun_locl_type) in

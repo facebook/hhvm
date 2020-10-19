@@ -30,8 +30,9 @@ use oxidized_by_ref::{
     typing_defs,
     typing_defs::{
         ConstDecl, EnumType, FunArity, FunElt, FunImplicitParams, FunParam, FunParams, FunType,
-        ParamMode, ParamMutability, PossiblyEnforcedTy, Reactivity, ShapeFieldType, ShapeKind,
-        Tparam, Ty, Ty_, TypeconstAbstractKind, TypedefType, WhereConstraint, XhpAttrTag,
+        IfcFunDecl, ParamMode, ParamMutability, PossiblyEnforcedTy, Reactivity, ShapeFieldType,
+        ShapeKind, Tparam, Ty, Ty_, TypeconstAbstractKind, TypedefType, WhereConstraint,
+        XhpAttrTag,
     },
     typing_defs_flags::{FunParamFlags, FunTypeFlags},
     typing_reason::Reason,
@@ -239,6 +240,10 @@ fn tarraykey<'a>(arena: &'a Bump) -> &'a Ty<'a> {
 
 fn default_capability<'a>(arena: &'a Bump, r: Reason<'a>) -> &'a Ty<'a> {
     arena.alloc(Ty(arena.alloc(r), Ty_::Tunion(&[])))
+}
+
+fn default_ifc_fun_decl<'a>() -> IfcFunDecl<'a> {
+    IfcFunDecl::FDPolicied(Some("#PUBLIC"))
 }
 
 #[derive(Debug)]
@@ -764,6 +769,7 @@ struct Attributes<'a> {
     dynamically_callable: bool,
     returns_disposable: bool,
     php_std_lib: bool,
+    policied: IfcFunDecl<'a>,
 }
 
 impl<'a> DirectDeclSmartConstructors<'a> {
@@ -1006,6 +1012,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
             dynamically_callable: false,
             returns_disposable: false,
             php_std_lib: false,
+            policied: default_ifc_fun_decl(),
         };
 
         // If we see the attribute `__OnlyRxIfImpl(Foo::class)`, set
@@ -1111,6 +1118,20 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                     }
                     "__PHPStdLib" => {
                         attributes.php_std_lib = true;
+                    }
+                    "__Policied" => {
+                        let string_literal_params = || {
+                            attribute
+                                .string_literal_params
+                                .first()
+                                .map(|&x| self.str_from_utf8(x))
+                        };
+                        // Take the classname param by default
+                        attributes.policied =
+                            IfcFunDecl::FDPolicied(attribute.classname_params.first().map_or_else(
+                                string_literal_params, // default
+                                |&x| Some(x.1),        // f
+                            ));
                     }
                     _ => {}
                 }
@@ -1288,6 +1309,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
         if attributes.returns_void_to_rx {
             flags |= FunTypeFlags::RETURNS_VOID_TO_RX;
         }
+        let ifc_decl = attributes.policied;
 
         flags |= Self::param_mutability_to_fun_type_flags(attributes.param_mutability);
         // Pop the type params stack only after creating all inner types.
@@ -1304,6 +1326,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
             }),
             reactive: attributes.reactivity,
             flags,
+            ifc_decl,
         });
 
         let ty = self.alloc(Ty(self.alloc(Reason::witness(id.0)), Ty_::Tfun(ft)));
@@ -3757,7 +3780,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         }));
 
         let string_literal_params = if match name.1 {
-            "__Deprecated" | "__Cipp" | "__CippLocal" => true,
+            "__Deprecated" | "__Cipp" | "__CippLocal" | "__Policied" => true,
             _ => false,
         } {
             fn fold_string_concat<'a>(expr: &nast::Expr<'a>, acc: &mut Vec<'a, u8>) {
@@ -3904,6 +3927,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 }),
                 reactive: Reactivity::Nonreactive,
                 flags,
+                ifc_decl: default_ifc_fun_decl(),
             })),
         )
     }

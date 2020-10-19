@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ff481e41b5da20513015d6ae6ff2d9aa>>
+// @generated SignedSource<<f91d701e0837b7a85f3884035588e625>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -292,6 +292,7 @@ impl<'a> Node<'a> for FunType<'a> {
                 ret: ref __binding_5,
                 reactive: ref __binding_6,
                 flags: ref __binding_7,
+                ifc_decl: ref __binding_8,
             } => {
                 {
                     __binding_0.accept(v)
@@ -314,7 +315,10 @@ impl<'a> Node<'a> for FunType<'a> {
                 {
                     __binding_6.accept(v)
                 }
-                { __binding_7.accept(v) }
+                {
+                    __binding_7.accept(v)
+                }
+                { __binding_8.accept(v) }
             }
         }
     }
@@ -331,6 +335,16 @@ impl<'a> Node<'a> for Id<'a> {
                 }
                 { __binding_1.accept(v) }
             }
+        }
+    }
+}
+impl<'a> Node<'a> for IfcFunDecl<'a> {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_ifc_fun_decl(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            IfcFunDecl::FDPolicied(ref __binding_0) => __binding_0.accept(v),
         }
     }
 }

@@ -42,6 +42,7 @@ and fun_decl_in_env (env : Decl_env.env) ~(is_lambda : bool) (f : Nast.fun_) :
     Typing_defs.fun_elt =
   check_params f.f_params;
   let reactivity = fun_reactivity env f.f_user_attributes in
+  let ifc_decl = find_policied_attribute f.f_user_attributes in
   let returns_mutable = fun_returns_mutable f.f_user_attributes in
   let returns_void_to_rx = fun_returns_void_to_rx f.f_user_attributes in
   let return_disposable = has_return_disposable_attribute f.f_user_attributes in
@@ -104,6 +105,7 @@ and fun_decl_in_env (env : Decl_env.env) ~(is_lambda : bool) (f : Nast.fun_) :
                 ~returns_mutable
                 ~return_disposable
                 ~returns_void_to_rx;
+            ft_ifc_decl = ifc_decl;
           } )
   in
   { fe_pos = fst f.f_name; fe_type; fe_deprecated; fe_php_std_lib }

@@ -570,6 +570,7 @@ let default_constructor_ce class_ =
       ft_ret = { et_type = MakeType.void r; et_enforced = false };
       ft_flags = 0;
       ft_reactive = Nonreactive;
+      ft_ifc_decl = default_ifc_fun_decl;
     }
   in
   {

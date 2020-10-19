@@ -46,6 +46,8 @@ let pp_reactivity fmt r = Typing_defs.pp_reactivity fmt r
 
 let show_reactivity r = Typing_defs.show_reactivity r
 
+let pp_ifc_fun_decl fmt d = Typing_defs.pp_ifc_fun_decl fmt d
+
 let show_mutability_env _ = "<mutability-env>"
 
 let pp_mutability_env fmt _ = Format.fprintf fmt "<mutability-env>"

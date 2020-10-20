@@ -53,8 +53,8 @@ let expect_equals key value expected =
 
 let expect_equals_list key values expected_values =
   (* Because saving the dep table does not maintain order *)
-  let values = List.sort compare values in
-  let expected_values = List.sort compare expected_values in
+  let values = List.sort ~compare values in
+  let expected_values = List.sort ~compare expected_values in
   let len_values = List.length values in
   let len_exp_values = List.length expected_values in
   if len_values = len_exp_values then
@@ -133,7 +133,7 @@ let test_deps_in_memory () =
       expect_equals_list key (get key) values)
 
 let test_deptable_sql () =
-  let deptable_name = Filename.temp_file "test_deptable" ".sql" in
+  let deptable_name = Caml.Filename.temp_file "test_deptable" ".sql" in
   save_in_daemon deptable_name;
   init_shared_mem ();
   load_dep_table_sqlite deptable_name false;
@@ -142,7 +142,7 @@ let test_deptable_sql () =
   Sys.remove deptable_name
 
 let test_ignore_hh_version () =
-  let deptable_name = Filename.temp_file "test_ignore_hh_version" ".sql" in
+  let deptable_name = Caml.Filename.temp_file "test_ignore_hh_version" ".sql" in
   save_in_daemon deptable_name ~buildRevision:"test_build_revision";
   init_shared_mem ();
   try

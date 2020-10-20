@@ -776,7 +776,7 @@ let rec equal_decl_ty_ ty_1 ty_2 =
     String.equal s1 s2 && equal_decl_tyl argl1 argl2
   | (Taccess (ty1, idl1), Taccess (ty2, idl2)) ->
     equal_decl_ty ty1 ty2
-    && List.equal ~equal:(fun (_, s1) (_, s2) -> String.equal s1 s2) idl1 idl2
+    && List.equal (fun (_, s1) (_, s2) -> String.equal s1 s2) idl1 idl2
   | (Tarray (tk1, tv1), Tarray (tk2, tv2)) ->
     Option.equal equal_decl_ty tk1 tk2 && Option.equal equal_decl_ty tv1 tv2
   | (Tdarray (tk1, tv1), Tdarray (tk2, tv2)) ->
@@ -795,7 +795,7 @@ let rec equal_decl_ty_ ty_1 ty_2 =
   | (Tshape (shape_kind1, fields1), Tshape (shape_kind2, fields2)) ->
     equal_shape_kind shape_kind1 shape_kind2
     && List.equal
-         ~equal:(fun (k1, v1) (k2, v2) ->
+         (fun (k1, v1) (k2, v2) ->
            Ast_defs.ShapeField.equal k1 k2 && equal_shape_field_type v1 v2)
          (Nast.ShapeMap.elements fields1)
          (Nast.ShapeMap.elements fields2)
@@ -877,7 +877,7 @@ and equal_param_rx_annotation pa1 pa2 =
   | (Param_rx_if_impl _, Param_rx_var) ->
     false
 
-and equal_decl_tyl tyl1 tyl2 = List.equal ~equal:equal_decl_ty tyl1 tyl2
+and equal_decl_tyl tyl1 tyl2 = List.equal equal_decl_ty tyl1 tyl2
 
 and equal_decl_possibly_enforced_ty ety1 ety2 =
   equal_decl_ty ety1.et_type ety2.et_type
@@ -888,7 +888,7 @@ and equal_decl_fun_param param1 param2 =
   && Int.equal param1.fp_flags param2.fp_flags
 
 and equal_decl_ft_params params1 params2 =
-  List.equal ~equal:equal_decl_fun_param params1 params2
+  List.equal equal_decl_fun_param params1 params2
 
 and equal_decl_ft_implicit_params { capability = cap1 } { capability = cap2 } =
   equal_decl_ty cap1 cap2
@@ -918,20 +918,19 @@ let equal_decl_tparam tp1 tp2 =
   Ast_defs.equal_variance tp1.tp_variance tp2.tp_variance
   && Ast_defs.equal_id tp1.tp_name tp2.tp_name
   && List.equal
-       ~equal:
-         (Tuple.T2.equal ~eq1:Ast_defs.equal_constraint_kind ~eq2:equal_decl_ty)
+       (Tuple.T2.equal ~eq1:Ast_defs.equal_constraint_kind ~eq2:equal_decl_ty)
        tp1.tp_constraints
        tp2.tp_constraints
   && Aast.equal_reify_kind tp1.tp_reified tp2.tp_reified
   && List.equal
-       ~equal:equal_user_attribute
+       equal_user_attribute
        tp1.tp_user_attributes
        tp2.tp_user_attributes
 
 let equal_typedef_type tt1 tt2 =
   Pos.equal tt1.td_pos tt2.td_pos
   && Aast.equal_typedef_visibility tt1.td_vis tt2.td_vis
-  && List.equal ~equal:equal_decl_tparam tt1.td_tparams tt2.td_tparams
+  && List.equal equal_decl_tparam tt1.td_tparams tt2.td_tparams
   && Option.equal equal_decl_ty tt1.td_constraint tt2.td_constraint
   && equal_decl_ty tt1.td_type tt2.td_type
 

@@ -58,7 +58,7 @@ let null_path =
 
 let temp_dir_name =
   if Sys.win32 then
-    Filename.get_temp_dir_name ()
+    Stdlib.Filename.get_temp_dir_name ()
   else
     "/tmp"
 
@@ -132,7 +132,7 @@ let cat_no_fail filename =
   let len = Int64.to_int @@ In_channel.length ic in
   let len = Option.value_exn len in
   let buf = Buffer.create len in
-  Buffer.add_channel buf ic len;
+  Caml.Buffer.add_channel buf ic len;
   let content = Buffer.contents buf in
   close_in_no_fail filename ic;
   content

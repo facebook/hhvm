@@ -98,7 +98,7 @@ let emitted_mro_elements_equal a b =
   && Option.is_none mro_cyclic = Option.is_none b.mro_cyclic
   && Option.is_none mro_required_at = Option.is_none b.mro_required_at
   && Option.equal String.equal mro_trait_reuse b.mro_trait_reuse
-  && List.equal mro_type_args b.mro_type_args ~equal:equal_decl_ty
+  && List.equal equal_decl_ty mro_type_args b.mro_type_args
 
 let empty_mro_element =
   {

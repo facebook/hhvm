@@ -74,15 +74,6 @@ let set_up_global_environment (env : env) : setup_result =
   in
   { workers; ctx }
 
-(* TODO(T76615473) use Core_kernel once we updated past 1.12 *)
-let split_extension path =
-  let ext = Caml.Filename.extension path in
-  if String.is_empty ext then
-    (path, None)
-  else
-    let ext = String.sub ext ~pos:1 ~len:(String.length ext - 1) in
-    (Caml.Filename.remove_extension path, Some ext)
-
 let load_saved_state ~(env : env) ~(setup_result : setup_result) :
     saved_state_result Lwt.t =
   let%lwt (naming_table_path, naming_table_changed_files) =
@@ -114,7 +105,7 @@ let load_saved_state ~(env : env) ~(setup_result : setup_result) :
       let errors_path =
         dep_table_path
         |> Path.to_string
-        |> split_extension
+        |> Filename.split_extension
         |> fst
         |> SaveStateService.get_errors_filename
         |> Path.make

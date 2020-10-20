@@ -119,7 +119,7 @@ let rec compute_value_delta (oldval : value) (newval : value) : delta =
     else
       Set_delta { added; removed }
   | (List l1, List l2) ->
-    if List.equal l1 l2 equal_value then
+    if List.equal equal_value l1 l2 then
       Unchanged
     else
       Updated newval

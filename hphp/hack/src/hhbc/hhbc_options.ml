@@ -212,7 +212,7 @@ let disable_array_typehint o = o.option_disable_array_typehint
 let allow_unstable_features o = o.option_allow_unstable_features
 
 let canonical_aliased_namespaces an =
-  List.sort (fun p1 p2 -> String.compare (fst p1) (fst p2)) an
+  List.sort ~compare:(fun p1 p2 -> String.compare (fst p1) (fst p2)) an
 
 let to_string o =
   let aliased_namespaces_str =

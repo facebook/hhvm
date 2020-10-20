@@ -998,7 +998,7 @@ let method_name_already_bound pos name =
    the second that differ from the first *)
 let highlight_differences base to_highlight =
   match List.zip (String.to_list base) (String.to_list to_highlight) with
-  | Some l ->
+  | List.Or_unequal_lengths.Ok l ->
     List.group l ~break:(fun (o1, s1) (o2, s2) ->
         not (Bool.equal (Char.equal o1 s1) (Char.equal o2 s2)))
     |> List.map ~f:(fun cs ->
@@ -1009,7 +1009,7 @@ let highlight_differences base to_highlight =
            else
              Markdown_lite.md_highlight s)
     |> String.concat
-  | None -> to_highlight
+  | List.Or_unequal_lengths.Unequal_lengths -> to_highlight
 
 let error_name_already_bound name name_prev p p_prev =
   let name = strip_ns name in

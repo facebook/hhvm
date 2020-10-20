@@ -194,7 +194,7 @@ let pop_errors ds ~global_errors =
           match (old, new_) with
           | (None, Some new_) -> Some new_
           | (Some old, Some new_)
-            when not (List.equal ~equal:Errors.equal_error old new_) ->
+            when not (List.equal Errors.equal_error old new_) ->
             Some new_
           | (Some _, None) -> Some []
           | _ -> None)

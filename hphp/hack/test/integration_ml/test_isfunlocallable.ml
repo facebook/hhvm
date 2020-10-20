@@ -286,7 +286,7 @@ let test () =
     let ctx = Provider_utils.ctx_from_server_env env in
     let pos_list = [(Relative_path.from_root ~suffix:file, line, col)] in
     let result = ServerRxApiShared.helper h ctx [] pos_list in
-    if not (List.equal result [expected] ~equal:String.equal) then
+    if not (List.equal String.equal result [expected]) then
       let msg =
         "Unexpected test result\nExpected:\n"
         ^ expected

@@ -103,9 +103,9 @@ let rec subtype ~pos t1 t2 acc =
       acc
   | (Ttuple tl1, Ttuple tl2) ->
     (match List.zip tl1 tl2 with
-    | Some zip ->
+    | List.Or_unequal_lengths.Ok zip ->
       List.fold zip ~init:acc ~f:(fun acc (t1, t2) -> subtype t1 t2 acc)
-    | None -> err "incompatible tuple types")
+    | List.Or_unequal_lengths.Unequal_lengths -> err "incompatible tuple types")
   | (Tclass cl1, Tclass cl2) ->
     (* We do not attempt to replicate the work Hack did and instead
        only act on policies. A bit of precision could be gained when
@@ -116,8 +116,9 @@ let rec subtype ~pos t1 t2 acc =
   | (Tfun f1, Tfun f2) ->
     let zipped_args =
       match List.zip f1.f_args f2.f_args with
-      | Some zip -> zip
-      | None -> err "functions have different number of arguments"
+      | List.Or_unequal_lengths.Ok zip -> zip
+      | List.Or_unequal_lengths.Unequal_lengths ->
+        err "functions have different number of arguments"
     in
     (* Contravariant in argument types *)
     List.fold ~f:(fun acc (t1, t2) -> subtype t2 t1 acc) ~init:acc zipped_args

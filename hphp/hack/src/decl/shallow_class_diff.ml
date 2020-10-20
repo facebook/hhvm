@@ -189,13 +189,13 @@ let mro_inputs_equal (c1 : shallow_class) (c2 : shallow_class) : bool =
        equal_shallow_method
        (List.find c1.sc_methods is_to_string)
        (List.find c2.sc_methods is_to_string)
-  && List.equal c1.sc_tparams c2.sc_tparams Poly.( = )
-  && List.equal c1.sc_extends c2.sc_extends Poly.( = )
-  && List.equal c1.sc_implements c2.sc_implements Poly.( = )
-  && List.equal c1.sc_uses c2.sc_uses Poly.( = )
-  && List.equal c1.sc_req_extends c2.sc_req_extends Poly.( = )
-  && List.equal c1.sc_req_implements c2.sc_req_implements Poly.( = )
-  && List.equal c1.sc_xhp_attr_uses c2.sc_xhp_attr_uses Poly.( = )
+  && List.equal Poly.( = ) c1.sc_tparams c2.sc_tparams
+  && List.equal Poly.( = ) c1.sc_extends c2.sc_extends
+  && List.equal Poly.( = ) c1.sc_implements c2.sc_implements
+  && List.equal Poly.( = ) c1.sc_uses c2.sc_uses
+  && List.equal Poly.( = ) c1.sc_req_extends c2.sc_req_extends
+  && List.equal Poly.( = ) c1.sc_req_implements c2.sc_req_implements
+  && List.equal Poly.( = ) c1.sc_xhp_attr_uses c2.sc_xhp_attr_uses
 
 (* The ConsistentConstruct attribute is propagated down the inheritance
    hierarchy, so we can model it with Changed_inheritance on the constructor. To

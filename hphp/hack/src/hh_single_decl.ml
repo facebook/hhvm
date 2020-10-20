@@ -151,7 +151,7 @@ let compare_decl ctx verbosity fn =
             Tempfile.with_real_tempdir (fun dir ->
                 let temp_dir = Path.to_string dir in
                 let temp_file () =
-                  Filename.temp_file
+                  Caml.Filename.temp_file
                     ~temp_dir
                     (Printf.sprintf "%s_%s" name key)
                     ".txt"

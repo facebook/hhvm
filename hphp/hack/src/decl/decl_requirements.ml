@@ -98,7 +98,7 @@ let naive_dedup req_extends =
         begin
           try
             let hl' = Caml.Hashtbl.find h name in
-            if not (List.equal hl hl' equal_decl_ty) then
+            if not (List.equal equal_decl_ty hl hl') then
               raise Exit
             else
               None

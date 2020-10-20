@@ -82,7 +82,7 @@ let run_index_builder (harness : Test_harness.t) : si_env =
   Relative_path.set_path_prefix Relative_path.Hhi hhi_folder;
   let repo_path = Path.to_string harness.repo_dir in
   (* Set up initial variables *)
-  let fn = Filename.temp_file "autocomplete." ".db" in
+  let fn = Caml.Filename.temp_file "autocomplete." ".db" in
   let file_opt = Some fn in
   let ctxt =
     {

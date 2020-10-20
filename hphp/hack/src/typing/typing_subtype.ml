@@ -1980,7 +1980,7 @@ and simplify_subtype_has_member
         String.equal (snd name_sub) (snd name)
         && class_id_equal cid_sub class_id
         && Option.equal
-             (List.equal ~equal:targ_equal)
+             (List.equal targ_equal)
              explicit_targs_sub
              explicit_targs
       then

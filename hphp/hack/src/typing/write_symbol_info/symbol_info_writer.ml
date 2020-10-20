@@ -26,8 +26,7 @@ let write_file file_dir num_tasts json_chunks =
   Out_channel.close channel;
   Hh_logger.log
     "Wrote %s of JSON facts on %i files"
-    (Byte_units.to_string_hum
-       (Byte_units.create `Bytes (float_of_int json_length)))
+    (Byte_units.to_string_hum (Byte_units.of_bytes_int json_length))
     num_tasts
 
 let write_json

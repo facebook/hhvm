@@ -30,7 +30,7 @@ let parse_exn str =
   String.filter ~f:(fun chr -> not @@ Char.equal ' ' chr) str
   |> String.split ~on:';'
   |> (fun xs ->
-       if List.equal xs [""] ~equal:String.equal then
+       if List.equal String.equal xs [""] then
          []
        else
          xs)

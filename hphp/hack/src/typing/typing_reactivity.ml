@@ -242,8 +242,8 @@ let get_effective_reactivity env r ft arg_types =
   | rx ->
     begin
       match List.zip ft.ft_params arg_types with
-      | Some l -> List.fold ~init:(env, rx, None) ~f:go l
-      | None -> (env, r, None)
+      | List.Or_unequal_lengths.Ok l -> List.fold ~init:(env, rx, None) ~f:go l
+      | List.Or_unequal_lengths.Unequal_lengths -> (env, r, None)
     end
 
 let check_call env method_info pos reason ft arg_types =

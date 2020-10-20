@@ -363,7 +363,7 @@ let position_groups_by_file marker_and_msgs : position_group list list =
     (* Must make sure list of positions is ordered *)
     |> List.map ~f:(fun msgs ->
            List.sort
-             (fun mm1 mm2 ->
+             ~compare:(fun mm1 mm2 ->
                let p1 = Errors.get_message_pos mm1.message in
                let p2 = Errors.get_message_pos mm2.message in
                Int.compare (Pos.line p1) (Pos.line p2))

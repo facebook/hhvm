@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/base/bespoke/layout.h"
 
+#include "hphp/runtime/base/bespoke/bespoke-top.h"
 #include "hphp/runtime/base/bespoke/logging-array.h"
 #include "hphp/runtime/base/bespoke/logging-profile.h"
 #include "hphp/runtime/base/bespoke/monotype-dict.h"
@@ -93,6 +94,7 @@ struct Layout::Initializer {
   Initializer() {
     assertx(s_layoutTableIndex.load(std::memory_order_relaxed) == 0);
     LoggingArray::InitializeLayouts();
+    BespokeTop::InitializeLayouts();
     MonotypeVec::InitializeLayouts();
     EmptyMonotypeDict::InitializeLayouts();
   }

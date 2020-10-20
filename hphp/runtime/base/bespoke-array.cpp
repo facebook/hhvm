@@ -64,9 +64,9 @@ ArrayData* BespokeArray::ToVanilla(const ArrayData* ad, const char* reason) {
   return asBespoke(ad)->vtable()->fnEscalateToVanilla(ad, reason);
 }
 
-void BespokeArray::logReachEvent(TransID transId, uint32_t guardIdx) {
+void BespokeArray::logReachEvent(TransID transId, SrcKey sk) {
   if (layoutIndex() != bespoke::LoggingArray::GetLayoutIndex()) return;
-  bespoke::LoggingArray::As(this)->logReachEvent(transId, guardIdx);
+  bespoke::LoggingArray::As(this)->logReachEvent(transId, sk);
 }
 
 bool BespokeArray::checkInvariants() const {

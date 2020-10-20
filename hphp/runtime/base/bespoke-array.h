@@ -101,7 +101,7 @@ public:
   static void ReleaseUncounted(ArrayData*);
 
   // Log that a bespoke array made it to a particular profiling translation.
-  void logReachEvent(TransID transId, uint32_t guardIdx);
+  void logReachEvent(TransID transId, SrcKey sk);
 
 private:
   template <typename T, typename ... Args>

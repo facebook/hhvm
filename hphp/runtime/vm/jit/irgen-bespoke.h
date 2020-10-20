@@ -27,12 +27,6 @@ namespace HPHP { namespace jit { namespace irgen {
 
 /*
  * If this bytecode makes use of the layout of any of its array-like inputs,
- * check that we have a specific enough type to continue a tracelet.
- */
-bool checkBespokeInputs(IRGS&, SrcKey);
-
-/*
- * If this bytecode makes use of the layout of any of its array-like inputs,
  * handle the cases where they have some non-vanilla "bespoke" layout. The rest
  * of irgen may assume that these cases never occur.
  *

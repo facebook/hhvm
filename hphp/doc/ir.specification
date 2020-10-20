@@ -1428,10 +1428,10 @@ To string conversions:
   may be based on flags or sampling. If we don't create an array, we return S0
   unchanged. The result will match S0 in type and static-ness.
 
-| LogArrayReach<TransGuard>, ND, S(ArrLike), LA
+| LogArrayReach<TransSrcKey>, ND, S(ArrLike), LA
 
-  If the supplied array is a LoggingArray, log that the current tracelet. This
-  will log a Reach event with the specified TransID.
+  If the supplied array is a LoggingArray, log the current tracelet and SrcKey
+  for use during specialization.
 
 | NewDArray, DDArr, C(Int), PRc
 

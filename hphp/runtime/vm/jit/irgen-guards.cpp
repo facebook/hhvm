@@ -127,7 +127,7 @@ void checkType(IRGS& env, const Location& loc, Type type, Offset dest) {
   }
 }
 
-void genLogArrayReach(IRGS& env, const Location& loc, uint32_t guardIdx) {
+void genLogArrayReach(IRGS& env, const Location& loc, SrcKey sk) {
   assertx(env.context.transIDs.size() == 1);
   assertx(env.context.kind == TransKind::Profile);
   auto const transID = *env.context.transIDs.begin();
@@ -147,7 +147,7 @@ void genLogArrayReach(IRGS& env, const Location& loc, uint32_t guardIdx) {
     }
     not_reached();
   }();
-  gen(env, LogArrayReach, TransGuardData(transID, guardIdx), array);
+  gen(env, LogArrayReach, TransSrcKeyData(transID, sk), array);
 }
 
 //////////////////////////////////////////////////////////////////////

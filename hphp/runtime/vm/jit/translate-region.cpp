@@ -232,34 +232,12 @@ void emitGuards(irgen::IRGS& irgs,
   }
 
   // Emit type guards/preconditions.
-  std::vector<ArrayReachInfo> arrayReachLocs;
-  if (irgs.context.kind == TransKind::Profile) {
-    // If we're in a profiling tracelet, weaken vanilla guards so that bespoke
-    // LoggingArrays can flow through tracelets. Track information so that we
-    // can log when a LoggingArray passes a weakened guard.
-    for (uint32_t i = 0; i < typePreConditions.size(); i++) {
-      auto const& preCond = typePreConditions[i];
-      auto const origType = preCond.type;
-      auto const isVanillaGuard = origType.arrSpec().vanilla();
-      auto const type = isVanillaGuard ? origType.unspecialize() : origType;
-      auto const loc  = preCond.location;
-      assertx(!type.arrSpec().bespokeLayout());
-      irgen::checkType(irgs, loc, type, bcOff);
-      if (isVanillaGuard) {
-        arrayReachLocs.push_back(ArrayReachInfo {loc, i});
-      }
-    }
-  } else {
-    for (auto const& preCond : typePreConditions) {
-      auto const type = preCond.type;
-      auto const loc  = preCond.location;
-      irgen::checkType(irgs, loc, type, bcOff);
-    }
+  for (auto const& preCond : typePreConditions) {
+    auto const type = preCond.type;
+    auto const loc  = preCond.location;
+    assertx(IMPLIES(type.arrSpec(), irgs.context.kind == TransKind::Live));
+    irgen::checkType(irgs, loc, type, bcOff);
   }
-
-  // We should only have array reach events to record if we're in a profiling
-  // tracelet, in which case isEntry should be true.
-  assertx(IMPLIES(!arrayReachLocs.empty(), isEntry));
 
   // Finish emitting guards, and emit profiling counters.
   if (isEntry) {
@@ -283,10 +261,6 @@ void emitGuards(irgen::IRGS& irgs,
     // In the entry block, hhbc-translator gets a chance to emit some code
     // immediately after the initial checks on the first instruction.
     irgen::prepareEntry(irgs);
-
-    for (auto const& reachLoc : arrayReachLocs) {
-      irgen::genLogArrayReach(irgs, reachLoc.loc, reachLoc.guardIdx);
-    }
   }
 }
 

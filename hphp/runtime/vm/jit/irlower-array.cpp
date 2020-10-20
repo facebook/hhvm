@@ -529,9 +529,9 @@ void cgNewRecord(IRLS& env, const IRInstruction* inst) {
 }
 
 namespace {
-void arrayReach(ArrayData* ad, TransID transId, uint32_t guardIdx) {
+void arrayReach(ArrayData* ad, TransID transId, uint64_t sk) {
   if (LIKELY(ad->isVanilla())) return;
-  BespokeArray::asBespoke(ad)->logReachEvent(transId, guardIdx);
+  BespokeArray::asBespoke(ad)->logReachEvent(transId, SrcKey(sk));
 }
 }
 
@@ -540,7 +540,7 @@ void cgLogArrayReach(IRLS& env, const IRInstruction* inst) {
 
   auto& v = vmain(env);
   auto const args = argGroup(env, inst)
-    .ssa(0).imm(data->transId).imm(data->guardIdx);
+    .ssa(0).imm(data->transId).imm(data->sk.toAtomicInt());
 
   auto const target = CallSpec::direct(arrayReach);
   cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);

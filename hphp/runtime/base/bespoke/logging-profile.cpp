@@ -209,20 +209,20 @@ double LoggingProfile::getProfileWeight() const {
   return getTotalEvents() * getSampleCountMultiplier();
 }
 
-void LoggingProfile::logReach(TransID transId, uint32_t guardIdx) {
+void LoggingProfile::logReach(TransID transId, SrcKey sk) {
   // Hold the read mutex for the duration of the mutation so that export cannot
   // begin until the mutation is complete.
   folly::SharedMutex::ReadHolder lock{s_exportStartedLock};
   if (s_exportStarted.load(std::memory_order_relaxed)) return;
 
   ReachMap::accessor it;
-  if (reachedTracelets.insert(it, {transId, guardIdx})) {
+  if (reachedUsageSites.insert(it, {transId, sk})) {
     it->second = 1;
   } else {
     it->second++;
   }
-  FTRACE(6, "{} reached {}, guard {} [count={}]\n", source.getSymbol(),
-         transId, guardIdx, it->second);
+  FTRACE(6, "{} reached tracelet {}, srckey {} [count={}]\n", source.getSymbol(),
+         transId, showShort(sk), it->second);
 }
 
 void LoggingProfile::logEvent(ArrayOp op) {
@@ -364,19 +364,19 @@ struct EntryTypesEscalationOutputData {
   uint64_t count;
 };
 
-struct TraceletReachOutputData {
-  TraceletReachOutputData(TransID tid, size_t guardIdx, uint64_t count)
+struct ReachOutputData {
+  ReachOutputData(TransID tid, SrcKey sk, uint64_t count)
     : tid(tid)
-    , guardIdx(guardIdx)
+    , sk(sk)
     , count(count)
   {}
 
-  bool operator<(const TraceletReachOutputData& other) const {
+  bool operator<(const ReachOutputData& other) const {
     return count > other.count;
   }
 
   TransID tid;
-  size_t guardIdx;
+  SrcKey sk;
   uint64_t count;
 };
 
@@ -386,18 +386,18 @@ struct SourceOutputData {
                    std::vector<SinkOutputData>&& sinkData,
                    std::vector<EntryTypesEscalationOutputData>&& monoEscalations,
                    std::vector<EntryTypesUseOutputData>&& monoUses,
-                   std::vector<TraceletReachOutputData>&& traceletReachData)
+                   std::vector<ReachOutputData>&& reachData)
     : profile(profile)
     , monotypeEscalations(std::move(monoEscalations))
     , monotypeUses(std::move(monoUses))
     , sinks(std::move(sinkData))
-    , traceletReach(std::move(traceletReachData))
+    , reach(std::move(reachData))
   {
     std::sort(sinks.begin(), sinks.end());
     std::sort(monotypeEscalations.begin(), monotypeEscalations.end());
     std::sort(monotypeUses.begin(), monotypeUses.end());
     std::sort(operations.begin(), operations.end());
-    std::sort(traceletReach.begin(), traceletReach.end());
+    std::sort(reach.begin(), reach.end());
 
     readCount = 0;
     writeCount = 0;
@@ -424,7 +424,7 @@ struct SourceOutputData {
   std::vector<EntryTypesEscalationOutputData> monotypeEscalations;
   std::vector<EntryTypesUseOutputData> monotypeUses;
   std::vector<SinkOutputData> sinks;
-  std::vector<TraceletReachOutputData> traceletReach;
+  std::vector<ReachOutputData> reach;
   uint64_t readCount;
   uint64_t writeCount;
   double weight;
@@ -489,13 +489,6 @@ bool exportSortedProfiles(FILE* file, const ProfileOutputData& profileData) {
     LOG_OR_RETURN(file, "  Write operations:\n");
     if (!exportOperationSet(file, sourceData.writeOperations)) return false;
 
-    LOG_OR_RETURN(file, "  Sinks:\n");
-    for (auto const& sinkData : sourceData.sinks) {
-      LOG_OR_RETURN(file, "  {: >6}x {}\n", sinkData.totalCount,
-                    sinkData.sink.valid() ? sinkData.sink.getSymbol()
-                                          : "<unknown>");
-    }
-
     LOG_OR_RETURN(file, "  Entry Type Escalations:\n");
     for (auto const& escData : sourceData.monotypeEscalations) {
       LOG_OR_RETURN(file, "  {: >6}x {} -> {}\n", escData.count,
@@ -508,10 +501,10 @@ bool exportSortedProfiles(FILE* file, const ProfileOutputData& profileData) {
                     useData.state.toString());
     }
 
-    LOG_OR_RETURN(file, "  Reached tracelets:\n");
-    for (auto const& traceletData : sourceData.traceletReach) {
-      LOG_OR_RETURN(file, "  {: >6}x {}, guard {}\n", traceletData.count,
-                    traceletData.tid, traceletData.guardIdx);
+    LOG_OR_RETURN(file, "  Reached usage sites:\n");
+    for (auto const& reachData : sourceData.reach) {
+      LOG_OR_RETURN(file, "  {: >6}x tracelet {}, srckey {}\n", reachData.count,
+                    reachData.tid, showShort(reachData.sk));
     }
 
     LOG_OR_RETURN(file, "\n");
@@ -592,15 +585,14 @@ SourceOutputData sortSourceData(const LoggingProfile* profile) {
     }
   );
 
-  std::vector<TraceletReachOutputData> reaches;
-  reaches.reserve(profile->reachedTracelets.size());
+  std::vector<ReachOutputData> reaches;
+  reaches.reserve(profile->reachedUsageSites.size());
   std::transform(
-    profile->reachedTracelets.begin(), profile->reachedTracelets.end(),
+    profile->reachedUsageSites.begin(), profile->reachedUsageSites.end(),
     std::back_inserter(reaches),
     [](const std::pair<LoggingProfile::ReachLocation, size_t>& reachData) {
-      return TraceletReachOutputData(reachData.first.first,
-                                     reachData.first.second,
-                                     reachData.second);
+      return ReachOutputData(reachData.first.first, reachData.first.second,
+                             reachData.second);
     }
   );
 

@@ -37,6 +37,9 @@ namespace {
 
 void translateDispatchBespoke(IRGS& env,
                               const NormalizedInstruction& ni) {
+  auto const DEBUG_ONLY sk = ni.source;
+  FTRACE_MOD(Trace::hhir, 2, "At {}: {}: perform bespoke translation\n",
+             sk.offset(), opcodeToName(sk.op()));
   switch (ni.op()) {
     case Op::SetM:
     case Op::QueryM:
@@ -132,25 +135,23 @@ folly::Optional<Location> getVanillaLocation(const IRGS& env, SrcKey sk) {
 // location has a bespoke layout, we return true. If it has a vanilla layout,
 // we return false. Otherwise, we emit a vanilla guard and return false.
 bool guardToLayout(IRGS& env, SrcKey sk, Location loc) {
-  assertx(env.formingRegion || env.context.kind != TransKind::Profile);
+  assertx(env.context.kind != TransKind::Profile);
   assertx(!env.irb->guardFailBlock());
   auto const& type = env.irb->typeOf(loc, DataTypeSpecific);
   if (!(type.isKnownDataType() && type <= TArrLike)) return false;
 
+  auto const base = type.unspecialize();
+  auto const layout = type.arrSpec().bespokeLayout();
+  auto const target_type = layout ? base.narrowToBespokeLayout(*layout)
+                                  : base.narrowToVanilla();
+
   FTRACE_MOD(Trace::hhir, 2,
              "At {}: {}: guard input {} to layout specific: {}\n",
-             sk.offset(), opcodeToName(sk.op()), show(loc), type);
+             sk.offset(), opcodeToName(sk.op()), show(loc), target_type);
   auto const gc = GuardConstraint(DataTypeSpecialized).setArrayLayoutSensitive();
   env.irb->constrainLocation(loc, gc);
-  if (typeFitsConstraint(type, gc)) {
-    return type.arrSpec().bespokeLayout().has_value();
-  }
-
-  auto const target_type = type.unspecialize().narrowToVanilla();
-  env.irb->setGuardFailBlock(makeExit(env));
   checkType(env, loc, target_type, -1);
-  env.irb->resetGuardFailBlock();
-  return false;
+  return !target_type.arrSpec().vanilla();
 }
 
 // In a profiling tracelet, we don't want to guard on the array being vanilla,
@@ -168,17 +169,28 @@ void emitLoggingDiamond(
     return;
   }
 
-
   FTRACE_MOD(Trace::hhir, 2, "At {}: {}: log when {} is bespoke: {}\n",
              ni.source.offset(), opcodeToName(ni.op()), show(loc), type);
 
+  if (!env.formingRegion) {
+    // If we're not forming a region (and therefore have a ProfTransID), log
+    // that the array reached this bytecode. If the array is a LoggingArray,
+    // this will record a reach event. Once the ArraySampled bit is
+    // implemented, we will also use this helper to count how many sampled vs.
+    // unsampled arrays reach the usage site. This information can inform if a
+    // significant number of vanilla arrays origininating from unlogged sources
+    // (such as builtins) are reaching the site so we don't inappropriately
+    // specialize.
+    genLogArrayReach(env, loc, ni.source);
+  }
+
   auto const dropVanilla = [&](Type type) {
-    return type.isKnownDataType() && type <= TArrLike ? type.unspecialize()
-                                                      : type;
+    return type.isKnownDataType() && type <= TArrLike
+      ? type.unspecialize()
+      : type;
   };
   std::vector<Type> vanillaLocalTypes;
   std::vector<Type> vanillaStackTypes;
-
   ifThen(
     env,
     [&](Block* taken) {
@@ -186,6 +198,7 @@ void emitLoggingDiamond(
       env.irb->setGuardFailBlock(taken);
       checkType(env, loc, target_type, -1);
       env.irb->resetGuardFailBlock();
+
       emitVanilla(env);
 
       // We have a vanilla and a logging side of the diamond. The logging side
@@ -208,17 +221,11 @@ void emitLoggingDiamond(
     },
     [&] {
       hint(env, Block::Hint::Unlikely);
-      // TODO(mcolavita): Until we can emit a vanilla|logging guard, do the
-      // check manually
-      auto const loggingLayout =
-        BespokeLayout::FromIndex(bespoke::LoggingArray::GetLayoutIndex().raw);
-      auto const target_type = type.unspecialize()
-        .narrowToBespokeLayout(loggingLayout);
-      checkType(env, loc, target_type, -1);
-      // Note that nextBlock is null iff opcodeChangesPC (which, for
-      // layout-sensitive bytecodes, implies that opcodeBreaksBB and we are at
-      // the end of the tracelet). Therefore we don't need to worry about
-      // control flow after the InterpOneCF.
+
+      auto const topLayout = BespokeLayout::TopLayout();
+      auto const topType = type.unspecialize().narrowToBespokeLayout(topLayout);
+      assertTypeLocation(env, loc, topType);
+
       try {
         translateDispatchBespoke(env, ni);
       } catch (const FailedIRGen& exn) {
@@ -227,6 +234,13 @@ void emitLoggingDiamond(
            ni.toString(), exn.what());
         throw;
       }
+
+      // For layout-sensitive bytecodes, opcodeChangesPC implies that
+      // opcodeBreaksBB and we are at the end of the tracelet. Therefore we
+      // don't need to worry about control flow after the InterpOneCF.
+      auto const DEBUG_ONLY op = curFunc(env)->getOp(bcOff(env));
+      auto const DEBUG_ONLY opChangePC = opcodeChangesPC(op);
+      assertx(IMPLIES(opChangePC, opcodeBreaksBB(op, false)));
 
       for (uint32_t i = 0; i < vanillaLocalTypes.size(); i ++) {
         gen(env, AssertLoc, vanillaLocalTypes[i], LocalId(i), fp(env));
@@ -240,37 +254,9 @@ void emitLoggingDiamond(
   );
 }
 
-void emitDiamondOnLocation(
-    IRGS& env, const NormalizedInstruction& ni, Location loc,
-    std::function<void(IRGS&)> emitVanilla) {
-  assertx(env.context.kind == TransKind::Profile);
-
-  auto const DEBUG_ONLY op = curFunc(env)->getOp(bcOff(env));
-  auto const DEBUG_ONLY opChangePC = opcodeChangesPC(op);
-  assertx(IMPLIES(opChangePC, opcodeBreaksBB(op, false)));
-
-  emitLoggingDiamond(env, ni, loc, emitVanilla);
-}
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-bool checkBespokeInputs(IRGS& env, SrcKey sk) {
-  if (!allowBespokeArrayLikes()) return true;
-
-  if (auto const loc = getVanillaLocation(env, sk)) {
-    auto const& type = env.irb->fs().typeOf(*loc);
-    if (!type.maybe(TArrLike) ||
-        type.arrSpec().vanilla() ||
-        type.arrSpec().bespokeLayout()) {
-      return true;
-    }
-    FTRACE_MOD(Trace::region, 2, "At {}: {}: input {} may be bespoke: {}\n",
-               sk.offset(), opcodeToName(sk.op()), show(*loc), type);
-    return false;
-  }
-  return true;
-}
 
 void handleBespokeInputs(IRGS& env, const NormalizedInstruction& ni,
                          std::function<void(IRGS&)> emitVanilla) {
@@ -288,22 +274,25 @@ void handleBespokeInputs(IRGS& env, const NormalizedInstruction& ni,
     return;
   }
 
-  if (env.formingRegion || env.context.kind != TransKind::Profile) {
-    // We're forming a region or not in a profiling tracelet
-    auto const bespoke = guardToLayout(env, sk, *loc);
-    if (bespoke) {
-      // We have a bespoke type; dispatch to specialized irgen
-      translateDispatchBespoke(env, ni);
-    } else {
-      // We have a vanilla type or unspecialized type; dispatch to normal irgen
-      emitVanilla(env);
-    }
+  if (env.context.kind == TransKind::Profile) {
+    // We are in a profiling tracelet. We most likely have a logging array in a
+    // profiling tracelet; emit a diamond to handle it. If it's another bespoke,
+    // side-exit.
+    emitLoggingDiamond(env, ni, *loc, emitVanilla);
     return;
   }
 
-  // We potentially have a logging array in a profiling tracelet; emit a
-  // diamond to handle it.
-  emitDiamondOnLocation(env, ni, *loc, emitVanilla);
+  // We're not in a profiling tracelet; specialize for the observed layout.
+  // In the future, we will supply the layout we believe we should specialize
+  // the bytecode for.
+  auto const bespoke = guardToLayout(env, sk, *loc);
+  if (bespoke) {
+    // We have a bespoke type; dispatch to specialized irgen
+    translateDispatchBespoke(env, ni);
+  } else {
+    // We have a vanilla type or unspecialized type; dispatch to normal irgen
+    emitVanilla(env);
+  }
 }
 
 void handleVanillaOutputs(IRGS& env, SrcKey sk) {

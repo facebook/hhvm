@@ -210,8 +210,8 @@ bool LoggingArray::checkInvariants() const {
   return true;
 }
 
-void LoggingArray::logReachEvent(TransID transId, uint32_t guardIdx) {
-  profile->logReach(transId, guardIdx);
+void LoggingArray::logReachEvent(TransID transId, SrcKey sk) {
+  profile->logReach(transId, sk);
 }
 
 void LoggingArray::updateKindAndLegacy() {

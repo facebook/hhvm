@@ -540,23 +540,22 @@ struct TransIDData : IRExtraData {
 };
 
 /*
- * Translation ID and guard number.
+ * Translation ID and source key.
  *
- * Used by logging arrays to track the tracelets entered and which array guards
- * were constrained to DataTypeSpecialized.
+ * Used to track the layout-sensitive bytecodes at which logging arrays arrive.
  */
-struct TransGuardData : IRExtraData {
-  explicit TransGuardData(TransID transId, uint32_t guardIdx)
+struct TransSrcKeyData : IRExtraData {
+  explicit TransSrcKeyData(TransID transId, SrcKey sk)
     : transId(transId)
-    , guardIdx(guardIdx)
+    , sk(sk)
   {}
 
   std::string show() const {
-    return folly::sformat("transId={}, guardIdx={}", transId, guardIdx);
+    return folly::sformat("transId={}, sk={}", transId, showShort(sk));
   }
 
   TransID transId;
-  uint32_t guardIdx;
+  SrcKey sk;
 };
 
 
@@ -1691,7 +1690,7 @@ X(ReqBindJmp,                   ReqBindJmpData);
 X(ReqRetranslateOpt,            IRSPRelOffsetData);
 X(CheckCold,                    TransIDData);
 X(IncProfCounter,               TransIDData);
-X(LogArrayReach,                TransGuardData);
+X(LogArrayReach,                TransSrcKeyData);
 X(DefFuncEntryFP,               FuncData);
 X(Call,                         CallData);
 X(CallBuiltin,                  CallBuiltinData);

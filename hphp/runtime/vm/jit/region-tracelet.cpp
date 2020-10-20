@@ -188,7 +188,6 @@ bool prepareInstruction(Env& env) {
       return false;
     }
   }
-  if (!checkBespokeInputs(env.irgs, env.inst.source)) return false;
 
   addInstruction(env);
 

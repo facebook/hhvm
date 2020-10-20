@@ -381,7 +381,6 @@ struct RegionContext {
 
   SrcKey sk;
   jit::vector<LiveType> liveTypes;
-  bool liveBespoke = false;
   FPInvOffset spOffset;
 };
 

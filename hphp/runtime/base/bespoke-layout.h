@@ -59,13 +59,16 @@ struct BespokeLayout {
   /* retrieve a layout by index */
   static BespokeLayout FromIndex(uint16_t index);
 
+  /* retrieve the logging layout */
+  static BespokeLayout LoggingLayout();
+  static BespokeLayout TopLayout();
+
   /* get a human-readable string describing the layout */
   const std::string& describe() const;
 
   /****************************************************************************
    * access to arraydata methods
    ****************************************************************************/
-
 
   using SSATmp = jit::SSATmp;
   using Block = jit::Block;

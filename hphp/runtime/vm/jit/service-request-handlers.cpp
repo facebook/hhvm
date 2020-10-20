@@ -62,18 +62,11 @@ RegionContext getContext(SrcKey sk, bool profiling) {
   auto const ctxClass = func->cls();
   auto const addLiveType = [&](Location loc, tv_rval tv) {
     auto const type = typeFromTV(tv, ctxClass);
-    if (profiling) {
-      // Generate a translation for vanilla arrays, even if the live types are
-      // bespoke.
-      auto const unspecialized =
-        tvIsArrayLike(tv) ? type.unspecialize().narrowToVanilla() : type;
-      assertx(IMPLIES(unspecialized != type, allowBespokeArrayLikes()));
-      ctx.liveTypes.push_back({loc, unspecialized});
-    } else {
-      auto const bespoke = tvIsArrayLike(tv) && !val(tv).parr->isVanilla();
-      ctx.liveTypes.push_back({loc, type});
-      ctx.liveBespoke |= bespoke;
-    }
+    auto const typeLayoutAdjusted = [&] {
+      if (!profiling || !allowBespokeArrayLikes()) return type;
+      return type <= TArrLike ? type.unspecialize() : type;
+    }();
+    ctx.liveTypes.push_back({loc, typeLayoutAdjusted});
 
     FTRACE(2, "Added live type: {}\n", show(ctx.liveTypes.back()));
   };

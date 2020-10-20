@@ -66,7 +66,7 @@ struct ArraySpec {
 
   /*
    * Assign the bespoke layout of the ArraySpec, if it is possible
-   * to do so without a contradiction--otherwise return Top
+   * to do so without a contradiction--otherwise return Bottom.
    */
   ArraySpec narrowToBespokeLayout(BespokeLayout layout) const;
 

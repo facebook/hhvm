@@ -150,13 +150,6 @@ function test() {
   } else if ($count < NUM_FILES*3 + 1) {
     $filename = fetch_filename_for_count($count - NUM_FILES*2 - 1);
     if ($filename === null) return;
-    echo "Adding comment to $filename...\n";
-    add_comment_to_file($filename);
-    require $filename;
-    say_file();
-  } else if ($count < NUM_FILES*4 + 1) {
-    $filename = fetch_filename_for_count($count - NUM_FILES*3 - 1);
-    if ($filename === null) return;
     echo "Modifying to $filename...\n";
     modify_file($filename);
     require $filename;
@@ -174,16 +167,6 @@ function create_file($filename) {
 <?hh
 function say_file() { var_dump(__FILE__); }
 
-EOT;
-
-  file_put_contents($filename, $contents);
-}
-
-function add_comment_to_file($filename) {
-  $contents = <<<EOT
-<?hh
-function say_file() { var_dump(__FILE__); }
-//HI
 EOT;
 
   file_put_contents($filename, $contents);

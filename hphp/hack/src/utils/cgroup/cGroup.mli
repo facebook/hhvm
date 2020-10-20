@@ -13,4 +13,4 @@ type stats = {
   file: int;
 }
 
-val get_stats : unit -> (stats, string) result Lwt.t
+val get_stats : unit -> (stats, string) result

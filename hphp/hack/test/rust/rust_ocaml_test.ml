@@ -31,7 +31,6 @@ type parser =
   | MINIMAL
   | POSITIONED
   | COROUTINE
-  | DECL_MODE
   | LOWERER
   | COROUTINE_ERRORS
 
@@ -313,17 +312,6 @@ let get_files_in_path ~args path =
       &&
       match args.parser with
       | COROUTINE -> true
-      | DECL_MODE ->
-        (* Note: these crash in both OCaml and Rust version of positioned DeclMode parser *)
-        (not @@ String_utils.string_ends_with f "ffp/yield_bad1.php")
-        && (not @@ String_utils.string_ends_with f "ffp/yield_from_bad1.php")
-        && (not @@ String_utils.string_ends_with f "test_variadic_type_hint.php")
-        && not
-           @@ String_utils.string_ends_with f "namespace_group_use_decl.php"
-        && (not @@ String_utils.string_ends_with f "parser_massive_add_exp.php")
-        && not
-           @@ String_utils.string_ends_with f "parser_massive_concat_exp.php"
-        && true
       | LOWERER ->
         (* TODO(shiqicao): parser_massive_add_exp.php and parser_massive_concat_exp.php crashs
           Ocaml with SYNTAX ERROR: Expression recursion limit reached. Rust doesn't crash,
@@ -446,9 +434,6 @@ module CoroutineErrorsTest_ = CoroutineTest_.WithTreeBuilder (struct
 end)
 
 module CoroutineErrorsTest = Runner (CoroutineErrorsTest_)
-module DeclModeTest_ = WithSyntax (PositionedSyntax)
-module DeclModeSC = DeclModeSmartConstructors.WithSyntax (PositionedSyntax)
-module DeclModeTest = Runner (DeclModeTest_.WithSmartConstructors (DeclModeSC))
 module EditablePositionedSyntaxSC =
   SyntaxSmartConstructors.WithSyntax (EditablePositionedSyntax)
 
@@ -665,7 +650,6 @@ let () =
     | COROUTINE -> CoroutineTest.test_batch args ~ocaml_env ~rust_env
     | COROUTINE_ERRORS ->
       CoroutineErrorsTest.test_batch args ~ocaml_env ~rust_env
-    | DECL_MODE -> DeclModeTest.test_batch args ~ocaml_env ~rust_env
     | LOWERER -> LowererTest.test_batch args ~ocaml_env ~rust_env
   in
   let (user, runs, _mem) =

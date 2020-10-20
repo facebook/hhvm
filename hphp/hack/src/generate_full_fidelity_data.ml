@@ -1098,10 +1098,6 @@ SYNTAX
     Full_fidelity_source_text.t ->
     Full_fidelity_parser_env.t ->
     unit * t * Full_fidelity_syntax_error.t list * Rust_pointer.t option
-  val rust_parse_with_decl_mode_sc :
-    Full_fidelity_source_text.t ->
-    Full_fidelity_parser_env.t ->
-    bool list * t * Full_fidelity_syntax_error.t list * Rust_pointer.t option
   val rust_parse_with_verify_sc :
     Full_fidelity_source_text.t ->
     Full_fidelity_parser_env.t ->

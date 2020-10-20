@@ -119,8 +119,6 @@ let rust_parse text env = !rust_parse_ref text env
 
 let rust_parse_with_coroutine_sc _ _ = failwith "not implemented"
 
-let rust_parse_with_decl_mode_sc _ _ = failwith "not implemented"
-
 let rust_parse_with_verify_sc _ _ = failwith "not implemented"
 
 let rust_parser_errors _ _ _ = failwith "not implemented"

@@ -437,21 +437,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "decl_mode_parser_ffi"
-version = "0.0.0"
-dependencies = [
- "decl_mode_parser 0.0.0",
- "ocamlrep 0.0.0",
- "ocamlrep_ocamlpool 0.0.0",
- "oxidized 0.0.0",
- "parser_core_types 0.0.0",
- "rust_parser_ffi 0.0.0",
- "rust_to_ocaml 0.0.0",
- "smart_constructors 0.0.0",
- "stack_limit 0.0.0",
-]
-
-[[package]]
 name = "decl_mode_smart_constructors"
 version = "0.0.0"
 dependencies = [
@@ -1201,7 +1186,6 @@ name = "hack_parser_ffi"
 version = "3.49.0"
 dependencies = [
  "aast_parser_ffi 0.0.0",
- "decl_mode_parser_ffi 0.0.0",
  "minimal_parser_ffi 0.0.0",
  "positioned_parser_ffi 0.0.0",
  "verify_parser_ffi 0.0.0",

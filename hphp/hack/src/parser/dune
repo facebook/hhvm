@@ -93,7 +93,6 @@
    smartConstructors
    smartConstructorsWrappers
    verifySmartConstructors
-   declModeSmartConstructors
    syntaxSmartConstructors)
   (libraries
     common

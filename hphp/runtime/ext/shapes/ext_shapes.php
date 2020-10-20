@@ -45,7 +45,7 @@ namespace HH {
     public static function toDict(
       darray $shape,
     ): dict {
-      return dict($shape);
+      return dict(\HH\array_unmark_legacy($shape));
     }
 
   }

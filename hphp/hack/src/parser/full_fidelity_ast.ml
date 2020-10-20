@@ -26,7 +26,6 @@ type env = {
   lower_coroutines: bool;
   fail_open: bool;
   parser_options: ParserOptions.t;
-  fi_mode: FileInfo.mode;
   file: Relative_path.t;
   disable_global_state_mutation: bool;
 }
@@ -56,7 +55,6 @@ let make_env
     show_all_errors;
     lower_coroutines;
     parser_options;
-    fi_mode = FileInfo.Mpartial;
     fail_open;
     file;
     disable_global_state_mutation;

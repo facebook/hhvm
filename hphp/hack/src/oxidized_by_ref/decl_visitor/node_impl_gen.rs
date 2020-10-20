@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<7bb94b8803147443d19ed185543e3dc5>>
+// @generated SignedSource<<f47049cc78eb73a906cf2aca3e2d358e>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -489,6 +489,7 @@ impl<'a> Node<'a> for Reason<'a> {
             Reason::RglobalFunParam(ref __binding_0) => __binding_0.accept(v),
             Reason::RglobalFunRet(ref __binding_0) => __binding_0.accept(v),
             Reason::Rsplice(ref __binding_0) => __binding_0.accept(v),
+            Reason::RetBoolean(ref __binding_0) => __binding_0.accept(v),
         }
     }
 }

@@ -1,0 +1,84 @@
+File "boolean_check.php", line 99, characters 11-25:
+Typing error (Typing[4110])
+  File "boolean_check.php", line 99, characters 11-25:
+  Expected `bool` because Expression Trees do not allow coercion of truthy values
+  File "boolean_check.php", line 86, characters 27-31:
+  But got `?bool`
+File "boolean_check.php", line 100, characters 11-25:
+Typing error (Typing[4110])
+  File "boolean_check.php", line 100, characters 11-25:
+  Expected `bool` because Expression Trees do not allow coercion of truthy values
+  File "boolean_check.php", line 86, characters 27-31:
+  But got `?bool`
+File "boolean_check.php", line 106, characters 16-30:
+Typing error (Typing[4110])
+  File "boolean_check.php", line 106, characters 16-30:
+  Expected `bool` because Expression Trees do not allow coercion of truthy values
+  File "boolean_check.php", line 86, characters 27-31:
+  But got `?bool`
+File "boolean_check.php", line 109, characters 16-30:
+Typing error (Typing[4110])
+  File "boolean_check.php", line 109, characters 16-30:
+  Expected `bool` because Expression Trees do not allow coercion of truthy values
+  File "boolean_check.php", line 86, characters 27-31:
+  But got `?bool`
+File "boolean_check.php", line 117, characters 13-27:
+Typing error (Typing[4110])
+  File "boolean_check.php", line 117, characters 13-27:
+  Expected `bool` because Expression Trees do not allow coercion of truthy values
+  File "boolean_check.php", line 86, characters 27-31:
+  But got `?bool`
+File "boolean_check.php", line 123, characters 13-27:
+Typing error (Typing[4110])
+  File "boolean_check.php", line 123, characters 13-27:
+  Expected `bool` because Expression Trees do not allow coercion of truthy values
+  File "boolean_check.php", line 86, characters 27-31:
+  But got `?bool`
+File "boolean_check.php", line 124, characters 20-34:
+Typing error (Typing[4110])
+  File "boolean_check.php", line 124, characters 20-34:
+  Expected `bool` because Expression Trees do not allow coercion of truthy values
+  File "boolean_check.php", line 86, characters 27-31:
+  But got `?bool`
+File "boolean_check.php", line 125, characters 14-28:
+Typing error (Typing[4110])
+  File "boolean_check.php", line 125, characters 14-28:
+  Expected `bool` because Expression Trees do not allow coercion of truthy values
+  File "boolean_check.php", line 86, characters 27-31:
+  But got `?bool`
+File "boolean_check.php", line 126, characters 20-34:
+Typing error (Typing[4110])
+  File "boolean_check.php", line 126, characters 20-34:
+  Expected `bool` because Expression Trees do not allow coercion of truthy values
+  File "boolean_check.php", line 86, characters 27-31:
+  But got `?bool`
+File "boolean_check.php", line 134, characters 7-21:
+Typing error (Typing[4110])
+  File "boolean_check.php", line 134, characters 7-21:
+  Expected `bool` because Expression Trees do not allow coercion of truthy values
+  File "boolean_check.php", line 86, characters 27-31:
+  But got `?bool`
+File "boolean_check.php", line 135, characters 19-33:
+Typing error (Typing[4110])
+  File "boolean_check.php", line 135, characters 19-33:
+  Expected `bool` because Expression Trees do not allow coercion of truthy values
+  File "boolean_check.php", line 86, characters 27-31:
+  But got `?bool`
+File "boolean_check.php", line 139, characters 7-21:
+Typing error (Typing[4110])
+  File "boolean_check.php", line 139, characters 7-21:
+  Expected `bool` because Expression Trees do not allow coercion of truthy values
+  File "boolean_check.php", line 86, characters 27-31:
+  But got `?bool`
+File "boolean_check.php", line 140, characters 19-33:
+Typing error (Typing[4110])
+  File "boolean_check.php", line 140, characters 19-33:
+  Expected `bool` because Expression Trees do not allow coercion of truthy values
+  File "boolean_check.php", line 86, characters 27-31:
+  But got `?bool`
+File "boolean_check.php", line 144, characters 8-22:
+Typing error (Typing[4110])
+  File "boolean_check.php", line 144, characters 8-22:
+  Expected `bool` because Expression Trees do not allow coercion of truthy values
+  File "boolean_check.php", line 86, characters 27-31:
+  But got `?bool`

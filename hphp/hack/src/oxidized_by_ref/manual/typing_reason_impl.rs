@@ -94,7 +94,8 @@ impl<'a> Reason<'a> {
             | RglobalClassProp(p)
             | RglobalFunParam(p)
             | RglobalFunRet(p)
-            | Rsplice(p) => Some(p),
+            | Rsplice(p)
+            | RetBoolean(p) => Some(p),
             RlostInfo((_, r, _))
             | Rinstantiate((_, _, r))
             | Rtypeconst((r, _, _, _))

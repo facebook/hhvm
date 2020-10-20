@@ -298,6 +298,14 @@ let get_allow_wildcards env = env.Typing_env_types.allow_wildcards
 
 let condition_type_matches = Typing_reactivity.condition_type_matches
 
+(* We are in an Expression Tree *)
+let set_et env =
+  { env with Typing_env_types.et_spliced_types = Some IMap.empty }
+
+let unset_et env = { env with Typing_env_types.et_spliced_types = None }
+
+let in_et env = Option.is_some env.Typing_env_types.et_spliced_types
+
 (* ocaml being ocaml...
  * We need at least one explicit reference to the Typing_pocket_univereses
  * module otherwise the compiler will not include it in the resulting binary.

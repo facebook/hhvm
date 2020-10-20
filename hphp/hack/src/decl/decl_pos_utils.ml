@@ -107,6 +107,7 @@ struct
     | Rglobal_fun_param p -> Rglobal_fun_param (pos p)
     | Rglobal_fun_ret p -> Rglobal_fun_ret (pos p)
     | Rsplice p -> Rsplice (pos p)
+    | Ret_boolean p -> Ret_boolean (pos p)
 
   let rec ty t =
     let (p, x) = deref t in

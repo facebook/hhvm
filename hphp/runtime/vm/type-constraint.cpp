@@ -992,11 +992,7 @@ void TypeConstraint::verifyOutParamFail(const Func* func,
       raise_clsmeth_compat_type_hint_outparam_notice(
         func, displayName(func->cls()), paramNum);
     }
-    if (RO::EvalHackArrDVArrs) {
-      castClsMeth(c, make_vec_array<String,String>);
-    } else {
-      castClsMeth(c, make_varray<String,String>);
-    }
+    castClsMeth(c, make_varray<String,String>);
     return;
   }
 
@@ -1069,11 +1065,7 @@ void TypeConstraint::verifyPropFail(const Class* thisCls,
     // Only trigger coercion logic if property type hints are soft
     if ((RO::EvalCheckPropTypeHints != 3) ||
         (isUpperBound() && RO::EvalEnforceGenericsUB < 2)) return;
-    if (RO::EvalHackArrDVArrs) {
-      castClsMeth(val, make_vec_array<String,String>);
-    } else {
-      castClsMeth(val, make_varray<String,String>);
-    }
+    castClsMeth(val, make_varray<String,String>);
     return;
   }
 
@@ -1124,11 +1116,7 @@ void TypeConstraint::verifyFail(const Func* func, tv_lval c,
       auto const i = id == ReturnId ? folly::none : folly::make_optional(id);
       raise_clsmeth_compat_type_hint(func, name, i);
     }
-    if (RO::EvalHackArrDVArrs) {
-      castClsMeth(c, make_vec_array<String,String>);
-    } else {
-      castClsMeth(c, make_varray<String,String>);
-    }
+    castClsMeth(c, make_varray<String,String>);
     return;
   }
 

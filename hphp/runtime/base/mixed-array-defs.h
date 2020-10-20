@@ -305,6 +305,7 @@ void ConvertTvToUncounted(
     case KindOfClsMeth: {
       if (RuntimeOption::EvalHackArrDVArrs) {
         tvCastToVecInPlace(source);
+        tvSetLegacyArrayInPlace(source, RuntimeOption::EvalHackArrDVArrMark);
         type = KindOfPersistentVec;
         auto& ad = data.parr;
         if (handlePersistent(ad)) break;

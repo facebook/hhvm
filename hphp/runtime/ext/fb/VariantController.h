@@ -176,9 +176,7 @@ struct VariantControllerImpl {
       case VariantControllerHackArraysMode::OFF:
         return empty_darray();
       case VariantControllerHackArraysMode::MIGRATORY:
-        return RuntimeOption::EvalHackArrDVArrs
-          ? empty_dict_array()
-          : empty_darray();
+        return empty_darray();
     }
   }
   static MapType createMap(DArrayInit&& map) {
@@ -209,9 +207,7 @@ struct VariantControllerImpl {
         empty = ArrayData::CreateDArray();
         break;
       case VariantControllerHackArraysMode::MIGRATORY:
-        empty = RuntimeOption::EvalHackArrDVArrs
-          ? ArrayData::CreateDict()
-          : ArrayData::CreateDArray();
+        empty = ArrayData::CreateDArray();
         break;
     }
     return MapType(empty);
@@ -266,9 +262,7 @@ struct VariantControllerImpl {
       case VariantControllerHackArraysMode::OFF:
         return empty_darray();
       case VariantControllerHackArraysMode::MIGRATORY:
-        return RuntimeOption::EvalHackArrDVArrs
-          ? empty_vec_array()
-          : empty_varray();
+        return empty_varray();
     }
   }
   static int64_t vectorSize(const VectorType& vec) {

@@ -381,13 +381,8 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
       auto const doConvertAndCall = [&](Opcode op) {
         doConvertAndCallImpl(gen(env, op, unpack));
       };
-      if (RuntimeOption::EvalHackArrDVArrs) {
-        if (unpack->isA(TVec)) return doCall(fca, true /* skipRepack */);
-        if (unpack->isA(TArrLike)) return doConvertAndCall(ConvArrLikeToVec);
-      } else {
-        if (unpack->isA(TVArr)) return doCall(fca, true /* skipRepack */);
-        if (unpack->isA(TArrLike)) return doConvertAndCall(ConvArrLikeToVArr);
-      }
+      if (unpack->isA(TVec | TVArr)) return doCall(fca, true /* skipRepack */);
+      if (unpack->isA(TArrLike)) return doConvertAndCall(ConvArrLikeToVArr);
     }
 
     // Slow path. Uses funcPrologueRedispatchUnpack to repack the arguments.

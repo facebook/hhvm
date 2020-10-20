@@ -941,9 +941,7 @@ bool coerceToVecOrVArray(tv_lval lval) {
   if (!ad->isVectorData()) return false;
 
   // Do the coercion and replace the value.
-  auto const varray = RO::EvalHackArrDVArrs
-    ? ad->toVec(/*copy=*/true)
-    : ad->toVArray(/*copy=*/true);
+  auto const varray = ad->toVArray(/*copy=*/true);
   tvCopy(make_array_like_tv(varray), lval);
   assertx(ad != varray);
   decRefArr(ad);

@@ -385,7 +385,6 @@ public:
 
   ALWAYS_INLINE
   void pushArrayLikeNoRc(ArrayData* a) {
-    assertx(RuntimeOption::EvalHackArrDVArrs || a->isPHPArrayType());
     assertx(m_top != m_elms);
     m_top--;
     *m_top = make_array_like_tv(a);
@@ -423,6 +422,13 @@ public:
   }
 
   ALWAYS_INLINE
+  void pushArrayLike(ArrayData* a) {
+    assertx(a);
+    pushArrayLikeNoRc(a);
+    a->incRefCount();
+  }
+
+  ALWAYS_INLINE
   void pushVec(ArrayData* a) {
     assertx(a);
     pushVecNoRc(a);
@@ -447,6 +453,14 @@ public:
   void pushStaticArray(const ArrayData* a) {
     assertx(a->isStatic()); // No need to call a->incRefCount().
     assertx(a->isPHPArrayType());
+    assertx(m_top != m_elms);
+    m_top--;
+    *m_top = make_persistent_array_like_tv(const_cast<ArrayData*>(a));
+  }
+
+  ALWAYS_INLINE
+  void pushStaticArrayLike(const ArrayData* a) {
+    assertx(a->isStatic()); // No need to call a->incRefCount().
     assertx(m_top != m_elms);
     m_top--;
     *m_top = make_persistent_array_like_tv(const_cast<ArrayData*>(a));

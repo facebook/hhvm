@@ -52,11 +52,7 @@ struct GenericsSaver {
   }
   static void push(Array&& generics) {
     if (LIKELY(generics.isNull())) return;
-    if (RuntimeOption::EvalHackArrDVArrs) {
-      vmStack().pushVecNoRc(generics.detach());
-    } else {
-      vmStack().pushArrayNoRc(generics.detach());
-    }
+    vmStack().pushArrayLikeNoRc(generics.detach());
   }
 
 private:
@@ -183,11 +179,7 @@ inline void calleeGenericsChecks(const Func* callee, bool hasGenerics) {
     // are on the stack.
     ARRPROV_USE_RUNTIME_LOCATION();
     auto const ad = ArrayData::CreateVArray();
-    if (RuntimeOption::EvalHackArrDVArrs) {
-      vmStack().pushVecNoRc(ad);
-    } else {
-      vmStack().pushArrayNoRc(ad);
-    }
+    vmStack().pushArrayLikeNoRc(ad);
     return;
   }
 
@@ -249,11 +241,7 @@ inline void initFuncInputs(const Func* callee, uint32_t numArgsInclUnpack) {
   if (callee->hasVariadicCaptureParam()) {
     ARRPROV_USE_RUNTIME_LOCATION();
     auto const ad = ArrayData::CreateVArray();
-    if (RuntimeOption::EvalHackArrDVArrs) {
-      vmStack().pushVecNoRc(ad);
-    } else {
-      vmStack().pushArrayNoRc(ad);
-    }
+    vmStack().pushArrayLikeNoRc(ad);
     ++numArgsInclUnpack;
   }
 

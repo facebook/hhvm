@@ -347,9 +347,8 @@ Array& ObjectData::reserveProperties(int numDynamic /* = 2 */) {
     check_non_safepoint_surprise();
   }
 
-  return setDynPropArray(Array::attach(
-    RO::EvalHackArrDVArrs ? MixedArray::MakeReserveDict(numDynamic)
-                          : MixedArray::MakeReserveDArray(numDynamic)));
+  return
+    setDynPropArray(Array::attach(MixedArray::MakeReserveDArray(numDynamic)));
 }
 
 Array& ObjectData::setDynPropArray(const Array& newArr) {

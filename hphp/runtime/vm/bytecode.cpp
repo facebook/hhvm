@@ -899,11 +899,7 @@ uint32_t prepareUnpackArgs(const Func* func, uint32_t numArgs,
   auto const ad = ai.create();
   assertx(ad->hasExactlyOneRef());
   assertx(ad->size() == numNewUnpackArgs);
-  if (RuntimeOption::EvalHackArrDVArrs) {
-    stack.pushVecNoRc(ad);
-  } else {
-    stack.pushArrayNoRc(ad);
-  }
+  stack.pushArrayLikeNoRc(ad);
   return numParams + 1;
 }
 
@@ -1777,11 +1773,7 @@ OPTBLD_INLINE void iopCombineAndResolveTypeStruct(uint32_t n) {
     resolveAndVerifyTypeStructureHelper(n, vmStack().topC(), false, false);
   vmStack().popC(); // pop the first TS
   vmStack().ndiscard(n-1);
-  if (RuntimeOption::EvalHackArrDVArrs) {
-    vmStack().pushDict(resolved);
-  } else {
-    vmStack().pushArray(resolved);
-  }
+  vmStack().pushArrayLike(resolved);
 }
 
 OPTBLD_INLINE void iopRecordReifiedGeneric() {
@@ -1793,11 +1785,7 @@ OPTBLD_INLINE void iopRecordReifiedGeneric() {
   auto const result =
     jit::recordReifiedGenericsAndGetTSList(tsList->m_data.parr);
   vmStack().discard();
-  if (RuntimeOption::EvalHackArrDVArrs) {
-    vmStack().pushStaticVec(result);
-  } else {
-    vmStack().pushStaticArray(result);
-  }
+  vmStack().pushStaticArrayLike(result);
 }
 
 OPTBLD_INLINE void iopCheckReifiedGenericMismatch() {
@@ -2443,11 +2431,7 @@ OPTBLD_INLINE void iopClassGetTS() {
   vmStack().popC();
   vmStack().pushClass(cls);
   if (reified_types) {
-    if (RuntimeOption::EvalHackArrDVArrs) {
-      vmStack().pushStaticVec(reified_types);
-    } else {
-      vmStack().pushStaticArray(reified_types);
-    }
+    vmStack().pushStaticArrayLike(reified_types);
   } else {
     vmStack().pushNull();
   }
@@ -3792,11 +3776,7 @@ OPTBLD_INLINE void fcallFuncRFunc(PC origpc, PC& pc, FCallArgs& fca) {
   auto const rfunc = vmStack().topC()->m_data.prfunc;
   auto const func = rfunc->m_func;
   vmStack().discard();
-  if (RuntimeOption::EvalHackArrDVArrs) {
-    vmStack().pushVec(rfunc->m_arr);
-  } else {
-    vmStack().pushArray(rfunc->m_arr);
-  }
+  vmStack().pushArrayLike(rfunc->m_arr);
   decRefRFunc(rfunc);
 
   fcallImpl<false>(origpc, pc, fca.withGenerics(), func, NoCtx{});
@@ -3820,11 +3800,7 @@ OPTBLD_INLINE void fcallFuncRClsMeth(PC origpc, PC& pc, const FCallArgs& fca) {
   auto const cls = rclsMeth->m_cls;
   auto const func = rclsMeth->m_func;
   vmStack().discard();
-  if (RuntimeOption::EvalHackArrDVArrs) {
-    vmStack().pushVec(rclsMeth->m_arr);
-  } else {
-    vmStack().pushArray(rclsMeth->m_arr);
-  }
+  vmStack().pushArrayLike(rclsMeth->m_arr);
   decRefRClsMeth(rclsMeth);
 
   fcallImpl<false>(origpc, pc, fca.withGenerics(), func, cls);
@@ -4050,11 +4026,7 @@ void resolveMethodImpl(TypedValue* c1, TypedValue* c2) {
   arr.set(1, Variant{func});
   vmStack().popC();
   vmStack().popC();
-  if (RuntimeOption::EvalHackArrDVArrs) {
-    vmStack().pushVecNoRc(arr.detach());
-  } else {
-    vmStack().pushArrayNoRc(arr.detach());
-  }
+  vmStack().pushArrayLikeNoRc(arr.detach());
 }
 
 } // namespace

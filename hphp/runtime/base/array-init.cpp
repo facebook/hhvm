@@ -74,9 +74,7 @@ DArrayInit::DArrayInit(size_t n, CheckAllocation)
   if (UNLIKELY(allocsz > kMaxSmallSize && tl_heap->preAllocOOM(allocsz))) {
     check_non_safepoint_surprise();
   }
-  m_arr = RuntimeOption::EvalHackArrDVArrs
-    ? MixedArray::MakeReserveDict(n)
-    : MixedArray::MakeReserveDArray(n);
+  m_arr = MixedArray::MakeReserveDArray(n);
   assertx(m_arr->hasExactlyOneRef());
   check_non_safepoint_surprise();
 }

@@ -1650,11 +1650,7 @@ TypedValue ExecutionContext::invokeFuncFew(
   if (UNLIKELY(numParams < numArgs)) {
     VArrayInit ai{numArgs - numParams};
     for (auto i = numParams; i < numArgs; ++i) ai.append(argv[i]);
-    if (RuntimeOption::EvalHackArrDVArrs) {
-      stack.pushVecNoRc(ai.create());
-    } else {
-      stack.pushArrayNoRc(ai.create());
-    }
+    stack.pushArrayLikeNoRc(ai.create());
     numArgs = numParams + 1;
   }
 

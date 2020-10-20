@@ -101,6 +101,7 @@ inline TypedValue* castClsmethToContainerInplace(TypedValue* c) {
   if (isClsMethType(c->m_type)) {
     if (RuntimeOption::EvalHackArrDVArrs) {
       tvCastToVecInPlace(c);
+      tvSetLegacyArrayInPlace(c, RuntimeOption::EvalHackArrDVArrMark);
     } else {
       tvCastToVArrayInPlace(c);
     }

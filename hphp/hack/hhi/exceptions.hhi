@@ -63,6 +63,8 @@ class Error implements Throwable {
   <<__Pure, __MaybeMutable>>
   final public function getTrace(): varray<mixed>;
   <<__Pure, __MaybeMutable>>
+  final public function getTraceUntagged(): varray<mixed>;
+  <<__Pure, __MaybeMutable>>
   final public function getTraceAsString(): string;
   public function __toString(): string;
   public function toString(): string;
@@ -103,6 +105,8 @@ class Exception implements Throwable {
   final public function getLine(): int;
   <<__Pure, __MaybeMutable>>
   final public function getTrace(): varray<mixed>;
+  <<__Pure, __MaybeMutable>>
+  final public function getTraceUntagged(): varray<mixed>;
   final protected function __prependTrace(Container<mixed> $trace): void;
   <<__Pure, __MaybeMutable>>
   final public function getTraceAsString(): string;

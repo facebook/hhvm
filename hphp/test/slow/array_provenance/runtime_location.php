@@ -6,7 +6,7 @@ function get_runtime_array() {
   try {
     var_dump($d0 < $d1);
   } catch (Exception $e) {
-    return $e->getTrace();
+    return $e->getTraceUntagged();
   }
 }
 

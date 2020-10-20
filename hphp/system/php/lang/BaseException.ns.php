@@ -109,6 +109,17 @@ trait BaseException {
    */
   <<__Pure, __MaybeMutable, __ProvenanceSkipFrame>>
   final public function getTrace() {
+    return \HH\tag_provenance_here($this->getTraceUntagged());
+  }
+
+  /**
+    * Returns the Exception stack trace, without tagging it with array
+    * provenance information. DO NOT CALL THIS METHOD. It's only meant
+    * for use at certain callsites where we can guarantee that legacy
+    * array behaviors are not observed.
+   */
+  <<__Pure, __MaybeMutable>>
+  final public function getTraceUntagged() {
     if (\is_resource($this->trace)) {
       $this->trace = \__SystemLib\extract_trace($this->trace);
     }
@@ -123,7 +134,7 @@ trait BaseException {
     $this->trace = varray(
       \array_merge(
         \array_values($trace),
-        $this->getTrace(),
+        $this->getTraceUntagged(),
       )
     );
   }
@@ -140,7 +151,7 @@ trait BaseException {
   final public function getTraceAsString() {
     $i = 0;
     $s = "";
-    foreach ($this->getTrace() as $frame) {
+    foreach ($this->getTraceUntagged() as $frame) {
       if (!\HH\is_any_array($frame)) continue;
       $s .= "#$i " .
         ($frame['file'] ?? "") . "(" .

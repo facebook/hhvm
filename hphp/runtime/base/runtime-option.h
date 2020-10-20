@@ -1306,6 +1306,10 @@ struct RuntimeOption {
   F(uint32_t, UnitPrefetcherMaxThreads, 0)                              \
   F(uint32_t, UnitPrefetcherMinThreads, 0)                              \
   F(uint32_t, UnitPrefetcherIdleThreadTimeoutSecs, 60)                  \
+  /* Delete any Unit not used in last N seconds */                      \
+  F(uint32_t, IdleUnitTimeoutSecs, 0)                                   \
+  /* Don't reap total Units below threshold */                          \
+  F(uint32_t, IdleUnitMinThreshold, 0)                                  \
   /* */
 
 private:

@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/file-stream-wrapper.h"
 #include "hphp/runtime/base/file-util.h"
+#include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/base/plain-file.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/rds.h"
@@ -328,6 +329,10 @@ ServiceData::ExportedCounter* s_unitActualCompiles =
   ServiceData::createCounter("vm.unit-actual-compiles");
 ServiceData::ExportedCounter* s_unitsPrefetched =
   ServiceData::createCounter("vm.units-prefetched");
+ServiceData::ExportedCounter* s_unitsPathReaped =
+  ServiceData::createCounter("vm.units-path-reaped");
+ServiceData::ExportedCounter* s_unitsEvalReaped =
+  ServiceData::createCounter("vm.units-eval-reaped");
 
 }
 
@@ -1037,9 +1042,7 @@ CachedUnit lookupUnitNonRepoAuth(StringData* requestedPath,
   assertx(rpath->isStatic());
 
   auto const& options = RepoOptions::forFile(rpath->data());
-  if (!g_context.isNull()) {
-    g_context->onLoadWithOptions(requestedPath->data(), options);
-  }
+  g_context->onLoadWithOptions(requestedPath->data(), options);
 
   auto [cache, wrapper] = getNonRepoCacheWithWrapper(rpath);
   if (!cache) return CachedUnit{};
@@ -1071,6 +1074,17 @@ CachedUnit lookupUnitNonRepoAuth(StringData* requestedPath,
   }();
 
   if (cu.unit) {
+    if (RuntimeOption::EvalIdleUnitTimeoutSecs > 0 &&
+        !forPrefetch) {
+      // Mark this Unit as being used by this request. This will keep
+      // the Unit from being reaped until this request ends. We defer
+      // updating the timestamp on the Unit until this request ends
+      // (the expiration time should be measured from the end of the
+      // last request which used it).
+      cu.unit->setLastTouchRequest(Treadmill::getRequestGenCount());
+      g_context->m_touchedUnits.emplace(cu.unit);
+    }
+
     if (RuntimeOption::EvalReuseUnitsByHash &&
         !forPrefetch &&
         cu.unit->hasPerRequestFilepath()) {
@@ -1318,8 +1332,9 @@ size_t numLoadedUnits() {
 
 Unit* getLoadedUnit(StringData* path) {
   if (!RuntimeOption::RepoAuthoritative) {
+    auto const rpath = resolveRequestedPath(path, false);
     NonRepoUnitCache::const_accessor accessor;
-    if (s_nonRepoUnitCache.find(accessor, path) ) {
+    if (s_nonRepoUnitCache.find(accessor, rpath) ) {
       auto cachedUnit = accessor->second.cachedUnit.copy();
       return cachedUnit ? cachedUnit->cu.unit : nullptr;
     }
@@ -1498,19 +1513,6 @@ Unit* lookupUnit(StringData* path, const char* currentDir, bool* initial_opt,
 Unit* lookupSyslibUnit(StringData* path, const Native::FuncTable& nativeFuncs) {
   assertx(RuntimeOption::RepoAuthoritative);
   return lookupUnitRepoAuth(path, nativeFuncs).unit;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-void clearUnitCacheForExit() {
-  s_nonRepoUnitCache.clear();
-  s_repoUnitCache.clear();
-  s_perUserUnitCaches.clear();
-}
-
-void shutdownUnitPrefetcher() {
-  if (RO::RepoAuthoritative || !unitPrefetchingEnabled()) return;
-  getPrefetchExecutor().join();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1788,7 +1790,7 @@ static EvaledUnitsMap s_evaledUnits;
 Unit* compileEvalString(const StringData* code, const char* evalFilename) {
   auto const scode = makeStaticString(code);
   EvaledUnitsMap::accessor acc;
-  if (s_evaledUnits.insert(acc, scode)) {
+  if (s_evaledUnits.insert(acc, scode) || !acc->second) {
     acc->second = compile_string(
       scode->data(),
       scode->size(),
@@ -1797,7 +1799,323 @@ Unit* compileEvalString(const StringData* code, const char* evalFilename) {
       g_context->getRepoOptionsForCurrentFrame()
     );
   }
+  if (RO::EvalIdleUnitTimeoutSecs > 0 && !RO::RepoAuthoritative) {
+    // Mark this Unit like we do for normal Units
+    acc->second->setLastTouchRequest(Treadmill::getRequestGenCount());
+    g_context->m_touchedUnits.emplace(acc->second);
+  }
   return acc->second;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+namespace {
+
+/*
+ * Unit Reaper
+ *
+ * This thread is responsible for removing "expired" Units from caches
+ * (after which they will get deleted by the treadmil). This helps
+ * long running server processes avoid wasting memory on old Units
+ * which will never be used any longer. This is especially useful when
+ * using symlinks and every change is considered a "new" Unit.
+ *
+ * For every Unit we keep two pieces of information. The first is the
+ * newest request which used the Unit. The second is the latest
+ * timestamp of when the Unit was last used. The timestamp is actually
+ * updated only at the point when a using request ends (this keeps
+ * from biasing against long running requests).
+ *
+ * The Eval.IdleUnitTimeoutSecs determines when a Unit is expired. If
+ * a Unit has not been used by any currently running threads, and its
+ * timestamp is more than Eval.IdleUnitTimeoutSecs in the past, it is
+ * considered expired and will be removed.
+ *
+ * There is an additional config called Eval.IdleUnitMinThreshold. If
+ * set, the Unit reaper will not reap more Units than needed to bring
+ * the current set of Units below that threshold. IE: If the threshold
+ * is 1000, and there's 500 non-expired units, and 700 expired units,
+ * it will only reap 200 (instead of the full 700). This is useful to
+ * avoid an idle server from reaping every Unit and keeping a base
+ * "working set" in memory.
+ *
+ * The reaper runs at regular intervals and scans all the Unit caches
+ * for expired units. The regular interval is either the Unit
+ * expiration timeout, or 5 minutes (whichever is shorter). Running at
+ * regular intervals is easier than trying to keep track of the "next
+ * expiration" and avoids pathologies with wakingup to often and doing
+ * little work. Since we expect the expiration timeout to be
+ * configured long in practice, 5 minutes was a good upper limit to
+ * allow for somewhat timely reclamation, without doing a lot of
+ * needless work.
+ */
+struct UnitReaper {
+  UnitReaper()
+    : m_timeout{RO::EvalIdleUnitTimeoutSecs}
+    , m_interval{std::min<std::chrono::seconds>(m_timeout, kMaxInterval)}
+    , m_thread{&UnitReaper::run, this}
+  {}
+
+  ~UnitReaper() {
+    // Signal the thread to wake up and then wait for it to exit
+    m_done = 1;
+    folly::atomic_notify_one(&m_done);
+    m_thread.join();
+  }
+
+private:
+
+  using Clock = Unit::TouchClock;
+
+  static constexpr const std::chrono::minutes kMaxInterval{5};
+
+  // A Unit is considered expired if it has not been touched by any
+  // running request (IE, its touched request is older than the oldest
+  // running request), and its touch timestamp plus the expiration
+  // time is before now.
+  bool isExpired(Clock::time_point now,
+                 int64_t oldestRequest,
+                 int64_t lastRequest,
+                 Clock::time_point lastTime) const {
+    assertx(oldestRequest);
+    if (lastRequest >= oldestRequest) return false;
+    if (now < lastTime + m_timeout) return false;
+    return true;
+  }
+
+  void reapPathCaches(Clock::time_point now, int64_t oldestRequest) {
+    auto const threshold = RO::EvalIdleUnitMinThreshold;
+
+    // Do a quick check if the total size of the caches is below the
+    // threshold. If so, we know there's nothing to do.
+    auto totalCacheSize = s_nonRepoUnitCache.size();
+    for (auto const& p : s_perUserUnitCaches) {
+      totalCacheSize += p.second->size();
+    }
+    if (totalCacheSize <= threshold) return;
+
+    // We might need to reap something. Loop over all of the caches
+    // and look for expired Units. Record any that we find.
+    struct Expired {
+      NonRepoUnitCache* cache;
+      const StringData* path;
+      Clock::time_point time;
+    };
+    std::vector<Expired> expired;
+    size_t nonExpired = 0;
+
+    auto const process = [&] (NonRepoUnitCache& cache) {
+      // Iterating over the caches is safe because we never remove any
+      // entries. We might, however, skip entries or visit an entry
+      // more than once. Skipping is fine, we'll just miss a
+      // potentially expired Unit (we'll catch it again next
+      // time). Visiting more than once will be dealt with below.
+      for (auto const& p : cache) {
+        assertx(p.first->isStatic());
+        auto const cached = p.second.cachedUnit.copy();
+        if (!cached || !cached->cu.unit) continue;
+        auto const [lastRequest, lastTime] = cached->cu.unit->getLastTouch();
+        if (!isExpired(now, oldestRequest, lastRequest, lastTime)) {
+          ++nonExpired;
+          continue;
+        }
+        expired.emplace_back(Expired{&cache, p.first, lastTime});
+      }
+    };
+    process(s_nonRepoUnitCache);
+    for (auto& p : s_perUserUnitCaches) process(*p.second);
+
+    // Nothing is expired. We're done.
+    if (expired.empty()) return;
+
+    // As mentioed above, we might have visited an entry more than
+    // once. Remove any duplicates.
+    std::sort(
+      expired.begin(), expired.end(),
+      [] (const Expired& a, const Expired& b) { return a.path < b.path; }
+    );
+    expired.erase(
+      std::unique(
+        expired.begin(), expired.end(),
+        [] (const Expired& a, const Expired& b) { return a.path == b.path; }
+      ),
+      expired.end()
+    );
+
+    // Check how many we want to actually reap. Non-expired Units
+    // consume the threshold first, and only then expired Units.
+    auto const toReap =
+      expired.size() -
+      std::min<size_t>(
+        threshold - std::min<uint32_t>(nonExpired, threshold),
+        expired.size()
+      );
+    // We can keep everything.
+    if (!toReap) return;
+
+    // If we don't have to reap everything, we need to decide which
+    // ones we want to actually keep. Sort the expired Units by their
+    // timestamp (we want to preferentially reap older Units). Since
+    // ties can be common with timestamps (since they are set at the
+    // end of the request), use path to break ties.
+    if (toReap < expired.size()) {
+      std::sort(
+        expired.begin(), expired.end(),
+        [] (const Expired& a, const Expired& b) {
+          if (a.time < b.time) return true;
+          if (a.time > b.time) return false;
+          return a.path->compare(b.path) < 0;
+        }
+      );
+      // Only keep the oldest ones.
+      expired.erase(expired.begin() + toReap, expired.end());
+    }
+
+    // Do the actual reaping:
+    for (auto const& e : expired) {
+      assertx(e.path->isStatic());
+
+      // The entry better be here since we never remove them and we
+      // saw it before.
+      NonRepoUnitCache::const_accessor accessor;
+      always_assert(e.cache->find(accessor, e.path));
+
+      // Lock the entry. NB: this entry may have been changed since we
+      // iterated over it. It may not even have the same Unit in it.
+      auto& cachedUnit = accessor->second.cachedUnit;
+      cachedUnit.lock_for_update();
+
+      // The Unit could have been touched (or there could be a
+      // different Unit in it), so redo the expiration check. If its
+      // not actually expired now, skip it.
+      auto const cached = cachedUnit.copy();
+      if (!cached || !cached->cu.unit) {
+        cachedUnit.unlock();
+        continue;
+      }
+      auto const [lastRequest, lastTime] = cached->cu.unit->getLastTouch();
+      if (!isExpired(now, oldestRequest, lastRequest, lastTime)) {
+        cachedUnit.unlock();
+        continue;
+      }
+
+      // Still expired. Replace the entry with a nullptr and put the
+      // Unit on the treadmill to be deleted.
+      if (auto old = cachedUnit.update_and_unlock({})) {
+        Treadmill::enqueue([o = std::move(old)] {});
+        s_unitsPathReaped->increment();
+      }
+    }
+  }
+
+  // Reap the evaled Unit cache. Only the path Unit caches, we don't
+  // keep any threshold here.
+  void reapEvalCaches(Clock::time_point now, int64_t oldestRequest) {
+    if (s_evaledUnits.empty()) return;
+
+    // Iterate over the cache. This is safe because we never delete
+    // anything from it. We may, however, get duplicates or skip
+    // elements. These are both fine. Store all the keys we encounter
+    // and process them below.
+    hphp_fast_set<const StringData*> codes;
+    for (auto const& p : s_evaledUnits) {
+      if (!p.second) continue;
+      assertx(p.first->isStatic());
+      codes.emplace(p.first);
+    }
+
+    // For every key encountered, check if the Unit is expired and if
+    // so, remove it.
+    for (auto const& c : codes) {
+      // We grab an exclusive accessor, preventing anyone else from
+      // touching this entry.
+      EvaledUnitsMap::accessor accessor;
+      // We should always find this entry because we just got the key
+      // from it (and we don't remove entries).
+      always_assert(s_evaledUnits.find(accessor, c));
+      // Check if the Unit is expired. If it is, null out the entry
+      // (but don't remove it), and put the Unit on the treadmill to
+      // be deleted.
+      auto const unit = accessor->second;
+      auto const [lastRequest, lastTime] = unit->getLastTouch();
+      if (!isExpired(now, oldestRequest, lastRequest, lastTime)) continue;
+      accessor->second = nullptr;
+      Treadmill::enqueue([unit] { delete unit; });
+      s_unitsEvalReaped->increment();
+    }
+  }
+
+  void reap(Unit::TouchClock::time_point now) {
+    // The reaper runs as a request, to lock the treadmill and keep
+    // things from being deleted out under us.
+    HphpSession _{Treadmill::SessionKind::UnitReaper};
+
+    auto const oldestRequest = Treadmill::getOldestRequestGenCount();
+    // Since this is a request, we should always have an oldest
+    // request (maybe ourself).
+    assertx(oldestRequest);
+
+    reapPathCaches(now, oldestRequest);
+    reapEvalCaches(now, oldestRequest);
+  }
+
+  void run() {
+    assertx(RO::EvalIdleUnitTimeoutSecs > 0);
+    assertx(!RO::RepoAuthoritative);
+
+    hphp_thread_init();
+    SCOPE_EXIT { hphp_thread_exit(); };
+    folly::setThreadName("unit-reaper");
+
+    // Since no Units should exist when we start up, we can't have any
+    // expired Units until at least the full timeout period.
+    auto nextWakeup = Clock::now() + m_timeout + m_interval;
+    while (!m_done) {
+      folly::atomic_wait_until(&m_done, 1u, nextWakeup);
+      if (m_done) break; // Shut down thread
+      auto const now = Clock::now();
+      // Check for spurious wakeups:
+      if (now < nextWakeup) continue;
+      // We timed out, so run the reaper. Schedule to run it again at
+      // the next interval.
+      reap(now);
+      nextWakeup = now + m_interval;
+    }
+  }
+
+  // How long until a Unit is considered expired
+  const std::chrono::seconds m_timeout;
+  // How often do we run the reaper? This is typically less than the
+  // full expiration period.
+  const std::chrono::seconds m_interval;
+
+  // Flag to mark that the thread should shutdown
+  folly::atomic_uint_fast_wait_t m_done{0};
+  std::thread m_thread;
+};
+
+UnitReaper* s_unit_reaper = nullptr;
+
+InitFiniNode s_unit_reaper_init(
+  [] {
+    assertx(!s_unit_reaper);
+    if (RO::EvalIdleUnitTimeoutSecs > 0 && !RO::RepoAuthoritative) {
+      s_unit_reaper = new UnitReaper();
+    }
+  },
+  InitFiniNode::When::ProcessInit
+);
+
+}
+
+// This could be done with an InitFiniNode, but it has to be done
+// before moduleShutdown().
+void shutdownUnitReaper() {
+  if (!s_unit_reaper) return;
+  assertx(RO::EvalIdleUnitTimeoutSecs > 0);
+  assertx(!RO::RepoAuthoritative);
+  delete s_unit_reaper;
+  s_unit_reaper = nullptr;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1810,9 +2128,23 @@ ServiceData::CounterCallback s_counters(
     counters["vm.hash-unit-cache-size"] = s_unitByHashCache.size();
     counters["vm.eval-unit-cache-size"] = s_evaledUnits.size();
     counters["vm.live-units"] = Unit::liveUnitCount();
+    counters["vm.created-units"] = Unit::createdUnitCount();
   }
 );
 
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void clearUnitCacheForExit() {
+  s_nonRepoUnitCache.clear();
+  s_repoUnitCache.clear();
+  s_perUserUnitCaches.clear();
+}
+
+void shutdownUnitPrefetcher() {
+  if (RO::RepoAuthoritative || !unitPrefetchingEnabled()) return;
+  getPrefetchExecutor().join();
 }
 
 //////////////////////////////////////////////////////////////////////

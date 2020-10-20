@@ -174,6 +174,43 @@ inline bool Unit::hasCacheRef() const {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// Idle unit reaping
+
+inline void Unit::setLastTouchRequest(int64_t request) {
+  assertx(!RuntimeOption::RepoAuthoritative);
+  assertx(RuntimeOption::EvalIdleUnitTimeoutSecs > 0);
+  assertx(m_extended);
+  auto u = getExtended();
+  auto old = u->m_lastTouchRequest.load();
+  while (old < request) {
+    if (u->m_lastTouchRequest.compare_exchange_weak(old, request)) return;
+  }
+}
+
+inline void Unit::setLastTouchTime(TouchClock::time_point now) {
+  assertx(!RuntimeOption::RepoAuthoritative);
+  assertx(RuntimeOption::EvalIdleUnitTimeoutSecs > 0);
+  assertx(m_extended);
+  auto u = getExtended();
+  auto old = u->m_lastTouchTime.load();
+  while (old < now) {
+    if (u->m_lastTouchTime.compare_exchange_weak(old, now)) return;
+  }
+}
+
+inline std::pair<int64_t, Unit::TouchClock::time_point>
+Unit::getLastTouch() const {
+  assertx(!RuntimeOption::RepoAuthoritative);
+  assertx(RuntimeOption::EvalIdleUnitTimeoutSecs > 0);
+  assertx(m_extended);
+  auto const u = getExtended();
+  return std::make_pair(
+    u->m_lastTouchRequest.load(),
+    u->m_lastTouchTime.load()
+  );
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // Bytecode.
 
 inline PC Unit::entry() const {

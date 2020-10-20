@@ -269,6 +269,10 @@ void finishRequest() {
   }
 }
 
+int64_t getOldestRequestGenCount() {
+  return s_oldestRequestInFlight.load(std::memory_order_relaxed);
+}
+
 /*
  * Return the start time of the oldest request in seconds, rounded such that
  * time(nullptr) >= getOldestStartTime() is guaranteed to be true.
@@ -321,6 +325,7 @@ char const* getSessionKindName(SessionKind value) {
     case SessionKind::CompilerEmit: return "CompilerEmit";
     case SessionKind::CompilerAnalysis: return "CompilerAnalysis";
     case SessionKind::CLISession: return "CLISession";
+    case SessionKind::UnitReaper: return "UnitReaper";
   }
   return "";
 }

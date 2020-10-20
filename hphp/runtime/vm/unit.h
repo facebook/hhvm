@@ -334,6 +334,27 @@ public:
   bool hasCacheRef() const;
 
   /////////////////////////////////////////////////////////////////////////////
+  // Idle unit reaping
+
+  using TouchClock = std::chrono::steady_clock;
+
+  /*
+   * Mark that this Unit has been touched by the given request.
+   */
+  void setLastTouchRequest(int64_t request);
+
+  /*
+   * Mark that this Unit has been touched at the given timestamp.
+   */
+  void setLastTouchTime(TouchClock::time_point);
+
+  /*
+   * Get the newest request which has touched this Unit, and the
+   * latest timestamp of the touch.
+   */
+  std::pair<int64_t, TouchClock::time_point> getLastTouch() const;
+
+  /////////////////////////////////////////////////////////////////////////////
   // Bytecode.                                                          [const]
 
   /*
@@ -708,6 +729,9 @@ public:
     return true;
   }
 
+  // Total number of Units ever created
+  static size_t createdUnitCount() { return s_createdUnits; }
+
   // Total number of currently allocated Units
   static size_t liveUnitCount() { return s_liveUnits; }
 
@@ -778,6 +802,7 @@ private:
 
   rds::Link<req::dynamic_bitset, rds::Mode::Normal> m_coverage;
 
+  static std::atomic<size_t> s_createdUnits;
   static std::atomic<size_t> s_liveUnits;
 };
 
@@ -799,6 +824,10 @@ struct UnitExtended : Unit {
 
   // Used by Eval.ReuseUnitsByHash:
   rds::Link<LowStringPtr, rds::Mode::Normal> m_perRequestFilepath;
+
+  // Used by Eval.IdleUnitTimeoutSecs:
+  std::atomic<int64_t> m_lastTouchRequest{0};
+  std::atomic<TouchClock::time_point> m_lastTouchTime{TouchClock::time_point{}};
 };
 
 ///////////////////////////////////////////////////////////////////////////////

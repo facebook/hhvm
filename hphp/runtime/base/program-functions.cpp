@@ -2834,6 +2834,17 @@ void hphp_session_exit(Transport* transport) {
   jit::mcgen::checkRetranslateAll();
   jit::mcgen::checkSerializeOptProf();
   jit::tc::requestExit();
+
+  if (RO::EvalIdleUnitTimeoutSecs > 0 && !RO::RepoAuthoritative) {
+    // Update the timestamp of any Unit we touched in this request. We
+    // defer this until the end of the request to prevent Units from
+    // being considered "expired" while a request is still using it.
+    auto const now = Unit::TouchClock::now();
+    for (auto const u : g_context->m_touchedUnits) u->setLastTouchTime(now);
+  } else {
+    assertx(g_context->m_touchedUnits.empty());
+  }
+
   // Similarly, apc strings could be in the ServerNote array, and
   // it's possible they are scheduled to be destroyed after this request
   // finishes.
@@ -2892,6 +2903,7 @@ void hphp_process_exit() noexcept {
   LOG_AND_IGNORE(Eval::Debugger::Stop())
   LOG_AND_IGNORE(g_context.destroy())
   LOG_AND_IGNORE(shutdownUnitPrefetcher());
+  LOG_AND_IGNORE(shutdownUnitReaper());
   LOG_AND_IGNORE(ExtensionRegistry::moduleShutdown())
   LOG_AND_IGNORE(compilers_shutdown())
 #ifndef _MSC_VER

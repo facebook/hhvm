@@ -111,6 +111,7 @@ const StaticString s_stderr("STDERR");
 
 }
 
+std::atomic<size_t> Unit::s_createdUnits{0};
 std::atomic<size_t> Unit::s_liveUnits{0};
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -135,6 +136,7 @@ Unit::Unit()
   , m_serialized(false)
   , m_ICE(false)
 {
+  ++s_createdUnits;
   ++s_liveUnits;
 }
 

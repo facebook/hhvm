@@ -46,7 +46,8 @@ enum class SessionKind {
   HHBBC,
   CompilerEmit,
   CompilerAnalysis,
-  CLISession
+  CLISession,
+  UnitReaper
 };
 
 /*
@@ -65,6 +66,12 @@ int64_t requestIdx();
  */
 void startRequest(SessionKind session_kind);
 void finishRequest();
+
+/*
+ * Returns the unique GenCount identifying the oldest request in
+ * flight (or zero if there is none).
+ */
+int64_t getOldestRequestGenCount();
 
 /*
  * Returns the oldest start time in seconds of all requests in flight.
@@ -121,4 +128,3 @@ struct Session final {
 }}
 
 #include "hphp/runtime/vm/treadmill-inl.h"
-

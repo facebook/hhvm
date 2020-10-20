@@ -1,4 +1,4 @@
-/* num2str.c: bcmath library file. */
+/* rmzero.c: bcmath library file. */
 /*
     Copyright (C) 1991, 1992, 1993, 1994, 1997 Free Software Foundation, Inc.
     Copyright (C) 2000 Philip A. Nelson
@@ -38,42 +38,16 @@
 #include "bcmath.h"
 #include "private.h"
 
-/* Convert a numbers to a string.  Base 10 only.*/
+/* For many things, we may have leading zeros in a number NUM.
+   _bc_rm_leading_zeros just moves the data "value" pointer to the
+   correct place and adjusts the length. */
 
-char
-*bc_num2str (num)
-      bc_num num;
+ void
+_bc_rm_leading_zeros (bc_num num)
 {
-  char *str, *sptr;
-  char *nptr;
-  int  index, signch;
-
-  /* Allocate the string memory. */
-  signch = ( num->n_sign == PLUS ? 0 : 1 );  /* Number of sign chars. */
-  if (num->n_scale > 0)
-    str = (char *)malloc(num->n_len + num->n_scale + 2 + signch);
-  else
-    str = (char *)malloc(num->n_len + 1 + signch);
-  if (str == NULL) bc_out_of_memory();
-
-  /* The negative sign if needed. */
-  sptr = str;
-  if (signch) *sptr++ = '-';
-
-  /* Load the whole number. */
-  nptr = num->n_value;
-  for (index=num->n_len; index>0; index--)
-    *sptr++ = BCD_CHAR(*nptr++);
-
-  /* Now the fraction. */
-  if (num->n_scale > 0)
-    {
-      *sptr++ = '.';
-      for (index=0; index<num->n_scale; index++)
-	*sptr++ = BCD_CHAR(*nptr++);
-    }
-
-  /* Terminate the string and return it! */
-  *sptr = '\0';
-  return (str);
+  /* We can move n_value to point to the first non zero digit! */
+  while (*num->n_value == 0 && num->n_len > 1) {
+    num->n_value++;
+    num->n_len--;
+  }
 }

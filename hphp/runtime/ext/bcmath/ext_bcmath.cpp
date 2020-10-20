@@ -275,12 +275,10 @@ struct bcmathExtension final : Extension {
 } s_bcmath_extension;
 
 ///////////////////////////////////////////////////////////////////////////////
+}
 
-extern "C" {
-  struct BCMathGlobals *get_bcmath_globals() {
-    return &HPHP::s_globals.get()->data;
-  }
+struct BCMathGlobals *get_bcmath_globals() {
+  return &HPHP::s_globals.get()->data;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-}

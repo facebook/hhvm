@@ -51,9 +51,7 @@ int mul_base_digits = MUL_BASE_DIGITS;
 /* Multiply utility routines */
 
 static bc_num
-new_sub_num (length, scale, value)
-     int length, scale;
-     char *value;
+new_sub_num (int length, int scale, char* value)
 {
   bc_num temp;
 

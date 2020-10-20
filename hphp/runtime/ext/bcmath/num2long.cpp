@@ -1,4 +1,4 @@
-/* debug.c: bcmath library file. */
+/* num2long.c: bcmath library file. */
 /*
     Copyright (C) 1991, 1992, 1993, 1994, 1997 Free Software Foundation, Inc.
     Copyright (C) 2000 Philip A. Nelson
@@ -38,32 +38,31 @@
 #include "bcmath.h"
 #include "private.h"
 
-/* pn prints the number NUM in base 10. */
+/* Convert a number NUM to a long.  The function returns only the integer
+   part of the number.  For numbers that are too large to represent as
+   a long, this function returns a zero.  This can be detected by checking
+   the NUM for zero after having a zero returned. */
 
-static void
-out_char (int c)
+long
+bc_num2long (bc_num num)
 {
-  putchar(c);
-}
+  long val;
+  char *nptr;
+  int  index;
 
+  /* Extract the int value, ignore the fraction. */
+  val = 0;
+  nptr = num->n_value;
+  for (index=num->n_len; (index>0) && (val<=(LONG_MAX/BASE)); index--)
+    val = val*BASE + *nptr++;
 
-void
-pn (bc_num num TSRMLS_DC)
-{
-  bc_out_num (num, 10, out_char, 0 TSRMLS_CC);
-  out_char ('\n');
-}
+  /* Check for overflow.  If overflow, return zero. */
+  if (index>0) val = 0;
+  if (val < 0) val = 0;
 
-
-/* pv prints a character array as if it was a string of bcd digits. */
-void
-pv (name, num, len)
-     char *name;
-     unsigned char *num;
-     int len;
-{
-  int i;
-  printf ("%s=", name);
-  for (i=0; i<len; i++) printf ("%c",BCD_CHAR(num[i]));
-  printf ("\n");
+  /* Return the value. */
+  if (num->n_sign == PLUS)
+    return (val);
+  else
+    return (-val);
 }

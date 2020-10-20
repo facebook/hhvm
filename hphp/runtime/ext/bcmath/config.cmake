@@ -1,29 +1,29 @@
 HHVM_DEFINE_EXTENSION("bcmath"
   SOURCES
-    add.c
-    compare.c
-    debug.c
-    div.c
-    divmod.c
-    doaddsub.c
+    add.cpp
+    compare.cpp
+    debug.cpp
+    div.cpp
+    divmod.cpp
+    doaddsub.cpp
     ext_bcmath.cpp
-    init.c
-    int2num.c
-    nearzero.c
-    neg.c
-    num2long.c
-    num2str.c
-    outofmem.c
-    output.c
-    raise.c
-    raisemod.c
-    recmul.c
-    rmzero.c
-    rt.c
-    sqrt.c
-    str2num.c
-    sub.c
-    zero.c
+    init.cpp
+    int2num.cpp
+    nearzero.cpp
+    neg.cpp
+    num2long.cpp
+    num2str.cpp
+    outofmem.cpp
+    output.cpp
+    raise.cpp
+    raisemod.cpp
+    recmul.cpp
+    rmzero.cpp
+    rt.cpp
+    sqrt.cpp
+    str2num.cpp
+    sub.cpp
+    zero.cpp
   HEADERS
     bcmath.h
     config.h

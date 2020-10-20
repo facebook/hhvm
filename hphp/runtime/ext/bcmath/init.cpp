@@ -46,8 +46,7 @@
 /* new_num allocates a number and sets fields to known values. */
 
 bc_num
-_bc_new_num_ex (length, scale, persistent)
-     int length, scale, persistent;
+_bc_new_num_ex (int length, int scale, int persistent)
 {
   bc_num temp;
 
@@ -85,9 +84,7 @@ _bc_new_num_ex (length, scale, persistent)
    frees the storage if reference count is zero. */
 
 void
-_bc_free_num_ex (num, persistent)
-    bc_num *num;
-    int persistent;
+_bc_free_num_ex (bc_num* num, int persistent)
 {
   if (*num == NULL) return;
   (*num)->n_refs--;

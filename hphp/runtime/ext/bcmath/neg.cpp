@@ -1,4 +1,4 @@
-/* rmzero.c: bcmath library file. */
+/* neg.c: bcmath library file. */
 /*
     Copyright (C) 1991, 1992, 1993, 1994, 1997 Free Software Foundation, Inc.
     Copyright (C) 2000 Philip A. Nelson
@@ -38,18 +38,10 @@
 #include "bcmath.h"
 #include "private.h"
 
-/* For many things, we may have leading zeros in a number NUM.
-   _bc_rm_leading_zeros just moves the data "value" pointer to the
-   correct place and adjusts the length. */
+/* In some places we need to check if the number is negative. */
 
- void
-_bc_rm_leading_zeros (num)
-     bc_num num;
+char
+bc_is_neg (bc_num num)
 {
-  /* We can move n_value to point to the first non zero digit! */
-  while (*num->n_value == 0 && num->n_len > 1) {
-    num->n_value++;
-    num->n_len--;
-  }
+  return num->n_sign == MINUS;
 }
-

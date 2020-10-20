@@ -1,4 +1,4 @@
-/* neg.c: bcmath library file. */
+/* int2num.c: bcmath library file. */
 /*
     Copyright (C) 1991, 1992, 1993, 1994, 1997 Free Software Foundation, Inc.
     Copyright (C) 2000 Philip A. Nelson
@@ -38,12 +38,44 @@
 #include "bcmath.h"
 #include "private.h"
 
-/* In some places we need to check if the number is negative. */
 
-char
-bc_is_neg (num)
-     bc_num num;
+/* Convert an integer VAL to a bc number NUM. */
+
+void
+bc_int2num (bc_num* num, int val)
 {
-  return num->n_sign == MINUS;
-}
+  char buffer[30];
+  char *bptr, *vptr;
+  int  ix = 1;
+  char neg = 0;
 
+  /* Sign. */
+  if (val < 0)
+    {
+      neg = 1;
+      val = -val;
+    }
+
+  /* Get things going. */
+  bptr = buffer;
+  *bptr++ = val % BASE;
+  val = val / BASE;
+
+  /* Extract remaining digits. */
+  while (val != 0)
+    {
+      *bptr++ = val % BASE;
+      val = val / BASE;
+      ix++; 		/* Count the digits. */
+    }
+
+  /* Make the number. */
+  bc_free_num (num);
+  *num = bc_new_num (ix, 0);
+  if (neg) (*num)->n_sign = MINUS;
+
+  /* Assign the digits. */
+  vptr = (*num)->n_value;
+  while (ix-- > 0)
+    *vptr++ = *--bptr;
+}

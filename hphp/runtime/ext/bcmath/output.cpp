@@ -58,10 +58,7 @@ static char ref_str[] = "0123456789ABCDEF";
    is the actual routine for writing the characters. */
 
 void
-bc_out_long (val, size, space, out_char)
-     long val;
-     int size, space;
-     void (*out_char)(int);
+bc_out_long (long val, int size, int space, void (*out_char)(int))
 {
   char digits[40];
   int len, ix;

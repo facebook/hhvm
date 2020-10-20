@@ -1,4 +1,4 @@
-/* num2long.c: bcmath library file. */
+/* add.c: bcmath library file. */
 /*
     Copyright (C) 1991, 1992, 1993, 1994, 1997 Free Software Foundation, Inc.
     Copyright (C) 2000 Philip A. Nelson
@@ -38,33 +38,48 @@
 #include "bcmath.h"
 #include "private.h"
 
-/* Convert a number NUM to a long.  The function returns only the integer
-   part of the number.  For numbers that are too large to represent as
-   a long, this function returns a zero.  This can be detected by checking
-   the NUM for zero after having a zero returned. */
 
-long
-bc_num2long (num)
-     bc_num num;
+/* Here is the full add routine that takes care of negative numbers.
+   N1 is added to N2 and the result placed into RESULT.  SCALE_MIN
+   is the minimum scale for the result. */
+
+void
+bc_add (bc_num n1, bc_num n2, bc_num* result, int scale_min)
 {
-  long val;
-  char *nptr;
-  int  index;
+  bc_num sum = NULL;
+  int cmp_res;
+  int res_scale;
 
-  /* Extract the int value, ignore the fraction. */
-  val = 0;
-  nptr = num->n_value;
-  for (index=num->n_len; (index>0) && (val<=(LONG_MAX/BASE)); index--)
-    val = val*BASE + *nptr++;
-
-  /* Check for overflow.  If overflow, return zero. */
-  if (index>0) val = 0;
-  if (val < 0) val = 0;
-
-  /* Return the value. */
-  if (num->n_sign == PLUS)
-    return (val);
+  if (n1->n_sign == n2->n_sign)
+    {
+      sum = _bc_do_add (n1, n2, scale_min);
+      sum->n_sign = n1->n_sign;
+    }
   else
-    return (-val);
-}
+    {
+      /* subtraction must be done. */
+      cmp_res = _bc_do_compare (n1, n2, FALSE, FALSE);  /* Compare magnitudes. */
+      switch (cmp_res)
+	{
+	case -1:
+	  /* n1 is less than n2, subtract n1 from n2. */
+	  sum = _bc_do_sub (n2, n1, scale_min);
+	  sum->n_sign = n2->n_sign;
+	  break;
+	case  0:
+	  /* They are equal! return zero with the correct scale! */
+	  res_scale = MAX (scale_min, MAX(n1->n_scale, n2->n_scale));
+	  sum = bc_new_num (1, res_scale);
+	  memset (sum->n_value, 0, res_scale+1);
+	  break;
+	case  1:
+	  /* n2 is less than n1, subtract n2 from n1. */
+	  sum = _bc_do_sub (n1, n2, scale_min);
+	  sum->n_sign = n1->n_sign;
+	}
+    }
 
+  /* Clean up and return. */
+  bc_free_num (result);
+  *result = sum;
+}

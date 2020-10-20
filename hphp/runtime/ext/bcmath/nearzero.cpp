@@ -43,9 +43,7 @@
    Last digit is defined by scale. */
 
 char
-bc_is_near_zero (num, scale)
-     bc_num num;
-     int scale;
+bc_is_near_zero (bc_num num, int scale)
 {
   int  count;
   char *nptr;
@@ -66,4 +64,3 @@ bc_is_near_zero (num, scale)
   else
     return TRUE;
 }
-

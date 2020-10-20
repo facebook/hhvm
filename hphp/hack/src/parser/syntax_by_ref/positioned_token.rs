@@ -79,6 +79,18 @@ impl<'a> PositionedToken<'a> {
     pub fn inner_ptr_eq(x: &Self, y: &Self) -> bool {
         std::ptr::eq(x.0, y.0)
     }
+
+    pub fn leading(&self) -> TriviaKinds {
+        self.0.leading
+    }
+
+    pub fn trailing(&self) -> TriviaKinds {
+        self.0.trailing
+    }
+
+    pub fn offset(&self) -> usize {
+        self.0.offset
+    }
 }
 
 impl<'a> LexableToken for PositionedToken<'a> {
@@ -183,14 +195,12 @@ impl<'a> token_factory::TokenFactory for TokenFactory<'a> {
     fn with_leading(&mut self, token: Self::Token, leading: CompactTrivia) -> Self::Token {
         let mut new = PositionedTokenImpl::clone(token.0);
         new.leading = leading.kinds;
-        new.leading_width = leading.width;
         PositionedToken(self.arena.alloc(new))
     }
 
     fn with_trailing(&mut self, token: Self::Token, trailing: CompactTrivia) -> Self::Token {
         let mut new = PositionedTokenImpl::clone(token.0);
         new.trailing = trailing.kinds;
-        new.trailing_width = trailing.width;
         PositionedToken(self.arena.alloc(new))
     }
 

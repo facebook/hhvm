@@ -44,6 +44,14 @@ class Code {
   ): this::TAst {
     throw new Exception();
   }
+  public function forStatement(
+    vec<this::TAst> $_init,
+    ?this::TAst $_cond,
+    vec<this::TAst> $_incr,
+    vec<this::TAst> $_body,
+  ): this::TAst {
+    throw new Exception();
+  }
   public function returnStatement(?this::TAst $_): this::TAst {
     throw new Exception();
   }
@@ -56,6 +64,7 @@ class Code {
   }
 }
 function bar(): void {}
+function baz(int $_): void {}
 
 final class ExprTree<TVisitor, TResult, TInfer>{
   public function __construct(
@@ -66,4 +75,5 @@ final class ExprTree<TVisitor, TResult, TInfer>{
 
 function foo(): void {
   $loop = Code`() ==> { while(true) { bar(); } }`;
+  $for = Code`() ==> { for($x = 0; true; $x = $x + 1) { baz($x); } }`;
 }

@@ -87,9 +87,9 @@ function foo(): void {
   // Ban PHP-style lambdas.
   $f = Code`function() { return 1; }`;
 
-  // Ban loops other than while.
+  // Ban do-while and foreach loops.
   $f = Code`() ==> { do {} while(true); }`;
-  $f = Code`() ==> { for($i = 0; $i < 10; $i++) {} }`;
+  $f = Code`(vec<int> $items) ==> { foreach ($items as $_) {} }`;
 
   // Ban lambdas with default arguments.
   $f = Code`(int $x = 1) ==> { return $x; }`;

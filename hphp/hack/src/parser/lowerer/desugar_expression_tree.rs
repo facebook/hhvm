@@ -304,6 +304,29 @@ fn rewrite_stmt(s: &Stmt) -> Option<Expr> {
                 ))
             }
         },
+        // Convert `for (...; ...; ...) {...}` to `$v->forStatement(vec[...], ..., vec[...], vec[...])`.
+        For(w) => {
+            let (init, cond, incr, body) = &**w;
+            let init_exprs = init.iter().map(rewrite_expr).collect();
+            let cond_expr = match cond {
+                Some(cond) => rewrite_expr(cond),
+                None => null_literal(),
+            };
+            let incr_exprs = incr.iter().map(rewrite_expr).collect();
+
+            let body_stmts = rewrite_stmts(body);
+
+            Some(meth_call(
+                "forStatement",
+                vec![
+                    vec_literal(init_exprs),
+                    cond_expr,
+                    vec_literal(incr_exprs),
+                    vec_literal(body_stmts),
+                ],
+                &s.0,
+            ))
+        }
         // Convert `break;` to `$v->breakStatement()`
         Break => Some(meth_call("breakStatement", vec![], &s.0)),
         // Convert `continue;` to `$v->continueStatement()`

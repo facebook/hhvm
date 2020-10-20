@@ -50,6 +50,7 @@ impl<'ast> Visitor<'ast> for Checker {
             Return(_) => {}
             If(_) => {}
             While(_) => {}
+            For(_) => {}
             Break => {}
             Continue => {}
             // Primarily used for if without else, but also used for standalone ;.

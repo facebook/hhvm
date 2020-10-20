@@ -15,133 +15,209 @@
 */
 
 #include "hphp/util/hfsort.h"
-
-#include <set>
-#include <unordered_map>
-
-#include <folly/Format.h>
-
 #include "hphp/util/hash.h"
 #include "hphp/util/trace.h"
 
+#include <folly/Format.h>
+
+#include <set>
+
 namespace HPHP { namespace hfsort {
+
+#define HFTRACE(LEVEL, ...)                                     \
+  if (HPHP::Trace::moduleEnabled(HPHP::Trace::hfsort, LEVEL)) { \
+    HPHP::Trace::traceRelease(__VA_ARGS__);                     \
+}
+
 namespace {
 
-#define HFTRACE(LEVEL, ...)                         \
-  if (Trace::moduleEnabled(Trace::hfsort, LEVEL)) { \
-    Trace::traceRelease(__VA_ARGS__);               \
-  }
-
-// The size of a cache page
-// Since we optimize both for iTLB cache (2MB pages) and i-cache (64b pages),
-// using a value that fits both
-constexpr uint32_t kPageSize = uint32_t(1) << 12;
+// The size of a cache page. Since we optimize both for iTLB cache (2MB pages)
+// and i-cache (64b pages), using a value that fits both
+constexpr uint64_t kCachePageSize = 4096;
 
 // Capacity of the iTLB cache: larger values yield more iTLB-friendly result,
 // while smaller values result in better i-cache performance
-constexpr uint32_t kITLBEntries = 16;
+constexpr uint64_t kCacheEntries = 16;
 
-constexpr size_t kInvalidAddr = -1;
+// The maximum distance (in bytes) of an arc considered for optimization
+constexpr uint64_t kMaxArcDistance = 4096;
 
-// A cache of precomputed results for a pair of clusters
-class PrecomputedResults {
- public:
-  PrecomputedResults() {}
+// A threshold used to filter out edges whose relative weight is smaller than
+// the value
+constexpr double kArcThreshold = 0.00000001;
 
-  bool contains(Cluster* first, Cluster* second) const {
-    if (invalidKeys.count(first) || invalidKeys.count(second)) {
-      return false;
+// The minimum probability of a call for merging two chains
+constexpr double kMergeProbability = 0.95;
+
+class Edge;
+using ArcList = std::vector<const Arc*>;
+
+/*
+ * A chain (ordered sequence) of nodes (functions) in the call graph
+ */
+class Chain {
+public:
+  Chain(const Chain&) = delete;
+  Chain(Chain&&) = default;
+  Chain& operator=(const Chain&) = delete;
+  Chain& operator=(Chain&&) = default;
+
+  explicit Chain(size_t id, TargetId node, size_t samples, size_t size)
+    : id(id),
+      samples(samples),
+      size(size),
+      nodes(1, node) {}
+
+  double density() const {
+    return static_cast<double>(samples) / size;
+  }
+
+  Edge* getEdge(Chain* other) const {
+    for (auto it : edges) {
+      if (it.first == other)
+        return it.second;
     }
-    auto key = std::make_pair(first, second);
-    return cache.find(key) != cache.end();
+    return nullptr;
   }
 
-  double get(Cluster* first, Cluster* second) const {
-    auto key = std::make_pair(first, second);
-    auto it = cache.find(key);
-    assert(it != cache.end());
-    return it->second;
+  void removeEdge(Chain* other) {
+    auto it = edges.begin();
+    while (it != edges.end()) {
+      if (it->first == other) {
+        edges.erase(it);
+        return;
+      }
+      it++;
+    }
   }
 
-  void set(Cluster* first, Cluster* second, double value) {
-    auto key = std::make_pair(first, second);
-    cache[key] = value;
+  void addEdge(Chain* other, Edge* edge) {
+    edges.push_back(std::make_pair(other, edge));
   }
 
-  void validateAll() {
-    invalidKeys.clear();
+  void merge(Chain* other) {
+    nodes.insert(nodes.end(), other->nodes.begin(), other->nodes.end());
+    samples += other->samples;
+    size += other->size;
   }
 
-  void invalidate(Cluster* cluster) {
-    invalidKeys.insert(cluster);
+  void mergeEdges(Chain* other);
+
+  void clear() {
+    nodes.clear();
+    edges.clear();
   }
 
- private:
-  std::unordered_map<std::pair<Cluster*, Cluster*>, double> cache;
-  std::unordered_set<Cluster*> invalidKeys;
+public:
+  size_t id;
+  uint64_t samples;
+  uint64_t size;
+  // Cached score for the chain
+  double score{0};
+  // Cached short-calls for the chain
+  double shortCalls{0};
+  // Nodes in the chain
+  std::vector<TargetId> nodes;
+  // Adjacent chains and corresponding edges (lists of arcs)
+  std::vector<std::pair<Chain*, Edge*>> edges;
 };
 
-// A wrapper for algorthm-wide variables
-struct AlgoState {
-  // the call graph
-  const TargetGraph* cg;
-  // the total number of samples in the graph
-  double totalSamples;
-  // target_id => cluster
-  std::vector<Cluster*> funcCluster;
-  // current address of the function from the beginning of its cluster
-  std::vector<size_t> addr;
+/*
+ * An edge in the call graph representing Arcs between two Chains.
+ * When functions are merged into chains, the edges are combined too so that
+ * there is always at most one edge between a pair of chains
+ */
+class Edge {
+public:
+  Edge(const Edge&) = delete;
+  Edge(Edge&&) = default;
+  Edge& operator=(const Edge&) = delete;
+  Edge& operator=(Edge&&) = default;
+
+  explicit Edge(Chain* srcChain, Chain* dstChain, const Arc *arc)
+    : srcChain(srcChain),
+      dstChain(dstChain),
+      arcs(1, arc) {}
+
+  void changeEndpoint(Chain* from, Chain* to) {
+    if (from == srcChain) {
+      srcChain = to;
+    }
+    if (from == dstChain) {
+      dstChain = to;
+    }
+  }
+
+  void moveArcs(Edge* other) {
+    arcs.insert(arcs.end(), other->arcs.begin(), other->arcs.end());
+    other->arcs.clear();
+  }
+
+  void setMergeGain(Chain* predChain, double forwardGain, double backwardGain) {
+    if (forwardGain >= backwardGain) {
+      isGainForward = predChain == srcChain;
+      cachedGain = forwardGain;
+    } else {
+      isGainForward = predChain != srcChain;
+      cachedGain = backwardGain;
+    }
+  }
+
+  double gain() const {
+    return cachedGain;
+  }
+
+  Chain* predChain() const {
+    return isGainForward ? srcChain : dstChain;
+  }
+
+  Chain* succChain() const {
+    return isGainForward ? dstChain : srcChain;
+  }
+
+private:
+  Chain* srcChain{nullptr};
+  Chain* dstChain{nullptr};
+
+public:
+  // Original arcs in the binary with corresponding execution counts
+  ArcList arcs;
+  // Cached gain of merging the pair of chains
+  double cachedGain{-1.0};
+  // Since the gain of merging (Src, Dst) and (Dst, Src) might be different,
+  // we store a flag indicating which of the options results in a higher gain
+  bool isGainForward;
 };
 
-}
+void Chain::mergeEdges(Chain* other) {
+  assert(this != other && "cannot merge a chain with itself");
 
-/*
- * Sorting clusters by their density in decreasing order
- */
-void sortByDensity(std::vector<Cluster*>& clusters) {
-  std::sort(
-    clusters.begin(),
-    clusters.end(),
-    [&] (const Cluster* c1, const Cluster* c2) {
-      double d1 = c1->density();
-      double d2 = c2->density();
-      // making sure the sorting is deterministic
-      if (d1 != d2) return d1 > d2;
-      if (c1->size != c2->size) return c1->size < c2->size;
-      if (c1->samples != c2->samples) return c1->samples > c2->samples;
-      return c1->targets[0] < c2->targets[0];
+  // Update edges adjacent to chain other
+  for (auto edgeIt : other->edges) {
+    const auto dstChain = edgeIt.first;
+    const auto dstEdge = edgeIt.second;
+    const auto targetChain = dstChain == other ? this : dstChain;
+
+    // Find the corresponding edge in the current chain
+    auto curEdge = getEdge(targetChain);
+    if (curEdge == nullptr) {
+      dstEdge->changeEndpoint(other, this);
+      this->addEdge(targetChain, dstEdge);
+      if (dstChain != this && dstChain != other) {
+        dstChain->addEdge(this, dstEdge);
+      }
+    } else {
+      curEdge->moveArcs(dstEdge);
     }
-  );
+    // Cleanup leftover edge
+    if (dstChain != other) {
+      dstChain->removeEdge(other);
+    }
+  }
 }
 
 /*
- * Density of a cluster formed by merging a given pair of clusters
- */
-double density(Cluster* clusterPred, Cluster* clusterSucc) {
-  double combinedSamples = clusterPred->samples + clusterSucc->samples;
-  double combinedSize = clusterPred->size + clusterSucc->size;
-  return combinedSamples / combinedSize;
-}
-
-/*
- * The probability that a page with a given weight is not present in the cache.
- *
- * Assume that the hot function are called in a random order; then the
- * probability of a TLB page being accessed after a function call is
- * p=pageSamples/totalSamples. The probability that the page is not accessed
- * is (1-p), and the probability that it is not in the cache (i.e. not accessed
- * during the last kITLBEntries function calls) is (1-p)^kITLBEntries
- */
-double missProbability(const AlgoState& state, double pageSamples) {
-  double p = pageSamples / state.totalSamples;
-  double x = kITLBEntries;
-  // avoiding precision issues for small values
-  if (p < 0.0001) return (1.0 - x * p + x * (x - 1.0) * p * p / 2.0);
-  return pow(1.0 - p, x);
-}
-
-/*
- * Expected hit ratio of the iTLB cache under the given order of clusters
+ * HFSortPlus - layout of hot functions with iTLB cache optimization.
  *
  * Given an ordering of hot functions (and hence, their assignment to the
  * iTLB pages), we can divide all functions calls into two categories:
@@ -152,314 +228,434 @@ double missProbability(const AlgoState& state, double pageSamples) {
  * the page is accessed). Assuming that functions are sent to the iTLB cache
  * in a random order, the probability that a page is present in the cache is
  * proportional to the number of samples corresponding to the functions on the
- * page. The following procedure detects short and long calls, and estimates
+ * page. The following algorithm detects short and long calls, and optimizes
  * the expected number of cache misses for the long ones.
  */
-double expectedCacheHitRatio(const AlgoState& state,
-                             const std::vector<Cluster*>& clusters_) {
-  // copy and sort by density
-  std::vector<Cluster*> clusters(clusters_);
-  sortByDensity(clusters);
-
-  // generate function addresses with an alignment
-  std::vector<size_t> addr(state.cg->targets.size(), kInvalidAddr);
-  size_t curAddr = 0;
-  // 'hotness' of the pages
-  std::vector<double> pageSamples;
-  for (auto cluster : clusters) {
-    for (auto targetId : cluster->targets) {
-      if (curAddr & 0xf) curAddr = (curAddr & ~0xf) + 16;
-      addr[targetId] = curAddr;
-      curAddr += state.cg->targets[targetId].size;
-      // update page weight
-      size_t page = addr[targetId] / kPageSize;
-      while (pageSamples.size() <= page) pageSamples.push_back(0.0);
-      pageSamples[page] += state.cg->targets[targetId].samples;
-    }
+class HFSortPlus {
+public:
+  explicit HFSortPlus(const TargetGraph& cg) : cg(cg) {
+    initialize();
   }
 
-  // computing expected number of misses for every function
-  double misses = 0;
-  for (auto cluster : clusters) {
-    for (auto targetId : cluster->targets) {
-      size_t page = addr[targetId] / kPageSize;
-      double samples = state.cg->targets[targetId].samples;
-      // probability that the page is not present in the cache
-      double missProb = missProbability(state, pageSamples[page]);
+  /*
+   * Run the algorithm and return an ordered set of function clusters.
+   */
+  std::vector<Cluster> run() {
+    HFTRACE(1, "Starting hfsort+ for %lu clusters\n", hotChains.size());
 
-      for (auto pred : state.cg->targets[targetId].preds) {
-        if (state.cg->targets[pred].samples == 0) continue;
-        auto arc = state.cg->arcs.find(Arc(pred, targetId));
+    // Pass 1
+    runPassOne();
 
-        // the source page
-        size_t srcPage = (addr[pred] + (size_t)arc->avgCallOffset) / kPageSize;
-        if (page != srcPage) {
-          // this is a miss
-          misses += arc->weight * missProb;
+    // Pass 2
+    runPassTwo();
+
+    // Sorting chains by density in decreasing order
+    auto densityComparator = [](const Chain* c1, const Chain* c2) {
+      if (c1->density() != c2->density()) {
+        return c1->density() > c2->density();
+      }
+      // Making sure the comparison is deterministic
+      return c1->id < c2->id;
+    };
+    std::stable_sort(hotChains.begin(), hotChains.end(), densityComparator);
+
+    // Return the set of clusters that are left, which are the ones that
+    // didn't get merged (so their first func is its original func)
+    std::vector<Cluster> clusters;
+    clusters.reserve(hotChains.size());
+    for (auto Chain : hotChains) {
+      clusters.emplace_back(Cluster(Chain->nodes, cg));
+    }
+    HFTRACE(1, "Completed hfsort+ with %lu clusters\n", hotChains.size());
+    return clusters;
+  }
+
+private:
+  /*
+   * Initialize the set of active chains, function id to chain mapping,
+   * total number of samples and function addresses.
+   */
+  void initialize() {
+    // Find hot functions with samples in the data
+    outWeight.resize(cg.targets.size(), 0);
+    inWeight.resize(cg.targets.size(), 0);
+    for (size_t f = 0; f < cg.targets.size(); ++f) {
+      for (auto succ : cg.targets[f].succs) {
+        const auto arc = cg.arcs.find(Arc(f, succ));
+        outWeight[f] += arc->weight;
+        inWeight[succ] += arc->weight;
+      }
+    }
+    size_t numTargets = 0;
+    for (size_t f = 0; f < cg.targets.size(); ++f) {
+      assert(cg.targets[f].samples >= inWeight[f] && "incorrect input weights");
+      if (inWeight[f] > 0 || outWeight[f] > 0) {
+        numTargets++;
+      }
+    }
+
+    // Initialize chains
+    allChains.reserve(numTargets);
+    hotChains.reserve(numTargets);
+    nodeChain.resize(cg.targets.size(), nullptr);
+    addr.resize(cg.targets.size(), 0);
+    totalSamples = 0.0;
+    for (size_t f = 0; f < cg.targets.size(); ++f) {
+      if (inWeight[f] == 0 && outWeight[f] == 0) continue;
+      allChains.emplace_back(f, f, cg.targets[f].samples, cg.targets[f].size);
+      hotChains.push_back(&allChains.back());
+      nodeChain[f] = &allChains.back();
+      totalSamples += cg.targets[f].samples;
+    }
+
+    allEdges.reserve(cg.arcs.size());
+    for (auto& chain : hotChains) {
+      auto f = chain->nodes.back();
+      for (auto succ : cg.targets[f].succs) {
+        if (f == succ) continue;
+        const Arc& arc = *cg.arcs.find(Arc(f, succ));
+        if (arc.weight == 0.0 || arc.weight / totalSamples < kArcThreshold) {
+          continue;
         }
-        samples -= arc->weight;
-      }
 
-      // the remaining samples come from the jitted code
-      misses += samples * missProb;
+        auto curEdge = nodeChain[f]->getEdge(nodeChain[succ]);
+        if (curEdge != nullptr) {
+          // This edge is already present in the graph
+          assert(nodeChain[succ]->getEdge(nodeChain[f]) != nullptr);
+          curEdge->arcs.push_back(&arc);
+        } else {
+          // This is a new edge
+          allEdges.emplace_back(nodeChain[f], nodeChain[succ], &arc);
+          nodeChain[f]->addEdge(nodeChain[succ], &allEdges.back());
+          nodeChain[succ]->addEdge(nodeChain[f], &allEdges.back());
+        }
+      }
+    }
+
+    for (auto& chain : hotChains) {
+      chain->shortCalls = shortCalls(chain);
+      chain->score = score(chain);
     }
   }
 
-  return 100.0 * (1.0 - misses / state.totalSamples);
-}
+  /*
+   * The probability that a page with a given density is not in the cache.
+   *
+   * Assume that the hot functions are called in a random order; then the
+   * probability of an i-TLB page being accessed after a function call is
+   * p = pageSamples / totalSamples. The probability that the page is not
+   * accessed is (1 - p), and the probability that it is not in the cache
+   * (i.e. not accessed during the last kCacheEntries function calls)
+   * is (1 - p)^kCacheEntries
+   */
+  double missProbability(double chainDensity) const {
+    double pageSamples = chainDensity * kCachePageSize;
+    if (pageSamples >= totalSamples) {
+      return 0;
+    }
 
-/*
- * Get adjacent clusters (the ones that share an arc) with the given one
- */
-std::unordered_set<Cluster*> adjacentClusters(const AlgoState& state,
-                                              Cluster* cluster) {
-  std::unordered_set<Cluster*> result;
-  for (auto targetId : cluster->targets) {
-    for (auto succ : state.cg->targets[targetId].succs) {
-      auto succCluster = state.funcCluster[succ];
-      if (succCluster != nullptr && succCluster != cluster) {
-        result.insert(succCluster);
+    double p = pageSamples / totalSamples;
+    return pow(1.0 - p, double(kCacheEntries));
+  }
+
+  /*
+   * The expected number of calls on different i-TLB pages for an arc of the
+   * call graph with a specified weight.
+   */
+  double expectedCalls(uint64_t srcAddr, uint64_t dstAddr, double weight) const {
+    uint64_t dist = srcAddr >= dstAddr ? srcAddr - dstAddr : dstAddr - srcAddr;
+    if (dist >= kMaxArcDistance) {
+      return 0;
+    }
+
+    double d = double(dist) / double(kMaxArcDistance);
+    // Increasing the importance of shorter calls
+    return (1.0 - d * d) * weight;
+  }
+
+  /*
+   * The expected number of calls within a given chain with both endpoints on
+   * the same cache page.
+   */
+  double shortCalls(Chain* chain) const {
+    auto edge = chain->getEdge(chain);
+    if (edge == nullptr) {
+      return 0;
+    }
+
+    double calls = 0;
+    for (auto arc : edge->arcs) {
+      uint64_t srcAddr = addr[arc->src] + uint64_t(arc->avgCallOffset);
+      uint64_t dstAddr = addr[arc->dst];
+      calls += expectedCalls(srcAddr, dstAddr, arc->weight);
+    }
+    return calls;
+  }
+
+  /*
+   * The number of calls between the two chains with both endpoints on
+   * the same i-TLB page, assuming that a given pair of chains gets merged.
+   */
+  double shortCalls(Chain* chainPred,
+                    Chain* chainSucc,
+                    Edge* edge) const {
+    double calls = 0;
+    for (auto arc : edge->arcs) {
+      auto srcChain = nodeChain[arc->src];
+      uint64_t srcAddr;
+      uint64_t dstAddr;
+      if (srcChain == chainPred) {
+        srcAddr = addr[arc->src] + uint64_t(arc->avgCallOffset);
+        dstAddr = addr[arc->dst] + chainPred->size;
+      } else {
+        srcAddr = addr[arc->src] + uint64_t(arc->avgCallOffset) + chainPred->size;
+        dstAddr = addr[arc->dst];
+      }
+      calls += expectedCalls(srcAddr, dstAddr, arc->weight);
+    }
+
+    calls += chainPred->shortCalls;
+    calls += chainSucc->shortCalls;
+
+    return calls;
+  }
+
+  double score(Chain* chain) const {
+    double longCalls = chain->samples - chain->shortCalls;
+    return longCalls * missProbability(chain->density());
+  }
+
+  /*
+   * The gain of merging two chains.
+   *
+   * We assume that the final chains are sorted by their density, and hence
+   * every chain is likely to be adjacent with chains of the same density.
+   * Thus, the 'hotness' of every chain can be estimated by density*pageSize,
+   * which is used to compute the probability of cache misses for long calls
+   * of a given chain.
+   * The result is also scaled by the size of the resulting chain in order to
+   * increase the chance of merging short chains, which is helpful for
+   * the i-cache performance.
+   */
+  double mergeGain(Chain* chainPred, Chain* chainSucc, Edge* edge) const {
+    // Cache misses on the chains before merging
+    double curScore = chainPred->score + chainSucc->score;
+
+    // Cache misses on the merged chain
+    double longCalls = chainPred->samples + chainSucc->samples -
+                       shortCalls(chainPred, chainSucc, edge);
+    const double mergedSamples = chainPred->samples + chainSucc->samples;
+    const double mergedSize = chainPred->size + chainSucc->size;
+    double newScore = longCalls * missProbability(mergedSamples / mergedSize);
+
+    double gain = curScore - newScore;
+    // Scale the result to increase the importance of merging short chains
+    gain /= std::min(chainPred->size, chainSucc->size);
+
+    return gain;
+  }
+
+  /*
+   * Run the first optimization pass of the algorithm:
+   * Merge chains that call each other with a high probability.
+   */
+  void runPassOne() {
+    // Find candidate pairs of chains for merging
+    std::vector<const Arc*> arcsToMerge;
+    for (auto chainPred : hotChains) {
+      auto f = chainPred->nodes.back();
+      for (auto succ : cg.targets[f].succs) {
+        if (f == succ) continue;
+
+        const Arc& arc = *cg.arcs.find(Arc(f, succ));
+        if (arc.weight == 0.0 || arc.weight / totalSamples < kArcThreshold) {
+          continue;
+        }
+
+        const double callsFromPred = outWeight[f];
+        const double callsToSucc = inWeight[succ];
+        const double callsPredSucc = arc.weight;
+
+        // Probability that the first chain is calling the second one
+        const double probOut =
+          callsFromPred > 0 ? callsPredSucc / callsFromPred : 0;
+        assert(0.0 <= probOut && probOut <= 1.0 && "incorrect out-probability");
+
+        // Probability that the second chain is called from the first one
+        const double probIn =
+          callsToSucc > 0 ? callsPredSucc / callsToSucc : 0;
+        assert(0.0 <= probIn && probIn <= 1.0 && "incorrect in-probability");
+
+        if (std::min(probOut, probIn) >= kMergeProbability) {
+          arcsToMerge.push_back(&arc);
+        }
       }
     }
-    for (auto pred : state.cg->targets[targetId].preds) {
-      auto predCluster = state.funcCluster[pred];
-      if (predCluster != nullptr && predCluster != cluster) {
-        result.insert(predCluster);
-      }
-    }
-  }
-  return result;
-}
 
-/*
- * The expected number of calls for an edge withing the same TLB page
- */
-double expectedCalls(int src_addr, int dst_addr, double edgeWeight) {
-  int dist = std::abs(src_addr - dst_addr);
-  if (dist > kPageSize) {
-    return 0;
-  }
-  return (double(kPageSize - dist) / kPageSize) * edgeWeight;
-}
+    // Sort the pairs by the weight in reverse order
+    std::sort(
+      arcsToMerge.begin(),
+      arcsToMerge.end(),
+      [](const Arc* l, const Arc* r) {
+        return l->weight > r->weight;
+      });
 
-/*
- * The expected number of calls within a given cluster with both endpoints on
- * the same TLB cache page
- */
-double shortCalls(const AlgoState& state, Cluster* cluster) {
-  double calls = 0;
-  for (auto targetId : cluster->targets) {
-    for (auto succ : state.cg->targets[targetId].succs) {
-      if (state.funcCluster[succ] == cluster) {
-        auto arc = state.cg->arcs.find(Arc(targetId, succ));
-
-        int src_addr = state.addr[targetId] + arc->avgCallOffset;
-        int dst_addr = state.addr[succ];
-
-        calls += expectedCalls(src_addr, dst_addr, arc->weight);
+    // Merge the pairs of chains
+    for (auto arc : arcsToMerge) {
+      auto chainPred = nodeChain[arc->src];
+      auto chainSucc = nodeChain[arc->dst];
+      if (chainPred == chainSucc) continue;
+      if (chainPred->nodes.back() == arc->src &&
+          chainSucc->nodes.front() == arc->dst) {
+        mergeChains(chainPred, chainSucc);
       }
     }
   }
 
-  return calls;
-}
+  /*
+   * Run the second optimization pass of the hfsort+ algorithm:
+   * Merge pairs of chains while there is an improvement in the
+   * expected cache miss ratio.
+   */
+  void runPassTwo() {
+    // Creating a priority queue containing all edges ordered by the merge gain
+    auto gainComparator = [&](Edge* A, Edge* B) {
+      if (A->gain() != B->gain()) {
+        return A->gain() > B->gain();
+      }
+      // Making sure the comparison is deterministic
+      if (A->predChain() != B->predChain()) {
+        return A->predChain()->id < B->predChain()->id;
+      }
+      return A->succChain()->id < B->succChain()->id;
+    };
+    std::set<Edge*, decltype(gainComparator)> queue(gainComparator);
 
-/*
- * The number of calls between the two clusters with both endpoints on
- * the same TLB page, assuming that a given pair of clusters gets merged
- */
-double shortCalls(const AlgoState& state,
-                  Cluster* clusterPred,
-                  Cluster* clusterSucc) {
-  double calls = 0;
-  for (auto targetId : clusterPred->targets) {
-    for (auto succ : state.cg->targets[targetId].succs) {
-      if (state.funcCluster[succ] == clusterSucc) {
-        auto arc = state.cg->arcs.find(Arc(targetId, succ));
+    // Inserting the edges into the queue
+    for (auto chainPred : hotChains) {
+      for (auto edgeIt : chainPred->edges) {
+        auto chainSucc = edgeIt.first;
+        auto chainEdge = edgeIt.second;
+        // Ignore loop edges
+        if (chainPred == chainSucc) continue;
+        // Ignore already processed edges
+        if (chainEdge->gain() != -1.0) continue;
 
-        int src_addr = state.addr[targetId] + arc->avgCallOffset;
-        int dst_addr = state.addr[succ] + clusterPred->size;
+        // Compute the gain of merging the two chains
+        auto forwardGain = mergeGain(chainPred, chainSucc, chainEdge);
+        auto backwardGain = mergeGain(chainSucc, chainPred, chainEdge);
+        chainEdge->setMergeGain(chainPred, forwardGain, backwardGain);
+        if (chainEdge->gain() > 0.0) {
+          queue.insert(chainEdge);
+        }
+      }
+    }
 
-        calls += expectedCalls(src_addr, dst_addr, arc->weight);
+    // Merge the chains while the gain of merging is positive
+    while (!queue.empty()) {
+      // Extract the best (top) edge for merging
+      auto it = *queue.begin();
+      queue.erase(queue.begin());
+      Edge* bestEdge = it;
+      Chain* bestChainPred = bestEdge->predChain();
+      Chain* bestChainSucc = bestEdge->succChain();
+      if (bestChainPred == bestChainSucc || bestEdge->gain() <= 0.0) {
+        continue;
+      }
+
+      // Remove outdated edges
+      for (auto edgeIt : bestChainPred->edges) {
+        queue.erase(edgeIt.second);
+      }
+      for (auto edgeIt : bestChainSucc->edges) {
+        queue.erase(edgeIt.second);
+      }
+
+      // Merge the best pair of chains
+      mergeChains(bestChainPred, bestChainSucc);
+
+      // Insert newly created edges into the queue
+      for (auto edgeIt : bestChainPred->edges) {
+        auto chainSucc = edgeIt.first;
+        auto chainEdge = edgeIt.second;
+        // Ignore loop edges
+        if (bestChainPred == chainSucc) continue;
+
+        // Compute the gain of merging the two chains
+        auto forwardGain = mergeGain(bestChainPred, chainSucc, chainEdge);
+        auto backwardGain = mergeGain(chainSucc, bestChainPred, chainEdge);
+        chainEdge->setMergeGain(bestChainPred, forwardGain, backwardGain);
+        if (chainEdge->gain() > 0.0) {
+          queue.insert(chainEdge);
+        }
       }
     }
   }
 
-  for (auto targetId : clusterPred->targets) {
-    for (auto pred : state.cg->targets[targetId].preds) {
-      if (state.funcCluster[pred] == clusterSucc) {
-        auto arc = state.cg->arcs.find(Arc(pred, targetId));
+  /*
+   * Merge chain From into chain Into and update the list of active chains.
+   */
+  void mergeChains(Chain* into, Chain* from) {
+    assert(into != from && "cannot merge a chain with itself");
+    into->merge(from);
 
-        int src_addr = state.addr[pred] + arc->avgCallOffset +
-          clusterPred->size;
-        int dst_addr = state.addr[targetId];
-
-        calls += expectedCalls(src_addr, dst_addr, arc->weight);
-      }
+    // Update the chains and addresses for functions merged from from
+    size_t curAddr = 0;
+    for (auto f : into->nodes) {
+      nodeChain[f] = into;
+      addr[f] = curAddr;
+      curAddr += cg.targets[f].size;
     }
+
+    // Merge edges
+    into->mergeEdges(from);
+    from->clear();
+
+    // Update cached scores for the new chain
+    into->shortCalls = shortCalls(into);
+    into->score = score(into);
+
+    // Remove chain from from the list of active chains
+    auto it = std::remove(hotChains.begin(), hotChains.end(), from);
+    hotChains.erase(it, hotChains.end());
   }
 
-  return calls;
+private:
+  // The call graph
+  const TargetGraph& cg;
+
+  // All chains of functions
+  std::vector<Chain> allChains;
+
+  // Active chains. The vector gets updated at runtime when chains are merged
+  std::vector<Chain*> hotChains;
+
+  // All edges between chains
+  std::vector<Edge> allEdges;
+
+  // Node_id => chain
+  std::vector<Chain*> nodeChain;
+
+  // Current address of the function from the beginning of its chain
+  std::vector<uint64_t> addr;
+
+  // Total weight of outgoing arcs for each function
+  std::vector<double> outWeight;
+
+  // Total weight of incoming arcs for each function
+  std::vector<double> inWeight;
+
+  // The total number of samples in the graph
+  double totalSamples;
+};
+
 }
 
 /*
- * The gain of merging two clusters.
- *
- * We assume that the final clusters are sorted by their density, and hence
- * every cluster is likely to be adjacent with clusters of the same density.
- * Thus, the 'hotness' of every cluster can be estimated by density*pageSize,
- * which is used to compute the probability of cache misses for long calls
- * of a given cluster.
- * The result is also scaled by the size of the resulting cluster in order to
- * increse the chance of merging short clusters, which is helpful for
- * the i-cache performance.
- */
-double mergeGain(const AlgoState& state,
-                 Cluster* clusterPred,
-                 Cluster* clusterSucc) {
-  // cache misses on the first cluster
-  double longCallsPred = clusterPred->samples - shortCalls(state, clusterPred);
-  double probPred = missProbability(state, clusterPred->density() * kPageSize);
-  double expectedMissesPred = longCallsPred * probPred;
-
-  // cache misses on the second cluster
-  double longCallsSucc = clusterSucc->samples - shortCalls(state, clusterSucc);
-  double probSucc = missProbability(state, clusterSucc->density() * kPageSize);
-  double expectedMissesSucc = longCallsSucc * probSucc;
-
-  // cache misses on the merged cluster
-  double longCallsNew = longCallsPred + longCallsSucc -
-                        shortCalls(state, clusterPred, clusterSucc);
-  double newDensity = density(clusterPred, clusterSucc);
-  double probNew = missProbability(state, newDensity * kPageSize);
-  double missesNew = longCallsNew * probNew;
-
-  double gain = expectedMissesPred + expectedMissesSucc - missesNew;
-  // scaling the result to increase the importance of merging short clusters
-  return gain / (clusterPred->size + clusterSucc->size);
-}
-
- /*
-  * Merge two clusters
-  */
-void mergeInto(AlgoState& state, Cluster* into, Cluster* other) {
-  auto& targets = other->targets;
-  into->targets.insert(into->targets.end(), targets.begin(), targets.end());
-  into->size += other->size;
-  into->samples += other->samples;
-
-  size_t curAddr = 0;
-  for (auto targetId : into->targets) {
-    state.funcCluster[targetId] = into;
-    state.addr[targetId] = curAddr;
-    curAddr += state.cg->targets[targetId].size;
-  }
-
-  other->size = 0;
-  other->samples = 0;
-  other->targets.clear();
-}
-
-/*
- * HFSortPlus - layout of hot functions with iTLB cache optimization
+ * HFSortPlus - layout of hot functions with iTLB cache optimization.
  */
 std::vector<Cluster> hfsortPlus(const TargetGraph& cg) {
-  // create a cluster for every function
-  std::vector<Cluster> allClusters;
-  allClusters.reserve(cg.targets.size());
-  for (size_t f = 0; f < cg.targets.size(); f++) {
-    allClusters.emplace_back(f, cg.targets[f]);
-  }
-
-  // initialize objects used by the algorithm
-  std::vector<Cluster*> clusters;
-  clusters.reserve(cg.targets.size());
-  AlgoState state;
-  state.cg = &cg;
-  state.totalSamples = 0;
-  state.funcCluster = std::vector<Cluster*>(cg.targets.size(), nullptr);
-  state.addr = std::vector<size_t>(cg.targets.size(), kInvalidAddr);
-  for (size_t f = 0; f < cg.targets.size(); f++) {
-    if (cg.targets[f].samples == 0) continue;
-
-    clusters.push_back(&allClusters[f]);
-    state.funcCluster[f] = &allClusters[f];
-    state.addr[f] = 0;
-    state.totalSamples += cg.targets[f].samples;
-  }
-
-  HFTRACE(1, "Starting hfsort+ for %lu clusters\n", clusters.size());
-  HFTRACE(1, "Initial expected iTLB cache hit ratio: %.4lf\n",
-    expectedCacheHitRatio(state, clusters));
-
-  // the cache keeps precomputed values of mergeGain for pairs of clusters;
-  // when a pair of clusters (x,y) gets merged, we need to invalidate the pairs
-  // containing both x and y (and recompute them on the next iteration)
-  PrecomputedResults cache;
-
-  int steps = 0;
-  // merge pairs of clusters while there is an improvement
-  while (clusters.size() > 1) {
-    if (steps % 500 == 0) {
-      HFTRACE(1, "step = %d  clusters = %lu  expected_hit_rate = %.4lf\n",
-        steps,
-        clusters.size(),
-        expectedCacheHitRatio(state, clusters));
-    }
-    steps++;
-
-    Cluster* bestClusterPred = nullptr;
-    Cluster* bestClusterSucc = nullptr;
-    double bestGain = -1;
-    for (auto clusterPred : clusters) {
-      // get candidates for merging with the current cluster
-      auto candidateClusters = adjacentClusters(state, clusterPred);
-
-      // find the best candidate
-      for (auto clusterSucc : candidateClusters) {
-        // get a cost of merging two clusters
-        if (!cache.contains(clusterPred, clusterSucc)) {
-          double value = mergeGain(state, clusterPred, clusterSucc);
-          cache.set(clusterPred, clusterSucc, value);
-        }
-
-        double gain = cache.get(clusterPred, clusterSucc);
-        // breaking ties by density to make the hottest clusters be merged first
-        if (gain > bestGain || (std::abs(gain - bestGain) < 1e-8 &&
-                                density(clusterPred, clusterSucc) >
-                                density(bestClusterPred, bestClusterSucc))) {
-          bestGain = gain;
-          bestClusterPred = clusterPred;
-          bestClusterSucc = clusterSucc;
-        }
-      }
-    }
-    cache.validateAll();
-
-    if (bestGain <= 0.0) break;
-
-    cache.invalidate(bestClusterPred);
-    cache.invalidate(bestClusterSucc);
-
-    // merge the best pair of clusters
-    mergeInto(state, bestClusterPred, bestClusterSucc);
-    // remove bestClusterSucc from the list of active clusters
-    auto iter = std::remove(clusters.begin(), clusters.end(), bestClusterSucc);
-    clusters.erase(iter, clusters.end());
-  }
-
-  HFTRACE(1, "Completed hfsort+ with %lu clusters\n", clusters.size());
-  HFTRACE(1, "Final expected iTLB cache hit ratio: %.4lf\n",
-    expectedCacheHitRatio(state, clusters));
-
-  // Return the set of clusters that are left, which are the ones that
-  // didn't get merged (so their first func is its original func).
-  sortByDensity(clusters);
-  std::vector<Cluster> result;
-  for (auto cluster : clusters) {
-    result.emplace_back(std::move(*cluster));
-  }
-  return result;
+  return HFSortPlus(cg).run();
 }
 
 }}

@@ -83,6 +83,7 @@ struct TargetGraph {
 
 struct Cluster {
   Cluster(TargetId id, const Target& f);
+  Cluster(const std::vector<TargetId>& ids, const TargetGraph& cg);
 
   std::string toString() const;
   double density() const;
@@ -148,4 +149,3 @@ void TargetGraph::printDot(char* fileName, L getLabel) const {
 }
 
 }}
-

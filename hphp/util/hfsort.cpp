@@ -108,6 +108,19 @@ Cluster::Cluster(TargetId id, const Target& f) {
   HFTRACE(1, "new Cluster: %s\n", toString().c_str());
 }
 
+Cluster::Cluster(const std::vector<TargetId>& ids, const TargetGraph& cg) {
+  targets.reserve(ids.size());
+  size = 0;
+  samples = 0;
+  frozen = false;
+  for (TargetId id : ids) {
+    targets.push_back(id);
+    size += cg.targets[id].size;
+    samples += cg.targets[id].samples;
+  }
+  HFTRACE(1, "new Cluster: %s\n", toString().c_str());
+}
+
 std::string Cluster::toString() const {
   return folly::sformat("funcs = [{}]", folly::join(", ", targets));
 }

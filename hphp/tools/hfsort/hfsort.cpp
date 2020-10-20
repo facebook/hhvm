@@ -192,6 +192,9 @@ void print(CallGraph& cg, const char* filename,
   double totalCalls    = 0;
   double totalCalls64B = 0;
   double totalCalls4KB = 0;
+  double totalCalls32KB = 0;
+  double totalCalls128KB = 0;
+  double totalCalls512KB = 0;
   double totalCalls2MB = 0;
   std::unordered_map<TargetId,uint64_t> newAddr;
   for (auto& cluster : clusters) {
@@ -234,7 +237,10 @@ void print(CallGraph& cg, const char* filename,
           calls += w;
           if (d < 64)      totalCalls64B += w;
           if (d < 4096)    totalCalls4KB += w;
-          if (d < 2 << 20) totalCalls2MB += w;
+          if (d < 1 << 15) totalCalls32KB += w;
+          if (d < 1 << 17) totalCalls128KB += w;
+          if (d < 1 << 19) totalCalls512KB += w;
+          if (d < 1 << 21) totalCalls2MB += w;
           HFTRACE(
             2,
             "arc: %u [@%lu+%.1lf] -> %u [@%lu]: weight = %.0lf, "
@@ -271,6 +277,12 @@ void print(CallGraph& cg, const char* filename,
            totalCalls64B, 100 * totalCalls64B / totalCalls);
     printf("  Total Calls within 4KB = %.0lf (%.2lf%%)\n",
            totalCalls4KB, 100 * totalCalls4KB / totalCalls);
+    printf("  Total Calls within 32KB = %.0lf (%.2lf%%)\n",
+           totalCalls32KB, 100 * totalCalls32KB / totalCalls);
+    printf("  Total Calls within 128KB = %.0lf (%.2lf%%)\n",
+           totalCalls128KB, 100 * totalCalls128KB / totalCalls);
+    printf("  Total Calls within 512KB = %.0lf (%.2lf%%)\n",
+           totalCalls512KB, 100 * totalCalls512KB / totalCalls);
     printf("  Total Calls within 2MB = %.0lf (%.2lf%%)\n",
            totalCalls2MB, 100 * totalCalls2MB / totalCalls);
   }

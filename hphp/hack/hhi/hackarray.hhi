@@ -10,6 +10,11 @@
 
 namespace HH {
 
+/**
+ * The parent class for all array types (containers that are values).
+ * This currently includes both Hack Arrays (vec, dict, keyset) and Legacy
+ * Arrays (varray, darray).
+ */
 <<__Sealed(dict::class, keyset::class, vec::class)>>
 abstract class AnyArray<+Tk as arraykey, +Tv> implements KeyedContainer<Tk, Tv>, \XHPChild {}
 

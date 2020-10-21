@@ -4,9 +4,9 @@ Invalid argument (Typing[4110])
   Expected `TA`
   File "array_map10.php", line 3, characters 54-55:
   But got `TC`
-  File "hackarray.hhi", line 18, characters 52-52:
+  File "hackarray.hhi", line 23, characters 52-52:
     via this generic `T`
-  File "hackarray.hhi", line 14, characters 77-78:
+  File "hackarray.hhi", line 19, characters 77-78:
     via this generic `Tv`
   File "interfaces.hhi", line 118, characters 99-100:
     via this generic `Tv`

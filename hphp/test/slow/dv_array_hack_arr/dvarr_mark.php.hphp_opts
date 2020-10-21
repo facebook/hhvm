@@ -1,2 +1,2 @@
 -vRuntime.Eval.EmitClsMethPointers=false -vRuntime.Eval.EmitInstMethPointers=false
--vRuntime.Eval.HackArrDVArrs=true -vRuntime.Eval.HackArrDVArrMark=true -vEval.HackArrDVArrVarDump=true
+-vRuntime.Eval.HackArrDVArrs=true -vRuntime.Eval.HackArrDVArrMark=true

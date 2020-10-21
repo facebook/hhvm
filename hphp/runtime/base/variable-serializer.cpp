@@ -914,12 +914,18 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData,
       case ArrayKind::PHP:
         m_buf->append("array (\n");
         break;
-      case ArrayKind::VArray:
-        m_buf->append(m_type == Type::PHPOutput ? "varray [\n" : "array (\n");
+      case ArrayKind::VArray: {
+        auto const dvarray = RO::EvalHackArrDVArrVarExport ||
+                             m_type == Type::PHPOutput;
+        m_buf->append(dvarray ? "varray [\n" : "array (\n");
         break;
-      case ArrayKind::DArray:
-        m_buf->append(m_type == Type::PHPOutput ? "darray [\n" : "array (\n");
+      }
+      case ArrayKind::DArray: {
+        auto const dvarray = RO::EvalHackArrDVArrVarExport ||
+                             m_type == Type::PHPOutput;
+        m_buf->append(dvarray ? "darray [\n" : "array (\n");
         break;
+      }
       case ArrayKind::MarkedVArray:
       case ArrayKind::MarkedDArray:
         always_assert(0);
@@ -954,10 +960,10 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData,
             return "array";
           case ArrayKind::VArray:
           case ArrayKind::MarkedVArray:
-            return RuntimeOption::EvalHackArrDVArrVarDump ? "varray" : "array";
+            return "varray";
           case ArrayKind::DArray:
           case ArrayKind::MarkedDArray:
-            return RuntimeOption::EvalHackArrDVArrVarDump ? "darray" : "array";
+            return "darray";
         }
         not_reached();
       }();
@@ -1140,16 +1146,18 @@ void VariableSerializer::writeArrayKey(
   case Type::PHPOutput:
     indent();
     if (kind == AK::Vec || kind == AK::Keyset) return;
-    if (kind == AK::VArray && m_type == Type::PHPOutput) return;
+    if ((kind == AK::VArray || kind == AK::MarkedVArray) &&
+        (RO::EvalHackArrDVArrVarExport || m_type == Type::PHPOutput)) {
+      return;
+    }
     write(key, true);
     m_buf->append(" => ");
     break;
 
   case Type::VarDump:
   case Type::DebugDump:
-    if (kind == AK::Vec || kind == AK::Keyset) return;
-    if ((kind == AK::VArray || kind == AK::MarkedVArray) &&
-        RuntimeOption::EvalHackArrDVArrVarDump) {
+    if (kind == AK::Vec || kind == AK::Keyset ||
+        kind == AK::VArray || kind == AK::MarkedVArray) {
       return;
     }
     indent();
@@ -1336,9 +1344,12 @@ void VariableSerializer::writeArrayFooter(
         m_buf->append(')');
         break;
       case ArrayKind::VArray:
-      case ArrayKind::DArray:
-        m_buf->append(m_type == Type::PHPOutput ? ']' : ')');
+      case ArrayKind::DArray: {
+        auto const dvarrays = RO::EvalHackArrDVArrVarExport ||
+                              m_type == Type::PHPOutput;
+        m_buf->append(dvarrays ? ']' : ')');
         break;
+      }
       case ArrayKind::MarkedVArray:
       case ArrayKind::MarkedDArray:
         always_assert(0);

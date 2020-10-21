@@ -23,14 +23,23 @@ function write_a_to_b(C $c): void {
   $c->b = id($c->a);
 }
 
-function precision_loss(C $c, Exception $e): void {
+function precision_ok(C $c, Exception $e): void {
   $f = ($a, $b) ==> {
     $c->a = $a;
     $c->b = $b;
     return $c->b;
   };
+
   // ok
   $f($c->a, $c->b);
+}
+
+function precision_ko(C $c, Exception $e): void {
+  $f = ($a, $b) ==> {
+    $c->a = $a;
+    $c->b = $b;
+    return $c->b;
+  };
 
   // calling id on $f leads to imprecision
   $f2 = id($f);
@@ -45,10 +54,16 @@ function a_gets_b(C $c): void {
   $c->a = apply($x ==> $x, $c->b);
 }
 
-function assign_in_func(C $c): void {
+function assign_in_func_ok(C $c): void {
   $f = $x ==> {
     $c->a = $x;
   };
   apply($f, $c->a); // ok
+}
+
+function assign_in_func_ko(C $c): void {
+  $f = $x ==> {
+    $c->a = $x;
+  };
   apply($f, $c->b); // error
 }

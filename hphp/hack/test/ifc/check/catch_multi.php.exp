@@ -7,14 +7,6 @@ Data with policy `A` appears in context `B`. (Typing[4379])
   This may be the data sink with policy `B`
   File "catch_multi.php", line 43, characters 9-17:
   Another program point contributing to the illegal flow
-File "catch_multi.php", line 45, characters 5-14:
-Data with policy `A` appears in context `B`. (Typing[4379])
-  File "catch_multi.php", line 6, characters 14-19:
-  This may be the data source with policy `A`
-  File "catch_multi.php", line 9, characters 14-19:
-  This may be the data sink with policy `B`
-  File "catch_multi.php", line 43, characters 9-17:
-  Another program point contributing to the illegal flow
 File "catch_multi.php", line 61, characters 5-17:
 Data with policy `A` appears in context `B`. (Typing[4379])
   File "catch_multi.php", line 6, characters 14-19:

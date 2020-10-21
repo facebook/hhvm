@@ -26,10 +26,14 @@ function assign_pub(C $c): void {
   $c->b = $c->pub;
 }
 
-function bad_assign(C $c): void {
+function bad_assign_ko1(C $c): void {
+  // illegal!
+  $c->pub = $c->a;
+}
+
+function bad_assign_ko2(C $c): void {
   // illegal!
   $c->a = $c->b;
-  $c->pub = $c->a;
 }
 
 <<Governed("PUBLIC")>>
@@ -38,19 +42,23 @@ function takes_pub(shape("x" => int, "y" => string) $sh): void {}
 <<Governed("A")>>
 function takes_a(shape("x" => int, "y" => string) $sh): void {}
 
-function pass_to_pub(C $c): void {
+function pass_to_pub_ok(C $c): void {
   // ok
   takes_pub($c->pub);
+}
 
+function pass_to_pub_ko(C $c): void {
   // illegal
   takes_pub($c->a);
 }
 
-function pass_to_a(C $c): void {
+function pass_to_a_ok(C $c): void {
   // ok
   takes_a($c->pub);
   takes_a($c->a);
+}
 
+function pass_to_a_ko(C $c): void {
   // illegal
   takes_a($c->b);
 }

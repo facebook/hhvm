@@ -9,17 +9,36 @@ class C {
     public int $b = 0;
 }
 
-function incr_pc(C $c): void {
+function incr_pc_ok1(C $c): void {
   if (!($c->a > 0)) {
     $c->a--; // ok
-    --$c->a;
-    $c->b++; // This is illegal because the PC depends on A
-    ++$c->b;
   }
 }
 
-function assign_uop(C $c): void {
-  // All illegal
+function incr_pc_ok2(C $c): void {
+  if (!($c->a > 0)) {
+    --$c->a; // ok
+  }
+}
+
+function incr_pc_ko1(C $c): void {
+  if (!($c->a > 0)) {
+    $c->b++; // This is illegal because the PC depends on A
+  }
+}
+
+function incr_pc_ko2(C $c): void {
+  if (!($c->a > 0)) {
+    ++$c->b; // This is illegal because the PC depends on A
+  }
+}
+
+function assign_uop_ko1(C $c): void {
+  // illegal
   $c->b = ~$c->a;
+}
+
+function assign_uop_ko2(C $c): void {
+  // illegal
   $c->b = -$c->a;
 }

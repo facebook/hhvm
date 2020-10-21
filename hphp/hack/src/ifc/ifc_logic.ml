@@ -173,7 +173,7 @@ let simplify (c : prop) =
   in
   let dedup l =
     let cpol = compare_policy in
-    let compare = Tuple3.compare ~cmp1:PosSet.compare ~cmp2:cpol ~cmp3:cpol in
+    let compare = Tuple3.compare ~cmp1:(fun _ _ -> 0) ~cmp2:cpol ~cmp3:cpol in
     List.filter
       ~f:(fun (_, p1, p2) -> not (equal_policy p1 p2))
       (List.dedup_and_sort ~compare l)

@@ -39,16 +39,6 @@ Data with policy `A` appears in context `B`. (Typing[4379])
   This may be the data sink with policy `B`
   File "lambda.php", line 39, characters 7-15:
   Another program point contributing to the illegal flow
-  File "lambda.php", line 42, characters 5-18:
-  Another program point contributing to the illegal flow
-File "lambda.php", line 44, characters 3-15:
-Data with policy `A` appears in context `B`. (Typing[4379])
-  File "lambda.php", line 6, characters 14-19:
-  This may be the data source with policy `A`
-  File "lambda.php", line 9, characters 14-19:
-  This may be the data sink with policy `B`
-  File "lambda.php", line 39, characters 7-15:
-  Another program point contributing to the illegal flow
   File "lambda.php", line 40, characters 5-18:
   Another program point contributing to the illegal flow
 File "lambda.php", line 24, characters 3-16:
@@ -76,22 +66,6 @@ Data with policy `B` appears in context `A`. (Typing[4379])
   File "lambda.php", line 13, characters 3-14:
   Another program point contributing to the illegal flow
   File "lambda.php", line 32, characters 7-15:
-  Another program point contributing to the illegal flow
-  File "lambda.php", line 29, characters 9-17:
-  Another program point contributing to the illegal flow
-  File "lambda.php", line 28, characters 3-92:
-  Another program point contributing to the illegal flow
-File "lambda.php", line 35, characters 3-16:
-Data with policy `B` appears in context `A`. (Typing[4379])
-  File "lambda.php", line 9, characters 14-19:
-  This may be the data source with policy `B`
-  File "lambda.php", line 6, characters 14-19:
-  This may be the data sink with policy `A`
-  File "lambda.php", line 14, characters 3-13:
-  Another program point contributing to the illegal flow
-  File "lambda.php", line 13, characters 3-14:
-  Another program point contributing to the illegal flow
-  File "lambda.php", line 30, characters 7-15:
   Another program point contributing to the illegal flow
   File "lambda.php", line 29, characters 9-17:
   Another program point contributing to the illegal flow

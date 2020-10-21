@@ -47,22 +47,6 @@ Data with policy `A` appears in context `B`. (Typing[4379])
   This may be the data sink with policy `B`
   File "switch.php", line 87, characters 10-14:
   Another program point contributing to the illegal flow
-File "switch.php", line 91, characters 7-16:
-Data with policy `A` appears in context `B`. (Typing[4379])
-  File "switch.php", line 6, characters 14-19:
-  This may be the data source with policy `A`
-  File "switch.php", line 9, characters 14-19:
-  This may be the data sink with policy `B`
-  File "switch.php", line 87, characters 10-14:
-  Another program point contributing to the illegal flow
-File "switch.php", line 88, characters 7-16:
-Data with policy `A` appears in context `B`. (Typing[4379])
-  File "switch.php", line 6, characters 14-19:
-  This may be the data source with policy `A`
-  File "switch.php", line 9, characters 14-19:
-  This may be the data sink with policy `B`
-  File "switch.php", line 87, characters 10-14:
-  Another program point contributing to the illegal flow
 File "switch.php", line 104, characters 10-13:
 Data with policy `B` appears in context `A`. (Typing[4379])
   File "switch.php", line 9, characters 14-19:

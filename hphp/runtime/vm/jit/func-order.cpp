@@ -251,8 +251,13 @@ std::pair<std::vector<FuncId>, uint64_t> hfsortFuncs() {
     }
   }
 
-  auto clusters = hfsort::clusterize(cg);
-  sort(clusters.begin(), clusters.end(), hfsort::compareClustersDensity);
+  std::vector<hfsort::Cluster> clusters;
+  if (RuntimeOption::EvalJitPGOHFSortPlus) {
+    clusters = hfsort::hfsortPlus(cg);
+  } else {
+    clusters = hfsort::clusterize(cg);
+    sort(clusters.begin(), clusters.end(), hfsort::compareClustersDensity);
+  }
   if (serverMode) {
     Logger::Info("retranslateAll: finished clusterizing the functions");
   }

@@ -936,6 +936,7 @@ struct RuntimeOption {
   F(bool,     JitPGODumpCallGraph,     false)                           \
   F(bool,     JitPGOOptCodeCallGraph,  true)                            \
   F(bool,     JitPGORacyProfiling,     false)                           \
+  F(bool,     JitPGOHFSortPlus,        false)                           \
   F(uint32_t, JitLiveThreshold,       ServerExecutionMode() ? 1000 : 0) \
   F(uint32_t, JitProfileThreshold,     ServerExecutionMode() ? 200 : 0) \
   F(uint32_t, JitSrcKeyThreshold,      0)                               \

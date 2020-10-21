@@ -3422,7 +3422,7 @@ void selectiveWeakenDecRefs(IRUnit& unit) {
 
   for (auto& block : blocks) {
     for (auto& inst : *block) {
-      if (inst.is(DecRef)) {
+      if (inst.is(DecRef, DecRefNZ)) {
         const auto& type = inst.src(0)->type();
         const auto profile = decRefProfile(unit.context(), &inst);
         if (profile.optimizing()) {
@@ -3434,7 +3434,7 @@ void selectiveWeakenDecRefs(IRUnit& unit) {
             : RuntimeOption::EvalJitPGODecRefNopDecPercentCOW;
           if (decrefdPct < decrefdPctLimit && !(type <= TCounted)) {
             inst.convertToNop();
-          } else {
+          } else if (inst.is(DecRef)) {
             const auto destroyPct = data.percent(data.destroyed());
             double destroyPctLimit = inst.src(0)->type() <= cowFree
               ? RuntimeOption::EvalJitPGODecRefNZReleasePercent

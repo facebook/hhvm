@@ -9,7 +9,7 @@ export HACK_OPAM_DEPS=(
   cmdliner.1.0.4
   core_kernel.v0.12.3
   dtoa.0.3.1
-  dune.2.7.1
+  dune.2.5.1
   fileutils.0.5.3
   lru.0.3.0
   lwt.4.2.1

@@ -1252,6 +1252,15 @@ arrprov::Tag VariableUnserializer::unserializeProvenanceTag() {
     return {};
   }
 
+  auto const read_line = [&]() -> int {
+    expectChar(':');
+    expectChar('i');
+    expectChar(':');
+    auto const line = static_cast<int>(readInt());
+    expectChar(';');
+    return line;
+  };
+
   auto const read_name = [&]() -> const StringData* {
     if (peek() == 't') {
       assertx(m_unitFilename);
@@ -1283,14 +1292,16 @@ arrprov::Tag VariableUnserializer::unserializeProvenanceTag() {
 #define FINISH(x) (RO::EvalArrayProvenance ? arrprov::Tag::x : arrprov::Tag{})
 
   if (peek() == ':') {
-    expectChar(':');
-    expectChar('i');
-    expectChar(':');
-    auto const line = static_cast<int>(readInt());
-    expectChar(';');
+    auto const line = read_line();
     auto const name = read_name();
     expectChar(';');
     return FINISH(Known(name, line));
+  } else if (peek() == 'f') {
+    readChar();
+    auto const line = read_line();
+    auto const name = read_name();
+    expectChar(';');
+    return FINISH(Param(name, line));
   } else if (peek() == 'r') {
     auto const name = expect_name();
     return FINISH(TraitMerge(name));

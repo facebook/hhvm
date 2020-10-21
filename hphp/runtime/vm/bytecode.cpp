@@ -841,9 +841,6 @@ uint32_t prepareUnpackArgs(const Func* func, uint32_t numArgs,
   auto const numUnpackArgs = getContainerSize(unpackArgs);
   auto const numParams = func->numNonVariadicParams();
   if (LIKELY(numArgs == numParams)) {
-    ARRPROV_USE_RUNTIME_LOCATION();
-    // Nothing to unpack.
-    if (numUnpackArgs == 0) return numParams;
     // Convert unpack args to the proper type.
     if (RuntimeOption::EvalHackArrDVArrs) {
       tvCastToVecInPlace(&unpackArgs);

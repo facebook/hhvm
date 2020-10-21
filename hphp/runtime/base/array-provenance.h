@@ -56,13 +56,15 @@ struct Tag {
     KnownTraitMerge,
     /* Dummy tag for all large enums, which we cache as static arrays */
     KnownLargeEnum,
+    /* a particular argument to a function should be marked */
+    KnownFuncParam,
     /* no vmregs are available, filename and line are runtime locations */
     RuntimeLocation,
     /* some piece of the runtime prevented a backtrace from being collected--
      * e.g. the JIT will use this to prevent a tag being assigned to an array
      * in the JIT corresponding to the PHP location that entered the JIT */
     RuntimeLocationPoison,
-    /* known unit + line number. Must be the last kind - see name() for why */
+    /* known unit + line number */
     Known,
     /* NOTE: We CANNOT fit another kind here; kind 7 is reserved */
   };
@@ -70,6 +72,11 @@ struct Tag {
   constexpr Tag() = default;
   Tag(const Func* func, Offset offset);
 
+  static Tag Param(const Func* func, int32_t param);
+
+  static Tag Param(const StringData* func, int32_t param) {
+    return Tag(Kind::KnownFuncParam, func, param);
+  }
   static Tag Known(const StringData* filename, int32_t line) {
     return Tag(Kind::Known, filename, line);
   }
@@ -89,10 +96,12 @@ struct Tag {
   /*
    * `name` means different things for different kinds:
    *  - Kind::Known, Kind::KnownTraitMerge: a Hack filename
-   *  - Kind::LargeEnum: a Hack enum class
+   *  - Kind::KnownLargeEnum: a Hack enum class
+   *  - Kind::KnownFuncParam: a Hack function, param, and filename
    *  - Kind::RuntimeLocation, Kind::RuntimeLocationPoison: a C++ file/line
    *
-   * `line` will be -1 except for Kind::Known, in which case it may be valid.
+   * `line` will be -1 except for Kind::Known and Kind::KnownFuncParam,
+   * in which case it may be a valid Hack line number.
    */
   Kind kind() const;
   const StringData* name() const;
@@ -117,6 +126,7 @@ struct Tag {
     case Kind::Known: return true;
     case Kind::KnownTraitMerge: return true;
     case Kind::KnownLargeEnum: return true;
+    case Kind::KnownFuncParam: return true;
     case Kind::RuntimeLocation: return true;
     case Kind::RuntimeLocationPoison: return false;
     }

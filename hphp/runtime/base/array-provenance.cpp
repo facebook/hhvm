@@ -25,8 +25,9 @@
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/packed-array.h"
-#include "hphp/runtime/vm/vm-regs.h"
+#include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/srckey.h"
+#include "hphp/runtime/vm/vm-regs.h"
 
 #include "hphp/util/stack-trace.h"
 #include "hphp/util/rds-local.h"
@@ -104,6 +105,17 @@ TagID getTagID(TagStorage tag) {
   return it->second;
 }
 
+// "indirect" kinds are kinds that are always stored in the TagStorage table.
+// These are the only kinds that have both a name and a line number, because
+// arrprov::Tag is only 4 bytes and cannot store both itself.
+constexpr bool isIndirectKind(Tag::Kind kind) {
+  return kind == Tag::Kind::Known || kind == Tag::Kind::KnownFuncParam;
+}
+
+const StringData* getFilename(const Func* func, const Unit* unit) {
+  return func->isBuiltin() ? unit->filepath() : func->filename();
+}
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -112,8 +124,19 @@ Tag::Tag(const Func* func, Offset offset) {
   // Builtins have empty filenames, so use the unit; else use func->filename
   // in order to resolve the original filenames of flattened traits.
   auto const unit = func->unit();
-  auto const file = func->isBuiltin() ? unit->filepath() : func->filename();
-  *this = Known(file, unit->getLineNumber(offset));
+  *this = Known(getFilename(func, unit), unit->getLineNumber(offset));
+}
+
+Tag Tag::Param(const Func* func, int32_t param) {
+  // The text computation here is expensive, but Param() is only used in the
+  // interpreter and the JIT - the tag is burned into JIT-ed code for speed.
+  assertx(func->fullName());
+  auto const unit = func->unit();
+  auto const file = getFilename(func, unit);
+  auto const line = unit->getLineNumber(func->base());
+  auto const text = folly::to<std::string>(
+      "param ", param, " of ", func->fullName()->data(), " at ", file->data());
+  return Tag::Param(makeStaticString(text), line);
 }
 
 Tag::Tag(Tag::Kind kind, const StringData* name, int32_t line) {
@@ -123,7 +146,7 @@ Tag::Tag(Tag::Kind kind, const StringData* name, int32_t line) {
   assertx((k & uintptr_t(name)) == 0);
   assertx(kind != Kind::Invalid);
 
-  if (kind == Kind::Known) {
+  if (isIndirectKind(kind)) {
     m_id = k | (getTagID({name, line}) << kKindBits);
   } else if (uintptr_t(name) <= std::numeric_limits<TagID>::max()) {
     m_id = k | safe_cast<TagID>(uintptr_t(name));
@@ -144,15 +167,17 @@ Tag::Kind Tag::kind() const {
 }
 const StringData* Tag::name() const {
   auto const bits = m_id & kKindMask;
-  if (bits < TagID(Kind::Known)) {
-    return reinterpret_cast<StringData*>(m_id & ~kKindMask);
+  if (bits == kKindMask || isIndirectKind(Kind(bits))) {
+    return getTagStorage(size_t(m_id) >> kKindBits).first;
   }
-  return getTagStorage(size_t(m_id) >> kKindBits).first;
+  return reinterpret_cast<StringData*>(m_id & ~kKindMask);
 }
 int32_t Tag::line() const {
   auto const bits = m_id & kKindMask;
-  if (bits != TagID(Kind::Known)) return -1;
-  return getTagStorage(size_t(m_id) >> kKindBits).second;
+  if (isIndirectKind(Kind(bits))) {
+    return getTagStorage(size_t(m_id) >> kKindBits).second;
+  }
+  return -1;
 }
 uint64_t Tag::hash() const {
   return m_id;
@@ -170,6 +195,7 @@ std::string Tag::toString() const {
   case Kind::Invalid:
     return "unknown location (no tag)";
   case Kind::Known:
+  case Kind::KnownFuncParam:
     return folly::sformat("{}:{}", name()->slice(), line());
   case Kind::KnownTraitMerge:
     return folly::sformat("{}:{} (trait xinit merge)", name()->slice(), -1);

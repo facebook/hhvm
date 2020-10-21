@@ -239,7 +239,9 @@ inline void initFuncInputs(const Func* callee, uint32_t numArgsInclUnpack) {
   }
 
   if (callee->hasVariadicCaptureParam()) {
-    ARRPROV_USE_RUNTIME_LOCATION();
+    arrprov::TagOverride _(RO::EvalArrayProvenance
+      ? arrprov::Tag::Param(callee, numParams)
+      : arrprov::Tag{});
     auto const ad = ArrayData::CreateVArray();
     vmStack().pushArrayLikeNoRc(ad);
     ++numArgsInclUnpack;

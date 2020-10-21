@@ -171,8 +171,6 @@ std::string Tag::toString() const {
     return "unknown location (no tag)";
   case Kind::Known:
     return folly::sformat("{}:{}", name()->slice(), line());
-  case Kind::UnknownRepo:
-    return "unknown location (repo union)";
   case Kind::KnownTraitMerge:
     return folly::sformat("{}:{} (trait xinit merge)", name()->slice(), -1);
   case Kind::KnownLargeEnum:

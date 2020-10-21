@@ -600,7 +600,6 @@ struct ProvTag {
 
   static ProvTag Top;
   static ProvTag NoTag;
-  static ProvTag SomeTag;
 
   static ProvTag FromSArr(SArray a) {
     assertx(RO::EvalArrayProvenance);

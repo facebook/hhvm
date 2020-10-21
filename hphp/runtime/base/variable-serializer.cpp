@@ -1793,10 +1793,6 @@ void VariableSerializer::serializeArrayImpl(const ArrayData* arr,
         write_name(tag.name());
         break;
       }
-      case arrprov::Tag::Kind::UnknownRepo: {
-        m_buf->append("pu;");
-        break;
-      }
       case arrprov::Tag::Kind::KnownTraitMerge: {
         m_buf->append("pr:");
         write_name(tag.name());

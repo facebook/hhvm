@@ -1291,10 +1291,6 @@ arrprov::Tag VariableUnserializer::unserializeProvenanceTag() {
     auto const name = read_name();
     expectChar(';');
     return FINISH(Known(name, line));
-  } else if (peek() == 'u') {
-    expectChar('u');
-    expectChar(';');
-    return FINISH(RepoUnion());
   } else if (peek() == 'r') {
     auto const name = expect_name();
     return FINISH(TraitMerge(name));

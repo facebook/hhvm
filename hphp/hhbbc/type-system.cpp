@@ -49,7 +49,6 @@ TRACE_SET_MOD(hhbbc);
 TYPES(X)
 #undef X
 
-ProvTag ProvTag::SomeTag = arrprov::Tag::RepoUnion();
 ProvTag ProvTag::Top = {};
 ProvTag ProvTag::NoTag = ProvTag::KnownEmpty{};
 
@@ -572,25 +571,14 @@ trep combine_dv_arr_like_bits(trep a, trep b) {
  * Determine if one provenance tag is a (non-strict) subtype of another
  */
 bool subtypeProvTag(ProvTag p1, ProvTag p2) {
-  return p2 == ProvTag::Top ||
-    (p2 == ProvTag::SomeTag && p1 != ProvTag::NoTag) ||
-    p1 == p2;
+  return p1 == p2 || p2 == ProvTag::Top;
 }
 
 /*
  * Compute the union of two provenance tags
  */
 ProvTag unionProvTag(ProvTag p1, ProvTag p2) {
-  if (p1 == p2) {
-    return p1;
-  } else if (p1 == ProvTag::NoTag ||
-             p2 == ProvTag::NoTag ||
-             p1 == ProvTag::Top ||
-             p2 == ProvTag::Top) {
-    return ProvTag::Top;
-  } else {
-    return ProvTag::SomeTag;
-  }
+  return p1 == p2 ? p1 : ProvTag::Top;
 }
 
 /*
@@ -602,17 +590,11 @@ ProvTag unionProvTag(ProvTag p1, ProvTag p2) {
  * wider than either input type.
  */
 ProvTag intersectProvTag(ProvTag p1, ProvTag p2) {
-  if (p1 == ProvTag::Top) {
+  if (p1 == p2) {
+    return p1;
+  } else if (p1 == ProvTag::Top) {
     return p2;
   } else if (p2 == ProvTag::Top) {
-    return p1;
-  } else if (p1 == p2) {
-    return p1;
-  } else if (p1 == ProvTag::NoTag || p2 == ProvTag::NoTag) {
-    return ProvTag::Top;
-  } else if (p1 == ProvTag::SomeTag) {
-    return p2;
-  } else if (p2 == ProvTag::SomeTag) {
     return p1;
   } else {
     return ProvTag::Top;
@@ -627,11 +609,7 @@ ProvTag intersectProvTag(ProvTag p1, ProvTag p2) {
  * they do not match.
  */
 bool couldBeProvTag(ProvTag p1, ProvTag p2) {
-  return p1 == ProvTag::Top ||
-    p2 == ProvTag::Top ||
-    (p1 == ProvTag::SomeTag && p2 != ProvTag::NoTag) ||
-    (p2 == ProvTag::SomeTag && p1 != ProvTag::NoTag) ||
-    p1 == p2;
+  return p1 == p2 || p1 == ProvTag::Top || p2 == ProvTag::Top;
 }
 
 LegacyMark intersectLegacyMark(LegacyMark a, LegacyMark b) {

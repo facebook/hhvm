@@ -52,8 +52,6 @@ struct Tag {
   enum class Kind {
     /* uninitialized */
     Invalid,
-    /* result of a union in a repo build */
-    UnknownRepo,
     /* lost original line number as a result of trait ${x}init merges */
     KnownTraitMerge,
     /* Dummy tag for all large enums, which we cache as static arrays */
@@ -75,9 +73,6 @@ struct Tag {
   static Tag Known(const StringData* filename, int32_t line) {
     return Tag(Kind::Known, filename, line);
   }
-  static Tag RepoUnion() {
-    return Tag(Kind::UnknownRepo, nullptr);
-  }
   static Tag TraitMerge(const StringData* filename) {
     return Tag(Kind::KnownTraitMerge, filename);
   }
@@ -93,7 +88,7 @@ struct Tag {
 
   /*
    * `name` means different things for different kinds:
-   *  - Kind::Known, Kind::TraitMerge: a Hack filename
+   *  - Kind::Known, Kind::KnownTraitMerge: a Hack filename
    *  - Kind::LargeEnum: a Hack enum class
    *  - Kind::RuntimeLocation, Kind::RuntimeLocationPoison: a C++ file/line
    *
@@ -120,7 +115,6 @@ struct Tag {
     switch (kind()) {
     case Kind::Invalid: return false;
     case Kind::Known: return true;
-    case Kind::UnknownRepo: return false;
     case Kind::KnownTraitMerge: return true;
     case Kind::KnownLargeEnum: return true;
     case Kind::RuntimeLocation: return true;

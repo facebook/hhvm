@@ -39,9 +39,7 @@
 #include "bcmath.h"
 #include "private.h"
 
-#if SANDER_0
- bc_num _bc_Free_list = NULL;
-#endif
+#include <folly/ScopeGuard.h>
 
 /* new_num allocates a number and sets fields to known values. */
 
@@ -52,28 +50,14 @@ _bc_new_num_ex (int length, int scale, int persistent)
 
   assert(length >= 0);
   assert(scale >= 0);
-  size_t malloc_size = sizeof(bc_struct) + (size_t)length + (size_t)scale;
-  if (malloc_size > INT_MAX) {
-    bc_out_of_memory();
-  }
 
-  temp = (bc_num)malloc(malloc_size);
-  if (temp == NULL) bc_out_of_memory();
-#if 0
-  if (_bc_Free_list != NULL) {
-    temp = _bc_Free_list;
-    _bc_Free_list = temp->n_next;
-  } else {
-    temp = (bc_num)malloc (sizeof(bc_struct));
-    if (temp == NULL) bc_out_of_memory ();
-  }
-#endif
+  temp = (bc_num)bc_malloc(sizeof(bc_struct) + (size_t)length + (size_t)scale);
+  SCOPE_FAIL { bc_free(temp); };
   temp->n_sign = PLUS;
   temp->n_len = length;
   temp->n_scale = scale;
   temp->n_refs = 1;
-  temp->n_ptr = (char *)malloc(length + scale);
-  if (temp->n_ptr == NULL) bc_out_of_memory();
+  temp->n_ptr = (char *)bc_malloc(length + scale);
   temp->n_value = temp->n_ptr;
   memset(temp->n_ptr, 0, length + scale);
   return temp;
@@ -90,30 +74,12 @@ _bc_free_num_ex (bc_num* num, int persistent)
   (*num)->n_refs--;
   if ((*num)->n_refs == 0) {
     if ((*num)->n_ptr) {
-      free((*num)->n_ptr);
+      bc_free((*num)->n_ptr);
     }
-    free(*num);
-#if 0
-    (*num)->n_next = _bc_Free_list;
-    _bc_Free_list = *num;
-#endif
+    bc_free(*num);
   }
   *num = NULL;
 }
-
-
-/* Intitialize the number package! */
-
-void
-bc_init_numbers (TSRMLS_D)
-{
-  BCG(_zero_) = _bc_new_num_ex (1,0,1);
-  BCG(_one_)  = _bc_new_num_ex (1,0,1);
-  BCG(_one_)->n_value[0] = 1;
-  BCG(_two_)  = _bc_new_num_ex (1,0,1);
-  BCG(_two_)->n_value[0] = 2;
-}
-
 
 /* Make a copy of a number!  Just increments the reference count! */
 

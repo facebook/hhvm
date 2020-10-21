@@ -38,6 +38,8 @@
 #include "bcmath.h"
 #include "private.h"
 
+#include <folly/ScopeGuard.h>
+
 /* Recursive vs non-recursive multiply crossover ranges. */
 #if defined(MULDIGITS)
 #include "muldigits.h"
@@ -55,17 +57,7 @@ new_sub_num (int length, int scale, char* value)
 {
   bc_num temp;
 
-#ifdef SANDER_0
-  if (_bc_Free_list != NULL) {
-    temp = _bc_Free_list;
-    _bc_Free_list = temp->n_next;
-  } else {
-#endif
-    temp = (bc_num)malloc (sizeof(bc_struct));
-#ifdef SANDER_0
-    if (temp == NULL) bc_out_of_memory ();
-  }
-#endif
+  temp = (bc_num)bc_malloc (sizeof(bc_struct));
   temp->n_sign = PLUS;
   temp->n_len = length;
   temp->n_scale = scale;
@@ -197,6 +189,14 @@ _bc_rec_mul (bc_num u, int ulen, bc_num v, int vlen, bc_num *prod,
   n = (MAX(ulen, vlen)+1) / 2;
 
   /* Split u and v. */
+  u0 = NULL;
+  u1 = NULL;
+  v0 = NULL;
+  v1 = NULL;
+  SCOPE_EXIT { bc_free_num(&u0); };
+  SCOPE_EXIT { bc_free_num(&u1); };
+  SCOPE_EXIT { bc_free_num(&v0); };
+  SCOPE_EXIT { bc_free_num(&v1); };
   if (ulen < n) {
     u1 = bc_copy_num (BCG(_zero_));
     u0 = new_sub_num (ulen,0, u->n_value);
@@ -221,24 +221,31 @@ _bc_rec_mul (bc_num u, int ulen, bc_num v, int vlen, bc_num *prod,
   /* Calculate sub results ... */
 
   bc_init_num(&d1 TSRMLS_CC);
+  SCOPE_EXIT { bc_free_num(&d1); };
   bc_init_num(&d2 TSRMLS_CC);
+  SCOPE_EXIT { bc_free_num(&d2); };
   bc_sub (u1, u0, &d1, 0);
   d1len = d1->n_len;
   bc_sub (v0, v1, &d2, 0);
   d2len = d2->n_len;
 
-
   /* Do recursive multiplies and shifted adds. */
+  m1 = NULL;
+  SCOPE_EXIT { bc_free_num(&m1); };
   if (m1zero)
     m1 = bc_copy_num (BCG(_zero_));
   else
     _bc_rec_mul (u1, u1->n_len, v1, v1->n_len, &m1, 0 TSRMLS_CC);
 
+  m2 = NULL;
+  SCOPE_EXIT { bc_free_num(&m2); };
   if (bc_is_zero(d1 TSRMLS_CC) || bc_is_zero(d2 TSRMLS_CC))
     m2 = bc_copy_num (BCG(_zero_));
   else
     _bc_rec_mul (d1, d1len, d2, d2len, &m2, 0 TSRMLS_CC);
 
+  m3 = NULL;
+  SCOPE_EXIT { bc_free_num(&m3); };
   if (bc_is_zero(u0 TSRMLS_CC) || bc_is_zero(v0 TSRMLS_CC))
     m3 = bc_copy_num (BCG(_zero_));
   else
@@ -255,17 +262,6 @@ _bc_rec_mul (bc_num u, int ulen, bc_num v, int vlen, bc_num *prod,
   _bc_shift_addsub (*prod, m3, n, 0);
   _bc_shift_addsub (*prod, m3, 0, 0);
   _bc_shift_addsub (*prod, m2, n, d1->n_sign != d2->n_sign);
-
-  /* Now clean up! */
-  bc_free_num (&u1);
-  bc_free_num (&u0);
-  bc_free_num (&v1);
-  bc_free_num (&m1);
-  bc_free_num (&v0);
-  bc_free_num (&m2);
-  bc_free_num (&m3);
-  bc_free_num (&d1);
-  bc_free_num (&d2);
 }
 
 /* The multiply routine.  N2 times N1 is put int PROD with the scale of

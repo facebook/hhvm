@@ -38,6 +38,8 @@
 #include "bcmath.h"
 #include "private.h"
 
+#include <folly/ScopeGuard.h>
+
 /* Convert a numbers to a string.  Base 10 only.*/
 
 char
@@ -50,10 +52,10 @@ char
   /* Allocate the string memory. */
   signch = ( num->n_sign == PLUS ? 0 : 1 );  /* Number of sign chars. */
   if (num->n_scale > 0)
-    str = (char *)malloc(num->n_len + num->n_scale + 2 + signch);
+    str = (char *)bc_malloc(num->n_len + num->n_scale + 2 + signch);
   else
-    str = (char *)malloc(num->n_len + 1 + signch);
-  if (str == NULL) bc_out_of_memory();
+    str = (char *)bc_malloc(num->n_len + 1 + signch);
+  SCOPE_FAIL { bc_free(str); };
 
   /* The negative sign if needed. */
   sptr = str;

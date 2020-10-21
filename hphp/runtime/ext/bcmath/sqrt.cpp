@@ -38,6 +38,8 @@
 #include "bcmath.h"
 #include "private.h"
 
+#include <folly/ScopeGuard.h>
+
 /* Take the square root NUM and return it in NUM with SCALE digits
    after the decimal place. */
 
@@ -72,11 +74,14 @@ bc_sqrt (bc_num *num, int scale TSRMLS_DC)
   /* Initialize the variables. */
   rscale = MAX (scale, (*num)->n_scale);
   bc_init_num(&guess TSRMLS_CC);
+  SCOPE_EXIT { bc_free_num(&guess); };
   bc_init_num(&guess1 TSRMLS_CC);
+  SCOPE_EXIT { bc_free_num(&guess1); };
   bc_init_num(&diff TSRMLS_CC);
+  SCOPE_EXIT { bc_free_num(&diff); };
   point5 = bc_new_num (1,1);
+  SCOPE_EXIT { bc_free_num(&point5); };
   point5->n_value[1] = 5;
-
 
   /* Calculate the initial guess. */
   if (cmp_res < 0)
@@ -120,10 +125,5 @@ bc_sqrt (bc_num *num, int scale TSRMLS_DC)
   /* Assign the number and clean up. */
   bc_free_num (num);
   bc_divide (guess,BCG(_one_),num,rscale TSRMLS_CC);
-  bc_free_num (&guess);
-  bc_free_num (&guess1);
-  bc_free_num (&point5);
-  bc_free_num (&diff);
   return 1;
 }
-

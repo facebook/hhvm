@@ -38,6 +38,8 @@
 #include "bcmath.h"
 #include "private.h"
 
+#include <folly/ScopeGuard.h>
+
 /* Raise BASE to the EXPO power, reduced modulo MOD.  The result is
    placed in RESULT.  If a EXPO is not an integer,
    only the integer part is used.  */
@@ -54,9 +56,13 @@ bc_raisemod (bc_num base, bc_num expo, bc_num mod, bc_num *result, int scale TSR
 
   /* Set initial values.  */
   power = bc_copy_num (base);
+  SCOPE_EXIT { bc_free_num(&power); };
   exponent = bc_copy_num (expo);
+  SCOPE_EXIT { bc_free_num(&exponent); };
   temp = bc_copy_num (BCG(_one_));
+  SCOPE_FAIL { bc_free_num(&temp); };
   bc_init_num(&parity TSRMLS_CC);
+  SCOPE_EXIT { bc_free_num(&parity); };
 
   /* Check the base for scale digits. */
   if (base->n_scale != 0)
@@ -89,10 +95,7 @@ bc_raisemod (bc_num base, bc_num expo, bc_num mod, bc_num *result, int scale TSR
     }
 
   /* Assign the value. */
-  bc_free_num (&power);
-  bc_free_num (&exponent);
   bc_free_num (result);
-  bc_free_num (&parity);
   *result = temp;
   return 0;	/* Everything is OK. */
 }

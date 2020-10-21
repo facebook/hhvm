@@ -38,6 +38,7 @@
 #include "bcmath.h"
 #include "private.h"
 
+#include <folly/ScopeGuard.h>
 
 /* Division *and* modulo for numbers.  This computes both NUM1 / NUM2 and
    NUM1 % NUM2  and puts the results in QUOT and REM, except that if QUOT
@@ -57,6 +58,7 @@ bc_divmod (bc_num num1, bc_num num2, bc_num *quot, bc_num *rem, int scale TSRMLS
   /* Calculate final scale. */
   rscale = MAX (num1->n_scale, num2->n_scale+scale);
   bc_init_num(&temp TSRMLS_CC);
+  SCOPE_EXIT { bc_free_num(&temp); };
 
   /* Calculate it. */
   bc_divide (num1, num2, &temp, scale TSRMLS_CC);
@@ -64,7 +66,6 @@ bc_divmod (bc_num num1, bc_num num2, bc_num *quot, bc_num *rem, int scale TSRMLS
     quotient = bc_copy_num (temp);
   bc_multiply (temp, num2, &temp, rscale TSRMLS_CC);
   bc_sub (num1, temp, rem, rscale);
-  bc_free_num (&temp);
 
   if (quot)
     {
@@ -84,4 +85,3 @@ bc_modulo (bc_num num1, bc_num num2, bc_num *result, int scale TSRMLS_DC)
 {
   return bc_divmod (num1, num2, NULL, result, scale TSRMLS_CC);
 }
-

@@ -13,13 +13,11 @@ HHVM_DEFINE_EXTENSION("bcmath"
     neg.cpp
     num2long.cpp
     num2str.cpp
-    outofmem.cpp
     output.cpp
     raise.cpp
     raisemod.cpp
     recmul.cpp
     rmzero.cpp
-    rt.cpp
     sqrt.cpp
     str2num.cpp
     sub.cpp

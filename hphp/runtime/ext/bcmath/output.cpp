@@ -38,6 +38,7 @@
 #include "bcmath.h"
 #include "private.h"
 
+#include <folly/ScopeGuard.h>
 
 /* The following routines provide output for bcd numbers package
    using the rules of POSIX bc for output. */
@@ -123,16 +124,21 @@ bc_out_num (bc_num num, int o_base, void (*out_char)(int), int leading_zero TSRM
 	/* The number is some other base. */
 	digits = NULL;
 	bc_init_num (&int_part TSRMLS_CC);
+        SCOPE_EXIT { bc_free_num(&int_part); };
 	bc_divide (num, BCG(_one_), &int_part, 0 TSRMLS_CC);
 	bc_init_num (&frac_part TSRMLS_CC);
+        SCOPE_EXIT { bc_free_num(&frac_part); };
 	bc_init_num (&cur_dig TSRMLS_CC);
+        SCOPE_EXIT { bc_free_num(&cur_dig); };
 	bc_init_num (&base TSRMLS_CC);
+        SCOPE_EXIT { bc_free_num(&base); };
 	bc_sub (num, int_part, &frac_part, 0);
 	/* Make the INT_PART and FRAC_PART positive. */
 	int_part->n_sign = PLUS;
 	frac_part->n_sign = PLUS;
 	bc_int2num (&base, o_base);
 	bc_init_num (&max_o_digit TSRMLS_CC);
+        SCOPE_EXIT { bc_free_num(&max_o_digit); };
 	bc_int2num (&max_o_digit, o_base-1);
 
 
@@ -140,9 +146,8 @@ bc_out_num (bc_num num, int o_base, void (*out_char)(int), int leading_zero TSRM
 	while (!bc_is_zero (int_part TSRMLS_CC))
 	  {
 	    bc_modulo (int_part, base, &cur_dig, 0 TSRMLS_CC);
-		/* PHP Change:  malloc() -> emalloc() */
-	    temp = (stk_rec *)malloc (sizeof(stk_rec));
-	    if (temp == NULL) bc_out_of_memory();
+            temp = (stk_rec *)bc_malloc (sizeof(stk_rec));
+            SCOPE_FAIL { bc_free(temp); };
 	    temp->digit = bc_num2long (cur_dig);
 	    temp->next = digits;
 	    digits = temp;
@@ -161,7 +166,7 @@ bc_out_num (bc_num num, int o_base, void (*out_char)(int), int leading_zero TSRM
 		  (*out_char) (ref_str[ (int) temp->digit]);
 		else
 		  bc_out_long (temp->digit, max_o_digit->n_len, 1, out_char);
-		free (temp);
+		bc_free(temp);
 	      }
 	  }
 
@@ -171,6 +176,7 @@ bc_out_num (bc_num num, int o_base, void (*out_char)(int), int leading_zero TSRM
 	    (*out_char) ('.');
 	    pre_space = 0;
 	    t_num = bc_copy_num (BCG(_one_));
+            SCOPE_EXIT { bc_free_num(&t_num); };
 	    while (t_num->n_len <= num->n_scale) {
 	      bc_multiply (frac_part, base, &frac_part, num->n_scale TSRMLS_CC);
 	      fdigit = bc_num2long (frac_part);
@@ -185,14 +191,6 @@ bc_out_num (bc_num num, int o_base, void (*out_char)(int), int leading_zero TSRM
 	      }
 	      bc_multiply (t_num, base, &t_num, 0 TSRMLS_CC);
 	    }
-	    bc_free_num (&t_num);
-	  }
-
-	/* Clean up. */
-	bc_free_num (&int_part);
-	bc_free_num (&frac_part);
-	bc_free_num (&base);
-	bc_free_num (&cur_dig);
-	bc_free_num (&max_o_digit);
+          }
       }
 }

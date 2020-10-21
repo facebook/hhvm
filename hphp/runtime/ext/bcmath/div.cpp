@@ -38,6 +38,7 @@
 #include "bcmath.h"
 #include "private.h"
 
+#include <folly/ScopeGuard.h>
 
 /* Some utility routines for the divide:  First a one digit multiply.
    NUM (with SIZE digits) is multiplied by DIGIT and the result is
@@ -124,14 +125,14 @@ bc_divide (bc_num n1, bc_num n2, bc_num *quot, int scale TSRMLS_DC)
     extra = scale - scale1;
   else
     extra = 0;
-  num1 = (unsigned char *)malloc(n1->n_len+n1->n_scale + extra+2);
-  if (num1 == NULL) bc_out_of_memory();
+  num1 = (unsigned char *)bc_malloc(n1->n_len+n1->n_scale + extra+2);
+  SCOPE_EXIT { bc_free(num1); };
   memset (num1, 0, n1->n_len+n1->n_scale+extra+2);
   memcpy (num1+1, n1->n_value, n1->n_len+n1->n_scale);
 
   len2 = n2->n_len + scale2;
-  num2 = (unsigned char *)malloc(len2 + 1);
-  if (num2 == NULL) bc_out_of_memory();
+  num2 = (unsigned char *)bc_malloc(len2 + 1);
+  SCOPE_EXIT { bc_free(num2); };
   memcpy (num2, n2->n_value, len2);
   *(num2+len2) = 0;
   n2ptr = num2;
@@ -158,11 +159,12 @@ bc_divide (bc_num n1, bc_num n2, bc_num *quot, int scale TSRMLS_DC)
 
   /* Allocate and zero the storage for the quotient. */
   qval = bc_new_num (qdigits-scale,scale);
+  SCOPE_FAIL { bc_free_num(&qval); };
   memset (qval->n_value, 0, qdigits);
 
   /* Allocate storage for the temporary storage mval. */
-  mval = (unsigned char *)malloc(len2 + 1);
-  if (mval == NULL) bc_out_of_memory ();
+  mval = (unsigned char *)bc_malloc(len2 + 1);
+  SCOPE_EXIT { bc_free(mval); };
 
   /* Now for the full divide algorithm. */
   if (!zero)
@@ -260,11 +262,6 @@ bc_divide (bc_num n1, bc_num n2, bc_num *quot, int scale TSRMLS_DC)
   _bc_rm_leading_zeros (qval);
   bc_free_num (quot);
   *quot = qval;
-
-  /* Clean up temporary storage. */
-  free (mval);
-  free (num1);
-  free (num2);
 
   return 0;	/* Everything is OK. */
 }

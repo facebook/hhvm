@@ -85,8 +85,6 @@ typedef struct bc_struct
 
 /* Function Prototypes */
 
-void bc_init_numbers(TSRMLS_D);
-
 bc_num _bc_new_num_ex(int length, int scale, int persistent);
 
 void _bc_free_num_ex(bc_num *num, int persistent);
@@ -140,7 +138,9 @@ void bc_out_num(bc_num num, int o_base, void (* out_char)(int),
 
 void bc_rt_warn(char *mesg ,...);
 void bc_rt_error(char *mesg ,...);
-void bc_out_of_memory(void);
+
+void* bc_malloc(size_t total);
+void bc_free(void* ptr);
 
 #define bc_new_num(length, scale)    _bc_new_num_ex((length), (scale), 0)
 #define bc_free_num(num)             _bc_free_num_ex((num), 0)

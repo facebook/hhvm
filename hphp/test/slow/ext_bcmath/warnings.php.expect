@@ -1,0 +1,10 @@
+Error: bc math warning: non-zero scale in exponent (2)
+string(31) "1267650600228229401496703205376"
+Error: bc math error: exponent too large in raise (4096)
+string(1) "1"
+Error: bc math warning: non-zero scale in base (2)
+string(1) "9"
+Error: bc math warning: non-zero scale in exponent (2)
+string(1) "8"
+Error: bc math warning: non-zero scale in modulus (2)
+string(1) "8"

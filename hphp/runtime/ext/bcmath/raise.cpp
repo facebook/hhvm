@@ -38,6 +38,7 @@
 #include "bcmath.h"
 #include "private.h"
 
+#include <folly/ScopeGuard.h>
 
 /* Raise NUM1 to the NUM2 power.  The result is placed in RESULT.
    Maximum exponent is LONG_MAX.  If a NUM2 is not an integer,
@@ -83,6 +84,7 @@ bc_raise (bc_num num1, bc_num num2, bc_num *result, int scale TSRMLS_DC)
 
    /* Set initial value of temp.  */
    power = bc_copy_num (num1);
+   SCOPE_EXIT { bc_free_num(&power); };
    pwrscale = num1->n_scale;
    while ((exponent & 1) == 0)
      {
@@ -91,6 +93,7 @@ bc_raise (bc_num num1, bc_num num2, bc_num *result, int scale TSRMLS_DC)
        exponent = exponent >> 1;
      }
    temp = bc_copy_num (power);
+   SCOPE_FAIL { bc_free_num(&temp); };
    calcscale = pwrscale;
    exponent = exponent >> 1;
 
@@ -119,6 +122,4 @@ bc_raise (bc_num num1, bc_num num2, bc_num *result, int scale TSRMLS_DC)
        if ((*result)->n_scale > rscale)
 	 (*result)->n_scale = rscale;
      }
-   bc_free_num (&power);
 }
-

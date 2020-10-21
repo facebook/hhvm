@@ -20,4 +20,9 @@ class C {
 
   // should be default
   public function defaults(): void {}
+
+  public function with_args(
+    <<__External>> C $x,
+    <<__CanCall>> (function(): void) $f
+  ): void {}
 }

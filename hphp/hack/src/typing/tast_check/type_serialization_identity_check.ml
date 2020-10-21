@@ -52,7 +52,9 @@ let rec strip_ty ty =
               ~mode:(get_fp_mode fp)
               ~accept_disposable:false
               ~mutability:None
-              ~has_default:false;
+              ~has_default:false
+              ~ifc_external:false
+              ~ifc_can_call:false;
           (* Dummy values: these aren't currently serialized. *)
           fp_pos = Pos.none;
           fp_name = None;

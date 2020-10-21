@@ -106,7 +106,21 @@ let handler =
         1
         2;
       check_deprecated_static f.f_user_attributes;
-      check_ifc_enabled (Nast_check_env.get_tcopt env) f.f_user_attributes
+      check_ifc_enabled (Nast_check_env.get_tcopt env) f.f_user_attributes;
+      let params = f.f_params in
+      List.iter
+        (fun fp ->
+          check_attribute_arity
+            fp.param_user_attributes
+            SN.UserAttributes.uaExternal
+            0
+            0;
+          check_attribute_arity
+            fp.param_user_attributes
+            SN.UserAttributes.uaCanCall
+            0
+            0)
+        params
 
     method! at_method_ env m =
       check_attribute_arity m.m_user_attributes SN.UserAttributes.uaPolicied 0 1;

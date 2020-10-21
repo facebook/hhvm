@@ -96,3 +96,7 @@ let fp_flags_accept_disposable = 1 lsl 0
 let fp_flags_inout             = 1 lsl 1
 
 let fp_flags_has_default       = 1 lsl 2
+
+let fp_flags_ifc_external      = 1 lsl 3
+
+let fp_flags_ifc_can_call      = 1 lsl 4

@@ -598,7 +598,9 @@ let default_fun_param ?(pos = Pos.none) ty : 'a fun_param =
         ~mode:FPnormal
         ~accept_disposable:false
         ~mutability:None
-        ~has_default:false;
+        ~has_default:false
+        ~ifc_external:false
+        ~ifc_can_call:false;
     fp_rx_annotation = None;
   }
 

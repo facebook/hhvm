@@ -473,6 +473,10 @@ module Flags = struct
 
   let get_fp_mutability fp = from_mutable_flags fp.fp_flags
 
+  let get_fp_ifc_external fp = is_set fp.fp_flags fp_flags_ifc_external
+
+  let get_fp_ifc_can_call fp = is_set fp.fp_flags fp_flags_ifc_can_call
+
   let fun_kind_to_flags kind =
     match kind with
     | Ast_defs.FSync -> 0
@@ -497,11 +501,19 @@ module Flags = struct
     | FPnormal -> 0x0
     | FPinout -> fp_flags_inout
 
-  let make_fp_flags ~mode ~accept_disposable ~mutability ~has_default =
+  let make_fp_flags
+      ~mode
+      ~accept_disposable
+      ~mutability
+      ~has_default
+      ~ifc_external
+      ~ifc_can_call =
     let flags = mode_to_flags mode in
     let flags = Int.bit_or (to_mutable_flags mutability) flags in
     let flags = set_bit fp_flags_accept_disposable accept_disposable flags in
     let flags = set_bit fp_flags_has_default has_default flags in
+    let flags = set_bit fp_flags_ifc_external ifc_external flags in
+    let flags = set_bit fp_flags_ifc_can_call ifc_can_call flags in
     flags
 
   let get_fp_accept_disposable fp =
@@ -971,7 +983,16 @@ module Pp = struct
       Format.fprintf fmt "@[~%s:" "mode";
       Format.fprintf fmt "%s" (show_param_mode (get_fp_mode fp));
       Format.fprintf fmt "@]";
+      Format.fprintf fmt "@ ";
 
+      Format.fprintf fmt "@[~%s:" "ifc_external";
+      Format.fprintf fmt "%B" (get_fp_ifc_external fp);
+      Format.fprintf fmt "@]";
+      Format.fprintf fmt "@ ";
+
+      Format.fprintf fmt "@[~%s:" "ifc_can_call";
+      Format.fprintf fmt "%B" (get_fp_ifc_can_call fp);
+      Format.fprintf fmt "@]";
       Format.fprintf fmt ")@]"
     in
 

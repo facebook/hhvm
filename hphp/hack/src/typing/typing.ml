@@ -5032,7 +5032,9 @@ and dispatch_call
                           ~mode:FPnormal
                           ~accept_disposable:true
                           ~mutability:None
-                          ~has_default:false;
+                          ~has_default:false
+                          ~ifc_external:false
+                          ~ifc_can_call:false;
                       fp_rx_annotation = None;
                     });
               ft_implicit_params =
@@ -6358,6 +6360,8 @@ and call
                   ~accept_disposable:false (* TODO: deal with disposables *)
                   ~mutability:(Some Param_maybe_mutable)
                   ~has_default:false
+                  ~ifc_external:false
+                  ~ifc_can_call:false
               in
               {
                 fp_pos = pos;

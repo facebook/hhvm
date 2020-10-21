@@ -79,6 +79,12 @@ let find_policied_attribute user_attributes : ifc_fun_decl =
 let has_accept_disposable_attribute user_attributes =
   Naming_attributes.mem SN.UserAttributes.uaAcceptDisposable user_attributes
 
+let has_external_attribute user_attributes =
+  Naming_attributes.mem SN.UserAttributes.uaExternal user_attributes
+
+let has_can_call_attribute user_attributes =
+  Naming_attributes.mem SN.UserAttributes.uaCanCall user_attributes
+
 let has_return_disposable_attribute user_attributes =
   Naming_attributes.mem SN.UserAttributes.uaReturnDisposable user_attributes
 
@@ -240,7 +246,9 @@ let make_param_ty env ~is_lambda param =
         ~mutability:(get_param_mutability param.param_user_attributes)
         ~accept_disposable:
           (has_accept_disposable_attribute param.param_user_attributes)
-        ~has_default:(Option.is_some param.param_expr);
+        ~has_default:(Option.is_some param.param_expr)
+        ~ifc_external:(has_external_attribute param.param_user_attributes)
+        ~ifc_can_call:(has_can_call_attribute param.param_user_attributes);
     fp_rx_annotation = rx_annotation;
   }
 
@@ -257,7 +265,9 @@ let make_ellipsis_param_ty pos =
         ~mode:FPnormal
         ~mutability:None
         ~accept_disposable:false
-        ~has_default:false;
+        ~has_default:false
+        ~ifc_external:false
+        ~ifc_can_call:false;
     fp_rx_annotation = None;
   }
 

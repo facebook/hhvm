@@ -101,7 +101,11 @@ and hint_ p env = function
             ~mode:(get_param_mode k)
             ~accept_disposable:false
             ~mutability
-            ~has_default:false;
+            ~has_default:
+              false
+              (* Currently do not support external and cancall on parameters of function parameters *)
+            ~ifc_external:false
+            ~ifc_can_call:false;
         fp_rx_annotation = None;
       }
     in

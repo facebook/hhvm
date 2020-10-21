@@ -177,7 +177,8 @@ Parsed decls:
                      };
                    fp_flags =
                    (make_fp_flags ~mutability:None ~accept_disposable:false
-                     ~has_default:false ~mode:Typing_defs_core.FPnormal);
+                     ~has_default:false ~mode:Typing_defs_core.FPnormal
+                     ~ifc_external:false ~ifc_can_call:false);
                     };
                   { fp_pos = [16:9-14]; fp_name = (Some "$arg2");
                     fp_type =
@@ -188,7 +189,8 @@ Parsed decls:
                       };
                     fp_flags =
                     (make_fp_flags ~mutability:None ~accept_disposable:false
-                      ~has_default:false ~mode:Typing_defs_core.FPnormal);
+                      ~has_default:false ~mode:Typing_defs_core.FPnormal
+                      ~ifc_external:false ~ifc_can_call:false);
                      }
                   ];
                 ft_implicit_params =
@@ -317,7 +319,8 @@ Parsed decls:
                    (make_fp_flags
                      ~mutability:(Some Typing_defs_core.Param_borrowed_mutable)
                      ~accept_disposable:false ~has_default:false
-                     ~mode:Typing_defs_core.FPnormal);
+                     ~mode:Typing_defs_core.FPnormal ~ifc_external:false
+                     ~ifc_can_call:false);
                     };
                   { fp_pos = [34:32-34]; fp_name = (Some "$b");
                     fp_type =
@@ -330,7 +333,8 @@ Parsed decls:
                     (make_fp_flags
                       ~mutability:(Some Typing_defs_core.Param_maybe_mutable)
                       ~accept_disposable:false ~has_default:false
-                      ~mode:Typing_defs_core.FPnormal);
+                      ~mode:Typing_defs_core.FPnormal ~ifc_external:false
+                      ~ifc_can_call:false);
                      };
                   { fp_pos = [35:32-34]; fp_name = (Some "$c");
                     fp_type =
@@ -343,7 +347,8 @@ Parsed decls:
                     (make_fp_flags
                       ~mutability:(Some Typing_defs_core.Param_owned_mutable)
                       ~accept_disposable:false ~has_default:false
-                      ~mode:Typing_defs_core.FPnormal);
+                      ~mode:Typing_defs_core.FPnormal ~ifc_external:false
+                      ~ifc_can_call:false);
                      }
                   ];
                 ft_implicit_params =
@@ -451,7 +456,8 @@ Parsed decls:
                        fp_flags =
                        (make_fp_flags ~mutability:None
                          ~accept_disposable:false ~has_default:false
-                         ~mode:Typing_defs_core.FPnormal);
+                         ~mode:Typing_defs_core.FPnormal ~ifc_external:false
+                         ~ifc_can_call:false);
                         };
                       { fp_pos = [52:22-32]; fp_name = (Some "$protected");
                         fp_type =
@@ -463,7 +469,8 @@ Parsed decls:
                         fp_flags =
                         (make_fp_flags ~mutability:None
                           ~accept_disposable:false ~has_default:false
-                          ~mode:Typing_defs_core.FPnormal);
+                          ~mode:Typing_defs_core.FPnormal ~ifc_external:false
+                          ~ifc_can_call:false);
                          };
                       { fp_pos = [53:19-26]; fp_name = (Some "$public");
                         fp_type =
@@ -475,7 +482,8 @@ Parsed decls:
                         fp_flags =
                         (make_fp_flags ~mutability:None
                           ~accept_disposable:false ~has_default:false
-                          ~mode:Typing_defs_core.FPnormal);
+                          ~mode:Typing_defs_core.FPnormal ~ifc_external:false
+                          ~ifc_can_call:false);
                          };
                       { fp_pos = [54:19-30]; fp_name = (Some "$hasDefault");
                         fp_type =
@@ -487,7 +495,8 @@ Parsed decls:
                         fp_flags =
                         (make_fp_flags ~mutability:None
                           ~accept_disposable:false ~has_default:true
-                          ~mode:Typing_defs_core.FPnormal);
+                          ~mode:Typing_defs_core.FPnormal ~ifc_external:false
+                          ~ifc_can_call:false);
                          }
                       ];
                     ft_implicit_params =

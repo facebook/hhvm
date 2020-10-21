@@ -162,6 +162,77 @@ Parsed decls:
                   ~returns_mutable:false ~returns_void_to_rx:false);
                 ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {#PUBLIC}
                 }));
+          sm_visibility = Public; sm_deprecated = None };
+        { Shallow_decl_defs.sm_abstract = false; sm_final = false;
+          sm_memoizelsb = false; sm_name = ([24:19-28], "with_args");
+          sm_override = false; sm_dynamicallycallable = false;
+          sm_reactivity = None;
+          sm_type =
+          (Rwitness (root|ifc_policied.php line 24, characters 19-27),
+           (Tfun
+              { ft_arity = (Fstandard ()); ft_tparams = [];
+                ft_where_constraints = [];
+                ft_params =
+                [{ fp_pos = [25:22-24]; fp_name = (Some "$x");
+                   fp_type =
+                   { et_enforced = false;
+                     et_type =
+                     (Rhint (root|ifc_policied.php line 25, characters 20-20),
+                      (Tapply (([25:20-21], "\\C"), [])))
+                     };
+                   fp_flags =
+                   (make_fp_flags ~mutability:None ~accept_disposable:false
+                     ~has_default:false ~mode:Typing_defs_core.FPnormal
+                     ~ifc_external:true ~ifc_can_call:false);
+                    };
+                  { fp_pos = [26:38-40]; fp_name = (Some "$f");
+                    fp_type =
+                    { et_enforced = false;
+                      et_type =
+                      (Rhint (root|ifc_policied.php line 26, characters 19-36),
+                       (Tfun
+                          { ft_arity = (Fstandard ()); ft_tparams = [];
+                            ft_where_constraints = []; ft_params = [];
+                            ft_implicit_params =
+                            { capability =
+                              (Rhint (root|ifc_policied.php line 26, characters 19-36),
+                               (Tunion []))
+                              };
+                            ft_ret =
+                            { et_enforced = false;
+                              et_type =
+                              (Rhint (root|ifc_policied.php line 26, characters 32-35),
+                               (Tprim Tvoid))
+                              };
+                            ft_flags =
+                            (make_ft_flags FSync None
+                              ~return_disposable:false ~returns_mutable:false
+                              ~returns_void_to_rx:false);
+                            ft_reactive = Nonreactive;
+                            ft_ifc_decl = FDPolicied {#PUBLIC} }))
+                      };
+                    fp_flags =
+                    (make_fp_flags ~mutability:None ~accept_disposable:false
+                      ~has_default:false ~mode:Typing_defs_core.FPnormal
+                      ~ifc_external:false ~ifc_can_call:true);
+                     }
+                  ];
+                ft_implicit_params =
+                { capability =
+                  (Rhint (root|ifc_policied.php line 24, characters 19-27),
+                   (Tunion []))
+                  };
+                ft_ret =
+                { et_enforced = false;
+                  et_type =
+                  (Rhint (root|ifc_policied.php line 27, characters 6-9),
+                   (Tprim Tvoid))
+                  };
+                ft_flags =
+                (make_ft_flags FSync None ~return_disposable:false
+                  ~returns_mutable:false ~returns_void_to_rx:false);
+                ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {#PUBLIC}
+                }));
           sm_visibility = Public; sm_deprecated = None }
         ];
       sc_user_attributes = []; sc_enum_type = None };

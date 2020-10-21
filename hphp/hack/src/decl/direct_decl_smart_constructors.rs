@@ -770,6 +770,8 @@ struct Attributes<'a> {
     returns_disposable: bool,
     php_std_lib: bool,
     policied: IfcFunDecl<'a>,
+    external: bool,
+    can_call: bool,
 }
 
 impl<'a> DirectDeclSmartConstructors<'a> {
@@ -1013,6 +1015,8 @@ impl<'a> DirectDeclSmartConstructors<'a> {
             returns_disposable: false,
             php_std_lib: false,
             policied: default_ifc_fun_decl(),
+            external: false,
+            can_call: false,
         };
 
         // If we see the attribute `__OnlyRxIfImpl(Foo::class)`, set
@@ -1135,6 +1139,12 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                     }
                     "__InferFlows" => {
                         attributes.policied = IfcFunDecl::FDInferFlows;
+                    }
+                    "__External" => {
+                        attributes.external = true;
+                    }
+                    "__CanCall" => {
+                        attributes.can_call = true;
                     }
                     _ => {}
                 }
@@ -1425,6 +1435,12 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                             };
                             if attributes.accept_disposable {
                                 flags |= FunParamFlags::ACCEPT_DISPOSABLE
+                            }
+                            if attributes.external {
+                                flags |= FunParamFlags::IFC_EXTERNAL
+                            }
+                            if attributes.can_call {
+                                flags |= FunParamFlags::IFC_CAN_CALL
                             }
                             match kind {
                                 ParamMode::FPinout => {

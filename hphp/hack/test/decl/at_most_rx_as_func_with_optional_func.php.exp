@@ -37,7 +37,8 @@ Parsed decls:
                              fp_flags =
                              (make_fp_flags ~mutability:None
                                ~accept_disposable:false ~has_default:false
-                               ~mode:Typing_defs_core.FPnormal);
+                               ~mode:Typing_defs_core.FPnormal
+                               ~ifc_external:false ~ifc_can_call:false);
                               }
                            ];
                          ft_implicit_params =
@@ -59,7 +60,8 @@ Parsed decls:
                };
               fp_flags =
               (make_fp_flags ~mutability:None ~accept_disposable:false
-                ~has_default:true ~mode:Typing_defs_core.FPnormal);
+                ~has_default:true ~mode:Typing_defs_core.FPnormal
+                ~ifc_external:false ~ifc_can_call:false);
                }
             ];
           ft_implicit_params =

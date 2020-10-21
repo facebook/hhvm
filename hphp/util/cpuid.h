@@ -23,6 +23,7 @@ enum class ProcessorFamily {
   Intel_Haswell,
   Intel_Broadwell,
   Intel_Skylake,
+  Intel_Cooperlake,
   Unknown,
 };
 
@@ -59,9 +60,14 @@ ProcessorFamily getProcessorFamily() {
       case 0x56:
         f = ProcessorFamily::Intel_Broadwell;
         break;
+      case 0x55:
+        f = ProcessorFamily::Intel_Cooperlake;
+        break;
       default:
         if (CPUID_MODEL(x) >= 0x5E) {
-          // Any newer processors.
+          // Any newer processors.  This is not correct.  New processors may
+          // not fall into this case.  Model numbers are not monotonically
+          // increasing.
           f = ProcessorFamily::Intel_Skylake;
         }
         break;

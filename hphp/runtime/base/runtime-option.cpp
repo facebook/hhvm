@@ -939,6 +939,7 @@ static inline bool alignMacroFusionPairs() {
     case ProcessorFamily::Intel_Haswell:
     case ProcessorFamily::Intel_Broadwell:
     case ProcessorFamily::Intel_Skylake:
+    case ProcessorFamily::Intel_Cooperlake:
       return true;
     case ProcessorFamily::Unknown:
       return false;

@@ -56,3 +56,8 @@ class H extends G {
   <<__CippRx>>
   public function f(): void {}
 }
+
+class I extends A {
+  <<__Cipp>>
+  public function f(): void {}
+}

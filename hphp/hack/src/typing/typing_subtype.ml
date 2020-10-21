@@ -2445,12 +2445,24 @@ and simplify_subtype_reactivity
       end
     | _ -> invalid_env env
   in
+  let is_some_cipp_or_pure r =
+    match r with
+    | Pure _
+    | CippRx ->
+      true
+    | Nonreactive -> false
+    | _ -> not (any_reactive r)
+  in
   match (r_sub, r_super) with
-  (* anything reactive is a subtype of nonreactive functions *)
-  | ( ( Nonreactive | Local _ | Shallow _ | Reactive _ | Pure _
-      | MaybeReactive _ | RxVar _ | CippLocal _ | CippGlobal ),
-      Nonreactive ) ->
-    valid env
+  (* hardcode that cipp can't call noncipp and vice versa since we want to
+    allow subtyping to aid in testing, but let normal calling checks handle
+    cipp/pure v cipp/pure *)
+  | (Cipp _, _) when is_call_site && not (is_some_cipp_or_pure r_super) ->
+    invalid_env env
+  | (_, Cipp _) when is_call_site && not (is_some_cipp_or_pure r_sub) ->
+    invalid_env env
+  (* anything is a subtype of nonreactive functions *)
+  | (_, Nonreactive) -> valid env
   (* to compare two maybe reactive values we need to unwrap them *)
   | (MaybeReactive sub, MaybeReactive super) ->
     simplify_subtype_reactivity

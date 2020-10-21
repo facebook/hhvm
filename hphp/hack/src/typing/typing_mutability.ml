@@ -31,9 +31,9 @@ module Shared (Env : Env_S) = struct
       match get_node fun_ty with
       | Tfun fty ->
         begin
-          match (Env.env_reactivity env, fty.ft_reactive) with
+          match Env.env_reactivity env with
           (* in localrx context assume non-reactive functions to return mutable *)
-          | (Local _, Nonreactive) -> true
+          | Local _ when not (any_reactive fty.ft_reactive) -> true
           | _ -> get_ft_returns_mutable fty
         end
       | _ -> false

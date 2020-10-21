@@ -278,7 +278,7 @@ let check_mutability_fun_params env mut_args call_ty el =
   match get_node call_ty with
   | Tfun fty ->
     (* exit early if when calling non-reactive function *)
-    if equal_reactivity fty.ft_reactive Nonreactive then
+    if not (any_reactive fty.ft_reactive) then
       ()
     else
       let params = fty.ft_params in
@@ -386,7 +386,7 @@ let enforce_mutable_call (env : Env.env) (te : expr) =
       match get_node efun_ty with
       | Tfun fty ->
         (* do not check receiver mutability when calling non-reactive function *)
-        if not (equal_reactivity fty.ft_reactive Nonreactive) then (
+        if any_reactive fty.ft_reactive then (
           let fpos = get_pos efun_ty in
           (* OwnedMutable annotation is not allowed on methods so
        we ignore it here since it already syntax error *)
@@ -562,28 +562,22 @@ let check =
     inherit [ctx] Tast_visitor.iter_with_state as super
 
     method handle_body env ctx b =
-      match ctx.reactivity with
-      | Nonreactive
-      | Cipp _
-      | CippLocal _
-      | CippGlobal ->
+      if not (any_reactive ctx.reactivity) then
         List.iter b.fb_ast (check_non_rx#on_stmt env)
-      | _ ->
-        begin
-          match b.fb_ast with
-          | [(_, If (((p, _), Id (_, c)), then_stmt, else_stmt))]
-            when SN.Rx.is_enabled c ->
-            (match ctx.reactivity with
-            | Pure _
-            | MaybeReactive (Pure _)
-            | RxVar (Some (Pure _)) ->
-              Errors.rx_enabled_in_non_rx_context p;
-              List.iter b.fb_ast (self#on_stmt (env, ctx))
-            | _ ->
-              List.iter then_stmt (self#on_stmt (env, ctx));
-              List.iter else_stmt ~f:(check_non_rx#on_stmt env))
-          | _ -> List.iter b.fb_ast (self#on_stmt (env, ctx))
-        end
+      else
+        match b.fb_ast with
+        | [(_, If (((p, _), Id (_, c)), then_stmt, else_stmt))]
+          when SN.Rx.is_enabled c ->
+          (match ctx.reactivity with
+          | Pure _
+          | MaybeReactive (Pure _)
+          | RxVar (Some (Pure _)) ->
+            Errors.rx_enabled_in_non_rx_context p;
+            List.iter b.fb_ast (self#on_stmt (env, ctx))
+          | _ ->
+            List.iter then_stmt (self#on_stmt (env, ctx));
+            List.iter else_stmt ~f:(check_non_rx#on_stmt env))
+        | _ -> List.iter b.fb_ast (self#on_stmt (env, ctx))
 
     method! on_Expr (env, ctx) e = self#on_expr (env, set_expr_statement ctx) e
 
@@ -594,7 +588,7 @@ let check =
 
     method! on_expr (env, ctx) expr =
       let check_reactivity =
-        (not (equal_reactivity ctx.reactivity Nonreactive))
+        any_reactive ctx.reactivity
         && not (TypecheckerOptions.unsafe_rx (Env.get_tcopt env))
       in
       if check_reactivity then (

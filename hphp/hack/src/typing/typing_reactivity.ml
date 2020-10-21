@@ -285,10 +285,10 @@ let check_call env method_info pos reason ft arg_types =
           | _ -> false)
     in
     let do_conditional_check =
+      any_reactive (env_reactivity env)
+      &&
       match env_reactivity env with
-      | Local _
-      | Nonreactive ->
-        false
+      | Local _ -> false
       | _ -> true
     in
     let env =
@@ -466,7 +466,7 @@ let try_substitute_type_with_condition env cond_ty ty =
    and it is not assignable to fresh type parameter. To handle this for returns we reduce
    return type to its upper bound if return type is TFresh and current context is non-reactive *)
 let strip_condition_type_in_return env ty =
-  if not (equal_reactivity (env_reactivity env) Nonreactive) then
+  if any_reactive (env_reactivity env) then
     ty
   else
     let (env, ety) = Env.expand_type env ty in

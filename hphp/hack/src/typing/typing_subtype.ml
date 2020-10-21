@@ -2567,7 +2567,7 @@ and simplify_subtype_reactivity
   | _ -> check_condition_type_has_matching_reactive_method env
 
 and should_check_fun_params_reactivity (ft_super : locl_fun_type) =
-  not (equal_reactivity ft_super.ft_reactive Nonreactive)
+  any_reactive ft_super.ft_reactive
 
 (* checks condition described by OnlyRxIfImpl condition on parameter is met  *)
 and simplify_subtype_param_rx_if_impl
@@ -2732,8 +2732,7 @@ and simplify_subtype_fun_params_reactivity
     let (_, p_sub_type) = Env.expand_type env p_sub.fp_type.et_type in
     begin
       match get_node p_sub_type with
-      | Tfun tfun when not (equal_reactivity tfun.ft_reactive Nonreactive) ->
-        valid env
+      | Tfun tfun when any_reactive tfun.ft_reactive -> valid env
       | Tfun _ ->
         ( env,
           TL.invalid ~fail:(fun () ->
@@ -2865,7 +2864,7 @@ and simplify_subtype_funs_attributes
         (get_ft_returns_mutable ft_sub)
         (get_ft_returns_mutable ft_super)
     || (not (get_ft_returns_mutable ft_super))
-    || equal_reactivity ft_sub.ft_reactive Nonreactive )
+    || not (any_reactive ft_sub.ft_reactive) )
     (fun () ->
       Errors.mutable_return_result_mismatch
         (get_ft_returns_mutable ft_super)
@@ -2873,7 +2872,7 @@ and simplify_subtype_funs_attributes
         p_sub
         subtype_env.on_error)
   |> check_with
-       ( equal_reactivity ft_super.ft_reactive Nonreactive
+       ( (not (any_reactive ft_super.ft_reactive))
        || get_ft_returns_void_to_rx ft_super
        || not (get_ft_returns_void_to_rx ft_sub) )
        (fun () ->
@@ -2901,8 +2900,7 @@ and simplify_subtype_funs_attributes
   |>
   (* check mutability only for reactive functions *)
   let check_params_mutability =
-    (not (equal_reactivity ft_super.ft_reactive Nonreactive))
-    && not (equal_reactivity ft_sub.ft_reactive Nonreactive)
+    any_reactive ft_super.ft_reactive && any_reactive ft_sub.ft_reactive
   in
   fun (env, prop) ->
     ( if check_params_mutability (* check mutability of receivers *) then
@@ -3000,8 +2998,7 @@ and simplify_subtype_funs
   end
   &&& begin
         let check_params_mutability =
-          (not (equal_reactivity ft_super.ft_reactive Nonreactive))
-          && not (equal_reactivity ft_sub.ft_reactive Nonreactive)
+          any_reactive ft_super.ft_reactive && any_reactive ft_sub.ft_reactive
         in
         let is_method =
           Option.equal

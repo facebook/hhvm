@@ -869,6 +869,22 @@ and equal_reactivity r1 r2 =
   | (CippRx, CippRx) -> true
   | _ -> false
 
+and any_reactive r =
+  match r with
+  | Local _
+  | Shallow _
+  | Reactive _
+  | Pure _
+  | MaybeReactive _
+  | RxVar _
+  | CippRx ->
+    true
+  | Nonreactive
+  | Cipp _
+  | CippLocal _
+  | CippGlobal ->
+    false
+
 and equal_param_rx_annotation pa1 pa2 =
   match (pa1, pa2) with
   | (Param_rx_var, Param_rx_var) -> true

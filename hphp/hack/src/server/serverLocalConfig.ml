@@ -425,6 +425,8 @@ type t = {
    * redeclare any files when a function or global constant changes.
    *)
   disable_conservative_redecl: bool;
+  (* forces Hulk *)
+  force_remote_type_check: bool;
   ide_parser_cache: bool;
   ide_tast_cache: bool;
   (* When enabled, save hot class declarations (for now, specified in a special
@@ -504,6 +506,7 @@ let default =
     log_categories = [];
     experiments = [];
     experiments_config_meta = "";
+    force_remote_type_check = false;
     use_saved_state = false;
     require_saved_state = false;
     load_state_script_timeout = 20;
@@ -729,6 +732,12 @@ let load_ fn ~silent ~current_version overrides =
     bool_if_version
       "enable_fuzzy_search"
       ~default:default.enable_fuzzy_search
+      config
+  in
+  let force_remote_type_check =
+    bool_if_version
+      "force_remote_type_check"
+      ~default:default.force_remote_type_check
       config
   in
   let lazy_parse =
@@ -1093,6 +1102,7 @@ let load_ fn ~silent ~current_version overrides =
     go_to_implementation;
     allow_unstable_features;
     watchman;
+    force_remote_type_check;
   }
 
 let load ~silent ~current_version config_overrides =

@@ -92,9 +92,9 @@ struct SrcKey : private boost::totally_ordered<SrcKey> {
    * Direct accessors.
    */
   FuncId funcID() const;
-  int offset() const;
-  bool prologue() const;
+  Offset offset() const;
   ResumeMode resumeMode() const;
+  bool prologue() const;
   bool hasThis() const;
 
   /*
@@ -158,12 +158,15 @@ private:
 
   /////////////////////////////////////////////////////////////////////////////
 
+  static constexpr size_t kNumModeBits = 2;
+  static constexpr size_t kNumOffsetBits = 32 - kNumModeBits;
+
   union {
     AtomicInt m_atomicInt;
     struct {
       FuncId m_funcID;
-      uint32_t m_offset : 30;
-      uint32_t m_resumeModeAndPrologue : 2;
+      uint32_t m_offset : kNumOffsetBits;
+      uint32_t m_resumeModeAndTags : kNumModeBits;
     };
   };
 };

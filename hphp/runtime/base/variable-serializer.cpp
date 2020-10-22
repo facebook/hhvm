@@ -1269,9 +1269,14 @@ void VariableSerializer::writeArrayValue(
   case Type::VarExport:
   case Type::PHPOutput: {
     auto const oldKeyPrinted = m_keyPrinted;
-    m_keyPrinted =
-      (kind != ArrayKind::Vec && kind != ArrayKind::Keyset) &&
-      (kind != ArrayKind::VArray || m_type != Type::PHPOutput);
+    m_keyPrinted = [&]{
+      if (kind == ArrayKind::Vec || kind == ArrayKind::Keyset) return false;
+      if ((kind == ArrayKind::VArray || kind == ArrayKind::MarkedVArray) &&
+          (RO::EvalHackArrDVArrVarExport || m_type == Type::PHPOutput)) {
+        return false;
+      }
+      return true;
+    }();
     SCOPE_EXIT { m_keyPrinted = oldKeyPrinted; };
     write(value);
     m_buf->append(",\n");

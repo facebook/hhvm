@@ -1,7 +1,1 @@
-(library
-    (name call_order)
-    (wrapped false)
-    (modules callOrder)
-    (libraries
-      default_injector_config
-      full_fidelity))
+; TODO add the unit tests from the TARGETS file

@@ -61,9 +61,7 @@ void reportTraceletToVtune(const Unit* unit,
   for (auto& mapping : tr.bcMapping) {
     LineNumberInfo info;
 
-    info.LineNumber = mapping.sk.prologue()
-      ? unit->getLineNumber(mapping.sk.func()->line1())
-      : unit->getLineNumber(mapping.sk.offset());
+    info.LineNumber = mapping.sk.lineNumber();
 
     // Note that main code may be generated in the cold code range (see
     // emitBlock in code-gen-x64 genCodeImpl()) so we need to explicitly check

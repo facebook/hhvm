@@ -230,7 +230,7 @@ void logArrayIterProfile(IRGS& env, const IterArgs& data,
     auto const func = marker.func();
     func_str = func->fullName()->data();
     file_str = func->filename()->data();
-    line_int = func->unit()->getLineNumber(marker.bcOff());
+    line_int = marker.sk().lineNumber();
   }
 
   std::vector<std::string> inline_state_string;

@@ -788,7 +788,7 @@ void maybe_output_prof_trans_rec_trace(
     profTransRecProfile["file_path"] = filePath;
     profTransRecProfile["function_name"] = sk.func()->fullName()->data();
     profTransRecProfile["profile"] = folly::dynamic::object("profileType", "ProfTransRec");
-    profTransRecProfile["start_line_number"] = unit->getLineNumber(profTransRec->region()->start().offset());
+    profTransRecProfile["start_line_number"] = profTransRec->region()->start().lineNumber();
     profTransRecProfile["translation_weight"] = translationWeight;
     profTransRecProfile["region"] = folly::dynamic::object("blocks", blocks);
     HPHP::Trace::traceRelease("json:%s\n", folly::toJson(profTransRecProfile).c_str());

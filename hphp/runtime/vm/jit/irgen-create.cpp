@@ -140,8 +140,7 @@ void initThrowable(IRGS& env, const Class* cls, SSATmp* throwable) {
   } else {
     auto const fileSlot = rootCls->lookupDeclProp(s_file.get());
     auto const lineSlot = rootCls->lookupDeclProp(s_line.get());
-    auto const unit = curFunc(env)->unit();
-    auto const line = unit->getLineNumber(bcOff(env));
+    auto const line = curSrcKey(env).lineNumber();
     assertx(rootCls->declPropTypeConstraint(fileSlot).isString());
     assertx(rootCls->declPropTypeConstraint(lineSlot).isInt());
     gen(env, StMem, propAddr(fileSlot), cns(env, curFunc(env)->filename()));

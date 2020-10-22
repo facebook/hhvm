@@ -104,6 +104,7 @@ struct SrcKey : private boost::totally_ordered<SrcKey> {
   const Unit* unit() const;
   Op op() const;
   PC pc() const;
+  int lineNumber() const;
 
   /////////////////////////////////////////////////////////////////////////////
 

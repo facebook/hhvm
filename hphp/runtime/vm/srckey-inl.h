@@ -134,6 +134,11 @@ inline PC SrcKey::pc() const {
   return func()->at(offset());
 }
 
+inline int SrcKey::lineNumber() const {
+  if (prologue()) return func()->line1();
+  return unit()->getLineNumber(offset());
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 inline void SrcKey::setOffset(Offset o) {

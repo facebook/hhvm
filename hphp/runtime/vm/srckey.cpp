@@ -35,7 +35,7 @@ std::string show(SrcKey sk) {
     filepath = unit->origFilepath()->data();
   }
   return folly::sformat("{}:{} in {}(id 0x{:#x})@{: >6}{}{}",
-                        filepath, unit->getLineNumber(sk.offset()),
+                        filepath, sk.lineNumber(),
                         func->fullName()->data(),
                         (uint32_t)sk.funcID().toInt(), sk.offset(),
                         resumeModeShortName(sk.resumeMode()),
@@ -70,7 +70,6 @@ void sktrace(SrcKey sk, const char *fmt, ...) {
 
 std::string SrcKey::getSymbol() const {
   const Func* f = func();
-  const Unit* u = unit();
 
   if (f->isBuiltin()) {
     return f->fullName()->data();
@@ -81,7 +80,7 @@ std::string SrcKey::getSymbol() const {
       "{}::{}::line-{}",
       f->preClass()->name(),
       f->name(),
-      u->getLineNumber(offset())
+      lineNumber()
     ).str();
   }
 
@@ -89,7 +88,7 @@ std::string SrcKey::getSymbol() const {
   return folly::format(
     "{}::line-{}",
     f->fullName(),
-    u->getLineNumber(offset())
+    lineNumber()
   ).str();
 }
 

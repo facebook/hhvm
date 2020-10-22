@@ -1925,7 +1925,6 @@ void logArrayAccessProfile(IRGS& env, SSATmp* arr, SSATmp* key,
   auto const marker  = makeMarker(env, bcOff(env));
   assertx(marker.hasFunc());
   auto const func = marker.func();
-  auto const unit = func->unit();
 
   std::vector<std::string> inline_state_string;
   std::vector<folly::StringPiece> inline_state;
@@ -1939,7 +1938,7 @@ void logArrayAccessProfile(IRGS& env, SSATmp* arr, SSATmp* key,
   entry.setStr("profile", profile.toString());
   entry.setStr("source_func", func->fullName()->data());
   entry.setStr("source_file", func->filename()->data());
-  entry.setInt("source_line", unit->getLineNumber(marker.bcOff()));
+  entry.setInt("source_line", marker.sk().lineNumber());
   entry.setInt("prof_count", curProfCount(env));
   entry.setInt("inline_depth", env.inlineState.depth);
   entry.setVec("inline_state", inline_state);

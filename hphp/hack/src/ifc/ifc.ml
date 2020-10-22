@@ -601,15 +601,12 @@ let cow_array ~pos renv ty =
       a_length = Env.new_policy_var renv "fake_length";
     }
 
-(* Deals with a true assignment to either a local variable
-   or an object property *)
-let asn ~expr ~pos renv env ((_, lhs_ty), lhs_exp) rhs_pty =
+(* Deals with an assignment to a local variable or an object property *)
+let assign_helper ~expr ~pos renv env ((_, lhs_ty), lhs_exp) rhs_pty =
   match lhs_exp with
   | A.Lvar (_, lid) ->
     let prefix = Local_id.to_string lid in
     let lhs_pty = Lift.ty ~prefix renv lhs_ty in
-    (* set asn to true to mark the local as assigned in the
-       current code branch *)
     let env = Env.set_local_type env lid lhs_pty in
     let deps = PSet.elements (Env.get_lpc env) in
     let env = Env.acc env (add_dependencies ~pos deps lhs_pty) in
@@ -639,15 +636,14 @@ let may_throw_out_of_bounds_exn ~pos renv env arry ix_pty =
   let pc_deps = PSet.add arry.a_length (object_policy ix_pty) in
   may_throw ~pos renv env pc_deps exn_ty
 
-(* A wrapper for asn that deals with Hack arrays' syntactic
-   sugar; it is important to get it right to account for the
-   CoW semantics of Hack arrays:
+(* A wrapper around assign_helper that deals with Hack arrays' syntactic
+   sugar; this accounts for the CoW semantics of Hack arrays:
 
      $x->p[4][] = "hi";
 
    does not mutate an array cell, but the property p of
    the object $x instead.  *)
-let rec asn_top ~expr ~pos renv env lhs rhs_pty =
+let rec assign ~expr ~pos renv env lhs rhs_pty =
   match snd lhs with
   | A.Array_get (arry_exp, ix_opt) ->
     (* Evaluate the array *)
@@ -689,10 +685,12 @@ let rec asn_top ~expr ~pos renv env lhs rhs_pty =
     let env = Env.acc env (subtype ~pos rhs_pty arry.a_value) in
 
     (* assign the vector itself *)
-    asn_top ~expr ~pos renv env arry_exp arry_pty
-  | _ -> asn ~expr ~pos renv env lhs rhs_pty
+    assign ~expr ~pos renv env arry_exp arry_pty
+  | _ -> assign_helper ~expr ~pos renv env lhs rhs_pty
 
-let rec assign ~pos renv env op lhs_exp rhs_exp =
+(* Assignment helper that accounts for flows when there is an operator
+   attached to the assignment, e.g., `$x += 42`. *)
+let rec assign_with_op ~pos renv env op lhs_exp rhs_exp =
   let expr = expr ~pos renv in
   let (env, rhs_pty) =
     if Option.is_none op then
@@ -703,7 +701,7 @@ let rec assign ~pos renv env op lhs_exp rhs_exp =
       let (env, rhs_pty) = expr env rhs_exp in
       binop ~pos renv env lhs_pty rhs_pty
   in
-  let env = asn_top ~expr ~pos renv env lhs_exp rhs_pty in
+  let env = assign ~expr ~pos renv env lhs_exp rhs_pty in
   (env, rhs_pty)
 
 (* Generate flow constraints for an expression *)
@@ -718,7 +716,7 @@ and expr ~pos renv (env : Env.expr_env) (((_, ety), e) : Tast.expr) =
   | A.String _ ->
     (* literals are public *)
     (env, Tprim (Env.new_policy_var renv "lit"))
-  | A.Binop (Ast_defs.Eq op, e1, e2) -> assign ~pos renv env op e1 e2
+  | A.Binop (Ast_defs.Eq op, e1, e2) -> assign_with_op ~pos renv env op e1 e2
   | A.Binop (_, e1, e2) ->
     let (env, ty1) = expr env e1 in
     let (env, ty2) = expr env e2 in
@@ -731,7 +729,7 @@ and expr ~pos renv (env : Env.expr_env) (((_, ety), e) : Tast.expr) =
       | Ast_defs.Udecr
       | Ast_defs.Upincr
       | Ast_defs.Updecr ->
-        assign ~pos renv env None e e
+        assign_with_op ~pos renv env None e e
       (* Prim operators that don't mutate *)
       | Ast_defs.Utild
       | Ast_defs.Unot
@@ -1067,11 +1065,11 @@ and stmt renv (env : Env.stmt_env) ((pos, s) : Tast.stmt) =
       match as_exp with
       | Aast.As_v value
       | Aast.Await_as_v (_, value) ->
-        asn ~expr ~pos renv env value array.a_value
+        assign_helper ~expr ~pos renv env value array.a_value
       | Aast.As_kv (key, value)
       | Aast.Await_as_kv (_, key, value) ->
-        let env = asn ~expr ~pos renv env value array.a_value in
-        asn ~expr ~pos renv env key array.a_key
+        let env = assign_helper ~expr ~pos renv env value array.a_value in
+        assign_helper ~expr ~pos renv env key array.a_key
     in
 
     let pc_policies = PSet.singleton array.a_length in

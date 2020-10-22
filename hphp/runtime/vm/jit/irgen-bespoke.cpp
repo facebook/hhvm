@@ -421,10 +421,6 @@ void translateDispatchBespoke(IRGS& env,
     case Op::Dim:
       emitBespokeDim(env, (MOpMode) ni.imm[0].u_OA, ni.imm[1].u_KA);
       return;
-    case Op::SetRangeM:
-    case Op::IncDecM:
-    case Op::SetOpM:
-    case Op::UnsetM:
     case Op::FCallBuiltin:
     case Op::NativeImpl:
     case Op::AddElemC:
@@ -469,7 +465,7 @@ folly::Optional<Location> getVanillaLocation(const IRGS& env, SrcKey sk) {
 
   if (op == Op::FCallBuiltin || op == Op::NativeImpl) {
     return getVanillaLocationForBuiltin(env, sk);
-  } else if (isMemberDimOp(op) || isMemberFinalOp(op)) {
+  } else if (isMemberDimOp(op) || (op == Op::QueryM || op == Op::SetM)) {
     return {Location::MBase{}};
   }
 

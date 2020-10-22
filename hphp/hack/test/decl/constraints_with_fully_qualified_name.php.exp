@@ -78,7 +78,7 @@ typedefs =
     td_type =
     (Rhint (root|constraints_with_fully_qualified_name.php line 4, characters 11-16),
      (Tprim Tstring))
-    } }; consts = {}
+    } }; consts = {}; records = {}
 }
 
 They matched!

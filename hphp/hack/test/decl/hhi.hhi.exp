@@ -94,7 +94,7 @@ Parsed decls:
   consts =
   { "\\Y" ->
     { Typing_defs.cd_pos = [5:11-12];
-      cd_type = (Rhint (root|hhi.hhi line 5, characters 7-9), (Tprim Tint)) } }
-  }
+      cd_type = (Rhint (root|hhi.hhi line 5, characters 7-9), (Tprim Tint)) } };
+  records = {} }
 
 They matched!

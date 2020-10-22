@@ -11,6 +11,7 @@ type decls = {
   funs: Typing_defs.fun_elt SMap.t;
   typedefs: Typing_defs.typedef_type SMap.t;
   consts: Typing_defs.const_decl SMap.t;
+  records: Typing_defs.record_def_type SMap.t;
 }
 [@@deriving show]
 
@@ -21,6 +22,7 @@ type decl_lists = {
   dl_funs: (string * Typing_defs.fun_elt) list;
   dl_typedefs: (string * Typing_defs.typedef_type) list;
   dl_consts: (string * Typing_defs.const_decl) list;
+  dl_records: (string * Typing_defs.record_def_type) list;
 }
 
 val parse_decls_ffi : Relative_path.t -> string -> decls

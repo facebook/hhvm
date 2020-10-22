@@ -31,6 +31,7 @@ pub struct Decls<'a> {
     pub funs: SMap<'a, &'a typing_defs::FunElt<'a>>,
     pub typedefs: SMap<'a, &'a typing_defs::TypedefType<'a>>,
     pub consts: SMap<'a, &'a typing_defs::ConstDecl<'a>>,
+    pub records: SMap<'a, &'a typing_defs::RecordDefType<'a>>,
 }
 impl<'a> TrivialDrop for Decls<'a> {}
 impl<'a> Decls<'a> {
@@ -38,7 +39,7 @@ impl<'a> Decls<'a> {
         match kind {
             NameType::Fun => Some(Self::decl_to_slab(self.funs.get(symbol)?)),
             NameType::Class => Some(Self::decl_to_slab(self.classes.get(symbol)?)),
-            NameType::RecordDef => unimplemented!(),
+            NameType::RecordDef => Some(Self::decl_to_slab(self.records.get(symbol)?)),
             NameType::Typedef => Some(Self::decl_to_slab(self.typedefs.get(symbol)?)),
             NameType::Const => Some(Self::decl_to_slab(self.consts.get(symbol)?)),
         }
@@ -66,5 +67,6 @@ pub struct DeclLists<'a> {
     pub funs: List<'a, (&'a str, &'a typing_defs::FunElt<'a>)>,
     pub typedefs: List<'a, (&'a str, &'a typing_defs::TypedefType<'a>)>,
     pub consts: List<'a, (&'a str, &'a typing_defs::ConstDecl<'a>)>,
+    pub records: List<'a, (&'a str, &'a typing_defs::RecordDefType<'a>)>,
 }
 impl<'a> TrivialDrop for DeclLists<'a> {}

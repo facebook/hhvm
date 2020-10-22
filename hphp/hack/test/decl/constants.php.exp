@@ -30,7 +30,7 @@ Parsed decls:
           [(Rhint (root|constants.php line 11, characters 11-13),
             (Tprim Tint))]
           )))
-      } }
-  }
+      } };
+  records = {} }
 
 They matched!

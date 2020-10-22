@@ -45,7 +45,7 @@ Parsed decls:
            (Tapply (([5:41-43], "\\ID"), [])))
           ])
      ))
-  } }; consts = {}
+  } }; consts = {}; records = {}
 }
 
 They matched!

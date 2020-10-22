@@ -245,7 +245,7 @@ sc_methods =
        ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {#PUBLIC} }));
   sm_visibility = Public; sm_deprecated = None }
 ]; sc_user_attributes = []; sc_enum_type = None } }; funs = {};
-typedefs = {}; consts = {}
+typedefs = {}; consts = {}; records = {}
 }
 
 They matched!

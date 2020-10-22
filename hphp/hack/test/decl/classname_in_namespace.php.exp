@@ -42,6 +42,6 @@ Parsed decls:
             (Tapply (([9:25-26], "\\NS\\C"), [])))]
           )))
       } };
-  consts = {} }
+  consts = {}; records = {} }
 
 They matched!

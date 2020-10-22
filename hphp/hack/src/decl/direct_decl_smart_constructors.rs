@@ -30,9 +30,9 @@ use oxidized_by_ref::{
     typing_defs,
     typing_defs::{
         ConstDecl, EnumType, FunArity, FunElt, FunImplicitParams, FunParam, FunParams, FunType,
-        IfcFunDecl, ParamMode, ParamMutability, PossiblyEnforcedTy, Reactivity, ShapeFieldType,
-        ShapeKind, Tparam, Ty, Ty_, TypeconstAbstractKind, TypedefType, WhereConstraint,
-        XhpAttrTag,
+        IfcFunDecl, ParamMode, ParamMutability, PossiblyEnforcedTy, Reactivity, RecordFieldReq,
+        ShapeFieldType, ShapeKind, Tparam, Ty, Ty_, TypeconstAbstractKind, TypedefType,
+        WhereConstraint, XhpAttrTag,
     },
     typing_defs_flags::{FunParamFlags, FunTypeFlags},
     typing_reason::Reason,
@@ -180,6 +180,7 @@ pub struct InProgressDecls<'a> {
     pub funs: List<'a, (&'a str, &'a typing_defs::FunElt<'a>)>,
     pub typedefs: List<'a, (&'a str, &'a typing_defs::TypedefType<'a>)>,
     pub consts: List<'a, (&'a str, &'a typing_defs::ConstDecl<'a>)>,
+    pub records: List<'a, (&'a str, &'a typing_defs::RecordDefType<'a>)>,
 }
 
 pub fn empty_decls() -> InProgressDecls<'static> {
@@ -188,6 +189,7 @@ pub fn empty_decls() -> InProgressDecls<'static> {
         funs: List::empty(),
         typedefs: List::empty(),
         consts: List::empty(),
+        records: List::empty(),
     }
 }
 
@@ -635,6 +637,7 @@ pub enum Node<'a> {
     This(&'a Pos<'a>), // This needs a pos since it shows up in Taccess.
     TypeParameters(&'a &'a [&'a Tparam<'a>]),
     WhereConstraint(&'a WhereConstraint<'a>),
+    RecordField(&'a (Id<'a>, RecordFieldReq)),
 
     // For cases where the position of a node is included in some outer
     // position, but we do not need to track any further information about that
@@ -789,6 +792,10 @@ impl<'a> DirectDeclSmartConstructors<'a> {
     fn add_const(&mut self, name: &'a str, decl: &'a typing_defs::ConstDecl<'a>) {
         self.state.decls.consts =
             List::cons((name, decl), self.state.decls.consts, self.state.arena);
+    }
+    fn add_record(&mut self, name: &'a str, decl: &'a typing_defs::RecordDefType<'a>) {
+        self.state.decls.records =
+            List::cons((name, decl), self.state.decls.records, self.state.arena);
     }
 
     #[inline(always)]
@@ -2456,6 +2463,57 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 }
             }
         }
+    }
+
+    fn make_record_declaration(
+        &mut self,
+        attribute_spec: Self::R,
+        modifier: Self::R,
+        _keyword: Self::R,
+        name: Self::R,
+        _extends_keyword: Self::R,
+        extends_opt: Self::R,
+        _left_brace: Self::R,
+        fields: Self::R,
+        right_brace: Self::R,
+    ) -> Self::R {
+        let name = match self.elaborate_name(name) {
+            Some(name) => name,
+            None => return Node::Ignored(SK::RecordDeclaration),
+        };
+        self.add_record(
+            name.1,
+            self.alloc(typing_defs::RecordDefType {
+                name,
+                extends: self.elaborate_name(extends_opt),
+                fields: self.slice(fields.iter().filter_map(|node| match node {
+                    Node::RecordField(&field) => Some(field),
+                    _ => None,
+                })),
+                abstract_: matches!(modifier, Node::Token(TokenKind::Abstract)),
+                pos: self.merge_positions(attribute_spec, right_brace),
+            }),
+        );
+        Node::Ignored(SK::RecordDeclaration)
+    }
+
+    fn make_record_field(
+        &mut self,
+        _type_: Self::R,
+        name: Self::R,
+        initializer: Self::R,
+        _semicolon: Self::R,
+    ) -> Self::R {
+        let name = match self.expect_name(name) {
+            Some(name) => name,
+            None => return Node::Ignored(SK::RecordField),
+        };
+        let field_req = if initializer.is_ignored() {
+            RecordFieldReq::ValueRequired
+        } else {
+            RecordFieldReq::HasDefaultValue
+        };
+        Node::RecordField(self.alloc((name, field_req)))
     }
 
     fn make_alias_declaration(

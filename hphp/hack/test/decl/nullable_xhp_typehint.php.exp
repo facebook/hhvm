@@ -11,6 +11,6 @@ Parsed decls:
           (Rhint (root|nullable_xhp_typehint.php line 3, characters 18-21),
            (Tapply (([3:18-22], "\\:div"), [])))))
       } };
-  consts = {} }
+  consts = {}; records = {} }
 
 They matched!

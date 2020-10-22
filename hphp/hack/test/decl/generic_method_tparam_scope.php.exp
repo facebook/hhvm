@@ -102,7 +102,7 @@ Parsed decls:
     sm_visibility = Public; sm_deprecated = None }
     ];
   sc_user_attributes = []; sc_enum_type = None } }; funs = {}; typedefs = {};
-consts = {}
+consts = {}; records = {}
 }
 
 They matched!

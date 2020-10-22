@@ -93,7 +93,7 @@ Parsed decls:
       cd_type =
       (Rhint (root|nested_namespaces.php line 24, characters 9-32),
        (Tapply (([24:9-33], "\\MyNamespace\\MyVeryInnerNamespaceType"), [])))
-      } }
-  }
+      } };
+  records = {} }
 
 They matched!

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<f47049cc78eb73a906cf2aca3e2d358e>>
+// @generated SignedSource<<055a1881bb86c8ed7071c73d3e003154>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -106,6 +106,7 @@ impl<'a> Node<'a> for Decls<'a> {
                 funs: ref __binding_1,
                 typedefs: ref __binding_2,
                 consts: ref __binding_3,
+                records: ref __binding_4,
             } => {
                 {
                     __binding_0.accept(v)
@@ -116,7 +117,10 @@ impl<'a> Node<'a> for Decls<'a> {
                 {
                     __binding_2.accept(v)
                 }
-                { __binding_3.accept(v) }
+                {
+                    __binding_3.accept(v)
+                }
+                { __binding_4.accept(v) }
             }
         }
     }
@@ -490,6 +494,47 @@ impl<'a> Node<'a> for Reason<'a> {
             Reason::RglobalFunRet(ref __binding_0) => __binding_0.accept(v),
             Reason::Rsplice(ref __binding_0) => __binding_0.accept(v),
             Reason::RetBoolean(ref __binding_0) => __binding_0.accept(v),
+        }
+    }
+}
+impl<'a> Node<'a> for RecordDefType<'a> {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_record_def_type(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            RecordDefType {
+                name: ref __binding_0,
+                extends: ref __binding_1,
+                fields: ref __binding_2,
+                abstract_: ref __binding_3,
+                pos: ref __binding_4,
+            } => {
+                {
+                    __binding_0.accept(v)
+                }
+                {
+                    __binding_1.accept(v)
+                }
+                {
+                    __binding_2.accept(v)
+                }
+                {
+                    __binding_3.accept(v)
+                }
+                { __binding_4.accept(v) }
+            }
+        }
+    }
+}
+impl<'a> Node<'a> for RecordFieldReq {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_record_field_req(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            RecordFieldReq::ValueRequired => {}
+            RecordFieldReq::HasDefaultValue => {}
         }
     }
 }

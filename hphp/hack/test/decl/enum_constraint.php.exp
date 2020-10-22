@@ -54,6 +54,6 @@ Parsed decls:
                         ))));
               te_includes = []; te_enum_class = false })
       } };
-  funs = {}; typedefs = {}; consts = {} }
+  funs = {}; typedefs = {}; consts = {}; records = {} }
 
 They matched!

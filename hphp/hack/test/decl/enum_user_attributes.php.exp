@@ -40,6 +40,6 @@ Parsed decls:
                (Tprim Tstring));
               te_constraint = None; te_includes = []; te_enum_class = false })
       } };
-  funs = {}; typedefs = {}; consts = {} }
+  funs = {}; typedefs = {}; consts = {}; records = {} }
 
 They matched!

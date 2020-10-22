@@ -140,7 +140,7 @@ Parsed decls:
         ~returns_mutable:false ~returns_void_to_rx:false);
       ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {#PUBLIC} }));
 sm_visibility = Public; sm_deprecated = None }]; sc_user_attributes = [];
-sc_enum_type = None } }; funs = {}; typedefs = {}; consts = {}
+sc_enum_type = None } }; funs = {}; typedefs = {}; consts = {}; records = {}
 }
 
 They matched!

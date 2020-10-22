@@ -107,6 +107,6 @@ Parsed decls:
          ua_classname_params = [] }
         ];
       sc_enum_type = None } };
-  funs = {}; typedefs = {}; consts = {} }
+  funs = {}; typedefs = {}; consts = {}; records = {} }
 
 They matched!

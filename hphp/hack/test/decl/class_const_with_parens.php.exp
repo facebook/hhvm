@@ -23,6 +23,6 @@ Parsed decls:
       sc_typeconsts = []; sc_pu_enums = []; sc_props = []; sc_sprops = [];
       sc_constructor = None; sc_static_methods = []; sc_methods = [];
       sc_user_attributes = []; sc_enum_type = None } };
-  funs = {}; typedefs = {}; consts = {} }
+  funs = {}; typedefs = {}; consts = {}; records = {} }
 
 They matched!

@@ -19,6 +19,6 @@ Parsed decls:
       td_type =
       (Rhint (root|namespaces2.php line 5, characters 28-33), (Tprim Tstring))
       } };
-  consts = {} }
+  consts = {}; records = {} }
 
 They matched!

@@ -72,7 +72,7 @@ Parsed decls:
     { Typing_defs.cd_pos = [6:7-12];
       cd_type =
       (Rwitness (root|const_missing_hint.php line 6, characters 7-11), Tany)
-      } }
-  }
+      } };
+  records = {} }
 
 They matched!

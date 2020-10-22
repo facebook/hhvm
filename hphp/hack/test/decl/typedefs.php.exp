@@ -165,7 +165,7 @@ Parsed decls:
       (Rhint (root|typedefs.php line 15, characters 50-51),
        (Tgeneric ("TK", []))),
    (Rhint (root|typedefs.php line 15, characters 54-55), (Tgeneric ("TV", [])
-    )))) } }; consts = {}
+    )))) } }; consts = {}; records = {}
 }
 
 They matched!

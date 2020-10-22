@@ -141,7 +141,7 @@ typedefs =
      (Ttuple
         [(Rhint (root|tuples.php line 3, characters 20-24), (Tprim Tfloat));
           (Rhint (root|tuples.php line 3, characters 27-31), (Tprim Tfloat))]))
-    } }; consts = {}
+    } }; consts = {}; records = {}
 }
 
 They matched!

@@ -191,9 +191,8 @@ let get_record_def (ctx : Provider_context.t) (record_name : string) :
           in
           Some rdecl
         | None -> None)
-  | Provider_backend.Decl_service _ ->
-    failwith
-      "Decl_provider.get_record_def not yet impl. for decl memory provider"
+  | Provider_backend.Decl_service { decl; _ } ->
+    Decl_service_client.rpc_get_record_def decl record_name
 
 let get_gconst (ctx : Provider_context.t) (gconst_name : string) :
     gconst_decl option =

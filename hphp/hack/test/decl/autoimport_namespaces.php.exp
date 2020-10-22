@@ -30,6 +30,6 @@ Parsed decls:
       (Rhint (root|autoimport_namespaces.php line 7, characters 22-35),
        (Tapply (([7:22-36], "\\RxRx\\Exception"), [])))
       } };
-  consts = {} }
+  consts = {}; records = {} }
 
 They matched!

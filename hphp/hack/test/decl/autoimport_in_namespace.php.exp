@@ -42,6 +42,6 @@ Parsed decls:
             (Tprim Tint))]
           )))
       } };
-  consts = {} }
+  consts = {}; records = {} }
 
 They matched!

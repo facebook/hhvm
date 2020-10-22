@@ -37,6 +37,6 @@ Parsed decls:
               } }
           )))
       } };
-  consts = {} }
+  consts = {}; records = {} }
 
 They matched!

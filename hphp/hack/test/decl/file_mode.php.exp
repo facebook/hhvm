@@ -48,7 +48,7 @@ Parsed decls:
       cd_type =
       (Rhint (root|file_mode.php line 9, characters 7-19),
        (Tapply (([9:7-20], "\\MyPartialType"), [])))
-      } }
-  }
+      } };
+  records = {} }
 
 They matched!

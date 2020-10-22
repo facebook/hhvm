@@ -68,6 +68,6 @@ Parsed decls:
               ~returns_mutable:false ~returns_void_to_rx:false);
             ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {#PUBLIC} }));
       fe_pos = [8:16-19]; fe_php_std_lib = false } };
-  typedefs = {}; consts = {} }
+  typedefs = {}; consts = {}; records = {} }
 
 They matched!

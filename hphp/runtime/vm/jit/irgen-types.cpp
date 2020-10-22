@@ -409,7 +409,7 @@ Type typeOpToType(IsTypeOp op) {
   case IsTypeOp::Res:     return TRes;
   case IsTypeOp::ClsMeth: return TClsMeth;
   case IsTypeOp::Func:    return TFunc;
-  case IsTypeOp::Class:   return TCls;
+  case IsTypeOp::Class:
   case IsTypeOp::Vec:
   case IsTypeOp::Dict:
   case IsTypeOp::VArray:
@@ -447,6 +447,13 @@ SSATmp* isStrImpl(IRGS& env, SSATmp* src) {
 
   mc.ifTypeThen(src, TStr, [&](SSATmp*) { return cns(env, true); });
 
+  mc.ifTypeThen(src, TLazyCls, [&](SSATmp*) {
+    if (RuntimeOption::EvalClassIsStringNotices) {
+      gen(env, RaiseNotice, cns(env, s_CLASS_IS_STRING.get()));
+    }
+    return cns(env, true);
+  });
+
   mc.ifTypeThen(src, TCls, [&](SSATmp*) {
     if (RuntimeOption::EvalClassIsStringNotices) {
       gen(env, RaiseNotice, cns(env, s_CLASS_IS_STRING.get()));
@@ -462,6 +469,13 @@ void maybeLogSerialization(IRGS& env, SSATmp* arr, SerializationSite site) {
   assertx(arr->isA(TVArr|TDArr));
   if (!RO::EvalArrayProvenance) return;
   gen(env, RaiseArraySerializeNotice, cns(env, site), arr);
+}
+
+SSATmp* isClassImpl(IRGS& env, SSATmp* src) {
+  MultiCond mc{env};
+  mc.ifTypeThen(src, TLazyCls, [&](SSATmp*) { return cns(env, true); });
+  mc.ifTypeThen(src, TCls, [&](SSATmp*) { return cns(env, true); });
+  return mc.elseDo([&]{ return cns(env, false); });
 }
 
 SSATmp* isPHPArrayImpl(IRGS& env, SSATmp* src) {
@@ -604,7 +618,7 @@ SSATmp* implInstanceOfD(IRGS& env, SSATmp* src, const StringData* className) {
     PUNT(InstanceOfD_MaybeObj);
   }
   if (!src->isA(TObj)) {
-    if (src->isA(TCls)) {
+    if (src->isA(TCls | TLazyCls)) {
       if (!interface_supports_string(className)) return cns(env, false);
       if (RuntimeOption::EvalClassIsStringNotices && src->isA(TCls)) {
         gen(
@@ -919,18 +933,29 @@ bool emitIsTypeStructWithoutResolvingIfPossible(
     case TypeStructure::Kind::T_bool:        return primitive(TBool);
     case TypeStructure::Kind::T_float:       return primitive(TDbl);
     case TypeStructure::Kind::T_string: {
+      if (t->type().maybe(TLazyCls) &&
+          RuntimeOption::EvalClassIsStringNotices) {
+        ifElse(env,
+          [&] (Block* taken) {
+            gen(env, CheckType, TLazyCls, taken, t);
+          },
+          [&] {
+            gen(env, RaiseNotice, cns(env, s_CLASS_IS_STRING.get()));
+          }
+        );
+      }
       if (t->type().maybe(TCls) &&
-          RuntimeOption::EvalRaiseClassConversionWarning) {
+          RuntimeOption::EvalClassIsStringNotices) {
         ifElse(env,
           [&] (Block* taken) {
             gen(env, CheckType, TCls, taken, t);
           },
           [&] {
-            gen(env, RaiseWarning, cns(env, s_CLASS_IS_STRING.get()));
+            gen(env, RaiseNotice, cns(env, s_CLASS_IS_STRING.get()));
           }
         );
       }
-      return unionOf(TStr, TCls);
+      return unionOf(TStr, TLazyCls, TCls);
     }
     case TypeStructure::Kind::T_null:        return primitive(TNull);
     case TypeStructure::Kind::T_void:        return primitive(TNull);
@@ -940,7 +965,31 @@ bool emitIsTypeStructWithoutResolvingIfPossible(
     case TypeStructure::Kind::T_dynamic:
       return success();
     case TypeStructure::Kind::T_num:         return unionOf(TInt, TDbl);
-    case TypeStructure::Kind::T_arraykey:    return unionOf(TInt, TStr);
+    case TypeStructure::Kind::T_arraykey: {
+      if (t->type().maybe(TLazyCls) &&
+          RuntimeOption::EvalClassIsStringNotices) {
+        ifElse(env,
+          [&] (Block* taken) {
+            gen(env, CheckType, TLazyCls, taken, t);
+          },
+          [&] {
+            gen(env, RaiseNotice, cns(env, s_CLASS_IS_STRING.get()));
+          }
+        );
+      }
+      if (t->type().maybe(TCls) &&
+          RuntimeOption::EvalClassIsStringNotices) {
+        ifElse(env,
+          [&] (Block* taken) {
+            gen(env, CheckType, TCls, taken, t);
+          },
+          [&] {
+            gen(env, RaiseNotice, cns(env, s_CLASS_IS_STRING.get()));
+          }
+        );
+      }
+      return unionOf(TInt, TStr, TLazyCls, TCls);
+    }
     case TypeStructure::Kind::T_any_array:
       if (t->type().maybe(TClsMeth)) {
         if (t->isA(TClsMeth)) {
@@ -1681,6 +1730,7 @@ SSATmp* isTypeHelper(IRGS& env, IsTypeOp subop, SSATmp* val) {
     case IsTypeOp::Scalar:  return isScalarImpl(env, val);
     case IsTypeOp::Str:     return isStrImpl(env, val);
     case IsTypeOp::ArrLike: return isArrLikeImpl(env, val);
+    case IsTypeOp::Class:   return isClassImpl(env, val);
     default: break;
   }
 

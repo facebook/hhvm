@@ -375,8 +375,11 @@ enum trep : uint64_t {
   BClsMethLike    = BClsMeth | BRClsMeth,
   BOptClsMethLike = BInitNull | BClsMethLike,
 
-  BStrLike    = BCls | BStr,
-  BUncStrLike = BCls | BSStr,
+  BClsLike    = BCls | BLazyCls,
+  BOptClsLike = BInitNull | BClsLike,
+
+  BStrLike    = BCls | BLazyCls | BStr,
+  BUncStrLike = BCls | BLazyCls | BSStr,
 
   BOptStrLike    = BInitNull | BStrLike,
   BOptUncStrLike = BInitNull | BUncStrLike,
@@ -1054,6 +1057,7 @@ X(UncArrKey)                                    \
 X(ArrKey)                                       \
 X(FuncLike)                                     \
 X(ClsMethLike)                                  \
+X(ClsLike)                                      \
 X(UncStrLike)                                   \
 X(StrLike)                                      \
 X(UncArrKeyCompat)                              \
@@ -1124,6 +1128,7 @@ X(OptUncArrKey)                                 \
 X(OptArrKey)                                    \
 X(OptFuncLike)                                  \
 X(OptClsMethLike)                               \
+X(OptClsLike)                                   \
 X(OptUncStrLike)                                \
 X(OptStrLike)                                   \
 X(OptUncArrKeyCompat)                           \
@@ -1712,7 +1717,7 @@ Type loosen_values(Type t);
 Type loosen_emptiness(Type t);
 
 /*
- * Force all TFunc and TCls types to TUncStrLike, and all TClsMeth to either
+ * Force all TCls and TLazyCls types to TUncStrLike, and all TClsMeth to either
  * TVArrLike or TVecLike.
  */
 Type loosen_likeness(Type t);

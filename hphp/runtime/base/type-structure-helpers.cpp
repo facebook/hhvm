@@ -589,7 +589,7 @@ bool checkTypeStructureMatchesTVImpl(
     case TypeStructure::Kind::T_arraykey:
       if (isClassType(type) || isLazyClassType(type)) {
         if (RO::EvalClassIsStringNotices) {
-          raise_notice("Class used in is_arraykey");
+          raise_notice("Class used in is_string");
         }
         return true;
       }

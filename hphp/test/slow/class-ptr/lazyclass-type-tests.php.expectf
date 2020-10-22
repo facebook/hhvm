@@ -1,0 +1,29 @@
+Notice: Class used in is_string in %s/test/slow/class-ptr/lazyclass-type-tests.php on line 14
+bool(true)
+
+Notice: Class used in is_string in %s/test/slow/class-ptr/lazyclass-type-tests.php on line 15
+bool(true)
+
+Notice: Class used in is_string in %s/test/slow/class-ptr/lazyclass-type-tests.php on line 17
+bool(true)
+bool(true)
+
+Notice: Class used in is_string in %s/test/slow/class-ptr/lazyclass-type-tests.php on line 14
+bool(true)
+
+Notice: Class used in is_string in %s/test/slow/class-ptr/lazyclass-type-tests.php on line 15
+bool(true)
+
+Notice: Class used in is_string in %s/test/slow/class-ptr/lazyclass-type-tests.php on line 17
+bool(true)
+bool(true)
+
+Notice: Class used in is_string in %s/test/slow/class-ptr/lazyclass-type-tests.php on line 7
+bool(true)
+
+Notice: Class used in is_string in %s/test/slow/class-ptr/lazyclass-type-tests.php on line 8
+bool(true)
+
+Notice: Class used in is_string in %s/test/slow/class-ptr/lazyclass-type-tests.php on line 9
+bool(true)
+bool(true)

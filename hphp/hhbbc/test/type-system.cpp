@@ -419,6 +419,7 @@ auto const non_opt_unions = folly::lazy([] {
     TUncStrLike,
     TFuncLike,
     TClsMethLike,
+    TClsLike,
     TTop
   };
 });
@@ -658,6 +659,7 @@ TEST(Type, Prim) {
     { TArrCompat, TPrim },
     { TStrLike, TPrim },
     { TFuncLike, TPrim },
+    { TClsLike, TPrim },
     { TCls, TInitPrim },
     { TFunc,    TInitPrim },
   };
@@ -687,6 +689,7 @@ TEST(Type, Prim) {
     { TPrim, TFunc },
     { TPrim, TFuncLike },
     { TPrim, TStrLike },
+    { TPrim, TClsLike },
   };
 
   for (auto kv : subtype_true) {
@@ -785,6 +788,7 @@ TEST(Type, Unc) {
     { TStrLike, TInitUnc, true },
     { TUncStrLike, TInitUnc, true },
     { TClsMeth, TInitUnc, use_lowptr },
+    { TClsLike, TInitUnc, true },
     { TVArrCompat, TInitUnc, true },
     { TVecCompat, TInitUnc, true },
     { TArrCompat, TInitUnc, true },
@@ -974,8 +978,8 @@ TEST(Type, OptUnionOf) {
   EXPECT_EQ(TOptFuncLike, union_of(TRFunc, TOptFunc));
 
 
-  EXPECT_EQ(TOptStrLike, union_of(TOptCls, TStr));
-  EXPECT_EQ(TOptUncStrLike, union_of(TOptCls, TSStr));
+  EXPECT_EQ(TOptStrLike, union_of(TOptCls, union_of(TLazyCls, TStr)));
+  EXPECT_EQ(TOptUncStrLike, union_of(TOptLazyCls, union_of(TCls, TSStr)));
 
   EXPECT_EQ(TOptVArrCompat, union_of(TOptClsMeth, TVArr));
   EXPECT_EQ(TOptVArrCompatSA, union_of(TOptClsMeth, TSVArr));
@@ -2577,6 +2581,7 @@ TEST(Type, LoosenStaticness) {
     { sdict_map(test_map), dict_map(test_map) },
     { TClsMeth, TClsMeth },
     { TFuncLike, TFuncLike },
+    { TClsLike, TClsLike },
     { TStrLike, TStrLike },
     { TUncStrLike, TStrLike },
     { TVArrCompat, TVArrCompat },
@@ -3070,6 +3075,8 @@ TEST(Type, MustBeCounted) {
     { TRFunc, true },
     { TSArr, false },
     { TCls, false },
+    { TLazyCls, false },
+    { TClsLike, false },
     { TPrim, false },
     { TUnc, false },
     { TInitUnc, false },

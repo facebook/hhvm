@@ -213,6 +213,8 @@ bool mayHaveData(trep bits) {
   case BOptLazyCls:
   case BClsMethLike:
   case BOptClsMethLike:
+  case BClsLike:
+  case BOptClsLike:
   case BInitCell:
   case BCell:
   case BTop:
@@ -253,6 +255,7 @@ bool canBeOptional(trep bits) {
   case BClsMeth:
   case BRClsMeth:
   case BClsMethLike:
+  case BClsLike:
   case BRecord:
   case BRFunc:
   case BLazyCls:
@@ -377,6 +380,7 @@ bool canBeOptional(trep bits) {
   case BOptClsMeth:
   case BOptRClsMeth:
   case BOptClsMethLike:
+  case BOptClsLike:
   case BOptRecord:
   case BOptLazyCls:
   case BOptArrLikeE:
@@ -3908,7 +3912,7 @@ Type type_of_istype(IsTypeOp op) {
     assertx(!RO::EvalHackArrDVArrs);
     return TDArr;
   case IsTypeOp::ClsMeth: return TClsMeth;
-  case IsTypeOp::Class: return TCls;
+  case IsTypeOp::Class: return TClsLike;
   case IsTypeOp::Func:
     return TFunc;
   case IsTypeOp::ArrLike:
@@ -3940,6 +3944,7 @@ folly::Optional<IsTypeOp> type_to_istypeop(const Type& t) {
   }
   if (t.subtypeOf(BClsMeth)) return IsTypeOp::ClsMeth;
   if (t.subtypeOf(BCls)) return IsTypeOp::Class;
+  if (t.subtypeOf(BLazyCls)) return IsTypeOp::Class;
   if (t.subtypeOf(BFunc)) return IsTypeOp::Func;
   return folly::none;
 }
@@ -4580,6 +4585,7 @@ Type union_of(Type a, Type b) {
   Y(ArrKey)
 
   Y(FuncLike)
+  Y(ClsLike)
 
   Y(UncStrLike)
   Y(StrLike)
@@ -4998,7 +5004,7 @@ Type loosen_likeness(Type t) {
     }
   }
 
-  if (t.couldBe(BCls)) t = union_of(std::move(t), TUncStrLike);
+  if (t.couldBe(BCls | BLazyCls)) t = union_of(std::move(t), TUncStrLike);
 
   switch (t.m_dataTag) {
   case DataTag::None:
@@ -6262,7 +6268,7 @@ bool is_type_might_raise(const Type& testTy, const Type& valTy) {
 
   if (is_opt(testTy)) return is_type_might_raise(unopt(testTy), valTy);
   if (testTy == TStrLike) {
-    return valTy.couldBe(BCls);
+    return valTy.couldBe(BCls | BLazyCls);
   } else if (testTy == TArr || testTy == TArrCompat) {
     return mayLogProv ||
            (RO::EvalIsVecNotices && !hackarr && valTy.couldBe(BClsMeth));

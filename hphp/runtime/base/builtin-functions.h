@@ -90,7 +90,7 @@ inline bool is_double(const TypedValue* c) {
 
 inline bool is_string(const TypedValue* c) {
   if (tvIsString(c)) return true;
-  if (tvIsClass(c)) {
+  if (tvIsClass(c) || tvIsLazyClass(c)) {
     if (RuntimeOption::EvalClassIsStringNotices) {
       raise_notice("Class used in is_string");
     }
@@ -267,7 +267,7 @@ inline bool is_clsmeth(const TypedValue* c) {
 
 inline bool is_class(const TypedValue* c) {
   assertx(tvIsPlausible(*c));
-  return tvIsClass(c);
+  return tvIsClass(c) || tvIsLazyClass(c);
 }
 
 inline bool is_fun(const TypedValue* c) {

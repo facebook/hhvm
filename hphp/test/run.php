@@ -405,7 +405,7 @@ function rel_path($to) {
 }
 
 function get_options($argv) {
-  # Options marked * affect test behavior, and need to be reported by list_tests
+  // Options marked * affect test behavior, and need to be reported by list_tests
   $parameters = darray[
     '*env:' => '',
     'exclude:' => 'e:',
@@ -1142,10 +1142,10 @@ function exec_with_stack($cmd) {
     }
     $all_selects_failed=false;
     if ($available === 0) continue;
-    # var_dump($read);
+    // var_dump($read);
     foreach ($read as $pipe) {
       $t = fread($pipe, 4096);
-      # var_dump($t);
+      // var_dump($t);
       if ($t === false) continue;
       $s .= $t;
     }

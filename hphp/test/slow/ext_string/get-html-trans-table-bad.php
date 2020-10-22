@@ -12,7 +12,7 @@ $encodings = varray[
 foreach ($encodings as $encoding) {
   try {
     $a = get_html_translation_table(HTML_SPECIALCHARS, ENT_COMPAT, $encoding);
-    #  var_dump(count($a));
+    //  var_dump(count($a));
     ksort(inout $a);
     var_dump($a);
   } catch (Exception $e) {

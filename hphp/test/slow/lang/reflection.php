@@ -2,8 +2,8 @@
 
 const SOME_CONSTANT = "some string";
 
-#===============================================================================
-# ReflectionFunction.
+//===============================================================================
+// ReflectionFunction.
 
 class State { static $staticX = 4; }
 
@@ -37,8 +37,8 @@ function g($a=null, $b=varray[1, 2, 3], $c=SOME_CONSTANT) {
   print "In g($a, $b, $c)\n";
 }
 
-#===============================================================================
-# ReflectionClass.
+//===============================================================================
+// ReflectionClass.
 
 interface H {
   public function methH();
@@ -186,10 +186,10 @@ function entrypoint_reflection(): void {
   print "\n";
 
   print "--- getInterfaces() ---\n";
-  # Very verbose.
-  #var_dump(
+  // Very verbose.
+  //var_dump(
             $rb->getInterfaces()
-  #         )
+  //         )
             ;
   print "\n";
 
@@ -197,10 +197,10 @@ function entrypoint_reflection(): void {
   print "\n";
 
   print "--- getMethods() ---\n";
-  # Very verbose.
-  #var_dump(
+  // Very verbose.
+  //var_dump(
             $rb->getMethods()
-  #         )
+  //         )
             ;
   print "\n";
 
@@ -218,26 +218,26 @@ function entrypoint_reflection(): void {
   print "\n";
 
   print "--- getProperties() ---\n";
-  # Very verbose.
-  #var_dump(
+  // Very verbose.
+  //var_dump(
             $rb->getProperties()
-  #         )
+  //         )
             ;
   print "\n";
 
   print "--- getProperty() ---\n";
-  # Very verbose.
-  #var_dump(
+  // Very verbose.
+  //var_dump(
             $rb->getProperty('p0')
-  #         )
+  //         )
             ;
   print "\n";
 
   print "--- getStaticProperties() ---\n";
-  # Very verbose.
-  #var_dump(
+  // Very verbose.
+  //var_dump(
             $rb->getStaticProperties()
-  #         )
+  //         )
             ;
   print "\n";
 

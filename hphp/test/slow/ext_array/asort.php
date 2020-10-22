@@ -25,7 +25,7 @@ $arr = varray["G\xediron",        // &iacute; (Latin-1)
                      "G\xe1rcia"];       // &aacute; (Latin-1)
 asort(inout $arr, SORT_REGULAR);
 
-# Make the output ASCII-safe
+// Make the output ASCII-safe
 foreach($arr as $key => $val) {
   $arr[$key] = urlencode($val);
 }

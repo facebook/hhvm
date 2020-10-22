@@ -1,6 +1,6 @@
 <?hh
 
-# bug #2088495
+// bug #2088495
 function asd($x, $y) {
   if ($x == 'exit' && $y == 'foo') {
     echo "yep\n";

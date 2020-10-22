@@ -199,9 +199,9 @@ function test_core(WatchmanInstance $wminst): void {
   apc_delete('stress_counter');  // Stops async callback_checksub()
   sleep(1);
 
-  # Sync testing is based on the fact there will immediately be an event to
-  # process as Watchman will send us an "initial" update straight away. There
-  # should then be no further updates.
+  // Sync testing is based on the fact there will immediately be an event to
+  // process as Watchman will send us an "initial" update straight away. There
+  // should then be no further updates.
   print("Testing syncing\n");
   HH\watchman_subscribe(
     '{"fields": ["name"], "expression": ["exists"]}',
@@ -251,8 +251,8 @@ function test_core(WatchmanInstance $wminst): void {
   }
   HH\watchman_unsubscribe(SUB_NAME) |> HH\asio\join($$);
 
-  # Check we can unsubscribe while a callback is in progress. The easiest way
-  # synthesize this event is to unsubscribe in a callback itself.
+  // Check we can unsubscribe while a callback is in progress. The easiest way
+  // synthesize this event is to unsubscribe in a callback itself.
   print("Check unsubscribing while callback in progress\n");
   HH\watchman_subscribe(
     '{"fields": ["name"], "expression": ["exists"]}',
@@ -269,7 +269,7 @@ function test_core(WatchmanInstance $wminst): void {
     print("PASS\n");
   }
 
-  # Make sure we fail gracefully if we connect to an invalid socket
+  // Make sure we fail gracefully if we connect to an invalid socket
   print("Checking connecting to a bad socket is graceful\n");
   $saw_exception = false;
   try {
@@ -285,7 +285,7 @@ function test_core(WatchmanInstance $wminst): void {
     print("FAIL\n");
   }
 
-  # Kill Watchman server and check to make sure a subscription gets notified.
+  // Kill Watchman server and check to make sure a subscription gets notified.
   print("Checking detection of dead Watchman server connection\n");
   apc_delete('callback_broken');
   HH\watchman_subscribe(
@@ -312,9 +312,9 @@ function test_core(WatchmanInstance $wminst): void {
 <<__EntryPoint>>
 function entrypoint_ext_watchman(): void {
 
-  # !!! Please contact devx_www oncall if this breaks. !!!
-  #
-  # The Watchman extension is a core part of www infrastructure on devservers.
+  // !!! Please contact devx_www oncall if this breaks. !!!
+  //
+  // The Watchman extension is a core part of www infrastructure on devservers.
 
   require_once 'constants.inc';
   require_once 'callback.inc';

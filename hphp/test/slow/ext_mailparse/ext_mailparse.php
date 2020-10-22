@@ -27,8 +27,8 @@ $text =
   "this is a regular mime attachment.\n".
   "\n";
 
-# MAXPARTS is 300, but the error does not occur until the 302nd
-# MIME part is parsed.
+// MAXPARTS is 300, but the error does not occur until the 302nd
+// MIME part is parsed.
 for ($i = 0; $i < 301; $i++) {
   $text .=
     "------=_NextPart_\n".

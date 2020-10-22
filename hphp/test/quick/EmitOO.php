@@ -23,12 +23,12 @@ class C extends B implements I {
   }
 
   function f($a) {
-    # None-bare $this.
+    // None-bare $this.
     print "In C::f(), p : ".$this->p."\n";
     print "In C::f(), q : ".$this->q."\n";
     print "In C::f(), r : ".$this->r."\n";
     $this->g(
-    # Bare $this.
+    // Bare $this.
              $this);
     $x = $this;
     $this;
@@ -36,7 +36,7 @@ class C extends B implements I {
   }
 
   function g($x) {
-    # None-bare $this.
+    // None-bare $this.
     print "In C::g(), p : ".$this->p."\n";
     print "In C::g(), q : ".$this->q."\n";
     print "In C::g(), r : ".$this->r."\n";
@@ -52,14 +52,14 @@ function main() {
   $X = "C";
   print "$X::k : ".$X::k."\n";
 
-# XXX Exit here to avoid unimplemented HHBC instructions.
+// XXX Exit here to avoid unimplemented HHBC instructions.
   exit(0);
 
   C::sf();
 
-# XXX Need SProp replacement.
-#print "C::\$s : ".C::$s."\n";
-#print "\$X::\$s : ".$X::$s."\n";
+// XXX Need SProp replacement.
+//print "C::\$s : ".C::$s."\n";
+//print "\$X::\$s : ".$X::$s."\n";
 
   $c = new C();
   print "\$c->p : ".$c->p."\n";

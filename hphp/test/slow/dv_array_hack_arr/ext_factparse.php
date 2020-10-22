@@ -1,18 +1,18 @@
 <?hh
 
-# !!! Please contact devx_www oncall if this breaks. !!!
-#
-# "Fact parsing" is a core part of www infrastructure on devservers.
+// !!! Please contact devx_www oncall if this breaks. !!!
+//
+// "Fact parsing" is a core part of www infrastructure on devservers.
 
 
-#
-# Features to test
-#
+//
+// Features to test
+//
 
 function f1() {}
 
 class CL0 {
-  # negative test
+  // negative test
   function f3() {}
 }
 
@@ -20,7 +20,7 @@ class CL1<T> {
 }
 
 interface I0 {
-  # negative test
+  // negative test
   function f4();
 }
 
@@ -28,7 +28,7 @@ interface I1<T> {
 }
 
 trait TR0 {
-  # negative test
+  // negative test
   function f5() {}
 }
 
@@ -64,9 +64,9 @@ enum E0 : int {
   EV1 = 1;
 }
 
-#
-# Execute single-threaded test
-#
+//
+// Execute single-threaded test
+//
 <<__EntryPoint>> function main(): void {
 $source = file(__FILE__);
 $source[0] = '<?hh namespace NS {';
@@ -99,9 +99,9 @@ try {
 }
 
 
-#
-# Execute erroneous files test
-#
+//
+// Execute erroneous files test
+//
 
 $garbage_file = tempnam(sys_get_temp_dir(), "factparsetest");
 file_put_contents($garbage_file, "<?hh }");
@@ -126,9 +126,9 @@ try {
   unlink($garbage_file);
 }
 
-#
-# Test path mangling
-#
+//
+// Test path mangling
+//
 
 $simplefile = tempnam(sys_get_temp_dir(), "factparsetest");
 file_put_contents($simplefile, "<?hh function f(){}");
@@ -152,9 +152,9 @@ try {
 }
 
 
-#
-# Execute multi-threaded test
-#
+//
+// Execute multi-threaded test
+//
 
 $many_files = varray[];
 for ($i = 0; $i < 10000; $i++) {
@@ -180,9 +180,9 @@ if (!$failed) {
 }
 
 
-#
-# Test version get (not checking actual number)
-#
+//
+// Test version get (not checking actual number)
+//
 
 if ((int)HH\ext_factparse_version()) {
   print "PASSED version get test\n";
@@ -191,9 +191,9 @@ if ((int)HH\ext_factparse_version()) {
 }
 
 
-#
-# Check bad arg handling
-#
+//
+// Check bad arg handling
+//
 
 try {
   HH\facts_parse(null, null, null, null);

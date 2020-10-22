@@ -1,4 +1,4 @@
-<?hh # vim:ft=php:
+<?hh // vim:ft=php:
 <<__EntryPoint>>
 function main_entry(): void {
 

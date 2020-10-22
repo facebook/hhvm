@@ -7,8 +7,8 @@ abstract final class FStatics {
   public static $staticY;
 }
 
-#===============================================================================
-# ReflectionFunction.
+//===============================================================================
+// ReflectionFunction.
 <<__DynamicallyCallable>>
 function f($a, inout $b, $c=null) {
   print "In f()\n";

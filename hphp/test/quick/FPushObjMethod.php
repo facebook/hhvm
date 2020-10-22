@@ -19,15 +19,15 @@ class I extends F {
 
 function anon($o) {
   print "In anon()\n";
-#  $o->fPrivate();
-#  $o->fProtected();
+//  $o->fPrivate();
+//  $o->fProtected();
   $o->fPublic();
 }
 class W {
   static public function fW($o) {
     print "In W::fW()\n";
-#    $o->fPrivate();
-#    $o->fProtected();
+//    $o->fPrivate();
+//    $o->fProtected();
     $o->fPublic();
   }
 }
@@ -120,15 +120,15 @@ function entrypoint_FPushObjMethod(): void {
   anon($x);
   W::fW($x);
   $x->fX();
-  #$x->fY();
-  #$x->fZ();
+  //$x->fY();
+  //$x->fZ();
   print "=== Y ===\n";
   $y = new Y();
   anon($y);
   W::fW($y);
   $y->fX();
   $y->fY();
-  #$y->fZ();
+  //$y->fZ();
   print "=== Z ===\n";
   $z = new Z();
   anon($z);

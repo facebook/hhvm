@@ -28,11 +28,11 @@ EOT;
   $xsl = XSLTPrepare::getXSL();
   $xsl->loadXML( $sXsl );
 
-  # START XSLT
+  // START XSLT
   $proc = XSLTPrepare::getProc();
   $proc->importStylesheet( $xsl );
 
-  # TRASNFORM & PRINT
+  // TRASNFORM & PRINT
   $dom = XSLTPrepare::getDOM();
   print $proc->transformToXML( $dom );
 
@@ -43,10 +43,10 @@ EOT;
       print "OK, no file created\n";
   }
 
-  #SET NO SECURITY PREFS
+  //SET NO SECURITY PREFS
   $proc->setSecurityPrefs(XSL_SECPREF_NONE);
 
-  # TRASNFORM & PRINT
+  // TRASNFORM & PRINT
   print $proc->transformToXML( $dom );
 
 
@@ -58,10 +58,10 @@ EOT;
 
   unlink($outputfile);
 
-  #SET SECURITY PREFS AGAIN
+  //SET SECURITY PREFS AGAIN
   $proc->setSecurityPrefs( XSL_SECPREF_WRITE_FILE |  XSL_SECPREF_WRITE_NETWORK | XSL_SECPREF_CREATE_DIRECTORY);
 
-  # TRASNFORM & PRINT
+  // TRASNFORM & PRINT
   print $proc->transformToXML( $dom );
 
   if (file_exists($outputfile)) {

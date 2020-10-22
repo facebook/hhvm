@@ -53,7 +53,7 @@ function main() {
   var_dump(constant('K::WOO'));
   var_dump(constant('L::WEE'));
 
-  # Test forcing autoload.
+  // Test forcing autoload.
   var_dump(AutoloadedClass::INDEED);
 
   print "Test end\n";

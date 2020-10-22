@@ -1,4 +1,4 @@
-dict(7) {
+dict(6) {
   ["some_int"]=>
   vec(1) {
     string(18) "// Int description"
@@ -34,10 +34,6 @@ dict(7) {
     string(5) "/*3*/"
     string(4) "/**/"
     string(13) "//... still 3"
-  }
-  ["pound_comment"]=>
-  vec(1) {
-    string(6) "#hello"
   }
   ["star_comment"]=>
   vec(1) {

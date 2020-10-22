@@ -42,7 +42,7 @@ async function main_eager_return() {
     if ($when == 'exit' &&
         $func == 'baz' &&
         $args === null) {
-      #var_dump($when, $func, $args);
+      //var_dump($when, $func, $args);
       throw new Exception;
     }
   });

@@ -18,7 +18,7 @@ $table = darray["AB" => "Alberta",
 "YT" => "Territoire du Yukon"];
 asort(inout $table, SORT_LOCALE_STRING);
 
-#ASCII-ize
+//ASCII-ize
 foreach($table as $key => $val) {
   $table[$key] = urlencode($val);
 }

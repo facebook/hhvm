@@ -35,7 +35,7 @@ class B extends Y {
     $a = new A;
     $a->foo();
     $a->bar();
-#    $a->baz();
+//    $a->baz();
   }
 }
 <<__EntryPoint>> function main(): void {

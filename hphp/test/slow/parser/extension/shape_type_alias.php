@@ -23,8 +23,6 @@ type X = shape(
   'some_bool' /* Paragraph */ =>//...
     bool/*3*//**///... still 3
   ,
-  #hello
-  'pound_comment' => int,
   /**
    * comment
    */

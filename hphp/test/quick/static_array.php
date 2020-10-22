@@ -1,5 +1,5 @@
 <?hh
-# Static arrays.
+// Static arrays.
 <<__EntryPoint>> function main(): void {
 $a = varray[];
 var_dump($a);
@@ -36,7 +36,7 @@ var_dump($a);
 $a = darray["hello" => "world"];
 var_dump($a);
 
-# Non-static arrays.
+// Non-static arrays.
 $v = null;
 $a = varray[$v];
 var_dump($a);

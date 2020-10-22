@@ -1,20 +1,20 @@
 <?hh
 
-# !!! Please contact devx_www oncall if this breaks. !!!
-#
-# "Fact parsing" is a core part of www infrastructure on devservers.
+// !!! Please contact devx_www oncall if this breaks. !!!
+//
+// "Fact parsing" is a core part of www infrastructure on devservers.
 
 
-#
-# Features to test
-#
+//
+// Features to test
+//
 
 function f1() {}
 
 function f2() {}
 
 class CL0 {
-  # negative test
+  // negative test
   function f3() {}
 }
 
@@ -22,7 +22,7 @@ class CL1<T> {
 }
 
 interface I0 {
-  # negative test
+  // negative test
   function f4();
 }
 
@@ -30,7 +30,7 @@ interface I1<T> {
 }
 
 trait TR0 {
-  # negative test
+  // negative test
   function f5() {}
 }
 
@@ -76,15 +76,15 @@ function f6() {
 <<__EntryPoint>>
 function entrypoint_ext_factparse(): void {
 
-  # Does not compile.
-  # function f9() {
-  #   const CO6 = 1;
-  # }
+  // Does not compile.
+  // function f9() {
+  //   const CO6 = 1;
+  // }
 
 
-  #
-  # Execute single-threaded test
-  #
+  //
+  // Execute single-threaded test
+  //
 
   $source = file(__FILE__);
   $source[0] = '<?hh namespace NS {';
@@ -117,9 +117,9 @@ function entrypoint_ext_factparse(): void {
   }
 
 
-  #
-  # Execute erroneous files test
-  #
+  //
+  // Execute erroneous files test
+  //
 
   $garbage_file = tempnam(sys_get_temp_dir(), "factparsetest");
   file_put_contents($garbage_file, "<?hh }");
@@ -144,9 +144,9 @@ function entrypoint_ext_factparse(): void {
     unlink($garbage_file);
   }
 
-  #
-  # Test path mangling
-  #
+  //
+  // Test path mangling
+  //
 
   $simplefile = tempnam(sys_get_temp_dir(), "factparsetest");
   file_put_contents($simplefile, "<?hh function f(){}");
@@ -170,9 +170,9 @@ function entrypoint_ext_factparse(): void {
   }
 
 
-  #
-  # Execute multi-threaded test
-  #
+  //
+  // Execute multi-threaded test
+  //
 
   $many_files = varray[];
   for ($i = 0; $i < 10000; $i++) {
@@ -198,9 +198,9 @@ function entrypoint_ext_factparse(): void {
   }
 
 
-  #
-  # Test version get (not checking actual number)
-  #
+  //
+  // Test version get (not checking actual number)
+  //
 
   if ((int)HH\ext_factparse_version()) {
     print "PASSED version get test\n";
@@ -209,9 +209,9 @@ function entrypoint_ext_factparse(): void {
   }
 
 
-  #
-  # Check bad arg handling
-  #
+  //
+  // Check bad arg handling
+  //
 
   try {
     HH\facts_parse(null, null, null, null);

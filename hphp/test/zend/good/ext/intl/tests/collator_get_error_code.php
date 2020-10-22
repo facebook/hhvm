@@ -33,7 +33,7 @@ function ut_main()
 function main_entry(): void {
   include_once( 'ut_common.inc' );
 
-  # Suppress warning messages.
+  // Suppress warning messages.
   error_reporting( E_ERROR );
 
   ut_run();

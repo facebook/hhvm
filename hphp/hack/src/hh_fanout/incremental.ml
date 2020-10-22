@@ -7,7 +7,7 @@
  *)
 
 module Hh_bucket = Bucket
-open Core_kernel
+open Hh_prelude
 
 type client_id = Client_id of string
 

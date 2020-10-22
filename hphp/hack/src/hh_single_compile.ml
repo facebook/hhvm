@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 module P = Printf
 module SyntaxError = Full_fidelity_syntax_error
 module SourceText = Full_fidelity_source_text
@@ -21,6 +21,14 @@ module Logger = HackcEventLogger
 type mode =
   | CLI
   | DAEMON
+
+let is_mode_cli = function
+  | CLI -> true
+  | DAEMON -> false
+
+let is_mode_daemon = function
+  | CLI -> false
+  | DAEMON -> true
 
 type options = {
   filename: string;
@@ -91,7 +99,7 @@ let print_compiler_version () =
 let assert_regular_file filename =
   if
     (not (Sys.file_exists filename))
-    || (Unix.stat filename).Unix.st_kind <> Unix.S_REG
+    || Poly.((Unix.stat filename).Unix.st_kind <> Unix.S_REG)
   then
     raise (Arg.Bad (filename ^ " not a valid file"))
 
@@ -171,18 +179,18 @@ let parse_options () =
     print_compiler_version ();
     exit 0
   );
-  if !mode = DAEMON then print_compiler_version ();
+  if is_mode_daemon !mode then print_compiler_version ();
   let needs_file = Option.is_none !input_file_list in
   let fn =
     if needs_file then
       match !fn_ref with
       | Some fn ->
-        if !mode = CLI then
+        if is_mode_cli !mode then
           fn
         else
           die usage
       | None ->
-        if !mode = CLI then
+        if is_mode_cli !mode then
           die usage
         else
           Caml.read_line ()
@@ -572,7 +580,7 @@ let decl_and_run_mode compiler_options =
             set_config =
               (fun _header body ->
                 let config_json =
-                  if body = "" then
+                  if String.is_empty body then
                     None
                   else
                     Some body
@@ -725,7 +733,7 @@ let decl_and_run_mode compiler_options =
             |> fst
             |> Hhbc_options.to_string );
         if
-          compiler_options.filename <> ""
+          (not (String.is_empty compiler_options.filename))
           && Sys.is_directory compiler_options.filename
         then
           P.eprintf

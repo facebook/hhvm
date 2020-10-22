@@ -6,7 +6,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 open Typing_service_types
 
 module type Delegate_sig = sig

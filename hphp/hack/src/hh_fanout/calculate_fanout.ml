@@ -6,7 +6,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 
 module Detail_level = struct
   type t =
@@ -170,13 +170,13 @@ let calculate_dep_set_for_path
   let (modified_symbols, removed_symbols) =
     List.partition_tf old_symbols ~f:(fun old_symbol ->
         List.exists new_symbols ~f:(fun new_symbol ->
-            old_symbol.symbol_edge = new_symbol.symbol_edge))
+            Poly.(old_symbol.symbol_edge = new_symbol.symbol_edge)))
   in
   let added_symbols =
     List.filter new_symbols ~f:(fun new_symbol ->
         not
           (List.exists old_symbols ~f:(fun old_symbol ->
-               old_symbol.symbol_edge = new_symbol.symbol_edge)))
+               Poly.(old_symbol.symbol_edge = new_symbol.symbol_edge))))
   in
 
   let explanation = { removed_symbols; modified_symbols; added_symbols } in

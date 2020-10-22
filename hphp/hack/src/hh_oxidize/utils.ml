@@ -103,7 +103,7 @@ let map_and_concat ?sep l ~f = List.map l ~f |> String.concat ?sep
 let common_prefix a b =
   let len = min (String.length a) (String.length b) in
   let rec aux i =
-    if i = len || a.[i] <> b.[i] then
+    if i = len || not (Char.equal a.[i] b.[i]) then
       String.sub a 0 i
     else
       aux (i + 1)
@@ -132,7 +132,7 @@ let split_on_uppercase str =
 
 let add_trailing_underscore original_name name =
   if
-    original_name.[String.length original_name - 1] = '_'
+    Char.equal original_name.[String.length original_name - 1] '_'
     || SSet.mem rust_keywords name
   then
     name ^ "_"

@@ -6,7 +6,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 
 module Types = struct
   type job_id = Job_id of Int64.t [@@deriving show, eq]

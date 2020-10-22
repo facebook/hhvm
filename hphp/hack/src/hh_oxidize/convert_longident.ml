@@ -59,9 +59,9 @@ let to_string for_open id =
       in
       (* HACK: The oxidized version of `ty` has no phase. *)
       let ty =
-        if ty = "LoclTy" then
+        if String.equal ty "LoclTy" then
           "Ty"
-        else if ty = "LoclPossiblyEnforcedTy" then
+        else if String.equal ty "LoclPossiblyEnforcedTy" then
           "PossiblyEnforcedTy"
         else if SSet.mem ty strip_decl_prefix then
           String.chop_prefix_exn ty "Decl"

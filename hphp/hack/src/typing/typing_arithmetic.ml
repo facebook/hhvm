@@ -5,7 +5,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
-open Core_kernel
+open Hh_prelude
 open Typing_defs
 module Env = Typing_env
 module MakeType = Typing_make_type

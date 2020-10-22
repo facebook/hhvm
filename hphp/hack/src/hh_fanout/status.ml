@@ -6,7 +6,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 
 let go (fanout_calculations : Calculate_fanout.result list) : unit Lwt.t =
   let (fanout_files, explanations) =

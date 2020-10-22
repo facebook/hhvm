@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 
 let query_class_methods
     (ctx : Provider_context.t) (class_name : string) (method_query : string) :

@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 module SyntaxTree = Full_fidelity_syntax_tree
 module SourceText = Full_fidelity_source_text
 module SyntaxError = Full_fidelity_syntax_error
@@ -39,7 +39,7 @@ let text_source_to_filename = function
 let file_exists path = Option.is_some (Sys_utils.realpath path)
 
 let rec guess_root config start recursion_limit =
-  if start = Path.parent start then
+  if Path.equal start (Path.parent start) then
     None
   (* Reach fs root, nothing to do. *)
   else if Wwwroot.is_www_directory ~config start then
@@ -450,7 +450,7 @@ let format ?config ?range ?ranges env tree =
          * incorrect newline than to omit it, which would cause the following line
          * (along with its indentation spaces) to be joined with the last line in
          * the range. See test case: binary_expression_range_formatting.php *)
-        if formatted.[String.length formatted - 1] = '\n' then
+        if Char.equal formatted.[String.length formatted - 1] '\n' then
           formatted
         else
           formatted ^ "\n")

@@ -7,7 +7,7 @@
  *)
 
 module Hh_bucket = Bucket
-open Core_kernel
+open Hh_prelude
 
 type dependent = Typing_deps.Dep.dependent Typing_deps.Dep.variant
 

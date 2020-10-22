@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 open Facts
 
 let mangle_xhp_mode = ref true

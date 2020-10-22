@@ -6,7 +6,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 
 (** Takes a docblock with asterisks and leading/ending slashes removed.
     Returns the parameters mentioned in the docblock (with @param) and their

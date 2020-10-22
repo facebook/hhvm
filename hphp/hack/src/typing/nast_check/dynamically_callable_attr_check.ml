@@ -13,7 +13,7 @@ open Hh_prelude
 
 [@@@warning "+33"]
 
-open Core_kernel
+open Hh_prelude
 open Aast
 module SN = Naming_special_names
 

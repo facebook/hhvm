@@ -6,7 +6,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 
 (* This should stay at toplevel in order to be executed before [Daemon.check_entry_point]. *)
 let entry =

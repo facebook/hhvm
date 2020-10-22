@@ -14,7 +14,7 @@
  * See .mli file for details.
  *)
 
-open Core_kernel
+open Hh_prelude
 module Config = WatchmanEventWatcherConfig
 module Responses = WatchmanEventWatcherConfig.Responses
 

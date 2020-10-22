@@ -11,7 +11,7 @@
            ("Who watches the Watchmen?")
 ****************************************************)
 
-open Core_kernel
+open Hh_prelude
 
 (**
  * Watches a repo and logs state-leave and state-enter
@@ -164,7 +164,8 @@ let process_changes changes env =
       let env = { env with update_state = Left } in
       let () = notify_waiting_clients env in
       env
-    | Watchman_pushed (State_enter (name, json)) when name = "hg.update" ->
+    | Watchman_pushed (State_enter (name, json))
+      when String.equal name "hg.update" ->
       Hh_logger.log "State_enter %s" name;
       let ( >>= ) = Option.( >>= ) in
       let ( >>| ) = Option.( >>| ) in
@@ -172,13 +173,14 @@ let process_changes changes env =
         ( json >>= Watchman_utils.rev_in_state_change >>| fun hg_rev ->
           Hh_logger.log "Revision: %s" hg_rev );
       { env with update_state = Entering }
-    | Watchman_pushed (State_enter (name, _json)) when name = "hg.transaction"
-      ->
+    | Watchman_pushed (State_enter (name, _json))
+      when String.equal name "hg.transaction" ->
       { env with transaction_state = Entering }
     | Watchman_pushed (State_enter (name, _json)) ->
       Hh_logger.log "Ignoring State_enter %s" name;
       env
-    | Watchman_pushed (State_leave (name, json)) when name = "hg.update" ->
+    | Watchman_pushed (State_leave (name, json))
+      when String.equal name "hg.update" ->
       Hh_logger.log "State_leave %s" name;
       let ( >>= ) = Option.( >>= ) in
       let ( >>| ) = Option.( >>| ) in
@@ -188,8 +190,8 @@ let process_changes changes env =
       let env = { env with update_state = Left } in
       let () = notify_waiting_clients env in
       env
-    | Watchman_pushed (State_leave (name, _json)) when name = "hg.transaction"
-      ->
+    | Watchman_pushed (State_leave (name, _json))
+      when String.equal name "hg.transaction" ->
       { env with transaction_state = Left }
     | Watchman_pushed (State_leave (name, _json)) ->
       Hh_logger.log "Ignoring State_leave %s" name;
@@ -218,7 +220,7 @@ let check_subscription env =
 
 let sleep_and_check ?(wait_time = 0.3) socket =
   let (ready_socket_l, _, _) = Unix.select [socket] [] [] wait_time in
-  ready_socket_l <> []
+  not (List.is_empty ready_socket_l)
 
 (** Batch accept all new client connections. Return the list of them. *)
 let get_new_clients socket =

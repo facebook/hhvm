@@ -40,7 +40,7 @@ let extern_type type_name =
   "" :: State.curr_module_name () :: Output.glob_uses ()
   |> List.find_map ~f:(fun mod_name ->
          let maybe_qualified_type =
-           if mod_name = "" then
+           if String.equal mod_name "" then
              type_name
            else
              mod_name ^ "::" ^ type_name
@@ -53,7 +53,7 @@ let owned_type type_name =
   "" :: State.curr_module_name () :: Output.glob_uses ()
   |> List.exists ~f:(fun mod_name ->
          let maybe_qualified_type =
-           if mod_name = "" then
+           if String.equal mod_name "" then
              type_name
            else
              mod_name ^ "::" ^ type_name
@@ -68,7 +68,7 @@ let copy_type type_name =
       ( "" :: State.curr_module_name () :: Output.glob_uses ()
       |> List.exists ~f:(fun mod_name ->
              let maybe_qualified_type =
-               if mod_name = "" then
+               if String.equal mod_name "" then
                  type_name
                else
                  mod_name ^ "::" ^ type_name

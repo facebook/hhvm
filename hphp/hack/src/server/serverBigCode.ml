@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 open File_content
 open Hh_json
 open Provider_context
@@ -336,7 +336,8 @@ class visitor ~ctx ~entry ~filename ~source_text =
       let (line, column) = Pos.line_column p in
       let column = column + 1 in
       let pos_str = Printf.sprintf "%d-%d" line column in
-      ( if not (SSet.exists (fun key -> key = pos_str) !positions) then
+      ( if not (SSet.exists (fun key -> String.equal key pos_str) !positions)
+      then
         match context with
         | Some tokens ->
           let entry =
@@ -363,7 +364,8 @@ class visitor ~ctx ~entry ~filename ~source_text =
       let (line, column) = Pos.line_column p in
       let column = column + 1 in
       let pos_str = Printf.sprintf "%d-%d" line column in
-      ( if not (SSet.exists (fun key -> key = pos_str) !positions) then
+      ( if not (SSet.exists (fun key -> String.equal key pos_str) !positions)
+      then
         match context with
         | Some tokens ->
           let entry =

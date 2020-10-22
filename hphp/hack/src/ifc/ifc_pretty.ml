@@ -6,7 +6,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 open Format
 open Ifc_types
 module Env = Ifc_env

@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 open ServerCommandTypes.Find_refs
 
 val to_json : result -> Hh_json.json

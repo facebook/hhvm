@@ -8,7 +8,7 @@
  *)
 
 module Hh_bucket = Bucket
-open Core_kernel
+open Hh_prelude
 
 (* The protocol for a next function is to return a list of elements.
  * It will be called repeatedly until it returns an empty list.

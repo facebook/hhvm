@@ -6,7 +6,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 open Direct_decl_parser
 
 type verbosity =
@@ -53,8 +53,9 @@ let time verbosity msg f =
   let before = Unix.gettimeofday () in
   let ret = f () in
   let after = Unix.gettimeofday () in
-  if verbosity = Verbose then
-    Printf.printf "%s: %f ms\n" msg ((after -. before) *. 1000.);
+  (match verbosity with
+  | Verbose -> Printf.printf "%s: %f ms\n" msg ((after -. before) *. 1000.)
+  | _ -> ());
   ret
 
 let colon = Str.regexp ":"

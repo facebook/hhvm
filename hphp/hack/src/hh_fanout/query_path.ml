@@ -6,7 +6,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 
 type dep_path_acc = Typing_deps.Dep.t list
 

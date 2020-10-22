@@ -6,7 +6,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 
 type single_result = {
   hash: Typing_deps.Dep.t;

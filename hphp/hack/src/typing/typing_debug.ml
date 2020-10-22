@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 open Typing_env_types
 open Typing_inference_env.Size
 module Env = Typing_env

@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 
 type env = {
   ns_ns_uses: string SMap.t; [@opaque]

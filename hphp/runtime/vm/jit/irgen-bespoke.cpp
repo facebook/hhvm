@@ -398,6 +398,39 @@ void emitBespokeDim(IRGS& env, MOpMode mode, MemberKey mk) {
   stMBase(env, val);
 }
 
+void emitBespokeAddElemC(IRGS& env) {
+  auto const arrType = topC(env, BCSPRelOffset{2})->type();
+  auto const keyType = topC(env, BCSPRelOffset{2})->type();
+  if (!arrType.subtypeOfAny(TDict, TDArr)) {
+    PUNT(AddElemC-Bespoke-WrongType);
+  } else if (!keyType.subtypeOfAny(TInt, TStr, TCls, TLazyCls)) {
+    interpOne(env, arrType.unspecialize(), 3);
+    return;
+  }
+
+  auto const value = popC(env, DataTypeGeneric);
+  auto const key = classConvertPuntOnRaise(env, popC(env));
+  auto const arr = popC(env);
+  auto const layout = arrType.arrSpec().bespokeLayout();
+  auto const newArr = layout->emitSet(env, arr, key, value);
+  push(env, newArr);
+  decRef(env, key);
+}
+
+void emitBespokeAddNewElemC(IRGS& env) {
+  auto const arrType = topC(env, BCSPRelOffset{1})->type();
+  if (!arrType.subtypeOfAny(TKeyset, TVec, TVArr)) {
+    PUNT(AddNewElemC-Bespoke-WrongType);
+  }
+
+  auto const value = popC(env, DataTypeGeneric);
+  auto const arr = popC(env);
+  auto const layout = arrType.arrSpec().bespokeLayout();
+  auto const newArr = layout->emitAppend(env, arr, value);
+  push(env, newArr);
+  decRef(env, value);
+}
+
 void translateDispatchBespoke(IRGS& env,
                               const NormalizedInstruction& ni) {
   auto const DEBUG_ONLY sk = ni.source;
@@ -421,10 +454,14 @@ void translateDispatchBespoke(IRGS& env,
     case Op::Dim:
       emitBespokeDim(env, (MOpMode) ni.imm[0].u_OA, ni.imm[1].u_KA);
       return;
+    case Op::AddElemC:
+      emitBespokeAddElemC(env);
+      return;
+    case Op::AddNewElemC:
+      emitBespokeAddNewElemC(env);
+      return;
     case Op::FCallBuiltin:
     case Op::NativeImpl:
-    case Op::AddElemC:
-    case Op::AddNewElemC:
     case Op::ClassGetTS:
     case Op::ColFromArray:
     case Op::IterInit:

@@ -82,6 +82,78 @@ SSATmp* memberKey(IRGS& env, MemberKey mk) {
   return classConvertPuntOnRaise(env, res);
 }
 
+SSATmp* emitSetNewElem(IRGS& env, SSATmp* origValue, uint32_t nDiscard) {
+  auto const baseType = env.irb->fs().mbase().type;
+  auto const base = extractBase(env);
+  auto const value = [&] {
+    if (!(baseType <= TKeyset)) return origValue;
+
+    if (!origValue->type().isKnownDataType()) {
+      PUNT(Bespoke-SetNewElem-Keyset);
+    }
+    return classConvertPuntOnRaise(env, origValue);
+  }();
+
+  if (baseType <= TKeyset && !value->isA(TInt | TStr)) {
+    gen(env, ThrowInvalidArrayKey, base, value);
+    return value;
+  }
+
+  auto const baseLoc = gen(env, LdMBase, TLvalToCell);
+  if (!canUpdateCanonicalBase(baseLoc)) PUNT(BespokeSetMFrameStkCell);
+
+  auto const layout = baseType.arrSpec().bespokeLayout();
+  auto const newArr = layout->emitAppend(env, base, value);
+
+  // Update the base's location with the new array.
+  updateCanonicalBase(env, baseLoc, newArr);
+  gen(env, IncRef, value);
+  return value;
+}
+
+SSATmp* emitSetElem(IRGS& env, SSATmp* key, SSATmp* value) {
+  auto const baseType = env.irb->fs().mbase().type;
+  auto const base = extractBase(env);
+  auto const isVec = baseType.subtypeOfAny(TVec, TVArr);
+  auto const isDict = baseType.subtypeOfAny(TDict, TDArr);
+  if ((isVec && !key->isA(TInt)) ||
+      (isDict && !key->isA(TInt | TStr))) {
+    gen(env, ThrowInvalidArrayKey, base, key);
+    return cns(env, TBottom);
+  } else if (baseType <= TKeyset) {
+    gen(env, ThrowInvalidOperation,
+        cns(env, s_InvalidKeysetOperationMsg.get()));
+    return cns(env, TBottom);
+  }
+
+  auto const baseLoc = gen(env, LdMBase, TLvalToCell);
+  if (!canUpdateCanonicalBase(baseLoc)) PUNT(BespokeSetMFrameStkCell);
+
+  auto const layout = baseType.arrSpec().bespokeLayout();
+  auto const newArr = layout->emitSet(env, base, key, value);
+
+  // Update the base's location with the new array.
+  updateCanonicalBase(env, baseLoc, newArr);
+  gen(env, IncRef, value);
+  return value;
+}
+
+void emitBespokeSetM(IRGS& env, uint32_t nDiscard, MemberKey mk) {
+  auto const value = topC(env, BCSPRelOffset{0}, DataTypeGeneric);
+  auto const result = [&] () -> SSATmp* {
+    if (mcodeIsProp(mk.mcode)) PUNT(BespokeSetMProp);
+    if (mk.mcode == MW) {
+      return emitSetNewElem(env, value, nDiscard);
+    }
+
+    assertx(mcodeIsElem(mk.mcode));
+    auto const key = memberKey(env, mk);
+    return emitSetElem(env, key, value);
+  }();
+  popC(env, DataTypeGeneric);
+  mFinalImpl(env, nDiscard, result);
+}
+
 SSATmp* emitIsset(IRGS& env, SSATmp* key) {
   auto const baseType = env.irb->fs().mbase().type;
   auto const base = extractBase(env);
@@ -172,6 +244,8 @@ void translateDispatchBespoke(IRGS& env,
                         ni.imm[2].u_KA);
       return;
     case Op::SetM:
+      emitBespokeSetM(env, ni.imm[0].u_IVA, ni.imm[1].u_KA);
+      return;
     case Op::Dim:
     case Op::SetRangeM:
     case Op::IncDecM:

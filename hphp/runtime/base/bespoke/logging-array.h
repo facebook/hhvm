@@ -57,6 +57,13 @@ struct LoggingArray : BespokeArray {
   EntryTypes entryTypes;
 };
 
+struct LoggingLayout : Layout {
+  LoggingLayout();
+
+  SSATmp* emitSet(IRGS& env, SSATmp* base, SSATmp* key, SSATmp* val) const override;
+  SSATmp* emitAppend(IRGS& env, SSATmp* base, SSATmp* val) const override;
+};
+
 }}
 
 #endif // HPHP_LOGGING_ARRAY_H_

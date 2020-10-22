@@ -69,6 +69,21 @@ SSATmp* inlineSetOp(IRGS& env, SetOpOp op, SSATmp* lhs, SSATmp* rhs);
 void mFinalImpl(IRGS& env, int32_t nDiscard, SSATmp* result);
 
 /*
+ * Looks up the canonical location of the MBase pointer and determines whether
+ * we are able to update it directly. We are only unable to do so if the MBase
+ * did not originate from LdLocAddr or LdStkAddr, and the type is possible
+ * TMemToFrameCell or TMemToStkCell.
+ */
+bool canUpdateCanonicalBase(SSATmp* baseLoc);
+
+/*
+ * Looks up the canonical location of the MBase pointer and updates it to a new
+ * value. This is used for final member operations to update the source of the
+ * MBase directly.
+ */
+void updateCanonicalBase(IRGS& env, SSATmp* baseLoc, SSATmp* newArr);
+
+/*
  * Use profiling data from an ArrayAccessProfile to conditionally optimize
  * the array access represented by `generic' using `direct' or `missing`.
  *

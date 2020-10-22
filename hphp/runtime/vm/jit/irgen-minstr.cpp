@@ -1341,45 +1341,13 @@ SSATmp* emitArrayLikeSet(IRGS& env, SSATmp* key, SSATmp* value) {
   }
 
   auto const baseLoc = ldMBase(env);
-  auto const canonicalBaseLoc = canonical(baseLoc);
-  assertx(canonicalBaseLoc);
-  switch (canonicalBaseLoc->inst()->op()) {
-    case LdLocAddr:
-    case LdStkAddr:
-      break;
-    default: {
-      auto const t = baseLoc->type();
-      if (t.maybe(TMemToFrameCell) ||
-          t.maybe(TMemToStkCell)) {
-        // We don't handle these, as anything simple would require killing all
-        // frame and stack info in frame state (currently framestate asserts we
-        // don't stmem to ptrs of this type for this reason).
-        return nullptr;
-      }
-      break;
-    }
-  }
+  if (!canUpdateCanonicalBase(baseLoc)) return nullptr;
 
   auto const op = isVec ? VecSet : DictSet;
   auto const newArr = gen(env, op, base, key, value);
 
   // Update the base's location with the new array.
-  switch (canonicalBaseLoc->inst()->op()) {
-    case LdLocAddr: {
-      auto const locID = canonicalBaseLoc->inst()->extra<LocalId>()->locId;
-      gen(env, StLoc, LocalId { locID }, fp(env), newArr);
-      break;
-    }
-    case LdStkAddr: {
-      auto const irSPRel =
-        canonicalBaseLoc->inst()->extra<IRSPRelOffsetData>()->offset;
-      gen(env, StStk, IRSPRelOffsetData{irSPRel}, sp(env), newArr);
-      break;
-    }
-    default:
-      gen(env, StMem, baseLoc, newArr);
-      break;
-  }
+  updateCanonicalBase(env, baseLoc, newArr);
   gen(env, IncRef, value);
   return value;
 }
@@ -1528,11 +1496,53 @@ SSATmp* memberKey(IRGS& env, MemberKey mk) {
   return convertClassKey(env, res);
 }
 
-//////////////////////////////////////////////////////////////////////
-
 }
 
 //////////////////////////////////////////////////////////////////////
+
+bool canUpdateCanonicalBase(SSATmp* baseLoc) {
+  auto const canonicalBaseLoc = canonical(baseLoc);
+  assertx(canonicalBaseLoc);
+  switch (canonicalBaseLoc->inst()->op()) {
+    case LdLocAddr:
+    case LdStkAddr:
+      break;
+    default: {
+      auto const t = baseLoc->type();
+      if (t.maybe(TMemToFrameCell) ||
+          t.maybe(TMemToStkCell)) {
+        // We don't handle these, as anything simple would require killing all
+        // frame and stack info in frame state (currently framestate asserts we
+        // don't stmem to ptrs of this type for this reason).
+        return false;
+      }
+      break;
+    }
+  }
+
+  return true;
+}
+
+void updateCanonicalBase(IRGS& env, SSATmp* baseLoc, SSATmp* newArr) {
+  auto const canonicalBaseLoc = canonical(baseLoc);
+  assertx(canonicalBaseLoc);
+  switch (canonicalBaseLoc->inst()->op()) {
+    case LdLocAddr: {
+      auto const locID = canonicalBaseLoc->inst()->extra<LocalId>()->locId;
+      gen(env, StLoc, LocalId { locID }, fp(env), newArr);
+      break;
+    }
+    case LdStkAddr: {
+      auto const irSPRel =
+        canonicalBaseLoc->inst()->extra<IRSPRelOffsetData>()->offset;
+      gen(env, StStk, IRSPRelOffsetData{irSPRel}, sp(env), newArr);
+      break;
+    }
+    default:
+      gen(env, StMem, baseLoc, newArr);
+      break;
+  }
+}
 
 void mFinalImpl(IRGS& env, int32_t nDiscard, SSATmp* result) {
   for (auto i = 0; i < nDiscard; ++i) popDecRef(env);

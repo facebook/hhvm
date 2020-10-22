@@ -24,7 +24,9 @@
 #include "hphp/runtime/base/memory-manager-defs.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/vm/jit/mcgen-translate.h"
+#include "hphp/runtime/vm/jit/ssa-tmp.h"
+#include "hphp/runtime/vm/jit/irgen.h"
+#include "hphp/runtime/vm/jit/punt.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
 #include <tbb/concurrent_hash_map.h>
@@ -73,6 +75,26 @@ void logEvent(const LoggingArray* lad, ArrayOp op, Ts&&... args) {
 
 //////////////////////////////////////////////////////////////////////////////
 
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+LoggingLayout::LoggingLayout(): Layout("LoggingLayout", &s_vtable) {};
+
+using namespace jit;
+using namespace jit::irgen;
+
+SSATmp* LoggingLayout::emitSet(IRGS& env, SSATmp* base, SSATmp* key,
+                               SSATmp* val) const {
+  auto const outputType = base->type().modified();
+  return gen(env, BespokeSet, outputType, BespokeLayoutData { this }, base,
+             key, val);
+}
+
+SSATmp* LoggingLayout::emitAppend(IRGS& env, SSATmp* base, SSATmp* val) const {
+  auto const outputType = base->type().modified();
+  return gen(env, BespokeAppend, outputType, BespokeLayoutData { this }, base,
+             val);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -145,7 +167,7 @@ const ArrayData* maybeMakeLoggingArray(const ArrayData* ad) {
 //////////////////////////////////////////////////////////////////////////////
 
 void LoggingArray::InitializeLayouts() {
-  auto const layout = new Layout("LoggingLayout", &s_vtable);
+  auto const layout = new LoggingLayout();
   always_assert(layout->index() == kLayoutIndex);
 }
 

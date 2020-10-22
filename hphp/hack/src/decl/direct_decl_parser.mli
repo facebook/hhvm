@@ -25,7 +25,9 @@ type decl_lists = {
   dl_records: (string * Typing_defs.record_def_type) list;
 }
 
-val parse_decls_ffi : Relative_path.t -> string -> decls
+type ns_map = (string * string) list
+
+val parse_decls_ffi : Relative_path.t -> string -> ns_map -> decls
 
 val parse_decl_lists_ffi :
-  Relative_path.t -> string -> decl_lists * FileInfo.mode option
+  Relative_path.t -> string -> ns_map -> decl_lists * FileInfo.mode option

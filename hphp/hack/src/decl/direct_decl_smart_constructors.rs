@@ -4,6 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use std::cell::{Cell, RefCell};
+use std::collections::BTreeMap;
 use std::rc::Rc;
 
 use bstr::BStr;
@@ -50,10 +51,22 @@ type SK = SyntaxKind;
 
 type SSet<'a> = arena_collections::SortedSet<'a, &'a str>;
 
+type NamespaceMap = BTreeMap<std::string::String, std::string::String>;
+
 impl<'a> DirectDeclSmartConstructors<'a> {
-    pub fn new(src: &SourceText<'a>, file_mode: Mode, arena: &'a Bump) -> Self {
+    pub fn new(
+        src: &SourceText<'a>,
+        file_mode: Mode,
+        auto_namespace_map: &'a NamespaceMap,
+        arena: &'a Bump,
+    ) -> Self {
         Self {
-            state: State::new(IndexedSourceText::new(src.clone()), file_mode, arena),
+            state: State::new(
+                IndexedSourceText::new(src.clone()),
+                file_mode,
+                auto_namespace_map,
+                arena,
+            ),
             token_factory: SimpleTokenFactoryImpl::new(),
         }
     }
@@ -290,12 +303,19 @@ struct NamespaceBuilder<'a> {
 }
 
 impl<'a> NamespaceBuilder<'a> {
-    fn new_in(arena: &'a Bump) -> Self {
+    fn new_in(auto_ns_map: &'a NamespaceMap, arena: &'a Bump) -> Self {
+        let mut imports = AssocListMut::new_in(arena);
+        // TODO: This isn't enough to handle the auto namespace map correctly.
+        // We might benefit from an audit of our name elaboration logic and an
+        // effort to bring it in line with what hackc does (T76827745).
+        for (name, alias) in auto_ns_map.iter() {
+            imports.insert(name.as_str(), alias.as_str());
+        }
         NamespaceBuilder {
             arena,
             stack: bumpalo::vec![in arena; NamespaceInfo {
                 name: "\\",
-                imports: AssocListMut::new_in(arena),
+                imports,
             }],
         }
     }
@@ -459,7 +479,12 @@ pub struct State<'a> {
 }
 
 impl<'a> State<'a> {
-    pub fn new(source_text: IndexedSourceText<'a>, file_mode: Mode, arena: &'a Bump) -> State<'a> {
+    pub fn new(
+        source_text: IndexedSourceText<'a>,
+        file_mode: Mode,
+        auto_namespace_map: &'a NamespaceMap,
+        arena: &'a Bump,
+    ) -> State<'a> {
         let path = source_text.source_text().file_path();
         let prefix = path.prefix();
         let path = String::from_str_in(path.path_str(), arena).into_bump_str();
@@ -470,7 +495,7 @@ impl<'a> State<'a> {
             filename: arena.alloc(filename),
             file_mode,
             decls: empty_decls(),
-            namespace_builder: Rc::new(NamespaceBuilder::new_in(arena)),
+            namespace_builder: Rc::new(NamespaceBuilder::new_in(auto_namespace_map, arena)),
             classish_name_builder: ClassishNameBuilder::new(),
             type_parameters: Rc::new(Vec::new_in(arena)),
             // EndOfFile is used here as a None value (signifying "beginning of

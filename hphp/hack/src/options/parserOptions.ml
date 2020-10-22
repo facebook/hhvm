@@ -11,6 +11,9 @@ type t = GlobalOptions.t [@@deriving show]
 
 let auto_namespace_map = GlobalOptions.po_auto_namespace_map
 
+let with_auto_namespace_map po m =
+  { po with GlobalOptions.po_auto_namespace_map = m }
+
 let codegen = GlobalOptions.po_codegen
 
 let deregister_php_stdlib = GlobalOptions.po_deregister_php_stdlib

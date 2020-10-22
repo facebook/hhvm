@@ -14,6 +14,14 @@ type verbosity =
   | Verbose
   | Silent
 
+let auto_namespace_map = []
+
+let popt =
+  let po = ParserOptions.default in
+  let po = ParserOptions.with_disable_xhp_element_mangling po false in
+  let po = ParserOptions.with_auto_namespace_map po auto_namespace_map in
+  po
+
 let init root : Provider_context.t =
   Relative_path.(set_path_prefix Root root);
   let (_handle : SharedMem.handle) =
@@ -28,10 +36,7 @@ let init root : Provider_context.t =
   in
   let ctx =
     Provider_context.empty_for_tool
-      ~popt:
-        (ParserOptions.with_disable_xhp_element_mangling
-           ParserOptions.default
-           false)
+      ~popt
       ~tcopt
       ~backend:Provider_backend.Shared_memory
   in
@@ -67,7 +72,8 @@ let compare_decl ctx verbosity fn =
   let text = RealDisk.cat fn in
   let fn = Relative_path.(create Root fn) in
   let decls =
-    time verbosity "Parsed decls" (fun () -> parse_decls_ffi fn text)
+    time verbosity "Parsed decls" (fun () ->
+        parse_decls_ffi fn text auto_namespace_map)
   in
   let facts =
     Option.value_exn

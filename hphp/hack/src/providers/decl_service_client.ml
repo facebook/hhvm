@@ -38,6 +38,7 @@ module Decls =
 
 type t = {
   client: Decl_ipc_ffi_externs.decl_client;
+  ns_map: Direct_decl_parser.ns_map;
   mutable current_file_decls: Direct_decl_parser.decls;
   gconst_path_cache: Relative_path.t option String.Table.t;
   fun_path_cache: Relative_path.t option String.Table.t;
@@ -45,9 +46,12 @@ type t = {
     (Relative_path.t * Naming_types.kind_of_type) option String.Table.t;
 }
 
-let from_raw_client (client : Decl_ipc_ffi_externs.decl_client) : t =
+let from_raw_client
+    (client : Decl_ipc_ffi_externs.decl_client)
+    (ns_map : (string * string) list) : t =
   {
     client;
+    ns_map;
     current_file_decls = Direct_decl_parser.empty_decls;
     gconst_path_cache = String.Table.create ();
     fun_path_cache = String.Table.create ();
@@ -220,5 +224,5 @@ let rpc_get_type_canon_name (t : t) (name : string) : string option =
 
 let parse_and_cache_decls_in
     (t : t) (filename : Relative_path.t) (contents : string) : unit =
-  let decls = Direct_decl_parser.parse_decls_ffi filename contents in
+  let decls = Direct_decl_parser.parse_decls_ffi filename contents t.ns_map in
   t.current_file_decls <- decls

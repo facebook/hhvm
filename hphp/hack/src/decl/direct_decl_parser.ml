@@ -31,9 +31,11 @@ type decl_lists = {
   dl_records: (string * Typing_defs.record_def_type) list;
 }
 
-external parse_decls_ffi : Relative_path.t -> string -> decls
-  = "parse_decls_ffi"
+type ns_map = (string * string) list
+
+external parse_decls_ffi : Relative_path.t -> string -> ns_map -> decls
+  = "hh_parse_decls_ffi"
 
 external parse_decl_lists_ffi :
-  Relative_path.t -> string -> decl_lists * FileInfo.mode option
-  = "parse_decl_lists_ffi"
+  Relative_path.t -> string -> ns_map -> decl_lists * FileInfo.mode option
+  = "hh_parse_decl_lists_ffi"

@@ -243,12 +243,16 @@ arr_lval EmptyMonotypeVec::LvalStr(EmptyMonotypeVec* ead, StringData* k) {
   throwInvalidArrayKeyException(k, ead);
 }
 
-arr_lval EmptyMonotypeVec::ElemInt(EmptyMonotypeVec* eadIn, int64_t k) {
-  throwOOBArrayKeyException(k, eadIn);
+tv_lval EmptyMonotypeVec::ElemInt(
+    tv_lval lval, int64_t k, bool throwOnMissing) {
+  if (throwOnMissing) throwOOBArrayKeyException(k, lval.val().parr);
+  return const_cast<TypedValue*>(&immutable_null_base);
 }
 
-arr_lval EmptyMonotypeVec::ElemStr(EmptyMonotypeVec* ead, StringData* k) {
-  throwInvalidArrayKeyException(k, ead);
+tv_lval EmptyMonotypeVec::ElemStr(
+    tv_lval lval, StringData* k, bool throwOnMissing) {
+  if (throwOnMissing) throwInvalidArrayKeyException(k, lval.val().parr);
+  return const_cast<TypedValue*>(&immutable_null_base);
 }
 
 ArrayData* EmptyMonotypeVec::SetInt(EmptyMonotypeVec* eadIn, int64_t k,
@@ -598,19 +602,28 @@ arr_lval MonotypeVec::LvalStr(MonotypeVec* mad, StringData* k) {
   throwInvalidArrayKeyException(k, mad);
 }
 
-arr_lval MonotypeVec::ElemInt(MonotypeVec* madIn, int64_t k) {
+tv_lval MonotypeVec::ElemInt(tv_lval lval, int64_t k, bool throwOnMissing) {
+  auto const madIn = As(lval.val().parr);
   if (size_t(k) >= madIn->size()) {
-    throwOOBArrayKeyException(k, madIn);
+    if (throwOnMissing) throwOOBArrayKeyException(k, madIn);
+    return const_cast<TypedValue*>(&immutable_null_base);
   }
-  auto const mad = madIn->cowCheck() ? madIn->copy() : madIn;
+  auto const cow = madIn->cowCheck();
+  auto const mad = cow ? madIn->copy() : madIn;
+  if (cow) {
+    lval.type() = dt_with_rc(lval.type());
+    lval.val().parr = mad;
+    if (madIn->decReleaseCheck()) Release(madIn);
+  }
   static_assert(folly::kIsLittleEndian);
   auto const type_ptr = reinterpret_cast<DataType*>(&mad->m_extra_hi16);
   assertx(*type_ptr == mad->type());
-  return arr_lval{mad, type_ptr, &mad->valueRefUnchecked(k)};
+  return tv_lval{type_ptr, &mad->valueRefUnchecked(k)};
 }
 
-arr_lval MonotypeVec::ElemStr(MonotypeVec* mad, StringData* k) {
-  throwInvalidArrayKeyException(k, mad);
+tv_lval MonotypeVec::ElemStr(tv_lval lval, StringData* k, bool throwOnMissing) {
+  if (throwOnMissing) throwInvalidArrayKeyException(k, lval.val().parr);
+  return const_cast<TypedValue*>(&immutable_null_base);
 }
 
 ArrayData* MonotypeVec::SetInt(MonotypeVec* madIn, int64_t k, TypedValue v) {

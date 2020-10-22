@@ -59,8 +59,8 @@ void logBespokeDispatch(const ArrayData* ad, const char* fn);
   X(ssize_t, IterRewind, const T*, ssize_t) \
   X(arr_lval, LvalInt, T* ad, int64_t k) \
   X(arr_lval, LvalStr, T* ad, StringData* k) \
-  X(arr_lval, ElemInt, T* ad, int64_t k) \
-  X(arr_lval, ElemStr, T* ad, StringData* k) \
+  X(tv_lval, ElemInt, tv_lval lval, int64_t k, bool) \
+  X(tv_lval, ElemStr, tv_lval lval, StringData* k, bool) \
   X(ArrayData*, SetInt, T*, int64_t k, TypedValue v) \
   X(ArrayData*, SetStr, T*, StringData* k, TypedValue v)\
   X(ArrayData*, RemoveInt, T*, int64_t) \
@@ -145,11 +145,13 @@ struct LayoutFunctionDispatcher {
   static arr_lval LvalStr(ArrayData* ad, StringData* k) {
     return Array::LvalStr(Cast(ad, __func__), k);
   }
-  static arr_lval ElemInt(ArrayData* ad, int64_t k) {
-    return Array::ElemInt(Cast(ad, __func__), k);
+  static tv_lval ElemInt(tv_lval lval, int64_t k, bool throwOnMissing) {
+    Cast(lval.val().parr, __func__);
+    return Array::ElemInt(lval, k, throwOnMissing);
   }
-  static arr_lval ElemStr(ArrayData* ad, StringData* k) {
-    return Array::ElemStr(Cast(ad, __func__), k);
+  static tv_lval ElemStr(tv_lval lval, StringData* k, bool throwOnMissing) {
+    Cast(lval.val().parr, __func__);
+    return Array::ElemStr(lval, k, throwOnMissing);
   }
   static ArrayData* SetInt(ArrayData* ad, int64_t k, TypedValue v) {
     return Array::SetInt(Cast(ad, __func__), k, v);

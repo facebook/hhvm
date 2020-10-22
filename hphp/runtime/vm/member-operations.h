@@ -526,20 +526,39 @@ inline TypedValue Elem(tv_rval base, key_type<keyType> key) {
 /**
  * ElemD when base is a bespoke array-like
  */
-template <bool Elem>
-inline arr_lval ElemDBespokePre(tv_lval base, int64_t key) {
-  return Elem ? BespokeArray::ElemInt(base.val().parr, key)
-              : BespokeArray::LvalInt(base.val().parr, key);
+inline void ElemDBespokeUpdateBase(tv_lval base, arr_lval result) {
+  auto const oldArr = base.val().parr;
+  if (result.arr != oldArr) {
+    type(base) = dt_with_rc(type(base));
+    val(base).parr = result.arr;
+    decRefArr(oldArr);
+  }
 }
 
 template <bool Elem>
-inline arr_lval ElemDBespokePre(tv_lval base, StringData* key) {
-  return Elem ? BespokeArray::ElemStr(base.val().parr, key)
-              : BespokeArray::LvalStr(base.val().parr, key);
+inline tv_lval ElemDBespokePre(tv_lval base, int64_t key) {
+  if constexpr (Elem) {
+    return BespokeArray::ElemInt(base, key, true);
+  } else {
+    auto const result = BespokeArray::LvalInt(base.val().parr, key);
+    ElemDBespokeUpdateBase(base, result);
+    return result;
+  }
 }
 
 template <bool Elem>
-inline arr_lval ElemDBespokePre(tv_lval base, TypedValue key) {
+inline tv_lval ElemDBespokePre(tv_lval base, StringData* key) {
+  if constexpr (Elem) {
+    return BespokeArray::ElemStr(base, key, true);
+  } else {
+    auto const result = BespokeArray::LvalStr(base.val().parr, key);
+    ElemDBespokeUpdateBase(base, result);
+    return result;
+  }
+}
+
+template <bool Elem>
+inline tv_lval ElemDBespokePre(tv_lval base, TypedValue key) {
   auto const dt = key.m_type;
   if (isIntType(dt))    return ElemDBespokePre<Elem>(base, key.m_data.num);
   if (isStringType(dt)) return ElemDBespokePre<Elem>(base, key.m_data.pstr);
@@ -551,15 +570,9 @@ inline tv_lval ElemDBespoke(tv_lval base, key_type<keyType> key) {
   assertx(tvIsArrayLike(base));
   assertx(tvIsPlausible(*base));
 
-  auto const oldArr = base.val().parr;
-  assertx(!oldArr->isVanilla());
+  assertx(!base.val().parr->isVanilla());
   auto const result = ElemDBespokePre<Elem>(base, key);
   assertx(IMPLIES(Elem, result.type() == dt_modulo_persistence(result.type())));
-  if (result.arr != oldArr) {
-    type(base) = dt_with_rc(type(base));
-    val(base).parr = result.arr;
-    decRefArr(oldArr);
-  }
   assertx(tvIsPlausible(*base));
   assertx(result.type() != KindOfUninit);
   return result;
@@ -833,21 +846,17 @@ inline tv_lval ElemUEmptyish() {
 /**
  * ElemU when base is a bespoke array-like
  */
-inline arr_lval ElemUBespokePre(tv_lval base, int64_t key) {
+inline tv_lval ElemUBespokePre(tv_lval base, int64_t key) {
   if (tvIsKeyset(base)) throwInvalidKeysetOperation();
-  auto const ad = base.val().parr;
-  if (!BespokeArray::ExistsInt(ad, key)) return {ad, ElemUEmptyish()};
-  return BespokeArray::ElemInt(ad, key);
+  return BespokeArray::ElemInt(base, key, false);
 }
 
-inline arr_lval ElemUBespokePre(tv_lval base, StringData* key) {
+inline tv_lval ElemUBespokePre(tv_lval base, StringData* key) {
   if (tvIsKeyset(base)) throwInvalidKeysetOperation();
-  auto const ad = base.val().parr;
-  if (!BespokeArray::ExistsStr(ad, key)) return {ad, ElemUEmptyish()};
-  return BespokeArray::ElemStr(ad, key);
+  return BespokeArray::ElemStr(base, key, false);
 }
 
-inline arr_lval ElemUBespokePre(tv_lval base, TypedValue key) {
+inline tv_lval ElemUBespokePre(tv_lval base, TypedValue key) {
   auto const dt = key.m_type;
   if (isIntType(dt))    return ElemUBespokePre(base, key.m_data.num);
   if (isStringType(dt)) return ElemUBespokePre(base, key.m_data.pstr);
@@ -859,14 +868,8 @@ inline tv_lval ElemUBespoke(tv_lval base, key_type<keyType> key) {
   assertx(tvIsArrayLike(base));
   assertx(tvIsPlausible(*base));
 
-  auto const oldArr = base.val().parr;
-  assertx(!oldArr->isVanilla());
+  assertx(!base.val().parr->isVanilla());
   auto const result = ElemUBespokePre(base, key);
-  if (result.arr != oldArr) {
-    type(base) = dt_with_rc(type(base));
-    val(base).parr = result.arr;
-    decRefArr(oldArr);
-  }
   assertx(tvIsPlausible(*base));
   assertx(result.type() != KindOfUninit);
   return result;

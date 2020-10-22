@@ -143,10 +143,12 @@ public:
   //  * The caller using this method may *never* change the value of the type
   //    the resulting lval points to. (It may store to it with the same type.)
   //
+  // Furthermore, Elem methods accept the tv_lval of the array being operated
+  // on. This lval is updated accordingly if the array is escalated or copied.
   static arr_lval LvalInt(ArrayData* ad, int64_t key);
   static arr_lval LvalStr(ArrayData* ad, StringData* key);
-  static arr_lval ElemInt(ArrayData* ad, int64_t key);
-  static arr_lval ElemStr(ArrayData* ad, StringData* key);
+  static tv_lval ElemInt(tv_lval lvalIn, int64_t key, bool throwOnMissing);
+  static tv_lval ElemStr(tv_lval lvalIn, StringData* key, bool throwOnMissing);
 
   // insertion
   static ArrayData* SetInt(ArrayData* ad, int64_t key, TypedValue v);

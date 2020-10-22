@@ -388,9 +388,15 @@ decltype(auto) mutate(LoggingArray* lad, EntryTypes ms, F&& f) {
   return escalate(lad, f(lad->wrapped), ms);
 }
 
-arr_lval elem(arr_lval lval) {
-  lval.type() = dt_modulo_persistence(lval.type());
-  return lval;
+tv_lval elem(tv_lval lvalIn, arr_lval result) {
+  result.type() = dt_modulo_persistence(result.type());
+  auto const ladIn = LoggingArray::As(lvalIn.val().parr);
+  if (result.arr != ladIn) {
+    lvalIn.type() = dt_with_rc(lvalIn.type());
+    lvalIn.val().parr = result.arr;
+    if (ladIn->decReleaseCheck()) LoggingArray::Release(ladIn);
+  }
+  return result;
 }
 }
 
@@ -411,21 +417,32 @@ arr_lval LoggingArray::LvalStr(LoggingArray* lad, StringData* k) {
   logEvent(lad, ms, ArrayOp::LvalStr, k, val);
   return mutate(lad, ms, [&](ArrayData* arr) { return arr->lval(k); });
 }
-arr_lval LoggingArray::ElemInt(LoggingArray* lad, int64_t k) {
+tv_lval LoggingArray::ElemInt(tv_lval lval, int64_t k, bool throwOnMissing) {
+  auto const lad = As(lval.val().parr);
   auto const val = lad->wrapped->get(k);
   auto const key = make_tv<KindOfInt64>(k);
   auto const ms = val.is_init() ? lad->entryTypes.with(key, countedValue(val))
                                 : lad->entryTypes;
   logEvent(lad, ms, ArrayOp::ElemInt, k, val);
-  return elem(mutate(lad, ms, [&](ArrayData* arr) { return arr->lval(k); }));
+  if (!val.is_init() && !throwOnMissing) {
+    return const_cast<TypedValue*>(&immutable_null_base);
+  }
+  return elem(lval,
+              mutate(lad, ms, [&](ArrayData* arr) { return arr->lval(k); }));
 }
-arr_lval LoggingArray::ElemStr(LoggingArray* lad, StringData* k) {
+tv_lval LoggingArray::ElemStr(
+    tv_lval lval, StringData* k, bool throwOnMissing) {
+  auto const lad = As(lval.val().parr);
   auto const val = lad->wrapped->get(k);
   auto const key = make_tv<KindOfString>(k);
   auto const ms = val.is_init() ? lad->entryTypes.with(key, countedValue(val))
                                 : lad->entryTypes;
   logEvent(lad, ms, ArrayOp::ElemStr, k, val);
-  return elem(mutate(lad, ms, [&](ArrayData* arr) { return arr->lval(k); }));
+  if (!val.is_init() && !throwOnMissing) {
+    return const_cast<TypedValue*>(&immutable_null_base);
+  }
+  return elem(lval,
+              mutate(lad, ms, [&](ArrayData* arr) { return arr->lval(k); }));
 }
 
 ArrayData* LoggingArray::SetInt(LoggingArray* lad, int64_t k, TypedValue v) {

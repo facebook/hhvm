@@ -182,11 +182,15 @@ arr_lval EmptyMonotypeDict::LvalInt(Self* ad, int64_t k) {
 arr_lval EmptyMonotypeDict::LvalStr(Self* ad, StringData* k) {
   throwOOBArrayKeyException(k, ad);
 }
-arr_lval EmptyMonotypeDict::ElemInt(Self* ad, int64_t k) {
-  throwOOBArrayKeyException(k, ad);
+tv_lval EmptyMonotypeDict::ElemInt(
+    tv_lval lval, int64_t k, bool throwOnMissing) {
+  if (throwOnMissing) throwOOBArrayKeyException(k, lval.val().parr);
+  return const_cast<TypedValue*>(&immutable_null_base);
 }
-arr_lval EmptyMonotypeDict::ElemStr(Self* ad, StringData* k) {
-  throwOOBArrayKeyException(k, ad);
+tv_lval EmptyMonotypeDict::ElemStr(
+    tv_lval lval, StringData* k, bool throwOnMissing) {
+  throwOOBArrayKeyException(k, lval.val().parr);
+  return const_cast<TypedValue*>(&immutable_null_base);
 }
 
 ArrayData* EmptyMonotypeDict::SetInt(Self* ad, int64_t k, TypedValue v) {
@@ -519,10 +523,16 @@ ArrayData* MonotypeDict<Key>::removeImpl(Key key) {
 }
 
 template <typename Key> template <typename K>
-arr_lval MonotypeDict<Key>::elemImpl(Key key, K k) {
-  if (key == getTombstone<Key>()) throwOOBArrayKeyException(k, this);
+arr_lval MonotypeDict<Key>::elemImpl(Key key, K k, bool throwOnMissing) {
+  if (key == getTombstone<Key>()) {
+    if (throwOnMissing) throwOOBArrayKeyException(k, this);
+    return {this, const_cast<TypedValue*>(&immutable_null_base)};
+  }
   auto const old = findForGet(key, getHash(key));
-  if (old == nullptr) throwOOBArrayKeyException(k, this);
+  if (old == nullptr) {
+    if (throwOnMissing) throwOOBArrayKeyException(k, this);
+    return {this, const_cast<TypedValue*>(&immutable_null_base)};
+  }
 
   auto const mad = cowCheck() ? copy() : this;
   auto const elm = old - elms() + mad->elms();
@@ -1001,13 +1011,29 @@ arr_lval MonotypeDict<Key>::LvalStr(Self* mad, StringData* k) {
 }
 
 template <typename Key>
-arr_lval MonotypeDict<Key>::ElemInt(Self* mad, int64_t k) {
-  return mad->elemImpl(coerceKey<Key>(k), k);
+tv_lval MonotypeDict<Key>::ElemInt(
+    tv_lval lvalIn, int64_t k, bool throwOnMissing) {
+  auto const madIn = As(lvalIn.val().parr);
+  auto const lval = madIn->elemImpl(coerceKey<Key>(k), k, throwOnMissing);
+  if (lval.arr != madIn) {
+    lvalIn.type() = dt_with_rc(lvalIn.type());
+    lvalIn.val().parr = lval.arr;
+    if (madIn->decReleaseCheck()) Release(madIn);
+  }
+  return lval;
 }
 
 template <typename Key>
-arr_lval MonotypeDict<Key>::ElemStr(Self* mad, StringData* k) {
-  return mad->elemImpl(coerceKey<Key>(k), k);
+tv_lval MonotypeDict<Key>::ElemStr(
+    tv_lval lvalIn, StringData* k, bool throwOnMissing) {
+  auto const madIn = As(lvalIn.val().parr);
+  auto const lval = madIn->elemImpl(coerceKey<Key>(k), k, throwOnMissing);
+  if (lval.arr != madIn) {
+    lvalIn.type() = dt_with_rc(lvalIn.type());
+    lvalIn.val().parr = lval.arr;
+    if (madIn->decReleaseCheck()) Release(madIn);
+  }
+  return lval;
 }
 
 template <typename Key>

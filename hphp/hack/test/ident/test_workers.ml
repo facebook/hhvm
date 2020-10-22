@@ -1,6 +1,6 @@
 module Hh_bucket = Bucket (* Bucket is shadowed by Core_kernel *)
 
-open Core_kernel
+open Hh_prelude
 
 module IntKey = struct
   type t = int

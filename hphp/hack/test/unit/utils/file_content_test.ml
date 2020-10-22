@@ -8,10 +8,10 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 open File_content
 
-let expect_has_content fc content = content = fc
+let expect_has_content fc content = String.equal content fc
 
 let test_basic_edit () =
   let content = "for test\n" in
@@ -175,7 +175,7 @@ let test_offsets () =
   let s = "hi\n" ^ "g" ^ c2 ^ "\n" ^ c3 ^ c4 in
   let check ~offset position =
     let result = offset_to_position s offset in
-    if result <> position then
+    if Poly.(result <> position) then
       failwith
         (Printf.sprintf
            "Expected offset %i to be {line=%i,col=%i} not {line=%i,col=%i}"
@@ -246,7 +246,7 @@ let test_large () =
 let assert_line expected f l =
   let s = Full_fidelity_source_text.line_text f l in
   Printf.printf "Expected: [%s] Actual: [%s]\n" expected s;
-  if s <> expected then
+  if not (String.equal s expected) then
     failwith "Assertion failed"
   else
     ()

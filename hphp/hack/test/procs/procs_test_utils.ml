@@ -1,4 +1,4 @@
-open Core_kernel
+open Hh_prelude
 
 let entry =
   WorkerController.register_entry_point ~restore:(fun _ ~(worker_id : int) ->
@@ -46,4 +46,4 @@ let run_interrupter limit =
 let read_exclamation_mark fd =
   let exclamation_mark = Bytes.create 1 in
   let read = Unix.read fd exclamation_mark 0 1 in
-  assert (read = 1 && Bytes.to_string exclamation_mark = "!")
+  assert (read = 1 && String.equal (Bytes.to_string exclamation_mark) "!")

@@ -1,4 +1,4 @@
-open Core_kernel
+open Hh_prelude
 
 let entry =
   WorkerController.register_entry_point ~restore:(fun () ~(worker_id : int) ->
@@ -33,7 +33,7 @@ let call_and_verify_result worker f x expected =
     |> wait_until_ready
     |> WorkerController.get_result
   in
-  result = expected
+  String.equal result expected
 
 (** This is just like the test_worker_uncaught_exception_exits_with_2 test
  * except we add a call_wapper to the worker. It catches all exceptions and

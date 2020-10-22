@@ -6,7 +6,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 
 type drop_test (* abstract type for the Rust DropTest type *)
 

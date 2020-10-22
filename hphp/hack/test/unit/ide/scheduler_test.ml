@@ -8,7 +8,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 
 type test_env = {
   (* What callbacks were called and when *)
@@ -42,7 +42,7 @@ let schedule_wait_for_channel name fd ~priority =
 let run_and_expect_trace env trace =
   let env = TestScheduler.wait_and_run_ready env in
   List.iter2_exn env.callbacks_trace trace ~f:(fun (x, _) y ->
-      if x <> y then raise Exit);
+      if not (String.equal x y) then raise Exit);
   env
 
 let test_fun_wait env =

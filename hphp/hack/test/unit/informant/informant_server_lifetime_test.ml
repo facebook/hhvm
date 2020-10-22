@@ -1,4 +1,4 @@
-open Core_kernel
+open Hh_prelude
 
 module Target_saved_state_comparator = struct
   type t = ServerMonitorUtils.target_saved_state
@@ -19,7 +19,7 @@ module Target_saved_state_comparator = struct
          ~default:"None"
          ~f:ServerMonitorUtils.watchman_mergebase_to_string)
 
-  let is_equal x y = x = y
+  let is_equal x y = Poly.(x = y)
 end
 
 module Int_asserter = Asserter.Int_asserter

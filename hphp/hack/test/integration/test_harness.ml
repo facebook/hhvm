@@ -1,4 +1,4 @@
-open Core_kernel
+open Hh_prelude
 
 module Tools = struct
   let boxed_string content =

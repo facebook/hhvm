@@ -8,7 +8,7 @@
  *)
 
 module OcamlPrintf = Printf
-open Core_kernel
+open Hh_prelude
 module Printf = OcamlPrintf
 
 [@@@warning "-3"]

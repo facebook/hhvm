@@ -1,4 +1,4 @@
-open Core_kernel
+open Hh_prelude
 open IndexBuilderTypes
 open SearchUtils
 open Test_harness
@@ -31,7 +31,7 @@ let assert_ns_matches (expected_ns : string) (actual : SearchUtils.si_results) :
     unit =
   let found =
     List.fold actual ~init:false ~f:(fun acc item ->
-        item.si_name = expected_ns || acc)
+        String.equal item.si_name expected_ns || acc)
   in
   ( if not found then
     let results_str =

@@ -6,7 +6,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 open OUnit2
 open Typing_defs
 open Typing_env_types
@@ -73,7 +73,10 @@ end = struct
     in
     assert_bool
       error_message
-      (negate <> Inf.tyvar_occurs_in_tyvar env.inference_env tv1 ~in_:tv2)
+      (not
+         (Bool.equal
+            negate
+            (Inf.tyvar_occurs_in_tyvar env.inference_env tv1 ~in_:tv2)))
 
   let assert_tyvar_doesnt_occur_in_tyvar =
     assert_tyvar_occurs_in_tyvar ~negate:true

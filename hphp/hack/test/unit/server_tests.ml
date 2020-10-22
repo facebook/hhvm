@@ -8,7 +8,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 
 let tcopt_with_defer =
   GlobalOptions.{ default with tco_defer_class_declaration_threshold = Some 1 }

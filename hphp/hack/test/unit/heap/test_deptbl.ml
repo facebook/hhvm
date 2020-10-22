@@ -8,7 +8,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 
 (* Functions to get and store data from deptable *)
 

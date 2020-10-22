@@ -8,7 +8,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 open Integration_test_base_types
 open Reordered_argument_collections
 open ServerCommandTypes

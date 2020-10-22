@@ -1,4 +1,4 @@
-open Core_kernel
+open Hh_prelude
 
 (* primitive tests *)
 external get_a : unit -> char = "get_a"
@@ -121,7 +121,7 @@ external realloc_in_ocaml_heap : 'a -> 'a = "realloc_in_ocaml_heap"
 
 let test_char () =
   let x = get_a () in
-  assert (x = 'a')
+  assert (Char.equal x 'a')
 
 let test_int () =
   let x = get_five () in
@@ -172,14 +172,14 @@ let test_int_option_ref () =
 
 let test_str () =
   let s = get_str () in
-  assert (s = "static str")
+  assert (String.equal s "static str")
 
 let test_byte_slice () =
   let b = get_byte_slice () in
-  assert (Caml.Bytes.sub_string b 0 4 = "byte");
-  assert (Caml.Bytes.get b 4 = '\x00');
-  assert (Caml.Bytes.get b 5 = '\xFF');
-  assert (Caml.Bytes.sub_string b 6 5 = "slice")
+  assert (String.equal (Caml.Bytes.sub_string b 0 4) "byte");
+  assert (Char.equal (Caml.Bytes.get b 4) '\x00');
+  assert (Char.equal (Caml.Bytes.get b 5) '\xFF');
+  assert (String.equal (Caml.Bytes.sub_string b 6 5) "slice")
 
 let test_int_opt_slice () =
   match get_int_opt_slice () with
@@ -223,32 +223,32 @@ let test_bar () =
 let test_empty_string () =
   let s = get_empty_string () in
   assert (String.length s = 0);
-  assert (s = "")
+  assert (String.equal s "")
 
 let test_a_string () =
   let s = get_a_string () in
   assert (String.length s = 1);
-  assert (s = "a")
+  assert (String.equal s "a")
 
 let test_ab_string () =
   let s = get_ab_string () in
   assert (String.length s = 2);
-  assert (s = "ab")
+  assert (String.equal s "ab")
 
 let test_abcde_string () =
   let s = get_abcde_string () in
   assert (String.length s = 5);
-  assert (s = "abcde")
+  assert (String.equal s "abcde")
 
 let test_abcdefg_string () =
   let s = get_abcdefg_string () in
   assert (String.length s = 7);
-  assert (s = "abcdefg")
+  assert (String.equal s "abcdefg")
 
 let test_abcdefgh_string () =
   let s = get_abcdefgh_string () in
   assert (String.length s = 8);
-  assert (s = "abcdefgh")
+  assert (String.equal s "abcdefgh")
 
 let float_compare f1 f2 =
   let abs_diff = Float.abs (f1 -. f2) in
@@ -262,9 +262,17 @@ let test_one_two_float () =
   let f = get_one_two_float () in
   assert (float_compare f 1.2)
 
-let test_apple () = assert (get_apple () = Apple)
+let test_apple () =
+  assert (
+    match get_apple () with
+    | Apple -> true
+    | _ -> false )
 
-let test_kiwi () = assert (get_kiwi () = Kiwi)
+let test_kiwi () =
+  assert (
+    match get_kiwi () with
+    | Kiwi -> true
+    | _ -> false )
 
 let test_orange () =
   match get_orange () with
@@ -310,7 +318,7 @@ let test_sset () =
 
 let test_convert_char () =
   let x = convert_to_ocamlrep 'a' in
-  assert (x = 'a')
+  assert (Char.equal x 'a')
 
 let test_convert_int () =
   let x = convert_to_ocamlrep 5 in
@@ -399,32 +407,32 @@ let test_convert_bar () =
 let test_convert_empty_string () =
   let s = convert_to_ocamlrep "" in
   assert (String.length s = 0);
-  assert (s = "")
+  assert (String.equal s "")
 
 let test_convert_a_string () =
   let s = convert_to_ocamlrep "a" in
   assert (String.length s = 1);
-  assert (s = "a")
+  assert (String.equal s "a")
 
 let test_convert_ab_string () =
   let s = convert_to_ocamlrep "ab" in
   assert (String.length s = 2);
-  assert (s = "ab")
+  assert (String.equal s "ab")
 
 let test_convert_abcde_string () =
   let s = convert_to_ocamlrep "abcde" in
   assert (String.length s = 5);
-  assert (s = "abcde")
+  assert (String.equal s "abcde")
 
 let test_convert_abcdefg_string () =
   let s = convert_to_ocamlrep "abcdefg" in
   assert (String.length s = 7);
-  assert (s = "abcdefg")
+  assert (String.equal s "abcdefg")
 
 let test_convert_abcdefgh_string () =
   let s = convert_to_ocamlrep "abcdefgh" in
   assert (String.length s = 8);
-  assert (s = "abcdefgh")
+  assert (String.equal s "abcdefgh")
 
 let float_compare f1 f2 =
   let abs_diff = Float.abs (f1 -. f2) in
@@ -438,9 +446,17 @@ let test_convert_one_two_float () =
   let f = convert_to_ocamlrep 1.2 in
   assert (float_compare f 1.2)
 
-let test_convert_apple () = assert (convert_to_ocamlrep Apple = Apple)
+let test_convert_apple () =
+  assert (
+    match convert_to_ocamlrep Apple with
+    | Apple -> true
+    | _ -> false )
 
-let test_convert_kiwi () = assert (convert_to_ocamlrep Kiwi = Kiwi)
+let test_convert_kiwi () =
+  assert (
+    match convert_to_ocamlrep Kiwi with
+    | Kiwi -> true
+    | _ -> false )
 
 let test_convert_orange () =
   match convert_to_ocamlrep (Orange 39) with
@@ -498,7 +514,7 @@ let test_convert_shared_value () =
 
 let test_realloc_char () =
   let x = realloc_in_ocaml_heap 'a' in
-  assert (x = 'a')
+  assert (Char.equal x 'a')
 
 let test_realloc_int () =
   let x = realloc_in_ocaml_heap 5 in
@@ -577,32 +593,32 @@ let test_realloc_bar () =
 let test_realloc_empty_string () =
   let s = realloc_in_ocaml_heap "" in
   assert (String.length s = 0);
-  assert (s = "")
+  assert (String.equal s "")
 
 let test_realloc_a_string () =
   let s = realloc_in_ocaml_heap "a" in
   assert (String.length s = 1);
-  assert (s = "a")
+  assert (String.equal s "a")
 
 let test_realloc_ab_string () =
   let s = realloc_in_ocaml_heap "ab" in
   assert (String.length s = 2);
-  assert (s = "ab")
+  assert (String.equal s "ab")
 
 let test_realloc_abcde_string () =
   let s = realloc_in_ocaml_heap "abcde" in
   assert (String.length s = 5);
-  assert (s = "abcde")
+  assert (String.equal s "abcde")
 
 let test_realloc_abcdefg_string () =
   let s = realloc_in_ocaml_heap "abcdefg" in
   assert (String.length s = 7);
-  assert (s = "abcdefg")
+  assert (String.equal s "abcdefg")
 
 let test_realloc_abcdefgh_string () =
   let s = realloc_in_ocaml_heap "abcdefgh" in
   assert (String.length s = 8);
-  assert (s = "abcdefgh")
+  assert (String.equal s "abcdefgh")
 
 let float_compare f1 f2 =
   let abs_diff = Float.abs (f1 -. f2) in
@@ -616,9 +632,17 @@ let test_realloc_one_two_float () =
   let f = realloc_in_ocaml_heap 1.2 in
   assert (float_compare f 1.2)
 
-let test_realloc_apple () = assert (realloc_in_ocaml_heap Apple = Apple)
+let test_realloc_apple () =
+  assert (
+    match realloc_in_ocaml_heap Apple with
+    | Apple -> true
+    | _ -> false )
 
-let test_realloc_kiwi () = assert (realloc_in_ocaml_heap Kiwi = Kiwi)
+let test_realloc_kiwi () =
+  assert (
+    match realloc_in_ocaml_heap Kiwi with
+    | Kiwi -> true
+    | _ -> false )
 
 let test_realloc_orange () =
   match realloc_in_ocaml_heap (Orange 39) with

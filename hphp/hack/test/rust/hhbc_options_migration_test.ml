@@ -1,4 +1,4 @@
-open Core_kernel
+open Hh_prelude
 open OUnit2
 
 (* Useful debugging, since no ppx printer for Hhbc_options.t *)

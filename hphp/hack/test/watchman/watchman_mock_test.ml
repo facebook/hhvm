@@ -1,4 +1,4 @@
-open Core_kernel
+open Hh_prelude
 
 module Watchman_changes_comparator = struct
   type t = Watchman.changes

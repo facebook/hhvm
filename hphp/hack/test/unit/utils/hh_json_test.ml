@@ -8,7 +8,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 
 let throws f =
   try
@@ -33,7 +33,7 @@ let test_escape_unescape () =
       let encoded = Hh_json.json_to_string json in
       let decoded = Hh_json.json_of_string encoded in
       let result = Hh_json.get_string_exn decoded in
-      result = s)
+      String.equal result s)
 
 let test_empty_string () =
   try
@@ -82,7 +82,12 @@ let test_jget_string () =
   let json_none = None in
   Hh_json_helpers.(
     let results = "" in
-    let str = Jget.string_opt json_string "foo" = Some "hello" in
+    let str =
+      Option.equal
+        String.equal
+        (Jget.string_opt json_string "foo")
+        (Some "hello")
+    in
     let num = Jget.string_opt json_number "foo" |> Option.is_none in
     let nul = Jget.string_opt json_number "foo" |> Option.is_none in
     let abs = Jget.string_opt json_absent "foo" |> Option.is_none in
@@ -97,11 +102,13 @@ let test_jget_string () =
           abs
           non
     in
-    let str = Jget.string_d json_string "foo" ~default:"d" = "hello" in
-    let num = Jget.string_d json_absent "foo" ~default:"d" = "d" in
-    let nul = Jget.string_d json_absent "foo" ~default:"d" = "d" in
-    let abs = Jget.string_d json_absent "foo" ~default:"d" = "d" in
-    let non = Jget.string_d json_none "foo" ~default:"d" = "d" in
+    let str =
+      String.equal (Jget.string_d json_string "foo" ~default:"d") "hello"
+    in
+    let num = String.equal (Jget.string_d json_absent "foo" ~default:"d") "d" in
+    let nul = String.equal (Jget.string_d json_absent "foo" ~default:"d") "d" in
+    let abs = String.equal (Jget.string_d json_absent "foo" ~default:"d") "d" in
+    let non = String.equal (Jget.string_d json_none "foo" ~default:"d") "d" in
     let results =
       results
       ^ Printf.sprintf
@@ -112,7 +119,7 @@ let test_jget_string () =
           abs
           non
     in
-    let str = Jget.string_exn json_string "foo" = "hello" in
+    let str = String.equal (Jget.string_exn json_string "foo") "hello" in
     let num = throws (fun () -> Jget.string_exn json_number "foo") in
     let nul = throws (fun () -> Jget.string_exn json_null "foo") in
     let abs = throws (fun () -> Jget.string_exn json_absent "foo") in
@@ -137,7 +144,7 @@ let test_jget_number () =
   let json_string = Some (Hh_json.json_of_string "{ \"foo\": \"hello\" }") in
   Hh_json_helpers.(
     let results = "" in
-    let iint = Jget.int_opt json_int "foo" = Some 1 in
+    let iint = Option.equal Int.equal (Jget.int_opt json_int "foo") (Some 1) in
     let ifloat = throws (fun () -> Jget.int_opt json_float "foo") in
     let istring = Jget.int_opt json_string "foo" |> Option.is_none in
     let results =
@@ -148,8 +155,12 @@ let test_jget_number () =
           ifloat
           istring
     in
-    let fint = Jget.float_opt json_int "foo" = Some 1.0 in
-    let ffloat = Jget.float_opt json_float "foo" = Some 1.0 in
+    let fint =
+      Option.equal Float.equal (Jget.float_opt json_int "foo") (Some 1.0)
+    in
+    let ffloat =
+      Option.equal Float.equal (Jget.float_opt json_float "foo") (Some 1.0)
+    in
     let fstring = Jget.float_opt json_string "foo" |> Option.is_none in
     let results =
       results

@@ -1,4 +1,4 @@
-open Core_kernel
+open Hh_prelude
 
 module Report_comparator :
   Asserter.Comparator with type t = Informant_sig.report = struct

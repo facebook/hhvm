@@ -1397,6 +1397,24 @@ OPTBLD_INLINE void iopClsCnsD(const StringData* clsCnsName, Id classId) {
   tvDup(clsCns, *c1);
 }
 
+OPTBLD_INLINE void iopClsCnsL(tv_lval local) {
+  auto const clsTV = vmStack().topC();
+  if (!isClassType(clsTV->m_type)) {
+    raise_error("Attempting class constant access on non-class");
+  }
+  auto const cls = clsTV->m_data.pclass;
+  if (!isStringType(type(local))) {
+    raise_error("String expected for %s constant", cls->name()->data());
+  }
+  auto const clsCnsName = val(local).pstr;
+  auto const clsCns = cls->clsCnsGet(clsCnsName);
+  if (clsCns.m_type == KindOfUninit) {
+    raise_error("Couldn't find constant %s::%s",
+                cls->name()->data(), clsCnsName->data());
+  }
+  tvSet(clsCns, *clsTV);
+}
+
 OPTBLD_INLINE void iopConcat() {
   auto const c1 = vmStack().topC();
   auto const c2 = vmStack().indC(1);

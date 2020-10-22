@@ -371,7 +371,7 @@ void emitChainFaults(IRGS& env)               { interpOne(env); }
 void emitContGetReturn(IRGS& env)             { interpOne(env); }
 void emitResolveClass(IRGS& env, const StringData*)
                                               { interpOne(env); }
-
+void emitClsCnsL(IRGS& env, int)              { interpOne(env); }
 //////////////////////////////////////////////////////////////////////
 
 }}}

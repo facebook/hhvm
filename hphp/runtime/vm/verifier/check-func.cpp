@@ -1490,6 +1490,7 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op, bool pure) {
     case Op::CnsE:
     case Op::ClsCns:
     case Op::ClsCnsD:
+    case Op::ClsCnsL:
     case Op::File:
     case Op::Dir:
     case Op::Method:

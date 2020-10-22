@@ -980,6 +980,12 @@ ClsCns <litstr id>  [C:Class]  ->  [C:Null|Bool|Int|Dbl|Str|Arr|Vec|Dict|Keyset|
   named %1 from the class $1 onto the stack. If there is no class
   constant named %1 in class $1, this instruction throws a fatal error.
 
+ClsCnsL <local variable id>  [C:Class]  ->  [C:Null|Bool|Int|Dbl|Str|Arr|Vec|Dict|Keyset|Resource]
+
+  Get class constant (local). This instruction pushes the value of the class
+  named %1 from the class $1 onto the stack. If there is no class constant
+  named %1 in class $1, this instruction throws a fatal error.
+
 ClsCnsD <litstr id> <litstr id>    []  ->  [C:Null|Bool|Int|Dbl|Str|Arr|Vec|Dict|Keyset|Resource]
 
   Get class constant (direct). This instruction first checks if %2 matches the

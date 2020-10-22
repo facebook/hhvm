@@ -243,6 +243,7 @@ pub enum InstructLitConst {
     CnsE(ConstId),
     ClsCns(ConstId),
     ClsCnsD(ConstId, ClassId),
+    ClsCnsL(local::Type),
     File,
     Dir,
     Method,

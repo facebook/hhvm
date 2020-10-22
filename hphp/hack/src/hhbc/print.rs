@@ -2077,6 +2077,10 @@ fn print_lit_const<W: Write>(w: &mut W, lit: &InstructLitConst) -> Result<(), W:
             w.write(" ")?;
             print_class_id(w, cid)
         }
+        LC::ClsCnsL(id) => {
+            w.write("ClsCnsL ")?;
+            print_local(w, id)
+        }
         LC::NewCol(ct) => {
             w.write("NewCol ")?;
             print_collection_type(w, ct)

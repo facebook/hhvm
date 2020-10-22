@@ -126,6 +126,7 @@ static const struct {
   { OpCnsE,        {None,             Stack1,       OutCns          }},
   { OpClsCns,      {Stack1,           Stack1,       OutUnknown      }},
   { OpClsCnsD,     {None,             Stack1,       OutUnknown      }},
+  { OpClsCnsL,     {Stack1|Local,     Stack1,       OutUnknown      }},
   { OpFile,        {None,             Stack1,       OutString       }},
   { OpDir,         {None,             Stack1,       OutString       }},
   { OpMethod,      {None,             Stack1,       OutString       }},
@@ -1031,6 +1032,7 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::RetM:
   case Op::Select:
   case Op::LockObj:
+  case Op::ClsCnsL:
     return false;
 
   // These are instructions that are always interp-one'd, or are always no-ops.

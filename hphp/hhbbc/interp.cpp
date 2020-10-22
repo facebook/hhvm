@@ -1217,6 +1217,13 @@ void in(ISS& env, const bc::ClsCnsD& op) {
   push(env, TInitCell);
 }
 
+void in(ISS& env, const bc::ClsCnsL& op) {
+  //For now, just pop a stack value and push a TCell.
+  mayReadLocal(env, op.loc1);
+  popC(env);
+  push(env, TInitCell);
+}
+
 void in(ISS& env, const bc::File&)   { effect_free(env); push(env, TSStr); }
 void in(ISS& env, const bc::Dir&)    { effect_free(env); push(env, TSStr); }
 void in(ISS& env, const bc::Method&) { effect_free(env); push(env, TSStr); }

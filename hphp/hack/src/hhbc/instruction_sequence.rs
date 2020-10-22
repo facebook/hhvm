@@ -286,6 +286,10 @@ pub mod instr {
         instr(Instruct::ILitConst(InstructLitConst::ClsCns(const_id)))
     }
 
+    pub fn clscnsl(local: local::Type) -> InstrSeq {
+        instr(Instruct::ILitConst(InstructLitConst::ClsCnsL(local)))
+    }
+
     pub fn eq() -> InstrSeq {
         instr(Instruct::IOp(InstructOperator::Eq))
     }

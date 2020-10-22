@@ -561,6 +561,7 @@ constexpr uint32_t kMaxConcatN = 4;
   O(CnsE,            ONE(SA),          NOV,             ONE(CV),    NF) \
   O(ClsCns,          ONE(SA),          ONE(CV),         ONE(CV),    NF) \
   O(ClsCnsD,         TWO(SA,SA),       NOV,             ONE(CV),    NF) \
+  O(ClsCnsL,         ONE(LA),          ONE(CV),         ONE(CV),    NF) \
   O(ClassName,       NA,               ONE(CV),         ONE(CV),    NF) \
   O(File,            NA,               NOV,             ONE(CV),    NF) \
   O(Dir,             NA,               NOV,             ONE(CV),    NF) \
@@ -1185,4 +1186,3 @@ struct hash<HPHP::Op> {
 }
 
 //////////////////////////////////////////////////////////////////////
-

@@ -1,6 +1,6 @@
 === IFC analysis results for ifc_errors.php
 File "ifc_errors.php", line 16, characters 3-45:
-Unable to analyze information flow for statement. This might be unsafe. (Typing[4385])
+Unable to analyze information flow for statement (For). This might be unsafe. (Typing[4385])
 File "ifc_errors.php", line 21, characters 3-15:
 Data with policy `PRIVATE` appears in context `PUBLIC`. (Typing[4379])
   File "ifc_errors.php", line 9, characters 14-22:

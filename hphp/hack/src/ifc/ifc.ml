@@ -942,47 +942,17 @@ and expr ~pos renv (env : Env.expr_env) (((_, ety), e) : Tast.expr) =
     in
     let (env, s) = List.fold ~f ~init:(env, Nast.ShapeMap.empty) s in
     (env, Tshape (T.Closed_shape, s))
-  (* --- expressions below are not yet supported *)
-  | A.Darray (_, _)
-  | A.Varray (_, _)
-  | A.ValCollection (_, _, _)
-  | A.KeyValCollection (_, _, _)
-  | A.Omitted
-  | A.Id _
-  | A.Clone _
-  | A.Obj_get (_, _, _)
-  | A.Class_get (_, _)
-  | A.Class_const (_, _)
-  | A.FunctionPointer (_, _)
-  | A.String2 _
-  | A.PrefixedString (_, _)
-  | A.Yield _
-  | A.Yield_break
-  | A.Suspend _
-  | A.Expr_list _
-  | A.Cast (_, _)
-  | A.Eif (_, _, _)
-  | A.Is (_, _)
-  | A.As (_, _, _)
-  | A.Record (_, _)
-  | A.Xml (_, _, _)
-  | A.Callconv (_, _)
-  | A.Lplaceholder _
-  | A.Fun_id _
-  | A.Method_id (_, _)
-  | A.Method_caller (_, _)
-  | A.Smethod_id (_, _)
-  | A.Pair _
-  | A.Assert _
-  | A.PU_atom _
-  | A.PU_identifier (_, _, _)
-  | A.Any ->
-    Errors.unknown_information_flow pos "expression";
-    (env, Lift.ty renv ety)
+  (* --- A valid AST does not contain these nodes *)
   | A.Import _
   | A.Collection _
   | A.BracedExpr _ ->
     failwith "AST should not contain these nodes"
+  (* --- expressions below are not yet supported *)
+  | _ ->
+    Errors.unknown_information_flow
+      pos
+      (sprintf "expression (%s)" (Utils.expr_name e));
+    (env, Lift.ty renv ety)
 
 and stmt renv (env : Env.stmt_env) ((pos, s) : Tast.stmt) =
   let expr_ = expr
@@ -1251,8 +1221,16 @@ and stmt renv (env : Env.stmt_env) ((pos, s) : Tast.stmt) =
     let out = clear_pc_deps out in
     (env, out)
   | A.Noop -> Env.close_stmt env K.Next
+  (* --- These nodes do not appear after naming *)
+  | A.Block _
+  | A.Markup _ ->
+    failwith
+      "Unexpected nodes in AST. These nodes should have been removed in naming."
+  (* --- These nodes are not yet supported *)
   | _ ->
-    Errors.unknown_information_flow pos "statement";
+    Errors.unknown_information_flow
+      pos
+      (sprintf "statement (%s)" (Utils.stmt_name s));
     Env.close_stmt env K.Next
 
 and block renv env (blk : Tast.block) =

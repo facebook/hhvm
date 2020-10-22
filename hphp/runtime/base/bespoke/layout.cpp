@@ -43,15 +43,14 @@ std::atomic<size_t> s_layoutTableIndex;
 std::array<Layout*, Layout::kMaxIndex.raw + 1> s_layoutTable;
 }
 
-Layout::Layout(const std::string& description, const LayoutFunctions* vtable)
-    : m_index(ReserveIndices(1)), m_description(description), m_vtable(vtable) {
+Layout::Layout(const std::string& description)
+    : m_index(ReserveIndices(1)), m_description(description) {
   assertx(s_layoutTable[m_index.raw] == nullptr);
   s_layoutTable[m_index.raw] = this;
 }
 
-Layout::Layout(LayoutIndex index, const std::string& description,
-               const LayoutFunctions* vtable)
-    : m_index(index), m_description(description), m_vtable(vtable) {
+Layout::Layout(LayoutIndex index, const std::string& description)
+    : m_index(index), m_description(description) {
   assertx(s_layoutTable[m_index.raw] == nullptr);
   s_layoutTable[m_index.raw] = this;
 }
@@ -76,27 +75,6 @@ const Layout* Layout::FromIndex(LayoutIndex index) {
   return layout;
 }
 
-SSATmp* Layout::emitGet(
-    IRGS& env, SSATmp* arr, SSATmp* key, Block* taken) const {
-  auto const data = BespokeLayoutData { this };
-  return gen(env, BespokeGet, TCell, data, taken, arr, key);
-}
-
-SSATmp* Layout::emitElem(
-    IRGS& env, SSATmp* arr, SSATmp* key, bool throwOnMissing) const {
-  return gen(env, BespokeElem, TCell, BespokeLayoutData { this }, arr,
-             key, cns(env, throwOnMissing));
-}
-
-SSATmp* Layout::emitSet(
-    IRGS& env, SSATmp* arr, SSATmp* key, SSATmp* val) const {
-  PUNT(unimpl_bespoke_emitSet);
-}
-
-SSATmp* Layout::emitAppend(IRGS& env, SSATmp* arr, SSATmp* val) const {
-  PUNT(unimpl_bespoke_emitAppend);
-}
-
 struct Layout::Initializer {
   Initializer() {
     assertx(s_layoutTableIndex.load(std::memory_order_relaxed) == 0);
@@ -107,6 +85,54 @@ struct Layout::Initializer {
   }
 };
 Layout::Initializer Layout::s_initializer;
+
+//////////////////////////////////////////////////////////////////////////////
+
+ConcreteLayout::ConcreteLayout(const std::string& description,
+                               const LayoutFunctions* vtable = nullptr)
+  : Layout(description)
+  , m_vtable(vtable)
+{
+  assertx(vtable);
+}
+
+ConcreteLayout::ConcreteLayout(LayoutIndex index,
+                               const std::string& description,
+                               const LayoutFunctions* vtable = nullptr)
+  : Layout(index, description)
+  , m_vtable(vtable)
+{
+  assertx(vtable);
+}
+
+SSATmp* ConcreteLayout::emitGet(
+    IRGS& env, SSATmp* arr, SSATmp* key, Block* taken) const {
+  auto const data = BespokeLayoutData { this };
+  return gen(env, BespokeGet, TCell, data, taken, arr, key);
+}
+
+SSATmp* ConcreteLayout::emitElem(
+    IRGS& env, SSATmp* arr, SSATmp* key, bool throwOnMissing) const {
+  auto const data = BespokeLayoutData { this };
+  return gen(env, BespokeElem, TCell, data, arr, key, cns(env, throwOnMissing));
+}
+
+SSATmp* ConcreteLayout::emitSet(
+    IRGS& env, SSATmp* arr, SSATmp* key, SSATmp* val) const {
+  PUNT(unimpl_bespoke_emitSet);
+}
+
+SSATmp* ConcreteLayout::emitAppend(IRGS& env, SSATmp* arr, SSATmp* val) const {
+  PUNT(unimpl_bespoke_emitAppend);
+}
+
+const ConcreteLayout* ConcreteLayout::FromConcreteIndex(LayoutIndex index) {
+  auto const layout = s_layoutTable[index.raw];
+  assertx(layout != nullptr);
+  assertx(layout->index() == index);
+  assertx(layout->isConcrete());
+  return reinterpret_cast<ConcreteLayout*>(layout);
+}
 
 //////////////////////////////////////////////////////////////////////////////
 

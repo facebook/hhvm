@@ -57,7 +57,7 @@ struct LoggingArray : BespokeArray {
   EntryTypes entryTypes;
 };
 
-struct LoggingLayout : Layout {
+struct LoggingLayout : ConcreteLayout {
   LoggingLayout();
 
   SSATmp* emitSet(IRGS& env, SSATmp* base, SSATmp* key, SSATmp* val) const override;

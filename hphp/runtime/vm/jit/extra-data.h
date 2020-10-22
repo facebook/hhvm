@@ -1607,7 +1607,7 @@ struct MethCallerData : IRExtraData {
 };
 
 struct BespokeLayoutData : IRExtraData {
-  explicit BespokeLayoutData(const bespoke::Layout* layout)
+  explicit BespokeLayoutData(const bespoke::ConcreteLayout* layout)
     : layout(layout)
   {}
 
@@ -1616,7 +1616,7 @@ struct BespokeLayoutData : IRExtraData {
                   : "Generic";
   }
 
-  const bespoke::Layout* layout;
+  const bespoke::ConcreteLayout* layout;
 };
 
 //////////////////////////////////////////////////////////////////////

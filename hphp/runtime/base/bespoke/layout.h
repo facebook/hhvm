@@ -217,15 +217,8 @@ constexpr LayoutFunctions fromArray() {
 /*
  * A bespoke::Layout can represent either both the concrete layout of a given
  * BespokeArray or some abstract type that's a union of concrete layouts.
- *
- * vtable() will be nullptr for an abstract layout. BespokeArray only admits
- * a concrete layout, but we may JIT code for abstract layouts.
  */
 struct Layout {
-  Layout(const std::string& description,
-         const LayoutFunctions* vtable = nullptr);
-  Layout(LayoutIndex index, const std::string& description,
-         const LayoutFunctions* vtable = nullptr);
   virtual ~Layout() {}
 
   /*
@@ -237,7 +230,7 @@ struct Layout {
 
   LayoutIndex index() const { return m_index; }
   const std::string& describe() const { return m_description; }
-  const LayoutFunctions* vtable() const { return m_vtable; }
+  virtual bool isConcrete() const { return false; }
 
   /*
    * In order to support efficient layout type tests in the JIT, we let
@@ -271,12 +264,9 @@ struct Layout {
   /*
    * Return the value at `key` in `arr`, branching to `taken` if the key is
    * not present. This operation does no refcounting.
-   *
-   * The default implementation invokes the layout-specific GetInt/GetStr
-   * methods without virtualization.
    */
   virtual SSATmp* emitGet(
-      IRGS& env, SSATmp* arr, SSATmp* key, Block* taken) const;
+      IRGS& env, SSATmp* arr, SSATmp* key, Block* taken) const = 0;
 
   /*
    * Return a half-lval (immutable type pointer) to the value at `key` in the
@@ -284,30 +274,27 @@ struct Layout {
    * `lval` is updated.  If the key is not present, it throws if
    * `throwOnMissing` is true.  Otherwise, it returns an lval to
    * immutable_null_base. This operation does no refcounting.
-   *
-   * The default implementation invokes the layout-specific ElemInt/ElemStr
-   * methods without virtualization.
    */
   virtual SSATmp* emitElem(
-      IRGS& env, SSATmp* lval, SSATmp* key, bool throwOnMissing) const;
+      IRGS& env, SSATmp* lval, SSATmp* key, bool throwOnMissing) const = 0;
 
   /*
    * Create a new array by setting `arr[key] = val`, CoWing or escalating as
    * needed. This op consumes a ref on `arr` and produces a ref on the result.
-   *
-   * The default implementation punts.
    */
   virtual SSATmp* emitSet(
-      IRGS& env, SSATmp* arr, SSATmp* key, SSATmp* val) const;
+      IRGS& env, SSATmp* arr, SSATmp* key, SSATmp* val) const = 0;
 
   /*
    * Create a new array by setting `arr[] = val`, CoWing or escalating as
    * needed. This op consumes a ref on `arr` and produces a ref on the result.
-   *
-   * The default implementation punts.
    */
   virtual SSATmp* emitAppend(
-    IRGS& env, SSATmp* arr, SSATmp* val) const;
+    IRGS& env, SSATmp* arr, SSATmp* val) const = 0;
+
+protected:
+  explicit Layout(const std::string& description);
+  Layout(LayoutIndex index, const std::string& description);
 
 private:
   struct Initializer;
@@ -315,6 +302,59 @@ private:
 
   LayoutIndex m_index;
   std::string m_description;
+  const LayoutFunctions* m_vtable;
+};
+
+/*
+ * A concrete bespoke layout providing a vtable to access the bespoke array
+ * implementation methods. It also provides default implementations for the
+ * various JIT helpers in terms of the vtable methods.
+ */
+struct ConcreteLayout : public Layout {
+  ConcreteLayout(const std::string& description,
+                 const LayoutFunctions* vtable);
+  ConcreteLayout(LayoutIndex index, const std::string& description,
+                 const LayoutFunctions* vtable);
+  virtual ~ConcreteLayout() {}
+
+  const LayoutFunctions* vtable() const { return m_vtable; }
+  bool isConcrete() const override { return true; }
+
+  static const ConcreteLayout* FromConcreteIndex(LayoutIndex index);
+
+  ///////////////////////////////////////////////////////////////////////////
+
+  using SSATmp = jit::SSATmp;
+  using Block = jit::Block;
+  using IRGS = jit::irgen::IRGS;
+
+  /*
+   * This default implementation invokes the layout-specific GetInt/GetStr
+   * methods without virtualization.
+   */
+  virtual SSATmp* emitGet(
+      IRGS& env, SSATmp* arr, SSATmp* key, Block* taken) const override;
+
+  /*
+   * This default implementation invokes the layout-specific ElemInt/ElemStr
+   * methods without virtualization.
+   */
+  virtual SSATmp* emitElem(
+      IRGS& env, SSATmp* lval, SSATmp* key, bool throwOnMissing) const override;
+
+  /*
+   * This default implementation punts.
+   */
+  virtual SSATmp* emitSet(
+      IRGS& env, SSATmp* arr, SSATmp* key, SSATmp* val) const override;
+
+  /*
+   * This default implementation punts.
+   */
+  virtual SSATmp* emitAppend(
+    IRGS& env, SSATmp* arr, SSATmp* val) const override;
+
+private:
   const LayoutFunctions* m_vtable;
 };
 

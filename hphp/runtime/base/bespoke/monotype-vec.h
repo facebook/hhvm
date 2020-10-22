@@ -100,11 +100,11 @@ private:
   friend MonotypeVec;
 };
 
-struct EmptyMonotypeVecLayout : public Layout {
+struct EmptyMonotypeVecLayout : public ConcreteLayout {
   explicit EmptyMonotypeVecLayout(LayoutIndex index);
 };
 
-struct MonotypeVecLayout : public Layout {
+struct MonotypeVecLayout : public ConcreteLayout {
   MonotypeVecLayout(LayoutIndex index, DataType type);
   static std::string makeDescription(DataType type);
   DataType m_fixedType;

@@ -26,10 +26,34 @@ namespace HPHP{
 namespace bespoke {
 namespace testing {
 
+struct MockLayout : public Layout {
+  MockLayout(const std::string& description): Layout(description) {}
+
+  virtual SSATmp* emitGet(
+      IRGS& env, SSATmp* arr, SSATmp* key, Block* taken) const override {
+    return nullptr;
+  }
+
+  virtual SSATmp* emitElem(
+      IRGS& env, SSATmp* lval, SSATmp* key, bool) const override {
+    return nullptr;
+  }
+
+  virtual SSATmp* emitSet(
+      IRGS& env, SSATmp* arr, SSATmp* key, SSATmp* val) const override {
+    return nullptr;
+  }
+
+  virtual SSATmp* emitAppend(
+    IRGS& env, SSATmp* arr, SSATmp* val) const override {
+    return nullptr;
+  }
+};
+
 inline Layout* makeDummyLayout(const std::string& name) {
   using ::testing::Mock;
 
-  auto const ret = new Layout(name);
+  auto const ret = new MockLayout(name);
   Mock::AllowLeak(ret);
   return ret;
 }

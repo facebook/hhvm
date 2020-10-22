@@ -79,7 +79,7 @@ void logEvent(const LoggingArray* lad, ArrayOp op, Ts&&... args) {
 
 //////////////////////////////////////////////////////////////////////////////
 
-LoggingLayout::LoggingLayout(): Layout("LoggingLayout", &s_vtable) {};
+LoggingLayout::LoggingLayout(): ConcreteLayout("LoggingLayout", &s_vtable) {};
 
 using namespace jit;
 using namespace jit::irgen;

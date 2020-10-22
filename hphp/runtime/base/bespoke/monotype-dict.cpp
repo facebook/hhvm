@@ -1116,7 +1116,8 @@ void EmptyMonotypeDict::InitializeLayouts() {
   always_assert(base == kBaseLayoutIndex);
 
   static auto const empty_vtable = fromArray<EmptyMonotypeDict>();
-  new Layout(getEmptyLayoutIndex(), "MonotypeDict<Empty,Empty>", &empty_vtable);
+  new ConcreteLayout(getEmptyLayoutIndex(), "MonotypeDict<Empty,Empty>",
+                     &empty_vtable);
 
   static auto const int_vtable = fromArray<MonotypeDict<int64_t>>();
   static auto const str_vtable = fromArray<MonotypeDict<StringData*>>();
@@ -1127,9 +1128,9 @@ void EmptyMonotypeDict::InitializeLayouts() {
     auto ints = getIntLayoutIndex(KindOf##name); \
     auto strs = getStrLayoutIndex(KindOf##name); \
     auto s32s = getStaticStrLayoutIndex(KindOf##name); \
-    new Layout(ints, "MonotypeDict<Int,"#name">", &int_vtable); \
-    new Layout(strs, "MonotypeDict(Str,"#name">", &str_vtable); \
-    new Layout(s32s, "MonotypeDict<StaticStr,"#name">", &s32_vtable); \
+    new ConcreteLayout(ints, "MonotypeDict<Int,"#name">", &int_vtable); \
+    new ConcreteLayout(strs, "MonotypeDict(Str,"#name">", &str_vtable); \
+    new ConcreteLayout(s32s, "MonotypeDict<StaticStr,"#name">", &s32_vtable); \
   }
 DATATYPES
 #undef DT

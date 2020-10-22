@@ -52,7 +52,7 @@ bool checkLayoutMatches(const bespoke::Layout* layout, SSATmp* arr) {
   auto const DEBUG_ONLY layoutType =
     arr->type().unspecialize().narrowToBespokeLayout(BespokeLayout(layout));
   // TODO(mcolavita): Once we have a type hierarchy, we don't need IMPLIES
-  assertx(IMPLIES(layout->vtable(), arr->type() <= layoutType));
+  assertx(IMPLIES(layout->isConcrete(), arr->type() <= layoutType));
 
   return true;
 }

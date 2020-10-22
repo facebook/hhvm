@@ -56,11 +56,14 @@ void cgBespokeGet(IRLS& env, const IRInstruction* inst) {
   auto const retType = dst.reg(1);
   auto const dest = callDest(retElem, retType);
   auto const target = [&] {
-    if (inst->src(1)->isA(TStr)) {
-      return CallSpec::direct(BespokeArray::NvGetStr);
+    auto const layout = inst->extra<BespokeLayoutData>()->layout;
+    if (layout) {
+      auto const vtable = layout->vtable();
+      return inst->src(1)->isA(TStr) ? CallSpec::direct(vtable->fnGetStr)
+                                     : CallSpec::direct(vtable->fnGetInt);
     } else {
-      assertx(inst->src(1)->isA(TInt));
-      return CallSpec::direct(BespokeArray::NvGetInt);
+     return inst->src(1)->isA(TStr) ? CallSpec::direct(BespokeArray::NvGetStr)
+                                    : CallSpec::direct(BespokeArray::NvGetInt);
     }
   }();
   auto const args = argGroup(env, inst).ssa(0).ssa(1);
@@ -77,9 +80,15 @@ void cgBespokeElem(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
   auto const dest = callDest(env, inst);
   auto const target = [&] {
-    return inst->src(1)->isA(TStr)
-      ? CallSpec::direct(BespokeArray::ElemStr)
-      : CallSpec::direct(BespokeArray::ElemInt);
+    auto const layout = inst->extra<BespokeLayoutData>()->layout;
+    if (layout) {
+      auto const vtable = layout->vtable();
+      return inst->src(1)->isA(TStr) ? CallSpec::direct(vtable->fnElemStr)
+                                     : CallSpec::direct(vtable->fnElemInt);
+    } else {
+      return inst->src(1)->isA(TStr) ? CallSpec::direct(BespokeArray::ElemStr)
+                                     : CallSpec::direct(BespokeArray::ElemInt);
+    }
   }();
   auto const args = argGroup(env, inst).ssa(0).ssa(1).ssa(2);
   cgCallHelper(v, env, target, dest, SyncOptions::Sync, args);

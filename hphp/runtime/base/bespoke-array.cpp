@@ -37,7 +37,9 @@ const BespokeArray* BespokeArray::asBespoke(const ArrayData* ad) {
 }
 
 BespokeLayout BespokeArray::layout() const {
-  return BespokeLayout{bespoke::Layout::FromIndex(layoutIndex())};
+  auto const layout =
+    bespoke::ConcreteLayout::FromConcreteIndex(layoutIndex());
+  return BespokeLayout{layout};
 }
 
 bespoke::LayoutIndex BespokeArray::layoutIndex() const {
@@ -45,7 +47,7 @@ bespoke::LayoutIndex BespokeArray::layoutIndex() const {
 }
 
 const bespoke::LayoutFunctions* BespokeArray::vtable() const {
-  return bespoke::Layout::FromIndex(layoutIndex())->vtable();
+  return bespoke::ConcreteLayout::FromConcreteIndex(layoutIndex())->vtable();
 }
 
 void BespokeArray::setLayoutIndex(bespoke::LayoutIndex index) {

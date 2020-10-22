@@ -91,7 +91,7 @@ constexpr LayoutIndex getEmptyLayoutIndex() {
 }
 
 MonotypeVecLayout::MonotypeVecLayout(LayoutIndex index, DataType type)
-  : Layout(index, makeDescription(type), &s_monotypeVecVtable)
+  : ConcreteLayout(index, makeDescription(type), &s_monotypeVecVtable)
   , m_fixedType(type)
 {}
 
@@ -100,7 +100,7 @@ std::string MonotypeVecLayout::makeDescription(DataType type) {
 }
 
 EmptyMonotypeVecLayout::EmptyMonotypeVecLayout(LayoutIndex index)
-  : Layout(index, "MonotypeVec<Empty>", &s_emptyMonotypeVecVtable)
+  : ConcreteLayout(index, "MonotypeVec<Empty>", &s_emptyMonotypeVecVtable)
 {}
 
 void MonotypeVec::InitializeLayouts() {

@@ -591,6 +591,13 @@ void emitLoggingDiamond(
     genLogArrayReach(env, loc, ni.source);
   }
 
+  // Occassionally, we have an array that is known to be vanilla (e.g. as a
+  // result of LdClsTypeCns). In this case, just emit vanilla code.
+  if (type.arrSpec().vanilla()) {
+    emitVanilla(env);
+    return;
+  }
+
   auto const dropVanilla = [&](Type type) {
     return type.isKnownDataType() && type <= TArrLike
       ? type.unspecialize()

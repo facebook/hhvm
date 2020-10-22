@@ -62,7 +62,8 @@ class AsyncMysqlClient {
       string $password,
       int $timeout_micros = -1,
       ?MySSLContextProvider $ssl_provider = null,
-      int $tcp_timeout_micros = 0): Awaitable<AsyncMysqlConnection> { }
+      int $tcp_timeout_micros = 0,
+      string $sni_server_name = ""): Awaitable<AsyncMysqlConnection> { }
 
     static public function connectWithOpts(
       string $host,
@@ -122,6 +123,7 @@ class AsyncMysqlConnectionOptions {
   public function setQueryTimeout(int $timeout): void { }
   public function setConnectionAttributes(darray<string, string> $val): void { }
   public function setSSLOptionsProvider(?MySSLContextProvider $ssl_context): void { }
+  public function setSniServerName(string $sni_server_name) : void { }
 }
 
 class AsyncMysqlClientStats {

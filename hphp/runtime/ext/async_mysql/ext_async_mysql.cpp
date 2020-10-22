@@ -340,6 +340,16 @@ static void HHVM_METHOD(
   data->m_conn_opts.setSSLOptionsProvider(sslProvider->getSSLProvider());
 }
 
+static void
+HHVM_METHOD(AsyncMysqlConnectionOptions, setSniServerName, const String& sniServername) {
+  auto* data = Native::data<AsyncMysqlConnectionOptions>(this_);
+  // #ifdef FACEBOOK until Open Source squangle pin is updated - needed as of
+  // Squangle 2020-10-21
+  #ifdef FACEBOOK
+  data->m_conn_opts.setSniServerName(static_cast<std::string>(sniServername));
+  #endif
+}
+
 static int64_t getQueryTimeout(int64_t timeout_micros) {
   if (timeout_micros < 0) {
     return mysqlExtension::ReadTimeout * 1000;
@@ -403,7 +413,8 @@ Object HHVM_STATIC_METHOD(
     const String& password,
     int64_t timeout_micros /* = -1 */,
     const Variant& sslContextProvider /* = null */,
-    int64_t tcp_timeout_micros /* = 0 */) {
+    int64_t tcp_timeout_micros /* = 0 */,
+    const String& sni_server_name /* = "" */) {
   am::ConnectionKey key(
       static_cast<std::string>(host),
       port,
@@ -429,6 +440,14 @@ Object HHVM_STATIC_METHOD(
     // Squangle 2020-09-17
     #ifdef FACEBOOK
     op->setTcpTimeout(am::Duration(tcp_timeout_micros));
+    #endif
+  }
+  // If ssl sni name is not empty, set it
+  if (!sni_server_name.empty()) {
+    // #ifdef FACEBOOK until Open Source squangle pin is updated - needed as of
+    // Squangle 2020-10-21
+    #ifdef FACEBOOK
+    op->setSniServerName(static_cast<std::string>(sni_server_name));
     #endif
   }
 
@@ -1841,7 +1860,7 @@ static struct AsyncMysqlExtension final : Extension {
   // bump the version number and use a version guard in www:
   //   $ext = new ReflectionExtension("async_mysql");
   //   $version = (float) $ext->getVersion();
-  AsyncMysqlExtension() : Extension("async_mysql", "2.0") {}
+  AsyncMysqlExtension() : Extension("async_mysql", "3.0") {}
   void moduleInit() override {
     // expose the mysql flags
     HHVM_RC_INT_SAME(NOT_NULL_FLAG);
@@ -2024,6 +2043,7 @@ static struct AsyncMysqlExtension final : Extension {
     HHVM_ME(AsyncMysqlConnectionOptions, setQueryTimeout);
     HHVM_ME(AsyncMysqlConnectionOptions, setConnectionAttributes);
     HHVM_ME(AsyncMysqlConnectionOptions, setSSLOptionsProvider);
+    HHVM_ME(AsyncMysqlConnectionOptions, setSniServerName);
     Native::registerNativeDataInfo<AsyncMysqlConnectionOptions>(
         AsyncMysqlConnectionOptions::s_className.get());
 

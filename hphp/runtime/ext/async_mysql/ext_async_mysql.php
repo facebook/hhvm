@@ -90,6 +90,7 @@ final class AsyncMysqlClient {
    * @param $ssl_context - Optionally allow the connection to tunnel via SSL.
    * @param $tcp_timeout_micros - Timeout, in microseconds, for the tcp phase of
    *                          connect operation; Default: 0 for no timeout.
+   * @param $sni_server_name - SNI hostname to use when connecting via SSL.
    *
    * @return - an `Awaitable` representing an `AsyncMysqlConnection`. `await`
    * or `join` this result to obtain the actual connection.
@@ -103,6 +104,7 @@ final class AsyncMysqlClient {
                                  int $timeout_micros = -1,
                                  ?MySSLContextProvider $ssl_context = null,
                                  int $tcp_timeout_micros = 0,
+                                 string $sni_server_name = "",
                                 ): Awaitable<AsyncMysqlConnection>;
 
   /**
@@ -682,6 +684,10 @@ class AsyncMysqlConnectionOptions {
   // SSL Configuration if SSL is to be used for connection
   <<__HipHopSpecific, __Native>>
   public function setSSLOptionsProvider(?MySSLContextProvider $ssl_opts): void;
+
+  // SNI hostname to use when connecting via SSL
+  <<__HipHopSpecific, __Native>>
+  public function setSniServerName(string $sni_server_name) : void;
 }
 /**
  * Provides timing statistics about the MySQL client.

@@ -37,6 +37,12 @@ LayoutIndex BespokeTop::GetLayoutIndex() {
   return s_layout->index();
 }
 
+SSATmp* BespokeTop::emitElem(
+    IRGS& env, SSATmp* lval, SSATmp* key, bool throwOnMissing) const {
+  auto const data = BespokeLayoutData { nullptr };
+  return gen(env, BespokeElem, TCell, data, lval, key, cns(env,throwOnMissing));
+}
+
 SSATmp* BespokeTop::emitGet(IRGS& env, SSATmp* arr, SSATmp* key,
                             Block* taken) const {
   return gen(env, BespokeGet, TCell, BespokeLayoutData { nullptr }, taken, arr,

@@ -614,6 +614,7 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #define DLvalOfPtr      return ptrToLvalReturn(inst);
 #define DPtrIter        return ptrIterReturn(inst);
 #define DPtrIterVal     return ptrIterValReturn(inst);
+#define DLvalToElemParam return inst->typeParam().lval(Ptr::Elem);
 
 #define O(name, dstinfo, srcinfo, flags) case name: dstinfo not_reached();
 
@@ -661,6 +662,7 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #undef DLvalOfPtr
 #undef DPtrIter
 #undef DPtrIterVal
+#undef DLvalToElemParam
 }
 
 }}

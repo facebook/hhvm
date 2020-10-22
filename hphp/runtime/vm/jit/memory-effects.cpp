@@ -1326,6 +1326,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ElemDictD:
   case ElemDictU:
   case ElemKeysetU:
+  case BespokeElem:
   case ElemX:
   case ElemDX:
   case ElemUX:

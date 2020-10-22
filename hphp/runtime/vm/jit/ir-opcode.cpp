@@ -56,6 +56,7 @@ TRACE_SET_MOD(hhir);
 #define DDictSet       HasDest
 #define DVecSet        HasDest
 #define DKeysetElem    HasDest
+#define DLvalToElemParam  HasDest
 #define DVecFirstElem     HasDest
 #define DVecLastElem      HasDest
 #define DVecKey           HasDest
@@ -129,6 +130,7 @@ OpInfo g_opInfo[] = {
 #undef DDictSet
 #undef DVecSet
 #undef DKeysetElem
+#undef DLvalToElemParam
 #undef DVecFirstElem
 #undef DVecLastElem
 #undef DVecKey
@@ -278,8 +280,9 @@ bool opcodeMayRaise(Opcode opc) {
   case AllocObj:
   case AllocObjReified:
   case BaseG:
-  case BespokeSet:
   case BespokeAppend:
+  case BespokeElem:
+  case BespokeSet:
   case Call:
   case CallBuiltin:
   case CGetElem:

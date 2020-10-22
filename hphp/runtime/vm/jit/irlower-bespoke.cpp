@@ -73,4 +73,17 @@ void cgBespokeGet(IRLS& env, const IRInstruction* inst) {
   );
 }
 
+void cgBespokeElem(IRLS& env, const IRInstruction* inst) {
+  auto& v = vmain(env);
+  auto const dest = callDest(env, inst);
+  auto const target = [&] {
+    return inst->src(1)->isA(TStr)
+      ? CallSpec::direct(BespokeArray::ElemStr)
+      : CallSpec::direct(BespokeArray::ElemInt);
+  }();
+  auto const args = argGroup(env, inst).ssa(0).ssa(1).ssa(2);
+  cgCallHelper(v, env, target, dest, SyncOptions::Sync, args);
+}
+
+
 }}}

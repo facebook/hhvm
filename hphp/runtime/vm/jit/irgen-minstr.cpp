@@ -292,12 +292,6 @@ SSATmp* propTvRefPtr(IRGS& env, SSATmp* base, const SSATmp* key) {
     : tvTempBasePtr(env);
 }
 
-SSATmp* ptrToInitNull(IRGS& env) {
-  // Nothing is allowed to write anything to the init null variant, so this
-  // inner type is always true.
-  return cns(env, Type::cns(&immutable_null_base, TLvalToOtherInitNull));
-}
-
 SSATmp* ptrToUninit(IRGS& env) {
   // Nothing can write to the uninit null variant either, so the inner type
   // here is also always true.
@@ -1499,6 +1493,12 @@ SSATmp* memberKey(IRGS& env, MemberKey mk) {
 }
 
 //////////////////////////////////////////////////////////////////////
+
+SSATmp* ptrToInitNull(IRGS& env) {
+  // Nothing is allowed to write anything to the init null variant, so this
+  // inner type is always true.
+  return cns(env, Type::cns(&immutable_null_base, TLvalToOtherInitNull));
+}
 
 bool canUpdateCanonicalBase(SSATmp* baseLoc) {
   auto const canonicalBaseLoc = canonical(baseLoc);

@@ -636,6 +636,7 @@ bool canDCE(IRInstruction* inst) {
   case ProfileSubClsCns:
   case CheckVecBounds:
   case CheckVecBoundsLA:
+  case BespokeElem:
   case BespokeGet:
   case LdVectorSize:
   case BeginCatch:

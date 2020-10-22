@@ -62,6 +62,8 @@ void annotArrayAccessProfile(IRGS& env,
  */
 SSATmp* inlineSetOp(IRGS& env, SetOpOp op, SSATmp* lhs, SSATmp* rhs);
 
+SSATmp* ptrToInitNull(IRGS& env);
+
 /*
  * Pop nDiscard elements from the stack, push the result (if non-null),
  * and mark the member operation as complete.

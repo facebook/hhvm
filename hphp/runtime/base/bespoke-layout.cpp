@@ -64,6 +64,12 @@ SSATmp* BespokeLayout::emitGet(
   return m_layout->emitGet(env, arr, key, taken);
 }
 
+SSATmp* BespokeLayout::emitElem(
+    IRGS& env, SSATmp* arr, SSATmp* key, bool throwOnMissing) const {
+  assertx(checkLayoutMatches(m_layout, arr));
+  return m_layout->emitElem(env, arr, key, throwOnMissing);
+}
+
 SSATmp* BespokeLayout::emitSet(
     IRGS& env, SSATmp* arr, SSATmp* key, SSATmp* val) const {
   assertx(checkLayoutMatches(m_layout, arr));

@@ -3002,6 +3002,14 @@ fields of that struct for holding intermediate values.
   implementations on the layout provided. If no layout is provided, the general
   BespokeArray dispatch is used.
 
+| BespokeElem<T,Layout>, DLvalToElemParam, SLvalToBespokeArr S(Int,Str) C(Bool), MElem
+
+  Get a half-lval to an element of type T with key S1 in the bespoke array at
+  S0 using the ElemInt/ElemStr implementations on the layout provided. If
+  copying or escalation are performed, the array in S0 is updated. S2 specifies
+  if an exception should be thrown if the value is not present. If no layout is
+  provided, the general BespokeArray dispatch is used.
+
 | BespokeSet<T,Layout>, DParam(ArrLike), SBespokeArr S(Int,Str) S(Cell), PRc|CRc
 
   Set element with key S1 in bespoke array S0 to S2, returning an array of type

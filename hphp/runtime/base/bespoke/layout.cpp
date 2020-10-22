@@ -82,6 +82,12 @@ SSATmp* Layout::emitGet(
   return gen(env, BespokeGet, TCell, data, taken, arr, key);
 }
 
+SSATmp* Layout::emitElem(
+    IRGS& env, SSATmp* arr, SSATmp* key, bool throwOnMissing) const {
+  return gen(env, BespokeElem, TCell, BespokeLayoutData { this }, arr,
+             key, cns(env, throwOnMissing));
+}
+
 SSATmp* Layout::emitSet(
     IRGS& env, SSATmp* arr, SSATmp* key, SSATmp* val) const {
   PUNT(unimpl_bespoke_emitSet);

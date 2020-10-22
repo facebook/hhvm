@@ -279,6 +279,19 @@ struct Layout {
       IRGS& env, SSATmp* arr, SSATmp* key, Block* taken) const;
 
   /*
+   * Return a half-lval (immutable type pointer) to the value at `key` in the
+   * array at `lval`. If escalation or copying is performed, the array at
+   * `lval` is updated.  If the key is not present, it throws if
+   * `throwOnMissing` is true.  Otherwise, it returns an lval to
+   * immutable_null_base. This operation does no refcounting.
+   *
+   * The default implementation invokes the layout-specific ElemInt/ElemStr
+   * methods without virtualization.
+   */
+  virtual SSATmp* emitElem(
+      IRGS& env, SSATmp* lval, SSATmp* key, bool throwOnMissing) const;
+
+  /*
    * Create a new array by setting `arr[key] = val`, CoWing or escalating as
    * needed. This op consumes a ref on `arr` and produces a ref on the result.
    *

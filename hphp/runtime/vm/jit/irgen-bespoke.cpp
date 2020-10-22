@@ -37,6 +37,12 @@ namespace HPHP { namespace jit { namespace irgen {
 
 namespace {
 
+void stMBase(IRGS& env, SSATmp* base) {
+  if (base->isA(TPtrToCell)) base = gen(env, ConvPtrToLval, base);
+  assert_flog(base->isA(TLvalToCell), "Unexpected mbase: {}", *base->inst());
+  gen(env, StMBase, base);
+}
+
 SSATmp* extractBase(IRGS& env) {
   auto const& mbase = env.irb->fs().mbase();
   if (mbase.value) return mbase.value;
@@ -327,6 +333,71 @@ void emitBespokeAKExists(IRGS& env) {
   );
 }
 
+SSATmp* tvTempBasePtr(IRGS& env) {
+  return gen(env, LdMIStateAddr, cns(env, offsetof(MInstrState, tvTempBase)));
+}
+
+SSATmp* baseValueToLval(IRGS& env, SSATmp* base) {
+  auto const temp = tvTempBasePtr(env);
+  gen(env, StMem, temp, base);
+  return gen(env, ConvPtrToLval, temp);
+}
+
+SSATmp* bespokeElemImpl(IRGS& env, MOpMode mode, Type baseType, SSATmp* key) {
+  auto const base = extractBase(env);
+  auto const baseLval = gen(env, LdMBase, TLvalToCell);
+  auto const needsLval = mode == MOpMode::Unset || mode == MOpMode::Define;
+  auto const shouldThrow = mode == MOpMode::Warn || mode == MOpMode::InOut ||
+                           mode == MOpMode::Define;
+
+  auto const invalid_key = [&] {
+    gen(env, ThrowInvalidArrayKey, extractBase(env), key);
+    return cns(env, TBottom);
+  };
+
+  if (baseType.subtypeOfAny(TVec, TVArr) && key->isA(TStr)) {
+    return shouldThrow ? invalid_key() : ptrToInitNull(env);
+  }
+  if (!key->isA(TInt | TStr)) return invalid_key();
+  if (baseType <= TKeyset && needsLval) {
+    gen(env, ThrowInvalidOperation,
+        cns(env, s_InvalidKeysetOperationMsg.get()));
+    return cns(env, TBottom);
+  }
+
+  if (needsLval) {
+    auto const layout = baseType.arrSpec().bespokeLayout();
+    return layout->emitElem(env, baseLval, key, shouldThrow);
+  } else {
+    return cond(
+      env,
+      [&](Block* taken) {
+        auto const layout = baseType.arrSpec().bespokeLayout();
+        return layout->emitGet(env, base, key, taken);
+      },
+      [&](SSATmp* val) {
+        return baseValueToLval(env, val);
+      },
+      [&] {
+        if (shouldThrow) gen(env, ThrowOutOfBounds, base, key);
+        return ptrToInitNull(env);
+      }
+    );
+  }
+}
+
+void emitBespokeDim(IRGS& env, MOpMode mode, MemberKey mk) {
+  auto const key = memberKey(env, mk);
+  if (mk.mcode == MW) PUNT(BespokeDimNewElem);
+  if (mcodeIsProp(mk.mcode)) PUNT(BespokeDimProp);
+  assertx(mcodeIsElem(mk.mcode));
+
+  auto const baseType = env.irb->fs().mbase().type;
+  auto const val = bespokeElemImpl(env, mode, baseType, key);
+
+  stMBase(env, val);
+}
+
 void translateDispatchBespoke(IRGS& env,
                               const NormalizedInstruction& ni) {
   auto const DEBUG_ONLY sk = ni.source;
@@ -348,6 +419,8 @@ void translateDispatchBespoke(IRGS& env,
       emitBespokeAKExists(env);
       return;
     case Op::Dim:
+      emitBespokeDim(env, (MOpMode) ni.imm[0].u_OA, ni.imm[1].u_KA);
+      return;
     case Op::SetRangeM:
     case Op::IncDecM:
     case Op::SetOpM:

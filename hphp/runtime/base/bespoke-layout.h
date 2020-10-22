@@ -76,6 +76,7 @@ struct BespokeLayout {
   using IRGS = jit::irgen::IRGS;
 
   SSATmp* emitGet(IRGS& env, SSATmp* arr, SSATmp* key, Block* taken) const;
+  SSATmp* emitElem(IRGS& env, SSATmp* arr, SSATmp* key, bool throwOnMissing) const;
   SSATmp* emitSet(IRGS& env, SSATmp* arr, SSATmp* key, SSATmp* val) const;
   SSATmp* emitAppend(IRGS& env, SSATmp* arr, SSATmp* val) const;
 

@@ -413,8 +413,10 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* /*unit*/) {
     return true;
   };
 
-  auto const checkBespokeArr = [&] () {
-    auto const t = src()->type();
+  auto const checkBespokeArr = [&] (bool lval) {
+    auto const tRaw = src()->type();
+    if (lval) check(tRaw <= TLvalToCell, tRaw, "Lval");
+    auto const t = lval ? tRaw.deref() : tRaw;
     check(t.isKnownDataType() && t <= TArrLike, t, "Known ArrLike");
 
     auto const srcLayout = t.arrSpec().bespokeLayout();
@@ -512,9 +514,10 @@ using TypeNames::TCA;
                           checkMultiple(src(), types, names);               \
                         }                                                   \
                       }
-#define SVArr         checkArr(false /* is_kv */, false /* is_const */);
-#define SDArr         checkArr(true  /* is_kv */, false /* is_const */);
-#define SBespokeArr   checkBespokeArr();
+#define SVArr               checkArr(false /* is_kv */, false /* is_const */);
+#define SDArr               checkArr(true  /* is_kv */, false /* is_const */);
+#define SBespokeArr         checkBespokeArr(false /* lval */);
+#define SLvalToBespokeArr   checkBespokeArr(true /* lval */);
 #define CDArr         checkArr(true  /* is_kv */, true  /* is_const */);
 #define ND
 #define DMulti
@@ -537,6 +540,7 @@ using TypeNames::TCA;
                          },                                                    \
                          IdxSeq<__VA_ARGS__>{}                                 \
                        );
+#define DLvalToElemParam requireTypeParam(Top);
 #define DLdObjCls
 #define DAllocObj
 #define DVecElem
@@ -583,6 +587,7 @@ using TypeNames::TCA;
 #undef SVArrOrNull
 #undef SDArr
 #undef SBespokeArr
+#undef SLvalToBespokeArr
 #undef CDArr
 
 #undef ND
@@ -596,6 +601,7 @@ using TypeNames::TCA;
 #undef DofS
 #undef DRefineS
 #undef DParam
+#undef DLvalToElemParam
 #undef DLdObjCls
 #undef DAllocObj
 #undef DVecElem

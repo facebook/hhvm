@@ -233,6 +233,54 @@ void emitBespokeQueryM(IRGS& env, uint32_t nDiscard, QueryMOp query,
   mFinalImpl(env, nDiscard, result);
 }
 
+void emitBespokeIdx(IRGS& env) {
+  auto const def = topC(env, BCSPRelOffset{0});
+  auto const base = topC(env, BCSPRelOffset{2});
+  auto const origKey = topC(env, BCSPRelOffset{1}, DataTypeGeneric);
+  if (!origKey->type().isKnownDataType()) PUNT(Bespoke-Idx-KeyNotKnown);
+  auto const key = classConvertPuntOnRaise(env, origKey);
+
+  auto const finish = [&](SSATmp* elem) {
+    discard(env, 3);
+    pushIncRef(env, elem);
+    decRef(env, def);
+    decRef(env, key);
+    decRef(env, base);
+  };
+
+  auto const baseType = base->type();
+  auto const isVec = baseType.subtypeOfAny(TVec, TVArr);
+  if (key->isA(TNull) || (isVec && key->isA(TNull | TStr))) {
+    finish(def);
+    return;
+  }
+
+  if (!key->isA(TInt) && !key->isA(TStr)) {
+    finish(def);
+    updateMarker(env);
+    env.irb->exceptionStackBoundary();
+    gen(env, ThrowInvalidArrayKey, base, key);
+    return;
+  }
+
+  cond(
+    env,
+    [&](Block* taken) {
+      auto const layout = baseType.arrSpec().bespokeLayout();
+      return layout->emitGet(env, base, key, taken);
+    },
+    [&](SSATmp* val) {
+      // TODO(mcolavita): type profile information
+      finish(val);
+      return nullptr;
+    },
+    [&] {
+      finish(def);
+      return nullptr;
+    }
+  );
+}
+
 void translateDispatchBespoke(IRGS& env,
                               const NormalizedInstruction& ni) {
   auto const DEBUG_ONLY sk = ni.source;
@@ -246,6 +294,10 @@ void translateDispatchBespoke(IRGS& env,
     case Op::SetM:
       emitBespokeSetM(env, ni.imm[0].u_IVA, ni.imm[1].u_KA);
       return;
+    case Op::Idx:
+    case Op::ArrayIdx:
+      emitBespokeIdx(env);
+      return;
     case Op::Dim:
     case Op::SetRangeM:
     case Op::IncDecM:
@@ -253,8 +305,6 @@ void translateDispatchBespoke(IRGS& env,
     case Op::UnsetM:
     case Op::FCallBuiltin:
     case Op::NativeImpl:
-    case Op::Idx:
-    case Op::ArrayIdx:
     case Op::AddElemC:
     case Op::AddNewElemC:
     case Op::AKExists:

@@ -204,34 +204,40 @@ let process_file
   let ignore_check_typedef opts fn name = ignore (check_typedef opts fn name) in
   let ignore_check_const opts fn name = ignore (check_const opts fn name) in
   try
-    let (errors', (tasts, global_tvenvs)) =
-      Errors.do_with_context fn Errors.Typing (fun () ->
-          let (fun_tasts, fun_global_tvenvs) =
-            List.map funs ~f:snd
-            |> List.filter_map ~f:(type_fun ctx fn)
-            |> List.unzip
-          in
-          let (class_tasts, class_global_tvenvs) =
-            List.map classes ~f:snd
-            |> List.filter_map ~f:(type_class ctx fn)
-            |> List.unzip
-          in
-          let class_global_tvenvs = List.concat class_global_tvenvs in
-          List.map record_defs ~f:snd
-          |> List.iter ~f:(ignore_type_record_def ctx fn);
-          List.map typedefs ~f:snd |> List.iter ~f:(ignore_check_typedef ctx fn);
-          List.map gconsts ~f:snd |> List.iter ~f:(ignore_check_const ctx fn);
-          (fun_tasts @ class_tasts, fun_global_tvenvs @ class_global_tvenvs))
+    let result =
+      let result =
+        Errors.do_with_context fn Errors.Typing (fun () ->
+            let (fun_tasts, fun_global_tvenvs) =
+              List.map funs ~f:snd
+              |> List.filter_map ~f:(type_fun ctx fn)
+              |> List.unzip
+            in
+            let (class_tasts, class_global_tvenvs) =
+              List.map classes ~f:snd
+              |> List.filter_map ~f:(type_class ctx fn)
+              |> List.unzip
+            in
+            let class_global_tvenvs = List.concat class_global_tvenvs in
+            List.map record_defs ~f:snd
+            |> List.iter ~f:(ignore_type_record_def ctx fn);
+            List.map typedefs ~f:snd
+            |> List.iter ~f:(ignore_check_typedef ctx fn);
+            List.map gconsts ~f:snd |> List.iter ~f:(ignore_check_const ctx fn);
+            (fun_tasts @ class_tasts, fun_global_tvenvs @ class_global_tvenvs))
+      in
+      match Deferred_decl.get_deferments ~f:(fun d -> Declare d) with
+      | [] -> Ok result
+      | deferred_files -> Error deferred_files
     in
-    if GlobalOptions.tco_global_inference opts then
-      Typing_global_inference.StateSubConstraintGraphs.build_and_save
-        ctx
-        tasts
-        global_tvenvs;
-    let deferred_files = Deferred_decl.get_deferments ~f:(fun d -> Declare d) in
-    match deferred_files with
-    | [] -> { errors = Errors.merge errors' errors; computation = [] }
-    | _ ->
+    match result with
+    | Ok (errors', (tasts, global_tvenvs)) ->
+      if GlobalOptions.tco_global_inference opts then
+        Typing_global_inference.StateSubConstraintGraphs.build_and_save
+          ctx
+          tasts
+          global_tvenvs;
+      { errors = Errors.merge errors' errors; computation = [] }
+    | Error deferred_files ->
       let computation =
         List.concat
           [

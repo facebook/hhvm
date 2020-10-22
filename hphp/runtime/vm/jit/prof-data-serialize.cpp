@@ -183,7 +183,6 @@ void read_unit_preload(ProfDataDeserializer& ser) {
 }
 
 void write_units_preload(ProfDataSerializer& ser) {
-  auto const maxFuncId = profData()->maxProfilingFuncId();
   std::vector<Unit*> units;
   hphp_fast_set<Unit*, pointer_hash<Unit>> seen;
   auto const check_unit =
@@ -195,12 +194,14 @@ void write_units_preload(ProfDataSerializer& ser) {
       if (filepath->size() >= 2 && filepath->data()[1] == ':') return false;
       return true;
     };
-  for (FuncId fid = 0; fid <= maxFuncId; fid++) {
-    if (!Func::isFuncIdValid(fid) || !profData()->profiling(fid)) continue;
-    auto const u = Func::fromFuncId(fid)->unit();
-    if (!check_unit(u)) continue;
+  auto const pd = profData();
+  assertx(pd);
+  pd->getProfilingFuncs().foreach([&](auto const& func) {
+    if (!func) return;
+    auto const u = func->unit();
+    if (!check_unit(u)) return;
     if (seen.insert(u).second) units.push_back(u);
-  }
+  });
   auto all_loaded = loadedUnitsRepoAuth();
   for (auto u : all_loaded) {
     if (!check_unit(u)) continue;
@@ -690,33 +691,28 @@ bool read_named_type(ProfDataDeserializer& ser) {
 }
 
 void write_profiled_funcs(ProfDataSerializer& ser, ProfData* pd) {
-  auto const maxFuncId = pd->maxProfilingFuncId();
-
-  for (FuncId fid = 0; fid <= maxFuncId; fid++) {
-    if (!Func::isFuncIdValid(fid) || !pd->profiling(fid)) continue;
-    write_func(ser, Func::fromFuncId(fid));
-  }
+  pd->getProfilingFuncs().foreach([&](auto const& func) {
+    if (!func) return;
+    write_func(ser, func);
+  });
   write_raw(ser, uintptr_t{});
 }
 
 void read_profiled_funcs(ProfDataDeserializer& ser, ProfData* pd) {
   while (auto const func = read_func(ser)) {
-    pd->setProfiling(func->getFuncId());
+    pd->setProfiling(func);
   }
 }
 
 void write_named_types(ProfDataSerializer& ser, ProfData* pd) {
-  auto const maxFuncId = pd->maxProfilingFuncId();
-
   // in an attempt to get a sensible order for these, start with the
   // ones referenced by params and return constraints.
-  for (FuncId fid = 0; fid <= maxFuncId; fid++) {
-    if (!Func::isFuncIdValid(fid) || !pd->profiling(fid)) continue;
-    auto const func = Func::fromFuncId(fid);
+  pd->getProfilingFuncs().foreach([&](auto const& func) {
+    if (!func) return;
     for (auto const& p : func->params()) {
       write_named_type(ser, p.typeConstraint.namedEntity());
     }
-  }
+  });
 
   // Now just iterate and write anything that remains
   NamedEntity::foreach_name(

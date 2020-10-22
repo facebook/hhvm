@@ -84,7 +84,7 @@ bool mcGenUnit(TransEnv& env, CodeCache::View codeView, CGMeta& fixups) {
 
   auto const startSk = unit.context().initSrcKey;
   if (unit.context().kind == TransKind::Profile) {
-    profData()->setProfiling(startSk.func()->getFuncId());
+    profData()->setProfiling(startSk.func());
   }
 
   return true;
@@ -716,21 +716,18 @@ void invalidateFuncsProfSrcKeys() {
                          RuntimeOption::ServerExecutionMode());
   auto const pd = profData();
   assertx(pd);
-  auto const maxFuncId = pd->maxProfilingFuncId();
+  pd->getProfilingFuncs().foreach([&](auto const& func) {
+    if (!func) return;
 
-  for (FuncId funcId = 0; funcId <= maxFuncId; funcId++) {
-    if (!Func::isFuncIdValid(funcId) || !pd->profiling(funcId)) continue;
-
-    auto func = const_cast<Func*>(Func::fromFuncId(funcId));
     invalidateFuncProfSrcKeys(func);
 
     // clear the func body and prologues
-    func->resetFuncBody();
+    const_cast<Func*>(func.get())->resetFuncBody();
     auto const numPrologues = func->numPrologues();
     for (int p = 0; p < numPrologues; p++) {
-      func->resetPrologue(p);
+      const_cast<Func*>(func.get())->resetPrologue(p);
     }
-  }
+  });
 }
 
 void publishSortedOptFuncsMeta(std::vector<FuncMetaInfo>& infos) {

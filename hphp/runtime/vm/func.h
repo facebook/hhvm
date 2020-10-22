@@ -1465,6 +1465,46 @@ private:
   }
 
   /////////////////////////////////////////////////////////////////////////////
+  // Profiling State.
+
+public:
+  enum ProfilingState : uint8_t {
+    None      = 0,
+    Profiling = 1 << 0,
+    Optimized = 1 << 1,
+  };
+
+ /*
+  * Wrapper around std::atomic<uint8_t> that enables it to be
+  * copy constructable,
+  */
+  struct AtomicProfilingState {
+    AtomicProfilingState() {}
+
+    AtomicProfilingState(const AtomicProfilingState&) {}
+    AtomicProfilingState& operator=(const AtomicProfilingState&) = delete;
+
+    bool set(ProfilingState state) {
+      auto const prev = m_state.fetch_or(state, std::memory_order_release);
+      return prev & state;
+    }
+
+    bool check(ProfilingState state) const {
+      return m_state.load(std::memory_order_acquire) & state;
+    }
+
+    std::atomic<uint8_t> m_state{ProfilingState::None};
+  };
+
+  inline AtomicProfilingState& profilingState() const {
+    return m_profilingState;
+  }
+
+  inline AtomicProfilingState& profilingState() {
+    return m_profilingState;
+  }
+
+  /////////////////////////////////////////////////////////////////////////////
   // Constants.
 
 private:
@@ -1519,12 +1559,14 @@ private:
   // TODO(#1114385) intercept should work via invalidation.
   mutable int8_t m_maybeIntercepted;
   mutable ClonedFlag m_cloned;
+  mutable AtomicProfilingState m_profilingState;
   bool m_isPreFunc : 1;
   bool m_hasPrivateAncestor : 1;
   bool m_shouldSampleJit : 1;
   bool m_serialized : 1;
   bool m_hasForeignThis : 1;
   bool m_registeredInDataMap : 1;
+  // 2 free bits
   int m_maxStackCells{0};
   uint64_t m_inoutBitVal{0};
   Unit* const m_unit;

@@ -70,23 +70,21 @@ uint32_t getFuncSize(FuncId funcId) {
 hfsort::TargetGraph
 createCallGraphFromProfCode(jit::hash_map<hfsort::TargetId, FuncId>& funcID) {
   ProfData::Session pds;
-  assertx(profData() != nullptr);
 
   using hfsort::TargetId;
 
   hfsort::TargetGraph cg;
   jit::hash_map<FuncId, TargetId> targetID;
-  auto pd = profData();
+  auto const pd = profData();
+  assertx(pd);
 
   // Create one node (aka target) for each function that was profiled.
-  const auto maxFuncId = pd->maxProfilingFuncId();
-
-  FTRACE(1, "createCallGraph: maxFuncId = {}\n", maxFuncId);
-  for (FuncId fid = 0; fid <= maxFuncId; fid++) {
-    if (!Func::isFuncIdValid(fid) || !pd->profiling(fid)) continue;
-    const auto func = Func::fromFuncId(fid);
-    const auto baseOffset = func->base();
-    const auto transIds = pd->funcProfTransIDs(fid);
+  FTRACE(1, "createCallGraph\n");
+  pd->getProfilingFuncs().foreach([&](auto const& func) {
+    if (!func) return;
+    auto const baseOffset = func->base();
+    auto const fid = func->getFuncId();
+    auto const transIds = pd->funcProfTransIDs(fid);
     uint32_t size = 1; // avoid zero-sized functions
     uint32_t profCount = 0;
     for (auto transId : transIds) {
@@ -102,7 +100,7 @@ createCallGraphFromProfCode(jit::hash_map<hfsort::TargetId, FuncId>& funcID) {
     targetID[fid] = targetId;
     funcID[targetId] = fid;
     FTRACE(1, "  - adding node FuncId = {} => TargetId = {}\n", fid, targetId);
-  }
+  });
 
   // Add arcs with weights
 
@@ -134,12 +132,12 @@ createCallGraphFromProfCode(jit::hash_map<hfsort::TargetId, FuncId>& funcID) {
     }
   };
 
-  for (FuncId fid = 0; fid <= maxFuncId; fid++) {
-    if (!Func::isFuncIdValid(fid) || !pd->profiling(fid)) continue;
+  pd->getProfilingFuncs().foreach([&] (auto const& func) {
+    if (!func) return;
 
-    auto func = Func::fromFuncId(fid);
-    const auto calleeTargetId = targetID[fid];
-    const auto transIds = pd->funcProfTransIDs(fid);
+    auto const fid = func->getFuncId();
+    auto const calleeTargetId = targetID[fid];
+    auto const transIds = pd->funcProfTransIDs(fid);
     uint64_t totalCalls = 0;
     for (int nargs = 0; nargs <= func->numNonVariadicParams() + 1; nargs++) {
       auto transId = pd->proflogueTransId(func, nargs);
@@ -156,7 +154,7 @@ createCallGraphFromProfCode(jit::hash_map<hfsort::TargetId, FuncId>& funcID) {
     }
     auto samples = cg.getSamples(calleeTargetId);
     cg.setSamples(calleeTargetId, std::max(totalCalls, samples));
-  }
+  });
   cg.normalizeArcWeights();
   return cg;
 }

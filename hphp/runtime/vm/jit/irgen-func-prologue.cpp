@@ -304,7 +304,7 @@ void emitPrologueEntry(IRGS& env, const Func* callee, uint32_t argc,
   // Increment profiling counter.
   if (isProfiling(env.context.kind)) {
     gen(env, IncProfCounter, TransIDData{transID});
-    profData()->setProfiling(callee->getFuncId());
+    profData()->setProfiling(callee);
   }
 }
 

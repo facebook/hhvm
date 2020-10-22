@@ -281,6 +281,52 @@ void emitBespokeIdx(IRGS& env) {
   );
 }
 
+void emitBespokeAKExists(IRGS& env) {
+  auto const base = popC(env);
+  auto const origKey = popC(env);
+  if (!origKey->type().isKnownDataType()) PUNT(Bespoke-AKExists-KeyNotKnown);
+  auto const key = classConvertPuntOnRaise(env, origKey);
+
+  auto const finish = [&](bool res) {
+    push(env, cns(env, res));
+    decRef(env, base);
+    decRef(env, key);
+  };
+
+  auto const throwBadKey = [&] {
+    finish(false);
+    updateMarker(env);
+    env.irb->exceptionStackBoundary();
+    gen(env, ThrowInvalidArrayKey, base, key);
+  };
+
+  auto const baseType = base->type();
+  auto const isVec = baseType.subtypeOfAny(TVec, TVArr);
+  if (isVec && key->isA(TStr)) {
+    finish(false);
+    return;
+  } else if (!key->type().subtypeOfAny(TInt, TStr)) {
+    throwBadKey();
+    return;
+  }
+
+  cond(
+    env,
+    [&](Block* taken) {
+      auto const layout = baseType.arrSpec().bespokeLayout();
+      return layout->emitGet(env, base, key, taken);
+    },
+    [&](SSATmp* val) {
+      finish(true);
+      return nullptr;
+    },
+    [&] {
+      finish(false);
+      return nullptr;
+    }
+  );
+}
+
 void translateDispatchBespoke(IRGS& env,
                               const NormalizedInstruction& ni) {
   auto const DEBUG_ONLY sk = ni.source;
@@ -298,6 +344,9 @@ void translateDispatchBespoke(IRGS& env,
     case Op::ArrayIdx:
       emitBespokeIdx(env);
       return;
+    case Op::AKExists:
+      emitBespokeAKExists(env);
+      return;
     case Op::Dim:
     case Op::SetRangeM:
     case Op::IncDecM:
@@ -307,7 +356,6 @@ void translateDispatchBespoke(IRGS& env,
     case Op::NativeImpl:
     case Op::AddElemC:
     case Op::AddNewElemC:
-    case Op::AKExists:
     case Op::ClassGetTS:
     case Op::ColFromArray:
     case Op::IterInit:

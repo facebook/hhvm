@@ -1446,7 +1446,7 @@ SSATmp* setNewElemImpl(IRGS& env, uint32_t nDiscard) {
     value = convertClassKey(env, value);
     if (!value->isA(TInt | TStr)) {
       auto const base = extractBase(env);
-      gen(env, ThrowInvalidArrayKey, makeCatchSet(env, nDiscard), base, value);
+      gen(env, ThrowInvalidArrayKey, base, value);
     } else {
       gen(env, SetNewElemKeyset, makeCatchSet(env, nDiscard), basePtr, value);
     }

@@ -904,30 +904,23 @@ void printTopFuncs() {
 }
 
 void printTopFuncsBySize() {
-  std::unordered_map<FuncId::Id,size_t> funcSize;
-  FuncId::Id maxFuncId = 0;
+  std::unordered_map<FuncId, size_t> funcSize;
   for (TransID t = 0; t < NTRANS; t++) {
     const auto trec = TREC(t);
     if (trec->isValid()) {
-      const auto funcId = trec->src.funcID().toInt();
+      const auto funcId = trec->src.funcID();
       funcSize[funcId] += trec->aLen;
-      if (funcId > maxFuncId) {
-        maxFuncId = funcId;
-      }
     }
   }
-  std::vector<FuncId::Id> funcIds(maxFuncId+1);
-  for (FuncId::Id fid = 0; fid <= maxFuncId; fid++) {
-    funcIds[fid] = fid;
-  }
-  std::sort(funcIds.begin(), funcIds.end(),
-            [&](FuncId::Id fid1, FuncId::Id fid2) {
-    return funcSize[fid1] > funcSize[fid2];
+  std::vector<std::pair<FuncId, size_t>> topN(nTopFuncs);
+  std::partial_sort_copy(funcSize.begin(), funcSize.end(),
+                         topN.begin(), topN.end(),
+    [&](auto const& a, auto const& b) {
+      return a.second > b.second;
   });
   g_logger->printGeneric("FuncID:   \tSize (total aLen in bytes):\n");
-  for (size_t i = 0; i < nTopFuncs; i++) {
-    const auto fid = funcIds[i];
-    g_logger->printGeneric("%10u\t%10lu\n", fid, funcSize[funcIds[i]]);
+  for (auto const& [fid, size] : topN) {
+    g_logger->printGeneric("%10u\t%10lu\n", fid.toInt(), size);
   }
 }
 

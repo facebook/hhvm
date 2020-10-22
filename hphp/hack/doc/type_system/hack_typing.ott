@@ -140,9 +140,6 @@ t, u {{ ocaml ty }} :: 'ty_' ::=                           {{ com syntax of type
   | shape ( sft1 , .. , sftn , vardots \ sfn1 , .. , sfnm )   :: :: openshape  {{ com open shape (all field names are ssumed to be disjoint) }}
   | function ( t1 , .. , tn ) : t           :: :: function {{ com function type }}
   | function ( t1 , .. , tn , t0 vardots ) : t :: :: variadicfunction {{ com variadic function type }}
-  | array < > :: :: emptyarray              {{ com empty array }}
-  | array < t > :: :: vecarray              {{ com vec-like array }}
-  | array < t1 , t2 > :: :: maparray        {{ com map-like array }}
   | vec < t > :: :: vec {{ com vector }}
   | dict < t1 , t2 > :: :: dict {{ com dictionary }}
   | keyset < t > :: :: keyset {{ com key set }}
@@ -833,43 +830,6 @@ G |- dict<t1, t2> <: `KeyedContainer`<t1, t2>
 
 ---------------------------------- :: keyset_as_KeyedContainer
 G |- keyset<t> <: `KeyedContainer`<t, t>
-
-{{ com \subsection{Legacy arrays} }}
-
-{{ com Legacy arrays are covariant in all parameters. }}
-
-G |- t <: u
------------------------------- :: vecarray_co
-G |- array<t> <: array<u>
-
-G |- t1 <: u1
-G |- t2 <: u2
------------------------------- :: maparray_co
-G |- array<t1,t2> <: array<u1,u2>
-
-{{ com Vec-like arrays can be treated as map-like arrays indexed by integers. }}
-
------------------------- :: vecarray_as_maparray
-G |- array<t> <: array<int,t>
-
-{{ com Map-like arrays can be indexed. }}
-------------------------------- :: maparray_as_KeyedContainer
-G |- array<t1,t2> <: `KeyedContainer`<t1,t2>
-
-{{ com The empty array type is a bottom type in the array hierarchy. }}
-------------------------------- :: emptyarray_as_vecarray
-G |- array<> <: array<t>
-
-------------------------------- :: emptyarray_as_maparray
-G |- array<> <: array<t1,t2>
-
-{{ com Arrays over the bottom type $[[nothing]]$ are inhabited by the empty array only. }}
-
-------------------------------- :: vecarray_over_nothing_as_emptyarray
-G |- array<nothing> <: array<>
-
----------------------------------- :: maparray_over_nothing_as_emptyarray
-G |- array<t, nothing> <: array<>
 
 {{ com \subsection{Functions} }}
 {{ com
@@ -1785,10 +1745,6 @@ G |- t' ~> t
 G |- keyset < t > [] := t' => keyset < t >
 
 G |- t' ~> t
--------------------------------------------------- :: vecarray
-G |- array < t > [] := t' => array < t >
-
-G |- t' ~> t
 -------------------------------------------------- :: vector
 G |- `Vector` < t > [] := t' => `Vector` < t >
 
@@ -1829,14 +1785,6 @@ G ; K |- vec < t > [ e ] := t => vec < t >
 G ; K |- e : t1 | dynamic
 -------------------------------------------------- :: dict
 G ; K |- dict < t1 , t2 > [ e ] := t2 => dict < t1 , t2 >
-
-G ; K |- e : int | dynamic
--------------------------------------------------- :: vecarray
-G ; K |- array < t > [ e ] := t => array < t >
-
-G ; K |- e : t1 | dynamic
--------------------------------------------------- :: maparray
-G ; K |- array < t1 , t2 > [ e ] := t2 => array < t1 , t2 >
 
 G ; K |- e : int | dynamic
 -------------------------------------------------- :: vector
@@ -1928,12 +1876,6 @@ is_hack_collection ( dict < t1 , t2 > ) = False
 
 -------------------------------------------------- :: keyset
 is_hack_collection ( keyset < t > ) = False
-
--------------------------------------------------- :: vecarray
-is_hack_collection ( array < t > ) = False
-
--------------------------------------------------- :: maparray
-is_hack_collection ( array < t1 , t2 > ) = False
 
 -------------------------------------------------- :: closed_shape
 is_hack_collection ( shape ( sft1 , .. , sftn ) ) = False

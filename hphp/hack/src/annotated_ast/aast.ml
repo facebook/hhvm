@@ -128,6 +128,12 @@ and ('ex, 'fb, 'en, 'hi) function_ptr_id =
   | FP_id of sid
   | FP_class_const of ('ex, 'fb, 'en, 'hi) class_id * pstring
 
+and ('ex, 'fb, 'en, 'hi) expression_tree = {
+  et_hint: hint;
+  et_src_expr: ('ex, 'fb, 'en, 'hi) expr;
+  et_desugared_expr: ('ex, 'fb, 'en, 'hi) expr;
+}
+
 and ('ex, 'fb, 'en, 'hi) expr_ =
   | Darray of
       ('hi targ * 'hi targ) option
@@ -206,8 +212,7 @@ and ('ex, 'fb, 'en, 'hi) expr_ =
       (** TODO: T38184446 Consolidate collections in AAST *)
   | BracedExpr of ('ex, 'fb, 'en, 'hi) expr
   | ParenthesizedExpr of ('ex, 'fb, 'en, 'hi) expr
-  | ExpressionTree of
-      hint * ('ex, 'fb, 'en, 'hi) expr * ('ex, 'fb, 'en, 'hi) expr option
+  | ExpressionTree of ('ex, 'fb, 'en, 'hi) expression_tree
   (* None of these constructors exist in the AST *)
   | Lplaceholder of pos
   | Fun_id of sid

@@ -2198,8 +2198,14 @@ and expr_ env p (e : Nast.expr_) =
         h
     in
     N.Cast (ty, expr env e2)
-  | Aast.ExpressionTree (ty, e, e2) ->
-    N.ExpressionTree (hint env ty, expr env e, Option.map e2 (expr env))
+  | Aast.ExpressionTree et ->
+    N.ExpressionTree
+      N.
+        {
+          et_hint = hint env et.et_hint;
+          et_src_expr = expr env et.et_src_expr;
+          et_desugared_expr = expr env et.et_desugared_expr;
+        }
   | Aast.ET_Splice e -> N.ET_Splice (expr env e)
   | Aast.Unop (uop, e) -> N.Unop (uop, expr env e)
   | Aast.Binop ((Ast_defs.Eq None as op), lv, e2) ->

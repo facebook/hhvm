@@ -2061,10 +2061,14 @@ where
                 Self::p_expr(&c.cast_operand, env)?,
             )),
             PrefixedCodeExpression(c) => {
-                let mut e = Self::p_expr(&c.prefixed_code_expression, env)?;
+                let mut src_expr = Self::p_expr(&c.prefixed_code_expression, env)?;
                 let hint = Self::p_hint(&c.prefixed_code_prefix, env)?;
-                let desugared_e = desugar(&hint, &mut e, &env);
-                Ok(E_::mk_expression_tree(hint, e, Some(desugared_e)))
+                let desugared_expr = desugar(&hint, &mut src_expr, &env);
+                Ok(E_::mk_expression_tree(ast::ExpressionTree {
+                    hint,
+                    src_expr,
+                    desugared_expr,
+                }))
             }
             ConditionalExpression(c) => {
                 let alter = Self::p_expr(&c.conditional_alternative, env)?;

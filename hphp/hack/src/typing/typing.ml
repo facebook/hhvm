@@ -2556,7 +2556,7 @@ and expr_
     in
     let (env, ty) = Phase.localize_hint_with_self env hint in
     make_result env p (Aast.Cast (hint, te)) ty
-  | ExpressionTree (hint, e, e2) -> expression_tree env p hint e e2
+  | ExpressionTree et -> expression_tree env p et
   | Is (e, hint) ->
     Typing_kinding.Simple.check_well_kinded_hint env hint;
     let (env, te, _) = expr env e in
@@ -3433,9 +3433,9 @@ and anon_make ?el ?ret_ty env lambda_pos f ft idl is_anon =
 (*****************************************************************************)
 (* Expression trees *)
 (*****************************************************************************)
-and expression_tree env p visitor_class e desugared_expr =
-  let (spliced_expressions, new_et) =
-    Typing_expression_trees.extract_spliced_expressions e
+and expression_tree env p et =
+  let (spliced_expressions, new_src_expr) =
+    Typing_expression_trees.extract_spliced_expressions et.et_src_expr
   in
   let (env, spliced_expression_map) =
     List.fold
@@ -3446,18 +3446,24 @@ and expression_tree env p visitor_class e desugared_expr =
       spliced_expressions
   in
   let env = { env with et_spliced_types = Some spliced_expression_map } in
-  let (env, (te, ty)) =
+  let (env, t_src_expr) =
     Typing_lenv.stash_and_do env (Env.all_continuations env) (fun env ->
         let env = Env.reinitialize_locals env in
-        let (env, te, ty) = expr env new_et in
-        (env, (te, ty)))
+        let (env, te, _ty) = expr env new_src_expr in
+        (env, te))
   in
   let env = { env with et_spliced_types = None } in
-  match desugared_expr with
-  | Some desugared_expr ->
-    let (env, te2, ty2) = expr env desugared_expr in
-    make_result env p (Aast.ExpressionTree (visitor_class, te, Some te2)) ty2
-  | None -> make_result env p (Aast.ExpressionTree (visitor_class, te, None)) ty
+  let (env, t_desugared_expr, ty_desugared) = expr env et.et_desugared_expr in
+  make_result
+    env
+    p
+    (Aast.ExpressionTree
+       {
+         et_hint = et.et_hint;
+         et_src_expr = t_src_expr;
+         et_desugared_expr = t_desugared_expr;
+       })
+    ty_desugared
 
 and et_splice env p e =
   let error = expr_error env Reason.Rnone e in

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<731a0f0bc2de991a39459a05110180e4>>
+// @generated SignedSource<<ca0b1a9319604a0ef9de523e5b11f62a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -309,6 +309,18 @@ pub trait Visitor<'node> {
         &mut self,
         c: &mut <Self::P as Params>::Context,
         p: &'node Expr_<
+            <Self::P as Params>::Ex,
+            <Self::P as Params>::Fb,
+            <Self::P as Params>::En,
+            <Self::P as Params>::Hi,
+        >,
+    ) -> Result<(), <Self::P as Params>::Error> {
+        p.recurse(c, self.object())
+    }
+    fn visit_expression_tree(
+        &mut self,
+        c: &mut <Self::P as Params>::Context,
+        p: &'node ExpressionTree<
             <Self::P as Params>::Ex,
             <Self::P as Params>::Fb,
             <Self::P as Params>::En,

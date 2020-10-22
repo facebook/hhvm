@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ccac7d8fee5119da2afd9d1064527cb2>>
+// @generated SignedSource<<cd97898b69e74698e09ee93724632956>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -286,6 +286,26 @@ pub enum FunctionPtrId<Ex, Fb, En, Hi> {
     Serialize,
     ToOcamlRep
 )]
+pub struct ExpressionTree<Ex, Fb, En, Hi> {
+    pub hint: Hint,
+    pub src_expr: Expr<Ex, Fb, En, Hi>,
+    pub desugared_expr: Expr<Ex, Fb, En, Hi>,
+}
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
 pub enum Expr_<Ex, Fb, En, Hi> {
     Darray(
         Box<(
@@ -377,7 +397,7 @@ pub enum Expr_<Ex, Fb, En, Hi> {
     Collection(Box<(Sid, Option<CollectionTarg<Hi>>, Vec<Afield<Ex, Fb, En, Hi>>)>),
     BracedExpr(Box<Expr<Ex, Fb, En, Hi>>),
     ParenthesizedExpr(Box<Expr<Ex, Fb, En, Hi>>),
-    ExpressionTree(Box<(Hint, Expr<Ex, Fb, En, Hi>, Option<Expr<Ex, Fb, En, Hi>>)>),
+    ExpressionTree(Box<ExpressionTree<Ex, Fb, En, Hi>>),
     Lplaceholder(Box<Pos>),
     FunId(Box<Sid>),
     MethodId(Box<(Expr<Ex, Fb, En, Hi>, Pstring)>),

@@ -9,106 +9,101 @@
         [([4:3-37],
           (Expr
              ([4:3-36],
-              (ExpressionTree (([4:3-7], (Happly (([4:3-7], "\\Code"), []))),
-                 ([4:8-35],
-                  (Binop (Plus,
-                     ([4:8-14],
-                      (Binop (Plus, ([4:8-9], (Int "4")),
-                         ([4:12-14], (Int "10"))))),
-                     ([4:17-35],
-                      (ET_Splice
-                         ([4:28-34],
-                          (Binop (Plus, ([4:28-30], (Lvar ([4:28-30], $x))),
-                             ([4:33-34], (Int "2")))))))
-                     ))),
-                 (Some ([4:8-35],
-                        (Call (
-                           ([4:8-35],
-                            (Lfun (
-                               { f_span = [4:8-35]; f_annotation = ();
-                                 f_mode = Mstrict; f_ret = ((), None);
-                                 f_name = ([Pos.none], ";anonymous");
-                                 f_tparams = []; f_where_constraints = [];
-                                 f_variadic = FVnonVariadic; f_params = [];
-                                 f_cap = ((), None);
-                                 f_unsafe_cap = ((), None);
-                                 f_body =
-                                 { fb_ast =
-                                   [([4:28-34],
-                                     (Expr
+              (ExpressionTree
+                 { et_hint = ([4:3-7], (Happly (([4:3-7], "\\Code"), [])));
+                   et_src_expr =
+                   ([4:8-35],
+                    (Binop (Plus,
+                       ([4:8-14],
+                        (Binop (Plus, ([4:8-9], (Int "4")),
+                           ([4:12-14], (Int "10"))))),
+                       ([4:17-35],
+                        (ET_Splice
+                           ([4:28-34],
+                            (Binop (Plus,
+                               ([4:28-30], (Lvar ([4:28-30], $x))),
+                               ([4:33-34], (Int "2")))))))
+                       )));
+                   et_desugared_expr =
+                   ([4:8-35],
+                    (Call (
+                       ([4:8-35],
+                        (Lfun (
+                           { f_span = [4:8-35]; f_annotation = ();
+                             f_mode = Mstrict; f_ret = ((), None);
+                             f_name = ([Pos.none], ";anonymous");
+                             f_tparams = []; f_where_constraints = [];
+                             f_variadic = FVnonVariadic; f_params = [];
+                             f_cap = ((), None); f_unsafe_cap = ((), None);
+                             f_body =
+                             { fb_ast =
+                               [([4:28-34],
+                                 (Expr
+                                    ([4:28-34],
+                                     (Binop ((Eq None),
+                                        ([4:28-34], (Lvar ([4:28-34], $__0))),
                                         ([4:28-34],
-                                         (Binop ((Eq None),
-                                            ([4:28-34],
-                                             (Lvar ([4:28-34], $__0))),
-                                            ([4:28-34],
-                                             (Binop (Plus,
-                                                ([4:28-30],
-                                                 (Lvar ([4:28-30], $x))),
-                                                ([4:33-34], (Int "2")))))
-                                            )))));
-                                     ([4:8-35],
-                                      (Return
-                                         (Some ([4:8-35],
-                                                (New (
-                                                   ([4:8-35],
-                                                    (CI
-                                                       ([4:8-35],
-                                                        "\\ExprTree"))),
-                                                   [],
-                                                   [([4:8-35],
-                                                     (Lfun (
-                                                        { f_span = [4:8-35];
-                                                          f_annotation = ();
-                                                          f_mode = Mstrict;
-                                                          f_ret = ((), None);
-                                                          f_name =
-                                                          ([Pos.none],
-                                                           ";anonymous");
-                                                          f_tparams = [];
-                                                          f_where_constraints =
-                                                          [];
-                                                          f_variadic =
-                                                          FVnonVariadic;
-                                                          f_params =
-                                                          [{ param_annotation =
-                                                             [4:3-7];
-                                                             param_type_hint =
-                                                             ((),
-                                                              (Some (
-                                                              [4:3-7],
-                                                              (Happly (
-                                                                 ([4:3-7],
-                                                                  "\\Code"),
-                                                                 [])))));
-                                                             param_is_variadic =
-                                                             false;
-                                                             param_pos =
-                                                             [4:3-7];
-                                                             param_name =
-                                                             "$v";
-                                                             param_expr =
-                                                             None;
-                                                             param_callconv =
-                                                             None;
-                                                             param_user_attributes =
-                                                             [];
-                                                             param_visibility =
-                                                             None }
-                                                            ];
-                                                          f_cap = ((), None);
-                                                          f_unsafe_cap =
-                                                          ((), None);
-                                                          f_body =
-                                                          { fb_ast =
-                                                            [([4:8-35],
-                                                              (Return
-                                                                 (Some (
-                                                                 [4:8-35],
-                                                                 (Call (
+                                         (Binop (Plus,
+                                            ([4:28-30],
+                                             (Lvar ([4:28-30], $x))),
+                                            ([4:33-34], (Int "2")))))
+                                        )))));
+                                 ([4:8-35],
+                                  (Return
+                                     (Some ([4:8-35],
+                                            (New (
+                                               ([4:8-35],
+                                                (CI ([4:8-35], "\\ExprTree"))),
+                                               [],
+                                               [([4:8-35],
+                                                 (Lfun (
+                                                    { f_span = [4:8-35];
+                                                      f_annotation = ();
+                                                      f_mode = Mstrict;
+                                                      f_ret = ((), None);
+                                                      f_name =
+                                                      ([Pos.none],
+                                                       ";anonymous");
+                                                      f_tparams = [];
+                                                      f_where_constraints =
+                                                      [];
+                                                      f_variadic =
+                                                      FVnonVariadic;
+                                                      f_params =
+                                                      [{ param_annotation =
+                                                         [4:3-7];
+                                                         param_type_hint =
+                                                         ((),
+                                                          (Some ([4:3-7],
+                                                                 (Happly (
                                                                     (
-                                                                    [4:8-35],
+                                                                    [4:3-7],
+                                                                    "\\Code"),
+                                                                    [])))));
+                                                         param_is_variadic =
+                                                         false;
+                                                         param_pos = [4:3-7];
+                                                         param_name = "$v";
+                                                         param_expr = None;
+                                                         param_callconv =
+                                                         None;
+                                                         param_user_attributes =
+                                                         [];
+                                                         param_visibility =
+                                                         None }
+                                                        ];
+                                                      f_cap = ((), None);
+                                                      f_unsafe_cap =
+                                                      ((), None);
+                                                      f_body =
+                                                      { fb_ast =
+                                                        [([4:8-35],
+                                                          (Return
+                                                             (Some ([4:8-35],
                                                                     (
-                                                                    Obj_get (
+                                                                    Call (
+                                                                    ([4:8-35],
+                                                                    (Obj_get (
                                                                     ([4:8-35],
                                                                     (Lvar
                                                                     ([4:8-35],
@@ -193,129 +188,117 @@
                                                                     $__0)))],
                                                                     None)))],
                                                                     None))))))
-                                                              ];
-                                                            fb_annotation =
-                                                            Named };
-                                                          f_fun_kind = FSync;
-                                                          f_user_attributes =
-                                                          [];
-                                                          f_file_attributes =
-                                                          [];
-                                                          f_external = false;
-                                                          f_namespace =
-                                                          { Namespace_env.ns_ns_uses =
-                                                            <opaque>;
-                                                            ns_class_uses =
-                                                            <opaque>;
-                                                            ns_record_def_uses =
-                                                            <opaque>;
-                                                            ns_fun_uses =
-                                                            <opaque>;
-                                                            ns_const_uses =
-                                                            <opaque>;
-                                                            ns_name = None;
-                                                            ns_auto_ns_map =
-                                                            [];
-                                                            ns_is_codegen =
-                                                            false;
-                                                            ns_disable_xhp_element_mangling =
-                                                            false };
-                                                          f_doc_comment =
-                                                          None;
-                                                          f_static = false },
-                                                        [([4:28-34], $__0)])));
-                                                     ([4:8-35],
-                                                      (Lfun (
-                                                         { f_span = [4:8-35];
-                                                           f_annotation = ();
-                                                           f_mode = Mstrict;
-                                                           f_ret = ((), None);
-                                                           f_name =
-                                                           ([Pos.none],
-                                                            ";anonymous");
-                                                           f_tparams = [];
-                                                           f_where_constraints =
-                                                           [];
-                                                           f_variadic =
-                                                           FVnonVariadic;
-                                                           f_params = [];
-                                                           f_cap = ((), None);
-                                                           f_unsafe_cap =
-                                                           ((), None);
-                                                           f_body =
-                                                           { fb_ast =
-                                                             [([4:8-35],
-                                                               (Return
-                                                                  (Some (
-                                                                  [4:8-35],
+                                                          ];
+                                                        fb_annotation = Named
+                                                        };
+                                                      f_fun_kind = FSync;
+                                                      f_user_attributes = [];
+                                                      f_file_attributes = [];
+                                                      f_external = false;
+                                                      f_namespace =
+                                                      { Namespace_env.ns_ns_uses =
+                                                        <opaque>;
+                                                        ns_class_uses =
+                                                        <opaque>;
+                                                        ns_record_def_uses =
+                                                        <opaque>;
+                                                        ns_fun_uses =
+                                                        <opaque>;
+                                                        ns_const_uses =
+                                                        <opaque>;
+                                                        ns_name = None;
+                                                        ns_auto_ns_map = [];
+                                                        ns_is_codegen = false;
+                                                        ns_disable_xhp_element_mangling =
+                                                        false };
+                                                      f_doc_comment = None;
+                                                      f_static = false },
+                                                    [([4:28-34], $__0)])));
+                                                 ([4:8-35],
+                                                  (Lfun (
+                                                     { f_span = [4:8-35];
+                                                       f_annotation = ();
+                                                       f_mode = Mstrict;
+                                                       f_ret = ((), None);
+                                                       f_name =
+                                                       ([Pos.none],
+                                                        ";anonymous");
+                                                       f_tparams = [];
+                                                       f_where_constraints =
+                                                       [];
+                                                       f_variadic =
+                                                       FVnonVariadic;
+                                                       f_params = [];
+                                                       f_cap = ((), None);
+                                                       f_unsafe_cap =
+                                                       ((), None);
+                                                       f_body =
+                                                       { fb_ast =
+                                                         [([4:8-35],
+                                                           (Return
+                                                              (Some (
+                                                              [4:8-35],
+                                                              (Binop (Plus,
+                                                                 ([4:8-14],
                                                                   (Binop (
-                                                                    Plus,
-                                                                    ([4:8-14],
-                                                                    (Binop (
                                                                     Plus,
                                                                     ([4:8-9],
                                                                     (Int "4")),
                                                                     ([4:12-14],
                                                                     (Int "10"))
                                                                     ))),
-                                                                    ([4:17-35],
-                                                                    (ET_Splice
+                                                                 ([4:17-35],
+                                                                  (ET_Splice
                                                                     ([4:28-34],
                                                                     (Lvar
                                                                     ([4:28-34],
                                                                     $__0)))))
-                                                                    ))))))
-                                                               ];
-                                                             fb_annotation =
-                                                             Named };
-                                                           f_fun_kind = FSync;
-                                                           f_user_attributes =
-                                                           [];
-                                                           f_file_attributes =
-                                                           [];
-                                                           f_external = false;
-                                                           f_namespace =
-                                                           { Namespace_env.ns_ns_uses =
-                                                             <opaque>;
-                                                             ns_class_uses =
-                                                             <opaque>;
-                                                             ns_record_def_uses =
-                                                             <opaque>;
-                                                             ns_fun_uses =
-                                                             <opaque>;
-                                                             ns_const_uses =
-                                                             <opaque>;
-                                                             ns_name = None;
-                                                             ns_auto_ns_map =
-                                                             [];
-                                                             ns_is_codegen =
-                                                             false;
-                                                             ns_disable_xhp_element_mangling =
-                                                             false };
-                                                           f_doc_comment =
-                                                           None;
-                                                           f_static = false },
-                                                         [([4:28-34], $__0)]
-                                                         )))
-                                                     ],
-                                                   None, [4:8-35]))))))
-                                     ];
-                                   fb_annotation = Named };
-                                 f_fun_kind = FSync; f_user_attributes = [];
-                                 f_file_attributes = []; f_external = false;
-                                 f_namespace =
-                                 { Namespace_env.ns_ns_uses = <opaque>;
-                                   ns_class_uses = <opaque>;
-                                   ns_record_def_uses = <opaque>;
-                                   ns_fun_uses = <opaque>;
-                                   ns_const_uses = <opaque>; ns_name = None;
-                                   ns_auto_ns_map = [];
-                                   ns_is_codegen = false;
-                                   ns_disable_xhp_element_mangling = false };
-                                 f_doc_comment = None; f_static = false },
-                               [([4:28-30], $x)]))),
-                           [], [], None))))
-                 )))))
+                                                                 ))))))
+                                                           ];
+                                                         fb_annotation =
+                                                         Named };
+                                                       f_fun_kind = FSync;
+                                                       f_user_attributes = [];
+                                                       f_file_attributes = [];
+                                                       f_external = false;
+                                                       f_namespace =
+                                                       { Namespace_env.ns_ns_uses =
+                                                         <opaque>;
+                                                         ns_class_uses =
+                                                         <opaque>;
+                                                         ns_record_def_uses =
+                                                         <opaque>;
+                                                         ns_fun_uses =
+                                                         <opaque>;
+                                                         ns_const_uses =
+                                                         <opaque>;
+                                                         ns_name = None;
+                                                         ns_auto_ns_map = [];
+                                                         ns_is_codegen =
+                                                         false;
+                                                         ns_disable_xhp_element_mangling =
+                                                         false };
+                                                       f_doc_comment = None;
+                                                       f_static = false },
+                                                     [([4:28-34], $__0)])))
+                                                 ],
+                                               None, [4:8-35]))))))
+                                 ];
+                               fb_annotation = Named };
+                             f_fun_kind = FSync; f_user_attributes = [];
+                             f_file_attributes = []; f_external = false;
+                             f_namespace =
+                             { Namespace_env.ns_ns_uses = <opaque>;
+                               ns_class_uses = <opaque>;
+                               ns_record_def_uses = <opaque>;
+                               ns_fun_uses = <opaque>;
+                               ns_const_uses = <opaque>; ns_name = None;
+                               ns_auto_ns_map = []; ns_is_codegen = false;
+                               ns_disable_xhp_element_mangling = false };
+                             f_doc_comment = None; f_static = false },
+                           [([4:28-30], $x)]))),
+                       [], [], None)))
+                   }))))
           ];
         fb_annotation = Named };
       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];

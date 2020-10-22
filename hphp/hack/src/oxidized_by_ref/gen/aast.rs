@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<2b2fedb77f0cfa5d8246f2a1f3cced66>>
+// @generated SignedSource<<ad152fc37ea5306713925dc5df245102>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -287,6 +287,29 @@ impl<'a, Ex: TrivialDrop, Fb: TrivialDrop, En: TrivialDrop, Hi: TrivialDrop> Tri
 
 #[derive(
     Clone,
+    Debug,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+pub struct ExpressionTree<'a, Ex, Fb, En, Hi> {
+    pub hint: &'a Hint<'a>,
+    pub src_expr: &'a Expr<'a, Ex, Fb, En, Hi>,
+    pub desugared_expr: &'a Expr<'a, Ex, Fb, En, Hi>,
+}
+impl<'a, Ex: TrivialDrop, Fb: TrivialDrop, En: TrivialDrop, Hi: TrivialDrop> TrivialDrop
+    for ExpressionTree<'a, Ex, Fb, En, Hi>
+{
+}
+
+#[derive(
+    Clone,
     Copy,
     Debug,
     Eq,
@@ -435,13 +458,7 @@ pub enum Expr_<'a, Ex, Fb, En, Hi> {
     ),
     BracedExpr(&'a Expr<'a, Ex, Fb, En, Hi>),
     ParenthesizedExpr(&'a Expr<'a, Ex, Fb, En, Hi>),
-    ExpressionTree(
-        &'a (
-            &'a Hint<'a>,
-            &'a Expr<'a, Ex, Fb, En, Hi>,
-            Option<&'a Expr<'a, Ex, Fb, En, Hi>>,
-        ),
-    ),
+    ExpressionTree(&'a ExpressionTree<'a, Ex, Fb, En, Hi>),
     Lplaceholder(&'a Pos<'a>),
     FunId(&'a Sid<'a>),
     MethodId(&'a (&'a Expr<'a, Ex, Fb, En, Hi>, &'a Pstring<'a>)),

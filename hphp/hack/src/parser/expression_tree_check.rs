@@ -78,11 +78,10 @@ impl<'ast> Visitor<'ast> for Checker {
 
                 // Only run the syntax check on the original syntax
                 // from the user. Ignore the desugared expression.
-                let user_syntax = &et.1;
-                let res = user_syntax.accept(c, self);
+                let res = &et.src_expr.accept(c, self);
 
                 c.in_expression_tree = false;
-                return res;
+                return *res;
             }
             ETSplice(e) => {
                 let previous_state = c.in_expression_tree;

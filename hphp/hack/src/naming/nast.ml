@@ -80,6 +80,8 @@ type field = (Pos.t, func_body_ann, unit, unit) Aast.field
 
 type afield = (Pos.t, func_body_ann, unit, unit) Aast.afield
 
+type expression_tree = (Pos.t, func_body_ann, unit, unit) Aast.expression_tree
+
 type pu_enum = (Pos.t, func_body_ann, unit, unit) Aast.pu_enum
 
 type pu_member = (Pos.t, func_body_ann, unit, unit) Aast.pu_member
@@ -530,7 +532,7 @@ module Visitor_DEPRECATED = struct
 
       method on_cast : 'a -> hint -> expr -> 'a
 
-      method on_expression_tree : 'a -> hint -> expr -> expr option -> 'a
+      method on_expression_tree : 'a -> expression_tree -> 'a
 
       method on_unop : 'a -> Ast_defs.uop -> expr -> 'a
 
@@ -820,7 +822,7 @@ module Visitor_DEPRECATED = struct
         | PrefixedString (_, e) -> this#on_expr acc e
         | Pair (ta, e1, e2) -> this#on_pair acc ta e1 e2
         | Cast (hint, e) -> this#on_cast acc hint e
-        | ExpressionTree (hint, e, e2) -> this#on_expression_tree acc hint e e2
+        | ExpressionTree et -> this#on_expression_tree acc et
         | Unop (uop, e) -> this#on_unop acc uop e
         | Binop (bop, e1, e2) -> this#on_binop acc bop e1 e2
         | Pipe (id, e1, e2) -> this#on_pipe acc id e1 e2
@@ -1002,11 +1004,11 @@ module Visitor_DEPRECATED = struct
 
       method on_cast acc _ e = this#on_expr acc e
 
-      method on_expression_tree acc _ e e2 =
-        let acc = this#on_expr acc e in
-        match e2 with
-        | None -> acc
-        | Some e -> this#on_expr acc e
+      method on_expression_tree acc (et : expression_tree) =
+        let acc = this#on_hint acc et.et_hint in
+        let acc = this#on_expr acc et.et_src_expr in
+        let acc = this#on_expr acc et.et_desugared_expr in
+        acc
 
       method on_unop acc _ e = this#on_expr acc e
 

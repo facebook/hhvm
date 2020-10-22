@@ -520,16 +520,7 @@ pub fn emit_expr(emitter: &mut Emitter, env: &Env, expression: &tast::Expr) -> R
         Expr_::PUAtom(_) | Expr_::PUIdentifier(_) => Err(unrecoverable(
             "TODO(T35357243): Pocket Universes syntax must be erased by now",
         )),
-        Expr_::ExpressionTree(et) => {
-            let desugared_expr = &et.2;
-            if let Some(expr) = desugared_expr {
-                emit_expr(emitter, env, expr)
-            } else {
-                Err(unrecoverable(
-                    "TODO(exprtrees): Expression Trees need to be desugared before emission",
-                ))
-            }
-        }
+        Expr_::ExpressionTree(et) => emit_expr(emitter, env, &et.desugared_expr),
         _ => unimplemented!("TODO(hrust)"),
     }
 }

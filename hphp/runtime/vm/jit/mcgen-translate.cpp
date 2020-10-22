@@ -92,7 +92,7 @@ CompactVector<Trace::BumpRelease> bumpTraceFunctions(const Func* func) {
     return result;
   };
 
-  if (func->getFuncId() == RuntimeOption::TraceFuncId) {
+  if (func->getFuncId().toInt() == RuntimeOption::TraceFuncId) {
     return def();
   }
   if (!RuntimeOption::TraceFunctions.empty()) {

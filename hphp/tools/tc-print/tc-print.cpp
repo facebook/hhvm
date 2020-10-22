@@ -367,7 +367,7 @@ void sortTrans() {
     const auto trec = TREC(tid);
     if (trec->isValid() &&
         (selectedFuncId == INVALID_ID ||
-         selectedFuncId == trec->src.funcID()) &&
+         selectedFuncId == trec->src.funcID().toInt()) &&
         (kindFilter == "all" || kindFilter == show(trec->kind).c_str())) {
       transPrintOrder.push_back(tid);
     }
@@ -597,7 +597,7 @@ dynamic getTransRec(const TransRec* tRec,
   }();
 
   const dynamic src = dynamic::object("sha1", tRec->sha1.toString())
-                                     ("funcId", tRec->src.funcID())
+                                     ("funcId", tRec->src.funcID().toInt())
                                      ("funcName", tRec->funcName)
                                      ("resumeMode", resumeMode)
                                      ("hasThis", tRec->src.hasThis())
@@ -904,24 +904,24 @@ void printTopFuncs() {
 }
 
 void printTopFuncsBySize() {
-  std::unordered_map<FuncId,size_t> funcSize;
-  FuncId maxFuncId = 0;
+  std::unordered_map<FuncId::Id,size_t> funcSize;
+  FuncId::Id maxFuncId = 0;
   for (TransID t = 0; t < NTRANS; t++) {
     const auto trec = TREC(t);
     if (trec->isValid()) {
-      const auto funcId = trec->src.funcID();
+      const auto funcId = trec->src.funcID().toInt();
       funcSize[funcId] += trec->aLen;
       if (funcId > maxFuncId) {
         maxFuncId = funcId;
       }
     }
   }
-  std::vector<FuncId> funcIds(maxFuncId+1);
-  for (FuncId fid = 0; fid <= maxFuncId; fid++) {
+  std::vector<FuncId::Id> funcIds(maxFuncId+1);
+  for (FuncId::Id fid = 0; fid <= maxFuncId; fid++) {
     funcIds[fid] = fid;
   }
   std::sort(funcIds.begin(), funcIds.end(),
-            [&](FuncId fid1, FuncId fid2) {
+            [&](FuncId::Id fid1, FuncId::Id fid2) {
     return funcSize[fid1] > funcSize[fid2];
   });
   g_logger->printGeneric("FuncID:   \tSize (total aLen in bytes):\n");

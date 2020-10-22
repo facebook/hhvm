@@ -18,6 +18,7 @@
 
 #include <cstdint>
 #include "hphp/util/low-ptr.h"
+#include <folly/Format.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -118,10 +119,51 @@ constexpr Slot kInvalidSlot = -1;
 /*
  * Unique identifier for a Func*.
  */
-using FuncId = uint32_t;
-constexpr FuncId InvalidFuncId = -1;
-constexpr FuncId DummyFuncId = -2;
+struct FuncId {
+
+  using Id = uint32_t;
+  static FuncId Invalid;
+  static FuncId Dummy;
+
+  uint32_t toInt() const { return m_id; }
+
+  bool isInvalid() const { return m_id == Invalid.m_id; }
+  bool isDummy()   const { return m_id == Dummy.m_id; }
+
+  bool operator==(const FuncId& id) const {
+    return m_id == id.m_id;
+  }
+  bool operator<(const FuncId& id) const {
+    return m_id < id.m_id;
+  }
+
+  Id m_id;
+};
+
+static_assert(sizeof(FuncId) == sizeof(uint32_t), "");
 
 ///////////////////////////////////////////////////////////////////////////////
 }
+
+namespace std {
+  template<> struct hash<HPHP::FuncId> {
+    size_t operator()(HPHP::FuncId id) const { return id.toInt(); }
+  };
+}
+
+namespace folly {
+template<> class FormatValue<HPHP::FuncId> {
+  public:
+    explicit FormatValue(HPHP::FuncId id) noexcept : m_id(id) {}
+
+    template<typename C>
+    void format(FormatArg& arg, C& cb) const {
+      format_value::formatString(folly::to<std::string>(m_id.toInt()), arg, cb);
+    }
+
+  private:
+    HPHP::FuncId m_id;
+};
+};
+
 

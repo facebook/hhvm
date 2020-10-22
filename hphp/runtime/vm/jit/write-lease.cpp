@@ -195,8 +195,8 @@ bool couldAcquireOptimizeLease(const Func* func) {
       break;
     case LockLevel::Func: {
       auto const funcId = func->getFuncId();
-      s_funcOwners.ensureSize(funcId + 1);
-      auto const owner = s_funcOwners[funcId].load(std::memory_order_relaxed);
+      s_funcOwners.ensureSize(funcId.toInt() + 1);
+      auto const owner = s_funcOwners[funcId.toInt()].load(std::memory_order_relaxed);
       auto const self = Treadmill::requestIdx();
       return owner == self || owner == Treadmill::kInvalidRequestIdx;
     }
@@ -227,8 +227,8 @@ LeaseHolder::LeaseHolder(const Func* func, TransKind kind, bool isWorker)
 
   if (m_func) {
     auto const funcId = m_func->getFuncId();
-    s_funcOwners.ensureSize(funcId + 1);
-    auto& owner = s_funcOwners[funcId];
+    s_funcOwners.ensureSize(funcId.toInt() + 1);
+    auto& owner = s_funcOwners[funcId.toInt()];
     auto oldOwner = owner.load(std::memory_order_relaxed);
     auto const self = Treadmill::requestIdx();
 
@@ -285,7 +285,7 @@ void LeaseHolder::dropLocks() {
   }
 
   if (m_acquiredFunc) {
-    auto& owner = s_funcOwners[m_func->getFuncId()];
+    auto& owner = s_funcOwners[m_func->getFuncId().toInt()];
     owner.store(Treadmill::kInvalidRequestIdx, std::memory_order_release);
     m_acquiredFunc = false;
   }

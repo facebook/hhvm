@@ -620,7 +620,7 @@ static bool shouldLog(const Func* /*func*/) {
 
 void logCommon(StructuredLogEntry sample, const ActRec* ar, ssize_t flags) {
   sample.setInt("flags", flags);
-  sample.setInt("func_id", ar->func()->getFuncId());
+  sample.setInt("func_id", ar->func()->getFuncId().toInt());
   sample.setStr("thread_mode",
     ServerStats::ThreadModeString(ServerStats::GetThreadMode()));
   sample.setStr("func_name", ar->func()->name()->data());

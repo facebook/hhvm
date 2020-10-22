@@ -37,7 +37,7 @@ std::string show(SrcKey sk) {
   return folly::sformat("{}:{} in {}(id 0x{:#x})@{: >6}{}{}",
                         filepath, unit->getLineNumber(sk.offset()),
                         func->fullName()->data(),
-                        (uint32_t)sk.funcID(), sk.offset(),
+                        (uint32_t)sk.funcID().toInt(), sk.offset(),
                         resumeModeShortName(sk.resumeMode()),
                         sk.hasThis()  ? "t" : "",
                         sk.prologue() ? "p" : "");

@@ -243,7 +243,7 @@ SrcKey read_srckey(ProfDataDeserializer& ser) {
     read_func(ser);
     orig = read_raw<SrcKey::AtomicInt>(ser);
   }
-  auto const id = SrcKey::fromAtomicInt(orig).funcID();
+  auto const id = SrcKey::fromAtomicInt(orig).funcID().toInt();
   assertx(uint32_t(orig) == id);
   auto const sk = SrcKey::fromAtomicInt(orig - id + ser.getFid(id));
   ITRACE(2, "SrcKey: {}\n", show(sk));
@@ -1451,7 +1451,7 @@ void write_func(ProfDataSerializer& ser, const Func* func) {
   if (!func || !ser.serialize(func)) return write_raw(ser, func);
 
   write_serialized_ptr(ser, func);
-  uint32_t fid = func->getFuncId();
+  uint32_t fid = func->getFuncId().toInt();
   assertx(!(fid & 0x80000000));
   if (func == SystemLib::s_nullCtor ||
       (!func->isMethod() && func->isBuiltin() &&
@@ -1531,7 +1531,7 @@ Func* read_func(ProfDataDeserializer& ser) {
         }
         not_reached();
       }();
-      ser.recordFid(fid, func->getFuncId());
+      ser.recordFid(fid, func->getFuncId().toInt());
       return const_cast<Func*>(func);
     }
   );

@@ -21,7 +21,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 inline SrcKey::SrcKey()
-  : m_funcID{InvalidFuncId}
+  : m_funcID{FuncId::Invalid}
   , m_offset{0}
   , m_resumeModeAndPrologue{encodeResumeMode(ResumeMode::None)}
 {}
@@ -77,7 +77,7 @@ inline SrcKey SrcKey::fromAtomicInt(AtomicInt in) {
 ///////////////////////////////////////////////////////////////////////////////
 
 inline bool SrcKey::valid() const {
-  return m_funcID != InvalidFuncId;
+  return !m_funcID.isInvalid();
 }
 
 inline SrcKey::AtomicInt SrcKey::toAtomicInt() const {
@@ -85,7 +85,7 @@ inline SrcKey::AtomicInt SrcKey::toAtomicInt() const {
 }
 
 inline FuncId SrcKey::funcID() const {
-  assertx(m_funcID != InvalidFuncId);
+  assertx(!m_funcID.isInvalid());
   return m_funcID;
 }
 

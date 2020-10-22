@@ -79,7 +79,7 @@ void cgDefFuncEntryFP(IRLS& env, const IRInstruction* inst) {
   emitStLowPtr(v, v.cns(func), newFP[AROFF(m_func)],
                sizeof(LowPtr<const Func>));
 #else
-  v << storeli{(int32_t)func->getFuncId(), newFP[AROFF(m_funcId)]};
+  v << storeli{(int32_t)func->getFuncId().toInt(), newFP[AROFF(m_funcId)]};
 #endif
 
   int32_t constexpr flagsDelta =
@@ -186,7 +186,7 @@ void cgStFrameFunc(IRLS& env, const IRInstruction* inst) {
 #ifdef USE_LOWPTR
   emitStLowPtr(v, v.cns(func), fp[AROFF(m_func)], sizeof(LowPtr<const Func>));
 #else
-  v << storeli{(int32_t)func->getFuncId(), fp[AROFF(m_funcId)]};
+  v << storeli{(int32_t)func->getFuncId().toInt(), fp[AROFF(m_funcId)]};
 #endif
 }
 

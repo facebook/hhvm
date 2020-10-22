@@ -187,7 +187,7 @@ inline SharedOnlyKey makeSharedOnlyKey(FuncId funcId) {
   // This is a pseudo-random permutation, so it can be used as both a hash and a
   // key (different FuncIds will never map to the same SharedOnlyKey).
   return folly::hash::twang_mix64(
-    (static_cast<uint64_t>(funcId) << 32) + funcId
+    (static_cast<uint64_t>(funcId.toInt()) << 32) + funcId.toInt()
   );
 }
 

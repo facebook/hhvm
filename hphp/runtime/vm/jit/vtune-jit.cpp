@@ -36,7 +36,7 @@ void reportTraceletToVtune(const Unit* unit,
 
   if (!unit) return;
 
-  methodInfo.method_id = tr.src.funcID() + MIN_METHOD_ID;
+  methodInfo.method_id = tr.src.funcID().toInt() + MIN_METHOD_ID;
 
   if (func && func->fullName()) {
     char *name = const_cast<char *>(func->fullName()->data());

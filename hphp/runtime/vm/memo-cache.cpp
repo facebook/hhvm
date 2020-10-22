@@ -121,7 +121,7 @@ template <int N> struct FuncIdHeader {
     return funcId == other.funcId;
   }
   size_t startHash(size_t firstHash) const {
-    return combineHashes(funcId, firstHash);
+    return combineHashes(funcId.toInt(), firstHash);
   }
   // Always non-empty
   size_t startHash() const { always_assert(false); }

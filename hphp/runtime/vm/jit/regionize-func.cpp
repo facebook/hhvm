@@ -287,7 +287,7 @@ RegionVec regionizeFunc(const Func* func, std::string& transCFGAnnot) {
 
   if (Trace::moduleEnabled(HPHP::Trace::pgo, 5)) {
     auto dotFileName = folly::to<std::string>(
-      "/tmp/func-cfg-", funcId, ".dot");
+      "/tmp/func-cfg-", funcId.toInt(), ".dot");
     std::ofstream outFile(dotFileName);
     if (outFile.is_open()) {
       cfg.print(outFile, funcId, profData);

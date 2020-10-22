@@ -31,6 +31,7 @@
 
 #include "hphp/runtime/base/config.h"
 #include "hphp/runtime/base/typed-value.h"
+#include "hphp/runtime/base/types.h"
 #include "hphp/util/compilation-flags.h"
 #include "hphp/util/hash-map.h"
 #include "hphp/util/functional.h"
@@ -524,7 +525,7 @@ struct RuntimeOption {
   static int StackTraceTimeout;
   static std::string RemoteTraceOutputDir;
   static std::set<std::string, stdltistr> TraceFunctions;
-  static uint32_t TraceFuncId;
+  static FuncId::Id TraceFuncId;
 
   static bool EnableStats;
   static bool EnableAPCStats;

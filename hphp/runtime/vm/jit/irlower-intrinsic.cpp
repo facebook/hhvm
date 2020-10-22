@@ -708,7 +708,7 @@ void cgMemoGetInstanceCache(IRLS& env, const IRInstruction* inst) {
         .reg(cache)
         .imm(
           getter
-            ? funcId
+            ? funcId.toInt()
             : GenericMemoId{funcId, extra->keys.count}.asParam()
         );
       addKeysAddr(args);
@@ -824,7 +824,7 @@ void cgMemoSetInstanceCache(IRLS& env, const IRInstruction* inst) {
         .addr(obj, slotOff + TVOFF(m_data))
         .imm(
           setter
-            ? funcId
+            ? funcId.toInt()
             : GenericMemoId{funcId, extra->keys.count}.asParam()
         );
       addKeysAddr(args);

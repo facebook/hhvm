@@ -785,7 +785,7 @@ std::string RuntimeOption::StackTraceFilename;
 int RuntimeOption::StackTraceTimeout = 0; // seconds; 0 means unlimited
 std::string RuntimeOption::RemoteTraceOutputDir = "/tmp";
 std::set<std::string, stdltistr> RuntimeOption::TraceFunctions;
-uint32_t RuntimeOption::TraceFuncId = InvalidFuncId;
+FuncId::Id RuntimeOption::TraceFuncId = FuncId::Invalid.toInt();
 
 bool RuntimeOption::EnableStats = false;
 bool RuntimeOption::EnableAPCStats = false;
@@ -2817,7 +2817,7 @@ void RuntimeOption::Load(
   ExtensionRegistry::moduleLoad(ini, config);
   initialize_apc();
 
-  if (TraceFunctions.size() || TraceFuncId != InvalidFuncId) {
+  if (TraceFunctions.size() || TraceFuncId != FuncId::Invalid.toInt()) {
     Trace::ensureInit(getTraceOutputFile());
   }
 

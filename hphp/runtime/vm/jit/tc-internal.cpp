@@ -133,8 +133,8 @@ bool shouldTranslateNoSizeLimit(SrcKey sk, TransKind kind) {
                       kind == TransKind::ProfPrologue;
   if (isLive || isProf) {
     auto const funcId = func->getFuncId();
-    s_func_counters.ensureSize(funcId + 1);
-    s_func_counters[funcId].fetch_add(1, std::memory_order_relaxed);
+    s_func_counters.ensureSize(funcId.toInt() + 1);
+    s_func_counters[funcId.toInt()].fetch_add(1, std::memory_order_relaxed);
     uint32_t skCount = 1;
     if (RuntimeOption::EvalJitSrcKeyThreshold > 1) {
       SrcKeyCounters::accessor acc;
@@ -144,7 +144,7 @@ bool shouldTranslateNoSizeLimit(SrcKey sk, TransKind kind) {
     }
     auto const funcThreshold = isLive ? RuntimeOption::EvalJitLiveThreshold
                                       : RuntimeOption::EvalJitProfileThreshold;
-    if (s_func_counters[funcId] < funcThreshold) {
+    if (s_func_counters[funcId.toInt()] < funcThreshold) {
       return false;
     }
     if (skCount < RuntimeOption::EvalJitSrcKeyThreshold) {

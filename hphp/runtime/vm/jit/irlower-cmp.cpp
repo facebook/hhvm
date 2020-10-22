@@ -342,7 +342,7 @@ void cgDbgAssertFunc(IRLS& env, const IRInstruction* inst) {
 #ifdef USE_LOWPTR
   emitCmpLowPtr<Func>(v, sf, v.cns(func), fp[AROFF(m_func)]);
 #else
-  v << cmplim{(int32_t)func->getFuncId(), fp[AROFF(m_funcId)], sf};
+  v << cmplim{(int32_t)func->getFuncId().toInt(), fp[AROFF(m_funcId)], sf};
 #endif
   ifThen(v, CC_NE, sf, [&](Vout& v) { v << trap{TRAP_REASON}; });
 }

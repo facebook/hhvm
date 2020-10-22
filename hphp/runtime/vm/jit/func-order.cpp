@@ -51,20 +51,20 @@ std::vector<FuncId> s_funcOrder;
 using CallAddrFuncs = tbb::concurrent_hash_map<TCA,FuncId>;
 CallAddrFuncs s_callToFuncId;
 
-using FuncPair = std::pair<FuncId,FuncId>;
+using FuncPair = std::pair<FuncId::Id,FuncId::Id>;
 using CallCounters = tbb::concurrent_hash_map<FuncPair,uint32_t>;
 CallCounters s_callCounters;
 
 // Map that keeps track of the size of optimized translations/prologues for each
 // function.
-using FuncSizes = tbb::concurrent_hash_map<FuncId,uint32_t>;
+using FuncSizes = tbb::concurrent_hash_map<FuncId::Id,uint32_t>;
 FuncSizes s_funcSizes;
 
 ////////////////////////////////////////////////////////////////////////////////
 
 uint32_t getFuncSize(FuncId funcId) {
   FuncSizes::const_accessor acc;
-  return s_funcSizes.find(acc, funcId) ? acc->second : 1; // avoid div by 0
+  return s_funcSizes.find(acc, funcId.toInt()) ? acc->second : 1; // avoid div by 0
 }
 
 hfsort::TargetGraph
@@ -183,8 +183,8 @@ createCallGraphFromOptCode(jit::hash_map<hfsort::TargetId, FuncId>& funcID) {
            it.first.first, it.first.second, it.second);
     auto const weight = it.second;
     if (weight == 0) continue; // don't create arcs with zero weight
-    auto const callerFid = it.first.first;
-    auto const calleeFid = it.first.second;
+    auto const callerFid = FuncId{it.first.first};
+    auto const calleeFid = FuncId{it.first.second};
     auto const callerTid = getTargetID(callerFid);
     auto const calleeTid = getTargetID(calleeFid);
     cg.incArcWeight(callerTid, calleeTid, weight);
@@ -343,7 +343,7 @@ void deserialize(ProfDataDeserializer& des) {
   s_funcOrder.reserve(sz);
   for (auto i = sz; i > 0; --i) {
     auto const origId = read_raw<FuncId>(des);
-    s_funcOrder.push_back(des.getFid(origId));
+    s_funcOrder.push_back({des.getFid(origId.toInt())});
   }
 }
 
@@ -359,7 +359,8 @@ void setCallFuncId(TCA callRetAddr, FuncId funcId) {
 
 FuncId getCallFuncId(TCA callRetAddr) {
   CallAddrFuncs::const_accessor acc;
-  return s_callToFuncId.find(acc, callRetAddr) ? acc->second : InvalidFuncId;
+  return s_callToFuncId.find(acc, callRetAddr)
+    ? acc->second : FuncId::Invalid;
 }
 
 void clearCallFuncId(TCA callRetAddr) {
@@ -373,14 +374,14 @@ void incCount(const ActRec* fp) {
   if (callerRip == nullptr) return;
   auto const callee = fp->func()->getFuncId();
   auto const caller = getCallFuncId(callerRip);
-  if (caller == InvalidFuncId) {
+  if (caller.isInvalid()) {
     // assert callerRip is not in the hot code area, where only optimized code
     // lives
     assert_flog(!tc::isHotCodeAddress(callerRip),
                 "callerRip not found: {}", callerRip);
     return;
   }
-  auto pair = FuncPair(caller, callee);
+  auto pair = FuncPair(caller.toInt(), callee.toInt());
   {
     CallCounters::accessor acc;
     if (!s_callCounters.insert(acc, CallCounters::value_type(pair, 1))) {
@@ -400,7 +401,7 @@ void recordTranslation(const TransRec& transRec) {
                                   : transRec.acoldLen ? transRec.acoldLen
                                                       : transRec.afrozenLen;
   FuncSizes::accessor acc;
-  if (!s_funcSizes.insert(acc, FuncSizes::value_type(funcId, size))) {
+  if (!s_funcSizes.insert(acc, FuncSizes::value_type(funcId.toInt(), size))) {
     acc->second += size;
   }
 }

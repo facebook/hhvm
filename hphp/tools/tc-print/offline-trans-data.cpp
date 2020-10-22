@@ -257,7 +257,7 @@ void OfflineTransData::findFuncTrans(uint32_t selectedFuncId,
   for (uint32_t tid = 0; tid < nTranslations; tid++) {
     if (!translations[tid].isValid() ||
         translations[tid].kind == TransKind::Anchor ||
-        translations[tid].src.funcID() != selectedFuncId) continue;
+        translations[tid].src.funcID().toInt() != selectedFuncId) continue;
     inodes->push_back(tid);
   }
 }

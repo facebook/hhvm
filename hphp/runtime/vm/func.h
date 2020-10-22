@@ -251,7 +251,7 @@ struct Func final {
   /*
    * The next available FuncId.  For observation only; does not reserve.
    */
-  static FuncId nextFuncId();
+  static FuncId::Id nextFuncId();
 
   /*
    * Lookup a Func* by its ID.
@@ -1534,7 +1534,7 @@ private:
 #endif
   AtomicLowPtr<uint8_t> m_funcBody{nullptr};
   mutable rds::Link<LowPtr<Func>, rds::Mode::NonLocal> m_cachedFunc;
-  FuncId m_funcId{InvalidFuncId};
+  FuncId m_funcId{FuncId::Invalid};
   mutable AtomicLowPtr<const StringData> m_fullName{nullptr};
   LowStringPtr m_name{nullptr};
 
@@ -1611,12 +1611,12 @@ struct PrologueID {
 
   struct Hasher {
     size_t operator()(PrologueID pid) const {
-      return pid.funcId() + (size_t(pid.nargs()) << 32);
+      return pid.funcId().toInt() + (size_t(pid.nargs()) << 32);
     }
   };
 
  private:
-  FuncId   m_funcId{InvalidFuncId};
+  FuncId   m_funcId{FuncId::Invalid};
   uint32_t m_nargs{0xffffffff};
 };
 

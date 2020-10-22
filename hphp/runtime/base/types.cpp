@@ -13,68 +13,17 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#include <limits>
 
-#pragma once
-
-#include <folly/dynamic.h>
-
-#include "hphp/runtime/base/object-data.h"
-#include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/base/types.h"
 
 namespace HPHP {
-
-struct Class;
-
-namespace jit {
-
 ///////////////////////////////////////////////////////////////////////////////
 
-struct ProfDataSerializer;
-struct ProfDataDeserializer;
+FuncId FuncId::Invalid = FuncId{std::numeric_limits<FuncId::Id>::max()};
+FuncId FuncId::Dummy   = FuncId{std::numeric_limits<FuncId::Id>::max() - 1};
 
-/*
- * Profiles the target functions for a given call site to determine the most
- * common callee along with the expected probability of calling it.
- */
-struct CallTargetProfile {
-
-  void report(const Func* ar);
-
-  static void reduce(CallTargetProfile& profile,
-                     const CallTargetProfile& other);
-
-  const Func* choose(double& probability) const;
-
-  std::string toString() const;
-  folly::dynamic toDynamic() const;
-
-  void serialize(ProfDataSerializer&) const;
-
-  void deserialize(ProfDataDeserializer&);
-
- private:
-  struct Entry {
-    FuncId   funcId{FuncId::Invalid};
-    uint32_t count{0};
-  };
-
-  void init();
-
-  static const size_t kMaxEntries = 3;
-
-  Entry    m_entries[kMaxEntries];
-  uint32_t m_untracked{0};
-  bool     m_init{false};
+///////////////////////////////////////////////////////////////////////////////
 };
 
-///////////////////////////////////////////////////////////////////////////////
-
-inline const StringData* callTargetProfileKey() {
-  return makeStaticString("CallTargetProfile");
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-
-}}
 

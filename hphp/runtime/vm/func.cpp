@@ -72,7 +72,7 @@ std::atomic<bool> Func::s_treadmill;
  * We can't start with 0 since that's used for special sentinel value
  * in TreadHashMap
  */
-static std::atomic<FuncId> s_nextFuncId{1};
+static std::atomic<FuncId::Id> s_nextFuncId{1};
 AtomicLowPtrVector<const Func> Func::s_funcVec{0, nullptr};
 static InitFiniNode s_funcVecReinit([]{
   UnsafeReinitEmptyAtomicLowPtrVector(
@@ -154,19 +154,19 @@ void* Func::allocFuncMem(int numParams) {
 }
 
 void Func::destroy(Func* func) {
-  if (func->m_funcId != InvalidFuncId) {
+  if (!func->m_funcId.isInvalid()) {
     if (jit::mcgen::initialized() && RuntimeOption::EvalEnableReusableTC) {
       // Free TC-space associated with func
       jit::tc::reclaimFunction(func);
     }
 
-    assertx(s_funcVec.get(func->m_funcId) == func);
-    s_funcVec.set(func->m_funcId, nullptr);
+    assertx(s_funcVec.get(func->m_funcId.toInt()) == func);
+    s_funcVec.set(func->m_funcId.toInt(), nullptr);
 
     if (func->m_registeredInDataMap) {
       func->deregisterInDataMap();
     }
-    func->m_funcId = InvalidFuncId;
+    func->m_funcId = FuncId::Invalid;
 
     if (s_treadmill.load(std::memory_order_acquire)) {
       Treadmill::enqueue([func](){ destroy(func); });
@@ -186,13 +186,13 @@ void Func::freeClone() {
     jit::tc::reclaimFunction(this);
   }
 
-  if (m_funcId != InvalidFuncId) {
-    assertx(s_funcVec.get(m_funcId) == this);
-    s_funcVec.set(m_funcId, nullptr);
+  if (!m_funcId.isInvalid()) {
+    assertx(s_funcVec.get(m_funcId.toInt()) == this);
+    s_funcVec.set(m_funcId.toInt(), nullptr);
     if (m_registeredInDataMap) {
       deregisterInDataMap();
     }
-    m_funcId = InvalidFuncId;
+    m_funcId = FuncId::Invalid;
   }
 
   m_cloned.flag.clear();
@@ -215,7 +215,7 @@ Func* Func::clone(Class* cls, const StringData* name) const {
   f->m_cloned.flag.test_and_set();
   f->initPrologues(numParams);
   f->m_funcBody = nullptr;
-  f->m_funcId = InvalidFuncId;
+  f->m_funcId = FuncId::Invalid;
   if (name) f->m_name = name;
   f->m_u.setCls(cls);
   f->setFullName(numParams);
@@ -343,7 +343,7 @@ void Func::finishedEmittingParams(std::vector<ParamInfo>& fParams) {
 }
 
 void Func::registerInDataMap() {
-  assertx(m_funcId != InvalidFuncId &&
+  assertx(!m_funcId.isInvalid() &&
           (!m_isPreFunc || m_cloned.flag.test_and_set()));
   assertx(!m_registeredInDataMap);
   assertx(mallocEnd());
@@ -353,7 +353,7 @@ void Func::registerInDataMap() {
 
 void Func::deregisterInDataMap() {
   assertx(m_registeredInDataMap);
-  assertx(m_funcId != InvalidFuncId &&
+  assertx(!m_funcId.isInvalid() &&
           (!m_isPreFunc || m_cloned.flag.test_and_set()));
   data_map::deregister(this);
   m_registeredInDataMap = false;
@@ -384,28 +384,28 @@ std::pair<const StringData*, const StringData*> Func::getMethCallerNames(
 // FuncId manipulation.
 
 void Func::setNewFuncId() {
-  assertx(m_funcId == InvalidFuncId);
-  m_funcId = s_nextFuncId.fetch_add(1, std::memory_order_relaxed);
+  assertx(m_funcId.isInvalid());
+  m_funcId = {s_nextFuncId.fetch_add(1, std::memory_order_relaxed)};
 
-  s_funcVec.ensureSize(m_funcId + 1);
-  assertx(s_funcVec.get(m_funcId) == nullptr);
-  s_funcVec.set(m_funcId, this);
+  s_funcVec.ensureSize(m_funcId.toInt() + 1);
+  assertx(s_funcVec.get(m_funcId.toInt()) == nullptr);
+  s_funcVec.set(m_funcId.toInt(), this);
 }
 
-FuncId Func::nextFuncId() {
+FuncId::Id Func::nextFuncId() {
   return s_nextFuncId.load(std::memory_order_relaxed);
 }
 
 const Func* Func::fromFuncId(FuncId id) {
-  assertx(id < s_nextFuncId);
-  auto func = s_funcVec.get(id);
+  assertx(id.toInt() < s_nextFuncId);
+  auto func = s_funcVec.get(id.toInt());
   func->validate();
   return func;
 }
 
 bool Func::isFuncIdValid(FuncId id) {
-  if (id >= s_nextFuncId) return false;
-  return s_funcVec.get(id) != nullptr;
+  if (id.toInt() >= s_nextFuncId) return false;
+  return s_funcVec.get(id.toInt()) != nullptr;
 }
 
 

@@ -50,7 +50,7 @@ void CallTargetProfile::report(const Func* func) {
   size_t i = 0;
   for (; i < kMaxEntries; i++) {
     auto& entry = m_entries[i];
-    if (entry.funcId == InvalidFuncId) {
+    if (entry.funcId.isInvalid()) {
       entry.funcId = funcId;
       entry.count = 1;
       return;
@@ -72,7 +72,7 @@ void CallTargetProfile::reduce(CallTargetProfile& profile,
     // Copy into `allEntries' all the valid entries from `profile'.
     for (size_t i = 0; i < kMaxEntries; i++) {
       auto const& entry = profile.m_entries[i];
-      if (entry.funcId == InvalidFuncId) break;
+      if (entry.funcId.isInvalid()) break;
       allEntries[nEntries++] = entry;
     }
   }
@@ -82,7 +82,7 @@ void CallTargetProfile::reduce(CallTargetProfile& profile,
     // from `profile' or by adding new entries to `allEntries'.
     for (size_t o = 0; o < kMaxEntries; o++) {
       auto const& otherEntry = other.m_entries[o];
-      if (otherEntry.funcId == InvalidFuncId) break;
+      if (otherEntry.funcId.isInvalid()) break;
       size_t p = 0;
       for (; p < kMaxEntries; p++) {
         auto& entry = allEntries[p];
@@ -109,8 +109,8 @@ void CallTargetProfile::reduce(CallTargetProfile& profile,
             [&] (const Entry& a, const Entry& b) {
               // Sort in decreasing order of `count' while keeping invalid
               // entries at the end.
-              if (b.funcId == InvalidFuncId) return a.funcId != InvalidFuncId;
-              if (a.funcId == InvalidFuncId) return false;
+              if (b.funcId.isInvalid()) return !a.funcId.isInvalid();
+              if (a.funcId.isInvalid()) return false;
               return a.count > b.count;
             });
   auto const nEntriesToCopy = std::min(kMaxEntries, nEntries);
@@ -120,7 +120,7 @@ void CallTargetProfile::reduce(CallTargetProfile& profile,
   profile.m_untracked += other.m_untracked;
   for (size_t i = kMaxEntries; i < nEntries; i++) {
     auto const& entry = allEntries[i];
-    if (entry.funcId == InvalidFuncId) break;
+    if (entry.funcId.isInvalid()) break;
     profile.m_untracked += entry.count;
   }
 }
@@ -131,7 +131,7 @@ const Func* CallTargetProfile::choose(double& probability) const {
     return nullptr;
   }
 
-  assertx(m_entries[0].funcId != InvalidFuncId);
+  assertx(!m_entries[0].funcId.isInvalid());
 
   FTRACE(3, "CallTargetProfile::choose(): {}\n", *this);
 
@@ -140,7 +140,7 @@ const Func* CallTargetProfile::choose(double& probability) const {
 
   for (size_t i = 1; i < kMaxEntries ; i++) {
     auto const& entry = m_entries[i];
-    if (entry.funcId == InvalidFuncId) break;
+    if (entry.funcId.isInvalid()) break;
     total += entry.count;
     if (entry.count > m_entries[bestIdx].count) {
       bestIdx = i;
@@ -161,12 +161,12 @@ std::string CallTargetProfile::toString() const {
   std::ostringstream out;
   uint64_t total = m_untracked;
   for (auto const& entry : m_entries) {
-    if (entry.funcId != InvalidFuncId) {
+    if (!entry.funcId.isInvalid()) {
       total += entry.count;
     }
   }
   for (auto const& entry : m_entries) {
-    if (entry.funcId != InvalidFuncId) {
+    if (!entry.funcId.isInvalid()) {
       out << folly::format("FuncId {}: {} ({:.1f}%), ",
                            entry.funcId, entry.count,
                            total == 0 ? 0 : 100.0 * entry.count / total);
@@ -184,16 +184,16 @@ folly::dynamic CallTargetProfile::toDynamic() const {
 
   uint64_t total = m_untracked;
   for (auto const& entry : m_entries) {
-    if (entry.funcId != InvalidFuncId) {
+    if (!entry.funcId.isInvalid()) {
       total += entry.count;
     }
   }
 
   dynamic entries = dynamic::array;
   for (auto const& entry : m_entries) {
-    if (entry.funcId != InvalidFuncId) {
+    if (!entry.funcId.isInvalid()) {
       auto percent = total == 0 ? 0 : 100.0 * entry.count / total;
-      entries.push_back(dynamic::object("funcId", entry.funcId)
+      entries.push_back(dynamic::object("funcId", entry.funcId.toInt())
                                        ("count", entry.count)
                                        ("percent", percent));
     }
@@ -212,8 +212,8 @@ folly::dynamic CallTargetProfile::toDynamic() const {
 void CallTargetProfile::serialize(ProfDataSerializer& ser) const {
   for (size_t i = 0; i < kMaxEntries; i++) {
     auto const funcId = m_entries[i].funcId;
-    const Func* func = funcId == kInvalidId ? nullptr
-                                            : Func::fromFuncId(funcId);
+    const Func* func = funcId.isInvalid() ? nullptr
+                                          : Func::fromFuncId(funcId);
     write_func(ser, func);
     write_raw(ser, m_entries[i].count);
   }
@@ -224,7 +224,8 @@ void CallTargetProfile::serialize(ProfDataSerializer& ser) const {
 void CallTargetProfile::deserialize(ProfDataDeserializer& ser) {
   for (size_t i = 0; i < kMaxEntries; i++) {
     auto const func = read_func(ser);
-    m_entries[i].funcId = func != nullptr ? func->getFuncId() : kInvalidId;
+    m_entries[i].funcId =
+      func != nullptr ? func->getFuncId() : FuncId::Invalid;
     read_raw(ser, m_entries[i].count);
   }
   read_raw(ser, m_untracked);

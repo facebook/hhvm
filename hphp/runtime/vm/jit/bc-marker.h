@@ -44,7 +44,7 @@ struct BCMarker {
    */
   static BCMarker Dummy() {
     return BCMarker {
-      SrcKey(DummyFuncId, 0, ResumeMode::None),
+      SrcKey(FuncId::Dummy, 0, ResumeMode::None),
       FPInvOffset{0},
       false,
       TransIDSet{},
@@ -78,7 +78,7 @@ struct BCMarker {
   std::string show() const;
   bool valid() const;
   bool isDummy() const { return m_sk.valid() &&
-                                m_sk.funcID() == DummyFuncId; }
+                                m_sk.funcID().isDummy(); }
   bool hasFunc() const { return valid() && !isDummy(); }
 
   SrcKey      sk()        const { assertx(valid()); return m_sk;            }

@@ -183,7 +183,7 @@ void ProfData::addProfTrans(TransID transID,
 }
 
 bool ProfData::anyBlockEndsAt(const Func* func, Offset offset) {
-  auto it = m_blockEndOffsets.find(func->getFuncId());
+  auto it = m_blockEndOffsets.find(func->getFuncId().toInt());
   if (it == m_blockEndOffsets.end()) {
     Arena arena;
     Verifier::GraphBuilder builder{arena, func};
@@ -195,7 +195,8 @@ bool ProfData::anyBlockEndsAt(const Func* func, Offset offset) {
       offsets.insert(last);
     }
 
-    it = m_blockEndOffsets.emplace(func->getFuncId(), std::move(offsets)).first;
+    it = m_blockEndOffsets.emplace(func->getFuncId().toInt(),
+                                   std::move(offsets)).first;
   }
 
   return it->second.count(offset);

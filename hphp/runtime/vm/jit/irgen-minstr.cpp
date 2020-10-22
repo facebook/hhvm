@@ -1178,16 +1178,6 @@ SSATmp* elemImpl(IRGS& env, MOpMode mode, SSATmp* key) {
   return baseValueToLval(env, value);
 }
 
-/*
- * Pop nDiscard elements from the stack, push the result (if present),
- * and mark the member operation as complete.
- */
-void mFinalImpl(IRGS& env, int32_t nDiscard, SSATmp* result) {
-  for (auto i = 0; i < nDiscard; ++i) popDecRef(env);
-  if (result) push(env, result);
-  gen(env, FinishMemberOp);
-}
-
 template<class Finish>
 SSATmp* cGetPropImpl(IRGS& env, SSATmp* base, SSATmp* key,
                      MOpMode mode, bool nullsafe, Finish finish) {
@@ -1540,6 +1530,14 @@ SSATmp* memberKey(IRGS& env, MemberKey mk) {
 
 //////////////////////////////////////////////////////////////////////
 
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void mFinalImpl(IRGS& env, int32_t nDiscard, SSATmp* result) {
+  for (auto i = 0; i < nDiscard; ++i) popDecRef(env);
+  if (result) push(env, result);
+  gen(env, FinishMemberOp);
 }
 
 //////////////////////////////////////////////////////////////////////

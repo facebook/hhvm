@@ -63,6 +63,12 @@ void annotArrayAccessProfile(IRGS& env,
 SSATmp* inlineSetOp(IRGS& env, SetOpOp op, SSATmp* lhs, SSATmp* rhs);
 
 /*
+ * Pop nDiscard elements from the stack, push the result (if non-null),
+ * and mark the member operation as complete.
+ */
+void mFinalImpl(IRGS& env, int32_t nDiscard, SSATmp* result);
+
+/*
  * Use profiling data from an ArrayAccessProfile to conditionally optimize
  * the array access represented by `generic' using `direct' or `missing`.
  *

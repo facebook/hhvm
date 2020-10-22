@@ -78,7 +78,8 @@ const Layout* Layout::FromIndex(LayoutIndex index) {
 
 SSATmp* Layout::emitGet(
     IRGS& env, SSATmp* arr, SSATmp* key, Block* taken) const {
-  PUNT(unimpl_bespoke_emitGet);
+  auto const data = BespokeLayoutData { this };
+  return gen(env, BespokeGet, TCell, data, taken, arr, key);
 }
 
 SSATmp* Layout::emitSet(

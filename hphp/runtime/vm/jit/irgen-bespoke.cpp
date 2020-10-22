@@ -18,11 +18,13 @@
 #include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/bespoke/logging-array.h"
 
+#include "hphp/runtime/vm/jit/analysis.h"
 #include "hphp/runtime/vm/jit/irgen-builtin.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 #include "hphp/runtime/vm/jit/irgen-interpone.h"
 #include "hphp/runtime/vm/jit/irgen-state.h"
+#include "hphp/runtime/vm/jit/irgen-minstr.h"
 #include "hphp/runtime/vm/srckey.h"
 #include "hphp/util/tiny-vector.h"
 #include "hphp/util/trace.h"
@@ -35,14 +37,141 @@ namespace HPHP { namespace jit { namespace irgen {
 
 namespace {
 
+SSATmp* extractBase(IRGS& env) {
+  auto const& mbase = env.irb->fs().mbase();
+  if (mbase.value) return mbase.value;
+  auto const mbaseLval = gen(env, LdMBase, TLvalToCell);
+  return gen(env, LdMem, mbase.type, mbaseLval);
+}
+
+SSATmp* classConvertPuntOnRaise(IRGS& env, SSATmp* key) {
+  if (key->isA(TCls)) {
+    if (RuntimeOption::EvalRaiseClassConversionWarning) {
+      PUNT(BespokeClsConvert);
+    }
+    return gen(env, LdClsName, key);
+  }
+  if (key->isA(TLazyCls)) {
+    if (RuntimeOption::EvalRaiseClassConversionWarning) {
+      PUNT(BespokeClsConvert);
+    }
+    return gen(env, LdLazyClsName, key);
+  }
+  return key;
+}
+
+SSATmp* memberKey(IRGS& env, MemberKey mk) {
+  auto const res = [&] () -> SSATmp* {
+    switch (mk.mcode) {
+      case MW:
+        return nullptr;
+      case MEL: case MPL:
+        return ldLocWarn(env, mk.local, nullptr, DataTypeSpecific);
+      case MEC: case MPC:
+        return topC(env, BCSPRelOffset{int32_t(mk.iva)});
+      case MEI:
+        return cns(env, mk.int64);
+      case MET: case MPT: case MQT:
+        return cns(env, mk.litstr);
+    }
+    not_reached();
+  }();
+  if (!res) return nullptr;
+
+  if (!res->type().isKnownDataType()) PUNT(MInstr-KeyNotKnown);
+  return classConvertPuntOnRaise(env, res);
+}
+
+SSATmp* emitIsset(IRGS& env, SSATmp* key) {
+  auto const baseType = env.irb->fs().mbase().type;
+  auto const base = extractBase(env);
+
+  if (!key->isA(TInt | TStr)) {
+    gen(env, ThrowInvalidArrayKey, base, key);
+    return cns(env, TBottom);
+  }
+  if (baseType.subtypeOfAny(TVec, TVArr) && !key->isA(TInt)) {
+    return cns(env, false);
+  }
+
+  return cond(
+    env,
+    [&](Block* taken) {
+      auto const layout = baseType.arrSpec().bespokeLayout();
+      return layout->emitGet(env, base, key, taken);
+    },
+    [&](SSATmp* val) { return gen(env, IsNType, TNull, val); },
+    [&] { return cns(env, false); }
+  );
+}
+
+SSATmp* emitGetElem(IRGS& env, SSATmp* key, bool quiet) {
+  auto const baseType = env.irb->fs().mbase().type;
+  auto const base = extractBase(env);
+
+  if (!key->isA(TInt | TStr)) {
+    gen(env, ThrowInvalidArrayKey, base, key);
+    return cns(env, TBottom);
+  }
+  if (baseType.subtypeOfAny(TVec, TVArr) && !key->isA(TInt)) {
+    if (quiet) return cns(env, TInitNull);
+
+    gen(env, ThrowInvalidArrayKey, base, key);
+    return cns(env, TBottom);
+  }
+
+  return cond(
+    env,
+    [&](Block* taken) {
+      auto const layout = baseType.arrSpec().bespokeLayout();
+      return layout->emitGet(env, base, key, taken);
+    },
+    [&](SSATmp* val) {
+      // TODO(mcolavita): type profile information
+      gen(env, IncRef, val);
+      return val;
+    },
+    [&] {
+      hint(env, Block::Hint::Unlikely);
+      if (quiet) return cns(env, TInitNull);
+
+      gen(env, ThrowOutOfBounds, base, key);
+      return cns(env, TBottom);
+    }
+  );
+}
+
+void emitBespokeQueryM(IRGS& env, uint32_t nDiscard, QueryMOp query,
+                       MemberKey mk) {
+  if (mk.mcode == MW) PUNT(BespokeQueryMNewElem);
+  if (mcodeIsProp(mk.mcode)) PUNT(BespokeQueryMProp);
+  auto const key = memberKey(env, mk);
+  auto const result = [&] {
+    switch (query) {
+      case QueryMOp::InOut:
+      case QueryMOp::CGet:
+        return emitGetElem(env, key, false);
+      case QueryMOp::CGetQuiet:
+        return emitGetElem(env, key, true);
+      case QueryMOp::Isset:
+        return emitIsset(env, key);
+    }
+    not_reached();
+  }();
+  mFinalImpl(env, nDiscard, result);
+}
+
 void translateDispatchBespoke(IRGS& env,
                               const NormalizedInstruction& ni) {
   auto const DEBUG_ONLY sk = ni.source;
   FTRACE_MOD(Trace::hhir, 2, "At {}: {}: perform bespoke translation\n",
              sk.offset(), opcodeToName(sk.op()));
   switch (ni.op()) {
-    case Op::SetM:
     case Op::QueryM:
+      emitBespokeQueryM(env, ni.imm[0].u_IVA, (QueryMOp) ni.imm[1].u_OA,
+                        ni.imm[2].u_KA);
+      return;
+    case Op::SetM:
     case Op::Dim:
     case Op::SetRangeM:
     case Op::IncDecM:

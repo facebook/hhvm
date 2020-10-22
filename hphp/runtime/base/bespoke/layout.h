@@ -269,6 +269,9 @@ struct Layout {
   /*
    * Return the value at `key` in `arr`, branching to `taken` if the key is
    * not present. This operation does no refcounting.
+   *
+   * The default implementation invokes the layout-specific GetInt/GetStr
+   * methods without virtualization.
    */
   virtual SSATmp* emitGet(
       IRGS& env, SSATmp* arr, SSATmp* key, Block* taken) const;
@@ -276,6 +279,8 @@ struct Layout {
   /*
    * Create a new array by setting `arr[key] = val`, CoWing or escalating as
    * needed. This op consumes a ref on `arr` and produces a ref on the result.
+   *
+   * The default implementation punts.
    */
   virtual SSATmp* emitSet(
       IRGS& env, SSATmp* arr, SSATmp* key, SSATmp* val) const;
@@ -283,6 +288,8 @@ struct Layout {
   /*
    * Create a new array by setting `arr[] = val`, CoWing or escalating as
    * needed. This op consumes a ref on `arr` and produces a ref on the result.
+   *
+   * The default implementation punts.
    */
   virtual SSATmp* emitAppend(
     IRGS& env, SSATmp* arr, SSATmp* val) const;

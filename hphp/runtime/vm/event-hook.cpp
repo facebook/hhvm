@@ -271,11 +271,22 @@ void runUserProfilerOnFunctionEnter(const ActRec* ar, bool isResume) {
   VMRegAnchor _;
   ExecutingSetprofileCallbackGuard guard;
 
-  auto frameinfo = Array::attach(ArrayData::CreateDArray(ARRPROV_HERE()));
+  CallCtx ctx;
+  vm_decode_function(g_context->m_setprofileCallback, ctx);
+  auto const func = ctx.func;
+  if (!func) return;
 
-  if (!isResume) {
-    // Add arguments only if this is a function call.
-    frameinfo.set(s_args, hhvm_get_frame_args(ar));
+  Array frameinfo;
+  {
+    arrprov::TagOverride _(RO::EvalArrayProvenance
+      ? arrprov::Tag::Param(func, 2)
+      : arrprov::Tag{});
+
+    frameinfo = Array::attach(ArrayData::CreateDArray());
+    if (!isResume) {
+      // Add arguments only if this is a function call.
+      frameinfo.set(s_args, hhvm_get_frame_args(ar));
+    }
   }
 
   addFramePointers(ar, frameinfo, !isResume);
@@ -291,7 +302,7 @@ void runUserProfilerOnFunctionEnter(const ActRec* ar, bool isResume) {
     frameinfo
   );
 
-  vm_call_user_func(g_context->m_setprofileCallback, params);
+  g_context->invokeFunc(func, params, ctx.this_, ctx.cls, ctx.dynamic);
 }
 
 void runUserProfilerOnFunctionExit(const ActRec* ar, const TypedValue* retval,
@@ -303,15 +314,21 @@ void runUserProfilerOnFunctionExit(const ActRec* ar, const TypedValue* retval,
   VMRegAnchor _;
   ExecutingSetprofileCallbackGuard guard;
 
+  CallCtx ctx;
+  vm_decode_function(g_context->m_setprofileCallback, ctx);
+  auto const func = ctx.func;
+  if (!func) return;
+
   Array frameinfo;
-  if (retval) {
-    frameinfo = make_darray_tagged(ARRPROV_HERE(),
-                                   s_return,
-                                   tvAsCVarRef(retval));
-  } else if (exception) {
-    frameinfo = make_darray_tagged(ARRPROV_HERE(),
-                                   s_exception,
-                                   Variant{exception});
+  {
+    arrprov::TagOverride _(RO::EvalArrayProvenance
+      ? arrprov::Tag::Param(func, 2)
+      : arrprov::Tag{});
+    if (retval) {
+      frameinfo = make_darray(s_return, tvAsCVarRef(retval));
+    } else if (exception) {
+      frameinfo = make_darray(s_exception, Variant{exception});
+    }
   }
   addFramePointers(ar, frameinfo, false);
 
@@ -321,7 +338,7 @@ void runUserProfilerOnFunctionExit(const ActRec* ar, const TypedValue* retval,
     frameinfo
   );
 
-  vm_call_user_func(g_context->m_setprofileCallback, params);
+  g_context->invokeFunc(func, params, ctx.this_, ctx.cls, ctx.dynamic);
 }
 
 static Variant call_intercept_handler(
@@ -355,7 +372,12 @@ static Variant call_intercept_handler(
     );
   }
 
-  args = hhvm_get_frame_args(ar);
+  {
+    arrprov::TagOverride _(RO::EvalArrayProvenance
+      ? arrprov::Tag::Param(f, 2)
+      : arrprov::Tag{});
+    args = hhvm_get_frame_args(ar);
+  }
 
   VArrayInit par{newCallback ? 3u : 5u};
   par.append(called);
@@ -400,17 +422,28 @@ static Variant call_intercept_handler_callback(
     SystemLib::throwRuntimeExceptionObject(
       Variant("The callback for fb_intercept2 cannot have inout parameters"));
   }
-  auto const curArgs = hhvm_get_frame_args(ar);
-  VArrayInit args(prepend_this + curArgs.size());
-  if (prepend_this) {
-    auto const thiz = [&] {
-      if (!origCallee->cls()) return make_tv<KindOfNull>();
-      if (ar->hasThis()) return make_tv<KindOfObject>(ar->getThis());
-      return make_tv<KindOfClass>(ar->getClass());
-    }();
-    args.append(thiz);
-  }
-  IterateV(curArgs.get(), [&](TypedValue v) { args.append(v); });
+
+  auto const args = [&]{
+    // The array here is the array of all parameters. Typically, this array
+    // isn't observed - however, if the callback takes the array as a single
+    // varargs list, it will be. In this case, it will be param 0.
+    arrprov::TagOverride _(RO::EvalArrayProvenance
+      ? arrprov::Tag::Param(f, 0)
+      : arrprov::Tag{});
+
+    auto const curArgs = hhvm_get_frame_args(ar);
+    VArrayInit args(prepend_this + curArgs.size());
+    if (prepend_this) {
+      auto const thiz = [&] {
+        if (!origCallee->cls()) return make_tv<KindOfNull>();
+        if (ar->hasThis()) return make_tv<KindOfObject>(ar->getThis());
+        return make_tv<KindOfClass>(ar->getClass());
+      }();
+      args.append(thiz);
+    }
+    IterateV(curArgs.get(), [&](TypedValue v) { args.append(v); });
+    return args.toArray();
+  }();
   auto reifiedGenerics = [&] {
     if (!origCallee->hasReifiedGenerics()) return Array();
     // Reified generics is the first non param local
@@ -419,9 +452,8 @@ static Variant call_intercept_handler_callback(
     return Array(val(generics).parr);
   }();
   auto ret = Variant::attach(
-    g_context->invokeFunc(f, args.toArray(), callCtx.this_, callCtx.cls,
-                          callCtx.dynamic, false, false,
-                          std::move(reifiedGenerics))
+    g_context->invokeFunc(f, args, callCtx.this_, callCtx.cls, callCtx.dynamic,
+                          false, false, std::move(reifiedGenerics))
   );
   return ret;
 }

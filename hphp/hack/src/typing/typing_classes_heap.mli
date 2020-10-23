@@ -20,10 +20,6 @@ module Classes : sig
   (** This is the preferred entry-point. It gets the class, and uses
   a local-memory cache. *)
   val get : Provider_context.t -> key -> t option
-
-  val mem : Provider_context.t -> key -> bool
-
-  val find_unsafe : Provider_context.t -> key -> t
 end
 
 module Api : sig

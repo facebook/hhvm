@@ -164,23 +164,6 @@ module Classes = struct
   let get ctx class_name =
     Decl_counters.count_decl Decl_counters.Class class_name (fun decl_counter ->
         get_impl ctx decl_counter class_name)
-
-  let find_unsafe ctx key =
-    let v =
-      Decl_counters.count_decl
-        Decl_counters.Class_find_unsafe
-        key
-        (fun decl_counter -> get_impl ctx decl_counter key)
-    in
-    match v with
-    | None -> raise Caml.Not_found
-    | Some v -> v
-
-  let mem ctx key =
-    Decl_counters.count_decl Decl_counters.Class_mem key @@ fun decl_counter ->
-    match get_impl ctx decl_counter key with
-    | None -> false
-    | Some _ -> true
 end
 
 module ApiShallow = struct

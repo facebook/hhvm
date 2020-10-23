@@ -15,8 +15,6 @@ type decl
 type decl_kind =
   | Class_no_local_cache
   | Class
-  | Class_find_unsafe
-  | Class_mem
   | Fun
   | GConst
   | Record_def

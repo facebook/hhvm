@@ -132,8 +132,8 @@ module Classes = struct
 
   let get_no_local_cache (ctx : Provider_context.t) (class_name : string) :
       t option =
-    Counters.count_decl_accessor @@ fun () ->
-    get_no_local_cache_impl ctx class_name
+    Decl_counters.count_decl class_name Decl_counters.Class_no_local_cache
+    @@ fun () -> get_no_local_cache_impl ctx class_name
 
   let get_impl ctx class_name =
     match Cache.get class_name with
@@ -148,16 +148,17 @@ module Classes = struct
       end
 
   let get ctx class_name =
-    Counters.count_decl_accessor @@ fun () -> get_impl ctx class_name
+    Decl_counters.count_decl class_name Decl_counters.Class @@ fun () ->
+    get_impl ctx class_name
 
   let find_unsafe ctx key =
-    Counters.count_decl_accessor @@ fun () ->
+    Decl_counters.count_decl key Decl_counters.Class_find_unsafe @@ fun () ->
     match get_impl ctx key with
     | None -> raise Caml.Not_found
     | Some x -> x
 
   let mem ctx key =
-    Counters.count_decl_accessor @@ fun () ->
+    Decl_counters.count_decl key Decl_counters.Class_mem @@ fun () ->
     match get_impl ctx key with
     | None -> false
     | Some _ -> true
@@ -166,13 +167,13 @@ end
 module ApiShallow = struct
   let shallow_decl t =
     (* Looks only at the immediate shallow decl *)
-    Counters.count_decl_accessor @@ fun () ->
+    Decl_counters.count_subdecl Decl_counters.Shallow_decl @@ fun () ->
     match t with
     | Lazy lc -> lc.sc
     | Eager _ -> failwith "shallow_class_decl is disabled"
 
   let abstract t =
-    Counters.count_decl_accessor @@ fun () ->
+    Decl_counters.count_subdecl Decl_counters.Abstract @@ fun () ->
     match t with
     | Lazy lc ->
       begin
@@ -187,61 +188,61 @@ module ApiShallow = struct
     | Eager c -> c.tc_abstract
 
   let final t =
-    Counters.count_decl_accessor @@ fun () ->
+    Decl_counters.count_subdecl Decl_counters.Final @@ fun () ->
     match t with
     | Lazy lc -> lc.sc.sc_final
     | Eager c -> c.tc_final
 
   let const t =
-    Counters.count_decl_accessor @@ fun () ->
+    Decl_counters.count_subdecl Decl_counters.Const @@ fun () ->
     match t with
     | Lazy lc -> Attrs.mem SN.UserAttributes.uaConst lc.sc.sc_user_attributes
     | Eager c -> c.tc_const
 
   let kind t =
-    Counters.count_decl_accessor @@ fun () ->
+    Decl_counters.count_subdecl Decl_counters.Kind @@ fun () ->
     match t with
     | Lazy lc -> lc.sc.sc_kind
     | Eager c -> c.tc_kind
 
   let is_xhp t =
-    Counters.count_decl_accessor @@ fun () ->
+    Decl_counters.count_subdecl Decl_counters.Is_xhp @@ fun () ->
     match t with
     | Lazy lc -> lc.sc.sc_is_xhp
     | Eager c -> c.tc_is_xhp
 
   let name t =
-    Counters.count_decl_accessor @@ fun () ->
+    Decl_counters.count_subdecl Decl_counters.Name @@ fun () ->
     match t with
     | Lazy lc -> snd lc.sc.sc_name
     | Eager c -> c.tc_name
 
   let pos t =
-    Counters.count_decl_accessor @@ fun () ->
+    Decl_counters.count_subdecl Decl_counters.Pos @@ fun () ->
     match t with
     | Lazy lc -> fst lc.sc.sc_name
     | Eager c -> c.tc_pos
 
   let tparams t =
-    Counters.count_decl_accessor @@ fun () ->
+    Decl_counters.count_subdecl Decl_counters.Tparams @@ fun () ->
     match t with
     | Lazy lc -> lc.sc.sc_tparams
     | Eager c -> c.tc_tparams
 
   let where_constraints t =
-    Counters.count_decl_accessor @@ fun () ->
+    Decl_counters.count_subdecl Decl_counters.Where_constraints @@ fun () ->
     match t with
     | Lazy lc -> lc.sc.sc_where_constraints
     | Eager c -> c.tc_where_constraints
 
   let enum_type t =
-    Counters.count_decl_accessor @@ fun () ->
+    Decl_counters.count_subdecl Decl_counters.Enum_type @@ fun () ->
     match t with
     | Lazy lc -> lc.sc.sc_enum_type
     | Eager c -> c.tc_enum_type
 
   let sealed_whitelist t =
-    Counters.count_decl_accessor @@ fun () ->
+    Decl_counters.count_subdecl Decl_counters.Sealed_whitelist @@ fun () ->
     let get_sealed_whitelist sc =
       match Attrs.find SN.UserAttributes.uaSealed sc.sc_user_attributes with
       | None -> None
@@ -253,7 +254,7 @@ module ApiShallow = struct
     | Eager c -> c.tc_sealed_whitelist
 
   let decl_errors t =
-    Counters.count_decl_accessor @@ fun () ->
+    Decl_counters.count_subdecl Decl_counters.Decl_errors @@ fun () ->
     match t with
     | Lazy _ -> None
     | Eager c -> c.tc_decl_errors
@@ -313,13 +314,13 @@ end
 
 module ApiLazy = struct
   let construct t =
-    Counters.count_decl_accessor @@ fun () ->
+    Decl_counters.count_subdecl Decl_counters.Construct @@ fun () ->
     match t with
     | Lazy lc -> Lazy.force lc.ih.construct
     | Eager c -> c.tc_construct
 
   let need_init t =
-    Counters.count_decl_accessor @@ fun () ->
+    Decl_counters.count_subdecl Decl_counters.Need_init @@ fun () ->
     match t with
     | Lazy lc ->
       let (constructor, _) = Lazy.force lc.ih.construct in
@@ -329,97 +330,100 @@ module ApiLazy = struct
     | Eager c -> c.tc_need_init
 
   let get_ancestor t ancestor =
-    Counters.count_decl_accessor @@ fun () ->
+    Decl_counters.count_subdecl (Decl_counters.Get_ancestor ancestor)
+    @@ fun () ->
     match t with
     | Lazy lc -> LSTable.get lc.ancestors ancestor
     | Eager c -> SMap.find_opt ancestor c.tc_ancestors
 
   let has_ancestor t ancestor =
-    Counters.count_decl_accessor @@ fun () ->
+    Decl_counters.count_subdecl (Decl_counters.Has_ancestor ancestor)
+    @@ fun () ->
     match t with
     | Lazy lc -> LSTable.mem lc.ancestors ancestor
     | Eager c -> SMap.mem ancestor c.tc_ancestors
 
   let requires_ancestor t ancestor =
-    Counters.count_decl_accessor @@ fun () ->
+    Decl_counters.count_subdecl (Decl_counters.Requires_ancestor ancestor)
+    @@ fun () ->
     match t with
     | Lazy lc -> LSTable.mem lc.req_ancestor_names ancestor
     | Eager c -> SSet.mem ancestor c.tc_req_ancestors_extends
 
   let extends t ancestor =
-    Counters.count_decl_accessor @@ fun () ->
+    Decl_counters.count_subdecl (Decl_counters.Extends ancestor) @@ fun () ->
     match t with
     | Lazy lc -> LSTable.mem lc.parents_and_traits ancestor
     | Eager c -> SSet.mem ancestor c.tc_extends
 
   let get_const t id =
-    Counters.count_decl_accessor @@ fun () ->
+    Decl_counters.count_subdecl (Decl_counters.Get_const id) @@ fun () ->
     match t with
     | Lazy lc -> LSTable.get lc.ih.consts id
     | Eager c -> SMap.find_opt id c.tc_consts
 
   let has_const t id =
-    Counters.count_decl_accessor @@ fun () ->
+    Decl_counters.count_subdecl (Decl_counters.Has_const id) @@ fun () ->
     match t with
     | Lazy lc -> LSTable.mem lc.ih.consts id
     | Eager c -> SMap.mem id c.tc_consts
 
   let get_typeconst t id =
-    Counters.count_decl_accessor @@ fun () ->
+    Decl_counters.count_subdecl (Decl_counters.Get_typeconst id) @@ fun () ->
     match t with
     | Lazy lc -> LSTable.get lc.ih.typeconsts id
     | Eager c -> SMap.find_opt id c.tc_typeconsts
 
   let has_typeconst t id =
-    Counters.count_decl_accessor @@ fun () ->
+    Decl_counters.count_subdecl (Decl_counters.Has_typeconst id) @@ fun () ->
     match t with
     | Lazy lc -> LSTable.mem lc.ih.typeconsts id
     | Eager c -> SMap.mem id c.tc_typeconsts
 
   let get_prop t id =
-    Counters.count_decl_accessor @@ fun () ->
+    Decl_counters.count_subdecl (Decl_counters.Get_prop id) @@ fun () ->
     match t with
     | Lazy lc -> LSTable.get lc.ih.props id
     | Eager c -> SMap.find_opt id c.tc_props
 
   let has_prop t id =
-    Counters.count_decl_accessor @@ fun () ->
+    Decl_counters.count_subdecl (Decl_counters.Has_prop id) @@ fun () ->
     match t with
     | Lazy lc -> LSTable.mem lc.ih.props id
     | Eager c -> SMap.mem id c.tc_props
 
   let get_sprop t id =
-    Counters.count_decl_accessor @@ fun () ->
+    Decl_counters.count_subdecl (Decl_counters.Get_sprop id) @@ fun () ->
     match t with
     | Lazy lc -> LSTable.get lc.ih.sprops id
     | Eager c -> SMap.find_opt id c.tc_sprops
 
   let has_sprop t id =
-    Counters.count_decl_accessor @@ fun () ->
+    Decl_counters.count_subdecl (Decl_counters.Has_sprop id) @@ fun () ->
     match t with
     | Lazy lc -> LSTable.mem lc.ih.sprops id
     | Eager c -> SMap.mem id c.tc_sprops
 
   let get_method t id =
-    Counters.count_decl_accessor @@ fun () ->
+    Decl_counters.count_subdecl (Decl_counters.Get_method id) @@ fun () ->
     match t with
     | Lazy lc -> LSTable.get lc.ih.methods id
     | Eager c -> SMap.find_opt id c.tc_methods
 
   let has_method t id =
-    Counters.count_decl_accessor @@ fun () ->
+    Decl_counters.count_subdecl (Decl_counters.Has_method id) @@ fun () ->
     match t with
     | Lazy lc -> LSTable.mem lc.ih.methods id
     | Eager c -> SMap.mem id c.tc_methods
 
   let get_smethod t id =
-    Counters.count_decl_accessor @@ fun () ->
+    Decl_counters.count_subdecl (Decl_counters.Get_smethod id) @@ fun () ->
     match t with
     | Lazy lc -> LSTable.get lc.ih.smethods id
     | Eager c -> SMap.find_opt id c.tc_smethods
 
   let has_smethod t id =
-    Counters.count_decl_accessor @@ fun () ->
+    Decl_counters.count_subdecl (Decl_counters.Has_smethod id) @@ fun () ->
     match t with
     | Lazy lc -> LSTable.mem lc.ih.smethods id
     | Eager c -> SMap.mem id c.tc_smethods
@@ -436,13 +440,14 @@ end
 
 module ApiEager = struct
   let members_fully_known t =
-    Counters.count_decl_accessor @@ fun () ->
+    Decl_counters.count_subdecl Decl_counters.Members_fully_known @@ fun () ->
     match t with
     | Lazy lc -> Lazy.force lc.members_fully_known
     | Eager c -> c.tc_members_fully_known
 
   let all_ancestor_req_names t =
-    Counters.count_decl_accessor @@ fun () ->
+    Decl_counters.count_subdecl Decl_counters.All_ancestor_req_names
+    @@ fun () ->
     (* The two below will traverse ancestors in different orders.
     But if the typechecker discovers errors in different order, no matter. *)
     match t with
@@ -450,25 +455,25 @@ module ApiEager = struct
     | Eager c -> SSet.elements c.tc_req_ancestors_extends
 
   let all_extends_ancestors t =
-    Counters.count_decl_accessor @@ fun () ->
+    Decl_counters.count_subdecl Decl_counters.All_extends_ancestors @@ fun () ->
     match t with
     | Lazy lc -> LSTable.to_list lc.parents_and_traits |> List.map ~f:fst
     | Eager c -> SSet.elements c.tc_extends
 
   let all_ancestors t =
-    Counters.count_decl_accessor @@ fun () ->
+    Decl_counters.count_subdecl Decl_counters.All_ancestors @@ fun () ->
     match t with
     | Lazy lc -> LSTable.to_list lc.ancestors
     | Eager c -> SMap.bindings c.tc_ancestors
 
   let all_ancestor_names t =
-    Counters.count_decl_accessor @@ fun () ->
+    Decl_counters.count_subdecl Decl_counters.All_ancestors @@ fun () ->
     match t with
     | Lazy lc -> List.map (LSTable.to_list lc.ancestors) fst
     | Eager c -> SMap.ordered_keys c.tc_ancestors
 
   let all_ancestor_reqs t =
-    Counters.count_decl_accessor @@ fun () ->
+    Decl_counters.count_subdecl Decl_counters.All_ancestor_reqs @@ fun () ->
     match t with
     | Lazy lc -> lc.all_requirements |> Sequence.to_list
     | Eager c -> c.tc_req_ancestors
@@ -479,7 +484,7 @@ module ApiEager = struct
     |> List.append (ApiShallow.upper_bounds_on_this_from_constraints t)
 
   let is_disposable t =
-    Counters.count_decl_accessor @@ fun () ->
+    Decl_counters.count_subdecl Decl_counters.Is_disposable @@ fun () ->
     let is_disposable_class_name class_name =
       String.equal class_name SN.Classes.cIDisposable
       || String.equal class_name SN.Classes.cIAsyncDisposable
@@ -496,62 +501,63 @@ module ApiEager = struct
     | Eager c -> c.tc_is_disposable
 
   let get_pu_enum t id =
-    Counters.count_decl_accessor @@ fun () ->
+    Decl_counters.count_subdecl (Decl_counters.Get_pu_enum id) @@ fun () ->
     match t with
     | Lazy lc -> LSTable.get lc.ih.pu_enums id
     | Eager c -> SMap.find_opt id c.tc_pu_enums
 
   let consts t =
-    Counters.count_decl_accessor @@ fun () ->
+    Decl_counters.count_subdecl Decl_counters.Consts @@ fun () ->
     match t with
     | Lazy lc -> LSTable.to_list lc.ih.consts
     | Eager c -> SMap.bindings c.tc_consts
 
   let typeconsts t =
-    Counters.count_decl_accessor @@ fun () ->
+    Decl_counters.count_subdecl Decl_counters.Typeconsts @@ fun () ->
     match t with
     | Lazy lc -> LSTable.to_list lc.ih.typeconsts
     | Eager c -> SMap.bindings c.tc_typeconsts
 
   let pu_enums t =
-    Counters.count_decl_accessor @@ fun () ->
+    Decl_counters.count_subdecl Decl_counters.Pu_enums @@ fun () ->
     match t with
     | Lazy lc -> LSTable.to_list lc.ih.pu_enums
     | Eager c -> SMap.bindings c.tc_pu_enums
 
   let props t =
-    Counters.count_decl_accessor @@ fun () ->
+    Decl_counters.count_subdecl Decl_counters.Props @@ fun () ->
     match t with
     | Lazy lc -> LSTable.to_list lc.ih.props
     | Eager c -> SMap.bindings c.tc_props
 
   let sprops t =
-    Counters.count_decl_accessor @@ fun () ->
+    Decl_counters.count_subdecl Decl_counters.SProps @@ fun () ->
     match t with
     | Lazy lc -> LSTable.to_list lc.ih.sprops
     | Eager c -> SMap.bindings c.tc_sprops
 
   let methods t =
-    Counters.count_decl_accessor @@ fun () ->
+    Decl_counters.count_subdecl Decl_counters.Methods @@ fun () ->
     match t with
     | Lazy lc -> LSTable.to_list lc.ih.methods
     | Eager c -> SMap.bindings c.tc_methods
 
   let smethods t =
-    Counters.count_decl_accessor @@ fun () ->
+    Decl_counters.count_subdecl Decl_counters.SMethods @@ fun () ->
     match t with
     | Lazy lc -> LSTable.to_list lc.ih.smethods
     | Eager c -> SMap.bindings c.tc_smethods
 
   let all_inherited_methods t id =
-    Counters.count_decl_accessor @@ fun () ->
+    Decl_counters.count_subdecl Decl_counters.All_inherited_methods @@ fun () ->
     match t with
     | Lazy lc ->
       LSTable.get lc.ih.all_inherited_methods id |> Option.value ~default:[]
     | Eager _ -> failwith "shallow_class_decl is disabled"
 
   let all_inherited_smethods t id =
-    Counters.count_decl_accessor @@ fun () ->
+    Decl_counters.count_subdecl Decl_counters.All_inherited_smethods
+    @@ fun () ->
     match t with
     | Lazy lc ->
       LSTable.get lc.ih.all_inherited_smethods id |> Option.value ~default:[]
@@ -571,7 +577,7 @@ module Api = struct
      class declaration, since [Typing_deferred_members] makes it obsolete. *)
   let deferred_init_members t =
     (* Not applicable to shallow decl *)
-    Counters.count_decl_accessor @@ fun () ->
+    Decl_counters.count_subdecl Decl_counters.Deferred_init_members @@ fun () ->
     match t with
     | Lazy _ -> failwith "shallow_class_decl is enabled"
     | Eager c -> c.tc_deferred_init_members

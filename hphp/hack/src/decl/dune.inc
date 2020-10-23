@@ -397,3 +397,13 @@
     decl_defs
     typing_defs)
   (preprocess (pps ppx_deriving.std)))
+
+(library
+  (name decl_counters)
+  (modules decl_counters)
+  (libraries
+    counters
+    logging
+    utils_core
+    relative_path)
+  (preprocess (pps ppx_deriving.std)))

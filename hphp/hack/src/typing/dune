@@ -31,8 +31,8 @@
   (libraries
     core_kernel
     decl
-    counters
     decl_ancestors
+    decl_counters
     decl_inheritance
     naming_provider
     shallow_decl_defs

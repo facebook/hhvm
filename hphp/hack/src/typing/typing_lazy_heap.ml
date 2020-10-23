@@ -20,7 +20,7 @@ let get_class = Typing_classes_heap.Classes.get
 let get_class_no_local_cache = Typing_classes_heap.Classes.get_no_local_cache
 
 let get_fun ~(sh : SharedMem.uses) ctx x =
-  Counters.count_decl_accessor @@ fun () ->
+  Decl_counters.count_decl x Decl_counters.Fun @@ fun () ->
   let SharedMem.Uses = sh in
   match Typing_heap.Funs.get x with
   | Some c -> Some c
@@ -35,7 +35,7 @@ let get_fun ~(sh : SharedMem.uses) ctx x =
     | None -> None)
 
 let get_gconst ~(sh : SharedMem.uses) ctx cst_name =
-  Counters.count_decl_accessor @@ fun () ->
+  Decl_counters.count_decl cst_name Decl_counters.GConst @@ fun () ->
   let SharedMem.Uses = sh in
   match Typing_heap.GConsts.get cst_name with
   | Some c -> Some c
@@ -50,7 +50,7 @@ let get_gconst ~(sh : SharedMem.uses) ctx cst_name =
     | None -> None)
 
 let get_record_def ~(sh : SharedMem.uses) ctx x =
-  Counters.count_decl_accessor @@ fun () ->
+  Decl_counters.count_decl x Decl_counters.Record_def @@ fun () ->
   let SharedMem.Uses = sh in
   match Typing_heap.RecordDefs.get x with
   | Some c -> Some c
@@ -65,7 +65,7 @@ let get_record_def ~(sh : SharedMem.uses) ctx x =
     | None -> None)
 
 let get_typedef ~(sh : SharedMem.uses) ctx x =
-  Counters.count_decl_accessor @@ fun () ->
+  Decl_counters.count_decl x Decl_counters.Typedef @@ fun () ->
   let SharedMem.Uses = sh in
   match Typing_heap.Typedefs.get x with
   | Some c -> Some c

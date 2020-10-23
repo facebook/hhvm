@@ -30,14 +30,10 @@ namespace HPHP { namespace jit {
 std::string BCMarker::show() const {
   assertx(valid());
   return folly::format(
-    "--- bc {}{}{}{}, fp {}, spOff {} ({}){}",
-    m_sk.offset(),
-    resumeModeShortName(m_sk.resumeMode()),
-    m_sk.hasThis()  ? "t" : "",
-    m_sk.prologue() ? "p" : "",
+    "--- bc {}, fp {}, spOff {} {}",
+    showShort(m_sk),
     m_fp ? folly::to<std::string>(m_fp->id()) : "_",
     m_spOff.offset,
-    m_sk.func()->fullName(),
     m_profTransIDs.empty()
       ? ""
       : folly::sformat(" [profTrans={}]", folly::join(',', m_profTransIDs))

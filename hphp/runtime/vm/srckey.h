@@ -89,8 +89,17 @@ struct SrcKey : private boost::totally_ordered<SrcKey> {
   /*
    * Direct accessors.
    */
+
   FuncId funcID() const;
+
+  // Offset of the bytecode represented by this SrcKey.
+  // Valid only when !prologue().
   Offset offset() const;
+
+  // Offset of the bytecode that will be used to enter the function.
+  // Valid only when prologue().
+  Offset entryOffset() const;
+
   ResumeMode resumeMode() const;
   bool prologue() const;
   bool hasThis() const;
@@ -103,6 +112,10 @@ struct SrcKey : private boost::totally_ordered<SrcKey> {
   Op op() const;
   PC pc() const;
   int lineNumber() const;
+
+  // Human readable offset of one of the above. Gives a std::string instead of
+  // an Offset, as this should be used only for debugging and tracing.
+  std::string printableOffset() const;
 
   /////////////////////////////////////////////////////////////////////////////
 

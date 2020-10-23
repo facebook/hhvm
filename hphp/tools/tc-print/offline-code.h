@@ -102,7 +102,7 @@ struct TCRangeInfo {
 
     auto const offset = [&]() -> folly::dynamic {
       if (!sk) return dynamic();
-      return sk->offset();
+      return sk->printableOffset();
     }();
 
     // TODO(T52857125) - maybe also include func and unit info?

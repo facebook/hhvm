@@ -23,6 +23,7 @@
 namespace HPHP {
 
 std::string SrcKey::showInst() const {
+  if (prologue()) return "Prologue";
   auto const f = func();
   return instrToString(f->at(offset()), f);
 }
@@ -34,10 +35,10 @@ std::string show(SrcKey sk) {
   if (unit->origFilepath()->data() && unit->origFilepath()->size()) {
     filepath = unit->origFilepath()->data();
   }
-  return folly::sformat("{}:{} in {}(id 0x{:#x})@{: >6}{}{}",
+  return folly::sformat("{}:{} in {}(id 0x{:#x})@{: >6}{}{}{}",
                         filepath, sk.lineNumber(),
                         func->fullName()->data(),
-                        (uint32_t)sk.funcID().toInt(), sk.offset(),
+                        sk.funcID().toInt(), sk.printableOffset(),
                         resumeModeShortName(sk.resumeMode()),
                         sk.hasThis()  ? "t" : "",
                         sk.prologue() ? "p" : "");
@@ -49,7 +50,7 @@ std::string showShort(SrcKey sk) {
     "{}(id {:#x})@{}{}{}{}",
     sk.func()->fullName(),
     sk.funcID(),
-    sk.offset(),
+    sk.printableOffset(),
     resumeModeShortName(sk.resumeMode()),
     sk.hasThis()  ? "t" : "",
     sk.prologue() ? "p" : ""
@@ -59,8 +60,7 @@ std::string showShort(SrcKey sk) {
 void sktrace(SrcKey sk, const char *fmt, ...) {
   if (!Trace::enabled) return;
 
-  auto const f = sk.func();
-  auto inst = instrToString(f->at(sk.offset()), f);
+  auto const inst = sk.showInst();
   Trace::trace("%s: %20s ", show(sk).c_str(), inst.c_str());
   va_list a;
   va_start(a, fmt);

@@ -94,7 +94,17 @@ inline FuncId SrcKey::funcID() const {
 }
 
 inline Offset SrcKey::offset() const {
+  assertx(!prologue());
   return m_offset;
+}
+
+inline Offset SrcKey::entryOffset() const {
+  assertx(prologue());
+  return m_offset;
+}
+
+inline std::string SrcKey::printableOffset() const {
+  return std::to_string(m_offset);
 }
 
 inline bool SrcKey::hasThis() const {
@@ -131,10 +141,12 @@ inline const Unit* SrcKey::unit() const {
 }
 
 inline Op SrcKey::op() const {
+  assertx(!prologue());
   return func()->getOp(offset());
 }
 
 inline PC SrcKey::pc() const {
+  assertx(!prologue());
   return func()->at(offset());
 }
 
@@ -147,14 +159,17 @@ inline int SrcKey::lineNumber() const {
 
 inline void SrcKey::setOffset(Offset o) {
   assertx((uint32_t)o >> kNumOffsetBits == 0);
+  assertx(!prologue());
   m_offset = (uint32_t)o;
 }
 
 inline OffsetSet SrcKey::succOffsets() const {
+  assertx(!prologue());
   return instrSuccOffsets(pc(), func());
 }
 
 inline void SrcKey::advance(const Func* f) {
+  assertx(!prologue());
   m_offset += instrLen((f ? f : func())->at(offset()));
 }
 

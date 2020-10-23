@@ -138,6 +138,10 @@ Fixup makeFixup(const BCMarker& marker, SyncOptions sync) {
   // of the marker represents the additional SP offset that needs to be added.
   if (marker.stublogue()) return Fixup::indirect(0, marker.spOff());
 
+  // The rest of the prologue cannot throw exceptions, but may execute C++ code
+  // that may need a fixup. Let it point to the first opcode of the function.
+  if (marker.prologue()) return Fixup::direct(0, marker.spOff());
+
   auto const bcOff = marker.fixupBcOff() - marker.fixupFunc()->base();
   return Fixup::direct(bcOff, marker.spOff());
 }

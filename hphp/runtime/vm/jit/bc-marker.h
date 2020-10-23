@@ -123,11 +123,6 @@ struct BCMarker {
     ret.m_fixupSk = sk;
     return ret;
   }
-  BCMarker setPrologue() const {
-    auto ret = *this;
-    ret.m_sk = SrcKey{func(), bcOff(), SrcKey::PrologueTag{}};
-    return ret;
-  }
 
   void reset() {
     m_sk = SrcKey();

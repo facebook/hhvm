@@ -312,7 +312,7 @@ void OfflineTransData::printTransRec(TransID transId,
     tRec->funcName,
     static_cast<int32_t>(tRec->src.resumeMode()),
     tRec->src.prologue(),
-    tRec->src.offset(),
+    tRec->src.printableOffset(),
     tRec->guards.size());
 
   for (auto& guard : tRec->guards) {

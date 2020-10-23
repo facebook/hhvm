@@ -445,7 +445,7 @@ TCRangeInfo OfflineCode::getRangeInfo(const TransBCMapping& transBCMap,
     auto const sk = transBCMap.sk;
     rangeInfo.unit = currUnit;
     if (sk.prologue()) {
-      auto const func = currUnit->getFunc(sk.offset());
+      auto const func = currUnit->getFunc(sk.entryOffset());
       auto const lineNum = func->line1();
       rangeInfo.func = func;
       rangeInfo.instrStr = "Prologue";

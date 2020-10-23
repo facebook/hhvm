@@ -19,6 +19,7 @@
 #include <folly/dynamic.h>
 #include <folly/json.h>
 
+#include <iomanip>
 #include <iostream>
 #include <sstream>
 #include <vector>
@@ -232,19 +233,18 @@ dynamic getIRInstruction(const IRInstruction& inst,
   dynamic markerObj = dynamic::object;
   std::ostringstream mStr;
   std::ostringstream funcStr;
-  auto const& newMarker = inst.marker();
-  if (!newMarker.hasFunc()) {
+  auto const sk = inst.marker().sk();
+  if (!sk.valid()) {
     markerObj = dynamic(nullptr);
   } else {
-    auto func = newMarker.func();
-    func->prettyPrint(mStr, Func::PrintOpts().noBytecode());
+    sk.func()->prettyPrint(mStr, Func::PrintOpts().noBytecode());
     mStr << std::string(kIndent, ' ')
-         << newMarker.show()
-         << '\n';
-
-    auto const bcOffset = newMarker.bcOff();
+         << inst.marker().show()
+         << std::endl
+         << std::string(kIndent, ' ')
+         << sk.showInst()
+         << std::endl;
     // TODO(T46690139)
-    func->prettyPrintInstruction(mStr, bcOffset);
     std::vector<std::string> vec;
     folly::split('\n', mStr.str(), vec);
     for (auto const& s : vec) {
@@ -279,16 +279,14 @@ dynamic getIRInstruction(const IRInstruction& inst,
   const Block* taken = inst.taken();
   const dynamic takenObj = taken ? getLabel(taken) : dynamic(nullptr);
 
-  auto const offset = inst.marker().bcOff() + inst.iroff();
-  auto const startLine = inst.marker().sk().lineNumber();
-
   result.update(dynamic::merge(getOpcode(&inst, guards),
                                dynamic::object("id", id)
                                               ("taken", takenObj)
                                               ("srcs", getSrcs(&inst))
                                               ("dsts", getDsts(&inst))
-                                              ("offset", offset)
-                                              ("startLine", startLine)));
+                                              ("offset", sk.printableOffset())
+                                              ("iroff", inst.iroff())
+                                              ("startLine", sk.lineNumber())));
   return result;
 }
 
@@ -457,7 +455,7 @@ dynamic getSrcKey(const SrcKey& sk) {
   return dynamic::object("func", sk.func()->name()->slice())
                         ("unit", unit->origFilepath()->slice())
                         ("prologue", sk.prologue())
-                        ("offset", sk.offset())
+                        ("offset", sk.printableOffset())
                         ("resumeMode", resumeModeShortName(sk.resumeMode()))
                         ("hasThis", sk.hasThis())
                         ("startLine", sk.lineNumber());
@@ -711,7 +709,7 @@ void printIRInstruction(std::ostream& os,
          << std::string(kIndent, ' ')
          << "--- invalid marker"
          << color(ANSI_COLOR_END)
-         << '\n';
+         << std::endl;
     } else {
       auto func = newMarker.func();
       if (!curMarker.hasFunc() || func != curMarker.func()) {
@@ -719,10 +717,11 @@ void printIRInstruction(std::ostream& os,
       }
       mStr << std::string(kIndent, ' ')
            << newMarker.show()
-           << '\n';
+           << std::endl
+           << std::string(kIndent, ' ')
+           << newMarker.sk().showInst()
+           << std::endl;
 
-      auto bcOffset = newMarker.bcOff();
-      func->prettyPrintInstruction(mStr, bcOffset);
       std::vector<std::string> vec;
       folly::split('\n', mStr.str(), vec);
       os << markerEndl;

@@ -11,22 +11,23 @@ function test(): void {
 final class Code {
   const type TAst = mixed;
   // Simple literals.
-  public function intLiteral(int $_): this::TAst {
+  public function intLiteral(?ExprPos $_, int $_): this::TAst {
     throw new Exception();
   }
-  public function boolLiteral(bool $_): this::TAst {
+  public function boolLiteral(?ExprPos $_, bool $_): this::TAst {
     throw new Exception();
   }
-  public function stringLiteral(string $_): this::TAst {
+  public function stringLiteral(?ExprPos $_, string $_): this::TAst {
     throw new Exception();
   }
-  public function nullLiteral(): this::TAst {
+  public function nullLiteral(?ExprPos $_): this::TAst {
     throw new Exception();
   }
-  public function localVar(string $_): this::TAst {
+  public function localVar(?ExprPos $_, string $_): this::TAst {
     throw new Exception();
   }
   public function lambdaLiteral(
+    ?ExprPos $_,
     vec<string> $_args,
     vec<this::TAst> $_body,
   ): this::TAst {
@@ -34,28 +35,52 @@ final class Code {
   }
 
   // Operators
-  public function plus(this::TAst $_, this::TAst $_): this::TAst {
+  public function plus(
+    ?ExprPos $_,
+    this::TAst $_,
+    this::TAst $_,
+  ): this::TAst {
     throw new Exception();
   }
-  public function ampamp(this::TAst $_, this::TAst $_): this::TAst {
+  public function ampamp(
+    ?ExprPos $_,
+    this::TAst $_,
+    this::TAst $_,
+  ): this::TAst {
     throw new Exception();
   }
-  public function barbar(this::TAst $_, this::TAst $_): this::TAst {
+  public function barbar(
+    ?ExprPos $_,
+    this::TAst $_,
+    this::TAst $_,
+  ): this::TAst {
     throw new Exception();
   }
-  public function exclamationMark(this::TAst $_): this::TAst {
+  public function exclamationMark(
+    ?ExprPos $_,
+    this::TAst $_,
+  ): this::TAst {
     throw new Exception();
   }
-  public function call(string $_fnName, vec<this::TAst> $_args): this::TAst {
+  public function call(
+    ?ExprPos $_,
+    string $_fnName,
+    vec<this::TAst> $_args,
+  ): this::TAst {
     throw new Exception();
   }
 
-  public function assign(this::TAst $_, this::TAst $_): this::TAst {
+  public function assign(
+    ?ExprPos $_,
+    this::TAst $_,
+    this::TAst $_,
+  ): this::TAst {
     throw new Exception();
   }
 
   // Statements.
   public function ifStatement(
+    ?ExprPos $_,
     this::TAst $_cond,
     vec<this::TAst> $_then_body,
     vec<this::TAst> $_else_body,
@@ -63,15 +88,20 @@ final class Code {
     throw new Exception();
   }
   public function whileStatement(
+    ?ExprPos $_,
     this::TAst $_cond,
     vec<this::TAst> $_body,
   ): this::TAst {
     throw new Exception();
   }
-  public function returnStatement(?this::TAst $_): this::TAst {
+  public function returnStatement(
+    ?ExprPos $_,
+    ?this::TAst $_,
+  ): this::TAst {
     throw new Exception();
   }
   public function forStatement(
+    ?ExprPos $_,
     vec<this::TAst> $_,
     this::TAst $_,
     vec<this::TAst> $_,
@@ -79,15 +109,18 @@ final class Code {
   ): this::TAst {
     throw new Exception();
   }
-  public function breakStatement(): this::TAst {
+  public function breakStatement(?ExprPos $_): this::TAst {
     throw new Exception();
   }
-  public function continueStatement(): this::TAst {
+  public function continueStatement(?ExprPos $_,): this::TAst {
     throw new Exception();
   }
 
   // Splice
-  public function splice<T>(ExprTree<this, this::TAst, T> $_): this::TAst {
+  public function splice<T>(
+    ?ExprPos $_,
+    ExprTree<this, this::TAst, T> $_,
+  ): this::TAst {
     throw new Exception();
   }
 
@@ -99,8 +132,18 @@ final class Code {
 
 final class ExprTree<TVisitor, TResult, TInfer>{
   public function __construct(
+    private ?ExprPos $pos,
     private (function(TVisitor): TResult) $x,
     private (function(): TInfer) $err,
+  ) {}
+}
+
+final class ExprPos {
+  public function __construct(
+    private int $begin_line,
+    private int $begin_col,
+    private int $end_line,
+    private int $end_col,
   ) {}
 }
 //// END DEFS

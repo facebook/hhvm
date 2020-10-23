@@ -23,4 +23,3 @@ module Funs = Decl_heap.Funs
 module Typedefs = Decl_heap.Typedefs
 module GConsts = Decl_heap.GConsts
 module RecordDefs = Decl_heap.RecordDefs
-module Classes = Typing_classes_heap.Classes

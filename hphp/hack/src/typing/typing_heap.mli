@@ -23,10 +23,6 @@ end
 
 module Funs : ReadOnly with type key = StringKey.t and type t = fun_elt
 
-module Classes : sig
-  include module type of Typing_classes_heap.Classes
-end
-
 module Typedefs : ReadOnly with type key = StringKey.t and type t = typedef_type
 
 module RecordDefs :

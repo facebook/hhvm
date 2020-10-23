@@ -11,19 +11,18 @@ open Typing_defs
 
 (* This entire file is "private". Its sole consumer is Decl_provider.ml. *)
 
-module Classes : sig
-  type key = StringKey.t
+type class_t
 
-  type t
-
-  val get : Provider_context.t -> Decl_counters.decl option -> key -> t option
-
-  val get_no_local_cache :
-    Provider_context.t -> Decl_counters.decl option -> key -> t option
-end
+val get : Provider_context.t -> string -> class_t option
 
 module Api : sig
-  type t = Classes.t
+  (** This type "t" is what all APIs operate upon. It includes
+  a "decl option". This provides context about how the specified
+  class_t was fetched in the first place. It's used solely for telemetry,
+  so that telemetry about APIs can be easily correlated with telemetry
+  to the original call to the [get] which fetched the class_t in the
+  first place. *)
+  type t = Decl_counters.decl option * class_t
 
   val need_init : t -> bool
 

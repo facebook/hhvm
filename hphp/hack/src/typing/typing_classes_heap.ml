@@ -25,11 +25,24 @@ type lazy_class_type = {
   all_requirements: (Pos.t * decl_ty) Sequence.t;
 }
 
-type class_type_variant =
+(** class_t:
+This type is an abstraction layer over shallow vs folded decl,
+and provides a view of classes which includes all
+inherited members and their types.
+
+In legacy folded decl, that view is constructed by merging a single
+heap entry for the folded class with many entries for the types
+of each of its members (those member entries are looked up lazily,
+as needed).
+
+In shallow decl, that view is constructed even more lazily,
+by iterating over the shallow representation of the class
+and its ancestors one at a time. *)
+type class_t =
   | Lazy of lazy_class_type
   | Eager of class_type
 
-let make_lazy_class_type ctx decl_counter class_name =
+let make_lazy_class_type ctx class_name =
   match Shallow_classes_provider.get ctx class_name with
   | None -> None
   | Some sc ->
@@ -46,21 +59,20 @@ let make_lazy_class_type ctx decl_counter class_name =
     let get_ancestor = LSTable.get ancestors in
     let inherited_members = Decl_inheritance.make ctx class_name get_ancestor in
     Some
-      ( decl_counter,
-        Lazy
-          {
-            sc;
-            ih = inherited_members;
-            ancestors;
-            parents_and_traits;
-            members_fully_known;
-            req_ancestor_names;
-            all_requirements;
-          } )
+      (Lazy
+         {
+           sc;
+           ih = inherited_members;
+           ancestors;
+           parents_and_traits;
+           members_fully_known;
+           req_ancestor_names;
+           all_requirements;
+         })
 
-let make_eager_class_type ctx decl_counter class_name =
+let make_eager_class_type ctx class_name =
   match Decl_heap.Classes.get class_name with
-  | Some decl -> Some (decl_counter, Eager (Decl_class.to_class_type decl))
+  | Some decl -> Some (Eager (Decl_class.to_class_type decl))
   | None ->
     begin
       match Naming_provider.get_type_path_and_kind ctx class_name with
@@ -78,82 +90,23 @@ let make_eager_class_type ctx decl_counter class_name =
               Decl.declare_class_in_file ~sh:SharedMem.Uses ctx file class_name)
         in
         Deferred_decl.increment_counter ();
-        Some
-          ( decl_counter,
-            Eager (Decl_class.to_class_type (Option.value_exn decl)) )
+        Some (Eager (Decl_class.to_class_type (Option.value_exn decl)))
     end
 
-module Classes = struct
-  (** This module is an abstraction layer over shallow vs folded decl,
-      and provides a view of classes which includes all
-      inherited members and their types.
-
-      In legacy folded decl, that view is constructed by merging a single
-      heap entry for the folded class with many entries for the types
-      of each of its members (those member entries are looked up lazily,
-      as needed).
-
-      In shallow decl, that view is constructed even more lazily,
-      by iterating over the shallow representation of the class
-      and its ancestors one at a time. *)
-
-  (** This cache caches the result of full class computations
-      (the class merged with all its inherited members.)  *)
-  module Cache =
-    SharedMem.LocalCache
-      (StringKey)
-      (struct
-        type t = class_type_variant
-
-        let prefix = Prefix.make ()
-
-        let description = "Decl_Typing_ClassType"
-      end)
-      (struct
-        let capacity = 1000
-      end)
-
-  type key = StringKey.t
-
-  (** This type "t" what all subdecl accessors operate upon, e.g. "get method foo
-  of the specified class_type_variant" or "get all smethods of the specified
-  class_type_variant". We also pass in a "decl option". This provides context
-  about how the specified class_type_variant was fetched in the first place.
-  It's used solely for telemetry, so that telemetry about subdecl accessors
-  can be easily correlated with how the original class_type_variant was fetched. *)
-  type t = Decl_counters.decl option * class_type_variant
-
-  let get_no_local_cache
-      (ctx : Provider_context.t)
-      (decl_counter : Decl_counters.decl option)
-      (class_name : string) :
-      (Decl_counters.decl option * class_type_variant) option =
-    (* Fetches either the [Lazy] class (if shallow decls are enabled)
+let get (ctx : Provider_context.t) (class_name : string) : class_t option =
+  (* Fetches either the [Lazy] class (if shallow decls are enabled)
     or the [Eager] class (otherwise).
     Note: Eager will always read+write to shmem Decl_heaps.
     Lazy will solely go through the ctx provider. *)
-    try
-      if TypecheckerOptions.shallow_class_decl (Provider_context.get_tcopt ctx)
-      then
-        make_lazy_class_type ctx decl_counter class_name
-      else
-        make_eager_class_type ctx decl_counter class_name
-    with Deferred_decl.Defer d ->
-      Deferred_decl.add_deferment ~d;
-      None
-
-  let get ctx decl_counter class_name =
-    match Cache.get class_name with
-    | Some t -> Some (decl_counter, t)
-    | None ->
-      begin
-        match get_no_local_cache ctx decl_counter class_name with
-        | None -> None
-        | Some (decl_counter, class_type_variant) ->
-          Cache.add class_name class_type_variant;
-          Some (decl_counter, class_type_variant)
-      end
-end
+  try
+    if TypecheckerOptions.shallow_class_decl (Provider_context.get_tcopt ctx)
+    then
+      make_lazy_class_type ctx class_name
+    else
+      make_eager_class_type ctx class_name
+  with Deferred_decl.Defer d ->
+    Deferred_decl.add_deferment ~d;
+    None
 
 module ApiShallow = struct
   let shallow_decl (decl, t) =
@@ -564,7 +517,7 @@ module ApiEager = struct
 end
 
 module Api = struct
-  type t = Decl_counters.decl option * class_type_variant
+  type t = Decl_counters.decl option * class_t
 
   include ApiShallow
   include ApiLazy

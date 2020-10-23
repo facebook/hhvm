@@ -29,6 +29,22 @@ type typedef_decl = Typing_defs.typedef_type
 
 type gconst_decl = Typing_defs.decl_ty
 
+(** This cache caches the result of full class computations
+      (the class merged with all its inherited members.)  *)
+module Cache =
+  SharedMem.LocalCache
+    (StringKey)
+    (struct
+      type t = Typing_classes_heap.class_t
+
+      let prefix = Prefix.make ()
+
+      let description = "Decl_Typing_ClassType"
+    end)
+    (struct
+      let capacity = 1000
+    end)
+
 let prepare_for_typecheck
     (ctx : Provider_context.t) (path : Relative_path.t) (content : string) :
     unit =
@@ -85,30 +101,53 @@ let get_class (ctx : Provider_context.t) (class_name : class_key) :
     class_decl option =
   Counters.count Counters.Category.Decling @@ fun () ->
   Decl_counters.count_decl Decl_counters.Class class_name @@ fun counter ->
+  (* There's a confusing matrix of possibilities:
+  SHALLOW - in this case, the Typing_classes_heap.class_t we get back is
+    just a small shim that does memoization; further accessors on it
+    like "get_method" will lazily call Linearization_provider and Shallow_classes_provider
+    to get more information
+  EAGER - in this case, the Typing_classes_heap.class_t we get back is
+    an "folded" object which keeps an intire index of all members, although
+    those members are fetched lazily via Lazy.t.
+
+  and
+
+  LOCAL BACKEND - the class_t is cached in the local backend.
+  SHAREDMEM BACKEND - the class_t is cached in the worker-local 'Cache' heap.
+    Note that in the case of eager, the class_t is really just a fairly simple
+    derivation of the decl_class_type that lives in shmem.
+  DECL BACKEND - the class_t is cached in the worker-local 'Cache' heap *)
   match Provider_context.get_backend ctx with
-  | Provider_backend.Shared_memory ->
-    Typing_classes_heap.Classes.get ctx counter class_name
+  | Provider_backend.Shared_memory
+  | Provider_backend.Decl_service _ ->
+    begin
+      match Cache.get class_name with
+      | Some t -> Some (counter, t)
+      | None ->
+        begin
+          match Typing_classes_heap.get ctx class_name with
+          | None -> None
+          | Some v ->
+            Cache.add class_name v;
+            Some (counter, v)
+        end
+    end
   | Provider_backend.Local_memory { Provider_backend.decl_cache; _ } ->
     let result : Obj.t option =
       Provider_backend.Decl_cache.find_or_add
         decl_cache
         ~key:(Provider_backend.Decl_cache_entry.Class_decl class_name)
         ~default:(fun () ->
-          let result : class_decl option =
-            Typing_classes_heap.Classes.get_no_local_cache
-              ctx
-              counter
-              class_name
+          let v : Typing_classes_heap.class_t option =
+            Typing_classes_heap.get ctx class_name
           in
-          Option.map result ~f:Obj.repr)
+          Option.map v ~f:Obj.repr)
     in
-    let result : class_decl option = Option.map result ~f:Obj.obj in
-    result
-  | Provider_backend.Decl_service _ ->
-    (* The decl service caches shallow decls, so we communicate with it in
-       Shallow_classes_provider. Typing_lazy_heap lazily folds shallow decls to
-       provide a folded-decl API.  *)
-    Typing_classes_heap.Classes.get ctx counter class_name
+    (match result with
+    | None -> None
+    | Some obj ->
+      let v : Typing_classes_heap.class_t = Obj.obj obj in
+      Some (counter, v))
 
 let get_typedef (ctx : Provider_context.t) (typedef_name : string) :
     typedef_decl option =

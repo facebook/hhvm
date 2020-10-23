@@ -49,6 +49,14 @@ class DateTime2 implements DateTimeInterface {
   function getOffset() {}
 }
 
+function foo(): void {}
+function rfoo<reify T>(): void {}
+
+class Bar {
+  public static function foo(): void {}
+  public static function rfoo<reify T>(): void {}
+}
+
 function test_pair($k1, $v1, $k2, $v2) {
   echo "$k1 cmp $k2:\n";
   try {
@@ -150,6 +158,11 @@ function main(): void {
 
   $clo1 = function () { return 0; };
   $clo2 = function () { return 0; };
+
+  $fp = foo<>;
+  $rfp = rfoo<int>;
+  $clsmeth = Bar::foo<>;
+  $rclsmeth = Bar::rfoo<int>;
 
   $arr1 = varray[];
   $arr2 = varray[99];
@@ -276,6 +289,9 @@ function main(): void {
                'closure clo1' => $clo1, 'closure clo2' => $clo2,
 
                'resource f1' => $f1, 'resource f2' => $f2, 'resource f3' => $f3,
+
+               'func_ptr' => $fp, 'rfunc_ptr' => $rfp,
+               'clsmeth' => $clsmeth, 'rclsmeth' => $rclsmeth,
               ];
 
   echo "same    nsame   lt      lte     eq      neq     gte     gt      cmp\n\n";

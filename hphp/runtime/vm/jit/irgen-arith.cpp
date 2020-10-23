@@ -591,6 +591,12 @@ void implNullCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
       raiseClsMethCompareWarningHelper(env, op);
       push(env, emitConstCmp(env, op, false, true));
     }
+  } else if (rightTy <= TFunc) {
+    push(env, emitMixedFuncCmp(env, op));
+  } else if (rightTy <= TRFunc) {
+    PUNT(RFunc-cmp);
+  } else if (rightTy <= TRClsMeth) {
+    PUNT(RClsMeth-cmp);
   } else {
     // Otherwise, convert both sides to booleans (with null becoming false).
     push(env,
@@ -623,6 +629,10 @@ void implBoolCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
     }
   } else if (rightTy <= TFunc) {
     push(env, emitMixedFuncCmp(env, op));
+  } else if (rightTy <= TRFunc) {
+    PUNT(RFunc-cmp);
+  } else if (rightTy <= TRClsMeth) {
+    PUNT(RClsMeth-cmp);
   } else {
     // Convert whatever is on the right to a boolean and compare. The conversion
     // may be a no-op if the right operand is already a bool.
@@ -702,6 +712,10 @@ void implIntCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
     }
   } else if (rightTy <= TFunc) {
     push(env, emitMixedFuncCmp(env, op));
+  } else if (rightTy <= TRFunc) {
+    PUNT(RFunc-cmp);
+  } else if (rightTy <= TRClsMeth) {
+    PUNT(RClsMeth-cmp);
   } else {
     // For everything else, convert to an int. The conversion may be a no-op if
     // the right operand is already an int.
@@ -763,6 +777,10 @@ void implDblCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
     }
   } else if (rightTy <= TFunc) {
     push(env, emitMixedFuncCmp(env, op));
+  } else if (rightTy <= TRFunc) {
+    PUNT(RFunc-cmp);
+  } else if (rightTy <= TRClsMeth) {
+    PUNT(RClsMeth-cmp);
   } else {
     // For everything else, convert to a double. The conversion may be a no-op
     // if the right operand is already a double.
@@ -901,6 +919,10 @@ void implVecCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
     }
   } else if (rightTy <= TFunc) {
     push(env, emitMixedFuncCmp(env, op));
+  } else if (rightTy <= TRFunc) {
+    PUNT(RFunc-cmp);
+  } else if (rightTy <= TRClsMeth) {
+    PUNT(RClsMeth-cmp);
   } else {
     push(env, emitMixedVecCmp(env, op));
   }
@@ -928,6 +950,10 @@ void implDictCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
     }
   } else if (rightTy <= TFunc) {
     push(env, emitMixedFuncCmp(env, op));
+  } else if (rightTy <= TRFunc) {
+    PUNT(RFunc-cmp);
+  } else if (rightTy <= TRClsMeth) {
+    PUNT(RClsMeth-cmp);
   } else {
     push(env, emitMixedDictCmp(env, op));
   }
@@ -955,6 +981,10 @@ void implKeysetCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
     }
   } else if (rightTy <= TFunc) {
     push(env, emitMixedFuncCmp(env, op));
+  } else if (rightTy <= TRFunc) {
+    PUNT(RFunc-cmp);
+  } else if (rightTy <= TRClsMeth) {
+    PUNT(RClsMeth-cmp);
   } else {
     push(env, emitMixedKeysetCmp(env, op));
   }
@@ -1042,6 +1072,10 @@ void implStrCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
     push(env, emitMixedKeysetCmp(env, op));
   } else if (rightTy <= TFunc) {
     push(env, emitMixedFuncCmp(env, op));
+  } else if (rightTy <= TRFunc) {
+    PUNT(RFunc-cmp);
+  } else if (rightTy <= TRClsMeth) {
+    PUNT(RClsMeth-cmp);
   } else if (rightTy <= TClsMeth) {
     if (RuntimeOption::EvalHackArrDVArrs) {
       push(env, emitMixedClsMethCmp(env, op));
@@ -1123,6 +1157,10 @@ void implObjCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
     );
   } else if (rightTy <= TFunc) {
     push(env, emitMixedFuncCmp(env, op));
+  } else if (rightTy <= TRFunc) {
+    PUNT(RFunc-cmp);
+  } else if (rightTy <= TRClsMeth) {
+    PUNT(RClsMeth-cmp);
   } else if (rightTy <= TCls) {
     if (RuntimeOption::EvalRaiseClassConversionWarning) {
       gen(env, RaiseWarning, cns(env, s_clsToStringWarning.get()));
@@ -1222,6 +1260,12 @@ void implResCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
     push(env, emitMixedDictCmp(env, op));
   } else if (rightTy <= TKeyset) {
     push(env, emitMixedKeysetCmp(env, op));
+  } else if (rightTy <= TFunc) {
+    push(env, emitMixedFuncCmp(env, op));
+  } else if (rightTy <= TRFunc) {
+    PUNT(RFunc-cmp);
+  } else if (rightTy <= TRClsMeth) {
+    PUNT(RClsMeth-cmp);
   } else if (rightTy <= TClsMeth) {
     if (RuntimeOption::EvalHackArrDVArrs) {
       push(env, emitMixedClsMethCmp(env, op));
@@ -1259,6 +1303,10 @@ void implFunCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
     push(env, emitMixedKeysetCmp(env, op));
   } else if (rightTy <= TClsMeth && RuntimeOption::EvalHackArrDVArrs) {
     push(env, emitMixedClsMethCmp(env, op));
+  } else if (rightTy <= TRFunc) {
+    PUNT(RFunc-cmp);
+  } else if (rightTy <= TRClsMeth) {
+    PUNT(RClsMeth-cmp);
   } else {
     push(env, emitMixedFuncCmp(env, op));
   }

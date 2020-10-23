@@ -240,6 +240,14 @@ null cmp resource f2:
 F       T       T       T       F       T       F       F       -1
 null cmp resource f3:
 F       T       T       T       F       T       F       F       -1
+null cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+null cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+null cmp clsmeth:
+F       T       T       T       F       T       F       F       -1
+null cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 false cmp null:
 F       T       F       T       T       F       T       F       0
 false cmp false:
@@ -480,6 +488,14 @@ false cmp resource f2:
 F       T       T       T       F       T       F       F       -1
 false cmp resource f3:
 F       T       T       T       F       T       F       F       -1
+false cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+false cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+false cmp clsmeth:
+F       T       T       T       F       T       F       F       -1
+false cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 true cmp null:
 F       T       F       F       F       T       T       T       1
 true cmp false:
@@ -720,6 +736,14 @@ true cmp resource f2:
 F       T       F       T       T       F       T       F       0
 true cmp resource f3:
 F       T       F       T       T       F       T       F       0
+true cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+true cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+true cmp clsmeth:
+F       T       F       T       T       F       T       F       0
+true cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 int 0 cmp null:
 F       T       F       T       T       F       T       F       0
 int 0 cmp false:
@@ -960,6 +984,14 @@ int 0 cmp resource f2:
 F       T       T       T       F       T       F       F       -1
 int 0 cmp resource f3:
 F       T       T       T       F       T       F       F       -1
+int 0 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+int 0 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+int 0 cmp clsmeth:
+F       T       T       T       F       T       F       F       -1
+int 0 cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 int 99 cmp null:
 F       T       F       F       F       T       T       T       1
 int 99 cmp false:
@@ -1200,6 +1232,14 @@ int 99 cmp resource f2:
 F       T       F       F       F       T       T       T       1
 int 99 cmp resource f3:
 F       T       F       F       F       T       T       T       1
+int 99 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+int 99 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+int 99 cmp clsmeth:
+F       T       T       T       F       T       F       F       -1
+int 99 cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 int -1 cmp null:
 F       T       F       F       F       T       T       T       1
 int -1 cmp false:
@@ -1440,6 +1480,14 @@ int -1 cmp resource f2:
 F       T       T       T       F       T       F       F       -1
 int -1 cmp resource f3:
 F       T       T       T       F       T       F       F       -1
+int -1 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+int -1 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+int -1 cmp clsmeth:
+F       T       T       T       F       T       F       F       -1
+int -1 cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 float 0 cmp null:
 F       T       F       T       T       F       T       F       0
 float 0 cmp false:
@@ -1680,6 +1728,14 @@ float 0 cmp resource f2:
 F       T       T       T       F       T       F       F       -1
 float 0 cmp resource f3:
 F       T       T       T       F       T       F       F       -1
+float 0 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+float 0 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+float 0 cmp clsmeth:
+F       T       T       T       F       T       F       F       -1
+float 0 cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 double 99 cmp null:
 F       T       F       F       F       T       T       T       1
 double 99 cmp false:
@@ -1920,6 +1976,14 @@ double 99 cmp resource f2:
 F       T       F       F       F       T       T       T       1
 double 99 cmp resource f3:
 F       T       F       F       F       T       T       T       1
+double 99 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+double 99 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+double 99 cmp clsmeth:
+F       T       T       T       F       T       F       F       -1
+double 99 cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 float 99 cmp null:
 F       T       F       F       F       T       T       T       1
 float 99 cmp false:
@@ -2160,6 +2224,14 @@ float 99 cmp resource f2:
 F       T       F       F       F       T       T       T       1
 float 99 cmp resource f3:
 F       T       F       F       F       T       T       T       1
+float 99 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+float 99 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+float 99 cmp clsmeth:
+F       T       T       T       F       T       F       F       -1
+float 99 cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 float -1 cmp null:
 F       T       F       F       F       T       T       T       1
 float -1 cmp false:
@@ -2400,6 +2472,14 @@ float -1 cmp resource f2:
 F       T       T       T       F       T       F       F       -1
 float -1 cmp resource f3:
 F       T       T       T       F       T       F       F       -1
+float -1 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+float -1 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+float -1 cmp clsmeth:
+F       T       T       T       F       T       F       F       -1
+float -1 cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 INF cmp null:
 F       T       F       F       F       T       T       T       1
 INF cmp false:
@@ -2640,6 +2720,14 @@ INF cmp resource f2:
 F       T       F       F       F       T       T       T       1
 INF cmp resource f3:
 F       T       F       F       F       T       T       T       1
+INF cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+INF cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+INF cmp clsmeth:
+F       T       T       T       F       T       F       F       -1
+INF cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 -INF cmp null:
 F       T       F       F       F       T       T       T       1
 -INF cmp false:
@@ -2880,6 +2968,14 @@ F       T       T       T       F       T       F       F       -1
 F       T       T       T       F       T       F       F       -1
 -INF cmp resource f3:
 F       T       T       T       F       T       F       F       -1
+-INF cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+-INF cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+-INF cmp clsmeth:
+F       T       T       T       F       T       F       F       -1
+-INF cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 NAN cmp null:
 F       T       F       F       F       T       T       T       1
 NAN cmp false:
@@ -3120,6 +3216,14 @@ NAN cmp resource f2:
 F       T       F       F       F       T       F       F       -1
 NAN cmp resource f3:
 F       T       F       F       F       T       F       F       -1
+NAN cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+NAN cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+NAN cmp clsmeth:
+F       T       T       T       F       T       F       F       -1
+NAN cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 "" cmp null:
 F       T       F       T       T       F       T       F       0
 "" cmp false:
@@ -3360,6 +3464,14 @@ F       T       T       T       F       T       F       F       -1
 F       T       T       T       F       T       F       F       -1
 "" cmp resource f3:
 F       T       T       T       F       T       F       F       -1
+"" cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+"" cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+"" cmp clsmeth:
+F       T       T       T       F       T       F       F       -1
+"" cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 "0" cmp null:
 F       T       F       F       F       T       T       T       1
 "0" cmp false:
@@ -3600,6 +3712,14 @@ F       T       T       T       F       T       F       F       -1
 F       T       T       T       F       T       F       F       -1
 "0" cmp resource f3:
 F       T       T       T       F       T       F       F       -1
+"0" cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+"0" cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+"0" cmp clsmeth:
+F       T       T       T       F       T       F       F       -1
+"0" cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 "99" cmp null:
 F       T       F       F       F       T       T       T       1
 "99" cmp false:
@@ -3840,6 +3960,14 @@ F       T       F       F       F       T       T       T       1
 F       T       F       F       F       T       T       T       1
 "99" cmp resource f3:
 F       T       F       F       F       T       T       T       1
+"99" cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+"99" cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+"99" cmp clsmeth:
+F       T       T       T       F       T       F       F       -1
+"99" cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 "-1" cmp null:
 F       T       F       F       F       T       T       T       1
 "-1" cmp false:
@@ -4080,6 +4208,14 @@ F       T       T       T       F       T       F       F       -1
 F       T       T       T       F       T       F       F       -1
 "-1" cmp resource f3:
 F       T       T       T       F       T       F       F       -1
+"-1" cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+"-1" cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+"-1" cmp clsmeth:
+F       T       T       T       F       T       F       F       -1
+"-1" cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 "0.0" cmp null:
 F       T       F       F       F       T       T       T       1
 "0.0" cmp false:
@@ -4320,6 +4456,14 @@ F       T       T       T       F       T       F       F       -1
 F       T       T       T       F       T       F       F       -1
 "0.0" cmp resource f3:
 F       T       T       T       F       T       F       F       -1
+"0.0" cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+"0.0" cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+"0.0" cmp clsmeth:
+F       T       T       T       F       T       F       F       -1
+"0.0" cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 "99.0" cmp null:
 F       T       F       F       F       T       T       T       1
 "99.0" cmp false:
@@ -4560,6 +4704,14 @@ F       T       F       F       F       T       T       T       1
 F       T       F       F       F       T       T       T       1
 "99.0" cmp resource f3:
 F       T       F       F       F       T       T       T       1
+"99.0" cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+"99.0" cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+"99.0" cmp clsmeth:
+F       T       T       T       F       T       F       F       -1
+"99.0" cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 "-1.0" cmp null:
 F       T       F       F       F       T       T       T       1
 "-1.0" cmp false:
@@ -4800,6 +4952,14 @@ F       T       T       T       F       T       F       F       -1
 F       T       T       T       F       T       F       F       -1
 "-1.0" cmp resource f3:
 F       T       T       T       F       T       F       F       -1
+"-1.0" cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+"-1.0" cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+"-1.0" cmp clsmeth:
+F       T       T       T       F       T       F       F       -1
+"-1.0" cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 "foo" cmp null:
 F       T       F       F       F       T       T       T       1
 "foo" cmp false:
@@ -5040,6 +5200,14 @@ F       T       T       T       F       T       F       F       -1
 F       T       T       T       F       T       F       F       -1
 "foo" cmp resource f3:
 F       T       T       T       F       T       F       F       -1
+"foo" cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+"foo" cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+"foo" cmp clsmeth:
+F       T       T       T       F       T       F       F       -1
+"foo" cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 "BAZ" cmp null:
 F       T       F       F       F       T       T       T       1
 "BAZ" cmp false:
@@ -5280,6 +5448,14 @@ F       T       T       T       F       T       F       F       -1
 F       T       T       T       F       T       F       F       -1
 "BAZ" cmp resource f3:
 F       T       T       T       F       T       F       F       -1
+"BAZ" cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+"BAZ" cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+"BAZ" cmp clsmeth:
+F       T       T       T       F       T       F       F       -1
+"BAZ" cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 array arr1 cmp null:
 F       T       Err     Err     T       F       Err     Err     Err
 array arr1 cmp false:
@@ -5519,6 +5695,14 @@ F       T       Err     Err     F       T       Err     Err     Err
 array arr1 cmp resource f2:
 F       T       Err     Err     F       T       Err     Err     Err
 array arr1 cmp resource f3:
+F       T       Err     Err     F       T       Err     Err     Err
+array arr1 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+array arr1 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+array arr1 cmp clsmeth:
+F       T       T       T       F       T       F       F       -1
+array arr1 cmp rclsmeth:
 F       T       Err     Err     F       T       Err     Err     Err
 array arr2 cmp null:
 F       T       Err     Err     F       T       Err     Err     Err
@@ -5760,6 +5944,14 @@ array arr2 cmp resource f2:
 F       T       Err     Err     F       T       Err     Err     Err
 array arr2 cmp resource f3:
 F       T       Err     Err     F       T       Err     Err     Err
+array arr2 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+array arr2 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+array arr2 cmp clsmeth:
+F       T       T       T       F       T       F       F       -1
+array arr2 cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 array arr3 cmp null:
 F       T       Err     Err     F       T       Err     Err     Err
 array arr3 cmp false:
@@ -5999,6 +6191,14 @@ F       T       Err     Err     F       T       Err     Err     Err
 array arr3 cmp resource f2:
 F       T       Err     Err     F       T       Err     Err     Err
 array arr3 cmp resource f3:
+F       T       Err     Err     F       T       Err     Err     Err
+array arr3 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+array arr3 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+array arr3 cmp clsmeth:
+F       T       T       T       F       T       F       F       -1
+array arr3 cmp rclsmeth:
 F       T       Err     Err     F       T       Err     Err     Err
 array arr4 cmp null:
 F       T       Err     Err     F       T       Err     Err     Err
@@ -6240,6 +6440,14 @@ array arr4 cmp resource f2:
 F       T       Err     Err     F       T       Err     Err     Err
 array arr4 cmp resource f3:
 F       T       Err     Err     F       T       Err     Err     Err
+array arr4 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+array arr4 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+array arr4 cmp clsmeth:
+F       T       F       F       F       T       T       T       1
+array arr4 cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 array arr5 cmp null:
 F       T       Err     Err     F       T       Err     Err     Err
 array arr5 cmp false:
@@ -6479,6 +6687,14 @@ F       T       Err     Err     F       T       Err     Err     Err
 array arr5 cmp resource f2:
 F       T       Err     Err     F       T       Err     Err     Err
 array arr5 cmp resource f3:
+F       T       Err     Err     F       T       Err     Err     Err
+array arr5 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+array arr5 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+array arr5 cmp clsmeth:
+F       T       F       F       F       T       T       T       1
+array arr5 cmp rclsmeth:
 F       T       Err     Err     F       T       Err     Err     Err
 array arr6 cmp null:
 F       T       Err     Err     F       T       Err     Err     Err
@@ -6720,6 +6936,14 @@ array arr6 cmp resource f2:
 F       T       Err     Err     F       T       Err     Err     Err
 array arr6 cmp resource f3:
 F       T       Err     Err     F       T       Err     Err     Err
+array arr6 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+array arr6 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+array arr6 cmp clsmeth:
+F       T       F       F       F       T       T       T       1
+array arr6 cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 array arr7 cmp null:
 F       T       Err     Err     F       T       Err     Err     Err
 array arr7 cmp false:
@@ -6959,6 +7183,14 @@ F       T       Err     Err     F       T       Err     Err     Err
 array arr7 cmp resource f2:
 F       T       Err     Err     F       T       Err     Err     Err
 array arr7 cmp resource f3:
+F       T       Err     Err     F       T       Err     Err     Err
+array arr7 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+array arr7 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+array arr7 cmp clsmeth:
+F       T       F       F       F       T       T       T       1
+array arr7 cmp rclsmeth:
 F       T       Err     Err     F       T       Err     Err     Err
 array arr8 cmp null:
 F       T       Err     Err     F       T       Err     Err     Err
@@ -7200,6 +7432,14 @@ array arr8 cmp resource f2:
 F       T       Err     Err     F       T       Err     Err     Err
 array arr8 cmp resource f3:
 F       T       Err     Err     F       T       Err     Err     Err
+array arr8 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+array arr8 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+array arr8 cmp clsmeth:
+F       T       F       F       F       T       T       T       1
+array arr8 cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 array arr9 cmp null:
 F       T       Err     Err     F       T       Err     Err     Err
 array arr9 cmp false:
@@ -7439,6 +7679,14 @@ F       T       Err     Err     F       T       Err     Err     Err
 array arr9 cmp resource f2:
 F       T       Err     Err     F       T       Err     Err     Err
 array arr9 cmp resource f3:
+F       T       Err     Err     F       T       Err     Err     Err
+array arr9 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+array arr9 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+array arr9 cmp clsmeth:
+F       T       F       F       F       T       T       T       1
+array arr9 cmp rclsmeth:
 F       T       Err     Err     F       T       Err     Err     Err
 array arr10 cmp null:
 F       T       Err     Err     F       T       Err     Err     Err
@@ -7680,6 +7928,14 @@ array arr10 cmp resource f2:
 F       T       Err     Err     F       T       Err     Err     Err
 array arr10 cmp resource f3:
 F       T       Err     Err     F       T       Err     Err     Err
+array arr10 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+array arr10 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+array arr10 cmp clsmeth:
+F       T       F       F       F       T       T       T       1
+array arr10 cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 array arr11 cmp null:
 F       T       Err     Err     F       T       Err     Err     Err
 array arr11 cmp false:
@@ -7919,6 +8175,14 @@ F       T       Err     Err     F       T       Err     Err     Err
 array arr11 cmp resource f2:
 F       T       Err     Err     F       T       Err     Err     Err
 array arr11 cmp resource f3:
+F       T       Err     Err     F       T       Err     Err     Err
+array arr11 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+array arr11 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+array arr11 cmp clsmeth:
+F       T       F       F       F       T       T       T       1
+array arr11 cmp rclsmeth:
 F       T       Err     Err     F       T       Err     Err     Err
 array arr12 cmp null:
 F       T       Err     Err     F       T       Err     Err     Err
@@ -8160,6 +8424,14 @@ array arr12 cmp resource f2:
 F       T       Err     Err     F       T       Err     Err     Err
 array arr12 cmp resource f3:
 F       T       Err     Err     F       T       Err     Err     Err
+array arr12 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+array arr12 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+array arr12 cmp clsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
+array arr12 cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 array arr13 cmp null:
 F       T       Err     Err     F       T       Err     Err     Err
 array arr13 cmp false:
@@ -8399,6 +8671,14 @@ F       T       Err     Err     F       T       Err     Err     Err
 array arr13 cmp resource f2:
 F       T       Err     Err     F       T       Err     Err     Err
 array arr13 cmp resource f3:
+F       T       Err     Err     F       T       Err     Err     Err
+array arr13 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+array arr13 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+array arr13 cmp clsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
+array arr13 cmp rclsmeth:
 F       T       Err     Err     F       T       Err     Err     Err
 array arr14 cmp null:
 F       T       Err     Err     F       T       Err     Err     Err
@@ -8640,6 +8920,14 @@ array arr14 cmp resource f2:
 F       T       Err     Err     F       T       Err     Err     Err
 array arr14 cmp resource f3:
 F       T       Err     Err     F       T       Err     Err     Err
+array arr14 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+array arr14 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+array arr14 cmp clsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
+array arr14 cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 array arr15 cmp null:
 F       T       Err     Err     F       T       Err     Err     Err
 array arr15 cmp false:
@@ -8879,6 +9167,14 @@ F       T       Err     Err     F       T       Err     Err     Err
 array arr15 cmp resource f2:
 F       T       Err     Err     F       T       Err     Err     Err
 array arr15 cmp resource f3:
+F       T       Err     Err     F       T       Err     Err     Err
+array arr15 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+array arr15 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+array arr15 cmp clsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
+array arr15 cmp rclsmeth:
 F       T       Err     Err     F       T       Err     Err     Err
 array arr16 cmp null:
 F       T       Err     Err     F       T       Err     Err     Err
@@ -9120,6 +9416,14 @@ array arr16 cmp resource f2:
 F       T       Err     Err     F       T       Err     Err     Err
 array arr16 cmp resource f3:
 F       T       Err     Err     F       T       Err     Err     Err
+array arr16 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+array arr16 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+array arr16 cmp clsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
+array arr16 cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 array arr17 cmp null:
 F       T       Err     Err     F       T       Err     Err     Err
 array arr17 cmp false:
@@ -9359,6 +9663,14 @@ F       T       Err     Err     F       T       Err     Err     Err
 array arr17 cmp resource f2:
 F       T       Err     Err     F       T       Err     Err     Err
 array arr17 cmp resource f3:
+F       T       Err     Err     F       T       Err     Err     Err
+array arr17 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+array arr17 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+array arr17 cmp clsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
+array arr17 cmp rclsmeth:
 F       T       Err     Err     F       T       Err     Err     Err
 array arr18 cmp null:
 F       T       Err     Err     F       T       Err     Err     Err
@@ -9600,6 +9912,14 @@ array arr18 cmp resource f2:
 F       T       Err     Err     F       T       Err     Err     Err
 array arr18 cmp resource f3:
 F       T       Err     Err     F       T       Err     Err     Err
+array arr18 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+array arr18 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+array arr18 cmp clsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
+array arr18 cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 array arr19 cmp null:
 F       T       Err     Err     F       T       Err     Err     Err
 array arr19 cmp false:
@@ -9839,6 +10159,14 @@ F       T       Err     Err     F       T       Err     Err     Err
 array arr19 cmp resource f2:
 F       T       Err     Err     F       T       Err     Err     Err
 array arr19 cmp resource f3:
+F       T       Err     Err     F       T       Err     Err     Err
+array arr19 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+array arr19 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+array arr19 cmp clsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
+array arr19 cmp rclsmeth:
 F       T       Err     Err     F       T       Err     Err     Err
 array arr20 cmp null:
 F       T       Err     Err     F       T       Err     Err     Err
@@ -10080,6 +10408,14 @@ array arr20 cmp resource f2:
 F       T       Err     Err     F       T       Err     Err     Err
 array arr20 cmp resource f3:
 F       T       Err     Err     F       T       Err     Err     Err
+array arr20 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+array arr20 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+array arr20 cmp clsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
+array arr20 cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 array arr21 cmp null:
 F       T       Err     Err     F       T       Err     Err     Err
 array arr21 cmp false:
@@ -10319,6 +10655,14 @@ F       T       Err     Err     F       T       Err     Err     Err
 array arr21 cmp resource f2:
 F       T       Err     Err     F       T       Err     Err     Err
 array arr21 cmp resource f3:
+F       T       Err     Err     F       T       Err     Err     Err
+array arr21 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+array arr21 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+array arr21 cmp clsmeth:
+F       T       F       F       F       T       T       T       1
+array arr21 cmp rclsmeth:
 F       T       Err     Err     F       T       Err     Err     Err
 array arr22 cmp null:
 F       T       Err     Err     F       T       Err     Err     Err
@@ -10560,6 +10904,14 @@ array arr22 cmp resource f2:
 F       T       Err     Err     F       T       Err     Err     Err
 array arr22 cmp resource f3:
 F       T       Err     Err     F       T       Err     Err     Err
+array arr22 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+array arr22 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+array arr22 cmp clsmeth:
+F       T       F       F       F       T       T       T       1
+array arr22 cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 vec vec1 cmp null:
 F       T       Err     Err     T       F       Err     Err     Err
 vec vec1 cmp false:
@@ -10799,6 +11151,14 @@ F       T       Err     Err     F       T       Err     Err     Err
 vec vec1 cmp resource f2:
 F       T       Err     Err     F       T       Err     Err     Err
 vec vec1 cmp resource f3:
+F       T       Err     Err     F       T       Err     Err     Err
+vec vec1 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+vec vec1 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+vec vec1 cmp clsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
+vec vec1 cmp rclsmeth:
 F       T       Err     Err     F       T       Err     Err     Err
 vec vec2 cmp null:
 F       T       Err     Err     F       T       Err     Err     Err
@@ -11040,6 +11400,14 @@ vec vec2 cmp resource f2:
 F       T       Err     Err     F       T       Err     Err     Err
 vec vec2 cmp resource f3:
 F       T       Err     Err     F       T       Err     Err     Err
+vec vec2 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+vec vec2 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+vec vec2 cmp clsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
+vec vec2 cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 vec vec3 cmp null:
 F       T       Err     Err     F       T       Err     Err     Err
 vec vec3 cmp false:
@@ -11279,6 +11647,14 @@ F       T       Err     Err     F       T       Err     Err     Err
 vec vec3 cmp resource f2:
 F       T       Err     Err     F       T       Err     Err     Err
 vec vec3 cmp resource f3:
+F       T       Err     Err     F       T       Err     Err     Err
+vec vec3 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+vec vec3 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+vec vec3 cmp clsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
+vec vec3 cmp rclsmeth:
 F       T       Err     Err     F       T       Err     Err     Err
 vec vec4 cmp null:
 F       T       Err     Err     F       T       Err     Err     Err
@@ -11520,6 +11896,14 @@ vec vec4 cmp resource f2:
 F       T       Err     Err     F       T       Err     Err     Err
 vec vec4 cmp resource f3:
 F       T       Err     Err     F       T       Err     Err     Err
+vec vec4 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+vec vec4 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+vec vec4 cmp clsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
+vec vec4 cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 vec vec5 cmp null:
 F       T       Err     Err     F       T       Err     Err     Err
 vec vec5 cmp false:
@@ -11759,6 +12143,14 @@ F       T       Err     Err     F       T       Err     Err     Err
 vec vec5 cmp resource f2:
 F       T       Err     Err     F       T       Err     Err     Err
 vec vec5 cmp resource f3:
+F       T       Err     Err     F       T       Err     Err     Err
+vec vec5 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+vec vec5 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+vec vec5 cmp clsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
+vec vec5 cmp rclsmeth:
 F       T       Err     Err     F       T       Err     Err     Err
 vec vec6 cmp null:
 F       T       Err     Err     F       T       Err     Err     Err
@@ -12000,6 +12392,14 @@ vec vec6 cmp resource f2:
 F       T       Err     Err     F       T       Err     Err     Err
 vec vec6 cmp resource f3:
 F       T       Err     Err     F       T       Err     Err     Err
+vec vec6 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+vec vec6 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+vec vec6 cmp clsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
+vec vec6 cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 vec vec7 cmp null:
 F       T       Err     Err     F       T       Err     Err     Err
 vec vec7 cmp false:
@@ -12239,6 +12639,14 @@ F       T       Err     Err     F       T       Err     Err     Err
 vec vec7 cmp resource f2:
 F       T       Err     Err     F       T       Err     Err     Err
 vec vec7 cmp resource f3:
+F       T       Err     Err     F       T       Err     Err     Err
+vec vec7 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+vec vec7 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+vec vec7 cmp clsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
+vec vec7 cmp rclsmeth:
 F       T       Err     Err     F       T       Err     Err     Err
 vec vec8 cmp null:
 F       T       Err     Err     F       T       Err     Err     Err
@@ -12480,6 +12888,14 @@ vec vec8 cmp resource f2:
 F       T       Err     Err     F       T       Err     Err     Err
 vec vec8 cmp resource f3:
 F       T       Err     Err     F       T       Err     Err     Err
+vec vec8 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+vec vec8 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+vec vec8 cmp clsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
+vec vec8 cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 vec vec9 cmp null:
 F       T       Err     Err     F       T       Err     Err     Err
 vec vec9 cmp false:
@@ -12719,6 +13135,14 @@ F       T       Err     Err     F       T       Err     Err     Err
 vec vec9 cmp resource f2:
 F       T       Err     Err     F       T       Err     Err     Err
 vec vec9 cmp resource f3:
+F       T       Err     Err     F       T       Err     Err     Err
+vec vec9 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+vec vec9 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+vec vec9 cmp clsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
+vec vec9 cmp rclsmeth:
 F       T       Err     Err     F       T       Err     Err     Err
 vec vec10 cmp null:
 F       T       Err     Err     F       T       Err     Err     Err
@@ -12960,6 +13384,14 @@ vec vec10 cmp resource f2:
 F       T       Err     Err     F       T       Err     Err     Err
 vec vec10 cmp resource f3:
 F       T       Err     Err     F       T       Err     Err     Err
+vec vec10 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+vec vec10 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+vec vec10 cmp clsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
+vec vec10 cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 vec vec11 cmp null:
 F       T       Err     Err     F       T       Err     Err     Err
 vec vec11 cmp false:
@@ -13199,6 +13631,14 @@ F       T       Err     Err     F       T       Err     Err     Err
 vec vec11 cmp resource f2:
 F       T       Err     Err     F       T       Err     Err     Err
 vec vec11 cmp resource f3:
+F       T       Err     Err     F       T       Err     Err     Err
+vec vec11 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+vec vec11 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+vec vec11 cmp clsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
+vec vec11 cmp rclsmeth:
 F       T       Err     Err     F       T       Err     Err     Err
 dict dict1 cmp null:
 F       T       Err     Err     T       F       Err     Err     Err
@@ -13440,6 +13880,14 @@ dict dict1 cmp resource f2:
 F       T       Err     Err     F       T       Err     Err     Err
 dict dict1 cmp resource f3:
 F       T       Err     Err     F       T       Err     Err     Err
+dict dict1 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+dict dict1 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+dict dict1 cmp clsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
+dict dict1 cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 dict dict2 cmp null:
 F       T       Err     Err     F       T       Err     Err     Err
 dict dict2 cmp false:
@@ -13679,6 +14127,14 @@ F       T       Err     Err     F       T       Err     Err     Err
 dict dict2 cmp resource f2:
 F       T       Err     Err     F       T       Err     Err     Err
 dict dict2 cmp resource f3:
+F       T       Err     Err     F       T       Err     Err     Err
+dict dict2 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+dict dict2 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+dict dict2 cmp clsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
+dict dict2 cmp rclsmeth:
 F       T       Err     Err     F       T       Err     Err     Err
 dict dict3 cmp null:
 F       T       Err     Err     F       T       Err     Err     Err
@@ -13920,6 +14376,14 @@ dict dict3 cmp resource f2:
 F       T       Err     Err     F       T       Err     Err     Err
 dict dict3 cmp resource f3:
 F       T       Err     Err     F       T       Err     Err     Err
+dict dict3 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+dict dict3 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+dict dict3 cmp clsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
+dict dict3 cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 dict dict4 cmp null:
 F       T       Err     Err     F       T       Err     Err     Err
 dict dict4 cmp false:
@@ -14159,6 +14623,14 @@ F       T       Err     Err     F       T       Err     Err     Err
 dict dict4 cmp resource f2:
 F       T       Err     Err     F       T       Err     Err     Err
 dict dict4 cmp resource f3:
+F       T       Err     Err     F       T       Err     Err     Err
+dict dict4 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+dict dict4 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+dict dict4 cmp clsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
+dict dict4 cmp rclsmeth:
 F       T       Err     Err     F       T       Err     Err     Err
 dict dict5 cmp null:
 F       T       Err     Err     F       T       Err     Err     Err
@@ -14400,6 +14872,14 @@ dict dict5 cmp resource f2:
 F       T       Err     Err     F       T       Err     Err     Err
 dict dict5 cmp resource f3:
 F       T       Err     Err     F       T       Err     Err     Err
+dict dict5 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+dict dict5 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+dict dict5 cmp clsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
+dict dict5 cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 dict dict6 cmp null:
 F       T       Err     Err     F       T       Err     Err     Err
 dict dict6 cmp false:
@@ -14639,6 +15119,14 @@ F       T       Err     Err     F       T       Err     Err     Err
 dict dict6 cmp resource f2:
 F       T       Err     Err     F       T       Err     Err     Err
 dict dict6 cmp resource f3:
+F       T       Err     Err     F       T       Err     Err     Err
+dict dict6 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+dict dict6 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+dict dict6 cmp clsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
+dict dict6 cmp rclsmeth:
 F       T       Err     Err     F       T       Err     Err     Err
 dict dict7 cmp null:
 F       T       Err     Err     F       T       Err     Err     Err
@@ -14880,6 +15368,14 @@ dict dict7 cmp resource f2:
 F       T       Err     Err     F       T       Err     Err     Err
 dict dict7 cmp resource f3:
 F       T       Err     Err     F       T       Err     Err     Err
+dict dict7 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+dict dict7 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+dict dict7 cmp clsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
+dict dict7 cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 dict dict8 cmp null:
 F       T       Err     Err     F       T       Err     Err     Err
 dict dict8 cmp false:
@@ -15119,6 +15615,14 @@ F       T       Err     Err     F       T       Err     Err     Err
 dict dict8 cmp resource f2:
 F       T       Err     Err     F       T       Err     Err     Err
 dict dict8 cmp resource f3:
+F       T       Err     Err     F       T       Err     Err     Err
+dict dict8 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+dict dict8 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+dict dict8 cmp clsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
+dict dict8 cmp rclsmeth:
 F       T       Err     Err     F       T       Err     Err     Err
 dict dict9 cmp null:
 F       T       Err     Err     F       T       Err     Err     Err
@@ -15360,6 +15864,14 @@ dict dict9 cmp resource f2:
 F       T       Err     Err     F       T       Err     Err     Err
 dict dict9 cmp resource f3:
 F       T       Err     Err     F       T       Err     Err     Err
+dict dict9 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+dict dict9 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+dict dict9 cmp clsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
+dict dict9 cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 dict dict10 cmp null:
 F       T       Err     Err     F       T       Err     Err     Err
 dict dict10 cmp false:
@@ -15599,6 +16111,14 @@ F       T       Err     Err     F       T       Err     Err     Err
 dict dict10 cmp resource f2:
 F       T       Err     Err     F       T       Err     Err     Err
 dict dict10 cmp resource f3:
+F       T       Err     Err     F       T       Err     Err     Err
+dict dict10 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+dict dict10 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+dict dict10 cmp clsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
+dict dict10 cmp rclsmeth:
 F       T       Err     Err     F       T       Err     Err     Err
 dict dict11 cmp null:
 F       T       Err     Err     F       T       Err     Err     Err
@@ -15840,6 +16360,14 @@ dict dict11 cmp resource f2:
 F       T       Err     Err     F       T       Err     Err     Err
 dict dict11 cmp resource f3:
 F       T       Err     Err     F       T       Err     Err     Err
+dict dict11 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+dict dict11 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+dict dict11 cmp clsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
+dict dict11 cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 keyset ks1 cmp null:
 F       T       Err     Err     T       F       Err     Err     Err
 keyset ks1 cmp false:
@@ -16079,6 +16607,14 @@ F       T       Err     Err     F       T       Err     Err     Err
 keyset ks1 cmp resource f2:
 F       T       Err     Err     F       T       Err     Err     Err
 keyset ks1 cmp resource f3:
+F       T       Err     Err     F       T       Err     Err     Err
+keyset ks1 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+keyset ks1 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+keyset ks1 cmp clsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
+keyset ks1 cmp rclsmeth:
 F       T       Err     Err     F       T       Err     Err     Err
 keyset ks2 cmp null:
 F       T       Err     Err     F       T       Err     Err     Err
@@ -16320,6 +16856,14 @@ keyset ks2 cmp resource f2:
 F       T       Err     Err     F       T       Err     Err     Err
 keyset ks2 cmp resource f3:
 F       T       Err     Err     F       T       Err     Err     Err
+keyset ks2 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+keyset ks2 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+keyset ks2 cmp clsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
+keyset ks2 cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 keyset ks3 cmp null:
 F       T       Err     Err     F       T       Err     Err     Err
 keyset ks3 cmp false:
@@ -16559,6 +17103,14 @@ F       T       Err     Err     F       T       Err     Err     Err
 keyset ks3 cmp resource f2:
 F       T       Err     Err     F       T       Err     Err     Err
 keyset ks3 cmp resource f3:
+F       T       Err     Err     F       T       Err     Err     Err
+keyset ks3 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+keyset ks3 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+keyset ks3 cmp clsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
+keyset ks3 cmp rclsmeth:
 F       T       Err     Err     F       T       Err     Err     Err
 keyset ks4 cmp null:
 F       T       Err     Err     F       T       Err     Err     Err
@@ -16800,6 +17352,14 @@ keyset ks4 cmp resource f2:
 F       T       Err     Err     F       T       Err     Err     Err
 keyset ks4 cmp resource f3:
 F       T       Err     Err     F       T       Err     Err     Err
+keyset ks4 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+keyset ks4 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+keyset ks4 cmp clsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
+keyset ks4 cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 keyset ks5 cmp null:
 F       T       Err     Err     F       T       Err     Err     Err
 keyset ks5 cmp false:
@@ -17039,6 +17599,14 @@ F       T       Err     Err     F       T       Err     Err     Err
 keyset ks5 cmp resource f2:
 F       T       Err     Err     F       T       Err     Err     Err
 keyset ks5 cmp resource f3:
+F       T       Err     Err     F       T       Err     Err     Err
+keyset ks5 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+keyset ks5 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+keyset ks5 cmp clsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
+keyset ks5 cmp rclsmeth:
 F       T       Err     Err     F       T       Err     Err     Err
 keyset ks6 cmp null:
 F       T       Err     Err     F       T       Err     Err     Err
@@ -17280,6 +17848,14 @@ keyset ks6 cmp resource f2:
 F       T       Err     Err     F       T       Err     Err     Err
 keyset ks6 cmp resource f3:
 F       T       Err     Err     F       T       Err     Err     Err
+keyset ks6 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+keyset ks6 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+keyset ks6 cmp clsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
+keyset ks6 cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 keyset ks7 cmp null:
 F       T       Err     Err     F       T       Err     Err     Err
 keyset ks7 cmp false:
@@ -17519,6 +18095,14 @@ F       T       Err     Err     F       T       Err     Err     Err
 keyset ks7 cmp resource f2:
 F       T       Err     Err     F       T       Err     Err     Err
 keyset ks7 cmp resource f3:
+F       T       Err     Err     F       T       Err     Err     Err
+keyset ks7 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+keyset ks7 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+keyset ks7 cmp clsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
+keyset ks7 cmp rclsmeth:
 F       T       Err     Err     F       T       Err     Err     Err
 keyset ks8 cmp null:
 F       T       Err     Err     F       T       Err     Err     Err
@@ -17760,6 +18344,14 @@ keyset ks8 cmp resource f2:
 F       T       Err     Err     F       T       Err     Err     Err
 keyset ks8 cmp resource f3:
 F       T       Err     Err     F       T       Err     Err     Err
+keyset ks8 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+keyset ks8 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+keyset ks8 cmp clsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
+keyset ks8 cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 keyset ks9 cmp null:
 F       T       Err     Err     F       T       Err     Err     Err
 keyset ks9 cmp false:
@@ -17999,6 +18591,14 @@ F       T       Err     Err     F       T       Err     Err     Err
 keyset ks9 cmp resource f2:
 F       T       Err     Err     F       T       Err     Err     Err
 keyset ks9 cmp resource f3:
+F       T       Err     Err     F       T       Err     Err     Err
+keyset ks9 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+keyset ks9 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+keyset ks9 cmp clsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
+keyset ks9 cmp rclsmeth:
 F       T       Err     Err     F       T       Err     Err     Err
 keyset ks10 cmp null:
 F       T       Err     Err     F       T       Err     Err     Err
@@ -18240,6 +18840,14 @@ keyset ks10 cmp resource f2:
 F       T       Err     Err     F       T       Err     Err     Err
 keyset ks10 cmp resource f3:
 F       T       Err     Err     F       T       Err     Err     Err
+keyset ks10 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+keyset ks10 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+keyset ks10 cmp clsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
+keyset ks10 cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 keyset ks11 cmp null:
 F       T       Err     Err     F       T       Err     Err     Err
 keyset ks11 cmp false:
@@ -18479,6 +19087,14 @@ F       T       Err     Err     F       T       Err     Err     Err
 keyset ks11 cmp resource f2:
 F       T       Err     Err     F       T       Err     Err     Err
 keyset ks11 cmp resource f3:
+F       T       Err     Err     F       T       Err     Err     Err
+keyset ks11 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+keyset ks11 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+keyset ks11 cmp clsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
+keyset ks11 cmp rclsmeth:
 F       T       Err     Err     F       T       Err     Err     Err
 keyset ks12 cmp null:
 F       T       Err     Err     F       T       Err     Err     Err
@@ -18720,6 +19336,14 @@ keyset ks12 cmp resource f2:
 F       T       Err     Err     F       T       Err     Err     Err
 keyset ks12 cmp resource f3:
 F       T       Err     Err     F       T       Err     Err     Err
+keyset ks12 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+keyset ks12 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+keyset ks12 cmp clsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
+keyset ks12 cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 keyset ks13 cmp null:
 F       T       Err     Err     F       T       Err     Err     Err
 keyset ks13 cmp false:
@@ -18959,6 +19583,14 @@ F       T       Err     Err     F       T       Err     Err     Err
 keyset ks13 cmp resource f2:
 F       T       Err     Err     F       T       Err     Err     Err
 keyset ks13 cmp resource f3:
+F       T       Err     Err     F       T       Err     Err     Err
+keyset ks13 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+keyset ks13 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+keyset ks13 cmp clsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
+keyset ks13 cmp rclsmeth:
 F       T       Err     Err     F       T       Err     Err     Err
 object a1 cmp null:
 F       T       F       F       F       T       T       T       1
@@ -19200,6 +19832,14 @@ object a1 cmp resource f2:
 F       T       F       F       F       T       T       T       1
 object a1 cmp resource f3:
 F       T       F       F       F       T       T       T       1
+object a1 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+object a1 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+object a1 cmp clsmeth:
+F       T       F       F       F       T       T       T       1
+object a1 cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 object a2 cmp null:
 F       T       F       F       F       T       T       T       1
 object a2 cmp false:
@@ -19440,6 +20080,14 @@ object a2 cmp resource f2:
 F       T       F       F       F       T       T       T       1
 object a2 cmp resource f3:
 F       T       F       F       F       T       T       T       1
+object a2 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+object a2 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+object a2 cmp clsmeth:
+F       T       F       F       F       T       T       T       1
+object a2 cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 object a3 cmp null:
 F       T       F       F       F       T       T       T       1
 object a3 cmp false:
@@ -19680,6 +20328,14 @@ object a3 cmp resource f2:
 F       T       F       F       F       T       T       T       1
 object a3 cmp resource f3:
 F       T       F       F       F       T       T       T       1
+object a3 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+object a3 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+object a3 cmp clsmeth:
+F       T       F       F       F       T       T       T       1
+object a3 cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 object a4 cmp null:
 F       T       F       F       F       T       T       T       1
 object a4 cmp false:
@@ -19920,6 +20576,14 @@ object a4 cmp resource f2:
 F       T       F       F       F       T       T       T       1
 object a4 cmp resource f3:
 F       T       F       F       F       T       T       T       1
+object a4 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+object a4 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+object a4 cmp clsmeth:
+F       T       F       F       F       T       T       T       1
+object a4 cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 object a5 cmp null:
 F       T       F       F       F       T       T       T       1
 object a5 cmp false:
@@ -20160,6 +20824,14 @@ object a5 cmp resource f2:
 F       T       F       F       F       T       T       T       1
 object a5 cmp resource f3:
 F       T       F       F       F       T       T       T       1
+object a5 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+object a5 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+object a5 cmp clsmeth:
+F       T       F       F       F       T       T       T       1
+object a5 cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 object a6 cmp null:
 F       T       F       F       F       T       T       T       1
 object a6 cmp false:
@@ -20400,6 +21072,14 @@ object a6 cmp resource f2:
 F       T       F       F       F       T       T       T       1
 object a6 cmp resource f3:
 F       T       F       F       F       T       T       T       1
+object a6 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+object a6 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+object a6 cmp clsmeth:
+F       T       F       F       F       T       T       T       1
+object a6 cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 object a7 cmp null:
 F       T       F       F       F       T       T       T       1
 object a7 cmp false:
@@ -20640,6 +21320,14 @@ object a7 cmp resource f2:
 F       T       F       F       F       T       T       T       1
 object a7 cmp resource f3:
 F       T       F       F       F       T       T       T       1
+object a7 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+object a7 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+object a7 cmp clsmeth:
+F       T       F       F       F       T       T       T       1
+object a7 cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 object a8 cmp null:
 F       T       F       F       F       T       T       T       1
 object a8 cmp false:
@@ -20880,6 +21568,14 @@ object a8 cmp resource f2:
 F       T       F       F       F       T       T       T       1
 object a8 cmp resource f3:
 F       T       F       F       F       T       T       T       1
+object a8 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+object a8 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+object a8 cmp clsmeth:
+F       T       F       F       F       T       T       T       1
+object a8 cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 object a9 cmp null:
 F       T       F       F       F       T       T       T       1
 object a9 cmp false:
@@ -21120,6 +21816,14 @@ object a9 cmp resource f2:
 F       T       F       F       F       T       T       T       1
 object a9 cmp resource f3:
 F       T       F       F       F       T       T       T       1
+object a9 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+object a9 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+object a9 cmp clsmeth:
+F       T       F       F       F       T       T       T       1
+object a9 cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 object a10 cmp null:
 F       T       F       F       F       T       T       T       1
 object a10 cmp false:
@@ -21360,6 +22064,14 @@ object a10 cmp resource f2:
 F       T       F       F       F       T       T       T       1
 object a10 cmp resource f3:
 F       T       F       F       F       T       T       T       1
+object a10 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+object a10 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+object a10 cmp clsmeth:
+F       T       F       F       F       T       T       T       1
+object a10 cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 object a11 cmp null:
 F       T       F       F       F       T       T       T       1
 object a11 cmp false:
@@ -21600,6 +22312,14 @@ object a11 cmp resource f2:
 F       T       F       F       F       T       T       T       1
 object a11 cmp resource f3:
 F       T       F       F       F       T       T       T       1
+object a11 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+object a11 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+object a11 cmp clsmeth:
+F       T       F       F       F       T       T       T       1
+object a11 cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 object a12 cmp null:
 F       T       F       F       F       T       T       T       1
 object a12 cmp false:
@@ -21840,6 +22560,14 @@ object a12 cmp resource f2:
 F       T       F       F       F       T       T       T       1
 object a12 cmp resource f3:
 F       T       F       F       F       T       T       T       1
+object a12 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+object a12 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+object a12 cmp clsmeth:
+F       T       F       F       F       T       T       T       1
+object a12 cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 object a13 cmp null:
 F       T       F       F       F       T       T       T       1
 object a13 cmp false:
@@ -22080,6 +22808,14 @@ object a13 cmp resource f2:
 F       T       F       F       F       T       T       T       1
 object a13 cmp resource f3:
 F       T       F       F       F       T       T       T       1
+object a13 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+object a13 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+object a13 cmp clsmeth:
+F       T       F       F       F       T       T       T       1
+object a13 cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 object a14 cmp null:
 F       T       F       F       F       T       T       T       1
 object a14 cmp false:
@@ -22320,6 +23056,14 @@ object a14 cmp resource f2:
 F       T       F       F       F       T       T       T       1
 object a14 cmp resource f3:
 F       T       F       F       F       T       T       T       1
+object a14 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+object a14 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+object a14 cmp clsmeth:
+F       T       F       F       F       T       T       T       1
+object a14 cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 object a15 cmp null:
 F       T       F       F       F       T       T       T       1
 object a15 cmp false:
@@ -22560,6 +23304,14 @@ object a15 cmp resource f2:
 F       T       F       F       F       T       T       T       1
 object a15 cmp resource f3:
 F       T       F       F       F       T       T       T       1
+object a15 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+object a15 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+object a15 cmp clsmeth:
+F       T       F       F       F       T       T       T       1
+object a15 cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 object a16 cmp null:
 F       T       F       F       F       T       T       T       1
 object a16 cmp false:
@@ -22800,6 +23552,14 @@ object a16 cmp resource f2:
 F       T       F       F       F       T       T       T       1
 object a16 cmp resource f3:
 F       T       F       F       F       T       T       T       1
+object a16 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+object a16 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+object a16 cmp clsmeth:
+F       T       F       F       F       T       T       T       1
+object a16 cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 object a17 cmp null:
 F       T       F       F       F       T       T       T       1
 object a17 cmp false:
@@ -23040,6 +23800,14 @@ object a17 cmp resource f2:
 F       T       F       F       F       T       T       T       1
 object a17 cmp resource f3:
 F       T       F       F       F       T       T       T       1
+object a17 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+object a17 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+object a17 cmp clsmeth:
+F       T       F       F       F       T       T       T       1
+object a17 cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 object a18 cmp null:
 F       T       F       F       F       T       T       T       1
 object a18 cmp false:
@@ -23280,6 +24048,14 @@ object a18 cmp resource f2:
 F       T       F       F       F       T       T       T       1
 object a18 cmp resource f3:
 F       T       F       F       F       T       T       T       1
+object a18 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+object a18 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+object a18 cmp clsmeth:
+F       T       F       F       F       T       T       T       1
+object a18 cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 object b1 cmp null:
 F       T       F       F       F       T       T       T       1
 object b1 cmp false:
@@ -23520,6 +24296,14 @@ object b1 cmp resource f2:
 F       T       F       F       F       T       T       T       1
 object b1 cmp resource f3:
 F       T       F       F       F       T       T       T       1
+object b1 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+object b1 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+object b1 cmp clsmeth:
+F       T       F       F       F       T       T       T       1
+object b1 cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 object c1 cmp null:
 F       T       F       F       F       T       T       T       1
 object c1 cmp false:
@@ -23760,6 +24544,14 @@ object c1 cmp resource f2:
 F       T       F       F       F       T       T       T       1
 object c1 cmp resource f3:
 F       T       F       F       F       T       T       T       1
+object c1 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+object c1 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+object c1 cmp clsmeth:
+F       T       F       F       F       T       T       T       1
+object c1 cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 object s1 cmp null:
 F       T       F       F       F       T       T       T       1
 object s1 cmp false:
@@ -24000,6 +24792,14 @@ object s1 cmp resource f2:
 F       T       F       F       F       T       T       T       1
 object s1 cmp resource f3:
 F       T       F       F       F       T       T       T       1
+object s1 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+object s1 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+object s1 cmp clsmeth:
+F       T       F       F       F       T       T       T       1
+object s1 cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 object s2 cmp null:
 F       T       F       F       F       T       T       T       1
 object s2 cmp false:
@@ -24240,6 +25040,14 @@ object s2 cmp resource f2:
 F       T       F       F       F       T       T       T       1
 object s2 cmp resource f3:
 F       T       F       F       F       T       T       T       1
+object s2 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+object s2 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+object s2 cmp clsmeth:
+F       T       F       F       F       T       T       T       1
+object s2 cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 object s3 cmp null:
 F       T       F       F       F       T       T       T       1
 object s3 cmp false:
@@ -24480,6 +25288,14 @@ object s3 cmp resource f2:
 F       T       F       F       F       T       T       T       1
 object s3 cmp resource f3:
 F       T       F       F       F       T       T       T       1
+object s3 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+object s3 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+object s3 cmp clsmeth:
+F       T       F       F       F       T       T       T       1
+object s3 cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 object s4 cmp null:
 F       T       F       F       F       T       T       T       1
 object s4 cmp false:
@@ -24720,6 +25536,14 @@ object s4 cmp resource f2:
 F       T       F       F       F       T       T       T       1
 object s4 cmp resource f3:
 F       T       F       F       F       T       T       T       1
+object s4 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+object s4 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+object s4 cmp clsmeth:
+F       T       F       F       F       T       T       T       1
+object s4 cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 object t1 cmp null:
 F       T       F       F       F       T       T       T       1
 object t1 cmp false:
@@ -24960,6 +25784,14 @@ object t1 cmp resource f2:
 F       T       F       F       F       T       T       T       1
 object t1 cmp resource f3:
 F       T       F       F       F       T       T       T       1
+object t1 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+object t1 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+object t1 cmp clsmeth:
+F       T       F       F       F       T       T       T       1
+object t1 cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 object t2 cmp null:
 F       T       F       F       F       T       T       T       1
 object t2 cmp false:
@@ -25200,6 +26032,14 @@ object t2 cmp resource f2:
 F       T       F       F       F       T       T       T       1
 object t2 cmp resource f3:
 F       T       F       F       F       T       T       T       1
+object t2 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+object t2 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+object t2 cmp clsmeth:
+F       T       F       F       F       T       T       T       1
+object t2 cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 object t3 cmp null:
 F       T       F       F       F       T       T       T       1
 object t3 cmp false:
@@ -25440,6 +26280,14 @@ object t3 cmp resource f2:
 F       T       F       F       F       T       T       T       1
 object t3 cmp resource f3:
 F       T       F       F       F       T       T       T       1
+object t3 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+object t3 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+object t3 cmp clsmeth:
+F       T       F       F       F       T       T       T       1
+object t3 cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 object t4 cmp null:
 F       T       F       F       F       T       T       T       1
 object t4 cmp false:
@@ -25680,6 +26528,14 @@ object t4 cmp resource f2:
 F       T       F       F       F       T       T       T       1
 object t4 cmp resource f3:
 F       T       F       F       F       T       T       T       1
+object t4 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+object t4 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+object t4 cmp clsmeth:
+F       T       F       F       F       T       T       T       1
+object t4 cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 object t5 cmp null:
 F       T       F       F       F       T       T       T       1
 object t5 cmp false:
@@ -25920,6 +26776,14 @@ object t5 cmp resource f2:
 F       T       F       F       F       T       T       T       1
 object t5 cmp resource f3:
 F       T       F       F       F       T       T       T       1
+object t5 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+object t5 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+object t5 cmp clsmeth:
+F       T       F       F       F       T       T       T       1
+object t5 cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 object xml cmp null:
 F       T       F       F       F       T       T       T       1
 object xml cmp false:
@@ -26160,6 +27024,14 @@ object xml cmp resource f2:
 F       T       F       F       F       T       T       T       1
 object xml cmp resource f3:
 F       T       F       F       F       T       T       T       1
+object xml cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+object xml cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+object xml cmp clsmeth:
+F       T       F       F       F       T       T       T       1
+object xml cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 vector v1 cmp null:
 F       T       F       F       F       T       T       T       1
 vector v1 cmp false:
@@ -26400,6 +27272,14 @@ vector v1 cmp resource f2:
 F       T       F       F       F       T       T       T       1
 vector v1 cmp resource f3:
 F       T       F       F       F       T       T       T       1
+vector v1 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+vector v1 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+vector v1 cmp clsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
+vector v1 cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 vector v2 cmp null:
 F       T       F       F       F       T       T       T       1
 vector v2 cmp false:
@@ -26640,6 +27520,14 @@ vector v2 cmp resource f2:
 F       T       F       F       F       T       T       T       1
 vector v2 cmp resource f3:
 F       T       F       F       F       T       T       T       1
+vector v2 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+vector v2 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+vector v2 cmp clsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
+vector v2 cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 vector v3 cmp null:
 F       T       F       F       F       T       T       T       1
 vector v3 cmp false:
@@ -26880,6 +27768,14 @@ vector v3 cmp resource f2:
 F       T       F       F       F       T       T       T       1
 vector v3 cmp resource f3:
 F       T       F       F       F       T       T       T       1
+vector v3 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+vector v3 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+vector v3 cmp clsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
+vector v3 cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 pair p1 cmp null:
 F       T       F       F       F       T       T       T       1
 pair p1 cmp false:
@@ -27120,6 +28016,14 @@ pair p1 cmp resource f2:
 F       T       F       F       F       T       T       T       1
 pair p1 cmp resource f3:
 F       T       F       F       F       T       T       T       1
+pair p1 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+pair p1 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+pair p1 cmp clsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
+pair p1 cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 pair p2 cmp null:
 F       T       F       F       F       T       T       T       1
 pair p2 cmp false:
@@ -27360,6 +28264,14 @@ pair p2 cmp resource f2:
 F       T       F       F       F       T       T       T       1
 pair p2 cmp resource f3:
 F       T       F       F       F       T       T       T       1
+pair p2 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+pair p2 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+pair p2 cmp clsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
+pair p2 cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 pair p3 cmp null:
 F       T       F       F       F       T       T       T       1
 pair p3 cmp false:
@@ -27600,6 +28512,14 @@ pair p3 cmp resource f2:
 F       T       F       F       F       T       T       T       1
 pair p3 cmp resource f3:
 F       T       F       F       F       T       T       T       1
+pair p3 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+pair p3 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+pair p3 cmp clsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
+pair p3 cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 closure clo1 cmp null:
 F       T       F       F       F       T       T       T       1
 closure clo1 cmp false:
@@ -27840,6 +28760,14 @@ closure clo1 cmp resource f2:
 F       T       F       F       F       T       T       T       1
 closure clo1 cmp resource f3:
 F       T       F       F       F       T       T       T       1
+closure clo1 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+closure clo1 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+closure clo1 cmp clsmeth:
+F       T       F       F       F       T       T       T       1
+closure clo1 cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 closure clo2 cmp null:
 F       T       F       F       F       T       T       T       1
 closure clo2 cmp false:
@@ -28080,6 +29008,14 @@ closure clo2 cmp resource f2:
 F       T       F       F       F       T       T       T       1
 closure clo2 cmp resource f3:
 F       T       F       F       F       T       T       T       1
+closure clo2 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+closure clo2 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+closure clo2 cmp clsmeth:
+F       T       F       F       F       T       T       T       1
+closure clo2 cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 resource f1 cmp null:
 F       T       F       F       F       T       T       T       1
 resource f1 cmp false:
@@ -28320,6 +29256,14 @@ resource f1 cmp resource f2:
 F       T       T       T       F       T       F       F       -1
 resource f1 cmp resource f3:
 F       T       T       T       F       T       F       F       -1
+resource f1 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+resource f1 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+resource f1 cmp clsmeth:
+F       T       T       T       F       T       F       F       -1
+resource f1 cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 resource f2 cmp null:
 F       T       F       F       F       T       T       T       1
 resource f2 cmp false:
@@ -28560,6 +29504,14 @@ resource f2 cmp resource f2:
 T       F       F       T       T       F       T       F       0
 resource f2 cmp resource f3:
 F       T       T       T       F       T       F       F       -1
+resource f2 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+resource f2 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+resource f2 cmp clsmeth:
+F       T       T       T       F       T       F       F       -1
+resource f2 cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
 resource f3 cmp null:
 F       T       F       F       F       T       T       T       1
 resource f3 cmp false:
@@ -28800,6 +29752,1006 @@ resource f3 cmp resource f2:
 F       T       F       F       F       T       T       T       1
 resource f3 cmp resource f3:
 T       F       F       T       T       F       T       F       0
+resource f3 cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+resource f3 cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+resource f3 cmp clsmeth:
+F       T       T       T       F       T       F       F       -1
+resource f3 cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp null:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp false:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp true:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp int 0:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp int 99:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp int -1:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp float 0:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp double 99:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp float 99:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp float -1:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp INF:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp -INF:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp NAN:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp "":
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp "0":
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp "99":
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp "-1":
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp "0.0":
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp "99.0":
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp "-1.0":
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp "foo":
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp "BAZ":
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp array arr1:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp array arr2:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp array arr3:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp array arr4:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp array arr5:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp array arr6:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp array arr7:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp array arr8:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp array arr9:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp array arr10:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp array arr11:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp array arr12:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp array arr13:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp array arr14:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp array arr15:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp array arr16:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp array arr17:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp array arr18:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp array arr19:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp array arr20:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp array arr21:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp array arr22:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp vec vec1:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp vec vec2:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp vec vec3:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp vec vec4:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp vec vec5:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp vec vec6:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp vec vec7:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp vec vec8:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp vec vec9:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp vec vec10:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp vec vec11:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp dict dict1:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp dict dict2:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp dict dict3:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp dict dict4:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp dict dict5:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp dict dict6:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp dict dict7:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp dict dict8:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp dict dict9:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp dict dict10:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp dict dict11:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp keyset ks1:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp keyset ks2:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp keyset ks3:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp keyset ks4:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp keyset ks5:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp keyset ks6:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp keyset ks7:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp keyset ks8:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp keyset ks9:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp keyset ks10:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp keyset ks11:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp keyset ks12:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp keyset ks13:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp object a1:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp object a2:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp object a3:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp object a4:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp object a5:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp object a6:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp object a7:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp object a8:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp object a9:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp object a10:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp object a11:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp object a12:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp object a13:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp object a14:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp object a15:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp object a16:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp object a17:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp object a18:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp object b1:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp object c1:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp object s1:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp object s2:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp object s3:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp object s4:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp object t1:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp object t2:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp object t3:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp object t4:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp object t5:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp object xml:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp vector v1:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp vector v2:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp vector v3:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp pair p1:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp pair p2:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp pair p3:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp closure clo1:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp closure clo2:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp resource f1:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp resource f2:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp resource f3:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp func_ptr:
+T       F       Err     Err     T       F       Err     Err     Err
+func_ptr cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp clsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
+func_ptr cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp null:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp false:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp true:
+F       T       Err     Err     T       F       Err     Err     Err
+rfunc_ptr cmp int 0:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp int 99:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp int -1:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp float 0:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp double 99:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp float 99:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp float -1:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp INF:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp -INF:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp NAN:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp "":
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp "0":
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp "99":
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp "-1":
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp "0.0":
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp "99.0":
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp "-1.0":
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp "foo":
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp "BAZ":
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp array arr1:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp array arr2:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp array arr3:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp array arr4:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp array arr5:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp array arr6:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp array arr7:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp array arr8:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp array arr9:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp array arr10:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp array arr11:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp array arr12:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp array arr13:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp array arr14:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp array arr15:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp array arr16:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp array arr17:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp array arr18:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp array arr19:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp array arr20:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp array arr21:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp array arr22:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp vec vec1:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp vec vec2:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp vec vec3:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp vec vec4:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp vec vec5:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp vec vec6:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp vec vec7:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp vec vec8:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp vec vec9:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp vec vec10:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp vec vec11:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp dict dict1:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp dict dict2:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp dict dict3:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp dict dict4:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp dict dict5:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp dict dict6:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp dict dict7:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp dict dict8:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp dict dict9:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp dict dict10:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp dict dict11:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp keyset ks1:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp keyset ks2:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp keyset ks3:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp keyset ks4:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp keyset ks5:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp keyset ks6:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp keyset ks7:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp keyset ks8:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp keyset ks9:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp keyset ks10:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp keyset ks11:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp keyset ks12:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp keyset ks13:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp object a1:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp object a2:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp object a3:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp object a4:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp object a5:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp object a6:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp object a7:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp object a8:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp object a9:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp object a10:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp object a11:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp object a12:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp object a13:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp object a14:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp object a15:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp object a16:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp object a17:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp object a18:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp object b1:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp object c1:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp object s1:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp object s2:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp object s3:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp object s4:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp object t1:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp object t2:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp object t3:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp object t4:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp object t5:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp object xml:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp vector v1:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp vector v2:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp vector v3:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp pair p1:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp pair p2:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp pair p3:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp closure clo1:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp closure clo2:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp resource f1:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp resource f2:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp resource f3:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp rfunc_ptr:
+T       F       Err     Err     T       F       Err     Err     Err
+rfunc_ptr cmp clsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
+rfunc_ptr cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
+clsmeth cmp null:
+F       T       F       F       F       T       T       T       1
+clsmeth cmp false:
+F       T       F       F       F       T       T       T       1
+clsmeth cmp true:
+F       T       F       T       T       F       T       F       0
+clsmeth cmp int 0:
+F       T       F       F       F       T       T       T       1
+clsmeth cmp int 99:
+F       T       F       F       F       T       T       T       1
+clsmeth cmp int -1:
+F       T       F       F       F       T       T       T       1
+clsmeth cmp float 0:
+F       T       F       F       F       T       T       T       1
+clsmeth cmp double 99:
+F       T       F       F       F       T       T       T       1
+clsmeth cmp float 99:
+F       T       F       F       F       T       T       T       1
+clsmeth cmp float -1:
+F       T       F       F       F       T       T       T       1
+clsmeth cmp INF:
+F       T       F       F       F       T       T       T       1
+clsmeth cmp -INF:
+F       T       F       F       F       T       T       T       1
+clsmeth cmp NAN:
+F       T       F       F       F       T       T       T       1
+clsmeth cmp "":
+F       T       F       F       F       T       T       T       1
+clsmeth cmp "0":
+F       T       F       F       F       T       T       T       1
+clsmeth cmp "99":
+F       T       F       F       F       T       T       T       1
+clsmeth cmp "-1":
+F       T       F       F       F       T       T       T       1
+clsmeth cmp "0.0":
+F       T       F       F       F       T       T       T       1
+clsmeth cmp "99.0":
+F       T       F       F       F       T       T       T       1
+clsmeth cmp "-1.0":
+F       T       F       F       F       T       T       T       1
+clsmeth cmp "foo":
+F       T       F       F       F       T       T       T       1
+clsmeth cmp "BAZ":
+F       T       F       F       F       T       T       T       1
+clsmeth cmp array arr1:
+F       T       F       F       F       T       T       T       1
+clsmeth cmp array arr2:
+F       T       F       F       F       T       T       T       1
+clsmeth cmp array arr3:
+F       T       F       F       F       T       T       T       1
+clsmeth cmp array arr4:
+F       T       T       T       F       T       F       F       -1
+clsmeth cmp array arr5:
+F       T       T       T       F       T       F       F       -1
+clsmeth cmp array arr6:
+F       T       T       T       F       T       F       F       -1
+clsmeth cmp array arr7:
+F       T       T       T       F       T       F       F       -1
+clsmeth cmp array arr8:
+F       T       T       T       F       T       F       F       -1
+clsmeth cmp array arr9:
+F       T       T       T       F       T       F       F       -1
+clsmeth cmp array arr10:
+F       T       T       T       F       T       F       F       -1
+clsmeth cmp array arr11:
+F       T       T       T       F       T       F       F       -1
+clsmeth cmp array arr12:
+F       T       Err     Err     F       T       Err     Err     Err
+clsmeth cmp array arr13:
+F       T       Err     Err     F       T       Err     Err     Err
+clsmeth cmp array arr14:
+F       T       Err     Err     F       T       Err     Err     Err
+clsmeth cmp array arr15:
+F       T       Err     Err     F       T       Err     Err     Err
+clsmeth cmp array arr16:
+F       T       Err     Err     F       T       Err     Err     Err
+clsmeth cmp array arr17:
+F       T       Err     Err     F       T       Err     Err     Err
+clsmeth cmp array arr18:
+F       T       Err     Err     F       T       Err     Err     Err
+clsmeth cmp array arr19:
+F       T       Err     Err     F       T       Err     Err     Err
+clsmeth cmp array arr20:
+F       T       Err     Err     F       T       Err     Err     Err
+clsmeth cmp array arr21:
+F       T       T       T       F       T       F       F       -1
+clsmeth cmp array arr22:
+F       T       T       T       F       T       F       F       -1
+clsmeth cmp vec vec1:
+F       T       Err     Err     F       T       Err     Err     Err
+clsmeth cmp vec vec2:
+F       T       Err     Err     F       T       Err     Err     Err
+clsmeth cmp vec vec3:
+F       T       Err     Err     F       T       Err     Err     Err
+clsmeth cmp vec vec4:
+F       T       Err     Err     F       T       Err     Err     Err
+clsmeth cmp vec vec5:
+F       T       Err     Err     F       T       Err     Err     Err
+clsmeth cmp vec vec6:
+F       T       Err     Err     F       T       Err     Err     Err
+clsmeth cmp vec vec7:
+F       T       Err     Err     F       T       Err     Err     Err
+clsmeth cmp vec vec8:
+F       T       Err     Err     F       T       Err     Err     Err
+clsmeth cmp vec vec9:
+F       T       Err     Err     F       T       Err     Err     Err
+clsmeth cmp vec vec10:
+F       T       Err     Err     F       T       Err     Err     Err
+clsmeth cmp vec vec11:
+F       T       Err     Err     F       T       Err     Err     Err
+clsmeth cmp dict dict1:
+F       T       Err     Err     F       T       Err     Err     Err
+clsmeth cmp dict dict2:
+F       T       Err     Err     F       T       Err     Err     Err
+clsmeth cmp dict dict3:
+F       T       Err     Err     F       T       Err     Err     Err
+clsmeth cmp dict dict4:
+F       T       Err     Err     F       T       Err     Err     Err
+clsmeth cmp dict dict5:
+F       T       Err     Err     F       T       Err     Err     Err
+clsmeth cmp dict dict6:
+F       T       Err     Err     F       T       Err     Err     Err
+clsmeth cmp dict dict7:
+F       T       Err     Err     F       T       Err     Err     Err
+clsmeth cmp dict dict8:
+F       T       Err     Err     F       T       Err     Err     Err
+clsmeth cmp dict dict9:
+F       T       Err     Err     F       T       Err     Err     Err
+clsmeth cmp dict dict10:
+F       T       Err     Err     F       T       Err     Err     Err
+clsmeth cmp dict dict11:
+F       T       Err     Err     F       T       Err     Err     Err
+clsmeth cmp keyset ks1:
+F       T       Err     Err     F       T       Err     Err     Err
+clsmeth cmp keyset ks2:
+F       T       Err     Err     F       T       Err     Err     Err
+clsmeth cmp keyset ks3:
+F       T       Err     Err     F       T       Err     Err     Err
+clsmeth cmp keyset ks4:
+F       T       Err     Err     F       T       Err     Err     Err
+clsmeth cmp keyset ks5:
+F       T       Err     Err     F       T       Err     Err     Err
+clsmeth cmp keyset ks6:
+F       T       Err     Err     F       T       Err     Err     Err
+clsmeth cmp keyset ks7:
+F       T       Err     Err     F       T       Err     Err     Err
+clsmeth cmp keyset ks8:
+F       T       Err     Err     F       T       Err     Err     Err
+clsmeth cmp keyset ks9:
+F       T       Err     Err     F       T       Err     Err     Err
+clsmeth cmp keyset ks10:
+F       T       Err     Err     F       T       Err     Err     Err
+clsmeth cmp keyset ks11:
+F       T       Err     Err     F       T       Err     Err     Err
+clsmeth cmp keyset ks12:
+F       T       Err     Err     F       T       Err     Err     Err
+clsmeth cmp keyset ks13:
+F       T       Err     Err     F       T       Err     Err     Err
+clsmeth cmp object a1:
+F       T       T       T       F       T       F       F       -1
+clsmeth cmp object a2:
+F       T       T       T       F       T       F       F       -1
+clsmeth cmp object a3:
+F       T       T       T       F       T       F       F       -1
+clsmeth cmp object a4:
+F       T       T       T       F       T       F       F       -1
+clsmeth cmp object a5:
+F       T       T       T       F       T       F       F       -1
+clsmeth cmp object a6:
+F       T       T       T       F       T       F       F       -1
+clsmeth cmp object a7:
+F       T       T       T       F       T       F       F       -1
+clsmeth cmp object a8:
+F       T       T       T       F       T       F       F       -1
+clsmeth cmp object a9:
+F       T       T       T       F       T       F       F       -1
+clsmeth cmp object a10:
+F       T       T       T       F       T       F       F       -1
+clsmeth cmp object a11:
+F       T       T       T       F       T       F       F       -1
+clsmeth cmp object a12:
+F       T       T       T       F       T       F       F       -1
+clsmeth cmp object a13:
+F       T       T       T       F       T       F       F       -1
+clsmeth cmp object a14:
+F       T       T       T       F       T       F       F       -1
+clsmeth cmp object a15:
+F       T       T       T       F       T       F       F       -1
+clsmeth cmp object a16:
+F       T       T       T       F       T       F       F       -1
+clsmeth cmp object a17:
+F       T       T       T       F       T       F       F       -1
+clsmeth cmp object a18:
+F       T       T       T       F       T       F       F       -1
+clsmeth cmp object b1:
+F       T       T       T       F       T       F       F       -1
+clsmeth cmp object c1:
+F       T       T       T       F       T       F       F       -1
+clsmeth cmp object s1:
+F       T       T       T       F       T       F       F       -1
+clsmeth cmp object s2:
+F       T       T       T       F       T       F       F       -1
+clsmeth cmp object s3:
+F       T       T       T       F       T       F       F       -1
+clsmeth cmp object s4:
+F       T       T       T       F       T       F       F       -1
+clsmeth cmp object t1:
+F       T       T       T       F       T       F       F       -1
+clsmeth cmp object t2:
+F       T       T       T       F       T       F       F       -1
+clsmeth cmp object t3:
+F       T       T       T       F       T       F       F       -1
+clsmeth cmp object t4:
+F       T       T       T       F       T       F       F       -1
+clsmeth cmp object t5:
+F       T       T       T       F       T       F       F       -1
+clsmeth cmp object xml:
+F       T       T       T       F       T       F       F       -1
+clsmeth cmp vector v1:
+F       T       Err     Err     F       T       Err     Err     Err
+clsmeth cmp vector v2:
+F       T       Err     Err     F       T       Err     Err     Err
+clsmeth cmp vector v3:
+F       T       Err     Err     F       T       Err     Err     Err
+clsmeth cmp pair p1:
+F       T       Err     Err     F       T       Err     Err     Err
+clsmeth cmp pair p2:
+F       T       Err     Err     F       T       Err     Err     Err
+clsmeth cmp pair p3:
+F       T       Err     Err     F       T       Err     Err     Err
+clsmeth cmp closure clo1:
+F       T       T       T       F       T       F       F       -1
+clsmeth cmp closure clo2:
+F       T       T       T       F       T       F       F       -1
+clsmeth cmp resource f1:
+F       T       F       F       F       T       T       T       1
+clsmeth cmp resource f2:
+F       T       F       F       F       T       T       T       1
+clsmeth cmp resource f3:
+F       T       F       F       F       T       T       T       1
+clsmeth cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+clsmeth cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+clsmeth cmp clsmeth:
+T       F       F       T       T       F       T       F       0
+clsmeth cmp rclsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp null:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp false:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp true:
+F       T       Err     Err     T       F       Err     Err     Err
+rclsmeth cmp int 0:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp int 99:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp int -1:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp float 0:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp double 99:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp float 99:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp float -1:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp INF:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp -INF:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp NAN:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp "":
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp "0":
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp "99":
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp "-1":
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp "0.0":
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp "99.0":
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp "-1.0":
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp "foo":
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp "BAZ":
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp array arr1:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp array arr2:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp array arr3:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp array arr4:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp array arr5:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp array arr6:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp array arr7:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp array arr8:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp array arr9:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp array arr10:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp array arr11:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp array arr12:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp array arr13:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp array arr14:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp array arr15:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp array arr16:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp array arr17:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp array arr18:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp array arr19:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp array arr20:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp array arr21:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp array arr22:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp vec vec1:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp vec vec2:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp vec vec3:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp vec vec4:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp vec vec5:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp vec vec6:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp vec vec7:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp vec vec8:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp vec vec9:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp vec vec10:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp vec vec11:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp dict dict1:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp dict dict2:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp dict dict3:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp dict dict4:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp dict dict5:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp dict dict6:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp dict dict7:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp dict dict8:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp dict dict9:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp dict dict10:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp dict dict11:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp keyset ks1:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp keyset ks2:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp keyset ks3:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp keyset ks4:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp keyset ks5:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp keyset ks6:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp keyset ks7:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp keyset ks8:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp keyset ks9:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp keyset ks10:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp keyset ks11:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp keyset ks12:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp keyset ks13:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp object a1:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp object a2:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp object a3:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp object a4:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp object a5:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp object a6:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp object a7:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp object a8:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp object a9:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp object a10:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp object a11:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp object a12:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp object a13:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp object a14:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp object a15:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp object a16:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp object a17:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp object a18:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp object b1:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp object c1:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp object s1:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp object s2:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp object s3:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp object s4:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp object t1:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp object t2:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp object t3:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp object t4:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp object t5:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp object xml:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp vector v1:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp vector v2:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp vector v3:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp pair p1:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp pair p2:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp pair p3:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp closure clo1:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp closure clo2:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp resource f1:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp resource f2:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp resource f3:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp func_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp rfunc_ptr:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp clsmeth:
+F       T       Err     Err     F       T       Err     Err     Err
+rclsmeth cmp rclsmeth:
+T       F       Err     Err     T       F       Err     Err     Err
 
 same    nsame   lt      lte     eq      neq     gte     gt      cmp
 

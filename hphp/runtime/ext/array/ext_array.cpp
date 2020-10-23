@@ -2550,20 +2550,18 @@ IMPLEMENT_STATIC_REQUEST_LOCAL(Collator, s_collator);
 
 namespace {
 struct ArraySortTmp {
-  ArraySortTmp(TypedValue* arr, SortFunction sf) : m_arr(arr) {
-    m_ad = arr->m_data.parr->escalateForSort(sf);
+  ArraySortTmp(TypedValue* tv, SortFunction sf) : m_tv(tv) {
+    m_ad = val(tv).parr->escalateForSort(sf);
     assertx(m_ad->empty() || m_ad->hasExactlyOneRef());
   }
   ~ArraySortTmp() {
-    if (m_ad != val(m_arr).parr) {
-      auto tmp = Array::attach(val(m_arr).parr);
-      val(m_arr).parr = m_ad;
-      type(m_arr) = m_ad->toDataType();
+    if (m_ad != val(m_tv).parr) {
+      tvMove(make_array_like_tv(m_ad), m_tv);
     }
   }
   ArrayData* operator->() { return m_ad; }
  private:
-  TypedValue* m_arr;
+  TypedValue* m_tv;
   ArrayData* m_ad;
 };
 }
@@ -2571,6 +2569,9 @@ struct ArraySortTmp {
 static bool
 php_sort(Variant& container, int sort_flags, bool ascending) {
   if (container.isArray()) {
+    auto const ad = container.asTypedValue()->val().parr;
+    if (ad->size() == 1 && (ad->isVArray() || ad->isVecType())) return true;
+    if (ad->empty()) return true;
     SortFunction sf = getSortFunction(SORTFUNC_SORT, ascending);
     ArraySortTmp ast(container.asTypedValue(), sf);
     ast->sort(sort_flags, ascending);
@@ -2596,6 +2597,8 @@ php_sort(Variant& container, int sort_flags, bool ascending) {
 static bool
 php_asort(Variant& container, int sort_flags, bool ascending) {
   if (container.isArray()) {
+    auto const ad = container.asTypedValue()->val().parr;
+    if (ad->size() <= 1 && !(ad->isVArray() || ad->isVecType())) return true;
     SortFunction sf = getSortFunction(SORTFUNC_ASORT, ascending);
     ArraySortTmp ast(container.asTypedValue(), sf);
     ast->asort(sort_flags, ascending);
@@ -2621,7 +2624,8 @@ static bool
 php_ksort(Variant& container, int sort_flags, bool ascending) {
   if (container.isArray()) {
     auto const ad = container.asTypedValue()->val().parr;
-    if (ascending && (ad->isVArray() || ad->isVecType())) return true;
+    auto const vecish = ad->isVArray() || ad->isVecType();
+    if ((vecish && ascending) || (!vecish && ad->size() <= 1)) return true;
     SortFunction sf = getSortFunction(SORTFUNC_KSORT, ascending);
     ArraySortTmp ast(container.asTypedValue(), sf);
     ast->ksort(sort_flags, ascending);
@@ -2700,6 +2704,9 @@ bool HHVM_FUNCTION(usort,
                    const Variant& cmp_function) {
   if (checkIsClsMethAndRaise( __FUNCTION__+2, container)) return false;
   if (container.isArray()) {
+    auto const ad = container.asTypedValue()->val().parr;
+    if (ad->size() == 1 && (ad->isVArray() || ad->isVecType())) return true;
+    if (ad->empty()) return true;
     ArraySortTmp ast(container.asTypedValue(), SORTFUNC_USORT);
     return ast->usort(cmp_function);
   }
@@ -2724,6 +2731,8 @@ bool HHVM_FUNCTION(uasort,
                    const Variant& cmp_function) {
   if (checkIsClsMethAndRaise( __FUNCTION__+2, container)) return false;
   if (container.isArray()) {
+    auto const ad = container.asTypedValue()->val().parr;
+    if (ad->size() <= 1 && !(ad->isVArray() || ad->isVecType())) return true;
     ArraySortTmp ast(container.asTypedValue(), SORTFUNC_UASORT);
     return ast->uasort(cmp_function);
   }
@@ -2750,6 +2759,8 @@ bool HHVM_FUNCTION(uksort,
                    const Variant& cmp_function) {
   if (checkIsClsMethAndRaise( __FUNCTION__+2, container)) return false;
   if (container.isArray()) {
+    auto const ad = container.asTypedValue()->val().parr;
+    if (ad->size() <= 1 && !(ad->isVArray() || ad->isVecType())) return true;
     ArraySortTmp ast(container.asTypedValue(), SORTFUNC_UKSORT);
     return ast->uksort(cmp_function);
   }

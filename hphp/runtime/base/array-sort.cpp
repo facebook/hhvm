@@ -151,43 +151,22 @@ void SetArray::postSort(bool) {   // nothrow guarantee
 }
 
 ArrayData* MixedArray::EscalateForSort(ArrayData* ad, SortFunction sf) {
-  auto a = asMixed(ad);
-  // We can uncomment later if we want this feature.
-  // if (a->m_size <= 1 && !isSortFamily(sf)) {
-  //   return a;
-  // }
-  if (UNLIKELY(hasUserDefinedCmp(sf) || a->cowCheck())) {
-    auto ret = a->copyMixed();
-    assertx(ret->hasExactlyOneRef());
-    return ret;
-  }
-  return a;
+  auto const a = asMixed(ad);
+  return a->cowCheck() ? a->copyMixed() : a;
 }
 
 ArrayData* SetArray::EscalateForSort(ArrayData* ad, SortFunction sf) {
-  auto a = asSet(ad);
-  if (UNLIKELY(hasUserDefinedCmp(sf) || a->cowCheck())) {
-    auto ret = a->copySet();
-    assertx(ret->hasExactlyOneRef());
-    return ret;
-  }
-  return a;
+  auto const a = asSet(ad);
+  return a->cowCheck() ? a->copySet() : a;
 }
 
 ArrayData* PackedArray::EscalateForSort(ArrayData* ad, SortFunction sf) {
   assertx(checkInvariants(ad));
   assertx(sf != SORTFUNC_KSORT);
-  if (isSortFamily(sf)) {               // sort/rsort/usort
-    if (UNLIKELY(ad->cowCheck())) {
-      auto ret = PackedArray::Copy(ad);
-      assertx(ret->hasExactlyOneRef());
-      return ret;
-    }
-    return ad;
+  if (isSortFamily(sf)) { // sort/rsort/usort
+    return ad->cowCheck() ? PackedArray::Copy(ad) : ad;
   }
-  auto const ret = ToMixedCopy(ad);
-  assertx(ret->empty() || ret->hasExactlyOneRef());
-  return ret;
+  return ToMixedCopy(ad);
 }
 
 #define SORT_CASE(flag, cmp_type, acc_type) \

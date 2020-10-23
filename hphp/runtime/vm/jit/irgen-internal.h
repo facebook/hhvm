@@ -572,14 +572,12 @@ inline SSATmp* apparate(IRGS& env, Type type) {
 
 //////////////////////////////////////////////////////////////////////
 
-inline BCMarker makeMarker(IRGS& env, Offset bcOff) {
+inline BCMarker makeMarker(IRGS& env, SrcKey sk) {
   auto const stackOff = spOffBCFromFP(env);
-
-  FTRACE(2, "makeMarker: bc {} sp {} fn {}\n",
-         bcOff, stackOff.offset, curFunc(env)->fullName()->data());
+  FTRACE(2, "makeMarker: sk {} sp {}\n", showShort(sk), stackOff.offset);
 
   return BCMarker {
-    SrcKey(curSrcKey(env), bcOff),
+    sk,
     stackOff,
     env.irb->fs().stublogue(),
     env.profTransIDs,
@@ -588,7 +586,7 @@ inline BCMarker makeMarker(IRGS& env, Offset bcOff) {
 }
 
 inline void updateMarker(IRGS& env) {
-  env.irb->setCurMarker(makeMarker(env, bcOff(env)));
+  env.irb->setCurMarker(makeMarker(env, curSrcKey(env)));
 }
 
 //////////////////////////////////////////////////////////////////////

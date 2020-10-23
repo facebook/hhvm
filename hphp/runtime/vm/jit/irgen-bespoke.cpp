@@ -557,7 +557,7 @@ bool guardToLayout(IRGS& env, SrcKey sk, Location loc) {
              sk.offset(), opcodeToName(sk.op()), show(loc), target_type);
   auto const gc = GuardConstraint(DataTypeSpecialized).setArrayLayoutSensitive();
   env.irb->constrainLocation(loc, gc);
-  checkType(env, loc, target_type, -1);
+  checkType(env, loc, target_type, bcOff(env));
   return !target_type.arrSpec().vanilla();
 }
 
@@ -610,7 +610,7 @@ void emitLoggingDiamond(
     [&](Block* taken) {
       auto const target_type = type.unspecialize().narrowToVanilla();
       env.irb->setGuardFailBlock(taken);
-      checkType(env, loc, target_type, -1);
+      checkType(env, loc, target_type, bcOff(env));
       env.irb->resetGuardFailBlock();
 
       emitVanilla(env);

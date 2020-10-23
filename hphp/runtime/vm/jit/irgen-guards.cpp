@@ -29,7 +29,7 @@ namespace {
 template<typename Check, typename Ld>
 void checkTypeImpl(IRGS& env, Type type, Offset dest, Check check, Ld ld) {
   auto exit = env.irb->guardFailBlock();
-  if (exit == nullptr) exit = makeExit(env, dest);
+  if (exit == nullptr) exit = makeExit(env, SrcKey{curSrcKey(env), dest});
 
   if (env.formingRegion || !type.isSpecialized()) {
     check(type, exit);

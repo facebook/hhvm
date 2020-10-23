@@ -1201,7 +1201,7 @@ SSATmp* cGetPropImpl(IRGS& env, SSATmp* base, SSATmp* key,
 Block* makeCatchSet(IRGS& env, uint32_t nDiscard) {
   auto block = defBlock(env, Block::Hint::Unused);
 
-  BlockPusher bp(*env.irb, makeMarker(env, bcOff(env)), block);
+  BlockPusher bp(*env.irb, makeMarker(env, curSrcKey(env)), block);
   gen(env, BeginCatch);
 
   ifThen(
@@ -1238,7 +1238,7 @@ Block* makeCatchSet(IRGS& env, uint32_t nDiscard) {
   // stores to MIState.
   gen(env, FinishMemberOp);
 
-  gen(env, Jmp, makeExit(env, nextBcOff(env)));
+  gen(env, Jmp, makeExit(env, nextSrcKey(env)));
   return block;
 }
 
@@ -1307,7 +1307,7 @@ void handleStrTestResult(IRGS& env, uint32_t nDiscard, SSATmp* strTestResult) {
       }
       push(env, str);
       gen(env, FinishMemberOp);
-      gen(env, Jmp, makeExit(env, nextBcOff(env)));
+      gen(env, Jmp, makeExit(env, nextSrcKey(env)));
     }
   );
 }
@@ -1922,7 +1922,7 @@ void logArrayAccessProfile(IRGS& env, SSATmp* arr, SSATmp* key,
   if (!RO::EvalLogArrayAccessProfile) return;
   if (env.inlineState.conjure) return;
 
-  auto const marker  = makeMarker(env, bcOff(env));
+  auto const marker  = makeMarker(env, curSrcKey(env));
   assertx(marker.hasFunc());
   auto const func = marker.func();
 

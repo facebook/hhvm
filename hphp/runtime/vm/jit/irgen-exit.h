@@ -40,14 +40,14 @@ struct IRGS;
 
 /*
  * Create a block that side exits the current region, going to the supplied
- * target offset (if targetBcOff is -1, it goes to the current instruction's
- * offset).  The `trflags' version side exits to the current offset, and passes
- * extra flags to the service request which can be used while JITing to disable
- * certain optimizations.
+ * target SrcKey. If target is unspecified, it goes to the current instruction's
+ * SrcKey.  The `trflags' version passes extra flags to the service request
+ * which can be used while JITing to disable certain optimizations.
  *
- * Both functions use the current state to create the block.
+ * All functions use the current state to create the block.
  */
-Block* makeExit(IRGS&, Offset targetBcOff = -1);
+Block* makeExit(IRGS&);
+Block* makeExit(IRGS&, SrcKey targetSk);
 Block* makeExit(IRGS&, TransFlags trflags);
 
 /*
@@ -72,7 +72,7 @@ Block* makeExitOpt(IRGS&);
  * The block is created with the current state.
  */
 Block* makeExitSlow(IRGS&);
-Block* makeExitSurprise(IRGS&, Offset);
+Block* makeExitSurprise(IRGS&, SrcKey);
 
 /*
  * Create a block that should never be reached. Useful for debug assertions.

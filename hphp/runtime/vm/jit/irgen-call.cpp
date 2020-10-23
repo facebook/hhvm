@@ -215,7 +215,7 @@ void handleCallReturn(IRGS& env, const Func* callee, const FCallArgs& fca,
                       SSATmp* retVal, bool asyncEagerReturn, bool unlikely) {
   if (!asyncEagerReturn) {
     push(env, retVal);
-    if (unlikely) gen(env, Jmp, makeExit(env, nextBcOff(env)));
+    if (unlikely) gen(env, Jmp, makeExit(env, nextSrcKey(env)));
     return;
   }
 
@@ -238,7 +238,7 @@ void handleCallReturn(IRGS& env, const Func* callee, const FCallArgs& fca,
       push(env, gen(env, AssertType, ty, retVal));
       auto const asyncEagerOffset = bcOff(env) + fca.asyncEagerOffset;
       if (unlikely) {
-        gen(env, Jmp, makeExit(env, asyncEagerOffset));
+        gen(env, Jmp, makeExit(env, SrcKey{curSrcKey(env), asyncEagerOffset}));
       } else {
         jmpImpl(env, asyncEagerOffset);
       }
@@ -247,7 +247,7 @@ void handleCallReturn(IRGS& env, const Func* callee, const FCallArgs& fca,
       hint(env, Block::Hint::Unlikely);
       auto const ty = callee ? callReturnType(callee) : TInitCell;
       push(env, gen(env, AssertType, ty, retVal));
-      if (unlikely) gen(env, Jmp, makeExit(env, nextBcOff(env)));
+      if (unlikely) gen(env, Jmp, makeExit(env, nextSrcKey(env)));
     }
   );
 }
@@ -668,7 +668,7 @@ void optimizeProfiledCallMethod(IRGS& env,
     env.irb->exceptionStackBoundary();
 
     emitFCall(nullptr, true /* no call profiling */);
-    gen(env, Jmp, makeExit(env, nextBcOff(env)));
+    gen(env, Jmp, makeExit(env, nextSrcKey(env)));
   };
 
   MethProfile data = profile.data();

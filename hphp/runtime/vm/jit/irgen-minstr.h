@@ -261,7 +261,7 @@ SSATmp* profiledType(IRGS& env, SSATmp* tmp, Finish finish) {
              gen(env, AssertType, takenType, tmp);
            }
            finish();
-           gen(env, Jmp, makeExit(env, nextBcOff(env)));
+           gen(env, Jmp, makeExit(env, nextSrcKey(env)));
          });
 
   return ptmp;

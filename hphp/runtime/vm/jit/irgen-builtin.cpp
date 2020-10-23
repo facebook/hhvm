@@ -99,12 +99,12 @@ bool type_converts_to_number(Type ty) {
 
 Block* make_opt_catch(IRGS& env, const ParamPrep& params) {
   // The params have been popped and if we're inlining the ActRec is gone
-  env.irb->setCurMarker(makeMarker(env, nextBcOff(env)));
+  env.irb->setCurMarker(makeMarker(env, nextSrcKey(env)));
   env.irb->exceptionStackBoundary();
 
   assertx(!env.irb->fs().stublogue());
   auto const exit = defBlock(env, Block::Hint::Unlikely);
-  BlockPusher bp(*env.irb, makeMarker(env, nextBcOff(env)), exit);
+  BlockPusher bp(*env.irb, makeMarker(env, nextSrcKey(env)), exit);
   gen(env, BeginCatch);
   params.decRefParams(env);
   auto const data = EndCatchData {
@@ -1458,7 +1458,7 @@ struct CatchMaker {
   Block* makeUnusualCatch() const {
     assertx(!env.irb->fs().stublogue());
     auto const exit = defBlock(env, Block::Hint::Unlikely);
-    BlockPusher bp(*env.irb, makeMarker(env, bcOff(env)), exit);
+    BlockPusher bp(*env.irb, makeMarker(env, curSrcKey(env)), exit);
     gen(env, BeginCatch);
     decRefParams();
     prepareForCatch();

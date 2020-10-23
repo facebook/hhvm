@@ -214,10 +214,10 @@ void logArrayIterProfile(IRGS& env, const IterArgs& data,
   // We don't want production webservers to log when they do so.
   if (!RO::EvalLogArrayIterProfile) return;
 
-  auto const marker  = makeMarker(env, bcOff(env));
+  auto const marker  = makeMarker(env, curSrcKey(env));
   auto const profile = TargetProfile<ArrayIterProfile>(
     env.context,
-    makeMarker(env, bcOff(env)),
+    makeMarker(env, curSrcKey(env)),
     s_ArrayIterProfile.get()
   );
   if (!profile.optimizing()) return;
@@ -278,7 +278,7 @@ ArrayIterProfile::Result getProfileResult(IRGS& env, const SSATmp* base) {
 
   auto const profile = TargetProfile<ArrayIterProfile>(
     env.context,
-    makeMarker(env, bcOff(env)),
+    makeMarker(env, curSrcKey(env)),
     s_ArrayIterProfile.get()
   );
   if (!profile.optimizing()) return generic;
@@ -623,7 +623,7 @@ void emitSpecializedHeader(IRGS& env, const Accessor& accessor,
     },
     [&]{
       finish(elm, val);
-      gen(env, Jmp, makeExit(env, nextBcOff(env)));
+      gen(env, Jmp, makeExit(env, nextSrcKey(env)));
     }
   );
   finish(elm, guarded_val);

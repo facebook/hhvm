@@ -1807,7 +1807,7 @@ void emitDiv(IRGS& env) {
         auto const msg = cns(env, s_DIVISION_BY_ZERO.get());
         gen(env, RaiseWarning, msg);
         push(env, cns(env, false));
-        gen(env, Jmp, makeExit(env, nextBcOff(env)));
+        gen(env, Jmp, makeExit(env, nextSrcKey(env)));
         }
       }
   );
@@ -1838,7 +1838,7 @@ void emitDiv(IRGS& env) {
             // Avoid SIGFPE when dividing the miniumum respresentable integer
             // by -1.
             push(env, gen(env, DivDbl, toDbl(dividend), toDbl(divisor)));
-            gen(env, Jmp, makeExit(env, nextBcOff(env)));
+            gen(env, Jmp, makeExit(env, nextSrcKey(env)));
           }
         );
       }
@@ -1882,7 +1882,7 @@ void emitMod(IRGS& env) {
         decRef(env, btr);
         decRef(env, btl);
         push(env, cns(env, false));
-        gen(env, Jmp, makeExit(env, nextBcOff(env)));
+        gen(env, Jmp, makeExit(env, nextSrcKey(env)));
       }
     }
   );

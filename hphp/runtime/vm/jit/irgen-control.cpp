@@ -42,7 +42,7 @@ void surpriseCheck(IRGS& env, Offset relOffset) {
 
 void surpriseCheckWithTarget(IRGS& env, Offset targetBcOff) {
   auto const ptr = resumeMode(env) != ResumeMode::None ? sp(env) : fp(env);
-  auto const exit = makeExitSurprise(env, targetBcOff);
+  auto const exit = makeExitSurprise(env, SrcKey{curSrcKey(env), targetBcOff});
   gen(env, CheckSurpriseFlags, exit, ptr);
 }
 
@@ -57,7 +57,7 @@ Block* getBlock(IRGS& env, Offset offset) {
   // and makeBlock will just return it.  This will be the proper successor
   // block set by setSuccIRBlocks.  Otherwise, the given offset doesn't belong
   // to the region, so we just create an exit block.
-  if (!env.irb->hasBlock(sk)) return makeExit(env, offset);
+  if (!env.irb->hasBlock(sk)) return makeExit(env, sk);
 
   return env.irb->makeBlock(sk, curProfCount(env));
 }

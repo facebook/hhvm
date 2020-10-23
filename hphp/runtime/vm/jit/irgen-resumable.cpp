@@ -142,7 +142,7 @@ template<class Hook>
 void suspendHook(IRGS& env, Hook hook) {
   // Sync the marker to let the unwinder know that the consumed input is
   // no longer on the eval stack.
-  env.irb->setCurMarker(makeMarker(env, bcOff(env)));
+  updateMarker(env);
   env.irb->exceptionStackBoundary();
 
   ringbufferMsg(env, Trace::RBTypeFuncExit, curFunc(env)->fullName());
@@ -376,8 +376,8 @@ void implYield(IRGS& env, bool withKey) {
  * bytecode offset is a jump target from things we aren't thinking about
  * here).
  */
-Type awaitedTypeFromHHBBC(IRGS& env, Offset nextBcOff) {
-  auto pc = curFunc(env)->at(nextBcOff);
+Type awaitedTypeFromHHBBC(IRGS& env, SrcKey nextSk) {
+  auto pc = nextSk.pc();
   if (decode_op(pc) != Op::AssertRATStk) return TInitCell;
   auto const stkLoc = decode_iva(pc);
   if (stkLoc != 0) return TInitCell;
@@ -414,8 +414,8 @@ Type awaitedTypeFromSSATmp(const SSATmp* awaitable) {
   return TInitCell;
 }
 
-Type awaitedType(IRGS& env, SSATmp* awaitable, Offset nextBcOff) {
-  return awaitedTypeFromHHBBC(env, nextBcOff) &
+Type awaitedType(IRGS& env, SSATmp* awaitable, SrcKey nextSk) {
+  return awaitedTypeFromHHBBC(env, nextSk) &
          awaitedTypeFromSSATmp(awaitable);
 }
 
@@ -458,7 +458,7 @@ void emitWHResult(IRGS& env) {
     "we test state for non-zero, success must be zero"
   );
   gen(env, JmpNZero, exitSlow, gen(env, LdWHState, child));
-  auto const awaitedTy = awaitedType(env, child, nextBcOff(env));
+  auto const awaitedTy = awaitedType(env, child, nextSrcKey(env));
   auto const res = gen(env, LdWHResult, awaitedTy, child);
   gen(env, IncRef, res);
   decRef(env, child);
@@ -467,7 +467,6 @@ void emitWHResult(IRGS& env) {
 
 void emitAwait(IRGS& env) {
   auto const suspendOffset = bcOff(env);
-  auto const resumeOffset = nextBcOff(env);
   assertx(curFunc(env)->isAsync());
   assertx(spOffBCFromFP(env) == spOffEmpty(env) + 1);
 
@@ -488,7 +487,7 @@ void emitAwait(IRGS& env) {
   auto const child = gen(env, AssertType, TAwaitable, popped);
 
   auto const handleSucceeded = [&] {
-    auto const awaitedTy = awaitedType(env, child, resumeOffset);
+    auto const awaitedTy = awaitedType(env, child, nextSrcKey(env));
     auto const res = gen(env, LdWHResult, awaitedTy, child);
     gen(env, IncRef, res);
     decRef(env, child);
@@ -516,9 +515,9 @@ void emitAwait(IRGS& env) {
     if (childIsSWH) {
       gen(env, Unreachable, ASSERT_REASON);
     } else if (resumeMode(env) == ResumeMode::Async) {
-      implAwaitR(env, child, suspendOffset, resumeOffset);
+      implAwaitR(env, child, suspendOffset, nextBcOff(env));
     } else {
-      implAwaitE(env, child, suspendOffset, resumeOffset);
+      implAwaitE(env, child, suspendOffset, nextBcOff(env));
     }
   };
 
@@ -557,7 +556,7 @@ void emitAwait(IRGS& env) {
           [&] (Block* taken) { gen(env, JmpNZero, taken, state); },
           [&] {
             handleSucceeded();
-            gen(env, Jmp, makeExit(env, resumeOffset));
+            gen(env, Jmp, makeExit(env, nextSrcKey(env)));
           },
           [&] { handleFailed(); }
         );

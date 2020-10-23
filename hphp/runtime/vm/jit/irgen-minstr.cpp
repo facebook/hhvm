@@ -1335,7 +1335,10 @@ SSATmp* emitArrayLikeSet(IRGS& env, SSATmp* key, SSATmp* value) {
   }
 
   auto const baseLoc = ldMBase(env);
-  if (!canUpdateCanonicalBase(baseLoc)) return nullptr;
+  if (!canUpdateCanonicalBase(baseLoc)) {
+    gen(env, SetElem, baseLoc, key, value);
+    return value;
+  }
 
   auto const op = isVec ? VecSet : DictSet;
   auto const newArr = gen(env, op, base, key, value);
@@ -1370,7 +1373,7 @@ void setNewElemVecImpl(IRGS& env, uint32_t nDiscard, SSATmp* basePtr,
       gen(env, StMem, elemPtr, value);
     },
     [&] {
-      gen(env, SetNewElemVec, makeCatchSet(env, nDiscard), basePtr, value);
+      gen(env, SetNewElemVec, basePtr, value);
     }
   );
 
@@ -1389,7 +1392,7 @@ SSATmp* setNewElemImpl(IRGS& env, uint32_t nDiscard) {
     setNewElemVecImpl(env, nDiscard, basePtr, baseType, value);
   } else if (baseType.subtypeOfAny(TDArr, TDict)) {
     constrainBase(env);
-    gen(env, SetNewElemDict, makeCatchSet(env, nDiscard), basePtr, value);
+    gen(env, SetNewElemDict, basePtr, value);
   } else if (baseType <= TKeyset) {
     constrainBase(env);
     if (!value->type().isKnownDataType()) {
@@ -1400,7 +1403,7 @@ SSATmp* setNewElemImpl(IRGS& env, uint32_t nDiscard) {
       auto const base = extractBase(env);
       gen(env, ThrowInvalidArrayKey, base, value);
     } else {
-      gen(env, SetNewElemKeyset, makeCatchSet(env, nDiscard), basePtr, value);
+      gen(env, SetNewElemKeyset, basePtr, value);
     }
   } else {
     gen(env, SetNewElem, makeCatchSet(env, nDiscard), basePtr, value);
@@ -1436,10 +1439,7 @@ SSATmp* setElemImpl(IRGS& env, uint32_t nDiscard, SSATmp* key) {
     case SimpleOp::Vec:
     case SimpleOp::Dict:
     case SimpleOp::Keyset:
-      if (auto result = emitArrayLikeSet(env, key, value)) {
-        return result;
-      }
-      // If we couldn't emit a specialized op, fall through to the generic path.
+      return emitArrayLikeSet(env, key, value);
 
     case SimpleOp::Pair:
     case SimpleOp::None:

@@ -9,35 +9,41 @@ class C {
     public int $b = 0;
 }
 
+<<__InferFlows>>
 function incr_pc_ok1(C $c): void {
   if (!($c->a > 0)) {
     $c->a--; // ok
   }
 }
 
+<<__InferFlows>>
 function incr_pc_ok2(C $c): void {
   if (!($c->a > 0)) {
     --$c->a; // ok
   }
 }
 
+<<__InferFlows>>
 function incr_pc_ko1(C $c): void {
   if (!($c->a > 0)) {
     $c->b++; // This is illegal because the PC depends on A
   }
 }
 
+<<__InferFlows>>
 function incr_pc_ko2(C $c): void {
   if (!($c->a > 0)) {
     ++$c->b; // This is illegal because the PC depends on A
   }
 }
 
+<<__InferFlows>>
 function assign_uop_ko1(C $c): void {
   // illegal
   $c->b = ~$c->a;
 }
 
+<<__InferFlows>>
 function assign_uop_ko2(C $c): void {
   // illegal
   $c->b = -$c->a;

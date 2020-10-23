@@ -14,6 +14,7 @@ class C {
   public arraykey $out = 42;
 }
 
+<<__InferFlows>>
 function simple(bool $b, C $c): void {
   $x = 42;
   while ($b) {
@@ -24,6 +25,7 @@ function simple(bool $b, C $c): void {
   $c->out = $x;
 }
 
+<<__InferFlows>>
 function breaks(bool $b, C $c): void {
   $x = 42;
   while ($b) {
@@ -36,6 +38,7 @@ function breaks(bool $b, C $c): void {
   $c->out = $x;
 }
 
+<<__InferFlows>>
 function continues(bool $b, C $c): void {
   $x = 42;
   while ($b) {
@@ -48,6 +51,7 @@ function continues(bool $b, C $c): void {
   $c->out = $x;
 }
 
+<<__InferFlows>>
 function pcleak(C $c): void {
   $n = 0;
   while ($c->prib) {
@@ -59,6 +63,7 @@ function pcleak(C $c): void {
   $c->out = $n;
 }
 
+<<__InferFlows>>
 function niftyleak(bool $b, C $c): void {
   $x = 42;
   $y = 24;

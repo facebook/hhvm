@@ -28,25 +28,30 @@ function dbl(int $x): int {
   return $x;
 }
 
+<<__InferFlows>>
 function flow_a_to_b(C $c): void {
   $n = dbl($c->a);
   $c->setb($n);
 }
 
+<<__InferFlows>>
 function flow_b_to_b(C $c): void {
   $c->setb($c->b);
 }
 
+<<__InferFlows>>
 function flow_bot_to_b(C $c): void {
   $c->setb(dbl(dbl(42)));
 }
 
+<<__InferFlows>>
 function indirect_flow_a_to_b(C $c): void {
   if ($c->a > 0) {
     $c->setb(42);
   }
 }
 
+<<__InferFlows>>
 function indirect_flow_a_to_b_bis(C $c1, C $c2): void {
   if ($c1->is_a_pos()) {
     $c2->setb($c2->b + 1);

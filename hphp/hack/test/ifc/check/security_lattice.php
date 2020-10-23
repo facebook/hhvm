@@ -9,6 +9,7 @@
 //    PUBLIC
 
 class C {
+  <<__InferFlows>>
   public function __construct(
     <<__Policied("A")>>
     public int $a,
@@ -20,6 +21,7 @@ class C {
     public int $private,
   ) {}
 
+  <<__InferFlows>>
   public function test(): void {
     $this->public = $this->public;   // Ok
     $this->private = $this->public;  // Ok

@@ -2,6 +2,7 @@
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
 class A {
+  <<__InferFlows>>
   public function __construct() {}
 }
 
@@ -12,6 +13,7 @@ class B {
   <<__Policied("PRIVATE")>>
   public A $priv;
 
+  <<__InferFlows>>
   public function __construct() {
     $this->pub = new A();
     $this->priv = new A();

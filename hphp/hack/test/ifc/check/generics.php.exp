@@ -1,61 +1,61 @@
 === IFC analysis results for generics.php
-File "generics.php", line 54, characters 24-25:
+File "generics.php", line 61, characters 24-25:
 Data with policy `B` appears in context `A`. (Typing[4379])
   File "generics.php", line 9, characters 14-19:
   This may be the data source with policy `B`
   File "generics.php", line 6, characters 14-19:
   This may be the data sink with policy `A`
-  File "generics.php", line 50, characters 3-16:
+  File "generics.php", line 56, characters 3-16:
   Another program point contributing to the illegal flow
-  File "generics.php", line 54, characters 3-34:
+  File "generics.php", line 61, characters 3-34:
   Another program point contributing to the illegal flow
-File "generics.php", line 68, characters 3-19:
+File "generics.php", line 77, characters 3-19:
 Data with policy `B` appears in context `A`. (Typing[4379])
   File "generics.php", line 9, characters 14-19:
   This may be the data source with policy `B`
   File "generics.php", line 6, characters 14-19:
   This may be the data sink with policy `A`
-  File "generics.php", line 50, characters 3-16:
+  File "generics.php", line 56, characters 3-16:
   Another program point contributing to the illegal flow
-  File "generics.php", line 66, characters 5-15:
+  File "generics.php", line 75, characters 5-15:
   Another program point contributing to the illegal flow
-  File "generics.php", line 65, characters 3-36:
+  File "generics.php", line 74, characters 3-36:
   Another program point contributing to the illegal flow
-File "generics.php", line 46, characters 3-20:
+File "generics.php", line 51, characters 3-20:
 Data with policy `B` appears in context `A`. (Typing[4379])
   File "generics.php", line 9, characters 14-19:
   This may be the data source with policy `B`
   File "generics.php", line 6, characters 14-19:
   This may be the data sink with policy `A`
-  File "generics.php", line 14, characters 3-12:
+  File "generics.php", line 15, characters 3-12:
   Another program point contributing to the illegal flow
-  File "generics.php", line 45, characters 3-15:
+  File "generics.php", line 50, characters 3-15:
   Another program point contributing to the illegal flow
-  File "generics.php", line 41, characters 5-17:
+  File "generics.php", line 46, characters 5-17:
   Another program point contributing to the illegal flow
-  File "generics.php", line 39, characters 5-15:
+  File "generics.php", line 44, characters 5-15:
   Another program point contributing to the illegal flow
-  File "generics.php", line 38, characters 3-76:
+  File "generics.php", line 43, characters 3-76:
   Another program point contributing to the illegal flow
-File "generics.php", line 46, characters 3-20:
+File "generics.php", line 51, characters 3-20:
 Data with policy `A` appears in context `B`. (Typing[4379])
   File "generics.php", line 6, characters 14-19:
   This may be the data source with policy `A`
   File "generics.php", line 9, characters 14-19:
   This may be the data sink with policy `B`
-  File "generics.php", line 14, characters 3-12:
+  File "generics.php", line 15, characters 3-12:
   Another program point contributing to the illegal flow
-  File "generics.php", line 45, characters 3-15:
+  File "generics.php", line 50, characters 3-15:
   Another program point contributing to the illegal flow
-  File "generics.php", line 40, characters 5-15:
+  File "generics.php", line 45, characters 5-15:
   Another program point contributing to the illegal flow
-  File "generics.php", line 38, characters 3-76:
+  File "generics.php", line 43, characters 3-76:
   Another program point contributing to the illegal flow
-File "generics.php", line 23, characters 3-20:
+File "generics.php", line 26, characters 3-20:
 Data with policy `A` appears in context `B`. (Typing[4379])
   File "generics.php", line 6, characters 14-19:
   This may be the data source with policy `A`
   File "generics.php", line 9, characters 14-19:
   This may be the data sink with policy `B`
-  File "generics.php", line 14, characters 3-12:
+  File "generics.php", line 15, characters 3-12:
   Another program point contributing to the illegal flow

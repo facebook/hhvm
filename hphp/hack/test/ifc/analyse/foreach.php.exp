@@ -9,7 +9,7 @@ Analyzing \dict_lit_flow:
 * Final environment:
   Deps: {}
   Constraints:
-    [4:12-30] dict < $value, dict'1 < $key
+    [5:12-30] dict < $value, dict'1 < $key
   Locals:
     { $#capability -> nothing; $#local_capability -> nothing }
 
@@ -23,7 +23,7 @@ Analyzing \dict_var_flow:
 * Final environment:
   Deps: {}
   Constraints:
-    [8:12-17]
+    [10:12-17]
       $dict'1 < $dict'3, $dict < $dict'2, len < len'1, $dict'2 < $value,
       $dict'3 < $key
   Locals:
@@ -41,7 +41,7 @@ Analyzing \vec_lit_flow:
 * Final environment:
   Deps: {}
   Constraints:
-    [12:12-22] Vec < $value
+    [15:12-22] Vec < $value
   Locals:
     { $#capability -> nothing; $#local_capability -> nothing }
 
@@ -55,7 +55,7 @@ Analyzing \vec_var_flow:
 * Final environment:
   Deps: {}
   Constraints:
-    [16:12-16] key < key'1, $vec < $vec'1, len < len'1, $vec'1 < $value
+    [20:12-16] key < key'1, $vec < $vec'1, len < len'1, $vec'1 < $value
   Locals:
     { $#capability -> nothing;
       $#local_capability -> nothing;
@@ -71,7 +71,7 @@ Analyzing \keyset_lit_flow:
 * Final environment:
   Deps: {}
   Constraints:
-    [20:12-25] Keyset < $value
+    [25:12-25] Keyset < $value
   Locals:
     { $#capability -> nothing; $#local_capability -> nothing }
 
@@ -85,7 +85,7 @@ Analyzing \keyset_var_flow:
 * Final environment:
   Deps: {}
   Constraints:
-    [24:12-19]
+    [30:12-19]
       $keyset < $keyset'1, $keyset < $keyset'1, len < len'1,
       $keyset'1 < $value
   Locals:

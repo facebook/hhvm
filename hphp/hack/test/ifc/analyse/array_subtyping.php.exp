@@ -9,7 +9,7 @@ Analyzing \dictToDictPrim:
 * Final environment:
   Deps: {}
   Constraints:
-    [6:3-16] $dict'1 < ret'1, $dict < ret, len'1 < len
+    [7:3-16] $dict'1 < ret'1, $dict < ret, len'1 < len
   Locals:
     { $dict -> dict<<$dict'1> => <$dict>; |len'1|> }
 
@@ -23,7 +23,7 @@ Analyzing \dictToDictClass:
 * Final environment:
   Deps: {}
   Constraints:
-    [10:3-16] $dict < ret, C_lump = C_lump'1, C'1 < C, len'1 < len
+    [12:3-16] $dict < ret, C_lump = C_lump'1, C'1 < C, len'1 < len
   Locals:
     { $dict -> dict<<$dict> => \C<C'1, C_lump'1>; |len'1|> }
 
@@ -37,7 +37,7 @@ Analyzing \dictToKTClass:
 * Final environment:
   Deps: {}
   Constraints:
-    [14:3-16]
+    [17:3-16]
       $dict < HH\KeyedTraversable, C < HH\KeyedTraversable,
       len < HH\KeyedTraversable, C_lump = HH\KeyedTraversable_lump
   Locals:
@@ -53,7 +53,7 @@ Analyzing \vecToVecPrim:
 * Final environment:
   Deps: {}
   Constraints:
-    [18:3-15] key'1 < key, $vec < ret, len'1 < len
+    [22:3-15] key'1 < key, $vec < ret, len'1 < len
   Locals:
     { $vec -> vec<<key'1> => <$vec>; |len'1|> }
 
@@ -67,7 +67,7 @@ Analyzing \vecToVecClass:
 * Final environment:
   Deps: {}
   Constraints:
-    [22:3-15] key'1 < key, C_lump = C_lump'1, C'1 < C, len'1 < len
+    [27:3-15] key'1 < key, C_lump = C_lump'1, C'1 < C, len'1 < len
   Locals:
     { $vec -> vec<<key'1> => \C<C'1, C_lump'1>; |len'1|> }
 
@@ -81,7 +81,7 @@ Analyzing \vecToKTClass:
 * Final environment:
   Deps: {}
   Constraints:
-    [26:3-15]
+    [32:3-15]
       C < HH\KeyedTraversable, key < HH\KeyedTraversable,
       len < HH\KeyedTraversable, C_lump = HH\KeyedTraversable_lump
   Locals:
@@ -97,7 +97,7 @@ Analyzing \keysetToKeysetPrim:
 * Final environment:
   Deps: {}
   Constraints:
-    [30:3-18] $keyset < ret, $keyset < ret, len'1 < len
+    [37:3-18] $keyset < ret, $keyset < ret, len'1 < len
   Locals:
     { $keyset -> keyset<<$keyset> => <$keyset>; |len'1|> }
 
@@ -111,7 +111,7 @@ Analyzing \keysetToKTPrim:
 * Final environment:
   Deps: {}
   Constraints:
-    [34:3-18] $keyset < HH\KeyedTraversable, len < HH\KeyedTraversable
+    [42:3-18] $keyset < HH\KeyedTraversable, len < HH\KeyedTraversable
   Locals:
     { $keyset -> keyset<<$keyset> => <$keyset>; |len|> }
 

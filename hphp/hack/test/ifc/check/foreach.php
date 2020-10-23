@@ -9,6 +9,7 @@ class C {
   public int $value = 0;
 }
 
+<<__InferFlows>>
 function leak_through_vec_value(C $c): void {
   $vec = vec[$c->value];
   foreach ($vec as $value) {
@@ -17,7 +18,7 @@ function leak_through_vec_value(C $c): void {
   }
 }
 
-
+<<__InferFlows>>
 function leak_through_dict_key_and_value(C $c): void {
   $dict = dict[$c->key => $c->value];
   foreach ($dict as $key => $value) {

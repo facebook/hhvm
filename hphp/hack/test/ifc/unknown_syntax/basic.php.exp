@@ -1,7 +1,7 @@
 === IFC analysis results for basic.php
-File "basic.php", line 5, characters 7-15:
+File "basic.php", line 6, characters 7-15:
 Unable to analyze information flow for expression (As). This might be unsafe. (Typing[4385])
-File "basic.php", line 13, characters 3-66:
+File "basic.php", line 15, characters 3-66:
 Unable to analyze information flow for statement (Do). This might be unsafe. (Typing[4385])
-File "basic.php", line 19, characters 3-12:
+File "basic.php", line 21, characters 3-12:
 Unable to analyze information flow for local $x missing from env. This might be unsafe. (Typing[4385])

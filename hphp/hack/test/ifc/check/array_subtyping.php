@@ -10,6 +10,7 @@ class Simple {
   <<__Policied("KEYED_CONTAINER")>>
   public KeyedContainer<int,string> $keyedContainer = vec[];
 
+  <<__InferFlows>>
   public function vecToKT(): void {
     $this->vec[$this->ix] = $this->value;
     // INDEX flows to KEYED_TRAVERSABLE
@@ -17,6 +18,7 @@ class Simple {
     $this->keyedTraversable = $this->vec;
   }
 
+  <<__InferFlows>>
   public function vecToKC(): void {
     $this->vec[$this->ix] = $this->value;
     // INDEX flows to KEYED_TRAVERSABLE

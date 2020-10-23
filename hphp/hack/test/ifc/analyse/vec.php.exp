@@ -9,7 +9,7 @@ Analyzing \empty:
 * Final environment:
   Deps: {}
   Constraints:
-    [4:3-16] key'1 < key, Vec < ret, len'1 < len
+    [5:3-16] key'1 < key, Vec < ret, len'1 < len
   Locals:
     {}
 
@@ -23,7 +23,7 @@ Analyzing \collection:
 * Final environment:
   Deps: {}
   Constraints:
-    [8:3-29] lit < Vec, lit'1 < Vec, key'1 < key, Vec < ret, len'1 < len
+    [10:3-29] lit < Vec, lit'1 < Vec, key'1 < key, Vec < ret, len'1 < len
   Locals:
     {}
 
@@ -37,7 +37,7 @@ Analyzing \add:
 * Final environment:
   Deps: {}
   Constraints:
-    [12:3-14]
+    [15:3-14]
       key < weak, $vec < weak'1, len < weak'2, lit < weak'1, weak < key'1,
       weak'1 < $vec'1, weak'2 < len'1
   Locals:
@@ -53,7 +53,7 @@ Analyzing \retElem:
 * Final environment:
   Deps: {}
   Constraints:
-    [16:3-18]
+    [20:3-18]
       lit < key, OutOfBoundsException_lump = exn_lump,
       OutOfBoundsException < exn, len < exn, lit < exn, $vec < ret,
       len < ret, lit < ret

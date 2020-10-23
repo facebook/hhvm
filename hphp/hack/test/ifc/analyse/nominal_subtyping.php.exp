@@ -9,7 +9,7 @@ Analyzing __construct:
 * Final environment:
   Deps: {}
   Constraints:
-    [6:16-19] D < PD, pc < PD, $pd < PD
+    [7:16-19] D < PD, pc < PD, $pd < PD
   Locals:
     { $pd -> <$pd> }
 
@@ -26,9 +26,9 @@ Analyzing __construct:
     [no pos]
       {(this: \E<E, E_lump>)->\D#__construct<pcjoin'1, D#__construct_self>(<$pd>): <D#__construct_ret> [\Exception<D#__construct_exn,
                                                                     D#__construct_exn_lump>]}
-    [12:16-19] E < PD, pc < PD, $pd < PD
-    [14:16-19] E < PE, pc < PE, $pe < PE
-    [16:5-30]
+    [14:16-19] E < PD, pc < PD, $pd < PD
+    [16:16-19] E < PE, pc < PE, $pe < PE
+    [18:5-30]
       D#__construct_self < D#__construct_ret,
       D#__construct_exn_lump = exn_lump, D#__construct_exn < exn,
       D#__construct_exn < exn, D#__construct_self < pcjoin,
@@ -47,7 +47,7 @@ Analyzing \testPoliciedPropertiesED:
 * Final environment:
   Deps: {}
   Constraints:
-    [20:46-56] D_lump = E_lump, E < D
+    [23:46-56] D_lump = E_lump, E < D
   Locals:
     { $e -> \E<E, E_lump> }
 
@@ -65,10 +65,10 @@ Analyzing __construct:
       {(this: \F<F, F_lump>)->\E#__construct<pcjoin'1, E#__construct_self>(<$pd>,
                                                                     <$pe>): <E#__construct_ret> [\Exception<E#__construct_exn,
                                                                     E#__construct_exn_lump>]}
-    [24:16-19] F < PD, pc < PD, $pd < PD
-    [25:16-19] F < PE, pc < PE, $pe < PE
-    [27:16-19] F < PF, pc < PF, $pf < PF
-    [29:5-35]
+    [28:16-19] F < PD, pc < PD, $pd < PD
+    [29:16-19] F < PE, pc < PE, $pe < PE
+    [31:16-19] F < PF, pc < PF, $pf < PF
+    [33:5-35]
       E#__construct_self < E#__construct_ret,
       E#__construct_exn_lump = exn_lump, E#__construct_exn < exn,
       E#__construct_exn < exn, E#__construct_self < pcjoin,
@@ -87,7 +87,7 @@ Analyzing \testPoliciedPropertiesFE:
 * Final environment:
   Deps: {}
   Constraints:
-    [33:46-56] E_lump = F_lump, F < E
+    [38:46-56] E_lump = F_lump, F < E
   Locals:
     { $f -> \F<F, F_lump> }
 
@@ -101,7 +101,7 @@ Analyzing \testPoliciedPropertiesFD:
 * Final environment:
   Deps: {}
   Constraints:
-    [34:46-56] D_lump = F_lump, F < D
+    [40:46-56] D_lump = F_lump, F < D
   Locals:
     { $f -> \F<F, F_lump> }
 

@@ -17,6 +17,7 @@ class B extends A {
   public int $k = 0;
 }
 
+<<__InferFlows>>
 function test(B $b): void {
   $b->i = $b->k;
   $b->j = $b->k;

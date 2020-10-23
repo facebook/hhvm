@@ -12,6 +12,7 @@ class X {
 class E1 extends Exception {}
 class E2 extends Exception {}
 
+<<__InferFlows>>
 function no_catch_all(X $x, E2 $e): void {
   try {
     if ($x->a > 0) throw $e;
@@ -20,6 +21,7 @@ function no_catch_all(X $x, E2 $e): void {
   $x->b = 0;
 }
 
+<<__InferFlows>>
 function store_in_finally(X $x, E1 $e): void {
   try {
     if ($x->a > 0) throw $e;
@@ -29,6 +31,7 @@ function store_in_finally(X $x, E1 $e): void {
   }
 }
 
+<<__InferFlows>>
 function return_in_try(X $x, E1 $e): void {
   try {
     if ($x->a > 0) return;
@@ -38,6 +41,7 @@ function return_in_try(X $x, E1 $e): void {
   }
 }
 
+<<__InferFlows>>
 function multi_catch(X $x, E1 $e): void {
   try {
     if ($x->a > 0) throw $e;
@@ -48,6 +52,7 @@ function multi_catch(X $x, E1 $e): void {
   }
 }
 
+<<__InferFlows>>
 function no_catch(X $x, E1 $e, bool $b): void {
   try {
     $val = 0;
@@ -62,6 +67,7 @@ function no_catch(X $x, E1 $e, bool $b): void {
   }
 }
 
+<<__InferFlows>>
 function throw_in_catch(X $x, E1 $e): void {
   try {
     if ($x->a > 0) throw $e;
@@ -72,6 +78,7 @@ function throw_in_catch(X $x, E1 $e): void {
   $x->b = 123;
 }
 
+<<__InferFlows>>
 function local_bindings(bool $b, Exception $e): int {
   try {
     try {
@@ -87,6 +94,7 @@ function local_bindings(bool $b, Exception $e): int {
   return 0;
 }
 
+<<__InferFlows>>
 function unreachable_assign(X $x, Exception $e): void {
   $val = 0;
   try {

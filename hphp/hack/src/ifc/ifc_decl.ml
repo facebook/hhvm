@@ -76,8 +76,7 @@ let callable_decl attrs args =
       if Option.is_some (get_attr infer_flows_id attrs) then
         FDInferFlows
       else
-        (* Eventually, make this (FDGovernedBy Pbot) *)
-        FDInferFlows
+        FDPolicied (Some pbot)
   in
   let fd_args =
     let mk_arg_kind param id f def =

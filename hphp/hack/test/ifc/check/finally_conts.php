@@ -9,6 +9,7 @@ class X {
   public int $b = 1;
 }
 
+<<__InferFlows>>
 function f(X $x, Exception $e, bool $b): void {
   $z = 0;
   try {
@@ -34,6 +35,7 @@ function f(X $x, Exception $e, bool $b): void {
   $x->b = $z;
 }
 
+<<__InferFlows>>
 function g(X $x, Exception $e): void {
   try {
     try {

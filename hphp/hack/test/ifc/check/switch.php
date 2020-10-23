@@ -9,6 +9,7 @@ class C {
   public int $b = 0;
 }
 
+<<__InferFlows>>
 function switch_basic(C $c): void {
   switch ($c->a) {
     case 0:
@@ -21,6 +22,7 @@ function switch_basic(C $c): void {
   $c->b = 1; // ok, PC is erased at this point
 }
 
+<<__InferFlows>>
 function leak_in_case_expr(C $c, int $x): void {
   switch ($x) {
     case $c->a:
@@ -31,6 +33,7 @@ function leak_in_case_expr(C $c, int $x): void {
   }
 }
 
+<<__InferFlows>>
 function leak_in_fallthrough(C $c, int $x): void {
   $y = 0;
   switch ($x) {
@@ -45,6 +48,7 @@ function leak_in_fallthrough(C $c, int $x): void {
   }
 }
 
+<<__InferFlows>>
 function leak_after_switch(C $c, int $x): void {
   switch ($x) {
     case 0:
@@ -57,6 +61,7 @@ function leak_after_switch(C $c, int $x): void {
   $c->b = $y;
 }
 
+<<__InferFlows>>
 function leak_fallthrough_pc(C $c, int $x): void {
   switch ($x) {
     case 0:
@@ -69,6 +74,7 @@ function leak_fallthrough_pc(C $c, int $x): void {
   }
 }
 
+<<__InferFlows>>
 function leak_pc_after_switch(C $c): void {
   switch ($c->a) {
     case 0:
@@ -79,6 +85,7 @@ function leak_pc_after_switch(C $c): void {
   $c->b = 1;
 }
 
+<<__InferFlows>>
 function leak_pc_complex(C $c, int $x, Exception $e): void {
   switch ($x) {
     case 0:
@@ -95,6 +102,7 @@ function leak_pc_complex(C $c, int $x, Exception $e): void {
   }
 }
 
+<<__InferFlows>>
 function leak_pc_in_case_exp(C $c): int {
   $f = () ==> {
     $c->a = 0;

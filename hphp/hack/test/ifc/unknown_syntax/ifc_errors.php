@@ -9,6 +9,7 @@ class A {
   public int $priv = 1;
 }
 
+<<__InferFlows>>
 function f(A $a): void {
   $x = $a->priv;
 

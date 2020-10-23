@@ -9,7 +9,7 @@ Analyzing __construct:
 * Final environment:
   Deps: {}
   Constraints:
-    [4:42-45] D < D_lump, pc < D_lump, $di < D_lump
+    [5:42-45] D < D_lump, pc < D_lump, $di < D_lump
   Locals:
     { $di -> <$di> }
 
@@ -23,8 +23,8 @@ Analyzing __construct:
 * Final environment:
   Deps: {}
   Constraints:
-    [10:16-19] C < SECRET, pc < SECRET, $ci < SECRET
-    [12:14-16] C < SECRET, pc < SECRET, D_lump = SECRET, D < SECRET
+    [12:16-19] C < SECRET, pc < SECRET, $ci < SECRET
+    [14:14-16] C < SECRET, pc < SECRET, D_lump = SECRET, D < SECRET
   Locals:
     { $ci -> <$ci>; $d -> \D<D, D_lump> }
 
@@ -38,7 +38,7 @@ Analyzing getShallow1:
 * Final environment:
   Deps: {}
   Constraints:
-    [16:5-22] SECRET < .ci, C < .ci, .ci < ret
+    [19:5-22] SECRET < .ci, C < .ci, .ci < ret
   Locals:
     {}
 
@@ -52,7 +52,7 @@ Analyzing getShallow2:
 * Final environment:
   Deps: {}
   Constraints:
-    [20:5-21] SECRET < .d, C < .d, D_lump = SECRET, .d < D
+    [24:5-21] SECRET < .d, C < .d, D_lump = SECRET, .d < D
   Locals:
     {}
 
@@ -66,7 +66,7 @@ Analyzing getDeep:
 * Final environment:
   Deps: {}
   Constraints:
-    [24:5-25] SECRET < .d, C < .d, SECRET < .di, .d < .di, .di < ret
+    [29:5-25] SECRET < .d, C < .d, SECRET < .di, .d < .di, .di < ret
   Locals:
     {}
 
@@ -80,7 +80,7 @@ Analyzing writeDeep:
 * Final environment:
   Deps: {}
   Constraints:
-    [28:5-23] SECRET < .d, C < .d, .d < SECRET, pc < SECRET, lit < SECRET
+    [34:5-23] SECRET < .d, C < .d, .d < SECRET, pc < SECRET, lit < SECRET
   Locals:
     {}
 

@@ -11,9 +11,9 @@ Analyzing __construct:
 * Final environment:
   Deps: {}
   Constraints:
-    [12:16-21] My < MINT, pc < MINT, $mInt < MINT
-    [14:18-24] My < OTHER, pc < OTHER, Other_lump = OTHER, Other < OTHER
-    [15:17-23] My < My_lump, pc < My_lump, $mBool < My_lump
+    [13:16-21] My < MINT, pc < MINT, $mInt < MINT
+    [15:18-24] My < OTHER, pc < OTHER, Other_lump = OTHER, Other < OTHER
+    [16:17-23] My < My_lump, pc < My_lump, $mBool < My_lump
   Locals:
     { $mBool -> <$mBool>;
       $mInt -> <$mInt>;
@@ -29,7 +29,7 @@ Analyzing getMInt:
 * Final environment:
   Deps: {}
   Constraints:
-    [19:5-24] MINT < .mInt, My < .mInt, .mInt < ret
+    [21:5-24] MINT < .mInt, My < .mInt, .mInt < ret
   Locals:
     {}
 
@@ -43,7 +43,7 @@ Analyzing setMInt:
 * Final environment:
   Deps: {}
   Constraints:
-    [23:5-30] My < MINT, pc < MINT, $candidate < MINT
+    [26:5-30] My < MINT, pc < MINT, $candidate < MINT
   Locals:
     { $candidate -> <$candidate> }
 
@@ -57,7 +57,7 @@ Analyzing \tlGetMyInt:
 * Final environment:
   Deps: {}
   Constraints:
-    [28:3-21] MINT < .mInt, My < .mInt, .mInt < ret
+    [32:3-21] MINT < .mInt, My < .mInt, .mInt < ret
   Locals:
     { $obj -> \My<My, My_lump> }
 
@@ -71,7 +71,7 @@ Analyzing \tlSetMyInt:
 * Final environment:
   Deps: {}
   Constraints:
-    [32:3-21] My < MINT, pc < MINT, $val < MINT
+    [37:3-21] My < MINT, pc < MINT, $val < MINT
   Locals:
     { $obj -> \My<My, My_lump>; $val -> <$val> }
 
@@ -85,7 +85,7 @@ Analyzing \tlGetOther:
 * Final environment:
   Deps: {}
   Constraints:
-    [36:3-22] OTHER < .other, My < .other, Other_lump = OTHER, .other < Other
+    [42:3-22] OTHER < .other, My < .other, Other_lump = OTHER, .other < Other
   Locals:
     { $obj -> \My<My, My_lump> }
 
@@ -99,7 +99,7 @@ Analyzing \tlGetOtherBool:
 * Final environment:
   Deps: {}
   Constraints:
-    [40:3-29]
+    [47:3-29]
       OTHER < .other, My < .other, OBOOL < .oBool, .other < .oBool,
       .oBool < ret
   Locals:
@@ -115,7 +115,7 @@ Analyzing \tlSetOtherBool:
 * Final environment:
   Deps: {}
   Constraints:
-    [44:3-30]
+    [52:3-30]
       OTHER < .other, My < .other, .other < OBOOL, pc < OBOOL, $bool < OBOOL
   Locals:
     { $bool -> <$bool>; $obj -> \My<My, My_lump> }

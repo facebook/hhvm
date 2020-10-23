@@ -5,6 +5,7 @@ class C {
   <<__Policied("PUBLIC")>>
   public int $value = 0;
 
+  <<__InferFlows>>
   public function __construct() {}
 }
 

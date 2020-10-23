@@ -1,6 +1,7 @@
 <?hh // strict
 
 class PublicData {
+  <<__InferFlows>>
   public function __construct(
     <<__Policied("PUBLIC")>>
     public string $data,
@@ -8,12 +9,14 @@ class PublicData {
 }
 
 class PoliciedData {
+  <<__InferFlows>>
   public function __construct(
     <<__Policied("SECRET")>>
     public bool $data,
   ) {}
 }
 
+<<__InferFlows>>
 function earlyReturn(PoliciedData $x, PublicData $y): void {
   if ($x->data) {
     return;

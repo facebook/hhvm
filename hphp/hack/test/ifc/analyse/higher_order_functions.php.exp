@@ -9,7 +9,7 @@ Analyzing \apply:
 * Final environment:
   Deps: {}
   Constraints:
-    [5:3-16]
+    [6:3-16]
       anonymous_self < anonymous_ret, anonymous_exn_lump = exn_lump,
       anonymous_exn < exn, anonymous_exn < exn, anonymous_self < pcjoin,
       anonymous_exn < pcjoin, pcjoin < pcjoin'1, pc < pcjoin'1, lit < $f'1,

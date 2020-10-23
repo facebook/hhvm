@@ -14,9 +14,11 @@ class C {
   <<__Policied("PUBLIC")>>
   public A $a;
 
+  <<__InferFlows>>
   public function __construct() { $this->a = new A(); }
 }
 
+<<__InferFlows>>
 function apply_ok((function(int): int) $f, C $c): void {
   // This is fine since we're inferring flows
   $c->value = $f(0);

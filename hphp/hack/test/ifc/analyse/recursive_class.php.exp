@@ -9,8 +9,8 @@ Analyzing __construct:
 * Final environment:
   Deps: {}
   Constraints:
-    [5:16-21] R < R_lump, pc < R_lump, $prop < R_lump
-    [6:14-16] R < R_lump, pc < R_lump, R_lump = R_lump'1, R'1 < R_lump
+    [6:16-21] R < R_lump, pc < R_lump, $prop < R_lump
+    [7:14-16] R < R_lump, pc < R_lump, R_lump = R_lump'1, R'1 < R_lump
   Locals:
     { $prop -> <$prop>; $r -> \R<R'1, R_lump'1> }
 
@@ -24,7 +24,7 @@ Analyzing recursiveGet:
 * Final environment:
   Deps: {}
   Constraints:
-    [10:5-33]
+    [12:5-33]
       R_lump < .r, R < .r, R_lump < .r'1, .r < .r'1, R_lump < .r'2,
       .r'1 < .r'2, R_lump < .prop, .r'2 < .prop, .prop < ret
   Locals:
@@ -40,7 +40,7 @@ Analyzing recursiveWrite:
 * Final environment:
   Deps: {}
   Constraints:
-    [14:5-31]
+    [17:5-31]
       R_lump < .r, R < .r, R_lump < .r'1, .r < .r'1, R_lump < .r'2,
       .r'1 < .r'2, .r'2 < R_lump, pc < R_lump, lit < R_lump
   Locals:

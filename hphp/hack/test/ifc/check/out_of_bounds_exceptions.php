@@ -2,13 +2,16 @@
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
 class X {
+  <<__InferFlows>>
   public function __construct(<<__Policied("PRIVATE")>> public int $valuex) {}
 }
 
 class Y {
+  <<__InferFlows>>
   public function __construct(<<__Policied("PUBLIC")>> public int $valuey) {}
 }
 
+<<__InferFlows>>
 function koVecAccess(X $x, Y $y, vec<int> $v): void {
   if ($x->valuex > 10) {
     // The following may throw out of bounds exception.
@@ -18,6 +21,7 @@ function koVecAccess(X $x, Y $y, vec<int> $v): void {
   $y->valuey = 10;
 }
 
+<<__InferFlows>>
 function koVecAssign(X $x, Y $y, vec<int> $v): void {
   if ($x->valuex > 10) {
     // The following may throw out of bounds exception.
@@ -27,6 +31,7 @@ function koVecAssign(X $x, Y $y, vec<int> $v): void {
   $y->valuey = 10;
 }
 
+<<__InferFlows>>
 function okDictAssign(X $x, Y $y, dict<int,int> $dict): void {
   // Assigning to a dictionary does not cause an exception to be thrown, so
   // there is no leak here.
@@ -36,6 +41,7 @@ function okDictAssign(X $x, Y $y, dict<int,int> $dict): void {
   $y->valuey = 10;
 }
 
+<<__InferFlows>>
 function koDictAccess(X $x, Y $y, dict<string,int> $v): void {
   if ($x->valuex > 10) {
     // The following may throw out of bounds exception.
@@ -45,6 +51,7 @@ function koDictAccess(X $x, Y $y, dict<string,int> $v): void {
   $y->valuey = 10;
 }
 
+<<__InferFlows>>
 function okDict(X $x, Y $y, dict<string,int> $v): void {
   if ($x->valuex > 10) {
     // The following is fine because we handle all exceptions.
@@ -62,12 +69,14 @@ class V {
   <<__Policied("PUBLIC")>>
   public bool $b = false;
 
+  <<__InferFlows>>
   public function koIsEmptyAccess(): void {
     if (isEmptyAccess($this->vec)) {
       $this->b = true; // VEC leaks to PUBLIC through length
     }
   }
 
+  <<__InferFlows>>
   public function koIsEmptyAssign(): void {
     if (isEmptyAssign($this->vec)) {
       $this->b = true; // VEC leaks to PUBLIC through length
@@ -76,6 +85,7 @@ class V {
 }
 
 // The following decides the length using exceptions.
+<<__InferFlows>>
 function isEmptyAccess(vec<string> $v): bool {
   try {
     $v[1];
@@ -86,6 +96,7 @@ function isEmptyAccess(vec<string> $v): bool {
 }
 
 // The following decides the length using exceptions.
+<<__InferFlows>>
 function isEmptyAssign(vec<string> $v): bool {
   try {
     $v[1] = 42;

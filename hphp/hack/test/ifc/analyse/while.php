@@ -1,5 +1,6 @@
 <?hh // strict
 
+<<__InferFlows>>
 function simple(bool $b, string $s1, string $s2): arraykey {
   $x = "";
   while ($b) {
@@ -9,6 +10,7 @@ function simple(bool $b, string $s1, string $s2): arraykey {
   return $x;
 }
 
+<<__InferFlows>>
 function union(bool $b, int $i, string $s1, string $s2): arraykey {
   $x = $i;
   while ($b) {
@@ -18,6 +20,7 @@ function union(bool $b, int $i, string $s1, string $s2): arraykey {
   return $x;
 }
 
+<<__InferFlows>>
 function breaks(bool $b, int $i, string $s1, string $s2): arraykey {
   $x = $i;
   while ($b) {
@@ -28,6 +31,7 @@ function breaks(bool $b, int $i, string $s1, string $s2): arraykey {
   return $x;
 }
 
+<<__InferFlows>>
 function continues(bool $b, int $i, string $s1, string $s2): arraykey {
   $x = $i;
   while ($b) {

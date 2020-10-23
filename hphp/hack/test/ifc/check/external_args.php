@@ -3,12 +3,14 @@
 
 class A {
   public int $value = 0;
+  <<__InferFlows>>
   public function __construct() {}
 }
 
 class B {
   public A $a;
 
+  <<__InferFlows>>
   public function __construct() { $this->a = new A(); }
 }
 

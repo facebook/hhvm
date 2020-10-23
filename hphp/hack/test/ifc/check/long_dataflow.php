@@ -1,6 +1,7 @@
 <?hh
 
 class C {
+  <<__InferFlows>>
   public function __construct(
     <<__Policied("PUBLIC")>>
     public int $public,
@@ -32,6 +33,7 @@ function getPrivate(C $obj): int {
   return $tmp;
 }
 
+<<__InferFlows>>
 function test(C $obj): void {
   $obj->unrelated = $obj->private;
   $private = getPrivate($obj);

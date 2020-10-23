@@ -9,9 +9,9 @@ Analyzing __construct:
 * Final environment:
   Deps: {}
   Constraints:
-    [6:16-19] C < PUBLIC, pc < PUBLIC, $cx < PUBLIC
-    [7:16-19] C < C_lump, pc < C_lump, $cy < C_lump
-    [8:14-17] C < C_lump, pc < C_lump, C_lump = D_lump, D < C_lump
+    [7:16-19] C < PUBLIC, pc < PUBLIC, $cx < PUBLIC
+    [8:16-19] C < C_lump, pc < C_lump, $cy < C_lump
+    [9:14-17] C < C_lump, pc < C_lump, C_lump = D_lump, D < C_lump
   Locals:
     { $cd -> \D<D, D_lump>; $cx -> <$cx>; $cy -> <$cy> }
 
@@ -25,7 +25,7 @@ Analyzing testGetUnpolicied:
 * Final environment:
   Deps: {}
   Constraints:
-    [12:5-22] C_lump < .cd, C < .cd, C_lump = D_lump, .cd < D
+    [14:5-22] C_lump < .cd, C < .cd, C_lump = D_lump, .cd < D
   Locals:
     {}
 
@@ -39,8 +39,8 @@ Analyzing testSetMultipleUnpolicied:
 * Final environment:
   Deps: {}
   Constraints:
-    [16:5-20] C < C_lump, pc < C_lump, lit < C_lump
-    [17:5-20] C < C_lump, pc < C_lump, C_lump = D_lump, D < C_lump
+    [19:5-20] C < C_lump, pc < C_lump, lit < C_lump
+    [20:5-20] C < C_lump, pc < C_lump, C_lump = D_lump, D < C_lump
   Locals:
     { $d -> \D<D, D_lump> }
 
@@ -54,7 +54,7 @@ Analyzing testSetDeep:
 * Final environment:
   Deps: {}
   Constraints:
-    [21:5-24] C_lump < .cd, C < .cd, .cd < C_lump, pc < C_lump, $i < C_lump
+    [25:5-24] C_lump < .cd, C < .cd, .cd < C_lump, pc < C_lump, $i < C_lump
   Locals:
     { $i -> <$i> }
 
@@ -68,7 +68,7 @@ Analyzing __construct:
 * Final environment:
   Deps: {}
   Constraints:
-    [26:42-45] D < D_lump, pc < D_lump, $di < D_lump
+    [31:42-45] D < D_lump, pc < D_lump, $di < D_lump
   Locals:
     { $di -> <$di> }
 

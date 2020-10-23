@@ -45,58 +45,6 @@ module Cache =
       let capacity = 1000
     end)
 
-let prepare_for_typecheck
-    (ctx : Provider_context.t) (path : Relative_path.t) (content : string) :
-    unit =
-  match Provider_context.get_backend ctx with
-  | Provider_backend.Shared_memory
-  | Provider_backend.Local_memory _ ->
-    ()
-  (* When using the decl service, before typechecking the file, populate our
-     decl caches with the symbols declared within that file. If we leave this to
-     the decl service, then in longer files, the decls declared later in the
-     file may be evicted by the time we attempt to typecheck them, forcing the
-     decl service to re-parse the file. This can lead to many re-parses in
-     extreme cases. *)
-  | Provider_backend.Decl_service { decl; _ } ->
-    Decl_service_client.parse_and_cache_decls_in decl path content
-
-let get_fun (ctx : Provider_context.t) (fun_name : fun_key) : fun_decl option =
-  Counters.count Counters.Category.Decling @@ fun () ->
-  Decl_counters.count_decl Decl_counters.Fun fun_name @@ fun _counter ->
-  match Provider_context.get_backend ctx with
-  | Provider_backend.Shared_memory ->
-    (match Decl_heap.Funs.get fun_name with
-    | Some c -> Some c
-    | None ->
-      (match Naming_provider.get_fun_path ctx fun_name with
-      | Some filename ->
-        let ft =
-          Errors.run_in_decl_mode filename (fun () ->
-              Decl.declare_fun_in_file ~write_shmem:true ctx filename fun_name)
-        in
-        Some ft
-      | None -> None))
-  | Provider_backend.Local_memory { Provider_backend.decl_cache; _ } ->
-    Provider_backend.Decl_cache.find_or_add
-      decl_cache
-      ~key:(Provider_backend.Decl_cache_entry.Fun_decl fun_name)
-      ~default:(fun () ->
-        match Naming_provider.get_fun_path ctx fun_name with
-        | Some filename ->
-          let ft =
-            Errors.run_in_decl_mode filename (fun () ->
-                Decl.declare_fun_in_file
-                  ~write_shmem:false
-                  ctx
-                  filename
-                  fun_name)
-          in
-          Some ft
-        | None -> None)
-  | Provider_backend.Decl_service { decl; _ } ->
-    Decl_service_client.rpc_get_fun decl fun_name
-
 let get_class (ctx : Provider_context.t) (class_name : class_key) :
     class_decl option =
   Counters.count Counters.Category.Decling @@ fun () ->
@@ -148,6 +96,42 @@ let get_class (ctx : Provider_context.t) (class_name : class_key) :
     | Some obj ->
       let v : Typing_classes_heap.class_t = Obj.obj obj in
       Some (counter, v))
+
+let get_fun (ctx : Provider_context.t) (fun_name : fun_key) : fun_decl option =
+  Counters.count Counters.Category.Decling @@ fun () ->
+  Decl_counters.count_decl Decl_counters.Fun fun_name @@ fun _counter ->
+  match Provider_context.get_backend ctx with
+  | Provider_backend.Shared_memory ->
+    (match Decl_heap.Funs.get fun_name with
+    | Some c -> Some c
+    | None ->
+      (match Naming_provider.get_fun_path ctx fun_name with
+      | Some filename ->
+        let ft =
+          Errors.run_in_decl_mode filename (fun () ->
+              Decl.declare_fun_in_file ~write_shmem:true ctx filename fun_name)
+        in
+        Some ft
+      | None -> None))
+  | Provider_backend.Local_memory { Provider_backend.decl_cache; _ } ->
+    Provider_backend.Decl_cache.find_or_add
+      decl_cache
+      ~key:(Provider_backend.Decl_cache_entry.Fun_decl fun_name)
+      ~default:(fun () ->
+        match Naming_provider.get_fun_path ctx fun_name with
+        | Some filename ->
+          let ft =
+            Errors.run_in_decl_mode filename (fun () ->
+                Decl.declare_fun_in_file
+                  ~write_shmem:false
+                  ctx
+                  filename
+                  fun_name)
+          in
+          Some ft
+        | None -> None)
+  | Provider_backend.Decl_service { decl; _ } ->
+    Decl_service_client.rpc_get_fun decl fun_name
 
 let get_typedef (ctx : Provider_context.t) (typedef_name : string) :
     typedef_decl option =
@@ -272,6 +256,22 @@ let get_gconst (ctx : Provider_context.t) (gconst_name : string) :
         | None -> None)
   | Provider_backend.Decl_service { decl; _ } ->
     Decl_service_client.rpc_get_gconst decl gconst_name
+
+let prepare_for_typecheck
+    (ctx : Provider_context.t) (path : Relative_path.t) (content : string) :
+    unit =
+  match Provider_context.get_backend ctx with
+  | Provider_backend.Shared_memory
+  | Provider_backend.Local_memory _ ->
+    ()
+  (* When using the decl service, before typechecking the file, populate our
+     decl caches with the symbols declared within that file. If we leave this to
+     the decl service, then in longer files, the decls declared later in the
+     file may be evicted by the time we attempt to typecheck them, forcing the
+     decl service to re-parse the file. This can lead to many re-parses in
+     extreme cases. *)
+  | Provider_backend.Decl_service { decl; _ } ->
+    Decl_service_client.parse_and_cache_decls_in decl path content
 
 let local_changes_push_sharedmem_stack () : unit =
   Decl_heap.Funs.LocalChanges.push_stack ();

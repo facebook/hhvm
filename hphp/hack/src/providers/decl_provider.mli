@@ -39,14 +39,6 @@ val get_fun : Provider_context.t -> fun_key -> fun_decl option
 
 val get_class : Provider_context.t -> class_key -> class_decl option
 
-val get_class_constructor : Provider_context.t -> class_key -> fun_decl option
-
-val get_class_method :
-  Provider_context.t -> class_key -> fun_key -> fun_decl option
-
-val get_static_method :
-  Provider_context.t -> class_key -> fun_key -> fun_decl option
-
 val get_record_def :
   Provider_context.t -> record_def_key -> record_def_decl option
 

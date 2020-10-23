@@ -106,48 +106,6 @@ let get_class (ctx : Provider_context.t) (class_name : class_key) :
        provide a folded-decl API.  *)
     Typing_classes_heap.Classes.get ctx class_name
 
-let convert_class_elt_to_fun_decl class_elt_opt : fun_decl option =
-  Typing_defs.(
-    match class_elt_opt with
-    | Some { ce_type = (lazy ty); ce_deprecated; ce_pos = (lazy pos); _ } ->
-      Some
-        {
-          fe_pos = pos;
-          fe_type = ty;
-          fe_deprecated = ce_deprecated;
-          fe_php_std_lib = false;
-        }
-    | _ -> None)
-
-let get_class_constructor (ctx : Provider_context.t) (class_name : class_key) :
-    fun_decl option =
-  Counters.count Counters.Category.Decling @@ fun () ->
-  match get_class ctx class_name with
-  | None -> None
-  | Some cls ->
-    let (class_elt_option, _) = Typing_classes_heap.Api.construct cls in
-    convert_class_elt_to_fun_decl class_elt_option
-
-let get_class_method
-    (ctx : Provider_context.t) (class_name : class_key) (method_name : fun_key)
-    : fun_decl option =
-  Counters.count Counters.Category.Decling @@ fun () ->
-  match get_class ctx class_name with
-  | None -> None
-  | Some cls ->
-    let meth = Class.get_method cls method_name in
-    convert_class_elt_to_fun_decl meth
-
-let get_static_method
-    (ctx : Provider_context.t) (class_name : class_key) (method_name : fun_key)
-    : fun_decl option =
-  Counters.count Counters.Category.Decling @@ fun () ->
-  match get_class ctx class_name with
-  | None -> None
-  | Some cls ->
-    let smeth = Class.get_smethod cls method_name in
-    convert_class_elt_to_fun_decl smeth
-
 let get_typedef (ctx : Provider_context.t) (typedef_name : string) :
     typedef_decl option =
   Counters.count Counters.Category.Decling @@ fun () ->

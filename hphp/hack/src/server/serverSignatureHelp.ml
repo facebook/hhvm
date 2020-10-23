@@ -105,12 +105,24 @@ let get_occurrence_info
     | SymbolOccurrence.Method (classname, methodname) ->
       let classname = Utils.add_ns classname in
       let ft =
-        if String.equal methodname "__construct" then
-          Decl_provider.get_class_constructor ctx classname
-        else
-          Option.first_some
-            (Decl_provider.get_class_method ctx classname methodname)
-            (Decl_provider.get_static_method ctx classname methodname)
+        Decl_provider.get_class ctx classname
+        |> Option.bind ~f:(fun cls ->
+               if String.equal methodname "__construct" then
+                 Decl_provider.Class.construct cls |> fst
+               else
+                 Option.first_some
+                   (Decl_provider.Class.get_method cls methodname)
+                   (Decl_provider.Class.get_smethod cls methodname))
+        |> Option.map ~f:(fun class_elt ->
+               (* We'll convert class_elt to fun_decl here solely as a lazy
+        convenience, so that the "display" code below can display
+        both class_elt and fun_decl uniformally. *)
+               {
+                 Typing_defs.fe_pos = Lazy.force class_elt.Typing_defs.ce_pos;
+                 fe_type = Lazy.force class_elt.Typing_defs.ce_type;
+                 fe_deprecated = class_elt.Typing_defs.ce_deprecated;
+                 fe_php_std_lib = false;
+               })
       in
       (ft, occurrence)
     | _ ->

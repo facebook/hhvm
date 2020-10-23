@@ -2,6 +2,6 @@
 
 <<file: __EnableUnstableFeatures('coeffects_provisional')>>
 
-function f()[non_rx]: void {
+function f()[defaults]: void {
   $x = ($i)[rx] ==> {};
 }

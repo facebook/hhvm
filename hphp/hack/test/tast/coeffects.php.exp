@@ -1,20 +1,20 @@
 [(Fun
     { f_span = [5:1-7:2]; f_annotation = (); f_mode = Mstrict;
-      f_ret = ((void), (Some ([5:23-27], (Hprim Tvoid))));
+      f_ret = ((void), (Some ([5:25-29], (Hprim Tvoid))));
       f_name = ([5:10-11], "\\f"); f_tparams = []; f_where_constraints = [];
       f_variadic = FVnonVariadic; f_params = [];
       f_cap =
-      ((((HH\Capabilities\RxLocal & HH\Capabilities\Throwing<mixed> & HH\Capabilities\NonDet))),
-       (Some ([5:13-21],
+      ((((HH\Capabilities\RxLocal & HH\Capabilities\IO & HH\Capabilities\CippGlobal & HH\Capabilities\Globals & HH\Capabilities\UnrestrictedMutation))),
+       (Some ([5:13-23],
               (Hintersection
-                 [([5:14-20],
-                   (Happly (([5:14-20], "\\HH\\Contexts\\non_rx"), [])))]))));
+                 [([5:14-22],
+                   (Happly (([5:14-22], "\\HH\\Contexts\\defaults"), [])))]))));
       f_unsafe_cap =
       (((mixed)),
-       (Some ([5:13-21],
+       (Some ([5:13-23],
               (Hintersection
-                 [([5:14-20],
-                   (Happly (([5:14-20], "\\HH\\Contexts\\Unsafe\\non_rx"), 
+                 [([5:14-22],
+                   (Happly (([5:14-22], "\\HH\\Contexts\\Unsafe\\defaults"),
                       [])))
                    ]))));
       f_body =
@@ -39,7 +39,7 @@
                           param_visibility = None }
                          ];
                        f_cap =
-                       (((HH\Capabilities\Rx)),
+                       ((((HH\Capabilities\Rx & HH\Capabilities\IO))),
                         (Some ([6:12-16],
                                (Hintersection
                                   [([6:13-15],

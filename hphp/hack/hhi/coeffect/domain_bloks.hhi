@@ -8,18 +8,10 @@
  *
  */
 
-namespace HH\Capabilities {
-  /**
-   * The capability for non-determinism
-   */
-  <<__Sealed()>>
-  interface NonDet extends Server {}
-}
-
 namespace HH\Contexts {
-  type non_det = \HH\Capabilities\NonDet;
+  type bloks = \HH\Capabilities\Client;
 
   namespace Unsafe {
-    type non_det = mixed;
+    type bloks = mixed;
   }
 }

@@ -7,8 +7,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  */
-
-// Effect domain: Reactivity
+<<file:__EnableUnstableFeatures('union_intersection_type_hints')>>
 
 namespace HH\Capabilities {
   /**
@@ -16,12 +15,28 @@ namespace HH\Capabilities {
    * Each weaker level of reactive context has additional privileges,
    * thus the respective capabilities are subtypes of this one.
    */
-  <<__Sealed(RxShallow::class, \HH\Contexts\rx::class)>>
-  interface Rx {} // long-term: extends Throwing<mixed>
+  <<__Sealed(RxShallow::class)>>
+  interface Rx extends Server {}
 
-  <<__Sealed(RxLocal::class, \HH\Contexts\rx_shallow::class)>>
+  <<__Sealed(RxLocal::class)>>
   interface RxShallow extends Rx {}
 
-  <<__Sealed(Defaults::class, \HH\Contexts\rx_local::class, \HH\Contexts\rx_shallow::class)>>
+  <<__Sealed()>>
   interface RxLocal extends RxShallow {}
+}
+
+namespace HH\Contexts {
+  type rx = (\HH\Capabilities\Rx & \HH\Capabilities\IO);
+
+  // type rx_shallow = (\HH\Capabilities\RxShallow & rx);
+  type rx_shallow = (\HH\Capabilities\RxShallow & \HH\Capabilities\IO);
+
+  // type rx_local = (\HH\Capabilities\RxLocal & rx_shallow);
+  type rx_local = (\HH\Capabilities\RxLocal & \HH\Capabilities\IO);
+
+  namespace Unsafe {
+    type rx = mixed;
+    type rx_shallow = \HH\Capabilities\RxLocal;
+    type rx_local = \HH\Contexts\defaults;
+  }
 }

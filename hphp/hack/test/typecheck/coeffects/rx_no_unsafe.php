@@ -3,13 +3,13 @@
 
 // see hhi/coeffect/contexts.hhi for mapping to capabilities
 
-function non_rx_fn()[non_rx]: void {
+function non_rx_fn()[defaults]: void {
   rx_fn();
 }
 
 function rx_fn()[rx]: void {
   pure_fn();
-  non_rx_fn(); // error (non_rx context requires additional capabilities)
+  non_rx_fn(); // error (non_rx context requires different capabilities)
 }
 
 function pure_fn()[pure]: void {
@@ -18,6 +18,6 @@ function pure_fn()[pure]: void {
 }
 
 function purest_fn()[]: void {
-  // currently, `pure` has no additional capabilities, so it's equivalent to []
-  pure_fn(); // ok
+  pure_fn(); // error, purest has capabilities {} but pure is {Server}
+  purest_fn(); // ok
 }

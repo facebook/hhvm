@@ -1,11 +1,11 @@
 <?hh
 
 <<file: __EnableUnstableFeatures('coeffects_provisional')>>
-function f()@{ \HH\Contexts\pure }: void {
+function f()@{ rx }: void {
   f();
   g();
 }
-function g()@{ \HH\Contexts\non_rx }: void {
+function g()@{ defaults }: void {
   f();
   g();
 }

@@ -3,7 +3,7 @@
 
 <<file: __EnableUnstableFeatures('coeffects_provisional')>>
 
-function default_context()[non_rx]: void {}
+function default_context()[defaults]: void {}
 
 function rx_context()[rx]: void {
   // verify the lambda inherits capability rx from the outer function
@@ -29,7 +29,7 @@ function nondeterministic_context()[non_det]: void {
 
   ()[rx] ==> {
     // the type-checker shouldn't close over the non_det capability
-    () ==> nondeterministic_context(); // error
+    () ==> nondeterministic_context(); // error FIXME(coeffects)
 
     () ==> rx_context(); // ok (since rx is in the enclosing scope / inherited)
   };

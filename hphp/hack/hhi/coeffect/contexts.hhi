@@ -52,11 +52,21 @@ namespace HH {
    */
   namespace Capabilities {
     /**
-     * The default, normally unannotated context,
-     * maps to multiple capabilities precisely.
+     * Top level only. Capabilities are defined in adjacent HHI files
+     * and separated by their effect domain.
      */
-    // TODO(coeffects) enable intersection types and use:
-    type Defaults = (RxLocal & Throwing<mixed> & NonDet);
+    <<__Sealed(
+      Rx::class,
+      CippGlobal::class,
+      NonDet::class,
+      Globals::class,
+      IO::class,
+      UnrestrictedMutation::class
+    )>>
+    interface Server {}
+
+    <<__Sealed()>>
+    interface Client {}
   }
 
   /**
@@ -68,22 +78,20 @@ namespace HH {
    *   i.e., automatically present in the corresponding context
    */
   namespace Contexts {
-    // effect domain: reactivity
+    /**
+     * The default, normally unannotated context,
+     * maps to multiple capabilities precisely.
+     */
+    // type defaults = (rx_local & cipp_global & UnrestrictedMutation);
+    type defaults = (
+      \HH\Capabilities\RxLocal &
+      \HH\Capabilities\IO &
+      \HH\Capabilities\CippGlobal &
+      \HH\Capabilities\Globals &
+      \HH\Capabilities\UnrestrictedMutation
+    );
 
-    type non_rx = \HH\Capabilities\Defaults;
-    type rx_local = \HH\Capabilities\RxLocal;
-    type rx_shallow = \HH\Capabilities\RxShallow;
-    type rx = \HH\Capabilities\Rx;
-    type pure = mixed; // long-term: pure = Throwing<mixed>
-
-    // effect domain: execution
-
-    type non_det = \HH\Capabilities\NonDet;
-
-    // effect domain: exceptions (experimental)
-
-    type throws<-T> = \HH\Capabilities\Throwing<T>;
-
+    type pure = \HH\Capabilities\Server;
     /**
      * As an unsafe extension and for the purpose of top-level migration,
      * we additionally map certain contexts to a (set of) capabilities that
@@ -91,19 +99,15 @@ namespace HH {
      * This namespace contains mapping to such capabilities using
      * same-named contexts. More precisely, the function/method with context
      * `ctx` has the following type of capability in its body:
-     *   \HH\Capabiliites\ctx & \HH\Capabilities\Unsafe\ctx
-     * where safe contexts have `\Unsafe\ctx = mixed`
+     *   \HH\Capabilities\ctx & \HH\Capabilities\Unsafe\ctx
+     * where safe contexts have `\Unsafe\ctx = mixed`. The function signature's
+     * capability remains:
+     *   \HH\Capabilities\ctx
+     * for the purposes of subtyping and calling.
      */
     namespace Unsafe {
-      type non_rx = mixed;
-      type rx_local = \HH\Capabilities\Defaults;
-      type rx_shallow = \HH\Capabilities\RxLocal;
-      type rx = mixed;
+      type defaults = mixed;
       type pure = mixed;
-
-      type non_det = mixed;
-
-      type throws<-T> = mixed;
     }
   }
 }

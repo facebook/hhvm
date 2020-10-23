@@ -45,6 +45,7 @@ final class MyVisitor {
 final class ExprTree<TVisitor, TResult, TInfer>{
   public function __construct(
     private ExprPos $pos,
+    private string $filepath,
     private (function(TVisitor): TResult) $ast,
     private (function(): TInfer) $err,
   ) {}

@@ -86,7 +86,12 @@ pub fn desugar(hint: &aast::Hint, e: &Expr, env: &Env) -> Expr {
         new_obj(
             &temp_pos,
             "\\ExprTree",
-            vec![exprpos(&temp_pos), visitor_lambda, typing_lambda],
+            vec![
+                exprpos(&temp_pos),
+                Expr::new(temp_pos.clone(), Expr_::Id(Box::new(make_id("__FILE__")))),
+                visitor_lambda,
+                typing_lambda,
+            ],
         ),
         &temp_pos.clone(),
     );

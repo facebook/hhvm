@@ -1,4 +1,10 @@
-File "splice_err1.php", line 76, characters 13-26:
+File "splice_err1.php", line 9, characters 13-26:
 Expected `ExprTree<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "splice_err1.php", line 73, characters 8-8:
+  File "splice_err1.php", line 6, characters 8-8:
+  But got `int`
+File "splice_err1.php", line 9, characters 24-25:
+Invalid argument (Typing[4110])
+  File "splice_err1.php", line 93, characters 29-57:
+  Expected `ExprTree<Code, mixed, [unresolved]>`
+  File "splice_err1.php", line 6, characters 8-8:
   But got `int`

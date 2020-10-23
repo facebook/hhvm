@@ -2,8 +2,15 @@
 
 <<file:__EnableUnstableFeatures('expression_trees')>>
 
-// Placeholder definitions so we don't get naming/typing errors.
-class Code {
+function bar(mixed $_): int { return 1; }
+
+function foo(): void {
+  $fun_call = Code`bar("baz")`;
+}
+
+//// BEGIN DEFS
+// Placeholder definition so we don't get naming/typing errors.
+final class Code {
   const type TAst = mixed;
   // Simple literals.
   public function intLiteral(int $_): this::TAst {
@@ -15,7 +22,16 @@ class Code {
   public function stringLiteral(string $_): this::TAst {
     throw new Exception();
   }
+  public function nullLiteral(): this::TAst {
+    throw new Exception();
+  }
   public function localVar(string $_): this::TAst {
+    throw new Exception();
+  }
+  public function lambdaLiteral(
+    vec<string> $_args,
+    vec<this::TAst> $_body,
+  ): this::TAst {
     throw new Exception();
   }
 
@@ -23,14 +39,24 @@ class Code {
   public function plus(this::TAst $_, this::TAst $_): this::TAst {
     throw new Exception();
   }
+  public function ampamp(this::TAst $_, this::TAst $_): this::TAst {
+    throw new Exception();
+  }
+  public function barbar(this::TAst $_, this::TAst $_): this::TAst {
+    throw new Exception();
+  }
+  public function exclamationMark(this::TAst $_): this::TAst {
+    throw new Exception();
+  }
   public function call(string $_fnName, vec<this::TAst> $_args): this::TAst {
     throw new Exception();
   }
 
-  // Statements.
   public function assign(this::TAst $_, this::TAst $_): this::TAst {
     throw new Exception();
   }
+
+  // Statements.
   public function ifStatement(
     this::TAst $_cond,
     vec<this::TAst> $_then_body,
@@ -47,15 +73,31 @@ class Code {
   public function returnStatement(?this::TAst $_): this::TAst {
     throw new Exception();
   }
-
-  public function lambdaLiteral(
-    vec<string> $_args,
-    vec<this::TAst> $_body,
+  public function forStatement(
+    vec<this::TAst> $_,
+    this::TAst $_,
+    vec<this::TAst> $_,
+    vec<this::TAst> $_,
   ): this::TAst {
     throw new Exception();
   }
+  public function breakStatement(): this::TAst {
+    throw new Exception();
+  }
+  public function continueStatement(): this::TAst {
+    throw new Exception();
+  }
+
+  // Splice
+  public function splice<T>(ExprTree<this, this::TAst, T> $_): this::TAst {
+    throw new Exception();
+  }
+
+  // TODO: Discard unsupported syntax nodes while lowering
+  public function unsupportedSyntax(string $msg): this::TAst {
+    throw new Exception($msg);
+  }
 }
-function bar(mixed $_): int { return 1; }
 
 final class ExprTree<TVisitor, TResult, TInfer>{
   public function __construct(
@@ -63,7 +105,4 @@ final class ExprTree<TVisitor, TResult, TInfer>{
     private (function(): TInfer) $err,
   ) {}
 }
-
-function foo(): void {
-  $fun_call = Code`bar("baz")`;
-}
+//// END DEFS

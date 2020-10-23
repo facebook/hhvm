@@ -1,9 +1,9 @@
-File "splice_state2.php", line 95, characters 23-31:
+File "splice_state2.php", line 23, characters 23-31:
 Typing error (Typing[4110])
-  File "splice_state2.php", line 95, characters 23-27:
+  File "splice_state2.php", line 23, characters 23-27:
   Expected `num` because this is used in an arithmetic operation
   File "splice_state2.php", line 6, characters 10-13:
   But got `?int`
-  File "splice_state2.php", line 93, characters 23-33:
+  File "splice_state2.php", line 21, characters 23-33:
   All the local information about `$x->x` has been invalidated during this call.
 This is a limitation of the type-checker; use a local if that's the problem.

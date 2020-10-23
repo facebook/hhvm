@@ -25,8 +25,7 @@
   (name typing_heap)
   (wrapped false)
   (modules
-    typing_classes_heap
-    typing_heap)
+    typing_classes_heap)
   (libraries
     core_kernel
     decl

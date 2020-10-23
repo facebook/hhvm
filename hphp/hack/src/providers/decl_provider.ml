@@ -66,7 +66,7 @@ let get_fun (ctx : Provider_context.t) (fun_name : fun_key) : fun_decl option =
   Decl_counters.count_decl Decl_counters.Fun fun_name @@ fun _counter ->
   match Provider_context.get_backend ctx with
   | Provider_backend.Shared_memory ->
-    (match Typing_heap.Funs.get fun_name with
+    (match Decl_heap.Funs.get fun_name with
     | Some c -> Some c
     | None ->
       (match Naming_provider.get_fun_path ctx fun_name with
@@ -155,7 +155,7 @@ let get_typedef (ctx : Provider_context.t) (typedef_name : string) :
   Decl_counters.count_decl Decl_counters.Typedef typedef_name @@ fun _counter ->
   match Provider_context.get_backend ctx with
   | Provider_backend.Shared_memory ->
-    (match Typing_heap.Typedefs.get typedef_name with
+    (match Decl_heap.Typedefs.get typedef_name with
     | Some c -> Some c
     | None ->
       (match Naming_provider.get_typedef_path ctx typedef_name with
@@ -197,7 +197,7 @@ let get_record_def (ctx : Provider_context.t) (record_name : string) :
   @@ fun _counter ->
   match Provider_context.get_backend ctx with
   | Provider_backend.Shared_memory ->
-    (match Typing_heap.RecordDefs.get record_name with
+    (match Decl_heap.RecordDefs.get record_name with
     | Some c -> Some c
     | None ->
       (match Naming_provider.get_record_def_path ctx record_name with
@@ -238,7 +238,7 @@ let get_gconst (ctx : Provider_context.t) (gconst_name : string) :
   Decl_counters.count_decl Decl_counters.GConst gconst_name @@ fun _counter ->
   match Provider_context.get_backend ctx with
   | Provider_backend.Shared_memory ->
-    (match Typing_heap.GConsts.get gconst_name with
+    (match Decl_heap.GConsts.get gconst_name with
     | Some c -> Some c
     | None ->
       (match Naming_provider.get_const_path ctx gconst_name with

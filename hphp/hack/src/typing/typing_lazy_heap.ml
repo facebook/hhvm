@@ -10,7 +10,6 @@
 open Hh_prelude
 
 let get_type_id_filename ctx x expected_kind =
-  Counters.count_decl_accessor @@ fun () ->
   match Naming_provider.get_type_path_and_kind ctx x with
   | Some (fn, kind) when Naming_types.equal_kind_of_type kind expected_kind ->
     Some fn

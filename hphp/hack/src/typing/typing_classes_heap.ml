@@ -114,7 +114,7 @@ module Classes = struct
 
   type t = class_type_variant
 
-  let get_no_local_cache (ctx : Provider_context.t) (class_name : string) :
+  let get_no_local_cache_impl (ctx : Provider_context.t) (class_name : string) :
       t option =
     (* Fetches either the [Lazy] class (if shallow decls are enabled)
     or the [Eager] class (otherwise).
@@ -130,26 +130,35 @@ module Classes = struct
       Deferred_decl.add_deferment ~d;
       None
 
-  let get ctx class_name =
+  let get_no_local_cache (ctx : Provider_context.t) (class_name : string) :
+      t option =
     Counters.count_decl_accessor @@ fun () ->
+    get_no_local_cache_impl ctx class_name
+
+  let get_impl ctx class_name =
     match Cache.get class_name with
     | Some t -> Some t
     | None ->
       begin
-        match get_no_local_cache ctx class_name with
+        match get_no_local_cache_impl ctx class_name with
         | None -> None
         | Some class_type_variant ->
           Cache.add class_name class_type_variant;
           Some class_type_variant
       end
 
+  let get ctx class_name =
+    Counters.count_decl_accessor @@ fun () -> get_impl ctx class_name
+
   let find_unsafe ctx key =
-    match get ctx key with
+    Counters.count_decl_accessor @@ fun () ->
+    match get_impl ctx key with
     | None -> raise Caml.Not_found
     | Some x -> x
 
   let mem ctx key =
-    match get ctx key with
+    Counters.count_decl_accessor @@ fun () ->
+    match get_impl ctx key with
     | None -> false
     | Some _ -> true
 end
@@ -312,12 +321,11 @@ module ApiLazy = struct
   let need_init t =
     Counters.count_decl_accessor @@ fun () ->
     match t with
-    | Lazy _ ->
-      begin
-        match fst (construct t) with
-        | None -> false
-        | Some ce -> not (get_ce_abstract ce)
-      end
+    | Lazy lc ->
+      let (constructor, _) = Lazy.force lc.ih.construct in
+      (match constructor with
+      | None -> false
+      | Some ce -> not (get_ce_abstract ce))
     | Eager c -> c.tc_need_init
 
   let get_ancestor t ancestor =
@@ -354,7 +362,7 @@ module ApiLazy = struct
     Counters.count_decl_accessor @@ fun () ->
     match t with
     | Lazy lc -> LSTable.mem lc.ih.consts id
-    | Eager _ -> Option.is_some (get_const t id)
+    | Eager c -> SMap.mem id c.tc_consts
 
   let get_typeconst t id =
     Counters.count_decl_accessor @@ fun () ->
@@ -366,7 +374,7 @@ module ApiLazy = struct
     Counters.count_decl_accessor @@ fun () ->
     match t with
     | Lazy lc -> LSTable.mem lc.ih.typeconsts id
-    | Eager _ -> Option.is_some (get_typeconst t id)
+    | Eager c -> SMap.mem id c.tc_typeconsts
 
   let get_prop t id =
     Counters.count_decl_accessor @@ fun () ->
@@ -378,7 +386,7 @@ module ApiLazy = struct
     Counters.count_decl_accessor @@ fun () ->
     match t with
     | Lazy lc -> LSTable.mem lc.ih.props id
-    | Eager _ -> Option.is_some (get_prop t id)
+    | Eager c -> SMap.mem id c.tc_props
 
   let get_sprop t id =
     Counters.count_decl_accessor @@ fun () ->
@@ -390,7 +398,7 @@ module ApiLazy = struct
     Counters.count_decl_accessor @@ fun () ->
     match t with
     | Lazy lc -> LSTable.mem lc.ih.sprops id
-    | Eager _ -> Option.is_some (get_sprop t id)
+    | Eager c -> SMap.mem id c.tc_sprops
 
   let get_method t id =
     Counters.count_decl_accessor @@ fun () ->
@@ -402,7 +410,7 @@ module ApiLazy = struct
     Counters.count_decl_accessor @@ fun () ->
     match t with
     | Lazy lc -> LSTable.mem lc.ih.methods id
-    | Eager _ -> Option.is_some (get_method t id)
+    | Eager c -> SMap.mem id c.tc_methods
 
   let get_smethod t id =
     Counters.count_decl_accessor @@ fun () ->
@@ -414,7 +422,7 @@ module ApiLazy = struct
     Counters.count_decl_accessor @@ fun () ->
     match t with
     | Lazy lc -> LSTable.mem lc.ih.smethods id
-    | Eager _ -> Option.is_some (get_smethod t id)
+    | Eager c -> SMap.mem id c.tc_smethods
 
   let get_any_method ~is_static cls id =
     (* tally is already done inside the following three methods *)
@@ -456,7 +464,7 @@ module ApiEager = struct
   let all_ancestor_names t =
     Counters.count_decl_accessor @@ fun () ->
     match t with
-    | Lazy _ -> List.map (all_ancestors t) fst
+    | Lazy lc -> List.map (LSTable.to_list lc.ancestors) fst
     | Eager c -> SMap.ordered_keys c.tc_ancestors
 
   let all_ancestor_reqs t =
@@ -477,10 +485,14 @@ module ApiEager = struct
       || String.equal class_name SN.Classes.cIAsyncDisposable
     in
     match t with
-    | Lazy _ ->
-      is_disposable_class_name (ApiShallow.name t)
-      || List.exists (all_ancestor_names t) is_disposable_class_name
-      || List.exists (all_ancestor_req_names t) is_disposable_class_name
+    | Lazy lc ->
+      let all_ancestor_names = List.map (LSTable.to_list lc.ancestors) fst in
+      let all_ancestor_req_names =
+        LSTable.to_list lc.req_ancestor_names |> List.map ~f:fst
+      in
+      is_disposable_class_name (snd lc.sc.sc_name)
+      || List.exists all_ancestor_names is_disposable_class_name
+      || List.exists all_ancestor_req_names is_disposable_class_name
     | Eager c -> c.tc_is_disposable
 
   let get_pu_enum t id =

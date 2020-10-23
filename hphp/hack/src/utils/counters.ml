@@ -47,12 +47,10 @@ type time_in_sec = float
 type counter = {
   count: int;  (** how many times did 'count' get called? *)
   time: time_in_sec;  (** cumulative duration of all calls to 'count' *)
-  is_counting: bool;
-      (** to avoid double-counting when a method calls 'count' and so does a nested one *)
   enabled: bool;  (** 'enabled' controls whether any counting is done at all *)
 }
 
-let empty ~enabled = { is_counting = false; count = 0; time = 0.; enabled }
+let empty ~enabled = { count = 0; time = 0.; enabled }
 
 (** here we store each individual counter. *)
 type t =
@@ -97,23 +95,18 @@ let get_time (category : Category.t) : unit -> time_in_sec =
 let count (category : Category.t) (f : unit -> 'a) : 'a =
   let get_time = get_time category in
   let tally = get_counter category in
-  if (not tally.enabled) || tally.is_counting then
-    (* is_counting is to avoid double-counting, in the case that a method calls 'count'
-    and then a nested method itself also calls 'count'. *)
+  if not tally.enabled then
     f ()
-  else begin
-    set_counter category { tally with is_counting = true };
+  else
     let start_time = get_time () in
     Utils.try_finally ~f ~finally:(fun () ->
         set_counter
           category
           {
-            is_counting = false;
             count = tally.count + 1;
             time = tally.time +. get_time () -. start_time;
             enabled = tally.enabled;
           })
-  end
 
 let count_decl_accessor (f : unit -> 'a) : 'a = count C.Decl_accessors f
 

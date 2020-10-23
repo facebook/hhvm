@@ -77,6 +77,10 @@ inline SrcKey SrcKey::fromAtomicInt(AtomicInt in) {
 ///////////////////////////////////////////////////////////////////////////////
 
 inline bool SrcKey::valid() const {
+  assertx(
+    m_funcID.isInvalid() || m_funcID.isDummy() ||
+    (m_offset >= func()->base() && m_offset < func()->past())
+  );
   return !m_funcID.isInvalid();
 }
 

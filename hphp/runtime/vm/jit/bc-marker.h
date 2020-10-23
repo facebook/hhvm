@@ -77,9 +77,7 @@ struct BCMarker {
 
   std::string show() const;
   bool valid() const;
-  bool isDummy() const { return m_sk.valid() &&
-                                m_sk.funcID().isDummy(); }
-  bool hasFunc() const { return valid() && !isDummy(); }
+  bool hasFunc() const { return valid() && !m_sk.funcID().isDummy(); }
 
   SrcKey      sk()        const { assertx(valid()); return m_sk;            }
   const Func* func()      const { assertx(hasFunc()); return m_sk.func();   }

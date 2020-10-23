@@ -76,9 +76,7 @@ struct SrcKey : private boost::totally_ordered<SrcKey> {
   /////////////////////////////////////////////////////////////////////////////
 
   /*
-   * Whether the SrcKey has a valid FuncId.
-   *
-   * Does not check for validity of any other fields.
+   * Whether this is the sentinel value of invalid SrcKey.
    */
   bool valid() const;
 

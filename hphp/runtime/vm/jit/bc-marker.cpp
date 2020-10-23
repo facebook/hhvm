@@ -45,14 +45,10 @@ std::string BCMarker::show() const {
 }
 
 bool BCMarker::valid() const {
-  if (isDummy()) return true;
   // Note, we can't check stack bounds here because of inlining, and
   // instructions like idx, which can create php-level calls.
-  return
-    m_sk.valid() &&
-    m_sk.offset() >= m_sk.func()->base() &&
-    m_sk.offset() < m_sk.func()->past() &&
-    m_profTransIDs.find(kInvalidTransID) == m_profTransIDs.end();
+  assertx(m_profTransIDs.find(kInvalidTransID) == m_profTransIDs.end());
+  return m_sk.valid();
 }
 
 //////////////////////////////////////////////////////////////////////

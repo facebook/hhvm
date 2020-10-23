@@ -1715,11 +1715,11 @@ where
             '\r' => {
                 let w = if self.peek_char(1) == '\n' { 2 } else { 1 };
                 self.advance(w);
-                Trivia::<TF>::make_eol(self.source(), self.start, w)
+                Trivia::<TF>::make_eol(self.start, w)
             }
             '\n' => {
                 self.advance(1);
-                Trivia::<TF>::make_eol(self.source(), self.start, 1)
+                Trivia::<TF>::make_eol(self.start, 1)
             }
             _ => panic!("scan_end_of_line called while not on end of line!"),
         }
@@ -1727,7 +1727,7 @@ where
 
     fn scan_hash_comment(&mut self) -> Trivium<TF> {
         self.skip_to_end_of_line();
-        Trivia::<TF>::make_single_line_comment(self.source(), self.start, self.width())
+        Trivia::<TF>::make_single_line_comment(self.start, self.width())
     }
 
     fn scan_single_line_comment(&mut self) -> Trivium<TF> {
@@ -1742,9 +1742,9 @@ where
         let w = self.width();
         let remainder = self.offset - lexer_ws.offset;
         if remainder >= 11 && lexer_ws.peek_string(11) == b"FALLTHROUGH" {
-            Trivia::<TF>::make_fallthrough(self.source(), self.start, w)
+            Trivia::<TF>::make_fallthrough(self.start, w)
         } else {
-            Trivia::<TF>::make_single_line_comment(self.source(), self.start, w)
+            Trivia::<TF>::make_single_line_comment(self.start, w)
         }
     }
 
@@ -1789,11 +1789,11 @@ where
         self.skip_to_end_of_delimited_comment();
         let w = self.width();
         if lexer_ws.match_string(b"HH_FIXME") {
-            Trivia::<TF>::make_fix_me(self.source(), self.start, w)
+            Trivia::<TF>::make_fix_me(self.start, w)
         } else if lexer_ws.match_string(b"HH_IGNORE_ERROR") {
-            Trivia::<TF>::make_ignore_error(self.source(), self.start, w)
+            Trivia::<TF>::make_ignore_error(self.start, w)
         } else {
-            Trivia::<TF>::make_delimited_comment(self.source(), self.start, w)
+            Trivia::<TF>::make_delimited_comment(self.start, w)
         }
     }
 
@@ -1814,8 +1814,7 @@ where
             ' ' | '\t' => {
                 let new_end = Self::str_skip_whitespace(self.source_text_string(), self.offset);
                 let new_start = self.offset;
-                let new_trivia =
-                    Trivia::<TF>::make_whitespace(self.source(), new_start, new_end - new_start);
+                let new_trivia = Trivia::<TF>::make_whitespace(new_start, new_end - new_start);
                 self.with_start_offset(new_start, new_end);
                 Some(new_trivia)
             }
@@ -1840,12 +1839,12 @@ where
             ' ' | '\t' => {
                 let j = Self::str_skip_whitespace(self.source_text_string(), i);
                 self.with_start_offset(i, j);
-                Some(Trivia::<TF>::make_whitespace(self.source(), i, j - i))
+                Some(Trivia::<TF>::make_whitespace(i, j - i))
             }
             '\r' | '\n' => {
                 let j = Self::str_scan_end_of_line(self.source_text_string(), i);
                 self.with_start_offset(i, j);
-                Some(Trivia::<TF>::make_eol(self.source(), i, j - i))
+                Some(Trivia::<TF>::make_eol(i, j - i))
             }
             _ =>
             // Not trivia

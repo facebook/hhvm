@@ -190,14 +190,12 @@ where
     {
         let token = tokenizer(self.lexer_mut());
         if !self.skipped_tokens().is_empty() {
-            // SourceText is just an Rc, so this clone is just a refcount bump.
-            let source = self.lexer().source().clone();
             let start = self.lexer().start();
             let mut leading = Trivia::<S>::new();
             for t in self.drain_skipped_tokens() {
                 let (t_leading, t_width, t_trailing) = t.into_trivia_and_width();
                 leading.extend(t_leading);
-                leading.push(Trivia::<S>::make_extra_token_error(&source, start, t_width));
+                leading.push(Trivia::<S>::make_extra_token_error(start, t_width));
                 leading.extend(t_trailing);
             }
             leading.extend(token.clone_leading());

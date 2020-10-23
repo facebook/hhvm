@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<2dbd9bc06379002e0b2510f2429a6d28>>
+// @generated SignedSource<<eaeb1bce257d6663cb325424ab47589c>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -453,6 +453,7 @@ impl<P: Params> Node<P> for Class_<P::Ex, P::Fb, P::En, P::Hi> {
         self.xhp_category.accept(c, v)?;
         self.reqs.accept(c, v)?;
         self.implements.accept(c, v)?;
+        self.implements_dynamic.accept(c, v)?;
         self.where_constraints.accept(c, v)?;
         self.consts.accept(c, v)?;
         self.typeconsts.accept(c, v)?;

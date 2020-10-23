@@ -112,6 +112,7 @@ type t = {
   tco_method_call_inference: bool;
   tco_report_pos_from_reason: bool;
   tco_typecheck_sample_rate: float;
+  tco_enable_sound_dynamic: bool;
 }
 [@@deriving eq, show]
 
@@ -291,6 +292,7 @@ let default =
     tco_method_call_inference = false;
     tco_report_pos_from_reason = false;
     tco_typecheck_sample_rate = 1.0;
+    tco_enable_sound_dynamic = false;
   }
 
 let make
@@ -417,6 +419,7 @@ let make
     ?(tco_method_call_inference = default.tco_method_call_inference)
     ?(tco_report_pos_from_reason = default.tco_report_pos_from_reason)
     ?(tco_typecheck_sample_rate = default.tco_typecheck_sample_rate)
+    ?(tco_enable_sound_dynamic = default.tco_enable_sound_dynamic)
     () =
   {
     tco_experimental_features;
@@ -523,6 +526,7 @@ let make
     tco_method_call_inference;
     tco_report_pos_from_reason;
     tco_typecheck_sample_rate;
+    tco_enable_sound_dynamic;
   }
 
 let tco_experimental_feature_enabled t s =
@@ -753,3 +757,5 @@ let tco_method_call_inference t = t.tco_method_call_inference
 let tco_report_pos_from_reason t = t.tco_report_pos_from_reason
 
 let tco_typecheck_sample_rate t = t.tco_typecheck_sample_rate
+
+let tco_enable_sound_dynamic t = t.tco_enable_sound_dynamic

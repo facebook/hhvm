@@ -518,6 +518,7 @@ fn make_closure(
         xhp_category: None,
         reqs: vec![],
         implements: vec![],
+        implements_dynamic: false,
         where_constraints: vec![],
         consts: vec![],
         typeconsts: vec![],

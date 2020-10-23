@@ -4,8 +4,8 @@
       c_kind = Cnormal; c_name = ([12:7-16], "\\TestClass"); c_tparams = [];
       c_extends = []; c_uses = []; c_use_as_alias = [];
       c_insteadof_alias = []; c_xhp_attr_uses = []; c_xhp_category = None;
-      c_reqs = []; c_implements = []; c_where_constraints = [];
-      c_consts = []; c_typeconsts = [];
+      c_reqs = []; c_implements = []; c_implements_dynamic = false;
+      c_where_constraints = []; c_consts = []; c_typeconsts = [];
       c_vars =
       [{ cv_final = false; cv_xhp_attr = None; cv_abstract = false;
          cv_visibility = Private;

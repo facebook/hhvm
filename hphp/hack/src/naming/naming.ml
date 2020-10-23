@@ -994,6 +994,7 @@ let rec class_ ctx c =
     N.c_xhp_category = c.Aast.c_xhp_category;
     N.c_reqs = req_extends @ req_implements;
     N.c_implements = implements;
+    N.c_implements_dynamic = c.Aast.c_implements_dynamic;
     N.c_where_constraints = where_constraints;
     N.c_consts = consts;
     N.c_typeconsts = typeconsts;

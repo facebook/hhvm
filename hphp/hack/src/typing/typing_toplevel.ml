@@ -1130,6 +1130,7 @@ and class_def_ env c tc =
       Aast.c_xhp_category = c.c_xhp_category;
       Aast.c_reqs = c.c_reqs;
       Aast.c_implements = c.c_implements;
+      Aast.c_implements_dynamic = c.c_implements_dynamic;
       Aast.c_where_constraints = c.c_where_constraints;
       Aast.c_consts = typed_consts;
       Aast.c_typeconsts = typed_typeconsts;

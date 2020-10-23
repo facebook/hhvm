@@ -3245,6 +3245,35 @@ where
         Self::map_fold(&f, &op, node, env, acc)
     }
 
+    fn could_map_filter<R, F>(f: F, node: &Syntax<T, V>, env: &mut Env) -> Result<(Vec<R>, bool)>
+    where
+        F: Fn(&Syntax<T, V>, &mut Env) -> Result<Option<R>>,
+    {
+        Self::map_flatten_filter_(f, node, env, (vec![], false))
+    }
+
+    #[inline]
+    fn map_flatten_filter_<R, F>(
+        f: F,
+        node: &Syntax<T, V>,
+        env: &mut Env,
+        acc: (Vec<R>, bool),
+    ) -> Result<(Vec<R>, bool)>
+    where
+        F: Fn(&Syntax<T, V>, &mut Env) -> Result<Option<R>>,
+    {
+        let op = |mut v: (Vec<R>, bool), a| -> (Vec<R>, bool) {
+            match a {
+                Option::None => (v.0, true),
+                Option::Some(a) => {
+                    v.0.push(a);
+                    v
+                }
+            }
+        };
+        Self::map_fold(&f, &op, node, env, acc)
+    }
+
     fn map_fold<A, R, F, O>(
         f: &F,
         op: &O,
@@ -4719,7 +4748,25 @@ where
                     Some(ast::Hint_::Happly(_, hl)) => !hl.is_empty(),
                     _ => false,
                 };
-                let implements = Self::could_map(Self::p_hint, &c.classish_implements_list, env)?;
+                let (implements, implements_dynamic) = Self::could_map_filter(
+                    |node, env| -> Result<Option<ast::Hint>> {
+                        match Self::p_hint(node, env) {
+                            Err(e) => Err(e),
+                            Ok(h) => match &*h.1 {
+                                oxidized::aast_defs::Hint_::Happly(oxidized::ast::Id(_, id), _) => {
+                                    if id == "dynamic" {
+                                        Ok(None)
+                                    } else {
+                                        Ok(Some(h))
+                                    }
+                                }
+                                _ => Ok(Some(h)),
+                            },
+                        }
+                    },
+                    &c.classish_implements_list,
+                    env,
+                )?;
                 let where_constraints =
                     Self::p_where_constraint(true, node, &c.classish_where_clause, env)?;
                 let namespace = Self::mk_empty_ns_env(env);
@@ -4750,6 +4797,7 @@ where
                     xhp_category: None,
                     reqs: vec![],
                     implements,
+                    implements_dynamic,
                     where_constraints,
                     consts: vec![],
                     typeconsts: vec![],
@@ -4863,6 +4911,7 @@ where
                     tparams: vec![],
                     extends: vec![],
                     implements: vec![],
+                    implements_dynamic: false,
                     where_constraints: vec![],
                     consts: Self::could_map(p_enumerator, &c.enum_enumerators, env)?,
                     namespace: Self::mk_empty_ns_env(env),
@@ -4932,6 +4981,7 @@ where
                     tparams: vec![],
                     extends: extends.clone(),
                     implements: vec![],
+                    implements_dynamic: false,
                     where_constraints: vec![],
                     consts: vec![],
                     namespace: Self::mk_empty_ns_env(env),

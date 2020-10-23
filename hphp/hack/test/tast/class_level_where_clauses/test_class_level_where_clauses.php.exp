@@ -9,7 +9,7 @@
         ];
       c_extends = []; c_uses = []; c_use_as_alias = [];
       c_insteadof_alias = []; c_xhp_attr_uses = []; c_xhp_category = None;
-      c_reqs = []; c_implements = [];
+      c_reqs = []; c_implements = []; c_implements_dynamic = false;
       c_where_constraints =
       [(([12:30-31], (Habstr ("T", []))), Constraint_eq,
         ([12:34-37], (Hprim Tint)))];
@@ -37,7 +37,7 @@
          ];
        c_extends = []; c_uses = []; c_use_as_alias = [];
        c_insteadof_alias = []; c_xhp_attr_uses = []; c_xhp_category = None;
-       c_reqs = []; c_implements = [];
+       c_reqs = []; c_implements = []; c_implements_dynamic = false;
        c_where_constraints =
        [(([14:29-30], (Habstr ("T", []))), Constraint_eq,
          ([14:33-36], (Hprim Tint)));
@@ -67,7 +67,7 @@
          ];
        c_extends = []; c_uses = []; c_use_as_alias = [];
        c_insteadof_alias = []; c_xhp_attr_uses = []; c_xhp_category = None;
-       c_reqs = []; c_implements = [];
+       c_reqs = []; c_implements = []; c_implements_dynamic = false;
        c_where_constraints =
        [(([16:34-35], (Habstr ("T", []))), Constraint_eq,
          ([16:38-41], (Hprim Tint)));
@@ -96,7 +96,7 @@
          ];
        c_extends = []; c_uses = []; c_use_as_alias = [];
        c_insteadof_alias = []; c_xhp_attr_uses = []; c_xhp_category = None;
-       c_reqs = []; c_implements = [];
+       c_reqs = []; c_implements = []; c_implements_dynamic = false;
        c_where_constraints =
        [(([18:26-27], (Habstr ("T", []))), Constraint_as,
          ([18:31-34], (Hprim Tint)))];
@@ -120,7 +120,7 @@
          ];
        c_extends = []; c_uses = []; c_use_as_alias = [];
        c_insteadof_alias = []; c_xhp_attr_uses = []; c_xhp_category = None;
-       c_reqs = []; c_implements = [];
+       c_reqs = []; c_implements = []; c_implements_dynamic = false;
        c_where_constraints =
        [(([20:29-30], (Habstr ("T", []))), Constraint_super,
          ([20:37-40], (Hprim Tint)))];

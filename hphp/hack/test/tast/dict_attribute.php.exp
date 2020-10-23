@@ -4,8 +4,9 @@
       c_kind = Cnormal; c_name = ([5:7-8], "\\A"); c_tparams = [];
       c_extends = []; c_uses = []; c_use_as_alias = [];
       c_insteadof_alias = []; c_xhp_attr_uses = []; c_xhp_category = None;
-      c_reqs = []; c_implements = []; c_where_constraints = [];
-      c_consts = []; c_typeconsts = []; c_vars = [];
+      c_reqs = []; c_implements = []; c_implements_dynamic = false;
+      c_where_constraints = []; c_consts = []; c_typeconsts = [];
+      c_vars = [];
       c_methods =
       [{ m_span = [6:3-55]; m_annotation = (); m_final = false;
          m_abstract = false; m_static = false; m_visibility = Public;
@@ -70,9 +71,9 @@
        c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = [];
        c_implements =
        [([9:30-47], (Happly (([9:30-47], "\\HH\\ClassAttribute"), [])))];
-       c_where_constraints = []; c_consts = []; c_typeconsts = [];
-       c_vars = []; c_methods = []; c_attributes = []; c_xhp_children = [];
-       c_xhp_attrs = [];
+       c_implements_dynamic = false; c_where_constraints = []; c_consts = [];
+       c_typeconsts = []; c_vars = []; c_methods = []; c_attributes = [];
+       c_xhp_children = []; c_xhp_attrs = [];
        c_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
          ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;
@@ -112,9 +113,9 @@
        c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = [];
        c_implements =
        [([10:30-46], (Happly (([10:30-46], "\\HH\\EnumAttribute"), [])))];
-       c_where_constraints = []; c_consts = []; c_typeconsts = [];
-       c_vars = []; c_methods = []; c_attributes = []; c_xhp_children = [];
-       c_xhp_attrs = [];
+       c_implements_dynamic = false; c_where_constraints = []; c_consts = [];
+       c_typeconsts = []; c_vars = []; c_methods = []; c_attributes = [];
+       c_xhp_children = []; c_xhp_attrs = [];
        c_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
          ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;
@@ -154,9 +155,9 @@
        c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = [];
        c_implements =
        [([11:30-50], (Happly (([11:30-50], "\\HH\\FunctionAttribute"), [])))];
-       c_where_constraints = []; c_consts = []; c_typeconsts = [];
-       c_vars = []; c_methods = []; c_attributes = []; c_xhp_children = [];
-       c_xhp_attrs = [];
+       c_implements_dynamic = false; c_where_constraints = []; c_consts = [];
+       c_typeconsts = []; c_vars = []; c_methods = []; c_attributes = [];
+       c_xhp_children = []; c_xhp_attrs = [];
        c_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
          ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;
@@ -196,9 +197,9 @@
        c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = [];
        c_implements =
        [([12:32-50], (Happly (([12:32-50], "\\HH\\MethodAttribute"), [])))];
-       c_where_constraints = []; c_consts = []; c_typeconsts = [];
-       c_vars = []; c_methods = []; c_attributes = []; c_xhp_children = [];
-       c_xhp_attrs = [];
+       c_implements_dynamic = false; c_where_constraints = []; c_consts = [];
+       c_typeconsts = []; c_vars = []; c_methods = []; c_attributes = [];
+       c_xhp_children = []; c_xhp_attrs = [];
        c_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
          ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;
@@ -239,9 +240,9 @@
        c_implements =
        [([13:34-62],
          (Happly (([13:34-62], "\\HH\\InstancePropertyAttribute"), [])))];
-       c_where_constraints = []; c_consts = []; c_typeconsts = [];
-       c_vars = []; c_methods = []; c_attributes = []; c_xhp_children = [];
-       c_xhp_attrs = [];
+       c_implements_dynamic = false; c_where_constraints = []; c_consts = [];
+       c_typeconsts = []; c_vars = []; c_methods = []; c_attributes = [];
+       c_xhp_children = []; c_xhp_attrs = [];
        c_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
          ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;
@@ -282,9 +283,9 @@
        c_implements =
        [([14:34-60],
          (Happly (([14:34-60], "\\HH\\StaticPropertyAttribute"), [])))];
-       c_where_constraints = []; c_consts = []; c_typeconsts = [];
-       c_vars = []; c_methods = []; c_attributes = []; c_xhp_children = [];
-       c_xhp_attrs = [];
+       c_implements_dynamic = false; c_where_constraints = []; c_consts = [];
+       c_typeconsts = []; c_vars = []; c_methods = []; c_attributes = [];
+       c_xhp_children = []; c_xhp_attrs = [];
        c_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
          ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;
@@ -325,9 +326,9 @@
        c_implements =
        [([15:30-51], (Happly (([15:30-51], "\\HH\\ParameterAttribute"), [])))
          ];
-       c_where_constraints = []; c_consts = []; c_typeconsts = [];
-       c_vars = []; c_methods = []; c_attributes = []; c_xhp_children = [];
-       c_xhp_attrs = [];
+       c_implements_dynamic = false; c_where_constraints = []; c_consts = [];
+       c_typeconsts = []; c_vars = []; c_methods = []; c_attributes = [];
+       c_xhp_children = []; c_xhp_attrs = [];
        c_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
          ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;
@@ -368,9 +369,9 @@
        c_implements =
        [([16:35-56], (Happly (([16:35-56], "\\HH\\TypeAliasAttribute"), [])))
          ];
-       c_where_constraints = []; c_consts = []; c_typeconsts = [];
-       c_vars = []; c_methods = []; c_attributes = []; c_xhp_children = [];
-       c_xhp_attrs = [];
+       c_implements_dynamic = false; c_where_constraints = []; c_consts = [];
+       c_typeconsts = []; c_vars = []; c_methods = []; c_attributes = [];
+       c_xhp_children = []; c_xhp_attrs = [];
        c_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
          ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;
@@ -410,9 +411,9 @@
        c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = [];
        c_implements =
        [([17:31-47], (Happly (([17:31-47], "\\HH\\FileAttribute"), [])))];
-       c_where_constraints = []; c_consts = []; c_typeconsts = [];
-       c_vars = []; c_methods = []; c_attributes = []; c_xhp_children = [];
-       c_xhp_attrs = [];
+       c_implements_dynamic = false; c_where_constraints = []; c_consts = [];
+       c_typeconsts = []; c_vars = []; c_methods = []; c_attributes = [];
+       c_xhp_children = []; c_xhp_attrs = [];
        c_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
          ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;
@@ -521,8 +522,8 @@
        c_kind = Cnormal; c_name = ([23:7-9], "\\CC"); c_tparams = [];
        c_extends = []; c_uses = []; c_use_as_alias = [];
        c_insteadof_alias = []; c_xhp_attr_uses = []; c_xhp_category = None;
-       c_reqs = []; c_implements = []; c_where_constraints = [];
-       c_consts = []; c_typeconsts = [];
+       c_reqs = []; c_implements = []; c_implements_dynamic = false;
+       c_where_constraints = []; c_consts = []; c_typeconsts = [];
        c_vars =
        [{ cv_final = false; cv_xhp_attr = None; cv_abstract = false;
           cv_visibility = Private;
@@ -648,9 +649,10 @@
          ];
        c_uses = []; c_use_as_alias = []; c_insteadof_alias = [];
        c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = [];
-       c_implements = []; c_where_constraints = []; c_consts = [];
-       c_typeconsts = []; c_vars = []; c_methods = []; c_attributes = [];
-       c_xhp_children = []; c_xhp_attrs = [];
+       c_implements = []; c_implements_dynamic = false;
+       c_where_constraints = []; c_consts = []; c_typeconsts = [];
+       c_vars = []; c_methods = []; c_attributes = []; c_xhp_children = [];
+       c_xhp_attrs = [];
        c_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
          ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;

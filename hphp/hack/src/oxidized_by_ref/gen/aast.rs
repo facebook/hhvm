@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ad152fc37ea5306713925dc5df245102>>
+// @generated SignedSource<<50036e15d7e4b5bfa03f4ec289680b08>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -961,6 +961,7 @@ pub struct Class_<'a, Ex, Fb, En, Hi> {
     pub xhp_category: Option<&'a (&'a Pos<'a>, &'a [&'a Pstring<'a>])>,
     pub reqs: &'a [(&'a ClassHint<'a>, &'a oxidized::aast::IsExtends)],
     pub implements: &'a [&'a ClassHint<'a>],
+    pub implements_dynamic: bool,
     pub where_constraints: &'a [&'a WhereConstraintHint<'a>],
     pub consts: &'a [&'a ClassConst<'a, Ex, Fb, En, Hi>],
     pub typeconsts: &'a [&'a ClassTypeconst<'a, Ex, Fb, En, Hi>],

@@ -275,6 +275,8 @@ type t = {
    * DO NOT set to any other value except for testing purposes.
    *)
   tco_typecheck_sample_rate: float;
+  (* Experimental implementation of a "sound" dynamic type *)
+  tco_enable_sound_dynamic: bool;
 }
 [@@deriving eq, show]
 
@@ -382,6 +384,7 @@ val make :
   ?tco_method_call_inference:bool ->
   ?tco_report_pos_from_reason:bool ->
   ?tco_typecheck_sample_rate:float ->
+  ?tco_enable_sound_dynamic:bool ->
   unit ->
   t
 
@@ -622,3 +625,5 @@ val tco_method_call_inference : t -> bool
 val tco_report_pos_from_reason : t -> bool
 
 val tco_typecheck_sample_rate : t -> float
+
+val tco_enable_sound_dynamic : t -> bool

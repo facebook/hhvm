@@ -14,9 +14,9 @@ Errors:
       c_implements =
       [([3:20-45], (Happly (([3:20-45], "\\HH\\TypeParameterAttribute"), [])))
         ];
-      c_where_constraints = []; c_consts = []; c_typeconsts = [];
-      c_vars = []; c_methods = []; c_attributes = []; c_xhp_children = [];
-      c_xhp_attrs = [];
+      c_implements_dynamic = false; c_where_constraints = []; c_consts = [];
+      c_typeconsts = []; c_vars = []; c_methods = []; c_attributes = [];
+      c_xhp_children = []; c_xhp_attrs = [];
       c_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;
@@ -34,9 +34,9 @@ Errors:
        c_implements =
        [([4:20-45],
          (Happly (([4:20-45], "\\HH\\TypeParameterAttribute"), [])))];
-       c_where_constraints = []; c_consts = []; c_typeconsts = [];
-       c_vars = []; c_methods = []; c_attributes = []; c_xhp_children = [];
-       c_xhp_attrs = [];
+       c_implements_dynamic = false; c_where_constraints = []; c_consts = [];
+       c_typeconsts = []; c_vars = []; c_methods = []; c_attributes = [];
+       c_xhp_children = []; c_xhp_attrs = [];
        c_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
          ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;

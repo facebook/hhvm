@@ -7,9 +7,9 @@
       c_reqs = [];
       c_implements =
       [([7:24-41], (Happly (([7:24-41], "\\HH\\FileAttribute"), [])))];
-      c_where_constraints = []; c_consts = []; c_typeconsts = [];
-      c_vars = []; c_methods = []; c_attributes = []; c_xhp_children = [];
-      c_xhp_attrs = [];
+      c_implements_dynamic = false; c_where_constraints = []; c_consts = [];
+      c_typeconsts = []; c_vars = []; c_methods = []; c_attributes = [];
+      c_xhp_children = []; c_xhp_attrs = [];
       c_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;
@@ -47,9 +47,9 @@
        c_reqs = [];
        c_implements =
        [([13:24-41], (Happly (([13:24-41], "\\HH\\FileAttribute"), [])))];
-       c_where_constraints = []; c_consts = []; c_typeconsts = [];
-       c_vars = []; c_methods = []; c_attributes = []; c_xhp_children = [];
-       c_xhp_attrs = [];
+       c_implements_dynamic = false; c_where_constraints = []; c_consts = [];
+       c_typeconsts = []; c_vars = []; c_methods = []; c_attributes = [];
+       c_xhp_children = []; c_xhp_attrs = [];
        c_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
          ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;

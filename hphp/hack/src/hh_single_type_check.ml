@@ -253,6 +253,7 @@ let parse_options () =
   let allowed_decl_fixme_codes = ref ISet.empty in
   let method_call_inference = ref false in
   let report_pos_from_reason = ref false in
+  let enable_sound_dynamic = ref false in
   let options =
     [
       ( "--ifc",
@@ -598,6 +599,9 @@ let parse_options () =
         Arg.Set report_pos_from_reason,
         " Flag errors whose position is derived from reason information in types."
       );
+      ( "--enable-sound-dynamic-type",
+        Arg.Set enable_sound_dynamic,
+        "Enforce sound dynamic types.  Experimental." );
     ]
   in
   let options = Arg.align ~limit:25 options in
@@ -675,6 +679,7 @@ let parse_options () =
       ~po_allow_unstable_features:true
       ~tco_method_call_inference:!method_call_inference
       ~tco_report_pos_from_reason:!report_pos_from_reason
+      ~tco_enable_sound_dynamic:!enable_sound_dynamic
       ()
   in
   Errors.allowed_fixme_codes_strict :=

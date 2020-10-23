@@ -112,6 +112,7 @@ impl Default for GlobalOptions {
             tco_method_call_inference: false,
             tco_report_pos_from_reason: false,
             tco_typecheck_sample_rate: 1.0,
+            tco_enable_sound_dynamic: false,
         }
     }
 }

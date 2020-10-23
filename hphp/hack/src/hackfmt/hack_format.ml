@@ -2310,14 +2310,60 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           union_types = types;
           union_right_paren = right_p;
         } ->
-      transform_argish env left_p types right_p
+      delimited_nest
+        env
+        left_p
+        right_p
+        [
+          handle_possible_list
+            env
+            types
+            ~after_each:(fun is_last ->
+              if is_last then
+                Split
+              else
+                space_split ())
+            ~handle_element:(fun node ->
+              match Syntax.syntax node with
+              | Syntax.ListItem { list_item; list_separator } ->
+                Concat
+                  [
+                    t env list_item;
+                    when_present list_separator space;
+                    t env list_separator;
+                  ]
+              | _ -> t env node);
+        ]
     | Syntax.IntersectionTypeSpecifier
         {
           intersection_left_paren = left_p;
           intersection_types = types;
           intersection_right_paren = right_p;
         } ->
-      transform_argish env left_p types right_p
+      delimited_nest
+        env
+        left_p
+        right_p
+        [
+          handle_possible_list
+            env
+            types
+            ~after_each:(fun is_last ->
+              if is_last then
+                Split
+              else
+                space_split ())
+            ~handle_element:(fun node ->
+              match Syntax.syntax node with
+              | Syntax.ListItem { list_item; list_separator } ->
+                Concat
+                  [
+                    t env list_item;
+                    when_present list_separator space;
+                    t env list_separator;
+                  ]
+              | _ -> t env node);
+        ]
     | Syntax.TupleTypeExplicitSpecifier
         {
           tuple_type_keyword = kw;

@@ -6,6 +6,8 @@
  *
  *)
 
+type decl
+
 type decl_kind =
   | Class_no_local_cache
   | Class
@@ -71,10 +73,13 @@ type subdecl_kind =
   (* Misc *)
   | Deferred_init_members
 
-let count_decl (name : string) (kind : decl_kind) (f : unit -> 'a) : 'a =
+let count_decl (kind : decl_kind) (name : string) (f : decl option -> 'a) : 'a =
   ignore (name, kind);
-  Counters.count_decl_accessor f
+  Counters.count_decl_accessor (fun () -> f None)
 
-let count_subdecl (kind : subdecl_kind) (f : unit -> 'a) : 'a =
+let count_subdecl (decl : decl option) (kind : subdecl_kind) (f : unit -> 'a) :
+    'a =
   ignore kind;
-  Counters.count_decl_accessor f
+  match decl with
+  | None -> f ()
+  | Some _ -> Counters.count_decl_accessor f

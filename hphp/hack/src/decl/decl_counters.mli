@@ -6,6 +6,12 @@
  *
  *)
 
+(** This opaque type carries decl_counter-specific context that will be used
+in telemetry to relate the subdecl accessors like "get member foo of class",
+back to the original decl accessor "get the class named Bar" which got this
+specific class in the first place. *)
+type decl
+
 type decl_kind =
   | Class_no_local_cache
   | Class
@@ -71,6 +77,24 @@ type subdecl_kind =
   (* Misc *)
   | Deferred_init_members
 
-val count_decl : string -> decl_kind -> (unit -> 'a) -> 'a
+(** E.g. 'count_decl Class "Foo" (fun d -> <implementation>)'. The idea is that
+<implementation> is the body of work which fetches the decl of class "foo",
+and we want to record telemetry about its performance. This function will
+execute <implementation>, and will internally keep track of things like how long
+it took and what decl was fetched, and will log the telemetry appropriately.
 
-val count_subdecl : subdecl_kind -> (unit -> 'a) -> 'a
+The callback takes a parameter [d]. This is for use of subsidiary decl accessors,
+e.g. 'count_subdecl d (Get_method "bar") (fun () -> <implementation2>)'. It's
+so that, when we record telemetry about <implementation2>, we can relate it
+back to the original count_decl which fetched the class Foo in the first place.
+[d] is optional; it will be None if e.g. the original call to count_decl established
+that no telemetry should be collected during this run, and we want to avoid
+re-establishing this fact during the call to count_subdecl. *)
+val count_decl : decl_kind -> string -> (decl option -> 'a) -> 'a
+
+(** E.g. 'count_subdecl d (Get_method "bar") (fun () -> <implementation2>)'. The idea
+is that <implementation2> is the body of work which fetches the decl of method 'bar'
+of some class, and we want to record telemetry about its performance. This function
+will execution <implementation2> , and will internally keep track of things like
+how long it took, and will log the telemetry appropriately. *)
+val count_subdecl : decl option -> subdecl_kind -> (unit -> 'a) -> 'a

@@ -69,6 +69,8 @@ void logBespokeDispatch(const ArrayData* ad, const char* fn);
   X(ArrayData*, Pop, T*, Variant&) \
   X(ArrayData*, ToDVArray, T*, bool copy) \
   X(ArrayData*, ToHackArr, T*, bool copy) \
+  X(ArrayData*, PreSort, T*, SortFunction sf) \
+  X(ArrayData*, PostSort, T*, ArrayData* vad) \
   X(ArrayData*, SetLegacyArray, T*, bool copy, bool legacy)
 
 struct LayoutFunctions {
@@ -191,6 +193,12 @@ struct LayoutFunctionDispatcher {
   }
   static ArrayData* ToHackArr(ArrayData* ad, bool copy) {
     return Array::ToHackArr(Cast(ad, __func__), copy);
+  }
+  static ArrayData* PreSort(ArrayData* ad, SortFunction sf) {
+    return Array::PreSort(Cast(ad, __func__), sf);
+  }
+  static ArrayData* PostSort(ArrayData* ad, ArrayData* vad) {
+    return Array::PostSort(Cast(ad, __func__), vad);
   }
   static ArrayData* SetLegacyArray(ArrayData* ad, bool copy, bool legacy) {
     return Array::SetLegacyArray(Cast(ad, __func__), copy, legacy);

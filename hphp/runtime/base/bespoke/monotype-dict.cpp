@@ -19,7 +19,6 @@
 
 #include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/bespoke-array.h"
-#include "hphp/runtime/base/bespoke/logging-profile.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/memory-manager-defs.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
@@ -230,6 +229,12 @@ ArrayData* EmptyMonotypeDict::ToDVArray(Self* ad, bool copy) {
 }
 ArrayData* EmptyMonotypeDict::ToHackArr(Self* ad, bool copy) {
   return GetDict(false);
+}
+ArrayData* EmptyMonotypeDict::PreSort(Self* ead, SortFunction sf) {
+  always_assert(false);
+}
+ArrayData* EmptyMonotypeDict::PostSort(Self* ead, ArrayData* vad) {
+  always_assert(false);
 }
 ArrayData* EmptyMonotypeDict::SetLegacyArray(Self* ad, bool copy, bool legacy) {
   return ad->isDArray() ? GetDArray(legacy) : GetDict(legacy);
@@ -1102,6 +1107,36 @@ ArrayData* MonotypeDict<Key>::ToHackArr(Self* madIn, bool copy) {
   mad->setLegacyArrayInPlace(false);
   assertx(mad->checkInvariants());
   return mad;
+}
+
+template <typename Key>
+ArrayData* MonotypeDict<Key>::PreSort(Self* mad, SortFunction sf) {
+  return mad->escalateWithCapacity(mad->size());
+}
+
+// Some sort types can change the keys of a dict or darray.
+namespace {
+ArrayData* MonotypeDictPostSort(MixedArray* mad, DataType dt) {
+  auto const keys = mad->keyTypes();
+  auto const result = [&]() -> ArrayData* {
+    if (keys.mustBeStaticStrs()) {
+      return MonotypeDict<StringData*>::MakeFromVanilla(mad, dt);
+    } else if (keys.mustBeStrs()) {
+      return MonotypeDict<LowStringPtr>::MakeFromVanilla(mad, dt);
+    } else if (keys.mustBeInts()) {
+      return MonotypeDict<int64_t>::MakeFromVanilla(mad, dt);
+    }
+    return nullptr;
+  }();
+  if (!result) return mad;
+  MixedArray::Release(mad);
+  return result;
+}
+}
+
+template <typename Key>
+ArrayData* MonotypeDict<Key>::PostSort(Self* mad, ArrayData* vad) {
+  return MonotypeDictPostSort(MixedArray::asMixed(vad), mad->type());
 }
 
 template <typename Key>

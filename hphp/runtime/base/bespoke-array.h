@@ -161,7 +161,13 @@ public:
   static ArrayData* RemoveStr(ArrayData* ad, const StringData* key);
 
   // sorting
+  //
+  // To sort a bespoke array, EscalateForSort always returns a vanilla array,
+  // which we sort and pass back to PostSort. PostSort consumes an Rc on `vad`
+  // and produces an Rc on its (possibly bespoke) result.
+  //
   static ArrayData* EscalateForSort(ArrayData* ad, SortFunction sf);
+  static ArrayData* PostSort(ArrayData* ad, ArrayData* vad);
   static auto constexpr Sort   = UnsupportedOp<void, ArrayData*, int, bool>;
   static auto constexpr Asort  = UnsupportedOp<void, ArrayData*, int, bool>;
   static auto constexpr Ksort  = UnsupportedOp<void, ArrayData*, int, bool>;

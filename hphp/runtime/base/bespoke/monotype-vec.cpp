@@ -306,6 +306,14 @@ ArrayData* EmptyMonotypeVec::ToHackArr(EmptyMonotypeVec* eadIn, bool copy) {
   return GetVec(false);
 }
 
+ArrayData* EmptyMonotypeVec::PreSort(EmptyMonotypeVec* ead, SortFunction sf) {
+  always_assert(false);
+}
+
+ArrayData* EmptyMonotypeVec::PostSort(EmptyMonotypeVec* ead, ArrayData* vad) {
+  always_assert(false);
+}
+
 ArrayData* EmptyMonotypeVec::SetLegacyArray(EmptyMonotypeVec* eadIn,
                                             bool copy, bool legacy) {
   if (eadIn->isVecType()) {
@@ -733,6 +741,16 @@ ArrayData* MonotypeVec::ToHackArr(MonotypeVec* madIn, bool copy) {
   assertx(mad->checkInvariants());
 
   return mad;
+}
+
+ArrayData* MonotypeVec::PreSort(MonotypeVec* mad, SortFunction sf) {
+  return mad->escalateWithCapacity(mad->size());
+}
+
+ArrayData* MonotypeVec::PostSort(MonotypeVec* mad, ArrayData* vad) {
+  auto const result = MakeFromVanilla(vad, mad->type());
+  PackedArray::Release(vad);
+  return result;
 }
 
 ArrayData* MonotypeVec::SetLegacyArray(MonotypeVec* madIn,

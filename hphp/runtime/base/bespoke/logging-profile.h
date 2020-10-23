@@ -66,6 +66,8 @@ struct EntryTypes;
   X(Pop,                false) \
   X(ToDVArray,          true)  \
   X(ToHackArr,          true)  \
+  X(PreSort,            true)  \
+  X(PostSort,           true)  \
   X(SetLegacyArray,     true)
 
 enum class ArrayOp : uint8_t {

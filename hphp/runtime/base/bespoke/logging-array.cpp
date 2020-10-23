@@ -501,6 +501,18 @@ ArrayData* LoggingArray::ToHackArr(LoggingArray* lad, bool copy) {
   auto const cow = copy || lad->wrapped->cowCheck();
   return convert(lad, lad->wrapped->toHackArr(cow));
 }
+ArrayData* LoggingArray::PreSort(LoggingArray* lad, SortFunction sf) {
+  logEvent(lad, ArrayOp::PreSort, makeStaticString(sortFunctionName(sf)));
+  auto const cow = lad->cowCheck();
+  if (cow) lad->wrapped->incRefCount();
+  auto const result = lad->wrapped->escalateForSort(sf);
+  if (cow) lad->wrapped->decRefCount();
+  return result;
+}
+ArrayData* LoggingArray::PostSort(LoggingArray* lad, ArrayData* vad) {
+  logEvent(lad, EntryTypes::ForArray(vad), ArrayOp::PostSort);
+  return convert(lad, vad);
+}
 ArrayData* LoggingArray::SetLegacyArray(
     LoggingArray* lad, bool copy, bool legacy) {
   logEvent(lad, ArrayOp::SetLegacyArray);

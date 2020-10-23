@@ -2555,7 +2555,14 @@ struct ArraySortTmp {
     assertx(m_ad->empty() || m_ad->hasExactlyOneRef());
   }
   ~ArraySortTmp() {
-    if (m_ad != val(m_tv).parr) {
+    // We must call BespokeArray::PostSort before cleaning up the old array,
+    // because some bespoke arrays may move values from old -> m_ad at PreSort
+    // and move them back at PostSort. (LoggingArray moves the entire array.)
+    auto const old = val(m_tv).parr;
+    if (!old->isVanilla()) {
+      m_ad = BespokeArray::PostSort(old, m_ad);
+    }
+    if (m_ad != old) {
       tvMove(make_array_like_tv(m_ad), m_tv);
     }
   }

@@ -228,10 +228,18 @@ ArrayData* BespokeArray::RemoveStr(ArrayData* ad, const StringData* key) {
 
 // sorting
 ArrayData* BespokeArray::EscalateForSort(ArrayData* ad, SortFunction sf) {
-  auto const vad = asBespoke(ad)->vtable()->fnEscalateToVanilla(
-    ad, sortFunctionName(sf)
-  );
-  return vad->escalateForSort(sf);
+  if (!isSortFamily(sf)) {
+    if (ad->isVArray())  return ad->toDArray(true);
+    if (ad->isVecType()) return ad->toDict(true);
+  }
+  assertx(!ad->empty());
+  return asBespoke(ad)->vtable()->fnPreSort(ad, sf);
+}
+ArrayData* BespokeArray::PostSort(ArrayData* ad, ArrayData* vad) {
+  assertx(vad->isVanilla());
+  if (ad->toDataType() != vad->toDataType()) return vad;
+  assertx(vad->hasExactlyOneRef());
+  return asBespoke(ad)->vtable()->fnPostSort(ad, vad);
 }
 
 // high-level ops

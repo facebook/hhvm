@@ -88,7 +88,7 @@ SSATmp* memberKey(IRGS& env, MemberKey mk) {
   return classConvertPuntOnRaise(env, res);
 }
 
-SSATmp* emitSetNewElem(IRGS& env, SSATmp* origValue, uint32_t nDiscard) {
+SSATmp* emitSetNewElem(IRGS& env, SSATmp* origValue) {
   auto const baseType = env.irb->fs().mbase().type;
   auto const base = extractBase(env);
   auto const value = [&] {
@@ -106,7 +106,10 @@ SSATmp* emitSetNewElem(IRGS& env, SSATmp* origValue, uint32_t nDiscard) {
   }
 
   auto const baseLoc = gen(env, LdMBase, TLvalToCell);
-  if (!canUpdateCanonicalBase(baseLoc)) PUNT(BespokeSetMFrameStkCell);
+  if (!canUpdateCanonicalBase(baseLoc)) {
+    gen(env, SetNewElem, baseLoc, value);
+    return value;
+  }
 
   auto const layout = baseType.arrSpec().bespokeLayout();
   auto const newArr = layout->emitAppend(env, base, value);
@@ -133,7 +136,10 @@ SSATmp* emitSetElem(IRGS& env, SSATmp* key, SSATmp* value) {
   }
 
   auto const baseLoc = gen(env, LdMBase, TLvalToCell);
-  if (!canUpdateCanonicalBase(baseLoc)) PUNT(BespokeSetMFrameStkCell);
+  if (!canUpdateCanonicalBase(baseLoc)) {
+    gen(env, SetElem, baseLoc, key, value);
+    return value;
+  }
 
   auto const layout = baseType.arrSpec().bespokeLayout();
   auto const newArr = layout->emitSet(env, base, key, value);
@@ -149,7 +155,7 @@ void emitBespokeSetM(IRGS& env, uint32_t nDiscard, MemberKey mk) {
   auto const result = [&] () -> SSATmp* {
     if (mcodeIsProp(mk.mcode)) PUNT(BespokeSetMProp);
     if (mk.mcode == MW) {
-      return emitSetNewElem(env, value, nDiscard);
+      return emitSetNewElem(env, value);
     }
 
     assertx(mcodeIsElem(mk.mcode));
@@ -399,8 +405,8 @@ void emitBespokeDim(IRGS& env, MOpMode mode, MemberKey mk) {
 }
 
 void emitBespokeAddElemC(IRGS& env) {
+  auto const keyType = topC(env, BCSPRelOffset{1})->type();
   auto const arrType = topC(env, BCSPRelOffset{2})->type();
-  auto const keyType = topC(env, BCSPRelOffset{2})->type();
   if (!arrType.subtypeOfAny(TDict, TDArr)) {
     PUNT(AddElemC-Bespoke-WrongType);
   } else if (!keyType.subtypeOfAny(TInt, TStr, TCls, TLazyCls)) {

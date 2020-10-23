@@ -133,20 +133,6 @@ void MonotypeVec::InitializeLayouts() {
 // EmptyMonotypeVec
 //////////////////////////////////////////////////////////////////////////////
 
-/**
- * Escalate the EmptyMonotypeVec to a MonotypeVec with a given type. The new
- * MonotypeVec will have capacity > 0 and therefore allow the new element to be
- * inserted without an additional copy or escalation.
- */
-MonotypeVec* EmptyMonotypeVec::escalateToTyped(EmptyMonotypeVec* eadIn,
-                                               DataType type) {
-  auto const dt = dt_modulo_persistence(type);
-  auto const hk = eadIn->isVecType() ? HeaderKind::BespokeVec
-                                     : HeaderKind::BespokeVArray;
-  return MonotypeVec::Make(dt, 0, nullptr, hk, eadIn->isLegacyArray(),
-                           /*staticArr=*/false);
-}
-
 EmptyMonotypeVec* EmptyMonotypeVec::As(ArrayData* ad) {
   auto const ead = reinterpret_cast<EmptyMonotypeVec*>(ad);
   assertx(ead->checkInvariants());
@@ -294,8 +280,10 @@ ssize_t EmptyMonotypeVec::IterRewind(const EmptyMonotypeVec*, ssize_t pos) {
   return 0;
 }
 
-ArrayData* EmptyMonotypeVec::Append(EmptyMonotypeVec* eadIn, TypedValue v) {
-  auto const mad = escalateToTyped(eadIn, type(v));
+ArrayData* EmptyMonotypeVec::Append(EmptyMonotypeVec* ead, TypedValue v) {
+  auto const dt = dt_modulo_persistence(type(v));
+  auto const mad = MonotypeVec::MakeReserve(
+      ead->m_kind, ead->isLegacyArray(), 1, dt);
   auto const res = MonotypeVec::Append(mad, v);
   assertx(mad == res);
   return res;
@@ -362,46 +350,49 @@ void MonotypeVec::incRefValues() {
   );
 }
 
-MonotypeVec* MonotypeVec::MakeReserve(uint32_t cap, HeaderKind hk,
-                                      bool legacy, bool staticArr) {
-  assertx(hk == HeaderKind::BespokeVec || hk == HeaderKind::BespokeVArray);
+MonotypeVec* MonotypeVec::MakeReserve(
+    HeaderKind hk, bool legacy, uint32_t capacity, DataType dt) {
+  auto const bytes = sizeof(MonotypeVec) + capacity * sizeof(Value);
+  auto const index = std::max(MemoryManager::size2Index(bytes), kMinSizeIndex);
 
-  auto const size = sizeof(MonotypeVec) + cap * sizeof(Value);
-  auto const sizeIndex = std::max(MemoryManager::size2Index(size),
-                                  kMinSizeIndex);
-  auto const aux =
-    packSizeIndexAndAuxBits(sizeIndex, legacy ? ArrayData::kLegacyArray : 0);
+  auto const mad = static_cast<MonotypeVec*>(tl_heap->objMallocIndex(index));
+  auto const aux = packSizeIndexAndAuxBits(
+      index, legacy ? ArrayData::kLegacyArray : 0);
 
-  if (staticArr) {
-    auto mad = static_cast<MonotypeVec*>(
-        RO::EvalLowStaticArrays ? low_malloc(size) : uncounted_malloc(size));
-    mad->initHeader_16(hk, StaticValue, aux);
+  mad->initHeader_16(hk, OneReference, aux);
+  mad->setLayoutIndex(getLayoutIndex(dt));
+  mad->m_size = 0;
 
-    return mad;
-  } else {
-    auto const mad =
-      static_cast<MonotypeVec*>(tl_heap->objMallocIndex(sizeIndex));
-    mad->initHeader_16(hk, OneReference, aux);
-
-    return mad;
-  }
+  assertx(mad->checkInvariants());
+  return mad;
 }
 
-MonotypeVec* MonotypeVec::Make(DataType type, uint32_t size,
-                               const TypedValue* values, HeaderKind hk,
-                               bool legacy, bool staticArr) {
-  assertx(type == dt_modulo_persistence(type));
-  auto const mad = MakeReserve(size, hk, legacy, staticArr);
-  mad->m_size = size;
-  mad->setLayoutIndex(getLayoutIndex(type));
+MonotypeVec* MonotypeVec::MakeFromVanilla(ArrayData* ad, DataType dt) {
+  assertx(ad->hasVanillaPackedLayout());
+  auto const kind = ad->isVArray() ? HeaderKind::BespokeVArray
+                                   : HeaderKind::BespokeVec;
+  auto result = MakeReserve(kind, ad->isLegacyArray(), ad->size(), dt);
 
-  for (uint32_t i = 0; i < size; i ++) {
-    tvIncRefGen(values[i]);
-    mad->valueRefUnchecked(i) = val(values[i]);
-    assertx(type == dt_modulo_persistence(values[i].m_type));
+  PackedArray::IterateVNoInc(ad, [&](auto v) {
+    auto const next = Append(result, v);
+    assertx(result == next);
+    result = As(next);
+  });
+
+  if (ad->isStatic()) {
+    auto const size = HeapSize(result);
+    auto const copy = static_cast<MonotypeVec*>(
+        RO::EvalLowStaticArrays ? low_malloc(size) : uncounted_malloc(size));
+    memcpy16_inline(copy, result, size);
+    auto const aux = packSizeIndexAndAuxBits(
+      result->sizeIndex(), result->auxBits());
+    copy->initHeader_16(kind, StaticValue, aux);
+    Release(result);
+    result = copy;
   }
 
-  return mad;
+  assertx(result->checkInvariants());
+  return result;
 }
 
 Value* MonotypeVec::rawData() {

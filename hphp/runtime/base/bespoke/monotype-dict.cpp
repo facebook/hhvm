@@ -167,9 +167,10 @@ ssize_t EmptyMonotypeDict::IterRewind(const Self* ad, ssize_t prev) {
 
 namespace {
 template <typename Key>
-ArrayData* makeStrMonotypeDict(HeaderKind kind, StringData* k, TypedValue v) {
+ArrayData* makeStrMonotypeDict(
+    HeaderKind kind, bool legacy, StringData* k, TypedValue v) {
   auto const dt = dt_modulo_persistence(type(v));
-  auto const mad = MonotypeDict<Key>::MakeReserve(kind, 1, dt);
+  auto const mad = MonotypeDict<Key>::MakeReserve(kind, legacy, 1, dt);
   auto const result = MonotypeDict<Key>::SetStr(mad, k, v);
   assertx(result == mad);
   return result;
@@ -195,14 +196,17 @@ tv_lval EmptyMonotypeDict::ElemStr(
 
 ArrayData* EmptyMonotypeDict::SetInt(Self* ad, int64_t k, TypedValue v) {
   auto const dt = dt_modulo_persistence(type(v));
-  auto const mad = MonotypeDict<int64_t>::MakeReserve(ad->m_kind, 1, dt);
+  auto const mad = MonotypeDict<int64_t>::MakeReserve(
+      ad->m_kind, ad->isLegacyArray(), 1, dt);
   auto const result = MonotypeDict<int64_t>::SetInt(mad, k, v);
   assertx(result == mad);
   return result;
 }
 ArrayData* EmptyMonotypeDict::SetStr(Self* ad, StringData* k, TypedValue v) {
-  return k->isStatic() ? makeStrMonotypeDict<LowStringPtr>(ad->m_kind, k, v)
-                       : makeStrMonotypeDict<StringData*>(ad->m_kind, k, v);
+  auto const legacy = ad->isLegacyArray();
+  return k->isStatic()
+    ? makeStrMonotypeDict<LowStringPtr>(ad->m_kind, legacy, k, v)
+    : makeStrMonotypeDict<StringData*>(ad->m_kind, legacy, k, v);
 }
 ArrayData* EmptyMonotypeDict::RemoveInt(Self* ad, int64_t k) {
   return ad;
@@ -359,12 +363,13 @@ uint8_t MonotypeDict<Key>::ComputeSizeIndex(size_t size) {
 
 template <typename Key>
 MonotypeDict<Key>* MonotypeDict<Key>::MakeReserve(
-    HeaderKind kind, size_t size, DataType dt) {
+    HeaderKind kind, bool legacy, size_t size, DataType dt) {
   auto const index = ComputeSizeIndex(size);
   auto const mem = tl_heap->objMallocIndex(index);
   auto const ad = reinterpret_cast<MonotypeDict<Key>*>(mem);
 
-  auto const aux = packSizeIndexAndAuxBits(index, 0);
+  auto const aux = packSizeIndexAndAuxBits(
+      index, legacy ? ArrayData::kLegacyArray : 0);
   ad->initHeader_16(kind, OneReference, aux);
   ad->setLayoutIndex(getLayoutIndex<Key>(dt));
   ad->m_extra_lo16 = 0;
@@ -382,10 +387,9 @@ MonotypeDict<Key>* MonotypeDict<Key>::MakeFromVanilla(
   assertx(ad->hasVanillaMixedLayout());
   auto const kind = ad->isDArray() ? HeaderKind::BespokeDArray
                                    : HeaderKind::BespokeDict;
-  auto result = MakeReserve(kind, ad->size(), dt);
-  result->setLegacyArrayInPlace(ad->isLegacyArray());
+  auto result = MakeReserve(kind, ad->isLegacyArray(), ad->size(), dt);
 
-  IterateKVNoInc(ad, [&](auto k, auto v) {
+  MixedArray::IterateKV(MixedArray::asMixed(ad), [&](auto k, auto v) {
     auto const next = tvIsString(k) ? SetStr(result, val(k).pstr, v)
                                     : SetInt(result, val(k).num, v);
     assertx(result == next);
@@ -752,7 +756,6 @@ ArrayData* MonotypeDict<Key>::escalateWithCapacity(size_t capacity) const {
   auto const dt = type();
   forEachElm([&](auto i, auto elm) {
     auto const tv = TypedValue { elm->val, dt };
-    tvIncRefGen(tv);
     auto const result = [&]{
       if constexpr (std::is_same<Key, int64_t>::value) {
         return MixedArray::SetInt(ad, elm->key, tv);

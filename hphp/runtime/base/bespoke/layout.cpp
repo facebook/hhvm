@@ -179,15 +179,9 @@ ArrayData* maybeMonoify(ArrayData* ad) {
   }
 
   auto const dt = dt_modulo_persistence(et.valueDatatype);
-  if (ad->isDArray() || ad->isDictType()) {
-    return MakeMonotypeDictFromVanilla(ad, dt, et.keyTypes);
-  }
-
-  assertx(ad->isVArray() || ad->isVecType());
-  auto const hk = ad->isVecType() ? HeaderKind::BespokeVec
-                                  : HeaderKind::BespokeVArray;
-  return MonotypeVec::Make(dt, ad->size(), packedData(ad), hk,
-                           ad->isLegacyArray(), ad->isStatic());
+  return ad->isDArray() || ad->isDictType()
+    ? MakeMonotypeDictFromVanilla(ad, dt, et.keyTypes)
+    : MonotypeVec::MakeFromVanilla(ad, dt);
 }
 }
 

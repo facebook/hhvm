@@ -128,7 +128,8 @@ struct EmptyMonotypeDict : BespokeArray {
 template <typename Key>
 struct MonotypeDict : BespokeArray {
   static uint8_t ComputeSizeIndex(size_t size);
-  static MonotypeDict* MakeReserve(HeaderKind kind, size_t size, DataType dt);
+  static MonotypeDict* MakeReserve(
+      HeaderKind kind, bool legacy, size_t capacity, DataType dt);
   static MonotypeDict* MakeFromVanilla(ArrayData* ad, DataType dt);
 
   static MonotypeDict* As(ArrayData* ad);

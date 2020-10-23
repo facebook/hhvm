@@ -35,13 +35,18 @@ struct MonotypeVec : public BespokeArray {
   static void InitializeLayouts();
 
   /**
-   * Create a new MonotypeVec. Note that the staticArr option is used to create
-   * a non-deduplicated static MonotypeVec. This is only for temporary use to
-   * satisfy static RATs while GetScalarArray is unimplemented.
+   * Create a new, empty MonotypeVec with the given capacity.
    */
-  static MonotypeVec* Make(DataType type, uint32_t size,
-                           const TypedValue* values, HeaderKind hk,
-                           bool legacy, bool staticArr);
+  static MonotypeVec* MakeReserve(
+      HeaderKind hk, bool legacy, uint32_t capacity, DataType dt);
+
+  /**
+   * Create a new MonotypeVec from the given vanilla vec or varray. The values
+   * of the source array must have the given type. The new array will match
+   * the input in kind, legacy bit, and static-ness.
+   */
+  static MonotypeVec* MakeFromVanilla(ArrayData* ad, DataType dt);
+
   static MonotypeVec* As(ArrayData* ad);
   static const MonotypeVec* As(const ArrayData* ad);
 
@@ -59,9 +64,6 @@ private:
   void forEachCountableValue(CountableFn c, MaybeCountableFn mc);
   void decRefValues();
   void incRefValues();
-
-  static MonotypeVec* MakeReserve(uint32_t cap, HeaderKind hk, bool legacy,
-                                  bool staticArr);
 
   size_t capacity() const;
   uint8_t sizeIndex() const;
@@ -93,8 +95,6 @@ struct EmptyMonotypeVec : public BespokeArray {
 #undef X
 
 private:
-  static MonotypeVec* escalateToTyped(EmptyMonotypeVec* adIn, DataType type);
-
   bool checkInvariants() const;
 
   friend MonotypeVec;

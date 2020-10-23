@@ -6,9 +6,9 @@ class D {
 
 class C {
   public function __construct(
-    <<Policied("Secret")>>
+    <<__Policied("Secret")>>
     public int $ci,
-    <<Policied("Secret")>>
+    <<__Policied("Secret")>>
     public D $d,
   ) { }
 

@@ -10,6 +10,7 @@
     heap_global_storage
     hhi
     naming_global
+    naming_special_names
     nast
     provider_context
     relative_path

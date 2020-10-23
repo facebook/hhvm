@@ -1,11 +1,11 @@
 <?hh // strict
 
 class Basic {
-  <<Policied("S")>>
+  <<__Policied("S")>>
   public string $string = "string";
-  <<Policied("B")>>
+  <<__Policied("B")>>
   public bool $bool = false;
-  <<Policied("D")>>
+  <<__Policied("D")>>
   public dict<string,bool> $dict = dict[];
 
   public function set(): void {
@@ -30,11 +30,11 @@ class Basic {
 
 class COW {
   public function __construct(
-    <<Policied("X")>>
+    <<__Policied("X")>>
     public bool $x,
-    <<Policied("Y")>>
+    <<__Policied("Y")>>
     public bool $y,
-    <<Policied("DICT")>>
+    <<__Policied("DICT")>>
     public dict<string,bool> $dict,
   ) {}
 

@@ -1,11 +1,11 @@
 <?hh
 
 class Basic {
-  <<Policied("S")>>
+  <<__Policied("S")>>
   public string $string = "string";
-  <<Policied("A")>>
+  <<__Policied("A")>>
   public arraykey $arraykey = "string";
-  <<Policied("K")>>
+  <<__Policied("K")>>
   public keyset<arraykey> $keyset = keyset[];
 
   public function add(): void {
@@ -26,11 +26,11 @@ class Basic {
 
 class COW {
   public function __construct(
-    <<Policied("X")>>
+    <<__Policied("X")>>
     public string $x,
-    <<Policied("Y")>>
+    <<__Policied("Y")>>
     public int $y,
-    <<Policied("KEYSET")>>
+    <<__Policied("KEYSET")>>
     public keyset<arraykey> $keyset,
   ) {}
 

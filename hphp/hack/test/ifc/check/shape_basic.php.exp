@@ -15,11 +15,11 @@ File "shape_basic.php", line 63, characters 3-17:
 Data with policy `B` appears in context `A`. (Typing[4379])
   File "shape_basic.php", line 12, characters 43-73:
   This may be the data source with policy `B`
-  File "shape_basic.php", line 42, characters 12-14:
+  File "shape_basic.php", line 42, characters 14-16:
   This may be the data sink with policy `A`
 File "shape_basic.php", line 52, characters 3-19:
 Data with policy `A` appears in context `PUBLIC`. (Typing[4379])
   File "shape_basic.php", line 9, characters 43-73:
   This may be the data source with policy `A`
-  File "shape_basic.php", line 39, characters 12-19:
+  File "shape_basic.php", line 39, characters 14-21:
   This may be the data sink with policy `PUBLIC`

@@ -6,10 +6,10 @@ class A {
 }
 
 class B {
-  <<Policied("PUBLIC")>>
+  <<__Policied("PUBLIC")>>
   public A $pub;
 
-  <<Policied("PRIVATE")>>
+  <<__Policied("PRIVATE")>>
   public A $priv;
 
   public function __construct() {
@@ -18,26 +18,26 @@ class B {
   }
 }
 
-<<Governed("A")>>
-function f(<<External>> A $x): void {}
+<<__Policied("A")>>
+function f(<<__External>> A $x): void {}
 
-<<Governed("A")>>
+<<__Policied("A")>>
 function g(A $x): void {}
 
-<<Governed("A")>>
+<<__Policied("A")>>
 function governed_to_external(A $x): void {
   // Ok! Regular values can be passed to external because external is more
   // restrictive
   f($x);
 }
 
-<<Governed("A")>>
-function external_to_governed(<<External>> A $x): void {
+<<__Policied("A")>>
+function external_to_governed(<<__External>> A $x): void {
   // Not ok! An external cannot be used as a regular value
   g($x);
 }
 
-<<InferFlows>>
+<<__InferFlows>>
 function public_to_A(B $x): void {
   // Ok! Even though f is governed by the policy A its argument is marked as
   // external and, as such, can be subject to any policy P such that P flows to
@@ -45,22 +45,22 @@ function public_to_A(B $x): void {
   f($x->pub);
 }
 
-<<Governed("PUBLIC")>>
-function external_to_external(<<External>> A $x): void {
+<<__Policied("PUBLIC")>>
+function external_to_external(<<__External>> A $x): void {
   try {
     // Ok because the arg is external
     f($x);
   } catch (Exception $_) {}
 }
 
-<<InferFlows>>
+<<__InferFlows>>
 function private_to_A(B $x): void {
   // Not allowed because PRIVATE does not flow to A
   f($x->priv);
 }
 
-<<Governed("PRIVATE")>>
-function private_external_to_A(<<External>> A $x): void {
+<<__Policied("PRIVATE")>>
+function private_external_to_A(<<__External>> A $x): void {
   // Not allowed! $x can be subject to any policy P that flows to Private, that
   // is, to any policy. In particular P might not flow into A as required for
   // f's argument, so the call is invalid.

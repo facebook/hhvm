@@ -2,10 +2,10 @@
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
 class X {
-  <<Policied("A")>>
+  <<__Policied("A")>>
   public int $a = 0;
 
-  <<Policied("B")>>
+  <<__Policied("B")>>
   public int $b = 1;
 }
 

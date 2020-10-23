@@ -2,13 +2,13 @@
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
 class C {
-  <<Policied("PUBLIC")>>
+  <<__Policied("PUBLIC")>>
   public shape("x" => int, "y" => string) $pub = shape("x" => 1, "y" => "");
 
-  <<Policied("A")>>
+  <<__Policied("A")>>
   public shape("y" => string, "x" => int) $a = shape("x" => 1, "y" => "");
 
-  <<Policied("B")>>
+  <<__Policied("B")>>
   public shape("x" => int, "y" => string) $b = shape("x" => 1, "y" => "");
 }
 
@@ -36,10 +36,10 @@ function bad_assign_ko2(C $c): void {
   $c->a = $c->b;
 }
 
-<<Governed("PUBLIC")>>
+<<__Policied("PUBLIC")>>
 function takes_pub(shape("x" => int, "y" => string) $sh): void {}
 
-<<Governed("A")>>
+<<__Policied("A")>>
 function takes_a(shape("x" => int, "y" => string) $sh): void {}
 
 function pass_to_pub_ok(C $c): void {

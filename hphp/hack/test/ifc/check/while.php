@@ -1,16 +1,16 @@
 <?hh // strict
 
 class C {
-  <<Policied("PRIVATE")>>
+  <<__Policied("PRIVATE")>>
   public string $pri = "";
 
-  <<Policied("PRIVATE")>>
+  <<__Policied("PRIVATE")>>
   public bool $prib = true;
 
-  <<Policied("PUBLIC")>>
+  <<__Policied("PUBLIC")>>
   public string $pub = "";
 
-  <<Policied("PUBLIC")>>
+  <<__Policied("PUBLIC")>>
   public arraykey $out = 42;
 }
 

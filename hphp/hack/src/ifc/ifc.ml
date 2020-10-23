@@ -567,7 +567,7 @@ let call ~pos renv env call_type that_pty_opt args_pty ret_ty =
     in
     let (env, call_constraint) =
       match SMap.find_opt callable_name renv.re_decl.de_fun with
-      | Some { fd_kind = FDGovernedBy policy; fd_args } ->
+      | Some { fd_kind = FDPolicied policy; fd_args } ->
         let scheme = Decl.make_callable_scheme renv policy fp fd_args in
         let prop =
           (* because cipp_scheme is created after fp they cannot
@@ -1371,7 +1371,7 @@ let analyse_callable
 
     let entailment =
       match SMap.find_opt callable_name decl_env.de_fun with
-      | Some { fd_kind = FDGovernedBy policy; fd_args } ->
+      | Some { fd_kind = FDPolicied policy; fd_args } ->
         let scheme = Decl.make_callable_scheme renv policy proto fd_args in
         fun prop ->
           let fun_scheme = Fscheme (scope, proto, prop) in
@@ -1562,35 +1562,3 @@ let do_ opts files_info ctx =
   in
 
   Relative_path.Map.fold files_info ~init:[] ~f:handle_file
-
-let magic_builtins =
-  [|
-    ( "ifc_magic.hhi",
-      {|<?hh // strict
-class InferFlows
-  implements
-    HH\FunctionAttribute,
-    HH\MethodAttribute {}
-class Policied
-  implements
-    HH\InstancePropertyAttribute,
-    HH\ClassAttribute,
-    HH\ParameterAttribute,
-    HH\FunctionAttribute {
-  public function __construct(public string $purpose) { }
-}
-class Governed
- implements
-   HH\FunctionAttribute,
-   HH\MethodAttribute {
-  public function __construct(public string $purpose = "") { }
-}
-class External
-  implements
-    HH\ParameterAttribute {}
-class CanCall
-  implements
-    HH\ParameterAttribute {}
-|}
-    );
-  |]

@@ -206,7 +206,7 @@ type magic_decl = {
 }
 
 type fun_decl_kind =
-  | FDGovernedBy of policy option
+  | FDPolicied of policy option
   | FDInferFlows
 
 type arg_kind =

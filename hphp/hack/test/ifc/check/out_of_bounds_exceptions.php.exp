@@ -23,19 +23,19 @@ Data with policy `VEC` appears in context `PUBLIC`. (Typing[4379])
   Another program point contributing to the illegal flow
 File "out_of_bounds_exceptions.php", line 45, characters 3-18:
 Data with policy `PRIVATE` appears in context `PUBLIC`. (Typing[4379])
-  File "out_of_bounds_exceptions.php", line 5, characters 66-72:
+  File "out_of_bounds_exceptions.php", line 5, characters 68-74:
   This may be the data source with policy `PRIVATE`
-  File "out_of_bounds_exceptions.php", line 9, characters 65-71:
+  File "out_of_bounds_exceptions.php", line 9, characters 67-73:
   This may be the data sink with policy `PUBLIC`
 File "out_of_bounds_exceptions.php", line 18, characters 3-18:
 Data with policy `PRIVATE` appears in context `PUBLIC`. (Typing[4379])
-  File "out_of_bounds_exceptions.php", line 5, characters 66-72:
+  File "out_of_bounds_exceptions.php", line 5, characters 68-74:
   This may be the data source with policy `PRIVATE`
-  File "out_of_bounds_exceptions.php", line 9, characters 65-71:
+  File "out_of_bounds_exceptions.php", line 9, characters 67-73:
   This may be the data sink with policy `PUBLIC`
 File "out_of_bounds_exceptions.php", line 27, characters 3-18:
 Data with policy `PRIVATE` appears in context `PUBLIC`. (Typing[4379])
-  File "out_of_bounds_exceptions.php", line 5, characters 66-72:
+  File "out_of_bounds_exceptions.php", line 5, characters 68-74:
   This may be the data source with policy `PRIVATE`
-  File "out_of_bounds_exceptions.php", line 9, characters 65-71:
+  File "out_of_bounds_exceptions.php", line 9, characters 67-73:
   This may be the data sink with policy `PUBLIC`

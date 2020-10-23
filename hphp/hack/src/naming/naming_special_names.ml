@@ -382,7 +382,7 @@ module UserAttributes = struct
           (uaPu, [cls]);
           (uaEnableUnstableFeatures, [file]);
           (uaEnumClass, [cls; enum]);
-          (uaPolicied, [fn; mthd]);
+          (uaPolicied, [fn; mthd; instProperty; parameter]);
           (uaInferFlows, [fn; mthd]);
           (uaExternal, [parameter]);
           (uaCanCall, [parameter]);

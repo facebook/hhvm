@@ -2,7 +2,7 @@
 
 class D {
   public function __construct(
-    <<Policied("pd")>>
+    <<__Policied("pd")>>
     public int $pd
   ) {}
 }
@@ -10,7 +10,7 @@ class D {
 class E extends D {
   public function __construct(
     public int $pd,
-    <<Policied("pe")>>
+    <<__Policied("pe")>>
     public int $pe,
   ) {
     parent::__construct($pd);
@@ -23,7 +23,7 @@ class F extends E {
   public function __construct(
     public int $pd,
     public int $pe,
-    <<Policied("pf")>>
+    <<__Policied("pf")>>
     public int $pf,
   ) {
     parent::__construct($pd, $pe);

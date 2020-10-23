@@ -10,13 +10,13 @@
 
 class C {
   public function __construct(
-    <<Policied("A")>>
+    <<__Policied("A")>>
     public int $a,
-    <<Policied("B")>>
+    <<__Policied("B")>>
     public int $b,
-    <<Policied("PUBLIC")>>
+    <<__Policied("PUBLIC")>>
     public int $public,
-    <<Policied("PRIVATE")>>
+    <<__Policied("PRIVATE")>>
     public int $private,
   ) {}
 

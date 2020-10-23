@@ -1,14 +1,14 @@
 <?hh // strict
 
 class A {
-  <<Policied("X")>>
+  <<__Policied("X")>>
   public int $x = 0;
 
-  <<Policied("Y")>>
+  <<__Policied("Y")>>
   public int $y = 0;
 };
 
-<<InferFlows>>
+<<__InferFlows>>
 function g(A $a): void {
   $x = $a;
   if ($a->x > 0) {

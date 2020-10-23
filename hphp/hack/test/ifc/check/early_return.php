@@ -2,14 +2,14 @@
 
 class PublicData {
   public function __construct(
-    <<Policied("PUBLIC")>>
+    <<__Policied("PUBLIC")>>
     public string $data,
   ) {}
 }
 
 class PoliciedData {
   public function __construct(
-    <<Policied("SECRET")>>
+    <<__Policied("SECRET")>>
     public bool $data,
   ) {}
 }

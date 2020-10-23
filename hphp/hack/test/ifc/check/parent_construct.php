@@ -2,14 +2,14 @@
 
 class C {
   public function __construct(
-    <<Policied("PRIVATE")>>
+    <<__Policied("PRIVATE")>>
     public int $private,
   ) { }
 }
 
 class D extends C {
   public function __construct(
-    <<Policied("PUBLIC")>>
+    <<__Policied("PUBLIC")>>
     public int $public,
     public int $private,
   ) {

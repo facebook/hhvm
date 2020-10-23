@@ -5,13 +5,13 @@ class A {
 }
 
 class C {
-  <<Policied("PUBLIC")>>
+  <<__Policied("PUBLIC")>>
   public int $value = 0;
 
-  <<Policied("FOO")>>
+  <<__Policied("FOO")>>
   public bool $foo = false;
 
-  <<Policied("PUBLIC")>>
+  <<__Policied("PUBLIC")>>
   public A $a;
 
   public function __construct() { $this->a = new A(); }
@@ -25,12 +25,12 @@ function apply_ok((function(int): int) $f, C $c): void {
 // Function arguments of cipp function take in cipp
 // data and return cipp data
 
-<<Governed>>
+<<__Policied>>
 function apply((function(int): int) $f, int $arg): int {
   return $f($arg);
 }
 
-<<Governed>>
+<<__Policied>>
 function apply0((function(int): int) $f, C $c): void {
   // PUBLIC flows into CIPP, the call works because ints
   // are immutable
@@ -39,19 +39,19 @@ function apply0((function(int): int) $f, C $c): void {
 
 // Functions below trigger errors
 
-<<Governed>>
+<<__Policied>>
 function apply1((function(int): int) $f, C $c): void {
   $c->value = $f(0);
 }
 
-<<Governed>>
+<<__Policied>>
 function apply2((function(): void) $f, C $c): void {
   if ($c->foo) {
     $f();
   }
 }
 
-<<Governed>>
+<<__Policied>>
 function apply3((function(A): void) $f, C $c): void {
   // Error, $c->a is mutable
   $f($c->a);

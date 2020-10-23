@@ -4,9 +4,9 @@ class MyException extends Exception {}
 
 class C {
   public function __construct(
-    <<Policied("PRIVATE")>>
+    <<__Policied("PRIVATE")>>
     public int $private,
-    <<Policied("PUBLIC")>>
+    <<__Policied("PUBLIC")>>
     public int $public,
   ) { }
 }

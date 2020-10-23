@@ -2,9 +2,9 @@
 
 class X {
   public function __construct(
-    <<Policied("PUBLIC")>>
+    <<__Policied("PUBLIC")>>
     public int $public,
-    <<Policied("PRIVATE")>>
+    <<__Policied("PRIVATE")>>
     public int $private,
   ) {}
 

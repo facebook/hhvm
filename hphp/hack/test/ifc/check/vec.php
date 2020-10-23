@@ -1,9 +1,9 @@
 <?hh // strict
 
 class Basic {
-  <<Policied("I")>>
+  <<__Policied("I")>>
   public int $i = 0;
-  <<Policied("V")>>
+  <<__Policied("V")>>
   public vec<int> $v = vec[];
 
   public function set(): void {
@@ -27,11 +27,11 @@ class Basic {
 
 class COW {
   public function __construct(
-    <<Policied("X")>>
+    <<__Policied("X")>>
     public int $x,
-    <<Policied("Y")>>
+    <<__Policied("Y")>>
     public int $y,
-    <<Policied("VX")>>
+    <<__Policied("VX")>>
     public vec<int> $vx,
   ) {}
 

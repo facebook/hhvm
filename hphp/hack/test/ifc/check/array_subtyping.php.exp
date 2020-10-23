@@ -1,7 +1,7 @@
 === IFC analysis results for array_subtyping.php
 File "array_subtyping.php", line 24, characters 5-39:
 Data with policy `VALUE` appears in context `KEYED_CONTAINER`. (Typing[4379])
-  File "array_subtyping.php", line 5, characters 39-54:
+  File "array_subtyping.php", line 5, characters 41-56:
   This may be the data source with policy `VALUE`
   File "array_subtyping.php", line 11, characters 37-59:
   This may be the data sink with policy `KEYED_CONTAINER`
@@ -9,7 +9,7 @@ Data with policy `VALUE` appears in context `KEYED_CONTAINER`. (Typing[4379])
   Another program point contributing to the illegal flow
 File "array_subtyping.php", line 24, characters 5-39:
 Data with policy `INDEX` appears in context `KEYED_CONTAINER`. (Typing[4379])
-  File "array_subtyping.php", line 4, characters 36-43:
+  File "array_subtyping.php", line 4, characters 38-45:
   This may be the data source with policy `INDEX`
   File "array_subtyping.php", line 11, characters 37-59:
   This may be the data sink with policy `KEYED_CONTAINER`
@@ -17,7 +17,7 @@ Data with policy `INDEX` appears in context `KEYED_CONTAINER`. (Typing[4379])
   Another program point contributing to the illegal flow
 File "array_subtyping.php", line 17, characters 5-41:
 Data with policy `VALUE` appears in context `KEYED_TRAVERSABLE`. (Typing[4379])
-  File "array_subtyping.php", line 5, characters 39-54:
+  File "array_subtyping.php", line 5, characters 41-56:
   This may be the data source with policy `VALUE`
   File "array_subtyping.php", line 9, characters 39-63:
   This may be the data sink with policy `KEYED_TRAVERSABLE`
@@ -25,7 +25,7 @@ Data with policy `VALUE` appears in context `KEYED_TRAVERSABLE`. (Typing[4379])
   Another program point contributing to the illegal flow
 File "array_subtyping.php", line 17, characters 5-41:
 Data with policy `INDEX` appears in context `KEYED_TRAVERSABLE`. (Typing[4379])
-  File "array_subtyping.php", line 4, characters 36-43:
+  File "array_subtyping.php", line 4, characters 38-45:
   This may be the data source with policy `INDEX`
   File "array_subtyping.php", line 9, characters 39-63:
   This may be the data sink with policy `KEYED_TRAVERSABLE`

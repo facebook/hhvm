@@ -2,14 +2,14 @@
 
 class Secret {
   public function __construct(
-    <<Policied("PRIVATE")>>
+    <<__Policied("PRIVATE")>>
     public int $secret,
   ) {}
 }
 
 class A {
   public function __construct(
-    <<Policied("PUBLIC")>>
+    <<__Policied("PUBLIC")>>
     public int $pa,
   ) {}
 }
@@ -30,14 +30,14 @@ class C extends B {
   }
 }
 
-<<InferFlows>>
+<<__InferFlows>>
 function castBA(B $b): A { return $b; }
 
 function testBA(Secret $secret, B $b): void {
   castBA($b)->pa = $secret->secret;
 }
 
-<<InferFlows>>
+<<__InferFlows>>
 function castCA(C $c): A { return $c; }
 
 function testCA(Secret $secret, C $c): void {

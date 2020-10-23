@@ -1,19 +1,19 @@
 <?hh // strict
 
 class A {
-  <<Policied("P1")>>
+  <<__Policied("P1")>>
   public int $i = 0;
 }
 
 trait T {
-  <<Policied("P2")>>
+  <<__Policied("P2")>>
   public int $j = 0;
 }
 
 class B extends A {
   use T;
 
-  <<Policied("P3")>>
+  <<__Policied("P3")>>
   public int $k = 0;
 }
 

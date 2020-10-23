@@ -1,11 +1,11 @@
 <?hh
 
 class C {
-  <<Policied("PUBLIC")>>
+  <<__Policied("PUBLIC")>>
   public int $out = 0;
-  <<Policied("KEY")>>
+  <<__Policied("KEY")>>
   public int $key = 0;
-  <<Policied("VALUE")>>
+  <<__Policied("VALUE")>>
   public int $value = 0;
 }
 

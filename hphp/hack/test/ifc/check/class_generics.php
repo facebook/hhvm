@@ -3,14 +3,14 @@
 
 class A<T> {
   public function __construct(
-    <<Policied("A")>>
+    <<__Policied("A")>>
     public T $a
   ) {}
 }
 
 class B<T> {
   public function __construct(
-    <<Policied("B")>>
+    <<__Policied("B")>>
     public T $b
   ) {}
 }

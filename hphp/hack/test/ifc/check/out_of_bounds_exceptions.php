@@ -2,11 +2,11 @@
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
 class X {
-  public function __construct(<<Policied("PRIVATE")>> public int $valuex) {}
+  public function __construct(<<__Policied("PRIVATE")>> public int $valuex) {}
 }
 
 class Y {
-  public function __construct(<<Policied("PUBLIC")>> public int $valuey) {}
+  public function __construct(<<__Policied("PUBLIC")>> public int $valuey) {}
 }
 
 function koVecAccess(X $x, Y $y, vec<int> $v): void {
@@ -56,10 +56,10 @@ function okDict(X $x, Y $y, dict<string,int> $v): void {
 }
 
 class V {
-  <<Policied("VEC")>>
+  <<__Policied("VEC")>>
   public vec<string> $vec = vec[];
 
-  <<Policied("PUBLIC")>>
+  <<__Policied("PUBLIC")>>
   public bool $b = false;
 
   public function koIsEmptyAccess(): void {

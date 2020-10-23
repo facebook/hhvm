@@ -215,8 +215,8 @@ let class_decl fmt { cd_policied_properties = props; _ } =
 let fun_decl fmt decl =
   let kind =
     match decl.fd_kind with
-    | FDGovernedBy (Some policy) -> show_policy policy
-    | FDGovernedBy None -> "implicit"
+    | FDPolicied (Some policy) -> show_policy policy
+    | FDPolicied None -> "implicit"
     | FDInferFlows -> "infer"
   in
   fprintf fmt "{ kind = %s }" kind

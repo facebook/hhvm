@@ -16,6 +16,7 @@ module Lattice = Ifc_security_lattice
 module L = Logic.Infix
 module A = Aast
 module T = Typing_defs
+module SN = Naming_special_names
 
 (* Everything done in this file should eventually be merged in Hack's
    regular decl phase. Right now it is more convenient to keep things
@@ -25,9 +26,9 @@ exception FlowDecl of string
 
 let fail s = raise (FlowDecl s)
 
-let policied_id = "\\Policied"
+let policied_id = SN.UserAttributes.uaPolicied
 
-let infer_flows_id = "\\InferFlows"
+let infer_flows_id = SN.UserAttributes.uaInferFlows
 
 let exception_id = "\\Exception"
 
@@ -41,13 +42,11 @@ let keyset_id = "\\HH\\keyset"
 
 let awaitable_id = "\\HH\\Awaitable"
 
-let governed_id = "\\Governed"
-
 let construct_id = "__construct"
 
-let external_id = "\\External"
+let external_id = SN.UserAttributes.uaExternal
 
-let callable_id = "\\CanCall"
+let callable_id = SN.UserAttributes.uaCanCall
 
 let make_callable_name cls_name_opt name =
   match cls_name_opt with
@@ -63,7 +62,7 @@ let get_attr attr attrs =
 
 let callable_decl attrs args =
   let fd_kind =
-    match get_attr governed_id attrs with
+    match get_attr policied_id attrs with
     | Some attr ->
       let policy =
         match attr.A.ua_params with
@@ -72,7 +71,7 @@ let callable_decl attrs args =
           Some (Lattice.parse_policy (PosSet.singleton pos) purpose)
         | _ -> fail "expected a string literal as governed by argument."
       in
-      FDGovernedBy policy
+      FDPolicied policy
     | None ->
       if Option.is_some (get_attr infer_flows_id attrs) then
         FDInferFlows

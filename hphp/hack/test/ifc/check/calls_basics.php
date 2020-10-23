@@ -1,18 +1,18 @@
 <?hh // strict
 
 class C {
-  <<Policied("A")>>
+  <<__Policied("A")>>
   public int $a = 0;
 
-  <<Policied("B")>>
+  <<__Policied("B")>>
   public int $b = 0;
 
-  <<InferFlows>>
+  <<__InferFlows>>
   public function setb(int $n): void {
     $this->b = $n;
   }
 
-  <<InferFlows>>
+  <<__InferFlows>>
   public function is_a_pos(): bool {
     if ($this->a > 0) {
       return true;
@@ -22,7 +22,7 @@ class C {
   }
 }
 
-<<InferFlows>>
+<<__InferFlows>>
 function dbl(int $x): int {
   $x += $x;
   return $x;

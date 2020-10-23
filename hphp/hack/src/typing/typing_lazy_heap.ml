@@ -9,12 +9,6 @@
 
 open Hh_prelude
 
-let get_type_id_filename ctx x expected_kind =
-  match Naming_provider.get_type_path_and_kind ctx x with
-  | Some (fn, kind) when Naming_types.equal_kind_of_type kind expected_kind ->
-    Some fn
-  | _ -> None
-
 let get_class = Typing_classes_heap.Classes.get
 
 let get_class_no_local_cache = Typing_classes_heap.Classes.get_no_local_cache
@@ -55,7 +49,7 @@ let get_record_def ~(sh : SharedMem.uses) ctx x =
   match Typing_heap.RecordDefs.get x with
   | Some c -> Some c
   | None ->
-    (match get_type_id_filename ctx x Naming_types.TRecordDef with
+    (match Naming_provider.get_record_def_path ctx x with
     | Some filename ->
       let tdecl =
         Errors.run_in_decl_mode filename (fun () ->
@@ -70,7 +64,7 @@ let get_typedef ~(sh : SharedMem.uses) ctx x =
   match Typing_heap.Typedefs.get x with
   | Some c -> Some c
   | None ->
-    (match get_type_id_filename ctx x Naming_types.TTypedef with
+    (match Naming_provider.get_typedef_path ctx x with
     | Some filename ->
       let tdecl =
         Errors.run_in_decl_mode filename (fun () ->

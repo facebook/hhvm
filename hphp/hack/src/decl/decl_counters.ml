@@ -9,7 +9,6 @@
 type decl
 
 type decl_kind =
-  | Class_no_local_cache
   | Class
   | Fun
   | GConst

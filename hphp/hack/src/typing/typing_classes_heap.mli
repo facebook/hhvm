@@ -9,17 +9,17 @@
 
 open Typing_defs
 
+(* This entire file is "private". Its sole consumer is Decl_provider.ml. *)
+
 module Classes : sig
   type key = StringKey.t
 
   type t
 
-  (** Implementation detail, do not use. For use in [Decl_provider] only. *)
-  val get_no_local_cache : Provider_context.t -> key -> t option
+  val get : Provider_context.t -> Decl_counters.decl option -> key -> t option
 
-  (** This is the preferred entry-point. It gets the class, and uses
-  a local-memory cache. *)
-  val get : Provider_context.t -> key -> t option
+  val get_no_local_cache :
+    Provider_context.t -> Decl_counters.decl option -> key -> t option
 end
 
 module Api : sig

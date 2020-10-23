@@ -123,7 +123,7 @@ module Classes = struct
   can be easily correlated with how the original class_type_variant was fetched. *)
   type t = Decl_counters.decl option * class_type_variant
 
-  let get_no_local_cache_impl
+  let get_no_local_cache
       (ctx : Provider_context.t)
       (decl_counter : Decl_counters.decl option)
       (class_name : string) :
@@ -142,28 +142,17 @@ module Classes = struct
       Deferred_decl.add_deferment ~d;
       None
 
-  let get_no_local_cache (ctx : Provider_context.t) (class_name : string) :
-      t option =
-    Decl_counters.count_decl
-      Decl_counters.Class_no_local_cache
-      class_name
-      (fun decl_counter -> get_no_local_cache_impl ctx decl_counter class_name)
-
-  let get_impl ctx decl_counter class_name =
+  let get ctx decl_counter class_name =
     match Cache.get class_name with
     | Some t -> Some (decl_counter, t)
     | None ->
       begin
-        match get_no_local_cache_impl ctx decl_counter class_name with
+        match get_no_local_cache ctx decl_counter class_name with
         | None -> None
         | Some (decl_counter, class_type_variant) ->
           Cache.add class_name class_type_variant;
           Some (decl_counter, class_type_variant)
       end
-
-  let get ctx class_name =
-    Decl_counters.count_decl Decl_counters.Class class_name (fun decl_counter ->
-        get_impl ctx decl_counter class_name)
 end
 
 module ApiShallow = struct

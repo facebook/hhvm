@@ -87,6 +87,7 @@
     decl_provider)
   (libraries
     counters
+    decl_counters
     decl_class
     decl_service_client
     provider_backend

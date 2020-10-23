@@ -49,7 +49,18 @@ let get_fun (ctx : Provider_context.t) (fun_name : fun_key) : fun_decl option =
   Counters.count Counters.Category.Decling @@ fun () ->
   match Provider_context.get_backend ctx with
   | Provider_backend.Shared_memory ->
-    Typing_lazy_heap.get_fun ~sh:SharedMem.Uses ctx fun_name
+    Decl_counters.count_decl Decl_counters.Fun fun_name @@ fun _counter ->
+    (match Typing_heap.Funs.get fun_name with
+    | Some c -> Some c
+    | None ->
+      (match Naming_provider.get_fun_path ctx fun_name with
+      | Some filename ->
+        let ft =
+          Errors.run_in_decl_mode filename (fun () ->
+              Decl.declare_fun_in_file ~write_shmem:true ctx filename fun_name)
+        in
+        Some ft
+      | None -> None))
   | Provider_backend.Local_memory { Provider_backend.decl_cache; _ } ->
     Provider_backend.Decl_cache.find_or_add
       decl_cache
@@ -74,7 +85,8 @@ let get_class (ctx : Provider_context.t) (class_name : class_key) :
     class_decl option =
   Counters.count Counters.Category.Decling @@ fun () ->
   match Provider_context.get_backend ctx with
-  | Provider_backend.Shared_memory -> Typing_lazy_heap.get_class ctx class_name
+  | Provider_backend.Shared_memory ->
+    Typing_classes_heap.Classes.get ctx class_name
   | Provider_backend.Local_memory { Provider_backend.decl_cache; _ } ->
     let result : Obj.t option =
       Provider_backend.Decl_cache.find_or_add
@@ -82,7 +94,7 @@ let get_class (ctx : Provider_context.t) (class_name : class_key) :
         ~key:(Provider_backend.Decl_cache_entry.Class_decl class_name)
         ~default:(fun () ->
           let result : class_decl option =
-            Typing_lazy_heap.get_class_no_local_cache ctx class_name
+            Typing_classes_heap.Classes.get_no_local_cache ctx class_name
           in
           Option.map result ~f:Obj.repr)
     in
@@ -92,7 +104,7 @@ let get_class (ctx : Provider_context.t) (class_name : class_key) :
     (* The decl service caches shallow decls, so we communicate with it in
        Shallow_classes_provider. Typing_lazy_heap lazily folds shallow decls to
        provide a folded-decl API.  *)
-    Typing_lazy_heap.get_class ctx class_name
+    Typing_classes_heap.Classes.get ctx class_name
 
 let convert_class_elt_to_fun_decl class_elt_opt : fun_decl option =
   Typing_defs.(
@@ -141,7 +153,23 @@ let get_typedef (ctx : Provider_context.t) (typedef_name : string) :
   Counters.count Counters.Category.Decling @@ fun () ->
   match Provider_context.get_backend ctx with
   | Provider_backend.Shared_memory ->
-    Typing_lazy_heap.get_typedef ~sh:SharedMem.Uses ctx typedef_name
+    Decl_counters.count_decl Decl_counters.Typedef typedef_name
+    @@ fun _counter ->
+    (match Typing_heap.Typedefs.get typedef_name with
+    | Some c -> Some c
+    | None ->
+      (match Naming_provider.get_typedef_path ctx typedef_name with
+      | Some filename ->
+        let tdecl =
+          Errors.run_in_decl_mode filename (fun () ->
+              Decl.declare_typedef_in_file
+                ~write_shmem:true
+                ctx
+                filename
+                typedef_name)
+        in
+        Some tdecl
+      | None -> None))
   | Provider_backend.Local_memory { Provider_backend.decl_cache; _ } ->
     Provider_backend.Decl_cache.find_or_add
       decl_cache
@@ -167,7 +195,23 @@ let get_record_def (ctx : Provider_context.t) (record_name : string) :
   Counters.count Counters.Category.Decling @@ fun () ->
   match Provider_context.get_backend ctx with
   | Provider_backend.Shared_memory ->
-    Typing_lazy_heap.get_record_def ~sh:SharedMem.Uses ctx record_name
+    Decl_counters.count_decl Decl_counters.Record_def record_name
+    @@ fun _counter ->
+    (match Typing_heap.RecordDefs.get record_name with
+    | Some c -> Some c
+    | None ->
+      (match Naming_provider.get_record_def_path ctx record_name with
+      | Some filename ->
+        let tdecl =
+          Errors.run_in_decl_mode filename (fun () ->
+              Decl.declare_record_def_in_file
+                ~write_shmem:true
+                ctx
+                filename
+                record_name)
+        in
+        Some tdecl
+      | None -> None))
   | Provider_backend.Local_memory { Provider_backend.decl_cache; _ } ->
     Provider_backend.Decl_cache.find_or_add
       decl_cache
@@ -193,7 +237,22 @@ let get_gconst (ctx : Provider_context.t) (gconst_name : string) :
   Counters.count Counters.Category.Decling @@ fun () ->
   match Provider_context.get_backend ctx with
   | Provider_backend.Shared_memory ->
-    Typing_lazy_heap.get_gconst ~sh:SharedMem.Uses ctx gconst_name
+    Decl_counters.count_decl Decl_counters.GConst gconst_name @@ fun _counter ->
+    (match Typing_heap.GConsts.get gconst_name with
+    | Some c -> Some c
+    | None ->
+      (match Naming_provider.get_const_path ctx gconst_name with
+      | Some filename ->
+        let gconst =
+          Errors.run_in_decl_mode filename (fun () ->
+              Decl.declare_const_in_file
+                ~write_shmem:true
+                ctx
+                filename
+                gconst_name)
+        in
+        Some gconst
+      | None -> None))
   | Provider_backend.Local_memory { Provider_backend.decl_cache; _ } ->
     Provider_backend.Decl_cache.find_or_add
       decl_cache

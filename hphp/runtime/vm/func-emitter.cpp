@@ -171,6 +171,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   auto f = m_ue.newFunc(this, unit, name, attrs, params.size());
 
   f->m_isPreFunc = !!preClass;
+  f->m_coeffectAttrs = coeffectAttrs;
 
   auto const uait = userAttributes.find(s___Reified.get());
   auto const hasReifiedGenerics = uait != userAttributes.end();
@@ -513,6 +514,7 @@ void FuncEmitter::serdeMetaData(SerDe& sd) {
     (base)
     (past_delta)
     (a)
+    (coeffectAttrs)
     (hniReturnType)
     (repoReturnType)
     (repoAwaitedReturnType)

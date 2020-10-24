@@ -554,7 +554,7 @@ struct AsmState {
     currentStackDepth->adjust(*this, delta);
   }
 
-  void adjustStackHighwater(int depth) {
+  void adjustStackHighwater(int16_t depth) {
     if (depth) {
       fe->maxStackCells = std::max(fe->maxStackCells, depth);
     }
@@ -692,9 +692,13 @@ struct AsmState {
       fe->allocUnnamedLocal();
     }
 
-    fe->maxStackCells +=
+    auto const maxStackCells =
       fe->numLocals() +
       fe->numIterators() * kNumIterCells;
+    always_assert(std::numeric_limits<int16_t>::max() >
+                  fe->maxStackCells + maxStackCells);
+    fe->maxStackCells += maxStackCells;
+
 
     fe->finish(ue->bcPos());
 
@@ -2241,7 +2245,8 @@ void parse_user_attribute(AsmState& as,
  * if attributeMap is non null.
  */
 Attr parse_attribute_list(AsmState& as, AttrContext ctx,
-                          UserAttributeMap *userAttrs = nullptr) {
+                          UserAttributeMap* userAttrs = nullptr,
+                          CoeffectAttr* coeffectAttrs = nullptr) {
   as.in.skipWhitespace();
   int ret = AttrNone;
   if (as.in.peek() != '[') return Attr(ret);
@@ -2266,8 +2271,9 @@ Attr parse_attribute_list(AsmState& as, AttrContext ctx,
     auto const rxAttrs = rxAttrsFromAttrString(word);
     if (rxAttrs != 0) {
       if (seen_rxl) as.error("multiple rx attributes");
+      if (!coeffectAttrs) as.error("invalid position for rx attribute");
       seen_rxl = true;
-      ret |= rxAttrs;
+      *coeffectAttrs |= rxAttrs;
       continue;
     }
 
@@ -2572,7 +2578,8 @@ void parse_function_flags(AsmState& as) {
       as.fe->isPairGenerator = true;
     } else if (flag == "isRxDisabled") {
       // this relies on attributes being parsed before flags
-      if (!funcAttrIsAnyRx(as.fe->attrs) || funcAttrIsPure(as.fe->attrs)) {
+      if (!funcAttrIsAnyRx(as.fe->coeffectAttrs) ||
+          funcAttrIsPure(as.fe->coeffectAttrs)) {
         as.error("isRxDisabled on non-rx func");
       }
       as.fe->isRxDisabled = true;
@@ -2674,7 +2681,9 @@ void parse_function(AsmState& as) {
   auto const ubs = parse_ubs(as);
 
   UserAttributeMap userAttrs;
-  Attr attrs = parse_attribute_list(as, AttrContext::Func, &userAttrs);
+  CoeffectAttr coeffectAttrs = CEAttrNone;
+  Attr attrs = parse_attribute_list(as, AttrContext::Func,
+                                    &userAttrs, &coeffectAttrs);
 
   if (!SystemLib::s_inited) {
     attrs |= AttrUnique | AttrPersistent | AttrBuiltin;
@@ -2692,6 +2701,7 @@ void parse_function(AsmState& as) {
 
   as.fe = as.ue->newFuncEmitter(makeStaticString(name));
   as.fe->init(line0, line1, as.ue->bcPos(), attrs, nullptr);
+  as.fe->coeffectAttrs = coeffectAttrs;
 
   auto currUBs = getRelevantUpperBounds(retTypeInfo.second, ubs, {}, {});
   auto const hasReifiedGenerics =
@@ -2732,7 +2742,9 @@ void parse_method(AsmState& as, const UpperBoundMap& class_ubs) {
   auto const ubs = parse_ubs(as);
 
   UserAttributeMap userAttrs;
-  Attr attrs = parse_attribute_list(as, AttrContext::Func, &userAttrs);
+  CoeffectAttr coeffectAttrs = CEAttrNone;
+  Attr attrs = parse_attribute_list(as, AttrContext::Func,
+                                    &userAttrs, &coeffectAttrs);
 
   if (!SystemLib::s_inited) attrs |= AttrBuiltin;
 
@@ -2754,6 +2766,7 @@ void parse_method(AsmState& as, const UpperBoundMap& class_ubs) {
   as.fe = as.ue->newMethodEmitter(sname, as.pce);
   as.pce->addMethod(as.fe);
   as.fe->init(line0, line1, as.ue->bcPos(), attrs, nullptr);
+  as.fe->coeffectAttrs = coeffectAttrs;
 
   auto const hasReifiedGenerics =
     userAttrs.find(s___Reified.get()) != userAttrs.end() ||

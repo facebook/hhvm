@@ -549,7 +549,7 @@ inline bool Func::isResumable() const {
 // Coeffects.
 
 inline RxLevel Func::rxLevel() const {
-  return rxLevelFromAttr(m_attrs);
+  return rxLevelFromAttr(m_coeffectAttrs);
 }
 
 inline bool Func::isRxDisabled() const {
@@ -557,7 +557,7 @@ inline bool Func::isRxDisabled() const {
 }
 
 inline bool Func::isRxConditional() const {
-  return rxConditionalFromAttr(m_attrs);
+  return rxConditionalFromAttr(m_coeffectAttrs);
 }
 
 inline bool Func::hasCoeffectRules() const {
@@ -598,6 +598,10 @@ inline bool Func::isSpecial(const StringData* name) {
 
 inline Attr Func::attrs() const {
   return m_attrs;
+}
+
+inline CoeffectAttr Func::coeffectAttrs() const {
+  return m_coeffectAttrs;
 }
 
 inline const UserAttributeMap& Func::userAttributes() const {
@@ -719,6 +723,10 @@ inline int8_t& Func::maybeIntercepted() const {
 
 inline void Func::setAttrs(Attr attrs) {
   m_attrs = attrs;
+}
+
+inline void Func::setCoeffectAttrs(CoeffectAttr attrs) {
+  m_coeffectAttrs = attrs;
 }
 
 inline void Func::setBaseCls(Class* baseCls) {

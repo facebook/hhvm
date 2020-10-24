@@ -326,8 +326,8 @@ Func* setupNullClsMethod(Func* f, Class* cls, StringData* name) {
   auto clone = f->clone(cls, name);
   clone->setNewFuncId();
   clone->setAttrs(static_cast<Attr>(
-                    AttrPublic | AttrNoInjection | AttrDynamicallyCallable) |
-                    rxMakeAttr(RxLevel::Pure, false));
+                    AttrPublic | AttrNoInjection | AttrDynamicallyCallable));
+  clone->setCoeffectAttrs(rxMakeAttr(RxLevel::Pure, false));
   return clone;
 }
 

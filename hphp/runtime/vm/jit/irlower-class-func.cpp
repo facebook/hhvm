@@ -252,14 +252,14 @@ void cgLdFuncRxLevel(IRLS& env, const IRInstruction* inst) {
   auto const dst = dstLoc(env, inst, 0).reg();
   auto& v = vmain(env);
 
-  static_assert(AttrRxLevel0 == (1u << 14), "");
-  static_assert(AttrRxLevel1 == (1u << 15), "");
-  static_assert(AttrRxLevel2 == (1u << 16), "");
+  static_assert(CEAttrRxLevel0 == (1u << 0), "");
+  static_assert(CEAttrRxLevel1 == (1u << 1), "");
+  static_assert(CEAttrRxLevel2 == (1u << 2), "");
   auto const attrs = v.makeReg();
   auto const shifted = v.makeReg();
-  v << loadzlq{func[Func::attrsOff()], attrs};
-  v << shrqi{14, attrs, shifted, v.makeReg()};
-  v << andqi{7, shifted, dst, v.makeReg()};
+  v << loadzlq{func[Func::coeffectAttrsOff()], attrs};
+  v << shrqi{kRxAttrShift, attrs, shifted, v.makeReg()};
+  v << andqi{int32_t(kRxLevelMask), shifted, dst, v.makeReg()};
 }
 
 ///////////////////////////////////////////////////////////////////////////////

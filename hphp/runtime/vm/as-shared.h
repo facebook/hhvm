@@ -19,6 +19,7 @@
 #include <folly/Optional.h>
 
 #include "hphp/runtime/base/attr.h"
+#include "hphp/runtime/vm/rx.h"
 #include "hphp/runtime/vm/type-constraint.h"
 
 namespace HPHP {
@@ -50,12 +51,14 @@ enum class AttrContext {
  * Convert an attr to a vector of attribute names, for a given context.
  */
 std::vector<std::string> attrs_to_vec(AttrContext, Attr);
+std::vector<std::string> attrs_to_vec(AttrContext, CoeffectAttr);
 
 /*
  * Convert an attr to a string of space-separated attribute names, for
  * a given context.
  */
 std::string attrs_to_string(AttrContext, Attr);
+std::string attrs_to_string(AttrContext, CoeffectAttr);
 
 /*
  * Convert a string containing a single attribute name into an Attr,

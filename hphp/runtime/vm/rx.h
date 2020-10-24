@@ -22,6 +22,27 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+enum CoeffectAttr : uint16_t {
+  CEAttrNone = 0,
+  // The RxLevel attrs are used to encode the maximum level of reactivity
+  // of a function. RxNonConditional indicates level conditionality.
+  CEAttrRxLevel0         = (1u << 0),
+  CEAttrRxLevel1         = (1u << 1),
+  CEAttrRxLevel2         = (1u << 2),
+  CEAttrRxNonConditional = (1u << 3),
+};
+
+constexpr CoeffectAttr operator|(CoeffectAttr a, CoeffectAttr b) {
+  return CoeffectAttr((uint16_t)a | (uint16_t)b);
+}
+
+
+inline CoeffectAttr& operator|=(CoeffectAttr& a, const CoeffectAttr& b) {
+  return (a = CoeffectAttr((uint16_t)a | (uint16_t)b));
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 enum class RxLevel : uint8_t {
   None               = 0,
   Local              = 1,
@@ -30,47 +51,48 @@ enum class RxLevel : uint8_t {
   Pure               = 4,
 };
 
-constexpr int kRxAttrShift = 14;
+constexpr int kRxAttrShift = 0;
 #define ASSERT_LEVEL(attr, rl) \
   static_assert(static_cast<RxLevel>(attr >> kRxAttrShift) == RxLevel::rl, "")
-ASSERT_LEVEL(AttrRxLevel0, Local);
-ASSERT_LEVEL(AttrRxLevel1, Shallow);
-ASSERT_LEVEL((AttrRxLevel0 | AttrRxLevel1), Rx);
-ASSERT_LEVEL(AttrRxLevel2, Pure);
+ASSERT_LEVEL(CEAttrRxLevel0, Local);
+ASSERT_LEVEL(CEAttrRxLevel1, Shallow);
+ASSERT_LEVEL((CEAttrRxLevel0 | CEAttrRxLevel1), Rx);
+ASSERT_LEVEL(CEAttrRxLevel2, Pure);
 #undef ASSERT_LEVEL
 
-constexpr uint32_t kRxAttrMask = AttrRxLevel0 | AttrRxLevel1 | AttrRxLevel2;
-constexpr uint32_t kRxLevelMask = 7u;
+constexpr uint16_t kRxAttrMask =
+  CEAttrRxLevel0 | CEAttrRxLevel1 | CEAttrRxLevel2;
+constexpr uint16_t kRxLevelMask = 7u;
 static_assert(kRxAttrMask >> kRxAttrShift == kRxLevelMask, "");
-static_assert(AttrRxNonConditional == (8u << kRxAttrShift), "");
+static_assert(CEAttrRxNonConditional == (8u << kRxAttrShift), "");
 
 
-constexpr RxLevel rxLevelFromAttr(Attr attrs) {
+constexpr RxLevel rxLevelFromAttr(CoeffectAttr attrs) {
   return static_cast<RxLevel>(
-    (static_cast<uint32_t>(attrs) >> kRxAttrShift) & kRxLevelMask
+    (static_cast<uint16_t>(attrs) >> kRxAttrShift) & kRxLevelMask
   );
 }
 
-constexpr bool rxConditionalFromAttr(Attr attrs) {
-  return !(attrs & AttrRxNonConditional);
+constexpr bool rxConditionalFromAttr(CoeffectAttr attrs) {
+  return !(attrs & CEAttrRxNonConditional);
 }
 
-constexpr Attr rxMakeAttr(RxLevel level, bool conditional) {
-  return static_cast<Attr>(static_cast<uint32_t>(level) << kRxAttrShift)
-    | (conditional ? AttrNone : AttrRxNonConditional);
+constexpr CoeffectAttr rxMakeAttr(RxLevel level, bool conditional) {
+  return static_cast<CoeffectAttr>(static_cast<uint16_t>(level) << kRxAttrShift)
+    | (conditional ? CEAttrNone : CEAttrRxNonConditional);
 }
 
-Attr rxAttrsFromAttrString(const std::string& a);
-const char* rxAttrsToAttrString(Attr a);
+CoeffectAttr rxAttrsFromAttrString(const std::string& a);
+const char* rxAttrsToAttrString(CoeffectAttr a);
 
 const char* rxLevelToString(RxLevel r);
 
-constexpr bool funcAttrIsAnyRx(Attr a) {
-  return static_cast<uint32_t>(a) & kRxAttrMask;
+constexpr bool funcAttrIsAnyRx(CoeffectAttr a) {
+  return static_cast<uint16_t>(a) & kRxAttrMask;
 }
 
-constexpr bool funcAttrIsPure(Attr a) {
-  return static_cast<uint32_t>(a) & AttrRxLevel2;
+constexpr bool funcAttrIsPure(CoeffectAttr a) {
+  return static_cast<uint16_t>(a) & CEAttrRxLevel2;
 }
 
 bool rxEnforceCallsInLevel(RxLevel level);

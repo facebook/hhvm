@@ -98,13 +98,23 @@ std::vector<std::string> attrs_to_vec(AttrContext ctx, Attr attrs) {
   HHAS_ATTRS
 #undef X
 
-  auto const rxAttrString = rxAttrsToAttrString(attrs);
-  if (rxAttrString) vec.push_back(rxAttrString);
-
   return vec;
 }
 
 std::string attrs_to_string(AttrContext ctx, Attr attrs) {
+  using namespace folly::gen;
+  return from(attrs_to_vec(ctx, attrs)) | unsplit<std::string>(" ");
+}
+
+std::vector<std::string> attrs_to_vec(AttrContext ctx, CoeffectAttr attrs) {
+  std::vector<std::string> vec;
+  if (auto const rxAttrString = rxAttrsToAttrString(attrs)) {
+    vec.push_back(rxAttrString);
+  }
+  return vec;
+}
+
+std::string attrs_to_string(AttrContext ctx, CoeffectAttr attrs) {
   using namespace folly::gen;
   return from(attrs_to_vec(ctx, attrs)) | unsplit<std::string>(" ");
 }

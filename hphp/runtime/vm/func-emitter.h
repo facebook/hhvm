@@ -262,7 +262,8 @@ public:
   Attr attrs;
 
   ParamInfoVec params;
-  int maxStackCells;
+  CoeffectAttr coeffectAttrs{CEAttrNone};
+  int16_t maxStackCells{0};
 
   MaybeDataType hniReturnType;
   TypeConstraint retTypeConstraint;

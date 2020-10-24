@@ -115,13 +115,6 @@ enum Attr {
   // not extended, or on a method that no extending class defines the method.
   AttrNoOverride           = (1u << 13), //    X  |          |    X    //
                                          //       |          |         //
-  // The RxLevel attrs are used to encode the maximum level of reactivity
-  // of a function. RxNonConditional indicates level conditionality.
-  AttrRxLevel0             = (1u << 14), //       |          |    X    //
-  AttrRxLevel1             = (1u << 15), //       |          |    X    //
-  AttrRxLevel2             = (1u << 16), //       |          |    X    //
-  AttrRxNonConditional     = (1u << 17), //       |          |    X    //
-                                         //       |          |         //
   // Indicates that the function, class or static property can be loaded
   // once and then persisted across all requests. |          |         //
   AttrPersistent           = (1u << 18), //    X  |    X     |    X    //

@@ -578,8 +578,12 @@ void Func::print_attrs(std::ostream& out, Attr attrs) {
   if (attrs & AttrDynamicallyCallable) { out << " (dyn_callable)"; }
   if (attrs & AttrIsMethCaller) { out << " (is_meth_caller)"; }
   if (attrs & AttrNoContext) { out << " (no_context)"; }
-  auto rxAttrString = rxAttrsToAttrString(attrs);
-  if (rxAttrString) out << " (" << rxAttrString << ")";
+}
+
+void Func::print_attrs(std::ostream& out, CoeffectAttr attrs) {
+  if (auto rxAttrString = rxAttrsToAttrString(attrs)) {
+    out << " (" << rxAttrString << ")";
+  }
 }
 
 void Func::prettyPrint(std::ostream& out, const PrintOpts& opts) const {
@@ -587,6 +591,7 @@ void Func::prettyPrint(std::ostream& out, const PrintOpts& opts) const {
     if (preClass() != nullptr) {
       out << "Method";
       print_attrs(out, m_attrs);
+      print_attrs(out, m_coeffectAttrs);
       if (isPhpLeafFn()) out << " (leaf)";
       if (isMemoizeWrapper()) out << " (memoize_wrapper)";
       if (isMemoizeWrapperLSB()) out << " (memoize_wrapper_lsb)";
@@ -598,6 +603,7 @@ void Func::prettyPrint(std::ostream& out, const PrintOpts& opts) const {
     } else {
       out << "Function";
       print_attrs(out, m_attrs);
+      print_attrs(out, m_coeffectAttrs);
       if (isPhpLeafFn()) out << " (leaf)";
       if (isMemoizeWrapper()) out << " (memoize_wrapper)";
       if (isMemoizeWrapperLSB()) out << " (memoize_wrapper_lsb)";

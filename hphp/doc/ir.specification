@@ -1084,6 +1084,11 @@ To string conversions:
   Load the constant 'constantName' for the class 'className'. If not
   initialized, branch to B.
 
+| LookupClsCns, D(Cell), S(Cls) S(Str), NF
+
+  Lookup a class constant. May raise errors if either the class or constant are
+  not defined.
+
 | LdSubClsCns<constantName,slot>, D(Uncounted), S(Cls), NF
 
   Load the constant 'constantName' for the class S0. The constant is known to

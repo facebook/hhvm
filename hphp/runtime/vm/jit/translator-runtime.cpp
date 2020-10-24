@@ -670,6 +670,10 @@ Class* lookupClsRDS(const StringData* name) {
   return NamedEntity::get(name)->getCachedClass();
 }
 
+TypedValue lookupClsCns(const Class* cls, const StringData* cnsName) {
+  return cls->clsCnsGet(cnsName);
+}
+
 bool methodExistsHelper(Class* cls, StringData* meth) {
   assertx(isNormalClass(cls) && !isAbstract(cls));
   return cls->lookupMethod(meth) != nullptr;

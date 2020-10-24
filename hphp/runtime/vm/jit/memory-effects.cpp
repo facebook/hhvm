@@ -1608,6 +1608,9 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     if (!RO::EvalRaiseOnCaseInsensitiveLookup) return IrrelevantEffects {};
     return may_load_store(AHeapAny, AHeapAny);
 
+  case LookupClsCns:
+    return may_load_store(AEmpty, AEmpty);
+
   case StClosureArg:
     return PureStore {
       AProp {

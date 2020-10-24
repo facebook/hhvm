@@ -695,6 +695,7 @@ bool canDCE(IRInstruction* inst) {
   case StFrameCtx:
   case StFrameFunc:
   case StFrameMeta:
+  case LookupClsCns:
     return false;
 
   case IsTypeStruct:

@@ -152,6 +152,8 @@ const Func* loadClassCtor(Class* cls, Class* ctx);
 const Func* lookupClsMethodHelper(const Class* cls, const StringData* methName,
                                   ObjectData* obj, const Class* ctx);
 
+TypedValue lookupClsCns(const Class* cls, const StringData* cnsName);
+
 // These shuffle* functions are the JIT's version of bytecode.cpp's
 // shuffleExtraStackArgs
 void trimExtraArgs(ActRec* ar);
@@ -196,4 +198,3 @@ tv_lval elemVecIU(tv_lval base, int64_t key);
 //////////////////////////////////////////////////////////////////////
 
 }}
-

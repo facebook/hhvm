@@ -1104,6 +1104,11 @@ constexpr bool isTypeAssert(Op op) {
   return op == OpAssertRATL || op == OpAssertRATStk;
 }
 
+constexpr bool isIteratorOp(Op op) {
+  return op == OpIterInit || op == Op::LIterInit ||
+         op == OpIterNext || op == Op::LIterNext;
+}
+
 inline bool isMemberBaseOp(Op op) {
   switch (op) {
     case Op::BaseGC:

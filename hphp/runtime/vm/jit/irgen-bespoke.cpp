@@ -470,11 +470,12 @@ void translateDispatchBespoke(IRGS& env,
     case Op::NativeImpl:
     case Op::ClassGetTS:
     case Op::ColFromArray:
+      interpOne(env);
+      return;
     case Op::IterInit:
     case Op::LIterInit:
     case Op::LIterNext:
-      interpOne(env);
-      return;
+      always_assert(false);
     default:
       not_reached();
   }
@@ -550,7 +551,7 @@ folly::Optional<Location> getLocationToGuard(const IRGS& env, SrcKey sk) {
 
   // Even if the bytecode is layout-sensitive, it may be applied to e.g. an
   // object input, or our known types may be too general for us to guard.
-  auto const gc = DataTypeSpecific;
+  auto const gc = isIteratorOp(sk.op()) ? DataTypeIterBase : DataTypeSpecific;
   auto const type = env.irb->typeOf(*loc, gc);
   auto const needsGuard = type != TBottom && type <= TArrLike &&
                           typeFitsConstraint(type, gc);
@@ -684,7 +685,9 @@ void handleBespokeInputs(IRGS& env, const NormalizedInstruction& ni,
 
   emitLogArrayReach(env, *loc, sk);
 
-  if (env.context.kind == TransKind::Profile) {
+  if (isIteratorOp(sk.op())) {
+    emitVanilla(env);
+  } else if (env.context.kind == TransKind::Profile) {
     // In a profiling tracelet, we'll emit a diamond that handles vanilla
     // array-likes on one side and bespoke array-likes on the other.
     if (type.arrSpec().vanilla()) {

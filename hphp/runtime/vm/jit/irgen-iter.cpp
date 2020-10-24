@@ -78,6 +78,16 @@ bool iterInitEmptyBase(IRGS& env, Offset doneOffset, SSATmp* base, bool local) {
   return true;
 }
 
+// For profiling tracelets, we deliberately widen the types of locals used
+// as a local iterator base to make it easier to merge tracelets later.
+//
+// This pessimization only affects region formation. We still track types
+// precisely when we optimize the IRUnit.
+void widenLocalIterBase(IRGS& env, int baseLocalId) {
+  if (env.context.kind != TransKind::Profile) return;
+  env.irb->fs().clearForUnprocessedPred();
+}
+
 //////////////////////////////////////////////////////////////////////
 
 }  // namespace
@@ -85,7 +95,7 @@ bool iterInitEmptyBase(IRGS& env, Offset doneOffset, SSATmp* base, bool local) {
 //////////////////////////////////////////////////////////////////////
 
 void emitIterInit(IRGS& env, IterArgs ita, Offset doneOffset) {
-  auto const base = topC(env);
+  auto const base = topC(env, BCSPRelOffset{0}, DataTypeIterBase);
   if (!base->type().subtypeOfAny(TArrLike, TObj)) PUNT(IterInit);
   if (iterInitEmptyBase(env, doneOffset, base, false)) return;
   specializeIterInit(env, doneOffset, ita, kInvalidId);
@@ -110,7 +120,7 @@ void emitIterNext(IRGS& env, IterArgs ita, Offset loopOffset) {
 
 void emitLIterInit(IRGS& env, IterArgs ita,
                    int32_t baseLocalId, Offset doneOffset) {
-  auto const base = ldLoc(env, baseLocalId, nullptr, DataTypeSpecific);
+  auto const base = ldLoc(env, baseLocalId, nullptr, DataTypeIterBase);
   if (!base->type().subtypeOfAny(TArrLike, TObj)) PUNT(LIterInit);
   if (iterInitEmptyBase(env, doneOffset, base, true)) return;
   specializeIterInit(env, doneOffset, ita, baseLocalId);
@@ -121,6 +131,7 @@ void emitLIterInit(IRGS& env, IterArgs ita,
     : (ita.hasKey() ? IterInitK : IterInit);
   auto const data = IterData(ita);
   auto const result = gen(env, op, data, base, fp(env));
+  widenLocalIterBase(env, baseLocalId);
   implIterInitJmp(env, doneOffset, result);
 }
 
@@ -128,7 +139,9 @@ void emitLIterNext(IRGS& env, IterArgs ita,
                    int32_t baseLocalId, Offset loopOffset) {
   if (specializeIterNext(env, loopOffset, ita, baseLocalId)) return;
 
-  auto const base = ldLoc(env, baseLocalId, nullptr, DataTypeSpecific);
+  auto const base = ldLoc(env, baseLocalId, nullptr, DataTypeIterBase);
+  if (!base->type().subtypeOfAny(TArrLike, TObj)) PUNT(LIterNext);
+
   auto const result = [&]{
     if (base->isA(TArrLike)) {
       auto const op = ita.hasKey() ? LIterNextK : LIterNext;
@@ -137,6 +150,7 @@ void emitLIterNext(IRGS& env, IterArgs ita,
     auto const op = ita.hasKey() ? IterNextK : IterNext;
     return gen(env, op, IterData(ita), fp(env));
   }();
+  widenLocalIterBase(env, baseLocalId);
   implIterNextJmp(env, loopOffset, result);
 }
 
@@ -146,7 +160,8 @@ void emitIterFree(IRGS& env, int32_t iterId) {
 }
 
 void emitLIterFree(IRGS& env, int32_t iterId, int32_t baseLocalId) {
-  auto const baseType = env.irb->local(baseLocalId, DataTypeSpecific).type;
+  auto const baseType = env.irb->local(baseLocalId, DataTypeIterBase).type;
+  if (!baseType.subtypeOfAny(TArrLike, TObj)) PUNT(LIterFree);
   if (!(baseType <= TArrLike)) gen(env, IterFree, IterId(iterId), fp(env));
   gen(env, KillIter, IterId(iterId), fp(env));
 }

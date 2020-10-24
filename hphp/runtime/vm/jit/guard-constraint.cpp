@@ -52,6 +52,10 @@ bool typeFitsConstraint(Type t, GuardConstraint gc) {
     case DataTypeGeneric:
       return true;
 
+    case DataTypeIterBase:
+      return (t.isKnownDataType() || !t.maybe(TCounted) || t <= TArrLike) &&
+             (t <= TUninit || !t.maybe(TUninit));
+
     case DataTypeCountnessInit:
       return (t.isKnownDataType() || !t.maybe(TCounted)) &&
              (t <= TUninit || !t.maybe(TUninit));

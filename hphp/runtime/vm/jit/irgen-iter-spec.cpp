@@ -686,9 +686,9 @@ void emitSpecializedFooter(IRGS& env, const Accessor& accessor,
 // Speculatively generate specialized code for this IterInit.
 void specializeIterInit(IRGS& env, Offset doneOffset,
                         const IterArgs& data, uint32_t baseLocalId) {
-  auto const gc = DataTypeSpecific;
   auto const local = baseLocalId != kInvalidId;
-  auto const base = local ? ldLoc(env, baseLocalId, nullptr, gc) : topC(env);
+  auto const base = local ? ldLoc(env, baseLocalId, nullptr, DataTypeIterBase)
+                          : topC(env, BCSPRelOffset{0}, DataTypeIterBase);
   profileDecRefs(env, data, base, local, /*init=*/true);
 
   // `body` and `done` are at a different stack depth for non-local IterInits.

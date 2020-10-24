@@ -1261,10 +1261,16 @@ Type relaxType(Type t, DataTypeCategory cat) {
     case DataTypeGeneric:
       return TCell;
 
+    case DataTypeIterBase:
+      if (t <= TUninit) return TUninit;
+      if (t <= TUncountedInit) return TUncountedInit;
+      if (t <= TArrLike) return TArrLike;
+      return t.unspecialize();
+
     case DataTypeCountnessInit:
       if (t <= TUninit) return TUninit;
-      return (!t.maybe(TCounted) && !t.maybe(TUninit))
-        ? TUncountedInit : t.unspecialize();
+      if (t <= TUncountedInit) return TUncountedInit;
+      return t.unspecialize();
 
     case DataTypeSpecific:
       return t.unspecialize();

@@ -2562,13 +2562,13 @@ To string conversions:
 
 16. Iterators
 
-| IterInit<IterData>,   D(Bool), S(ArrLike,Obj) S(FramePtr), CRc
+| IterInit<IterData>,   D(Bool), S(ArrLike,Obj) S(FramePtr), CRc|LA
 
-| IterInitK<IterData>,  D(Bool), S(ArrLike,Obj) S(FramePtr), CRc
+| IterInitK<IterData>,  D(Bool), S(ArrLike,Obj) S(FramePtr), CRc|LA
 
-| LIterInit<IterData>,  D(Bool), S(ArrLike) S(FramePtr),     NF
+| LIterInit<IterData>,  D(Bool), S(ArrLike) S(FramePtr),     LA
 
-| LIterInitK<IterData>, D(Bool), S(ArrLike) S(FramePtr),     NF
+| LIterInitK<IterData>, D(Bool), S(ArrLike) S(FramePtr),     LA
 
   <IterData> consists of three indices, iterId, keyId and valId. iterId is
   the index of the iterator variable, keyId and valId are indices of local
@@ -2587,13 +2587,9 @@ To string conversions:
   value (and key) into the local variable with index valId (and keyId,
   respectively).
 
-  The IterInit and IterInitK instructions always copy the array element by
-  value.
-
   The LIter variations only accept arrays and do not take ownership of their
-  base. Instead the base is provided on each operation on the iterator. This
-  avoids having to raise the ref-count of the base (in situations where this is
-  safe).
+  base. Instead, the base is provided on each operation on the iterator, so
+  that we can avoid inc-ref-ing the base (in cases where that's safe).
 
   This instruction has the ConsumesRC property because it either decrements the
   reference count of S0 or stores a reference to S0 into the new iterator.
@@ -2602,9 +2598,9 @@ To string conversions:
 
 | IterNextK<IterData>,  D(Bool), S(FramePtr), NF
 
-| LIterNext<IterData>,  D(Bool), S(ArrLike) S(FramePtr), NF
+| LIterNext<IterData>,  D(Bool), S(ArrLike) S(FramePtr), LA
 
-| LIterNextK<IterData>, D(Bool), S(ArrLike) S(FramePtr), NF
+| LIterNextK<IterData>, D(Bool), S(ArrLike) S(FramePtr), LA
 
   <IterData> consists of three indices, iterId, keyId and valId. iterId is
   the index of the iterator variable, keyId and valId are indices of local
@@ -2617,9 +2613,6 @@ To string conversions:
   variable and returns false; otherwise, it returns true. If the iterator has
   not reached its end, then this instruction stores the iterator's next value
   (and key) into the local variable with index valId (and keyId, respectively).
-
-  The IterInit and IterInitK instructions always copy the array element by
-  value.
 
 | IterFree<iterId>, ND, S(FramePtr), NF
 

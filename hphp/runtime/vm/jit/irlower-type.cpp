@@ -74,13 +74,28 @@ void cgCheckType(IRLS& env, const IRInstruction* inst) {
   auto const typeParam = inst->typeParam();
 
   if (src->isA(typeParam)) {
-    // src is the target type or better.  Just define our dst.
+    // src is the target type or better. Just define our dst.
     doMov();
     return;
-  }
-  if (!src->type().maybe(typeParam)) {
-    // src is definitely not the target type.  Always jump.
+  } else if (!src->type().maybe(typeParam)) {
+    // src is definitely not the target type. Always jump.
     v << jmp{label(env, inst->taken())};
+    return;
+  }
+
+  /*
+   * See if we're just checking the array specialization or the object class
+   * of a value with a mostly-known type.
+   *
+   * NOTE: we must support cases like CheckType<ArrLike=Vanilla> t1:Vec in
+   * this check, which is why we check here that src->type() matches the
+   * unspecialized type before skipping the DataType component of the test.
+   */
+  if (typeParam.isSpecialized() &&
+      typeParam.unspecialize() >= src->type()) {
+    detail::emitSpecializedTypeTest(v, env, typeParam, srcData,
+                                    v.makeReg(), doJcc);
+    doMov();
     return;
   }
 
@@ -94,24 +109,6 @@ void cgCheckType(IRLS& env, const IRInstruction* inst) {
     return;
   }
 
-  /*
-   * See if we're just checking the array kind or object class of a value with
-   * a mostly-known type.
-   *
-   * Important: We don't support typeParam being something like
-   * StaticArr=kPackedKind unless the src->type() also already knows its
-   * staticness.  We do allow things like CheckType<Arr=Packed> t1:StaticArr,
-   * though.  This is why we have to check that the unspecialized type is at
-   * least as big as the src->type().
-   */
-  if (typeParam.isSpecialized() &&
-      typeParam.unspecialize() >= src->type()) {
-    detail::emitSpecializedTypeTest(v, env, typeParam, srcData,
-                                    v.makeReg(), doJcc);
-    doMov();
-    return;
-  }
-
   // We know that it is a string and we are checking for static str
   if (!typeParam.isSpecialized() && typeParam <= TStaticStr) {
     if (!src->isA(TStr)) {
@@ -121,7 +118,7 @@ void cgCheckType(IRLS& env, const IRInstruction* inst) {
       return;
     }
     detail::emitSpecializedTypeTest(v, env, typeParam, srcData,
-                                v.makeReg(), doJcc);
+                                    v.makeReg(), doJcc);
     doMov();
     return;
   }

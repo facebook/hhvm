@@ -127,27 +127,21 @@ void checkType(IRGS& env, const Location& loc, Type type, Offset dest) {
   }
 }
 
-void genLogArrayReach(IRGS& env, const Location& loc, SrcKey sk) {
-  assertx(env.context.transIDs.size() == 1);
-  assertx(env.context.kind == TransKind::Profile);
-  auto const transID = *env.context.transIDs.begin();
-  auto const array = [&] {
-    switch (loc.tag()) {
-      case LTag::Local:
-        return gen(env, LdLoc, TCell, LocalId(loc.localId()), fp(env));
-      case LTag::Stack: {
-        auto const soff = IRSPRelOffsetData {
-          offsetFromIRSP(env, loc.stackIdx()) };
-        return gen(env, LdStk, TCell, soff, sp(env));
-      }
-      case LTag::MBase: {
-        auto const mbr = gen(env, LdMBase, TLvalToCell);
-        return gen(env, LdMem, mbr->type().deref(), mbr);
-      }
+SSATmp* loadLocation(IRGS& env, const Location& loc) {
+  switch (loc.tag()) {
+    case LTag::Local:
+      return gen(env, LdLoc, TCell, LocalId(loc.localId()), fp(env));
+    case LTag::Stack: {
+      auto const soff = IRSPRelOffsetData {
+        offsetFromIRSP(env, loc.stackIdx()) };
+      return gen(env, LdStk, TCell, soff, sp(env));
     }
-    not_reached();
-  }();
-  gen(env, LogArrayReach, TransSrcKeyData(transID, sk), array);
+    case LTag::MBase: {
+      auto const mbr = gen(env, LdMBase, TLvalToCell);
+      return gen(env, LdMem, mbr->type().deref(), mbr);
+    }
+  }
+  not_reached();
 }
 
 //////////////////////////////////////////////////////////////////////

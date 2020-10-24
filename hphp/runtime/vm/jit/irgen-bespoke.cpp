@@ -539,32 +539,59 @@ folly::Optional<Location> getVanillaLocation(const IRGS& env, SrcKey sk) {
   always_assert(false);
 }
 
+// Returns a location that we should do some layout-sensitive guards for.
+// Unlike getVanillaLocation, this helper checks options, known types, etc.
+folly::Optional<Location> getLocationToGuard(const IRGS& env, SrcKey sk) {
+  if (!allowBespokeArrayLikes()) return folly::none;
+
+  // If this check fails, the bytecode is not layout-sensitive.
+  auto const loc = getVanillaLocation(env, sk);
+  if (!loc) return folly::none;
+
+  // Even if the bytecode is layout-sensitive, it may be applied to e.g. an
+  // object input, or our known types may be too general for us to guard.
+  auto const gc = DataTypeSpecific;
+  auto const type = env.irb->typeOf(*loc, gc);
+  auto const needsGuard = type != TBottom && type <= TArrLike &&
+                          typeFitsConstraint(type, gc);
+  FTRACE_MOD(Trace::hhir, 2, "At {}: {}: location {}: {} {} layout guard\n",
+             sk.offset(), opcodeToName(sk.op()), show(*loc), type,
+             needsGuard ? "needs" : "does not need");
+  return needsGuard ? loc : folly::none;
+}
+
 // Strengthen the guards for a layout-sensitive location prior to irgen for the
 // bytecode, returning false if standard vanilla translation should be used and
 // true if bespoke translation should be used.
 //
-// If the location does not have a known data type, it returns false.
-// Otherwise, it constrains the location to DataTypeSpecialized. If the
-// location has a bespoke layout, we return true. If it has a vanilla layout,
-// we return false. Otherwise, we emit a vanilla guard and return false.
-bool guardToLayout(IRGS& env, SrcKey sk, Location loc) {
+// Right now, we strengthen the guard based only on the type of the array-like
+// at that location. In the future, we'll still do that for live translations,
+// but we'll use profiling for optimized translations.
+bool guardToLayout(IRGS& env, SrcKey sk, Location loc, Type type) {
   assertx(env.context.kind != TransKind::Profile);
   assertx(!env.irb->guardFailBlock());
-  auto const& type = env.irb->typeOf(loc, DataTypeSpecific);
-  if (!(type.isKnownDataType() && type <= TArrLike)) return false;
 
-  auto const base = type.unspecialize();
   auto const layout = type.arrSpec().bespokeLayout();
-  auto const target_type = layout ? base.narrowToBespokeLayout(*layout)
-                                  : base.narrowToVanilla();
+  auto const target_type = layout ? TArrLike.narrowToBespokeLayout(*layout)
+                                  : TVanillaArrLike;
 
-  FTRACE_MOD(Trace::hhir, 2,
-             "At {}: {}: guard input {} to layout specific: {}\n",
+  FTRACE_MOD(Trace::hhir, 2, "At {}: {}: guard input {} to layout: {}\n",
              sk.offset(), opcodeToName(sk.op()), show(loc), target_type);
   auto const gc = GuardConstraint(DataTypeSpecialized).setArrayLayoutSensitive();
   env.irb->constrainLocation(loc, gc);
   checkType(env, loc, target_type, bcOff(env));
   return !target_type.arrSpec().vanilla();
+}
+
+void emitLogArrayReach(IRGS& env, Location loc, SrcKey sk) {
+  // We won't have a tracelet ID to use during tracelet-selection time.
+  // In profiling tracelets, we should have exactly one tracelet ID to log.
+  if (env.formingRegion || env.context.kind != TransKind::Profile) return;
+  assertx(env.context.transIDs.size() == 1);
+
+  auto const arr = loadLocation(env, loc);
+  auto const transID = *env.context.transIDs.begin();
+  gen(env, LogArrayReach, TransSrcKeyData(transID, sk), arr);
 }
 
 // In a profiling tracelet, we don't want to guard on the array being vanilla,
@@ -574,49 +601,17 @@ void emitLoggingDiamond(
     std::function<void(IRGS&)> emitVanilla) {
   assertx(env.context.kind == TransKind::Profile);
   assertx(!env.irb->guardFailBlock());
-  auto const& type = env.irb->typeOf(loc, DataTypeSpecific);
-  FTRACE_MOD(Trace::hhir, 2, "At {}: {}: consider {}: {}\n",
-             ni.source.offset(), opcodeToName(ni.op()), show(loc), type);
-  if (!(type.isKnownDataType() && type <= TArrLike)) {
-    emitVanilla(env);
-    return;
-  }
 
-  FTRACE_MOD(Trace::hhir, 2, "At {}: {}: log when {} is bespoke: {}\n",
-             ni.source.offset(), opcodeToName(ni.op()), show(loc), type);
-
-  if (!env.formingRegion) {
-    // If we're not forming a region (and therefore have a ProfTransID), log
-    // that the array reached this bytecode. If the array is a LoggingArray,
-    // this will record a reach event. Once the ArraySampled bit is
-    // implemented, we will also use this helper to count how many sampled vs.
-    // unsampled arrays reach the usage site. This information can inform if a
-    // significant number of vanilla arrays origininating from unlogged sources
-    // (such as builtins) are reaching the site so we don't inappropriately
-    // specialize.
-    genLogArrayReach(env, loc, ni.source);
-  }
-
-  // Occassionally, we have an array that is known to be vanilla (e.g. as a
-  // result of LdClsTypeCns). In this case, just emit vanilla code.
-  if (type.arrSpec().vanilla()) {
-    emitVanilla(env);
-    return;
-  }
-
-  auto const dropVanilla = [&](Type type) {
-    return type.isKnownDataType() && type <= TArrLike
-      ? type.unspecialize()
-      : type;
+  auto const dropArrSpec = [&](Type type) {
+    return type <= TArrLike ? type.unspecialize() : type;
   };
   std::vector<Type> vanillaLocalTypes;
   std::vector<Type> vanillaStackTypes;
   ifThen(
     env,
     [&](Block* taken) {
-      auto const target_type = type.unspecialize().narrowToVanilla();
       env.irb->setGuardFailBlock(taken);
-      checkType(env, loc, target_type, bcOff(env));
+      checkType(env, loc, TVanillaArrLike, bcOff(env));
       env.irb->resetGuardFailBlock();
 
       emitVanilla(env);
@@ -631,19 +626,19 @@ void emitLoggingDiamond(
       vanillaStackTypes.reserve(pushed);
       for (uint32_t i = 0; i < locals; i ++) {
         auto const lType = env.irb->fs().local(i).type;
-        vanillaLocalTypes.push_back(dropVanilla(lType));
+        vanillaLocalTypes.push_back(dropArrSpec(lType));
       }
       for (int32_t i = 0; i < pushed; i ++) {
         auto const idx = BCSPRelOffset{-i};
         auto const sType = env.irb->fs().stack(offsetFromIRSP(env, idx)).type;
-        vanillaStackTypes.push_back(dropVanilla(sType));
+        vanillaStackTypes.push_back(dropArrSpec(sType));
       }
     },
     [&] {
       hint(env, Block::Hint::Unlikely);
 
       auto const topLayout = BespokeLayout::TopLayout();
-      auto const topType = type.unspecialize().narrowToBespokeLayout(topLayout);
+      auto const topType = TArrLike.narrowToBespokeLayout(topLayout);
       assertTypeLocation(env, loc, topType);
 
       try {
@@ -680,38 +675,32 @@ void emitLoggingDiamond(
 
 void handleBespokeInputs(IRGS& env, const NormalizedInstruction& ni,
                          std::function<void(IRGS&)> emitVanilla) {
-  if (!allowBespokeArrayLikes()) {
-    // No bespokes, just irgen for vanilla
-    emitVanilla(env);
-    return;
-  }
-
   auto const sk = ni.source;
-  auto const loc = getVanillaLocation(env, sk);
-  if (!loc) {
-    // No layout-sensitive inputs, just irgen for vanilla
-    emitVanilla(env);
-    return;
-  }
+  auto const loc = getLocationToGuard(env, sk);
+  if (!loc) return emitVanilla(env);
+
+  auto const type = env.irb->typeOf(*loc, DataTypeGeneric);
+  assertx(type <= TArrLike);
+
+  emitLogArrayReach(env, *loc, sk);
 
   if (env.context.kind == TransKind::Profile) {
-    // We are in a profiling tracelet. We most likely have a logging array in a
-    // profiling tracelet; emit a diamond to handle it. If it's another bespoke,
-    // side-exit.
-    emitLoggingDiamond(env, ni, *loc, emitVanilla);
-    return;
-  }
-
-  // We're not in a profiling tracelet; specialize for the observed layout.
-  // In the future, we will supply the layout we believe we should specialize
-  // the bytecode for.
-  auto const bespoke = guardToLayout(env, sk, *loc);
-  if (bespoke) {
-    // We have a bespoke type; dispatch to specialized irgen
-    translateDispatchBespoke(env, ni);
+    // In a profiling tracelet, we'll emit a diamond that handles vanilla
+    // array-likes on one side and bespoke array-likes on the other.
+    if (type.arrSpec().vanilla()) {
+      emitVanilla(env);
+    } else {
+      emitLoggingDiamond(env, ni, *loc, emitVanilla);
+    }
   } else {
-    // We have a vanilla type or unspecialized type; dispatch to normal irgen
-    emitVanilla(env);
+    // In an optimized or live translation, we guard to a specialized layout
+    // and then emit either vanilla or bespoke code.
+    auto const bespoke = guardToLayout(env, sk, *loc, type);
+    if (bespoke) {
+      translateDispatchBespoke(env, ni);
+    } else {
+      emitVanilla(env);
+    }
   }
 }
 

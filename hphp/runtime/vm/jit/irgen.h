@@ -114,7 +114,7 @@ void checkType(IRGS&, const Location&, Type, Offset dest);
 void assertTypeStack(IRGS&, BCSPRelOffset, Type);
 void assertTypeLocal(IRGS&, uint32_t id, Type);
 void assertTypeLocation(IRGS&, const Location&, Type);
-void genLogArrayReach(IRGS&, const Location&, SrcKey sk);
+SSATmp* loadLocation(IRGS&, const Location&);
 
 /*
  * After all initial guards instructions have been emitted, the client of this

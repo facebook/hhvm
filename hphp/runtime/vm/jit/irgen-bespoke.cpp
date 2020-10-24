@@ -467,7 +467,6 @@ void translateDispatchBespoke(IRGS& env,
       emitBespokeAddNewElemC(env);
       return;
     case Op::FCallBuiltin:
-    case Op::NativeImpl:
     case Op::ClassGetTS:
     case Op::ColFromArray:
       interpOne(env);
@@ -483,31 +482,25 @@ void translateDispatchBespoke(IRGS& env,
 
 folly::Optional<Location> getVanillaLocationForBuiltin(const IRGS& env,
                                                         SrcKey sk) {
-  auto const op = sk.op();
   auto const soff = env.irb->fs().bcSPOff();
 
-  assertx(op == Op::FCallBuiltin || op == Op::NativeImpl);
-  auto const func = op == Op::FCallBuiltin
-    ? Func::lookupBuiltin(sk.unit()->lookupLitstrId(getImm(sk.pc(), 3).u_SA))
-    : curFunc(env);
+  assertx(sk.op() == Op::FCallBuiltin);
+  auto const func =
+    Func::lookupBuiltin(sk.unit()->lookupLitstrId(getImm(sk.pc(), 3).u_SA));
   if (!func) return folly::none;
   auto const param = getBuiltinVanillaParam(func->fullName()->data());
   if (param < 0) return folly::none;
 
-  if (op == Op::FCallBuiltin) {
-    if (getImm(sk.pc(), 0).u_IVA != func->numParams()) return folly::none;
-    if (getImm(sk.pc(), 2).u_IVA != func->numInOutParams()) return folly::none;
-    return {Location::Stack{soff - func->numParams() + 1 + param}};
-  } else {
-    return {Location::Local{safe_cast<uint32_t>(param)}};
-  }
+  if (getImm(sk.pc(), 0).u_IVA != func->numParams()) return folly::none;
+  if (getImm(sk.pc(), 2).u_IVA != func->numInOutParams()) return folly::none;
+  return {Location::Stack{soff - func->numParams() + 1 + param}};
 }
 
 folly::Optional<Location> getVanillaLocation(const IRGS& env, SrcKey sk) {
   auto const op = sk.op();
   auto const soff = env.irb->fs().bcSPOff();
 
-  if (op == Op::FCallBuiltin || op == Op::NativeImpl) {
+  if (op == Op::FCallBuiltin) {
     return getVanillaLocationForBuiltin(env, sk);
   } else if (isMemberDimOp(op) || (op == Op::QueryM || op == Op::SetM)) {
     return {Location::MBase{}};

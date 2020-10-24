@@ -1252,6 +1252,17 @@ const hphp_fast_string_imap<int> s_vanilla_params{
 
 //////////////////////////////////////////////////////////////////////
 
+// If bespoke array-likes are enabled, we may encounter inlined NativeImpls
+// with optimized IR generation paths. In this case, we don't emit
+// layout-sensitive implementations to avoid making NativeImpl a
+// layout-sensitive bytecode. Therefore, when bespokes are enabled and we are
+// not at an FCallBuiltin bytecode, don't emit an optimized implementation if
+// it's layout-sensitive.
+bool skipLayoutSensitiveNativeImpl(IRGS& env, const StringData* fname) {
+  return allowBespokeArrayLikes() && curSrcKey(env).op() != Op::FCallBuiltin &&
+         s_vanilla_params.find(fname->data()) != s_vanilla_params.end();
+}
+
 SSATmp* optimizedFCallBuiltin(IRGS& env,
                               const Func* func,
                               const ParamPrep& params,
@@ -1274,7 +1285,7 @@ SSATmp* optimizedFCallBuiltin(IRGS& env,
       // contents to their proper place on the stack.
       auto const ad = retVal->arrLikeVal();
       assertx(ad->isStatic());
-      assertx(ad->hasVanillaPackedLayout());
+      assertx(ad->isVecType() || ad->isVArray());
       assertx(ad->size() == numInOut + 1);
 
       size_t inOutIndex = 0;
@@ -1295,6 +1306,10 @@ SSATmp* optimizedFCallBuiltin(IRGS& env,
       // The first element of the tuple is always the actual function
       // return.
       return cns(env, ad->nvGetVal(0));
+    }
+
+    if (skipLayoutSensitiveNativeImpl(env, fname)) {
+      return nullptr;
     }
 
     auto const it = s_opt_emit_fns.find(fname->data());

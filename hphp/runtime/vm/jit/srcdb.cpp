@@ -135,10 +135,6 @@ TCA SrcRec::getFallbackTranslation() const {
   return m_anchorTranslation;
 }
 
-FPInvOffset SrcRec::nonResumedSPOff() const {
-  return svcreq::extract_spoff(getFallbackTranslation());
-}
-
 void SrcRec::chainFrom(IncomingBranch br) {
   assertx(br.type() == IncomingBranch::Tag::ADDR ||
           tc::isValidCodeAddress(br.toSmash()));
@@ -230,30 +226,7 @@ void SrcRec::relocate(RelocationInfo& rel) {
   }
 }
 
-void SrcRec::addDebuggerGuard(TCA dbgGuard, TCA dbgBranchGuardSrc) {
-  assertx(!m_dbgBranchGuardSrc);
-
-  TRACE(1, "SrcRec(%p)::addDebuggerGuard @%p, "
-        "%zd incoming branches to rechain\n",
-        this, dbgGuard, m_incomingBranches.size());
-
-  patchIncomingBranches(dbgGuard);
-
-  // Set m_dbgBranchGuardSrc after patching, so we don't try to patch
-  // the debug guard.
-  m_dbgBranchGuardSrc = dbgBranchGuardSrc;
-  m_topTranslation = dbgGuard;
-}
-
 void SrcRec::patchIncomingBranches(TCA newStart) {
-  if (hasDebuggerGuard()) {
-    // We have a debugger guard, so all jumps to us funnel through
-    // this.  Just smash m_dbgBranchGuardSrc.
-    TRACE(1, "smashing m_dbgBranchGuardSrc @%p\n", m_dbgBranchGuardSrc.get());
-    smashJmp(m_dbgBranchGuardSrc, newStart);
-    return;
-  }
-
   TRACE(1, "%zd incoming branches to rechain\n", m_incomingBranches.size());
 
   for (auto &br : m_incomingBranches) {

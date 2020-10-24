@@ -847,8 +847,6 @@ void createSrcRec(SrcKey sk, FPInvOffset spOff) {
     recordFuncSrcRec(sk.func(), sr);
   }
 
-  if (srcRecSPOff) always_assert(sr->nonResumedSPOff() == *srcRecSPOff);
-
   size_t asize      = codeView.main().frontier()   - astart;
   size_t coldSize   = codeView.cold().frontier()   - coldStart;
   size_t frozenSize = codeView.frozen().frontier() - frozenStart;

@@ -131,10 +131,6 @@ struct RequestInjectionData {
 
   ~RequestInjectionData() = default;
 
-  static constexpr uint32_t debuggerReadOnlyOffset() {
-    return offsetof(RequestInjectionData, m_debuggerAttached);
-  }
-
   void reset();
 
   void onSessionInit();

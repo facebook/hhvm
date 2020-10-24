@@ -114,7 +114,6 @@ bool emit(Venv& env, const fallback& i);
 bool emit(Venv& env, const fallbackcc& i);
 bool emit(Venv& env, const retransopt& i);
 bool emit(Venv& env, const movqs& i);
-bool emit(Venv& env, const debugguardjmp& i);
 bool emit(Venv& env, const jmps& i);
 
 inline bool emit(Venv& env, const pushframe&) {

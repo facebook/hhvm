@@ -241,15 +241,6 @@ bool emit(Venv& env, const movqs& i) {
   return true;
 }
 
-bool emit(Venv& env, const debugguardjmp& i) {
-  auto const jmp = emitSmashableJmp(*env.cb, env.meta, i.realCode);
-  if (i.watch) {
-    *i.watch = jmp;
-    env.meta.watchpoints.push_back(i.watch);
-  }
-  return true;
-}
-
 bool emit(Venv& env, const jmps& i) {
   auto const jmp = emitSmashableJmp(*env.cb, env.meta, env.cb->frontier());
   env.jmps.push_back({jmp, i.targets[0]});

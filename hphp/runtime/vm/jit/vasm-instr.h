@@ -85,7 +85,6 @@ struct Vunit;
   O(phijmp, Inone, U(uses), Dn)\
   O(conjure, Inone, Un, D(c))\
   O(conjureuse, Inone, U(c), Dn)\
-  O(debugguardjmp, Inone, Un, Dn)\
   O(inlinestart, Inone, Un, Dn)\
   O(inlineend, Inone, Un, Dn)\
   O(pushframe, Inone, Un, Dn)\
@@ -602,13 +601,6 @@ struct reload { Vreg s, d; };
  * (regardless of what definition d is dominated by).
  */
 struct ssaalias { Vreg s; Vreg d; };
-
-/*
- * Emit a smashable jmp to realCode.
- *
- * *watch will be set to the address of the smashable.
- */
-struct debugguardjmp { TCA realCode; TCA* watch; };
 
 /*
  * Marks the entry block of an inlined function, func, in the current unit,

@@ -175,14 +175,6 @@ struct SrcRec final {
   }
 
   /*
-   * Returns the VM stack offset the translations in the SrcRec have, in
-   * situations where we need to and can know.
-   *
-   * Pre: this SrcRec is for a non-resumed SrcKey
-   */
-  FPInvOffset nonResumedSPOff() const;
-
-  /*
    * Get the anchor translation for this SrcRec. If another thread holds the
    * code lock it may update this address via relocate().
    */
@@ -191,13 +183,10 @@ struct SrcRec final {
   //////////////////////////////////////////////////////////////////////////////
 
   /*
-   * The following functions are used during creation of new
-   * translations or when inserting debug guards.  May only be called
-   * when holding the lock for this SrcRec.
+   * The following functions are used during creation of new translations.
+   * May only be called when holding the lock for this SrcRec.
    */
   void chainFrom(IncomingBranch br);
-  void addDebuggerGuard(TCA dbgGuard, TCA m_dbgBranchGuardSrc);
-  bool hasDebuggerGuard() const { return m_dbgBranchGuardSrc != nullptr; }
 
   const GrowableVector<IncomingBranch>& incomingBranches() const {
     return m_incomingBranches;
@@ -263,8 +252,6 @@ private:
 
   GrowableVector<TransLoc> m_translations;
   GrowableVector<IncomingBranch> m_incomingBranches;
-  // The branch src for the debug guard, if this has one.
-  LowTCA m_dbgBranchGuardSrc{nullptr};
 
   mutable folly::SharedMutex m_lock;
 };

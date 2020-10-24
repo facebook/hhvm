@@ -302,17 +302,6 @@ constexpr size_t stub_size() {
   return 0;
 }
 
-
-/*
- * Extract the VM stack offset associated with a service request stub.
- *
- * When we emit service requests stubs for non-resumed TC contexts, we first
- * emit code that rematerializes the VM stack pointer.  Sometimes, we want to
- * replace a stub with a different service request (e.g., bind_jcc_1st), so we
- * have to fish the offset out of the stub first.
- */
-FPInvOffset extract_spoff(TCA stub);
-
 ///////////////////////////////////////////////////////////////////////////////
 
 /*

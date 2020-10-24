@@ -360,7 +360,6 @@ bool effectsImpl(const Vinstr& inst, bool pure) {
     case Vinstr::conjureuse:
     case Vinstr::contenter:
     case Vinstr::cqo:
-    case Vinstr::debugguardjmp:
     case Vinstr::debugtrap:
     case Vinstr::declm:
     case Vinstr::decqm:

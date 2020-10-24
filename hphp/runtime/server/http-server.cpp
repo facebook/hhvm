@@ -469,6 +469,8 @@ void HttpServer::runOrExitProcess() {
   EvictFileCache();
 
   waitForServers();
+  // Log APC samples after all requests finish.
+  apc_sample_by_size();
   playShutdownRequest(RuntimeOption::ServerCleanupRequest);
 }
 

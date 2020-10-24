@@ -353,6 +353,11 @@ struct ConcurrentTableSharedStore {
    * store is empty or this operation is not supported, returns an empty vector.
    */
   std::vector<EntryInfo> sampleEntriesInfo(uint32_t count);
+  /*
+   * Return a list of entries with consideration of memory usage. Roughly one
+   * sample every 'bytes' of memory is used.
+   */
+  std::vector<EntryInfo> sampleEntriesInfoBySize(uint32_t bytes);
 
   /*
    * Debugging.  Access information about all the entries in this table.

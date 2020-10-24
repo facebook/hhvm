@@ -58,6 +58,7 @@ struct apcExtension final : Extension {
   static bool Stat;
   static bool EnableCLI;
   static bool DeferredExpiration;
+  static uint32_t SizedSampleBytes;
 
   void moduleLoad(const IniSetting::Map& ini, Hdf config) override;
   void moduleInit() override;
@@ -200,7 +201,7 @@ bool apc_dump_prefix(const char *filename,
                      uint32_t count);
 size_t get_const_map_size();
 bool apc_get_random_entries(std::ostream &out, uint32_t count);
+void apc_sample_by_size();
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

@@ -1361,6 +1361,32 @@ ConcurrentTableSharedStore::sampleEntriesInfo(uint32_t count) {
   return samples;
 }
 
+std::vector<EntryInfo>
+ConcurrentTableSharedStore::sampleEntriesInfoBySize(uint32_t bytes) {
+  std::vector<EntryInfo> samples;
+  if (bytes == 0) return samples;
+  int64_t next = folly::Random::rand32(bytes);
+  int64_t curr_time = time(nullptr);
+  samples.reserve(m_vars.size() / bytes * 128);
+  SharedMutex::WriteHolder l(m_lock);
+  for (auto& iter : m_vars) {
+    auto const key = iter.first;
+    StoreValue& value = iter.second;
+    if (value.expired()) continue;
+    int size = sizeof(StoreValue) + strlen(key) + 1;
+    if (value.data().left()) {          // in memory
+      size += value.dataSize;
+    }
+    next -= size;
+    if (next < 0) {
+      samples.push_back(makeEntryInfo(key, &value, curr_time));
+      next += ((-next) / bytes + 1) * bytes;
+      assertx(next > 0);
+    }
+  }
+  return samples;
+}
+
 template<typename Key, typename T, typename HashCompare>
 bool ConcurrentTableSharedStore
       ::APCMap<Key,T,HashCompare>

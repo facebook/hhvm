@@ -194,6 +194,8 @@ void apcExtension::moduleLoad(const IniSetting::Map& ini, Hdf config) {
   Config::Bind(ShareUncounted, ini, config, "Server.APC.ShareUncounted", true);
   if (!UseUncounted && ShareUncounted) ShareUncounted = false;
 
+  Config::Bind(SizedSampleBytes, ini, config, "Server.APC.SizedSampleBytes", 0);
+
   IniSetting::Bind(this, IniSetting::PHP_INI_SYSTEM, "apc.enabled", &Enable);
   IniSetting::Bind(this, IniSetting::PHP_INI_SYSTEM, "apc.stat",
                    RuntimeOption::RepoAuthoritative ? "0" : "1", &Stat);
@@ -318,6 +320,7 @@ bool apcExtension::Stat = true;
 // Different from zend default but matches what we've been returning for years
 bool apcExtension::EnableCLI = true;
 bool apcExtension::DeferredExpiration = true;
+uint32_t apcExtension::SizedSampleBytes = 0;
 
 static apcExtension s_apc_extension;
 
@@ -1217,6 +1220,22 @@ bool apc_dump_prefix(const char *filename,
 bool apc_get_random_entries(std::ostream &out, uint32_t count) {
   apc_store().dumpRandomKeys(out, count);
   return true;
+}
+
+// skewed sampling, so that bigger ones are more likely to be sampled.
+void apc_sample_by_size() {
+  if (apcExtension::SizedSampleBytes == 0) return;
+  if (!StructuredLog::enabled()) return;
+  auto entries =
+    apc_store().sampleEntriesInfoBySize(apcExtension::SizedSampleBytes);
+  StructuredLogEntry sample;
+  for (auto& entry : entries) {
+    sample.setStr("key", entry.key);
+    sample.setInt("in_mem", static_cast<int64_t>(entry.inMem));
+    sample.setInt("ttl", entry.ttl);
+    sample.setInt("size", entry.size);
+    StructuredLog::log("apc_samples", sample);
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

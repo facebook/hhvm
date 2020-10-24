@@ -277,6 +277,8 @@ type t = {
   tco_typecheck_sample_rate: float;
   (* Experimental implementation of a "sound" dynamic type *)
   tco_enable_sound_dynamic: bool;
+  (* Disallow #-style comments, except hashbangs(#!) *)
+  po_disallow_hash_comments: bool;
 }
 [@@deriving eq, show]
 
@@ -385,6 +387,7 @@ val make :
   ?tco_report_pos_from_reason:bool ->
   ?tco_typecheck_sample_rate:float ->
   ?tco_enable_sound_dynamic:bool ->
+  ?po_disallow_hash_comments:bool ->
   unit ->
   t
 
@@ -627,3 +630,5 @@ val tco_report_pos_from_reason : t -> bool
 val tco_typecheck_sample_rate : t -> float
 
 val tco_enable_sound_dynamic : t -> bool
+
+val po_disallow_hash_comments : t -> bool

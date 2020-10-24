@@ -113,6 +113,7 @@ type t = {
   tco_report_pos_from_reason: bool;
   tco_typecheck_sample_rate: float;
   tco_enable_sound_dynamic: bool;
+  po_disallow_hash_comments: bool;
 }
 [@@deriving eq, show]
 
@@ -293,6 +294,7 @@ let default =
     tco_report_pos_from_reason = false;
     tco_typecheck_sample_rate = 1.0;
     tco_enable_sound_dynamic = false;
+    po_disallow_hash_comments = false;
   }
 
 let make
@@ -420,6 +422,7 @@ let make
     ?(tco_report_pos_from_reason = default.tco_report_pos_from_reason)
     ?(tco_typecheck_sample_rate = default.tco_typecheck_sample_rate)
     ?(tco_enable_sound_dynamic = default.tco_enable_sound_dynamic)
+    ?(po_disallow_hash_comments = default.po_disallow_hash_comments)
     () =
   {
     tco_experimental_features;
@@ -527,6 +530,7 @@ let make
     tco_report_pos_from_reason;
     tco_typecheck_sample_rate;
     tco_enable_sound_dynamic;
+    po_disallow_hash_comments;
   }
 
 let tco_experimental_feature_enabled t s =
@@ -759,3 +763,5 @@ let tco_report_pos_from_reason t = t.tco_report_pos_from_reason
 let tco_typecheck_sample_rate t = t.tco_typecheck_sample_rate
 
 let tco_enable_sound_dynamic t = t.tco_enable_sound_dynamic
+
+let po_disallow_hash_comments t = t.po_disallow_hash_comments

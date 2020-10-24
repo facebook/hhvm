@@ -134,6 +134,11 @@ let disable_array = GlobalOptions.po_disable_array
 
 let disable_array_typehint = GlobalOptions.po_disable_array_typehint
 
+let disallow_hash_comments = GlobalOptions.po_disallow_hash_comments
+
+let with_disallow_hash_comments po b =
+  { po with GlobalOptions.po_disallow_hash_comments = b }
+
 let make
     ~auto_namespace_map
     ~codegen
@@ -160,7 +165,8 @@ let make
     ~disable_modes
     ~disable_hh_ignore_error
     ~disable_array
-    ~disable_array_typehint =
+    ~disable_array_typehint
+    ~disallow_hash_comments =
   GlobalOptions.
     {
       default with
@@ -191,11 +197,13 @@ let make
       po_disable_hh_ignore_error = disable_hh_ignore_error;
       po_disable_array = disable_array;
       po_disable_array_typehint = disable_array_typehint;
+      po_disallow_hash_comments = disallow_hash_comments;
     }
 
 (* Changes here need to be synchronized with rust_parser_errors_ffi.rs *)
 type ffi_t =
   bool
+  * bool
   * bool
   * bool
   * bool
@@ -236,4 +244,5 @@ let to_rust_ffi_t po ~hhvm_compat_mode ~hhi_mode ~codegen =
     disable_array po,
     const_default_lambda_args po,
     disable_array_typehint po,
-    allow_unstable_features po )
+    allow_unstable_features po,
+    disallow_hash_comments po )

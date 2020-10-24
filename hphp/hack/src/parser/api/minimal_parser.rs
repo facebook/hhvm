@@ -53,7 +53,8 @@ fn trivia_lexer<'a>(
     source_text: &SourceText<'a>,
     offset: usize,
 ) -> Lexer<'a, SimpleTokenFactoryImpl<MinimalToken>> {
-    Lexer::make_at(source_text, offset, SimpleTokenFactoryImpl::new())
+    // TODO: disallow hash style comments by default later
+    Lexer::make_at(source_text, offset, SimpleTokenFactoryImpl::new(), false)
 }
 
 pub fn scan_leading_xhp_trivia(source_text: SourceText, offset: usize) -> Vec<MinimalTrivium> {

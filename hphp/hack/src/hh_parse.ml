@@ -73,6 +73,7 @@ module FullFidelityParseArgs = struct
     disable_xhp_element_mangling: bool;
     allow_unstable_features: bool;
     enable_xhp_class_modifier: bool;
+    disallow_hash_comments: bool;
   }
 
   let make
@@ -111,7 +112,8 @@ module FullFidelityParseArgs = struct
       disallow_discarded_nullable_awaitables
       disable_xhp_element_mangling
       allow_unstable_features
-      enable_xhp_class_modifier =
+      enable_xhp_class_modifier
+      disallow_hash_comments =
     {
       full_fidelity_json;
       full_fidelity_dot;
@@ -149,6 +151,7 @@ module FullFidelityParseArgs = struct
       disable_xhp_element_mangling;
       allow_unstable_features;
       enable_xhp_class_modifier;
+      disallow_hash_comments;
     }
 
   let parse_args () =
@@ -203,6 +206,7 @@ module FullFidelityParseArgs = struct
     let disable_xhp_element_mangling = ref false in
     let allow_unstable_features = ref false in
     let enable_xhp_class_modifier = ref false in
+    let disallow_hash_comments = ref false in
     let options =
       [
         (* modes *)
@@ -348,6 +352,9 @@ No errors are filtered out."
         ( "--allow-unstable-features",
           Arg.Set allow_unstable_features,
           "Enables the __EnableUnstableFeatures attribute" );
+        ( "--disallow-hash-comments",
+          Arg.Set disallow_hash_comments,
+          "Disables hash-style(#) comments (except hashbangs)" );
       ]
     in
     Arg.parse options push_file usage;
@@ -404,6 +411,7 @@ No errors are filtered out."
       !disable_xhp_element_mangling
       !allow_unstable_features
       !enable_xhp_class_modifier
+      !disallow_hash_comments
 end
 
 open FullFidelityParseArgs
@@ -491,6 +499,9 @@ let handle_existing_file args filename =
       popt
       args.enable_xhp_class_modifier
   in
+  let popt =
+    ParserOptions.with_disallow_hash_comments popt args.disallow_hash_comments
+  in
   (* Parse with the full fidelity parser *)
   let file = Relative_path.create Relative_path.Dummy filename in
   let source_text = SourceText.from_file file in
@@ -508,6 +519,7 @@ let handle_existing_file args filename =
         (* When print_errors is true, the leaked tree will be passed to ParserErrors,
          * which will consume it. *)
       ~leak_rust_tree:print_errors
+      ~disallow_hash_comments:args.disallow_hash_comments
       ?mode
       ()
   in

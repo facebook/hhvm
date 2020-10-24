@@ -46,6 +46,8 @@ unsafe fn parser_options_from_ocaml_only_for_parser_errors(
     let po_const_default_lambda_args = bool::from_ocaml(*ocaml_opts.add(17)).unwrap();
     let po_disable_array_typehint = bool::from_ocaml(*ocaml_opts.add(18)).unwrap();
     let po_allow_unstable_features = bool::from_ocaml(*ocaml_opts.add(19)).unwrap();
+    let po_disallow_hash_comments = bool::from_ocaml(*ocaml_opts.add(20)).unwrap();
+
 
     parser_options.po_disable_lval_as_an_expression = po_disable_lval_as_an_expression;
     parser_options.po_disable_legacy_soft_typehints = po_disable_legacy_soft_typehints;
@@ -65,7 +67,7 @@ unsafe fn parser_options_from_ocaml_only_for_parser_errors(
     parser_options.po_disable_array = po_disable_array;
     parser_options.po_disable_array_typehint = po_disable_array_typehint;
     parser_options.po_allow_unstable_features = po_allow_unstable_features;
-
+    parser_options.po_disallow_hash_comments = po_disallow_hash_comments;
     (parser_options, (hhvm_compat_mode, hhi_mode, codegen))
 }
 

@@ -126,6 +126,9 @@ let assert_opts_equal caml rust =
   assert_equal
     Hhbc_options.(allow_unstable_features caml)
     Hhbc_options.(allow_unstable_features rust);
+  assert_equal
+    Hhbc_options.(disallow_hash_comments caml)
+    Hhbc_options.(disallow_hash_comments rust);
   ()
 
 let json_override_2bools =
@@ -320,6 +323,9 @@ let test_all_overrides_json_only _ =
   \"hhvm.hack.lang.const_default_lambda_args\": {
     \"global_value\": true
   },
+  \"hhvm.hack.lang.disallow_hash_comments\": {
+    \"global_value\": true
+  },
   \"hhvm.hack.lang.const_static_props\": {
     \"global_value\": true
   },
@@ -497,6 +503,9 @@ module CliArgOverrides = struct
 
   let hhvm'php7'uvs = "-vhhvm.php7.ltr_assign=true"
 
+  let hhvm'hack'lang'disallow_hash_comments =
+    "-vhhvm.hack.lang.disallow_hash_comments=true"
+
   let hhvm'rx_is_enabled = "-vhhvm.rx_is_enabled=2"
 
   (* let hhvm'server'include_search_paths = "UNSUPPORTED BY CLI" *)
@@ -550,6 +559,7 @@ let test_all_overrides_cli_only _ =
       hhvm'rx_is_enabled;
       (* hhvm'server'include_search_paths; *)
       hhvm'hack'lang'const_default_lambda_args;
+      hhvm'hack'lang'disallow_hash_comments;
     ]
   in
   let (caml_opts, _) = caml_from_configs ~jsons:[] ~args in

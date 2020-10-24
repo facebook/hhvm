@@ -3,7 +3,7 @@
 class C extends A {
 }
 
-# Test recursive non-scalar class constant initialization.
+// Test recursive non-scalar class constant initialization.
 class D {
 }
 class E extends D {
@@ -11,7 +11,7 @@ class E extends D {
 class F extends E {
 }
 
-# Test inheritance of interface constants
+// Test inheritance of interface constants
 interface I {
   const WEE = 123;
 }

@@ -77,6 +77,7 @@ where
     in_type: bool,
     token_factory: TF,
     cache: Rc<RefCell<Option<LexerCache<TF::Token>>>>,
+    disallow_hash_comments: bool,
 }
 
 #[derive(Debug, PartialEq)]
@@ -113,7 +114,12 @@ where
         }
     }
 
-    pub fn make_at(source: &SourceText<'a>, offset: usize, token_factory: TF) -> Self {
+    pub fn make_at(
+        source: &SourceText<'a>,
+        offset: usize,
+        token_factory: TF,
+        disallow_hash_comments: bool,
+    ) -> Self {
         Self {
             source: source.clone(),
             start: offset,
@@ -122,11 +128,12 @@ where
             in_type: false,
             cache: Rc::new(RefCell::new(None)),
             token_factory,
+            disallow_hash_comments,
         }
     }
 
-    pub fn make(source: &SourceText<'a>, token_factory: TF) -> Self {
-        Self::make_at(source, 0, token_factory)
+    pub fn make(source: &SourceText<'a>, token_factory: TF, disallow_hash_comments: bool) -> Self {
+        Self::make_at(source, 0, token_factory, disallow_hash_comments)
     }
 
     fn continue_from(&mut self, l: Lexer<'a, TF>) {
@@ -1800,8 +1807,16 @@ where
     fn scan_php_trivium(&mut self) -> Option<Trivium<TF>> {
         match self.peek_char(0) {
             '#' => {
-                self.start_new_lexeme();
-                Some(self.scan_hash_comment())
+                if !self.disallow_hash_comments || self.peek_char(1) == '!' {
+                    // We still support hash comments if the next character would make a hashbang
+
+                    self.start_new_lexeme();
+                    Some(self.scan_hash_comment())
+                } else {
+                    self.start_new_lexeme();
+                    // Not trivia
+                    None
+                }
             }
             '/' => {
                 self.start_new_lexeme();

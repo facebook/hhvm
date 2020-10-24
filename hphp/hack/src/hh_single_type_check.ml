@@ -254,6 +254,7 @@ let parse_options () =
   let method_call_inference = ref false in
   let report_pos_from_reason = ref false in
   let enable_sound_dynamic = ref false in
+  let disallow_hash_comments = ref false in
   let options =
     [
       ( "--ifc",
@@ -602,6 +603,9 @@ let parse_options () =
       ( "--enable-sound-dynamic-type",
         Arg.Set enable_sound_dynamic,
         "Enforce sound dynamic types.  Experimental." );
+      ( "--disallow-hash-comments",
+        Arg.Set disallow_hash_comments,
+        "Disallow #-style comments (besides hashbangs)." );
     ]
   in
   let options = Arg.align ~limit:25 options in
@@ -680,6 +684,7 @@ let parse_options () =
       ~tco_method_call_inference:!method_call_inference
       ~tco_report_pos_from_reason:!report_pos_from_reason
       ~tco_enable_sound_dynamic:!enable_sound_dynamic
+      ~po_disallow_hash_comments:!disallow_hash_comments
       ()
   in
   Errors.allowed_fixme_codes_strict :=

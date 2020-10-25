@@ -222,20 +222,6 @@ void cgAKExistsObj(IRLS& env, const IRInstruction* inst) {
 ///////////////////////////////////////////////////////////////////////////////
 // Array creation.
 
-void cgNewLoggingArray(IRLS& env, const IRInstruction* inst) {
-  auto const target = [&] {
-    if (shouldTestBespokeArrayLikes()) {
-      return CallSpec::direct(
-        static_cast<ArrayData*(*)(ArrayData*)>(bespoke::makeBespokeForTesting));
-    } else {
-      return CallSpec::direct(
-        static_cast<ArrayData*(*)(ArrayData*)>(bespoke::maybeMakeLoggingArray));
-    }
-  }();
-  cgCallHelper(vmain(env), env, target, callDest(env, inst),
-               SyncOptions::Sync, argGroup(env, inst).ssa(0));
-}
-
 namespace {
 
 using MakeArrayFn = ArrayData*(uint32_t);
@@ -526,24 +512,6 @@ void newRecordImpl(IRLS& env, const IRInstruction* inst, Fn creatorFn) {
 
 void cgNewRecord(IRLS& env, const IRInstruction* inst) {
   newRecordImpl(env, inst, RecordData::newRecord);
-}
-
-namespace {
-void arrayReach(ArrayData* ad, TransID transId, uint64_t sk) {
-  if (LIKELY(ad->isVanilla())) return;
-  BespokeArray::asBespoke(ad)->logReachEvent(transId, SrcKey(sk));
-}
-}
-
-void cgLogArrayReach(IRLS& env, const IRInstruction* inst) {
-  auto data = inst->extra<LogArrayReach>();
-
-  auto& v = vmain(env);
-  auto const args = argGroup(env, inst)
-    .ssa(0).imm(data->transId).imm(data->sk.toAtomicInt());
-
-  auto const target = CallSpec::direct(arrayReach);
-  cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

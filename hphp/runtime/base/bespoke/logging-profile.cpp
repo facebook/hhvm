@@ -67,6 +67,13 @@ ARRAY_OPS
   not_reached();
 }
 
+// SrcKey includes more information than just the (Func, Offset) pair,
+// but we want all our logging to be grouped by these two fields alone.
+SrcKey canonicalize(SrcKey sk) {
+  assertx(sk.valid());
+  return SrcKey(sk.func(), sk.offset(), ResumeMode::None);
+}
+
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -209,20 +216,21 @@ double LoggingProfile::getProfileWeight() const {
   return getTotalEvents() * getSampleCountMultiplier();
 }
 
-void LoggingProfile::logReach(TransID transId, SrcKey sk) {
+void LoggingProfile::logReach(TransID transId, SrcKey skRaw) {
   // Hold the read mutex for the duration of the mutation so that export cannot
   // begin until the mutation is complete.
   folly::SharedMutex::ReadHolder lock{s_exportStartedLock};
   if (s_exportStarted.load(std::memory_order_relaxed)) return;
 
   ReachMap::accessor it;
+  auto const sk = canonicalize(skRaw);
   if (reachedUsageSites.insert(it, {transId, sk})) {
     it->second = 1;
   } else {
     it->second++;
   }
-  FTRACE(6, "{} reached tracelet {}, srckey {} [count={}]\n", source.getSymbol(),
-         transId, showShort(sk), it->second);
+  FTRACE(6, "{} reached tracelet {}, srckey {} [count={}]\n",
+         source.getSymbol(), transId, showShort(sk), it->second);
 }
 
 void LoggingProfile::logEvent(ArrayOp op) {
@@ -649,7 +657,8 @@ void waitOnExportProfiles() {
 
 //////////////////////////////////////////////////////////////////////////////
 
-LoggingProfile* getLoggingProfile(SrcKey sk, ArrayData* ad) {
+LoggingProfile* getLoggingProfile(SrcKey skRaw, ArrayData* ad) {
+  auto const sk = canonicalize(skRaw);
   {
     ProfileMap::const_accessor it;
     if (s_profileMap.find(it, sk)) return it->second;
@@ -685,7 +694,7 @@ SrcKey getSrcKey() {
   auto const fp = vmfp();
   auto const func = fp->func();
   if (!func->contains(vmpc())) return SrcKey();
-  return SrcKey(func, vmpc(), resumeModeFromActRec(fp));
+  return canonicalize(SrcKey(func, vmpc(), resumeModeFromActRec(fp)));
 }
 
 //////////////////////////////////////////////////////////////////////////////

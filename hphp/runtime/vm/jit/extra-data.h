@@ -525,7 +525,6 @@ struct ArrayAccessProfileData : RDSHandleData {
   bool cowCheck;
 };
 
-
 /*
  * Translation ID.
  *
@@ -538,26 +537,6 @@ struct TransIDData : IRExtraData {
 
   TransID transId;
 };
-
-/*
- * Translation ID and source key.
- *
- * Used to track the layout-sensitive bytecodes at which logging arrays arrive.
- */
-struct TransSrcKeyData : IRExtraData {
-  explicit TransSrcKeyData(TransID transId, SrcKey sk)
-    : transId(transId)
-    , sk(sk)
-  {}
-
-  std::string show() const {
-    return folly::sformat("transId={}, sk={}", transId, showShort(sk));
-  }
-
-  TransID transId;
-  SrcKey sk;
-};
-
 
 /*
  * FP-relative offset.
@@ -1690,7 +1669,7 @@ X(ReqBindJmp,                   ReqBindJmpData);
 X(ReqRetranslateOpt,            IRSPRelOffsetData);
 X(CheckCold,                    TransIDData);
 X(IncProfCounter,               TransIDData);
-X(LogArrayReach,                TransSrcKeyData);
+X(LogArrayReach,                TransIDData);
 X(DefFuncEntryFP,               FuncData);
 X(Call,                         CallData);
 X(CallBuiltin,                  CallBuiltinData);

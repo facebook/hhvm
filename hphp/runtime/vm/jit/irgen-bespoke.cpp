@@ -585,7 +585,7 @@ void emitLogArrayReach(IRGS& env, Location loc, SrcKey sk) {
 
   auto const arr = loadLocation(env, loc);
   auto const transID = *env.context.transIDs.begin();
-  gen(env, LogArrayReach, TransSrcKeyData(transID, sk), arr);
+  gen(env, LogArrayReach, TransIDData(transID), arr);
 }
 
 // In a profiling tracelet, we don't want to guard on the array being vanilla,
@@ -702,8 +702,8 @@ void handleBespokeInputs(IRGS& env, const NormalizedInstruction& ni,
 
 void handleVanillaOutputs(IRGS& env, SrcKey sk) {
   if (!allowBespokeArrayLikes()) return;
-  if (env.context.kind != TransKind::Profile
-      && !shouldTestBespokeArrayLikes()) {
+  if (env.context.kind != TransKind::Profile &&
+      !shouldTestBespokeArrayLikes()) {
     return;
   }
   auto const op = sk.op();

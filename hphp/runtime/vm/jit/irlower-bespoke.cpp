@@ -20,6 +20,40 @@
 
 namespace HPHP { namespace jit { namespace irlower {
 
+//////////////////////////////////////////////////////////////////////////////
+
+static void logArrayReach(ArrayData* ad, TransID transId, uint64_t sk) {
+  if (LIKELY(ad->isVanilla())) return;
+  BespokeArray::asBespoke(ad)->logReachEvent(transId, SrcKey(sk));
+}
+
+void cgLogArrayReach(IRLS& env, const IRInstruction* inst) {
+  auto const data = inst->extra<LogArrayReach>();
+
+  auto& v = vmain(env);
+  auto const args = argGroup(env, inst)
+    .ssa(0).imm(data->transId).imm(inst->marker().sk().toAtomicInt());
+
+  auto const target = CallSpec::direct(logArrayReach);
+  cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
+}
+
+void cgNewLoggingArray(IRLS& env, const IRInstruction* inst) {
+  auto const target = [&] {
+    if (shouldTestBespokeArrayLikes()) {
+      return CallSpec::direct(
+        static_cast<ArrayData*(*)(ArrayData*)>(bespoke::makeBespokeForTesting));
+    } else {
+      return CallSpec::direct(
+        static_cast<ArrayData*(*)(ArrayData*)>(bespoke::maybeMakeLoggingArray));
+    }
+  }();
+  cgCallHelper(vmain(env), env, target, callDest(env, inst),
+               SyncOptions::Sync, argGroup(env, inst).ssa(0));
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
 void cgBespokeSet(IRLS& env, const IRInstruction* inst) {
   // TODO(mcolavita): layout-based dispatch when we have move layout methods
   auto const target = [&] {
@@ -94,5 +128,6 @@ void cgBespokeElem(IRLS& env, const IRInstruction* inst) {
   cgCallHelper(v, env, target, dest, SyncOptions::Sync, args);
 }
 
+//////////////////////////////////////////////////////////////////////////////
 
 }}}

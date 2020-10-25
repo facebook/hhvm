@@ -8,6 +8,7 @@
  *)
 
 open Typing_deps
+module Mode = Typing_deps_mode
 
 type t = {
   changed: DepSet.t;
@@ -15,8 +16,8 @@ type t = {
   needs_recheck: DepSet.t;
 }
 
-let empty () =
-  let empty = DepSet.make () in
+let empty mode =
+  let empty = DepSet.make mode in
   { changed = empty; mro_invalidated = empty; needs_recheck = empty }
 
 let mark_changed (deps : t) (changed : DepSet.t) : t =
@@ -32,13 +33,15 @@ let mark_as_needing_recheck (deps : t) (needs_recheck : DepSet.t) : t =
   { deps with needs_recheck = DepSet.union deps.needs_recheck needs_recheck }
 
 let mark_all_dependents_as_needing_recheck
-    (deps : t) (dep : Dep.dependency Dep.variant) : t =
-  mark_as_needing_recheck deps (Typing_deps.get_ideps dep)
+    (mode : Mode.t) (deps : t) (dep : Dep.dependency Dep.variant) : t =
+  mark_as_needing_recheck deps (Typing_deps.get_ideps mode dep)
 
-let add_maximum_fanout (deps : t) (changed_dep : Dep.t) : t =
-  let changed = DepSet.singleton changed_dep in
-  let changed_and_descendants = Typing_deps.add_extend_deps changed in
-  let needs_recheck = Typing_deps.add_typing_deps changed_and_descendants in
+let add_maximum_fanout (mode : Mode.t) (deps : t) (changed_dep : Dep.t) : t =
+  let changed = DepSet.singleton mode changed_dep in
+  let changed_and_descendants = Typing_deps.add_extend_deps mode changed in
+  let needs_recheck =
+    Typing_deps.add_typing_deps mode changed_and_descendants
+  in
   let deps = mark_changed deps changed in
   let deps = mark_mro_invalidated deps changed_and_descendants in
   let deps = mark_as_needing_recheck deps needs_recheck in

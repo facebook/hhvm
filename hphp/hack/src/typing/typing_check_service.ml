@@ -462,7 +462,9 @@ let process_files
          ~prev:start_counters)
   in
 
-  let new_dep_edges = Typing_deps.flush_ideps_batch () in
+  let new_dep_edges =
+    Typing_deps.flush_ideps_batch (Provider_context.get_deps_mode ctx)
+  in
   let dep_edges = Typing_deps.merge_dep_edges dep_edges new_dep_edges in
 
   TypingLogger.flush_buffers ();

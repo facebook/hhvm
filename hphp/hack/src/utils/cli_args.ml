@@ -199,6 +199,10 @@ let parse_saved_state_json (json, _keytrace) =
     json >>= get_string "corresponding_base_revision"
     >>= fun (for_base_rev, _for_base_rev_keytrace) ->
     json >>= get_string "deptable" >>= fun (deptable, _deptable_keytrace) ->
+    (match json >>= get_bool "deptable_is_64bit" with
+    | Error (Missing_key_error _) -> return false
+    | result -> result)
+    >>= fun (deptable_is_64bit, _) ->
     json >>= get_array "changes" >>= fun (changes, _) ->
     let naming_changes =
       match json >>= get_val "naming_changes" with
@@ -212,6 +216,7 @@ let parse_saved_state_json (json, _keytrace) =
         saved_state_fn = state;
         corresponding_base_revision = for_base_rev;
         deptable_fn = deptable;
+        deptable_is_64bit;
         prechecked_changes;
         changes;
         naming_changes;

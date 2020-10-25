@@ -15,6 +15,7 @@ val to_json : result -> Hh_json.json
 val add_ns : String.t -> String.t
 
 val handle_prechecked_files :
+  Provider_context.t ->
   ServerEnv.genv ->
   ServerEnv.env ->
   Typing_deps.DepSet.elt ->

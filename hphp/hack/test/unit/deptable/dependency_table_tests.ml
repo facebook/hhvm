@@ -104,6 +104,7 @@ let run_test f =
         Provider_context.empty_for_test
           ~popt:ParserOptions.default
           ~tcopt:TypecheckerOptions.default
+          ~deps_mode:Typing_deps_mode.SQLiteMode
       in
 
       let unbacked_naming_table = write_and_parse_test_files () in
@@ -139,7 +140,10 @@ let test_dep_graph_blob () =
           }
       in
       let ctx =
-        Provider_context.empty_for_test ~popt:ParserOptions.default ~tcopt:opts
+        Provider_context.empty_for_test
+          ~popt:ParserOptions.default
+          ~tcopt:opts
+          ~deps_mode:Typing_deps_mode.SQLiteMode
       in
 
       (* Check reentrancy *)

@@ -35,33 +35,37 @@ type t = {
   popt: ParserOptions.t;
   tcopt: TypecheckerOptions.t;
   backend: Provider_backend.t;
+  deps_mode: Typing_deps_mode.t;
   entries: entries;
 }
 
-let empty_for_tool ~popt ~tcopt ~backend =
-  { popt; tcopt; backend; entries = Relative_path.Map.empty }
+let empty_for_tool ~popt ~tcopt ~backend ~deps_mode =
+  { popt; tcopt; backend; deps_mode; entries = Relative_path.Map.empty }
 
-let empty_for_worker ~popt ~tcopt =
+let empty_for_worker ~popt ~tcopt ~deps_mode =
   {
     popt;
     tcopt;
     backend = Provider_backend.Shared_memory;
+    deps_mode;
     entries = Relative_path.Map.empty;
   }
 
-let empty_for_test ~popt ~tcopt =
+let empty_for_test ~popt ~tcopt ~deps_mode =
   {
     popt;
     tcopt;
     backend = Provider_backend.Shared_memory;
+    deps_mode;
     entries = Relative_path.Map.empty;
   }
 
-let empty_for_debugging ~popt ~tcopt =
+let empty_for_debugging ~popt ~tcopt ~deps_mode =
   {
     popt;
     tcopt;
     backend = Provider_backend.Shared_memory;
+    deps_mode;
     entries = Relative_path.Map.empty;
   }
 
@@ -101,6 +105,8 @@ let map_tcopt (t : t) ~(f : TypecheckerOptions.t -> TypecheckerOptions.t) : t =
   { t with tcopt = f t.tcopt }
 
 let get_backend (t : t) : Provider_backend.t = t.backend
+
+let get_deps_mode (t : t) : Typing_deps_mode.t = t.deps_mode
 
 let get_entries (t : t) : entries = t.entries
 

@@ -82,6 +82,7 @@ type files_changed_while_parsing = Relative_path.Set.t
 type loaded_info = {
   saved_state_fn: string;
   deptable_fn: string;
+  deptable_is_64bit: bool;
   naming_table_fn: string option;
   corresponding_rev: Hg.rev;
   mergebase_rev: Hg.global_rev option;

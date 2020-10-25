@@ -12,22 +12,23 @@ open ClassDiff
 open Reordered_argument_collections
 open Typing_deps
 
-let class_names_from_deps ~get_classes_in_file deps =
+let class_names_from_deps ~mode ~get_classes_in_file deps =
   let filenames = Typing_deps.Files.get_files deps in
   Relative_path.Set.fold filenames ~init:SSet.empty ~f:(fun file acc ->
       SSet.fold (get_classes_in_file file) ~init:acc ~f:(fun cid acc ->
-          if DepSet.mem deps Dep.(make (Class cid)) then
+          if DepSet.mem deps Dep.(make (hash_mode mode) (Class cid)) then
             SSet.add acc cid
           else
             acc))
 
 let add_minor_change_fanout
+    ~(mode : Typing_deps_mode.t)
     ~(get_classes_in_file : Relative_path.t -> SSet.t)
     (acc : AffectedDeps.t)
     (class_name : string)
     (minor_change : ClassDiff.minor_change) : AffectedDeps.t =
-  let dep = Dep.make (Dep.Class class_name) in
-  let changed = DepSet.singleton dep in
+  let dep = Dep.make (hash_mode mode) (Dep.Class class_name) in
+  let changed = DepSet.singleton mode dep in
   let acc = AffectedDeps.mark_changed acc changed in
   let acc = AffectedDeps.mark_as_needing_recheck acc changed in
   let {
@@ -45,7 +46,7 @@ let add_minor_change_fanout
        changed, there will be no change in the fanout except in the positions
        in error messages, and we recheck all files with errors anyway. *)
     if mro_positions_changed then
-      let changed_and_descendants = Typing_deps.add_extend_deps changed in
+      let changed_and_descendants = Typing_deps.add_extend_deps mode changed in
       AffectedDeps.mark_mro_invalidated acc changed_and_descendants
     else
       acc
@@ -53,8 +54,10 @@ let add_minor_change_fanout
   let changed_and_descendant_class_names =
     lazy
       begin
-        let changed_and_descendants = Typing_deps.add_extend_deps changed in
-        class_names_from_deps ~get_classes_in_file changed_and_descendants
+        let changed_and_descendants =
+          Typing_deps.add_extend_deps mode changed
+        in
+        class_names_from_deps ~mode ~get_classes_in_file changed_and_descendants
       end
   in
   (* Recheck any files with a reference to the member returned by make_dep,
@@ -67,11 +70,15 @@ let add_minor_change_fanout
       (Lazy.force changed_and_descendant_class_names)
       ~init:acc
       ~f:(fun cid acc ->
-        AffectedDeps.mark_all_dependents_as_needing_recheck acc (make_dep cid))
+        AffectedDeps.mark_all_dependents_as_needing_recheck
+          mode
+          acc
+          (make_dep cid))
   in
   let add_member_fanout acc change make_dep =
     if not (ClassDiff.change_affects_descendants change) then
       AffectedDeps.mark_all_dependents_as_needing_recheck
+        mode
         acc
         (make_dep class_name)
     else
@@ -93,6 +100,7 @@ let add_minor_change_fanout
           | Added
           | Removed ->
             AffectedDeps.mark_all_dependents_as_needing_recheck
+              mode
               acc
               (Dep.AllMembers class_name)
           | _ -> acc
@@ -118,23 +126,34 @@ let add_minor_change_fanout
   in
   acc
 
-let add_maximum_fanout (acc : AffectedDeps.t) (class_name : string) =
-  AffectedDeps.add_maximum_fanout acc (Dep.make (Dep.Class class_name))
+let add_maximum_fanout
+    (mode : Typing_deps_mode.t) (acc : AffectedDeps.t) (class_name : string) =
+  AffectedDeps.add_maximum_fanout
+    mode
+    acc
+    (Dep.make (hash_mode mode) (Dep.Class class_name))
 
 let add_fanout
+    ~(mode : Typing_deps_mode.t)
     ~(get_classes_in_file : Relative_path.t -> SSet.t)
     (acc : AffectedDeps.t)
     (class_name, diff) : AffectedDeps.t =
   match diff with
   | Unchanged -> acc
-  | Major_change -> add_maximum_fanout acc class_name
+  | Major_change -> add_maximum_fanout mode acc class_name
   | Minor_change minor_change ->
-    add_minor_change_fanout ~get_classes_in_file acc class_name minor_change
+    add_minor_change_fanout
+      ~mode
+      ~get_classes_in_file
+      acc
+      class_name
+      minor_change
 
 let fanout_of_changes
+    ~(mode : Typing_deps_mode.t)
     ~(get_classes_in_file : Relative_path.t -> SSet.t)
     (changes : (string * ClassDiff.t) list) : AffectedDeps.t =
   List.fold
     changes
-    ~init:(AffectedDeps.empty ())
-    ~f:(add_fanout ~get_classes_in_file)
+    ~init:(AffectedDeps.empty mode)
+    ~f:(add_fanout ~mode ~get_classes_in_file)

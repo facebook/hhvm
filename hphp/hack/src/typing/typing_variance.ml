@@ -258,7 +258,7 @@ let get_class_variance ctx root (pos, class_name) =
     [Vcovariant [(pos, Rtype_argument (Utils.strip_ns name), Pcovariant)]]
   | _ ->
     let dep = Typing_deps.Dep.Class class_name in
-    Typing_deps.add_idep (fst root) dep;
+    Typing_deps.add_idep (Provider_context.get_deps_mode ctx) (fst root) dep;
     let tparams =
       match Decl_provider.get_typedef ctx class_name with
       | Some { td_tparams; _ } -> td_tparams

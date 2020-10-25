@@ -26,12 +26,15 @@ while typing-dependencies don't need to be transitively traversed since they
 always end in a terminal node.
 *)
 let rec search
+    ~(deps_mode : Typing_deps_mode.t)
     ~(dep_path_acc : dep_path_acc)
     ~(seen_acc : Typing_deps.DepSet.t)
     ~(current : Typing_deps.Dep.t)
     ~(dest : Typing_deps.Dep.t) : dep_path_acc option =
   let current_direct_deps =
-    current |> Typing_deps.DepSet.singleton |> Typing_deps.add_typing_deps
+    current
+    |> Typing_deps.DepSet.singleton deps_mode
+    |> Typing_deps.add_typing_deps deps_mode
   in
   if Typing_deps.DepSet.mem current_direct_deps dest then
     Some (dest :: dep_path_acc)
@@ -43,8 +46,8 @@ let rec search
     let extends_deps =
       current
       |> Typing_deps.Dep.extends_of_class
-      |> Typing_deps.DepSet.singleton
-      |> Typing_deps.add_typing_deps
+      |> Typing_deps.DepSet.singleton deps_mode
+      |> Typing_deps.add_typing_deps deps_mode
       |> Typing_deps.DepSet.elements
     in
     List.fold_until
@@ -53,24 +56,28 @@ let rec search
       ~f:(fun seen_acc extends_dep ->
         let seen_acc = Typing_deps.DepSet.add seen_acc extends_dep in
         let result =
-          search ~dep_path_acc ~seen_acc ~current:extends_dep ~dest
+          search ~deps_mode ~dep_path_acc ~seen_acc ~current:extends_dep ~dest
         in
         match result with
         | Some result -> Container.Continue_or_stop.Stop (Some result)
         | None -> Container.Continue_or_stop.Continue seen_acc)
       ~finish:(fun _seen_acc -> None)
 
-let go ~(source : Typing_deps.Dep.t) ~(dest : Typing_deps.Dep.t) : result =
+let go
+    ~(deps_mode : Typing_deps_mode.t)
+    ~(source : Typing_deps.Dep.t)
+    ~(dest : Typing_deps.Dep.t) : result =
   search
+    ~deps_mode
     ~dep_path_acc:[]
-    ~seen_acc:Typing_deps.(DepSet.make ())
+    ~seen_acc:Typing_deps.(DepSet.make deps_mode)
     ~current:source
     ~dest
   |> Option.map ~f:(fun dep_path ->
          List.rev_map dep_path ~f:(fun dep ->
              let paths =
                dep
-               |> Typing_deps.DepSet.singleton
+               |> Typing_deps.DepSet.singleton deps_mode
                |> Typing_deps.Files.get_files
              in
              { dep; paths }))

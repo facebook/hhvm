@@ -71,7 +71,8 @@ let init (genv : ServerEnv.genv) (lazy_level : lazy_level) (env : ServerEnv.env)
   if not (ServerArgs.check_mode genv.options) then
     SearchServiceRunner.update_fileinfo_map env.naming_table SearchUtils.Init;
 
-  let t = update_files genv env.naming_table t in
+  let ctx = Provider_utils.ctx_from_server_env env in
+  let t = update_files genv env.naming_table ctx t in
   let (env, t) = naming env t in
   let fast = Naming_table.to_fast env.naming_table in
   let failed_parsing = Errors.get_failed_files env.errorl Errors.Parsing in

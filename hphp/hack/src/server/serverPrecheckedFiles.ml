@@ -18,13 +18,13 @@ let should_use options local_config =
 let set env prechecked_files = { env with prechecked_files }
 
 let intersect_with_master_deps
-    ~deps ~dirty_master_deps ~rechecked_files genv env =
+    ~deps_mode ~deps ~dirty_master_deps ~rechecked_files genv env =
   (* Compute maximum fan-out of input dep set *)
-  let deps = Typing_deps.add_all_deps deps in
+  let deps = Typing_deps.add_all_deps deps_mode deps in
   (* See if it intersects in any way with dirty_master_deps *)
   let common_deps = Typing_deps.DepSet.inter deps dirty_master_deps in
   (* Expand the common part *)
-  let more_deps = Typing_deps.add_all_deps common_deps in
+  let more_deps = Typing_deps.add_all_deps deps_mode common_deps in
   (* Remove the common part from dirty_master_deps (because after expanding it's
    * no longer dirty. *)
   let dirty_master_deps =
@@ -73,6 +73,8 @@ let update_rechecked_files env rechecked =
   env
 
 let update_after_recheck genv env rechecked ~start_time =
+  let ctx = Provider_utils.ctx_from_server_env env in
+  let deps_mode = Provider_context.get_deps_mode ctx in
   let telemetry =
     Telemetry.create ()
     |> Telemetry.duration ~key:"start" ~start_time
@@ -99,6 +101,7 @@ let update_after_recheck genv env rechecked ~start_time =
      * and expand them too *)
     let (env, dirty_master_deps, size) =
       intersect_with_master_deps
+        ~deps_mode
         ~deps:dirty_local_deps
         ~dirty_master_deps
         ~rechecked_files
@@ -123,7 +126,7 @@ let update_after_recheck genv env rechecked ~start_time =
         { env with init_env; full_check }
     in
     let clean_local_deps = dirty_local_deps in
-    let dirty_local_deps = Typing_deps.DepSet.make () in
+    let dirty_local_deps = Typing_deps.DepSet.make deps_mode in
     HackEventLogger.prechecked_evaluate_init t size;
     let telemetry =
       telemetry
@@ -146,6 +149,8 @@ let update_after_recheck genv env rechecked ~start_time =
   | _ -> (env, telemetry)
 
 let update_after_local_changes genv env changes ~start_time =
+  let ctx = Provider_utils.ctx_from_server_env env in
+  let deps_mode = Provider_context.get_deps_mode ctx in
   let telemetry =
     Telemetry.create ()
     |> Telemetry.duration ~key:"start" ~start_time
@@ -190,6 +195,7 @@ let update_after_local_changes genv env changes ~start_time =
         in
         let (env, dirty_master_deps, size) =
           intersect_with_master_deps
+            ~deps_mode
             ~deps:changes
             ~dirty_master_deps:dirty_deps.dirty_master_deps
             ~rechecked_files:dirty_deps.rechecked_files
@@ -229,7 +235,11 @@ let expand_all env =
   | Prechecked_files_disabled -> env
   | Initial_typechecking dirty_deps
   | Prechecked_files_ready dirty_deps ->
-    let deps = Typing_deps.add_all_deps dirty_deps.dirty_master_deps in
+    let ctx = Provider_utils.ctx_from_server_env env in
+    let deps_mode = Provider_context.get_deps_mode ctx in
+    let deps =
+      Typing_deps.add_all_deps deps_mode dirty_deps.dirty_master_deps
+    in
     let needs_recheck = Typing_deps.Files.get_files deps in
     let needs_recheck =
       Relative_path.Set.diff needs_recheck dirty_deps.rechecked_files
@@ -250,4 +260,7 @@ let expand_all env =
     set
       env
       (Prechecked_files_ready
-         { dirty_deps with dirty_master_deps = Typing_deps.DepSet.make () })
+         {
+           dirty_deps with
+           dirty_master_deps = Typing_deps.DepSet.make deps_mode;
+         })

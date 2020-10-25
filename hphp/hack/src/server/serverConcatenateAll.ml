@@ -9,8 +9,6 @@
 
 open Hh_prelude
 open ServerEnv
-module DepSet = Typing_deps.DepSet
-module Dep = Typing_deps.Dep
 module SourceText = Full_fidelity_source_text
 module Syntax = Full_fidelity_editable_syntax
 module SyntaxTree = Full_fidelity_syntax_tree.WithSyntax (Syntax)
@@ -122,6 +120,8 @@ let get_normalized_content (path : Relative_path.t) =
  * - rewrite namespace statements so that concatenation is valid
  *)
 let go (genv : ServerEnv.genv) (env : ServerEnv.env) (prefixes : string list) =
+  let ctx = Provider_utils.ctx_from_server_env env in
+  let deps_mode = Provider_context.get_deps_mode ctx in
   let file_filter (path : string) =
     FindUtils.file_filter path
     && List.exists prefixes (fun prefix ->
@@ -140,14 +140,15 @@ let go (genv : ServerEnv.genv) (env : ServerEnv.env) (prefixes : string list) =
     match fileinfo with
     | Some FileInfo.{ classes; _ } ->
       let classes =
+        let open Typing_deps in
         List.fold_left
-          ~init:(DepSet.make ())
+          ~init:(DepSet.make deps_mode)
           ~f:(fun acc (_, class_id) ->
-            DepSet.add acc (Dep.make (Dep.Class class_id)))
+            DepSet.add acc (Dep.make (hash_mode deps_mode) (Dep.Class class_id)))
           classes
       in
       let deps =
-        Typing_deps.add_extend_deps classes
+        Typing_deps.add_extend_deps deps_mode classes
         |> Typing_deps.Files.get_files
         |> Relative_path.Set.filter ~f:path_filter
       in

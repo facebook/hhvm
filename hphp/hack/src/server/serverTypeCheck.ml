@@ -378,7 +378,9 @@ let parsing genv env to_check ~stop_at_errors =
 (*****************************************************************************)
 
 let update_naming_table env fast_parsed =
-  Relative_path.Map.iter fast_parsed Typing_deps.Files.update_file;
+  let ctx = Provider_utils.ctx_from_server_env env in
+  let deps_mode = Provider_context.get_deps_mode ctx in
+  Relative_path.Map.iter fast_parsed (Typing_deps.Files.update_file deps_mode);
   let naming_table = Naming_table.update_many env.naming_table fast_parsed in
   naming_table
 
@@ -467,6 +469,7 @@ module type CheckKindType = sig
   val get_to_recheck2_approximation :
     to_redecl_phase2_deps:Typing_deps.DepSet.t ->
     env:ServerEnv.env ->
+    ctx:Provider_context.t ->
     Relative_path.Set.t
 
   (* Which files to typecheck, based on results of declaration phase *)
@@ -520,7 +523,7 @@ module FullCheckKind : CheckKindType = struct
     let fast = extend_fast genv fast naming_table env.needs_phase2_redecl in
     (fast, Relative_path.Map.empty)
 
-  let get_to_recheck2_approximation ~to_redecl_phase2_deps:_ ~env:_ =
+  let get_to_recheck2_approximation ~to_redecl_phase2_deps:_ ~env:_ ~ctx:_ =
     (* Full check is computing to_recheck2 set accurately, so there is no need
      * to approximate anything *)
     Relative_path.Set.empty
@@ -619,10 +622,13 @@ module LazyCheckKind : CheckKindType = struct
     ( extend_fast genv decl_defs naming_table to_redecl_phase2_now,
       extend_fast genv decl_defs naming_table to_redecl_phase2_later )
 
-  let get_related_files dep =
-    Typing_deps.(add_typing_deps (DepSet.singleton dep) |> Files.get_files)
+  let get_related_files ctx dep =
+    let deps_mode = Provider_context.get_deps_mode ctx in
+    Typing_deps.(
+      add_typing_deps deps_mode (DepSet.singleton deps_mode dep)
+      |> Files.get_files)
 
-  let get_to_recheck2_approximation ~to_redecl_phase2_deps ~env =
+  let get_to_recheck2_approximation ~to_redecl_phase2_deps ~env ~ctx =
     (* We didn't do the full fan-out from to_redecl_phase2_deps, so the
      * to_recheck2 set might not be complete. We would recompute it during next
      * full check, but if it contains files open in editor, we would like to
@@ -637,7 +643,7 @@ module LazyCheckKind : CheckKindType = struct
       Typing_deps.DepSet.fold
         to_redecl_phase2_deps
         ~init:Relative_path.Set.empty
-        ~f:(fun x acc -> Relative_path.Set.union acc @@ get_related_files x)
+        ~f:(fun x acc -> Relative_path.Set.union acc @@ get_related_files ctx x)
       |> Relative_path.Set.filter ~f:(is_ide_file env)
 
   let get_defs_to_recheck ~reparsed ~phase_2_decl_defs ~to_recheck ~env =
@@ -903,7 +909,10 @@ functor
       let to_recheck2 =
         Relative_path.Set.union
           to_recheck2
-          (CheckKind.get_to_recheck2_approximation to_redecl_phase2_deps env)
+          (CheckKind.get_to_recheck2_approximation
+             to_redecl_phase2_deps
+             env
+             ctx)
       in
       { errors_after_phase2 = errors; needs_phase2_redecl; to_recheck2 }
 
@@ -1150,7 +1159,9 @@ functor
         Telemetry.duration telemetry ~key:"naming_start" ~start_time
       in
 
-      let deptable_unlocked = Typing_deps.allow_dependency_table_reads true in
+      let deptable_unlocked =
+        Typing_deps.allow_dependency_table_reads env.deps_mode true
+      in
       (* Run Naming_global, updating the reverse naming table (which maps the names
        of toplevel symbols to the files in which they were declared) in shared
        memory. Does not run Naming itself (which converts an AST to a NAST by
@@ -1385,7 +1396,7 @@ functor
              ~value:(Typing_deps.DepSet.cardinal changed)
       in
       let (_ : bool) =
-        Typing_deps.allow_dependency_table_reads deptable_unlocked
+        Typing_deps.allow_dependency_table_reads env.deps_mode deptable_unlocked
       in
       (* Checking this before starting typechecking because we want to attribtue
        * big rechecks to rebases, even when restarting is disabled *)
@@ -1519,7 +1530,7 @@ functor
       in
 
       (* INVALIDATE FILES (EXPERIMENTAL TYPES IN CODEGEN) **********************)
-      ServerInvalidateUnits.go genv files_checked fast_parsed naming_table;
+      ServerInvalidateUnits.go genv ctx files_checked fast_parsed naming_table;
 
       let telemetry =
         Telemetry.duration telemetry ~key:"invalidate_end" ~start_time
@@ -1567,7 +1578,9 @@ functor
       let telemetry =
         Telemetry.duration telemetry ~key:"prechecked2_start" ~start_time
       in
-      let deptable_unlocked = Typing_deps.allow_dependency_table_reads true in
+      let deptable_unlocked =
+        Typing_deps.allow_dependency_table_reads env.deps_mode true
+      in
       let (env, prechecked2_telemetry) =
         ServerPrecheckedFiles.update_after_recheck
           genv
@@ -1576,7 +1589,7 @@ functor
           ~start_time
       in
       let (_ : bool) =
-        Typing_deps.allow_dependency_table_reads deptable_unlocked
+        Typing_deps.allow_dependency_table_reads env.deps_mode deptable_unlocked
       in
       let telemetry =
         telemetry

@@ -54,7 +54,10 @@ let handle_unbound_name env (pos, name) kind =
         | Errors.RecordContext -> Typing_deps.Dep.RecordDef name
         | Errors.ClassContext -> Typing_deps.Dep.Class name
       in
-      Typing_deps.add_idep env.droot dep
+      Typing_deps.add_idep
+        (Provider_context.get_deps_mode env.ctx)
+        env.droot
+        dep
 
 let has_canon_name env get_name get_pos (pos, name) =
   match get_name env.ctx name with

@@ -74,11 +74,13 @@ let setup ~(sqlite : bool) (tcopt : GlobalOptions.t) : setup =
   let naming_table = Naming_table.create file_infos in
   (* Construct the reverse naming table (symbols-to-files) *)
   let fast = Naming_table.to_fast naming_table in
+  let deps_mode = Typing_deps_mode.SQLiteMode in
   let ctx =
     Provider_context.empty_for_tool
       ~popt
       ~tcopt
       ~backend:(Provider_backend.get ())
+      ~deps_mode
   in
   Relative_path.Map.iter
     fast
@@ -106,6 +108,7 @@ let setup ~(sqlite : bool) (tcopt : GlobalOptions.t) : setup =
           ~popt:(Provider_context.get_popt ctx)
           ~tcopt:(Provider_context.get_tcopt ctx)
           ~backend:(Provider_backend.get ())
+          ~deps_mode:(Provider_context.get_deps_mode ctx)
       in
       (sqlite_ctx, Naming_table.load_from_sqlite sqlite_ctx db_name)
     ) else

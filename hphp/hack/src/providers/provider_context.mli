@@ -104,22 +104,34 @@ val empty_for_tool :
   popt:ParserOptions.t ->
   tcopt:TypecheckerOptions.t ->
   backend:Provider_backend.t ->
+  deps_mode:Typing_deps_mode.t ->
   t
 
 (** The empty context, for use with Multiworker workers. This assumes that the
 backend is shared memory. We don't want to serialize and send the entire
 [ServerEnv.env] to these workers because a [ServerEnv.env] contains large data
 objects (such as the forward naming table). *)
-val empty_for_worker : popt:ParserOptions.t -> tcopt:TypecheckerOptions.t -> t
+val empty_for_worker :
+  popt:ParserOptions.t ->
+  tcopt:TypecheckerOptions.t ->
+  deps_mode:Typing_deps_mode.t ->
+  t
 
 (** The empty context, for use in tests, where there may not be a
 [ServerEnv.env] available. *)
-val empty_for_test : popt:ParserOptions.t -> tcopt:TypecheckerOptions.t -> t
+val empty_for_test :
+  popt:ParserOptions.t ->
+  tcopt:TypecheckerOptions.t ->
+  deps_mode:Typing_deps_mode.t ->
+  t
 
 (** The empty context, for use in debugging aides in production code, where
 there may not be a [ServerEnv.env] available. *)
 val empty_for_debugging :
-  popt:ParserOptions.t -> tcopt:TypecheckerOptions.t -> t
+  popt:ParserOptions.t ->
+  tcopt:TypecheckerOptions.t ->
+  deps_mode:Typing_deps_mode.t ->
+  t
 
 (** Creates an entry. *)
 val make_entry : path:Relative_path.t -> contents:entry_contents -> entry
@@ -155,6 +167,9 @@ val map_tcopt : t -> f:(TypecheckerOptions.t -> TypecheckerOptions.t) -> t
 
 (** Get the [Provider_backend.t] that backs this [t]. *)
 val get_backend : t -> Provider_backend.t
+
+(** Get the [Typing_deps_mode.t] that backs this [t]. *)
+val get_deps_mode : t -> Typing_deps_mode.t
 
 (** Get the entries currently contained in this [t]. *)
 val get_entries : t -> entries

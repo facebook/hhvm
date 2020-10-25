@@ -93,7 +93,7 @@ let rec check_exhaustiveness_ env pos ty caselist enum_coming_from_unresolved =
     let dep = Typing_deps.Dep.AllMembers id in
     let decl_env = Env.get_decl_env env in
     Option.iter decl_env.Decl_env.droot (fun root ->
-        Typing_deps.add_idep root dep);
+        Typing_deps.add_idep (Env.get_deps_mode env) root dep);
     let tc = unsafe_opt @@ Env.get_enum env id in
     check_enum_exhaustiveness pos tc caselist enum_coming_from_unresolved;
     env

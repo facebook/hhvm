@@ -125,4 +125,4 @@ If the path does not exist, it is atomically created and loaded.
 
 Currently not production-usable -- it is not safe for concurrent consumers.
 *)
-val make_reference_implementation : Path.t -> state
+val make_reference_implementation : Typing_deps_mode.t -> Path.t -> state

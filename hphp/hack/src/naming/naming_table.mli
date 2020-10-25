@@ -52,7 +52,8 @@ dependency hashes are smaller than naming table hashes, and consequently
 can't uniquely identify entries in the naming table.
 
 Only works for backed naming tables. *)
-val get_dep_set_files : t -> Typing_deps.DepSet.t -> Relative_path.Set.t
+val get_dep_set_files :
+  t -> Typing_deps_mode.t -> Typing_deps.DepSet.t -> Relative_path.Set.t
 
 val has_file : t -> Relative_path.t -> bool
 

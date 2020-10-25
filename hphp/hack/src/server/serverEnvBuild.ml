@@ -292,13 +292,14 @@ let default_genv =
     debug_channels = None;
   }
 
-let make_env ~init_id config =
+let make_env ~init_id ~deps_mode config =
   {
     tcopt = ServerConfig.typechecker_options config;
     popt = ServerConfig.parser_options config;
     gleanopt = ServerConfig.glean_options config;
     swriteopt = ServerConfig.symbol_write_options config;
     naming_table = Naming_table.empty;
+    deps_mode;
     typing_service =
       { delegate_state = Typing_service_delegate.default; enabled = false };
     errorl = Errors.empty;

@@ -48,7 +48,6 @@ type options = {
   waiting_client: Unix.file_descr option;
   watchman_debug_logging: bool;
   with_saved_state: saved_state_target option;
-  with_dep_graph_v2: string option;
   allow_non_opt_build: bool;
   write_symbol_info: string option;
 }
@@ -137,10 +136,6 @@ module Messages = struct
     ^ "Expects a JSON string specified as: "
     ^ saved_state_json_descr
 
-  let with_dep_graph_v2 =
-    " Use the new dependency graph format. Expects a file"
-    ^ " containing the new depency graph to use."
-
   let write_symbol_info = " write symbol info to json files"
 end
 
@@ -184,7 +179,6 @@ let parse_options () : options =
   let waiting_client = ref None in
   let watchman_debug_logging = ref false in
   let with_saved_state = ref None in
-  let with_dep_graph_v2 = ref None in
   let allow_non_opt_build = ref false in
   let write_symbol_info = ref None in
   let set_ai s = ai_mode := Some (Ai_options.prepare ~server:true s) in
@@ -262,9 +256,6 @@ let parse_options () : options =
       ( "--with-mini-state",
         Arg.String set_with_saved_state,
         Messages.with_saved_state );
-      ( "--with-dep-graph-v2",
-        Arg.String (fun x -> with_dep_graph_v2 := Some x),
-        Messages.with_dep_graph_v2 );
       ( "--write-symbol-info",
         Arg.String set_write_symbol_info,
         Messages.write_symbol_info );
@@ -360,7 +351,6 @@ let parse_options () : options =
     waiting_client = !waiting_client;
     watchman_debug_logging = !watchman_debug_logging;
     with_saved_state;
-    with_dep_graph_v2 = !with_dep_graph_v2;
     allow_non_opt_build = !allow_non_opt_build;
     write_symbol_info = !write_symbol_info;
   }
@@ -396,7 +386,6 @@ let default_options ~root =
     waiting_client = None;
     watchman_debug_logging = false;
     with_saved_state = None;
-    with_dep_graph_v2 = None;
     allow_non_opt_build = false;
     write_symbol_info = None;
   }
@@ -466,8 +455,6 @@ let watchman_debug_logging options = options.watchman_debug_logging
 
 let with_saved_state options = options.with_saved_state
 
-let with_dep_graph_v2 options = options.with_dep_graph_v2
-
 let allow_non_opt_build options = options.allow_non_opt_build
 
 let write_symbol_info options = options.write_symbol_info
@@ -531,7 +518,6 @@ let to_string
       waiting_client;
       watchman_debug_logging;
       with_saved_state;
-      with_dep_graph_v2;
       allow_non_opt_build;
       write_symbol_info;
     } =
@@ -544,11 +530,6 @@ let to_string
     match with_saved_state with
     | None -> "<>"
     | Some _ -> "SavedStateTarget(...)"
-  in
-  let dep_graph_v2_str =
-    match with_dep_graph_v2 with
-    | None -> "<>"
-    | Some x -> x
   in
   let waiting_client_str =
     match waiting_client with
@@ -686,9 +667,6 @@ let to_string
     ", ";
     "with_saved_state: ";
     saved_state_str;
-    ", ";
-    "with_dep_graph_v2: ";
-    dep_graph_v2_str;
     ", ";
     "allow_non_opt_build: ";
     string_of_bool allow_non_opt_build;

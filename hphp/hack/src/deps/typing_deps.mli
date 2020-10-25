@@ -7,6 +7,8 @@
  *
  *)
 
+module Mode = Typing_deps_mode
+
 module Dep : sig
   (** A node in the dependency graph that must be rechecked when its dependencies change. *)
   type dependent
@@ -66,7 +68,7 @@ module Dep : sig
 
   type t
 
-  val make : 'a variant -> t
+  val make : Mode.hash_mode -> 'a variant -> t
 
   val is_class : t -> bool
 
@@ -88,9 +90,9 @@ module DepSet : sig
 
   type elt = Dep.t
 
-  val make : unit -> t
+  val make : Mode.t -> t
 
-  val singleton : elt -> t
+  val singleton : Mode.t -> elt -> t
 
   val add : t -> elt -> t
 
@@ -118,7 +120,7 @@ end
 module VisitedSet : sig
   type t
 
-  val make : unit -> t
+  val make : Mode.t -> t
 end
 
 module NamingHash : sig
@@ -156,31 +158,18 @@ end
 module Files : sig
   val get_files : DepSet.t -> Relative_path.Set.t
 
-  val deps_of_file_info : FileInfo.t -> DepSet.t
+  val deps_of_file_info : Mode.t -> FileInfo.t -> DepSet.t
 
-  val update_file : Relative_path.t -> FileInfo.t -> unit
+  val update_file : Mode.t -> Relative_path.t -> FileInfo.t -> unit
 end
 
 type dep_edge
 
 type dep_edges
 
-type mode =
-  | SQLiteMode
-  | CustomMode of string
-  | SaveCustomMode of {
-      graph: string option;
-      new_edges_dir: string;
-    }
-[@@deriving show]
-
-val get_mode : unit -> mode
-
-val set_mode : mode -> unit
+val hash_mode : Typing_deps_mode.t -> Typing_deps_mode.hash_mode
 
 val worker_id : int option ref
-
-val force_load_custom_dep_graph : unit -> (unit, string) result
 
 val trace : bool ref
 
@@ -190,42 +179,48 @@ val add_dependency_callback :
   unit
 
 (* returns the previous value of the flag *)
-val allow_dependency_table_reads : bool -> bool
+val allow_dependency_table_reads : Mode.t -> bool -> bool
 
-val add_idep : Dep.dependent Dep.variant -> Dep.dependency Dep.variant -> unit
+val add_idep :
+  Mode.t -> Dep.dependent Dep.variant -> Dep.dependency Dep.variant -> unit
 
-val add_idep_directly_to_graph : dependent:Dep.t -> dependency:Dep.t -> unit
+val add_idep_directly_to_graph :
+  Mode.t -> dependent:Dep.t -> dependency:Dep.t -> unit
 
 val dep_edges_make : unit -> dep_edges
 
-val flush_ideps_batch : unit -> dep_edges
+val flush_ideps_batch : Mode.t -> dep_edges
 
 val merge_dep_edges : dep_edges -> dep_edges -> dep_edges
 
 val register_discovered_dep_edges : dep_edges -> unit
 
-val get_ideps_from_hash : Dep.t -> DepSet.t
+val get_ideps_from_hash : Mode.t -> Dep.t -> DepSet.t
 
-val get_ideps : Dep.dependency Dep.variant -> DepSet.t
+val get_ideps : Mode.t -> Dep.dependency Dep.variant -> DepSet.t
 
 (* Add to accumulator all extend dependencies of source_class. Visited is used
  * to avoid processing nodes reachable in multiple ways more than once. In other
  * words: use DFS to find all nodes reachable by "extends" edges starting from
  * source class *)
 val get_extend_deps :
-  visited:VisitedSet.t -> source_class:Dep.t -> acc:DepSet.t -> DepSet.t
+  mode:Mode.t ->
+  visited:VisitedSet.t ->
+  source_class:Dep.t ->
+  acc:DepSet.t ->
+  DepSet.t
 
 (* Grow input set by adding all its extend dependencies (including recursive) *)
-val add_extend_deps : DepSet.t -> DepSet.t
+val add_extend_deps : Mode.t -> DepSet.t -> DepSet.t
 
 (* Grow input set by adding all its typing dependencies (direct only) *)
-val add_typing_deps : DepSet.t -> DepSet.t
+val add_typing_deps : Mode.t -> DepSet.t -> DepSet.t
 
 (* add_extend_deps and add_typing_deps chained together *)
-val add_all_deps : DepSet.t -> DepSet.t
+val add_all_deps : Mode.t -> DepSet.t -> DepSet.t
 
 module ForTest : sig
-  val compute_dep_hash : 'a Dep.variant -> int
+  val compute_dep_hash : Mode.hash_mode -> 'a Dep.variant -> int
 
   val combine_hashes : dep_hash:int64 -> naming_hash:int64 -> int64
 end

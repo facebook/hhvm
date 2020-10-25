@@ -8,13 +8,13 @@
  *)
 
 open Hh_prelude
-module DepSet = Typing_deps.DepSet
-module Dep = Typing_deps.Dep
 
 let go
     (workers : MultiWorker.worker list option)
     (env : ServerEnv.env)
     (threshold : int) : string =
+  let ctx = Provider_utils.ctx_from_server_env env in
+  let deps_mode = Provider_context.get_deps_mode ctx in
   let naming_table = env.ServerEnv.naming_table in
   let start_t = Unix.gettimeofday () in
   Hh_logger.log "Generating hot classes file...";
@@ -28,8 +28,12 @@ let go
   in
   let add_hot_classes acc cids =
     List.fold cids ~init:acc ~f:(fun acc cid ->
-        let deps = DepSet.singleton @@ Dep.make (Dep.Class cid) in
-        let deps = Typing_deps.add_all_deps deps in
+        let open Typing_deps in
+        let deps =
+          DepSet.singleton deps_mode
+          @@ Dep.make (hash_mode deps_mode) (Dep.Class cid)
+        in
+        let deps = Typing_deps.add_all_deps deps_mode deps in
         if DepSet.cardinal deps > threshold then
           cid :: acc
         else

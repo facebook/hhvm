@@ -97,6 +97,7 @@ let make_cursor_id (id : int) (client_config : client_config) : cursor_id =
 let typecheck_and_get_deps_and_errors_job
     (ctx : Provider_context.t) _acc (paths : Relative_path.t list) :
     Errors.t * dep_graph_delta =
+  let deps_mode = Provider_context.get_deps_mode ctx in
   List.fold
     paths
     ~init:(Errors.empty, HashSet.create ())
@@ -108,8 +109,12 @@ let typecheck_and_get_deps_and_errors_job
         Typing_deps.add_dependency_callback
           "typecheck_and_get_deps_and_errors_job"
           (fun dependent dependency ->
-            let dependent = Typing_deps.Dep.make dependent in
-            let dependency = Typing_deps.Dep.make dependency in
+            let dependent =
+              Typing_deps.(Dep.make (hash_mode deps_mode) dependent)
+            in
+            let dependency =
+              Typing_deps.(Dep.make (hash_mode deps_mode) dependency)
+            in
             HashSet.add deps (dependent, dependency));
         let { Tast_provider.Compute_tast_and_errors.errors; _ } =
           Tast_provider.compute_tast_and_errors_unquarantined ~ctx ~entry
@@ -124,7 +129,7 @@ let typecheck_and_get_deps_and_errors_job
 let get_state_file_path (state_dir : Path.t) : Path.t =
   Path.concat state_dir "ocaml.state"
 
-class cursor ~client_id ~cursor_state =
+class cursor ~deps_mode ~client_id ~cursor_state =
   object (self)
     val client_id : client_id = client_id
 
@@ -215,7 +220,10 @@ class cursor ~client_id ~cursor_state =
         | Typecheck_result
             { previous; typecheck_result = { fanout_files_deps; _ } } ->
           HashSet.iter fanout_files_deps ~f:(fun (dependent, dependency) ->
-              Typing_deps.add_idep_directly_to_graph dependent dependency);
+              Typing_deps.add_idep_directly_to_graph
+                deps_mode
+                dependent
+                dependency);
           helper previous
       in
       helper cursor_state
@@ -294,6 +302,7 @@ class cursor ~client_id ~cursor_state =
       let fanout_result =
         Calculate_fanout.go
           ~detail_level
+          ~deps_mode
           ~old_naming_table
           ~new_naming_table
           ~file_deltas:changed_files
@@ -303,7 +312,7 @@ class cursor ~client_id ~cursor_state =
         Saved_state_delta
           { previous = cursor_state; changed_files; fanout_result }
       in
-      new cursor ~client_id ~cursor_state
+      new cursor ~deps_mode ~client_id ~cursor_state
 
     method calculate_errors
         (ctx : Provider_context.t) (workers : MultiWorker.worker list)
@@ -339,6 +348,7 @@ class cursor ~client_id ~cursor_state =
         let typecheck_result = { fanout_files_deps; errors } in
         let cursor =
           new cursor
+            ~deps_mode
             ~client_id
             ~cursor_state:
               (Typecheck_result { previous = current_cursor; typecheck_result })
@@ -357,7 +367,7 @@ let save_state ~(state_path : Path.t) ~(persistent_state : persistent_state) :
   Out_channel.with_file ~binary:true (Path.to_string state_path) ~f:(fun oc ->
       Marshal.to_channel oc persistent_state [Marshal.Closures])
 
-class state ~state_path ~persistent_state =
+class state ~deps_mode ~state_path ~persistent_state =
   object
     val state_path : Path.t = state_path
 
@@ -372,7 +382,11 @@ class state ~state_path ~persistent_state =
         =
       match Hashtbl.find persistent_state.clients client_id with
       | Some client_config ->
-        Ok (new cursor ~client_id ~cursor_state:(Saved_state client_config))
+        Ok
+          (new cursor
+             ~deps_mode
+             ~client_id
+             ~cursor_state:(Saved_state client_config))
       | None ->
         let (Client_id client_id) = client_id in
         Error (Printf.sprintf "Client ID %s could not be found" client_id)
@@ -431,7 +445,8 @@ let init_state_dir (state_dir : Path.t) ~(populate_dir : Path.t -> unit) : unit
           before us, so we don't need to do anything further. *)
           ())
 
-let make_reference_implementation (state_dir : Path.t) : state =
+let make_reference_implementation
+    (deps_mode : Typing_deps_mode.t) (state_dir : Path.t) : state =
   init_state_dir state_dir ~populate_dir:(fun temp_dir ->
       let temp_state_path = get_state_file_path temp_dir in
       if not (Path.file_exists temp_state_path) then
@@ -459,5 +474,5 @@ let make_reference_implementation (state_dir : Path.t) : state =
         ^^ "then try your query again." );
       Exception.reraise e
   in
-  let state = new state ~state_path ~persistent_state in
+  let state = new state ~deps_mode ~state_path ~persistent_state in
   (state :> state)

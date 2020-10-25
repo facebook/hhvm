@@ -8,6 +8,7 @@
  *)
 
 open Typing_deps
+module Mode = Typing_deps_mode
 
 (** AffectedDeps.t represents the "fanout" of a change, representing the cached
     information we must invalidate and the files we must re-typecheck if we want
@@ -34,7 +35,7 @@ type t = {
           to filename (exposed via Typing_deps.get_files). *)
 }
 
-val empty : unit -> t
+val empty : Mode.t -> t
 
 val mark_changed : t -> DepSet.t -> t
 
@@ -43,8 +44,8 @@ val mark_mro_invalidated : t -> DepSet.t -> t
 val mark_as_needing_recheck : t -> DepSet.t -> t
 
 val mark_all_dependents_as_needing_recheck :
-  t -> Dep.dependency Dep.variant -> t
+  Mode.t -> t -> Dep.dependency Dep.variant -> t
 
-val add_maximum_fanout : t -> Dep.t -> t
+val add_maximum_fanout : Mode.t -> t -> Dep.t -> t
 
 val union : t -> t -> t

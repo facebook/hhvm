@@ -21,16 +21,20 @@ let mode env = env.mode
 
 let tcopt env = Provider_context.get_tcopt env.ctx
 
+let deps_mode env = Provider_context.get_deps_mode env.ctx
+
 let add_wclass env x =
   let dep = Dep.Class x in
-  Option.iter env.droot (fun root -> Typing_deps.add_idep root dep);
+  Option.iter env.droot (fun root ->
+      Typing_deps.add_idep (deps_mode env) root dep);
   ()
 
 let add_extends_dependency env x =
+  let deps_mode = deps_mode env in
   Option.iter env.droot (fun root ->
       let dep = Dep.Class x in
-      Typing_deps.add_idep root (Dep.Extends x);
-      Typing_deps.add_idep root dep);
+      Typing_deps.add_idep deps_mode root (Dep.Extends x);
+      Typing_deps.add_idep deps_mode root dep);
   ()
 
 let get_class_dep env x =
@@ -41,10 +45,12 @@ let get_class_dep env x =
 let get_construct env class_ =
   add_wclass env class_.dc_name;
   let dep = Dep.Cstr class_.dc_name in
-  Option.iter env.droot (fun root -> Typing_deps.add_idep root dep);
+  Option.iter env.droot (fun root ->
+      Typing_deps.add_idep (deps_mode env) root dep);
   class_.dc_construct
 
 let add_constructor_dependency env class_name =
   add_wclass env class_name;
   let dep = Dep.Cstr class_name in
-  Option.iter env.droot (fun root -> Typing_deps.add_idep root dep)
+  Option.iter env.droot (fun root ->
+      Typing_deps.add_idep (deps_mode env) root dep)

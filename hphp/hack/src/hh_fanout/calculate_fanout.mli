@@ -45,6 +45,7 @@ val explanation_to_json : explanation -> Hh_json.json
 
 val go :
   detail_level:Detail_level.t ->
+  deps_mode:Typing_deps_mode.t ->
   old_naming_table:Naming_table.t ->
   new_naming_table:Naming_table.t ->
   file_deltas:Naming_sqlite.file_deltas ->
@@ -55,6 +56,7 @@ val get_symbol_edges_for_file_info : FileInfo.t -> symbol_edge list
 
 val file_info_to_dep_set :
   detail_level:Detail_level.t ->
+  deps_mode:Typing_deps_mode.t ->
   Naming_table.t ->
   FileInfo.t ->
   Typing_deps.DepSet.t * changed_symbol list

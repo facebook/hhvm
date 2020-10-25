@@ -69,13 +69,16 @@ let parsing
   (env, Hh_logger.log_duration "Parsing" t)
 
 let update_files
-    (genv : ServerEnv.genv) (naming_table : Naming_table.t) (t : float) : float
-    =
+    (genv : ServerEnv.genv)
+    (naming_table : Naming_table.t)
+    (ctx : Provider_context.t)
+    (t : float) : float =
   if no_incremental_check genv.options then
     t
   else (
     Hh_logger.log "Updating file dependencies...";
-    Naming_table.iter naming_table Typing_deps.Files.update_file;
+    let deps_mode = Provider_context.get_deps_mode ctx in
+    Naming_table.iter naming_table (Typing_deps.Files.update_file deps_mode);
     HackEventLogger.updating_deps_end t;
     Hh_logger.log_duration "Updated file dependencies" t
   )

@@ -8,6 +8,10 @@
 
 type result
 
-val go : dep_hash:Typing_deps.Dep.t -> include_extends:bool -> result
+val go :
+  deps_mode:Typing_deps_mode.t ->
+  dep_hash:Typing_deps.Dep.t ->
+  include_extends:bool ->
+  result
 
 val result_to_json : result -> Hh_json.json

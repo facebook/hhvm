@@ -8,6 +8,9 @@
 
 open Hh_prelude
 
+(* TODO(hverr): Support 64-bit deps mode *)
+let deps_mode = Typing_deps_mode.SQLiteMode
+
 type env = {
   from: string;
   client_id: string;
@@ -50,7 +53,9 @@ let set_up_global_environment (env : env) : setup_result =
     (* no workers *)
   in
   let init_id = Random_id.short_string () in
-  let server_env = ServerEnvBuild.make_env ~init_id genv.ServerEnv.config in
+  let server_env =
+    ServerEnvBuild.make_env ~init_id ~deps_mode genv.ServerEnv.config
+  in
   (* We need shallow class declarations so that we can invalidate individual
   members in a class hierarchy. *)
   let server_env =
@@ -194,7 +199,7 @@ let get_state_path ~(env : env) : Path.t =
 let make_incremental_state ~(env : env) : Incremental.state =
   let state_path = get_state_path env in
   Hh_logger.log "State path: %s" (Path.to_string state_path);
-  Incremental.make_reference_implementation state_path
+  Incremental.make_reference_implementation deps_mode state_path
 
 let advance_cursor
     ~(env : env)
@@ -679,7 +684,7 @@ let mode_debug ~(env : env) ~(path : Path.t) ~(cursor_id : string option) :
       ~new_naming_table
       ~file_deltas
       ~path
-    |> Debug_fanout.result_to_json
+    |> Debug_fanout.result_to_json ~deps_mode
   in
   let json =
     Hh_json.JSON_Object
@@ -755,7 +760,8 @@ let mode_query
     load_saved_state ~env ~setup_result
   in
   let json =
-    Query_fanout.go ~dep_hash ~include_extends |> Query_fanout.result_to_json
+    Query_fanout.go ~deps_mode ~dep_hash ~include_extends
+    |> Query_fanout.result_to_json
   in
   let json = Hh_json.JSON_Object [("result", json)] in
   Hh_json.json_to_multiline_output Out_channel.stdout json;
@@ -791,7 +797,9 @@ let mode_query_path
   let%lwt (_saved_state_result : saved_state_result) =
     load_saved_state ~env ~setup_result
   in
-  let json = Query_path.go ~source ~dest |> Query_path.result_to_json in
+  let json =
+    Query_path.go ~deps_mode ~source ~dest |> Query_path.result_to_json
+  in
   let json = Hh_json.JSON_Object [("result", json)] in
   Hh_json.json_to_multiline_output Out_channel.stdout json;
   Lwt.return_unit

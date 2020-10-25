@@ -8,14 +8,14 @@
 use depgraph::reader::{Dep, DepGraph, DepGraphOpener};
 use fnv::FnvHasher;
 use im_rc::OrdSet;
-use ocamlrep::Value;
+use ocamlrep::{FromError, FromOcamlRep, Value};
 use ocamlrep_custom::{caml_serialize_default_impls, CamlSerialize, Custom};
 use ocamlrep_ocamlpool::ocaml_ffi;
 use once_cell::sync::OnceCell;
+use oxidized::typing_deps_mode::{HashMode, TypingDepsMode};
 use std::cell::RefCell;
 use std::collections::{BTreeMap, BTreeSet, VecDeque};
 use std::convert::TryInto;
-use std::ffi::OsString;
 use std::hash::Hasher;
 use std::io::Write;
 use std::panic;
@@ -33,16 +33,6 @@ fn _static_assert() {
     let _ = [(); 0 - (!(8 == std::mem::size_of::<usize>()) as usize)];
 }
 
-/// Custom node, we'll be generating 64-bit hashes.
-///
-/// The optional string points to an existing dep graph, if available.
-/// This file name will be set in every worker, and when trying to read
-/// from it, will be lazily opened.
-#[derive(Clone, Debug, Eq, PartialEq)]
-struct DepGraphMode(Option<OsString>);
-
-static DEPGRAPH_MODE: OnceCell<DepGraphMode> = OnceCell::new();
-
 /// A structure wrapping the memory-mapped dependency graph.
 /// Each worker will itself lazily (or eagerly upon request)
 /// open a memory-mapping to the dependency graph.
@@ -56,6 +46,35 @@ static DEPGRAPH: OnceCell<Option<UnsafeDepGraph>> = OnceCell::new();
 /// Even though this is only used in a single-threaded context (from OCaml)
 /// we wrap it in a `Mutex` to ensure safety.
 static DEPGRAPH_DELTA: OnceCell<Mutex<DepGraphDelta>> = OnceCell::new();
+
+/// A raw OCaml pointer to the dependency mode.
+///
+/// We use this raw pointer because we don't want to constantly
+/// convert between the OCaml and Rust value (which involves copying)
+/// when its not needed. Rather, we only convert when we first open the
+/// dependency graph.
+#[derive(Debug, Clone, Copy)]
+pub struct RawTypingDepsMode(usize);
+
+impl FromOcamlRep for RawTypingDepsMode {
+    fn from_ocamlrep(value: Value<'_>) -> Result<Self, FromError> {
+        Ok(Self(value.to_bits()))
+    }
+}
+
+impl RawTypingDepsMode {
+    /// Convert the raw pointer into a Rust value
+    ///
+    /// # Safety
+    ///
+    /// Only safe if the OCaml pointer underlying `self` is still valid!
+    /// You should not use this method if the OCaml runtime has had a change
+    /// to run between obtaining `self` and calling this method!
+    unsafe fn to_rust(self) -> Result<TypingDepsMode, FromError> {
+        let value: Value<'_> = Value::from_bits(self.0);
+        TypingDepsMode::from_ocamlrep(value)
+    }
+}
 
 /// We wrap the dependency graph in an unsafe structure.
 ///
@@ -100,38 +119,31 @@ impl UnsafeDepGraph {
         &self._do_not_reference_depgraph
     }
 
-    /// Enable the custom dep graph, either with or without existing
-    /// saved-state.
+    /// Load the graph using the given mode.
     ///
-    /// # Panics
+    /// # Safety
     ///
-    /// If previously called with a different argument.
-    pub fn enable(depgraph_fn: Option<OsString>) {
-        let new_mode = DepGraphMode(depgraph_fn);
-        let current_mode = DEPGRAPH_MODE.get_or_init(|| new_mode.clone());
-
-        if current_mode != &new_mode {
-            panic!("programming error: dep graph mode already enabled");
-        }
-    }
-
-    /// Load the graph using `DEPGRAPH_MODE`
-    ///
-    /// A no-op if the graph is already loaded.
-    ///
-    /// # Panics
-    ///
-    /// If this function is called before enabling custom mode
-    /// using `enable`.
-    pub fn load() -> Result<(), String> {
-        let _depgraph = DEPGRAPH.get_or_try_init::<_, String>(|| {
-            match DEPGRAPH_MODE.get() {
-                None => panic!("programming error: cannot call load before enabling mode"),
-                Some(DepGraphMode(None)) => {
+    /// The pointer to the dependency graph mode should still be pointing
+    /// to a valid OCaml object.
+    pub unsafe fn load(mode: RawTypingDepsMode) -> Result<Option<&'static UnsafeDepGraph>, String> {
+        let depgraph = DEPGRAPH.get_or_try_init::<_, String>(|| {
+            let mode = mode.to_rust().unwrap();
+            match mode {
+                TypingDepsMode::SQLiteMode => {
+                    panic!("programming error: cannot call load in SQLite mode")
+                }
+                TypingDepsMode::SaveCustomMode {
+                    graph: None,
+                    new_edges_dir: _,
+                } => {
                     // Enabled, but we don't have a saved-state, so we can't open it
                     Ok(None)
                 }
-                Some(DepGraphMode(Some(depgraph_fn))) => {
+                TypingDepsMode::CustomMode(depgraph_fn)
+                | TypingDepsMode::SaveCustomMode {
+                    graph: Some(depgraph_fn),
+                    new_edges_dir: _,
+                } => {
                     let opener = DepGraphOpener::from_path(&depgraph_fn)
                         .map_err(|err| format!("could not open dep graph file: {:?}", err))?;
                     let depgraph = UnsafeDepGraph::new(opener)?;
@@ -140,10 +152,10 @@ impl UnsafeDepGraph {
             }
         })?;
 
-        Ok(())
+        Ok(depgraph.as_ref())
     }
 
-    /// Run the closure with the loaded dep graph.
+    /// Run the closure with the loaded dep graph or the provided graph.
     ///
     /// # Panics
     ///
@@ -152,18 +164,17 @@ impl UnsafeDepGraph {
     ///
     /// Panics if the graph is not yet loaded, and opening
     /// the graph results in an error.
-    pub fn with<F, R>(f: F) -> R
+    ///
+    /// # Safety
+    ///
+    /// The pointer to the dependency graph mode should still be pointing
+    /// to a valid OCaml object.
+    pub unsafe fn with<F, R>(mode: RawTypingDepsMode, f: F) -> R
     where
         for<'a> F: FnOnce(&'a DepGraph<'a>) -> R,
     {
-        if !Self::is_initialized() {
-            Self::load().unwrap();
-        }
-
-        let g = DEPGRAPH.get().unwrap();
-        f(g.as_ref()
-            .expect("no saved-state dep graph available")
-            .depgraph())
+        let g = Self::load(mode).unwrap();
+        f(g.expect("no saved-state dep graph available").depgraph())
     }
 
     /// Run the closure with the loaded dep graph. If the custom dep graph
@@ -176,40 +187,19 @@ impl UnsafeDepGraph {
     ///
     /// Panics if the graph is not yet loaded, and opening
     /// the graph results in an error.
-    pub fn with_default<F, R>(default: R, f: F) -> R
+    ///
+    /// # Safety
+    ///
+    /// The pointer to the dependency graph mode should still be pointing
+    /// to a valid OCaml object.
+    pub unsafe fn with_default<F, R>(mode: RawTypingDepsMode, default: R, f: F) -> R
     where
         for<'a> F: FnOnce(&'a DepGraph<'a>) -> R,
     {
-        if !Self::is_initialized() {
-            Self::load().unwrap();
-        }
-
-        let g = DEPGRAPH.get().unwrap();
-        match g.as_ref() {
+        match Self::load(mode).unwrap() {
             None => default,
             Some(g) => f(g.depgraph()),
         }
-    }
-
-    /// Return whether the global custom dependency graph is initialized.
-    #[inline(always)]
-    pub fn is_initialized() -> bool {
-        // This should be really fast on x86, as the `get` call
-        // just does an atomic load with acquire semantics, which doesn't
-        // require any memory fences on x86.
-        DEPGRAPH.get().is_some()
-    }
-
-    /// Return whether the custom dependency graph is enabled.
-    ///
-    /// For example, used to determine whether 64-bit or 32-bit hashes
-    /// should be generated.
-    #[inline(always)]
-    pub fn is_enabled() -> bool {
-        // This should be really fast on x86, as the `get` call
-        // just does an atomic load with acquire semantics, which doesn't
-        // require any memory fences on x86.
-        DEPGRAPH_MODE.get().is_some()
     }
 }
 
@@ -314,7 +304,7 @@ fn make_hasher() -> FnvHasher {
     Default::default()
 }
 
-fn postprocess_hash(dep_type: DepType, hash: u64) -> u64 {
+fn postprocess_hash(mode: HashMode, dep_type: DepType, hash: u64) -> u64 {
     let hash: u64 = match dep_type {
         DepType::Class => {
             // For class dependencies, set the lowest bit to 1. For extends
@@ -331,16 +321,19 @@ fn postprocess_hash(dep_type: DepType, hash: u64) -> u64 {
         }
     };
 
-    if !UnsafeDepGraph::is_enabled() {
-        // We are in the legacy dependency graph system:
-        //
-        // The shared-memory dependency graph stores edges as pairs of vertices.
-        // Each vertex has 31 bits of actual content and 1 bit of OCaml bookkeeping.
-        // Thus, we truncate the hash to 31 bits.
-        hash & ((1 << 31) - 1)
-    } else {
-        // One bit is used for OCaml bookkeeping!
-        hash & !(1 << 63)
+    match mode {
+        HashMode::Hash32Bit => {
+            // We are in the legacy dependency graph system:
+            //
+            // The shared-memory dependency graph stores edges as pairs of vertices.
+            // Each vertex has 31 bits of actual content and 1 bit of OCaml bookkeeping.
+            // Thus, we truncate the hash to 31 bits.
+            hash & ((1 << 31) - 1)
+        }
+        HashMode::Hash64Bit => {
+            // One bit is used for OCaml bookkeeping!
+            hash & !(1 << 63)
+        }
     }
 }
 
@@ -356,11 +349,11 @@ fn get_dep_type_hash_key(dep_type: DepType) -> u8 {
 }
 
 /// Hash a one-argument `Typing_deps.Dep.variant`'s fields.
-pub fn hash1(dep_type: DepType, name1: &[u8]) -> u64 {
+pub fn hash1(mode: HashMode, dep_type: DepType, name1: &[u8]) -> u64 {
     let mut hasher = make_hasher();
     hasher.write_u8(get_dep_type_hash_key(dep_type));
     hasher.write(name1);
-    postprocess_hash(dep_type, hasher.finish())
+    postprocess_hash(mode, dep_type, hasher.finish())
 }
 
 /// Hashes an `int` and `string`, arising from one of the one-argument cases of
@@ -378,8 +371,8 @@ pub fn hash1(dep_type: DepType, name1: &[u8]) -> u64 {
 /// do not spawn threads in our OCaml code, so the pointed-to value will not be
 /// concurrently modified.
 #[no_mangle]
-unsafe extern "C" fn hash1_ocaml(dep_type_tag: usize, name1: usize) -> usize {
-    fn do_hash(dep_type_tag: Value<'_>, name1: Value<'_>) -> Value<'static> {
+unsafe extern "C" fn hash1_ocaml(mode: usize, dep_type_tag: usize, name1: usize) -> usize {
+    fn do_hash(mode: HashMode, dep_type_tag: Value<'_>, name1: Value<'_>) -> Value<'static> {
         let dep_type_tag = dep_type_tag
             .as_int()
             .expect("dep_type_tag could not be converted to int");
@@ -388,7 +381,7 @@ unsafe extern "C" fn hash1_ocaml(dep_type_tag: usize, name1: usize) -> usize {
             .as_byte_string()
             .expect("name1 could not be converted to byte string");
 
-        let result: u64 = hash1(dep_type, name1);
+        let result: u64 = hash1(mode, dep_type, name1);
 
         // In Rust, a numeric cast between two integers of the same size
         // is a no-op. We require a 64-bit word size.
@@ -397,19 +390,20 @@ unsafe extern "C" fn hash1_ocaml(dep_type_tag: usize, name1: usize) -> usize {
         Value::int(result)
     }
 
+    let mode = HashMode::from_ocaml(mode).unwrap();
     let dep_type_tag = Value::from_bits(dep_type_tag);
     let name1 = Value::from_bits(name1);
-    let result = do_hash(dep_type_tag, name1);
+    let result = do_hash(mode, dep_type_tag, name1);
     Value::to_bits(result)
 }
 
 /// Hash a two-argument `Typing_deps.Dep.variant`'s fields.
-pub fn hash2(dep_type: DepType, name1: &[u8], name2: &[u8]) -> u64 {
+pub fn hash2(mode: HashMode, dep_type: DepType, name1: &[u8], name2: &[u8]) -> u64 {
     let mut hasher = make_hasher();
     hasher.write_u8(get_dep_type_hash_key(dep_type));
     hasher.write(name1);
     hasher.write(name2);
-    postprocess_hash(dep_type, hasher.finish())
+    postprocess_hash(mode, dep_type, hasher.finish())
 }
 
 /// Hashes an `int` and two `string`s, arising from one of the two-argument cases of
@@ -427,8 +421,18 @@ pub fn hash2(dep_type: DepType, name1: &[u8], name2: &[u8]) -> u64 {
 /// do not spawn threads in our OCaml code, so the pointed-to value will not be
 /// concurrently modified.
 #[no_mangle]
-unsafe extern "C" fn hash2_ocaml(dep_type_tag: usize, name1: usize, name2: usize) -> usize {
-    fn do_hash(dep_type_tag: Value<'_>, name1: Value<'_>, name2: Value<'_>) -> Value<'static> {
+unsafe extern "C" fn hash2_ocaml(
+    mode: usize,
+    dep_type_tag: usize,
+    name1: usize,
+    name2: usize,
+) -> usize {
+    fn do_hash(
+        mode: HashMode,
+        dep_type_tag: Value<'_>,
+        name1: Value<'_>,
+        name2: Value<'_>,
+    ) -> Value<'static> {
         let dep_type_tag = dep_type_tag
             .as_int()
             .expect("dep_type_tag could not be converted to int");
@@ -440,7 +444,7 @@ unsafe extern "C" fn hash2_ocaml(dep_type_tag: usize, name1: usize, name2: usize
             .as_byte_string()
             .expect("name2 could not be converted to byte string");
 
-        let result: u64 = hash2(dep_type, name1, name2);
+        let result: u64 = hash2(mode, dep_type, name1, name2);
 
         // In Rust, a numeric cast between two integers of the same size
         // is a no-op. We require a 64-bit word size.
@@ -449,10 +453,11 @@ unsafe extern "C" fn hash2_ocaml(dep_type_tag: usize, name1: usize, name2: usize
         Value::int(result)
     }
 
+    let mode = HashMode::from_ocaml(mode).unwrap();
     let dep_type_tag = Value::from_bits(dep_type_tag);
     let name1 = Value::from_bits(name1);
     let name2 = Value::from_bits(name2);
-    let result = do_hash(dep_type_tag, name1, name2);
+    let result = do_hash(mode, dep_type_tag, name1, name2);
     Value::to_bits(result)
 }
 
@@ -462,17 +467,6 @@ pub fn combine_hashes(dep_hash: u64, naming_hash: i64) -> i64 {
     let upper_31_bits = (dep_hash as i64) << 31;
     let lower_31_bits = naming_hash & 0b01111111_11111111_11111111_11111111;
     upper_31_bits | lower_31_bits
-}
-
-// Functions to load the dep graph
-ocaml_ffi! {
-    fn hh_custom_dep_graph_enable(depgraph_fn: Option<OsString>) {
-        UnsafeDepGraph::enable(depgraph_fn);
-    }
-
-    fn hh_custom_dep_graph_force_load() -> Result<(), String> {
-        UnsafeDepGraph::load()
-    }
 }
 
 /// Rust set of dependencies that can be transferred from
@@ -559,34 +553,42 @@ ocaml_ffi! {
 
 // Functions to query the dependency graph
 ocaml_ffi! {
-    fn hh_custom_dep_graph_has_edge(dependent: Dep, dependency: Dep) -> bool {
-        UnsafeDepGraph::with_default(false, move |g| {
-            match g.hash_list_for(dependency) {
-                Some(hash_list) => g.hash_list_contains(hash_list, dependent),
-                None => false,
-            }
-        })
+    fn hh_custom_dep_graph_has_edge(mode: RawTypingDepsMode, dependent: Dep, dependency: Dep) -> bool {
+        // Safety: we don't call into OCaml again, so mode will remain valid.
+        unsafe {
+            UnsafeDepGraph::with_default(mode, false, move |g| {
+                match g.hash_list_for(dependency) {
+                    Some(hash_list) => g.hash_list_contains(hash_list, dependent),
+                    None => false,
+                }
+            })
+        }
     }
 
-    fn hh_custom_dep_graph_get_ideps_from_hash(dep: Dep) -> Custom<DepSet> {
-
+    fn hh_custom_dep_graph_get_ideps_from_hash(mode: RawTypingDepsMode, dep: Dep) -> Custom<DepSet> {
         let mut deps = OrdSet::new();
         DepGraphDelta::with(|delta| {
             if let Some(delta_deps) = delta.get(dep) {
                 deps.extend(delta_deps.iter().copied());
             }
         });
-        UnsafeDepGraph::with(|g| {
-            if let Some(hash_list) = g.hash_list_for(dep) {
-                deps.extend(g.hash_list_hashes(hash_list));
-            }
-        });
+        // Safety: we don't call into OCaml again, so mode will remain valid.
+        unsafe {
+            UnsafeDepGraph::with(mode, |g| {
+                if let Some(hash_list) = g.hash_list_for(dep) {
+                    deps.extend(g.hash_list_hashes(hash_list));
+                }
+            });
+        }
 
         Custom::from(DepSet(deps))
     }
 
-    fn hh_custom_dep_graph_add_typing_deps(query: Custom<DepSet>) -> Custom<DepSet> {
-        let mut s = UnsafeDepGraph::with(|g| g.query_typing_deps_multi(&query));
+    fn hh_custom_dep_graph_add_typing_deps(mode: RawTypingDepsMode, query: Custom<DepSet>) -> Custom<DepSet> {
+        // Safety: we don't call into OCaml again, so mode will remain valid.
+        let mut s = unsafe {
+            UnsafeDepGraph::with(mode, |g| g.query_typing_deps_multi(&query))
+        };
         DepGraphDelta::with(|delta| {
             for dep in query.iter() {
                 if let Some(depies) = delta.get(*dep) {
@@ -597,20 +599,27 @@ ocaml_ffi! {
         Custom::from(DepSet(s))
     }
 
-    fn hh_custom_dep_graph_add_extend_deps(query: Custom<DepSet>) -> Custom<DepSet> {
+    fn hh_custom_dep_graph_add_extend_deps(mode: RawTypingDepsMode, query: Custom<DepSet>) -> Custom<DepSet> {
         let mut visited = BTreeSet::new();
         let mut queue = VecDeque::new();
         let mut acc = query.clone();
         for source_class in query.iter() {
-            get_extend_deps_visit(&mut visited, &mut queue, *source_class, &mut acc);
+            // Safety: we don't call into OCaml again, so mode will remain valid.
+            unsafe {
+                get_extend_deps_visit(mode, &mut visited, &mut queue, *source_class, &mut acc);
+            }
         }
         while let Some(source_class) = queue.pop_front() {
-            get_extend_deps_visit(&mut visited, &mut queue, source_class, &mut acc);
+            // Safety: we don't call into OCaml again, so mode will remain valid.
+            unsafe {
+                get_extend_deps_visit(mode, &mut visited, &mut queue, source_class, &mut acc);
+            }
         }
         Custom::from(acc.into())
     }
 
     fn hh_custom_dep_graph_get_extend_deps(
+        mode: RawTypingDepsMode,
         visited: Custom<VisitedSet>,
         source_class: Dep,
         acc: Custom<DepSet>,
@@ -618,9 +627,13 @@ ocaml_ffi! {
         let mut visited = visited.borrow_mut();
         let mut queue = VecDeque::new();
         let mut acc = acc.clone();
-        get_extend_deps_visit(&mut visited, &mut queue, source_class, &mut acc);
-        while let Some(source_class) = queue.pop_front() {
-            get_extend_deps_visit(&mut visited, &mut queue, source_class, &mut acc);
+
+        // Safety: we don't call into OCaml again, so mode will remain valid.
+        unsafe {
+            get_extend_deps_visit(mode, &mut visited, &mut queue, source_class, &mut acc);
+            while let Some(source_class) = queue.pop_front() {
+                get_extend_deps_visit(mode, &mut visited, &mut queue, source_class, &mut acc);
+            }
         }
         Custom::from(acc.into())
     }
@@ -635,7 +648,14 @@ ocaml_ffi! {
     }
 }
 
-fn get_extend_deps_visit(
+/// Helper function to recursively get extend deps
+///
+/// # Safety
+///
+/// The dependency graph mode must be a pointer to an OCaml value that's
+/// still valid.
+unsafe fn get_extend_deps_visit(
+    mode: RawTypingDepsMode,
     visited: &mut BTreeSet<Dep>,
     queue: &mut VecDeque<Dep>,
     source_class: Dep,
@@ -660,7 +680,7 @@ fn get_extend_deps_visit(
             delta_deps.iter().copied().for_each(&mut handle_extends_dep);
         }
     });
-    UnsafeDepGraph::with(|g| {
+    UnsafeDepGraph::with(mode, |g| {
         if let Some(hash_list) = g.hash_list_for(extends_hash) {
             g.hash_list_hashes(hash_list)
                 .for_each(&mut handle_extends_dep);
@@ -730,30 +750,42 @@ mod tests {
     extern crate test;
 
     use super::*;
-    use ocamlrep::{Arena, Value};
+    use ocamlrep::{Arena, ToOcamlRep, Value};
+    use oxidized::typing_deps_mode::HashMode;
     use test::Bencher;
 
     const SHORT_CLASS_NAME: &str = "\\Foo";
     const LONG_CLASS_NAME: &str = "\\EntReasonablyLongClassNameSinceSomeClassNamesAreLong";
 
+    const HASH_MODE: HashMode = HashMode::Hash32Bit;
+
     #[bench]
     fn bench_hash1_short(b: &mut Bencher) {
         b.iter(|| {
-            crate::hash1(crate::DepType::Class, SHORT_CLASS_NAME.as_bytes());
+            crate::hash1(
+                HASH_MODE,
+                crate::DepType::Class,
+                SHORT_CLASS_NAME.as_bytes(),
+            );
         });
     }
 
     #[bench]
     fn bench_hash1_long(b: &mut Bencher) {
         b.iter(|| {
-            crate::hash1(crate::DepType::Class, LONG_CLASS_NAME.as_bytes());
+            crate::hash1(HASH_MODE, crate::DepType::Class, LONG_CLASS_NAME.as_bytes());
         });
     }
 
     #[bench]
     fn bench_hash2_short(b: &mut Bencher) {
         b.iter(|| {
-            crate::hash2(crate::DepType::Const, SHORT_CLASS_NAME.as_bytes(), b"\\T");
+            crate::hash2(
+                HASH_MODE,
+                crate::DepType::Const,
+                SHORT_CLASS_NAME.as_bytes(),
+                b"\\T",
+            );
         });
     }
 
@@ -761,6 +793,7 @@ mod tests {
     fn bench_hash2_long(b: &mut Bencher) {
         b.iter(|| {
             crate::hash2(
+                HASH_MODE,
                 crate::DepType::Const,
                 LONG_CLASS_NAME.as_bytes(),
                 b"\\TSomeTypeConstant",
@@ -774,7 +807,11 @@ mod tests {
         let dep_type = crate::DepType::Class;
         let name1 = arena.add(&String::from(LONG_CLASS_NAME));
         b.iter(|| unsafe {
-            crate::hash1_ocaml(Value::int(dep_type as isize).to_bits(), name1.to_bits())
+            crate::hash1_ocaml(
+                HASH_MODE.to_ocamlrep(&arena).to_bits(),
+                Value::int(dep_type as isize).to_bits(),
+                name1.to_bits(),
+            )
         });
     }
 
@@ -786,6 +823,7 @@ mod tests {
         let name2 = arena.add(&String::from("\\TSomeTypeConstant"));
         b.iter(|| unsafe {
             crate::hash2_ocaml(
+                HASH_MODE.to_ocamlrep(&arena).to_bits(),
                 Value::int(dep_type as isize).to_bits(),
                 name1.to_bits(),
                 name2.to_bits(),

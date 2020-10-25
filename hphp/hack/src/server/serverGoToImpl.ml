@@ -123,10 +123,12 @@ let search_class
     (genv : ServerEnv.genv)
     (env : ServerEnv.env) : ServerEnv.env * server_result_or_retry =
   let class_name = ServerFindRefs.add_ns class_name in
+  let deps_mode = Provider_context.get_deps_mode ctx in
   ServerFindRefs.handle_prechecked_files
+    ctx
     genv
     env
-    Typing_deps.Dep.(make (Class class_name))
+    Typing_deps.(Dep.(make (hash_mode deps_mode) (Class class_name)))
   @@ fun () ->
   let child_classes = find_child_classes ctx class_name genv env in
   if List.length child_classes < parallel_limit then
@@ -146,10 +148,12 @@ let search_member
     let class_name =
       FindRefsService.get_origin_class_name ctx class_name member
     in
+    let deps_mode = Provider_context.get_deps_mode ctx in
     ServerFindRefs.handle_prechecked_files
+      ctx
       genv
       env
-      Typing_deps.Dep.(make (Class class_name))
+      Typing_deps.(Dep.(make (hash_mode deps_mode) (Class class_name)))
     @@ fun () ->
     (* Find all the classes that extend this one *)
     let child_classes = find_child_classes ctx class_name genv env in

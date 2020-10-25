@@ -12,6 +12,7 @@ module Types = struct
     naming_changes: Relative_path.t list;
     corresponding_base_revision: string;
     deptable_fn: string;
+    deptable_is_64bit: bool;
     prechecked_changes: Relative_path.t list;
     saved_state_fn: string;
   }

@@ -39,10 +39,12 @@ let init_state
   make_hhi_dir ();
   Typing_global_inference.set_path ();
   let ctx =
+    (* TODO(hverr): Support 64-bit *)
     Provider_context.empty_for_tool
       ~popt
       ~tcopt
       ~backend:Provider_backend.Shared_memory
+      ~deps_mode:Typing_deps_mode.SQLiteMode
   in
   let batch_state = Batch_global_state.save ~trace:true in
   (ctx, batch_state)

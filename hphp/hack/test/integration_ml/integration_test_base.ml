@@ -82,10 +82,11 @@ let setup_server ?custom_config ?(hhi_files = []) () =
   test_init_common () ~hhi_files;
 
   let init_id = Random_id.short_string () in
+  let deps_mode = Typing_deps_mode.SQLiteMode in
   let result =
     match custom_config with
-    | Some config -> ServerEnvBuild.make_env ~init_id config
-    | None -> ServerEnvBuild.make_env ~init_id !genv.ServerEnv.config
+    | Some config -> ServerEnvBuild.make_env ~init_id ~deps_mode config
+    | None -> ServerEnvBuild.make_env ~init_id ~deps_mode !genv.ServerEnv.config
   in
   let hhi_file_list =
     List.map hhi_files ~f:(fun (fn, _) ->
@@ -652,6 +653,8 @@ let load_state
   in
   let saved_state_fn = saved_state_dir ^ "/" ^ saved_state_filename in
   let deptable_fn = saved_state_dir ^ "/" ^ saved_state_filename ^ ".sql" in
+  (* TODO(hverr): Figure out 64-bit *)
+  let deptable_is_64bit = false in
   let load_state_approach =
     ServerInit.Precomputed
       {
@@ -660,13 +663,20 @@ let load_state
          * which is irrelevant in tests *)
         corresponding_base_revision = "-1";
         deptable_fn;
+        deptable_is_64bit;
         naming_changes = [];
         prechecked_changes;
         changes;
       }
   in
   let init_id = Random_id.short_string () in
-  let env = ServerEnvBuild.make_env ~init_id !genv.ServerEnv.config in
+  (* TODO(hverr): Figure out 64-bit *)
+  let env =
+    ServerEnvBuild.make_env
+      ~init_id
+      ~deps_mode:Typing_deps_mode.SQLiteMode
+      !genv.ServerEnv.config
+  in
   match
     ServerInit.init
       ~init_approach:(ServerInit.Saved_state_init load_state_approach)

@@ -21,6 +21,8 @@ val get_tcopt : env -> TypecheckerOptions.t
 
 val map_tcopt : env -> f:(TypecheckerOptions.t -> TypecheckerOptions.t) -> env
 
+val get_deps_mode : env -> Typing_deps_mode.t
+
 val get_ctx : env -> Provider_context.t
 
 val fresh_type : env -> Pos.t -> env * locl_ty

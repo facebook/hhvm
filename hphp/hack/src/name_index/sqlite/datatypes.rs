@@ -9,6 +9,7 @@ use std::default::Default;
 
 use oxidized::naming_types::KindOfType;
 use oxidized::relative_path::Prefix;
+use oxidized::typing_deps_mode::HashMode;
 use rusqlite::types::FromSql;
 use rusqlite::types::{FromSqlError, FromSqlResult, ValueRef};
 use std::convert::TryFrom;
@@ -105,8 +106,10 @@ pub(crate) mod convert {
     }
 
     pub fn name_to_hash(dep_type: deps_rust::DepType, name: &str) -> i64 {
+        // For naming we use 32-bit hashes, because we're only going to use
+        // the LSBs anyways.
         let naming_hash = make_naming_hash(name);
-        let dep_hash = deps_rust::hash1(dep_type, name.as_bytes());
+        let dep_hash = deps_rust::hash1(HashMode::Hash32Bit, dep_type, name.as_bytes());
         let result = deps_rust::combine_hashes(dep_hash, naming_hash);
         result
     }

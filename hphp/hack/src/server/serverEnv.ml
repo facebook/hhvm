@@ -120,6 +120,7 @@ let is_full_check_started = function
  *)
 type env = {
   naming_table: Naming_table.t;
+  deps_mode: Typing_deps_mode.t;
   typing_service: typing_service;
   tcopt: TypecheckerOptions.t;
   popt: ParserOptions.t;

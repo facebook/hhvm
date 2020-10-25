@@ -155,17 +155,22 @@ let get_origin_class_name ctx class_name member =
 let get_child_classes_files ctx class_name =
   match Naming_provider.get_type_kind ctx class_name with
   | Some Naming_types.TClass ->
+    let deps_mode = Provider_context.get_deps_mode ctx in
     (* Find the files that contain classes that extend class_ *)
-    let cid_hash = Typing_deps.Dep.make (Typing_deps.Dep.Class class_name) in
+    let cid_hash =
+      Typing_deps.(Dep.make (hash_mode deps_mode) (Dep.Class class_name))
+    in
     let extend_deps =
       Decl_compare.get_extend_deps
+        deps_mode
         cid_hash
-        (Typing_deps.DepSet.singleton cid_hash)
+        (Typing_deps.DepSet.singleton deps_mode cid_hash)
     in
     Typing_deps.Files.get_files extend_deps
   | _ -> Relative_path.Set.empty
 
 let get_deps_set ctx classes =
+  let deps_mode = Provider_context.get_deps_mode ctx in
   SSet.fold
     classes
     ~f:
@@ -175,7 +180,7 @@ let get_deps_set ctx classes =
         | None -> acc
         | Some fn ->
           let dep = Typing_deps.Dep.Class class_name in
-          let ideps = Typing_deps.get_ideps dep in
+          let ideps = Typing_deps.get_ideps deps_mode dep in
           let files = Typing_deps.Files.get_files ideps in
           let files = Relative_path.Set.add files fn in
           Relative_path.Set.union files acc
@@ -185,8 +190,9 @@ let get_deps_set ctx classes =
 let get_deps_set_function ctx f_name =
   match Naming_provider.get_fun_path ctx f_name with
   | Some fn ->
+    let deps_mode = Provider_context.get_deps_mode ctx in
     let dep = Typing_deps.Dep.Fun f_name in
-    let ideps = Typing_deps.get_ideps dep in
+    let ideps = Typing_deps.get_ideps deps_mode dep in
     let files = Typing_deps.Files.get_files ideps in
     Relative_path.Set.add files fn
   | None -> Relative_path.Set.empty
@@ -194,8 +200,9 @@ let get_deps_set_function ctx f_name =
 let get_deps_set_gconst ctx cst_name =
   match Naming_provider.get_const_path ctx cst_name with
   | Some fn ->
+    let deps_mode = Provider_context.get_deps_mode ctx in
     let dep = Typing_deps.Dep.GConst cst_name in
-    let ideps = Typing_deps.get_ideps dep in
+    let ideps = Typing_deps.get_ideps deps_mode dep in
     let files = Typing_deps.Files.get_files ideps in
     Relative_path.Set.add files fn
   | None -> Relative_path.Set.empty

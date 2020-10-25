@@ -11,31 +11,10 @@ open Hh_prelude
 module Set = Stdlib.Set
 module Format = Stdlib.Format
 module Hashtbl = Stdlib.Hashtbl
+module Mode = Typing_deps_mode
 open Reordered_argument_collections
+open Typing_deps_mode
 open Utils
-
-(***********************************************)
-(* Which dependency graph format are we using? *)
-(***********************************************)
-type mode =
-  | SQLiteMode  (** Legacy mode, with SQLite saved-state dependency graph *)
-  | CustomMode of string
-      (** Custom mode, with the new custom dependency graph format.
-        * The parameter is the path to the database. *)
-  | SaveCustomMode of {
-      graph: string option;
-      new_edges_dir: string;
-    }
-      (** Mode to produce both the legacy SQLite saved-state dependency graph,
-        * and, along side it, the new custom 64-bit dependency graph.
-        *
-        * The first parameter is (optionally) a path to an existing custom 64-bit
-        * dependency graph. If it is present, only new edges will be written,
-        * of not, all edges will be written. *)
-[@@deriving show]
-
-(** Which mode is active? *)
-let mode = ref SQLiteMode
 
 let worker_id : int option ref = ref None
 
@@ -64,9 +43,12 @@ module Dep = struct
     | FunName : string -> 'a variant
     | GConstName : string -> 'a variant
 
-  external hash1 : int -> string -> int = "hash1_ocaml" [@@noalloc]
+  external hash1 : Mode.hash_mode -> int -> string -> int = "hash1_ocaml"
+    [@@noalloc]
 
-  external hash2 : int -> string -> string -> int = "hash2_ocaml" [@@noalloc]
+  external hash2 : Mode.hash_mode -> int -> string -> string -> int
+    = "hash2_ocaml"
+    [@@noalloc]
 
   (** Explicit [equals] function since [=] doesn't work on the [variant] GADT. *)
   let variant_equals : type a b. a variant -> b variant -> bool =
@@ -108,21 +90,22 @@ module Dep = struct
   type t = int
 
   (* Keep in sync with the tags for `DepType` in `typing_deps.rs`. *)
-  let make : type a. a variant -> t = function
-    | GConst name1 -> hash1 0 name1
-    | Fun name1 -> hash1 1 name1
-    | Class name1 -> hash1 2 name1
-    | Extends name1 -> hash1 3 name1
-    | RecordDef name1 -> hash1 4 name1
-    | Const (name1, name2) -> hash2 5 name1 name2
-    | Cstr name1 -> hash1 6 name1
-    | Prop (name1, name2) -> hash2 7 name1 name2
-    | SProp (name1, name2) -> hash2 8 name1 name2
-    | Method (name1, name2) -> hash2 9 name1 name2
-    | SMethod (name1, name2) -> hash2 10 name1 name2
-    | AllMembers name1 -> hash1 11 name1
-    | FunName name1 -> hash1 12 name1
-    | GConstName name1 -> hash1 13 name1
+  let make : type a. Mode.hash_mode -> a variant -> t =
+   fun mode -> function
+    | GConst name1 -> hash1 mode 0 name1
+    | Fun name1 -> hash1 mode 1 name1
+    | Class name1 -> hash1 mode 2 name1
+    | Extends name1 -> hash1 mode 3 name1
+    | RecordDef name1 -> hash1 mode 4 name1
+    | Const (name1, name2) -> hash2 mode 5 name1 name2
+    | Cstr name1 -> hash1 mode 6 name1
+    | Prop (name1, name2) -> hash2 mode 7 name1 name2
+    | SProp (name1, name2) -> hash2 mode 8 name1 name2
+    | Method (name1, name2) -> hash2 mode 9 name1 name2
+    | SMethod (name1, name2) -> hash2 mode 10 name1 name2
+    | AllMembers name1 -> hash1 mode 11 name1
+    | FunName name1 -> hash1 mode 12 name1
+    | GConstName name1 -> hash1 mode 13 name1
 
   let is_class x = x land 1 = 1
 
@@ -249,15 +232,15 @@ module DepSet = struct
 
   type elt = Dep.t
 
-  let make () =
-    match !mode with
+  let make mode =
+    match mode with
     | SQLiteMode -> SQLiteDepSet (SQLiteDepSet.make ())
     | CustomMode _
     | SaveCustomMode _ ->
       CustomDepSet (CustomDepSet.make ())
 
-  let singleton elt =
-    match !mode with
+  let singleton mode elt =
+    match mode with
     | SQLiteMode -> SQLiteDepSet (SQLiteDepSet.singleton elt)
     | CustomMode _
     | SaveCustomMode _ ->
@@ -338,8 +321,8 @@ module VisitedSet = struct
     | SQLiteVisitedSet of SQLiteDepSet.t ref
     | CustomVisitedSet of custom_t
 
-  let make () : t =
-    match !mode with
+  let make mode : t =
+    match mode with
     | SQLiteMode -> SQLiteVisitedSet (ref (SQLiteDepSet.make ()))
     | CustomMode _
     | SaveCustomMode _ ->
@@ -411,7 +394,11 @@ module NamingHash = struct
     | Extends _ as variant -> unsupported variant
 
   let make (variant : 'a Dep.variant) : t =
-    let dep_hash = variant |> Dep.make |> Int64.of_int in
+    (* Here we still use 32-bit hashes, because we are going to use
+     * only 31-bits anyways when we combine the hashes.
+     *
+     * Note that a 32-bit hash is just the LSBs of the 64-bit hash. *)
+    let dep_hash = variant |> Dep.make Hash32Bit |> Int64.of_int in
     let naming_hash =
       variant |> get_dep_variant_name |> SharedMemHash.hash_string
     in
@@ -489,8 +476,8 @@ module SQLiteGraph = struct
       Caml.Hashtbl.iter (fun _ f -> f dependent dependency) dependency_callbacks;
       if !trace then
         add_idep_directly_to_graph
-          ~dependent:(Dep.make dependent)
-          ~dependency:(Dep.make dependency)
+          ~dependent:(Dep.make Hash32Bit dependent)
+          ~dependency:(Dep.make Hash32Bit dependency)
     )
 
   let rec get_extend_deps ~visited ~source_class ~acc =
@@ -538,12 +525,6 @@ module CustomGraph = struct
 
   external assert_master : unit -> unit = "assert_master"
 
-  external hh_custom_dep_graph_enable : string option -> unit
-    = "hh_custom_dep_graph_enable"
-
-  external hh_custom_dep_graph_force_load : unit -> (unit, string) result
-    = "hh_custom_dep_graph_force_load"
-
   let allow_reads_ref = ref false
 
   let allow_dependency_table_reads flag =
@@ -552,28 +533,28 @@ module CustomGraph = struct
     allow_reads_ref := flag;
     prev
 
-  external hh_custom_dep_graph_has_edge : Dep.t -> Dep.t -> bool
+  external hh_custom_dep_graph_has_edge : Mode.t -> Dep.t -> Dep.t -> bool
     = "hh_custom_dep_graph_has_edge"
     [@@noalloc]
 
-  external get_ideps_from_hash : Dep.t -> DepSet.t
+  external get_ideps_from_hash : Mode.t -> Dep.t -> DepSet.t
     = "hh_custom_dep_graph_get_ideps_from_hash"
 
-  external add_typing_deps : DepSet.t -> DepSet.t
+  external add_typing_deps : Mode.t -> DepSet.t -> DepSet.t
     = "hh_custom_dep_graph_add_typing_deps"
 
-  external add_extend_deps : DepSet.t -> DepSet.t
+  external add_extend_deps : Mode.t -> DepSet.t -> DepSet.t
     = "hh_custom_dep_graph_add_extend_deps"
 
   external get_extend_deps :
-    VisitedSet.custom_t -> Dep.t -> DepSet.t -> DepSet.t
+    Mode.t -> VisitedSet.custom_t -> Dep.t -> DepSet.t -> DepSet.t
     = "hh_custom_dep_graph_get_extend_deps"
 
   external register_discovered_dep_edge : Dep.t -> Dep.t -> unit
     = "hh_custom_dep_graph_register_discovered_dep_edge"
     [@@noalloc]
 
-  let add_all_deps x = x |> add_extend_deps |> add_typing_deps
+  let add_all_deps mode x = x |> add_extend_deps mode |> add_typing_deps mode
 
   type dep_edge = {
     idependent: Dep.t;
@@ -602,7 +583,7 @@ module CustomGraph = struct
    * deserialize in OCaml. *)
   let filtered_deps_batch : DepEdgeSet.t ref = ref DepEdgeSet.empty
 
-  let filter_discovered_deps_batch () =
+  let filter_discovered_deps_batch mode =
     (* Empty discovered_deps_bach by checking for each edge whether it's already
      * in the dependency graph. If it is not, add it to the filtered deps batch. *)
     let s = !filtered_deps_batch in
@@ -610,7 +591,7 @@ module CustomGraph = struct
       Hashtbl.fold
         begin
           fun ({ idependent; idependency } as edge) () s ->
-          if not (hh_custom_dep_graph_has_edge idependent idependency) then
+          if not (hh_custom_dep_graph_has_edge mode idependent idependency) then
             DepEdgeSet.add edge s
           else
             s
@@ -631,9 +612,9 @@ module CustomGraph = struct
       end
       s
 
-  let add_idep dependent dependency =
-    let idependent = Dep.make dependent in
-    let idependency = Dep.make dependency in
+  let add_idep mode dependent dependency =
+    let idependent = Dep.make Hash64Bit dependent in
+    let idependency = Dep.make Hash64Bit dependency in
     if idependent = idependency then
       ()
     else (
@@ -641,7 +622,7 @@ module CustomGraph = struct
       if !trace then begin
         Hashtbl.replace discovered_deps_batch { idependent; idependency } ();
         if Hashtbl.length discovered_deps_batch >= 1000 then
-          filter_discovered_deps_batch ()
+          filter_discovered_deps_batch mode
       end
     )
 end
@@ -652,12 +633,12 @@ module SaveCustomGraph = struct
 
   let destination_file_handle_ref : Out_channel.t option ref = ref None
 
-  let destination_file_handle () =
+  let destination_file_handle mode =
     match !destination_file_handle_ref with
     | Some handle -> handle
     | None ->
       let filepath =
-        match !mode with
+        match mode with
         | SaveCustomMode { new_edges_dir; _ } ->
           let worker_id = Base.Option.value_exn !worker_id in
           Filename.concat
@@ -671,13 +652,18 @@ module SaveCustomGraph = struct
       destination_file_handle_ref := Some handle;
       handle
 
-  let filter_discovered_deps_batch () =
+  let filter_discovered_deps_batch mode =
     Hashtbl.iter
       begin
         fun CustomGraph.{ idependent; idependency } () ->
-        if not (CustomGraph.hh_custom_dep_graph_has_edge idependent idependency)
+        if
+          not
+            (CustomGraph.hh_custom_dep_graph_has_edge
+               mode
+               idependent
+               idependency)
         then begin
-          let handle = destination_file_handle () in
+          let handle = destination_file_handle mode in
           (* output_binary_int outputs the lower 4-bytes only, regardless
            * of architecture. It outputs in big-endian format.*)
           Out_channel.output_binary_int handle (idependent lsr 32);
@@ -689,9 +675,9 @@ module SaveCustomGraph = struct
       discovered_deps_batch;
     Hashtbl.clear discovered_deps_batch
 
-  let add_idep dependent dependency =
-    let idependent = Dep.make dependent in
-    let idependency = Dep.make dependency in
+  let add_idep mode dependent dependency =
+    let idependent = Dep.make Hash64Bit dependent in
+    let idependency = Dep.make Hash64Bit dependency in
     if idependent = idependency then
       ()
     else (
@@ -702,7 +688,7 @@ module SaveCustomGraph = struct
           CustomGraph.{ idependent; idependency }
           ();
         if Hashtbl.length discovered_deps_batch >= 1000 then
-          filter_discovered_deps_batch ()
+          filter_discovered_deps_batch mode
       end
     )
 end
@@ -710,26 +696,7 @@ end
 (** Registeres Rust custom types with the OCaml runtime, supporting deserialization *)
 let () = CustomGraph.hh_custom_dep_graph_register_custom_types ()
 
-let get_mode () = !mode
-
-let set_mode m =
-  (* This function has been explicitly kept light-weight, because
-   * it will be called upon every worker's initialization! Whether
-   * the worker will be used for type checking or not! *)
-  mode := m;
-  match m with
-  | SQLiteMode -> ()
-  | CustomMode fn -> CustomGraph.hh_custom_dep_graph_enable (Some fn)
-  | SaveCustomMode { graph; _ } -> CustomGraph.hh_custom_dep_graph_enable graph
-
-let force_load_custom_dep_graph : unit -> (unit, string) result =
- fun () ->
-  let () =
-    match !mode with
-    | CustomMode _ -> ()
-    | _ -> failwith "programmer error: mode not set upon server initialization"
-  in
-  CustomGraph.hh_custom_dep_graph_force_load ()
+let hash_mode = Typing_deps_mode.hash_mode
 
 (*****************************************************************************)
 (* Module keeping track which files contain the toplevel definitions. *)
@@ -751,7 +718,7 @@ module Files = struct
       deps
       ~init:Relative_path.Set.empty
 
-  let deps_of_file_info (file_info : FileInfo.t) : DepSet.t =
+  let deps_of_file_info (mode : Mode.t) (file_info : FileInfo.t) : DepSet.t =
     let {
       FileInfo.funs;
       classes;
@@ -764,14 +731,15 @@ module Files = struct
     } =
       file_info
     in
-    let empty = DepSet.make () in
+    let hash_mode = Mode.hash_mode mode in
+    let empty = DepSet.make mode in
     let consts =
       List.fold_left
         consts
         ~f:
           begin
             fun acc (_, const_id) ->
-            DepSet.add acc (Dep.make (Dep.GConst const_id))
+            DepSet.add acc (Dep.make hash_mode (Dep.GConst const_id))
           end
         ~init:empty
     in
@@ -781,7 +749,7 @@ module Files = struct
         ~f:
           begin
             fun acc (_, fun_id) ->
-            DepSet.add acc (Dep.make (Dep.Fun fun_id))
+            DepSet.add acc (Dep.make hash_mode (Dep.Fun fun_id))
           end
         ~init:empty
     in
@@ -791,7 +759,7 @@ module Files = struct
         ~f:
           begin
             fun acc (_, class_id) ->
-            DepSet.add acc (Dep.make (Dep.Class class_id))
+            DepSet.add acc (Dep.make hash_mode (Dep.Class class_id))
           end
         ~init:empty
     in
@@ -801,7 +769,7 @@ module Files = struct
         ~f:
           begin
             fun acc (_, type_id) ->
-            DepSet.add acc (Dep.make (Dep.Class type_id))
+            DepSet.add acc (Dep.make hash_mode (Dep.Class type_id))
           end
         ~init:classes
     in
@@ -811,7 +779,7 @@ module Files = struct
         ~f:
           begin
             fun acc (_, type_id) ->
-            DepSet.add acc (Dep.make (Dep.Class type_id))
+            DepSet.add acc (Dep.make hash_mode (Dep.Class type_id))
           end
         ~init:classes
     in
@@ -819,8 +787,8 @@ module Files = struct
     let defs = DepSet.union defs consts in
     defs
 
-  let update_file filename info =
-    DepSet.iter (deps_of_file_info info) ~f:(fun def ->
+  let update_file mode filename info =
+    DepSet.iter (deps_of_file_info mode info) ~f:(fun def ->
         let previous =
           match Hashtbl.find_opt !ifiles def with
           | Some files -> files
@@ -851,21 +819,21 @@ type dep_edges = CustomGraph.DepEdgeSet.t option
     are only read from the master thread (proof: g_db in hh_shared.c is NOT in
     shared memory!). In any case this mechanism should be cleaned up.
     *)
-let allow_dependency_table_reads flag =
-  match !mode with
+let allow_dependency_table_reads mode flag =
+  match mode with
   | SQLiteMode -> SQLiteGraph.allow_dependency_table_reads flag
   | CustomMode _
   | SaveCustomMode _ ->
     CustomGraph.allow_dependency_table_reads flag
 
-let add_idep dependent dependency =
-  match !mode with
+let add_idep mode dependent dependency =
+  match mode with
   | SQLiteMode -> SQLiteGraph.add_idep dependent dependency
-  | CustomMode _ -> CustomGraph.add_idep dependent dependency
-  | SaveCustomMode _ -> SaveCustomGraph.add_idep dependent dependency
+  | CustomMode _ -> CustomGraph.add_idep mode dependent dependency
+  | SaveCustomMode _ -> SaveCustomGraph.add_idep mode dependent dependency
 
-let add_idep_directly_to_graph ~dependent ~dependency =
-  match !mode with
+let add_idep_directly_to_graph mode ~dependent ~dependency =
+  match mode with
   | SQLiteMode -> SQLiteGraph.add_idep_directly_to_graph ~dependent ~dependency
   | CustomMode _
   | SaveCustomMode _ ->
@@ -874,20 +842,20 @@ let add_idep_directly_to_graph ~dependent ~dependency =
 
 let dep_edges_make () : dep_edges = Some CustomGraph.DepEdgeSet.empty
 
-let flush_ideps_batch () : dep_edges =
-  match !mode with
+let flush_ideps_batch mode : dep_edges =
+  match mode with
   | SQLiteMode ->
     (* In SQLite mode, the dependency edges are immediately
      * added to shared memory. *)
     None
   | CustomMode _ ->
     (* Make sure we don't miss any dependencies! *)
-    CustomGraph.filter_discovered_deps_batch ();
+    CustomGraph.filter_discovered_deps_batch mode;
     let old_batch = !CustomGraph.filtered_deps_batch in
     CustomGraph.filtered_deps_batch := CustomGraph.DepEdgeSet.empty;
     Some old_batch
   | SaveCustomMode _ ->
-    SaveCustomGraph.filter_discovered_deps_batch ();
+    SaveCustomGraph.filter_discovered_deps_batch mode;
     None
 
 let merge_dep_edges (x : dep_edges) (y : dep_edges) : dep_edges =
@@ -904,17 +872,18 @@ let register_discovered_dep_edges : dep_edges -> unit = function
       (CustomGraph.DepEdgeSet.cardinal batch);
     CustomGraph.register_discovered_dep_edges batch
 
-let get_ideps_from_hash hash =
+let get_ideps_from_hash mode hash =
   let open DepSet in
-  match !mode with
+  match mode with
   | SQLiteMode -> SQLiteDepSet (SQLiteGraph.get_ideps_from_hash hash)
   | CustomMode _
   | SaveCustomMode _ ->
-    CustomDepSet (CustomGraph.get_ideps_from_hash hash)
+    CustomDepSet (CustomGraph.get_ideps_from_hash mode hash)
 
-let get_ideps dependency = get_ideps_from_hash (Dep.make dependency)
+let get_ideps mode dependency =
+  get_ideps_from_hash mode (Dep.make (hash_mode mode) dependency)
 
-let get_extend_deps ~visited ~source_class ~acc =
+let get_extend_deps ~mode ~visited ~source_class ~acc =
   let open DepSet in
   let open VisitedSet in
   match (visited, acc) with
@@ -922,24 +891,24 @@ let get_extend_deps ~visited ~source_class ~acc =
     let acc = SQLiteGraph.get_extend_deps ~visited ~source_class ~acc in
     SQLiteDepSet acc
   | (CustomVisitedSet visited, CustomDepSet acc) ->
-    let acc = CustomGraph.get_extend_deps visited source_class acc in
+    let acc = CustomGraph.get_extend_deps mode visited source_class acc in
     CustomDepSet acc
   | _ -> failwith "incompatible dep set types"
 
-let add_extend_deps acc =
+let add_extend_deps mode acc =
   let open DepSet in
   match acc with
   | SQLiteDepSet acc -> SQLiteDepSet (SQLiteGraph.add_extend_deps acc)
-  | CustomDepSet acc -> CustomDepSet (CustomGraph.add_extend_deps acc)
+  | CustomDepSet acc -> CustomDepSet (CustomGraph.add_extend_deps mode acc)
 
-let add_typing_deps acc =
+let add_typing_deps mode acc =
   let open DepSet in
   match acc with
   | SQLiteDepSet acc -> SQLiteDepSet (SQLiteGraph.add_typing_deps acc)
-  | CustomDepSet acc -> CustomDepSet (CustomGraph.add_typing_deps acc)
+  | CustomDepSet acc -> CustomDepSet (CustomGraph.add_typing_deps mode acc)
 
-let add_all_deps acc =
+let add_all_deps mode acc =
   let open DepSet in
   match acc with
   | SQLiteDepSet acc -> SQLiteDepSet (SQLiteGraph.add_all_deps acc)
-  | CustomDepSet acc -> CustomDepSet (CustomGraph.add_all_deps acc)
+  | CustomDepSet acc -> CustomDepSet (CustomGraph.add_all_deps mode acc)

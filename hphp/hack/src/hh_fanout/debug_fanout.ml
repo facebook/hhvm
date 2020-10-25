@@ -24,14 +24,16 @@ type result = {
   relevant_dep_edges: dep_edge list;
 }
 
-let result_to_json (result : result) : Hh_json.json =
+let result_to_json ~(deps_mode : Typing_deps_mode.t) (result : result) :
+    Hh_json.json =
   let dep_to_json dep =
     Hh_json.JSON_Object
       [
         ("variant", Hh_json.JSON_String (Typing_deps.Dep.variant_to_string dep));
         ( "hash",
           Hh_json.JSON_String
-            (Typing_deps.Dep.make dep |> Typing_deps.Dep.to_debug_string) );
+            ( Typing_deps.(Dep.make (hash_mode deps_mode) dep)
+            |> Typing_deps.Dep.to_debug_string ) );
       ]
   in
   let dep_edge_to_json { dependent; dependency } =
@@ -82,8 +84,10 @@ let go
     ~(new_naming_table : Naming_table.t)
     ~(file_deltas : Naming_sqlite.file_deltas)
     ~(path : Relative_path.t) : result =
+  let deps_mode = Provider_context.get_deps_mode ctx in
   let { Calculate_fanout.fanout_dependents; fanout_files; explanations; _ } =
     Calculate_fanout.go
+      ~deps_mode
       ~detail_level:Calculate_fanout.Detail_level.Low
       ~old_naming_table
       ~new_naming_table
@@ -125,7 +129,8 @@ let go
            ~num_workers:(List.length workers))
   in
   HashSet.filter relevant_dep_edges ~f:(fun { dependent; _ } ->
-      Typing_deps.DepSet.mem fanout_dependents (Typing_deps.Dep.make dependent));
+      let open Typing_deps in
+      DepSet.mem fanout_dependents (Dep.make (hash_mode deps_mode) dependent));
   let relevant_dep_edges = HashSet.to_list relevant_dep_edges in
 
   { dependencies; fanout_dependents; relevant_dep_edges }

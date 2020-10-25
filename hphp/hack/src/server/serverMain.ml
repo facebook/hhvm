@@ -1074,7 +1074,9 @@ let serve genv env in_fds =
    * take it into account, either by explcitely enabling reads (and being fine
    * with stale results), or declaring (in ServerCommand) that it requires full
    * check to be completed before being executed. *)
-  let (_ : bool) = Typing_deps.allow_dependency_table_reads false in
+  let (_ : bool) =
+    Typing_deps.allow_dependency_table_reads env.deps_mode false
+  in
   let () = Errors.set_allow_errors_in_default_path false in
   MultiThreadedCall.on_exception (fun (e, stack) ->
       ServerUtils.exit_on_exception e ~stack);
@@ -1297,19 +1299,11 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
   let root = ServerArgs.root options in
   ServerDynamicView.toggle := ServerArgs.dynamic_view options;
 
-  (* We must set the dependency graph mode here, BEFORE we launch the workers
-   * that will involve saving and restoring the dependency graph mode. *)
-  let () =
-    let open Typing_deps in
-    match
-      (ServerArgs.with_dep_graph_v2 options, ServerArgs.save_64bit options)
-    with
-    | (Some graph, Some new_edges_dir) ->
-      set_mode @@ SaveCustomMode { graph = Some graph; new_edges_dir }
-    | (Some graph, None) -> Typing_deps.(set_mode @@ CustomMode graph)
-    | (None, Some new_edges_dir) ->
-      set_mode @@ SaveCustomMode { graph = None; new_edges_dir }
-    | (None, None) -> set_mode SQLiteMode
+  let deps_mode =
+    match ServerArgs.save_64bit options with
+    | Some new_edges_dir ->
+      Typing_deps_mode.SaveCustomMode { graph = None; new_edges_dir }
+    | None -> Typing_deps_mode.SQLiteMode
   in
 
   (* The OCaml default is 500, but we care about minimizing the memory
@@ -1448,7 +1442,7 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
       ~logging_init:worker_logging_init
   in
   let genv = ServerEnvBuild.make_genv options config local_config workers in
-  (genv, ServerEnvBuild.make_env genv.config ~init_id)
+  (genv, ServerEnvBuild.make_env genv.config ~init_id ~deps_mode)
 
 let run_once options config local_config =
   let (genv, env) =

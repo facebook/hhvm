@@ -615,7 +615,10 @@ and class_decl
   SMap.iter
     begin
       fun x _ ->
-      Typing_deps.add_idep class_dep (Dep.Class x)
+      Typing_deps.add_idep
+        (Provider_context.get_deps_mode ctx)
+        class_dep
+        (Dep.Class x)
     end
     impl;
   tc

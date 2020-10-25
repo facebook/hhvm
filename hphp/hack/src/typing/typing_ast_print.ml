@@ -26,5 +26,6 @@ let print_tast_for_rust (tast : Tast.program) : unit =
   (* TODO: do we need real versions of any of those?*)
   let popt = ParserOptions.default in
   let tcopt = TypecheckerOptions.default in
-  let ctx = Provider_context.empty_for_test ~popt ~tcopt in
+  let deps_mode = Typing_deps_mode.SQLiteMode in
+  let ctx = Provider_context.empty_for_test ~popt ~tcopt ~deps_mode in
   print_tast ctx tast

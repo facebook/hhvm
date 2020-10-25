@@ -89,6 +89,8 @@ let get_val_kind = Typing_env.get_val_kind
 
 let get_file = Typing_env.get_file
 
+let get_deps_mode = Typing_env.get_deps_mode
+
 let fully_expand = Typing_expand.fully_expand
 
 (*****************************************************************************)

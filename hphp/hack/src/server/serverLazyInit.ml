@@ -29,23 +29,17 @@ open ServerEnv
 open ServerInitCommon
 open ServerInitTypes
 open String_utils
-module DepSet = Typing_deps.DepSet
-module Dep = Typing_deps.Dep
 module SLC = ServerLocalConfig
 
 type deptable =
   | SQLiteDeptable of string
   | CustomDeptable of string
 
-let deptable_with_filename (genv : genv) ~(is_64bit : bool) (fn : string) :
-    deptable =
-  match ServerArgs.with_dep_graph_v2 genv.options with
-  | Some fn -> CustomDeptable fn
-  | None ->
-    if is_64bit then
-      CustomDeptable fn
-    else
-      SQLiteDeptable fn
+let deptable_with_filename ~(is_64bit : bool) (fn : string) : deptable =
+  if is_64bit then
+    CustomDeptable fn
+  else
+    SQLiteDeptable fn
 
 let lock_and_load_deptable
     (deptable : deptable) ~(ignore_hh_version : bool) ~(fail_if_missing : bool)
@@ -75,13 +69,9 @@ let lock_and_load_deptable
         Caml.Printexc.raise_with_backtrace e stack
     end
   | CustomDeptable fn ->
-    Hh_logger.log "Loading custom dependency graph from %s" fn;
-    (* We force load the dependency graph here early, because we
-     * want to catch loading errors early, and "properly" handle them *)
-    Typing_deps.(set_mode @@ CustomMode fn);
-    (match Typing_deps.force_load_custom_dep_graph () with
-    | Ok () -> ()
-    | Error msg -> failwith msg)
+    (* The new dependency graph is threaded through function calls
+     * instead of stored in a global *)
+    Hh_logger.log "Custom dependency graph will be loaded lazily from %s" fn
 
 let merge_saved_state_futures
     (genv : genv)
@@ -139,7 +129,6 @@ let merge_saved_state_futures
       let fail_if_missing = not genv.local_config.SLC.can_skip_deptable in
       let deptable =
         deptable_with_filename
-          genv
           ~is_64bit:result.State_loader.deptable_is_64bit
           result.State_loader.deptable_fn
       in
@@ -169,6 +158,7 @@ let merge_saved_state_futures
           {
             saved_state_fn = result.State_loader.saved_state_fn;
             deptable_fn = result.State_loader.deptable_fn;
+            deptable_is_64bit = result.State_loader.deptable_is_64bit;
             naming_table_fn = naming_table_fallback_path;
             corresponding_rev = result.State_loader.corresponding_rev;
             mergebase_rev = result.State_loader.mergebase_rev;
@@ -280,6 +270,7 @@ let use_precomputed_state_exn
     ServerArgs.saved_state_fn;
     corresponding_base_revision;
     deptable_fn;
+    deptable_is_64bit;
     changes;
     naming_changes;
     prechecked_changes;
@@ -288,7 +279,9 @@ let use_precomputed_state_exn
   in
   let ignore_hh_version = ServerArgs.ignore_hh_version genv.ServerEnv.options in
   let fail_if_missing = not genv.local_config.SLC.can_skip_deptable in
-  let deptable = deptable_with_filename genv ~is_64bit:false deptable_fn in
+  let deptable =
+    deptable_with_filename ~is_64bit:deptable_is_64bit deptable_fn
+  in
   lock_and_load_deptable deptable ~ignore_hh_version ~fail_if_missing;
   let changes = Relative_path.set_of_list changes in
   let naming_changes = Relative_path.set_of_list naming_changes in
@@ -307,6 +300,7 @@ let use_precomputed_state_exn
   {
     saved_state_fn;
     deptable_fn;
+    deptable_is_64bit;
     naming_table_fn = naming_table_fallback_path;
     corresponding_rev =
       Hg.Global_rev (int_of_string corresponding_base_revision);
@@ -427,15 +421,19 @@ let get_dirty_fast
       end
     ~init:Relative_path.Map.empty
 
-let names_to_deps (names : FileInfo.names) : DepSet.t =
+let names_to_deps (deps_mode : Typing_deps_mode.t) (names : FileInfo.names) :
+    Typing_deps.DepSet.t =
+  let open Typing_deps in
   let { FileInfo.n_funs; n_classes; n_record_defs; n_types; n_consts } =
     names
   in
   let add_deps_of_sset dep_ctor sset depset =
     SSet.fold sset ~init:depset ~f:(fun n acc ->
-        DepSet.add acc (Dep.make (dep_ctor n)))
+        DepSet.add acc (Dep.make (hash_mode deps_mode) (dep_ctor n)))
   in
-  let deps = add_deps_of_sset (fun n -> Dep.Fun n) n_funs (DepSet.make ()) in
+  let deps =
+    add_deps_of_sset (fun n -> Dep.Fun n) n_funs (DepSet.make deps_mode)
+  in
   let deps = add_deps_of_sset (fun n -> Dep.FunName n) n_funs deps in
   let deps = add_deps_of_sset (fun n -> Dep.Class n) n_classes deps in
   let deps = add_deps_of_sset (fun n -> Dep.RecordDef n) n_record_defs deps in
@@ -501,7 +499,7 @@ let get_files_to_undecl_and_recheck
       ~defs:fast
   in
   Decl_redecl_service.remove_old_defs ctx ~bucket_size genv.workers dirty_names;
-  let deps = Typing_deps.add_all_deps to_redecl in
+  let deps = Typing_deps.add_all_deps env.deps_mode to_redecl in
   let deps = Typing_deps.DepSet.union deps to_recheck in
   let files_to_undecl = Typing_deps.Files.get_files to_redecl in
   let files_to_recheck = Typing_deps.Files.get_files deps in
@@ -567,8 +565,14 @@ let type_check_dirty
         end
       ~init:FileInfo.empty_names
   in
-  let master_deps = names dirty_master_files_changed_hash |> names_to_deps in
-  let local_deps = names dirty_local_files_changed_hash |> names_to_deps in
+  let ctx = Provider_utils.ctx_from_server_env env in
+  let deps_mode = Provider_context.get_deps_mode ctx in
+  let master_deps =
+    names dirty_master_files_changed_hash |> names_to_deps deps_mode
+  in
+  let local_deps =
+    names dirty_local_files_changed_hash |> names_to_deps deps_mode
+  in
   (* Include similar_files in the dirty_fast used to determine which loaded
      declarations to oldify. This is necessary because the positions of
      declarations may have changed, which affects error messages and FIXMEs. *)
@@ -587,7 +591,7 @@ let type_check_dirty
         if genv.local_config.SLC.load_decls_from_saved_state then
           get_files_to_undecl_and_recheck dirty_local_files_changed_hash
         else
-          let deps = Typing_deps.add_all_deps local_deps in
+          let deps = Typing_deps.add_all_deps env.deps_mode local_deps in
           (Relative_path.Set.empty, Typing_deps.Files.get_files deps)
       in
       ( ServerPrecheckedFiles.set
@@ -597,7 +601,7 @@ let type_check_dirty
                rechecked_files = Relative_path.Set.empty;
                dirty_local_deps = local_deps;
                dirty_master_deps = master_deps;
-               clean_local_deps = Typing_deps.(DepSet.make ());
+               clean_local_deps = Typing_deps.(DepSet.make deps_mode);
              }),
         to_undecl,
         to_recheck )
@@ -608,7 +612,7 @@ let type_check_dirty
           get_files_to_undecl_and_recheck dirty_files_changed_hash
         else
           let deps = Typing_deps.DepSet.union master_deps local_deps in
-          let deps = Typing_deps.add_all_deps deps in
+          let deps = Typing_deps.add_all_deps env.deps_mode deps in
           (Relative_path.Set.empty, Typing_deps.Files.get_files deps)
       in
       (env, to_undecl, to_recheck)
@@ -748,7 +752,8 @@ let initialize_naming_table
   if not do_naming then
     (env, t)
   else
-    let t = update_files genv env.naming_table t in
+    let ctx = Provider_utils.ctx_from_server_env env in
+    let t = update_files genv env.naming_table ctx t in
     naming env t
 
 let load_naming_table (genv : ServerEnv.genv) (env : ServerEnv.env) :
@@ -814,7 +819,8 @@ let write_symbol_info_init (genv : ServerEnv.genv) (env : ServerEnv.env) :
   let (env, t) =
     initialize_naming_table "write symbol info initialization" genv env
   in
-  let t = update_files genv env.naming_table t in
+  let ctx = Provider_utils.ctx_from_server_env env in
+  let t = update_files genv env.naming_table ctx t in
   let (env, t) = naming env t in
   let index_paths = env.swriteopt.symbol_write_index_paths in
   let files =
@@ -943,7 +949,11 @@ let post_saved_state_initialization
     mergebase_rev;
     mergebase;
     old_errors;
-    _;
+    deptable_fn;
+    deptable_is_64bit;
+    saved_state_fn = _;
+    corresponding_rev = _;
+    state_distance = _;
   } =
     loaded_info
   in
@@ -952,6 +962,15 @@ let post_saved_state_initialization
     {
       env with
       init_env = { env.init_env with mergebase = get_mergebase mergebase };
+      deps_mode =
+        ( if deptable_is_64bit then
+          match ServerArgs.save_64bit genv.options with
+          | Some new_edges_dir ->
+            Typing_deps_mode.SaveCustomMode
+              { graph = Some deptable_fn; new_edges_dir }
+          | None -> Typing_deps_mode.CustomMode deptable_fn
+        else
+          Typing_deps_mode.SQLiteMode );
     }
   in
 
@@ -1018,9 +1037,9 @@ let post_saved_state_initialization
     env.naming_table
     SearchUtils.TypeChecker;
 
-  let t = update_files genv env.naming_table t in
+  let ctx = Provider_utils.ctx_from_server_env env in
+  let t = update_files genv env.naming_table ctx t in
   let t =
-    let ctx = Provider_utils.ctx_from_server_env env in
     naming_from_saved_state ctx old_naming_table parsing_files naming_table_fn t
   in
   (* Do global naming on all dirty files *)
@@ -1078,7 +1097,7 @@ let post_saved_state_initialization
     }
   in
   (* Update the fileinfo object's dependencies now that we have full fast *)
-  let t = update_files genv env.naming_table t in
+  let t = update_files genv env.naming_table ctx t in
   type_check_dirty
     genv
     env

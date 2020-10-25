@@ -507,6 +507,7 @@ dependencies = [
  "ocamlrep_custom 0.0.0",
  "ocamlrep_ocamlpool 0.0.0",
  "once_cell 1.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "oxidized 0.0.0",
 ]
 
 [[package]]

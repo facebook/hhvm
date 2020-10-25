@@ -36,8 +36,8 @@ let shallow_decl_enabled (ctx : Provider_context.t) =
 (*****************************************************************************)
 let on_the_fly_neutral = Errors.empty
 
-let compute_deps_neutral () =
-  let empty = DepSet.make () in
+let compute_deps_neutral mode =
+  let empty = DepSet.make mode in
   (empty, empty, empty)
 
 (*****************************************************************************)
@@ -76,7 +76,7 @@ let compute_classes_deps
   let (changed, to_redecl, to_recheck) = acc in
   let (rc, rdd, rdc) =
     Decl_compare.get_classes_deps
-      ctx
+      ~ctx
       ~conservative_redecl
       old_classes
       new_classes
@@ -94,9 +94,9 @@ let compute_classes_deps
 (*****************************************************************************)
 
 let compute_funs_deps
-    ~conservative_redecl old_funs (changed, to_redecl, to_recheck) funs =
+    ctx ~conservative_redecl old_funs (changed, to_redecl, to_recheck) funs =
   let (rc, rdd, rdc) =
-    Decl_compare.get_funs_deps ~conservative_redecl old_funs funs
+    Decl_compare.get_funs_deps ~ctx ~conservative_redecl old_funs funs
   in
   let changed = DepSet.union rc changed in
   let to_redecl = DepSet.union rdd to_redecl in
@@ -110,8 +110,8 @@ let compute_funs_deps
 (*****************************************************************************)
 
 let compute_types_deps
-    ~conservative_redecl old_types (changed, to_redecl, to_recheck) types =
-  let (rc, rdc) = Decl_compare.get_types_deps old_types types in
+    ctx ~conservative_redecl old_types (changed, to_redecl, to_recheck) types =
+  let (rc, rdc) = Decl_compare.get_types_deps ~ctx old_types types in
   let changed = DepSet.union rc changed in
   let to_redecl =
     if conservative_redecl then
@@ -123,10 +123,11 @@ let compute_types_deps
   (changed, to_redecl, to_recheck)
 
 let compute_record_defs_deps
-    ~conservative_redecl old_record_defs acc record_defs =
+    ctx ~conservative_redecl old_record_defs acc record_defs =
   let (changed, to_redecl, to_recheck) = acc in
   let (rc, rdd, rdc) =
     Decl_compare.get_record_defs_deps
+      ~ctx
       ~conservative_redecl
       old_record_defs
       record_defs
@@ -143,9 +144,13 @@ let compute_record_defs_deps
 (*****************************************************************************)
 
 let compute_gconsts_deps
-    ~conservative_redecl old_gconsts (changed, to_redecl, to_recheck) gconsts =
+    ctx
+    ~conservative_redecl
+    old_gconsts
+    (changed, to_redecl, to_recheck)
+    gconsts =
   let (rc, rdd, rdc) =
-    Decl_compare.get_gconsts_deps ~conservative_redecl old_gconsts gconsts
+    Decl_compare.get_gconsts_deps ~ctx ~conservative_redecl old_gconsts gconsts
   in
   let changed = DepSet.union rc changed in
   let to_redecl = DepSet.union rdd to_redecl in
@@ -179,23 +184,26 @@ let compute_deps ctx ~conservative_redecl fast (filel : Relative_path.t list) =
   let { FileInfo.n_classes; n_record_defs; n_funs; n_types; n_consts } =
     names
   in
-  let empty = DepSet.make () in
+  let empty = DepSet.make (Provider_context.get_deps_mode ctx) in
   let acc = (empty, empty, empty) in
   (* Fetching everything at once is faster *)
   let old_funs = Decl_heap.Funs.get_old_batch n_funs in
-  let acc = compute_funs_deps ~conservative_redecl old_funs acc n_funs in
+  let acc = compute_funs_deps ctx ~conservative_redecl old_funs acc n_funs in
   let old_types = Decl_heap.Typedefs.get_old_batch n_types in
-  let acc = compute_types_deps ~conservative_redecl old_types acc n_types in
+  let acc = compute_types_deps ctx ~conservative_redecl old_types acc n_types in
   let old_record_defs = Decl_heap.RecordDefs.get_old_batch n_record_defs in
   let acc =
     compute_record_defs_deps
+      ctx
       ~conservative_redecl
       old_record_defs
       acc
       n_record_defs
   in
   let old_consts = Decl_heap.GConsts.get_old_batch n_consts in
-  let acc = compute_gconsts_deps ~conservative_redecl old_consts acc n_consts in
+  let acc =
+    compute_gconsts_deps ctx ~conservative_redecl old_consts acc n_consts
+  in
   let acc =
     if shallow_decl_enabled ctx then
       acc
@@ -319,7 +327,7 @@ let parallel_on_the_fly_decl
       MultiWorker.call
         workers
         ~job:(load_and_compute_deps ctx ~conservative_redecl)
-        ~neutral:(compute_deps_neutral ())
+        ~neutral:(compute_deps_neutral (Provider_context.get_deps_mode ctx))
         ~merge:(merge_compute_deps files_initial_count files_computed_count)
         ~next:(MultiWorker.next ~max_size:bucket_size workers fnl)
     in
@@ -410,14 +418,15 @@ let get_maybe_dependent_classes
       SSet.union acc @@ get_classes x)
   |> SSet.elements
 
-let get_dependent_classes_files (classes : SSet.t) : Relative_path.Set.t =
-  let visited = VisitedSet.make () in
+let get_dependent_classes_files (mode : Typing_deps_mode.t) (classes : SSet.t) :
+    Relative_path.Set.t =
+  let visited = VisitedSet.make mode in
   SSet.fold
     classes
-    ~init:Typing_deps.(DepSet.make ())
+    ~init:Typing_deps.(DepSet.make mode)
     ~f:(fun c acc ->
-      let source_class = Dep.make (Dep.Class c) in
-      Typing_deps.get_extend_deps ~visited ~source_class ~acc)
+      let source_class = Dep.make (hash_mode mode) (Dep.Class c) in
+      Typing_deps.get_extend_deps ~mode ~visited ~source_class ~acc)
   |> Typing_deps.Files.get_files
 
 let filter_dependent_classes
@@ -497,7 +506,7 @@ let get_dependent_classes
     ~(bucket_size : int)
     (get_classes : Relative_path.t -> SSet.t)
     (classes : SSet.t) : SSet.t =
-  get_dependent_classes_files classes
+  get_dependent_classes_files (Provider_context.get_deps_mode ctx) classes
   |> get_maybe_dependent_classes get_classes classes
   |> filter_dependent_classes_parallel ctx workers ~bucket_size classes
   |> SSet.of_list

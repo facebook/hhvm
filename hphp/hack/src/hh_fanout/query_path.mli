@@ -8,6 +8,10 @@
 
 type result
 
-val go : source:Typing_deps.Dep.t -> dest:Typing_deps.Dep.t -> result
+val go :
+  deps_mode:Typing_deps_mode.t ->
+  source:Typing_deps.Dep.t ->
+  dest:Typing_deps.Dep.t ->
+  result
 
 val result_to_json : result -> Hh_json.json

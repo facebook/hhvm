@@ -239,8 +239,9 @@ let get_file_info a key =
 let get_file_info_unsafe a key =
   Core_kernel.Option.value_exn (get_file_info a key)
 
-let get_dep_set_files (naming_table : t) (deps : Typing_deps.DepSet.t) :
-    Relative_path.Set.t =
+let get_dep_set_files
+    (naming_table : t) (mode : Typing_deps_mode.t) (deps : Typing_deps.DepSet.t)
+    : Relative_path.Set.t =
   match naming_table with
   | Unbacked _ ->
     failwith
@@ -278,7 +279,7 @@ let get_dep_set_files (naming_table : t) (deps : Typing_deps.DepSet.t) :
         match file_info with
         | Naming_sqlite.Deleted -> Relative_path.Set.remove acc path
         | Naming_sqlite.Modified file_info ->
-          let file_deps = Typing_deps.Files.deps_of_file_info file_info in
+          let file_deps = Typing_deps.Files.deps_of_file_info mode file_info in
           if
             not
               (Typing_deps.DepSet.is_empty

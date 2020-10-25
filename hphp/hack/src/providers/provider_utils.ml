@@ -95,6 +95,7 @@ let ctx_from_server_env (env : ServerEnv.env) : Provider_context.t =
     ~popt:env.ServerEnv.popt
     ~tcopt:env.ServerEnv.tcopt
     ~backend:(Provider_backend.get ())
+    ~deps_mode:env.ServerEnv.deps_mode
 
 let respect_but_quarantine_unsaved_changes
     ~(ctx : Provider_context.t) ~(f : unit -> 'a) : 'a =

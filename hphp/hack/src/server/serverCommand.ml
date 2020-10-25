@@ -179,17 +179,18 @@ let full_recheck_if_needed genv env msg =
 (* Only grant access to dependency table to commands that declared that they
  * need full check - without full check, there are no guarantees about
  * dependency table being up to date. *)
-let with_dependency_table_reads full_recheck_needed f =
+let with_dependency_table_reads mode full_recheck_needed f =
   let deptable_unlocked =
     if full_recheck_needed then
-      Some (Typing_deps.allow_dependency_table_reads true)
+      Some (Typing_deps.allow_dependency_table_reads mode true)
     else
       None
   in
   try_finally ~f ~finally:(fun () ->
       Option.iter deptable_unlocked ~f:(fun deptable_unlocked ->
           ignore
-            (Typing_deps.allow_dependency_table_reads deptable_unlocked : bool)))
+            ( Typing_deps.allow_dependency_table_reads mode deptable_unlocked
+              : bool )))
 
 (* Given a set of declaration names, put them in shared memory. We do it here, because
  * declarations computed while handling IDE commands will likely be useful for subsequent IDE
@@ -256,7 +257,8 @@ let with_decl_tracking f =
  * available, when current recheck is cancelled... *)
 let actually_handle genv client msg full_recheck_needed ~is_stale env =
   Hh_logger.debug "SeverCommand.actually_handle preamble";
-  with_dependency_table_reads full_recheck_needed @@ fun () ->
+  with_dependency_table_reads env.ServerEnv.deps_mode full_recheck_needed
+  @@ fun () ->
   Errors.ignore_ @@ fun () ->
   assert (
     (not full_recheck_needed) || ServerEnv.(is_full_check_done env.full_check)

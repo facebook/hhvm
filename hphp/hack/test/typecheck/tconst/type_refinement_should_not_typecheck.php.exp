@@ -1,1 +1,10 @@
-No errors
+File "type_refinement_should_not_typecheck.php", line 25, characters 13-22:
+Invalid argument (Typing[4110])
+  File "type_refinement_should_not_typecheck.php", line 10, characters 39-40:
+  Expected `D0`
+  File "type_refinement_should_not_typecheck.php", line 15, characters 33-34:
+    resulting from accessing the type constant 'T2'
+  File "type_refinement_should_not_typecheck.php", line 17, characters 52-53:
+    on an object of type A0
+  File "type_refinement_should_not_typecheck.php", line 25, characters 21-22:
+  But got `D1`

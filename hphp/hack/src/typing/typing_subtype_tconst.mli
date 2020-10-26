@@ -16,4 +16,9 @@ environment.
 If that type constant is not present, make a fresh invariant
 type variable and add it as the type of the type constant in the environment.
 *)
-val get_tyvar_type_const : env -> Ident.t -> Aast.sid -> env * locl_ty
+val get_tyvar_type_const :
+  env ->
+  Ident.t ->
+  Aast.sid ->
+  on_error:Errors.typing_error_callback ->
+  env * locl_ty

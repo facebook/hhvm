@@ -93,13 +93,11 @@ let make_all_type_consts_equal
     env
 
 (** `p` is the position where var::tconstid was encountered. *)
-let get_tyvar_type_const env var ((pos, tconstid_) as tconstid) =
+let get_tyvar_type_const env var ((pos, tconstid_) as tconstid) ~on_error =
   match Env.get_tyvar_type_const env var tconstid with
   | Some (_pos, ty) -> (env, ty)
   | None ->
     let (env, tvar) = Env.fresh_invariant_type_var env pos in
     Typing_log.log_new_tvar_for_tconst env pos var tconstid_ tvar;
-    let env =
-      add_tyvar_type_const env var tconstid tvar (Errors.unify_error_at pos)
-    in
+    let env = add_tyvar_type_const env var tconstid tvar ~on_error in
     (env, tvar)

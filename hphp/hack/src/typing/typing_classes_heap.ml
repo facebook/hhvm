@@ -75,22 +75,23 @@ let make_eager_class_type ctx class_name =
   | Some decl -> Some (Eager (Decl_class.to_class_type decl))
   | None ->
     begin
-      match Naming_provider.get_type_path_and_kind ctx class_name with
-      | Some (_, Naming_types.TTypedef)
-      | Some (_, Naming_types.TRecordDef)
-      | None ->
-        None
-      | Some (file, Naming_types.TClass) ->
+      match Naming_provider.get_class_path ctx class_name with
+      | None -> None
+      | Some file ->
         Deferred_decl.raise_if_should_defer ~d:file;
-        (* declare_class_in_file actual reads from Decl_heap.Classes.get
-        like what we do above, which makes our test redundant but cleaner.
-        It also writes into Decl_heap.Classes and other Decl_heaps. *)
+        (* declare_folded_class_in_file actual reads from Decl_heap.Classes.get
+         * like what we do above, which makes our test redundant but cleaner.
+         * It also writes into Decl_heap.Classes and other Decl_heaps. *)
         let decl =
           Errors.run_in_decl_mode file (fun () ->
-              Decl.declare_class_in_file ~sh:SharedMem.Uses ctx file class_name)
+              Decl.declare_folded_class_in_file
+                ~sh:SharedMem.Uses
+                ctx
+                file
+                class_name)
         in
         Deferred_decl.increment_counter ();
-        Some (Eager (Decl_class.to_class_type (Option.value_exn decl)))
+        Some (Eager (Decl_class.to_class_type decl))
     end
 
 let get (ctx : Provider_context.t) (class_name : string) : class_t option =

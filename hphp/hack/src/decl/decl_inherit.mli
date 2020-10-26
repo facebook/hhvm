@@ -29,5 +29,5 @@ type inherited = {
   ih_smethods: element SMap.t;
 }
 
-(* Builds the inherited type *)
+(** Builds the inherited type by fetching any ancestor from the heap. *)
 val make : Decl_env.env -> Shallow_decl_defs.shallow_class -> inherited

@@ -242,9 +242,6 @@ let check_if_cyclic (class_env : class_env) ((pos, cid) : Pos.t * string) : bool
   if is_cyclic then Errors.cyclic_class_def stack pos;
   is_cyclic
 
-let shallow_decl_enabled (ctx : Provider_context.t) : bool =
-  TypecheckerOptions.shallow_class_decl (Provider_context.get_tcopt ctx)
-
 let pu_enum_fold
     origin
     (acc : Typing_defs.pu_enum_type SMap.t)
@@ -309,40 +306,12 @@ let pu_enum_fold
   in
   SMap.add (snd spu.spu_name) tpu acc
 
-let rec class_decl_if_missing
+let rec class_naming_and_decl
     ~(sh : SharedMem.uses) (class_env : class_env) (c : Nast.class_) :
-    (string * Decl_defs.decl_class_type) option =
-  let ((_, cid) as c_name) = c.c_name in
-  if check_if_cyclic class_env c_name then
-    None
-  else if shallow_decl_enabled class_env.ctx then
-    (* This function is often called for its side effect of ensuring that the
-         class is declared. When shallow-decl is enabled, we still want this
-         side effect (for use cases like on-the-fly declaring entire files in
-         Decl_redecl_service for incremental typechecking), but since we are not
-         producing a folded class declaration, there is nothing we can return.
-         This is a code smell--we should use a function with a different
-         signature when we only want this side effect. *)
-    let (_ : shallow_class) =
-      Shallow_classes_provider.decl class_env.ctx ~use_cache:true c
-    in
-    None
-  else
-    match Decl_heap.Classes.get cid with
-    | Some class_ -> Some (cid, class_)
-    | None ->
-      (* Class elements are in memory if and only if the class itself is there.
-       * Exiting before class declaration is ready would break this invariant *)
-      WorkerCancel.with_no_cancellations @@ fun () ->
-      let class_ = class_naming_and_decl ~sh class_env cid c in
-      Some class_
-
-and class_naming_and_decl
-    ~(sh : SharedMem.uses)
-    (class_env : class_env)
-    (cid : string)
-    (c : Nast.class_) : string * Decl_defs.decl_class_type =
-  let class_env = { class_env with stack = SSet.add cid class_env.stack } in
+    string * Decl_defs.decl_class_type =
+  let class_env =
+    { class_env with stack = SSet.add (snd c.c_name) class_env.stack }
+  in
   let shallow_class =
     Shallow_classes_provider.decl class_env.ctx ~use_cache:false c
   in
@@ -360,22 +329,22 @@ and class_parents_decl
     ~(sh : SharedMem.uses)
     (class_env : class_env)
     (c : Shallow_decl_defs.shallow_class) : unit =
-  let class_type class_ =
-    let (_ : Decl_defs.decl_class_type option) =
-      class_type_decl ~sh class_env class_
-    in
-    ()
+  let ensure_declared class_ty =
+    match get_node class_ty with
+    | Tapply (class_name, _) ->
+      ensure_class_is_declared ~sh class_env class_name
+    | _ -> ()
   in
-  List.iter c.sc_extends class_type;
-  List.iter c.sc_implements class_type;
-  List.iter c.sc_uses class_type;
-  List.iter c.sc_xhp_attr_uses class_type;
-  List.iter c.sc_req_extends class_type;
-  List.iter c.sc_req_implements class_type;
+  List.iter c.sc_extends ensure_declared;
+  List.iter c.sc_implements ensure_declared;
+  List.iter c.sc_uses ensure_declared;
+  List.iter c.sc_xhp_attr_uses ensure_declared;
+  List.iter c.sc_req_extends ensure_declared;
+  List.iter c.sc_req_implements ensure_declared;
   let enum_includes =
     Aast.enum_includes_map ~f:(fun et -> et.te_includes) c.sc_enum_type
   in
-  List.iter enum_includes class_type;
+  List.iter enum_includes ensure_declared;
   ()
 
 and is_disposable_type (env : Decl_env.env) (hint : Typing_defs.decl_ty) : bool
@@ -389,24 +358,30 @@ and is_disposable_type (env : Decl_env.env) (hint : Typing_defs.decl_ty) : bool
     end
   | _ -> false
 
-and class_type_decl
-    ~(sh : SharedMem.uses) (class_env : class_env) (hint : Typing_defs.decl_ty)
-    : Decl_defs.decl_class_type option =
-  match get_node hint with
-  | Tapply ((_, cid), _) ->
-    begin
-      match Naming_provider.get_class_path class_env.ctx cid with
-      | Some fn when not (Decl_heap.Classes.mem cid) ->
-        (* We are supposed to redeclare the class *)
-        let class_opt = Ast_provider.find_class_in_file class_env.ctx fn cid in
-        Errors.run_in_context fn Errors.Decl (fun () ->
-            Option.Monad_infix.(
-              class_opt >>= class_decl_if_missing ~sh class_env >>| snd))
-      | _ -> None
-    end
-  | _ ->
-    (* This class lives in PHP land *)
-    None
+and class_decl_if_missing
+    ~(sh : SharedMem.uses) (class_env : class_env) (class_name : string) :
+    (string * Decl_defs.decl_class_type) option =
+  match Decl_heap.Classes.get class_name with
+  | Some decl -> Some (class_name, decl)
+  | None ->
+    (match Naming_provider.get_class_path class_env.ctx class_name with
+    | None -> None
+    | Some fn ->
+      (match Ast_provider.find_class_in_file class_env.ctx fn class_name with
+      | None -> None
+      | Some class_ ->
+        Errors.run_in_context fn Errors.Decl @@ fun () ->
+        Some (class_naming_and_decl ~sh class_env class_)))
+
+and ensure_class_is_declared
+    ~(sh : SharedMem.uses)
+    (class_env : class_env)
+    ((pos, class_name) : Aast.sid) : unit =
+  if check_if_cyclic class_env (pos, class_name) then
+    ()
+  else
+    let (_ : _ option) = class_decl_if_missing ~sh class_env class_name in
+    ()
 
 and class_is_abstract (c : Shallow_decl_defs.shallow_class) : bool =
   match c.sc_kind with
@@ -517,13 +492,10 @@ and class_decl
       (* HHVM implicitly adds Stringish interface for every class/iface/trait
        * with a __toString method; "string" also implements this interface *)
       (* Declare Stringish and parents if not already declared *)
+      let stringish = (pos, SN.Classes.cStringish) in
       let class_env = { ctx; stack = SSet.empty } in
-      let ty =
-        mk (Reason.Rhint pos, Tapply ((pos, SN.Classes.cStringish), []))
-      in
-      let (_ : Decl_defs.decl_class_type option) =
-        class_type_decl ~sh class_env ty
-      in
+      ensure_class_is_declared ~sh class_env stringish;
+      let ty = mk (Reason.Rhint pos, Tapply (stringish, [])) in
       ty :: impl
     | _ -> impl
   in
@@ -569,12 +541,7 @@ and class_decl
       consts
   in
   let has_own_cstr = has_concrete_cstr && Option.is_some c.sc_constructor in
-  let deferred_members =
-    if shallow_decl_enabled ctx then
-      SSet.empty
-    else
-      snd (Decl_init_check.class_ ~has_own_cstr env c)
-  in
+  let deferred_members = snd (Decl_init_check.class_ ~has_own_cstr env c) in
   let sealed_whitelist = get_sealed_whitelist c in
   let tc =
     {
@@ -971,3 +938,15 @@ and method_decl_acc
       Decl_heap.Methods.add (elt.elt_origin, id) fe;
   let acc = SMap.add id elt acc in
   (acc, condition_types)
+
+let class_decl_if_missing
+    ~(sh : SharedMem.uses) (ctx : Provider_context.t) (c : Nast.class_) :
+    string * Decl_defs.decl_class_type =
+  let (_, class_name) = c.c_name in
+  match Decl_heap.Classes.get class_name with
+  | Some class_ -> (class_name, class_)
+  | None ->
+    (* Class elements are in memory if and only if the class itself is there.
+     * Exiting before class declaration is ready would break this invariant *)
+    WorkerCancel.with_no_cancellations @@ fun () ->
+    class_naming_and_decl ~sh { ctx; stack = SSet.empty } c

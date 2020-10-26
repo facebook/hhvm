@@ -62,6 +62,21 @@ let stop_tracking () : FileInfo.names =
   res
 
 (*****************************************************************************)
+
+let shallow_decl_enabled (ctx : Provider_context.t) : bool =
+  TypecheckerOptions.shallow_class_decl (Provider_context.get_tcopt ctx)
+
+let class_decl_if_missing
+    ~(sh : SharedMem.uses) (ctx : Provider_context.t) (c : Nast.class_) : unit =
+  if shallow_decl_enabled ctx then
+    let (_ : Shallow_decl_defs.shallow_class) =
+      Shallow_classes_provider.decl ctx ~use_cache:true c
+    in
+    ()
+  else
+    let (_ : _ * _) = Decl_folded_class.class_decl_if_missing ~sh ctx c in
+    ()
+
 let rec name_and_declare_types_program
     ~(sh : SharedMem.uses) (ctx : Provider_context.t) (prog : Nast.program) :
     unit =
@@ -77,12 +92,7 @@ let rec name_and_declare_types_program
           Decl_nast.fun_naming_and_decl ~write_shmem:true ctx f
         in
         ()
-      | Class c ->
-        let class_env = Decl_folded_class.{ ctx; stack = SSet.empty } in
-        let (_ : (string * Decl_defs.decl_class_type) option) =
-          Decl_folded_class.class_decl_if_missing ~sh class_env c
-        in
-        ()
+      | Class c -> class_decl_if_missing ~sh ctx c
       | RecordDef rd -> Decl_nast.record_def_decl_if_missing ~sh ctx rd
       | Typedef typedef -> Decl_nast.typedef_decl_if_missing ~sh ctx typedef
       | Stmt _ -> ()
@@ -105,19 +115,16 @@ let err_not_found (file : Relative_path.t) (name : string) : 'a =
   in
   raise (Decl_defs.Decl_not_found err_str)
 
-let declare_class_in_file
+let declare_folded_class_in_file
     ~(sh : SharedMem.uses)
     (ctx : Provider_context.t)
     (file : Relative_path.t)
-    (name : string) : Decl_defs.decl_class_type option =
+    (name : string) : Decl_defs.decl_class_type =
   match Ast_provider.find_class_in_file ctx file name with
   | Some cls ->
-    let class_env = Decl_folded_class.{ ctx; stack = SSet.empty } in
-    (match Decl_folded_class.class_decl_if_missing ~sh class_env cls with
-    | None -> None
-    | Some (name, decl) ->
-      record_class name;
-      Some decl)
+    let (name, decl) = Decl_folded_class.class_decl_if_missing ~sh ctx cls in
+    record_class name;
+    decl
   | None -> err_not_found file name
 
 let declare_fun_in_file

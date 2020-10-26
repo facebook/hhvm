@@ -502,7 +502,7 @@ let from_interface_constants env acc impls =
 
 let make env c =
   (* members inherited from parent class ... *)
-  let acc = from_parent env c in
+  let (acc : inherited) = from_parent env c in
   let acc =
     List.fold_left ~f:(from_requirements env c) ~init:acc c.sc_req_extends
   in

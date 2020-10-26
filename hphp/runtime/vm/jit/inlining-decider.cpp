@@ -314,7 +314,6 @@ Vcost computeTranslationCostSlow(SrcKey at,
     TransIDSet{},
     0,  // optIndex
     TransKind::Optimize,
-    TransFlags{},
     at,
     &region
   };

@@ -27,7 +27,6 @@ namespace HPHP { namespace jit { namespace irgen {
 IRGS::IRGS(IRUnit& unit, const RegionDesc* region, int32_t budgetBCInstrs,
            TranslateRetryContext* retryContext)
   : context(unit.context())
-  , transFlags(unit.context().flags)
   , region(region)
   , unit(unit)
   , irb(new IRBuilder(unit, context.initSrcKey.func()))

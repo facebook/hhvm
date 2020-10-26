@@ -349,8 +349,8 @@ void optimizeJmps(Vunit& unit, MaybeVinstrId clobber) {
             const auto jcc_irctx = code.back().irctx();
             code.pop_back();
             code.emplace_back(
-              fallbackcc{jcc_i.cc, jcc_i.sf, fb_i.target,
-                         fb_i.spOff, fb_i.trflags, fb_i.args},
+              fallbackcc{jcc_i.cc, jcc_i.sf, fb_i.target, fb_i.spOff,
+                         fb_i.args},
               jcc_irctx
             );
             code.emplace_back(jmp{t0}, jcc_irctx);

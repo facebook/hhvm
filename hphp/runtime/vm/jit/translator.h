@@ -115,7 +115,6 @@ struct TransContext {
   TransIDSet transIDs;  // May be empty if not for a real translation.
   int optIndex;
   TransKind kind{TransKind::Invalid};
-  TransFlags flags;
   SrcKey initSrcKey;
   const RegionDesc* region{nullptr};
 };

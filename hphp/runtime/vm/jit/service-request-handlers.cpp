@@ -116,8 +116,7 @@ const StaticString s_AlwaysInterp("__ALWAYS_INTERP");
  * If a translation for this SrcKey already exists it will be returned. The kind
  * of translation created will be selected based on the SrcKey specified.
  */
-TCA getTranslation(TransArgs args) {
-  auto sk = args.sk;
+TCA getTranslation(SrcKey sk) {
   sk.func()->validate();
 
   if (!RID().getJit()) {
@@ -150,6 +149,7 @@ TCA getTranslation(TransArgs args) {
     return nullptr;
   }
 
+  auto args = TransArgs{sk};
   args.kind = tc::profileFunc(args.sk.func()) ?
     TransKind::Profile : TransKind::Live;
 
@@ -174,18 +174,15 @@ TCA getTranslation(TransArgs args) {
  * Runtime service handler that patches a jmp to the translation of u:dest from
  * toSmash.
  */
-TCA bindJmp(TCA toSmash, SrcKey destSk, ServiceRequest req, TransFlags trflags,
-            bool& smashed) {
-  auto args = TransArgs{destSk};
-  args.flags = trflags;
-  auto tDest = getTranslation(args);
+TCA bindJmp(TCA toSmash, SrcKey destSk, ServiceRequest req, bool& smashed) {
+  auto tDest = getTranslation(destSk);
   if (!tDest) return nullptr;
 
   if (req == REQ_BIND_ADDR) {
-    return tc::bindAddr(toSmash, destSk, trflags, smashed);
+    return tc::bindAddr(toSmash, destSk, smashed);
   }
 
-  return tc::bindJmp(toSmash, destSk, trflags, smashed);
+  return tc::bindJmp(toSmash, destSk, smashed);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -206,7 +203,7 @@ TCA getFuncBody(const Func* func) {
     tca = tc::ustubs().resumeHelper;
   } else {
     SrcKey sk(func, func->base(), ResumeMode::None);
-    tca = getTranslation(TransArgs{sk});
+    tca = getTranslation(sk);
   }
 
   if (tca) const_cast<Func*>(func)->setFuncBody(tca);
@@ -234,18 +231,15 @@ TCA handleServiceRequest(ReqInfo& info) noexcept {
     case REQ_BIND_ADDR: {
       auto const toSmash = info.args[0].tca;
       sk = SrcKey::fromAtomicInt(info.args[1].sk);
-      auto const trflags = info.args[2].trflags;
-      start = bindJmp(toSmash, sk, info.req, trflags, smashed);
+      start = bindJmp(toSmash, sk, info.req, smashed);
       break;
     }
 
     case REQ_RETRANSLATE: {
       INC_TPC(retranslate);
       sk = SrcKey{ liveFunc(), info.args[0].offset, liveResumeMode() };
-      auto trflags = info.args[1].trflags;
-      auto args = TransArgs{sk};
-      args.flags = trflags;
-      start = mcgen::retranslate(args, getContext(args.sk, tc::profileFunc(sk.func())));
+      auto const context = getContext(sk, tc::profileFunc(sk.func()));
+      start = mcgen::retranslate(TransArgs{sk}, context);
       SKTRACE(2, sk, "retranslated @%p\n", start);
       break;
     }
@@ -304,7 +298,7 @@ TCA handleServiceRequest(ReqInfo& info) noexcept {
              func->fullName()->data(),
              destFunc->fullName()->data());
       sk = liveSK();
-      start = getTranslation(TransArgs{sk});
+      start = getTranslation(sk);
       break;
     }
   }
@@ -362,7 +356,7 @@ TCA handleResume(bool interpFirst) {
     start = nullptr;
     INC_TPC(interp_bb_force);
   } else {
-    start = getTranslation(TransArgs(sk));
+    start = getTranslation(sk);
   }
 
   vmJitReturnAddr() = nullptr;
@@ -386,7 +380,7 @@ TCA handleResume(bool interpFirst) {
 
       assertx(vmpc());
       sk = liveSK();
-      start = getTranslation(TransArgs{sk});
+      start = getTranslation(sk);
     }
   }
 

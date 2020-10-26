@@ -2669,15 +2669,13 @@ void processSpillExits(Vunit& unit, Vlabel label, SpillState state,
     if (inst.op == Vinstr::fallbackcc) {
       auto const& fb_i = inst.fallbackcc_;
       targetCode.emplace_back(free);
-      targetCode.emplace_back(fallback{fb_i.target, fb_i.spOff,
-                                       fb_i.trflags, fb_i.args});
+      targetCode.emplace_back(fallback{fb_i.target, fb_i.spOff, fb_i.args});
       cc = fb_i.cc;
       sf = fb_i.sf;
     } else if (inst.op == Vinstr::bindjcc) {
       auto const& bj_i = inst.bindjcc_;
       targetCode.emplace_back(free);
-      targetCode.emplace_back(bindjmp{bj_i.target, bj_i.spOff, bj_i.trflags,
-                                      bj_i.args});
+      targetCode.emplace_back(bindjmp{bj_i.target, bj_i.spOff, bj_i.args});
       cc = bj_i.cc;
       sf = bj_i.sf;
     } else /* inst.op == Vinstr::jcci */ {

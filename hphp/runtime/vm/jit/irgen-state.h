@@ -56,7 +56,6 @@ struct IRGS {
                 TranslateRetryContext* retryContext);
 
   TransContext context;
-  TransFlags transFlags;
   const RegionDesc* region;
   IRUnit& unit;
   std::unique_ptr<IRBuilder> irb;

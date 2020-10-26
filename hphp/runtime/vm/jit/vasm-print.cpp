@@ -132,8 +132,6 @@ struct FormatVisitor {
       str << "nullptr";
     }
   }
-  void imm(TransFlags f) {
-  }
   void imm(DestType dt) {
     str << sep() << destTypeName(dt);
   }

@@ -119,8 +119,7 @@ void optimizeExits(Vunit& unit, MaybeVinstrId clobber) {
       const auto& bj = unit.blocks[exit].code.back().bindjmp_;
       auto const irctx = code.back().irctx();
       hoist_sync(exit);
-      code.back() = bindjcc{cc, ijcc.sf, bj.target, bj.spOff,
-                            bj.trflags, bj.args};
+      code.back() = bindjcc{cc, ijcc.sf, bj.target, bj.spOff, bj.args};
       if (clobber) code.back().id = *clobber;
       code.emplace_back(jmp{next}, irctx);
     };

@@ -49,7 +49,6 @@ struct TransArgs {
 
   SrcKey sk;
   Annotations annotations;
-  TransFlags flags{0};
   TransID transId{kInvalidTransID};
   // A sequential per function index to identify optimized
   // translations in TRACE and StructuredLog output (in particular to

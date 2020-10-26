@@ -709,40 +709,22 @@ struct LdTVAuxData : IRExtraData {
 struct ReqBindJmpData : IRExtraData {
   explicit ReqBindJmpData(const SrcKey& target,
                           FPInvOffset invSPOff,
-                          IRSPRelOffset irSPOff,
-                          TransFlags trflags)
+                          IRSPRelOffset irSPOff)
     : target(target)
     , invSPOff(invSPOff)
     , irSPOff(irSPOff)
-    , trflags(trflags)
   {}
 
   std::string show() const {
     return folly::sformat(
-      "{}, FPInv {}, IRSP {}, Flags {}",
-      target.offset(), invSPOff.offset, irSPOff.offset, trflags.packed
+      "{}, FPInv {}, IRSP {}",
+      target.offset(), invSPOff.offset, irSPOff.offset
     );
   }
 
   SrcKey target;
   FPInvOffset invSPOff;
   IRSPRelOffset irSPOff;
-  TransFlags trflags;
-};
-
-struct ReqRetranslateData : IRExtraData {
-  explicit ReqRetranslateData(IRSPRelOffset irSPOff,
-                              TransFlags trflags)
-    : irSPOff(irSPOff)
-    , trflags{trflags}
-  {}
-
-  std::string show() const {
-    return folly::to<std::string>(irSPOff.offset, ',', trflags.packed);
-  }
-
-  IRSPRelOffset irSPOff;
-  TransFlags trflags;
 };
 
 /*
@@ -1675,8 +1657,8 @@ X(InlineCall,                   InlineCallData);
 X(StFrameMeta,                  StFrameMetaData);
 X(BeginInlining,                BeginInliningData);
 X(InlineReturn,                 FPRelOffsetData);
-X(ReqRetranslate,               ReqRetranslateData);
 X(ReqBindJmp,                   ReqBindJmpData);
+X(ReqRetranslate,               IRSPRelOffsetData);
 X(ReqRetranslateOpt,            IRSPRelOffsetData);
 X(CheckCold,                    TransIDData);
 X(IncProfCounter,               TransIDData);

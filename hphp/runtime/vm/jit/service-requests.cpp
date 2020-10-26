@@ -160,8 +160,7 @@ void emit_svcreq(CodeBlock& cb,
 ///////////////////////////////////////////////////////////////////////////////
 
 TCA emit_bindjmp_stub(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
-                      FPInvOffset spOff,
-                      TCA jmp, SrcKey target, TransFlags trflags) {
+                      FPInvOffset spOff, TCA jmp, SrcKey target) {
   return emit_ephemeral(
     cb,
     data,
@@ -171,14 +170,12 @@ TCA emit_bindjmp_stub(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
       ? folly::none : folly::make_optional(spOff),
     REQ_BIND_JMP,
     jmp,
-    target.toAtomicInt(),
-    trflags.packed
+    target.toAtomicInt()
   );
 }
 
 TCA emit_bindaddr_stub(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
-                       FPInvOffset spOff,
-                       TCA* addr, SrcKey target, TransFlags trflags) {
+                       FPInvOffset spOff, TCA* addr, SrcKey target) {
   // Right now it's possible that addr isn't PIC addressable, as it may be into
   // the heap (SSwitchMap binds addresses directly into its heap memory,
   // see #10347945). Passing a TCA generates an RIP relative address which can
@@ -194,8 +191,7 @@ TCA emit_bindaddr_stub(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
         ? folly::none : folly::make_optional(spOff),
       REQ_BIND_ADDR,
       (TCA)addr, // needs to be RIP relative so that we can relocate it
-      target.toAtomicInt(),
-      trflags.packed
+      target.toAtomicInt()
     );
   }
 
@@ -208,29 +204,12 @@ TCA emit_bindaddr_stub(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
       ? folly::none : folly::make_optional(spOff),
     REQ_BIND_ADDR,
     addr,
-    target.toAtomicInt(),
-    trflags.packed
-  );
-}
-
-TCA emit_retranslate_stub(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
-                          FPInvOffset spOff,
-                          SrcKey target, TransFlags trflags) {
-  return emit_persistent(
-    cb,
-    data,
-    fixups,
-    target.resumeMode() != ResumeMode::None
-      ? folly::none : folly::make_optional(spOff),
-    REQ_RETRANSLATE,
-    target.offset(),
-    trflags.packed
+    target.toAtomicInt()
   );
 }
 
 TCA emit_retranslate_opt_stub(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
-                              FPInvOffset spOff,
-                              SrcKey sk) {
+                              FPInvOffset spOff, SrcKey sk) {
   return emit_persistent(
     cb,
     data,

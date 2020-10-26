@@ -488,7 +488,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ReqRetranslate:
     return ExitEffects {
       AUnknown,
-      stack_below(inst.src(0), inst.extra<ReqRetranslate>()->irSPOff - 1)
+      stack_below(inst.src(0), inst.extra<ReqRetranslate>()->offset - 1)
     };
   case ReqRetranslateOpt:
     return ExitEffects {

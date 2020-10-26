@@ -425,7 +425,6 @@ void cgReqBindJmp(IRLS& env, const IRInstruction* inst) {
   v << bindjmp{
     extra->target,
     extra->invSPOff,
-    extra->trflags,
     cross_trace_args(inst->marker())
   };
 }
@@ -435,11 +434,10 @@ void cgReqRetranslate(IRLS& env, const IRInstruction* inst) {
   auto const extra  = inst->extra<ReqRetranslate>();
   auto& v = vmain(env);
 
-  maybe_syncsp(v, inst->marker(), srcLoc(env, inst, 0).reg(), extra->irSPOff);
+  maybe_syncsp(v, inst->marker(), srcLoc(env, inst, 0).reg(), extra->offset);
   v << fallback{
     destSK,
     inst->marker().spOff(),
-    extra->trflags,
     cross_trace_args(inst->marker())
   };
 }

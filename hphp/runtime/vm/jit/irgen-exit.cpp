@@ -49,15 +49,14 @@ bool branchesToItself(SrcKey sk) {
  *
  * In all other cases, a ReqBindJmp is generated.
  */
-void exitRequest(IRGS& env, TransFlags flags, SrcKey target) {
-  auto const curBCOff = bcOff(env);
+void exitRequest(IRGS& env, SrcKey target) {
   auto const irSP = spOffBCFromIRSP(env);
   auto const invSP = spOffBCFromFP(env);
-  if (env.firstBcInst && target.offset() == curBCOff) {
+  if (env.firstBcInst && target == curSrcKey(env)) {
     gen(
       env,
       ReqRetranslate,
-      ReqRetranslateData { irSP, flags },
+      IRSPRelOffsetData { irSP },
       sp(env),
       fp(env)
     );
@@ -66,29 +65,27 @@ void exitRequest(IRGS& env, TransFlags flags, SrcKey target) {
   gen(
     env,
     ReqBindJmp,
-    ReqBindJmpData { target, invSP, irSP, flags },
+    ReqBindJmpData { target, invSP, irSP },
     sp(env),
     fp(env)
   );
 }
 
-Block* implMakeExit(IRGS& env, TransFlags trflags, SrcKey targetSk,
-                    bool isGuard = false) {
+Block* implMakeExit(IRGS& env, SrcKey targetSk) {
   auto const curSk = curSrcKey(env);
 
   // If the targetSk is to the same instruction, the instruction can also
-  // branch back to itself (e.g. IterNext w/ offset=0), and isGuard is false,
-  // then we can't distinguish whether the exit is due to a guard failure
-  // (i.e., no state advanced) or an actual control-flow transfer (i.e.,
-  // advancing state).  These are rare situations, and so we just punt to the
-  // interpreter.
-  if (!isGuard && targetSk == curSk && branchesToItself(curSrcKey(env))) {
+  // branch back to itself (e.g. IterNext w/ offset=0), then we can't
+  // distinguish whether the exit is due to a guard failure (i.e., no state
+  // advanced) or an actual control-flow transfer (i.e., advancing state).
+  // These are rare situations, and so we just punt to the interpreter.
+  if (targetSk == curSk && branchesToItself(curSrcKey(env))) {
     PUNT(MakeExitAtBranchToItself);
   }
 
   auto const exit = defBlock(env, Block::Hint::Unlikely);
   BlockPusher bp(*env.irb, makeMarker(env, targetSk), exit);
-  exitRequest(env, trflags, targetSk);
+  exitRequest(env, targetSk);
   return exit;
 }
 
@@ -97,19 +94,11 @@ Block* implMakeExit(IRGS& env, TransFlags trflags, SrcKey targetSk,
 }
 
 Block* makeExit(IRGS& env) {
-  return implMakeExit(env, TransFlags{}, curSrcKey(env));
+  return implMakeExit(env, curSrcKey(env));
 }
 
 Block* makeExit(IRGS& env, SrcKey targetSk) {
-  return implMakeExit(env, TransFlags{}, targetSk);
-}
-
-Block* makeExit(IRGS& env, TransFlags flags) {
-  return implMakeExit(env, flags, curSrcKey(env));
-}
-
-Block* makeGuardExit(IRGS& env, TransFlags flags) {
-  return implMakeExit(env, flags, curSrcKey(env), true);
+  return implMakeExit(env, targetSk);
 }
 
 Block* makeExitSlow(IRGS& env) {
@@ -127,7 +116,7 @@ Block* makeExitSurprise(IRGS& env, SrcKey targetSk) {
   auto const exit = defBlock(env, Block::Hint::Unlikely);
   BlockPusher bp(*env.irb, makeMarker(env, targetSk), exit);
   gen(env, HandleRequestSurprise);
-  exitRequest(env, TransFlags{}, targetSk);
+  exitRequest(env, targetSk);
   return exit;
 }
 

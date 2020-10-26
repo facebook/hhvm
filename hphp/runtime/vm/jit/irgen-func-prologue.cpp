@@ -466,8 +466,7 @@ void emitJmpFuncBody(IRGS& env, const Func* callee, uint32_t argc) {
     ReqBindJmpData {
       SrcKey { callee, callee->getEntryForNumArgs(argc), ResumeMode::None },
       FPInvOffset { callee->numSlotsInFrame() },
-      spOffBCFromIRSP(env),
-      TransFlags{}
+      spOffBCFromIRSP(env)
     },
     sp(env),
     fp(env)

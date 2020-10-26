@@ -55,7 +55,6 @@ genFuncPrologue(TransID transID, TransKind kind,
     transID == kInvalidTransID ? TransIDSet{} : TransIDSet{transID},
     0,  // optIndex
     kind,
-    TransFlags{},
     SrcKey{func, func->getEntryForNumArgs(argc), SrcKey::PrologueTag{}},
     nullptr
   };

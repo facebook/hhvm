@@ -152,21 +152,6 @@ inline bool isPrologue(TransKind k) {
   always_assert(false);
 }
 
-/*
- * Compact flags which may be threaded through a service request to provide
- * hints or demands for retranslations.
- */
-struct TransFlags {
-  /* implicit */ TransFlags(uint64_t flags = 0) : packed(flags) {}
-
-  bool operator==(TransFlags o) const { return packed == o.packed; }
-  bool operator!=(TransFlags o) const { return packed != o.packed; }
-
-  uint64_t packed;
-};
-
-static_assert(sizeof(TransFlags) <= sizeof(uint64_t), "Too many TransFlags!");
-
 ///////////////////////////////////////////////////////////////////////////////
 
 /*

@@ -11579,7 +11579,6 @@ bool split_side_exits(State& state) {
           fallback{
             inst.fallbackcc_.target,
             inst.fallbackcc_.spOff,
-            inst.fallbackcc_.trflags,
             inst.fallbackcc_.args
           }
         );
@@ -11588,7 +11587,6 @@ bool split_side_exits(State& state) {
           bindjmp{
             inst.bindjcc_.target,
             inst.bindjcc_.spOff,
-            inst.bindjcc_.trflags,
             inst.bindjcc_.args
           }
         );

@@ -819,8 +819,7 @@ void createSrcRec(SrcKey sk, FPInvOffset spOff) {
                                   codeView.data(),
                                   srcRecSPOff,
                                   REQ_RETRANSLATE,
-                                  sk.offset(),
-                                  TransFlags().packed);
+                                  sk.offset());
   } else {
     auto const stubsize = svcreq::stub_size();
     auto newStart = codeView.cold().allocInner(stubsize);
@@ -834,8 +833,7 @@ void createSrcRec(SrcKey sk, FPInvOffset spOff) {
                                  (TCA)newStart,
                                  srcRecSPOff,
                                  REQ_RETRANSLATE,
-                                 sk.offset(),
-                                 TransFlags().packed);
+                                 sk.offset());
   }
   SKTRACE(1, sk, "inserting anchor translation for (%p,%d) at %p\n",
           sk.unit(), sk.offset(), req);

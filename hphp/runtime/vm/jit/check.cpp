@@ -417,6 +417,10 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* /*unit*/) {
     auto const tRaw = src()->type();
     if (lval) check(tRaw <= TLvalToCell, tRaw, "Lval");
     auto const t = lval ? tRaw.deref() : tRaw;
+    if (t == TBottom) {
+      ++curSrc;
+      return;
+    }
     check(t.isKnownDataType() && t <= TArrLike, t, "Known ArrLike");
 
     auto const srcLayout = t.arrSpec().bespokeLayout();

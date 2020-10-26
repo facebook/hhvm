@@ -724,15 +724,17 @@ LoggingProfile* getLoggingProfile(SrcKey skRaw) {
     return insert->second;
   }();
 
-  if (profile) {
-    // We lost the race to set profile. Free the static arrays we allocated.
-    // We do so in reverse order in case we're using a static bump allocator.
-    freeStaticArray(profile->staticSampledArray);
-    freeStaticArray(profile->staticLoggingArray);
-  } else if (ad) {
-    // We won the race to set profile, so we log the new static allocations.
-    MemoryStats::LogAlloc(AllocKind::StaticArray, sizeof(LoggingArray));
-    MemoryStats::LogAlloc(AllocKind::StaticArray, allocSize(ad));
+  if (ad) {
+    if (profile) {
+      // We lost the race to set profile. Free the static arrays we allocated.
+      // We do so in reverse order in case we're using a static bump allocator.
+      freeStaticArray(profile->staticSampledArray);
+      freeStaticArray(profile->staticLoggingArray);
+    } else {
+      // We won the race to set profile, so we log the new static allocations.
+      MemoryStats::LogAlloc(AllocKind::StaticArray, sizeof(LoggingArray));
+      MemoryStats::LogAlloc(AllocKind::StaticArray, allocSize(ad));
+    }
   }
   return result;
 }

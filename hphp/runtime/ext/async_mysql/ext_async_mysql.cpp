@@ -1299,6 +1299,11 @@ static Object HHVM_METHOD(AsyncMysqlQueryResult, mapRowsTyped) {
   return data->buildRows(true /* as_maps */, true /* typed */);
 }
 
+static Array HHVM_METHOD(AsyncMysqlQueryResult, dictRowsTyped) {
+  auto* data = Native::data<AsyncMysqlQueryResult>(this_);
+  return data->buildTypedVecMaps();
+}
+
 static Object HHVM_METHOD(AsyncMysqlQueryResult, rowBlocks) {
   auto* data = Native::data<AsyncMysqlQueryResult>(this_);
   auto ret = req::make<c_Vector>();
@@ -1381,6 +1386,21 @@ Object AsyncMysqlQueryResult::buildRows(bool as_maps, bool typed_values) {
     }
   }
   return Object(std::move(ret));
+}
+
+Array AsyncMysqlQueryResult::buildTypedVecMaps() {
+  VecInit ret{m_query_result->numRows()};
+  for (const auto& row : *m_query_result) {
+    DictInit row_map{row.size()};
+    for (int i = 0; i < row.size(); ++i) {
+      row_map.set(
+          m_field_index->getFieldString(i),
+          buildTypedValue(
+              m_query_result->getRowFields(), row, i, true));
+    }
+    ret.append(row_map.toArray());
+  }
+  return ret.toArray();
 }
 
 FieldIndex::FieldIndex(const am::RowFields* row_fields) {
@@ -1984,6 +2004,7 @@ static struct AsyncMysqlExtension final : Extension {
     HHVM_ME(AsyncMysqlQueryResult, mapRows);
     HHVM_ME(AsyncMysqlQueryResult, vectorRows);
     HHVM_ME(AsyncMysqlQueryResult, mapRowsTyped);
+    HHVM_ME(AsyncMysqlQueryResult, dictRowsTyped);
     HHVM_ME(AsyncMysqlQueryResult, vectorRowsTyped);
     HHVM_ME(AsyncMysqlQueryResult, rowBlocks);
     HHVM_ME(AsyncMysqlQueryResult, noIndexUsed);

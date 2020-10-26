@@ -1171,7 +1171,7 @@ final class AsyncMysqlQueryResult extends AsyncMysqlResult {
    *           associated with that row.
    */
   <<__HipHopSpecific, __Native>>
-  public function mapRows(): Vector<Map>;
+  public function mapRows(): Vector<Map<string, ?string>>;
 
   /**
    * Returns the actual rows returned by the successful query, each row
@@ -1189,7 +1189,7 @@ final class AsyncMysqlQueryResult extends AsyncMysqlResult {
    *           column values for each row.
    */
   <<__HipHopSpecific, __Native>>
-  public function vectorRows(): Vector;
+  public function vectorRows(): Vector<KeyedContainer<int, ?string>>;
 
   /**
    * Returns the actual rows returned by the successful query, each row
@@ -1204,7 +1204,10 @@ final class AsyncMysqlQueryResult extends AsyncMysqlResult {
    *           associated with that row.
    */
   <<__HipHopSpecific, __Native>>
-  public function mapRowsTyped(): Vector;
+  public function mapRowsTyped():  Vector<Map<string, mixed>>;
+
+  <<__HipHopSpecific, __Native>>
+  public function dictRowsTyped(): vec<dict<string, arraykey>>;
 
   /**
    * Returns the actual rows returned by the successful query, each row
@@ -1219,7 +1222,7 @@ final class AsyncMysqlQueryResult extends AsyncMysqlResult {
    *           column values for each row.
    */
   <<__HipHopSpecific, __Native>>
-  public function vectorRowsTyped(): Vector;
+  public function vectorRowsTyped(): Vector<KeyedContainer<int, mixed>>;
 
   /**
    * Returns a `Vector` representing all row blocks returned by the successful
@@ -1267,7 +1270,7 @@ final class AsyncMysqlQueryResult extends AsyncMysqlResult {
    * @return - A Map<string, string> of the response attributes from MySQL
    */
   <<__HipHopSpecific, __Native>>
-  public function responseAttributes(): Map;
+  public function responseAttributes(): Map<string, string>;
 }
 
 /**

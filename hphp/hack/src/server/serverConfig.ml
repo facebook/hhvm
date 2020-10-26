@@ -431,6 +431,7 @@ let load ~silent config_filename options : t * ServerLocalConfig.t =
       ?tco_report_pos_from_reason:(bool_opt "report_pos_from_reason" config)
       ?tco_typecheck_sample_rate:(float_opt "typecheck_sample_rate" config)
       ?tco_enable_sound_dynamic:(bool_opt "enable_sound_dynamic_type" config)
+      ?po_disallow_hash_comments:(bool_opt "disallow_hash_comments" config)
       ()
   in
   Errors.allowed_fixme_codes_strict :=

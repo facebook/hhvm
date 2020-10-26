@@ -564,10 +564,8 @@ struct DefStackData : IRExtraData {
   {}
 
   std::string show() const {
-    return folly::to<std::string>(
-      "irSPOff={}, bcSPOff={}",
-      irSPOff.offset, bcSPOff.offset
-    );
+    return folly::sformat("irSPOff={}, bcSPOff={}",
+                          irSPOff.offset, bcSPOff.offset);
   }
 
   bool equals(DefStackData o) const {
@@ -1598,6 +1596,19 @@ struct BespokeLayoutData : IRExtraData {
   const bespoke::ConcreteLayout* layout;
 };
 
+struct LoggingProfileData : IRExtraData {
+  explicit LoggingProfileData(bespoke::LoggingProfile* profile)
+    : profile(profile)
+  {}
+
+  std::string show() const {
+    // profile->source is already printed in the instruction's marker.
+    return folly::sformat("{}", reinterpret_cast<void*>(profile));
+  }
+
+  bespoke::LoggingProfile* profile;
+};
+
 //////////////////////////////////////////////////////////////////////
 
 #define X(op, data)                                                   \
@@ -1670,6 +1681,7 @@ X(ReqRetranslateOpt,            IRSPRelOffsetData);
 X(CheckCold,                    TransIDData);
 X(IncProfCounter,               TransIDData);
 X(LogArrayReach,                TransIDData);
+X(NewLoggingArray,              LoggingProfileData);
 X(DefFuncEntryFP,               FuncData);
 X(Call,                         CallData);
 X(CallBuiltin,                  CallBuiltinData);

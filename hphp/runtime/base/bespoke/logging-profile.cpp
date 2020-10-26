@@ -666,9 +666,28 @@ void freeStaticArray(ArrayData* ad) {
     : reinterpret_cast<char*>(ad);
  RO::EvalLowStaticArrays ? low_free(alloc) : uncounted_free(alloc);
 }
+
+bool shouldLogAtSrcKey(SrcKey sk) {
+  if (!sk.valid()) {
+    FTRACE(5, "VMRegAnchor failed for maybeMakeLoggingArray.\n");
+    return false;
+  }
+
+  // Don't profile static arrays used for TypeStruct tests. Rather than using
+  // these arrays, we almost always just do a DataType check on the value.
+  if ((sk.op() == Op::Array || sk.op() == Op::Dict) &&
+      sk.advanced().op() == Op::IsTypeStructC) {
+    FTRACE(5, "Skipping static array used for TypeStruct test.\n");
+    return false;
+  }
+
+  return true;
+}
 }
 
-LoggingProfile* getLoggingProfile(SrcKey skRaw, ArrayData* ad) {
+LoggingProfile* getLoggingProfile(SrcKey skRaw) {
+  if (!shouldLogAtSrcKey(skRaw)) return nullptr;
+
   auto const sk = canonicalize(skRaw);
   {
     ProfileMap::const_accessor it;
@@ -679,6 +698,17 @@ LoggingProfile* getLoggingProfile(SrcKey skRaw, ArrayData* ad) {
   // begin until the mutation is complete.
   folly::SharedMutex::ReadHolder lock{s_exportStartedLock};
   if (s_exportStarted.load(std::memory_order_relaxed)) return nullptr;
+
+  auto const ad = [&]() -> ArrayData* {
+    auto const op = sk.op();
+    if (op != Op::Array && op != Op::Vec &&
+        op != Op::Dict && op != Op::Keyset) {
+      return nullptr;
+    }
+    auto const unit = sk.func()->unit();
+    auto const result = unit->lookupArrayId(getImm(sk.pc(), 0).u_AA);
+    return const_cast<ArrayData*>(result);
+  }();
 
   auto profile = std::make_unique<LoggingProfile>(sk);
   if (ad) {

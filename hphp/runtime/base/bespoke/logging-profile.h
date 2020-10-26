@@ -142,12 +142,9 @@ public:
 };
 
 // Return a profile for the given (valid) SrcKey. If no profile for the SrcKey
-// exists, a new one is made. If we're done profiling (which usually happens
-// in retranslateAll), this function will return nullptr.
-//
-// `ad` may be null; if provided, it must be a static array, and we will use
-// it to set the cached staticLoggingArray and staticSampledArray.
-LoggingProfile* getLoggingProfile(SrcKey sk, ArrayData* ad);
+// exists, a new one is made. If we're done profiling or it's not useful to
+// profile this bytecode, this function will return nullptr.
+LoggingProfile* getLoggingProfile(SrcKey sk);
 
 // Attempt to get the current SrcKey. May fail and return an invalid SrcKey.
 SrcKey getSrcKey();

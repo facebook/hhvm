@@ -14,6 +14,8 @@
   +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/base/bespoke/logging-profile.h"
+
 #include "hphp/runtime/vm/jit/irlower.h"
 #include "hphp/runtime/vm/jit/irlower-internal.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
@@ -39,17 +41,17 @@ void cgLogArrayReach(IRLS& env, const IRInstruction* inst) {
 }
 
 void cgNewLoggingArray(IRLS& env, const IRInstruction* inst) {
+  auto const data = inst->extra<NewLoggingArray>();
+
   auto const target = [&] {
-    if (shouldTestBespokeArrayLikes()) {
-      return CallSpec::direct(
-        static_cast<ArrayData*(*)(ArrayData*)>(bespoke::makeBespokeForTesting));
-    } else {
-      return CallSpec::direct(
-        static_cast<ArrayData*(*)(ArrayData*)>(bespoke::maybeMakeLoggingArray));
-    }
+    using Fn = ArrayData*(*)(ArrayData*, bespoke::LoggingProfile*);
+    return shouldTestBespokeArrayLikes()
+      ? CallSpec::direct(static_cast<Fn>(bespoke::makeBespokeForTesting))
+      : CallSpec::direct(static_cast<Fn>(bespoke::maybeMakeLoggingArray));
   }();
-  cgCallHelper(vmain(env), env, target, callDest(env, inst),
-               SyncOptions::Sync, argGroup(env, inst).ssa(0));
+
+  cgCallHelper(vmain(env), env, target, callDest(env, inst), SyncOptions::Sync,
+               argGroup(env, inst).ssa(0).immPtr(data->profile));
 }
 
 //////////////////////////////////////////////////////////////////////////////

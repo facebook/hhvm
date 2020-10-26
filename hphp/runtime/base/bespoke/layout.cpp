@@ -184,9 +184,9 @@ ArrayData* maybeMonoify(ArrayData* ad) {
 }
 }
 
-ArrayData* makeBespokeForTesting(ArrayData* ad) {
+ArrayData* makeBespokeForTesting(ArrayData* ad, LoggingProfile* profile) {
   if (!jit::mcgen::retranslateAllEnabled()) {
-    return bespoke::maybeMakeLoggingArray(ad);
+    return bespoke::maybeMakeLoggingArray(ad, profile);
   }
   auto const mod = requestCount() % 3;
   if (mod == 1) return bespoke::maybeMakeLoggingArray(ad);

@@ -120,55 +120,44 @@ void setLoggingEnabled(bool val) {
 
 ArrayData* maybeMakeLoggingArray(ArrayData* ad) {
   if (!g_emitLoggingArrays.load(std::memory_order_relaxed)) return ad;
-  auto const sk = getSrcKey();
-  if (!sk.valid()) {
-    FTRACE(5, "VMRegAnchor failed for maybeMakeLoggingArray.\n");
-    return ad;
-  } else if (ad->isSampledArray() || !ad->isVanilla()) {
-    assertx(isArrLikeCastOp(sk.op()));
+
+  auto const profile = getLoggingProfile(getSrcKey());
+  return profile ? maybeMakeLoggingArray(ad, profile) : ad;
+}
+
+const ArrayData* maybeMakeLoggingArray(const ArrayData* ad) {
+  return maybeMakeLoggingArray(const_cast<ArrayData*>(ad));
+}
+
+ArrayData* maybeMakeLoggingArray(ArrayData* ad, LoggingProfile* profile) {
+  if (!g_emitLoggingArrays.load(std::memory_order_relaxed)) return ad;
+
+  if (ad->isSampledArray() || !ad->isVanilla()) {
+    assertx(isArrLikeCastOp(profile->source.op()));
     FTRACE(5, "Skipping logging for {} array.\n",
            ad->isSampledArray() ? "sampled" : "bespoke");
     return ad;
   }
 
-  auto const op = sk.op();
-  auto const useStatic = op == Op::Array || op == Op::Vec ||
-                         op == Op::Dict || op == Op::Keyset;
-  assertx(IMPLIES(useStatic, ad->isStatic()));
-  assertx(IMPLIES(ad->isStatic(), useStatic || isArrLikeCastOp(op)));
+  auto const shouldEmitBespoke = [&]{
+    if (shouldTestBespokeArrayLikes()) return true;
+    if (RO::EvalEmitLoggingArraySampleRate == 0) return false;
 
-  // Don't profile static arrays used for TypeStruct tests. Rather than using
-  // these arrays, we almost always just do a DataType check on the value.
-  if ((op == Op::Array || op == Op::Dict) &&
-      sk.advanced().op() == Op::IsTypeStructC) {
-    FTRACE(5, "Skipping static array used for TypeStruct test.\n");
-    return ad;
-  }
-
-  auto const profile = getLoggingProfile(sk, useStatic ? ad : nullptr);
-  if (!profile) return ad;
-
-  auto const shouldEmitBespoke = [&] {
-    if (shouldTestBespokeArrayLikes()) {
-      FTRACE(5, "Observe rid: {}\n", requestCount());
-      return true;
-    } else {
-      if (RO::EvalEmitLoggingArraySampleRate == 0) return false;
-
-      auto const skCount = profile->sampleCount++;
-      FTRACE(5, "Observe SrcKey count: {}\n", skCount);
-      return (skCount - 1) % RO::EvalEmitLoggingArraySampleRate == 0;
-    }
+    auto const skCount = profile->sampleCount++;
+    FTRACE(5, "Observe SrcKey count: {}\n", skCount);
+    return (skCount - 1) % RO::EvalEmitLoggingArraySampleRate == 0;
   }();
 
   if (!shouldEmitBespoke) {
-    FTRACE(5, "Emit vanilla at {}\n", sk.getSymbol());
-    return useStatic ? profile->staticSampledArray : makeSampledArray(ad);
+    FTRACE(5, "Emit vanilla at {}\n", profile->source.getSymbol());
+    auto const cached = profile->staticSampledArray;
+    return cached ? cached : makeSampledArray(ad);
   }
 
-  FTRACE(5, "Emit bespoke at {}\n", sk.getSymbol());
+  FTRACE(5, "Emit bespoke at {}\n", profile->source.getSymbol());
   profile->loggingArraysEmitted++;
-  if (useStatic) return profile->staticLoggingArray;
+  auto const cached = profile->staticLoggingArray;
+  if (cached) return cached;
 
   // Non-static array constructors are basically a sequence of sets or appends.
   // We already log these events at the correct granularity; re-use that logic.
@@ -177,10 +166,6 @@ ArrayData* maybeMakeLoggingArray(ArrayData* ad) {
                   : profile->logEvent(ArrayOp::ConstructInt, val(k).num, v);
   });
   return LoggingArray::Make(ad, profile, EntryTypes::ForArray(ad));
-}
-
-const ArrayData* maybeMakeLoggingArray(const ArrayData* ad) {
-  return maybeMakeLoggingArray(const_cast<ArrayData*>(ad));
 }
 
 //////////////////////////////////////////////////////////////////////////////

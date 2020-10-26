@@ -38,11 +38,13 @@ namespace bespoke {
 // Hide Layout and its implementations to the rest of the codebase.
 struct Layout;
 struct LayoutFunctions;
+struct LoggingProfile;
 
 // Maybe wrap this array in a LoggingArray, based on runtime options.
 ArrayData* maybeMakeLoggingArray(ArrayData*);
 const ArrayData* maybeMakeLoggingArray(const ArrayData*);
-ArrayData* makeBespokeForTesting(ArrayData*);
+ArrayData* maybeMakeLoggingArray(ArrayData*, LoggingProfile*);
+ArrayData* makeBespokeForTesting(ArrayData*, LoggingProfile*);
 void setLoggingEnabled(bool);
 void exportProfiles();
 void waitOnExportProfiles();

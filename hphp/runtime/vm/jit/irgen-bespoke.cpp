@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/bespoke/logging-array.h"
+#include "hphp/runtime/base/bespoke/logging-profile.h"
 
 #include "hphp/runtime/vm/jit/analysis.h"
 #include "hphp/runtime/vm/jit/irgen-builtin.h"
@@ -709,14 +710,11 @@ void handleVanillaOutputs(IRGS& env, SrcKey sk) {
   auto const op = sk.op();
   if (!isArrLikeConstructorOp(op) && !isArrLikeCastOp(op)) return;
 
-  // These SrcKeys are always skipped in maybeMakeLoggingArray. If we make
-  // this logic more complicated, we should expose a helper to share the code.
-  if ((op == Op::Array || op == Op::Dict) &&
-      sk.advanced().op() == Op::IsTypeStructC) {
-    return;
-  }
+  auto const profile = bespoke::getLoggingProfile(sk);
+  if (!profile) return;
 
-  push(env, gen(env, NewLoggingArray, popC(env)));
+  auto const data = LoggingProfileData(profile);
+  push(env, gen(env, NewLoggingArray, data, popC(env)));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

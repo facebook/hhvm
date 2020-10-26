@@ -716,14 +716,7 @@ void handleVanillaOutputs(IRGS& env, SrcKey sk) {
     return;
   }
 
-  auto const result = topC(env);
-  auto const vanilla = result->type().arrSpec().vanilla();
-  assertx(IMPLIES(isArrLikeConstructorOp(op), vanilla));
-  if (!vanilla) return;
-
-  auto const logging = gen(env, NewLoggingArray, result);
-  discard(env);
-  push(env, logging);
+  push(env, gen(env, NewLoggingArray, popC(env)));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

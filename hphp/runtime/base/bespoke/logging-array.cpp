@@ -104,11 +104,14 @@ void setLoggingEnabled(bool val) {
 }
 
 ArrayData* maybeMakeLoggingArray(ArrayData* ad) {
-  assertx(ad->isVanilla());
   if (!g_emitLoggingArrays.load(std::memory_order_relaxed)) return ad;
   auto const sk = getSrcKey();
   if (!sk.valid()) {
     FTRACE(5, "VMRegAnchor failed for maybleEnableLogging.\n");
+    return ad;
+  } else if (!ad->isVanilla()) {
+    assertx(isArrLikeCastOp(sk.op()));
+    FTRACE(5, "Skipping logging for bespoke array.\n");
     return ad;
   }
 

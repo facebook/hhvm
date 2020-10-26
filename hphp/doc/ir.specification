@@ -1427,7 +1427,7 @@ To string conversions:
 
   Clear the IsBeingConstructed flag on the object.
 
-| NewLoggingArray, DLoggingArrLike, S(VArr,DArr,Vec,Dict,Keyset), PRc|CRc
+| NewLoggingArray, DLoggingArrLike, S(VArr,DArr,Vec,Dict,Keyset), PRc|CRc|LA
 
   Maybe create a LoggingArray wrapping the vanilla array-like S0. The decision
   may be based on flags or sampling. If we don't create an array, we return S0

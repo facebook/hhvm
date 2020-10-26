@@ -1627,31 +1627,46 @@ OPTBLD_INLINE void iopCastString() {
   tvCastToStringInPlace(c1);
 }
 
+namespace {
+void maybeMakeLoggingArrayAfterCast(TypedValue* tv) {
+  auto const oldArr = val(tv).parr;
+  auto const newArr = bespoke::maybeMakeLoggingArray(oldArr);
+  if (newArr == oldArr) return;
+  val(tv).parr = newArr;
+  type(tv) = dt_with_rc(type(tv));
+}
+}
+
 OPTBLD_INLINE void iopCastDict() {
   TypedValue* c1 = vmStack().topC();
   tvCastToDictInPlace(c1);
+  maybeMakeLoggingArrayAfterCast(c1);
 }
 
 OPTBLD_INLINE void iopCastKeyset() {
   TypedValue* c1 = vmStack().topC();
   tvCastToKeysetInPlace(c1);
+  maybeMakeLoggingArrayAfterCast(c1);
 }
 
 OPTBLD_INLINE void iopCastVec() {
   TypedValue* c1 = vmStack().topC();
   tvCastToVecInPlace(c1);
+  maybeMakeLoggingArrayAfterCast(c1);
 }
 
 OPTBLD_INLINE void iopCastVArray() {
   assertx(!RuntimeOption::EvalHackArrDVArrs);
   TypedValue* c1 = vmStack().topC();
   tvCastToVArrayInPlace(c1);
+  maybeMakeLoggingArrayAfterCast(c1);
 }
 
 OPTBLD_INLINE void iopCastDArray() {
   assertx(!RuntimeOption::EvalHackArrDVArrs);
   TypedValue* c1 = vmStack().topC();
   tvCastToDArrayInPlace(c1);
+  maybeMakeLoggingArrayAfterCast(c1);
 }
 
 OPTBLD_INLINE void iopDblAsBits() {

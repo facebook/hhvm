@@ -92,9 +92,6 @@ CompactVector<Trace::BumpRelease> bumpTraceFunctions(const Func* func) {
     return result;
   };
 
-  if (func->getFuncId().toInt() == RuntimeOption::TraceFuncId) {
-    return def();
-  }
   if (!RuntimeOption::TraceFunctions.empty()) {
     auto const funcName = func->fullName()->slice();
     auto const it =

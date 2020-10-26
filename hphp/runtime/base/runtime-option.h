@@ -526,7 +526,6 @@ struct RuntimeOption {
   static int StackTraceTimeout;
   static std::string RemoteTraceOutputDir;
   static std::set<std::string, stdltistr> TraceFunctions;
-  static FuncId::Id TraceFuncId;
 
   static bool EnableStats;
   static bool EnableAPCStats;

@@ -1,6 +1,6 @@
 File "var_args_inheritance2.php", line 17, characters 19-20:
 The method `f1` has the wrong type (Typing[4341])
-File "var_args_inheritance2.php", line 17, characters 19-20:
-Too many mandatory arguments
-File "var_args_inheritance2.php", line 13, characters 19-20:
-Because of this definition
+  File "var_args_inheritance2.php", line 17, characters 19-20:
+  Too many mandatory arguments (expected 1 but got 2)
+  File "var_args_inheritance2.php", line 13, characters 19-20:
+  Because of this definition

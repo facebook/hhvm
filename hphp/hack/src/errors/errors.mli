@@ -480,9 +480,11 @@ val implement_abstract :
 
 val generic_static : Pos.t -> string -> unit
 
-val fun_too_many_args : Pos.t -> Pos.t -> typing_error_callback -> unit
+val fun_too_many_args :
+  int -> int -> Pos.t -> Pos.t -> typing_error_callback -> unit
 
-val fun_too_few_args : Pos.t -> Pos.t -> typing_error_callback -> unit
+val fun_too_few_args :
+  int -> int -> Pos.t -> Pos.t -> typing_error_callback -> unit
 
 val fun_unexpected_nonvariadic : Pos.t -> Pos.t -> typing_error_callback -> unit
 

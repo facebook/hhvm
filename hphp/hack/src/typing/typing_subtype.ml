@@ -2928,7 +2928,13 @@ and simplify_subtype_funs_attributes
       (env, prop) )
     |> check_with
          (arity_min ft_sub <= arity_min ft_super)
-         (fun () -> Errors.fun_too_many_args p_sub p_super subtype_env.on_error)
+         (fun () ->
+           Errors.fun_too_many_args
+             (arity_min ft_super)
+             (arity_min ft_sub)
+             p_sub
+             p_super
+             subtype_env.on_error)
     |> fun res ->
     match (ft_sub.ft_arity, ft_super.ft_arity) with
     | (Fvariadic { fp_name = None; _ }, Fvariadic { fp_name = Some _; _ }) ->
@@ -2946,7 +2952,13 @@ and simplify_subtype_funs_attributes
       let super_max = List.length ft_super.ft_params in
       if sub_max < super_max then
         with_error
-          (fun () -> Errors.fun_too_few_args p_sub p_super subtype_env.on_error)
+          (fun () ->
+            Errors.fun_too_few_args
+              super_max
+              sub_max
+              p_sub
+              p_super
+              subtype_env.on_error)
           res
       else
         res

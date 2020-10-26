@@ -3316,18 +3316,31 @@ let generic_static pos x =
     ^ Markdown_lite.md_codify x
     ^ "." )
 
-let fun_too_many_args pos1 pos2 (on_error : typing_error_callback) =
+let fun_too_many_args
+    required actual pos1 pos2 (on_error : typing_error_callback) =
   on_error
     ~code:(Typing.err_code Typing.FunTooManyArgs)
     [
-      (pos1, "Too many mandatory arguments");
+      ( pos1,
+        Printf.sprintf
+          "Too many mandatory arguments (expected %d but got %d)"
+          required
+          actual );
       (pos2, "Because of this definition");
     ]
 
-let fun_too_few_args pos1 pos2 (on_error : typing_error_callback) =
+let fun_too_few_args
+    required actual pos1 pos2 (on_error : typing_error_callback) =
   on_error
     ~code:(Typing.err_code Typing.FunTooFewArgs)
-    [(pos1, "Too few arguments"); (pos2, "Because of this definition")]
+    [
+      ( pos1,
+        Printf.sprintf
+          "Too few arguments (required %d but got %d)"
+          required
+          actual );
+      (pos2, "Because of this definition");
+    ]
 
 let fun_unexpected_nonvariadic pos1 pos2 (on_error : typing_error_callback) =
   on_error

@@ -74,6 +74,7 @@ void BespokeArray::logReachEvent(TransID transId, SrcKey sk) {
 bool BespokeArray::checkInvariants() const {
   assertx(!isVanilla());
   assertx(kindIsValid());
+  assertx(!isSampledArray());
   assertx(vtable() != nullptr);
   assertx(m_extra_hi16 & kExtraMagicBit.raw);
   return true;

@@ -37,7 +37,6 @@ struct LoggingArray : BespokeArray {
   static LoggingArray* Make(ArrayData* ad, LoggingProfile* profile,
                             EntryTypes ms);
   static LoggingArray* MakeStatic(ArrayData* ad, LoggingProfile* profile);
-  static void FreeStatic(LoggingArray* lad);
 
   bool checkInvariants() const;
 

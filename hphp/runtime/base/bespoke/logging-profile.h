@@ -134,16 +134,19 @@ public:
   SrcKey source;
   std::atomic<uint64_t> sampleCount = 0;
   std::atomic<uint64_t> loggingArraysEmitted = 0;
-  LoggingArray* staticArray = nullptr;
+  LoggingArray* staticLoggingArray = nullptr;
+  ArrayData* staticSampledArray = nullptr;
   EventMap events;
   EntryTypesMap monotypeEvents;
   ReachMap reachedUsageSites;
 };
 
 // Return a profile for the given (valid) SrcKey. If no profile for the SrcKey
-// exists, a new one is created. `ad` may be null; if provided, it must be a
-// static array, and we will use *StaticLoggingArray to construct a matching
-// static LoggingArray. May return null after exportProfiles begins.
+// exists, a new one is made. If we're done profiling (which usually happens
+// in retranslateAll), this function will return nullptr.
+//
+// `ad` may be null; if provided, it must be a static array, and we will use
+// it to set the cached staticLoggingArray and staticSampledArray.
 LoggingProfile* getLoggingProfile(SrcKey sk, ArrayData* ad);
 
 // Attempt to get the current SrcKey. May fail and return an invalid SrcKey.

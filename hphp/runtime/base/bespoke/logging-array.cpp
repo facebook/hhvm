@@ -73,6 +73,21 @@ void logEvent(const LoggingArray* lad, ArrayOp op, Ts&&... args) {
   logEvent(lad, lad->entryTypes, op, std::forward<Ts>(args)...);
 }
 
+// PRc|CRc method that returns a copy of the vanilla array `vad` with the
+// sampled bit set, operating in place whenever possible.
+ArrayData* makeSampledArray(ArrayData* vad) {
+  assertx(vad->isVanilla());
+  auto const result = [&]{
+    if (!vad->cowCheck()) return vad;
+    vad->decRefCount();
+    if (vad->hasVanillaPackedLayout()) return PackedArray::Copy(vad);
+    if (vad->hasVanillaMixedLayout())  return MixedArray::Copy(vad);
+    return SetArray::Copy(vad);
+  }();
+  result->setSampledArrayInPlace();
+  return result;
+}
+
 //////////////////////////////////////////////////////////////////////////////
 
 }
@@ -107,11 +122,12 @@ ArrayData* maybeMakeLoggingArray(ArrayData* ad) {
   if (!g_emitLoggingArrays.load(std::memory_order_relaxed)) return ad;
   auto const sk = getSrcKey();
   if (!sk.valid()) {
-    FTRACE(5, "VMRegAnchor failed for maybleEnableLogging.\n");
+    FTRACE(5, "VMRegAnchor failed for maybeMakeLoggingArray.\n");
     return ad;
-  } else if (!ad->isVanilla()) {
+  } else if (ad->isSampledArray() || !ad->isVanilla()) {
     assertx(isArrLikeCastOp(sk.op()));
-    FTRACE(5, "Skipping logging for bespoke array.\n");
+    FTRACE(5, "Skipping logging for {} array.\n",
+           ad->isSampledArray() ? "sampled" : "bespoke");
     return ad;
   }
 
@@ -147,12 +163,12 @@ ArrayData* maybeMakeLoggingArray(ArrayData* ad) {
 
   if (!shouldEmitBespoke) {
     FTRACE(5, "Emit vanilla at {}\n", sk.getSymbol());
-    return ad;
+    return useStatic ? profile->staticSampledArray : makeSampledArray(ad);
   }
 
   FTRACE(5, "Emit bespoke at {}\n", sk.getSymbol());
   profile->loggingArraysEmitted++;
-  if (useStatic) return profile->staticArray;
+  if (useStatic) return profile->staticLoggingArray;
 
   // Non-static array constructors are basically a sequence of sets or appends.
   // We already log these events at the correct granularity; re-use that logic.
@@ -217,11 +233,6 @@ LoggingArray* LoggingArray::MakeStatic(ArrayData* ad, LoggingProfile* profile) {
   lad->entryTypes = EntryTypes::ForArray(ad);
   assertx(lad->checkInvariants());
   return lad;
-}
-
-void LoggingArray::FreeStatic(LoggingArray* lad) {
-  assertx(lad->wrapped->isStatic());
-  RO::EvalLowStaticArrays ? low_free(lad) : uncounted_free(lad);
 }
 
 bool LoggingArray::checkInvariants() const {

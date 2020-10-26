@@ -17,8 +17,9 @@
 
 #include "hphp/runtime/base/bespoke/logging-profile.h"
 
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/bespoke/logging-array.h"
+#include "hphp/runtime/base/memory-manager-defs.h"
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/server/memory-stats.h"
 #include "hphp/runtime/vm/jit/mcgen-translate.h"
 #include "hphp/runtime/vm/vm-regs.h"
@@ -657,6 +658,16 @@ void waitOnExportProfiles() {
 
 //////////////////////////////////////////////////////////////////////////////
 
+namespace {
+void freeStaticArray(ArrayData* ad) {
+  assertx(ad->isStatic());
+  auto const alloc = ad->hasStrKeyTable()
+    ? reinterpret_cast<char*>(ad->mutableStrKeyTable())
+    : reinterpret_cast<char*>(ad);
+ RO::EvalLowStaticArrays ? low_free(alloc) : uncounted_free(alloc);
+}
+}
+
 LoggingProfile* getLoggingProfile(SrcKey skRaw, ArrayData* ad) {
   auto const sk = canonicalize(skRaw);
   {
@@ -669,18 +680,31 @@ LoggingProfile* getLoggingProfile(SrcKey skRaw, ArrayData* ad) {
   folly::SharedMutex::ReadHolder lock{s_exportStartedLock};
   if (s_exportStarted.load(std::memory_order_relaxed)) return nullptr;
 
-  auto prof = std::make_unique<LoggingProfile>(sk);
-  if (ad) prof->staticArray = LoggingArray::MakeStatic(ad, prof.get());
-
-  ProfileMap::accessor insert;
-  if (s_profileMap.insert(insert, sk)) {
-    insert->second = prof.release();
-    MemoryStats::LogAlloc(AllocKind::StaticArray, sizeof(LoggingArray));
-  } else if (ad) {
-    LoggingArray::FreeStatic(prof->staticArray);
+  auto profile = std::make_unique<LoggingProfile>(sk);
+  if (ad) {
+    profile->staticLoggingArray = LoggingArray::MakeStatic(ad, profile.get());
+    profile->staticSampledArray = ad->makeSampledStaticArray();
   }
 
-  return insert->second;
+  auto const result = [&]{
+    ProfileMap::accessor insert;
+    if (s_profileMap.insert(insert, sk)) {
+      insert->second = profile.release();
+    }
+    return insert->second;
+  }();
+
+  if (profile) {
+    // We lost the race to set profile. Free the static arrays we allocated.
+    // We do so in reverse order in case we're using a static bump allocator.
+    freeStaticArray(profile->staticSampledArray);
+    freeStaticArray(profile->staticLoggingArray);
+  } else if (ad) {
+    // We won the race to set profile, so we log the new static allocations.
+    MemoryStats::LogAlloc(AllocKind::StaticArray, sizeof(LoggingArray));
+    MemoryStats::LogAlloc(AllocKind::StaticArray, allocSize(ad));
+  }
+  return result;
 }
 
 SrcKey getSrcKey() {

@@ -242,7 +242,23 @@ inline bool ArrayData::hasStrKeyTable() const {
 }
 
 inline uint8_t ArrayData::auxBits() const {
-  return isLegacyArray() ? kLegacyArray : 0;
+  return safe_cast<uint8_t>(m_aux16 & (kLegacyArray | kSampledArray));
+}
+
+inline bool ArrayData::isSampledArray() const {
+  return m_aux16 & kSampledArray;
+}
+
+inline void ArrayData::setSampledArrayInPlace() {
+  assertx(hasExactlyOneRef());
+  m_aux16 |= ArrayData::kSampledArray;
+}
+
+inline ArrayData* ArrayData::makeSampledStaticArray() const {
+  assertx(isStatic());
+  auto const result = copyStatic();
+  result->m_aux16 |= ArrayData::kSampledArray;
+  return result;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

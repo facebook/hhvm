@@ -235,8 +235,13 @@ void ArrayData::GetScalarArray(ArrayData** parr, arrprov::Tag tag) {
   it = s_arrayDataMap.find(arr);
   if (it != s_arrayDataMap.end()) return replace(*it);
 
-  auto ad = arr->copyStatic();
+  // We should clear the sampled bit in the new static array regardless of
+  // whether the input array was sampled, because specializing the input is
+  // not sufficient to specialize this new static array.
+  auto const ad = arr->copyStatic();
+  ad->m_aux16 &= ~kSampledArray;
   assertx(ad->isStatic());
+
   // TODO(T68458896): allocSize rounds up to size class, which we shouldn't do.
   MemoryStats::LogAlloc(AllocKind::StaticArray, allocSize(ad));
 

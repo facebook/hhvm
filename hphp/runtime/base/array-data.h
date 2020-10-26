@@ -119,10 +119,17 @@ struct ArrayData : MaybeCountable {
   static auto constexpr kLegacyArray = 2;
 
   /*
-   * Indicates that this array has a side table that contains information about
-   * its keys.
+   * Indicates that this array has a side table that contains information
+   * about its keys (which must all be static strings).
    */
   static auto constexpr kHasStrKeyTable = 4;
+
+  /*
+   * Indicates that this array-like was sampled for bespoke logging. Set for
+   * arrays produced by Hack constructors - e.g. Vec, NewStructDict - but not
+   * for arrays produced by native constructors - e.g. builtins, varargs.
+   */
+  static auto constexpr kSampledArray = 8;
 
   /////////////////////////////////////////////////////////////////////////////
   // Creation and destruction.
@@ -287,7 +294,12 @@ public:
 
   bool hasStrKeyTable() const;
 
-  /* Get the aux bits in the header that must be preserved
+  bool isSampledArray() const;
+  void setSampledArrayInPlace();
+  ArrayData* makeSampledStaticArray() const;
+
+  /*
+   * Get the aux bits in the header that must be preserved
    * when we copy or resize the array
    */
   uint8_t auxBits() const;

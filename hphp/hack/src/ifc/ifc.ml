@@ -645,16 +645,19 @@ let may_throw_out_of_bounds_exn ~pos renv env arry ix_pty =
    the object $x instead.  *)
 let rec assign ~expr ~pos renv env lhs rhs_pty =
   match snd lhs with
-  | A.Array_get (arry_exp, ix_opt) ->
+  | A.Array_get ((((_, arry_ty), _) as arry_exp), ix_opt) ->
     (* Evaluate the array *)
     let (env, arry_pty, arry) =
       let (env, old_arry_pty) = expr env arry_exp in
-      (* Here weakening achieves copy-on-write because any new flow we
-         register won't share the same flow destination as the earlier
-         assignments. *)
-      let (env, arry_pty) =
-        adjust_ptype ~pos ~adjustment:Aweaken renv env old_arry_pty
-      in
+      let arry_pty = Lift.ty ~prefix:"arr" renv arry_ty in
+
+      (* Here we achieve two things:
+       * 1. CoW semantics by using a fresh array type that will be used from now on.
+       * 2. Account for the assignment destination type. This is the type the
+       *    LHS would receive _after_ the assignment.
+       *)
+      let env = Env.acc env (subtype ~pos old_arry_pty arry_pty) in
+
       let arry = cow_array ~pos renv arry_pty in
       (env, arry_pty, arry)
     in

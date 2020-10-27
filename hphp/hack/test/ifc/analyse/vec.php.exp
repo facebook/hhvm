@@ -38,10 +38,10 @@ Analyzing \add:
   Deps: {}
   Constraints:
     [15:3-14]
-      key < weak, $vec < weak'1, len < weak'2, lit < weak'1, weak < key'1,
-      weak'1 < $vec'1, weak'2 < len'1
+      key < key'1, $vec < arr, len < len'1, lit < arr, key'1 < key'2,
+      arr < $vec'1, len'1 < len'2
   Locals:
-    { $vec -> vec<<key'1> => <$vec'1>; |len'1|> }
+    { $vec -> vec<<key'2> => <$vec'1>; |len'2|> }
 
 Analyzing \retElem:
 * pc: pc

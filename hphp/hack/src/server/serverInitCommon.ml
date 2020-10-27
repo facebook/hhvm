@@ -36,76 +36,95 @@ let parsing
     ~(get_next : Relative_path.t list Bucket.next)
     ?(count : int option)
     (t : float)
-    ~(trace : bool) : ServerEnv.env * float =
-  begin
-    match count with
-    | None -> ServerProgress.send_progress_to_monitor "%s" "parsing"
-    | Some c -> ServerProgress.send_progress_to_monitor "parsing %d files" c
-  end;
-  let quick = lazy_parse in
-  let (fast, errorl, _) =
-    Parsing_service.go
-      ~quick
-      ~show_all_errors:true
-      genv.workers
-      Relative_path.Set.empty
-      ~get_next
-      ~trace
-      env.popt
-  in
-  let naming_table = Naming_table.update_many env.naming_table fast in
-  let hs = SharedMem.heap_size () in
-  Hh_logger.log "Heap size: %d" hs;
-  Stats.(stats.init_parsing_heap_size <- hs);
+    ~(trace : bool)
+    (running_memory_stats : CgroupProfiler.MemStats.running) :
+    ServerEnv.env * float =
+  CgroupProfiler.collect_cgroup_stats
+    running_memory_stats
+    ~group:"parsing"
+    ~f:(fun () ->
+      begin
+        match count with
+        | None -> ServerProgress.send_progress_to_monitor "%s" "parsing"
+        | Some c -> ServerProgress.send_progress_to_monitor "parsing %d files" c
+      end;
+      let quick = lazy_parse in
+      let (fast, errorl, _) =
+        Parsing_service.go
+          ~quick
+          ~show_all_errors:true
+          genv.workers
+          Relative_path.Set.empty
+          ~get_next
+          ~trace
+          env.popt
+      in
+      let naming_table = Naming_table.update_many env.naming_table fast in
+      let hs = SharedMem.heap_size () in
+      Hh_logger.log "Heap size: %d" hs;
+      Stats.(stats.init_parsing_heap_size <- hs);
 
-  (* The true count of how many files we parsed is wrapped up in the get_next closure.
+      (* The true count of how many files we parsed is wrapped up in the get_next closure.
   But our caller provides us 'count' option in cases where it knows the number in
   advance, e.g. during init. We'll log that for now. In future it'd be nice to
   log the actual number parsed. *)
-  HackEventLogger.parsing_end_for_init t hs ~parsed_count:count;
-  let env =
-    { env with naming_table; errorl = Errors.merge errorl env.errorl }
-  in
-  (env, Hh_logger.log_duration "Parsing" t)
+      HackEventLogger.parsing_end_for_init t hs ~parsed_count:count;
+      let env =
+        { env with naming_table; errorl = Errors.merge errorl env.errorl }
+      in
+      (env, Hh_logger.log_duration "Parsing" t))
 
 let update_files
     (genv : ServerEnv.genv)
     (naming_table : Naming_table.t)
     (ctx : Provider_context.t)
-    (t : float) : float =
-  if no_incremental_check genv.options then
-    t
-  else (
-    Hh_logger.log "Updating file dependencies...";
-    let deps_mode = Provider_context.get_deps_mode ctx in
-    Naming_table.iter naming_table (Typing_deps.Files.update_file deps_mode);
-    HackEventLogger.updating_deps_end t;
-    Hh_logger.log_duration "Updated file dependencies" t
-  )
+    (t : float)
+    (running_memory_stats : CgroupProfiler.MemStats.running) : float =
+  CgroupProfiler.collect_cgroup_stats
+    running_memory_stats
+    ~group:"update files"
+    ~f:(fun () ->
+      if no_incremental_check genv.options then
+        t
+      else (
+        Hh_logger.log "Updating file dependencies...";
+        let deps_mode = Provider_context.get_deps_mode ctx in
+        Naming_table.iter naming_table (Typing_deps.Files.update_file deps_mode);
+        HackEventLogger.updating_deps_end t;
+        Hh_logger.log_duration "Updated file dependencies" t
+      ))
 
-let naming (env : ServerEnv.env) (t : float) : ServerEnv.env * float =
-  ServerProgress.send_progress_to_monitor "resolving symbol references";
-  let ctx = Provider_utils.ctx_from_server_env env in
-  let env =
-    Naming_table.fold
-      env.naming_table
-      ~f:
-        begin
-          fun k v env ->
-          let (errorl, failed_naming) = Naming_global.ndecl_file ctx k v in
-          {
-            env with
-            errorl = Errors.merge errorl env.errorl;
-            failed_naming =
-              Relative_path.Set.union env.failed_naming failed_naming;
-          }
-        end
-      ~init:env
-  in
-  let hs = SharedMem.heap_size () in
-  Hh_logger.log "Heap size: %d" hs;
-  HackEventLogger.global_naming_end t hs;
-  (env, Hh_logger.log_duration "Naming" t)
+let naming
+    (env : ServerEnv.env)
+    (t : float)
+    (running_memory_stats : CgroupProfiler.MemStats.running) :
+    ServerEnv.env * float =
+  CgroupProfiler.collect_cgroup_stats
+    running_memory_stats
+    ~group:"naming"
+    ~f:(fun () ->
+      ServerProgress.send_progress_to_monitor "resolving symbol references";
+      let ctx = Provider_utils.ctx_from_server_env env in
+      let env =
+        Naming_table.fold
+          env.naming_table
+          ~f:
+            begin
+              fun k v env ->
+              let (errorl, failed_naming) = Naming_global.ndecl_file ctx k v in
+              {
+                env with
+                errorl = Errors.merge errorl env.errorl;
+                failed_naming =
+                  Relative_path.Set.union env.failed_naming failed_naming;
+              }
+            end
+          ~init:env
+      in
+      let hs = SharedMem.heap_size () in
+      Hh_logger.log "Heap size: %d" hs;
+      HackEventLogger.global_naming_end t hs;
+      (env, Hh_logger.log_duration "Naming" t))
 
 let is_path_in_range (path : string) (range : ServerArgs.files_to_check_range) :
     bool =
@@ -154,90 +173,101 @@ let type_check
     (env : ServerEnv.env)
     (files_to_check : Relative_path.t list)
     (init_telemetry : Telemetry.t)
-    (t : float) : ServerEnv.env * float =
-  (* No type checking in AI mode *)
-  if Option.is_some (ServerArgs.ai_mode genv.options) then
-    (env, t)
-  else if
-    ServerArgs.check_mode genv.options
-    || Option.is_some (ServerArgs.save_filename genv.options)
-    || Option.is_some (ServerArgs.save_with_spec genv.options)
-  then (
-    (* Prechecked files are not supported in check/saving-state modes, we
-     * should always recheck everything necessary up-front. *)
-    assert (
-      match env.prechecked_files with
-      | Prechecked_files_disabled -> true
-      | _ -> false );
+    (t : float)
+    (running_mem_stats : CgroupProfiler.MemStats.running) :
+    ServerEnv.env * float =
+  CgroupProfiler.collect_cgroup_stats
+    running_mem_stats
+    ~group:"type check"
+    ~f:(fun () ->
+      (* No type checking in AI mode *)
+      if Option.is_some (ServerArgs.ai_mode genv.options) then
+        (env, t)
+      else if
+        ServerArgs.check_mode genv.options
+        || Option.is_some (ServerArgs.save_filename genv.options)
+        || Option.is_some (ServerArgs.save_with_spec genv.options)
+      then (
+        (* Prechecked files are not supported in check/saving-state modes, we
+         * should always recheck everything necessary up-front. *)
+        assert (
+          match env.prechecked_files with
+          | Prechecked_files_disabled -> true
+          | _ -> false );
 
-    let count = List.length files_to_check in
-    let logstring = Printf.sprintf "Filter %d files" count in
-    Hh_logger.log "Begin %s" logstring;
+        let count = List.length files_to_check in
+        let logstring = Printf.sprintf "Filter %d files" count in
+        Hh_logger.log "Begin %s" logstring;
 
-    let (files_to_check : Relative_path.t list) =
-      match ServerArgs.save_with_spec genv.options with
-      | None -> files_to_check
-      | Some (spec : ServerArgs.save_state_spec_info) ->
-        filter_filenames_by_spec files_to_check spec
-    in
-    let (_new_t : float) = Hh_logger.log_duration logstring t in
-    let count = List.length files_to_check in
-    let logstring = Printf.sprintf "type-check %d files" count in
-    Hh_logger.log "Begin %s" logstring;
-    let ( (errorl : Errors.t),
-          (delegate_state : Typing_service_delegate.state),
-          (typecheck_telemetry : Telemetry.t) ) =
-      let memory_cap =
-        genv.local_config.ServerLocalConfig.max_typechecker_worker_memory_mb
-      in
-      let ctx = Provider_utils.ctx_from_server_env env in
-      Typing_check_service.go
-        ctx
-        genv.workers
-        env.typing_service.delegate_state
-        (Telemetry.create ())
-        Relative_path.Set.empty
-        files_to_check
-        ~memory_cap
-        ~check_info:(ServerCheckUtils.get_check_info genv env)
-    in
-    let heap_size = SharedMem.heap_size () in
-    Hh_logger.log "Heap size: %d" heap_size;
-    let hash_telemetry = ServerUtils.log_and_get_sharedmem_load_telemetry () in
-    let telemetry =
-      Telemetry.create ()
-      |> Telemetry.object_ ~key:"init" ~value:init_telemetry
-      |> Telemetry.object_ ~key:"typecheck" ~value:typecheck_telemetry
-      |> Telemetry.object_ ~key:"hash" ~value:hash_telemetry
-    in
-    HackEventLogger.type_check_end
-      (Some telemetry)
-      ~heap_size
-      ~started_count:count
-      ~count
-      ~experiments:genv.local_config.ServerLocalConfig.experiments
-      ~start_t:t;
-    let env =
-      {
-        env with
-        typing_service = { env.typing_service with delegate_state };
-        errorl = Errors.merge errorl env.errorl;
-      }
-    in
-    (env, Hh_logger.log_duration logstring t)
-  ) else
-    let needs_recheck =
-      List.fold files_to_check ~init:Relative_path.Set.empty ~f:(fun acc fn ->
-          Relative_path.Set.add acc fn)
-    in
-    let env =
-      {
-        env with
-        needs_recheck = Relative_path.Set.union env.needs_recheck needs_recheck;
-        (* eagerly start rechecking after init *)
-        full_check = Full_check_started;
-        init_env =
-          { env.init_env with why_needed_full_init = Some init_telemetry };
-      }
-    in
-    (env, t)
+        let (files_to_check : Relative_path.t list) =
+          match ServerArgs.save_with_spec genv.options with
+          | None -> files_to_check
+          | Some (spec : ServerArgs.save_state_spec_info) ->
+            filter_filenames_by_spec files_to_check spec
+        in
+        let (_new_t : float) = Hh_logger.log_duration logstring t in
+        let count = List.length files_to_check in
+        let logstring = Printf.sprintf "type-check %d files" count in
+        Hh_logger.log "Begin %s" logstring;
+        let ( (errorl : Errors.t),
+              (delegate_state : Typing_service_delegate.state),
+              (typecheck_telemetry : Telemetry.t) ) =
+          let memory_cap =
+            genv.local_config.ServerLocalConfig.max_typechecker_worker_memory_mb
+          in
+          let ctx = Provider_utils.ctx_from_server_env env in
+          Typing_check_service.go
+            ctx
+            genv.workers
+            env.typing_service.delegate_state
+            (Telemetry.create ())
+            Relative_path.Set.empty
+            files_to_check
+            ~memory_cap
+            ~check_info:(ServerCheckUtils.get_check_info genv env)
+        in
+        let heap_size = SharedMem.heap_size () in
+        Hh_logger.log "Heap size: %d" heap_size;
+        let hash_telemetry =
+          ServerUtils.log_and_get_sharedmem_load_telemetry ()
+        in
+        let telemetry =
+          Telemetry.create ()
+          |> Telemetry.object_ ~key:"init" ~value:init_telemetry
+          |> Telemetry.object_ ~key:"typecheck" ~value:typecheck_telemetry
+          |> Telemetry.object_ ~key:"hash" ~value:hash_telemetry
+        in
+        HackEventLogger.type_check_end
+          (Some telemetry)
+          ~heap_size
+          ~started_count:count
+          ~count
+          ~experiments:genv.local_config.ServerLocalConfig.experiments
+          ~start_t:t;
+        let env =
+          {
+            env with
+            typing_service = { env.typing_service with delegate_state };
+            errorl = Errors.merge errorl env.errorl;
+          }
+        in
+        (env, Hh_logger.log_duration logstring t)
+      ) else
+        let needs_recheck =
+          List.fold
+            files_to_check
+            ~init:Relative_path.Set.empty
+            ~f:(fun acc fn -> Relative_path.Set.add acc fn)
+        in
+        let env =
+          {
+            env with
+            needs_recheck =
+              Relative_path.Set.union env.needs_recheck needs_recheck;
+            (* eagerly start rechecking after init *)
+            full_check = Full_check_started;
+            init_env =
+              { env.init_env with why_needed_full_init = Some init_telemetry };
+          }
+        in
+        (env, t))

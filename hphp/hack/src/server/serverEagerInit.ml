@@ -51,8 +51,12 @@ let type_decl
   let env = { env with errorl = Errors.merge errorl env.errorl } in
   (env, t)
 
-let init (genv : ServerEnv.genv) (lazy_level : lazy_level) (env : ServerEnv.env)
-    : ServerEnv.env * float =
+let init
+    (genv : ServerEnv.genv)
+    (lazy_level : lazy_level)
+    (env : ServerEnv.env)
+    (running_mem_stats : CgroupProfiler.MemStats.running) :
+    ServerEnv.env * float =
   let init_telemetry =
     Telemetry.create ()
     |> Telemetry.float_ ~key:"start_time" ~value:(Unix.gettimeofday ())
@@ -67,13 +71,14 @@ let init (genv : ServerEnv.genv) (lazy_level : lazy_level) (env : ServerEnv.env)
   in
   (* Parsing entire repo, too many files to trace *)
   let trace = false in
-  let (env, t) = parsing ~lazy_parse genv env ~get_next t ~trace in
+  let (env, t) =
+    parsing ~lazy_parse genv env ~get_next t ~trace running_mem_stats
+  in
   if not (ServerArgs.check_mode genv.options) then
     SearchServiceRunner.update_fileinfo_map env.naming_table SearchUtils.Init;
-
   let ctx = Provider_utils.ctx_from_server_env env in
-  let t = update_files genv env.naming_table ctx t in
-  let (env, t) = naming env t in
+  let t = update_files genv env.naming_table ctx t running_mem_stats in
+  let (env, t) = naming env t running_mem_stats in
   let fast = Naming_table.to_fast env.naming_table in
   let failed_parsing = Errors.get_failed_files env.errorl Errors.Parsing in
   let fast =
@@ -89,4 +94,10 @@ let init (genv : ServerEnv.genv) (lazy_level : lazy_level) (env : ServerEnv.env)
   in
   (* Type-checking everything *)
   SharedMem.cleanup_sqlite ();
-  type_check genv env (Relative_path.Map.keys fast) init_telemetry t
+  type_check
+    genv
+    env
+    (Relative_path.Map.keys fast)
+    init_telemetry
+    t
+    running_mem_stats

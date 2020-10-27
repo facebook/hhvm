@@ -9,18 +9,30 @@
 
 open ServerInitTypes
 
-val full_init : ServerEnv.genv -> ServerEnv.env -> ServerEnv.env * float
+val full_init :
+  ServerEnv.genv ->
+  ServerEnv.env ->
+  CgroupProfiler.MemStats.running ->
+  ServerEnv.env * float
 
-val parse_only_init : ServerEnv.genv -> ServerEnv.env -> ServerEnv.env * float
+val parse_only_init :
+  ServerEnv.genv ->
+  ServerEnv.env ->
+  CgroupProfiler.MemStats.running ->
+  ServerEnv.env * float
 
 val write_symbol_info_init :
-  ServerEnv.genv -> ServerEnv.env -> ServerEnv.env * float
+  ServerEnv.genv ->
+  ServerEnv.env ->
+  CgroupProfiler.MemStats.running ->
+  ServerEnv.env * float
 
 val saved_state_init :
   load_state_approach:load_state_approach ->
   ServerEnv.genv ->
   ServerEnv.env ->
   Path.t ->
+  CgroupProfiler.MemStats.running ->
   ( (ServerEnv.env * float) * (loaded_info * files_changed_while_parsing),
     load_state_error )
   result

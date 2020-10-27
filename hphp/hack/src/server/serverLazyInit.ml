@@ -199,7 +199,9 @@ let download_and_load_state_exn
     ~(target : ServerMonitorUtils.target_saved_state option)
     ~(genv : ServerEnv.genv)
     ~(ctx : Provider_context.t)
-    ~(root : Path.t) : (loaded_info, load_state_error) result =
+    ~(root : Path.t)
+    (running_mem_stats : CgroupProfiler.MemStats.running) :
+    (loaded_info, load_state_error) result =
   let open ServerMonitorUtils in
   let saved_state_handle =
     match target with
@@ -227,19 +229,24 @@ let download_and_load_state_exn
         && not genv.local_config.load_state_natively_64bit)
     then begin
       Hh_logger.log "Starting naming table download.";
-      let loader_future =
-        State_loader_futures.load
-          ~watchman_opts:
-            Saved_state_loader.Watchman_options.{ root; sockname = None }
-          ~ignore_hh_version
-          ~saved_state_type:Saved_state_loader.Naming_table
-        |> Future.with_timeout ~timeout:60
-      in
-      Future.continue_and_map_err loader_future @@ fun result ->
-      match result with
-      | Ok (Ok load_state) -> Ok (Some load_state)
-      | Ok (Error e) -> Error (Saved_state_loader.long_user_message_of_error e)
-      | Error e -> Error (Future.error_to_string e)
+      CgroupProfiler.collect_cgroup_stats
+        running_mem_stats
+        ~group:"download naming table"
+        ~f:(fun () ->
+          let loader_future =
+            State_loader_futures.load
+              ~watchman_opts:
+                Saved_state_loader.Watchman_options.{ root; sockname = None }
+              ~ignore_hh_version
+              ~saved_state_type:Saved_state_loader.Naming_table
+            |> Future.with_timeout ~timeout:60
+          in
+          Future.continue_and_map_err loader_future @@ fun result ->
+          match result with
+          | Ok (Ok load_state) -> Ok (Some load_state)
+          | Ok (Error e) ->
+            Error (Saved_state_loader.long_user_message_of_error e)
+          | Error e -> Error (Future.error_to_string e))
     end else
       Future.of_value (Ok None)
   in
@@ -265,7 +272,8 @@ let download_and_load_state_exn
 let use_precomputed_state_exn
     (genv : ServerEnv.genv)
     (ctx : Provider_context.t)
-    (info : ServerArgs.saved_state_target_info) : loaded_info =
+    (info : ServerArgs.saved_state_target_info)
+    (running_mem_stats : CgroupProfiler.MemStats.running) : loaded_info =
   let {
     ServerArgs.saved_state_fn;
     corresponding_base_revision;
@@ -282,7 +290,11 @@ let use_precomputed_state_exn
   let deptable =
     deptable_with_filename ~is_64bit:deptable_is_64bit deptable_fn
   in
-  lock_and_load_deptable deptable ~ignore_hh_version ~fail_if_missing;
+  CgroupProfiler.collect_cgroup_stats
+    running_mem_stats
+    ~group:"load deptable"
+    ~f:(fun () ->
+      lock_and_load_deptable deptable ~ignore_hh_version ~fail_if_missing);
   let changes = Relative_path.set_of_list changes in
   let naming_changes = Relative_path.set_of_list naming_changes in
   let prechecked_changes = Relative_path.set_of_list prechecked_changes in
@@ -290,12 +302,16 @@ let use_precomputed_state_exn
   let shallow_decls = genv.local_config.SLC.shallow_class_decl in
   let naming_table_fallback_path = get_naming_table_fallback_path genv None in
   let (old_naming_table, old_errors) =
-    SaveStateService.load_saved_state
-      ctx
-      saved_state_fn
-      ~naming_table_fallback_path
-      ~load_decls
-      ~shallow_decls
+    CgroupProfiler.collect_cgroup_stats
+      running_mem_stats
+      ~group:"load saved state"
+      ~f:(fun () ->
+        SaveStateService.load_saved_state
+          ctx
+          saved_state_fn
+          ~naming_table_fallback_path
+          ~load_decls
+          ~shallow_decls)
   in
   {
     saved_state_fn;
@@ -532,7 +548,9 @@ let type_check_dirty
     ~(dirty_master_files_changed_hash : Relative_path.Set.t)
     ~(dirty_local_files_unchanged_hash : Relative_path.Set.t)
     ~(dirty_local_files_changed_hash : Relative_path.Set.t)
-    (t : float) : ServerEnv.env * float =
+    (t : float)
+    (running_mem_stats : CgroupProfiler.MemStats.running) :
+    ServerEnv.env * float =
   let start_t = Unix.gettimeofday () in
   let telemetry =
     Telemetry.create ()
@@ -687,7 +705,9 @@ let type_check_dirty
            ~key:"to_recheck"
            ~value:(Relative_path.Set.cardinal to_recheck)
     in
-    let result = type_check genv env files_to_check init_telemetry t in
+    let result =
+      type_check genv env files_to_check init_telemetry t running_mem_stats
+    in
     HackEventLogger.type_check_dirty
       ~start_t
       ~dirty_count:(Relative_path.Set.cardinal dirty_files_changed_hash)
@@ -730,7 +750,9 @@ let initialize_naming_table
     ?(fnl : Relative_path.t list option = None)
     ?(do_naming : bool = false)
     (genv : ServerEnv.genv)
-    (env : ServerEnv.env) : ServerEnv.env * float =
+    (env : ServerEnv.env)
+    (running_mem_stats : CgroupProfiler.MemStats.running) :
+    ServerEnv.env * float =
   SharedMem.cleanup_sqlite ();
   ServerProgress.send_progress_to_monitor "%s" progress_message;
   let (get_next, count, t) =
@@ -748,15 +770,20 @@ let initialize_naming_table
   let lazy_parse = not genv.local_config.SLC.use_full_fidelity_parser in
   (* full init - too many files to trace all of them *)
   let trace = false in
-  let (env, t) = parsing ~lazy_parse genv env ~get_next ?count t ~trace in
+  let (env, t) =
+    parsing ~lazy_parse genv env ~get_next ?count t ~trace running_mem_stats
+  in
   if not do_naming then
     (env, t)
   else
     let ctx = Provider_utils.ctx_from_server_env env in
-    let t = update_files genv env.naming_table ctx t in
-    naming env t
+    let t = update_files genv env.naming_table ctx t running_mem_stats in
+    naming env t running_mem_stats
 
-let load_naming_table (genv : ServerEnv.genv) (env : ServerEnv.env) :
+let load_naming_table
+    (genv : ServerEnv.genv)
+    (env : ServerEnv.env)
+    (running_mem_stats : CgroupProfiler.MemStats.running) :
     ServerEnv.env * float =
   let ignore_hh_version = ServerArgs.ignore_hh_version genv.options in
   let loader_future =
@@ -779,7 +806,12 @@ let load_naming_table (genv : ServerEnv.genv) (env : ServerEnv.env) :
     in
     let ctx = Provider_utils.ctx_from_server_env env in
     let naming_table_path = Path.to_string naming_table_path in
-    let naming_table = Naming_table.load_from_sqlite ctx naming_table_path in
+    let naming_table =
+      CgroupProfiler.collect_cgroup_stats
+        running_mem_stats
+        ~group:"load NT from sqilte"
+        ~f:(fun () -> Naming_table.load_from_sqlite ctx naming_table_path)
+    in
     let (env, t) =
       initialize_naming_table
         ~fnl:(Some changed_files)
@@ -787,14 +819,19 @@ let load_naming_table (genv : ServerEnv.genv) (env : ServerEnv.env) :
         "full initialization (with loaded naming table)"
         genv
         env
+        running_mem_stats
     in
     let t =
-      naming_from_saved_state
-        ctx
-        env.naming_table
-        (Relative_path.set_of_list changed_files)
-        (Some naming_table_path)
-        t
+      CgroupProfiler.collect_cgroup_stats
+        running_mem_stats
+        ~group:"naming from saved state"
+        ~f:(fun () ->
+          naming_from_saved_state
+            ctx
+            env.naming_table
+            (Relative_path.set_of_list changed_files)
+            (Some naming_table_path)
+            t)
     in
     ( {
         env with
@@ -808,8 +845,12 @@ let load_naming_table (genv : ServerEnv.genv) (env : ServerEnv.env) :
       "full initialization (failed to load naming table)"
       genv
       env
+      running_mem_stats
 
-let write_symbol_info_init (genv : ServerEnv.genv) (env : ServerEnv.env) :
+let write_symbol_info_init
+    (genv : ServerEnv.genv)
+    (env : ServerEnv.env)
+    (running_mem_stats : CgroupProfiler.MemStats.running) :
     ServerEnv.env * float =
   let out_dir =
     match ServerArgs.write_symbol_info genv.options with
@@ -817,11 +858,15 @@ let write_symbol_info_init (genv : ServerEnv.genv) (env : ServerEnv.env) :
     | Some s -> s
   in
   let (env, t) =
-    initialize_naming_table "write symbol info initialization" genv env
+    initialize_naming_table
+      "write symbol info initialization"
+      genv
+      env
+      running_mem_stats
   in
   let ctx = Provider_utils.ctx_from_server_env env in
-  let t = update_files genv env.naming_table ctx t in
-  let (env, t) = naming env t in
+  let t = update_files genv env.naming_table ctx t running_mem_stats in
+  let (env, t) = naming env t running_mem_stats in
   let index_paths = env.swriteopt.symbol_write_index_paths in
   let files =
     if List.length index_paths > 0 then
@@ -868,12 +913,16 @@ let write_symbol_info_init (genv : ServerEnv.genv) (env : ServerEnv.env) :
   let ctx = Provider_utils.ctx_from_server_env env in
   let root_path = env.swriteopt.symbol_write_root_path in
   let hhi_path = env.swriteopt.symbol_write_hhi_path in
+  (* TODO(milliechen): log memory for this step *)
   Symbol_info_writer.go genv.workers ctx out_dir root_path hhi_path files;
 
   (env, t)
 
 (* If we fail to load a saved state, fall back to typechecking everything *)
-let full_init (genv : ServerEnv.genv) (env : ServerEnv.env) :
+let full_init
+    (genv : ServerEnv.genv)
+    (env : ServerEnv.env)
+    (running_mem_stats : CgroupProfiler.MemStats.running) :
     ServerEnv.env * float =
   let init_telemetry =
     Telemetry.create ()
@@ -887,9 +936,14 @@ let full_init (genv : ServerEnv.genv) (env : ServerEnv.env) :
         genv.ServerEnv.local_config.SLC.remote_type_check
           .SLC.RemoteTypeCheck.load_naming_table_on_full_init
     then
-      initialize_naming_table ~do_naming:true "full initialization" genv env
+      initialize_naming_table
+        ~do_naming:true
+        "full initialization"
+        genv
+        env
+        running_mem_stats
     else
-      load_naming_table genv env
+      load_naming_table genv env running_mem_stats
   in
   if not is_check_mode then
     SearchServiceRunner.update_fileinfo_map env.naming_table SearchUtils.Init;
@@ -908,11 +962,14 @@ let full_init (genv : ServerEnv.genv) (env : ServerEnv.env) :
     else
       env
   in
-  type_check genv env fnl init_telemetry t
+  type_check genv env fnl init_telemetry t running_mem_stats
 
-let parse_only_init (genv : ServerEnv.genv) (env : ServerEnv.env) :
+let parse_only_init
+    (genv : ServerEnv.genv)
+    (env : ServerEnv.env)
+    (running_mem_stats : CgroupProfiler.MemStats.running) :
     ServerEnv.env * float =
-  initialize_naming_table "parse-only initialization" genv env
+  initialize_naming_table "parse-only initialization" genv env running_mem_stats
 
 let get_mergebase (mergebase_future : Hg.hg_rev option Future.t) :
     Hg.hg_rev option =
@@ -933,8 +990,9 @@ let get_mergebase (mergebase_future : Hg.hg_rev option Future.t) :
 let post_saved_state_initialization
     ~(genv : ServerEnv.genv)
     ~(env : ServerEnv.env)
-    ~(state_result : loaded_info * Relative_path.Set.t) : ServerEnv.env * float
-    =
+    ~(state_result : loaded_info * Relative_path.Set.t)
+    (running_mem_stats : CgroupProfiler.MemStats.running) :
+    ServerEnv.env * float =
   let ((loaded_info : ServerInitTypes.loaded_info), changed_while_parsing) =
     state_result
   in
@@ -1032,18 +1090,18 @@ let post_saved_state_initialization
       ~count:(List.length parsing_files_list)
       t
       ~trace
+      running_mem_stats
   in
   SearchServiceRunner.update_fileinfo_map
     env.naming_table
     SearchUtils.TypeChecker;
-
   let ctx = Provider_utils.ctx_from_server_env env in
-  let t = update_files genv env.naming_table ctx t in
+  let t = update_files genv env.naming_table ctx t running_mem_stats in
   let t =
     naming_from_saved_state ctx old_naming_table parsing_files naming_table_fn t
   in
   (* Do global naming on all dirty files *)
-  let (env, t) = naming env t in
+  let (env, t) = naming env t running_mem_stats in
   (* Add all files from fast to the files_info object *)
   let fast = Naming_table.to_fast env.naming_table in
   let failed_parsing = Errors.get_failed_files env.errorl Errors.Parsing in
@@ -1097,7 +1155,7 @@ let post_saved_state_initialization
     }
   in
   (* Update the fileinfo object's dependencies now that we have full fast *)
-  let t = update_files genv env.naming_table ctx t in
+  let t = update_files genv env.naming_table ctx t running_mem_stats in
   type_check_dirty
     genv
     env
@@ -1108,12 +1166,14 @@ let post_saved_state_initialization
     ~dirty_local_files_unchanged_hash
     ~dirty_local_files_changed_hash
     t
+    running_mem_stats
 
 let saved_state_init
     ~(load_state_approach : load_state_approach)
     (genv : ServerEnv.genv)
     (env : ServerEnv.env)
-    (root : Path.t) :
+    (root : Path.t)
+    (running_mem_stats : CgroupProfiler.MemStats.running) :
     ( (ServerEnv.env * float) * (loaded_info * Relative_path.Set.t),
       load_state_error )
     result =
@@ -1143,9 +1203,16 @@ let saved_state_init
   (* following function will be run under the timeout *)
   let do_ (_id : Timeout.t) : (loaded_info, load_state_error) result =
     match load_state_approach with
-    | Precomputed info -> Ok (use_precomputed_state_exn genv ctx info)
+    | Precomputed info ->
+      Ok (use_precomputed_state_exn genv ctx info running_mem_stats)
     | Load_state_natively use_canary ->
-      download_and_load_state_exn ~use_canary ~target:None ~genv ~ctx ~root
+      download_and_load_state_exn
+        ~use_canary
+        ~target:None
+        ~genv
+        ~ctx
+        ~root
+        running_mem_stats
     | Load_state_natively_with_target target ->
       download_and_load_state_exn
         ~use_canary:false
@@ -1153,6 +1220,7 @@ let saved_state_init
         ~genv
         ~ctx
         ~root
+        running_mem_stats
   in
   let state_result =
     try
@@ -1174,5 +1242,7 @@ let saved_state_init
   | Error err -> Error err
   | Ok state_result ->
     ServerProgress.send_progress_to_monitor "loading saved state succeeded";
-    let (env, t) = post_saved_state_initialization ~state_result ~env ~genv in
+    let (env, t) =
+      post_saved_state_initialization ~state_result ~env ~genv running_mem_stats
+    in
     Ok ((env, t), state_result)

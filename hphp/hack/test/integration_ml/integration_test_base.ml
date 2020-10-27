@@ -678,10 +678,11 @@ let load_state
       !genv.ServerEnv.config
   in
   match
-    ServerInit.init
-      ~init_approach:(ServerInit.Saved_state_init load_state_approach)
-      !genv
-      env
+    snd
+      (ServerInit.init
+         ~init_approach:(ServerInit.Saved_state_init load_state_approach)
+         !genv
+         env)
   with
   | (env, ServerInit.Load_state_succeeded _) -> env
   | (_env, ServerInit.Load_state_declined s) ->

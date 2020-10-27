@@ -115,7 +115,7 @@ let get_lazy_level (genv : ServerEnv.genv) : lazy_level =
   | (true, true, true) -> Init
   | _ -> Off
 
-let remote_init genv env root worker_key check_id =
+let remote_init genv env root worker_key check_id _running_mem_stats =
   if not (ServerArgs.check_mode genv.options) then
     failwith "Remote init is only supported in check (run once) mode";
   let bin_root = Path.make (Filename.dirname Sys.argv.(0)) in
@@ -141,20 +141,26 @@ let remote_init genv env root worker_key check_id =
     ~init_start_t
     ~bin_root
     ~root;
+  (* TODO(milliechen): sample cgorup memory stats during remote init *)
   let _ = Hh_logger.log_duration "Remote type check" t in
   (env, Load_state_declined "Out-of-band naming table initialization only")
 
-let lazy_full_init genv env =
-  ( ServerLazyInit.full_init genv env |> post_init genv,
+let lazy_full_init genv env running_mem_stats =
+  ( ServerLazyInit.full_init genv env running_mem_stats |> post_init genv,
     Load_state_declined "No saved-state requested (for lazy init)" )
 
-let lazy_parse_only_init genv env =
-  ( ServerLazyInit.parse_only_init genv env |> fst,
+let lazy_parse_only_init genv env running_mem_stats =
+  ( ServerLazyInit.parse_only_init genv env running_mem_stats |> fst,
     Load_state_declined "No saved-state requested (for lazy parse-only init)" )
 
-let lazy_saved_state_init genv env root load_state_approach =
+let lazy_saved_state_init genv env root load_state_approach running_mem_stats =
   let result =
-    ServerLazyInit.saved_state_init ~load_state_approach genv env root
+    ServerLazyInit.saved_state_init
+      ~load_state_approach
+      genv
+      env
+      root
+      running_mem_stats
   in
   (* Saved-state init is the only kind of init that might error... *)
   match result with
@@ -190,30 +196,38 @@ let lazy_saved_state_init genv env root load_state_approach =
     | Exit_status.No_error ->
       ServerProgress.send_to_monitor
         (MonitorRpc.PROGRESS_WARNING (Some user_message));
-      ( ServerLazyInit.full_init genv env |> post_init genv,
+      ( ServerLazyInit.full_init genv env running_mem_stats |> post_init genv,
         Load_state_failed (user_message, Utils.Callstack stack) )
     | _ -> Exit.exit ~msg:user_message ~stack next_step)
 
-let eager_init genv env _lazy_lev init_approach =
+let eager_init genv env _lazy_lev running_mem_stats =
   let init_result =
-    match init_approach with
-    | Full_init -> Load_state_declined "No saved-state requested"
-    | _ ->
-      Hh_logger.log "Saved-state requested, but overridden by eager init";
-      Load_state_declined "Saved-state requested, but overridden by eager init"
+    Hh_logger.log "Saved-state requested, but overridden by eager init";
+    Load_state_declined "Saved-state requested, but overridden by eager init"
   in
-  let env = ServerEagerInit.init genv _lazy_lev env |> post_init genv in
+  let env =
+    ServerEagerInit.init genv _lazy_lev env running_mem_stats |> post_init genv
+  in
   (env, init_result)
 
-let lazy_write_symbol_info_init genv env =
-  ( ServerLazyInit.write_symbol_info_init genv env |> post_init genv,
+let eager_full_init genv env _lazy_lev running_mem_stats =
+  let env =
+    ServerEagerInit.init genv _lazy_lev env running_mem_stats |> post_init genv
+  in
+  let init_result = Load_state_declined "No saved-state requested" in
+  (env, init_result)
+
+let lazy_write_symbol_info_init genv env running_mem_stats =
+  ( ServerLazyInit.write_symbol_info_init genv env running_mem_stats
+    |> post_init genv,
     Load_state_declined "Write Symobl info state" )
 
 (* entry point *)
 let init
     ~(init_approach : init_approach)
     (genv : ServerEnv.genv)
-    (env : ServerEnv.env) : ServerEnv.env * init_result =
+    (env : ServerEnv.env) :
+    CgroupProfiler.MemStats.finished * (ServerEnv.env * init_result) =
   Provider_backend.set_shared_memory_backend ();
   let lazy_lev = get_lazy_level genv in
   let root = ServerArgs.root genv.options in
@@ -224,15 +238,25 @@ let init
     ) else
       (lazy_lev, init_approach)
   in
-  match (lazy_lev, init_approach) with
-  | (_, Remote_init { worker_key; check_id }) ->
-    remote_init genv env root worker_key check_id
-  | (Init, Full_init) -> lazy_full_init genv env
-  | (Init, Parse_only_init) -> lazy_parse_only_init genv env
-  | (Init, Saved_state_init load_state_approach) ->
-    lazy_saved_state_init genv env root load_state_approach
-  | (Off, _)
-  | (Decl, _)
-  | (Parse, _) ->
-    eager_init genv env lazy_lev init_approach
-  | (_, Write_symbol_info) -> lazy_write_symbol_info_init genv env
+  let (label, init_method) =
+    match (lazy_lev, init_approach) with
+    | (_, Remote_init { worker_key; check_id }) ->
+      ("remote init", remote_init genv env root worker_key check_id)
+    | (Init, Full_init) -> ("lazy full init", lazy_full_init genv env)
+    | (Init, Parse_only_init) ->
+      ("lazy parse-only init", lazy_parse_only_init genv env)
+    | (Init, Saved_state_init load_state_approach) ->
+      ( "lazy saved-state init",
+        lazy_saved_state_init genv env root load_state_approach )
+    | (Off, Full_init)
+    | (Decl, Full_init)
+    | (Parse, Full_init) ->
+      ("eager full init", eager_full_init genv env lazy_lev)
+    | (Off, _)
+    | (Decl, _)
+    | (Parse, _) ->
+      ("eager init", eager_init genv env lazy_lev)
+    | (_, Write_symbol_info) ->
+      ("lazy write-symbol-info init", lazy_write_symbol_info_init genv env)
+  in
+  CgroupProfiler.profile_memory ~label ~f:init_method

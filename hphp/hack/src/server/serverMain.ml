@@ -1178,7 +1178,10 @@ let program_init genv env =
   let (init_approach, approach_name) = resolve_init_approach genv in
   Hh_logger.log "Initing with approach: %s" approach_name;
   let (env, init_type, init_error, init_error_stack, state_distance) =
-    let (env, init_result) = ServerInit.init ~init_approach genv env in
+    let (mem_stats, (env, init_result)) =
+      ServerInit.init ~init_approach genv env
+    in
+    CgroupProfiler.print_summary_memory_table mem_stats;
     match init_approach with
     | ServerInit.Remote_init _ -> (env, "remote", None, None, None)
     | ServerInit.Write_symbol_info

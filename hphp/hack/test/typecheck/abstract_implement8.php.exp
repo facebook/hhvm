@@ -1,6 +1,6 @@
 File "abstract_implement8.php", line 16, characters 19-27:
-The method `getMyName` has the wrong type (Typing[4341])
-File "abstract_implement8.php", line 12, characters 32-37:
-Expected `string`
-File "abstract_implement8.php", line 16, characters 32-34:
-But got `int`
+The method `getMyName` is not compatible with the overridden method (Typing[4341])
+  File "abstract_implement8.php", line 12, characters 32-37:
+  Expected `string`
+  File "abstract_implement8.php", line 16, characters 32-34:
+  But got `int`

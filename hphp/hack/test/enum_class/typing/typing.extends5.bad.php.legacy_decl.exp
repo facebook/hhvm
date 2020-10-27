@@ -3,7 +3,7 @@ Class `F` does not correctly implement all required members  (Typing[4340])
   File "typing.extends5.bad.php", line 26, characters 29-38:
   Some members are incompatible with those declared in type `NormalEnum`
   File "BuiltinEnum.hhi", line 120, characters 32-40:
-  The method `getValues` has the wrong type
+  The method `getValues` is not compatible with the overridden method
   File "typing.extends5.bad.php", line 22, characters 6-15:
   Expected `NormalEnum`
   File "BuiltinEnum.hhi", line 34, characters 60-60:

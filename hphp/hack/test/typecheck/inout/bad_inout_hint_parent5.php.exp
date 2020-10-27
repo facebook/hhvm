@@ -1,6 +1,6 @@
 File "bad_inout_hint_parent5.php", line 11, characters 19-21:
-The method `foo` has the wrong type (Typing[4341])
-File "bad_inout_hint_parent5.php", line 4, characters 42-44:
-This is an `inout` parameter
-File "bad_inout_hint_parent5.php", line 11, characters 36-38:
-It is incompatible with a normal parameter
+The method `foo` is not compatible with the overridden method (Typing[4341])
+  File "bad_inout_hint_parent5.php", line 4, characters 42-44:
+  This is an `inout` parameter
+  File "bad_inout_hint_parent5.php", line 11, characters 36-38:
+  It is incompatible with a normal parameter

@@ -1,18 +1,18 @@
 File "ambiguous_inheritance.php", line 11, characters 16-16:
 Class `C` does not correctly implement all required members  (Typing[4340])
-File "ambiguous_inheritance.php", line 11, characters 33-34:
-Some members are incompatible with those declared in type `I2`
-File "ambiguous_inheritance.php", line 4, characters 19-21:
-The method `foo` has the wrong type
-File "ambiguous_inheritance.php", line 11, characters 16-16:
-Class `C` does not correctly implement all required members 
-File "ambiguous_inheritance.php", line 11, characters 33-34:
-Some members are incompatible with those declared in type `I2`
-File "ambiguous_inheritance.php", line 4, characters 19-21:
-The method `foo` has the wrong type
-File "ambiguous_inheritance.php", line 8, characters 26-28:
-Expected `int`
-File "ambiguous_inheritance.php", line 4, characters 26-30:
-But got `mixed`
-File "ambiguous_inheritance.php", line 4, characters 19-21:
-This declaration was inherited from an object of type `I1`. Redeclare this member in `C` with a compatible signature.
+  File "ambiguous_inheritance.php", line 11, characters 33-34:
+  Some members are incompatible with those declared in type `I2`
+  File "ambiguous_inheritance.php", line 4, characters 19-21:
+  The method `foo` is not compatible with the overridden method
+  File "ambiguous_inheritance.php", line 11, characters 16-16:
+  Class `C` does not correctly implement all required members 
+  File "ambiguous_inheritance.php", line 11, characters 33-34:
+  Some members are incompatible with those declared in type `I2`
+  File "ambiguous_inheritance.php", line 4, characters 19-21:
+  The method `foo` is not compatible with the overridden method
+  File "ambiguous_inheritance.php", line 8, characters 26-28:
+  Expected `int`
+  File "ambiguous_inheritance.php", line 4, characters 26-30:
+  But got `mixed`
+  File "ambiguous_inheritance.php", line 4, characters 19-21:
+  This declaration was inherited from an object of type `I1`. Redeclare this member in `C` with a compatible signature.

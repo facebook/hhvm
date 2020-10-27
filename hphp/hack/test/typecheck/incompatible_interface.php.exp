@@ -1,20 +1,20 @@
 File "incompatible_interface.php", line 18, characters 19-21:
 Invalid return type (Typing[4336])
-File "incompatible_interface.php", line 18, characters 19-21:
-Expected `void` because this function does not always return a value
-File "incompatible_interface.php", line 18, characters 26-26:
-But got `T`
+  File "incompatible_interface.php", line 18, characters 19-21:
+  Expected `void` because this function does not always return a value
+  File "incompatible_interface.php", line 18, characters 26-26:
+  But got `T`
 File "incompatible_interface.php", line 18, characters 19-21:
 Invalid return type (Typing[4336])
-File "incompatible_interface.php", line 18, characters 26-26:
-Expected `T`
+  File "incompatible_interface.php", line 18, characters 26-26:
+  Expected `T`
+  File "incompatible_interface.php", line 18, characters 19-21:
+  But got `void` because this function does not always return a value
 File "incompatible_interface.php", line 18, characters 19-21:
-But got `void` because this function does not always return a value
-File "incompatible_interface.php", line 18, characters 19-21:
-The method `foo` has the wrong type (Typing[4341])
-File "incompatible_interface.php", line 13, characters 26-28:
-Expected `int`
-File "incompatible_interface.php", line 16, characters 9-9:
-But got `T`
-File "incompatible_interface.php", line 18, characters 26-26:
-  via this generic `T`
+The method `foo` is not compatible with the overridden method (Typing[4341])
+  File "incompatible_interface.php", line 13, characters 26-28:
+  Expected `int`
+  File "incompatible_interface.php", line 16, characters 9-9:
+  But got `T`
+  File "incompatible_interface.php", line 18, characters 26-26:
+    via this generic `T`

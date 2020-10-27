@@ -31,7 +31,7 @@ You cannot mutate this (Typing[4011])
   File "anyarray_bad.php", line 4, characters 25-42:
   This is an object of type AnyArray<int, int>
 File "anyarray_bad.php", line 25, characters 19-21:
-The method `foo` has the wrong type (Typing[4341])
+The method `foo` is not compatible with the overridden method (Typing[4341])
   File "anyarray_bad.php", line 25, characters 32-34:
   Expected `int`
   File "anyarray_bad.php", line 21, characters 32-39:

@@ -1,24 +1,24 @@
 File "using_bad_override.php", line 14, characters 19-21:
-The method `foo` has the wrong type (Typing[4341])
-File "using_bad_override.php", line 10, characters 51-52:
-This parameter is marked `<<__AcceptDisposable>>`
-File "using_bad_override.php", line 14, characters 29-30:
-This parameter is not marked `<<__AcceptDisposable>>`
+The method `foo` is not compatible with the overridden method (Typing[4341])
+  File "using_bad_override.php", line 10, characters 51-52:
+  This parameter is marked `<<__AcceptDisposable>>`
+  File "using_bad_override.php", line 14, characters 29-30:
+  This parameter is not marked `<<__AcceptDisposable>>`
 File "using_bad_override.php", line 19, characters 19-21:
-The method `bar` has the wrong type (Typing[4341])
-File "using_bad_override.php", line 19, characters 51-52:
-This parameter is marked `<<__AcceptDisposable>>`
-File "using_bad_override.php", line 11, characters 29-30:
-This parameter is not marked `<<__AcceptDisposable>>`
+The method `bar` is not compatible with the overridden method (Typing[4341])
+  File "using_bad_override.php", line 19, characters 51-52:
+  This parameter is marked `<<__AcceptDisposable>>`
+  File "using_bad_override.php", line 11, characters 29-30:
+  This parameter is not marked `<<__AcceptDisposable>>`
 File "using_bad_override.php", line 31, characters 19-21:
-The method `foo` has the wrong type (Typing[4341])
-File "using_bad_override.php", line 27, characters 19-21:
-This is marked `<<__ReturnDisposable>>`.
-File "using_bad_override.php", line 31, characters 19-21:
-This is not marked `<<__ReturnDisposable>>`.
+The method `foo` is not compatible with the overridden method (Typing[4341])
+  File "using_bad_override.php", line 27, characters 19-21:
+  This is marked `<<__ReturnDisposable>>`.
+  File "using_bad_override.php", line 31, characters 19-21:
+  This is not marked `<<__ReturnDisposable>>`.
 File "using_bad_override.php", line 38, characters 19-21:
-The method `bar` has the wrong type (Typing[4341])
-File "using_bad_override.php", line 28, characters 19-21:
-This is not marked `<<__ReturnDisposable>>`.
-File "using_bad_override.php", line 38, characters 19-21:
-This is marked `<<__ReturnDisposable>>`.
+The method `bar` is not compatible with the overridden method (Typing[4341])
+  File "using_bad_override.php", line 28, characters 19-21:
+  This is not marked `<<__ReturnDisposable>>`.
+  File "using_bad_override.php", line 38, characters 19-21:
+  This is marked `<<__ReturnDisposable>>`.

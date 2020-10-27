@@ -1,6 +1,6 @@
 File "var_args_inheritance1.php", line 17, characters 19-20:
-The method `f1` has the wrong type (Typing[4341])
-File "var_args_inheritance1.php", line 17, characters 19-20:
-Should have a variadic argument
-File "var_args_inheritance1.php", line 13, characters 19-20:
-Because of this definition
+The method `f1` is not compatible with the overridden method (Typing[4341])
+  File "var_args_inheritance1.php", line 17, characters 19-20:
+  Should have a variadic argument
+  File "var_args_inheritance1.php", line 13, characters 19-20:
+  Because of this definition

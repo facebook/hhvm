@@ -1,4 +1,4 @@
-Typing[4341] The method f has the wrong type [1]
+Typing[4341] The method f is not compatible with the overridden method [1]
 -> Expected string [2]
 -> But got int [3]
 
@@ -18,7 +18,7 @@ long_directory_name.php--long/directory/name/class_def.php:3:21
 
 Typing[4340] Class TBothTraits does not correctly implement all required members  [1]
 -> Some members are incompatible with those declared in type TReqExtChild [2]
--> The method f has the wrong type [3]
+-> The method f is not compatible with the overridden method [3]
 -> Expected int [4]
 -> But got string [5]
 

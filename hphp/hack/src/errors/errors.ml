@@ -2330,7 +2330,7 @@ let bad_method_override pos member_name msgl (on_error : typing_error_callback)
     ( pos,
       "The method "
       ^ (strip_ns member_name |> Markdown_lite.md_codify)
-      ^ " has the wrong type" )
+      ^ " is not compatible with the overridden method" )
   in
   (* This is a cascading error message *)
   on_error ~code:(Typing.err_code Typing.BadMethodOverride) (msg :: msgl)

@@ -1,5 +1,5 @@
 File "classes_consistent_construct.php", line 8, characters 19-29:
-The method `__construct` has the wrong type (Typing[4341])
+The method `__construct` is not compatible with the overridden method (Typing[4341])
   File "classes_consistent_construct.php", line 8, characters 19-29:
   Too many mandatory arguments (expected 0 but got 1)
   File "classes_consistent_construct.php", line 4, characters 7-8:

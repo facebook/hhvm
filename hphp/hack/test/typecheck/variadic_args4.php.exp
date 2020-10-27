@@ -1,6 +1,6 @@
 File "variadic_args4.php", line 8, characters 19-22:
-The method `meth` has the wrong type (Typing[4341])
-File "variadic_args4.php", line 8, characters 19-22:
-Should have a variadic argument
-File "variadic_args4.php", line 4, characters 19-22:
-Because of this definition
+The method `meth` is not compatible with the overridden method (Typing[4341])
+  File "variadic_args4.php", line 8, characters 19-22:
+  Should have a variadic argument
+  File "variadic_args4.php", line 4, characters 19-22:
+  Because of this definition

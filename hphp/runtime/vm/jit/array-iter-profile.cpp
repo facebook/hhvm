@@ -109,6 +109,7 @@ ArrayIterProfile::Result ArrayIterProfile::result() const {
 }
 
 void ArrayIterProfile::update(const ArrayData* arr, bool is_kviter) {
+  auto const size = arr->size();
   auto const specialization = getIterSpecialization(arr);
   if (specialization.specialized) {
     if (arr->empty()) {
@@ -116,11 +117,7 @@ void ArrayIterProfile::update(const ArrayData* arr, bool is_kviter) {
     } else {
       m_key_types_counts[specialization.key_types]++;
     }
-    auto const size = arr->size();
     m_num_iterations += size;
-    auto const array_index = size == 0 ? 0 : 1 + (size_t)std::floor(std::log2(size));
-    assert(array_index < kNumApproximateCountBuckets);
-    m_approximate_iteration_buckets[array_index]++;
     m_base_type_counts[specialization.base_type]++;
     size_t num_profiled_values = 0;
     IterateKVNoInc(arr, [&](TypedValue k, TypedValue v) {
@@ -133,6 +130,9 @@ void ArrayIterProfile::update(const ArrayData* arr, bool is_kviter) {
     // value_type, or the num_iterations for these bases.
     m_generic_base_count++;
   }
+  auto const array_index = size == 0 ? 0 : 1 + (size_t)std::floor(std::log2(size));
+  assert(array_index < kNumApproximateCountBuckets);
+  m_approximate_iteration_buckets[array_index]++;
 }
 
 void ArrayIterProfile::reduce(ArrayIterProfile& l, const ArrayIterProfile& r) {

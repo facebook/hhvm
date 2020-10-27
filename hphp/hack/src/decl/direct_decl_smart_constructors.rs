@@ -1472,6 +1472,12 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                             if initializer.is_present() {
                                 flags |= FunParamFlags::HAS_DEFAULT;
                             }
+                            let variadic = initializer.is_ignored() && variadic;
+                            let type_ = if variadic {
+                                self.alloc(Ty(self.alloc(Reason::RvarParam(id.0)), type_.1))
+                            } else {
+                                type_
+                            };
                             let param = self.alloc(FunParam {
                                 pos: id.0,
                                 name: Some(id.1),
@@ -1483,9 +1489,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                                 rx_annotation: None,
                             });
                             arity = match arity {
-                                FunArity::Fstandard if initializer.is_ignored() && variadic => {
-                                    FunArity::Fvariadic(param)
-                                }
+                                FunArity::Fstandard if variadic => FunArity::Fvariadic(param),
                                 arity => {
                                     params.push(param);
                                     arity

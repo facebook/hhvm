@@ -239,6 +239,26 @@ impl<'a, T> List<'a, T> {
         }
         node
     }
+
+    /// Prepend the given element to the list in-place.
+    pub fn push_front<A: Arena>(&mut self, element: T, arena: &'a A)
+    where
+        T: TrivialDrop,
+    {
+        *self = Cons(arena.alloc((element, *self)));
+    }
+
+    /// Remove the first element of the list in-place and return a reference to
+    /// it, or `None` if the list is empty.
+    pub fn pop_front(&mut self) -> Option<&'a T> {
+        match self {
+            Nil => None,
+            Cons((x, l)) => {
+                *self = *l;
+                Some(x)
+            }
+        }
+    }
 }
 
 // The derived implementations of Copy and Clone require `T` to be Copy/Clone.

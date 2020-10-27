@@ -9,7 +9,6 @@ include = ["../decl_subst.rs", "../direct_decl_parser.rs", "../lib.rs"]
 path = "../lib.rs"
 
 [dependencies]
-arena_collections = { path = "../../arena_collections" }
 direct_decl_parser = { path = "../../parser/api/cargo/direct_decl_parser" }
 ocamlrep = { path = "../../ocamlrep" }
 oxidized = { path = "../../oxidized" }

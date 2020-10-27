@@ -96,6 +96,7 @@ prim_defs::Comment
 relative_path::map::Map
 s_map::SMap
 s_set::SSet
+shallow_decl_defs::Decl
 tany_sentinel::TanySentinel
 tast::MutabilityEnv
 tast::Reactivity

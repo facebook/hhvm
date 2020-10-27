@@ -39,6 +39,14 @@ impl<'a, T: Node<'a>> Node<'a> for Option<T> {
     }
 }
 
+impl<'a, T: Node<'a>> Node<'a> for arena_collections::List<'a, T> {
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        for elt in self.iter() {
+            elt.accept(v);
+        }
+    }
+}
+
 impl<'a, K: Node<'a>, V: Node<'a>> Node<'a> for arena_collections::map::Map<'a, K, V> {
     fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
         for (key, value) in self.iter() {

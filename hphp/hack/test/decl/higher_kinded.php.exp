@@ -1,6 +1,6 @@
 Parsed decls:
 
-{ Direct_decl_parser.classes = {}; funs = {};
+{ classes = {}; funs = {};
   typedefs =
   { "\\ID" ->
     { Typing_defs.td_pos = [3:6-8]; td_vis = Transparent;

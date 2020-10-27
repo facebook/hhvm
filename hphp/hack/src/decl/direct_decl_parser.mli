@@ -6,16 +6,7 @@
  *
  *)
 
-type decls = {
-  classes: Shallow_decl_defs.shallow_class SMap.t;
-  funs: Typing_defs.fun_elt SMap.t;
-  typedefs: Typing_defs.typedef_type SMap.t;
-  consts: Typing_defs.const_decl SMap.t;
-  records: Typing_defs.record_def_type SMap.t;
-}
-[@@deriving show]
-
-val empty_decls : decls
+type decls = (string * Shallow_decl_defs.decl) list [@@deriving show]
 
 type decl_lists = {
   dl_classes: (string * Shallow_decl_defs.shallow_class) list;

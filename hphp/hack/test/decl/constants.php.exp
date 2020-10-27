@@ -1,6 +1,6 @@
 Parsed decls:
 
-{ Direct_decl_parser.classes = {}; funs = {}; typedefs = {};
+{ classes = {}; funs = {}; typedefs = {};
   consts =
   { "\\MY_CONST" ->
     { Typing_defs.cd_pos = [6:14-22];

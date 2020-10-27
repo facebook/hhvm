@@ -16,17 +16,20 @@ use bumpalo::{
 use hh_autoimport_rust as hh_autoimport;
 use naming_special_names_rust as naming_special_names;
 
-use arena_collections::{AssocListMut, List, MultiSetMut};
+use arena_collections::{AssocListMut, MultiSetMut};
 use flatten_smart_constructors::{FlattenOp, FlattenSmartConstructors};
 use oxidized_by_ref::{
     aast, aast_defs,
     ast_defs::{Bop, ClassKind, ConstraintKind, FunKind, Id, ShapeFieldName, Uop, Variance},
     decl_defs::MethodReactivity,
+    direct_decl_parser::Decls,
     file_info::Mode,
     nast,
     pos::Pos,
     relative_path::RelativePath,
-    shallow_decl_defs::{self, ShallowClassConst, ShallowMethod, ShallowProp, ShallowTypeconst},
+    shallow_decl_defs::{
+        self, Decl, ShallowClassConst, ShallowMethod, ShallowProp, ShallowTypeconst,
+    },
     shape_map::ShapeField,
     typing_defs,
     typing_defs::{
@@ -184,25 +187,6 @@ impl<'a> DirectDeclSmartConstructors<'a> {
             }
             _ => (hint, None),
         }
-    }
-}
-
-#[derive(Copy, Clone, Debug)]
-pub struct InProgressDecls<'a> {
-    pub classes: List<'a, (&'a str, &'a shallow_decl_defs::ShallowClass<'a>)>,
-    pub funs: List<'a, (&'a str, &'a typing_defs::FunElt<'a>)>,
-    pub typedefs: List<'a, (&'a str, &'a typing_defs::TypedefType<'a>)>,
-    pub consts: List<'a, (&'a str, &'a typing_defs::ConstDecl<'a>)>,
-    pub records: List<'a, (&'a str, &'a typing_defs::RecordDefType<'a>)>,
-}
-
-pub fn empty_decls() -> InProgressDecls<'static> {
-    InProgressDecls {
-        classes: List::empty(),
-        funs: List::empty(),
-        typedefs: List::empty(),
-        consts: List::empty(),
-        records: List::empty(),
     }
 }
 
@@ -468,7 +452,7 @@ impl<'a> ClassishNameBuilder<'a> {
 pub struct State<'a> {
     pub source_text: IndexedSourceText<'a>,
     pub arena: &'a bumpalo::Bump,
-    pub decls: InProgressDecls<'a>,
+    pub decls: Decls<'a>,
     filename: &'a RelativePath<'a>,
     file_mode: Mode,
     namespace_builder: Rc<NamespaceBuilder<'a>>,
@@ -494,7 +478,7 @@ impl<'a> State<'a> {
             arena,
             filename: arena.alloc(filename),
             file_mode,
-            decls: empty_decls(),
+            decls: Decls::empty(),
             namespace_builder: Rc::new(NamespaceBuilder::new_in(auto_namespace_map, arena)),
             classish_name_builder: ClassishNameBuilder::new(),
             type_parameters: Rc::new(Vec::new_in(arena)),
@@ -804,23 +788,29 @@ struct Attributes<'a> {
 
 impl<'a> DirectDeclSmartConstructors<'a> {
     fn add_class(&mut self, name: &'a str, decl: &'a shallow_decl_defs::ShallowClass<'a>) {
-        self.state.decls.classes =
-            List::cons((name, decl), self.state.decls.classes, self.state.arena);
+        self.state
+            .decls
+            .add(name, Decl::Class(decl), self.state.arena);
     }
     fn add_fun(&mut self, name: &'a str, decl: &'a typing_defs::FunElt<'a>) {
-        self.state.decls.funs = List::cons((name, decl), self.state.decls.funs, self.state.arena);
+        self.state
+            .decls
+            .add(name, Decl::Fun(decl), self.state.arena);
     }
     fn add_typedef(&mut self, name: &'a str, decl: &'a typing_defs::TypedefType<'a>) {
-        self.state.decls.typedefs =
-            List::cons((name, decl), self.state.decls.typedefs, self.state.arena);
+        self.state
+            .decls
+            .add(name, Decl::Typedef(decl), self.state.arena);
     }
     fn add_const(&mut self, name: &'a str, decl: &'a typing_defs::ConstDecl<'a>) {
-        self.state.decls.consts =
-            List::cons((name, decl), self.state.decls.consts, self.state.arena);
+        self.state
+            .decls
+            .add(name, Decl::Const(decl), self.state.arena);
     }
     fn add_record(&mut self, name: &'a str, decl: &'a typing_defs::RecordDefType<'a>) {
-        self.state.decls.records =
-            List::cons((name, decl), self.state.decls.records, self.state.arena);
+        self.state
+            .decls
+            .add(name, Decl::Record(decl), self.state.arena);
     }
 
     #[inline(always)]

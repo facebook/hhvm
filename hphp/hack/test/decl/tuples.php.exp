@@ -1,6 +1,6 @@
 Parsed decls:
 
-{ Direct_decl_parser.classes = {};
+{ classes = {};
   funs =
   { "\\generic_tuple" ->
     { Typing_defs.fe_deprecated = None;

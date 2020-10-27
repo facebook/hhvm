@@ -70,13 +70,42 @@ let mangle_xhp x =
   |> Str.global_replace colon "__"
   |> Str.global_replace dash "_"
 
+type decls = {
+  classes: Shallow_decl_defs.shallow_class SMap.t;
+  funs: Typing_defs.fun_elt SMap.t;
+  typedefs: Typing_defs.typedef_type SMap.t;
+  consts: Typing_defs.const_decl SMap.t;
+  records: Typing_defs.record_def_type SMap.t;
+}
+[@@deriving show { with_path = false }]
+
+let empty_decls =
+  {
+    classes = SMap.empty;
+    funs = SMap.empty;
+    typedefs = SMap.empty;
+    consts = SMap.empty;
+    records = SMap.empty;
+  }
+
+let parse_decls fn text auto_namespace_map =
+  let decls = parse_decls_ffi fn text auto_namespace_map in
+  List.fold decls ~init:empty_decls ~f:(fun decls (name, decl) ->
+      let open Shallow_decl_defs in
+      match decl with
+      | Class x -> { decls with classes = SMap.add name x decls.classes }
+      | Fun x -> { decls with funs = SMap.add name x decls.funs }
+      | Typedef x -> { decls with typedefs = SMap.add name x decls.typedefs }
+      | Record x -> { decls with records = SMap.add name x decls.records }
+      | Const x -> { decls with consts = SMap.add name x decls.consts })
+
 let compare_decl ctx verbosity fn =
   let fn = Path.to_string fn in
   let text = RealDisk.cat fn in
   let fn = Relative_path.(create Root fn) in
   let decls =
     time verbosity "Parsed decls" (fun () ->
-        parse_decls_ffi fn text auto_namespace_map)
+        parse_decls fn text auto_namespace_map)
   in
   let facts =
     Option.value_exn

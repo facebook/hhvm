@@ -1,6 +1,6 @@
 Parsed decls:
 
-{ Direct_decl_parser.classes = {}; funs = {};
+{ classes = {}; funs = {};
   typedefs =
   { "\\BackslashRxException" ->
     { Typing_defs.td_pos = [5:6-26]; td_vis = Transparent; td_tparams = [];

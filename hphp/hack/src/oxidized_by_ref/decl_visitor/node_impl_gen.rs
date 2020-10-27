@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<055a1881bb86c8ed7071c73d3e003154>>
+// @generated SignedSource<<4458b7139933f256407dcd3ee6d70ac8>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -95,33 +95,27 @@ impl<'a> Node<'a> for ConstraintKind {
         }
     }
 }
+impl<'a> Node<'a> for Decl<'a> {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_decl(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            Decl::Class(ref __binding_0) => __binding_0.accept(v),
+            Decl::Fun(ref __binding_0) => __binding_0.accept(v),
+            Decl::Record(ref __binding_0) => __binding_0.accept(v),
+            Decl::Typedef(ref __binding_0) => __binding_0.accept(v),
+            Decl::Const(ref __binding_0) => __binding_0.accept(v),
+        }
+    }
+}
 impl<'a> Node<'a> for Decls<'a> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
         v.visit_decls(self)
     }
     fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
         match self {
-            Decls {
-                classes: ref __binding_0,
-                funs: ref __binding_1,
-                typedefs: ref __binding_2,
-                consts: ref __binding_3,
-                records: ref __binding_4,
-            } => {
-                {
-                    __binding_0.accept(v)
-                }
-                {
-                    __binding_1.accept(v)
-                }
-                {
-                    __binding_2.accept(v)
-                }
-                {
-                    __binding_3.accept(v)
-                }
-                { __binding_4.accept(v) }
-            }
+            Decls(ref __binding_0) => __binding_0.accept(v),
         }
     }
 }

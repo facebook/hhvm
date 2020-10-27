@@ -15,12 +15,14 @@ module CacheKey = struct
   let to_string = show
 end
 
-type decl =
-  | Fun_decl of Typing_defs.fun_elt
-  | Class_decl of Shallow_decl_defs.shallow_class
-  | Typedef_decl of Typing_defs.typedef_type
-  | Record_decl of Typing_defs.record_def_type
-  | Gconst_decl of Typing_defs.decl_ty
+module SymbolMap = Reordered_argument_map (WrappedMap.Make (CacheKey))
+
+type decl = Shallow_decl_defs.decl =
+  | Class of Shallow_decl_defs.class_decl
+  | Fun of Shallow_decl_defs.fun_decl
+  | Record of Shallow_decl_defs.record_decl
+  | Typedef of Shallow_decl_defs.typedef_decl
+  | Const of Shallow_decl_defs.const_decl
 
 module Decls =
   SharedMem.LocalCache
@@ -39,7 +41,7 @@ module Decls =
 type t = {
   client: Decl_ipc_ffi_externs.decl_client;
   ns_map: Direct_decl_parser.ns_map;
-  mutable current_file_decls: Direct_decl_parser.decls;
+  mutable current_file_decls: decl SymbolMap.t;
   gconst_path_cache: Relative_path.t option String.Table.t;
   fun_path_cache: Relative_path.t option String.Table.t;
   type_path_and_kind_cache:
@@ -52,7 +54,7 @@ let from_raw_client
   {
     client;
     ns_map;
-    current_file_decls = Direct_decl_parser.empty_decls;
+    current_file_decls = SymbolMap.empty;
     gconst_path_cache = String.Table.create ();
     fun_path_cache = String.Table.create ();
     type_path_and_kind_cache = String.Table.create ();
@@ -73,11 +75,13 @@ let pointer_to_option (ptr : 'a) : 'a option =
 let add_to_cache cache key value = ignore (String.Table.add cache key value)
 
 let rpc_get_fun (t : t) (name : string) : Typing_defs.fun_elt option =
-  match SMap.find_opt t.current_file_decls.Direct_decl_parser.funs name with
-  | Some decl -> Some decl
+  let key = (FileInfo.Fun, name) in
+  match SymbolMap.find_opt t.current_file_decls key with
+  | Some (Fun decl) -> Some decl
+  | Some _ -> assert false
   | None ->
-    (match Decls.get (FileInfo.Fun, name) with
-    | Some (Some (Fun_decl decl)) -> Some decl
+    (match Decls.get key with
+    | Some (Some (Fun decl)) -> Some decl
     | Some (Some _) -> assert false
     | Some None -> None
     | None ->
@@ -85,7 +89,7 @@ let rpc_get_fun (t : t) (name : string) : Typing_defs.fun_elt option =
       let fun_elt_opt = pointer_to_option ptr in
       Decls.add
         (FileInfo.Fun, name)
-        (Option.map fun_elt_opt ~f:(fun x -> Fun_decl x));
+        (Option.map fun_elt_opt ~f:(fun x -> Fun x));
       let path_opt =
         Option.map fun_elt_opt ~f:(fun fun_elt ->
             Pos.filename fun_elt.Typing_defs.fe_pos)
@@ -95,11 +99,13 @@ let rpc_get_fun (t : t) (name : string) : Typing_defs.fun_elt option =
 
 let rpc_get_class (t : t) (name : string) :
     Shallow_decl_defs.shallow_class option =
-  match SMap.find_opt t.current_file_decls.Direct_decl_parser.classes name with
-  | Some decl -> Some decl
+  let key = (FileInfo.Class, name) in
+  match SymbolMap.find_opt t.current_file_decls key with
+  | Some (Class decl) -> Some decl
+  | Some _ -> assert false
   | None ->
-    (match Decls.get (FileInfo.Class, name) with
-    | Some (Some (Class_decl decl)) -> Some decl
+    (match Decls.get key with
+    | Some (Some (Class decl)) -> Some decl
     | Some (Some _) -> assert false
     | Some None -> None
     | None ->
@@ -107,7 +113,7 @@ let rpc_get_class (t : t) (name : string) :
       let class_decl_opt = pointer_to_option ptr in
       Decls.add
         (FileInfo.Class, name)
-        (Option.map class_decl_opt ~f:(fun x -> Class_decl x));
+        (Option.map class_decl_opt ~f:(fun x -> Class x));
       Option.iter class_decl_opt ~f:(fun sc ->
           add_to_cache
             t.type_path_and_kind_cache
@@ -118,11 +124,13 @@ let rpc_get_class (t : t) (name : string) :
       class_decl_opt)
 
 let rpc_get_typedef (t : t) (name : string) : Typing_defs.typedef_type option =
-  match SMap.find_opt t.current_file_decls.Direct_decl_parser.typedefs name with
-  | Some decl -> Some decl
+  let key = (FileInfo.Typedef, name) in
+  match SymbolMap.find_opt t.current_file_decls key with
+  | Some (Typedef decl) -> Some decl
+  | Some _ -> assert false
   | None ->
-    (match Decls.get (FileInfo.Typedef, name) with
-    | Some (Some (Typedef_decl decl)) -> Some decl
+    (match Decls.get key with
+    | Some (Some (Typedef decl)) -> Some decl
     | Some (Some _) -> assert false
     | Some None -> None
     | None ->
@@ -130,7 +138,7 @@ let rpc_get_typedef (t : t) (name : string) : Typing_defs.typedef_type option =
       let typedef_decl_opt = pointer_to_option ptr in
       Decls.add
         (FileInfo.Typedef, name)
-        (Option.map typedef_decl_opt ~f:(fun x -> Typedef_decl x));
+        (Option.map typedef_decl_opt ~f:(fun x -> Typedef x));
       Option.iter typedef_decl_opt ~f:(fun td ->
           add_to_cache
             t.type_path_and_kind_cache
@@ -140,46 +148,52 @@ let rpc_get_typedef (t : t) (name : string) : Typing_defs.typedef_type option =
 
 let rpc_get_record_def (t : t) (name : string) :
     Typing_defs.record_def_type option =
-  match Decls.get (FileInfo.RecordDef, name) with
-  | Some (Some (Record_decl decl)) -> Some decl
-  | Some (Some _) -> assert false
-  | Some None -> None
+  let key = (FileInfo.RecordDef, name) in
+  match SymbolMap.find_opt t.current_file_decls key with
+  | Some (Record decl) -> Some decl
+  | Some _ -> assert false
   | None ->
-    let ptr = Decl_ipc_ffi_externs.get_decl t.client FileInfo.RecordDef name in
-    let record_decl_opt = pointer_to_option ptr in
-    Decls.add
-      (FileInfo.RecordDef, name)
-      (Option.map record_decl_opt ~f:(fun x -> Record_decl x));
-    Option.iter record_decl_opt ~f:(fun rdt ->
-        add_to_cache
-          t.type_path_and_kind_cache
-          name
-          (Some (Pos.filename rdt.Typing_defs.rdt_pos, Naming_types.TRecordDef)));
-    record_decl_opt
+    (match Decls.get key with
+    | Some (Some (Record decl)) -> Some decl
+    | Some (Some _) -> assert false
+    | Some None -> None
+    | None ->
+      let ptr =
+        Decl_ipc_ffi_externs.get_decl t.client FileInfo.RecordDef name
+      in
+      let record_decl_opt = pointer_to_option ptr in
+      Decls.add
+        (FileInfo.RecordDef, name)
+        (Option.map record_decl_opt ~f:(fun x -> Record x));
+      Option.iter record_decl_opt ~f:(fun rdt ->
+          add_to_cache
+            t.type_path_and_kind_cache
+            name
+            (Some (Pos.filename rdt.Typing_defs.rdt_pos, Naming_types.TRecordDef)));
+      record_decl_opt)
 
 let rpc_get_gconst (t : t) (name : string) : Typing_defs.decl_ty option =
-  match SMap.find_opt t.current_file_decls.Direct_decl_parser.consts name with
-  | Some decl -> Some decl.Typing_defs.cd_type
+  let key = (FileInfo.Const, name) in
+  match SymbolMap.find_opt t.current_file_decls key with
+  | Some (Const decl) -> Some decl.Typing_defs.cd_type
+  | Some _ -> assert false
   | None ->
-    (match Decls.get (FileInfo.Const, name) with
-    | Some (Some (Gconst_decl decl)) -> Some decl
+    (match Decls.get key with
+    | Some (Some (Const decl)) -> Some decl.Typing_defs.cd_type
     | Some (Some _) -> assert false
     | Some None -> None
     | None ->
       let ptr = Decl_ipc_ffi_externs.get_decl t.client FileInfo.Const name in
       let gconst_decl_opt = pointer_to_option ptr in
-      let gconst_ty_opt =
-        Option.map gconst_decl_opt (fun c -> c.Typing_defs.cd_type)
-      in
       Decls.add
         (FileInfo.Const, name)
-        (Option.map gconst_ty_opt ~f:(fun x -> Gconst_decl x));
+        (Option.map gconst_decl_opt ~f:(fun x -> Const x));
       let path_opt =
-        Option.map gconst_ty_opt ~f:(fun ty ->
+        Option.map gconst_decl_opt ~f:(fun ty ->
             Pos.filename (Typing_defs.get_pos ty))
       in
       add_to_cache t.gconst_path_cache name path_opt;
-      gconst_ty_opt)
+      Option.map gconst_decl_opt (fun c -> c.Typing_defs.cd_type))
 
 let rpc_get_gconst_path (t : t) (name : string) : Relative_path.t option =
   match String.Table.find t.gconst_path_cache name with
@@ -225,4 +239,11 @@ let rpc_get_type_canon_name (t : t) (name : string) : string option =
 let parse_and_cache_decls_in
     (t : t) (filename : Relative_path.t) (contents : string) : unit =
   let decls = Direct_decl_parser.parse_decls_ffi filename contents t.ns_map in
-  t.current_file_decls <- decls
+  t.current_file_decls <-
+    List.fold decls ~init:SymbolMap.empty ~f:(fun map (name, decl) ->
+        match decl with
+        | Class _ -> SymbolMap.add map (FileInfo.Class, name) decl
+        | Fun _ -> SymbolMap.add map (FileInfo.Fun, name) decl
+        | Typedef _ -> SymbolMap.add map (FileInfo.Typedef, name) decl
+        | Record _ -> SymbolMap.add map (FileInfo.RecordDef, name) decl
+        | Const _ -> SymbolMap.add map (FileInfo.Const, name) decl)

@@ -1,6 +1,6 @@
 Parsed decls:
 
-{ Direct_decl_parser.classes = {};
+{ classes = {};
   funs =
   { "\\a" ->
     { Typing_defs.fe_deprecated = None;

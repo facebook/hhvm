@@ -1,6 +1,6 @@
 Parsed decls:
 
-{ Direct_decl_parser.classes = {}; funs = {}; typedefs = {}; consts = {};
+{ classes = {}; funs = {}; typedefs = {}; consts = {};
   records =
   { "\\A" ->
     { Typing_defs.rdt_name = ([3:8-9], "\\A"); rdt_extends = None;

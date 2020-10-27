@@ -454,7 +454,6 @@ dependencies = [
 name = "decl_rust"
 version = "0.0.0"
 dependencies = [
- "arena_collections 0.0.0",
  "bumpalo 3.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "direct_decl_parser 0.0.0",
  "ocamlrep 0.0.0",

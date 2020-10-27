@@ -1,13 +1,12 @@
-Parsed decls:
-
-{ classes = {}; funs = {}; typedefs = {}; consts = {};
-  records =
-  { "\\A" ->
-    { Typing_defs.rdt_name = ([3:8-9], "\\A"); rdt_extends = None;
-      rdt_fields =
-      [(([4:7-8], "x"), Typing_defs.ValueRequired);
-        (([5:7-8], "y"), Typing_defs.HasDefaultValue)];
-      rdt_abstract = false; rdt_pos = [Pos.none] } }
-  }
-
-They matched!
+--- legacy
++++ direct decl
+@@ -1,8 +1,8 @@
+ [("\\A",
+   (Shallow_decl_defs.Record
+      { Typing_defs.rdt_name = ([3:8-9], "\\A"); rdt_extends = None;
+        rdt_fields =
+        [(([4:7-8], "x"), Typing_defs.ValueRequired);
+          (([5:7-8], "y"), Typing_defs.HasDefaultValue)];
+-       rdt_abstract = false; rdt_pos = [3:1-6:2] }))
++       rdt_abstract = false; rdt_pos = [Pos.none] }))
+   ]

@@ -1,23 +1,22 @@
-Parsed decls:
-
-{ classes =
-  { "\\:foo" ->
-    { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
-      sc_is_xhp = true; sc_has_xhp_keyword = false; sc_kind = Cnormal;
-      sc_name = ([3:7-11], "\\:foo"); sc_tparams = [];
-      sc_where_constraints = []; sc_extends = []; sc_uses = [];
-      sc_xhp_attr_uses = []; sc_req_extends = []; sc_req_implements = [];
-      sc_implements = [];
-      sc_consts =
-      [{ Shallow_decl_defs.scc_abstract = false; scc_name = ([4:13-14], "X");
-         scc_type =
-         (Rhint (root|xhp_class_const.php line 4, characters 9-11),
-          (Tprim Tint))
-         }
-        ];
-      sc_typeconsts = []; sc_pu_enums = []; sc_props = []; sc_sprops = [];
-      sc_constructor = None; sc_static_methods = []; sc_methods = [];
-      sc_user_attributes = []; sc_enum_type = None } };
-  funs = {}; typedefs = {}; consts = {}; records = {} }
+[("\\:foo",
+  (Shallow_decl_defs.Class
+     { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
+       sc_is_xhp = true; sc_has_xhp_keyword = false; sc_kind = Cnormal;
+       sc_name = ([3:7-11], "\\:foo"); sc_tparams = [];
+       sc_where_constraints = []; sc_extends = []; sc_uses = [];
+       sc_xhp_attr_uses = []; sc_req_extends = []; sc_req_implements = [];
+       sc_implements = [];
+       sc_consts =
+       [{ Shallow_decl_defs.scc_abstract = false;
+          scc_name = ([4:13-14], "X");
+          scc_type =
+          (Rhint (root|xhp_class_const.php line 4, characters 9-11),
+           (Tprim Tint))
+          }
+         ];
+       sc_typeconsts = []; sc_pu_enums = []; sc_props = []; sc_sprops = [];
+       sc_constructor = None; sc_static_methods = []; sc_methods = [];
+       sc_user_attributes = []; sc_enum_type = None }))
+  ]
 
 They matched!

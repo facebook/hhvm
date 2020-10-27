@@ -1,30 +1,27 @@
-Parsed decls:
-
-{ classes = {};
-  funs =
-  { "\\f" ->
-    { Typing_defs.fe_deprecated = None;
-      fe_type =
-      (Rwitness (root|qualified_name_in_attribute_arg.php line 4, characters 10-10),
-       (Tfun
-          { ft_arity = (Fstandard ()); ft_tparams = [];
-            ft_where_constraints = []; ft_params = [];
-            ft_implicit_params =
-            { capability =
-              (Rhint (root|qualified_name_in_attribute_arg.php line 4, characters 10-10),
-               (Tunion []))
-              };
-            ft_ret =
-            { et_enforced = false;
-              et_type =
-              (Rhint (root|qualified_name_in_attribute_arg.php line 4, characters 15-18),
-               (Tprim Tvoid))
-              };
-            ft_flags =
-            (make_ft_flags FSync None ~return_disposable:false
-              ~returns_mutable:false ~returns_void_to_rx:false);
-            ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {#PUBLIC} }));
-      fe_pos = [4:10-11]; fe_php_std_lib = false } };
-  typedefs = {}; consts = {}; records = {} }
+[("\\f",
+  (Shallow_decl_defs.Fun
+     { Typing_defs.fe_deprecated = None;
+       fe_type =
+       (Rwitness (root|qualified_name_in_attribute_arg.php line 4, characters 10-10),
+        (Tfun
+           { ft_arity = (Fstandard ()); ft_tparams = [];
+             ft_where_constraints = []; ft_params = [];
+             ft_implicit_params =
+             { capability =
+               (Rhint (root|qualified_name_in_attribute_arg.php line 4, characters 10-10),
+                (Tunion []))
+               };
+             ft_ret =
+             { et_enforced = false;
+               et_type =
+               (Rhint (root|qualified_name_in_attribute_arg.php line 4, characters 15-18),
+                (Tprim Tvoid))
+               };
+             ft_flags =
+             (make_ft_flags FSync None ~return_disposable:false
+               ~returns_mutable:false ~returns_void_to_rx:false);
+             ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {#PUBLIC} }));
+       fe_pos = [4:10-11]; fe_php_std_lib = false }))
+  ]
 
 They matched!

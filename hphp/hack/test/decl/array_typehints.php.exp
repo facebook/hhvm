@@ -1,236 +1,257 @@
-Parsed decls:
-
-{ classes = {};
-  funs =
-  { "\\a2" ->
-    { Typing_defs.fe_deprecated = None;
-      fe_type =
-      (Rwitness (root|array_typehints.php line 3, characters 10-11),
-       (Tfun
-          { ft_arity = (Fstandard ()); ft_tparams = [];
-            ft_where_constraints = []; ft_params = [];
-            ft_implicit_params =
-            { capability =
-              (Rhint (root|array_typehints.php line 3, characters 10-11),
-               (Tunion []))
-              };
-            ft_ret =
-            { et_enforced = false;
-              et_type =
-              (Rhint (root|array_typehints.php line 3, characters 16-34),
-               (Tdarray (
-                  (Rhint (root|array_typehints.php line 3, characters 23-25),
-                   (Tprim Tint)),
-                  (Rhint (root|array_typehints.php line 3, characters 28-33),
-                   (Tprim Tstring))
-                  )))
-              };
-            ft_flags =
-            (make_ft_flags FSync None ~return_disposable:false
-              ~returns_mutable:false ~returns_void_to_rx:false);
-            ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {#PUBLIC} }));
-      fe_pos = [3:10-12]; fe_php_std_lib = false };
-    "\\d0" ->
-    { Typing_defs.fe_deprecated = None;
-      fe_type =
-      (Rwitness (root|array_typehints.php line 15, characters 10-11),
-       (Tfun
-          { ft_arity = (Fstandard ()); ft_tparams = [];
-            ft_where_constraints = []; ft_params = [];
-            ft_implicit_params =
-            { capability =
-              (Rhint (root|array_typehints.php line 15, characters 10-11),
-               (Tunion []))
-              };
-            ft_ret =
-            { et_enforced = false;
-              et_type =
-              (Rhint (root|array_typehints.php line 15, characters 16-21),
-               (Tdarray ((Rnone (| line 0, characters 0-0), Tany),
-                  (Rnone (| line 0, characters 0-0), Tany))))
-              };
-            ft_flags =
-            (make_ft_flags FSync None ~return_disposable:false
-              ~returns_mutable:false ~returns_void_to_rx:false);
-            ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {#PUBLIC} }));
-      fe_pos = [15:10-12]; fe_php_std_lib = false };
-    "\\d2" ->
-    { Typing_defs.fe_deprecated = None;
-      fe_type =
-      (Rwitness (root|array_typehints.php line 19, characters 10-11),
-       (Tfun
-          { ft_arity = (Fstandard ()); ft_tparams = [];
-            ft_where_constraints = []; ft_params = [];
-            ft_implicit_params =
-            { capability =
-              (Rhint (root|array_typehints.php line 19, characters 10-11),
-               (Tunion []))
-              };
-            ft_ret =
-            { et_enforced = false;
-              et_type =
-              (Rhint (root|array_typehints.php line 19, characters 16-34),
-               (Tdarray (
-                  (Rhint (root|array_typehints.php line 19, characters 23-25),
-                   (Tprim Tint)),
-                  (Rhint (root|array_typehints.php line 19, characters 28-33),
-                   (Tprim Tstring))
-                  )))
-              };
-            ft_flags =
-            (make_ft_flags FSync None ~return_disposable:false
-              ~returns_mutable:false ~returns_void_to_rx:false);
-            ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {#PUBLIC} }));
-      fe_pos = [19:10-12]; fe_php_std_lib = false };
-    "\\v0" ->
-    { Typing_defs.fe_deprecated = None;
-      fe_type =
-      (Rwitness (root|array_typehints.php line 7, characters 10-11),
-       (Tfun
-          { ft_arity = (Fstandard ()); ft_tparams = [];
-            ft_where_constraints = []; ft_params = [];
-            ft_implicit_params =
-            { capability =
-              (Rhint (root|array_typehints.php line 7, characters 10-11),
-               (Tunion []))
-              };
-            ft_ret =
-            { et_enforced = false;
-              et_type =
-              (Rhint (root|array_typehints.php line 7, characters 16-21),
-               (Tvarray (Rnone (| line 0, characters 0-0), Tany)))
-              };
-            ft_flags =
-            (make_ft_flags FSync None ~return_disposable:false
-              ~returns_mutable:false ~returns_void_to_rx:false);
-            ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {#PUBLIC} }));
-      fe_pos = [7:10-12]; fe_php_std_lib = false };
-    "\\v1" ->
-    { Typing_defs.fe_deprecated = None;
-      fe_type =
-      (Rwitness (root|array_typehints.php line 11, characters 10-11),
-       (Tfun
-          { ft_arity = (Fstandard ()); ft_tparams = [];
-            ft_where_constraints = []; ft_params = [];
-            ft_implicit_params =
-            { capability =
-              (Rhint (root|array_typehints.php line 11, characters 10-11),
-               (Tunion []))
-              };
-            ft_ret =
-            { et_enforced = false;
-              et_type =
-              (Rhint (root|array_typehints.php line 11, characters 16-26),
-               (Tvarray
-                  (Rhint (root|array_typehints.php line 11, characters 23-25),
-                   (Tprim Tint))))
-              };
-            ft_flags =
-            (make_ft_flags FSync None ~return_disposable:false
-              ~returns_mutable:false ~returns_void_to_rx:false);
-            ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {#PUBLIC} }));
-      fe_pos = [11:10-12]; fe_php_std_lib = false };
-    "\\vd0" ->
-    { Typing_defs.fe_deprecated = None;
-      fe_type =
-      (Rwitness (root|array_typehints.php line 23, characters 10-12),
-       (Tfun
-          { ft_arity = (Fstandard ()); ft_tparams = [];
-            ft_where_constraints = []; ft_params = [];
-            ft_implicit_params =
-            { capability =
-              (Rhint (root|array_typehints.php line 23, characters 10-12),
-               (Tunion []))
-              };
-            ft_ret =
-            { et_enforced = false;
-              et_type =
-              (Rhint (root|array_typehints.php line 23, characters 17-32),
-               (Tvarray_or_darray
-                  (Rnone (| line 0, characters 0-0), (Tprim Tarraykey)),
-                  (Rnone (| line 0, characters 0-0), Tany)))
-              };
-            ft_flags =
-            (make_ft_flags FSync None ~return_disposable:false
-              ~returns_mutable:false ~returns_void_to_rx:false);
-            ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {#PUBLIC} }));
-      fe_pos = [23:10-13]; fe_php_std_lib = false };
-    "\\vd1" ->
-    { Typing_defs.fe_deprecated = None;
-      fe_type =
-      (Rwitness (root|array_typehints.php line 27, characters 10-12),
-       (Tfun
-          { ft_arity = (Fstandard ()); ft_tparams = [];
-            ft_where_constraints = []; ft_params = [];
-            ft_implicit_params =
-            { capability =
-              (Rhint (root|array_typehints.php line 27, characters 10-12),
-               (Tunion []))
-              };
-            ft_ret =
-            { et_enforced = false;
-              et_type =
-              (Rhint (root|array_typehints.php line 27, characters 17-37),
-               (Tvarray_or_darray
-                  (Rnone (| line 0, characters 0-0), (Tprim Tarraykey)),
-                  (Rhint (root|array_typehints.php line 27, characters 34-36),
-                   (Tprim Tint))))
-              };
-            ft_flags =
-            (make_ft_flags FSync None ~return_disposable:false
-              ~returns_mutable:false ~returns_void_to_rx:false);
-            ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {#PUBLIC} }));
-      fe_pos = [27:10-13]; fe_php_std_lib = false };
-    "\\vd2" ->
-    { Typing_defs.fe_deprecated = None;
-      fe_type =
-      (Rwitness (root|array_typehints.php line 31, characters 10-12),
-       (Tfun
-          { ft_arity = (Fstandard ()); ft_tparams = [];
-            ft_where_constraints = []; ft_params = [];
-            ft_implicit_params =
-            { capability =
-              (Rhint (root|array_typehints.php line 31, characters 10-12),
-               (Tunion []))
-              };
-            ft_ret =
-            { et_enforced = false;
-              et_type =
-              (Rhint (root|array_typehints.php line 31, characters 17-45),
-               (Tvarray_or_darray
-                  (Rhint (root|array_typehints.php line 31, characters 34-36),
-                   (Tprim Tint)),
-                  (Rhint (root|array_typehints.php line 31, characters 39-44),
-                   (Tprim Tstring))))
-              };
-            ft_flags =
-            (make_ft_flags FSync None ~return_disposable:false
-              ~returns_mutable:false ~returns_void_to_rx:false);
-            ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {#PUBLIC} }));
-      fe_pos = [31:10-13]; fe_php_std_lib = false };
-    "\\vd3" ->
-    { Typing_defs.fe_deprecated = None;
-      fe_type =
-      (Rwitness (root|array_typehints.php line 35, characters 10-12),
-       (Tfun
-          { ft_arity = (Fstandard ()); ft_tparams = [];
-            ft_where_constraints = []; ft_params = [];
-            ft_implicit_params =
-            { capability =
-              (Rhint (root|array_typehints.php line 35, characters 10-12),
-               (Tunion []))
-              };
-            ft_ret =
-            { et_enforced = false;
-              et_type =
-              (Rhint (root|array_typehints.php line 35, characters 17-51),
-               Tany)
-              };
-            ft_flags =
-            (make_ft_flags FSync None ~return_disposable:false
-              ~returns_mutable:false ~returns_void_to_rx:false);
-            ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {#PUBLIC} }));
-      fe_pos = [35:10-13]; fe_php_std_lib = false } };
-  typedefs = {}; consts = {}; records = {} }
-
-They matched!
+--- legacy
++++ direct decl
+@@ -1,248 +1,239 @@
+ [("\\a2",
+   (Shallow_decl_defs.Fun
+      { Typing_defs.fe_deprecated = None;
+        fe_type =
+        (Rwitness (root|array_typehints.php line 3, characters 10-11),
+         (Tfun
+            { ft_arity = (Fstandard ()); ft_tparams = [];
+              ft_where_constraints = []; ft_params = [];
+              ft_implicit_params =
+              { capability =
+                (Rhint (root|array_typehints.php line 3, characters 10-11),
+                 (Tunion []))
+                };
+              ft_ret =
+              { et_enforced = false;
+                et_type =
+                (Rhint (root|array_typehints.php line 3, characters 16-34),
+                 (Tdarray (
+                    (Rhint (root|array_typehints.php line 3, characters 23-25),
+                     (Tprim Tint)),
+                    (Rhint (root|array_typehints.php line 3, characters 28-33),
+                     (Tprim Tstring))
+                    )))
+                };
+              ft_flags =
+              (make_ft_flags FSync None ~return_disposable:false
+                ~returns_mutable:false ~returns_void_to_rx:false);
+              ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {#PUBLIC} }));
+        fe_pos = [3:10-12]; fe_php_std_lib = false }));
+   ("\\v0",
+    (Shallow_decl_defs.Fun
+       { Typing_defs.fe_deprecated = None;
+         fe_type =
+         (Rwitness (root|array_typehints.php line 7, characters 10-11),
+          (Tfun
+             { ft_arity = (Fstandard ()); ft_tparams = [];
+               ft_where_constraints = []; ft_params = [];
+               ft_implicit_params =
+               { capability =
+                 (Rhint (root|array_typehints.php line 7, characters 10-11),
+                  (Tunion []))
+                 };
+               ft_ret =
+               { et_enforced = false;
+                 et_type =
+                 (Rhint (root|array_typehints.php line 7, characters 16-21),
+-                 (Tvarray
+-                    (Rhint (root|array_typehints.php line 7, characters 16-21),
+-                     Tany)))
++                 (Tvarray (Rnone (| line 0, characters 0-0), Tany)))
+                 };
+               ft_flags =
+               (make_ft_flags FSync None ~return_disposable:false
+                 ~returns_mutable:false ~returns_void_to_rx:false);
+               ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {#PUBLIC} }));
+         fe_pos = [7:10-12]; fe_php_std_lib = false }));
+   ("\\v1",
+    (Shallow_decl_defs.Fun
+       { Typing_defs.fe_deprecated = None;
+         fe_type =
+         (Rwitness (root|array_typehints.php line 11, characters 10-11),
+          (Tfun
+             { ft_arity = (Fstandard ()); ft_tparams = [];
+               ft_where_constraints = []; ft_params = [];
+               ft_implicit_params =
+               { capability =
+                 (Rhint (root|array_typehints.php line 11, characters 10-11),
+                  (Tunion []))
+                 };
+               ft_ret =
+               { et_enforced = false;
+                 et_type =
+                 (Rhint (root|array_typehints.php line 11, characters 16-26),
+                  (Tvarray
+                     (Rhint (root|array_typehints.php line 11, characters 23-25),
+                      (Tprim Tint))))
+                 };
+               ft_flags =
+               (make_ft_flags FSync None ~return_disposable:false
+                 ~returns_mutable:false ~returns_void_to_rx:false);
+               ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {#PUBLIC} }));
+         fe_pos = [11:10-12]; fe_php_std_lib = false }));
+   ("\\d0",
+    (Shallow_decl_defs.Fun
+       { Typing_defs.fe_deprecated = None;
+         fe_type =
+         (Rwitness (root|array_typehints.php line 15, characters 10-11),
+          (Tfun
+             { ft_arity = (Fstandard ()); ft_tparams = [];
+               ft_where_constraints = []; ft_params = [];
+               ft_implicit_params =
+               { capability =
+                 (Rhint (root|array_typehints.php line 15, characters 10-11),
+                  (Tunion []))
+                 };
+               ft_ret =
+               { et_enforced = false;
+                 et_type =
+                 (Rhint (root|array_typehints.php line 15, characters 16-21),
+-                 (Tdarray (
+-                    (Rhint (root|array_typehints.php line 15, characters 16-21),
+-                     Tany),
+-                    (Rhint (root|array_typehints.php line 15, characters 16-21),
+-                     Tany)
+-                    )))
++                 (Tdarray ((Rnone (| line 0, characters 0-0), Tany),
++                    (Rnone (| line 0, characters 0-0), Tany))))
+                 };
+               ft_flags =
+               (make_ft_flags FSync None ~return_disposable:false
+                 ~returns_mutable:false ~returns_void_to_rx:false);
+               ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {#PUBLIC} }));
+         fe_pos = [15:10-12]; fe_php_std_lib = false }));
+   ("\\d2",
+    (Shallow_decl_defs.Fun
+       { Typing_defs.fe_deprecated = None;
+         fe_type =
+         (Rwitness (root|array_typehints.php line 19, characters 10-11),
+          (Tfun
+             { ft_arity = (Fstandard ()); ft_tparams = [];
+               ft_where_constraints = []; ft_params = [];
+               ft_implicit_params =
+               { capability =
+                 (Rhint (root|array_typehints.php line 19, characters 10-11),
+                  (Tunion []))
+                 };
+               ft_ret =
+               { et_enforced = false;
+                 et_type =
+                 (Rhint (root|array_typehints.php line 19, characters 16-34),
+                  (Tdarray (
+                     (Rhint (root|array_typehints.php line 19, characters 23-25),
+                      (Tprim Tint)),
+                     (Rhint (root|array_typehints.php line 19, characters 28-33),
+                      (Tprim Tstring))
+                     )))
+                 };
+               ft_flags =
+               (make_ft_flags FSync None ~return_disposable:false
+                 ~returns_mutable:false ~returns_void_to_rx:false);
+               ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {#PUBLIC} }));
+         fe_pos = [19:10-12]; fe_php_std_lib = false }));
+   ("\\vd0",
+    (Shallow_decl_defs.Fun
+       { Typing_defs.fe_deprecated = None;
+         fe_type =
+         (Rwitness (root|array_typehints.php line 23, characters 10-12),
+          (Tfun
+             { ft_arity = (Fstandard ()); ft_tparams = [];
+               ft_where_constraints = []; ft_params = [];
+               ft_implicit_params =
+               { capability =
+                 (Rhint (root|array_typehints.php line 23, characters 10-12),
+                  (Tunion []))
+                 };
+               ft_ret =
+               { et_enforced = false;
+                 et_type =
+                 (Rhint (root|array_typehints.php line 23, characters 17-32),
+                  (Tvarray_or_darray
+-                    (Rvarray_or_darray_key (root|array_typehints.php line 23, characters 17-32),
+-                     (Tprim Tarraykey)),
+-                    (Rhint (root|array_typehints.php line 23, characters 17-32),
+-                     Tany)))
++                    (Rnone (| line 0, characters 0-0), (Tprim Tarraykey)),
++                    (Rnone (| line 0, characters 0-0), Tany)))
+                 };
+               ft_flags =
+               (make_ft_flags FSync None ~return_disposable:false
+                 ~returns_mutable:false ~returns_void_to_rx:false);
+               ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {#PUBLIC} }));
+         fe_pos = [23:10-13]; fe_php_std_lib = false }));
+   ("\\vd1",
+    (Shallow_decl_defs.Fun
+       { Typing_defs.fe_deprecated = None;
+         fe_type =
+         (Rwitness (root|array_typehints.php line 27, characters 10-12),
+          (Tfun
+             { ft_arity = (Fstandard ()); ft_tparams = [];
+               ft_where_constraints = []; ft_params = [];
+               ft_implicit_params =
+               { capability =
+                 (Rhint (root|array_typehints.php line 27, characters 10-12),
+                  (Tunion []))
+                 };
+               ft_ret =
+               { et_enforced = false;
+                 et_type =
+                 (Rhint (root|array_typehints.php line 27, characters 17-37),
+                  (Tvarray_or_darray
+-                    (Rvarray_or_darray_key (root|array_typehints.php line 27, characters 17-37),
+-                     (Tprim Tarraykey)),
++                    (Rnone (| line 0, characters 0-0), (Tprim Tarraykey)),
+                     (Rhint (root|array_typehints.php line 27, characters 34-36),
+                      (Tprim Tint))))
+                 };
+               ft_flags =
+               (make_ft_flags FSync None ~return_disposable:false
+                 ~returns_mutable:false ~returns_void_to_rx:false);
+               ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {#PUBLIC} }));
+         fe_pos = [27:10-13]; fe_php_std_lib = false }));
+   ("\\vd2",
+    (Shallow_decl_defs.Fun
+       { Typing_defs.fe_deprecated = None;
+         fe_type =
+         (Rwitness (root|array_typehints.php line 31, characters 10-12),
+          (Tfun
+             { ft_arity = (Fstandard ()); ft_tparams = [];
+               ft_where_constraints = []; ft_params = [];
+               ft_implicit_params =
+               { capability =
+                 (Rhint (root|array_typehints.php line 31, characters 10-12),
+                  (Tunion []))
+                 };
+               ft_ret =
+               { et_enforced = false;
+                 et_type =
+                 (Rhint (root|array_typehints.php line 31, characters 17-45),
+                  (Tvarray_or_darray
+                     (Rhint (root|array_typehints.php line 31, characters 34-36),
+                      (Tprim Tint)),
+                     (Rhint (root|array_typehints.php line 31, characters 39-44),
+                      (Tprim Tstring))))
+                 };
+               ft_flags =
+               (make_ft_flags FSync None ~return_disposable:false
+                 ~returns_mutable:false ~returns_void_to_rx:false);
+               ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {#PUBLIC} }));
+         fe_pos = [31:10-13]; fe_php_std_lib = false }));
+   ("\\vd3",
+    (Shallow_decl_defs.Fun
+       { Typing_defs.fe_deprecated = None;
+         fe_type =
+         (Rwitness (root|array_typehints.php line 35, characters 10-12),
+          (Tfun
+             { ft_arity = (Fstandard ()); ft_tparams = [];
+               ft_where_constraints = []; ft_params = [];
+               ft_implicit_params =
+               { capability =
+                 (Rhint (root|array_typehints.php line 35, characters 10-12),
+                  (Tunion []))
+                 };
+               ft_ret =
+               { et_enforced = false;
+                 et_type =
+                 (Rhint (root|array_typehints.php line 35, characters 17-51),
+                  Tany)
+                 };
+               ft_flags =
+               (make_ft_flags FSync None ~return_disposable:false
+                 ~returns_mutable:false ~returns_void_to_rx:false);
+               ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {#PUBLIC} }));
+         fe_pos = [35:10-13]; fe_php_std_lib = false }))
+   ]

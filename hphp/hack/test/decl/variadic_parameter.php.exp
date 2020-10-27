@@ -1,78 +1,75 @@
-Parsed decls:
-
-{ classes = {};
-  funs =
-  { "\\test" ->
-    { Typing_defs.fe_deprecated = None;
-      fe_type =
-      (Rwitness (root|variadic_parameter.php line 3, characters 10-13),
-       (Tfun
-          { ft_arity = (Fstandard ()); ft_tparams = [];
-            ft_where_constraints = [];
-            ft_params =
-            [{ fp_pos = [3:42-44]; fp_name = (Some "$f");
-               fp_type =
-               { et_enforced = false;
-                 et_type =
-                 (Rhint (root|variadic_parameter.php line 3, characters 15-40),
-                  (Tfun
-                     { ft_arity =
-                       (Fvariadic (
-                          { fp_pos = [3:25-30]; fp_name = None;
-                            fp_type =
-                            { et_enforced = false;
-                              et_type =
-                              (Rhint (root|variadic_parameter.php line 3, characters 25-29),
-                               Tmixed)
-                              };
-                            fp_flags =
-                            (make_fp_flags ~mutability:None
-                              ~accept_disposable:false ~has_default:false
-                              ~mode:Typing_defs_core.FPnormal
-                              ~ifc_external:false ~ifc_can_call:false);
-                             }
-                          ));
-                       ft_tparams = []; ft_where_constraints = [];
-                       ft_params = [];
-                       ft_implicit_params =
-                       { capability =
-                         (Rhint (root|variadic_parameter.php line 3, characters 15-40),
-                          (Tunion []))
-                         };
-                       ft_ret =
-                       { et_enforced = false;
-                         et_type =
-                         (Rhint (root|variadic_parameter.php line 3, characters 36-39),
-                          (Tprim Tvoid))
-                         };
-                       ft_flags =
-                       (make_ft_flags FSync None ~return_disposable:false
-                         ~returns_mutable:false ~returns_void_to_rx:false);
-                       ft_reactive = Nonreactive;
-                       ft_ifc_decl = FDPolicied {#PUBLIC} }))
-                 };
-               fp_flags =
-               (make_fp_flags ~mutability:None ~accept_disposable:false
-                 ~has_default:false ~mode:Typing_defs_core.FPnormal
-                 ~ifc_external:false ~ifc_can_call:false);
-                }
-              ];
-            ft_implicit_params =
-            { capability =
-              (Rhint (root|variadic_parameter.php line 3, characters 10-13),
-               (Tunion []))
-              };
-            ft_ret =
-            { et_enforced = false;
-              et_type =
-              (Rhint (root|variadic_parameter.php line 3, characters 47-50),
-               (Tprim Tvoid))
-              };
-            ft_flags =
-            (make_ft_flags FSync None ~return_disposable:false
-              ~returns_mutable:false ~returns_void_to_rx:false);
-            ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {#PUBLIC} }));
-      fe_pos = [3:10-14]; fe_php_std_lib = false } };
-  typedefs = {}; consts = {}; records = {} }
+[("\\test",
+  (Shallow_decl_defs.Fun
+     { Typing_defs.fe_deprecated = None;
+       fe_type =
+       (Rwitness (root|variadic_parameter.php line 3, characters 10-13),
+        (Tfun
+           { ft_arity = (Fstandard ()); ft_tparams = [];
+             ft_where_constraints = [];
+             ft_params =
+             [{ fp_pos = [3:42-44]; fp_name = (Some "$f");
+                fp_type =
+                { et_enforced = false;
+                  et_type =
+                  (Rhint (root|variadic_parameter.php line 3, characters 15-40),
+                   (Tfun
+                      { ft_arity =
+                        (Fvariadic (
+                           { fp_pos = [3:25-30]; fp_name = None;
+                             fp_type =
+                             { et_enforced = false;
+                               et_type =
+                               (Rhint (root|variadic_parameter.php line 3, characters 25-29),
+                                Tmixed)
+                               };
+                             fp_flags =
+                             (make_fp_flags ~mutability:None
+                               ~accept_disposable:false ~has_default:false
+                               ~mode:Typing_defs_core.FPnormal
+                               ~ifc_external:false ~ifc_can_call:false);
+                              }
+                           ));
+                        ft_tparams = []; ft_where_constraints = [];
+                        ft_params = [];
+                        ft_implicit_params =
+                        { capability =
+                          (Rhint (root|variadic_parameter.php line 3, characters 15-40),
+                           (Tunion []))
+                          };
+                        ft_ret =
+                        { et_enforced = false;
+                          et_type =
+                          (Rhint (root|variadic_parameter.php line 3, characters 36-39),
+                           (Tprim Tvoid))
+                          };
+                        ft_flags =
+                        (make_ft_flags FSync None ~return_disposable:false
+                          ~returns_mutable:false ~returns_void_to_rx:false);
+                        ft_reactive = Nonreactive;
+                        ft_ifc_decl = FDPolicied {#PUBLIC} }))
+                  };
+                fp_flags =
+                (make_fp_flags ~mutability:None ~accept_disposable:false
+                  ~has_default:false ~mode:Typing_defs_core.FPnormal
+                  ~ifc_external:false ~ifc_can_call:false);
+                 }
+               ];
+             ft_implicit_params =
+             { capability =
+               (Rhint (root|variadic_parameter.php line 3, characters 10-13),
+                (Tunion []))
+               };
+             ft_ret =
+             { et_enforced = false;
+               et_type =
+               (Rhint (root|variadic_parameter.php line 3, characters 47-50),
+                (Tprim Tvoid))
+               };
+             ft_flags =
+             (make_ft_flags FSync None ~return_disposable:false
+               ~returns_mutable:false ~returns_void_to_rx:false);
+             ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {#PUBLIC} }));
+       fe_pos = [3:10-14]; fe_php_std_lib = false }))
+  ]
 
 They matched!

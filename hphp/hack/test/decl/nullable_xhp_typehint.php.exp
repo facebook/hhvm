@@ -1,16 +1,13 @@
-Parsed decls:
-
-{ classes = {}; funs = {};
-  typedefs =
-  { "\\MaybeDiv" ->
-    { Typing_defs.td_pos = [3:6-14]; td_vis = Transparent; td_tparams = [];
-      td_constraint = None;
-      td_type =
-      (Rhint (root|nullable_xhp_typehint.php line 3, characters 17-21),
-       (Toption
-          (Rhint (root|nullable_xhp_typehint.php line 3, characters 18-21),
-           (Tapply (([3:18-22], "\\:div"), [])))))
-      } };
-  consts = {}; records = {} }
+[("\\MaybeDiv",
+  (Shallow_decl_defs.Typedef
+     { Typing_defs.td_pos = [3:6-14]; td_vis = Transparent; td_tparams = [];
+       td_constraint = None;
+       td_type =
+       (Rhint (root|nullable_xhp_typehint.php line 3, characters 17-21),
+        (Toption
+           (Rhint (root|nullable_xhp_typehint.php line 3, characters 18-21),
+            (Tapply (([3:18-22], "\\:div"), [])))))
+       }))
+  ]
 
 They matched!

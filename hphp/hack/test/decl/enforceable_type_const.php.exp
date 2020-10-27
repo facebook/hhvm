@@ -1,24 +1,22 @@
-Parsed decls:
-
-{ classes =
-  { "\\I" ->
-    { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
-      sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cinterface;
-      sc_name = ([3:11-12], "\\I"); sc_tparams = [];
-      sc_where_constraints = []; sc_extends = []; sc_uses = [];
-      sc_xhp_attr_uses = []; sc_req_extends = []; sc_req_implements = [];
-      sc_implements = []; sc_consts = [];
-      sc_typeconsts =
-      [{ Shallow_decl_defs.stc_abstract = (Typing_defs.TCAbstract None);
-         stc_constraint =
-         (Some (Rhint (root|enforceable_type_const.php line 4, characters 46-53),
-                (Tprim Tarraykey)));
-         stc_name = ([4:41-42], "T"); stc_type = None;
-         stc_enforceable = ([4:5-18], true); stc_reifiable = None }
-        ];
-      sc_pu_enums = []; sc_props = []; sc_sprops = []; sc_constructor = None;
-      sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
-      sc_enum_type = None } };
-  funs = {}; typedefs = {}; consts = {}; records = {} }
+[("\\I",
+  (Shallow_decl_defs.Class
+     { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
+       sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cinterface;
+       sc_name = ([3:11-12], "\\I"); sc_tparams = [];
+       sc_where_constraints = []; sc_extends = []; sc_uses = [];
+       sc_xhp_attr_uses = []; sc_req_extends = []; sc_req_implements = [];
+       sc_implements = []; sc_consts = [];
+       sc_typeconsts =
+       [{ Shallow_decl_defs.stc_abstract = (Typing_defs.TCAbstract None);
+          stc_constraint =
+          (Some (Rhint (root|enforceable_type_const.php line 4, characters 46-53),
+                 (Tprim Tarraykey)));
+          stc_name = ([4:41-42], "T"); stc_type = None;
+          stc_enforceable = ([4:5-18], true); stc_reifiable = None }
+         ];
+       sc_pu_enums = []; sc_props = []; sc_sprops = [];
+       sc_constructor = None; sc_static_methods = []; sc_methods = [];
+       sc_user_attributes = []; sc_enum_type = None }))
+  ]
 
 They matched!

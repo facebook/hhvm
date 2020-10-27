@@ -1,22 +1,20 @@
-Parsed decls:
-
-{ classes =
-  { "\\Y" ->
-    { Shallow_decl_defs.sc_mode = Mpartial; sc_final = false;
-      sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
-      sc_name = ([12:7-8], "\\Y"); sc_tparams = [];
-      sc_where_constraints = []; sc_extends = []; sc_uses = [];
-      sc_xhp_attr_uses = []; sc_req_extends = []; sc_req_implements = [];
-      sc_implements = []; sc_consts = []; sc_typeconsts = [];
-      sc_pu_enums = [];
-      sc_props =
-      [{ Shallow_decl_defs.sp_const = false; sp_xhp_attr = None;
-         sp_lateinit = false; sp_lsb = false; sp_name = ([13:10-12], "x");
-         sp_needs_init = false; sp_type = None; sp_abstract = false;
-         sp_visibility = Public }
-        ];
-      sc_sprops = []; sc_constructor = None; sc_static_methods = [];
-      sc_methods = []; sc_user_attributes = []; sc_enum_type = None } };
-  funs = {}; typedefs = {}; consts = {}; records = {} }
+[("\\Y",
+  (Shallow_decl_defs.Class
+     { Shallow_decl_defs.sc_mode = Mpartial; sc_final = false;
+       sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
+       sc_name = ([12:7-8], "\\Y"); sc_tparams = [];
+       sc_where_constraints = []; sc_extends = []; sc_uses = [];
+       sc_xhp_attr_uses = []; sc_req_extends = []; sc_req_implements = [];
+       sc_implements = []; sc_consts = []; sc_typeconsts = [];
+       sc_pu_enums = [];
+       sc_props =
+       [{ Shallow_decl_defs.sp_const = false; sp_xhp_attr = None;
+          sp_lateinit = false; sp_lsb = false; sp_name = ([13:10-12], "x");
+          sp_needs_init = false; sp_type = None; sp_abstract = false;
+          sp_visibility = Public }
+         ];
+       sc_sprops = []; sc_constructor = None; sc_static_methods = [];
+       sc_methods = []; sc_user_attributes = []; sc_enum_type = None }))
+  ]
 
 They matched!

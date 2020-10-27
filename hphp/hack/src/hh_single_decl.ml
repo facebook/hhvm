@@ -9,11 +9,6 @@
 open Hh_prelude
 open Direct_decl_parser
 
-type verbosity =
-  | Standard
-  | Verbose
-  | Silent
-
 let auto_namespace_map = []
 
 let popt =
@@ -51,202 +46,67 @@ let init root : Provider_context.t =
 
   ctx
 
-let time verbosity msg f =
-  let before = Unix.gettimeofday () in
-  let ret = f () in
-  let after = Unix.gettimeofday () in
-  (match verbosity with
-  | Verbose -> Printf.printf "%s: %f ms\n" msg ((after -. before) *. 1000.)
-  | _ -> ());
-  ret
+let rec shallow_declare_ast ctx decls prog =
+  List.fold prog ~init:decls ~f:(fun decls def ->
+      let open Aast in
+      match def with
+      | Namespace (_, prog) -> shallow_declare_ast ctx decls prog
+      | NamespaceUse _ -> decls
+      | SetNamespaceEnv _ -> decls
+      | FileAttributes _ -> decls
+      | Fun f ->
+        let (name, decl) =
+          Decl_nast.fun_naming_and_decl ~write_shmem:false ctx f
+        in
+        (name, Shallow_decl_defs.Fun decl) :: decls
+      | Class c ->
+        let decl = Shallow_classes_provider.decl ~use_cache:false ctx c in
+        let (_, name) = decl.Shallow_decl_defs.sc_name in
+        (name, Shallow_decl_defs.Class decl) :: decls
+      | RecordDef rd ->
+        let (name, decl) =
+          Decl_nast.record_def_naming_and_decl ~write_shmem:false ctx rd
+        in
+        (name, Shallow_decl_defs.Record decl) :: decls
+      | Typedef typedef ->
+        let (name, decl) =
+          Decl_nast.typedef_naming_and_decl ~write_shmem:false ctx typedef
+        in
+        (name, Shallow_decl_defs.Typedef decl) :: decls
+      | Stmt _ -> decls
+      | Constant cst ->
+        let (name, ty) =
+          Decl_nast.const_naming_and_decl ~write_shmem:false ctx cst
+        in
+        let decl = Typing_defs.{ cd_pos = fst cst.cst_name; cd_type = ty } in
+        (name, Shallow_decl_defs.Const decl) :: decls)
 
-let colon = Str.regexp ":"
-
-let dash = Str.regexp "-"
-
-let mangle_xhp x =
-  x
-  |> Str.replace_first colon "xhp_"
-  |> Str.global_replace colon "__"
-  |> Str.global_replace dash "_"
-
-type decls = {
-  classes: Shallow_decl_defs.shallow_class SMap.t;
-  funs: Typing_defs.fun_elt SMap.t;
-  typedefs: Typing_defs.typedef_type SMap.t;
-  consts: Typing_defs.const_decl SMap.t;
-  records: Typing_defs.record_def_type SMap.t;
-}
-[@@deriving show { with_path = false }]
-
-let empty_decls =
-  {
-    classes = SMap.empty;
-    funs = SMap.empty;
-    typedefs = SMap.empty;
-    consts = SMap.empty;
-    records = SMap.empty;
-  }
-
-let parse_decls fn text auto_namespace_map =
-  let decls = parse_decls_ffi fn text auto_namespace_map in
-  List.fold decls ~init:empty_decls ~f:(fun decls (name, decl) ->
-      let open Shallow_decl_defs in
-      match decl with
-      | Class x -> { decls with classes = SMap.add name x decls.classes }
-      | Fun x -> { decls with funs = SMap.add name x decls.funs }
-      | Typedef x -> { decls with typedefs = SMap.add name x decls.typedefs }
-      | Record x -> { decls with records = SMap.add name x decls.records }
-      | Const x -> { decls with consts = SMap.add name x decls.consts })
-
-let compare_decl ctx verbosity fn =
+let compare_decls ctx fn =
   let fn = Path.to_string fn in
   let text = RealDisk.cat fn in
   let fn = Relative_path.(create Root fn) in
-  let decls =
-    time verbosity "Parsed decls" (fun () ->
-        parse_decls fn text auto_namespace_map)
-  in
-  let facts =
-    Option.value_exn
-      ~message:"Could not parse facts from file"
-      (Facts_parser.from_text
-         ~php5_compat_mode:false
-         ~hhvm_compat_mode:false
-         ~disable_nontoplevel_declarations:false
-         ~disable_legacy_soft_typehints:false
-         ~allow_new_attribute_syntax:true
-         ~disable_legacy_attribute_syntax:false
-         ~enable_xhp_class_modifier:false
-         ~disable_xhp_element_mangling:false
-         ~filename:fn
-         ~text)
-  in
-  let passes_symbol_check () =
-    let compare name facts_symbols decl_symbols =
-      let facts_symbols = SSet.of_list (List.map facts_symbols (( ^ ) "\\")) in
-      let decl_symbols = SSet.of_list decl_symbols in
-      let facts_only = SSet.diff facts_symbols decl_symbols in
-      let decl_only = SSet.diff decl_symbols facts_symbols in
-      if (not @@ SSet.is_empty facts_only) || (not @@ SSet.is_empty decl_only)
-      then (
-        if not @@ SSet.is_empty facts_only then
-          Printf.eprintf
-            "The following %s were found in the facts parse but not the decl parse: %s\n"
-            name
-            (SSet.show facts_only);
-        if not @@ SSet.is_empty decl_only then
-          Printf.eprintf
-            "The following %s were found in the decl parse but not the facts parse: %s\n"
-            name
-            (SSet.show decl_only);
-        prerr_endline "";
-        false
-      ) else
-        true
-    in
-    [
-      compare "typedef(s)" facts.Facts.type_aliases (SMap.keys decls.typedefs);
-      compare "constant(s)" facts.Facts.constants (SMap.keys decls.consts);
-      compare "function(s)" facts.Facts.functions (SMap.keys decls.funs);
-      compare
-        "class(es)"
-        (Facts.InvSMap.keys facts.Facts.types)
-        ( List.map (SMap.keys decls.classes) ~f:mangle_xhp
-        @ SMap.keys decls.typedefs );
-    ]
-    |> List.reduce_exn ~f:( && )
-  in
-  let passes_decl_check () =
-    let () =
-      time verbosity "Calculated legacy decls" (fun () ->
-          (* Put the file contents in the disk heap so both the decl parsing and
-           * legacy decl branches can avoid having to wait for file I/O. *)
-          File_provider.provide_file fn (File_provider.Disk text);
-          Decl.make_env ~sh:SharedMem.Uses ctx fn)
-    in
-    let compare name get_decl eq_decl show_decl parsed_decls =
-      let different_decls =
-        SMap.fold
-          (fun key parsed_decl acc ->
-            let legacy_decl = get_decl ctx fn key in
-            let legacy_decl_str = show_decl legacy_decl in
-            let parsed_decl_str = show_decl parsed_decl in
-            if not @@ eq_decl legacy_decl parsed_decl then
-              (key, legacy_decl_str, parsed_decl_str) :: acc
-            else
-              acc)
-          parsed_decls
-          []
-      in
-      match different_decls with
-      | [] -> true
-      | different_decls ->
-        Printf.eprintf
-          "The following %s differed between the legacy and parsed versions:\n"
-          name;
-        List.iter different_decls ~f:(fun (key, legacy_decl, parsed_decl) ->
-            Tempfile.with_real_tempdir (fun dir ->
-                let temp_dir = Path.to_string dir in
-                let temp_file () =
-                  Caml.Filename.temp_file
-                    ~temp_dir
-                    (Printf.sprintf "%s_%s" name key)
-                    ".txt"
-                in
-                let expected = temp_file () in
-                let actual = temp_file () in
-                Disk.write_file ~file:expected ~contents:legacy_decl;
-                Disk.write_file ~file:actual ~contents:parsed_decl;
-                Printf.eprintf "\n\n[%s]\n" key;
-                Out_channel.flush stderr;
-                Ppxlib_print_diff.print
-                  ~diff_command:"diff -U9999 --label legacy --label parsed"
-                  ~file1:expected
-                  ~file2:actual
-                  ()));
-        false
-    in
-    [
-      compare
-        "typedef(s)"
-        (Decl.declare_typedef_in_file ~write_shmem:true)
-        Typing_defs.equal_typedef_type
-        Typing_defs.show_typedef_type
-        decls.typedefs;
-      compare
-        "constant(s)"
-        (fun ctx a b -> Decl.declare_const_in_file ~write_shmem:true ctx a b)
-        Typing_defs.equal_decl_ty
-        Typing_defs.show_decl_ty
-        (SMap.map (fun cd -> cd.Typing_defs.cd_type) decls.consts);
-      compare
-        "function(s)"
-        (Decl.declare_fun_in_file ~write_shmem:true)
-        Typing_defs.equal_fun_elt
-        Typing_defs.show_fun_elt
-        decls.funs;
-      compare
-        "class(es)"
-        (fun ctx fn name ->
-          let class_ = Ast_provider.find_class_in_file ctx fn name in
-          let class_ = Option.value_exn class_ in
-          let class_ =
-            Shallow_classes_provider.decl ctx ~use_cache:true class_
-          in
-          class_)
-        Shallow_decl_defs.equal_shallow_class
-        Shallow_decl_defs.show_shallow_class
-        decls.classes;
-    ]
-    |> List.reduce_exn ~f:( && )
-  in
-  let matched = passes_symbol_check () && passes_decl_check () in
-  if matched then (
-    print_endline "Parsed decls:\n";
-    print_endline (show_decls decls);
-    print_endline "\nThey matched!"
-  );
+  let ast = Ast_provider.get_ast ctx fn in
+  let legacy_decls = shallow_declare_ast ctx [] ast in
+  let legacy_decls_str = show_decls (List.rev legacy_decls) ^ "\n" in
+  let decls = parse_decls_ffi fn text auto_namespace_map in
+  let decls_str = show_decls (List.rev decls) ^ "\n" in
+  let matched = String.equal decls_str legacy_decls_str in
+  if matched then
+    Printf.printf "%s\nThey matched!\n" decls_str
+  else
+    Tempfile.with_real_tempdir (fun dir ->
+        let temp_dir = Path.to_string dir in
+        let expected =
+          Caml.Filename.temp_file ~temp_dir "expected_decls" ".txt"
+        in
+        let actual = Caml.Filename.temp_file ~temp_dir "actual_decls" ".txt" in
+        Disk.write_file ~file:expected ~contents:legacy_decls_str;
+        Disk.write_file ~file:actual ~contents:decls_str;
+        Ppxlib_print_diff.print
+          ~diff_command:"diff -U9999 --label legacy --label 'direct decl'"
+          ~file1:expected
+          ~file2:actual
+          ());
   matched
 
 type modes = CompareDirectDeclParser
@@ -271,31 +131,22 @@ let () =
     | None -> file := Some f
     | Some _ -> usage_and_exit ()
   in
-  let verbosity = ref Standard in
   let skip_if_errors = ref false in
+  let expect_extension = ref ".exp" in
+  let set_expect_extension s = expect_extension := s in
   Arg.parse
     [
       ( "--compare-direct-decl-parser",
         Arg.Unit (set_mode CompareDirectDeclParser),
         "(mode) Runs the direct decl parser against the FFP -> naming -> decl pipeline and compares their output"
       );
-      ( "--verbosity",
-        Arg.Symbol
-          ( ["silent"; "standard"; "verbose"],
-            fun v ->
-              verbosity :=
-                match v with
-                | "silent" -> Silent
-                | "standard" -> Standard
-                | "verbose" -> Verbose
-                | _ ->
-                  failwith
-                  @@ Printf.sprintf "Did not understand verbosity level %s" v ),
-        " Set the verbosity level. Silent will hide the \"no differences\" message on a successful "
-        ^ "run, and verbose will print debugging information to the console" );
       ( "--skip-if-errors",
         Arg.Set skip_if_errors,
         "Skip comparison if the corresponding .exp file has errors" );
+      ( "--expect-extension",
+        Arg.String set_expect_extension,
+        "The extension with which the output of the legacy pipeline should be written"
+      );
     ]
     set_file
     usage;
@@ -321,5 +172,5 @@ let () =
         let file = Path.make file in
         let ctx = init (Path.dirname file) in
         Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
-            if not @@ compare_decl ctx !verbosity file then exit 1)
+            if not @@ compare_decls ctx file then exit 1)
     end

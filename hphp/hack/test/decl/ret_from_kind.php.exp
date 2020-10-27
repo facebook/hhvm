@@ -1,95 +1,94 @@
-Parsed decls:
-
-{ classes = {};
-  funs =
-  { "\\no_hint_async" ->
-    { Typing_defs.fe_deprecated = None;
-      fe_type =
-      (Rwitness (root|ret_from_kind.php line 3, characters 16-28),
-       (Tfun
-          { ft_arity = (Fstandard ()); ft_tparams = [];
-            ft_where_constraints = []; ft_params = [];
-            ft_implicit_params =
-            { capability =
-              (Rhint (root|ret_from_kind.php line 3, characters 16-28),
-               (Tunion []))
-              };
-            ft_ret =
-            { et_enforced = false;
-              et_type =
-              (Rret_fun_kind (root|ret_from_kind.php line 3, characters 16-28),
-               (Tapply (([3:16-29], "\\HH\\Awaitable"),
-                  [(Rwitness (root|ret_from_kind.php line 3, characters 16-28),
-                    Tany)]
-                  )))
-              };
-            ft_flags =
-            (make_ft_flags FAsync None ~return_disposable:false
-              ~returns_mutable:false ~returns_void_to_rx:false);
-            ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {#PUBLIC} }));
-      fe_pos = [3:16-29]; fe_php_std_lib = false };
-    "\\no_hint_async_generator" ->
-    { Typing_defs.fe_deprecated = None;
-      fe_type =
-      (Rwitness (root|ret_from_kind.php line 9, characters 16-38),
-       (Tfun
-          { ft_arity = (Fstandard ()); ft_tparams = [];
-            ft_where_constraints = []; ft_params = [];
-            ft_implicit_params =
-            { capability =
-              (Rhint (root|ret_from_kind.php line 9, characters 16-38),
-               (Tunion []))
-              };
-            ft_ret =
-            { et_enforced = false;
-              et_type =
-              (Rret_fun_kind (root|ret_from_kind.php line 9, characters 16-38),
-               (Tapply (([9:16-39], "\\HH\\AsyncGenerator"),
-                  [(Rwitness (root|ret_from_kind.php line 9, characters 16-38),
-                    Tany);
-                    (Rwitness (root|ret_from_kind.php line 9, characters 16-38),
-                     Tany);
-                    (Rwitness (root|ret_from_kind.php line 9, characters 16-38),
-                     Tany)
-                    ]
-                  )))
-              };
-            ft_flags =
-            (make_ft_flags FAsyncGenerator None ~return_disposable:false
-              ~returns_mutable:false ~returns_void_to_rx:false);
-            ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {#PUBLIC} }));
-      fe_pos = [9:16-39]; fe_php_std_lib = false };
-    "\\no_hint_generator" ->
-    { Typing_defs.fe_deprecated = None;
-      fe_type =
-      (Rwitness (root|ret_from_kind.php line 5, characters 10-26),
-       (Tfun
-          { ft_arity = (Fstandard ()); ft_tparams = [];
-            ft_where_constraints = []; ft_params = [];
-            ft_implicit_params =
-            { capability =
-              (Rhint (root|ret_from_kind.php line 5, characters 10-26),
-               (Tunion []))
-              };
-            ft_ret =
-            { et_enforced = false;
-              et_type =
-              (Rret_fun_kind (root|ret_from_kind.php line 5, characters 10-26),
-               (Tapply (([5:10-27], "\\Generator"),
-                  [(Rwitness (root|ret_from_kind.php line 5, characters 10-26),
-                    Tany);
-                    (Rwitness (root|ret_from_kind.php line 5, characters 10-26),
-                     Tany);
-                    (Rwitness (root|ret_from_kind.php line 5, characters 10-26),
-                     Tany)
-                    ]
-                  )))
-              };
-            ft_flags =
-            (make_ft_flags FGenerator None ~return_disposable:false
-              ~returns_mutable:false ~returns_void_to_rx:false);
-            ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {#PUBLIC} }));
-      fe_pos = [5:10-27]; fe_php_std_lib = false } };
-  typedefs = {}; consts = {}; records = {} }
+[("\\no_hint_async",
+  (Shallow_decl_defs.Fun
+     { Typing_defs.fe_deprecated = None;
+       fe_type =
+       (Rwitness (root|ret_from_kind.php line 3, characters 16-28),
+        (Tfun
+           { ft_arity = (Fstandard ()); ft_tparams = [];
+             ft_where_constraints = []; ft_params = [];
+             ft_implicit_params =
+             { capability =
+               (Rhint (root|ret_from_kind.php line 3, characters 16-28),
+                (Tunion []))
+               };
+             ft_ret =
+             { et_enforced = false;
+               et_type =
+               (Rret_fun_kind (root|ret_from_kind.php line 3, characters 16-28),
+                (Tapply (([3:16-29], "\\HH\\Awaitable"),
+                   [(Rwitness (root|ret_from_kind.php line 3, characters 16-28),
+                     Tany)]
+                   )))
+               };
+             ft_flags =
+             (make_ft_flags FAsync None ~return_disposable:false
+               ~returns_mutable:false ~returns_void_to_rx:false);
+             ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {#PUBLIC} }));
+       fe_pos = [3:16-29]; fe_php_std_lib = false }));
+  ("\\no_hint_generator",
+   (Shallow_decl_defs.Fun
+      { Typing_defs.fe_deprecated = None;
+        fe_type =
+        (Rwitness (root|ret_from_kind.php line 5, characters 10-26),
+         (Tfun
+            { ft_arity = (Fstandard ()); ft_tparams = [];
+              ft_where_constraints = []; ft_params = [];
+              ft_implicit_params =
+              { capability =
+                (Rhint (root|ret_from_kind.php line 5, characters 10-26),
+                 (Tunion []))
+                };
+              ft_ret =
+              { et_enforced = false;
+                et_type =
+                (Rret_fun_kind (root|ret_from_kind.php line 5, characters 10-26),
+                 (Tapply (([5:10-27], "\\Generator"),
+                    [(Rwitness (root|ret_from_kind.php line 5, characters 10-26),
+                      Tany);
+                      (Rwitness (root|ret_from_kind.php line 5, characters 10-26),
+                       Tany);
+                      (Rwitness (root|ret_from_kind.php line 5, characters 10-26),
+                       Tany)
+                      ]
+                    )))
+                };
+              ft_flags =
+              (make_ft_flags FGenerator None ~return_disposable:false
+                ~returns_mutable:false ~returns_void_to_rx:false);
+              ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {#PUBLIC} }));
+        fe_pos = [5:10-27]; fe_php_std_lib = false }));
+  ("\\no_hint_async_generator",
+   (Shallow_decl_defs.Fun
+      { Typing_defs.fe_deprecated = None;
+        fe_type =
+        (Rwitness (root|ret_from_kind.php line 9, characters 16-38),
+         (Tfun
+            { ft_arity = (Fstandard ()); ft_tparams = [];
+              ft_where_constraints = []; ft_params = [];
+              ft_implicit_params =
+              { capability =
+                (Rhint (root|ret_from_kind.php line 9, characters 16-38),
+                 (Tunion []))
+                };
+              ft_ret =
+              { et_enforced = false;
+                et_type =
+                (Rret_fun_kind (root|ret_from_kind.php line 9, characters 16-38),
+                 (Tapply (([9:16-39], "\\HH\\AsyncGenerator"),
+                    [(Rwitness (root|ret_from_kind.php line 9, characters 16-38),
+                      Tany);
+                      (Rwitness (root|ret_from_kind.php line 9, characters 16-38),
+                       Tany);
+                      (Rwitness (root|ret_from_kind.php line 9, characters 16-38),
+                       Tany)
+                      ]
+                    )))
+                };
+              ft_flags =
+              (make_ft_flags FAsyncGenerator None ~return_disposable:false
+                ~returns_mutable:false ~returns_void_to_rx:false);
+              ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {#PUBLIC} }));
+        fe_pos = [9:16-39]; fe_php_std_lib = false }))
+  ]
 
 They matched!

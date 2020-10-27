@@ -230,13 +230,6 @@ fn tany() -> &'static Ty<'static> {
     TANY
 }
 
-fn tarraykey<'a>(arena: &'a Bump) -> &'a Ty<'a> {
-    arena.alloc(Ty(
-        Reason::none(),
-        Ty_::Tprim(arena.alloc(aast::Tprim::Tarraykey)),
-    ))
-}
-
 fn default_capability<'a>(arena: &'a Bump, r: Reason<'a>) -> &'a Ty<'a> {
     arena.alloc(Ty(arena.alloc(r), Ty_::Tunion(&[])))
 }
@@ -927,12 +920,16 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                 )))
             }
             Node::Varray(pos) => {
-                Some(self.alloc(Ty(self.alloc(Reason::hint(pos)), Ty_::Tvarray(tany()))))
+                let tany = self.alloc(Ty(self.alloc(Reason::hint(pos)), TANY_));
+                Some(self.alloc(Ty(self.alloc(Reason::hint(pos)), Ty_::Tvarray(tany))))
             }
-            Node::Darray(pos) => Some(self.alloc(Ty(
-                self.alloc(Reason::hint(pos)),
-                Ty_::Tdarray(self.alloc((tany(), tany()))),
-            ))),
+            Node::Darray(pos) => {
+                let tany = self.alloc(Ty(self.alloc(Reason::hint(pos)), TANY_));
+                Some(self.alloc(Ty(
+                    self.alloc(Reason::hint(pos)),
+                    Ty_::Tdarray(self.alloc((tany, tany))),
+                )))
+            }
             Node::This(pos) => Some(self.alloc(Ty(self.alloc(Reason::hint(pos)), Ty_::Tthis))),
             Node::Expr(expr) => {
                 fn expr_to_ty<'a>(arena: &'a Bump, expr: &'a nast::Expr<'a>) -> Option<Ty_<'a>> {
@@ -1003,7 +1000,9 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                         "nonnull" => Ty_::Tnonnull,
                         "dynamic" => Ty_::Tdynamic,
                         "varray_or_darray" => {
-                            Ty_::TvarrayOrDarray(self.alloc((tarraykey(self.state.arena), tany())))
+                            let key_type = self.varray_or_darray_key(pos);
+                            let value_type = self.alloc(Ty(self.alloc(Reason::hint(pos)), TANY_));
+                            Ty_::TvarrayOrDarray(self.alloc((key_type, value_type)))
                         }
                         _ => {
                             let name =
@@ -1592,6 +1591,14 @@ impl<'a> DirectDeclSmartConstructors<'a> {
 
     fn tany_with_pos(&self, pos: &'a Pos<'a>) -> &'a Ty<'a> {
         self.alloc(Ty(self.alloc(Reason::witness(pos)), TANY_))
+    }
+
+    /// The type used when a `varray_or_darray` typehint is missing its key type argument.
+    fn varray_or_darray_key(&self, pos: &'a Pos<'a>) -> &'a Ty<'a> {
+        self.alloc(Ty(
+            self.alloc(Reason::RvarrayOrDarrayKey(pos)),
+            Ty_::Tprim(self.alloc(aast::Tprim::Tarraykey)),
+        ))
     }
 
     fn source_text_at_pos(&self, pos: &'a Pos<'a>) -> &'a [u8] {
@@ -2437,17 +2444,25 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             None => return Node::Ignored(SK::GenericTypeSpecifier),
         };
         if class_id.1.trim_start_matches("\\") == "varray_or_darray" {
-            let pos = self.merge(class_id.0, self.get_pos(type_arguments));
+            let id_pos = class_id.0;
+            let pos = self.merge(id_pos, self.get_pos(type_arguments));
             let type_arguments = type_arguments.as_slice(self.state.arena);
             let ty_ = match type_arguments {
-                [tk, tv] => Ty_::TvarrayOrDarray(self.alloc((
-                    self.node_to_ty(*tk).unwrap_or_else(|| tany()),
-                    self.node_to_ty(*tv).unwrap_or_else(|| tany()),
-                ))),
-                [tv] => Ty_::TvarrayOrDarray(self.alloc((
-                    tarraykey(self.state.arena),
-                    self.node_to_ty(*tv).unwrap_or_else(|| tany()),
-                ))),
+                [tk, tv] => Ty_::TvarrayOrDarray(
+                    self.alloc((
+                        self.node_to_ty(*tk)
+                            .unwrap_or_else(|| self.tany_with_pos(id_pos)),
+                        self.node_to_ty(*tv)
+                            .unwrap_or_else(|| self.tany_with_pos(id_pos)),
+                    )),
+                ),
+                [tv] => Ty_::TvarrayOrDarray(
+                    self.alloc((
+                        self.varray_or_darray_key(pos),
+                        self.node_to_ty(*tv)
+                            .unwrap_or_else(|| self.tany_with_pos(id_pos)),
+                    )),
+                ),
                 _ => TANY_,
             };
             self.hint_ty(pos, ty_)
@@ -3792,7 +3807,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
 
     fn make_varray_type_specifier(
         &mut self,
-        varray: Self::R,
+        varray_keyword: Self::R,
         _less_than: Self::R,
         tparam: Self::R,
         _trailing_comma: Self::R,
@@ -3800,10 +3815,10 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
     ) -> Self::R {
         let tparam = match self.node_to_ty(tparam) {
             Some(ty) => ty,
-            None => return Node::Ignored(SK::VarrayTypeSpecifier),
+            None => self.tany_with_pos(self.get_pos(varray_keyword)),
         };
         self.hint_ty(
-            self.merge_positions(varray, greater_than),
+            self.merge_positions(varray_keyword, greater_than),
             Ty_::Tvarray(tparam),
         )
     }

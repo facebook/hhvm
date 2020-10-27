@@ -191,6 +191,11 @@ struct APCArray {
       k == APCKind::SharedMarkedDArray;
   }
 
+  bool isUnmarkedDVArray() const {
+    return m_handle.kind() == APCKind::SharedDArray ||
+           m_handle.kind() == APCKind::SharedVArray;
+  }
+
   bool isVArray() const {
     return m_handle.kind() == APCKind::SharedVArray ||
            m_handle.kind() == APCKind::SharedMarkedVArray;

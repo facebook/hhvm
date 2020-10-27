@@ -238,7 +238,7 @@ bool arrayWantsTag(const ArrayData* ad) {
 }
 
 bool arrayWantsTag(const APCArray* a) {
-  return RO::EvalArrayProvenance && (a->isVArray() || a->isDArray());
+  return RO::EvalArrayProvenance && a->isUnmarkedDVArray();
 }
 
 bool arrayWantsTag(const AsioExternalThreadEvent* ev) {
@@ -325,16 +325,19 @@ thread_local folly::Optional<Tag> tl_tag_override = folly::none;
 Tag getTag(const ArrayData* ad) {
   assertx(RO::EvalArrayProvenance);
   if (tl_tag_override) return *tl_tag_override;
+  // We ensure that arrays that don't want a tag have an invalid tag set.
   return Tag::get(ad);
 }
 
 Tag getTag(const APCArray* a) {
   assertx(RO::EvalArrayProvenance);
+  if (!arrayWantsTag(a)) return {};
   return Tag::get(a);
 }
 
 Tag getTag(const AsioExternalThreadEvent* ev) {
   assertx(RO::EvalArrayProvenance);
+  // We ensure that Asio events that don't want a tag have an invalid tag set.
   return Tag::get(ev);
 }
 

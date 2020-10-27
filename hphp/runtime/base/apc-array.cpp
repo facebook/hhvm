@@ -94,9 +94,11 @@ APCArray::MakeSharedArray(ArrayData* arr, APCHandleLevel level,
     level,
     [&]() {
       auto const add_prov = [arr] (APCHandle::Pair pair) {
+        auto const a = APCArray::fromHandle(pair.handle);
+        assertx(arrprov::arrayWantsTag(a) == arrprov::arrayWantsTag(arr));
         if (UNLIKELY(RO::EvalArrayProvenance)) {
           if (auto const tag = arrprov::getTag(arr)) {
-            arrprov::setTag(APCArray::fromHandle(pair.handle), tag);
+            arrprov::setTag(a, tag);
           }
         }
         return pair;
@@ -206,7 +208,8 @@ APCHandle::Pair APCArray::MakeHash(ArrayData* arr, APCKind kind,
                        + sizeof(Bucket) * num
                        + prov_off;
   auto p = reinterpret_cast<char*>(apc_malloc(allocSize)) + prov_off;
-  APCArray* ret = new (p) APCArray(HashedCtor{}, kind, cap);
+  auto ret = new (p) APCArray(HashedCtor{}, kind, cap);
+  if (prov_off) arrprov::clearTag(ret);
 
   for (int i = 0; i < cap; i++) ret->hash()[i] = -1;
 
@@ -301,6 +304,7 @@ APCHandle::Pair APCArray::MakePacked(ArrayData* arr, APCKind kind,
                        + prov_off;
   auto p = reinterpret_cast<char*>(apc_malloc(allocSize)) + prov_off;
   auto ret = new (p) APCArray(PackedCtor{}, kind, num_elems);
+  if (prov_off) arrprov::clearTag(ret);
 
   size_t i = 0;
   auto size = allocSize;

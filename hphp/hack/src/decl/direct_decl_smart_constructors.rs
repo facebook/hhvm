@@ -2470,6 +2470,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             let Id(pos, class_type) = class_id;
             match class_type.rsplit('\\').next() {
                 Some(name) if self.is_type_param_in_scope(name) => {
+                    let pos = self.merge(pos, self.get_pos(type_arguments));
                     let type_arguments = self.slice(
                         type_arguments
                             .iter()

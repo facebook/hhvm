@@ -1,53 +1,51 @@
---- legacy
-+++ direct decl
-@@ -1,49 +1,49 @@
- [("\\ID",
-   (Shallow_decl_defs.Typedef
-      { Typing_defs.td_pos = [3:6-8]; td_vis = Transparent;
-        td_tparams =
-        [{ Typing_defs_core.tp_variance = Invariant;
-           tp_name = ([3:9-10], "T"); tp_tparams = []; tp_constraints = [];
-           tp_reified = Erased; tp_user_attributes = [] }
-          ];
-        td_constraint = None;
-        td_type =
-        (Rhint (root|higher_kinded.php line 3, characters 14-14),
-         (Tgeneric ("T", [])))
-      }));
- ("\\Test1",
+[("\\ID",
   (Shallow_decl_defs.Typedef
-     { Typing_defs.td_pos = [5:6-11]; td_vis = Transparent;
+     { Typing_defs.td_pos = [3:6-8]; td_vis = Transparent;
        td_tparams =
        [{ Typing_defs_core.tp_variance = Invariant;
-          tp_name = ([5:12-14], "TC");
-          tp_tparams =
-          [{ Typing_defs_core.tp_variance = Invariant;
-             tp_name = ([5:15-18], "TA1"); tp_tparams = [];
-             tp_constraints = []; tp_reified = Erased; tp_user_attributes = []
-             };
-            { Typing_defs_core.tp_variance = Invariant;
-              tp_name = ([5:20-23], "TA2");
-              tp_tparams =
-              [{ Typing_defs_core.tp_variance = Invariant;
-                 tp_name = ([5:24-27], "TA3"); tp_tparams = [];
-                 tp_constraints = []; tp_reified = Erased;
-                 tp_user_attributes = [] }
-                ];
-              tp_constraints = []; tp_reified = Erased;
-              tp_user_attributes = [] }
-            ];
-          tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }
+          tp_name = ([3:9-10], "T"); tp_tparams = []; tp_constraints = [];
+          tp_reified = Erased; tp_user_attributes = [] }
          ];
        td_constraint = None;
        td_type =
--      (Rhint (root|higher_kinded.php line 5, characters 33-43),
-+      (Rhint (root|higher_kinded.php line 5, characters 33-34),
-        (Tgeneric ("TC",
-           [(Rhint (root|higher_kinded.php line 5, characters 36-38),
-             (Tprim Tint));
-             (Rhint (root|higher_kinded.php line 5, characters 41-42),
-              (Tapply (([5:41-43], "\\ID"), [])))
-             ])
-        ))
-     }))
- ]
+       (Rhint (root|higher_kinded.php line 3, characters 14-14),
+        (Tgeneric ("T", [])))
+     }));
+("\\Test1",
+ (Shallow_decl_defs.Typedef
+    { Typing_defs.td_pos = [5:6-11]; td_vis = Transparent;
+      td_tparams =
+      [{ Typing_defs_core.tp_variance = Invariant;
+         tp_name = ([5:12-14], "TC");
+         tp_tparams =
+         [{ Typing_defs_core.tp_variance = Invariant;
+            tp_name = ([5:15-18], "TA1"); tp_tparams = [];
+            tp_constraints = []; tp_reified = Erased; tp_user_attributes = []
+            };
+           { Typing_defs_core.tp_variance = Invariant;
+             tp_name = ([5:20-23], "TA2");
+             tp_tparams =
+             [{ Typing_defs_core.tp_variance = Invariant;
+                tp_name = ([5:24-27], "TA3"); tp_tparams = [];
+                tp_constraints = []; tp_reified = Erased;
+                tp_user_attributes = [] }
+               ];
+             tp_constraints = []; tp_reified = Erased;
+             tp_user_attributes = [] }
+           ];
+         tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }
+        ];
+      td_constraint = None;
+      td_type =
+      (Rhint (root|higher_kinded.php line 5, characters 33-43),
+       (Tgeneric ("TC",
+          [(Rhint (root|higher_kinded.php line 5, characters 36-38),
+            (Tprim Tint));
+            (Rhint (root|higher_kinded.php line 5, characters 41-42),
+             (Tapply (([5:41-43], "\\ID"), [])))
+            ])
+       ))
+    }))
+]
+
+They matched!

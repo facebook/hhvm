@@ -290,7 +290,8 @@ TCA emitFuncPrologueRedispatch(CodeBlock& cb, DataBlock& data) {
     });
 
     // Slow path: we passed more arguments than declared. Need to pack the extra
-    // args and dispatch to the "too many arguments" prologue.
+    // args and dispatch to the "too many arguments" prologue. We should likely
+    // move all of this logic to a helper - JIT-ing it doesn't help much.
 
     // We are going to do a C++ call, need to ensure native stack is aligned.
     v << stublogue{false};
@@ -306,18 +307,21 @@ TCA emitFuncPrologueRedispatch(CodeBlock& cb, DataBlock& data) {
 
     // Pack the extra args into a vec/varray.
     auto const helper = [](uint32_t count,
-                           TypedValue* values) -> ArrayData* {
-      // TODO(jgriego) surely we have a better way of instrumenting this ...
-      ARRPROV_USE_RUNTIME_LOCATION();
+                           TypedValue* values,
+                           const Func* func) -> ArrayData* {
+      arrprov::TagOverride _(RO::EvalArrayProvenance
+        ? arrprov::Tag::Param(func, func->numNonVariadicParams())
+        : arrprov::Tag{});
       return PackedArray::MakeVArray(count, values);
     };
     auto const packedArr = v.makeReg();
     {
+      using PackExtraArgs = ArrayData* (*)(uint32_t, TypedValue*, const Func*);
       auto const save = r_php_call_flags()|r_php_call_func()|r_php_call_ctx();
       PhysRegSaver prs{v, save};
       v << vcall{
-        CallSpec::direct(static_cast<ArrayData* (*)(uint32_t, TypedValue*)>(helper)),
-        v.makeVcallArgs({{numToPack, stackTopPtr}}),
+        CallSpec::direct(static_cast<PackExtraArgs>(helper)),
+        v.makeVcallArgs({{numToPack, stackTopPtr, func}}),
         v.makeTuple({packedArr}),
         Fixup::none(),
         DestType::SSA

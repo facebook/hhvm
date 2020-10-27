@@ -29,4 +29,15 @@ function main() {
   test(1, ...vec[varray[new C()]]);
   test(1, ...varray[varray[17]]);
   test(1, ...varray[varray[new C()]]);
+
+  $function = __hhvm_intrinsics\launder_value(test<>);
+  $function(1);
+  $function(1, 2);
+  $function(1, 2, 3);
+  $function(...vec[1, 2, 3]);
+  $function(...varray[1, 2, 3]);
+  $function(1, ...vec[2, 3]);
+  $function(1, ...varray[2, 3]);
+  $function(1, 2, ...vec[3]);
+  $function(1, 2, ...varray[3]);
 }

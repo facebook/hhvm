@@ -8,6 +8,7 @@
     connection_tracker
     client_ide_service
     clowder_paste
+    extra_rage
     flytrap
     glean_dependency_graph_stubs
     hh_server_monitor

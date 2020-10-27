@@ -196,6 +196,13 @@
     (pps lwt_ppx ppx_deriving.std)))
 
 (library
+  (name extra_rage)
+  (wrapped false)
+  (modules extra_rage)
+  (preprocess
+    (pps lwt_ppx ppx_deriving.std)))
+
+(library
   (name security_stubs)
   (wrapped false)
   (modules security)

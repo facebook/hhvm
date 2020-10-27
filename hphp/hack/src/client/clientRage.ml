@@ -564,6 +564,22 @@ let rage_experiments_and_config
     ( local_config.ServerLocalConfig.experiments,
       local_config.ServerLocalConfig.experiments_config_meta )
 
+let rage_repro (mergebase : string option) (patch_script : string option) :
+    (string * string) option Lwt.t =
+  match (mergebase, patch_script) with
+  | (None, _)
+  | (_, None) ->
+    Lwt.return_none
+  | (Some mergebase, Some patch_script) ->
+    let%lwt result = Extra_rage.create_repro mergebase patch_script in
+    let result =
+      match result with
+      | Some (Ok { Lwt_utils.Process_success.stdout; _ }) -> stdout
+      | Some (Error failure) -> format_failure "" failure
+      | None -> "not applicable"
+    in
+    Lwt.return_some ("repro", result)
+
 let main (env : env) : Exit_status.t Lwt.t =
   let start_time = Unix.gettimeofday () in
   Hh_logger.Level.set_min_level Hh_logger.Level.Error;
@@ -657,7 +673,7 @@ let main (env : env) : Exit_status.t Lwt.t =
 
   (* www *)
   eprintf "Getting current www state";
-  let%lwt { hgdiff; instructions; _ } = rage_www env in
+  let%lwt { hgdiff; instructions; mergebase; patch_script } = rage_www env in
   Option.iter hgdiff ~f:add;
   add ("www", instructions);
 
@@ -699,6 +715,10 @@ let main (env : env) : Exit_status.t Lwt.t =
   eprintf "Looking at hh_server tmp directory";
   let%lwt tmp_dir = rage_tmp_dir () in
   add ("hh_server tmp", tmp_dir);
+
+  (* repro *)
+  let%lwt repro = rage_repro mergebase patch_script in
+  Option.iter repro ~f:add;
 
   (* We've assembled everything! now log it. *)
   let%lwt result =

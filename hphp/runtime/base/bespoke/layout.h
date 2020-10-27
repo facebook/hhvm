@@ -298,7 +298,16 @@ struct Layout {
    * needed. This op consumes a ref on `arr` and produces a ref on the result.
    */
   virtual SSATmp* emitAppend(
-    IRGS& env, SSATmp* arr, SSATmp* val) const = 0;
+      IRGS& env, SSATmp* arr, SSATmp* val) const = 0;
+
+  /*
+   * Escalate the bespoke array to vanilla. The default implementation invokes
+   * the general BespokeArray implementation. It performs no refcounting
+   * operations.
+   */
+  virtual SSATmp* emitEscalateToVanilla(
+      IRGS& env, SSATmp* arr, const char* reason) const;
+
 
 protected:
   explicit Layout(const std::string& description);
@@ -360,7 +369,15 @@ struct ConcreteLayout : public Layout {
    * This default implementation punts.
    */
   virtual SSATmp* emitAppend(
-    IRGS& env, SSATmp* arr, SSATmp* val) const override;
+      IRGS& env, SSATmp* arr, SSATmp* val) const override;
+
+  /*
+   * This default implementation invokes the layout-specific EscalateToVanilla
+   * method without virtualization.
+   */
+  virtual SSATmp* emitEscalateToVanilla(
+      IRGS& env, SSATmp* arr, const char* reason) const override;
+
 
 private:
   const LayoutFunctions* m_vtable;

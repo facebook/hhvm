@@ -438,6 +438,26 @@ void emitBespokeAddNewElemC(IRGS& env) {
   decRef(env, value);
 }
 
+void emitBespokeColFromArray(IRGS& env, CollectionType type) {
+  assertx(type != CollectionType::Pair);
+  auto const arr = popC(env);
+  auto const arrType = arr->type();
+  if (!arrType.subtypeOfAny(TVec, TDict)) PUNT(Bespoke-BadColType);
+  if (arrType <= TVec &&
+      !(type == CollectionType::Vector || type == CollectionType::ImmVector)) {
+    PUNT(Bespoke-ColTypeMismatch);
+  }
+  if (arrType <= TDict &&
+      (type == CollectionType::Vector || type == CollectionType::ImmVector)) {
+    PUNT(Bespoke-ColTypeMismatch);
+  }
+  auto const layout = arrType.arrSpec().bespokeLayout();
+  auto const vanilla = layout->emitEscalateToVanilla(env, arr, "ColFromArray");
+  auto const col = gen(env, NewColFromArray, NewColData { type }, vanilla);
+  decRef(env, arr);
+  push(env, col);
+}
+
 void translateDispatchBespoke(IRGS& env,
                               const NormalizedInstruction& ni) {
   auto const DEBUG_ONLY sk = ni.source;
@@ -467,9 +487,11 @@ void translateDispatchBespoke(IRGS& env,
     case Op::AddNewElemC:
       emitBespokeAddNewElemC(env);
       return;
+    case Op::ColFromArray:
+      emitBespokeColFromArray(env, (CollectionType) ni.imm[0].u_OA);
+      return;
     case Op::FCallBuiltin:
     case Op::ClassGetTS:
-    case Op::ColFromArray:
       interpOne(env);
       return;
     case Op::IterInit:

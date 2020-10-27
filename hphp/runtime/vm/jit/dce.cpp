@@ -638,6 +638,7 @@ bool canDCE(IRInstruction* inst) {
   case CheckVecBoundsLA:
   case BespokeElem:
   case BespokeGet:
+  case BespokeEscalateToVanilla:
   case LdVectorSize:
   case BeginCatch:
   case EndCatch:

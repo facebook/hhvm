@@ -575,6 +575,8 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #define DofS(n)         return inst->src(n)->type();
 #define DRefineS(n)     return inst->src(n)->type() & inst->typeParam();
 #define DParam(t)       return inst->typeParam();
+#define DEscalateToVanilla return inst->src(0)->type().modified().\
+                               narrowToVanilla();
 #define DLdObjCls {                                                \
   if (auto spec = inst->src(0)->type().clsSpec()) {                \
     auto const cls = spec.cls();                                   \
@@ -630,6 +632,7 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #undef DofS
 #undef DRefineS
 #undef DParam
+#undef DEscalateToVanilla
 #undef DLdObjCls
 #undef DAllocObj
 #undef DVecElem

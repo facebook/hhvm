@@ -75,6 +75,13 @@ const Layout* Layout::FromIndex(LayoutIndex index) {
   return layout;
 }
 
+SSATmp* Layout::emitEscalateToVanilla(IRGS& env, SSATmp* arr,
+                                      const char* reason) const {
+  auto const data = BespokeLayoutData { nullptr };
+  auto const str = cns(env, makeStaticString(reason));
+  return gen(env, BespokeEscalateToVanilla, data, arr, str);
+}
+
 struct Layout::Initializer {
   Initializer() {
     assertx(s_layoutTableIndex.load(std::memory_order_relaxed) == 0);
@@ -124,6 +131,13 @@ SSATmp* ConcreteLayout::emitSet(
 
 SSATmp* ConcreteLayout::emitAppend(IRGS& env, SSATmp* arr, SSATmp* val) const {
   PUNT(unimpl_bespoke_emitAppend);
+}
+
+SSATmp* ConcreteLayout::emitEscalateToVanilla(IRGS& env, SSATmp* arr,
+                                              const char* reason) const {
+  auto const data = BespokeLayoutData { this };
+  auto const str = cns(env, makeStaticString(reason));
+  return gen(env, BespokeEscalateToVanilla, data, arr, str);
 }
 
 const ConcreteLayout* ConcreteLayout::FromConcreteIndex(LayoutIndex index) {

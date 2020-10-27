@@ -27,6 +27,18 @@ namespace HPHP {
 using namespace jit;
 using namespace jit::irgen;
 
+BespokeLayout::BespokeLayout(const bespoke::Layout* layout)
+  : m_layout(layout)
+{
+  assertx(layout);
+}
+
+BespokeLayout::BespokeLayout(const bespoke::ConcreteLayout* layout)
+  : m_layout(layout)
+{
+  assertx(layout);
+}
+
 BespokeLayout BespokeLayout::FromIndex(uint16_t index) {
   return BespokeLayout{bespoke::Layout::FromIndex({index})};
 }
@@ -79,6 +91,12 @@ SSATmp* BespokeLayout::emitSet(
 SSATmp* BespokeLayout::emitAppend(IRGS& env, SSATmp* arr, SSATmp* val) const {
   assertx(checkLayoutMatches(m_layout, arr));
   return m_layout->emitAppend(env, arr, val);
+}
+
+SSATmp* BespokeLayout::emitEscalateToVanilla(IRGS& env, SSATmp* arr,
+                                             const char* reason) const {
+  assertx(checkLayoutMatches(m_layout, arr));
+  return m_layout->emitEscalateToVanilla(env, arr, reason);
 }
 
 }

@@ -3023,6 +3023,11 @@ fields of that struct for holding intermediate values.
   layout provided, returning an array of type T. If no layout is provided, the
   general BespokeArray dispatch is used.
 
+| BespokeEscalateToVanilla<Layout>, DEscalateToVanilla, SBespokeArr CStr, NF
+
+  Escalate bespoke array S0 to a vanilla array for the reason S1 using the
+  EscalateToVanilla implementation on the layout provided. If no layout is
+  provided, the general BespokeArray dispatch is used.
 
 | MapSet, ND, S(Obj) S(Int,Str) S(Cell), CRc
 

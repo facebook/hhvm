@@ -14,6 +14,7 @@
   +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/base/bespoke/layout.h"
 #include "hphp/runtime/base/bespoke/logging-profile.h"
 
 #include "hphp/runtime/vm/jit/irlower.h"
@@ -127,6 +128,23 @@ void cgBespokeElem(IRLS& env, const IRInstruction* inst) {
     }
   }();
   auto const args = argGroup(env, inst).ssa(0).ssa(1).ssa(2);
+  cgCallHelper(v, env, target, dest, SyncOptions::Sync, args);
+}
+
+void cgBespokeEscalateToVanilla(IRLS& env, const IRInstruction* inst) {
+  auto& v = vmain(env);
+  auto const dest = callDest(env, inst);
+  auto const reason = inst->src(1)->strVal()->data();
+  auto const target = [&] {
+    auto const layout = inst->extra<BespokeLayoutData>()->layout;
+    if (layout) {
+      auto const vtable = layout->vtable();
+      return CallSpec::direct(vtable->fnEscalateToVanilla);
+    } else {
+      return CallSpec::direct(BespokeArray::ToVanilla);
+    }
+  }();
+  auto const args = argGroup(env, inst).ssa(0).imm(reason);
   cgCallHelper(v, env, target, dest, SyncOptions::Sync, args);
 }
 

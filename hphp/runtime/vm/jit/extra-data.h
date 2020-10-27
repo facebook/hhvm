@@ -18,7 +18,6 @@
 
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/typed-value.h"
-#include "hphp/runtime/base/bespoke/layout.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/iter.h"
 #include "hphp/runtime/vm/srckey.h"
@@ -1571,7 +1570,7 @@ struct BespokeLayoutData : IRExtraData {
   {}
 
   std::string show() const {
-    return layout ? folly::sformat("{}", layout->describe())
+    return layout ? folly::sformat("{}", BespokeLayout{layout}.describe())
                   : "Generic";
   }
 
@@ -1806,6 +1805,7 @@ X(LdRecDescCached,              RecNameData);
 X(LdRecDescCachedSafe,          RecNameData);
 X(BespokeGet,                   BespokeLayoutData);
 X(BespokeElem,                  BespokeLayoutData);
+X(BespokeEscalateToVanilla,     BespokeLayoutData);
 X(BespokeSet,                   BespokeLayoutData);
 X(BespokeAppend,                BespokeLayoutData);
 X(LdUnitPerRequestFilepath,     RDSHandleData);

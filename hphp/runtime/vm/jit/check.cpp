@@ -530,6 +530,7 @@ using TypeNames::TCA;
 #define DBuiltin
 #define DCall
 #define DGenIter
+#define DEscalateToVanilla
 #define DSubtract(src, t)checkDst(src < inst->numSrcs(),  \
                              "invalid src num");
 #define DofS(src)   checkDst(src < inst->numSrcs(),  \
@@ -604,6 +605,7 @@ using TypeNames::TCA;
 #undef DSetElem
 #undef DofS
 #undef DRefineS
+#undef DEscalateToVanilla
 #undef DParam
 #undef DLvalToElemParam
 #undef DLdObjCls

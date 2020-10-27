@@ -83,6 +83,7 @@ TRACE_SET_MOD(hhir);
 #define DLvalOfPtr     HasDest
 #define DPtrIter       HasDest
 #define DPtrIterVal    HasDest
+#define DEscalateToVanilla HasDest
 
 namespace {
 template<Opcode op, uint64_t flags>
@@ -130,6 +131,7 @@ OpInfo g_opInfo[] = {
 #undef DDictSet
 #undef DVecSet
 #undef DKeysetElem
+#undef DEscalateToVanilla
 #undef DLvalToElemParam
 #undef DVecFirstElem
 #undef DVecLastElem
@@ -505,6 +507,7 @@ bool opcodeMayRaise(Opcode opc) {
   case AsyncSwitchFast:
   case BeginCatch:
   case BeginInlining:
+  case BespokeEscalateToVanilla:
   case BespokeGet:
   case Ceil:
   case CheckArrayCOW:

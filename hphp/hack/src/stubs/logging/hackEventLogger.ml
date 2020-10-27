@@ -413,6 +413,10 @@ module ProfileTypeCheck = struct
   let get_telemetry_url ~init_id:_ ~recheck_id:_ = ""
 end
 
+module CGroup = struct
+  let profile ~phase:_ ~start:_ ~delta:_ ~hwm_delta:_ = ()
+end
+
 module Rage = struct
   let rage
       ~rageid:_

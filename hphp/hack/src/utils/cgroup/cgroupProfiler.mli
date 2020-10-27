@@ -13,6 +13,8 @@ module MemStats : sig
 
   val sample_memory :
     group:string -> metric:string -> value:float -> running -> unit
+
+  val log_to_scuba : finished -> unit
 end
 
 val collect_cgroup_stats :

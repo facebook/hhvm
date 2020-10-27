@@ -67,6 +67,24 @@ module MemStats = struct
       in
       set_metric ~group ~metric new_metric running_memory
 
+  let log_to_scuba (mem_stats : finished) : unit =
+    List.iter
+      (fun phase ->
+        match SMap.find_opt phase mem_stats.finished_results with
+        | None -> ()
+        | Some result ->
+          SMap.iter
+            (fun metric value ->
+              let label = "[" ^ mem_stats.finished_label ^ "]" in
+              let phase = label ^ " [" ^ phase ^ "] " ^ metric in
+              HackEventLogger.CGroup.profile
+                ~phase
+                ~start:value.start
+                ~delta:value.delta
+                ~hwm_delta:value.high_water_mark_delta)
+            result)
+      mem_stats.finished_groups
+
   let print_summary_memory_table =
     let pretty_num f =
       let abs_f = abs_float f in

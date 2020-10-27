@@ -1177,17 +1177,19 @@ let program_init genv env =
   in
   let (init_approach, approach_name) = resolve_init_approach genv in
   Hh_logger.log "Initing with approach: %s" approach_name;
-  let (env, init_type, init_error, init_error_stack, state_distance) =
+  let (env, mem_stats, init_type, init_error, init_error_stack, state_distance)
+      =
     let (mem_stats, (env, init_result)) =
       ServerInit.init ~init_approach genv env
     in
     CgroupProfiler.print_summary_memory_table mem_stats;
     match init_approach with
-    | ServerInit.Remote_init _ -> (env, "remote", None, None, None)
+    | ServerInit.Remote_init _ -> (env, mem_stats, "remote", None, None, None)
     | ServerInit.Write_symbol_info
     | ServerInit.Full_init ->
-      (env, "fresh", None, None, None)
-    | ServerInit.Parse_only_init -> (env, "parse-only", None, None, None)
+      (env, mem_stats, "fresh", None, None, None)
+    | ServerInit.Parse_only_init ->
+      (env, mem_stats, "parse-only", None, None, None)
     | ServerInit.Saved_state_init _ ->
       begin
         match init_result with
@@ -1199,11 +1201,11 @@ let program_init genv env =
             | None -> "state_load_blob"
             | Some _ -> "state_load_sqlite"
           in
-          (env, init_type, None, None, distance)
+          (env, mem_stats, init_type, None, None, distance)
         | ServerInit.Load_state_failed (err, stack) ->
-          (env, "state_load_failed", Some err, Some stack, None)
+          (env, mem_stats, "state_load_failed", Some err, Some stack, None)
         | ServerInit.Load_state_declined reason ->
-          (env, "state_load_declined", Some reason, None, None)
+          (env, mem_stats, "state_load_declined", Some reason, None, None)
       end
   in
   let env =
@@ -1230,6 +1232,7 @@ let program_init genv env =
   in
   EventLogger.set_init_type init_type;
   let telemetry = ServerUtils.log_and_get_sharedmem_load_telemetry () in
+  CgroupProfiler.MemStats.log_to_scuba mem_stats;
   HackEventLogger.init_lazy_end
     telemetry
     ~informant_use_xdb

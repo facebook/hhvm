@@ -1419,7 +1419,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                             }
 
                             let type_ = if hint.is_ignored() {
-                                tany()
+                                self.tany_with_pos(id.0)
                             } else {
                                 self.node_to_ty(hint).map(|ty| match ty {
                                     Ty(r, Ty_::Tfun(fun_type)) if attributes.at_most_rx_as_func => {

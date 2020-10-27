@@ -42,6 +42,13 @@ const StaticString s_root_name("root_name");
 const StaticString s_alias("alias");
 const StaticString s_hh_this("HH\\this");
 
+// Fixed error messages
+const StaticString s_reified_type_must_be_ts(
+  "Reified type must be a type structure");
+const StaticString s_new_instance_of_not_string(
+  "You cannot create a new instance of this type as it is not a string");
+
+
 ///////////////////////////////////////////////////////////////////////////////
 
 namespace detail {

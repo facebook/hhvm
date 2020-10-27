@@ -18,6 +18,7 @@
 #include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/bespoke/logging-array.h"
 #include "hphp/runtime/base/bespoke/logging-profile.h"
+#include "hphp/runtime/base/type-structure-helpers-defs.h"
 
 #include "hphp/runtime/vm/jit/analysis.h"
 #include "hphp/runtime/vm/jit/irgen-builtin.h"
@@ -458,6 +459,60 @@ void emitBespokeColFromArray(IRGS& env, CollectionType type) {
   push(env, col);
 }
 
+void emitBespokeClassGetTS(IRGS& env) {
+  auto const reqType = RO::EvalHackArrDVArrs ? TDict : TDArr;
+  auto const arr = topC(env);
+  auto const arrType = arr->type();
+  if (!(arrType <= reqType)) {
+    if (arrType.maybe(reqType)) {
+      PUNT(Bespoke-ClassGetTS-UnguardedTS);
+    } else {
+      gen(env, RaiseError, cns(env, s_reified_type_must_be_ts.get()));
+      return;
+    }
+  }
+
+  auto const layout = arrType.arrSpec().bespokeLayout();
+  ifElse(
+    env,
+    [&](Block* taken) {
+      layout->emitGet(env, arr, cns(env, s_generic_types.get()), taken);
+    },
+    [&] { gen(env, Jmp, makeExitSlow(env)); }
+  );
+
+  auto const classKey = cns(env, s_classname.get());
+  auto const classVal = cond(
+    env,
+    [&](Block* taken) {
+      return layout->emitGet(env, arr, classKey, taken);
+    },
+    [&] (SSATmp* val) { return val; },
+    [&] {
+      gen(env, ThrowArrayKeyException, arr, classKey);
+      return cns(env, TBottom);
+    }
+  );
+
+  auto const className = cond(
+    env,
+    [&] (Block* taken) {
+      return gen(env, CheckType, TStr, taken, classVal);
+    },
+    [&] (SSATmp* val) { return val; },
+    [&] {
+      hint(env, Block::Hint::Unlikely);
+      gen(env, RaiseError, cns(env, s_new_instance_of_not_string.get()));
+      return cns(env, TBottom);
+    }
+  );
+
+  auto const cls = ldCls(env, className);
+  popDecRef(env);
+  push(env, cls);
+  push(env, cns(env, TInitNull));
+}
+
 void translateDispatchBespoke(IRGS& env,
                               const NormalizedInstruction& ni) {
   auto const DEBUG_ONLY sk = ni.source;
@@ -490,8 +545,10 @@ void translateDispatchBespoke(IRGS& env,
     case Op::ColFromArray:
       emitBespokeColFromArray(env, (CollectionType) ni.imm[0].u_OA);
       return;
-    case Op::FCallBuiltin:
     case Op::ClassGetTS:
+      emitBespokeClassGetTS(env);
+      return;
+    case Op::FCallBuiltin:
       interpOne(env);
       return;
     case Op::IterInit:

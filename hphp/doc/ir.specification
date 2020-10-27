@@ -3115,7 +3115,7 @@ fields of that struct for holding intermediate values.
 
   Throws an OutOfBoundsException if S0 is an undefined index for an array.
 
-| ThrowArrayKeyException, ND, S(DArr,Dict) S(Str), T
+| ThrowArrayKeyException, ND, S(DArr,Dict) S(Str), T|LA
 
   Throws an OutOfBoundsException if S0 is an undefined key for a darray or dict.
 

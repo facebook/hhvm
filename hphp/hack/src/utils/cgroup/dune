@@ -1,6 +1,10 @@
 (library
   (name cgroup)
   (wrapped false)
+  (modules
+    CGroup
+    CgroupProfiler
+  )
   (libraries
     core_kernel
     lwt

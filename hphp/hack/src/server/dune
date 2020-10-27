@@ -312,6 +312,7 @@
   (libraries
     build
     ci_util
+    cgroup
     folly_stubs
     load_script
     lwt

@@ -7,7 +7,7 @@
   )
   (libraries
     core_kernel
-    logging_stubs
+    logging
     procfs
   )
   (preprocess (pps lwt_ppx)))

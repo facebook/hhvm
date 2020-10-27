@@ -32,9 +32,51 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+#ifdef USE_LOWPTR
+constexpr bool use_lowptr = true;
+
 namespace detail {
+using low_storage_t = uint32_t;
+}
+#else
+constexpr bool use_lowptr = false;
+
+namespace detail {
+using low_storage_t = uintptr_t;
+}
+#endif
+
+inline bool is_low_mem(void* m) {
+  assertx(use_lowptr);
+  const uint32_t mask = ~0;
+  auto const i = reinterpret_cast<intptr_t>(m);
+  return (mask & i) == i;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
+namespace detail {
+
+template<class T>
+inline bool is_low(T* px) {
+  low_storage_t ones = ~0;
+  auto ptr = reinterpret_cast<uintptr_t>(px);
+  return (ptr & ones) == ptr;
+}
+
+template<class T>
+inline low_storage_t to_low(T* px) {
+  always_assert(is_low(px));
+  return (low_storage_t)(reinterpret_cast<uintptr_t>(px));
+}
+
+template<class T>
+inline low_storage_t to_low_unchecked(T* px) {
+  assertx(is_low(px));
+  return (low_storage_t)(reinterpret_cast<uintptr_t>(px));
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 
 /**
  * Low memory pointer template.
@@ -100,32 +142,16 @@ struct LowPtrImpl {
   /*
    * Observers.
    */
-  T* get() const {
-    return reinterpret_cast<T*>(S::get(m_s));
-  }
-
-  T& operator*() const {
-    return *get();
-  }
-
-  T* operator->() const {
-    return get();
-  }
-
-  /* implicit */ operator T*() const {
-    return get();
-  }
-
-  explicit operator bool() const {
-    return get();
-  }
+  T* get() const { return reinterpret_cast<T*>(S::get(m_s)); }
+  T& operator*()               const { return *get(); }
+  T* operator->()              const { return get(); }
+  /* implicit */ operator T*() const { return get(); }
+  explicit operator bool()     const { return get(); }
 
   /*
    * Modifiers.
    */
-  void reset() {
-    operator=(nullptr);
-  }
+  void reset() { operator=(nullptr); }
 
   template <typename Q = T>
   typename std::enable_if<
@@ -146,53 +172,19 @@ struct LowPtrImpl {
   }
 
 private:
-  /*
-   * Lowness.
-   */
-  static bool is_low(T* px) {
-    typename S::raw_type ones = ~0;
-    auto ptr = reinterpret_cast<uintptr_t>(px);
-    return (ptr & ones) == ptr;
-  }
-
-  static typename S::raw_type to_low(T* px) {
-    always_assert(is_low(px));
-    return (typename S::raw_type)(reinterpret_cast<uintptr_t>(px));
-  }
-
-  static typename S::raw_type to_low_unchecked(T* px) {
-    assertx(is_low(px));
-    return (typename S::raw_type)(reinterpret_cast<uintptr_t>(px));
-  }
-
-protected:
   typename S::storage_type m_s{0};
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 
-template <class S>
-struct RawStorage {
-  using raw_type = S;
-  using storage_type = S;
-
-  static ALWAYS_INLINE raw_type get(const storage_type& s) {
-    return s;
-  }
-  static ALWAYS_INLINE void set(storage_type& s, raw_type r) {
-    s = r;
-  }
-};
-
 template <class S, std::memory_order read_order, std::memory_order write_order>
 struct AtomicStorage {
-  using raw_type = S;
   using storage_type = std::atomic<S>;
 
-  static ALWAYS_INLINE raw_type get(const storage_type& s) {
+  static ALWAYS_INLINE low_storage_t get(const storage_type& s) {
     return s.load(read_order);
   }
-  static ALWAYS_INLINE void set(storage_type& s, raw_type r) {
+  static ALWAYS_INLINE void set(storage_type& s, low_storage_t r) {
     s.store(r, write_order);
   }
 };
@@ -203,30 +195,54 @@ struct AtomicStorage {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifdef USE_LOWPTR
-constexpr bool use_lowptr = true;
-
-namespace detail {
-using low_storage_t = uint32_t;
-}
-#else
-constexpr bool use_lowptr = false;
-
-namespace detail {
-using low_storage_t = uintptr_t;
-}
-#endif
-
-inline bool is_low_mem(void* m) {
-  assertx(use_lowptr);
-  const uint32_t mask = ~0;
-  auto const i = reinterpret_cast<intptr_t>(m);
-  return (mask & i) == i;
-}
-
 template<class T>
-using LowPtr =
-  detail::LowPtrImpl<T, detail::RawStorage<detail::low_storage_t>>;
+struct LowPtr {
+  using storage_type = detail::low_storage_t;
+  enum class Unchecked {};
+
+  /*
+   * Constructors.
+   */
+  LowPtr() = default;
+
+  /* implicit */ LowPtr(T* px) : m_s{detail::to_low(px)} {}
+  /* implicit */ LowPtr(Unchecked, T* px) : m_s{detail::to_low_unchecked(px)} {}
+  /* implicit */ LowPtr(std::nullptr_t /*px*/) : m_s{0} {}
+
+  LowPtr(const LowPtr<T>&) = default;
+  LowPtr(LowPtr<T>&&) = default;
+
+  /*
+   * Assignments.
+   */
+  LowPtr& operator=(T* px) {
+    m_s = detail::to_low(px);
+    return *this;
+  }
+  LowPtr& operator=(const LowPtr<T>&) = default;
+  LowPtr& operator=(std::nullptr_t /*px*/) {
+    m_s = 0;
+    return *this;
+  }
+  LowPtr& operator=(LowPtr<T>&&) = default;
+
+  /*
+   * Observers.
+   */
+  T* get()                     const { return reinterpret_cast<T*>(m_s); }
+  T& operator*()               const { return *get(); }
+  T* operator->()              const { return get(); }
+  /* implicit */ operator T*() const { return get(); }
+  explicit operator bool()     const { return get(); }
+
+  /*
+   * Modifiers.
+   */
+  void reset() { operator=(nullptr); }
+
+private:
+  storage_type m_s{0};
+};
 
 template<class T,
          std::memory_order read_order = std::memory_order_relaxed,

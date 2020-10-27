@@ -161,11 +161,11 @@
                 "token":{
                   "kind":"(",
                   "text":"(",
-                  "offset":47,
-                  "leading_width":0,
+                  "offset":46,
+                  "leading_width":1,
                   "width":1,
                   "trailing_width":0,
-                  "leading":[{"kind":"extra_token_error","text":")","offset":48,"width":1}],
+                  "leading":[{"kind":"extra_token_error","text":"f","offset":46,"width":1}],
                   "trailing":[],
                   "line_number":6
                 }
@@ -274,5 +274,5 @@
     }
   },
   "program_text":"<?hh\n\n@Attr1\n@Attr2\n<<Attr3, Attr4>>\nfunction f(): void {}\n",
-  "version":"2020-08-05-0000"
+  "version":"2020-10-15-0001"
 }

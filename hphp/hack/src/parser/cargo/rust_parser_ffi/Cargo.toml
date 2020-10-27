@@ -17,6 +17,6 @@ operator = { path = "../operator" }
 oxidized = { path = "../../../oxidized" }
 parser_core_types = { path = "../core_types" }
 rust_to_ocaml = { path = "../rust_to_ocaml" }
-smart_constructors = { path = "../smart_constructors" }
 stack_limit = { path = "../../../utils/stack_limit" }
+bumpalo = { version = "3.2.1", features = ["collections"] }
 libc = "0.2"

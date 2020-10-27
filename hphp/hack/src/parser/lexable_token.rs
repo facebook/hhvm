@@ -11,7 +11,7 @@ use crate::{
     token_kind::TokenKind, trivia_kind::TriviaKind,
 };
 
-pub trait LexableToken: Clone {
+pub trait LexableToken: Clone + Debug {
     type Trivia: LexableTrivia;
 
     fn kind(&self) -> TokenKind;
@@ -47,9 +47,6 @@ where
     fn text<'b>(&self, source_text: &'b SourceText) -> &'b str;
     fn text_raw<'b>(&self, source_text: &'b SourceText) -> &'b [u8];
     fn clone_value(&self) -> Self;
-    fn trim_left(&mut self, n: usize) -> Result<(), String>;
-    fn trim_right(&mut self, n: usize) -> Result<(), String>;
-    fn concatenate(s: &Self, e: &Self) -> Result<Self, String>;
     fn positioned_leading(&self) -> &[PositionedTrivium];
     fn positioned_trailing(&self) -> &[PositionedTrivium];
 }

@@ -5,6 +5,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::{lexable_token::LexableToken, lexable_trivia::LexableTrivia, token_kind::TokenKind};
+use std::fmt::Debug;
 
 pub type Trivia<TF> = <<TF as TokenFactory>::Token as LexableToken>::Trivia;
 pub type Trivium<TF> =
@@ -58,7 +59,7 @@ impl<Token: SimpleTokenFactory> SimpleTokenFactoryImpl<Token> {
     }
 }
 
-impl<T: SimpleTokenFactory> TokenFactory for SimpleTokenFactoryImpl<T> {
+impl<T: SimpleTokenFactory + Debug> TokenFactory for SimpleTokenFactoryImpl<T> {
     type Token = T;
 
     fn make(
@@ -91,4 +92,10 @@ impl<T: SimpleTokenFactory> TokenFactory for SimpleTokenFactoryImpl<T> {
     fn with_kind(&mut self, token: Self::Token, kind: TokenKind) -> Self::Token {
         token.with_kind(kind)
     }
+}
+
+pub trait TokenMutator: TokenFactory {
+    fn trim_left(&mut self, t: &Self::Token, n: usize) -> Self::Token;
+    fn trim_right(&mut self, t: &Self::Token, n: usize) -> Self::Token;
+    fn concatenate(&mut self, s: &Self::Token, e: &Self::Token) -> Self::Token;
 }

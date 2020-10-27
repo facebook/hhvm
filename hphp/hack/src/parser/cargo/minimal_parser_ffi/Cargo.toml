@@ -13,8 +13,4 @@ minimal_parser = { path = "../../api/cargo/minimal_parser" }
 ocamlrep = { path = "../../../ocamlrep" }
 ocamlrep_ocamlpool = { path = "../../../ocamlrep_ocamlpool" }
 oxidized = { path = "../../../oxidized" }
-parser_core_types = { path = "../core_types" }
 rust_parser_ffi = { path = "../rust_parser_ffi" }
-rust_to_ocaml = { path = "../rust_to_ocaml" }
-smart_constructors = { path = "../smart_constructors" }
-stack_limit = { path = "../../../utils/stack_limit" }

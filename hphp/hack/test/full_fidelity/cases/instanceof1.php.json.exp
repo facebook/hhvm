@@ -110,11 +110,11 @@
             "token":{
               "kind":";",
               "text":";",
-              "offset":28,
-              "leading_width":0,
+              "offset":25,
+              "leading_width":3,
               "width":1,
               "trailing_width":1,
-              "leading":[{"kind":"extra_token_error","text":"\n","offset":29,"width":3}],
+              "leading":[{"kind":"extra_token_error","text":"Foo","offset":25,"width":3}],
               "trailing":[{"kind":"end_of_line","text":"\n","offset":29,"width":1}],
               "line_number":3
             }
@@ -141,5 +141,5 @@
     }
   },
   "program_text":"<?hh\n\n$_ = $x instanceof Foo;\n",
-  "version":"2020-06-23-0001"
+  "version":"2020-10-15-0001"
 }

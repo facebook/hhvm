@@ -23,7 +23,7 @@ use oxidized::{
 ///   );
 /// )();
 /// ```
-pub fn desugar(hint: &aast::Hint, e: &Expr, env: &Env) -> Expr {
+pub fn desugar<TF>(hint: &aast::Hint, e: &Expr, env: &Env<TF>) -> Expr {
     let (e, extracted_splices) = extract_and_replace_splices(e);
     let temp_pos = e.0.clone();
 
@@ -120,7 +120,12 @@ fn wrap_return(e: Expr, pos: &Pos) -> Stmt {
 }
 
 /// Wrap a FuncBody into an anonymous Fun_
-fn wrap_fun_(body: ast::FuncBody, params: Vec<ast::FunParam>, pos: Pos, env: &Env) -> ast::Fun_ {
+fn wrap_fun_<TF>(
+    body: ast::FuncBody,
+    params: Vec<ast::FunParam>,
+    pos: Pos,
+    env: &Env<TF>,
+) -> ast::Fun_ {
     ast::Fun_ {
         span: pos,
         annotation: (),

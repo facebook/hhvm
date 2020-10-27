@@ -6,11 +6,8 @@
 use oxidized::file_info::Mode;
 
 use crate::{
-    lexable_token::LexableToken,
-    source_text::SourceText,
-    syntax::{Syntax, SyntaxValueType},
-    syntax_error::SyntaxError,
-    syntax_trait::SyntaxTrait,
+    lexable_token::LexableToken, source_text::SourceText, syntax_by_ref::syntax::Syntax,
+    syntax_error::SyntaxError, syntax_trait::SyntaxTrait,
 };
 use std::{borrow::Borrow, convert::AsRef};
 
@@ -23,15 +20,15 @@ pub struct SyntaxTree<'a, Syntax, State> {
     required_stack_size: Option<usize>,
 }
 
-impl<'a, T, V, State> SyntaxTree<'a, Syntax<T, V>, State>
+impl<'arena, T, V, State> SyntaxTree<'_, Syntax<'arena, T, V>, State>
 where
     T: LexableToken,
-    V: SyntaxValueType<T>,
-    Syntax<T, V>: SyntaxTrait,
+    Syntax<'arena, T, V>: SyntaxTrait,
 {
-    pub fn errors(&self) -> Vec<&SyntaxError>
+    pub fn errors<'r>(&'r self) -> Vec<&SyntaxError>
     where
         State: Clone,
+        'r: 'arena,
     {
         let mut errs: Vec<&SyntaxError> = if self.is_decl() {
             self.errors
@@ -45,7 +42,10 @@ where
         errs
     }
 
-    fn is_in_body(node: &Syntax<T, V>, position: usize) -> bool {
+    fn is_in_body<'r>(node: &'r Syntax<'arena, T, V>, position: usize) -> bool
+    where
+        'r: 'arena,
+    {
         let p = Self::parentage(node, position);
         for i in 1..p.len() {
             if p[i - 1].is_compound_statement()
@@ -58,7 +58,13 @@ where
     }
 
     // TODO:(shiqicao) move this function to SyntaxTrait, see D18359931
-    fn parentage(node: &Syntax<T, V>, position: usize) -> Vec<&Syntax<T, V>> {
+    fn parentage<'r>(
+        node: &'r Syntax<'arena, T, V>,
+        position: usize,
+    ) -> Vec<&'r Syntax<'arena, T, V>>
+    where
+        'r: 'arena,
+    {
         let mut acc = vec![];
         if position < node.full_width() {
             Self::parentage_(node, position, &mut acc);
@@ -66,11 +72,13 @@ where
         acc
     }
 
-    fn parentage_<'b>(
-        node: &'b Syntax<T, V>,
+    fn parentage_<'r>(
+        node: &'r Syntax<'arena, T, V>,
         mut position: usize,
-        acc: &mut Vec<&'b Syntax<T, V>>,
-    ) {
+        acc: &mut Vec<&'r Syntax<'arena, T, V>>,
+    ) where
+        'r: 'arena,
+    {
         for c in node.iter_children() {
             let width = node.full_width();
             if position < width {

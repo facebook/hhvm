@@ -94,12 +94,12 @@
               "token":{
                 "kind":"{",
                 "text":"{",
-                "offset":49,
-                "leading_width":0,
+                "offset":40,
+                "leading_width":9,
                 "width":1,
                 "trailing_width":0,
                 "leading":[
-                  {"kind":"extra_token_error","text":"}\nclass ","offset":50,"width":8},
+                  {"kind":"extra_token_error","text":"abstract","offset":40,"width":8},
                   {"kind":"whitespace","text":" ","offset":48,"width":1}
                 ],
                 "trailing":[],
@@ -228,12 +228,12 @@
               "token":{
                 "kind":"{",
                 "text":"{",
-                "offset":76,
-                "leading_width":0,
+                "offset":73,
+                "leading_width":3,
                 "width":1,
                 "trailing_width":0,
                 "leading":[
-                  {"kind":"extra_token_error","text":"}\n","offset":77,"width":2},
+                  {"kind":"extra_token_error","text":"as","offset":73,"width":2},
                   {"kind":"whitespace","text":" ","offset":75,"width":1}
                 ],
                 "trailing":[],
@@ -290,12 +290,12 @@
               "token":{
                 "kind":"{",
                 "text":"{",
-                "offset":91,
-                "leading_width":0,
+                "offset":85,
+                "leading_width":6,
                 "width":1,
                 "trailing_width":0,
                 "leading":[
-                  {"kind":"extra_token_error","text":"}\ncla","offset":92,"width":5},
+                  {"kind":"extra_token_error","text":"break","offset":85,"width":5},
                   {"kind":"whitespace","text":" ","offset":90,"width":1}
                 ],
                 "trailing":[],
@@ -352,12 +352,12 @@
               "token":{
                 "kind":"{",
                 "text":"{",
-                "offset":105,
-                "leading_width":0,
+                "offset":100,
+                "leading_width":5,
                 "width":1,
                 "trailing_width":0,
                 "leading":[
-                  {"kind":"extra_token_error","text":"}\ncl","offset":106,"width":4},
+                  {"kind":"extra_token_error","text":"case","offset":100,"width":4},
                   {"kind":"whitespace","text":" ","offset":104,"width":1}
                 ],
                 "trailing":[],
@@ -414,12 +414,12 @@
               "token":{
                 "kind":"{",
                 "text":"{",
-                "offset":120,
-                "leading_width":0,
+                "offset":114,
+                "leading_width":6,
                 "width":1,
                 "trailing_width":0,
                 "leading":[
-                  {"kind":"extra_token_error","text":"}\ncla","offset":121,"width":5},
+                  {"kind":"extra_token_error","text":"catch","offset":114,"width":5},
                   {"kind":"whitespace","text":" ","offset":119,"width":1}
                 ],
                 "trailing":[],
@@ -476,12 +476,12 @@
               "token":{
                 "kind":"{",
                 "text":"{",
-                "offset":135,
-                "leading_width":0,
+                "offset":129,
+                "leading_width":6,
                 "width":1,
                 "trailing_width":0,
                 "leading":[
-                  {"kind":"extra_token_error","text":"}\ncla","offset":136,"width":5},
+                  {"kind":"extra_token_error","text":"class","offset":129,"width":5},
                   {"kind":"whitespace","text":" ","offset":134,"width":1}
                 ],
                 "trailing":[],
@@ -538,12 +538,12 @@
               "token":{
                 "kind":"{",
                 "text":"{",
-                "offset":150,
-                "leading_width":0,
+                "offset":144,
+                "leading_width":6,
                 "width":1,
                 "trailing_width":0,
                 "leading":[
-                  {"kind":"extra_token_error","text":"}\ncla","offset":151,"width":5},
+                  {"kind":"extra_token_error","text":"clone","offset":144,"width":5},
                   {"kind":"whitespace","text":" ","offset":149,"width":1}
                 ],
                 "trailing":[],
@@ -600,12 +600,12 @@
               "token":{
                 "kind":"{",
                 "text":"{",
-                "offset":165,
-                "leading_width":0,
+                "offset":159,
+                "leading_width":6,
                 "width":1,
                 "trailing_width":0,
                 "leading":[
-                  {"kind":"extra_token_error","text":"}\ncla","offset":166,"width":5},
+                  {"kind":"extra_token_error","text":"const","offset":159,"width":5},
                   {"kind":"whitespace","text":" ","offset":164,"width":1}
                 ],
                 "trailing":[],
@@ -662,12 +662,12 @@
               "token":{
                 "kind":"{",
                 "text":"{",
-                "offset":183,
-                "leading_width":0,
+                "offset":174,
+                "leading_width":9,
                 "width":1,
                 "trailing_width":0,
                 "leading":[
-                  {"kind":"extra_token_error","text":"}\nclass ","offset":184,"width":8},
+                  {"kind":"extra_token_error","text":"continue","offset":174,"width":8},
                   {"kind":"whitespace","text":" ","offset":182,"width":1}
                 ],
                 "trailing":[],
@@ -724,12 +724,12 @@
               "token":{
                 "kind":"{",
                 "text":"{",
-                "offset":200,
-                "leading_width":0,
+                "offset":192,
+                "leading_width":8,
                 "width":1,
                 "trailing_width":0,
                 "leading":[
-                  {"kind":"extra_token_error","text":"}\nclass","offset":201,"width":7},
+                  {"kind":"extra_token_error","text":"default","offset":192,"width":7},
                   {"kind":"whitespace","text":" ","offset":199,"width":1}
                 ],
                 "trailing":[],
@@ -786,12 +786,12 @@
               "token":{
                 "kind":"{",
                 "text":"{",
-                "offset":212,
-                "leading_width":0,
+                "offset":209,
+                "leading_width":3,
                 "width":1,
                 "trailing_width":0,
                 "leading":[
-                  {"kind":"extra_token_error","text":"}\n","offset":213,"width":2},
+                  {"kind":"extra_token_error","text":"do","offset":209,"width":2},
                   {"kind":"whitespace","text":" ","offset":211,"width":1}
                 ],
                 "trailing":[],
@@ -848,12 +848,12 @@
               "token":{
                 "kind":"{",
                 "text":"{",
-                "offset":226,
-                "leading_width":0,
+                "offset":221,
+                "leading_width":5,
                 "width":1,
                 "trailing_width":0,
                 "leading":[
-                  {"kind":"extra_token_error","text":"}\ncl","offset":227,"width":4},
+                  {"kind":"extra_token_error","text":"echo","offset":221,"width":4},
                   {"kind":"whitespace","text":" ","offset":225,"width":1}
                 ],
                 "trailing":[],
@@ -910,12 +910,12 @@
               "token":{
                 "kind":"{",
                 "text":"{",
-                "offset":240,
-                "leading_width":0,
+                "offset":235,
+                "leading_width":5,
                 "width":1,
                 "trailing_width":0,
                 "leading":[
-                  {"kind":"extra_token_error","text":"}\ncl","offset":241,"width":4},
+                  {"kind":"extra_token_error","text":"else","offset":235,"width":4},
                   {"kind":"whitespace","text":" ","offset":239,"width":1}
                 ],
                 "trailing":[],
@@ -972,12 +972,12 @@
               "token":{
                 "kind":"{",
                 "text":"{",
-                "offset":256,
-                "leading_width":0,
+                "offset":249,
+                "leading_width":7,
                 "width":1,
                 "trailing_width":0,
                 "leading":[
-                  {"kind":"extra_token_error","text":"}\nclas","offset":257,"width":6},
+                  {"kind":"extra_token_error","text":"elseif","offset":249,"width":6},
                   {"kind":"whitespace","text":" ","offset":255,"width":1}
                 ],
                 "trailing":[],
@@ -1034,12 +1034,12 @@
               "token":{
                 "kind":"{",
                 "text":"{",
-                "offset":271,
-                "leading_width":0,
+                "offset":265,
+                "leading_width":6,
                 "width":1,
                 "trailing_width":0,
                 "leading":[
-                  {"kind":"extra_token_error","text":"}\ncla","offset":272,"width":5},
+                  {"kind":"extra_token_error","text":"empty","offset":265,"width":5},
                   {"kind":"whitespace","text":" ","offset":270,"width":1}
                 ],
                 "trailing":[],
@@ -1096,12 +1096,12 @@
               "token":{
                 "kind":"{",
                 "text":"{",
-                "offset":287,
-                "leading_width":0,
+                "offset":280,
+                "leading_width":7,
                 "width":1,
                 "trailing_width":0,
                 "leading":[
-                  {"kind":"extra_token_error","text":"}\nclas","offset":288,"width":6},
+                  {"kind":"extra_token_error","text":"endfor","offset":280,"width":6},
                   {"kind":"whitespace","text":" ","offset":286,"width":1}
                 ],
                 "trailing":[],
@@ -1158,12 +1158,12 @@
               "token":{
                 "kind":"{",
                 "text":"{",
-                "offset":307,
-                "leading_width":0,
+                "offset":296,
+                "leading_width":11,
                 "width":1,
                 "trailing_width":0,
                 "leading":[
-                  {"kind":"extra_token_error","text":"}\nclass en","offset":308,"width":10},
+                  {"kind":"extra_token_error","text":"endforeach","offset":296,"width":10},
                   {"kind":"whitespace","text":" ","offset":306,"width":1}
                 ],
                 "trailing":[],
@@ -1220,12 +1220,12 @@
               "token":{
                 "kind":"{",
                 "text":"{",
-                "offset":322,
-                "leading_width":0,
+                "offset":316,
+                "leading_width":6,
                 "width":1,
                 "trailing_width":0,
                 "leading":[
-                  {"kind":"extra_token_error","text":"}\ncla","offset":323,"width":5},
+                  {"kind":"extra_token_error","text":"endif","offset":316,"width":5},
                   {"kind":"whitespace","text":" ","offset":321,"width":1}
                 ],
                 "trailing":[],
@@ -1282,12 +1282,12 @@
               "token":{
                 "kind":"{",
                 "text":"{",
-                "offset":341,
-                "leading_width":0,
+                "offset":331,
+                "leading_width":10,
                 "width":1,
                 "trailing_width":0,
                 "leading":[
-                  {"kind":"extra_token_error","text":"}\nclass e","offset":342,"width":9},
+                  {"kind":"extra_token_error","text":"endswitch","offset":331,"width":9},
                   {"kind":"whitespace","text":" ","offset":340,"width":1}
                 ],
                 "trailing":[],
@@ -1344,12 +1344,12 @@
               "token":{
                 "kind":"{",
                 "text":"{",
-                "offset":359,
-                "leading_width":0,
+                "offset":350,
+                "leading_width":9,
                 "width":1,
                 "trailing_width":0,
                 "leading":[
-                  {"kind":"extra_token_error","text":"}\nclass ","offset":360,"width":8},
+                  {"kind":"extra_token_error","text":"endwhile","offset":350,"width":8},
                   {"kind":"whitespace","text":" ","offset":358,"width":1}
                 ],
                 "trailing":[],
@@ -1406,12 +1406,12 @@
               "token":{
                 "kind":"{",
                 "text":"{",
-                "offset":373,
-                "leading_width":0,
+                "offset":368,
+                "leading_width":5,
                 "width":1,
                 "trailing_width":0,
                 "leading":[
-                  {"kind":"extra_token_error","text":"}\ncl","offset":374,"width":4},
+                  {"kind":"extra_token_error","text":"eval","offset":368,"width":4},
                   {"kind":"whitespace","text":" ","offset":372,"width":1}
                 ],
                 "trailing":[],
@@ -1549,12 +1549,12 @@
               "token":{
                 "kind":"{",
                 "text":"{",
-                "offset":405,
-                "leading_width":0,
+                "offset":399,
+                "leading_width":6,
                 "width":1,
                 "trailing_width":0,
                 "leading":[
-                  {"kind":"extra_token_error","text":"}\ncla","offset":406,"width":5},
+                  {"kind":"extra_token_error","text":"final","offset":399,"width":5},
                   {"kind":"whitespace","text":" ","offset":404,"width":1}
                 ],
                 "trailing":[],
@@ -1611,12 +1611,12 @@
               "token":{
                 "kind":"{",
                 "text":"{",
-                "offset":422,
-                "leading_width":0,
+                "offset":414,
+                "leading_width":8,
                 "width":1,
                 "trailing_width":0,
                 "leading":[
-                  {"kind":"extra_token_error","text":"}\nclass","offset":423,"width":7},
+                  {"kind":"extra_token_error","text":"finally","offset":414,"width":7},
                   {"kind":"whitespace","text":" ","offset":421,"width":1}
                 ],
                 "trailing":[],
@@ -1673,12 +1673,12 @@
               "token":{
                 "kind":"{",
                 "text":"{",
-                "offset":435,
-                "leading_width":0,
+                "offset":431,
+                "leading_width":4,
                 "width":1,
                 "trailing_width":0,
                 "leading":[
-                  {"kind":"extra_token_error","text":"}\nc","offset":436,"width":3},
+                  {"kind":"extra_token_error","text":"for","offset":431,"width":3},
                   {"kind":"whitespace","text":" ","offset":434,"width":1}
                 ],
                 "trailing":[],
@@ -1735,12 +1735,12 @@
               "token":{
                 "kind":"{",
                 "text":"{",
-                "offset":452,
-                "leading_width":0,
+                "offset":444,
+                "leading_width":8,
                 "width":1,
                 "trailing_width":0,
                 "leading":[
-                  {"kind":"extra_token_error","text":"}\nclass","offset":453,"width":7},
+                  {"kind":"extra_token_error","text":"foreach","offset":444,"width":7},
                   {"kind":"whitespace","text":" ","offset":451,"width":1}
                 ],
                 "trailing":[],
@@ -1797,12 +1797,12 @@
               "token":{
                 "kind":"{",
                 "text":"{",
-                "offset":470,
-                "leading_width":0,
+                "offset":461,
+                "leading_width":9,
                 "width":1,
                 "trailing_width":0,
                 "leading":[
-                  {"kind":"extra_token_error","text":"}\nclass ","offset":471,"width":8},
+                  {"kind":"extra_token_error","text":"function","offset":461,"width":8},
                   {"kind":"whitespace","text":" ","offset":469,"width":1}
                 ],
                 "trailing":[],
@@ -1859,12 +1859,12 @@
               "token":{
                 "kind":"{",
                 "text":"{",
-                "offset":486,
-                "leading_width":0,
+                "offset":479,
+                "leading_width":7,
                 "width":1,
                 "trailing_width":0,
                 "leading":[
-                  {"kind":"extra_token_error","text":"}\nclas","offset":487,"width":6},
+                  {"kind":"extra_token_error","text":"global","offset":479,"width":6},
                   {"kind":"whitespace","text":" ","offset":485,"width":1}
                 ],
                 "trailing":[],
@@ -1921,12 +1921,12 @@
               "token":{
                 "kind":"{",
                 "text":"{",
-                "offset":500,
-                "leading_width":0,
+                "offset":495,
+                "leading_width":5,
                 "width":1,
                 "trailing_width":0,
                 "leading":[
-                  {"kind":"extra_token_error","text":"}\ncl","offset":501,"width":4},
+                  {"kind":"extra_token_error","text":"goto","offset":495,"width":4},
                   {"kind":"whitespace","text":" ","offset":499,"width":1}
                 ],
                 "trailing":[],
@@ -1983,12 +1983,12 @@
               "token":{
                 "kind":"{",
                 "text":"{",
-                "offset":512,
-                "leading_width":0,
+                "offset":509,
+                "leading_width":3,
                 "width":1,
                 "trailing_width":0,
                 "leading":[
-                  {"kind":"extra_token_error","text":"}\n","offset":513,"width":2},
+                  {"kind":"extra_token_error","text":"if","offset":509,"width":2},
                   {"kind":"whitespace","text":" ","offset":511,"width":1}
                 ],
                 "trailing":[],
@@ -2126,12 +2126,12 @@
               "token":{
                 "kind":"{",
                 "text":"{",
-                "offset":549,
-                "leading_width":0,
+                "offset":541,
+                "leading_width":8,
                 "width":1,
                 "trailing_width":0,
                 "leading":[
-                  {"kind":"extra_token_error","text":"}\nclass","offset":550,"width":7},
+                  {"kind":"extra_token_error","text":"include","offset":541,"width":7},
                   {"kind":"whitespace","text":" ","offset":548,"width":1}
                 ],
                 "trailing":[],
@@ -2188,12 +2188,12 @@
               "token":{
                 "kind":"{",
                 "text":"{",
-                "offset":571,
-                "leading_width":0,
+                "offset":558,
+                "leading_width":13,
                 "width":1,
                 "trailing_width":0,
                 "leading":[
-                  {"kind":"extra_token_error","text":"}\nclass inou","offset":572,"width":12},
+                  {"kind":"extra_token_error","text":"include_once","offset":558,"width":12},
                   {"kind":"whitespace","text":" ","offset":570,"width":1}
                 ],
                 "trailing":[],
@@ -2250,12 +2250,12 @@
               "token":{
                 "kind":"{",
                 "text":"{",
-                "offset":586,
-                "leading_width":0,
+                "offset":580,
+                "leading_width":6,
                 "width":1,
                 "trailing_width":0,
                 "leading":[
-                  {"kind":"extra_token_error","text":"}\ncla","offset":587,"width":5},
+                  {"kind":"extra_token_error","text":"inout","offset":580,"width":5},
                   {"kind":"whitespace","text":" ","offset":585,"width":1}
                 ],
                 "trailing":[],
@@ -2312,12 +2312,12 @@
               "token":{
                 "kind":"{",
                 "text":"{",
-                "offset":606,
-                "leading_width":0,
+                "offset":595,
+                "leading_width":11,
                 "width":1,
                 "trailing_width":0,
                 "leading":[
-                  {"kind":"extra_token_error","text":"}\nclass in","offset":607,"width":10},
+                  {"kind":"extra_token_error","text":"instanceof","offset":595,"width":10},
                   {"kind":"whitespace","text":" ","offset":605,"width":1}
                 ],
                 "trailing":[],
@@ -2374,12 +2374,12 @@
               "token":{
                 "kind":"{",
                 "text":"{",
-                "offset":625,
-                "leading_width":0,
+                "offset":615,
+                "leading_width":10,
                 "width":1,
                 "trailing_width":0,
                 "leading":[
-                  {"kind":"extra_token_error","text":"}\nclass i","offset":626,"width":9},
+                  {"kind":"extra_token_error","text":"insteadof","offset":615,"width":9},
                   {"kind":"whitespace","text":" ","offset":624,"width":1}
                 ],
                 "trailing":[],
@@ -2436,12 +2436,12 @@
               "token":{
                 "kind":"{",
                 "text":"{",
-                "offset":644,
-                "leading_width":0,
+                "offset":634,
+                "leading_width":10,
                 "width":1,
                 "trailing_width":0,
                 "leading":[
-                  {"kind":"extra_token_error","text":"}\nclass i","offset":645,"width":9},
+                  {"kind":"extra_token_error","text":"interface","offset":634,"width":9},
                   {"kind":"whitespace","text":" ","offset":643,"width":1}
                 ],
                 "trailing":[],
@@ -2498,12 +2498,12 @@
               "token":{
                 "kind":"{",
                 "text":"{",
-                "offset":659,
-                "leading_width":0,
+                "offset":653,
+                "leading_width":6,
                 "width":1,
                 "trailing_width":0,
                 "leading":[
-                  {"kind":"extra_token_error","text":"}\ncla","offset":660,"width":5},
+                  {"kind":"extra_token_error","text":"isset","offset":653,"width":5},
                   {"kind":"whitespace","text":" ","offset":658,"width":1}
                 ],
                 "trailing":[],
@@ -2560,12 +2560,12 @@
               "token":{
                 "kind":"{",
                 "text":"{",
-                "offset":673,
-                "leading_width":0,
+                "offset":668,
+                "leading_width":5,
                 "width":1,
                 "trailing_width":0,
                 "leading":[
-                  {"kind":"extra_token_error","text":"}\ncl","offset":674,"width":4},
+                  {"kind":"extra_token_error","text":"list","offset":668,"width":4},
                   {"kind":"whitespace","text":" ","offset":672,"width":1}
                 ],
                 "trailing":[],
@@ -2622,12 +2622,12 @@
               "token":{
                 "kind":"{",
                 "text":"{",
-                "offset":692,
-                "leading_width":0,
+                "offset":682,
+                "leading_width":10,
                 "width":1,
                 "trailing_width":0,
                 "leading":[
-                  {"kind":"extra_token_error","text":"}\nclass n","offset":693,"width":9},
+                  {"kind":"extra_token_error","text":"namespace","offset":682,"width":9},
                   {"kind":"whitespace","text":" ","offset":691,"width":1}
                 ],
                 "trailing":[],
@@ -2684,12 +2684,12 @@
               "token":{
                 "kind":"{",
                 "text":"{",
-                "offset":705,
-                "leading_width":0,
+                "offset":701,
+                "leading_width":4,
                 "width":1,
                 "trailing_width":0,
                 "leading":[
-                  {"kind":"extra_token_error","text":"}\nc","offset":706,"width":3},
+                  {"kind":"extra_token_error","text":"new","offset":701,"width":3},
                   {"kind":"whitespace","text":" ","offset":704,"width":1}
                 ],
                 "trailing":[],
@@ -2746,12 +2746,12 @@
               "token":{
                 "kind":"{",
                 "text":"{",
-                "offset":720,
-                "leading_width":0,
+                "offset":714,
+                "leading_width":6,
                 "width":1,
                 "trailing_width":0,
                 "leading":[
-                  {"kind":"extra_token_error","text":"}\ncla","offset":721,"width":5},
+                  {"kind":"extra_token_error","text":"print","offset":714,"width":5},
                   {"kind":"whitespace","text":" ","offset":719,"width":1}
                 ],
                 "trailing":[],
@@ -2808,12 +2808,12 @@
               "token":{
                 "kind":"{",
                 "text":"{",
-                "offset":737,
-                "leading_width":0,
+                "offset":729,
+                "leading_width":8,
                 "width":1,
                 "trailing_width":0,
                 "leading":[
-                  {"kind":"extra_token_error","text":"}\nclass","offset":738,"width":7},
+                  {"kind":"extra_token_error","text":"private","offset":729,"width":7},
                   {"kind":"whitespace","text":" ","offset":736,"width":1}
                 ],
                 "trailing":[],
@@ -2870,12 +2870,12 @@
               "token":{
                 "kind":"{",
                 "text":"{",
-                "offset":756,
-                "leading_width":0,
+                "offset":746,
+                "leading_width":10,
                 "width":1,
                 "trailing_width":0,
                 "leading":[
-                  {"kind":"extra_token_error","text":"}\nclass p","offset":757,"width":9},
+                  {"kind":"extra_token_error","text":"protected","offset":746,"width":9},
                   {"kind":"whitespace","text":" ","offset":755,"width":1}
                 ],
                 "trailing":[],
@@ -2932,12 +2932,12 @@
               "token":{
                 "kind":"{",
                 "text":"{",
-                "offset":772,
-                "leading_width":0,
+                "offset":765,
+                "leading_width":7,
                 "width":1,
                 "trailing_width":0,
                 "leading":[
-                  {"kind":"extra_token_error","text":"}\nclas","offset":773,"width":6},
+                  {"kind":"extra_token_error","text":"public","offset":765,"width":6},
                   {"kind":"whitespace","text":" ","offset":771,"width":1}
                 ],
                 "trailing":[],
@@ -2994,12 +2994,12 @@
               "token":{
                 "kind":"{",
                 "text":"{",
-                "offset":789,
-                "leading_width":0,
+                "offset":781,
+                "leading_width":8,
                 "width":1,
                 "trailing_width":0,
                 "leading":[
-                  {"kind":"extra_token_error","text":"}\nclass","offset":790,"width":7},
+                  {"kind":"extra_token_error","text":"require","offset":781,"width":7},
                   {"kind":"whitespace","text":" ","offset":788,"width":1}
                 ],
                 "trailing":[],
@@ -3056,12 +3056,12 @@
               "token":{
                 "kind":"{",
                 "text":"{",
-                "offset":811,
-                "leading_width":0,
+                "offset":798,
+                "leading_width":13,
                 "width":1,
                 "trailing_width":0,
                 "leading":[
-                  {"kind":"extra_token_error","text":"}\nclass retu","offset":812,"width":12},
+                  {"kind":"extra_token_error","text":"require_once","offset":798,"width":12},
                   {"kind":"whitespace","text":" ","offset":810,"width":1}
                 ],
                 "trailing":[],
@@ -3118,12 +3118,12 @@
               "token":{
                 "kind":"{",
                 "text":"{",
-                "offset":827,
-                "leading_width":0,
+                "offset":820,
+                "leading_width":7,
                 "width":1,
                 "trailing_width":0,
                 "leading":[
-                  {"kind":"extra_token_error","text":"}\nclas","offset":828,"width":6},
+                  {"kind":"extra_token_error","text":"return","offset":820,"width":6},
                   {"kind":"whitespace","text":" ","offset":826,"width":1}
                 ],
                 "trailing":[],
@@ -3180,12 +3180,12 @@
               "token":{
                 "kind":"{",
                 "text":"{",
-                "offset":842,
-                "leading_width":0,
+                "offset":836,
+                "leading_width":6,
                 "width":1,
                 "trailing_width":0,
                 "leading":[
-                  {"kind":"extra_token_error","text":"}\ncla","offset":843,"width":5},
+                  {"kind":"extra_token_error","text":"shape","offset":836,"width":5},
                   {"kind":"whitespace","text":" ","offset":841,"width":1}
                 ],
                 "trailing":[],
@@ -3242,12 +3242,12 @@
               "token":{
                 "kind":"{",
                 "text":"{",
-                "offset":858,
-                "leading_width":0,
+                "offset":851,
+                "leading_width":7,
                 "width":1,
                 "trailing_width":0,
                 "leading":[
-                  {"kind":"extra_token_error","text":"}\nclas","offset":859,"width":6},
+                  {"kind":"extra_token_error","text":"static","offset":851,"width":6},
                   {"kind":"whitespace","text":" ","offset":857,"width":1}
                 ],
                 "trailing":[],
@@ -3304,12 +3304,12 @@
               "token":{
                 "kind":"{",
                 "text":"{",
-                "offset":874,
-                "leading_width":0,
+                "offset":867,
+                "leading_width":7,
                 "width":1,
                 "trailing_width":0,
                 "leading":[
-                  {"kind":"extra_token_error","text":"}\nclas","offset":875,"width":6},
+                  {"kind":"extra_token_error","text":"switch","offset":867,"width":6},
                   {"kind":"whitespace","text":" ","offset":873,"width":1}
                 ],
                 "trailing":[],
@@ -3366,12 +3366,12 @@
               "token":{
                 "kind":"{",
                 "text":"{",
-                "offset":889,
-                "leading_width":0,
+                "offset":883,
+                "leading_width":6,
                 "width":1,
                 "trailing_width":0,
                 "leading":[
-                  {"kind":"extra_token_error","text":"}\ncla","offset":890,"width":5},
+                  {"kind":"extra_token_error","text":"throw","offset":883,"width":5},
                   {"kind":"whitespace","text":" ","offset":888,"width":1}
                 ],
                 "trailing":[],
@@ -3428,12 +3428,12 @@
               "token":{
                 "kind":"{",
                 "text":"{",
-                "offset":904,
-                "leading_width":0,
+                "offset":898,
+                "leading_width":6,
                 "width":1,
                 "trailing_width":0,
                 "leading":[
-                  {"kind":"extra_token_error","text":"}\ncla","offset":905,"width":5},
+                  {"kind":"extra_token_error","text":"trait","offset":898,"width":5},
                   {"kind":"whitespace","text":" ","offset":903,"width":1}
                 ],
                 "trailing":[],
@@ -3490,12 +3490,12 @@
               "token":{
                 "kind":"{",
                 "text":"{",
-                "offset":917,
-                "leading_width":0,
+                "offset":913,
+                "leading_width":4,
                 "width":1,
                 "trailing_width":0,
                 "leading":[
-                  {"kind":"extra_token_error","text":"}\nc","offset":918,"width":3},
+                  {"kind":"extra_token_error","text":"try","offset":913,"width":3},
                   {"kind":"whitespace","text":" ","offset":916,"width":1}
                 ],
                 "trailing":[],
@@ -3552,12 +3552,12 @@
               "token":{
                 "kind":"{",
                 "text":"{",
-                "offset":932,
-                "leading_width":0,
+                "offset":926,
+                "leading_width":6,
                 "width":1,
                 "trailing_width":0,
                 "leading":[
-                  {"kind":"extra_token_error","text":"}\ncla","offset":933,"width":5},
+                  {"kind":"extra_token_error","text":"unset","offset":926,"width":5},
                   {"kind":"whitespace","text":" ","offset":931,"width":1}
                 ],
                 "trailing":[],
@@ -3614,12 +3614,12 @@
               "token":{
                 "kind":"{",
                 "text":"{",
-                "offset":945,
-                "leading_width":0,
+                "offset":941,
+                "leading_width":4,
                 "width":1,
                 "trailing_width":0,
                 "leading":[
-                  {"kind":"extra_token_error","text":"}\nc","offset":946,"width":3},
+                  {"kind":"extra_token_error","text":"use","offset":941,"width":3},
                   {"kind":"whitespace","text":" ","offset":944,"width":1}
                 ],
                 "trailing":[],
@@ -3676,12 +3676,12 @@
               "token":{
                 "kind":"{",
                 "text":"{",
-                "offset":960,
-                "leading_width":0,
+                "offset":954,
+                "leading_width":6,
                 "width":1,
                 "trailing_width":0,
                 "leading":[
-                  {"kind":"extra_token_error","text":"}\ncla","offset":961,"width":5},
+                  {"kind":"extra_token_error","text":"using","offset":954,"width":5},
                   {"kind":"whitespace","text":" ","offset":959,"width":1}
                 ],
                 "trailing":[],
@@ -3738,12 +3738,12 @@
               "token":{
                 "kind":"{",
                 "text":"{",
-                "offset":973,
-                "leading_width":0,
+                "offset":969,
+                "leading_width":4,
                 "width":1,
                 "trailing_width":0,
                 "leading":[
-                  {"kind":"extra_token_error","text":"}\nc","offset":974,"width":3},
+                  {"kind":"extra_token_error","text":"var","offset":969,"width":3},
                   {"kind":"whitespace","text":" ","offset":972,"width":1}
                 ],
                 "trailing":[],
@@ -3800,12 +3800,12 @@
               "token":{
                 "kind":"{",
                 "text":"{",
-                "offset":988,
-                "leading_width":0,
+                "offset":982,
+                "leading_width":6,
                 "width":1,
                 "trailing_width":0,
                 "leading":[
-                  {"kind":"extra_token_error","text":"}\ncla","offset":989,"width":5},
+                  {"kind":"extra_token_error","text":"while","offset":982,"width":5},
                   {"kind":"whitespace","text":" ","offset":987,"width":1}
                 ],
                 "trailing":[],
@@ -3862,12 +3862,12 @@
               "token":{
                 "kind":"{",
                 "text":"{",
-                "offset":1003,
-                "leading_width":0,
+                "offset":997,
+                "leading_width":6,
                 "width":1,
                 "trailing_width":0,
                 "leading":[
-                  {"kind":"extra_token_error","text":"}\n\nne","offset":1004,"width":5},
+                  {"kind":"extra_token_error","text":"yield","offset":997,"width":5},
                   {"kind":"whitespace","text":" ","offset":1002,"width":1}
                 ],
                 "trailing":[],
@@ -8860,5 +8860,5 @@
     }
   },
   "program_text":"<?hh\n\n// Raise \"Unexpected token\"\nclass abstract {}\nclass array {}\nclass as {}\nclass break {}\nclass case {}\nclass catch {}\nclass class {}\nclass clone {}\nclass const {}\nclass continue {}\nclass default {}\nclass do {}\nclass echo {}\nclass else {}\nclass elseif {}\nclass empty {}\nclass endfor {}\nclass endforeach {}\nclass endif {}\nclass endswitch {}\nclass endwhile {}\nclass eval {}\nclass extends {}\nclass final {}\nclass finally {}\nclass for {}\nclass foreach {}\nclass function {}\nclass global {}\nclass goto {}\nclass if {}\nclass implements {}\nclass include {}\nclass include_once {}\nclass inout {}\nclass instanceof {}\nclass insteadof {}\nclass interface {}\nclass isset {}\nclass list {}\nclass namespace {}\nclass new {}\nclass print {}\nclass private {}\nclass protected {}\nclass public {}\nclass require {}\nclass require_once {}\nclass return {}\nclass shape {}\nclass static {}\nclass switch {}\nclass throw {}\nclass trait {}\nclass try {}\nclass unset {}\nclass use {}\nclass using {}\nclass var {}\nclass while {}\nclass yield {}\n\nnew abstract();\nnew array();\nnew as();\nnew break();\nnew case();\nnew catch();\n// new class(); // can't test this; error recovery makes us stop parsing the new expression when we see the class token; then we start parsing from the class token as if we have a classish declaration, and the entire rest of the test is seen as a classish body\nnew clone();\nnew const();\nnew continue();\nnew declare();\nnew default();\nnew do();\nnew echo();\nnew else();\nnew elseif();\nnew empty();\nnew endfor();\nnew endforeach();\nnew enddeclare();\nnew endif();\nnew endswitch();\nnew endwhile();\nnew eval();\nnew extends();\nnew final();\nnew finally();\nnew for();\nnew foreach();\nnew function();\nnew global();\nnew goto();\nnew if();\nnew implements();\nnew include();\nnew include_once();\nnew inout();\nnew instanceof();\nnew insteadof();\n// new interface(); // can't test this; error recovery makes us stop parsing the new expression when we see the interface token; then we start parsing from the interface token as if we have a classish declaration, and the entire rest of the test is seen as a classish body\nnew isset();\nnew list();\nnew namespace();\nnew new();\nnew print();\nnew private();\nnew protected();\nnew public();\nnew require();\nnew require_once();\nnew return();\nnew shape();\nnew static();\nnew switch();\nnew throw();\n// new trait(); // can't test this; error recovery makes us stop parsing the new expression when we see the trait token; then we start parsing from the trait token as if we have a classish declaration, and the entire rest of the test is seen as a classish body\nnew try();\nnew unset();\nnew use();\nnew using();\nnew var();\nnew while();\nnew yield();\n",
-  "version":"2020-09-14-0000"
+  "version":"2020-10-15-0001"
 }

@@ -1389,11 +1389,11 @@
                     "token":{
                       "kind":";",
                       "text":";",
-                      "offset":316,
-                      "leading_width":0,
+                      "offset":311,
+                      "leading_width":5,
                       "width":1,
                       "trailing_width":1,
-                      "leading":[{"kind":"extra_token_error","text":"\n  pu","offset":317,"width":5}],
+                      "leading":[{"kind":"extra_token_error","text":"class","offset":311,"width":5}],
                       "trailing":[{"kind":"end_of_line","text":"\n","offset":317,"width":1}],
                       "line_number":23
                     }
@@ -1697,5 +1697,5 @@
     }
   },
   "program_text":"<?hh\n\ntrait T1 {\n  public function animal(): void {\n    echo \"Dog\";\n  }\n}\n\ntrait T2 {\n  public function animal(): void {\n    echo \"Cat\";\n  }\n}\n\nclass C {\n  use T1, T2;\n\n  public function animal(): void = T1::animal;\n}\n\nclass D {\n  public function animal(): void = animal;\n  public function animal(): void = T1::class;\n  public function animal(): void = \\MyNamespace\\T2::foo; // ok\n}\n",
-  "version":"2020-09-14-0000"
+  "version":"2020-10-15-0001"
 }

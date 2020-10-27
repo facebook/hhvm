@@ -11,11 +11,24 @@ use std::iter::Iterator;
 use ocamlpool_rust::utils::*;
 use ocamlrep_ocamlpool::add_to_ambient_pool;
 use parser_core_types::{
-    lexable_token::LexableToken, minimal_syntax::MinimalValue, minimal_token::MinimalToken,
-    minimal_trivia::MinimalTrivia, positioned_syntax::PositionedValue,
-    positioned_token::PositionedToken, positioned_trivia::PositionedTrivium,
-    source_text::SourceText, syntax::*, syntax_error::SyntaxError, syntax_kind::SyntaxKind,
-    token_kind::TokenKind, trivia_kind::TriviaKind,
+    lexable_token::LexableToken,
+    minimal_syntax::MinimalValue,
+    minimal_token::MinimalToken,
+    minimal_trivia::MinimalTrivia,
+    positioned_syntax::PositionedValue,
+    positioned_token::PositionedToken,
+    positioned_trivia::PositionedTrivium,
+    source_text::SourceText,
+    syntax::*,
+    syntax_by_ref::{
+        positioned_token::PositionedToken as PositionedTokenByRef,
+        positioned_value::PositionedValue as PositionedValueByRef, syntax::Syntax as SyntaxByRef,
+        syntax_variant_generated::SyntaxVariant as SyntaxVariantByRef,
+    },
+    syntax_error::SyntaxError,
+    syntax_kind::SyntaxKind,
+    token_kind::TokenKind,
+    trivia_kind::TriviaKind,
 };
 use smart_constructors::NoState;
 
@@ -136,6 +149,52 @@ where
     }
 }
 
+impl<Token, SyntaxValue> ToOcaml for SyntaxByRef<'_, Token, SyntaxValue>
+where
+    Token: LexableToken + ToOcaml,
+    SyntaxValue: SyntaxValueType<Token> + ToOcaml,
+{
+    unsafe fn to_ocaml(&self, context: &SerializationContext) -> Value {
+        let value = self.value.to_ocaml(context);
+
+        let syntax = match &self.children {
+            SyntaxVariantByRef::Missing => u8_to_ocaml(SyntaxKind::Missing.ocaml_tag()),
+            SyntaxVariantByRef::Token(token) => {
+                let token_kind = token.kind();
+                let token = token.to_ocaml(context);
+                let block = reserve_block(SyntaxKind::Token(token_kind).ocaml_tag(), 1);
+                caml_set_field(block, 0, token);
+                block
+            }
+            SyntaxVariantByRef::SyntaxList(l) => {
+                let l = to_list(l, context);
+                let block = reserve_block(SyntaxKind::SyntaxList.ocaml_tag(), 1);
+                caml_set_field(block, 0, l);
+                block
+            }
+            _ => {
+                let tag = self.kind().ocaml_tag() as u8;
+                // This could be much more readable by constructing a vector of children and
+                // passing it to to_list, but the cost of this intermediate vector allocation is
+                // too big
+                let n = self.iter_children().count();
+                let result = reserve_block(tag, n);
+                // Similarly, fold() avoids intermediate allocation done by children()
+                self.iter_children().fold(0, |i, field| {
+                    let field = field.to_ocaml(context);
+                    caml_set_field(result, i, field);
+                    i + 1
+                });
+                result
+            }
+        };
+        let block = reserve_block(0, 2);
+        caml_set_field(block, 0, syntax);
+        caml_set_field(block, 1, value);
+        block
+    }
+}
+
 impl ToOcaml for PositionedTrivium {
     unsafe fn to_ocaml(&self, context: &SerializationContext) -> Value {
         // From full_fidelity_positioned_trivia.ml:
@@ -178,6 +237,37 @@ fn get_forward_pointer(token: &PositionedToken) -> Value {
 
 fn set_forward_pointer(token: &PositionedToken, value: Value) {
     token.set_cached_value(value, get_ocamlpool_generation());
+}
+
+impl ToOcaml for PositionedTokenByRef<'_> {
+    unsafe fn to_ocaml(&self, context: &SerializationContext) -> Value {
+        let kind = self.kind().to_ocaml(context);
+        let offset = usize_to_ocaml(self.offset());
+        let leading_width = usize_to_ocaml(self.leading_width());
+        let width = usize_to_ocaml(self.width());
+        let trailing_width = usize_to_ocaml(self.trailing_width());
+
+        let trivia = usize_to_ocaml((self.leading().bits() | self.trailing().bits()) as usize);
+        // From full_fidelity_positioned_token.ml:
+        // type t = {
+        //   kind: TokenKind.t;
+        //   source_text: SourceText.t;
+        //   offset: int; (* Beginning of first trivia *)
+        //   leading_width: int;
+        //   width: int; (* Width of actual token, not counting trivia *)
+        //   trailing_width: int;
+        //   trivia: LazyTrivia.t;
+        // }
+        let res = reserve_block(0, 7);
+        caml_set_field(res, 0, kind);
+        caml_set_field(res, 1, context.source_text);
+        caml_set_field(res, 2, offset);
+        caml_set_field(res, 3, leading_width);
+        caml_set_field(res, 4, width);
+        caml_set_field(res, 5, trailing_width);
+        caml_set_field(res, 6, trivia);
+        res
+    }
 }
 
 impl ToOcaml for PositionedToken {
@@ -259,6 +349,37 @@ impl ToOcaml for PositionedValue {
                 let offset = usize_to_ocaml(*offset);
                 // Missing of {...}
                 let block = reserve_block(MISSING_VALUE_VARIANT.into(), 2);
+                caml_set_field(block, 0, context.source_text);
+                caml_set_field(block, 1, offset);
+                block
+            }
+        }
+    }
+}
+
+impl ToOcaml for PositionedValueByRef<'_> {
+    unsafe fn to_ocaml(&self, context: &SerializationContext) -> Value {
+        match self {
+            PositionedValueByRef::TokenValue(t) => {
+                let token = t.to_ocaml(context);
+                // TokenValue of  ...
+                let block = reserve_block(TOKEN_VALUE_VARIANT, 1);
+                caml_set_field(block, 0, token);
+                block
+            }
+            PositionedValueByRef::TokenSpan(left, right) => {
+                let left = left.to_ocaml(context);
+                let right = right.to_ocaml(context);
+                // TokenSpan { left: Token.t; right: Token.t }
+                let block = reserve_block(TOKEN_SPAN_VARIANT, 2);
+                caml_set_field(block, 0, left);
+                caml_set_field(block, 1, right);
+                block
+            }
+            PositionedValueByRef::Missing { offset } => {
+                let offset = usize_to_ocaml(*offset);
+                // Missing of {...}
+                let block = reserve_block(MISSING_VALUE_VARIANT, 2);
                 caml_set_field(block, 0, context.source_text);
                 caml_set_field(block, 1, offset);
                 block

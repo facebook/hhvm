@@ -464,12 +464,12 @@
             "token":{
               "kind":"(",
               "text":"(",
-              "offset":94,
-              "leading_width":0,
+              "offset":88,
+              "leading_width":6,
               "width":1,
               "trailing_width":0,
               "leading":[
-                {"kind":"extra_token_error","text":"$i <=","offset":95,"width":5},
+                {"kind":"extra_token_error","text":"whike","offset":88,"width":5},
                 {"kind":"whitespace","text":" ","offset":93,"width":1}
               ],
               "trailing":[],
@@ -1001,12 +1001,12 @@
             "token":{
               "kind":"(",
               "text":"(",
-              "offset":442,
-              "leading_width":0,
+              "offset":436,
+              "leading_width":6,
               "width":1,
               "trailing_width":0,
               "leading":[
-                {"kind":"extra_token_error","text":"$i <=","offset":443,"width":5},
+                {"kind":"extra_token_error","text":"whike","offset":436,"width":5},
                 {"kind":"whitespace","text":" ","offset":441,"width":1}
               ],
               "trailing":[],
@@ -1526,5 +1526,5 @@
     }
   },
   "program_text":"<?hh\n\n$i = 1;\ndo {\n  echo \"$i\\t\".($i * $i).\"\\n\"; // output a table of squares\n  ++$i;\n} whike ($i <= 10); // report 'whike' as misspelled\n\n// Known issue: something about the location reported by current_token_text\n// in full_fidelity_parser_helpers is tripped up enough enough by newlines\n// that the misspelling recovery doesn't work on this 'whike'.\n\n$i = 1;\ndo {\n  echo \"$i\\t\".($i * $i).\"\\n\"; // output a table of squares\n  ++$i;\n}\nwhike ($i <= 10);\n\n// Known cases that this error recovery improvement does not address.\n// These are still not-recovered-from because the require_[TokenKind]\n// methods are not invoked when parsing them.\n\n$doublerl = ($p) =>> $p * 2; // ideally would report '=>>' as misspelled\n$doublerl = ($p) ==g $p * 2; // ideally would report '==g' as misspelled\n",
-  "version":"2020-06-23-0001"
+  "version":"2020-10-15-0001"
 }

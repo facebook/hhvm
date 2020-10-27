@@ -15,3 +15,4 @@ ocamlrep_ocamlpool = { path = "../../../../ocamlrep_ocamlpool" }
 oxidized = { path = "../../../../oxidized" }
 parser_core_types = { path = "../../core_types" }
 rust_parser_errors = { path = ".." }
+bumpalo = { version = "3.2.1", features = ["collections"] }

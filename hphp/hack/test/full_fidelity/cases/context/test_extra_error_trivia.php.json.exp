@@ -150,12 +150,12 @@
                       "token":{
                         "kind":"function",
                         "text":"function",
-                        "offset":62,
-                        "leading_width":0,
+                        "offset":58,
+                        "leading_width":4,
                         "width":8,
                         "trailing_width":1,
                         "leading":[
-                          {"kind":"extra_token_error","text":"f()","offset":71,"width":3},
+                          {"kind":"extra_token_error","text":"sta","offset":58,"width":3},
                           {"kind":"whitespace","text":" ","offset":61,"width":1}
                         ],
                         "trailing":[{"kind":"whitespace","text":" ","offset":70,"width":1}],
@@ -300,17 +300,12 @@
                       "token":{
                         "kind":"function",
                         "text":"function",
-                        "offset":158,
-                        "leading_width":0,
+                        "offset":142,
+                        "leading_width":16,
                         "width":8,
                         "trailing_width":1,
                         "leading":[
-                          {
-                            "kind":"extra_token_error",
-                            "text":"f() {\n  }\n\n  //",
-                            "offset":167,
-                            "width":15
-                          },
+                          {"kind":"extra_token_error","text":"meaninglessword","offset":142,"width":15},
                           {"kind":"whitespace","text":" ","offset":157,"width":1}
                         ],
                         "trailing":[{"kind":"whitespace","text":" ","offset":166,"width":1}],
@@ -815,5 +810,5 @@
     }
   },
   "program_text":"<?hh\n\nclass C {\n\n  // 'sta' becomes error trivia\n  public sta function f() {\n  }\n\n  // 'meaninglessword' becomes error trivia\n  public static meaninglessword function f() {\n  }\n\n  // no change in parsing\n  public meaninglessword static function f() {\n  }\n\n  // no change in parsing\n  public meaninglessword1 meaninglessword2 function f() {\n  }\n\n}\n",
-  "version":"2020-09-14-0000"
+  "version":"2020-10-15-0001"
 }

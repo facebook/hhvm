@@ -13,29 +13,50 @@
 //! of a function, for example based on presence of `yield` statement which turns a function into
 //! generator. This parser tracks and returns this kind of data in its state.
 
+use bumpalo::Bump;
 use decl_mode_smart_constructors::{DeclModeSmartConstructors, State as DeclModeState};
 use parser::{
     parser::Parser,
     parser_env::ParserEnv,
-    positioned_syntax::{PositionedSyntax, PositionedValue},
-    positioned_token::PositionedToken,
     smart_constructors_wrappers::WithKind,
     source_text::SourceText,
+    syntax_by_ref::{
+        positioned_syntax::PositionedSyntax,
+        positioned_token::{PositionedToken, TokenFactory},
+        positioned_value::PositionedValue,
+    },
     syntax_error::SyntaxError,
 };
 use stack_limit::StackLimit;
 
-pub type SmartConstructors<'a> =
-    WithKind<DeclModeSmartConstructors<'a, PositionedSyntax, PositionedToken, PositionedValue>>;
+pub type SmartConstructors<'src, 'arena> = WithKind<
+    DeclModeSmartConstructors<
+        'src,
+        'arena,
+        PositionedSyntax<'arena>,
+        PositionedToken<'arena>,
+        PositionedValue<'arena>,
+        TokenFactory<'arena>,
+    >,
+>;
 
-pub type ScState<'a> = DeclModeState<'a, PositionedSyntax>;
+pub type ScState<'src, 'arena> = DeclModeState<'src, 'arena, PositionedSyntax<'arena>>;
 
-pub fn parse_script<'a>(
-    source: &SourceText<'a>,
+pub fn parse_script<'src, 'arena>(
+    arena: &'arena Bump,
+    source: &SourceText<'src>,
     env: ParserEnv,
-    stack_limit: Option<&'a StackLimit>,
-) -> (PositionedSyntax, Vec<SyntaxError>, ScState<'a>) {
-    let sc = WithKind::new(DeclModeSmartConstructors::new(&source));
+    stack_limit: Option<&'src StackLimit>,
+) -> (
+    PositionedSyntax<'arena>,
+    Vec<SyntaxError>,
+    ScState<'src, 'arena>,
+) {
+    let sc = WithKind::new(DeclModeSmartConstructors::new(
+        &source,
+        TokenFactory { arena },
+        arena,
+    ));
     let mut parser = Parser::new(&source, env, sc);
     let root = parser.parse_script(stack_limit);
     let errors = parser.errors();

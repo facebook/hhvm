@@ -20,11 +20,10 @@
 
 use minimal_smart_constructors::MinimalSmartConstructors;
 use parser::{
-    compact_token::CompactToken, lexer::Lexer, minimal_syntax::MinimalSyntax,
-    minimal_token::MinimalToken, minimal_trivia::MinimalTrivium, parser::Parser,
-    parser_env::ParserEnv, smart_constructors::NoState, smart_constructors_wrappers::WithKind,
-    source_text::SourceText, syntax_error::SyntaxError, token_factory::SimpleTokenFactoryImpl,
-    token_kind::TokenKind,
+    lexer::Lexer, minimal_syntax::MinimalSyntax, minimal_token::MinimalToken,
+    minimal_trivia::MinimalTrivium, parser::Parser, parser_env::ParserEnv,
+    smart_constructors::NoState, smart_constructors_wrappers::WithKind, source_text::SourceText,
+    syntax_error::SyntaxError, token_factory::SimpleTokenFactoryImpl,
 };
 use stack_limit::StackLimit;
 
@@ -57,43 +56,26 @@ fn trivia_lexer<'a>(
     Lexer::make_at(source_text, offset, SimpleTokenFactoryImpl::new(), false)
 }
 
-pub fn scan_leading_xhp_trivia(source_text: SourceText, offset: usize) -> Vec<MinimalTrivium> {
-    trivia_lexer(&source_text, offset).scan_leading_xhp_trivia()
+pub fn scan_leading_xhp_trivia(
+    source_text: &SourceText,
+    offset: usize,
+    width: usize,
+) -> Vec<MinimalTrivium> {
+    trivia_lexer(&source_text, offset).scan_leading_xhp_trivia_with_width(width)
 }
 
-pub fn scan_trailing_xhp_trivia(source_text: SourceText, offset: usize) -> Vec<MinimalTrivium> {
+pub fn scan_trailing_xhp_trivia(source_text: &SourceText, offset: usize) -> Vec<MinimalTrivium> {
     trivia_lexer(&source_text, offset).scan_trailing_xhp_trivia()
 }
 
-pub fn scan_leading_php_trivia(source_text: SourceText, offset: usize) -> Vec<MinimalTrivium> {
-    trivia_lexer(&source_text, offset).scan_leading_php_trivia()
+pub fn scan_leading_php_trivia(
+    source_text: &SourceText,
+    offset: usize,
+    width: usize,
+) -> Vec<MinimalTrivium> {
+    trivia_lexer(&source_text, offset).scan_leading_php_trivia_with_width(width)
 }
 
-pub fn scan_trailing_php_trivia(source_text: SourceText, offset: usize) -> Vec<MinimalTrivium> {
+pub fn scan_trailing_php_trivia(source_text: &SourceText, offset: usize) -> Vec<MinimalTrivium> {
     trivia_lexer(&source_text, offset).scan_trailing_php_trivia()
-}
-
-pub trait RescanTrivia {
-    fn scan_leading(&self, source_text: &SourceText<'_>) -> Vec<MinimalTrivium>;
-    fn scan_trailing(&self, source_text: &SourceText<'_>) -> Vec<MinimalTrivium>;
-}
-
-impl RescanTrivia for CompactToken {
-    fn scan_leading(&self, source_text: &SourceText<'_>) -> Vec<MinimalTrivium> {
-        let mut lexer = trivia_lexer(source_text, self.leading_start_offset());
-        if self.kind() == TokenKind::XHPBody {
-            lexer.scan_leading_xhp_trivia()
-        } else {
-            lexer.scan_leading_php_trivia()
-        }
-    }
-
-    fn scan_trailing(&self, source_text: &SourceText<'_>) -> Vec<MinimalTrivium> {
-        let mut lexer = trivia_lexer(source_text, self.trailing_start_offset());
-        if self.kind() == TokenKind::XHPBody {
-            lexer.scan_trailing_xhp_trivia()
-        } else {
-            lexer.scan_trailing_php_trivia()
-        }
-    }
 }

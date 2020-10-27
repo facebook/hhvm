@@ -190,29 +190,6 @@ impl LexablePositionedToken for PositionedToken {
         RcOc::new(inner)
     }
 
-    fn trim_left(&mut self, n: usize) -> Result<(), String> {
-        let inner = RcOc::get_mut(self).ok_or("could not get mutable")?;
-        inner.leading_width = inner.leading_width + n;
-        inner.width = inner.width - n;
-        Ok(())
-    }
-
-    fn trim_right(&mut self, n: usize) -> Result<(), String> {
-        let inner = RcOc::get_mut(self).ok_or("could not get mutable")?;
-        inner.trailing_width = inner.trailing_width + n;
-        inner.width = inner.width - n;
-        Ok(())
-    }
-
-    fn concatenate(s: &Self, e: &Self) -> Result<Self, String> {
-        let mut t = s.clone_value();
-        let inner = RcOc::get_mut(&mut t).ok_or("could not get mutable")?;
-        inner.width = e.end_offset() + 1 - s.start_offset();
-        inner.trailing_width = e.trailing_width();
-        inner.trailing = e.trailing.to_vec();
-        Ok(t)
-    }
-
     fn positioned_leading(&self) -> &[PositionedTrivium] {
         &self.leading
     }

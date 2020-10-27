@@ -1883,7 +1883,7 @@ where
     fn scan_leading_trivia(
         &mut self,
         scanner: impl Fn(&mut Self) -> Option<Trivium<TF>>,
-    ) -> <TF::Token as LexableToken>::Trivia {
+    ) -> Trivia<TF> {
         let mut acc = Trivia::<TF>::new();
         while let Some(t) = scanner(self) {
             acc.push(t)
@@ -1891,11 +1891,62 @@ where
         acc
     }
 
-    pub fn scan_leading_php_trivia(&mut self) -> <TF::Token as LexableToken>::Trivia {
+    fn scan_leading_trivia_with_width(
+        &mut self,
+        scanner: impl Fn(&mut Self) -> Option<Trivium<TF>>,
+        mut width: usize,
+    ) -> Trivia<TF> {
+        let mut acc = Trivia::<TF>::new();
+        let mut extra_token_error_width = 0;
+        let mut extra_token_error_offset = self.offset();
+        loop {
+            if width == 0 {
+                if extra_token_error_width > 0 {
+                    acc.push(Trivia::<TF>::make_extra_token_error(
+                        extra_token_error_offset,
+                        extra_token_error_width,
+                    ));
+                }
+                break acc;
+            }
+            if let Some(t) = scanner(self) {
+                if extra_token_error_width > 0 {
+                    acc.push(Trivia::<TF>::make_extra_token_error(
+                        extra_token_error_offset,
+                        extra_token_error_width,
+                    ));
+                    extra_token_error_width = 0;
+                    extra_token_error_offset = self.start();
+                }
+                width -= t.width();
+                acc.push(t);
+            } else {
+                self.advance(1);
+                width -= 1;
+                extra_token_error_width += 1;
+            }
+        }
+    }
+
+    pub fn scan_leading_php_trivia_with_width(
+        &mut self,
+        width: usize,
+    ) -> <TF::Token as LexableToken>::Trivia {
+        self.scan_leading_trivia_with_width(&Self::scan_php_trivium, width)
+    }
+
+    pub fn scan_leading_xhp_trivia_with_width(
+        &mut self,
+        width: usize,
+    ) -> <TF::Token as LexableToken>::Trivia {
+        self.scan_leading_trivia_with_width(&Self::scan_xhp_trivium, width)
+    }
+
+    pub(crate) fn scan_leading_php_trivia(&mut self) -> <TF::Token as LexableToken>::Trivia {
         self.scan_leading_trivia(&Self::scan_php_trivium)
     }
 
-    pub fn scan_leading_xhp_trivia(&mut self) -> <TF::Token as LexableToken>::Trivia {
+    pub(crate) fn scan_leading_xhp_trivia(&mut self) -> <TF::Token as LexableToken>::Trivia {
         self.scan_leading_trivia(&Self::scan_xhp_trivium)
     }
 

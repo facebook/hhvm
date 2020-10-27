@@ -194,6 +194,8 @@ impl<'a> token_factory::TokenFactory for TokenFactory<'a> {
 
     fn with_leading(&mut self, token: Self::Token, leading: CompactTrivia) -> Self::Token {
         let mut new = PositionedTokenImpl::clone(token.0);
+        new.offset = token.0.offset - (leading.width - token.0.leading_width);
+        new.leading_width = leading.width;
         new.leading = leading.kinds;
         PositionedToken(self.arena.alloc(new))
     }
@@ -211,6 +213,33 @@ impl<'a> token_factory::TokenFactory for TokenFactory<'a> {
     }
 }
 
+impl<'a> token_factory::TokenMutator for TokenFactory<'a> {
+    fn trim_left(&mut self, t: &Self::Token, n: usize) -> Self::Token {
+        let mut new = PositionedTokenImpl::clone(t.0);
+        let leading = t.clone_leading();
+        new.leading_width = leading.width + n;
+        new.width = t.width() - n;
+        PositionedToken(self.arena.alloc(new))
+    }
+
+    fn trim_right(&mut self, t: &Self::Token, n: usize) -> Self::Token {
+        let mut new = PositionedTokenImpl::clone(t.0);
+        let trailing = t.clone_trailing();
+        new.trailing_width = trailing.width + n;
+        new.width = t.width() - n;
+        PositionedToken(self.arena.alloc(new))
+    }
+
+    fn concatenate(&mut self, s: &Self::Token, e: &Self::Token) -> Self::Token {
+        let mut new = PositionedTokenImpl::clone(s.0);
+        new.width = e.end_offset() + 1 - s.start_offset();
+        let e_trailing = e.clone_trailing();
+        new.trailing_width = e_trailing.width;
+        new.trailing = e_trailing.kinds;
+        PositionedToken(self.arena.alloc(new))
+    }
+}
+
 impl<'a> LexablePositionedToken for PositionedToken<'a> {
     fn text<'b>(&self, source_text: &'b SourceText) -> &'b str {
         source_text.sub_as_str(self.0.start_offset(), self.0.width)
@@ -222,38 +251,6 @@ impl<'a> LexablePositionedToken for PositionedToken<'a> {
 
     fn clone_value(&self) -> Self {
         self.clone()
-    }
-
-    fn trim_left(&mut self, _n: usize) -> Result<(), String> {
-        /*
-        let inner = RcOc::get_mut(self).ok_or("could not get mutable")?;
-        inner.leading_width = inner.leading_width + n;
-        inner.width = inner.width - n;
-        Ok(())
-        */
-        unimplemented!()
-    }
-
-    fn trim_right(&mut self, _n: usize) -> Result<(), String> {
-        /*
-        let inner = RcOc::get_mut(self).ok_or("could not get mutable")?;
-        inner.trailing_width = inner.trailing_width + n;
-        inner.width = inner.width - n;
-        Ok(())
-        */
-        unimplemented!()
-    }
-
-    fn concatenate(_s: &Self, _e: &Self) -> Result<Self, String> {
-        /*
-        let mut t = s.clone_value();
-        let inner = RcOc::get_mut(&mut t).ok_or("could not get mutable")?;
-        inner.width = e.end_offset() + 1 - s.start_offset();
-        inner.trailing_width = e.trailing_width();
-        inner.trailing = e.trailing.to_vec();
-        Ok(t)
-        */
-        unimplemented!()
     }
 
     fn positioned_leading(&self) -> &[PositionedTrivium] {

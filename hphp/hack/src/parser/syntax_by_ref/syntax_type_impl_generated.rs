@@ -17,23 +17,25 @@
  *
  */
 use super::{
-    syntax::*,
-    syntax_variant_generated::*,
     has_arena::HasArena,
-    positioned_token::PositionedToken,
-    positioned_value::PositionedValue
+    syntax::*, syntax_variant_generated::*,
 };
-use crate::syntax::{SyntaxType, SyntaxValueType};
+use crate::{
+    lexable_token::LexableToken,
+    syntax::{SyntaxType, SyntaxValueType},
+};
 
-impl<'a, C> SyntaxType<C> for Syntax<'a, PositionedToken<'a>, PositionedValue<'a>>
+impl<'a, C, T, V> SyntaxType<C> for Syntax<'a, T, V>
 where
+    T: LexableToken + Copy,
+    V: SyntaxValueType<T>,
     C: HasArena<'a>,
 {
     fn make_end_of_file(ctx: &C, token: Self) -> Self {
         let syntax = SyntaxVariant::EndOfFile(ctx.get_arena().alloc(EndOfFileChildren {
             token,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -41,7 +43,7 @@ where
         let syntax = SyntaxVariant::Script(ctx.get_arena().alloc(ScriptChildren {
             declarations,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -49,7 +51,7 @@ where
         let syntax = SyntaxVariant::QualifiedName(ctx.get_arena().alloc(QualifiedNameChildren {
             parts,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -57,7 +59,7 @@ where
         let syntax = SyntaxVariant::SimpleTypeSpecifier(ctx.get_arena().alloc(SimpleTypeSpecifierChildren {
             specifier,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -65,7 +67,7 @@ where
         let syntax = SyntaxVariant::LiteralExpression(ctx.get_arena().alloc(LiteralExpressionChildren {
             expression,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -74,7 +76,7 @@ where
             name,
             str,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -85,7 +87,7 @@ where
             expression,
             right_backtick,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -93,7 +95,7 @@ where
         let syntax = SyntaxVariant::VariableExpression(ctx.get_arena().alloc(VariableExpressionChildren {
             expression,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -101,7 +103,7 @@ where
         let syntax = SyntaxVariant::PipeVariableExpression(ctx.get_arena().alloc(PipeVariableExpressionChildren {
             expression,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -113,7 +115,7 @@ where
             attributes,
             right_double_angle,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -131,7 +133,7 @@ where
             enumerators,
             right_brace,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -142,7 +144,7 @@ where
             value,
             semicolon,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -160,7 +162,7 @@ where
             elements,
             right_brace,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -175,7 +177,7 @@ where
             right_paren,
             semicolon,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -191,7 +193,7 @@ where
             fields,
             right_brace,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -202,7 +204,7 @@ where
             init,
             semi,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -217,7 +219,7 @@ where
             type_,
             semicolon,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -229,7 +231,7 @@ where
             declarators,
             semicolon,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -238,7 +240,7 @@ where
             name,
             initializer,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -247,7 +249,7 @@ where
             header,
             body,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -256,7 +258,7 @@ where
             keyword,
             name,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -266,7 +268,7 @@ where
             declarations,
             right_brace,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -274,7 +276,7 @@ where
         let syntax = SyntaxVariant::NamespaceEmptyBody(ctx.get_arena().alloc(NamespaceEmptyBodyChildren {
             semicolon,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -285,7 +287,7 @@ where
             clauses,
             semicolon,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -299,7 +301,7 @@ where
             right_brace,
             semicolon,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -310,7 +312,7 @@ where
             as_,
             alias,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -320,7 +322,7 @@ where
             declaration_header,
             body,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -339,7 +341,7 @@ where
             type_,
             where_clause,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -349,7 +351,7 @@ where
             types,
             right_bracket,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -362,7 +364,7 @@ where
             unsafe_type,
             right_brace,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -371,7 +373,7 @@ where
             keyword,
             constraints,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -381,7 +383,7 @@ where
             operator,
             right_type,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -392,7 +394,7 @@ where
             function_body,
             semicolon,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -404,7 +406,7 @@ where
             name,
             semicolon,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -423,7 +425,7 @@ where
             where_clause,
             body,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -433,7 +435,7 @@ where
             elements,
             right_brace,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -443,7 +445,7 @@ where
             keyword,
             removed_names,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -454,7 +456,7 @@ where
             modifiers,
             aliased_name,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -466,7 +468,7 @@ where
             clauses,
             right_brace,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -476,7 +478,7 @@ where
             names,
             semicolon,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -487,7 +489,7 @@ where
             name,
             semicolon,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -499,7 +501,7 @@ where
             declarators,
             semicolon,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -508,7 +510,7 @@ where
             name,
             initializer,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -525,7 +527,7 @@ where
             type_specifier,
             semicolon,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -534,7 +536,7 @@ where
             decorator,
             expression,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -547,7 +549,7 @@ where
             name,
             default_value,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -557,7 +559,7 @@ where
             type_,
             ellipsis,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -567,7 +569,7 @@ where
             attributes,
             right_double_angle,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -575,7 +577,7 @@ where
         let syntax = SyntaxVariant::AttributeSpecification(ctx.get_arena().alloc(AttributeSpecificationChildren {
             attributes,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -584,7 +586,7 @@ where
             at,
             attribute_name,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -593,7 +595,7 @@ where
             require,
             filename,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -602,7 +604,7 @@ where
             expression,
             semicolon,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -612,7 +614,7 @@ where
             statements,
             right_brace,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -621,7 +623,7 @@ where
             expression,
             semicolon,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -630,7 +632,7 @@ where
             hashbang,
             suffix,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -639,7 +641,7 @@ where
             less_than_question,
             name,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -651,7 +653,7 @@ where
             right_paren,
             semicolon,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -664,7 +666,7 @@ where
             right_paren,
             body,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -675,7 +677,7 @@ where
             expression,
             semicolon,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -687,7 +689,7 @@ where
             right_paren,
             body,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -701,7 +703,7 @@ where
             elseif_clauses,
             else_clause,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -713,7 +715,7 @@ where
             right_paren,
             statement,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -722,7 +724,7 @@ where
             keyword,
             statement,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -733,7 +735,7 @@ where
             catch_clauses,
             finally_clause,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -746,7 +748,7 @@ where
             right_paren,
             body,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -755,7 +757,7 @@ where
             keyword,
             body,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -769,7 +771,7 @@ where
             right_paren,
             semicolon,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -785,7 +787,7 @@ where
             right_paren,
             body,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -802,7 +804,7 @@ where
             right_paren,
             body,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -816,7 +818,7 @@ where
             sections,
             right_brace,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -826,7 +828,7 @@ where
             statements,
             fallthrough,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -835,7 +837,7 @@ where
             keyword,
             semicolon,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -845,7 +847,7 @@ where
             expression,
             colon,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -854,7 +856,7 @@ where
             keyword,
             colon,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -864,7 +866,7 @@ where
             expression,
             semicolon,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -873,7 +875,7 @@ where
             name,
             colon,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -883,7 +885,7 @@ where
             label_name,
             semicolon,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -893,7 +895,7 @@ where
             expression,
             semicolon,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -902,7 +904,7 @@ where
             keyword,
             semicolon,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -911,7 +913,7 @@ where
             keyword,
             semicolon,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -921,7 +923,7 @@ where
             expressions,
             semicolon,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -930,7 +932,7 @@ where
             keyword,
             statement,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -939,7 +941,7 @@ where
             equal,
             value,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -955,7 +957,7 @@ where
             implements_list,
             body,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -973,7 +975,7 @@ where
             use_,
             body,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -984,7 +986,7 @@ where
             variables,
             right_paren,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -996,7 +998,7 @@ where
             arrow,
             body,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1009,7 +1011,7 @@ where
             colon,
             type_,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1020,7 +1022,7 @@ where
             right_paren,
             operand,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1030,7 +1032,7 @@ where
             operator,
             name,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1040,7 +1042,7 @@ where
             operator,
             name,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1050,7 +1052,7 @@ where
             operator,
             name,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1060,7 +1062,7 @@ where
             operator,
             name,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1069,7 +1071,7 @@ where
             keyword,
             operand,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1078,7 +1080,7 @@ where
             operator,
             operand,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1087,7 +1089,7 @@ where
             operand,
             operator,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1097,7 +1099,7 @@ where
             operator,
             right_operand,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1107,7 +1109,7 @@ where
             operator,
             right_operand,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1117,7 +1119,7 @@ where
             operator,
             right_operand,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1127,7 +1129,7 @@ where
             operator,
             right_operand,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1139,7 +1141,7 @@ where
             colon,
             alternative,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1150,7 +1152,7 @@ where
             argument,
             right_paren,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1161,7 +1163,7 @@ where
             argument_list,
             right_paren,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1172,7 +1174,7 @@ where
             argument_list,
             right_paren,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1184,7 +1186,7 @@ where
             argument_list,
             right_paren,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1193,7 +1195,7 @@ where
             receiver,
             type_args,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1203,7 +1205,7 @@ where
             expression,
             right_paren,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1213,7 +1215,7 @@ where
             expression,
             right_brace,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1223,7 +1225,7 @@ where
             expression,
             right_brace,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1234,7 +1236,7 @@ where
             members,
             right_paren,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1245,7 +1247,7 @@ where
             initializers,
             right_brace,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1254,7 +1256,7 @@ where
             new_keyword,
             object,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1265,7 +1267,7 @@ where
             argument_list,
             right_paren,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1276,7 +1278,7 @@ where
             members,
             right_bracket,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1288,7 +1290,7 @@ where
             members,
             right_bracket,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1300,7 +1302,7 @@ where
             members,
             right_bracket,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1312,7 +1314,7 @@ where
             members,
             right_bracket,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1324,7 +1326,7 @@ where
             members,
             right_bracket,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1336,7 +1338,7 @@ where
             members,
             right_bracket,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1346,7 +1348,7 @@ where
             arrow,
             value,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1357,7 +1359,7 @@ where
             index,
             right_bracket,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1368,7 +1370,7 @@ where
             index,
             right_bracket,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1378,7 +1380,7 @@ where
             async_,
             compound_statement,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1388,7 +1390,7 @@ where
             expression,
             semicolon,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1398,7 +1400,7 @@ where
             xhp_children,
             right_paren,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1408,7 +1410,7 @@ where
             categories,
             semicolon,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1419,7 +1421,7 @@ where
             values,
             right_brace,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1428,7 +1430,7 @@ where
             at,
             keyword,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1437,7 +1439,7 @@ where
             at,
             keyword,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1447,7 +1449,7 @@ where
             attributes,
             semicolon,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1458,7 +1460,7 @@ where
             initializer,
             required,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1466,7 +1468,7 @@ where
         let syntax = SyntaxVariant::XHPSimpleClassAttribute(ctx.get_arena().alloc(XHPSimpleClassAttributeChildren {
             type_,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1476,7 +1478,7 @@ where
             equal,
             expression,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1487,7 +1489,7 @@ where
             expression,
             right_brace,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1498,7 +1500,7 @@ where
             attributes,
             right_angle,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1508,7 +1510,7 @@ where
             body,
             close,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1518,7 +1520,7 @@ where
             name,
             right_angle,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1528,7 +1530,7 @@ where
             separator,
             right_type,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1538,7 +1540,7 @@ where
             separator,
             right_type,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1550,7 +1552,7 @@ where
             trailing_comma,
             right_angle,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1562,7 +1564,7 @@ where
             trailing_comma,
             right_angle,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1573,7 +1575,7 @@ where
             types,
             right_angle,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1585,7 +1587,7 @@ where
             trailing_comma,
             right_angle,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1598,7 +1600,7 @@ where
             param_params,
             constraints,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1607,7 +1609,7 @@ where
             keyword,
             type_,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1621,7 +1623,7 @@ where
             trailing_comma,
             right_angle,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1632,7 +1634,7 @@ where
             members,
             right_angle,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1648,7 +1650,7 @@ where
             return_type,
             outer_right_paren,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1657,7 +1659,7 @@ where
             call_convention,
             type_,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1669,7 +1671,7 @@ where
             trailing_comma,
             right_angle,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1680,7 +1682,7 @@ where
             arrow,
             type_,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1690,7 +1692,7 @@ where
             arrow,
             value,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1702,7 +1704,7 @@ where
             ellipsis,
             right_paren,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1713,7 +1715,7 @@ where
             fields,
             right_paren,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1724,7 +1726,7 @@ where
             items,
             right_paren,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1733,7 +1735,7 @@ where
             class_type,
             argument_list,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1742,7 +1744,7 @@ where
             question,
             type_,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1751,7 +1753,7 @@ where
             tilde,
             type_,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1760,7 +1762,7 @@ where
             at,
             type_,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1769,7 +1771,7 @@ where
             attribute_spec,
             type_,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1778,7 +1780,7 @@ where
             reified,
             type_,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1788,7 +1790,7 @@ where
             types,
             right_angle,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1798,7 +1800,7 @@ where
             parameters,
             right_angle,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1808,7 +1810,7 @@ where
             types,
             right_paren,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1818,7 +1820,7 @@ where
             types,
             right_paren,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1828,7 +1830,7 @@ where
             types,
             right_paren,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1836,7 +1838,7 @@ where
         let syntax = SyntaxVariant::ErrorSyntax(ctx.get_arena().alloc(ErrorSyntaxChildren {
             error,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1845,7 +1847,7 @@ where
             item,
             separator,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1854,7 +1856,7 @@ where
             glyph,
             expression,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1866,7 +1868,7 @@ where
             operator,
             name,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1879,7 +1881,7 @@ where
             right_paren,
             semicolon,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1893,7 +1895,7 @@ where
             fields,
             right_brace,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1904,7 +1906,7 @@ where
             name,
             semicolon,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1915,7 +1917,7 @@ where
             type_parameter,
             semicolon,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1924,7 +1926,7 @@ where
             name,
             initializer,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 
@@ -1935,7 +1937,7 @@ where
             equal,
             type_,
         }));
-        let value = PositionedValue::from_values(syntax.iter_children().map(|child| &child.value));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
     }
 

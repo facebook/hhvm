@@ -41,7 +41,7 @@ module LazyTrivia : sig
 
   val leading :
     t ->
-    (int -> Trivia.MinimalTrivia.t list) ->
+    (int -> int -> Trivia.MinimalTrivia.t list) ->
     Trivia.SourceText.t ->
     int ->
     int ->
@@ -49,7 +49,7 @@ module LazyTrivia : sig
 
   val trailing :
     t ->
-    (int -> Trivia.MinimalTrivia.t list) ->
+    (int -> int -> Trivia.MinimalTrivia.t list) ->
     Trivia.SourceText.t ->
     int ->
     int ->
@@ -187,7 +187,7 @@ end = struct
     if width = 0 then
       []
     else
-      let trivia = scanner offset in
+      let trivia = scanner offset width in
       Trivia.from_minimal_list source_text trivia offset
 
   let leading trivia scanner source_text offset width =
@@ -243,7 +243,8 @@ let is_in_xhp token =
   | TokenKind.XHPBody -> true
   | _ -> false
 
-let make_rust_scanner token fn (offset : int) = fn token.source_text offset
+let make_rust_scanner token fn (offset : int) (width : int) =
+  fn token.source_text offset width
 
 let leading token =
   let scanner =

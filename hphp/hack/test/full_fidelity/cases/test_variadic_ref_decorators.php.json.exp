@@ -332,12 +332,12 @@
                       "token":{
                         "kind":"variable",
                         "text":"$x",
-                        "offset":78,
-                        "leading_width":0,
+                        "offset":76,
+                        "leading_width":2,
                         "width":2,
                         "trailing_width":0,
                         "leading":[
-                          {"kind":"extra_token_error","text":")","offset":80,"width":1},
+                          {"kind":"extra_token_error","text":"&","offset":76,"width":1},
                           {"kind":"whitespace","text":" ","offset":77,"width":1}
                         ],
                         "trailing":[],
@@ -978,12 +978,12 @@
                                 "token":{
                                   "kind":"variable",
                                   "text":"$x",
-                                  "offset":203,
-                                  "leading_width":0,
+                                  "offset":201,
+                                  "leading_width":2,
                                   "width":2,
                                   "trailing_width":0,
                                   "leading":[
-                                    {"kind":"extra_token_error","text":")","offset":205,"width":1},
+                                    {"kind":"extra_token_error","text":"&","offset":201,"width":1},
                                     {"kind":"whitespace","text":" ","offset":202,"width":1}
                                   ],
                                   "trailing":[],
@@ -1352,5 +1352,5 @@
     }
   },
   "program_text":"<?hh // strict\n\nfunction variadic(mixed ... $x) : void {}\n\nfunction ref(int & $x) : void {}\n\nfunction varvar(mixed ... ... $x) : void {}\n\nfunction refref(int & & $x) : void {}\n\nfunction varref(int ... & $x) : void {}\n\nfunction refvar(mixed & ... $x) : void {}\n",
-  "version":"2020-09-14-0000"
+  "version":"2020-10-15-0001"
 }

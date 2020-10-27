@@ -150,12 +150,12 @@
                       "token":{
                         "kind":"function",
                         "text":"function",
-                        "offset":99,
-                        "leading_width":0,
+                        "offset":95,
+                        "leading_width":4,
                         "width":8,
                         "trailing_width":1,
                         "leading":[
-                          {"kind":"extra_token_error","text":"f()","offset":108,"width":3},
+                          {"kind":"extra_token_error","text":"sta","offset":95,"width":3},
                           {"kind":"whitespace","text":" ","offset":98,"width":1}
                         ],
                         "trailing":[{"kind":"whitespace","text":" ","offset":107,"width":1}],
@@ -300,17 +300,12 @@
                       "token":{
                         "kind":"function",
                         "text":"function",
-                        "offset":220,
-                        "leading_width":0,
+                        "offset":204,
+                        "leading_width":16,
                         "width":8,
                         "trailing_width":1,
                         "leading":[
-                          {
-                            "kind":"extra_token_error",
-                            "text":"f() {\n  }\n\n  //",
-                            "offset":229,
-                            "width":15
-                          },
+                          {"kind":"extra_token_error","text":"meaninglessword","offset":204,"width":15},
                           {"kind":"whitespace","text":" ","offset":219,"width":1}
                         ],
                         "trailing":[{"kind":"whitespace","text":" ","offset":228,"width":1}],
@@ -1351,5 +1346,5 @@
     }
   },
   "program_text":"<?hh\n\nclass C {\n\n  // parsed as a method containing an extra, invalid word: error1056\n  public sta function f() {\n  }\n\n  // parsed as a method containing an extra, invalid word: error1056\n  public static meaninglessword function f() {\n  }\n\n  // the below case isn't fixed yet; it retains its old behavior.\n  public meaninglessword static function f() {\n  }\n\n  // the below case isn't fixed yet; it retains its old behavior.\n  public meaninglessword1 meaninglessword2 function f() {\n  }\n\n}\n\nclass C {\n\n  public sta // parsed as property declaration\n\n  function f() { // parsed as method\n  }\n\n}\n\nclass C {\n\n  public sta // parsed as property declaration\n\n  public function f() { // parsed as method\n  }\n\n}\n",
-  "version":"2020-09-14-0000"
+  "version":"2020-10-15-0001"
 }

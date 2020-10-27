@@ -521,11 +521,11 @@
                     "token":{
                       "kind":";",
                       "text":";",
-                      "offset":88,
-                      "leading_width":0,
+                      "offset":85,
+                      "leading_width":3,
                       "width":1,
                       "trailing_width":1,
-                      "leading":[{"kind":"extra_token_error","text":"\n}\n","offset":89,"width":3}],
+                      "leading":[{"kind":"extra_token_error","text":"$c1","offset":85,"width":3}],
                       "trailing":[{"kind":"end_of_line","text":"\n","offset":89,"width":1}],
                       "line_number":3
                     }
@@ -570,5 +570,5 @@
     }
   },
   "program_text":"<?hh // strict\nfunction f(): void {\n  $a = $x = &$x1 + $y = &$y1 * $z = &$z1 + $c = &$c1;\n}\n",
-  "version":"2020-09-14-0000"
+  "version":"2020-10-15-0001"
 }

@@ -18,8 +18,9 @@ ocamlrep = { path = "../../../ocamlrep" }
 ocamlrep_derive = { path = "../../../ocamlrep_derive" }
 oxidized = { path = "../../../oxidized" }
 parser_core_types = { path = "../core_types" }
-positioned_parser = { path = "../../api/cargo/positioned_parser" }
+positioned_by_ref_parser = { path = "../../api/cargo/positioned_by_ref_parser" }
 rust_aast_parser_types = { path = "../rust_aast_parser_types" }
 rust_parser_errors = { path = "../errors" }
 smart_constructors = { path = "../smart_constructors" }
 stack_limit = { path = "../../../utils/stack_limit" }
+bumpalo = { version = "3.2.1", features = ["collections"] }

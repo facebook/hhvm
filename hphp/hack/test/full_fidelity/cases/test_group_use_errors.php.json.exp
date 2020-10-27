@@ -1615,11 +1615,11 @@
                     "token":{
                       "kind":";",
                       "text":";",
-                      "offset":336,
-                      "leading_width":0,
+                      "offset":331,
+                      "leading_width":5,
                       "width":1,
                       "trailing_width":1,
-                      "leading":[{"kind":"extra_token_error","text":"\n}\n\nn","offset":337,"width":5}],
+                      "leading":[{"kind":"extra_token_error","text":"false","offset":331,"width":5}],
                       "trailing":[{"kind":"end_of_line","text":"\n","offset":337,"width":1}],
                       "line_number":29
                     }
@@ -2233,5 +2233,5 @@
     }
   },
   "program_text":"<?hh //strict\n\nnamespace foo {\n    class C { }\n    class D { }\n}\n\nnamespace illegal1 {\n  use \\foo { C, D };\n}\n\nnamespace illegal2 {\n  use \\foo\\ { type C, D };\n}\n\nnamespace illegal3 {\n  use \\foo\\ { type C, type D };\n}\n\nnamespace legal1 {\n  use \\foo\\ { C, D };\n}\n\nnamespace legal2 {\n  use \\foo;\n}\n\nnamespace illegal4 {\n  use \\foo as false;\n}\n\nnamespace legal3 {\n  use type \\foo\\C, \\foo\\D;\n}\n\nnamespace legal4 {\n  use type \\foo\\ { C, D };\n}\n",
-  "version":"2020-06-23-0001"
+  "version":"2020-10-15-0001"
 }

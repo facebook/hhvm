@@ -107,12 +107,12 @@
               "token":{
                 "kind":"{",
                 "text":"{",
-                "offset":86,
-                "leading_width":0,
+                "offset":72,
+                "leading_width":14,
                 "width":1,
                 "trailing_width":1,
                 "leading":[
-                  {"kind":"extra_token_error","text":"\n  require ex","offset":87,"width":13},
+                  {"kind":"extra_token_error","text":"extraNonsense","offset":72,"width":13},
                   {"kind":"whitespace","text":" ","offset":85,"width":1}
                 ],
                 "trailing":[{"kind":"end_of_line","text":"\n","offset":87,"width":1}],
@@ -174,13 +174,11 @@
                     "token":{
                       "kind":";",
                       "text":";",
-                      "offset":122,
-                      "leading_width":0,
+                      "offset":109,
+                      "leading_width":13,
                       "width":1,
                       "trailing_width":1,
-                      "leading":[
-                        {"kind":"extra_token_error","text":"\n\n  private\n ","offset":123,"width":13}
-                      ],
+                      "leading":[{"kind":"extra_token_error","text":"extraNonsense","offset":109,"width":13}],
                       "trailing":[{"kind":"end_of_line","text":"\n","offset":123,"width":1}],
                       "line_number":5
                     }
@@ -274,11 +272,11 @@
                     "token":{
                       "kind":";",
                       "text":";",
-                      "offset":161,
-                      "leading_width":0,
+                      "offset":160,
+                      "leading_width":1,
                       "width":1,
                       "trailing_width":1,
-                      "leading":[{"kind":"extra_token_error","text":"\n","offset":162,"width":1}],
+                      "leading":[{"kind":"extra_token_error","text":"!","offset":160,"width":1}],
                       "trailing":[{"kind":"end_of_line","text":"\n","offset":162,"width":1}],
                       "line_number":8
                     }
@@ -373,12 +371,12 @@
                       "token":{
                         "kind":"(",
                         "text":"(",
-                        "offset":214,
-                        "leading_width":0,
+                        "offset":200,
+                        "leading_width":14,
                         "width":1,
                         "trailing_width":0,
                         "leading":[
-                          {"kind":"extra_token_error","text":"array $inputs","offset":215,"width":13},
+                          {"kind":"extra_token_error","text":"extraNonsense","offset":200,"width":13},
                           {"kind":"whitespace","text":" ","offset":213,"width":1}
                         ],
                         "trailing":[],
@@ -437,11 +435,11 @@
                       "token":{
                         "kind":")",
                         "text":")",
-                        "offset":234,
-                        "leading_width":0,
+                        "offset":229,
+                        "leading_width":5,
                         "width":1,
                         "trailing_width":1,
-                        "leading":[{"kind":"extra_token_error","text":"{\n   ","offset":236,"width":5}],
+                        "leading":[{"kind":"extra_token_error","text":"extra","offset":229,"width":5}],
                         "trailing":[{"kind":"whitespace","text":" ","offset":235,"width":1}],
                         "line_number":10
                       }
@@ -593,11 +591,11 @@
                             "token":{
                               "kind":";",
                               "text":";",
-                              "offset":266,
-                              "leading_width":0,
+                              "offset":265,
+                              "leading_width":1,
                               "width":1,
                               "trailing_width":1,
-                              "leading":[{"kind":"extra_token_error","text":"\n","offset":267,"width":1}],
+                              "leading":[{"kind":"extra_token_error","text":")","offset":265,"width":1}],
                               "trailing":[{"kind":"end_of_line","text":"\n","offset":267,"width":1}],
                               "line_number":11
                             }
@@ -887,12 +885,12 @@
                             "token":{
                               "kind":"(",
                               "text":"(",
-                              "offset":336,
-                              "leading_width":0,
+                              "offset":322,
+                              "leading_width":14,
                               "width":1,
                               "trailing_width":0,
                               "leading":[
-                                {"kind":"extra_token_error","text":"!$x) {\n      ","offset":337,"width":13},
+                                {"kind":"extra_token_error","text":"extraNonsense","offset":322,"width":13},
                                 {"kind":"whitespace","text":" ","offset":335,"width":1}
                               ],
                               "trailing":[],
@@ -1186,11 +1184,11 @@
                                     "token":{
                                       "kind":";",
                                       "text":";",
-                                      "offset":390,
-                                      "leading_width":0,
+                                      "offset":385,
+                                      "leading_width":5,
                                       "width":1,
                                       "trailing_width":1,
-                                      "leading":[{"kind":"extra_token_error","text":"\n    ","offset":391,"width":5}],
+                                      "leading":[{"kind":"extra_token_error","text":"67835","offset":385,"width":5}],
                                       "trailing":[{"kind":"end_of_line","text":"\n","offset":391,"width":1}],
                                       "line_number":16
                                     }
@@ -1387,11 +1385,11 @@
                                     "token":{
                                       "kind":";",
                                       "text":";",
-                                      "offset":516,
-                                      "leading_width":0,
+                                      "offset":515,
+                                      "leading_width":1,
                                       "width":1,
                                       "trailing_width":1,
-                                      "leading":[{"kind":"extra_token_error","text":"\n","offset":517,"width":1}],
+                                      "leading":[{"kind":"extra_token_error","text":"$","offset":515,"width":1}],
                                       "trailing":[{"kind":"end_of_line","text":"\n","offset":517,"width":1}],
                                       "line_number":19
                                     }
@@ -1435,13 +1433,11 @@
                                     "token":{
                                       "kind":";",
                                       "text":";",
-                                      "offset":550,
-                                      "leading_width":0,
+                                      "offset":537,
+                                      "leading_width":13,
                                       "width":1,
                                       "trailing_width":1,
-                                      "leading":[
-                                        {"kind":"extra_token_error","text":"\n    }\n\n    /","offset":551,"width":13}
-                                      ],
+                                      "leading":[{"kind":"extra_token_error","text":"extraNonsense","offset":537,"width":13}],
                                       "trailing":[{"kind":"end_of_line","text":"\n","offset":551,"width":1}],
                                       "line_number":20
                                     }
@@ -3242,5 +3238,5 @@
     }
   },
   "program_text":"<?hh\n// Copyright 2004-present Facebook. All Rights Reserved.\n\ntrait T1 extraNonsense {\n  require extends T2 extraNonsense;\n\n  private\n    $x = CAPITAL_LETTERS !;\n\n  final protected async function f1 extraNonsense (array $inputs extra) {\n    $x = $x->getSomething());\n    $x = await X::forSomething($x)->gen('s');\n\n    if extraNonsense (!$x) {\n      $x->y = false;\n      $x->y[] = 's' 67835;\n      // known error recovery suboptimality: './.65$' isn't parsed as\n      // a contiguous token\n      $x->y[] = 's' ./.65$;\n      return false extraNonsense;\n    }\n\n    // All code below this point is error-free.\n\n    if ((count($inputs) != 1) || (f($inputs) != $x->getSomething())) {\n      $x->y[] = 's';\n      $x->y = false;\n      return false;\n    }\n\n    if (!$x->test()) {\n      $x->y[] = 's';\n      $x->y= false;\n      return false;\n    }\n\n    list(\n      $x,\n      $x,\n    ) = await genSomething(\n      X::genSomething($x),\n      X::get()->genSomething($x),\n    );\n  }\n}\n",
-  "version":"2020-09-14-0000"
+  "version":"2020-10-15-0001"
 }

@@ -420,11 +420,11 @@
                     "token":{
                       "kind":";",
                       "text":";",
-                      "offset":100,
-                      "leading_width":0,
+                      "offset":99,
+                      "leading_width":1,
                       "width":1,
                       "trailing_width":1,
-                      "leading":[{"kind":"extra_token_error","text":"\n","offset":101,"width":1}],
+                      "leading":[{"kind":"extra_token_error","text":"`","offset":99,"width":1}],
                       "trailing":[{"kind":"end_of_line","text":"\n","offset":101,"width":1}],
                       "line_number":6
                     }
@@ -469,5 +469,5 @@
     }
   },
   "program_text":"<?hh\n\n<<file:__EnableUnstableFeatures('expression_trees')>>\n\nfunction test(): void {\n  Code`Code`4``;\n}\n",
-  "version":"2020-10-01-0000"
+  "version":"2020-10-15-0001"
 }

@@ -4,14 +4,14 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use bumpalo::Bump;
+
 use mode_parser::parse_mode;
 use ocamlrep::{ptr::UnsafeOcamlPtr, Allocator, FromOcamlRep};
 use ocamlrep_ocamlpool::{ocaml_ffi, Pool};
 use operator::{Assoc, Operator};
 use oxidized::file_info::Mode;
 use oxidized::{file_info, full_fidelity_parser_env::FullFidelityParserEnv};
-use smart_constructors::{NodeType, SmartConstructors};
-
 use parser_core_types::syntax_tree::SyntaxTree;
 use parser_core_types::{
     minimal_trivia::MinimalTrivium, parser_env::ParserEnv, source_text::SourceText,
@@ -20,37 +20,35 @@ use parser_core_types::{
 use rust_to_ocaml::{SerializationContext, ToOcaml};
 use stack_limit::{StackLimit, KI, MI};
 
-pub trait ParseScript<'a, Sc, ScState> {
-    fn parse_script(
-        source: &SourceText<'a>,
-        env: ParserEnv,
-        stack_limit: Option<&'a StackLimit>,
-    ) -> (<Sc::R as NodeType>::R, Vec<SyntaxError>, ScState)
-    where
-        Sc: SmartConstructors<State = ScState>,
-        Sc::R: NodeType,
-        <Sc::R as NodeType>::R: ToOcaml,
-        ScState: Clone + ToOcaml;
-}
-
-pub fn parse<'a, Sc, ScState, ParseFun>(
+pub fn parse<'a, ParseFn, Node, State>(
     ocaml_source_text: UnsafeOcamlPtr,
     env: FullFidelityParserEnv,
+    parse_fn: ParseFn,
 ) -> UnsafeOcamlPtr
 where
-    ParseFun: ParseScript<'a, Sc, ScState>,
-    Sc: SmartConstructors<State = ScState>,
-    Sc::R: NodeType,
-    <Sc::R as NodeType>::R: ToOcaml,
-    ScState: Clone + ToOcaml,
+    ParseFn: Fn(
+            &'a Bump,
+            &SourceText<'a>,
+            ParserEnv,
+            Option<&'a StackLimit>,
+        ) -> (Node, Vec<SyntaxError>, State)
+        + Clone
+        + Send
+        + Sync
+        + std::panic::UnwindSafe
+        + std::panic::RefUnwindSafe
+        + 'static,
+    Node: ToOcaml + 'a,
+    State: ToOcaml + 'a,
 {
     let ocaml_source_text = ocaml_source_text.as_usize();
 
     let leak_rust_tree = env.leak_rust_tree;
     let env = ParserEnv::from(env);
 
-    let make_retryable = move || {
+    let make_retryable = || {
         let env = env.clone();
+        let parse_fn = parse_fn.clone();
         Box::new(
             move |stack_limit: &StackLimit, nonmain_stack_size: Option<usize>| {
                 // Safety: Requires no concurrent interaction with OCaml runtime
@@ -60,8 +58,17 @@ where
                 // Safety: the parser asks for a stack limit with the same lifetime
                 // as the source text, but no syntax tree borrows the stack limit,
                 // so we really only need it to live as long as the parser.
-                // Transmute away its lifetime to satisfy the parser API.
-                let stack_limit_ref: &'a StackLimit = unsafe { std::mem::transmute(stack_limit) };
+                // Unsafely extend its lifetime to satisfy the parser API.
+                let stack_limit_ref: &'a StackLimit =
+                    unsafe { (stack_limit as *const StackLimit).as_ref().unwrap() };
+
+                let arena = Bump::new();
+
+                // Safety: Similarly, the arena just needs to outlive the returned
+                // Node and State (which may reference it). We ensure this by
+                // not destroying the arena until after converting the node and
+                // state to OCaml values.
+                let arena_ref: &'a Bump = unsafe { (&arena as *const Bump).as_ref().unwrap() };
 
                 // We only convert the source text from OCaml in this innermost
                 // closure because it contains an Rc. If we converted it
@@ -71,7 +78,7 @@ where
                 let source_text = unsafe { SourceText::from_ocaml(ocaml_source_text).unwrap() };
                 let disable_modes = env.disable_modes;
                 let (root, errors, state) =
-                    ParseFun::parse_script(&source_text, env, Some(stack_limit_ref));
+                    parse_fn(arena_ref, &source_text, env, Some(stack_limit_ref));
                 // traversing the parsed syntax tree uses about 1/3 of the stack
                 let context = SerializationContext::new(ocaml_source_text);
                 let ocaml_root = unsafe { root.to_ocaml(&context) };
@@ -90,7 +97,12 @@ where
                         (),
                         nonmain_stack_size,
                     ));
-                    Some(Box::leak(tree) as *const SyntaxTree<_, ()> as usize)
+                    // A rust pointer of (&SyntaxTree, &Arena) is passed to Ocaml,
+                    // Ocaml will pass it back to `rust_parser_errors::rust_parser_errors_positioned`
+                    // PLEASE ENSURE TYPE SAFETY MANUALLY!!!
+                    let tree = Box::leak(tree) as *const SyntaxTree<_, ()> as usize;
+                    let arena = Box::leak(Box::new(arena)) as *const Bump as usize;
+                    Some(Box::leak(Box::new((tree, arena))) as *const (usize, usize) as usize)
                 } else {
                     None
                 };
@@ -160,7 +172,7 @@ where
 
 #[macro_export]
 macro_rules! parse {
-    ($name:ident, $sc:ty, $scstate:ty, $parse_script:expr $(,)?) => {
+    ($name:ident, $parse_script:expr $(,)?) => {
         // We don't use the ocaml_ffi! macro here because we want precise
         // control over the Pool--when a parse fails, we want to free the old
         // pool and create a new one.
@@ -169,30 +181,34 @@ macro_rules! parse {
             ocamlrep_ocamlpool::catch_unwind(|| {
                 use ocamlrep::{ptr::UnsafeOcamlPtr, FromOcamlRep};
                 use oxidized::full_fidelity_parser_env::FullFidelityParserEnv;
-                use parser_core_types::parser_env::ParserEnv;
-                use parser_core_types::source_text::SourceText;
-                use parser_core_types::syntax_error::SyntaxError;
-                use rust_to_ocaml::ToOcaml;
-                use smart_constructors::NodeType;
-                use stack_limit::StackLimit;
 
-                struct ParseFun;
-                impl<'a> $crate::ParseScript<'a, $sc, $scstate> for ParseFun {
-                    fn parse_script(
-                        source: &SourceText<'a>,
-                        env: ParserEnv,
-                        stack_limit: Option<&'a StackLimit>,
-                    ) -> (
-                        <<$sc as smart_constructors::SmartConstructors>::R as NodeType>::R,
-                        Vec<SyntaxError>,
-                        $scstate,
-                    ) {
-                        $parse_script(source, env, stack_limit)
-                    }
-                }
                 let ocaml_source_text = unsafe { UnsafeOcamlPtr::new(ocaml_source_text) };
                 let env = unsafe { FullFidelityParserEnv::from_ocaml(env).unwrap() };
-                $crate::parse::<'a, $sc, $scstate, ParseFun>(ocaml_source_text, env).as_usize()
+                $crate::parse(ocaml_source_text, env, |_, s, e, l| $parse_script(s, e, l))
+                    .as_usize()
+            })
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! parse_with_arena {
+    ($name:ident, $parse_script:expr $(,)?) => {
+        // We don't use the ocaml_ffi! macro here because we want precise
+        // control over the Pool--when a parse fails, we want to free the old
+        // pool and create a new one.
+        #[no_mangle]
+        pub extern "C" fn $name<'a>(ocaml_source_text: usize, env: usize) -> usize {
+            ocamlrep_ocamlpool::catch_unwind(|| {
+                use ocamlrep::{ptr::UnsafeOcamlPtr, FromOcamlRep};
+                use oxidized::full_fidelity_parser_env::FullFidelityParserEnv;
+
+                let ocaml_source_text = unsafe { UnsafeOcamlPtr::new(ocaml_source_text) };
+                let env = unsafe { FullFidelityParserEnv::from_ocaml(env).unwrap() };
+                $crate::parse(ocaml_source_text, env, |a, s, e, l| {
+                    $parse_script(a, s, e, l)
+                })
+                .as_usize()
             })
         }
     };
@@ -204,17 +220,17 @@ ocaml_ffi! {
         mode
     }
 
-    fn scan_leading_xhp_trivia(source_text: SourceText, offset: usize) -> Vec<MinimalTrivium> {
-        minimal_parser::scan_leading_xhp_trivia(source_text, offset)
+    fn scan_leading_xhp_trivia(source_text: SourceText, offset: usize, width: usize) -> Vec<MinimalTrivium> {
+        minimal_parser::scan_leading_xhp_trivia(&source_text, offset, width)
     }
-    fn scan_trailing_xhp_trivia(source_text: SourceText, offset: usize) -> Vec<MinimalTrivium> {
-        minimal_parser::scan_trailing_xhp_trivia(source_text, offset)
+    fn scan_trailing_xhp_trivia(source_text: SourceText, offset: usize, _width: usize) -> Vec<MinimalTrivium> {
+        minimal_parser::scan_trailing_xhp_trivia(&source_text, offset)
     }
-    fn scan_leading_php_trivia(source_text: SourceText, offset: usize) -> Vec<MinimalTrivium> {
-        minimal_parser::scan_leading_php_trivia(source_text, offset)
+    fn scan_leading_php_trivia(source_text: SourceText, offset: usize, width: usize) -> Vec<MinimalTrivium> {
+        minimal_parser::scan_leading_php_trivia(&source_text, offset, width)
     }
-    fn scan_trailing_php_trivia(source_text: SourceText, offset: usize) -> Vec<MinimalTrivium> {
-        minimal_parser::scan_trailing_php_trivia(source_text, offset)
+    fn scan_trailing_php_trivia(source_text: SourceText, offset: usize, _width: usize) -> Vec<MinimalTrivium> {
+        minimal_parser::scan_trailing_php_trivia(&source_text, offset)
     }
 
     fn trailing_from_token(token: TokenKind) -> Operator {

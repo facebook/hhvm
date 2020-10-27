@@ -6,6 +6,7 @@
 
 use crate::aast_check;
 use crate::expression_tree_check;
+use bumpalo::Bump;
 use lowerer::{lower, ScourComment};
 use mode_parser::{parse_mode, Language};
 use namespaces_rust as namespaces;
@@ -16,8 +17,11 @@ use oxidized::{
 use parser_core_types::{
     indexed_source_text::IndexedSourceText,
     parser_env::ParserEnv,
-    positioned_syntax::{PositionedSyntax, PositionedValue},
-    positioned_token::PositionedToken,
+    syntax_by_ref::{
+        positioned_syntax::PositionedSyntax,
+        positioned_token::{PositionedToken, TokenFactory},
+        positioned_value::PositionedValue,
+    },
     syntax_error::SyntaxError,
     syntax_tree::SyntaxTree,
 };
@@ -27,7 +31,7 @@ use smart_constructors::NoState;
 use stack_limit::StackLimit;
 use std::borrow::Borrow;
 
-type PositionedSyntaxTree<'a> = SyntaxTree<'a, PositionedSyntax, NoState>;
+type PositionedSyntaxTree<'src, 'arena> = SyntaxTree<'src, PositionedSyntax<'arena>, NoState>;
 
 #[derive(Debug, FromOcamlRep, ToOcamlRep)]
 pub enum Error {
@@ -45,21 +49,15 @@ impl<T: ToString> From<T> for Error {
 type Result<T> = std::result::Result<T, Error>;
 
 pub struct AastParser;
-impl<'a> AastParser {
+impl<'src> AastParser {
     pub fn from_text(
         env: &Env,
-        source: &'a IndexedSourceText<'a>,
-        stack_limit: Option<&'a StackLimit>,
+        indexed_source_text: &'src IndexedSourceText<'src>,
+        stack_limit: Option<&'src StackLimit>,
     ) -> Result<ParserResult> {
-        Self::from_text_(env, source, stack_limit)
-    }
-
-    fn from_text_(
-        env: &Env,
-        indexed_source_text: &'a IndexedSourceText<'a>,
-        stack_limit: Option<&'a StackLimit>,
-    ) -> Result<ParserResult> {
-        let (language, mode, tree) = Self::parse_text(env, indexed_source_text, stack_limit)?;
+        let arena = Bump::new();
+        let (language, mode, tree) =
+            Self::parse_text(&arena, env, indexed_source_text, stack_limit)?;
         match language {
             Language::Hack => {}
             _ => return Err(Error::NotAHackFile()),
@@ -79,6 +77,8 @@ impl<'a> AastParser {
             &env.parser_options,
             env.elaborate_namespaces,
             stack_limit,
+            TokenFactory { arena: &arena },
+            &arena,
         );
         let ret = lower(&mut lowerer_env, tree.root());
         let ret = if env.elaborate_namespaces {
@@ -110,10 +110,10 @@ impl<'a> AastParser {
         })
     }
 
-    fn check_syntax_error(
+    fn check_syntax_error<'arena>(
         env: &Env,
-        indexed_source_text: &'a IndexedSourceText<'a>,
-        tree: &'a PositionedSyntaxTree<'a>,
+        indexed_source_text: &'src IndexedSourceText<'src>,
+        tree: &PositionedSyntaxTree<'src, 'arena>,
         aast: Option<&Program<Pos, (), (), ()>>,
     ) -> Vec<SyntaxError> {
         let find_errors = |hhi_mode: bool| -> Vec<SyntaxError> {
@@ -155,11 +155,12 @@ impl<'a> AastParser {
         }
     }
 
-    fn parse_text(
+    fn parse_text<'arena>(
+        arena: &'arena Bump,
         env: &Env,
-        indexed_source_text: &'a IndexedSourceText<'a>,
-        stack_limit: Option<&'a StackLimit>,
-    ) -> Result<(Language, Option<Mode>, PositionedSyntaxTree<'a>)> {
+        indexed_source_text: &'src IndexedSourceText<'src>,
+        stack_limit: Option<&'src StackLimit>,
+    ) -> Result<(Language, Option<Mode>, PositionedSyntaxTree<'src, 'arena>)> {
         let source_text = indexed_source_text.source_text();
         let (language, mut mode) = parse_mode(indexed_source_text.source_text());
         if mode == Some(Mode::Mpartial) && env.parser_options.po_disable_modes {
@@ -185,29 +186,30 @@ impl<'a> AastParser {
 
         let tree = if quick_mode {
             let (tree, errors, _state) =
-                decl_mode_parser::parse_script(source_text, parser_env, stack_limit);
+                decl_mode_parser::parse_script(arena, source_text, parser_env, stack_limit);
             PositionedSyntaxTree::create(source_text, tree, errors, mode, NoState, None)
         } else {
-            let (tree, errors, state) =
-                positioned_parser::parse_script(source_text, parser_env, stack_limit);
-            PositionedSyntaxTree::create(source_text, tree, errors, mode, state, None)
+            let (tree, errors, _state) =
+                positioned_by_ref_parser::parse_script(arena, source_text, parser_env, stack_limit);
+            PositionedSyntaxTree::create(source_text, tree, errors, mode, NoState, None)
         };
         Ok((language, mode, tree))
     }
 
-    fn scour_comments_and_add_fixmes(
+    fn scour_comments_and_add_fixmes<'arena>(
         env: &Env,
-        indexed_source_text: &'a IndexedSourceText,
-        script: &PositionedSyntax,
+        indexed_source_text: &'src IndexedSourceText,
+        script: &PositionedSyntax<'arena>,
     ) -> Result<ScouredComments> {
-        let scourer: ScourComment<PositionedToken, PositionedValue> = ScourComment {
-            phantom: std::marker::PhantomData,
-            indexed_source_text,
-            collect_fixmes: env.keep_errors,
-            include_line_comments: env.include_line_comments,
-            disable_hh_ignore_error: env.parser_options.po_disable_hh_ignore_error,
-            allowed_decl_fixme_codes: &env.parser_options.po_allowed_decl_fixme_codes,
-        };
+        let scourer: ScourComment<PositionedToken<'arena>, PositionedValue<'arena>> =
+            ScourComment {
+                phantom: std::marker::PhantomData,
+                indexed_source_text,
+                collect_fixmes: env.keep_errors,
+                include_line_comments: env.include_line_comments,
+                disable_hh_ignore_error: env.parser_options.po_disable_hh_ignore_error,
+                allowed_decl_fixme_codes: &env.parser_options.po_allowed_decl_fixme_codes,
+            };
         Ok(scourer.scour_comments(script))
     }
 }

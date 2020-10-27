@@ -7,7 +7,7 @@ use itertools::Itertools;
 use lazy_static::lazy_static;
 use regex::Regex;
 use std::collections::{BTreeMap, HashMap, HashSet};
-use std::str::FromStr;
+use std::{matches, str::FromStr};
 use strum;
 use strum::IntoEnumIterator;
 use strum_macros::{Display, EnumIter, EnumString, IntoStaticStr};
@@ -18,8 +18,14 @@ use oxidized::parser_options::ParserOptions;
 use parser_core_types::{
     indexed_source_text::IndexedSourceText,
     lexable_token::LexableToken,
-    positioned_syntax::PositionedSyntax,
-    syntax::{ListItemChildren, Syntax, SyntaxValueType, SyntaxVariant, SyntaxVariant::*},
+    syntax::SyntaxValueType,
+    syntax_by_ref::{
+        positioned_syntax::PositionedSyntax,
+        positioned_token::PositionedToken,
+        positioned_value::PositionedValue,
+        syntax::Syntax,
+        syntax_variant_generated::{ListItemChildren, SyntaxVariant, SyntaxVariant::*},
+    },
     syntax_error::{self as errors, Error, ErrorType, SyntaxError},
     syntax_trait::SyntaxTrait,
     syntax_tree::SyntaxTree,
@@ -257,29 +263,31 @@ fn make_first_use_or_def(
 struct ParserErrors<'a, Token, Value, State> {
     phantom: std::marker::PhantomData<(*const Token, *const Value, *const State)>,
 
-    env: Env<'a, Syntax<Token, Value>, SyntaxTree<'a, Syntax<Token, Value>, State>>,
+    env: Env<'a, Syntax<'a, Token, Value>, SyntaxTree<'a, Syntax<'a, Token, Value>, State>>,
     errors: Vec<SyntaxError>,
-    parents: Vec<&'a Syntax<Token, Value>>,
+    parents: Vec<S<'a, Token, Value>>,
 
     trait_require_clauses: Strmap<TokenKind>,
     is_in_concurrent_block: bool,
     names: UsedNames,
     // Named (not anonymous) namespaces that the current expression is enclosed within.
-    nested_namespaces: Vec<&'a Syntax<Token, Value>>,
+    nested_namespaces: Vec<S<'a, Token, Value>>,
     namespace_type: NamespaceType,
     namespace_name: String,
 }
 
+type S<'a, T, V> = &'a Syntax<'a, T, V>;
+
 // TODO: why do we need :'a everywhere?
 impl<'a, Token: 'a, Value: 'a, State: 'a> ParserErrors<'a, Token, Value, State>
 where
-    Syntax<Token, Value>: SyntaxTrait,
+    Syntax<'a, Token, Value>: SyntaxTrait,
     Token: LexableToken + std::fmt::Debug,
     Value: SyntaxValueType<Token> + std::fmt::Debug,
     State: Clone,
 {
     fn new(
-        env: Env<'a, Syntax<Token, Value>, SyntaxTree<'a, Syntax<Token, Value>, State>>,
+        env: Env<'a, Syntax<'a, Token, Value>, SyntaxTree<'a, Syntax<'a, Token, Value>, State>>,
     ) -> Self {
         Self {
             env,
@@ -295,12 +303,12 @@ where
         }
     }
 
-    fn text(&self, node: &'a Syntax<Token, Value>) -> &'a str {
+    fn text(&self, node: S<'a, Token, Value>) -> &'a str {
         node.extract_text(self.env.syntax_tree.text())
             .expect("<text_extraction_failure>")
     }
 
-    fn make_location(s: &'a Syntax<Token, Value>, e: &'a Syntax<Token, Value>) -> Location {
+    fn make_location(s: S<'a, Token, Value>, e: S<'a, Token, Value>) -> Location {
         let start_offset = Self::start_offset(s);
         let end_offset = Self::end_offset(e);
         Location {
@@ -309,16 +317,16 @@ where
         }
     }
 
-    fn make_location_of_node(n: &'a Syntax<Token, Value>) -> Location {
+    fn make_location_of_node(n: S<'a, Token, Value>) -> Location {
         Self::make_location(n, n)
     }
 
-    fn start_offset(n: &'a Syntax<Token, Value>) -> usize {
+    fn start_offset(n: S<'a, Token, Value>) -> usize {
         // TODO: this logic should be moved to SyntaxTrait::position, when implemented
         n.leading_start_offset() + n.leading_width()
     }
 
-    fn end_offset(n: &'a Syntax<Token, Value>) -> usize {
+    fn end_offset(n: S<'a, Token, Value>) -> usize {
         // TODO: this logic should be moved to SyntaxTrait::position, when implemented
         let w = n.width();
         n.leading_start_offset() + n.leading_width() + w
@@ -338,23 +346,23 @@ where
     // list then the separators are filtered from the resulting list.
     fn syntax_to_list(
         include_separators: bool,
-        node: &'a Syntax<Token, Value>,
-    ) -> impl DoubleEndedIterator<Item = &'a Syntax<Token, Value>> {
+        node: S<'a, Token, Value>,
+    ) -> impl DoubleEndedIterator<Item = S<'a, Token, Value>> {
         use itertools::Either::{Left, Right};
         use std::iter::{empty, once};
         let on_list_item = move |x: &'a ListItemChildren<Token, Value>| {
             if include_separators {
-                vec![&x.list_item, &x.list_separator].into_iter()
+                vec![&x.item, &x.separator].into_iter()
             } else {
-                vec![&x.list_item].into_iter()
+                vec![&x.item].into_iter()
             }
         };
-        match &node.syntax {
+        match &node.children {
             Missing => Left(Left(empty())),
             SyntaxList(s) => Left(Right(
                 s.iter()
                     .map(move |x| {
-                        match &x.syntax {
+                        match &x.children {
                             ListItem(x) => Left(on_list_item(x)),
                             _ => Right(once(x)),
                         }
@@ -367,34 +375,30 @@ where
     }
 
     fn syntax_to_list_no_separators(
-        node: &'a Syntax<Token, Value>,
-    ) -> impl DoubleEndedIterator<Item = &'a Syntax<Token, Value>> {
+        node: S<'a, Token, Value>,
+    ) -> impl DoubleEndedIterator<Item = S<'a, Token, Value>> {
         Self::syntax_to_list(false, node)
     }
 
     fn syntax_to_list_with_separators(
-        node: &'a Syntax<Token, Value>,
-    ) -> impl DoubleEndedIterator<Item = &'a Syntax<Token, Value>> {
+        node: S<'a, Token, Value>,
+    ) -> impl DoubleEndedIterator<Item = S<'a, Token, Value>> {
         Self::syntax_to_list(true, node)
     }
 
     fn assert_last_in_list<F>(
         assert_fun: F,
-        node: &'a Syntax<Token, Value>,
-    ) -> Option<&'a Syntax<Token, Value>>
+        node: S<'a, Token, Value>,
+    ) -> Option<S<'a, Token, Value>>
     where
-        F: Fn(&'a Syntax<Token, Value>) -> bool,
+        F: Fn(S<'a, Token, Value>) -> bool,
     {
         let mut iter = Self::syntax_to_list_no_separators(node);
         iter.next_back();
         iter.find(|x| assert_fun(*x))
     }
 
-    fn enable_unstable_feature(
-        &mut self,
-        _node: &'a Syntax<Token, Value>,
-        arg: &'a Syntax<Token, Value>,
-    ) {
+    fn enable_unstable_feature(&mut self, _node: S<'a, Token, Value>, arg: S<'a, Token, Value>) {
         let error_invalid_argument = |self_: &mut Self, message| {
             self_.errors.push(Self::make_error_from_node(
                 arg,
@@ -402,9 +406,9 @@ where
             ))
         };
 
-        match &arg.syntax {
+        match &arg.children {
             LiteralExpression(x) => {
-                let text = self.text(&x.literal_expression);
+                let text = self.text(&x.expression);
                 match UnstableFeatures::from_str(escaper::unquote_str(text)) {
                     Ok(feature) => {
                         self.env.context.active_unstable_features.insert(feature);
@@ -424,11 +428,7 @@ where
         };
     }
 
-    fn check_can_use_feature(
-        &mut self,
-        node: &'a Syntax<Token, Value>,
-        feature: &UnstableFeatures,
-    ) {
+    fn check_can_use_feature(&mut self, node: S<'a, Token, Value>, feature: &UnstableFeatures) {
         let parser_options = &self.env.parser_options;
         let enabled = match feature {
             UnstableFeatures::UnionIntersectionTypeHints => {
@@ -446,29 +446,29 @@ where
     }
 
     fn attr_spec_to_node_list(
-        node: &'a Syntax<Token, Value>,
-    ) -> impl DoubleEndedIterator<Item = &'a Syntax<Token, Value>> {
+        node: S<'a, Token, Value>,
+    ) -> impl DoubleEndedIterator<Item = S<'a, Token, Value>> {
         use itertools::Either::{Left, Right};
         let f = |attrs| Left(Self::syntax_to_list_no_separators(attrs));
-        match &node.syntax {
-            AttributeSpecification(x) => f(&x.attribute_specification_attributes),
-            OldAttributeSpecification(x) => f(&x.old_attribute_specification_attributes),
-            FileAttributeSpecification(x) => f(&x.file_attribute_specification_attributes),
+        match &node.children {
+            AttributeSpecification(x) => f(&x.attributes),
+            OldAttributeSpecification(x) => f(&x.attributes),
+            FileAttributeSpecification(x) => f(&x.attributes),
             _ => Right(std::iter::empty()),
         }
     }
 
-    fn attr_constructor_call(node: &'a Syntax<Token, Value>) -> &'a SyntaxVariant<Token, Value> {
-        match &node.syntax {
-            ConstructorCall(_) => &node.syntax,
-            Attribute(x) => &x.attribute_attribute_name.syntax,
+    fn attr_constructor_call(node: S<'a, Token, Value>) -> &'a SyntaxVariant<Token, Value> {
+        match &node.children {
+            ConstructorCall(_) => &node.children,
+            Attribute(x) => &x.attribute_name.children,
             _ => &Missing,
         }
     }
 
-    fn attr_name(&self, node: &'a Syntax<Token, Value>) -> Option<&'a str> {
+    fn attr_name(&self, node: S<'a, Token, Value>) -> Option<&'a str> {
         if let ConstructorCall(x) = Self::attr_constructor_call(node) {
-            Some(self.text(&x.constructor_call_type))
+            Some(self.text(&x.type_))
         } else {
             None
         }
@@ -476,19 +476,17 @@ where
 
     fn attr_args(
         &self,
-        node: &'a Syntax<Token, Value>,
-    ) -> Option<impl DoubleEndedIterator<Item = &'a Syntax<Token, Value>>> {
+        node: S<'a, Token, Value>,
+    ) -> Option<impl DoubleEndedIterator<Item = S<'a, Token, Value>>> {
         if let ConstructorCall(x) = Self::attr_constructor_call(node) {
-            Some(Self::syntax_to_list_no_separators(
-                &x.constructor_call_argument_list,
-            ))
+            Some(Self::syntax_to_list_no_separators(&x.argument_list))
         } else {
             None
         }
     }
 
-    fn attribute_specification_contains(&self, node: &'a Syntax<Token, Value>, name: &str) -> bool {
-        match &node.syntax {
+    fn attribute_specification_contains(&self, node: S<'a, Token, Value>, name: &str) -> bool {
+        match &node.children {
             AttributeSpecification(_)
             | OldAttributeSpecification(_)
             | FileAttributeSpecification(_) => {
@@ -498,74 +496,66 @@ where
         }
     }
 
-    fn methodish_contains_attribute(
-        &self,
-        node: &'a Syntax<Token, Value>,
-        attribute: &str,
-    ) -> bool {
-        match &node.syntax {
+    fn methodish_contains_attribute(&self, node: S<'a, Token, Value>, attribute: &str) -> bool {
+        match &node.children {
             MethodishDeclaration(x) => {
-                self.attribute_specification_contains(&x.methodish_attribute, attribute)
+                self.attribute_specification_contains(&x.attribute, attribute)
             }
             _ => false,
         }
     }
 
-    fn is_decorated_expression<F>(node: &'a Syntax<Token, Value>, f: F) -> bool
+    fn is_decorated_expression<F>(node: S<'a, Token, Value>, f: F) -> bool
     where
-        F: Fn(&'a Syntax<Token, Value>) -> bool,
+        F: Fn(S<'a, Token, Value>) -> bool,
     {
-        match &node.syntax {
-            DecoratedExpression(x) => f(&x.decorated_expression_decorator),
+        match &node.children {
+            DecoratedExpression(x) => f(&x.decorator),
             _ => false,
         }
     }
 
-    fn test_decorated_expression_child<F>(node: &'a Syntax<Token, Value>, f: F) -> bool
+    fn test_decorated_expression_child<F>(node: S<'a, Token, Value>, f: F) -> bool
     where
-        F: Fn(&'a Syntax<Token, Value>) -> bool,
+        F: Fn(S<'a, Token, Value>) -> bool,
     {
-        match &node.syntax {
-            DecoratedExpression(x) => f(&x.decorated_expression_expression),
+        match &node.children {
+            DecoratedExpression(x) => f(&x.expression),
             _ => false,
         }
     }
 
-    fn is_variadic_expression(node: &'a Syntax<Token, Value>) -> bool {
+    fn is_variadic_expression(node: S<'a, Token, Value>) -> bool {
         Self::is_decorated_expression(node, |x| x.is_ellipsis())
             || Self::test_decorated_expression_child(node, &Self::is_variadic_expression)
     }
 
-    fn is_double_variadic(node: &'a Syntax<Token, Value>) -> bool {
+    fn is_double_variadic(node: S<'a, Token, Value>) -> bool {
         Self::is_decorated_expression(node, |x| x.is_ellipsis())
             && Self::test_decorated_expression_child(node, &Self::is_variadic_expression)
     }
 
-    fn is_variadic_parameter_variable(node: &'a Syntax<Token, Value>) -> bool {
+    fn is_variadic_parameter_variable(node: S<'a, Token, Value>) -> bool {
         // TODO: This shouldn't be a decorated *expression* because we are not
         // expecting an expression at all. We're expecting a declaration.
         Self::is_variadic_expression(node)
     }
 
-    fn is_variadic_parameter_declaration(node: &'a Syntax<Token, Value>) -> bool {
-        match &node.syntax {
+    fn is_variadic_parameter_declaration(node: S<'a, Token, Value>) -> bool {
+        match &node.children {
             VariadicParameter(_) => true,
-            ParameterDeclaration(x) => Self::is_variadic_parameter_variable(&x.parameter_name),
+            ParameterDeclaration(x) => Self::is_variadic_parameter_variable(&x.name),
             _ => false,
         }
     }
-    fn misplaced_variadic_param(
-        param: &'a Syntax<Token, Value>,
-    ) -> Option<&'a Syntax<Token, Value>> {
+    fn misplaced_variadic_param(param: S<'a, Token, Value>) -> Option<S<'a, Token, Value>> {
         Self::assert_last_in_list(&Self::is_variadic_parameter_declaration, param)
     }
-    fn misplaced_variadic_arg(args: &'a Syntax<Token, Value>) -> Option<&'a Syntax<Token, Value>> {
+    fn misplaced_variadic_arg(args: S<'a, Token, Value>) -> Option<S<'a, Token, Value>> {
         Self::assert_last_in_list(&Self::is_variadic_expression, args)
     }
     // If a list ends with a variadic parameter followed by a comma, return it
-    fn ends_with_variadic_comma(
-        params: &'a Syntax<Token, Value>,
-    ) -> Option<&'a Syntax<Token, Value>> {
+    fn ends_with_variadic_comma(params: S<'a, Token, Value>) -> Option<S<'a, Token, Value>> {
         let mut iter = Self::syntax_to_list_with_separators(params).rev();
         let y = iter.next();
         let x = iter.next();
@@ -578,38 +568,36 @@ where
     }
 
     // Extract variadic parameter from a parameter list
-    fn variadic_param(params: &'a Syntax<Token, Value>) -> Option<&'a Syntax<Token, Value>> {
+    fn variadic_param(params: S<'a, Token, Value>) -> Option<S<'a, Token, Value>> {
         Self::syntax_to_list_with_separators(params)
             .find(|&x| Self::is_variadic_parameter_declaration(x))
     }
 
-    fn is_parameter_with_default_value(param: &'a Syntax<Token, Value>) -> bool {
-        match &param.syntax {
-            ParameterDeclaration(x) => !x.parameter_default_value.is_missing(),
+    fn is_parameter_with_default_value(param: S<'a, Token, Value>) -> bool {
+        match &param.children {
+            ParameterDeclaration(x) => !x.default_value.is_missing(),
             _ => false,
         }
     }
 
     // test a node is a syntaxlist and that the list contains an element
     // satisfying a given predicate
-    fn list_contains_predicate<P>(p: P, node: &'a Syntax<Token, Value>) -> bool
+    fn list_contains_predicate<P>(p: P, node: S<'a, Token, Value>) -> bool
     where
-        P: Fn(&'a Syntax<Token, Value>) -> bool,
+        P: Fn(S<'a, Token, Value>) -> bool,
     {
-        if let SyntaxList(lst) = &node.syntax {
+        if let SyntaxList(lst) = &node.children {
             lst.iter().any(p)
         } else {
             false
         }
     }
 
-    fn list_first_duplicate_token(
-        node: &'a Syntax<Token, Value>,
-    ) -> Option<&'a Syntax<Token, Value>> {
-        if let SyntaxList(lst) = &node.syntax {
+    fn list_first_duplicate_token(node: S<'a, Token, Value>) -> Option<S<'a, Token, Value>> {
+        if let SyntaxList(lst) = &node.children {
             let mut seen = BTreeMap::new();
             for node in lst.iter().rev() {
-                if let Token(t) = &node.syntax {
+                if let Token(t) = &node.children {
                     if let Some(dup) = seen.insert(t.kind(), node) {
                         return Some(dup);
                     }
@@ -619,23 +607,23 @@ where
         None
     }
 
-    fn is_empty_list_or_missing(node: &'a Syntax<Token, Value>) -> bool {
-        match &node.syntax {
+    fn is_empty_list_or_missing(node: S<'a, Token, Value>) -> bool {
+        match &node.children {
             SyntaxList(x) if x.is_empty() => true,
             Missing => true,
             _ => false,
         }
     }
 
-    fn token_kind(node: &'a Syntax<Token, Value>) -> Option<TokenKind> {
-        if let Token(t) = &node.syntax {
+    fn token_kind(node: S<'a, Token, Value>) -> Option<TokenKind> {
+        if let Token(t) = &node.children {
             return Some(t.kind());
         }
         None
     }
 
     // Helper function for common code pattern
-    fn is_token_kind(node: &'a Syntax<Token, Value>, kind: TokenKind) -> bool {
+    fn is_token_kind(node: S<'a, Token, Value>, kind: TokenKind) -> bool {
         Self::token_kind(node) == Some(kind)
     }
 
@@ -643,44 +631,40 @@ where
         self.env
             .context
             .active_classish
-            .and_then(|x| match &x.syntax {
-                ClassishDeclaration(cd) => Self::token_kind(&cd.classish_keyword),
+            .and_then(|x| match &x.children {
+                ClassishDeclaration(cd) => Self::token_kind(&cd.keyword),
                 _ => None,
             })
     }
 
-    fn modifiers_of_function_decl_header_exn(
-        node: &'a Syntax<Token, Value>,
-    ) -> &'a Syntax<Token, Value> {
-        match &node.syntax {
-            FunctionDeclarationHeader(x) => &x.function_modifiers,
+    fn modifiers_of_function_decl_header_exn(node: S<'a, Token, Value>) -> S<'a, Token, Value> {
+        match &node.children {
+            FunctionDeclarationHeader(x) => &x.modifiers,
             _ => panic!("expected to get FunctionDeclarationHeader"),
         }
     }
 
-    fn get_modifiers_of_declaration(
-        node: &'a Syntax<Token, Value>,
-    ) -> Option<&'a Syntax<Token, Value>> {
-        match &node.syntax {
+    fn get_modifiers_of_declaration(node: S<'a, Token, Value>) -> Option<S<'a, Token, Value>> {
+        match &node.children {
             MethodishDeclaration(x) => Some(Self::modifiers_of_function_decl_header_exn(
-                &x.methodish_function_decl_header,
+                &x.function_decl_header,
             )),
             FunctionDeclaration(x) => Some(Self::modifiers_of_function_decl_header_exn(
-                &x.function_declaration_header,
+                &x.declaration_header,
             )),
-            PropertyDeclaration(x) => Some(&x.property_modifiers),
-            ConstDeclaration(x) => Some(&x.const_modifiers),
-            TypeConstDeclaration(x) => Some(&x.type_const_modifiers),
-            ClassishDeclaration(x) => Some(&x.classish_modifiers),
-            TraitUseAliasItem(x) => Some(&x.trait_use_alias_item_modifiers),
+            PropertyDeclaration(x) => Some(&x.modifiers),
+            ConstDeclaration(x) => Some(&x.modifiers),
+            TypeConstDeclaration(x) => Some(&x.modifiers),
+            ClassishDeclaration(x) => Some(&x.modifiers),
+            TraitUseAliasItem(x) => Some(&x.modifiers),
             _ => None,
         }
     }
 
     // tests whether the node's modifiers contain one that satisfies [p]
-    fn has_modifier_helper<P>(p: P, node: &'a Syntax<Token, Value>) -> bool
+    fn has_modifier_helper<P>(p: P, node: S<'a, Token, Value>) -> bool
     where
-        P: Fn(&'a Syntax<Token, Value>) -> bool,
+        P: Fn(S<'a, Token, Value>) -> bool,
     {
         match Self::get_modifiers_of_declaration(node) {
             Some(x) => Self::list_contains_predicate(p, x),
@@ -689,29 +673,29 @@ where
     }
 
     // does the node contain the Abstract keyword in its modifiers
-    fn has_modifier_abstract(node: &'a Syntax<Token, Value>) -> bool {
+    fn has_modifier_abstract(node: S<'a, Token, Value>) -> bool {
         Self::has_modifier_helper(|x| x.is_abstract(), node)
     }
 
     // does the node contain the Static keyword in its modifiers
-    fn has_modifier_static(node: &'a Syntax<Token, Value>) -> bool {
+    fn has_modifier_static(node: S<'a, Token, Value>) -> bool {
         Self::has_modifier_helper(|x| x.is_static(), node)
     }
 
     // does the node contain the Private keyword in its modifiers
-    fn has_modifier_private(node: &'a Syntax<Token, Value>) -> bool {
+    fn has_modifier_private(node: S<'a, Token, Value>) -> bool {
         Self::has_modifier_helper(|x| x.is_private(), node)
     }
 
-    fn get_modifier_final(modifiers: &'a Syntax<Token, Value>) -> Option<&'a Syntax<Token, Value>> {
+    fn get_modifier_final(modifiers: S<'a, Token, Value>) -> Option<S<'a, Token, Value>> {
         Self::syntax_to_list_no_separators(modifiers).find(|x| x.is_final())
     }
 
-    fn is_visibility(x: &'a Syntax<Token, Value>) -> bool {
+    fn is_visibility(x: S<'a, Token, Value>) -> bool {
         x.is_public() || x.is_private() || x.is_protected()
     }
 
-    fn contains_async_not_last(mods: &'a Syntax<Token, Value>) -> bool {
+    fn contains_async_not_last(mods: S<'a, Token, Value>) -> bool {
         let mut mod_list = Self::syntax_to_list_no_separators(mods);
         match mod_list.next_back() {
             Some(x) if x.is_async() => false,
@@ -719,13 +703,13 @@ where
         }
     }
 
-    fn has_static<F>(&self, node: &'a Syntax<Token, Value>, f: F) -> bool
+    fn has_static<F>(&self, node: S<'a, Token, Value>, f: F) -> bool
     where
-        F: Fn(&'a Syntax<Token, Value>) -> bool,
+        F: Fn(S<'a, Token, Value>) -> bool,
     {
-        match &node.syntax {
+        match &node.children {
             FunctionDeclarationHeader(node) => {
-                let label = &node.function_name;
+                let label = &node.name;
                 f(label)
                     && self
                         .env
@@ -748,35 +732,34 @@ where
         }
     }
 
-    fn is_clone(&self, label: &'a Syntax<Token, Value>) -> bool {
+    fn is_clone(&self, label: S<'a, Token, Value>) -> bool {
         self.text(label).eq_ignore_ascii_case(sn::members::__CLONE)
     }
 
-    fn class_constructor_has_static(&self, node: &'a Syntax<Token, Value>) -> bool {
+    fn class_constructor_has_static(&self, node: S<'a, Token, Value>) -> bool {
         self.has_static(node, |x| x.is_construct())
     }
 
-    fn clone_cannot_be_static(&self, node: &'a Syntax<Token, Value>) -> bool {
+    fn clone_cannot_be_static(&self, node: S<'a, Token, Value>) -> bool {
         self.has_static(node, |x| self.is_clone(x))
     }
 
     fn promoted_params(
-        params: impl DoubleEndedIterator<Item = &'a Syntax<Token, Value>>,
-    ) -> impl DoubleEndedIterator<Item = &'a Syntax<Token, Value>> {
-        params.filter(|node| match &node.syntax {
-            ParameterDeclaration(x) => !x.parameter_visibility.is_missing(),
+        params: impl DoubleEndedIterator<Item = S<'a, Token, Value>>,
+    ) -> impl DoubleEndedIterator<Item = S<'a, Token, Value>> {
+        params.filter(|node| match &node.children {
+            ParameterDeclaration(x) => !x.visibility.is_missing(),
             _ => false,
         })
     }
 
     // Given a function declaration header, confirm that it is NOT a constructor
     // and that the header containing it has visibility modifiers in parameters
-    fn class_non_constructor_has_visibility_param(node: &'a Syntax<Token, Value>) -> bool {
-        match &node.syntax {
+    fn class_non_constructor_has_visibility_param(node: S<'a, Token, Value>) -> bool {
+        match &node.children {
             FunctionDeclarationHeader(node) => {
-                let params = Self::syntax_to_list_no_separators(&node.function_parameter_list);
-                (!&node.function_name.is_construct())
-                    && Self::promoted_params(params).next().is_some()
+                let params = Self::syntax_to_list_no_separators(&node.parameter_list);
+                (!&node.name.is_construct()) && Self::promoted_params(params).next().is_some()
             }
             _ => false,
         }
@@ -784,16 +767,11 @@ where
 
     // Don't allow a promoted parameter in a constructor if the class
     // already has a property with the same name. Return the clashing name found.
-    fn class_constructor_param_promotion_clash(
-        &self,
-        node: &'a Syntax<Token, Value>,
-    ) -> Option<&str> {
+    fn class_constructor_param_promotion_clash(&self, node: S<'a, Token, Value>) -> Option<&str> {
         use itertools::Either::{Left, Right};
-        let class_elts = |node: Option<&'a Syntax<Token, Value>>| match node.map(|x| &x.syntax) {
-            Some(ClassishDeclaration(cd)) => match &cd.classish_body.syntax {
-                ClassishBody(cb) => Left(Self::syntax_to_list_no_separators(
-                    &cb.classish_body_elements,
-                )),
+        let class_elts = |node: Option<S<'a, Token, Value>>| match node.map(|x| &x.children) {
+            Some(ClassishDeclaration(cd)) => match &cd.body.children {
+                ClassishBody(cb) => Left(Self::syntax_to_list_no_separators(&cb.elements)),
                 _ => Right(std::iter::empty()),
             },
             _ => Right(std::iter::empty()),
@@ -801,11 +779,11 @@ where
 
         // A property declaration may include multiple property names:
         // public int $x, $y;
-        let prop_names = |elt: &'a Syntax<Token, Value>| match &elt.syntax {
+        let prop_names = |elt: S<'a, Token, Value>| match &elt.children {
             PropertyDeclaration(x) => Left(
-                Self::syntax_to_list_no_separators(&x.property_declarators).filter_map(|decl| {
-                    match &decl.syntax {
-                        PropertyDeclarator(x) => Some(self.text(&x.property_name)),
+                Self::syntax_to_list_no_separators(&x.declarators).filter_map(|decl| {
+                    match &decl.children {
+                        PropertyDeclarator(x) => Some(self.text(&x.name)),
                         _ => None,
                     }
                 }),
@@ -813,18 +791,18 @@ where
             _ => Right(std::iter::empty()),
         };
 
-        let param_name = |p: &'a Syntax<Token, Value>| match &p.syntax {
-            ParameterDeclaration(x) => Some(self.text(&x.parameter_name)),
+        let param_name = |p: S<'a, Token, Value>| match &p.children {
+            ParameterDeclaration(x) => Some(self.text(&x.name)),
             _ => None,
         };
 
-        match &node.syntax {
-            FunctionDeclarationHeader(node) if node.function_name.is_construct() => {
+        match &node.children {
+            FunctionDeclarationHeader(node) if node.name.is_construct() => {
                 let class_var_names: Vec<_> = class_elts(self.env.context.active_classish)
                     .map(|x| prop_names(x))
                     .flatten()
                     .collect();
-                let params = Self::syntax_to_list_no_separators(&node.function_parameter_list);
+                let params = Self::syntax_to_list_no_separators(&node.parameter_list);
                 let mut promoted_param_names = Self::promoted_params(params).filter_map(param_name);
                 promoted_param_names.find(|name| class_var_names.contains(name))
             }
@@ -833,13 +811,13 @@ where
     }
 
     // Ban parameter promotion in abstract constructors.
-    fn abstract_class_constructor_has_visibility_param(node: &'a Syntax<Token, Value>) -> bool {
-        match &node.syntax {
+    fn abstract_class_constructor_has_visibility_param(node: S<'a, Token, Value>) -> bool {
+        match &node.children {
             FunctionDeclarationHeader(node) => {
-                let label = &node.function_name;
-                let params = Self::syntax_to_list_no_separators(&node.function_parameter_list);
+                let label = &node.name;
+                let params = Self::syntax_to_list_no_separators(&node.parameter_list);
                 label.is_construct()
-                    && Self::list_contains_predicate(|x| x.is_abstract(), &node.function_modifiers)
+                    && Self::list_contains_predicate(|x| x.is_abstract(), &node.modifiers)
                     && Self::promoted_params(params).next().is_some()
             }
             _ => false,
@@ -847,22 +825,22 @@ where
     }
 
     // Ban parameter promotion in interfaces and traits.
-    fn interface_or_trait_has_visibility_param(&self, node: &'a Syntax<Token, Value>) -> bool {
-        match &node.syntax {
+    fn interface_or_trait_has_visibility_param(&self, node: S<'a, Token, Value>) -> bool {
+        match &node.children {
             FunctionDeclarationHeader(node) => {
                 let is_interface_or_trait =
                     self.env
                         .context
                         .active_classish
-                        .map_or(false, |parent_classish| match &parent_classish.syntax {
+                        .map_or(false, |parent_classish| match &parent_classish.children {
                             ClassishDeclaration(cd) => {
-                                let kind = Self::token_kind(&cd.classish_keyword);
+                                let kind = Self::token_kind(&cd.keyword);
                                 kind == Some(TokenKind::Interface) || kind == Some(TokenKind::Trait)
                             }
                             _ => false,
                         });
 
-                let params = Self::syntax_to_list_no_separators(&node.function_parameter_list);
+                let params = Self::syntax_to_list_no_separators(&node.parameter_list);
                 Self::promoted_params(params).next().is_some() && is_interface_or_trait
             }
             _ => false,
@@ -870,18 +848,18 @@ where
     }
 
     // check that a constructor is type annotated
-    fn class_constructor_has_non_void_type(&self, node: &'a Syntax<Token, Value>) -> bool {
+    fn class_constructor_has_non_void_type(&self, node: S<'a, Token, Value>) -> bool {
         if !self.env.is_typechecker() {
             false
         } else {
-            match &node.syntax {
+            match &node.children {
                 FunctionDeclarationHeader(node) => {
-                    let label = &node.function_name;
-                    let type_ano = &node.function_type;
-                    let function_colon = &node.function_colon;
+                    let label = &node.name;
+                    let type_ano = &node.type_;
+                    let function_colon = &node.colon;
                     let is_missing = type_ano.is_missing() && function_colon.is_missing();
-                    let is_void = match &type_ano.syntax {
-                        SimpleTypeSpecifier(spec) => spec.simple_type_specifier.is_void(),
+                    let is_void = match &type_ano.children {
+                        SimpleTypeSpecifier(spec) => spec.specifier.is_void(),
                         _ => false,
                     };
                     label.is_construct() && !(is_missing || is_void)
@@ -891,9 +869,9 @@ where
         }
     }
 
-    fn unsupported_magic_method_errors(&mut self, node: &'a Syntax<Token, Value>) {
-        if let FunctionDeclarationHeader(x) = &node.syntax {
-            let name = self.text(&x.function_name).to_ascii_lowercase();
+    fn unsupported_magic_method_errors(&mut self, node: S<'a, Token, Value>) {
+        if let FunctionDeclarationHeader(x) = &node.children {
+            let name = self.text(&x.name).to_ascii_lowercase();
             let unsupported = sn::members::UNSUPPORTED_MAP.get(&name);
 
             if let Some(unsupported) = unsupported {
@@ -905,14 +883,14 @@ where
         }
     }
 
-    fn async_magic_method(&self, node: &'a Syntax<Token, Value>) -> bool {
-        match &node.syntax {
+    fn async_magic_method(&self, node: S<'a, Token, Value>) -> bool {
+        match &node.children {
             FunctionDeclarationHeader(node) => {
-                let name = self.text(&node.function_name).to_ascii_lowercase();
+                let name = self.text(&node.name).to_ascii_lowercase();
                 match name {
                     _ if name.eq_ignore_ascii_case(sn::members::__DISPOSE_ASYNC) => false,
                     _ if sn::members::AS_LOWERCASE_SET.contains(&name) => {
-                        Self::list_contains_predicate(|x| x.is_async(), &node.function_modifiers)
+                        Self::list_contains_predicate(|x| x.is_async(), &node.modifiers)
                     }
                     _ => false,
                 }
@@ -921,26 +899,26 @@ where
         }
     }
 
-    fn clone_takes_no_arguments(&self, node: &'a Syntax<Token, Value>) -> bool {
-        match &node.syntax {
+    fn clone_takes_no_arguments(&self, node: S<'a, Token, Value>) -> bool {
+        match &node.children {
             FunctionDeclarationHeader(x) => {
-                let mut params = Self::syntax_to_list_no_separators(&x.function_parameter_list);
-                self.is_clone(&x.function_name) && params.next().is_some()
+                let mut params = Self::syntax_to_list_no_separators(&x.parameter_list);
+                self.is_clone(&x.name) && params.next().is_some()
             }
             _ => false,
         }
     }
 
     // whether a methodish decl has body
-    fn methodish_has_body(node: &'a Syntax<Token, Value>) -> bool {
-        match &node.syntax {
-            MethodishDeclaration(syntax) => !syntax.methodish_function_body.is_missing(),
+    fn methodish_has_body(node: S<'a, Token, Value>) -> bool {
+        match &node.children {
+            MethodishDeclaration(syntax) => !syntax.function_body.is_missing(),
             _ => false,
         }
     }
 
     // whether a methodish decl is native
-    fn methodish_is_native(&self, node: &'a Syntax<Token, Value>) -> bool {
+    fn methodish_is_native(&self, node: S<'a, Token, Value>) -> bool {
         self.methodish_contains_attribute(node, "__Native")
     }
 
@@ -951,9 +929,9 @@ where
             .context
             .active_classish
             .iter()
-            .any(|parent_classish| match &parent_classish.syntax {
+            .any(|parent_classish| match &parent_classish.children {
                 ClassishDeclaration(cd) => {
-                    Self::token_kind(&cd.classish_keyword) == Some(TokenKind::Interface)
+                    Self::token_kind(&cd.keyword) == Some(TokenKind::Interface)
                 }
                 _ => false,
             })
@@ -962,10 +940,7 @@ where
     // Test whether node is a non-abstract method without a body and not native.
     // Here node is the methodish node
     // And methods inside interfaces are inherently considered abstract *)
-    fn methodish_non_abstract_without_body_not_native(
-        &self,
-        node: &'a Syntax<Token, Value>,
-    ) -> bool {
+    fn methodish_non_abstract_without_body_not_native(&self, node: S<'a, Token, Value>) -> bool {
         let non_abstract =
             !(Self::has_modifier_abstract(node) || self.methodish_inside_interface());
         let not_has_body = !Self::methodish_has_body(node);
@@ -976,7 +951,7 @@ where
     }
 
     // Test whether node is a method that is both abstract and private
-    fn methodish_abstract_conflict_with_private(node: &'a Syntax<Token, Value>) -> bool {
+    fn methodish_abstract_conflict_with_private(node: S<'a, Token, Value>) -> bool {
         let is_abstract = Self::has_modifier_abstract(node);
         let has_private = Self::has_modifier_private(node);
         is_abstract && has_private
@@ -991,11 +966,11 @@ where
         match (self.parents.get(len - 2), self.parents.get(len - 3)) {
             (
                 Some(Syntax {
-                    syntax: CompoundStatement(_),
+                    children: CompoundStatement(_),
                     ..
                 }),
                 Some(x),
-            ) => match &x.syntax {
+            ) => match &x.children {
                 FunctionDeclaration(_)
                 | MethodishDeclaration(_)
                 | AnonymousFunction(_)
@@ -1009,8 +984,8 @@ where
 
     fn make_error_from_nodes(
         child: Option<SyntaxError>,
-        start_node: &'a Syntax<Token, Value>,
-        end_node: &'a Syntax<Token, Value>,
+        start_node: S<'a, Token, Value>,
+        end_node: S<'a, Token, Value>,
         error_type: ErrorType,
         error: errors::Error,
     ) -> SyntaxError {
@@ -1019,20 +994,20 @@ where
         SyntaxError::make_with_child_and_type(child, s, e, error_type, error)
     }
 
-    fn make_error_from_node(node: &'a Syntax<Token, Value>, error: errors::Error) -> SyntaxError {
+    fn make_error_from_node(node: S<'a, Token, Value>, error: errors::Error) -> SyntaxError {
         Self::make_error_from_nodes(None, node, node, ErrorType::ParseError, error)
     }
 
     fn make_error_from_node_with_type(
-        node: &'a Syntax<Token, Value>,
+        node: S<'a, Token, Value>,
         error: errors::Error,
         error_type: ErrorType,
     ) -> SyntaxError {
         Self::make_error_from_nodes(None, node, node, error_type, error)
     }
 
-    fn is_invalid_xhp_attr_enum_item_literal(literal_expression: &'a Syntax<Token, Value>) -> bool {
-        if let Token(t) = &literal_expression.syntax {
+    fn is_invalid_xhp_attr_enum_item_literal(literal_expression: S<'a, Token, Value>) -> bool {
+        if let Token(t) = &literal_expression.children {
             match t.kind() {
                 TokenKind::DecimalLiteral
                 | TokenKind::SingleQuotedStringLiteral
@@ -1044,24 +1019,24 @@ where
         }
     }
 
-    fn is_invalid_xhp_attr_enum_item(node: &'a Syntax<Token, Value>) -> bool {
-        if let LiteralExpression(x) = &node.syntax {
-            Self::is_invalid_xhp_attr_enum_item_literal(&x.literal_expression)
+    fn is_invalid_xhp_attr_enum_item(node: S<'a, Token, Value>) -> bool {
+        if let LiteralExpression(x) = &node.children {
+            Self::is_invalid_xhp_attr_enum_item_literal(&x.expression)
         } else {
             true
         }
     }
 
-    fn xhp_errors(&mut self, node: &'a Syntax<Token, Value>) {
-        match &node.syntax {
+    fn xhp_errors(&mut self, node: S<'a, Token, Value>) {
+        match &node.children {
             XHPEnumType(enum_type) => {
-                if self.env.is_typechecker() && enum_type.xhp_enum_values.is_missing() {
+                if self.env.is_typechecker() && enum_type.values.is_missing() {
                     self.errors.push(Self::make_error_from_node(
-                        &enum_type.xhp_enum_values,
+                        &enum_type.values,
                         errors::error2055,
                     ))
                 } else if self.env.is_typechecker() {
-                    Self::syntax_to_list_no_separators(&enum_type.xhp_enum_values)
+                    Self::syntax_to_list_no_separators(&enum_type.values)
                         .filter(|&x| Self::is_invalid_xhp_attr_enum_item(x))
                         .for_each(|item| {
                             self.errors
@@ -1070,10 +1045,10 @@ where
                 }
             }
             XHPExpression(x) => {
-                if let XHPOpen(xhp_open) = &x.xhp_open.syntax {
-                    if let XHPClose(xhp_close) = &x.xhp_close.syntax {
-                        let open_tag = self.text(&xhp_open.xhp_open_name);
-                        let close_tag = self.text(&xhp_close.xhp_close_name);
+                if let XHPOpen(xhp_open) = &x.open.children {
+                    if let XHPClose(xhp_close) = &x.close.children {
+                        let open_tag = self.text(&xhp_open.name);
+                        let close_tag = self.text(&xhp_close.name);
                         if open_tag != close_tag {
                             self.errors.push(Self::make_error_from_node(
                                 node,
@@ -1087,7 +1062,7 @@ where
         }
     }
 
-    fn invalid_modifier_errors<F>(&mut self, decl_name: &str, node: &'a Syntax<Token, Value>, ok: F)
+    fn invalid_modifier_errors<F>(&mut self, decl_name: &str, node: S<'a, Token, Value>, ok: F)
     where
         F: Fn(TokenKind) -> bool,
     {
@@ -1111,10 +1086,10 @@ where
                     errors::duplicate_modifiers_for_declaration(decl_name),
                 ))
             }
-            if let SyntaxList(modifiers) = &modifiers.syntax {
-                let modifiers: Vec<&'a Syntax<Token, Value>> = modifiers
+            if let SyntaxList(modifiers) = &modifiers.children {
+                let modifiers: Vec<S<'a, Token, Value>> = modifiers
                     .iter()
-                    .filter(|x: &&'a Syntax<Token, Value>| Self::is_visibility(*x))
+                    .filter(|x: &S<'a, Token, Value>| Self::is_visibility(*x))
                     .collect();
                 if modifiers.len() > 1 {
                     self.errors.push(Self::make_error_from_node(
@@ -1132,7 +1107,7 @@ where
         check: F,
         node: &'b X,
         error: E, // closure to avoid constant premature concatenation of error strings
-        error_node: &'a Syntax<Token, Value>,
+        error_node: S<'a, Token, Value>,
     ) where
         F: Fn(&mut Self, &'b X) -> bool,
         E: Fn() -> Error,
@@ -1146,7 +1121,7 @@ where
     // helper since there are so many kinds of errors
     fn produce_error_from_check<'b, F, E, X>(&mut self, check: F, node: &'b X, error: E)
     where
-        F: Fn(&'b X) -> Option<&'a Syntax<Token, Value>>,
+        F: Fn(&'b X) -> Option<S<'a, Token, Value>>,
         E: Fn() -> Error,
     {
         if let Some(error_node) = check(node) {
@@ -1165,12 +1140,12 @@ where
 
     // Given a function_declaration_header node, returns its function_name
     // as a string opt.
-    fn extract_function_name(&self, header_node: &'a Syntax<Token, Value>) -> Option<&'a str> {
+    fn extract_function_name(&self, header_node: S<'a, Token, Value>) -> Option<&'a str> {
         // The '_' arm of this match will never be reached, but the type checker
         // doesn't allow a direct extraction of function_name from
         // function_declaration_header. *)
-        match &header_node.syntax {
-            FunctionDeclarationHeader(fdh) => Some(self.text(&fdh.function_name)),
+        match &header_node.children {
+            FunctionDeclarationHeader(fdh) => Some(self.text(&fdh.name)),
             _ => None,
         }
     }
@@ -1181,26 +1156,26 @@ where
 
         match self.env.context.active_methodish {
             Some(Syntax {
-                syntax: FunctionDeclaration(x),
+                children: FunctionDeclaration(x),
                 ..
-            }) => self.extract_function_name(&x.function_declaration_header),
+            }) => self.extract_function_name(&x.declaration_header),
             Some(Syntax {
-                syntax: MethodishDeclaration(x),
+                children: MethodishDeclaration(x),
                 ..
-            }) => self.extract_function_name(&x.methodish_function_decl_header),
+            }) => self.extract_function_name(&x.function_decl_header),
             _ => None,
         }
     }
 
     // Given a particular TokenKind::(Trait/Interface), tests if a given
     // classish_declaration node is both of that kind and declared abstract.
-    fn is_classish_kind_declared_abstract(&self, cd_node: &'a Syntax<Token, Value>) -> bool {
-        match &cd_node.syntax {
+    fn is_classish_kind_declared_abstract(&self, cd_node: S<'a, Token, Value>) -> bool {
+        match &cd_node.children {
             ClassishDeclaration(x)
-                if Self::is_token_kind(&x.classish_keyword, TokenKind::Trait)
-                    || Self::is_token_kind(&x.classish_keyword, TokenKind::Interface) =>
+                if Self::is_token_kind(&x.keyword, TokenKind::Trait)
+                    || Self::is_token_kind(&x.keyword, TokenKind::Interface) =>
             {
-                Self::list_contains_predicate(|x| x.is_abstract(), &x.classish_modifiers)
+                Self::list_contains_predicate(|x| x.is_abstract(), &x.modifiers)
             }
             _ => false,
         }
@@ -1210,7 +1185,7 @@ where
         self.env
             .context
             .active_callable
-            .map_or(false, |node| match &node.syntax {
+            .map_or(false, |node| match &node.children {
                 AnonymousFunction(_) | LambdaExpression(_) | AwaitableCreationExpression(_) => true,
                 _ => false,
             })
@@ -1223,17 +1198,12 @@ where
 
     // Returns the first ClassishDeclaration node or
     // None if there isn't one or classish_kind does not match. *)
-    fn first_parent_classish_node(
-        &self,
-        classish_kind: TokenKind,
-    ) -> Option<&'a Syntax<Token, Value>> {
+    fn first_parent_classish_node(&self, classish_kind: TokenKind) -> Option<S<'a, Token, Value>> {
         self.env
             .context
             .active_classish
-            .and_then(|node| match &node.syntax {
-                ClassishDeclaration(cd)
-                    if Self::is_token_kind(&cd.classish_keyword, classish_kind) =>
-                {
+            .and_then(|node| match &node.children {
+                ClassishDeclaration(cd) if Self::is_token_kind(&cd.keyword, classish_kind) => {
                     Some(node)
                 }
                 _ => None,
@@ -1244,8 +1214,8 @@ where
     // the given context (not just Classes )
     fn active_classish_name(&self) -> Option<&'a str> {
         self.env.context.active_classish.and_then(|node| {
-            if let ClassishDeclaration(cd) = &node.syntax {
-                cd.classish_name.extract_text(self.env.syntax_tree.text())
+            if let ClassishDeclaration(cd) = &node.children {
+                cd.name.extract_text(self.env.syntax_tree.text())
             } else {
                 None
             }
@@ -1254,40 +1224,39 @@ where
 
     // Return, as a string opt, the name of the Class in the given context
     fn first_parent_class_name(&self) -> Option<&'a str> {
-        return self
-            .env
+        self.env
             .context
             .active_classish
             .and_then(|parent_classish| {
-                if let ClassishDeclaration(cd) = &parent_classish.syntax {
-                    if Self::token_kind(&cd.classish_keyword) == Some(TokenKind::Class) {
+                if let ClassishDeclaration(cd) = &parent_classish.children {
+                    if Self::token_kind(&cd.keyword) == Some(TokenKind::Class) {
                         return self.active_classish_name();
                     } else {
                         return None; // This arm is never reached
                     }
                 }
                 return None;
-            });
+            })
     }
 
     // Given a declaration node, returns the modifier node matching the given
     // predicate from its list of modifiers, or None if there isn't one.
     fn extract_keyword<F>(
         modifier: F,
-        declaration_node: &'a Syntax<Token, Value>,
-    ) -> Option<&'a Syntax<Token, Value>>
+        declaration_node: S<'a, Token, Value>,
+    ) -> Option<S<'a, Token, Value>>
     where
-        F: Fn(&'a Syntax<Token, Value>) -> bool,
+        F: Fn(S<'a, Token, Value>) -> bool,
     {
         Self::get_modifiers_of_declaration(declaration_node).and_then(|modifiers_list| {
             Self::syntax_to_list_no_separators(modifiers_list)
-                .find(|x: &&'a Syntax<Token, Value>| modifier(*x))
+                .find(|x: &S<'a, Token, Value>| modifier(*x))
         })
     }
 
     // Wrapper function that uses above extract_keyword function to test if node
     // contains is_abstract keyword
-    fn is_abstract_declaration(declaration_node: &'a Syntax<Token, Value>) -> bool {
+    fn is_abstract_declaration(declaration_node: S<'a, Token, Value>) -> bool {
         Self::extract_keyword(|x| x.is_abstract(), declaration_node).is_some()
     }
 
@@ -1302,28 +1271,28 @@ where
         self.first_parent_classish_node(TokenKind::Trait).is_some()
     }
 
-    fn is_abstract_and_async_method(md_node: &'a Syntax<Token, Value>) -> bool {
+    fn is_abstract_and_async_method(md_node: S<'a, Token, Value>) -> bool {
         Self::is_abstract_declaration(md_node)
             && Self::extract_keyword(|x| x.is_async(), md_node).is_some()
     }
 
-    fn is_interface_and_async_method(&self, md_node: &'a Syntax<Token, Value>) -> bool {
+    fn is_interface_and_async_method(&self, md_node: S<'a, Token, Value>) -> bool {
         self.is_inside_interface() && Self::extract_keyword(|x| x.is_async(), md_node).is_some()
     }
 
-    fn get_params_for_enclosing_callable(&self) -> Option<&'a Syntax<Token, Value>> {
-        let from_header = |header: &'a Syntax<Token, Value>| match &header.syntax {
-            FunctionDeclarationHeader(fdh) => Some(&fdh.function_parameter_list),
+    fn get_params_for_enclosing_callable(&self) -> Option<S<'a, Token, Value>> {
+        let from_header = |header: S<'a, Token, Value>| match &header.children {
+            FunctionDeclarationHeader(fdh) => Some(&fdh.parameter_list),
             _ => None,
         };
         self.env
             .context
             .active_callable
-            .and_then(|callable| match &callable.syntax {
-                FunctionDeclaration(x) => from_header(&x.function_declaration_header),
-                MethodishDeclaration(x) => from_header(&x.methodish_function_decl_header),
-                LambdaExpression(x) => match &x.lambda_signature.syntax {
-                    LambdaSignature(x) => Some(&x.lambda_parameters),
+            .and_then(|callable| match &callable.children {
+                FunctionDeclaration(x) => from_header(&x.declaration_header),
+                MethodishDeclaration(x) => from_header(&x.function_decl_header),
+                LambdaExpression(x) => match &x.signature.children {
+                    LambdaSignature(x) => Some(&x.parameters),
                     _ => None,
                 },
                 _ => None,
@@ -1336,28 +1305,28 @@ where
         };
         match self.env.context.active_methodish {
             Some(Syntax {
-                syntax: FunctionDeclaration(x),
+                children: FunctionDeclaration(x),
                 ..
-            }) => from_attr_spec(&x.function_attribute_spec),
+            }) => from_attr_spec(&x.attribute_spec),
             Some(Syntax {
-                syntax: MethodishDeclaration(x),
+                children: MethodishDeclaration(x),
                 ..
-            }) => from_attr_spec(&x.methodish_attribute),
+            }) => from_attr_spec(&x.attribute),
             _ => false,
         }
     }
 
-    fn parameter_callconv(param: &'a Syntax<Token, Value>) -> Option<&'a Syntax<Token, Value>> {
-        (match &param.syntax {
-            ParameterDeclaration(x) => Some(&x.parameter_call_convention),
-            ClosureParameterTypeSpecifier(x) => Some(&x.closure_parameter_call_convention),
-            VariadicParameter(x) => Some(&x.variadic_parameter_call_convention),
+    fn parameter_callconv(param: S<'a, Token, Value>) -> Option<S<'a, Token, Value>> {
+        (match &param.children {
+            ParameterDeclaration(x) => Some(&x.call_convention),
+            ClosureParameterTypeSpecifier(x) => Some(&x.call_convention),
+            VariadicParameter(x) => Some(&x.call_convention),
             _ => None,
         })
         .filter(|node| !node.is_missing())
     }
 
-    fn is_parameter_with_callconv(param: &'a Syntax<Token, Value>) -> bool {
+    fn is_parameter_with_callconv(param: S<'a, Token, Value>) -> bool {
         Self::parameter_callconv(param).is_some()
     }
 
@@ -1370,27 +1339,27 @@ where
     }
 
     fn is_inside_async_method(&self) -> bool {
-        let from_header = |header: &'a Syntax<Token, Value>| match &header.syntax {
+        let from_header = |header: S<'a, Token, Value>| match &header.children {
             FunctionDeclarationHeader(fdh) => {
-                Self::syntax_to_list_no_separators(&fdh.function_modifiers).any(|x| x.is_async())
+                Self::syntax_to_list_no_separators(&fdh.modifiers).any(|x| x.is_async())
             }
             _ => false,
         };
         self.env
             .context
             .active_callable
-            .map_or(false, |node| match &node.syntax {
-                FunctionDeclaration(x) => from_header(&x.function_declaration_header),
-                MethodishDeclaration(x) => from_header(&x.methodish_function_decl_header),
-                AnonymousFunction(x) => !x.anonymous_async_keyword.is_missing(),
-                LambdaExpression(x) => !x.lambda_async.is_missing(),
+            .map_or(false, |node| match &node.children {
+                FunctionDeclaration(x) => from_header(&x.declaration_header),
+                MethodishDeclaration(x) => from_header(&x.function_decl_header),
+                AnonymousFunction(x) => !x.async_keyword.is_missing(),
+                LambdaExpression(x) => !x.async_.is_missing(),
                 AwaitableCreationExpression(_) => true,
                 _ => false,
             })
     }
 
     fn make_name_already_used_error(
-        node: &'a Syntax<Token, Value>,
+        node: S<'a, Token, Value>,
         name: &str,
         short_name: &str,
         original_location: &Location,
@@ -1421,32 +1390,32 @@ where
         }
     }
 
-    fn check_type_hint(&mut self, node: &'a Syntax<Token, Value>) {
+    fn check_type_hint(&mut self, node: S<'a, Token, Value>) {
         for x in node.iter_children() {
             self.check_type_hint(x)
         }
         let check_type_name = |self_: &mut Self, s| {
             self_.check_type_name_reference(self_.text(s), Self::make_location_of_node(node))
         };
-        match &node.syntax {
-            SimpleTypeSpecifier(x) => check_type_name(self, &x.simple_type_specifier),
-            GenericTypeSpecifier(x) => check_type_name(self, &x.generic_class_type),
+        match &node.children {
+            SimpleTypeSpecifier(x) => check_type_name(self, &x.specifier),
+            GenericTypeSpecifier(x) => check_type_name(self, &x.class_type),
             _ => {}
         }
     }
 
-    fn extract_callconv_node(node: &'a Syntax<Token, Value>) -> Option<&'a Syntax<Token, Value>> {
-        match &node.syntax {
-            ParameterDeclaration(x) => Some(&x.parameter_call_convention),
-            ClosureParameterTypeSpecifier(x) => Some(&x.closure_parameter_call_convention),
-            VariadicParameter(x) => Some(&x.variadic_parameter_call_convention),
+    fn extract_callconv_node(node: S<'a, Token, Value>) -> Option<S<'a, Token, Value>> {
+        match &node.children {
+            ParameterDeclaration(x) => Some(&x.call_convention),
+            ClosureParameterTypeSpecifier(x) => Some(&x.call_convention),
+            VariadicParameter(x) => Some(&x.call_convention),
             _ => None,
         }
     }
 
     // Given a node, checks if it is a abstract ConstDeclaration
-    fn is_abstract_const(declaration: &'a Syntax<Token, Value>) -> bool {
-        match &declaration.syntax {
+    fn is_abstract_const(declaration: S<'a, Token, Value>) -> bool {
+        match &declaration.children {
             ConstDeclaration(_) => Self::has_modifier_abstract(declaration),
             _ => false,
         }
@@ -1454,7 +1423,7 @@ where
 
     // Given a ConstDeclarator node, test whether it is abstract, but has an
     // initializer.
-    fn constant_abstract_with_initializer(&self, init: &'a Syntax<Token, Value>) -> bool {
+    fn constant_abstract_with_initializer(&self, init: S<'a, Token, Value>) -> bool {
         let is_abstract = match self.env.context.active_const {
             Some(p_const_declaration) if Self::is_abstract_const(p_const_declaration) => true,
             _ => false,
@@ -1464,8 +1433,8 @@ where
     }
 
     // Given a node, checks if it is a concrete ConstDeclaration *)
-    fn is_concrete_const(declaration: &'a Syntax<Token, Value>) -> bool {
-        match &declaration.syntax {
+    fn is_concrete_const(declaration: S<'a, Token, Value>) -> bool {
+        match &declaration.children {
             ConstDeclaration(_) => !Self::has_modifier_abstract(declaration),
             _ => false,
         }
@@ -1473,7 +1442,7 @@ where
 
     // Given a ConstDeclarator node, test whether it is concrete, but has no
     // initializer.
-    fn constant_concrete_without_initializer(&self, init: &'a Syntax<Token, Value>) -> bool {
+    fn constant_concrete_without_initializer(&self, init: S<'a, Token, Value>) -> bool {
         let is_concrete = match self.env.context.active_const {
             Some(p_const_declaration) if Self::is_concrete_const(p_const_declaration) => true,
             _ => false,
@@ -1481,7 +1450,7 @@ where
         is_concrete && init.is_missing()
     }
 
-    fn methodish_memoize_lsb_on_non_static(&mut self, node: &'a Syntax<Token, Value>) {
+    fn methodish_memoize_lsb_on_non_static(&mut self, node: S<'a, Token, Value>) {
         if self.methodish_contains_attribute(node, sn::user_attributes::MEMOIZE_LSB)
             && !Self::has_modifier_static(node)
         {
@@ -1494,18 +1463,18 @@ where
 
     fn function_declaration_contains_attribute(
         &self,
-        node: &'a Syntax<Token, Value>,
+        node: S<'a, Token, Value>,
         attribute: &str,
     ) -> bool {
-        match &node.syntax {
+        match &node.children {
             FunctionDeclaration(x) => {
-                self.attribute_specification_contains(&x.function_attribute_spec, attribute)
+                self.attribute_specification_contains(&x.attribute_spec, attribute)
             }
             _ => false,
         }
     }
 
-    fn methodish_contains_memoize(&self, node: &'a Syntax<Token, Value>) -> bool {
+    fn methodish_contains_memoize(&self, node: S<'a, Token, Value>) -> bool {
         self.env.is_typechecker()
             && self.is_inside_interface()
             && self.methodish_contains_attribute(node, sn::user_attributes::MEMOIZE)
@@ -1523,7 +1492,7 @@ where
             || name == sn::user_attributes::CIPP_RX
     }
 
-    fn is_some_reactivity_attribute(&self, node: &'a Syntax<Token, Value>) -> bool {
+    fn is_some_reactivity_attribute(&self, node: S<'a, Token, Value>) -> bool {
         match self.attr_name(node) {
             None => false,
             Some(name) => Self::is_some_reactivity_attribute_name(name),
@@ -1532,9 +1501,9 @@ where
 
     fn attribute_first_reactivity_annotation(
         &self,
-        node: &'a Syntax<Token, Value>,
-    ) -> Option<&'a Syntax<Token, Value>> {
-        match &node.syntax {
+        node: S<'a, Token, Value>,
+    ) -> Option<S<'a, Token, Value>> {
+        match &node.children {
             AttributeSpecification(_) | OldAttributeSpecification(_) => {
                 Self::attr_spec_to_node_list(node).find(|x| self.is_some_reactivity_attribute(x))
             }
@@ -1542,22 +1511,19 @@ where
         }
     }
 
-    fn attribute_has_reactivity_annotation(&self, attr_spec: &'a Syntax<Token, Value>) -> bool {
+    fn attribute_has_reactivity_annotation(&self, attr_spec: S<'a, Token, Value>) -> bool {
         self.attribute_first_reactivity_annotation(attr_spec)
             .is_some()
     }
 
-    fn attribute_missing_reactivity_for_condition(
-        &self,
-        attr_spec: &'a Syntax<Token, Value>,
-    ) -> bool {
+    fn attribute_missing_reactivity_for_condition(&self, attr_spec: S<'a, Token, Value>) -> bool {
         let has_attr = |attr| self.attribute_specification_contains(attr_spec, attr);
         !(self.attribute_has_reactivity_annotation(attr_spec))
             && (has_attr(sn::user_attributes::ONLY_RX_IF_IMPL)
                 || has_attr(sn::user_attributes::AT_MOST_RX_AS_ARGS))
     }
 
-    fn error_if_memoize_function_returns_mutable(&mut self, attrs: &'a Syntax<Token, Value>) {
+    fn error_if_memoize_function_returns_mutable(&mut self, attrs: S<'a, Token, Value>) {
         let mut has_memoize = false;
         let mut mutable_node = None;
         let mut mut_return_node = None;
@@ -1591,16 +1557,16 @@ where
         }
     }
 
-    fn methodish_missing_reactivity_for_condition(&self, node: &'a Syntax<Token, Value>) -> bool {
-        match &node.syntax {
+    fn methodish_missing_reactivity_for_condition(&self, node: S<'a, Token, Value>) -> bool {
+        match &node.children {
             MethodishDeclaration(x) => {
-                self.attribute_missing_reactivity_for_condition(&x.methodish_attribute)
+                self.attribute_missing_reactivity_for_condition(&x.attribute)
             }
             _ => false,
         }
     }
 
-    fn check_nonrx_annotation(&mut self, node: &'a Syntax<Token, Value>) {
+    fn check_nonrx_annotation(&mut self, node: S<'a, Token, Value>) {
         let err_decl = |self_: &mut Self| {
             self_.errors.push(Self::make_error_from_node(
                 node,
@@ -1613,12 +1579,12 @@ where
                 errors::invalid_non_rx_argument_for_lambda,
             ))
         };
-        let attr_spec = match &node.syntax {
-            MethodishDeclaration(x) => Some((&x.methodish_attribute, true)),
-            FunctionDeclaration(x) => Some((&x.function_attribute_spec, true)),
-            AnonymousFunction(x) => Some((&x.anonymous_attribute_spec, false)),
-            LambdaExpression(x) => Some((&x.lambda_attribute_spec, false)),
-            AwaitableCreationExpression(x) => Some((&x.awaitable_attribute_spec, false)),
+        let attr_spec = match &node.children {
+            MethodishDeclaration(x) => Some((&x.attribute, true)),
+            FunctionDeclaration(x) => Some((&x.attribute_spec, true)),
+            AnonymousFunction(x) => Some((&x.attribute_spec, false)),
+            LambdaExpression(x) => Some((&x.attribute_spec, false)),
+            AwaitableCreationExpression(x) => Some((&x.attribute_spec, false)),
             _ => None,
         };
 
@@ -1628,8 +1594,8 @@ where
                 .find(|node| self.attr_name(node) == Some(sn::user_attributes::NON_RX))
                 .and_then(|x| self.attr_args(x));
 
-            let is_string_argument = |x: &'a Syntax<Token, Value>| match &x.syntax {
-                LiteralExpression(x) => match &x.literal_expression.syntax {
+            let is_string_argument = |x: S<'a, Token, Value>| match &x.children {
+                LiteralExpression(x) => match &x.expression.children {
                     Token(token) => {
                         token.kind() == TokenKind::DoubleQuotedStringLiteral
                             || token.kind() == TokenKind::SingleQuotedStringLiteral
@@ -1673,20 +1639,17 @@ where
         }
     }
 
-    fn function_missing_reactivity_for_condition(&self, node: &'a Syntax<Token, Value>) -> bool {
-        match &node.syntax {
+    fn function_missing_reactivity_for_condition(&self, node: S<'a, Token, Value>) -> bool {
+        match &node.children {
             FunctionDeclaration(x) => {
-                self.attribute_missing_reactivity_for_condition(&x.function_attribute_spec)
+                self.attribute_missing_reactivity_for_condition(&x.attribute_spec)
             }
             _ => false,
         }
     }
 
-    fn attribute_multiple_reactivity_annotations(
-        &self,
-        attr_spec: &'a Syntax<Token, Value>,
-    ) -> bool {
-        match &attr_spec.syntax {
+    fn attribute_multiple_reactivity_annotations(&self, attr_spec: S<'a, Token, Value>) -> bool {
+        match &attr_spec.children {
             OldAttributeSpecification(_) | AttributeSpecification(_) => {
                 Self::attr_spec_to_node_list(attr_spec)
                     .filter(|x| self.is_some_reactivity_attribute(x))
@@ -1698,19 +1661,17 @@ where
         }
     }
 
-    fn methodish_multiple_reactivity_annotations(&self, node: &'a Syntax<Token, Value>) -> bool {
-        match &node.syntax {
-            MethodishDeclaration(x) => {
-                self.attribute_multiple_reactivity_annotations(&x.methodish_attribute)
-            }
+    fn methodish_multiple_reactivity_annotations(&self, node: S<'a, Token, Value>) -> bool {
+        match &node.children {
+            MethodishDeclaration(x) => self.attribute_multiple_reactivity_annotations(&x.attribute),
             _ => false,
         }
     }
 
-    fn function_multiple_reactivity_annotations(&self, node: &'a Syntax<Token, Value>) -> bool {
-        match &node.syntax {
+    fn function_multiple_reactivity_annotations(&self, node: S<'a, Token, Value>) -> bool {
+        match &node.children {
             FunctionDeclaration(x) => {
-                self.attribute_multiple_reactivity_annotations(&x.function_attribute_spec)
+                self.attribute_multiple_reactivity_annotations(&x.attribute_spec)
             }
             _ => false,
         }
@@ -1737,8 +1698,8 @@ where
             Some(x) => x,
             _ => return false,
         };
-        if let ClassishDeclaration(cd) = &active_classish.syntax {
-            return self.attr_spec_contains_enum_class(&cd.classish_attribute);
+        if let ClassishDeclaration(cd) = &active_classish.children {
+            return self.attr_spec_contains_enum_class(&cd.attribute);
         }
         return false;
     }
@@ -1748,24 +1709,24 @@ where
             Some(x) => x,
             _ => return false,
         };
-        if let ClassishDeclaration(x) = &active_classish.syntax {
-            if let TypeParameters(x) = &x.classish_type_parameters.syntax {
-                return Self::syntax_to_list_no_separators(&x.type_parameters_parameters).any(
-                    |p| match &p.syntax {
-                        TypeParameter(x) => !x.type_reified.is_missing(),
+        if let ClassishDeclaration(x) = &active_classish.children {
+            if let TypeParameters(x) = &x.type_parameters.children {
+                return Self::syntax_to_list_no_separators(&x.parameters).any(|p| {
+                    match &p.children {
+                        TypeParameter(x) => !x.reified.is_missing(),
                         _ => false,
-                    },
-                );
+                    }
+                });
             }
         };
         false
     }
 
-    fn methodish_errors(&mut self, node: &'a Syntax<Token, Value>) {
-        match &node.syntax {
+    fn methodish_errors(&mut self, node: S<'a, Token, Value>) {
+        match &node.children {
             FunctionDeclarationHeader(x) => {
-                let function_parameter_list = &x.function_parameter_list;
-                let function_type = &x.function_type;
+                let function_parameter_list = &x.parameter_list;
+                let function_type = &x.type_;
 
                 self.produce_error(
                     |self_, x| Self::class_constructor_has_non_void_type(self_, x),
@@ -1806,7 +1767,7 @@ where
                 self.function_declaration_header_memoize_lsb();
             }
             FunctionDeclaration(fd) => {
-                let function_attrs = &fd.function_attribute_spec;
+                let function_attrs = &fd.attribute_spec;
                 self.produce_error(
                     |self_, x| Self::function_multiple_reactivity_annotations(self_, x),
                     node,
@@ -1829,13 +1790,13 @@ where
                 });
             }
             MethodishDeclaration(md) => {
-                let header_node = &md.methodish_function_decl_header;
+                let header_node = &md.function_decl_header;
                 let modifiers = Self::modifiers_of_function_decl_header_exn(header_node);
                 let class_name = self.active_classish_name().unwrap_or("");
                 let method_name = self
-                    .extract_function_name(&md.methodish_function_decl_header)
+                    .extract_function_name(&md.function_decl_header)
                     .unwrap_or("");
-                let method_attrs = &md.methodish_attribute;
+                let method_attrs = &md.attribute;
                 self.error_if_memoize_function_returns_mutable(method_attrs);
                 self.produce_error(
                     |self_, x| self_.methodish_contains_memoize(x),
@@ -1917,7 +1878,7 @@ where
                     ))
                 };
 
-                let fun_semicolon = &md.methodish_semicolon;
+                let fun_semicolon = &md.semicolon;
 
                 self.produce_error(
                     |self_, x| self_.methodish_non_abstract_without_body_not_native(x),
@@ -1985,7 +1946,7 @@ where
         }
     }
 
-    fn is_hashbang(&self, node: &'a Syntax<Token, Value>) -> bool {
+    fn is_hashbang(&self, node: S<'a, Token, Value>) -> bool {
         let text = self.text(node);
         lazy_static! {
             static ref RE: Regex = Regex::new("^#!.*\n").unwrap();
@@ -2005,34 +1966,30 @@ where
 
     // If a variadic parameter has a default value, return it
     fn variadic_param_with_default_value(
-        params: &'a Syntax<Token, Value>,
-    ) -> Option<&'a Syntax<Token, Value>> {
+        params: S<'a, Token, Value>,
+    ) -> Option<S<'a, Token, Value>> {
         Self::variadic_param(params).filter(|x| Self::is_parameter_with_default_value(x))
     }
 
     // If a variadic parameter is marked inout, return it
-    fn variadic_param_with_callconv(
-        params: &'a Syntax<Token, Value>,
-    ) -> Option<&'a Syntax<Token, Value>> {
+    fn variadic_param_with_callconv(params: S<'a, Token, Value>) -> Option<S<'a, Token, Value>> {
         Self::variadic_param(params).filter(|x| Self::is_parameter_with_callconv(x))
     }
 
     // If an inout parameter has a default, return the default
-    fn param_with_callconv_has_default(
-        node: &'a Syntax<Token, Value>,
-    ) -> Option<&'a Syntax<Token, Value>> {
-        match &node.syntax {
+    fn param_with_callconv_has_default(node: S<'a, Token, Value>) -> Option<S<'a, Token, Value>> {
+        match &node.children {
             ParameterDeclaration(x)
                 if Self::is_parameter_with_callconv(node)
                     && Self::is_parameter_with_default_value(&node) =>
             {
-                Some(&x.parameter_default_value)
+                Some(&x.default_value)
             }
             _ => None,
         }
     }
 
-    fn params_errors(&mut self, params: &'a Syntax<Token, Value>) {
+    fn params_errors(&mut self, params: S<'a, Token, Value>) {
         self.produce_error_from_check(&Self::ends_with_variadic_comma, params, || {
             errors::error2022
         });
@@ -2049,7 +2006,7 @@ where
         });
     }
 
-    fn decoration_errors(&mut self, node: &'a Syntax<Token, Value>) {
+    fn decoration_errors(&mut self, node: S<'a, Token, Value>) {
         self.produce_error(
             |_, x| Self::is_double_variadic(x),
             node,
@@ -2058,9 +2015,9 @@ where
         );
     }
 
-    fn parameter_rx_errors(&mut self, node: &'a Syntax<Token, Value>) {
-        if let ParameterDeclaration(x) = &node.syntax {
-            let spec = &x.parameter_attribute;
+    fn parameter_rx_errors(&mut self, node: S<'a, Token, Value>) {
+        if let ParameterDeclaration(x) = &node.children {
+            let spec = &x.attribute;
             let has_owned_mutable =
                 self.attribute_specification_contains(spec, sn::user_attributes::OWNED_MUTABLE);
 
@@ -2123,44 +2080,40 @@ where
     }
 
     fn does_unop_create_write(token_kind: Option<TokenKind>) -> bool {
-        token_kind.map_or(false, |x| match x {
-            TokenKind::PlusPlus | TokenKind::MinusMinus => true,
-            _ => false,
+        token_kind.map_or(false, |x| {
+            matches!(x, TokenKind::PlusPlus | TokenKind::MinusMinus)
         })
     }
 
     fn does_decorator_create_write(token_kind: Option<TokenKind>) -> bool {
-        match token_kind {
-            Some(TokenKind::Inout) => true,
-            _ => false,
-        }
+        matches!(token_kind, Some(TokenKind::Inout))
     }
 
     fn node_lval_type<'b>(
-        node: &'a Syntax<Token, Value>,
-        parents: &'b [&'a Syntax<Token, Value>],
+        node: S<'a, Token, Value>,
+        parents: &'b [S<'a, Token, Value>],
     ) -> LvalType {
-        let is_in_final_lval_position = |mut node, parents: &'b [&'a Syntax<Token, Value>]| {
+        let is_in_final_lval_position = |mut node, parents: &'b [S<'a, Token, Value>]| {
             for &parent in parents.iter().rev() {
-                match &parent.syntax {
+                match &parent.children {
                     SyntaxList(_) | ListItem(_) => {
                         node = parent;
                         continue;
                     }
                     ExpressionStatement(_) => return true,
                     ForStatement(x)
-                        if node as *const _ == &x.for_initializer as *const _
-                            || node as *const _ == &x.for_end_of_loop as *const _ =>
+                        if node as *const _ == &x.initializer as *const _
+                            || node as *const _ == &x.end_of_loop as *const _ =>
                     {
                         return true;
                     }
                     UsingStatementFunctionScoped(x)
-                        if node as *const _ == &x.using_function_expression as *const _ =>
+                        if node as *const _ == &x.expression as *const _ =>
                     {
                         return true;
                     }
                     UsingStatementBlockScoped(x)
-                        if node as *const _ == &x.using_block_expressions as *const _ =>
+                        if node as *const _ == &x.expressions as *const _ =>
                     {
                         return true;
                     }
@@ -2169,26 +2122,25 @@ where
             }
             false
         };
-        let get_arg_call_node_with_parents = |mut node, parents: &'b [&'a Syntax<Token, Value>]| {
+        let get_arg_call_node_with_parents = |mut node, parents: &'b [S<'a, Token, Value>]| {
             for i in (0..parents.len()).rev() {
                 let parent = parents[i];
-                match &parent.syntax {
+                match &parent.children {
                     SyntaxList(_) | ListItem(_) => {
                         node = parent;
                         continue;
                     }
                     FunctionCallExpression(x)
-                        if node as *const _ == &x.function_call_argument_list as *const _ =>
+                        if node as *const _ == &x.argument_list as *const _ =>
                     {
                         if i == 0 {
                             // probably unreachable, but just in case to avoid crashing on 0-1
                             return Some((parent, &parents[0..0]));
                         }
                         let grandparent = parents.get(i - 1).unwrap();
-                        return match &grandparent.syntax {
+                        return match &grandparent.children {
                             PrefixUnaryExpression(x)
-                                if Self::token_kind(&x.prefix_unary_operator)
-                                    == Some(TokenKind::At) =>
+                                if Self::token_kind(&x.operator) == Some(TokenKind::At) =>
                             {
                                 Some((grandparent, &parents[..i - 1]))
                             }
@@ -2210,11 +2162,11 @@ where
                     }
                     match parents.last() {
                         None => LvalTypeNonFinalInout,
-                        Some(parent) => match &parent.syntax {
+                        Some(parent) => match &parent.children {
                             BinaryExpression(x)
-                                if call_node as *const _ == &x.binary_right_operand as *const _
+                                if call_node as *const _ == &x.right_operand as *const _
                                     && Self::does_binop_create_write_on_left(Self::token_kind(
-                                        &x.binary_operator,
+                                        &x.operator,
                                     )) =>
                             {
                                 if is_in_final_lval_position(parent, &parents[..parents.len() - 1])
@@ -2230,26 +2182,24 @@ where
                 }
             };
 
-        let unary_expression_operator = |x: &'a Syntax<Token, Value>| match &x.syntax {
-            PrefixUnaryExpression(x) => &x.prefix_unary_operator,
-            PostfixUnaryExpression(x) => &x.postfix_unary_operator,
+        let unary_expression_operator = |x: S<'a, Token, Value>| match &x.children {
+            PrefixUnaryExpression(x) => &x.operator,
+            PostfixUnaryExpression(x) => &x.operator,
             _ => panic!("expected expression operator"),
         };
 
-        let unary_expression_operand = |x: &'a Syntax<Token, Value>| match &x.syntax {
-            PrefixUnaryExpression(x) => &x.prefix_unary_operand,
-            PostfixUnaryExpression(x) => &x.postfix_unary_operand,
+        let unary_expression_operand = |x: S<'a, Token, Value>| match &x.children {
+            PrefixUnaryExpression(x) => &x.operand,
+            PostfixUnaryExpression(x) => &x.operand,
             _ => panic!("expected expression operator"),
         };
 
         if let Some(next_node) = parents.last() {
             let parents = &parents[..parents.len() - 1];
-            match &next_node.syntax {
+            match &next_node.children {
                 DecoratedExpression(x)
-                    if node as *const _ == &x.decorated_expression_expression as *const _
-                        && Self::does_decorator_create_write(Self::token_kind(
-                            &x.decorated_expression_decorator,
-                        )) =>
+                    if node as *const _ == &x.expression as *const _
+                        && Self::does_decorator_create_write(Self::token_kind(&x.decorator)) =>
                 {
                     lval_ness_of_function_arg_for_inout(next_node, parents)
                 }
@@ -2266,10 +2216,8 @@ where
                     }
                 }
                 BinaryExpression(x)
-                    if node as *const _ == &x.binary_left_operand as *const _
-                        && Self::does_binop_create_write_on_left(Self::token_kind(
-                            &x.binary_operator,
-                        )) =>
+                    if node as *const _ == &x.left_operand as *const _
+                        && Self::does_binop_create_write_on_left(Self::token_kind(&x.operator)) =>
                 {
                     if is_in_final_lval_position(next_node, parents) {
                         LvalTypeFinal
@@ -2278,8 +2226,8 @@ where
                     }
                 }
                 ForeachStatement(x)
-                    if node as *const _ == &x.foreach_key as *const _
-                        || node as *const _ == &x.foreach_value as *const _ =>
+                    if node as *const _ == &x.key as *const _
+                        || node as *const _ == &x.value as *const _ =>
                 {
                     LvalTypeFinal
                 }
@@ -2290,7 +2238,7 @@ where
         }
     }
 
-    fn lval_errors(&mut self, syntax_node: &'a Syntax<Token, Value>) {
+    fn lval_errors(&mut self, syntax_node: S<'a, Token, Value>) {
         if self.env.parser_options.po_disable_lval_as_an_expression {
             if let LvalTypeNonFinal = Self::node_lval_type(syntax_node, &self.parents) {
                 self.errors.push(Self::make_error_from_node(
@@ -2301,21 +2249,21 @@ where
         }
     }
 
-    fn parameter_errors(&mut self, node: &'a Syntax<Token, Value>) {
+    fn parameter_errors(&mut self, node: S<'a, Token, Value>) {
         let param_errors = |self_: &mut Self, params| {
             for x in Self::syntax_to_list_no_separators(params) {
                 self_.parameter_rx_errors(x)
             }
             self_.params_errors(params)
         };
-        match &node.syntax {
+        match &node.children {
             ParameterDeclaration(p) => {
                 let callconv_text = self.text(Self::extract_callconv_node(node).unwrap_or(node));
                 self.produce_error_from_check(&Self::param_with_callconv_has_default, node, || {
                     errors::error2074(callconv_text)
                 });
                 self.parameter_rx_errors(node);
-                self.check_type_hint(&p.parameter_type);
+                self.check_type_hint(&p.type_);
 
                 if let Some(inout_modifier) = Self::parameter_callconv(node) {
                     if self.is_inside_async_method() {
@@ -2346,12 +2294,12 @@ where
                     }
                 }
             }
-            FunctionDeclarationHeader(x) => param_errors(self, &x.function_parameter_list),
-            AnonymousFunction(x) => param_errors(self, &x.anonymous_parameters),
-            ClosureTypeSpecifier(x) => param_errors(self, &x.closure_parameter_list),
+            FunctionDeclarationHeader(x) => param_errors(self, &x.parameter_list),
+            AnonymousFunction(x) => param_errors(self, &x.parameters),
+            ClosureTypeSpecifier(x) => param_errors(self, &x.parameter_list),
             LambdaExpression(x) => {
-                if let LambdaSignature(x) = &x.lambda_signature.syntax {
-                    param_errors(self, &x.lambda_parameters)
+                if let LambdaSignature(x) = &x.signature.children {
+                    param_errors(self, &x.parameters)
                 }
             }
             DecoratedExpression(_) => self.decoration_errors(node),
@@ -2360,22 +2308,18 @@ where
     }
 
     // Only check the functions; invalid attributes on methods (like <<__EntryPoint>>) are caught elsewhere
-    fn multiple_entrypoint_attribute_errors(&mut self, node: &'a Syntax<Token, Value>) {
-        match &node.syntax {
+    fn multiple_entrypoint_attribute_errors(&mut self, node: S<'a, Token, Value>) {
+        match &node.children {
             FunctionDeclaration(f)
                 if self.attribute_specification_contains(
-                    &f.function_attribute_spec,
+                    &f.attribute_spec,
                     sn::user_attributes::ENTRY_POINT,
                 ) =>
             {
                 // Get the location of the <<...>> annotation
-                let location = match &f.function_attribute_spec.syntax {
-                    AttributeSpecification(x) => {
-                        Self::make_location_of_node(&x.attribute_specification_attributes)
-                    }
-                    OldAttributeSpecification(x) => {
-                        Self::make_location_of_node(&x.old_attribute_specification_attributes)
-                    }
+                let location = match &f.attribute_spec.children {
+                    AttributeSpecification(x) => Self::make_location_of_node(&x.attributes),
+                    OldAttributeSpecification(x) => Self::make_location_of_node(&x.attributes),
                     _ => panic!("Expected attribute specification node"),
                 };
                 let def = make_first_use_or_def(
@@ -2409,9 +2353,9 @@ where
         }
     }
 
-    fn redeclaration_errors(&mut self, node: &'a Syntax<Token, Value>) {
-        match &node.syntax {
-            FunctionDeclarationHeader(f) if !f.function_name.is_missing() => {
+    fn redeclaration_errors(&mut self, node: S<'a, Token, Value>) {
+        match &node.children {
+            FunctionDeclarationHeader(f) if !f.name.is_missing() => {
                 let mut it = self.parents.iter().rev();
                 let p1 = it.next();
                 let _ = it.next();
@@ -2420,18 +2364,18 @@ where
                 match (p1, p3, p4) {
                     (
                         Some(Syntax {
-                            syntax: FunctionDeclaration(_),
+                            children: FunctionDeclaration(_),
                             ..
                         }),
                         Some(Syntax {
-                            syntax: NamespaceBody(_),
+                            children: NamespaceBody(_),
                             ..
                         }),
                         _,
                     )
                     | (
                         Some(Syntax {
-                            syntax: FunctionDeclaration(_),
+                            children: FunctionDeclaration(_),
                             ..
                         }),
                         _,
@@ -2439,7 +2383,7 @@ where
                     )
                     | (
                         Some(Syntax {
-                            syntax: MethodishDeclaration(_),
+                            children: MethodishDeclaration(_),
                             ..
                         }),
                         _,
@@ -2447,17 +2391,17 @@ where
                     )
                     | (
                         Some(Syntax {
-                            syntax: MethodishTraitResolution(_),
+                            children: MethodishTraitResolution(_),
                             ..
                         }),
                         _,
                         _,
                     ) => {
-                        let function_name = self.text(&f.function_name);
-                        let location = Self::make_location_of_node(&f.function_name);
+                        let function_name: &str = self.text(&f.name);
+                        let location = Self::make_location_of_node(&f.name);
                         let is_method = match p1 {
                             Some(Syntax {
-                                syntax: MethodishDeclaration(_),
+                                children: MethodishDeclaration(_),
                                 ..
                             }) => true,
                             _ => false,
@@ -2505,7 +2449,7 @@ where
                                 let line_num = line_num as usize;
 
                                 self.errors.push(Self::make_name_already_used_error(
-                                    &f.function_name,
+                                    &f.name,
                                     &combine_names(&self.namespace_name, &function_name),
                                     &function_name,
                                     &def.location,
@@ -2527,40 +2471,38 @@ where
         }
     }
 
-    fn is_foreach_in_for(for_initializer: &'a Syntax<Token, Value>) -> bool {
+    fn is_foreach_in_for(for_initializer: S<'a, Token, Value>) -> bool {
         if let Some(Syntax {
-            syntax: ListItem(x),
+            children: ListItem(x),
             ..
         }) = for_initializer.syntax_node_to_list().next()
         {
-            x.list_item.is_as_expression()
+            x.item.is_as_expression()
         } else {
             false
         }
     }
 
-    fn statement_errors(&mut self, node: &'a Syntax<Token, Value>) {
-        let expect_colon = |colon: &'a Syntax<Token, Value>| match &colon.syntax {
+    fn statement_errors(&mut self, node: S<'a, Token, Value>) {
+        let expect_colon = |colon: S<'a, Token, Value>| match &colon.children {
             Token(m) if self.env.is_typechecker() && m.kind() != TokenKind::Colon => {
                 Some((colon, errors::error1020))
             }
             _ => None,
         };
-        (match &node.syntax {
-            TryStatement(x)
-                if x.try_catch_clauses.is_missing() && x.try_finally_clause.is_missing() =>
-            {
+        (match &node.children {
+            TryStatement(x) if x.catch_clauses.is_missing() && x.finally_clause.is_missing() => {
                 Some((node, errors::error2007))
             }
             UsingStatementFunctionScoped(_) if !self.using_statement_function_scoped_is_legal() => {
                 Some((node, errors::using_st_function_scoped_top_level))
             }
-            ForStatement(x) if Self::is_foreach_in_for(&x.for_initializer) => {
+            ForStatement(x) if Self::is_foreach_in_for(&x.initializer) => {
                 Some((node, errors::for_with_as_expression))
             }
-            CaseLabel(x) => expect_colon(&x.case_colon),
+            CaseLabel(x) => expect_colon(&x.colon),
 
-            DefaultLabel(x) => expect_colon(&x.default_colon),
+            DefaultLabel(x) => expect_colon(&x.colon),
             _ => None,
         })
         .into_iter()
@@ -2570,10 +2512,10 @@ where
         })
     }
 
-    fn invalid_shape_initializer_name(&mut self, node: &'a Syntax<Token, Value>) {
-        match &node.syntax {
+    fn invalid_shape_initializer_name(&mut self, node: S<'a, Token, Value>) {
+        match &node.children {
             LiteralExpression(x) => {
-                let is_str = match Self::token_kind(&x.literal_expression) {
+                let is_str = match Self::token_kind(&x.expression) {
                     Some(TokenKind::SingleQuotedStringLiteral) => true,
 
                     // TODO: Double quoted string are only legal
@@ -2612,9 +2554,9 @@ where
         }
     }
 
-    fn invalid_shape_field_check(&mut self, node: &'a Syntax<Token, Value>) {
-        if let FieldInitializer(x) = &node.syntax {
-            self.invalid_shape_initializer_name(&x.field_initializer_name)
+    fn invalid_shape_field_check(&mut self, node: S<'a, Token, Value>) {
+        if let FieldInitializer(x) = &node.children {
+            self.invalid_shape_initializer_name(&x.name)
         } else {
             self.errors.push(Self::make_error_from_node(
                 node,
@@ -2633,16 +2575,14 @@ where
         })
     }
 
-    fn check_disallowed_variables(&mut self, node: &'a Syntax<Token, Value>) {
-        match &node.syntax {
+    fn check_disallowed_variables(&mut self, node: S<'a, Token, Value>) {
+        match &node.children {
             VariableExpression(x) => {
                 // TODO(T75820862): Allow $GLOBALS to be used as a variable name
-                if self.text(&x.variable_expression) == sn::superglobals::GLOBALS {
+                if self.text(&x.expression) == sn::superglobals::GLOBALS {
                     self.errors
                         .push(Self::make_error_from_node(node, errors::globals_disallowed))
-                } else if self.text(&x.variable_expression) == sn::special_idents::THIS
-                    && !self.has_this()
-                {
+                } else if self.text(&x.expression) == sn::special_idents::THIS && !self.has_this() {
                     // If we are in the special top level debugger function, lets not check for $this since
                     // it will be properly lifted in closure convert
                     if self
@@ -2659,13 +2599,13 @@ where
         }
     }
 
-    fn unset_errors(&mut self, node: &'a Syntax<Token, Value>) {
-        match &node.syntax {
+    fn unset_errors(&mut self, node: S<'a, Token, Value>) {
+        match &node.children {
             UnsetStatement(x) => {
-                for expr in Self::syntax_to_list_no_separators(&x.unset_variables) {
-                    match &expr.syntax {
+                for expr in Self::syntax_to_list_no_separators(&x.variables) {
+                    match &expr.children {
                         VariableExpression(x)
-                            if self.text(&x.variable_expression) == sn::special_idents::THIS =>
+                            if self.text(&x.expression) == sn::special_idents::THIS =>
                         {
                             self.errors
                                 .push(Self::make_error_from_node(node, errors::cannot_unset_this))
@@ -2682,20 +2622,18 @@ where
     fn function_call_argument_errors(
         &mut self,
         in_constructor_call: bool,
-        node: &'a Syntax<Token, Value>,
+        node: S<'a, Token, Value>,
     ) {
-        if let Some(e) = match &node.syntax {
+        if let Some(e) = match &node.children {
             DecoratedExpression(x) => {
-                if let Token(token) = &x.decorated_expression_decorator.syntax {
+                if let Token(token) = &x.decorator.children {
                     if token.kind() == TokenKind::Inout {
-                        let expression = &x.decorated_expression_expression;
-                        match &expression.syntax {
+                        let expression = &x.expression;
+                        match &expression.children {
                             _ if in_constructor_call => Some(errors::inout_param_in_construct),
                             VariableExpression(x)
-                                if sn::superglobals::is_any_global(
-                                    self.text(&x.variable_expression),
-                                ) || self.text(&x.variable_expression)
-                                    == sn::special_idents::THIS =>
+                                if sn::superglobals::is_any_global(self.text(&x.expression))
+                                    || self.text(&x.expression) == sn::special_idents::THIS =>
                             {
                                 Some(errors::fun_arg_invalid_arg)
                             }
@@ -2708,12 +2646,12 @@ where
                             | FunctionCallExpression(_)
                             | MemberSelectionExpression(_)
                             | SafeMemberSelectionExpression(_) => Some(errors::fun_arg_invalid_arg),
-                            SubscriptExpression(x) => match &x.subscript_receiver.syntax {
+                            SubscriptExpression(x) => match &x.receiver.children {
                                 MemberSelectionExpression(_) | ScopeResolutionExpression(_) => {
                                     Some(errors::fun_arg_invalid_arg)
                                 }
                                 _ => {
-                                    let text = self.text(&x.subscript_receiver);
+                                    let text = self.text(&x.receiver);
                                     if sn::superglobals::is_any_global(text) {
                                         Some(errors::fun_arg_inout_containers)
                                     } else {
@@ -2736,41 +2674,36 @@ where
         }
     }
 
-    fn function_call_on_xhp_name_errors(&mut self, node: &'a Syntax<Token, Value>) {
-        let check = |
-            self_: &mut Self,
-            member_object: &'a Syntax<Token, Value>,
-            name: &'a Syntax<Token, Value>,
-        | {
-            if let XHPExpression(_) = &member_object.syntax {
-                if self_.env.is_typechecker() {
-                    self_.errors.push(Self::make_error_from_node(
-                        node,
-                        errors::method_calls_on_xhp_expression,
-                    ))
+    fn function_call_on_xhp_name_errors(&mut self, node: S<'a, Token, Value>) {
+        let check =
+            |self_: &mut Self, member_object: S<'a, Token, Value>, name: S<'a, Token, Value>| {
+                if let XHPExpression(_) = &member_object.children {
+                    if self_.env.is_typechecker() {
+                        self_.errors.push(Self::make_error_from_node(
+                            node,
+                            errors::method_calls_on_xhp_expression,
+                        ))
+                    }
                 }
-            }
 
-            if let Token(token) = &name.syntax {
-                if token.kind() == TokenKind::XHPClassName {
-                    self_.errors.push(Self::make_error_from_node(
-                        node,
-                        errors::method_calls_on_xhp_attributes,
-                    ))
+                if let Token(token) = &name.children {
+                    if token.kind() == TokenKind::XHPClassName {
+                        self_.errors.push(Self::make_error_from_node(
+                            node,
+                            errors::method_calls_on_xhp_attributes,
+                        ))
+                    }
                 }
-            }
-        };
-        match &node.syntax {
-            MemberSelectionExpression(x) => check(self, &x.member_object, &x.member_name),
-            SafeMemberSelectionExpression(x) => {
-                check(self, &x.safe_member_object, &x.safe_member_name)
-            }
+            };
+        match &node.children {
+            MemberSelectionExpression(x) => check(self, &x.object, &x.name),
+            SafeMemberSelectionExpression(x) => check(self, &x.object, &x.name),
             _ => {}
         }
     }
 
-    fn no_async_before_lambda_body(&mut self, body_node: &'a Syntax<Token, Value>) {
-        if let AwaitableCreationExpression(_) = &body_node.syntax {
+    fn no_async_before_lambda_body(&mut self, body_node: S<'a, Token, Value>) {
+        if let AwaitableCreationExpression(_) = &body_node.children {
             if self.env.is_typechecker() {
                 self.errors.push(Self::make_error_from_node(
                     body_node,
@@ -2780,8 +2713,8 @@ where
         }
     }
 
-    fn no_memoize_attribute_on_lambda(&mut self, node: &'a Syntax<Token, Value>) {
-        match &node.syntax {
+    fn no_memoize_attribute_on_lambda(&mut self, node: S<'a, Token, Value>) {
+        match &node.children {
             OldAttributeSpecification(_) | AttributeSpecification(_) => {
                 for node in Self::attr_spec_to_node_list(node) {
                     match self.attr_name(node) {
@@ -2802,8 +2735,8 @@ where
         }
     }
 
-    fn is_good_scope_resolution_qualifier(node: &'a Syntax<Token, Value>) -> bool {
-        match &node.syntax {
+    fn is_good_scope_resolution_qualifier(node: S<'a, Token, Value>) -> bool {
+        match &node.children {
             QualifiedName(_) => true,
             Token(token) => match token.kind() {
                 TokenKind::XHPClassName
@@ -2817,21 +2750,17 @@ where
         }
     }
 
-    fn new_variable_errors_(
-        &mut self,
-        node: &'a Syntax<Token, Value>,
-        inside_scope_resolution: bool,
-    ) {
-        match &node.syntax {
+    fn new_variable_errors_(&mut self, node: S<'a, Token, Value>, inside_scope_resolution: bool) {
+        match &node.children {
             SimpleTypeSpecifier(_)
             | VariableExpression(_)
             | GenericTypeSpecifier(_)
             | PipeVariableExpression(_) => {}
-            SubscriptExpression(x) if x.subscript_index.is_missing() => self.errors.push(
+            SubscriptExpression(x) if x.index.is_missing() => self.errors.push(
                 Self::make_error_from_node(node, errors::instanceof_missing_subscript_index),
             ),
             SubscriptExpression(x) => {
-                self.new_variable_errors_(&x.subscript_receiver, inside_scope_resolution)
+                self.new_variable_errors_(&x.receiver, inside_scope_resolution)
             }
             MemberSelectionExpression(x) => {
                 if inside_scope_resolution {
@@ -2840,17 +2769,17 @@ where
                         errors::instanceof_memberselection_inside_scoperesolution,
                     ))
                 } else {
-                    self.new_variable_errors_(&x.member_object, inside_scope_resolution)
+                    self.new_variable_errors_(&x.object, inside_scope_resolution)
                 }
             }
             ScopeResolutionExpression(x) => {
-                if let Token(name) = &x.scope_resolution_name.syntax {
-                    if Self::is_good_scope_resolution_qualifier(&x.scope_resolution_qualifier)
+                if let Token(name) = &x.name.children {
+                    if Self::is_good_scope_resolution_qualifier(&x.qualifier)
                         && name.kind() == TokenKind::Variable
                     {
                         // OK
                     } else if name.kind() == TokenKind::Variable {
-                        self.new_variable_errors_(&x.scope_resolution_qualifier, true)
+                        self.new_variable_errors_(&x.qualifier, true)
                     } else {
                         self.errors.push(Self::make_error_from_node(
                             node,
@@ -2873,13 +2802,13 @@ where
         }
     }
 
-    fn new_variable_errors(&mut self, node: &'a Syntax<Token, Value>) {
+    fn new_variable_errors(&mut self, node: S<'a, Token, Value>) {
         self.new_variable_errors_(node, false)
     }
 
-    fn class_type_designator_errors(&mut self, node: &'a Syntax<Token, Value>) {
+    fn class_type_designator_errors(&mut self, node: S<'a, Token, Value>) {
         if !Self::is_good_scope_resolution_qualifier(node) {
-            match &node.syntax {
+            match &node.children {
                 ParenthesizedExpression(_) => {}
                 _ => self.new_variable_errors(node),
             }
@@ -2888,13 +2817,13 @@ where
 
     fn rec_walk_impl<F, X>(
         &self,
-        parents: &mut Vec<&'a Syntax<Token, Value>>,
+        parents: &mut Vec<S<'a, Token, Value>>,
         f: &F,
-        node: &'a Syntax<Token, Value>,
+        node: S<'a, Token, Value>,
         mut acc: X,
     ) -> X
     where
-        F: Fn(&'a Syntax<Token, Value>, &Vec<&'a Syntax<Token, Value>>, X) -> (bool, X),
+        F: Fn(S<'a, Token, Value>, &Vec<S<'a, Token, Value>>, X) -> (bool, X),
     {
         let (continue_walk, new_acc) = f(node, parents, acc);
         acc = new_acc;
@@ -2908,16 +2837,16 @@ where
         acc
     }
 
-    fn rec_walk<F, X>(&self, f: F, node: &'a Syntax<Token, Value>, acc: X) -> X
+    fn rec_walk<F, X>(&self, f: F, node: S<'a, Token, Value>, acc: X) -> X
     where
-        F: Fn(&'a Syntax<Token, Value>, &Vec<&'a Syntax<Token, Value>>, X) -> (bool, X),
+        F: Fn(S<'a, Token, Value>, &Vec<S<'a, Token, Value>>, X) -> (bool, X),
     {
         self.rec_walk_impl(&mut vec![], &f, node, acc)
     }
 
-    fn find_invalid_lval_usage(&self, node: &'a Syntax<Token, Value>) -> Vec<SyntaxError> {
+    fn find_invalid_lval_usage(&self, node: S<'a, Token, Value>) -> Vec<SyntaxError> {
         self.rec_walk(
-            |node, parents, mut acc| match &node.syntax {
+            |node, parents, mut acc| match &node.children {
                 AnonymousFunction(_) | LambdaExpression(_) | AwaitableCreationExpression(_) => {
                     (false, acc)
                 }
@@ -2956,9 +2885,7 @@ where
         })
     }
 
-    fn get_positions_binop_allows_await(
-        t: &'a Syntax<Token, Value>,
-    ) -> BinopAllowsAwaitInPositions {
+    fn get_positions_binop_allows_await(t: S<'a, Token, Value>) -> BinopAllowsAwaitInPositions {
         use TokenKind::*;
         match Self::token_kind(t) {
             None => BinopAllowAwaitNone,
@@ -3005,7 +2932,7 @@ where
         }
     }
 
-    fn unop_allows_await(t: &'a Syntax<Token, Value>) -> bool {
+    fn unop_allows_await(t: S<'a, Token, Value>) -> bool {
         use TokenKind::*;
         Self::token_kind(t).map_or(false, |t| match t {
             Exclamation | Tilde | Plus | Minus | At | Clone | Print => true,
@@ -3013,7 +2940,7 @@ where
         })
     }
 
-    fn await_as_an_expression_errors(&mut self, await_node: &'a Syntax<Token, Value>) {
+    fn await_as_an_expression_errors(&mut self, await_node: S<'a, Token, Value>) {
         let mut prev = None;
         let mut node = await_node;
         for n in self.parents.iter().rev() {
@@ -3021,33 +2948,31 @@ where
                 node = prev;
             }
             prev = Some(n);
-            match &n.syntax {
+            match &n.children {
                 // statements that root for the concurrently executed await expressions
                 ExpressionStatement(_)
                 | ReturnStatement(_)
                 | UnsetStatement(_)
                 | EchoStatement(_)
                 | ThrowStatement(_) => break,
-                IfStatement(x) if node as *const _ == &x.if_condition as *const _ => break,
-                ForStatement(x) if node as *const _ == &x.for_initializer as *const _ => break,
-                SwitchStatement(x) if node as *const _ == &x.switch_expression as *const _ => break,
-                ForeachStatement(x) if node as *const _ == &x.foreach_collection as *const _ => {
+                IfStatement(x) if node as *const _ == &x.condition as *const _ => break,
+                ForStatement(x) if node as *const _ == &x.initializer as *const _ => break,
+                SwitchStatement(x) if node as *const _ == &x.expression as *const _ => break,
+                ForeachStatement(x) if node as *const _ == &x.collection as *const _ => {
                     break;
                 }
-                UsingStatementBlockScoped(x)
-                    if node as *const _ == &x.using_block_expressions as *const _ =>
-                {
+                UsingStatementBlockScoped(x) if node as *const _ == &x.expressions as *const _ => {
                     break;
                 }
                 UsingStatementFunctionScoped(x)
-                    if node as *const _ == &x.using_function_expression as *const _ =>
+                    if node as *const _ == &x.expression as *const _ =>
                 {
                     break;
                 }
-                LambdaExpression(x) if node as *const _ == &x.lambda_body as *const _ => break,
+                LambdaExpression(x) if node as *const _ == &x.body as *const _ => break,
                 // Dependent awaits are not allowed currently
                 PrefixUnaryExpression(x)
-                    if Self::token_kind(&x.prefix_unary_operator) == Some(TokenKind::Await) =>
+                    if Self::token_kind(&x.operator) == Some(TokenKind::Await) =>
                 {
                     self.errors.push(Self::make_error_from_node(
                         await_node,
@@ -3056,22 +2981,19 @@ where
                     break;
                 }
                 // Unary based expressions have their own custom fanout
-                PrefixUnaryExpression(x) if Self::unop_allows_await(&x.prefix_unary_operator) => {
+                PrefixUnaryExpression(x) if Self::unop_allows_await(&x.operator) => {
                     continue;
                 }
-                PostfixUnaryExpression(x) if Self::unop_allows_await(&x.postfix_unary_operator) => {
+                PostfixUnaryExpression(x) if Self::unop_allows_await(&x.operator) => {
                     continue;
                 }
-                DecoratedExpression(x)
-                    if Self::unop_allows_await(&x.decorated_expression_decorator) =>
-                {
+                DecoratedExpression(x) if Self::unop_allows_await(&x.decorator) => {
                     continue;
                 }
                 // Special case the pipe operator error message
                 BinaryExpression(x)
-                    if node as *const _ == &x.binary_right_operand as *const _
-                        && Self::token_kind(&x.binary_operator)
-                            == Some(TokenKind::BarGreaterThan) =>
+                    if node as *const _ == &x.right_operand as *const _
+                        && Self::token_kind(&x.operator) == Some(TokenKind::BarGreaterThan) =>
                 {
                     self.errors.push(Self::make_error_from_node(
                         await_node,
@@ -3083,14 +3005,10 @@ where
                 // if operator is not short-circuiting and containing expression
                 // is in legal location
                 BinaryExpression(x)
-                    if (match Self::get_positions_binop_allows_await(&x.binary_operator) {
+                    if (match Self::get_positions_binop_allows_await(&x.operator) {
                         BinopAllowAwaitBoth => true,
-                        BinopAllowAwaitLeft => {
-                            node as *const _ == &x.binary_left_operand as *const _
-                        }
-                        BinopAllowAwaitRight => {
-                            node as *const _ == &x.binary_right_operand as *const _
-                        }
+                        BinopAllowAwaitLeft => node as *const _ == &x.left_operand as *const _,
+                        BinopAllowAwaitRight => node as *const _ == &x.right_operand as *const _,
                         BinopAllowAwaitNone => false,
                     }) =>
                 {
@@ -3098,24 +3016,20 @@ where
                 }
                 // test part of conditional expression is considered legal location if
                 //  onditional expression itself is in legal location
-                ConditionalExpression(x) if node as *const _ == &x.conditional_test as *const _ => {
+                ConditionalExpression(x) if node as *const _ == &x.test as *const _ => {
                     continue;
                 }
                 FunctionCallExpression(x)
-                    if node as *const _ == &x.function_call_receiver as *const _
-                        || node as *const _ == &x.function_call_argument_list as *const _
-                            && !x
-                                .function_call_receiver
-                                .is_safe_member_selection_expression() =>
+                    if node as *const _ == &x.receiver as *const _
+                        || node as *const _ == &x.argument_list as *const _
+                            && !x.receiver.is_safe_member_selection_expression() =>
                 {
                     continue;
                 }
 
                 // object of member selection expression or safe member selection expression
                 // is in legal position if member selection expression itself is in legal position
-                SafeMemberSelectionExpression(x)
-                    if node as *const _ == &x.safe_member_object as *const _ =>
-                {
+                SafeMemberSelectionExpression(x) if node as *const _ == &x.object as *const _ => {
                     continue;
                 }
 
@@ -3166,7 +3080,7 @@ where
             .parents
             .iter()
             .rev()
-            .any(|parent| match &parent.syntax {
+            .any(|parent| match &parent.children {
                 ConcurrentStatement(_) => true,
                 _ => false,
             });
@@ -3175,7 +3089,7 @@ where
                 self.parents
                     .iter()
                     .rev()
-                    .find(|parent| match &parent.syntax {
+                    .find(|parent| match &parent.children {
                         ExpressionStatement(_)
                         | ReturnStatement(_)
                         | UnsetStatement(_)
@@ -3197,12 +3111,12 @@ where
         }
     }
 
-    fn check_prefix_unary_dollar(node: &'a Syntax<Token, Value>) -> bool {
-        match &node.syntax {
+    fn check_prefix_unary_dollar(node: S<'a, Token, Value>) -> bool {
+        match &node.children {
             PrefixUnaryExpression(x)
-                if Self::token_kind(&x.prefix_unary_operator) == Some(TokenKind::Dollar) =>
+                if Self::token_kind(&x.operator) == Some(TokenKind::Dollar) =>
             {
-                Self::check_prefix_unary_dollar(&x.prefix_unary_operand)
+                Self::check_prefix_unary_dollar(&x.operand)
             }
             BracedExpression(_) | SubscriptExpression(_) | VariableExpression(_) => false, // these ones are valid
             LiteralExpression(_) | PipeVariableExpression(_) => false, // these ones get caught later
@@ -3210,10 +3124,10 @@ where
         }
     }
 
-    fn node_has_await_child(&mut self, node: &'a Syntax<Token, Value>) -> bool {
+    fn node_has_await_child(&mut self, node: S<'a, Token, Value>) -> bool {
         self.rec_walk(
             |node, _parents, acc| {
-                let is_new_scope = match &node.syntax {
+                let is_new_scope = match &node.children {
                     AnonymousFunction(_) | LambdaExpression(_) | AwaitableCreationExpression(_) => {
                         true
                     }
@@ -3222,10 +3136,9 @@ where
                 if is_new_scope {
                     (false, false)
                 } else {
-                    let is_await = |n: &'a Syntax<Token, Value>| match &n.syntax {
+                    let is_await = |n: S<'a, Token, Value>| match &n.children {
                         PrefixUnaryExpression(x)
-                            if Self::token_kind(&x.prefix_unary_operator)
-                                == Some(TokenKind::Await) =>
+                            if Self::token_kind(&x.operator) == Some(TokenKind::Await) =>
                         {
                             true
                         }
@@ -3240,13 +3153,13 @@ where
         )
     }
 
-    fn expression_errors(&mut self, node: &'a Syntax<Token, Value>) {
-        let check_is_as_expression = |self_: &mut Self, hint: &'a Syntax<Token, Value>| {
-            let n = match &node.syntax {
+    fn expression_errors(&mut self, node: S<'a, Token, Value>) {
+        let check_is_as_expression = |self_: &mut Self, hint: S<'a, Token, Value>| {
+            let n = match &node.children {
                 IsExpression(_) => "is",
                 _ => "as",
             };
-            match &hint.syntax {
+            match &hint.children {
                 ClosureTypeSpecifier(_) if self_.env.is_hhvm_compat() => {
                     self_.errors.push(Self::make_error_from_node(
                         hint,
@@ -3260,10 +3173,7 @@ where
                     ));
                 }
                 AttributizedSpecifier(x)
-                    if self_.attribute_specification_contains(
-                        &x.attributized_specifier_attribute_spec,
-                        "__Soft",
-                    ) =>
+                    if self_.attribute_specification_contains(&x.attribute_spec, "__Soft") =>
                 {
                     self_.errors.push(Self::make_error_from_node(
                         hint,
@@ -3273,18 +3183,16 @@ where
                 _ => {}
             }
         };
-        match &node.syntax {
+        match &node.children {
             // We parse the right hand side of `new` as a generic expression, but PHP
             // (and therefore Hack) only allow a certain subset of expressions, so we
             // should verify here that the expression we parsed is in that subset.
             // Refer: https://github.com/php/php-langspec/blob/master/spec/10-expressions.md#instanceof-operator*)
             ConstructorCall(ctr_call) => {
-                for p in
-                    Self::syntax_to_list_no_separators(&ctr_call.constructor_call_argument_list)
-                {
+                for p in Self::syntax_to_list_no_separators(&ctr_call.argument_list) {
                     self.function_call_argument_errors(true, p);
                 }
-                self.class_type_designator_errors(&ctr_call.constructor_call_type);
+                self.class_type_designator_errors(&ctr_call.type_);
                 if self.env.is_typechecker() {
                     // attr or list item -> syntax list -> attribute
                     match self.parents.iter().rev().nth(2) {
@@ -3296,11 +3204,10 @@ where
                             ()
                         }
                         _ => {
-                            if ctr_call.constructor_call_left_paren.is_missing()
-                                || ctr_call.constructor_call_right_paren.is_missing()
+                            if ctr_call.left_paren.is_missing() || ctr_call.right_paren.is_missing()
                             {
-                                let node = &ctr_call.constructor_call_type;
-                                let constructor_name = self.text(&ctr_call.constructor_call_type);
+                                let node = &ctr_call.type_;
+                                let constructor_name = self.text(&ctr_call.type_);
                                 self.errors.push(Self::make_error_from_node(
                                     node,
                                     errors::error2038(constructor_name),
@@ -3311,11 +3218,11 @@ where
                 };
             }
             LiteralExpression(x) => {
-                if let Token(token) = &x.literal_expression.syntax {
+                if let Token(token) = &x.expression.children {
                     if token.kind() == TokenKind::DecimalLiteral
                         || token.kind() == TokenKind::DecimalLiteral
                     {
-                        let text = self.text(&x.literal_expression);
+                        let text = self.text(&x.expression);
                         if text.parse::<i64>().is_err() {
                             let error_text = if token.kind() == TokenKind::DecimalLiteral {
                                 errors::error2071(text)
@@ -3330,14 +3237,14 @@ where
             }
 
             SubscriptExpression(x)
-                if self.env.is_typechecker() && x.subscript_left_bracket.is_left_brace() =>
+                if self.env.is_typechecker() && x.left_bracket.is_left_brace() =>
             {
                 self.errors
                     .push(Self::make_error_from_node(node, errors::error2020))
             }
 
             FunctionCallExpression(x) => {
-                let arg_list = &x.function_call_argument_list;
+                let arg_list = &x.argument_list;
                 if let Some(h) = Self::misplaced_variadic_arg(arg_list) {
                     self.errors
                         .push(Self::make_error_from_node(h, errors::error2033))
@@ -3347,7 +3254,7 @@ where
                     self.function_call_argument_errors(false, p)
                 }
 
-                let recv = &x.function_call_receiver;
+                let recv = &x.receiver;
 
                 self.function_call_on_xhp_name_errors(recv);
 
@@ -3360,13 +3267,13 @@ where
                     ))
                 }
             }
-            ListExpression(x) if x.list_members.is_missing() && self.env.is_hhvm_compat() => {
+            ListExpression(x) if x.members.is_missing() && self.env.is_hhvm_compat() => {
                 if let Some(Syntax {
-                    syntax: ForeachStatement(x),
+                    children: ForeachStatement(x),
                     ..
                 }) = self.parents.last()
                 {
-                    if node as *const _ == &x.foreach_value as *const _ {
+                    if node as *const _ == &x.value as *const _ {
                         self.errors.push(Self::make_error_from_node_with_type(
                             node,
                             errors::error2077,
@@ -3387,12 +3294,12 @@ where
                 }
             }
             ShapeExpression(x) => {
-                for f in Self::syntax_to_list_no_separators(&x.shape_expression_fields).rev() {
+                for f in Self::syntax_to_list_no_separators(&x.fields).rev() {
                     self.invalid_shape_field_check(f)
                 }
             }
             DecoratedExpression(x) => {
-                let decorator = &x.decorated_expression_decorator;
+                let decorator = &x.decorator;
                 if Self::token_kind(decorator) == Some(TokenKind::Await) {
                     self.await_as_an_expression_errors(node)
                 }
@@ -3425,14 +3332,14 @@ where
                 }
             }
             ScopeResolutionExpression(x) => {
-                let qualifier = &x.scope_resolution_qualifier;
-                let name = &x.scope_resolution_name;
+                let qualifier = &x.qualifier;
+                let name = &x.name;
 
                 let (is_dynamic_name, is_self_or_parent, is_valid) =
                 // PHP langspec allows string literals, variables
                 // qualified names, static, self and parent as valid qualifiers
                 // We do not allow string literals in hack
-                match (&qualifier.syntax, Self::token_kind(qualifier)) {
+                match (&qualifier.children, Self::token_kind(qualifier)) {
                     (LiteralExpression(_), _) => (false, false, false),
                     (QualifiedName(_), _) => (false, false, true),
                     (_, Some(TokenKind::Name))
@@ -3443,8 +3350,7 @@ where
                     }
                     // ${}::class
                     (PrefixUnaryExpression(x), _)
-                        if Self::token_kind(&x.prefix_unary_operator)
-                            == Some(TokenKind::Dollar) =>
+                        if Self::token_kind(&x.operator) == Some(TokenKind::Dollar) =>
                     {
                         (true, false, true)
                     }
@@ -3485,7 +3391,7 @@ where
             }
 
             PrefixUnaryExpression(x)
-                if Self::token_kind(&x.prefix_unary_operator) == Some(TokenKind::Dollar) =>
+                if Self::token_kind(&x.operator) == Some(TokenKind::Dollar) =>
             {
                 if Self::check_prefix_unary_dollar(node) {
                     self.errors
@@ -3496,32 +3402,31 @@ where
             // TODO(T21285960): Remove this bug-port, stemming from T22184312
             LambdaExpression(x)
                 if self.env.is_hhvm_compat()
-                    && !x.lambda_async.is_missing()
-                    && x.lambda_async.trailing_width() == 0
-                    && x.lambda_signature.leading_width() == 0 =>
+                    && !x.async_.is_missing()
+                    && x.async_.trailing_width() == 0
+                    && x.signature.leading_width() == 0 =>
             {
                 self.errors
                     .push(Self::make_error_from_node(node, errors::error1057("==>")))
             }
             // End of bug-port
-            IsExpression(x) => check_is_as_expression(self, &x.is_right_operand),
-            AsExpression(x) => check_is_as_expression(self, &x.as_right_operand),
+            IsExpression(x) => check_is_as_expression(self, &x.right_operand),
+            AsExpression(x) => check_is_as_expression(self, &x.right_operand),
 
             ConditionalExpression(x) => {
-                if x.conditional_consequence.is_missing() && self.env.is_typechecker() {
+                if x.consequence.is_missing() && self.env.is_typechecker() {
                     self.errors.push(Self::make_error_from_node(
                         node,
                         errors::elvis_operator_space,
                     ))
                 }
-                if x.conditional_test.is_conditional_expression() && self.env.is_typechecker() {
+                if x.test.is_conditional_expression() && self.env.is_typechecker() {
                     self.errors
                         .push(Self::make_error_from_node(node, errors::nested_ternary))
                 }
-                match &x.conditional_alternative.syntax {
+                match &x.alternative.children {
                     LambdaExpression(x)
-                        if x.lambda_body.is_conditional_expression()
-                            && self.env.is_typechecker() =>
+                        if x.body.is_conditional_expression() && self.env.is_typechecker() =>
                     {
                         self.errors
                             .push(Self::make_error_from_node(node, errors::nested_ternary))
@@ -3530,14 +3435,12 @@ where
                 }
             }
             LambdaExpression(x) => {
-                self.no_memoize_attribute_on_lambda(&x.lambda_attribute_spec);
-                self.no_async_before_lambda_body(&x.lambda_body);
+                self.no_memoize_attribute_on_lambda(&x.attribute_spec);
+                self.no_async_before_lambda_body(&x.body);
             }
-            AnonymousFunction(x) => {
-                self.no_memoize_attribute_on_lambda(&x.anonymous_attribute_spec)
-            }
+            AnonymousFunction(x) => self.no_memoize_attribute_on_lambda(&x.attribute_spec),
             AwaitableCreationExpression(x) => {
-                self.no_memoize_attribute_on_lambda(&x.awaitable_attribute_spec)
+                self.no_memoize_attribute_on_lambda(&x.attribute_spec)
             }
 
             CollectionLiteralExpression(x) => {
@@ -3548,8 +3451,8 @@ where
                 }
                 use Status::*;
 
-                let n = &x.collection_literal_name;
-                let initializers = &x.collection_literal_initializers;
+                let n = &x.name;
+                let initializers = &x.initializers;
 
                 let is_standard_collection = |lc_name: &str| {
                     lc_name.eq_ignore_ascii_case("pair")
@@ -3610,23 +3513,23 @@ where
                         _ => InvalidClass,
                     }
                 };
-                let status = match &n.syntax {
+                let status = match &n.children {
                     // non-qualified name
-                    SimpleTypeSpecifier(x) => match &x.simple_type_specifier.syntax {
-                        Token(t) => check_type_specifier(&x.simple_type_specifier, t),
-                        QualifiedName(x) => check_qualified_name(&x.qualified_name_parts),
+                    SimpleTypeSpecifier(x) => match &x.specifier.children {
+                        Token(t) => check_type_specifier(&x.specifier, t),
+                        QualifiedName(x) => check_qualified_name(&x.parts),
                         _ => InvalidClass,
                     },
-                    GenericTypeSpecifier(x) => match &x.generic_class_type.syntax {
-                        Token(t) => check_type_specifier(&x.generic_class_type, t),
-                        QualifiedName(x) => check_qualified_name(&x.qualified_name_parts),
+                    GenericTypeSpecifier(x) => match &x.class_type.children {
+                        Token(t) => check_type_specifier(&x.class_type, t),
+                        QualifiedName(x) => check_qualified_name(&x.parts),
                         _ => InvalidClass,
                     },
                     _ => InvalidClass,
                 };
 
-                let is_key_value = |s: &Syntax<Token, Value>| {
-                    if let ElementInitializer(_) = s.syntax {
+                let is_key_value = |s: &Syntax<'a, Token, Value>| {
+                    if let ElementInitializer(_) = s.children {
                         true
                     } else {
                         false
@@ -3679,9 +3582,7 @@ where
                     )),
                 }
             }
-            PrefixUnaryExpression(x)
-                if Self::token_kind(&x.prefix_unary_operator) == Some(TokenKind::Await) =>
-            {
+            PrefixUnaryExpression(x) if Self::token_kind(&x.operator) == Some(TokenKind::Await) => {
                 self.await_as_an_expression_errors(node)
             }
             // Other kinds of expressions currently produce no expr errors.
@@ -3692,7 +3593,7 @@ where
     fn check_repeated_properties_tconst_const(
         &mut self,
         full_name: &str,
-        prop: &'a Syntax<Token, Value>,
+        prop: S<'a, Token, Value>,
         p_names: &mut HashSet<String>,
         c_names: &mut HashSet<String>,
     ) {
@@ -3713,30 +3614,30 @@ where
             }
         };
 
-        match &prop.syntax {
+        match &prop.children {
             PropertyDeclaration(x) => {
-                for prop in Self::syntax_to_list_no_separators(&x.property_declarators) {
-                    if let PropertyDeclarator(x) = &prop.syntax {
-                        check(&x.property_name, p_names)
+                for prop in Self::syntax_to_list_no_separators(&x.declarators) {
+                    if let PropertyDeclarator(x) = &prop.children {
+                        check(&x.name, p_names)
                     }
                 }
             }
             ConstDeclaration(x) => {
-                for prop in Self::syntax_to_list_no_separators(&x.const_declarators) {
-                    if let ConstantDeclarator(x) = &prop.syntax {
-                        check(&x.constant_declarator_name, c_names)
+                for prop in Self::syntax_to_list_no_separators(&x.declarators) {
+                    if let ConstantDeclarator(x) = &prop.children {
+                        check(&x.name, c_names)
                     }
                 }
             }
-            TypeConstDeclaration(x) => check(&x.type_const_name, c_names),
+            TypeConstDeclaration(x) => check(&x.name, c_names),
             _ => {}
         }
     }
 
-    fn require_errors(&mut self, node: &'a Syntax<Token, Value>) {
-        if let RequireClause(p) = &node.syntax {
-            let name = self.text(&p.require_name);
-            let req_kind = Self::token_kind(&p.require_kind);
+    fn require_errors(&mut self, node: S<'a, Token, Value>) {
+        if let RequireClause(p) = &node.children {
+            let name = self.text(&p.name);
+            let req_kind = Self::token_kind(&p.kind);
             match (self.trait_require_clauses.get(name), req_kind) {
                 (None, Some(tk)) => self.trait_require_clauses.add(name, tk),
                 (Some(tk1), Some(tk2)) if *tk1 == tk2 =>
@@ -3760,12 +3661,7 @@ where
         }
     }
 
-    fn check_type_name(
-        &mut self,
-        name: &'a Syntax<Token, Value>,
-        name_text: &str,
-        location: Location,
-    ) {
+    fn check_type_name(&mut self, name: S<'a, Token, Value>, name_text: &str, location: Location) {
         match self.names.classes.get(name_text) {
             Some(FirstUseOrDef {
                 location,
@@ -3810,15 +3706,15 @@ where
 
     fn get_type_params_and_emit_shadowing_errors(
         &mut self,
-        l: &'a Syntax<Token, Value>,
+        l: S<'a, Token, Value>,
     ) -> (HashSet<&'a str>, HashSet<&'a str>) {
         let mut res: HashSet<&'a str> = HashSet::new();
         let mut notreified: HashSet<&'a str> = HashSet::new();
         for p in Self::syntax_to_list_no_separators(l).rev() {
-            match &p.syntax {
+            match &p.children {
                 TypeParameter(x) => {
-                    let name = self.text(&x.type_name);
-                    if !x.type_reified.is_missing() {
+                    let name = self.text(&x.name);
+                    if !x.reified.is_missing() {
                         if res.contains(&name) {
                             self.errors
                                 .push(Self::make_error_from_node(p, errors::shadowing_reified))
@@ -3835,29 +3731,29 @@ where
         (res, notreified)
     }
 
-    fn reified_parameter_errors(&mut self, node: &'a Syntax<Token, Value>) {
-        if let FunctionDeclarationHeader(x) = &node.syntax {
-            if let TypeParameters(x) = &x.function_type_parameter_list.syntax {
-                self.get_type_params_and_emit_shadowing_errors(&x.type_parameters_parameters)
-                    .0;
+    fn reified_parameter_errors(&mut self, node: S<'a, Token, Value>) {
+        if let FunctionDeclarationHeader(x) = &node.children {
+            if let TypeParameters(x) = &x.type_parameter_list.children {
+                self.get_type_params_and_emit_shadowing_errors(&x.parameters);
             }
         }
     }
 
-    fn is_method_declaration(node: &'a Syntax<Token, Value>) -> bool {
-        if let MethodishDeclaration(_) = &node.syntax {
+    fn is_method_declaration(node: S<'a, Token, Value>) -> bool {
+        if let MethodishDeclaration(_) = &node.children {
             true
         } else {
             false
         }
     }
 
-    fn class_reified_param_errors(&mut self, node: &'a Syntax<Token, Value>) {
-        match &node.syntax {
+    fn class_reified_param_errors(&mut self, node: S<'a, Token, Value>) {
+        match &node.children {
             ClassishDeclaration(cd) => {
-                let (reified, non_reified) = match &cd.classish_type_parameters.syntax {
-                    TypeParameters(x) => self
-                        .get_type_params_and_emit_shadowing_errors(&x.type_parameters_parameters),
+                let (reified, non_reified) = match &cd.type_parameters.children {
+                    TypeParameters(x) => {
+                        self.get_type_params_and_emit_shadowing_errors(&x.parameters)
+                    }
                     _ => (HashSet::new(), HashSet::new()),
                 };
 
@@ -3866,43 +3762,39 @@ where
                     .cloned()
                     .collect::<HashSet<&'a str>>();
 
-                let add_error = |self_: &mut Self, e: &'a Syntax<Token, Value>| {
-                    if let TypeParameter(x) = &e.syntax {
-                        if !x.type_reified.is_missing()
-                            && tparams.contains(&self_.text(&x.type_name))
-                        {
+                let add_error = |self_: &mut Self, e: S<'a, Token, Value>| {
+                    if let TypeParameter(x) = &e.children {
+                        if !x.reified.is_missing() && tparams.contains(&self_.text(&x.name)) {
                             self_
                                 .errors
                                 .push(Self::make_error_from_node(e, errors::shadowing_reified))
                         }
                     }
                 };
-                let check_method = |e: &'a Syntax<Token, Value>| {
-                    if let MethodishDeclaration(x) = &e.syntax {
-                        if let FunctionDeclarationHeader(x) =
-                            &x.methodish_function_decl_header.syntax
-                        {
-                            if let TypeParameters(x) = &x.function_type_parameter_list.syntax {
-                                Self::syntax_to_list_no_separators(&x.type_parameters_parameters)
+                let check_method = |e: S<'a, Token, Value>| {
+                    if let MethodishDeclaration(x) = &e.children {
+                        if let FunctionDeclarationHeader(x) = &x.function_decl_header.children {
+                            if let TypeParameters(x) = &x.type_parameter_list.children {
+                                Self::syntax_to_list_no_separators(&x.parameters)
                                     .rev()
                                     .for_each(|x| add_error(self, x))
                             }
                         }
                     }
                 };
-                if let ClassishBody(x) = &cd.classish_body.syntax {
-                    Self::syntax_to_list_no_separators(&x.classish_body_elements)
+                if let ClassishBody(x) = &cd.body.children {
+                    Self::syntax_to_list_no_separators(&x.elements)
                         .rev()
                         .for_each(check_method)
                 }
 
                 if !reified.is_empty() {
-                    if Self::is_token_kind(&cd.classish_keyword, TokenKind::Interface) {
+                    if Self::is_token_kind(&cd.keyword, TokenKind::Interface) {
                         self.errors.push(Self::make_error_from_node(
                             node,
                             errors::reified_in_invalid_classish("an interface"),
                         ))
-                    } else if Self::is_token_kind(&cd.classish_keyword, TokenKind::Trait) {
+                    } else if Self::is_token_kind(&cd.keyword, TokenKind::Trait) {
                         self.errors.push(Self::make_error_from_node(
                             node,
                             errors::reified_in_invalid_classish("a trait"),
@@ -3922,27 +3814,24 @@ where
         }
     }
 
-    fn attr_spec_contains_sealed(&self, node: &'a Syntax<Token, Value>) -> bool {
+    fn attr_spec_contains_sealed(&self, node: S<'a, Token, Value>) -> bool {
         self.attribute_specification_contains(node, sn::user_attributes::SEALED)
     }
 
-    fn attr_spec_contains_enum_class(&self, node: &'a Syntax<Token, Value>) -> bool {
+    fn attr_spec_contains_enum_class(&self, node: S<'a, Token, Value>) -> bool {
         self.attribute_specification_contains(node, sn::user_attributes::ENUM_CLASS)
     }
 
-    fn attr_spec_contains_const(&self, node: &'a Syntax<Token, Value>) -> bool {
+    fn attr_spec_contains_const(&self, node: S<'a, Token, Value>) -> bool {
         self.attribute_specification_contains(node, sn::user_attributes::CONST)
     }
 
     // If there's more than one XHP category, report an error on the last one.
     fn duplicate_xhp_category_errors<I>(&mut self, elts: I)
     where
-        I: Iterator<Item = &'a Syntax<Token, Value>>,
+        I: Iterator<Item = S<'a, Token, Value>>,
     {
-        let mut iter = elts.filter(|x| match &x.syntax {
-            XHPCategoryDeclaration(_) => true,
-            _ => false,
-        });
+        let mut iter = elts.filter(|x| matches!(&(*x).children, XHPCategoryDeclaration(_)));
         iter.next();
         if let Some(node) = iter.last() {
             self.errors.push(Self::make_error_from_node(
@@ -3956,12 +3845,9 @@ where
     // on the last one.
     fn duplicate_xhp_children_errors<I>(&mut self, elts: I)
     where
-        I: Iterator<Item = &'a Syntax<Token, Value>>,
+        I: Iterator<Item = S<'a, Token, Value>>,
     {
-        let mut iter = elts.filter(|x| match &x.syntax {
-            XHPChildrenDeclaration(_) => true,
-            _ => false,
-        });
+        let mut iter = elts.filter(|x| matches!(&(*x).children, XHPChildrenDeclaration(_)));
         iter.next();
         if let Some(node) = iter.last() {
             self.errors.push(Self::make_error_from_node(
@@ -3973,7 +3859,7 @@ where
 
     fn interface_private_method_errors<I>(&mut self, elts: I)
     where
-        I: Iterator<Item = &'a Syntax<Token, Value>>,
+        I: Iterator<Item = S<'a, Token, Value>>,
     {
         for elt in elts {
             if let Some(modifiers) = Self::get_modifiers_of_declaration(elt) {
@@ -3989,14 +3875,14 @@ where
         }
     }
 
-    fn classish_errors(&mut self, node: &'a Syntax<Token, Value>) {
-        if let ClassishDeclaration(cd) = &node.syntax {
+    fn classish_errors(&mut self, node: S<'a, Token, Value>) {
+        if let ClassishDeclaration(cd) = &node.children {
             // Given a ClassishDeclaration node, test whether or not it's a trait
             // invoking the 'extends' keyword.
             let classish_invalid_extends_keyword = |_| {
                 // Invalid if uses 'extends' and is a trait.
-                Self::token_kind(&cd.classish_extends_keyword) == Some(TokenKind::Extends)
-                    && Self::token_kind(&cd.classish_keyword) == Some(TokenKind::Trait)
+                Self::token_kind(&cd.extends_keyword) == Some(TokenKind::Extends)
+                    && Self::token_kind(&cd.keyword) == Some(TokenKind::Trait)
             };
 
             let abstract_keyword = Self::extract_keyword(|x| x.is_abstract(), node).unwrap_or(node);
@@ -4011,13 +3897,11 @@ where
             // Given a sealed ClassishDeclaration node, test whether all the params
             // are classnames.
             let classish_sealed_arg_not_classname = |self_: &mut Self| {
-                Self::attr_spec_to_node_list(&cd.classish_attribute).any(|node| {
+                Self::attr_spec_to_node_list(&cd.attribute).any(|node| {
                     self_.attr_name(node) == Some(sn::user_attributes::SEALED)
                         && self_.attr_args(node).map_or(false, |mut args| {
-                            args.any(|arg_node| match &arg_node.syntax {
-                                ScopeResolutionExpression(x) => {
-                                    self_.text(&x.scope_resolution_name) != "class"
-                                }
+                            args.any(|arg_node| match &arg_node.children {
+                                ScopeResolutionExpression(x) => self_.text(&x.name) != "class",
                                 _ => true,
                             })
                         })
@@ -4026,14 +3910,14 @@ where
 
             // Only "regular" class names are allowed in `__Sealed()`
             // attributes.
-            for node in Self::attr_spec_to_node_list(&cd.classish_attribute) {
+            for node in Self::attr_spec_to_node_list(&cd.attribute) {
                 if (self.attr_name(node)) == Some(sn::user_attributes::SEALED) {
                     match self.attr_args(node) {
                         Some(args) => {
                             for arg in args {
-                                match &arg.syntax {
+                                match &arg.children {
                                     ScopeResolutionExpression(x) => {
-                                        let txt = self.text(&x.scope_resolution_qualifier);
+                                        let txt = self.text(&x.qualifier);
                                         let excludes = vec![
                                             sn::classes::SELF,
                                             sn::classes::PARENT,
@@ -4041,7 +3925,7 @@ where
                                         ];
                                         if excludes.iter().any(|&e| txt == e) {
                                             self.errors.push(Self::make_error_from_node(
-                                                &x.scope_resolution_qualifier,
+                                                &x.qualifier,
                                                 errors::sealed_qualifier_invalid,
                                             ));
                                         }
@@ -4055,29 +3939,28 @@ where
                 }
             }
 
-            let classish_is_sealed = self.attr_spec_contains_sealed(&cd.classish_attribute);
+            let classish_is_sealed = self.attr_spec_contains_sealed(&cd.attribute);
 
             // Given a ClassishDeclaration node, test whether or not length of
             // extends_list is appropriate for the classish_keyword. *)
             let classish_invalid_extends_list = |self_: &mut Self| {
                 // Invalid if is a class and has list of length greater than one.
                 self_.env.is_typechecker()
-                    && Self::token_kind(&cd.classish_keyword) == Some(TokenKind::Class)
-                    && Self::token_kind(&cd.classish_extends_keyword) == Some(TokenKind::Extends)
-                    && Self::syntax_to_list_no_separators(&cd.classish_extends_list).count() != 1
+                    && Self::token_kind(&cd.keyword) == Some(TokenKind::Class)
+                    && Self::token_kind(&cd.extends_keyword) == Some(TokenKind::Extends)
+                    && Self::syntax_to_list_no_separators(&cd.extends_list).count() != 1
             };
 
             // Given a ClassishDeclaration node, test whether it is sealed and final.
             let classish_sealed_final = |_| {
-                Self::list_contains_predicate(|x| x.is_final(), &cd.classish_modifiers)
-                    && classish_is_sealed
+                Self::list_contains_predicate(|x| x.is_final(), &cd.modifiers) && classish_is_sealed
             };
 
             self.produce_error(
                 |self_, _| classish_invalid_extends_list(self_),
                 &(),
                 || errors::error2037,
-                &cd.classish_extends_list,
+                &cd.extends_list,
             );
 
             self.invalid_modifier_errors("Classes, interfaces, and traits", node, |kind| {
@@ -4088,51 +3971,51 @@ where
                 |self_, _| classish_sealed_arg_not_classname(self_),
                 &(),
                 || errors::sealed_val_not_classname,
-                &cd.classish_attribute,
+                &cd.attribute,
             );
 
             self.produce_error(
                 |_, x| classish_invalid_extends_keyword(x),
                 &(),
                 || errors::error2036,
-                &cd.classish_extends_keyword,
+                &cd.extends_keyword,
             );
 
             self.produce_error(
                 |_, x| classish_sealed_final(x),
                 &(),
                 || errors::sealed_final,
-                &cd.classish_attribute,
+                &cd.attribute,
             );
 
-            let classish_name = self.text(&cd.classish_name);
+            let classish_name = self.text(&cd.name);
             self.produce_error(
                 |_, x| Self::cant_be_classish_name(x),
                 &classish_name,
                 || errors::reserved_keyword_as_class_name(&classish_name),
-                &cd.classish_name,
+                &cd.name,
             );
-            if Self::is_token_kind(&cd.classish_keyword, TokenKind::Interface)
-                && !cd.classish_implements_keyword.is_missing()
+            if Self::is_token_kind(&cd.keyword, TokenKind::Interface)
+                && !cd.implements_keyword.is_missing()
             {
                 self.errors.push(Self::make_error_from_node(
                     node,
                     errors::interface_implements,
                 ))
             };
-            if self.attr_spec_contains_const(&cd.classish_attribute)
-                && (Self::is_token_kind(&cd.classish_keyword, TokenKind::Interface)
-                    || Self::is_token_kind(&cd.classish_keyword, TokenKind::Trait))
+            if self.attr_spec_contains_const(&cd.attribute)
+                && (Self::is_token_kind(&cd.keyword, TokenKind::Interface)
+                    || Self::is_token_kind(&cd.keyword, TokenKind::Trait))
             {
                 self.errors.push(Self::make_error_from_node(
                     node,
                     errors::no_const_interfaces_traits_enums,
                 ))
             }
-            if self.attr_spec_contains_const(&cd.classish_attribute)
-                && Self::is_token_kind(&cd.classish_keyword, TokenKind::Class)
-                && Self::list_contains_predicate(|x| x.is_abstract(), &cd.classish_modifiers)
-                && Self::list_contains_predicate(|x| x.is_final(), &cd.classish_modifiers)
+            if self.attr_spec_contains_const(&cd.attribute)
+                && Self::is_token_kind(&cd.keyword, TokenKind::Class)
+                && Self::list_contains_predicate(|x| x.is_abstract(), &cd.modifiers)
+                && Self::list_contains_predicate(|x| x.is_final(), &cd.modifiers)
             {
                 self.errors.push(Self::make_error_from_node(
                     node,
@@ -4140,8 +4023,8 @@ where
                 ))
             }
 
-            if Self::list_contains_predicate(|x| x.is_final(), &cd.classish_modifiers) {
-                match Self::token_kind(&cd.classish_keyword) {
+            if Self::list_contains_predicate(|x| x.is_final(), &cd.modifiers) {
+                match Self::token_kind(&cd.keyword) {
                     Some(TokenKind::Interface) => self.errors.push(Self::make_error_from_node(
                         node,
                         errors::declared_final("Interfaces"),
@@ -4154,8 +4037,8 @@ where
                 }
             }
 
-            if Self::token_kind(&cd.classish_xhp) == Some(TokenKind::XHP) {
-                match Self::token_kind(&cd.classish_keyword) {
+            if Self::token_kind(&cd.xhp) == Some(TokenKind::XHP) {
+                match Self::token_kind(&cd.keyword) {
                     Some(TokenKind::Interface) => self.errors.push(Self::make_error_from_node(
                         node,
                         errors::invalid_xhp_classish("Interfaces"),
@@ -4172,13 +4055,12 @@ where
                 }
             }
 
-            let name = self.text(&cd.classish_name);
-            if let ClassishBody(cb) = &cd.classish_body.syntax {
-                let declared_name_str = self.text(&cd.classish_name);
+            let name = self.text(&cd.name);
+            if let ClassishBody(cb) = &cd.body.children {
+                let declared_name_str = self.text(&cd.name);
                 let full_name = combine_names(&self.namespace_name, declared_name_str);
 
-                let class_body_elts =
-                    || Self::syntax_to_list_no_separators(&cb.classish_body_elements);
+                let class_body_elts = || Self::syntax_to_list_no_separators(&cb.elements);
                 let class_body_methods =
                     || class_body_elts().filter(|x| Self::is_method_declaration(x));
 
@@ -4194,16 +4076,16 @@ where
                 }
                 let has_abstract_fn = class_body_methods().any(&Self::has_modifier_abstract);
                 if has_abstract_fn
-                    && Self::is_token_kind(&cd.classish_keyword, TokenKind::Class)
-                    && !Self::list_contains_predicate(|x| x.is_abstract(), &cd.classish_modifiers)
+                    && Self::is_token_kind(&cd.keyword, TokenKind::Class)
+                    && !Self::list_contains_predicate(|x| x.is_abstract(), &cd.modifiers)
                 {
                     self.errors.push(Self::make_error_from_node(
-                        &cd.classish_name,
+                        &cd.name,
                         errors::class_with_abstract_method(name),
                     ))
                 }
 
-                if Self::is_token_kind(&cd.classish_keyword, TokenKind::Interface) {
+                if Self::is_token_kind(&cd.keyword, TokenKind::Interface) {
                     self.interface_private_method_errors(class_body_elts());
                 }
 
@@ -4211,12 +4093,10 @@ where
                 self.duplicate_xhp_children_errors(class_body_elts());
             }
 
-            match Self::token_kind(&cd.classish_keyword) {
-                Some(TokenKind::Class) | Some(TokenKind::Trait)
-                    if !cd.classish_name.is_missing() =>
-                {
-                    let location = Self::make_location_of_node(&cd.classish_name);
-                    self.check_type_name(&cd.classish_name, name, location)
+            match Self::token_kind(&cd.keyword) {
+                Some(TokenKind::Class) | Some(TokenKind::Trait) if !cd.name.is_missing() => {
+                    let location = Self::make_location_of_node(&cd.name);
+                    self.check_type_name(&cd.name, name, location)
                 }
                 _ => {}
             }
@@ -4224,7 +4104,7 @@ where
     }
 
     // Checks for modifiers on class constants
-    fn class_constant_modifier_errors(&mut self, node: &'a Syntax<Token, Value>) {
+    fn class_constant_modifier_errors(&mut self, node: S<'a, Token, Value>) {
         if self.is_inside_trait() {
             self.errors
                 .push(Self::make_error_from_node(node, errors::const_in_trait))
@@ -4232,45 +4112,39 @@ where
         self.invalid_modifier_errors("Constants", node, |kind| kind == TokenKind::Abstract);
     }
 
-    fn type_const_modifier_errors(&mut self, node: &'a Syntax<Token, Value>) {
+    fn type_const_modifier_errors(&mut self, node: S<'a, Token, Value>) {
         self.invalid_modifier_errors("Type constants", node, |kind| kind == TokenKind::Abstract);
     }
 
-    fn alias_errors(&mut self, node: &'a Syntax<Token, Value>) {
-        if let AliasDeclaration(ad) = &node.syntax {
-            if Self::token_kind(&ad.alias_keyword) == Some(TokenKind::Type)
-                && !ad.alias_constraint.is_missing()
+    fn alias_errors(&mut self, node: S<'a, Token, Value>) {
+        if let AliasDeclaration(ad) = &node.children {
+            if Self::token_kind(&ad.keyword) == Some(TokenKind::Type) && !ad.constraint.is_missing()
             {
-                self.errors.push(Self::make_error_from_node(
-                    &ad.alias_keyword,
-                    errors::error2034,
-                ))
+                self.errors
+                    .push(Self::make_error_from_node(&ad.keyword, errors::error2034))
             }
-            if !ad.alias_name.is_missing() {
-                let name = self.text(&ad.alias_name);
-                let location = Self::make_location_of_node(&ad.alias_name);
-                if let TypeConstant(_) = &ad.alias_type.syntax {
+            if !ad.name.is_missing() {
+                let name = self.text(&ad.name);
+                let location = Self::make_location_of_node(&ad.name);
+                if let TypeConstant(_) = &ad.type_.children {
                     if self.env.is_typechecker() {
                         self.errors.push(Self::make_error_from_node(
-                            &ad.alias_type,
+                            &ad.type_,
                             errors::type_alias_to_type_constant,
                         ))
                     }
                 }
 
-                self.check_type_name(&ad.alias_name, name, location)
+                self.check_type_name(&ad.name, name, location)
             }
         }
     }
 
-    fn is_invalid_group_use_clause(
-        kind: &'a Syntax<Token, Value>,
-        clause: &'a Syntax<Token, Value>,
-    ) -> bool {
-        if let NamespaceUseClause(x) = &clause.syntax {
-            let clause_kind = &x.namespace_use_clause_kind;
+    fn is_invalid_group_use_clause(kind: S<'a, Token, Value>, clause: S<'a, Token, Value>) -> bool {
+        if let NamespaceUseClause(x) = &clause.children {
+            let clause_kind = &x.clause_kind;
             if kind.is_missing() {
-                match &clause_kind.syntax {
+                match &clause_kind.children {
                     Missing => false,
                     Token(token)
                         if token.kind() == TokenKind::Function
@@ -4288,15 +4162,15 @@ where
         }
     }
 
-    fn is_invalid_group_use_prefix(prefix: &'a Syntax<Token, Value>) -> bool {
+    fn is_invalid_group_use_prefix(prefix: S<'a, Token, Value>) -> bool {
         !prefix.is_namespace_prefix()
     }
 
-    fn group_use_errors(&mut self, node: &'a Syntax<Token, Value>) {
-        if let NamespaceGroupUseDeclaration(x) = &node.syntax {
-            let prefix = &x.namespace_group_use_prefix;
-            let clauses = &x.namespace_group_use_clauses;
-            let kind = &x.namespace_group_use_kind;
+    fn group_use_errors(&mut self, node: S<'a, Token, Value>) {
+        if let NamespaceGroupUseDeclaration(x) = &node.children {
+            let prefix = &x.prefix;
+            let clauses = &x.clauses;
+            let kind = &x.kind;
             Self::syntax_to_list_no_separators(clauses)
                 .filter(|x| Self::is_invalid_group_use_clause(kind, x))
                 .for_each(|clause| {
@@ -4316,15 +4190,15 @@ where
         &mut self,
         namespace_prefix: Option<&str>,
 
-        kind: &'a Syntax<Token, Value>,
-        cl: &'a Syntax<Token, Value>,
+        kind: S<'a, Token, Value>,
+        cl: S<'a, Token, Value>,
     ) {
-        match &cl.syntax {
-            NamespaceUseClause(x) if !&x.namespace_use_name.is_missing() => {
-                let name = &x.namespace_use_name;
+        match &cl.children {
+            NamespaceUseClause(x) if !&x.name.is_missing() => {
+                let name = &x.name;
 
                 let kind = if kind.is_missing() {
-                    &x.namespace_use_clause_kind
+                    &x.clause_kind
                 } else {
                     kind
                 };
@@ -4334,10 +4208,8 @@ where
                     None => combine_names(GLOBAL_NAMESPACE_NAME, name_text),
                     Some(p) => combine_names(p, name_text),
                 };
-                let short_name = Self::get_short_name_from_qualified_name(
-                    name_text,
-                    self.text(&x.namespace_use_alias),
-                );
+                let short_name =
+                    Self::get_short_name_from_qualified_name(name_text, self.text(&x.alias));
 
                 let do_check = |
                     self_: &mut Self,
@@ -4379,7 +4251,7 @@ where
                     }
                 };
 
-                match &kind.syntax {
+                match &kind.children {
                     Token(token) => match token.kind() {
                         TokenKind::Namespace => do_check(
                             self,
@@ -4478,38 +4350,36 @@ where
         }
     }
 
-    fn is_global_in_const_decl(&self, init: &'a Syntax<Token, Value>) -> bool {
-        if let SimpleInitializer(x) = &init.syntax {
-            if let VariableExpression(x) = &x.simple_initializer_value.syntax {
-                return sn::superglobals::is_any_global(self.text(&x.variable_expression));
+    fn is_global_in_const_decl(&self, init: S<'a, Token, Value>) -> bool {
+        if let SimpleInitializer(x) = &init.children {
+            if let VariableExpression(x) = &x.value.children {
+                return sn::superglobals::is_any_global(self.text(&x.expression));
             }
         }
         false
     }
 
-    fn namespace_use_declaration_errors(&mut self, node: &'a Syntax<Token, Value>) {
-        match &node.syntax {
+    fn namespace_use_declaration_errors(&mut self, node: S<'a, Token, Value>) {
+        match &node.children {
             NamespaceUseDeclaration(x) => {
-                Self::syntax_to_list_no_separators(&x.namespace_use_clauses).for_each(|clause| {
-                    self.use_class_or_namespace_clause_errors(None, &x.namespace_use_kind, clause)
+                Self::syntax_to_list_no_separators(&x.clauses).for_each(|clause| {
+                    self.use_class_or_namespace_clause_errors(None, &x.kind, clause)
                 })
             }
-            NamespaceGroupUseDeclaration(x) => {
-                Self::syntax_to_list_no_separators(&x.namespace_group_use_clauses).for_each(
-                    |clause| {
-                        match &clause.syntax {
-                            NamespaceUseClause(x) if !x.namespace_use_name.is_missing() => self
-                                .check_preceding_backslashes_qualified_name(&x.namespace_use_name),
-                            _ => {}
+            NamespaceGroupUseDeclaration(x) => Self::syntax_to_list_no_separators(&x.clauses)
+                .for_each(|clause| {
+                    match &clause.children {
+                        NamespaceUseClause(x) if !x.name.is_missing() => {
+                            self.check_preceding_backslashes_qualified_name(&x.name)
                         }
-                        self.use_class_or_namespace_clause_errors(
-                            Some(self.text(&x.namespace_group_use_prefix)),
-                            &x.namespace_group_use_kind,
-                            clause,
-                        )
-                    },
-                )
-            }
+                        _ => {}
+                    }
+                    self.use_class_or_namespace_clause_errors(
+                        Some(self.text(&x.prefix)),
+                        &x.kind,
+                        clause,
+                    )
+                }),
             _ => {}
         }
     }
@@ -4521,7 +4391,7 @@ where
         )
     }
 
-    fn check_constant_expression(&mut self, node: &'a Syntax<Token, Value>) {
+    fn check_constant_expression(&mut self, node: S<'a, Token, Value>) {
         // __FUNCTION_CREDENTIAL__ emits an object,
         // so it cannot be used in a constant expression
         let not_function_credential = |self_: &Self, token: &Token| {
@@ -4546,7 +4416,7 @@ where
             token.kind() == TokenKind::Name && not_function_credential(self_, token)
         };
 
-        let is_good_scope_resolution_name = |node: &'a Syntax<Token, Value>| match &node.syntax {
+        let is_good_scope_resolution_name = |node: S<'a, Token, Value>| match &node.children {
             QualifiedName(_) => true,
             Token(token) => {
                 use TokenKind::*;
@@ -4571,8 +4441,8 @@ where
             ))
         };
 
-        let check_type_specifier = |self_: &mut Self, x: &'a Syntax<Token, Value>, initializer| {
-            if let Token(token) = &x.syntax {
+        let check_type_specifier = |self_: &mut Self, x: S<'a, Token, Value>, initializer| {
+            if let Token(token) = &x.children {
                 if is_namey(self_, &token) {
                     return Self::syntax_to_list_no_separators(initializer)
                         .for_each(|x| self_.check_constant_expression(x));
@@ -4584,7 +4454,7 @@ where
         let check_collection_members = |self_: &mut Self, x| {
             Self::syntax_to_list_no_separators(x).for_each(|x| self_.check_constant_expression(&x))
         };
-        match &node.syntax {
+        match &node.children {
             Missing | QualifiedName(_) | LiteralExpression(_) => {}
             Token(token) => {
                 if !is_namey(self, token) {
@@ -4592,11 +4462,11 @@ where
                 }
             }
             PrefixUnaryExpression(x) => {
-                if let Token(token) = &x.prefix_unary_operator.syntax {
+                if let Token(token) = &x.operator.children {
                     use TokenKind::*;
                     match token.kind() {
                         Exclamation | Plus | Minus | Tilde => {
-                            self.check_constant_expression(&x.prefix_unary_operand)
+                            self.check_constant_expression(&x.operand)
                         }
                         _ => default(self),
                     }
@@ -4605,7 +4475,7 @@ where
                 }
             }
             BinaryExpression(x) => {
-                if let Token(token) = &x.binary_operator.syntax {
+                if let Token(token) = &x.operator.children {
                     use TokenKind::*;
                     match token.kind() {
                         BarBar
@@ -4632,8 +4502,8 @@ where
                         | LessThanEqual
                         | LessThanEqualGreaterThan
                         | QuestionColon => {
-                            self.check_constant_expression(&x.binary_left_operand);
-                            self.check_constant_expression(&x.binary_right_operand);
+                            self.check_constant_expression(&x.left_operand);
+                            self.check_constant_expression(&x.right_operand);
                         }
                         _ => default(self),
                     }
@@ -4642,90 +4512,67 @@ where
                 }
             }
             ConditionalExpression(x) => {
-                self.check_constant_expression(&x.conditional_test);
-                self.check_constant_expression(&x.conditional_consequence);
-                self.check_constant_expression(&x.conditional_alternative);
+                self.check_constant_expression(&x.test);
+                self.check_constant_expression(&x.consequence);
+                self.check_constant_expression(&x.alternative);
             }
             SimpleInitializer(x) => {
-                if let LiteralExpression(y) = &x.simple_initializer_value.syntax {
-                    if let SyntaxList(_) = &y.literal_expression.syntax {
+                if let LiteralExpression(y) = &x.value.children {
+                    if let SyntaxList(_) = &y.expression.children {
                         self.errors.push(Self::make_error_from_node(
                             node,
                             errors::invalid_constant_initializer,
                         ))
                     }
-                    self.check_constant_expression(&x.simple_initializer_value)
+                    self.check_constant_expression(&x.value)
                 } else {
-                    self.check_constant_expression(&x.simple_initializer_value)
+                    self.check_constant_expression(&x.value)
                 }
             }
 
-            ParenthesizedExpression(x) => {
-                self.check_constant_expression(&x.parenthesized_expression_expression)
-            }
+            ParenthesizedExpression(x) => self.check_constant_expression(&x.expression),
             CollectionLiteralExpression(x) => {
-                if let SimpleTypeSpecifier(y) = &x.collection_literal_name.syntax {
-                    check_type_specifier(
-                        self,
-                        &y.simple_type_specifier,
-                        &x.collection_literal_initializers,
-                    )
-                } else if let GenericTypeSpecifier(y) = &x.collection_literal_name.syntax {
-                    check_type_specifier(
-                        self,
-                        &y.generic_class_type,
-                        &x.collection_literal_initializers,
-                    )
+                if let SimpleTypeSpecifier(y) = &x.name.children {
+                    check_type_specifier(self, &y.specifier, &x.initializers)
+                } else if let GenericTypeSpecifier(y) = &x.name.children {
+                    check_type_specifier(self, &y.class_type, &x.initializers)
                 } else {
                     default(self)
                 };
             }
 
-            TupleExpression(x) => check_collection_members(self, &x.tuple_expression_items),
-            KeysetIntrinsicExpression(x) => {
-                check_collection_members(self, &x.keyset_intrinsic_members)
-            }
-            VarrayIntrinsicExpression(x) => {
-                check_collection_members(self, &x.varray_intrinsic_members)
-            }
-            DarrayIntrinsicExpression(x) => {
-                check_collection_members(self, &x.darray_intrinsic_members)
-            }
-            VectorIntrinsicExpression(x) => {
-                check_collection_members(self, &x.vector_intrinsic_members)
-            }
-            DictionaryIntrinsicExpression(x) => {
-                check_collection_members(self, &x.dictionary_intrinsic_members)
-            }
-            ShapeExpression(x) => check_collection_members(self, &x.shape_expression_fields),
+            TupleExpression(x) => check_collection_members(self, &x.items),
+            KeysetIntrinsicExpression(x) => check_collection_members(self, &x.members),
+            VarrayIntrinsicExpression(x) => check_collection_members(self, &x.members),
+            DarrayIntrinsicExpression(x) => check_collection_members(self, &x.members),
+            VectorIntrinsicExpression(x) => check_collection_members(self, &x.members),
+            DictionaryIntrinsicExpression(x) => check_collection_members(self, &x.members),
+            ShapeExpression(x) => check_collection_members(self, &x.fields),
             ElementInitializer(x) => {
-                self.check_constant_expression(&x.element_key);
-                self.check_constant_expression(&x.element_value);
+                self.check_constant_expression(&x.key);
+                self.check_constant_expression(&x.value);
             }
             FieldInitializer(x) => {
-                self.check_constant_expression(&x.field_initializer_name);
-                self.check_constant_expression(&x.field_initializer_value);
+                self.check_constant_expression(&x.name);
+                self.check_constant_expression(&x.value);
             }
             ScopeResolutionExpression(x)
-                if Self::is_good_scope_resolution_qualifier(&x.scope_resolution_qualifier)
-                    && is_good_scope_resolution_name(&x.scope_resolution_name) => {}
-            AsExpression(x) => match &x.as_right_operand.syntax {
-                LikeTypeSpecifier(_) => self.check_constant_expression(&x.as_left_operand),
+                if Self::is_good_scope_resolution_qualifier(&x.qualifier)
+                    && is_good_scope_resolution_name(&x.name) => {}
+            AsExpression(x) => match &x.right_operand.children {
+                LikeTypeSpecifier(_) => self.check_constant_expression(&x.left_operand),
                 GenericTypeSpecifier(y)
-                    if self.text(&y.generic_class_type) == sn::fb::INCORRECT_TYPE
-                        || self.text(&y.generic_class_type)
-                            == Self::strip_ns(sn::fb::INCORRECT_TYPE) =>
+                    if self.text(&y.class_type) == sn::fb::INCORRECT_TYPE
+                        || self.text(&y.class_type) == Self::strip_ns(sn::fb::INCORRECT_TYPE) =>
                 {
-                    self.check_constant_expression(&x.as_left_operand)
+                    self.check_constant_expression(&x.left_operand)
                 }
                 _ => default(self),
             },
             FunctionCallExpression(x) => {
                 let mut check_receiver_and_arguments = |receiver| {
                     if is_whitelisted_function(self, receiver) {
-                        for node in
-                            Self::syntax_to_list_no_separators(&x.function_call_argument_list)
-                        {
+                        for node in Self::syntax_to_list_no_separators(&x.argument_list) {
                             self.check_constant_expression(node)
                         }
                     } else {
@@ -4733,11 +4580,11 @@ where
                     }
                 };
 
-                match &x.function_call_receiver.syntax {
+                match &x.receiver.children {
                     Token(tok) if tok.kind() == TokenKind::Name => {
-                        check_receiver_and_arguments(&x.function_call_receiver)
+                        check_receiver_and_arguments(&x.receiver)
                     }
-                    QualifiedName(_) => check_receiver_and_arguments(&x.function_call_receiver),
+                    QualifiedName(_) => check_receiver_and_arguments(&x.receiver),
                     _ => default(self),
                 }
             }
@@ -4757,16 +4604,14 @@ where
         }
     }
 
-    fn check_static_in_initializer(&mut self, initializer: &'a Syntax<Token, Value>) -> bool {
-        if let SimpleInitializer(x) = &initializer.syntax {
-            if let ScopeResolutionExpression(x) = &x.simple_initializer_value.syntax {
-                if let Token(t) = &x.scope_resolution_qualifier.syntax {
+    fn check_static_in_initializer(&mut self, initializer: S<'a, Token, Value>) -> bool {
+        if let SimpleInitializer(x) = &initializer.children {
+            if let ScopeResolutionExpression(x) = &x.value.children {
+                if let Token(t) = &x.qualifier.children {
                     match t.kind() {
                         TokenKind::Static => return true,
                         TokenKind::Parent => {
-                            return self
-                                .text(&x.scope_resolution_name)
-                                .eq_ignore_ascii_case("class");
+                            return self.text(&x.name).eq_ignore_ascii_case("class");
                         }
                         _ => return false,
                     }
@@ -4776,40 +4621,40 @@ where
         false
     }
 
-    fn const_decl_errors(&mut self, node: &'a Syntax<Token, Value>) {
-        if let ConstantDeclarator(cd) = &node.syntax {
+    fn const_decl_errors(&mut self, node: S<'a, Token, Value>) {
+        if let ConstantDeclarator(cd) = &node.children {
             self.produce_error(
                 |self_, x| self_.constant_abstract_with_initializer(x),
-                &cd.constant_declarator_initializer,
+                &cd.initializer,
                 || errors::error2051,
-                &cd.constant_declarator_initializer,
+                &cd.initializer,
             );
 
             self.produce_error(
                 |self_, x| self_.constant_concrete_without_initializer(x),
-                &cd.constant_declarator_initializer,
+                &cd.initializer,
                 || errors::error2050,
-                &cd.constant_declarator_initializer,
+                &cd.initializer,
             );
 
             self.produce_error(
                 |self_, x| self_.is_global_in_const_decl(x),
-                &cd.constant_declarator_initializer,
+                &cd.initializer,
                 || errors::global_in_const_decl,
-                &cd.constant_declarator_initializer,
+                &cd.initializer,
             );
-            self.check_constant_expression(&cd.constant_declarator_initializer);
+            self.check_constant_expression(&cd.initializer);
 
             self.produce_error(
                 |self_, x| self_.check_static_in_initializer(x),
-                &cd.constant_declarator_initializer,
+                &cd.initializer,
                 || errors::parent_static_const_decl,
-                &cd.constant_declarator_initializer,
+                &cd.initializer,
             );
 
-            if !cd.constant_declarator_name.is_missing() {
-                let constant_name = self.text(&cd.constant_declarator_name);
-                let location = Self::make_location_of_node(&cd.constant_declarator_name);
+            if !cd.name.is_missing() {
+                let constant_name = self.text(&cd.name);
+                let location = Self::make_location_of_node(&cd.name);
                 let def = make_first_use_or_def(
                     false,
                     NameDef,
@@ -4838,7 +4683,7 @@ where
                         let line_num = line_num as usize;
 
                         self.errors.push(Self::make_name_already_used_error(
-                            &cd.constant_declarator_name,
+                            &cd.name,
                             &combine_names(&self.namespace_name, &constant_name),
                             &constant_name,
                             &def.location,
@@ -4852,9 +4697,9 @@ where
         }
     }
 
-    fn class_property_modifiers_errors(&mut self, node: &'a Syntax<Token, Value>) {
-        if let PropertyDeclaration(x) = &node.syntax {
-            let property_modifiers = &x.property_modifiers;
+    fn class_property_modifiers_errors(&mut self, node: S<'a, Token, Value>) {
+        if let PropertyDeclaration(x) = &node.children {
+            let property_modifiers = &x.modifiers;
 
             let abstract_static_props = self.env.parser_options.po_abstract_static_props;
             self.invalid_modifier_errors("Properties", node, |kind| {
@@ -4892,11 +4737,11 @@ where
         }
     }
 
-    fn class_property_const_errors(&mut self, node: &'a Syntax<Token, Value>) {
-        if let PropertyDeclaration(x) = &node.syntax {
-            if self.attr_spec_contains_const(&x.property_attribute_spec)
+    fn class_property_const_errors(&mut self, node: S<'a, Token, Value>) {
+        if let PropertyDeclaration(x) = &node.children {
+            if self.attr_spec_contains_const(&x.attribute_spec)
                 && self.attribute_specification_contains(
-                    &x.property_attribute_spec,
+                    &x.attribute_spec,
                     sn::user_attributes::LATE_INIT,
                 )
             {
@@ -4909,16 +4754,16 @@ where
         }
     }
 
-    fn class_property_declarator_errors(&mut self, node: &'a Syntax<Token, Value>) {
+    fn class_property_declarator_errors(&mut self, node: S<'a, Token, Value>) {
         let check_decls = |
             self_: &mut Self,
-            f: &dyn Fn(&'a Syntax<Token, Value>) -> bool,
+            f: &dyn Fn(S<'a, Token, Value>) -> bool,
             error: errors::Error,
             property_declarators,
         | {
             Self::syntax_to_list_no_separators(property_declarators).for_each(|decl| {
-                if let PropertyDeclarator(x) = &decl.syntax {
-                    if f(&x.property_initializer) {
+                if let PropertyDeclarator(x) = &decl.children {
+                    if f(&x.initializer) {
                         self_
                             .errors
                             .push(Self::make_error_from_node(node, error.clone()))
@@ -4926,7 +4771,7 @@ where
                 }
             })
         };
-        if let PropertyDeclaration(x) = &node.syntax {
+        if let PropertyDeclaration(x) = &node.children {
             if self.env.parser_options.tco_const_static_props && Self::has_modifier_static(node) {
                 if self.env.parser_options.po_abstract_static_props
                     && Self::has_modifier_abstract(node)
@@ -4935,21 +4780,21 @@ where
                         self,
                         &|n| !n.is_missing(),
                         errors::abstract_prop_init,
-                        &x.property_declarators,
+                        &x.declarators,
                     )
-                } else if self.attr_spec_contains_const(&x.property_attribute_spec) {
+                } else if self.attr_spec_contains_const(&x.attribute_spec) {
                     check_decls(
                         self,
                         &|n| n.is_missing(),
                         errors::const_static_prop_init,
-                        &x.property_declarators,
+                        &x.declarators,
                     )
                 }
             }
         }
     }
 
-    fn trait_use_alias_item_modifier_errors(&mut self, node: &'a Syntax<Token, Value>) {
+    fn trait_use_alias_item_modifier_errors(&mut self, node: S<'a, Token, Value>) {
         self.invalid_modifier_errors("Trait use aliases", node, |kind| {
             kind == TokenKind::Final
                 || kind == TokenKind::Private
@@ -4958,11 +4803,11 @@ where
         });
     }
 
-    fn mixed_namespace_errors(&mut self, node: &'a Syntax<Token, Value>) {
-        match &node.syntax {
+    fn mixed_namespace_errors(&mut self, node: S<'a, Token, Value>) {
+        match &node.children {
             NamespaceBody(x) => {
-                let s = Self::start_offset(&x.namespace_left_brace);
-                let e = Self::end_offset(&x.namespace_right_brace);
+                let s = Self::start_offset(&x.left_brace);
+                let e = Self::end_offset(&x.right_brace);
                 if let NamespaceType::Unbracketed(Location {
                     start_offset,
                     end_offset,
@@ -4983,8 +4828,8 @@ where
                 }
             }
             NamespaceEmptyBody(x) => {
-                let s = Self::start_offset(&x.namespace_semicolon);
-                let e = Self::end_offset(&x.namespace_semicolon);
+                let s = Self::start_offset(&x.semicolon);
+                let e = Self::end_offset(&x.semicolon);
                 if let NamespaceType::Bracketed(Location {
                     start_offset,
                     end_offset,
@@ -5009,17 +4854,16 @@ where
                 let mut has_code_outside_namespace = false;
 
                 if let [Syntax {
-                    syntax: Script(_), ..
+                    children: Script(_),
+                    ..
                 }, syntax_list] = self.parents.as_slice()
                 {
-                    if let SyntaxList(_) = syntax_list.syntax {
+                    if let SyntaxList(_) = syntax_list.children {
                         is_first_decl = false;
                         for decl in Self::syntax_to_list_no_separators(syntax_list) {
-                            match &decl.syntax {
+                            match &decl.children {
                                 MarkupSection(x) => {
-                                    if x.markup_hashbang.width() == 0
-                                        || self.is_hashbang(&x.markup_hashbang)
-                                    {
+                                    if x.hashbang.width() == 0 || self.is_hashbang(&x.hashbang) {
                                         continue;
                                     } else {
                                         break;
@@ -5034,12 +4878,11 @@ where
                             }
                         }
 
-                        has_code_outside_namespace = !(x.namespace_body.is_namespace_empty_body())
+                        has_code_outside_namespace = !(x.body.is_namespace_empty_body())
                             && Self::syntax_to_list_no_separators(syntax_list).any(|decl| {
-                                match &decl.syntax {
+                                match &decl.children {
                                     MarkupSection(x) => {
-                                        !(x.markup_hashbang.width() == 0
-                                            || self.is_hashbang(&x.markup_hashbang))
+                                        !(x.hashbang.width() == 0 || self.is_hashbang(&x.hashbang))
                                     }
                                     NamespaceDeclaration(_)
                                     | FileAttributeSpecification(_)
@@ -5068,21 +4911,21 @@ where
         }
     }
 
-    fn enumerator_errors(&mut self, node: &'a Syntax<Token, Value>) {
-        if let Enumerator(x) = &node.syntax {
-            if self.text(&x.enumerator_name).eq_ignore_ascii_case("class") {
+    fn enumerator_errors(&mut self, node: S<'a, Token, Value>) {
+        if let Enumerator(x) = &node.children {
+            if self.text(&x.name).eq_ignore_ascii_case("class") {
                 self.errors.push(Self::make_error_from_node(
                     node,
                     errors::enum_elem_name_is_class,
                 ))
             }
-            self.check_constant_expression(&x.enumerator_value)
+            self.check_constant_expression(&x.value)
         }
     }
 
-    fn enum_decl_errors(&mut self, node: &'a Syntax<Token, Value>) {
-        if let EnumDeclaration(x) = &node.syntax {
-            let attrs = &x.enum_attribute_spec;
+    fn enum_decl_errors(&mut self, node: S<'a, Token, Value>) {
+        if let EnumDeclaration(x) = &node.children {
+            let attrs = &x.attribute_spec;
             if self.attr_spec_contains_sealed(attrs) {
                 self.errors
                     .push(Self::make_error_from_node(node, errors::sealed_enum))
@@ -5093,15 +4936,15 @@ where
                 ))
             }
 
-            if !x.enum_name.is_missing() {
-                let name = self.text(&x.enum_name);
-                let location = Self::make_location_of_node(&x.enum_name);
-                self.check_type_name(&x.enum_name, name, location)
+            if !x.name.is_missing() {
+                let name = self.text(&x.name);
+                let location = Self::make_location_of_node(&x.name);
+                self.check_type_name(&x.name, name, location)
             }
         }
     }
 
-    fn check_lvalue(&mut self, loperand: &'a Syntax<Token, Value>) {
+    fn check_lvalue(&mut self, loperand: S<'a, Token, Value>) {
         let append_errors = |self_: &mut Self, node, error| {
             self_.errors.push(Self::make_error_from_node(node, error))
         };
@@ -5119,20 +4962,21 @@ where
             }
         };
 
-        match &loperand.syntax {
-            ListExpression(x) => Self::syntax_to_list_no_separators(&x.list_members)
-                .for_each(|n| self.check_lvalue(n)),
+        match &loperand.children {
+            ListExpression(x) => {
+                Self::syntax_to_list_no_separators(&x.members).for_each(|n| self.check_lvalue(n))
+            }
             SafeMemberSelectionExpression(_) => {
                 err(self, errors::not_allowed_in_write("`?->` operator"))
             }
             MemberSelectionExpression(x) => {
-                if Self::token_kind(&x.member_name) == Some(TokenKind::XHPClassName) {
+                if Self::token_kind(&x.name) == Some(TokenKind::XHPClassName) {
                     err(self, errors::not_allowed_in_write("`->:` operator"))
                 }
             }
-            CatchClause(x) => check_variable(self, self.text(&x.catch_variable)),
-            VariableExpression(x) => check_variable(self, self.text(&x.variable_expression)),
-            DecoratedExpression(x) => match Self::token_kind(&x.decorated_expression_decorator) {
+            CatchClause(x) => check_variable(self, self.text(&x.variable)),
+            VariableExpression(x) => check_variable(self, self.text(&x.expression)),
+            DecoratedExpression(x) => match Self::token_kind(&x.decorator) {
                 Some(TokenKind::Clone) => err(self, errors::not_allowed_in_write("`clone`")),
                 Some(TokenKind::Await) => err(self, errors::not_allowed_in_write("`await`")),
                 Some(TokenKind::Suspend) => err(self, errors::not_allowed_in_write("`suspend`")),
@@ -5145,8 +4989,8 @@ where
                 Some(TokenKind::Inout) => err(self, errors::not_allowed_in_write("`inout`")),
                 _ => {}
             },
-            ParenthesizedExpression(x) => self.check_lvalue(&x.parenthesized_expression_expression),
-            SubscriptExpression(x) => self.check_lvalue(&x.subscript_receiver),
+            ParenthesizedExpression(x) => self.check_lvalue(&x.expression),
+            SubscriptExpression(x) => self.check_lvalue(&x.receiver),
             LambdaExpression(_)
             | AnonymousFunction(_)
             | AwaitableCreationExpression(_)
@@ -5171,8 +5015,8 @@ where
                 self,
                 errors::not_allowed_in_write(loperand.kind().to_string()),
             ),
-            PrefixUnaryExpression(x) => check_unary_expression(self, &x.prefix_unary_operator),
-            PostfixUnaryExpression(x) => check_unary_expression(self, &x.postfix_unary_operator),
+            PrefixUnaryExpression(x) => check_unary_expression(self, &x.operator),
+            PostfixUnaryExpression(x) => check_unary_expression(self, &x.operator),
 
             // FIXME: Array_get ((_, Class_const _), _) is not a valid lvalue. *)
             _ => {} // Ideally we should put all the rest of the syntax here so everytime
@@ -5181,36 +5025,30 @@ where
         }
     }
 
-    fn assignment_errors(&mut self, node: &'a Syntax<Token, Value>) {
-        let check_unary_expression = |self_: &mut Self, op, loperand: &'a Syntax<Token, Value>| {
+    fn assignment_errors(&mut self, node: S<'a, Token, Value>) {
+        let check_unary_expression = |self_: &mut Self, op, loperand: S<'a, Token, Value>| {
             if Self::does_unop_create_write(Self::token_kind(op)) {
                 self_.check_lvalue(loperand)
             }
         };
-        match &node.syntax {
-            PrefixUnaryExpression(x) => {
-                check_unary_expression(self, &x.prefix_unary_operator, &x.prefix_unary_operand)
-            }
-            PostfixUnaryExpression(x) => {
-                check_unary_expression(self, &x.postfix_unary_operator, &x.postfix_unary_operand)
-            }
+        match &node.children {
+            PrefixUnaryExpression(x) => check_unary_expression(self, &x.operator, &x.operand),
+            PostfixUnaryExpression(x) => check_unary_expression(self, &x.operator, &x.operand),
             DecoratedExpression(x) => {
-                let loperand = &x.decorated_expression_expression;
-                if Self::does_decorator_create_write(Self::token_kind(
-                    &x.decorated_expression_decorator,
-                )) {
+                let loperand = &x.expression;
+                if Self::does_decorator_create_write(Self::token_kind(&x.decorator)) {
                     self.check_lvalue(&loperand)
                 }
             }
             BinaryExpression(x) => {
-                let loperand = &x.binary_left_operand;
-                if Self::does_binop_create_write_on_left(Self::token_kind(&x.binary_operator)) {
+                let loperand = &x.left_operand;
+                if Self::does_binop_create_write_on_left(Self::token_kind(&x.operator)) {
                     self.check_lvalue(&loperand);
                 }
             }
             ForeachStatement(x) => {
-                self.check_lvalue(&x.foreach_value);
-                self.check_lvalue(&x.foreach_key);
+                self.check_lvalue(&x.value);
+                self.check_lvalue(&x.key);
             }
             CatchClause(_) => {
                 self.check_lvalue(node);
@@ -5219,14 +5057,14 @@ where
         }
     }
 
-    fn dynamic_method_call_errors(&mut self, node: &'a Syntax<Token, Value>) {
-        match &node.syntax {
-            FunctionCallExpression(x) if !x.function_call_type_args.is_missing() => {
+    fn dynamic_method_call_errors(&mut self, node: S<'a, Token, Value>) {
+        match &node.children {
+            FunctionCallExpression(x) if !x.type_args.is_missing() => {
                 let is_variable = |x| Self::is_token_kind(x, TokenKind::Variable);
-                let is_dynamic = match &x.function_call_receiver.syntax {
-                    ScopeResolutionExpression(x) => is_variable(&x.scope_resolution_name),
-                    MemberSelectionExpression(x) => is_variable(&x.member_name),
-                    SafeMemberSelectionExpression(x) => is_variable(&x.safe_member_name),
+                let is_dynamic = match &x.receiver.children {
+                    ScopeResolutionExpression(x) => is_variable(&x.name),
+                    MemberSelectionExpression(x) => is_variable(&x.name),
+                    SafeMemberSelectionExpression(x) => is_variable(&x.name),
                     _ => false,
                 };
                 if is_dynamic {
@@ -5242,9 +5080,9 @@ where
 
     fn get_namespace_name(&self) -> String {
         if let Some(node) = self.nested_namespaces.last() {
-            if let NamespaceDeclaration(x) = &node.syntax {
-                if let NamespaceDeclarationHeader(x) = &x.namespace_header.syntax {
-                    let ns = &x.namespace_name;
+            if let NamespaceDeclaration(x) = &node.children {
+                if let NamespaceDeclarationHeader(x) = &x.header.children {
+                    let ns = &x.name;
                     if !ns.is_missing() {
                         return combine_names(&self.namespace_name, self.text(ns));
                     }
@@ -5262,8 +5100,8 @@ where
         }
     }
 
-    fn disabled_legacy_soft_typehint_errors(&mut self, node: &'a Syntax<Token, Value>) {
-        if let SoftTypeSpecifier(_) = node.syntax {
+    fn disabled_legacy_soft_typehint_errors(&mut self, node: S<'a, Token, Value>) {
+        if let SoftTypeSpecifier(_) = node.children {
             if self.env.parser_options.po_disable_legacy_soft_typehints {
                 self.errors.push(Self::make_error_from_node(
                     node,
@@ -5273,8 +5111,8 @@ where
         }
     }
 
-    fn disabled_legacy_attribute_syntax_errors(&mut self, node: &'a Syntax<Token, Value>) {
-        match node.syntax {
+    fn disabled_legacy_attribute_syntax_errors(&mut self, node: S<'a, Token, Value>) {
+        match node.children {
             OldAttributeSpecification(_)
                 if self.env.parser_options.po_disable_legacy_attribute_syntax =>
             {
@@ -5287,13 +5125,13 @@ where
         }
     }
 
-    fn param_default_decl_errors(&mut self, node: &'a Syntax<Token, Value>) {
-        if let ParameterDeclaration(x) = &node.syntax {
+    fn param_default_decl_errors(&mut self, node: S<'a, Token, Value>) {
+        if let ParameterDeclaration(x) = &node.children {
             if self.env.parser_options.po_const_default_lambda_args {
                 match self.env.context.active_callable {
-                    Some(node) => match node.syntax {
+                    Some(node) => match node.children {
                         AnonymousFunction(_) | LambdaExpression(_) => {
-                            self.check_constant_expression(&x.parameter_default_value);
+                            self.check_constant_expression(&x.default_value);
                         }
                         _ => {}
                     },
@@ -5301,13 +5139,13 @@ where
                 }
             }
             if self.env.parser_options.po_const_default_func_args {
-                self.check_constant_expression(&x.parameter_default_value)
+                self.check_constant_expression(&x.default_value)
             }
         }
     }
 
-    fn concurrent_statement_errors(&mut self, node: &'a Syntax<Token, Value>) {
-        if let ConcurrentStatement(x) = &node.syntax {
+    fn concurrent_statement_errors(&mut self, node: S<'a, Token, Value>) {
+        if let ConcurrentStatement(x) = &node.children {
             // issue error if concurrent blocks are nested
             if self.is_in_concurrent_block {
                 self.errors.push(Self::make_error_from_node(
@@ -5315,17 +5153,17 @@ where
                     errors::nested_concurrent_blocks,
                 ))
             };
-            if let CompoundStatement(x) = &x.concurrent_statement.syntax {
-                let statement_list = || Self::syntax_to_list_no_separators(&x.compound_statements);
+            if let CompoundStatement(x) = &x.statement.children {
+                let statement_list = || Self::syntax_to_list_no_separators(&x.statements);
                 if statement_list().nth(1).is_none() {
                     self.errors.push(Self::make_error_from_node(
                         node,
                         errors::fewer_than_two_statements_in_concurrent_block,
                     ))
                 }
-                for n in statement_list() {
-                    if let ExpressionStatement(x) = &n.syntax {
-                        if !self.node_has_await_child(&x.expression_statement_expression) {
+                for ref n in statement_list() {
+                    if let ExpressionStatement(x) = &n.children {
+                        if !self.node_has_await_child(&x.expression) {
                             self.errors.push(Self::make_error_from_node(
                                 n,
                                 errors::statement_without_await_in_concurrent_block,
@@ -5338,7 +5176,7 @@ where
                         ))
                     }
                 }
-                for n in statement_list() {
+                for ref n in statement_list() {
                     for error in self.find_invalid_lval_usage(n) {
                         self.errors.push(error)
                     }
@@ -5352,8 +5190,8 @@ where
         }
     }
 
-    fn disabled_function_pointer_expression_error(&mut self, node: &'a Syntax<Token, Value>) {
-        if let FunctionPointerExpression(_) = &node.syntax {
+    fn disabled_function_pointer_expression_error(&mut self, node: S<'a, Token, Value>) {
+        if let FunctionPointerExpression(_) = &node.children {
             if !self
                 .env
                 .parser_options
@@ -5367,17 +5205,17 @@ where
         }
     }
 
-    fn check_qualified_name(&mut self, node: &'a Syntax<Token, Value>) {
+    fn check_qualified_name(&mut self, node: S<'a, Token, Value>) {
         // The last segment in a qualified name should not have a trailing backslash
         // i.e. `Foospace\Bar\` except as the prefix of a GroupUseClause
         if let Some(Syntax {
-            syntax: NamespaceGroupUseDeclaration(_),
+            children: NamespaceGroupUseDeclaration(_),
             ..
         }) = self.parents.last()
         {
         } else {
-            if let QualifiedName(x) = &node.syntax {
-                let name_parts = &x.qualified_name_parts;
+            if let QualifiedName(x) = &node.children {
+                let name_parts = &x.parts;
                 let mut parts = Self::syntax_to_list_with_separators(name_parts);
                 let last_part = parts.nth_back(0);
                 match last_part {
@@ -5390,12 +5228,12 @@ where
         }
     }
 
-    fn check_preceding_backslashes_qualified_name(&mut self, node: &'a Syntax<Token, Value>) {
+    fn check_preceding_backslashes_qualified_name(&mut self, node: S<'a, Token, Value>) {
         // Qualified names as part of file level declarations
         // (group use, namespace use, namespace declarations) should not have preceding backslashes
         // `use namespace A\{\B}` will throw this error.
-        if let QualifiedName(x) = &node.syntax {
-            let name_parts = &x.qualified_name_parts;
+        if let QualifiedName(x) = &node.children {
+            let name_parts = &x.parts;
             let mut parts = Self::syntax_to_list_with_separators(name_parts);
             let first_part = parts.find(|x| !x.is_missing());
 
@@ -5423,7 +5261,7 @@ where
         self.namespace_name == GLOBAL_NAMESPACE_NAME
     }
 
-    fn folder(&mut self, node: &'a Syntax<Token, Value>) {
+    fn folder(&mut self, node: S<'a, Token, Value>) {
         let has_rx_attr_mutable_hack = |self_: &mut Self, attrs| {
             self_
                 .attribute_first_reactivity_annotation(attrs)
@@ -5454,20 +5292,20 @@ where
                 self_.env.context.active_callable_attr_spec = Some(s);
             };
 
-        match &node.syntax {
+        match &node.children {
             ConstDeclaration(_) => {
                 prev_context = Some(self.env.context.clone());
                 self.env.context.active_const = Some(node)
             }
             FunctionDeclaration(x) => {
-                named_function_context(self, node, &x.function_attribute_spec, &mut prev_context)
+                named_function_context(self, node, &x.attribute_spec, &mut prev_context)
             }
             MethodishDeclaration(x) => {
-                named_function_context(self, node, &x.methodish_attribute, &mut prev_context)
+                named_function_context(self, node, &x.attribute, &mut prev_context)
             }
             NamespaceDeclaration(x) => {
-                if let NamespaceDeclarationHeader(x) = &x.namespace_header.syntax {
-                    let namespace_name = &x.namespace_name;
+                if let NamespaceDeclarationHeader(x) = &x.header.children {
+                    let namespace_name = &x.name;
                     if !namespace_name.is_missing() && !self.text(namespace_name).is_empty() {
                         pushed_nested_namespace = true;
                         self.nested_namespaces.push(node)
@@ -5475,19 +5313,19 @@ where
                 }
             }
             AnonymousFunction(x) => {
-                lambda_context(self, node, &x.anonymous_attribute_spec, &mut prev_context)
+                lambda_context(self, node, &x.attribute_spec, &mut prev_context)
             }
             LambdaExpression(x) => {
-                lambda_context(self, node, &x.lambda_attribute_spec, &mut prev_context)
+                lambda_context(self, node, &x.attribute_spec, &mut prev_context)
             }
             AwaitableCreationExpression(x) => {
-                lambda_context(self, node, &x.awaitable_attribute_spec, &mut prev_context)
+                lambda_context(self, node, &x.attribute_spec, &mut prev_context)
             }
             ClassishDeclaration(_) => {
                 prev_context = Some(self.env.context.clone());
                 self.env.context.active_classish = Some(node)
             }
-            FileAttributeSpecification(_) => Self::attr_spec_to_node_list(node).for_each(|node| {
+            FileAttributeSpecification(_) => Self::attr_spec_to_node_list(node).for_each(|ref node| {
                 if self.attr_name(node).as_deref()
                     == Some(sn::user_attributes::ENABLE_UNSTABLE_FEATURES)
                 {
@@ -5514,7 +5352,7 @@ where
                                 ),
                             ))
                         } else {
-                            args.for_each(|arg| self.enable_unstable_feature(node, arg))
+                            args.for_each(|ref arg| self.enable_unstable_feature(node, arg))
                         }
                     } else {
                     }
@@ -5525,7 +5363,7 @@ where
 
         self.parameter_errors(node);
 
-        match &node.syntax {
+        match &node.children {
             TryStatement(_)
             | UsingStatementFunctionScoped(_)
             | ForStatement(_)
@@ -5605,7 +5443,7 @@ where
             | CatchClause(_) => self.assignment_errors(node),
             XHPEnumType(_) | XHPExpression(_) => self.xhp_errors(node),
             PropertyDeclarator(x) => {
-                let init = &x.property_initializer;
+                let init = &x.initializer;
 
                 self.produce_error(
                     |self_, x| self_.check_static_in_initializer(x),
@@ -5615,10 +5453,8 @@ where
                 );
                 self.check_constant_expression(&init)
             }
-            RecordField(x) => self.check_constant_expression(&x.record_field_init),
-            XHPClassAttribute(x) => {
-                self.check_constant_expression(&x.xhp_attribute_decl_initializer)
-            }
+            RecordField(x) => self.check_constant_expression(&x.init),
+            XHPClassAttribute(x) => self.check_constant_expression(&x.initializer),
             OldAttributeSpecification(_) => self.disabled_legacy_attribute_syntax_errors(node),
             SoftTypeSpecifier(_) => self.disabled_legacy_soft_typehint_errors(node),
             FunctionPointerExpression(_) => self.disabled_function_pointer_expression_error(node),
@@ -5628,7 +5464,7 @@ where
         }
         self.lval_errors(node);
 
-        match &node.syntax {
+        match &node.children {
             LambdaExpression(_) | AwaitableCreationExpression(_) | AnonymousFunction(_) => {
                 let prev_is_in_concurrent_block = self.is_in_concurrent_block;
                 // reset is_in_concurrent_block for functions
@@ -5652,10 +5488,8 @@ where
 
             NamespaceBody(x) => {
                 if self.namespace_type == Unspecified {
-                    self.namespace_type = Bracketed(Self::make_location(
-                        &x.namespace_left_brace,
-                        &x.namespace_right_brace,
-                    ))
+                    self.namespace_type =
+                        Bracketed(Self::make_location(&x.left_brace, &x.right_brace))
                 }
 
                 let old_namespace_name = self.namespace_name.clone();
@@ -5679,8 +5513,7 @@ where
             }
             NamespaceEmptyBody(x) => {
                 if self.namespace_type == Unspecified {
-                    self.namespace_type =
-                        Unbracketed(Self::make_location_of_node(&x.namespace_semicolon))
+                    self.namespace_type = Unbracketed(Self::make_location_of_node(&x.semicolon))
                 }
                 self.namespace_name = self.get_namespace_name();
                 self.names = UsedNames::empty();
@@ -5715,7 +5548,7 @@ where
                 self.fold_child_nodes(node)
             }
             FunctionCallExpression(x)
-                if self.text(&x.function_call_receiver) == sn::special_functions::SPLICE =>
+                if self.text(&x.receiver) == sn::special_functions::SPLICE =>
             {
                 let previous_state = self.env.context.active_expression_tree;
                 self.env.context.active_expression_tree = false;
@@ -5725,7 +5558,7 @@ where
             _ => self.fold_child_nodes(node),
         }
 
-        match &node.syntax {
+        match &node.children {
             UnionTypeSpecifier(_) | IntersectionTypeSpecifier(_) => {
                 self.check_can_use_feature(node, &UnstableFeatures::UnionIntersectionTypeHints)
             }
@@ -5742,14 +5575,13 @@ where
             | PocketMappingTypeDeclaration(_) => {
                 self.check_can_use_feature(node, &UnstableFeatures::PocketUniverses)
             }
-            ClassishDeclaration(x) => match &x.classish_where_clause.syntax {
-                WhereClause(_) => self.check_can_use_feature(
-                    &x.classish_where_clause,
-                    &UnstableFeatures::ClassLevelWhere,
-                ),
+            ClassishDeclaration(x) => match &x.where_clause.children {
+                WhereClause(_) => {
+                    self.check_can_use_feature(&x.where_clause, &UnstableFeatures::ClassLevelWhere)
+                }
                 _ => {}
             },
-            EnumDeclaration(x) => match &x.enum_includes_keyword.syntax {
+            EnumDeclaration(x) => match &x.includes_keyword.children {
                 Token(_) => self.check_can_use_feature(node, &UnstableFeatures::EnumSupertyping),
                 _ => {}
             },
@@ -5771,7 +5603,7 @@ where
         }
     }
 
-    fn fold_child_nodes(&mut self, node: &'a Syntax<Token, Value>) {
+    fn fold_child_nodes(&mut self, node: S<'a, Token, Value>) {
         self.parents.push(node);
         for c in node.iter_children() {
             self.folder(c)
@@ -5792,7 +5624,7 @@ where
     }
 
     fn parse_errors(
-        tree: &'a SyntaxTree<'a, Syntax<Token, Value>, State>,
+        tree: &'a SyntaxTree<'a, Syntax<'a, Token, Value>, State>,
         text: IndexedSourceText<'a>,
         parser_options: ParserOptions,
         hhvm_compat_mode: bool,
@@ -5843,13 +5675,13 @@ where
 }
 
 pub fn parse_errors<'a, State: Clone>(
-    tree: &'a SyntaxTree<'a, PositionedSyntax, State>,
+    tree: &'a SyntaxTree<'a, PositionedSyntax<'a>, State>,
     parser_options: ParserOptions,
     hhvm_compat_mode: bool,
     hhi_mode: bool,
     codegen: bool,
 ) -> Vec<SyntaxError> {
-    ParserErrors::parse_errors(
+    <ParserErrors<'a, PositionedToken<'a>, PositionedValue<'a>, State>>::parse_errors(
         tree,
         IndexedSourceText::new(tree.text().clone()),
         parser_options,
@@ -5860,14 +5692,14 @@ pub fn parse_errors<'a, State: Clone>(
 }
 
 pub fn parse_errors_with_text<'a, State: Clone>(
-    tree: &'a SyntaxTree<'a, PositionedSyntax, State>,
+    tree: &'a SyntaxTree<'a, PositionedSyntax<'a>, State>,
     text: IndexedSourceText<'a>,
     parser_options: ParserOptions,
     hhvm_compat_mode: bool,
     hhi_mode: bool,
     codegen: bool,
 ) -> Vec<SyntaxError> {
-    ParserErrors::parse_errors(
+    <ParserErrors<'a, PositionedToken<'a>, PositionedValue<'a>, State>>::parse_errors(
         tree,
         text,
         parser_options,

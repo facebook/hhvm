@@ -23,7 +23,7 @@ let parse_minimal text env = parse_minimal text env
 
 external parse_positioned :
   SourceText.t -> Env.t -> (unit, PositionedSyntax.t) result
-  = "parse_positioned"
+  = "parse_positioned_by_ref"
 
 let parse_positioned text env = parse_positioned text env
 

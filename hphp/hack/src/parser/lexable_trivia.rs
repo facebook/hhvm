@@ -5,8 +5,9 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::trivia_kind::TriviaKind;
+use std::fmt::Debug;
 
-pub trait LexableTrivia: Clone {
+pub trait LexableTrivia: Clone + Debug {
     type Trivium: LexableTrivium;
 
     fn new() -> Self;
@@ -50,7 +51,7 @@ pub trait LexableTrivia: Clone {
     }
 }
 
-pub trait LexableTrivium: Clone + PartialEq {
+pub trait LexableTrivium: Clone + PartialEq + Debug {
     fn make_whitespace(offset: usize, width: usize) -> Self;
     fn make_eol(offset: usize, width: usize) -> Self;
     fn make_single_line_comment(offset: usize, width: usize) -> Self;
@@ -59,7 +60,6 @@ pub trait LexableTrivium: Clone + PartialEq {
     fn make_ignore_error(offset: usize, width: usize) -> Self;
     fn make_extra_token_error(offset: usize, width: usize) -> Self;
     fn make_delimited_comment(offset: usize, width: usize) -> Self;
-
     fn kind(&self) -> TriviaKind;
     fn width(&self) -> usize;
 }

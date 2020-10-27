@@ -4,9 +4,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::matches;
+
 use super::positioned_token::PositionedToken;
 use crate::{
-    lexable_token::LexableToken, syntax::SyntaxValueType, syntax_kind::SyntaxKind,
+    lexable_token::LexableToken,
+    syntax::{SyntaxValueType, SyntaxValueWithKind},
+    syntax_kind::SyntaxKind,
     token_kind::TokenKind,
 };
 
@@ -192,6 +196,19 @@ impl<'a> SyntaxValueType<PositionedToken<'a>> for PositionedValue<'a> {
         match have_width.peek() {
             None => PositionedValue::Missing { offset },
             Some(first) => Self::value_from_outer_children(first, have_width.last().unwrap()),
+        }
+    }
+}
+
+impl<'a> SyntaxValueWithKind for PositionedValue<'a> {
+    fn is_missing(&self) -> bool {
+        matches!(self, PositionedValue::Missing { .. })
+    }
+
+    fn token_kind(&self) -> Option<TokenKind> {
+        match self {
+            PositionedValue::TokenValue(pt) => Some(pt.kind()),
+            _ => None,
         }
     }
 }

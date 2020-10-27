@@ -386,11 +386,11 @@
             "token":{
               "kind":";",
               "text":";",
-              "offset":101,
-              "leading_width":0,
+              "offset":99,
+              "leading_width":2,
               "width":1,
               "trailing_width":29,
-              "leading":[{"kind":"extra_token_error","text":"\n$","offset":130,"width":2}],
+              "leading":[{"kind":"extra_token_error","text":"34","offset":99,"width":2}],
               "trailing":[
                 {"kind":"whitespace","text":"  ","offset":102,"width":2},
                 {
@@ -2471,5 +2471,5 @@
     }
   },
   "program_text":"<?hh // strict\n\n$p1 = new Point;     // error2038\n$p1 = new Point();  // legal\n$p1 = new Point 12, 34;  // error2038, among others\n$p1 = new Point(12);   // legal\n$p1 = new RReeaallllyyLLoonnggNNaammee;   // error2038\n$p1 = new $PointClassVar->$pointClassName();  // legal\n$p1 = new 'Point'(12);  // not a class-type-designator\n$p1 = new Point::Point(12);  // not a class-type-designator\n$p1 = new Point::$pointVar(12);  // legal\n$p1 = new Point::Point::$pointVar(12);  // not a class-type-designator\n$p1 = new Point::$pointVar::$pointVar(12);  // legal\n$p1 = new $point(12); // legal\n$p1 = new Point<int>(12); // legal\n$p1 = new (function_that_returns_class_name())(12); // legal\n$p1 = \"Point\" |> new $$(12); // legal\n",
-  "version":"2020-06-23-0001"
+  "version":"2020-10-15-0001"
 }

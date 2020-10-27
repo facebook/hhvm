@@ -507,11 +507,11 @@
             "token":{
               "kind":";",
               "text":";",
-              "offset":46,
-              "leading_width":0,
+              "offset":45,
+              "leading_width":1,
               "width":1,
               "trailing_width":1,
-              "leading":[{"kind":"extra_token_error","text":"\n","offset":47,"width":1}],
+              "leading":[{"kind":"extra_token_error","text":")","offset":45,"width":1}],
               "trailing":[{"kind":"end_of_line","text":"\n","offset":47,"width":1}],
               "line_number":3
             }
@@ -538,5 +538,5 @@
     }
   },
   "program_text":"<?hh\n\nvar_dump(@@@@!!@ & @&-+@!@@@~~@@ 42 + 1);\n",
-  "version":"2020-06-23-0001"
+  "version":"2020-10-15-0001"
 }

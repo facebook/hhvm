@@ -95,12 +95,12 @@
               "token":{
                 "kind":"{",
                 "text":"{",
-                "offset":81,
-                "leading_width":0,
+                "offset":71,
+                "leading_width":10,
                 "width":1,
                 "trailing_width":0,
                 "leading":[
-                  {"kind":"extra_token_error","text":"}\n\nfuncti","offset":82,"width":9},
+                  {"kind":"extra_token_error","text":"Namespace","offset":71,"width":9},
                   {"kind":"whitespace","text":" ","offset":80,"width":1}
                 ],
                 "trailing":[],
@@ -530,5 +530,5 @@
     }
   },
   "program_text":"<?hh\n\n// Using `namespace` in any case as a name is not allowed\n\nclass Namespace {}\n\nfunction test(): void {\n  $y = new Namespace();\n}\n\nfunction Namespace(): void {}\n",
-  "version":"2020-09-14-0000"
+  "version":"2020-10-15-0001"
 }

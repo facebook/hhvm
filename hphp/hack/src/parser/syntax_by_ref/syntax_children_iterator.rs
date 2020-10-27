@@ -17,3 +17,9 @@ impl<'a, T, V> Iterator for SyntaxChildrenIterator<'a, T, V> {
         self.next_impl(true)
     }
 }
+
+impl<'a, T, V> DoubleEndedIterator for SyntaxChildrenIterator<'a, T, V> {
+    fn next_back(&mut self) -> Option<Self::Item> {
+        self.next_impl(false)
+    }
+}

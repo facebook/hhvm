@@ -5600,6 +5600,68 @@ let unnecessary_attribute pos ~attr ~reason ~suggestion =
       (pos, suggestion);
     ]
 
+let inherited_class_member_with_different_case
+    member_type name name_prev p child_class prev_class prev_class_pos =
+  let name = strip_ns name in
+  let name_prev = strip_ns name_prev in
+  let child_class = strip_ns child_class in
+  let prev_class = strip_ns prev_class in
+  let errs =
+    [
+      ( p,
+        child_class
+        ^ " inherits a "
+        ^ member_type
+        ^ " named "
+        ^ Markdown_lite.md_codify name_prev
+        ^ " which differs from this one ("
+        ^ name
+        ^ ") only by case." );
+      ( prev_class_pos,
+        "It was inherited from "
+        ^ prev_class
+        ^ " as "
+        ^ (highlight_differences name name_prev |> Markdown_lite.md_codify)
+        ^ ". If you meant to override it, please use the same casing as the inherited "
+        ^ member_type
+        ^ "."
+        ^ " Otherwise, please choose a different name for the new method." );
+    ]
+  in
+  add_list (Typing.err_code Typing.InheritedMethodCaseDiffers) errs
+
+let multiple_inherited_class_member_with_different_case
+    ~member_type ~name1 ~name2 ~class1 ~class2 ~child_class ~child_p ~p1 ~p2 =
+  let name1 = strip_ns name1 in
+  let name2 = strip_ns name2 in
+  let class1 = strip_ns class1 in
+  let class2 = strip_ns class2 in
+  let child_class = strip_ns child_class in
+  let errs =
+    [
+      ( child_p,
+        Markdown_lite.md_codify child_class
+        ^ " inherited two versions of the "
+        ^ member_type
+        ^ " "
+        ^ Markdown_lite.md_codify name1
+        ^ " that differ only by case." );
+      ( p1,
+        "It inherited "
+        ^ Markdown_lite.md_codify name1
+        ^ " from "
+        ^ class1
+        ^ " here." );
+      ( p2,
+        "And "
+        ^ Markdown_lite.md_codify name2
+        ^ " from "
+        ^ class2
+        ^ " here. Please rename these methods to the same casing." );
+    ]
+  in
+  add_list (Typing.err_code Typing.InheritedMethodCaseDiffers) errs
+
 (*****************************************************************************)
 (* Printing *)
 (*****************************************************************************)

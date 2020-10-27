@@ -661,7 +661,8 @@ module Typing = struct
     | RedeclaringClassishConstant [@value 4389]
     | CallCoeffects [@value 4390]
     | AbstractFunctionPointer [@value 4391]
-    | UnnecessaryAttribute [@value 4392] (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
+    | UnnecessaryAttribute [@value 4392]
+    | InheritedMethodCaseDiffers [@value 4393]
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum

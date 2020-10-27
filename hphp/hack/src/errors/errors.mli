@@ -1447,3 +1447,18 @@ val unnecessary_attribute :
   reason:Pos.t * string ->
   suggestion:string option ->
   unit
+
+val inherited_class_member_with_different_case :
+  string -> string -> string -> Pos.t -> string -> string -> Pos.t -> unit
+
+val multiple_inherited_class_member_with_different_case :
+  member_type:string ->
+  name1:string ->
+  name2:string ->
+  class1:string ->
+  class2:string ->
+  child_class:string ->
+  child_p:Pos.t ->
+  p1:Pos.t ->
+  p2:Pos.t ->
+  unit

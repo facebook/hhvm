@@ -30,8 +30,7 @@
                         { ft_arity = (Fstandard ()); ft_tparams = [];
                           ft_where_constraints = [];
                           ft_params =
--                         [{ fp_pos = [6:33-34]; fp_name = None;
-+                         [{ fp_pos = [6:25-35]; fp_name = None;
+                          [{ fp_pos = [6:33-34]; fp_name = None;
                              fp_type =
                              { et_enforced = false;
                                et_type =
@@ -104,8 +103,7 @@
                         { ft_arity = (Fstandard ()); ft_tparams = [];
                           ft_where_constraints = [];
                           ft_params =
--                         [{ fp_pos = [9:38-39]; fp_name = None;
-+                         [{ fp_pos = [9:25-40]; fp_name = None;
+                          [{ fp_pos = [9:38-39]; fp_name = None;
                              fp_type =
                              { et_enforced = false;
                                et_type =
@@ -178,8 +176,7 @@
                         { ft_arity = (Fstandard ()); ft_tparams = [];
                           ft_where_constraints = [];
                           ft_params =
--                         [{ fp_pos = [12:38-39]; fp_name = None;
-+                         [{ fp_pos = [12:25-40]; fp_name = None;
+                          [{ fp_pos = [12:38-39]; fp_name = None;
                              fp_type =
                              { et_enforced = false;
                                et_type =

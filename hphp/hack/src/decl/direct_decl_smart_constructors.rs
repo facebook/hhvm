@@ -3988,7 +3988,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             };
 
             self.alloc(FunParam {
-                pos: self.get_pos(fp.hint),
+                pos: self.get_pos(hint),
                 name: None,
                 type_: self.alloc(PossiblyEnforcedTy {
                     enforced: false,

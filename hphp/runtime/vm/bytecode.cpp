@@ -3600,8 +3600,8 @@ bool doFCall(CallFlags callFlags, const Func* func, uint32_t numArgsInclUnpack,
   initFuncInputs(func, numArgsInclUnpack);
 
   ar->m_sfp = vmfp();
-  ar->setJitReturn(retAddr);
   ar->setFunc(func);
+  ar->setJitReturn(retAddr);
   ar->m_callOffAndFlags = ActRec::encodeCallOffsetAndFlags(
     callFlags.callOffset(),
     callFlags.asyncEagerReturn() ? (1 << ActRec::AsyncEagerRet) : 0

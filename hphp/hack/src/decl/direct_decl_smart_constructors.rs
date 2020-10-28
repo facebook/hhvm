@@ -668,7 +668,6 @@ pub enum Node<'a> {
     XhpClassAttributeDeclaration(&'a XhpClassAttributeDeclarationNode<'a>),
     XhpClassAttribute(&'a XhpClassAttributeNode<'a>),
     XhpAttributeUse(&'a Node<'a>),
-    XhpEnumType(&'a Node<'a>),
     TypeConstant(&'a ShallowTypeconst<'a>),
     RequireClause(&'a RequireClause<'a>),
     ClassishBody(&'a &'a [Node<'a>]),
@@ -1015,9 +1014,6 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                 self.alloc(Reason::witness(pos)),
                 Ty_::Tprim(self.alloc(aast::Tprim::Tbool)),
             ))),
-            Node::XhpEnumType(enum_values) => {
-                enum_values.iter().next().map(|x| self.node_to_ty(*x))?
-            }
             Node::Token(t) if t.kind() == TokenKind::Varray => {
                 let pos = self.token_pos(t);
                 let tany = self.alloc(Ty(self.alloc(Reason::hint(pos)), TANY_));
@@ -2055,6 +2051,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             | TokenKind::Lateinit
             | TokenKind::RecordDec
             | TokenKind::RightBrace
+            | TokenKind::Enum
             | TokenKind::Required => Node::Token(FixedWidthToken::new(kind, token.start_offset())),
             TokenKind::EndOfFile
             | TokenKind::Attribute
@@ -2080,7 +2077,6 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             | TokenKind::Endif
             | TokenKind::Endswitch
             | TokenKind::Endwhile
-            | TokenKind::Enum
             | TokenKind::Eval
             | TokenKind::Fallthrough
             | TokenKind::File
@@ -3432,12 +3428,19 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
 
     fn make_xhp_enum_type(
         &mut self,
-        _keyword: Self::R,
+        enum_keyword: Self::R,
         _left_brace: Self::R,
         xhp_enum_values: Self::R,
-        _right_brace: Self::R,
+        right_brace: Self::R,
     ) -> Self::R {
-        Node::XhpEnumType(self.alloc(xhp_enum_values))
+        let ty_opt = xhp_enum_values
+            .iter()
+            .next()
+            .and_then(|x| self.node_to_ty(*x));
+        match ty_opt {
+            Some(ty) => self.hint_ty(self.merge_positions(enum_keyword, right_brace), ty.1),
+            None => Node::Ignored(SK::XHPEnumType),
+        }
     }
 
     fn make_xhp_class_attribute(

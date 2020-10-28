@@ -550,8 +550,7 @@ using TypeNames::TCA;
 #define DAllocObj
 #define DVecElem
 #define DDictElem
-#define DDictSet
-#define DVecSet
+#define DModified(n)
 #define DKeysetElem
 #define DVecFirstElem
 #define DVecLastElem
@@ -612,8 +611,7 @@ using TypeNames::TCA;
 #undef DAllocObj
 #undef DVecElem
 #undef DDictElem
-#undef DDictSet
-#undef DVecSet
+#undef DModified
 #undef DKeysetElem
 #undef DVecFirstElem
 #undef DVecLastElem

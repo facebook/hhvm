@@ -53,8 +53,7 @@ TRACE_SET_MOD(hhir);
 #define DAllocObj      HasDest
 #define DVecElem       HasDest
 #define DDictElem      HasDest
-#define DDictSet       HasDest
-#define DVecSet        HasDest
+#define DModified(n)   HasDest
 #define DKeysetElem    HasDest
 #define DLvalToElemParam  HasDest
 #define DVecFirstElem     HasDest
@@ -128,8 +127,6 @@ OpInfo g_opInfo[] = {
 #undef DLdObjCls
 #undef DVecElem
 #undef DDictElem
-#undef DDictSet
-#undef DVecSet
 #undef DKeysetElem
 #undef DEscalateToVanilla
 #undef DLvalToElemParam
@@ -281,6 +278,10 @@ bool opcodeMayRaise(Opcode opc) {
   case AKExistsObj:
   case AllocObj:
   case AllocObjReified:
+  case ArrayMarkLegacyShallow:
+  case ArrayMarkLegacyRecursive:
+  case ArrayUnmarkLegacyShallow:
+  case ArrayUnmarkLegacyRecursive:
   case BaseG:
   case BespokeAppend:
   case BespokeElem:
@@ -440,6 +441,7 @@ bool opcodeMayRaise(Opcode opc) {
   case SuspendHookAwaitR:
   case SuspendHookCreateCont:
   case SuspendHookYield:
+  case TagProvenanceHere:
   case ThrowAsTypeStructException:
   case ThrowArrayIndexException:
   case ThrowArrayKeyException:
@@ -873,8 +875,6 @@ bool opcodeMayRaise(Opcode opc) {
   case SameObj:
   case SameStr:
   case Select:
-  case SetLegacyDict:
-  case SetLegacyVec:
   case Shl:
   case Shr:
   case Sqrt:
@@ -905,8 +905,6 @@ bool opcodeMayRaise(Opcode opc) {
   case SubIntO:
   case Unreachable:
   case UnwindCheckSideExit:
-  case UnsetLegacyDict:
-  case UnsetLegacyVec:
   case VecFirst:
   case VecLast:
   case VectorIsset:

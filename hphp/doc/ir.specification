@@ -2190,9 +2190,9 @@ To string conversions:
 
   Concatenate S0, S1, S2, and S3.
 
-| AddNewElemKeyset, D(Keyset), S(Keyset) S(Cell), CRc|PRc
+| AddNewElemKeyset, D(Keyset),    S(Keyset) S(Cell),   CRc|PRc
 
-| AddNewElemVec,    DVecSet,   S(VArr,Vec) S(Cell),    CRc|PRc
+| AddNewElemVec,    DModified(0), S(VArr,Vec) S(Cell), CRc|PRc
 
   Add S1 as a new element to the array/keyset/vec S0.  (Note: S1 must actually
   be a subtype of InitCell for array invariants, but we can't assert this yet
@@ -2984,12 +2984,12 @@ fields of that struct for holding intermediate values.
 
   Initialize the memoization instance slots for object S0 of the given class.
 
-| VecSet, DVecSet, S(VArr,Vec) S(Int) S(Cell), PRc|CRc
+| VecSet, DModified(0), S(VArr,Vec) S(Int) S(Cell), PRc|CRc
 
   Set element with key S1 in S0 to S2. The dest will be a new Vec that should
   replace S0.
 
-| DictSet, DDictSet, S(DArr,Dict) S(Int,Str) S(Cell), PRc|CRc
+| DictSet, DModified(0), S(DArr,Dict) S(Int,Str) S(Cell), PRc|CRc
 
   Set element with key S1 in S0 to S2. The dest will be a new Dict that should
   replace S0.
@@ -3243,16 +3243,22 @@ fields of that struct for holding intermediate values.
   Returns the first value(key) from the keyset in S0.
   If the array is empty, it will return NULL.
 
-| SetLegacyVec, D(Vec), S(Vec), CRc|PRc
+| ArrayMarkLegacyShallow,     DModified(0), S(Vec,Dict,VArr,DArr), CRc|PRc|LA
 
-| SetLegacyDict, D(Dict), S(Dict), CRc|PRc
+| ArrayMarkLegacyRecursive,   DModified(0), S(Vec,Dict,VArr,DArr), CRc|PRc|LA
 
-| UnsetLegacyVec, D(Vec), S(Vec), CRc|PRc
+| ArrayUnmarkLegacyShallow,   DModified(0), S(Vec,Dict,VArr,DArr), CRc|PRc|LA
 
-| UnsetLegacyDict, D(Dict), S(Dict), CRc|PRc
+| ArrayUnmarkLegacyRecursive, DModified(0), S(Vec,Dict,VArr,DArr), CRc|PRc|LA
 
-  Enable/disable the legacy bit on the vec/dict in S0, copying it if necessary
-  and returning the tagged array.
+  Set or unset the legacy bit on the array-like in S0, copying it if needed.
+  The recursive variants traverse through the array-like's transitive elements
+  but stop traversal at any non-array-like.
+
+| TagProvenanceHere, DModified(0), S(Vec,Dict,VArr,DArr) S(Int), CRc|PRc|LA
+
+  Tag the dvarray S0 with provenance information, using flags S1, skipping
+  over any stack frames with ProvenanceSkipFrame annotations.
 
 
 18. Exception/unwinding support

@@ -102,35 +102,67 @@ void cgCheckVecBoundsLA(IRLS& env, const IRInstruction* inst) {
 
 namespace {
 
-ArrayData* setLegacyHelper(ArrayData* ad, bool legacy) {
-  auto const result = ad->setLegacyArray(ad->cowCheck(), legacy);
-  if (result != ad) decRefArr(ad);
-  return result;
+static ArrayData* markLegacyShallowHelper(ArrayData* ad, bool legacy) {
+  auto const tv = make_array_like_tv(ad);
+  auto const result = arrprov::markTvShallow(tv, legacy);
+  decRefArr(ad);
+  assertx(tvIsArrayLike(result));
+  return val(result).parr;
 }
 
-void setLegacyImpl(IRLS& env, const IRInstruction* inst, bool set) {
-  auto const args = argGroup(env, inst).ssa(0).imm(set);
-  auto const target = CallSpec::direct(setLegacyHelper);
+static ArrayData* markLegacyRecursiveHelper(ArrayData* ad, bool legacy) {
+  auto const tv = make_array_like_tv(ad);
+  auto const result = arrprov::markTvRecursively(tv, legacy);
+  decRefArr(ad);
+  assertx(tvIsArrayLike(result));
+  return val(result).parr;
+}
+
+static ArrayData* tagProvenanceHelper(ArrayData* ad, int64_t flags) {
+  auto const tv = make_array_like_tv(ad);
+  auto const result = arrprov::tagTvRecursively(tv, flags);
+  decRefArr(ad);
+  assertx(tvIsArrayLike(result));
+  return val(result).parr;
+}
+
+void markLegacyShallow(IRLS& env, const IRInstruction* inst, bool legacy) {
+  auto const args = argGroup(env, inst).ssa(0).imm(legacy);
+  auto const target = CallSpec::direct(markLegacyShallowHelper);
   cgCallHelper(vmain(env), env, target, callDest(env, inst),
-               SyncOptions::None, args);
+               SyncOptions::Sync, args);
+}
+
+void markLegacyRecursive(IRLS& env, const IRInstruction* inst, bool legacy) {
+  auto const args = argGroup(env, inst).ssa(0).imm(legacy);
+  auto const target = CallSpec::direct(markLegacyRecursiveHelper);
+  cgCallHelper(vmain(env), env, target, callDest(env, inst),
+               SyncOptions::Sync, args);
 }
 
 }
 
-void cgSetLegacyVec(IRLS& env, const IRInstruction* inst) {
-  setLegacyImpl(env, inst, true);
+void cgArrayMarkLegacyShallow(IRLS& env, const IRInstruction* inst) {
+  markLegacyShallow(env, inst, true);
 }
 
-void cgSetLegacyDict(IRLS& env, const IRInstruction* inst) {
-  setLegacyImpl(env, inst, true);
+void cgArrayMarkLegacyRecursive(IRLS& env, const IRInstruction* inst) {
+  markLegacyRecursive(env, inst, true);
 }
 
-void cgUnsetLegacyVec(IRLS& env, const IRInstruction* inst) {
-  setLegacyImpl(env, inst, false);
+void cgArrayUnmarkLegacyShallow(IRLS& env, const IRInstruction* inst) {
+  markLegacyShallow(env, inst, false);
 }
 
-void cgUnsetLegacyDict(IRLS& env, const IRInstruction* inst) {
-  setLegacyImpl(env, inst, false);
+void cgArrayUnmarkLegacyRecursive(IRLS& env, const IRInstruction* inst) {
+  markLegacyRecursive(env, inst, false);
+}
+
+void cgTagProvenanceHere(IRLS& env, const IRInstruction* inst) {
+  auto const args = argGroup(env, inst).ssa(0).ssa(1);
+  auto const target = CallSpec::direct(tagProvenanceHelper);
+  cgCallHelper(vmain(env), env, target, callDest(env, inst),
+               SyncOptions::Sync, args);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

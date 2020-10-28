@@ -1912,10 +1912,11 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ThrowParameterWrongType:
   case ThrowParamInOutMismatch:
   case ThrowParamInOutMismatchRange:
-  case SetLegacyDict:
-  case SetLegacyVec:
-  case UnsetLegacyDict:
-  case UnsetLegacyVec:
+  case ArrayMarkLegacyShallow:
+  case ArrayMarkLegacyRecursive:
+  case ArrayUnmarkLegacyShallow:
+  case ArrayUnmarkLegacyRecursive:
+  case TagProvenanceHere:
   case SetOpTV:
   case OutlineSetOp:
   case ThrowAsTypeStructException:

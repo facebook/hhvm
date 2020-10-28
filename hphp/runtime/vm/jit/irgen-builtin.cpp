@@ -1119,44 +1119,6 @@ SSATmp* opt_tag_provenance_here(IRGS& env, const ParamPrep& params) {
   return nullptr;
 }
 
-StaticString s_ARRAY_MARK_LEGACY_VEC(Strings::ARRAY_MARK_LEGACY_VEC);
-StaticString s_ARRAY_MARK_LEGACY_DICT(Strings::ARRAY_MARK_LEGACY_DICT);
-
-SSATmp* opt_array_mark_legacy(IRGS& env, const ParamPrep& params) {
-  if (params.size() != 1) return nullptr;
-  auto const value = params[0].value;
-  if (!RO::EvalHackArrDVArrs) {
-    if (value->isA(TVec)) {
-      gen(env,
-          RaiseWarning,
-          make_opt_catch(env, params),
-          cns(env, s_ARRAY_MARK_LEGACY_VEC.get()));
-    } else if (value->isA(TDict)) {
-      gen(env,
-          RaiseWarning,
-          make_opt_catch(env, params),
-          cns(env, s_ARRAY_MARK_LEGACY_DICT.get()));
-    }
-  }
-  if (value->isA(TVec)) {
-    return gen(env, SetLegacyVec, value);
-  } else if (value->isA(TDict)) {
-    return gen(env, SetLegacyDict, value);
-  }
-  return nullptr;
-}
-
-SSATmp* opt_array_unmark_legacy(IRGS& env, const ParamPrep& params) {
-  if (params.size() != 1) return nullptr;
-  auto const value = params[0].value;
-  if (value->isA(TVec)) {
-    return gen(env, UnsetLegacyVec, value);
-  } else if (value->isA(TDict)) {
-    return gen(env, UnsetLegacyDict, value);
-  }
-  return nullptr;
-}
-
 SSATmp* opt_is_meth_caller(IRGS& env, const ParamPrep& params) {
   if (params.size() != 1) return nullptr;
   auto const value = params[0].value;
@@ -1233,8 +1195,6 @@ const hphp_fast_string_imap<OptEmitFn> s_opt_emit_fns{
   {"HH\\BuiltinEnum::isValid", opt_enum_is_valid},
   {"HH\\is_meth_caller", opt_is_meth_caller},
   {"HH\\tag_provenance_here", opt_tag_provenance_here},
-  {"HH\\array_mark_legacy", opt_array_mark_legacy},
-  {"HH\\array_unmark_legacy", opt_array_unmark_legacy},
   {"HH\\meth_caller_get_class", opt_meth_caller_get_class},
   {"HH\\meth_caller_get_method", opt_meth_caller_get_method},
 };

@@ -267,10 +267,6 @@ bool canDCE(IRInstruction* inst) {
   case IsClsDynConstructible:
   case LdFuncRxLevel:
   case StrictlyIntegerConv:
-  case SetLegacyDict:
-  case SetLegacyVec:
-  case UnsetLegacyDict:
-  case UnsetLegacyVec:
   case GetMemoKeyScalar:
   case LookupSPropSlot:
   case ConstructClosure:
@@ -697,6 +693,11 @@ bool canDCE(IRInstruction* inst) {
   case StFrameFunc:
   case StFrameMeta:
   case LookupClsCns:
+  case ArrayMarkLegacyShallow:
+  case ArrayMarkLegacyRecursive:
+  case ArrayUnmarkLegacyShallow:
+  case ArrayUnmarkLegacyRecursive:
+  case TagProvenanceHere:
     return false;
 
   case IsTypeStruct:

@@ -257,10 +257,10 @@ fn read_member_modifiers<'a: 'b, 'b>(modifiers: impl Iterator<Item = &'b Node<'a
         if let Some(vis) = modifier.as_visibility() {
             ret.visibility = vis;
         }
-        match modifier {
-            Node::Token(TokenKind::Static) => ret.is_static = true,
-            Node::Token(TokenKind::Abstract) => ret.is_abstract = true,
-            Node::Token(TokenKind::Final) => ret.is_final = true,
+        match modifier.token_kind() {
+            Some(TokenKind::Static) => ret.is_static = true,
+            Some(TokenKind::Abstract) => ret.is_abstract = true,
+            Some(TokenKind::Final) => ret.is_final = true,
             _ => {}
         }
     }
@@ -579,6 +579,55 @@ pub struct UserAttributeNode<'a> {
     string_literal_params: &'a [&'a BStr], // this is only used for __Deprecated attribute message and Cipp parameters
 }
 
+mod fixed_width_token {
+    use parser_core_types::token_kind::TokenKind;
+    use std::convert::TryInto;
+
+    #[derive(Copy, Clone)]
+    pub struct FixedWidthToken(u64); // { offset: u56, kind: TokenKind }
+
+    const KIND_BITS: u8 = 8;
+    const KIND_MASK: u64 = u8::MAX as u64;
+    const MAX_OFFSET: u64 = !(KIND_MASK << (64 - KIND_BITS));
+
+    impl FixedWidthToken {
+        pub fn new(kind: TokenKind, offset: usize) -> Self {
+            // We don't want to spend bits tracking the width of fixed-width
+            // tokens. Since we don't track width, verify that this token kind
+            // is in fact a fixed-width kind.
+            debug_assert!(kind.fixed_width().is_some());
+
+            let offset: u64 = offset.try_into().unwrap();
+            if offset > MAX_OFFSET {
+                panic!("FixedWidthToken: offset too large");
+            }
+            Self(offset << KIND_BITS | kind as u8 as u64)
+        }
+
+        pub fn offset(self) -> usize {
+            (self.0 >> KIND_BITS).try_into().unwrap()
+        }
+
+        pub fn kind(self) -> TokenKind {
+            TokenKind::try_from_u8(self.0 as u8).unwrap()
+        }
+
+        pub fn width(self) -> usize {
+            self.kind().fixed_width().unwrap().get()
+        }
+    }
+
+    impl std::fmt::Debug for FixedWidthToken {
+        fn fmt(&self, fmt: &mut std::fmt::Formatter) -> std::fmt::Result {
+            fmt.debug_struct("FixedWidthToken")
+                .field("kind", &self.kind())
+                .field("offset", &self.offset())
+                .finish()
+        }
+    }
+}
+use fixed_width_token::FixedWidthToken;
+
 #[derive(Copy, Clone, Debug)]
 pub enum Node<'a> {
     // Nodes which are not useful in constructing a decl are ignored. We keep
@@ -646,8 +695,8 @@ pub enum Node<'a> {
     // node (for instance, the parentheses surrounding a tuple type).
     Pos(&'a Pos<'a>),
 
-    // Simple keywords and tokens.
-    Token(TokenKind),
+    // Non-ignored, fixed-width tokens (e.g., keywords, operators, braces, etc.).
+    Token(FixedWidthToken),
 }
 
 impl<'a> smart_constructors::NodeType for Node<'a> {
@@ -658,7 +707,7 @@ impl<'a> smart_constructors::NodeType for Node<'a> {
     }
 
     fn is_abstract(&self) -> bool {
-        matches!(self, Node::Token(TokenKind::Abstract))
+        self.is_token(TokenKind::Abstract)
     }
     fn is_name(&self) -> bool {
         matches!(self, Node::Name(..))
@@ -699,6 +748,17 @@ impl<'a> smart_constructors::NodeType for Node<'a> {
 }
 
 impl<'a> Node<'a> {
+    fn is_token(self, kind: TokenKind) -> bool {
+        self.token_kind() == Some(kind)
+    }
+
+    fn token_kind(self) -> Option<TokenKind> {
+        match self {
+            Node::Token(token) => Some(token.kind()),
+            _ => None,
+        }
+    }
+
     fn as_slice(self, b: &'a Bump) -> &'a [Self] {
         match self {
             Node::List(&items) | Node::BracketedList(&(_, items, _)) => items,
@@ -731,10 +791,10 @@ impl<'a> Node<'a> {
     }
 
     fn as_visibility(&self) -> Option<aast::Visibility> {
-        match self {
-            Node::Token(TokenKind::Private) => Some(aast::Visibility::Private),
-            Node::Token(TokenKind::Protected) => Some(aast::Visibility::Protected),
-            Node::Token(TokenKind::Public) => Some(aast::Visibility::Public),
+        match self.token_kind() {
+            Some(TokenKind::Private) => Some(aast::Visibility::Private),
+            Some(TokenKind::Protected) => Some(aast::Visibility::Protected),
+            Some(TokenKind::Public) => Some(aast::Visibility::Public),
             _ => None,
         }
     }
@@ -848,7 +908,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
         self.merge(self.get_pos(node1), self.get_pos(node2))
     }
 
-    fn pos_from_slice(&self, nodes: &'a [Node<'a>]) -> &'a Pos<'a> {
+    fn pos_from_slice(&self, nodes: &[Node<'a>]) -> &'a Pos<'a> {
         nodes.iter().fold(Pos::none(), |acc, &node| {
             self.merge(acc, self.get_pos(node))
         })
@@ -881,6 +941,13 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                 self.merge(self.pos_from_slice(inner_list), second_pos),
             ),
             Node::Expr(&aast::Expr(pos, _)) => pos,
+            Node::Token(token) => {
+                let start = token.offset();
+                let end = start + token.width();
+                let start = self.state.source_text.offset_to_file_pos_triple(start);
+                let end = self.state.source_text.offset_to_file_pos_triple(end);
+                Pos::from_lnum_bol_cnum(self.state.arena, self.state.filename, start, end)
+            }
             _ => Pos::none(),
         }
     }
@@ -1303,11 +1370,8 @@ impl<'a> DirectDeclSmartConstructors<'a> {
         let async_ = header
             .modifiers
             .iter()
-            .any(|n| matches!(n, Node::Token(TokenKind::Async)));
-        let fun_kind = if body.iter().any(|node| match node {
-            Node::Token(TokenKind::Yield) => true,
-            _ => false,
-        }) {
+            .any(|n| n.is_token(TokenKind::Async));
+        let fun_kind = if body.iter().any(|node| node.is_token(TokenKind::Yield)) {
             if async_ {
                 FunKind::FAsyncGenerator
             } else {
@@ -1817,9 +1881,10 @@ impl<'a> FlattenOp for DirectDeclSmartConstructors<'a> {
 
     fn is_zero(s: &Self::S) -> bool {
         match s {
-            Node::Token(TokenKind::Yield) => false,
-            Node::Token(TokenKind::Required) => false,
-            Node::Token(TokenKind::Lateinit) => false,
+            Node::Token(token) => match token.kind() {
+                TokenKind::Yield | TokenKind::Required | TokenKind::Lateinit => false,
+                _ => true,
+            },
             Node::List(inner) => inner.iter().all(Self::is_zero),
             _ => true,
         }
@@ -1995,7 +2060,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             | TokenKind::Static
             | TokenKind::Trait
             | TokenKind::Lateinit
-            | TokenKind::Required => Node::Token(kind),
+            | TokenKind::Required => Node::Token(FixedWidthToken::new(kind, token.start_offset())),
             TokenKind::EndOfFile
             | TokenKind::Attribute
             | TokenKind::Await
@@ -2120,12 +2185,12 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
     }
 
     fn make_list(&mut self, items: std::vec::Vec<Self::R>, _: usize) -> Self::R {
-        if items
+        if let Some(&yield_) = items
             .iter()
             .flat_map(|node| node.iter())
-            .any(|node| matches!(node, Node::Token(TokenKind::Yield)))
+            .find(|node| node.is_token(TokenKind::Yield))
         {
-            Node::Token(TokenKind::Yield)
+            yield_
         } else {
             let size = items.iter().filter(|node| node.is_present()).count();
             let items_iter = items.into_iter();
@@ -2380,8 +2445,8 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             _ => return Node::Ignored(SK::BinaryExpression),
         };
 
-        match (&op, rhs) {
-            (Bop::Eq(_), Node::Token(TokenKind::Yield)) => return rhs,
+        match (&op, rhs.is_token(TokenKind::Yield)) {
+            (Bop::Eq(_), true) => return rhs,
             _ => {}
         }
 
@@ -2525,7 +2590,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                     Node::RecordField(&field) => Some(field),
                     _ => None,
                 })),
-                abstract_: matches!(modifier, Node::Token(TokenKind::Abstract)),
+                abstract_: modifier.is_token(TokenKind::Abstract),
                 pos: self.merge_positions(attribute_spec, right_brace),
             }),
         );
@@ -2581,9 +2646,9 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         let tparams = self.pop_type_params(generic_params);
         let typedef = self.alloc(TypedefType {
             pos,
-            vis: match keyword {
-                Node::Token(TokenKind::Type) => aast::TypedefVisibility::Transparent,
-                Node::Token(TokenKind::Newtype) => aast::TypedefVisibility::Opaque,
+            vis: match keyword.token_kind() {
+                Some(TokenKind::Type) => aast::TypedefVisibility::Transparent,
+                Some(TokenKind::Newtype) => aast::TypedefVisibility::Opaque,
                 _ => aast::TypedefVisibility::Transparent,
             },
             tparams,
@@ -2597,9 +2662,9 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
     }
 
     fn make_type_constraint(&mut self, kind: Self::R, value: Self::R) -> Self::R {
-        let kind = match kind {
-            Node::Token(TokenKind::As) => ConstraintKind::ConstraintAs,
-            Node::Token(TokenKind::Super) => ConstraintKind::ConstraintSuper,
+        let kind = match kind.token_kind() {
+            Some(TokenKind::As) => ConstraintKind::ConstraintAs,
+            Some(TokenKind::Super) => ConstraintKind::ConstraintSuper,
             n => panic!("Expected either As or Super, but was {:?}", n),
         };
         Node::TypeConstraint(self.alloc((kind, value)))
@@ -2651,9 +2716,10 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 Node::Operator(&(_, TokenKind::Plus)) => Variance::Covariant,
                 _ => Variance::Invariant,
             },
-            reified: match reify {
-                Node::Token(TokenKind::Reify) => aast::ReifyKind::Reified,
-                _ => aast::ReifyKind::Erased,
+            reified: if reify.is_token(TokenKind::Reify) {
+                aast::ReifyKind::Reified
+            } else {
+                aast::ReifyKind::Erased
             },
             constraints,
             tparam_params,
@@ -2729,10 +2795,8 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                     Some(id) => id,
                     None => return Node::Ignored(SK::ParameterDeclaration),
                 };
-                match ellipsis {
-                    Node::Token(TokenKind::DotDotDot) => (true, id),
-                    _ => (false, id),
-                }
+                let variadic = ellipsis.is_token(TokenKind::DotDotDot);
+                (variadic, id)
             }
             name => {
                 let name = match name.as_id() {
@@ -2742,9 +2806,10 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 (false, name)
             }
         };
-        let kind = match inout {
-            Node::Token(TokenKind::Inout) => ParamMode::FPinout,
-            _ => ParamMode::FPnormal,
+        let kind = if inout.is_token(TokenKind::Inout) {
+            ParamMode::FPinout
+        } else {
+            ParamMode::FPnormal
         };
         Node::FunParam(self.alloc(FunParamDecl {
             attributes,
@@ -2856,8 +2921,9 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         }))
     }
 
-    fn make_yield_expression(&mut self, _keyword: Self::R, _operand: Self::R) -> Self::R {
-        Node::Token(TokenKind::Yield)
+    fn make_yield_expression(&mut self, keyword: Self::R, _operand: Self::R) -> Self::R {
+        assert!(keyword.token_kind() == Some(TokenKind::Yield));
+        keyword
     }
 
     fn make_const_declaration(
@@ -3005,7 +3071,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             Some(id) => id,
             None => return Node::Ignored(SK::NamespaceUseClause),
         };
-        let as_ = if let Node::Token(TokenKind::As) = as_ {
+        let as_ = if as_.is_token(TokenKind::As) {
             match aliased_name.as_id() {
                 Some(name) => Some(name.1),
                 None => return Node::Ignored(SK::NamespaceUseClause),
@@ -3030,8 +3096,9 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             self.node_to_ty(left_type).unwrap_or_else(|| tany()),
             match operator {
                 Node::Operator((_, TokenKind::Equal)) => ConstraintKind::ConstraintEq,
-                Node::Token(TokenKind::As) => ConstraintKind::ConstraintAs,
-                Node::Token(TokenKind::Super) => ConstraintKind::ConstraintSuper,
+                Node::Token(token) if token.kind() == TokenKind::Super => {
+                    ConstraintKind::ConstraintSuper
+                }
                 _ => ConstraintKind::ConstraintAs,
             },
             self.node_to_ty(right_type).unwrap_or_else(|| tany()),
@@ -3063,17 +3130,17 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             (false, name)
         };
 
-        let mut class_kind = match class_keyword {
-            Node::Token(TokenKind::Interface) => ClassKind::Cinterface,
-            Node::Token(TokenKind::Trait) => ClassKind::Ctrait,
+        let mut class_kind = match class_keyword.token_kind() {
+            Some(TokenKind::Interface) => ClassKind::Cinterface,
+            Some(TokenKind::Trait) => ClassKind::Ctrait,
             _ => ClassKind::Cnormal,
         };
         let mut final_ = false;
 
         for modifier in modifiers.iter() {
-            match modifier {
-                Node::Token(TokenKind::Abstract) => class_kind = ClassKind::Cabstract,
-                Node::Token(TokenKind::Final) => final_ = true,
+            match modifier.token_kind() {
+                Some(TokenKind::Abstract) => class_kind = ClassKind::Cabstract,
+                Some(TokenKind::Final) => final_ = true,
                 _ => {}
             }
         }
@@ -3120,9 +3187,9 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                     xhp_attr_uses_len += xhp_attr_uses_decls.len();
                 }
                 Node::TypeConstant(..) => typeconsts_len += 1,
-                Node::RequireClause(require) => match require.require_type {
-                    Node::Token(TokenKind::Extends) => req_extends_len += 1,
-                    Node::Token(TokenKind::Implements) => req_implements_len += 1,
+                Node::RequireClause(require) => match require.require_type.token_kind() {
+                    Some(TokenKind::Extends) => req_extends_len += 1,
+                    Some(TokenKind::Implements) => req_implements_len += 1,
                     _ => {}
                 },
                 Node::List(consts @ [Node::Const(..), ..]) => consts_len += consts.len(),
@@ -3191,11 +3258,11 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                     )
                 }
                 Node::TypeConstant(constant) => typeconsts.push(constant),
-                Node::RequireClause(require) => match require.require_type {
-                    Node::Token(TokenKind::Extends) => {
+                Node::RequireClause(require) => match require.require_type.token_kind() {
+                    Some(TokenKind::Extends) => {
                         req_extends.extend(self.node_to_ty(require.name).iter())
                     }
-                    Node::Token(TokenKind::Implements) => {
+                    Some(TokenKind::Implements) => {
                         req_implements.extend(self.node_to_ty(require.name).iter())
                     }
                     _ => {}
@@ -3258,10 +3325,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             mode: self.state.file_mode,
             final_,
             is_xhp,
-            has_xhp_keyword: match xhp_keyword {
-                Node::Token(TokenKind::XHP) => true,
-                _ => false,
-            },
+            has_xhp_keyword: xhp_keyword.is_token(TokenKind::XHP),
             kind: class_kind,
             name: Id(pos, name),
             tparams,
@@ -3409,9 +3473,9 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             name,
             hint: type_,
             needs_init: !initializer.is_present(),
-            tag: match tag {
-                Node::Token(TokenKind::Required) => Some(XhpAttrTag::Required),
-                Node::Token(TokenKind::Lateinit) => Some(XhpAttrTag::Lateinit),
+            tag: match tag.token_kind() {
+                Some(TokenKind::Required) => Some(XhpAttrTag::Required),
+                Some(TokenKind::Lateinit) => Some(XhpAttrTag::Lateinit),
                 _ => None,
             },
             nullable: match initializer {
@@ -3690,8 +3754,8 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 n => panic!("Expected a shape field specifier, but was {:?}", n),
             }
         }
-        let kind = match open {
-            Node::Token(TokenKind::DotDotDot) => ShapeKind::OpenShape,
+        let kind = match open.token_kind() {
+            Some(TokenKind::DotDotDot) => ShapeKind::OpenShape,
             _ => ShapeKind::ClosedShape,
         };
         let pos = self.merge_positions(shape, rparen);
@@ -4045,9 +4109,10 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
     }
 
     fn make_closure_parameter_type_specifier(&mut self, inout: Self::R, hint: Self::R) -> Self::R {
-        let kind = match inout {
-            Node::Token(TokenKind::Inout) => ParamMode::FPinout,
-            _ => ParamMode::FPnormal,
+        let kind = if inout.is_token(TokenKind::Inout) {
+            ParamMode::FPinout
+        } else {
+            ParamMode::FPnormal
         };
         Node::FunParam(self.alloc(FunParamDecl {
             attributes: Node::Ignored(SK::Missing),
@@ -4074,10 +4139,9 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         _semicolon: Self::R,
     ) -> Self::R {
         let attributes = self.to_attributes(attributes);
-        let has_abstract_keyword = modifiers.iter().fold(false, |abstract_, node| match node {
-            Node::Token(TokenKind::Abstract) => true,
-            _ => abstract_,
-        });
+        let has_abstract_keyword = modifiers
+            .iter()
+            .any(|node| node.is_token(TokenKind::Abstract));
         let constraint = match constraint {
             Node::TypeConstraint(innards) => self.node_to_ty(innards.1),
             _ => None,

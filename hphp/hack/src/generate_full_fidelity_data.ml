@@ -2996,7 +2996,11 @@ module GenerateFFRustTokenKind = struct
       guard
       (token_kind x)
 
-  let to_kind_declaration x = sprintf "    %s,\n" (token_kind x)
+  let rust_tag = ref (-1)
+
+  let to_kind_declaration x =
+    incr rust_tag;
+    sprintf "    %s = %d,\n" (token_kind x) !rust_tag
 
   let token_text x = escape_token_text x.token_text
 
@@ -3012,14 +3016,34 @@ module GenerateFFRustTokenKind = struct
     incr ocaml_tag;
     sprintf "            TokenKind::%s => %d,\n" (token_kind x) !ocaml_tag
 
+  let from_u8_tag = ref (-1)
+
+  let to_try_from_u8 x =
+    incr from_u8_tag;
+    sprintf
+      "            %d => Some(TokenKind::%s),\n"
+      !from_u8_tag
+      (token_kind x)
+
+  let to_width x =
+    let len = String.length (token_text x) in
+    assert (len > 0);
+    sprintf
+      "            TokenKind::%s => Some(unsafe { NonZeroUsize::new_unchecked(%d) }),\n"
+      (token_kind x)
+      len
+
   let full_fidelity_rust_token_kind_template =
     make_header CStyle ""
     ^ "
+
+use std::num::NonZeroUsize;
 
 use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
 
 #[allow(non_camel_case_types)] // allow Include_once and Require_once
 #[derive(Debug, Copy, Clone, PartialEq, Ord, Eq, PartialOrd, FromOcamlRep, ToOcamlRep)]
+#[repr(u8)]
 pub enum TokenKind {
     // No text tokens
 KIND_DECLARATIONS_NO_TEXT    // Given text tokens
@@ -3027,7 +3051,7 @@ KIND_DECLARATIONS_GIVEN_TEXT    // Variable text tokens
 KIND_DECLARATIONS_VARIABLE_TEXT}
 
 impl TokenKind {
-    pub fn to_string(&self) -> &str {
+    pub fn to_string(self) -> &'static str {
         match self {
             // No text tokens
 TO_STRING_NO_TEXT            // Given text tokens
@@ -3051,6 +3075,18 @@ FROM_STRING_GIVEN_TEXT            _ => None,
         match self {
 OCAML_TAG_NO_TEXTOCAML_TAG_GIVEN_TEXTOCAML_TAG_VARIABLE_TEXT        }
     }
+
+    pub fn try_from_u8(tag: u8) -> Option<Self> {
+        match tag {
+FROM_U8_NO_TEXTFROM_U8_GIVEN_TEXTFROM_U8_VARIABLE_TEXT            _ => None,
+        }
+    }
+
+    pub fn fixed_width(self) -> Option<NonZeroUsize> {
+        match self {
+WIDTH_GIVEN_TEXT            _ => None,
+        }
+    }
 }
 "
 
@@ -3069,6 +3105,10 @@ OCAML_TAG_NO_TEXTOCAML_TAG_GIVEN_TEXTOCAML_TAG_VARIABLE_TEXT        }
           {
             token_pattern = "OCAML_TAG_NO_TEXT";
             token_func = map_and_concat to_ocaml_tag;
+          };
+          {
+            token_pattern = "FROM_U8_NO_TEXT";
+            token_func = map_and_concat to_try_from_u8;
           };
         ]
       ~token_given_text_transformations:
@@ -3089,6 +3129,14 @@ OCAML_TAG_NO_TEXTOCAML_TAG_GIVEN_TEXTOCAML_TAG_VARIABLE_TEXT        }
             token_pattern = "OCAML_TAG_GIVEN_TEXT";
             token_func = map_and_concat to_ocaml_tag;
           };
+          {
+            token_pattern = "FROM_U8_GIVEN_TEXT";
+            token_func = map_and_concat to_try_from_u8;
+          };
+          {
+            token_pattern = "WIDTH_GIVEN_TEXT";
+            token_func = map_and_concat to_width;
+          };
         ]
       ~token_variable_text_transformations:
         [
@@ -3103,6 +3151,10 @@ OCAML_TAG_NO_TEXTOCAML_TAG_GIVEN_TEXTOCAML_TAG_VARIABLE_TEXT        }
           {
             token_pattern = "OCAML_TAG_VARIABLE_TEXT";
             token_func = map_and_concat to_ocaml_tag;
+          };
+          {
+            token_pattern = "FROM_U8_VARIABLE_TEXT";
+            token_func = map_and_concat to_try_from_u8;
           };
         ]
       ~filename:(full_fidelity_path_prefix ^ "token_kind.rs")

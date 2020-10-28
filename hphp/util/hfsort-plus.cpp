@@ -47,7 +47,10 @@ constexpr uint64_t kMaxArcDistance = 4096;
 constexpr double kArcThreshold = 0.00000001;
 
 // The minimum probability of a call for merging two chains
-constexpr double kMergeProbability = 0.95;
+constexpr double kMergeProbability = 0.9;
+
+// Epsilon for comparison of doubles
+constexpr double EPS = 1e-8;
 
 class Edge;
 using ArcList = std::vector<const Arc*>;
@@ -154,7 +157,17 @@ public:
   }
 
   void setMergeGain(Chain* predChain, double forwardGain, double backwardGain) {
-    if (forwardGain >= backwardGain) {
+    // When forward and backward gains are the same, prioritize merging that
+    // preserves the original order of the functions in the binary
+    if (std::abs(forwardGain - backwardGain) < EPS) {
+      if (srcChain->id < dstChain->id) {
+        isGainForward = true;
+        cachedGain = predChain == srcChain ? forwardGain : backwardGain;
+      } else {
+        isGainForward = false;
+        cachedGain = predChain == srcChain ? backwardGain : forwardGain;
+      }
+    } else if (forwardGain > backwardGain) {
       isGainForward = predChain == srcChain;
       cachedGain = forwardGain;
     } else {
@@ -350,6 +363,7 @@ private:
    */
   double missProbability(double chainDensity) const {
     double pageSamples = chainDensity * kCachePageSize;
+
     if (pageSamples >= totalSamples) {
       return 0;
     }
@@ -520,11 +534,11 @@ private:
   void runPassTwo() {
     // Creating a priority queue containing all edges ordered by the merge gain
     auto gainComparator = [&](Edge* A, Edge* B) {
-      if (A->gain() != B->gain()) {
+      if (std::abs(A->gain() - B->gain()) > EPS) {
         return A->gain() > B->gain();
       }
       // Making sure the comparison is deterministic
-      if (A->predChain() != B->predChain()) {
+      if (A->predChain()->id != B->predChain()->id) {
         return A->predChain()->id < B->predChain()->id;
       }
       return A->succChain()->id < B->succChain()->id;

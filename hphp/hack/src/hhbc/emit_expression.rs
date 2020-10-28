@@ -2791,7 +2791,6 @@ fn get_call_builtin_func_info(opts: &Options, id: impl AsRef<str>) -> Option<(us
     }
 }
 
-// How do we make these work with reified generics?
 fn emit_function_pointer(
     e: &mut Emitter,
     env: &Env,
@@ -2799,18 +2798,19 @@ fn emit_function_pointer(
     fpid: &tast::FunctionPtrId,
     targs: &[tast::Targ],
 ) -> Result {
-    match fpid {
+    let instrs = match fpid {
         // This is a function name. Equivalent to HH\fun('str')
-        tast::FunctionPtrId::FPId(id) => emit_hh_fun(e, env, pos, targs, id.name()),
+        tast::FunctionPtrId::FPId(id) => emit_hh_fun(e, env, pos, targs, id.name())?,
         // class_meth
         tast::FunctionPtrId::FPClassConst(cid, method_id) => {
             // TODO(hrust) should accept `let method_id = method::Type::from_ast_name(&(cc.1).1);`
             let method_id: method::Type = string_utils::strip_global_ns(&method_id.1)
                 .to_string()
                 .into();
-            emit_class_meth_native(e, env, pos, cid, method_id, targs)
+            emit_class_meth_native(e, env, pos, cid, method_id, targs)?
         }
-    }
+    };
+    Ok(emit_pos_then(pos, instrs))
 }
 
 fn emit_hh_fun(

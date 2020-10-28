@@ -34,9 +34,9 @@ use oxidized_by_ref::{
     typing_defs,
     typing_defs::{
         ConstDecl, EnumType, FunArity, FunElt, FunImplicitParams, FunParam, FunParams, FunType,
-        IfcFunDecl, ParamMode, ParamMutability, PossiblyEnforcedTy, Reactivity, RecordFieldReq,
-        ShapeFieldType, ShapeKind, Tparam, Ty, Ty_, TypeconstAbstractKind, TypedefType,
-        WhereConstraint, XhpAttrTag,
+        IfcFunDecl, ParamMode, ParamMutability, ParamRxAnnotation, PossiblyEnforcedTy, Reactivity,
+        RecordFieldReq, ShapeFieldType, ShapeKind, Tparam, Ty, Ty_, TypeconstAbstractKind,
+        TypedefType, WhereConstraint, XhpAttrTag,
     },
     typing_defs_flags::{FunParamFlags, FunTypeFlags},
     typing_reason::Reason,
@@ -803,6 +803,7 @@ impl<'a> Node<'a> {
 
 struct Attributes<'a> {
     reactivity: Reactivity<'a>,
+    reactivity_condition_type: Option<&'a Ty<'a>>,
     param_mutability: Option<ParamMutability>,
     deprecated: Option<&'a str>,
     reifiable: Option<&'a Pos<'a>>,
@@ -1068,6 +1069,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
     fn to_attributes(&self, node: Node<'a>) -> Attributes<'a> {
         let mut attributes = Attributes {
             reactivity: Reactivity::Nonreactive,
+            reactivity_condition_type: None,
             param_mutability: None,
             deprecated: None,
             reifiable: None,
@@ -1091,7 +1093,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
 
         // If we see the attribute `__OnlyRxIfImpl(Foo::class)`, set
         // `reactivity_condition_type` to `Foo`.
-        let reactivity_condition_type = node.iter().find_map(|attr| match attr {
+        attributes.reactivity_condition_type = node.iter().find_map(|attr| match attr {
             Node::Attribute(UserAttributeNode {
                 name: Id(_, "__OnlyRxIfImpl"),
                 classname_params: &[class_name],
@@ -1118,16 +1120,20 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                     // __RxShallow, and __RxLocal, so to avoid cloning the
                     // condition type, we use Option::take here.
                     "__Rx" => {
-                        attributes.reactivity = Reactivity::Reactive(reactivity_condition_type)
+                        attributes.reactivity =
+                            Reactivity::Reactive(attributes.reactivity_condition_type)
                     }
                     "__RxShallow" => {
-                        attributes.reactivity = Reactivity::Shallow(reactivity_condition_type)
+                        attributes.reactivity =
+                            Reactivity::Shallow(attributes.reactivity_condition_type)
                     }
                     "__RxLocal" => {
-                        attributes.reactivity = Reactivity::Local(reactivity_condition_type)
+                        attributes.reactivity =
+                            Reactivity::Local(attributes.reactivity_condition_type)
                     }
                     "__Pure" => {
-                        attributes.reactivity = Reactivity::Pure(reactivity_condition_type);
+                        attributes.reactivity =
+                            Reactivity::Pure(attributes.reactivity_condition_type);
                     }
                     "__Cipp" => {
                         attributes.reactivity = Reactivity::Cipp(string_or_classname_arg(attribute))
@@ -1532,6 +1538,13 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                             } else {
                                 type_
                             };
+                            let rx_annotation = if attributes.at_most_rx_as_func {
+                                Some(ParamRxAnnotation::ParamRxVar)
+                            } else {
+                                attributes
+                                    .reactivity_condition_type
+                                    .map(|ty| ParamRxAnnotation::ParamRxIfImpl(ty))
+                            };
                             let param = self.alloc(FunParam {
                                 pos: id.0,
                                 name: Some(id.1),
@@ -1540,7 +1553,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                                     type_,
                                 }),
                                 flags,
-                                rx_annotation: None,
+                                rx_annotation,
                             });
                             arity = match arity {
                                 FunArity::Fstandard if variadic => FunArity::Fvariadic(param),

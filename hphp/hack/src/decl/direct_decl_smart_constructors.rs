@@ -483,7 +483,7 @@ impl<'a> State<'a> {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct FunParamDecl<'a> {
     attributes: Node<'a>,
     visibility: Node<'a>,
@@ -494,7 +494,7 @@ pub struct FunParamDecl<'a> {
     initializer: Node<'a>,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct FunctionHeader<'a> {
     name: Node<'a>,
     modifiers: Node<'a>,
@@ -504,13 +504,13 @@ pub struct FunctionHeader<'a> {
     ret_hint: Node<'a>,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct RequireClause<'a> {
     require_type: Node<'a>,
     name: Node<'a>,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct TypeParameterDecl<'a> {
     name: Node<'a>,
     reified: aast::ReifyKind,
@@ -520,43 +520,43 @@ pub struct TypeParameterDecl<'a> {
     user_attributes: &'a [&'a UserAttributeNode<'a>],
 }
 
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct ClosureTypeHint<'a> {
     args: Node<'a>,
     ret_hint: Node<'a>,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct NamespaceUseClause<'a> {
     id: Id<'a>,
     as_: Option<&'a str>,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct ConstructorNode<'a> {
     method: &'a ShallowMethod<'a>,
     properties: &'a [ShallowProp<'a>],
 }
 
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct MethodNode<'a> {
     method: &'a ShallowMethod<'a>,
     is_static: bool,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct PropertyNode<'a> {
     decls: &'a [ShallowProp<'a>],
     is_static: bool,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct XhpClassAttributeDeclarationNode<'a> {
     xhp_attr_decls: &'a [ShallowProp<'a>],
     xhp_attr_uses_decls: &'a [Node<'a>],
 }
 
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct XhpClassAttributeNode<'a> {
     name: Id<'a>,
     tag: Option<XhpAttrTag>,
@@ -565,13 +565,13 @@ pub struct XhpClassAttributeNode<'a> {
     hint: Node<'a>,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct ShapeFieldNode<'a> {
     name: &'a ShapeField<'a>,
     type_: &'a ShapeFieldType<'a>,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct UserAttributeNode<'a> {
     name: Id<'a>,
     classname_params: &'a [Id<'a>],
@@ -1476,21 +1476,25 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                                 self.tany_with_pos(id.0)
                             } else {
                                 self.node_to_ty(hint).map(|ty| match ty {
-                                    Ty(r, Ty_::Tfun(fun_type)) if attributes.at_most_rx_as_func => {
-                                        let mut fun_type = (*fun_type).clone();
-                                        fun_type.reactive = Reactivity::RxVar(None);
-                                        self.alloc(Ty(r, Ty_::Tfun(self.alloc(fun_type))))
-                                    }
-                                    Ty(r, Ty_::Toption(Ty(r1, Ty_::Tfun(fun_type))))
+                                    &Ty(r, Ty_::Tfun(fun_type))
                                         if attributes.at_most_rx_as_func =>
                                     {
-                                        let mut fun_type = (*fun_type).clone();
-                                        fun_type.reactive = Reactivity::RxVar(None);
+                                        let fun_type = self.alloc(FunType {
+                                            reactive: Reactivity::RxVar(None),
+                                            ..*fun_type
+                                        });
+                                        self.alloc(Ty(r, Ty_::Tfun(fun_type)))
+                                    }
+                                    &Ty(r, Ty_::Toption(&Ty(r1, Ty_::Tfun(fun_type))))
+                                        if attributes.at_most_rx_as_func =>
+                                    {
+                                        let fun_type = self.alloc(FunType {
+                                            reactive: Reactivity::RxVar(None),
+                                            ..*fun_type
+                                        });
                                         self.alloc(Ty(
                                             r,
-                                            Ty_::Toption(
-                                                self.alloc(Ty(r1, Ty_::Tfun(self.alloc(fun_type)))),
-                                            ),
+                                            Ty_::Toption(self.alloc(Ty(r1, Ty_::Tfun(fun_type)))),
                                         ))
                                     }
                                     ty => ty,
@@ -1610,28 +1614,28 @@ impl<'a> DirectDeclSmartConstructors<'a> {
         );
 
         let ty_ = match (base_ty, type_arguments) {
-            (Id(_, name), &[Ty(_, Ty_::Tfun(f))]) if name == "\\Pure" => {
+            (Id(_, name), &[&Ty(_, Ty_::Tfun(f))]) if name == "\\Pure" => {
                 Ty_::Tfun(self.alloc(FunType {
                     reactive: Reactivity::Pure(None),
-                    ..(*f).clone()
+                    ..*f
                 }))
             }
-            (Id(_, name), &[Ty(_, Ty_::Tfun(f))]) if name == "\\Rx" => {
+            (Id(_, name), &[&Ty(_, Ty_::Tfun(f))]) if name == "\\Rx" => {
                 Ty_::Tfun(self.alloc(FunType {
                     reactive: Reactivity::Reactive(None),
-                    ..(*f).clone()
+                    ..*f
                 }))
             }
-            (Id(_, name), &[Ty(_, Ty_::Tfun(f))]) if name == "\\RxShallow" => {
+            (Id(_, name), &[&Ty(_, Ty_::Tfun(f))]) if name == "\\RxShallow" => {
                 Ty_::Tfun(self.alloc(FunType {
                     reactive: Reactivity::Shallow(None),
-                    ..(*f).clone()
+                    ..*f
                 }))
             }
-            (Id(_, name), &[Ty(_, Ty_::Tfun(f))]) if name == "\\RxLocal" => {
+            (Id(_, name), &[&Ty(_, Ty_::Tfun(f))]) if name == "\\RxLocal" => {
                 Ty_::Tfun(self.alloc(FunType {
                     reactive: Reactivity::Local(None),
-                    ..(*f).clone()
+                    ..*f
                 }))
             }
             _ => Ty_::Tapply(self.alloc((base_ty, type_arguments))),
@@ -1713,7 +1717,6 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                     params,
                     implicit_params,
                     ret,
-                    reactive: fun_type.reactive.clone(),
                     ..*fun_type
                 }))
             }
@@ -1850,7 +1853,7 @@ impl<'a> FlattenOp for DirectDeclSmartConstructors<'a> {
         let mut r = Vec::with_capacity_in(size, self.state.arena);
         for s in lst.into_iter() {
             match s {
-                Node::List(children) => r.extend(children.iter().cloned()),
+                Node::List(children) => r.extend(children.iter().copied()),
                 x => {
                     if !Self::is_zero(&x) {
                         r.push(x)

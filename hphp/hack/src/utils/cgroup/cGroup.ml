@@ -79,9 +79,10 @@ type stats = {
 
 (* Some cgroup files contain only a single integer *)
 let read_single_number_file path =
-  let contents = Sys_utils.cat path in
-  try Ok (contents |> String.strip |> int_of_string)
-  with Failure _ -> Error "Failed to parse memory.current"
+  try Ok (Sys_utils.cat path |> String.strip |> int_of_string) with
+  | Failure _
+  | Sys_error _ ->
+    Error "Failed to parse memory.current"
 
 let parse_stat stat_contents =
   let stats =
@@ -113,7 +114,10 @@ let get_stats_for_cgroup (cgroup_name : string) : (stats, string) result =
   and total_swap_result =
     read_single_number_file (Filename.concat dir "memory.swap.current")
   and stat_contents_result =
-    Ok (Sys_utils.cat (Filename.concat dir "memory.stat"))
+    try Ok (Sys_utils.cat (Filename.concat dir "memory.stat")) with
+    | Failure _
+    | Sys_error _ ->
+      Error "Failed to parse memory.stat"
   in
   total_result >>= fun total ->
   total_swap_result >>= fun total_swap ->

@@ -276,13 +276,9 @@ mod inout_locals {
 pub fn wrap_array_mark_legacy(e: &Emitter, ins: InstrSeq) -> InstrSeq {
     if mark_as_legacy(e.options()) {
         InstrSeq::gather(vec![
-            instr::nulluninit(),
-            instr::nulluninit(),
             ins,
-            instr::fcallfuncd(
-                FcallArgs::new(FcallFlags::default(), 1, vec![], None, 1, None),
-                function::from_raw_string("HH\\array_mark_legacy"),
-            ),
+            instr::false_(),
+            instr::instr(Instruct::IMisc(InstructMisc::ArrayMarkLegacy)),
         ])
     } else {
         ins
@@ -1169,13 +1165,9 @@ fn emit_static_collection(
         if arrprov_enabled && env.scope.has_function_attribute("__ProvenanceSkipFrame") {
             InstrSeq::gather(vec![
                 emit_pos(pos),
-                instr::nulluninit(),
-                instr::nulluninit(),
                 instr::typedvalue(tv),
-                instr::fcallfuncd(
-                    FcallArgs::new(FcallFlags::default(), 1, vec![], None, 1, None),
-                    function::from_raw_string("HH\\tag_provenance_here"),
-                ),
+                instr::int(0),
+                instr::instr(Instruct::IMisc(InstructMisc::TagProvenanceHere)),
                 transform_instr,
             ])
         } else {
@@ -1636,6 +1628,46 @@ fn emit_call_isset_exprs(e: &mut Emitter, env: &Env, pos: &Pos, exprs: &[tast::E
             ]))
         }
     }
+}
+
+fn emit_tag_provenance_here(e: &mut Emitter, env: &Env, pos: &Pos, es: &[tast::Expr]) -> Result {
+    let default = if es.len() == 1 {
+        instr::int(0)
+    } else {
+        instr::empty()
+    };
+    let tag = instr::instr(Instruct::IMisc(InstructMisc::TagProvenanceHere));
+    Ok(InstrSeq::gather(vec![
+        emit_exprs(e, env, es)?,
+        emit_pos(pos),
+        default,
+        tag,
+    ]))
+}
+
+fn emit_array_mark_legacy(
+    e: &mut Emitter,
+    env: &Env,
+    pos: &Pos,
+    es: &[tast::Expr],
+    legacy: bool,
+) -> Result {
+    let default = if es.len() == 1 {
+        instr::false_()
+    } else {
+        instr::empty()
+    };
+    let mark = if legacy {
+        instr::instr(Instruct::IMisc(InstructMisc::ArrayMarkLegacy))
+    } else {
+        instr::instr(Instruct::IMisc(InstructMisc::ArrayUnmarkLegacy))
+    };
+    Ok(InstrSeq::gather(vec![
+        emit_exprs(e, env, es)?,
+        emit_pos(pos),
+        default,
+        mark,
+    ]))
 }
 
 fn emit_idx(e: &mut Emitter, env: &Env, pos: &Pos, es: &[tast::Expr]) -> Result {
@@ -2561,6 +2593,15 @@ fn emit_special_function(
         ("__hhvm_internal_getmemokeyl", &[E(_, E_::Lvar(ref param))]) if e.systemlib() => Ok(Some(
             instr::getmemokeyl(local::Type::Named(local_id::get_name(&param.1).into())),
         )),
+        ("HH\\array_mark_legacy", _) if args.len() == 1 || args.len() == 2 => {
+            Ok(Some(emit_array_mark_legacy(e, env, pos, args, true)?))
+        }
+        ("HH\\array_unmark_legacy", _) if args.len() == 1 || args.len() == 2 => {
+            Ok(Some(emit_array_mark_legacy(e, env, pos, args, false)?))
+        }
+        ("HH\\tag_provenance_here", _) if args.len() == 1 || args.len() == 2 => {
+            Ok(Some(emit_tag_provenance_here(e, env, pos, args)?))
+        }
         _ => Ok(
             match (
                 args,

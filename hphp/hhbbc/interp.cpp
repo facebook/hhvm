@@ -5306,6 +5306,48 @@ void idxImpl(ISS& env, bool arraysOnly) {
 void in(ISS& env, const bc::Idx&)      { idxImpl(env, false); }
 void in(ISS& env, const bc::ArrayIdx&) { idxImpl(env, true);  }
 
+namespace {
+void implArrayMarkLegacy(ISS& env, bool legacy) {
+  auto const recursive = popC(env);
+  auto const value = popC(env);
+
+  if (auto const tv_recursive = tv(recursive)) {
+    if (auto const tv_value = tv(value)) {
+      if (tvIsBool(*tv_recursive)) {
+        auto const result = eval_cell([&]{
+          return val(*tv_recursive).num
+            ? arrprov::markTvRecursively(*tv_value, legacy)
+            : arrprov::markTvShallow(*tv_value, legacy);
+        });
+        if (result) {
+          push(env, *result);
+          effect_free(env);
+          constprop(env);
+          return;
+        }
+      }
+    }
+  }
+
+  // TODO(kshaunak): We could add some type info here.
+  push(env, TInitCell);
+}
+}
+
+void in(ISS& env, const bc::ArrayMarkLegacy&) {
+  implArrayMarkLegacy(env, true);
+}
+
+void in(ISS& env, const bc::ArrayUnmarkLegacy&) {
+  implArrayMarkLegacy(env, false);
+}
+
+void in(ISS& env, const bc::TagProvenanceHere&) {
+  popC(env);
+  popC(env);
+  push(env, TInitCell);
+}
+
 void in(ISS& env, const bc::CheckProp&) {
   if (env.ctx.cls->attrs & AttrNoOverride) {
     return reduce(env, bc::False {});

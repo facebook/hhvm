@@ -42,7 +42,7 @@ TRACE_SET_MOD(runtime);
  */
 void print_string(StringData* s) {
   g_context->write(s->data(), s->size());
-  TRACE(1, "t-x64 output(str): (%p) %43s\n", s->data(),
+  TRACE(2, "t-x64 output(str): (%p) %43s\n", s->data(),
         escapeStringForCPP(s->data(), s->size()).data());
   decRefStr(s);
 }

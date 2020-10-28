@@ -3378,6 +3378,48 @@ OPTBLD_INLINE void iopArrayIdx() {
   *arr = result;
 }
 
+namespace {
+void implArrayMarkLegacy(bool legacy) {
+  auto const recursive = *vmStack().topTV();
+  if (!tvIsBool(recursive)) {
+    SystemLib::throwInvalidArgumentExceptionObject(
+      folly::sformat("$recursive must be a bool; got {}",
+                     getDataTypeString(type(recursive))));
+  }
+
+  auto const input = vmStack().indTV(1);
+  auto const output = val(recursive).num
+    ? arrprov::markTvRecursively(*input, legacy)
+    : arrprov::markTvShallow(*input, legacy);
+
+  vmStack().popTV();
+  tvMove(output, input);
+}
+}
+
+OPTBLD_INLINE void iopArrayMarkLegacy() {
+  implArrayMarkLegacy(true);
+}
+
+OPTBLD_INLINE void iopArrayUnmarkLegacy() {
+  implArrayMarkLegacy(false);
+}
+
+OPTBLD_INLINE void iopTagProvenanceHere() {
+  auto const flags = *vmStack().topTV();
+  if (!tvIsInt(flags)) {
+    SystemLib::throwInvalidArgumentExceptionObject(
+      folly::sformat("$flags must be an int; got {}",
+                     getDataTypeString(type(flags))));
+  }
+
+  auto const input = vmStack().indTV(1);
+  auto const output = arrprov::tagTvRecursively(*input, val(flags).num);
+
+  vmStack().popTV();
+  tvMove(output, input);
+}
+
 OPTBLD_INLINE void iopSetL(tv_lval to) {
   TypedValue* fr = vmStack().topC();
   tvSet(*fr, to);

@@ -338,6 +338,9 @@ static const struct {
   { OpCreateCl,    {BStackN,          Stack1,       OutObject       }},
   { OpIdx,         {StackTop3,        Stack1,       OutUnknown      }},
   { OpArrayIdx,    {StackTop3,        Stack1,       OutUnknown      }},
+  { OpArrayMarkLegacy,   {StackTop2,  Stack1,       OutUnknown      }},
+  { OpArrayUnmarkLegacy, {StackTop2,  Stack1,       OutUnknown      }},
+  { OpTagProvenanceHere, {StackTop2,  Stack1,       OutUnknown      }},
   { OpCheckProp,   {None,             Stack1,       OutBoolean      }},
   { OpInitProp,    {Stack1,           None,         OutNone         }},
   { OpSilence,     {Local|DontGuardAny,
@@ -885,6 +888,9 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::Keyset:
   case Op::Vec:
   case Op::ArrayIdx:
+  case Op::ArrayMarkLegacy:
+  case Op::ArrayUnmarkLegacy:
+  case Op::TagProvenanceHere:
   case Op::BareThis:
   case Op::BitNot:
   case Op::CGetG:

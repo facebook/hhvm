@@ -1584,6 +1584,9 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op, bool pure) {
     case Op::AKExists:
     case Op::Idx:
     case Op::ArrayIdx:
+    case Op::ArrayMarkLegacy:
+    case Op::ArrayUnmarkLegacy:
+    case Op::TagProvenanceHere:
       return true;
 
     // this

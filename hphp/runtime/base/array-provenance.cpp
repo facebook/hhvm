@@ -438,7 +438,7 @@ Tag tagFromPC() {
       StructuredLogEntry sle;
       sle.setStr("reason", why);
       sle.setStackTrace("stack", StackTrace{StackTrace::Force{}});
-      FTRACE_MOD(Trace::runtime, 2, "arrprov {} {}\n", why, show(sle));
+      FTRACE(2, "arrprov {} {}\n", why, show(sle));
       StructuredLog::log("hphp_arrprov_diagnostics", sle);
     }
   };
@@ -521,6 +521,7 @@ ArrayData* apply_mutation_fast(ArrayData* in, ArrayData* result,
     assertx(Array::IterEnd(result) == Array::IterEnd(in));
     tvMove(next, LvalAtIterPos<Array>(result, pos));
   }
+  FTRACE(1, "Depth {}: {}\n", depth, result && result != in ? "copy" : "reuse");
   return result == in ? nullptr : result;
 }
 
@@ -546,6 +547,7 @@ ArrayData* apply_mutation_slow(ArrayData* in, ArrayData* result,
       assertx(result->hasExactlyOneRef());
     }
   });
+  FTRACE(1, "Depth {}: {}\n", depth, result && result != in ? "copy" : "reuse");
   return result == in ? nullptr : result;
 }
 
@@ -585,7 +587,10 @@ ArrayData* apply_mutation(TypedValue tv, State& state,
   auto const in = val(tv).parr;
   cow |= in->cowCheck();
   auto result = state.mutation(in, cow);
-  if (!state.recursive) return result;
+  if (!state.recursive) {
+    FTRACE(1, "Depth {}: {}\n", depth, result ? "copy" : "reuse");
+    return result;
+  }
 
   // Recursively apply the mutation to the array's contents. For efficiency,
   // we do the layout check outside of the iteration loop.

@@ -1553,6 +1553,9 @@ void dce(Env& env, const bc::AddNewElemC&)      { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::AddO&)             { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::AKExists&)         { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::ArrayIdx&)         { pushRemovableIfNoThrow(env); }
+void dce(Env& env, const bc::ArrayMarkLegacy&)  { pushRemovableIfNoThrow(env); }
+void dce(Env& env, const bc::ArrayUnmarkLegacy&){ pushRemovableIfNoThrow(env); }
+void dce(Env& env, const bc::TagProvenanceHere&){ pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::BitAnd&)           { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::BitNot&)           { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::BitOr&)            { pushRemovableIfNoThrow(env); }

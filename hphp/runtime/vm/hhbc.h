@@ -752,6 +752,9 @@ constexpr uint32_t kMaxConcatN = 4;
   O(AwaitAll,        ONE(LAR),         NOV,             ONE(CV),    CF) \
   O(Idx,             NA,               THREE(CV,CV,CV), ONE(CV),    NF) \
   O(ArrayIdx,        NA,               THREE(CV,CV,CV), ONE(CV),    NF) \
+  O(ArrayMarkLegacy,    NA,            TWO(CV,CV),      ONE(CV),    NF) \
+  O(ArrayUnmarkLegacy,  NA,            TWO(CV,CV),      ONE(CV),    NF) \
+  O(TagProvenanceHere,  NA,            TWO(CV,CV),      ONE(CV),    NF) \
   O(CheckProp,       ONE(SA),          NOV,             ONE(CV),    NF) \
   O(InitProp,        TWO(SA,                                            \
                        OA(InitPropOp)),ONE(CV),         NOV,        NF) \

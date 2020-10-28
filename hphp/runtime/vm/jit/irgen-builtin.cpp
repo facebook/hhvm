@@ -1095,30 +1095,6 @@ SSATmp* opt_enum_coerce(IRGS& env, const ParamPrep& params) {
   );
 }
 
-SSATmp* opt_tag_provenance_here(IRGS& env, const ParamPrep& params) {
-
-  if (!(params.size() == 1 ||
-        (params.size() == 2 && params[1].value->isA(TInt)))) {
-    return nullptr;
-  }
-  auto const result = params[0].value;
-
-  auto emit_noop = [&]() {
-    gen(env, IncRef, result);
-    return result;
-  };
-
-  if (!RO::EvalArrayProvenance) {
-    return emit_noop();
-  }
-
-  if (!result->type().maybe(TArrLike)) {
-    return emit_noop();
-  }
-
-  return nullptr;
-}
-
 SSATmp* opt_is_meth_caller(IRGS& env, const ParamPrep& params) {
   if (params.size() != 1) return nullptr;
   auto const value = params[0].value;
@@ -1194,7 +1170,6 @@ const hphp_fast_string_imap<OptEmitFn> s_opt_emit_fns{
   {"HH\\BuiltinEnum::coerce", opt_enum_coerce},
   {"HH\\BuiltinEnum::isValid", opt_enum_is_valid},
   {"HH\\is_meth_caller", opt_is_meth_caller},
-  {"HH\\tag_provenance_here", opt_tag_provenance_here},
   {"HH\\meth_caller_get_class", opt_meth_caller_get_class},
   {"HH\\meth_caller_get_method", opt_meth_caller_get_method},
 };
@@ -2358,6 +2333,81 @@ GuardConstraint idxBaseConstraint(Type baseType, Type keyType,
 
 //////////////////////////////////////////////////////////////////////
 
+}
+
+namespace {
+void implArrayMarkLegacy(IRGS& env, bool legacy) {
+  auto const recursive = topC(env, BCSPRelOffset{0});
+  auto const value     = topC(env, BCSPRelOffset{1});
+
+  if (!recursive->isA(TBool)) {
+    PUNT(ArrayMarkLegacy-RecursiveMustBeBool);
+  } else if (!value->type().isKnownDataType()) {
+    PUNT(ArrayMarkLegacy-ValueMustBeKnown);
+  }
+
+
+  if (!value->isA(TVec|TDict|TVArr|TDArr)) {
+    discard(env);
+    return;
+  }
+
+  auto const result = cond(
+    env,
+    [&](Block* taken) {
+      gen(env, JmpZero, taken, recursive);
+    },
+    [&]{
+      auto const op = legacy ? ArrayMarkLegacyRecursive
+                             : ArrayUnmarkLegacyRecursive;
+      return gen(env, op, value);
+    },
+    [&]{
+      auto const op = legacy ? ArrayMarkLegacyShallow
+                             : ArrayUnmarkLegacyShallow;
+      return gen(env, op, value);
+    }
+  );
+
+  discard(env, 2);
+  push(env, result);
+}
+}
+
+void emitArrayMarkLegacy(IRGS& env) {
+  implArrayMarkLegacy(env, true);
+}
+
+void emitArrayUnmarkLegacy(IRGS& env) {
+  implArrayMarkLegacy(env, false);
+}
+
+void emitTagProvenanceHere(IRGS& env) {
+  auto const flags = topC(env, BCSPRelOffset{0});
+  auto const value = topC(env, BCSPRelOffset{1});
+
+  // When arrprov is disabled, this bytecode should do nothing.
+  if (!RO::EvalArrayProvenance && flags->isA(TInt)) {
+    discard(env);
+    return;
+  }
+
+  if (!flags->isA(TInt)) {
+    PUNT(TagProvenanceHere-FlagsMustBeInt);
+  } else if (!value->type().isKnownDataType()) {
+    PUNT(TagProvenanceHere-ValueMustBeKnown);
+  }
+
+
+  if (!value->isA(TVec|TDict|TVArr|TDArr)) {
+    discard(env);
+    return;
+  }
+
+  auto const result = gen(env, TagProvenanceHere, value, flags);
+
+  discard(env, 2);
+  push(env, result);
 }
 
 void emitArrayIdx(IRGS& env) {

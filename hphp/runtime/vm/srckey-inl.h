@@ -21,47 +21,35 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 inline SrcKey::SrcKey()
-  : m_funcID{FuncId::Invalid}
-  , m_offset{0}
-  , m_resumeModeAndTags{encodeResumeMode(ResumeMode::None)}
+  : m_s{FuncId::Invalid, 0, encodeResumeMode(ResumeMode::None)}
 {}
 
 inline SrcKey::SrcKey(const Func* f, Offset off, ResumeMode resumeMode)
-  : m_funcID{f->getFuncId()}
-  , m_offset{(uint32_t)off}
-  , m_resumeModeAndTags{encodeResumeMode(resumeMode)}
+  : m_s{f->getFuncId(), (uint32_t)off, encodeResumeMode(resumeMode)}
 {
   assertx((uint32_t)off >> kNumOffsetBits == 0);
 }
 
 inline SrcKey::SrcKey(const Func* f, PC pc, ResumeMode resumeMode)
-  : m_funcID{f->getFuncId()}
-  , m_offset{(uint32_t)f->offsetOf(pc)}
-  , m_resumeModeAndTags{encodeResumeMode(resumeMode)}
+  : m_s{f->getFuncId(), (uint32_t)f->offsetOf(pc), encodeResumeMode(resumeMode)}
 {
   assertx((uint32_t)f->offsetOf(pc) >> kNumOffsetBits == 0);
 }
 
 inline SrcKey::SrcKey(FuncId funcId, Offset off, ResumeMode resumeMode)
-  : m_funcID{funcId}
-  , m_offset{(uint32_t)off}
-  , m_resumeModeAndTags{encodeResumeMode(resumeMode)}
+  : m_s{funcId, (uint32_t)off, encodeResumeMode(resumeMode)}
 {
   assertx((uint32_t)off >> kNumOffsetBits == 0);
 }
 
 inline SrcKey::SrcKey(const Func* f, Offset off, PrologueTag)
-  : m_funcID{f->getFuncId()}
-  , m_offset{(uint32_t)off}
-  , m_resumeModeAndTags{encodePrologue()}
+  : m_s{f->getFuncId(), (uint32_t)off, encodePrologue()}
 {
   assertx((uint32_t)off >> kNumOffsetBits == 0);
 }
 
 inline SrcKey::SrcKey(SrcKey other, Offset off)
-  : m_funcID{other.funcID()}
-  , m_offset{(uint32_t)off}
-  , m_resumeModeAndTags{other.m_resumeModeAndTags}
+  : m_s{other.funcID(), (uint32_t)off, other.m_s.m_resumeModeAndTags}
 {
   assertx((uint32_t)off >> kNumOffsetBits == 0);
 }
@@ -71,17 +59,18 @@ inline SrcKey::SrcKey(AtomicInt in)
 {}
 
 inline SrcKey SrcKey::fromAtomicInt(AtomicInt in) {
-  return SrcKey { in };
+  return SrcKey {in};
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 inline bool SrcKey::valid() const {
+  auto const funcID = m_s.m_funcID;
   assertx(
-    m_funcID.isInvalid() || m_funcID.isDummy() ||
-    (m_offset >= func()->base() && m_offset < func()->past())
+    funcID.isInvalid() || funcID.isDummy() ||
+    (m_s.m_offset >= func()->base() && m_s.m_offset < func()->past())
   );
-  return !m_funcID.isInvalid();
+  return !funcID.isInvalid();
 }
 
 inline SrcKey::AtomicInt SrcKey::toAtomicInt() const {
@@ -89,22 +78,22 @@ inline SrcKey::AtomicInt SrcKey::toAtomicInt() const {
 }
 
 inline FuncId SrcKey::funcID() const {
-  assertx(!m_funcID.isInvalid());
-  return m_funcID;
+  assertx(!m_s.m_funcID.isInvalid());
+  return m_s.m_funcID;
 }
 
 inline Offset SrcKey::offset() const {
   assertx(!prologue());
-  return m_offset;
+  return m_s.m_offset;
 }
 
 inline Offset SrcKey::entryOffset() const {
   assertx(prologue());
-  return m_offset;
+  return m_s.m_offset;
 }
 
 inline std::string SrcKey::printableOffset() const {
-  return std::to_string(m_offset);
+  return std::to_string(m_s.m_offset);
 }
 
 inline bool SrcKey::hasThis() const {
@@ -113,12 +102,12 @@ inline bool SrcKey::hasThis() const {
 }
 
 inline ResumeMode SrcKey::resumeMode() const {
-  return m_resumeModeAndTags < 3
-    ? (ResumeMode)m_resumeModeAndTags : ResumeMode::None;
+  return m_s.m_resumeModeAndTags < 3
+    ? (ResumeMode)m_s.m_resumeModeAndTags : ResumeMode::None;
 }
 
 inline bool SrcKey::prologue() const {
-  return m_resumeModeAndTags == 3;
+  return m_s.m_resumeModeAndTags == 3;
 }
 
 inline uint32_t SrcKey::encodeResumeMode(ResumeMode resumeMode) {
@@ -133,7 +122,7 @@ inline uint32_t SrcKey::encodePrologue() {
 }
 
 inline const Func* SrcKey::func() const {
-  return Func::fromFuncId(m_funcID);
+  return Func::fromFuncId(m_s.m_funcID);
 }
 
 inline const Unit* SrcKey::unit() const {
@@ -160,7 +149,7 @@ inline int SrcKey::lineNumber() const {
 inline void SrcKey::setOffset(Offset o) {
   assertx((uint32_t)o >> kNumOffsetBits == 0);
   assertx(!prologue());
-  m_offset = (uint32_t)o;
+  m_s.m_offset = (uint32_t)o;
 }
 
 inline OffsetSet SrcKey::succOffsets() const {
@@ -170,7 +159,7 @@ inline OffsetSet SrcKey::succOffsets() const {
 
 inline void SrcKey::advance(const Func* f) {
   assertx(!prologue());
-  m_offset += instrLen((f ? f : func())->at(offset()));
+  m_s.m_offset += instrLen((f ? f : func())->at(offset()));
 }
 
 inline SrcKey SrcKey::advanced(const Func* f) const {

@@ -179,7 +179,7 @@ private:
       FuncId m_funcID;
       uint32_t m_offset : kNumOffsetBits;
       uint32_t m_resumeModeAndTags : kNumModeBits;
-    };
+    } m_s;
   };
 };
 

@@ -156,6 +156,9 @@ let rec freshen_inside_ty env ty =
   | Tpu_type_access _ ->
     (* TODO(T36532263) suggested by Catherine, might be updated next *)
     default ()
+  | Taccess (ty, ids) ->
+    let (env, ty) = freshen_ty env ty in
+    (env, mk (r, Taccess (ty, ids)))
   | Tunapplied_alias _ -> default ()
 
 and freshen_ty env ty = Env.fresh_invariant_type_var env (get_pos ty)
@@ -570,6 +573,7 @@ let unsolved_invariant_tyvars_under_union_and_intersection env ty =
     | Tfun _
     | Tpu _
     | Tpu_type_access _
+    | Taccess _
     | Tunapplied_alias _ ->
       (env, tyvars)
   in

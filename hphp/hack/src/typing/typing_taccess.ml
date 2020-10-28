@@ -418,6 +418,7 @@ let rec expand ctx env root : _ * result =
     Typing_defs.error_Tunapplied_alias_in_illegal_context ()
   | Tpu _
   | Tpu_type_access _
+  | Taccess _
   | Tobject
   | Tnonnull
   | Tprim _

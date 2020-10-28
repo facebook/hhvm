@@ -142,6 +142,9 @@ module ExprDepTy = struct
       | (r, Tintersection tyl) ->
         let (env, tyl) = List.fold_map tyl ~init:env ~f:make in
         (env, mk (r, Tintersection tyl))
+      | (r, Taccess (ty, ids)) ->
+        let (env, ty) = make env ty in
+        (env, mk (r, Taccess (ty, ids)))
       (* TODO(T36532263) check if this is legal *)
       | ( _,
           ( Tobject | Tnonnull | Tprim _ | Tshape _ | Ttuple _ | Tdynamic

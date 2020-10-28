@@ -113,7 +113,7 @@ let rec assert_nontrivial p bop env ty1 ty2 =
           | Tvarray_or_darray _ | Tprim _ | Toption _ | Tdynamic | Tvar _
           | Tfun _ | Tgeneric _ | Tnewtype _ | Tdependent _ | Tclass _
           | Ttuple _ | Tunion _ | Tintersection _ | Tobject | Tshape _ | Tpu _
-          | Tpu_type_access _ | Tunapplied_alias _ ) ),
+          | Tpu_type_access _ | Taccess _ | Tunapplied_alias _ ) ),
         _ ) ->
       ())
 

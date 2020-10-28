@@ -331,7 +331,8 @@ let is_union_or_inter_type (ty : locl_ty) =
   | Tvarray _
   | Tdarray _
   | Tunapplied_alias _
-  | Tvarray_or_darray _ ->
+  | Tvarray_or_darray _
+  | Taccess _ ->
     false
 
 module InternalType = struct
@@ -450,6 +451,7 @@ let ty_con_ordinal ty_ =
   | Tdarray _ -> 21
   | Tvarray_or_darray _ -> 22
   | Tunapplied_alias _ -> 23
+  | Taccess _ -> 24
 
 (* Ordinal value for type constructor, for decl types *)
 let decl_ty_con_ordinal ty_ =

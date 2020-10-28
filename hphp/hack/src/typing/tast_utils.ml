@@ -185,7 +185,8 @@ let rec truthiness env ty =
   | Tfun _
   | Ttuple _
   | Tpu _
-  | Tpu_type_access _ ->
+  | Tpu_type_access _
+  | Taccess _ ->
     (* TODO(T36532263) check if that's ok *) Unknown
   | Tunapplied_alias _ ->
     Typing_defs.error_Tunapplied_alias_in_illegal_context ()
@@ -262,7 +263,8 @@ let rec find_sketchy_types env acc ty =
   | Tvarray_or_darray _
   | Tpu _
   | Tpu_type_access _
-  | Tunapplied_alias _ ->
+  | Tunapplied_alias _
+  | Taccess _ ->
     acc
 
 let find_sketchy_types env ty = find_sketchy_types env [] ty

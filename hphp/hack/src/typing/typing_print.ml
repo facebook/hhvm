@@ -586,6 +586,16 @@ module Full = struct
     | Tpu (base, (_, enum)) -> pu_concat k base enum
     | Tpu_type_access ((_, member), (_, tyname)) ->
       text member ^^ text (":@" ^ tyname)
+    | Taccess (root_ty, ids) ->
+      Concat
+        [
+          k root_ty;
+          to_doc
+            (List.fold_left
+               ids
+               ~f:(fun acc (_, sid) -> acc ^ "::" ^ sid)
+               ~init:"");
+        ]
 
   let rec constraint_type_ to_doc st env x =
     let k lty = locl_ty to_doc st env lty in
@@ -827,6 +837,7 @@ module ErrorString = struct
          in a type argument position then, which inst below
          prints with a different function (namely Full.locl_ty)  *)
       failwith "Tunapplied_alias is not a type"
+    | Taccess (_ty, _ids) -> "a type constant"
 
   and inst env tyl =
     if List.is_empty tyl then
@@ -1025,6 +1036,8 @@ module Json = struct
       @@ kind p "pocket_universe_type_access"
       @ name (snd member)
       @ name (snd typ)
+    (* TODO akenn *)
+    | (p, Taccess (ty, _ids)) -> obj @@ kind p "type_constant" @ args [ty]
 
   type deserialized_result = (locl_ty, deserialization_error) result
 

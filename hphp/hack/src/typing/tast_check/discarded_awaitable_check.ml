@@ -57,7 +57,8 @@ let rec enforce_not_awaitable env p ty =
   | Tshape _
   | Tdynamic
   | Tpu _
-  | Tpu_type_access _ ->
+  | Tpu_type_access _
+  | Taccess _ ->
     ()
   | Tunapplied_alias _ ->
     Typing_defs.error_Tunapplied_alias_in_illegal_context ()

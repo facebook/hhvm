@@ -60,6 +60,7 @@ let expand_ty ?var_hook ?pos env ty =
       (* TODO(T36532263) see if that needs updating *)
       | (p, Tpu (base, enum)) -> mk (p, Tpu (exp_ty base, enum))
       | (_, Tpu_type_access (_, _)) -> ety
+      | (_, Taccess _) -> ety
       | (_, Tunapplied_alias _) -> ety
     in
     ety

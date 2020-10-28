@@ -142,6 +142,9 @@ module Locl_Inst = struct
     | Tpu (ty, sid) ->
       let ty = instantiate subst ty in
       Tpu (ty, sid)
+    | Taccess (ty, ids) ->
+      let ty = instantiate subst ty in
+      Taccess (ty, ids)
 
   and instantiate_possibly_enforced_ty subst et =
     { et_type = instantiate subst et.et_type; et_enforced = et.et_enforced }

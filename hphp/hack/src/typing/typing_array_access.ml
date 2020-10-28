@@ -483,7 +483,8 @@ let rec array_get
       | Tunion _
       | Tintersection _
       | Tpu _
-      | Tpu_type_access _ ->
+      | Tpu_type_access _
+      | Taccess _ ->
         error_array env expr_pos ty1
       (* Type-check array access as though it is the method
        * array_get<Tk,Tv>(KeyedContainer<Tk,Tv> $array, Tk $key): Tv
@@ -570,7 +571,7 @@ let assign_array_append ~array_pos ~expr_pos ur env ty1 ty2 =
           ( Tnonnull | Tdarray _ | Tvarray_or_darray _ | Toption _ | Tprim _
           | Tvar _ | Tfun _ | Tclass _ | Ttuple _ | Tshape _ | Tunion _
           | Tintersection _ | Tgeneric _ | Tnewtype _ | Tdependent _ | Tpu _
-          | Tpu_type_access _ ) ) ->
+          | Tpu_type_access _ | Taccess _ ) ) ->
         error_assign_array_append env expr_pos ty1)
 
 let widen_for_assign_array_get ~expr_pos index_expr env ty =
@@ -816,7 +817,8 @@ let assign_array_get ~array_pos ~expr_pos ur env ty1 key tkey ty2 =
       | Tfun _
       | Tclass _
       | Tpu _
-      | Tpu_type_access _ ->
+      | Tpu_type_access _
+      | Taccess _ ->
         Errors.array_access_write
           expr_pos
           (Reason.to_pos r)

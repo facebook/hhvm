@@ -57,7 +57,8 @@ let rec is_stringish env ty =
   | Ttuple _
   | Tfun _
   | Tshape _
-  | Tpu_type_access _ ->
+  | Tpu_type_access _
+  | Taccess _ ->
     false
   | Tunapplied_alias _ ->
     Typing_defs.error_Tunapplied_alias_in_illegal_context ()

@@ -529,6 +529,7 @@ and default_subtype
           |> (* Turn error into a generic error about the type parameter *)
           if_unsat (invalid ~fail)
         | (_, Tdynamic) when subtype_env.treat_dynamic_as_bottom -> valid env
+        | (_, Taccess _) -> invalid ~fail env
         | (_, Tpu_type_access ((_pm, msub), (_pn, nsub))) ->
           (* If member is actually an expression dependent type,
            * we need to update this_ty
@@ -1145,7 +1146,7 @@ and simplify_subtype_i
                 ( Tdynamic | Tprim _ | Tnonnull | Tfun _ | Ttuple _ | Tshape _
                 | Tobject | Tclass _ | Tvarray _ | Tdarray _
                 | Tvarray_or_darray _ | Tany _ | Terr | Tpu _
-                | Tpu_type_access _ ) ),
+                | Tpu_type_access _ | Taccess _ ) ),
               _ ) ->
             simplify_subtype ~subtype_env ~this_ty lty_sub arg_ty_super env)
       )
@@ -1230,6 +1231,7 @@ and simplify_subtype_i
           else
             simplify_subtype ~subtype_env ~this_ty bound_sub ty_super env
         | _ -> default_subtype env))
+    | (_, Taccess _) -> invalid_env env
     | (_, Tgeneric (name_super, tyargs_super)) ->
       (* TODO(T69551141) handle type arguments. Right now, only passing tyargs_super to
          Env.get_lower_bounds *)
@@ -1306,7 +1308,7 @@ and simplify_subtype_i
                   | Tarraykey | Tnoreturn | Tatom _ ))
             | Tnonnull | Tfun _ | Ttuple _ | Tshape _ | Tobject | Tclass _
             | Tvarray _ | Tdarray _ | Tvarray_or_darray _ | Tpu _
-            | Tpu_type_access _ ) ) ->
+            | Tpu_type_access _ | Taccess _ ) ) ->
           valid env
         | _ -> default_subtype env))
     | (_, Tdynamic) ->

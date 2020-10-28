@@ -62,7 +62,7 @@ class type ['a] decl_type_visitor_type =
       decl_phase shape_field_type Nast.ShapeMap.t ->
       'a
 
-    method on_taccess : 'a -> Reason.t -> taccess_type -> 'a
+    method on_taccess : 'a -> Reason.t -> decl_phase taccess_type -> 'a
   end
 
 class virtual ['a] decl_type_visitor : ['a] decl_type_visitor_type =
@@ -228,6 +228,8 @@ class type ['a] locl_type_visitor_type =
     method on_tlist : 'a -> Reason.t -> locl_ty list -> 'a
 
     method on_tunapplied_alias : 'a -> Reason.t -> string -> 'a
+
+    method on_taccess : 'a -> Reason.t -> locl_phase taccess_type -> 'a
   end
 
 class virtual ['a] locl_type_visitor : ['a] locl_type_visitor_type =
@@ -310,6 +312,8 @@ class virtual ['a] locl_type_visitor : ['a] locl_type_visitor_type =
 
     method on_tunapplied_alias acc _ _ = acc
 
+    method on_taccess acc _ (ty, _ids) = this#on_type acc ty
+
     method on_type acc ty =
       let (r, x) = deref ty in
       match x with
@@ -337,6 +341,7 @@ class virtual ['a] locl_type_visitor : ['a] locl_type_visitor_type =
       | Tpu_type_access (member, tyname) ->
         this#on_tpu_type_access acc r member tyname
       | Tunapplied_alias n -> this#on_tunapplied_alias acc r n
+      | Taccess (ty, ids) -> this#on_taccess acc r (ty, ids)
   end
 
 class type ['a] internal_type_visitor_type =

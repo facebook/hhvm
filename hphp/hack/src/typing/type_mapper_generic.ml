@@ -78,6 +78,9 @@ class type ['env] type_mapper_type =
     method on_tvarray_or_darray :
       'env -> Reason.t -> locl_ty -> locl_ty -> 'env * locl_ty
 
+    method on_taccess :
+      'env -> Reason.t -> locl_ty -> Aast.sid list -> 'env * locl_ty
+
     method on_type : 'env -> locl_ty -> 'env * locl_ty
 
     method on_locl_ty_list : 'env -> locl_ty list -> 'env * locl_ty list
@@ -139,6 +142,8 @@ class ['env] shallow_type_mapper : ['env] type_mapper_type =
     method on_tvarray_or_darray env r ty1 ty2 =
       (env, mk (r, Tvarray_or_darray (ty1, ty2)))
 
+    method on_taccess env r ty ids = (env, mk (r, Taccess (ty, ids)))
+
     method on_type env ty =
       let (r, ty) = deref ty in
       match ty with
@@ -166,6 +171,7 @@ class ['env] shallow_type_mapper : ['env] type_mapper_type =
       | Tdarray (ty1, ty2) -> this#on_tdarray env r ty1 ty2
       | Tvarray_or_darray (ty1, ty2) -> this#on_tvarray_or_darray env r ty1 ty2
       | Tunapplied_alias name -> this#on_tunapplied_alias env r name
+      | Taccess (ty, ids) -> this#on_taccess env r ty ids
 
     method on_locl_ty_list env tyl = List.map_env env tyl ~f:this#on_type
   end

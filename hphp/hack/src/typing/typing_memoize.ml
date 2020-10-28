@@ -98,7 +98,8 @@ let check_param : env -> Nast.fun_param -> unit =
     | Tunapplied_alias _ ->
       Typing_defs.error_Tunapplied_alias_in_illegal_context ()
     | Tpu_type_access _
-    | Tpu _ ->
+    | Tpu _
+    | Taccess _ ->
       ()
     | Tfun _
     | Tvar _

@@ -299,7 +299,7 @@ and simplify_union_ env ty1 ty2 r =
              * types, etc. - so for now we leave it here.
              * TODO improve that. *)
             | Tnonnull | Tany _ | Tintersection _ | Tpu _ | Tpu_type_access _
-            | Toption _ | Tunion _ ) as ty1_ ) ),
+            | Toption _ | Tunion _ | Taccess _ ) as ty1_ ) ),
         (_, ty2_) ) ->
       (* Make sure to add a dependency on any classes referenced here, even if
        * we're in an error state (i.e., where we are right now). The need for

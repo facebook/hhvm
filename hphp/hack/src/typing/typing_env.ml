@@ -1399,7 +1399,8 @@ and get_tyvars_i env (ty : internal_type) =
     | Tpu (base, _) -> get_tyvars env base
     | Tpu_type_access (_, _)
     | Tunapplied_alias _ ->
-      (env, ISet.empty, ISet.empty))
+      (env, ISet.empty, ISet.empty)
+    | Taccess (ty, _ids) -> get_tyvars env ty)
   | ConstraintType ty ->
     (match deref_constraint_type ty with
     | (_, Tdestructure { d_required; d_optional; d_variadic; d_kind = _ }) ->

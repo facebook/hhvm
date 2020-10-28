@@ -168,8 +168,6 @@ and _ ty_ =
   | Tthis : decl_phase ty_
   (* Either an object type or a type alias, ty list are the arguments *)
   | Tapply : Nast.sid * decl_ty list -> decl_phase ty_
-  (* Name of class, name of type const, remaining names of type consts *)
-  | Taccess : taccess_type -> decl_phase ty_
   (* The type of the various forms of "array":
    * Tarray (None, None)         => "array"
    * Tarray (Some ty, None)      => "array<ty>"
@@ -263,6 +261,8 @@ and _ ty_ =
   | Tvarray : 'phase ty -> 'phase ty_
   (* Tvarray_or_darray (ty1, ty2) => "varray_or_darray<ty1, ty2>" *)
   | Tvarray_or_darray : 'phase ty * 'phase ty -> 'phase ty_
+  (* Name of class, name of type const, remaining names of type consts *)
+  | Taccess : 'phase taccess_type -> 'phase ty_
   (*========== Below Are Types That Cannot Be Declared In User Code ==========*)
   (* This represents a type alias that lacks necessary type arguments. Given
    *   type Foo<T1,T2> = ...
@@ -319,7 +319,7 @@ and _ ty_ =
        * - second parameter is the name of the type to project
        *)
 
-and taccess_type = decl_ty * Nast.sid list
+and 'phase taccess_type = 'phase ty * Nast.sid list
 
 (* represents reactivity of function
    - None corresponds to non-reactive function
@@ -471,7 +471,7 @@ module Pp : sig
 
   val pp_ty_list : Format.formatter -> 'a ty list -> unit
 
-  val pp_taccess_type : Format.formatter -> taccess_type -> unit
+  val pp_taccess_type : Format.formatter -> 'a taccess_type -> unit
 
   val pp_reactivity : Format.formatter -> reactivity -> unit
 

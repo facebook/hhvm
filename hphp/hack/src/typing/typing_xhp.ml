@@ -93,6 +93,7 @@ let rec walk_and_gather_xhp_ ~env ~pos cty =
     (env, [], [cty])
   | Tpu _
   | Tpu_type_access _
+  | Taccess _
   | Tunapplied_alias _ ->
     (env, [], [cty])
 

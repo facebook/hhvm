@@ -73,7 +73,8 @@ let rec is_byval_collection_or_string_or_any_type env ty =
     | Tfun _
     | Tvar _
     | Tpu _
-    | Tpu_type_access _ ->
+    | Tpu_type_access _
+    | Taccess _ ->
       false
     | Tunapplied_alias _ ->
       Typing_defs.error_Tunapplied_alias_in_illegal_context ()

@@ -666,7 +666,8 @@ let rec class_get_pu_ env cty name =
   | Ttuple _
   | Tobject
   | Tshape _
-  | Tunapplied_alias _ ->
+  | Tunapplied_alias _
+  | Taccess _ ->
     (env, None)
   | Tintersection _ -> (env, None)
   | Tpu_type_access _

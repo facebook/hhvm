@@ -170,8 +170,6 @@ and _ ty_ =
   | Tthis : decl_phase ty_  (** The late static bound type of a class *)
   | Tapply : Nast.sid * decl_ty list -> decl_phase ty_
       (** Either an object type or a type alias, ty list are the arguments *)
-  | Taccess : taccess_type -> decl_phase ty_
-      (** Name of class, name of type const, remaining names of type consts *)
   | Tarray : decl_ty option * decl_ty option -> decl_phase ty_
       (** The type of the various forms of "array":
        *
@@ -269,6 +267,8 @@ and _ ty_ =
   | Tvarray : 'phase ty -> 'phase ty_  (** Tvarray (ty) => "varray<ty>" *)
   | Tvarray_or_darray : 'phase ty * 'phase ty -> 'phase ty_
       (** Tvarray_or_darray (ty1, ty2) => "varray_or_darray<ty1, ty2>" *)
+  | Taccess : 'phase taccess_type -> 'phase ty_
+      (** Name of class, name of type const, remaining names of type consts *)
   (*========== Below Are Types That Cannot Be Declared In User Code ==========*)
   | Tunapplied_alias : string -> locl_phase ty_
       (** This represents a type alias that lacks necessary type arguments. Given
@@ -318,7 +318,7 @@ and _ ty_ =
        * - second parameter is the name of the type to project
        *)
 
-and taccess_type = decl_ty * Nast.sid list
+and 'phase taccess_type = 'phase ty * Nast.sid list
 
 (** represents reactivity of function
    - None corresponds to non-reactive function
@@ -729,7 +729,7 @@ module Pp = struct
     Format.fprintf fmt "@,]@]";
     Format.fprintf fmt "@])"
 
-  and pp_taccess_type : Format.formatter -> taccess_type -> unit =
+  and pp_taccess_type : type a. Format.formatter -> a taccess_type -> unit =
    fun fmt (a0, a1) ->
     Format.fprintf fmt "(@[";
     pp_ty fmt a0;

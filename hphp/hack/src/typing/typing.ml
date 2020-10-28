@@ -5543,7 +5543,7 @@ and class_get_
   | ( _,
       ( Tvar _ | Tnonnull | Tvarray _ | Tdarray _ | Tvarray_or_darray _
       | Toption _ | Tprim _ | Tfun _ | Ttuple _ | Tobject | Tshape _ | Tpu _
-      | Tpu_type_access _ ) ) ->
+      | Tpu_type_access _ | Taccess _ ) ) ->
     Errors.non_class_member
       ~is_method
       mid
@@ -5823,7 +5823,7 @@ and static_class_id
       | ( _,
           ( Tany _ | Tnonnull | Tvarray _ | Tdarray _ | Tvarray_or_darray _
           | Toption _ | Tprim _ | Tfun _ | Ttuple _ | Tnewtype _ | Tdependent _
-          | Tobject | Tshape _ | Tpu _ | Tpu_type_access _ ) ) ->
+          | Tobject | Tshape _ | Tpu _ | Tpu_type_access _ | Taccess _ ) ) ->
         Errors.expected_class
           ~suffix:(", but got " ^ Typing_print.error env base_ty)
           p;
@@ -7241,7 +7241,8 @@ and class_get_pu_ env cty name =
     (env, None)
   | Tintersection _ -> (env, None)
   | Tpu_type_access _
-  | Tpu _ ->
+  | Tpu _
+  | Taccess _ ->
     (env, None)
   | Tnewtype (_, _, ty)
   | Tdependent (_, ty) ->

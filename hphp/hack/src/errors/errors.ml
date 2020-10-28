@@ -4582,13 +4582,6 @@ let override_per_trait class_name id m_pos =
 let missing_assign pos =
   add (Typing.err_code Typing.MissingAssign) pos "Please assign a value"
 
-let private_override pos class_id id =
-  add
-    (Typing.err_code Typing.PrivateOverride)
-    pos
-    ( Markdown_lite.md_codify (strip_ns class_id ^ "::" ^ id)
-    ^ ": combining private and override is nonsensical" )
-
 let invalid_memoized_param pos ty_reason_msg =
   add_list
     (Typing.err_code Typing.InvalidMemoizedParam)

@@ -39,24 +39,12 @@ let error_if_abstract_method_is_memoized method_ =
   if method_.m_abstract && is_memoizable method_.m_user_attributes then
     Errors.abstract_method_memoize (fst method_.m_name)
 
-let error_if_private_method_is_overridable class_name method_ =
-  if
-    Aast.equal_visibility method_.m_visibility Private
-    && is_overridable method_.m_user_attributes
-  then
-    let (pos, id) = method_.m_name in
-    Errors.private_override pos class_name id
-
 let handler =
   object
     inherit Nast_visitor.handler_base
 
     method! at_class_ _ class_ =
-      error_if_duplicate_method_names class_.c_methods;
-      List.iter
-        class_.c_methods
-        (error_if_private_method_is_overridable (snd class_.c_name));
-      ()
+      error_if_duplicate_method_names class_.c_methods
 
     method! at_method_ _ method_ =
       error_if_clone_has_arguments method_;

@@ -130,7 +130,7 @@
      ft_flags =
      (make_ft_flags FSync None ~return_disposable:false
        ~returns_mutable:false ~returns_void_to_rx:false);
-     ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {#PUBLIC} })))
+     ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC} })))
   ]; tp_reified = Erased; tp_user_attributes = [] };
 { Typing_defs_core.tp_variance = Invariant; tp_name = ([15:3-9], "Tshape");
   tp_tparams = [];

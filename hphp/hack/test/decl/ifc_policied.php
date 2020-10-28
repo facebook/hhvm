@@ -26,3 +26,6 @@ class C {
     <<__CanCall>> (function(): void) $f
   ): void {}
 }
+
+<<__InferFlows>>
+function inferflows(): void {}

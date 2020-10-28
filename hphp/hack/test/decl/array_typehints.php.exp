@@ -25,7 +25,7 @@
              ft_flags =
              (make_ft_flags FSync None ~return_disposable:false
                ~returns_mutable:false ~returns_void_to_rx:false);
-             ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {#PUBLIC} }));
+             ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC} }));
        fe_pos = [3:10-12]; fe_php_std_lib = false }));
   ("\\v0",
    (Shallow_decl_defs.Fun
@@ -51,7 +51,7 @@
               ft_flags =
               (make_ft_flags FSync None ~return_disposable:false
                 ~returns_mutable:false ~returns_void_to_rx:false);
-              ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {#PUBLIC} }));
+              ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [7:10-12]; fe_php_std_lib = false }));
   ("\\v1",
    (Shallow_decl_defs.Fun
@@ -77,7 +77,7 @@
               ft_flags =
               (make_ft_flags FSync None ~return_disposable:false
                 ~returns_mutable:false ~returns_void_to_rx:false);
-              ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {#PUBLIC} }));
+              ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [11:10-12]; fe_php_std_lib = false }));
   ("\\d0",
    (Shallow_decl_defs.Fun
@@ -106,7 +106,7 @@
               ft_flags =
               (make_ft_flags FSync None ~return_disposable:false
                 ~returns_mutable:false ~returns_void_to_rx:false);
-              ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {#PUBLIC} }));
+              ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [15:10-12]; fe_php_std_lib = false }));
   ("\\d2",
    (Shallow_decl_defs.Fun
@@ -135,7 +135,7 @@
               ft_flags =
               (make_ft_flags FSync None ~return_disposable:false
                 ~returns_mutable:false ~returns_void_to_rx:false);
-              ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {#PUBLIC} }));
+              ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [19:10-12]; fe_php_std_lib = false }));
   ("\\vd0",
    (Shallow_decl_defs.Fun
@@ -163,7 +163,7 @@
               ft_flags =
               (make_ft_flags FSync None ~return_disposable:false
                 ~returns_mutable:false ~returns_void_to_rx:false);
-              ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {#PUBLIC} }));
+              ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [23:10-13]; fe_php_std_lib = false }));
   ("\\vd1",
    (Shallow_decl_defs.Fun
@@ -191,7 +191,7 @@
               ft_flags =
               (make_ft_flags FSync None ~return_disposable:false
                 ~returns_mutable:false ~returns_void_to_rx:false);
-              ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {#PUBLIC} }));
+              ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [27:10-13]; fe_php_std_lib = false }));
   ("\\vd2",
    (Shallow_decl_defs.Fun
@@ -219,7 +219,7 @@
               ft_flags =
               (make_ft_flags FSync None ~return_disposable:false
                 ~returns_mutable:false ~returns_void_to_rx:false);
-              ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {#PUBLIC} }));
+              ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [31:10-13]; fe_php_std_lib = false }));
   ("\\vd3",
    (Shallow_decl_defs.Fun
@@ -243,7 +243,7 @@
               ft_flags =
               (make_ft_flags FSync None ~return_disposable:false
                 ~returns_mutable:false ~returns_void_to_rx:false);
-              ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {#PUBLIC} }));
+              ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [35:10-13]; fe_php_std_lib = false }))
   ]
 

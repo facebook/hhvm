@@ -69,7 +69,7 @@
               ft_flags =
               (make_ft_flags FSync None ~return_disposable:false
                 ~returns_mutable:false ~returns_void_to_rx:false);
-              ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {#PUBLIC} }));
+              ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [5:10-21]; fe_php_std_lib = false }));
   ("\\returns_shape",
    (Shallow_decl_defs.Fun
@@ -121,7 +121,7 @@
               ft_flags =
               (make_ft_flags FSync None ~return_disposable:false
                 ~returns_mutable:false ~returns_void_to_rx:false);
-              ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {#PUBLIC} }));
+              ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [9:10-23]; fe_php_std_lib = false }));
   ("\\generic_shape",
    (Shallow_decl_defs.Fun
@@ -173,7 +173,7 @@
         ft_flags =
         (make_ft_flags FSync None ~return_disposable:false
           ~returns_mutable:false ~returns_void_to_rx:false);
-        ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {#PUBLIC} }));
+        ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC} }));
 fe_pos = [15:10-23]; fe_php_std_lib = false }));
 ("\\TaggedCoordinate",
  (Shallow_decl_defs.Typedef

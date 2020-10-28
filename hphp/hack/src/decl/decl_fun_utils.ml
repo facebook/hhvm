@@ -74,6 +74,9 @@ let find_policied_attribute user_attributes : ifc_fun_decl =
     (match get_classname_or_literal_attribute_param ua_params with
     | Some s -> FDPolicied (Some s)
     | None -> FDPolicied None)
+  | None
+    when Naming_attributes.mem SN.UserAttributes.uaInferFlows user_attributes ->
+    FDInferFlows
   | None -> default_ifc_fun_decl
 
 let has_accept_disposable_attribute user_attributes =

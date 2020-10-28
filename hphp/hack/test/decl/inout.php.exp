@@ -46,7 +46,7 @@
                         (make_ft_flags FSync None ~return_disposable:false
                           ~returns_mutable:false ~returns_void_to_rx:false);
                         ft_reactive = Nonreactive;
-                        ft_ifc_decl = FDPolicied {#PUBLIC} }))
+                        ft_ifc_decl = FDPolicied {PUBLIC} }))
                   };
                 fp_rx_annotation = None;
                 fp_flags =
@@ -68,7 +68,7 @@
              ft_flags =
              (make_ft_flags FSync None ~return_disposable:false
                ~returns_mutable:false ~returns_void_to_rx:false);
-             ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {#PUBLIC} }));
+             ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC} }));
        fe_pos = [3:10-11]; fe_php_std_lib = false }))
   ]
 

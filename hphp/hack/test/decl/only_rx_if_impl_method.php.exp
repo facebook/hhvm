@@ -50,7 +50,7 @@
 -                 Reactive {(Rhint (root|only_rx_if_impl_method.php line 6, characters 26-35),
 +                 Reactive {(Rhint (root|only_rx_if_impl_method.php line 6, characters 26-28),
                              (Tapply (([6:26-29], "\\IRx"), [])))};
-                  ft_ifc_decl = FDPolicied {#PUBLIC} }));
+                  ft_ifc_decl = FDPolicied {PUBLIC} }));
             sm_visibility = Public; sm_deprecated = None }
            ];
          sc_user_attributes = []; sc_enum_type = None }))

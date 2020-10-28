@@ -64,7 +64,7 @@
                      (make_ft_flags FSync None ~return_disposable:false
                        ~returns_mutable:false ~returns_void_to_rx:false);
                      ft_reactive = Nonreactive;
-                     ft_ifc_decl = FDPolicied {#PUBLIC} }));
+                     ft_ifc_decl = FDPolicied {PUBLIC} }));
                sm_visibility = Public; sm_deprecated = None });
        sc_static_methods = [];
        sc_methods =
@@ -91,7 +91,7 @@
                 ft_flags =
                 (make_ft_flags FSync None ~return_disposable:false
                   ~returns_mutable:false ~returns_void_to_rx:false);
-                ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {#PUBLIC}
+                ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC}
                 }));
           sm_visibility = Private; sm_deprecated = None };
          { Shallow_decl_defs.sm_abstract = false; sm_final = false;
@@ -117,8 +117,8 @@
                  ft_flags =
                  (make_ft_flags FSync None ~return_disposable:false
                    ~returns_mutable:false ~returns_void_to_rx:false);
-                 ft_reactive = Nonreactive;
-                 ft_ifc_decl = FDPolicied {#PUBLIC} }));
+                 ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC}
+                 }));
            sm_visibility = Public; sm_deprecated = None };
          { Shallow_decl_defs.sm_abstract = false; sm_final = false;
            sm_memoizelsb = false; sm_name = ([13:22-37], "protectedMethod");
@@ -143,8 +143,8 @@
                  ft_flags =
                  (make_ft_flags FSync None ~return_disposable:false
                    ~returns_mutable:false ~returns_void_to_rx:false);
-                 ft_reactive = Nonreactive;
-                 ft_ifc_decl = FDPolicied {#PUBLIC} }));
+                 ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC}
+                 }));
            sm_visibility = Protected; sm_deprecated = None };
          { Shallow_decl_defs.sm_abstract = false; sm_final = false;
            sm_memoizelsb = false; sm_name = ([14:25-40], "async_generator");
@@ -205,8 +205,8 @@
                  ft_flags =
                  (make_ft_flags FAsyncGenerator None ~return_disposable:false
                    ~returns_mutable:false ~returns_void_to_rx:false);
-                 ft_reactive = Nonreactive;
-                 ft_ifc_decl = FDPolicied {#PUBLIC} }));
+                 ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC}
+                 }));
            sm_visibility = Public; sm_deprecated = None };
          { Shallow_decl_defs.sm_abstract = false; sm_final = false;
            sm_memoizelsb = false;
@@ -232,8 +232,8 @@
                  ft_flags =
                  (make_ft_flags FSync None ~return_disposable:false
                    ~returns_mutable:false ~returns_void_to_rx:false);
-                 ft_reactive = Reactive {};
-                 ft_ifc_decl = FDPolicied {#PUBLIC} }));
+                 ft_reactive = Reactive {}; ft_ifc_decl = FDPolicied {PUBLIC}
+                 }));
            sm_visibility = Public; sm_deprecated = None };
          { Shallow_decl_defs.sm_abstract = false; sm_final = false;
            sm_memoizelsb = false;
@@ -259,7 +259,7 @@
                  ft_flags =
                  (make_ft_flags FSync None ~return_disposable:false
                    ~returns_mutable:false ~returns_void_to_rx:false);
-                 ft_reactive = Shallow {}; ft_ifc_decl = FDPolicied {#PUBLIC}
+                 ft_reactive = Shallow {}; ft_ifc_decl = FDPolicied {PUBLIC}
                  }));
            sm_visibility = Public; sm_deprecated = None };
          { Shallow_decl_defs.sm_abstract = false; sm_final = false;
@@ -286,7 +286,7 @@
                  ft_flags =
                  (make_ft_flags FSync None ~return_disposable:false
                    ~returns_mutable:false ~returns_void_to_rx:false);
-                 ft_reactive = Local {}; ft_ifc_decl = FDPolicied {#PUBLIC} }));
+                 ft_reactive = Local {}; ft_ifc_decl = FDPolicied {PUBLIC} }));
            sm_visibility = Public; sm_deprecated = None };
          { Shallow_decl_defs.sm_abstract = false; sm_final = false;
            sm_memoizelsb = false;
@@ -359,8 +359,8 @@
                  ft_flags =
                  (make_ft_flags FSync None ~return_disposable:false
                    ~returns_mutable:false ~returns_void_to_rx:false);
-                 ft_reactive = Reactive {};
-                 ft_ifc_decl = FDPolicied {#PUBLIC} }));
+                 ft_reactive = Reactive {}; ft_ifc_decl = FDPolicied {PUBLIC}
+                 }));
            sm_visibility = Public; sm_deprecated = None };
          { Shallow_decl_defs.sm_abstract = false; sm_final = false;
            sm_memoizelsb = false; sm_name = ([40:19-33], "mutable_return");
@@ -385,8 +385,8 @@
                  ft_flags =
                  (make_ft_flags FSync None ~return_disposable:false
                    ~returns_mutable:true ~returns_void_to_rx:false);
-                 ft_reactive = Reactive {};
-                 ft_ifc_decl = FDPolicied {#PUBLIC} }));
+                 ft_reactive = Reactive {}; ft_ifc_decl = FDPolicied {PUBLIC}
+                 }));
            sm_visibility = Public; sm_deprecated = None }
          ];
        sc_user_attributes = []; sc_enum_type = None }));
@@ -547,7 +547,7 @@
                       (make_ft_flags FSync None ~return_disposable:false
                         ~returns_mutable:false ~returns_void_to_rx:false);
                       ft_reactive = Nonreactive;
-                      ft_ifc_decl = FDPolicied {#PUBLIC} }));
+                      ft_ifc_decl = FDPolicied {PUBLIC} }));
                 sm_visibility = Public; sm_deprecated = None });
         sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
         sc_enum_type = None }))

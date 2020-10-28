@@ -21,9 +21,10 @@ type ce_visibility =
 type ifc_fun_decl =
   | FDPolicied of string option
   | FDInferFlows
+[@@deriving eq]
 
-(* The default policy is the public one, use a # to prevent class collisions *)
-let default_ifc_fun_decl = FDPolicied (Some "#PUBLIC")
+(* The default policy is the public one. PUBLIC is a keyword, so no need to prevent class collisions *)
+let default_ifc_fun_decl = FDPolicied (Some "PUBLIC")
 
 type exact =
   | Exact

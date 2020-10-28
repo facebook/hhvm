@@ -61,8 +61,8 @@
                  ft_flags =
                  (make_ft_flags FSync None ~return_disposable:false
                    ~returns_mutable:false ~returns_void_to_rx:false);
-                 ft_reactive = Nonreactive;
-                 ft_ifc_decl = FDPolicied {#PUBLIC} }));
+                 ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC}
+                 }));
      sm_visibility = Public; sm_deprecated = None });
   sc_static_methods = [];
   sc_methods =
@@ -89,7 +89,7 @@
          ft_flags =
          (make_ft_flags FSync None ~return_disposable:false
            ~returns_mutable:false ~returns_void_to_rx:false);
-         ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {#PUBLIC} }));
+         ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC} }));
     sm_visibility = Public; sm_deprecated = None }
   ]; sc_user_attributes = []; sc_enum_type = None }));
 ("\\ContravariantBag",
@@ -155,7 +155,7 @@
                 ft_flags =
                 (make_ft_flags FSync None ~return_disposable:false
                   ~returns_mutable:false ~returns_void_to_rx:false);
-                ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {#PUBLIC}
+                ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC}
                 }));
     sm_visibility = Public; sm_deprecated = None });
  sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
@@ -223,7 +223,7 @@
                 ft_flags =
                 (make_ft_flags FSync None ~return_disposable:false
                   ~returns_mutable:false ~returns_void_to_rx:false);
-                ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {#PUBLIC}
+                ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC}
                 }));
     sm_visibility = Public; sm_deprecated = None });
  sc_static_methods = [];
@@ -251,7 +251,7 @@
         ft_flags =
         (make_ft_flags FSync None ~return_disposable:false
           ~returns_mutable:false ~returns_void_to_rx:false);
-        ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {#PUBLIC} }));
+        ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC} }));
    sm_visibility = Public; sm_deprecated = None }
  ]; sc_user_attributes = []; sc_enum_type = None }))
 ]

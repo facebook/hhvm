@@ -234,7 +234,7 @@ fn default_capability<'a>(arena: &'a Bump, r: Reason<'a>) -> &'a Ty<'a> {
 }
 
 fn default_ifc_fun_decl<'a>() -> IfcFunDecl<'a> {
-    IfcFunDecl::FDPolicied(Some("#PUBLIC"))
+    IfcFunDecl::FDPolicied(Some("PUBLIC"))
 }
 
 #[derive(Debug)]
@@ -820,7 +820,7 @@ struct Attributes<'a> {
     dynamically_callable: bool,
     returns_disposable: bool,
     php_std_lib: bool,
-    policied: IfcFunDecl<'a>,
+    ifc_attribute: IfcFunDecl<'a>,
     external: bool,
     can_call: bool,
 }
@@ -1086,7 +1086,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
             dynamically_callable: false,
             returns_disposable: false,
             php_std_lib: false,
-            policied: default_ifc_fun_decl(),
+            ifc_attribute: default_ifc_fun_decl(),
             external: false,
             can_call: false,
         };
@@ -1112,6 +1112,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                 .map(|&x| self.str_from_utf8(x))
                 .or_else(|| attribute.classname_params.first().map(|x| x.1))
         };
+        let mut ifc_already_policied = false;
 
         for attribute in node.iter() {
             if let Node::Attribute(attribute) = attribute {
@@ -1207,14 +1208,17 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                                 .map(|&x| self.str_from_utf8(x))
                         };
                         // Take the classname param by default
-                        attributes.policied =
+                        attributes.ifc_attribute =
                             IfcFunDecl::FDPolicied(attribute.classname_params.first().map_or_else(
                                 string_literal_params, // default
                                 |&x| Some(x.1),        // f
                             ));
+                        ifc_already_policied = true;
                     }
                     "__InferFlows" => {
-                        attributes.policied = IfcFunDecl::FDInferFlows;
+                        if !ifc_already_policied {
+                            attributes.ifc_attribute = IfcFunDecl::FDInferFlows;
+                        }
                     }
                     "__External" => {
                         attributes.external = true;
@@ -1399,7 +1403,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
         if attributes.returns_void_to_rx {
             flags |= FunTypeFlags::RETURNS_VOID_TO_RX;
         }
-        let ifc_decl = attributes.policied;
+        let ifc_decl = attributes.ifc_attribute;
 
         flags |= Self::param_mutability_to_fun_type_flags(attributes.param_mutability);
         // Pop the type params stack only after creating all inner types.

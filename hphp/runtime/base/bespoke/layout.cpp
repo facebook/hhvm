@@ -159,7 +159,7 @@ void logBespokeDispatch(const ArrayData* ad, const char* fn) {
 
 namespace {
 ArrayData* maybeMonoify(ArrayData* ad) {
-  if (ad->isVanilla() || ad->isKeysetType()) return ad;
+  if (!ad->isVanilla() || ad->isKeysetType()) return ad;
 
   auto const et = EntryTypes::ForArray(ad);
   auto const monotype_keys =

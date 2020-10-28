@@ -86,6 +86,7 @@
                    (Rhint (root|functions.php line 11, characters 29-31),
                     (Tprim Tint))
                    };
+                 fp_rx_annotation = None;
                  fp_flags =
                  (make_fp_flags ~mutability:None ~accept_disposable:false
                    ~has_default:false ~mode:Typing_defs_core.FPnormal
@@ -98,6 +99,7 @@
                     (Rhint (root|functions.php line 11, characters 40-44),
                      (Tprim Tfloat))
                     };
+                  fp_rx_annotation = None;
                   fp_flags =
                   (make_fp_flags ~mutability:None ~accept_disposable:false
                     ~has_default:false ~mode:Typing_defs_core.FPnormal
@@ -144,6 +146,7 @@
                    (Rhint (root|functions.php line 14, characters 43-49),
                     (Tapply (([14:43-50], "\\Typedef"), [])))
                    };
+                 fp_rx_annotation = None;
                  fp_flags =
                  (make_fp_flags ~mutability:None ~accept_disposable:false
                    ~has_default:false ~mode:Typing_defs_core.FPnormal
@@ -188,6 +191,7 @@
                    (Rhint (root|functions.php line 18, characters 30-30),
                     (Tgeneric ("T", [])))
                  };
+                fp_rx_annotation = None;
                 fp_flags =
                 (make_fp_flags ~mutability:None ~accept_disposable:false
                   ~has_default:false ~mode:Typing_defs_core.FPnormal
@@ -244,6 +248,7 @@
                  (Rhint (root|functions.php line 23, characters 3-4),
                   (Tgeneric ("T1", [])))
                };
+              fp_rx_annotation = None;
               fp_flags =
               (make_fp_flags ~mutability:None ~accept_disposable:false
                 ~has_default:false ~mode:Typing_defs_core.FPnormal
@@ -256,6 +261,7 @@
                 (Rhint (root|functions.php line 24, characters 3-4),
                  (Tgeneric ("T2", [])))
               };
+            fp_rx_annotation = None;
             fp_flags =
             (make_fp_flags ~mutability:None ~accept_disposable:false
               ~has_default:false ~mode:Typing_defs_core.FPnormal
@@ -321,6 +327,7 @@ fe_pos = [22:10-38]; fe_php_std_lib = false }));
                      (Rhint (root|functions.php line 33, characters 26-28),
                       (Tprim Tint))))
                  };
+               fp_rx_annotation = None;
                fp_flags =
                (make_fp_flags ~mutability:None ~accept_disposable:false
                  ~has_default:false ~mode:Typing_defs_core.FPnormal
@@ -359,6 +366,7 @@ fe_pos = [22:10-38]; fe_php_std_lib = false }));
                  (Rhint (root|functions.php line 35, characters 23-25),
                   (Tprim Tint))
                  };
+               fp_rx_annotation = None;
                fp_flags =
                (make_fp_flags ~mutability:None ~accept_disposable:false
                  ~has_default:false ~mode:Typing_defs_core.FPinout
@@ -403,6 +411,7 @@ fe_pos = [22:10-38]; fe_php_std_lib = false }));
                  (Rhint (root|functions.php line 38, characters 3-4),
                   (Tgeneric ("Tu", [])))
                };
+              fp_rx_annotation = None;
               fp_flags =
               (make_fp_flags ~mutability:None ~accept_disposable:false
                 ~has_default:false ~mode:Typing_defs_core.FPnormal
@@ -424,6 +433,7 @@ fe_pos = [22:10-38]; fe_php_std_lib = false }));
                            (Rhint (root|functions.php line 39, characters 13-14),
                             (Tgeneric ("Tu", [])))
                          };
+                        fp_rx_annotation = None;
                         fp_flags =
                         (make_fp_flags ~mutability:None
                           ~accept_disposable:false ~has_default:false
@@ -448,6 +458,7 @@ fe_pos = [22:10-38]; fe_php_std_lib = false }));
                     ft_reactive = Nonreactive;
                     ft_ifc_decl = FDPolicied {#PUBLIC} }))
               };
+            fp_rx_annotation = None;
             fp_flags =
             (make_fp_flags ~mutability:None ~accept_disposable:false
               ~has_default:false ~mode:Typing_defs_core.FPnormal
@@ -481,6 +492,7 @@ fe_pos = [22:10-38]; fe_php_std_lib = false }));
                                (Rhint (root|functions.php line 40, characters 24-25),
                                 (Tgeneric ("Tu", [])))
                              };
+                            fp_rx_annotation = None;
                             fp_flags =
                             (make_fp_flags ~mutability:None
                               ~accept_disposable:false ~has_default:false
@@ -505,6 +517,7 @@ fe_pos = [22:10-38]; fe_php_std_lib = false }));
                         ft_reactive = Nonreactive;
                         ft_ifc_decl = FDPolicied {#PUBLIC} }))
                   };
+                 fp_rx_annotation = None;
                  fp_flags =
                  (make_fp_flags ~mutability:None ~accept_disposable:false
                    ~has_default:false ~mode:Typing_defs_core.FPnormal
@@ -554,6 +567,7 @@ fe_pos = [37:10-37]; fe_php_std_lib = false }));
                        ]
                      )))
                  };
+               fp_rx_annotation = None;
                fp_flags =
                (make_fp_flags ~mutability:None ~accept_disposable:false
                  ~has_default:false ~mode:Typing_defs_core.FPnormal
@@ -670,6 +684,7 @@ fe_pos = [37:10-37]; fe_php_std_lib = false }));
                  (Rhint (root|functions.php line 61, characters 17-23),
                   (Tapply (([61:17-24], "\\Typedef"), [])))
                  };
+               fp_rx_annotation = None;
                fp_flags =
                (make_fp_flags
                  ~mutability:(Some Typing_defs_core.Param_borrowed_mutable)
@@ -684,6 +699,7 @@ fe_pos = [37:10-37]; fe_php_std_lib = false }));
                   (Rhint (root|functions.php line 62, characters 22-28),
                    (Tapply (([62:22-29], "\\Typedef"), [])))
                   };
+                fp_rx_annotation = None;
                 fp_flags =
                 (make_fp_flags
                   ~mutability:(Some Typing_defs_core.Param_maybe_mutable)
@@ -698,6 +714,7 @@ fe_pos = [37:10-37]; fe_php_std_lib = false }));
                   (Rhint (root|functions.php line 63, characters 22-28),
                    (Tapply (([63:22-29], "\\Typedef"), [])))
                   };
+                fp_rx_annotation = None;
                 fp_flags =
                 (make_fp_flags
                   ~mutability:(Some Typing_defs_core.Param_owned_mutable)
@@ -785,6 +802,7 @@ fe_pos = [37:10-37]; fe_php_std_lib = false }));
                      (Rhint (root|functions.php line 74, characters 40-40),
                       (Tgeneric ("T", [])))))
                };
+              fp_rx_annotation = None;
               fp_flags =
               (make_fp_flags ~mutability:None ~accept_disposable:false
                 ~has_default:false ~mode:Typing_defs_core.FPnormal
@@ -823,6 +841,7 @@ fe_pos = [37:10-37]; fe_php_std_lib = false }));
                  (Rhint (root|functions.php line 78, characters 29-36),
                   (Tprim Tresource))
                  };
+               fp_rx_annotation = None;
                fp_flags =
                (make_fp_flags ~mutability:None ~accept_disposable:false
                  ~has_default:false ~mode:Typing_defs_core.FPnormal
@@ -884,6 +903,7 @@ fe_pos = [37:10-37]; fe_php_std_lib = false }));
                    (Rvar_param (root|functions.php line 87, characters 37-41),
                     Tmixed)
                    };
+                 fp_rx_annotation = None;
                  fp_flags =
                  (make_fp_flags ~mutability:None ~accept_disposable:false
                    ~has_default:false ~mode:Typing_defs_core.FPnormal

@@ -14,6 +14,7 @@
                   (Rhint (root|like_types.php line 4, characters 21-23),
                    (Tprim Tint))
                   };
+                fp_rx_annotation = None;
                 fp_flags =
                 (make_fp_flags ~mutability:None ~accept_disposable:false
                   ~has_default:false ~mode:Typing_defs_core.FPnormal
@@ -64,6 +65,7 @@
                    (Rhint (root|like_types.php line 6, characters 23-23),
                     (Tgeneric ("T", [])))
                  };
+                fp_rx_annotation = None;
                 fp_flags =
                 (make_fp_flags ~mutability:None ~accept_disposable:false
                   ~has_default:false ~mode:Typing_defs_core.FPnormal
@@ -127,6 +129,7 @@
                           Tthis),
                          [([13:27-28], "T")])))
                     };
+                  fp_rx_annotation = None;
                   fp_flags =
                   (make_fp_flags ~mutability:None ~accept_disposable:false
                     ~has_default:false ~mode:Typing_defs_core.FPnormal

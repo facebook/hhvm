@@ -48,6 +48,7 @@
                            } }
                        )))
                    };
+                 fp_rx_annotation = None;
                  fp_flags =
                  (make_fp_flags ~mutability:None ~accept_disposable:false
                    ~has_default:false ~mode:Typing_defs_core.FPnormal
@@ -86,6 +87,7 @@
                    (Rhint (root|shapes.php line 10, characters 3-12),
                     (Tapply (([10:3-13], "\\Coordinate"), [])))
                    };
+                 fp_rx_annotation = None;
                  fp_flags =
                  (make_fp_flags ~mutability:None ~accept_disposable:false
                    ~has_default:false ~mode:Typing_defs_core.FPnormal
@@ -148,6 +150,7 @@
                         (Tgeneric ("T", [])))
                     ]))
                  };
+              fp_rx_annotation = None;
               fp_flags =
               (make_fp_flags ~mutability:None ~accept_disposable:false
                 ~has_default:false ~mode:Typing_defs_core.FPnormal

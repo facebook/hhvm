@@ -32,6 +32,7 @@
                      (Rhint (root|generic_method_tparam_scope.php line 4, characters 25-26),
                       (Tgeneric ("Ta", [])))
                    };
+                  fp_rx_annotation = None;
                   fp_flags =
                   (make_fp_flags ~mutability:None ~accept_disposable:false
                     ~has_default:false ~mode:Typing_defs_core.FPnormal
@@ -77,6 +78,7 @@
                     (Rhint (root|generic_method_tparam_scope.php line 8, characters 25-26),
                      (Tgeneric ("Tb", [])))
                   };
+                 fp_rx_annotation = None;
                  fp_flags =
                  (make_fp_flags ~mutability:None ~accept_disposable:false
                    ~has_default:false ~mode:Typing_defs_core.FPnormal

@@ -1019,6 +1019,16 @@ module Pp = struct
       Format.fprintf fmt "@]";
       Format.fprintf fmt ";@ ";
 
+      Format.fprintf fmt "@[%s =@ " "fp_rx_annotation";
+      (match x.fp_rx_annotation with
+      | None -> Format.pp_print_string fmt "None"
+      | Some x ->
+        Format.pp_print_string fmt "(Some ";
+        pp_param_rx_annotation fmt x;
+        Format.pp_print_string fmt ")");
+      Format.fprintf fmt "@]";
+      Format.fprintf fmt ";@ ";
+
       Format.fprintf fmt "@[%s =@ " "fp_flags";
       pp_fp_flags fmt x;
       Format.fprintf fmt "@]";
@@ -1038,6 +1048,15 @@ module Pp = struct
          ~init:false
          x);
     Format.fprintf fmt "@,]@]"
+
+  and pp_param_rx_annotation : Format.formatter -> param_rx_annotation -> unit =
+   fun fmt x ->
+    match x with
+    | Param_rx_var -> Format.pp_print_string fmt "Param_rx_var"
+    | Param_rx_if_impl ty ->
+      Format.pp_print_string fmt "(Param_rx_if_impl ";
+      pp_ty fmt ty;
+      Format.pp_print_string fmt ")"
 
   and pp_tparam_ : type a. Format.formatter -> a ty tparam -> unit =
    (fun fmt tparam -> pp_tparam pp_ty fmt tparam)

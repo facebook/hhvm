@@ -31,6 +31,7 @@
                           (Tprim Tfloat))
                          ]))
                    };
+                 fp_rx_annotation = None;
                  fp_flags =
                  (make_fp_flags ~mutability:None ~accept_disposable:false
                    ~has_default:false ~mode:Typing_defs_core.FPnormal
@@ -69,6 +70,7 @@
                    (Rhint (root|tuples.php line 9, characters 24-33),
                     (Tapply (([9:24-34], "\\Coordinate"), [])))
                    };
+                 fp_rx_annotation = None;
                  fp_flags =
                  (make_fp_flags ~mutability:None ~accept_disposable:false
                    ~has_default:false ~mode:Typing_defs_core.FPnormal
@@ -123,6 +125,7 @@
                         (Tgeneric ("T", [])))
                     ]))
                  };
+              fp_rx_annotation = None;
               fp_flags =
               (make_fp_flags ~mutability:None ~accept_disposable:false
                 ~has_default:false ~mode:Typing_defs_core.FPnormal

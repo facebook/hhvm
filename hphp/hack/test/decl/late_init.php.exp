@@ -35,6 +35,7 @@
                           (Rhint (root|late_init.php line 4, characters 54-59),
                            (Tprim Tstring))
                           };
+                        fp_rx_annotation = None;
                         fp_flags =
                         (make_fp_flags ~mutability:None
                           ~accept_disposable:false ~has_default:false

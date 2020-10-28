@@ -81,6 +81,7 @@
                    (Rhint (root|accept_disposable.php line 9, characters 35-40),
                     (Tapply (([9:35-41], "\\Handle"), [])))
                    };
+                 fp_rx_annotation = None;
                  fp_flags =
                  (make_fp_flags ~mutability:None ~accept_disposable:true
                    ~has_default:false ~mode:Typing_defs_core.FPnormal

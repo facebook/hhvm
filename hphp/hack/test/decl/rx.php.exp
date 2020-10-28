@@ -1,6 +1,6 @@
 --- legacy
 +++ direct decl
-@@ -1,247 +1,247 @@
+@@ -1,251 +1,251 @@
  [("\\C",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -49,6 +49,7 @@
                             ft_reactive = Pure {};
                             ft_ifc_decl = FDPolicied {#PUBLIC} }))
                       };
+                    fp_rx_annotation = None;
                     fp_flags =
                     (make_fp_flags ~mutability:None ~accept_disposable:false
                       ~has_default:false ~mode:Typing_defs_core.FPnormal
@@ -108,6 +109,7 @@
                              ft_reactive = Reactive {};
                              ft_ifc_decl = FDPolicied {#PUBLIC} }))
                        };
+                     fp_rx_annotation = None;
                      fp_flags =
                      (make_fp_flags ~mutability:None ~accept_disposable:false
                        ~has_default:false ~mode:Typing_defs_core.FPnormal
@@ -167,6 +169,7 @@
                              ft_reactive = Shallow {};
                              ft_ifc_decl = FDPolicied {#PUBLIC} }))
                        };
+                     fp_rx_annotation = None;
                      fp_flags =
                      (make_fp_flags ~mutability:None ~accept_disposable:false
                        ~has_default:false ~mode:Typing_defs_core.FPnormal
@@ -226,6 +229,7 @@
                              ft_reactive = Local {};
                              ft_ifc_decl = FDPolicied {#PUBLIC} }))
                        };
+                     fp_rx_annotation = None;
                      fp_flags =
                      (make_fp_flags ~mutability:None ~accept_disposable:false
                        ~has_default:false ~mode:Typing_defs_core.FPnormal

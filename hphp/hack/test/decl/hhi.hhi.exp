@@ -25,6 +25,7 @@
                    (Rhint (root|hhi.hhi line 7, characters 12-17),
                     (Tprim Tstring))
                    };
+                 fp_rx_annotation = None;
                  fp_flags =
                  (make_fp_flags ~mutability:None ~accept_disposable:false
                    ~has_default:false ~mode:Typing_defs_core.FPnormal
@@ -73,6 +74,7 @@
                       (Rhint (root|hhi.hhi line 10, characters 21-21),
                        (Tapply (([10:21-22], "\\X"), [])))
                       };
+                    fp_rx_annotation = None;
                     fp_flags =
                     (make_fp_flags ~mutability:None ~accept_disposable:false
                       ~has_default:false ~mode:Typing_defs_core.FPnormal

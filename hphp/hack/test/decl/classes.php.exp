@@ -163,6 +163,7 @@
                       (Rhint (root|classes.php line 15, characters 5-10),
                        (Tprim Tstring))
                       };
+                    fp_rx_annotation = None;
                     fp_flags =
                     (make_fp_flags ~mutability:None ~accept_disposable:false
                       ~has_default:false ~mode:Typing_defs_core.FPnormal
@@ -175,6 +176,7 @@
                        (Rhint (root|classes.php line 16, characters 5-7),
                         (Tprim Tint))
                        };
+                     fp_rx_annotation = None;
                      fp_flags =
                      (make_fp_flags ~mutability:None ~accept_disposable:false
                        ~has_default:false ~mode:Typing_defs_core.FPnormal
@@ -304,6 +306,7 @@
                       (Rhint (root|classes.php line 33, characters 19-25),
                        (Tapply (([33:19-26], "\\MyClass"), [])))
                       };
+                    fp_rx_annotation = None;
                     fp_flags =
                     (make_fp_flags
                       ~mutability:(Some Typing_defs_core.Param_borrowed_mutable)
@@ -318,6 +321,7 @@
                        (Rhint (root|classes.php line 34, characters 24-30),
                         (Tapply (([34:24-31], "\\MyClass"), [])))
                        };
+                     fp_rx_annotation = None;
                      fp_flags =
                      (make_fp_flags
                        ~mutability:(Some Typing_defs_core.Param_maybe_mutable)
@@ -332,6 +336,7 @@
                        (Rhint (root|classes.php line 35, characters 24-30),
                         (Tapply (([35:24-31], "\\MyClass"), [])))
                        };
+                     fp_rx_annotation = None;
                      fp_flags =
                      (make_fp_flags
                        ~mutability:(Some Typing_defs_core.Param_owned_mutable)
@@ -476,6 +481,7 @@
                            (Rhint (root|classes.php line 51, characters 13-18),
                             (Tprim Tstring))
                            };
+                         fp_rx_annotation = None;
                          fp_flags =
                          (make_fp_flags ~mutability:None
                            ~accept_disposable:false ~has_default:false
@@ -489,6 +495,7 @@
                             (Rhint (root|classes.php line 52, characters 15-20),
                              (Tprim Tstring))
                             };
+                          fp_rx_annotation = None;
                           fp_flags =
                           (make_fp_flags ~mutability:None
                             ~accept_disposable:false ~has_default:false
@@ -502,6 +509,7 @@
                             (Rhint (root|classes.php line 53, characters 12-17),
                              (Tprim Tstring))
                             };
+                          fp_rx_annotation = None;
                           fp_flags =
                           (make_fp_flags ~mutability:None
                             ~accept_disposable:false ~has_default:false
@@ -516,6 +524,7 @@
                             (Rhint (root|classes.php line 54, characters 12-17),
                              (Tprim Tstring))
                             };
+                          fp_rx_annotation = None;
                           fp_flags =
                           (make_fp_flags ~mutability:None
                             ~accept_disposable:false ~has_default:true

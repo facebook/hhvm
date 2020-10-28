@@ -1,6 +1,6 @@
 --- legacy
 +++ direct decl
-@@ -1,252 +1,251 @@
+@@ -1,254 +1,253 @@
  [("\\Policy",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -195,6 +195,7 @@
                         (Rhint (root|ifc_policied.php line 25, characters 20-20),
                          (Tapply (([25:20-21], "\\C"), [])))
                         };
+                      fp_rx_annotation = None;
                       fp_flags =
                       (make_fp_flags ~mutability:None ~accept_disposable:false
                         ~has_default:false ~mode:Typing_defs_core.FPnormal
@@ -227,6 +228,7 @@
                                ft_reactive = Nonreactive;
                                ft_ifc_decl = FDPolicied {#PUBLIC} }))
                          };
+                       fp_rx_annotation = None;
                        fp_flags =
                        (make_fp_flags ~mutability:None
                          ~accept_disposable:false ~has_default:false

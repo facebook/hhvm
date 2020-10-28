@@ -22,6 +22,7 @@
                                (Rhint (root|variadic_parameter.php line 3, characters 25-29),
                                 Tmixed)
                                };
+                             fp_rx_annotation = None;
                              fp_flags =
                              (make_fp_flags ~mutability:None
                                ~accept_disposable:false ~has_default:false
@@ -48,6 +49,7 @@
                         ft_reactive = Nonreactive;
                         ft_ifc_decl = FDPolicied {#PUBLIC} }))
                   };
+                fp_rx_annotation = None;
                 fp_flags =
                 (make_fp_flags ~mutability:None ~accept_disposable:false
                   ~has_default:false ~mode:Typing_defs_core.FPnormal

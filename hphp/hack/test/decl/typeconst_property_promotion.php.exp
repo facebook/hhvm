@@ -49,6 +49,7 @@
                                 Tthis),
                                [([6:19-20], "T")])))
                           };
+                        fp_rx_annotation = None;
                         fp_flags =
                         (make_fp_flags ~mutability:None
                           ~accept_disposable:false ~has_default:false

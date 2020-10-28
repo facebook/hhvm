@@ -43,6 +43,7 @@
                            (Rhint (root|classes_consistent_construct.php line 8, characters 31-31),
                             (Tapply (([8:31-32], "\\A"), [])))
                            };
+                         fp_rx_annotation = None;
                          fp_flags =
                          (make_fp_flags ~mutability:None
                            ~accept_disposable:false ~has_default:false

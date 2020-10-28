@@ -40,6 +40,7 @@
                         (Rhint (root|generic_classes.php line 6, characters 31-31),
                          (Tgeneric ("T", [])))
                       };
+                     fp_rx_annotation = None;
                      fp_flags =
                      (make_fp_flags ~mutability:None ~accept_disposable:false
                        ~has_default:false ~mode:Typing_defs_core.FPnormal
@@ -133,6 +134,7 @@
                        (Rhint (root|generic_classes.php line 18, characters 31-31),
                         (Tgeneric ("T", [])))
                      };
+                    fp_rx_annotation = None;
                     fp_flags =
                     (make_fp_flags ~mutability:None ~accept_disposable:false
                       ~has_default:false ~mode:Typing_defs_core.FPnormal
@@ -200,6 +202,7 @@
                        (Rhint (root|generic_classes.php line 26, characters 31-31),
                         (Tgeneric ("T", [])))
                      };
+                    fp_rx_annotation = None;
                     fp_flags =
                     (make_fp_flags ~mutability:None ~accept_disposable:false
                       ~has_default:false ~mode:Typing_defs_core.FPnormal

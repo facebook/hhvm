@@ -41,6 +41,7 @@
                           (Tapply (([9:16-17], "\\J"), [])))
                          ]))
                    };
+                 fp_rx_annotation = None;
                  fp_flags =
                  (make_fp_flags ~mutability:None ~accept_disposable:false
                    ~has_default:false ~mode:Typing_defs_core.FPnormal
@@ -84,6 +85,7 @@
                           (Tapply (([10:16-17], "\\J"), [])))
                          ]))
                    };
+                 fp_rx_annotation = None;
                  fp_flags =
                  (make_fp_flags ~mutability:None ~accept_disposable:false
                    ~has_default:false ~mode:Typing_defs_core.FPnormal

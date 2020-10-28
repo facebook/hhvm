@@ -1,6 +1,6 @@
 --- legacy
 +++ direct decl
-@@ -1,284 +1,284 @@
+@@ -1,291 +1,291 @@
  [("\\A",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -37,6 +37,7 @@
                                (Rhint (root|mutable.php line 6, characters 33-33),
                                 (Tapply (([6:33-34], "\\A"), [])))
                                };
+                             fp_rx_annotation = None;
                              fp_flags =
                              (make_fp_flags
                                ~mutability:(Some Typing_defs_core.Param_borrowed_mutable)
@@ -63,6 +64,7 @@
                           ft_reactive = Reactive {};
                           ft_ifc_decl = FDPolicied {#PUBLIC} }))
                     };
+                  fp_rx_annotation = None;
                   fp_flags =
                   (make_fp_flags ~mutability:None ~accept_disposable:false
                     ~has_default:false ~mode:Typing_defs_core.FPnormal
@@ -110,6 +112,7 @@
                                (Rhint (root|mutable.php line 9, characters 38-38),
                                 (Tapply (([9:38-39], "\\A"), [])))
                                };
+                             fp_rx_annotation = None;
                              fp_flags =
                              (make_fp_flags
                                ~mutability:(Some Typing_defs_core.Param_maybe_mutable)
@@ -136,6 +139,7 @@
                           ft_reactive = Reactive {};
                           ft_ifc_decl = FDPolicied {#PUBLIC} }))
                     };
+                  fp_rx_annotation = None;
                   fp_flags =
                   (make_fp_flags ~mutability:None ~accept_disposable:false
                     ~has_default:false ~mode:Typing_defs_core.FPnormal
@@ -183,6 +187,7 @@
                                (Rhint (root|mutable.php line 12, characters 38-38),
                                 (Tapply (([12:38-39], "\\A"), [])))
                                };
+                             fp_rx_annotation = None;
                              fp_flags =
                              (make_fp_flags
                                ~mutability:(Some Typing_defs_core.Param_owned_mutable)
@@ -209,6 +214,7 @@
                           ft_reactive = Reactive {};
                           ft_ifc_decl = FDPolicied {#PUBLIC} }))
                     };
+                  fp_rx_annotation = None;
                   fp_flags =
                   (make_fp_flags ~mutability:None ~accept_disposable:false
                     ~has_default:false ~mode:Typing_defs_core.FPnormal
@@ -266,6 +272,7 @@
                           ft_reactive = Reactive {};
                           ft_ifc_decl = FDPolicied {#PUBLIC} }))
                     };
+                  fp_rx_annotation = None;
                   fp_flags =
                   (make_fp_flags ~mutability:None ~accept_disposable:false
                     ~has_default:false ~mode:Typing_defs_core.FPnormal

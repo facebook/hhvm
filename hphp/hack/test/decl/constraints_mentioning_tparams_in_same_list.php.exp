@@ -109,6 +109,7 @@
                (Rhint (root|constraints_mentioning_tparams_in_same_list.php line 14, characters 21-22),
                 (Tgeneric ("Ta", [])))
              };
+            fp_rx_annotation = None;
             fp_flags =
             (make_fp_flags ~mutability:None ~accept_disposable:false
               ~has_default:false ~mode:Typing_defs_core.FPnormal

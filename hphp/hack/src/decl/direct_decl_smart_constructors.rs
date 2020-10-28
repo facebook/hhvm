@@ -86,7 +86,8 @@ impl<'a> DirectDeclSmartConstructors<'a> {
         pos: &'a Pos<'a>,
     ) -> Id<'a> {
         // If the name is already fully qualified, don't prepend a namespace.
-        let fully_qualified = matches!(parts.first(), Some(Node::Backslash(_)));
+        let fully_qualified =
+            matches!(parts.first(), Some(Node::Token(t)) if t.kind() == TokenKind::Backslash);
         let namespace = if fully_qualified { "" } else { namespace };
         // Count the length of the qualified name, so that we can allocate
         // exactly the right amount of space for it in our arena.
@@ -94,10 +95,8 @@ impl<'a> DirectDeclSmartConstructors<'a> {
         for part in parts {
             match part {
                 Node::Name(&(name, _)) => len += name.len(),
-                Node::Backslash(_) => len += 1,
-                Node::ListItem(&(Node::Name(&(name, _)), Node::Backslash(_))) => {
-                    len += name.len() + 1
-                }
+                Node::Token(t) if t.kind() == TokenKind::Backslash => len += 1,
+                Node::ListItem(&(Node::Name(&(name, _)), _backslash)) => len += name.len() + 1,
                 _ => {}
             }
         }
@@ -115,9 +114,9 @@ impl<'a> DirectDeclSmartConstructors<'a> {
         for part in parts {
             match part {
                 Node::Name(&(name, _pos)) => qualified_name.push_str(&name),
-                Node::Backslash(_) => qualified_name.push('\\'),
+                Node::Token(t) if t.kind() == TokenKind::Backslash => qualified_name.push('\\'),
                 Node::ListItem(listitem) => {
-                    if let (Node::Name(&(name, _)), Node::Backslash(_)) = &**listitem {
+                    if let (Node::Name(&(name, _)), _backslash) = &**listitem {
                         qualified_name.push_str(&name);
                         qualified_name.push_str("\\");
                     } else {
@@ -650,17 +649,12 @@ pub enum Node<'a> {
     Name(&'a (&'a str, &'a Pos<'a>)),
     XhpName(&'a (&'a str, &'a Pos<'a>)),
     QualifiedName(&'a (&'a [Node<'a>], &'a Pos<'a>)),
-    Array(&'a Pos<'a>),
-    Darray(&'a Pos<'a>),
-    Varray(&'a Pos<'a>),
     StringLiteral(&'a (&'a BStr, &'a Pos<'a>)), // For shape keys and const expressions.
     IntLiteral(&'a (&'a str, &'a Pos<'a>)),     // For const expressions.
     FloatingLiteral(&'a (&'a str, &'a Pos<'a>)), // For const expressions.
     BooleanLiteral(&'a (&'a str, &'a Pos<'a>)), // For const expressions.
-    Null(&'a Pos<'a>),                          // For const expressions.
     Ty(&'a Ty<'a>),
     TypeconstAccess(&'a (Cell<&'a Pos<'a>>, &'a Ty<'a>, RefCell<Vec<'a, Id<'a>>>)),
-    Backslash(&'a Pos<'a>), // This needs a pos since it shows up in names.
     ListItem(&'a (Node<'a>, Node<'a>)),
     Const(&'a ShallowClassConst<'a>),
     ConstInitializer(&'a (Node<'a>, Node<'a>)), // Name, initializer expression
@@ -683,17 +677,9 @@ pub enum Node<'a> {
     ShapeFieldSpecifier(&'a ShapeFieldNode<'a>),
     NamespaceUseClause(&'a NamespaceUseClause<'a>),
     Expr(&'a nast::Expr<'a>),
-    Operator(&'a (&'a Pos<'a>, TokenKind)),
-    Construct(&'a Pos<'a>),
-    This(&'a Pos<'a>), // This needs a pos since it shows up in Taccess.
     TypeParameters(&'a &'a [&'a Tparam<'a>]),
     WhereConstraint(&'a WhereConstraint<'a>),
     RecordField(&'a (Id<'a>, RecordFieldReq)),
-
-    // For cases where the position of a node is included in some outer
-    // position, but we do not need to track any further information about that
-    // node (for instance, the parentheses surrounding a tuple type).
-    Pos(&'a Pos<'a>),
 
     // Non-ignored, fixed-width tokens (e.g., keywords, operators, braces, etc.).
     Token(FixedWidthToken),
@@ -921,19 +907,10 @@ impl<'a> DirectDeclSmartConstructors<'a> {
             Node::TypeconstAccess((pos, _, _)) => pos.get(),
             Node::XhpName(&(_, pos)) => pos,
             Node::QualifiedName(&(_, pos)) => pos,
-            Node::Pos(pos)
-            | Node::Backslash(pos)
-            | Node::Construct(pos)
-            | Node::This(pos)
-            | Node::Array(pos)
-            | Node::Darray(pos)
-            | Node::Varray(pos)
-            | Node::IntLiteral(&(_, pos))
+            Node::IntLiteral(&(_, pos))
             | Node::FloatingLiteral(&(_, pos))
-            | Node::Null(pos)
             | Node::StringLiteral(&(_, pos))
-            | Node::BooleanLiteral(&(_, pos))
-            | Node::Operator(&(pos, _)) => pos,
+            | Node::BooleanLiteral(&(_, pos)) => pos,
             Node::ListItem(&(fst, snd)) => self.merge_positions(fst, snd),
             Node::List(items) => self.pos_from_slice(&items),
             Node::BracketedList(&(first_pos, inner_list, second_pos)) => self.merge(
@@ -941,15 +918,17 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                 self.merge(self.pos_from_slice(inner_list), second_pos),
             ),
             Node::Expr(&aast::Expr(pos, _)) => pos,
-            Node::Token(token) => {
-                let start = token.offset();
-                let end = start + token.width();
-                let start = self.state.source_text.offset_to_file_pos_triple(start);
-                let end = self.state.source_text.offset_to_file_pos_triple(end);
-                Pos::from_lnum_bol_cnum(self.state.arena, self.state.filename, start, end)
-            }
+            Node::Token(token) => self.token_pos(token),
             _ => Pos::none(),
         }
+    }
+
+    fn token_pos(&self, token: FixedWidthToken) -> &'a Pos<'a> {
+        let start = token.offset();
+        let end = start + token.width();
+        let start = self.state.source_text.offset_to_file_pos_triple(start);
+        let end = self.state.source_text.offset_to_file_pos_triple(end);
+        Pos::from_lnum_bol_cnum(self.state.arena, self.state.filename, start, end)
     }
 
     fn node_to_expr(&self, node: Node<'a>) -> Option<&'a nast::Expr<'a>> {
@@ -965,7 +944,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                     aast::Expr_::False
                 }
             }
-            Node::Null(_) => aast::Expr_::Null,
+            Node::Token(t) if t.kind() == TokenKind::NullLiteral => aast::Expr_::Null,
             Node::Name(..) | Node::QualifiedName(..) => {
                 aast::Expr_::Id(self.alloc(self.elaborate_name(node)?))
             }
@@ -986,18 +965,6 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                     Ty_::Taccess(self.alloc(typing_defs::TaccessType(*ty, names))),
                 )))
             }
-            Node::Varray(pos) => {
-                let tany = self.alloc(Ty(self.alloc(Reason::hint(pos)), TANY_));
-                Some(self.alloc(Ty(self.alloc(Reason::hint(pos)), Ty_::Tvarray(tany))))
-            }
-            Node::Darray(pos) => {
-                let tany = self.alloc(Ty(self.alloc(Reason::hint(pos)), TANY_));
-                Some(self.alloc(Ty(
-                    self.alloc(Reason::hint(pos)),
-                    Ty_::Tdarray(self.alloc((tany, tany))),
-                )))
-            }
-            Node::This(pos) => Some(self.alloc(Ty(self.alloc(Reason::hint(pos)), Ty_::Tthis))),
             Node::Expr(expr) => {
                 fn expr_to_ty<'a>(arena: &'a Bump, expr: &'a nast::Expr<'a>) -> Option<Ty_<'a>> {
                     use aast::Expr_::*;
@@ -1048,12 +1015,31 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                 self.alloc(Reason::witness(pos)),
                 Ty_::Tprim(self.alloc(aast::Tprim::Tbool)),
             ))),
-            Node::Null(pos) => Some(self.alloc(Ty(
-                self.alloc(Reason::hint(pos)),
-                Ty_::Tprim(self.alloc(aast::Tprim::Tnull)),
-            ))),
             Node::XhpEnumType(enum_values) => {
                 enum_values.iter().next().map(|x| self.node_to_ty(*x))?
+            }
+            Node::Token(t) if t.kind() == TokenKind::Varray => {
+                let pos = self.token_pos(t);
+                let tany = self.alloc(Ty(self.alloc(Reason::hint(pos)), TANY_));
+                Some(self.alloc(Ty(self.alloc(Reason::hint(pos)), Ty_::Tvarray(tany))))
+            }
+            Node::Token(t) if t.kind() == TokenKind::Darray => {
+                let pos = self.token_pos(t);
+                let tany = self.alloc(Ty(self.alloc(Reason::hint(pos)), TANY_));
+                Some(self.alloc(Ty(
+                    self.alloc(Reason::hint(pos)),
+                    Ty_::Tdarray(self.alloc((tany, tany))),
+                )))
+            }
+            Node::Token(t) if t.kind() == TokenKind::This => {
+                Some(self.alloc(Ty(self.alloc(Reason::hint(self.token_pos(t))), Ty_::Tthis)))
+            }
+            Node::Token(t) if t.kind() == TokenKind::NullLiteral => {
+                let pos = self.token_pos(t);
+                Some(self.alloc(Ty(
+                    self.alloc(Reason::hint(pos)),
+                    Ty_::Tprim(self.alloc(aast::Tprim::Tnull)),
+                )))
             }
             node => {
                 let Id(pos, name) = self.expect_name(node)?;
@@ -1251,11 +1237,11 @@ impl<'a> DirectDeclSmartConstructors<'a> {
             | Node::BooleanLiteral(_)
             | Node::IntLiteral(_)
             | Node::FloatingLiteral(_)
-            | Node::Null(_)
             | Node::Expr(aast::Expr(_, aast::Expr_::Unop(&(Uop::Uminus, _))))
             | Node::Expr(aast::Expr(_, aast::Expr_::Unop(&(Uop::Uplus, _)))) => {
                 self.node_to_ty(node)
             }
+            Node::Token(t) if t.kind() == TokenKind::NullLiteral => self.node_to_ty(node),
             _ => Some(self.tany_with_pos(self.get_pos(name))),
         }
     }
@@ -1347,7 +1333,8 @@ impl<'a> DirectDeclSmartConstructors<'a> {
         body: Node,
     ) -> Option<(Id<'a>, &'a Ty<'a>, &'a [ShallowProp<'a>])> {
         let id_opt = match (is_method, header.name) {
-            (true, Node::Construct(pos)) => {
+            (true, Node::Token(t)) if t.kind() == TokenKind::Construct => {
+                let pos = self.token_pos(t);
                 Some(Id(pos, naming_special_names::members::__CONSTRUCT))
             }
             (true, _) => self.expect_name(header.name),
@@ -1359,10 +1346,13 @@ impl<'a> DirectDeclSmartConstructors<'a> {
         let implicit_params = self.as_fun_implicit_params(header.capability, f_pos);
 
         let type_ = match header.name {
-            Node::Construct(pos) => self.alloc(Ty(
-                self.alloc(Reason::witness(pos)),
-                Ty_::Tprim(self.alloc(aast::Tprim::Tvoid)),
-            )),
+            Node::Token(t) if t.kind() == TokenKind::Construct => {
+                let pos = self.token_pos(t);
+                self.alloc(Ty(
+                    self.alloc(Reason::witness(pos)),
+                    Ty_::Tprim(self.alloc(aast::Tprim::Tvoid)),
+                ))
+            }
             _ => self
                 .node_to_ty(header.ret_hint)
                 .unwrap_or_else(|| self.tany_with_pos(f_pos)),
@@ -1979,7 +1969,6 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             TokenKind::FloatingLiteral => {
                 Node::FloatingLiteral(self.alloc((token_text(self), token_pos(self))))
             }
-            TokenKind::NullLiteral => Node::Null(token_pos(self)),
             TokenKind::BooleanLiteral => {
                 Node::BooleanLiteral(self.alloc((token_text(self), token_pos(self))))
             }
@@ -2002,18 +1991,19 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             TokenKind::Arraykey => self.prim_ty(aast::Tprim::Tarraykey, token_pos(self)),
             TokenKind::Noreturn => self.prim_ty(aast::Tprim::Tnoreturn, token_pos(self)),
             TokenKind::Resource => self.prim_ty(aast::Tprim::Tresource, token_pos(self)),
-            TokenKind::Darray => Node::Darray(token_pos(self)),
-            TokenKind::Varray => Node::Varray(token_pos(self)),
-            TokenKind::Backslash => Node::Backslash(token_pos(self)),
-            TokenKind::Construct => Node::Construct(token_pos(self)),
-            TokenKind::LeftParen
+            TokenKind::NullLiteral
+            | TokenKind::Darray
+            | TokenKind::Varray
+            | TokenKind::Backslash
+            | TokenKind::Construct
+            | TokenKind::LeftParen
             | TokenKind::RightParen
             | TokenKind::LeftBracket
             | TokenKind::RightBracket
             | TokenKind::Shape
-            | TokenKind::Question => Node::Pos(token_pos(self)),
-            TokenKind::This => Node::This(token_pos(self)),
-            TokenKind::Tilde
+            | TokenKind::Question
+            | TokenKind::This
+            | TokenKind::Tilde
             | TokenKind::Exclamation
             | TokenKind::Plus
             | TokenKind::Minus
@@ -2038,8 +2028,8 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             | TokenKind::GreaterThanGreaterThan
             | TokenKind::Percent
             | TokenKind::QuestionQuestion
-            | TokenKind::Equal => Node::Operator(self.alloc((token_pos(self), kind))),
-            TokenKind::Abstract
+            | TokenKind::Equal
+            | TokenKind::Abstract
             | TokenKind::As
             | TokenKind::Super
             | TokenKind::Async
@@ -2379,17 +2369,14 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
 
     fn make_prefix_unary_expression(&mut self, op: Self::R, value: Self::R) -> Self::R {
         let pos = self.merge_positions(op, value);
-        let op = match &op {
-            Node::Operator(&(_, op)) => match op {
-                TokenKind::Tilde => Uop::Utild,
-                TokenKind::Exclamation => Uop::Unot,
-                TokenKind::Plus => Uop::Uplus,
-                TokenKind::Minus => Uop::Uminus,
-                TokenKind::PlusPlus => Uop::Uincr,
-                TokenKind::MinusMinus => Uop::Udecr,
-                TokenKind::At => Uop::Usilence,
-                _ => return Node::Ignored(SK::PrefixUnaryExpression),
-            },
+        let op = match op.token_kind() {
+            Some(TokenKind::Tilde) => Uop::Utild,
+            Some(TokenKind::Exclamation) => Uop::Unot,
+            Some(TokenKind::Plus) => Uop::Uplus,
+            Some(TokenKind::Minus) => Uop::Uminus,
+            Some(TokenKind::PlusPlus) => Uop::Uincr,
+            Some(TokenKind::MinusMinus) => Uop::Udecr,
+            Some(TokenKind::At) => Uop::Usilence,
             _ => return Node::Ignored(SK::PrefixUnaryExpression),
         };
         let value = match self.node_to_expr(value) {
@@ -2401,12 +2388,9 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
 
     fn make_postfix_unary_expression(&mut self, value: Self::R, op: Self::R) -> Self::R {
         let pos = self.merge_positions(value, op);
-        let op = match &op {
-            Node::Operator(&(_, op)) => match op {
-                TokenKind::PlusPlus => Uop::Upincr,
-                TokenKind::MinusMinus => Uop::Updecr,
-                _ => return Node::Ignored(SK::PostfixUnaryExpression),
-            },
+        let op = match op.token_kind() {
+            Some(TokenKind::PlusPlus) => Uop::Upincr,
+            Some(TokenKind::MinusMinus) => Uop::Updecr,
             _ => return Node::Ignored(SK::PostfixUnaryExpression),
         };
         let value = match self.node_to_expr(value) {
@@ -2417,31 +2401,28 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
     }
 
     fn make_binary_expression(&mut self, lhs: Self::R, op_node: Self::R, rhs: Self::R) -> Self::R {
-        let op = match &op_node {
-            Node::Operator(&(_, op)) => match op {
-                TokenKind::Plus => Bop::Plus,
-                TokenKind::Minus => Bop::Minus,
-                TokenKind::Star => Bop::Star,
-                TokenKind::Slash => Bop::Slash,
-                TokenKind::Equal => Bop::Eq(None),
-                TokenKind::EqualEqual => Bop::Eqeq,
-                TokenKind::EqualEqualEqual => Bop::Eqeqeq,
-                TokenKind::StarStar => Bop::Starstar,
-                TokenKind::AmpersandAmpersand => Bop::Ampamp,
-                TokenKind::BarBar => Bop::Barbar,
-                TokenKind::LessThan => Bop::Lt,
-                TokenKind::LessThanEqual => Bop::Lte,
-                TokenKind::LessThanLessThan => Bop::Ltlt,
-                TokenKind::GreaterThan => Bop::Gt,
-                TokenKind::GreaterThanEqual => Bop::Gte,
-                TokenKind::GreaterThanGreaterThan => Bop::Gtgt,
-                TokenKind::Dot => Bop::Dot,
-                TokenKind::Ampersand => Bop::Amp,
-                TokenKind::Bar => Bop::Bar,
-                TokenKind::Percent => Bop::Percent,
-                TokenKind::QuestionQuestion => Bop::QuestionQuestion,
-                _ => return Node::Ignored(SK::BinaryExpression),
-            },
+        let op = match op_node.token_kind() {
+            Some(TokenKind::Plus) => Bop::Plus,
+            Some(TokenKind::Minus) => Bop::Minus,
+            Some(TokenKind::Star) => Bop::Star,
+            Some(TokenKind::Slash) => Bop::Slash,
+            Some(TokenKind::Equal) => Bop::Eq(None),
+            Some(TokenKind::EqualEqual) => Bop::Eqeq,
+            Some(TokenKind::EqualEqualEqual) => Bop::Eqeqeq,
+            Some(TokenKind::StarStar) => Bop::Starstar,
+            Some(TokenKind::AmpersandAmpersand) => Bop::Ampamp,
+            Some(TokenKind::BarBar) => Bop::Barbar,
+            Some(TokenKind::LessThan) => Bop::Lt,
+            Some(TokenKind::LessThanEqual) => Bop::Lte,
+            Some(TokenKind::LessThanLessThan) => Bop::Ltlt,
+            Some(TokenKind::GreaterThan) => Bop::Gt,
+            Some(TokenKind::GreaterThanEqual) => Bop::Gte,
+            Some(TokenKind::GreaterThanGreaterThan) => Bop::Gtgt,
+            Some(TokenKind::Dot) => Bop::Dot,
+            Some(TokenKind::Ampersand) => Bop::Amp,
+            Some(TokenKind::Bar) => Bop::Bar,
+            Some(TokenKind::Percent) => Bop::Percent,
+            Some(TokenKind::QuestionQuestion) => Bop::QuestionQuestion,
             _ => return Node::Ignored(SK::BinaryExpression),
         };
 
@@ -2711,9 +2692,9 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
 
         Node::TypeParameter(self.alloc(TypeParameterDecl {
             name,
-            variance: match variance {
-                Node::Operator(&(_, TokenKind::Minus)) => Variance::Contravariant,
-                Node::Operator(&(_, TokenKind::Plus)) => Variance::Covariant,
+            variance: match variance.token_kind() {
+                Some(TokenKind::Minus) => Variance::Contravariant,
+                Some(TokenKind::Plus) => Variance::Covariant,
                 _ => Variance::Invariant,
             },
             reified: if reify.is_token(TokenKind::Reify) {
@@ -3094,11 +3075,9 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
     ) -> Self::R {
         Node::WhereConstraint(self.alloc(WhereConstraint(
             self.node_to_ty(left_type).unwrap_or_else(|| tany()),
-            match operator {
-                Node::Operator((_, TokenKind::Equal)) => ConstraintKind::ConstraintEq,
-                Node::Token(token) if token.kind() == TokenKind::Super => {
-                    ConstraintKind::ConstraintSuper
-                }
+            match operator.token_kind() {
+                Some(TokenKind::Equal) => ConstraintKind::ConstraintEq,
+                Some(TokenKind::Super) => ConstraintKind::ConstraintSuper,
                 _ => ConstraintKind::ConstraintAs,
             },
             self.node_to_ty(right_type).unwrap_or_else(|| tany()),
@@ -3478,10 +3457,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 Some(TokenKind::Lateinit) => Some(XhpAttrTag::Lateinit),
                 _ => None,
             },
-            nullable: match initializer {
-                Node::Null(_) => true,
-                _ => !initializer.is_present(),
-            },
+            nullable: initializer.is_token(TokenKind::NullLiteral) || !initializer.is_present(),
         }))
     }
 
@@ -3509,10 +3485,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         // indicates an abstract function.
         let body = if body.is_ignored() { closer } else { body };
         let modifiers = read_member_modifiers(header.modifiers.iter());
-        let is_constructor = match header.name {
-            Node::Construct(_) => true,
-            _ => false,
-        };
+        let is_constructor = header.name.is_token(TokenKind::Construct);
         let is_method = true;
         let (id, ty, properties) = match self.function_to_ty(is_method, attributes, header, body) {
             Some(tuple) => tuple,

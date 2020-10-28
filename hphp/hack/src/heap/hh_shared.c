@@ -2266,7 +2266,6 @@ CAMLprim value hh_get_raw(value key) {
 /*****************************************************************************/
 CAMLprim value hh_deserialize_raw(value heap_entry) {
   CAMLparam1(heap_entry);
-  check_should_exit();
   CAMLlocal1(result);
 
   heap_entry_t* entry = (heap_entry_t*)Bytes_val(heap_entry);

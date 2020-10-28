@@ -32,9 +32,9 @@ TypedValue HHVM_FUNCTION(array_chunk,
 TypedValue HHVM_FUNCTION(array_combine,
                          const Variant& keys,
                          const Variant& values);
-TypedValue HHVM_FUNCTION(array_fill_keys,
-                         const Variant& keys,
-                         const Variant& value);
+Array HHVM_FUNCTION(array_fill_keys,
+                    const Variant& keys,
+                    const Variant& value);
 TypedValue HHVM_FUNCTION(array_fill,
                          int start_index,
                          int num,
@@ -271,4 +271,3 @@ inline int64_t countHelper(TypedValue tv) {
   getCheckedArrayRet(input, init_null())
 
 }
-

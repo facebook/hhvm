@@ -103,7 +103,7 @@ function array_count_values(AnyArray $input): mixed;
 function array_fill_keys(
   <<__MaybeMutable>> mixed $keys,
   mixed $value,
-): mixed;
+): darray;
 
 /**
  * Fills an array with num entries of the value of the value parameter, keys

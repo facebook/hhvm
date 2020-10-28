@@ -67,7 +67,10 @@ function array_column<Tv>(
   ?arraykey $column_key,
 ): varray_or_darray<Tv>;
 <<__PHPStdLib, __Pure>>
-function array_fill_keys(<<__MaybeMutable>> $keys, $value);
+function array_fill_keys<Tk as arraykey, Tv>(
+  <<__MaybeMutable>> Container<Tk> $keys,
+  Tv $value,
+): darray<Tk, Tv>;
 /*
  * Calls to array_filter are rewritten depending on the type
  * of argument to have one of the following signatures:

@@ -295,9 +295,9 @@ TypedValue HHVM_FUNCTION(array_count_values,
           )));
 }
 
-TypedValue HHVM_FUNCTION(array_fill_keys,
-                         const Variant& keys,
-                         const Variant& value) {
+Array HHVM_FUNCTION(array_fill_keys,
+                    const Variant& keys,
+                    const Variant& value) {
   folly::Optional<DArrayInit> ai;
   auto ok = IterateV(
     *keys.asTypedValue(),
@@ -323,12 +323,12 @@ TypedValue HHVM_FUNCTION(array_fill_keys,
   );
 
   if (!ok) {
-    raise_warning("Invalid operand type was used: array_fill_keys expects "
-                  "an array or collection");
-    return make_tv<KindOfNull>();
+    SystemLib::throwInvalidArgumentExceptionObject(
+      "Invalid operand type was used: array_fill_keys expects an array or "
+      "collection");
   }
   assertx(ai.has_value());
-  return tvReturn(ai->toVariant());
+  return ai->toArray();
 }
 
 TypedValue HHVM_FUNCTION(array_fill,

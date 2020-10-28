@@ -6,6 +6,8 @@ mod emit_statement;
 mod reified_generics_helpers;
 mod try_finally_rewriter;
 
+use aast::TypeHint;
+use aast_defs::{Hint, Hint_::*};
 use ast_body::AstBody;
 use ast_scope_rust::{Scope, ScopeItem};
 use decl_vars_rust as decl_vars;
@@ -23,15 +25,19 @@ use hhas_attribute_rust::{has_at_most_rx_as_func, is_only_rx_if_impl, HhasAttrib
 use hhas_body_rust::HhasBody;
 use hhas_param_rust::HhasParam;
 use hhas_type::Info as HhasTypeInfo;
-use hhbc_ast_rust::{FcallArgs, FcallFlags, Instruct, IstypeOp, ParamId};
+use hhbc_ast_rust::{
+    FcallArgs, FcallFlags, Instruct, IstypeOp, MemberKey, MemberOpMode, ParamId, QueryOp,
+};
 use hhbc_id_rust::function;
 use hhbc_string_utils_rust as string_utils;
 use instruction_sequence_rust::{instr, unrecoverable, Error, InstrSeq, Result};
 use label_rewriter_rust as label_rewriter;
 use naming_special_names_rust::classes;
 use ocamlrep::rc::RcOc;
-use options::CompilerFlags;
-use oxidized::{aast, ast as tast, ast_defs, doc_comment::DocComment, namespace_env, pos::Pos};
+use options::{CompilerFlags, LangFlags};
+use oxidized::{
+    aast, aast_defs, ast as tast, ast_defs, doc_comment::DocComment, namespace_env, pos::Pos,
+};
 use reified_generics_helpers as RGH;
 use runtime::TypedValue;
 
@@ -559,6 +565,175 @@ pub fn has_type_constraint(
     }
 }
 
+////////////////////////////////////////////////////////////////////////////////
+// atom_helpers
+
+mod atom_helpers {
+    use crate::*;
+    use aast_defs::ReifyKind::Erased;
+    use ast_defs::Id;
+    use instruction_sequence_rust::{instr, unrecoverable, InstrSeq, Result};
+    use local::Type::Named;
+    use tast::Tparam;
+
+    fn strip_ns(name: &str) -> &str {
+        match name.chars().next() {
+            Some('\\') => &name[1..],
+            _ => name,
+        }
+    }
+
+    pub fn is_generic(name: &str, tparams: &[Tparam]) -> bool {
+        tparams.iter().any(|t| match t.name {
+            Id(_, ref s) => s == self::strip_ns(name),
+        })
+    }
+
+    pub fn is_erased_generic(name: &str, tparams: &[Tparam]) -> bool {
+        tparams.iter().any(|t| match t.name {
+            Id(_, ref s) if s == self::strip_ns(name) => t.reified == Erased,
+            _ => false,
+        })
+    }
+
+    pub fn index_of_generic(tparams: &[Tparam], name: &str) -> Result<usize> {
+        match tparams.iter().enumerate().find_map(|(i, t)| match t.name {
+            Id(_, ref s) if s == self::strip_ns(name) => Some(i),
+            _ => None,
+        }) {
+            Some(u) => Ok(u),
+            None => Err(unrecoverable("Expected generic")),
+        }
+    }
+
+    pub fn emit_clscnsl(param: &HhasParam, cls_instrs: InstrSeq) -> Result {
+        let param_name = &param.name;
+        let loc = Named(param_name.into());
+        Ok(InstrSeq::gather(vec![
+            cls_instrs,
+            instr::classgetc(),
+            instr::clscnsl(loc.clone()),
+            instr::popl(loc),
+        ]))
+    }
+} //mod atom_helpers
+
+////////////////////////////////////////////////////////////////////////////////
+// atom_instrs
+
+fn atom_instrs(
+    emitter: &mut Emitter,
+    env: &mut Env,
+    param: &HhasParam,
+    ast_param: &tast::FunParam,
+    tparams: &[tast::Tparam],
+) -> Result<Option<InstrSeq>> {
+    if !param
+        .user_attributes
+        .iter()
+        .any(|a| a.is(|x| x == "__Atom"))
+    {
+        return Ok(None); // Not an atom. Nothing to do.
+    }
+    match &ast_param.type_hint {
+        TypeHint(_, None) => Err(unrecoverable("__Atom param type hint unavailable")),
+        TypeHint(_, Some(Hint(_, h))) => {
+            match &**h {
+                Happly(ast_defs::Id(_, ref ctor), vec) if ctor == "\\HH\\Elt" => {
+                    match &vec[..] {
+                        [hint, _] => {
+                            let Hint(_, e) = hint;
+                            match &**e {
+                                // Immediate type.
+                                Happly(ast_defs::Id(_, ref tag), _) => {
+                                    if atom_helpers::is_erased_generic(tag, tparams) {
+                                        Err(unrecoverable("Erased generic as HH\\Elt enum type"))
+                                    } else {
+                                        if !atom_helpers::is_generic(tag, tparams) {
+                                            //'tag' is a class name.
+                                            Ok(Some(atom_helpers::emit_clscnsl(
+                                                param,
+                                                emit_expression::emit_expr(
+                                                    emitter,
+                                                    env,
+                                                    &(tast::Expr(
+                                                        Pos::make_none(),
+                                                        aast::Expr_::String(bstr::BString::from(
+                                                            tag.to_owned(),
+                                                        )),
+                                                    )),
+                                                )?,
+                                            )?))
+                                        } else {
+                                            //'tag' is a reified generic.
+                                            Ok(Some(atom_helpers::emit_clscnsl(
+                                                param,
+                                                InstrSeq::gather(vec![
+                                                    emit_expression::emit_reified_generic_instrs(
+                                                        &Pos::make_none(),
+                                                        true,
+                                                        atom_helpers::index_of_generic(
+                                                            tparams, tag,
+                                                        )?,
+                                                    )?,
+                                                    instr::basec(0, MemberOpMode::ModeNone),
+                                                    instr::querym(
+                                                        1,
+                                                        QueryOp::CGet,
+                                                        MemberKey::ET("classname".into()),
+                                                    ),
+                                                ]),
+                                            )?))
+                                        }
+                                    }
+                                }
+                                // Type constant.
+                                Haccess(Hint(_, h), _) => {
+                                    match &**h {
+                                        Happly(ast_defs::Id(_, ref tag), _) => {
+                                            if atom_helpers::is_erased_generic(tag, tparams) {
+                                                Err(unrecoverable(
+                                                    "Erased generic as HH\\Elt enum type",
+                                                ))
+                                            } else {
+                                                //'tag' is a type constant.
+                                                Ok(Some(atom_helpers::emit_clscnsl(
+                                                param,
+                                                InstrSeq::gather(vec![
+                                                    emit_expression::get_type_structure_for_hint(
+                                                        emitter,
+                                                        tparams
+                                                            .iter()
+                                                            .map(|fp| fp.name.1.as_str())
+                                                            .collect::<Vec<_>>()
+                                                            .as_slice(),
+                                                        &IndexSet::new(),
+                                                        hint,
+                                                    )?,
+                                                    instr::combine_and_resolve_type_struct(1),
+                                                    instr::basec(0, MemberOpMode::ModeNone),
+                                                    instr::querym(1, QueryOp::CGet, MemberKey::ET("classname".into())),
+                                                ]),
+                                            )?))
+                                            }
+                                        }
+                                        _ => Err(unrecoverable(
+                                            "Unexpected case for HH\\Elt enum type",
+                                        )),
+                                    }
+                                }
+                                _ => Err(unrecoverable("Unexpected case for HH\\Elt enum type")),
+                            }
+                        }
+                        _ => Err(unrecoverable("Wrong number of type arguments to HH\\Elt")),
+                    }
+                }
+                _ => Err(unrecoverable("'__Atom' applied to a non-HH\\Elt parameter")),
+            }
+        }
+    }
+}
+
 pub fn emit_method_prolog(
     emitter: &mut Emitter,
     env: &mut Env,
@@ -575,32 +750,52 @@ pub fn emit_method_prolog(
                 Ok(None)
             } else {
                 use RGH::ReificationLevel as L;
-                match has_type_constraint(env, param.type_info.as_ref(), ast_param) {
-                    (L::Unconstrained, _) => Ok(None),
-                    (L::Not, _) => Ok(Some(instr::verify_param_type(param_name()))),
-                    (L::Maybe, Some(h)) => Ok(Some(InstrSeq::gather(vec![
-                        emit_expression::get_type_structure_for_hint(
-                            emitter,
-                            tparams
-                                .iter()
-                                .map(|fp| fp.name.1.as_str())
-                                .collect::<Vec<_>>()
-                                .as_slice(),
-                            &IndexSet::new(),
-                            &h,
-                        )?,
-                        instr::verify_param_type_ts(param_name()),
-                    ]))),
-                    (L::Definitely, Some(h)) => {
-                        let check = instr::istypel(
-                            local::Type::Named((&param.name).into()),
-                            IstypeOp::OpNull,
-                        );
-                        let verify_instr = instr::verify_param_type_ts(param_name());
-                        RGH::simplify_verify_type(emitter, env, pos, check, &h, verify_instr)
-                            .map(Some)
-                    }
-                    _ => Err(unrecoverable("impossible")),
+                let param_checks =
+                    match has_type_constraint(env, param.type_info.as_ref(), ast_param) {
+                        (L::Unconstrained, _) => Ok(None),
+                        (L::Not, _) => Ok(Some(instr::verify_param_type(param_name()))),
+                        (L::Maybe, Some(h)) => Ok(Some(InstrSeq::gather(vec![
+                            emit_expression::get_type_structure_for_hint(
+                                emitter,
+                                tparams
+                                    .iter()
+                                    .map(|fp| fp.name.1.as_str())
+                                    .collect::<Vec<_>>()
+                                    .as_slice(),
+                                &IndexSet::new(),
+                                &h,
+                            )?,
+                            instr::verify_param_type_ts(param_name()),
+                        ]))),
+                        (L::Definitely, Some(h)) => {
+                            let check = instr::istypel(
+                                local::Type::Named((&param.name).into()),
+                                IstypeOp::OpNull,
+                            );
+                            let verify_instr = instr::verify_param_type_ts(param_name());
+                            RGH::simplify_verify_type(emitter, env, pos, check, &h, verify_instr)
+                                .map(Some)
+                        }
+                        _ => Err(unrecoverable("impossible")),
+                    }?;
+
+                let atom_instrs = if emitter
+                    .options()
+                    .hhvm
+                    .hack_lang
+                    .flags
+                    .contains(LangFlags::ENABLE_ENUM_CLASSES)
+                {
+                    atom_instrs(emitter, env, param, ast_param, tparams)?
+                } else {
+                    None
+                };
+
+                match (param_checks, atom_instrs) {
+                    (None, None) => Ok(None),
+                    (Some(is), None) => Ok(Some(is)),
+                    (Some(is), Some(js)) => Ok(Some(InstrSeq::gather(vec![is, js]))),
+                    (None, Some(js)) => Ok(Some(js)),
                 }
             }
         };
@@ -610,8 +805,9 @@ pub fn emit_method_prolog(
         .filter(|p| !(p.is_variadic && p.name == "..."))
         .collect::<Vec<_>>();
     if params.len() != ast_params.len() {
-        return Err(Error::Unrecoverable("lenth mismatch".into()));
+        return Err(Error::Unrecoverable("length mismatch".into()));
     }
+
     let param_instrs = params
         .iter()
         .zip(ast_params.into_iter())
@@ -888,7 +1084,6 @@ fn set_function_jmp_targets(emitter: &mut Emitter, env: &mut Env) -> bool {
 }
 
 fn is_awaitable(hint: &tast::Hint) -> bool {
-    use tast::{Hint, Hint_::*};
     let Hint(_, h) = hint;
     match &**h {
         Happly(ast_defs::Id(_, s), hs) if s == classes::AWAITABLE && hs.len() <= 1 => true,

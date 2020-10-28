@@ -66,6 +66,7 @@ constexpr irlower::SyncOptions SNone = irlower::SyncOptions::None;
 constexpr irlower::SyncOptions SSync = irlower::SyncOptions::Sync;
 
 constexpr DestType DSSA  = DestType::SSA;
+constexpr DestType DTV   = DestType::TV;
 constexpr DestType DNone = DestType::None;
 
 template<class EDType, class MemberType>
@@ -227,7 +228,7 @@ static CallMap s_callMap {
     {LookupClsMethod,    lookupClsMethodHelper, DSSA, SSync,
                            {{SSA, 0}, {SSA, 1}, {SSA, 2}, {SSA, 3}}},
     {LookupClsRDS,       lookupClsRDS, DSSA, SNone, {{SSA, 0}}},
-    {LookupClsCns,       lookupClsCns, DSSA, SSync, {{SSA, 0}, {SSA, 1}}},
+    {LookupClsCns,       lookupClsCns, DTV, SSync, {{SSA, 0}, {SSA, 1}}},
     {PrintStr,           print_string, DNone, SSync, {{SSA, 0}}},
     {PrintInt,           print_int, DNone, SSync, {{SSA, 0}}},
     {PrintBool,          print_boolean, DNone, SSync, {{SSA, 0}}},

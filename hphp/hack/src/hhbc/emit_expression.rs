@@ -2988,7 +2988,7 @@ fn emit_call_expr(
     }
 }
 
-fn emit_reified_generic_instrs(pos: &Pos, is_fun: bool, index: usize) -> Result {
+pub fn emit_reified_generic_instrs(pos: &Pos, is_fun: bool, index: usize) -> Result {
     let base = if is_fun {
         instr::basel(
             local::Type::Named(string_utils::reified::GENERICS_LOCAL_NAME.into()),

@@ -14,6 +14,7 @@ use hhas_param_rust::HhasParam;
 use hhas_type::Info;
 use hhbc_string_utils_rust::locals::strip_dollar;
 use instruction_sequence_rust::{instr, InstrSeq, Result};
+use options::LangFlags;
 use oxidized::{
     aast_defs::{Hint, Hint_},
     aast_visitor::{self, AstParams, Node},
@@ -109,6 +110,23 @@ fn from_ast(
                         .get_hint()
                         .as_ref()
                         .map_or(vec![], |h| vec![h.clone()]),
+                )),
+            ))
+        } else if emitter
+            .options()
+            .hhvm
+            .hack_lang
+            .flags
+            .contains(LangFlags::ENABLE_ENUM_CLASSES)
+            && param.user_attributes.iter().any(|a| match &a.name {
+                Id(_, s) => s == "__Atom",
+            })
+        {
+            Some(Hint(
+                Pos::make_none(),
+                Box::new(Hint_::mk_happly(
+                    Id(Pos::make_none(), "HH\\string".to_string()),
+                    vec![],
                 )),
             ))
         } else {

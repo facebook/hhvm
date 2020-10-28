@@ -1451,19 +1451,17 @@ void write_func(ProfDataSerializer& ser, const Func* func) {
   if (!func || !ser.serialize(func)) return write_raw(ser, func);
 
   write_serialized_ptr(ser, func);
-  uint32_t fid = func->getFuncId().toInt();
-  assertx(!(fid & 0x80000000));
+  write_raw(ser, func->getFuncId().toInt());
   if (func == SystemLib::s_nullCtor ||
       (!func->isMethod() && func->isBuiltin() &&
       !func->isMethCaller())) {
     if (func == SystemLib::s_nullCtor) {
       assertx(func->name()->isame(s_86ctor.get()));
     }
-    fid = ~fid;
-    write_raw(ser, fid);
+    write_raw(ser, true);
     return write_string(ser, func->name());
   }
-  write_raw(ser, fid);
+  write_raw(ser, false);
 
   if (func->isMethod()) {
     auto const* cls = func->implCls();
@@ -1497,10 +1495,10 @@ Func* read_func(ProfDataDeserializer& ser) {
     ser,
     [&] () -> Func* {
       Trace::Indent _;
-      auto fid = read_raw<uint32_t>(ser);
+      auto const fid = read_raw<uint32_t>(ser);
+      auto const builtin_func = read_raw<bool>(ser);
       auto const func = [&] () -> const Func* {
-        if (fid & 0x80000000) {
-          fid = ~fid;
+        if (builtin_func) {
           auto const name = read_string(ser);
           if (name->isame(s_86ctor.get())) return SystemLib::s_nullCtor;
           return Func::lookup(name);

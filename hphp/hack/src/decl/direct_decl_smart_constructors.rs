@@ -2050,6 +2050,8 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             | TokenKind::Static
             | TokenKind::Trait
             | TokenKind::Lateinit
+            | TokenKind::RecordDec
+            | TokenKind::RightBrace
             | TokenKind::Required => Node::Token(FixedWidthToken::new(kind, token.start_offset())),
             TokenKind::EndOfFile
             | TokenKind::Attribute
@@ -2104,7 +2106,6 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             | TokenKind::Print
             | TokenKind::Real
             | TokenKind::Record
-            | TokenKind::RecordDec
             | TokenKind::Require
             | TokenKind::Require_once
             | TokenKind::Return
@@ -2119,7 +2120,6 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             | TokenKind::Where
             | TokenKind::While
             | TokenKind::LeftBrace
-            | TokenKind::RightBrace
             | TokenKind::MinusGreaterThan
             | TokenKind::Dollar
             | TokenKind::LessThanEqualGreaterThan
@@ -2550,7 +2550,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         &mut self,
         attribute_spec: Self::R,
         modifier: Self::R,
-        _keyword: Self::R,
+        record_keyword: Self::R,
         name: Self::R,
         _extends_keyword: Self::R,
         extends_opt: Self::R,
@@ -2572,7 +2572,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                     _ => None,
                 })),
                 abstract_: modifier.is_token(TokenKind::Abstract),
-                pos: self.merge_positions(attribute_spec, right_brace),
+                pos: self.pos_from_slice(&[attribute_spec, modifier, record_keyword, right_brace]),
             }),
         );
         Node::Ignored(SK::RecordDeclaration)

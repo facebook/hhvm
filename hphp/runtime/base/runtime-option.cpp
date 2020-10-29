@@ -2684,7 +2684,6 @@ void RuntimeOption::Load(
   // Run initializers depedent on options, e.g., resizing atomic maps/vectors.
   refineStaticStringTableSize();
   InitFiniNode::ProcessPostRuntimeOptions();
-  always_assert(Func::getFuncVec().size() == RuntimeOption::EvalFuncCountHint);
 
   // **************************************************************************
   //                                  DANGER

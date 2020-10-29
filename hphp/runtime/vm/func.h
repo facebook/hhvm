@@ -114,10 +114,11 @@ struct EHEnt {
 struct Func final {
   friend struct FuncEmitter;
 
+#ifndef USE_LOWPTR
   // DO NOT access it directly, instead use Func::getFuncVec()
   // Exposed in the header file for gdb python macros
   static AtomicLowPtrVector<const Func> s_funcVec;
-
+#endif
   /////////////////////////////////////////////////////////////////////////////
   // Types.
 
@@ -249,9 +250,9 @@ struct Func final {
   void setNewFuncId();
 
   /*
-   * The next available FuncId.  For observation only; does not reserve.
+   * The max FuncId num.
    */
-  static FuncId::Id nextFuncId();
+  static FuncId::Int maxFuncIdNum();
 
   /*
    * Lookup a Func* by its ID.
@@ -1089,12 +1090,6 @@ struct Func final {
    * Intercept hook flag.
    */
   int8_t& maybeIntercepted() const;
-
-  /*
-   * Access to the global vector of funcs.  This maps FuncID's back to Func*'s.
-   */
-  static const AtomicLowPtrVector<const Func>& getFuncVec();
-
 
   /////////////////////////////////////////////////////////////////////////////
   // Public setters.

@@ -20,8 +20,8 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-FuncId FuncId::Invalid = FuncId{std::numeric_limits<FuncId::Id>::max()};
-FuncId FuncId::Dummy   = FuncId{std::numeric_limits<FuncId::Id>::max() - 1};
+FuncId FuncId::Invalid = FuncId::fromInt(std::numeric_limits<FuncId::Int>::max());
+FuncId FuncId::Dummy   = FuncId::fromInt(std::numeric_limits<FuncId::Int>::max() - 1);
 
 ///////////////////////////////////////////////////////////////////////////////
 };

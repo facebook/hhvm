@@ -51,13 +51,13 @@ std::vector<FuncId> s_funcOrder;
 using CallAddrFuncs = tbb::concurrent_hash_map<TCA,FuncId>;
 CallAddrFuncs s_callToFuncId;
 
-using FuncPair = std::pair<FuncId::Id,FuncId::Id>;
+using FuncPair = std::pair<FuncId::Int,FuncId::Int>;
 using CallCounters = tbb::concurrent_hash_map<FuncPair,uint32_t>;
 CallCounters s_callCounters;
 
 // Map that keeps track of the size of optimized translations/prologues for each
 // function.
-using FuncSizes = tbb::concurrent_hash_map<FuncId::Id,uint32_t>;
+using FuncSizes = tbb::concurrent_hash_map<FuncId::Int,uint32_t>;
 FuncSizes s_funcSizes;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -183,8 +183,8 @@ createCallGraphFromOptCode(jit::hash_map<hfsort::TargetId, FuncId>& funcID) {
            it.first.first, it.first.second, it.second);
     auto const weight = it.second;
     if (weight == 0) continue; // don't create arcs with zero weight
-    auto const callerFid = FuncId{it.first.first};
-    auto const calleeFid = FuncId{it.first.second};
+    auto const callerFid = FuncId::fromInt(it.first.first);
+    auto const calleeFid = FuncId::fromInt(it.first.second);
     auto const callerTid = getTargetID(callerFid);
     auto const calleeTid = getTargetID(calleeFid);
     cg.incArcWeight(callerTid, calleeTid, weight);
@@ -343,7 +343,7 @@ void deserialize(ProfDataDeserializer& des) {
   s_funcOrder.reserve(sz);
   for (auto i = sz; i > 0; --i) {
     auto const origId = read_raw<FuncId>(des);
-    s_funcOrder.push_back({des.getFid(origId.toInt())});
+    s_funcOrder.push_back(FuncId::fromInt(des.getFid(origId.toInt())));
   }
 }
 

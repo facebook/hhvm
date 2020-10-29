@@ -72,16 +72,14 @@ std::atomic<bool> Func::s_treadmill;
  * We can't start with 0 since that's used for special sentinel value
  * in TreadHashMap
  */
-static std::atomic<FuncId::Id> s_nextFuncId{1};
+static std::atomic<FuncId::Int> s_nextFuncId{1};
+#ifndef USE_LOWPTR
 AtomicLowPtrVector<const Func> Func::s_funcVec{0, nullptr};
 static InitFiniNode s_funcVecReinit([]{
   UnsafeReinitEmptyAtomicLowPtrVector(
     Func::s_funcVec, RuntimeOption::EvalFuncCountHint);
 }, InitFiniNode::When::PostRuntimeOptions, "s_funcVec reinit");
-
-const AtomicLowPtrVector<const Func>& Func::getFuncVec() {
-  return s_funcVec;
-}
+#endif
 
 namespace {
 inline int numProloguesForNumParams(int numParams) {
@@ -160,8 +158,10 @@ void Func::destroy(Func* func) {
       jit::tc::reclaimFunction(func);
     }
 
+#ifndef USE_LOWPTR
     assertx(s_funcVec.get(func->m_funcId.toInt()) == func);
     s_funcVec.set(func->m_funcId.toInt(), nullptr);
+#endif
 
     if (func->m_registeredInDataMap) {
       func->deregisterInDataMap();
@@ -187,8 +187,10 @@ void Func::freeClone() {
   }
 
   if (!m_funcId.isInvalid()) {
+#ifndef USE_LOWPTR
     assertx(s_funcVec.get(m_funcId.toInt()) == this);
     s_funcVec.set(m_funcId.toInt(), nullptr);
+#endif
     if (m_registeredInDataMap) {
       deregisterInDataMap();
     }
@@ -383,6 +385,27 @@ std::pair<const StringData*, const StringData*> Func::getMethCallerNames(
 ///////////////////////////////////////////////////////////////////////////////
 // FuncId manipulation.
 
+FuncId::Int Func::maxFuncIdNum() {
+  return s_nextFuncId.load(std::memory_order_relaxed);
+}
+
+#ifdef USE_LOWPTR
+void Func::setNewFuncId() {
+  assertx(m_funcId.isInvalid());
+  m_funcId = {this};
+  s_nextFuncId.fetch_add(1, std::memory_order_relaxed);
+}
+
+const Func* Func::fromFuncId(FuncId id) {
+  auto const func = id.getFunc();
+  func->validate();
+  return func;
+}
+
+bool Func::isFuncIdValid(FuncId id) {
+  return !id.isInvalid() && !id.isDummy();
+}
+#else
 void Func::setNewFuncId() {
   assertx(m_funcId.isInvalid());
   m_funcId = {s_nextFuncId.fetch_add(1, std::memory_order_relaxed)};
@@ -392,13 +415,9 @@ void Func::setNewFuncId() {
   s_funcVec.set(m_funcId.toInt(), this);
 }
 
-FuncId::Id Func::nextFuncId() {
-  return s_nextFuncId.load(std::memory_order_relaxed);
-}
-
 const Func* Func::fromFuncId(FuncId id) {
   assertx(id.toInt() < s_nextFuncId);
-  auto func = s_funcVec.get(id.toInt());
+  auto const func = s_funcVec.get(id.toInt());
   func->validate();
   return func;
 }
@@ -407,6 +426,7 @@ bool Func::isFuncIdValid(FuncId id) {
   if (id.toInt() >= s_nextFuncId) return false;
   return s_funcVec.get(id.toInt()) != nullptr;
 }
+#endif
 
 
 ///////////////////////////////////////////////////////////////////////////////

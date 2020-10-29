@@ -25,6 +25,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+struct Func;
 struct String;
 struct StaticString;
 struct Array;
@@ -122,12 +123,31 @@ constexpr Slot kInvalidSlot = -1;
  * Unique identifier for a Func*.
  */
 struct FuncId {
-
-  using Id = uint32_t;
   static FuncId Invalid;
   static FuncId Dummy;
+  using Int = uint32_t;
 
-  uint32_t toInt() const { return m_id; }
+#ifdef USE_LOWPTR
+  using Id = LowPtr<const Func>;
+  Int toInt() const {
+    return static_cast<uint32_t>(
+      reinterpret_cast<uintptr_t>(
+        m_id.get()));
+  }
+  LowPtr<const Func> getFunc() const {
+    assertx(!isInvalid() && !isDummy());
+    return m_id;
+  }
+  static FuncId fromInt(Int num) {
+    return FuncId{Id(reinterpret_cast<const Func*>(num))};
+  }
+#else
+  using Id = uint32_t;
+  Int toInt() const { return m_id; }
+  static FuncId fromInt(Int num) {
+    return FuncId{num};
+  }
+#endif
 
   bool isInvalid() const { return m_id == Invalid.m_id; }
   bool isDummy()   const { return m_id == Dummy.m_id; }
@@ -138,7 +158,7 @@ struct FuncId {
     return m_id == id.m_id;
   }
   bool operator<(const FuncId& id) const {
-    return m_id < id.m_id;
+    return toInt() < id.toInt();
   }
 
   Id m_id;

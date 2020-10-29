@@ -1062,7 +1062,7 @@ bool AdminRequestHandler::handleCheckRequest(const std::string &cmd,
     appendStat("catch-traces", jit::numCatchTraces());
     appendStat("fixups", jit::FixupMap::size());
     appendStat("units", numLoadedUnits());
-    appendStat("funcs", Func::nextFuncId());
+    appendStat("funcs", Func::maxFuncIdNum());
     appendStat("named-entities", NamedEntity::tableSize());
     for (auto& pair : NamedEntity::tableStats()) {
       appendStat(folly::sformat("named-entities-{}", pair.first), pair.second);

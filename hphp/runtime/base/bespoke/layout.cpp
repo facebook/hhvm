@@ -140,6 +140,48 @@ SSATmp* ConcreteLayout::emitEscalateToVanilla(IRGS& env, SSATmp* arr,
   return gen(env, BespokeEscalateToVanilla, data, arr, str);
 }
 
+SSATmp* ConcreteLayout::emitIterFirstPos(IRGS& env, SSATmp* arr) const {
+  auto const data = BespokeLayoutData { this };
+  return gen(env, BespokeIterFirstPos, data, arr);
+}
+
+SSATmp* ConcreteLayout::emitIterLastPos(IRGS& env, SSATmp* arr) const {
+  auto const data = BespokeLayoutData { this };
+  return gen(env, BespokeIterLastPos, data, arr);
+}
+
+SSATmp* ConcreteLayout::emitIterPos(
+    IRGS& env, SSATmp* arr, SSATmp* idx) const {
+  PUNT(unimpl_bespoke_iterpos);
+}
+
+SSATmp* ConcreteLayout::emitIterAdvancePos(
+    IRGS& env, SSATmp* arr, SSATmp* pos) const {
+  auto const data = BespokeLayoutData { this };
+  return gen(env, BespokeIterAdvancePos, data, arr, pos);
+}
+
+SSATmp* ConcreteLayout::emitIterElm(IRGS& env, SSATmp* arr, SSATmp* pos) const {
+  return pos;
+}
+
+SSATmp* ConcreteLayout::emitIterGetKey(
+    IRGS& env, SSATmp* arr, SSATmp* elm) const {
+  auto const data = BespokeLayoutData { this };
+  auto const retType = arr->isA(TVec|TVArr) ? TInt : TInt|TStr;
+  return gen(env, BespokeIterGetKey, retType, data, arr, elm);
+}
+
+/**
+ * This default implementation invokes the layout-specific GetPosVal method
+ * without virtualization.
+ */
+SSATmp* ConcreteLayout::emitIterGetVal(
+    IRGS& env, SSATmp* arr, SSATmp* elm) const {
+  auto const data = BespokeLayoutData { this };
+  return gen(env, BespokeIterGetVal, TCell, data, arr, elm);
+}
+
 const ConcreteLayout* ConcreteLayout::FromConcreteIndex(LayoutIndex index) {
   auto const layout = s_layoutTable[index.raw];
   assertx(layout != nullptr);

@@ -1203,6 +1203,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     return PureLoad { AElemAny };
   }
 
+  case BespokeIterGetKey:
   case LdPtrIterKey:
     // Array element keys are not tracked by memory effects right now.
     return may_load_store(AEmpty, AEmpty);
@@ -1213,6 +1214,9 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     if (inst.typeParam() <= TStr) return PureLoad { AElemSAny };
     return PureLoad { AElemAny };
   }
+
+  case BespokeIterGetVal:
+    return may_load_store(AElemAny, AEmpty);
 
   case ElemMixedArrayK:
   case ElemDictK:
@@ -1486,6 +1490,9 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case AssertLoc:
   case AssertStk:
   case AssertMBase:
+  case BespokeIterAdvancePos:
+  case BespokeIterFirstPos:
+  case BespokeIterLastPos:
   case DefFrameRelSP:
   case DefRegSP:
   case DefCallFlags:

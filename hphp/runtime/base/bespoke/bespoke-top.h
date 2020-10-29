@@ -38,6 +38,20 @@ struct BespokeTop : public Layout {
       IRGS& env, SSATmp* arr, SSATmp* key, SSATmp* val) const override;
   SSATmp* emitAppend(
       IRGS& env, SSATmp* arr, SSATmp* val) const override;
+  SSATmp* emitIterFirstPos(
+      IRGS& env, SSATmp* arr) const override;
+  SSATmp* emitIterLastPos(
+      IRGS& env, SSATmp* arr) const override;
+  SSATmp* emitIterPos(
+      IRGS& env, SSATmp* arr, SSATmp* idx) const override;
+  SSATmp* emitIterAdvancePos(
+      IRGS& env, SSATmp* arr, SSATmp* pos) const override;
+  SSATmp* emitIterElm(
+      IRGS& env, SSATmp* arr, SSATmp* pos) const override;
+  SSATmp* emitIterGetKey(
+      IRGS& env, SSATmp* arr, SSATmp* elm) const override;
+  SSATmp* emitIterGetVal(
+      IRGS& env, SSATmp* arr, SSATmp* elm) const override;
 
 private:
   BespokeTop();

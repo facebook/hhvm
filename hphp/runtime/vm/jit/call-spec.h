@@ -65,8 +65,9 @@ namespace detail {
   T(TypedValue, TCell)           \
   T(bool, TBool)                 \
   T(double, TDbl)                \
-  T(int32_t, TInt)               \
-  T(int64_t, TInt)               \
+  T(int, TInt)                   \
+  T(long, TInt)                  \
+  T(long long, TInt)             \
   T(unsigned long, TInt)         \
   T(unsigned long long, TInt)    \
   T(unsigned int, U(Int, RDSHandle)) \

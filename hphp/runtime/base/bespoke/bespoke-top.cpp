@@ -17,6 +17,7 @@
 #include "hphp/runtime/base/bespoke/bespoke-top.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/irgen.h"
+#include "hphp/runtime/vm/jit/punt.h"
 
 namespace HPHP { namespace bespoke {
 
@@ -61,6 +62,41 @@ SSATmp* BespokeTop::emitAppend(IRGS& env, SSATmp* arr,
   auto const outputType = arr->type().unspecialize().modified();
   return gen(env, BespokeAppend, outputType, BespokeLayoutData { nullptr }, arr,
              val);
+}
+
+SSATmp* BespokeTop::emitIterFirstPos(IRGS& env, SSATmp* arr) const {
+  auto const data = BespokeLayoutData { nullptr };
+  return gen(env, BespokeIterFirstPos, data, arr);
+}
+
+SSATmp* BespokeTop::emitIterLastPos(IRGS& env, SSATmp* arr) const {
+  auto const data = BespokeLayoutData { nullptr };
+  return gen(env, BespokeIterLastPos, data, arr);
+}
+
+SSATmp* BespokeTop::emitIterPos(IRGS& env, SSATmp* arr, SSATmp* idx) const {
+  PUNT(unimpl_bespoke_iterpos);
+}
+
+SSATmp* BespokeTop::emitIterAdvancePos(
+    IRGS& env, SSATmp* arr, SSATmp* pos) const {
+  auto const data = BespokeLayoutData { nullptr };
+  return gen(env, BespokeIterAdvancePos, data, arr, pos);
+}
+
+SSATmp* BespokeTop::emitIterElm(IRGS& env, SSATmp* arr, SSATmp* pos) const {
+  return pos;
+}
+
+SSATmp* BespokeTop::emitIterGetKey(IRGS& env, SSATmp* arr, SSATmp* elm) const {
+  auto const data = BespokeLayoutData { nullptr };
+  auto const retType = arr->type().subtypeOfAny(TVec, TVArr) ? TInt : TInt|TStr;
+  return gen(env, BespokeIterGetKey, retType, data, arr, elm);
+}
+
+SSATmp* BespokeTop::emitIterGetVal(IRGS& env, SSATmp* arr, SSATmp* elm) const {
+  auto const data = BespokeLayoutData { nullptr };
+  return gen(env, BespokeIterGetVal, TCell, data, arr, elm);
 }
 
 }}

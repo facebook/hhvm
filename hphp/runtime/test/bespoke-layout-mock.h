@@ -48,6 +48,39 @@ struct MockLayout : public Layout {
     IRGS& env, SSATmp* arr, SSATmp* val) const override {
     return nullptr;
   }
+
+  virtual SSATmp* emitIterFirstPos(IRGS& env, SSATmp* arr) const override {
+    return nullptr;
+  }
+
+  virtual SSATmp* emitIterLastPos(IRGS& env, SSATmp* arr) const override {
+    return nullptr;
+  }
+
+  virtual SSATmp* emitIterPos(
+      IRGS& env, SSATmp* arr, SSATmp* idx) const override {
+    return nullptr;
+  }
+
+  virtual SSATmp* emitIterAdvancePos(
+      IRGS& env, SSATmp* arr, SSATmp* pos) const override {
+    return nullptr;
+  }
+
+  virtual SSATmp* emitIterElm(
+      IRGS& env, SSATmp* arr, SSATmp* pos) const override {
+    return nullptr;
+  }
+
+  virtual SSATmp* emitIterGetKey(
+      IRGS& env, SSATmp* arr, SSATmp* elm) const override {
+    return nullptr;
+  }
+
+  virtual SSATmp* emitIterGetVal(
+      IRGS& env, SSATmp* arr, SSATmp* elm) const override {
+    return nullptr;
+  }
 };
 
 inline Layout* makeDummyLayout(const std::string& name) {

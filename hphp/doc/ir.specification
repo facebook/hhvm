@@ -3023,6 +3023,28 @@ fields of that struct for holding intermediate values.
   layout provided, returning an array of type T. If no layout is provided, the
   general BespokeArray dispatch is used.
 
+| BespokeIterFirstPos<Layout>, D(Int), SBespokeArr, NF
+
+  Obtain the pos coresponding to the first valid element in bespoke array S0
+  using the IterBegin implementation on the layout provided.
+
+| BespokeIterLastPos<Layout>, D(Int), SBespokeArr, NF
+
+  Obtain the pos coresponding to the last valid element in bespoke array S0
+  using the IterLast implementation on the layout provided.
+
+| BespokeIterAdvancePos<Layout>, D(Int), SBespokeArr S(Int), NF
+
+  Advance the pos S1 for bespoke array S0 forward, returning the result.
+
+| BespokeIterGetKey<T, Layout>, DParam(Int|Str), SBespokeArr S(Int), NF
+
+  Obtain the key at pos S1 in bespoke array S0.
+
+| BespokeIterGetVal<T, Layout>, DParam(Cell), SBespokeArr S(Int), NF
+
+  Obtain the value at pos S1 in bespoke array S0.
+
 | BespokeEscalateToVanilla<Layout>, DEscalateToVanilla, SBespokeArr CStr, NF
 
   Escalate bespoke array S0 to a vanilla array for the reason S1 using the

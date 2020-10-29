@@ -1808,6 +1808,11 @@ X(BespokeElem,                  BespokeLayoutData);
 X(BespokeEscalateToVanilla,     BespokeLayoutData);
 X(BespokeSet,                   BespokeLayoutData);
 X(BespokeAppend,                BespokeLayoutData);
+X(BespokeIterFirstPos,          BespokeLayoutData);
+X(BespokeIterLastPos,           BespokeLayoutData);
+X(BespokeIterAdvancePos,        BespokeLayoutData);
+X(BespokeIterGetKey,            BespokeLayoutData);
+X(BespokeIterGetVal,            BespokeLayoutData);
 X(LdUnitPerRequestFilepath,     RDSHandleData);
 
 #undef X

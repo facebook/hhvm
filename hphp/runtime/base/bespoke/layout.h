@@ -308,6 +308,45 @@ struct Layout {
   virtual SSATmp* emitEscalateToVanilla(
       IRGS& env, SSATmp* arr, const char* reason) const;
 
+  /**
+   * Obtain the pos corresponding to the first valid element (i.e. not a
+   * tombstone).
+   */
+  virtual SSATmp* emitIterFirstPos(IRGS& env, SSATmp* arr) const = 0;
+
+  /**
+   * Obtain the pos in the array that corresponding to the last to a valid
+   * element (i.e. not a tombstone).
+   */
+  virtual SSATmp* emitIterLastPos(IRGS& env, SSATmp* arr) const = 0;
+
+  /**
+   * Obtain the pos in the array corresponding to the specified index. It
+   * assumes that the array contains no tombstones.
+   */
+  virtual SSATmp* emitIterPos(IRGS& env, SSATmp* arr, SSATmp* idx) const = 0;
+
+  /**
+   * Advance the supplied pos a single step forward.
+   */
+  virtual SSATmp* emitIterAdvancePos(
+      IRGS& env, SSATmp* arr, SSATmp* pos) const = 0;
+
+  /**
+   * Convert the supplied pos to an elm used to access the element.
+   */
+  virtual SSATmp* emitIterElm(IRGS& env, SSATmp* arr, SSATmp* pos) const = 0;
+
+  /**
+   * Obtain the key at the supplied elm.
+   */
+  virtual SSATmp* emitIterGetKey(IRGS& env, SSATmp* arr, SSATmp* elm) const = 0;
+
+  /**
+   * Obtain the value at the supplied elm.
+   */
+  virtual SSATmp* emitIterGetVal(IRGS& env, SSATmp* arr, SSATmp* elm) const = 0;
+
 
 protected:
   explicit Layout(const std::string& description);
@@ -378,6 +417,53 @@ struct ConcreteLayout : public Layout {
   virtual SSATmp* emitEscalateToVanilla(
       IRGS& env, SSATmp* arr, const char* reason) const override;
 
+  /**
+   * This default implementation invokes the layout-specific IterBegin method
+   * without virtualization.
+   */
+  virtual SSATmp* emitIterFirstPos(IRGS& env, SSATmp* arr) const override;
+
+  /**
+   * This default implementation invokes the layout-specific IterLast method
+   * without virtualization.
+   */
+  virtual SSATmp* emitIterLastPos(IRGS& env, SSATmp* arr) const override;
+
+  /**
+   * This default implementation punts.
+   */
+  virtual SSATmp* emitIterPos(
+      IRGS& env, SSATmp* arr, SSATmp* idx) const override;
+
+  /**
+   * This default implementation invokes the layout-specific IterAdvance method
+   * without virtualization.
+   */
+  virtual SSATmp* emitIterAdvancePos(
+      IRGS& env, SSATmp* arr, SSATmp* pos) const override;
+
+  /**
+   * This default implementation returns the supplied pos. In other words,
+   * elm = pos for all indices.
+   */
+  virtual SSATmp* emitIterElm(
+      IRGS& env, SSATmp* arr, SSATmp* pos) const override;
+
+  /**
+   * This default implementation invokes the layout-specific GetPosKey method
+   * without virtualization. If a non-default implementation of emitIterElm is
+   * provided, this will also have to be updated.
+   */
+  virtual SSATmp* emitIterGetKey(
+      IRGS& env, SSATmp* arr, SSATmp* elm) const override;
+
+  /**
+   * This default implementation invokes the layout-specific GetPosVal method
+   * without virtualization. If a non-default implementation of emitIterElm is
+   * provided, this will also have to be updated.
+   */
+  virtual SSATmp* emitIterGetVal(
+      IRGS& env, SSATmp* arr, SSATmp* elm) const override;
 
 private:
   const LayoutFunctions* m_vtable;

@@ -513,6 +513,101 @@ void emitBespokeClassGetTS(IRGS& env) {
   push(env, cns(env, TInitNull));
 }
 
+void emitBespokeShapesIdx(IRGS& env, uint32_t numArgs) {
+  if (numArgs != 2 && numArgs != 3) PUNT(Bespoke-ShapesIdx-BadArgs);
+
+  auto const def = [&] {
+    if (numArgs < 3) return cns(env, TInitNull);
+
+    auto const defVal = popC(env);
+    auto const defType = defVal->type();
+    if (!(defType <= TUninit) && defType.maybe(TUninit)) {
+      PUNT(Bespoke-ShapesIdx-BadDefault);
+    }
+    return defVal;
+  }();
+
+  auto const key = popC(env);
+  if (!key->type().subtypeOfAny(TInt, TStr)) {
+    PUNT(Bespoke-ShapesIdx-BadKey);
+  }
+
+  auto const arr = popC(env);
+  auto const arrType = arr->type();
+  if (!(arrType <= (RuntimeOption::EvalHackArrDVArrs ? TDict : TDArr))) {
+    if (arrType <= TNull) {
+      decRef(env, key);
+      push(env, def);
+      return;
+    } else {
+      PUNT(Bespoke-ShapesIdx-BadVal);
+    }
+  }
+
+  auto const res = cond(
+    env,
+    [&] (Block* taken) {
+      auto const layout = arrType.arrSpec().bespokeLayout();
+      return layout->emitGet(env, arr, key, taken);
+    },
+    [&] (SSATmp* val) {
+      // TODO(mcolavita): profiled type info
+      gen(env, IncRef, val);
+      decRef(env, def);
+      return val;
+    },
+    [&] {
+      return def;
+    }
+  );
+
+  decRef(env, key);
+  decRef(env, arr);
+  push(env, res);
+}
+
+template <bool isFirst, bool isKey>
+void emitBespokeFirstLast(IRGS& env, uint32_t numArgs) {
+  if (numArgs != 1) PUNT(Bespoke-FirstLast-BadArgs);
+  auto const arr = popC(env);
+  auto const arrType = arr->type();
+  auto const layout = arrType.arrSpec().bespokeLayout();
+  auto const size = gen(env, Count, arr);
+  auto const res = cond(
+    env,
+    [&](Block* taken) {
+      gen(env, JmpZero, taken, size);
+      auto const pos = isFirst ? layout->emitIterFirstPos(env, arr)
+                               : layout->emitIterLastPos(env, arr);
+      auto const elm = layout->emitIterElm(env, arr, pos);
+      return isKey ? layout->emitIterGetKey(env, arr, elm)
+                   : layout->emitIterGetVal(env, arr, elm);
+    },
+    [&] (SSATmp* val) { return val; },
+    [&] { return cns(env, TInitNull); }
+  );
+  push(env, res);
+  decRef(env, arr);
+}
+
+using BespokeOptEmitFn = void (*)(IRGS&, uint32_t);
+const hphp_fast_string_imap<BespokeOptEmitFn> s_bespoke_builtin_impls{
+  {"HH\\Shapes::idx", emitBespokeShapesIdx},
+  {"HH\\Lib\\_Private\\Native\\first", emitBespokeFirstLast<true, false>},
+  {"HH\\Lib\\_Private\\Native\\last", emitBespokeFirstLast<false, false>},
+  {"HH\\Lib\\_Private\\Native\\first_key", emitBespokeFirstLast<true, true>},
+  {"HH\\Lib\\_Private\\Native\\last_key", emitBespokeFirstLast<false, true>},
+};
+
+void emitBespokeFCallBuiltin(
+    IRGS& env, uint32_t numArgs, uint32_t numNonDefault, uint32_t numOut,
+    const StringData* funcName) {
+  auto const it = s_bespoke_builtin_impls.find(funcName->data());
+  assertx(it != s_bespoke_builtin_impls.end());
+  assertx(it->second);
+  it->second(env, numArgs);
+}
+
 void translateDispatchBespoke(IRGS& env,
                               const NormalizedInstruction& ni) {
   auto const DEBUG_ONLY sk = ni.source;
@@ -549,7 +644,9 @@ void translateDispatchBespoke(IRGS& env,
       emitBespokeClassGetTS(env);
       return;
     case Op::FCallBuiltin:
-      interpOne(env);
+      emitBespokeFCallBuiltin(
+        env, ni.imm[0].u_IVA, ni.imm[1].u_IVA, ni.imm[2].u_IVA,
+        ni.unit()->lookupLitstrId(ni.imm[3].u_SA));
       return;
     case Op::IterInit:
     case Op::LIterInit:

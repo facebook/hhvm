@@ -78,7 +78,13 @@ struct BespokeLayout {
   SSATmp* emitElem(IRGS& env, SSATmp* arr, SSATmp* key, bool throwOnMissing) const;
   SSATmp* emitSet(IRGS& env, SSATmp* arr, SSATmp* key, SSATmp* val) const;
   SSATmp* emitAppend(IRGS& env, SSATmp* arr, SSATmp* val) const;
-  SSATmp* emitEscalateToVanilla(IRGS& env, SSATmp* arr, const char* reaosn) const;
+  SSATmp* emitEscalateToVanilla(IRGS& env, SSATmp* arr, const char* reason) const;
+  SSATmp* emitIterFirstPos(IRGS& env, SSATmp* arr) const;
+  SSATmp* emitIterLastPos(IRGS& env, SSATmp* arr) const;
+  SSATmp* emitIterPos(IRGS& env, SSATmp* arr, SSATmp* idx) const;
+  SSATmp* emitIterElm(IRGS& env, SSATmp* arr, SSATmp* pos) const;
+  SSATmp* emitIterGetKey(IRGS& env, SSATmp* arr, SSATmp* elm) const;
+  SSATmp* emitIterGetVal(IRGS& env, SSATmp* arr, SSATmp* elm) const;
 
 private:
   const bespoke::Layout* m_layout{nullptr};

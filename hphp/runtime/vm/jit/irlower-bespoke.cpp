@@ -131,6 +131,86 @@ void cgBespokeElem(IRLS& env, const IRInstruction* inst) {
   cgCallHelper(v, env, target, dest, SyncOptions::Sync, args);
 }
 
+void cgBespokeIterFirstPos(IRLS& env, const IRInstruction* inst) {
+  auto& v = vmain(env);
+  auto const dest = callDest(env, inst);
+  auto const target = [&] {
+    auto const layout = inst->extra<BespokeLayoutData>()->layout;
+    if (layout) {
+      auto const vtable = layout->vtable();
+      return CallSpec::direct(vtable->fnIterBegin);
+    } else {
+      return CallSpec::direct(BespokeArray::IterBegin);
+    }
+  }();
+  auto const args = argGroup(env, inst).ssa(0);
+  cgCallHelper(v, env, target, dest, SyncOptions::Sync, args);
+}
+
+void cgBespokeIterLastPos(IRLS& env, const IRInstruction* inst) {
+  auto& v = vmain(env);
+  auto const dest = callDest(env, inst);
+  auto const target = [&] {
+    auto const layout = inst->extra<BespokeLayoutData>()->layout;
+    if (layout) {
+      auto const vtable = layout->vtable();
+      return CallSpec::direct(vtable->fnIterLast);
+    } else {
+      return CallSpec::direct(BespokeArray::IterLast);
+    }
+  }();
+  auto const args = argGroup(env, inst).ssa(0);
+  cgCallHelper(v, env, target, dest, SyncOptions::Sync, args);
+}
+
+void cgBespokeIterAdvancePos(IRLS& env, const IRInstruction* inst) {
+  auto& v = vmain(env);
+  auto const dest = callDest(env, inst);
+  auto const target = [&] {
+    auto const layout = inst->extra<BespokeLayoutData>()->layout;
+    if (layout) {
+      auto const vtable = layout->vtable();
+      return CallSpec::direct(vtable->fnIterAdvance);
+    } else {
+      return CallSpec::direct(BespokeArray::IterAdvance);
+    }
+  }();
+  auto const args = argGroup(env, inst).ssa(0).ssa(1);
+  cgCallHelper(v, env, target, dest, SyncOptions::Sync, args);
+}
+
+void cgBespokeIterGetKey(IRLS& env, const IRInstruction* inst) {
+  auto& v = vmain(env);
+  auto const dest = callDestTV(env, inst);
+  auto const target = [&] {
+    auto const layout = inst->extra<BespokeLayoutData>()->layout;
+    if (layout) {
+      auto const vtable = layout->vtable();
+      return CallSpec::direct(vtable->fnGetKey);
+    } else {
+      return CallSpec::direct(BespokeArray::GetPosKey);
+    }
+  }();
+  auto const args = argGroup(env, inst).ssa(0).ssa(1);
+  cgCallHelper(v, env, target, dest, SyncOptions::Sync, args);
+}
+
+void cgBespokeIterGetVal(IRLS& env, const IRInstruction* inst) {
+  auto& v = vmain(env);
+  auto const dest = callDestTV(env, inst);
+  auto const target = [&] {
+    auto const layout = inst->extra<BespokeLayoutData>()->layout;
+    if (layout) {
+      auto const vtable = layout->vtable();
+      return CallSpec::direct(vtable->fnGetVal);
+    } else {
+      return CallSpec::direct(BespokeArray::GetPosVal);
+    }
+  }();
+  auto const args = argGroup(env, inst).ssa(0).ssa(1);
+  cgCallHelper(v, env, target, dest, SyncOptions::Sync, args);
+}
+
 void cgBespokeEscalateToVanilla(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
   auto const dest = callDest(env, inst);

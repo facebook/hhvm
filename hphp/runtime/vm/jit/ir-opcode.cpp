@@ -511,6 +511,11 @@ bool opcodeMayRaise(Opcode opc) {
   case BeginInlining:
   case BespokeEscalateToVanilla:
   case BespokeGet:
+  case BespokeIterFirstPos:
+  case BespokeIterLastPos:
+  case BespokeIterAdvancePos:
+  case BespokeIterGetKey:
+  case BespokeIterGetVal:
   case Ceil:
   case CheckArrayCOW:
   case CheckCold:

@@ -99,5 +99,37 @@ SSATmp* BespokeLayout::emitEscalateToVanilla(IRGS& env, SSATmp* arr,
   return m_layout->emitEscalateToVanilla(env, arr, reason);
 }
 
+SSATmp* BespokeLayout::emitIterFirstPos(IRGS& env, SSATmp* arr) const {
+  assertx(checkLayoutMatches(m_layout, arr));
+  return m_layout->emitIterFirstPos(env, arr);
+}
+
+SSATmp* BespokeLayout::emitIterLastPos(IRGS& env, SSATmp* arr) const {
+  assertx(checkLayoutMatches(m_layout, arr));
+  return m_layout->emitIterLastPos(env, arr);
+}
+
+SSATmp* BespokeLayout::emitIterPos(IRGS& env, SSATmp* arr, SSATmp* idx) const {
+  assertx(checkLayoutMatches(m_layout, arr));
+  return m_layout->emitIterPos(env, arr, idx);
+}
+
+SSATmp* BespokeLayout::emitIterElm(IRGS& env, SSATmp* arr, SSATmp* pos) const {
+  assertx(checkLayoutMatches(m_layout, arr));
+  return m_layout->emitIterElm(env, arr, pos);
+}
+
+SSATmp* BespokeLayout::emitIterGetKey(
+    IRGS& env, SSATmp* arr, SSATmp* elm) const {
+  assertx(checkLayoutMatches(m_layout, arr));
+  return m_layout->emitIterGetKey(env, arr, elm);
+}
+
+SSATmp* BespokeLayout::emitIterGetVal(
+    IRGS& env, SSATmp* arr, SSATmp* elm) const {
+  assertx(checkLayoutMatches(m_layout, arr));
+  return m_layout->emitIterGetVal(env, arr, elm);
+}
+
 }
 

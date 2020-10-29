@@ -92,14 +92,9 @@ bool canTranslate() {
     RuntimeOption::EvalJitGlobalTranslationLimit;
 }
 
-static AtomicVector<uint32_t> s_func_counters{0, 0};
-static InitFiniNode s_func_counters_reinit(
-  [] {
-    UnsafeReinitEmptyAtomicVector(s_func_counters,
-                                  RuntimeOption::EvalFuncCountHint);
-  },
-  InitFiniNode::When::PostRuntimeOptions, "s_func_counters reinit"
-);
+using FuncCounterMap = tbb::concurrent_hash_map<FuncId, uint32_t,
+                                                FuncIdHashCompare>;
+static FuncCounterMap s_func_counters;
 
 using SrcKeyCounters = tbb::concurrent_hash_map<SrcKey, uint32_t,
                                                 SrcKey::TbbHashCompare>;
@@ -112,7 +107,7 @@ bool shouldTranslateNoSizeLimit(SrcKey sk, TransKind kind) {
     return false;
   }
 
-  const Func* func = sk.func();
+  auto const func = sk.func();
 
   // Do not translate functions from units marked as interpret-only.
   if (func->unit()->isInterpretOnly()) {
@@ -132,9 +127,6 @@ bool shouldTranslateNoSizeLimit(SrcKey sk, TransKind kind) {
   const bool isProf = kind == TransKind::Profile ||
                       kind == TransKind::ProfPrologue;
   if (isLive || isProf) {
-    auto const funcId = func->getFuncId();
-    s_func_counters.ensureSize(funcId.toInt() + 1);
-    s_func_counters[funcId.toInt()].fetch_add(1, std::memory_order_relaxed);
     uint32_t skCount = 1;
     if (RuntimeOption::EvalJitSrcKeyThreshold > 1) {
       SrcKeyCounters::accessor acc;
@@ -142,14 +134,14 @@ bool shouldTranslateNoSizeLimit(SrcKey sk, TransKind kind) {
         skCount = ++acc->second;
       }
     }
-    auto const funcThreshold = isLive ? RuntimeOption::EvalJitLiveThreshold
-                                      : RuntimeOption::EvalJitProfileThreshold;
-    if (s_func_counters[funcId.toInt()] < funcThreshold) {
-      return false;
+    {
+      FuncCounterMap::accessor acc;
+      if (!s_func_counters.insert(acc, {func->getFuncId(), 1})) ++acc->second;
+      auto const funcThreshold = isLive ? RuntimeOption::EvalJitLiveThreshold
+                                        : RuntimeOption::EvalJitProfileThreshold;
+      if (acc->second < funcThreshold) return false;
     }
-    if (skCount < RuntimeOption::EvalJitSrcKeyThreshold) {
-      return false;
-    }
+    if (skCount < RuntimeOption::EvalJitSrcKeyThreshold) return false;
   }
 
   return true;

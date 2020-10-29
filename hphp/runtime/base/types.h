@@ -17,8 +17,10 @@
 #pragma once
 
 #include <cstdint>
-#include "hphp/util/low-ptr.h"
 #include <folly/Format.h>
+
+#include "hphp/util/hash.h"
+#include "hphp/util/low-ptr.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -130,6 +132,8 @@ struct FuncId {
   bool isInvalid() const { return m_id == Invalid.m_id; }
   bool isDummy()   const { return m_id == Dummy.m_id; }
 
+  size_t hash()    const { return hash_int64(toInt()); }
+
   bool operator==(const FuncId& id) const {
     return m_id == id.m_id;
   }
@@ -142,12 +146,17 @@ struct FuncId {
 
 static_assert(sizeof(FuncId) == sizeof(uint32_t), "");
 
+struct FuncIdHashCompare {
+  static size_t hash(const FuncId& id) { return id.hash(); }
+  static bool equal(const FuncId& a, const FuncId& b) { return a == b; }
+};
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 
 namespace std {
   template<> struct hash<HPHP::FuncId> {
-    size_t operator()(HPHP::FuncId id) const { return id.toInt(); }
+    size_t operator()(HPHP::FuncId id) const { return id.hash(); }
   };
 }
 

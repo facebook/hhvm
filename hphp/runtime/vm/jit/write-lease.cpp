@@ -72,12 +72,7 @@ private:
 };
 
 static __thread bool threadCanAcquire = true;
-
-AtomicVector<int64_t> s_funcOwners{0, Treadmill::kInvalidRequestIdx};
-static InitFiniNode s_funcOwnersReinit([]{
-  UnsafeReinitEmptyAtomicVector(
-    s_funcOwners, RuntimeOption::EvalFuncCountHint);
-}, InitFiniNode::When::PostRuntimeOptions, "s_funcOwners reinit");
+static thread_local std::set<FuncId> tl_ownedFunc;
 
 std::atomic<int> s_jittingThreads{0};
 
@@ -194,11 +189,8 @@ bool couldAcquireOptimizeLease(const Func* func) {
     case LockLevel::None:
       break;
     case LockLevel::Func: {
-      auto const funcId = func->getFuncId();
-      s_funcOwners.ensureSize(funcId.toInt() + 1);
-      auto const owner = s_funcOwners[funcId.toInt()].load(std::memory_order_relaxed);
-      auto const self = Treadmill::requestIdx();
-      return owner == self || owner == Treadmill::kInvalidRequestIdx;
+      return !func->profilingState().check(Func::ProfilingState::Locked) ||
+             tl_ownedFunc.count(func->getFuncId()) != 0;
     }
     case LockLevel::Kind:
       return s_optimizeLease.couldAcquire();
@@ -226,20 +218,12 @@ LeaseHolder::LeaseHolder(const Func* func, TransKind kind, bool isWorker)
   if (level == LockLevel::Kind && !acquireKind(kind)) return;
 
   if (m_func) {
-    auto const funcId = m_func->getFuncId();
-    s_funcOwners.ensureSize(funcId.toInt() + 1);
-    auto& owner = s_funcOwners[funcId.toInt()];
-    auto oldOwner = owner.load(std::memory_order_relaxed);
-    auto const self = Treadmill::requestIdx();
-
-    if (oldOwner == self) {
-      // We already have the lock on this Func.
-    } else if (oldOwner != Treadmill::kInvalidRequestIdx) {
-      // Already owned by another thread.
-      return;
-    } else {
+    auto const fid = func->getFuncId();
+    if (!func->profilingState().set(Func::ProfilingState::Locked)) {
       // Unowned. Try to grab it. Only non-worker threads with LockLevel::Func
       // count towards the Eval.JitThreads limit.
+      tl_ownedFunc.insert(fid);
+      m_acquiredFunc = true;
       if (!isWorker && level == LockLevel::Func) {
         auto threads = s_jittingThreads.load(std::memory_order_relaxed);
         if (threads >= RuntimeOption::EvalJitThreads) return;
@@ -248,13 +232,9 @@ LeaseHolder::LeaseHolder(const Func* func, TransKind kind, bool isWorker)
         m_acquiredThread = true;
         if (threads >= RuntimeOption::EvalJitThreads) return;
       }
-
-      assertx(oldOwner == Treadmill::kInvalidRequestIdx);
-      if (!owner.compare_exchange_strong(oldOwner, self,
-                                         std::memory_order_acq_rel)) {
-        return;
-      }
-      m_acquiredFunc = true;
+    } else {
+      // Already owned by another thread.
+      if (tl_ownedFunc.count(fid) == 0) return;
     }
   }
 
@@ -285,8 +265,10 @@ void LeaseHolder::dropLocks() {
   }
 
   if (m_acquiredFunc) {
-    auto& owner = s_funcOwners[m_func->getFuncId().toInt()];
-    owner.store(Treadmill::kInvalidRequestIdx, std::memory_order_release);
+    tl_ownedFunc.erase(m_func->getFuncId());
+    DEBUG_ONLY auto const prev =
+      m_func->profilingState().unset(Func::ProfilingState::Locked);
+    assertx(prev);
     m_acquiredFunc = false;
   }
 

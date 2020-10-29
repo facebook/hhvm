@@ -101,6 +101,7 @@ HPHP::high_arena_tcache # Only needed in lowptr builds.
 HPHP::(anonymous namespace)::s_localCounters
 HPHP::arrprov::(anonymous namespace)::tl_tag_override
 HPHP::tracing::detail::tl_active
+HPHP::jit::(anonymous namespace)::tl_ownedFunc
 
 # Native Facts is not request-scoped.
 HPHP::Facts::t_adb

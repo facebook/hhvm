@@ -1476,6 +1476,7 @@ public:
     None      = 0,
     Profiling = 1 << 0,
     Optimized = 1 << 1,
+    Locked    = 1 << 2,
   };
 
  /*
@@ -1490,6 +1491,12 @@ public:
 
     bool set(ProfilingState state) {
       auto const prev = m_state.fetch_or(state, std::memory_order_release);
+      return prev & state;
+    }
+
+    bool unset(ProfilingState state) {
+      auto const prev =
+        m_state.fetch_and(~uint8_t(state), std::memory_order_release);
       return prev & state;
     }
 

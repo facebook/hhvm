@@ -13,7 +13,7 @@ use ast_scope_rust::{Scope, ScopeItem};
 use decl_vars_rust as decl_vars;
 use emit_adata_rust as emit_adata;
 use emit_expression_rust as emit_expression;
-use emit_fatal_rust::raise_fatal_runtime;
+use emit_fatal_rust::{raise_fatal_parse, raise_fatal_runtime};
 use emit_param_rust as emit_param;
 use emit_pos_rust::emit_pos;
 use emit_statement::emit_final_stmts;
@@ -636,7 +636,10 @@ fn atom_instrs(
         return Ok(None); // Not an atom. Nothing to do.
     }
     match &ast_param.type_hint {
-        TypeHint(_, None) => Err(unrecoverable("__Atom param type hint unavailable")),
+        TypeHint(_, None) => Err(raise_fatal_parse(
+            &ast_param.pos,
+            "__Atom param type hint unavailable",
+        )),
         TypeHint(_, Some(Hint(_, h))) => {
             match &**h {
                 Happly(ast_defs::Id(_, ref ctor), vec) if ctor == "\\HH\\Elt" => {
@@ -645,9 +648,12 @@ fn atom_instrs(
                             let Hint(_, e) = hint;
                             match &**e {
                                 // Immediate type.
-                                Happly(ast_defs::Id(_, ref tag), _) => {
+                                Happly(ast_defs::Id(pos, ref tag), _) => {
                                     if atom_helpers::is_erased_generic(tag, tparams) {
-                                        Err(unrecoverable("Erased generic as HH\\Elt enum type"))
+                                        Err(raise_fatal_parse(
+                                            &pos,
+                                            "Erased generic as HH\\Elt enum type",
+                                        ))
                                     } else {
                                         if !atom_helpers::is_generic(tag, tparams) {
                                             //'tag' is a class name.
@@ -690,9 +696,10 @@ fn atom_instrs(
                                 // Type constant.
                                 Haccess(Hint(_, h), _) => {
                                     match &**h {
-                                        Happly(ast_defs::Id(_, ref tag), _) => {
+                                        Happly(ast_defs::Id(pos, ref tag), _) => {
                                             if atom_helpers::is_erased_generic(tag, tparams) {
-                                                Err(unrecoverable(
+                                                Err(raise_fatal_parse(
+                                                    &pos,
                                                     "Erased generic as HH\\Elt enum type",
                                                 ))
                                             } else {
@@ -728,7 +735,10 @@ fn atom_instrs(
                         _ => Err(unrecoverable("Wrong number of type arguments to HH\\Elt")),
                     }
                 }
-                _ => Err(unrecoverable("'__Atom' applied to a non-HH\\Elt parameter")),
+                _ => Err(raise_fatal_parse(
+                    &ast_param.pos,
+                    "'__Atom' applied to a non-HH\\Elt parameter",
+                )),
             }
         }
     }

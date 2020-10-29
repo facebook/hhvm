@@ -3434,25 +3434,7 @@ and anon_make ?el ?ret_ty env lambda_pos f ft idl is_anon =
 (* Expression trees *)
 (*****************************************************************************)
 and expression_tree env p et =
-  let (spliced_expressions, new_src_expr) =
-    Typing_expression_trees.extract_spliced_expressions et.et_src_expr
-  in
-  let (env, spliced_expression_map) =
-    List.fold
-      ~f:(fun (env, map) (id, e) ->
-        let (env, te, ty) = expr env e in
-        (env, IMap.add id (te, ty) map))
-      ~init:(env, IMap.empty)
-      spliced_expressions
-  in
-  let env = { env with et_spliced_types = Some spliced_expression_map } in
-  let (env, t_src_expr) =
-    Typing_lenv.stash_and_do env (Env.all_continuations env) (fun env ->
-        let env = Env.reinitialize_locals env in
-        let (env, te, _ty) = expr env new_src_expr in
-        (env, te))
-  in
-  let env = { env with et_spliced_types = None } in
+  let (_, t_src_expr, _) = expr_any env p et.et_src_expr in
   let (env, t_desugared_expr, ty_desugared) = expr env et.et_desugared_expr in
   make_result
     env
@@ -3466,27 +3448,15 @@ and expression_tree env p et =
     ty_desugared
 
 and et_splice env p e =
-  let error = expr_error env Reason.Rnone e in
-  match snd e with
-  | Id (_, id) ->
-    let id = int_of_string id in
-    let v =
-      IMap.find_opt id (Option.value env.et_spliced_types ~default:IMap.empty)
-    in
-    begin
-      match v with
-      | None -> error
-      | Some (te, ty) ->
-        let (env, ty_visitor) = Env.fresh_type env p in
-        let (env, ty_res) = Env.fresh_type env p in
-        let (env, ty_infer) = Env.fresh_type env p in
-        let expr_tree_type =
-          MakeType.expr_tree (Reason.Rsplice p) ty_visitor ty_res ty_infer
-        in
-        let env = SubType.sub_type env ty expr_tree_type Errors.unify_error in
-        make_result env p (Aast.ET_Splice te) ty_infer
-    end
-  | _ -> error
+  let (env, te, ty) = expr env e in
+  let (env, ty_visitor) = Env.fresh_type env p in
+  let (env, ty_res) = Env.fresh_type env p in
+  let (env, ty_infer) = Env.fresh_type env p in
+  let expr_tree_type =
+    MakeType.expr_tree (Reason.Rsplice p) ty_visitor ty_res ty_infer
+  in
+  let env = SubType.sub_type env ty expr_tree_type Errors.unify_error in
+  make_result env p (Aast.ET_Splice te) ty_infer
 
 (*****************************************************************************)
 (* End expression trees *)

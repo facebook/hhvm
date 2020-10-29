@@ -146,7 +146,6 @@
     typing_check_decls
     typing_debug
     typing_disposable
-    typing_expression_trees
     typing_extends
     typing_exts
     typing_func_terminality

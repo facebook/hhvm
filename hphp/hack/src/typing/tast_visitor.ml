@@ -63,15 +63,6 @@ class virtual iter =
     method! on_As env e h =
       let env = Env.set_allow_wildcards env in
       super#on_As env e h
-
-    method! on_expr env e =
-      let env =
-        match snd e with
-        | Aast.ExpressionTree _ -> Env.set_et env
-        | Aast.ET_Splice _ -> Env.unset_et env
-        | _ -> env
-      in
-      super#on_expr env e
   end
 
 class virtual ['state] iter_with_state =

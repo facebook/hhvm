@@ -1,2 +1,6 @@
 File "nested_splicing.php", line 6, characters 19-28:
 This is a reserved keyword for expression trees that cannot be used (Parsing[1002])
+File "nested_splicing.php", line 6, characters 19-31:
+Expected `ExprTree<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
+  File "nested_splicing.php", line 6, characters 30-30:
+  But got `int`

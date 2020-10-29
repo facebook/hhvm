@@ -1248,7 +1248,13 @@ impl<'a> DirectDeclSmartConstructors<'a> {
             | Node::Expr(aast::Expr(_, aast::Expr_::Unop(&(Uop::Uplus, _)))) => {
                 self.node_to_ty(node)
             }
-            Node::Token(t) if t.kind() == TokenKind::NullLiteral => self.node_to_ty(node),
+            Node::Token(t) if t.kind() == TokenKind::NullLiteral => {
+                let pos = self.token_pos(t);
+                Some(self.alloc(Ty(
+                    self.alloc(Reason::witness(pos)),
+                    Ty_::Tprim(self.alloc(aast::Tprim::Tnull)),
+                )))
+            }
             _ => Some(self.tany_with_pos(self.get_pos(name))),
         }
     }

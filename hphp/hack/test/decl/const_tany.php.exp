@@ -1,0 +1,8 @@
+[("\\X",
+  (Shallow_decl_defs.Const
+     { Typing_defs.cd_pos = [3:7-8];
+       cd_type =
+       (Rwitness (root|const_tany.php line 3, characters 7-7), Tany) }))
+  ]
+
+They matched!

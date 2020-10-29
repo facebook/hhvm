@@ -2979,7 +2979,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 let ty = self
                     .node_to_ty(hint)
                     .or_else(|| self.infer_const(name, initializer))
-                    .unwrap_or_else(|| tany());
+                    .unwrap_or_else(|| self.tany_with_pos(pos));
                 self.add_const(id, self.alloc(ConstDecl { pos, type_: ty }));
                 Node::Ignored(SK::ConstDeclaration)
             }

@@ -37,164 +37,175 @@
             [(Constraint_as,
               (Rhint (root|constraints_mentioning_tparams_in_same_list.php line 7, characters 9-10),
                (Tgeneric ("Ta", []))))
-            ];
-          tp_reified = Erased; tp_user_attributes = [] };
-        { Typing_defs_core.tp_variance = Invariant;
-          tp_name = ([8:3-5], "Tc"); tp_tparams = [];
-          tp_constraints =
-          [(Constraint_as,
-            (Rhint (root|constraints_mentioning_tparams_in_same_list.php line 8, characters 9-10),
-             (Tgeneric ("Td", []))))
+              ];
+            tp_reified = Erased; tp_user_attributes = [] };
+          { Typing_defs_core.tp_variance = Invariant;
+            tp_name = ([8:3-5], "Tc"); tp_tparams = [];
+            tp_constraints =
+            [(Constraint_as,
+              (Rhint (root|constraints_mentioning_tparams_in_same_list.php line 8, characters 9-10),
+               (Tgeneric ("Td", []))))
+              ];
+            tp_reified = Erased; tp_user_attributes = [] };
+          { Typing_defs_core.tp_variance = Invariant;
+            tp_name = ([9:3-5], "Td"); tp_tparams = [];
+            tp_constraints =
+            [(Constraint_as,
+              (Rhint (root|constraints_mentioning_tparams_in_same_list.php line 9, characters 9-17),
+               (Tapply (([9:9-10], "\\E"),
+                  [(Rhint (root|constraints_mentioning_tparams_in_same_list.php line 9, characters 11-12),
+                    (Tgeneric ("Ta", [])));
+                    (Rhint (root|constraints_mentioning_tparams_in_same_list.php line 9, characters 15-16),
+                     (Tgeneric ("Tf", [])))
+                    ]
+                  ))))
+              ];
+            tp_reified = Erased; tp_user_attributes = [] };
+          { Typing_defs_core.tp_variance = Invariant;
+            tp_name = ([10:3-5], "Tf"); tp_tparams = []; tp_constraints = [];
+            tp_reified = Erased; tp_user_attributes = [] };
+          { Typing_defs_core.tp_variance = Invariant;
+            tp_name = ([11:3-7], "Tarr"); tp_tparams = [];
+            tp_constraints =
+            [(Constraint_as,
+              (Rhint (root|constraints_mentioning_tparams_in_same_list.php line 11, characters 11-20),
+               (Tvarray
+                  (Rhint (root|constraints_mentioning_tparams_in_same_list.php line 11, characters 18-19),
+                   (Tgeneric ("Ta", []))))))
+              ];
+            tp_reified = Erased; tp_user_attributes = [] };
+          { Typing_defs_core.tp_variance = Invariant;
+            tp_name = ([12:3-8], "Tlike"); tp_tparams = [];
+            tp_constraints =
+            [(Constraint_as,
+              (Rhint (root|constraints_mentioning_tparams_in_same_list.php line 12, characters 12-14),
+               (Tlike
+                  (Rhint (root|constraints_mentioning_tparams_in_same_list.php line 12, characters 13-14),
+                   (Tgeneric ("Ta", []))))))
+              ];
+            tp_reified = Erased; tp_user_attributes = [] };
+          { Typing_defs_core.tp_variance = Invariant;
+            tp_name = ([13:3-7], "Topt"); tp_tparams = [];
+            tp_constraints =
+            [(Constraint_as,
+              (Rhint (root|constraints_mentioning_tparams_in_same_list.php line 13, characters 11-13),
+               (Toption
+                  (Rhint (root|constraints_mentioning_tparams_in_same_list.php line 13, characters 12-13),
+                   (Tgeneric ("Ta", []))))))
+              ];
+            tp_reified = Erased; tp_user_attributes = [] };
+          { Typing_defs_core.tp_variance = Invariant;
+            tp_name = ([14:3-7], "Tfun"); tp_tparams = [];
+            tp_constraints =
+            [(Constraint_as,
+              (Rhint (root|constraints_mentioning_tparams_in_same_list.php line 14, characters 11-28),
+               (Tfun
+                  { ft_arity = (Fstandard ()); ft_tparams = [];
+                    ft_where_constraints = [];
+                    ft_params =
+                    [{ fp_pos = [14:21-23]; fp_name = None;
+                       fp_type =
+                       { et_enforced = false;
+                         et_type =
+                         (Rhint (root|constraints_mentioning_tparams_in_same_list.php line 14, characters 21-22),
+                          (Tgeneric ("Ta", [])))
+                         };
+                       fp_rx_annotation = None;
+                       fp_flags =
+                       (make_fp_flags ~mutability:None
+                         ~accept_disposable:false ~has_default:false
+                         ~mode:Typing_defs_core.FPnormal ~ifc_external:false
+                         ~ifc_can_call:false);
+                        }
+                      ];
+                    ft_implicit_params =
+                    { capability =
+                      (Rhint (root|constraints_mentioning_tparams_in_same_list.php line 14, characters 11-28),
+                       (Tunion []))
+                      };
+                    ft_ret =
+                    { et_enforced = false;
+                      et_type =
+                      (Rhint (root|constraints_mentioning_tparams_in_same_list.php line 14, characters 26-27),
+                       (Tgeneric ("Tb", [])))
+                      };
+                    ft_flags =
+                    (make_ft_flags FSync None ~return_disposable:false
+                      ~returns_mutable:false ~returns_void_to_rx:false);
+                    ft_reactive = Nonreactive;
+                    ft_ifc_decl = FDPolicied {PUBLIC} })))
+              ];
+            tp_reified = Erased; tp_user_attributes = [] };
+          { Typing_defs_core.tp_variance = Invariant;
+            tp_name = ([15:3-9], "Tshape"); tp_tparams = [];
+            tp_constraints =
+            [(Constraint_as,
+              (Rhint (root|constraints_mentioning_tparams_in_same_list.php line 15, characters 13-28),
+               (Tshape (Typing_defs_core.Closed_shape,
+                  { (SFlit_str ([15:19-22], "a")) ->
+                    { sft_optional = false;
+                      sft_ty =
+                      (Rhint (root|constraints_mentioning_tparams_in_same_list.php line 15, characters 26-27),
+                       (Tgeneric ("Ta", [])))
+                      } }
+                  ))))
+              ];
+            tp_reified = Erased; tp_user_attributes = [] };
+          { Typing_defs_core.tp_variance = Invariant;
+            tp_name = ([16:3-8], "Tdarr"); tp_tparams = [];
+            tp_constraints =
+            [(Constraint_as,
+              (Rhint (root|constraints_mentioning_tparams_in_same_list.php line 16, characters 12-25),
+               (Tdarray (
+                  (Rhint (root|constraints_mentioning_tparams_in_same_list.php line 16, characters 19-20),
+                   (Tgeneric ("Ta", []))),
+                  (Rhint (root|constraints_mentioning_tparams_in_same_list.php line 16, characters 23-24),
+                   (Tgeneric ("Tb", [])))
+                  ))))
+              ];
+            tp_reified = Erased; tp_user_attributes = [] };
+          { Typing_defs_core.tp_variance = Invariant;
+            tp_name = ([17:3-8], "Tvarr"); tp_tparams = [];
+            tp_constraints =
+            [(Constraint_as,
+              (Rhint (root|constraints_mentioning_tparams_in_same_list.php line 17, characters 12-21),
+               (Tvarray
+                  (Rhint (root|constraints_mentioning_tparams_in_same_list.php line 17, characters 19-20),
+                   (Tgeneric ("Ta", []))))))
+              ];
+            tp_reified = Erased; tp_user_attributes = [] };
+          { Typing_defs_core.tp_variance = Invariant;
+            tp_name = ([18:3-9], "Tvdarr"); tp_tparams = [];
+            tp_constraints =
+            [(Constraint_as,
+              (Rhint (root|constraints_mentioning_tparams_in_same_list.php line 18, characters 13-36),
+               (Tvarray_or_darray
+                  (Rhint (root|constraints_mentioning_tparams_in_same_list.php line 18, characters 30-31),
+                   (Tgeneric ("Ta", []))),
+                  (Rhint (root|constraints_mentioning_tparams_in_same_list.php line 18, characters 34-35),
+                   (Tgeneric ("Tb", []))))))
+              ];
+            tp_reified = Erased; tp_user_attributes = [] };
+          { Typing_defs_core.tp_variance = Invariant;
+            tp_name = ([19:3-9], "Ttuple"); tp_tparams = [];
+            tp_constraints =
+            [(Constraint_as,
+              (Rhint (root|constraints_mentioning_tparams_in_same_list.php line 19, characters 13-20),
+               (Ttuple
+                  [(Rhint (root|constraints_mentioning_tparams_in_same_list.php line 19, characters 14-15),
+                    (Tgeneric ("Ta", [])));
+                    (Rhint (root|constraints_mentioning_tparams_in_same_list.php line 19, characters 18-19),
+                     (Tgeneric ("Tb", [])))
+                    ])))
+              ];
+            tp_reified = Erased; tp_user_attributes = [] }
           ];
-        tp_reified = Erased; tp_user_attributes = [] };
-        { Typing_defs_core.tp_variance = Invariant;
-          tp_name = ([9:3-5], "Td"); tp_tparams = [];
-          tp_constraints =
-          [(Constraint_as,
-            (Rhint (root|constraints_mentioning_tparams_in_same_list.php line 9, characters 9-17),
-             (Tapply (([9:9-10], "\\E"),
-                [(Rhint (root|constraints_mentioning_tparams_in_same_list.php line 9, characters 11-12),
-                  (Tgeneric ("Ta", [])));
-                (Rhint (root|constraints_mentioning_tparams_in_same_list.php line 9, characters 15-16),
-                 (Tgeneric ("Tf", [])))
-             ]
-            ))))
-          ];
-      tp_reified = Erased; tp_user_attributes = [] };
-   { Typing_defs_core.tp_variance = Invariant; tp_name = ([10:3-5], "Tf");
-     tp_tparams = []; tp_constraints = []; tp_reified = Erased;
-     tp_user_attributes = [] };
-   { Typing_defs_core.tp_variance = Invariant; tp_name = ([11:3-7], "Tarr");
-     tp_tparams = [];
-     tp_constraints =
-     [(Constraint_as,
-       (Rhint (root|constraints_mentioning_tparams_in_same_list.php line 11, characters 11-20),
-        (Tvarray
-           (Rhint (root|constraints_mentioning_tparams_in_same_list.php line 11, characters 18-19),
-            (Tgeneric ("Ta", []))))))
-     ];
-   tp_reified = Erased; tp_user_attributes = [] };
-  { Typing_defs_core.tp_variance = Invariant; tp_name = ([12:3-8], "Tlike");
-    tp_tparams = [];
-    tp_constraints =
-    [(Constraint_as,
-      (Rhint (root|constraints_mentioning_tparams_in_same_list.php line 12, characters 12-14),
-       (Tlike
-          (Rhint (root|constraints_mentioning_tparams_in_same_list.php line 12, characters 13-14),
-           (Tgeneric ("Ta", []))))))
-    ];
-  tp_reified = Erased; tp_user_attributes = [] };
-{ Typing_defs_core.tp_variance = Invariant; tp_name = ([13:3-7], "Topt");
-  tp_tparams = [];
-  tp_constraints =
-  [(Constraint_as,
-    (Rhint (root|constraints_mentioning_tparams_in_same_list.php line 13, characters 11-13),
-     (Toption
-        (Rhint (root|constraints_mentioning_tparams_in_same_list.php line 13, characters 12-13),
-         (Tgeneric ("Ta", []))))))
-  ]; tp_reified = Erased; tp_user_attributes = [] };
-{ Typing_defs_core.tp_variance = Invariant; tp_name = ([14:3-7], "Tfun");
-  tp_tparams = [];
-  tp_constraints =
-  [(Constraint_as,
-    (Rhint (root|constraints_mentioning_tparams_in_same_list.php line 14, characters 11-28),
-     (Tfun
-        { ft_arity = (Fstandard ()); ft_tparams = [];
-          ft_where_constraints = [];
-          ft_params =
-          [{ fp_pos = [14:21-23]; fp_name = None;
-             fp_type =
-             { et_enforced = false;
-               et_type =
-               (Rhint (root|constraints_mentioning_tparams_in_same_list.php line 14, characters 21-22),
-                (Tgeneric ("Ta", [])))
-             };
-            fp_rx_annotation = None;
-            fp_flags =
-            (make_fp_flags ~mutability:None ~accept_disposable:false
-              ~has_default:false ~mode:Typing_defs_core.FPnormal
-              ~ifc_external:false ~ifc_can_call:false);
-             }
-          ];
-        ft_implicit_params =
-        { capability =
-          (Rhint (root|constraints_mentioning_tparams_in_same_list.php line 14, characters 11-28),
-           (Tunion []))
-          };
-        ft_ret =
-        { et_enforced = false;
-          et_type =
-          (Rhint (root|constraints_mentioning_tparams_in_same_list.php line 14, characters 26-27),
-           (Tgeneric ("Tb", [])))
-        };
-     ft_flags =
-     (make_ft_flags FSync None ~return_disposable:false
-       ~returns_mutable:false ~returns_void_to_rx:false);
-     ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC} })))
-  ]; tp_reified = Erased; tp_user_attributes = [] };
-{ Typing_defs_core.tp_variance = Invariant; tp_name = ([15:3-9], "Tshape");
-  tp_tparams = [];
-  tp_constraints =
-  [(Constraint_as,
-    (Rhint (root|constraints_mentioning_tparams_in_same_list.php line 15, characters 13-28),
-     (Tshape (Typing_defs_core.Closed_shape,
-        { (SFlit_str ([15:19-22], "a")) ->
-          { sft_optional = false;
-            sft_ty =
-            (Rhint (root|constraints_mentioning_tparams_in_same_list.php line 15, characters 26-27),
-             (Tgeneric ("Ta", [])))
-          } }
-     ))))
-  ]; tp_reified = Erased; tp_user_attributes = [] };
-{ Typing_defs_core.tp_variance = Invariant; tp_name = ([16:3-8], "Tdarr");
-  tp_tparams = [];
-  tp_constraints =
-  [(Constraint_as,
-    (Rhint (root|constraints_mentioning_tparams_in_same_list.php line 16, characters 12-25),
-     (Tdarray (
-        (Rhint (root|constraints_mentioning_tparams_in_same_list.php line 16, characters 19-20),
-         (Tgeneric ("Ta", []))),
-     (Rhint (root|constraints_mentioning_tparams_in_same_list.php line 16, characters 23-24),
-      (Tgeneric ("Tb", [])))
-    ))))
-  ]; tp_reified = Erased; tp_user_attributes = [] };
-{ Typing_defs_core.tp_variance = Invariant; tp_name = ([17:3-8], "Tvarr");
-  tp_tparams = [];
-  tp_constraints =
-  [(Constraint_as,
-    (Rhint (root|constraints_mentioning_tparams_in_same_list.php line 17, characters 12-21),
-     (Tvarray
-        (Rhint (root|constraints_mentioning_tparams_in_same_list.php line 17, characters 19-20),
-         (Tgeneric ("Ta", []))))))
-  ]; tp_reified = Erased; tp_user_attributes = [] };
-{ Typing_defs_core.tp_variance = Invariant; tp_name = ([18:3-9], "Tvdarr");
-  tp_tparams = [];
-  tp_constraints =
-  [(Constraint_as,
-    (Rhint (root|constraints_mentioning_tparams_in_same_list.php line 18, characters 13-36),
-     (Tvarray_or_darray
-        (Rhint (root|constraints_mentioning_tparams_in_same_list.php line 18, characters 30-31),
-         (Tgeneric ("Ta", []))),
-     (Rhint (root|constraints_mentioning_tparams_in_same_list.php line 18, characters 34-35),
-      (Tgeneric ("Tb", []))))))
-  ]; tp_reified = Erased; tp_user_attributes = [] };
-{ Typing_defs_core.tp_variance = Invariant; tp_name = ([19:3-9], "Ttuple");
-  tp_tparams = [];
-  tp_constraints =
-  [(Constraint_as,
-    (Rhint (root|constraints_mentioning_tparams_in_same_list.php line 19, characters 13-20),
-     (Ttuple
-        [(Rhint (root|constraints_mentioning_tparams_in_same_list.php line 19, characters 14-15),
-          (Tgeneric ("Ta", [])));
-        (Rhint (root|constraints_mentioning_tparams_in_same_list.php line 19, characters 18-19),
-         (Tgeneric ("Tb", [])))
-     ])))
-  ]; tp_reified = Erased; tp_user_attributes = [] }];
-sc_where_constraints = []; sc_extends = []; sc_uses = [];
-sc_xhp_attr_uses = []; sc_req_extends = []; sc_req_implements = [];
-sc_implements = []; sc_consts = []; sc_typeconsts = []; sc_pu_enums = [];
-sc_props = []; sc_sprops = []; sc_constructor = None; sc_static_methods = [];
-sc_methods = []; sc_user_attributes = []; sc_enum_type = None }))
-]
+        sc_where_constraints = []; sc_extends = []; sc_uses = [];
+        sc_xhp_attr_uses = []; sc_req_extends = []; sc_req_implements = [];
+        sc_implements = []; sc_consts = []; sc_typeconsts = [];
+        sc_pu_enums = []; sc_props = []; sc_sprops = [];
+        sc_constructor = None; sc_static_methods = []; sc_methods = [];
+        sc_user_attributes = []; sc_enum_type = None }))
+  ]
 
 They matched!

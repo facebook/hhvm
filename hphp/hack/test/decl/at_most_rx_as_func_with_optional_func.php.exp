@@ -30,55 +30,56 @@
                                  et_type =
                                  (Rhint (root|at_most_rx_as_func_with_optional_func.php line 6, characters 14-14),
                                   (Tgeneric ("T", [])))
-                               };
-                              fp_rx_annotation = None;
-                              fp_flags =
-                              (make_fp_flags ~mutability:None
-                                ~accept_disposable:false ~has_default:false
-                                ~mode:Typing_defs_core.FPnormal
-                                ~ifc_external:false ~ifc_can_call:false);
-                               }
-                            ];
-                          ft_implicit_params =
-                          { capability =
-                            (Rhint (root|at_most_rx_as_func_with_optional_func.php line 6, characters 4-22),
-                             (Tunion []))
-                            };
-                          ft_ret =
-                          { et_enforced = false;
-                            et_type =
-                            (Rhint (root|at_most_rx_as_func_with_optional_func.php line 6, characters 18-21),
-                             (Tprim Tbool))
-                            };
-                          ft_flags =
-                          (make_ft_flags FSync None ~return_disposable:false
-                            ~returns_mutable:false ~returns_void_to_rx:false);
-                          ft_reactive = RxVar {};
-                          ft_ifc_decl = FDPolicied {PUBLIC} }))))
-                };
-               fp_rx_annotation = (Some Param_rx_var);
-               fp_flags =
-               (make_fp_flags ~mutability:None ~accept_disposable:false
-                 ~has_default:true ~mode:Typing_defs_core.FPnormal
-                 ~ifc_external:false ~ifc_can_call:false);
-                }
-             ];
-           ft_implicit_params =
-           { capability =
-             (Rhint (root|at_most_rx_as_func_with_optional_func.php line 4, characters 10-10),
-              (Tunion []))
-             };
-           ft_ret =
-           { et_enforced = false;
-             et_type =
-             (Rhint (root|at_most_rx_as_func_with_optional_func.php line 7, characters 4-7),
-              (Tprim Tbool))
-             };
-           ft_flags =
-           (make_ft_flags FSync None ~return_disposable:false
-             ~returns_mutable:false ~returns_void_to_rx:false);
-           ft_reactive = Reactive {}; ft_ifc_decl = FDPolicied {PUBLIC} }));
-     fe_pos = [4:10-11]; fe_php_std_lib = false }))
-]
+                                 };
+                               fp_rx_annotation = None;
+                               fp_flags =
+                               (make_fp_flags ~mutability:None
+                                 ~accept_disposable:false ~has_default:false
+                                 ~mode:Typing_defs_core.FPnormal
+                                 ~ifc_external:false ~ifc_can_call:false);
+                                }
+                              ];
+                            ft_implicit_params =
+                            { capability =
+                              (Rhint (root|at_most_rx_as_func_with_optional_func.php line 6, characters 4-22),
+                               (Tunion []))
+                              };
+                            ft_ret =
+                            { et_enforced = false;
+                              et_type =
+                              (Rhint (root|at_most_rx_as_func_with_optional_func.php line 6, characters 18-21),
+                               (Tprim Tbool))
+                              };
+                            ft_flags =
+                            (make_ft_flags FSync None
+                              ~return_disposable:false ~returns_mutable:false
+                              ~returns_void_to_rx:false);
+                            ft_reactive = RxVar {};
+                            ft_ifc_decl = FDPolicied {PUBLIC} }))))
+                  };
+                fp_rx_annotation = (Some Param_rx_var);
+                fp_flags =
+                (make_fp_flags ~mutability:None ~accept_disposable:false
+                  ~has_default:true ~mode:Typing_defs_core.FPnormal
+                  ~ifc_external:false ~ifc_can_call:false);
+                 }
+               ];
+             ft_implicit_params =
+             { capability =
+               (Rhint (root|at_most_rx_as_func_with_optional_func.php line 4, characters 10-10),
+                (Tunion []))
+               };
+             ft_ret =
+             { et_enforced = false;
+               et_type =
+               (Rhint (root|at_most_rx_as_func_with_optional_func.php line 7, characters 4-7),
+                (Tprim Tbool))
+               };
+             ft_flags =
+             (make_ft_flags FSync None ~return_disposable:false
+               ~returns_mutable:false ~returns_void_to_rx:false);
+             ft_reactive = Reactive {}; ft_ifc_decl = FDPolicied {PUBLIC} }));
+       fe_pos = [4:10-11]; fe_php_std_lib = false }))
+  ]
 
 They matched!

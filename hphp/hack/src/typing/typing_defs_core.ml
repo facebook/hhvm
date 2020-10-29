@@ -570,7 +570,7 @@ module Pp = struct
       Format.fprintf fmt "%S" a0;
       Format.fprintf fmt ",@ ";
       pp_ty_list fmt a1;
-      Format.fprintf fmt "@,)@]"
+      Format.fprintf fmt "@,)@])"
     | Tunapplied_alias a0 ->
       Format.fprintf fmt "(@[<2>Tunappliedalias@ ";
       Format.fprintf fmt "%S" a0;
@@ -675,10 +675,12 @@ module Pp = struct
       Format.fprintf fmt "@])"
     | Tunion tyl ->
       Format.fprintf fmt "(@[<2>Tunion@ ";
-      pp_ty_list fmt tyl
+      pp_ty_list fmt tyl;
+      Format.fprintf fmt "@])"
     | Tintersection tyl ->
       Format.fprintf fmt "(@[<2>Tintersection@ ";
-      pp_ty_list fmt tyl
+      pp_ty_list fmt tyl;
+      Format.fprintf fmt "@])"
     | Tobject -> Format.pp_print_string fmt "Tobject"
     | Tclass (a0, a2, a1) ->
       Format.fprintf fmt "(@[<2>Tclass (@,";
@@ -727,8 +729,7 @@ module Pp = struct
            true)
          ~init:false
          tyl);
-    Format.fprintf fmt "@,]@]";
-    Format.fprintf fmt "@])"
+    Format.fprintf fmt "@,]@]"
 
   and pp_taccess_type : type a. Format.formatter -> a taccess_type -> unit =
    fun fmt (a0, a1) ->

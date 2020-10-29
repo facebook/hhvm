@@ -52,50 +52,50 @@
                (Tapply (([14:11-14], "\\HH\\Map"),
                   [(Rhint (root|constraints_with_fully_qualified_name_in_namespace.php line 14, characters 15-16),
                     (Tgeneric ("Ta", [])));
-                  (Rhint (root|constraints_with_fully_qualified_name_in_namespace.php line 14, characters 19-20),
-                   (Tgeneric ("Te", [])))
-               ]
-              ))))
-            ];
-        tp_reified = Erased; tp_user_attributes = [] };
-        { Typing_defs_core.tp_variance = Invariant;
-          tp_name = ([15:5-7], "Tc"); tp_tparams = [];
-          tp_constraints =
-          [(Constraint_as,
-            (Rhint (root|constraints_with_fully_qualified_name_in_namespace.php line 15, characters 11-23),
-             (Tapply (([15:11-14], "\\HH\\Map"),
-                [(Rhint (root|constraints_with_fully_qualified_name_in_namespace.php line 15, characters 15-17),
-                  (Tapply (([15:15-18], "\\Ta"), [])));
-                  (Rhint (root|constraints_with_fully_qualified_name_in_namespace.php line 15, characters 20-22),
-                   (Tapply (([15:20-23], "\\Te"), [])))
-                  ]
-                ))))
-            ];
-          tp_reified = Erased; tp_user_attributes = [] };
-        { Typing_defs_core.tp_variance = Invariant;
-          tp_name = ([16:5-7], "Td"); tp_tparams = [];
-          tp_constraints =
-          [(Constraint_as,
-            (Rhint (root|constraints_with_fully_qualified_name_in_namespace.php line 16, characters 11-29),
-             (Tapply (([16:11-14], "\\HH\\Map"),
-                [(Rhint (root|constraints_with_fully_qualified_name_in_namespace.php line 16, characters 15-20),
-                  (Tapply (([16:15-21], "\\NS\\Ta"), [])));
-                  (Rhint (root|constraints_with_fully_qualified_name_in_namespace.php line 16, characters 23-28),
-                   (Tapply (([16:23-29], "\\NS\\Te"), [])))
-                  ]
-                ))))
-            ];
-          tp_reified = Erased; tp_user_attributes = [] };
-        { Typing_defs_core.tp_variance = Invariant;
-          tp_name = ([17:5-7], "Te"); tp_tparams = []; tp_constraints = [];
-          tp_reified = Erased; tp_user_attributes = [] }
-        ];
-   sc_where_constraints = []; sc_extends = []; sc_uses = [];
-   sc_xhp_attr_uses = []; sc_req_extends = []; sc_req_implements = [];
-   sc_implements = []; sc_consts = []; sc_typeconsts = []; sc_pu_enums = [];
-   sc_props = []; sc_sprops = []; sc_constructor = None;
-   sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
-   sc_enum_type = None }))
-]
+                    (Rhint (root|constraints_with_fully_qualified_name_in_namespace.php line 14, characters 19-20),
+                     (Tgeneric ("Te", [])))
+                    ]
+                  ))))
+              ];
+            tp_reified = Erased; tp_user_attributes = [] };
+          { Typing_defs_core.tp_variance = Invariant;
+            tp_name = ([15:5-7], "Tc"); tp_tparams = [];
+            tp_constraints =
+            [(Constraint_as,
+              (Rhint (root|constraints_with_fully_qualified_name_in_namespace.php line 15, characters 11-23),
+               (Tapply (([15:11-14], "\\HH\\Map"),
+                  [(Rhint (root|constraints_with_fully_qualified_name_in_namespace.php line 15, characters 15-17),
+                    (Tapply (([15:15-18], "\\Ta"), [])));
+                    (Rhint (root|constraints_with_fully_qualified_name_in_namespace.php line 15, characters 20-22),
+                     (Tapply (([15:20-23], "\\Te"), [])))
+                    ]
+                  ))))
+              ];
+            tp_reified = Erased; tp_user_attributes = [] };
+          { Typing_defs_core.tp_variance = Invariant;
+            tp_name = ([16:5-7], "Td"); tp_tparams = [];
+            tp_constraints =
+            [(Constraint_as,
+              (Rhint (root|constraints_with_fully_qualified_name_in_namespace.php line 16, characters 11-29),
+               (Tapply (([16:11-14], "\\HH\\Map"),
+                  [(Rhint (root|constraints_with_fully_qualified_name_in_namespace.php line 16, characters 15-20),
+                    (Tapply (([16:15-21], "\\NS\\Ta"), [])));
+                    (Rhint (root|constraints_with_fully_qualified_name_in_namespace.php line 16, characters 23-28),
+                     (Tapply (([16:23-29], "\\NS\\Te"), [])))
+                    ]
+                  ))))
+              ];
+            tp_reified = Erased; tp_user_attributes = [] };
+          { Typing_defs_core.tp_variance = Invariant;
+            tp_name = ([17:5-7], "Te"); tp_tparams = []; tp_constraints = [];
+            tp_reified = Erased; tp_user_attributes = [] }
+          ];
+        sc_where_constraints = []; sc_extends = []; sc_uses = [];
+        sc_xhp_attr_uses = []; sc_req_extends = []; sc_req_implements = [];
+        sc_implements = []; sc_consts = []; sc_typeconsts = [];
+        sc_pu_enums = []; sc_props = []; sc_sprops = [];
+        sc_constructor = None; sc_static_methods = []; sc_methods = [];
+        sc_user_attributes = []; sc_enum_type = None }))
+  ]
 
 They matched!

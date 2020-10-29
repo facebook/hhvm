@@ -15,7 +15,7 @@
 */
 #include <limits>
 
-#include "hphp/runtime/base/types.h"
+#include "hphp/runtime/vm/func-id.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

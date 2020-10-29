@@ -19,13 +19,13 @@
 #include <cstdint>
 #include <folly/Format.h>
 
-#include "hphp/util/hash.h"
 #include "hphp/util/low-ptr.h"
+
+#include "hphp/runtime/vm/func-id.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-struct Func;
 struct String;
 struct StaticString;
 struct Array;
@@ -119,80 +119,5 @@ constexpr Offset kInvalidOffset = std::numeric_limits<Offset>::max();
 using Slot = uint32_t;
 constexpr Slot kInvalidSlot = -1;
 
-/*
- * Unique identifier for a Func*.
- */
-struct FuncId {
-  static FuncId Invalid;
-  static FuncId Dummy;
-  using Int = uint32_t;
-
-#ifdef USE_LOWPTR
-  using Id = LowPtr<const Func>;
-  Int toInt() const {
-    return static_cast<uint32_t>(
-      reinterpret_cast<uintptr_t>(
-        m_id.get()));
-  }
-  LowPtr<const Func> getFunc() const {
-    assertx(!isInvalid() && !isDummy());
-    return m_id;
-  }
-  static FuncId fromInt(Int num) {
-    return FuncId{Id(reinterpret_cast<const Func*>(num))};
-  }
-#else
-  using Id = uint32_t;
-  Int toInt() const { return m_id; }
-  static FuncId fromInt(Int num) {
-    return FuncId{num};
-  }
-#endif
-
-  bool isInvalid() const { return m_id == Invalid.m_id; }
-  bool isDummy()   const { return m_id == Dummy.m_id; }
-
-  size_t hash()    const { return hash_int64(toInt()); }
-
-  bool operator==(const FuncId& id) const {
-    return m_id == id.m_id;
-  }
-  bool operator<(const FuncId& id) const {
-    return toInt() < id.toInt();
-  }
-
-  Id m_id;
-};
-
-static_assert(sizeof(FuncId) == sizeof(uint32_t), "");
-
-struct FuncIdHashCompare {
-  static size_t hash(const FuncId& id) { return id.hash(); }
-  static bool equal(const FuncId& a, const FuncId& b) { return a == b; }
-};
-
 ///////////////////////////////////////////////////////////////////////////////
 }
-
-namespace std {
-  template<> struct hash<HPHP::FuncId> {
-    size_t operator()(HPHP::FuncId id) const { return id.hash(); }
-  };
-}
-
-namespace folly {
-template<> class FormatValue<HPHP::FuncId> {
-  public:
-    explicit FormatValue(HPHP::FuncId id) noexcept : m_id(id) {}
-
-    template<typename C>
-    void format(FormatArg& arg, C& cb) const {
-      format_value::formatString(folly::to<std::string>(m_id.toInt()), arg, cb);
-    }
-
-  private:
-    HPHP::FuncId m_id;
-};
-};
-
-

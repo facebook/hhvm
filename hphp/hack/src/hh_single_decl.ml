@@ -81,10 +81,11 @@ let rec shallow_declare_ast ctx decls prog =
         let decl = Typing_defs.{ cd_pos = fst cst.cst_name; cd_type = ty } in
         (name, Shallow_decl_defs.Const decl) :: decls)
 
-let compare_decls ctx fn =
-  let fn = Path.to_string fn in
-  let text = RealDisk.cat fn in
-  let fn = Relative_path.(create Root fn) in
+let compare_decls ctx fn text =
+  let (ctx, _entry) =
+    Provider_context.(
+      add_or_overwrite_entry_contents ~ctx ~path:fn ~contents:text)
+  in
   let ast = Ast_provider.get_ast ctx fn in
   let legacy_decls = shallow_declare_ast ctx [] ast in
   let legacy_decls_str = show_decls (List.rev legacy_decls) ^ "\n" in
@@ -92,7 +93,7 @@ let compare_decls ctx fn =
   let decls_str = show_decls (List.rev decls) ^ "\n" in
   let matched = String.equal decls_str legacy_decls_str in
   if matched then
-    Printf.printf "%s\nThey matched!\n" decls_str
+    Printf.eprintf "%s%!" decls_str
   else
     Tempfile.with_real_tempdir (fun dir ->
         let temp_dir = Path.to_string dir in
@@ -171,6 +172,36 @@ let () =
         in
         let file = Path.make file in
         let ctx = init (Path.dirname file) in
-        Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
-            if not @@ compare_decls ctx file then exit 1)
+        let file = Relative_path.(create Root (Path.to_string file)) in
+        let files = Multifile.file_to_file_list file in
+        let num_files = List.length files in
+        let (all_matched, _) =
+          List.fold
+            files
+            ~init:(true, true)
+            ~f:(fun (matched, is_first) (filename, contents) ->
+              (* All output is printed to stderr because that's the output
+                 channel Ppxlib_print_diff prints to. *)
+              if not is_first then Printf.eprintf "\n%!";
+              (* Multifile turns the path into an absolute path instead of a
+                 relative one. Turn it back into a relative path. *)
+              let filename =
+                Relative_path.(create Root (Relative_path.to_absolute filename))
+              in
+              if num_files > 1 then
+                Printf.eprintf
+                  "File %s\n%!"
+                  (Relative_path.storage_to_string filename);
+              let matched =
+                Provider_utils.respect_but_quarantine_unsaved_changes
+                  ~ctx
+                  ~f:(fun () -> compare_decls ctx filename contents)
+                && matched
+              in
+              (matched, false))
+        in
+        if all_matched then
+          Printf.eprintf "\nThey matched!\n%!"
+        else
+          exit 1
     end

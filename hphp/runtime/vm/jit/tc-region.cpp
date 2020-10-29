@@ -254,10 +254,8 @@ void publishTranslationMeta(TransMetaInfo& info) {
     }
   }
 
-  recordGdbTranslation(sk, view.main(), loc.mainStart(),
-                       loc.mainEnd(), false, false);
-  recordGdbTranslation(sk, view.cold(), loc.coldCodeStart(),
-                       loc.coldEnd(), false, false);
+  recordGdbTranslation(sk, view.main(), loc.mainStart(), loc.mainEnd());
+  recordGdbTranslation(sk, view.cold(), loc.coldCodeStart(), loc.coldEnd());
 
   transdb::addTranslation(tr);
   FuncOrder::recordTranslation(tr);

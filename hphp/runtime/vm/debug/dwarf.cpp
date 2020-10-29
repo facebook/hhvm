@@ -96,21 +96,10 @@ const char *DwarfInfo::lookupFile(const Unit *unit) {
   return file;
 }
 
-void DwarfInfo::addLineEntries(TCRange range,
-                               const Func* func,
-                               PC instr,
-                               FunctionInfo* f) {
-  if (func == nullptr || instr == nullptr) {
-    // For stubs, just add line 0
-    f->m_lineTable.push_back(LineEntry(range, 0));
-    return;
-  }
-  Offset offset = func->offsetOf(instr);
-
-  int lineNum = func->unit()->getLineNumber(offset);
-  if (lineNum >= 0) {
-    f->m_lineTable.push_back(LineEntry(range, lineNum));
-  }
+void DwarfInfo::addLineEntries(TCRange range, int lineNumber, FunctionInfo* f) {
+  // For stubs and missing line numbers, just add line 0
+  lineNumber = std::max(0, lineNumber);
+  f->m_lineTable.push_back(LineEntry(range, lineNumber));
 }
 
 void DwarfInfo::transferFuncs(DwarfChunk* from, DwarfChunk* to) {
@@ -152,17 +141,16 @@ static Mutex s_lock(RankLeaf);
 DwarfChunk* DwarfInfo::addTracelet(TCRange range,
                                    folly::Optional<std::string> name,
                                    const Func *func,
-                                   PC instr,
-                                   bool exit,
+                                   int lineNumber,
                                    bool inPrologue) {
   DwarfChunk* chunk = nullptr;
-  FunctionInfo* f = new FunctionInfo(range, exit);
+  FunctionInfo* f = new FunctionInfo(range, false);
   const Unit* unit = func ? func->unit(): nullptr;
   if (name) {
     f->name = *name;
   } else {
     assertx(func != nullptr);
-    f->name = lookupFunction(func, exit, inPrologue, true);
+    f->name = lookupFunction(func, inPrologue, true);
     auto names = func->localNames();
     for (int i = 0; i < func->numNamedLocals(); i++) {
       if (!names[i]) continue;
@@ -195,7 +183,7 @@ DwarfChunk* DwarfInfo::addTracelet(TCRange range,
     m_functions[end] = f;
   }
 
-  addLineEntries(TCRange(start, end, range.isAcold()), func, instr, f);
+  addLineEntries(TCRange(start, end, range.isAcold()), lineNumber, f);
 
   if (f->m_chunk == nullptr) {
     if (m_dwarfChunks.size() == 0 || m_dwarfChunks[0] == nullptr) {

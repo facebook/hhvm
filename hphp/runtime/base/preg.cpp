@@ -880,7 +880,7 @@ pcre_get_compiled_regex_cache(PCRECache::Accessor& accessor,
                                     folly::json::serialization_opts());
           Debug::DebugInfo::Get()->recordPerfMap(
             Debug::TCRange(start, end, false),
-            SrcKey{}, nullptr, false, false, escaped_name
+            SrcKey{}, escaped_name
           );
         }
       }

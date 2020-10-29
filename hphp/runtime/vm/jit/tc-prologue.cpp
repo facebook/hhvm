@@ -187,9 +187,9 @@ bool publishFuncPrologueMeta(Func* func, int nArgs, TransKind kind,
   }
 
   recordGdbTranslation(funcBody, codeView.main(), loc.mainStart(),
-                       loc.mainEnd(), false, true);
+                       loc.mainEnd());
   recordGdbTranslation(funcBody, codeView.cold(), loc.coldStart(),
-                       loc.coldEnd(), false, true);
+                       loc.coldEnd());
   recordBCInstr(OpFuncPrologue, loc.mainStart(), loc.mainEnd(), false);
   return true;
 }

@@ -41,8 +41,7 @@ namespace tc {
  * Record translation for gdb debugging of the tc.
  */
 void recordGdbTranslation(SrcKey sk, const CodeBlock& cb,
-                          const TCA start, const TCA end, bool exit,
-                          bool inPrologue);
+                          const TCA start, const TCA end);
 
 /*
  * Record BC instruction ranges in the tc for the perf map.

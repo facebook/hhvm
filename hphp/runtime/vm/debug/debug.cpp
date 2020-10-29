@@ -218,18 +218,17 @@ void DebugInfo::generatePidMapOverlay() {
 
 void DebugInfo::recordStub(TCRange range, const std::string& name) {
   if (range.isAcold()) {
-    m_acoldDwarfInfo.addTracelet(range, name, nullptr, nullptr, false, false);
+    m_acoldDwarfInfo.addTracelet(range, name, nullptr, -1, false);
   } else {
-    m_aDwarfInfo.addTracelet(range, name, nullptr, nullptr, false, false);
+    m_aDwarfInfo.addTracelet(range, name, nullptr, -1, false);
   }
 }
 
-void DebugInfo::recordPerfMap(TCRange range, SrcKey /*sk*/, const Func* func,
-                              bool exit, bool inPrologue, std::string name) {
+void DebugInfo::recordPerfMap(TCRange range, SrcKey sk, std::string name) {
   if (!m_perfMap) return;
   if (RuntimeOption::EvalProfileBC) return;
   if (name.empty()) {
-    name = lookupFunction(func, exit, inPrologue,
+    name = lookupFunction(sk.func(), sk.prologue(),
                           RuntimeOption::EvalPerfPidMapIncludeFilePath);
   }
   fprintf(m_perfMap, "%lx %x %s\n",
@@ -275,14 +274,13 @@ void DebugInfo::recordBCInstr(TCRange range, uint32_t op) {
   }
 }
 
-void DebugInfo::recordTracelet(TCRange range, const Func* func,
-    PC instr, bool exit, bool inPrologue) {
+void DebugInfo::recordTracelet(TCRange range, SrcKey sk) {
   if (range.isAcold()) {
-    m_acoldDwarfInfo.addTracelet(range, folly::none, func,
-                                 instr, exit, inPrologue);
+    m_acoldDwarfInfo.addTracelet(range, folly::none, sk.func(), sk.lineNumber(),
+                                 sk.prologue());
   } else {
-    m_aDwarfInfo.addTracelet(range, folly::none, func, instr, exit,
-                             inPrologue);
+    m_aDwarfInfo.addTracelet(range, folly::none, sk.func(), sk.lineNumber(),
+                             sk.prologue());
   }
 }
 
@@ -304,7 +302,6 @@ void DebugInfo::debugSync() {
 }
 
 std::string lookupFunction(const Func* f,
-                           bool exit,
                            bool inPrologue,
                            bool pseudoWithFileName) {
   // TODO: mangle the namespace and name?
@@ -314,11 +311,8 @@ std::string lookupFunction(const Func* f,
     fname += "::";
   }
   if (!strcmp(f->name()->data(), "")) {
-    if (!exit) {
-      fname += "__pseudoMain";
-    } else {
-      fname += "__exit";
-    }
+    // TODO: should no longer happen
+    fname += "__pseudoMain";
     return fname;
   }
   if (f->isClosureBody()) {

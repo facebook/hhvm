@@ -1326,9 +1326,6 @@ void UniqueStubs::add(const char* name,
     if (RuntimeOption::EvalPerfPidMap) {
       dbg.recordPerfMap(Debug::TCRange(start, end, &cb == &code.cold()),
                         SrcKey{},
-                        nullptr,
-                        false,
-                        false,
                         folly::sformat("HHVM::{}", name));
     }
 

@@ -30,13 +30,9 @@ struct DebugInfo {
   DebugInfo();
   ~DebugInfo();
 
-  void recordTracelet(TCRange range,
-                      const Func* func,
-                      PC instr, bool exit,
-                      bool inPrologue);
+  void recordTracelet(TCRange range, SrcKey sk);
   void recordStub(TCRange range, const std::string&);
-  void recordPerfMap(TCRange range, SrcKey sk, const Func* func, bool exit,
-                     bool inPrologue, std::string stub = "");
+  void recordPerfMap(TCRange range, SrcKey sk, std::string stub = "");
   void recordBCInstr(TCRange range, uint32_t op);
 
   static void recordDataMap(const void* from, const void* to,
@@ -110,7 +106,6 @@ void destroyDebugInfo();
  * Gets the fake symbol name we want to use for a php function.
  */
 std::string lookupFunction(const Func* func,
-                           bool exit,
                            bool inPrologue,
                            bool pseudoWithFileName);
 

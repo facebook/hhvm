@@ -520,7 +520,7 @@ ArrayData* MonotypeDict<Key>::removeImpl(Key key) {
 
   auto const mad = cowCheck() ? copy() : this;
   auto& index = mad->indices()[hash_pos];
-  auto const elm = mad->elmAtIndex(mad->indices()[hash_pos]);
+  auto const elm = mad->elmAtIndex(index);
   assertx(keysEqual(elm->key, key));
 
   decRefKey(elm->key);
@@ -685,7 +685,7 @@ void MonotypeDict<Key>::copyHash(const Self* other) {
 
 template <typename Key>
 void MonotypeDict<Key>::initHash() {
-  static_assert(kEmptyIndex == -1);
+  static_assert(kEmptyIndex == Index(-1));
   static_assert(kMinNumIndices * sizeof(Index) % 16 == 0);
   assertx(uintptr_t(indices()) % 16 == 0);
 
@@ -880,8 +880,9 @@ void MonotypeDict<Key>::ConvertToUncounted(
   mad->forEachElm([&](auto i, auto elm) {
     auto const elm_mut = const_cast<Elm*>(elm);
     if constexpr (std::is_same<Key, StringData*>::value) {
-      auto dt_mut = KindOfString;
-      ConvertTvToUncounted(tv_lval(&dt_mut, &elm_mut->val), seen);
+      auto tv = make_tv<KindOfString>(elm_mut->key);
+      ConvertTvToUncounted(&tv, seen);
+      elm_mut->key = val(tv).pstr;
     }
     auto dt_mut = dt;
     ConvertTvToUncounted(tv_lval(&dt_mut, &elm_mut->val), seen);
@@ -1120,9 +1121,9 @@ ArrayData* MonotypeDictPostSort(MixedArray* mad, DataType dt) {
   auto const keys = mad->keyTypes();
   auto const result = [&]() -> ArrayData* {
     if (keys.mustBeStaticStrs()) {
-      return MonotypeDict<StringData*>::MakeFromVanilla(mad, dt);
-    } else if (keys.mustBeStrs()) {
       return MonotypeDict<LowStringPtr>::MakeFromVanilla(mad, dt);
+    } else if (keys.mustBeStrs()) {
+      return MonotypeDict<StringData*>::MakeFromVanilla(mad, dt);
     } else if (keys.mustBeInts()) {
       return MonotypeDict<int64_t>::MakeFromVanilla(mad, dt);
     }

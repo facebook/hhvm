@@ -1,0 +1,167 @@
+[("\\Cov",
+  (Shallow_decl_defs.Class
+     { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
+       sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
+       sc_name = ([3:7-10], "\\Cov");
+       sc_tparams =
+       [{ Typing_defs_core.tp_variance = Covariant;
+          tp_name = ([3:12-14], "Tc"); tp_tparams = []; tp_constraints = [];
+          tp_reified = Erased; tp_user_attributes = [] }
+         ];
+       sc_where_constraints = []; sc_extends = []; sc_uses = [];
+       sc_xhp_attr_uses = []; sc_req_extends = []; sc_req_implements = [];
+       sc_implements = []; sc_consts = []; sc_typeconsts = [];
+       sc_pu_enums = []; sc_props = []; sc_sprops = [];
+       sc_constructor = None; sc_static_methods = []; sc_methods = [];
+       sc_user_attributes = []; sc_enum_type = None }));
+  ("\\A",
+   (Shallow_decl_defs.Class
+      { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
+        sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
+        sc_name = ([4:7-8], "\\A"); sc_tparams = [];
+        sc_where_constraints = []; sc_extends = []; sc_uses = [];
+        sc_xhp_attr_uses = []; sc_req_extends = []; sc_req_implements = [];
+        sc_implements = []; sc_consts = []; sc_typeconsts = [];
+        sc_pu_enums = []; sc_props = []; sc_sprops = [];
+        sc_constructor = None; sc_static_methods = []; sc_methods = [];
+        sc_user_attributes = []; sc_enum_type = None }));
+  ("\\Base",
+   (Shallow_decl_defs.Class
+      { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
+        sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
+        sc_name = ([6:7-11], "\\Base");
+        sc_tparams =
+        [{ Typing_defs_core.tp_variance = Invariant;
+           tp_name = ([6:12-14], "Tb"); tp_tparams = []; tp_constraints = [];
+           tp_reified = Erased; tp_user_attributes = [] }
+          ];
+        sc_where_constraints = []; sc_extends = []; sc_uses = [];
+        sc_xhp_attr_uses = []; sc_req_extends = []; sc_req_implements = [];
+        sc_implements = []; sc_consts = []; sc_typeconsts = [];
+        sc_pu_enums = []; sc_props = []; sc_sprops = [];
+        sc_constructor = None; sc_static_methods = [];
+        sc_methods =
+        [{ Shallow_decl_defs.sm_abstract = false; sm_final = false;
+           sm_memoizelsb = false; sm_name = ([7:19-22], "foo");
+           sm_override = false; sm_dynamicallycallable = false;
+           sm_reactivity = None;
+           sm_type =
+           (Rwitness (root|function_where_constraints.php line 7, characters 19-21),
+            (Tfun
+               { ft_arity = (Fstandard ());
+                 ft_tparams =
+                 [{ Typing_defs_core.tp_variance = Invariant;
+                    tp_name = ([7:23-25], "Tf"); tp_tparams = [];
+                    tp_constraints =
+                    [(Constraint_as,
+                      (Rhint (root|function_where_constraints.php line 7, characters 29-29),
+                       (Tapply (([7:29-30], "\\A"), []))))
+                      ];
+                    tp_reified = Erased; tp_user_attributes = [] }
+                   ];
+                 ft_where_constraints =
+                 [((Rhint (root|function_where_constraints.php line 7, characters 46-47),
+                    (Tgeneric ("Tb", []))),
+                   Constraint_as,
+                   (Rhint (root|function_where_constraints.php line 7, characters 52-58),
+                    (Tapply (([7:52-55], "\\Cov"),
+                       [(Rhint (root|function_where_constraints.php line 7, characters 56-57),
+                         (Tgeneric ("Tf", [])))]
+                       ))))
+                   ];
+                 ft_params = [];
+                 ft_implicit_params =
+                 { capability =
+                   (Rhint (root|function_where_constraints.php line 7, characters 19-21),
+                    (Tunion []))
+                   };
+                 ft_ret =
+                 { et_enforced = false;
+                   et_type =
+                   (Rhint (root|function_where_constraints.php line 7, characters 35-38),
+                    (Tprim Tvoid))
+                   };
+                 ft_flags =
+                 (make_ft_flags FSync None ~return_disposable:false
+                   ~returns_mutable:false ~returns_void_to_rx:false);
+                 ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC}
+                 }));
+           sm_visibility = Public; sm_deprecated = None }
+          ];
+        sc_user_attributes = []; sc_enum_type = None }));
+  ("\\Derived",
+   (Shallow_decl_defs.Class
+      { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
+        sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
+        sc_name = ([10:7-14], "\\Derived");
+        sc_tparams =
+        [{ Typing_defs_core.tp_variance = Invariant;
+           tp_name = ([10:15-17], "Td"); tp_tparams = [];
+           tp_constraints = []; tp_reified = Erased; tp_user_attributes = []
+           }
+          ];
+        sc_where_constraints = [];
+        sc_extends =
+        [(Rhint (root|function_where_constraints.php line 10, characters 27-39),
+          (Tapply (([10:27-31], "\\Base"),
+             [(Rhint (root|function_where_constraints.php line 10, characters 32-38),
+               (Tapply (([10:32-35], "\\Cov"),
+                  [(Rhint (root|function_where_constraints.php line 10, characters 36-37),
+                    (Tgeneric ("Td", [])))]
+                  )))
+               ]
+             )))
+          ];
+        sc_uses = []; sc_xhp_attr_uses = []; sc_req_extends = [];
+        sc_req_implements = []; sc_implements = []; sc_consts = [];
+        sc_typeconsts = []; sc_pu_enums = []; sc_props = []; sc_sprops = [];
+        sc_constructor = None; sc_static_methods = [];
+        sc_methods =
+        [{ Shallow_decl_defs.sm_abstract = false; sm_final = false;
+           sm_memoizelsb = false; sm_name = ([11:19-22], "foo");
+           sm_override = false; sm_dynamicallycallable = false;
+           sm_reactivity = None;
+           sm_type =
+           (Rwitness (root|function_where_constraints.php line 11, characters 19-21),
+            (Tfun
+               { ft_arity = (Fstandard ());
+                 ft_tparams =
+                 [{ Typing_defs_core.tp_variance = Invariant;
+                    tp_name = ([11:23-25], "Tf"); tp_tparams = [];
+                    tp_constraints =
+                    [(Constraint_as,
+                      (Rhint (root|function_where_constraints.php line 11, characters 29-29),
+                       (Tapply (([11:29-30], "\\A"), []))))
+                      ];
+                    tp_reified = Erased; tp_user_attributes = [] }
+                   ];
+                 ft_where_constraints =
+                 [((Rhint (root|function_where_constraints.php line 11, characters 46-47),
+                    (Tgeneric ("Td", []))),
+                   Constraint_as,
+                   (Rhint (root|function_where_constraints.php line 11, characters 52-52),
+                    (Tapply (([11:52-53], "\\A"), []))))
+                   ];
+                 ft_params = [];
+                 ft_implicit_params =
+                 { capability =
+                   (Rhint (root|function_where_constraints.php line 11, characters 19-21),
+                    (Tunion []))
+                   };
+                 ft_ret =
+                 { et_enforced = false;
+                   et_type =
+                   (Rhint (root|function_where_constraints.php line 11, characters 35-38),
+                    (Tprim Tvoid))
+                   };
+                 ft_flags =
+                 (make_ft_flags FSync None ~return_disposable:false
+                   ~returns_mutable:false ~returns_void_to_rx:false);
+                 ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC}
+                 }));
+           sm_visibility = Public; sm_deprecated = None }
+          ];
+        sc_user_attributes = []; sc_enum_type = None }))
+  ]
+
+They matched!

@@ -502,6 +502,7 @@ pub struct FunctionHeader<'a> {
     param_list: Node<'a>,
     capability: Node<'a>,
     ret_hint: Node<'a>,
+    where_constraints: Node<'a>,
 }
 
 #[derive(Debug)]
@@ -1408,10 +1409,17 @@ impl<'a> DirectDeclSmartConstructors<'a> {
         flags |= Self::param_mutability_to_fun_type_flags(attributes.param_mutability);
         // Pop the type params stack only after creating all inner types.
         let tparams = self.pop_type_params(header.type_params);
+
+        let where_constraints =
+            self.slice(header.where_constraints.iter().filter_map(|&x| match x {
+                Node::WhereConstraint(x) => Some(x),
+                _ => None,
+            }));
+
         let ft = self.alloc(FunType {
             arity,
             tparams,
-            where_constraints: &[],
+            where_constraints,
             params,
             implicit_params,
             ret: self.alloc(PossiblyEnforcedTy {
@@ -2899,7 +2907,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         capability_provisional: Self::R,
         _colon: Self::R,
         ret_hint: Self::R,
-        _where: Self::R,
+        where_constraints: Self::R,
     ) -> Self::R {
         // Use the position of the left paren if the name is missing.
         let name = if name.is_ignored() { left_paren } else { name };
@@ -2915,6 +2923,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             param_list,
             capability,
             ret_hint,
+            where_constraints,
         }))
     }
 
@@ -3141,9 +3150,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         }
 
         let where_constraints = self.slice(where_clause.iter().filter_map(|&x| match x {
-            Node::WhereConstraint(x) => {
-                Some(self.alloc(shallow_decl_defs::WhereConstraint(x.0, x.1, x.2)))
-            }
+            Node::WhereConstraint(x) => Some(x),
             _ => None,
         }));
 

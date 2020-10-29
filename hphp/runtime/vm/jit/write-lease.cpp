@@ -189,7 +189,7 @@ bool couldAcquireOptimizeLease(const Func* func) {
     case LockLevel::None:
       break;
     case LockLevel::Func: {
-      return !func->profilingState().check(Func::ProfilingState::Locked) ||
+      return !func->atomicFlags().check(Func::Flags::Locked) ||
              tl_ownedFunc.count(func->getFuncId()) != 0;
     }
     case LockLevel::Kind:
@@ -219,7 +219,7 @@ LeaseHolder::LeaseHolder(const Func* func, TransKind kind, bool isWorker)
 
   if (m_func) {
     auto const fid = func->getFuncId();
-    if (!func->profilingState().set(Func::ProfilingState::Locked)) {
+    if (!func->atomicFlags().set(Func::Flags::Locked)) {
       // Unowned. Try to grab it. Only non-worker threads with LockLevel::Func
       // count towards the Eval.JitThreads limit.
       tl_ownedFunc.insert(fid);
@@ -267,7 +267,7 @@ void LeaseHolder::dropLocks() {
   if (m_acquiredFunc) {
     tl_ownedFunc.erase(m_func->getFuncId());
     DEBUG_ONLY auto const prev =
-      m_func->profilingState().unset(Func::ProfilingState::Locked);
+      m_func->atomicFlags().unset(Func::Flags::Locked);
     assertx(prev);
     m_acquiredFunc = false;
   }

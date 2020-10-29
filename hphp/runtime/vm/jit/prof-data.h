@@ -412,7 +412,7 @@ struct ProfData {
    */
   bool optimized(FuncId funcId) const {
     auto const func = Func::fromFuncId(funcId);
-    return func->profilingState().check(Func::ProfilingState::Optimized);
+    return func->atomicFlags().check(Func::Flags::Optimized);
   }
   bool optimized(SrcKey sk) const {
     auto const it = m_optimizedSKs.find(sk.toAtomicInt());
@@ -425,7 +425,7 @@ struct ProfData {
   void setOptimized(FuncId funcId) {
     auto func = Func::fromFuncId(funcId);
     DEBUG_ONLY auto const changed =
-      func->profilingState().set(Func::ProfilingState::Optimized);
+      func->atomicFlags().set(Func::Flags::Optimized);
     assertx(!changed);
     m_optimizedFuncCount.fetch_add(1, std::memory_order_relaxed);
   }
@@ -448,7 +448,7 @@ struct ProfData {
    */
   bool profiling(const Func* func) const {
     assertx(func);
-    return func->profilingState().check(Func::ProfilingState::Profiling);
+    return func->atomicFlags().check(Func::Flags::Profiling);
   }
   bool profiling(FuncId funcId) const {
     auto const func = Func::fromFuncId(funcId);
@@ -460,7 +460,7 @@ struct ProfData {
    */
   void setProfiling(const Func* func) {
     assertx(func);
-    if (func->profilingState().set(Func::ProfilingState::Profiling)) {
+    if (func->atomicFlags().set(Func::Flags::Profiling)) {
       // If previously set due to a race condition between two threads,
       // lets stop here
       return;

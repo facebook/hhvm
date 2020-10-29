@@ -1467,7 +1467,7 @@ private:
   // Profiling State.
 
 public:
-  enum ProfilingState : uint8_t {
+  enum Flags : uint8_t {
     None      = 0,
     Profiling = 1 << 0,
     Optimized = 1 << 1,
@@ -1478,36 +1478,36 @@ public:
   * Wrapper around std::atomic<uint8_t> that enables it to be
   * copy constructable,
   */
-  struct AtomicProfilingState {
-    AtomicProfilingState() {}
+  struct AtomicFlags {
+    AtomicFlags() {}
 
-    AtomicProfilingState(const AtomicProfilingState&) {}
-    AtomicProfilingState& operator=(const AtomicProfilingState&) = delete;
+    AtomicFlags(const AtomicFlags&) {}
+    AtomicFlags& operator=(const AtomicFlags&) = delete;
 
-    bool set(ProfilingState state) {
-      auto const prev = m_state.fetch_or(state, std::memory_order_release);
-      return prev & state;
+    bool set(Flags flags) {
+      auto const prev = m_flags.fetch_or(flags, std::memory_order_release);
+      return prev & flags;
     }
 
-    bool unset(ProfilingState state) {
+    bool unset(Flags flags) {
       auto const prev =
-        m_state.fetch_and(~uint8_t(state), std::memory_order_release);
-      return prev & state;
+        m_flags.fetch_and(~uint8_t(flags), std::memory_order_release);
+      return prev & flags;
     }
 
-    bool check(ProfilingState state) const {
-      return m_state.load(std::memory_order_acquire) & state;
+    bool check(Flags flags) const {
+      return m_flags.load(std::memory_order_acquire) & flags;
     }
 
-    std::atomic<uint8_t> m_state{ProfilingState::None};
+    std::atomic<uint8_t> m_flags{Flags::None};
   };
 
-  inline AtomicProfilingState& profilingState() const {
-    return m_profilingState;
+  inline AtomicFlags& atomicFlags() const {
+    return m_atomicFlags;
   }
 
-  inline AtomicProfilingState& profilingState() {
-    return m_profilingState;
+  inline AtomicFlags& atomicFlags() {
+    return m_atomicFlags;
   }
 
   /////////////////////////////////////////////////////////////////////////////
@@ -1565,7 +1565,7 @@ private:
   // TODO(#1114385) intercept should work via invalidation.
   mutable int8_t m_maybeIntercepted;
   mutable ClonedFlag m_cloned;
-  mutable AtomicProfilingState m_profilingState;
+  mutable AtomicFlags m_atomicFlags;
   bool m_isPreFunc : 1;
   bool m_hasPrivateAncestor : 1;
   bool m_shouldSampleJit : 1;

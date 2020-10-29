@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<1ef6697eb20ebf991abfe9978b74ec3b>>
+// @generated SignedSource<<e8146270f109775f65bf6803669b0459>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -79,6 +79,7 @@ pub struct ClassElt<'a> {
     /// identifies the class from which this elt originates
     pub origin: &'a str,
     pub deprecated: Option<&'a str>,
+    /// pos of the type of the elt
     pub pos: &'a lazy::Lazy<&'a pos::Pos<'a>>,
     pub flags: isize,
 }

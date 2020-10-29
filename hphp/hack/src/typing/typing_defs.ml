@@ -29,7 +29,7 @@ type class_elt = {
   ce_type: decl_ty Lazy.t;
   ce_origin: string;  (** identifies the class from which this elt originates *)
   ce_deprecated: string option;
-  ce_pos: Pos.t Lazy.t;
+  ce_pos: Pos.t Lazy.t;  (** pos of the type of the elt *)
   ce_flags: int;
 }
 [@@deriving show]

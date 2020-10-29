@@ -234,19 +234,29 @@ let class_prop_pos class_name prop_name ctx : Pos.t =
     | None -> Pos.none
     | Some elt ->
       let member_origin = elt.Typing_defs.ce_origin in
-      let get_class_by_name ctx x =
-        let open Option.Monad_infix in
-        Naming_provider.get_type_path ctx x >>= fun fn ->
-        Ast_provider.find_class_in_file ctx fn x
-      in
-      (match get_class_by_name ctx member_origin with
-      | None -> Pos.none
-      | Some cls ->
-        let cv =
-          List.find_exn cls.c_vars ~f:(fun cv ->
-              String.equal (snd cv.cv_id) prop_name)
+      if shallow_decl_enabled ctx then
+        match Shallow_classes_provider.get ctx member_origin with
+        | None -> Pos.none
+        | Some sc ->
+          let prop =
+            List.find_exn sc.Shallow_decl_defs.sc_props ~f:(fun prop ->
+                String.equal (snd prop.Shallow_decl_defs.sp_name) prop_name)
+          in
+          fst prop.Shallow_decl_defs.sp_name
+      else
+        let get_class_by_name ctx x =
+          let open Option.Monad_infix in
+          Naming_provider.get_type_path ctx x >>= fun fn ->
+          Ast_provider.find_class_in_file ctx fn x
         in
-        fst cv.cv_id))
+        (match get_class_by_name ctx member_origin with
+        | None -> Pos.none
+        | Some cls ->
+          let cv =
+            List.find_exn cls.Aast.c_vars ~f:(fun cv ->
+                String.equal (snd cv.Aast.cv_id) prop_name)
+          in
+          fst cv.Aast.cv_id))
 
 let rec class_ tenv c =
   if not FileInfo.(equal_mode c.c_mode Mdecl) then

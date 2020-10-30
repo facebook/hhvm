@@ -73,14 +73,8 @@ void cgBespokeSet(IRLS& env, const IRInstruction* inst) {
 }
 
 void cgBespokeAppend(IRLS& env, const IRInstruction* inst) {
-  auto const target = [&] {
-    auto const layout = inst->extra<BespokeLayoutData>()->layout;
-    if (layout) {
-      return CallSpec::direct(layout->vtable()->fnAppend);
-    } else {
-      return CallSpec::direct(BespokeArray::Append);
-    }
-  }();
+  // TODO(mcolavita): layout-based dispatch when we have move layout methods
+  auto const target = CallSpec::direct(BespokeArray::AppendMove);
   auto const args = argGroup(env, inst).ssa(0).typedValue(1);
   auto& v = vmain(env);
   cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);

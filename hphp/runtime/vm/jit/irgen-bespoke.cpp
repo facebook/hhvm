@@ -436,7 +436,6 @@ void emitBespokeAddNewElemC(IRGS& env) {
   auto const layout = arrType.arrSpec().bespokeLayout();
   auto const newArr = layout->emitAppend(env, arr, value);
   push(env, newArr);
-  decRef(env, value);
 }
 
 void emitBespokeColFromArray(IRGS& env, CollectionType type) {

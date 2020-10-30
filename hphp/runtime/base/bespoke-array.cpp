@@ -247,6 +247,12 @@ ArrayData* BespokeArray::PostSort(ArrayData* ad, ArrayData* vad) {
 ArrayData* BespokeArray::Append(ArrayData* ad, TypedValue v) {
   return asBespoke(ad)->vtable()->fnAppend(ad, v);
 }
+ArrayData* BespokeArray::AppendMove(ArrayData* ad, TypedValue v) {
+  auto const result = Append(ad, v);
+  if (result != ad) decRefArr(ad);
+  tvDecRefGen(v);
+  return result;
+}
 ArrayData* BespokeArray::Pop(ArrayData* ad, Variant& out) {
   return asBespoke(ad)->vtable()->fnPop(ad, out);
 }

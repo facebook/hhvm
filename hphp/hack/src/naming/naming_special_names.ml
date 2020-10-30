@@ -332,6 +332,8 @@ module UserAttributes = struct
 
   let uaCanCall = "__CanCall"
 
+  let uaAtom = "__Atom"
+
   let as_map =
     AttributeKinds.(
       SMap.of_list
@@ -386,6 +388,7 @@ module UserAttributes = struct
           (uaInferFlows, [fn; mthd]);
           (uaExternal, [parameter]);
           (uaCanCall, [parameter]);
+          (uaAtom, [parameter]);
         ])
 
   (* These are names which are allowed in the systemlib but not in normal programs *)

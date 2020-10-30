@@ -824,6 +824,7 @@ struct Attributes<'a> {
     ifc_attribute: IfcFunDecl<'a>,
     external: bool,
     can_call: bool,
+    atom: bool,
 }
 
 impl<'a> DirectDeclSmartConstructors<'a> {
@@ -1090,6 +1091,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
             ifc_attribute: default_ifc_fun_decl(),
             external: false,
             can_call: false,
+            atom: false,
         };
 
         // If we see the attribute `__OnlyRxIfImpl(Foo::class)`, set
@@ -1226,6 +1228,9 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                     }
                     "__CanCall" => {
                         attributes.can_call = true;
+                    }
+                    "__Atom" => {
+                        attributes.atom = true;
                     }
                     _ => {}
                 }
@@ -1540,6 +1545,9 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                             }
                             if attributes.can_call {
                                 flags |= FunParamFlags::IFC_CAN_CALL
+                            }
+                            if attributes.atom {
+                                flags |= FunParamFlags::ATOM
                             }
                             match kind {
                                 ParamMode::FPinout => {

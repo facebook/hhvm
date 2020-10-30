@@ -73,6 +73,8 @@ val get_enum : env -> class_key -> class_decl option
 
 val is_enum : env -> class_key -> bool
 
+val is_enum_class : env -> class_key -> bool
+
 val get_enum_constraint : env -> class_key -> decl_ty option
 
 (** Add a dependency on specified class of the declaration being checked in the dependency graph. *)

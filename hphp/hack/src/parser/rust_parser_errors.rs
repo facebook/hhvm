@@ -83,6 +83,7 @@ enum UnstableFeatures {
     CoeffectsProvisional,
     EnumSupertyping,
     EnumClass,
+    EnumAtom,
 }
 
 use BinopAllowsAwaitInPositions::*;
@@ -5588,7 +5589,15 @@ where
             EnumClassDeclaration(_) | EnumClassEnumerator(_) => {
                 self.check_can_use_feature(node, &UnstableFeatures::EnumClass)
             }
-
+            OldAttributeSpecification(x) => {
+                let attributes_string = self.text(&x.attributes);
+                let has_atom = attributes_string
+                    .split(',')
+                    .any(|attr| attr.trim() == sn::user_attributes::ATOM);
+                if has_atom {
+                    self.check_can_use_feature(node, &UnstableFeatures::EnumAtom)
+                }
+            }
             _ => {}
         }
 

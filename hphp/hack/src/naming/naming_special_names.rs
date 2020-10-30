@@ -295,6 +295,8 @@ pub mod user_attributes {
 
     pub const ENUM_CLASS: &str = "__EnumClass";
 
+    pub const ATOM: &str = "__Atom";
+
     lazy_static! {
         static ref AS_SET: HashSet<&'static str> = vec![
             OVERRIDE,
@@ -341,6 +343,7 @@ pub mod user_attributes {
             NEVER_INLINE,
             ENABLE_UNSTABLE_FEATURES,
             ENUM_CLASS,
+            ATOM,
         ]
         .into_iter()
         .collect();

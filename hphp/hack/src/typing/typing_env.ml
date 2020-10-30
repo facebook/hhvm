@@ -697,6 +697,14 @@ let get_enum env x =
 
 let is_enum env x = Option.is_some (get_enum env x)
 
+let is_enum_class env x =
+  match get_enum env x with
+  | Some cls ->
+    (match Cls.enum_type cls with
+    | Some enum_type -> enum_type.te_enum_class
+    | None -> false (* we know this is impossible due to get_enum *))
+  | None -> false
+
 let get_typeconst env class_ mid =
   make_depend_on_class env (Cls.name class_);
   let dep = Dep.Const (Cls.name class_, mid) in

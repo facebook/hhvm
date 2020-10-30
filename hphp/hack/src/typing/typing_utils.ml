@@ -600,7 +600,8 @@ let default_fun_param ?(pos = Pos.none) ty : 'a fun_param =
         ~mutability:None
         ~has_default:false
         ~ifc_external:false
-        ~ifc_can_call:false;
+        ~ifc_can_call:false
+        ~is_atom:false;
     fp_rx_annotation = None;
   }
 
@@ -726,3 +727,20 @@ let class_get_pu_member_type ?from_class env ty enum member name =
   ( env,
     member >>= fun (ety_env, member) ->
     SMap.find_opt name member.tpum_types >>= fun dty -> Some (ety_env, dty) )
+
+let collect_enum_class_upper_bounds env name =
+  let rec collect seen result name =
+    let upper_bounds = Env.get_upper_bounds env name [] in
+    Typing_set.fold
+      (fun lty (seen, result) ->
+        match get_node lty with
+        | Tclass ((_, name), _, _) when Env.is_enum_class env name ->
+          (seen, SSet.add name result)
+        | Tgeneric (name, _) when not (SSet.mem name seen) ->
+          collect (SSet.add name seen) result name
+        | _ -> (seen, result))
+      upper_bounds
+      (seen, result)
+  in
+  let (_, upper_bounds) = collect SSet.empty SSet.empty name in
+  upper_bounds

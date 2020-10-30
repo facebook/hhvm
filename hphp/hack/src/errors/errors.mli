@@ -1460,3 +1460,9 @@ val multiple_inherited_class_member_with_different_case :
   p1:Pos.t ->
   p2:Pos.t ->
   unit
+
+val atom_invalid_parameter : Pos.t -> unit
+
+val atom_invalid_parameter_in_enum_class : Pos.t -> unit
+
+val atom_unknown : Pos.t -> string -> string -> unit

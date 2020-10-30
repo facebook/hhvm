@@ -663,6 +663,8 @@ module Typing = struct
     | AbstractFunctionPointer [@value 4391]
     | UnnecessaryAttribute [@value 4392]
     | InheritedMethodCaseDiffers [@value 4393]
+    | AtomUnknown [@value 4394]
+    | AtomInvalidParameter [@value 4395] (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum

@@ -5655,6 +5655,35 @@ let multiple_inherited_class_member_with_different_case
   in
   add_list (Typing.err_code Typing.InheritedMethodCaseDiffers) errs
 
+let atom_invalid_parameter pos =
+  add_list
+    (Typing.err_code Typing.AtomInvalidParameter)
+    [
+      ( pos,
+        "Attribute "
+        ^ Naming_special_names.UserAttributes.uaAtom
+        ^ " is only allowed on "
+        ^ Naming_special_names.Classes.cElt );
+    ]
+
+let atom_invalid_parameter_in_enum_class pos =
+  add_list
+    (Typing.err_code Typing.AtomInvalidParameter)
+    [
+      ( pos,
+        "When using "
+        ^ Naming_special_names.UserAttributes.uaAtom
+        ^ ", only type parameters bounded by enum classes and "
+        ^ "enum classes are allowed as the first parameters of "
+        ^ Naming_special_names.Classes.cElt );
+    ]
+
+let atom_unknown pos atom_name class_name =
+  let class_name = strip_ns class_name in
+  add_list
+    (Typing.err_code Typing.AtomUnknown)
+    [(pos, "Unknown constant " ^ atom_name ^ " in " ^ class_name)]
+
 (*****************************************************************************)
 (* Printing *)
 (*****************************************************************************)

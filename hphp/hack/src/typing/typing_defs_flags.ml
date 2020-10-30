@@ -100,3 +100,5 @@ let fp_flags_has_default       = 1 lsl 2
 let fp_flags_ifc_external      = 1 lsl 3
 
 let fp_flags_ifc_can_call      = 1 lsl 4
+
+let fp_flags_atom              = 1 lsl 5

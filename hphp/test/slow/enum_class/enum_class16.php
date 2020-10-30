@@ -1,5 +1,5 @@
 <?hh
-<<file: __EnableUnstableFeatures('enum_class')>>
+<<file: __EnableUnstableFeatures('enum_atom', 'enum_class')>>
 
 interface IBox {}
 class Box<T> implements IBox {

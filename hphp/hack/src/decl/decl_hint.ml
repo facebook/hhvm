@@ -105,7 +105,8 @@ and hint_ p env = function
               false
               (* Currently do not support external and cancall on parameters of function parameters *)
             ~ifc_external:false
-            ~ifc_can_call:false;
+            ~ifc_can_call:false
+            ~is_atom:false;
         fp_rx_annotation = None;
       }
     in

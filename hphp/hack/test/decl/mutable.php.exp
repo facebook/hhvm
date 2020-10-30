@@ -1,6 +1,6 @@
 --- legacy
 +++ direct decl
-@@ -1,291 +1,291 @@
+@@ -1,294 +1,294 @@
  [("\\A",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -43,7 +43,8 @@
                                ~mutability:(Some Typing_defs_core.Param_borrowed_mutable)
                                ~accept_disposable:false ~has_default:false
                                ~mode:Typing_defs_core.FPnormal
-                               ~ifc_external:false ~ifc_can_call:false);
+                               ~ifc_external:false ~ifc_can_call:false
+                               ~is_atom:false);
                               }
                             ];
                           ft_implicit_params =
@@ -68,7 +69,7 @@
                   fp_flags =
                   (make_fp_flags ~mutability:None ~accept_disposable:false
                     ~has_default:false ~mode:Typing_defs_core.FPnormal
-                    ~ifc_external:false ~ifc_can_call:false);
+                    ~ifc_external:false ~ifc_can_call:false ~is_atom:false);
                    }
                  ];
                ft_implicit_params =
@@ -118,7 +119,8 @@
                                ~mutability:(Some Typing_defs_core.Param_maybe_mutable)
                                ~accept_disposable:false ~has_default:false
                                ~mode:Typing_defs_core.FPnormal
-                               ~ifc_external:false ~ifc_can_call:false);
+                               ~ifc_external:false ~ifc_can_call:false
+                               ~is_atom:false);
                               }
                             ];
                           ft_implicit_params =
@@ -143,7 +145,7 @@
                   fp_flags =
                   (make_fp_flags ~mutability:None ~accept_disposable:false
                     ~has_default:false ~mode:Typing_defs_core.FPnormal
-                    ~ifc_external:false ~ifc_can_call:false);
+                    ~ifc_external:false ~ifc_can_call:false ~is_atom:false);
                    }
                  ];
                ft_implicit_params =
@@ -193,7 +195,8 @@
                                ~mutability:(Some Typing_defs_core.Param_owned_mutable)
                                ~accept_disposable:false ~has_default:false
                                ~mode:Typing_defs_core.FPnormal
-                               ~ifc_external:false ~ifc_can_call:false);
+                               ~ifc_external:false ~ifc_can_call:false
+                               ~is_atom:false);
                               }
                             ];
                           ft_implicit_params =
@@ -218,7 +221,7 @@
                   fp_flags =
                   (make_fp_flags ~mutability:None ~accept_disposable:false
                     ~has_default:false ~mode:Typing_defs_core.FPnormal
-                    ~ifc_external:false ~ifc_can_call:false);
+                    ~ifc_external:false ~ifc_can_call:false ~is_atom:false);
                    }
                  ];
                ft_implicit_params =
@@ -276,7 +279,7 @@
                   fp_flags =
                   (make_fp_flags ~mutability:None ~accept_disposable:false
                     ~has_default:false ~mode:Typing_defs_core.FPnormal
-                    ~ifc_external:false ~ifc_can_call:false);
+                    ~ifc_external:false ~ifc_can_call:false ~is_atom:false);
                    }
                  ];
                ft_implicit_params =

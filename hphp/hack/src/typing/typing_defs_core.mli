@@ -431,6 +431,8 @@ module Flags : sig
 
   val get_fp_ifc_external : 'a fun_param -> bool
 
+  val get_fp_is_atom : 'a fun_param -> bool
+
   val fun_kind_to_flags : Ast_defs.fun_kind -> Hh_prelude.Int.t
 
   val make_ft_flags :
@@ -450,6 +452,7 @@ module Flags : sig
     has_default:bool ->
     ifc_external:bool ->
     ifc_can_call:bool ->
+    is_atom:bool ->
     Hh_prelude.Int.t
 
   val get_fp_accept_disposable : 'a fun_param -> bool

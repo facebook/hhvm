@@ -1,0 +1,24 @@
+File "atom1.php", line 34, characters 12-27:
+Unknown constant B in EE (Typing[4394])
+File "atom1.php", line 34, characters 24-26:
+Invalid argument (Typing[4110])
+  File "atom1.php", line 25, characters 15-38:
+  Expected `HH\Elt<this::TEnum, Box>`
+  File "atom1.php", line 34, characters 24-26:
+  But got `string`
+File "atom1.php", line 50, characters 3-9:
+Unknown constant C in EE (Typing[4394])
+File "atom1.php", line 50, characters 6-8:
+Invalid argument (Typing[4110])
+  File "atom1.php", line 17, characters 24-38:
+  Expected `HH\Elt<EE, Box>`
+  File "atom1.php", line 50, characters 6-8:
+  But got `string`
+File "atom1.php", line 52, characters 3-15:
+Unknown constant C in EE (Typing[4394])
+File "atom1.php", line 52, characters 12-14:
+Invalid argument (Typing[4110])
+  File "atom1.php", line 25, characters 15-38:
+  Expected `HH\Elt<EE, Box>`
+  File "atom1.php", line 52, characters 12-14:
+  But got `string`

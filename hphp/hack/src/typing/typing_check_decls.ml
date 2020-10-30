@@ -39,6 +39,26 @@ let check_hint_wellkindedness env hint =
   let decl_ty = Decl_hint.hint env.decl_env hint in
   Typing_kinding.Simple.check_well_kinded_type env decl_ty
 
+(* Check if the __Atom attributes is on the parameter. If that's the case,
+ * we check that it is only involving an enum class or a generic
+ *)
+let check_atom_on_param env pos lty =
+  match get_node lty with
+  (* Uncomment the next line to allow normal enums with __Atom *)
+  (* | Tnewtype (enum_name, _, _) when Env.is_enum env enum_name -> () *)
+  | Tclass ((_, name), _, [ty_enum; _ty_interface])
+    when String.equal name SN.Classes.cElt ->
+    (match get_node ty_enum with
+    | Tclass ((_, enum_name), _, _) when Env.is_enum_class env enum_name -> ()
+    | Tgeneric (name, _) ->
+      let upper_bounds =
+        Typing_utils.collect_enum_class_upper_bounds env name
+      in
+      if SSet.cardinal upper_bounds <> 1 then
+        Errors.atom_invalid_parameter_in_enum_class pos
+    | _ -> Errors.atom_invalid_parameter_in_enum_class pos)
+  | _ -> Errors.atom_invalid_parameter pos
+
 let rec fun_ tenv f =
   let env = { typedef_tparams = []; tenv } in
   let (p, _) = f.f_name in
@@ -64,15 +84,15 @@ and where_constr env (h1, _, h2) =
   hint env h1;
   hint env h2
 
-and hint env (p, h) =
+and hint ?(is_atom = false) env (p, h) =
   (* Do not use this one recursively to avoid quadratic runtime! *)
   check_hint_wellkindedness env.tenv (p, h);
-  hint_ env p h
+  hint_ ~is_atom env p h
 
-and hint_no_kind_check env (p, h) = hint_ env p h
+and hint_no_kind_check env (p, h) = hint_ ~is_atom:false env p h
 
-and hint_ env p h_ =
-  let hint env (p, h) = hint_ env p h in
+and hint_ ~is_atom env p h_ =
+  let hint env (p, h) = hint_ ~is_atom:false env p h in
   match h_ with
   | Hany
   | Herr
@@ -135,7 +155,7 @@ and hint_ env p h_ =
     (match Env.get_class env.tenv x with
     | None -> ()
     | Some _ ->
-      check_happly env.typedef_tparams env.tenv (p, h);
+      check_happly ~is_atom env.typedef_tparams env.tenv (p, h);
       List.iter hl (hint env));
     ()
   | Hshape { nsi_allows_unknown_fields = _; nsi_field_map } ->
@@ -151,7 +171,8 @@ and hint_ env p h_ =
     | Hpu_access _ -> Errors.pu_invalid_access p ""
     | _ -> hint env h)
 
-and check_happly unchecked_tparams env h =
+and check_happly ?(is_atom = false) unchecked_tparams env h =
+  let pos = fst h in
   let decl_ty = Decl_hint.hint env.decl_env h in
   let unchecked_tparams =
     List.map
@@ -167,6 +188,7 @@ and check_happly unchecked_tparams env h =
   match get_node decl_ty with
   | Tapply _ ->
     let (env, locl_ty) = Phase.localize_with_self env decl_ty in
+    let () = if is_atom then check_atom_on_param env pos locl_ty in
     begin
       match get_node (TUtils.get_base_type env locl_ty) with
       | Tclass (cls, _, tyl) ->
@@ -264,7 +286,14 @@ and method_ env m =
   maybe hint env (hint_of_type_hint m.m_ret)
 
 and fun_param env param =
-  maybe hint env (hint_of_type_hint param.param_type_hint)
+  let is_atom =
+    List.exists
+      ~f:(fun { ua_name; ua_params } ->
+        String.equal (snd ua_name) SN.UserAttributes.uaAtom
+        && List.is_empty ua_params)
+      param.param_user_attributes
+  in
+  maybe (hint ~is_atom) env (hint_of_type_hint param.param_type_hint)
 
 and variadic_param env vparam =
   match vparam with

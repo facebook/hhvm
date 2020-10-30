@@ -5010,7 +5010,8 @@ and dispatch_call
                           ~mutability:None
                           ~has_default:false
                           ~ifc_external:false
-                          ~ifc_can_call:false;
+                          ~ifc_can_call:false
+                          ~is_atom:false;
                       fp_rx_annotation = None;
                     });
               ft_implicit_params =
@@ -6100,21 +6101,81 @@ and call
             | param :: paraml -> (false, Some param, paraml)
             | [] -> (true, var_param, paraml)
           in
-          let check_arg env ((pos, _) as e) opt_param ~is_variadic =
+          (* TODO: We're using plain String at the moment, until we
+           * introduce actual atom notation (#A instead of "A")
+           *)
+          let expand_atom_in_enum enum_name atom_name expected_ty =
+            let cls = Env.get_class env enum_name in
+            let open Option in
+            cls >>= fun cls ->
+            let constants = Cls.consts cls in
+            if List.Assoc.mem ~equal:String.equal constants atom_name then
+              let hi = (pos, expected_ty) in
+              (* TODO: here *)
+              let te = (hi, String atom_name) in
+              Some (te, expected_ty)
+            else (
+              Errors.atom_unknown pos atom_name enum_name;
+              None
+            )
+          in
+          let check_arg env ((pos, arg) as e) opt_param ~is_variadic =
             match opt_param with
             | Some param ->
+              (* First check if __Atom is used *)
+              let atom_type =
+                let is_atom = get_fp_is_atom param in
+                let ety = param.fp_type.et_type in
+                match arg with
+                (* TODO: and here *)
+                | String atom_name when is_atom ->
+                  (match get_node ety with
+                  (* Uncomment this if we want to support atoms for normal
+                   * enums
+                   *)
+                  (* | Tnewtype (enum_name, _, _) when Env.is_enum env enum_name -> *)
+                  (*   expand_atom_in_enum enum_name atom_name ety *)
+                  | Tclass ((_, name), _, [ty_enum; _ty_interface])
+                    when String.equal name SN.Classes.cElt ->
+                    (match get_node ty_enum with
+                    | Tclass ((_, enum_name), _, _)
+                      when Env.is_enum_class env enum_name ->
+                      expand_atom_in_enum enum_name atom_name ety
+                    | Tgeneric (name, _) ->
+                      let upper_bounds =
+                        Typing_utils.collect_enum_class_upper_bounds env name
+                      in
+                      SSet.fold
+                        (fun enum_name result ->
+                          if Option.is_none result then
+                            expand_atom_in_enum enum_name atom_name ety
+                          else
+                            result)
+                        upper_bounds
+                        None
+                    | _ ->
+                      (* Already reported, see Typing_check_decls *)
+                      None)
+                  | _ ->
+                    (* Already reported, see Typing_check_decls *)
+                    None)
+                | _ -> None
+              in
               let (env, te, ty) =
-                let expected =
-                  ExpectedTy.make_and_allow_coercion
-                    pos
-                    Reason.URparam
-                    param.fp_type
-                in
-                expr
-                  ~accept_using_var:(get_fp_accept_disposable param)
-                  ~expected
-                  env
-                  e
+                match atom_type with
+                | Some (te, ty) -> (env, te, ty)
+                | None ->
+                  let expected =
+                    ExpectedTy.make_and_allow_coercion
+                      pos
+                      Reason.URparam
+                      param.fp_type
+                  in
+                  expr
+                    ~accept_using_var:(get_fp_accept_disposable param)
+                    ~expected
+                    env
+                    e
               in
               let env = call_param env param (e, ty) ~is_variadic in
               (env, Some (te, ty))
@@ -6338,6 +6399,7 @@ and call
                   ~has_default:false
                   ~ifc_external:false
                   ~ifc_can_call:false
+                  ~is_atom:false
               in
               {
                 fp_pos = pos;

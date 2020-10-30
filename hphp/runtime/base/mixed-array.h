@@ -362,6 +362,10 @@ public:
   static arr_lval LvalSilentInt(ArrayData* ad, int64_t k);
   static arr_lval LvalSilentStr(ArrayData* ad, StringData* k);
 
+  // When we escalate a MonotypeDict to a vanilla MixedArray, we must ensure
+  // that iterator positions match (local iterators rely on this invariant).
+  static void AppendTombstoneInPlace(ArrayData* ad);
+
   //////////////////////////////////////////////////////////////////////
 
 private:

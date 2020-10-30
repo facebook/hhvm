@@ -754,12 +754,20 @@ MonotypeDict<Key>* MonotypeDict<Key>::resize(uint8_t index, bool copy) {
 template <typename Key>
 ArrayData* MonotypeDict<Key>::escalateWithCapacity(size_t capacity) const {
   assertx(capacity >= size());
-  auto ad = isDictType() ? MixedArray::MakeReserveDict(capacity)
-                         : MixedArray::MakeReserveDArray(capacity);
+  auto const space = capacity - size() + used();
+  auto ad = isDictType() ? MixedArray::MakeReserveDict(space)
+                         : MixedArray::MakeReserveDArray(space);
   ad->setLegacyArrayInPlace(isLegacyArray());
 
   auto const dt = type();
-  forEachElm([&](auto i, auto elm) {
+  for (auto elm = elms(), end = elm + used(); elm < end; elm++) {
+    // To support local iteration (where the base is not const), iterator
+    // indices must match between this array and its vanilla counterpart.
+    if (elm->key == getTombstone<Key>()) {
+      MixedArray::AppendTombstoneInPlace(ad);
+      continue;
+    }
+
     auto const tv = TypedValue { elm->val, dt };
     auto const result = [&]{
       if constexpr (std::is_same<Key, int64_t>::value) {
@@ -774,7 +782,10 @@ ArrayData* MonotypeDict<Key>::escalateWithCapacity(size_t capacity) const {
     }();
     assertx(ad == result);
     ad = result;
-  });
+  }
+
+  assertx(ad->size() == size());
+  assertx(ad->iter_end() == iter_end());
 
   return ad;
 }

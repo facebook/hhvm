@@ -1106,6 +1106,15 @@ arr_lval MixedArray::LvalSilentStr(ArrayData* ad, StringData* k) {
   return arr_lval { a, &a->data()[pos].data };
 }
 
+void MixedArray::AppendTombstoneInPlace(ArrayData* ad) {
+  auto a = asMixed(ad);
+  assertx(!a->isFull());
+  assertx(!a->cowCheck());
+  a->mutableKeyTypes()->recordTombstone();
+  a->data()[a->m_used].setTombstone();
+  a->m_used++;
+}
+
 ArrayData* MixedArray::SetInt(ArrayData* ad, int64_t k, TypedValue v) {
   assertx(ad->cowCheck() || ad->notCyclic(v));
   return asMixed(ad)->prepareForInsert(ad->cowCheck())->update(k, v);

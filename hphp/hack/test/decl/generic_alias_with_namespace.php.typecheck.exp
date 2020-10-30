@@ -1,0 +1,2 @@
+File "generic_alias_with_namespace.php", line 3, characters 15-19:
+Unbound name: `Bar\X` (Naming[2049])

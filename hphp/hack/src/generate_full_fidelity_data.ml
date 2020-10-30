@@ -3026,7 +3026,12 @@ module GenerateFFRustTokenKind = struct
       (token_kind x)
 
   let to_width x =
-    let len = String.length (token_text x) in
+    let len =
+      if String.equal (token_kind x) "Backslash" then
+        1
+      else
+        String.length (token_text x)
+    in
     assert (len > 0);
     sprintf
       "            TokenKind::%s => Some(unsafe { NonZeroUsize::new_unchecked(%d) }),\n"

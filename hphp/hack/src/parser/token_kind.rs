@@ -1089,7 +1089,7 @@ impl TokenKind {
             TokenKind::Async => Some(unsafe { NonZeroUsize::new_unchecked(5) }),
             TokenKind::Attribute => Some(unsafe { NonZeroUsize::new_unchecked(9) }),
             TokenKind::Await => Some(unsafe { NonZeroUsize::new_unchecked(5) }),
-            TokenKind::Backslash => Some(unsafe { NonZeroUsize::new_unchecked(3) }),
+            TokenKind::Backslash => Some(unsafe { NonZeroUsize::new_unchecked(1) }),
             TokenKind::Binary => Some(unsafe { NonZeroUsize::new_unchecked(6) }),
             TokenKind::Bool => Some(unsafe { NonZeroUsize::new_unchecked(4) }),
             TokenKind::Boolean => Some(unsafe { NonZeroUsize::new_unchecked(7) }),

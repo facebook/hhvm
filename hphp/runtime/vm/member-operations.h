@@ -1733,9 +1733,17 @@ template <typename Update>
 TypedValue UpdateBespoke(tv_lval base, TypedValue key, Update update) {
   auto const val = ElemDBespoke<KeyType::Any>(base, key);
   TypedValue tmp = *val;
+  if (val.type() == KindOfString) {
+    val.val().pstr = staticEmptyString();
+  } else {
+    tvIncRefGen(tmp);
+  }
   auto const result = update(&tmp);
   if (val.type() == tmp.type()) {
     val.val() = tmp.val();
+    if (val.type() != KindOfString) {
+      tvDecRefGen(tmp);
+    }
   } else {
     SetElemBespoke<KeyType::Any>(base, key, &tmp);
   }

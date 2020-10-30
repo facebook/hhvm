@@ -23,6 +23,7 @@ val type_check :
   ServerEnv.env ->
   check_kind ->
   float ->
+  CgroupProfiler.Profiling.t ->
   ServerEnv.env * check_results * Telemetry.t
 
 (****************************************************************************)

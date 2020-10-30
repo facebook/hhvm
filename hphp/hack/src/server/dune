@@ -247,6 +247,7 @@
     serverGlobalInference)
   (libraries
     buffered_line_reader
+    cgroup
     coverage_level
     decl_redecl_service
     dfind

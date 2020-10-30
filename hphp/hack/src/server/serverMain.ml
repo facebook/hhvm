@@ -409,7 +409,7 @@ let query_notifier genv env query_kind start_time =
  * The above doesn't apply in presence of interruptions / cancellations -
  * it's possible for client to request current recheck to be stopped.
  *)
-let rec recheck_until_no_changes_left acc genv env select_outcome =
+let rec recheck_until_no_changes_left acc genv env select_outcome profiling =
   let start_time = Unix.gettimeofday () in
   (* this is telemetry for the current batch, i.e. iteration: *)
   let telemetry =
@@ -549,7 +549,7 @@ let rec recheck_until_no_changes_left acc genv env select_outcome =
       |> Telemetry.duration ~key:"type_check_start" ~start_time
     in
     let (env, res, type_check_telemetry) =
-      ServerTypeCheck.type_check genv env check_kind start_time
+      ServerTypeCheck.type_check genv env check_kind start_time profiling
     in
     let telemetry =
       telemetry
@@ -598,7 +598,7 @@ let rec recheck_until_no_changes_left acc genv env select_outcome =
     then
       (acc, env)
     else
-      recheck_until_no_changes_left acc genv env select_outcome
+      recheck_until_no_changes_left acc genv env select_outcome profiling
 
 let new_serve_iteration_id () = Random_id.short_string ()
 
@@ -739,13 +739,17 @@ let serve_one_iteration genv env client_provider =
   (* after that we'll be able to give an up-to-date answer to the client. *)
   (* Except: this might be stopped early in some cases, e.g. IDE checks. *)
   let t_start_recheck = Unix.gettimeofday () in
-  let (stats, env) =
-    recheck_until_no_changes_left
-      (empty_recheck_loop_stats ~recheck_id)
-      genv
-      env
-      select_outcome
+  let (recheck_loop_mem_stats, (stats, env)) =
+    CgroupProfiler.profile_memory
+      ~event:"recheck loop"
+      ~f:
+        (recheck_until_no_changes_left
+           (empty_recheck_loop_stats ~recheck_id)
+           genv
+           env
+           select_outcome)
   in
+  CgroupProfiler.print_summary_memory_table recheck_loop_mem_stats;
   let t_done_recheck = Unix.gettimeofday () in
   let did_work = stats.total_rechecked_count > 0 in
   let env =

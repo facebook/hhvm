@@ -119,7 +119,7 @@ let commands_needs_writes = function
   | Rpc (_metadata, x) -> rpc_command_needs_writes x
   | _ -> false
 
-let full_recheck_if_needed' genv env reason =
+let full_recheck_if_needed' genv env reason profiling =
   if
     ServerEnv.(is_full_check_done env.full_check)
     && Relative_path.Set.is_empty env.ServerEnv.ide_needs_parsing
@@ -130,7 +130,7 @@ let full_recheck_if_needed' genv env reason =
     let start_time = Unix.gettimeofday () in
     let env = { env with ServerEnv.can_interrupt = false } in
     let (env, _res, _telemetry) =
-      ServerTypeCheck.(type_check genv env Full_check start_time)
+      ServerTypeCheck.(type_check genv env Full_check start_time profiling)
     in
     let env = { env with ServerEnv.can_interrupt = true } in
     assert (ServerEnv.(is_full_check_done env.full_check));
@@ -162,11 +162,14 @@ let full_recheck_if_needed genv env msg =
   if ignore_ide msg then
     let (ide, disk) = get_unsaved_changes env in
     let env = apply_changes env disk in
-    let env =
-      full_recheck_if_needed'
-        genv
-        { env with ServerEnv.remote = force_remote msg }
-        (reason msg)
+    let (_, env) =
+      CgroupProfiler.profile_memory
+        ~event:"full recheck"
+        ~f:
+          (full_recheck_if_needed'
+             genv
+             { env with ServerEnv.remote = force_remote msg }
+             (reason msg))
     in
     apply_changes env ide
   else

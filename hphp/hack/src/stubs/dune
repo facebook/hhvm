@@ -222,3 +222,11 @@
   (modules folly)
   (preprocess
     (pps lwt_ppx ppx_deriving.std)))
+
+(library
+  (name startup_initializer_stubs)
+  (wrapped false)
+  (modules
+    startup_initializer)
+  (preprocess
+    (pps lwt_ppx ppx_deriving.std)))

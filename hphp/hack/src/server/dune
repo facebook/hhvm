@@ -283,14 +283,6 @@
   (preprocess (pps lwt_ppx ppx_deriving.std))) ; See T41851208
 
 (library
-  (name startup_initializer_stubs)
-  (wrapped false)
-  (modules
-    startup_initializer)
-  (preprocess
-    (pps lwt_ppx ppx_deriving.std)))
-
-(library
   (name hh_server_monitor)
   (wrapped false)
   (modules

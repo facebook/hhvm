@@ -572,10 +572,16 @@ pub struct ShapeFieldNode<'a> {
     type_: &'a ShapeFieldType<'a>,
 }
 
+#[derive(Copy, Clone, Debug)]
+struct ClassNameParam<'a> {
+    name: Id<'a>,
+    full_pos: &'a Pos<'a>, // Position of the full expression `Foo::class`
+}
+
 #[derive(Debug)]
 pub struct UserAttributeNode<'a> {
     name: Id<'a>,
-    classname_params: &'a [Id<'a>],
+    classname_params: &'a [ClassNameParam<'a>],
     string_literal_params: &'a [&'a BStr], // this is only used for __Deprecated attribute message and Cipp parameters
 }
 
@@ -1099,11 +1105,11 @@ impl<'a> DirectDeclSmartConstructors<'a> {
         attributes.reactivity_condition_type = node.iter().find_map(|attr| match attr {
             Node::Attribute(UserAttributeNode {
                 name: Id(_, "__OnlyRxIfImpl"),
-                classname_params: &[class_name],
+                classname_params: &[param],
                 ..
             }) => Some(self.alloc(Ty(
-                self.alloc(Reason::hint(class_name.0)),
-                Ty_::Tapply(self.alloc((class_name, &[][..]))),
+                self.alloc(Reason::hint(param.full_pos)),
+                Ty_::Tapply(self.alloc((param.name, &[][..]))),
             ))),
             _ => None,
         });
@@ -1113,7 +1119,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                 .string_literal_params
                 .first()
                 .map(|&x| self.str_from_utf8(x))
-                .or_else(|| attribute.classname_params.first().map(|x| x.1))
+                .or_else(|| attribute.classname_params.first().map(|x| x.name.1))
         };
         let mut ifc_already_policied = false;
 
@@ -1214,7 +1220,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                         attributes.ifc_attribute =
                             IfcFunDecl::FDPolicied(attribute.classname_params.first().map_or_else(
                                 string_literal_params, // default
-                                |&x| Some(x.1),        // f
+                                |&x| Some(x.name.1),   // f
                             ));
                         ifc_already_policied = true;
                     }
@@ -1842,7 +1848,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
     ) -> &'a shallow_decl_defs::UserAttribute<'a> {
         self.alloc(shallow_decl_defs::UserAttribute {
             name: attr.name,
-            classname_params: self.slice(attr.classname_params.iter().map(|Id(_, s)| *s)),
+            classname_params: self.slice(attr.classname_params.iter().map(|p| p.name.1)),
         })
     }
 }
@@ -3984,12 +3990,12 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         };
         let classname_params = self.slice(args.iter().filter_map(|node| match node {
             Node::Expr(aast::Expr(
-                _,
+                full_pos,
                 aast::Expr_::ClassConst(&(
-                    aast::ClassId(_, aast::ClassId_::CI(&class_name)),
+                    aast::ClassId(_, aast::ClassId_::CI(&name)),
                     (_, "class"),
                 )),
-            )) => Some(class_name),
+            )) => Some(ClassNameParam { name, full_pos }),
             _ => None,
         }));
 

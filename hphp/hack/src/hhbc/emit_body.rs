@@ -13,7 +13,7 @@ use ast_scope_rust::{Scope, ScopeItem};
 use decl_vars_rust as decl_vars;
 use emit_adata_rust as emit_adata;
 use emit_expression_rust as emit_expression;
-use emit_fatal_rust::{raise_fatal_parse, raise_fatal_runtime};
+use emit_fatal_rust::{emit_fatal_runtime, raise_fatal_parse, raise_fatal_runtime};
 use emit_param_rust as emit_param;
 use emit_pos_rust::emit_pos;
 use emit_statement::emit_final_stmts;
@@ -26,12 +26,13 @@ use hhas_body_rust::HhasBody;
 use hhas_param_rust::HhasParam;
 use hhas_type::Info as HhasTypeInfo;
 use hhbc_ast_rust::{
-    FcallArgs, FcallFlags, Instruct, IstypeOp, MemberKey, MemberOpMode, ParamId, QueryOp,
+    ClassKind, FcallArgs, FcallFlags, Instruct, IstypeOp, MemberKey, MemberOpMode, ParamId, QueryOp,
 };
 use hhbc_id_rust::function;
 use hhbc_string_utils_rust as string_utils;
 use instruction_sequence_rust::{instr, unrecoverable, Error, InstrSeq, Result};
 use label_rewriter_rust as label_rewriter;
+use label_rust::Label;
 use naming_special_names_rust::classes;
 use ocamlrep::rc::RcOc;
 use options::{CompilerFlags, LangFlags};
@@ -606,7 +607,14 @@ mod atom_helpers {
         }
     }
 
-    pub fn emit_clscnsl(param: &HhasParam, cls_instrs: InstrSeq) -> Result {
+    pub fn emit_clscnsl(
+        param: &HhasParam,
+        pos: &Pos,
+        cls_instrs: InstrSeq,
+        msg: &str,
+        label_not_a_class: Label,
+        label_done: Label,
+    ) -> Result {
         let param_name = &param.name;
         let loc = Named(param_name.into());
         Ok(InstrSeq::gather(vec![
@@ -614,6 +622,10 @@ mod atom_helpers {
             instr::classgetc(),
             instr::clscnsl(loc.clone()),
             instr::popl(loc),
+            instr::jmp(label_done.clone()),
+            instr::label(label_not_a_class),
+            emit_fatal_runtime(&pos, msg),
+            instr::label(label_done),
         ]))
     }
 } //mod atom_helpers
@@ -641,6 +653,8 @@ fn atom_instrs(
             "__Atom param type hint unavailable",
         )),
         TypeHint(_, Some(Hint(_, h))) => {
+            let label_done = emitter.label_gen_mut().next_regular();
+            let label_not_a_class = emitter.label_gen_mut().next_regular();
             match &**h {
                 Happly(ast_defs::Id(_, ref ctor), vec) if ctor == "\\HH\\Elt" => {
                     match &vec[..] {
@@ -656,24 +670,51 @@ fn atom_instrs(
                                         ))
                                     } else {
                                         if !atom_helpers::is_generic(tag, tparams) {
-                                            //'tag' is a class name.
+                                            //'tag' is just a name.
                                             Ok(Some(atom_helpers::emit_clscnsl(
                                                 param,
-                                                emit_expression::emit_expr(
-                                                    emitter,
-                                                    env,
-                                                    &(tast::Expr(
-                                                        Pos::make_none(),
-                                                        aast::Expr_::String(bstr::BString::from(
-                                                            tag.to_owned(),
+                                                &pos,
+                                                InstrSeq::gather(vec![
+                                                    emit_expression::emit_expr(
+                                                        emitter,
+                                                        env,
+                                                        &(tast::Expr(
+                                                            Pos::make_none(),
+                                                            aast::Expr_::String(
+                                                                bstr::BString::from(tag.to_owned()),
+                                                            ),
                                                         )),
-                                                    )),
-                                                )?,
+                                                    )?,
+                                                    emit_expression::emit_expr(
+                                                        emitter,
+                                                        env,
+                                                        &(tast::Expr(
+                                                            Pos::make_none(),
+                                                            aast::Expr_::True,
+                                                        )),
+                                                    )?,
+                                                    instr::oodeclexists(ClassKind::Class),
+                                                    instr::jmpz(label_not_a_class.clone()),
+                                                    emit_expression::emit_expr(
+                                                        emitter,
+                                                        env,
+                                                        &(tast::Expr(
+                                                            Pos::make_none(),
+                                                            aast::Expr_::String(
+                                                                bstr::BString::from(tag.to_owned()),
+                                                            ),
+                                                        )),
+                                                    )?,
+                                                ]),
+                                                "Type is not a class",
+                                                label_not_a_class,
+                                                label_done,
                                             )?))
                                         } else {
                                             //'tag' is a reified generic.
                                             Ok(Some(atom_helpers::emit_clscnsl(
                                                 param,
+                                                &pos,
                                                 InstrSeq::gather(vec![
                                                     emit_expression::emit_reified_generic_instrs(
                                                         &Pos::make_none(),
@@ -685,10 +726,16 @@ fn atom_instrs(
                                                     instr::basec(0, MemberOpMode::ModeNone),
                                                     instr::querym(
                                                         1,
-                                                        QueryOp::CGet,
+                                                        QueryOp::CGetQuiet,
                                                         MemberKey::ET("classname".into()),
                                                     ),
+                                                    instr::dup(),
+                                                    instr::istypec(IstypeOp::OpNull),
+                                                    instr::jmpnz(label_not_a_class.clone()),
                                                 ]),
+                                                "Generic type parameter does not resolve to a class",
+                                                label_not_a_class,
+                                                label_done,
                                             )?))
                                         }
                                     }
@@ -705,22 +752,29 @@ fn atom_instrs(
                                             } else {
                                                 //'tag' is a type constant.
                                                 Ok(Some(atom_helpers::emit_clscnsl(
-                                                param,
-                                                InstrSeq::gather(vec![
-                                                    emit_expression::get_type_structure_for_hint(
-                                                        emitter,
-                                                        tparams
-                                                            .iter()
-                                                            .map(|fp| fp.name.1.as_str())
-                                                            .collect::<Vec<_>>()
-                                                            .as_slice(),
-                                                        &IndexSet::new(),
-                                                        hint,
-                                                    )?,
-                                                    instr::combine_and_resolve_type_struct(1),
-                                                    instr::basec(0, MemberOpMode::ModeNone),
-                                                    instr::querym(1, QueryOp::CGet, MemberKey::ET("classname".into())),
-                                                ]),
+                                                    param,
+                                                    &pos,
+                                                    InstrSeq::gather(vec![
+                                                        emit_expression::get_type_structure_for_hint(
+                                                            emitter,
+                                                            tparams
+                                                                .iter()
+                                                                .map(|fp| fp.name.1.as_str())
+                                                                .collect::<Vec<_>>()
+                                                                .as_slice(),
+                                                            &IndexSet::new(),
+                                                            hint,
+                                                        )?,
+                                                        instr::combine_and_resolve_type_struct(1),
+                                                        instr::basec(0, MemberOpMode::ModeNone),
+                                                        instr::querym(1, QueryOp::CGetQuiet, MemberKey::ET("classname".into())),
+                                                        instr::dup(),
+                                                        instr::istypec(IstypeOp::OpNull),
+                                                        instr::jmpnz(label_not_a_class.clone()),
+                                                    ]),
+                                                    "Type constant does not resolve to a class",
+                                                    label_not_a_class,
+                                                    label_done,
                                             )?))
                                             }
                                         }

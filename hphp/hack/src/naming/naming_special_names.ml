@@ -346,7 +346,7 @@ module UserAttributes = struct
           (uaMemoize, [fn; mthd]);
           (uaMemoizeLSB, [fn; mthd]);
           (uaPHPStdLib, [cls; fn; mthd]);
-          (uaHipHopSpecific, [cls]);
+          (uaHipHopSpecific, [cls; fn; mthd]);
           (uaAcceptDisposable, [parameter]);
           (uaReturnDisposable, [fn; mthd]);
           (uaPure, [fn; mthd]);

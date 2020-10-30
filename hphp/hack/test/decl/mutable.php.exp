@@ -1,301 +1,296 @@
---- legacy
-+++ direct decl
-@@ -1,294 +1,294 @@
- [("\\A",
-   (Shallow_decl_defs.Class
-      { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
-        sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
-        sc_name = ([3:7-8], "\\A"); sc_tparams = [];
-        sc_where_constraints = []; sc_extends = []; sc_uses = [];
-        sc_xhp_attr_uses = []; sc_req_extends = []; sc_req_implements = [];
-        sc_implements = []; sc_consts = []; sc_typeconsts = [];
-        sc_pu_enums = []; sc_props = []; sc_sprops = [];
-        sc_constructor = None; sc_static_methods = []; sc_methods = [];
-        sc_user_attributes = []; sc_enum_type = None }));
-   ("\\f",
-    (Shallow_decl_defs.Fun
-       { Typing_defs.fe_deprecated = None;
-         fe_type =
-         (Rwitness (root|mutable.php line 6, characters 10-10),
-          (Tfun
-             { ft_arity = (Fstandard ()); ft_tparams = [];
-               ft_where_constraints = [];
-               ft_params =
-               [{ fp_pos = [6:45-47]; fp_name = (Some "$a");
-                  fp_type =
-                  { et_enforced = false;
-                    et_type =
-                    (Rhint (root|mutable.php line 6, characters 12-43),
-                     (Tfun
-                        { ft_arity = (Fstandard ()); ft_tparams = [];
-                          ft_where_constraints = [];
-                          ft_params =
-                          [{ fp_pos = [6:33-34]; fp_name = None;
-                             fp_type =
-                             { et_enforced = false;
-                               et_type =
-                               (Rhint (root|mutable.php line 6, characters 33-33),
-                                (Tapply (([6:33-34], "\\A"), [])))
-                               };
-                             fp_rx_annotation = None;
-                             fp_flags =
-                             (make_fp_flags
-                               ~mutability:(Some Typing_defs_core.Param_borrowed_mutable)
-                               ~accept_disposable:false ~has_default:false
-                               ~mode:Typing_defs_core.FPnormal
-                               ~ifc_external:false ~ifc_can_call:false
-                               ~is_atom:false);
-                              }
-                            ];
-                          ft_implicit_params =
-                          { capability =
--                           (Rhint (root|mutable.php line 6, characters 12-43),
-+                           (Rhint (root|mutable.php line 6, characters 15-42),
-                             (Tunion []))
-                            };
-                          ft_ret =
-                          { et_enforced = false;
-                            et_type =
-                            (Rhint (root|mutable.php line 6, characters 38-41),
-                             (Tprim Tvoid))
-                            };
-                          ft_flags =
-                          (make_ft_flags FSync None ~return_disposable:false
-                            ~returns_mutable:false ~returns_void_to_rx:false);
-                          ft_reactive = Reactive {};
-                          ft_ifc_decl = FDPolicied {PUBLIC} }))
-                    };
-                  fp_rx_annotation = None;
-                  fp_flags =
-                  (make_fp_flags ~mutability:None ~accept_disposable:false
-                    ~has_default:false ~mode:Typing_defs_core.FPnormal
-                    ~ifc_external:false ~ifc_can_call:false ~is_atom:false);
-                   }
-                 ];
-               ft_implicit_params =
-               { capability =
-                 (Rhint (root|mutable.php line 6, characters 10-10),
-                  (Tunion []))
-                 };
-               ft_ret =
-               { et_enforced = false;
-                 et_type =
-                 (Rhint (root|mutable.php line 6, characters 50-53),
-                  (Tprim Tvoid))
-                 };
-               ft_flags =
-               (make_ft_flags FSync None ~return_disposable:false
-                 ~returns_mutable:false ~returns_void_to_rx:false);
-               ft_reactive = Reactive {}; ft_ifc_decl = FDPolicied {PUBLIC} }));
-         fe_pos = [6:10-11]; fe_php_std_lib = false }));
-   ("\\g",
-    (Shallow_decl_defs.Fun
-       { Typing_defs.fe_deprecated = None;
-         fe_type =
-         (Rwitness (root|mutable.php line 9, characters 10-10),
-          (Tfun
-             { ft_arity = (Fstandard ()); ft_tparams = [];
-               ft_where_constraints = [];
-               ft_params =
-               [{ fp_pos = [9:50-52]; fp_name = (Some "$a");
-                  fp_type =
-                  { et_enforced = false;
-                    et_type =
-                    (Rhint (root|mutable.php line 9, characters 12-48),
-                     (Tfun
-                        { ft_arity = (Fstandard ()); ft_tparams = [];
-                          ft_where_constraints = [];
-                          ft_params =
-                          [{ fp_pos = [9:38-39]; fp_name = None;
-                             fp_type =
-                             { et_enforced = false;
-                               et_type =
-                               (Rhint (root|mutable.php line 9, characters 38-38),
-                                (Tapply (([9:38-39], "\\A"), [])))
-                               };
-                             fp_rx_annotation = None;
-                             fp_flags =
-                             (make_fp_flags
-                               ~mutability:(Some Typing_defs_core.Param_maybe_mutable)
-                               ~accept_disposable:false ~has_default:false
-                               ~mode:Typing_defs_core.FPnormal
-                               ~ifc_external:false ~ifc_can_call:false
-                               ~is_atom:false);
-                              }
-                            ];
-                          ft_implicit_params =
-                          { capability =
--                           (Rhint (root|mutable.php line 9, characters 12-48),
-+                           (Rhint (root|mutable.php line 9, characters 15-47),
-                             (Tunion []))
-                            };
-                          ft_ret =
-                          { et_enforced = false;
-                            et_type =
-                            (Rhint (root|mutable.php line 9, characters 43-46),
-                             (Tprim Tvoid))
-                            };
-                          ft_flags =
-                          (make_ft_flags FSync None ~return_disposable:false
-                            ~returns_mutable:false ~returns_void_to_rx:false);
-                          ft_reactive = Reactive {};
-                          ft_ifc_decl = FDPolicied {PUBLIC} }))
-                    };
-                  fp_rx_annotation = None;
-                  fp_flags =
-                  (make_fp_flags ~mutability:None ~accept_disposable:false
-                    ~has_default:false ~mode:Typing_defs_core.FPnormal
-                    ~ifc_external:false ~ifc_can_call:false ~is_atom:false);
-                   }
-                 ];
-               ft_implicit_params =
-               { capability =
-                 (Rhint (root|mutable.php line 9, characters 10-10),
-                  (Tunion []))
-                 };
-               ft_ret =
-               { et_enforced = false;
-                 et_type =
-                 (Rhint (root|mutable.php line 9, characters 55-58),
-                  (Tprim Tvoid))
-                 };
-               ft_flags =
-               (make_ft_flags FSync None ~return_disposable:false
-                 ~returns_mutable:false ~returns_void_to_rx:false);
-               ft_reactive = Reactive {}; ft_ifc_decl = FDPolicied {PUBLIC} }));
-         fe_pos = [9:10-11]; fe_php_std_lib = false }));
-   ("\\h",
-    (Shallow_decl_defs.Fun
-       { Typing_defs.fe_deprecated = None;
-         fe_type =
-         (Rwitness (root|mutable.php line 12, characters 10-10),
-          (Tfun
-             { ft_arity = (Fstandard ()); ft_tparams = [];
-               ft_where_constraints = [];
-               ft_params =
-               [{ fp_pos = [12:50-52]; fp_name = (Some "$a");
-                  fp_type =
-                  { et_enforced = false;
-                    et_type =
-                    (Rhint (root|mutable.php line 12, characters 12-48),
-                     (Tfun
-                        { ft_arity = (Fstandard ()); ft_tparams = [];
-                          ft_where_constraints = [];
-                          ft_params =
-                          [{ fp_pos = [12:38-39]; fp_name = None;
-                             fp_type =
-                             { et_enforced = false;
-                               et_type =
-                               (Rhint (root|mutable.php line 12, characters 38-38),
-                                (Tapply (([12:38-39], "\\A"), [])))
-                               };
-                             fp_rx_annotation = None;
-                             fp_flags =
-                             (make_fp_flags
-                               ~mutability:(Some Typing_defs_core.Param_owned_mutable)
-                               ~accept_disposable:false ~has_default:false
-                               ~mode:Typing_defs_core.FPnormal
-                               ~ifc_external:false ~ifc_can_call:false
-                               ~is_atom:false);
-                              }
-                            ];
-                          ft_implicit_params =
-                          { capability =
--                           (Rhint (root|mutable.php line 12, characters 12-48),
-+                           (Rhint (root|mutable.php line 12, characters 15-47),
-                             (Tunion []))
-                            };
-                          ft_ret =
-                          { et_enforced = false;
-                            et_type =
-                            (Rhint (root|mutable.php line 12, characters 43-46),
-                             (Tprim Tvoid))
-                            };
-                          ft_flags =
-                          (make_ft_flags FSync None ~return_disposable:false
-                            ~returns_mutable:false ~returns_void_to_rx:false);
-                          ft_reactive = Reactive {};
-                          ft_ifc_decl = FDPolicied {PUBLIC} }))
-                    };
-                  fp_rx_annotation = None;
-                  fp_flags =
-                  (make_fp_flags ~mutability:None ~accept_disposable:false
-                    ~has_default:false ~mode:Typing_defs_core.FPnormal
-                    ~ifc_external:false ~ifc_can_call:false ~is_atom:false);
-                   }
-                 ];
-               ft_implicit_params =
-               { capability =
-                 (Rhint (root|mutable.php line 12, characters 10-10),
-                  (Tunion []))
-                 };
-               ft_ret =
-               { et_enforced = false;
-                 et_type =
-                 (Rhint (root|mutable.php line 12, characters 55-58),
-                  (Tprim Tvoid))
-                 };
-               ft_flags =
-               (make_ft_flags FSync None ~return_disposable:false
-                 ~returns_mutable:false ~returns_void_to_rx:false);
-               ft_reactive = Reactive {}; ft_ifc_decl = FDPolicied {PUBLIC} }));
-         fe_pos = [12:10-11]; fe_php_std_lib = false }));
-   ("\\i",
-    (Shallow_decl_defs.Fun
-       { Typing_defs.fe_deprecated = None;
-         fe_type =
-         (Rwitness (root|mutable.php line 15, characters 10-10),
-          (Tfun
-             { ft_arity = (Fstandard ()); ft_tparams = [];
-               ft_where_constraints = [];
-               ft_params =
-               [{ fp_pos = [15:46-48]; fp_name = (Some "$a");
-                  fp_type =
-                  { et_enforced = false;
-                    et_type =
-                    (Rhint (root|mutable.php line 15, characters 12-44),
-                     (Tfun
-                        { ft_arity = (Fstandard ()); ft_tparams = [];
-                          ft_where_constraints = []; ft_params = [];
-                          ft_implicit_params =
-                          { capability =
--                           (Rhint (root|mutable.php line 15, characters 12-44),
-+                           (Rhint (root|mutable.php line 15, characters 15-43),
-                             (Tunion []))
-                            };
-                          ft_ret =
-                          { et_enforced = false;
-                            et_type =
-                            (Rhint (root|mutable.php line 15, characters 41-41),
-                             (Tapply (([15:41-42], "\\A"), [])))
-                            };
-                          ft_flags =
-                          (make_ft_flags FSync None ~return_disposable:false
-                            ~returns_mutable:true ~returns_void_to_rx:false);
-                          ft_reactive = Reactive {};
-                          ft_ifc_decl = FDPolicied {PUBLIC} }))
-                    };
-                  fp_rx_annotation = None;
-                  fp_flags =
-                  (make_fp_flags ~mutability:None ~accept_disposable:false
-                    ~has_default:false ~mode:Typing_defs_core.FPnormal
-                    ~ifc_external:false ~ifc_can_call:false ~is_atom:false);
-                   }
-                 ];
-               ft_implicit_params =
-               { capability =
-                 (Rhint (root|mutable.php line 15, characters 10-10),
-                  (Tunion []))
-                 };
-               ft_ret =
-               { et_enforced = false;
-                 et_type =
-                 (Rhint (root|mutable.php line 15, characters 51-54),
-                  (Tprim Tvoid))
-                 };
-               ft_flags =
-               (make_ft_flags FSync None ~return_disposable:false
-                 ~returns_mutable:false ~returns_void_to_rx:false);
-               ft_reactive = Reactive {}; ft_ifc_decl = FDPolicied {PUBLIC} }));
-         fe_pos = [15:10-11]; fe_php_std_lib = false }))
-   ]
+[("\\A",
+  (Shallow_decl_defs.Class
+     { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
+       sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
+       sc_name = ([3:7-8], "\\A"); sc_tparams = [];
+       sc_where_constraints = []; sc_extends = []; sc_uses = [];
+       sc_xhp_attr_uses = []; sc_req_extends = []; sc_req_implements = [];
+       sc_implements = []; sc_consts = []; sc_typeconsts = [];
+       sc_pu_enums = []; sc_props = []; sc_sprops = [];
+       sc_constructor = None; sc_static_methods = []; sc_methods = [];
+       sc_user_attributes = []; sc_enum_type = None }));
+  ("\\f",
+   (Shallow_decl_defs.Fun
+      { Typing_defs.fe_deprecated = None;
+        fe_type =
+        (Rwitness (root|mutable.php line 6, characters 10-10),
+         (Tfun
+            { ft_arity = (Fstandard ()); ft_tparams = [];
+              ft_where_constraints = [];
+              ft_params =
+              [{ fp_pos = [6:45-47]; fp_name = (Some "$a");
+                 fp_type =
+                 { et_enforced = false;
+                   et_type =
+                   (Rhint (root|mutable.php line 6, characters 12-43),
+                    (Tfun
+                       { ft_arity = (Fstandard ()); ft_tparams = [];
+                         ft_where_constraints = [];
+                         ft_params =
+                         [{ fp_pos = [6:33-34]; fp_name = None;
+                            fp_type =
+                            { et_enforced = false;
+                              et_type =
+                              (Rhint (root|mutable.php line 6, characters 33-33),
+                               (Tapply (([6:33-34], "\\A"), [])))
+                              };
+                            fp_rx_annotation = None;
+                            fp_flags =
+                            (make_fp_flags
+                              ~mutability:(Some Typing_defs_core.Param_borrowed_mutable)
+                              ~accept_disposable:false ~has_default:false
+                              ~mode:Typing_defs_core.FPnormal
+                              ~ifc_external:false ~ifc_can_call:false
+                              ~is_atom:false);
+                             }
+                           ];
+                         ft_implicit_params =
+                         { capability =
+                           (Rhint (root|mutable.php line 6, characters 12-43),
+                            (Tunion []))
+                           };
+                         ft_ret =
+                         { et_enforced = false;
+                           et_type =
+                           (Rhint (root|mutable.php line 6, characters 38-41),
+                            (Tprim Tvoid))
+                           };
+                         ft_flags =
+                         (make_ft_flags FSync None ~return_disposable:false
+                           ~returns_mutable:false ~returns_void_to_rx:false);
+                         ft_reactive = Reactive {};
+                         ft_ifc_decl = FDPolicied {PUBLIC} }))
+                   };
+                 fp_rx_annotation = None;
+                 fp_flags =
+                 (make_fp_flags ~mutability:None ~accept_disposable:false
+                   ~has_default:false ~mode:Typing_defs_core.FPnormal
+                   ~ifc_external:false ~ifc_can_call:false ~is_atom:false);
+                  }
+                ];
+              ft_implicit_params =
+              { capability =
+                (Rhint (root|mutable.php line 6, characters 10-10),
+                 (Tunion []))
+                };
+              ft_ret =
+              { et_enforced = false;
+                et_type =
+                (Rhint (root|mutable.php line 6, characters 50-53),
+                 (Tprim Tvoid))
+                };
+              ft_flags =
+              (make_ft_flags FSync None ~return_disposable:false
+                ~returns_mutable:false ~returns_void_to_rx:false);
+              ft_reactive = Reactive {}; ft_ifc_decl = FDPolicied {PUBLIC} }));
+        fe_pos = [6:10-11]; fe_php_std_lib = false }));
+  ("\\g",
+   (Shallow_decl_defs.Fun
+      { Typing_defs.fe_deprecated = None;
+        fe_type =
+        (Rwitness (root|mutable.php line 9, characters 10-10),
+         (Tfun
+            { ft_arity = (Fstandard ()); ft_tparams = [];
+              ft_where_constraints = [];
+              ft_params =
+              [{ fp_pos = [9:50-52]; fp_name = (Some "$a");
+                 fp_type =
+                 { et_enforced = false;
+                   et_type =
+                   (Rhint (root|mutable.php line 9, characters 12-48),
+                    (Tfun
+                       { ft_arity = (Fstandard ()); ft_tparams = [];
+                         ft_where_constraints = [];
+                         ft_params =
+                         [{ fp_pos = [9:38-39]; fp_name = None;
+                            fp_type =
+                            { et_enforced = false;
+                              et_type =
+                              (Rhint (root|mutable.php line 9, characters 38-38),
+                               (Tapply (([9:38-39], "\\A"), [])))
+                              };
+                            fp_rx_annotation = None;
+                            fp_flags =
+                            (make_fp_flags
+                              ~mutability:(Some Typing_defs_core.Param_maybe_mutable)
+                              ~accept_disposable:false ~has_default:false
+                              ~mode:Typing_defs_core.FPnormal
+                              ~ifc_external:false ~ifc_can_call:false
+                              ~is_atom:false);
+                             }
+                           ];
+                         ft_implicit_params =
+                         { capability =
+                           (Rhint (root|mutable.php line 9, characters 12-48),
+                            (Tunion []))
+                           };
+                         ft_ret =
+                         { et_enforced = false;
+                           et_type =
+                           (Rhint (root|mutable.php line 9, characters 43-46),
+                            (Tprim Tvoid))
+                           };
+                         ft_flags =
+                         (make_ft_flags FSync None ~return_disposable:false
+                           ~returns_mutable:false ~returns_void_to_rx:false);
+                         ft_reactive = Reactive {};
+                         ft_ifc_decl = FDPolicied {PUBLIC} }))
+                   };
+                 fp_rx_annotation = None;
+                 fp_flags =
+                 (make_fp_flags ~mutability:None ~accept_disposable:false
+                   ~has_default:false ~mode:Typing_defs_core.FPnormal
+                   ~ifc_external:false ~ifc_can_call:false ~is_atom:false);
+                  }
+                ];
+              ft_implicit_params =
+              { capability =
+                (Rhint (root|mutable.php line 9, characters 10-10),
+                 (Tunion []))
+                };
+              ft_ret =
+              { et_enforced = false;
+                et_type =
+                (Rhint (root|mutable.php line 9, characters 55-58),
+                 (Tprim Tvoid))
+                };
+              ft_flags =
+              (make_ft_flags FSync None ~return_disposable:false
+                ~returns_mutable:false ~returns_void_to_rx:false);
+              ft_reactive = Reactive {}; ft_ifc_decl = FDPolicied {PUBLIC} }));
+        fe_pos = [9:10-11]; fe_php_std_lib = false }));
+  ("\\h",
+   (Shallow_decl_defs.Fun
+      { Typing_defs.fe_deprecated = None;
+        fe_type =
+        (Rwitness (root|mutable.php line 12, characters 10-10),
+         (Tfun
+            { ft_arity = (Fstandard ()); ft_tparams = [];
+              ft_where_constraints = [];
+              ft_params =
+              [{ fp_pos = [12:50-52]; fp_name = (Some "$a");
+                 fp_type =
+                 { et_enforced = false;
+                   et_type =
+                   (Rhint (root|mutable.php line 12, characters 12-48),
+                    (Tfun
+                       { ft_arity = (Fstandard ()); ft_tparams = [];
+                         ft_where_constraints = [];
+                         ft_params =
+                         [{ fp_pos = [12:38-39]; fp_name = None;
+                            fp_type =
+                            { et_enforced = false;
+                              et_type =
+                              (Rhint (root|mutable.php line 12, characters 38-38),
+                               (Tapply (([12:38-39], "\\A"), [])))
+                              };
+                            fp_rx_annotation = None;
+                            fp_flags =
+                            (make_fp_flags
+                              ~mutability:(Some Typing_defs_core.Param_owned_mutable)
+                              ~accept_disposable:false ~has_default:false
+                              ~mode:Typing_defs_core.FPnormal
+                              ~ifc_external:false ~ifc_can_call:false
+                              ~is_atom:false);
+                             }
+                           ];
+                         ft_implicit_params =
+                         { capability =
+                           (Rhint (root|mutable.php line 12, characters 12-48),
+                            (Tunion []))
+                           };
+                         ft_ret =
+                         { et_enforced = false;
+                           et_type =
+                           (Rhint (root|mutable.php line 12, characters 43-46),
+                            (Tprim Tvoid))
+                           };
+                         ft_flags =
+                         (make_ft_flags FSync None ~return_disposable:false
+                           ~returns_mutable:false ~returns_void_to_rx:false);
+                         ft_reactive = Reactive {};
+                         ft_ifc_decl = FDPolicied {PUBLIC} }))
+                   };
+                 fp_rx_annotation = None;
+                 fp_flags =
+                 (make_fp_flags ~mutability:None ~accept_disposable:false
+                   ~has_default:false ~mode:Typing_defs_core.FPnormal
+                   ~ifc_external:false ~ifc_can_call:false ~is_atom:false);
+                  }
+                ];
+              ft_implicit_params =
+              { capability =
+                (Rhint (root|mutable.php line 12, characters 10-10),
+                 (Tunion []))
+                };
+              ft_ret =
+              { et_enforced = false;
+                et_type =
+                (Rhint (root|mutable.php line 12, characters 55-58),
+                 (Tprim Tvoid))
+                };
+              ft_flags =
+              (make_ft_flags FSync None ~return_disposable:false
+                ~returns_mutable:false ~returns_void_to_rx:false);
+              ft_reactive = Reactive {}; ft_ifc_decl = FDPolicied {PUBLIC} }));
+        fe_pos = [12:10-11]; fe_php_std_lib = false }));
+  ("\\i",
+   (Shallow_decl_defs.Fun
+      { Typing_defs.fe_deprecated = None;
+        fe_type =
+        (Rwitness (root|mutable.php line 15, characters 10-10),
+         (Tfun
+            { ft_arity = (Fstandard ()); ft_tparams = [];
+              ft_where_constraints = [];
+              ft_params =
+              [{ fp_pos = [15:46-48]; fp_name = (Some "$a");
+                 fp_type =
+                 { et_enforced = false;
+                   et_type =
+                   (Rhint (root|mutable.php line 15, characters 12-44),
+                    (Tfun
+                       { ft_arity = (Fstandard ()); ft_tparams = [];
+                         ft_where_constraints = []; ft_params = [];
+                         ft_implicit_params =
+                         { capability =
+                           (Rhint (root|mutable.php line 15, characters 12-44),
+                            (Tunion []))
+                           };
+                         ft_ret =
+                         { et_enforced = false;
+                           et_type =
+                           (Rhint (root|mutable.php line 15, characters 41-41),
+                            (Tapply (([15:41-42], "\\A"), [])))
+                           };
+                         ft_flags =
+                         (make_ft_flags FSync None ~return_disposable:false
+                           ~returns_mutable:true ~returns_void_to_rx:false);
+                         ft_reactive = Reactive {};
+                         ft_ifc_decl = FDPolicied {PUBLIC} }))
+                   };
+                 fp_rx_annotation = None;
+                 fp_flags =
+                 (make_fp_flags ~mutability:None ~accept_disposable:false
+                   ~has_default:false ~mode:Typing_defs_core.FPnormal
+                   ~ifc_external:false ~ifc_can_call:false ~is_atom:false);
+                  }
+                ];
+              ft_implicit_params =
+              { capability =
+                (Rhint (root|mutable.php line 15, characters 10-10),
+                 (Tunion []))
+                };
+              ft_ret =
+              { et_enforced = false;
+                et_type =
+                (Rhint (root|mutable.php line 15, characters 51-54),
+                 (Tprim Tvoid))
+                };
+              ft_flags =
+              (make_ft_flags FSync None ~return_disposable:false
+                ~returns_mutable:false ~returns_void_to_rx:false);
+              ft_reactive = Reactive {}; ft_ifc_decl = FDPolicied {PUBLIC} }));
+        fe_pos = [15:10-11]; fe_php_std_lib = false }))
+  ]
+
+They matched!

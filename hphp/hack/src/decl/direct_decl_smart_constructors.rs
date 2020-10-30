@@ -1648,34 +1648,54 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                 .filter_map(|&node| self.node_to_ty(node)),
         );
 
+        let pos = self.merge(base_ty.0, pos_to_merge);
+
+        // OCaml decl creates a capability with a hint pointing to the entire
+        // type (i.e., pointing to `Rx<(function(): void)>` rather than just
+        // `(function(): void)`), so we extend the hint position similarly here.
+        let extend_capability_pos = |implicit_params: &'a FunImplicitParams| {
+            self.alloc(FunImplicitParams {
+                capability: self.alloc(Ty(
+                    self.alloc(Reason::hint(pos)),
+                    implicit_params.capability.1,
+                )),
+                ..*implicit_params
+            })
+        };
+
         let ty_ = match (base_ty, type_arguments) {
             (Id(_, name), &[&Ty(_, Ty_::Tfun(f))]) if name == "\\Pure" => {
                 Ty_::Tfun(self.alloc(FunType {
                     reactive: Reactivity::Pure(None),
+                    implicit_params: extend_capability_pos(f.implicit_params),
                     ..*f
                 }))
             }
             (Id(_, name), &[&Ty(_, Ty_::Tfun(f))]) if name == "\\Rx" => {
                 Ty_::Tfun(self.alloc(FunType {
                     reactive: Reactivity::Reactive(None),
+                    implicit_params: extend_capability_pos(f.implicit_params),
                     ..*f
                 }))
             }
             (Id(_, name), &[&Ty(_, Ty_::Tfun(f))]) if name == "\\RxShallow" => {
                 Ty_::Tfun(self.alloc(FunType {
                     reactive: Reactivity::Shallow(None),
+                    implicit_params: extend_capability_pos(f.implicit_params),
                     ..*f
                 }))
             }
             (Id(_, name), &[&Ty(_, Ty_::Tfun(f))]) if name == "\\RxLocal" => {
                 Ty_::Tfun(self.alloc(FunType {
                     reactive: Reactivity::Local(None),
+                    implicit_params: extend_capability_pos(f.implicit_params),
                     ..*f
                 }))
             }
             _ => Ty_::Tapply(self.alloc((base_ty, type_arguments))),
         };
-        self.hint_ty(self.merge(base_ty.0, pos_to_merge), ty_)
+
+        self.hint_ty(pos, ty_)
     }
 
     fn hint_ty(&self, pos: &'a Pos<'a>, ty_: Ty_<'a>) -> Node<'a> {

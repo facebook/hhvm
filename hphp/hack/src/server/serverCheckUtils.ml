@@ -110,6 +110,7 @@ let get_check_info genv env : Typing_check_service.check_info =
       profile_total_typecheck_duration =
         GlobalOptions.profile_total_typecheck_duration
           (ServerConfig.typechecker_options genv.config);
+      profile_decling = genv.local_config.ServerLocalConfig.profile_decling;
       profile_type_check_twice;
       profile_type_check_duration_threshold;
     })

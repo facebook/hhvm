@@ -246,6 +246,7 @@
     typing_check_utils)
   (libraries
     core_kernel
+    decl_counters
     decl_service
     errors
     file_info

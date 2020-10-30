@@ -488,6 +488,8 @@ type t = {
   profile_type_check_duration_threshold: float;
   (* The flag "--config profile_type_check_twice=true" causes each file to be typechecked twice in succession. If --profile-log then both times are logged. *)
   profile_type_check_twice: bool;
+  (* The flag "--config profile_decling=..." says what kind of instrumentation we want for each decl *)
+  profile_decling: Typing_service_types.profile_decling;
   (* If --profile-log, we can use "--config profile_owner=<str>" to send an arbitrary "owner" along with the telemetry *)
   profile_owner: string option;
   (* If --profile-log, we can use "--config profile_desc=<str>" to send an arbitrary "desc" along with telemetry *)
@@ -572,6 +574,7 @@ let default =
     tico_invalidate_smart = false;
     profile_type_check_duration_threshold = 0.05;
     profile_type_check_twice = false;
+    profile_decling = Typing_service_types.DeclingOff;
     profile_owner = None;
     profile_desc = "";
     (* seconds *)
@@ -1010,6 +1013,18 @@ let load_ fn ~silent ~current_version overrides =
       ~default:default.profile_type_check_twice
       config
   in
+  let profile_decling =
+    match string_ "profile_decling" ~default:"off" config with
+    | "off" -> Typing_service_types.DeclingOff
+    | "top_counts" -> Typing_service_types.DeclingTopCounts
+    | "all_telemetry" ->
+      Typing_service_types.DeclingAllTelemetry { callstacks = false }
+    | "all_telemetry_callstacks" ->
+      Typing_service_types.DeclingAllTelemetry { callstacks = true }
+    | _ ->
+      failwith
+        "profile_decling: off | top_counts | all_telemetry | all_telemetry_callstacks"
+  in
   let profile_owner = string_opt "profile_owner" config in
   let profile_desc =
     string_ "profile_desc" ~default:default.profile_desc config
@@ -1097,6 +1112,7 @@ let load_ fn ~silent ~current_version overrides =
     tico_invalidate_smart;
     profile_type_check_duration_threshold;
     profile_type_check_twice;
+    profile_decling;
     profile_owner;
     profile_desc;
     go_to_implementation;

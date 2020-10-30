@@ -405,5 +405,6 @@
     counters
     logging
     utils_core
-    relative_path)
+    relative_path
+    typing_service_api)
   (preprocess (pps ppx_deriving.std)))

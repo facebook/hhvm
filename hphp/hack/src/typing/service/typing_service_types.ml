@@ -31,6 +31,23 @@ type typing_result = {
   telemetry: Telemetry.t;
 }
 
+(** This controls how much logging to do for each decl accessor.
+The user configures it via --config profile_decling=...
+This config is picked up by typing_check_service and tast_provider,
+i.e. the two places that cause typechecking work to happen. It's respected
+by Decl_counters, i.e. the place that's invoked on each decl accessor. *)
+type profile_decling =
+  | DeclingOff
+      (** Don't do any logging. This will be as fast as possible, for production. *)
+  | DeclingTopCounts
+      (** Keep track of the top-level decl acccessors only (Class, Fun, ...)
+      and count them using Counters.count, and leave other mechanisms
+      to pick up and report Counters telemetry *)
+  | DeclingAllTelemetry of { callstacks: bool }
+      (** Keep track of all decl accessors, including class accessors
+      like Class.get_tparams; log them to HackEventLogger.
+      The [callstacks] flag says whether to gather callstacks too; this is costly! *)
+
 let accumulate_job_output
     (produced_by_job : typing_result) (accumulated_so_far : typing_result) :
     typing_result =
@@ -60,6 +77,7 @@ type check_info = {
   recheck_id: string option;
   profile_log: bool;
   profile_total_typecheck_duration: bool;
+  profile_decling: profile_decling;
   profile_type_check_twice: bool;
   profile_type_check_duration_threshold: float;
 }

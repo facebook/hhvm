@@ -205,6 +205,7 @@ let make_remote_server_api
             profile_log = true;
             profile_total_typecheck_duration = false;
             profile_type_check_twice = false;
+            profile_decling = Typing_check_service.DeclingOff;
             profile_type_check_duration_threshold = 0.0;
           }
         in

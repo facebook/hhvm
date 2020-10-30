@@ -137,6 +137,7 @@ let test_dep_graph_blob () =
             profile_total_typecheck_duration = false;
             profile_type_check_duration_threshold = 0.0;
             profile_type_check_twice = false;
+            profile_decling = Typing_service_types.DeclingOff;
           }
       in
       let ctx =

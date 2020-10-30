@@ -17,6 +17,7 @@ val parsing :
   ?count:int ->
   float ->
   trace:bool ->
+  profile_label:string ->
   CgroupProfiler.MemStats.running ->
   ServerEnv.env * float
 
@@ -31,6 +32,7 @@ val update_files :
 val naming :
   ServerEnv.env ->
   float ->
+  profile_label:string ->
   CgroupProfiler.MemStats.running ->
   ServerEnv.env * float
 
@@ -40,5 +42,6 @@ val type_check :
   Relative_path.t list ->
   Telemetry.t ->
   float ->
+  profile_label:string ->
   CgroupProfiler.MemStats.running ->
   ServerEnv.env * float

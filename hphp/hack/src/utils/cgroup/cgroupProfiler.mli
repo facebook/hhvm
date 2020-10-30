@@ -7,6 +7,8 @@
  *)
 
 module MemStats : sig
+  type memory_result
+
   type running
 
   type finished
@@ -14,7 +16,7 @@ module MemStats : sig
   val sample_memory :
     group:string -> metric:string -> value:float -> running -> unit
 
-  val log_to_scuba : finished -> unit
+  val log_to_scuba : stage:string -> running -> unit
 end
 
 val collect_cgroup_stats :

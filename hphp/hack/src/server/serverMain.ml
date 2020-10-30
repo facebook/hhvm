@@ -1182,7 +1182,6 @@ let program_init genv env =
     let (mem_stats, (env, init_result)) =
       ServerInit.init ~init_approach genv env
     in
-    CgroupProfiler.print_summary_memory_table mem_stats;
     match init_approach with
     | ServerInit.Remote_init _ -> (env, mem_stats, "remote", None, None, None)
     | ServerInit.Write_symbol_info
@@ -1232,7 +1231,7 @@ let program_init genv env =
   in
   EventLogger.set_init_type init_type;
   let telemetry = ServerUtils.log_and_get_sharedmem_load_telemetry () in
-  CgroupProfiler.MemStats.log_to_scuba mem_stats;
+  CgroupProfiler.print_summary_memory_table mem_stats;
   HackEventLogger.init_lazy_end
     telemetry
     ~informant_use_xdb

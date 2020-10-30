@@ -72,13 +72,21 @@ let init
   (* Parsing entire repo, too many files to trace *)
   let trace = false in
   let (env, t) =
-    parsing ~lazy_parse genv env ~get_next t ~trace running_mem_stats
+    parsing
+      ~lazy_parse
+      genv
+      env
+      ~get_next
+      t
+      ~trace
+      ~profile_label:"parsing"
+      running_mem_stats
   in
   if not (ServerArgs.check_mode genv.options) then
     SearchServiceRunner.update_fileinfo_map env.naming_table SearchUtils.Init;
   let ctx = Provider_utils.ctx_from_server_env env in
   let t = update_files genv env.naming_table ctx t running_mem_stats in
-  let (env, t) = naming env t running_mem_stats in
+  let (env, t) = naming env t ~profile_label:"naming" running_mem_stats in
   let fast = Naming_table.to_fast env.naming_table in
   let failed_parsing = Errors.get_failed_files env.errorl Errors.Parsing in
   let fast =
@@ -100,4 +108,5 @@ let init
     (Relative_path.Map.keys fast)
     init_telemetry
     t
+    ~profile_label:"type_check"
     running_mem_stats

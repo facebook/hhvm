@@ -6,6 +6,7 @@ module MemStats = struct
   }
 
   and running' = {
+    event: string;
     running_groups_rev: string list;
     running_results: memory_result SMap.t SMap.t;
     running_sub_results_rev: finished list;
@@ -53,6 +54,25 @@ module MemStats = struct
     in
     set_metric ~group ~metric new_metric running_memory
 
+  let log_result_to_scuba
+      ~(event : string) ~(stage : string) (result : memory_result SMap.t) : unit
+      =
+    SMap.iter
+      (fun metric value ->
+        HackEventLogger.CGroup.profile
+          ~event
+          ~stage
+          ~metric
+          ~start:value.start
+          ~delta:value.delta
+          ~hwm_delta:value.high_water_mark_delta)
+      result
+
+  let log_to_scuba ~(stage : string) (profiling : running) : unit =
+    match SMap.find_opt stage !profiling.running_results with
+    | None -> ()
+    | Some result -> log_result_to_scuba ~event:!profiling.event ~stage result
+
   let sample_memory ~group ~metric ~value running_memory =
     match get_metric ~group ~metric running_memory with
     | None -> start_sampling ~group ~metric ~value running_memory
@@ -66,24 +86,6 @@ module MemStats = struct
         }
       in
       set_metric ~group ~metric new_metric running_memory
-
-  let log_to_scuba (mem_stats : finished) : unit =
-    List.iter
-      (fun phase ->
-        match SMap.find_opt phase mem_stats.finished_results with
-        | None -> ()
-        | Some result ->
-          SMap.iter
-            (fun metric value ->
-              let label = "[" ^ mem_stats.finished_label ^ "]" in
-              let phase = label ^ " [" ^ phase ^ "] " ^ metric in
-              HackEventLogger.CGroup.profile
-                ~phase
-                ~start:value.start
-                ~delta:value.delta
-                ~hwm_delta:value.high_water_mark_delta)
-            result)
-      mem_stats.finished_groups
 
   let print_summary_memory_table =
     let pretty_num f =
@@ -225,6 +227,7 @@ let profile_memory ~label ~f =
     ref
       MemStats.
         {
+          event = label;
           running_groups_rev = [];
           running_results = SMap.empty;
           running_sub_results_rev = [];

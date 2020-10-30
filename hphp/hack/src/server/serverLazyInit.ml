@@ -199,9 +199,7 @@ let download_and_load_state_exn
     ~(target : ServerMonitorUtils.target_saved_state option)
     ~(genv : ServerEnv.genv)
     ~(ctx : Provider_context.t)
-    ~(root : Path.t)
-    (running_mem_stats : CgroupProfiler.MemStats.running) :
-    (loaded_info, load_state_error) result =
+    ~(root : Path.t) : (loaded_info, load_state_error) result =
   let open ServerMonitorUtils in
   let saved_state_handle =
     match target with
@@ -229,24 +227,19 @@ let download_and_load_state_exn
         && not genv.local_config.load_state_natively_64bit)
     then begin
       Hh_logger.log "Starting naming table download.";
-      CgroupProfiler.collect_cgroup_stats
-        running_mem_stats
-        ~group:"download naming table"
-        ~f:(fun () ->
-          let loader_future =
-            State_loader_futures.load
-              ~watchman_opts:
-                Saved_state_loader.Watchman_options.{ root; sockname = None }
-              ~ignore_hh_version
-              ~saved_state_type:Saved_state_loader.Naming_table
-            |> Future.with_timeout ~timeout:60
-          in
-          Future.continue_and_map_err loader_future @@ fun result ->
-          match result with
-          | Ok (Ok load_state) -> Ok (Some load_state)
-          | Ok (Error e) ->
-            Error (Saved_state_loader.long_user_message_of_error e)
-          | Error e -> Error (Future.error_to_string e))
+      let loader_future =
+        State_loader_futures.load
+          ~watchman_opts:
+            Saved_state_loader.Watchman_options.{ root; sockname = None }
+          ~ignore_hh_version
+          ~saved_state_type:Saved_state_loader.Naming_table
+        |> Future.with_timeout ~timeout:60
+      in
+      Future.continue_and_map_err loader_future @@ fun result ->
+      match result with
+      | Ok (Ok load_state) -> Ok (Some load_state)
+      | Ok (Error e) -> Error (Saved_state_loader.long_user_message_of_error e)
+      | Error e -> Error (Future.error_to_string e)
     end else
       Future.of_value (Ok None)
   in
@@ -706,8 +699,18 @@ let type_check_dirty
            ~value:(Relative_path.Set.cardinal to_recheck)
     in
     let result =
-      type_check genv env files_to_check init_telemetry t running_mem_stats
+      type_check
+        genv
+        env
+        files_to_check
+        init_telemetry
+        t
+        ~profile_label:"type check dirty files"
+        running_mem_stats
     in
+    CgroupProfiler.MemStats.log_to_scuba
+      ~stage:"type check dirty files"
+      running_mem_stats;
     HackEventLogger.type_check_dirty
       ~start_t
       ~dirty_count:(Relative_path.Set.cardinal dirty_files_changed_hash)
@@ -771,14 +774,23 @@ let initialize_naming_table
   (* full init - too many files to trace all of them *)
   let trace = false in
   let (env, t) =
-    parsing ~lazy_parse genv env ~get_next ?count t ~trace running_mem_stats
+    parsing
+      ~lazy_parse
+      genv
+      env
+      ~get_next
+      ?count
+      t
+      ~trace
+      ~profile_label:"parsing"
+      running_mem_stats
   in
   if not do_naming then
     (env, t)
   else
     let ctx = Provider_utils.ctx_from_server_env env in
     let t = update_files genv env.naming_table ctx t running_mem_stats in
-    naming env t running_mem_stats
+    naming env t ~profile_label:"naming" running_mem_stats
 
 let load_naming_table
     (genv : ServerEnv.genv)
@@ -866,7 +878,7 @@ let write_symbol_info_init
   in
   let ctx = Provider_utils.ctx_from_server_env env in
   let t = update_files genv env.naming_table ctx t running_mem_stats in
-  let (env, t) = naming env t running_mem_stats in
+  let (env, t) = naming env t ~profile_label:"naming" running_mem_stats in
   let index_paths = env.swriteopt.symbol_write_index_paths in
   let files =
     if List.length index_paths > 0 then
@@ -962,7 +974,14 @@ let full_init
     else
       env
   in
-  type_check genv env fnl init_telemetry t running_mem_stats
+  type_check
+    genv
+    env
+    fnl
+    init_telemetry
+    t
+    ~profile_label:"type_check"
+    running_mem_stats
 
 let parse_only_init
     (genv : ServerEnv.genv)
@@ -1090,8 +1109,12 @@ let post_saved_state_initialization
       ~count:(List.length parsing_files_list)
       t
       ~trace
+      ~profile_label:"parse dirty files"
       running_mem_stats
   in
+  CgroupProfiler.MemStats.log_to_scuba
+    ~stage:"parse dirty files"
+    running_mem_stats;
   SearchServiceRunner.update_fileinfo_map
     env.naming_table
     SearchUtils.TypeChecker;
@@ -1101,7 +1124,13 @@ let post_saved_state_initialization
     naming_from_saved_state ctx old_naming_table parsing_files naming_table_fn t
   in
   (* Do global naming on all dirty files *)
-  let (env, t) = naming env t running_mem_stats in
+  let (env, t) =
+    naming env t ~profile_label:"naming dirty files" running_mem_stats
+  in
+  CgroupProfiler.MemStats.log_to_scuba
+    ~stage:"naming dirty files"
+    running_mem_stats;
+
   (* Add all files from fast to the files_info object *)
   let fast = Naming_table.to_fast env.naming_table in
   let failed_parsing = Errors.get_failed_files env.errorl Errors.Parsing in
@@ -1202,25 +1231,33 @@ let saved_state_init
   let timeout = 2 * genv.local_config.SLC.load_state_script_timeout in
   (* following function will be run under the timeout *)
   let do_ (_id : Timeout.t) : (loaded_info, load_state_error) result =
-    match load_state_approach with
-    | Precomputed info ->
-      Ok (use_precomputed_state_exn genv ctx info running_mem_stats)
-    | Load_state_natively use_canary ->
-      download_and_load_state_exn
-        ~use_canary
-        ~target:None
-        ~genv
-        ~ctx
-        ~root
+    let state_result =
+      CgroupProfiler.collect_cgroup_stats
         running_mem_stats
-    | Load_state_natively_with_target target ->
-      download_and_load_state_exn
-        ~use_canary:false
-        ~target:(Some target)
-        ~genv
-        ~ctx
-        ~root
-        running_mem_stats
+        ~group:"load saved state"
+        ~f:(fun () ->
+          match load_state_approach with
+          | Precomputed info ->
+            Ok (use_precomputed_state_exn genv ctx info running_mem_stats)
+          | Load_state_natively use_canary ->
+            download_and_load_state_exn
+              ~use_canary
+              ~target:None
+              ~genv
+              ~ctx
+              ~root
+          | Load_state_natively_with_target target ->
+            download_and_load_state_exn
+              ~use_canary:false
+              ~target:(Some target)
+              ~genv
+              ~ctx
+              ~root)
+    in
+    CgroupProfiler.MemStats.log_to_scuba
+      ~stage:"load saved state"
+      running_mem_stats;
+    state_result
   in
   let state_result =
     try

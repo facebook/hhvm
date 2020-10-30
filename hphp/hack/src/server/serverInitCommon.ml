@@ -37,11 +37,12 @@ let parsing
     ?(count : int option)
     (t : float)
     ~(trace : bool)
+    ~(profile_label : string)
     (running_memory_stats : CgroupProfiler.MemStats.running) :
     ServerEnv.env * float =
   CgroupProfiler.collect_cgroup_stats
     running_memory_stats
-    ~group:"parsing"
+    ~group:profile_label
     ~f:(fun () ->
       begin
         match count with
@@ -97,11 +98,12 @@ let update_files
 let naming
     (env : ServerEnv.env)
     (t : float)
+    ~(profile_label : string)
     (running_memory_stats : CgroupProfiler.MemStats.running) :
     ServerEnv.env * float =
   CgroupProfiler.collect_cgroup_stats
     running_memory_stats
-    ~group:"naming"
+    ~group:profile_label
     ~f:(fun () ->
       ServerProgress.send_progress_to_monitor "resolving symbol references";
       let ctx = Provider_utils.ctx_from_server_env env in
@@ -174,11 +176,12 @@ let type_check
     (files_to_check : Relative_path.t list)
     (init_telemetry : Telemetry.t)
     (t : float)
+    ~(profile_label : string)
     (running_mem_stats : CgroupProfiler.MemStats.running) :
     ServerEnv.env * float =
   CgroupProfiler.collect_cgroup_stats
     running_mem_stats
-    ~group:"type check"
+    ~group:profile_label
     ~f:(fun () ->
       (* No type checking in AI mode *)
       if Option.is_some (ServerArgs.ai_mode genv.options) then

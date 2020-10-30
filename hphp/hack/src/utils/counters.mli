@@ -8,7 +8,6 @@
 
 module Category : sig
   type t =
-    | Decl_accessors
     | Decling
     | Disk_cat
     | Get_ast
@@ -33,8 +32,6 @@ val reset : enabled_categories:CategorySet.t -> t
 val restore_state : t -> unit
 
 val count : Category.t -> (unit -> 'a) -> 'a
-
-val count_decl_accessor : (unit -> 'a) -> 'a
 
 val count_disk_cat : (unit -> 'a) -> 'a
 

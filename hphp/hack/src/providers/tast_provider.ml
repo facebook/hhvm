@@ -57,7 +57,7 @@ let compute_tast_and_errors_unquarantined_internal
       Counters.(
         reset
           ~enabled_categories:
-            (CategorySet.of_list Category.[Decl_accessors; Disk_cat; Get_ast]))
+            (CategorySet.of_list Category.[Decling; Disk_cat; Get_ast]))
     in
     let t = Unix.gettimeofday () in
 

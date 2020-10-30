@@ -72,11 +72,9 @@ type subdecl_kind =
 
 let count_decl (kind : decl_kind) (name : string) (f : decl option -> 'a) : 'a =
   ignore (name, kind);
-  Counters.count_decl_accessor (fun () -> f None)
+  f None
 
 let count_subdecl (decl : decl option) (kind : subdecl_kind) (f : unit -> 'a) :
     'a =
-  ignore kind;
-  match decl with
-  | None -> f ()
-  | Some _ -> Counters.count_decl_accessor f
+  ignore (decl, kind);
+  f ()

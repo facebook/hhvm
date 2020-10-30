@@ -380,7 +380,7 @@ let process_files
         let categories = [] in
         let categories =
           if check_info.profile_log then
-            Decl_accessors :: Get_ast :: Disk_cat :: Typecheck :: categories
+            Get_ast :: Disk_cat :: Typecheck :: Decling :: categories
           else
             categories
         in

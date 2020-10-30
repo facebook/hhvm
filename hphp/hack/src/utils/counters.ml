@@ -14,7 +14,6 @@ module Category = struct
   [@@@warning "-32"]
 
   type t =
-    | Decl_accessors
     | Decling
     | Disk_cat
     | Get_ast
@@ -25,7 +24,6 @@ module Category = struct
 
   let to_string (category : t) : string =
     match category with
-    | Decl_accessors -> "decl_accessors"
     | Decling -> "decling"
     | Disk_cat -> "disk_cat"
     | Get_ast -> "get_ast"
@@ -83,7 +81,6 @@ let get_time (category : Category.t) : unit -> time_in_sec =
       let t = gettimeofday() in t.tv_sec + t.tv_usec / 1e6 *)
     Unix.gettimeofday
   | Category.Typecheck
-  | Category.Decl_accessors
   | Category.Decling
   | Category.Get_ast ->
     (* CPU time, excluding I/O, implemented in C in one of three ways depending on ocaml compilation flags:
@@ -107,8 +104,6 @@ let count (category : Category.t) (f : unit -> 'a) : 'a =
             time = tally.time +. get_time () -. start_time;
             enabled = tally.enabled;
           })
-
-let count_decl_accessor (f : unit -> 'a) : 'a = count C.Decl_accessors f
 
 let count_disk_cat (f : unit -> 'a) : 'a = count C.Disk_cat f
 

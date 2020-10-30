@@ -750,7 +750,10 @@ SrcKey getSrcKey() {
   auto const fp = vmfp();
   auto const func = fp->func();
   if (!func->contains(vmpc())) return SrcKey();
-  return canonicalize(SrcKey(func, vmpc(), resumeModeFromActRec(fp)));
+
+  auto const result = SrcKey(func, vmpc(), ResumeMode::None);
+  assertx(canonicalize(result) == result);
+  return result;
 }
 
 //////////////////////////////////////////////////////////////////////////////

@@ -554,6 +554,7 @@ let env_as_value env =
     lenv;
     genv;
     decl_env = _;
+    origin = _;
     in_loop;
     in_try;
     in_case;

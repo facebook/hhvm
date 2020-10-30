@@ -5,6 +5,7 @@
 
 pub mod ast;
 pub mod blame_set;
+pub mod decl_counters;
 pub mod decl_env;
 pub mod direct_decl_parser;
 pub mod doc_comment;

@@ -26,13 +26,17 @@ let is_trait_kind (k : Ast_defs.class_kind) : bool =
   | _ -> false
 
 let is_trait_name ctx (type_name : string) : bool =
-  let decl = Decl_provider.get_class ctx type_name in
+  let decl =
+    Decl_provider.get_class ~origin:Decl_counters.NastCheck ctx type_name
+  in
   match decl with
   | Some decl -> is_trait_kind (Cls.kind decl)
   | None -> false
 
 let is_class_name ctx (type_name : string) : bool =
-  let decl = Decl_provider.get_class ctx type_name in
+  let decl =
+    Decl_provider.get_class ~origin:Decl_counters.NastCheck ctx type_name
+  in
   match decl with
   | Some decl -> is_class_kind (Cls.kind decl)
   | None -> false
@@ -40,7 +44,9 @@ let is_class_name ctx (type_name : string) : bool =
 (* All the parent classes, used traits, and implemented interfaces of
    [type_name]. This is the flattened inheritance tree. *)
 let all_ancestor_names ctx (type_name : string) : string list =
-  let decl = Decl_provider.get_class ctx type_name in
+  let decl =
+    Decl_provider.get_class ~origin:Decl_counters.NastCheck ctx type_name
+  in
   match decl with
   | Some decl -> Decl_provider.Class.all_ancestor_names decl
   | None -> []
@@ -48,14 +54,18 @@ let all_ancestor_names ctx (type_name : string) : string list =
 (* Does trait/class [type_name] use [trait_name]? Includes indirect
    usage. *)
 let type_uses_trait ctx (type_name : string) (trait_name : string) : bool =
-  let decl = Decl_provider.get_class ctx type_name in
+  let decl =
+    Decl_provider.get_class ~origin:Decl_counters.NastCheck ctx type_name
+  in
   match decl with
   | Some decl -> Cls.has_ancestor decl trait_name
   | None -> false
 
 (* Return the position where class/trait [type_name] is defined. *)
 let classish_def_pos ctx type_name : Pos.t =
-  let decl = Decl_provider.get_class ctx type_name in
+  let decl =
+    Decl_provider.get_class ~origin:Decl_counters.NastCheck ctx type_name
+  in
   match decl with
   | Some decl -> Cls.pos decl
   | None -> Pos.none
@@ -96,7 +106,9 @@ let find_using_class ctx cls_name (trait_name : string) : string =
 (* Find the first use site in class/trait [type_name] of
    [trait_name], directly or via another trait. *)
 let trait_use_pos ctx (type_name : string) (trait_name : string) : Pos.t =
-  let decl = Decl_provider.get_class ctx type_name in
+  let decl =
+    Decl_provider.get_class ~origin:Decl_counters.NastCheck ctx type_name
+  in
   match decl with
   | Some decl ->
     let trait_ty = Cls.get_ancestor decl trait_name in
@@ -109,7 +121,9 @@ let trait_use_pos ctx (type_name : string) (trait_name : string) : Pos.t =
    both instance and static methods. *)
 let final_methods ctx (type_name : string) :
     (string * Typing_defs.class_elt) list =
-  let decl = Decl_provider.get_class ctx type_name in
+  let decl =
+    Decl_provider.get_class ~origin:Decl_counters.NastCheck ctx type_name
+  in
   match decl with
   | Some decl ->
     let methods = Cls.methods decl @ Cls.smethods decl in

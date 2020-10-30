@@ -224,28 +224,28 @@ let fun_env ctx f =
   let ctx =
     Provider_context.map_tcopt ctx ~f:(fun _tcopt -> f.f_annotation.tcopt)
   in
-  let env = EnvFromDef.fun_env ctx f in
+  let env = EnvFromDef.fun_env ~origin:Decl_counters.Tast ctx f in
   restore_fun_env env f
 
 let class_env ctx c =
   let ctx =
     Provider_context.map_tcopt ctx ~f:(fun _tcopt -> c.c_annotation.tcopt)
   in
-  let env = EnvFromDef.class_env ctx c in
+  let env = EnvFromDef.class_env ~origin:Decl_counters.Tast ctx c in
   restore_saved_env env c.c_annotation
 
 let typedef_env ctx t =
   let ctx =
     Provider_context.map_tcopt ctx ~f:(fun _tcopt -> t.t_annotation.tcopt)
   in
-  let env = EnvFromDef.typedef_env ctx t in
+  let env = EnvFromDef.typedef_env ~origin:Decl_counters.Tast ctx t in
   restore_saved_env env t.t_annotation
 
 let gconst_env ctx cst =
   let ctx =
     Provider_context.map_tcopt ctx ~f:(fun _tcopt -> cst.cst_annotation.tcopt)
   in
-  let env = EnvFromDef.gconst_env ctx cst in
+  let env = EnvFromDef.gconst_env ~origin:Decl_counters.Tast ctx cst in
   restore_saved_env env cst.cst_annotation
 
 let def_env ctx d =

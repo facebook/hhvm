@@ -260,10 +260,14 @@ let get_class_variance ctx root (pos, class_name) =
     let dep = Typing_deps.Dep.Class class_name in
     Typing_deps.add_idep (Provider_context.get_deps_mode ctx) (fst root) dep;
     let tparams =
-      match Decl_provider.get_typedef ctx class_name with
+      match
+        Decl_provider.get_typedef ~origin:Decl_counters.Variance ctx class_name
+      with
       | Some { td_tparams; _ } -> td_tparams
       | None ->
-        (match Decl_provider.get_class ctx class_name with
+        (match
+           Decl_provider.get_class ~origin:Decl_counters.Variance ctx class_name
+         with
         | None -> []
         | Some cls -> Cls.tparams cls)
     in
@@ -298,7 +302,9 @@ let rec class_ tcopt class_name class_type impl =
 (* The entry point (for typedefs). *)
 (*****************************************************************************)
 and typedef ctx type_name =
-  match Decl_provider.get_typedef ctx type_name with
+  match
+    Decl_provider.get_typedef ~origin:Decl_counters.Variance ctx type_name
+  with
   | Some { td_tparams; td_type; td_pos = _; td_constraint = _; td_vis = _ } ->
     let root = (Typing_deps.Dep.Class type_name, None) in
     let env =

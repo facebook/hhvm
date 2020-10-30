@@ -597,7 +597,11 @@ let check_class env c =
     let open Option in
     let res =
       get_parent_name_and_pos hint >>= fun (p, name) ->
-      Decl_provider.get_class env.Nast_check_env.ctx name >>| fun parent ->
+      Decl_provider.get_class
+        ~origin:Decl_counters.NastCheck
+        env.Nast_check_env.ctx
+        name
+      >>| fun parent ->
       let pu_enums = Cls.pu_enums parent in
       List.fold
         ~init

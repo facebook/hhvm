@@ -430,7 +430,9 @@ and fun_implicit_return env pos ret = function
     let rty = MakeType.awaitable r (MakeType.void r) in
     Typing_return.implicit_return env pos ~expected:ret ~actual:rty
 
-and block env stl = List.map_env env stl ~f:stmt
+and block env stl =
+  Typing_env.with_origin env Decl_counters.Body @@ fun env ->
+  List.map_env env stl ~f:stmt
 
 (* Set a local; must not be already assigned if it is a using variable *)
 and set_local ?(is_using_clause = false) env (pos, x) ty =
@@ -7109,7 +7111,7 @@ and type_param env t =
     } )
 
 and typedef_def ctx typedef =
-  let env = EnvFromDef.typedef_env ctx typedef in
+  let env = EnvFromDef.typedef_env ~origin:Decl_counters.TopLevel ctx typedef in
   let env =
     Phase.localize_and_add_ast_generic_parameters_and_where_constraints
       (fst typedef.t_name)
@@ -7293,4 +7295,9 @@ and class_get_pu_ env cty name =
     end
 
 (* External API *)
-let expr ?expected env e = expr ?expected env e
+let expr ?expected env e =
+  Typing_env.with_origin2 env Decl_counters.Body (fun env ->
+      expr ?expected env e)
+
+let stmt env st =
+  Typing_env.with_origin env Decl_counters.Body (fun env -> stmt env st)

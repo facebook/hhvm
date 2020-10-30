@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<753e913b7e27792d456be62032e81729>>
+// @generated SignedSource<<0e930968620c373264df0941f4afbb39>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -65,6 +65,7 @@ pub struct Env<'a> {
     pub in_try: bool,
     pub in_case: bool,
     pub inside_constructor: bool,
+    pub origin: Option<&'a decl_counters::Origin<'a>>,
     pub global_tpenv: &'a type_parameter_env::TypeParameterEnv<'a>,
     pub log_levels: s_map::SMap<'a, isize>,
     pub inference_env: &'a typing_inference_env::TypingInferenceEnv<'a>,

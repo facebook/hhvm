@@ -30,6 +30,10 @@ type env = {
   in_try: bool;
   in_case: bool;
   inside_constructor: bool;
+  (* Origin is a way, when we record telemetry on costs, to also record which
+  area of the typing code should be considered the originator of that work,
+  so we can add up which area contributed most to overall costs. *)
+  origin: Decl_counters.origin option;
   (* A set of constraints that are global to a given method *)
   global_tpenv: Type_parameter_env.t;
   log_levels: int SMap.t;

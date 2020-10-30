@@ -44,6 +44,8 @@ let get_ctx env = env.decl_env.Decl_env.ctx
 
 let get_file env = env.genv.file
 
+let get_origin env = env.origin
+
 let set_log_level env key log_level =
   { env with log_levels = SMap.add key log_level env.log_levels }
 
@@ -560,7 +562,7 @@ let initial_local tpenv local_reactive =
     local_reactive;
   }
 
-let empty ?(mode = FileInfo.Mstrict) ctx file ~droot =
+let empty ?origin ?(mode = FileInfo.Mstrict) ctx file ~droot =
   {
     function_pos = Pos.none;
     fresh_typarams = SSet.empty;
@@ -570,6 +572,7 @@ let empty ?(mode = FileInfo.Mstrict) ctx file ~droot =
     in_case = false;
     inside_constructor = false;
     decl_env = { mode; droot; ctx };
+    origin;
     genv =
       {
         tcopt = Provider_context.get_tcopt ctx;
@@ -660,7 +663,11 @@ let get_typedef env x =
   print_size
     "type"
     x
-    (Decl_provider.get_typedef ~file:(get_file env) (get_ctx env) x)
+    (Decl_provider.get_typedef
+       ?origin:(get_origin env)
+       ~file:(get_file env)
+       (get_ctx env)
+       x)
 
 let is_typedef env x =
   match Naming_provider.get_type_kind (get_ctx env) x with
@@ -672,7 +679,11 @@ let get_class (env : env) (name : string) : Cls.t option =
   print_size
     "class"
     name
-    (Decl_provider.get_class ~file:(get_file env) (get_ctx env) name)
+    (Decl_provider.get_class
+       ?origin:(get_origin env)
+       ~file:(get_file env)
+       (get_ctx env)
+       name)
 
 let get_class_dep env x =
   Decl_env.add_extends_dependency env.decl_env x;
@@ -685,7 +696,11 @@ let get_fun env x =
   print_size
     "fun"
     x
-    (Decl_provider.get_fun ~file:(get_file env) (get_ctx env) x)
+    (Decl_provider.get_fun
+       ?origin:(get_origin env)
+       ~file:(get_file env)
+       (get_ctx env)
+       x)
 
 let get_enum_constraint env x =
   match get_class env x with
@@ -702,7 +717,13 @@ let get_env_mutability env = env.lenv.local_mutability
 
 let get_enum env x =
   make_depend_on_class env x;
-  match Decl_provider.get_class ~file:(get_file env) (get_ctx env) x with
+  match
+    Decl_provider.get_class
+      ?origin:(get_origin env)
+      ~file:(get_file env)
+      (get_ctx env)
+      x
+  with
   | Some tc when Option.is_some (Cls.enum_type tc) -> Some tc
   | _ -> None
 
@@ -745,7 +766,11 @@ let get_gconst env cst_name =
   let dep = Dep.GConst cst_name in
   Option.iter env.decl_env.droot (fun root ->
       Typing_deps.add_idep (get_deps_mode env) root dep);
-  Decl_provider.get_gconst ~file:(get_file env) (get_ctx env) cst_name
+  Decl_provider.get_gconst
+    ?origin:(get_origin env)
+    ~file:(get_file env)
+    (get_ctx env)
+    cst_name
 
 let get_static_member is_method env class_ mid =
   make_depend_on_class env (Cls.name class_);
@@ -879,6 +904,20 @@ let with_env env f =
   let env = set_params env params in
   let env = set_return env ret in
   (env, result)
+
+let with_origin env origin f =
+  let old_origin = env.origin in
+  let env = { env with origin = Some origin } in
+  let (env, result) = f env in
+  let env = { env with origin = old_origin } in
+  (env, result)
+
+let with_origin2 env origin f =
+  let old_origin = env.origin in
+  let env = { env with origin = Some origin } in
+  let (env, r1, r2) = f env in
+  let env = { env with origin = old_origin } in
+  (env, r1, r2)
 
 let is_static env = env.genv.static
 

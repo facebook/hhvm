@@ -25,6 +25,8 @@ val get_deps_mode : env -> Typing_deps_mode.t
 
 val get_ctx : env -> Provider_context.t
 
+val get_origin : env -> Decl_counters.origin option
+
 val fresh_type : env -> Pos.t -> env * locl_ty
 
 (** Same as fresh_type but takes a specific reason as parameter. *)
@@ -61,6 +63,7 @@ val get_shape_field_name : Ast_defs.shape_field_name -> string
 val get_shape_field_name_pos : Ast_defs.shape_field_name -> Pos.t
 
 val empty :
+  ?origin:Decl_counters.origin ->
   ?mode:FileInfo.mode ->
   Provider_context.t ->
   Relative_path.t ->
@@ -138,6 +141,11 @@ val log_env_change : string -> ?level:int -> env -> env -> env
 val clear_params : env -> env
 
 val with_env : env -> (env -> env * 'a) -> env * 'a
+
+val with_origin : env -> Decl_counters.origin -> (env -> env * 'a) -> env * 'a
+
+val with_origin2 :
+  env -> Decl_counters.origin -> (env -> env * 'a * 'b) -> env * 'a * 'b
 
 val is_static : env -> bool
 

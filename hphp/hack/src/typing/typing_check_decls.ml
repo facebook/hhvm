@@ -145,7 +145,9 @@ and hint_ ~is_atom env p h_ =
     Errors.tuple_syntax p
   | Happly ((_, x), hl) as h when Env.is_typedef env.tenv x ->
     begin
-      match Decl_provider.get_typedef (get_ctx env) x with
+      match
+        Decl_provider.get_typedef ~origin:Decl_counters.TopLevel (get_ctx env) x
+      with
       | Some _ ->
         check_happly env.typedef_tparams env.tenv (p, h);
         List.iter hl (hint env)

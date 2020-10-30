@@ -19,6 +19,9 @@ type decl_kind =
   | Record_def
   | Typedef
 
+(** The idea of [origin] is so that callsites have a way of characterizing
+what they are, and have this characterization end up in telemetry.
+That's all. *)
 type origin =
   | Body  (** block, expr, statement *)
   | TopLevel  (** typing_toplevel stuff, well-formedness *)

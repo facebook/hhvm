@@ -109,7 +109,12 @@ let make_handler ctx =
 
       method! at_fun_ env f =
         let fid = snd f.f_name in
-        match Decl_provider.get_fun ctx (snd f.f_name) with
+        match
+          Decl_provider.get_fun
+            ~origin:Decl_counters.TastCheck
+            ctx
+            (snd f.f_name)
+        with
         | Some { fe_type; _ } ->
           begin
             match get_node fe_type with
@@ -122,7 +127,9 @@ let make_handler ctx =
 
       method! at_class_ env c =
         let cid = snd c.c_name in
-        match Decl_provider.get_class ctx cid with
+        match
+          Decl_provider.get_class ~origin:Decl_counters.TastCheck ctx cid
+        with
         | None -> ()
         | Some cls -> check_redundant_generics_class env (snd c.c_name) cls
     end

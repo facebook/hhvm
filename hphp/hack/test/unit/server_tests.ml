@@ -119,6 +119,7 @@ let test_process_file_deferring () =
   let errors = Errors.empty in
 
   (* Finally, this is what all the setup was for: process this file *)
+  Decl_counters.set_mode Typing_service_types.DeclingTopCounts;
   let prev_counter_state =
     Counters.(
       reset

@@ -47,7 +47,6 @@ module Cache =
 
 let get_class (ctx : Provider_context.t) (class_name : class_key) :
     class_decl option =
-  Counters.count Counters.Category.Decling @@ fun () ->
   Decl_counters.count_decl Decl_counters.Class class_name @@ fun counter ->
   (* There's a confusing matrix of possibilities:
   SHALLOW - in this case, the Typing_classes_heap.class_t we get back is
@@ -98,7 +97,6 @@ let get_class (ctx : Provider_context.t) (class_name : class_key) :
       Some (counter, v))
 
 let get_fun (ctx : Provider_context.t) (fun_name : fun_key) : fun_decl option =
-  Counters.count Counters.Category.Decling @@ fun () ->
   Decl_counters.count_decl Decl_counters.Fun fun_name @@ fun _counter ->
   match Provider_context.get_backend ctx with
   | Provider_backend.Shared_memory ->
@@ -135,7 +133,6 @@ let get_fun (ctx : Provider_context.t) (fun_name : fun_key) : fun_decl option =
 
 let get_typedef (ctx : Provider_context.t) (typedef_name : string) :
     typedef_decl option =
-  Counters.count Counters.Category.Decling @@ fun () ->
   Decl_counters.count_decl Decl_counters.Typedef typedef_name @@ fun _counter ->
   match Provider_context.get_backend ctx with
   | Provider_backend.Shared_memory ->
@@ -176,7 +173,6 @@ let get_typedef (ctx : Provider_context.t) (typedef_name : string) :
 
 let get_record_def (ctx : Provider_context.t) (record_name : string) :
     record_def_decl option =
-  Counters.count Counters.Category.Decling @@ fun () ->
   Decl_counters.count_decl Decl_counters.Record_def record_name
   @@ fun _counter ->
   match Provider_context.get_backend ctx with
@@ -218,7 +214,6 @@ let get_record_def (ctx : Provider_context.t) (record_name : string) :
 
 let get_gconst (ctx : Provider_context.t) (gconst_name : string) :
     gconst_decl option =
-  Counters.count Counters.Category.Decling @@ fun () ->
   Decl_counters.count_decl Decl_counters.GConst gconst_name @@ fun _counter ->
   match Provider_context.get_backend ctx with
   | Provider_backend.Shared_memory ->

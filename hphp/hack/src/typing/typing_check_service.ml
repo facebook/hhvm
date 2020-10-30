@@ -390,6 +390,7 @@ let process_files
           else
             categories
         in
+        Decl_counters.set_mode check_info.profile_decling;
         reset ~enabled_categories:(CategorySet.of_list categories)))
   in
   let (_start_time, start_counters) = read_counters () in

@@ -170,10 +170,12 @@
   (name tast_provider)
   (modules tast_provider)
   (libraries
+    decl_counters
     decl_provider
     provider_utils
     tast
-    typing)
+    typing
+    typing_service_api)
   (preprocess (pps ppx_deriving.std)))
 
 (library

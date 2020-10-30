@@ -6,6 +6,8 @@
  *
  *)
 
+let mode = ref Typing_service_types.DeclingOff
+
 type decl
 
 type decl_kind =
@@ -70,9 +72,20 @@ type subdecl_kind =
   (* Misc *)
   | Deferred_init_members
 
+let set_mode (new_mode : Typing_service_types.profile_decling) : unit =
+  mode := new_mode;
+  match !mode with
+  | Typing_service_types.DeclingOff
+  | Typing_service_types.DeclingTopCounts ->
+    ()
+  | _ -> failwith "TODO(ljw): implement other modes"
+
 let count_decl (kind : decl_kind) (name : string) (f : decl option -> 'a) : 'a =
   ignore (name, kind);
-  f None
+  match !mode with
+  | Typing_service_types.DeclingTopCounts ->
+    Counters.count Counters.Category.Decling (fun () -> f None)
+  | _ -> f None
 
 let count_subdecl (decl : decl option) (kind : subdecl_kind) (f : unit -> 'a) :
     'a =

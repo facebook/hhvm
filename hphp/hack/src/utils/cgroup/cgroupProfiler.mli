@@ -6,23 +6,18 @@
  *
  *)
 
-module MemStats : sig
-  type memory_result
+module Profiling : sig
+  type t
 
-  type running
-
-  type finished
-
-  val sample_memory :
-    group:string -> metric:string -> value:float -> running -> unit
-
-  val log_to_scuba : stage:string -> running -> unit
+  val record_stats :
+    stage:string -> metric:string -> value:float -> profiling:t -> unit
 end
 
 val collect_cgroup_stats :
-  MemStats.running -> group:string -> f:(unit -> 'a) -> 'a
+  profiling:Profiling.t -> stage:string -> f:(unit -> 'a) -> 'a
 
-val profile_memory :
-  label:string -> f:(MemStats.running -> 'a) -> MemStats.finished * 'a
+val profile_memory : event:string -> f:(Profiling.t -> 'a) -> Profiling.t * 'a
 
-val print_summary_memory_table : MemStats.finished -> unit
+val log_to_scuba : stage:string -> profiling:Profiling.t -> unit
+
+val print_summary_memory_table : Profiling.t -> unit

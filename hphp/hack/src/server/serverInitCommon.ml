@@ -38,11 +38,10 @@ let parsing
     (t : float)
     ~(trace : bool)
     ~(profile_label : string)
-    (running_memory_stats : CgroupProfiler.MemStats.running) :
-    ServerEnv.env * float =
+    ~(profiling : CgroupProfiler.Profiling.t) : ServerEnv.env * float =
   CgroupProfiler.collect_cgroup_stats
-    running_memory_stats
-    ~group:profile_label
+    ~profiling
+    ~stage:profile_label
     ~f:(fun () ->
       begin
         match count with
@@ -80,10 +79,10 @@ let update_files
     (naming_table : Naming_table.t)
     (ctx : Provider_context.t)
     (t : float)
-    (running_memory_stats : CgroupProfiler.MemStats.running) : float =
+    ~(profiling : CgroupProfiler.Profiling.t) : float =
   CgroupProfiler.collect_cgroup_stats
-    running_memory_stats
-    ~group:"update files"
+    ~profiling
+    ~stage:"update files"
     ~f:(fun () ->
       if no_incremental_check genv.options then
         t
@@ -99,11 +98,10 @@ let naming
     (env : ServerEnv.env)
     (t : float)
     ~(profile_label : string)
-    (running_memory_stats : CgroupProfiler.MemStats.running) :
-    ServerEnv.env * float =
+    ~(profiling : CgroupProfiler.Profiling.t) : ServerEnv.env * float =
   CgroupProfiler.collect_cgroup_stats
-    running_memory_stats
-    ~group:profile_label
+    ~profiling
+    ~stage:profile_label
     ~f:(fun () ->
       ServerProgress.send_progress_to_monitor "resolving symbol references";
       let ctx = Provider_utils.ctx_from_server_env env in
@@ -177,11 +175,10 @@ let type_check
     (init_telemetry : Telemetry.t)
     (t : float)
     ~(profile_label : string)
-    (running_mem_stats : CgroupProfiler.MemStats.running) :
-    ServerEnv.env * float =
+    ~(profiling : CgroupProfiler.Profiling.t) : ServerEnv.env * float =
   CgroupProfiler.collect_cgroup_stats
-    running_mem_stats
-    ~group:profile_label
+    ~profiling
+    ~stage:profile_label
     ~f:(fun () ->
       (* No type checking in AI mode *)
       if Option.is_some (ServerArgs.ai_mode genv.options) then

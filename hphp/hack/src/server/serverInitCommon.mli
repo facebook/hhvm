@@ -18,7 +18,7 @@ val parsing :
   float ->
   trace:bool ->
   profile_label:string ->
-  CgroupProfiler.MemStats.running ->
+  profiling:CgroupProfiler.Profiling.t ->
   ServerEnv.env * float
 
 val update_files :
@@ -26,14 +26,14 @@ val update_files :
   Naming_table.t ->
   Provider_context.t ->
   float ->
-  CgroupProfiler.MemStats.running ->
+  profiling:CgroupProfiler.Profiling.t ->
   float
 
 val naming :
   ServerEnv.env ->
   float ->
   profile_label:string ->
-  CgroupProfiler.MemStats.running ->
+  profiling:CgroupProfiler.Profiling.t ->
   ServerEnv.env * float
 
 val type_check :
@@ -43,5 +43,5 @@ val type_check :
   Telemetry.t ->
   float ->
   profile_label:string ->
-  CgroupProfiler.MemStats.running ->
+  profiling:CgroupProfiler.Profiling.t ->
   ServerEnv.env * float

@@ -52,5 +52,5 @@ val init :
   init_approach:init_approach ->
   ServerEnv.genv ->
   ServerEnv.env ->
-  CgroupProfiler.MemStats.finished
+  CgroupProfiler.Profiling.t
   * (ServerEnv.env * (* If the script failed, the error message *) init_result)

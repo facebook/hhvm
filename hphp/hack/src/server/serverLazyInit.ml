@@ -266,7 +266,7 @@ let use_precomputed_state_exn
     (genv : ServerEnv.genv)
     (ctx : Provider_context.t)
     (info : ServerArgs.saved_state_target_info)
-    (running_mem_stats : CgroupProfiler.MemStats.running) : loaded_info =
+    (profiling : CgroupProfiler.Profiling.t) : loaded_info =
   let {
     ServerArgs.saved_state_fn;
     corresponding_base_revision;
@@ -284,8 +284,8 @@ let use_precomputed_state_exn
     deptable_with_filename ~is_64bit:deptable_is_64bit deptable_fn
   in
   CgroupProfiler.collect_cgroup_stats
-    running_mem_stats
-    ~group:"load deptable"
+    ~profiling
+    ~stage:"load deptable"
     ~f:(fun () ->
       lock_and_load_deptable deptable ~ignore_hh_version ~fail_if_missing);
   let changes = Relative_path.set_of_list changes in
@@ -296,8 +296,8 @@ let use_precomputed_state_exn
   let naming_table_fallback_path = get_naming_table_fallback_path genv None in
   let (old_naming_table, old_errors) =
     CgroupProfiler.collect_cgroup_stats
-      running_mem_stats
-      ~group:"load saved state"
+      ~profiling
+      ~stage:"load saved state"
       ~f:(fun () ->
         SaveStateService.load_saved_state
           ctx
@@ -542,8 +542,7 @@ let type_check_dirty
     ~(dirty_local_files_unchanged_hash : Relative_path.Set.t)
     ~(dirty_local_files_changed_hash : Relative_path.Set.t)
     (t : float)
-    (running_mem_stats : CgroupProfiler.MemStats.running) :
-    ServerEnv.env * float =
+    (profiling : CgroupProfiler.Profiling.t) : ServerEnv.env * float =
   let start_t = Unix.gettimeofday () in
   let telemetry =
     Telemetry.create ()
@@ -706,11 +705,9 @@ let type_check_dirty
         init_telemetry
         t
         ~profile_label:"type check dirty files"
-        running_mem_stats
+        ~profiling
     in
-    CgroupProfiler.MemStats.log_to_scuba
-      ~stage:"type check dirty files"
-      running_mem_stats;
+    CgroupProfiler.log_to_scuba ~stage:"type check dirty files" ~profiling;
     HackEventLogger.type_check_dirty
       ~start_t
       ~dirty_count:(Relative_path.Set.cardinal dirty_files_changed_hash)
@@ -754,8 +751,7 @@ let initialize_naming_table
     ?(do_naming : bool = false)
     (genv : ServerEnv.genv)
     (env : ServerEnv.env)
-    (running_mem_stats : CgroupProfiler.MemStats.running) :
-    ServerEnv.env * float =
+    (profiling : CgroupProfiler.Profiling.t) : ServerEnv.env * float =
   SharedMem.cleanup_sqlite ();
   ServerProgress.send_progress_to_monitor "%s" progress_message;
   let (get_next, count, t) =
@@ -783,20 +779,19 @@ let initialize_naming_table
       t
       ~trace
       ~profile_label:"parsing"
-      running_mem_stats
+      ~profiling
   in
   if not do_naming then
     (env, t)
   else
     let ctx = Provider_utils.ctx_from_server_env env in
-    let t = update_files genv env.naming_table ctx t running_mem_stats in
-    naming env t ~profile_label:"naming" running_mem_stats
+    let t = update_files genv env.naming_table ctx t ~profiling in
+    naming env t ~profile_label:"naming" ~profiling
 
 let load_naming_table
     (genv : ServerEnv.genv)
     (env : ServerEnv.env)
-    (running_mem_stats : CgroupProfiler.MemStats.running) :
-    ServerEnv.env * float =
+    (profiling : CgroupProfiler.Profiling.t) : ServerEnv.env * float =
   let ignore_hh_version = ServerArgs.ignore_hh_version genv.options in
   let loader_future =
     State_loader_futures.load
@@ -820,8 +815,8 @@ let load_naming_table
     let naming_table_path = Path.to_string naming_table_path in
     let naming_table =
       CgroupProfiler.collect_cgroup_stats
-        running_mem_stats
-        ~group:"load NT from sqilte"
+        ~profiling
+        ~stage:"load NT from sqilte"
         ~f:(fun () -> Naming_table.load_from_sqlite ctx naming_table_path)
     in
     let (env, t) =
@@ -831,12 +826,12 @@ let load_naming_table
         "full initialization (with loaded naming table)"
         genv
         env
-        running_mem_stats
+        profiling
     in
     let t =
       CgroupProfiler.collect_cgroup_stats
-        running_mem_stats
-        ~group:"naming from saved state"
+        ~profiling
+        ~stage:"naming from saved state"
         ~f:(fun () ->
           naming_from_saved_state
             ctx
@@ -857,13 +852,12 @@ let load_naming_table
       "full initialization (failed to load naming table)"
       genv
       env
-      running_mem_stats
+      profiling
 
 let write_symbol_info_init
     (genv : ServerEnv.genv)
     (env : ServerEnv.env)
-    (running_mem_stats : CgroupProfiler.MemStats.running) :
-    ServerEnv.env * float =
+    (profiling : CgroupProfiler.Profiling.t) : ServerEnv.env * float =
   let out_dir =
     match ServerArgs.write_symbol_info genv.options with
     | None -> failwith "No write directory specified for --write-symbol-info"
@@ -874,11 +868,11 @@ let write_symbol_info_init
       "write symbol info initialization"
       genv
       env
-      running_mem_stats
+      profiling
   in
   let ctx = Provider_utils.ctx_from_server_env env in
-  let t = update_files genv env.naming_table ctx t running_mem_stats in
-  let (env, t) = naming env t ~profile_label:"naming" running_mem_stats in
+  let t = update_files genv env.naming_table ctx t profiling in
+  let (env, t) = naming env t ~profile_label:"naming" ~profiling in
   let index_paths = env.swriteopt.symbol_write_index_paths in
   let files =
     if List.length index_paths > 0 then
@@ -934,8 +928,7 @@ let write_symbol_info_init
 let full_init
     (genv : ServerEnv.genv)
     (env : ServerEnv.env)
-    (running_mem_stats : CgroupProfiler.MemStats.running) :
-    ServerEnv.env * float =
+    (profiling : CgroupProfiler.Profiling.t) : ServerEnv.env * float =
   let init_telemetry =
     Telemetry.create ()
     |> Telemetry.float_ ~key:"start_time" ~value:(Unix.gettimeofday ())
@@ -954,19 +947,17 @@ let full_init
           "full initialization"
           genv
           env
-          running_mem_stats
+          profiling
       in
-      CgroupProfiler.MemStats.log_to_scuba ~stage:"parsing" running_mem_stats;
-      CgroupProfiler.MemStats.log_to_scuba ~stage:"naming" running_mem_stats;
+      CgroupProfiler.log_to_scuba ~stage:"parsing" ~profiling;
+      CgroupProfiler.log_to_scuba ~stage:"naming" ~profiling;
       res
     ) else
-      let res = load_naming_table genv env running_mem_stats in
-      CgroupProfiler.MemStats.log_to_scuba
+      let res = load_naming_table genv env profiling in
+      CgroupProfiler.log_to_scuba
         ~stage:"loading NT from saved state"
-        running_mem_stats;
-      CgroupProfiler.MemStats.log_to_scuba
-        ~stage:"naming from saved state"
-        running_mem_stats;
+        ~profiling;
+      CgroupProfiler.log_to_scuba ~stage:"naming from saved state" ~profiling;
       res
   in
   if not is_check_mode then
@@ -994,17 +985,16 @@ let full_init
       init_telemetry
       t
       ~profile_label:"type check"
-      running_mem_stats
+      ~profiling
   in
-  CgroupProfiler.MemStats.log_to_scuba ~stage:"type check" running_mem_stats;
+  CgroupProfiler.log_to_scuba ~stage:"type check" ~profiling;
   typecheck_result
 
 let parse_only_init
     (genv : ServerEnv.genv)
     (env : ServerEnv.env)
-    (running_mem_stats : CgroupProfiler.MemStats.running) :
-    ServerEnv.env * float =
-  initialize_naming_table "parse-only initialization" genv env running_mem_stats
+    (profiling : CgroupProfiler.Profiling.t) : ServerEnv.env * float =
+  initialize_naming_table "parse-only initialization" genv env profiling
 
 let get_mergebase (mergebase_future : Hg.hg_rev option Future.t) :
     Hg.hg_rev option =
@@ -1026,8 +1016,7 @@ let post_saved_state_initialization
     ~(genv : ServerEnv.genv)
     ~(env : ServerEnv.env)
     ~(state_result : loaded_info * Relative_path.Set.t)
-    (running_mem_stats : CgroupProfiler.MemStats.running) :
-    ServerEnv.env * float =
+    (profiling : CgroupProfiler.Profiling.t) : ServerEnv.env * float =
   let ((loaded_info : ServerInitTypes.loaded_info), changed_while_parsing) =
     state_result
   in
@@ -1126,26 +1115,20 @@ let post_saved_state_initialization
       t
       ~trace
       ~profile_label:"parse dirty files"
-      running_mem_stats
+      ~profiling
   in
-  CgroupProfiler.MemStats.log_to_scuba
-    ~stage:"parse dirty files"
-    running_mem_stats;
+  CgroupProfiler.log_to_scuba ~stage:"parse dirty files" ~profiling;
   SearchServiceRunner.update_fileinfo_map
     env.naming_table
     SearchUtils.TypeChecker;
   let ctx = Provider_utils.ctx_from_server_env env in
-  let t = update_files genv env.naming_table ctx t running_mem_stats in
+  let t = update_files genv env.naming_table ctx t ~profiling in
   let t =
     naming_from_saved_state ctx old_naming_table parsing_files naming_table_fn t
   in
   (* Do global naming on all dirty files *)
-  let (env, t) =
-    naming env t ~profile_label:"naming dirty files" running_mem_stats
-  in
-  CgroupProfiler.MemStats.log_to_scuba
-    ~stage:"naming dirty files"
-    running_mem_stats;
+  let (env, t) = naming env t ~profile_label:"naming dirty files" ~profiling in
+  CgroupProfiler.log_to_scuba ~stage:"naming dirty files" ~profiling;
 
   (* Add all files from fast to the files_info object *)
   let fast = Naming_table.to_fast env.naming_table in
@@ -1200,7 +1183,7 @@ let post_saved_state_initialization
     }
   in
   (* Update the fileinfo object's dependencies now that we have full fast *)
-  let t = update_files genv env.naming_table ctx t running_mem_stats in
+  let t = update_files genv env.naming_table ctx t ~profiling in
   type_check_dirty
     genv
     env
@@ -1211,14 +1194,14 @@ let post_saved_state_initialization
     ~dirty_local_files_unchanged_hash
     ~dirty_local_files_changed_hash
     t
-    running_mem_stats
+    profiling
 
 let saved_state_init
     ~(load_state_approach : load_state_approach)
     (genv : ServerEnv.genv)
     (env : ServerEnv.env)
     (root : Path.t)
-    (running_mem_stats : CgroupProfiler.MemStats.running) :
+    (profiling : CgroupProfiler.Profiling.t) :
     ( (ServerEnv.env * float) * (loaded_info * Relative_path.Set.t),
       load_state_error )
     result =
@@ -1249,12 +1232,12 @@ let saved_state_init
   let do_ (_id : Timeout.t) : (loaded_info, load_state_error) result =
     let state_result =
       CgroupProfiler.collect_cgroup_stats
-        running_mem_stats
-        ~group:"load saved state"
+        ~profiling
+        ~stage:"load saved state"
         ~f:(fun () ->
           match load_state_approach with
           | Precomputed info ->
-            Ok (use_precomputed_state_exn genv ctx info running_mem_stats)
+            Ok (use_precomputed_state_exn genv ctx info profiling)
           | Load_state_natively use_canary ->
             download_and_load_state_exn
               ~use_canary
@@ -1270,9 +1253,7 @@ let saved_state_init
               ~ctx
               ~root)
     in
-    CgroupProfiler.MemStats.log_to_scuba
-      ~stage:"load saved state"
-      running_mem_stats;
+    CgroupProfiler.log_to_scuba ~stage:"load saved state" ~profiling;
     state_result
   in
   let state_result =
@@ -1296,6 +1277,6 @@ let saved_state_init
   | Ok state_result ->
     ServerProgress.send_progress_to_monitor "loading saved state succeeded";
     let (env, t) =
-      post_saved_state_initialization ~state_result ~env ~genv running_mem_stats
+      post_saved_state_initialization ~state_result ~env ~genv profiling
     in
     Ok ((env, t), state_result)

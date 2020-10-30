@@ -13,5 +13,5 @@ val init :
   ServerEnv.genv ->
   lazy_level ->
   ServerEnv.env ->
-  CgroupProfiler.MemStats.running ->
+  CgroupProfiler.Profiling.t ->
   ServerEnv.env * float

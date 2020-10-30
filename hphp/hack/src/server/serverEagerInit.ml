@@ -55,8 +55,7 @@ let init
     (genv : ServerEnv.genv)
     (lazy_level : lazy_level)
     (env : ServerEnv.env)
-    (running_mem_stats : CgroupProfiler.MemStats.running) :
-    ServerEnv.env * float =
+    (profiling : CgroupProfiler.Profiling.t) : ServerEnv.env * float =
   let init_telemetry =
     Telemetry.create ()
     |> Telemetry.float_ ~key:"start_time" ~value:(Unix.gettimeofday ())
@@ -80,13 +79,13 @@ let init
       t
       ~trace
       ~profile_label:"parsing"
-      running_mem_stats
+      ~profiling
   in
   if not (ServerArgs.check_mode genv.options) then
     SearchServiceRunner.update_fileinfo_map env.naming_table SearchUtils.Init;
   let ctx = Provider_utils.ctx_from_server_env env in
-  let t = update_files genv env.naming_table ctx t running_mem_stats in
-  let (env, t) = naming env t ~profile_label:"naming" running_mem_stats in
+  let t = update_files genv env.naming_table ctx t ~profiling in
+  let (env, t) = naming env t ~profile_label:"naming" ~profiling in
   let fast = Naming_table.to_fast env.naming_table in
   let failed_parsing = Errors.get_failed_files env.errorl Errors.Parsing in
   let fast =
@@ -109,4 +108,4 @@ let init
     init_telemetry
     t
     ~profile_label:"type_check"
-    running_mem_stats
+    ~profiling

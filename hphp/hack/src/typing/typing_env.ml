@@ -42,6 +42,8 @@ let get_deps_mode env = Provider_context.get_deps_mode env.decl_env.Decl_env.ctx
 
 let get_ctx env = env.decl_env.Decl_env.ctx
 
+let get_file env = env.genv.file
+
 let set_log_level env key log_level =
   { env with log_levels = SMap.add key log_level env.log_levels }
 
@@ -655,7 +657,10 @@ let print_size _kind _name obj =
 
 let get_typedef env x =
   make_depend_on_class env x;
-  print_size "type" x (Decl_provider.get_typedef (get_ctx env) x)
+  print_size
+    "type"
+    x
+    (Decl_provider.get_typedef ~file:(get_file env) (get_ctx env) x)
 
 let is_typedef env x =
   match Naming_provider.get_type_kind (get_ctx env) x with
@@ -664,7 +669,10 @@ let is_typedef env x =
 
 let get_class (env : env) (name : string) : Cls.t option =
   make_depend_on_class env name;
-  print_size "class" name (Decl_provider.get_class (get_ctx env) name)
+  print_size
+    "class"
+    name
+    (Decl_provider.get_class ~file:(get_file env) (get_ctx env) name)
 
 let get_class_dep env x =
   Decl_env.add_extends_dependency env.decl_env x;
@@ -674,7 +682,10 @@ let get_fun env x =
   let dep = Typing_deps.Dep.Fun x in
   Option.iter env.decl_env.Decl_env.droot (fun root ->
       Typing_deps.add_idep (get_deps_mode env) root dep);
-  print_size "fun" x (Decl_provider.get_fun (get_ctx env) x)
+  print_size
+    "fun"
+    x
+    (Decl_provider.get_fun ~file:(get_file env) (get_ctx env) x)
 
 let get_enum_constraint env x =
   match get_class env x with
@@ -691,7 +702,7 @@ let get_env_mutability env = env.lenv.local_mutability
 
 let get_enum env x =
   make_depend_on_class env x;
-  match Decl_provider.get_class (get_ctx env) x with
+  match Decl_provider.get_class ~file:(get_file env) (get_ctx env) x with
   | Some tc when Option.is_some (Cls.enum_type tc) -> Some tc
   | _ -> None
 
@@ -734,7 +745,7 @@ let get_gconst env cst_name =
   let dep = Dep.GConst cst_name in
   Option.iter env.decl_env.droot (fun root ->
       Typing_deps.add_idep (get_deps_mode env) root dep);
-  Decl_provider.get_gconst (get_ctx env) cst_name
+  Decl_provider.get_gconst ~file:(get_file env) (get_ctx env) cst_name
 
 let get_static_member is_method env class_ mid =
   make_depend_on_class env (Cls.name class_);
@@ -895,8 +906,6 @@ let get_parent_class env =
   get_parent_id env >>= get_class_dep env
 
 let get_fn_kind env = env.genv.fun_kind
-
-let get_file env = env.genv.file
 
 let set_fn_kind env fn_type =
   let genv = env.genv in

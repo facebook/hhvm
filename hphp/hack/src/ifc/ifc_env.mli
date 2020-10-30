@@ -4,7 +4,8 @@ open Ifc_types
 
 (* Creates a read-only environment sufficient to call functions
    from ifc_lift.ml *)
-val new_renv : Ifc_scope.t -> decl_env -> Tast.saved_env -> proto_renv
+val new_renv :
+  Ifc_scope.t -> decl_env -> Tast.saved_env -> Provider_context.t -> proto_renv
 
 (* Prepares a read-only environment to type-check a function *)
 val prep_renv : proto_renv -> ptype option -> ptype -> ptype -> policy -> renv

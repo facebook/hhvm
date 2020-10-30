@@ -225,10 +225,10 @@ let decl_env fmt de =
   let handle_class name decl =
     fprintf fmt "class %s: %a@ " name class_decl decl
   in
+  fprintf fmt "Decls:@.  @[<v>";
   let handle_fun name decl =
     fprintf fmt "function %s: %a@ " name fun_decl decl
   in
-  fprintf fmt "Decls:@.  @[<v>";
   SMap.iter handle_class de.de_class;
   SMap.iter handle_fun de.de_fun;
   fprintf fmt "@]"

@@ -6,7 +6,9 @@
   (flags (:standard -linkall))
   (libraries
     core_kernel
+    decl_provider
     full_fidelity
+    global_options
     heap_global_storage
     hhi
     naming_global
@@ -17,8 +19,9 @@
     sys_utils
     tast
     tast_provider
-    typing
+    typechecker_options
     typing_defs
+    typing_heap
     version)
   (preprocess
     (pps visitors.ppx ppx_deriving.std)))

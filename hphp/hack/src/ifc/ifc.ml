@@ -529,7 +529,9 @@ let may_throw ~pos renv env pc_deps exn_ty =
 let call ~pos renv env call_type that_pty_opt args_pty ret_ty =
   let name =
     match call_type with
-    | Cglobal callable_name -> callable_name
+    | Cconstructor callable_name
+    | Cglobal (callable_name, _) ->
+      Decl.callable_name_to_string callable_name
     | Clocal _ -> "anonymous"
   in
   let callee = Env.new_policy_var renv (name ^ "_self") in
@@ -557,28 +559,38 @@ let call ~pos renv env call_type that_pty_opt args_pty ret_ty =
       f_exn = callee_exn;
     }
   in
+  let result_from_fun_decl fp callable_name = function
+    | { fd_kind = FDPolicied policy; fd_args } ->
+      let scheme = Decl.make_callable_scheme renv policy fp fd_args in
+      let prop =
+        (* because cipp_scheme is created after fp they cannot
+        mismatch and call_constraint will not fail *)
+        Option.value_exn (Solver.call_constraint ~subtype ~pos fp scheme)
+      in
+      (env, prop)
+    | { fd_kind = FDInferFlows; _ } ->
+      let env = Env.add_dep env (Decl.callable_name_to_string callable_name) in
+      (env, Chole (pos, fp))
+  in
   match call_type with
-  | Clocal fty ->
-    let env = Env.acc env @@ subtype ~pos (Tfun fty) (Tfun hole_ty) in
+  | Clocal fun_ ->
+    let env = Env.acc env @@ subtype ~pos (Tfun fun_) (Tfun hole_ty) in
     (env, ret_pty)
-  | Cglobal callable_name ->
-    let fp =
-      { fp_name = callable_name; fp_this = that_pty_opt; fp_type = hole_ty }
-    in
+  | Cglobal (callable_name, fty) ->
+    let fp = { fp_name = name; fp_this = that_pty_opt; fp_type = hole_ty } in
     let (env, call_constraint) =
-      match SMap.find_opt callable_name renv.re_decl.de_fun with
-      | Some { fd_kind = FDPolicied policy; fd_args } ->
-        let scheme = Decl.make_callable_scheme renv policy fp fd_args in
-        let prop =
-          (* because cipp_scheme is created after fp they cannot
-             mismatch and call_constraint will not fail *)
-          Option.value_exn (Solver.call_constraint ~subtype ~pos fp scheme)
-        in
-        (env, prop)
-      | Some { fd_kind = FDInferFlows; _ } ->
-        let env = Env.add_dep env callable_name in
-        (env, Chole (pos, fp))
-      | None -> fail "unknown function '%s'" callable_name
+      result_from_fun_decl fp callable_name (Decl.convert_fun_type fty)
+    in
+    let env = Env.acc env (fun acc -> call_constraint :: acc) in
+    (env, ret_pty)
+  | Cconstructor callable_name ->
+    (* We don't have the function type on the TAST with constructors, so grab it from
+      decl heap. *)
+    let fp = { fp_name = name; fp_this = that_pty_opt; fp_type = hole_ty } in
+    let (env, call_constraint) =
+      match Decl.get_callable_decl renv.re_ctx callable_name with
+      | Some decl -> result_from_fun_decl fp callable_name decl
+      | None -> fail "Could not find %s in declarations" name
     in
     let env = Env.acc env (fun acc -> call_constraint :: acc) in
     (env, ret_pty)
@@ -764,24 +776,30 @@ and expr ~pos renv (env : Env.expr_env) (((_, ety), e) : Tast.expr) =
     expr env e
   (* TODO(T68414656): Support calls with type arguments *)
   | A.Call (e, _type_args, args, _extra_args) ->
+    let fty = Tast.get_type e in
     let (env, args_pty) = List.map_env ~f:expr env args in
     let call env call_type this_pty =
       call ~pos renv env call_type this_pty args_pty ety
     in
     begin
       match e with
+      (* Generally a function call *)
       | (_, A.Id (_, name)) ->
-        let call_id = Decl.make_callable_name None name in
-        call env (Cglobal call_id) None
+        let call_id = Decl.make_callable_name ~is_static:false None name in
+        call env (Cglobal (call_id, fty)) None
+      (* Regular method call *)
       | (_, A.Obj_get (obj, (_, A.Id (_, meth_name)), _)) ->
         let (env, obj_pty) = expr env obj in
         begin
           match obj_pty with
           | Tclass { c_name; _ } ->
-            let call_id = Decl.make_callable_name (Some c_name) meth_name in
-            call env (Cglobal call_id) (Some obj_pty)
+            let call_id =
+              Decl.make_callable_name ~is_static:false (Some c_name) meth_name
+            in
+            call env (Cglobal (call_id, fty)) (Some obj_pty)
           | _ -> fail "unhandled method call on %a" Pp.ptype obj_pty
         end
+      (* Static method call*)
       | (_, A.Class_const (((_, ty), cid), (_, meth_name))) ->
         let env =
           match cid with
@@ -799,7 +817,9 @@ and expr ~pos renv (env : Env.expr_env) (((_, ety), e) : Tast.expr) =
           | _ -> fail "unhandled method call on a non-class"
         in
         let class_name = find_class_name ty in
-        let call_id = Decl.make_callable_name (Some class_name) meth_name in
+        let call_id =
+          Decl.make_callable_name ~is_static:true (Some class_name) meth_name
+        in
         let this_pty =
           if String.equal meth_name Decl.construct_id then begin
             (* The only legal class id is `parent` which is invoked as if it
@@ -810,15 +830,15 @@ and expr ~pos renv (env : Env.expr_env) (((_, ety), e) : Tast.expr) =
           end else
             None
         in
-        call env (Cglobal call_id) this_pty
+        call env (Cglobal (call_id, fty)) this_pty
       | _ ->
         let (env, func_ty) = expr env e in
-        let fty =
+        let ifc_fty =
           match func_ty with
           | Tfun fty -> fty
           | _ -> failwith "calling something that is not a function"
         in
-        call env (Clocal fty) None
+        call env (Clocal ifc_fty) None
     end
   | A.ValCollection (((A.Vec | A.Keyset) as kind), _, exprs) ->
     (* Each element of the array is a subtype of the array's value parameter. *)
@@ -880,10 +900,15 @@ and expr ~pos renv (env : Env.expr_env) (((_, ety), e) : Tast.expr) =
     begin
       match obj_pty with
       | Tclass { c_name; _ } ->
-        let call_id = Decl.make_callable_name (Some c_name) Decl.construct_id in
+        let call_id =
+          Decl.make_callable_name
+            ~is_static:false
+            (Some c_name)
+            Decl.construct_id
+        in
         let lty = T.mk (Typing_reason.Rnone, T.Tprim A.Tvoid) in
         let (env, _) =
-          call ~pos renv env (Cglobal call_id) (Some obj_pty) args_pty lty
+          call ~pos renv env (Cconstructor call_id) (Some obj_pty) args_pty lty
         in
         let pty = Lift.ty ~prefix:"constr" renv ety in
         (env, pty)
@@ -1306,6 +1331,7 @@ let analyse_callable
     ~decl_env
     ~is_static
     ~saved_env
+    ~ctx
     name
     params
     body
@@ -1313,7 +1339,7 @@ let analyse_callable
   try
     (* Setup the read-only environment *)
     let scope = Scope.alloc () in
-    let renv = Env.new_renv scope decl_env saved_env in
+    let renv = Env.new_renv scope decl_env saved_env ctx in
 
     let global_pc = Env.new_policy_var renv "pc" in
     let exn = Lift.class_ty ~prefix:"exn" renv Decl.exception_id in
@@ -1354,12 +1380,12 @@ let analyse_callable
       Format.printf "@."
     end;
 
-    let callable_name = Decl.make_callable_name class_name name in
-    let f_self = Env.new_policy_var renv callable_name in
-
+    let callable_name = Decl.make_callable_name ~is_static class_name name in
+    let callable_name_str = Decl.callable_name_to_string callable_name in
+    let f_self = Env.new_policy_var renv callable_name_str in
     let proto =
       {
-        fp_name = callable_name;
+        fp_name = callable_name_str;
         fp_this = this_ty;
         fp_type =
           {
@@ -1373,7 +1399,7 @@ let analyse_callable
     in
 
     let entailment =
-      match SMap.find_opt callable_name decl_env.de_fun with
+      match Decl.get_callable_decl renv.re_ctx callable_name with
       | Some { fd_kind = FDPolicied policy; fd_args } ->
         let scheme = Decl.make_callable_scheme renv policy proto fd_args in
         fun prop ->
@@ -1398,7 +1424,7 @@ let analyse_callable
     Format.printf "Analyzing %s:@.  Failure: %s@.@." name s;
     None
 
-let walk_tast opts decl_env =
+let walk_tast opts decl_env ctx =
   let def = function
     | A.Fun
         {
@@ -1418,6 +1444,7 @@ let walk_tast opts decl_env =
           ~decl_env
           ~is_static
           ~saved_env
+          ~ctx
           name
           params
           body
@@ -1443,6 +1470,7 @@ let walk_tast opts decl_env =
           ~decl_env
           ~is_static
           ~saved_env
+          ~ctx
           name
           params
           body
@@ -1453,14 +1481,14 @@ let walk_tast opts decl_env =
   in
   (fun tast -> List.concat (List.filter_map ~f:def tast))
 
-let check opts tast =
+let check opts tast ctx =
   (* Declaration phase *)
-  let decl_env = Decl.collect_sigs tast in
+  let decl_env = Decl.collect_sigs ctx tast in
   if should_print ~user_mode:opts.opt_mode ~phase:Mdecl then
     Format.printf "%a@." Pp.decl_env decl_env;
 
   (* Flow analysis phase *)
-  let results = walk_tast opts decl_env tast in
+  let results = walk_tast opts decl_env ctx tast in
 
   (* Solver phase *)
   let results =
@@ -1558,7 +1586,7 @@ let do_ opts files_info ctx =
       let { Tast_provider.Compute_tast.tast; _ } =
         Tast_provider.compute_tast_unquarantined ~ctx ~entry
       in
-      let check () = check opts tast in
+      let check () = check opts tast ctx in
       let (new_errors, _) = Errors.do_with_context path Errors.Typing check in
       errors @ Errors.get_error_list new_errors
     | _ -> errors

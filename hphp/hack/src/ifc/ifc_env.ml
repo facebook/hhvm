@@ -33,7 +33,7 @@ let new_policy_var { re_scope; re_pvar_counters; _ } prefix =
   in
   Pfree_var (prefix ^ suffix, re_scope)
 
-let new_renv scope decl_env saved_tenv =
+let new_renv scope decl_env saved_tenv ctx =
   {
     re_scope = scope;
     re_decl = decl_env;
@@ -44,6 +44,7 @@ let new_renv scope decl_env saved_tenv =
     re_ret = ();
     re_gpc = pbot;
     re_exn = ();
+    re_ctx = ctx;
   }
 
 let prep_renv renv this_ty_opt ret_ty exn_ty gpc_pol =
@@ -56,6 +57,7 @@ let prep_renv renv this_ty_opt ret_ty exn_ty gpc_pol =
     re_ret = ret_ty;
     re_gpc = gpc_pol;
     re_exn = exn_ty;
+    re_ctx = renv.re_ctx;
   }
 
 (* - Read/write environments (env) - *)

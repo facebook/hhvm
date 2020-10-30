@@ -108,6 +108,12 @@ and fun_ = {
   f_exn: ptype;
 }
 
+type callable_name =
+  | Method of string * string (* Classname, method name *)
+  | StaticMethod of string * string (* Classname, static meth name *)
+  (* toplevel function *)
+  | Function of string
+
 type fun_proto = {
   fp_name: string;
   fp_this: ptype option;
@@ -272,6 +278,8 @@ type 'ptype renv_ = {
   re_gpc: policy;
   (* Exception thrown from the callable *)
   re_exn: 'ptype;
+  (* Decl provider context for accessing the decl heap *)
+  re_ctx: Provider_context.t;
 }
 
 type proto_renv = unit renv_
@@ -302,5 +310,6 @@ type adjustment =
   | Aweaken
 
 type call_type =
-  | Cglobal of string
+  | Cglobal of (callable_name * Typing_defs.locl_ty)
+  | Cconstructor of callable_name
   | Clocal of fun_

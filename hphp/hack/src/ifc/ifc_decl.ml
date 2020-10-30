@@ -42,17 +42,96 @@ let keyset_id = "\\HH\\keyset"
 
 let awaitable_id = "\\HH\\Awaitable"
 
-let construct_id = "__construct"
+let construct_id = SN.Members.__construct
 
 let external_id = SN.UserAttributes.uaExternal
 
 let callable_id = SN.UserAttributes.uaCanCall
 
-let make_callable_name cls_name_opt name =
-  match cls_name_opt with
-  | None -> name
-  | Some cls_name -> cls_name ^ "#" ^ name
+let convert_ifc_fun_decl pos (tfd : T.ifc_fun_decl) : fun_decl_kind =
+  match tfd with
+  | T.FDInferFlows -> FDInferFlows
+  | T.FDPolicied None -> FDPolicied None
+  | T.FDPolicied (Some purpose) ->
+    FDPolicied (Some (Lattice.parse_policy (PosSet.singleton pos) purpose))
 
+let get_method_from_provider ~static ctx class_name method_name =
+  match Decl_provider.get_class ctx class_name with
+  | None -> None
+  | Some cls when static -> Decl_provider.Class.get_smethod cls method_name
+  | Some cls when String.equal method_name construct_id ->
+    let (construct_opt, _) = Typing_classes_heap.Api.construct cls in
+    construct_opt
+  | Some cls -> Decl_provider.Class.get_method cls method_name
+
+let convert_fun_type fun_ty =
+  let open Typing_defs in
+  let pos = get_pos fun_ty in
+  let fty = get_node fun_ty in
+  match fty with
+  | Tfun { ft_params; ft_ifc_decl; _ } ->
+    let fd_kind = convert_ifc_fun_decl pos ft_ifc_decl in
+    let mk_arg fp =
+      match (T.get_fp_ifc_can_call fp, T.get_fp_ifc_external fp) with
+      | (_, true) -> AKExternal fp.fp_pos
+      | (true, _) -> AKCallable fp.fp_pos
+      | (false, false) -> AKDefault
+    in
+    let fd_args = List.map ft_params ~f:mk_arg in
+    { fd_kind; fd_args }
+  | _ -> fail "Expected a Tfun type from function declaration"
+
+(* Grab a function from the decl heap and convert it into a fun decl*)
+let get_fun (ctx : Provider_context.t) (fun_name : string) : fun_decl option =
+  let open Typing_defs in
+  match Decl_provider.get_fun ctx fun_name with
+  | None -> None
+  | Some { fe_type; _ } -> Some (convert_fun_type fe_type)
+
+(* Grab a method from the decl heap and convert it into a fun_decl *)
+let get_method
+    (ctx : Provider_context.t) (class_name : string) (method_name : string) :
+    fun_decl option =
+  let open Typing_defs in
+  match get_method_from_provider ~static:false ctx class_name method_name with
+  (* The default constructor for classes is public and takes no arguments *)
+  | None when String.equal method_name construct_id ->
+    let default_kind =
+      convert_ifc_fun_decl Pos.none Typing_defs.default_ifc_fun_decl
+    in
+    Some { fd_kind = default_kind; fd_args = [] }
+  | None -> None
+  | Some { ce_type = (lazy fun_type); _ } -> Some (convert_fun_type fun_type)
+
+let get_static_method
+    (ctx : Provider_context.t) (class_name : string) (method_name : string) :
+    fun_decl option =
+  let open Typing_defs in
+  match get_method_from_provider ~static:true ctx class_name method_name with
+  | None -> None
+  | Some { ce_type = (lazy fun_type); _ } -> Some (convert_fun_type fun_type)
+
+(* Grab any callable from the decl heap *)
+let get_callable_decl (ctx : Provider_context.t) (callable_name : callable_name)
+    : fun_decl option =
+  match callable_name with
+  | Method (cls, name) -> get_method ctx cls name
+  | StaticMethod (cls, name) -> get_static_method ctx cls name
+  | Function name -> get_fun ctx name
+
+let callable_name_to_string = function
+  | StaticMethod (cls, name)
+  | Method (cls, name) ->
+    cls ^ "#" ^ name
+  | Function name -> name
+
+let make_callable_name ~is_static cls_name_opt name =
+  match cls_name_opt with
+  | None -> Function name
+  | Some cls_name when is_static -> StaticMethod (cls_name, name)
+  | Some cls_name -> Method (cls_name, name)
+
+(* Grab an attribute from a list of attrs. Only used for policy properties *)
 let get_attr attr attrs =
   let is_attr a = String.equal (snd a.A.ua_name) attr in
   match List.filter ~f:is_attr attrs with
@@ -60,47 +139,23 @@ let get_attr attr attrs =
   | [a] -> Some a
   | _ -> fail ("multiple '" ^ attr ^ "' attributes found")
 
-let callable_decl attrs args =
-  let fd_kind =
-    match get_attr policied_id attrs with
-    | Some attr ->
-      let policy =
-        match attr.A.ua_params with
-        | [] -> None
-        | [((pos, _), A.String purpose)] ->
-          Some (Lattice.parse_policy (PosSet.singleton pos) purpose)
-        | _ -> fail "expected a string literal as governed by argument."
-      in
-      FDPolicied policy
-    | None ->
-      if Option.is_some (get_attr infer_flows_id attrs) then
-        FDInferFlows
-      else
-        FDPolicied (Some pbot)
+let fun_ ctx { A.f_name = (_, name); _ } =
+  let callable_name = make_callable_name ~is_static:false None name in
+  let result =
+    match get_callable_decl ctx callable_name with
+    | Some c -> c
+    | None -> fail ("Can't find fun " ^ name)
   in
-  let fd_args =
-    let mk_arg_kind param id f def =
-      match get_attr id param.A.param_user_attributes with
-      | Some { A.ua_name = (pos, _); _ } -> f pos
-      | None -> def
-    in
-    let f param =
-      AKDefault
-      |> mk_arg_kind param external_id (fun p -> AKExternal p)
-      |> mk_arg_kind param callable_id (fun p -> AKCallable p)
-    in
-    List.map ~f args
+  (callable_name, result)
+
+let meth ctx class_name { A.m_name = (_, name); m_static = is_static; _ } =
+  let callable_name = make_callable_name ~is_static (Some class_name) name in
+  let result =
+    match get_callable_decl ctx callable_name with
+    | Some c -> c
+    | None -> fail ("Can't find method " ^ class_name ^ " " ^ name)
   in
-  { fd_kind; fd_args }
-
-let fun_ { A.f_name = (_, name); f_user_attributes = attrs; f_params = args; _ }
-    =
-  (make_callable_name None name, callable_decl attrs args)
-
-let meth
-    class_name
-    { A.m_name = (_, name); m_user_attributes = attrs; m_params = args; _ } =
-  (make_callable_name (Some class_name) name, callable_decl attrs args)
+  (callable_name, result)
 
 let immediate_supers { A.c_uses; A.c_extends; _ } =
   let id_of_hint = function
@@ -170,7 +225,7 @@ let mk_policied_prop
   | `No_policy -> None
   | `Policy pp_purpose -> Some { pp_name; pp_visibility; pp_purpose; pp_pos }
 
-let class_ class_decl_env class_ =
+let class_ ctx class_decl_env class_ =
   let { A.c_name = (_, name); c_vars = properties; _ } = class_ in
 
   (* Class decl using the immediately available information of the base class *)
@@ -190,7 +245,13 @@ let class_ class_decl_env class_ =
   let class_decl = { cd_policied_properties } in
 
   (* Function declarations out of methods *)
-  let fun_decls = List.map ~f:(meth name) class_.A.c_methods in
+  let fun_decls =
+    List.map
+      ~f:(fun x ->
+        let (cn, decl) = meth ctx name x in
+        (callable_name_to_string cn, decl))
+      class_.A.c_methods
+  in
 
   (name, class_decl, fun_decls)
 
@@ -234,8 +295,7 @@ let topsort_classes classes =
   List.rev !schedule
 
 (* Removes all the auxiliary info needed only during declaration analysis. *)
-let collect_sigs defs =
-  (* Prepare class and function definitions *)
+let collect_sigs ctx defs =
   let pick = function
     | A.Class class_ -> `Fst class_
     | A.Fun fun_ -> `Snd fun_
@@ -245,12 +305,19 @@ let collect_sigs defs =
   let classes = topsort_classes classes in
 
   (* Process and accumulate function decls *)
-  let fun_decls = SMap.of_list (List.map ~f:fun_ funs) in
+  let fun_decls =
+    SMap.of_list
+      (List.map
+         ~f:(fun x ->
+           let (cn, decl) = fun_ ctx x in
+           (callable_name_to_string cn, decl))
+         funs)
+  in
 
   (* Process and accumulate class decls *)
   let init = { de_class = magic_class_decls; de_fun = fun_decls } in
   let add_class_decl { de_class; de_fun } cls =
-    let (class_name, class_decl, meth_decls) = class_ de_class cls in
+    let (class_name, class_decl, meth_decls) = class_ ctx de_class cls in
     let de_class = SMap.add class_name class_decl de_class in
     let de_fun = SMap.union (SMap.of_list meth_decls) de_fun in
     { de_class; de_fun }

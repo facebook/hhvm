@@ -1,0 +1,14 @@
+=== IFC analysis results for calls_basics.php
+Decls:
+  class \C: { policied_props = [a:A, b:B] }
+  class \Exception: { policied_props = [] }
+  class \HH\vec: { policied_props = [] }
+  function \C#is_a_pos: { kind = infer }
+  function \C#setb: { kind = infer }
+  function \dbl: { kind = infer }
+  function \flow_a_to_b: { kind = infer }
+  function \flow_b_to_b: { kind = infer }
+  function \flow_bot_to_b: { kind = infer }
+  function \indirect_flow_a_to_b: { kind = infer }
+  function \indirect_flow_a_to_b_bis: { kind = infer }
+  

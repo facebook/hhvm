@@ -1,7 +1,4 @@
 === IFC analysis results for higher_order_functions.php
-Analyzing __construct:
-  Failure: unknown function '\A#__construct'
-
 File "higher_order_functions.php", line 46, characters 3-20:
 Context-implicit policy leaks into `PUBLIC` via `pc`. (Typing[4380])
   File "higher_order_functions.php", line 9, characters 14-23:

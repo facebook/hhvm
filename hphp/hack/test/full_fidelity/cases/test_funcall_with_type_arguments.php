@@ -22,3 +22,9 @@ foo<bar<baz>();
 42 * foo < 90;
 42 * foo < 90 + 50;
 42 * foo < 90 === true;
+
+$f === foo<bar>() ? 1 : 2;
+foo<bar>($f === foo<bar>() ? 1 : 2);
+$f === x::foo<bar>(1) ? 1 : 2;
+x::foo<bar>($f === x::foo<bar>(1) ? 1 : 2);
+$f === Vector<int>{1,2,3} ? foo<bar>() : x::foo<bar>();

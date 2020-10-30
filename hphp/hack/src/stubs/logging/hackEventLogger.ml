@@ -417,6 +417,21 @@ module CGroup = struct
   let profile ~event:_ ~stage:_ ~metric:_ ~start:_ ~delta:_ ~hwm_delta:_ = ()
 end
 
+module ProfileDecl = struct
+  let count_decl
+      ~kind:_
+      ~cpu_duration:_
+      ~decl_id:_
+      ~decl_name:_
+      ~decl_callstack:_
+      ~decl_start_time:_
+      ~subdecl_member_name:_
+      ~subdecl_eagerness:_
+      ~subdecl_callstack:_
+      ~subdecl_start_time:_ =
+    ()
+end
+
 module Rage = struct
   let rage
       ~rageid:_

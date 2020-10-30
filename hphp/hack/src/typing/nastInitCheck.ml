@@ -508,6 +508,7 @@ and expr_ env acc p e =
   | Method_id _
   | Smethod_id _
   | Method_caller _
+  | EnumAtom _
   | PU_atom _
   | Id _ ->
     acc

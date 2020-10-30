@@ -1694,6 +1694,14 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                     }
                 })
             },
+            EnumAtomExpression(x) => {
+                get_index(2).and_then(|index| { match index {
+                        0 => Some(&x.hash),
+                    1 => Some(&x.expression),
+                        _ => None,
+                    }
+                })
+            },
             PocketAtomExpression(x) => {
                 get_index(2).and_then(|index| { match index {
                         0 => Some(&x.glyph),

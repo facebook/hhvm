@@ -2589,7 +2589,8 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           t env right_paren;
           t env semicolon;
           Newline;
-        ])
+        ]
+    | Syntax.EnumAtomExpression _ -> transform_simple env node)
 
 and when_present node f =
   match Syntax.syntax node with

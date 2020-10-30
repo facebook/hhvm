@@ -1125,6 +1125,10 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { list_item                                          : t
     ; list_separator                                     : t
     }
+  | EnumAtomExpression                of
+    { enum_atom_hash                                     : t
+    ; enum_atom_expression                               : t
+    }
   | PocketAtomExpression              of
     { pocket_atom_glyph                                  : t
     ; pocket_atom_expression                             : t
@@ -1271,6 +1275,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | ExprXHP                          of xhp_expression
   | ExprShape                        of shape_expression
   | ExprTuple                        of tuple_expression
+  | ExprEnumAtom                     of enum_atom_expression
   | ExprPocketAtom                   of pocket_atom_expression
   | ExprPocketIdentifier             of pocket_identifier_expression
   and specifier =
@@ -2431,6 +2436,10 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { intersection_left_paren: Token.t value
     ; intersection_types: specifier listesque value
     ; intersection_right_paren: Token.t value
+    }
+  and enum_atom_expression =
+    { enum_atom_hash: Token.t value
+    ; enum_atom_expression: Token.t value
     }
   and pocket_atom_expression =
     { pocket_atom_glyph: Token.t value

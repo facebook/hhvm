@@ -578,6 +578,9 @@ where S: SmartConstructors<State = State>,
     fn make_list_item(&mut self, arg0 : Self::R, arg1 : Self::R) -> Self::R {
         compose(SyntaxKind::ListItem, self.s.make_list_item(arg0.1, arg1.1))
     }
+    fn make_enum_atom_expression(&mut self, arg0 : Self::R, arg1 : Self::R) -> Self::R {
+        compose(SyntaxKind::EnumAtomExpression, self.s.make_enum_atom_expression(arg0.1, arg1.1))
+    }
     fn make_pocket_atom_expression(&mut self, arg0 : Self::R, arg1 : Self::R) -> Self::R {
         compose(SyntaxKind::PocketAtomExpression, self.s.make_pocket_atom_expression(arg0.1, arg1.1))
     }

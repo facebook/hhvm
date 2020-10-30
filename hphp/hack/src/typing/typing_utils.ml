@@ -515,6 +515,7 @@ let shape_field_name_ env field =
     | (p, Int name) -> Ok (Ast_defs.SFlit_int (p, name))
     | (p, String name) -> Ok (Ast_defs.SFlit_str (p, name))
     | (p, PU_atom name) -> Ok (Ast_defs.SFlit_str (p, name))
+    | (p, EnumAtom name) -> Ok (Ast_defs.SFlit_str (p, name))
     | (_, Class_const ((_, CI x), y)) -> Ok (Ast_defs.SFclass_const (x, y))
     | (_, Class_const ((_, CIself), y)) ->
       let c_ty = get_node (Env.get_self env) in

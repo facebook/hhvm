@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<0e20d204f0ed2032b49fd76cc832b002>>
+// @generated SignedSource<<393b98e78f6d1f6f98c0fba27978fb46>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -576,6 +576,7 @@ pub enum Typing {
     InheritedMethodCaseDiffers = 4393,
     AtomUnknown = 4394,
     AtomInvalidParameter = 4395,
+    AtomAsExpression = 4396,
 }
 impl TrivialDrop for Typing {}
 

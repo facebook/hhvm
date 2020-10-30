@@ -1011,6 +1011,10 @@ module type Syntax_S = sig
     { list_item                                          : t
     ; list_separator                                     : t
     }
+  | EnumAtomExpression                of
+    { enum_atom_hash                                     : t
+    ; enum_atom_expression                               : t
+    }
   | PocketAtomExpression              of
     { pocket_atom_glyph                                  : t
     ; pocket_atom_expression                             : t
@@ -1265,6 +1269,7 @@ module type Syntax_S = sig
   val make_intersection_type_specifier : t -> t -> t -> t
   val make_error : t -> t
   val make_list_item : t -> t -> t
+  val make_enum_atom_expression : t -> t -> t
   val make_pocket_atom_expression : t -> t -> t
   val make_pocket_identifier_expression : t -> t -> t -> t -> t -> t
   val make_pocket_atom_mapping_declaration : t -> t -> t -> t -> t -> t -> t
@@ -1447,6 +1452,7 @@ module type Syntax_S = sig
   val is_intersection_type_specifier : t -> bool
   val is_error : t -> bool
   val is_list_item : t -> bool
+  val is_enum_atom_expression : t -> bool
   val is_pocket_atom_expression : t -> bool
   val is_pocket_identifier_expression : t -> bool
   val is_pocket_atom_mapping_declaration : t -> bool

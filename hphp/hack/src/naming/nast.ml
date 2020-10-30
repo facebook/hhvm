@@ -622,6 +622,8 @@ module Visitor_DEPRECATED = struct
 
       method on_pu_atom : 'a -> string -> 'a
 
+      method on_enum_atom : 'a -> string -> 'a
+
       method on_pu_identifier : 'a -> class_id -> pstring -> pstring -> 'a
 
       method on_function_ptr_id :
@@ -846,6 +848,7 @@ module Visitor_DEPRECATED = struct
         | PU_atom sid -> this#on_pu_atom acc sid
         | PU_identifier (e, s1, s2) -> this#on_pu_identifier acc e s1 s2
         | ET_Splice e -> this#on_et_splice acc e
+        | EnumAtom sid -> this#on_enum_atom acc sid
 
       method on_collection acc tal afl =
         let acc =
@@ -1216,6 +1219,8 @@ module Visitor_DEPRECATED = struct
       method on_pu_identifier acc cid _ _ = this#on_class_id acc cid
 
       method on_pu_atom acc s = this#on_string acc s
+
+      method on_enum_atom acc s = this#on_string acc s
 
       method on_function_ptr_id acc fpi =
         match fpi with

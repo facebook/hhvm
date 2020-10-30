@@ -744,6 +744,10 @@ impl<'src> SmartConstructors for MinimalSmartConstructors {
         <Self as SyntaxSmartConstructors<MinimalSyntax, SimpleTokenFactoryImpl<MinimalToken>, NoState>>::make_list_item(self, arg0, arg1)
     }
 
+    fn make_enum_atom_expression(&mut self, arg0: Self::R, arg1: Self::R) -> Self::R {
+        <Self as SyntaxSmartConstructors<MinimalSyntax, SimpleTokenFactoryImpl<MinimalToken>, NoState>>::make_enum_atom_expression(self, arg0, arg1)
+    }
+
     fn make_pocket_atom_expression(&mut self, arg0: Self::R, arg1: Self::R) -> Self::R {
         <Self as SyntaxSmartConstructors<MinimalSyntax, SimpleTokenFactoryImpl<MinimalToken>, NoState>>::make_pocket_atom_expression(self, arg0, arg1)
     }

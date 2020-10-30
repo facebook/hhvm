@@ -194,6 +194,7 @@ pub enum SyntaxVariant<'a, T, V> {
     IntersectionTypeSpecifier(&'a IntersectionTypeSpecifierChildren<'a, T, V>),
     ErrorSyntax(&'a ErrorSyntaxChildren<'a, T, V>),
     ListItem(&'a ListItemChildren<'a, T, V>),
+    EnumAtomExpression(&'a EnumAtomExpressionChildren<'a, T, V>),
     PocketAtomExpression(&'a PocketAtomExpressionChildren<'a, T, V>),
     PocketIdentifierExpression(&'a PocketIdentifierExpressionChildren<'a, T, V>),
     PocketAtomMappingDeclaration(&'a PocketAtomMappingDeclarationChildren<'a, T, V>),
@@ -1518,6 +1519,12 @@ pub struct ErrorSyntaxChildren<'a, T, V> {
 pub struct ListItemChildren<'a, T, V> {
     pub item: Syntax<'a, T, V>,
     pub separator: Syntax<'a, T, V>,
+}
+
+#[derive(Debug, Clone)]
+pub struct EnumAtomExpressionChildren<'a, T, V> {
+    pub hash: Syntax<'a, T, V>,
+    pub expression: Syntax<'a, T, V>,
 }
 
 #[derive(Debug, Clone)]

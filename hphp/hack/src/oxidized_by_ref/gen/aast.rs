@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<50036e15d7e4b5bfa03f4ec289680b08>>
+// @generated SignedSource<<2c9978447c9c3604e8565b7973388d9f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -482,6 +482,7 @@ pub enum Expr_<'a, Ex, Fb, En, Hi> {
         ),
     ),
     ETSplice(&'a Expr<'a, Ex, Fb, En, Hi>),
+    EnumAtom(&'a str),
     Any,
 }
 impl<'a, Ex: TrivialDrop, Fb: TrivialDrop, En: TrivialDrop, Hi: TrivialDrop> TrivialDrop

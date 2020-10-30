@@ -472,6 +472,7 @@ where
             | TokenKind::Define => self.parse_define_expression(),
             | TokenKind::Eval => self.parse_eval_expression(),
             | TokenKind::ColonAt => self.parse_pocket_atom(),
+            | TokenKind::Hash => self.parse_atom(),
             | TokenKind::Empty => {
                 self.with_error(Errors::empty_expression_illegal);
                 let token = self.next_token_non_reserved_as_name();
@@ -3034,6 +3035,12 @@ where
             op,
             name
         )
+    }
+
+    fn parse_atom(&mut self) -> S::R {
+        let hash = self.assert_token(TokenKind::Hash);
+        let atom_name = self.require_name();
+        S!(make_enum_atom_expression, self, hash, atom_name)
     }
 
     fn parse_pocket_atom(&mut self) -> S::R {

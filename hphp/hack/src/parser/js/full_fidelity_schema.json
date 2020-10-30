@@ -1,6 +1,6 @@
 { "description" :
   "@generated JSON schema of the Hack Full Fidelity Parser AST",
-  "version" : "2020-10-15-0001",
+  "version" : "2020-10-29-0001",
   "trivia" : [
     { "trivia_kind_name" : "WhiteSpace",
       "trivia_type_name" : "whitespace" },
@@ -383,6 +383,8 @@
       "token_text" : "`" },
     { "token_kind" : "XHP",
       "token_text" : "xhp" },
+    { "token_kind" : "Hash",
+      "token_text" : "#" },
 
     { "token_kind" : "ErrorToken",
       "token_text" : null },
@@ -2089,6 +2091,14 @@
       "fields" : [
         { "field_name" : "item" },
         { "field_name" : "separator" }
+      ] },
+    { "kind_name" : "EnumAtomExpression",
+      "type_name" : "enum_atom_expression",
+      "description" : "enum_atom",
+      "prefix" : "enum_atom",
+      "fields" : [
+        { "field_name" : "hash" },
+        { "field_name" : "expression" }
       ] },
     { "kind_name" : "PocketAtomExpression",
       "type_name" : "pocket_atom_expression",

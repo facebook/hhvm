@@ -1,0 +1,10 @@
+File "atom_wrong_place.php", line 4, characters 1-16:
+Toplevel statements are not allowed. Use `__EntryPoint` attribute instead (Parsing[1002])
+File "atom_wrong_place.php", line 9, characters 8-8:
+This character is invalid. (Parsing[1002])
+File "atom_wrong_place.php", line 9, characters 8-8:
+Unbound name: `#` (a global constant) (Naming[2049])
+File "atom_wrong_place.php", line 8, characters 8-26:
+Atoms are not allowed as single expressions (Typing[4396])
+File "atom_wrong_place.php", line 9, characters 8-8:
+Unbound global constant (Typing) (Typing[4106])

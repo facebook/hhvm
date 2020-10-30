@@ -3015,6 +3015,9 @@ and expr_
     Errors.pu_typing p "identifier" s;
     expr_error env (Reason.Rwitness p) outer
   | ET_Splice e -> et_splice env p e
+  | EnumAtom s ->
+    Errors.atom_as_expr p;
+    make_result env p (Aast.EnumAtom s) (mk (Reason.Rwitness p, Terr))
 
 (* let ty = err_witness env cst_pos in *)
 and class_const ?(incl_tc = false) env p ((cpos, cid), mid) =
@@ -6111,8 +6114,7 @@ and call
             let constants = Cls.consts cls in
             if List.Assoc.mem ~equal:String.equal constants atom_name then
               let hi = (pos, expected_ty) in
-              (* TODO: here *)
-              let te = (hi, String atom_name) in
+              let te = (hi, EnumAtom atom_name) in
               Some (te, expected_ty)
             else (
               Errors.atom_unknown pos atom_name enum_name;
@@ -6127,8 +6129,7 @@ and call
                 let is_atom = get_fp_is_atom param in
                 let ety = param.fp_type.et_type in
                 match arg with
-                (* TODO: and here *)
-                | String atom_name when is_atom ->
+                | EnumAtom atom_name when is_atom ->
                   (match get_node ety with
                   (* Uncomment this if we want to support atoms for normal
                    * enums

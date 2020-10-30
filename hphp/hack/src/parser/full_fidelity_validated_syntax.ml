@@ -231,6 +231,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | Syntax.XHPExpression _ -> tag validate_xhp_expression (fun x -> ExprXHP x) x
     | Syntax.ShapeExpression _ -> tag validate_shape_expression (fun x -> ExprShape x) x
     | Syntax.TupleExpression _ -> tag validate_tuple_expression (fun x -> ExprTuple x) x
+    | Syntax.EnumAtomExpression _ -> tag validate_enum_atom_expression (fun x -> ExprEnumAtom x) x
     | Syntax.PocketAtomExpression _ -> tag validate_pocket_atom_expression (fun x -> ExprPocketAtom x) x
     | Syntax.PocketIdentifierExpression _ -> tag validate_pocket_identifier_expression (fun x -> ExprPocketIdentifier x) x
     | s -> aggregation_fail Def.Expression s
@@ -282,6 +283,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | ExprXHP                          thing -> invalidate_xhp_expression                 (value, thing)
     | ExprShape                        thing -> invalidate_shape_expression               (value, thing)
     | ExprTuple                        thing -> invalidate_tuple_expression               (value, thing)
+    | ExprEnumAtom                     thing -> invalidate_enum_atom_expression           (value, thing)
     | ExprPocketAtom                   thing -> invalidate_pocket_atom_expression         (value, thing)
     | ExprPocketIdentifier             thing -> invalidate_pocket_identifier_expression   (value, thing)
   and validate_specifier : specifier validator = fun x ->
@@ -3638,6 +3640,20 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
       { intersection_left_paren = invalidate_token x.intersection_left_paren
       ; intersection_types = invalidate_list_with (invalidate_specifier) x.intersection_types
       ; intersection_right_paren = invalidate_token x.intersection_right_paren
+      }
+    ; Syntax.value = v
+    }
+  and validate_enum_atom_expression : enum_atom_expression validator = function
+  | { Syntax.syntax = Syntax.EnumAtomExpression x; value = v } -> v,
+    { enum_atom_expression = validate_token x.enum_atom_expression
+    ; enum_atom_hash = validate_token x.enum_atom_hash
+    }
+  | s -> validation_fail (Some SyntaxKind.EnumAtomExpression) s
+  and invalidate_enum_atom_expression : enum_atom_expression invalidator = fun (v, x) ->
+    { Syntax.syntax =
+      Syntax.EnumAtomExpression
+      { enum_atom_hash = invalidate_token x.enum_atom_hash
+      ; enum_atom_expression = invalidate_token x.enum_atom_expression
       }
     ; Syntax.value = v
     }

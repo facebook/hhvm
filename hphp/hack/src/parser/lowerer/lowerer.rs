@@ -2289,6 +2289,7 @@ where
                 };
                 Ok(E_::mk_puidentifier(qual, field, name))
             }
+            EnumAtomExpression(c) => Ok(E_::EnumAtom(Self::pos_name(&c.expression, env)?.1)),
             _ => Self::missing_syntax_(Some(E_::Null), "expression", node, env),
         }
     }

@@ -228,6 +228,7 @@ module WithToken(Token: TokenType) = struct
       | IntersectionTypeSpecifier         _ -> SyntaxKind.IntersectionTypeSpecifier
       | ErrorSyntax                       _ -> SyntaxKind.ErrorSyntax
       | ListItem                          _ -> SyntaxKind.ListItem
+      | EnumAtomExpression                _ -> SyntaxKind.EnumAtomExpression
       | PocketAtomExpression              _ -> SyntaxKind.PocketAtomExpression
       | PocketIdentifierExpression        _ -> SyntaxKind.PocketIdentifierExpression
       | PocketAtomMappingDeclaration      _ -> SyntaxKind.PocketAtomMappingDeclaration
@@ -422,6 +423,7 @@ module WithToken(Token: TokenType) = struct
     let is_intersection_type_specifier          = has_kind SyntaxKind.IntersectionTypeSpecifier
     let is_error                                = has_kind SyntaxKind.ErrorSyntax
     let is_list_item                            = has_kind SyntaxKind.ListItem
+    let is_enum_atom_expression                 = has_kind SyntaxKind.EnumAtomExpression
     let is_pocket_atom_expression               = has_kind SyntaxKind.PocketAtomExpression
     let is_pocket_identifier_expression         = has_kind SyntaxKind.PocketIdentifierExpression
     let is_pocket_atom_mapping_declaration      = has_kind SyntaxKind.PocketAtomMappingDeclaration
@@ -2298,6 +2300,13 @@ module WithToken(Token: TokenType) = struct
       } ->
          let acc = f acc list_item in
          let acc = f acc list_separator in
+         acc
+      | EnumAtomExpression {
+        enum_atom_hash;
+        enum_atom_expression;
+      } ->
+         let acc = f acc enum_atom_hash in
+         let acc = f acc enum_atom_expression in
          acc
       | PocketAtomExpression {
         pocket_atom_glyph;
@@ -4192,6 +4201,13 @@ module WithToken(Token: TokenType) = struct
         list_item;
         list_separator;
       ]
+      | EnumAtomExpression {
+        enum_atom_hash;
+        enum_atom_expression;
+      } -> [
+        enum_atom_hash;
+        enum_atom_expression;
+      ]
       | PocketAtomExpression {
         pocket_atom_glyph;
         pocket_atom_expression;
@@ -6085,6 +6101,13 @@ module WithToken(Token: TokenType) = struct
       } -> [
         "list_item";
         "list_separator";
+      ]
+      | EnumAtomExpression {
+        enum_atom_hash;
+        enum_atom_expression;
+      } -> [
+        "enum_atom_hash";
+        "enum_atom_expression";
       ]
       | PocketAtomExpression {
         pocket_atom_glyph;
@@ -8202,6 +8225,14 @@ module WithToken(Token: TokenType) = struct
         ListItem {
           list_item;
           list_separator;
+        }
+      | (SyntaxKind.EnumAtomExpression, [
+          enum_atom_hash;
+          enum_atom_expression;
+        ]) ->
+        EnumAtomExpression {
+          enum_atom_hash;
+          enum_atom_expression;
         }
       | (SyntaxKind.PocketAtomExpression, [
           pocket_atom_glyph;
@@ -10812,6 +10843,17 @@ module WithToken(Token: TokenType) = struct
         let syntax = ListItem {
           list_item;
           list_separator;
+        } in
+        let value = ValueBuilder.value_from_syntax syntax in
+        make syntax value
+
+      let make_enum_atom_expression
+        enum_atom_hash
+        enum_atom_expression
+      =
+        let syntax = EnumAtomExpression {
+          enum_atom_hash;
+          enum_atom_expression;
         } in
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value

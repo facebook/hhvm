@@ -2361,6 +2361,15 @@ let schema : schema_node list =
       fields = [("item", Just "error"); ("separator", Token)];
     };
     {
+      kind_name = "EnumAtomExpression";
+      type_name = "enum_atom_expression";
+      func_name = "enum_atom_expression";
+      description = "enum_atom";
+      prefix = "enum_atom";
+      aggregates = [Expression];
+      fields = [("hash", Token); ("expression", Token)];
+    };
+    {
       kind_name = "PocketAtomExpression";
       type_name = "pocket_atom_expression";
       func_name = "pocket_atom_expression";

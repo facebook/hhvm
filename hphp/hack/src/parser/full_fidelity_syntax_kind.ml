@@ -189,6 +189,7 @@ type t =
   | IntersectionTypeSpecifier
   | ErrorSyntax
   | ListItem
+  | EnumAtomExpression
   | PocketAtomExpression
   | PocketIdentifierExpression
   | PocketAtomMappingDeclaration
@@ -373,6 +374,7 @@ let to_string kind =
   | IntersectionTypeSpecifier         -> "intersection_type_specifier"
   | ErrorSyntax                       -> "error"
   | ListItem                          -> "list_item"
+  | EnumAtomExpression                -> "enum_atom"
   | PocketAtomExpression              -> "pocket_atom"
   | PocketIdentifierExpression        -> "pocket_identifier"
   | PocketAtomMappingDeclaration      -> "pocket_atom_mapping"

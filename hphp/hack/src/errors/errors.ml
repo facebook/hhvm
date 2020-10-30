@@ -5684,6 +5684,11 @@ let atom_unknown pos atom_name class_name =
     (Typing.err_code Typing.AtomUnknown)
     [(pos, "Unknown constant " ^ atom_name ^ " in " ^ class_name)]
 
+let atom_as_expr pos =
+  add_list
+    (Typing.err_code Typing.AtomAsExpression)
+    [(pos, "Atoms are not allowed as single expressions")]
+
 (*****************************************************************************)
 (* Printing *)
 (*****************************************************************************)

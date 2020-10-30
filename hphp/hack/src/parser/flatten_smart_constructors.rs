@@ -1389,6 +1389,14 @@ pub trait FlattenSmartConstructors<'src, State>
         }
     }
 
+    fn make_enum_atom_expression(&mut self, arg0: Self::R, arg1: Self::R) -> Self::R {
+        if Self::is_zero(&arg0) && Self::is_zero(&arg1) {
+          Self::zero(SyntaxKind::EnumAtomExpression)
+        } else {
+          self.flatten(SyntaxKind::EnumAtomExpression, vec!(arg0, arg1))
+        }
+    }
+
     fn make_pocket_atom_expression(&mut self, arg0: Self::R, arg1: Self::R) -> Self::R {
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) {
           Self::zero(SyntaxKind::PocketAtomExpression)

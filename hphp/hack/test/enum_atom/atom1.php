@@ -27,11 +27,11 @@ abstract class Controller {
   }
 
   public static function getA() : int {
-    return static::get("A"); // TODO: fix with #A
+    return static::get(#A);
   }
 
   public static function getB() : int {
-    return static::get("B"); // TODO: fix with #B
+    return static::get(#B);
   }
 }
 
@@ -45,11 +45,10 @@ class CFF extends Controller {
 
 <<__EntryPoint>>
 function main(): void {
-  // TODO: fix with #X
-  ff("A");
-  ff("C");
-  CEE::get("A");
-  CEE::get("C");
-  CFF::get("A");
-  CFF::get("C");
+  ff(#A);
+  ff(#C);
+  CEE::get(#A);
+  CEE::get(#C);
+  CFF::get(#A);
+  CFF::get(#C);
 }

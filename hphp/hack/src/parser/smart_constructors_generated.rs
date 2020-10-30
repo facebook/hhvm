@@ -202,6 +202,7 @@ pub trait SmartConstructors: Clone {
     fn make_intersection_type_specifier(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> Self::R;
     fn make_error(&mut self, arg0 : Self::R) -> Self::R;
     fn make_list_item(&mut self, arg0 : Self::R, arg1 : Self::R) -> Self::R;
+    fn make_enum_atom_expression(&mut self, arg0 : Self::R, arg1 : Self::R) -> Self::R;
     fn make_pocket_atom_expression(&mut self, arg0 : Self::R, arg1 : Self::R) -> Self::R;
     fn make_pocket_identifier_expression(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R) -> Self::R;
     fn make_pocket_atom_mapping_declaration(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R, arg5 : Self::R) -> Self::R;

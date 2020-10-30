@@ -3668,6 +3668,24 @@ where
       Self { syntax, value }
     }
 
+    fn make_enum_atom_expression(ctx: &C, arg0: Self, arg1: Self) -> Self {
+      let children = &[
+          arg0.value, 
+          arg1.value
+      ];
+      let value = V::from_values(children.iter());
+      let syntax = Self::make(
+          ctx,
+          SyntaxKind::EnumAtomExpression,
+          &value,
+          &[
+              arg0.syntax, 
+              arg1.syntax
+          ],
+      );
+      Self { syntax, value }
+    }
+
     fn make_pocket_atom_expression(ctx: &C, arg0: Self, arg1: Self) -> Self {
       let children = &[
           arg0.value, 

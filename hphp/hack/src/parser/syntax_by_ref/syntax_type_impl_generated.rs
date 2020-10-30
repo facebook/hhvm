@@ -1851,6 +1851,15 @@ where
         Self::make(syntax, value)
     }
 
+    fn make_enum_atom_expression(ctx: &C, hash: Self, expression: Self) -> Self {
+        let syntax = SyntaxVariant::EnumAtomExpression(ctx.get_arena().alloc(EnumAtomExpressionChildren {
+            hash,
+            expression,
+        }));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
+        Self::make(syntax, value)
+    }
+
     fn make_pocket_atom_expression(ctx: &C, glyph: Self, expression: Self) -> Self {
         let syntax = SyntaxVariant::PocketAtomExpression(ctx.get_arena().alloc(PocketAtomExpressionChildren {
             glyph,

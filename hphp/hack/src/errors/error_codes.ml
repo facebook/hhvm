@@ -664,7 +664,8 @@ module Typing = struct
     | UnnecessaryAttribute [@value 4392]
     | InheritedMethodCaseDiffers [@value 4393]
     | AtomUnknown [@value 4394]
-    | AtomInvalidParameter [@value 4395] (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
+    | AtomInvalidParameter [@value 4395]
+    | AtomAsExpression [@value 4396] (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum

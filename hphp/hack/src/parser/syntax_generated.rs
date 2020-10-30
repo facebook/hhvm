@@ -1845,6 +1845,15 @@ where
         Self::make(syntax, value)
     }
 
+    fn make_enum_atom_expression(_: &C, enum_atom_hash: Self, enum_atom_expression: Self) -> Self {
+        let syntax = SyntaxVariant::EnumAtomExpression(Box::new(EnumAtomExpressionChildren {
+            enum_atom_hash,
+            enum_atom_expression,
+        }));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
+        Self::make(syntax, value)
+    }
+
     fn make_pocket_atom_expression(_: &C, pocket_atom_glyph: Self, pocket_atom_expression: Self) -> Self {
         let syntax = SyntaxVariant::PocketAtomExpression(Box::new(PocketAtomExpressionChildren {
             pocket_atom_glyph,
@@ -3272,6 +3281,12 @@ where
                 let acc = f(list_separator, acc);
                 acc
             },
+            SyntaxVariant::EnumAtomExpression(x) => {
+                let EnumAtomExpressionChildren { enum_atom_hash, enum_atom_expression } = *x;
+                let acc = f(enum_atom_hash, acc);
+                let acc = f(enum_atom_expression, acc);
+                acc
+            },
             SyntaxVariant::PocketAtomExpression(x) => {
                 let PocketAtomExpressionChildren { pocket_atom_glyph, pocket_atom_expression } = *x;
                 let acc = f(pocket_atom_glyph, acc);
@@ -3515,6 +3530,7 @@ where
             SyntaxVariant::IntersectionTypeSpecifier {..} => SyntaxKind::IntersectionTypeSpecifier,
             SyntaxVariant::ErrorSyntax {..} => SyntaxKind::ErrorSyntax,
             SyntaxVariant::ListItem {..} => SyntaxKind::ListItem,
+            SyntaxVariant::EnumAtomExpression {..} => SyntaxKind::EnumAtomExpression,
             SyntaxVariant::PocketAtomExpression {..} => SyntaxKind::PocketAtomExpression,
             SyntaxVariant::PocketIdentifierExpression {..} => SyntaxKind::PocketIdentifierExpression,
             SyntaxVariant::PocketAtomMappingDeclaration {..} => SyntaxKind::PocketAtomMappingDeclaration,
@@ -4676,6 +4692,11 @@ where
              (SyntaxKind::ListItem, 2) => SyntaxVariant::ListItem(Box::new(ListItemChildren {
                  list_separator: ts.pop().unwrap(),
                  list_item: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::EnumAtomExpression, 2) => SyntaxVariant::EnumAtomExpression(Box::new(EnumAtomExpressionChildren {
+                 enum_atom_expression: ts.pop().unwrap(),
+                 enum_atom_hash: ts.pop().unwrap(),
                  
              })),
              (SyntaxKind::PocketAtomExpression, 2) => SyntaxVariant::PocketAtomExpression(Box::new(PocketAtomExpressionChildren {
@@ -6058,6 +6079,12 @@ pub struct ListItemChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+pub struct EnumAtomExpressionChildren<T, V> {
+    pub enum_atom_hash: Syntax<T, V>,
+    pub enum_atom_expression: Syntax<T, V>,
+}
+
+#[derive(Debug, Clone)]
 pub struct PocketAtomExpressionChildren<T, V> {
     pub pocket_atom_glyph: Syntax<T, V>,
     pub pocket_atom_expression: Syntax<T, V>,
@@ -6297,6 +6324,7 @@ pub enum SyntaxVariant<T, V> {
     IntersectionTypeSpecifier(Box<IntersectionTypeSpecifierChildren<T, V>>),
     ErrorSyntax(Box<ErrorSyntaxChildren<T, V>>),
     ListItem(Box<ListItemChildren<T, V>>),
+    EnumAtomExpression(Box<EnumAtomExpressionChildren<T, V>>),
     PocketAtomExpression(Box<PocketAtomExpressionChildren<T, V>>),
     PocketIdentifierExpression(Box<PocketIdentifierExpressionChildren<T, V>>),
     PocketAtomMappingDeclaration(Box<PocketAtomMappingDeclarationChildren<T, V>>),
@@ -7975,6 +8003,14 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 get_index(2).and_then(|index| { match index {
                         0 => Some(&x.list_item),
                     1 => Some(&x.list_separator),
+                        _ => None,
+                    }
+                })
+            },
+            EnumAtomExpression(x) => {
+                get_index(2).and_then(|index| { match index {
+                        0 => Some(&x.enum_atom_hash),
+                    1 => Some(&x.enum_atom_expression),
                         _ => None,
                     }
                 })

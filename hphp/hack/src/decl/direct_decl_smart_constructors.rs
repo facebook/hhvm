@@ -986,7 +986,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                         ArrayGet(_) | As(_) | Assert(_) | Await(_) | Binop(_) | BracedExpr(_)
                         | Call(_) | Callconv(_) | Cast(_) | ClassConst(_) | ClassGet(_)
                         | Clone(_) | Collection(_) | Darray(_) | Dollardollar(_) | Efun(_)
-                        | Eif(_) | ETSplice(_) | ExpressionTree(_) | ExprList(_)
+                        | Eif(_) | EnumAtom(_) | ETSplice(_) | ExpressionTree(_) | ExprList(_)
                         | FunctionPointer(_) | FunId(_) | Id(_) | Import(_) | Is(_)
                         | KeyValCollection(_) | Lfun(_) | List(_) | Lplaceholder(_) | Lvar(_)
                         | MethodCaller(_) | MethodId(_) | New(_) | ObjGet(_) | Omitted
@@ -2202,6 +2202,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             | TokenKind::XHPStringLiteral
             | TokenKind::XHPBody
             | TokenKind::XHPComment
+            | TokenKind::Hash
             | TokenKind::Hashbang => Node::Ignored(SK::Token(kind)),
         };
         self.state.previous_token_kind = kind;

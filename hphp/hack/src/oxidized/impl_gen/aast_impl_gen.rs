@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<6ae181f78e7be9ea135e49bcfb6a3f69>>
+// @generated SignedSource<<13e7258747b62db1ee99b7ce44cfeadb>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -1175,6 +1175,9 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
     pub fn mk_etsplice(p0: Expr<Ex, Fb, En, Hi>) -> Self {
         Expr_::ETSplice(Box::new(p0))
     }
+    pub fn mk_enum_atom(p0: String) -> Self {
+        Expr_::EnumAtom(p0)
+    }
     pub fn mk_any() -> Self {
         Expr_::Any
     }
@@ -1529,6 +1532,12 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
     pub fn is_etsplice(&self) -> bool {
         match self {
             Expr_::ETSplice(..) => true,
+            _ => false,
+        }
+    }
+    pub fn is_enum_atom(&self) -> bool {
+        match self {
+            Expr_::EnumAtom(..) => true,
             _ => false,
         }
     }
@@ -1911,6 +1920,12 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
     pub fn as_etsplice(&self) -> Option<&Expr<Ex, Fb, En, Hi>> {
         match self {
             Expr_::ETSplice(p0) => Some(&p0),
+            _ => None,
+        }
+    }
+    pub fn as_enum_atom(&self) -> Option<&String> {
+        match self {
+            Expr_::EnumAtom(p0) => Some(p0),
             _ => None,
         }
     }
@@ -2328,6 +2343,12 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
             _ => None,
         }
     }
+    pub fn as_enum_atom_mut(&mut self) -> Option<&mut String> {
+        match self {
+            Expr_::EnumAtom(p0) => Some(p0),
+            _ => None,
+        }
+    }
     pub fn as_darray_into(
         self,
     ) -> Option<(
@@ -2701,6 +2722,12 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
     pub fn as_etsplice_into(self) -> Option<Expr<Ex, Fb, En, Hi>> {
         match self {
             Expr_::ETSplice(p0) => Some(*p0),
+            _ => None,
+        }
+    }
+    pub fn as_enum_atom_into(self) -> Option<String> {
+        match self {
+            Expr_::EnumAtom(p0) => Some(p0),
             _ => None,
         }
     }

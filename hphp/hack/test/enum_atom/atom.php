@@ -26,9 +26,8 @@ function ff(<<__Atom>> HH\Elt<EE, Box> $x) : int {
 
 <<__EntryPoint>>
 function main(): void {
-  // TODO: fix with #X
-  ff("A");
-  ff("C"); // unknown constant
+  ff(#A);
+  ff(#C); // unknown constant
 }
 
 class C {}

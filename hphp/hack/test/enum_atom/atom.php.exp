@@ -1,12 +1,8 @@
 File "atom.php", line 10, characters 23-23:
 Attribute __Atom is only allowed on \HH\Elt (Typing[4395])
-File "atom.php", line 31, characters 3-9:
+File "atom.php", line 30, characters 3-8:
 Unknown constant C in EE (Typing[4394])
-File "atom.php", line 31, characters 6-8:
-Invalid argument (Typing[4110])
-  File "atom.php", line 23, characters 24-38:
-  Expected `HH\Elt<EE, Box>`
-  File "atom.php", line 31, characters 6-8:
-  But got `string`
-File "atom.php", line 35, characters 47-60:
+File "atom.php", line 30, characters 6-7:
+Atoms are not allowed as single expressions (Typing[4396])
+File "atom.php", line 34, characters 47-60:
 When using __Atom, only type parameters bounded by enum classes and enum classes are allowed as the first parameters of \HH\Elt (Typing[4395])

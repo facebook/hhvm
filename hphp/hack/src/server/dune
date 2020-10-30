@@ -181,9 +181,7 @@
     decl_redecl_service
     fileutils
     hg
-    (select logging from
-      (facebook signed_source -> logging_fb)
-      (-> logging_stubs))
+    logging
     remote
     server_env
     sys_utils

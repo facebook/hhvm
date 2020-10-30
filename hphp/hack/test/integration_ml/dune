@@ -31,6 +31,7 @@
 (executable
   (name runner)
   (link_flags (:standard (:include ../../src/dune_config/ld-opts.sexp)))
+  (modes exe byte_complete)
   (modules
     runner
     test_added_parent
@@ -72,8 +73,8 @@
   (action (copy runner.exe test_all.exe)))
 
 (rule
-  (targets test_all.bc)
-  (action (copy runner.bc test_all.bc)))
+  (targets test_all.bc.exe)
+  (action (copy runner.bc.exe test_all.bc.exe)))
 
 (alias
   (name server_config_overrides)

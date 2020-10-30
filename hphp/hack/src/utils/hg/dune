@@ -17,6 +17,7 @@
   (name hg_runner)
   (modules hg_runner)
   (link_flags (:standard (:include ../../dune_config/ld-opts.sexp)))
+  (modes exe byte_complete)
   (libraries
     hg
     default_injector_config)

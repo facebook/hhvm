@@ -1,6 +1,7 @@
 (executable
   (name test_early)
   (link_flags (:standard (:include ../../src/dune_config/ld-opts.sexp)))
+  (modes exe byte_complete)
   (modules test_early)
   (libraries
     heap_ident
@@ -15,6 +16,7 @@
 (executable
   (name test_handoff)
   (link_flags (:standard (:include ../../src/dune_config/ld-opts.sexp)))
+  (modes exe byte_complete)
   (modules test_handoff)
   (libraries
     heap_ident
@@ -29,6 +31,7 @@
 (executable
   (name test_workers)
   (link_flags (:standard (:include ../../src/dune_config/ld-opts.sexp)))
+  (modes exe byte_complete)
   (modules test_workers)
   (libraries
     core_kernel

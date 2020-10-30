@@ -5,7 +5,7 @@
   (name hh_single_type_check)
   (modules
     hh_single_type_check)
-  (ocamlc_flags (:standard -custom))
+  (modes exe byte_complete)
   (link_flags (:standard (:include dune_config/ld-opts.sexp)))
   (libraries
     ai
@@ -31,7 +31,7 @@
   (name hh_server)
   (modules
     hh_server)
-  (ocamlc_flags (:standard -custom))
+  (modes exe byte_complete)
   (link_flags (:standard (:include dune_config/ld-opts.sexp)))
   (libraries
     client
@@ -52,7 +52,7 @@
   (name hh_client)
   (modules
     hh_client)
-  (ocamlc_flags (:standard -custom))
+  (modes exe byte_complete)
   (link_flags (:standard (:include dune_config/ld-opts.sexp)))
   (libraries
     client
@@ -74,6 +74,7 @@
   (name hh_single_compile)
   (modules
     hh_single_compile)
+  (modes exe byte_complete)
   (libraries
     compile_ffi
     compiler_id
@@ -88,14 +89,13 @@
     utils_multifile
     naming
     naming_elaborate_namespaces_endo)
-  (ocamlc_flags (:standard -custom))
   (link_flags (:standard (:include dune_config/ld-opts.sexp))))
 
 (executable
   (name hh_parse)
+  (modes exe byte_complete)
   (modules
     hh_parse)
-  (ocamlc_flags (:standard -custom))
   (link_flags (:standard (:include dune_config/ld-opts.sexp)))
   (libraries
     default_injector_config
@@ -108,7 +108,7 @@
   (name hackfmt)
   (modules
     hackfmt)
-  (ocamlc_flags (:standard -custom))
+  (modes exe byte_complete)
   (link_flags (:standard (:include dune_config/ld-opts.sexp)))
   (libraries
     default_injector_config
@@ -122,7 +122,6 @@
   (modules
     generate_full_fidelity
     generate_full_fidelity_data)
-  (ocamlc_flags (:standard -custom))
   (link_flags (:standard (:include dune_config/ld-opts.sexp)))
   (libraries
     core_kernel
@@ -160,18 +159,18 @@
 (alias
   (name debug-single)
   (deps
-    hh_single_type_check.bc
-    hh_single_compile.bc
+    hh_single_type_check.bc.exe
+    hh_single_compile.bc.exe
     ))
 
 (alias
   (name debug)
   (deps
-    hackfmt.bc
-    hh_client.bc
-    hh_fanout/hh_fanout.bc
-    hh_parse.bc
-    hh_server.bc
-    hh_single_compile.bc
-    hh_single_type_check.bc
+    hackfmt.bc.exe
+    hh_client.bc.exe
+    hh_fanout/hh_fanout.bc.exe
+    hh_parse.bc.exe
+    hh_server.bc.exe
+    hh_single_compile.bc.exe
+    hh_single_type_check.bc.exe
     ))

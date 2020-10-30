@@ -2,6 +2,7 @@
   (name test_method_override)
   (link_flags (:standard (:include ../../src/dune_config/ld-opts.sexp)))
   (modules test_method_override)
+  (modes exe byte_complete)
   (libraries
     integration_test_base))
 
@@ -14,6 +15,7 @@
   (name test_inconsistent_state)
   (link_flags (:standard (:include ../../src/dune_config/ld-opts.sexp)))
   (modules test_inconsistent_state)
+  (modes exe byte_complete)
   (libraries
     integration_test_base))
 
@@ -26,6 +28,7 @@
   (name test_enum_exhaustiveness)
   (link_flags (:standard (:include ../../src/dune_config/ld-opts.sexp)))
   (modules test_enum_exhaustiveness)
+  (modes exe byte_complete)
   (libraries
     integration_test_base))
 

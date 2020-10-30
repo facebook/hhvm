@@ -14,7 +14,7 @@ let executable_entry is_fb name =
       "(executable
         (name %s)
         (modules %s)
-        (ocamlc_flags (:standard -custom))
+        (modes exe byte_complete)
         (link_flags (:standard (:include ../dune_config/ld-opts.sexp)))
         (libraries
          default_injector_config
@@ -24,6 +24,7 @@ let executable_entry is_fb name =
       "(executable
         (name %s)
         (modules %s)
+        (modes exe byte_complete)
         (libraries))" name name
 
 let fb_entry name =

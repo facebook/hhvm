@@ -947,15 +947,27 @@ let full_init
       not
         genv.ServerEnv.local_config.SLC.remote_type_check
           .SLC.RemoteTypeCheck.load_naming_table_on_full_init
-    then
-      initialize_naming_table
-        ~do_naming:true
-        "full initialization"
-        genv
-        env
-        running_mem_stats
-    else
-      load_naming_table genv env running_mem_stats
+    then (
+      let res =
+        initialize_naming_table
+          ~do_naming:true
+          "full initialization"
+          genv
+          env
+          running_mem_stats
+      in
+      CgroupProfiler.MemStats.log_to_scuba ~stage:"parsing" running_mem_stats;
+      CgroupProfiler.MemStats.log_to_scuba ~stage:"naming" running_mem_stats;
+      res
+    ) else
+      let res = load_naming_table genv env running_mem_stats in
+      CgroupProfiler.MemStats.log_to_scuba
+        ~stage:"loading NT from saved state"
+        running_mem_stats;
+      CgroupProfiler.MemStats.log_to_scuba
+        ~stage:"naming from saved state"
+        running_mem_stats;
+      res
   in
   if not is_check_mode then
     SearchServiceRunner.update_fileinfo_map env.naming_table SearchUtils.Init;
@@ -974,14 +986,18 @@ let full_init
     else
       env
   in
-  type_check
-    genv
-    env
-    fnl
-    init_telemetry
-    t
-    ~profile_label:"type_check"
-    running_mem_stats
+  let typecheck_result =
+    type_check
+      genv
+      env
+      fnl
+      init_telemetry
+      t
+      ~profile_label:"type check"
+      running_mem_stats
+  in
+  CgroupProfiler.MemStats.log_to_scuba ~stage:"type check" running_mem_stats;
+  typecheck_result
 
 let parse_only_init
     (genv : ServerEnv.genv)

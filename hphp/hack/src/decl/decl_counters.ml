@@ -18,6 +18,15 @@ type decl_kind =
   | Typedef
 [@@deriving show { with_path = false }]
 
+type origin =
+  | Body
+  | TopLevel
+  | Tast
+  | Variance
+  | NastCheck
+  | TastCheck
+[@@deriving show { with_path = false }]
+
 type subdecl_kind =
   (* Shallow *)
   | Shallow_decl
@@ -165,6 +174,15 @@ type decl = {
       i.e. invocation of get_class / get_fun / ... *)
   decl_name: string;
       (** name of the top-level class/fun/... that was retrieved *)
+  decl_origin: origin option;
+      (** a classification of what larger purpose the code was engaged in,
+      at the moment of top-level decl retrieval. The caller of get_class / get_fun / ...
+      will opt into self-describing itself with a suitable origin. As mentioned above,
+      this is used solely for telemetry classification. *)
+  decl_file: Relative_path.t option;
+      (** the file we were typechecking at the moment of top-level decl retrieval.
+      The caller of get_class / get_fun / ... will opt into providing a
+      filename. *)
   decl_callstack: string option;
       (** callstack at the moment of top-level decl retrieval. This is
       optional in case the user opted out of (costly) callstack fetching. *)
@@ -173,15 +191,14 @@ type decl = {
 }
 
 let set_mode (new_mode : Typing_service_types.profile_decling) : unit =
-  mode := new_mode;
-  match !mode with
-  | Typing_service_types.DeclingOff
-  | Typing_service_types.DeclingTopCounts ->
-    ()
-  | _ -> failwith "TODO(ljw): implement other modes"
+  mode := new_mode
 
 let count_decl
-    (decl_kind : decl_kind) (decl_name : string) (f : decl option -> 'a) : 'a =
+    ?(origin : origin option)
+    ?(file : Relative_path.t option)
+    (decl_kind : decl_kind)
+    (decl_name : string)
+    (f : decl option -> 'a) : 'a =
   match !mode with
   | Typing_service_types.DeclingOff ->
     (* CARE! This path must be highly performant. *)
@@ -199,7 +216,14 @@ let count_decl
         None
     in
     let decl =
-      { decl_id; decl_name; decl_callstack; decl_start_time = start_time }
+      {
+        decl_id;
+        decl_name;
+        decl_callstack;
+        decl_origin = origin;
+        decl_file = file;
+        decl_start_time = start_time;
+      }
     in
     let result = f (Some decl) in
     HackEventLogger.ProfileDecl.count_decl
@@ -207,6 +231,8 @@ let count_decl
       ~cpu_duration:(Sys.time () -. start_cpu_time)
       ~decl_id
       ~decl_name
+      ~decl_origin:(Option.map origin ~f:show_origin)
+      ~decl_file:file
       ~decl_callstack
       ~decl_start_time:start_time
       ~subdecl_member_name:None
@@ -236,6 +262,8 @@ let count_subdecl
       ~cpu_duration:(Sys.time () -. start_cpu_time)
       ~decl_id:decl.decl_id
       ~decl_name:decl.decl_name
+      ~decl_origin:(Option.map decl.decl_origin ~f:show_origin)
+      ~decl_file:decl.decl_file
       ~decl_callstack:decl.decl_callstack
       ~decl_start_time:decl.decl_start_time
       ~subdecl_member_name:(subdecl_member_name subdecl_kind)

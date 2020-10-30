@@ -45,9 +45,13 @@ module Cache =
       let capacity = 1000
     end)
 
-let get_class (ctx : Provider_context.t) (class_name : class_key) :
-    class_decl option =
-  Decl_counters.count_decl Decl_counters.Class class_name @@ fun counter ->
+let get_class
+    ?(origin : Decl_counters.origin option)
+    ?(file : Relative_path.t option)
+    (ctx : Provider_context.t)
+    (class_name : class_key) : class_decl option =
+  Decl_counters.count_decl ?origin ?file Decl_counters.Class class_name
+  @@ fun counter ->
   (* There's a confusing matrix of possibilities:
   SHALLOW - in this case, the Typing_classes_heap.class_t we get back is
     just a small shim that does memoization; further accessors on it
@@ -96,8 +100,13 @@ let get_class (ctx : Provider_context.t) (class_name : class_key) :
       let v : Typing_classes_heap.class_t = Obj.obj obj in
       Some (counter, v))
 
-let get_fun (ctx : Provider_context.t) (fun_name : fun_key) : fun_decl option =
-  Decl_counters.count_decl Decl_counters.Fun fun_name @@ fun _counter ->
+let get_fun
+    ?(origin : Decl_counters.origin option)
+    ?(file : Relative_path.t option)
+    (ctx : Provider_context.t)
+    (fun_name : fun_key) : fun_decl option =
+  Decl_counters.count_decl Decl_counters.Fun ?origin ?file fun_name
+  @@ fun _counter ->
   match Provider_context.get_backend ctx with
   | Provider_backend.Shared_memory ->
     (match Decl_heap.Funs.get fun_name with
@@ -131,9 +140,13 @@ let get_fun (ctx : Provider_context.t) (fun_name : fun_key) : fun_decl option =
   | Provider_backend.Decl_service { decl; _ } ->
     Decl_service_client.rpc_get_fun decl fun_name
 
-let get_typedef (ctx : Provider_context.t) (typedef_name : string) :
-    typedef_decl option =
-  Decl_counters.count_decl Decl_counters.Typedef typedef_name @@ fun _counter ->
+let get_typedef
+    ?(origin : Decl_counters.origin option)
+    ?(file : Relative_path.t option)
+    (ctx : Provider_context.t)
+    (typedef_name : string) : typedef_decl option =
+  Decl_counters.count_decl Decl_counters.Typedef ?origin ?file typedef_name
+  @@ fun _counter ->
   match Provider_context.get_backend ctx with
   | Provider_backend.Shared_memory ->
     (match Decl_heap.Typedefs.get typedef_name with
@@ -171,9 +184,12 @@ let get_typedef (ctx : Provider_context.t) (typedef_name : string) :
   | Provider_backend.Decl_service { decl; _ } ->
     Decl_service_client.rpc_get_typedef decl typedef_name
 
-let get_record_def (ctx : Provider_context.t) (record_name : string) :
-    record_def_decl option =
-  Decl_counters.count_decl Decl_counters.Record_def record_name
+let get_record_def
+    ?(origin : Decl_counters.origin option)
+    ?(file : Relative_path.t option)
+    (ctx : Provider_context.t)
+    (record_name : string) : record_def_decl option =
+  Decl_counters.count_decl Decl_counters.Record_def ?origin ?file record_name
   @@ fun _counter ->
   match Provider_context.get_backend ctx with
   | Provider_backend.Shared_memory ->
@@ -212,9 +228,13 @@ let get_record_def (ctx : Provider_context.t) (record_name : string) :
   | Provider_backend.Decl_service { decl; _ } ->
     Decl_service_client.rpc_get_record_def decl record_name
 
-let get_gconst (ctx : Provider_context.t) (gconst_name : string) :
-    gconst_decl option =
-  Decl_counters.count_decl Decl_counters.GConst gconst_name @@ fun _counter ->
+let get_gconst
+    ?(origin : Decl_counters.origin option)
+    ?(file : Relative_path.t option)
+    (ctx : Provider_context.t)
+    (gconst_name : string) : gconst_decl option =
+  Decl_counters.count_decl Decl_counters.GConst ?origin ?file gconst_name
+  @@ fun _counter ->
   match Provider_context.get_backend ctx with
   | Provider_backend.Shared_memory ->
     (match Decl_heap.GConsts.get gconst_name with

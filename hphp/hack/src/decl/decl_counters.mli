@@ -19,6 +19,14 @@ type decl_kind =
   | Record_def
   | Typedef
 
+type origin =
+  | Body  (** block, expr, statement *)
+  | TopLevel  (** typing_toplevel stuff, well-formedness *)
+  | Tast  (** tast_env *)
+  | Variance  (** typing_variance *)
+  | NastCheck  (** typing/nast_check *)
+  | TastCheck  (** typing/tast_check *)
+
 type subdecl_kind =
   (* Shallow *)
   | Shallow_decl
@@ -87,7 +95,13 @@ back to the original count_decl which fetched the class Foo in the first place.
 [d] is optional; it will be None if e.g. the original call to count_decl established
 that no telemetry should be collected during this run, and we want to avoid
 re-establishing this fact during the call to count_subdecl. *)
-val count_decl : decl_kind -> string -> (decl option -> 'a) -> 'a
+val count_decl :
+  ?origin:origin ->
+  ?file:Relative_path.t ->
+  decl_kind ->
+  string ->
+  (decl option -> 'a) ->
+  'a
 
 (** E.g. 'count_subdecl d (Get_method "bar") (fun () -> <implementation2>)'. The idea
 is that <implementation2> is the body of work which fetches the decl of method 'bar'

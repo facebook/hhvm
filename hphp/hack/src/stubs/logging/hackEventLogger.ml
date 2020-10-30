@@ -423,6 +423,8 @@ module ProfileDecl = struct
       ~cpu_duration:_
       ~decl_id:_
       ~decl_name:_
+      ~decl_origin:_
+      ~decl_file:_
       ~decl_callstack:_
       ~decl_start_time:_
       ~subdecl_member_name:_

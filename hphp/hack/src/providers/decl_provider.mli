@@ -35,16 +35,40 @@ type gconst_decl = Typing_defs.decl_ty
 val prepare_for_typecheck :
   Provider_context.t -> Relative_path.t -> string -> unit
 
-val get_fun : Provider_context.t -> fun_key -> fun_decl option
+val get_fun :
+  ?origin:Decl_counters.origin ->
+  ?file:Relative_path.t ->
+  Provider_context.t ->
+  fun_key ->
+  fun_decl option
 
-val get_class : Provider_context.t -> class_key -> class_decl option
+val get_class :
+  ?origin:Decl_counters.origin ->
+  ?file:Relative_path.t ->
+  Provider_context.t ->
+  class_key ->
+  class_decl option
 
 val get_record_def :
-  Provider_context.t -> record_def_key -> record_def_decl option
+  ?origin:Decl_counters.origin ->
+  ?file:Relative_path.t ->
+  Provider_context.t ->
+  record_def_key ->
+  record_def_decl option
 
-val get_typedef : Provider_context.t -> typedef_key -> typedef_decl option
+val get_typedef :
+  ?origin:Decl_counters.origin ->
+  ?file:Relative_path.t ->
+  Provider_context.t ->
+  typedef_key ->
+  typedef_decl option
 
-val get_gconst : Provider_context.t -> gconst_key -> gconst_decl option
+val get_gconst :
+  ?origin:Decl_counters.origin ->
+  ?file:Relative_path.t ->
+  Provider_context.t ->
+  gconst_key ->
+  gconst_decl option
 
 val local_changes_push_sharedmem_stack : unit -> unit
 

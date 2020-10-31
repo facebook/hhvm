@@ -226,6 +226,8 @@ void StandardExtension::initMisc() {
     HHVM_FE(unpack);
     HHVM_FE(sys_getloadavg);
     HHVM_FE(hphp_to_string);
+    HHVM_FALIAS(HH\\array_mark_legacy, array_mark_legacy);
+    HHVM_FALIAS(HH\\array_unmark_legacy, array_unmark_legacy);
     HHVM_FALIAS(HH\\is_array_marked_legacy, is_array_marked_legacy);
     HHVM_FALIAS(__SystemLib\\max2, SystemLib_max2);
     HHVM_FALIAS(__SystemLib\\min2, SystemLib_min2);
@@ -579,6 +581,22 @@ Array HHVM_FUNCTION(sys_getloadavg) {
   double load[3];
   getloadavg(load, 3);
   return make_varray(load[0], load[1], load[2]);
+}
+
+Variant HHVM_FUNCTION(array_mark_legacy, const Variant& v, bool recursive) {
+  Variant force_cow = v;
+  auto const result =
+    recursive ? arrprov::markTvRecursively(*v.asTypedValue(), /*legacy=*/true)
+              : arrprov::markTvShallow(*v.asTypedValue(), /*legacy=*/true);
+  return Variant::attach(result);
+}
+
+Variant HHVM_FUNCTION(array_unmark_legacy, const Variant& v, bool recursive) {
+  Variant force_cow = v;
+  auto const result =
+    recursive ? arrprov::markTvRecursively(*v.asTypedValue(), /*legacy=*/false)
+              : arrprov::markTvShallow(*v.asTypedValue(), /*legacy=*/false);
+  return Variant::attach(result);
 }
 
 bool HHVM_FUNCTION(is_array_marked_legacy, const Variant& v) {

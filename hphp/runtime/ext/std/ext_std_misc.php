@@ -40,10 +40,10 @@ function server_warmup_status_monotonic(): string;
 <<__Native>>
 function execution_context(): string;
 
-<<__Pure>>
+<<__Pure, __Native, __IsFoldable>>
 function array_mark_legacy(mixed $v, bool $recursive = false): mixed;
 
-<<__Pure>>
+<<__Pure, __Native, __IsFoldable>>
 function array_unmark_legacy(mixed $v, bool $recursive = false): mixed;
 
 <<__Pure, __IsFoldable>>

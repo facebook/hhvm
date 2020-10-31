@@ -3147,6 +3147,11 @@ String HHVM_FUNCTION(HH_get_provenance, const Variant& in) {
   }
 }
 
+TypedValue HHVM_FUNCTION(HH_tag_provenance_here, TypedValue in, int64_t flags) {
+  auto force_cow = Variant::wrap(in);
+  return arrprov::tagTvRecursively(in, flags);
+}
+
 Array HHVM_FUNCTION(merge_xhp_attr_declarations,
                     const Array& arr1,
                     const Array& arr2,
@@ -3311,6 +3316,7 @@ struct ArrayExtension final : Extension {
     HHVM_FALIAS(HH\\darray, HH_darray);
     HHVM_FALIAS(HH\\array_key_cast, HH_array_key_cast);
     HHVM_FALIAS(HH\\get_provenance, HH_get_provenance);
+    HHVM_FALIAS(HH\\tag_provenance_here, HH_tag_provenance_here);
     HHVM_FALIAS(__SystemLib\\merge_xhp_attr_declarations,
                 merge_xhp_attr_declarations);
 

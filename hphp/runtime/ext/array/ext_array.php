@@ -1436,6 +1436,6 @@ namespace HH {
   <<__Native>>
   function get_provenance(mixed $key): string;
 
-  <<__Pure>>
+  <<__Native, __Pure>>
   function tag_provenance_here(mixed $key, int $flags = 0): mixed;
 }

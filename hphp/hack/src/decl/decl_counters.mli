@@ -52,6 +52,7 @@ type subdecl_kind =
   | Has_ancestor of string
   | Requires_ancestor of string
   | Extends of string
+  | Is_disposable
   | Get_const of string
   | Has_const of string
   | Get_typeconst of string
@@ -71,7 +72,6 @@ type subdecl_kind =
   | All_ancestors
   | All_ancestor_names
   | All_ancestor_reqs
-  | Is_disposable
   | Get_pu_enum of string
   | Consts
   | Typeconsts

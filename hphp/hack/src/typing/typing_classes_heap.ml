@@ -22,6 +22,7 @@ type lazy_class_type = {
   members_fully_known: bool Lazy.t;
   req_ancestor_names: unit LSTable.t;
   all_requirements: (Pos.t * decl_ty) Sequence.t;
+  is_disposable: bool Lazy.t;
 }
 
 (** class_t:
@@ -54,6 +55,7 @@ let make_lazy_class_type ctx class_name =
                  members_fully_known;
                  req_ancestor_names;
                  all_requirements;
+                 is_disposable;
                } =
            Decl_ancestors.make ctx class_name
          in
@@ -68,6 +70,7 @@ let make_lazy_class_type ctx class_name =
            members_fully_known;
            req_ancestor_names;
            all_requirements;
+           is_disposable;
          })
     in
     Some (Lazy (sc, remainder))
@@ -306,6 +309,12 @@ module ApiLazy = struct
     | Lazy (_sc, lc) -> LSTable.mem (Lazy.force lc).parents_and_traits ancestor
     | Eager c -> SSet.mem ancestor c.tc_extends
 
+  let is_disposable (decl, t) =
+    Decl_counters.count_subdecl decl Decl_counters.Is_disposable @@ fun () ->
+    match t with
+    | Lazy (_sc, lc) -> Lazy.force (Lazy.force lc).is_disposable
+    | Eager c -> c.tc_is_disposable
+
   let get_const (decl, t) id =
     Decl_counters.count_subdecl decl (Decl_counters.Get_const id) @@ fun () ->
     match t with
@@ -439,25 +448,6 @@ module ApiEager = struct
     (* tally is already done by all_ancestors and upper_bounds *)
     List.map ~f:(fun req -> snd req) (all_ancestor_reqs t)
     |> List.append (ApiShallow.upper_bounds_on_this_from_constraints t)
-
-  let is_disposable (decl, t) =
-    Decl_counters.count_subdecl decl Decl_counters.Is_disposable @@ fun () ->
-    let is_disposable_class_name class_name =
-      String.equal class_name SN.Classes.cIDisposable
-      || String.equal class_name SN.Classes.cIAsyncDisposable
-    in
-    match t with
-    | Lazy (sc, lc) ->
-      let all_ancestor_names =
-        List.map (LSTable.to_list (Lazy.force lc).ancestors) fst
-      in
-      let all_ancestor_req_names =
-        LSTable.to_list (Lazy.force lc).req_ancestor_names |> List.map ~f:fst
-      in
-      is_disposable_class_name (snd sc.sc_name)
-      || List.exists all_ancestor_names is_disposable_class_name
-      || List.exists all_ancestor_req_names is_disposable_class_name
-    | Eager c -> c.tc_is_disposable
 
   let get_pu_enum (decl, t) id =
     Decl_counters.count_subdecl decl (Decl_counters.Get_pu_enum id) @@ fun () ->

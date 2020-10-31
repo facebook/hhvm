@@ -50,6 +50,7 @@ type subdecl_kind =
   | Requires_ancestor of string
       [@printer (fun fmt _s -> fprintf fmt "Requires_ancestor")]
   | Extends of string [@printer (fun fmt _s -> fprintf fmt "Extends")]
+  | Is_disposable
   | Get_const of string [@printer (fun fmt _s -> fprintf fmt "Get_const")]
   | Has_const of string [@printer (fun fmt _s -> fprintf fmt "Has_const")]
   | Get_typeconst of string
@@ -71,7 +72,6 @@ type subdecl_kind =
   | All_ancestors
   | All_ancestor_names
   | All_ancestor_reqs
-  | Is_disposable
   | Get_pu_enum of string [@printer (fun fmt _s -> fprintf fmt "Get_pu_enum")]
   | Consts
   | Typeconsts
@@ -130,6 +130,7 @@ let subdecl_eagerness (subdecl_kind : subdecl_kind) : string =
   | Has_ancestor _
   | Requires_ancestor _
   | Extends _
+  | Is_disposable
   | Get_const _
   | Has_const _
   | Get_typeconst _
@@ -149,7 +150,6 @@ let subdecl_eagerness (subdecl_kind : subdecl_kind) : string =
   | All_ancestors
   | All_ancestor_names
   | All_ancestor_reqs
-  | Is_disposable
   | Get_pu_enum _
   | Consts
   | Typeconsts

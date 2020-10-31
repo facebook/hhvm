@@ -523,7 +523,7 @@ void emitBespokeShapesIdx(IRGS& env, uint32_t numArgs) {
     if (!(defType <= TUninit) && defType.maybe(TUninit)) {
       PUNT(Bespoke-ShapesIdx-BadDefault);
     }
-    return defVal;
+    return defType <= TUninit ? cns(env, TInitNull) : defVal;
   }();
 
   auto const key = popC(env);

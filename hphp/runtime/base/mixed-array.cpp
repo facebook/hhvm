@@ -471,10 +471,6 @@ MixedArray* MixedArray::CopyMixed(const MixedArray& other, AllocMode mode) {
   // work correctly, which assumes the position is the same in the original and
   // in the copy of the array, in case copying is needed.
 #ifdef USE_JEMALLOC
-  // Copy elements and hashes separately, because the array may not be very
-  // full.
-  assertx(reinterpret_cast<uintptr_t>(ad) % 16 == 0);
-  assertx(reinterpret_cast<uintptr_t>(&other) % 16 == 0);
   // Adding 24 bytes so that we can copy in 32-byte groups. This might
   // overwrite the hash table, but won't overrun the allocated space as long as
   // `malloc' returns multiple of 16 bytes.

@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/util/trace.h"
+#include "hphp/runtime/vm/jit/vasm-layout.h"
 
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
@@ -25,6 +25,8 @@
 #include "hphp/runtime/vm/jit/vasm-text.h"
 #include "hphp/runtime/vm/jit/vasm-unit.h"
 #include "hphp/runtime/vm/jit/vasm-visit.h"
+
+#include "hphp/util/trace.h"
 
 #include <boost/dynamic_bitset.hpp>
 #include <folly/MapUtil.h>
@@ -56,7 +58,7 @@ namespace HPHP { namespace jit {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-namespace {
+namespace layout {
 
 TRACE_SET_MOD(layout);
 
@@ -108,43 +110,27 @@ jit::vector<Vlabel> rpoLayout(Vunit& unit) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-/**
- * This keeps track of the weights of blocks and arcs in a Vunit.
- */
-struct Scale {
-  explicit Scale(const Vunit& unit)
-      : m_unit(unit)
-      , m_blocks(sortBlocks(unit))
-      , m_preds(computePreds(unit)) {
-    computeArcWeights();
-  }
+Scale::Scale(const Vunit& unit)
+    : m_unit(unit)
+    , m_blocks(sortBlocks(unit))
+    , m_preds(computePreds(unit)) {
+  computeArcWeights();
+}
 
-  explicit Scale(const Vunit& unit, const jit::vector<Vlabel>& blockOrder)
-      : m_unit(unit)
-      , m_blocks(blockOrder)
-      , m_preds(computePreds(unit)) {
-    computeArcWeights();
-  }
+Scale::Scale(const Vunit& unit, const jit::vector<Vlabel>& blockOrder)
+    : m_unit(unit)
+    , m_blocks(blockOrder)
+    , m_preds(computePreds(unit)) {
+  computeArcWeights();
+}
 
-  int64_t weight(Vlabel blk) const;
-  int64_t weight(Vlabel src, Vlabel dst) const;
+uint64_t Scale::predSize(Vlabel blk) const {
+  return m_preds[blk].size();
+}
 
-  std::string toString() const;
-
- private:
-  static const int64_t kUnknownWeight = std::numeric_limits<int64_t>::max();
-
-  void       computeArcWeights();
-  TransIDSet findProfTransIDs(Vlabel blk) const;
-  int64_t    findProfCount(Vlabel blk)   const;
-
-  static uint64_t arcId(Vlabel src, Vlabel dst) { return (src << 32) + dst; }
-
-  const Vunit&                     m_unit;
-  const jit::vector<Vlabel>        m_blocks;
-  const PredVector                 m_preds;
-  jit::hash_map<uint64_t, int64_t> m_arcWgts; // keyed using arcId()
-};
+const jit::vector<Vlabel>& Scale::blocks() const {
+  return m_blocks;
+}
 
 int64_t Scale::weight(Vlabel blk) const {
   return m_unit.blocks[blk].weight;
@@ -291,39 +277,22 @@ std::string Scale::toString() const {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-struct Clusterizer {
-  Clusterizer(Vunit& unit, const Scale& scale)
+Clusterizer::Clusterizer(Vunit& unit, const Scale& scale)
       : m_unit(unit)
-      , m_scale(scale)
-      , m_blocks(sortBlocks(unit)) {
-    initClusters();
-    clusterize();
-    sortClusters();
-    if (RuntimeOption::EvalJitPGOLayoutSplitHotCold) {
-      splitHotColdClusters();
-    }
-    FTRACE(1, "{}", toString());
+    , m_scale(scale)
+    , m_blocks(sortBlocks(unit)) {
+  initClusters();
+  if (RuntimeOption::EvalJitLayoutExtTSP) {
+    clusterizeExtTSP();
+  } else {
+    clusterizeGreedy();
   }
-
-  jit::vector<Vlabel> getBlockList() const;
-
-  std::string toString() const;
-
- private:
-  using Cluster = jit::vector<Vlabel>;
-
-  void initClusters();
-  void clusterize();
-  void sortClusters();
-  void splitHotColdClusters();
-
-  Vunit&                    m_unit;
-  const Scale&              m_scale;
-  const jit::vector<Vlabel> m_blocks;
-  jit::vector<Cluster>      m_clusters;
-  jit::vector<Vlabel>       m_blockCluster; // maps block to current cluster
-  jit::vector<Vlabel>       m_clusterOrder; // final sorted list of cluster ids
-};
+  sortClusters();
+  if (RuntimeOption::EvalJitPGOLayoutSplitHotCold) {
+    splitHotColdClusters();
+  }
+  FTRACE(1, "{}", toString());
+}
 
 jit::vector<Vlabel> Clusterizer::getBlockList() const {
   jit::vector<Vlabel> list;
@@ -357,7 +326,7 @@ void Clusterizer::initClusters() {
   }
 }
 
-void Clusterizer::clusterize() {
+void Clusterizer::clusterizeGreedy() {
   struct ArcInfo {
     Vlabel  src;
     Vlabel  dst;
@@ -662,8 +631,8 @@ jit::vector<Vlabel> layoutBlocks(Vunit& unit) {
   Timer timer(Timer::vasm_layout);
 
   return unit.context && unit.context->kind == TransKind::Optimize
-    ? pgoLayout(unit)
-    : rpoLayout(unit);
+    ? layout::pgoLayout(unit)
+    : layout::rpoLayout(unit);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

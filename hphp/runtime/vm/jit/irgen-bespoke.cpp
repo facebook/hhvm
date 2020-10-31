@@ -574,15 +574,16 @@ void emitBespokeFirstLast(IRGS& env, uint32_t numArgs) {
   auto const size = gen(env, Count, arr);
   auto const res = cond(
     env,
-    [&](Block* taken) {
-      gen(env, JmpZero, taken, size);
+    [&](Block* taken) { gen(env, JmpZero, taken, size); },
+    [&] {
       auto const pos = isFirst ? layout->emitIterFirstPos(env, arr)
                                : layout->emitIterLastPos(env, arr);
       auto const elm = layout->emitIterElm(env, arr, pos);
-      return isKey ? layout->emitIterGetKey(env, arr, elm)
-                   : layout->emitIterGetVal(env, arr, elm);
+      auto const result = isKey ? layout->emitIterGetKey(env, arr, elm)
+                                : layout->emitIterGetVal(env, arr, elm);
+      gen(env, IncRef, result);
+      return result;
     },
-    [&] (SSATmp* val) { return val; },
     [&] { return cns(env, TInitNull); }
   );
   push(env, res);

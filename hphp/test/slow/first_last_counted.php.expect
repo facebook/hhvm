@@ -1,0 +1,20 @@
+string(3) "foo"
+object(C) (1) {
+  ["x"]=>
+  int(17)
+}
+string(3) "bar"
+object(C) (1) {
+  ["x"]=>
+  int(34)
+}
+int(0)
+object(C) (1) {
+  ["x"]=>
+  int(51)
+}
+int(1)
+object(C) (1) {
+  ["x"]=>
+  int(68)
+}

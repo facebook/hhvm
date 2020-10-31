@@ -1078,7 +1078,7 @@ struct RuntimeOption {
    *     sample rate is 0, logging arrays are never constructed.        \
    *     Logging arrays are only created before RTA has begun. */       \
   F(int32_t, BespokeArrayLikeMode, 0)                                   \
-  F(uint64_t, EmitLoggingArraySampleRate, 0)                            \
+  F(uint64_t, EmitLoggingArraySampleRate, 1000)                         \
   F(string, ExportLoggingArrayDataPath, "")                             \
   /* Raise notices on various array operations which may present        \
    * compatibility issues with Hack arrays.                             \

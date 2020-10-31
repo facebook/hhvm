@@ -3010,12 +3010,9 @@ fields of that struct for holding intermediate values.
 
 | BespokeSet<T,Layout>, DParam(ArrLike), SBespokeArr S(Int,Str) S(Cell), PRc|CRc
 
-  Set element with key S1 in bespoke array S0 to S2, returning an array of type
-  T.
-
-  NB: Currently, the layout provided is unused and generic BespokeArray
-  dispatch is performed. This will be rectified when a suitable
-  SetIntMove/SetStrMove layout method is available.
+  Set element with key S1 in bespoke array S0 to S2 using the SetMove
+  implementation on the layout provided, returning an array of type T. If no
+  layout is provided, the general BespokeArray dispatch is used.
 
 | BespokeAppend<T,Layout>, DParam(ArrLike), SBespokeArr S(Cell), PRc|CRc
 

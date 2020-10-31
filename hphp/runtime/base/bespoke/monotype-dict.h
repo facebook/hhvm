@@ -163,7 +163,8 @@ private:
   ssize_t getPosImpl(Key key) const;
   ArrayData* removeImpl(Key key);
   template <typename K> arr_lval elemImpl(Key key, K k, bool throwOnMissing);
-  template <typename K> ArrayData* setImpl(Key key, K k, TypedValue v);
+  template <bool Move, typename K>
+  ArrayData* setImpl(Key key, K k, TypedValue v);
 
   // Iterate over values of this MonotypeDict, calling these callbacks for
   // each element. `k` takes a Key; `c`, `m`, and `u` take a TypedValue.

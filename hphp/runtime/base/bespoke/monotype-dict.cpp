@@ -201,11 +201,21 @@ ArrayData* EmptyMonotypeDict::SetInt(Self* ad, int64_t k, TypedValue v) {
   assertx(result == mad);
   return result;
 }
+ArrayData* EmptyMonotypeDict::SetIntMove(Self* ad, int64_t k, TypedValue v) {
+  auto const mad = SetInt(ad, k, v);
+  tvDecRefGen(v);
+  return mad;
+}
 ArrayData* EmptyMonotypeDict::SetStr(Self* ad, StringData* k, TypedValue v) {
   auto const legacy = ad->isLegacyArray();
   return k->isStatic()
     ? makeStrMonotypeDict<LowStringPtr>(ad->m_kind, legacy, k, v)
     : makeStrMonotypeDict<StringData*>(ad->m_kind, legacy, k, v);
+}
+ArrayData* EmptyMonotypeDict::SetStrMove(Self* ad, StringData* k, TypedValue v) {
+  auto const mad = SetStr(ad, k, v);
+  tvDecRefGen(v);
+  return mad;
 }
 ArrayData* EmptyMonotypeDict::RemoveInt(Self* ad, int64_t k) {
   return ad;
@@ -553,16 +563,22 @@ arr_lval MonotypeDict<Key>::elemImpl(Key key, K k, bool throwOnMissing) {
   return arr_lval{mad, type_ptr, const_cast<Value*>(&elm->val)};
 }
 
-template <typename Key> template <typename K>
+template <typename Key> template <bool Move, typename K>
 ArrayData* MonotypeDict<Key>::setImpl(Key key, K k, TypedValue v) {
   if (key == getTombstone<Key>() || used() == kMaxNumElms ||
       dt_modulo_persistence(v.type()) != type()) {
     auto const ad = escalateWithCapacity(size() + 1);
     auto const result = ad->set(k, v);
     assertx(ad == result);
+    if constexpr (Move) {
+      if (decReleaseCheck()) Release(this);
+      tvDecRefGen(v);
+    }
     return result;
   }
-  tvIncRefGen(v);
+  if constexpr (!Move) {
+    tvIncRefGen(v);
+  }
   auto const result = prepareForInsert();
   auto const update = result->template find<Update>(key, getHash(key));
   if (update.elm != nullptr) {
@@ -574,6 +590,9 @@ ArrayData* MonotypeDict<Key>::setImpl(Key key, K k, TypedValue v) {
     *result->elmAtIndex(*update.index) = { key, v.val() };
     result->m_extra_lo16++;
     result->m_size++;
+  }
+  if constexpr (Move) {
+    if (result != this && decReleaseCheck()) Release(this);
   }
   return result;
 }
@@ -1058,12 +1077,22 @@ tv_lval MonotypeDict<Key>::ElemStr(
 
 template <typename Key>
 ArrayData* MonotypeDict<Key>::SetInt(Self* mad, int64_t k, TypedValue v) {
-  return mad->setImpl(coerceKey<Key>(k), k, v);
+  return mad->setImpl<false>(coerceKey<Key>(k), k, v);
+}
+
+template <typename Key>
+ArrayData* MonotypeDict<Key>::SetIntMove(Self* mad, int64_t k, TypedValue v) {
+  return mad->setImpl<false>(coerceKey<Key>(k), k, v);
 }
 
 template <typename Key>
 ArrayData* MonotypeDict<Key>::SetStr(Self* mad, StringData* k, TypedValue v) {
-  return mad->setImpl(coerceKey<Key>(k), k, v);
+  return mad->setImpl<false>(coerceKey<Key>(k), k, v);
+}
+
+template <typename Key>
+ArrayData* MonotypeDict<Key>::SetStrMove(Self* mad, StringData* k, TypedValue v) {
+  return mad->setImpl<true>(coerceKey<Key>(k), k, v);
 }
 
 template <typename Key>

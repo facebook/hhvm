@@ -206,17 +206,11 @@ ArrayData* BespokeArray::SetInt(ArrayData* ad, int64_t key, TypedValue v) {
 ArrayData* BespokeArray::SetStr(ArrayData* ad, StringData* key, TypedValue v) {
   return asBespoke(ad)->vtable()->fnSetStr(ad, key, v);
 }
-ArrayData* BespokeArray::SetIntMove(ArrayData* ad, int64_t key, TypedValue val) {
-  auto const result = SetInt(ad, key, val);
-  if (result != ad) decRefArr(ad);
-  tvDecRefGen(val);
-  return result;
+ArrayData* BespokeArray::SetIntMove(ArrayData* ad, int64_t key, TypedValue v) {
+  return asBespoke(ad)->vtable()->fnSetIntMove(ad, key, v);
 }
-ArrayData* BespokeArray::SetStrMove(ArrayData* ad, StringData* key, TypedValue val) {
-  auto const result = SetStr(ad, key, val);
-  if (result != ad) decRefArr(ad);
-  tvDecRefGen(val);
-  return result;
+ArrayData* BespokeArray::SetStrMove(ArrayData* ad, StringData* key, TypedValue v) {
+  return asBespoke(ad)->vtable()->fnSetStrMove(ad, key, v);
 }
 
 // deletion

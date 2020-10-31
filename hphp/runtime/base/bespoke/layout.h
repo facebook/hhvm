@@ -63,6 +63,8 @@ void logBespokeDispatch(const ArrayData* ad, const char* fn);
   X(tv_lval, ElemStr, tv_lval lval, StringData* k, bool) \
   X(ArrayData*, SetInt, T*, int64_t k, TypedValue v) \
   X(ArrayData*, SetStr, T*, StringData* k, TypedValue v)\
+  X(ArrayData*, SetIntMove, T*, int64_t k, TypedValue v) \
+  X(ArrayData*, SetStrMove, T*, StringData* k, TypedValue v)\
   X(ArrayData*, RemoveInt, T*, int64_t) \
   X(ArrayData*, RemoveStr, T*, const StringData*) \
   X(ArrayData*, Append, T*, TypedValue v) \
@@ -160,6 +162,12 @@ struct LayoutFunctionDispatcher {
   }
   static ArrayData* SetStr(ArrayData* ad, StringData* k, TypedValue v){
     return Array::SetStr(Cast(ad, __func__), k, v);
+  }
+  static ArrayData* SetIntMove(ArrayData* ad, int64_t k, TypedValue v) {
+    return Array::SetIntMove(Cast(ad, __func__), k, v);
+  }
+  static ArrayData* SetStrMove(ArrayData* ad, StringData* k, TypedValue v){
+    return Array::SetStrMove(Cast(ad, __func__), k, v);
   }
   static ArrayData* RemoveInt(ArrayData* ad, int64_t k) {
     return Array::RemoveInt(Cast(ad, __func__), k);

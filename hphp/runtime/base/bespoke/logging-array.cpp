@@ -288,6 +288,11 @@ void LoggingArray::Release(LoggingArray* lad) {
   tl_heap->objFreeIndex(lad, kSizeIndex);
 }
 
+void LoggingArray::ZombieRelease(LoggingArray* lad) {
+  logEvent(lad, ArrayOp::Release);
+  tl_heap->objFreeIndex(lad, kSizeIndex);
+}
+
 //////////////////////////////////////////////////////////////////////////////
 // Accessors
 
@@ -348,13 +353,13 @@ TypedValue countedValue(TypedValue val) {
   return val;
 }
 
-ArrayData* escalate(LoggingArray* lad, ArrayData* result) {
+LoggingArray* escalate(LoggingArray* lad, ArrayData* result) {
   lad->updateSize();
   if (result == lad->wrapped) return lad;
   return LoggingArray::Make(result, lad->profile, lad->entryTypes);
 }
 
-ArrayData* escalate(LoggingArray* lad, ArrayData* result, EntryTypes ms) {
+LoggingArray* escalate(LoggingArray* lad, ArrayData* result, EntryTypes ms) {
   lad->updateSize();
   if (result == lad->wrapped) {
     lad->entryTypes = ms;
@@ -397,6 +402,26 @@ tv_lval elem(tv_lval lvalIn, arr_lval result) {
   }
   return result;
 }
+
+template <typename F>
+LoggingArray* mutateMove(LoggingArray* lad, EntryTypes ms, F&& f) {
+  auto const cow = lad->cowCheck();
+  if (cow) lad->wrapped->incRefCount();
+  auto const res = f(lad->wrapped);
+  if (cow || res == lad->wrapped) {
+    auto const ladNew = escalate(lad, res, ms);
+    if (ladNew != lad && lad->decReleaseCheck()) {
+      LoggingArray::ZombieRelease(lad);
+    }
+    return ladNew;
+  }
+
+  auto const profile = lad->profile;
+  assertx(lad->decReleaseCheck());
+  LoggingArray::ZombieRelease(lad);
+  return LoggingArray::Make(res, profile, ms);
+}
+
 }
 
 // Lvals cannot insert new keys, so KeyTypes are unchanged. We must pessimize
@@ -450,11 +475,23 @@ ArrayData* LoggingArray::SetInt(LoggingArray* lad, int64_t k, TypedValue v) {
   logEvent(lad, ms, ArrayOp::SetInt, k, v);
   return mutate(lad, ms, [&](ArrayData* w) { return w->set(k, v); });
 }
+ArrayData* LoggingArray::SetIntMove(LoggingArray* lad, int64_t k, TypedValue v) {
+  if (type(v) == KindOfUninit) type(v) = KindOfNull;
+  auto const ms = lad->entryTypes.with(make_tv<KindOfInt64>(k), v);
+  logEvent(lad, ms, ArrayOp::SetInt, k, v);
+  return mutateMove(lad, ms, [&](ArrayData* w) { return w->setMove(k, v); });
+}
 ArrayData* LoggingArray::SetStr(LoggingArray* lad, StringData* k, TypedValue v) {
   if (type(v) == KindOfUninit) type(v) = KindOfNull;
   auto const ms = lad->entryTypes.with(make_tv<KindOfString>(k), v);
   logEvent(lad, ms, ArrayOp::SetStr, k, v);
   return mutate(lad, ms, [&](ArrayData* w) { return w->set(k, v); });
+}
+ArrayData* LoggingArray::SetStrMove(LoggingArray* lad, StringData* k, TypedValue v) {
+  if (type(v) == KindOfUninit) type(v) = KindOfNull;
+  auto const ms = lad->entryTypes.with(make_tv<KindOfString>(k), v);
+  logEvent(lad, ms, ArrayOp::SetStr, k, v);
+  return mutateMove(lad, ms, [&](ArrayData* w) { return w->setMove(k, v); });
 }
 ArrayData* LoggingArray::RemoveInt(LoggingArray* lad, int64_t k) {
   logEvent(lad, ArrayOp::RemoveInt, k);

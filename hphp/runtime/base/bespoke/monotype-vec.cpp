@@ -251,6 +251,16 @@ ArrayData* EmptyMonotypeVec::SetStr(EmptyMonotypeVec* eadIn, StringData* k,
   throwInvalidArrayKeyException(k, eadIn);
 }
 
+ArrayData* EmptyMonotypeVec::SetIntMove(EmptyMonotypeVec* eadIn, int64_t k,
+                                        TypedValue) {
+  throwOOBArrayKeyException(k, eadIn);
+}
+
+ArrayData* EmptyMonotypeVec::SetStrMove(EmptyMonotypeVec* eadIn, StringData* k,
+                                        TypedValue) {
+  throwInvalidArrayKeyException(k, eadIn);
+}
+
 ArrayData* EmptyMonotypeVec::RemoveInt(EmptyMonotypeVec* eadIn, int64_t) {
   return eadIn;
 }
@@ -625,28 +635,51 @@ tv_lval MonotypeVec::ElemStr(tv_lval lval, StringData* k, bool throwOnMissing) {
   return const_cast<TypedValue*>(&immutable_null_base);
 }
 
-ArrayData* MonotypeVec::SetInt(MonotypeVec* madIn, int64_t k, TypedValue v) {
-  assertx(madIn->cowCheck() || madIn->notCyclic(v));
+template <bool Move>
+ArrayData* MonotypeVec::setIntImpl(int64_t k, TypedValue v) {
+  assertx(cowCheck() || notCyclic(v));
 
-  if (UNLIKELY(size_t(k) >= madIn->size())) {
-    throwOOBArrayKeyException(k, madIn);
+  if (UNLIKELY(size_t(k) >= size())) {
+    throwOOBArrayKeyException(k, this);
   }
 
-  if (madIn->type() != dt_modulo_persistence(v.m_type)) {
-    auto const vad = EscalateToVanilla(madIn, __func__);
+  if (type() != dt_modulo_persistence(v.m_type)) {
+    auto const vad = EscalateToVanilla(this, __func__);
     auto const res = vad->set(k, v);
     assertx(vad == res);
+    if constexpr (Move) {
+      if (decReleaseCheck()) Release(this);
+      tvDecRefGen(v);
+    }
     return res;
   }
 
-  auto const mad = madIn->cowCheck() ? madIn->copy() : madIn;
+  if constexpr (!Move) {
+    tvIncRefGen(v);
+  }
+  auto const cow = cowCheck();
+  auto const mad = cow ? copy() : this;
   mad->valueRefUnchecked(k) = val(v);
-  tvIncRefGen(v);
+  if constexpr (Move) {
+    if (cow && decReleaseCheck()) Release(this);
+  }
 
   return mad;
 }
 
+ArrayData* MonotypeVec::SetInt(MonotypeVec* madIn, int64_t k, TypedValue v) {
+  return madIn->setIntImpl<false>(k, v);
+}
+
+ArrayData* MonotypeVec::SetIntMove(MonotypeVec* madIn, int64_t k, TypedValue v) {
+  return madIn->setIntImpl<true>(k, v);
+}
+
 ArrayData* MonotypeVec::SetStr(MonotypeVec* madIn, StringData* k, TypedValue) {
+  throwInvalidArrayKeyException(k, madIn);
+}
+
+ArrayData* MonotypeVec::SetStrMove(MonotypeVec* madIn, StringData* k, TypedValue) {
   throwInvalidArrayKeyException(k, madIn);
 }
 

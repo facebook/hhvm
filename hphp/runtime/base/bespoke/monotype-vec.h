@@ -64,6 +64,8 @@ private:
   void forEachCountableValue(CountableFn c, MaybeCountableFn mc);
   void decRefValues();
   void incRefValues();
+  template <bool Move>
+  ArrayData* setIntImpl(int64_t k, TypedValue v);
 
   size_t capacity() const;
   uint8_t sizeIndex() const;

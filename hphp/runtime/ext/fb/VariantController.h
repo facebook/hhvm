@@ -269,7 +269,11 @@ struct VariantControllerImpl {
     return vec.size();
   }
   static void vectorAppend(VectorType& vec, const VariantType& v) {
-    vec.append(v);
+    if constexpr (HackArraysMode == VariantControllerHackArraysMode::OFF) {
+      vec.set(safe_cast<int64_t>(vec.size()), v);
+    } else {
+      vec.append(v);
+    }
   }
   static ArrayIter vectorIterator(const VectorType& vec) {
     return ArrayIter(vec);

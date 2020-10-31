@@ -94,7 +94,7 @@ struct VariableUnserializer {
    * Used to object property values that are overwritten by later entries.
    * For array element values, later values for the key override earlier ones.
    */
-  Array m_overwrittenList;
+  Array m_overwrittenList = Array::CreateVec();
 
   bool readOnly() const { return m_readOnly; }
 

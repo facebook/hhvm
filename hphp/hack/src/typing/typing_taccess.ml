@@ -334,15 +334,7 @@ let rec expand ctx env root : _ * result =
   | Tclass (cls, _, _) ->
     begin
       match Env.get_class env (snd cls) with
-      | None ->
-        ( env,
-          Missing
-            (fun () ->
-              if not ctx.ety_env.quiet then
-                Errors.unbound_name_type_constant_access
-                  ~access_pos:ctx.root_pos
-                  ~name_pos:(fst cls)
-                  (snd cls)) )
+      | None -> (env, Missing (fun () -> ()))
       | Some ci ->
         (* Hack: `self` in a trait is mistakenly replaced by the trait instead
            of the class using the trait, so if a trait is the root, it is

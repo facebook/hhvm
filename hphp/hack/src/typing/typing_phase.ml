@@ -280,13 +280,15 @@ let rec localize ~ety_env env (dty : decl_ty) =
   | (r, Taccess (root_ty, ids)) ->
     (* Sometimes, Tthis and Tgeneric are not expanded to Tabstract, so we need
     to allow accessing abstract type constants here. *)
-    let allow_abstract_tconst =
-      match get_node root_ty with
+    let rec allow_abstract_tconst ty =
+      match get_node ty with
       | Tthis
       | Tgeneric _ ->
         true
+      | Taccess (ty, _) -> allow_abstract_tconst ty
       | _ -> false
     in
+    let allow_abstract_tconst = allow_abstract_tconst root_ty in
     let (env, root_ty) = localize ~ety_env env root_ty in
     let root_pos = get_pos root_ty in
     let ((env, ty), _) =

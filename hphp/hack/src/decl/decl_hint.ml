@@ -158,8 +158,14 @@ and hint_ p env = function
     let argl = List.map argl (hint env) in
     Tapply (id, argl)
   | Haccess (root_ty, ids) ->
-    let root_ty = hint env root_ty in
-    Taccess (root_ty, ids)
+    let root_ty = hint_ p env (snd root_ty) in
+    let rec translate res ids =
+      match ids with
+      | [] -> res
+      | id :: ids ->
+        translate (Taccess (mk (Typing_reason.Rhint p, res), [id])) ids
+    in
+    translate root_ty ids
   | Htuple hl ->
     let tyl = List.map hl (hint env) in
     Ttuple tyl

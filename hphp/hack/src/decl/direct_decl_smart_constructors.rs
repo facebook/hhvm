@@ -4246,45 +4246,35 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             None => return Node::Ignored(SK::TypeConstant),
         };
         let pos = self.merge_positions(ty, constant_name);
-        match ty {
-            Node::TypeconstAccess(innards) => {
-                innards.0.set(pos);
-                // Nested typeconst accesses have to be collapsed.
-                innards.2.borrow_mut().push(id);
-                Node::TypeconstAccess(innards)
-            }
-            ty => {
-                let ty = match (
-                    ty,
-                    self.state.classish_name_builder.get_current_classish_name(),
-                ) {
-                    (Node::Name(("self", self_pos)), Some((name, class_name_pos))) => {
-                        // In classes, we modify the position when rewriting the
-                        // `self` keyword to point to the class name. In traits,
-                        // we don't (because traits are not types). We indicate
-                        // that the position shouldn't be rewritten with the
-                        // none Pos.
-                        let id_pos = if class_name_pos.is_none() {
-                            self_pos
-                        } else {
-                            class_name_pos
-                        };
-                        let reason = self.alloc(Reason::hint(self_pos));
-                        let ty_ = Ty_::Tapply(self.alloc((Id(id_pos, name), &[][..])));
-                        self.alloc(Ty(reason, ty_))
-                    }
-                    _ => match self.node_to_ty(ty) {
-                        Some(ty) => ty,
-                        None => return Node::Ignored(SK::TypeConstant),
-                    },
+        let ty = match (
+            ty,
+            self.state.classish_name_builder.get_current_classish_name(),
+        ) {
+            (Node::Name(("self", self_pos)), Some((name, class_name_pos))) => {
+                // In classes, we modify the position when rewriting the
+                // `self` keyword to point to the class name. In traits,
+                // we don't (because traits are not types). We indicate
+                // that the position shouldn't be rewritten with the
+                // none Pos.
+                let id_pos = if class_name_pos.is_none() {
+                    self_pos
+                } else {
+                    class_name_pos
                 };
-                Node::TypeconstAccess(self.alloc((
-                    Cell::new(pos),
-                    ty,
-                    RefCell::new(bumpalo::vec![in self.state.arena; id]),
-                )))
+                let reason = self.alloc(Reason::hint(self_pos));
+                let ty_ = Ty_::Tapply(self.alloc((Id(id_pos, name), &[][..])));
+                self.alloc(Ty(reason, ty_))
             }
-        }
+            _ => match self.node_to_ty(ty) {
+                Some(ty) => ty,
+                None => return Node::Ignored(SK::TypeConstant),
+            },
+        };
+        Node::TypeconstAccess(self.alloc((
+            Cell::new(pos),
+            ty,
+            RefCell::new(bumpalo::vec![in self.state.arena; id]),
+        )))
     }
 
     fn make_soft_type_specifier(&mut self, at_token: Self::R, hint: Self::R) -> Self::R {

@@ -131,7 +131,7 @@ void ArrayIterProfile::update(const ArrayData* arr, bool is_kviter) {
     m_generic_base_count++;
   }
   auto const array_index = size == 0 ? 0 : 1 + (size_t)std::floor(std::log2(size));
-  assert(array_index < kNumApproximateCountBuckets);
+  assertx(array_index < kNumApproximateCountBuckets);
   m_approximate_iteration_buckets[array_index]++;
 }
 

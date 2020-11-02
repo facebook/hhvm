@@ -1348,7 +1348,7 @@ let handle_mode
         print_errors check_errors
       else
         try
-          let ifc_errors = time @@ lazy (Ifc.do_ ifc_opts file_info ctx) in
+          let ifc_errors = time @@ lazy (Ifc_main.do_ ifc_opts file_info ctx) in
           if not (List.is_empty ifc_errors) then print_errors ifc_errors
         with exc ->
           (* get the backtrace before doing anything else to be sure

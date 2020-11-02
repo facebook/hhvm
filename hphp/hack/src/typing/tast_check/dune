@@ -4,6 +4,7 @@
   (libraries
     ast
     core_kernel
+    ifc_lib
     nast
     tast
     utils_core)

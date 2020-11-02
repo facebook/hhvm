@@ -10,6 +10,7 @@
   (libraries
     ai
     ifc
+    ifc_lib
     client
     default_injector_config
     file_content

@@ -94,6 +94,11 @@ and cow_array = {
 }
 
 and shape_field_type = {
+  (* The policy of the field is essentially the PC at the time that it is
+     assigned. We need to keep track of this separately because for optional
+     fields, we may still learn information based on whether or not the value is
+     present. *)
+  sft_policy: policy;
   sft_optional: bool;
   sft_ty: ptype;
 }
@@ -113,6 +118,10 @@ type callable_name =
   | StaticMethod of string * string (* Classname, static meth name *)
   (* toplevel function *)
   | Function of string
+
+type array =
+  | Aarray of cow_array
+  | Ashape of Type.shape_kind * shape_field_type Nast.ShapeMap.t
 
 type fun_proto = {
   fp_name: string;

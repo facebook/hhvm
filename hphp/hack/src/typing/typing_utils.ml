@@ -509,7 +509,7 @@ let reactivity_to_string env r =
 
 let get_printable_shape_field_name = Env.get_shape_field_name
 
-let shape_field_name_ env field =
+let shape_field_name_ this field =
   Aast.(
     match field with
     | (p, Int name) -> Ok (Ast_defs.SFlit_int (p, name))
@@ -518,14 +518,20 @@ let shape_field_name_ env field =
     | (p, EnumAtom name) -> Ok (Ast_defs.SFlit_str (p, name))
     | (_, Class_const ((_, CI x), y)) -> Ok (Ast_defs.SFclass_const (x, y))
     | (_, Class_const ((_, CIself), y)) ->
-      let c_ty = get_node (Env.get_self env) in
-      (match c_ty with
-      | Tclass (sid, _, _) -> Ok (Ast_defs.SFclass_const (sid, y))
-      | _ -> Error `Expected_class)
+      (match force this with
+      | Some sid -> Ok (Ast_defs.SFclass_const (sid, y))
+      | None -> Error `Expected_class)
     | _ -> Error `Invalid_shape_field_name)
 
 let shape_field_name env (p, field) =
-  match shape_field_name_ env (p, field) with
+  let this =
+    lazy
+      (let c_ty = get_node (Env.get_self env) in
+       match c_ty with
+       | Tclass (sid, _, _) -> Some sid
+       | _ -> None)
+  in
+  match shape_field_name_ this (p, field) with
   | Ok x -> Some x
   | Error `Expected_class ->
     Errors.expected_class p;

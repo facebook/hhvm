@@ -148,9 +148,11 @@ let rec subtype ~pos t1 t2 acc =
         let preprocess shape_kind = function
           (* A missing field of an open shape becomes an optional field of type mixed *)
           | None when T.equal_shape_kind shape_kind T.Open_shape ->
-            Some { sft_optional = true; sft_ty = Tinter [] }
-          (* If a field is optional with type nothing, consider it missing *)
-          | Some { sft_ty = Tunion []; sft_optional = true } -> None
+            Some { sft_optional = true; sft_policy = pbot; sft_ty = Tinter [] }
+          (* If a field is optional with type nothing, consider it missing.
+             Since it has type nothing, it can never be assigned and therefore
+             we do not need to consider its policy *)
+          | Some { sft_ty = Tunion []; sft_optional = true; _ } -> None
           | sft -> sft
         in
         let process_field acc _ f1 f2 =
@@ -160,8 +162,9 @@ let rec subtype ~pos t1 t2 acc =
           | (Some { sft_optional = true; _ }, Some { sft_optional = false; _ })
             ->
             err "optional field cannot be subtype of required"
-          | (Some { sft_ty = t1; _ }, Some { sft_ty = t2; _ }) ->
-            (subtype t1 t2 acc, None)
+          | ( Some { sft_ty = t1; sft_policy = p1; _ },
+              Some { sft_ty = t2; sft_policy = p2; _ } ) ->
+            (L.(p1 < p2) ~pos acc |> subtype t1 t2, None)
           | (Some _, None) -> err "missing field"
           | (None, Some { sft_optional; _ }) ->
             if sft_optional then
@@ -595,40 +598,69 @@ let call ~pos renv env call_type that_pty_opt args_pty ret_ty =
     let env = Env.acc env (fun acc -> call_constraint :: acc) in
     (env, ret_pty)
 
-let cow_array ~pos renv ty =
+(* Return either an array or a shape (anything that uses Array_get syntax for
+   reads/writes) *)
+let any_cow_array ~get_array ~mk_array ~pos renv ty =
   let rec f = function
-    | Tcow_array arry -> Some arry
+    | Tcow_array arry -> Some (Aarray arry)
+    | Tshape (k, s) -> Some (Ashape (k, s))
     | Tinter tys -> List.find_map tys f
     | _ -> None
   in
-  match f ty with
+  match Option.(f ty >>= get_array) with
   | Some arry -> arry
   | None ->
     Errors.unknown_information_flow pos "Hack array";
     (* The following CoW array is completely arbitrary. *)
-    {
-      a_kind = Adict;
-      a_key = Tprim (Env.new_policy_var renv "fake_key");
-      a_value = Tprim (Env.new_policy_var renv "fake_value");
-      a_length = Env.new_policy_var renv "fake_length";
-    }
+    mk_array
+      {
+        a_kind = Adict;
+        a_key = Tprim (Env.new_policy_var renv "fake_key");
+        a_value = Tprim (Env.new_policy_var renv "fake_value");
+        a_length = Env.new_policy_var renv "fake_length";
+      }
+
+let array_or_shape =
+  let get_array a = Some a in
+  let mk_array a = Aarray a in
+  any_cow_array ~get_array ~mk_array
+
+let cow_array =
+  let get_array = function
+    | Aarray a -> Some a
+    | Ashape _ -> None
+  in
+  let mk_array a = a in
+  any_cow_array ~get_array ~mk_array
 
 (* Deals with an assignment to a local variable or an object property *)
-let assign_helper ~expr ~pos renv env ((_, lhs_ty), lhs_exp) rhs_pty =
+let assign_helper
+    ?(use_pc = true) ~expr ~pos renv env ((_, lhs_ty), lhs_exp) rhs_pty =
   match lhs_exp with
   | A.Lvar (_, lid) ->
     let prefix = Local_id.to_string lid in
     let lhs_pty = Lift.ty ~prefix renv lhs_ty in
     let env = Env.set_local_type env lid lhs_pty in
-    let deps = PSet.elements (Env.get_lpc env) in
-    let env = Env.acc env (add_dependencies ~pos deps lhs_pty) in
+    let env =
+      if use_pc then
+        let deps = PSet.elements (Env.get_lpc env) in
+        Env.acc env (add_dependencies ~pos deps lhs_pty)
+      else
+        env
+    in
     let env = Env.acc env (subtype ~pos rhs_pty lhs_pty) in
     env
   | A.Obj_get (obj, (_, A.Id (_, property)), _) ->
     let (env, obj_pty) = expr env obj in
     let obj_pol = (receiver_of_obj_get obj_pty property).c_self in
     let lhs_pty = property_ptype renv obj_pty property lhs_ty in
-    let deps = obj_pol :: PSet.elements (Env.get_gpc renv env) in
+    let pc =
+      if use_pc then
+        PSet.elements (Env.get_gpc renv env)
+      else
+        []
+    in
+    let deps = obj_pol :: pc in
     let env = Env.acc env (add_dependencies ~pos deps lhs_pty) in
     let env = Env.acc env (subtype ~pos rhs_pty lhs_pty) in
     env
@@ -648,6 +680,23 @@ let may_throw_out_of_bounds_exn ~pos renv env arry ix_pty =
   let pc_deps = PSet.add arry.a_length (object_policy ix_pty) in
   may_throw ~pos renv env pc_deps exn_ty
 
+let shape_field_name renv ix =
+  let ix =
+    (* The utility function does not expect a TAST *)
+    let ((p, _), e) = ix in
+    (p, e)
+  in
+  (* NOTE: This does not support late static binding *)
+  let this =
+    lazy
+      (match renv.re_this with
+      | Some (Tclass cls) -> Some (fst ix, cls.c_name)
+      | _ -> None)
+  in
+  match Typing_utils.shape_field_name_ this ix with
+  | Ok fld -> Some fld
+  | Error _ -> None
+
 (* A wrapper around assign_helper that deals with Hack arrays' syntactic
    sugar; this accounts for the CoW semantics of Hack arrays:
 
@@ -655,7 +704,7 @@ let may_throw_out_of_bounds_exn ~pos renv env arry ix_pty =
 
    does not mutate an array cell, but the property p of
    the object $x instead.  *)
-let rec assign ~expr ~pos renv env lhs rhs_pty =
+let rec assign ?(use_pc = true) ~expr ~pos renv env lhs rhs_pty =
   match snd lhs with
   | A.Array_get ((((_, arry_ty), _) as arry_exp), ix_opt) ->
     (* Evaluate the array *)
@@ -670,38 +719,63 @@ let rec assign ~expr ~pos renv env lhs rhs_pty =
        *)
       let env = Env.acc env (subtype ~pos old_arry_pty arry_pty) in
 
-      let arry = cow_array ~pos renv arry_pty in
+      let arry = array_or_shape ~pos renv arry_pty in
       (env, arry_pty, arry)
     in
 
-    (* TODO(T68269878): track flows due to length changes *)
-    (* Evaluate the index *)
-    let (env, ix_pty_opt) =
-      match ix_opt with
-      | Some ix ->
-        let (env, ix_pty) = expr env ix in
-        (* The index flows to they key of the array *)
-        let env = Env.acc env (subtype ~pos ix_pty arry.a_key) in
-        (env, Some ix_pty)
-      | None -> (env, None)
+    let (env, arry_pty, use_pc) =
+      match arry with
+      | Aarray arry ->
+        (* TODO(T68269878): track flows due to length changes *)
+        (* Evaluate the index *)
+        let (env, ix_pty_opt) =
+          match ix_opt with
+          | Some ix ->
+            let (env, ix_pty) = expr env ix in
+            (* The index flows to they key of the array *)
+            let env = Env.acc env (subtype ~pos ix_pty arry.a_key) in
+            (env, Some ix_pty)
+          | None -> (env, None)
+        in
+
+        (* Potentially raise `OutOfBoundsException` *)
+        let env =
+          match ix_pty_opt with
+          (* When there is no index, we add a new element, hence no exception. *)
+          | None -> env
+          (* Dictionaries don't throw on assignment, they register a new key. *)
+          | Some _ when equal_array_kind arry.a_kind Adict -> env
+          | Some ix_pty -> may_throw_out_of_bounds_exn ~pos renv env arry ix_pty
+        in
+
+        (* Do the assignment *)
+        let env = Env.acc env (subtype ~pos rhs_pty arry.a_value) in
+        (env, arry_pty, true)
+      | Ashape (kind, fm) ->
+        begin
+          match Option.(ix_opt >>= shape_field_name renv) with
+          | Some key ->
+            (* The key can only be a literal (int, string) or class const, so
+              it is always public *)
+            let p = Env.new_policy_var renv "field" in
+            let pc = Env.get_lpc env |> PSet.elements in
+            let env = Env.acc env @@ L.(pc <* [p]) ~pos in
+            let fm =
+              Nast.ShapeMap.add
+                key
+                { sft_optional = false; sft_policy = p; sft_ty = rhs_pty }
+                fm
+            in
+            (env, Tshape (kind, fm), false)
+          | None ->
+            Errors.unknown_information_flow pos "shape key";
+            (env, Tshape (kind, fm), true)
+        end
     in
 
-    (* Potentially raise `OutOfBoundsException` *)
-    let env =
-      match ix_pty_opt with
-      (* When there is no index, we add a new element, hence no exception. *)
-      | None -> env
-      (* Dictionaries don't throw on assignment, they register a new key. *)
-      | Some _ when equal_array_kind arry.a_kind Adict -> env
-      | Some ix_pty -> may_throw_out_of_bounds_exn ~pos renv env arry ix_pty
-    in
-
-    (* Do the assignment *)
-    let env = Env.acc env (subtype ~pos rhs_pty arry.a_value) in
-
-    (* assign the vector itself *)
-    assign ~expr ~pos renv env arry_exp arry_pty
-  | _ -> assign_helper ~expr ~pos renv env lhs rhs_pty
+    (* assign the array/shape to itself *)
+    assign ~use_pc ~expr ~pos renv env arry_exp arry_pty
+  | _ -> assign_helper ~use_pc ~expr ~pos renv env lhs rhs_pty
 
 (* Assignment helper that accounts for flows when there is an operator
    attached to the assignment, e.g., `$x += 42`. *)
@@ -867,21 +941,43 @@ and expr ~pos renv (env : Env.expr_env) (((_, ety), e) : Tast.expr) =
   | A.Array_get (arry, ix_opt) ->
     (* Evaluate the array *)
     let (env, arry_pty) = expr env arry in
-    let arry = cow_array ~pos renv arry_pty in
+    let arry = array_or_shape ~pos renv arry_pty in
 
     (* Evaluate the index, it might have side-effects! *)
-    let (env, ix_pty) =
+    let (env, ix_exp, ix_pty) =
       match ix_opt with
-      | Some ix -> expr env ix
+      | Some ix ->
+        let (env, ty) = expr env ix in
+        (env, ix, ty)
       | None -> fail "cannot have an empty index when reading"
     in
+    begin
+      match arry with
+      | Aarray arry ->
+        (* The index flows into the array key which flows into the array value *)
+        let env = Env.acc env @@ subtype ~pos ix_pty arry.a_key in
 
-    (* The index flows into the array key which flows into the array value *)
-    let env = Env.acc env @@ subtype ~pos ix_pty arry.a_key in
+        let env = may_throw_out_of_bounds_exn ~pos renv env arry ix_pty in
 
-    let env = may_throw_out_of_bounds_exn ~pos renv env arry ix_pty in
-
-    (env, arry.a_value)
+        (env, arry.a_value)
+      | Ashape (_, fm) ->
+        let sft =
+          Option.(
+            shape_field_name renv ix_exp >>= fun f ->
+            Nast.ShapeMap.find_opt f fm)
+        in
+        begin
+          match sft with
+          | Some { sft_ty; sft_policy; _ } ->
+            let env =
+              Env.acc env @@ add_dependencies ~pos [sft_policy] sft_ty
+            in
+            (env, sft_ty)
+          | None ->
+            Errors.unknown_information_flow pos "nonexistent shape field";
+            (env, Lift.ty renv ety)
+        end
+    end
   | A.New (((_, lty), cid), _targs, args, _extra_args, _) ->
     (* TODO(T70139741): support variadic functions and constructors
      * TODO(T70139893): support classes with type parameters
@@ -961,9 +1057,12 @@ and expr ~pos renv (env : Env.expr_env) (((_, ety), e) : Tast.expr) =
     (env, t2)
   | A.Dollardollar (_, lid) -> refresh_local_type ~pos renv env lid ety
   | A.Shape s ->
+    let p = Env.new_policy_var renv "field" in
+    let pc = Env.get_lpc env |> PSet.elements in
+    let env = Env.acc env @@ L.(pc <* [p]) ~pos in
     let f (env, m) (key, e) =
       let (env, t) = expr env e in
-      let sft = { sft_ty = t; sft_optional = false } in
+      let sft = { sft_ty = t; sft_optional = false; sft_policy = p } in
       (env, Nast.ShapeMap.add key sft m)
     in
     let (env, s) = List.fold ~f ~init:(env, Nast.ShapeMap.empty) s in

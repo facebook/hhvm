@@ -68,9 +68,9 @@ let rec ptype fmt ty =
     fprintf fmt "%a" array_kind a_kind;
     fprintf fmt "<%a => %a; |%a|>" ptype a_key ptype a_value policy a_length
   | Tshape (kind, m) ->
-    let field fmt f =
-      if f.sft_optional then fprintf fmt "?";
-      ptype fmt f.sft_ty
+    let field fmt { sft_policy; sft_optional; sft_ty } =
+      if sft_optional then fprintf fmt "?";
+      fprintf fmt "<%a, %a>" policy sft_policy ptype sft_ty
     in
     fprintf fmt "shape(";
     Nast.ShapeMap.pp field fmt m;

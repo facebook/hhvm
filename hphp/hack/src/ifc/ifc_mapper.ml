@@ -35,7 +35,13 @@ let rec ptype fty fpol = function
         a_length = fpol a_length;
       }
   | Tshape (kind, fs) ->
-    let field sft = { sft with sft_ty = ptype fty fpol sft.sft_ty } in
+    let field sft =
+      {
+        sft with
+        sft_policy = fpol sft.sft_policy;
+        sft_ty = ptype fty fpol sft.sft_ty;
+      }
+    in
     Tshape (kind, Nast.ShapeMap.map field fs)
 
 and fun_ fty fpol f =

@@ -189,8 +189,6 @@ std::unique_ptr<Vunit> lowerUnit(const IRUnit& unit,
     assertx(vasm.frozen().empty() || vasm.frozen().closed());
   }
 
-  fixBlockWeights(*vunit);
-
   // This pass requires on some invariants about rvmfp() from HHIR, so we do it
   // here rather than in optimize() as those optimizations may be called for non
   // HHIR Vunits.

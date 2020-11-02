@@ -553,18 +553,7 @@ void Clusterizer::splitHotColdClusters() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-bool usedVasmBlockCounters(const Vunit& unit) {
-  auto const opt = unit.context && unit.context->kind == TransKind::Optimize;
-  return opt && RO::EvalJitPGOVasmBlockCounters && isJitDeserializing();
-}
-
 jit::vector<Vlabel> pgoLayout(Vunit& unit) {
-  // Make sure block weights are consistent if they didn't come from
-  // VasmBlockCounters.
-  if (!usedVasmBlockCounters(unit)) {
-    fixBlockWeights(unit);
-  }
-
   // Compute arc weights.
   Scale scale(unit);
   FTRACE(1, "profileGuidedLayout: Weighted CFG:\n{}\n", scale.toString());
@@ -633,51 +622,6 @@ jit::vector<Vlabel> layoutBlocks(Vunit& unit) {
   return unit.context && unit.context->kind == TransKind::Optimize
     ? layout::pgoLayout(unit)
     : layout::rpoLayout(unit);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-void fixBlockWeights(Vunit& unit) {
-  const auto preds(computePreds(unit));
-  bool changed = false;
-
-  auto const hasSelfEdge = [] (Vlabel b, auto const& l) {
-    return std::find(l.begin(), l.end(), b) != l.end();
-  };
-
-  do {
-    changed = false;
-    for (size_t b = 0; b < unit.blocks.size(); b++) {
-      auto& block = unit.blocks[b];
-
-      // Rule 1: a block's weight can't exceed the sum of its predecessors,
-      // except for the entry block.
-      if (b != unit.entry && !hasSelfEdge(Vlabel{b}, preds[b])) {
-        uint64_t predsTotal = 0;
-        for (auto p : preds[b]) {
-          predsTotal += unit.blocks[p].weight;
-        }
-        if (block.weight > predsTotal) {
-          block.weight = predsTotal;
-          changed = true;
-        }
-      }
-
-      // Rule 2: a block's weight can't exceed the sum of its successors, except
-      // for exit blocks.
-      auto const successors = succs(block);
-      if (successors.size() > 0 && !hasSelfEdge(Vlabel{b}, successors)) {
-        uint64_t succsTotal = 0;
-        for (auto s : successors) {
-          succsTotal += unit.blocks[s].weight;
-        }
-        if (block.weight > succsTotal) {
-          block.weight = succsTotal;
-          changed = true;
-        }
-      }
-    }
-  } while (changed);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

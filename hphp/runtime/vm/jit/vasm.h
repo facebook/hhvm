@@ -149,12 +149,6 @@ folly::Range<const Vlabel*> succs(const Vblock& block);
 jit::vector<Vlabel> sortBlocks(const Vunit& unit);
 
 /*
- * Make block weights more consistent by enforcing that the weight of each block
- * doesn't exceed the sums of the weights of its predecessors or its successors.
- */
-void fixBlockWeights(Vunit& unit);
-
-/*
  * Order blocks for lowering to machine code.  May use different layout
  * algorithms depending on the TransKind of `unit'.
  *
@@ -179,4 +173,3 @@ template<> struct hash<HPHP::jit::Vlabel> {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-

@@ -150,7 +150,7 @@ let check_typedef (ctx : Provider_context.t) (fn : Relative_path.t) (x : string)
         let typedef = Naming.typedef ctx t in
         Nast_check.def ctx (Aast.Typedef typedef);
         let ret = Typing.typedef_def ctx typedef in
-        Typing_variance.typedef (Typing_variance.make_vgenv ctx) x;
+        Typing_variance.typedef (Typing_variance.make_vgenv ctx fn) x;
         let def = Aast.Typedef ret in
         Tast_check.def ctx def;
         Some def)

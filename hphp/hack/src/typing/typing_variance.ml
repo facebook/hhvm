@@ -16,9 +16,12 @@ module TGen = Typing_generic
 module Cls = Decl_provider.Class
 
 (** variance global environment *)
-type vgenv = { ctx: Provider_context.t }
+type vgenv = {
+  ctx: Provider_context.t;
+  file: Relative_path.t;
+}
 
-let make_vgenv ctx = { ctx }
+let make_vgenv ctx file = { ctx; file }
 
 (*****************************************************************************)
 (* Module checking the (co/contra)variance annotations (+/-).
@@ -271,6 +274,7 @@ let get_class_variance vgenv root (pos, class_name) =
       match
         Decl_provider.get_typedef
           ~origin:Decl_counters.Variance
+          ~file:vgenv.file
           vgenv.ctx
           class_name
       with
@@ -279,6 +283,7 @@ let get_class_variance vgenv root (pos, class_name) =
         (match
            Decl_provider.get_class
              ~origin:Decl_counters.Variance
+             ~file:vgenv.file
              vgenv.ctx
              class_name
          with
@@ -317,7 +322,11 @@ let rec class_ vgenv class_name class_type impl =
 (*****************************************************************************)
 and typedef vgenv type_name =
   match
-    Decl_provider.get_typedef ~origin:Decl_counters.Variance vgenv.ctx type_name
+    Decl_provider.get_typedef
+      ~origin:Decl_counters.Variance
+      ~file:vgenv.file
+      vgenv.ctx
+      type_name
   with
   | Some { td_tparams; td_type; td_pos = _; td_constraint = _; td_vis = _ } ->
     let root = (Typing_deps.Dep.Class type_name, None) in

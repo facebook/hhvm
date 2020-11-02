@@ -1005,7 +1005,7 @@ and class_def_ env c tc =
       (Cls.where_constraints tc)
   in
   Typing_variance.class_
-    (Typing_variance.make_vgenv (Env.get_ctx env))
+    (Typing_variance.make_vgenv (Env.get_ctx env) (Env.get_file env))
     (snd c.c_name)
     tc
     impl;

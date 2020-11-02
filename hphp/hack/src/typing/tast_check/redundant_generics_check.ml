@@ -16,7 +16,9 @@ module SN = Naming_special_names
 let ft_redundant_tparams env root tparams tpenv ty =
   let (positive, negative) =
     Typing_variance.get_typarams
-      (Typing_variance.make_vgenv (Tast_env.get_ctx env))
+      (Typing_variance.make_vgenv
+         (Tast_env.get_ctx env)
+         (Tast_env.get_file env))
       root
       tpenv
       ty

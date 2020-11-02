@@ -245,7 +245,7 @@ ArrayData* makeBespokeForTesting(ArrayData* ad, LoggingProfile* profile) {
     return bespoke::maybeMakeLoggingArray(ad, profile);
   }
   auto const mod = requestCount() % 3;
-  if (mod == 1) return bespoke::maybeMakeLoggingArray(ad);
+  if (mod == 1) return bespoke::maybeMakeLoggingArray(ad, profile);
   if (mod == 2) return bespoke::maybeMonoify(ad);
   return ad;
 }

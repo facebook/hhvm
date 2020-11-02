@@ -1085,7 +1085,7 @@ ArrayData* MonotypeDict<Key>::SetInt(Self* mad, int64_t k, TypedValue v) {
 
 template <typename Key>
 ArrayData* MonotypeDict<Key>::SetIntMove(Self* mad, int64_t k, TypedValue v) {
-  return mad->setImpl<false>(coerceKey<Key>(k), k, v);
+  return mad->setImpl<true>(coerceKey<Key>(k), k, v);
 }
 
 template <typename Key>
@@ -1118,7 +1118,11 @@ ArrayData* MonotypeDict<Key>::appendImpl(TypedValue v) {
       }
     });
   }
-  if (nextKI < 0) return this;
+  if (UNLIKELY(nextKI < 0)) {
+    raise_warning("Cannot add element to the array as the next element is "
+                  "already occupied");
+    return this;
+  }
   return Move ? SetIntMove(this, nextKI, v) : SetInt(this, nextKI, v);
 }
 

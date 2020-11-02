@@ -2001,14 +2001,20 @@ function skip_test($options, $test, $run_skipif = true): ?string {
     if (file_exists($test . ".verify")) {
       return 'skip-verify';
     }
+    $no_multireq_tag = "nomultireq";
+    if (file_exists("$test.$no_multireq_tag") ||
+        file_exists(dirname($test).'/'.$no_multireq_tag)) {
+      return 'skip-multi-req';
+    }
     if (find_debug_config($test, 'hphpd.ini')) {
       return 'skip-debugger';
     }
   }
 
 
+  $no_bespoke_tag = "nobespoke";
   if (isset($options['bespoke']) &&
-      strpos($test, "nan_array_id_test.php") !== false) {
+      file_exists("$test.$no_bespoke_tag")) {
       // Skip due to changes in array identity
       return 'skip-bespoke';
   }

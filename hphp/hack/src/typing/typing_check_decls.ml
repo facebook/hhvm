@@ -35,6 +35,8 @@ type env = {
 
 let get_ctx env = Env.get_ctx env.tenv
 
+let get_file env = Env.get_file env.tenv
+
 let check_hint_wellkindedness env hint =
   let decl_ty = Decl_hint.hint env.decl_env hint in
   Typing_kinding.Simple.check_well_kinded_type env decl_ty
@@ -146,7 +148,11 @@ and hint_ ~is_atom env p h_ =
   | Happly ((_, x), hl) as h when Env.is_typedef env.tenv x ->
     begin
       match
-        Decl_provider.get_typedef ~origin:Decl_counters.TopLevel (get_ctx env) x
+        Decl_provider.get_typedef
+          ~origin:Decl_counters.TopLevel
+          ~file:(get_file env)
+          (get_ctx env)
+          x
       with
       | Some _ ->
         check_happly env.typedef_tparams env.tenv (p, h);

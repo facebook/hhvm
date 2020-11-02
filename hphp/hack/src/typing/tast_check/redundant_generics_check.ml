@@ -118,6 +118,7 @@ let make_handler ctx =
         match
           Decl_provider.get_fun
             ~origin:Decl_counters.TastCheck
+            ~file:(Tast_env.get_file env)
             ctx
             (snd f.f_name)
         with
@@ -134,7 +135,11 @@ let make_handler ctx =
       method! at_class_ env c =
         let cid = snd c.c_name in
         match
-          Decl_provider.get_class ~origin:Decl_counters.TastCheck ctx cid
+          Decl_provider.get_class
+            ~origin:Decl_counters.TastCheck
+            ~file:(Tast_env.get_file env)
+            ctx
+            cid
         with
         | None -> ()
         | Some cls -> check_redundant_generics_class env (snd c.c_name) cls

@@ -12,6 +12,8 @@ open Hh_prelude
 open Aast
 module Cls = Decl_provider.Class
 
+type tgenv = { ctx: Provider_context.t }
+
 let strip_ns = Utils.strip_ns
 
 let is_class_kind (k : Ast_defs.class_kind) : bool =
@@ -25,17 +27,17 @@ let is_trait_kind (k : Ast_defs.class_kind) : bool =
   | Ast_defs.Ctrait -> true
   | _ -> false
 
-let is_trait_name ctx (type_name : string) : bool =
+let is_trait_name tgenv (type_name : string) : bool =
   let decl =
-    Decl_provider.get_class ~origin:Decl_counters.NastCheck ctx type_name
+    Decl_provider.get_class ~origin:Decl_counters.NastCheck tgenv.ctx type_name
   in
   match decl with
   | Some decl -> is_trait_kind (Cls.kind decl)
   | None -> false
 
-let is_class_name ctx (type_name : string) : bool =
+let is_class_name tgenv (type_name : string) : bool =
   let decl =
-    Decl_provider.get_class ~origin:Decl_counters.NastCheck ctx type_name
+    Decl_provider.get_class ~origin:Decl_counters.NastCheck tgenv.ctx type_name
   in
   match decl with
   | Some decl -> is_class_kind (Cls.kind decl)
@@ -43,9 +45,9 @@ let is_class_name ctx (type_name : string) : bool =
 
 (* All the parent classes, used traits, and implemented interfaces of
    [type_name]. This is the flattened inheritance tree. *)
-let all_ancestor_names ctx (type_name : string) : string list =
+let all_ancestor_names tgenv (type_name : string) : string list =
   let decl =
-    Decl_provider.get_class ~origin:Decl_counters.NastCheck ctx type_name
+    Decl_provider.get_class ~origin:Decl_counters.NastCheck tgenv.ctx type_name
   in
   match decl with
   | Some decl -> Decl_provider.Class.all_ancestor_names decl
@@ -53,18 +55,18 @@ let all_ancestor_names ctx (type_name : string) : string list =
 
 (* Does trait/class [type_name] use [trait_name]? Includes indirect
    usage. *)
-let type_uses_trait ctx (type_name : string) (trait_name : string) : bool =
+let type_uses_trait tgenv (type_name : string) (trait_name : string) : bool =
   let decl =
-    Decl_provider.get_class ~origin:Decl_counters.NastCheck ctx type_name
+    Decl_provider.get_class ~origin:Decl_counters.NastCheck tgenv.ctx type_name
   in
   match decl with
   | Some decl -> Cls.has_ancestor decl trait_name
   | None -> false
 
 (* Return the position where class/trait [type_name] is defined. *)
-let classish_def_pos ctx type_name : Pos.t =
+let classish_def_pos tgenv type_name : Pos.t =
   let decl =
-    Decl_provider.get_class ~origin:Decl_counters.NastCheck ctx type_name
+    Decl_provider.get_class ~origin:Decl_counters.NastCheck tgenv.ctx type_name
   in
   match decl with
   | Some decl -> Cls.pos decl
@@ -72,15 +74,17 @@ let classish_def_pos ctx type_name : Pos.t =
 
 (* Return all the ancestors of class/trait [type_name] that use
    [trait_name]. *)
-let find_ancestors_using ctx (type_name : string) (trait_name : string) :
+let find_ancestors_using tgenv (type_name : string) (trait_name : string) :
     string list =
-  let ancestors = all_ancestor_names ctx type_name in
-  List.filter ancestors ~f:(fun name -> type_uses_trait ctx name trait_name)
+  let ancestors = all_ancestor_names tgenv type_name in
+  List.filter ancestors ~f:(fun name -> type_uses_trait tgenv name trait_name)
 
 (* Sort a list of class/trait names according to how many ancestors
    they have, in ascending order. *)
-let sort_by_num_ancestors ctx (type_names : string list) : string list =
-  let num_ancestors cls_name = List.length (all_ancestor_names ctx cls_name) in
+let sort_by_num_ancestors tgenv (type_names : string list) : string list =
+  let num_ancestors cls_name =
+    List.length (all_ancestor_names tgenv cls_name)
+  in
   let compare cls_x cls_y =
     Int.compare (num_ancestors cls_x) (num_ancestors cls_y)
   in
@@ -88,26 +92,26 @@ let sort_by_num_ancestors ctx (type_names : string list) : string list =
 
 (* Given a non-empty list of class/trait names, return the name with
    the fewest parents. *)
-let uppermost_classish ctx (names : string list) : string =
-  List.hd_exn (sort_by_num_ancestors ctx names)
+let uppermost_classish tgenv (names : string list) : string =
+  List.hd_exn (sort_by_num_ancestors tgenv names)
 
-let lowermost_classish ctx (names : string list) : string =
-  List.hd_exn (List.rev (sort_by_num_ancestors ctx names))
+let lowermost_classish tgenv (names : string list) : string =
+  List.hd_exn (List.rev (sort_by_num_ancestors tgenv names))
 
 (* Find the uppermost class in the hierarchy that is using [trait_name],
    directly or via another trait. *)
-let find_using_class ctx cls_name (trait_name : string) : string =
-  let using_ancestors = find_ancestors_using ctx cls_name trait_name in
+let find_using_class tgenv cls_name (trait_name : string) : string =
+  let using_ancestors = find_ancestors_using tgenv cls_name trait_name in
   let class_ancestors =
-    cls_name :: List.filter using_ancestors ~f:(is_class_name ctx)
+    cls_name :: List.filter using_ancestors ~f:(is_class_name tgenv)
   in
-  uppermost_classish ctx class_ancestors
+  uppermost_classish tgenv class_ancestors
 
 (* Find the first use site in class/trait [type_name] of
    [trait_name], directly or via another trait. *)
-let trait_use_pos ctx (type_name : string) (trait_name : string) : Pos.t =
+let trait_use_pos tgenv (type_name : string) (trait_name : string) : Pos.t =
   let decl =
-    Decl_provider.get_class ~origin:Decl_counters.NastCheck ctx type_name
+    Decl_provider.get_class ~origin:Decl_counters.NastCheck tgenv.ctx type_name
   in
   match decl with
   | Some decl ->
@@ -119,10 +123,10 @@ let trait_use_pos ctx (type_name : string) (trait_name : string) : Pos.t =
 
 (* The final methods in [type_name] (excluding inherited methods),
    both instance and static methods. *)
-let final_methods ctx (type_name : string) :
+let final_methods tgenv (type_name : string) :
     (string * Typing_defs.class_elt) list =
   let decl =
-    Decl_provider.get_class ~origin:Decl_counters.NastCheck ctx type_name
+    Decl_provider.get_class ~origin:Decl_counters.NastCheck tgenv.ctx type_name
   in
   match decl with
   | Some decl ->
@@ -134,8 +138,8 @@ let final_methods ctx (type_name : string) :
       methods
   | None -> []
 
-let has_final_method ctx (type_name : string) : bool =
-  match final_methods ctx type_name with
+let has_final_method tgenv (type_name : string) : bool =
+  match final_methods tgenv type_name with
   | _ :: _ -> true
   | [] -> false
 
@@ -148,7 +152,7 @@ let has_final_method ctx (type_name : string) : bool =
  *
  * The route from Three to One in this example is ["Three"; "Two"; "One"].
  *)
-let trait_use_route ctx type_name trait_name : string list =
+let trait_use_route tgenv type_name trait_name : string list =
   let rec traits_between type_name trait_name seen : string list =
     if SSet.mem type_name seen then
       (* The code is bad: it has a cyclic trait definition. Ensure
@@ -156,10 +160,10 @@ let trait_use_route ctx type_name trait_name : string list =
       []
     else
       (* Find all the ancestors that use this trait. *)
-      let ancestors = find_ancestors_using ctx type_name trait_name in
+      let ancestors = find_ancestors_using tgenv type_name trait_name in
       (* Choose the ancestor closest to [type_name] by taking the ancestor
      that has the most ancestors itself. *)
-      let sorted_ancestors = List.rev (sort_by_num_ancestors ctx ancestors) in
+      let sorted_ancestors = List.rev (sort_by_num_ancestors tgenv ancestors) in
       match sorted_ancestors with
       | [] -> []
       | [ancestor] -> [ancestor]
@@ -181,13 +185,13 @@ let rec pairwise_map (items : 'a list) (f : 'a -> 'a -> 'b) : 'b list =
 
 (* Return a list of positions that show how we ended up using this
    trait. *)
-let relevant_positions ctx using_cls_name used_trait reused_trait :
+let relevant_positions tgenv using_cls_name used_trait reused_trait :
     (Pos.t * string) list =
   let describe_route (type_name : string) (trait_name : string) :
       (Pos.t * string) list =
-    let route = trait_use_route ctx type_name trait_name in
+    let route = trait_use_route tgenv type_name trait_name in
     pairwise_map route (fun type_name trait_name ->
-        ( trait_use_pos ctx type_name trait_name,
+        ( trait_use_pos tgenv type_name trait_name,
           Printf.sprintf
             "`%s` uses `%s`"
             (strip_ns type_name)
@@ -205,7 +209,7 @@ let relevant_positions ctx using_cls_name used_trait reused_trait :
   let result =
     result
     @ [
-        ( classish_def_pos ctx using_cls_name,
+        ( classish_def_pos tgenv using_cls_name,
           Printf.sprintf "`%s` is defined here" (strip_ns using_cls_name) );
       ]
   in
@@ -215,7 +219,7 @@ let relevant_positions ctx using_cls_name used_trait reused_trait :
   let result = result @ describe_route using_cls_name reused_trait in
 
   (* Finally, show the final method in the trait. *)
-  let (meth_name, meth) = List.hd_exn (final_methods ctx reused_trait) in
+  let (meth_name, meth) = List.hd_exn (final_methods tgenv reused_trait) in
   result
   @ [
       ( Lazy.force meth.Typing_defs.ce_pos,
@@ -269,7 +273,7 @@ let handler =
     inherit Nast_visitor.handler_base
 
     method! at_class_ env c =
-      let ctx = env.Nast_check_env.ctx in
+      let tgenv = { ctx = env.Nast_check_env.ctx } in
       let cls_name = snd c.c_name in
 
       let (_ : SSet.t) =
@@ -277,17 +281,17 @@ let handler =
           (traits_and_parent c)
           ~init:SSet.empty
           ~f:(fun seen_traits (p, type_name) ->
-            let trait_ancestors = all_trait_ancestors ctx type_name in
+            let trait_ancestors = all_trait_ancestors tgenv type_name in
             let traits_with_final_meths =
-              List.filter ~f:(has_final_method ctx) trait_ancestors
+              List.filter ~f:(has_final_method tgenv) trait_ancestors
               |> SSet.of_list
             in
             match union_report_overlaps seen_traits traits_with_final_meths with
             | (seen_traits, []) -> seen_traits
             | (_, dupes) ->
-              let dupe = lowermost_classish ctx dupes in
-              let using_class = find_using_class ctx cls_name dupe in
-              let trace = relevant_positions ctx using_class type_name dupe in
+              let dupe = lowermost_classish tgenv dupes in
+              let using_class = find_using_class tgenv cls_name dupe in
+              let trace = relevant_positions tgenv using_class type_name dupe in
               Errors.trait_reuse_with_final_method p dupe using_class trace;
               SSet.empty)
       in

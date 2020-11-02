@@ -1,0 +1,2 @@
+File "abstract_trait.php", line 4, characters 1-8:
+Only classes may be declared `abstract`. (Parsing[1002])

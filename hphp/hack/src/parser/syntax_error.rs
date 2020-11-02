@@ -295,8 +295,7 @@ pub const error2041: Error = Cow::Borrowed(concat!(
     "Unexpected method body: interfaces may contain only",
     " method signatures, and **not** method implementations."
 ));
-pub const error2042: Error = Cow::Borrowed("Interfaces may not be declared `abstract`.");
-pub const error2043: Error = Cow::Borrowed("Traits may not be declared `abstract`.");
+pub const error2042: Error = Cow::Borrowed("Only classes may be declared `abstract`.");
 pub fn error2046(method_type: &str) -> Error {
     Cow::Owned(format!(
         "`async` cannot be used on {}. Use an `Awaitable<...>` return type instead.",

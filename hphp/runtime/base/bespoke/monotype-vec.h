@@ -69,6 +69,7 @@ private:
   ArrayData* appendImpl(TypedValue v);
   template <bool Move>
   ArrayData* setIntImpl(int64_t k, TypedValue v);
+  arr_lval elemImpl(int64_t k, bool throwOnMissing);
 
   size_t capacity() const;
   uint8_t sizeIndex() const;

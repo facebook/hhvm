@@ -543,12 +543,26 @@ ArrayData* MonotypeDict<Key>::removeImpl(Key key) {
   mad->m_size--;
   return mad;
 }
+template <typename Key>
+arr_lval MonotypeDict<Key>::lvalDispatch(int64_t k) {
+  return LvalInt(this, k);
+}
+
+template <typename Key>
+arr_lval MonotypeDict<Key>::lvalDispatch(StringData* k) {
+  return LvalStr(this, k);
+}
 
 template <typename Key> template <typename K>
 arr_lval MonotypeDict<Key>::elemImpl(Key key, K k, bool throwOnMissing) {
   if (key == getTombstone<Key>()) {
     if (throwOnMissing) throwOOBArrayKeyException(k, this);
     return {this, const_cast<TypedValue*>(&immutable_null_base)};
+  }
+  if (type() == KindOfClsMeth) {
+    // If we have a ClsMeth, we need to return a proper lval, so we escalate to
+    // vanilla.
+    return lvalDispatch(k);
   }
   auto const old = findForGet(key, getHash(key));
   if (old == nullptr) {

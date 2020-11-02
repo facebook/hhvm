@@ -620,23 +620,33 @@ arr_lval MonotypeVec::LvalStr(MonotypeVec* mad, StringData* k) {
   throwInvalidArrayKeyException(k, mad);
 }
 
-tv_lval MonotypeVec::ElemInt(tv_lval lval, int64_t k, bool throwOnMissing) {
-  auto const madIn = As(lval.val().parr);
-  if (size_t(k) >= madIn->size()) {
-    if (throwOnMissing) throwOOBArrayKeyException(k, madIn);
-    return const_cast<TypedValue*>(&immutable_null_base);
+arr_lval MonotypeVec::elemImpl(int64_t k, bool throwOnMissing) {
+  if (size_t(k) >= size()) {
+    if (throwOnMissing) throwOOBArrayKeyException(k, this);
+    return {this, const_cast<TypedValue*>(&immutable_null_base)};
   }
-  auto const cow = madIn->cowCheck();
-  auto const mad = cow ? madIn->copy() : madIn;
-  if (cow) {
-    lval.type() = dt_with_rc(lval.type());
-    lval.val().parr = mad;
-    if (madIn->decReleaseCheck()) Release(madIn);
+  if (type() == KindOfClsMeth) {
+    // If we have a ClsMeth, we need to return a proper lval, so we escalate to
+    // vanilla.
+    return LvalInt(this, k);
   }
+  auto const cow = cowCheck();
+  auto const mad = cow ? copy() : this;
   static_assert(folly::kIsLittleEndian);
   auto const type_ptr = reinterpret_cast<DataType*>(&mad->m_extra_hi16);
   assertx(*type_ptr == mad->type());
-  return tv_lval{type_ptr, &mad->valueRefUnchecked(k)};
+  return arr_lval{mad, type_ptr, &mad->valueRefUnchecked(k)};
+}
+
+tv_lval MonotypeVec::ElemInt(tv_lval lvalIn, int64_t k, bool throwOnMissing) {
+  auto const madIn = As(lvalIn.val().parr);
+  auto const lval = madIn->elemImpl(k, throwOnMissing);
+  if (lval.arr != madIn) {
+    lvalIn.type() = dt_with_rc(lvalIn.type());
+    lvalIn.val().parr = lval.arr;
+    if (madIn->decReleaseCheck()) Release(madIn);
+  }
+  return lval;
 }
 
 tv_lval MonotypeVec::ElemStr(tv_lval lval, StringData* k, bool throwOnMissing) {

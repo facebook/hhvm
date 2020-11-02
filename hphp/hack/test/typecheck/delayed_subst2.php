@@ -1,8 +1,8 @@
 ////file1.php
 <?hh // partial
 
-interface I<T> {}
-interface I2 extends I<int> {}
+interface I2 { }
+interface I<T> extends I2 {}
 
 /* HH_FIXME[4101] */
 function i(): I {

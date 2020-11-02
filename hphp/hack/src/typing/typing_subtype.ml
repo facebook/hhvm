@@ -16,7 +16,6 @@ open Typing_logic_helpers
 module Reason = Typing_reason
 module Env = Typing_env
 module Inter = Typing_intersection
-module Subst = Decl_subst
 module TUtils = Typing_utils
 module SN = Naming_special_names
 module Phase = Typing_phase
@@ -92,16 +91,19 @@ module ConditionTypes = struct
       let ty =
         match try_get_class_for_condition_type env ty with
         | None -> ty
-        | Some (_, cls) when List.is_empty (Cls.tparams cls) -> ty
         | Some (((p, _) as sid), cls) ->
-          let params =
-            List.map (Cls.tparams cls) ~f:(fun { tp_name = (p, x); _ } ->
-                (* TODO(T69551141) handle type arguments *)
-                MakeType.generic (Reason.Rwitness p) x)
-          in
-          let subst = Decl_instantiate.make_subst (Cls.tparams cls) [] in
-          let ty = MakeType.apply (Reason.Rwitness p) sid params in
-          Decl_instantiate.instantiate subst ty
+          let tparams = Cls.tparams cls in
+          if List.is_empty tparams then
+            ty
+          else
+            let params =
+              List.map tparams ~f:(fun { tp_name = (p, x); _ } ->
+                  (* TODO(T69551141) handle type arguments *)
+                  MakeType.generic (Reason.Rwitness p) x)
+            in
+            let subst = Decl_instantiate.make_subst tparams [] in
+            let ty = MakeType.apply (Reason.Rwitness p) sid params in
+            Decl_instantiate.instantiate subst ty
       in
       let ety_env = Phase.env_with_self env in
       let (_, t) = Phase.localize ~ety_env env ty in
@@ -1178,50 +1180,38 @@ and simplify_subtype_i
           let class_def = Env.get_class env x in
           (match (d_sup, class_def) with
           | (DTthis, Some class_ty) ->
+            let tolerate_wrong_arity =
+              not (Partial.should_check_error (Env.get_mode env) 4029)
+            in
             let tyl_super =
-              if
-                List.is_empty tyl_super
-                && not (Partial.should_check_error (Env.get_mode env) 4029)
-              then
+              if List.is_empty tyl_super && tolerate_wrong_arity then
                 List.map (Cls.tparams class_ty) (fun _ ->
                     mk (r_super, Typing_defs.make_tany ()))
               else
                 tyl_super
             in
-            if
-              not
-                (Int.equal
-                   (List.length (Cls.tparams class_ty))
-                   (List.length tyl_super))
-            then
-              invalid_env_with env (fun () ->
-                  Errors.expected_tparam
-                    ~definition_pos:(Cls.pos class_ty)
-                    ~use_pos:(Reason.to_pos r_super)
-                    (List.length (Cls.tparams class_ty))
-                    (Some subtype_env.on_error))
-            else
-              let ety_env =
-                {
-                  type_expansions = [];
-                  substs = Subst.make_locl (Cls.tparams class_ty) tyl_super;
-                  this_ty = Option.value this_ty ~default:ty_super;
-                  from_class = None;
-                  on_error = subtype_env.on_error;
-                  quiet = true;
-                }
-              in
-              let lower_bounds_super = Cls.lower_bounds_on_this class_ty in
-              let rec try_constraints lower_bounds_super env =
-                match lower_bounds_super with
-                | [] -> invalid_env_with env fail
-                | ty_super :: lower_bounds_super ->
-                  let (env, ty_super) = Phase.localize ~ety_env env ty_super in
-                  env
-                  |> simplify_subtype ~subtype_env ~this_ty ty_sub ty_super
-                  ||| try_constraints lower_bounds_super
-              in
-              try_constraints lower_bounds_super env
+            let ety_env =
+              {
+                type_expansions = [];
+                substs =
+                  TUtils.make_locl_subst_for_class_tparams class_ty tyl_super;
+                this_ty = Option.value this_ty ~default:ty_super;
+                from_class = None;
+                on_error = subtype_env.on_error;
+                quiet = true;
+              }
+            in
+            let lower_bounds_super = Cls.lower_bounds_on_this class_ty in
+            let rec try_constraints lower_bounds_super env =
+              match lower_bounds_super with
+              | [] -> invalid_env_with env fail
+              | ty_super :: lower_bounds_super ->
+                let (env, ty_super) = Phase.localize ~ety_env env ty_super in
+                env
+                |> simplify_subtype ~subtype_env ~this_ty ty_sub ty_super
+                ||| try_constraints lower_bounds_super
+            in
+            try_constraints lower_bounds_super env
           | _ -> invalid_env_with env fail)
         | ((_, Tdependent (d_sub, bound_sub)), _) ->
           let this_ty = Option.first_some this_ty (Some ty_sub) in
@@ -1644,13 +1634,16 @@ and simplify_subtype_i
                         subtype_env.on_error)
                 else
                   let variance_reifiedl =
-                    match class_def_sub with
-                    | None ->
-                      List.map tyl_sub (fun _ ->
-                          (Ast_defs.Invariant, Aast.Erased))
-                    | Some class_sub ->
-                      List.map (Cls.tparams class_sub) (fun t ->
-                          (t.tp_variance, t.tp_reified))
+                    if List.is_empty tyl_sub then
+                      []
+                    else
+                      match class_def_sub with
+                      | None ->
+                        List.map tyl_sub (fun _ ->
+                            (Ast_defs.Invariant, Aast.Erased))
+                      | Some class_sub ->
+                        List.map (Cls.tparams class_sub) (fun t ->
+                            (t.tp_variance, t.tp_reified))
                   in
                   (* C<t1, .., tn> <: C<u1, .., un> iff
                    *   t1 <:v1> u1 /\ ... /\ tn <:vn> un
@@ -1684,67 +1677,54 @@ and simplify_subtype_i
                 else
                   tyl_sub
               in
-              if
-                not
-                  (Int.equal
-                     (List.length (Cls.tparams class_sub))
-                     (List.length tyl_sub))
-              then
-                invalid_env_with env (fun () ->
-                    Errors.expected_tparam
-                      ~definition_pos:(Cls.pos class_sub)
-                      ~use_pos:(Reason.to_pos r_sub)
-                      (List.length (Cls.tparams class_sub))
-                      (Some subtype_env.on_error))
-              else
-                let ety_env =
-                  {
-                    type_expansions = [];
-                    substs = Subst.make_locl (Cls.tparams class_sub) tyl_sub;
-                    (* TODO: do we need this? *)
-                    this_ty = Option.value this_ty ~default:ty_sub;
-                    from_class = None;
-                    quiet = true;
-                    on_error = subtype_env.on_error;
-                  }
-                in
-                let up_obj = Cls.get_ancestor class_sub cid_super in
-                (match up_obj with
-                | Some up_obj ->
-                  let (env, up_obj) = Phase.localize ~ety_env env up_obj in
-                  simplify_subtype ~subtype_env ~this_ty up_obj ty_super env
-                | None ->
-                  if
-                    Ast_defs.(equal_class_kind (Cls.kind class_sub) Ctrait)
-                    || Ast_defs.(
-                         equal_class_kind (Cls.kind class_sub) Cinterface)
-                  then
-                    let rec try_upper_bounds_on_this up_objs env =
-                      match up_objs with
-                      | [] ->
-                        (* It's crucial that we don't lose updates to global_tpenv in env that were
-                         * introduced by PHase.localize. TODO: avoid this requirement *)
-                        invalid_env env
-                      | ub_obj_typ :: up_objs ->
-                        (* a trait is never the runtime type, but it can be used
-                         * as a constraint if it has requirements or where constraints
-                         * for its using classes *)
-                        let (env, ub_obj_typ) =
-                          Phase.localize ~ety_env env ub_obj_typ
-                        in
-                        env
-                        |> simplify_subtype
-                             ~subtype_env
-                             ~this_ty
-                             (mk (r_sub, get_node ub_obj_typ))
-                             ty_super
-                        ||| try_upper_bounds_on_this up_objs
-                    in
-                    try_upper_bounds_on_this
-                      (Cls.upper_bounds_on_this class_sub)
+              let ety_env =
+                {
+                  type_expansions = [];
+                  substs =
+                    TUtils.make_locl_subst_for_class_tparams class_sub tyl_sub;
+                  (* TODO: do we need this? *)
+                  this_ty = Option.value this_ty ~default:ty_sub;
+                  from_class = None;
+                  quiet = true;
+                  on_error = subtype_env.on_error;
+                }
+              in
+              let up_obj = Cls.get_ancestor class_sub cid_super in
+              (match up_obj with
+              | Some up_obj ->
+                let (env, up_obj) = Phase.localize ~ety_env env up_obj in
+                simplify_subtype ~subtype_env ~this_ty up_obj ty_super env
+              | None ->
+                if
+                  Ast_defs.(equal_class_kind (Cls.kind class_sub) Ctrait)
+                  || Ast_defs.(equal_class_kind (Cls.kind class_sub) Cinterface)
+                then
+                  let rec try_upper_bounds_on_this up_objs env =
+                    match up_objs with
+                    | [] ->
+                      (* It's crucial that we don't lose updates to global_tpenv in env that were
+                       * introduced by PHase.localize. TODO: avoid this requirement *)
+                      invalid_env env
+                    | ub_obj_typ :: up_objs ->
+                      (* a trait is never the runtime type, but it can be used
+                       * as a constraint if it has requirements or where constraints
+                       * for its using classes *)
+                      let (env, ub_obj_typ) =
+                        Phase.localize ~ety_env env ub_obj_typ
+                      in
                       env
-                  else
-                    invalid_env env))
+                      |> simplify_subtype
+                           ~subtype_env
+                           ~this_ty
+                           (mk (r_sub, get_node ub_obj_typ))
+                           ty_super
+                      ||| try_upper_bounds_on_this up_objs
+                  in
+                  try_upper_bounds_on_this
+                    (Cls.upper_bounds_on_this class_sub)
+                    env
+                else
+                  invalid_env env))
         | (r_sub, (Tvarray tv | Tdarray (_, tv) | Tvarray_or_darray (_, tv))) ->
           (match (exact_super, tyl_super) with
           | (Nonexact, [tv_super])

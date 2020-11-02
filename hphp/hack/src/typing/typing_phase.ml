@@ -1006,8 +1006,9 @@ and localize_hint ~ety_env env hint =
 and localize_missing_tparams_class env r sid class_ =
   let use_pos = Reason.to_pos r in
   let use_name = Utils.strip_ns (snd sid) in
+  let tparams = Cls.tparams class_ in
   let ((env, _i), tyl) =
-    List.fold_map (Cls.tparams class_) ~init:(env, 0) ~f:(fun (env, i) tparam ->
+    List.fold_map tparams ~init:(env, 0) ~f:(fun (env, i) tparam ->
         let (env, ty) =
           Env.new_global_tyvar
             env
@@ -1022,15 +1023,13 @@ and localize_missing_tparams_class env r sid class_ =
     {
       type_expansions = [];
       this_ty = c_ty;
-      substs = Subst.make_locl (Cls.tparams class_) tyl;
+      substs = Subst.make_locl tparams tyl;
       from_class = Some (Aast.CI sid);
       quiet = false;
       on_error = Errors.unify_error_at use_pos;
     }
   in
-  let env =
-    check_tparams_constraints ~use_pos ~ety_env env (Cls.tparams class_)
-  in
+  let env = check_tparams_constraints ~use_pos ~ety_env env tparams in
   let env =
     check_where_constraints
       ~in_class:true

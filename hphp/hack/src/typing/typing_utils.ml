@@ -745,3 +745,9 @@ let collect_enum_class_upper_bounds env name =
   in
   let (_, upper_bounds) = collect SSet.empty SSet.empty name in
   upper_bounds
+
+let make_locl_subst_for_class_tparams classdef tyl =
+  if List.is_empty tyl then
+    SMap.empty
+  else
+    Decl_subst.make_locl (Cls.tparams classdef) tyl

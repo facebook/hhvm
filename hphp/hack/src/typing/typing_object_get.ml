@@ -21,7 +21,6 @@ module Inter = Typing_intersection
 module SN = Naming_special_names
 module TVis = Typing_visibility
 module Phase = Typing_phase
-module Subst = Decl_subst
 module MakeType = Typing_make_type
 module Cls = Decl_provider.Class
 module Partial = Partial_provider
@@ -121,7 +120,8 @@ let widen_class_for_obj_get ~is_method ~nullsafe ~on_error member_name env ty =
               let ety_env =
                 {
                   type_expansions = [];
-                  substs = Subst.make_locl (Cls.tparams class_info) tyl;
+                  substs =
+                    TUtils.make_locl_subst_for_class_tparams class_info tyl;
                   this_ty = ty;
                   from_class = None;
                   quiet = true;
@@ -198,7 +198,7 @@ let rec obj_get_concrete_ty
     {
       type_expansions = [];
       this_ty;
-      substs = Subst.make_locl (Cls.tparams class_info) paraml;
+      substs = TUtils.make_locl_subst_for_class_tparams class_info paraml;
       from_class = Some class_id;
       quiet = true;
       on_error;

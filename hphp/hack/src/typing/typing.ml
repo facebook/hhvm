@@ -1753,7 +1753,7 @@ and expr_
       let ety_env =
         {
           (Phase.env_with_self env) with
-          substs = Subst.make_locl (Cls.tparams class_) tvarl;
+          substs = TUtils.make_locl_subst_for_class_tparams class_ tvarl;
         }
       in
       let (env, local_obj_ty) = Phase.localize ~ety_env env obj_type in
@@ -1778,7 +1778,10 @@ and expr_
                  : return_type_of(Class::meth_name)
          *)
         let ety_env =
-          { ety_env with substs = Subst.make_locl (Cls.tparams class_) tvarl }
+          {
+            ety_env with
+            substs = TUtils.make_locl_subst_for_class_tparams class_ tvarl;
+          }
         in
         let env =
           Phase.check_tparams_constraints
@@ -1896,7 +1899,7 @@ and expr_
         let ety_env =
           {
             type_expansions = [];
-            substs = Subst.make_locl (Cls.tparams class_) tyargs;
+            substs = TUtils.make_locl_subst_for_class_tparams class_ tyargs;
             this_ty = cid_ty;
             from_class = Some cid;
             quiet = true;
@@ -3640,7 +3643,8 @@ and new_object
           let ety_env =
             {
               type_expansions = [];
-              substs = Subst.make_locl (Cls.tparams class_info) params;
+              substs =
+                TUtils.make_locl_subst_for_class_tparams class_info params;
               this_ty = obj_ty;
               from_class = None;
               quiet = false;
@@ -5333,7 +5337,7 @@ and class_get_
         {
           type_expansions = [];
           this_ty;
-          substs = Subst.make_locl (Cls.tparams class_) paraml;
+          substs = TUtils.make_locl_subst_for_class_tparams class_ paraml;
           from_class = Some cid;
           quiet = true;
           on_error = Errors.unify_error_at p;
@@ -5819,7 +5823,7 @@ and call_construct p env class_ params el unpacked_element cid cid_ty =
     {
       type_expansions = [];
       this_ty = cid_ty;
-      substs = Subst.make_locl (Cls.tparams class_) params;
+      substs = TUtils.make_locl_subst_for_class_tparams class_ params;
       from_class = Some cid;
       quiet = true;
       on_error = Errors.unify_error_at p;
@@ -7290,7 +7294,10 @@ and class_get_pu_ env cty name =
       | Some class_ ->
         (match Env.get_pu_enum env class_ name with
         | Some et ->
-          (env, Some (cty, Subst.make_locl (Cls.tparams class_) paraml, et))
+          ( env,
+            Some
+              (cty, TUtils.make_locl_subst_for_class_tparams class_ paraml, et)
+          )
         | None -> (env, None))
     end
 

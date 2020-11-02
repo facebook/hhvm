@@ -39,7 +39,6 @@ let is_enforceable (env : env) (ty : decl_ty) =
       begin
         match Env.get_class env name with
         | Some tc ->
-          let tparams = Cls.tparams tc in
           begin
             match tyl with
             | [] -> true
@@ -50,7 +49,7 @@ let is_enforceable (env : env) (ty : decl_ty) =
                     List.fold2
                       ~init:true
                       targs
-                      tparams
+                      (Cls.tparams tc)
                       ~f:(fun acc targ tparam ->
                         match get_node targ with
                         | Tdynamic

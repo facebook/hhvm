@@ -13,7 +13,6 @@ open Typing_defs
 module Env = Typing_env
 module Phase = Typing_phase
 module Reason = Typing_reason
-module Subst = Decl_subst
 module TUtils = Typing_utils
 module MakeType = Typing_make_type
 module Cls = Decl_provider.Class
@@ -123,7 +122,7 @@ and get_spread_attributes env pos onto_xhp cty =
       {
         type_expansions = [];
         this_ty = xhp_ty;
-        substs = Subst.make_locl (Cls.tparams xhp_info) tparams;
+        substs = TUtils.make_locl_subst_for_class_tparams xhp_info tparams;
         from_class = None;
         quiet = false;
         on_error = Errors.unify_error;

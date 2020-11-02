@@ -118,6 +118,7 @@
     type_mapper_generic
     typing_ast
     typing_defs
+    typing_heap
     global_config)
   (preprocess (pps ppx_deriving.std)))
 

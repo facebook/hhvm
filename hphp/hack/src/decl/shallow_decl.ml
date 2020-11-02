@@ -346,6 +346,7 @@ let class_ ctx c =
     sc_req_extends;
     sc_req_implements;
     sc_implements;
+    sc_implements_dynamic = c.c_implements_dynamic;
     sc_consts = List.filter_map c.c_consts (class_const env c);
     sc_typeconsts = List.filter_map c.c_typeconsts (typeconst env c);
     sc_pu_enums = List.map c.c_pu_enums (pu_enum env);

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<4908eaff686053a2e6ca845e945db734>>
+// @generated SignedSource<<20de78d0e6ed042ee655aa5e9e34e229>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -565,16 +565,17 @@ impl<'a> Node<'a> for ShallowClass<'a> {
                 req_extends: ref __binding_11,
                 req_implements: ref __binding_12,
                 implements: ref __binding_13,
-                consts: ref __binding_14,
-                typeconsts: ref __binding_15,
-                pu_enums: ref __binding_16,
-                props: ref __binding_17,
-                sprops: ref __binding_18,
-                constructor: ref __binding_19,
-                static_methods: ref __binding_20,
-                methods: ref __binding_21,
-                user_attributes: ref __binding_22,
-                enum_type: ref __binding_23,
+                implements_dynamic: ref __binding_14,
+                consts: ref __binding_15,
+                typeconsts: ref __binding_16,
+                pu_enums: ref __binding_17,
+                props: ref __binding_18,
+                sprops: ref __binding_19,
+                constructor: ref __binding_20,
+                static_methods: ref __binding_21,
+                methods: ref __binding_22,
+                user_attributes: ref __binding_23,
+                enum_type: ref __binding_24,
             } => {
                 {
                     __binding_0.accept(v)
@@ -645,7 +646,10 @@ impl<'a> Node<'a> for ShallowClass<'a> {
                 {
                     __binding_22.accept(v)
                 }
-                { __binding_23.accept(v) }
+                {
+                    __binding_23.accept(v)
+                }
+                { __binding_24.accept(v) }
             }
         }
     }

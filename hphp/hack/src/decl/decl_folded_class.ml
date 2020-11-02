@@ -569,6 +569,7 @@ and class_decl
       dc_smethods = sm;
       dc_construct = cstr;
       dc_ancestors = impl;
+      dc_implements_dynamic = c.sc_implements_dynamic;
       dc_extends = extends;
       dc_sealed_whitelist = sealed_whitelist;
       dc_xhp_attr_deps = xhp_attr_deps;

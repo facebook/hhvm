@@ -42,6 +42,7 @@ type subdecl_kind =
   | Enum_type
   | Sealed_whitelist
   | Decl_errors
+  | Implements_dynamic
   (* Lazy *)
   | Construct
   | Need_init
@@ -122,7 +123,8 @@ let subdecl_eagerness (subdecl_kind : subdecl_kind) : string =
   | Where_constraints
   | Enum_type
   | Sealed_whitelist
-  | Decl_errors ->
+  | Decl_errors
+  | Implements_dynamic ->
     "shallow"
   | Construct
   | Need_init

@@ -66,6 +66,7 @@ let to_class_type
       dc_smethods;
       dc_construct;
       dc_ancestors;
+      dc_implements_dynamic;
       dc_req_ancestors;
       dc_req_ancestors_extends;
       dc_extends;
@@ -165,6 +166,7 @@ let to_class_type
       ft_map_elements Decl_heap.StaticMethods.find_unsafe dc_smethods;
     tc_construct;
     tc_ancestors = dc_ancestors;
+    tc_implements_dynamic = dc_implements_dynamic;
     tc_req_ancestors = dc_req_ancestors;
     tc_req_ancestors_extends = dc_req_ancestors_extends;
     tc_extends = dc_extends;

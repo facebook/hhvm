@@ -3359,7 +3359,16 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
 
         let extends = self.slice(extends.iter().filter_map(|&node| self.node_to_ty(node)));
 
-        let implements = self.slice(implements.iter().filter_map(|&node| self.node_to_ty(node)));
+        let mut implements_dynamic = false;
+        let implements = self.slice(implements.iter().filter_map(
+            |&node| match self.node_to_ty(node) {
+                Some(Ty(_, Ty_::Tdynamic)) => {
+                    implements_dynamic = true;
+                    None
+                }
+                x => x,
+            },
+        ));
 
         // Pop the type params stack only after creating all inner types.
         let tparams = self.pop_type_params(tparams);
@@ -3379,6 +3388,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             req_extends,
             req_implements,
             implements,
+            implements_dynamic,
             consts,
             typeconsts,
             pu_enums: &[],
@@ -3708,6 +3718,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             req_extends: &[],
             req_implements: &[],
             implements: &[],
+            implements_dynamic: false,
             consts,
             typeconsts: &[],
             pu_enums: &[],

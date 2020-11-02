@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<e8146270f109775f65bf6803669b0459>>
+// @generated SignedSource<<66cc2e2eac7c2e0bf335d00e473a9925>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -245,6 +245,8 @@ pub struct ClassType<'a> {
     /// This includes all the classes, interfaces and traits this class is
     /// using.
     pub ancestors: s_map::SMap<'a, &'a Ty<'a>>,
+    /// Whether the class is coercible to dynamic
+    pub implements_dynamic: bool,
     pub req_ancestors: &'a [&'a Requirement<'a>],
     /// the extends of req_ancestors
     pub req_ancestors_extends: s_set::SSet<'a>,

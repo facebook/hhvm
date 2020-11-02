@@ -5,8 +5,8 @@
        sc_name = ([3:7-8], "\\A"); sc_tparams = [];
        sc_where_constraints = []; sc_extends = []; sc_uses = [];
        sc_xhp_attr_uses = []; sc_req_extends = []; sc_req_implements = [];
-       sc_implements = []; sc_consts = []; sc_typeconsts = [];
-       sc_pu_enums = []; sc_props = []; sc_sprops = [];
+       sc_implements = []; sc_implements_dynamic = false; sc_consts = [];
+       sc_typeconsts = []; sc_pu_enums = []; sc_props = []; sc_sprops = [];
        sc_constructor = None; sc_static_methods = [];
        sc_methods =
        [{ Shallow_decl_defs.sm_abstract = false; sm_final = false;
@@ -73,8 +73,9 @@
         [(Rhint (root|classes_inheritance.php line 8, characters 17-17),
           (Tapply (([8:17-18], "\\A"), [])))];
         sc_uses = []; sc_xhp_attr_uses = []; sc_req_extends = [];
-        sc_req_implements = []; sc_implements = []; sc_consts = [];
-        sc_typeconsts = []; sc_pu_enums = []; sc_props = []; sc_sprops = [];
+        sc_req_implements = []; sc_implements = [];
+        sc_implements_dynamic = false; sc_consts = []; sc_typeconsts = [];
+        sc_pu_enums = []; sc_props = []; sc_sprops = [];
         sc_constructor = None; sc_static_methods = [];
         sc_methods =
         [{ Shallow_decl_defs.sm_abstract = false; sm_final = false;
@@ -138,8 +139,8 @@
         sc_name = ([13:11-12], "\\C"); sc_tparams = [];
         sc_where_constraints = []; sc_extends = []; sc_uses = [];
         sc_xhp_attr_uses = []; sc_req_extends = []; sc_req_implements = [];
-        sc_implements = []; sc_consts = []; sc_typeconsts = [];
-        sc_pu_enums = []; sc_props = []; sc_sprops = [];
+        sc_implements = []; sc_implements_dynamic = false; sc_consts = [];
+        sc_typeconsts = []; sc_pu_enums = []; sc_props = []; sc_sprops = [];
         sc_constructor = None; sc_static_methods = [];
         sc_methods =
         [{ Shallow_decl_defs.sm_abstract = true; sm_final = false;
@@ -180,8 +181,9 @@
         [(Rhint (root|classes_inheritance.php line 17, characters 21-21),
           (Tapply (([17:21-22], "\\C"), [])))];
         sc_uses = []; sc_xhp_attr_uses = []; sc_req_extends = [];
-        sc_req_implements = []; sc_implements = []; sc_consts = [];
-        sc_typeconsts = []; sc_pu_enums = []; sc_props = []; sc_sprops = [];
+        sc_req_implements = []; sc_implements = [];
+        sc_implements_dynamic = false; sc_consts = []; sc_typeconsts = [];
+        sc_pu_enums = []; sc_props = []; sc_sprops = [];
         sc_constructor = None; sc_static_methods = [];
         sc_methods =
         [{ Shallow_decl_defs.sm_abstract = true; sm_final = false;
@@ -222,8 +224,9 @@
         sc_implements =
         [(Rhint (root|classes_inheritance.php line 21, characters 20-20),
           (Tapply (([21:20-21], "\\C"), [])))];
-        sc_consts = []; sc_typeconsts = []; sc_pu_enums = []; sc_props = [];
-        sc_sprops = []; sc_constructor = None; sc_static_methods = [];
+        sc_implements_dynamic = false; sc_consts = []; sc_typeconsts = [];
+        sc_pu_enums = []; sc_props = []; sc_sprops = [];
+        sc_constructor = None; sc_static_methods = [];
         sc_methods =
         [{ Shallow_decl_defs.sm_abstract = false; sm_final = false;
            sm_memoizelsb = false; sm_name = ([22:19-20], "c");
@@ -267,8 +270,9 @@
         sc_implements =
         [(Rhint (root|classes_inheritance.php line 25, characters 30-30),
           (Tapply (([25:30-31], "\\D"), [])))];
-        sc_consts = []; sc_typeconsts = []; sc_pu_enums = []; sc_props = [];
-        sc_sprops = []; sc_constructor = None; sc_static_methods = [];
+        sc_implements_dynamic = false; sc_consts = []; sc_typeconsts = [];
+        sc_pu_enums = []; sc_props = []; sc_sprops = [];
+        sc_constructor = None; sc_static_methods = [];
         sc_methods =
         [{ Shallow_decl_defs.sm_abstract = false; sm_final = false;
            sm_memoizelsb = false; sm_name = ([26:19-20], "d");

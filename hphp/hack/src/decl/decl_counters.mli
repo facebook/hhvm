@@ -45,6 +45,7 @@ type subdecl_kind =
   | Enum_type
   | Sealed_whitelist
   | Decl_errors
+  | Implements_dynamic
   (* Lazy *)
   | Construct
   | Need_init

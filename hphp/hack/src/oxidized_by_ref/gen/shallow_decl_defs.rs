@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<e7313af1cd8864a4a2141d9e8fb8587d>>
+// @generated SignedSource<<ec493ce5962648cf06cb3328906fb41c>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -187,6 +187,7 @@ pub struct ShallowClass<'a> {
     pub req_extends: &'a [&'a Ty<'a>],
     pub req_implements: &'a [&'a Ty<'a>],
     pub implements: &'a [&'a Ty<'a>],
+    pub implements_dynamic: bool,
     pub consts: &'a [&'a ShallowClassConst<'a>],
     pub typeconsts: &'a [&'a ShallowTypeconst<'a>],
     pub pu_enums: &'a [&'a ShallowPuEnum<'a>],

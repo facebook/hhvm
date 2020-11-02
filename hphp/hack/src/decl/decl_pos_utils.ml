@@ -299,6 +299,7 @@ struct
       dc_smethods = dc.dc_smethods;
       dc_construct = dc.dc_construct;
       dc_ancestors = SMap.map ty dc.dc_ancestors;
+      dc_implements_dynamic = dc.dc_implements_dynamic;
       dc_enum_type = Option.map dc.dc_enum_type enum_type;
       dc_decl_errors = None;
       dc_condition_types = dc.dc_condition_types;
@@ -339,6 +340,7 @@ struct
       sc_req_extends = List.map sc.sc_req_extends ty;
       sc_req_implements = List.map sc.sc_req_implements ty;
       sc_implements = List.map sc.sc_implements ty;
+      sc_implements_dynamic = sc.sc_implements_dynamic;
       sc_consts = List.map sc.sc_consts shallow_class_const;
       sc_typeconsts = List.map sc.sc_typeconsts shallow_typeconst;
       sc_pu_enums = List.map sc.sc_pu_enums shallow_pu_enum;

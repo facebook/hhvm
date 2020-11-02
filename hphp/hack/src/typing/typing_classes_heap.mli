@@ -80,6 +80,8 @@ module Api : sig
 
   val requires_ancestor : t -> string -> bool
 
+  val get_implements_dynamic : t -> bool
+
   val extends : t -> string -> bool
 
   val all_ancestors : t -> (string * decl_ty) list

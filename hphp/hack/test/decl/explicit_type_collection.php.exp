@@ -8,7 +8,8 @@
        sc_implements =
        [(Rhint (root|explicit_type_collection.php line 3, characters 20-36),
          (Tapply (([3:20-37], "\\HH\\ClassAttribute"), [])))];
-       sc_consts = []; sc_typeconsts = []; sc_pu_enums = [];
+       sc_implements_dynamic = false; sc_consts = []; sc_typeconsts = [];
+       sc_pu_enums = [];
        sc_props =
        [{ Shallow_decl_defs.sp_const = false; sp_xhp_attr = None;
           sp_lateinit = false; sp_lsb = false; sp_name = ([4:49-51], "i");
@@ -77,7 +78,7 @@
         sc_name = ([8:7-10], "\\Foo"); sc_tparams = [];
         sc_where_constraints = []; sc_extends = []; sc_uses = [];
         sc_xhp_attr_uses = []; sc_req_extends = []; sc_req_implements = [];
-        sc_implements = [];
+        sc_implements = []; sc_implements_dynamic = false;
         sc_consts =
         [{ Shallow_decl_defs.scc_abstract = false;
            scc_name = ([9:16-19], "KEY");
@@ -100,8 +101,8 @@
         sc_name = ([15:7-10], "\\Bar"); sc_tparams = [];
         sc_where_constraints = []; sc_extends = []; sc_uses = [];
         sc_xhp_attr_uses = []; sc_req_extends = []; sc_req_implements = [];
-        sc_implements = []; sc_consts = []; sc_typeconsts = [];
-        sc_pu_enums = []; sc_props = []; sc_sprops = [];
+        sc_implements = []; sc_implements_dynamic = false; sc_consts = [];
+        sc_typeconsts = []; sc_pu_enums = []; sc_props = []; sc_sprops = [];
         sc_constructor = None; sc_static_methods = []; sc_methods = [];
         sc_user_attributes =
         [{ Typing_defs_core.ua_name = ([12:3-4], "\\A");

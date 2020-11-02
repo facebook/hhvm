@@ -5,8 +5,8 @@
        sc_name = ([3:16-23], "\\Machine"); sc_tparams = [];
        sc_where_constraints = []; sc_extends = []; sc_uses = [];
        sc_xhp_attr_uses = []; sc_req_extends = []; sc_req_implements = [];
-       sc_implements = []; sc_consts = []; sc_typeconsts = [];
-       sc_pu_enums = []; sc_props = []; sc_sprops = [];
+       sc_implements = []; sc_implements_dynamic = false; sc_consts = [];
+       sc_typeconsts = []; sc_pu_enums = []; sc_props = []; sc_sprops = [];
        sc_constructor = None; sc_static_methods = [];
        sc_methods =
        [{ Shallow_decl_defs.sm_abstract = false; sm_final = false;
@@ -70,8 +70,8 @@
         sc_name = ([8:11-17], "\\Fliers"); sc_tparams = [];
         sc_where_constraints = []; sc_extends = []; sc_uses = [];
         sc_xhp_attr_uses = []; sc_req_extends = []; sc_req_implements = [];
-        sc_implements = []; sc_consts = []; sc_typeconsts = [];
-        sc_pu_enums = []; sc_props = []; sc_sprops = [];
+        sc_implements = []; sc_implements_dynamic = false; sc_consts = [];
+        sc_typeconsts = []; sc_pu_enums = []; sc_props = []; sc_sprops = [];
         sc_constructor = None; sc_static_methods = [];
         sc_methods =
         [{ Shallow_decl_defs.sm_abstract = true; sm_final = false;
@@ -115,8 +115,8 @@
         sc_req_implements =
         [(Rhint (root|classes_require.php line 14, characters 22-27),
           (Tapply (([14:22-28], "\\Fliers"), [])))];
-        sc_implements = []; sc_consts = []; sc_typeconsts = [];
-        sc_pu_enums = []; sc_props = []; sc_sprops = [];
+        sc_implements = []; sc_implements_dynamic = false; sc_consts = [];
+        sc_typeconsts = []; sc_pu_enums = []; sc_props = []; sc_sprops = [];
         sc_constructor = None; sc_static_methods = [];
         sc_methods =
         [{ Shallow_decl_defs.sm_abstract = false; sm_final = false;
@@ -163,8 +163,9 @@
         sc_implements =
         [(Rhint (root|classes_require.php line 23, characters 41-46),
           (Tapply (([23:41-47], "\\Fliers"), [])))];
-        sc_consts = []; sc_typeconsts = []; sc_pu_enums = []; sc_props = [];
-        sc_sprops = []; sc_constructor = None; sc_static_methods = [];
+        sc_implements_dynamic = false; sc_consts = []; sc_typeconsts = [];
+        sc_pu_enums = []; sc_props = []; sc_sprops = [];
+        sc_constructor = None; sc_static_methods = [];
         sc_methods =
         [{ Shallow_decl_defs.sm_abstract = false; sm_final = false;
            sm_memoizelsb = false; sm_name = ([26:19-22], "fly");

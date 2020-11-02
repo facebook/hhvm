@@ -113,6 +113,7 @@ and class_type = {
   tc_ancestors: decl_ty SMap.t;
       (** This includes all the classes, interfaces and traits this class is
        * using. *)
+  tc_implements_dynamic: bool;  (** Whether the class is coercible to dynamic *)
   tc_req_ancestors: requirement list;
   tc_req_ancestors_extends: SSet.t;  (** the extends of req_ancestors *)
   tc_extends: SSet.t;

@@ -84,6 +84,7 @@ type shallow_class = {
   sc_req_extends: decl_ty list;
   sc_req_implements: decl_ty list;
   sc_implements: decl_ty list;
+  sc_implements_dynamic: bool;
   sc_consts: shallow_class_const list;
   sc_typeconsts: shallow_typeconst list;
   sc_pu_enums: shallow_pu_enum list;

@@ -196,6 +196,7 @@ type decl_class_type = {
   dc_smethods: element SMap.t;
   dc_construct: element option * consistent_kind;
   dc_ancestors: decl_ty SMap.t;
+  dc_implements_dynamic: bool;
   dc_req_ancestors: requirement list;
   dc_req_ancestors_extends: SSet.t;
   dc_extends: SSet.t;

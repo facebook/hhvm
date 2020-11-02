@@ -299,6 +299,15 @@ ArrayData* EmptyMonotypeVec::Append(EmptyMonotypeVec* ead, TypedValue v) {
   return res;
 }
 
+ArrayData* EmptyMonotypeVec::AppendMove(EmptyMonotypeVec* ead, TypedValue v) {
+  auto const dt = dt_modulo_persistence(type(v));
+  auto const mad = MonotypeVec::MakeReserve(
+      ead->m_kind, ead->isLegacyArray(), 1, dt);
+  auto const res = MonotypeVec::AppendMove(mad, v);
+  assertx(mad == res);
+  return res;
+}
+
 ArrayData* EmptyMonotypeVec::Pop(EmptyMonotypeVec* ead, Variant& value) {
   value = uninit_null();
   return ead;
@@ -723,20 +732,34 @@ ssize_t MonotypeVec::IterRewind(const MonotypeVec* mad, ssize_t pos) {
   return pos > 0 ? pos - 1 : mad->size();
 }
 
-ArrayData* MonotypeVec::Append(MonotypeVec* madIn, TypedValue v) {
-  if (madIn->type() != dt_modulo_persistence(v.m_type)) {
+template <bool Move>
+ArrayData* MonotypeVec::appendImpl(TypedValue v) {
+  if (type() != dt_modulo_persistence(v.type())) {
     // Type doesn't match; escalate to vanilla
-    auto const ad = madIn->escalateWithCapacity(madIn->size() + 1);
+    auto const ad = escalateWithCapacity(size() + 1);
     auto const res = PackedArray::Append(ad, v);
     assertx(ad == res);
     return res;
   }
 
-  auto const mad = madIn->prepareForInsert();
+  auto const mad = prepareForInsert();
   mad->valueRefUnchecked(mad->m_size++) = val(v);
-  tvIncRefGen(v);
+
+  if constexpr (Move) {
+    if (mad != this && decReleaseCheck()) Release(this);
+  } else {
+    tvIncRefGen(v);
+  }
 
   return mad;
+}
+
+ArrayData* MonotypeVec::Append(MonotypeVec* madIn, TypedValue v) {
+  return madIn->appendImpl<false>(v);
+}
+
+ArrayData* MonotypeVec::AppendMove(MonotypeVec* madIn, TypedValue v) {
+  return madIn->appendImpl<true>(v);
 }
 
 ArrayData* MonotypeVec::Pop(MonotypeVec* madIn, Variant& value) {

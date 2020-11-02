@@ -510,6 +510,12 @@ ArrayData* LoggingArray::Append(LoggingArray* lad, TypedValue v) {
   logEvent(lad, ms, ArrayOp::Append, v);
   return mutate(lad, ms, [&](ArrayData* w) { return w->append(v); });
 }
+ArrayData* LoggingArray::AppendMove(LoggingArray* lad, TypedValue v) {
+  auto const result = Append(lad, v);
+  if (result != lad && lad->decReleaseCheck()) Release(lad);
+  tvDecRefGen(v);
+  return result;
+}
 ArrayData* LoggingArray::Pop(LoggingArray* lad, Variant& ret) {
   logEvent(lad, ArrayOp::Pop);
   return mutate(lad, [&](ArrayData* w) { return w->pop(ret); });

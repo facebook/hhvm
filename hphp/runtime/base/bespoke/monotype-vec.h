@@ -64,6 +64,9 @@ private:
   void forEachCountableValue(CountableFn c, MaybeCountableFn mc);
   void decRefValues();
   void incRefValues();
+
+  template <bool Move>
+  ArrayData* appendImpl(TypedValue v);
   template <bool Move>
   ArrayData* setIntImpl(int64_t k, TypedValue v);
 

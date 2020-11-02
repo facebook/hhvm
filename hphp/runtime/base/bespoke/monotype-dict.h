@@ -163,6 +163,9 @@ private:
   ssize_t getPosImpl(Key key) const;
   ArrayData* removeImpl(Key key);
   template <typename K> arr_lval elemImpl(Key key, K k, bool throwOnMissing);
+
+  template <bool Move>
+  ArrayData* appendImpl(TypedValue v);
   template <bool Move, typename K>
   ArrayData* setImpl(Key key, K k, TypedValue v);
 

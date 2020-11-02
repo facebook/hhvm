@@ -227,6 +227,9 @@ ArrayData* EmptyMonotypeDict::RemoveStr(Self* ad, const StringData* k) {
 ArrayData* EmptyMonotypeDict::Append(Self* ad, TypedValue v) {
   return SetInt(ad, 0, v);
 }
+ArrayData* EmptyMonotypeDict::AppendMove(Self* ad, TypedValue v) {
+  return SetIntMove(ad, 0, v);
+}
 ArrayData* EmptyMonotypeDict::Pop(Self* ad, Variant& ret) {
   ret = uninit_null();
   return ad;
@@ -1105,17 +1108,28 @@ ArrayData* MonotypeDict<Key>::RemoveStr(Self* mad, const StringData* k) {
   return mad->removeImpl(coerceKey<Key>(k));
 }
 
-template <typename Key>
-ArrayData* MonotypeDict<Key>::Append(Self* mad, TypedValue v) {
+template <typename Key> template <bool Move>
+ArrayData* MonotypeDict<Key>::appendImpl(TypedValue v) {
   auto nextKI = int64_t{0};
   if constexpr (std::is_same<Key, int64_t>::value) {
-    mad->forEachElm([&](auto i, auto elm) {
+    forEachElm([&](auto i, auto elm) {
       if (elm->key >= nextKI && nextKI >= 0) {
         nextKI = static_cast<uint64_t>(elm->key) + 1;
       }
     });
   }
-  return nextKI < 0 ? mad : SetInt(mad, nextKI, v);
+  if (nextKI < 0) return this;
+  return Move ? SetIntMove(this, nextKI, v) : SetInt(this, nextKI, v);
+}
+
+template <typename Key>
+ArrayData* MonotypeDict<Key>::Append(Self* mad, TypedValue v) {
+  return mad->appendImpl<false>(v);
+}
+
+template <typename Key>
+ArrayData* MonotypeDict<Key>::AppendMove(Self* mad, TypedValue v) {
+  return mad->appendImpl<true>(v);
 }
 
 template <typename Key>

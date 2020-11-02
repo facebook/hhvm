@@ -68,6 +68,7 @@ void logBespokeDispatch(const ArrayData* ad, const char* fn);
   X(ArrayData*, RemoveInt, T*, int64_t) \
   X(ArrayData*, RemoveStr, T*, const StringData*) \
   X(ArrayData*, Append, T*, TypedValue v) \
+  X(ArrayData*, AppendMove, T*, TypedValue v) \
   X(ArrayData*, Pop, T*, Variant&) \
   X(ArrayData*, ToDVArray, T*, bool copy) \
   X(ArrayData*, ToHackArr, T*, bool copy) \
@@ -192,6 +193,9 @@ struct LayoutFunctionDispatcher {
   }
   static ArrayData* Append(ArrayData* ad, TypedValue v) {
     return Array::Append(Cast(ad, __func__), v);
+  }
+  static ArrayData* AppendMove(ArrayData* ad, TypedValue v) {
+    return Array::AppendMove(Cast(ad, __func__), v);
   }
   static ArrayData* Pop(ArrayData* ad, Variant& v) {
     return Array::Pop(Cast(ad, __func__), v);

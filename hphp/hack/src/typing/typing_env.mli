@@ -25,7 +25,7 @@ val get_deps_mode : env -> Typing_deps_mode.t
 
 val get_ctx : env -> Provider_context.t
 
-val get_origin : env -> Decl_counters.origin option
+val get_tracing_info : env -> Decl_counters.tracing_info option
 
 val fresh_type : env -> Pos.t -> env * locl_ty
 

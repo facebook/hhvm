@@ -87,6 +87,11 @@ type subdecl_kind =
   | Deferred_init_members
 [@@deriving show { with_path = false }]
 
+type tracing_info = {
+  origin: origin;
+  file: Relative_path.t;
+}
+
 let subdecl_member_name (subdecl_kind : subdecl_kind) : string option =
   match subdecl_kind with
   | Get_ancestor s
@@ -196,8 +201,7 @@ let set_mode (new_mode : Typing_service_types.profile_decling) : unit =
   mode := new_mode
 
 let count_decl
-    ?(origin : origin option)
-    ?(file : Relative_path.t option)
+    ?(tracing_info : tracing_info option)
     (decl_kind : decl_kind)
     (decl_name : string)
     (f : decl option -> 'a) : 'a =
@@ -222,8 +226,8 @@ let count_decl
         decl_id;
         decl_name;
         decl_callstack;
-        decl_origin = origin;
-        decl_file = file;
+        decl_origin = Option.map tracing_info ~f:(fun ti -> ti.origin);
+        decl_file = Option.map tracing_info ~f:(fun ti -> ti.file);
         decl_start_time = start_time;
       }
     in
@@ -233,8 +237,8 @@ let count_decl
       ~cpu_duration:(Sys.time () -. start_cpu_time)
       ~decl_id
       ~decl_name
-      ~decl_origin:(Option.map origin ~f:show_origin)
-      ~decl_file:file
+      ~decl_origin:(Option.map decl.decl_origin ~f:show_origin)
+      ~decl_file:decl.decl_file
       ~decl_callstack
       ~decl_start_time:start_time
       ~subdecl_member_name:None

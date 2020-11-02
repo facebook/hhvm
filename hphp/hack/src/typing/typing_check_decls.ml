@@ -35,7 +35,11 @@ type env = {
 
 let get_ctx env = Env.get_ctx env.tenv
 
-let get_file env = Env.get_file env.tenv
+let get_tracing_info env =
+  {
+    Decl_counters.origin = Decl_counters.TopLevel;
+    file = Env.get_file env.tenv;
+  }
 
 let check_hint_wellkindedness env hint =
   let decl_ty = Decl_hint.hint env.decl_env hint in
@@ -149,8 +153,7 @@ and hint_ ~is_atom env p h_ =
     begin
       match
         Decl_provider.get_typedef
-          ~origin:Decl_counters.TopLevel
-          ~file:(get_file env)
+          ~tracing_info:(get_tracing_info env)
           (get_ctx env)
           x
       with

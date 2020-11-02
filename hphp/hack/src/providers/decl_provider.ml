@@ -46,11 +46,10 @@ module Cache =
     end)
 
 let get_class
-    ?(origin : Decl_counters.origin option)
-    ?(file : Relative_path.t option)
+    ?(tracing_info : Decl_counters.tracing_info option)
     (ctx : Provider_context.t)
     (class_name : class_key) : class_decl option =
-  Decl_counters.count_decl ?origin ?file Decl_counters.Class class_name
+  Decl_counters.count_decl ?tracing_info Decl_counters.Class class_name
   @@ fun counter ->
   (* There's a confusing matrix of possibilities:
   SHALLOW - in this case, the Typing_classes_heap.class_t we get back is
@@ -101,11 +100,10 @@ let get_class
       Some (counter, v))
 
 let get_fun
-    ?(origin : Decl_counters.origin option)
-    ?(file : Relative_path.t option)
+    ?(tracing_info : Decl_counters.tracing_info option)
     (ctx : Provider_context.t)
     (fun_name : fun_key) : fun_decl option =
-  Decl_counters.count_decl Decl_counters.Fun ?origin ?file fun_name
+  Decl_counters.count_decl Decl_counters.Fun ?tracing_info fun_name
   @@ fun _counter ->
   match Provider_context.get_backend ctx with
   | Provider_backend.Shared_memory ->
@@ -141,11 +139,10 @@ let get_fun
     Decl_service_client.rpc_get_fun decl fun_name
 
 let get_typedef
-    ?(origin : Decl_counters.origin option)
-    ?(file : Relative_path.t option)
+    ?(tracing_info : Decl_counters.tracing_info option)
     (ctx : Provider_context.t)
     (typedef_name : string) : typedef_decl option =
-  Decl_counters.count_decl Decl_counters.Typedef ?origin ?file typedef_name
+  Decl_counters.count_decl Decl_counters.Typedef ?tracing_info typedef_name
   @@ fun _counter ->
   match Provider_context.get_backend ctx with
   | Provider_backend.Shared_memory ->
@@ -185,11 +182,10 @@ let get_typedef
     Decl_service_client.rpc_get_typedef decl typedef_name
 
 let get_record_def
-    ?(origin : Decl_counters.origin option)
-    ?(file : Relative_path.t option)
+    ?(tracing_info : Decl_counters.tracing_info option)
     (ctx : Provider_context.t)
     (record_name : string) : record_def_decl option =
-  Decl_counters.count_decl Decl_counters.Record_def ?origin ?file record_name
+  Decl_counters.count_decl Decl_counters.Record_def ?tracing_info record_name
   @@ fun _counter ->
   match Provider_context.get_backend ctx with
   | Provider_backend.Shared_memory ->
@@ -229,11 +225,10 @@ let get_record_def
     Decl_service_client.rpc_get_record_def decl record_name
 
 let get_gconst
-    ?(origin : Decl_counters.origin option)
-    ?(file : Relative_path.t option)
+    ?(tracing_info : Decl_counters.tracing_info option)
     (ctx : Provider_context.t)
     (gconst_name : string) : gconst_decl option =
-  Decl_counters.count_decl Decl_counters.GConst ?origin ?file gconst_name
+  Decl_counters.count_decl Decl_counters.GConst ?tracing_info gconst_name
   @@ fun _counter ->
   match Provider_context.get_backend ctx with
   | Provider_backend.Shared_memory ->

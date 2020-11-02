@@ -584,7 +584,12 @@ let check_attributes c_pos c_name c_pu_enums attributes pu_context =
 
 let check_class env c =
   let (c_pos, c_name) = c.c_name in
-  let file = Pos.filename c_pos in
+  let tracing_info =
+    {
+      Decl_counters.origin = Decl_counters.NastCheck;
+      file = Pos.filename c_pos;
+    }
+  in
   (* trait check: only instances are allowed *)
   let () = check_if_trait c in
   (* Scan all direct parents (but interfaces) to collect PU info and
@@ -598,11 +603,7 @@ let check_class env c =
     let open Option in
     let res =
       get_parent_name_and_pos hint >>= fun (p, name) ->
-      Decl_provider.get_class
-        ~origin:Decl_counters.NastCheck
-        ~file
-        env.Nast_check_env.ctx
-        name
+      Decl_provider.get_class ~tracing_info env.Nast_check_env.ctx name
       >>| fun parent ->
       let pu_enums = Cls.pu_enums parent in
       List.fold

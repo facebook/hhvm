@@ -14,7 +14,7 @@ module Cls = Decl_provider.Class
 
 type tgenv = {
   ctx: Provider_context.t;
-  file: Relative_path.t;
+  tracing_info: Decl_counters.tracing_info;
 }
 
 let strip_ns = Utils.strip_ns
@@ -32,11 +32,7 @@ let is_trait_kind (k : Ast_defs.class_kind) : bool =
 
 let is_trait_name tgenv (type_name : string) : bool =
   let decl =
-    Decl_provider.get_class
-      ~origin:Decl_counters.NastCheck
-      ~file:tgenv.file
-      tgenv.ctx
-      type_name
+    Decl_provider.get_class ~tracing_info:tgenv.tracing_info tgenv.ctx type_name
   in
   match decl with
   | Some decl -> is_trait_kind (Cls.kind decl)
@@ -44,11 +40,7 @@ let is_trait_name tgenv (type_name : string) : bool =
 
 let is_class_name tgenv (type_name : string) : bool =
   let decl =
-    Decl_provider.get_class
-      ~origin:Decl_counters.NastCheck
-      ~file:tgenv.file
-      tgenv.ctx
-      type_name
+    Decl_provider.get_class ~tracing_info:tgenv.tracing_info tgenv.ctx type_name
   in
   match decl with
   | Some decl -> is_class_kind (Cls.kind decl)
@@ -58,11 +50,7 @@ let is_class_name tgenv (type_name : string) : bool =
    [type_name]. This is the flattened inheritance tree. *)
 let all_ancestor_names tgenv (type_name : string) : string list =
   let decl =
-    Decl_provider.get_class
-      ~origin:Decl_counters.NastCheck
-      ~file:tgenv.file
-      tgenv.ctx
-      type_name
+    Decl_provider.get_class ~tracing_info:tgenv.tracing_info tgenv.ctx type_name
   in
   match decl with
   | Some decl -> Decl_provider.Class.all_ancestor_names decl
@@ -72,11 +60,7 @@ let all_ancestor_names tgenv (type_name : string) : string list =
    usage. *)
 let type_uses_trait tgenv (type_name : string) (trait_name : string) : bool =
   let decl =
-    Decl_provider.get_class
-      ~origin:Decl_counters.NastCheck
-      ~file:tgenv.file
-      tgenv.ctx
-      type_name
+    Decl_provider.get_class ~tracing_info:tgenv.tracing_info tgenv.ctx type_name
   in
   match decl with
   | Some decl -> Cls.has_ancestor decl trait_name
@@ -85,11 +69,7 @@ let type_uses_trait tgenv (type_name : string) (trait_name : string) : bool =
 (* Return the position where class/trait [type_name] is defined. *)
 let classish_def_pos tgenv type_name : Pos.t =
   let decl =
-    Decl_provider.get_class
-      ~origin:Decl_counters.NastCheck
-      ~file:tgenv.file
-      tgenv.ctx
-      type_name
+    Decl_provider.get_class ~tracing_info:tgenv.tracing_info tgenv.ctx type_name
   in
   match decl with
   | Some decl -> Cls.pos decl
@@ -134,11 +114,7 @@ let find_using_class tgenv cls_name (trait_name : string) : string =
    [trait_name], directly or via another trait. *)
 let trait_use_pos tgenv (type_name : string) (trait_name : string) : Pos.t =
   let decl =
-    Decl_provider.get_class
-      ~origin:Decl_counters.NastCheck
-      ~file:tgenv.file
-      tgenv.ctx
-      type_name
+    Decl_provider.get_class ~tracing_info:tgenv.tracing_info tgenv.ctx type_name
   in
   match decl with
   | Some decl ->
@@ -153,11 +129,7 @@ let trait_use_pos tgenv (type_name : string) (trait_name : string) : Pos.t =
 let final_methods tgenv (type_name : string) :
     (string * Typing_defs.class_elt) list =
   let decl =
-    Decl_provider.get_class
-      ~origin:Decl_counters.NastCheck
-      ~file:tgenv.file
-      tgenv.ctx
-      type_name
+    Decl_provider.get_class ~tracing_info:tgenv.tracing_info tgenv.ctx type_name
   in
   match decl with
   | Some decl ->
@@ -305,7 +277,14 @@ let handler =
 
     method! at_class_ env c =
       let tgenv =
-        { ctx = env.Nast_check_env.ctx; file = fst c.c_name |> Pos.filename }
+        {
+          ctx = env.Nast_check_env.ctx;
+          tracing_info =
+            {
+              Decl_counters.origin = Decl_counters.NastCheck;
+              file = fst c.c_name |> Pos.filename;
+            };
+        }
       in
       let cls_name = snd c.c_name in
 

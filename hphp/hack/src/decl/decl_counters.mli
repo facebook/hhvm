@@ -86,6 +86,11 @@ type subdecl_kind =
   (* Misc *)
   | Deferred_init_members
 
+type tracing_info = {
+  origin: origin;
+  file: Relative_path.t;
+}
+
 (** E.g. 'count_decl Class "Foo" (fun d -> <implementation>)'. The idea is that
 <implementation> is the body of work which fetches the decl of class "foo",
 and we want to record telemetry about its performance. This function will
@@ -100,12 +105,7 @@ back to the original count_decl which fetched the class Foo in the first place.
 that no telemetry should be collected during this run, and we want to avoid
 re-establishing this fact during the call to count_subdecl. *)
 val count_decl :
-  ?origin:origin ->
-  ?file:Relative_path.t ->
-  decl_kind ->
-  string ->
-  (decl option -> 'a) ->
-  'a
+  ?tracing_info:tracing_info -> decl_kind -> string -> (decl option -> 'a) -> 'a
 
 (** E.g. 'count_subdecl d (Get_method "bar") (fun () -> <implementation2>)'. The idea
 is that <implementation2> is the body of work which fetches the decl of method 'bar'

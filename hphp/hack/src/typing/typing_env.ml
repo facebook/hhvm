@@ -44,7 +44,7 @@ let get_ctx env = env.decl_env.Decl_env.ctx
 
 let get_file env = env.genv.file
 
-let get_origin env = env.origin
+let get_tracing_info env = env.tracing_info
 
 let set_log_level env key log_level =
   { env with log_levels = SMap.add key log_level env.log_levels }
@@ -572,7 +572,8 @@ let empty ?origin ?(mode = FileInfo.Mstrict) ctx file ~droot =
     in_case = false;
     inside_constructor = false;
     decl_env = { mode; droot; ctx };
-    origin;
+    tracing_info =
+      Option.map origin ~f:(fun origin -> { Decl_counters.origin; file });
     genv =
       {
         tcopt = Provider_context.get_tcopt ctx;
@@ -664,8 +665,7 @@ let get_typedef env x =
     "type"
     x
     (Decl_provider.get_typedef
-       ?origin:(get_origin env)
-       ~file:(get_file env)
+       ?tracing_info:(get_tracing_info env)
        (get_ctx env)
        x)
 
@@ -680,8 +680,7 @@ let get_class (env : env) (name : string) : Cls.t option =
     "class"
     name
     (Decl_provider.get_class
-       ?origin:(get_origin env)
-       ~file:(get_file env)
+       ?tracing_info:(get_tracing_info env)
        (get_ctx env)
        name)
 
@@ -696,11 +695,7 @@ let get_fun env x =
   print_size
     "fun"
     x
-    (Decl_provider.get_fun
-       ?origin:(get_origin env)
-       ~file:(get_file env)
-       (get_ctx env)
-       x)
+    (Decl_provider.get_fun ?tracing_info:(get_tracing_info env) (get_ctx env) x)
 
 let get_enum_constraint env x =
   match get_class env x with
@@ -718,11 +713,7 @@ let get_env_mutability env = env.lenv.local_mutability
 let get_enum env x =
   make_depend_on_class env x;
   match
-    Decl_provider.get_class
-      ?origin:(get_origin env)
-      ~file:(get_file env)
-      (get_ctx env)
-      x
+    Decl_provider.get_class ?tracing_info:(get_tracing_info env) (get_ctx env) x
   with
   | Some tc when Option.is_some (Cls.enum_type tc) -> Some tc
   | _ -> None
@@ -767,8 +758,7 @@ let get_gconst env cst_name =
   Option.iter env.decl_env.droot (fun root ->
       Typing_deps.add_idep (get_deps_mode env) root dep);
   Decl_provider.get_gconst
-    ?origin:(get_origin env)
-    ~file:(get_file env)
+    ?tracing_info:(get_tracing_info env)
     (get_ctx env)
     cst_name
 
@@ -906,17 +896,19 @@ let with_env env f =
   (env, result)
 
 let with_origin env origin f =
-  let old_origin = env.origin in
-  let env = { env with origin = Some origin } in
+  let ti1 = env.tracing_info in
+  let ti2 = Option.map ti1 ~f:(fun ti -> { ti with Decl_counters.origin }) in
+  let env = { env with tracing_info = ti2 } in
   let (env, result) = f env in
-  let env = { env with origin = old_origin } in
+  let env = { env with tracing_info = ti1 } in
   (env, result)
 
 let with_origin2 env origin f =
-  let old_origin = env.origin in
-  let env = { env with origin = Some origin } in
+  let ti1 = env.tracing_info in
+  let ti2 = Option.map ti1 ~f:(fun ti -> { ti with Decl_counters.origin }) in
+  let env = { env with tracing_info = ti2 } in
   let (env, r1, r2) = f env in
-  let env = { env with origin = old_origin } in
+  let env = { env with tracing_info = ti1 } in
   (env, r1, r2)
 
 let is_static env = env.genv.static

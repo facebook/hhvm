@@ -108,6 +108,12 @@ let check_redundant_generics_class env class_name class_type =
   |> List.filter ~f:(fun (_, meth) -> String.equal meth.ce_origin class_name)
   |> List.iter ~f:(check_redundant_generics_class_method env root tpenv)
 
+let get_tracing_info env =
+  {
+    Decl_counters.origin = Decl_counters.TastCheck;
+    file = Tast_env.get_file env;
+  }
+
 let make_handler ctx =
   let handler =
     object
@@ -117,8 +123,7 @@ let make_handler ctx =
         let fid = snd f.f_name in
         match
           Decl_provider.get_fun
-            ~origin:Decl_counters.TastCheck
-            ~file:(Tast_env.get_file env)
+            ~tracing_info:(get_tracing_info env)
             ctx
             (snd f.f_name)
         with
@@ -135,11 +140,7 @@ let make_handler ctx =
       method! at_class_ env c =
         let cid = snd c.c_name in
         match
-          Decl_provider.get_class
-            ~origin:Decl_counters.TastCheck
-            ~file:(Tast_env.get_file env)
-            ctx
-            cid
+          Decl_provider.get_class ~tracing_info:(get_tracing_info env) ctx cid
         with
         | None -> ()
         | Some cls -> check_redundant_generics_class env (snd c.c_name) cls

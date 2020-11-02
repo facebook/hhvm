@@ -2258,7 +2258,9 @@ void implDictKeysetIdx(IRGS& env,
                        bool is_dict,
                        SSATmp* loaded_collection_dict) {
   auto const def = topC(env, BCSPRelOffset{0});
-  auto const key = convertClassKey(env, topC(env, BCSPRelOffset{1}));
+  auto const origKey = topC(env, BCSPRelOffset{1});
+  if (!origKey->type().isKnownDataType()) PUNT(Idx-KeyNotKnown);
+  auto const key = convertClassKey(env, origKey);
   auto const stack_base = topC(env, BCSPRelOffset{2});
 
   auto const finish = [&](SSATmp* elem) {
@@ -2470,7 +2472,9 @@ void emitIdx(IRGS& env) {
 
 void emitAKExists(IRGS& env) {
   auto const arr = popC(env);
-  auto key = convertClassKey(env, popC(env));
+  auto const origKey = popC(env);
+  if (!origKey->type().isKnownDataType()) PUNT(AKExists-KeyNotKnown);
+  auto const key = convertClassKey(env, origKey);
   if (key->isA(TFunc)) PUNT(AKExists_func_key);
   if (!arr->type().subtypeOfAny(TKeyset, TVec, TVArr, TDict, TDArr, TObj)) {
     PUNT(AKExists_unknown_array_or_obj_type);

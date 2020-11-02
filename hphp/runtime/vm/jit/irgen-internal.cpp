@@ -56,6 +56,7 @@ SSATmp* convertClassKey(IRGS& env, SSATmp* key) {
     }
     return gen(env, LdLazyClsName, key);
   }
+  assertx(!key->type().maybe(TCls | TLazyCls));
   return key;
 }
 

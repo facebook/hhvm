@@ -339,11 +339,7 @@ static void HHVM_METHOD(
 static void
 HHVM_METHOD(AsyncMysqlConnectionOptions, setSniServerName, const String& sniServername) {
   auto* data = Native::data<AsyncMysqlConnectionOptions>(this_);
-  // #ifdef FACEBOOK until Open Source squangle pin is updated - needed as of
-  // Squangle 2020-10-21
-  #ifdef FACEBOOK
   data->m_conn_opts.setSniServerName(static_cast<std::string>(sniServername));
-  #endif
 }
 
 static int64_t getQueryTimeout(int64_t timeout_micros) {
@@ -436,11 +432,7 @@ Object HHVM_STATIC_METHOD(
   }
   // If ssl sni name is not empty, set it
   if (!sni_server_name.empty()) {
-    // #ifdef FACEBOOK until Open Source squangle pin is updated - needed as of
-    // Squangle 2020-10-21
-    #ifdef FACEBOOK
     op->setSniServerName(static_cast<std::string>(sni_server_name));
-    #endif
   }
 
   return newAsyncMysqlConnectEvent(std::move(op), getClient());

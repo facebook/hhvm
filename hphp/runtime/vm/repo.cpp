@@ -257,6 +257,11 @@ void Repo::loadGlobalData(bool readGlobalTables /* = true */) {
     RuntimeOption::PHP7_Substr              = s_globalData.PHP7_Substr;
     RuntimeOption::EvalCheckPropTypeHints   = s_globalData.CheckPropTypeHints;
     RuntimeOption::EvalHackArrDVArrs        = s_globalData.HackArrDVArrs;
+
+    // arrprov is only for dvarrays. It should be off if HADVAs is on.
+    always_assert(IMPLIES(RO::EvalHackArrDVArrs, !RO::EvalArrayProvenance));
+    always_assert(IMPLIES(RO::EvalHackArrDVArrs, !RO::EvalLogArrayProvenance));
+
     /*
      * We only should enable array provenance at runtime if it was enabled in
      * the repo AND we have logging enabled--otherwise it's pointless to do the

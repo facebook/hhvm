@@ -2816,6 +2816,12 @@ void RuntimeOption::Load(
 
   if (TraceFunctions.size()) Trace::ensureInit(getTraceOutputFile());
 
+  // arrprov is only for dvarrays. It should be off if HADVAs is on.
+  if (RO::EvalHackArrDVArrs) {
+    RO::EvalArrayProvenance = false;
+    RO::EvalLogArrayProvenance = false;
+  }
+
   // Bespoke array-likes
 
   // We don't support provenance for bespoke array-likes, so don't construct

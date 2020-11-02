@@ -389,6 +389,7 @@ void reassignTag(ArrayData* ad) {
 }
 
 ArrayData* tagStaticArr(ArrayData* ad, Tag tag /* = {} */) {
+  assertx(!RO::EvalHackArrDVArrs);
   assertx(RO::EvalArrayProvenance);
   assertx(ad->isStatic());
   assertx(arrayWantsTag(ad));

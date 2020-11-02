@@ -275,6 +275,12 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
 
   // Temporary, during file-cache migration.
   Config::Bind(FileCache::UseNewCache, ini, config, "UseNewCache", false);
+
+  // arrprov is only for dvarrays. It should be off if HADVAs is on.
+  if (RO::EvalHackArrDVArrs) {
+    RO::EvalArrayProvenance = false;
+    RO::EvalLogArrayProvenance = false;
+  }
 }
 
 void Option::Load() {

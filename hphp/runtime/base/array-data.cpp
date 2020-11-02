@@ -976,6 +976,7 @@ namespace arrprov_detail {
 
 template<typename SrcArr>
 ArrayData* tagArrProvImpl(ArrayData* ad, const SrcArr* src) {
+  assertx(!RuntimeOption::EvalHackArrDVArrs);
   assertx(RuntimeOption::EvalArrayProvenance);
   assertx(ad->hasExactlyOneRef() || !ad->isRefCounted());
 

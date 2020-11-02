@@ -56,10 +56,12 @@
     typing_coeffects
     typing_coercion
     typing_cont_key
+    typing_const_reifiable
     typing_continuations
     typing_deferred_members
     typing_dependent_type
     typing_enforceability
+    typing_enforceable_hint
     typing_enum
     typing_env
     typing_env_from_def
@@ -86,6 +88,7 @@
     typing_pocket_universes
     typing_print
     typing_reactivity
+    typing_reified_check
     typing_solver
     typing_solver_utils
     typing_special_fun

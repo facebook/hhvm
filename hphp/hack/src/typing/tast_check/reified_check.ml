@@ -11,66 +11,13 @@ open Hh_prelude
 open Aast
 open Typing_defs
 open Type_validator
+open Typing_reified_check (* validator *)
+
 module Env = Tast_env
 module SN = Naming_special_names
 module UA = SN.UserAttributes
 module Cls = Decl_provider.Class
 module Nast = Aast
-
-let validator =
-  object (this)
-    inherit type_validator as super
-
-    method! on_tapply acc r (p, h) tyl =
-      if String.equal h SN.Classes.cTypename then
-        this#invalid acc r "a typename"
-      else if String.equal h SN.Classes.cClassname then
-        this#invalid acc r "a classname"
-      else if
-        String.equal h SN.Typehints.wildcard
-        && not (Env.get_allow_wildcards acc.env)
-      then
-        this#invalid acc r "a wildcard"
-      else
-        super#on_tapply acc r (p, h) tyl
-
-    method! on_tgeneric acc r t _tyargs =
-      (* Ignoring type aguments: If there were any, then this generic variable isn't allowed to be
-        reified anyway *)
-      (* TODO(T70069116) actually implement that check *)
-      match Env.get_reified acc.env t with
-      | Nast.Erased -> this#invalid acc r "not reified"
-      | Nast.SoftReified -> this#invalid acc r "soft reified"
-      | Nast.Reified -> acc
-
-    method! on_tarray acc r _ _ = this#invalid acc r "an array type"
-
-    method! on_tvarray_or_darray acc r _ _ = this#invalid acc r "an array type"
-
-    method! on_tfun acc r _ = this#invalid acc r "a function type"
-
-    method! on_typeconst acc is_concrete typeconst =
-      match typeconst.ttc_abstract with
-      | _ when Option.is_some typeconst.ttc_reifiable || is_concrete ->
-        super#on_typeconst acc is_concrete typeconst
-      | _ ->
-        let r = Reason.Rwitness (fst typeconst.ttc_name) in
-        let kind =
-          "an abstract type constant without the __Reifiable attribute"
-        in
-        this#invalid acc r kind
-
-    method! on_taccess acc r (root, ids) =
-      let acc =
-        match acc.reification with
-        | Unresolved -> this#on_type acc root
-        | Resolved -> acc
-      in
-      super#on_taccess acc r (root, ids)
-
-    method! on_tthis acc r =
-      this#invalid acc r "the late static bound this type"
-  end
 
 let is_reified tparam = not (equal_reify_kind tparam.tp_reified Erased)
 
@@ -139,7 +86,7 @@ let verify_targ_valid env reification tparam targ =
     | Nast.Erased -> () );
 
   if Attributes.mem UA.uaEnforceable tparam.tp_user_attributes then
-    Enforceable_hint_check.validator#validate_hint
+    Typing_enforceable_hint.validator#validate_hint
       env
       (snd targ)
       (Errors.invalid_enforceable_type "parameter" tparam.tp_name);

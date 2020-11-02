@@ -12,25 +12,7 @@ open Aast
 open Typing_defs
 module Cls = Decl_provider.Class
 module Env = Tast_env
-
-let check_reifiable env tc attr_pos =
-  let check_impl kind ty_opt =
-    match ty_opt with
-    | Some ty ->
-      let emit_err = Errors.reifiable_attr attr_pos kind in
-      Reified_check.validator#validate_type
-        env
-        (fst tc.ttc_name)
-        ty
-        ~reification:Type_validator.Unresolved
-        emit_err
-    | None -> ()
-  in
-  check_impl "type" tc.ttc_type;
-  check_impl "constraint" tc.ttc_constraint;
-  match tc.ttc_abstract with
-  | TCAbstract default_ty -> check_impl "type" default_ty
-  | _ -> ()
+open Typing_const_reifiable
 
 let handler =
   object
@@ -64,7 +46,7 @@ let handler =
                 | ((TCPartiallyAbstract | TCConcrete), Some ty) ->
                   if snd tc.ttc_enforceable then
                     let pos = fst tc.ttc_enforceable in
-                    Enforceable_hint_check.validator#validate_type
+                    Typing_enforceable_hint.validator#validate_type
                       env
                       (fst tc.ttc_name)
                       ty

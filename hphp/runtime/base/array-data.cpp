@@ -1016,6 +1016,10 @@ ArrayData* ArrayData::toPHPArrayIntishCast(bool copy) {
   });
   if (!intish) return base;
 
+  if (RO::EvalHackArrCompatIntishCastNotices) {
+    raise_hackarr_compat_notice("triggered IntishCast for toPHPArray");
+  }
+
   // Create a new, plain PHP array with the casted keys.
   auto result = MixedArrayInit(base->size());
   IterateKVNoInc(base, [&](TypedValue k, TypedValue v) {
@@ -1041,7 +1045,7 @@ ArrayData* ArrayData::toPHPArrayIntishCast(bool copy) {
 bool ArrayData::intishCastKey(const StringData* key, int64_t& i) const {
   if (key->isStrictlyInteger(i)) {
     if (RO::EvalHackArrCompatIntishCastNotices) {
-      raise_hackarr_compat_notice("triggered array-based IntishCast");
+      raise_hackarr_compat_notice("triggered IntishCast for set");
     }
     return true;
   }

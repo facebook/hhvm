@@ -99,7 +99,6 @@ const DEFAULT: GlobalOptions<'_> = GlobalOptions {
     symbol_write_ignore_paths: &[],
     symbol_write_index_paths: &[],
     symbol_write_include_hhi: true,
-    po_enable_first_class_function_pointers: true,
     po_enable_enum_classes: false,
     po_disable_modes: false,
     po_disable_hh_ignore_error: false,

@@ -251,8 +251,6 @@ type t = {
   po_disable_xhp_element_mangling: bool;
   (* Disable `children (foo|bar+|pcdata)` declarations as they can be implemented without special syntax *)
   po_disable_xhp_children_declarations: bool;
-  (* Enables the special first class function pointer syntax foo<> *)
-  po_enable_first_class_function_pointers: bool;
   (* Enable enum class syntax *)
   po_enable_enum_classes: bool;
   (* Treats partial files as strict *)
@@ -374,7 +372,6 @@ val make :
   ?po_enable_xhp_class_modifier:bool ->
   ?po_disable_xhp_element_mangling:bool ->
   ?po_disable_xhp_children_declarations:bool ->
-  ?po_enable_first_class_function_pointers:bool ->
   ?po_enable_enum_classes:bool ->
   ?po_disable_modes:bool ->
   ?po_disable_hh_ignore_error:bool ->
@@ -608,8 +605,6 @@ val po_enable_xhp_class_modifier : t -> bool
 val po_disable_xhp_element_mangling : t -> bool
 
 val po_disable_xhp_children_declarations : t -> bool
-
-val po_enable_first_class_function_pointers : t -> bool
 
 val po_enable_enum_classes : t -> bool
 

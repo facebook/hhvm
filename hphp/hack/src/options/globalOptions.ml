@@ -101,7 +101,6 @@ type t = {
   po_enable_xhp_class_modifier: bool;
   po_disable_xhp_element_mangling: bool;
   po_disable_xhp_children_declarations: bool;
-  po_enable_first_class_function_pointers: bool;
   po_enable_enum_classes: bool;
   po_disable_modes: bool;
   po_disable_hh_ignore_error: bool;
@@ -289,7 +288,6 @@ let default =
     po_enable_xhp_class_modifier = true;
     po_disable_xhp_element_mangling = true;
     po_disable_xhp_children_declarations = true;
-    po_enable_first_class_function_pointers = true;
     po_enable_enum_classes = false;
     po_disable_modes = false;
     po_disable_hh_ignore_error = false;
@@ -414,8 +412,6 @@ let make
     ?(po_disable_xhp_element_mangling = default.po_disable_xhp_element_mangling)
     ?(po_disable_xhp_children_declarations =
       default.po_disable_xhp_children_declarations)
-    ?(po_enable_first_class_function_pointers =
-      default.po_enable_first_class_function_pointers)
     ?(po_enable_enum_classes = default.po_enable_enum_classes)
     ?(po_disable_modes = default.po_disable_modes)
     ?(po_disable_hh_ignore_error = default.po_disable_hh_ignore_error)
@@ -525,7 +521,6 @@ let make
     po_enable_xhp_class_modifier;
     po_disable_xhp_element_mangling;
     po_disable_xhp_children_declarations;
-    po_enable_first_class_function_pointers;
     po_enable_enum_classes;
     po_disable_modes;
     po_disable_hh_ignore_error;
@@ -745,9 +740,6 @@ let po_disable_xhp_element_mangling t = t.po_disable_xhp_element_mangling
 
 let po_disable_xhp_children_declarations t =
   t.po_disable_xhp_children_declarations
-
-let po_enable_first_class_function_pointers t =
-  t.po_enable_first_class_function_pointers
 
 let po_enable_enum_classes t = t.po_enable_enum_classes
 

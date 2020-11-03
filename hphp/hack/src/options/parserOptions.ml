@@ -115,12 +115,6 @@ let enable_xhp_class_modifier = GlobalOptions.po_enable_xhp_class_modifier
 let with_enable_xhp_class_modifier po b =
   { po with GlobalOptions.po_enable_xhp_class_modifier = b }
 
-let enable_first_class_function_pointers =
-  GlobalOptions.po_enable_first_class_function_pointers
-
-let with_enable_first_class_function_pointers po b =
-  { po with GlobalOptions.po_enable_first_class_function_pointers = b }
-
 let enable_enum_classes = GlobalOptions.po_enable_enum_classes
 
 let with_enable_enum_classes po b =
@@ -160,7 +154,6 @@ let make
     ~disable_xhp_element_mangling
     ~allow_unstable_features
     ~disable_xhp_children_declarations
-    ~enable_first_class_function_pointers
     ~enable_enum_classes
     ~disable_modes
     ~disable_hh_ignore_error
@@ -190,8 +183,6 @@ let make
       po_disable_xhp_element_mangling = disable_xhp_element_mangling;
       po_allow_unstable_features = allow_unstable_features;
       po_disable_xhp_children_declarations = disable_xhp_children_declarations;
-      po_enable_first_class_function_pointers =
-        enable_first_class_function_pointers;
       po_enable_enum_classes = enable_enum_classes;
       po_disable_modes = disable_modes;
       po_disable_hh_ignore_error = disable_hh_ignore_error;
@@ -203,7 +194,6 @@ let make
 (* Changes here need to be synchronized with rust_parser_errors_ffi.rs *)
 type ffi_t =
   bool
-  * bool
   * bool
   * bool
   * bool
@@ -238,7 +228,6 @@ let to_rust_ffi_t po ~hhvm_compat_mode ~hhi_mode ~codegen =
     enable_xhp_class_modifier po,
     disable_xhp_element_mangling po,
     disable_xhp_children_declarations po,
-    enable_first_class_function_pointers po,
     enable_enum_classes po,
     disable_modes po,
     disable_array po,

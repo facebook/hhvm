@@ -425,8 +425,6 @@ let load ~silent config_filename options : t * ServerLocalConfig.t =
         (bool_opt "enable_xhp_class_modifier" config)
       ?po_disable_modes:(bool_opt "disable_modes" config)
       ?po_disable_hh_ignore_error:(bool_opt "disable_hh_ignore_error" config)
-      ?po_enable_first_class_function_pointers:
-        (bool_opt "enable_first_class_function_pointers" config)
       ?tco_method_call_inference:(bool_opt "method_call_inference" config)
       ?tco_report_pos_from_reason:(bool_opt "report_pos_from_reason" config)
       ?tco_typecheck_sample_rate:(float_opt "typecheck_sample_rate" config)

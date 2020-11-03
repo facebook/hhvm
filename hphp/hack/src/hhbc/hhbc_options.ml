@@ -54,7 +54,6 @@ type t = {
   option_disable_xhp_element_mangling: bool;
   option_disable_xhp_children_declarations: bool;
   option_enable_xhp_class_modifier: bool;
-  option_enable_first_class_function_pointers: bool;
   option_disable_array: bool;
   option_disable_array_typehint: bool;
   option_allow_unstable_features: bool;
@@ -109,7 +108,6 @@ let default =
     option_disable_xhp_element_mangling = false;
     option_disable_xhp_children_declarations = false;
     option_enable_xhp_class_modifier = false;
-    option_enable_first_class_function_pointers = true;
     option_disable_array = false;
     option_disable_array_typehint = false;
     option_allow_unstable_features = false;
@@ -203,9 +201,6 @@ let disable_xhp_children_declarations o =
 let enable_xhp_class_modifier o = o.option_enable_xhp_class_modifier
 
 let check_int_overflow o = o.option_check_int_overflow > 0
-
-let enable_first_class_function_pointers o =
-  o.option_enable_first_class_function_pointers
 
 let disable_array o = o.option_disable_array
 
@@ -392,11 +387,6 @@ let set_option options name value =
     { options with option_disable_xhp_element_mangling = as_bool value }
   | "hhvm.hack.lang.check_int_overflow" ->
     { options with option_check_int_overflow = int_of_string value }
-  | "hhvm.hack.lang.enable_first_class_function_pointers" ->
-    {
-      options with
-      option_enable_first_class_function_pointers = int_of_string value > 0;
-    }
   | "hhvm.hack.lang.disable_array" ->
     { options with option_disable_array = as_bool value }
   | "hhvm.hack.lang.disable_array_typehint" ->
@@ -599,11 +589,6 @@ let value_setters =
       { opts with option_disallow_func_ptrs_in_constants = v = 1 } );
     ( set_value "hhvm.hack.lang.check_int_overflow" get_value_from_config_int
     @@ fun opts v -> { opts with option_check_int_overflow = v } );
-    ( set_value
-        "hhvm.hack.lang.enable_first_class_function_pointers"
-        get_value_from_config_int
-    @@ fun opts v ->
-      { opts with option_enable_first_class_function_pointers = v = 1 } );
     ( set_value "hhvm.hack.lang.disable_array" get_value_from_config_int
     @@ fun opts v -> { opts with option_disable_array = v = 1 } );
     ( set_value "hhvm.hack.lang.disable_array_typehint" get_value_from_config_int

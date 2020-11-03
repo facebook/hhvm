@@ -100,7 +100,6 @@ struct RepoOptions {
   H(bool,           DisableArray,                     true)           \
   H(bool,           DisableArrayCast,                 true)           \
   H(bool,           DisableArrayTypehint,             true)           \
-  H(bool,           EnableFirstClassFunctionPointers, true)           \
   H(bool,           EnableEnumClasses,                false)          \
   /**/
 
@@ -586,7 +585,6 @@ struct RuntimeOption {
   static std::string EvalJitSerdesFile;
   static std::string ProfDataTag;
   static bool DumpPreciseProfData;
-  static bool EnableFirstClassFunctionPointers;
 
   // ENABLED (1) selects PHP7 behavior.
   static bool PHP7_NoHexNumerics;

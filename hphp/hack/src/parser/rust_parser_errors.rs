@@ -5191,21 +5191,6 @@ where
         }
     }
 
-    fn disabled_function_pointer_expression_error(&mut self, node: S<'a, Token, Value>) {
-        if let FunctionPointerExpression(_) = &node.children {
-            if !self
-                .env
-                .parser_options
-                .po_enable_first_class_function_pointers
-            {
-                self.errors.push(Self::make_error_from_node(
-                    node,
-                    errors::function_pointers_disabled,
-                ))
-            }
-        }
-    }
-
     fn check_qualified_name(&mut self, node: S<'a, Token, Value>) {
         // The last segment in a qualified name should not have a trailing backslash
         // i.e. `Foospace\Bar\` except as the prefix of a GroupUseClause
@@ -5458,7 +5443,6 @@ where
             XHPClassAttribute(x) => self.check_constant_expression(&x.initializer),
             OldAttributeSpecification(_) => self.disabled_legacy_attribute_syntax_errors(node),
             SoftTypeSpecifier(_) => self.disabled_legacy_soft_typehint_errors(node),
-            FunctionPointerExpression(_) => self.disabled_function_pointer_expression_error(node),
             QualifiedName(_) => self.check_qualified_name(node),
             UnsetStatement(_) => self.unset_errors(node),
             _ => {}

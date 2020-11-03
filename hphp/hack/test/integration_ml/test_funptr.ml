@@ -134,7 +134,7 @@ let identify_tests =
 let test () =
   let root = "/" in
   let hhconfig_filename = Filename.concat root ".hhconfig" in
-  let hhconfig_contents = "enable_first_class_function_pointers=true" in
+  let hhconfig_contents = "" in
   let files = [("source.php", source)] in
 
   Relative_path.set_path_prefix Relative_path.Root (Path.make root);

@@ -271,7 +271,6 @@ prefixed_flags!(
     DISALLOW_HASH_COMMENTS,
     ENABLE_CLASS_LEVEL_WHERE_CLAUSES,
     ENABLE_COROUTINES,
-    ENABLE_FIRST_CLASS_FUNCTION_POINTERS,
     ENABLE_ENUM_CLASSES,
     ENABLE_XHP_CLASS_MODIFIER,
     DISABLE_ARRAY_CAST,
@@ -281,9 +280,7 @@ prefixed_flags!(
 );
 impl Default for LangFlags {
     fn default() -> LangFlags {
-        LangFlags::ENABLE_COROUTINES
-            | LangFlags::DISABLE_LEGACY_SOFT_TYPEHINTS
-            | LangFlags::ENABLE_FIRST_CLASS_FUNCTION_POINTERS
+        LangFlags::ENABLE_COROUTINES | LangFlags::DISABLE_LEGACY_SOFT_TYPEHINTS
     }
 }
 
@@ -753,9 +750,6 @@ mod tests {
   "hhvm.hack.lang.enable_enum_classes": {
     "global_value": false
   },
-  "hhvm.hack.lang.enable_first_class_function_pointers": {
-    "global_value": true
-  },
   "hhvm.hack.lang.enable_xhp_class_modifier": {
     "global_value": false
   },
@@ -1188,7 +1182,7 @@ bitflags! {
         // No longer using bit 44.
         const CONST_DEFAULT_LAMBDA_ARGS = 1 << 45;
         const ENABLE_XHP_CLASS_MODIFIER = 1 << 46;
-        const ENABLE_FIRST_CLASS_FUNCTION_POINTERS = 1 << 47;
+        // No longer using bit 47.
         const ENABLE_ENUM_CLASSES = 1 << 48;
         const DISABLE_XHP_ELEMENT_MANGLING = 1 << 49;
         const DISABLE_ARRAY = 1 << 50;

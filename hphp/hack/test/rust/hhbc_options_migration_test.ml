@@ -115,9 +115,6 @@ let assert_opts_equal caml rust =
     Hhbc_options.(check_int_overflow caml)
     Hhbc_options.(check_int_overflow rust);
   assert_equal
-    Hhbc_options.(enable_first_class_function_pointers caml)
-    Hhbc_options.(enable_first_class_function_pointers rust);
-  assert_equal
     Hhbc_options.(disable_xhp_element_mangling caml)
     Hhbc_options.(disable_xhp_element_mangling rust);
   assert_equal
@@ -353,9 +350,6 @@ let test_all_overrides_json_only _ =
   \"hhvm.hack.lang.enable_coroutines\": {
     \"global_value\": false
   },
-  \"hhvm.hack.lang.enable_first_class_function_pointers\": {
-    \"global_value\": true
-  },
   \"hhvm.hack.lang.enable_xhp_class_modifier\": {
     \"global_value\": true
   },
@@ -477,9 +471,6 @@ module CliArgOverrides = struct
 
   let hhvm'hack'lang'enable_coroutines = "-vhack.lang.enablecoroutines=false"
 
-  let hhvm'hack'lang'enable_first_class_function_pointers =
-    "-vhhvm.hack.lang.enable_first_class_function_pointers=2"
-
   let hhvm'hack'lang'enable_xhp_class_modifier =
     "-vhhvm.hack.lang.enable_xhp_class_modifier=true"
 
@@ -545,7 +536,6 @@ let test_all_overrides_cli_only _ =
       hhvm'hack'lang'disallow_func_ptrs_in_constants;
       hhvm'hack'lang'enable_class_level_where_clauses;
       hhvm'hack'lang'enable_coroutines;
-      hhvm'hack'lang'enable_first_class_function_pointers;
       hhvm'hack'lang'enable_xhp_class_modifier;
       hhvm'hack'lang'phpism'disable_nontoplevel_declarations;
       hhvm'hack'lang'phpism'disable_static_closures;

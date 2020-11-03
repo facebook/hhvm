@@ -2014,14 +2014,10 @@ For void functions, we support implicit return by including a skip continuation.
 ------------------------------------------------------------------------------------------ :: function
 |- function id ( t1 $x1 , .. , tn $xn ) : t block
 
-( t1 $x1 , .. , tn $xn , t0 vardots $x0 ) : t ; { x1 : t1 , .. , xn : tn , x0 : vec<t0> } ; { return : G } |- block
------------------------------------------------------------ :: function_variadic
-|- function id ( t1 $x1 , .. , tn $xn , t0 vardots $x0 ) : t block
-
 ( t1 $x1 , .. , tn $xn ) : void ; { x1 : t1 , .. , xn : tn } ; { return : G, skip : G } |- block
 --------------------------------------------------------------- :: function_void
 |- function id ( t1 $x1 , .. , tn $xn ) : void block
 
-( t1 $x1 , .. , tn $xn , t0 vardots $x0 ) : void ; { x1 : t1 , .. , xn : tn , x0 : vec<t0> } ; { return : G, skip : G } |- block
---------------------------------------------------------------- :: function_void_variadic
-|- function id ( t1 $x1 , .. , tn $xn , t0 vardots $x0 ) : void block
+|- function id ( t1 $x1 , .. , tn $xn , vec<t0> $x0 ) : t block
+----------------------------------------------------------- :: function_variadic
+|- function id ( t1 $x1 , .. , tn $xn , t0 vardots $x0 ) : t block

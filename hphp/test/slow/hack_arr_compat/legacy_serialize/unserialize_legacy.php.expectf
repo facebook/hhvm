@@ -27,8 +27,6 @@ false
 dict(0) {
 }
 === k:0:{} ===
-
-Warning: is_array_marked_legacy expects a dict, vec, darray, or varray in %s on line 10
 false
 keyset(0) {
 }

@@ -2940,6 +2940,7 @@ fn istype_op(opts: &Options, id: impl AsRef<str>) -> Option<IstypeOp> {
         } else {
             OpPHPArr
         }),
+        "HH\\is_array_marked_legacy" => Some(OpLegacyArrLike),
         "HH\\is_class" => Some(OpClass),
         _ => None,
     }

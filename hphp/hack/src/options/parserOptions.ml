@@ -133,6 +133,12 @@ let disallow_hash_comments = GlobalOptions.po_disallow_hash_comments
 let with_disallow_hash_comments po b =
   { po with GlobalOptions.po_disallow_hash_comments = b }
 
+let disallow_fun_and_cls_meth_pseudo_funcs =
+  GlobalOptions.po_disallow_fun_and_cls_meth_pseudo_funcs
+
+let with_disallow_fun_and_cls_meth_pseudo_funcs po b =
+  { po with GlobalOptions.po_disallow_fun_and_cls_meth_pseudo_funcs = b }
+
 let make
     ~auto_namespace_map
     ~codegen
@@ -159,7 +165,8 @@ let make
     ~disable_hh_ignore_error
     ~disable_array
     ~disable_array_typehint
-    ~disallow_hash_comments =
+    ~disallow_hash_comments
+    ~disallow_fun_and_cls_meth_pseudo_funcs =
   GlobalOptions.
     {
       default with
@@ -189,11 +196,14 @@ let make
       po_disable_array = disable_array;
       po_disable_array_typehint = disable_array_typehint;
       po_disallow_hash_comments = disallow_hash_comments;
+      po_disallow_fun_and_cls_meth_pseudo_funcs =
+        disallow_fun_and_cls_meth_pseudo_funcs;
     }
 
 (* Changes here need to be synchronized with rust_parser_errors_ffi.rs *)
 type ffi_t =
   bool
+  * bool
   * bool
   * bool
   * bool
@@ -234,4 +244,5 @@ let to_rust_ffi_t po ~hhvm_compat_mode ~hhi_mode ~codegen =
     const_default_lambda_args po,
     disable_array_typehint po,
     allow_unstable_features po,
-    disallow_hash_comments po )
+    disallow_hash_comments po,
+    disallow_fun_and_cls_meth_pseudo_funcs po )

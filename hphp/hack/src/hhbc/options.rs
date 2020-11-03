@@ -267,6 +267,7 @@ prefixed_flags!(
     DISABLE_LVAL_AS_AN_EXPRESSION,
     DISABLE_UNSET_CLASS_CONST,
     DISABLE_XHP_ELEMENT_MANGLING,
+    DISALLOW_FUN_AND_CLS_METH_PSEUDO_FUNCS,
     DISALLOW_FUNC_PTRS_IN_CONSTANTS,
     DISALLOW_HASH_COMMENTS,
     ENABLE_CLASS_LEVEL_WHERE_CLAUSES,
@@ -735,6 +736,9 @@ mod tests {
   "hhvm.hack.lang.disable_xhp_element_mangling": {
     "global_value": false
   },
+  "hhvm.hack.lang.disallow_fun_and_cls_meth_pseudo_funcs": {
+    "global_value": false
+  },
   "hhvm.hack.lang.disallow_func_ptrs_in_constants": {
     "global_value": false
   },
@@ -1192,5 +1196,6 @@ bitflags! {
         const HACK_ARR_DV_ARR_MARK = 1 << 54;
         const ALLOW_UNSTABLE_FEATURES = 1 << 55;
         const DISALLOW_HASH_COMMENTS = 1 << 56;
+        const DISALLOW_FUN_AND_CLS_METH_PSEUDO_FUNCS = 1 << 57;
     }
 }

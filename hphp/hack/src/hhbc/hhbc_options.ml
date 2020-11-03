@@ -58,6 +58,7 @@ type t = {
   option_disable_array_typehint: bool;
   option_allow_unstable_features: bool;
   option_disallow_hash_comments: bool;
+  option_disallow_fun_and_cls_meth_pseudo_funcs: bool;
 }
 [@@deriving eq, ord]
 
@@ -112,6 +113,7 @@ let default =
     option_disable_array_typehint = false;
     option_allow_unstable_features = false;
     option_disallow_hash_comments = false;
+    option_disallow_fun_and_cls_meth_pseudo_funcs = false;
   }
 
 let constant_folding o = o.option_constant_folding
@@ -210,6 +212,9 @@ let allow_unstable_features o = o.option_allow_unstable_features
 
 let disallow_hash_comments o = o.option_disallow_hash_comments
 
+let disallow_fun_and_cls_meth_pseudo_funcs o =
+  o.option_disallow_fun_and_cls_meth_pseudo_funcs
+
 let canonical_aliased_namespaces an =
   List.sort ~compare:(fun p1 p2 -> String.compare (fst p1) (fst p2)) an
 
@@ -294,6 +299,8 @@ let to_string o =
       Printf.sprintf "disable_array_typehint: %B" @@ disable_array_typehint o;
       Printf.sprintf "allow_unstable_features: %B" @@ allow_unstable_features o;
       Printf.sprintf "disallow_hash_comments: %B" @@ disallow_hash_comments o;
+      Printf.sprintf "disallow_fun_and_cls_meth_pseudo_funcs: %B"
+      @@ disallow_fun_and_cls_meth_pseudo_funcs o;
     ]
 
 let as_bool s =
@@ -395,6 +402,11 @@ let set_option options name value =
     { options with option_allow_unstable_features = as_bool value }
   | "hhvm.hack.lang.disallow_hash_comments" ->
     { options with option_disallow_hash_comments = as_bool value }
+  | "hhvm.hack.lang.disallow_fun_and_cls_meth_pseudo_funcs" ->
+    {
+      options with
+      option_disallow_fun_and_cls_meth_pseudo_funcs = as_bool value;
+    }
   | _ -> options
 
 let get_value_from_config_ config key =
@@ -599,6 +611,11 @@ let value_setters =
     @@ fun opts v -> { opts with option_allow_unstable_features = v = 1 } );
     ( set_value "hhvm.hack.lang.disallow_hash_comments" get_value_from_config_int
     @@ fun opts v -> { opts with option_disallow_hash_comments = v = 1 } );
+    ( set_value
+        "hhvm.hack.lang.disallow_fun_and_cls_meth_pseudo_funcs"
+        get_value_from_config_int
+    @@ fun opts v ->
+      { opts with option_disallow_fun_and_cls_meth_pseudo_funcs = v = 1 } );
   ]
 
 let extract_config_options_from_json ~init config_json =

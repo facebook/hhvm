@@ -277,6 +277,8 @@ type t = {
   tco_enable_sound_dynamic: bool;
   (* Disallow #-style comments, except hashbangs(#!) *)
   po_disallow_hash_comments: bool;
+  (* Disable parsing of fun() and class_meth() *)
+  po_disallow_fun_and_cls_meth_pseudo_funcs: bool;
 }
 [@@deriving eq, show]
 
@@ -385,6 +387,7 @@ val make :
   ?tco_typecheck_sample_rate:float ->
   ?tco_enable_sound_dynamic:bool ->
   ?po_disallow_hash_comments:bool ->
+  ?po_disallow_fun_and_cls_meth_pseudo_funcs:bool ->
   unit ->
   t
 
@@ -629,3 +632,5 @@ val tco_typecheck_sample_rate : t -> float
 val tco_enable_sound_dynamic : t -> bool
 
 val po_disallow_hash_comments : t -> bool
+
+val po_disallow_fun_and_cls_meth_pseudo_funcs : t -> bool

@@ -24,6 +24,7 @@ type t = {
   disable_xhp_children_declarations: bool;
   disable_modes: bool;
   disallow_hash_comments: bool;
+  disallow_fun_and_cls_meth_pseudo_funcs: bool;
 }
 [@@deriving show]
 
@@ -45,6 +46,7 @@ let default =
     disable_xhp_children_declarations = false;
     disable_modes = false;
     disallow_hash_comments = false;
+    disallow_fun_and_cls_meth_pseudo_funcs = false;
   }
 
 let make
@@ -68,6 +70,8 @@ let make
       default.disable_xhp_children_declarations)
     ?(disable_modes = default.disable_modes)
     ?(disallow_hash_comments = default.disallow_hash_comments)
+    ?(disallow_fun_and_cls_meth_pseudo_funcs =
+      default.disallow_fun_and_cls_meth_pseudo_funcs)
     () =
   {
     hhvm_compat_mode;
@@ -86,6 +90,7 @@ let make
     disable_xhp_children_declarations;
     disable_modes;
     disallow_hash_comments;
+    disallow_fun_and_cls_meth_pseudo_funcs;
   }
 
 let hhvm_compat_mode e = e.hhvm_compat_mode
@@ -121,3 +126,6 @@ let disable_xhp_children_declarations e = e.disable_xhp_children_declarations
 let disable_modes e = e.disable_modes
 
 let disallow_hash_comments e = e.disallow_hash_comments
+
+let disallow_fun_and_cls_meth_pseudo_funcs e =
+  e.disallow_fun_and_cls_meth_pseudo_funcs

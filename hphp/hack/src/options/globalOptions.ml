@@ -113,6 +113,7 @@ type t = {
   tco_typecheck_sample_rate: float;
   tco_enable_sound_dynamic: bool;
   po_disallow_hash_comments: bool;
+  po_disallow_fun_and_cls_meth_pseudo_funcs: bool;
 }
 [@@deriving eq, show]
 
@@ -300,6 +301,7 @@ let default =
     tco_typecheck_sample_rate = 1.0;
     tco_enable_sound_dynamic = false;
     po_disallow_hash_comments = false;
+    po_disallow_fun_and_cls_meth_pseudo_funcs = false;
   }
 
 let make
@@ -426,6 +428,8 @@ let make
     ?(tco_typecheck_sample_rate = default.tco_typecheck_sample_rate)
     ?(tco_enable_sound_dynamic = default.tco_enable_sound_dynamic)
     ?(po_disallow_hash_comments = default.po_disallow_hash_comments)
+    ?(po_disallow_fun_and_cls_meth_pseudo_funcs =
+      default.po_disallow_fun_and_cls_meth_pseudo_funcs)
     () =
   {
     tco_experimental_features;
@@ -533,6 +537,7 @@ let make
     tco_typecheck_sample_rate;
     tco_enable_sound_dynamic;
     po_disallow_hash_comments;
+    po_disallow_fun_and_cls_meth_pseudo_funcs;
   }
 
 let tco_experimental_feature_enabled t s =
@@ -764,3 +769,6 @@ let tco_typecheck_sample_rate t = t.tco_typecheck_sample_rate
 let tco_enable_sound_dynamic t = t.tco_enable_sound_dynamic
 
 let po_disallow_hash_comments t = t.po_disallow_hash_comments
+
+let po_disallow_fun_and_cls_meth_pseudo_funcs t =
+  t.po_disallow_fun_and_cls_meth_pseudo_funcs

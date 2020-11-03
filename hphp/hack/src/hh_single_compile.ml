@@ -444,6 +444,8 @@ let parse_hh_file ~config_jsons ~compiler_options filename body =
         ~enable_xhp_class_modifier:(enable_xhp_class_modifier co)
         ~disable_xhp_element_mangling:(disable_xhp_element_mangling co)
         ~disallow_hash_comments:(disallow_hash_comments co)
+        ~disallow_fun_and_cls_meth_pseudo_funcs:
+          (disallow_fun_and_cls_meth_pseudo_funcs co)
         ?mode
         ()
     in

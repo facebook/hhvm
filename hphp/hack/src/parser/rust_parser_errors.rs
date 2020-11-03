@@ -3267,6 +3267,27 @@ where
                         errors::reserved_et_keyword,
                     ))
                 }
+
+                let fun_and_clsmeth_disabled = self
+                    .env
+                    .parser_options
+                    .po_disallow_fun_and_cls_meth_pseudo_funcs;
+
+                if self.text(recv) == Self::strip_hh_ns(sn::autoimported_functions::FUN_)
+                    && fun_and_clsmeth_disabled
+                {
+                    self.errors
+                        .push(Self::make_error_from_node(recv, errors::fun_disabled))
+                }
+
+                if self.text(recv) == Self::strip_hh_ns(sn::autoimported_functions::CLASS_METH)
+                    && fun_and_clsmeth_disabled
+                {
+                    self.errors.push(Self::make_error_from_node(
+                        recv,
+                        errors::class_meth_disabled,
+                    ))
+                }
             }
             ListExpression(x) if x.members.is_missing() && self.env.is_hhvm_compat() => {
                 if let Some(Syntax {

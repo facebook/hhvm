@@ -19,6 +19,7 @@ pub struct ParserEnv {
     pub disable_xhp_children_declarations: bool,
     pub disable_modes: bool,
     pub disallow_hash_comments: bool,
+    pub disallow_fun_and_cls_meth_pseudo_funcs: bool,
 }
 
 impl From<FullFidelityParserEnv> for ParserEnv {
@@ -33,6 +34,7 @@ impl From<FullFidelityParserEnv> for ParserEnv {
             disable_xhp_children_declarations: env.disable_xhp_children_declarations,
             disable_modes: env.disable_modes,
             disallow_hash_comments: env.disallow_hash_comments,
+            disallow_fun_and_cls_meth_pseudo_funcs: env.disallow_fun_and_cls_meth_pseudo_funcs,
         }
     }
 }

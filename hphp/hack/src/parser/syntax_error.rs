@@ -978,3 +978,9 @@ pub const reserved_et_keyword: Error =
     Cow::Borrowed("This is a reserved keyword for expression trees that cannot be used");
 
 pub const invalid_enum_class_enumerator: Error = Cow::Borrowed("Invalid enum class constant");
+
+pub const fun_disabled: Error =
+    Cow::Borrowed("`fun()` is disabled; switch to first-class references like `foo<>`");
+
+pub const class_meth_disabled: Error =
+    Cow::Borrowed("`class_meth()` is disabled; switch to first-class references like `C::bar<>`");

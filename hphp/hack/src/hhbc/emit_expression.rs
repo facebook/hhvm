@@ -27,7 +27,7 @@ use naming_special_names_rust::{
     emitter_special_functions, fb, pseudo_consts, pseudo_functions, special_functions,
     special_idents, superglobals, typehints, user_attributes,
 };
-use options::{CompilerFlags, HhvmFlags, Options};
+use options::{CompilerFlags, HhvmFlags, LangFlags, Options};
 use oxidized::{
     aast, aast_defs,
     aast_visitor::{visit, visit_mut, AstParams, Node, NodeMut, Visitor, VisitorMut},
@@ -2354,6 +2354,12 @@ fn emit_special_function(
 ) -> Result<Option<InstrSeq>> {
     use tast::{Expr as E, Expr_ as E_};
     let nargs = args.len() + uarg.map_or(0, |_| 1);
+    let fun_and_clsmeth_disabled = e
+        .options()
+        .hhvm
+        .hack_lang
+        .flags
+        .contains(LangFlags::DISALLOW_FUN_AND_CLS_METH_PSEUDO_FUNCS);
     match (lower_fq_name, args) {
         (id, _) if id == special_functions::ECHO => Ok(Some(InstrSeq::gather(
             args.iter()
@@ -2434,7 +2440,12 @@ fn emit_special_function(
             Ok(Some(emit_exit(e, env, args.first())?))
         }
         ("HH\\fun", _) => {
-            if nargs != 1 {
+            if fun_and_clsmeth_disabled {
+                Err(emit_fatal::raise_fatal_parse(
+                    pos,
+                    "`fun()` is disabled; switch to first-class references like `foo<>`",
+                ))
+            } else if nargs != 1 {
                 Err(emit_fatal::raise_fatal_runtime(
                     pos,
                     format!(
@@ -2521,6 +2532,10 @@ fn emit_special_function(
                 ),
             )),
         },
+        ("HH\\class_meth", _) if fun_and_clsmeth_disabled => Err(emit_fatal::raise_fatal_parse(
+            pos,
+            "`class_meth()` is disabled; switch to first-class references like `C::bar<>`",
+        )),
         ("HH\\class_meth", &[ref cls, ref meth, ..]) if nargs == 2 => {
             if meth.1.is_string() {
                 if cls.1.is_string()

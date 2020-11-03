@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<9f893c8af27308af3babe46b7bd4172f>>
+// @generated SignedSource<<9dd7ee8fce5f698202093749d1b481e8>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -153,7 +153,7 @@ impl TrivialDrop for EnvAnnot {}
 pub struct UsingStmt<Ex, Fb, En, Hi> {
     pub is_block_scoped: bool,
     pub has_await: bool,
-    pub expr: Expr<Ex, Fb, En, Hi>,
+    pub exprs: (Pos, Vec<Expr<Ex, Fb, En, Hi>>),
     pub block: Block<Ex, Fb, En, Hi>,
 }
 

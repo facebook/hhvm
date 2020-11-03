@@ -437,7 +437,7 @@ and stmt env acc st =
     expr acc e
   | While (e, _) -> expr acc e
   | Using us ->
-    let acc = expr acc us.us_expr in
+    let acc = List.fold_left (snd us.us_exprs) ~f:expr ~init:acc in
     block acc us.us_block
   | For (e1, _, _, _) -> exprl env acc e1
   | Switch (e, cl) ->

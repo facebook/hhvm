@@ -45,45 +45,41 @@
          [([8:3-10:4],
            (Using
               { us_is_block_scoped = false; us_has_await = false;
-                us_expr =
-                (([8:10-46], (Handle, Handle)),
-                 (Expr_list
-                    [(([8:10-27], Handle),
-                      (Binop ((Eq None),
-                         (([8:10-12], Handle), (Lvar ([8:10-12], $x))),
-                         (([8:15-27], Handle),
-                          (New (
-                             (([8:19-25], Handle),
-                              (CI ([8:19-25], "\\Handle"))),
-                             [], [], None, ([8:19-25], _))))
-                         )));
-                      (([8:29-46], Handle),
-                       (Binop ((Eq None),
-                          (([8:29-31], Handle), (Lvar ([8:29-31], $y))),
-                          (([8:34-46], Handle),
-                           (New (
-                              (([8:38-44], Handle),
-                               (CI ([8:38-44], "\\Handle"))),
-                              [], [], None, ([8:38-44], _))))
-                          )))
-                      ]));
+                us_exprs =
+                ([8:10-46],
+                 [(([8:10-27], Handle),
+                   (Binop ((Eq None),
+                      (([8:10-12], Handle), (Lvar ([8:10-12], $x))),
+                      (([8:15-27], Handle),
+                       (New (
+                          (([8:19-25], Handle), (CI ([8:19-25], "\\Handle"))),
+                          [], [], None, ([8:19-25], _))))
+                      )));
+                   (([8:29-46], Handle),
+                    (Binop ((Eq None),
+                       (([8:29-31], Handle), (Lvar ([8:29-31], $y))),
+                       (([8:34-46], Handle),
+                        (New (
+                           (([8:38-44], Handle), (CI ([8:38-44], "\\Handle"))),
+                           [], [], None, ([8:38-44], _))))
+                       )))
+                   ]);
                 us_block =
                 [([9:5-33],
                   (Using
                      { us_is_block_scoped = false; us_has_await = false;
-                       us_expr =
-                       (([9:12-29], (Handle)),
-                        (Expr_list
-                           [(([9:12-29], Handle),
-                             (Binop ((Eq None),
-                                (([9:12-14], Handle), (Lvar ([9:12-14], $z))),
-                                (([9:17-29], Handle),
-                                 (New (
-                                    (([9:21-27], Handle),
-                                     (CI ([9:21-27], "\\Handle"))),
-                                    [], [], None, ([9:21-27], _))))
-                                )))
-                             ]));
+                       us_exprs =
+                       ([9:12-29],
+                        [(([9:12-29], Handle),
+                          (Binop ((Eq None),
+                             (([9:12-14], Handle), (Lvar ([9:12-14], $z))),
+                             (([9:17-29], Handle),
+                              (New (
+                                 (([9:21-27], Handle),
+                                  (CI ([9:21-27], "\\Handle"))),
+                                 [], [], None, ([9:21-27], _))))
+                             )))
+                          ]);
                        us_block = [([Pos.none], Noop)] }))
                   ]
                 }))

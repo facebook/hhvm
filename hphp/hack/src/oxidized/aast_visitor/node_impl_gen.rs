@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<a87fec8921f21ed9e6ad4a9e429c750f>>
+// @generated SignedSource<<f84354d28536f98597af09e47ea82cfd>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -2110,7 +2110,7 @@ impl<P: Params> Node<P> for UsingStmt<P::Ex, P::Fb, P::En, P::Hi> {
     ) -> Result<(), P::Error> {
         self.is_block_scoped.accept(c, v)?;
         self.has_await.accept(c, v)?;
-        self.expr.accept(c, v)?;
+        self.exprs.accept(c, v)?;
         self.block.accept(c, v)?;
         Ok(())
     }

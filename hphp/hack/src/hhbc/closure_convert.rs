@@ -1110,7 +1110,9 @@ impl<'ast, 'a> VisitorMut<'ast> for ClosureConvertVisitor<'a> {
                 if x.has_await {
                     env.check_if_in_async_context()?;
                 }
-                self.visit_expr(env, &mut x.expr)?;
+                for e in &mut x.exprs.1 {
+                    self.visit_expr(env, e)?;
+                }
                 env.with_in_using(true, |env| visit_mut(self, env, &mut x.block))?;
                 Ok(self.state.current_function_state.has_finally = true)
             }

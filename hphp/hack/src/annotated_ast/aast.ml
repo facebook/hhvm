@@ -96,7 +96,7 @@ and env_annot =
 and ('ex, 'fb, 'en, 'hi) using_stmt = {
   us_is_block_scoped: bool;
   us_has_await: bool;
-  us_expr: ('ex, 'fb, 'en, 'hi) expr;
+  us_exprs: pos * ('ex, 'fb, 'en, 'hi) expr list;
   us_block: ('ex, 'fb, 'en, 'hi) block;
 }
 

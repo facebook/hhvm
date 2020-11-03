@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<2c9978447c9c3604e8565b7973388d9f>>
+// @generated SignedSource<<c4709db09807a2621172f47ddcd18b23>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -137,7 +137,7 @@ pub use oxidized::aast::EnvAnnot;
 pub struct UsingStmt<'a, Ex, Fb, En, Hi> {
     pub is_block_scoped: bool,
     pub has_await: bool,
-    pub expr: &'a Expr<'a, Ex, Fb, En, Hi>,
+    pub exprs: (&'a Pos<'a>, &'a [&'a Expr<'a, Ex, Fb, En, Hi>]),
     pub block: &'a Block<'a, Ex, Fb, En, Hi>,
 }
 impl<'a, Ex: TrivialDrop, Fb: TrivialDrop, En: TrivialDrop, Hi: TrivialDrop> TrivialDrop

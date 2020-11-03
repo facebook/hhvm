@@ -695,7 +695,7 @@ module Visitor_DEPRECATED = struct
         acc
 
       method on_using acc us =
-        let acc = this#on_expr acc us.us_expr in
+        let acc = List.fold_left (snd us.us_exprs) ~f:this#on_expr ~init:acc in
         let acc = this#on_block acc us.us_block in
         acc
 

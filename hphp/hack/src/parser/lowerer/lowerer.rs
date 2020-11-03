@@ -2498,6 +2498,14 @@ where
         }
     }
 
+    fn p_exprs_with_loc(n: S<'a, T, V>, e: &mut Env<'a, TF>) -> Result<(Pos, Vec<ast::Expr>)> {
+        let loc = Self::p_pos(&n, e);
+        let p_expr = |n: S<'a, T, V>, e: &mut Env<'a, TF>| -> Result<ast::Expr> {
+            Self::p_expr_with_loc(ExprLocation::UsingStatement, n, e)
+        };
+        Ok((loc, Self::could_map(p_expr, n, e)?))
+    }
+
     fn p_stmt_list_(
         pos: &Pos,
         mut nodes: Iter<S<'a, T, V>>,
@@ -2515,11 +2523,7 @@ where
                                 ast::Stmt_::mk_using(ast::UsingStmt {
                                     is_block_scoped: false,
                                     has_await: !c.await_keyword.is_missing(),
-                                    expr: Self::p_expr_l_with_loc(
-                                        ExprLocation::UsingStatement,
-                                        &c.expression,
-                                        e,
-                                    )?,
+                                    exprs: Self::p_exprs_with_loc(&c.expression, e)?,
                                     block: body,
                                 }),
                             ))
@@ -2841,11 +2845,7 @@ where
                         S_::mk_using(ast::UsingStmt {
                             is_block_scoped: true,
                             has_await: !&c.await_keyword.is_missing(),
-                            expr: Self::p_expr_l_with_loc(
-                                ExprLocation::UsingStatement,
-                                &c.expressions,
-                                e,
-                            )?,
+                            exprs: Self::p_exprs_with_loc(&c.expressions, e)?,
                             block: Self::p_block(false, &c.body, e)?,
                         }),
                     ))
@@ -2859,11 +2859,7 @@ where
                         S_::mk_using(ast::UsingStmt {
                             is_block_scoped: false,
                             has_await: !&c.await_keyword.is_missing(),
-                            expr: Self::p_expr_with_loc(
-                                ExprLocation::UsingStatement,
-                                &c.expression,
-                                e,
-                            )?,
+                            exprs: Self::p_exprs_with_loc(&c.expression, e)?,
                             block: vec![Self::mk_noop(e)],
                         }),
                     ))

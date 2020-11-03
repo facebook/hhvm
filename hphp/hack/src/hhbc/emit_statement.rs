@@ -387,14 +387,16 @@ fn emit_awaitall_multi(
     })
 }
 
-fn emit_using(e: &mut Emitter, env: &mut Env, pos: &Pos, using: &tast::UsingStmt) -> Result {
+fn emit_using(e: &mut Emitter, env: &mut Env, _pos: &Pos, using: &tast::UsingStmt) -> Result {
     let block_pos = block_pos(&using.block)?;
-    match (using.expr).1.as_expr_list() {
-        // TODO(hrust): avoid cloning blocks and expressions
-        Some(es) => emit_stmts(
+    if using.exprs.1.len() > 1 {
+        emit_stmts(
             e,
             env,
-            es.iter()
+            using
+                .exprs
+                .1
+                .iter()
                 .rev()
                 .fold(using.block.clone(), |block, expr| {
                     vec![tast::Stmt(
@@ -402,20 +404,21 @@ fn emit_using(e: &mut Emitter, env: &mut Env, pos: &Pos, using: &tast::UsingStmt
                         tast::Stmt_::mk_using(tast::UsingStmt {
                             has_await: using.has_await,
                             is_block_scoped: using.is_block_scoped,
-                            expr: expr.clone(),
+                            exprs: (expr.0.clone(), vec![expr.clone()]),
                             block,
                         }),
                     )]
                 })
                 .as_slice(),
-        ),
-        _ => e.local_scope(|e| {
-            let (local, preamble) = match &(using.expr).1 {
+        )
+    } else {
+        e.local_scope(|e| {
+            let (local, preamble) = match &(using.exprs.1[0].1) {
                 tast::Expr_::Binop(x) => match (&x.0, (x.1).1.as_lvar()) {
                     (ast_defs::Bop::Eq(None), Some(tast::Lid(_, id))) => (
                         local::Type::Named(local_id::get_name(&id).into()),
                         InstrSeq::gather(vec![
-                            emit_expr::emit_expr(e, env, &using.expr)?,
+                            emit_expr::emit_expr(e, env, &(using.exprs.1[0]))?,
                             emit_pos(&block_pos),
                             instr::popc(),
                         ]),
@@ -425,7 +428,7 @@ fn emit_using(e: &mut Emitter, env: &mut Env, pos: &Pos, using: &tast::UsingStmt
                         (
                             l.clone(),
                             InstrSeq::gather(vec![
-                                emit_expr::emit_expr(e, env, &using.expr)?,
+                                emit_expr::emit_expr(e, env, &(using.exprs.1[0]))?,
                                 instr::setl(l),
                                 instr::popc(),
                             ]),
@@ -435,7 +438,7 @@ fn emit_using(e: &mut Emitter, env: &mut Env, pos: &Pos, using: &tast::UsingStmt
                 tast::Expr_::Lvar(lid) => (
                     local::Type::Named(local_id::get_name(&lid.1).into()),
                     InstrSeq::gather(vec![
-                        emit_expr::emit_expr(e, env, &using.expr)?,
+                        emit_expr::emit_expr(e, env, &(using.exprs.1[0]))?,
                         emit_pos(&block_pos),
                         instr::popc(),
                     ]),
@@ -445,7 +448,7 @@ fn emit_using(e: &mut Emitter, env: &mut Env, pos: &Pos, using: &tast::UsingStmt
                     (
                         l.clone(),
                         InstrSeq::gather(vec![
-                            emit_expr::emit_expr(e, env, &using.expr)?,
+                            emit_expr::emit_expr(e, env, &(using.exprs.1[0]))?,
                             instr::setl(l),
                             instr::popc(),
                         ]),
@@ -457,8 +460,13 @@ fn emit_using(e: &mut Emitter, env: &mut Env, pos: &Pos, using: &tast::UsingStmt
             let body = env.do_in_using_body(e, finally_start.clone(), &using.block, emit_block)?;
             let jump_instrs = tfr::JumpInstructions::collect(&body, &mut env.jump_targets_gen);
             let jump_instrs_is_empty = jump_instrs.is_empty();
-            let finally_epilogue =
-                tfr::emit_finally_epilogue(e, env, pos, jump_instrs, finally_end.clone())?;
+            let finally_epilogue = tfr::emit_finally_epilogue(
+                e,
+                env,
+                &using.exprs.1[0].0,
+                jump_instrs,
+                finally_end.clone(),
+            )?;
             let try_instrs = if jump_instrs_is_empty {
                 body
             } else {
@@ -521,7 +529,7 @@ fn emit_using(e: &mut Emitter, env: &mut Env, pos: &Pos, using: &tast::UsingStmt
                 let catch_instrs = InstrSeq::gather(vec![
                     emit_pos(&block_pos),
                     make_finally_catch(e, exn_local, finally_instrs),
-                    emit_pos(pos),
+                    emit_pos(&using.exprs.1[0].0),
                 ]);
                 InstrSeq::create_try_catch(e.label_gen_mut(), None, true, try_instrs, catch_instrs)
             };
@@ -533,7 +541,7 @@ fn emit_using(e: &mut Emitter, env: &mut Env, pos: &Pos, using: &tast::UsingStmt
                 finally_epilogue,
                 instr::label(finally_end),
             ]))
-        }),
+        })
     }
 }
 

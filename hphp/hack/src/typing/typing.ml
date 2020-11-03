@@ -491,29 +491,16 @@ and check_using_expr has_await env ((pos, content) as using_clause) =
 (* Check the using clause e in
  * `using (e) { ... }` statement (`has_await = false`) or
  * `await using (e) { ... }` statement (`has_await = true`).
- * The expression consists of a comma-separated list of expressions (Expr_list)
- * or a single expression.
+ * `using_clauses` is a list of expressions.
  * Return the typed expression, and any variables that must
  * be designated as "using variables" for avoiding escapes.
  *)
-and check_using_clause env has_await ((pos, content) as using_clause) =
-  match content with
-  | Expr_list using_clauses ->
-    let (env, pairs) =
-      List.map_env env using_clauses (check_using_expr has_await)
-    in
-    let (typed_using_clauses, vars_list) = List.unzip pairs in
-    let ty =
-      MakeType.tuple Reason.Rnone (List.map typed_using_clauses Tast.get_type)
-    in
-    ( env,
-      Tast.make_typed_expr pos ty (Aast.Expr_list typed_using_clauses),
-      List.concat vars_list )
-  | _ ->
-    let (env, (typed_using_clause, vars)) =
-      check_using_expr has_await env using_clause
-    in
-    (env, typed_using_clause, vars)
+and check_using_clause env has_await using_clauses =
+  let (env, pairs) =
+    List.map_env env using_clauses (check_using_expr has_await)
+  in
+  let (typed_using_clauses, vars) = List.unzip pairs in
+  (env, typed_using_clauses, List.concat vars)
 
 (* Require a new construct with disposable *)
 and enforce_return_disposable _env e =
@@ -795,7 +782,7 @@ and stmt_ env pos st =
   | Using
       {
         us_has_await = has_await;
-        us_expr = using_clause;
+        us_exprs = (loc, using_clause);
         us_block = using_block;
         us_is_block_scoped;
       } ->
@@ -811,7 +798,7 @@ and stmt_ env pos st =
         Aast.
           {
             us_has_await = has_await;
-            us_expr = typed_using_clause;
+            us_exprs = (loc, typed_using_clause);
             us_block = typed_using_block;
             us_is_block_scoped;
           } )

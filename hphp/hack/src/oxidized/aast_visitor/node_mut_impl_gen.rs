@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<52971bfd751eef3c5b88255397d46174>>
+// @generated SignedSource<<6c12b843101c25b5805d8aa4eeee6a45>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -2110,7 +2110,7 @@ impl<P: Params> NodeMut<P> for UsingStmt<P::Ex, P::Fb, P::En, P::Hi> {
     ) -> Result<(), P::Error> {
         self.is_block_scoped.accept(c, v)?;
         self.has_await.accept(c, v)?;
-        self.expr.accept(c, v)?;
+        self.exprs.accept(c, v)?;
         self.block.accept(c, v)?;
         Ok(())
     }

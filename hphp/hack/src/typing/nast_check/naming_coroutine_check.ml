@@ -35,9 +35,9 @@ let handler =
 
     method! at_stmt env =
       function
-      | (_, Using { us_has_await; us_expr = (p, _); _ })
+      | (_, Using { us_has_await; us_exprs; _ })
         when us_has_await && is_sync env ->
-        Errors.await_in_sync_function p
+        Errors.await_in_sync_function (fst us_exprs)
       | (_, Foreach (_, (Await_as_v (p, _) | Await_as_kv (p, _, _)), _))
       | (p, Awaitall _)
         when is_sync env ->

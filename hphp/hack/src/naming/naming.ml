@@ -1604,14 +1604,14 @@ and fun_ ctx f =
   in
   named_fun
 
-and get_using_vars (_, e) =
-  match e with
-  | Aast.Expr_list using_clauses -> List.concat_map using_clauses get_using_vars
-  (* Simple assignment to local of form `$lvar = e` *)
-  | Aast.Binop (Ast_defs.Eq None, (_, Aast.Lvar (p, lid)), _) ->
-    [(p, Local_id.get_name lid)]
-  (* Arbitrary expression. This will be assigned to a temporary *)
-  | _ -> []
+and get_using_vars es =
+  List.concat_map es (fun (_, e) ->
+      match e with
+      (* Simple assignment to local of form `$lvar = e` *)
+      | Aast.Binop (Ast_defs.Eq None, (_, Aast.Lvar (p, lid)), _) ->
+        [(p, Local_id.get_name lid)]
+      (* Arbitrary expression. This will be assigned to a temporary *)
+      | _ -> [])
 
 and stmt env (pos, st) =
   let stmt =
@@ -1632,7 +1632,7 @@ and stmt env (pos, st) =
     | Aast.Do (b, e) -> do_stmt env b e
     | Aast.While (e, b) -> N.While (expr env e, block env b)
     | Aast.Using s ->
-      using_stmt env s.Aast.us_has_await s.Aast.us_expr s.Aast.us_block
+      using_stmt env s.Aast.us_has_await s.Aast.us_exprs s.Aast.us_block
     | Aast.For (st1, e, st2, b) -> for_stmt env st1 e st2 b
     | Aast.Switch (e, cl) -> switch_stmt env e cl
     | Aast.Foreach (e, ae, b) -> foreach_stmt env e ae b
@@ -1694,9 +1694,9 @@ and do_stmt env b e =
   N.Do (b, e)
 
 (* Scoping is essentially that of do: block is always executed *)
-and using_stmt env has_await e b =
+and using_stmt env has_await (loc, e) b =
   let vars = get_using_vars e in
-  let e = expr env e in
+  let e = List.map ~f:(expr env) e in
   let b = block ~new_scope:false env b in
   Env.remove_locals env vars;
   N.Using
@@ -1705,7 +1705,7 @@ and using_stmt env has_await e b =
         us_is_block_scoped = false;
         (* This isn't used for naming so provide a default *)
         us_has_await = has_await;
-        us_expr = e;
+        us_exprs = (loc, e);
         us_block = b;
       }
 

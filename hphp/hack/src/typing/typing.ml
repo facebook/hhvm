@@ -2613,6 +2613,10 @@ and expr_
     in
     (* Check type annotations on the lambda *)
     Typing_check_decls.fun_ env f;
+    (* Check attributes on the lambda *)
+    let env =
+      attributes_check_def env SN.AttributeKinds.lambda f.f_user_attributes
+    in
     (* This is the function type as declared on the lambda itself.
      * If type hints are absent then use Tany instead. *)
     let declared_fe =

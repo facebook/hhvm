@@ -3,8 +3,8 @@
 class A {
   <<__RxLocal>>
   public function f(int $a): void {
-    // OK - rx
-    $a = <<__RxOfScope>> () ==> 1;
+    // OK - rx of scope
+    $a = () ==> 1;
     // ERROR
     $this->g($a);
   }

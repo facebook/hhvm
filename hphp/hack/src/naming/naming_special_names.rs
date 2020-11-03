@@ -402,6 +402,8 @@ pub mod attribute_kinds {
 
     pub const TYPE_CONST: &str = "\\HH\\TypeConstantAttribute";
 
+    pub const LAMBDA: &str = "\\HH\\LambdaAttribute";
+
     pub static PLAIN_ENGLISH: &[(&str, &str)] = &[
         (CLS, "a class"),
         (ENUM, "an enum"),
@@ -413,7 +415,8 @@ pub mod attribute_kinds {
         (PARAMETER, "a parameter"),
         (TYPE_PARAM, "a type parameter"),
         (FILE, "a file"),
-        (TYPE_CONST, "a type pub constant"),
+        (TYPE_CONST, "a type constant"),
+        (LAMBDA, "a lambda expression"),
     ];
 
     lazy_static! {

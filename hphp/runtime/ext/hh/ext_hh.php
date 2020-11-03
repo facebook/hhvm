@@ -247,6 +247,8 @@ interface TypeAliasAttribute {}
 interface FunctionAttribute {}
 interface MethodAttribute {}
 
+interface LambdaAttribute {}
+
 // properties
 interface PropertyAttribute {}
 interface InstancePropertyAttribute extends PropertyAttribute {}

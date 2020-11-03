@@ -19,7 +19,7 @@ async function gen_filter_with_key<Tk as arraykey, Tv>(
   $tests = await ($traversable
     |> map_with_key(
       $$,
-      <<__RxOfScope>> async ($k, $v) ==> await $predicate($k, $v),
+      async ($k, $v) ==> await $predicate($k, $v),
     )
     |> gen($$));
   $result = dict[];

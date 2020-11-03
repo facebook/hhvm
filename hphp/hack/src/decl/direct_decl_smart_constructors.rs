@@ -1498,7 +1498,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                                 properties.push(ShallowProp {
                                     const_: false,
                                     xhp_attr: None,
-                                    lateinit: attributes.late_init,
+                                    lateinit: false,
                                     lsb: false,
                                     name: Id(pos, name),
                                     needs_init: true,

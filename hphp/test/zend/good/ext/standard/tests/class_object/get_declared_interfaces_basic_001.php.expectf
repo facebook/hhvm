@@ -1,7 +1,7 @@
 *** Testing get_declared_interfaces() : basic functionality ***
 
 -- Testing get_declared_interfaces() function with Zero arguments --
-varray(71) {
+varray(72) {
   string(23) "HH\Rx\IteratorAggregate"
   string(19) "HH\Rx\KeyedIterator"
   string(24) "HH\Rx\AsyncKeyedIterator"
@@ -50,6 +50,7 @@ varray(71) {
   string(10) "MutableMap"
   string(9) "Stringish"
   string(14) "ConstMapAccess"
+  string(18) "HH\LambdaAttribute"
   string(15) "HH\Rx\Exception"
   string(11) "IndexAccess"
   string(15) "ConstCollection"

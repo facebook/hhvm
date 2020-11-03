@@ -3,8 +3,8 @@
 class A {
   <<__Rx>>
   public function f(int $a): void {
-    // OK - rx
-    $a = <<__RxOfScope>> () ==> 1;
+    // OK - rx of scope
+    $a = () ==> 1;
     // OK
     $this->g($a);
   }

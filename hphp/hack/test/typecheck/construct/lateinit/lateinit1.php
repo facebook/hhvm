@@ -25,7 +25,3 @@ final class C3 {
     $this->prop2 = $x;
   }
 }
-
-final class C4 {
-  public function __construct(<<__LateInit>>private string $prop): void {}
-}

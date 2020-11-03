@@ -167,7 +167,7 @@ void emitCGetL2(IRGS& env, NamedLocal loc) {
 }
 
 void emitUnsetL(IRGS& env, int32_t id) {
-  auto const prev = ldLoc(env, id, makeExit(env), DataTypeCountnessInit);
+  auto const prev = ldLoc(env, id, makeExit(env), DataTypeGeneric);
   stLocRaw(env, id, fp(env), cns(env, TUninit));
   decRef(env, prev);
 }

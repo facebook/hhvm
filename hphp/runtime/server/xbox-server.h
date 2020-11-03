@@ -44,9 +44,6 @@ public:
    */
   static Resource TaskStart(const String& msg, const String& reqInitDoc = "",
       ServerTaskEvent<XboxServer, XboxTransport> *event = nullptr);
-  static void TaskStartFromNonRequest(
-    const folly::StringPiece msg,
-    const folly::StringPiece reqInitDoc = "");
   static bool TaskStatus(const Resource& task);
   static int TaskResult(const Resource& task, int timeout_ms, Variant *ret);
   static int TaskResult(XboxTransport* const job, int timeout_ms, Variant *ret);

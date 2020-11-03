@@ -282,34 +282,6 @@ Resource XboxServer::TaskStart(const String& msg,
   return Resource();
 }
 
-void XboxServer::TaskStartFromNonRequest(
-  const folly::StringPiece msg,
-  const folly::StringPiece reqInitDoc /* ="" */
-) {
-    {
-      Lock l(s_dispatchMutex);
-      if (s_dispatcher &&
-          (s_dispatcher->getActiveWorker() <
-           RuntimeOption::XboxServerThreadCount ||
-           s_dispatcher->getQueuedJobs() <
-           RuntimeOption::XboxServerMaxQueueLength)) {
-        XboxTransport *job = new XboxTransport(msg, reqInitDoc);
-        job->incRefCount(); // paired with worker's decRefCount()
-
-        assertx(s_dispatcher);
-        s_dispatcher->enqueue(job);
-        return;
-      }
-  }
-  const char* errMsg =
-    (RuntimeOption::XboxServerThreadCount > 0 ?
-     "Cannot create new Xbox task because the Xbox queue has "
-     "reached maximum capacity" :
-     "Cannot create new Xbox task because the Xbox is not enabled");
-
-  throw std::runtime_error(errMsg);
-}
-
 bool XboxServer::TaskStatus(const Resource& task) {
   return cast<XboxTask>(task)->getJob()->isDone();
 }

@@ -3,4 +3,3 @@
 -vEval.ForbidDynamicCallsToClsMeth=1
 -vEval.ForbidDynamicConstructs=1
 -vEval.ForbidDynamicCallsWithAttr=true
--vEval.EmitClsMethPointers=1

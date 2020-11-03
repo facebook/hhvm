@@ -291,7 +291,7 @@ let test_all_overrides_json_only _ =
     \"global_value\": [\"f\", \"g\"]
   },
   \"hhvm.emit_cls_meth_pointers\": {
-    \"global_value\": false
+    \"global_value\": true
   },
  \"hhvm.emit_inst_meth_pointers\": {
     \"global_value\": false
@@ -423,7 +423,7 @@ module CliArgOverrides = struct
 
   (* let hhvm'dynamic_invoke_functions = "UNSUPPORTED BY CLI" *)
 
-  let hhvm'emit_cls_meth_pointers = "-vhhvm.emit_cls_meth_pointers=0"
+  let hhvm'emit_cls_meth_pointers = "-vhhvm.emit_cls_meth_pointers=1"
 
   let hhvm'emit_inst_meth_pointers = "-vhhvm.emit_inst_meth_pointers=0"
 

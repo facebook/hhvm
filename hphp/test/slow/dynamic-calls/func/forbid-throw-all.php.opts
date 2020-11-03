@@ -1,3 +1,2 @@
--vEval.EmitClsMethPointers=true
 -vEval.ForbidDynamicCallsToFunc=3
 -vEval.ForbidDynamicCallsWithAttr=true

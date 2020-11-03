@@ -1156,7 +1156,7 @@ struct RuntimeOption {
   F(bool, RxPretendIsEnabled, false)                                    \
   /* Raise warning when class pointers are used as strings. */          \
   F(bool, RaiseClassConversionWarning, false)                           \
-  F(bool, EmitClsMethPointers, false)                                   \
+  F(bool, EmitClsMethPointers, true)                                    \
   /* EmitClassPointers:
    * 0 => convert Foo::class to string "Foo"
    * 1 => convert Foo::class to class pointer

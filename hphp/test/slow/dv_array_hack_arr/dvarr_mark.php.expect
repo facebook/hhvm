@@ -31,11 +31,6 @@ darray(1) {
 }
 bool(true)
 varray(2) {
-  string(3) "Baz"
-  string(2) "sm"
-}
-bool(true)
-varray(2) {
   object(Baz) (0) {
   }
   string(1) "m"

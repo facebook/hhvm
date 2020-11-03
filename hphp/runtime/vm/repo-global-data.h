@@ -140,7 +140,7 @@ struct Repo::GlobalData {
   uint64_t Signature = 0;
 
   int32_t EmitClassPointers = 0;
-  bool EmitClsMethPointers = false;
+  bool EmitClsMethPointers = true;
 
   /*
    * If clsmeth type may raise,
@@ -205,5 +205,3 @@ std::string show(const Repo::GlobalData& gd);
 //////////////////////////////////////////////////////////////////////
 
 }
-
-

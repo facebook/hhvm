@@ -27,9 +27,6 @@ function foo($x) {
   $e = darray[1 => $x];
   var_dump(HH\is_array_marked_legacy($e));
   var_dump($e);
-  $f = class_meth(Baz::class, "sm");
-  var_dump(HH\is_array_marked_legacy($f));
-  var_dump($f);
   $obj = new Baz();
   $g = inst_meth($obj, "m");
   var_dump(HH\is_array_marked_legacy($g));

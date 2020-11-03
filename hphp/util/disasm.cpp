@@ -41,12 +41,8 @@ static int addressToSymbol(xed_uint64_t address, char* symbolBuffer,
   if (boost::starts_with(name, "0x")) {
     return 0;
   }
-  auto pos = name.find_first_of('(');
-  auto copyLength = pos != std::string::npos
-    ? std::min(pos, size_t(bufferLength - 1))
-    : bufferLength - 1;
-  strncpy(symbolBuffer, name.c_str(), copyLength);
-  symbolBuffer[copyLength] = '\0';
+  strncpy(symbolBuffer, name.c_str(), bufferLength - 1);
+  symbolBuffer[bufferLength - 1] = '\0';
   *offset = 0;
   return 1;
 }

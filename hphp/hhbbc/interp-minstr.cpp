@@ -1156,6 +1156,12 @@ void miFinalSetElem(ISS& env,
   finish(isWeird ? TInitCell : t1);
 }
 
+void miFinalUnreachable(ISS& env, int32_t nDiscard) {
+  assertx(env.state.unreachable);
+  discard(env, nDiscard);
+  push(env, TBottom);
+}
+
 void miFinalSetOpElem(ISS& env, int32_t nDiscard,
                       SetOpOp subop, const Type& key,
                       LocalId keyLoc) {
@@ -1171,6 +1177,10 @@ void miFinalSetOpElem(ISS& env, int32_t nDiscard,
     }
     return TInitCell;
   }();
+
+  // Don't update static property state if we're in an unreachable state.
+  if (env.state.unreachable) return miFinalUnreachable(env, nDiscard);
+
   auto const resultTy = typeSetOp(subop, lhsTy, rhsTy);
   pessimisticFinalElemD(env, key, resultTy);
   endBase(env, true, keyLoc);
@@ -1192,6 +1202,10 @@ void miFinalIncDecElem(ISS& env, int32_t nDiscard,
     }
     return TInitCell;
   }();
+
+  // Don't update static property state if we're in an unreachable state.
+  if (env.state.unreachable) return miFinalUnreachable(env, nDiscard);
+
   auto const preTy = typeIncDec(subop, postTy);
   pessimisticFinalElemD(env, key, preTy);
   endBase(env, true, keyLoc);

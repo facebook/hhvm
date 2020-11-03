@@ -9,7 +9,10 @@
          param_callconv = None; param_user_attributes = [];
          param_visibility = None }
         ];
-      f_cap = ((nothing), None); f_unsafe_cap = ((mixed), None);
+      f_cap =
+      (((HH\Capabilities\RxLocal & HH\Capabilities\IO & HH\Capabilities\CippGlobal & HH\Capabilities\Globals & HH\Capabilities\UnrestrictedMutation)),
+       None);
+      f_unsafe_cap = ((mixed), None);
       f_body =
       { fb_ast =
         [([4:3-13],
@@ -35,7 +38,10 @@
          param_callconv = None; param_user_attributes = [];
          param_visibility = None }
         ];
-      f_cap = ((nothing), None); f_unsafe_cap = ((mixed), None);
+      f_cap =
+      (((HH\Capabilities\RxLocal & HH\Capabilities\IO & HH\Capabilities\CippGlobal & HH\Capabilities\Globals & HH\Capabilities\UnrestrictedMutation)),
+       None);
+      f_unsafe_cap = ((mixed), None);
       f_body =
       { fb_ast =
         [([4:3-13],
@@ -54,7 +60,10 @@
     { f_span = [3:1-5:2]; f_annotation = (); f_mode = Mpartial;
       f_ret = ((int), None); f_name = ([3:10-11], "\\f"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
-      f_cap = ((nothing), None); f_unsafe_cap = ((mixed), None);
+      f_cap =
+      (((HH\Capabilities\RxLocal & HH\Capabilities\IO & HH\Capabilities\CippGlobal & HH\Capabilities\Globals & HH\Capabilities\UnrestrictedMutation)),
+       None);
+      f_unsafe_cap = ((mixed), None);
       f_body =
       { fb_ast =
         [([4:3-20],

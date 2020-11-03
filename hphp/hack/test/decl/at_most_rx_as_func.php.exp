@@ -41,7 +41,8 @@
                         ft_implicit_params =
                         { capability =
                           (Rhint (root|at_most_rx_as_func.php line 5, characters 24-42),
-                           (Tunion []))
+                           (Tapply (([5:24-43], "\\HH\\Contexts\\defaults"),
+                              [])))
                           };
                         ft_ret =
                         { et_enforced = false;
@@ -78,7 +79,7 @@
              ft_implicit_params =
              { capability =
                (Rhint (root|at_most_rx_as_func.php line 4, characters 10-10),
-                (Tunion []))
+                (Tapply (([4:10-11], "\\HH\\Contexts\\defaults"), [])))
                };
              ft_ret =
              { et_enforced = false;

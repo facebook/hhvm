@@ -9,7 +9,7 @@
              ft_implicit_params =
              { capability =
                (Rhint (root|ret_from_kind.php line 3, characters 16-28),
-                (Tunion []))
+                (Tapply (([3:16-29], "\\HH\\Contexts\\defaults"), [])))
                };
              ft_ret =
              { et_enforced = false;
@@ -36,7 +36,7 @@
               ft_implicit_params =
               { capability =
                 (Rhint (root|ret_from_kind.php line 5, characters 10-26),
-                 (Tunion []))
+                 (Tapply (([5:10-27], "\\HH\\Contexts\\defaults"), [])))
                 };
               ft_ret =
               { et_enforced = false;
@@ -68,7 +68,7 @@
               ft_implicit_params =
               { capability =
                 (Rhint (root|ret_from_kind.php line 9, characters 16-38),
-                 (Tunion []))
+                 (Tapply (([9:16-39], "\\HH\\Contexts\\defaults"), [])))
                 };
               ft_ret =
               { et_enforced = false;

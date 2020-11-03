@@ -67,7 +67,8 @@
                 ];
               ft_implicit_params =
               { capability =
-                (Rhint (root|xhp.php line 7, characters 10-32), (Tunion []))
+                (Rhint (root|xhp.php line 7, characters 10-32),
+                 (Tapply (([7:10-33], "\\HH\\Contexts\\defaults"), [])))
                 };
               ft_ret =
               { et_enforced = false;

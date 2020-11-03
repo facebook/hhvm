@@ -21,7 +21,7 @@
                 ft_implicit_params =
                 { capability =
                   (Rhint (root|self_param_mutability.php line 5, characters 19-19),
-                   (Tunion []))
+                   (Tapply (([5:19-20], "\\HH\\Contexts\\defaults"), [])))
                   };
                 ft_ret =
                 { et_enforced = false;
@@ -49,7 +49,7 @@
                  ft_implicit_params =
                  { capability =
                    (Rhint (root|self_param_mutability.php line 8, characters 19-19),
-                    (Tunion []))
+                    (Tapply (([8:19-20], "\\HH\\Contexts\\defaults"), [])))
                    };
                  ft_ret =
                  { et_enforced = false;

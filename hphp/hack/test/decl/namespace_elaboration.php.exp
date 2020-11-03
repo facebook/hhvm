@@ -24,7 +24,7 @@
              ft_implicit_params =
              { capability =
                (Rhint (root|namespace_elaboration.php line 31, characters 10-11),
-                (Tunion []))
+                (Tapply (([31:10-12], "\\HH\\Contexts\\defaults"), [])))
                };
              ft_ret =
              { et_enforced = false;
@@ -63,7 +63,7 @@
               ft_implicit_params =
               { capability =
                 (Rhint (root|namespace_elaboration.php line 35, characters 10-17),
-                 (Tunion []))
+                 (Tapply (([35:10-18], "\\HH\\Contexts\\defaults"), [])))
                 };
               ft_ret =
               { et_enforced = false;
@@ -103,7 +103,7 @@
               ft_implicit_params =
               { capability =
                 (Rhint (root|namespace_elaboration.php line 39, characters 10-18),
-                 (Tunion []))
+                 (Tapply (([39:10-19], "\\HH\\Contexts\\defaults"), [])))
                 };
               ft_ret =
               { et_enforced = false;

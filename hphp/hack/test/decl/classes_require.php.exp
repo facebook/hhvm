@@ -21,7 +21,7 @@
                 ft_implicit_params =
                 { capability =
                   (Rhint (root|classes_require.php line 4, characters 19-27),
-                   (Tunion []))
+                   (Tapply (([4:19-28], "\\HH\\Contexts\\defaults"), [])))
                   };
                 ft_ret =
                 { et_enforced = false;
@@ -47,7 +47,7 @@
                  ft_implicit_params =
                  { capability =
                    (Rhint (root|classes_require.php line 5, characters 19-28),
-                    (Tunion []))
+                    (Tapply (([5:19-29], "\\HH\\Contexts\\defaults"), [])))
                    };
                  ft_ret =
                  { et_enforced = false;
@@ -86,7 +86,7 @@
                  ft_implicit_params =
                  { capability =
                    (Rhint (root|classes_require.php line 9, characters 19-21),
-                    (Tunion []))
+                    (Tapply (([9:19-22], "\\HH\\Contexts\\defaults"), [])))
                    };
                  ft_ret =
                  { et_enforced = false;
@@ -131,7 +131,7 @@
                  ft_implicit_params =
                  { capability =
                    (Rhint (root|classes_require.php line 16, characters 19-25),
-                    (Tunion []))
+                    (Tapply (([16:19-26], "\\HH\\Contexts\\defaults"), [])))
                    };
                  ft_ret =
                  { et_enforced = false;
@@ -179,7 +179,7 @@
                  ft_implicit_params =
                  { capability =
                    (Rhint (root|classes_require.php line 26, characters 19-21),
-                    (Tunion []))
+                    (Tapply (([26:19-22], "\\HH\\Contexts\\defaults"), [])))
                    };
                  ft_ret =
                  { et_enforced = false;

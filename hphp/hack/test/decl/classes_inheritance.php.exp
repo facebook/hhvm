@@ -21,7 +21,7 @@
                 ft_implicit_params =
                 { capability =
                   (Rhint (root|classes_inheritance.php line 4, characters 19-19),
-                   (Tunion []))
+                   (Tapply (([4:19-20], "\\HH\\Contexts\\defaults"), [])))
                   };
                 ft_ret =
                 { et_enforced = false;
@@ -47,7 +47,7 @@
                  ft_implicit_params =
                  { capability =
                    (Rhint (root|classes_inheritance.php line 5, characters 19-19),
-                    (Tunion []))
+                    (Tapply (([5:19-20], "\\HH\\Contexts\\defaults"), [])))
                    };
                  ft_ret =
                  { et_enforced = false;
@@ -90,7 +90,7 @@
                  ft_implicit_params =
                  { capability =
                    (Rhint (root|classes_inheritance.php line 9, characters 19-19),
-                    (Tunion []))
+                    (Tapply (([9:19-20], "\\HH\\Contexts\\defaults"), [])))
                    };
                  ft_ret =
                  { et_enforced = false;
@@ -116,7 +116,7 @@
                   ft_implicit_params =
                   { capability =
                     (Rhint (root|classes_inheritance.php line 10, characters 19-19),
-                     (Tunion []))
+                     (Tapply (([10:19-20], "\\HH\\Contexts\\defaults"), [])))
                     };
                   ft_ret =
                   { et_enforced = false;
@@ -155,7 +155,7 @@
                  ft_implicit_params =
                  { capability =
                    (Rhint (root|classes_inheritance.php line 14, characters 19-19),
-                    (Tunion []))
+                    (Tapply (([14:19-20], "\\HH\\Contexts\\defaults"), [])))
                    };
                  ft_ret =
                  { et_enforced = false;
@@ -198,7 +198,7 @@
                  ft_implicit_params =
                  { capability =
                    (Rhint (root|classes_inheritance.php line 18, characters 19-19),
-                    (Tunion []))
+                    (Tapply (([18:19-20], "\\HH\\Contexts\\defaults"), [])))
                    };
                  ft_ret =
                  { et_enforced = false;
@@ -240,7 +240,7 @@
                  ft_implicit_params =
                  { capability =
                    (Rhint (root|classes_inheritance.php line 22, characters 19-19),
-                    (Tunion []))
+                    (Tapply (([22:19-20], "\\HH\\Contexts\\defaults"), [])))
                    };
                  ft_ret =
                  { et_enforced = false;
@@ -286,7 +286,7 @@
                  ft_implicit_params =
                  { capability =
                    (Rhint (root|classes_inheritance.php line 26, characters 19-19),
-                    (Tunion []))
+                    (Tapply (([26:19-20], "\\HH\\Contexts\\defaults"), [])))
                    };
                  ft_ret =
                  { et_enforced = false;

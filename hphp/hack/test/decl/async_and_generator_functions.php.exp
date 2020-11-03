@@ -9,7 +9,7 @@
              ft_implicit_params =
              { capability =
                (Rhint (root|async_and_generator_functions.php line 3, characters 10-22),
-                (Tunion []))
+                (Tapply (([3:10-23], "\\HH\\Contexts\\defaults"), [])))
                };
              ft_ret =
              { et_enforced = false;
@@ -33,7 +33,7 @@
               ft_implicit_params =
               { capability =
                 (Rhint (root|async_and_generator_functions.php line 5, characters 16-29),
-                 (Tunion []))
+                 (Tapply (([5:16-30], "\\HH\\Contexts\\defaults"), [])))
                 };
               ft_ret =
               { et_enforced = false;
@@ -60,7 +60,7 @@
               ft_implicit_params =
               { capability =
                 (Rhint (root|async_and_generator_functions.php line 10, characters 10-27),
-                 (Tunion []))
+                 (Tapply (([10:10-28], "\\HH\\Contexts\\defaults"), [])))
                 };
               ft_ret =
               { et_enforced = false;
@@ -92,7 +92,7 @@
               ft_implicit_params =
               { capability =
                 (Rhint (root|async_and_generator_functions.php line 14, characters 10-40),
-                 (Tunion []))
+                 (Tapply (([14:10-41], "\\HH\\Contexts\\defaults"), [])))
                 };
               ft_ret =
               { et_enforced = false;
@@ -124,7 +124,7 @@
               ft_implicit_params =
               { capability =
                 (Rhint (root|async_and_generator_functions.php line 18, characters 16-30),
-                 (Tunion []))
+                 (Tapply (([18:16-31], "\\HH\\Contexts\\defaults"), [])))
                 };
               ft_ret =
               { et_enforced = false;

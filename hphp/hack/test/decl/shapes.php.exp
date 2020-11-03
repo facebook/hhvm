@@ -58,7 +58,7 @@
               ft_implicit_params =
               { capability =
                 (Rhint (root|shapes.php line 5, characters 10-20),
-                 (Tunion []))
+                 (Tapply (([5:10-21], "\\HH\\Contexts\\defaults"), [])))
                 };
               ft_ret =
               { et_enforced = false;
@@ -97,7 +97,7 @@
               ft_implicit_params =
               { capability =
                 (Rhint (root|shapes.php line 9, characters 10-22),
-                 (Tunion []))
+                 (Tapply (([9:10-23], "\\HH\\Contexts\\defaults"), [])))
                 };
               ft_ret =
               { et_enforced = false;
@@ -160,7 +160,7 @@
               ft_implicit_params =
               { capability =
                 (Rhint (root|shapes.php line 15, characters 10-22),
-                 (Tunion []))
+                 (Tapply (([15:10-23], "\\HH\\Contexts\\defaults"), [])))
                 };
               ft_ret =
               { et_enforced = false;

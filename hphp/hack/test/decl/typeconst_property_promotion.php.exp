@@ -1,6 +1,6 @@
 --- legacy
 +++ direct decl
-@@ -1,79 +1,79 @@
+@@ -1,80 +1,80 @@
  [("\\C",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -65,7 +65,8 @@
                       ft_implicit_params =
                       { capability =
                         (Rhint (root|typeconst_property_promotion.php line 5, characters 19-29),
-                         (Tunion []))
+                         (Tapply (([5:19-30], "\\HH\\Contexts\\defaults"), 
+                            [])))
                         };
                       ft_ret =
                       { et_enforced = false;

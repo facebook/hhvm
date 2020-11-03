@@ -51,7 +51,7 @@
               ft_implicit_params =
               { capability =
                 (Rhint (root|denotable_unions.php line 9, characters 10-10),
-                 (Tunion []))
+                 (Tapply (([9:10-11], "\\HH\\Contexts\\defaults"), [])))
                 };
               ft_ret =
               { et_enforced = false;
@@ -95,7 +95,7 @@
               ft_implicit_params =
               { capability =
                 (Rhint (root|denotable_unions.php line 10, characters 10-10),
-                 (Tunion []))
+                 (Tapply (([10:10-11], "\\HH\\Contexts\\defaults"), [])))
                 };
               ft_ret =
               { et_enforced = false;

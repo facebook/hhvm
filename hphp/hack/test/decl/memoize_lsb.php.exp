@@ -21,7 +21,7 @@
                 ft_implicit_params =
                 { capability =
                   (Rhint (root|memoize_lsb.php line 5, characters 26-26),
-                   (Tunion []))
+                   (Tapply (([5:26-27], "\\HH\\Contexts\\defaults"), [])))
                   };
                 ft_ret =
                 { et_enforced = false;

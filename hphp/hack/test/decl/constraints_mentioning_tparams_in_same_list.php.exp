@@ -121,7 +121,8 @@
                     ft_implicit_params =
                     { capability =
                       (Rhint (root|constraints_mentioning_tparams_in_same_list.php line 14, characters 11-28),
-                       (Tunion []))
+                       (Tapply (([14:11-29], "\\HH\\Contexts\\defaults"), 
+                          [])))
                       };
                     ft_ret =
                     { et_enforced = false;

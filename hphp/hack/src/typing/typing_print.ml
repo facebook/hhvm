@@ -1416,7 +1416,8 @@ module Json = struct
                  ft_implicit_params =
                    {
                      capability =
-                       Typing_make_type.default_capability Reason.Rnone;
+                       (* TODO(coeffects) properly serialize implicit params *)
+                       Typing_make_type.nothing Reason.Rnone;
                    };
                  ft_ret = { et_type = ft_ret; et_enforced = false };
                  (* Dummy values: these aren't currently serialized. *)

@@ -34,7 +34,8 @@
                 ];
               ft_implicit_params =
               { capability =
-                (Rhint (root|hhi.hhi line 7, characters 10-10), (Tunion []))
+                (Rhint (root|hhi.hhi line 7, characters 10-10),
+                 (Tapply (([7:10-11], "\\HH\\Contexts\\defaults"), [])))
                 };
               ft_ret =
               { et_enforced = false;
@@ -84,7 +85,7 @@
                  ft_implicit_params =
                  { capability =
                    (Rhint (root|hhi.hhi line 10, characters 19-19),
-                    (Tunion []))
+                    (Tapply (([10:19-20], "\\HH\\Contexts\\defaults"), [])))
                    };
                  ft_ret =
                  { et_enforced = false;

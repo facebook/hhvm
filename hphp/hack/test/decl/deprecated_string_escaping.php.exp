@@ -10,7 +10,7 @@
              ft_implicit_params =
              { capability =
                (Rhint (root|deprecated_string_escaping.php line 4, characters 10-15),
-                (Tunion []))
+                (Tapply (([4:10-16], "\\HH\\Contexts\\defaults"), [])))
                };
              ft_ret =
              { et_enforced = false;
@@ -35,7 +35,7 @@
               ft_implicit_params =
               { capability =
                 (Rhint (root|deprecated_string_escaping.php line 7, characters 10-15),
-                 (Tunion []))
+                 (Tapply (([7:10-16], "\\HH\\Contexts\\defaults"), [])))
                 };
               ft_ret =
               { et_enforced = false;

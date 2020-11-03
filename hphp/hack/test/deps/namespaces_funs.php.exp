@@ -1,1 +1,2 @@
+Class HH\Contexts\defaults -> Fun NS\bar, Fun NS\foo, Fun foo
 Fun NS\foo -> Fun NS\bar

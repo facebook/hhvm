@@ -52,7 +52,8 @@
                      ft_implicit_params =
                      { capability =
                        (Rhint (root|classes.php line 9, characters 19-29),
-                        (Tunion []))
+                        (Tapply (([9:19-30], "\\HH\\Contexts\\defaults"), 
+                           [])))
                        };
                      ft_ret =
                      { et_enforced = false;
@@ -80,7 +81,7 @@
                 ft_implicit_params =
                 { capability =
                   (Rhint (root|classes.php line 11, characters 20-32),
-                   (Tunion []))
+                   (Tapply (([11:20-33], "\\HH\\Contexts\\defaults"), [])))
                   };
                 ft_ret =
                 { et_enforced = false;
@@ -106,7 +107,7 @@
                  ft_implicit_params =
                  { capability =
                    (Rhint (root|classes.php line 12, characters 19-30),
-                    (Tunion []))
+                    (Tapply (([12:19-31], "\\HH\\Contexts\\defaults"), [])))
                    };
                  ft_ret =
                  { et_enforced = false;
@@ -132,7 +133,7 @@
                  ft_implicit_params =
                  { capability =
                    (Rhint (root|classes.php line 13, characters 22-36),
-                    (Tunion []))
+                    (Tapply (([13:22-37], "\\HH\\Contexts\\defaults"), [])))
                    };
                  ft_ret =
                  { et_enforced = false;
@@ -187,7 +188,7 @@
                  ft_implicit_params =
                  { capability =
                    (Rhint (root|classes.php line 14, characters 25-39),
-                    (Tunion []))
+                    (Tapply (([14:25-40], "\\HH\\Contexts\\defaults"), [])))
                    };
                  ft_ret =
                  { et_enforced = false;
@@ -222,7 +223,7 @@
                  ft_implicit_params =
                  { capability =
                    (Rhint (root|classes.php line 23, characters 19-35),
-                    (Tunion []))
+                    (Tapply (([23:19-36], "\\HH\\Contexts\\defaults"), [])))
                    };
                  ft_ret =
                  { et_enforced = false;
@@ -249,7 +250,7 @@
                  ft_implicit_params =
                  { capability =
                    (Rhint (root|classes.php line 26, characters 19-43),
-                    (Tunion []))
+                    (Tapply (([26:19-44], "\\HH\\Contexts\\defaults"), [])))
                    };
                  ft_ret =
                  { et_enforced = false;
@@ -276,7 +277,7 @@
                  ft_implicit_params =
                  { capability =
                    (Rhint (root|classes.php line 29, characters 19-41),
-                    (Tunion []))
+                    (Tapply (([29:19-42], "\\HH\\Contexts\\defaults"), [])))
                    };
                  ft_ret =
                  { et_enforced = false;
@@ -349,7 +350,7 @@
                  ft_implicit_params =
                  { capability =
                    (Rhint (root|classes.php line 32, characters 19-48),
-                    (Tunion []))
+                    (Tapply (([32:19-49], "\\HH\\Contexts\\defaults"), [])))
                    };
                  ft_ret =
                  { et_enforced = false;
@@ -375,7 +376,7 @@
                  ft_implicit_params =
                  { capability =
                    (Rhint (root|classes.php line 40, characters 19-32),
-                    (Tunion []))
+                    (Tapply (([40:19-33], "\\HH\\Contexts\\defaults"), [])))
                    };
                  ft_ret =
                  { et_enforced = false;
@@ -541,7 +542,8 @@
                       ft_implicit_params =
                       { capability =
                         (Rhint (root|classes.php line 50, characters 19-29),
-                         (Tunion []))
+                         (Tapply (([50:19-30], "\\HH\\Contexts\\defaults"),
+                            [])))
                         };
                       ft_ret =
                       { et_enforced = false;

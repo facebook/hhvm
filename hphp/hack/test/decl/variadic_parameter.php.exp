@@ -36,7 +36,8 @@
                         ft_implicit_params =
                         { capability =
                           (Rhint (root|variadic_parameter.php line 3, characters 15-40),
-                           (Tunion []))
+                           (Tapply (([3:15-41], "\\HH\\Contexts\\defaults"),
+                              [])))
                           };
                         ft_ret =
                         { et_enforced = false;
@@ -60,7 +61,7 @@
              ft_implicit_params =
              { capability =
                (Rhint (root|variadic_parameter.php line 3, characters 10-13),
-                (Tunion []))
+                (Tapply (([3:10-14], "\\HH\\Contexts\\defaults"), [])))
                };
              ft_ret =
              { et_enforced = false;

@@ -9,7 +9,7 @@
              ft_implicit_params =
              { capability =
                (Rhint (root|namespace_unscoped.php line 5, characters 10-10),
-                (Tunion []))
+                (Tapply (([5:10-11], "\\HH\\Contexts\\defaults"), [])))
                };
              ft_ret =
              { et_enforced = false;
@@ -33,7 +33,7 @@
               ft_implicit_params =
               { capability =
                 (Rhint (root|namespace_unscoped.php line 9, characters 10-10),
-                 (Tunion []))
+                 (Tapply (([9:10-11], "\\HH\\Contexts\\defaults"), [])))
                 };
               ft_ret =
               { et_enforced = false;

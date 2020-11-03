@@ -27,7 +27,7 @@
               ft_implicit_params =
               { capability =
                 (Rhint (root|like_types.php line 4, characters 10-19),
-                 (Tunion []))
+                 (Tapply (([4:10-20], "\\HH\\Contexts\\defaults"), [])))
                 };
               ft_ret =
               { et_enforced = false;
@@ -78,7 +78,7 @@
                ft_implicit_params =
                { capability =
                  (Rhint (root|like_types.php line 6, characters 10-10),
-                  (Tunion []))
+                  (Tapply (([6:10-11], "\\HH\\Contexts\\defaults"), [])))
                  };
                ft_ret =
                { et_enforced = false;
@@ -143,7 +143,7 @@
                   ft_implicit_params =
                   { capability =
                     (Rhint (root|like_types.php line 13, characters 19-19),
-                     (Tunion []))
+                     (Tapply (([13:19-20], "\\HH\\Contexts\\defaults"), [])))
                     };
                   ft_ret =
                   { et_enforced = false;

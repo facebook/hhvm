@@ -51,7 +51,8 @@
                      ft_implicit_params =
                      { capability =
                        (Rhint (root|generic_classes.php line 6, characters 19-29),
-                        (Tunion []))
+                        (Tapply (([6:19-30], "\\HH\\Contexts\\defaults"), 
+                           [])))
                        };
                      ft_ret =
                      { et_enforced = false;
@@ -79,7 +80,7 @@
                 ft_implicit_params =
                 { capability =
                   (Rhint (root|generic_classes.php line 10, characters 19-21),
-                   (Tunion []))
+                   (Tapply (([10:19-22], "\\HH\\Contexts\\defaults"), [])))
                   };
                 ft_ret =
                 { et_enforced = false;
@@ -149,7 +150,8 @@
                       ft_implicit_params =
                       { capability =
                         (Rhint (root|generic_classes.php line 18, characters 19-29),
-                         (Tunion []))
+                         (Tapply (([18:19-30], "\\HH\\Contexts\\defaults"),
+                            [])))
                         };
                       ft_ret =
                       { et_enforced = false;
@@ -219,7 +221,8 @@
                       ft_implicit_params =
                       { capability =
                         (Rhint (root|generic_classes.php line 26, characters 19-29),
-                         (Tunion []))
+                         (Tapply (([26:19-30], "\\HH\\Contexts\\defaults"),
+                            [])))
                         };
                       ft_ret =
                       { et_enforced = false;
@@ -247,7 +250,7 @@
                  ft_implicit_params =
                  { capability =
                    (Rhint (root|generic_classes.php line 30, characters 19-21),
-                    (Tunion []))
+                    (Tapply (([30:19-22], "\\HH\\Contexts\\defaults"), [])))
                    };
                  ft_ret =
                  { et_enforced = false;

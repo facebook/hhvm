@@ -3476,8 +3476,9 @@ and type_capability env cap unsafe_cap default_pos =
   let (env, cap_ty) =
     Option.value_map
       cap_hint_opt
-      ~default:(env, MakeType.default_capability (Reason.Rhint default_pos))
-      ~f:(Phase.localize_hint_with_self env)
+      ~default:(MakeType.default_capability (Reason.Rhint default_pos))
+      ~f:(Decl_hint.hint env.decl_env)
+    |> Phase.localize_with_self env
   in
   let unsafe_cap_hint_opt = hint_of_type_hint unsafe_cap in
   let (env, unsafe_cap_ty) =
@@ -5001,6 +5002,10 @@ and dispatch_call
         (env, Tast.make_typed_expr epos tany Aast.Any, tany)
       | (env, Some (ety_env, et)) ->
         let (env, fty) =
+          let (env, capability) =
+            MakeType.default_capability (Reason.Rwitness fpos)
+            |> Phase.localize_with_self env
+          in
           let make_fty params ft_ret =
             {
               ft_arity = Fstandard;
@@ -5023,11 +5028,7 @@ and dispatch_call
                           ~is_atom:false;
                       fp_rx_annotation = None;
                     });
-              ft_implicit_params =
-                {
-                  capability =
-                    MakeType.default_capability (Reason.Rwitness fpos);
-                };
+              ft_implicit_params = { capability };
               ft_ret = { et_enforced = false; et_type = ft_ret };
               ft_reactive = Nonreactive;
               ft_flags = 0;
@@ -6427,12 +6428,11 @@ and call
             let ft_tparams = [] in
             let ft_where_constraints = [] in
             let ft_params = List.map ~f:mk_fun_param type_of_el in
-            let ft_implicit_params =
-              let capability =
-                Typing_make_type.default_capability Reason.Rnone
-              in
-              { capability }
+            let (env, capability) =
+              Typing_make_type.default_capability Reason.Rnone
+              |> Phase.localize_with_self env
             in
+            let ft_implicit_params = { capability } in
             let (env, return_ty) = Env.fresh_type env pos in
             let return_ty =
               match in_await with

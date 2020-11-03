@@ -1668,6 +1668,7 @@ fn print_istype_op<W: Write>(w: &mut W, op: &IstypeOp) -> Result<(), W::Error> {
         Op::OpDict => w.write("Dict"),
         Op::OpVec => w.write("Vec"),
         Op::OpArrLike => w.write("ArrLike"),
+        Op::OpLegacyArrLike => w.write("LegacyArrLike"),
         Op::OpVArray => w.write("VArray"),
         Op::OpDArray => w.write("DArray"),
         Op::OpClsMeth => w.write("ClsMeth"),

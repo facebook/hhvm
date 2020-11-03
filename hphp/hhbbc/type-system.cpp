@@ -3918,6 +3918,7 @@ Type type_of_istype(IsTypeOp op) {
   case IsTypeOp::ArrLike:
     return RO::EvalIsCompatibleClsMethType ? TArrLikeCompat : TArrLike;
   case IsTypeOp::Scalar: always_assert(0);
+  case IsTypeOp::LegacyArrLike: always_assert(0);
   }
   not_reached();
 }
@@ -6297,8 +6298,8 @@ bool is_type_might_raise(const Type& testTy, const Type& valTy) {
 bool is_type_might_raise(IsTypeOp testOp, const Type& valTy) {
   switch (testOp) {
     case IsTypeOp::Scalar:
+    case IsTypeOp::LegacyArrLike:
       return false;
-      /* fallthrough */
     default:
       return is_type_might_raise(type_of_istype(testOp), valTy);
   }

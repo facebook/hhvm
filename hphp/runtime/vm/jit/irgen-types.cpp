@@ -415,6 +415,7 @@ Type typeOpToType(IsTypeOp op) {
   case IsTypeOp::VArray:
   case IsTypeOp::DArray:
   case IsTypeOp::ArrLike:
+  case IsTypeOp::LegacyArrLike:
   case IsTypeOp::PHPArr:
   case IsTypeOp::Scalar: not_reached();
   }
@@ -600,6 +601,22 @@ SSATmp* isArrLikeImpl(IRGS& env, SSATmp* src) {
   }
 
   return mc.elseDo([&]{ return gen(env, IsType, TArrLike, src); });
+}
+
+SSATmp* isLegacyArrLikeImpl(IRGS& env, SSATmp* src) {
+  MultiCond mc{env};
+
+  if (RO::EvalHackArrDVArrs) {
+    mc.ifTypeThen(src, TVec|TDict, [&](SSATmp* src) {
+      return gen(env, IsLegacyArrLike, src);
+    });
+  } else {
+    mc.ifTypeThen(src, TVArr|TDArr, [&](SSATmp* src) {
+      return gen(env, IsLegacyArrLike, src);
+    });
+  }
+
+  return mc.elseDo([&]{ return cns(env, false); });
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1722,15 +1739,16 @@ void emitIsUnsetL(IRGS& env, int32_t id) {
 
 SSATmp* isTypeHelper(IRGS& env, IsTypeOp subop, SSATmp* val) {
   switch (subop) {
-    case IsTypeOp::VArray: /* intentional fallthrough */
-    case IsTypeOp::DArray:  return isDVArrayImpl(env, val, subop);
-    case IsTypeOp::PHPArr:  return isPHPArrayImpl(env, val);
-    case IsTypeOp::Vec:     return isVecImpl(env, val);
-    case IsTypeOp::Dict:    return isDictImpl(env, val);
-    case IsTypeOp::Scalar:  return isScalarImpl(env, val);
-    case IsTypeOp::Str:     return isStrImpl(env, val);
-    case IsTypeOp::ArrLike: return isArrLikeImpl(env, val);
-    case IsTypeOp::Class:   return isClassImpl(env, val);
+    case IsTypeOp::VArray:        /* intentional fallthrough */
+    case IsTypeOp::DArray:        return isDVArrayImpl(env, val, subop);
+    case IsTypeOp::PHPArr:        return isPHPArrayImpl(env, val);
+    case IsTypeOp::Vec:           return isVecImpl(env, val);
+    case IsTypeOp::Dict:          return isDictImpl(env, val);
+    case IsTypeOp::Scalar:        return isScalarImpl(env, val);
+    case IsTypeOp::Str:           return isStrImpl(env, val);
+    case IsTypeOp::ArrLike:       return isArrLikeImpl(env, val);
+    case IsTypeOp::LegacyArrLike: return isLegacyArrLikeImpl(env, val);
+    case IsTypeOp::Class:         return isClassImpl(env, val);
     default: break;
   }
 

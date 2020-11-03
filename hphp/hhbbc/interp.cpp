@@ -1897,7 +1897,7 @@ bool isTypeHelper(ISS& env,
                   LocalId location,
                   Op op,
                   const JmpOp& jmp) {
-  if (typeOp == IsTypeOp::Scalar) {
+  if (typeOp == IsTypeOp::Scalar || typeOp == IsTypeOp::LegacyArrLike) {
     return false;
   }
 
@@ -2916,6 +2916,7 @@ void isTypeLImpl(ISS& env, const Op& op) {
 
   switch (op.subop2) {
   case IsTypeOp::Scalar: return push(env, TBool);
+  case IsTypeOp::LegacyArrLike: return push(env, TBool);
   case IsTypeOp::Obj: return isTypeObj(env, loc);
   default: return isTypeImpl(env, loc, type_of_istype(op.subop2));
   }
@@ -2931,6 +2932,7 @@ void isTypeCImpl(ISS& env, const Op& op) {
 
   switch (op.subop1) {
   case IsTypeOp::Scalar: return push(env, TBool);
+  case IsTypeOp::LegacyArrLike: return push(env, TBool);
   case IsTypeOp::Obj: return isTypeObj(env, t1);
   default: return isTypeImpl(env, t1, type_of_istype(op.subop1));
   }
@@ -3009,6 +3011,7 @@ bool isValidTypeOpForIsAs(const IsTypeOp& op) {
     case IsTypeOp::VArray:
     case IsTypeOp::DArray:
     case IsTypeOp::ArrLike:
+    case IsTypeOp::LegacyArrLike:
     case IsTypeOp::Scalar:
     case IsTypeOp::ClsMeth:
     case IsTypeOp::Func:

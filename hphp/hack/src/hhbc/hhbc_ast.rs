@@ -379,6 +379,7 @@ pub enum IstypeOp {
     OpClsMeth,
     OpFunc,
     OpPHPArr,
+    OpLegacyArrLike,
     OpClass,
 }
 

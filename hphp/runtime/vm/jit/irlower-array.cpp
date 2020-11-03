@@ -165,6 +165,16 @@ void cgTagProvenanceHere(IRLS& env, const IRInstruction* inst) {
                SyncOptions::Sync, args);
 }
 
+void cgIsLegacyArrLike(IRLS& env, const IRInstruction* inst) {
+  auto const arr = srcLoc(env, inst, 0).reg();
+  auto const dst = dstLoc(env, inst, 0).reg();
+  auto& v = vmain(env);
+
+  auto const sf = v.makeReg();
+  v << testbim{ArrayData::kLegacyArray, arr[HeaderAuxOffset], sf};
+  v << cmovb{CC_E, sf, v.cns(1), v.cns(0), dst};
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 namespace {

@@ -150,6 +150,7 @@ bool canDCE(IRInstruction* inst) {
   case IsNType:
   case IsTypeMem:
   case IsNTypeMem:
+  case IsLegacyArrLike:
   case IsWaitHandle:
   case IsCol:
   case LdStk:

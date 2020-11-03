@@ -2920,7 +2920,11 @@ fn istype_op(opts: &Options, id: impl AsRef<str>) -> Option<IstypeOp> {
         "HH\\is_any_array" => Some(OpArrLike),
         "HH\\is_class_meth" => Some(OpClsMeth),
         "HH\\is_fun" => Some(OpFunc),
-        "HH\\is_php_array" => Some(OpPHPArr),
+        "HH\\is_php_array" => Some(if hack_arr_dv_arrs {
+            OpLegacyArrLike
+        } else {
+            OpPHPArr
+        }),
         "HH\\is_class" => Some(OpClass),
         _ => None,
     }

@@ -3164,6 +3164,16 @@ SSATmp* simplifyIsCol(State& env, const IRInstruction* inst) {
     });
 }
 
+SSATmp* simplifyIsLegacyArrLike(State& env, const IRInstruction* inst) {
+  auto const arr = inst->src(0);
+  if (!RO::EvalHackArrDVArrs && !arr->isA(TVArr|TDArr)) {
+    return cns(env, false);
+  } else if (arr->hasConstVal()) {
+    return cns(env, arr->arrLikeVal()->isLegacyArray());
+  }
+  return nullptr;
+}
+
 SSATmp* simplifyHasToString(State& env, const IRInstruction* inst) {
   return simplifyByClass(
     env, inst->src(0),
@@ -3411,6 +3421,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(InstanceOfIfaceVtable)
   X(IsNType)
   X(IsType)
+  X(IsLegacyArrLike)
   X(IsWaitHandle)
   X(IsCol)
   X(HasToString)

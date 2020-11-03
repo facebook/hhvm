@@ -3217,6 +3217,9 @@ OPTBLD_INLINE static bool isTypeHelper(TypedValue val, IsTypeOp op) {
   case IsTypeOp::Res:    return tvIsResource(val);
   case IsTypeOp::Scalar: return HHVM_FN(is_scalar)(tvAsCVarRef(val));
   case IsTypeOp::ArrLike: return is_any_array(&val);
+  case IsTypeOp::LegacyArrLike: {
+    return tvIsArrayLike(val) && val.val().parr->isLegacyArray();
+  }
   case IsTypeOp::ClsMeth: return is_clsmeth(&val);
   case IsTypeOp::Func: return is_fun(&val);
   case IsTypeOp::Class: return is_class(&val);

@@ -696,6 +696,7 @@ bool opcodeMayRaise(Opcode opc) {
   case IsFunReifiedGenericsMatched:
   case IsNType:
   case IsNTypeMem:
+  case IsLegacyArrLike:
   case IsType:
   case IsTypeMem:
   case IsTypeStructCached:

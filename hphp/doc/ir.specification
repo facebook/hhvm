@@ -3262,6 +3262,10 @@ fields of that struct for holding intermediate values.
   Returns the first value(key) from the keyset in S0.
   If the array is empty, it will return NULL.
 
+| IsLegacyArrLike, D(Bool), S(Vec,Dict,VArr,DArr), LA
+
+  Returns true iff the given array has the legacy bit set.
+
 | ArrayMarkLegacyShallow,     DModified(0), S(Vec,Dict,VArr,DArr), CRc|PRc|LA
 
 | ArrayMarkLegacyRecursive,   DModified(0), S(Vec,Dict,VArr,DArr), CRc|PRc|LA

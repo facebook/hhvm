@@ -260,6 +260,7 @@ bool supportsGVN(const IRInstruction* inst) {
   case HasToString:
   case IsType:
   case IsNType:
+  case IsLegacyArrLike:
   case IsWaitHandle:
   case IsCol:
   case LdRDSAddr:

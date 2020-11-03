@@ -1706,6 +1706,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case InterfaceSupportsDbl:
   case InterfaceSupportsInt:
   case InterfaceSupportsStr:
+  case IsLegacyArrLike:
   case IsWaitHandle:
   case IsCol:
   case HasToString:

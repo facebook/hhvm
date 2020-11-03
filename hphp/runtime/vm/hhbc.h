@@ -315,6 +315,7 @@ inline bool isIncDecO(IncDecOp op) {
   ISTYPE_OP(Obj)                               \
   ISTYPE_OP(Scalar)                            \
   ISTYPE_OP(ArrLike)                           \
+  ISTYPE_OP(LegacyArrLike)                     \
   ISTYPE_OP(Res)                               \
   ISTYPE_OP(VArray)                            \
   ISTYPE_OP(DArray)                            \

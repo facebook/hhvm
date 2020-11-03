@@ -3990,7 +3990,7 @@ folly::Optional<Type> type_of_type_structure(const Index& index,
         v.emplace_back(std::move(t.value()));
       }
       if (v.empty()) return folly::none;
-      auto const arrT = arr_packed_varray(v, ProvTag::Top);
+      auto const arrT = RO::EvalHackArrDVArrs ? vec(v) : arr_packed_varray(v);
       return is_nullable ? union_of(std::move(arrT), TNull) : arrT;
     }
     case TypeStructure::Kind::T_shape: {
@@ -4032,7 +4032,9 @@ folly::Optional<Type> type_of_type_structure(const Index& index,
           make_tv<KindOfPersistentString>(key), std::move(t.value()));
       }
       if (map.empty()) return folly::none;
-      auto const arrT = arr_map_darray(map);
+      auto const arrT = RO::EvalHackArrDVArrs
+        ? dict_map(map)
+        : arr_map_darray(map);
       return is_nullable ? union_of(std::move(arrT), TNull) : arrT;
     }
     case TypeStructure::Kind::T_vec_or_dict:

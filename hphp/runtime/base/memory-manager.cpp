@@ -301,7 +301,7 @@ void MemoryManager::refreshStats() {
   m_lastUsage = usage;
   if (usage > m_usageLimit && m_couldOOM) {
     refreshStatsHelperExceeded();
-  } else if (usage > m_memThresholdCallbackPeakUsage) {
+  } else if (usage >= 0 && usage > m_memThresholdCallbackPeakUsage) {
     m_memThresholdCallbackPeakUsage = SIZE_MAX;
     setSurpriseFlag(MemThresholdFlag);
   }

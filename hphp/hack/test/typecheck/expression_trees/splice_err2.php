@@ -13,19 +13,25 @@ function foo(): void {
 // Placeholder definition so we don't get naming/typing errors.
 final class Code {
   const type TAst = mixed;
-  // Simple literals.
-  public function intLiteral(?ExprPos $_, int $_): this::TAst {
+  // Lifting literals.
+  public static function intLiteral(int $_): ExprTree<this, this::TAst, int> {
     throw new Exception();
   }
-  public function boolLiteral(?ExprPos $_, bool $_): this::TAst {
+  public static function boolLiteral(bool $_):
+    ExprTree<this, this::TAst, bool>
+  {
     throw new Exception();
   }
-  public function stringLiteral(?ExprPos $_, string $_): this::TAst {
+  public static function stringLiteral(string $_):
+    ExprTree<this, this::TAst, string>
+  {
     throw new Exception();
   }
-  public function nullLiteral(?ExprPos $_): this::TAst {
+  public static function nullLiteral(): ExprTree<this, this::TAst, null> {
     throw new Exception();
   }
+
+  // Expressions
   public function localVar(?ExprPos $_, string $_): this::TAst {
     throw new Exception();
   }

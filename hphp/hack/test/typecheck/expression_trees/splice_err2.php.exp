@@ -2,5 +2,5 @@ File "splice_err2.php", line 9, characters 13-30:
 Typing error (Typing[4110])
   File "splice_err2.php", line 9, characters 17-30:
   Expected `num` because this is used in an arithmetic operation
-  File "splice_err2.php", line 6, characters 13-19:
+  File "splice_err2.php", line 26, characters 32-37:
   But got `string`

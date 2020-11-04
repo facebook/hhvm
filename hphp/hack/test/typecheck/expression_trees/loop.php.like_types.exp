@@ -1,0 +1,16 @@
+File "loop.php", line 9, characters 31-34:
+Expected `ExprTree<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
+  File "loop.php", line 22, characters 5-36:
+  But got `dynamic` because it is an unenforceable type
+File "loop.php", line 10, characters 33-33:
+Expected `ExprTree<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
+  File "loop.php", line 18, characters 46-76:
+  But got `dynamic` because it is an unenforceable type
+File "loop.php", line 10, characters 36-39:
+Expected `ExprTree<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
+  File "loop.php", line 22, characters 5-36:
+  But got `dynamic` because it is an unenforceable type
+File "loop.php", line 10, characters 52-52:
+Expected `ExprTree<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
+  File "loop.php", line 18, characters 46-76:
+  But got `dynamic` because it is an unenforceable type

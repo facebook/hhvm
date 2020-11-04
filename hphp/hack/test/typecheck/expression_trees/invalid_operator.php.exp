@@ -20,3 +20,5 @@ File "invalid_operator.php", line 34, characters 32-38:
 Unsupported syntax for expression trees. (Parsing[1002])
 File "invalid_operator.php", line 37, characters 28-34:
 Unsupported syntax for expression trees. (Parsing[1002])
+File "invalid_operator.php", line 23, characters 33-33:
+Variable `$__0` is undefined, or not always defined. (Naming[2050])

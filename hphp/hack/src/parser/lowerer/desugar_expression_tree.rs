@@ -5,7 +5,7 @@ use oxidized::{
     aast,
     aast_visitor::{AstParams, NodeMut, VisitorMut},
     ast,
-    ast::{ClassId, ClassId_, Expr, Expr_, Stmt, Stmt_},
+    ast::{ClassId, ClassId_, Expr, Expr_, Hint_, Stmt, Stmt_},
     ast_defs::*,
     file_info,
     pos::Pos,
@@ -24,7 +24,16 @@ use oxidized::{
 /// )();
 /// ```
 pub fn desugar<TF>(hint: &aast::Hint, e: &Expr, env: &Env<TF>) -> Expr {
-    let (e, extracted_splices) = extract_and_replace_splices(e);
+    let visitor_name = {
+        if let Hint_::Happly(id, _) = &*hint.1 {
+            &id.1
+        } else {
+            ""
+        }
+    };
+
+    let e = virtualize_expr(visitor_name.to_string(), e);
+    let (e, extracted_splices) = extract_and_replace_splices(&e);
     let temp_pos = e.0.clone();
 
     // Create assignments of extracted splices
@@ -149,21 +158,87 @@ fn wrap_fun_<TF>(
     }
 }
 
+/// Preprocess expression
+///   Virtualizes literals
+///   TODO: Reduces operators to method calls
+///   TODO: Transforms function calls
+fn virtualize_expr(visitor_name: String, e: &Expr) -> Expr {
+    let mut e_copy = e.clone();
+
+    let mut visitor = Virtualizer { visitor_name };
+    visitor.visit_expr(&mut (), &mut e_copy).unwrap();
+    e_copy
+}
+
+struct Virtualizer {
+    visitor_name: String,
+}
+
+impl<'ast> VisitorMut<'ast> for Virtualizer {
+    type P = AstParams<(), ()>;
+
+    fn object(&mut self) -> &mut dyn VisitorMut<'ast, P = Self::P> {
+        self
+    }
+
+    fn visit_expr(&mut self, env: &mut (), e: &mut Expr) -> Result<(), ()> {
+        use aast::Expr_::*;
+
+        let pos = e.0.clone();
+
+        let mk_splice = |e: Expr| -> Expr { Expr::new(pos.clone(), Expr_::ETSplice(Box::new(e))) };
+
+        match e.1 {
+            // Convert `1` to `__splice__(Visitor::intLiteral(1))`.
+            Int(_) => {
+                *e = mk_splice(static_meth_call(
+                    &self.visitor_name,
+                    "intLiteral",
+                    vec![e.clone()],
+                    &pos,
+                ))
+            }
+            // Convert `"foo"` to `__splice__(Visitor::stringLiteral("foo"))`
+            String(_) => {
+                *e = mk_splice(static_meth_call(
+                    &self.visitor_name,
+                    "stringLiteral",
+                    vec![e.clone()],
+                    &pos,
+                ))
+            }
+            // Convert `true` to `__splice__(Visitor::boolLiteral(true))`
+            True | False => {
+                *e = mk_splice(static_meth_call(
+                    &self.visitor_name,
+                    "boolLiteral",
+                    vec![e.clone()],
+                    &pos,
+                ))
+            }
+            // Convert `null` to `__splice__(Visitor::nullLiteral())`
+            Null => {
+                *e = mk_splice(static_meth_call(
+                    &self.visitor_name,
+                    "nullLiteral",
+                    vec![],
+                    &pos,
+                ))
+            }
+            // Do not want to recurse into splices
+            ETSplice(_) => {}
+            _ => e.recurse(env, self.object())?,
+        }
+        Ok(())
+    }
+}
+
 /// Convert expression tree expressions to method calls.
 fn rewrite_expr(e: &Expr) -> Expr {
     use aast::Expr_::*;
 
     let pos = exprpos(&e.0);
     match &e.1 {
-        // Convert `1` to `$v->intLiteral(new ExprPos(...), 1)`.
-        Int(_) => meth_call("intLiteral", vec![pos, e.clone()], &e.0),
-        // Convert `"foo"` to `$v->stringLiteral(new ExprPos(...), "foo")`.
-        String(_) => meth_call("stringLiteral", vec![pos, e.clone()], &e.0),
-        // Convert `true` to `$v->boolLiteral(new ExprPos(...), true)`.
-        True => meth_call("boolLiteral", vec![pos, e.clone()], &e.0),
-        False => meth_call("boolLiteral", vec![pos, e.clone()], &e.0),
-        // Convert `null` to `$v->nullLiteral(new ExprPos(...))`.
-        Null => meth_call("nullLiteral", vec![pos], &e.0),
         // Convert `$x` to `$v->localVar(new ExprPos(...), "$x")` (note the quoting).
         Lvar(lid) => meth_call("localVar", vec![pos, string_literal(&((lid.1).1))], &e.0),
         Binop(bop) => {
@@ -407,6 +482,27 @@ fn meth_call(meth_name: &str, args: Vec<Expr>, pos: &Pos) -> Expr {
         None,
     )));
     Expr::new(pos.clone(), c)
+}
+
+fn static_meth_call(classname: &str, meth_name: &str, args: Vec<Expr>, pos: &Pos) -> Expr {
+    let callee = Expr::new(
+        pos.clone(),
+        Expr_::ClassConst(Box::new((
+            // TODO: Refactor ClassId creation with new_obj
+            ClassId(
+                pos.clone(),
+                ClassId_::CIexpr(Expr::new(
+                    pos.clone(),
+                    Expr_::Id(Box::new(Id(pos.clone(), classname.to_string()))),
+                )),
+            ),
+            (pos.clone(), meth_name.to_string()),
+        ))),
+    );
+    Expr::new(
+        pos.clone(),
+        Expr_::Call(Box::new((callee, vec![], args, None))),
+    )
 }
 
 /// Join a slice of positions together into a single, larger position.

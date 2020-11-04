@@ -14,12 +14,26 @@ function test(): void {
 }
 
 final class MyVisitor {
-  public function intLiteral(ExprPos $_, int $i): string {
-    return (string)$i;
+  public static function intLiteral(
+    int $i,
+  ): ExprTree<MyVisitor, mixed, int> {
+    return new ExprTree(
+      null,
+      null,
+      (MyVisitor $_) ==> (string)$i,
+      () ==> { throw new Exception(); },
+    );
   }
 
-  public function stringLiteral(ExprPos $_, string $s): string {
-    return "\"$s\"";
+  public static function stringLiteral(
+    string $s
+  ): ExprTree<MyVisitor, mixed, string> {
+    return new ExprTree(
+      null,
+      null,
+      (MyVisitor $_) ==> "\"$s\"",
+      () ==> { throw new Exception(); },
+    );
   }
 
   public function plus(ExprPos $_, mixed $lhs, mixed $rhs): string {
@@ -40,12 +54,19 @@ final class MyVisitor {
     }
     return $call . ")" ;
   }
+
+  public function splice(
+    ExprPos $_,
+    ExprTree<MyVisitor, mixed, mixed> $et,
+  ): mixed {
+    return $et->construct($this);
+  }
 }
 
 final class ExprTree<TVisitor, TResult, TInfer>{
   public function __construct(
-    private ExprPos $pos,
-    private string $filepath,
+    private ?ExprPos $pos,
+    private ?string $filepath,
     private (function(TVisitor): TResult) $ast,
     private (function(): TInfer) $err,
   ) {}

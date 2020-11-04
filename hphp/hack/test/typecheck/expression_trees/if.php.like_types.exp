@@ -1,0 +1,20 @@
+File "if.php", line 6, characters 46-46:
+Expected `ExprTree<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
+  File "if.php", line 24, characters 46-76:
+  But got `dynamic` because it is an unenforceable type
+File "if.php", line 6, characters 58-58:
+Expected `ExprTree<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
+  File "if.php", line 24, characters 46-76:
+  But got `dynamic` because it is an unenforceable type
+File "if.php", line 10, characters 14-14:
+Expected `ExprTree<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
+  File "if.php", line 24, characters 46-76:
+  But got `dynamic` because it is an unenforceable type
+File "if.php", line 12, characters 14-14:
+Expected `ExprTree<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
+  File "if.php", line 24, characters 46-76:
+  But got `dynamic` because it is an unenforceable type
+File "if.php", line 14, characters 14-14:
+Expected `ExprTree<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
+  File "if.php", line 24, characters 46-76:
+  But got `dynamic` because it is an unenforceable type

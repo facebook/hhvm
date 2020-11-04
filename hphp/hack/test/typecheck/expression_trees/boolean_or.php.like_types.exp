@@ -1,0 +1,8 @@
+File "boolean_or.php", line 6, characters 13-16:
+Expected `ExprTree<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
+  File "boolean_or.php", line 18, characters 5-36:
+  But got `dynamic` because it is an unenforceable type
+File "boolean_or.php", line 6, characters 21-25:
+Expected `ExprTree<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
+  File "boolean_or.php", line 18, characters 5-36:
+  But got `dynamic` because it is an unenforceable type

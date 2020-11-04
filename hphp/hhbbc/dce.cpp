@@ -1280,6 +1280,23 @@ void dce(Env& env, const bc::IsTypeL& op) {
     });
 }
 
+void updateSrcLocForAddElemC(UseInfo& ui, int32_t srcLoc) {
+  assertx(ui.usage == Use::AddElemC);
+  assertx(!ui.actions.empty());
+
+  for (auto& it : ui.actions) {
+    if (it.second.bcs.size() != 1) continue;
+    if (it.second.action != DceAction::Replace) continue;
+
+    auto& bc = it.second.bcs[0];
+    if (bc.op == Op::NewStructDArray ||
+        bc.op == Op::NewStructDict ||
+        bc.op == Op::NewVArray) {
+      bc.srcLoc = srcLoc;
+    }
+  }
+}
+
 void dce(Env& env, const bc::Array& op) {
   stack_ops(env, [&] (UseInfo& ui) {
       if (allUnusedIfNotLastRef(ui)) return PushFlags::MarkUnused;
@@ -1287,6 +1304,8 @@ void dce(Env& env, const bc::Array& op) {
       if (ui.usage != Use::AddElemC) return PushFlags::MarkLive;
 
       assert(!env.dceState.isLocal);
+
+      updateSrcLocForAddElemC(ui, env.op.srcLoc);
 
       CompactVector<Bytecode> bcs;
       IterateV(op.arr1, [&] (TypedValue v) {
@@ -1299,8 +1318,11 @@ void dce(Env& env, const bc::Array& op) {
 }
 
 void dce(Env& env, const bc::NewDictArray&) {
-  stack_ops(env, [&] (const UseInfo& ui) {
+  stack_ops(env, [&] (UseInfo& ui) {
       if (ui.usage == Use::AddElemC || allUnused(ui)) {
+        if (ui.usage == Use::AddElemC) {
+          updateSrcLocForAddElemC(ui, env.op.srcLoc);
+        }
         env.dceState.didAddOpts  = true;
         return PushFlags::MarkUnused;
       }
@@ -1310,8 +1332,11 @@ void dce(Env& env, const bc::NewDictArray&) {
 }
 
 void dce(Env& env, const bc::NewDArray&) {
-  stack_ops(env, [&] (const UseInfo& ui) {
+  stack_ops(env, [&] (UseInfo& ui) {
       if (ui.usage == Use::AddElemC || allUnused(ui)) {
+        if (ui.usage == Use::AddElemC) {
+          updateSrcLocForAddElemC(ui, env.op.srcLoc);
+        }
         env.dceState.didAddOpts  = true;
         return PushFlags::MarkUnused;
       }
@@ -2310,7 +2335,8 @@ void dce_perform(php::WideFunc& func, const DceActionMap& actionMap) {
   using It = BytecodeVec::iterator;
   auto setloc = [] (int32_t srcLoc, It start, int n) {
     while (n--) {
-      start++->srcLoc = srcLoc;
+      if (start->srcLoc < 0) start->srcLoc = srcLoc;
+      start++;
     }
   };
 
@@ -2318,12 +2344,13 @@ void dce_perform(php::WideFunc& func, const DceActionMap& actionMap) {
     auto const& id = elm.first;
     auto const& dceAction = elm.second;
     auto const b = func.blocks()[id.blk].mutate();
+    auto const srcLoc = b->hhbcs[id.idx].srcLoc;
     FTRACE(1, "{} {}\n", show(elm), show(*func, b->hhbcs[id.idx]));
+
     switch (dceAction.action) {
       case DceAction::PopInputs:
         // we want to replace the bytecode with pops of its inputs
         if (auto const numToPop = numPop(b->hhbcs[id.idx])) {
-          auto const srcLoc = b->hhbcs[id.idx].srcLoc;
           b->hhbcs.erase(b->hhbcs.begin() + id.idx);
           b->hhbcs.insert(b->hhbcs.begin() + id.idx,
                           numToPop,
@@ -2335,7 +2362,6 @@ void dce_perform(php::WideFunc& func, const DceActionMap& actionMap) {
       case DceAction::Kill:
         if (b->hhbcs.size() == 1) {
           // we don't allow empty blocks
-          auto const srcLoc = b->hhbcs[0].srcLoc;
           b->hhbcs[0] = bc::Nop {};
           b->hhbcs[0].srcLoc = srcLoc;
         } else {
@@ -2349,15 +2375,13 @@ void dce_perform(php::WideFunc& func, const DceActionMap& actionMap) {
         b->hhbcs.insert(b->hhbcs.begin() + id.idx + 1,
                         numToPop,
                         bc::PopC {});
-        setloc(b->hhbcs[id.idx].srcLoc,
-               b->hhbcs.begin() + id.idx + 1, numToPop);
+        setloc(srcLoc, b->hhbcs.begin() + id.idx + 1, numToPop);
         break;
       }
       case DceAction::Replace:
       {
         auto const& bcs = dceAction.bcs;
         always_assert(!bcs.empty());
-        auto const srcLoc = b->hhbcs[id.idx].srcLoc;
         b->hhbcs.erase(b->hhbcs.begin() + id.idx);
         b->hhbcs.insert(b->hhbcs.begin() + id.idx,
                         begin(bcs), end(bcs));
@@ -2368,7 +2392,6 @@ void dce_perform(php::WideFunc& func, const DceActionMap& actionMap) {
       {
         auto const& bcs = dceAction.bcs;
         always_assert(!bcs.empty());
-        auto const srcLoc = b->hhbcs[id.idx].srcLoc;
         auto const numToPop = numPop(b->hhbcs[id.idx]);
         b->hhbcs.erase(b->hhbcs.begin() + id.idx);
         b->hhbcs.insert(b->hhbcs.begin() + id.idx,
@@ -2391,7 +2414,6 @@ void dce_perform(php::WideFunc& func, const DceActionMap& actionMap) {
       {
         assertx(b->hhbcs[id.idx].op == OpBaseL);
         auto const base = b->hhbcs[id.idx].BaseL;
-        auto const srcLoc = b->hhbcs[id.idx].srcLoc;
         b->hhbcs[id.idx] = bc::PushL {base.nloc1.id};
         b->hhbcs.insert(
           b->hhbcs.begin() + id.idx + 1, bc::BaseC{0, base.subop2});
@@ -2425,7 +2447,6 @@ void dce_perform(php::WideFunc& func, const DceActionMap& actionMap) {
           popFrame.arg1 -= dceAction.maskOrCount;
           if (popFrame.arg1 <= 1) {
             auto const remaining = popFrame.arg1;
-            auto const srcLoc = b->hhbcs[id.idx].srcLoc;
             b->hhbcs.erase(b->hhbcs.begin() + id.idx);
             b->hhbcs.insert(
               b->hhbcs.begin() + id.idx,
@@ -2443,7 +2464,6 @@ void dce_perform(php::WideFunc& func, const DceActionMap& actionMap) {
         assertx(id.idx == 0);
         auto const& bcs = dceAction.bcs;
         always_assert(!bcs.empty());
-        auto const srcLoc = b->hhbcs[id.idx].srcLoc;
         b->hhbcs.insert(b->hhbcs.begin() + id.idx,
                         begin(bcs), end(bcs));
         setloc(srcLoc, b->hhbcs.begin() + id.idx, bcs.size());
@@ -2469,7 +2489,6 @@ void dce_perform(php::WideFunc& func, const DceActionMap& actionMap) {
         // The MBR must not be alive across control flow edges.
         always_assert(idx < b->hhbcs.size());
         assertx(idx == id.idx || isMemberFinalOp(b->hhbcs[idx].op));
-        auto const srcLoc = b->hhbcs[idx].srcLoc;
         b->hhbcs.insert(b->hhbcs.begin() + idx + 1,
                         begin(bcs), end(bcs));
         setloc(srcLoc, b->hhbcs.begin() + idx + 1, bcs.size());

@@ -409,3 +409,5 @@ let provide_ast_hint
 let remove_batch paths = ParserHeap.remove_batch paths
 
 let has_for_test (path : Relative_path.t) : bool = ParserHeap.mem path
+
+let clear_parser_cache () = ParserHeap.Cache.clear ()

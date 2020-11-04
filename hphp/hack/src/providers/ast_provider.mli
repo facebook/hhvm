@@ -102,3 +102,5 @@ val provide_ast_hint : Relative_path.t -> Nast.program -> parse_type -> unit
 val remove_batch : Relative_path.Set.t -> unit
 
 val has_for_test : Relative_path.t -> bool
+
+val clear_parser_cache : unit -> unit

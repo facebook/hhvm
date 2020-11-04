@@ -564,6 +564,7 @@ let rage_experiments_and_config
     ( local_config.ServerLocalConfig.experiments,
       local_config.ServerLocalConfig.experiments_config_meta )
 
+(** Human-readable text showing an attempt to kick off a repro of what the user had *)
 let rage_repro (mergebase : string option) (patch_script : string option) :
     (string * string) option Lwt.t =
   match (mergebase, patch_script) with
@@ -579,6 +580,40 @@ let rage_repro (mergebase : string option) (patch_script : string option) :
       | None -> "not applicable"
     in
     Lwt.return_some ("repro", result)
+
+(** Human-readable text relating to what shell commands the user has executed *)
+let rage_command_history () : string Lwt.t =
+  let re = Str.regexp "^#[0-9]+$" in
+  let fn = Sys_utils.expanduser "~/.bash_history" in
+  let bash_history =
+    if Sys.file_exists fn then
+      try
+        let contents = Sys_utils.cat fn |> String_utils.split_into_lines in
+        (* .bash_history file format is a command-line, then a line like "#<timestamp>", repeated.
+        We'll reformat the timestamps. This fold statement has an accumulator (cmd, cmds) where
+        cmd is the most recent timestamp encountered, and cmds is where we accumuate "[time] - cmd".
+        Each command-line is followed by its timestamps, but the command-lines are unsorted. *)
+        let (_, cmds) =
+          List.fold contents ~init:("?", []) ~f:(fun (cmd, cmds) s ->
+              if Str.string_match re s 0 then
+                let t = float_of_string (String_utils.lstrip s "#") in
+                ("?", (Utils.timestring t ^ " " ^ cmd) :: cmds)
+              else
+                (s, cmds))
+        in
+        let cmds = List.sort cmds ~compare:String.descending in
+        Printf.sprintf
+          ( "BASH HISTORY\n"
+          ^^ "The file ~/.bash_history contains recent commands, but (1) it is only updated when\n"
+          ^^ "the user closes their shell and hence doesn't contain recent commands, and (2) it\n"
+          ^^ "naturally doesn't exist if the user doesn't use bash!\n\n%s" )
+          (List.take cmds 100 |> String.concat ~sep:"\n")
+      with e -> Exception.wrap e |> Exception.to_string
+    else
+      "Not found: ~/.bash_history"
+  in
+  let%lwt shell = Extra_rage.shell () in
+  Lwt.return (Printf.sprintf "%s\n\n\n%s" bash_history shell)
 
 let main (env : env) : Exit_status.t Lwt.t =
   let start_time = Unix.gettimeofday () in
@@ -719,6 +754,13 @@ let main (env : env) : Exit_status.t Lwt.t =
   (* repro *)
   let%lwt repro = rage_repro mergebase patch_script in
   Option.iter repro ~f:add;
+
+  (* host *)
+  let hostname = Unix.gethostname () in
+  let%lwt ooms = Extra_rage.ooms () in
+  add ("host", hostname ^ "\n\n" ^ ooms);
+  let%lwt command_history = rage_command_history () in
+  add ("command_history", command_history);
 
   (* We've assembled everything! now log it. *)
   let%lwt result =

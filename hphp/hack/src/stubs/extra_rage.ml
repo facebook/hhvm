@@ -9,3 +9,7 @@
 let create_repro ~mergebase ~patch_script =
   ignore (mergebase, patch_script);
   Lwt.return_none
+
+let ooms () = Lwt.return ""
+
+let shell () = Lwt.return ""

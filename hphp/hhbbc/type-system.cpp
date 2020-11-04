@@ -539,10 +539,11 @@ trep combine_arr_like_bits(trep a, trep b) {
   if (check(a, BVArr) && check(b, BVArr)) return combine_varr_bits(a, b);
   if (check(a, BDArr) && check(b, BDArr)) return combine_darr_bits(a, b);
   // If they're all arrays, combine them and promote it to the right TArr union.
-  if (check(a, BArr))    return combine_dv_arrish_bits(a, b);
-  if (check(a, BVec))    return combine_vec_bits(a,       b);
-  if (check(a, BDict))   return combine_dict_bits(a,      b);
-  if (check(a, BKeyset)) return combine_keyset_bits(a,    b);
+  if (check(a, BArr))     return combine_dv_arrish_bits(a, b);
+  if (check(a, BVec))     return combine_vec_bits(a, b);
+  if (check(a, BDict))    return combine_dict_bits(a, b);
+  if (check(a, BKeyset))  return combine_keyset_bits(a, b);
+  if (check(a, BArrLike)) return combine_arrish_bits<BArrLike>(a, b);
   not_reached();
 }
 
@@ -555,12 +556,13 @@ trep combine_arr_like_bits(trep a, trep b) {
 trep combine_dv_arr_like_bits(trep a, trep b) {
   auto check = [] (trep a, trep x) { return (a & (x | BNull)) == a; };
   assert(isPredefined(a) && !check(a, BNull));
-  if (check(a, BVArr))   return combine_varr_bits(a,   b);
-  if (check(a, BDArr))   return combine_darr_bits(a,   b);
-  if (check(a, BArr))    return combine_arr_bits(a,    b);
-  if (check(a, BVec))    return combine_vec_bits(a,    b);
-  if (check(a, BDict))   return combine_dict_bits(a,   b);
-  if (check(a, BKeyset)) return combine_keyset_bits(a, b);
+  if (check(a, BVArr))    return combine_varr_bits(a,   b);
+  if (check(a, BDArr))    return combine_darr_bits(a,   b);
+  if (check(a, BArr))     return combine_arr_bits(a,    b);
+  if (check(a, BVec))     return combine_vec_bits(a,    b);
+  if (check(a, BDict))    return combine_dict_bits(a,   b);
+  if (check(a, BKeyset))  return combine_keyset_bits(a, b);
+  if (check(a, BArrLike)) return combine_arrish_bits<BArrLike>(a, b);
   not_reached();
 }
 
@@ -4584,6 +4586,13 @@ Type union_of(Type a, Type b) {
   Y(KeysetN)
   Y(Keyset)
 
+  Y(SArrLikeE)
+  Y(SArrLikeN)
+  Y(SArrLike)
+  Y(ArrLikeE)
+  Y(ArrLikeN)
+  Y(ArrLike)
+
   Y(UncArrKey)
   Y(ArrKey)
 
@@ -4604,6 +4613,8 @@ Type union_of(Type a, Type b) {
 
   Y(ArrCompatSA)
   Y(ArrCompat)
+  Y(ArrLikeCompatSA)
+  Y(ArrLikeCompat)
 
   // non-optional types that contain other types above (and hence
   // must come after them).
@@ -5679,6 +5690,13 @@ Type arr_map_newelem(Type& map, const Type& val, ProvTag src) {
   return ival(lastK + 1);
 }
 
+std::pair<Type, ThrowMode>
+array_like_elem(const Type& arr, const Type& origKey) {
+  auto const key = disect_strict_key(origKey);
+  if (key.type == TBottom) return {TBottom, ThrowMode::BadOperation};
+  return array_like_elem(std::move(arr), key, TBottom);
+}
+
 std::pair<Type, ThrowMode> array_like_elem(const Type& arr,
                                            const ArrKey& key,
                                            const Type& defaultTy) {
@@ -5761,6 +5779,13 @@ array_elem(const Type& arr, const Type& undisectedKey, const Type& defaultTy) {
   assert(arr.subtypeOrNull(BArr));
   auto const key = disect_array_key(undisectedKey);
   return array_like_elem(arr, key, defaultTy);
+}
+
+std::pair<Type, ThrowMode>
+array_like_set(Type arr, const Type& origKey, const Type& val, ProvTag src) {
+  auto const key = disect_strict_key(origKey);
+  if (key.type == TBottom) return {TBottom, ThrowMode::BadOperation};
+  return array_like_set(std::move(arr), key, val, ProvTag::Top);
 }
 
 /*

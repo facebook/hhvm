@@ -1780,6 +1780,7 @@ std::pair<Type, ThrowMode> dict_elem(const Type& dict, const Type& key,
                                      const Type& defaultTy = TBottom);
 std::pair<Type, ThrowMode> keyset_elem(const Type& keyset, const Type& key,
                                        const Type& defaultTy = TBottom);
+std::pair<Type,ThrowMode> array_like_elem(const Type& arr, const Type& key);
 
 /*
  * (array|vec|dict|keyset)_set
@@ -1797,6 +1798,8 @@ std::pair<Type, ThrowMode> array_set(Type arr, const Type& key,
 std::pair<Type, ThrowMode> vec_set(Type vec, const Type& key, const Type& val);
 std::pair<Type, ThrowMode> dict_set(Type dict, const Type& key, const Type& val);
 std::pair<Type, ThrowMode> keyset_set(Type keyset, const Type& key, const Type& val);
+std::pair<Type,ThrowMode> array_like_set(Type arr, const Type& key, const Type& val,
+                                         ProvTag src = ProvTag::Top);
 
 /*
  * (array|vec|dict|keyset)_newelem
@@ -1812,6 +1815,8 @@ std::pair<Type,Type> array_newelem(Type arr, const Type& val, ProvTag src);
 std::pair<Type,Type> vec_newelem(Type vec, const Type& val);
 std::pair<Type,Type> dict_newelem(Type dict, const Type& val);
 std::pair<Type,Type> keyset_newelem(Type keyset, const Type& val);
+std::pair<Type,Type> array_like_newelem(Type arr, const Type& val,
+                                        ProvTag src = ProvTag::Top);
 
 /*
  * Return the best known information for iteration of the supplied type. This is

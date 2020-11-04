@@ -203,6 +203,8 @@ bool array_do_set(ISS& env, const Type& key, const Type& value) {
       return dict_set(std::move(base), key, value);
     } else if (base.subtypeOf(BKeyset)) {
       return keyset_set(std::move(base), key, value);
+    } else if (base.subtypeOf(BArrLike)) {
+      return array_like_set(std::move(base), key, value);
     }
     return folly::none;
   }();
@@ -236,10 +238,11 @@ folly::Optional<Type> array_do_elem(ISS& env,
                                     const Type& key) {
   auto const& base = env.collect.mInstrState.base.type;
   auto res = [&] () -> folly::Optional<std::pair<Type,ThrowMode>> {
-    if (base.subtypeOf(BArr))    return  array_elem(base, key);
-    if (base.subtypeOf(BVec))    return    vec_elem(base, key);
-    if (base.subtypeOf(BDict))   return   dict_elem(base, key);
-    if (base.subtypeOf(BKeyset)) return keyset_elem(base, key);
+    if (base.subtypeOf(BArr))     return  array_elem(base, key);
+    if (base.subtypeOf(BVec))     return    vec_elem(base, key);
+    if (base.subtypeOf(BDict))    return   dict_elem(base, key);
+    if (base.subtypeOf(BKeyset))  return keyset_elem(base, key);
+    if (base.subtypeOf(BArrLike)) return array_like_elem(base, key);
     return folly::none;
   }();
   if (!res) return folly::none;
@@ -292,6 +295,8 @@ folly::Optional<Type> array_do_newelem(ISS& env, const Type& value) {
       return dict_newelem(std::move(base), value);
     } else if (base.subtypeOf(BKeyset)) {
       return keyset_newelem(std::move(base), value);
+    } else if (base.subtypeOf(BArrLike)) {
+      return array_like_newelem(std::move(base), value);
     }
     return folly::none;
   }();
@@ -391,10 +396,13 @@ Type currentChainType(ISS& env, Type val) {
     } else if (it->base.subtypeOf(BDict)) {
       val = dict_set(it->base, it->key, val).first;
       if (val == TBottom) val = TDict;
-    } else {
-      assert(it->base.subtypeOf(BKeyset));
+    } else if (it->base.subtypeOf(BKeyset)) {
       val = keyset_set(it->base, it->key, val).first;
       if (val == TBottom) val = TKeyset;
+    } else {
+      assertx(it->base.subtypeOf(BArrLike));
+      val = array_like_set(it->base, it->key, val).first;
+      if (val == TBottom) val = TArrLike;
     }
   }
   return val;
@@ -410,7 +418,10 @@ Type resolveArrayChain(ISS& env, Type val) {
     env.collect.mInstrState.arrayChain.pop_back();
     FTRACE(5, "{}  | {} := {} in {}\n", prefix,
       show(key), show(val), show(arr));
-    if (arr.subtypeOf(BVec)) {
+    if (arr.subtypeOf(BArr)) {
+      val = array_set(std::move(arr), key, val, tag).first;
+      if (val == TBottom) val = TArr;
+    } else if (arr.subtypeOf(BVec)) {
       val = vec_set(std::move(arr), key, val).first;
       if (val == TBottom) val = TVec;
     } else if (arr.subtypeOf(BDict)) {
@@ -420,9 +431,9 @@ Type resolveArrayChain(ISS& env, Type val) {
       val = keyset_set(std::move(arr), key, val).first;
       if (val == TBottom) val = TKeyset;
     } else {
-      assert(arr.subtypeOf(BArr));
-      val = array_set(std::move(arr), key, val, tag).first;
-      if (val == TBottom) val = TArr;
+      assertx(arr.subtypeOf(BArrLike));
+      val = array_like_set(std::move(arr), key, val, tag).first;
+      if (val == TBottom) val = TArrLike;
     }
   } while (!env.collect.mInstrState.arrayChain.empty());
   FTRACE(5, "{}  = {}\n", prefix, show(val));

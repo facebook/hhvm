@@ -28,7 +28,7 @@ namespace {
 BespokeTop* s_layout;
 }
 
-BespokeTop::BespokeTop(): Layout("BespokeTop") {}
+BespokeTop::BespokeTop(): Layout("BespokeTop", {}, true) {}
 
 void BespokeTop::InitializeLayouts() {
   s_layout = new BespokeTop();

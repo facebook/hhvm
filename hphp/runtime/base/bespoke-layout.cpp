@@ -59,6 +59,29 @@ const std::string& BespokeLayout::describe() const {
   return m_layout->describe();
 }
 
+bool BespokeLayout::operator<=(const BespokeLayout& o) const {
+  return *m_layout <= *o.m_layout;
+}
+
+BespokeLayout BespokeLayout::operator|(const BespokeLayout& o) const {
+  return BespokeLayout{*m_layout | *o.m_layout};
+}
+
+folly::Optional<BespokeLayout>
+    BespokeLayout::operator&(const BespokeLayout& o) const {
+  auto const layout = *m_layout & *o.m_layout;
+  if (layout) return BespokeLayout{layout};
+  return folly::none;
+}
+
+BespokeLayout BespokeLayout::getLiveableAncestor() const {
+  return BespokeLayout{m_layout->getLiveableAncestor()};
+}
+
+void BespokeLayout::FinalizeHierarchy() {
+  bespoke::Layout::FinalizeHierarchy();
+}
+
 namespace {
 bool checkLayoutMatches(const bespoke::Layout* layout, SSATmp* arr) {
   auto const DEBUG_ONLY layoutType =

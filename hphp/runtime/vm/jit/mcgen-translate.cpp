@@ -42,6 +42,7 @@
 #include "hphp/runtime/vm/workload-stats.h"
 
 #include "hphp/runtime/base/bespoke-array.h"
+#include "hphp/runtime/base/bespoke-layout.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/tracing.h"
 #include "hphp/runtime/base/vm-worker.h"
@@ -328,12 +329,13 @@ void scheduleSerializeOptProf() {
  * functions being PGO'd, which enables controlling the order in which the
  * Optimize translations are emitted in the TC.
  *
- * There are 4 main steps in this process:
+ * There are 5 main steps in this process:
  *   1) Get ordering of functions in the TC using hfsort on the call graph (or
  *   from a precomputed order when deserializing).
- *   2) Optionally serialize profile data when configured.
- *   3) Generate machine code for each of the profiled functions.
- *   4) Relocate the functions in the TC according to the selected order.
+ *   2) Compute a bespoke coloring and finalize the layout hierarchy.
+ *   3) Optionally serialize profile data when configured.
+ *   4) Generate machine code for each of the profiled functions.
+ *   5) Relocate the functions in the TC according to the selected order.
  */
 void retranslateAll() {
   const bool serverMode = RuntimeOption::ServerExecutionMode();
@@ -355,13 +357,16 @@ void retranslateAll() {
   auto const& sortedFuncs = FuncOrder::get();
   auto const nFuncs = sortedFuncs.size();
 
-  // 2) Check if we should dump profile data. We may exit here in
+  // 2) Perform bespoke coloring and finalize the layout hierarchy.
+  if (allowBespokeArrayLikes()) BespokeLayout::FinalizeHierarchy();
+
+  // 3) Check if we should dump profile data. We may exit here in
   //    SerializeAndExit mode, without really doing the JIT, unless
   //    serialization of optimized code's profile is also enabled.
 
   if (serialize && serializeProfDataAndLog()) return;
 
-  // 3) Generate machine code for all the profiled functions.
+  // 4) Generate machine code for all the profiled functions.
 
   auto const initialSize = 512;
   std::vector<tc::FuncMetaInfo> jobs;
@@ -395,7 +400,7 @@ void retranslateAll() {
       }
     }
 
-    // 4) Relocate the machine code into code.hot in the desired order
+    // 5) Relocate the machine code into code.hot in the desired order
 
     tc::relocatePublishSortedOptFuncs(std::move(jobs));
 

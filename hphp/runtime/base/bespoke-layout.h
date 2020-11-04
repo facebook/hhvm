@@ -23,6 +23,8 @@
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/util/assertions.h"
 
+#include <folly/Optional.h>
+
 namespace HPHP {
 
 namespace jit {
@@ -51,6 +53,11 @@ struct BespokeLayout {
   bool operator!=(const BespokeLayout& o) const {
     return !(*this == o);
   }
+  bool operator<=(const BespokeLayout& o) const;
+  BespokeLayout operator|(const BespokeLayout& o) const;
+  folly::Optional<BespokeLayout> operator&(const BespokeLayout& o) const;
+  BespokeLayout getLiveableAncestor() const;
+  static void FinalizeHierarchy();
 
   /* get the index of this layout */
   uint16_t index() const;

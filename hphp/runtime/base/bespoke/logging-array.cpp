@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/bespoke/logging-profile.h"
+#include "hphp/runtime/base/bespoke/bespoke-top.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/memory-manager-defs.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
@@ -51,7 +52,7 @@ static_assert(kSizeIndex == 0 ||
               kSizeIndex2Size[kSizeIndex - 1] < sizeof(LoggingArray),
               "kSizeIndex must be the smallest size for LoggingArray");
 
-constexpr LayoutIndex kLayoutIndex = {0};
+LoggingLayout* s_layout;
 auto const s_vtable = fromArray<LoggingArray>();
 std::atomic<bool> g_emitLoggingArrays;
 
@@ -94,7 +95,10 @@ ArrayData* makeSampledArray(ArrayData* vad) {
 
 //////////////////////////////////////////////////////////////////////////////
 
-LoggingLayout::LoggingLayout(): ConcreteLayout("LoggingLayout", &s_vtable) {};
+LoggingLayout::LoggingLayout()
+  : ConcreteLayout("LoggingLayout", &s_vtable, {BespokeTop::GetLayoutIndex()},
+                   /*liveable=*/ false)
+{}
 
 using namespace jit;
 using namespace jit::irgen;
@@ -171,12 +175,11 @@ ArrayData* maybeMakeLoggingArray(ArrayData* ad, LoggingProfile* profile) {
 //////////////////////////////////////////////////////////////////////////////
 
 void LoggingArray::InitializeLayouts() {
-  auto const layout = new LoggingLayout();
-  always_assert(layout->index() == kLayoutIndex);
+  s_layout = new LoggingLayout();
 }
 
 bespoke::LayoutIndex LoggingArray::GetLayoutIndex() {
-  return kLayoutIndex;
+  return s_layout->index();
 }
 
 LoggingArray* LoggingArray::As(ArrayData* ad) {
@@ -195,7 +198,7 @@ LoggingArray* LoggingArray::Make(ArrayData* ad, LoggingProfile* profile,
   auto lad = static_cast<LoggingArray*>(tl_heap->objMallocIndex(kSizeIndex));
   lad->initHeader_16(getBespokeKind(ad->kind()), OneReference, ad->auxBits());
   lad->m_size = ad->size();
-  lad->setLayoutIndex(kLayoutIndex);
+  lad->setLayoutIndex(GetLayoutIndex());
   lad->wrapped = ad;
   lad->profile = profile;
   lad->entryTypes = ms;
@@ -212,7 +215,7 @@ LoggingArray* LoggingArray::MakeStatic(ArrayData* ad, LoggingProfile* profile) {
       RO::EvalLowStaticArrays ? low_malloc(size) : uncounted_malloc(size));
   lad->initHeader_16(getBespokeKind(ad->kind()), StaticValue, ad->auxBits());
   lad->m_size = ad->size();
-  lad->setLayoutIndex(kLayoutIndex);
+  lad->setLayoutIndex(GetLayoutIndex());
   lad->wrapped = ad;
   lad->profile = profile;
   lad->entryTypes = EntryTypes::ForArray(ad);
@@ -225,7 +228,7 @@ bool LoggingArray::checkInvariants() const {
   assertx(wrapped->kindIsValid());
   assertx(wrapped->size() == size());
   assertx(wrapped->toDataType() == toDataType());
-  assertx(layoutIndex() == kLayoutIndex);
+  assertx(layoutIndex() == GetLayoutIndex());
   assertx(m_kind == getBespokeKind(wrapped->kind()));
   assertx(isLegacyArray() == wrapped->isLegacyArray());
   return true;

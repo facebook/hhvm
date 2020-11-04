@@ -18,7 +18,7 @@
 #include "hphp/runtime/base/bespoke/monotype-vec.h"
 
 #include "hphp/runtime/base/bespoke/entry-types.h"
-
+#include "hphp/runtime/base/bespoke/bespoke-top.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
@@ -91,7 +91,8 @@ constexpr LayoutIndex getEmptyLayoutIndex() {
 }
 
 MonotypeVecLayout::MonotypeVecLayout(LayoutIndex index, DataType type)
-  : ConcreteLayout(index, makeDescription(type), &s_monotypeVecVtable)
+  : ConcreteLayout(index, makeDescription(type), &s_monotypeVecVtable,
+                   {BespokeTop::GetLayoutIndex()}, /*liveable=*/ true)
   , m_fixedType(type)
 {}
 
@@ -100,7 +101,8 @@ std::string MonotypeVecLayout::makeDescription(DataType type) {
 }
 
 EmptyMonotypeVecLayout::EmptyMonotypeVecLayout(LayoutIndex index)
-  : ConcreteLayout(index, "MonotypeVec<Empty>", &s_emptyMonotypeVecVtable)
+  : ConcreteLayout(index, "MonotypeVec<Empty>", &s_emptyMonotypeVecVtable,
+                   {BespokeTop::GetLayoutIndex()}, /*liveable=*/ true)
 {}
 
 void MonotypeVec::InitializeLayouts() {

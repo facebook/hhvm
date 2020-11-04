@@ -18,6 +18,7 @@
 #include "hphp/runtime/base/bespoke/monotype-dict.h"
 
 #include "hphp/runtime/base/array-data-defs.h"
+#include "hphp/runtime/base/bespoke/bespoke-top.h"
 #include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/memory-manager-defs.h"
@@ -1228,20 +1229,24 @@ void EmptyMonotypeDict::InitializeLayouts() {
 
   static auto const empty_vtable = fromArray<EmptyMonotypeDict>();
   new ConcreteLayout(getEmptyLayoutIndex(), "MonotypeDict<Empty,Empty>",
-                     &empty_vtable);
+                     &empty_vtable, {BespokeTop::GetLayoutIndex()},
+                     /*liveable=*/ true);
 
   static auto const int_vtable = fromArray<MonotypeDict<int64_t>>();
   static auto const str_vtable = fromArray<MonotypeDict<StringData*>>();
   static auto const s32_vtable = fromArray<MonotypeDict<LowStringPtr>>();
 
 #define DT(name, value) \
-  if (dt_modulo_persistence(KindOf##name) == KindOf##name) { \
-    auto ints = getIntLayoutIndex(KindOf##name); \
-    auto strs = getStrLayoutIndex(KindOf##name); \
-    auto s32s = getStaticStrLayoutIndex(KindOf##name); \
-    new ConcreteLayout(ints, "MonotypeDict<Int,"#name">", &int_vtable); \
-    new ConcreteLayout(strs, "MonotypeDict(Str,"#name">", &str_vtable); \
-    new ConcreteLayout(s32s, "MonotypeDict<StaticStr,"#name">", &s32_vtable); \
+  if (dt_modulo_persistence(KindOf##name) == KindOf##name) {                 \
+    auto ints = getIntLayoutIndex(KindOf##name);                             \
+    auto strs = getStrLayoutIndex(KindOf##name);                             \
+    auto s32s = getStaticStrLayoutIndex(KindOf##name);                       \
+    new ConcreteLayout(ints, "MonotypeDict<Int,"#name">", &int_vtable,       \
+                       {BespokeTop::GetLayoutIndex()}, /*liveable=*/ true);  \
+    new ConcreteLayout(strs, "MonotypeDict(Str,"#name">", &str_vtable,       \
+                       {BespokeTop::GetLayoutIndex()}, /*liveable=*/ true);  \
+    new ConcreteLayout(s32s, "MonotypeDict<StaticStr,"#name">", &s32_vtable, \
+                       {BespokeTop::GetLayoutIndex()}, /*liveable=*/ true);  \
   }
 DATATYPES
 #undef DT

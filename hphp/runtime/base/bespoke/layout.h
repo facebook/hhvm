@@ -23,6 +23,8 @@
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/util/type-scan.h"
 
+#include <set>
+
 namespace HPHP {
 
 namespace jit {
@@ -237,8 +239,58 @@ constexpr LayoutFunctions fromArray() {
 /*
  * A bespoke::Layout can represent either both the concrete layout of a given
  * BespokeArray or some abstract type that's a union of concrete layouts.
+ *
+ * bespoke::Layout also maintains the type hierarchy of bespoke layouts.
+ * Bespoke layouts form a lattice, with BespokeTop as the top type and the null
+ * layout as the bottom type. Each layout specifies its set of immediate
+ * parents and whether or not it is "liveable"--whether it is sufficiently
+ * general to be used as a guard type for a live translation. The type
+ * hierarchy satisfies the following constraints:
+ *
+ *   1) When a layout is initialized, all of its parents must have already been
+ *   initialized. This ensures that the type hierarchy is a DAG. Each layout
+ *   other than BespokeTop must have at least one parent.
+ *
+ *   2) The supplied parents of each node are immediate parents. That is, no
+ *   supplied parent can be an ancestor of another supplied parent. This
+ *   ensures that the parent edges form a covering relation and simplifies the
+ *   process of computing joins and meets.
+ *
+ *   3) The type hierarchy forms a join semilattice. That is, the least upper
+ *   bound of every pair of layouts exists (this is trivial as we have
+ *   BespokeTop) and is unique. Together with our bottom type, this implies
+ *   that the type hierarchy is a lattice in which both least upper bounds and
+ *   greatest lower bounds are unique.
+ *
+ *   4) Each layout has a distinct least liveable ancestor. This is equivalent
+ *   to the constraint that each liveable layout is the unique parent of each
+ *   of its non-liveable immediate children. This makes the process of
+ *   converting a layout to a liveable layout unambiguous.
+ *
+ * These constraints are validated upon the creation of each layout in debug
+ * mode. If the constraints are satisfied, we are left with a DAG corresponding
+ * to the covering relation of a valid lattice, in which join and meet can be
+ * implemented by simple BFS.
+ *
+ * Once the type hierarchy has been created, we supply the standard <=, meet
+ * (&), and join (|) operations for the layouts, which are used from ArraySpec
+ * for type operations. We further expose getLiveableAncestor to obtain a
+ * layout's least liveable ancestor. Note that several of these operations
+ * cannot be correctly implemented until the layout hierarchy is finalized
+ * (which occurs when FinalizeHierarchy is invoked).
+ *
+ * When the layout hierarchy is final, all type operations are valid. Before
+ * the layout hierarchy is final, only type operations on BespokeTop are
+ * permitted. This enables us to use BespokeTop and normal type operations in
+ * profiling tracelets while disallowing more specific type operations that
+ * require knowledge of the bespoke hierarchy.
  */
 struct Layout {
+  using LayoutSet = std::set<LayoutIndex>;
+
+  Layout(const Layout& l) = delete;
+  Layout& operator=(const Layout&) = delete;
+
   virtual ~Layout() {}
 
   /*
@@ -251,6 +303,11 @@ struct Layout {
   LayoutIndex index() const { return m_index; }
   const std::string& describe() const { return m_description; }
   virtual bool isConcrete() const { return false; }
+  /*
+   * Checks whether the layout is marked as "liveable"--general enough to be
+   * used as a guard type in a live translation.
+   */
+  bool isLiveable() const { return m_liveable; }
 
   /*
    * In order to support efficient layout type tests in the JIT, we let
@@ -260,8 +317,26 @@ struct Layout {
    *   @postcondition: The result is a multiple of size.
    */
   static LayoutIndex ReserveIndices(size_t size);
-
   static const Layout* FromIndex(LayoutIndex index);
+
+  /*
+   * Seals the bespoke type hierarchy. Before this is invoked, type operations
+   * on bespoke layouts other than BespokeTop are invalid. After it is invoked,
+   * all type operations are valid but no new layouts can be created.
+   */
+  static void FinalizeHierarchy();
+
+  /*
+   * Returns the layout's unique least liveable ancestor for use in a live
+   * translation. If the type hierarchy is not finalized, we simply return
+   * BespokeTop. This enables us to support live translations that may be
+   * created before RTA has finalized the hierarchy.
+   */
+  const Layout* getLiveableAncestor() const;
+
+  bool operator<=(const Layout& other) const;
+  const Layout* operator|(const Layout& other) const;
+  const Layout* operator&(const Layout& other) const;
 
   ///////////////////////////////////////////////////////////////////////////
 
@@ -361,16 +436,29 @@ struct Layout {
 
 
 protected:
-  explicit Layout(const std::string& description);
-  Layout(LayoutIndex index, const std::string& description);
+  explicit Layout(const std::string& description, LayoutSet&& parents,
+                  bool liveable);
+  Layout(LayoutIndex index, const std::string& description, LayoutSet&& parents,
+         bool liveable);
 
 private:
+  bool checkInvariants() const;
+  bool isDescendentOf(const Layout* other) const;
+  LayoutSet computeAncestors() const;
+  LayoutSet computeDescendents() const;
+  const Layout* nearestBound(bool upward, const Layout* other) const;
+  const Layout* nearestBoundDebug(bool upward, const Layout* other) const;
+
   struct Initializer;
   static Initializer s_initializer;
+  struct BFSWalker;
 
   LayoutIndex m_index;
   std::string m_description;
   const LayoutFunctions* m_vtable;
+  LayoutSet m_parents;
+  LayoutSet m_children;
+  bool m_liveable;
 };
 
 /*
@@ -379,10 +467,11 @@ private:
  * various JIT helpers in terms of the vtable methods.
  */
 struct ConcreteLayout : public Layout {
-  ConcreteLayout(const std::string& description,
-                 const LayoutFunctions* vtable);
+  ConcreteLayout(const std::string& description, const LayoutFunctions* vtable,
+                 LayoutSet&& parents, bool liveable);
   ConcreteLayout(LayoutIndex index, const std::string& description,
-                 const LayoutFunctions* vtable);
+                 const LayoutFunctions* vtable, LayoutSet&& parents,
+                 bool liveable);
   virtual ~ConcreteLayout() {}
 
   const LayoutFunctions* vtable() const { return m_vtable; }

@@ -166,6 +166,10 @@ inline ArraySpec::Sort ArraySpec::sortForBespokeIndex(uint16_t index) {
   );
 }
 
+inline ArraySpec::Sort ArraySpec::sortForBespokeLayout(const BespokeLayout& l) {
+  return sortForBespokeIndex(l.index());
+}
+
 inline std::optional<uint16_t> ArraySpec::bespokeIndexForSort(ArraySpec::Sort s) {
   auto const sort = static_cast<uint16_t>(s);
   auto constexpr vanilla = static_cast<uint16_t>(Sort::Vanilla);

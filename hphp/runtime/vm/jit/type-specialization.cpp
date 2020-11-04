@@ -55,8 +55,10 @@ bool ArraySpec::operator<=(const ArraySpec& rhs) const {
     if (!lhs.vanilla()) {
       return false;
     }
-  } else if (auto const index = rhs.bespokeIndex()) {
-    if (lhs.bespokeIndex() != index) {
+  } else if (auto const rLay = rhs.bespokeLayout()) {
+    if (auto const lLay = lhs.bespokeLayout()) {
+      return *lLay <= *rLay;
+    } else {
       return false;
     }
   }
@@ -87,13 +89,13 @@ ArraySpec ArraySpec::operator|(const ArraySpec& rhs) const {
   assertx(lhs.m_sort != Sort::Bottom);
   assertx(rhs.m_sort != Sort::Bottom);
 
+  auto const lLay = lhs.bespokeLayout();
+  auto const rLay = rhs.bespokeLayout();
   if (lhs.m_sort == Sort::Top ||
       rhs.m_sort == Sort::Top) {
     result.m_sort = Sort::Top;
-  } else if (lhs.bespokeIndex() && rhs.bespokeIndex()) {
-    if (lhs.bespokeIndex() != rhs.bespokeIndex()) {
-      result.m_sort = Sort::Top;
-    }
+  } else if (lLay && rLay) {
+    result.m_sort = sortForBespokeLayout(*lLay | *rLay);
   } else if (lhs.vanilla() != rhs.vanilla()) {
     result.m_sort = Sort::Top;
   }
@@ -129,8 +131,17 @@ ArraySpec ArraySpec::operator&(const ArraySpec& rhs) const {
     result.m_sort = lhs.m_sort;
   } else if (lhs.vanilla() != rhs.vanilla()) {
     return Bottom();
-  } else if (lhs.bespokeIndex() != rhs.bespokeIndex()) {
-    return Bottom();
+  } else if (auto const lLay = lhs.bespokeLayout()) {
+    if (auto const rLay = rhs.bespokeLayout()) {
+      auto const meet = *lLay & *rLay;
+      if (meet) {
+        result.m_sort = sortForBespokeLayout(*meet);
+      } else {
+        return Bottom();
+      }
+    } else {
+      return Bottom();
+    }
   }
 
   if (!rhs.type()) {

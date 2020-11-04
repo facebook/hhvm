@@ -53,6 +53,9 @@ void waitOnExportProfiles();
 struct LayoutIndex {
   bool operator==(LayoutIndex o) const { return raw == o.raw; }
   bool operator!=(LayoutIndex o) const { return raw != o.raw; }
+  bool operator<(LayoutIndex o) const { return raw < o.raw; }
+
+public:
   uint16_t raw;
 };
 

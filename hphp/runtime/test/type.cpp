@@ -21,7 +21,7 @@
 
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/array-init.h"
-#include "hphp/runtime/base/bespoke/layout.h"
+#include "hphp/runtime/base/bespoke-layout.h"
 #include "hphp/runtime/base/repo-auth-type-array.h"
 #include "hphp/runtime/test/bespoke-layout-mock.h"
 #include "hphp/runtime/vm/jit/guard-constraint.h"
@@ -890,8 +890,20 @@ TEST(Type, VanillaVec) {
 }
 
 TEST(Type, BespokeVec) {
-  auto const foo_layout = BespokeLayout{bespoke::testing::makeDummyLayout("foo")};
-  auto const bar_layout = BespokeLayout{bespoke::testing::makeDummyLayout("bar")};
+  auto const foo_layout = BespokeLayout{
+    bespoke::testing::makeDummyLayout(
+      "foo",
+      {BespokeLayout::TopLayout()},
+      true
+    )
+  };
+  auto const bar_layout = BespokeLayout{
+    bespoke::testing::makeDummyLayout(
+      "bar",
+      {BespokeLayout::TopLayout()},
+      true
+    )
+  };
 
   auto const vecFoo = TVec.narrowToBespokeLayout(foo_layout);
   EXPECT_EQ("Vec=Bespoke(foo)", vecFoo.toString());
@@ -905,18 +917,26 @@ TEST(Type, BespokeVec) {
 
   auto const vecBar = TVec.narrowToBespokeLayout(bar_layout);
   EXPECT_EQ("Vec=Bespoke(bar)", vecBar.toString());
-  EXPECT_FALSE(vecFoo <= vecBar);
-  EXPECT_FALSE(vecBar <= vecFoo);
-  EXPECT_EQ(TBottom, vecFoo & vecBar);
-  EXPECT_EQ(TVec, vecFoo | vecBar);
 
   auto const vecVanillaBar = TVanillaVec.narrowToBespokeLayout(bar_layout);
   EXPECT_EQ(TBottom, vecVanillaBar);
 }
 
 TEST(Type, BespokeVecRAT) {
-  auto const foo_layout = BespokeLayout{bespoke::testing::makeDummyLayout("foo")};
-  auto const bar_layout = BespokeLayout{bespoke::testing::makeDummyLayout("bar")};
+  auto const foo_layout = BespokeLayout{
+    bespoke::testing::makeDummyLayout(
+      "foo",
+      {BespokeLayout::TopLayout()},
+      true
+    )
+  };
+  auto const bar_layout = BespokeLayout{
+    bespoke::testing::makeDummyLayout(
+      "bar",
+      {BespokeLayout::TopLayout()},
+      true
+    )
+  };
 
   ArrayTypeTable::Builder ratBuilder;
   auto const rat = ratBuilder.packedn(RepoAuthType::Array::Empty::No,
@@ -964,6 +984,205 @@ TEST(Type, VanillaVecRAT) {
   EXPECT_FALSE(vecRat <= TVanillaVec);
   EXPECT_TRUE(vanillaVecRat < TVanillaVec);
   EXPECT_FALSE(vecRat < TVanillaVec);
+}
+
+TEST(Type, BespokeHierarchy) {
+  /*
+   *    top(L)
+   *   /     \
+   *  foo(L)  baz
+   *  |   \   / \
+   * bar  bat(L) ter
+   */
+  RO::EvalBespokeArrayLikeMode = 2;
+  auto const foo_layout = BespokeLayout{
+    bespoke::testing::makeDummyLayout(
+      "foo",
+      {BespokeLayout::TopLayout()},
+      true
+    )
+  };
+  auto const baz_layout = BespokeLayout{
+    bespoke::testing::makeDummyLayout(
+      "baz",
+      {BespokeLayout::TopLayout()},
+      false
+    )
+  };
+  auto const bar_layout = BespokeLayout{
+    bespoke::testing::makeDummyLayout(
+      "bar",
+      {foo_layout},
+      false
+    )
+  };
+  auto const bat_layout = BespokeLayout{
+    bespoke::testing::makeDummyLayout(
+      "bat",
+      {foo_layout, baz_layout},
+      true
+    )
+  };
+  auto const ter_layout = BespokeLayout{
+    bespoke::testing::makeDummyLayout(
+      "ter",
+      {baz_layout},
+      false
+    )
+  };
+  BespokeLayout::FinalizeHierarchy();
+  auto const top = TVec.narrowToBespokeLayout(BespokeLayout::TopLayout());
+  auto const foo = TVec.narrowToBespokeLayout(foo_layout);
+  auto const baz = TVec.narrowToBespokeLayout(baz_layout);
+  auto const bar = TVec.narrowToBespokeLayout(bar_layout);
+  auto const bat = TVec.narrowToBespokeLayout(bat_layout);
+  auto const ter = TVec.narrowToBespokeLayout(ter_layout);
+  auto const bot = TBottom;
+
+  // Subtypes
+  EXPECT_TRUE(top <= top);
+  EXPECT_TRUE(foo <= top);
+  EXPECT_TRUE(baz <= top);
+  EXPECT_TRUE(bar <= top);
+  EXPECT_TRUE(bat <= top);
+  EXPECT_TRUE(ter <= top);
+
+  EXPECT_FALSE(top <= foo);
+  EXPECT_TRUE(foo <= foo);
+  EXPECT_FALSE(baz <= foo);
+  EXPECT_TRUE(bar <= foo);
+  EXPECT_TRUE(bat <= foo);
+  EXPECT_FALSE(ter <= foo);
+
+  EXPECT_FALSE(top <= bar);
+  EXPECT_FALSE(foo <= bar);
+  EXPECT_FALSE(baz <= bar);
+  EXPECT_TRUE(bar <= bar);
+  EXPECT_FALSE(bat <= bar);
+  EXPECT_FALSE(ter <= bar);
+
+  EXPECT_FALSE(top <= bat);
+  EXPECT_FALSE(foo <= bat);
+  EXPECT_FALSE(baz <= bat);
+  EXPECT_FALSE(bar <= bat);
+  EXPECT_TRUE(bat <= bat);
+  EXPECT_FALSE(ter <= bat);
+
+  EXPECT_FALSE(top <= baz);
+  EXPECT_FALSE(foo <= baz);
+  EXPECT_TRUE(baz <= baz);
+  EXPECT_FALSE(bar <= baz);
+  EXPECT_TRUE(bat <= baz);
+  EXPECT_TRUE(ter <= baz);
+
+  EXPECT_FALSE(top <= ter);
+  EXPECT_FALSE(foo <= ter);
+  EXPECT_FALSE(baz <= ter);
+  EXPECT_FALSE(bar <= ter);
+  EXPECT_FALSE(bat <= ter);
+  EXPECT_TRUE(ter <= ter);
+
+  EXPECT_TRUE(bot <= top);
+  EXPECT_TRUE(bot <= foo);
+  EXPECT_TRUE(bot <= baz);
+  EXPECT_TRUE(bot <= bar);
+  EXPECT_TRUE(bot <= bat);
+  EXPECT_TRUE(bot <= ter);
+
+  // Joins
+  EXPECT_EQ(top, top | top);
+  EXPECT_EQ(top, top | foo);
+  EXPECT_EQ(top, top | baz);
+  EXPECT_EQ(top, top | bar);
+  EXPECT_EQ(top, top | bat);
+  EXPECT_EQ(top, top | ter);
+
+  EXPECT_EQ(top, foo | top);
+  EXPECT_EQ(foo, foo | foo);
+  EXPECT_EQ(top, foo | baz);
+  EXPECT_EQ(foo, foo | bar);
+  EXPECT_EQ(foo, foo | bat);
+  EXPECT_EQ(top, foo | ter);
+
+  EXPECT_EQ(top, baz | top);
+  EXPECT_EQ(top, baz | foo);
+  EXPECT_EQ(baz, baz | baz);
+  EXPECT_EQ(top, baz | bar);
+  EXPECT_EQ(baz, baz | bat);
+  EXPECT_EQ(baz, baz | ter);
+
+  EXPECT_EQ(top, bar | top);
+  EXPECT_EQ(foo, bar | foo);
+  EXPECT_EQ(top, bar | baz);
+  EXPECT_EQ(bar, bar | bar);
+  EXPECT_EQ(foo, bar | bat);
+  EXPECT_EQ(top, bar | ter);
+
+  EXPECT_EQ(top, bat | top);
+  EXPECT_EQ(foo, bat | foo);
+  EXPECT_EQ(baz, bat | baz);
+  EXPECT_EQ(foo, bat | bar);
+  EXPECT_EQ(bat, bat | bat);
+  EXPECT_EQ(baz, bat | ter);
+
+  EXPECT_EQ(top, ter | top);
+  EXPECT_EQ(top, ter | foo);
+  EXPECT_EQ(baz, ter | baz);
+  EXPECT_EQ(top, ter | bar);
+  EXPECT_EQ(baz, ter | bat);
+  EXPECT_EQ(ter, ter | ter);
+
+  // Meets
+  EXPECT_EQ(top, top & top);
+  EXPECT_EQ(foo, top & foo);
+  EXPECT_EQ(baz, top & baz);
+  EXPECT_EQ(bar, top & bar);
+  EXPECT_EQ(bat, top & bat);
+  EXPECT_EQ(ter, top & ter);
+
+  EXPECT_EQ(foo, foo & top);
+  EXPECT_EQ(foo, foo & foo);
+  EXPECT_EQ(bat, foo & baz);
+  EXPECT_EQ(bar, foo & bar);
+  EXPECT_EQ(bat, foo & bat);
+  EXPECT_EQ(bot, foo & ter);
+
+  EXPECT_EQ(baz, baz & top);
+  EXPECT_EQ(bat, baz & foo);
+  EXPECT_EQ(baz, baz & baz);
+  EXPECT_EQ(bot, baz & bar);
+  EXPECT_EQ(bat, baz & bat);
+  EXPECT_EQ(ter, baz & ter);
+
+  EXPECT_EQ(bar, bar & top);
+  EXPECT_EQ(bar, bar & foo);
+  EXPECT_EQ(bot, bar & baz);
+  EXPECT_EQ(bar, bar & bar);
+  EXPECT_EQ(bot, bar & bat);
+  EXPECT_EQ(bot, bar & ter);
+
+  EXPECT_EQ(bat, bat & top);
+  EXPECT_EQ(bat, bat & foo);
+  EXPECT_EQ(bat, bat & baz);
+  EXPECT_EQ(bot, bat & bar);
+  EXPECT_EQ(bat, bat & bat);
+  EXPECT_EQ(bot, bat & ter);
+
+  EXPECT_EQ(ter, ter & top);
+  EXPECT_EQ(bot, ter & foo);
+  EXPECT_EQ(ter, ter & baz);
+  EXPECT_EQ(bot, ter & bar);
+  EXPECT_EQ(bot, ter & bat);
+  EXPECT_EQ(ter, ter & ter);
+
+  // Liveable ancestors
+  auto const top_layout = BespokeLayout::TopLayout();
+  EXPECT_EQ(top_layout, top_layout.getLiveableAncestor());
+  EXPECT_EQ(foo_layout, foo_layout.getLiveableAncestor());
+  EXPECT_EQ(top_layout, baz_layout.getLiveableAncestor());
+  EXPECT_EQ(foo_layout, bar_layout.getLiveableAncestor());
+  EXPECT_EQ(bat_layout, bat_layout.getLiveableAncestor());
+  EXPECT_EQ(top_layout, ter_layout.getLiveableAncestor());
 }
 
 TEST(Type, PtrKinds) {

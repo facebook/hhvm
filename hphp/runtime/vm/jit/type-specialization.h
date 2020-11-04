@@ -155,6 +155,7 @@ private:
 
   /* convert an index to a Sort */
   static Sort sortForBespokeIndex(uint16_t);
+  static Sort sortForBespokeLayout(const BespokeLayout& l);
   /* convert a sort to an index, or return 0 if the sort does not represent an
    * index */
   static std::optional<uint16_t> bespokeIndexForSort(Sort);

@@ -27,7 +27,9 @@ namespace bespoke {
 namespace testing {
 
 struct MockLayout : public Layout {
-  MockLayout(const std::string& description): Layout(description) {}
+  MockLayout(const std::string& description, LayoutSet&& parents, bool liveable)
+    : Layout(description, std::move(parents), liveable)
+  {}
 
   virtual SSATmp* emitGet(
       IRGS& env, SSATmp* arr, SSATmp* key, Block* taken) const override {
@@ -83,10 +85,20 @@ struct MockLayout : public Layout {
   }
 };
 
-inline Layout* makeDummyLayout(const std::string& name) {
+inline Layout* makeDummyLayout(const std::string& name,
+                               const std::vector<BespokeLayout>& parents,
+                               bool liveable) {
   using ::testing::Mock;
 
-  auto const ret = new MockLayout(name);
+  Layout::LayoutSet indices;
+  std::transform(
+    parents.cbegin(), parents.cend(),
+    std::inserter(indices, indices.end()),
+    [&](BespokeLayout bl) {
+      return bespoke::LayoutIndex{bl.index()};
+    }
+  );
+  auto const ret = new MockLayout(name, std::move(indices), liveable);
   Mock::AllowLeak(ret);
   return ret;
 }

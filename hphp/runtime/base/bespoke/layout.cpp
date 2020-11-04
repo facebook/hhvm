@@ -30,6 +30,8 @@
 #include <atomic>
 #include <array>
 #include <folly/lang/Bits.h>
+#include <folly/Optional.h>
+#include <vector>
 
 namespace HPHP { namespace bespoke {
 
@@ -41,18 +43,283 @@ using namespace jit::irgen;
 namespace {
 std::atomic<size_t> s_layoutTableIndex;
 std::array<Layout*, Layout::kMaxIndex.raw + 1> s_layoutTable;
+bool s_hierarchyFinal = false;
 }
 
-Layout::Layout(const std::string& description)
-    : m_index(ReserveIndices(1)), m_description(description) {
+Layout::Layout(const std::string& description, LayoutSet&& parents,
+               bool liveable)
+  : m_index(ReserveIndices(1))
+  , m_description(description)
+  , m_parents(std::move(parents))
+  , m_liveable(liveable)
+{
+  assertx(!s_hierarchyFinal);
   assertx(s_layoutTable[m_index.raw] == nullptr);
   s_layoutTable[m_index.raw] = this;
+  assertx(checkInvariants());
 }
 
-Layout::Layout(LayoutIndex index, const std::string& description)
-    : m_index(index), m_description(description) {
+Layout::Layout(LayoutIndex index, const std::string& description,
+               LayoutSet&& parents, bool liveable)
+  : m_index(index)
+  , m_description(description)
+  , m_parents(std::move(parents))
+  , m_liveable(liveable)
+{
+  assertx(!s_hierarchyFinal);
   assertx(s_layoutTable[m_index.raw] == nullptr);
   s_layoutTable[m_index.raw] = this;
+  assertx(checkInvariants());
+}
+
+/*
+ * A BFS implementation used to traverse the bespoke type lattice.
+ */
+struct Layout::BFSWalker {
+  BFSWalker(bool upward, LayoutIndex initIdx)
+    : m_workQ({initIdx})
+    , m_upward(upward)
+  {
+    assertx(IMPLIES(!upward, s_hierarchyFinal));
+  }
+
+  template <typename C>
+  BFSWalker(bool upward, C&& col)
+    : m_workQ(col.cbegin(), col.cend())
+    , m_upward(upward)
+  {
+    assertx(IMPLIES(!upward, s_hierarchyFinal));
+  }
+
+  /*
+   * Return the next new node in the graph discovered by BFS, or folly::none if
+   * the BFS has terminated.
+   */
+  folly::Optional<LayoutIndex> next() {
+    while (!m_workQ.empty()) {
+      auto const index = m_workQ.front();
+      m_workQ.pop_front();
+      if (m_processed.find(index) != m_processed.end()) continue;
+      m_processed.insert(index);
+      auto const layout = FromIndex(index);
+      auto const nextSet = m_upward ? layout->m_parents : layout->m_children;
+      for (auto const next : nextSet) {
+        m_workQ.push_back(next);
+      }
+      return index;
+    }
+    return folly::none;
+  }
+
+  /*
+   * Checks if the BFS has encountered a given node.
+   */
+  bool hasSeen(LayoutIndex index) const {
+    return m_processed.find(index) != m_processed.end();
+  }
+
+  /*
+   * Returns the full set of nodes seen during the BFS.
+   */
+  LayoutSet allSeen() const { return m_processed; }
+
+private:
+  LayoutSet m_processed;
+  std::deque<LayoutIndex> m_workQ;
+  bool m_upward;
+};
+
+/*
+ * Computes whether the layout is a descendent of another layout. To do so, we
+ * simply perform an upward BFS from the current layout until we encounter the
+ * other layout or the BFS terminates.
+ */
+bool Layout::isDescendentOf(const Layout* other) const {
+  BFSWalker walker(true, index());
+  while (auto const idx = walker.next()) {
+    if (idx == other->index()) return true;
+  }
+  return false;
+}
+
+/*
+ * Compute the full set of ancestors by running upward DFS until termination.
+ */
+Layout::LayoutSet Layout::computeAncestors() const {
+  BFSWalker walker(true, index());
+  while (walker.next()) {}
+  return walker.allSeen();
+}
+
+/*
+ * Compute the full set of descendents by running downward DFS until
+ * termination.
+ */
+Layout::LayoutSet Layout::computeDescendents() const {
+  BFSWalker walker(false, index());
+  while (walker.next()) {}
+  return walker.allSeen();
+}
+
+/*
+ * Computes the least upper bound or the greatest lower bound via BFS. Because
+ * the edges in our graph represent the covering relation of the lattice, the
+ * greatest upper bound is the first node found by an upward BFS on the two
+ * layouts, and the least upper bound is the first node found by a downward BFS
+ * on the two layouts.
+ */
+const Layout* Layout::nearestBound(bool upward, const Layout* other) const {
+  BFSWalker walkerA(upward, index());
+  BFSWalker walkerB(upward, other->index());
+  while (true) {
+    auto const idxA = walkerA.next();
+    if (idxA && walkerB.hasSeen(*idxA)) return FromIndex(*idxA);
+    auto const idxB = walkerB.next();
+    if (idxB && walkerA.hasSeen(*idxB)) return FromIndex(*idxB);
+
+    if (!idxA && !idxB) return nullptr;
+  }
+}
+
+/*
+ * A less efficient implementation of least upper and greatest lower bound that
+ * does not assume uniqueness. This implementation works for general DAGs and
+ * is used to validate that the DAG is a lattice. For a lattice, it always
+ * agrees with nearestBound.
+ */
+const Layout* Layout::nearestBoundDebug(bool upward, const Layout* other) const {
+  assertx(IMPLIES(!upward, s_hierarchyFinal));
+  LayoutSet myClosure = upward ? computeAncestors() : computeDescendents();
+  LayoutSet otherClosure =
+    upward ? other->computeAncestors() : other->computeDescendents();
+  LayoutSet common;
+  std::set_intersection(myClosure.cbegin(), myClosure.cend(),
+                        otherClosure.cbegin(), otherClosure.cend(),
+                        std::inserter(common, common.end()));
+  LayoutSet workQ(common);
+  for (auto const item : workQ) {
+    auto const layout = FromIndex(item);
+    for (auto const rel : upward ? layout->m_parents : layout->m_children) {
+      auto const iter = common.find(rel);
+      if (iter == common.end()) continue;
+      common.erase(iter);
+    }
+  }
+  assertx(common.size() <= 1);
+  if (common.empty()) return nullptr;
+  auto const layout = FromIndex(*common.cbegin());
+  assertx(upward ? isDescendentOf(layout) : layout->isDescendentOf(this));
+  assertx(upward ? other->isDescendentOf(layout) : layout->isDescendentOf(other));
+  return layout;
+}
+
+bool Layout::checkInvariants() const {
+  if (!allowBespokeArrayLikes()) return true;
+
+  // 0. Parents are valid.
+  for (auto const DEBUG_ONLY parent : m_parents) {
+    assertx(FromIndex(parent));
+  }
+
+  // 1. Indices are a topological ordering for the descendent graph.
+  for (auto const DEBUG_ONLY parent : m_parents) {
+    assertx(parent < index());
+  }
+
+  // 2. The parents provided are immediate parents (i.e. the descendent graph
+  // is a covering relation).
+  {
+    LayoutSet grandparents;
+    for (auto const parent : m_parents) {
+      auto const layout = FromIndex(parent);
+      std::copy(layout->m_parents.cbegin(), layout->m_parents.cend(),
+                std::inserter(grandparents, grandparents.end()));
+    }
+    BFSWalker walker(true, grandparents);
+    auto const all = walker.allSeen();
+    LayoutSet inter;
+    std::set_intersection(all.cbegin(), all.cend(),
+                          m_parents.cbegin(), m_parents.cend(),
+                          std::inserter(inter, inter.end()));
+    assertx(inter.empty());
+  }
+
+  // 3. Least upper bound exists and is unique.
+  for (size_t i = 0; i < index().raw; i++) {
+    auto const other = s_layoutTable[i];
+    if (!other) continue;
+    auto const DEBUG_ONLY lub = nearestBoundDebug(true, other);
+    assertx(lub);
+    assertx(lub == other->nearestBoundDebug(true, this));
+  }
+
+  // 4. Liveable ancestor is unique. This is true iff a liveable node is the
+  // unique parent of each of its non-liveable children.
+  for (auto const DEBUG_ONLY parent : m_parents) {
+    assertx(IMPLIES(!m_liveable && FromIndex(parent)->m_liveable,
+                    m_parents.size() == 1));
+  }
+
+  return true;
+}
+
+void Layout::FinalizeHierarchy() {
+  assertx(allowBespokeArrayLikes());
+  assertx(!s_hierarchyFinal);
+  for (size_t i = 0; i < s_layoutTableIndex; i++) {
+    auto const layout = s_layoutTable[i];
+    if (!layout) continue;
+    assertx(layout->checkInvariants());
+    for (auto const pIdx : layout->m_parents) {
+      auto const parent = s_layoutTable[pIdx.raw];
+      assertx(parent);
+      parent->m_children.insert(layout->index());
+    }
+  }
+  s_hierarchyFinal = true;
+}
+
+bool Layout::operator<=(const Layout& other) const {
+  if (!s_hierarchyFinal) {
+    // If the hierarchy is not final, then we can only deal with BespokeTop.
+    always_assert(index() == BespokeTop::GetLayoutIndex());
+    always_assert(other.index() == BespokeTop::GetLayoutIndex());
+    return true;
+  }
+  return isDescendentOf(&other);
+}
+
+const Layout* Layout::operator|(const Layout& other) const {
+  if (!s_hierarchyFinal) {
+    always_assert(index() == BespokeTop::GetLayoutIndex());
+    always_assert(other.index() == BespokeTop::GetLayoutIndex());
+    return this;
+  }
+  auto const bound = nearestBound(true, &other);
+  assertx(bound == nearestBoundDebug(true, &other));
+  always_assert(bound);
+  return bound;
+}
+
+const Layout* Layout::operator&(const Layout& other) const {
+  if (!s_hierarchyFinal) {
+    always_assert(index() == BespokeTop::GetLayoutIndex());
+    always_assert(other.index() == BespokeTop::GetLayoutIndex());
+    return this;
+  }
+  auto const bound = nearestBound(false, &other);
+  assertx(bound == nearestBoundDebug(false, &other));
+  return bound;
+}
+
+const Layout* Layout::getLiveableAncestor() const {
+  if (!s_hierarchyFinal) return FromIndex(BespokeTop::GetLayoutIndex());
+  BFSWalker walker(true, index());
+  while (auto const idx = walker.next()) {
+    auto const layout = FromIndex(*idx);
+    if (layout->isLiveable()) return layout;
+  }
+  always_assert(false);
 }
 
 LayoutIndex Layout::ReserveIndices(size_t count) {
@@ -85,8 +352,8 @@ SSATmp* Layout::emitEscalateToVanilla(IRGS& env, SSATmp* arr,
 struct Layout::Initializer {
   Initializer() {
     assertx(s_layoutTableIndex.load(std::memory_order_relaxed) == 0);
-    LoggingArray::InitializeLayouts();
     BespokeTop::InitializeLayouts();
+    LoggingArray::InitializeLayouts();
     MonotypeVec::InitializeLayouts();
     EmptyMonotypeDict::InitializeLayouts();
   }
@@ -96,8 +363,10 @@ Layout::Initializer Layout::s_initializer;
 //////////////////////////////////////////////////////////////////////////////
 
 ConcreteLayout::ConcreteLayout(const std::string& description,
-                               const LayoutFunctions* vtable = nullptr)
-  : Layout(description)
+                               const LayoutFunctions* vtable,
+                               LayoutSet&& parents,
+                               bool liveable)
+  : Layout(description, std::move(parents), liveable)
   , m_vtable(vtable)
 {
   assertx(vtable);
@@ -105,8 +374,10 @@ ConcreteLayout::ConcreteLayout(const std::string& description,
 
 ConcreteLayout::ConcreteLayout(LayoutIndex index,
                                const std::string& description,
-                               const LayoutFunctions* vtable = nullptr)
-  : Layout(index, description)
+                               const LayoutFunctions* vtable,
+                               LayoutSet&& parents,
+                               bool liveable)
+  : Layout(index, description, std::move(parents), liveable)
   , m_vtable(vtable)
 {
   assertx(vtable);

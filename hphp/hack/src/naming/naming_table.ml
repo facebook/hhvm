@@ -725,7 +725,7 @@ let save_async naming_table ~init_id ~root ~destination_path =
   Stdlib.close_out chan;
 
   let open SaveAsync in
-  Future.make
+  FutureProcess.make
     (Process.run_entry
        Process_types.Default
        save_entry

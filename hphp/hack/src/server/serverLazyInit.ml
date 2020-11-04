@@ -92,7 +92,7 @@ let merge_saved_state_futures
     | Error error ->
       Hh_logger.log
         "Unhandled error from State_loader: %s"
-        (Future.show_error error);
+        (Future.error_to_string error);
       let e = Exception.wrap_unraised (Future.error_to_exn error) in
       let exn = Exception.to_exn e in
       let stack = Utils.Callstack (Exception.get_backtrace_string e) in

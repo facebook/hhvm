@@ -40,43 +40,51 @@ module Hg_actual = struct
       exec_hg
         (["cat"; "-r"; rev_string rev] @ files @ ["-o"; out; "--cwd"; repo])
     in
-    Future.make process ignore
+    FutureProcess.make process ignore
 
   (** Returns the closest global ancestor in master to the given rev.
    *
    * hg log -r 'ancestor(master,rev)' -T '{globalrev}\n'
    *)
-  let get_closest_global_ancestor rev repo =
+  let get_closest_global_ancestor rev repo : global_rev Future.t =
     let global_rev_query rev =
       exec_hg ["log"; "-r"; rev; "-T"; "{globalrev}\n"; "--cwd"; repo]
     in
     let global_rev_process rev =
-      Future.make (global_rev_query rev) (fun s ->
+      FutureProcess.make (global_rev_query rev) (fun s ->
           int_of_string (String.trim s))
     in
     (* If we are on public commit, it should have global_rev field and we are done *)
-    let q1 = global_rev_process rev in
+    let (q1 : global_rev Future.t) = global_rev_process rev in
     (* Otherwise, we want the closest public commit. It returns empty set when
      * we are on a public commit, hence the need to still do q1 too *)
-    let q2 =
+    let (q2 : global_rev Future.t) =
       global_rev_process (Printf.sprintf "parents(roots(draft() & ::%s))" rev)
     in
     (* q2 can also fail in case of merge conflicts, in which case let's fall back to
      * what we always used to do, closest mergebase with master bookmark *)
-    let q3 = global_rev_process (Printf.sprintf "ancestor(master,%s)" rev) in
-    let take_first r1 r2 =
+    let (q3 : global_rev Future.t) =
+      global_rev_process (Printf.sprintf "ancestor(master,%s)" rev)
+    in
+    (* let open Core_kernel in *)
+    let take_first
+        (r1 : (global_rev, Future.error) result)
+        (r2 : (global_rev, Future.error) result) :
+        (global_rev, Future.error) result =
       match r1 with
       | Ok _ -> r1
       | _ -> r2
     in
-    Future.(merge q1 (merge q2 q3 take_first) take_first)
+    let (r1 : global_rev Future.t) = Future.merge q2 q3 take_first in
+    let (r2 : global_rev Future.t) = Future.merge q1 r1 take_first in
+    r2
 
   let current_mergebase_hg_rev repo =
     let process =
       exec_hg
         ["log"; "--rev"; "ancestor(master,.)"; "-T"; "{node}"; "--cwd"; repo]
     in
-    Future.make process @@ fun result ->
+    FutureProcess.make process @@ fun result ->
     let result = String.trim result in
     if String.length result < 1 then
       raise Malformed_result
@@ -88,7 +96,7 @@ module Hg_actual = struct
    * hg id -i --cwd <repo> *)
   let current_working_copy_hg_rev repo =
     let process = exec_hg ["id"; "-i"; "--cwd"; repo] in
-    Future.make process @@ fun result ->
+    FutureProcess.make process @@ fun result ->
     let result = String.trim result in
     if String.length result < 1 then
       raise Malformed_result
@@ -102,7 +110,7 @@ module Hg_actual = struct
     let process =
       exec_hg ["log"; "-r"; "p2()"; "-T"; "{node}"; "--cwd"; repo]
     in
-    let future = Future.make process String.trim in
+    let future = FutureProcess.make process String.trim in
     match Future.get future with
     | Ok "" -> None
     | Ok s -> Some s
@@ -139,7 +147,7 @@ module Hg_actual = struct
     let process =
       exec_hg ["status"; "-n"; "--rev"; rev_string rev; "--cwd"; repo]
     in
-    Future.make process Sys_utils.split_lines
+    FutureProcess.make process Sys_utils.split_lines
 
   (** Similar to above, except instead of listing files to get us to
    * the repo's current state, it gets us to the given "finish" revision.
@@ -170,14 +178,12 @@ module Hg_actual = struct
             repo;
           ]
       in
-      Future.make process Sys_utils.split_lines
+      FutureProcess.make process Sys_utils.split_lines
 
   (** hg update --rev r<global_rev> --cwd <repo> *)
   let update_to_rev rev repo =
-    let process =
-      exec_hg ["update"; "--rev"; rev_string rev; "--cwd"; repo; "--clean"]
-    in
-    Future.make process ignore
+    let process = exec_hg ["update"; "--rev"; rev_string rev; "--cwd"; repo] in
+    FutureProcess.make process ignore
 
   module Mocking = struct
     exception Cannot_set_when_mocks_disabled

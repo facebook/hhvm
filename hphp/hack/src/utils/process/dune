@@ -28,7 +28,8 @@
   (wrapped false)
   (modules
     future
-    future_sig)
+    future_sig
+    futureProcess)
   (preprocess (pps ppx_deriving.std))
   (libraries
     process

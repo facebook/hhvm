@@ -77,7 +77,7 @@ let test_process_finishes_within_timeout () =
 
 let test_future () =
   let future =
-    Future.make
+    FutureProcess.make
       (Process.exec (Exec_command.For_use_in_testing_only "sleep") ["1"])
       String.trim
   in
@@ -87,7 +87,7 @@ let test_future () =
 
 let test_future_is_ready () =
   let future =
-    Future.make
+    FutureProcess.make
       (Process.exec (Exec_command.For_use_in_testing_only "sleep") ["1"])
       String.trim
   in
@@ -111,7 +111,7 @@ let test_future_continue_with () =
           (Exec_command.For_use_in_testing_only "ls")
           [Path.to_string dir_path]
       in
-      let future = Future.make ls_proc String.trim in
+      let future = FutureProcess.make ls_proc String.trim in
       let future = Future.continue_with future String.uppercase_ascii in
       String_asserter.assert_equals
         "TEST.TXT"
@@ -128,7 +128,7 @@ let test_future_continue_with_future () =
           (Exec_command.For_use_in_testing_only "ls")
           [Path.to_string dir_path]
       in
-      let future = Future.make ls_proc String.trim in
+      let future = FutureProcess.make ls_proc String.trim in
       let future =
         Future.continue_with_future future (fun a ->
             let cat_proc =
@@ -136,7 +136,7 @@ let test_future_continue_with_future () =
                 (Exec_command.For_use_in_testing_only "cat")
                 [Path.to_string (Path.concat dir_path a)]
             in
-            Future.make cat_proc String.trim)
+            FutureProcess.make cat_proc String.trim)
       in
       String_asserter.assert_equals
         "my file contents"
@@ -153,7 +153,7 @@ let test_future_continue_and_map_err_ok () =
           (Exec_command.For_use_in_testing_only "ls")
           [Path.to_string dir_path]
       in
-      let future = Future.make ls_proc String.trim in
+      let future = FutureProcess.make ls_proc String.trim in
       let future =
         Future.continue_and_map_err future (fun res ->
             match res with
@@ -175,7 +175,7 @@ let test_future_continue_and_map_err_error () =
       (Exec_command.For_use_in_testing_only "command_that_doesnt_exist")
       []
   in
-  let future = Future.make fail_proc String.trim in
+  let future = FutureProcess.make fail_proc String.trim in
   let future =
     Future.continue_and_map_err future (fun res ->
         match res with
@@ -206,7 +206,7 @@ let test_future_long_continuation_chain_ok () =
           (Exec_command.For_use_in_testing_only "ls")
           [Path.to_string dir1]
       in
-      let future = Future.make ls_proc String.trim in
+      let future = FutureProcess.make ls_proc String.trim in
       let future =
         Future.continue_with_future future (fun ls_result ->
             let cat_proc =
@@ -214,7 +214,7 @@ let test_future_long_continuation_chain_ok () =
                 (Exec_command.For_use_in_testing_only "cat")
                 [Path.to_string (Path.concat dir1 ls_result)]
             in
-            Future.make cat_proc String.trim)
+            FutureProcess.make cat_proc String.trim)
       in
       let future =
         Future.continue_with_future future (fun cat_result ->
@@ -223,7 +223,7 @@ let test_future_long_continuation_chain_ok () =
                 (Exec_command.For_use_in_testing_only "cat")
                 [cat_result]
             in
-            Future.make cat_proc String.trim)
+            FutureProcess.make cat_proc String.trim)
       in
       String_asserter.assert_equals
         "my file contents"
@@ -246,7 +246,7 @@ let test_future_long_continuation_chain_error () =
           (Exec_command.For_use_in_testing_only "ls")
           [Path.to_string dir1]
       in
-      let future = Future.make ls_proc String.trim in
+      let future = FutureProcess.make ls_proc String.trim in
       let future =
         Future.continue_with_future future (fun ls_result ->
             let cat_proc =
@@ -254,7 +254,7 @@ let test_future_long_continuation_chain_error () =
                 (Exec_command.For_use_in_testing_only "cat")
                 [Path.to_string (Path.concat dir1 ls_result)]
             in
-            Future.make cat_proc String.trim)
+            FutureProcess.make cat_proc String.trim)
       in
       let future =
         Future.continue_with_future future (fun cat_result ->
@@ -263,7 +263,7 @@ let test_future_long_continuation_chain_error () =
                 (Exec_command.For_use_in_testing_only "cat")
                 [cat_result]
             in
-            Future.make cat_proc String.trim)
+            FutureProcess.make cat_proc String.trim)
       in
       let future =
         Future.continue_and_map_err future (fun res ->

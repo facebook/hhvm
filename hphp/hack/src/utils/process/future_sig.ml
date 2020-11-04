@@ -7,31 +7,7 @@
  *
  *)
 
-(** Deserializes the byte sequence. *)
-type 'a deserializer = string -> 'a
-
-module Types = struct
-  type process_status = Unix.process_status
-
-  let pp_process_status fmt status =
-    Caml.Format.fprintf fmt "%s" (Process.status_to_string status)
-
-  type error_mode =
-    | Process_failure of {
-        status: process_status;
-        stderr: string;
-      }
-    | Timed_out of {
-        stdout: string;
-        stderr: string;
-      }
-    | Process_aborted
-    | Continuation_raised of Exception.t
-    | Transformer_raised of Exception.t
-  [@@deriving show]
-
-  type error = Process_types.invocation_info * error_mode [@@deriving show]
-
+module type S = sig
   type verbose_error = {
     message: string;
     stack: Utils.callstack;
@@ -39,23 +15,63 @@ module Types = struct
   }
   [@@deriving show]
 
-  type 'a status =
-    | Complete_with_result of ('a, error) result
+  (* First class module abstract signature for external errors *)
+  module type Error = sig
+    type config
+
+    type t
+
+    (* Create an error object *)
+    val create : config -> t
+
+    (* Callback handler that converts error object to string *)
+    val to_string : t -> string
+
+    (* Callback handler that converts error object to verbose_error *)
+    val to_string_verbose : t -> verbose_error
+  end
+
+  (* Wrapper module the bundles Error object with its handler.
+    This uses the technique/pattern as "A Query-Handling Framework"
+    example in RealWorld Ocaml book *)
+  module type Error_instance = sig
+    module Error : Error
+
+    val this : Error.t
+  end
+
+  (* Helper function to create a default error instance *)
+  val create_error_instance :
+    (module Error with type config = 'a) -> 'a -> (module Error_instance)
+
+  val create_default_error_instance : string -> (module Error_instance)
+
+  (* Future error can be categorized into interanl errors and external
+   environment specific errors. For external errors, the environment
+   specific handlers will be used to convert the error into string *)
+  type error =
+    | External of (module Error_instance)
+    | Internal_Continuation_raised of Exception.t
+    | Internal_timeout of Exception.t
+
+  type 'value get_value =
+    timeout:int -> ('value, (module Error_instance)) result
+
+  type is_value_ready = unit -> bool
+
+  type 'value status =
+    | Complete_with_result of ('value, error) result
     | In_progress of { age: float }
 
-  exception Failure of error
-end
+  exception Future_failure of error
 
-module type S = sig
-  include module type of Types
-
-  type 'a t [@@deriving eq]
+  type 'value t [@@deriving eq]
 
   (* Blocking. Returns the value from the underlying process. *)
-  val get : ?timeout:int -> 'a t -> ('a, error) result
+  val get : ?timeout:int -> 'value t -> ('value, error) result
 
   (* Like get, but raises Failure instead of returning when result is Error. *)
-  val get_exn : ?timeout:int -> 'a t -> 'a
+  val get_exn : ?timeout:int -> 'value t -> 'value
 
   (* Creates a future out of the process handle. If the timeout is specified,
       then this timeout will take priority over the timeout that's passed
@@ -85,8 +101,7 @@ module type S = sig
         if set here and if it is expired, `is_ready` will return true and
         `check_status` will return a "timed out" result
     *)
-  val make :
-    Process_types.t -> ?timeout:int -> 'result deserializer -> 'result t
+  val make : ?timeout:int -> 'value get_value * is_value_ready -> 'value t
 
   (* Sets or resets the timeout on an existing future. The meaning of
       setting a timeout on a merged or a bound future is thus:
@@ -103,7 +118,7 @@ module type S = sig
      be convenient to set the timeout separately, instead of threading
      the timeout into the other module's APIs.
     *)
-  val with_timeout : 'result t -> timeout:int -> 'result t
+  val with_timeout : 'value t -> timeout:int -> 'value t
 
   (* Analogous to "make" above, but takes in two futures and a function that
    * consumes their results, producing a third future that "is_ready" when both
@@ -114,32 +129,35 @@ module type S = sig
   val merge :
     'a t ->
     'b t ->
-    (('a, error) result -> ('b, error) result -> ('c, error) result) ->
-    'c t
+    (('a, error) result -> ('b, error) result -> ('value, error) result) ->
+    'value t
 
   (* Adds a computation that will be applied to the result of the future when
    * it is finished. *)
-  val continue_with : 'a t -> ('a -> 'b) -> 'b t
+  val continue_with : 'value t -> ('value -> 'next_value) -> 'next_value t
 
   (* Adds another future to be generated after the given future finishes. *)
-  val continue_with_future : 'a t -> ('a -> 'b t) -> 'b t
+  val continue_with_future :
+    'value t -> ('value -> 'next_value t) -> 'next_value t
 
   (* Adds another future to be generated after the given future finishes, but
   * allows custom handling of process errors. *)
   val continue_and_map_err :
-    'a t -> (('a, error) result -> ('b, 'c) result) -> ('b, 'c) result t
+    'value t ->
+    (('value, error) result -> ('next_value, 'next_error) result) ->
+    ('next_value, 'next_error) result t
 
   val on_error : 'value t -> (error -> unit) -> 'value t
 
   (* Wraps a value inside a future. *)
-  val of_value : 'a -> 'a t
+  val of_value : 'value -> 'value t
 
   (* Wraps an error with the specified string message inside a future *)
-  val of_error : string -> 'a t
+  val of_error : string -> 'value t
 
   (* Like of_value, except returns false "delays" number of times of
    * calling is_ready on it before returning true. *)
-  val delayed_value : delays:int -> 'a -> 'a t
+  val delayed_value : delays:int -> 'value -> 'value t
 
   (* Checks whether the future is ready or not by checking the underlying
       implementation (e.g., Process) whether it's ready. The meaning of
@@ -149,18 +167,18 @@ module type S = sig
       `is_ready` will return true if the timeout is expired, even if
       the underlying implementation is still working. Calling `get` afterwards
       will result in a timeout failure. *)
-  val is_ready : 'a t -> bool
+  val is_ready : 'value t -> bool
 
   (* Think of this as a combination of `is_ready` and `get`:
     - if ready, returns the result
     - if not ready, then returns the in-progress status
     Note that, if the future was created with a timeout, it will return
     a timed out result if the timeout is expired *)
-  val check_status : 'a t -> 'a status
+  val check_status : 'value t -> 'value status
 
   (* Return the timestamp the future was constructed. For Merged futures,
    * returns the older of the merged futures. *)
-  val start_t : 'a t -> float
+  val start_t : 'value t -> float
 
   val error_to_string : error -> string
 

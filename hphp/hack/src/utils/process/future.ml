@@ -1,70 +1,132 @@
 (*
- * Copyright (c) 2016, Facebook, Inc.
- * All rights reserved.
+ * Copyright (c) Facebook, Inc. and its affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
 
-(**
- * We shell out hg commands, so its computation is out-of-process, and
- * return a Future for the result.
- *
- * A promise is a strongly-typed wrapper around Process
- *)
-
 open Hh_prelude
-include Future_sig.Types
 
-type 'a delayed = {
+type verbose_error = {
+  message: string;
+  stack: Utils.callstack;
+  environment: string option;
+}
+[@@deriving show]
+
+(* First class module abstract signature for external errors *)
+module type Error = sig
+  type config
+
+  type t
+
+  (* Create an error object *)
+  val create : config -> t
+
+  (* Callback handler that converts error object to string *)
+  val to_string : t -> string
+
+  (* Callback handler that converts error object to verbose_error *)
+  val to_string_verbose : t -> verbose_error
+end
+
+(* Wrapper module the bundles Error object with its handler.
+    This uses the technique/pattern as "A Query-Handling Framework"
+    example in RealWorld Ocaml book *)
+module type Error_instance = sig
+  module Error : Error
+
+  val this : Error.t
+end
+
+(* Future error can be categorized into interanl errors and external
+   environment specific errors. For external errors, the environment
+   specific handlers will be used to convert the error into string *)
+type error =
+  | External of (module Error_instance)
+  | Internal_Continuation_raised of Exception.t
+  | Internal_timeout of Exception.t
+
+type 'value get_value = timeout:int -> ('value, (module Error_instance)) result
+
+type is_value_ready = unit -> bool
+
+type 'value status =
+  | Complete_with_result of ('value, error) result
+  | In_progress of { age: float }
+
+exception Future_failure of error
+
+type 'value delayed = {
   (* Number of times it has been tapped by "is_ready" or "check_status". *)
   tapped: int;
   (* Number of times remaining to be tapped before it is ready. *)
   remaining: int;
-  value: 'a;
+  value: 'value;
 }
 
-type 'a incomplete = {
-  (* The underlying implementation whose progress we manage *)
-  process: Process_types.t;
-  (* An optional deadline (time value); if set, the future can expire when being
-    checked for readiness. If not set, only the `get` function's timeout will
-    apply (default or explicit). *)
+type 'value incomplete = {
+  get_value: 'value get_value;
   deadline: float option;
-  (* The underlying implementation's output is a string. This function transforms
-    the output into a desired value of the type that the Future's successful
-    result is of. *)
-  transformer: string -> 'a;
+  is_value_ready: is_value_ready;
 }
 
-type 'a promise =
-  | Complete : 'a -> 'a promise
+type 'value t = 'value promise ref * creation_time
+
+and 'value promise =
+  | Complete : 'value -> 'value promise
   | Complete_but_failed of error
   (* Delayed is useful for deterministic testing. Must be tapped by "is ready" or
    * "check_status" the remaining number of times before it is ready. *)
-  | Delayed : 'a delayed -> 'a promise
+  | Delayed : 'value delayed -> 'value promise
   (* A future formed from two underlying futures. Calling "get" blocks until
    * both underlying are ready. *)
   | Merged :
-      ( 'a t
+      'a t
       * 'b t
-      * (('a, error) result -> ('b, error) result -> ('c, error) result) )
-      -> 'c promise
+      * (('a, error) result -> ('b, error) result -> ('value, error) result)
+      -> 'value promise
   (* The future's success is bound to another future producer; it's a chain
       of futures that have to execute serially in order, as opposed to
       the list of Merged futures above that have to execute in parallel. *)
-  | Bound : ('a t * (('a, error) result -> 'b t)) -> 'b promise
+  | Bound :
+      'value t * (('value, error) result -> 'next_value t)
+      -> 'next_value promise
   (* The future is not yet fulfilled. *)
-  | Incomplete of 'a incomplete
+  | Incomplete of 'value incomplete
 
-(** float is the time the Future was constructed. *)
-and 'a t = 'a promise ref * float
+and creation_time = float
 
 let equal (_f : 'a -> 'a -> bool) (x : 'a t) (y : 'a t) = Poly.equal x y
 
 (* 30 seconds *)
 let default_timeout = 30
+
+let create_error_instance (type a) (module E : Error with type config = a) err =
+  ( module struct
+    module Error = E
+
+    let this = E.create err
+  end : Error_instance )
+
+(* Provide a default error implementation *)
+module DefaultError = struct
+  type config = string
+
+  type t = string
+
+  let create config = config
+
+  let to_string (error : t) : string = error
+
+  let to_string_verbose (error : t) : verbose_error =
+    { message = error; environment = None; stack = Utils.Callstack error }
+end
+
+(* Helper function to create a default error instance *)
+let create_default_error_instance (error : string) =
+  create_error_instance (module DefaultError) error
 
 (* Given an optional deadline, constructs a timeout time span, in seconds,
     relative to the current time (dealine - now). If the current time is past
@@ -88,130 +150,63 @@ let deadline_of_timeout ~timeout ~start_time =
   | Some timeout -> Some (start_time +. float_of_int timeout)
   | None -> None
 
-let make
-    (process : Process_types.t)
-    ?(timeout : int option)
-    (transformer : string -> 'result) : 'result t =
+let make ?(timeout : int option) (get_value, is_value_ready) : 'value t =
   let deadline =
     deadline_of_timeout ~timeout ~start_time:(Unix.gettimeofday ())
   in
-  (ref (Incomplete { process; deadline; transformer }), Unix.gettimeofday ())
+  ( ref (Incomplete { get_value; deadline; is_value_ready }),
+    Unix.gettimeofday () )
 
-let of_value v = (ref @@ Complete v, Unix.gettimeofday ())
+let of_value (value : 'value) : 'value t =
+  (ref @@ Complete value, Unix.gettimeofday ())
 
 let of_error (e : string) =
   try failwith e
   with e ->
-    let e = Exception.wrap e in
-    let info = Process_types.dummy.Process_types.info in
-    ( ref @@ Complete_but_failed (info, Continuation_raised e),
+    ( ref
+      @@ Complete_but_failed (Internal_Continuation_raised (Exception.wrap e)),
       Unix.gettimeofday () )
 
-let delayed_value ~delays v =
-  ( ref (Delayed { tapped = 0; remaining = delays; value = v }),
+let delayed_value ~(delays : int) (value : 'value) : 'value t =
+  ( ref @@ Delayed { tapped = 0; remaining = delays; value },
     Unix.gettimeofday () )
 
-let error_to_string (info, e) =
-  let info =
-    Printf.sprintf
-      "(%s [%s])"
-      info.Process_types.name
-      (String.concat ~sep:", " info.Process_types.args)
-  in
-  let status_string s =
-    match s with
-    | Unix.WEXITED i -> Printf.sprintf "(%s WEXITED %d)" info i
-    | Unix.WSIGNALED i -> Printf.sprintf "(%s WSIGNALED %d)" info i
-    | Unix.WSTOPPED i -> Printf.sprintf "(%s WSTOPPED %d)" info i
-  in
-  match e with
-  | Process_failure { status; stderr } ->
-    Printf.sprintf
-      "Process_failure(%s, stderr: %s)"
-      (status_string status)
-      stderr
-  | Timed_out { stdout; stderr } ->
-    Printf.sprintf "Timed_out(%s (stdout: %s) (stderr: %s))" info stdout stderr
-  | Process_aborted -> Printf.sprintf "Process_aborted(%s)" info
-  | Continuation_raised e ->
+let error_to_exn e = Future_failure e
+
+let error_to_string err : string =
+  match err with
+  | Internal_Continuation_raised e ->
     Printf.sprintf "Continuation_raised(%s)" (Exception.get_ctor_string e)
-  | Transformer_raised e ->
-    Printf.sprintf
-      "Transformer_raised(%s %s)"
-      info
-      (Exception.get_ctor_string e)
+  | Internal_timeout e ->
+    Printf.sprintf "Timed_out(%s)" (Exception.get_ctor_string e)
+  | External err ->
+    let module I = (val err : Error_instance) in
+    I.Error.to_string I.this
 
-let error_to_string_verbose (error : error) : verbose_error =
-  let (invocation_info, error_mode) = error in
-  let Process_types.{ name; args; env; stack = Utils.Callstack stack } =
-    invocation_info
-  in
-  let env = Process.env_to_string env in
-  let stack = stack |> Exception.clean_stack in
-  let cmd_and_args =
-    Printf.sprintf "`%s %s`" name (String.concat ~sep:" " args)
-  in
-  match error_mode with
-  | Process_failure { status; stderr } ->
-    let status =
-      match status with
-      | Unix.WEXITED i -> Printf.sprintf "exited with code %n" i
-      | Unix.WSIGNALED i -> Printf.sprintf "killed with signal %n" i
-      | Unix.WSTOPPED i -> Printf.sprintf "stopped with signal %n" i
-    in
-    {
-      message = Printf.sprintf "%s - %s\n%s\n" cmd_and_args status stderr;
-      environment = Some env;
-      stack = Utils.Callstack stack;
-    }
-  | Timed_out { stdout; stderr } ->
+let error_to_string_verbose err : verbose_error =
+  match err with
+  | Internal_Continuation_raised ex ->
+    let stack = Exception.get_backtrace_string ex |> Exception.clean_stack in
     {
       message =
         Printf.sprintf
-          "%s timed out\nSTDOUT:\n%s\nSTDERR:\n%s\n"
-          cmd_and_args
-          stdout
-          stderr;
-      environment = Some env;
-      stack = Utils.Callstack stack;
-    }
-  | Process_aborted ->
-    {
-      message = Printf.sprintf "%s aborted" cmd_and_args;
+          "Continuation failure - %s"
+          (Exception.get_ctor_string ex);
       environment = None;
       stack = Utils.Callstack stack;
     }
-  | Continuation_raised e ->
-    let stack =
-      (Exception.get_backtrace_string e |> Exception.clean_stack)
-      ^ "-----\n"
-      ^ stack
-    in
+  | Internal_timeout ex ->
     {
-      message =
-        Printf.sprintf "Continuation failure - %s" (Exception.get_ctor_string e);
+      message = Exception.to_string ex;
+      stack = Utils.Callstack (Exception.get_backtrace_string ex);
       environment = None;
-      stack = Utils.Callstack stack;
     }
-  | Transformer_raised e ->
-    let stack =
-      (Exception.get_backtrace_string e |> Exception.clean_stack)
-      ^ "-----\n"
-      ^ stack
-    in
-    {
-      message =
-        Printf.sprintf
-          "%s - unable to process output - %s"
-          cmd_and_args
-          (Exception.get_ctor_string e);
-      environment = None;
-      stack = Utils.Callstack stack;
-    }
+  | External err ->
+    let module I = (val err : Error_instance) in
+    I.Error.to_string_verbose I.this
 
-let error_to_exn e = Failure e
-
-let rec get : 'a. ?timeout:int -> 'a t -> ('a, error) result =
+(* Must explicitly make recursive functions polymorphic. *)
+let rec get : 'value. ?timeout:int -> 'value t -> ('value, error) result =
  fun ?(timeout = default_timeout) (promise, _) ->
   match !promise with
   | Complete v -> Ok v
@@ -219,24 +214,25 @@ let rec get : 'a. ?timeout:int -> 'a t -> ('a, error) result =
   | Delayed { value; remaining; _ } when remaining <= 0 -> Ok value
   | Delayed _ ->
     let error =
-      Timed_out { stdout = ""; stderr = "Delayed value not ready yet" }
+      Internal_timeout
+        (Exception.wrap_unraised (Failure "Delayed value not ready yet"))
     in
-    Error (Process_types.dummy.Process_types.info, error)
-  | Merged (a, b, handler) ->
-    let start_t = Unix.time () in
-    let a = get ~timeout a in
-    let consumed_t = int_of_float @@ (Unix.time () -. start_t) in
+    Error error
+  | Merged (a_future, b_future, handler) ->
+    let start_t = Unix.gettimeofday () in
+    let a_result = get ~timeout a_future in
+    let consumed_t = int_of_float @@ (Unix.gettimeofday () -. start_t) in
     let timeout = timeout - consumed_t in
-    let b = get ~timeout b in
+    let b_result = get ~timeout b_future in
     (* NB: We don't need to cache the result of running the handler because
      * underlying Futures a and b have the values cached internally. So
      * subsequent calls to "get" on this Merged Future will just re-run
      * the handler on the cached result. *)
-    handler a b
+    handler a_result b_result
   | Bound (curr_future, next_producer) ->
-    let start_t = Unix.time () in
+    let start_t = Unix.gettimeofday () in
     let curr_result = get ~timeout curr_future in
-    let consumed_t = int_of_float @@ (Unix.time () -. start_t) in
+    let consumed_t = int_of_float @@ (Unix.gettimeofday () -. start_t) in
     let timeout = timeout - consumed_t in
     begin
       try
@@ -250,36 +246,26 @@ let rec get : 'a. ?timeout:int -> 'a t -> ('a, error) result =
         next_result
       with e ->
         let e = Exception.wrap e in
-        let info = Process_types.dummy.Process_types.info in
-        promise := Complete_but_failed (info, Continuation_raised e);
-        Error (info, Continuation_raised e)
+        promise := Complete_but_failed (Internal_Continuation_raised e);
+        Error (Internal_Continuation_raised e)
     end
-  | Incomplete { process; deadline; transformer } ->
+  | Incomplete { get_value; deadline; is_value_ready = _ } ->
     let timeout = timeout_of_deadline deadline ~max_timeout:timeout in
-    let info = process.Process_types.info in
-    (match Process.read_and_wait_pid ~timeout process with
-    | Ok { Process_types.stdout; _ } ->
-      begin
-        try
-          let result = transformer stdout in
-          promise := Complete result;
-          Ok result
-        with e ->
-          let e = Exception.wrap e in
-          promise := Complete_but_failed (info, Transformer_raised e);
-          Error (info, Transformer_raised e)
-      end
-    | Error (Process_types.Abnormal_exit { status; stderr; _ }) ->
-      Error (info, Process_failure { status; stderr })
-    | Error (Process_types.Timed_out { stdout; stderr }) ->
-      Error (info, Timed_out { stdout; stderr })
-    | Error Process_types.Overflow_stdin -> Error (info, Process_aborted))
+    let result = get_value ~timeout in
+    (match result with
+    | Ok res ->
+      promise := Complete res;
+      Ok res
+    | Error err ->
+      let error = External err in
+      promise := Complete_but_failed error;
+      Error error)
 
-let get_exn ?timeout x =
-  get ?timeout x |> Result.map_error ~f:error_to_exn |> Result.ok_exn
+let get_exn ?timeout (future : 'value t) =
+  get ?timeout future |> Result.map_error ~f:error_to_exn |> Result.ok_exn
 
 (* Must explicitly make recursive functions polymorphic. *)
-let rec is_ready : 'a. 'a t -> bool =
+let rec is_ready : 'value. 'value t -> bool =
  fun (promise, _) ->
   match !promise with
   | Complete _
@@ -309,25 +295,29 @@ let rec is_ready : 'a. 'a t -> bool =
         is_next_ready
       with e ->
         let e = Exception.wrap e in
-        let info = Process_types.dummy.Process_types.info in
-        promise := Complete_but_failed (info, Continuation_raised e);
+        promise := Complete_but_failed (Internal_Continuation_raised e);
         true
     end else
       false
-  | Incomplete { process; deadline; _ } ->
+  | Incomplete { get_value = _; deadline; is_value_ready } ->
     (* Note: if the promise's own deadline is not set, we allow the caller
         to call is_ready as long as they wish, without timing out *)
     let timeout = timeout_of_deadline deadline ~max_timeout:1 in
     if timeout > 0 then
-      Process.is_ready process
+      is_value_ready ()
     else
       (* E.g., we timed out *)
       true
 
-let merge_status stat_a stat_b handler =
-  match (stat_a, stat_b) with
-  | (Complete_with_result a, Complete_with_result b) ->
-    Complete_with_result (handler a b)
+let merge_status
+    (status_a : 'a status)
+    (status_b : 'b status)
+    (handler :
+      ('a, error) result -> ('b, error) result -> ('value, error) result) :
+    'value status =
+  match (status_a, status_b) with
+  | (Complete_with_result result_a, Complete_with_result result_b) ->
+    Complete_with_result (handler result_a result_b)
   | (In_progress { age }, In_progress { age = age_b }) when Float.(age > age_b)
     ->
     In_progress { age }
@@ -335,21 +325,31 @@ let merge_status stat_a stat_b handler =
   | (_, In_progress { age }) ->
     In_progress { age }
 
-let start_t : 'a. 'a t -> float = (fun (_, time) -> time)
+let start_t : 'value. 'value t -> float = (fun (_, time) -> time)
 
-let merge a b handler =
-  (ref (Merged (a, b, handler)), Float.min (start_t a) (start_t b))
+let merge
+    (future_a : 'a t)
+    (future_b : 'b t)
+    (handler :
+      ('a, error) result -> ('b, error) result -> ('value, error) result) :
+    'value t =
+  ( ref @@ Merged (future_a, future_b, handler),
+    Float.min (start_t future_a) (start_t future_b) )
 
-let make_continue (first : 'first t) next_producer : 'next t =
-  (ref (Bound (first, next_producer)), start_t first)
+let make_continue
+    (first : 'first t) (next_producer : ('first, error) result -> 'next t) :
+    'next_value t =
+  (ref @@ Bound (first, next_producer), start_t first)
 
-let continue_with_future (a : 'a t) (f : 'a -> 'b t) : 'b t =
-  let f res =
-    match res with
-    | Ok res -> f res
-    | Error error -> (ref (Complete_but_failed error), start_t a)
+let continue_with_future
+    (future : 'value t) (continuation_handler : 'value -> 'next_value t) :
+    'next_value t =
+  let continuation_handler (result : ('value, error) result) =
+    match result with
+    | Ok value -> continuation_handler value
+    | Error error -> (ref @@ Complete_but_failed error, start_t future)
   in
-  make_continue a f
+  make_continue future continuation_handler
 
 let continue_with (a : 'a t) (f : 'a -> 'b) : 'b t =
   continue_with_future a (fun a -> of_value (f a))
@@ -388,9 +388,9 @@ let rec with_timeout : 'value. 'value t -> timeout:int -> 'value t =
       handler
   | Bound (curr_future, next_producer) ->
     make_continue (with_timeout curr_future ~timeout) next_producer
-  | Incomplete { process; transformer; _ } ->
+  | Incomplete { get_value; is_value_ready; _ } ->
     let deadline = deadline_of_timeout ~timeout:(Some timeout) ~start_time in
-    (ref (Incomplete { process; deadline; transformer }), start_time)
+    (ref (Incomplete { get_value; deadline; is_value_ready }), start_time)
 
 (* Must explicitly make recursive function polymorphic. *)
 let rec check_status : 'a. 'a t -> 'a status =
@@ -409,23 +409,23 @@ let rec check_status : 'a. 'a t -> 'a status =
     if is_ready (promise, start_t) then
       Complete_with_result (get (promise, start_t))
     else
-      let age = Unix.time () -. start_t in
+      let age = Unix.gettimeofday () -. start_t in
       In_progress { age }
-  | Incomplete { process; deadline; _ } ->
+  | Incomplete { get_value = _; deadline; is_value_ready } ->
     (* Note: if the promise's own deadline is not set, we allow the caller
         to call check_status as long as they wish, without timing out *)
     let timeout = timeout_of_deadline deadline ~max_timeout:1 in
-    if Process.is_ready process || timeout <= 0 then
+    if is_value_ready () || timeout <= 0 then
       Complete_with_result (get ~timeout (promise, start_t))
     else
-      let age = Unix.time () -. start_t in
+      let age = Unix.gettimeofday () -. start_t in
       In_progress { age }
 
 (* Necessary to avoid a cyclic type definition error. *)
-type 'a future = 'a t
+type 'value future = 'value t
 
 module Promise = struct
-  type 'a t = 'a future
+  type 'value t = 'value future
 
   let return = of_value
 

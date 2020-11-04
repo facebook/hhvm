@@ -62,6 +62,7 @@ namespace HPHP { namespace jit { namespace mcgen {
 namespace {
 
 std::thread s_retranslateAllThread;
+std::mutex s_rtaThreadMutex;
 std::atomic<bool> s_retranslateAllScheduled{false};
 std::atomic<bool> s_retranslateAllComplete{false};
 static __thread const CompactVector<Trace::BumpRelease>* s_bumpers;
@@ -454,8 +455,11 @@ void joinWorkerThreads() {
     }
   }
 
-  if (s_retranslateAllThread.joinable()) {
-    s_retranslateAllThread.join();
+  {
+    std::unique_lock<std::mutex> lock{s_rtaThreadMutex};
+    if (s_retranslateAllThread.joinable()) {
+      s_retranslateAllThread.join();
+    }
   }
 
   if (s_serializeOptProfThread.joinable()) {
@@ -687,7 +691,7 @@ void checkRetranslateAll(bool force) {
     Treadmill::enqueue([] { bespoke::exportProfiles(); });
   }
 
-  if (!force && RuntimeOption::ServerExecutionMode()) {
+  if (!force && serverMode) {
     // We schedule a one-time call to retranslateAll() via the treadmill.  We
     // use the treadmill to ensure that no additional Profile translations are
     // being emitted when retranslateAll() runs, which avoids the need for
@@ -695,6 +699,7 @@ void checkRetranslateAll(bool force) {
     // stalling the treadmill, the thread is joined in the processExit handler
     // for mcgen.
     Treadmill::enqueue([] {
+      std::unique_lock<std::mutex> lock{s_rtaThreadMutex};
       s_retranslateAllThread = std::thread([] {
         rds::local::init();
         SCOPE_EXIT { rds::local::fini(); };
@@ -702,6 +707,7 @@ void checkRetranslateAll(bool force) {
       });
     });
   } else {
+    std::unique_lock<std::mutex> lock{s_rtaThreadMutex};
     s_retranslateAllThread = std::thread([] {
       BootStats::Block timer("retranslateall",
                              RuntimeOption::ServerExecutionMode());
@@ -709,9 +715,8 @@ void checkRetranslateAll(bool force) {
       SCOPE_EXIT { rds::local::fini(); };
       retranslateAll();
     });
+    if (!serverMode) s_retranslateAllThread.join();
   }
-
-  if (!serverMode) s_retranslateAllThread.join();
 }
 
 bool retranslateAllPending() {

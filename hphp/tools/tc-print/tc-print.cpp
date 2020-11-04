@@ -78,6 +78,7 @@ double          helpersMinPercentage = 0;
 ExtOpcode       filterByOpcode  = 0;
 std::string     kindFilter      = "all";
 uint32_t        selectedFuncId  = INVALID_ID;
+std::string     selectedFuncName;
 TCA             minAddr         = 0;
 TCA             maxAddr         = (TCA)-1;
 uint32_t        annotationsVerbosity = 2;
@@ -202,8 +203,8 @@ void parseOptions(int argc, char *argv[]) {
   int c;
   opterr = 0;
   char* sortByArg = nullptr;
-  while ((c = getopt(argc, argv, "hc:Dd:f:g:ip:st:u:S:T:o:e:E:bB:v:k:a:A:n:jH:"
-                                 "x"))
+  while ((c = getopt(argc, argv,
+                     "hc:Dd:F:f:G:g:ip:st:u:S:T:o:e:E:bB:v:k:a:A:n:jH:x"))
          != -1) {
     switch (c) {
       case 'A':
@@ -227,12 +228,20 @@ void parseOptions(int argc, char *argv[]) {
       case 'd':
         dumpDir = optarg;
         break;
+      case 'F':
+        creationOrder = true;
+        selectedFuncName = optarg;
+        break;
       case 'f':
         creationOrder = true;
         if (sscanf(optarg, "%u", &selectedFuncId) != 1) {
           usage();
           exit(1);
         }
+        break;
+      case 'G':
+        transCFG = true;
+        selectedFuncName = optarg;
         break;
       case 'g':
         transCFG = true;
@@ -1080,6 +1089,17 @@ void printTopBytecodes(const OfflineTransData* tdata,
   }
 }
 
+static uint32_t findSelectedFuncId() {
+  if (selectedFuncName.empty()) return INVALID_ID;
+  for (uint32_t t = 0; t < NTRANS; t++) {
+    auto tRec = TREC(t);
+    if (tRec->isValid() && tRec->funcName == selectedFuncName) {
+      return tRec->src.funcID().toInt();
+    }
+  }
+  return INVALID_ID;
+}
+
 int main(int argc, char *argv[]) {
   StaticString::CreateAll();
   folly::SingletonVault::singleton()->registrationComplete();
@@ -1115,6 +1135,10 @@ int main(int argc, char *argv[]) {
   loadProfData();
 
   g_transData->setAnnotationsVerbosity(annotationsVerbosity);
+
+  if (selectedFuncId == INVALID_ID) {
+    selectedFuncId = findSelectedFuncId();
+  }
 
   if (nTopFuncs) {
     if (nTopFuncs > NFUNCS) {

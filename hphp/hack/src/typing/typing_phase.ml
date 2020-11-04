@@ -191,22 +191,14 @@ let rec localize ~ety_env env (dty : decl_ty) =
   | (r, Tgeneric (x, targs)) ->
     let localize_tgeneric ?replace_with name r =
       match (targs, replace_with, Env.get_pos_and_kind_of_generic env name) with
-      | (_, _, Some (def_pos, kind)) ->
+      | (_, _, Some (_def_pos, kind)) ->
         let arg_kinds : KindDefs.Simple.named_kind list =
           KindDefs.Simple.from_full_kind kind
           |> KindDefs.Simple.get_named_parameter_kinds
         in
-        let use_pos = Reason.to_pos r in
         begin
           match
-            ( localize_tparams_by_kind
-                ~ety_env
-                ~def_pos
-                ~use_pos
-                env
-                targs
-                arg_kinds,
-              replace_with )
+            (localize_tparams_by_kind ~ety_env env targs arg_kinds, replace_with)
           with
           | ((env, _), Some repl_ty) -> (env, mk (r, repl_ty))
           | ((env, locl_tyargs), None) ->
@@ -366,8 +358,6 @@ let rec localize ~ety_env env (dty : decl_ty) =
 (* Localize type arguments for something whose kinds is [kind] *)
 and localize_tparams_by_kind
     ~ety_env
-    ~def_pos:_
-    ~use_pos:_
     env
     (tyargs : decl_ty list)
     (nkinds : KindDefs.Simple.named_kind list) =
@@ -499,9 +489,7 @@ and localize_class_instantiation ~ety_env env r sid tyargs class_info =
            *)
           localize_missing_tparams_class env r sid class_info
         else
-          let def_pos = Cls.pos class_info in
-          let use_pos = Reason.to_pos r in
-          localize_tparams_by_kind ~ety_env ~def_pos ~use_pos env tyargs nkinds
+          localize_tparams_by_kind ~ety_env env tyargs nkinds
       in
       (env, mk (r, Tclass (sid, Nonexact, tyl))))
 
@@ -510,11 +498,7 @@ and localize_typedef_instantiation ~ety_env env r type_name tyargs =
   | Some typedef_info ->
     let tparams = typedef_info.Typing_defs.td_tparams in
     let nkinds = KindDefs.Simple.named_kinds_of_decl_tparams tparams in
-    let use_pos = Reason.to_pos r in
-    let def_pos = typedef_info.Typing_defs.td_pos in
-    let (env, tyargs) =
-      localize_tparams_by_kind ~ety_env ~use_pos ~def_pos env tyargs nkinds
-    in
+    let (env, tyargs) = localize_tparams_by_kind ~ety_env env tyargs nkinds in
     TUtils.expand_typedef ety_env env r type_name tyargs
   | None ->
     (* This must be unreachable. We only call localize_typedef_instantiation if we *know* that
@@ -1030,14 +1014,18 @@ and localize_missing_tparams_class env r sid class_ =
     }
   in
   let env = check_tparams_constraints ~use_pos ~ety_env env tparams in
+  let constraints = Cls.where_constraints class_ in
   let env =
-    check_where_constraints
-      ~in_class:true
-      ~use_pos
-      ~definition_pos:(Cls.pos class_)
-      ~ety_env
+    if List.is_empty constraints then
       env
-      (Cls.where_constraints class_)
+    else
+      check_where_constraints
+        ~in_class:true
+        ~use_pos
+        ~definition_pos:(Cls.pos class_)
+        ~ety_env
+        env
+        constraints
   in
   (env, tyl)
 

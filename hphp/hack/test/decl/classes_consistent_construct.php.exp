@@ -28,9 +28,8 @@
         sc_pu_enums = []; sc_props = []; sc_sprops = [];
         sc_constructor =
         (Some { Shallow_decl_defs.sm_abstract = false; sm_final = false;
-                sm_memoizelsb = false; sm_name = ([8:19-30], "__construct");
-                sm_override = false; sm_dynamicallycallable = false;
-                sm_reactivity = None;
+                sm_name = ([8:19-30], "__construct"); sm_override = false;
+                sm_dynamicallycallable = false; sm_reactivity = None;
                 sm_type =
                 (Rwitness (root|classes_consistent_construct.php line 8, characters 19-29),
                  (Tfun

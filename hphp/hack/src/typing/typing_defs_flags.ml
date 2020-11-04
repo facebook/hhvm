@@ -62,8 +62,6 @@ let ce_flags_override            = 1 lsl 2
 
 let ce_flags_lsb                 = 1 lsl 3
 
-let ce_flags_memoizelsb          = 1 lsl 4
-
 let ce_flags_synthesized         = 1 lsl 5
 
 let ce_flags_const               = 1 lsl 6

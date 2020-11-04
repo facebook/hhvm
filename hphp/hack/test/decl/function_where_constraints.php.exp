@@ -42,9 +42,8 @@
         sc_constructor = None; sc_static_methods = [];
         sc_methods =
         [{ Shallow_decl_defs.sm_abstract = false; sm_final = false;
-           sm_memoizelsb = false; sm_name = ([7:19-22], "foo");
-           sm_override = false; sm_dynamicallycallable = false;
-           sm_reactivity = None;
+           sm_name = ([7:19-22], "foo"); sm_override = false;
+           sm_dynamicallycallable = false; sm_reactivity = None;
            sm_type =
            (Rwitness (root|function_where_constraints.php line 7, characters 19-21),
             (Tfun
@@ -119,9 +118,8 @@
         sc_constructor = None; sc_static_methods = [];
         sc_methods =
         [{ Shallow_decl_defs.sm_abstract = false; sm_final = false;
-           sm_memoizelsb = false; sm_name = ([11:19-22], "foo");
-           sm_override = false; sm_dynamicallycallable = false;
-           sm_reactivity = None;
+           sm_name = ([11:19-22], "foo"); sm_override = false;
+           sm_dynamicallycallable = false; sm_reactivity = None;
            sm_type =
            (Rwitness (root|function_where_constraints.php line 11, characters 19-21),
             (Tfun

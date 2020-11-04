@@ -1,6 +1,6 @@
 --- legacy
 +++ direct decl
-@@ -1,157 +1,157 @@
+@@ -1,154 +1,154 @@
  [("\\C",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -27,9 +27,8 @@
         sc_constructor = None; sc_static_methods = [];
         sc_methods =
         [{ Shallow_decl_defs.sm_abstract = false; sm_final = false;
-           sm_memoizelsb = false; sm_name = ([7:19-20], "f");
-           sm_override = false; sm_dynamicallycallable = false;
-           sm_reactivity = None;
+           sm_name = ([7:19-20], "f"); sm_override = false;
+           sm_dynamicallycallable = false; sm_reactivity = None;
            sm_type =
            (Rwitness (root|classes_typeconst.php line 7, characters 19-19),
             (Tfun
@@ -57,9 +56,8 @@
                  }));
            sm_visibility = Public; sm_deprecated = None };
           { Shallow_decl_defs.sm_abstract = false; sm_final = false;
-            sm_memoizelsb = false; sm_name = ([11:19-20], "g");
-            sm_override = false; sm_dynamicallycallable = false;
-            sm_reactivity = None;
+            sm_name = ([11:19-20], "g"); sm_override = false;
+            sm_dynamicallycallable = false; sm_reactivity = None;
             sm_type =
             (Rwitness (root|classes_typeconst.php line 11, characters 19-19),
              (Tfun
@@ -108,9 +106,8 @@
          sc_constructor = None; sc_static_methods = [];
          sc_methods =
          [{ Shallow_decl_defs.sm_abstract = true; sm_final = false;
-            sm_memoizelsb = false; sm_name = ([20:28-39], "instantiate");
-            sm_override = false; sm_dynamicallycallable = false;
-            sm_reactivity = None;
+            sm_name = ([20:28-39], "instantiate"); sm_override = false;
+            sm_dynamicallycallable = false; sm_reactivity = None;
             sm_type =
             (Rwitness (root|classes_typeconst.php line 20, characters 28-38),
              (Tfun

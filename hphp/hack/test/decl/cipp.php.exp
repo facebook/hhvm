@@ -10,9 +10,8 @@
        sc_constructor = None; sc_static_methods = [];
        sc_methods =
        [{ Shallow_decl_defs.sm_abstract = false; sm_final = false;
-          sm_memoizelsb = false; sm_name = ([5:19-30], "cipp_method");
-          sm_override = false; sm_dynamicallycallable = false;
-          sm_reactivity = None;
+          sm_name = ([5:19-30], "cipp_method"); sm_override = false;
+          sm_dynamicallycallable = false; sm_reactivity = None;
           sm_type =
           (Rwitness (root|cipp.php line 5, characters 19-29),
            (Tfun
@@ -35,7 +34,6 @@
                 ft_reactive = Cipp {\C}; ft_ifc_decl = FDPolicied {PUBLIC} }));
           sm_visibility = Public; sm_deprecated = None };
          { Shallow_decl_defs.sm_abstract = false; sm_final = false;
-           sm_memoizelsb = false;
            sm_name = ([8:19-37], "cipp_global_method"); sm_override = false;
            sm_dynamicallycallable = false; sm_reactivity = None;
            sm_type =
@@ -61,7 +59,6 @@
                  }));
            sm_visibility = Public; sm_deprecated = None };
          { Shallow_decl_defs.sm_abstract = false; sm_final = false;
-           sm_memoizelsb = false;
            sm_name = ([11:19-36], "cipp_local_method"); sm_override = false;
            sm_dynamicallycallable = false; sm_reactivity = None;
            sm_type =
@@ -87,9 +84,8 @@
                  ft_ifc_decl = FDPolicied {PUBLIC} }));
            sm_visibility = Public; sm_deprecated = None };
          { Shallow_decl_defs.sm_abstract = false; sm_final = false;
-           sm_memoizelsb = false; sm_name = ([14:19-33], "cipp_rx_method");
-           sm_override = false; sm_dynamicallycallable = false;
-           sm_reactivity = None;
+           sm_name = ([14:19-33], "cipp_rx_method"); sm_override = false;
+           sm_dynamicallycallable = false; sm_reactivity = None;
            sm_type =
            (Rwitness (root|cipp.php line 14, characters 19-32),
             (Tfun

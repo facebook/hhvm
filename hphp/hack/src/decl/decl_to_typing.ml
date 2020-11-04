@@ -39,7 +39,6 @@ let shallow_method_to_class_elt child_class mro subst meth : class_elt =
   let {
     sm_abstract = abstract;
     sm_final = final;
-    sm_memoizelsb = memoizelsb;
     sm_name = (pos, _);
     sm_dynamicallycallable = dynamicallycallable;
     sm_override = override;
@@ -76,7 +75,6 @@ let shallow_method_to_class_elt child_class mro subst meth : class_elt =
         ~lateinit:false
         ~lsb:false
         ~override
-        ~memoizelsb
         ~dynamicallycallable;
   }
 
@@ -135,7 +133,6 @@ let shallow_prop_to_telt child_class mro subst prop : tagged_elt =
             ~abstract:sp_abstract
             ~final:true
             ~override:false
-            ~memoizelsb:false
             ~synthesized:false
             ~dynamicallycallable:false;
       };

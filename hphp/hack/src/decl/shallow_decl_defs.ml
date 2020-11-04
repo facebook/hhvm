@@ -58,7 +58,6 @@ type shallow_prop = {
 type shallow_method = {
   sm_abstract: bool;
   sm_final: bool;
-  sm_memoizelsb: bool;
   sm_name: Ast_defs.id;
   sm_override: bool;
   sm_dynamicallycallable: bool;

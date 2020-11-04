@@ -21,8 +21,8 @@
         sc_constructor = None; sc_static_methods = [];
         sc_methods =
         [{ Shallow_decl_defs.sm_abstract = false; sm_final = false;
-           sm_memoizelsb = false; sm_name = ([7:19-20], "f");
-           sm_override = false; sm_dynamicallycallable = false;
+           sm_name = ([7:19-20], "f"); sm_override = false;
+           sm_dynamicallycallable = false;
            sm_reactivity = (Some (Decl_defs.Method_reactive (Some "\\IRx")));
            sm_type =
            (Rwitness (root|only_rx_if_impl_method.php line 7, characters 19-19),

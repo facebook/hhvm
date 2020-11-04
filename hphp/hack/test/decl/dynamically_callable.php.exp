@@ -10,9 +10,8 @@
        sc_constructor = None; sc_static_methods = [];
        sc_methods =
        [{ Shallow_decl_defs.sm_abstract = false; sm_final = false;
-          sm_memoizelsb = false; sm_name = ([14:19-22], "pub");
-          sm_override = false; sm_dynamicallycallable = true;
-          sm_reactivity = None;
+          sm_name = ([14:19-22], "pub"); sm_override = false;
+          sm_dynamicallycallable = true; sm_reactivity = None;
           sm_type =
           (Rwitness (root|dynamically_callable.php line 14, characters 19-21),
            (Tfun

@@ -968,8 +968,6 @@ let get_ce_override ce = is_set ce_flags_override ce.ce_flags
 
 let get_ce_lsb ce = is_set ce_flags_lsb ce.ce_flags
 
-let get_ce_memoizelsb ce = is_set ce_flags_memoizelsb ce.ce_flags
-
 let get_ce_synthesized ce = is_set ce_flags_synthesized ce.ce_flags
 
 let get_ce_const ce = is_set ce_flags_const ce.ce_flags
@@ -1019,7 +1017,6 @@ let make_ce_flags
     ~final
     ~override
     ~lsb
-    ~memoizelsb
     ~synthesized
     ~const
     ~lateinit
@@ -1029,7 +1026,6 @@ let make_ce_flags
   let flags = set_bit ce_flags_final final flags in
   let flags = set_bit ce_flags_override override flags in
   let flags = set_bit ce_flags_lsb lsb flags in
-  let flags = set_bit ce_flags_memoizelsb memoizelsb flags in
   let flags = set_bit ce_flags_synthesized synthesized flags in
   let flags = set_bit ce_flags_const const flags in
   let flags = set_bit ce_flags_lateinit lateinit flags in

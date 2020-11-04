@@ -140,13 +140,6 @@ let check_final_method parent_class_elt class_elt on_error =
       ~child:pos
       ~on_error:(Some on_error)
 
-let check_memoizelsb_method parent_class_elt class_elt on_error =
-  if get_ce_memoizelsb class_elt then
-    (* we have a __MemoizeLSB method which is overriding something else *)
-    let (lazy parent_pos) = parent_class_elt.ce_pos in
-    let (lazy pos) = class_elt.ce_pos in
-    Errors.override_memoizelsb parent_pos pos on_error
-
 let check_dynamically_callable member_name parent_class_elt class_elt on_error =
   if
     get_ce_dynamicallycallable parent_class_elt
@@ -250,7 +243,6 @@ let check_override
     (* we don't check constructors, as they are already checked
      * in the decl phase *)
     check_final_method parent_class_elt class_elt on_error;
-    check_memoizelsb_method parent_class_elt class_elt on_error;
     check_dynamically_callable member_name parent_class_elt class_elt on_error
   end;
 
@@ -591,7 +583,6 @@ let default_constructor_ce class_ =
         ~lateinit:false
         ~override:false
         ~lsb:false
-        ~memoizelsb:false
         ~synthesized:true
         ~dynamicallycallable:false;
   }

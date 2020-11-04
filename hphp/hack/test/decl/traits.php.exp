@@ -10,9 +10,8 @@
        sc_constructor = None; sc_static_methods = [];
        sc_methods =
        [{ Shallow_decl_defs.sm_abstract = false; sm_final = false;
-          sm_memoizelsb = false; sm_name = ([4:19-28], "doNothing");
-          sm_override = false; sm_dynamicallycallable = false;
-          sm_reactivity = None;
+          sm_name = ([4:19-28], "doNothing"); sm_override = false;
+          sm_dynamicallycallable = false; sm_reactivity = None;
           sm_type =
           (Rwitness (root|traits.php line 4, characters 19-27),
            (Tfun
@@ -52,9 +51,8 @@
         sc_constructor = None; sc_static_methods = [];
         sc_methods =
         [{ Shallow_decl_defs.sm_abstract = false; sm_final = false;
-           sm_memoizelsb = false; sm_name = ([10:19-32], "doMoreNothing");
-           sm_override = false; sm_dynamicallycallable = false;
-           sm_reactivity = None;
+           sm_name = ([10:19-32], "doMoreNothing"); sm_override = false;
+           sm_dynamicallycallable = false; sm_reactivity = None;
            sm_type =
            (Rwitness (root|traits.php line 10, characters 19-31),
             (Tfun
@@ -91,9 +89,8 @@
         sc_constructor = None; sc_static_methods = [];
         sc_methods =
         [{ Shallow_decl_defs.sm_abstract = false; sm_final = false;
-           sm_memoizelsb = false; sm_name = ([14:19-35], "doYetMoreNothing");
-           sm_override = false; sm_dynamicallycallable = false;
-           sm_reactivity = None;
+           sm_name = ([14:19-35], "doYetMoreNothing"); sm_override = false;
+           sm_dynamicallycallable = false; sm_reactivity = None;
            sm_type =
            (Rwitness (root|traits.php line 14, characters 19-34),
             (Tfun

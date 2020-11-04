@@ -10,9 +10,8 @@
        sc_constructor = None; sc_static_methods = [];
        sc_methods =
        [{ Shallow_decl_defs.sm_abstract = false; sm_final = false;
-          sm_memoizelsb = false; sm_name = ([5:21-22], "f");
-          sm_override = false; sm_dynamicallycallable = false;
-          sm_reactivity = None;
+          sm_name = ([5:21-22], "f"); sm_override = false;
+          sm_dynamicallycallable = false; sm_reactivity = None;
           sm_type =
           (Rwitness (root|class_in_namespace.php line 5, characters 21-21),
            (Tfun

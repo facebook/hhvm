@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<20de78d0e6ed042ee655aa5e9e34e229>>
+// @generated SignedSource<<d27954ae61414cf543c63107525fdb23>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -685,14 +685,13 @@ impl<'a> Node<'a> for ShallowMethod<'a> {
             ShallowMethod {
                 abstract_: ref __binding_0,
                 final_: ref __binding_1,
-                memoizelsb: ref __binding_2,
-                name: ref __binding_3,
-                override_: ref __binding_4,
-                dynamicallycallable: ref __binding_5,
-                reactivity: ref __binding_6,
-                type_: ref __binding_7,
-                visibility: ref __binding_8,
-                deprecated: ref __binding_9,
+                name: ref __binding_2,
+                override_: ref __binding_3,
+                dynamicallycallable: ref __binding_4,
+                reactivity: ref __binding_5,
+                type_: ref __binding_6,
+                visibility: ref __binding_7,
+                deprecated: ref __binding_8,
             } => {
                 {
                     __binding_0.accept(v)
@@ -718,10 +717,7 @@ impl<'a> Node<'a> for ShallowMethod<'a> {
                 {
                     __binding_7.accept(v)
                 }
-                {
-                    __binding_8.accept(v)
-                }
-                { __binding_9.accept(v) }
+                { __binding_8.accept(v) }
             }
         }
     }

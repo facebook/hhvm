@@ -669,9 +669,6 @@ val invalid_newable_type_param_constraints :
 val override_final :
   parent:Pos.t -> child:Pos.t -> on_error:typing_error_callback option -> unit
 
-val override_memoizelsb :
-  parent:Pos.t -> child:Pos.t -> typing_error_callback -> unit
-
 val override_lsb :
   member_name:string ->
   parent:Pos.t ->

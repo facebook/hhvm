@@ -1,6 +1,6 @@
 --- legacy
 +++ direct decl
-@@ -1,80 +1,80 @@
+@@ -1,79 +1,79 @@
  [("\\C",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -34,9 +34,8 @@
         sc_sprops = [];
         sc_constructor =
         (Some { Shallow_decl_defs.sm_abstract = false; sm_final = false;
-                sm_memoizelsb = false; sm_name = ([5:19-30], "__construct");
-                sm_override = false; sm_dynamicallycallable = false;
-                sm_reactivity = None;
+                sm_name = ([5:19-30], "__construct"); sm_override = false;
+                sm_dynamicallycallable = false; sm_reactivity = None;
                 sm_type =
                 (Rwitness (root|typeconst_property_promotion.php line 5, characters 19-29),
                  (Tfun

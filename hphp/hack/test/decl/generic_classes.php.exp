@@ -24,9 +24,8 @@
        sc_sprops = [];
        sc_constructor =
        (Some { Shallow_decl_defs.sm_abstract = false; sm_final = false;
-               sm_memoizelsb = false; sm_name = ([6:19-30], "__construct");
-               sm_override = false; sm_dynamicallycallable = false;
-               sm_reactivity = None;
+               sm_name = ([6:19-30], "__construct"); sm_override = false;
+               sm_dynamicallycallable = false; sm_reactivity = None;
                sm_type =
                (Rwitness (root|generic_classes.php line 6, characters 19-29),
                 (Tfun
@@ -69,9 +68,8 @@
        sc_static_methods = [];
        sc_methods =
        [{ Shallow_decl_defs.sm_abstract = false; sm_final = false;
-          sm_memoizelsb = false; sm_name = ([10:19-22], "get");
-          sm_override = false; sm_dynamicallycallable = false;
-          sm_reactivity = None;
+          sm_name = ([10:19-22], "get"); sm_override = false;
+          sm_dynamicallycallable = false; sm_reactivity = None;
           sm_type =
           (Rwitness (root|generic_classes.php line 10, characters 19-21),
            (Tfun
@@ -122,9 +120,8 @@
         sc_sprops = [];
         sc_constructor =
         (Some { Shallow_decl_defs.sm_abstract = false; sm_final = false;
-                sm_memoizelsb = false; sm_name = ([18:19-30], "__construct");
-                sm_override = false; sm_dynamicallycallable = false;
-                sm_reactivity = None;
+                sm_name = ([18:19-30], "__construct"); sm_override = false;
+                sm_dynamicallycallable = false; sm_reactivity = None;
                 sm_type =
                 (Rwitness (root|generic_classes.php line 18, characters 19-29),
                  (Tfun
@@ -193,9 +190,8 @@
         sc_sprops = [];
         sc_constructor =
         (Some { Shallow_decl_defs.sm_abstract = false; sm_final = false;
-                sm_memoizelsb = false; sm_name = ([26:19-30], "__construct");
-                sm_override = false; sm_dynamicallycallable = false;
-                sm_reactivity = None;
+                sm_name = ([26:19-30], "__construct"); sm_override = false;
+                sm_dynamicallycallable = false; sm_reactivity = None;
                 sm_type =
                 (Rwitness (root|generic_classes.php line 26, characters 19-29),
                  (Tfun
@@ -239,9 +235,8 @@
         sc_static_methods = [];
         sc_methods =
         [{ Shallow_decl_defs.sm_abstract = false; sm_final = false;
-           sm_memoizelsb = false; sm_name = ([30:19-22], "get");
-           sm_override = false; sm_dynamicallycallable = false;
-           sm_reactivity = None;
+           sm_name = ([30:19-22], "get"); sm_override = false;
+           sm_dynamicallycallable = false; sm_reactivity = None;
            sm_type =
            (Rwitness (root|generic_classes.php line 30, characters 19-21),
             (Tfun

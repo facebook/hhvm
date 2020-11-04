@@ -33,8 +33,8 @@
         sc_constructor = None; sc_static_methods = [];
         sc_methods =
         [{ Shallow_decl_defs.sm_abstract = false; sm_final = false;
-           sm_memoizelsb = false; sm_name = ([8:19-20], "f");
-           sm_override = false; sm_dynamicallycallable = false;
+           sm_name = ([8:19-20], "f"); sm_override = false;
+           sm_dynamicallycallable = false;
            sm_reactivity = (Some (Decl_defs.Method_pure None));
            sm_type =
            (Rwitness (root|pure.php line 8, characters 19-19),

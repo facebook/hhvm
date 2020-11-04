@@ -10,9 +10,8 @@
        sc_constructor = None;
        sc_static_methods =
        [{ Shallow_decl_defs.sm_abstract = false; sm_final = false;
-          sm_memoizelsb = true; sm_name = ([5:26-27], "f");
-          sm_override = false; sm_dynamicallycallable = false;
-          sm_reactivity = None;
+          sm_name = ([5:26-27], "f"); sm_override = false;
+          sm_dynamicallycallable = false; sm_reactivity = None;
           sm_type =
           (Rwitness (root|memoize_lsb.php line 5, characters 26-26),
            (Tfun

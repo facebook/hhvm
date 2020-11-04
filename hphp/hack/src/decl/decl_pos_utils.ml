@@ -404,7 +404,6 @@ struct
     {
       sm_abstract = sm.sm_abstract;
       sm_final = sm.sm_final;
-      sm_memoizelsb = sm.sm_memoizelsb;
       sm_name = string_id sm.sm_name;
       sm_override = sm.sm_override;
       sm_dynamicallycallable = sm.sm_dynamicallycallable;

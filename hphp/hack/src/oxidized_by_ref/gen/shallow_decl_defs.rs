@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ec493ce5962648cf06cb3328906fb41c>>
+// @generated SignedSource<<dc19e0238fcb868ac0c30e799e452557>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -148,7 +148,6 @@ impl<'a> TrivialDrop for ShallowProp<'a> {}
 pub struct ShallowMethod<'a> {
     pub abstract_: bool,
     pub final_: bool,
-    pub memoizelsb: bool,
     pub name: ast_defs::Id<'a>,
     pub override_: bool,
     pub dynamicallycallable: bool,

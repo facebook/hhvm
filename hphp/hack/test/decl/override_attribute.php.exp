@@ -10,9 +10,8 @@
        sc_constructor = None; sc_static_methods = [];
        sc_methods =
        [{ Shallow_decl_defs.sm_abstract = false; sm_final = false;
-          sm_memoizelsb = false; sm_name = ([4:19-20], "f");
-          sm_override = false; sm_dynamicallycallable = false;
-          sm_reactivity = None;
+          sm_name = ([4:19-20], "f"); sm_override = false;
+          sm_dynamicallycallable = false; sm_reactivity = None;
           sm_type =
           (Rwitness (root|override_attribute.php line 4, characters 19-19),
            (Tfun
@@ -53,9 +52,8 @@
         sc_constructor = None; sc_static_methods = [];
         sc_methods =
         [{ Shallow_decl_defs.sm_abstract = false; sm_final = false;
-           sm_memoizelsb = false; sm_name = ([9:19-20], "f");
-           sm_override = true; sm_dynamicallycallable = false;
-           sm_reactivity = None;
+           sm_name = ([9:19-20], "f"); sm_override = true;
+           sm_dynamicallycallable = false; sm_reactivity = None;
            sm_type =
            (Rwitness (root|override_attribute.php line 9, characters 19-19),
             (Tfun

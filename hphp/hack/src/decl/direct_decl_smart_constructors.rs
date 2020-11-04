@@ -3586,7 +3586,6 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         let method = self.alloc(ShallowMethod {
             abstract_: self.state.classish_name_builder.in_interface() || modifiers.is_abstract,
             final_: modifiers.is_final,
-            memoizelsb: attributes.memoizelsb,
             name: id,
             override_: attributes.override_,
             reactivity: match attributes.reactivity {

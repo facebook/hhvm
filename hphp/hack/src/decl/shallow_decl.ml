@@ -228,9 +228,6 @@ let method_type env m =
 let method_ env m =
   let override = Attrs.mem SN.UserAttributes.uaOverride m.m_user_attributes in
   let (pos, _) = m.m_name in
-  let has_memoizelsb =
-    Attrs.mem SN.UserAttributes.uaMemoizeLSB m.m_user_attributes
-  in
   let has_dynamicallycallable =
     Attrs.mem SN.UserAttributes.uaDynamicallyCallable m.m_user_attributes
   in
@@ -276,7 +273,6 @@ let method_ env m =
   {
     sm_abstract = m.m_abstract;
     sm_final = m.m_final;
-    sm_memoizelsb = has_memoizelsb;
     sm_name = m.m_name;
     sm_override = override;
     sm_dynamicallycallable = has_dynamicallycallable;

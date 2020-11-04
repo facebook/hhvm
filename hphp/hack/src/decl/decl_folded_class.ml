@@ -664,7 +664,6 @@ and build_constructor
           ~lateinit:false
           ~const:false
           ~lsb:false
-          ~memoizelsb:false
           ~synthesized:false
           ~override:false
           ~dynamicallycallable:false;
@@ -740,7 +739,6 @@ and prop_decl
           ~lsb:false
           ~synthesized:false
           ~override:false
-          ~memoizelsb:false
           ~const:sp.sp_const
           ~lateinit:sp.sp_lateinit
           ~abstract:sp.sp_abstract
@@ -777,7 +775,6 @@ and static_prop_decl
           ~lateinit:sp.sp_lateinit
           ~lsb:sp.sp_lsb
           ~override:false
-          ~memoizelsb:false
           ~abstract:sp.sp_abstract
           ~synthesized:false
           ~dynamicallycallable:false;
@@ -914,7 +911,6 @@ and method_decl_acc
           ~override:check_override
           ~synthesized:false
           ~lsb:false
-          ~memoizelsb:false
           ~const:false
           ~lateinit:false
           ~dynamicallycallable:m.sm_dynamicallycallable;

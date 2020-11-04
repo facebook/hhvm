@@ -10,9 +10,8 @@
        sc_constructor = None; sc_static_methods = [];
        sc_methods =
        [{ Shallow_decl_defs.sm_abstract = false; sm_final = false;
-          sm_memoizelsb = false; sm_name = ([5:19-22], "foo");
-          sm_override = false; sm_dynamicallycallable = false;
-          sm_reactivity = None;
+          sm_name = ([5:19-22], "foo"); sm_override = false;
+          sm_dynamicallycallable = false; sm_reactivity = None;
           sm_type =
           (Rwitness (root|deprecated.php line 5, characters 19-21),
            (Tfun
@@ -38,9 +37,8 @@
           sm_deprecated =
           (Some "The method foo is deprecated: use bar() instead") };
          { Shallow_decl_defs.sm_abstract = false; sm_final = false;
-           sm_memoizelsb = false; sm_name = ([8:19-22], "bar");
-           sm_override = false; sm_dynamicallycallable = false;
-           sm_reactivity = None;
+           sm_name = ([8:19-22], "bar"); sm_override = false;
+           sm_dynamicallycallable = false; sm_reactivity = None;
            sm_type =
            (Rwitness (root|deprecated.php line 8, characters 19-21),
             (Tfun
@@ -64,9 +62,8 @@
                  }));
            sm_visibility = Public; sm_deprecated = None };
          { Shallow_decl_defs.sm_abstract = false; sm_final = false;
-           sm_memoizelsb = false; sm_name = ([11:19-22], "baz");
-           sm_override = false; sm_dynamicallycallable = false;
-           sm_reactivity = None;
+           sm_name = ([11:19-22], "baz"); sm_override = false;
+           sm_dynamicallycallable = false; sm_reactivity = None;
            sm_type =
            (Rwitness (root|deprecated.php line 11, characters 19-21),
             (Tfun
@@ -90,9 +87,8 @@
                  }));
            sm_visibility = Public; sm_deprecated = None };
          { Shallow_decl_defs.sm_abstract = false; sm_final = false;
-           sm_memoizelsb = false; sm_name = ([14:19-23], "foo2");
-           sm_override = false; sm_dynamicallycallable = false;
-           sm_reactivity = None;
+           sm_name = ([14:19-23], "foo2"); sm_override = false;
+           sm_dynamicallycallable = false; sm_reactivity = None;
            sm_type =
            (Rwitness (root|deprecated.php line 14, characters 19-22),
             (Tfun

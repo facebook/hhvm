@@ -363,6 +363,15 @@ void Clusterizer::clusterizeGreedy() {
     // dst must be the first in its cluster
     if (dstC.front() != dst) continue;
 
+    // Don't merge blocks if their weights are beyond JitLayoutMaxMergeRatio.
+    // Avoiding to create clusters with block with very different weights can
+    // hurt cache locality. NB: We add 1 to the weights to avoid division by 0.
+    auto const srcWgt = m_unit.blocks[src].weight;
+    auto const dstWgt = m_unit.blocks[dst].weight;
+    const double ratio = (1.0 + std::max(srcWgt, dstWgt)) /
+                         (1.0 + std::min(srcWgt, dstWgt));
+    if (ratio > RO::EvalJitLayoutMaxMergeRatio) continue;
+
     // Don't merge zero and non-zero weight blocks that go in different areas.
     if (RO::EvalJitLayoutSeparateZeroWeightBlocks) {
       auto const srcZero = m_unit.blocks[src].weight == 0;

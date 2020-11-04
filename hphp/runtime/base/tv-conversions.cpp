@@ -655,7 +655,8 @@ ArrayData* tvCastToArrayLikeData(TypedValue tv) {
 
     case KindOfObject: {
       auto ad = tv.m_data.pobj->toArray<IC>();
-      assertx(ad->isPHPArrayType());
+      // When we cast a closure to an array, we get back a varray.
+      assertx(ad->isHAMSafeDArray() || ad->isHAMSafeVArray());
       return ad.detach();
     }
 

@@ -372,7 +372,9 @@ MixedArray* MixedArray::MakeMixedImpl(uint32_t size, const TypedValue* kvs) {
 MixedArray* MixedArray::MakeDArray(uint32_t size, const TypedValue* kvs) {
   if (RuntimeOption::EvalHackArrDVArrs) {
     auto const ad = MakeDict(size, kvs);
-    ad->setLegacyArrayInPlace(RO::EvalHackArrDVArrMark);
+    if (RO::EvalHackArrDVArrMark && ad != nullptr) {
+      ad->setLegacyArrayInPlace(true);
+    }
     return ad;
   }
 

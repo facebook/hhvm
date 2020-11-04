@@ -138,9 +138,9 @@ let rec reinfer_type_to_string_exn ty =
     | Tbool -> "bool"
     | Tatom _id -> "atom")
   | Tapply ((_p, id), _tyl) -> cut_namespace id
-  | Taccess (ty, ids) ->
+  | Taccess (ty, id) ->
     let s = reinfer_type_to_string_exn (get_node ty) in
-    List.fold ids ~init:s ~f:(fun s (_p, id) -> Printf.sprintf "%s::%s" s id)
+    Printf.sprintf "%s::%s" s (snd id)
   | _ -> raise Gi_reinfer_type_not_supported
 
 let reinfer_type_to_string_opt ty =

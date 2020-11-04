@@ -51,51 +51,34 @@ class virtual type_validator =
       let acc = Option.fold ~f:this#on_type ~init:acc typeconst.ttc_type in
       acc
 
-    method! on_taccess acc r (root, ids) =
-      (* We care only about the last type constant we access in the chain
-       * this::T1::T2::Tn. So we reverse the ids to get the last one then we resolve
-       * up to that point using localize to determine the root. i.e. we resolve
-       *   root = (this::T1::T2)
-       *   id = Tn
-       *)
-      match List.rev ids with
-      | [] -> this#on_type acc root
-      | (_, tconst) :: rest ->
-        let root =
-          if List.is_empty rest then
-            root
-          else
-            mk (r, Taccess (root, List.rev rest))
-        in
-        let (env, root) = Env.localize acc.env acc.ety_env root in
-        let (env, tyl) = Env.get_concrete_supertypes env root in
-        List.fold tyl ~init:acc ~f:(fun acc ty ->
-            let (env, ty) = Env.expand_type env ty in
-            match get_node ty with
-            | Tclass ((_, class_name), _, _) ->
-              let ( >>= ) = Option.( >>= ) in
-              Option.value
-                ~default:acc
-                ( Env.get_class env class_name >>= fun class_ ->
-                  Decl_provider.Class.get_typeconst class_ tconst
-                  >>= fun typeconst ->
-                  let is_concrete =
-                    match typeconst.ttc_abstract with
-                    | TCConcrete -> true
-                    (* This handles the case for partially abstract type constants. In this case
-                     * we know the assigned type will be chosen if the root is the same as the
-                     * concrete supertype of the root.
-                     *)
-                    | TCPartiallyAbstract when phys_equal root ty -> true
-                    | _ -> false
-                  in
-                  let ety_env = { acc.ety_env with this_ty = ty } in
-                  Some
-                    (this#on_typeconst
-                       { acc with ety_env }
-                       is_concrete
-                       typeconst) )
-            | _ -> acc)
+    method! on_taccess acc _r (root, id) =
+      let (env, root) = Env.localize acc.env acc.ety_env root in
+      let (env, tyl) = Env.get_concrete_supertypes env root in
+      List.fold tyl ~init:acc ~f:(fun acc ty ->
+          let (env, ty) = Env.expand_type env ty in
+          match get_node ty with
+          | Tclass ((_, class_name), _, _) ->
+            let ( >>= ) = Option.( >>= ) in
+            Option.value
+              ~default:acc
+              ( Env.get_class env class_name >>= fun class_ ->
+                Decl_provider.Class.get_typeconst class_ (snd id)
+                >>= fun typeconst ->
+                let is_concrete =
+                  match typeconst.ttc_abstract with
+                  | TCConcrete -> true
+                  (* This handles the case for partially abstract type constants. In this case
+                   * we know the assigned type will be chosen if the root is the same as the
+                   * concrete supertype of the root.
+                   *)
+                  | TCPartiallyAbstract when phys_equal root ty -> true
+                  | _ -> false
+                in
+                let ety_env = { acc.ety_env with this_ty = ty } in
+                Some
+                  (this#on_typeconst { acc with ety_env } is_concrete typeconst)
+              )
+          | _ -> acc)
 
     method! on_tapply acc r (pos, name) tyl =
       if Env.is_enum acc.env name && List.is_empty tyl then

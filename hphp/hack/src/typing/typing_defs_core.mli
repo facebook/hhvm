@@ -320,7 +320,7 @@ and _ ty_ =
        * - second parameter is the name of the type to project
        *)
 
-and 'phase taccess_type = 'phase ty * Nast.sid list
+and 'phase taccess_type = 'phase ty * Nast.sid
 
 (* represents reactivity of function
    - None corresponds to non-reactive function

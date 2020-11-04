@@ -104,6 +104,8 @@ let generic ?(type_args = []) r n = mk (r, Tgeneric (n, type_args))
 
 let err r = mk (r, Terr)
 
+let taccess r ty id = mk (r, Taccess (ty, id))
+
 let nullable_decl r ty =
   (* Cheap avoidance of double nullable *)
   match get_node ty with

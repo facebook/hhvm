@@ -41,7 +41,7 @@ let enum_kind name enum inner_ty get_ancestor =
             | None ->
               let this = Typing_defs_core.mk (get_reason enum, Tthis) in
               Typing_defs_core.mk
-                (get_reason enum, Taccess (this, [(get_pos enum, SN.FB.tInner)]))
+                (get_reason enum, Taccess (this, (get_pos enum, SN.FB.tInner)))
             | Some ty -> ty
           in
           Some (ty_exp, ty_exp, None, None)

@@ -59,9 +59,9 @@ and instantiate_ subst x =
   (* IMPORTANT: We cannot expand Taccess during instantiation because this can
    * be called before all type consts have been declared and inherited
    *)
-  | Taccess (ty, ids) ->
+  | Taccess (ty, id) ->
     let ty = instantiate subst ty in
-    Taccess (ty, ids)
+    Taccess (ty, id)
   | Tarray (ty1, ty2) ->
     let ty1 = Option.map ty1 (instantiate subst) in
     let ty2 = Option.map ty2 (instantiate subst) in

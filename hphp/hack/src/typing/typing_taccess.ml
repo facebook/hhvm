@@ -466,7 +466,7 @@ let expand_with_env
     begin
       match CT.try_get_class_for_condition_type env cond_ty with
       | Some (_, cls) when Cls.has_typeconst cls tconst ->
-        let cond_ty = mk (Reason.Rwitness (fst id), Taccess (cond_ty, [id])) in
+        let cond_ty = mk (Reason.Rwitness (fst id), Taccess (cond_ty, id)) in
         Option.value
           (TR.try_substitute_type_with_condition env cond_ty ty)
           ~default:(env, ty)
@@ -474,6 +474,9 @@ let expand_with_env
     end
   | _ -> (env, ty)
 
+(* This is called with non-nested type accesses e.g. this::T1::T2 is
+ * represented by (this, [T1; T2])
+ *)
 let referenced_typeconsts env ety_env (root, ids) ~on_error =
   let (env, root) = Phase.localize ~ety_env env root in
   List.fold

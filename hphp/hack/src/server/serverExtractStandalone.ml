@@ -1130,7 +1130,26 @@ and add_dep ctx env ~this ty : unit =
             add_dep ctx env ~this sft_ty)
           fdm
 
-      method! on_taccess () r (root, tconsts) =
+      (* We un-nest (((this::T1)::T2)::T3) into (this, [T1;T2;T3]) and then re-nest
+       * because legacy representation of Taccess was using lists. TODO: implement
+       * this more directly instead.
+       *)
+      method! on_taccess () r (root, tconst) =
+        let rec split_taccess root ids =
+          match Typing_defs.get_node root with
+          | Taccess (root, id) -> split_taccess root (id :: ids)
+          | _ -> (root, ids)
+        in
+        let rec make_taccess r root ids =
+          match ids with
+          | [] -> root
+          | id :: ids ->
+            make_taccess
+              Reason.Rnone
+              (mk (r, Typing_defs.Taccess (root, id)))
+              ids
+        in
+        let (root, tconsts) = split_taccess root [tconst] in
         let expand_type_access class_name tconsts =
           match tconsts with
           | [] -> raise UnexpectedDependency
@@ -1155,23 +1174,15 @@ and add_dep ctx env ~this ty : unit =
                     | Tapply ((_, name), _) -> Some name
                     | _ -> this
                   in
-                  let taccess = Typing_defs.Taccess (tc_type, tconsts) in
-                  add_dep
-                    ctx
-                    ~this
-                    env
-                    (Typing_defs.mk (Typing_reason.Rnone, taccess))
+                  let taccess = make_taccess r tc_type tconsts in
+                  add_dep ctx ~this env taccess
                 | (None, None) -> ()
               )
             | None -> ())
         in
         match Typing_defs.get_node root with
-        | Taccess (root', tconsts') ->
-          add_dep
-            ctx
-            ~this
-            env
-            (Typing_defs.mk (r, Taccess (root', tconsts' @ tconsts)))
+        | Taccess (root', tconst) ->
+          add_dep ctx ~this env (make_taccess r root' (tconst :: tconsts))
         | Tapply ((_, name), _) -> expand_type_access name tconsts
         | Tthis -> expand_type_access (Option.value_exn this) tconsts
         | _ -> raise UnexpectedDependency

@@ -269,7 +269,7 @@ let rec localize ~ety_env env (dty : decl_ty) =
   | (r, Tintersection tyl) ->
     let (env, tyl) = List.map_env env tyl (localize ~ety_env) in
     (env, mk (r, Tintersection tyl))
-  | (r, Taccess (root_ty, ids)) ->
+  | (r, Taccess (root_ty, id)) ->
     (* Sometimes, Tthis and Tgeneric are not expanded to Tabstract, so we need
     to allow accessing abstract type constants here. *)
     let rec allow_abstract_tconst ty =
@@ -283,30 +283,22 @@ let rec localize ~ety_env env (dty : decl_ty) =
     let allow_abstract_tconst = allow_abstract_tconst root_ty in
     let (env, root_ty) = localize ~ety_env env root_ty in
     let root_pos = get_pos root_ty in
-    let ((env, ty), _) =
-      List.fold
-        ids
-        ~init:((env, root_ty), root_pos)
-        ~f:(fun ((env, root_ty), root_pos) id ->
-          ( TUtils.expand_typeconst
-              ety_env
-              env
-              root_ty
-              id
-              ~root_pos
-              ~on_error:ety_env.on_error
-              ~allow_abstract_tconst,
-            fst id ))
+    let (env, ty) =
+      TUtils.expand_typeconst
+        ety_env
+        env
+        root_ty
+        id
+        ~root_pos
+        ~on_error:ety_env.on_error
+        ~allow_abstract_tconst
     in
     (* Elaborate reason with information about expression dependent types and
      * the original location of the Taccess type
      *)
     let elaborate_reason expand_reason =
-      (* First convert into a string of root_ty::ID1::ID2::IDn *)
       let taccess_string =
-        String.concat
-          ~sep:"::"
-          (Typing_print.full_strip_ns env root_ty :: List.map ~f:snd ids)
+        Typing_print.full_strip_ns env root_ty ^ "::" ^ snd id
       in
       (* If the root is an expression dependent type, change the primary
        * reason to be for the full Taccess type to preserve the position where

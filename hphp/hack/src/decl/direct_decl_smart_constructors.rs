@@ -3,7 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::cell::{Cell, RefCell};
 use std::collections::BTreeMap;
 use std::rc::Rc;
 
@@ -31,12 +30,11 @@ use oxidized_by_ref::{
         self, Decl, ShallowClassConst, ShallowMethod, ShallowProp, ShallowTypeconst,
     },
     shape_map::ShapeField,
-    typing_defs,
     typing_defs::{
-        ConstDecl, EnumType, FunArity, FunElt, FunImplicitParams, FunParam, FunParams, FunType,
-        IfcFunDecl, ParamMode, ParamMutability, ParamRxAnnotation, PossiblyEnforcedTy, Reactivity,
-        RecordFieldReq, ShapeFieldType, ShapeKind, Tparam, Ty, Ty_, TypeconstAbstractKind,
-        TypedefType, WhereConstraint, XhpAttrTag,
+        self, ConstDecl, EnumType, FunArity, FunElt, FunImplicitParams, FunParam, FunParams,
+        FunType, IfcFunDecl, ParamMode, ParamMutability, ParamRxAnnotation, PossiblyEnforcedTy,
+        Reactivity, RecordFieldReq, ShapeFieldType, ShapeKind, TaccessType, Tparam, Ty, Ty_,
+        TypeconstAbstractKind, TypedefType, WhereConstraint, XhpAttrTag,
     },
     typing_defs_flags::{FunParamFlags, FunTypeFlags},
     typing_reason::Reason,
@@ -667,7 +665,6 @@ pub enum Node<'a> {
     FloatingLiteral(&'a (&'a str, &'a Pos<'a>)), // For const expressions.
     BooleanLiteral(&'a (&'a str, &'a Pos<'a>)), // For const expressions.
     Ty(&'a Ty<'a>),
-    TypeconstAccess(&'a (Cell<&'a Pos<'a>>, &'a Ty<'a>, RefCell<Vec<'a, Id<'a>>>)),
     ListItem(&'a (Node<'a>, Node<'a>)),
     Const(&'a ShallowClassConst<'a>),
     ConstInitializer(&'a (Node<'a>, Node<'a>)), // Name, initializer expression
@@ -918,7 +915,6 @@ impl<'a> DirectDeclSmartConstructors<'a> {
         match node {
             Node::Name(&(_, pos)) => pos,
             Node::Ty(ty) => ty.get_pos().unwrap_or(Pos::none()),
-            Node::TypeconstAccess((pos, _, _)) => pos.get(),
             Node::XhpName(&(_, pos)) => pos,
             Node::QualifiedName(&(_, pos)) => pos,
             Node::IntLiteral(&(_, pos))
@@ -971,14 +967,6 @@ impl<'a> DirectDeclSmartConstructors<'a> {
     fn node_to_ty(&self, node: Node<'a>) -> Option<&'a Ty<'a>> {
         match node {
             Node::Ty(ty) => Some(ty),
-            Node::TypeconstAccess((pos, ty, names)) => {
-                let pos = pos.get();
-                let names = self.slice(names.borrow().iter().copied());
-                Some(self.alloc(Ty(
-                    self.alloc(Reason::hint(pos)),
-                    Ty_::Taccess(self.alloc(typing_defs::TaccessType(*ty, names))),
-                )))
-            }
             Node::Expr(expr) => {
                 fn expr_to_ty<'a>(arena: &'a Bump, expr: &'a nast::Expr<'a>) -> Option<Ty_<'a>> {
                     use aast::Expr_::*;
@@ -4286,11 +4274,8 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 None => return Node::Ignored(SK::TypeConstant),
             },
         };
-        Node::TypeconstAccess(self.alloc((
-            Cell::new(pos),
-            ty,
-            RefCell::new(bumpalo::vec![in self.state.arena; id]),
-        )))
+        let reason = self.alloc(Reason::hint(pos));
+        Node::Ty(self.alloc(Ty(reason, Ty_::Taccess(self.alloc(TaccessType(ty, id))))))
     }
 
     fn make_soft_type_specifier(&mut self, at_token: Self::R, hint: Self::R) -> Self::R {

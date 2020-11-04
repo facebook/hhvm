@@ -185,7 +185,7 @@ let typeconst_structure mro class_name stc =
   let r = Reason.Rwitness pos in
   let tsid = (pos, SN.FB.cTypeStructure) in
   let ts_ty =
-    mk (r, Tapply (tsid, [mk (r, Taccess (mk (r, Tthis), [stc.stc_name]))]))
+    mk (r, Tapply (tsid, [mk (r, Taccess (mk (r, Tthis), stc.stc_name))]))
   in
   let abstract =
     match stc.stc_abstract with

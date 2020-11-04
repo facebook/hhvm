@@ -163,7 +163,7 @@ and hint_ p env = function
       match ids with
       | [] -> res
       | id :: ids ->
-        translate (Taccess (mk (Typing_reason.Rhint p, res), [id])) ids
+        translate (Taccess (mk (Typing_reason.Rhint p, res), id)) ids
     in
     translate root_ty ids
   | Htuple hl ->

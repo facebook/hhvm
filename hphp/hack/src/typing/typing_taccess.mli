@@ -15,6 +15,6 @@ open Typing_env_types
 val referenced_typeconsts :
   env ->
   expand_env ->
-  decl_phase taccess_type ->
+  decl_ty * Nast.sid list ->
   on_error:Errors.typing_error_callback ->
   (string * string * Pos.t) list

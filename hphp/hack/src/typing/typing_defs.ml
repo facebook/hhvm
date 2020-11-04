@@ -777,9 +777,8 @@ let rec equal_decl_ty_ ty_1 ty_2 =
     String.equal s1 s2 && equal_decl_tyl tyl1 tyl2
   | (Tgeneric (s1, argl1), Tgeneric (s2, argl2)) ->
     String.equal s1 s2 && equal_decl_tyl argl1 argl2
-  | (Taccess (ty1, idl1), Taccess (ty2, idl2)) ->
-    equal_decl_ty ty1 ty2
-    && List.equal (fun (_, s1) (_, s2) -> String.equal s1 s2) idl1 idl2
+  | (Taccess (ty1, (_, s1)), Taccess (ty2, (_, s2))) ->
+    equal_decl_ty ty1 ty2 && String.equal s1 s2
   | (Tarray (tk1, tv1), Tarray (tk2, tv2)) ->
     Option.equal equal_decl_ty tk1 tk2 && Option.equal equal_decl_ty tv1 tv2
   | (Tdarray (tk1, tv1), Tdarray (tk2, tv2)) ->

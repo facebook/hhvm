@@ -128,7 +128,7 @@ struct
     | Tlike x -> Tlike (ty x)
     | Tfun ft -> Tfun (fun_type ft)
     | Tapply (sid, xl) -> Tapply (string_id sid, List.map xl ty)
-    | Taccess (root_ty, ids) -> Taccess (ty root_ty, List.map ids string_id)
+    | Taccess (root_ty, id) -> Taccess (ty root_ty, string_id id)
     | Tshape (shape_kind, fdm) ->
       Tshape (shape_kind, ShapeFieldMap.map_and_rekey fdm shape_field_name ty)
     | Tpu_access (base, sid) -> Tpu_access (ty base, string_id sid)

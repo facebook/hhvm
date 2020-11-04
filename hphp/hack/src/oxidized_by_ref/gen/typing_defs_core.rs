@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<26c784ac34c864466d5ffa50fa942e93>>
+// @generated SignedSource<<add3690cda30cfec03d00aeacaaa14d2>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -554,7 +554,7 @@ impl<'a> TrivialDrop for Ty_<'a> {}
     Serialize,
     ToOcamlRep
 )]
-pub struct TaccessType<'a>(pub &'a Ty<'a>, pub &'a [nast::Sid<'a>]);
+pub struct TaccessType<'a>(pub &'a Ty<'a>, pub nast::Sid<'a>);
 impl<'a> TrivialDrop for TaccessType<'a> {}
 
 /// represents reactivity of function

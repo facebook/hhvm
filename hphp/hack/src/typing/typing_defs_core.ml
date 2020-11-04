@@ -319,7 +319,7 @@ and _ ty_ =
        * - second parameter is the name of the type to project
        *)
 
-and 'phase taccess_type = 'phase ty * Nast.sid list
+and 'phase taccess_type = 'phase ty * Nast.sid
 
 (** represents reactivity of function
    - None corresponds to non-reactive function
@@ -741,14 +741,7 @@ module Pp = struct
     pp_ty fmt a0;
     Format.fprintf fmt ",@ ";
     Format.fprintf fmt "@[<2>[";
-    ignore
-      (List.fold_left
-         ~f:(fun sep x ->
-           if sep then Format.fprintf fmt ";@ ";
-           Aast.pp_sid fmt x;
-           true)
-         ~init:false
-         a1);
+    Aast.pp_sid fmt a1;
     Format.fprintf fmt "@,]@]";
     Format.fprintf fmt "@])"
 

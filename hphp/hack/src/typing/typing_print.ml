@@ -336,16 +336,7 @@ module Full = struct
     | Tarray (x, y) -> tarray k x y
     | Tapply ((_, s), []) -> to_doc s
     | Tgeneric (s, []) -> to_doc s
-    | Taccess (root_ty, ids) ->
-      Concat
-        [
-          k root_ty;
-          to_doc
-            (List.fold_left
-               ids
-               ~f:(fun acc (_, sid) -> acc ^ "::" ^ sid)
-               ~init:"");
-        ]
+    | Taccess (root_ty, id) -> Concat [k root_ty; text "::"; to_doc (snd id)]
     | Toption x -> Concat [text "?"; k x]
     | Tlike x -> Concat [text "~"; k x]
     | Tprim x -> tprim x
@@ -586,16 +577,7 @@ module Full = struct
     | Tpu (base, (_, enum)) -> pu_concat k base enum
     | Tpu_type_access ((_, member), (_, tyname)) ->
       text member ^^ text (":@" ^ tyname)
-    | Taccess (root_ty, ids) ->
-      Concat
-        [
-          k root_ty;
-          to_doc
-            (List.fold_left
-               ids
-               ~f:(fun acc (_, sid) -> acc ^ "::" ^ sid)
-               ~init:"");
-        ]
+    | Taccess (root_ty, id) -> Concat [k root_ty; text "::"; to_doc (snd id)]
 
   let rec constraint_type_ to_doc st env x =
     let k lty = locl_ty to_doc st env lty in
@@ -837,7 +819,7 @@ module ErrorString = struct
          in a type argument position then, which inst below
          prints with a different function (namely Full.locl_ty)  *)
       failwith "Tunapplied_alias is not a type"
-    | Taccess (_ty, _ids) -> "a type constant"
+    | Taccess (_ty, _id) -> "a type constant"
 
   and inst env tyl =
     if List.is_empty tyl then
@@ -1037,7 +1019,7 @@ module Json = struct
       @ name (snd member)
       @ name (snd typ)
     (* TODO akenn *)
-    | (p, Taccess (ty, _ids)) -> obj @@ kind p "type_constant" @ args [ty]
+    | (p, Taccess (ty, _id)) -> obj @@ kind p "type_constant" @ args [ty]
 
   type deserialized_result = (locl_ty, deserialization_error) result
 

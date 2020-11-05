@@ -758,11 +758,9 @@ and stmt_ env pos st =
                 let (env, tb) = block env b in
 
                 (* Annotate loop body with join and refined environments *)
-                let at = `Start in
-                let tb =
-                  assert_env_blk ~pos ~at Aast.Refinement refinement_map tb
-                in
-                let tb = assert_env_blk ~pos ~at Aast.Join join_map tb in
+                let assert_env_blk = assert_env_blk ~pos ~at:`Start in
+                let tb = assert_env_blk Aast.Refinement refinement_map tb in
+                let tb = assert_env_blk Aast.Join join_map tb in
 
                 (env, tb))
           in
@@ -808,7 +806,7 @@ and stmt_ env pos st =
       | Some e2 -> e2
       | None -> (Pos.none, True)
     in
-    let (env, (te1, te2, te3, tb)) =
+    let (env, (te1, te2, te3, tb, refinement_map)) =
       LEnv.stash_and_do env [C.Continue; C.Break] (fun env ->
           (* For loops leak their initalizer, but nothing that's defined in the
            body
@@ -821,21 +819,34 @@ and stmt_ env pos st =
                 (* The following is necessary in case there is an assignment in the
                  * expression *)
                 let (env, te2, _) = expr env e2 in
-                let (env, _lset) = condition env true te2 in
+                let (env, lset) = condition env true te2 in
+                let refinement_map = refinement_annot_map env lset in
                 let (env, tb) = block env b in
                 let env =
                   LEnv.update_next_from_conts env [C.Continue; C.Next]
                 in
+                let join_map = annot_map env in
                 let (env, te3, _) = exprs env e3 in
+
+                (* Export the join and refinement environments *)
+                let assert_env_blk = assert_env_blk ~pos ~at:`Start in
+                let tb = assert_env_blk Aast.Refinement refinement_map tb in
+                let tb = assert_env_blk Aast.Join join_map tb in
+
                 (env, (tb, te3)))
           in
           let env = LEnv.update_next_from_conts env [C.Continue; C.Next] in
           let (env, te2, _) = expr env e2 in
-          let (env, _lset) = condition env false te2 in
+          let (env, lset) = condition env false te2 in
+          let refinement_map_at_exit = refinement_annot_map env lset in
           let env = LEnv.update_next_from_conts env [C.Break; C.Next] in
-          (env, (te1, te2, te3, tb)))
+          (env, (te1, te2, te3, tb, refinement_map_at_exit)))
     in
-    (env, Aast.For (te1, Some te2, te3, tb))
+    let for_st = Aast.For (te1, Some te2, te3, tb) in
+    let for_st =
+      assert_env_stmt ~pos ~at:`End Aast.Refinement refinement_map for_st
+    in
+    (env, for_st)
   | Switch (((pos, _) as e), cl) ->
     let (env, te, ty) = expr env e in
     (* NB: A 'continue' inside a 'switch' block is equivalent to a 'break'.

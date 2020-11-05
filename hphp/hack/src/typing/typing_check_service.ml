@@ -26,7 +26,49 @@ it returns back to master the following progress report:
   - deferred: a list of computations which were discovered to be necessary to be
     performed before some of the computations in the input subset
 
-The deferred list needs further explanation, so read on.
+The deferred list needs further explanation, so read below.
+
+####
+
+Here's how we actually plumb through the workitems and their individual results, via MultiWorker:
+* We have mutable state [ref files_to_process], a list of filenames still to be processed
+    for the entire typecheck.
+* Datatype [progress] represents an input batch of work for a worker to do,
+    and also an output indication of how it dispatched that batch
+* Datatype [typing_result] represents the accumulation of telemetry, errors, deps results from workers.
+    Each individual worker is given an empty [typing_result] as input,
+    and merges its own results into that empty input to give a per-worker output,
+    and then we have a separate accumulator and we merge each per-worker's output
+    into that accumulator.
+* next : () -> progress
+    This mutates [files_to_process] by removing a bucket of filenames,
+    and returns a degenerate progress {remaining=bucket; completed=[]; deferred=[]}
+    which is basically just the bucket of work to be done by the job.
+* neutral : typing_result
+    This value is just the empty typing_result {errors=Empty; deps=Empty; telemetry=Empty}
+* job : typing_result -> progress -> (typing_result', progress')
+    MultiWorker will invoke this job. For input,
+    it provides a copy of the degenerate [typing_result] that it got from [neutral], and
+    it provides the degenerate [progress] i.e. just the bucket of work that it got from [next]
+    The behavior of our job is to take items out of progress.remaining and typecheck them.
+    It repeats this process until it either runs out of items or its heap grows too big.
+    It returns a new progress' {remaining'; completed; deferred} to show the items still
+    remaining, the ones it completed, and the ones it had to defer (see below).
+    It returns a new typing_result' {errors; deps; telemetry} by merging its own
+    newly discovered errors, deps, telemetry onto the (degenerate i.e. empty)
+    typing_result it was given as input.
+* merge :  (typing_result * progress) (accumulator : typing_result) -> typing_result
+    The initial value of accumulator is the same [neutral] that was given to each job.
+    After each job, MultiWorker calls [merge] to merge the results of that job
+    into the accumulator.
+    Our merge function looks at the progress {remaining;completed;deferred} that
+    came out of the job, and mutates [files_to_process] by sticking back "remaining+deferred" into it.
+    It then merges the typing_result {errors;deps;telemetry} that came out of the job
+    with those in its accumulator.
+
+The type signatures for MultiWorker look like they'd allow a variety of implementations,
+e.g. having just a single accumulator that starts at "neutral" and feeds one by one into
+each job. But we don't do that.
 
 ####
 

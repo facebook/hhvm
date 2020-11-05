@@ -18,13 +18,22 @@ type file_computation =
   | Prefetch of Relative_path.t list
 [@@deriving show]
 
+(** This type is used for both input and output of typechecker jobs.
+INPUT: [remaining] is the list of files that this job is expected to process, and [completed], [deferred] are empty.
+OUTPUT: all the files that were processed by the job are placed in [completed] or [deferred];
+if the job had to stop early, then [remaining] are the leftover files that the job failed to process. *)
 type computation_progress = {
-  completed: file_computation list;
   remaining: file_computation list;
+  completed: file_computation list;
   deferred: file_computation list;
 }
 [@@deriving show]
 
+(** This type is used for both input and output of typechecker jobs.
+It is also used to accumulate the results of all typechecker jobs.
+JOB-INPUT: all the fields are empty
+JOB-OUTPUT: process_files will merge what it discovered into the typing_result output by each job.
+ACCUMULATE: we start with all fields empty, and then merge in the output of each job as it's done. *)
 type typing_result = {
   errors: Errors.t;
   dep_edges: Typing_deps.dep_edges;

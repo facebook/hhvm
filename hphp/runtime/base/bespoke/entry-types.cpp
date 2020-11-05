@@ -125,16 +125,6 @@ EntryTypes EntryTypes::pessimizeValueTypes() const {
 }
 
 std::string EntryTypes::toString() const {
-  auto const keySt = [&] {
-    switch (keyTypes) {
-      case KeyTypes::Empty: return "Empty";
-      case KeyTypes::Ints: return "Ints";
-      case KeyTypes::StaticStrings: return "StaticStrings";
-      case KeyTypes::Strings: return "Strings";
-      case KeyTypes::Any: return "Any";
-    }
-    not_reached();
-  }();
   auto const valueSt = [&] {
     switch (valueTypes) {
       case ValueTypes::Empty: return folly::sformat("Empty");
@@ -147,7 +137,18 @@ std::string EntryTypes::toString() const {
     not_reached();
   }();
 
-  return folly::sformat("<{}, {}>", keySt, valueSt);
+  return folly::sformat("<{}, {}>", show(keyTypes), valueSt);
+}
+
+const char* show(KeyTypes kt) {
+  switch (kt) {
+    case KeyTypes::Empty: return "Empty";
+    case KeyTypes::Ints: return "Ints";
+    case KeyTypes::StaticStrings: return "StaticStrings";
+    case KeyTypes::Strings: return "Strings";
+    case KeyTypes::Any: return "Any";
+  }
+  not_reached();
 }
 
 }}

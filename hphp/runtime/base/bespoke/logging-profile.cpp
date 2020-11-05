@@ -388,20 +388,6 @@ struct OperationOutputData {
   uint64_t totalCount;
 };
 
-struct SinkOutputData {
-  SinkOutputData(SrcKey sink, uint64_t totalCount)
-    : sink(sink)
-    , totalCount(totalCount)
-  {}
-
-  bool operator<(const SinkOutputData& other) const {
-    return totalCount > other.totalCount;
-  }
-
-  SrcKey sink;
-  uint64_t totalCount;
-};
-
 struct EntryTypesUseOutputData {
   EntryTypesUseOutputData(EntryTypes state, uint64_t count)
     : state(state)
@@ -433,34 +419,76 @@ struct EntryTypesEscalationOutputData {
   uint64_t count;
 };
 
-struct ReachOutputData {
-  ReachOutputData(TransID tid, SrcKey sk, uint64_t count)
-    : tid(tid)
-    , sk(sk)
-    , count(count)
-  {}
+struct SourceFrequencyData {
+  SourceFrequencyData(SrcKey sk, uint64_t count) : sk(sk), count(count) {}
 
-  bool operator<(const ReachOutputData& other) const {
+  bool operator<(const SourceFrequencyData& other) const {
     return count > other.count;
   }
 
-  TransID tid;
   SrcKey sk;
   uint64_t count;
 };
 
+struct SinkTypeData {
+  SinkTypeData(const char* name, uint64_t count) : name(name), count(count) {}
+
+  bool operator<(const SinkTypeData& other) const {
+    return count > other.count;
+  }
+
+  const char* name;
+  uint64_t count;
+};
+
+// NOTE: These helpers undo the transformations in SinkProfile::update.
+
+const char* getArrTypeStr(size_t type) {
+  assertx(type <= SinkProfile::kNumArrTypes);
+  return ArrayData::kindToString(ArrayData::ArrayKind(type * 2));
+}
+
+const char* getKeyTypeStr(size_t type) {
+  assertx(type <= SinkProfile::kNumKeyTypes);
+  return show(KeyTypes(type));
+}
+
+const char* getValTypeStr(size_t type) {
+  assertx(type <= SinkProfile::kNumValTypes);
+  if (type == SinkProfile::kNoValTypes) return "Empty";
+  if (type == SinkProfile::kAnyValType) return "Any";
+  auto const dt = DataType(safe_cast<int8_t>(type) + kMinDataType);
+  switch (dt) {
+#define DT(name, ...) case KindOf##name: return #name;
+DATATYPES
+#undef DT
+  }
+  always_assert(false);
+}
+
+template <size_t N, typename Fn>
+std::vector<SinkTypeData> populateSortedCounts(
+    const std::atomic<uint64_t> (&counts)[N], Fn fn) {
+  std::vector<SinkTypeData> result;
+  for (auto i = 0; i < N; i++) {
+    auto const count = counts[i].load(std::memory_order_relaxed);
+    if (count) result.push_back({fn(i), count});
+  }
+  std::sort(result.begin(), result.end());
+  return result;
+}
+
 struct SourceOutputData {
   SourceOutputData(const LoggingProfile* profile,
+                   size_t numDistinctSinks,
                    std::vector<OperationOutputData>&& operations,
-                   std::vector<SinkOutputData>&& sinkData,
                    std::vector<EntryTypesEscalationOutputData>&& monoEscalations,
                    std::vector<EntryTypesUseOutputData>&& monoUses)
     : profile(profile)
+    , numDistinctSinks(numDistinctSinks)
     , monotypeEscalations(std::move(monoEscalations))
     , monotypeUses(std::move(monoUses))
-    , sinks(std::move(sinkData))
   {
-    std::sort(sinks.begin(), sinks.end());
     std::sort(monotypeEscalations.begin(), monotypeEscalations.end());
     std::sort(monotypeUses.begin(), monotypeUses.end());
     std::sort(operations.begin(), operations.end());
@@ -485,14 +513,51 @@ struct SourceOutputData {
   }
 
   const LoggingProfile* profile;
+  size_t numDistinctSinks;
   std::vector<OperationOutputData> readOperations;
   std::vector<OperationOutputData> writeOperations;
   std::vector<EntryTypesEscalationOutputData> monotypeEscalations;
   std::vector<EntryTypesUseOutputData> monotypeUses;
-  std::vector<SinkOutputData> sinks;
   uint64_t readCount;
   uint64_t writeCount;
   double weight;
+};
+
+struct SinkOutputData {
+  explicit SinkOutputData(const SinkProfile* profile)
+    : profile(profile)
+  {
+    std::map<SrcKey, uint64_t> sourceCounts;
+    for (auto const& it : profile->sources) {
+      sourceCounts[it.first->source] += it.second;
+    }
+    for (auto const& it : sourceCounts) {
+      sources.push_back({it.first, it.second});
+    }
+    std::sort(sources.begin(), sources.end());
+
+    arrCounts = populateSortedCounts(profile->arrCounts, getArrTypeStr);
+    keyCounts = populateSortedCounts(profile->keyCounts, getKeyTypeStr);
+    valCounts = populateSortedCounts(profile->valCounts, getValTypeStr);
+
+    sampledCount = profile->sampledCount.load(std::memory_order_relaxed);
+    unsampledCount = profile->unsampledCount.load(std::memory_order_relaxed);
+
+    weight = sampledCount + unsampledCount;
+  }
+
+  bool operator<(const SinkOutputData& other) const {
+    return weight > other.weight;
+  }
+
+  const SinkProfile* profile;
+  std::vector<SinkTypeData> arrCounts;
+  std::vector<SinkTypeData> keyCounts;
+  std::vector<SinkTypeData> valCounts;
+  std::vector<SourceFrequencyData> sources;
+  uint64_t sampledCount = 0;
+  uint64_t unsampledCount = 0;
+  uint64_t weight = 0;
 };
 
 using ProfileOutputData = std::vector<SourceOutputData>;
@@ -540,7 +605,19 @@ bool exportOperationSet(FILE* file,
   return true;
 }
 
+bool exportTypeCounts(FILE* file, const char* label,
+                      const std::vector<SinkTypeData>& counts) {
+  LOG_OR_RETURN(file, "  {} Type Counts:\n", label);
+  for (auto const& count : counts) {
+    LOG_OR_RETURN(file, "  {: >6}x {}\n", count.count, count.name);
+  }
+  return true;
+}
+
 bool exportSortedProfiles(FILE* file, const ProfileOutputData& profileData) {
+  LOG_OR_RETURN(file, "========================================================================\n");
+  LOG_OR_RETURN(file, "Sources:\n\n");
+
   for (auto const& sourceData : profileData) {
     auto const sourceProfile = sourceData.profile;
     auto const sourceSk = sourceProfile->source;
@@ -552,7 +629,7 @@ bool exportSortedProfiles(FILE* file, const ProfileOutputData& profileData) {
     LOG_OR_RETURN(file, "  {}\n", sourceSk.showInst());
     LOG_OR_RETURN(file, "  {} reads, {} writes, {} distinct sinks\n",
                   sourceData.readCount, sourceData.writeCount,
-                  sourceData.sinks.size());
+                  sourceData.numDistinctSinks);
 
     LOG_OR_RETURN(file, "  Read operations:\n");
     if (!exportOperationSet(file, sourceData.readOperations)) return false;
@@ -571,6 +648,26 @@ bool exportSortedProfiles(FILE* file, const ProfileOutputData& profileData) {
       LOG_OR_RETURN(file, "  {: >6}x {}\n", useData.count,
                     useData.state.toString());
     }
+
+    LOG_OR_RETURN(file, "\n");
+  }
+
+  return true;
+}
+
+bool exportSortedSinks(FILE* file, const std::vector<SinkOutputData>& sinks) {
+  LOG_OR_RETURN(file, "========================================================================\n");
+  LOG_OR_RETURN(file, "Sinks:\n\n");
+
+  for (auto const& sink : sinks) {
+    auto const sk = sink.profile->sink.second;
+    LOG_OR_RETURN(file, "{} [{}/{} sampled]\n",
+                  sk.getSymbol(), sink.sampledCount, sink.weight);
+    LOG_OR_RETURN(file, "  {}\n", sk.showInst());
+
+    if (!exportTypeCounts(file, "Array", sink.arrCounts)) return false;
+    if (!exportTypeCounts(file, "Key",   sink.keyCounts)) return false;
+    if (!exportTypeCounts(file, "Value", sink.valCounts)) return false;
 
     LOG_OR_RETURN(file, "\n");
   }
@@ -615,15 +712,6 @@ SourceOutputData sortSourceData(const LoggingProfile* profile) {
     }
   );
 
-  std::vector<SinkOutputData> sinks;
-  sinks.reserve(sinkCounts.size());
-  std::transform(
-    sinkCounts.begin(), sinkCounts.end(), std::back_inserter(sinks),
-    [](const std::pair<SrcKey, uint64_t>& sinkData) {
-      return SinkOutputData(sinkData.first, sinkData.second);
-    }
-  );
-
   // Determine monotype operations
   std::vector<EntryTypesEscalationOutputData> escalations;
   std::map<uint16_t, uint64_t> usesMap;
@@ -650,7 +738,7 @@ SourceOutputData sortSourceData(const LoggingProfile* profile) {
     }
   );
 
-  return SourceOutputData(profile, std::move(operations), std::move(sinks),
+  return SourceOutputData(profile, sinkCounts.size(), std::move(operations),
                           std::move(escalations), std::move(uses));
 }
 
@@ -671,6 +759,18 @@ ProfileOutputData sortProfileData() {
   return profileData;
 }
 
+std::vector<SinkOutputData> sortSinkData() {
+  std::vector<SinkOutputData> sinkData;
+  sinkData.reserve(s_sinkMap.size());
+
+  for (auto const& it : s_sinkMap) {
+    sinkData.push_back(SinkOutputData(it.second));
+  }
+  std::sort(sinkData.begin(), sinkData.end());
+
+  return sinkData;
+}
+
 }
 
 void exportProfiles() {
@@ -685,12 +785,14 @@ void exportProfiles() {
 
   s_exportProfilesThread = std::thread([] {
     auto const sources = sortProfileData();
+    auto const sinks = sortSinkData();
     auto const file = fopen(RO::EvalExportLoggingArrayDataPath.c_str(), "w");
     if (!file) return;
 
     SCOPE_EXIT { fclose(file); };
 
     exportSortedProfiles(file, sources);
+    exportSortedSinks(file, sinks);
   });
 }
 

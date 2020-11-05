@@ -87,6 +87,8 @@ struct EntryTypes {
   DataType valueDatatype;
 };
 
+const char* show(KeyTypes kt);
+
 }}
 
 #endif

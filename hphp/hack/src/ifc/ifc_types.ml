@@ -84,8 +84,8 @@ type ptype =
   | Tcow_array of cow_array
   | Tshape of Type.shape_kind * shape_field_type Nast.ShapeMap.t
 
-(* Copy-on-write indexed collection used for Hack arrays i.e. vec, dict, and
-   keyset *)
+(* Copy-on-write indexed collection used for Hack containers i.e. vec, dict,
+   keyset, varray, and darray *)
 and cow_array = {
   a_kind: array_kind;
   a_key: ptype;

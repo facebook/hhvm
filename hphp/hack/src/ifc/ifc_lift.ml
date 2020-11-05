@@ -66,49 +66,37 @@ let rec ty ?prefix ?lump renv (t : T.locl_ty) =
   | T.Ttuple tyl -> Ttuple (List.map ~f:ty tyl)
   | T.Tunion tyl -> Tunion (List.map ~f:ty tyl)
   | T.Tintersection tyl -> Tinter (List.map ~f:ty tyl)
-  | T.Tclass ((_, name), _, targs) when String.equal name Decl.vec_id ->
-    begin
-      match targs with
-      | [element_ty] ->
-        Tcow_array
-          {
-            a_kind = Avec;
-            (* Inventing a policy type for indices out of thin air *)
-            a_key = Tprim (get_policy ~prefix:"key" lump renv);
-            a_value = ty element_ty;
-            a_length = get_policy ~prefix:"len" lump renv;
-          }
-      | _ -> fail "vector needs a single type parameter"
-    end
-  | T.Tclass ((_, name), _, targs) when String.equal name Decl.dict_id ->
-    begin
-      match targs with
-      | [key_ty; value_ty] ->
-        Tcow_array
-          {
-            a_kind = Adict;
-            a_key = ty key_ty;
-            a_value = ty value_ty;
-            a_length = get_policy ~prefix:"len" lump renv;
-          }
-      | _ -> fail "dict needs two type parameters"
-    end
-  | T.Tclass ((_, name), _, targs) when String.equal name Decl.keyset_id ->
-    begin
-      match targs with
-      | [value_ty] ->
-        let element_pty = ty value_ty in
-        Tcow_array
-          {
-            a_kind = Akeyset;
-            (* Keysets have identical keys and values with identity
-               $keyset[$ix] === $ix (as bizarre as it is) *)
-            a_key = element_pty;
-            a_value = element_pty;
-            a_length = get_policy ~prefix:"len" lump renv;
-          }
-      | _ -> fail "keyset needs one type parameter"
-    end
+  | T.Tvarray element_ty
+  | T.Tclass ((_, "\\HH\\vec"), _, [element_ty]) ->
+    Tcow_array
+      {
+        a_kind = Avec;
+        (* Inventing a policy type for indices out of thin air *)
+        a_key = Tprim (get_policy ~prefix:"key" lump renv);
+        a_value = ty element_ty;
+        a_length = get_policy ~prefix:"len" lump renv;
+      }
+  | T.Tvarray_or_darray (key_ty, value_ty)
+  | T.Tdarray (key_ty, value_ty)
+  | T.Tclass ((_, "\\HH\\dict"), _, [key_ty; value_ty]) ->
+    Tcow_array
+      {
+        a_kind = Adict;
+        a_key = ty key_ty;
+        a_value = ty value_ty;
+        a_length = get_policy ~prefix:"len" lump renv;
+      }
+  | T.Tclass ((_, "\\HH\\keyset"), _, [value_ty]) ->
+    let element_pty = ty value_ty in
+    Tcow_array
+      {
+        a_kind = Akeyset;
+        (* Keysets have identical keys and values with identity
+            $keyset[$ix] === $ix (as bizarre as it is) *)
+        a_key = element_pty;
+        a_value = element_pty;
+        a_length = get_policy ~prefix:"len" lump renv;
+      }
   | T.Tclass ((_, name), _, targs) when String.equal name Decl.awaitable_id ->
     begin
       match targs with
@@ -146,9 +134,6 @@ let rec ty ?prefix ?lump renv (t : T.locl_ty) =
     Tshape (sh_kind, Nast.ShapeMap.map lift sh_type_map)
   (* ---  types below are not yet supported *)
   | T.Tdependent (_, _ty) -> fail "Tdependent"
-  | T.Tdarray (_keyty, _valty) -> fail "Tdarray"
-  | T.Tvarray _ty -> fail "Tvarray"
-  | T.Tvarray_or_darray (_keyty, _valty) -> fail "Tvarray_or_darray"
   | T.Tany _sentinel -> fail "Tany"
   | T.Terr -> fail "Terr"
   | T.Tnonnull -> fail "Tnonnull"

@@ -809,6 +809,32 @@ let rec assign_with_op ~pos renv env op lhs_exp rhs_exp =
 (* Generate flow constraints for an expression *)
 and expr ~pos renv (env : Env.expr_env) (((_, ety), e) : Tast.expr) =
   let expr = expr ~pos renv in
+  let vec_literal ~prefix exprs =
+    (* Each element of the array is a subtype of the array's value parameter. *)
+    let arry_pty = Lift.ty ~prefix renv ety in
+    let element_pty = (cow_array ~pos renv arry_pty).a_value in
+    let mk_element_subtype env exp =
+      let (env, pty) = expr env exp in
+      Env.acc env (subtype ~pos pty element_pty)
+    in
+    let env = List.fold ~f:mk_element_subtype ~init:env exprs in
+    (env, arry_pty)
+  in
+  let dict_literal ~prefix fields =
+    (* Each field's key and value are subtypes of the array key and value
+       policy types. *)
+    let dict_pty = Lift.ty ~prefix renv ety in
+    let arr = cow_array ~pos renv dict_pty in
+    let mk_element_subtype env (key, value) =
+      let subtype = subtype ~pos in
+      let (env, key_pty) = expr env key in
+      let (env, value_pty) = expr env value in
+      Env.acc env @@ fun acc ->
+      acc |> subtype key_pty arr.a_key |> subtype value_pty arr.a_value
+    in
+    let env = List.fold ~f:mk_element_subtype ~init:env fields in
+    (env, dict_pty)
+  in
   match e with
   | A.Null
   | A.True
@@ -927,30 +953,12 @@ and expr ~pos renv (env : Env.expr_env) (((_, ety), e) : Tast.expr) =
         in
         call env (Clocal ifc_fty) None
     end
+  | A.Varray (_, exprs) -> vec_literal ~prefix:"varray" exprs
   | A.ValCollection (((A.Vec | A.Keyset) as kind), _, exprs) ->
-    (* Each element of the array is a subtype of the array's value parameter. *)
-    let arry_pty = Lift.ty ~prefix:(A.show_vc_kind kind) renv ety in
-    let element_pty = (cow_array ~pos renv arry_pty).a_value in
-    let mk_element_subtype env exp =
-      let (env, pty) = expr env exp in
-      Env.acc env (subtype ~pos pty element_pty)
-    in
-    let env = List.fold ~f:mk_element_subtype ~init:env exprs in
-    (env, arry_pty)
-  | A.KeyValCollection (A.Dict, _, fields) ->
-    (* Each field's key and value are subtypes of the array key and value
-       policy types. *)
-    let dict_pty = Lift.ty ~prefix:"dict" renv ety in
-    let arr = cow_array ~pos renv dict_pty in
-    let mk_element_subtype env (key, value) =
-      let subtype = subtype ~pos in
-      let (env, key_pty) = expr env key in
-      let (env, value_pty) = expr env value in
-      Env.acc env @@ fun acc ->
-      acc |> subtype key_pty arr.a_key |> subtype value_pty arr.a_value
-    in
-    let env = List.fold ~f:mk_element_subtype ~init:env fields in
-    (env, dict_pty)
+    let prefix = A.show_vc_kind kind in
+    vec_literal ~prefix exprs
+  | A.Darray (_, fields) -> dict_literal ~prefix:"darray" fields
+  | A.KeyValCollection (A.Dict, _, fields) -> dict_literal ~prefix:"dict" fields
   | A.Array_get (arry, ix_opt) ->
     (* Evaluate the array *)
     let (env, arry_pty) = expr env arry in

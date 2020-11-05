@@ -109,10 +109,8 @@ void MonotypeVec::InitializeLayouts() {
   auto const base = Layout::ReserveIndices(1 << 8);
   always_assert(base == kBaseLayoutIndex);
   new EmptyMonotypeVecLayout(getEmptyLayoutIndex());
-#define DT(name, value)                                                \
-  if (dt_modulo_persistence(KindOf##name) == KindOf##name) {           \
-    new MonotypeVecLayout(getLayoutIndex(KindOf##name), KindOf##name); \
-  }
+#define DT(name, value)                                              \
+  new MonotypeVecLayout(getLayoutIndex(KindOf##name), KindOf##name);
   DATATYPES
 #undef DT
 
@@ -293,9 +291,8 @@ ssize_t EmptyMonotypeVec::IterRewind(const EmptyMonotypeVec*, ssize_t pos) {
 }
 
 ArrayData* EmptyMonotypeVec::Append(EmptyMonotypeVec* ead, TypedValue v) {
-  auto const dt = dt_modulo_persistence(type(v));
   auto const mad = MonotypeVec::MakeReserve(
-      ead->m_kind, ead->isLegacyArray(), 1, dt);
+      ead->m_kind, ead->isLegacyArray(), 1, type(v));
   auto const res = MonotypeVec::Append(mad, v);
   assertx(mad == res);
   return res;
@@ -353,14 +350,15 @@ ArrayData* EmptyMonotypeVec::SetLegacyArray(EmptyMonotypeVec* eadIn,
 template <typename CountableFn, typename MaybeCountableFn>
 void MonotypeVec::forEachCountableValue(CountableFn c, MaybeCountableFn mc) {
   auto const dt = type();
-  if (static_cast<data_type_t>(dt) & kHasPersistentMask) {
-    assertx(isRefcountedType(dt));
-    for (auto i = 0; i < m_size; i++) {
-      mc(dt, valueRefUnchecked(i).pcnt);
-    }
-  } else if (isRefcountedType(dt)) {
-    for (auto i = 0; i < m_size; i++) {
-      c(dt, reinterpret_cast<Countable*>(valueRefUnchecked(i).pcnt));
+  if (isRefcountedType(dt)) {
+    if (static_cast<data_type_t>(dt) & kHasPersistentMask) {
+      for (auto i = 0; i < m_size; i++) {
+        mc(dt, valueRefUnchecked(i).pcnt);
+      }
+    } else {
+      for (auto i = 0; i < m_size; i++) {
+        c(dt, reinterpret_cast<Countable*>(valueRefUnchecked(i).pcnt));
+      }
     }
   }
 }
@@ -518,7 +516,6 @@ bool MonotypeVec::checkInvariants() const {
   assertx(layoutIndex() != getEmptyLayoutIndex());
   assertx(layoutIndex() == getLayoutIndex(type()));
   assertx(isRealType(type()));
-  assertx(type() == dt_modulo_persistence(type()));
   if (size() > 0) {
     assertx(tvIsPlausible(typedValueUnchecked(0)));
   }
@@ -563,6 +560,10 @@ void MonotypeVec::ConvertToUncounted(MonotypeVec* madIn,
     ConvertTvToUncounted(lval, seen);
     assertx(equivDataTypes(dt, madIn->type()));
   }
+  auto narrowedType = static_cast<data_type_t>(oldType) & kHasPersistentMask
+    ? dt_with_persistence(oldType)
+    : oldType;
+  madIn->setLayoutIndex(getLayoutIndex(narrowedType));
 }
 
 void MonotypeVec::ReleaseUncounted(MonotypeVec* mad) {
@@ -634,6 +635,7 @@ arr_lval MonotypeVec::elemImpl(int64_t k, bool throwOnMissing) {
   }
   auto const cow = cowCheck();
   auto const mad = cow ? copy() : this;
+  mad->adjustTypePersistence(dt_with_rc(mad->type()));
   static_assert(folly::kIsLittleEndian);
   auto const type_ptr = reinterpret_cast<DataType*>(&mad->m_extra_hi16);
   assertx(*type_ptr == mad->type());
@@ -656,6 +658,14 @@ tv_lval MonotypeVec::ElemStr(tv_lval lval, StringData* k, bool throwOnMissing) {
   return const_cast<TypedValue*>(&immutable_null_base);
 }
 
+bool MonotypeVec::adjustTypePersistence(DataType dt) {
+  auto const mtype = type();
+  if (dt == mtype) return true;
+  if (!equivDataTypes(mtype, dt)) return false;
+  setLayoutIndex(getLayoutIndex(dt_with_rc(dt)));
+  return true;
+}
+
 template <bool Move>
 ArrayData* MonotypeVec::setIntImpl(int64_t k, TypedValue v) {
   assertx(cowCheck() || notCyclic(v));
@@ -664,7 +674,7 @@ ArrayData* MonotypeVec::setIntImpl(int64_t k, TypedValue v) {
     throwOOBArrayKeyException(k, this);
   }
 
-  if (type() != dt_modulo_persistence(v.m_type)) {
+  if (!adjustTypePersistence(v.m_type)) {
     auto const vad = EscalateToVanilla(this, __func__);
     auto const res = vad->set(k, v);
     assertx(vad == res);
@@ -746,7 +756,7 @@ ssize_t MonotypeVec::IterRewind(const MonotypeVec* mad, ssize_t pos) {
 
 template <bool Move>
 ArrayData* MonotypeVec::appendImpl(TypedValue v) {
-  if (type() != dt_modulo_persistence(v.type())) {
+  if (!adjustTypePersistence(v.m_type)) {
     // Type doesn't match; escalate to vanilla
     auto const ad = escalateWithCapacity(size() + 1);
     auto const res = PackedArray::Append(ad, v);

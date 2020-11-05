@@ -1,7 +1,7 @@
 include Disk_sig.Types
 
 let cat (filename : string) : string =
-  Counters.count_disk_cat @@ fun () ->
+  Counters.count Counters.Category.Disk_cat @@ fun () ->
   let ic = open_in_bin filename in
   let len = (try in_channel_length ic with Sys_error _ -> 0) in
   (* in_channel_length returns 0 for non-regular files; try reading it

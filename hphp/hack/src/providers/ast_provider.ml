@@ -315,7 +315,7 @@ let get_gconst defs name =
   get None defs
 
 let get_ast ?(full = false) ctx path =
-  Counters.count_get_ast @@ fun () ->
+  Counters.count Counters.Category.Get_ast @@ fun () ->
   (* If there's a ctx, and this file is in the ctx, then use ctx. *)
   (* Otherwise, the way we fetch/cache ASTs depends on the provider. *)
   let entry_opt =

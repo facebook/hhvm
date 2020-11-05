@@ -334,7 +334,7 @@ let check_pu_in_locl_ty env lty =
 
 let rec fun_def ctx f :
     (Tast.fun_def * Typing_inference_env.t_global_with_pos) option =
-  Counters.count_typecheck @@ fun () ->
+  Counters.count Counters.Category.Typecheck @@ fun () ->
   Errors.run_with_span f.f_span @@ fun () ->
   let env = EnvFromDef.fun_env ~origin:Decl_counters.TopLevel ctx f in
   with_timeout env f.f_name ~do_:(fun env ->
@@ -881,7 +881,7 @@ let class_type_param env ct =
   (env, tparam_list)
 
 let rec class_def ctx c =
-  Counters.count_typecheck @@ fun () ->
+  Counters.count Counters.Category.Typecheck @@ fun () ->
   Errors.run_with_span c.c_span @@ fun () ->
   let env = EnvFromDef.class_env ~origin:Decl_counters.TopLevel ctx c in
   let tc = Env.get_class env (snd c.c_name) in
@@ -1662,7 +1662,7 @@ and class_var_def ~is_static cls env cv =
       (cv.cv_span, global_inference_env) ) )
 
 let gconst_def ctx cst =
-  Counters.count_typecheck @@ fun () ->
+  Counters.count Counters.Category.Typecheck @@ fun () ->
   Errors.run_with_span cst.cst_span @@ fun () ->
   let env = EnvFromDef.gconst_env ~origin:Decl_counters.TopLevel ctx cst in
   let env = Env.set_env_pessimize env in
@@ -1781,7 +1781,7 @@ let check_record_inheritance_cycle env ((rd_pos, rd_name) : Aast.sid) : unit =
   worker rd_name [rd_name] (SSet.singleton rd_name)
 
 let record_def_def ctx rd =
-  Counters.count_typecheck @@ fun () ->
+  Counters.count Counters.Category.Typecheck @@ fun () ->
   let env = EnvFromDef.record_def_env ~origin:Decl_counters.TopLevel ctx rd in
   (match rd.rd_extends with
   | Some parent -> record_def_parent env rd parent

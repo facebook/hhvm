@@ -375,23 +375,16 @@ let process_files
   Ast_provider.local_changes_push_sharedmem_stack ();
 
   let _prev_counters_state =
-    Counters.(
-      Category.(
-        let categories = [] in
-        let categories =
-          if check_info.profile_log then
-            Get_ast :: Disk_cat :: Typecheck :: Decling :: categories
-          else
-            categories
-        in
-        let categories =
-          if check_info.profile_total_typecheck_duration then
-            Typecheck :: Decling :: categories
-          else
-            categories
-        in
-        Decl_counters.set_mode check_info.profile_decling;
-        reset ~enabled_categories:(CategorySet.of_list categories)))
+    let categories =
+      match
+        (check_info.profile_log, check_info.profile_total_typecheck_duration)
+      with
+      | (false, false) -> []
+      | (false, true) -> Counters.Category.[Typecheck; Decling]
+      | (true, _) -> Counters.Category.[Get_ast; Disk_cat; Typecheck; Decling]
+    in
+    Decl_counters.set_mode check_info.profile_decling;
+    Counters.reset ~enabled_categories:(Counters.CategorySet.of_list categories)
   in
   let (_start_time, start_counters) = read_counters () in
 

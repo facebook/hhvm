@@ -33,12 +33,6 @@ val restore_state : t -> unit
 
 val count : Category.t -> (unit -> 'a) -> 'a
 
-val count_disk_cat : (unit -> 'a) -> 'a
-
-val count_get_ast : (unit -> 'a) -> 'a
-
-val count_typecheck : (unit -> 'a) -> 'a
-
 val get_counters : unit -> Telemetry.t
 
 val read_time : Category.t -> time_in_sec

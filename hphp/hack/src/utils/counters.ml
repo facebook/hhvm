@@ -38,7 +38,6 @@ module Category = struct
 end
 
 module CategorySet = Caml.Set.Make (Category)
-module C = Category
 
 type time_in_sec = float
 
@@ -104,12 +103,6 @@ let count (category : Category.t) (f : unit -> 'a) : 'a =
             time = tally.time +. get_time () -. start_time;
             enabled = tally.enabled;
           })
-
-let count_disk_cat (f : unit -> 'a) : 'a = count C.Disk_cat f
-
-let count_get_ast (f : unit -> 'a) : 'a = count C.Get_ast f
-
-let count_typecheck (f : unit -> 'a) : 'a = count C.Typecheck f
 
 let read_time (category : Category.t) : time_in_sec =
   (get_counter category).time

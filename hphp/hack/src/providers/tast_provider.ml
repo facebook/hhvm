@@ -55,10 +55,10 @@ let compute_tast_and_errors_unquarantined_internal
     let prev_gc_telemetry = Telemetry.quick_gc_stat () in
     Decl_counters.set_mode Typing_service_types.DeclingTopCounts;
     let prev_tally_state =
-      Counters.(
-        reset
-          ~enabled_categories:
-            (CategorySet.of_list Category.[Decling; Disk_cat; Get_ast]))
+      Counters.reset
+        ~enabled_categories:
+          (Counters.CategorySet.of_list
+             Counters.Category.[Decling; Disk_cat; Get_ast])
     in
     let t = Unix.gettimeofday () in
 

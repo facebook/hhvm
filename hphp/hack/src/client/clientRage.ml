@@ -16,38 +16,6 @@ type env = {
   desc: string;
 }
 
-let format_failure (message : string) (failure : Lwt_utils.Process_failure.t) :
-    string =
-  let open Lwt_utils.Process_failure in
-  let status =
-    match failure.process_status with
-    | Unix.WEXITED i ->
-      Printf.sprintf "WEXITED %d (%s)" i (Exit_status.exit_code_to_string i)
-    | Unix.WSIGNALED i ->
-      let msg =
-        if i = Sys.sigkill then
-          " this signal might have been sent by 'hh rage' itself if the command took too long"
-        else
-          ""
-      in
-      Printf.sprintf
-        "WSIGNALED %d (%s)%s"
-        i
-        (PrintSignal.string_of_signal i)
-        msg
-    | Unix.WSTOPPED i ->
-      Printf.sprintf "WSTOPPED %d (%s)" i (PrintSignal.string_of_signal i)
-  in
-  Printf.sprintf
-    "%s\nCMDLINE: %s\nEXIT STATUS: %s\nSTART: %s\nEND: %s\n\nSTDOUT:\n%s\nSTDERR:\n%s\n"
-    message
-    failure.command_line
-    status
-    (Utils.timestring failure.start_time)
-    (Utils.timestring failure.end_time)
-    failure.stdout
-    failure.stderr
-
 let get_stack (pid, reason) : string Lwt.t =
   let pid = string_of_int pid in
   let format msg = Printf.sprintf "PSTACK %s (%s)\n%s\n" pid reason msg in
@@ -136,7 +104,8 @@ let rage_strobelight () : string Lwt.t =
           match result with
           | Ok { Lwt_utils.Process_success.stdout; stderr; _ } ->
             reason ^ "\n" ^ stdout ^ "\n" ^ stderr
-          | Error failure -> reason ^ format_failure "" failure
+          | Error failure ->
+            reason ^ "\n" ^ Lwt_utils.Process_failure.to_string failure
         in
         Lwt.return result)
       pids
@@ -204,7 +173,7 @@ let rage_ps () : string Lwt.t =
   in
   match result with
   | Ok { Lwt_utils.Process_success.stdout; _ } -> Lwt.return stdout
-  | Error failure -> Lwt.return (format_failure "" failure)
+  | Error failure -> Lwt.return (Lwt_utils.Process_failure.to_string failure)
 
 let rage_hh_version
     (env : env) (hhconfig_version_raw : Config_file.version option) :
@@ -240,7 +209,7 @@ let rage_hh_version
   let hh_server_version =
     match hh_server_version_result with
     | Ok { Lwt_utils.Process_success.stdout; _ } -> stdout
-    | Error failure -> format_failure "" failure
+    | Error failure -> Lwt_utils.Process_failure.to_string failure
   in
   let hh_version =
     Printf.sprintf
@@ -298,7 +267,8 @@ let rage_hh_server_state (env : env) :
   in
   match hh_server_state_result with
   | Error failure ->
-    Lwt.return_error (format_failure "failed to obtain state" failure)
+    Lwt.return_error
+      ("failed to obtain state\n" ^ Lwt_utils.Process_failure.to_string failure)
   | Ok { Lwt_utils.Process_success.stdout; _ } ->
     begin
       try
@@ -342,7 +312,9 @@ let rage_www (env : env) : www_results Lwt.t =
     Lwt.return
       {
         hgdiff = None;
-        instructions = format_failure "Unable to determine mergebase" failure;
+        instructions =
+          "Unable to determine mergebase\n"
+          ^ Lwt_utils.Process_failure.to_string failure;
         mergebase = None;
         patch_script = None;
       }
@@ -359,7 +331,10 @@ let rage_www (env : env) : www_results Lwt.t =
       match www_diff_result with
       | Error failure ->
         Lwt.return
-          (None, format_failure "Unable to determine diff" failure, None)
+          ( None,
+            "Unable to determine diff\n"
+            ^ Lwt_utils.Process_failure.to_string failure,
+            None )
       | Ok { Lwt_utils.Process_success.stdout = hgdiff; _ } ->
         if String.is_empty hgdiff then
           Lwt.return (None, "", None)
@@ -390,7 +365,8 @@ let rage_www (env : env) : www_results Lwt.t =
     in
     let hg_st =
       match hg_st_result with
-      | Error failure -> format_failure "Unable to `hg status`" failure
+      | Error failure ->
+        "Unable to `hg status`\n" ^ Lwt_utils.Process_failure.to_string failure
       | Ok { Lwt_utils.Process_success.stdout; _ } -> "hg status:\n" ^ stdout
     in
     Lwt.return
@@ -431,7 +407,9 @@ let rage_www_errors (env : env) : string Lwt.t =
          (Utils.timestring success.end_time)
          success.stdout
          success.stderr)
-  | Error failure -> Lwt.return (format_failure "hh check failure" failure)
+  | Error failure ->
+    Lwt.return
+      ("hh check failure\n" ^ Lwt_utils.Process_failure.to_string failure)
 
 let rage_saved_state (env : env) : (string * string) list Lwt.t =
   let watchman_opts =
@@ -530,7 +508,8 @@ let rage_tmp_dir () : string Lwt.t =
     match dir1_result with
     | Ok { Lwt_utils.Process_success.command_line; stdout; _ } ->
       Printf.sprintf "%s\n\n%s\n\n" command_line stdout
-    | Error failure -> format_failure "listing tmp directory" failure
+    | Error failure ->
+      "listing tmp directory\n" ^ Lwt_utils.Process_failure.to_string failure
   in
   (* `ls -lR /tmp/hh_server` will do a recursive list of every file and directory within
   our tmp directory - in case wrong files are there, or in case we lack permissions. *)
@@ -545,7 +524,8 @@ let rage_tmp_dir () : string Lwt.t =
     | Ok { Lwt_utils.Process_success.command_line; stdout; _ } ->
       Printf.sprintf "%s\n\n%s\n\n" command_line stdout
     | Error failure ->
-      format_failure "listing contents of tmp directory" failure
+      "listing contents of tmp directory\n"
+      ^ Lwt_utils.Process_failure.to_string failure
   in
   Lwt.return (dir1 ^ "\n\n" ^ dir2)
 
@@ -563,23 +543,6 @@ let rage_experiments_and_config
     in
     ( local_config.ServerLocalConfig.experiments,
       local_config.ServerLocalConfig.experiments_config_meta )
-
-(** Human-readable text showing an attempt to kick off a repro of what the user had *)
-let rage_repro (mergebase : string option) (patch_script : string option) :
-    (string * string) option Lwt.t =
-  match (mergebase, patch_script) with
-  | (None, _)
-  | (_, None) ->
-    Lwt.return_none
-  | (Some mergebase, Some patch_script) ->
-    let%lwt result = Extra_rage.create_repro mergebase patch_script in
-    let result =
-      match result with
-      | Some (Ok { Lwt_utils.Process_success.stdout; _ }) -> stdout
-      | Some (Error failure) -> format_failure "" failure
-      | None -> "not applicable"
-    in
-    Lwt.return_some ("repro", result)
 
 (** Human-readable text relating to what shell commands the user has executed *)
 let rage_command_history () : string Lwt.t =
@@ -752,8 +715,8 @@ let main (env : env) : Exit_status.t Lwt.t =
   add ("hh_server tmp", tmp_dir);
 
   (* repro *)
-  let%lwt repro = rage_repro mergebase patch_script in
-  Option.iter repro ~f:add;
+  let%lwt repro = Extra_rage.create_repro mergebase patch_script in
+  add ("repro", repro);
 
   (* host *)
   let hostname = Unix.gethostname () in

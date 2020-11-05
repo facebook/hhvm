@@ -8,7 +8,7 @@
 
 let create_repro ~mergebase ~patch_script =
   ignore (mergebase, patch_script);
-  Lwt.return_none
+  Lwt.return ""
 
 let ooms () = Lwt.return ""
 

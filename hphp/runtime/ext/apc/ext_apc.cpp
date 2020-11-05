@@ -344,6 +344,10 @@ Variant HHVM_FUNCTION(apc_store,
       Variant v = iter.second();
 
       auto const& strKey = key.asCStrRef();
+      if (strKey.empty()) {
+        raise_invalid_argument_warning("apc key: (empty string)");
+        return false;
+      }
       if (isKeyInvalid(strKey)) {
         raise_invalid_argument_warning("apc key: (contains invalid characters)");
         return Variant(false);
@@ -362,6 +366,10 @@ Variant HHVM_FUNCTION(apc_store,
   }
   String strKey = key_or_array.toString();
 
+  if (strKey.empty()) {
+    raise_invalid_argument_warning("apc key: (empty string)");
+    return false;
+  }
   if (isKeyInvalid(strKey)) {
     raise_invalid_argument_warning("apc key: (contains invalid characters)");
     return Variant(false);
@@ -381,6 +389,10 @@ bool HHVM_FUNCTION(apc_store_as_primed_do_not_use,
                    const String& key,
                    const Variant& var) {
   if (!apcExtension::Enable) return false;
+  if (key.empty()) {
+    raise_invalid_argument_warning("apc key: (empty string)");
+    return false;
+  }
   if (isKeyInvalid(key)) {
     raise_invalid_argument_warning("apc key: (contains invalid characters)");
     return false;
@@ -415,6 +427,10 @@ Variant HHVM_FUNCTION(apc_add,
       Variant v = iter.second();
 
       auto const& strKey = key.asCStrRef();
+      if (strKey.empty()) {
+        raise_invalid_argument_warning("apc key: (empty string)");
+        return false;
+      }
       if (isKeyInvalid(strKey)) {
         raise_invalid_argument_warning("apc key: (contains invalid characters)");
         return false;
@@ -432,6 +448,10 @@ Variant HHVM_FUNCTION(apc_add,
     return false;
   }
   auto strKey = key_or_array.asCStrRef();
+  if (strKey.empty()) {
+    raise_invalid_argument_warning("apc key: (empty string)");
+    return false;
+  }
   if (isKeyInvalid(strKey)) {
     raise_invalid_argument_warning("apc key: (contains invalid characters)");
     return false;

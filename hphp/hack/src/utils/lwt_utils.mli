@@ -35,6 +35,8 @@ module Process_failure : sig
     end_time: float;
   }
 
+  (** Human-readable multi-line fairly verbose explanation of the failure,
+  aimed for logging and hack developers, not for end users *)
   val to_string : t -> string
 end
 

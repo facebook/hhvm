@@ -100,11 +100,26 @@ module Process_failure = struct
       | None -> "<none>"
     in
     let exit_code =
-      Unix.(
-        match process_failure.process_status with
-        | WEXITED exit_code -> "WEXITED " ^ string_of_int exit_code
-        | WSIGNALED exit_code -> "WSIGNALED " ^ string_of_int exit_code
-        | WSTOPPED exit_code -> "WSTOPPED " ^ string_of_int exit_code)
+      match process_failure.process_status with
+      | Unix.WEXITED exit_code ->
+        Printf.sprintf
+          "WEXITED %d (%s)"
+          exit_code
+          (Exit_status.exit_code_to_string exit_code)
+      | Unix.WSIGNALED exit_code ->
+        Printf.sprintf
+          "WSIGNALLED %d (%s)%s"
+          exit_code
+          (PrintSignal.string_of_signal exit_code)
+          ( if exit_code = Sys.sigkill then
+            " - this often indicates a timeout"
+          else
+            "" )
+      | Unix.WSTOPPED exit_code ->
+        Printf.sprintf
+          "WSTOPPED %d (%s)"
+          exit_code
+          (PrintSignal.string_of_signal exit_code)
     in
     let stderr =
       match process_failure.stderr with
@@ -113,12 +128,15 @@ module Process_failure = struct
     in
     Printf.sprintf
       ( "Process '%s' failed with\n"
-      ^^ "Exception: %s\n"
       ^^ "Exit code: %s\n"
+      ^^ "%s -- %s\n"
+      ^^ "Exception: %s\n"
       ^^ "Stderr: %s" )
       process_failure.command_line
-      exn_message
       exit_code
+      (Utils.timestring process_failure.start_time)
+      (Utils.timestring process_failure.end_time)
+      exn_message
       stderr
 end
 

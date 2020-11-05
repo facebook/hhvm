@@ -2887,7 +2887,7 @@ bool array_multisort_impl(
     Variant* arg8 = nullptr,
     Variant* arg9 = nullptr
 ) {
-  if (!arg1->isPHPArray()) {
+  if (!arg1->isArray()) {
     if (arg1->isClsMeth()) {
       raiseIsClsMethWarning("array_multisort", 1);
       return false;

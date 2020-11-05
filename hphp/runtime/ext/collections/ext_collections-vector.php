@@ -274,12 +274,12 @@ final class Vector implements \MutableVector {
   /** Returns a varray built from the values from this Vector.
    * @return varray
    */
-  <<__Pure, __MaybeMutable>>
+  <<__Pure, __MaybeMutable, __ProvenanceSkipFrame>>
   public function toVArray(): varray {
     return varray($this);
   }
 
-  <<__Pure, __MaybeMutable>>
+  <<__Pure, __MaybeMutable, __ProvenanceSkipFrame>>
   public function toDArray(): darray {
     return darray($this);
   }
@@ -1015,7 +1015,7 @@ final class ImmVector implements \ConstVector {
   /** Returns an Iterable that produces the keys from this ImmVector.
    * @return object
    */
-  <<__Pure, __MutableReturn, __MaybeMutable>>
+  <<__Pure, __MutableReturn, __MaybeMutable, __ProvenanceSkipFrame>>
   public function keys(): this {
     return new self($this->toKeysArray());
   }
@@ -1100,12 +1100,12 @@ final class ImmVector implements \ConstVector {
   /** Returns a varray built from the values from this ImmVector.
    * @return varray
    */
-  <<__Pure, __MaybeMutable>>
+  <<__Pure, __MaybeMutable, __ProvenanceSkipFrame>>
   public function toVArray(): varray {
     return varray($this);
   }
 
-  <<__Pure, __MaybeMutable>>
+  <<__Pure, __MaybeMutable, __ProvenanceSkipFrame>>
   public function toDArray(): darray {
     return darray($this);
   }

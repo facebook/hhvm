@@ -802,6 +802,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
    *
    * @return     mixed   Returns the method result.
    */
+  <<__ProvenanceSkipFrame>>
   public function invoke($obj, ...$args): mixed {
     $this->validateInvokeParameters($obj, $args);
     if ($this->isStaticInPrologue()) {

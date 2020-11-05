@@ -122,6 +122,7 @@ interface MutableSet extends ConstSet,
 }
 
 trait StrictIterable implements \HH\Iterable {
+  <<__ProvenanceSkipFrame>>
   public function toArray() {
     $arr = varray[];
     foreach ($this as $v) {
@@ -129,6 +130,7 @@ trait StrictIterable implements \HH\Iterable {
     }
     return $arr;
   }
+  <<__ProvenanceSkipFrame>>
   public function toValuesArray() {
     return $this->toArray();
   }
@@ -251,6 +253,7 @@ trait StrictIterable implements \HH\Iterable {
 }
 
 trait StrictKeyedIterable implements \HH\KeyedIterable {
+  <<__ProvenanceSkipFrame>>
   public function toArray() {
     $arr = darray[];
     foreach ($this as $k => $v) {
@@ -258,6 +261,7 @@ trait StrictKeyedIterable implements \HH\KeyedIterable {
     }
     return $arr;
   }
+  <<__ProvenanceSkipFrame>>
   public function toValuesArray() {
     $arr = varray[];
     foreach ($this as $v) {
@@ -265,6 +269,7 @@ trait StrictKeyedIterable implements \HH\KeyedIterable {
     }
     return $arr;
   }
+  <<__ProvenanceSkipFrame>>
   public function toKeysArray() {
     $arr = varray[];
     foreach ($this as $k => $_) {

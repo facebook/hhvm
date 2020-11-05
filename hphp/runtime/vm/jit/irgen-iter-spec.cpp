@@ -687,7 +687,7 @@ void emitSpecializedFooter(IRGS& env, const Accessor& accessor,
 void specializeIterInit(IRGS& env, Offset doneOffset,
                         const IterArgs& data, uint32_t baseLocalId) {
   auto const local = baseLocalId != kInvalidId;
-  auto const base = local ? ldLoc(env, baseLocalId, nullptr, DataTypeIterBase)
+  auto const base = local ? ldLoc(env, baseLocalId, DataTypeIterBase)
                           : topC(env, BCSPRelOffset{0}, DataTypeIterBase);
   profileDecRefs(env, data, base, local, /*init=*/true);
 

@@ -120,7 +120,7 @@ void emitIterNext(IRGS& env, IterArgs ita, Offset loopOffset) {
 
 void emitLIterInit(IRGS& env, IterArgs ita,
                    int32_t baseLocalId, Offset doneOffset) {
-  auto const base = ldLoc(env, baseLocalId, nullptr, DataTypeIterBase);
+  auto const base = ldLoc(env, baseLocalId, DataTypeIterBase);
   if (!base->type().subtypeOfAny(TArrLike, TObj)) PUNT(LIterInit);
   if (iterInitEmptyBase(env, doneOffset, base, true)) return;
   specializeIterInit(env, doneOffset, ita, baseLocalId);
@@ -139,7 +139,7 @@ void emitLIterNext(IRGS& env, IterArgs ita,
                    int32_t baseLocalId, Offset loopOffset) {
   if (specializeIterNext(env, loopOffset, ita, baseLocalId)) return;
 
-  auto const base = ldLoc(env, baseLocalId, nullptr, DataTypeIterBase);
+  auto const base = ldLoc(env, baseLocalId, DataTypeIterBase);
   if (!base->type().subtypeOfAny(TArrLike, TObj)) PUNT(LIterNext);
 
   auto const result = [&]{

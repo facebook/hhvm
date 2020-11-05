@@ -114,7 +114,7 @@ void emitClassGetTS(IRGS& env) {
 }
 
 void emitCGetL(IRGS& env, NamedLocal loc) {
-  auto const value = ldLocWarn(env, loc, nullptr, DataTypeCountnessInit);
+  auto const value = ldLocWarn(env, loc, DataTypeCountnessInit);
   pushIncRef(env, value);
 }
 
@@ -122,7 +122,7 @@ void emitCGetQuietL(IRGS& env, int32_t id) {
   pushIncRef(
     env,
     [&] {
-      auto const loc = ldLoc(env, id, nullptr, DataTypeCountnessInit);
+      auto const loc = ldLoc(env, id, DataTypeCountnessInit);
 
       if (loc->type() <= TUninit) {
         return cns(env, TInitNull);
@@ -149,25 +149,25 @@ void emitCGetQuietL(IRGS& env, int32_t id) {
 }
 
 void emitCUGetL(IRGS& env, int32_t id) {
-  pushIncRef(env, ldLoc(env, id, nullptr, DataTypeGeneric));
+  pushIncRef(env, ldLoc(env, id, DataTypeGeneric));
 }
 
 void emitPushL(IRGS& env, int32_t id) {
   assertTypeLocal(env, id, TInitCell);  // bytecode invariant
-  auto* locVal = ldLoc(env, id, makeExit(env), DataTypeGeneric);
+  auto* locVal = ldLoc(env, id, DataTypeGeneric);
   push(env, locVal);
   stLocRaw(env, id, fp(env), cns(env, TUninit));
 }
 
 void emitCGetL2(IRGS& env, NamedLocal loc) {
   auto const oldTop = pop(env, DataTypeGeneric);
-  auto const val = ldLocWarn(env, loc, nullptr, DataTypeCountnessInit);
+  auto const val = ldLocWarn(env, loc, DataTypeCountnessInit);
   pushIncRef(env, val);
   push(env, oldTop);
 }
 
 void emitUnsetL(IRGS& env, int32_t id) {
-  auto const prev = ldLoc(env, id, makeExit(env), DataTypeGeneric);
+  auto const prev = ldLoc(env, id, DataTypeGeneric);
   stLocRaw(env, id, fp(env), cns(env, TUninit));
   decRef(env, prev);
 }
@@ -177,7 +177,7 @@ void emitSetL(IRGS& env, int32_t id) {
   // about the type of the value. stLoc needs to IncRef the value so it may
   // constrain it further.
   auto const src = popC(env, DataTypeGeneric);
-  pushStLoc(env, id, nullptr, src);
+  pushStLoc(env, id, src);
 }
 
 void emitPrint(IRGS& env) {
@@ -506,7 +506,7 @@ void emitPopU2(IRGS& env) {
 
 void emitPopL(IRGS& env, int32_t id) {
   auto const src = popC(env, DataTypeGeneric);
-  stLocMove(env, id, nullptr, src);
+  stLocMove(env, id, src);
 }
 
 void emitPopFrame(IRGS& env, uint32_t nout) {

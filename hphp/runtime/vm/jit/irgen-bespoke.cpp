@@ -74,7 +74,7 @@ SSATmp* memberKey(IRGS& env, MemberKey mk) {
       case MW:
         return nullptr;
       case MEL: case MPL:
-        return ldLocWarn(env, mk.local, nullptr, DataTypeSpecific);
+        return ldLocWarn(env, mk.local, DataTypeSpecific);
       case MEC: case MPC:
         return topC(env, BCSPRelOffset{int32_t(mk.iva)});
       case MEI:

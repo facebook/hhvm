@@ -188,7 +188,7 @@ void emitClsCns(IRGS& env, const StringData* cnsNameStr) {
 void emitClsCnsL(IRGS& env, int32_t id) {
   auto const cls = topC(env);
   if (!cls->isA(TCls)) PUNT(ClsCns-NotClass);
-  auto const cnsName = ldLoc(env, id, nullptr, DataTypeSpecific);
+  auto const cnsName = ldLoc(env, id, DataTypeSpecific);
   if (!cnsName->isA(TStr)) PUNT(ClsCns-NotStr);
   if (cnsName->hasConstVal(TStr)) {
     emitClsCns(env, cnsName->strVal());

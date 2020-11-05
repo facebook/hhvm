@@ -1928,7 +1928,7 @@ void nativeImplInlined(IRGS& env) {
     numNonDefault,
     false,
     [&] (uint32_t i, const Type) {
-      return ldLoc(env, i, nullptr, DataTypeSpecific);
+      return ldLoc(env, i, DataTypeSpecific);
     }
   );
 
@@ -2555,12 +2555,7 @@ void emitGetMemoKeyL(IRGS& env, NamedLocal loc) {
           func->fullName()->isame(s_implicit_context_set.get()) ||
           func->fullName()->isame(s_implicit_context_genSet.get()));
 
-  auto const value = ldLocWarn(
-    env,
-    loc,
-    nullptr,
-    DataTypeSpecific
-  );
+  auto const value = ldLocWarn(env, loc, DataTypeSpecific);
 
   // Use the generic scheme, which is implemented by GetMemoKey. The simplifier
   // will catch any additional special cases.
@@ -2895,7 +2890,7 @@ void emitSilence(IRGS& env, Id localId, SilenceOp subop) {
   case SilenceOp::End:
     {
       gen(env, AssertLoc, TInt, LocalId(localId), fp(env));
-      auto const level = ldLoc(env, localId, makeExit(env), DataTypeGeneric);
+      auto const level = ldLoc(env, localId, DataTypeGeneric);
       gen(env, RestoreErrorLevel, level);
     }
     break;

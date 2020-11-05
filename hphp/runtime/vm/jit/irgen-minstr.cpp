@@ -1474,7 +1474,7 @@ SSATmp* memberKey(IRGS& env, MemberKey mk) {
       case MW:
         return nullptr;
       case MEL: case MPL:
-        return ldLocWarn(env, mk.local, nullptr, DataTypeSpecific);
+        return ldLocWarn(env, mk.local, DataTypeSpecific);
       case MEC: case MPC:
         return topC(env, BCSPRelOffset{int32_t(mk.iva)});
       case MEI:
@@ -1572,7 +1572,7 @@ void emitBaseGC(IRGS& env, uint32_t idx, MOpMode mode) {
 }
 
 void emitBaseGL(IRGS& env, int32_t locId, MOpMode mode) {
-  auto name = ldLoc(env, locId, nullptr, DataTypeSpecific);
+  auto name = ldLoc(env, locId, DataTypeSpecific);
   baseGImpl(env, name, mode);
 }
 
@@ -1594,7 +1594,7 @@ void emitBaseSC(IRGS& env, uint32_t propIdx, uint32_t clsIdx, MOpMode mode) {
 void emitBaseL(IRGS& env, NamedLocal loc, MOpMode mode) {
   stMBase(env, ldLocAddr(env, loc.id));
 
-  auto base = ldLoc(env, loc.id, nullptr, DataTypeGeneric);
+  auto base = ldLoc(env, loc.id, DataTypeGeneric);
 
   if (!base->type().isKnownDataType()) PUNT(unknown-BaseL);
 

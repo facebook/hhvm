@@ -1656,7 +1656,7 @@ void emitSetOpL(IRGS& env, int32_t id, SetOpOp subop) {
   }();
   if (!subOpc) PUNT(SetOpL-Unsupported);
 
-  auto loc = ldLoc(env, id, nullptr, DataTypeGeneric);
+  auto loc = ldLoc(env, id, DataTypeGeneric);
 
   if (*subOpc == Op::Concat) {
     /*
@@ -1666,7 +1666,7 @@ void emitSetOpL(IRGS& env, int32_t id, SetOpOp subop) {
     auto const val    = popC(env);
     env.irb->constrainValue(loc, DataTypeSpecific);
     implConcat(env, val, loc, [&] (SSATmp* result) {
-      pushIncRef(env, stLocNRC(env, id, nullptr, result));
+      pushIncRef(env, stLocNRC(env, id, result));
     });
     return;
   }
@@ -1690,22 +1690,17 @@ void emitSetOpL(IRGS& env, int32_t id, SetOpOp subop) {
   auto const result = opc == AddIntO || opc == SubIntO || opc == MulIntO
     ? gen(env, opc, exitSlow, loc, val)
     : gen(env, opc, loc, val);
-  pushStLoc(env, id, nullptr, result);
+  pushStLoc(env, id, result);
 }
 
 void emitIncDecL(IRGS& env, NamedLocal loc, IncDecOp subop) {
-  auto const src = ldLocWarn(
-    env,
-    loc,
-    nullptr,
-    DataTypeSpecific
-  );
+  auto const src = ldLocWarn(env, loc, DataTypeSpecific);
 
   if (auto const result = incDec(env, subop, src)) {
     pushIncRef(env, isPre(subop) ? result : src);
     // Update marker to ensure newly-pushed value isn't clobbered by DecRef.
     updateMarker(env);
-    stLoc(env, loc.id, nullptr, result);
+    stLoc(env, loc.id, result);
     return;
   }
 

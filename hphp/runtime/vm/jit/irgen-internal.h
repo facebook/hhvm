@@ -683,7 +683,6 @@ inline SSATmp* ldCls(IRGS& env,
 
 inline SSATmp* ldLoc(IRGS& env,
                      uint32_t locId,
-                     Block* exit,
                      GuardConstraint gc) {
   env.irb->constrainLocal(locId, gc, "LdLoc");
   return gen(env, LdLoc, TCell, LocalId(locId), fp(env));
@@ -697,9 +696,8 @@ inline SSATmp* ldLoc(IRGS& env,
  */
 inline SSATmp* ldLocWarn(IRGS& env,
                          NamedLocal loc,
-                         Block* ldPMExit,
                          GuardConstraint gc) {
-  auto const locVal = ldLoc(env, loc.id, ldPMExit, gc);
+  auto const locVal = ldLoc(env, loc.id, gc);
 
   auto warnUninit = [&] {
     if (loc.name == kInvalidLocalName) {
@@ -756,11 +754,10 @@ inline SSATmp* stLocRaw(IRGS& env, uint32_t id, SSATmp* fp, SSATmp* newVal) {
  */
 inline SSATmp* stLocImpl(IRGS& env,
                          uint32_t id,
-                         Block* ldPMExit,
                          SSATmp* newVal,
                          bool decRefOld,
                          bool incRefNew) {
-  auto const oldLoc = ldLoc(env, id, ldPMExit, DataTypeGeneric);
+  auto const oldLoc = ldLoc(env, id, DataTypeGeneric);
 
   stLocRaw(env, id, fp(env), newVal);
   if (incRefNew) gen(env, IncRef, newVal);
@@ -770,27 +767,24 @@ inline SSATmp* stLocImpl(IRGS& env,
 
 inline SSATmp* stLoc(IRGS& env,
                      uint32_t id,
-                     Block* ldPMExit,
                      SSATmp* newVal) {
   constexpr bool decRefOld = true;
   constexpr bool incRefNew = true;
-  return stLocImpl(env, id, ldPMExit, newVal, decRefOld, incRefNew);
+  return stLocImpl(env, id, newVal, decRefOld, incRefNew);
 }
 
 inline SSATmp* stLocNRC(IRGS& env,
                         uint32_t id,
-                        Block* ldPMExit,
                         SSATmp* newVal) {
   constexpr bool decRefOld = false;
   constexpr bool incRefNew = false;
-  return stLocImpl(env, id, ldPMExit, newVal, decRefOld, incRefNew);
+  return stLocImpl(env, id, newVal, decRefOld, incRefNew);
 }
 
 inline void stLocMove(IRGS& env,
                       uint32_t id,
-                      Block* ldPMExit,
                       SSATmp* newVal) {
-  auto const oldLoc = ldLoc(env, id, ldPMExit, DataTypeGeneric);
+  auto const oldLoc = ldLoc(env, id, DataTypeGeneric);
 
   stLocRaw(env, id, fp(env), newVal);
   decRef(env, oldLoc);
@@ -798,18 +792,10 @@ inline void stLocMove(IRGS& env,
 
 inline SSATmp* pushStLoc(IRGS& env,
                          uint32_t id,
-                         Block* ldPMExit,
                          SSATmp* newVal) {
   constexpr bool decRefOld = true;
   constexpr bool incRefNew = true;
-  auto const ret = stLocImpl(
-    env,
-    id,
-    ldPMExit,
-    newVal,
-    decRefOld,
-    incRefNew
-  );
+  auto const ret = stLocImpl(env, id, newVal, decRefOld, incRefNew);
   return push(env, ret);
 }
 
@@ -831,7 +817,7 @@ inline SSATmp* ldStkAddr(IRGS& env, BCSPRelOffset relOffset) {
 
 inline void decRefLocalsInline(IRGS& env) {
   for (int id = curFunc(env)->numLocals() - 1; id >= 0; --id) {
-    auto const loc = ldLoc(env, id, nullptr, DataTypeGeneric);
+    auto const loc = ldLoc(env, id, DataTypeGeneric);
     decRef(env, loc, id);
   }
 }
@@ -907,4 +893,3 @@ SSATmp* convertClassKey(IRGS& env, SSATmp* key);
 void defineStack(IRGS& env, FPInvOffset bcSPOff);
 
 }}}
-

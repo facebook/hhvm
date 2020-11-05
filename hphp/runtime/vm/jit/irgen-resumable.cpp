@@ -590,7 +590,7 @@ void emitAwaitAll(IRGS& env, LocalRange locals) {
     }
     auto cnt = cns(env, 0);
     for (int i = 0; i < locals.count; ++i) {
-      auto const loc = ldLoc(env, locals.first + i, nullptr, DataTypeSpecific);
+      auto const loc = ldLoc(env, locals.first + i, DataTypeSpecific);
       if (loc->isA(TNull)) continue;
       if (!loc->isA(TObj)) PUNT(Await-NonObject);
       gen(env, JmpZero, exitSlow, gen(env, IsWaitHandle, loc));

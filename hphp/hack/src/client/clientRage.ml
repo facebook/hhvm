@@ -282,10 +282,15 @@ let rage_hh_server_state (env : env) :
     end
 
 type www_results = {
-  hgdiff: (string * string) option;
-  instructions: string;
   mergebase: string option;
+      (** The commit hash of 'hg log -r last(public()&::.)', or None if the hg command failed *)
+  hgdiff: (string * string) option;
+      (** A pair ("www_hgdiff.txt", <results of hg diff -r mergebase>), or None if the hg command failed *)
+  instructions: string;
+      (** Human-readable instructions on how someone else can update to the current "." revision, or
+      human-readable message if we can't generate those instructions e.g. due to a tool failure *)
   patch_script: string option;
+      (** A bash shell-script for how someone else can update to ".", or None if we can't generate instructions *)
 }
 
 let rage_www (env : env) : www_results Lwt.t =
@@ -546,6 +551,7 @@ let rage_experiments_and_config
 
 (** Human-readable text relating to what shell commands the user has executed *)
 let rage_command_history () : string Lwt.t =
+  (* .bash_history - a record of commands the user did, if they use bash. *)
   let re = Str.regexp "^#[0-9]+$" in
   let fn = Sys_utils.expanduser "~/.bash_history" in
   let bash_history =
@@ -575,8 +581,24 @@ let rage_command_history () : string Lwt.t =
     else
       "Not found: ~/.bash_history"
   in
+
   let%lwt shell = Extra_rage.shell () in
-  Lwt.return (Printf.sprintf "%s\n\n\n%s" bash_history shell)
+
+  (* hg journal - a list of all hg commit transitions in the repository *)
+  let%lwt journal_result =
+    Lwt_utils.exec_checked
+      ~timeout:30.0
+      Exec_command.Hg
+      [| "journal"; "--limit"; "300" |]
+  in
+  let journal =
+    match journal_result with
+    | Ok { Lwt_utils.Process_success.stdout; _ } -> stdout
+    | Error failure -> Lwt_utils.Process_failure.to_string failure
+  in
+  let journal = "HG JOURNAL\n" ^ journal in
+
+  Lwt.return (Printf.sprintf "%s\n\n\n%s\n\n\n%s" bash_history shell journal)
 
 let main (env : env) : Exit_status.t Lwt.t =
   let start_time = Unix.gettimeofday () in

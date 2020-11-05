@@ -297,10 +297,12 @@ let rage_www (env : env) : www_results Lwt.t =
   let hgplain_env =
     Process.env_to_array (Process_types.Augment ["HGPLAIN=1"])
   in
+  (* Long 5min timeout here, in case watchman had crashed and we want to wait for it to
+  come back up again - hg blocks until watchman is ready. *)
   let%lwt www_result =
     Lwt_utils.exec_checked
       ?env:hgplain_env
-      ~timeout:60.0
+      ~timeout:300.0
       Exec_command.Hg
       [|
         "log";
@@ -329,7 +331,7 @@ let rage_www (env : env) : www_results Lwt.t =
       Lwt_utils.exec_checked
         ?env:hgplain_env
         Exec_command.Hg
-        ~timeout:60.0
+        ~timeout:300.0
         [| "diff"; "-r"; mergebase; "--cwd"; Path.to_string env.root |]
     in
     let%lwt (patch_item, patch_instructions, patch_script) =
@@ -365,7 +367,7 @@ let rage_www (env : env) : www_results Lwt.t =
       Lwt_utils.exec_checked
         ?env:hgplain_env
         Exec_command.Hg
-        ~timeout:30.0
+        ~timeout:300.0
         [| "status"; "--cwd"; Path.to_string env.root |]
     in
     let hg_st =

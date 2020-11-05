@@ -694,12 +694,13 @@ bool checkTypeStructureMatchesTVImpl(
        */
       auto const ad = data.parr;
       auto const maybe_raise_notice = [&] (bool const result) {
+        if (RO::EvalHackArrDVArrs) return result;
         if (!gen_error /* avoid double logging */ && result &&
             RO::EvalHackArrIsShapeTupleNotices && !ad->isVArray()) {
           auto const dt = getDataTypeString(ad->toDataType());
           raise_hackarr_compat_notice(folly::sformat("{} is tuple", dt));
         }
-        return result && (isArrayType(type) || RO::EvalHackArrDVArrs);
+        return result && isArrayType(type);
       };
 
       if (!ad->isVArray() && !ad->isVecType()) return false;
@@ -779,12 +780,13 @@ bool checkTypeStructureMatchesTVImpl(
        */
       auto const ad = data.parr;
       auto const maybe_raise_notice = [&] (bool const result) {
+        if (RO::EvalHackArrDVArrs) return result;
         if (!gen_error /* avoid double logging */ && result &&
             RO::EvalHackArrIsShapeTupleNotices && !ad->isDArray()) {
           auto const dt = getDataTypeString(ad->toDataType());
           raise_hackarr_compat_notice(folly::sformat("{} is shape", dt));
         }
-        return result && (isArrayType(type) || RO::EvalHackArrDVArrs);
+        return result && isArrayType(type);
       };
 
       if (!ad->isDArray() && !ad->isDictType()) return false;

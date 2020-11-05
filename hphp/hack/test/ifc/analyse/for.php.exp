@@ -1,0 +1,77 @@
+=== IFC analysis results for for.php
+Analyzing \test_constraints:
+* pc: pc
+* This: None
+* Return: <ret>
+* Exception: \Exception<exn, exn_lump>
+* Params:
+  {}
+* Final environment:
+  Deps: {}
+  Constraints:
+    [4:8-14] lit < $i
+    [5:8-15]
+      HH\Capabilities\RxLocal_lump = HH\Capabilities\RxLocal_lump'1,
+      HH\Capabilities\RxLocal < HH\Capabilities\RxLocal'1,
+      HH\Capabilities\Globals_lump'1 = HH\Capabilities\RxLocal_lump,
+      HH\Capabilities\RxLocal < HH\Capabilities\Globals'1,
+      HH\Capabilities\CippGlobal_lump'1 = HH\Capabilities\RxLocal_lump,
+      HH\Capabilities\RxLocal < HH\Capabilities\CippGlobal'1,
+      HH\Capabilities\IO_lump'1 = HH\Capabilities\RxLocal_lump,
+      HH\Capabilities\RxLocal < HH\Capabilities\IO'1,
+      HH\Capabilities\RxLocal_lump = HH\Capabilities\UnrestrictedMutation_lump'1,
+      HH\Capabilities\RxLocal < HH\Capabilities\UnrestrictedMutation'1,
+      HH\Capabilities\RxLocal_lump'2 = HH\Capabilities\RxLocal_lump'3,
+      HH\Capabilities\RxLocal'2 < HH\Capabilities\RxLocal'3,
+      HH\Capabilities\IO_lump'3 = HH\Capabilities\RxLocal_lump'2,
+      HH\Capabilities\RxLocal'2 < HH\Capabilities\IO'3,
+      HH\Capabilities\CippGlobal_lump'3 = HH\Capabilities\RxLocal_lump'2,
+      HH\Capabilities\RxLocal'2 < HH\Capabilities\CippGlobal'3,
+      HH\Capabilities\Globals_lump'3 = HH\Capabilities\RxLocal_lump'2,
+      HH\Capabilities\RxLocal'2 < HH\Capabilities\Globals'3,
+      HH\Capabilities\RxLocal_lump'2 = HH\Capabilities\UnrestrictedMutation_lump'3,
+      HH\Capabilities\RxLocal'2 < HH\Capabilities\UnrestrictedMutation'3,
+      $i < $i'1, $i'1 < bop, lit'1 < bop,
+      HH\Capabilities\RxLocal_lump'1 = HH\Capabilities\RxLocal_lump'1,
+      HH\Capabilities\Globals_lump'1 = HH\Capabilities\RxLocal_lump'1,
+      HH\Capabilities\RxLocal'1 < HH\Capabilities\Globals'1,
+      HH\Capabilities\CippGlobal_lump'1 = HH\Capabilities\RxLocal_lump'1,
+      HH\Capabilities\RxLocal'1 < HH\Capabilities\CippGlobal'1,
+      HH\Capabilities\IO_lump'1 = HH\Capabilities\RxLocal_lump'1,
+      HH\Capabilities\RxLocal'1 < HH\Capabilities\IO'1,
+      HH\Capabilities\RxLocal_lump'1 = HH\Capabilities\UnrestrictedMutation_lump'1,
+      HH\Capabilities\RxLocal'1 < HH\Capabilities\UnrestrictedMutation'1,
+      HH\Capabilities\RxLocal_lump'3 = HH\Capabilities\RxLocal_lump'3,
+      HH\Capabilities\IO_lump'3 = HH\Capabilities\RxLocal_lump'3,
+      HH\Capabilities\RxLocal'3 < HH\Capabilities\IO'3,
+      HH\Capabilities\CippGlobal_lump'3 = HH\Capabilities\RxLocal_lump'3,
+      HH\Capabilities\RxLocal'3 < HH\Capabilities\CippGlobal'3,
+      HH\Capabilities\Globals_lump'3 = HH\Capabilities\RxLocal_lump'3,
+      HH\Capabilities\RxLocal'3 < HH\Capabilities\Globals'3,
+      HH\Capabilities\RxLocal_lump'3 = HH\Capabilities\UnrestrictedMutation_lump'3,
+      HH\Capabilities\RxLocal'3 < HH\Capabilities\UnrestrictedMutation'3,
+      $i'2 < $i'1
+    [6:8-12] bop < $i'2, $i'1 < $i'2
+  Locals:
+    { $#capability ->
+      (\HH\Capabilities\RxLocal<HH\Capabilities\RxLocal'1,
+                                  HH\Capabilities\RxLocal_lump'1> &
+         \HH\Capabilities\Globals<HH\Capabilities\Globals'1,
+                                    HH\Capabilities\Globals_lump'1> &
+         \HH\Capabilities\CippGlobal<HH\Capabilities\CippGlobal'1,
+                                       HH\Capabilities\CippGlobal_lump'1> &
+         \HH\Capabilities\IO<HH\Capabilities\IO'1, HH\Capabilities\IO_lump'1> &
+         \HH\Capabilities\UnrestrictedMutation<HH\Capabilities\UnrestrictedMutation'1,
+                                                 HH\Capabilities\UnrestrictedMutation_lump'1>);
+      $#local_capability ->
+      (\HH\Capabilities\RxLocal<HH\Capabilities\RxLocal'3,
+                                  HH\Capabilities\RxLocal_lump'3> &
+         \HH\Capabilities\IO<HH\Capabilities\IO'3, HH\Capabilities\IO_lump'3> &
+         \HH\Capabilities\CippGlobal<HH\Capabilities\CippGlobal'3,
+                                       HH\Capabilities\CippGlobal_lump'3> &
+         \HH\Capabilities\Globals<HH\Capabilities\Globals'3,
+                                    HH\Capabilities\Globals_lump'3> &
+         \HH\Capabilities\UnrestrictedMutation<HH\Capabilities\UnrestrictedMutation'3,
+                                                 HH\Capabilities\UnrestrictedMutation_lump'3>);
+      $i -> <$i'1> }
+

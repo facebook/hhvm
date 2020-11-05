@@ -13,10 +13,8 @@ class A {
 function f(A $a): void {
   $x = $a->priv;
 
-  // IFC cannot analyze any of this
-  for ($i = 0; $i < 10; $i++) {
-    $x++;
-  }
+  // IFC cannot analyze this
+  assert(true);
 
   // We still get a flow error here
   $a->pub = $x;

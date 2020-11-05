@@ -777,6 +777,19 @@ let rec assign ?(use_pc = true) ~expr ~pos renv env lhs rhs_pty =
     assign ~use_pc ~expr ~pos renv env arry_exp arry_pty
   | _ -> assign_helper ~use_pc ~expr ~pos renv env lhs rhs_pty
 
+let seq ~run (env, out) x =
+  let (out, next_opt) = Env.strip_cont out K.Next in
+  match next_opt with
+  | None ->
+    (* we are looking at dead code *)
+    (env, out)
+  | Some cont ->
+    let env = Env.prep_stmt env cont in
+    let (env, out_exceptional) = run env x in
+    (* we have to merge the exceptional outcomes from
+        before `x` with the ones after `x` *)
+    (env, Env.merge_out out_exceptional out)
+
 (* Assignment helper that accounts for flows when there is an operator
    attached to the assignment, e.g., `$x += 42`. *)
 let rec assign_with_op ~pos renv env op lhs_exp rhs_exp =
@@ -1192,6 +1205,59 @@ and stmt renv (env : Env.stmt_env) ((pos, s) : Tast.stmt) =
     in
     let out = clear_pc_deps out in
     (env, out)
+  | A.For (inits, cond_opt, incrs, (_, A.AssertEnv (A.Join, tymap)) :: blk) ->
+    (* Helper that evaluates an expression, but discards its type *)
+    let discarding_expr env (((pos, _), _) as exp) =
+      let (env, _, out_exceptional) = expr ~pos renv env exp in
+      Env.close_stmt ~merge:out_exceptional env K.Next
+    in
+
+    (* Evaluate the initialisers of the loop *)
+    let init = Env.close_stmt env K.Next in
+    let (env, out) = List.fold_left ~f:(seq ~run:discarding_expr) ~init inits in
+    let env = Env.prep_stmt env (KMap.find K.Next out) in
+
+    (* Use the position of the condition if awailable; entire loop's position
+       otherwise. *)
+    let pos =
+      match cond_opt with
+      | Some ((cond_pos, _), _) -> cond_pos
+      | None -> pos
+    in
+
+    let env = refresh_with_tymap ~pos renv env tymap in
+    let beg_locals = Env.get_locals env in
+
+    (* TODO: pc_pols should also flow into cty because the condition is evaluated
+       unconditionally only the first time around the loop. *)
+    let (env, pc_policies, cthrow) =
+      match cond_opt with
+      | Some cond ->
+        let (env, cty, cthrow) = expr ~pos renv env cond in
+        (env, object_policy cty, cthrow)
+      | None -> (env, PSet.empty, KMap.empty)
+    in
+
+    Env.with_pc_deps env pc_policies @@ fun env ->
+    let tainted_lpc = Env.get_lpc env in
+    let (env, out_blk) = block renv env blk in
+    let out_blk = Env.merge_out out_blk cthrow in
+    let out_blk = Env.merge_in_next out_blk K.Continue in
+
+    (* Handle loop increments *)
+    let init = (env, out_blk) in
+    let (env, out) = List.fold_left ~f:(seq ~run:discarding_expr) ~init incrs in
+
+    let env = loop_the_env ~pos env out beg_locals in
+    let out =
+      (* overwrite the Next outcome to use the type for local
+         variables as they are at the beginning of the loop,
+         then merge the Break outcome in Next *)
+      let next = { k_pc = tainted_lpc; k_vars = beg_locals } in
+      Env.merge_in_next (KMap.add K.Next next out_blk) K.Break
+    in
+    let out = clear_pc_deps out in
+    (env, out)
   | A.Foreach (collection, as_exp, (_, A.AssertEnv (A.Join, tymap)) :: blk) ->
     let pos = fst (fst collection) in
     let env = refresh_with_tymap ~pos renv env tymap in
@@ -1375,21 +1441,8 @@ and stmt renv (env : Env.stmt_env) ((pos, s) : Tast.stmt) =
     Env.close_stmt env K.Next
 
 and block renv env (blk : Tast.block) =
-  let seq (env, out) s =
-    let (out, next_opt) = Env.strip_cont out K.Next in
-    match next_opt with
-    | None ->
-      (* we are looking at dead code; skip the statement *)
-      (env, out)
-    | Some cont ->
-      let env = Env.prep_stmt env cont in
-      let (env, out_pst) = stmt renv env s in
-      (* we have to merge the exceptional outcomes from
-         before 's' with the ones after 's' *)
-      (env, Env.merge_out out_pst out)
-  in
   let init = Env.close_stmt env K.Next in
-  List.fold_left ~f:seq ~init blk
+  List.fold_left ~f:(seq ~run:(stmt renv)) ~init blk
 
 (* Checks that two type schemes are in a subtyping relationship. The
  * skeletons of the two input type schemes are expected to be same.

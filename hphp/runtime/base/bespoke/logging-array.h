@@ -41,9 +41,6 @@ struct LoggingArray : BespokeArray {
 
   bool checkInvariants() const;
 
-  // Record that this array reached a given profiling tracelet.
-  void logReachEvent(TransID transId, SrcKey sk);
-
   // Update synced fields after doing a mutation on the wrapped array.
   void updateKindAndLegacy();
   void updateSize();

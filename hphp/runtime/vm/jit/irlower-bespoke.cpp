@@ -25,19 +25,12 @@ namespace HPHP { namespace jit { namespace irlower {
 
 //////////////////////////////////////////////////////////////////////////////
 
-static void logArrayReach(ArrayData* ad, TransID transId, uint64_t sk) {
-  if (LIKELY(ad->isVanilla())) return;
-  BespokeArray::asBespoke(ad)->logReachEvent(transId, SrcKey(sk));
-}
-
 void cgLogArrayReach(IRLS& env, const IRInstruction* inst) {
   auto const data = inst->extra<LogArrayReach>();
 
   auto& v = vmain(env);
-  auto const args = argGroup(env, inst)
-    .ssa(0).imm(data->transId).imm(inst->marker().sk().toAtomicInt());
-
-  auto const target = CallSpec::direct(logArrayReach);
+  auto const args = argGroup(env, inst).imm(data->profile).ssa(0);
+  auto const target = CallSpec::method(&bespoke::SinkProfile::update);
   cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
 }
 

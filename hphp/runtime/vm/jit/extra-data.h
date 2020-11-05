@@ -1590,6 +1590,19 @@ struct LoggingProfileData : IRExtraData {
   bespoke::LoggingProfile* profile;
 };
 
+struct SinkProfileData : IRExtraData {
+  explicit SinkProfileData(bespoke::SinkProfile* profile)
+    : profile(profile)
+  {}
+
+  std::string show() const {
+    // profile->sink is already printed in the instruction's marker.
+    return folly::sformat("{}", reinterpret_cast<void*>(profile));
+  }
+
+  bespoke::SinkProfile* profile;
+};
+
 //////////////////////////////////////////////////////////////////////
 
 #define X(op, data)                                                   \
@@ -1661,7 +1674,7 @@ X(ReqRetranslate,               IRSPRelOffsetData);
 X(ReqRetranslateOpt,            IRSPRelOffsetData);
 X(CheckCold,                    TransIDData);
 X(IncProfCounter,               TransIDData);
-X(LogArrayReach,                TransIDData);
+X(LogArrayReach,                SinkProfileData);
 X(NewLoggingArray,              LoggingProfileData);
 X(DefFuncEntryFP,               FuncData);
 X(Call,                         CallData);

@@ -760,9 +760,12 @@ void emitLogArrayReach(IRGS& env, Location loc, SrcKey sk) {
   if (env.formingRegion || env.context.kind != TransKind::Profile) return;
   assertx(env.context.transIDs.size() == 1);
 
-  auto const arr = loadLocation(env, loc);
   auto const transID = *env.context.transIDs.begin();
-  gen(env, LogArrayReach, TransIDData(transID), arr);
+  auto const profile = bespoke::getSinkProfile(transID, sk);
+  if (!profile) return;
+
+  auto const arr = loadLocation(env, loc);
+  gen(env, LogArrayReach, SinkProfileData(profile), arr);
 }
 
 // In a profiling tracelet, we don't want to guard on the array being vanilla,

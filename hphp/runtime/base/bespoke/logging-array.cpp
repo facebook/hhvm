@@ -234,10 +234,6 @@ bool LoggingArray::checkInvariants() const {
   return true;
 }
 
-void LoggingArray::logReachEvent(TransID transId, SrcKey sk) {
-  profile->logReach(transId, sk);
-}
-
 void LoggingArray::updateKindAndLegacy() {
   assertx(hasExactlyOneRef());
   m_kind = getBespokeKind(wrapped->kind());

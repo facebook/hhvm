@@ -217,23 +217,6 @@ double LoggingProfile::getProfileWeight() const {
   return getTotalEvents() * getSampleCountMultiplier();
 }
 
-void LoggingProfile::logReach(TransID transId, SrcKey skRaw) {
-  // Hold the read mutex for the duration of the mutation so that export cannot
-  // begin until the mutation is complete.
-  folly::SharedMutex::ReadHolder lock{s_exportStartedLock};
-  if (s_exportStarted.load(std::memory_order_relaxed)) return;
-
-  ReachMap::accessor it;
-  auto const sk = canonicalize(skRaw);
-  if (reachedUsageSites.insert(it, {transId, sk})) {
-    it->second = 1;
-  } else {
-    it->second++;
-  }
-  FTRACE(6, "{} reached tracelet {}, srckey {} [count={}]\n",
-         source.getSymbol(), transId, showShort(sk), it->second);
-}
-
 void LoggingProfile::logEvent(ArrayOp op) {
   logEventImpl(EventKey(op));
 }
@@ -287,6 +270,83 @@ void LoggingProfile::logEntryTypes(EntryTypes before, EntryTypes after) {
 
   FTRACE(6, "EntryTypes escalation {} -> {} [count={}]\n", before.toString(),
          after.toString(), it->second);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+void SinkProfile::reduce(const SinkProfile& other) {
+  for (auto i = 0; i < kNumArrTypes; i++) {
+    arrCounts[i] += other.arrCounts[i];
+  }
+  for (auto i = 0; i < kNumKeyTypes; i++) {
+    keyCounts[i] += other.keyCounts[i];
+  }
+  for (auto i = 0; i < kNumValTypes; i++) {
+    valCounts[i] += other.valCounts[i];
+  }
+
+  sampledCount += other.sampledCount;
+  unsampledCount += other.unsampledCount;
+
+  for (auto entry : other.sources) {
+    SourceMap::accessor it;
+    if (sources.insert(it, entry.first)) {
+      it->second = entry.second;
+    } else {
+      it->second += entry.second;
+    }
+  }
+}
+
+void SinkProfile::update(const ArrayData* ad) {
+  folly::SharedMutex::ReadHolder lock{s_exportStartedLock};
+  if (s_exportStarted.load(std::memory_order_relaxed)) return;
+
+  // Because the export hasn't started yet, any bespoke arrays should be
+  // LoggingArrays at this point. Bail out if we get a non-logging bespoke.
+  const LoggingArray* lad = nullptr;
+  if (!ad->isVanilla()) {
+    auto const index = BespokeArray::asBespoke(ad)->layout().index();
+    if (index != LoggingArray::GetLayoutIndex().raw) return;
+    lad = LoggingArray::As(ad);
+  }
+
+  // Update array-like-generic fields: the sampled bit and the array type.
+
+  if (lad != nullptr || ad->isSampledArray()) {
+    sampledCount++;
+  } else {
+    unsampledCount++;
+  }
+
+  auto const kind = ad->kind() / 2;
+  assertx(kind < kNumArrTypes);
+  arrCounts[kind]++;
+
+  if (lad == nullptr) return;
+
+  // Update LoggingArray-only fields: key type, val type, and array source.
+
+  auto const& et = lad->entryTypes;
+  auto const key = size_t(et.keyTypes);
+  auto const val = [&]{
+    if (et.valueTypes == ValueTypes::Empty) return kNoValTypes;
+    if (et.valueTypes != ValueTypes::Monotype) return kAnyValType;
+    auto const dt = dt_modulo_persistence(et.valueDatatype);
+    return size_t(static_cast<data_type_t>(dt) - kMinDataType);
+  }();
+
+  assertx(key < kNumKeyTypes);
+  assertx(val < kNumValTypes);
+  keyCounts[key]++;
+  valCounts[val]++;
+
+  SourceMap::accessor it;
+  if (sources.insert(it, lad->profile)) {
+    it->second = 1;
+  } else {
+    it->second++;
+  }
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -394,19 +454,16 @@ struct SourceOutputData {
                    std::vector<OperationOutputData>&& operations,
                    std::vector<SinkOutputData>&& sinkData,
                    std::vector<EntryTypesEscalationOutputData>&& monoEscalations,
-                   std::vector<EntryTypesUseOutputData>&& monoUses,
-                   std::vector<ReachOutputData>&& reachData)
+                   std::vector<EntryTypesUseOutputData>&& monoUses)
     : profile(profile)
     , monotypeEscalations(std::move(monoEscalations))
     , monotypeUses(std::move(monoUses))
     , sinks(std::move(sinkData))
-    , reach(std::move(reachData))
   {
     std::sort(sinks.begin(), sinks.end());
     std::sort(monotypeEscalations.begin(), monotypeEscalations.end());
     std::sort(monotypeUses.begin(), monotypeUses.end());
     std::sort(operations.begin(), operations.end());
-    std::sort(reach.begin(), reach.end());
 
     readCount = 0;
     writeCount = 0;
@@ -433,7 +490,6 @@ struct SourceOutputData {
   std::vector<EntryTypesEscalationOutputData> monotypeEscalations;
   std::vector<EntryTypesUseOutputData> monotypeUses;
   std::vector<SinkOutputData> sinks;
-  std::vector<ReachOutputData> reach;
   uint64_t readCount;
   uint64_t writeCount;
   double weight;
@@ -443,7 +499,13 @@ using ProfileOutputData = std::vector<SourceOutputData>;
 using ProfileMap = tbb::concurrent_hash_map<SrcKey, LoggingProfile*,
                                             SrcKey::TbbHashCompare>;
 
+using SinkKeyHashCompare = pairHashCompare<
+  TransID, SrcKey, integralHashCompare<TransID>, SrcKey::TbbHashCompare>;
+using SinkMap = tbb::concurrent_hash_map<
+  SinkKey, SinkProfile*, SinkKeyHashCompare>;
+
 ProfileMap s_profileMap;
+SinkMap s_sinkMap;
 std::thread s_exportProfilesThread;
 
 template<typename... Ts>
@@ -508,12 +570,6 @@ bool exportSortedProfiles(FILE* file, const ProfileOutputData& profileData) {
     for (auto const& useData : sourceData.monotypeUses) {
       LOG_OR_RETURN(file, "  {: >6}x {}\n", useData.count,
                     useData.state.toString());
-    }
-
-    LOG_OR_RETURN(file, "  Reached usage sites:\n");
-    for (auto const& reachData : sourceData.reach) {
-      LOG_OR_RETURN(file, "  {: >6}x tracelet {}, srckey {}\n", reachData.count,
-                    reachData.tid, showShort(reachData.sk));
     }
 
     LOG_OR_RETURN(file, "\n");
@@ -594,20 +650,8 @@ SourceOutputData sortSourceData(const LoggingProfile* profile) {
     }
   );
 
-  std::vector<ReachOutputData> reaches;
-  reaches.reserve(profile->reachedUsageSites.size());
-  std::transform(
-    profile->reachedUsageSites.begin(), profile->reachedUsageSites.end(),
-    std::back_inserter(reaches),
-    [](const std::pair<LoggingProfile::ReachLocation, size_t>& reachData) {
-      return ReachOutputData(reachData.first.first, reachData.first.second,
-                             reachData.second);
-    }
-  );
-
   return SourceOutputData(profile, std::move(operations), std::move(sinks),
-                          std::move(escalations), std::move(uses),
-                          std::move(reaches));
+                          std::move(escalations), std::move(uses));
 }
 
 ProfileOutputData sortProfileData() {
@@ -736,6 +780,33 @@ LoggingProfile* getLoggingProfile(SrcKey skRaw) {
       MemoryStats::LogAlloc(AllocKind::StaticArray, allocSize(ad));
     }
   }
+  return result;
+}
+
+SinkProfile* getSinkProfile(TransID id, SrcKey skRaw) {
+  auto const key = SinkKey { id, canonicalize(skRaw) };
+  {
+    SinkMap::const_accessor it;
+    if (s_sinkMap.find(it, key)) return it->second;
+  }
+
+  // Hold the read mutex for the duration of the mutation so that export cannot
+  // begin until the mutation is complete.
+  folly::SharedMutex::ReadHolder lock{s_exportStartedLock};
+  if (s_exportStarted.load(std::memory_order_relaxed)) return nullptr;
+
+  auto profile = std::make_unique<SinkProfile>();
+  profile->sink = key;
+
+  auto const result = [&]{
+    SinkMap::accessor insert;
+    if (s_sinkMap.insert(insert, key)) {
+      insert->second = profile.release();
+    }
+    return insert->second;
+  }();
+
+  // Don't hold the lock while we free profile.
   return result;
 }
 

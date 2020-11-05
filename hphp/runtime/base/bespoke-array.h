@@ -39,6 +39,7 @@ namespace bespoke {
 struct Layout;
 struct LayoutFunctions;
 struct LoggingProfile;
+struct SinkProfile;
 
 // Maybe wrap this array in a LoggingArray, based on runtime options.
 ArrayData* maybeMakeLoggingArray(ArrayData*);
@@ -104,9 +105,6 @@ public:
   static ArrayData* MakeUncounted(ArrayData* array, bool hasApcTv,
                                   DataWalker::PointerMap* seen);
   static void ReleaseUncounted(ArrayData*);
-
-  // Log that a bespoke array made it to a particular profiling translation.
-  void logReachEvent(TransID transId, SrcKey sk);
 
 private:
   template <typename T, typename ... Args>

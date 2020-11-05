@@ -20,6 +20,7 @@
 
 #include "hphp/runtime/vm/srckey.h"
 
+#include "hphp/runtime/base/bespoke/entry-types.h"
 #include "hphp/runtime/base/program-functions.h"
 
 #include <folly/String.h>
@@ -31,7 +32,6 @@
 namespace HPHP { namespace bespoke {
 
 struct LoggingArray;
-struct EntryTypes;
 
 // The second entry in these tuples is an "is read operation" flag.
 // This flag is set for ops that are guaranteed to preserve the array's layout,
@@ -90,15 +90,6 @@ struct LoggingProfile {
   using EventMap = tbb::concurrent_hash_map<EventMapKey, size_t,
                                             EventMapHasher>;
 
-  // ReachLocations are a pair of a TransID and bytecode the logging array
-  // reached
-  using ReachLocation = std::pair<TransID, SrcKey>;
-  using ReachMapHasher = pairHashCompare<TransID, SrcKey,
-                                         integralHashCompare<TransID>,
-                                         SrcKey::TbbHashCompare>;
-  using ReachMap = tbb::concurrent_hash_map<ReachLocation, size_t,
-                                            ReachMapHasher>;
-
   // The key maps the EntryType before the operation to the EntryType after the
   // operation
   using EntryTypesMapKey = std::pair<uint16_t, uint16_t>;
@@ -113,8 +104,6 @@ struct LoggingProfile {
   double getSampleCountMultiplier() const;
   uint64_t getTotalEvents() const;
   double getProfileWeight() const;
-
-  void logReach(TransID transId, SrcKey sk);
 
   // We take specific inputs rather than templated inputs because we're going
   // to follow up soon with limitations on the number of arguments we can log.
@@ -138,13 +127,46 @@ public:
   ArrayData* staticSampledArray = nullptr;
   EventMap events;
   EntryTypesMap monotypeEvents;
-  ReachMap reachedUsageSites;
+};
+
+// We split sinks by profiling tracelet so we can condition on array type.
+using SinkKey = std::pair<TransID, SrcKey>;
+
+// We'll store a SinkProfile for each place where an array is used.
+struct SinkProfile {
+  using SourceMap = tbb::concurrent_hash_map<LoggingProfile*, size_t,
+                                             pointer_hash<LoggingProfile>>;
+
+  void reduce(const SinkProfile& other);
+  void update(const ArrayData* ad);
+
+public:
+  static constexpr size_t kNumArrTypes = ArrayData::kNumKinds / 2;
+  static constexpr size_t kNumKeyTypes = int(KeyTypes::Any) + 1;
+  static constexpr size_t kNumValTypes = kMaxDataType - kMinDataType + 3;
+
+  static constexpr size_t kNoValTypes = kNumValTypes - 2;
+  static constexpr size_t kAnyValType = kNumValTypes - 1;
+
+  SinkKey sink;
+
+  std::atomic<uint64_t> arrCounts[kNumArrTypes] = {};
+  std::atomic<uint64_t> keyCounts[kNumKeyTypes] = {};
+  std::atomic<uint64_t> valCounts[kNumValTypes] = {};
+
+  std::atomic<uint64_t> sampledCount = 0;
+  std::atomic<uint64_t> unsampledCount = 0;
+  SourceMap sources;
 };
 
 // Return a profile for the given (valid) SrcKey. If no profile for the SrcKey
 // exists, a new one is made. If we're done profiling or it's not useful to
 // profile this bytecode, this function will return nullptr.
 LoggingProfile* getLoggingProfile(SrcKey sk);
+
+// Return a profile for the given profiling tracelet and (valid) sink SrcKey.
+// If no profile for the sink exists, a new one is made. May return nullptr.
+SinkProfile* getSinkProfile(TransID id, SrcKey sk);
 
 // Attempt to get the current SrcKey. May fail and return an invalid SrcKey.
 SrcKey getSrcKey();

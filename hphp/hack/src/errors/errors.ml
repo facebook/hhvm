@@ -5537,6 +5537,15 @@ let atom_invalid_argument pos =
     (Typing.err_code Typing.AtomInvalidArgument)
     [(pos, "An atom is required here, not a class constant projection")]
 
+let ifc_internal_error pos reason =
+  add
+    (Typing.err_code Typing.IFCInternalError)
+    pos
+    ( "IFC Internal Error: "
+    ^ reason
+    ^ ". If you see this error and aren't expecting it, please `hh rage` and let the Hack team know."
+    )
+
 (*****************************************************************************)
 (* Printing *)
 (*****************************************************************************)

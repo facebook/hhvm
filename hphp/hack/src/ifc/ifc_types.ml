@@ -11,6 +11,12 @@ module LMap = Local_id.Map
 module Scope = Ifc_scope
 module Type = Typing_defs
 
+type ifc_error_ty =
+  | LiftError of string
+  | FlowInference of string
+
+exception IFCError of ifc_error_ty
+
 (* Most types should live here. *)
 
 type purpose = string [@@deriving ord, eq, show]

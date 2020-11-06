@@ -14,6 +14,11 @@ module Logic = Ifc_logic
 module Utils = Ifc_utils
 module T = Typing_defs
 
+let ifc_error_to_string (e : ifc_error_ty) : string =
+  match e with
+  | LiftError s -> "LiftError: " ^ s
+  | FlowInference s -> "FlowInference: " ^ s
+
 let comma_sep fmt () = fprintf fmt ",@ "
 
 let blank_sep fmt () = fprintf fmt "@ "

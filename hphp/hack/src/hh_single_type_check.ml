@@ -697,6 +697,11 @@ let parse_options () =
     GlobalOptions.codes_not_raised_partial tcopt;
   Errors.report_pos_from_reason :=
     GlobalOptions.tco_report_pos_from_reason tcopt;
+  let is_ifc_mode =
+    match !mode with
+    | Ifc _ -> true
+    | _ -> false
+  in
   let tcopt =
     {
       tcopt with
@@ -708,6 +713,10 @@ let parse_options () =
               String.equal x GlobalOptions.tco_experimental_forbid_nullable_cast
             then
               !forbid_nullable_cast
+            (* Only enable infer flows in IFC mode *)
+            else if String.equal x GlobalOptions.tco_experimental_infer_flows
+            then
+              is_ifc_mode
             else
               true
           end

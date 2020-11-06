@@ -19,11 +19,7 @@ module TPhase = Typing_phase
 module TReason = Typing_reason
 module TUtils = Typing_utils
 
-(* Functions to turn localized types into policied types. *)
-
-exception LiftError of string
-
-let fail fmt = Format.kasprintf (fun s -> raise (LiftError s)) fmt
+let fail fmt = Format.kasprintf (fun s -> raise (IFCError (LiftError s))) fmt
 
 let expand_var renv id =
   (* Drops the environment. Var expansion only compresses paths, so this is

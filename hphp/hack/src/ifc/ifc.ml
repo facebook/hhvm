@@ -24,12 +24,11 @@ module K = Typing_cont_key
 module LSet = Local_id.Set
 module TClass = Decl_provider.Class
 
-exception FlowInference of string
-
 let should_print ~user_mode ~phase =
   equal_mode user_mode Mdebug || equal_mode user_mode phase
 
-let fail fmt = Format.kasprintf (fun s -> raise (FlowInference s)) fmt
+let fail fmt =
+  Format.kasprintf (fun s -> raise (IFCError (FlowInference s))) fmt
 
 (* Returns the policies appearing in a type split in three sets
    of occurrences (covariant, invariant, contravariant) *)
@@ -1596,7 +1595,7 @@ let analyse_callable
       }
     in
     Some res
-  with FlowInference s ->
+  with IFCError (FlowInference s) ->
     Format.printf "Analyzing %s:@.  Failure: %s@.@." name s;
     None
 
@@ -1657,6 +1656,71 @@ let walk_tast opts decl_env ctx =
   in
   (fun tast -> List.concat (List.filter_map ~f:def tast))
 
+let check_valid_flow opts _ (result, implicit, simple) =
+  let simple_illegal_flows =
+    Logic.entailment_violations opts.opt_security_lattice simple
+  in
+  let to_err node =
+    ( PosSet.elements (pos_set_of_policy node),
+      Format.asprintf "%a" Pp.policy node )
+  in
+  let illegal_information_flow (poss, source, sink) =
+    (* Separate error positions that are not in the result and filter out
+         unknown positions *)
+    let (primary_poss, other_poss) =
+      PosSet.filter (fun p -> not @@ Pos.equal Pos.none p) poss
+      |> PosSet.elements
+      |> List.partition_tf ~f:(Pos.overlaps result.res_span)
+    in
+    (* Make sure the primary error position is the latest position in the
+         callable being analysed *)
+    let (primary_pos, other_poss) =
+      match List.sort ~compare:Pos.compare primary_poss |> List.rev with
+      | [] -> (result.res_span, other_poss)
+      | primary :: primary_poss ->
+        (primary, List.unordered_append primary_poss other_poss)
+    in
+
+    let (source, sink) = (to_err source, to_err sink) in
+    Errors.illegal_information_flow primary_pos other_poss source sink
+  in
+
+  let context_implicit_policy_leakage (pos, source, sink) =
+    (* The latest program point contributing to the violation is the
+         primary error *)
+    let (primary, secondaries) =
+      let poss =
+        PosSet.elements pos |> List.sort ~compare:Pos.compare |> List.rev
+      in
+      match poss with
+      | [] -> (result.res_span, [])
+      | primary :: secondaries -> (primary, secondaries)
+    in
+    let (source, sink) = (to_err source, to_err sink) in
+    Errors.context_implicit_policy_leakage primary secondaries source sink
+  in
+
+  if should_print ~user_mode:opts.opt_mode ~phase:Mcheck then begin
+    List.iter ~f:illegal_information_flow simple_illegal_flows;
+    List.iter ~f:context_implicit_policy_leakage implicit
+  end
+
+let simplify result =
+  let pred = const true in
+  ( result,
+    result.res_entailment result.res_constraint,
+    Logic.simplify @@ Logic.quantify ~pred ~quant:Qexists result.res_constraint
+  )
+
+let get_solver_result results =
+  try Ifc_solver.global_exn ~subtype results with
+  | Ifc_solver.Error Ifc_solver.RecursiveCycle ->
+    fail "solver error: cyclic call graph"
+  | Ifc_solver.Error (Ifc_solver.MissingResults callable) ->
+    fail "solver error: missing results for callable '%s'" callable
+  | Ifc_solver.Error (Ifc_solver.InvalidCall (caller, callee)) ->
+    fail "solver error: invalid call to '%s' in '%s'" callee caller
+
 let check opts tast ctx =
   (* Declaration phase *)
   let decl_env = Decl.collect_sigs ctx tast in
@@ -1667,25 +1731,9 @@ let check opts tast ctx =
   let results = walk_tast opts decl_env ctx tast in
 
   (* Solver phase *)
-  let results =
-    try Solver.global_exn ~subtype results with
-    | Solver.Error Solver.RecursiveCycle ->
-      fail "solver error: cyclic call graph"
-    | Solver.Error (Solver.MissingResults callable) ->
-      fail "solver error: missing results for callable '%s'" callable
-    | Solver.Error (Solver.InvalidCall (caller, callee)) ->
-      fail "solver error: invalid call to '%s' in '%s'" callee caller
-  in
+  let results = get_solver_result results in
 
-  let simplify result =
-    let pred = const true in
-    ( result,
-      result.res_entailment result.res_constraint,
-      Logic.simplify
-      @@ Logic.quantify ~pred ~quant:Qexists result.res_constraint )
-  in
   let simplified_results = SMap.map simplify results in
-
   let log_solver name (result, _, simplified) =
     Format.printf "@[<v>";
     Format.printf "Flow constraints for %s:@.  @[<v>" name;
@@ -1698,54 +1746,4 @@ let check opts tast ctx =
   if should_print ~user_mode:opts.opt_mode ~phase:Msolve then
     SMap.iter log_solver simplified_results;
 
-  (* Checking phase *)
-  let check_valid_flow _ (result, implicit, simple) =
-    let simple_illegal_flows =
-      Logic.entailment_violations opts.opt_security_lattice simple
-    in
-    let to_err node =
-      ( PosSet.elements (pos_set_of_policy node),
-        Format.asprintf "%a" Pp.policy node )
-    in
-    let illegal_information_flow (poss, source, sink) =
-      (* Separate error positions that are not in the result and filter out
-         unknown positions *)
-      let (primary_poss, other_poss) =
-        PosSet.filter (fun p -> not @@ Pos.equal Pos.none p) poss
-        |> PosSet.elements
-        |> List.partition_tf ~f:(Pos.overlaps result.res_span)
-      in
-      (* Make sure the primary error position is the latest position in the
-         callable being analysed *)
-      let (primary_pos, other_poss) =
-        match List.sort ~compare:Pos.compare primary_poss |> List.rev with
-        | [] -> (result.res_span, other_poss)
-        | primary :: primary_poss ->
-          (primary, List.unordered_append primary_poss other_poss)
-      in
-
-      let (source, sink) = (to_err source, to_err sink) in
-      Errors.illegal_information_flow primary_pos other_poss source sink
-    in
-
-    let context_implicit_policy_leakage (pos, source, sink) =
-      (* The latest program point contributing to the violation is the
-         primary error *)
-      let (primary, secondaries) =
-        let poss =
-          PosSet.elements pos |> List.sort ~compare:Pos.compare |> List.rev
-        in
-        match poss with
-        | [] -> (result.res_span, [])
-        | primary :: secondaries -> (primary, secondaries)
-      in
-      let (source, sink) = (to_err source, to_err sink) in
-      Errors.context_implicit_policy_leakage primary secondaries source sink
-    in
-
-    if should_print ~user_mode:opts.opt_mode ~phase:Mcheck then begin
-      List.iter ~f:illegal_information_flow simple_illegal_flows;
-      List.iter ~f:context_implicit_policy_leakage implicit
-    end
-  in
-  SMap.iter check_valid_flow simplified_results
+  SMap.iter (check_valid_flow opts) simplified_results

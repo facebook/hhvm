@@ -530,6 +530,7 @@ struct SinkOutputData {
     std::map<SrcKey, uint64_t> sourceCounts;
     for (auto const& it : profile->sources) {
       sourceCounts[it.first->source] += it.second;
+      loggedCount += it.second;
     }
     for (auto const& it : sourceCounts) {
       sources.push_back({it.first, it.second});
@@ -555,6 +556,7 @@ struct SinkOutputData {
   std::vector<SinkTypeData> keyCounts;
   std::vector<SinkTypeData> valCounts;
   std::vector<SourceFrequencyData> sources;
+  uint64_t loggedCount = 0;
   uint64_t sampledCount = 0;
   uint64_t unsampledCount = 0;
   uint64_t weight = 0;
@@ -661,13 +663,19 @@ bool exportSortedSinks(FILE* file, const std::vector<SinkOutputData>& sinks) {
 
   for (auto const& sink : sinks) {
     auto const sk = sink.profile->sink.second;
-    LOG_OR_RETURN(file, "{} [{}/{} sampled]\n",
-                  sk.getSymbol(), sink.sampledCount, sink.weight);
+    LOG_OR_RETURN(file, "{} [{}/{} sampled, {} logged]\n",
+                  sk.getSymbol(), sink.sampledCount,
+                  sink.weight, sink.loggedCount);
     LOG_OR_RETURN(file, "  {}\n", sk.showInst());
 
     if (!exportTypeCounts(file, "Array", sink.arrCounts)) return false;
     if (!exportTypeCounts(file, "Key",   sink.keyCounts)) return false;
     if (!exportTypeCounts(file, "Value", sink.valCounts)) return false;
+
+    LOG_OR_RETURN(file, "  Sources:\n");
+    for (auto const& edge : sink.sources) {
+      LOG_OR_RETURN(file, "  {: >6}x {}\n", edge.count, edge.sk.getSymbol());
+    }
 
     LOG_OR_RETURN(file, "\n");
   }

@@ -246,7 +246,7 @@ void ArrayData::GetScalarArray(ArrayData** parr, arrprov::Tag tag) {
   MemoryStats::LogAlloc(AllocKind::StaticArray, allocSize(ad));
 
   s_cachedHash.first = ad;
-  assertx(ScalarHash{}.raw_hash(ad) == s_cachedHash.second);
+  assertx(ScalarHash{}.raw_hash(ad, tag) == s_cachedHash.second);
   auto const DEBUG_ONLY inserted = s_arrayDataMap.insert(ad).second;
   assertx(inserted);
 

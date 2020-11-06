@@ -519,15 +519,42 @@ namespace interp_step {
 void in(ISS& env, const bc::FCallBuiltin& op) {
   auto const name = op.str4;
   auto const func = env.index.resolve_func(env.ctx, name);
+  auto const exactFunc = func.exactFunc();
 
   if (options.ConstantFoldBuiltins && func.isFoldable()) {
-    assertx(func.exactFunc());
-    if (auto val = const_fold(env, op.arg1, 0, *func.exactFunc(), true)) {
+    assertx(exactFunc);
+    if (auto val = const_fold(env, op.arg1, 0, *exactFunc, true)) {
       constprop(env);
+
+      auto const needsRuntimeProvenance =
+        RO::EvalArrayProvenance &&
+        exactFunc->attrs & AttrProvenanceSkipFrame;
+
+      auto const popInArgs = [&](BytecodeVec& bcs) {
+        for (uint32_t i = 0; i < op.arg1; ++i) {
+          // FCallBuiltin has CU flavored args, so we need to check the
+          // type to know how to pop them.
+          auto const& popped = topT(env, i);
+          if (popped.subtypeOf(BUninit)) {
+            bcs.push_back(bc::PopU {});
+          } else {
+            assertx(popped.subtypeOf(BInitCell));
+            bcs.push_back(bc::PopC {});
+          }
+        }
+      };
 
       // If there's no in-out parameters, we're done and can just push
       // the result.
       if (!op.arg3) {
+        if (needsRuntimeProvenance) {
+          BytecodeVec repl;
+          popInArgs(repl);
+          repl.push_back(gen_constant(*tv(*val)));
+          repl.push_back(bc::Int { 0 });
+          repl.push_back(bc::TagProvenanceHere {});
+          return reduce(env, std::move(repl));
+        }
         discard(env, op.arg1);
         return push(env, std::move(*val));
       }
@@ -545,18 +572,8 @@ void in(ISS& env, const bc::FCallBuiltin& op) {
       assertx(ad->size() == op.arg3 + 1);
 
       BytecodeVec repl;
-      // Pop the arguments
-      for (uint32_t i = 0; i < op.arg1; ++i) {
-        // FCallBuiltin has CU flavored args, so we need to check the
-        // type to know how to pop them.
-        auto const& popped = topT(env, i);
-        if (popped.subtypeOf(BUninit)) {
-          repl.push_back(bc::PopU {});
-        } else {
-          assertx(popped.subtypeOf(BInitCell));
-          repl.push_back(bc::PopC {});
-        }
-      }
+      popInArgs(repl);
+
       // Pop the placeholder uninit values
       for (uint32_t i = 0; i < op.arg3; ++i) {
         repl.push_back(bc::PopU {});
@@ -565,8 +582,12 @@ void in(ISS& env, const bc::FCallBuiltin& op) {
       for (uint32_t i = 0; i < op.arg3; ++i) {
         repl.push_back(gen_constant(ad->nvGetVal(op.arg3 - i)));
       }
-      // And push the actual function return
+      // Push the actual result, tagging it in ProvenanceSkipFrame functions.
       repl.push_back(gen_constant(ad->nvGetVal(0)));
+      if (needsRuntimeProvenance) {
+        repl.push_back(bc::Int { 0 });
+        repl.push_back(bc::TagProvenanceHere {});
+      }
 
       return reduce(env, std::move(repl));
     }
@@ -582,16 +603,15 @@ void in(ISS& env, const bc::FCallBuiltin& op) {
     // AttrParamCoerceFalse. Since this is a FCallBuiltin, we already know the
     // parameter count is exactly what the builtin expects.
     auto const precise_ty = [&]() -> folly::Optional<Type> {
-      auto const exact = func.exactFunc();
-      if (!exact) return folly::none;
-      if (exact->attrs & AttrVariadicParam) {
+      if (!exactFunc) return folly::none;
+      if (exactFunc->attrs & AttrVariadicParam) {
         return folly::none;
       }
-      assert(num_args == exact->params.size());
+      assert(num_args == exactFunc->params.size());
       // Check to see if all provided arguments are sub-types of what the
       // builtin expects. If so, we know there won't be any coercions.
       for (auto i = uint32_t{0}; i < num_args; ++i) {
-        auto const& param = exact->params[i];
+        auto const& param = exactFunc->params[i];
         if (!param.builtinType || param.builtinType == KindOfUninit) {
           return folly::none;
         }
@@ -600,7 +620,7 @@ void in(ISS& env, const bc::FCallBuiltin& op) {
           return folly::none;
         }
       }
-      return native_function_return_type(exact);
+      return native_function_return_type(exactFunc);
     }();
     if (!precise_ty) return env.index.lookup_return_type(env.ctx, func);
     return *precise_ty;
@@ -610,8 +630,8 @@ void in(ISS& env, const bc::FCallBuiltin& op) {
   for (auto i = uint32_t{0}; i < num_args + num_out; ++i) popT(env);
 
   for (auto i = num_out; i > 0; --i) {
-    if (auto const f = func.exactFunc()) {
-      push(env, native_function_out_type(f, i - 1));
+    if (exactFunc) {
+      push(env, native_function_out_type(exactFunc, i - 1));
     } else {
       push(env, TInitCell);
     }

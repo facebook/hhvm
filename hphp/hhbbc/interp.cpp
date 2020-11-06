@@ -3715,6 +3715,15 @@ bool fcallTryFold(
       repl.push_back(bc::PopU {});
     }
     repl.push_back(gen_constant(*v));
+
+    auto const needsRuntimeProvenance =
+      RO::EvalArrayProvenance &&
+      foldableFunc->attrs & AttrProvenanceSkipFrame;
+    if (needsRuntimeProvenance) {
+      repl.push_back(bc::Int { 0 });
+      repl.push_back(bc::TagProvenanceHere {});
+    }
+
     reduce(env, std::move(repl));
     return true;
   }
@@ -5346,9 +5355,12 @@ void in(ISS& env, const bc::ArrayUnmarkLegacy&) {
 }
 
 void in(ISS& env, const bc::TagProvenanceHere&) {
+  auto in = topC(env, 1);
+  auto out = loosen_provenance(loosen_staticness(loosen_values(std::move(in))));
+
   popC(env);
   popC(env);
-  push(env, TInitCell);
+  push(env, std::move(out));
 }
 
 void in(ISS& env, const bc::CheckProp&) {

@@ -639,8 +639,23 @@ SSATmp* opt_foldable(IRGS& env,
                      const Func* func,
                      const ParamPrep& params,
                      uint32_t numNonDefaultArgs) {
-  ARRPROV_USE_RUNTIME_LOCATION();
   if (!func->isFoldable()) return nullptr;
+
+  // Tag arrprov with the last non-ProvenanceSkipFrame SrcKey in inlineState.
+  auto const sk = [&]{
+    auto const cur = curSrcKey(env);
+    if (!RO::EvalArrayProvenance) return cur;
+    if (!cur.func()->isProvenanceSkipFrame()) return cur;
+    auto const& stack = env.inlineState.bcStateStack;
+    for (auto it = stack.rbegin(); it != stack.rend(); it++) {
+      if (!it->func()->isProvenanceSkipFrame()) return *it;
+    }
+    return SrcKey();
+  }();
+  assertx(IMPLIES(!RO::EvalArrayProvenance, sk.valid()));
+  if (!sk.valid()) return nullptr;
+  auto const tag = arrprov::tagFromSK(sk);
+  arrprov::TagOverride _{tag};
 
   const Class* cls = nullptr;
   if (func->isMethod()) {
@@ -710,7 +725,9 @@ SSATmp* opt_foldable(IRGS& env,
     assertx(tvIsPlausible(retVal));
 
     auto scalar_array = [&] {
-      return ArrayData::GetScalarArray(std::move(tvAsVariant(&retVal)));
+      auto& a = val(retVal).parr;
+      ArrayData::GetScalarArray(&a, tag);
+      return a;
     };
 
     switch (retVal.m_type) {

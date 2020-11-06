@@ -1099,6 +1099,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                             let value_type = self.alloc(Ty(self.alloc(Reason::hint(pos)), TANY_));
                             Ty_::TvarrayOrDarray(self.alloc((key_type, value_type)))
                         }
+                        "_" => Ty_::Terr,
                         _ => {
                             let name =
                                 self.prefix_ns(self.state.namespace_builder.rename_import(name));

@@ -46,7 +46,68 @@
                (Tapply (([5:41-43], "\\ID"), [])))
               ]
             )))
-        }))
+        }));
+  ("\\filter",
+   (Shallow_decl_defs.Fun
+      { Typing_defs.fe_deprecated = None;
+        fe_type =
+        (Rwitness (root|higher_kinded.php line 7, characters 10-15),
+         (Tfun
+            { ft_arity = (Fstandard ());
+              ft_tparams =
+              [{ Typing_defs_core.tp_variance = Invariant;
+                 tp_name = ([7:17-19], "TC");
+                 tp_tparams =
+                 [{ Typing_defs_core.tp_variance = Invariant;
+                    tp_name = ([7:20-21], "_"); tp_tparams = [];
+                    tp_constraints = []; tp_reified = Erased;
+                    tp_user_attributes = [] }
+                   ];
+                 tp_constraints = []; tp_reified = Erased;
+                 tp_user_attributes = [] };
+                { Typing_defs_core.tp_variance = Invariant;
+                  tp_name = ([7:24-26], "TV"); tp_tparams = [];
+                  tp_constraints = []; tp_reified = Erased;
+                  tp_user_attributes = [] }
+                ];
+              ft_where_constraints = [];
+              ft_params =
+              [{ fp_pos = [7:35-46]; fp_name = (Some "$collection");
+                 fp_type =
+                 { et_enforced = false;
+                   et_type =
+                   (Rhint (root|higher_kinded.php line 7, characters 28-33),
+                    (Tgeneric ("TC",
+                       [(Rhint (root|higher_kinded.php line 7, characters 31-32),
+                         (Tgeneric ("TV", [])))]
+                       )))
+                   };
+                 fp_rx_annotation = None;
+                 fp_flags =
+                 (make_fp_flags ~mutability:None ~accept_disposable:false
+                   ~has_default:false ~mode:Typing_defs_core.FPnormal
+                   ~ifc_external:false ~ifc_can_call:false ~is_atom:false);
+                  }
+                ];
+              ft_implicit_params =
+              { capability =
+                (Rhint (root|higher_kinded.php line 7, characters 10-15),
+                 (Tapply (([7:10-16], "\\HH\\Contexts\\defaults"), [])))
+                };
+              ft_ret =
+              { et_enforced = false;
+                et_type =
+                (Rhint (root|higher_kinded.php line 7, characters 49-55),
+                 (Tapply (([7:49-52], "\\HH\\vec"),
+                    [(Rhint (root|higher_kinded.php line 7, characters 53-54),
+                      (Tgeneric ("TV", [])))]
+                    )))
+                };
+              ft_flags =
+              (make_ft_flags FSync None ~return_disposable:false
+                ~returns_mutable:false ~returns_void_to_rx:false);
+              ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC} }));
+        fe_pos = [7:10-16]; fe_php_std_lib = false }))
   ]
 
 They matched!

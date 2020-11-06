@@ -348,6 +348,7 @@ pub fn expr_to_typed_value_(
                 std::string::String::from_utf8_unchecked(s.clone().into())
             }))
         }
+        EnumAtom(s) => Ok(TypedValue::String(s.clone())),
         Float(s) => {
             if s == math::INF {
                 Ok(TypedValue::float(std::f64::INFINITY))

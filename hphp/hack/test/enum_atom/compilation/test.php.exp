@@ -1,0 +1,321 @@
+# test.php starts here
+
+.filepath "test.php";
+
+.adata A_0 = """Y:3:{s:4:\"kind\";i:101;s:9:\"classname\";s:3:\"Box\";s:13:\"generic_types\";y:1:{Y:1:{s:4:\"kind\";i:4;}}}""";
+.adata A_1 = """Y:3:{s:4:\"kind\";i:101;s:9:\"classname\";s:6:\"HH\\Elt\";s:13:\"generic_types\";y:2:{Y:3:{s:4:\"kind\";i:102;s:9:\"root_name\";s:7:\"HH\\this\";s:11:\"access_list\";y:1:{s:5:\"TEnum\";}}Y:3:{s:4:\"kind\";i:101;s:9:\"classname\";s:3:\"Box\";s:13:\"generic_types\";y:1:{Y:2:{s:4:\"kind\";i:13;s:4:\"name\";s:1:\"_\";}}}}}""";
+.adata A_2 = """Y:3:{s:4:\"kind\";i:102;s:9:\"root_name\";s:7:\"HH\\this\";s:11:\"access_list\";y:1:{s:5:\"TEnum\";}}""";
+
+.function {} ["__EntryPoint"("""y:0:{}""")] (55,63) <"HH\\void" N > main() {
+  .srcloc 56:3,56:16;
+  NullUninit
+  NullUninit
+  .srcloc 56:12,56:12;
+  ClsCnsD "A" "E"
+  .srcloc 56:3,56:16;
+  FCallClsMethodD <> 1 1 "0" - "" "" "CE" "show"
+  .srcloc 56:3,56:17;
+  PopC
+  .srcloc 57:3,57:16;
+  NullUninit
+  NullUninit
+  .srcloc 57:12,57:12;
+  ClsCnsD "B" "E"
+  .srcloc 57:3,57:16;
+  FCallClsMethodD <> 1 1 "0" - "" "" "CE" "show"
+  .srcloc 57:3,57:17;
+  PopC
+  .srcloc 58:3,58:16;
+  NullUninit
+  NullUninit
+  .srcloc 58:12,58:12;
+  ClsCnsD "C" "F"
+  .srcloc 58:3,58:16;
+  FCallClsMethodD <> 1 1 "0" - "" "" "CF" "show"
+  .srcloc 58:3,58:17;
+  PopC
+  .srcloc 59:8,59:11;
+  String "\n"
+  .srcloc 59:3,59:12;
+  Print
+  .srcloc 59:3,59:12;
+  PopC
+  .srcloc 60:3,60:19;
+  NullUninit
+  NullUninit
+  .srcloc 60:17,60:18;
+  String "A"
+  .srcloc 60:3,60:19;
+  FCallClsMethodD <> 1 1 "0" - "" "" "CE" "show_atom"
+  .srcloc 60:3,60:20;
+  PopC
+  .srcloc 61:3,61:19;
+  NullUninit
+  NullUninit
+  .srcloc 61:17,61:18;
+  String "B"
+  .srcloc 61:3,61:19;
+  FCallClsMethodD <> 1 1 "0" - "" "" "CE" "show_atom"
+  .srcloc 61:3,61:20;
+  PopC
+  .srcloc 62:3,62:19;
+  NullUninit
+  NullUninit
+  .srcloc 62:17,62:18;
+  String "C"
+  .srcloc 62:3,62:19;
+  FCallClsMethodD <> 1 1 "0" - "" "" "CF" "show_atom"
+  .srcloc 62:3,62:20;
+  PopC
+  .srcloc 63:2,63:2;
+  Null
+  RetC
+}
+
+.class {} [interface] I (4,4) {
+}
+
+.class {} Box (6,8) implements (I) {
+  .property [public sys_initial_val] <"T" "T" extended_hint type_var> data =
+    """N;""";
+  .method {}{} [public] (7,7) <"" N > __construct(<"T" "T" extended_hint type_var> $data) {
+    .srcloc 7:10,7:48;
+    VerifyParamType $data
+    .srcloc 7:40,7:44;
+    CheckThis
+    .srcloc 7:40,7:44;
+    CGetL $data
+    BaseH
+    .srcloc 7:40,7:44;
+    SetM 0 PT:"data"
+    .srcloc 7:40,7:44;
+    PopC
+    .srcloc 7:49,7:49;
+    Null
+    RetC
+  }
+}
+
+.class {} [abstract final] HBox (10,14) {
+  .method {}{} [public static] (11,13) <"Box<HH\\string>" "Box" extended_hint> String() {
+    .srcloc 12:12,12:26;
+    NewObjD "Box"
+    Dup
+    NullUninit
+    .srcloc 12:20,12:25;
+    String "zuck"
+    .srcloc 12:12,12:26;
+    FCallCtor <LockWhileUnwinding> 1 1 "0" - "" ""
+    PopC
+    LockObj
+    .srcloc 12:5,12:27;
+    Array @A_0
+    VerifyRetTypeTS
+    RetC
+  }
+}
+
+.class {} [enum final enum_class "__EnumClass"("""y:0:{}""")] E (16,19) extends HH\BuiltinEnumClass {
+  .enum_ty <"I" extended_hint>;
+  .const A = uninit;
+  .const B = uninit;
+  .method {}{} [private static no_injection] (16,19) 86cinit($constName) {
+    .srcloc 16:1,19:82;
+    CGetL $constName
+    SSwitch <"A":L0 -:L1>
+  L0:
+    .srcloc 17:3,17:27;
+    NewObjD "HH\\Elt"
+    Dup
+    NullUninit
+    .srcloc 17:3,17:3;
+    String "A"
+    .srcloc 17:15,17:25;
+    NewObjD "Box"
+    Dup
+    NullUninit
+    .srcloc 17:23,17:24;
+    Int 42
+    .srcloc 17:15,17:25;
+    FCallCtor <LockWhileUnwinding> 1 1 "0" - "" ""
+    PopC
+    LockObj
+    .srcloc 17:3,17:27;
+    FCallCtor <LockWhileUnwinding> 2 1 "00" - "" ""
+    PopC
+    LockObj
+    .srcloc 16:1,19:82;
+    Jmp L2
+  L1:
+    .srcloc 18:3,18:33;
+    NewObjD "HH\\Elt"
+    Dup
+    NullUninit
+    .srcloc 18:3,18:3;
+    String "B"
+    .srcloc 18:18,18:31;
+    NullUninit
+    NullUninit
+    .srcloc 18:18,18:31;
+    FCallClsMethodD <> 0 1 "" - "" "" "HBox" "String"
+    .srcloc 18:3,18:33;
+    FCallCtor <LockWhileUnwinding> 2 1 "00" - "" ""
+    PopC
+    LockObj
+  L2:
+    .srcloc 16:1,19:82;
+    RetC
+  }
+}
+
+.class {} BBox (21,23) extends Box {
+  .method {}{} [public] (22,22) <"T" "T" extended_hint type_var> read() {
+    .srcloc 22:39,22:43;
+    CheckThis
+    .srcloc 22:39,22:49;
+    BaseH
+    QueryM 0 CGet PT:"data"
+    .srcloc 22:32,22:50;
+    VerifyRetTypeC
+    RetC
+  }
+  .method {}{} [protected no_injection] (21,23) 86reifiedinit(<"HH\\varray" "HH\\varray" > $__typestructures) {
+    NullUninit
+    NullUninit
+    CheckThis
+    BaseH
+    QueryM 0 CGet PT:"86reified_prop"
+    RecordReifiedGeneric
+    FCallClsMethodSD <> 1 1 "" - "" "" Parent "86reifiedinit"
+    PopC
+    Null
+    RetC
+  }
+}
+
+.class {} [enum final enum_class "__EnumClass"("""y:0:{}""")] F (25,27) extends HH\BuiltinEnumClass enum_includes (E) {
+  .enum_ty <"I" extended_hint>;
+  .const C = uninit;
+  .method {}{} [private static no_injection] (25,27) 86cinit($constName) {
+    .srcloc 26:3,26:31;
+    NewObjD "HH\\Elt"
+    Dup
+    NullUninit
+    .srcloc 26:3,26:3;
+    String "C"
+    .srcloc 26:16,26:29;
+    NewObjD "BBox"
+    Dup
+    NullUninit
+    .srcloc 26:25,26:28;
+    Double 3.1400000000000001
+    .srcloc 26:16,26:29;
+    FCallCtor <LockWhileUnwinding> 1 1 "0" - "" ""
+    PopC
+    LockObj
+    .srcloc 26:3,26:31;
+    FCallCtor <LockWhileUnwinding> 2 1 "00" - "" ""
+    PopC
+    LockObj
+    .srcloc 25:1,27:62;
+    RetC
+  }
+}
+
+.class {} [abstract] Controller (29,45) {
+  .const TEnum isType;
+  .method {}{} [public static] (32,34) <"T" "T" extended_hint type_var> get(<"HH\\Elt<HH\\this::TEnum, Box<T>>" "HH\\Elt" > $enum) {
+    .srcloc 32:17,34:110;
+    Array @A_1
+    VerifyParamTypeTS $enum
+    .srcloc 33:12,33:16;
+    CGetL $enum
+    NullUninit
+    .srcloc 33:12,33:26;
+    FCallObjMethodD <> 0 1 "" - "" "" NullThrows "unwrap"
+    .srcloc 33:12,33:26;
+    BaseC 0 Warn
+    QueryM 1 CGet PT:"data"
+    .srcloc 33:5,33:33;
+    VerifyRetTypeC
+    RetC
+  }
+  .method {}{} [public static] (36,39) <"HH\\void" N > show(<"HH\\Elt<HH\\this::TEnum, Box<T>>" "HH\\Elt" > $enum) {
+    .srcloc 36:17,39:124;
+    Array @A_1
+    VerifyParamTypeTS $enum
+    .srcloc 37:10,37:27;
+    NullUninit
+    NullUninit
+    .srcloc 37:22,37:26;
+    CGetL $enum
+    .srcloc 37:10,37:27;
+    FCallClsMethodSD <> 1 1 "0" - "" "" Static "get"
+    .srcloc 37:5,37:28;
+    Print
+    .srcloc 37:5,37:28;
+    PopC
+    .srcloc 38:10,38:13;
+    String "\n"
+    .srcloc 38:5,38:14;
+    Print
+    .srcloc 38:5,38:14;
+    PopC
+    .srcloc 39:4,39:4;
+    Null
+    RetC
+  }
+  .method {}{} [public static] (41,44) <"HH\\void" N > show_atom(["__Atom"("""y:0:{}""")]<"HH\\string" "HH\\string" > $enum) {
+    .srcloc 41:17,44:139;
+    Array @A_1
+    VerifyParamTypeTS $enum
+    Array @A_2
+    CombineAndResolveTypeStruct 1
+    BaseC 0 None
+    QueryM 1 CGetQuiet ET:"classname"
+    Dup
+    IsTypeC Null
+    JmpNZ L0
+    ClassGetC
+    ClsCnsL $enum
+    PopL $enum
+    Jmp L1
+  L0:
+    .srcloc 41:56,41:59;
+    String "Type constant does not resolve to a class"
+    Fatal Runtime
+  L1:
+    .srcloc 42:10,42:27;
+    NullUninit
+    NullUninit
+    .srcloc 42:22,42:26;
+    CGetL $enum
+    .srcloc 42:10,42:27;
+    FCallClsMethodSD <> 1 1 "0" - "" "" Static "get"
+    .srcloc 42:5,42:28;
+    Print
+    .srcloc 42:5,42:28;
+    PopC
+    .srcloc 43:10,43:13;
+    String "\n"
+    .srcloc 43:5,43:14;
+    Print
+    .srcloc 43:5,43:14;
+    PopC
+    .srcloc 44:4,44:4;
+    Null
+    RetC
+  }
+}
+
+.class {} [final] CE (47,49) extends Controller {
+  .const TEnum isType = """Y:2:{s:4:\"kind\";i:101;s:9:\"classname\";s:1:\"E\";}""";
+}
+
+.class {} [final] CF (51,53) extends Controller {
+  .const TEnum isType = """Y:2:{s:4:\"kind\";i:101;s:9:\"classname\";s:1:\"F\";}""";
+}
+
+.file_attributes ["__EnableUnstableFeatures"("""y:2:{s:9:\"enum_atom\";s:10:\"enum_class\";}""")] ;
+
+# test.php ends here

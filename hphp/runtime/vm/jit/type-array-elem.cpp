@@ -357,7 +357,7 @@ std::pair<Type, bool> dictFirstLastType(Type arr, bool isFirst, bool isKey) {
   if (arr.hasConstVal()) {
     auto const val = arr.arrLikeVal();
     if (val->empty()) return {TBottom, false};
-    auto const pos = isFirst ? val->iter_begin() : val->iter_end();
+    auto const pos = isFirst ? val->iter_begin() : val->iter_last();
     auto const tv = isKey ? val->nvGetKey(pos) : val->nvGetVal(pos);
     return {Type::cns(tv), true};
   }
@@ -376,7 +376,7 @@ std::pair<Type, bool> keysetFirstLastType(Type arr, bool isFirst) {
   if (arr.hasConstVal()) {
     auto val = arr.keysetVal();
     if (val->empty()) return {TBottom, false};
-    auto const pos = isFirst ? val->iter_begin() : val->iter_end();
+    auto const pos = isFirst ? val->iter_begin() : val->iter_last();
     return {Type::cns(val->nvGetVal(pos)), true};
   }
 

@@ -1149,14 +1149,6 @@ pub trait FlattenSmartConstructors<'src, State>
         }
     }
 
-    fn make_pu_access(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R) -> Self::R {
-        if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) {
-          Self::zero(SyntaxKind::PUAccess)
-        } else {
-          self.flatten(SyntaxKind::PUAccess, vec!(arg0, arg1, arg2))
-        }
-    }
-
     fn make_vector_type_specifier(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R) -> Self::R {
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) && Self::is_zero(&arg4) {
           Self::zero(SyntaxKind::VectorTypeSpecifier)
@@ -1394,70 +1386,6 @@ pub trait FlattenSmartConstructors<'src, State>
           Self::zero(SyntaxKind::EnumAtomExpression)
         } else {
           self.flatten(SyntaxKind::EnumAtomExpression, vec!(arg0, arg1))
-        }
-    }
-
-    fn make_pocket_atom_expression(&mut self, arg0: Self::R, arg1: Self::R) -> Self::R {
-        if Self::is_zero(&arg0) && Self::is_zero(&arg1) {
-          Self::zero(SyntaxKind::PocketAtomExpression)
-        } else {
-          self.flatten(SyntaxKind::PocketAtomExpression, vec!(arg0, arg1))
-        }
-    }
-
-    fn make_pocket_identifier_expression(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R) -> Self::R {
-        if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) && Self::is_zero(&arg4) {
-          Self::zero(SyntaxKind::PocketIdentifierExpression)
-        } else {
-          self.flatten(SyntaxKind::PocketIdentifierExpression, vec!(arg0, arg1, arg2, arg3, arg4))
-        }
-    }
-
-    fn make_pocket_atom_mapping_declaration(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R, arg5: Self::R) -> Self::R {
-        if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) && Self::is_zero(&arg4) && Self::is_zero(&arg5) {
-          Self::zero(SyntaxKind::PocketAtomMappingDeclaration)
-        } else {
-          self.flatten(SyntaxKind::PocketAtomMappingDeclaration, vec!(arg0, arg1, arg2, arg3, arg4, arg5))
-        }
-    }
-
-    fn make_pocket_enum_declaration(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R, arg5: Self::R, arg6: Self::R) -> Self::R {
-        if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) && Self::is_zero(&arg4) && Self::is_zero(&arg5) && Self::is_zero(&arg6) {
-          Self::zero(SyntaxKind::PocketEnumDeclaration)
-        } else {
-          self.flatten(SyntaxKind::PocketEnumDeclaration, vec!(arg0, arg1, arg2, arg3, arg4, arg5, arg6))
-        }
-    }
-
-    fn make_pocket_field_type_expr_declaration(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R) -> Self::R {
-        if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) {
-          Self::zero(SyntaxKind::PocketFieldTypeExprDeclaration)
-        } else {
-          self.flatten(SyntaxKind::PocketFieldTypeExprDeclaration, vec!(arg0, arg1, arg2, arg3))
-        }
-    }
-
-    fn make_pocket_field_type_declaration(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R) -> Self::R {
-        if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) {
-          Self::zero(SyntaxKind::PocketFieldTypeDeclaration)
-        } else {
-          self.flatten(SyntaxKind::PocketFieldTypeDeclaration, vec!(arg0, arg1, arg2, arg3))
-        }
-    }
-
-    fn make_pocket_mapping_id_declaration(&mut self, arg0: Self::R, arg1: Self::R) -> Self::R {
-        if Self::is_zero(&arg0) && Self::is_zero(&arg1) {
-          Self::zero(SyntaxKind::PocketMappingIdDeclaration)
-        } else {
-          self.flatten(SyntaxKind::PocketMappingIdDeclaration, vec!(arg0, arg1))
-        }
-    }
-
-    fn make_pocket_mapping_type_declaration(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R) -> Self::R {
-        if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) {
-          Self::zero(SyntaxKind::PocketMappingTypeDeclaration)
-        } else {
-          self.flatten(SyntaxKind::PocketMappingTypeDeclaration, vec!(arg0, arg1, arg2, arg3))
         }
     }
 

@@ -356,7 +356,6 @@ let string_of_tprim = function
   | Tvoid -> "void"
   | Tresource -> "resource"
   | Tnoreturn -> "noreturn"
-  | Tatom s -> ":@" ^ s
 
 let string_of_shape_field_name = function
   | Ast_defs.SFlit_int (_, s) -> s
@@ -457,7 +456,6 @@ let rec string_of_hint hint =
   | Hthis -> "this"
   | Hdynamic -> "dynamic"
   | Hnothing -> "nothing"
-  | Hpu_access (hint, (_, id)) -> string_of_hint hint ^ ":@" ^ id
   | Hunion hints ->
     Printf.sprintf "(%s)" (concat_map ~sep:" | " ~f:string_of_hint hints)
   | Hintersection hints ->
@@ -608,7 +606,6 @@ let get_init_for_prim = function
   | Aast_defs.Tstring
   | Aast_defs.Tarraykey ->
     "\"\""
-  | Aast_defs.Tatom s -> s
   | Aast_defs.Tvoid
   | Aast_defs.Tresource
   | Aast_defs.Tnoreturn ->

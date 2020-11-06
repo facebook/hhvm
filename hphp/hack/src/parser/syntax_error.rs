@@ -186,7 +186,6 @@ pub fn error1060(extension: &str) -> Error {
         kind.to_string()
     ))
 }
-pub const error1061: Error = Cow::Borrowed("A Pocket Universes operator `:@` is expected here.");
 pub const error1063: Error = Cow::Borrowed("Expected matching separator here.");
 pub const error1064: Error = Cow::Borrowed("XHP children declarations are no longer supported.");
 pub const error1065: Error = Cow::Borrowed("A backtick ``` is expected here.");
@@ -362,12 +361,6 @@ pub const inline_function_def: Error =
     Cow::Borrowed("Inline function definitions are not supported in Hack");
 pub const decl_outside_global_scope: Error =
     Cow::Borrowed("Declarations are not supported outside global scope");
-pub const pocket_universe_final_expected: Error =
-    Cow::Borrowed("The `final` keyword is expected here.");
-pub const pocket_universe_enum_expected: Error =
-    Cow::Borrowed("The `enum` keyword is expected here.");
-pub const pocket_universe_invalid_field: Error =
-    Cow::Borrowed("Invalid pocket universe field syntax.");
 pub const type_keyword: Error = Cow::Borrowed("The `type` keyword is expected here.");
 pub const expected_simple_offset_expression: Error =
     Cow::Borrowed("A simple offset expression is expected here");

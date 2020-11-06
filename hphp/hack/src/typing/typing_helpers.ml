@@ -48,8 +48,6 @@ module Fake = Typing_fake_members
 module TySet = Typing_set
 module TPEnv = Type_parameter_env
 
-exception InvalidPocketUniverse
-
 module ExpectedTy : sig
   [@@@warning "-32"]
 

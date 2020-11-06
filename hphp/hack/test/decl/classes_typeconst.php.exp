@@ -23,8 +23,8 @@
                    (Tprim Tstring)));
             stc_enforceable = ([Pos.none], false); stc_reifiable = None }
           ];
-        sc_pu_enums = []; sc_props = []; sc_sprops = [];
-        sc_constructor = None; sc_static_methods = [];
+        sc_props = []; sc_sprops = []; sc_constructor = None;
+        sc_static_methods = [];
         sc_methods =
         [{ Shallow_decl_defs.sm_abstract = false; sm_final = false;
            sm_name = ([7:19-20], "f"); sm_override = false;
@@ -102,8 +102,8 @@
             stc_name = ([19:23-33], "TConstType"); stc_type = None;
             stc_enforceable = ([Pos.none], false); stc_reifiable = None }
            ];
-         sc_pu_enums = []; sc_props = []; sc_sprops = [];
-         sc_constructor = None; sc_static_methods = [];
+         sc_props = []; sc_sprops = []; sc_constructor = None;
+         sc_static_methods = [];
          sc_methods =
          [{ Shallow_decl_defs.sm_abstract = true; sm_final = false;
             sm_name = ([20:28-39], "instantiate"); sm_override = false;

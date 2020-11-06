@@ -85,10 +85,7 @@ let rec strip_ty ty =
       in
       let shape_fields = Nast.ShapeMap.map strip_field shape_fields in
       Tshape (shape_kind, shape_fields)
-    | Tpu (base, enum) -> Tpu (strip_ty base, enum)
-    | Tpu_type_access (_, _)
-    | Taccess _ ->
-      ty
+    | Taccess _ -> ty
     | Tunapplied_alias _ ->
       Typing_defs.error_Tunapplied_alias_in_illegal_context ()
   in

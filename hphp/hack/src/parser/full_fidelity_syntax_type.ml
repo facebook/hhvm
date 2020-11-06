@@ -958,11 +958,6 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; type_constant_separator                            : t
     ; type_constant_right_type                           : t
     }
-  | PUAccess                          of
-    { pu_access_left_type                                : t
-    ; pu_access_separator                                : t
-    ; pu_access_right_type                               : t
-    }
   | VectorTypeSpecifier               of
     { vector_type_keyword                                : t
     ; vector_type_left_angle                             : t
@@ -1129,56 +1124,6 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { enum_atom_hash                                     : t
     ; enum_atom_expression                               : t
     }
-  | PocketAtomExpression              of
-    { pocket_atom_glyph                                  : t
-    ; pocket_atom_expression                             : t
-    }
-  | PocketIdentifierExpression        of
-    { pocket_identifier_qualifier                        : t
-    ; pocket_identifier_pu_operator                      : t
-    ; pocket_identifier_field                            : t
-    ; pocket_identifier_operator                         : t
-    ; pocket_identifier_name                             : t
-    }
-  | PocketAtomMappingDeclaration      of
-    { pocket_atom_mapping_glyph                          : t
-    ; pocket_atom_mapping_name                           : t
-    ; pocket_atom_mapping_left_paren                     : t
-    ; pocket_atom_mapping_mappings                       : t
-    ; pocket_atom_mapping_right_paren                    : t
-    ; pocket_atom_mapping_semicolon                      : t
-    }
-  | PocketEnumDeclaration             of
-    { pocket_enum_attributes                             : t
-    ; pocket_enum_modifiers                              : t
-    ; pocket_enum_enum                                   : t
-    ; pocket_enum_name                                   : t
-    ; pocket_enum_left_brace                             : t
-    ; pocket_enum_fields                                 : t
-    ; pocket_enum_right_brace                            : t
-    }
-  | PocketFieldTypeExprDeclaration    of
-    { pocket_field_type_expr_case                        : t
-    ; pocket_field_type_expr_type                        : t
-    ; pocket_field_type_expr_name                        : t
-    ; pocket_field_type_expr_semicolon                   : t
-    }
-  | PocketFieldTypeDeclaration        of
-    { pocket_field_type_case                             : t
-    ; pocket_field_type_type                             : t
-    ; pocket_field_type_type_parameter                   : t
-    ; pocket_field_type_semicolon                        : t
-    }
-  | PocketMappingIdDeclaration        of
-    { pocket_mapping_id_name                             : t
-    ; pocket_mapping_id_initializer                      : t
-    }
-  | PocketMappingTypeDeclaration      of
-    { pocket_mapping_type_keyword                        : t
-    ; pocket_mapping_type_name                           : t
-    ; pocket_mapping_type_equal                          : t
-    ; pocket_mapping_type_type                           : t
-    }
 
 end
 
@@ -1276,8 +1221,6 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | ExprShape                        of shape_expression
   | ExprTuple                        of tuple_expression
   | ExprEnumAtom                     of enum_atom_expression
-  | ExprPocketAtom                   of pocket_atom_expression
-  | ExprPocketIdentifier             of pocket_identifier_expression
   and specifier =
   | SpecSimple            of simple_type_specifier
   | SpecCapability        of capability
@@ -1315,7 +1258,6 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | BodyXHPChildren              of xhp_children_declaration
   | BodyXHPCategory              of xhp_category_declaration
   | BodyXHPClassAttribute        of xhp_class_attribute_declaration
-  | BodyPocketEnum               of pocket_enum_declaration
   and statement =
   | StmtInclusionDirective           of inclusion_directive
   | StmtCompound                     of compound_statement
@@ -1342,7 +1284,6 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | StmtEcho                         of echo_statement
   | StmtConcurrent                   of concurrent_statement
   | StmtTypeConstant                 of type_constant
-  | StmtPUAccess                     of pu_access
   and switch_label =
   | SwitchCase    of case_label
   | SwitchDefault of default_label
@@ -1394,7 +1335,6 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | LambdaXHP                          of xhp_expression
   | LambdaShape                        of shape_expression
   | LambdaTuple                        of tuple_expression
-  | LambdaPocketIdentifier             of pocket_identifier_expression
   and constructor_expression =
   | CExprLiteral                      of literal_expression
   | CExprPrefixedString               of prefixed_string_expression
@@ -1443,7 +1383,6 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | CExprXHP                          of xhp_expression
   | CExprShape                        of shape_expression
   | CExprTuple                        of tuple_expression
-  | CExprPocketIdentifier             of pocket_identifier_expression
   and namespace_internals =
   | NSINamespaceBody      of namespace_body
   | NSINamespaceEmptyBody of namespace_empty_body
@@ -1457,13 +1396,6 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | TODOEndOfFile of end_of_file
   and name_aggregate =
   | NameQualifiedName of qualified_name
-  and pufield_aggregate =
-  | PocketFieldPocketAtomMappingDeclaration   of pocket_atom_mapping_declaration
-  | PocketFieldPocketFieldTypeExprDeclaration of pocket_field_type_expr_declaration
-  | PocketFieldPocketFieldTypeDeclaration     of pocket_field_type_declaration
-  and pumapping_aggregate =
-  | PocketMappingPocketMappingIdDeclaration   of pocket_mapping_id_declaration
-  | PocketMappingPocketMappingTypeDeclaration of pocket_mapping_type_declaration
   and end_of_file =
     { end_of_file_token: Token.t value
     }
@@ -2277,11 +2209,6 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; type_constant_separator: Token.t value
     ; type_constant_right_type: Token.t value
     }
-  and pu_access =
-    { pu_access_left_type: specifier value
-    ; pu_access_separator: Token.t value
-    ; pu_access_right_type: Token.t value
-    }
   and vector_type_specifier =
     { vector_type_keyword: Token.t value
     ; vector_type_left_angle: Token.t value
@@ -2440,56 +2367,6 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   and enum_atom_expression =
     { enum_atom_hash: Token.t value
     ; enum_atom_expression: Token.t value
-    }
-  and pocket_atom_expression =
-    { pocket_atom_glyph: Token.t value
-    ; pocket_atom_expression: Token.t value
-    }
-  and pocket_identifier_expression =
-    { pocket_identifier_qualifier: expression value
-    ; pocket_identifier_pu_operator: Token.t value
-    ; pocket_identifier_field: expression value
-    ; pocket_identifier_operator: Token.t value
-    ; pocket_identifier_name: expression value
-    }
-  and pocket_atom_mapping_declaration =
-    { pocket_atom_mapping_glyph: Token.t value
-    ; pocket_atom_mapping_name: expression value
-    ; pocket_atom_mapping_left_paren: Token.t option value
-    ; pocket_atom_mapping_mappings: pumapping_aggregate listesque value
-    ; pocket_atom_mapping_right_paren: Token.t option value
-    ; pocket_atom_mapping_semicolon: Token.t value
-    }
-  and pocket_enum_declaration =
-    { pocket_enum_attributes: attribute_specification option value
-    ; pocket_enum_modifiers: Token.t listesque value
-    ; pocket_enum_enum: Token.t value
-    ; pocket_enum_name: Token.t value
-    ; pocket_enum_left_brace: Token.t value
-    ; pocket_enum_fields: pufield_aggregate listesque value
-    ; pocket_enum_right_brace: Token.t value
-    }
-  and pocket_field_type_expr_declaration =
-    { pocket_field_type_expr_case: Token.t value
-    ; pocket_field_type_expr_type: specifier value
-    ; pocket_field_type_expr_name: expression value
-    ; pocket_field_type_expr_semicolon: Token.t value
-    }
-  and pocket_field_type_declaration =
-    { pocket_field_type_case: Token.t value
-    ; pocket_field_type_type: Token.t value
-    ; pocket_field_type_type_parameter: type_parameter value
-    ; pocket_field_type_semicolon: Token.t value
-    }
-  and pocket_mapping_id_declaration =
-    { pocket_mapping_id_name: expression value
-    ; pocket_mapping_id_initializer: simple_initializer value
-    }
-  and pocket_mapping_type_declaration =
-    { pocket_mapping_type_keyword: Token.t value
-    ; pocket_mapping_type_name: expression value
-    ; pocket_mapping_type_equal: Token.t value
-    ; pocket_mapping_type_type: specifier value
     }
 
 [@@deriving show]

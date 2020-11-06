@@ -81,8 +81,7 @@ Errors:
            ns_disable_xhp_element_mangling = false }
          }
         ];
-      c_enum = None; c_pu_enums = []; c_doc_comment = None; c_emit_id = None
-      });
+      c_enum = None; c_doc_comment = None; c_emit_id = None });
   (Class
      { c_span = [8:3-10:4]; c_annotation = (); c_mode = Mstrict;
        c_final = false; c_is_xhp = false; c_has_xhp_keyword = false;
@@ -125,8 +124,7 @@ Errors:
             ns_disable_xhp_element_mangling = false }
           }
          ];
-       c_enum = None; c_pu_enums = []; c_doc_comment = None; c_emit_id = None
-       });
+       c_enum = None; c_doc_comment = None; c_emit_id = None });
   (Class
      { c_span = [16:3-25]; c_annotation = (); c_mode = Mstrict;
        c_final = false; c_is_xhp = false; c_has_xhp_keyword = false;
@@ -162,6 +160,5 @@ Errors:
             ns_disable_xhp_element_mangling = false }
           }
          ];
-       c_enum = None; c_pu_enums = []; c_doc_comment = None; c_emit_id = None
-       })
+       c_enum = None; c_doc_comment = None; c_emit_id = None })
   ]

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c4709db09807a2621172f47ddcd18b23>>
+// @generated SignedSource<<39cdb052f48c6a4c6976ce79c311f491>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -473,14 +473,6 @@ pub enum Expr_<'a, Ex, Fb, En, Hi> {
         ),
     ),
     Assert(&'a AssertExpr<'a, Ex, Fb, En, Hi>),
-    PUAtom(&'a str),
-    PUIdentifier(
-        &'a (
-            &'a ClassId<'a, Ex, Fb, En, Hi>,
-            &'a Pstring<'a>,
-            &'a Pstring<'a>,
-        ),
-    ),
     ETSplice(&'a Expr<'a, Ex, Fb, En, Hi>),
     EnumAtom(&'a str),
     Any,
@@ -975,7 +967,6 @@ pub struct Class_<'a, Ex, Fb, En, Hi> {
     pub user_attributes: &'a [&'a UserAttribute<'a, Ex, Fb, En, Hi>],
     pub file_attributes: &'a [&'a FileAttribute<'a, Ex, Fb, En, Hi>],
     pub enum_: Option<&'a Enum_<'a>>,
-    pub pu_enums: &'a [&'a PuEnum<'a, Ex, Fb, En, Hi>],
     pub doc_comment: Option<&'a DocComment<'a>>,
     pub emit_id: Option<&'a oxidized::aast::EmitId>,
 }
@@ -1328,98 +1319,6 @@ impl<'a, Ex: TrivialDrop, Fb: TrivialDrop, En: TrivialDrop, Hi: TrivialDrop> Tri
 }
 
 pub type RecordHint<'a> = Hint<'a>;
-
-/// Pocket Universe Enumeration, e.g.
-///
-/// ```
-///   enum Foo { // pu_name
-///     // pu_case_types
-///     case type T0;
-///     case type T1;
-///
-///     // pu_case_values
-///     case ?T0 default_value;
-///     case T1 foo;
-///
-///     // pu_members
-///     :@A( // pum_atom
-///       // pum_types
-///       type T0 = string,
-///       type T1 = int,
-///
-///       // pum_exprs
-///       default_value = null,
-///       foo = 42,
-///     );
-///     :@B( ... )
-///     ...
-///   }
-/// ```
-#[derive(
-    Clone,
-    Debug,
-    Eq,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-pub struct PuEnum<'a, Ex, Fb, En, Hi> {
-    pub annotation: En,
-    pub name: Sid<'a>,
-    pub user_attributes: &'a [&'a UserAttribute<'a, Ex, Fb, En, Hi>],
-    pub is_final: bool,
-    pub case_types: &'a [&'a Tparam<'a, Ex, Fb, En, Hi>],
-    pub case_values: &'a [&'a PuCaseValue<'a>],
-    pub members: &'a [&'a PuMember<'a, Ex, Fb, En, Hi>],
-}
-impl<'a, Ex: TrivialDrop, Fb: TrivialDrop, En: TrivialDrop, Hi: TrivialDrop> TrivialDrop
-    for PuEnum<'a, Ex, Fb, En, Hi>
-{
-}
-
-#[derive(
-    Clone,
-    Debug,
-    Eq,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-pub struct PuCaseValue<'a>(pub Sid<'a>, pub &'a Hint<'a>);
-impl<'a> TrivialDrop for PuCaseValue<'a> {}
-
-#[derive(
-    Clone,
-    Debug,
-    Eq,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-pub struct PuMember<'a, Ex, Fb, En, Hi> {
-    pub atom: Sid<'a>,
-    pub types: &'a [(Sid<'a>, &'a Hint<'a>)],
-    pub exprs: &'a [(Sid<'a>, &'a Expr<'a, Ex, Fb, En, Hi>)],
-}
-impl<'a, Ex: TrivialDrop, Fb: TrivialDrop, En: TrivialDrop, Hi: TrivialDrop> TrivialDrop
-    for PuMember<'a, Ex, Fb, En, Hi>
-{
-}
 
 pub type FunDef<'a, Ex, Fb, En, Hi> = Fun_<'a, Ex, Fb, En, Hi>;
 

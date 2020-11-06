@@ -513,9 +513,6 @@ pub fn emit_expr(emitter: &mut Emitter, env: &Env, expression: &tast::Expr) -> R
         Expr_::This | Expr_::Lplaceholder(_) | Expr_::Dollardollar(_) => {
             unimplemented!("TODO(hrust) Codegen after naming pass on AAST")
         }
-        Expr_::PUAtom(_) | Expr_::PUIdentifier(_) => Err(unrecoverable(
-            "TODO(T35357243): Pocket Universes syntax must be erased by now",
-        )),
         Expr_::ExpressionTree(et) => emit_expr(emitter, env, &et.desugared_expr),
         _ => unimplemented!("TODO(hrust)"),
     }
@@ -5087,7 +5084,6 @@ fn can_use_as_rhs_in_list_assignment(expr: &tast::Expr_) -> Result<bool> {
         | E_::ArrayGet(_)
         | E_::ObjGet(_)
         | E_::ClassGet(_)
-        | E_::PUAtom(_)
         | E_::Call(_)
         | E_::FunctionPointer(_)
         | E_::New(_)
@@ -5112,11 +5108,6 @@ fn can_use_as_rhs_in_list_assignment(expr: &tast::Expr_) -> Result<bool> {
                 }
             }
             b.0.is_plus() || b.0.is_question_question() || b.0.is_any_eq()
-        }
-        E_::PUIdentifier(_) => {
-            return Err(Unrecoverable(
-                "TODO(T35357243): Pocket Universes syntax must be erased by now".into(),
-            ));
         }
         _ => false,
     })

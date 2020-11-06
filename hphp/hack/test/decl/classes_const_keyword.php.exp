@@ -56,7 +56,7 @@
                )))
            }
          ];
-       sc_typeconsts = []; sc_pu_enums = []; sc_props = []; sc_sprops = [];
+       sc_typeconsts = []; sc_props = []; sc_sprops = [];
        sc_constructor = None; sc_static_methods = []; sc_methods = [];
        sc_user_attributes = []; sc_enum_type = None }));
   ("\\AbstractConsts",
@@ -75,7 +75,7 @@
             (Tprim Tint))
            }
           ];
-        sc_typeconsts = []; sc_pu_enums = []; sc_props = []; sc_sprops = [];
+        sc_typeconsts = []; sc_props = []; sc_sprops = [];
         sc_constructor = None; sc_static_methods = []; sc_methods = [];
         sc_user_attributes = []; sc_enum_type = None }));
   ("\\VecConsts",
@@ -110,7 +110,7 @@
                 )))
             }
           ];
-        sc_typeconsts = []; sc_pu_enums = []; sc_props = []; sc_sprops = [];
+        sc_typeconsts = []; sc_props = []; sc_sprops = [];
         sc_constructor = None; sc_static_methods = []; sc_methods = [];
         sc_user_attributes = []; sc_enum_type = None }));
   ("\\ArrayConsts",
@@ -160,7 +160,7 @@
                  (Tprim Tstring))))
             }
           ];
-        sc_typeconsts = []; sc_pu_enums = []; sc_props = []; sc_sprops = [];
+        sc_typeconsts = []; sc_props = []; sc_sprops = [];
         sc_constructor = None; sc_static_methods = []; sc_methods = [];
         sc_user_attributes = []; sc_enum_type = None }));
   ("\\BinopConsts",
@@ -197,7 +197,7 @@
              (Tprim Tbool))
             }
           ];
-        sc_typeconsts = []; sc_pu_enums = []; sc_props = []; sc_sprops = [];
+        sc_typeconsts = []; sc_props = []; sc_sprops = [];
         sc_constructor = None; sc_static_methods = []; sc_methods = [];
         sc_user_attributes = []; sc_enum_type = None }));
   ("\\ShapeConsts",
@@ -229,7 +229,7 @@
                )))
            }
           ];
-        sc_typeconsts = []; sc_pu_enums = []; sc_props = []; sc_sprops = [];
+        sc_typeconsts = []; sc_props = []; sc_sprops = [];
         sc_constructor = None; sc_static_methods = []; sc_methods = [];
         sc_user_attributes = []; sc_enum_type = None }));
   ("\\TupleConsts",
@@ -260,7 +260,7 @@
                  ]))
            }
           ];
-        sc_typeconsts = []; sc_pu_enums = []; sc_props = []; sc_sprops = [];
+        sc_typeconsts = []; sc_props = []; sc_sprops = [];
         sc_constructor = None; sc_static_methods = []; sc_methods = [];
         sc_user_attributes = []; sc_enum_type = None }));
   ("\\ClassnameConsts",
@@ -291,7 +291,7 @@
                 )))
             }
           ];
-        sc_typeconsts = []; sc_pu_enums = []; sc_props = []; sc_sprops = [];
+        sc_typeconsts = []; sc_props = []; sc_sprops = [];
         sc_constructor = None; sc_static_methods = []; sc_methods = [];
         sc_user_attributes = []; sc_enum_type = None }))
   ]

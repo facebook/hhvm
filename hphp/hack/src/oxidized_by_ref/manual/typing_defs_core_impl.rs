@@ -123,7 +123,6 @@ impl std::fmt::Debug for Ty_<'_> {
             Tarray((tk, tv)) => f.debug_tuple("Tarray").field(tk).field(tv).finish(),
             Tmixed => write!(f, "Tmixed"),
             Tlike(ty) => f.debug_tuple("Tlike").field(ty).finish(),
-            TpuAccess((ty, id)) => f.debug_tuple("TpuAccess").field(ty).field(id).finish(),
             Tany(_) => write!(f, "Tany"),
             Terr => write!(f, "Terr"),
             Tnonnull => write!(f, "Tnonnull"),
@@ -162,12 +161,6 @@ impl std::fmt::Debug for Ty_<'_> {
                 .field(id)
                 .field(exact)
                 .field(tys)
-                .finish(),
-            Tpu((ty, id)) => f.debug_tuple("Tpu").field(ty).field(id).finish(),
-            TpuTypeAccess((root, id)) => f
-                .debug_tuple("TpuTypeAccess")
-                .field(root)
-                .field(id)
                 .finish(),
         }
     }

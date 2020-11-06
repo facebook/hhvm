@@ -31,8 +31,7 @@
            ns_disable_xhp_element_mangling = false }
          }
         ];
-      c_enum = None; c_pu_enums = []; c_doc_comment = None; c_emit_id = None
-      });
+      c_enum = None; c_doc_comment = None; c_emit_id = None });
   (Class
      { c_span = [9:1-18]; c_annotation = (); c_mode = Mstrict;
        c_final = false; c_is_xhp = false; c_has_xhp_keyword = false;
@@ -63,6 +62,5 @@
             ns_disable_xhp_element_mangling = false }
           }
          ];
-       c_enum = None; c_pu_enums = []; c_doc_comment = None; c_emit_id = None
-       })
+       c_enum = None; c_doc_comment = None; c_emit_id = None })
   ]

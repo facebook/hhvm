@@ -147,8 +147,6 @@ let rec truthiness env ty =
   | Tprim Tvoid -> Always_falsy
   | Tprim Tnoreturn -> Unknown
   | Tprim (Tint | Tbool | Tfloat | Tstring | Tnum | Tarraykey) -> Possibly_falsy
-  (* Tatom are string at runtine, but neither "0" nor "" are valid atom names *)
-  | Tprim (Tatom _) -> Always_truthy
   | Tunion tyl ->
     begin
       match List.map tyl (truthiness env) with
@@ -184,8 +182,6 @@ let rec truthiness env ty =
   | Tobject
   | Tfun _
   | Ttuple _
-  | Tpu _
-  | Tpu_type_access _
   | Taccess _ ->
     (* TODO(T36532263) check if that's ok *) Unknown
   | Tunapplied_alias _ ->
@@ -261,8 +257,6 @@ let rec find_sketchy_types env acc ty =
   | Tvarray _
   | Tdarray _
   | Tvarray_or_darray _
-  | Tpu _
-  | Tpu_type_access _
   | Tunapplied_alias _
   | Taccess _ ->
     acc

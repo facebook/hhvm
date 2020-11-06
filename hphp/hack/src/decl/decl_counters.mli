@@ -73,10 +73,8 @@ type subdecl_kind =
   | All_ancestors
   | All_ancestor_names
   | All_ancestor_reqs
-  | Get_pu_enum of string
   | Consts
   | Typeconsts
-  | Pu_enums
   | Props
   | SProps
   | Methods

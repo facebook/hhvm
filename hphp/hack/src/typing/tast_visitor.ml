@@ -45,9 +45,6 @@ class virtual iter =
       in
       super#on_class_var env cv
 
-    method! on_pu_enum env x =
-      super#on_pu_enum (Env.restore_pu_enum_env env x) x
-
     method! on_Binop env op e1 e2 =
       match op with
       | Ast_defs.Eq _ ->
@@ -109,9 +106,6 @@ class virtual ['state] iter_with_state =
       in
       self#on_class_var_with_env (env, state) cv
 
-    method! on_pu_enum (env, state) x =
-      super#on_pu_enum (Env.restore_pu_enum_env env x, state) x
-
     method! on_Binop (env, state) op e1 e2 =
       match op with
       | Ast_defs.Eq _ ->
@@ -164,9 +158,6 @@ class virtual ['a] reduce =
           env
       in
       super#on_class_var env cv
-
-    method! on_pu_enum env x =
-      super#on_pu_enum (Env.restore_pu_enum_env env x) x
 
     method! on_Binop env op e1 e2 =
       match op with
@@ -230,9 +221,6 @@ class virtual map =
       in
       super#on_class_var env cv
 
-    method! on_pu_enum env x =
-      super#on_pu_enum (Env.restore_pu_enum_env env x) x
-
     method! on_Binop env op e1 e2 =
       match op with
       | Ast_defs.Eq _ ->
@@ -293,9 +281,6 @@ class virtual endo =
           env
       in
       super#on_class_var env cv
-
-    method! on_pu_enum env x =
-      super#on_pu_enum (Env.restore_pu_enum_env env x) x
 
     method! on_Binop env this op e1 e2 =
       match op with

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<13e7258747b62db1ee99b7ce44cfeadb>>
+// @generated SignedSource<<577370638ed81bc0c16dbb944893db29>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -1166,12 +1166,6 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
     pub fn mk_assert(p0: AssertExpr<Ex, Fb, En, Hi>) -> Self {
         Expr_::Assert(Box::new(p0))
     }
-    pub fn mk_puatom(p0: String) -> Self {
-        Expr_::PUAtom(p0)
-    }
-    pub fn mk_puidentifier(p0: ClassId<Ex, Fb, En, Hi>, p1: Pstring, p2: Pstring) -> Self {
-        Expr_::PUIdentifier(Box::new((p0, p1, p2)))
-    }
     pub fn mk_etsplice(p0: Expr<Ex, Fb, En, Hi>) -> Self {
         Expr_::ETSplice(Box::new(p0))
     }
@@ -1514,18 +1508,6 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
     pub fn is_assert(&self) -> bool {
         match self {
             Expr_::Assert(..) => true,
-            _ => false,
-        }
-    }
-    pub fn is_puatom(&self) -> bool {
-        match self {
-            Expr_::PUAtom(..) => true,
-            _ => false,
-        }
-    }
-    pub fn is_puidentifier(&self) -> bool {
-        match self {
-            Expr_::PUIdentifier(..) => true,
             _ => false,
         }
     }
@@ -1902,18 +1884,6 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
     pub fn as_assert(&self) -> Option<&AssertExpr<Ex, Fb, En, Hi>> {
         match self {
             Expr_::Assert(p0) => Some(&p0),
-            _ => None,
-        }
-    }
-    pub fn as_puatom(&self) -> Option<&String> {
-        match self {
-            Expr_::PUAtom(p0) => Some(p0),
-            _ => None,
-        }
-    }
-    pub fn as_puidentifier(&self) -> Option<(&ClassId<Ex, Fb, En, Hi>, &Pstring, &Pstring)> {
-        match self {
-            Expr_::PUIdentifier(p0) => Some((&p0.0, &p0.1, &p0.2)),
             _ => None,
         }
     }
@@ -2323,20 +2293,6 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
             _ => None,
         }
     }
-    pub fn as_puatom_mut(&mut self) -> Option<&mut String> {
-        match self {
-            Expr_::PUAtom(p0) => Some(p0),
-            _ => None,
-        }
-    }
-    pub fn as_puidentifier_mut(
-        &mut self,
-    ) -> Option<(&mut ClassId<Ex, Fb, En, Hi>, &mut Pstring, &mut Pstring)> {
-        match self {
-            Expr_::PUIdentifier(p0) => Some((&mut p0.0, &mut p0.1, &mut p0.2)),
-            _ => None,
-        }
-    }
     pub fn as_etsplice_mut(&mut self) -> Option<&mut Expr<Ex, Fb, En, Hi>> {
         match self {
             Expr_::ETSplice(p0) => Some(p0.as_mut()),
@@ -2704,18 +2660,6 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
     pub fn as_assert_into(self) -> Option<AssertExpr<Ex, Fb, En, Hi>> {
         match self {
             Expr_::Assert(p0) => Some(*p0),
-            _ => None,
-        }
-    }
-    pub fn as_puatom_into(self) -> Option<String> {
-        match self {
-            Expr_::PUAtom(p0) => Some(p0),
-            _ => None,
-        }
-    }
-    pub fn as_puidentifier_into(self) -> Option<(ClassId<Ex, Fb, En, Hi>, Pstring, Pstring)> {
-        match self {
-            Expr_::PUIdentifier(p0) => Some(((*p0).0, (*p0).1, (*p0).2)),
             _ => None,
         }
     }

@@ -189,7 +189,6 @@ type decl_class_type = {
       (** class name to the subst_context that must be applied to that class *)
   dc_consts: class_const SMap.t;
   dc_typeconsts: typeconst_type SMap.t;
-  dc_pu_enums: pu_enum_type SMap.t;
   dc_props: element SMap.t;
   dc_sprops: element SMap.t;
   dc_methods: element SMap.t;

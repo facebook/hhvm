@@ -289,16 +289,6 @@ let set_tyvar_type_const env var tconstid ty =
   wrap_inference_env_call_env env (fun env ->
       Inf.set_tyvar_type_const env var tconstid ty)
 
-let get_tyvar_pu_access env var =
-  wrap_inference_env_call_res env (fun env -> Inf.get_tyvar_pu_access env var)
-
-let get_tyvar_pu_accesses env var =
-  wrap_inference_env_call_res env (fun env -> Inf.get_tyvar_pu_accesses env var)
-
-let set_tyvar_pu_access env var name new_var =
-  wrap_inference_env_call_env env (fun env ->
-      Inf.set_tyvar_pu_access env var name new_var)
-
 let get_current_tyvars env =
   wrap_inference_env_call_res env Inf.get_current_tyvars
 
@@ -734,13 +724,6 @@ let get_typeconst env class_ mid =
   Option.iter env.decl_env.droot (fun root ->
       Typing_deps.add_idep (get_deps_mode env) root dep);
   Cls.get_typeconst class_ mid
-
-let get_pu_enum env class_ mid =
-  make_depend_on_class env (Cls.name class_);
-  let dep = Dep.Const (Cls.name class_, mid) in
-  Option.iter env.decl_env.droot (fun root ->
-      Typing_deps.add_idep (get_deps_mode env) root dep);
-  Cls.get_pu_enum class_ mid
 
 (* Used to access class constants. *)
 let get_const env class_ mid =
@@ -1443,10 +1426,7 @@ and get_tyvars_i env (ty : internal_type) =
       let (env, positive1, negative1) = get_tyvars env ty1 in
       let (env, positive2, negative2) = get_tyvars env ty2 in
       (env, ISet.union positive1 positive2, ISet.union negative1 negative2)
-    | Tpu (base, _) -> get_tyvars env base
-    | Tpu_type_access (_, _)
-    | Tunapplied_alias _ ->
-      (env, ISet.empty, ISet.empty)
+    | Tunapplied_alias _ -> (env, ISet.empty, ISet.empty)
     | Taccess (ty, _ids) -> get_tyvars env ty)
   | ConstraintType ty ->
     (match deref_constraint_type ty with

@@ -1038,9 +1038,8 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                         | FunctionPointer(_) | FunId(_) | Id(_) | Import(_) | Is(_)
                         | KeyValCollection(_) | Lfun(_) | List(_) | Lplaceholder(_) | Lvar(_)
                         | MethodCaller(_) | MethodId(_) | New(_) | ObjGet(_) | Omitted
-                        | Pair(_) | Pipe(_) | PUAtom(_) | PUIdentifier(_) | Record(_)
-                        | Shape(_) | SmethodId(_) | Suspend(_) | ValCollection(_) | Varray(_)
-                        | Xml(_) | Yield(_) | YieldBreak => None,
+                        | Pair(_) | Pipe(_) | Record(_) | Shape(_) | SmethodId(_) | Suspend(_)
+                        | ValCollection(_) | Varray(_) | Xml(_) | Yield(_) | YieldBreak => None,
                     }
                 }
 
@@ -1766,7 +1765,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
         Node::Ty(self.alloc(Ty(self.alloc(Reason::hint(pos)), ty_)))
     }
 
-    fn prim_ty(&self, tprim: aast::Tprim<'a>, pos: &'a Pos<'a>) -> Node<'a> {
+    fn prim_ty(&self, tprim: aast::Tprim, pos: &'a Pos<'a>) -> Node<'a> {
         self.hint_ty(pos, Ty_::Tprim(self.alloc(tprim)))
     }
 
@@ -1807,9 +1806,6 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                 }
             }
             Ty_::Tlike(ty) => Ty_::Tlike(self.convert_tapply_to_tgeneric(ty)),
-            Ty_::TpuAccess(&(ty, id)) => {
-                Ty_::TpuAccess(self.alloc((self.convert_tapply_to_tgeneric(ty), id)))
-            }
             Ty_::Toption(ty) => Ty_::Toption(self.convert_tapply_to_tgeneric(ty)),
             Ty_::Tfun(fun_type) => {
                 let convert_param = |param: &'a FunParam<'a>| {
@@ -2292,7 +2288,6 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             | TokenKind::SlashGreaterThan
             | TokenKind::LessThanSlash
             | TokenKind::LessThanQuestion
-            | TokenKind::ColonAt
             | TokenKind::Backtick
             | TokenKind::ErrorToken
             | TokenKind::DoubleQuotedStringLiteralHead
@@ -3520,7 +3515,6 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             implements_dynamic,
             consts,
             typeconsts,
-            pu_enums: &[],
             props,
             sprops,
             constructor,
@@ -3849,7 +3843,6 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             implements_dynamic: false,
             consts,
             typeconsts: &[],
-            pu_enums: &[],
             props: &[],
             sprops: &[],
             constructor: None,

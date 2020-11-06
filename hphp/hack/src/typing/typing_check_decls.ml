@@ -172,15 +172,6 @@ and hint_ ~is_atom env p h_ =
   | Hshape { nsi_allows_unknown_fields = _; nsi_field_map } ->
     let compute_hint_for_shape_field_info { sfi_hint; _ } = hint env sfi_hint in
     List.iter ~f:compute_hint_for_shape_field_info nsi_field_map
-  | Hpu_access (h, _) ->
-    (* We explicitly forbid any syntax other than Foo:@Bar in here, since it
-       brings more complexity to the type checker and do not allow anything
-       interesting at the moment. If one need a variable ranging over PU
-       member, one should use "C:@E" instead, and for a type parameter TP
-       bound by a PU, projecting its type T must be TP:@T *)
-    (match snd h with
-    | Hpu_access _ -> Errors.pu_invalid_access p ""
-    | _ -> hint env h)
 
 and check_happly ?(is_atom = false) unchecked_tparams env h =
   let pos = fst h in
@@ -268,7 +259,6 @@ and class_ tenv c =
   List.iter c.c_consts (const env);
   List.iter c_statics (method_ env);
   List.iter c_methods (method_ env);
-  List.iter c.c_pu_enums (pu_enum env (snd c.c_name));
   maybe enum env c.c_enum
 
 and typeconst (env, _) tconst =
@@ -310,61 +300,6 @@ and variadic_param env vparam =
   match vparam with
   | FVvariadicArg p -> fun_param env p
   | _ -> ()
-
-and pu_enum env c_name pu =
-  (* PU case type definitions can be constrained, e.g.
-   * class C {
-   *   enum E {
-   *     case type T as arraykey;
-   *     :@I(type T = int); // ok, int <: arraykey
-   *     :@S(type T = string); // ok, string <: arraykey
-   *     :@F(type F = float); // ko, float is not a subtype of arraykey
-   *   }
-   *}
-   *
-   * In here, we localize the type hint (type T = ...) found in each
-   * instances of a PU (the :@I/:@S/:@F above) and check if the resulting
-   * locl_ty satisfies the sub-typing constraints of the definition (as
-   * arraykey).
-   *)
-  let tenv = env.tenv in
-  let cls = Env.get_class tenv c_name in
-  let pu_enum =
-    Option.bind cls ~f:(fun cls -> Cls.get_pu_enum cls (snd pu.pu_name))
-  in
-  let pu_enum_case_types =
-    match pu_enum with
-    | None -> SMap.empty
-    | Some pu_enum -> pu_enum.tpu_case_types
-  in
-  let pum_types (sid, h) =
-    let () = hint env h in
-    let decl_ty = Decl_hint.hint tenv.decl_env h in
-    let (env, locl_ty) = Phase.localize_with_self tenv decl_ty in
-    let case_ty = SMap.find_opt (snd sid) pu_enum_case_types in
-    let ety_env = Phase.env_with_self env in
-    match case_ty with
-    | None ->
-      (* error already caught by naming *)
-      ()
-    | Some (_, { tp_name = (p, x); tp_constraints = cstrl; _ }) ->
-      let r = Reason.Rwitness p in
-      List.iter cstrl ~f:(fun (ck, cstr_ty) ->
-          let (env, cstr_ty) = Phase.localize ~ety_env env cstr_ty in
-          let (_ : Typing_env_types.env) =
-            TGenConstraint.check_constraint
-              env
-              ck
-              locl_ty
-              ~cstr_ty
-              (fun ?code:_ l -> Reason.explain_generic_constraint (fst h) r x l)
-          in
-          ())
-  in
-  let pu_member pum = List.iter ~f:pum_types pum.pum_types in
-  List.iter ~f:(tparam env) pu.pu_case_types;
-  List.iter ~f:(fun (_, h) -> hint env h) pu.pu_case_values;
-  List.iter ~f:pu_member pu.pu_members
 
 and enum env e =
   hint env e.e_base;

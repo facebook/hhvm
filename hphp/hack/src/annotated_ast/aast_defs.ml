@@ -131,7 +131,6 @@ and hint_ =
   | Hthis
   | Hdynamic
   | Hnothing
-  | Hpu_access of hint * sid
   | Hunion of hint list
   | Hintersection of hint list
 
@@ -147,9 +146,6 @@ and tprim =
   | Tnum
   | Tarraykey
   | Tnoreturn
-  | Tatom of string
-      (** plain Pocket Universe atom when we don't know which enum it is in.
-       * E.g. `:@MyAtom` *)
 
 and shape_field_info = {
   sfi_optional: bool;

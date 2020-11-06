@@ -1528,16 +1528,6 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_pu_access(_: &C, pu_access_left_type: Self, pu_access_separator: Self, pu_access_right_type: Self) -> Self {
-        let syntax = SyntaxVariant::PUAccess(Box::new(PUAccessChildren {
-            pu_access_left_type,
-            pu_access_separator,
-            pu_access_right_type,
-        }));
-        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
-        Self::make(syntax, value)
-    }
-
     fn make_vector_type_specifier(_: &C, vector_type_keyword: Self, vector_type_left_angle: Self, vector_type_type: Self, vector_type_trailing_comma: Self, vector_type_right_angle: Self) -> Self {
         let syntax = SyntaxVariant::VectorTypeSpecifier(Box::new(VectorTypeSpecifierChildren {
             vector_type_keyword,
@@ -1849,96 +1839,6 @@ where
         let syntax = SyntaxVariant::EnumAtomExpression(Box::new(EnumAtomExpressionChildren {
             enum_atom_hash,
             enum_atom_expression,
-        }));
-        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
-        Self::make(syntax, value)
-    }
-
-    fn make_pocket_atom_expression(_: &C, pocket_atom_glyph: Self, pocket_atom_expression: Self) -> Self {
-        let syntax = SyntaxVariant::PocketAtomExpression(Box::new(PocketAtomExpressionChildren {
-            pocket_atom_glyph,
-            pocket_atom_expression,
-        }));
-        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
-        Self::make(syntax, value)
-    }
-
-    fn make_pocket_identifier_expression(_: &C, pocket_identifier_qualifier: Self, pocket_identifier_pu_operator: Self, pocket_identifier_field: Self, pocket_identifier_operator: Self, pocket_identifier_name: Self) -> Self {
-        let syntax = SyntaxVariant::PocketIdentifierExpression(Box::new(PocketIdentifierExpressionChildren {
-            pocket_identifier_qualifier,
-            pocket_identifier_pu_operator,
-            pocket_identifier_field,
-            pocket_identifier_operator,
-            pocket_identifier_name,
-        }));
-        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
-        Self::make(syntax, value)
-    }
-
-    fn make_pocket_atom_mapping_declaration(_: &C, pocket_atom_mapping_glyph: Self, pocket_atom_mapping_name: Self, pocket_atom_mapping_left_paren: Self, pocket_atom_mapping_mappings: Self, pocket_atom_mapping_right_paren: Self, pocket_atom_mapping_semicolon: Self) -> Self {
-        let syntax = SyntaxVariant::PocketAtomMappingDeclaration(Box::new(PocketAtomMappingDeclarationChildren {
-            pocket_atom_mapping_glyph,
-            pocket_atom_mapping_name,
-            pocket_atom_mapping_left_paren,
-            pocket_atom_mapping_mappings,
-            pocket_atom_mapping_right_paren,
-            pocket_atom_mapping_semicolon,
-        }));
-        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
-        Self::make(syntax, value)
-    }
-
-    fn make_pocket_enum_declaration(_: &C, pocket_enum_attributes: Self, pocket_enum_modifiers: Self, pocket_enum_enum: Self, pocket_enum_name: Self, pocket_enum_left_brace: Self, pocket_enum_fields: Self, pocket_enum_right_brace: Self) -> Self {
-        let syntax = SyntaxVariant::PocketEnumDeclaration(Box::new(PocketEnumDeclarationChildren {
-            pocket_enum_attributes,
-            pocket_enum_modifiers,
-            pocket_enum_enum,
-            pocket_enum_name,
-            pocket_enum_left_brace,
-            pocket_enum_fields,
-            pocket_enum_right_brace,
-        }));
-        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
-        Self::make(syntax, value)
-    }
-
-    fn make_pocket_field_type_expr_declaration(_: &C, pocket_field_type_expr_case: Self, pocket_field_type_expr_type: Self, pocket_field_type_expr_name: Self, pocket_field_type_expr_semicolon: Self) -> Self {
-        let syntax = SyntaxVariant::PocketFieldTypeExprDeclaration(Box::new(PocketFieldTypeExprDeclarationChildren {
-            pocket_field_type_expr_case,
-            pocket_field_type_expr_type,
-            pocket_field_type_expr_name,
-            pocket_field_type_expr_semicolon,
-        }));
-        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
-        Self::make(syntax, value)
-    }
-
-    fn make_pocket_field_type_declaration(_: &C, pocket_field_type_case: Self, pocket_field_type_type: Self, pocket_field_type_type_parameter: Self, pocket_field_type_semicolon: Self) -> Self {
-        let syntax = SyntaxVariant::PocketFieldTypeDeclaration(Box::new(PocketFieldTypeDeclarationChildren {
-            pocket_field_type_case,
-            pocket_field_type_type,
-            pocket_field_type_type_parameter,
-            pocket_field_type_semicolon,
-        }));
-        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
-        Self::make(syntax, value)
-    }
-
-    fn make_pocket_mapping_id_declaration(_: &C, pocket_mapping_id_name: Self, pocket_mapping_id_initializer: Self) -> Self {
-        let syntax = SyntaxVariant::PocketMappingIdDeclaration(Box::new(PocketMappingIdDeclarationChildren {
-            pocket_mapping_id_name,
-            pocket_mapping_id_initializer,
-        }));
-        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
-        Self::make(syntax, value)
-    }
-
-    fn make_pocket_mapping_type_declaration(_: &C, pocket_mapping_type_keyword: Self, pocket_mapping_type_name: Self, pocket_mapping_type_equal: Self, pocket_mapping_type_type: Self) -> Self {
-        let syntax = SyntaxVariant::PocketMappingTypeDeclaration(Box::new(PocketMappingTypeDeclarationChildren {
-            pocket_mapping_type_keyword,
-            pocket_mapping_type_name,
-            pocket_mapping_type_equal,
-            pocket_mapping_type_type,
         }));
         let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
@@ -3054,13 +2954,6 @@ where
                 let acc = f(type_constant_right_type, acc);
                 acc
             },
-            SyntaxVariant::PUAccess(x) => {
-                let PUAccessChildren { pu_access_left_type, pu_access_separator, pu_access_right_type } = *x;
-                let acc = f(pu_access_left_type, acc);
-                let acc = f(pu_access_separator, acc);
-                let acc = f(pu_access_right_type, acc);
-                acc
-            },
             SyntaxVariant::VectorTypeSpecifier(x) => {
                 let VectorTypeSpecifierChildren { vector_type_keyword, vector_type_left_angle, vector_type_type, vector_type_trailing_comma, vector_type_right_angle } = *x;
                 let acc = f(vector_type_keyword, acc);
@@ -3287,72 +3180,6 @@ where
                 let acc = f(enum_atom_expression, acc);
                 acc
             },
-            SyntaxVariant::PocketAtomExpression(x) => {
-                let PocketAtomExpressionChildren { pocket_atom_glyph, pocket_atom_expression } = *x;
-                let acc = f(pocket_atom_glyph, acc);
-                let acc = f(pocket_atom_expression, acc);
-                acc
-            },
-            SyntaxVariant::PocketIdentifierExpression(x) => {
-                let PocketIdentifierExpressionChildren { pocket_identifier_qualifier, pocket_identifier_pu_operator, pocket_identifier_field, pocket_identifier_operator, pocket_identifier_name } = *x;
-                let acc = f(pocket_identifier_qualifier, acc);
-                let acc = f(pocket_identifier_pu_operator, acc);
-                let acc = f(pocket_identifier_field, acc);
-                let acc = f(pocket_identifier_operator, acc);
-                let acc = f(pocket_identifier_name, acc);
-                acc
-            },
-            SyntaxVariant::PocketAtomMappingDeclaration(x) => {
-                let PocketAtomMappingDeclarationChildren { pocket_atom_mapping_glyph, pocket_atom_mapping_name, pocket_atom_mapping_left_paren, pocket_atom_mapping_mappings, pocket_atom_mapping_right_paren, pocket_atom_mapping_semicolon } = *x;
-                let acc = f(pocket_atom_mapping_glyph, acc);
-                let acc = f(pocket_atom_mapping_name, acc);
-                let acc = f(pocket_atom_mapping_left_paren, acc);
-                let acc = f(pocket_atom_mapping_mappings, acc);
-                let acc = f(pocket_atom_mapping_right_paren, acc);
-                let acc = f(pocket_atom_mapping_semicolon, acc);
-                acc
-            },
-            SyntaxVariant::PocketEnumDeclaration(x) => {
-                let PocketEnumDeclarationChildren { pocket_enum_attributes, pocket_enum_modifiers, pocket_enum_enum, pocket_enum_name, pocket_enum_left_brace, pocket_enum_fields, pocket_enum_right_brace } = *x;
-                let acc = f(pocket_enum_attributes, acc);
-                let acc = f(pocket_enum_modifiers, acc);
-                let acc = f(pocket_enum_enum, acc);
-                let acc = f(pocket_enum_name, acc);
-                let acc = f(pocket_enum_left_brace, acc);
-                let acc = f(pocket_enum_fields, acc);
-                let acc = f(pocket_enum_right_brace, acc);
-                acc
-            },
-            SyntaxVariant::PocketFieldTypeExprDeclaration(x) => {
-                let PocketFieldTypeExprDeclarationChildren { pocket_field_type_expr_case, pocket_field_type_expr_type, pocket_field_type_expr_name, pocket_field_type_expr_semicolon } = *x;
-                let acc = f(pocket_field_type_expr_case, acc);
-                let acc = f(pocket_field_type_expr_type, acc);
-                let acc = f(pocket_field_type_expr_name, acc);
-                let acc = f(pocket_field_type_expr_semicolon, acc);
-                acc
-            },
-            SyntaxVariant::PocketFieldTypeDeclaration(x) => {
-                let PocketFieldTypeDeclarationChildren { pocket_field_type_case, pocket_field_type_type, pocket_field_type_type_parameter, pocket_field_type_semicolon } = *x;
-                let acc = f(pocket_field_type_case, acc);
-                let acc = f(pocket_field_type_type, acc);
-                let acc = f(pocket_field_type_type_parameter, acc);
-                let acc = f(pocket_field_type_semicolon, acc);
-                acc
-            },
-            SyntaxVariant::PocketMappingIdDeclaration(x) => {
-                let PocketMappingIdDeclarationChildren { pocket_mapping_id_name, pocket_mapping_id_initializer } = *x;
-                let acc = f(pocket_mapping_id_name, acc);
-                let acc = f(pocket_mapping_id_initializer, acc);
-                acc
-            },
-            SyntaxVariant::PocketMappingTypeDeclaration(x) => {
-                let PocketMappingTypeDeclarationChildren { pocket_mapping_type_keyword, pocket_mapping_type_name, pocket_mapping_type_equal, pocket_mapping_type_type } = *x;
-                let acc = f(pocket_mapping_type_keyword, acc);
-                let acc = f(pocket_mapping_type_name, acc);
-                let acc = f(pocket_mapping_type_equal, acc);
-                let acc = f(pocket_mapping_type_type, acc);
-                acc
-            },
 
         }
     }
@@ -3500,7 +3327,6 @@ where
             SyntaxVariant::XHPExpression {..} => SyntaxKind::XHPExpression,
             SyntaxVariant::XHPClose {..} => SyntaxKind::XHPClose,
             SyntaxVariant::TypeConstant {..} => SyntaxKind::TypeConstant,
-            SyntaxVariant::PUAccess {..} => SyntaxKind::PUAccess,
             SyntaxVariant::VectorTypeSpecifier {..} => SyntaxKind::VectorTypeSpecifier,
             SyntaxVariant::KeysetTypeSpecifier {..} => SyntaxKind::KeysetTypeSpecifier,
             SyntaxVariant::TupleTypeExplicitSpecifier {..} => SyntaxKind::TupleTypeExplicitSpecifier,
@@ -3531,14 +3357,6 @@ where
             SyntaxVariant::ErrorSyntax {..} => SyntaxKind::ErrorSyntax,
             SyntaxVariant::ListItem {..} => SyntaxKind::ListItem,
             SyntaxVariant::EnumAtomExpression {..} => SyntaxKind::EnumAtomExpression,
-            SyntaxVariant::PocketAtomExpression {..} => SyntaxKind::PocketAtomExpression,
-            SyntaxVariant::PocketIdentifierExpression {..} => SyntaxKind::PocketIdentifierExpression,
-            SyntaxVariant::PocketAtomMappingDeclaration {..} => SyntaxKind::PocketAtomMappingDeclaration,
-            SyntaxVariant::PocketEnumDeclaration {..} => SyntaxKind::PocketEnumDeclaration,
-            SyntaxVariant::PocketFieldTypeExprDeclaration {..} => SyntaxKind::PocketFieldTypeExprDeclaration,
-            SyntaxVariant::PocketFieldTypeDeclaration {..} => SyntaxKind::PocketFieldTypeDeclaration,
-            SyntaxVariant::PocketMappingIdDeclaration {..} => SyntaxKind::PocketMappingIdDeclaration,
-            SyntaxVariant::PocketMappingTypeDeclaration {..} => SyntaxKind::PocketMappingTypeDeclaration,
         }
     }
 
@@ -4497,12 +4315,6 @@ where
                  type_constant_left_type: ts.pop().unwrap(),
                  
              })),
-             (SyntaxKind::PUAccess, 3) => SyntaxVariant::PUAccess(Box::new(PUAccessChildren {
-                 pu_access_right_type: ts.pop().unwrap(),
-                 pu_access_separator: ts.pop().unwrap(),
-                 pu_access_left_type: ts.pop().unwrap(),
-                 
-             })),
              (SyntaxKind::VectorTypeSpecifier, 5) => SyntaxVariant::VectorTypeSpecifier(Box::new(VectorTypeSpecifierChildren {
                  vector_type_right_angle: ts.pop().unwrap(),
                  vector_type_trailing_comma: ts.pop().unwrap(),
@@ -4697,64 +4509,6 @@ where
              (SyntaxKind::EnumAtomExpression, 2) => SyntaxVariant::EnumAtomExpression(Box::new(EnumAtomExpressionChildren {
                  enum_atom_expression: ts.pop().unwrap(),
                  enum_atom_hash: ts.pop().unwrap(),
-                 
-             })),
-             (SyntaxKind::PocketAtomExpression, 2) => SyntaxVariant::PocketAtomExpression(Box::new(PocketAtomExpressionChildren {
-                 pocket_atom_expression: ts.pop().unwrap(),
-                 pocket_atom_glyph: ts.pop().unwrap(),
-                 
-             })),
-             (SyntaxKind::PocketIdentifierExpression, 5) => SyntaxVariant::PocketIdentifierExpression(Box::new(PocketIdentifierExpressionChildren {
-                 pocket_identifier_name: ts.pop().unwrap(),
-                 pocket_identifier_operator: ts.pop().unwrap(),
-                 pocket_identifier_field: ts.pop().unwrap(),
-                 pocket_identifier_pu_operator: ts.pop().unwrap(),
-                 pocket_identifier_qualifier: ts.pop().unwrap(),
-                 
-             })),
-             (SyntaxKind::PocketAtomMappingDeclaration, 6) => SyntaxVariant::PocketAtomMappingDeclaration(Box::new(PocketAtomMappingDeclarationChildren {
-                 pocket_atom_mapping_semicolon: ts.pop().unwrap(),
-                 pocket_atom_mapping_right_paren: ts.pop().unwrap(),
-                 pocket_atom_mapping_mappings: ts.pop().unwrap(),
-                 pocket_atom_mapping_left_paren: ts.pop().unwrap(),
-                 pocket_atom_mapping_name: ts.pop().unwrap(),
-                 pocket_atom_mapping_glyph: ts.pop().unwrap(),
-                 
-             })),
-             (SyntaxKind::PocketEnumDeclaration, 7) => SyntaxVariant::PocketEnumDeclaration(Box::new(PocketEnumDeclarationChildren {
-                 pocket_enum_right_brace: ts.pop().unwrap(),
-                 pocket_enum_fields: ts.pop().unwrap(),
-                 pocket_enum_left_brace: ts.pop().unwrap(),
-                 pocket_enum_name: ts.pop().unwrap(),
-                 pocket_enum_enum: ts.pop().unwrap(),
-                 pocket_enum_modifiers: ts.pop().unwrap(),
-                 pocket_enum_attributes: ts.pop().unwrap(),
-                 
-             })),
-             (SyntaxKind::PocketFieldTypeExprDeclaration, 4) => SyntaxVariant::PocketFieldTypeExprDeclaration(Box::new(PocketFieldTypeExprDeclarationChildren {
-                 pocket_field_type_expr_semicolon: ts.pop().unwrap(),
-                 pocket_field_type_expr_name: ts.pop().unwrap(),
-                 pocket_field_type_expr_type: ts.pop().unwrap(),
-                 pocket_field_type_expr_case: ts.pop().unwrap(),
-                 
-             })),
-             (SyntaxKind::PocketFieldTypeDeclaration, 4) => SyntaxVariant::PocketFieldTypeDeclaration(Box::new(PocketFieldTypeDeclarationChildren {
-                 pocket_field_type_semicolon: ts.pop().unwrap(),
-                 pocket_field_type_type_parameter: ts.pop().unwrap(),
-                 pocket_field_type_type: ts.pop().unwrap(),
-                 pocket_field_type_case: ts.pop().unwrap(),
-                 
-             })),
-             (SyntaxKind::PocketMappingIdDeclaration, 2) => SyntaxVariant::PocketMappingIdDeclaration(Box::new(PocketMappingIdDeclarationChildren {
-                 pocket_mapping_id_initializer: ts.pop().unwrap(),
-                 pocket_mapping_id_name: ts.pop().unwrap(),
-                 
-             })),
-             (SyntaxKind::PocketMappingTypeDeclaration, 4) => SyntaxVariant::PocketMappingTypeDeclaration(Box::new(PocketMappingTypeDeclarationChildren {
-                 pocket_mapping_type_type: ts.pop().unwrap(),
-                 pocket_mapping_type_equal: ts.pop().unwrap(),
-                 pocket_mapping_type_name: ts.pop().unwrap(),
-                 pocket_mapping_type_keyword: ts.pop().unwrap(),
                  
              })),
              _ => panic!("from_children called with wrong number of children"),
@@ -5852,13 +5606,6 @@ pub struct TypeConstantChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
-pub struct PUAccessChildren<T, V> {
-    pub pu_access_left_type: Syntax<T, V>,
-    pub pu_access_separator: Syntax<T, V>,
-    pub pu_access_right_type: Syntax<T, V>,
-}
-
-#[derive(Debug, Clone)]
 pub struct VectorTypeSpecifierChildren<T, V> {
     pub vector_type_keyword: Syntax<T, V>,
     pub vector_type_left_angle: Syntax<T, V>,
@@ -6084,72 +5831,6 @@ pub struct EnumAtomExpressionChildren<T, V> {
     pub enum_atom_expression: Syntax<T, V>,
 }
 
-#[derive(Debug, Clone)]
-pub struct PocketAtomExpressionChildren<T, V> {
-    pub pocket_atom_glyph: Syntax<T, V>,
-    pub pocket_atom_expression: Syntax<T, V>,
-}
-
-#[derive(Debug, Clone)]
-pub struct PocketIdentifierExpressionChildren<T, V> {
-    pub pocket_identifier_qualifier: Syntax<T, V>,
-    pub pocket_identifier_pu_operator: Syntax<T, V>,
-    pub pocket_identifier_field: Syntax<T, V>,
-    pub pocket_identifier_operator: Syntax<T, V>,
-    pub pocket_identifier_name: Syntax<T, V>,
-}
-
-#[derive(Debug, Clone)]
-pub struct PocketAtomMappingDeclarationChildren<T, V> {
-    pub pocket_atom_mapping_glyph: Syntax<T, V>,
-    pub pocket_atom_mapping_name: Syntax<T, V>,
-    pub pocket_atom_mapping_left_paren: Syntax<T, V>,
-    pub pocket_atom_mapping_mappings: Syntax<T, V>,
-    pub pocket_atom_mapping_right_paren: Syntax<T, V>,
-    pub pocket_atom_mapping_semicolon: Syntax<T, V>,
-}
-
-#[derive(Debug, Clone)]
-pub struct PocketEnumDeclarationChildren<T, V> {
-    pub pocket_enum_attributes: Syntax<T, V>,
-    pub pocket_enum_modifiers: Syntax<T, V>,
-    pub pocket_enum_enum: Syntax<T, V>,
-    pub pocket_enum_name: Syntax<T, V>,
-    pub pocket_enum_left_brace: Syntax<T, V>,
-    pub pocket_enum_fields: Syntax<T, V>,
-    pub pocket_enum_right_brace: Syntax<T, V>,
-}
-
-#[derive(Debug, Clone)]
-pub struct PocketFieldTypeExprDeclarationChildren<T, V> {
-    pub pocket_field_type_expr_case: Syntax<T, V>,
-    pub pocket_field_type_expr_type: Syntax<T, V>,
-    pub pocket_field_type_expr_name: Syntax<T, V>,
-    pub pocket_field_type_expr_semicolon: Syntax<T, V>,
-}
-
-#[derive(Debug, Clone)]
-pub struct PocketFieldTypeDeclarationChildren<T, V> {
-    pub pocket_field_type_case: Syntax<T, V>,
-    pub pocket_field_type_type: Syntax<T, V>,
-    pub pocket_field_type_type_parameter: Syntax<T, V>,
-    pub pocket_field_type_semicolon: Syntax<T, V>,
-}
-
-#[derive(Debug, Clone)]
-pub struct PocketMappingIdDeclarationChildren<T, V> {
-    pub pocket_mapping_id_name: Syntax<T, V>,
-    pub pocket_mapping_id_initializer: Syntax<T, V>,
-}
-
-#[derive(Debug, Clone)]
-pub struct PocketMappingTypeDeclarationChildren<T, V> {
-    pub pocket_mapping_type_keyword: Syntax<T, V>,
-    pub pocket_mapping_type_name: Syntax<T, V>,
-    pub pocket_mapping_type_equal: Syntax<T, V>,
-    pub pocket_mapping_type_type: Syntax<T, V>,
-}
-
 
 #[derive(Debug, Clone)]
 pub enum SyntaxVariant<T, V> {
@@ -6294,7 +5975,6 @@ pub enum SyntaxVariant<T, V> {
     XHPExpression(Box<XHPExpressionChildren<T, V>>),
     XHPClose(Box<XHPCloseChildren<T, V>>),
     TypeConstant(Box<TypeConstantChildren<T, V>>),
-    PUAccess(Box<PUAccessChildren<T, V>>),
     VectorTypeSpecifier(Box<VectorTypeSpecifierChildren<T, V>>),
     KeysetTypeSpecifier(Box<KeysetTypeSpecifierChildren<T, V>>),
     TupleTypeExplicitSpecifier(Box<TupleTypeExplicitSpecifierChildren<T, V>>),
@@ -6325,14 +6005,6 @@ pub enum SyntaxVariant<T, V> {
     ErrorSyntax(Box<ErrorSyntaxChildren<T, V>>),
     ListItem(Box<ListItemChildren<T, V>>),
     EnumAtomExpression(Box<EnumAtomExpressionChildren<T, V>>),
-    PocketAtomExpression(Box<PocketAtomExpressionChildren<T, V>>),
-    PocketIdentifierExpression(Box<PocketIdentifierExpressionChildren<T, V>>),
-    PocketAtomMappingDeclaration(Box<PocketAtomMappingDeclarationChildren<T, V>>),
-    PocketEnumDeclaration(Box<PocketEnumDeclarationChildren<T, V>>),
-    PocketFieldTypeExprDeclaration(Box<PocketFieldTypeExprDeclarationChildren<T, V>>),
-    PocketFieldTypeDeclaration(Box<PocketFieldTypeDeclarationChildren<T, V>>),
-    PocketMappingIdDeclaration(Box<PocketMappingIdDeclarationChildren<T, V>>),
-    PocketMappingTypeDeclaration(Box<PocketMappingTypeDeclarationChildren<T, V>>),
 }
 
 impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
@@ -7720,15 +7392,6 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                     }
                 })
             },
-            PUAccess(x) => {
-                get_index(3).and_then(|index| { match index {
-                        0 => Some(&x.pu_access_left_type),
-                    1 => Some(&x.pu_access_separator),
-                    2 => Some(&x.pu_access_right_type),
-                        _ => None,
-                    }
-                })
-            },
             VectorTypeSpecifier(x) => {
                 get_index(5).and_then(|index| { match index {
                         0 => Some(&x.vector_type_keyword),
@@ -8011,88 +7674,6 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 get_index(2).and_then(|index| { match index {
                         0 => Some(&x.enum_atom_hash),
                     1 => Some(&x.enum_atom_expression),
-                        _ => None,
-                    }
-                })
-            },
-            PocketAtomExpression(x) => {
-                get_index(2).and_then(|index| { match index {
-                        0 => Some(&x.pocket_atom_glyph),
-                    1 => Some(&x.pocket_atom_expression),
-                        _ => None,
-                    }
-                })
-            },
-            PocketIdentifierExpression(x) => {
-                get_index(5).and_then(|index| { match index {
-                        0 => Some(&x.pocket_identifier_qualifier),
-                    1 => Some(&x.pocket_identifier_pu_operator),
-                    2 => Some(&x.pocket_identifier_field),
-                    3 => Some(&x.pocket_identifier_operator),
-                    4 => Some(&x.pocket_identifier_name),
-                        _ => None,
-                    }
-                })
-            },
-            PocketAtomMappingDeclaration(x) => {
-                get_index(6).and_then(|index| { match index {
-                        0 => Some(&x.pocket_atom_mapping_glyph),
-                    1 => Some(&x.pocket_atom_mapping_name),
-                    2 => Some(&x.pocket_atom_mapping_left_paren),
-                    3 => Some(&x.pocket_atom_mapping_mappings),
-                    4 => Some(&x.pocket_atom_mapping_right_paren),
-                    5 => Some(&x.pocket_atom_mapping_semicolon),
-                        _ => None,
-                    }
-                })
-            },
-            PocketEnumDeclaration(x) => {
-                get_index(7).and_then(|index| { match index {
-                        0 => Some(&x.pocket_enum_attributes),
-                    1 => Some(&x.pocket_enum_modifiers),
-                    2 => Some(&x.pocket_enum_enum),
-                    3 => Some(&x.pocket_enum_name),
-                    4 => Some(&x.pocket_enum_left_brace),
-                    5 => Some(&x.pocket_enum_fields),
-                    6 => Some(&x.pocket_enum_right_brace),
-                        _ => None,
-                    }
-                })
-            },
-            PocketFieldTypeExprDeclaration(x) => {
-                get_index(4).and_then(|index| { match index {
-                        0 => Some(&x.pocket_field_type_expr_case),
-                    1 => Some(&x.pocket_field_type_expr_type),
-                    2 => Some(&x.pocket_field_type_expr_name),
-                    3 => Some(&x.pocket_field_type_expr_semicolon),
-                        _ => None,
-                    }
-                })
-            },
-            PocketFieldTypeDeclaration(x) => {
-                get_index(4).and_then(|index| { match index {
-                        0 => Some(&x.pocket_field_type_case),
-                    1 => Some(&x.pocket_field_type_type),
-                    2 => Some(&x.pocket_field_type_type_parameter),
-                    3 => Some(&x.pocket_field_type_semicolon),
-                        _ => None,
-                    }
-                })
-            },
-            PocketMappingIdDeclaration(x) => {
-                get_index(2).and_then(|index| { match index {
-                        0 => Some(&x.pocket_mapping_id_name),
-                    1 => Some(&x.pocket_mapping_id_initializer),
-                        _ => None,
-                    }
-                })
-            },
-            PocketMappingTypeDeclaration(x) => {
-                get_index(4).and_then(|index| { match index {
-                        0 => Some(&x.pocket_mapping_type_keyword),
-                    1 => Some(&x.pocket_mapping_type_name),
-                    2 => Some(&x.pocket_mapping_type_equal),
-                    3 => Some(&x.pocket_mapping_type_type),
                         _ => None,
                     }
                 })

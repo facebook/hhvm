@@ -707,10 +707,6 @@ where
         }
     }
 
-    fn require_colonat(&mut self) -> S::R {
-        self.require_token(TokenKind::ColonAt, Errors::error1061)
-    }
-
     fn require_name_allow_non_reserved(&mut self) -> S::R {
         let mut parser1 = self.clone();
         let token = parser1.next_token_non_reserved_as_name();

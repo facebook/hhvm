@@ -6,7 +6,7 @@
        sc_where_constraints = []; sc_extends = []; sc_uses = [];
        sc_xhp_attr_uses = []; sc_req_extends = []; sc_req_implements = [];
        sc_implements = []; sc_implements_dynamic = false; sc_consts = [];
-       sc_typeconsts = []; sc_pu_enums = []; sc_props = []; sc_sprops = [];
+       sc_typeconsts = []; sc_props = []; sc_sprops = [];
        sc_constructor = None; sc_static_methods = [];
        sc_methods =
        [{ Shallow_decl_defs.sm_abstract = false; sm_final = false;
@@ -73,8 +73,8 @@
         sc_uses = []; sc_xhp_attr_uses = []; sc_req_extends = [];
         sc_req_implements = []; sc_implements = [];
         sc_implements_dynamic = false; sc_consts = []; sc_typeconsts = [];
-        sc_pu_enums = []; sc_props = []; sc_sprops = [];
-        sc_constructor = None; sc_static_methods = [];
+        sc_props = []; sc_sprops = []; sc_constructor = None;
+        sc_static_methods = [];
         sc_methods =
         [{ Shallow_decl_defs.sm_abstract = false; sm_final = false;
            sm_name = ([9:19-20], "b"); sm_override = false;
@@ -136,7 +136,7 @@
         sc_where_constraints = []; sc_extends = []; sc_uses = [];
         sc_xhp_attr_uses = []; sc_req_extends = []; sc_req_implements = [];
         sc_implements = []; sc_implements_dynamic = false; sc_consts = [];
-        sc_typeconsts = []; sc_pu_enums = []; sc_props = []; sc_sprops = [];
+        sc_typeconsts = []; sc_props = []; sc_sprops = [];
         sc_constructor = None; sc_static_methods = [];
         sc_methods =
         [{ Shallow_decl_defs.sm_abstract = true; sm_final = false;
@@ -178,8 +178,8 @@
         sc_uses = []; sc_xhp_attr_uses = []; sc_req_extends = [];
         sc_req_implements = []; sc_implements = [];
         sc_implements_dynamic = false; sc_consts = []; sc_typeconsts = [];
-        sc_pu_enums = []; sc_props = []; sc_sprops = [];
-        sc_constructor = None; sc_static_methods = [];
+        sc_props = []; sc_sprops = []; sc_constructor = None;
+        sc_static_methods = [];
         sc_methods =
         [{ Shallow_decl_defs.sm_abstract = true; sm_final = false;
            sm_name = ([18:19-20], "d"); sm_override = false;
@@ -219,8 +219,8 @@
         [(Rhint (root|classes_inheritance.php line 21, characters 20-20),
           (Tapply (([21:20-21], "\\C"), [])))];
         sc_implements_dynamic = false; sc_consts = []; sc_typeconsts = [];
-        sc_pu_enums = []; sc_props = []; sc_sprops = [];
-        sc_constructor = None; sc_static_methods = [];
+        sc_props = []; sc_sprops = []; sc_constructor = None;
+        sc_static_methods = [];
         sc_methods =
         [{ Shallow_decl_defs.sm_abstract = false; sm_final = false;
            sm_name = ([22:19-20], "c"); sm_override = false;
@@ -264,8 +264,8 @@
         [(Rhint (root|classes_inheritance.php line 25, characters 30-30),
           (Tapply (([25:30-31], "\\D"), [])))];
         sc_implements_dynamic = false; sc_consts = []; sc_typeconsts = [];
-        sc_pu_enums = []; sc_props = []; sc_sprops = [];
-        sc_constructor = None; sc_static_methods = [];
+        sc_props = []; sc_sprops = []; sc_constructor = None;
+        sc_static_methods = [];
         sc_methods =
         [{ Shallow_decl_defs.sm_abstract = false; sm_final = false;
            sm_name = ([26:19-20], "d"); sm_override = false;

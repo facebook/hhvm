@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d27954ae61414cf543c63107525fdb23>>
+// @generated SignedSource<<6e9e01f46dc67d703da64ab4af854596>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -568,14 +568,13 @@ impl<'a> Node<'a> for ShallowClass<'a> {
                 implements_dynamic: ref __binding_14,
                 consts: ref __binding_15,
                 typeconsts: ref __binding_16,
-                pu_enums: ref __binding_17,
-                props: ref __binding_18,
-                sprops: ref __binding_19,
-                constructor: ref __binding_20,
-                static_methods: ref __binding_21,
-                methods: ref __binding_22,
-                user_attributes: ref __binding_23,
-                enum_type: ref __binding_24,
+                props: ref __binding_17,
+                sprops: ref __binding_18,
+                constructor: ref __binding_19,
+                static_methods: ref __binding_20,
+                methods: ref __binding_21,
+                user_attributes: ref __binding_22,
+                enum_type: ref __binding_23,
             } => {
                 {
                     __binding_0.accept(v)
@@ -646,10 +645,7 @@ impl<'a> Node<'a> for ShallowClass<'a> {
                 {
                     __binding_22.accept(v)
                 }
-                {
-                    __binding_23.accept(v)
-                }
-                { __binding_24.accept(v) }
+                { __binding_23.accept(v) }
             }
         }
     }
@@ -764,58 +760,6 @@ impl<'a> Node<'a> for ShallowProp<'a> {
                     __binding_7.accept(v)
                 }
                 { __binding_8.accept(v) }
-            }
-        }
-    }
-}
-impl<'a> Node<'a> for ShallowPuEnum<'a> {
-    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_shallow_pu_enum(self)
-    }
-    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
-        match self {
-            ShallowPuEnum {
-                name: ref __binding_0,
-                is_final: ref __binding_1,
-                case_types: ref __binding_2,
-                case_values: ref __binding_3,
-                members: ref __binding_4,
-            } => {
-                {
-                    __binding_0.accept(v)
-                }
-                {
-                    __binding_1.accept(v)
-                }
-                {
-                    __binding_2.accept(v)
-                }
-                {
-                    __binding_3.accept(v)
-                }
-                { __binding_4.accept(v) }
-            }
-        }
-    }
-}
-impl<'a> Node<'a> for ShallowPuMember<'a> {
-    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_shallow_pu_member(self)
-    }
-    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
-        match self {
-            ShallowPuMember {
-                atom: ref __binding_0,
-                types: ref __binding_1,
-                exprs: ref __binding_2,
-            } => {
-                {
-                    __binding_0.accept(v)
-                }
-                {
-                    __binding_1.accept(v)
-                }
-                { __binding_2.accept(v) }
             }
         }
     }
@@ -954,7 +898,7 @@ impl<'a> Node<'a> for Tparam<'a> {
         }
     }
 }
-impl<'a> Node<'a> for Tprim<'a> {
+impl<'a> Node<'a> for Tprim {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
         v.visit_tprim(self)
     }
@@ -970,7 +914,6 @@ impl<'a> Node<'a> for Tprim<'a> {
             Tprim::Tnum => {}
             Tprim::Tarraykey => {}
             Tprim::Tnoreturn => {}
-            Tprim::Tatom(ref __binding_0) => __binding_0.accept(v),
         }
     }
 }
@@ -1000,7 +943,6 @@ impl<'a> Node<'a> for Ty_<'a> {
             Ty_::Tarray(ref __binding_0) => __binding_0.accept(v),
             Ty_::Tmixed => {}
             Ty_::Tlike(ref __binding_0) => __binding_0.accept(v),
-            Ty_::TpuAccess(ref __binding_0) => __binding_0.accept(v),
             Ty_::Tany(ref __binding_0) => __binding_0.accept(v),
             Ty_::Terr => {}
             Ty_::Tnonnull => {}
@@ -1023,8 +965,6 @@ impl<'a> Node<'a> for Ty_<'a> {
             Ty_::Tdependent(ref __binding_0) => __binding_0.accept(v),
             Ty_::Tobject => {}
             Ty_::Tclass(ref __binding_0) => __binding_0.accept(v),
-            Ty_::Tpu(ref __binding_0) => __binding_0.accept(v),
-            Ty_::TpuTypeAccess(ref __binding_0) => __binding_0.accept(v),
         }
     }
 }

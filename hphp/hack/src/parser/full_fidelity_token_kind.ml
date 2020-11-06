@@ -200,7 +200,6 @@ type t =
   | SlashGreaterThan
   | LessThanSlash
   | LessThanQuestion
-  | ColonAt
   | Backtick
   | XHP
   | Hash
@@ -416,7 +415,6 @@ let from_string keyword ~only_reserved =
   | "/>"                                  -> Some SlashGreaterThan
   | "</"                                  -> Some LessThanSlash
   | "<?"                                  -> Some LessThanQuestion
-  | ":@"                                  -> Some ColonAt
   | "`"                                   -> Some Backtick
   | "xhp"          when not only_reserved -> Some XHP
   | "#"                                   -> Some Hash
@@ -606,7 +604,6 @@ let to_string kind =
   | SlashGreaterThan              -> "/>"
   | LessThanSlash                 -> "</"
   | LessThanQuestion              -> "<?"
-  | ColonAt                       -> ":@"
   | Backtick                      -> "`"
   | XHP                           -> "xhp"
   | Hash                          -> "#"

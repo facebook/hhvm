@@ -100,9 +100,6 @@ val get_const : env -> class_decl -> string -> class_const option
 (** Get type constant declaration from the appropriate backend and add dependency. *)
 val get_typeconst : env -> class_decl -> string -> typeconst_type option
 
-(** Get PU enum declaration from the appropriate backend and add dependency. *)
-val get_pu_enum : env -> class_decl -> string -> pu_enum_type option
-
 (** Get global constant declaration from the appropriate backend and add dependency. *)
 val get_gconst : env -> gconst_key -> gconst_decl option
 
@@ -374,13 +371,7 @@ val get_tyvar_eager_solve_fail : env -> Ident.t -> bool
 
 val get_tyvar_type_const : env -> int -> Aast.sid -> (Aast.sid * locl_ty) option
 
-val get_tyvar_pu_access : env -> int -> Aast.sid -> (Aast.sid * locl_ty) option
-
-val get_tyvar_pu_accesses : env -> int -> (Aast.sid * locl_ty) SMap.t
-
 val set_tyvar_type_const : env -> int -> Aast.sid -> locl_ty -> env
-
-val set_tyvar_pu_access : env -> int -> Aast.sid -> locl_ty -> env
 
 val get_tyvar_type_consts : env -> int -> (Aast.sid * locl_ty) SMap.t
 

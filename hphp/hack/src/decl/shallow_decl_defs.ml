@@ -26,22 +26,6 @@ type shallow_typeconst = {
 }
 [@@deriving eq, show]
 
-type shallow_pu_member = {
-  spum_atom: Ast_defs.id;
-  spum_types: (Ast_defs.id * decl_ty) list;
-  spum_exprs: Ast_defs.id list;
-}
-[@@deriving eq, show]
-
-type shallow_pu_enum = {
-  spu_name: Ast_defs.id;
-  spu_is_final: bool;
-  spu_case_types: decl_tparam list;
-  spu_case_values: (Ast_defs.id * decl_ty) list;
-  spu_members: shallow_pu_member list;
-}
-[@@deriving eq, show]
-
 type shallow_prop = {
   sp_const: bool;
   sp_xhp_attr: xhp_attr option;
@@ -86,7 +70,6 @@ type shallow_class = {
   sc_implements_dynamic: bool;
   sc_consts: shallow_class_const list;
   sc_typeconsts: shallow_typeconst list;
-  sc_pu_enums: shallow_pu_enum list;
   sc_props: shallow_prop list;
   sc_sprops: shallow_prop list;
   sc_constructor: shallow_method option;

@@ -248,10 +248,6 @@ val restore_method_env : env -> Tast.method_ -> env
     it appears in. *)
 val restore_fun_env : env -> Tast.fun_ -> env
 
-(** Construct an {!env} from a pocket universe definition and the {!env} of the context
-    it appears in. *)
-val restore_pu_enum_env : env -> Tast.pu_enum -> env
-
 val typing_env_as_tast_env : Typing_env_types.env -> env
 
 val tast_env_as_typing_env : env -> Typing_env_types.env

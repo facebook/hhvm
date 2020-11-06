@@ -210,13 +210,6 @@ and _ ty_ =
        * during the localization phase.
        *)
   | Tlike : decl_ty -> decl_phase ty_
-  | Tpu_access : decl_ty * Nast.sid -> decl_phase ty_
-      (** Access to a Pocket Universe or Pocket Universes dependent type,
-       * denoted by Foo:@Bar.
-       * It might be unresolved at first (e.g. if Foo is a generic variable).
-       * Will be refined to Tpu, or to the actual type associated with an
-       * atom, once typechecking is successful.
-       *)
   (*========== Following Types Exist in Both Phases ==========*)
   | Tany : TanySentinel.t -> 'phase ty_
   | Terr
@@ -307,16 +300,6 @@ and _ ty_ =
       (** An instance of a class or interface, ty list are the arguments
        * If exact=Exact, then this represents instances of *exactly* this class
        * If exact=Nonexact, this also includes subclasses
-       *)
-  | Tpu : locl_ty * Nast.sid -> locl_phase ty_
-      (** Typing of Pocket Universe Expressions
-       * - first parameter is the enclosing class
-       * - second parameter is the name of the Pocket Universe Enumeration
-       *)
-  | Tpu_type_access : Nast.sid * Nast.sid -> locl_phase ty_
-      (** Typing of Pocket Universes type projections
-       * - first parameter is the Tgeneric in place of the member name
-       * - second parameter is the name of the type to project
        *)
 
 and 'phase taccess_type = 'phase ty * Nast.sid
@@ -703,24 +686,6 @@ module Pp = struct
            a1);
       Format.fprintf fmt "@,]@]";
       Format.fprintf fmt "@,))@]"
-    | Tpu (base, enum) ->
-      Format.fprintf fmt "(@[<2>Tpu (%a@,,%a)@])" pp_ty base Aast.pp_sid enum;
-      Format.fprintf fmt "@])"
-    | Tpu_access (base, sid) ->
-      Format.fprintf fmt "(@[<2>Tpu_access (@,";
-      pp_ty fmt base;
-      Format.fprintf fmt ",@ ";
-      Aast.pp_sid fmt sid;
-      Format.fprintf fmt "@,))@]"
-    | Tpu_type_access (member, tyname) ->
-      Format.fprintf
-        fmt
-        "(@[<2>Tpu_type_access (%a@,,%a)@])"
-        Aast.pp_sid
-        member
-        Aast.pp_sid
-        tyname;
-      Format.fprintf fmt "@])"
 
   and pp_ty_list : type a. Format.formatter -> a ty list -> unit =
    fun fmt tyl ->

@@ -213,8 +213,7 @@ impl Operator {
             | TokenKind::GreaterThanGreaterThanEqual
             | TokenKind::MinusGreaterThan
             | TokenKind::QuestionMinusGreaterThan
-            | TokenKind::ColonColon
-            | TokenKind::ColonAt => true,
+            | TokenKind::ColonColon => true,
             _ => false,
         }
     }
@@ -275,7 +274,6 @@ impl Operator {
             TokenKind::LeftParen => FunctionCallOperator,
             TokenKind::LeftBracket => IndexingOperator,
             TokenKind::LeftBrace => IndexingOperator,
-            TokenKind::ColonAt => ScopeResolutionOperator,
             _ => panic!("not a trailing operator"),
         }
     }

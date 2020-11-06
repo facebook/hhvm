@@ -194,7 +194,6 @@ and hint_ p env = function
     in
     Tshape (shape_kind, fdm)
   | Hsoft (p, h_) -> hint_ p env h_
-  | Hpu_access (base, sid) -> Tpu_access (hint env base, sid)
 
 and possibly_enforced_hint env h =
   (* Initially we assume that a type is not enforced at runtime.

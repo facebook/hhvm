@@ -19,7 +19,6 @@ module LSTable = Lazy_string_table
 type inherited_members = {
   consts: class_const LSTable.t;
   typeconsts: typeconst_type LSTable.t;
-  pu_enums: pu_enum_type LSTable.t;
   props: class_elt LSTable.t;
   sprops: class_elt LSTable.t;
   methods: class_elt LSTable.t;
@@ -301,16 +300,6 @@ let typeconsts child_class_name lin =
                    subst))
   |> Sequence.concat
 
-(** Given a linearization filtered for const lookup, return a [Sequence.t]
-    emitting each pocket universe enum in linearization order. *)
-let pu_enums lin =
-  lin
-  |> Sequence.map ~f:(fun (mro, cls, _subst) ->
-         cls.sc_pu_enums
-         |> Sequence.of_list
-         |> Sequence.map ~f:(DTT.shallow_pu_enum_to_pu_enum_type mro.mro_name))
-  |> Sequence.concat
-
 let make_typeconst_cache class_name lin =
   LSTable.make
     lin
@@ -387,19 +376,6 @@ let make_typeconst_cache class_name lin =
           descendant_tc
       end
 
-(* TODO(T36532263) update and fix *)
-let make_pu_enum_cache lin =
-  LSTable.make
-    lin
-    ~is_canonical:(fun _ -> false)
-      (* TODO(shallow): once we support canonical, i.e. stopping early,
-      then update typing_classes_heap to mark this as a Lazy api. *)
-    ~merge:
-      begin
-        fun ~earlier:descendant_pu ~later:_ ->
-        descendant_pu
-      end
-
 let constructor_elt child_class_name (mro, cls, subst) =
   let consistent = Decl_utils.consistent_construct_kind cls in
   let elt =
@@ -447,13 +423,6 @@ let typeconsts_cache class_name lin =
   |> typeconsts class_name
   |> make_typeconst_cache class_name
 
-let pu_enums_cache lin =
-  lin
-  |> filter_for_const_lookup
-  |> pu_enums
-  |> Sequence.map ~f:(fun x -> (snd x.tpu_name, x))
-  |> make_pu_enum_cache
-
 let construct class_name lin =
   lazy
     ( lin
@@ -477,7 +446,6 @@ let make ctx class_name get_ancestor =
     consts =
       consts_cache ctx class_name (LSTable.get typeconsts) get_ancestor lin;
     typeconsts;
-    pu_enums = pu_enums_cache lin;
     props = props_cache class_name lin ~static:false;
     sprops = props_cache class_name lin ~static:true;
     methods = make_elt_cache class_name all_methods;

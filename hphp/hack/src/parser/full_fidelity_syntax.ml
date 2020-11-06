@@ -198,7 +198,6 @@ module WithToken(Token: TokenType) = struct
       | XHPExpression                     _ -> SyntaxKind.XHPExpression
       | XHPClose                          _ -> SyntaxKind.XHPClose
       | TypeConstant                      _ -> SyntaxKind.TypeConstant
-      | PUAccess                          _ -> SyntaxKind.PUAccess
       | VectorTypeSpecifier               _ -> SyntaxKind.VectorTypeSpecifier
       | KeysetTypeSpecifier               _ -> SyntaxKind.KeysetTypeSpecifier
       | TupleTypeExplicitSpecifier        _ -> SyntaxKind.TupleTypeExplicitSpecifier
@@ -229,14 +228,6 @@ module WithToken(Token: TokenType) = struct
       | ErrorSyntax                       _ -> SyntaxKind.ErrorSyntax
       | ListItem                          _ -> SyntaxKind.ListItem
       | EnumAtomExpression                _ -> SyntaxKind.EnumAtomExpression
-      | PocketAtomExpression              _ -> SyntaxKind.PocketAtomExpression
-      | PocketIdentifierExpression        _ -> SyntaxKind.PocketIdentifierExpression
-      | PocketAtomMappingDeclaration      _ -> SyntaxKind.PocketAtomMappingDeclaration
-      | PocketEnumDeclaration             _ -> SyntaxKind.PocketEnumDeclaration
-      | PocketFieldTypeExprDeclaration    _ -> SyntaxKind.PocketFieldTypeExprDeclaration
-      | PocketFieldTypeDeclaration        _ -> SyntaxKind.PocketFieldTypeDeclaration
-      | PocketMappingIdDeclaration        _ -> SyntaxKind.PocketMappingIdDeclaration
-      | PocketMappingTypeDeclaration      _ -> SyntaxKind.PocketMappingTypeDeclaration
 
 
     let kind node =
@@ -393,7 +384,6 @@ module WithToken(Token: TokenType) = struct
     let is_xhp_expression                       = has_kind SyntaxKind.XHPExpression
     let is_xhp_close                            = has_kind SyntaxKind.XHPClose
     let is_type_constant                        = has_kind SyntaxKind.TypeConstant
-    let is_pu_access                            = has_kind SyntaxKind.PUAccess
     let is_vector_type_specifier                = has_kind SyntaxKind.VectorTypeSpecifier
     let is_keyset_type_specifier                = has_kind SyntaxKind.KeysetTypeSpecifier
     let is_tuple_type_explicit_specifier        = has_kind SyntaxKind.TupleTypeExplicitSpecifier
@@ -424,14 +414,6 @@ module WithToken(Token: TokenType) = struct
     let is_error                                = has_kind SyntaxKind.ErrorSyntax
     let is_list_item                            = has_kind SyntaxKind.ListItem
     let is_enum_atom_expression                 = has_kind SyntaxKind.EnumAtomExpression
-    let is_pocket_atom_expression               = has_kind SyntaxKind.PocketAtomExpression
-    let is_pocket_identifier_expression         = has_kind SyntaxKind.PocketIdentifierExpression
-    let is_pocket_atom_mapping_declaration      = has_kind SyntaxKind.PocketAtomMappingDeclaration
-    let is_pocket_enum_declaration              = has_kind SyntaxKind.PocketEnumDeclaration
-    let is_pocket_field_type_expr_declaration   = has_kind SyntaxKind.PocketFieldTypeExprDeclaration
-    let is_pocket_field_type_declaration        = has_kind SyntaxKind.PocketFieldTypeDeclaration
-    let is_pocket_mapping_id_declaration        = has_kind SyntaxKind.PocketMappingIdDeclaration
-    let is_pocket_mapping_type_declaration      = has_kind SyntaxKind.PocketMappingTypeDeclaration
 
 
     let is_loop_statement node =
@@ -1997,15 +1979,6 @@ module WithToken(Token: TokenType) = struct
          let acc = f acc type_constant_separator in
          let acc = f acc type_constant_right_type in
          acc
-      | PUAccess {
-        pu_access_left_type;
-        pu_access_separator;
-        pu_access_right_type;
-      } ->
-         let acc = f acc pu_access_left_type in
-         let acc = f acc pu_access_separator in
-         let acc = f acc pu_access_right_type in
-         acc
       | VectorTypeSpecifier {
         vector_type_keyword;
         vector_type_left_angle;
@@ -2307,98 +2280,6 @@ module WithToken(Token: TokenType) = struct
       } ->
          let acc = f acc enum_atom_hash in
          let acc = f acc enum_atom_expression in
-         acc
-      | PocketAtomExpression {
-        pocket_atom_glyph;
-        pocket_atom_expression;
-      } ->
-         let acc = f acc pocket_atom_glyph in
-         let acc = f acc pocket_atom_expression in
-         acc
-      | PocketIdentifierExpression {
-        pocket_identifier_qualifier;
-        pocket_identifier_pu_operator;
-        pocket_identifier_field;
-        pocket_identifier_operator;
-        pocket_identifier_name;
-      } ->
-         let acc = f acc pocket_identifier_qualifier in
-         let acc = f acc pocket_identifier_pu_operator in
-         let acc = f acc pocket_identifier_field in
-         let acc = f acc pocket_identifier_operator in
-         let acc = f acc pocket_identifier_name in
-         acc
-      | PocketAtomMappingDeclaration {
-        pocket_atom_mapping_glyph;
-        pocket_atom_mapping_name;
-        pocket_atom_mapping_left_paren;
-        pocket_atom_mapping_mappings;
-        pocket_atom_mapping_right_paren;
-        pocket_atom_mapping_semicolon;
-      } ->
-         let acc = f acc pocket_atom_mapping_glyph in
-         let acc = f acc pocket_atom_mapping_name in
-         let acc = f acc pocket_atom_mapping_left_paren in
-         let acc = f acc pocket_atom_mapping_mappings in
-         let acc = f acc pocket_atom_mapping_right_paren in
-         let acc = f acc pocket_atom_mapping_semicolon in
-         acc
-      | PocketEnumDeclaration {
-        pocket_enum_attributes;
-        pocket_enum_modifiers;
-        pocket_enum_enum;
-        pocket_enum_name;
-        pocket_enum_left_brace;
-        pocket_enum_fields;
-        pocket_enum_right_brace;
-      } ->
-         let acc = f acc pocket_enum_attributes in
-         let acc = f acc pocket_enum_modifiers in
-         let acc = f acc pocket_enum_enum in
-         let acc = f acc pocket_enum_name in
-         let acc = f acc pocket_enum_left_brace in
-         let acc = f acc pocket_enum_fields in
-         let acc = f acc pocket_enum_right_brace in
-         acc
-      | PocketFieldTypeExprDeclaration {
-        pocket_field_type_expr_case;
-        pocket_field_type_expr_type;
-        pocket_field_type_expr_name;
-        pocket_field_type_expr_semicolon;
-      } ->
-         let acc = f acc pocket_field_type_expr_case in
-         let acc = f acc pocket_field_type_expr_type in
-         let acc = f acc pocket_field_type_expr_name in
-         let acc = f acc pocket_field_type_expr_semicolon in
-         acc
-      | PocketFieldTypeDeclaration {
-        pocket_field_type_case;
-        pocket_field_type_type;
-        pocket_field_type_type_parameter;
-        pocket_field_type_semicolon;
-      } ->
-         let acc = f acc pocket_field_type_case in
-         let acc = f acc pocket_field_type_type in
-         let acc = f acc pocket_field_type_type_parameter in
-         let acc = f acc pocket_field_type_semicolon in
-         acc
-      | PocketMappingIdDeclaration {
-        pocket_mapping_id_name;
-        pocket_mapping_id_initializer;
-      } ->
-         let acc = f acc pocket_mapping_id_name in
-         let acc = f acc pocket_mapping_id_initializer in
-         acc
-      | PocketMappingTypeDeclaration {
-        pocket_mapping_type_keyword;
-        pocket_mapping_type_name;
-        pocket_mapping_type_equal;
-        pocket_mapping_type_type;
-      } ->
-         let acc = f acc pocket_mapping_type_keyword in
-         let acc = f acc pocket_mapping_type_name in
-         let acc = f acc pocket_mapping_type_equal in
-         let acc = f acc pocket_mapping_type_type in
          acc
 
 
@@ -3897,15 +3778,6 @@ module WithToken(Token: TokenType) = struct
         type_constant_separator;
         type_constant_right_type;
       ]
-      | PUAccess {
-        pu_access_left_type;
-        pu_access_separator;
-        pu_access_right_type;
-      } -> [
-        pu_access_left_type;
-        pu_access_separator;
-        pu_access_right_type;
-      ]
       | VectorTypeSpecifier {
         vector_type_keyword;
         vector_type_left_angle;
@@ -4207,98 +4079,6 @@ module WithToken(Token: TokenType) = struct
       } -> [
         enum_atom_hash;
         enum_atom_expression;
-      ]
-      | PocketAtomExpression {
-        pocket_atom_glyph;
-        pocket_atom_expression;
-      } -> [
-        pocket_atom_glyph;
-        pocket_atom_expression;
-      ]
-      | PocketIdentifierExpression {
-        pocket_identifier_qualifier;
-        pocket_identifier_pu_operator;
-        pocket_identifier_field;
-        pocket_identifier_operator;
-        pocket_identifier_name;
-      } -> [
-        pocket_identifier_qualifier;
-        pocket_identifier_pu_operator;
-        pocket_identifier_field;
-        pocket_identifier_operator;
-        pocket_identifier_name;
-      ]
-      | PocketAtomMappingDeclaration {
-        pocket_atom_mapping_glyph;
-        pocket_atom_mapping_name;
-        pocket_atom_mapping_left_paren;
-        pocket_atom_mapping_mappings;
-        pocket_atom_mapping_right_paren;
-        pocket_atom_mapping_semicolon;
-      } -> [
-        pocket_atom_mapping_glyph;
-        pocket_atom_mapping_name;
-        pocket_atom_mapping_left_paren;
-        pocket_atom_mapping_mappings;
-        pocket_atom_mapping_right_paren;
-        pocket_atom_mapping_semicolon;
-      ]
-      | PocketEnumDeclaration {
-        pocket_enum_attributes;
-        pocket_enum_modifiers;
-        pocket_enum_enum;
-        pocket_enum_name;
-        pocket_enum_left_brace;
-        pocket_enum_fields;
-        pocket_enum_right_brace;
-      } -> [
-        pocket_enum_attributes;
-        pocket_enum_modifiers;
-        pocket_enum_enum;
-        pocket_enum_name;
-        pocket_enum_left_brace;
-        pocket_enum_fields;
-        pocket_enum_right_brace;
-      ]
-      | PocketFieldTypeExprDeclaration {
-        pocket_field_type_expr_case;
-        pocket_field_type_expr_type;
-        pocket_field_type_expr_name;
-        pocket_field_type_expr_semicolon;
-      } -> [
-        pocket_field_type_expr_case;
-        pocket_field_type_expr_type;
-        pocket_field_type_expr_name;
-        pocket_field_type_expr_semicolon;
-      ]
-      | PocketFieldTypeDeclaration {
-        pocket_field_type_case;
-        pocket_field_type_type;
-        pocket_field_type_type_parameter;
-        pocket_field_type_semicolon;
-      } -> [
-        pocket_field_type_case;
-        pocket_field_type_type;
-        pocket_field_type_type_parameter;
-        pocket_field_type_semicolon;
-      ]
-      | PocketMappingIdDeclaration {
-        pocket_mapping_id_name;
-        pocket_mapping_id_initializer;
-      } -> [
-        pocket_mapping_id_name;
-        pocket_mapping_id_initializer;
-      ]
-      | PocketMappingTypeDeclaration {
-        pocket_mapping_type_keyword;
-        pocket_mapping_type_name;
-        pocket_mapping_type_equal;
-        pocket_mapping_type_type;
-      } -> [
-        pocket_mapping_type_keyword;
-        pocket_mapping_type_name;
-        pocket_mapping_type_equal;
-        pocket_mapping_type_type;
       ]
 
 
@@ -5798,15 +5578,6 @@ module WithToken(Token: TokenType) = struct
         "type_constant_separator";
         "type_constant_right_type";
       ]
-      | PUAccess {
-        pu_access_left_type;
-        pu_access_separator;
-        pu_access_right_type;
-      } -> [
-        "pu_access_left_type";
-        "pu_access_separator";
-        "pu_access_right_type";
-      ]
       | VectorTypeSpecifier {
         vector_type_keyword;
         vector_type_left_angle;
@@ -6108,98 +5879,6 @@ module WithToken(Token: TokenType) = struct
       } -> [
         "enum_atom_hash";
         "enum_atom_expression";
-      ]
-      | PocketAtomExpression {
-        pocket_atom_glyph;
-        pocket_atom_expression;
-      } -> [
-        "pocket_atom_glyph";
-        "pocket_atom_expression";
-      ]
-      | PocketIdentifierExpression {
-        pocket_identifier_qualifier;
-        pocket_identifier_pu_operator;
-        pocket_identifier_field;
-        pocket_identifier_operator;
-        pocket_identifier_name;
-      } -> [
-        "pocket_identifier_qualifier";
-        "pocket_identifier_pu_operator";
-        "pocket_identifier_field";
-        "pocket_identifier_operator";
-        "pocket_identifier_name";
-      ]
-      | PocketAtomMappingDeclaration {
-        pocket_atom_mapping_glyph;
-        pocket_atom_mapping_name;
-        pocket_atom_mapping_left_paren;
-        pocket_atom_mapping_mappings;
-        pocket_atom_mapping_right_paren;
-        pocket_atom_mapping_semicolon;
-      } -> [
-        "pocket_atom_mapping_glyph";
-        "pocket_atom_mapping_name";
-        "pocket_atom_mapping_left_paren";
-        "pocket_atom_mapping_mappings";
-        "pocket_atom_mapping_right_paren";
-        "pocket_atom_mapping_semicolon";
-      ]
-      | PocketEnumDeclaration {
-        pocket_enum_attributes;
-        pocket_enum_modifiers;
-        pocket_enum_enum;
-        pocket_enum_name;
-        pocket_enum_left_brace;
-        pocket_enum_fields;
-        pocket_enum_right_brace;
-      } -> [
-        "pocket_enum_attributes";
-        "pocket_enum_modifiers";
-        "pocket_enum_enum";
-        "pocket_enum_name";
-        "pocket_enum_left_brace";
-        "pocket_enum_fields";
-        "pocket_enum_right_brace";
-      ]
-      | PocketFieldTypeExprDeclaration {
-        pocket_field_type_expr_case;
-        pocket_field_type_expr_type;
-        pocket_field_type_expr_name;
-        pocket_field_type_expr_semicolon;
-      } -> [
-        "pocket_field_type_expr_case";
-        "pocket_field_type_expr_type";
-        "pocket_field_type_expr_name";
-        "pocket_field_type_expr_semicolon";
-      ]
-      | PocketFieldTypeDeclaration {
-        pocket_field_type_case;
-        pocket_field_type_type;
-        pocket_field_type_type_parameter;
-        pocket_field_type_semicolon;
-      } -> [
-        "pocket_field_type_case";
-        "pocket_field_type_type";
-        "pocket_field_type_type_parameter";
-        "pocket_field_type_semicolon";
-      ]
-      | PocketMappingIdDeclaration {
-        pocket_mapping_id_name;
-        pocket_mapping_id_initializer;
-      } -> [
-        "pocket_mapping_id_name";
-        "pocket_mapping_id_initializer";
-      ]
-      | PocketMappingTypeDeclaration {
-        pocket_mapping_type_keyword;
-        pocket_mapping_type_name;
-        pocket_mapping_type_equal;
-        pocket_mapping_type_type;
-      } -> [
-        "pocket_mapping_type_keyword";
-        "pocket_mapping_type_name";
-        "pocket_mapping_type_equal";
-        "pocket_mapping_type_type";
       ]
 
 
@@ -7892,16 +7571,6 @@ module WithToken(Token: TokenType) = struct
           type_constant_separator;
           type_constant_right_type;
         }
-      | (SyntaxKind.PUAccess, [
-          pu_access_left_type;
-          pu_access_separator;
-          pu_access_right_type;
-        ]) ->
-        PUAccess {
-          pu_access_left_type;
-          pu_access_separator;
-          pu_access_right_type;
-        }
       | (SyntaxKind.VectorTypeSpecifier, [
           vector_type_keyword;
           vector_type_left_angle;
@@ -8233,106 +7902,6 @@ module WithToken(Token: TokenType) = struct
         EnumAtomExpression {
           enum_atom_hash;
           enum_atom_expression;
-        }
-      | (SyntaxKind.PocketAtomExpression, [
-          pocket_atom_glyph;
-          pocket_atom_expression;
-        ]) ->
-        PocketAtomExpression {
-          pocket_atom_glyph;
-          pocket_atom_expression;
-        }
-      | (SyntaxKind.PocketIdentifierExpression, [
-          pocket_identifier_qualifier;
-          pocket_identifier_pu_operator;
-          pocket_identifier_field;
-          pocket_identifier_operator;
-          pocket_identifier_name;
-        ]) ->
-        PocketIdentifierExpression {
-          pocket_identifier_qualifier;
-          pocket_identifier_pu_operator;
-          pocket_identifier_field;
-          pocket_identifier_operator;
-          pocket_identifier_name;
-        }
-      | (SyntaxKind.PocketAtomMappingDeclaration, [
-          pocket_atom_mapping_glyph;
-          pocket_atom_mapping_name;
-          pocket_atom_mapping_left_paren;
-          pocket_atom_mapping_mappings;
-          pocket_atom_mapping_right_paren;
-          pocket_atom_mapping_semicolon;
-        ]) ->
-        PocketAtomMappingDeclaration {
-          pocket_atom_mapping_glyph;
-          pocket_atom_mapping_name;
-          pocket_atom_mapping_left_paren;
-          pocket_atom_mapping_mappings;
-          pocket_atom_mapping_right_paren;
-          pocket_atom_mapping_semicolon;
-        }
-      | (SyntaxKind.PocketEnumDeclaration, [
-          pocket_enum_attributes;
-          pocket_enum_modifiers;
-          pocket_enum_enum;
-          pocket_enum_name;
-          pocket_enum_left_brace;
-          pocket_enum_fields;
-          pocket_enum_right_brace;
-        ]) ->
-        PocketEnumDeclaration {
-          pocket_enum_attributes;
-          pocket_enum_modifiers;
-          pocket_enum_enum;
-          pocket_enum_name;
-          pocket_enum_left_brace;
-          pocket_enum_fields;
-          pocket_enum_right_brace;
-        }
-      | (SyntaxKind.PocketFieldTypeExprDeclaration, [
-          pocket_field_type_expr_case;
-          pocket_field_type_expr_type;
-          pocket_field_type_expr_name;
-          pocket_field_type_expr_semicolon;
-        ]) ->
-        PocketFieldTypeExprDeclaration {
-          pocket_field_type_expr_case;
-          pocket_field_type_expr_type;
-          pocket_field_type_expr_name;
-          pocket_field_type_expr_semicolon;
-        }
-      | (SyntaxKind.PocketFieldTypeDeclaration, [
-          pocket_field_type_case;
-          pocket_field_type_type;
-          pocket_field_type_type_parameter;
-          pocket_field_type_semicolon;
-        ]) ->
-        PocketFieldTypeDeclaration {
-          pocket_field_type_case;
-          pocket_field_type_type;
-          pocket_field_type_type_parameter;
-          pocket_field_type_semicolon;
-        }
-      | (SyntaxKind.PocketMappingIdDeclaration, [
-          pocket_mapping_id_name;
-          pocket_mapping_id_initializer;
-        ]) ->
-        PocketMappingIdDeclaration {
-          pocket_mapping_id_name;
-          pocket_mapping_id_initializer;
-        }
-      | (SyntaxKind.PocketMappingTypeDeclaration, [
-          pocket_mapping_type_keyword;
-          pocket_mapping_type_name;
-          pocket_mapping_type_equal;
-          pocket_mapping_type_type;
-        ]) ->
-        PocketMappingTypeDeclaration {
-          pocket_mapping_type_keyword;
-          pocket_mapping_type_name;
-          pocket_mapping_type_equal;
-          pocket_mapping_type_type;
         }
       | (SyntaxKind.Missing, []) -> Missing
       | (SyntaxKind.SyntaxList, items) -> SyntaxList items
@@ -10423,19 +9992,6 @@ module WithToken(Token: TokenType) = struct
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value
 
-      let make_pu_access
-        pu_access_left_type
-        pu_access_separator
-        pu_access_right_type
-      =
-        let syntax = PUAccess {
-          pu_access_left_type;
-          pu_access_separator;
-          pu_access_right_type;
-        } in
-        let value = ValueBuilder.value_from_syntax syntax in
-        make syntax value
-
       let make_vector_type_specifier
         vector_type_keyword
         vector_type_left_angle
@@ -10854,130 +10410,6 @@ module WithToken(Token: TokenType) = struct
         let syntax = EnumAtomExpression {
           enum_atom_hash;
           enum_atom_expression;
-        } in
-        let value = ValueBuilder.value_from_syntax syntax in
-        make syntax value
-
-      let make_pocket_atom_expression
-        pocket_atom_glyph
-        pocket_atom_expression
-      =
-        let syntax = PocketAtomExpression {
-          pocket_atom_glyph;
-          pocket_atom_expression;
-        } in
-        let value = ValueBuilder.value_from_syntax syntax in
-        make syntax value
-
-      let make_pocket_identifier_expression
-        pocket_identifier_qualifier
-        pocket_identifier_pu_operator
-        pocket_identifier_field
-        pocket_identifier_operator
-        pocket_identifier_name
-      =
-        let syntax = PocketIdentifierExpression {
-          pocket_identifier_qualifier;
-          pocket_identifier_pu_operator;
-          pocket_identifier_field;
-          pocket_identifier_operator;
-          pocket_identifier_name;
-        } in
-        let value = ValueBuilder.value_from_syntax syntax in
-        make syntax value
-
-      let make_pocket_atom_mapping_declaration
-        pocket_atom_mapping_glyph
-        pocket_atom_mapping_name
-        pocket_atom_mapping_left_paren
-        pocket_atom_mapping_mappings
-        pocket_atom_mapping_right_paren
-        pocket_atom_mapping_semicolon
-      =
-        let syntax = PocketAtomMappingDeclaration {
-          pocket_atom_mapping_glyph;
-          pocket_atom_mapping_name;
-          pocket_atom_mapping_left_paren;
-          pocket_atom_mapping_mappings;
-          pocket_atom_mapping_right_paren;
-          pocket_atom_mapping_semicolon;
-        } in
-        let value = ValueBuilder.value_from_syntax syntax in
-        make syntax value
-
-      let make_pocket_enum_declaration
-        pocket_enum_attributes
-        pocket_enum_modifiers
-        pocket_enum_enum
-        pocket_enum_name
-        pocket_enum_left_brace
-        pocket_enum_fields
-        pocket_enum_right_brace
-      =
-        let syntax = PocketEnumDeclaration {
-          pocket_enum_attributes;
-          pocket_enum_modifiers;
-          pocket_enum_enum;
-          pocket_enum_name;
-          pocket_enum_left_brace;
-          pocket_enum_fields;
-          pocket_enum_right_brace;
-        } in
-        let value = ValueBuilder.value_from_syntax syntax in
-        make syntax value
-
-      let make_pocket_field_type_expr_declaration
-        pocket_field_type_expr_case
-        pocket_field_type_expr_type
-        pocket_field_type_expr_name
-        pocket_field_type_expr_semicolon
-      =
-        let syntax = PocketFieldTypeExprDeclaration {
-          pocket_field_type_expr_case;
-          pocket_field_type_expr_type;
-          pocket_field_type_expr_name;
-          pocket_field_type_expr_semicolon;
-        } in
-        let value = ValueBuilder.value_from_syntax syntax in
-        make syntax value
-
-      let make_pocket_field_type_declaration
-        pocket_field_type_case
-        pocket_field_type_type
-        pocket_field_type_type_parameter
-        pocket_field_type_semicolon
-      =
-        let syntax = PocketFieldTypeDeclaration {
-          pocket_field_type_case;
-          pocket_field_type_type;
-          pocket_field_type_type_parameter;
-          pocket_field_type_semicolon;
-        } in
-        let value = ValueBuilder.value_from_syntax syntax in
-        make syntax value
-
-      let make_pocket_mapping_id_declaration
-        pocket_mapping_id_name
-        pocket_mapping_id_initializer
-      =
-        let syntax = PocketMappingIdDeclaration {
-          pocket_mapping_id_name;
-          pocket_mapping_id_initializer;
-        } in
-        let value = ValueBuilder.value_from_syntax syntax in
-        make syntax value
-
-      let make_pocket_mapping_type_declaration
-        pocket_mapping_type_keyword
-        pocket_mapping_type_name
-        pocket_mapping_type_equal
-        pocket_mapping_type_type
-      =
-        let syntax = PocketMappingTypeDeclaration {
-          pocket_mapping_type_keyword;
-          pocket_mapping_type_name;
-          pocket_mapping_type_equal;
-          pocket_mapping_type_type;
         } in
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value

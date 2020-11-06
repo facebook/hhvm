@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<755db85c814eea8006704758a08aa838>>
+// @generated SignedSource<<0a225b954ed548fa23661d6794060514>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -20,7 +20,6 @@ use crate::*;
 pub use crate::ast_defs::shape_map;
 
 pub use aast::ClassHint;
-pub use aast::PuCaseValue;
 pub use aast::RecordHint;
 pub use aast::Sid;
 pub use aast::TraitHint;
@@ -101,10 +100,6 @@ pub type Field<'a> = aast::Field<'a, &'a pos::Pos<'a>, FuncBodyAnn<'a>, (), ()>;
 pub type Afield<'a> = aast::Afield<'a, &'a pos::Pos<'a>, FuncBodyAnn<'a>, (), ()>;
 
 pub type ExpressionTree<'a> = aast::ExpressionTree<'a, &'a pos::Pos<'a>, FuncBodyAnn<'a>, (), ()>;
-
-pub type PuEnum<'a> = aast::PuEnum<'a, &'a pos::Pos<'a>, FuncBodyAnn<'a>, (), ()>;
-
-pub type PuMember<'a> = aast::PuMember<'a, &'a pos::Pos<'a>, FuncBodyAnn<'a>, (), ()>;
 
 pub type Targ<'a> = aast::Targ<'a, ()>;
 

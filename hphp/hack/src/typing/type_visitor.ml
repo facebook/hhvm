@@ -164,7 +164,6 @@ class virtual ['a] decl_type_visitor : ['a] decl_type_visitor_type =
       | Tunion tyl -> this#on_tunion acc r tyl
       | Tintersection tyl -> this#on_tintersection acc r tyl
       | Tshape (shape_kind, fdm) -> this#on_tshape acc r shape_kind fdm
-      | Tpu_access (base, _) -> this#on_type acc base
   end
 
 class type ['a] locl_type_visitor_type =
@@ -205,10 +204,6 @@ class type ['a] locl_type_visitor_type =
     method on_tintersection : 'a -> Reason.t -> locl_ty list -> 'a
 
     method on_tobject : 'a -> Reason.t -> 'a
-
-    method on_tpu : 'a -> Reason.t -> locl_ty -> Aast.sid -> 'a
-
-    method on_tpu_type_access : 'a -> Reason.t -> Aast.sid -> Aast.sid -> 'a
 
     method on_tvarray_or_darray : 'a -> Reason.t -> locl_ty -> locl_ty -> 'a
 
@@ -306,10 +301,6 @@ class virtual ['a] locl_type_visitor : ['a] locl_type_visitor_type =
       let acc = this#on_type acc ty1 in
       this#on_type acc ty2
 
-    method on_tpu acc _ base _ = this#on_type acc base
-
-    method on_tpu_type_access acc _ _ _ = acc
-
     method on_tunapplied_alias acc _ _ = acc
 
     method on_taccess acc _ (ty, _ids) = this#on_type acc ty
@@ -337,9 +328,6 @@ class virtual ['a] locl_type_visitor : ['a] locl_type_visitor_type =
       | Tvarray ty -> this#on_tvarray acc r ty
       | Tdarray (ty1, ty2) -> this#on_tdarray acc r ty1 ty2
       | Tvarray_or_darray (ty1, ty2) -> this#on_tvarray_or_darray acc r ty1 ty2
-      | Tpu (base, enum) -> this#on_tpu acc r base enum
-      | Tpu_type_access (member, tyname) ->
-        this#on_tpu_type_access acc r member tyname
       | Tunapplied_alias n -> this#on_tunapplied_alias acc r n
       | Taccess (ty, ids) -> this#on_taccess acc r (ty, ids)
   end

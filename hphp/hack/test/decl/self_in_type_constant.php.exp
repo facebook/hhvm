@@ -27,9 +27,9 @@
                        [([5:24-25], "T")]))));
             stc_enforceable = ([Pos.none], false); stc_reifiable = None }
           ];
-        sc_pu_enums = []; sc_props = []; sc_sprops = [];
-        sc_constructor = None; sc_static_methods = []; sc_methods = [];
-        sc_user_attributes = []; sc_enum_type = None }));
+        sc_props = []; sc_sprops = []; sc_constructor = None;
+        sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
+        sc_enum_type = None }));
    ("\\I",
     (Shallow_decl_defs.Class
        { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -56,9 +56,9 @@
                         [([10:24-25], "V")]))));
              stc_enforceable = ([Pos.none], false); stc_reifiable = None }
            ];
-         sc_pu_enums = []; sc_props = []; sc_sprops = [];
-         sc_constructor = None; sc_static_methods = []; sc_methods = [];
-         sc_user_attributes = []; sc_enum_type = None }));
+         sc_props = []; sc_sprops = []; sc_constructor = None;
+         sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
+         sc_enum_type = None }));
    ("\\T",
     (Shallow_decl_defs.Class
        { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -71,8 +71,8 @@
            (Tapply (([14:19-20], "\\C"), [])))];
          sc_req_implements = []; sc_implements = [];
          sc_implements_dynamic = false; sc_consts = []; sc_typeconsts = [];
-         sc_pu_enums = []; sc_props = []; sc_sprops = [];
-         sc_constructor = None; sc_static_methods = [];
+         sc_props = []; sc_sprops = []; sc_constructor = None;
+         sc_static_methods = [];
          sc_methods =
          [{ Shallow_decl_defs.sm_abstract = true; sm_final = false;
             sm_name = ([15:28-29], "f"); sm_override = false;

@@ -9,7 +9,6 @@ use aast_parser::{
 use anyhow::{anyhow, *};
 use bitflags::bitflags;
 use emit_program_rust::{self as emit_program, emit_program, FromAstFlags};
-use emit_pu_rust;
 use env::emitter::Emitter;
 use hhas_program_rust::HhasProgram;
 use hhbc_ast_rust::FatalOp;
@@ -160,7 +159,6 @@ where
             ));
             // TODO(shiqicao): change opts to Rc<Option> to avoid cloning
             elaborate_namespaces_visitor::elaborate_program(RcOc::clone(&namespace), ast);
-            emit_pu_rust::translate(ast);
             let e = &mut emitter;
             time(move || emit(e, &env, namespace, ast))
         }

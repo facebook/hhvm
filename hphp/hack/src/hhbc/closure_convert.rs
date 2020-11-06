@@ -530,7 +530,6 @@ fn make_closure(
         namespace: RcOc::clone(&st.empty_namespace),
         enum_: None,
         doc_comment: None,
-        pu_enums: vec![],
         emit_id: Some(EmitId::Anonymous),
     };
 

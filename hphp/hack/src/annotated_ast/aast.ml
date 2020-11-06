@@ -225,8 +225,6 @@ and ('ex, 'fb, 'en, 'hi) expr_ =
       * ('ex, 'fb, 'en, 'hi) expr
       * ('ex, 'fb, 'en, 'hi) expr
   | Assert of ('ex, 'fb, 'en, 'hi) assert_expr
-  | PU_atom of string
-  | PU_identifier of ('ex, 'fb, 'en, 'hi) class_id * pstring * pstring
   | ET_Splice of ('ex, 'fb, 'en, 'hi) expr
   | EnumAtom of string
   | Any
@@ -397,7 +395,6 @@ and ('ex, 'fb, 'en, 'hi) class_ = {
   c_user_attributes: ('ex, 'fb, 'en, 'hi) user_attribute list;
   c_file_attributes: ('ex, 'fb, 'en, 'hi) file_attribute list;
   c_enum: enum_ option;
-  c_pu_enums: ('ex, 'fb, 'en, 'hi) pu_enum list;
   c_doc_comment: doc_comment option;
   c_emit_id: emit_id option;
 }
@@ -544,51 +541,6 @@ and ('ex, 'fb, 'en, 'hi) record_def = {
 }
 
 and record_hint = hint
-
-(** Pocket Universe Enumeration, e.g.
-
-```
-   enum Foo { // pu_name
-     // pu_case_types
-     case type T0;
-     case type T1;
-
-     // pu_case_values
-     case ?T0 default_value;
-     case T1 foo;
-
-     // pu_members
-     :@A( // pum_atom
-       // pum_types
-       type T0 = string,
-       type T1 = int,
-
-       // pum_exprs
-       default_value = null,
-       foo = 42,
-     );
-     :@B( ... )
-     ...
-   }
-```
-*)
-and ('ex, 'fb, 'en, 'hi) pu_enum = {
-  pu_annotation: 'en;
-  pu_name: sid;
-  pu_user_attributes: ('ex, 'fb, 'en, 'hi) user_attribute list;
-  pu_is_final: bool;
-  pu_case_types: ('ex, 'fb, 'en, 'hi) tparam list;
-  pu_case_values: pu_case_value list;
-  pu_members: ('ex, 'fb, 'en, 'hi) pu_member list;
-}
-
-and pu_case_value = sid * hint
-
-and ('ex, 'fb, 'en, 'hi) pu_member = {
-  pum_atom: sid;
-  pum_types: (sid * hint) list;
-  pum_exprs: (sid * ('ex, 'fb, 'en, 'hi) expr) list;
-}
 
 and ('ex, 'fb, 'en, 'hi) fun_def = ('ex, 'fb, 'en, 'hi) fun_
 

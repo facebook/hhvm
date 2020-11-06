@@ -79,7 +79,6 @@ enum UnstableFeatures {
     UnionIntersectionTypeHints,
     ClassLevelWhere,
     ExpressionTrees,
-    PocketUniverses,
     CoeffectsProvisional,
     EnumSupertyping,
     EnumClass,
@@ -5570,16 +5569,6 @@ where
             }
             Capability(_) | CapabilityProvisional(_) => {
                 self.check_can_use_feature(node, &UnstableFeatures::CoeffectsProvisional)
-            }
-            PocketAtomExpression(_)
-            | PocketIdentifierExpression(_)
-            | PocketAtomMappingDeclaration(_)
-            | PocketEnumDeclaration(_)
-            | PocketFieldTypeExprDeclaration(_)
-            | PocketFieldTypeDeclaration(_)
-            | PocketMappingIdDeclaration(_)
-            | PocketMappingTypeDeclaration(_) => {
-                self.check_can_use_feature(node, &UnstableFeatures::PocketUniverses)
             }
             ClassishDeclaration(x) => match &x.where_clause.children {
                 WhereClause(_) => {

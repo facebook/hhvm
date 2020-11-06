@@ -82,12 +82,6 @@ type afield = (Pos.t, func_body_ann, unit, unit) Aast.afield
 
 type expression_tree = (Pos.t, func_body_ann, unit, unit) Aast.expression_tree
 
-type pu_enum = (Pos.t, func_body_ann, unit, unit) Aast.pu_enum
-
-type pu_member = (Pos.t, func_body_ann, unit, unit) Aast.pu_member
-
-type pu_case_value = Aast.pu_case_value
-
 type targ = unit Aast.targ
 
 type sid = Aast.sid [@@deriving show]
@@ -620,11 +614,7 @@ module Visitor_DEPRECATED = struct
 
       method on_markup : 'a -> pstring -> 'a
 
-      method on_pu_atom : 'a -> string -> 'a
-
       method on_enum_atom : 'a -> string -> 'a
-
-      method on_pu_identifier : 'a -> class_id -> pstring -> pstring -> 'a
 
       method on_function_ptr_id :
         'a -> (Pos.t, func_body_ann, unit, unit) function_ptr_id -> 'a
@@ -845,8 +835,6 @@ module Visitor_DEPRECATED = struct
         | Collection (_, tal, fl) -> this#on_collection acc tal fl
         | BracedExpr e -> this#on_expr acc e
         | ParenthesizedExpr e -> this#on_expr acc e
-        | PU_atom sid -> this#on_pu_atom acc sid
-        | PU_identifier (e, s1, s2) -> this#on_pu_identifier acc e s1 s2
         | ET_Splice e -> this#on_et_splice acc e
         | EnumAtom sid -> this#on_enum_atom acc sid
 
@@ -1215,10 +1203,6 @@ module Visitor_DEPRECATED = struct
           | None -> acc
         in
         acc
-
-      method on_pu_identifier acc cid _ _ = this#on_class_id acc cid
-
-      method on_pu_atom acc s = this#on_string acc s
 
       method on_enum_atom acc s = this#on_string acc s
 

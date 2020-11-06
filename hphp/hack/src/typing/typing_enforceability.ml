@@ -112,7 +112,6 @@ let is_enforceable (env : env) (ty : decl_ty) =
     | Tvarray_or_darray (_, ty) -> is_any ty
     | Toption ty -> is_enforceable env visited ty
     (* TODO(T36532263) make sure that this is what we want *)
-    | Tpu_access _ -> false
   in
   is_enforceable env SSet.empty ty
 

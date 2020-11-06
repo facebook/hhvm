@@ -242,70 +242,6 @@ let check_if_cyclic (class_env : class_env) ((pos, cid) : Pos.t * string) : bool
   if is_cyclic then Errors.cyclic_class_def stack pos;
   is_cyclic
 
-let pu_enum_fold
-    origin
-    (acc : Typing_defs.pu_enum_type SMap.t)
-    (spu : Shallow_decl_defs.shallow_pu_enum) : Typing_defs.pu_enum_type SMap.t
-    =
-  let spu_name = snd spu.spu_name in
-  let tpu =
-    match SMap.find_opt spu_name acc with
-    | None -> Decl_to_typing.shallow_pu_enum_to_pu_enum_type origin spu
-    | Some tpu ->
-      let origin = { pu_class = origin; pu_enum = spu_name } in
-      {
-        tpu_name = spu.spu_name;
-        tpu_is_final = spu.spu_is_final;
-        tpu_case_types =
-          List.fold_left
-            spu.spu_case_types
-            ~init:tpu.tpu_case_types
-            ~f:(fun acc tp ->
-              let sid = snd tp.tp_name in
-              SMap.add sid (origin, tp) acc);
-        tpu_case_values =
-          List.fold_left
-            spu.spu_case_values
-            ~init:tpu.tpu_case_values
-            ~f:(fun acc (name, dty) ->
-              SMap.add (snd name) (origin, name, dty) acc);
-        tpu_members =
-          List.fold_left spu.spu_members ~init:tpu.tpu_members ~f:(fun acc sm ->
-              let tpum_types =
-                match SMap.find_opt (snd sm.spum_atom) acc with
-                | None -> SMap.empty
-                | Some tm -> tm.tpum_types
-              in
-              let tpum_exprs =
-                match SMap.find_opt (snd sm.spum_atom) acc with
-                | None -> SMap.empty
-                | Some tm -> tm.tpum_exprs
-              in
-              let tpum_types =
-                List.fold_left
-                  sm.spum_types
-                  ~init:tpum_types
-                  ~f:(fun acc (sid, declty) ->
-                    let k = snd sid in
-                    SMap.add k (origin, sid, declty) acc)
-              in
-              let tpum_exprs =
-                List.fold_left sm.spum_exprs ~init:tpum_exprs ~f:(fun acc k ->
-                    SMap.add (snd k) (origin, k) acc)
-              in
-              SMap.add
-                (snd sm.spum_atom)
-                {
-                  tpum_atom = sm.spum_atom;
-                  tpum_origin = origin;
-                  tpum_types;
-                  tpum_exprs;
-                }
-                acc);
-      }
-  in
-  SMap.add (snd spu.spu_name) tpu acc
-
 let rec class_naming_and_decl
     ~(sh : SharedMem.uses) (class_env : class_env) (c : Nast.class_) :
     string * Decl_defs.decl_class_type =
@@ -459,10 +395,6 @@ and class_decl
     else
       (typeconsts, consts)
   in
-  let pu_enums = inherited.Decl_inherit.ih_pu_enums in
-  let pu_enums =
-    List.fold_left c.sc_pu_enums ~f:(pu_enum_fold cls_name) ~init:pu_enums
-  in
   let sclass_var = static_prop_decl ~write_shmem:true c in
   let sprops = inherited.Decl_inherit.ih_sprops in
   let sprops = List.fold_left c.sc_sprops ~f:sclass_var ~init:sprops in
@@ -562,7 +494,6 @@ and class_decl
       dc_substs = inherited.Decl_inherit.ih_substs;
       dc_consts = consts;
       dc_typeconsts = typeconsts;
-      dc_pu_enums = pu_enums;
       dc_props = props;
       dc_sprops = sprops;
       dc_methods = m;

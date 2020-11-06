@@ -156,16 +156,6 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
       let env_with_nested = extend_tparams env tparam.tp_parameters in
       super#on_tparam env_with_nested tparam
 
-    method! on_pu_enum env pue =
-      let type_params =
-        List.fold
-          pue.pu_case_types
-          ~f:(fun acc { tp_name = sid; _ } -> SSet.add (snd sid) acc)
-          ~init:env.type_params
-      in
-      let env = { env with type_params } in
-      super#on_pu_enum env pue
-
     method! on_gconst env gc =
       let env = { env with namespace = gc.cst_namespace } in
       super#on_gconst env gc
@@ -269,9 +259,6 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
           expr
         else
           Id (NS.elaborate_id env.namespace NS.ElaborateConst sid)
-      | PU_identifier ((p1, CIexpr (p2, Id x1)), s1, s2) ->
-        let x1 = elaborate_type_name env x1 in
-        PU_identifier ((p1, CIexpr (p2, Id x1)), s1, s2)
       | New ((p1, CIexpr (p2, Id x)), tal, el, unpacked_element, ex) ->
         let x = elaborate_type_name env x in
         New

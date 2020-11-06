@@ -28,8 +28,7 @@ let check_param : env -> Nast.fun_param -> unit =
     let ety_env = Typing_phase.env_with_self env in
     let (env, ty, _) = Typing_tdef.force_expand_typedef ~ety_env env ty in
     match get_node ty with
-    | Tprim
-        (Tnull | Tarraykey | Tbool | Tint | Tfloat | Tstring | Tnum | Tatom _)
+    | Tprim (Tnull | Tarraykey | Tbool | Tint | Tfloat | Tstring | Tnum)
     | Tnonnull
     | Tany _
     | Terr
@@ -97,10 +96,7 @@ let check_param : env -> Nast.fun_param -> unit =
           error ty
     | Tunapplied_alias _ ->
       Typing_defs.error_Tunapplied_alias_in_illegal_context ()
-    | Tpu_type_access _
-    | Tpu _
-    | Taccess _ ->
-      ()
+    | Taccess _ -> ()
     | Tfun _
     | Tvar _
     | Tobject ->

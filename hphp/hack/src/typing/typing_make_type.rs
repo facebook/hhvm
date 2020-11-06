@@ -130,7 +130,7 @@ impl<'a> TypeBuilder<'a> {
     pub fn any(&'a self, reason: &'a Reason<'a>) -> &'a Ty<'a> {
         self.mk(reason, Ty_::Tany(TanySentinel))
     }
-    pub fn prim(&'a self, reason: &'a Reason<'a>, kind: PrimKind<'a>) -> &'a Ty<'a> {
+    pub fn prim(&'a self, reason: &'a Reason<'a>, kind: PrimKind) -> &'a Ty<'a> {
         self.mk(reason, Ty_::Tprim(self.alloc(kind)))
     }
     pub fn class(

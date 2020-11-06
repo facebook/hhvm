@@ -659,7 +659,6 @@ and hint_
   | Aast.Hnothing ->
     Errors.internal_error Pos.none "Unexpected hint not present on legacy AST";
     N.Herr
-  | Aast.Hpu_access (h, id) -> N.Hpu_access (hint ~allow_retonly env h, id)
 
 and hint_id
     ~forbid_this ~allow_retonly ~allow_wildcard ~tp_depth env ((p, x) as id) hl
@@ -933,7 +932,6 @@ let rec class_ ctx c =
   in
   let methods = List.map ~f:(method_ (fst env)) methods in
   let uses = List.map ~f:(hint env) c.Aast.c_uses in
-  let pu_enums = List.map ~f:(class_pu_enum env) c.Aast.c_pu_enums in
   let xhp_attr_uses = List.map ~f:(hint env) c.Aast.c_xhp_attr_uses in
   let (c_req_extends, c_req_implements) = Aast.split_reqs c in
   if
@@ -1005,7 +1003,6 @@ let rec class_ ctx c =
     N.c_namespace = c.Aast.c_namespace;
     N.c_enum = enum;
     N.c_doc_comment = c.Aast.c_doc_comment;
-    N.c_pu_enums = pu_enums;
     N.c_xhp_children = c.Aast.c_xhp_children;
     (* Naming and typechecking shouldn't use these fields *)
     N.c_attributes = [];
@@ -1944,7 +1941,6 @@ and expr_ env p (e : Nast.expr_) =
   | Aast.Lvar x ->
     let x = (fst x, Local_id.to_string @@ snd x) in
     N.Lvar (Env.lvar env x)
-  | Aast.PU_atom x -> N.PU_atom x
   | Aast.Obj_get (e1, e2, nullsafe) ->
     (* If we encounter Obj_get(_,_,true) by itself, then it means "?->"
        is being used for instance property access; see the case below for
@@ -1978,13 +1974,6 @@ and expr_ env p (e : Nast.expr_) =
     let x1 = (p, Local_id.to_string lid) in
     N.Class_const (make_class_id env x1, x2)
   | Aast.Class_const _ -> (* TODO: report error in strict mode *) N.Any
-  | Aast.PU_identifier ((_, c), s1, s2) ->
-    begin
-      match c with
-      | Aast.CIexpr (_, Aast.Id x1) ->
-        N.PU_identifier (make_class_id env x1, s1, s2)
-      | _ -> failwith "TODO(T35357243): Error during parsing of PU_identifier"
-    end
   | Aast.Call ((_, Aast.Id (p, pseudo_func)), tal, el, unpacked_element)
     when String.equal pseudo_func SN.SpecialFunctions.echo ->
     arg_unpack_unexpected unpacked_element;
@@ -2461,71 +2450,6 @@ and attr env at =
   | Aast.Xhp_spread e -> N.Xhp_spread (expr env e)
 
 and string2 env idl = List.map idl (expr env)
-
-and class_pu_enum env pu_enum =
-  let open Aast in
-  (* Erase the variance information, we don't need it *)
-  let pu_case_types =
-    List.map
-      ~f:(fun tp -> { tp with tp_variance = Ast_defs.Invariant })
-      pu_enum.pu_case_types
-  in
-  (* We create here an extended environment to type the abstract part
-     of a PU enumeration (namely `case type` and `case` statement).
-     Since we are typing the abstract part (`case type/ case`), we only
-     add their name, without hints.
-  *)
-  let env_with_case_types =
-    let (genv, lenv) = env in
-    (extend_tparams genv pu_case_types, lenv)
-  in
-  let pu_case_values =
-    List.map
-      ~f:(fun (sid, h) -> (sid, hint ~forbid_this:true env_with_case_types h))
-      pu_enum.pu_case_values
-  in
-  let pu_members =
-    let member { pum_atom; pum_types; pum_exprs } =
-      let pum_types =
-        List.map pum_types ~f:(fun (id, h) ->
-            (id, hint ~forbid_this:true env h))
-      in
-      (* Now that the abstract part is translated, we are going to do the same
-         for each atom declaration (namely `:@A (type T = ..., foo = bar)`).
-         This time, the original environment is extended with the PU types
-         _and_ their specific hints since we have everything at hand
-      *)
-      let env_with_mapped_types =
-        let make_tparam (sid, hint) =
-          {
-            tp_variance = Ast_defs.Invariant;
-            tp_name = sid;
-            tp_parameters = [];
-            tp_constraints = [(Ast_defs.Constraint_eq, hint)];
-            tp_reified = Erased;
-            tp_user_attributes = [];
-          }
-        in
-        let (genv, lenv) = env in
-        (extend_tparams genv (List.map ~f:make_tparam pum_types), lenv)
-      in
-      let pum_exprs =
-        List.map ~f:(fun (s, e) -> (s, expr env_with_mapped_types e)) pum_exprs
-      in
-      { pum_atom; pum_types; pum_exprs }
-    in
-    List.map ~f:member pu_enum.pu_members
-  in
-  let pu_case_types = type_paraml env pu_case_types in
-  {
-    pu_annotation = ();
-    pu_name = pu_enum.pu_name;
-    pu_user_attributes = pu_enum.pu_user_attributes;
-    pu_is_final = pu_enum.pu_is_final;
-    pu_case_types;
-    pu_case_values;
-    pu_members;
-  }
 
 let record_field env rf =
   let (id, h, e) = rf in

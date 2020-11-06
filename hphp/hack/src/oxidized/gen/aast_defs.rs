@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<5397b8d95654b0da0c9a3369fd05b240>>
+// @generated SignedSource<<31c9d190052702d0593e92e77cc88a74>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -263,7 +263,6 @@ pub enum Hint_ {
     Hthis,
     Hdynamic,
     Hnothing,
-    HpuAccess(Hint, Sid),
     Hunion(Vec<Hint>),
     Hintersection(Vec<Hint>),
 }
@@ -271,10 +270,12 @@ pub enum Hint_ {
 /// AST types such as Happly("int", []) are resolved to Hprim values
 #[derive(
     Clone,
+    Copy,
     Debug,
     Deserialize,
     Eq,
     FromOcamlRep,
+    FromOcamlRepIn,
     Hash,
     NoPosHash,
     Ord,
@@ -294,10 +295,8 @@ pub enum Tprim {
     Tnum,
     Tarraykey,
     Tnoreturn,
-    /// plain Pocket Universe atom when we don't know which enum it is in.
-    /// E.g. `:@MyAtom`
-    Tatom(String),
 }
+impl TrivialDrop for Tprim {}
 
 #[derive(
     Clone,

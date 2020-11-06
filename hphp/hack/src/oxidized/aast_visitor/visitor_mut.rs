@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<837e2662a90b42ec921e432da82e1edc>>
+// @generated SignedSource<<8fd56b9da1acc3b4600e9866dc03c470>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -539,37 +539,6 @@ pub trait VisitorMut<'node> {
         &mut self,
         c: &mut <Self::P as Params>::Context,
         p: &'node mut ParamMutability,
-    ) -> Result<(), <Self::P as Params>::Error> {
-        p.recurse(c, self.object())
-    }
-    fn visit_pu_case_value(
-        &mut self,
-        c: &mut <Self::P as Params>::Context,
-        p: &'node mut PuCaseValue,
-    ) -> Result<(), <Self::P as Params>::Error> {
-        p.recurse(c, self.object())
-    }
-    fn visit_pu_enum(
-        &mut self,
-        c: &mut <Self::P as Params>::Context,
-        p: &'node mut PuEnum<
-            <Self::P as Params>::Ex,
-            <Self::P as Params>::Fb,
-            <Self::P as Params>::En,
-            <Self::P as Params>::Hi,
-        >,
-    ) -> Result<(), <Self::P as Params>::Error> {
-        p.recurse(c, self.object())
-    }
-    fn visit_pu_member(
-        &mut self,
-        c: &mut <Self::P as Params>::Context,
-        p: &'node mut PuMember<
-            <Self::P as Params>::Ex,
-            <Self::P as Params>::Fb,
-            <Self::P as Params>::En,
-            <Self::P as Params>::Hi,
-        >,
     ) -> Result<(), <Self::P as Params>::Error> {
         p.recurse(c, self.object())
     }

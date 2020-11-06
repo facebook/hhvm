@@ -47,8 +47,7 @@ let rec is_stringish env ty =
   | Tdynamic
   | Tobject
   | Tnonnull
-  | Tprim _
-  | Tpu _ ->
+  | Tprim _ ->
     true
   | Tvarray _
   | Tdarray _
@@ -57,7 +56,6 @@ let rec is_stringish env ty =
   | Ttuple _
   | Tfun _
   | Tshape _
-  | Tpu_type_access _
   | Taccess _ ->
     false
   | Tunapplied_alias _ ->

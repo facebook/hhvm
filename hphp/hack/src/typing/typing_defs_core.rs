@@ -7,7 +7,7 @@ use ocamlrep::{Allocator, OpaqueValue, ToOcamlRep};
 
 pub use oxidized_by_ref::typing_defs_core::*;
 
-pub type PrimKind<'a> = oxidized_by_ref::aast_defs::Tprim<'a>;
+pub type PrimKind = oxidized_by_ref::aast_defs::Tprim;
 
 #[derive(Debug)]
 pub struct SavedEnv;

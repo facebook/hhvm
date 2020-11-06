@@ -59,7 +59,6 @@ let to_class_type
       dc_substs;
       dc_consts;
       dc_typeconsts;
-      dc_pu_enums;
       dc_props;
       dc_sprops;
       dc_methods;
@@ -154,7 +153,6 @@ let to_class_type
           let ty = Decl_heap.Props.find_unsafe x in
           (get_pos ty, ty))
         dc_props;
-    tc_pu_enums = dc_pu_enums;
     tc_sprops =
       map_elements
         (fun x ->

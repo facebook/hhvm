@@ -245,7 +245,6 @@ let parse_options () =
   let disable_modes = ref false in
   let disable_hh_ignore_error = ref false in
   let enable_systemlib_annotations = ref false in
-  let enable_pocket_universes_syntax = ref false in
   let enable_higher_kinded_types = ref false in
   let allowed_fixme_codes_strict = ref ISet.empty in
   let allowed_fixme_codes_partial = ref ISet.empty in
@@ -555,9 +554,6 @@ let parse_options () =
       ( "--enable-systemlib-annotations",
         Arg.Set enable_systemlib_annotations,
         "Enable systemlib annotations" );
-      ( "--enable-pocket-universes-syntax",
-        Arg.Set enable_pocket_universes_syntax,
-        "Enable the pocket universes syntax" );
       ( "--enable-higher-kinded-types",
         Arg.Set enable_higher_kinded_types,
         "Enable support for higher-kinded types" );

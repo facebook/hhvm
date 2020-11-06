@@ -26,7 +26,7 @@
         ns_auto_ns_map = []; ns_is_codegen = false;
         ns_disable_xhp_element_mangling = false };
       c_user_attributes = []; c_file_attributes = []; c_enum = None;
-      c_pu_enums = []; c_doc_comment = None; c_emit_id = None });
+      c_doc_comment = None; c_emit_id = None });
   (Fun
      { f_span = [9:1-15:2]; f_annotation = (); f_mode = Mstrict;
        f_ret = ((), (Some ([9:17-21], (Hprim Tvoid))));

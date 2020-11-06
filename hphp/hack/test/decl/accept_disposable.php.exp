@@ -9,8 +9,8 @@
        [(Rhint (root|accept_disposable.php line 4, characters 25-35),
          (Tapply (([4:25-36], "\\IDisposable"), [])))];
        sc_implements_dynamic = false; sc_consts = []; sc_typeconsts = [];
-       sc_pu_enums = []; sc_props = []; sc_sprops = [];
-       sc_constructor = None; sc_static_methods = [];
+       sc_props = []; sc_sprops = []; sc_constructor = None;
+       sc_static_methods = [];
        sc_methods =
        [{ Shallow_decl_defs.sm_abstract = false; sm_final = false;
           sm_name = ([5:19-28], "__dispose"); sm_override = false;

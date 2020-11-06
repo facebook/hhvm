@@ -609,10 +609,6 @@ impl<'src> SmartConstructors for DirectDeclSmartConstructors<'src> {
         <Self as FlattenSmartConstructors<'src, State<'src>>>::make_type_constant(self, left_type, separator, right_type)
     }
 
-    fn make_pu_access(&mut self, left_type: Self::R, separator: Self::R, right_type: Self::R) -> Self::R {
-        <Self as FlattenSmartConstructors<'src, State<'src>>>::make_pu_access(self, left_type, separator, right_type)
-    }
-
     fn make_vector_type_specifier(&mut self, keyword: Self::R, left_angle: Self::R, type_: Self::R, trailing_comma: Self::R, right_angle: Self::R) -> Self::R {
         <Self as FlattenSmartConstructors<'src, State<'src>>>::make_vector_type_specifier(self, keyword, left_angle, type_, trailing_comma, right_angle)
     }
@@ -731,38 +727,6 @@ impl<'src> SmartConstructors for DirectDeclSmartConstructors<'src> {
 
     fn make_enum_atom_expression(&mut self, hash: Self::R, expression: Self::R) -> Self::R {
         <Self as FlattenSmartConstructors<'src, State<'src>>>::make_enum_atom_expression(self, hash, expression)
-    }
-
-    fn make_pocket_atom_expression(&mut self, glyph: Self::R, expression: Self::R) -> Self::R {
-        <Self as FlattenSmartConstructors<'src, State<'src>>>::make_pocket_atom_expression(self, glyph, expression)
-    }
-
-    fn make_pocket_identifier_expression(&mut self, qualifier: Self::R, pu_operator: Self::R, field: Self::R, operator: Self::R, name: Self::R) -> Self::R {
-        <Self as FlattenSmartConstructors<'src, State<'src>>>::make_pocket_identifier_expression(self, qualifier, pu_operator, field, operator, name)
-    }
-
-    fn make_pocket_atom_mapping_declaration(&mut self, glyph: Self::R, name: Self::R, left_paren: Self::R, mappings: Self::R, right_paren: Self::R, semicolon: Self::R) -> Self::R {
-        <Self as FlattenSmartConstructors<'src, State<'src>>>::make_pocket_atom_mapping_declaration(self, glyph, name, left_paren, mappings, right_paren, semicolon)
-    }
-
-    fn make_pocket_enum_declaration(&mut self, attributes: Self::R, modifiers: Self::R, enum_: Self::R, name: Self::R, left_brace: Self::R, fields: Self::R, right_brace: Self::R) -> Self::R {
-        <Self as FlattenSmartConstructors<'src, State<'src>>>::make_pocket_enum_declaration(self, attributes, modifiers, enum_, name, left_brace, fields, right_brace)
-    }
-
-    fn make_pocket_field_type_expr_declaration(&mut self, case: Self::R, type_: Self::R, name: Self::R, semicolon: Self::R) -> Self::R {
-        <Self as FlattenSmartConstructors<'src, State<'src>>>::make_pocket_field_type_expr_declaration(self, case, type_, name, semicolon)
-    }
-
-    fn make_pocket_field_type_declaration(&mut self, case: Self::R, type_: Self::R, type_parameter: Self::R, semicolon: Self::R) -> Self::R {
-        <Self as FlattenSmartConstructors<'src, State<'src>>>::make_pocket_field_type_declaration(self, case, type_, type_parameter, semicolon)
-    }
-
-    fn make_pocket_mapping_id_declaration(&mut self, name: Self::R, initializer: Self::R) -> Self::R {
-        <Self as FlattenSmartConstructors<'src, State<'src>>>::make_pocket_mapping_id_declaration(self, name, initializer)
-    }
-
-    fn make_pocket_mapping_type_declaration(&mut self, keyword: Self::R, name: Self::R, equal: Self::R, type_: Self::R) -> Self::R {
-        <Self as FlattenSmartConstructors<'src, State<'src>>>::make_pocket_mapping_type_declaration(self, keyword, name, equal, type_)
     }
 
 }

@@ -172,7 +172,6 @@ pub trait SmartConstructors: Clone {
     fn make_xhp_expression(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> Self::R;
     fn make_xhp_close(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> Self::R;
     fn make_type_constant(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> Self::R;
-    fn make_pu_access(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> Self::R;
     fn make_vector_type_specifier(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R) -> Self::R;
     fn make_keyset_type_specifier(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R) -> Self::R;
     fn make_tuple_type_explicit_specifier(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R) -> Self::R;
@@ -203,13 +202,5 @@ pub trait SmartConstructors: Clone {
     fn make_error(&mut self, arg0 : Self::R) -> Self::R;
     fn make_list_item(&mut self, arg0 : Self::R, arg1 : Self::R) -> Self::R;
     fn make_enum_atom_expression(&mut self, arg0 : Self::R, arg1 : Self::R) -> Self::R;
-    fn make_pocket_atom_expression(&mut self, arg0 : Self::R, arg1 : Self::R) -> Self::R;
-    fn make_pocket_identifier_expression(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R) -> Self::R;
-    fn make_pocket_atom_mapping_declaration(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R, arg5 : Self::R) -> Self::R;
-    fn make_pocket_enum_declaration(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R, arg5 : Self::R, arg6 : Self::R) -> Self::R;
-    fn make_pocket_field_type_expr_declaration(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R) -> Self::R;
-    fn make_pocket_field_type_declaration(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R) -> Self::R;
-    fn make_pocket_mapping_id_declaration(&mut self, arg0 : Self::R, arg1 : Self::R) -> Self::R;
-    fn make_pocket_mapping_type_declaration(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R) -> Self::R;
 
 }

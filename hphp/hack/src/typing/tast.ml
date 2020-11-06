@@ -119,10 +119,6 @@ type record_def = (Pos.t * ty, unit, saved_env, ty) Aast.record_def
 
 type gconst = (Pos.t * ty, unit, saved_env, ty) Aast.gconst
 
-type pu_enum = (Pos.t * ty, unit, saved_env, ty) Aast.pu_enum
-
-type pu_member = (Pos.t * ty, unit, saved_env, ty) Aast.pu_member
-
 let empty_saved_env tcopt : saved_env =
   {
     tcopt;

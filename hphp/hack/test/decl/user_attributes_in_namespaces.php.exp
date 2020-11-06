@@ -9,9 +9,9 @@
        [(Rhint (root|user_attributes_in_namespaces.php line 4, characters 24-41),
          (Tapply (([4:24-42], "\\HH\\ClassAttribute"), [])))];
        sc_implements_dynamic = false; sc_consts = []; sc_typeconsts = [];
-       sc_pu_enums = []; sc_props = []; sc_sprops = [];
-       sc_constructor = None; sc_static_methods = []; sc_methods = [];
-       sc_user_attributes = []; sc_enum_type = None }));
+       sc_props = []; sc_sprops = []; sc_constructor = None;
+       sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
+       sc_enum_type = None }));
   ("\\X\\Y\\Bar",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -23,9 +23,9 @@
         [(Rhint (root|user_attributes_in_namespaces.php line 7, characters 26-43),
           (Tapply (([7:26-44], "\\HH\\ClassAttribute"), [])))];
         sc_implements_dynamic = false; sc_consts = []; sc_typeconsts = [];
-        sc_pu_enums = []; sc_props = []; sc_sprops = [];
-        sc_constructor = None; sc_static_methods = []; sc_methods = [];
-        sc_user_attributes = []; sc_enum_type = None }));
+        sc_props = []; sc_sprops = []; sc_constructor = None;
+        sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
+        sc_enum_type = None }));
   ("\\X\\C",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -34,7 +34,7 @@
         sc_where_constraints = []; sc_extends = []; sc_uses = [];
         sc_xhp_attr_uses = []; sc_req_extends = []; sc_req_implements = [];
         sc_implements = []; sc_implements_dynamic = false; sc_consts = [];
-        sc_typeconsts = []; sc_pu_enums = []; sc_props = []; sc_sprops = [];
+        sc_typeconsts = []; sc_props = []; sc_sprops = [];
         sc_constructor = None; sc_static_methods = []; sc_methods = [];
         sc_user_attributes =
         [{ Typing_defs_core.ua_name = ([10:10-15], "\\X\\Y\\Bar");

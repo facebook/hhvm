@@ -63,8 +63,7 @@
            ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
          }
         ];
-      c_enum = None; c_pu_enums = []; c_doc_comment = None; c_emit_id = None
-      });
+      c_enum = None; c_doc_comment = None; c_emit_id = None });
   (Class
      { c_span = [9:1-50]; c_annotation = (); c_mode = Mstrict;
        c_final = false; c_is_xhp = false; c_has_xhp_keyword = false;
@@ -105,8 +104,7 @@
             ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
           }
          ];
-       c_enum = None; c_pu_enums = []; c_doc_comment = None; c_emit_id = None
-       });
+       c_enum = None; c_doc_comment = None; c_emit_id = None });
   (Class
      { c_span = [10:1-49]; c_annotation = (); c_mode = Mstrict;
        c_final = false; c_is_xhp = false; c_has_xhp_keyword = false;
@@ -147,8 +145,7 @@
             ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
           }
          ];
-       c_enum = None; c_pu_enums = []; c_doc_comment = None; c_emit_id = None
-       });
+       c_enum = None; c_doc_comment = None; c_emit_id = None });
   (Class
      { c_span = [11:1-53]; c_annotation = (); c_mode = Mstrict;
        c_final = false; c_is_xhp = false; c_has_xhp_keyword = false;
@@ -189,8 +186,7 @@
             ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
           }
          ];
-       c_enum = None; c_pu_enums = []; c_doc_comment = None; c_emit_id = None
-       });
+       c_enum = None; c_doc_comment = None; c_emit_id = None });
   (Class
      { c_span = [12:1-53]; c_annotation = (); c_mode = Mstrict;
        c_final = false; c_is_xhp = false; c_has_xhp_keyword = false;
@@ -231,8 +227,7 @@
             ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
           }
          ];
-       c_enum = None; c_pu_enums = []; c_doc_comment = None; c_emit_id = None
-       });
+       c_enum = None; c_doc_comment = None; c_emit_id = None });
   (Class
      { c_span = [13:1-65]; c_annotation = (); c_mode = Mstrict;
        c_final = false; c_is_xhp = false; c_has_xhp_keyword = false;
@@ -274,8 +269,7 @@
             ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
           }
          ];
-       c_enum = None; c_pu_enums = []; c_doc_comment = None; c_emit_id = None
-       });
+       c_enum = None; c_doc_comment = None; c_emit_id = None });
   (Class
      { c_span = [14:1-63]; c_annotation = (); c_mode = Mstrict;
        c_final = false; c_is_xhp = false; c_has_xhp_keyword = false;
@@ -317,8 +311,7 @@
             ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
           }
          ];
-       c_enum = None; c_pu_enums = []; c_doc_comment = None; c_emit_id = None
-       });
+       c_enum = None; c_doc_comment = None; c_emit_id = None });
   (Class
      { c_span = [15:1-54]; c_annotation = (); c_mode = Mstrict;
        c_final = false; c_is_xhp = false; c_has_xhp_keyword = false;
@@ -360,8 +353,7 @@
             ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
           }
          ];
-       c_enum = None; c_pu_enums = []; c_doc_comment = None; c_emit_id = None
-       });
+       c_enum = None; c_doc_comment = None; c_emit_id = None });
   (Class
      { c_span = [16:1-59]; c_annotation = (); c_mode = Mstrict;
        c_final = false; c_is_xhp = false; c_has_xhp_keyword = false;
@@ -403,8 +395,7 @@
             ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
           }
          ];
-       c_enum = None; c_pu_enums = []; c_doc_comment = None; c_emit_id = None
-       });
+       c_enum = None; c_doc_comment = None; c_emit_id = None });
   (Class
      { c_span = [17:1-50]; c_annotation = (); c_mode = Mstrict;
        c_final = false; c_is_xhp = false; c_has_xhp_keyword = false;
@@ -445,8 +436,7 @@
             ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
           }
          ];
-       c_enum = None; c_pu_enums = []; c_doc_comment = None; c_emit_id = None
-       });
+       c_enum = None; c_doc_comment = None; c_emit_id = None });
   (Fun
      { f_span = [19:1-20:60]; f_annotation = (); f_mode = Mstrict;
        f_ret = ((void), (Some ([20:53-57], (Hprim Tvoid))));
@@ -645,8 +635,7 @@
             ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
           }
          ];
-       c_enum = None; c_pu_enums = []; c_doc_comment = None; c_emit_id = None
-       });
+       c_enum = None; c_doc_comment = None; c_emit_id = None });
   (Class
      { c_span = [32:1-33:16]; c_annotation = (); c_mode = Mstrict;
        c_final = false; c_is_xhp = false; c_has_xhp_keyword = false;
@@ -706,7 +695,7 @@
        c_enum =
        (Some { e_base = ([33:10-13], (Hprim Tint)); e_constraint = None;
                e_includes = []; e_enum_class = false });
-       c_pu_enums = []; c_doc_comment = None; c_emit_id = None });
+       c_doc_comment = None; c_emit_id = None });
   (Typedef
      { t_annotation = (); t_name = ([36:6-8], "\\tt"); t_tparams = [];
        t_constraint = None; t_kind = ([36:11-14], (Hprim Tint));

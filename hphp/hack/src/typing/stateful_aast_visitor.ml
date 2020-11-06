@@ -38,12 +38,6 @@ class type virtual ['env] nast_visitor_with_state =
 
     method at_file_attribute : 'env -> Nast.file_attribute -> 'env
 
-    method at_pu_enum : 'env -> Nast.pu_enum -> 'env
-
-    method at_pu_member : 'env -> Nast.pu_member -> 'env
-
-    method at_pu_case_value : 'env -> Nast.pu_case_value -> 'env
-
     method at_shape_field_name : 'env -> Nast.shape_field_name -> 'env
 
     method at_user_attribute : 'env -> Nast.user_attribute -> 'env
@@ -87,12 +81,6 @@ class virtual ['env] default_nast_visitor_with_state :
     method at_gconst env _ = env
 
     method at_file_attribute env _ = env
-
-    method at_pu_enum env _ = env
-
-    method at_pu_member env _ = env
-
-    method at_pu_case_value env _ = env
 
     method at_shape_field_name env _ = env
 
@@ -142,13 +130,6 @@ let combine_visitors =
 
       method at_file_attribute =
         visit visitor1#at_file_attribute visitor2#at_file_attribute
-
-      method at_pu_enum = visit visitor1#at_pu_enum visitor2#at_pu_enum
-
-      method at_pu_member = visit visitor1#at_pu_member visitor2#at_pu_member
-
-      method at_pu_case_value =
-        visit visitor1#at_pu_case_value visitor2#at_pu_case_value
 
       method at_shape_field_name =
         visit visitor1#at_shape_field_name visitor2#at_shape_field_name
@@ -220,18 +201,6 @@ let checker (visitor : 'env nast_visitor_with_state) =
     method! on_file_attribute env fa =
       let env = visitor#at_file_attribute env fa in
       super#on_file_attribute env fa
-
-    method! on_pu_enum env pu_enum =
-      let env = visitor#at_pu_enum env pu_enum in
-      super#on_pu_enum env pu_enum
-
-    method! on_pu_member env pu_member =
-      let env = visitor#at_pu_member env pu_member in
-      super#on_pu_member env pu_member
-
-    method! on_pu_case_value env pu_case_value =
-      let env = visitor#at_pu_case_value env pu_case_value in
-      super#on_pu_case_value env pu_case_value
 
     method! on_shape_field_name env sfn =
       let env = visitor#at_shape_field_name env sfn in

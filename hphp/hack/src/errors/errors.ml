@@ -1670,137 +1670,6 @@ let invalid_mutability_in_return_type_hint pos =
     pos
     "`OwnedMutable` is the only mutability related hint allowed in return type annotation for reactive function types."
 
-let pu_case_in_trait pos kind =
-  add
-    (Naming.err_code Naming.PocketUniversesNotInClass)
-    pos
-    (sprintf "Case %s is not allowed in traits" kind)
-
-let pu_duplication pos kind name seen =
-  let name = strip_ns name in
-  let seen = strip_ns seen in
-  add
-    (Naming.err_code Naming.PocketUniversesDuplication)
-    pos
-    (sprintf
-       "Pocket Universe %s %s is already declared in %s"
-       kind
-       (Markdown_lite.md_codify name)
-       (Markdown_lite.md_codify seen))
-
-let pu_duplication_in_instance pos kind name seen =
-  let name = strip_ns name in
-  let seen = strip_ns seen in
-  add
-    (Naming.err_code Naming.PocketUniversesDuplication)
-    pos
-    (sprintf
-       "%s %s is already assigned in %s"
-       kind
-       (Markdown_lite.md_codify name)
-       (Markdown_lite.md_codify seen))
-
-let pu_not_in_class pos name loc =
-  let name = strip_ns name in
-  let loc = strip_ns loc in
-  add
-    (Naming.err_code Naming.PocketUniversesNotInClass)
-    pos
-    (sprintf
-       "Pocket Universe %s is defined outside a class (%s)"
-       (Markdown_lite.md_codify name)
-       (Markdown_lite.md_codify loc))
-
-let pu_atom_missing pos name kind loc missing =
-  let name = strip_ns name in
-  let loc = strip_ns loc in
-  add
-    (Naming.err_code Naming.PocketUniversesAtomMissing)
-    pos
-    (sprintf
-       "In Pocket Universe %s, atom %s is missing %s %s"
-       (Markdown_lite.md_codify loc)
-       (Markdown_lite.md_codify name)
-       kind
-       (Markdown_lite.md_codify missing))
-
-let pu_atom_unknown pos name kind loc unk =
-  let name = strip_ns name in
-  let loc = strip_ns loc in
-  add
-    (Naming.err_code Naming.PocketUniversesAtomUnknown)
-    pos
-    (sprintf
-       "In Pocket Universe %s, atom %s declares unknown %s %s"
-       (Markdown_lite.md_codify loc)
-       (Markdown_lite.md_codify name)
-       kind
-       (Markdown_lite.md_codify unk))
-
-let pu_localize pos pu dep_ty =
-  let pu = strip_ns pu in
-  let dep_ty = strip_ns dep_ty in
-  add
-    (Naming.err_code Naming.PocketUniversesLocalization)
-    pos
-    (sprintf
-       "In the context of %s, cannot expand %s"
-       (Markdown_lite.md_codify pu)
-       (Markdown_lite.md_codify dep_ty))
-
-let pu_invalid_access pos msg =
-  add
-    (Naming.err_code Naming.PocketUniversesLocalization)
-    pos
-    ("Invalid Pocket Universe invocation" ^ msg)
-
-let pu_attribute_invalid pos =
-  add
-    (Typing.err_code Typing.PocketUniversesAttributes)
-    pos
-    "Invalid `__Pu` attribute"
-
-let pu_attribute_dup pos kind s =
-  let s = strip_ns s in
-  add
-    (Typing.err_code Typing.PocketUniversesAttributes)
-    pos
-    (sprintf
-       "Duplicated %s %s in `__Pu` attribute"
-       kind
-       (Markdown_lite.md_codify s))
-
-let pu_attribute_err pos kind class_name enum_name attr_name =
-  let class_name = strip_ns class_name in
-  add
-    (Typing.err_code Typing.PocketUniversesAttributes)
-    pos
-    (sprintf
-       "Class/Trait %s has a %s attribute %s for enumeration %s"
-       (Markdown_lite.md_codify class_name)
-       kind
-       (Markdown_lite.md_codify attr_name)
-       (Markdown_lite.md_codify enum_name))
-
-let pu_attribute_suggestion pos class_name content =
-  let class_name = strip_ns class_name in
-  add
-    (Typing.err_code Typing.PocketUniversesAttributes)
-    pos
-    (sprintf
-       "Class/Trait %s should have the attribute:\n`__Pu(%s)`"
-       (Markdown_lite.md_codify class_name)
-       content)
-
-let pu_attribute_not_necessary pos class_name =
-  let class_name = strip_ns class_name in
-  add
-    (Typing.err_code Typing.PocketUniversesAttributes)
-    pos
-    (sprintf
-       "Class/Trait %s does not need any `__Pu` attribute"
-       (Markdown_lite.md_codify class_name))
-
 let illegal_use_of_dynamically_callable attr_pos meth_pos visibility =
   add_list
     (Naming.err_code Naming.IllegalUseOfDynamicallyCallable)
@@ -3934,8 +3803,6 @@ let class_property_initializer_type_does_not_match_hint =
 let xhp_attribute_does_not_match_hint =
   maybe_unify_error Typing.XhpAttributeValueDoesNotMatchHint
 
-let pocket_universes_typing = maybe_unify_error Typing.PocketUniversesTyping
-
 let record_init_value_does_not_match_hint =
   maybe_unify_error Typing.RecordInitValueDoesNotMatchHint
 
@@ -4292,37 +4159,6 @@ let mutable_return_result_mismatch
         else
           m1 );
     ]
-
-let pu_expansion pos ty name =
-  let ty = strip_ns ty in
-  add
-    (Typing.err_code Typing.PocketUniversesExpansion)
-    pos
-    (sprintf "Cannot project type %s from %s." name ty)
-
-let pu_typing pos kind msg =
-  add
-    (Typing.err_code Typing.PocketUniversesTyping)
-    pos
-    (sprintf "Unexpected Pocket Universes %s %s during typing." kind msg)
-
-let pu_typing_not_supported pos =
-  add
-    (Typing.err_code Typing.PocketUniversesTyping)
-    pos
-    "Unsupported Pocket Universes member."
-
-let pu_typing_invalid_upper_bounds pos =
-  let msg =
-    "There isn't enough information to infer what pocket universe this atom is from"
-  in
-  add (Typing.err_code Typing.PocketUniversesInvalidUpperBounds) pos msg
-
-let pu_typing_refinement pos =
-  add
-    (Typing.err_code Typing.PocketUniversesRefinement)
-    pos
-    "Pocket Universes are not allowed on the right-hand side of `is`/`as`"
 
 let php_lambda_disallowed pos =
   add

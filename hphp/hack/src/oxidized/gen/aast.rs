@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<9dd7ee8fce5f698202093749d1b481e8>>
+// @generated SignedSource<<3b3acdce96170e5ece3d4427ac321eb5>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -412,8 +412,6 @@ pub enum Expr_<Ex, Fb, En, Hi> {
         )>,
     ),
     Assert(Box<AssertExpr<Ex, Fb, En, Hi>>),
-    PUAtom(String),
-    PUIdentifier(Box<(ClassId<Ex, Fb, En, Hi>, Pstring, Pstring)>),
     ETSplice(Box<Expr<Ex, Fb, En, Hi>>),
     EnumAtom(String),
     Any,
@@ -869,7 +867,6 @@ pub struct Class_<Ex, Fb, En, Hi> {
     pub user_attributes: Vec<UserAttribute<Ex, Fb, En, Hi>>,
     pub file_attributes: Vec<FileAttribute<Ex, Fb, En, Hi>>,
     pub enum_: Option<Enum_>,
-    pub pu_enums: Vec<PuEnum<Ex, Fb, En, Hi>>,
     pub doc_comment: Option<DocComment>,
     pub emit_id: Option<EmitId>,
 }
@@ -1223,92 +1220,6 @@ pub struct RecordDef<Ex, Fb, En, Hi> {
 }
 
 pub type RecordHint = Hint;
-
-/// Pocket Universe Enumeration, e.g.
-///
-/// ```
-///   enum Foo { // pu_name
-///     // pu_case_types
-///     case type T0;
-///     case type T1;
-///
-///     // pu_case_values
-///     case ?T0 default_value;
-///     case T1 foo;
-///
-///     // pu_members
-///     :@A( // pum_atom
-///       // pum_types
-///       type T0 = string,
-///       type T1 = int,
-///
-///       // pum_exprs
-///       default_value = null,
-///       foo = 42,
-///     );
-///     :@B( ... )
-///     ...
-///   }
-/// ```
-#[derive(
-    Clone,
-    Debug,
-    Deserialize,
-    Eq,
-    FromOcamlRep,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-pub struct PuEnum<Ex, Fb, En, Hi> {
-    pub annotation: En,
-    pub name: Sid,
-    pub user_attributes: Vec<UserAttribute<Ex, Fb, En, Hi>>,
-    pub is_final: bool,
-    pub case_types: Vec<Tparam<Ex, Fb, En, Hi>>,
-    pub case_values: Vec<PuCaseValue>,
-    pub members: Vec<PuMember<Ex, Fb, En, Hi>>,
-}
-
-#[derive(
-    Clone,
-    Debug,
-    Deserialize,
-    Eq,
-    FromOcamlRep,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-pub struct PuCaseValue(pub Sid, pub Hint);
-
-#[derive(
-    Clone,
-    Debug,
-    Deserialize,
-    Eq,
-    FromOcamlRep,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-pub struct PuMember<Ex, Fb, En, Hi> {
-    pub atom: Sid,
-    pub types: Vec<(Sid, Hint)>,
-    pub exprs: Vec<(Sid, Expr<Ex, Fb, En, Hi>)>,
-}
 
 pub type FunDef<Ex, Fb, En, Hi> = Fun_<Ex, Fb, En, Hi>;
 

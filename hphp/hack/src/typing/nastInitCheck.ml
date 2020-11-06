@@ -509,7 +509,6 @@ and expr_ env acc p e =
   | Smethod_id _
   | Method_caller _
   | EnumAtom _
-  | PU_atom _
   | Id _ ->
     acc
   | Lvar _
@@ -634,7 +633,6 @@ and expr_ env acc p e =
   | Collection _ -> acc
   | BracedExpr _ -> acc
   | ParenthesizedExpr _ -> acc
-  | PU_identifier _ -> acc
   | FunctionPointer _ -> acc
   | ET_Splice e -> expr acc e
 

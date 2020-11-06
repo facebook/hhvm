@@ -114,47 +114,6 @@ module ConditionTypes = struct
     | _ -> do_localize ty
 end
 
-(* Fetch all the constraints of a `Tpu_type_access(tparam, tyname)`, which
- * are stored in a PU definition, and filter them to only keep upper bounds
- *)
-let get_tpu_type_param_upper_bounds env tparam tyname =
-  (* Filter the decl type parameter constraints to only keep the `as` ones *)
-  let filter_constraints env ety_env decl_tparam =
-    List.filter_map_env env decl_tparam.tp_constraints ~f:(fun env (ck, dty) ->
-        match ck with
-        (* Only keep the "as" constraints *)
-        | Ast_defs.Constraint_as ->
-          let (env, lty) = Phase.localize ~ety_env env dty in
-          (env, Some lty)
-        | _ -> (env, None))
-  in
-  (* when tparam is bound by a Tpu(C, E), we look at the definition
-   * of the PU to get the constraints on `case type tyname`.
-   * We accumulate such constraints in `acc`
-   *)
-  let get_case_type_constraints env cls enum acc =
-    (* Get the type parameter associated to tyname in this PU *)
-    let (env, info) = TUtils.class_get_pu_type env cls enum tyname in
-    let (env, ltys) =
-      match info with
-      | None -> (env, [])
-      | Some (ety_env, (_, decl_tparam)) ->
-        filter_constraints env ety_env decl_tparam
-    in
-    (env, List.rev_append acc ltys)
-  in
-  (* Get upper bounds of the tparam generic *)
-  (* TODO(T70090664): added dummy [] here as type arguments *)
-  let upper_bounds = Env.get_upper_bounds env tparam [] in
-  Typing_set.fold
-    (fun bound (env, acc) ->
-      match get_node bound with
-      (* Only inspect Tpu bounds *)
-      | Tpu (cls, (_, enum)) -> get_case_type_constraints env cls enum acc
-      | _ -> (env, acc))
-    upper_bounds
-    (env, [])
-
 (* Given a pair of types `ty_sub` and `ty_super` attempt to apply simplifications
  * and add to the accumulated constraints in `constraints` any necessary and
  * sufficient [(t1,ck1,u1);...;(tn,ckn,un)] such that
@@ -532,50 +491,6 @@ and default_subtype
           if_unsat (invalid ~fail)
         | (_, Tdynamic) when subtype_env.treat_dynamic_as_bottom -> valid env
         | (_, Taccess _) -> invalid ~fail env
-        | (_, Tpu_type_access ((_pm, msub), (_pn, nsub))) ->
-          (* If member is actually an expression dependent type,
-           * we need to update this_ty
-           *)
-          let this_ty =
-            if DependentKind.is_generic_dep_ty msub && Option.is_none this_ty
-            then
-              Some lty_sub
-            else
-              this_ty
-          in
-          (*
-           * We are checking if msub:@nsub is a subtype of ty_super.
-           * Since msub is a generic parameter, we are scanning all of its
-           * upper bounds and look for all C:@E.
-           * We then scan the PU definition of these C:@E to gather the 'as'
-           * constraints on the type `case type nsub`.
-           *
-           * Finally, we attempt to use those in recursive subtype calls
-           * to check if they are <: ty_super.
-           *)
-          let (env, upper_bounds) =
-            get_tpu_type_param_upper_bounds env msub nsub
-          in
-          let rec try_bounds tyl env =
-            match tyl with
-            | [] -> invalid ~fail env
-            | [ty] ->
-              simplify_subtype_i
-                ~subtype_env
-                ~this_ty
-                (LoclType ty)
-                ty_super
-                env
-            | ty :: tyl ->
-              env
-              |> try_bounds tyl
-              ||| simplify_subtype_i
-                    ~subtype_env
-                    ~this_ty
-                    (LoclType ty)
-                    ty_super
-          in
-          env |> try_bounds upper_bounds |> if_unsat (invalid ~fail)
         | _ -> invalid ~fail env
       end
   in
@@ -1147,8 +1062,7 @@ and simplify_subtype_i
           | ( ( _,
                 ( Tdynamic | Tprim _ | Tnonnull | Tfun _ | Ttuple _ | Tshape _
                 | Tobject | Tclass _ | Tvarray _ | Tdarray _
-                | Tvarray_or_darray _ | Tany _ | Terr | Tpu _
-                | Tpu_type_access _ | Taccess _ ) ),
+                | Tvarray_or_darray _ | Tany _ | Terr | Taccess _ ) ),
               _ ) ->
             simplify_subtype ~subtype_env ~this_ty lty_sub arg_ty_super env)
       )
@@ -1295,10 +1209,9 @@ and simplify_subtype_i
             ( Tprim
                 Nast.(
                   ( Tint | Tbool | Tfloat | Tstring | Tresource | Tnum
-                  | Tarraykey | Tnoreturn | Tatom _ ))
+                  | Tarraykey | Tnoreturn ))
             | Tnonnull | Tfun _ | Ttuple _ | Tshape _ | Tobject | Tclass _
-            | Tvarray _ | Tdarray _ | Tvarray_or_darray _ | Tpu _
-            | Tpu_type_access _ | Taccess _ ) ) ->
+            | Tvarray _ | Tdarray _ | Tvarray_or_darray _ | Taccess _ ) ) ->
           valid env
         | _ -> default_subtype env))
     | (_, Tdynamic) ->
@@ -1313,12 +1226,7 @@ and simplify_subtype_i
       | LoclType lty ->
         (match (deref lty, prim_ty) with
         | ((_, Tprim (Nast.Tint | Nast.Tfloat)), Nast.Tnum) -> valid env
-        | ((_, Tprim (Nast.Tatom _)), Nast.Tstring) -> valid env
-        | ((_, Tpu (_, _)), Nast.Tstring) -> valid env
-        | ((_, Tprim (Nast.Tatom _ | Nast.Tint | Nast.Tstring)), Nast.Tarraykey)
-          ->
-          valid env
-        | ((_, Tpu (_, _)), Nast.Tarraykey) -> valid env
+        | ((_, Tprim (Nast.Tint | Nast.Tstring)), Nast.Tarraykey) -> valid env
         | ((_, Tprim prim_sub), _) when Aast.equal_tprim prim_sub prim_ty ->
           valid env
         | ((_, Toption arg_ty_sub), Nast.Tnull) ->
@@ -1359,52 +1267,6 @@ and simplify_subtype_i
         | _ ->
           let ty_super = anyfy env r_super ty_sub in
           simplify_subtype ~subtype_env ~this_ty ty_sub ty_super env))
-    | (_, Tpu (base_super, (_, enum_super))) ->
-      (match ety_sub with
-      | ConstraintType _ -> default_subtype env
-      | LoclType lty ->
-        (match deref lty with
-        (* TODO: document contravariance *)
-        | (_, Tpu (base_sub, (_, enum_sub)))
-          when String.equal enum_sub enum_super ->
-          simplify_subtype ~subtype_env ~this_ty base_super base_sub env
-        (* Atom vs Tpu: check for membership *)
-        | (_, Tprim (Aast_defs.Tatom atom))
-          when Option.is_some
-               @@ snd
-               @@ TUtils.class_get_pu_member env base_super enum_super atom ->
-          valid env
-        | _ -> default_subtype env))
-    | (_, Tpu_type_access (msuper, nsuper)) ->
-      (match ety_sub with
-      | ConstraintType _ -> default_subtype env
-      | LoclType ty_sub ->
-        (match get_node ty_sub with
-        | Tpu_type_access (msub, nsub) ->
-          if
-            String.equal (snd nsub) (snd nsuper)
-            && String.equal (snd msub) (snd msuper)
-          then
-            valid env
-          else
-            (* It's not 100% clear if we should use invalid_env directly or
-             * not. All my attempts a building an error here is always
-             * caught beforehand *)
-            default_subtype env
-        | Tunion _
-        | Tvar _
-        | Tintersection _ ->
-          default_subtype env
-        | _ ->
-          (* TODO: check if err is still needed *)
-          let err () =
-            let reason = get_reason ty_sub in
-            if Typing_utils.is_any env ty_sub then
-              ()
-            else
-              Errors.pu_typing_not_supported (Reason.to_pos reason)
-          in
-          invalid_env_with env err))
     | (r_super, Tfun ft_super) ->
       (match ety_sub with
       | ConstraintType _ -> default_subtype env
@@ -3081,13 +2943,6 @@ and add_tyvar_upper_bound_and_close
             ~on_error
             ~as_tyvar_with_cnstr:true
         in
-        let env =
-          Typing_subtype_pocket_universes.make_all_pu_equal
-            env
-            var
-            upper_bound
-            ~on_error
-        in
         ITySet.fold
           (fun lower_bound (env, prop1) ->
             let (env, prop2) =
@@ -3133,13 +2988,6 @@ and add_tyvar_lower_bound_and_close
             lower_bound
             ~on_error
             ~as_tyvar_with_cnstr:false
-        in
-        let env =
-          Typing_subtype_pocket_universes.make_all_pu_equal
-            env
-            var
-            lower_bound
-            ~on_error
         in
         ITySet.fold
           (fun upper_bound (env, prop1) ->

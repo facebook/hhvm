@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<dc19e0238fcb868ac0c30e799e452557>>
+// @generated SignedSource<<61bd4e238dbd18187a23e9961b1691d6>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -63,48 +63,6 @@ pub struct ShallowTypeconst<'a> {
     pub reifiable: Option<&'a pos::Pos<'a>>,
 }
 impl<'a> TrivialDrop for ShallowTypeconst<'a> {}
-
-#[derive(
-    Clone,
-    Debug,
-    Eq,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-pub struct ShallowPuMember<'a> {
-    pub atom: ast_defs::Id<'a>,
-    pub types: &'a [(ast_defs::Id<'a>, &'a Ty<'a>)],
-    pub exprs: &'a [ast_defs::Id<'a>],
-}
-impl<'a> TrivialDrop for ShallowPuMember<'a> {}
-
-#[derive(
-    Clone,
-    Debug,
-    Eq,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-pub struct ShallowPuEnum<'a> {
-    pub name: ast_defs::Id<'a>,
-    pub is_final: bool,
-    pub case_types: &'a [&'a Tparam<'a>],
-    pub case_values: &'a [(ast_defs::Id<'a>, &'a Ty<'a>)],
-    pub members: &'a [&'a ShallowPuMember<'a>],
-}
-impl<'a> TrivialDrop for ShallowPuEnum<'a> {}
 
 #[derive(
     Clone,
@@ -189,7 +147,6 @@ pub struct ShallowClass<'a> {
     pub implements_dynamic: bool,
     pub consts: &'a [&'a ShallowClassConst<'a>],
     pub typeconsts: &'a [&'a ShallowTypeconst<'a>],
-    pub pu_enums: &'a [&'a ShallowPuEnum<'a>],
     pub props: &'a [&'a ShallowProp<'a>],
     pub sprops: &'a [&'a ShallowProp<'a>],
     pub constructor: Option<&'a ShallowMethod<'a>>,

@@ -23,8 +23,6 @@ type aggregate_type =
   | ObjectCreationWhat
   | TODO
   | Name
-  | PUMapping
-  | PUField
 
 type child_spec =
   | Token (* Special case, since it's so common, synonym of `Just "Token"` *)
@@ -1954,20 +1952,6 @@ let schema : schema_node list =
         ];
     };
     {
-      kind_name = "PUAccess";
-      type_name = "pu_access";
-      func_name = "pu_access";
-      description = "pu_access";
-      prefix = "pu_access";
-      aggregates = [Statement];
-      fields =
-        [
-          ("left_type", Aggregate Specifier);
-          ("separator", Token);
-          ("right_type", Token);
-        ];
-    };
-    {
       kind_name = "VectorTypeSpecifier";
       type_name = "vector_type_specifier";
       func_name = "vector_type_specifier";
@@ -2369,138 +2353,6 @@ let schema : schema_node list =
       aggregates = [Expression];
       fields = [("hash", Token); ("expression", Token)];
     };
-    {
-      kind_name = "PocketAtomExpression";
-      type_name = "pocket_atom_expression";
-      func_name = "pocket_atom_expression";
-      description = "pocket_atom";
-      prefix = "pocket_atom";
-      aggregates = [Expression];
-      fields = [("glyph", Token); ("expression", Token)];
-    }
-    (* Syntax for Class:@Field::name where
-     Class is the qualifier
-     pu_operator must be :@
-     Field is the field
-     operator must be ::
-     name is the name
-  *);
-    {
-      kind_name = "PocketIdentifierExpression";
-      type_name = "pocket_identifier_expression";
-      func_name = "pocket_identifier_expression";
-      description = "pocket_identifier";
-      prefix = "pocket_identifier";
-      aggregates = [Expression; ConstructorExpression; LambdaBody];
-      fields =
-        [
-          ("qualifier", Aggregate Expression);
-          ("pu_operator", Token);
-          ("field", Aggregate Expression);
-          ("operator", Token);
-          ("name", Aggregate Expression);
-        ];
-    }
-    (* PocketUniverse: because of the trailing ';' I didn't want to
-   add the aggragte PUField to PocketAtomExpression, so I made the ( ... )
-   part optional. It will be up to the parser to only parse the two
-   possible syntax:
-   :@A;
-   :@A ( ... );
-*);
-    {
-      kind_name = "PocketAtomMappingDeclaration";
-      type_name = "pocket_atom_mapping_declaration";
-      func_name = "pocket_atom_mapping_declaration";
-      description = "pocket_atom_mapping";
-      prefix = "pocket_atom_mapping";
-      aggregates = [PUField];
-      fields =
-        [
-          ("glyph", Token);
-          ("name", Aggregate Expression);
-          ("left_paren", ZeroOrOne Token);
-          ("mappings", ZeroOrMore (Aggregate PUMapping));
-          ("right_paren", ZeroOrOne Token);
-          ("semicolon", Token);
-        ];
-    };
-    {
-      kind_name = "PocketEnumDeclaration";
-      type_name = "pocket_enum_declaration";
-      func_name = "pocket_enum_declaration";
-      description = "pocket_enum_declaration";
-      prefix = "pocket_enum";
-      aggregates = [ClassBodyDeclaration];
-      fields =
-        [
-          ("attributes", ZeroOrOne (Aggregate AttributeSpecification));
-          ("modifiers", ZeroOrMore Token);
-          ("enum", Token);
-          ("name", Token);
-          ("left_brace", Token);
-          ("fields", ZeroOrMore (Aggregate PUField));
-          ("right_brace", Token);
-        ];
-    };
-    {
-      kind_name = "PocketFieldTypeExprDeclaration";
-      type_name = "pocket_field_type_expr_declaration";
-      func_name = "pocket_field_type_expr_declaration";
-      description = "pocket_field_type_expr_declaration";
-      prefix = "pocket_field_type_expr";
-      aggregates = [PUField];
-      fields =
-        [
-          ("case", Token);
-          ("type", Aggregate Specifier);
-          ("name", Aggregate Expression);
-          ("semicolon", Token);
-        ];
-    };
-    {
-      kind_name = "PocketFieldTypeDeclaration";
-      type_name = "pocket_field_type_declaration";
-      func_name = "pocket_field_type_declaration";
-      description = "pocket_field_type_declaration";
-      prefix = "pocket_field_type";
-      aggregates = [PUField];
-      fields =
-        [
-          ("case", Token);
-          ("type", Token);
-          ("type_parameter", Just "TypeParameter");
-          ("semicolon", Token);
-        ];
-    };
-    {
-      kind_name = "PocketMappingIdDeclaration";
-      type_name = "pocket_mapping_id_declaration";
-      func_name = "pocket_mapping_id_declaration";
-      description = "pocket_mapping_id_declaration";
-      prefix = "pocket_mapping_id";
-      aggregates = [PUMapping];
-      fields =
-        [
-          ("name", Aggregate Expression);
-          ("initializer", Just "SimpleInitializer");
-        ];
-    };
-    {
-      kind_name = "PocketMappingTypeDeclaration";
-      type_name = "pocket_mapping_type_declaration";
-      func_name = "pocket_mapping_type_declaration";
-      description = "pocket_mapping_type_declaration";
-      prefix = "pocket_mapping_type";
-      aggregates = [PUMapping];
-      fields =
-        [
-          ("keyword", Token);
-          ("name", Aggregate Expression);
-          ("equal", Token);
-          ("type", Aggregate Specifier);
-        ];
-    };
   ]
 
 (******************************************************************************(
@@ -2522,8 +2374,6 @@ let generated_aggregate_types =
     ObjectCreationWhat;
     TODO;
     Name;
-    PUField;
-    PUMapping;
   ]
 
 let string_of_aggregate_type = function
@@ -2542,8 +2392,6 @@ let string_of_aggregate_type = function
   | ObjectCreationWhat -> "ObjectCreationWhat"
   | TODO -> "TODO"
   | Name -> "Name"
-  | PUField -> "PUField"
-  | PUMapping -> "PUMapping"
 
 module AggregateKey = struct
   type t = aggregate_type
@@ -2598,12 +2446,6 @@ let aggregation_of_todo_aggregate =
 let aggregation_of_name_aggregate =
   List.filter (fun x -> List.mem Name x.aggregates) schema
 
-let aggregation_of_pufield_aggregate =
-  List.filter (fun x -> List.mem PUField x.aggregates) schema
-
-let aggregation_of_pumapping_aggregate =
-  List.filter (fun x -> List.mem PUMapping x.aggregates) schema
-
 let aggregation_of = function
   | TopLevelDeclaration -> aggregation_of_top_level_declaration
   | Expression -> aggregation_of_expression
@@ -2620,8 +2462,6 @@ let aggregation_of = function
   | ObjectCreationWhat -> aggregation_of_object_creation_what
   | TODO -> aggregation_of_todo_aggregate
   | Name -> aggregation_of_name_aggregate
-  | PUField -> aggregation_of_pufield_aggregate
-  | PUMapping -> aggregation_of_pumapping_aggregate
 
 let aggregate_type_name = function
   | TopLevelDeclaration -> "top_level_declaration"
@@ -2639,8 +2479,6 @@ let aggregate_type_name = function
   | ObjectCreationWhat -> "object_creation_what"
   | TODO -> "todo_aggregate"
   | Name -> "name_aggregate"
-  | PUField -> "pufield_aggregate"
-  | PUMapping -> "pumapping_aggregate"
 
 let aggregate_type_pfx_trim = function
   | TopLevelDeclaration -> ("TLD", "\\(Declaration\\|Statement\\)$")
@@ -2658,8 +2496,6 @@ let aggregate_type_pfx_trim = function
   | ObjectCreationWhat -> ("New", "")
   | TODO -> ("TODO", "")
   | Name -> ("Name", "")
-  | PUField -> ("PocketField", "")
-  | PUMapping -> ("PocketMapping", "")
 
 (******************************************************************************(
  * Useful for debugging / schema alterations

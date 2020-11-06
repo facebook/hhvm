@@ -556,8 +556,6 @@ val class_property_initializer_type_does_not_match_hint : typing_error_callback
 
 val xhp_attribute_does_not_match_hint : typing_error_callback
 
-val pocket_universes_typing : typing_error_callback
-
 val record_init_value_does_not_match_hint : typing_error_callback
 
 val static_redeclared_as_dynamic :
@@ -1029,36 +1027,6 @@ val mutable_methods_must_be_reactive : Pos.t -> string -> unit
 val mutable_return_annotated_decls_must_be_reactive :
   string -> Pos.t -> string -> unit
 
-val pu_expansion : Pos.t -> string -> string -> unit
-
-val pu_typing : Pos.t -> string -> string -> unit
-
-val pu_typing_not_supported : Pos.t -> unit
-
-val pu_typing_invalid_upper_bounds : Pos.t -> unit
-
-val pu_typing_refinement : Pos.t -> unit
-
-val pu_atom_missing : Pos.t -> string -> string -> string -> string -> unit
-
-val pu_atom_unknown : Pos.t -> string -> string -> string -> string -> unit
-
-val pu_localize : Pos.t -> string -> string -> unit
-
-val pu_invalid_access : Pos.t -> string -> unit
-
-val pu_case_in_trait : Pos.t -> string -> unit
-
-val pu_attribute_invalid : Pos.t -> unit
-
-val pu_attribute_err : Pos.t -> string -> string -> string -> string -> unit
-
-val pu_attribute_dup : Pos.t -> string -> string -> unit
-
-val pu_attribute_suggestion : Pos.t -> string -> string -> unit
-
-val pu_attribute_not_necessary : Pos.t -> string -> unit
-
 val lvar_in_obj_get : Pos.t -> unit
 
 val invalid_freeze_target : Pos.t -> Pos.t -> string -> unit
@@ -1153,12 +1121,6 @@ val decl_override_missing_hint : Pos.t -> typing_error_callback -> unit
 val atmost_rx_as_rxfunc_invalid_location : Pos.t -> unit
 
 val no_atmost_rx_as_rxfunc_for_rx_if_args : Pos.t -> unit
-
-val pu_duplication : Pos.t -> string -> string -> string -> unit
-
-val pu_duplication_in_instance : Pos.t -> string -> string -> string -> unit
-
-val pu_not_in_class : Pos.t -> string -> string -> unit
 
 val illegal_use_of_dynamically_callable : Pos.t -> Pos.t -> string -> unit
 

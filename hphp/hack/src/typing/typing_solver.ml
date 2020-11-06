@@ -152,10 +152,6 @@ let rec freshen_inside_ty env ty =
     let (env, ty2) = freshen_ty env ty2 in
     (env, mk (r, Tdarray (ty1, ty2)))
   | Tvar _ -> default ()
-  | Tpu _
-  | Tpu_type_access _ ->
-    (* TODO(T36532263) suggested by Catherine, might be updated next *)
-    default ()
   | Taccess (ty, ids) ->
     let (env, ty) = freshen_ty env ty in
     (env, mk (r, Taccess (ty, ids)))
@@ -571,8 +567,6 @@ let unsolved_invariant_tyvars_under_union_and_intersection env ty =
     | Ttuple _
     | Tshape _
     | Tfun _
-    | Tpu _
-    | Tpu_type_access _
     | Taccess _
     | Tunapplied_alias _ ->
       (env, tyvars)

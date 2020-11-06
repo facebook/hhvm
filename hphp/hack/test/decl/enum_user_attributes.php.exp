@@ -26,7 +26,7 @@
             (Tprim Tstring))
            }
          ];
-       sc_typeconsts = []; sc_pu_enums = []; sc_props = []; sc_sprops = [];
+       sc_typeconsts = []; sc_props = []; sc_sprops = [];
        sc_constructor = None; sc_static_methods = []; sc_methods = [];
        sc_user_attributes =
        [{ Typing_defs_core.ua_name = ([3:18-21], "\\Bar");

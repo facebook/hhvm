@@ -3014,13 +3014,6 @@ and expr_
       p
       (Aast.Shape (List.map ~f:(fun (k, (te, _)) -> (k, te)) tfdm))
       (mk (Reason.Rwitness p, Tshape (Closed_shape, fdm)))
-  | PU_atom s ->
-    make_result env p (Aast.PU_atom s) (mk (Reason.Rwitness p, Tprim (Tatom s)))
-  | PU_identifier (_, (_, enum), (_, atom)) ->
-    (* TODO(T36532263): Pocket Universes *)
-    let s = enum ^ ":@" ^ atom in
-    Errors.pu_typing p "identifier" s;
-    expr_error env (Reason.Rwitness p) outer
   | ET_Splice e -> et_splice env p e
   | EnumAtom s ->
     Errors.atom_as_expr p;
@@ -4959,174 +4952,6 @@ and dispatch_call
       tel
       typed_unpack_element
       ty
-  | PU_identifier
-      ((cpos, cid), ((epos, enum) as enum'), ((case_pos, case) as case')) ->
-    (* We are type checking a PU expression like MyClass:@MyEnum::MyField($x).
-     * So we are crafting the right signature for such a 'function' call,
-     * based on the PU definition.
-     *
-     * Example:
-     *   class MyClass {
-     *     enum MyEnum {
-     *       case string name;
-     *       case type T;
-     *       case T data;
-     *     }
-     *   }
-     *
-     *   in such a context, MyClass:@MyEnum::name 's signature is
-     *      MyClass:@MyEnum -> string
-     *   and MyClass:@MyEnum::data 's signature is
-     *      forall TE <: MyClass:@MyEnum, TE -> TE:@T
-     *
-     *  To simplify the code in here, we always generate the second form, even
-     *  for simple types.
-     *)
-    let (env, tal, te1, ty1) =
-      static_class_id ~check_constraints:false cpos env [] cid
-    in
-    let arg_pos =
-      match el with
-      | (pos, _) :: _ -> pos
-      | _ -> fpos
-    in
-    if Typing_utils.is_any env ty1 then
-      ( (* An error message is already printed by the Naming phase. Let's avoid
-         * duplication. *)
-        env,
-        Tast.make_typed_expr fpos ty1 Aast.Any,
-        ty1 )
-    else (
-      match class_get_pu ~from_class:cid env ty1 enum with
-      | (env, None) ->
-        let () = Errors.unbound_name_typing epos enum in
-        let tany = mk (Reason.Rwitness epos, Typing_defs.make_tany ()) in
-        (env, Tast.make_typed_expr epos tany Aast.Any, tany)
-      | (env, Some (ety_env, et)) ->
-        let (env, fty) =
-          let (env, capability) =
-            MakeType.default_capability (Reason.Rwitness fpos)
-            |> Phase.localize_with_self env
-          in
-          let make_fty params ft_ret =
-            {
-              ft_arity = Fstandard;
-              ft_tparams = [];
-              ft_where_constraints = [];
-              ft_params =
-                List.map params ~f:(fun et_type ->
-                    {
-                      fp_pos = arg_pos;
-                      fp_name = None;
-                      fp_type = { et_enforced = false; et_type };
-                      fp_flags =
-                        make_fp_flags
-                          ~mode:FPnormal
-                          ~accept_disposable:true
-                          ~mutability:None
-                          ~has_default:false
-                          ~ifc_external:false
-                          ~ifc_can_call:false
-                          ~is_atom:false;
-                      fp_rx_annotation = None;
-                    });
-              ft_implicit_params = { capability };
-              ft_ret = { et_enforced = false; et_type = ft_ret };
-              ft_reactive = Nonreactive;
-              ft_flags = 0;
-              ft_ifc_decl = Typing_defs_core.default_ifc_fun_decl;
-            }
-          in
-          let reason = Reason.Rwitness fpos in
-          let (env, fty) =
-            let pu_type = mk (reason, Tpu (ty1, enum')) in
-            if String.equal SN.PocketUniverses.members case then
-              ( env,
-                make_fty
-                  []
-                  (mk
-                     ( reason,
-                       Tclass
-                         ( ( fst et.tpu_name,
-                             Naming_special_names.Collections.cVec ),
-                           Nonexact,
-                           [pu_type] ) )) )
-            else
-              let case_ty =
-                match SMap.find_opt case et.tpu_case_values with
-                | Some (_, _, case) -> case
-                | None ->
-                  Errors.pu_typing case_pos "identifier" case;
-                  MakeType.err (Reason.Rwitness case_pos)
-              in
-              (* Type variable to type the parameter of the Pu expression
-               * call, e.g. the type of the atom $x in call
-               * MyClass:@MyEnum::myField($x).
-               *
-               * We use a variable in case there is some dependency *)
-              let (env, fresh_ty) = Env.fresh_type env fpos in
-              let fresh_var =
-                match get_var fresh_ty with
-                | Some v -> v
-                | None -> assert false
-              in
-              (* Its original upper bound is the PU enum itself *)
-              let upper_bound = mk (reason, Tpu (ty1, enum')) in
-              let env =
-                SubType.sub_type
-                  env
-                  fresh_ty
-                  upper_bound
-                  Errors.pocket_universes_typing
-              in
-              let (env, substs) =
-                let f
-                    env
-                    _key
-                    ( _,
-                      { tp_name = pu_case_type_name; tp_reified = _reified; _ }
-                    ) =
-                  (* Update position to point to the function call site
-                   * rather than to the PU enum definition
-                   *)
-                  let pu_case_type_name = (fpos, snd pu_case_type_name) in
-                  Typing_subtype_pocket_universes.get_tyvar_pu_access
-                    env
-                    (Reason.Rwitness arg_pos)
-                    fresh_var
-                    pu_case_type_name
-                in
-                SMap.map_env f env et.tpu_case_types
-              in
-              let ety_env =
-                let combine _ va vb =
-                  if Option.is_some vb then
-                    vb
-                  else
-                    va
-                in
-                let substs = SMap.merge combine ety_env.substs substs in
-                { ety_env with substs }
-              in
-              let (env, case_ty) = Phase.localize ~ety_env env case_ty in
-              (env, make_fty [fresh_ty] case_ty)
-          in
-          (env, mk (Reason.Rwitness p, Tfun fty))
-        in
-        let (env, (tel, tuel, ty)) =
-          call ~expected p env fty el unpacked_element
-        in
-        make_call
-          env
-          (Tast.make_typed_expr
-             fpos
-             fty
-             (Aast.PU_identifier (te1, enum', case')))
-          tal
-          tel
-          tuel
-          ty
-    )
   | _ ->
     let (env, te, fty) = expr env e in
     let (env, fty) =
@@ -5525,8 +5350,8 @@ and class_get_
     Typing_defs.error_Tunapplied_alias_in_illegal_context ()
   | ( _,
       ( Tvar _ | Tnonnull | Tvarray _ | Tdarray _ | Tvarray_or_darray _
-      | Toption _ | Tprim _ | Tfun _ | Ttuple _ | Tobject | Tshape _ | Tpu _
-      | Tpu_type_access _ | Taccess _ ) ) ->
+      | Toption _ | Tprim _ | Tfun _ | Ttuple _ | Tobject | Tshape _ | Taccess _
+        ) ) ->
     Errors.non_class_member
       ~is_method
       mid
@@ -5806,7 +5631,7 @@ and static_class_id
       | ( _,
           ( Tany _ | Tnonnull | Tvarray _ | Tdarray _ | Tvarray_or_darray _
           | Toption _ | Tprim _ | Tfun _ | Ttuple _ | Tnewtype _ | Tdependent _
-          | Tobject | Tshape _ | Tpu _ | Tpu_type_access _ | Taccess _ ) ) ->
+          | Tobject | Tshape _ | Taccess _ ) ) ->
         Errors.expected_class
           ~suffix:(", but got " ^ Typing_print.error env base_ty)
           p;
@@ -7239,69 +7064,6 @@ and update_array_type ?lhs_of_null_coalesce p env e1 valkind =
       | _ -> (env, te1, ty1)
     end
   | _ -> raw_expr ?lhs_of_null_coalesce env e1
-
-and class_get_pu ?from_class env ty name =
-  match class_get_pu_ env ty name with
-  | (env, None) -> (env, None)
-  | (env, Some (this_ty, substs, et)) ->
-    let ety_env =
-      {
-        type_expansions = [];
-        this_ty;
-        substs;
-        from_class;
-        quiet = false;
-        on_error = Errors.unify_error;
-      }
-    in
-    (env, Some (ety_env, et))
-
-and class_get_pu_ env cty name =
-  let (env, cty) = Env.expand_type env cty in
-  match get_node cty with
-  | Tany _
-  | Terr
-  | Tdynamic
-  | Tunion _
-  | Tgeneric _ ->
-    (* TODO(T69551141) handle type arguments *)
-    (env, None)
-  | Tunapplied_alias _ ->
-    Typing_defs.error_Tunapplied_alias_in_illegal_context ()
-  | Tvar _
-  | Tnonnull
-  | Tvarray _
-  | Tdarray _
-  | Tvarray_or_darray _
-  | Toption _
-  | Tprim _
-  | Tfun _
-  | Ttuple _
-  | Tobject
-  | Tshape _ ->
-    (env, None)
-  | Tintersection _ -> (env, None)
-  | Tpu_type_access _
-  | Tpu _
-  | Taccess _ ->
-    (env, None)
-  | Tnewtype (_, _, ty)
-  | Tdependent (_, ty) ->
-    class_get_pu_ env ty name
-  | Tclass ((_, c), _, paraml) ->
-    let class_ = Env.get_class env c in
-    begin
-      match class_ with
-      | None -> (env, None)
-      | Some class_ ->
-        (match Env.get_pu_enum env class_ name with
-        | Some et ->
-          ( env,
-            Some
-              (cty, TUtils.make_locl_subst_for_class_tparams class_ paraml, et)
-          )
-        | None -> (env, None))
-    end
 
 (* External API *)
 let expr ?expected env e =

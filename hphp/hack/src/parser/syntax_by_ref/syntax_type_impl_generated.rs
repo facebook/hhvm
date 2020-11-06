@@ -1534,16 +1534,6 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_pu_access(ctx: &C, left_type: Self, separator: Self, right_type: Self) -> Self {
-        let syntax = SyntaxVariant::PUAccess(ctx.get_arena().alloc(PUAccessChildren {
-            left_type,
-            separator,
-            right_type,
-        }));
-        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
-        Self::make(syntax, value)
-    }
-
     fn make_vector_type_specifier(ctx: &C, keyword: Self, left_angle: Self, type_: Self, trailing_comma: Self, right_angle: Self) -> Self {
         let syntax = SyntaxVariant::VectorTypeSpecifier(ctx.get_arena().alloc(VectorTypeSpecifierChildren {
             keyword,
@@ -1855,96 +1845,6 @@ where
         let syntax = SyntaxVariant::EnumAtomExpression(ctx.get_arena().alloc(EnumAtomExpressionChildren {
             hash,
             expression,
-        }));
-        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
-        Self::make(syntax, value)
-    }
-
-    fn make_pocket_atom_expression(ctx: &C, glyph: Self, expression: Self) -> Self {
-        let syntax = SyntaxVariant::PocketAtomExpression(ctx.get_arena().alloc(PocketAtomExpressionChildren {
-            glyph,
-            expression,
-        }));
-        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
-        Self::make(syntax, value)
-    }
-
-    fn make_pocket_identifier_expression(ctx: &C, qualifier: Self, pu_operator: Self, field: Self, operator: Self, name: Self) -> Self {
-        let syntax = SyntaxVariant::PocketIdentifierExpression(ctx.get_arena().alloc(PocketIdentifierExpressionChildren {
-            qualifier,
-            pu_operator,
-            field,
-            operator,
-            name,
-        }));
-        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
-        Self::make(syntax, value)
-    }
-
-    fn make_pocket_atom_mapping_declaration(ctx: &C, glyph: Self, name: Self, left_paren: Self, mappings: Self, right_paren: Self, semicolon: Self) -> Self {
-        let syntax = SyntaxVariant::PocketAtomMappingDeclaration(ctx.get_arena().alloc(PocketAtomMappingDeclarationChildren {
-            glyph,
-            name,
-            left_paren,
-            mappings,
-            right_paren,
-            semicolon,
-        }));
-        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
-        Self::make(syntax, value)
-    }
-
-    fn make_pocket_enum_declaration(ctx: &C, attributes: Self, modifiers: Self, enum_: Self, name: Self, left_brace: Self, fields: Self, right_brace: Self) -> Self {
-        let syntax = SyntaxVariant::PocketEnumDeclaration(ctx.get_arena().alloc(PocketEnumDeclarationChildren {
-            attributes,
-            modifiers,
-            enum_,
-            name,
-            left_brace,
-            fields,
-            right_brace,
-        }));
-        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
-        Self::make(syntax, value)
-    }
-
-    fn make_pocket_field_type_expr_declaration(ctx: &C, case: Self, type_: Self, name: Self, semicolon: Self) -> Self {
-        let syntax = SyntaxVariant::PocketFieldTypeExprDeclaration(ctx.get_arena().alloc(PocketFieldTypeExprDeclarationChildren {
-            case,
-            type_,
-            name,
-            semicolon,
-        }));
-        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
-        Self::make(syntax, value)
-    }
-
-    fn make_pocket_field_type_declaration(ctx: &C, case: Self, type_: Self, type_parameter: Self, semicolon: Self) -> Self {
-        let syntax = SyntaxVariant::PocketFieldTypeDeclaration(ctx.get_arena().alloc(PocketFieldTypeDeclarationChildren {
-            case,
-            type_,
-            type_parameter,
-            semicolon,
-        }));
-        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
-        Self::make(syntax, value)
-    }
-
-    fn make_pocket_mapping_id_declaration(ctx: &C, name: Self, initializer: Self) -> Self {
-        let syntax = SyntaxVariant::PocketMappingIdDeclaration(ctx.get_arena().alloc(PocketMappingIdDeclarationChildren {
-            name,
-            initializer,
-        }));
-        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
-        Self::make(syntax, value)
-    }
-
-    fn make_pocket_mapping_type_declaration(ctx: &C, keyword: Self, name: Self, equal: Self, type_: Self) -> Self {
-        let syntax = SyntaxVariant::PocketMappingTypeDeclaration(ctx.get_arena().alloc(PocketMappingTypeDeclarationChildren {
-            keyword,
-            name,
-            equal,
-            type_,
         }));
         let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)

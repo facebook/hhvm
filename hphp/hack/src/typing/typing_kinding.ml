@@ -59,8 +59,7 @@ module Locl_Inst = struct
       let ty1 = instantiate subst ty1 in
       let ty2 = instantiate subst ty2 in
       Tvarray_or_darray (ty1, ty2)
-    | ( Tobject | Tvar _ | Tdynamic | Tnonnull | Tany _ | Terr | Tprim _
-      | Tpu_type_access _ ) as x ->
+    | (Tobject | Tvar _ | Tdynamic | Tnonnull | Tany _ | Terr | Tprim _) as x ->
       x
     | Ttuple tyl ->
       let tyl = List.map tyl (instantiate subst) in
@@ -139,9 +138,6 @@ module Locl_Inst = struct
     | Tdependent (dep, ty) ->
       let ty = instantiate subst ty in
       Tdependent (dep, ty)
-    | Tpu (ty, sid) ->
-      let ty = instantiate subst ty in
-      Tpu (ty, sid)
     | Taccess (ty, ids) ->
       let ty = instantiate subst ty in
       Taccess (ty, ids)
@@ -367,7 +363,6 @@ module Simple = struct
     | Tvarray_or_darray (tk, tv) ->
       check tk;
       check tv
-    | Tpu_access (ty, _)
     | Tlike ty
     | Toption ty ->
       check ty

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<393b98e78f6d1f6f98c0fba27978fb46>>
+// @generated SignedSource<<18825b846cf6e7699b88c0d059bb9c94>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -130,16 +130,11 @@ pub enum Naming {
     MisplacedMutabilityHint = 2097,
     MutabilityHintInNonRx = 2098,
     InvalidReturnMutableHint = 2099,
-    PocketUniversesDuplication = 2101,
     UnsupportedTraitUseAs = 2102,
     UnsupportedInsteadOf = 2103,
     InvalidTraitUseAsVisibility = 2104,
     InvalidFunPointer = 2105,
     IllegalUseOfDynamicallyCallable = 2106,
-    PocketUniversesNotInClass = 2107,
-    PocketUniversesAtomMissing = 2108,
-    PocketUniversesAtomUnknown = 2109,
-    PocketUniversesLocalization = 2110,
     ClassMethNonFinalSelf = 2111,
     ParentInFunctionPointer = 2112,
     SelfInNonFinalFunctionPointer = 2113,
@@ -530,8 +525,6 @@ pub enum Typing {
     ClassGetReified = 4346,
     RequireGenericExplicit = 4347,
     ClassConstantTypeMismatch = 4348,
-    PocketUniversesExpansion = 4349,
-    PocketUniversesTyping = 4350,
     RecordInitValueDoesNotMatchHint = 4351,
     AbstractTconstNotAllowed = 4352,
     NewAbstractRecord = 4353,
@@ -548,15 +541,12 @@ pub enum Typing {
     NotARecord = 4364,
     TraitReuseInsideClass = 4365,
     RedundantGeneric = 4366,
-    PocketUniversesInvalidUpperBounds = 4367,
-    PocketUniversesRefinement = 4368,
     ArrayAccessWrite = 4370,
     InvalidArrayKeyWrite = 4371,
     NullMemberWrite = 4372,
     NonObjectMemberWrite = 4373,
     ConcreteConstInterfaceOverride = 4374,
     MethCallerTrait = 4375,
-    PocketUniversesAttributes = 4376,
     DuplicateInterface = 4377,
     TypeParameterNameAlreadyUsedNonShadow = 4378,
     IllegalInformationFlow = 4379,

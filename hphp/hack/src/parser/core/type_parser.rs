@@ -265,35 +265,6 @@ where
         }
     }
 
-    //  SPEC
-    // pocket-universe-access:
-    //   name  :@  name
-    //   self  :@  name
-    //   this  :@  name
-    //   parent  :@  name
-    //   pocket-universe-access :@  name
-    fn parse_remaining_pocket_universe_access(&mut self, left: S::R) -> S::R {
-        let separator = self.fetch_token();
-        let right = self.next_token_as_name();
-        if right.kind() == TokenKind::Name {
-            let right = S!(make_token, self, right);
-            let syntax = S!(make_pu_access, self, left, separator, right);
-            let token = self.peek_token();
-            if token.kind() == TokenKind::ColonAt {
-                self.parse_remaining_pocket_universe_access(syntax)
-            } else {
-                syntax
-            }
-        } else {
-            // ERROR RECOVERY: Assume that the thing following the :@
-            // that is not a name belongs to the next thing to be
-            // parsed; treat the name as missing.
-            self.with_error(Errors::error1004);
-            let missing = S!(make_missing, self, self.pos());
-            S!(make_pu_access, self, left, separator, missing)
-        }
-    }
-
     fn parse_remaining_generic(&mut self, name: S::R) -> S::R {
         let (arguments, _) = self.parse_generic_type_argument_list();
         S!(make_generic_type_specifier, self, name, arguments)
@@ -313,7 +284,6 @@ where
         let token = self.peek_token();
         match token.kind() {
             TokenKind::ColonColon => self.parse_remaining_type_constant(name),
-            TokenKind::ColonAt => self.parse_remaining_pocket_universe_access(name),
             _ => S!(make_simple_type_specifier, self, name),
         }
     }

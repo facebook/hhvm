@@ -22,7 +22,6 @@ type inherited = {
   ih_cstr: element option * consistent_kind;
   ih_consts: class_const SMap.t;
   ih_typeconsts: typeconst_type SMap.t;
-  ih_pu_enums: pu_enum_type SMap.t;
   ih_props: element SMap.t;
   ih_sprops: element SMap.t;
   ih_methods: element SMap.t;

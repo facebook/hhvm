@@ -488,9 +488,6 @@ where S: SmartConstructors<State = State>,
     fn make_type_constant(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> Self::R {
         compose(SyntaxKind::TypeConstant, self.s.make_type_constant(arg0.1, arg1.1, arg2.1))
     }
-    fn make_pu_access(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> Self::R {
-        compose(SyntaxKind::PUAccess, self.s.make_pu_access(arg0.1, arg1.1, arg2.1))
-    }
     fn make_vector_type_specifier(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R) -> Self::R {
         compose(SyntaxKind::VectorTypeSpecifier, self.s.make_vector_type_specifier(arg0.1, arg1.1, arg2.1, arg3.1, arg4.1))
     }
@@ -580,30 +577,6 @@ where S: SmartConstructors<State = State>,
     }
     fn make_enum_atom_expression(&mut self, arg0 : Self::R, arg1 : Self::R) -> Self::R {
         compose(SyntaxKind::EnumAtomExpression, self.s.make_enum_atom_expression(arg0.1, arg1.1))
-    }
-    fn make_pocket_atom_expression(&mut self, arg0 : Self::R, arg1 : Self::R) -> Self::R {
-        compose(SyntaxKind::PocketAtomExpression, self.s.make_pocket_atom_expression(arg0.1, arg1.1))
-    }
-    fn make_pocket_identifier_expression(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R) -> Self::R {
-        compose(SyntaxKind::PocketIdentifierExpression, self.s.make_pocket_identifier_expression(arg0.1, arg1.1, arg2.1, arg3.1, arg4.1))
-    }
-    fn make_pocket_atom_mapping_declaration(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R, arg5 : Self::R) -> Self::R {
-        compose(SyntaxKind::PocketAtomMappingDeclaration, self.s.make_pocket_atom_mapping_declaration(arg0.1, arg1.1, arg2.1, arg3.1, arg4.1, arg5.1))
-    }
-    fn make_pocket_enum_declaration(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R, arg5 : Self::R, arg6 : Self::R) -> Self::R {
-        compose(SyntaxKind::PocketEnumDeclaration, self.s.make_pocket_enum_declaration(arg0.1, arg1.1, arg2.1, arg3.1, arg4.1, arg5.1, arg6.1))
-    }
-    fn make_pocket_field_type_expr_declaration(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R) -> Self::R {
-        compose(SyntaxKind::PocketFieldTypeExprDeclaration, self.s.make_pocket_field_type_expr_declaration(arg0.1, arg1.1, arg2.1, arg3.1))
-    }
-    fn make_pocket_field_type_declaration(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R) -> Self::R {
-        compose(SyntaxKind::PocketFieldTypeDeclaration, self.s.make_pocket_field_type_declaration(arg0.1, arg1.1, arg2.1, arg3.1))
-    }
-    fn make_pocket_mapping_id_declaration(&mut self, arg0 : Self::R, arg1 : Self::R) -> Self::R {
-        compose(SyntaxKind::PocketMappingIdDeclaration, self.s.make_pocket_mapping_id_declaration(arg0.1, arg1.1))
-    }
-    fn make_pocket_mapping_type_declaration(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R) -> Self::R {
-        compose(SyntaxKind::PocketMappingTypeDeclaration, self.s.make_pocket_mapping_type_declaration(arg0.1, arg1.1, arg2.1, arg3.1))
     }
 
 }

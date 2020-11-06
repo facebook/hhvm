@@ -26,7 +26,7 @@
             (Tprim Tint))
            }
          ];
-       sc_typeconsts = []; sc_pu_enums = []; sc_props = []; sc_sprops = [];
+       sc_typeconsts = []; sc_props = []; sc_sprops = [];
        sc_constructor = None; sc_static_methods = [];
        sc_methods =
        [{ Shallow_decl_defs.sm_abstract = false; sm_final = false;

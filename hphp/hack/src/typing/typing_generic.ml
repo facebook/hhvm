@@ -57,7 +57,6 @@ end = struct
         ty t2
       | Tvarray t -> ty t
       | Tshape (_, fdm) -> ShapeFieldMap.iter (fun _ v -> ty v) fdm
-      | Tpu_access (base, _) -> ty base
     in
     try
       ty x;

@@ -1,6 +1,6 @@
 --- legacy
 +++ direct decl
-@@ -1,79 +1,79 @@
+@@ -1,78 +1,78 @@
  [("\\C",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -17,7 +17,6 @@
                   (Tprim Tint)));
            stc_enforceable = ([Pos.none], false); stc_reifiable = None }
           ];
-        sc_pu_enums = [];
         sc_props =
         [{ Shallow_decl_defs.sp_const = false; sp_xhp_attr = None;
            sp_lateinit = false; sp_lsb = false; sp_name = ([6:21-23], "a");

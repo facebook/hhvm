@@ -140,7 +140,5 @@ let rec ty ?prefix ?lump renv (t : T.locl_ty) =
   | T.Tdynamic -> fail "Tdynamic"
   | T.Tnewtype (_name, _ty_list, _as_bound) -> fail "Tnewtype"
   | T.Tobject -> fail "Tobject"
-  | T.Tpu (_locl_ty, _sid) -> fail "Tpu"
-  | T.Tpu_type_access (_sid1, _sid2) -> fail "Tpu_type_access"
   | T.Taccess (_locl_ty, _ids) -> fail "Taccess"
   | T.Tunapplied_alias _ -> fail "Tunapplied_alias"

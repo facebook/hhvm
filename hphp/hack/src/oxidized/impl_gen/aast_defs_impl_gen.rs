@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<1667714d87f446debdeb00089bccb4d1>>
+// @generated SignedSource<<b0ca2cbdae299f19ea0224a3bc411dd4>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -323,9 +323,6 @@ impl Hint_ {
     pub fn mk_hnothing() -> Self {
         Hint_::Hnothing
     }
-    pub fn mk_hpu_access(p0: Hint, p1: Sid) -> Self {
-        Hint_::HpuAccess(p0, p1)
-    }
     pub fn mk_hunion(p0: Vec<Hint>) -> Self {
         Hint_::Hunion(p0)
     }
@@ -452,12 +449,6 @@ impl Hint_ {
             _ => false,
         }
     }
-    pub fn is_hpu_access(&self) -> bool {
-        match self {
-            Hint_::HpuAccess(..) => true,
-            _ => false,
-        }
-    }
     pub fn is_hunion(&self) -> bool {
         match self {
             Hint_::Hunion(..) => true,
@@ -545,12 +536,6 @@ impl Hint_ {
     pub fn as_hprim(&self) -> Option<&Tprim> {
         match self {
             Hint_::Hprim(p0) => Some(p0),
-            _ => None,
-        }
-    }
-    pub fn as_hpu_access(&self) -> Option<(&Hint, &Sid)> {
-        match self {
-            Hint_::HpuAccess(p0, p1) => Some((p0, p1)),
             _ => None,
         }
     }
@@ -644,12 +629,6 @@ impl Hint_ {
             _ => None,
         }
     }
-    pub fn as_hpu_access_mut(&mut self) -> Option<(&mut Hint, &mut Sid)> {
-        match self {
-            Hint_::HpuAccess(p0, p1) => Some((p0, p1)),
-            _ => None,
-        }
-    }
     pub fn as_hunion_mut(&mut self) -> Option<&mut Vec<Hint>> {
         match self {
             Hint_::Hunion(p0) => Some(p0),
@@ -740,12 +719,6 @@ impl Hint_ {
             _ => None,
         }
     }
-    pub fn as_hpu_access_into(self) -> Option<(Hint, Sid)> {
-        match self {
-            Hint_::HpuAccess(p0, p1) => Some((p0, p1)),
-            _ => None,
-        }
-    }
     pub fn as_hunion_into(self) -> Option<Vec<Hint>> {
         match self {
             Hint_::Hunion(p0) => Some(p0),
@@ -789,9 +762,6 @@ impl Tprim {
     }
     pub fn mk_tnoreturn() -> Self {
         Tprim::Tnoreturn
-    }
-    pub fn mk_tatom(p0: String) -> Self {
-        Tprim::Tatom(p0)
     }
     pub fn is_tnull(&self) -> bool {
         match self {
@@ -851,30 +821,6 @@ impl Tprim {
         match self {
             Tprim::Tnoreturn => true,
             _ => false,
-        }
-    }
-    pub fn is_tatom(&self) -> bool {
-        match self {
-            Tprim::Tatom(..) => true,
-            _ => false,
-        }
-    }
-    pub fn as_tatom(&self) -> Option<&String> {
-        match self {
-            Tprim::Tatom(p0) => Some(p0),
-            _ => None,
-        }
-    }
-    pub fn as_tatom_mut(&mut self) -> Option<&mut String> {
-        match self {
-            Tprim::Tatom(p0) => Some(p0),
-            _ => None,
-        }
-    }
-    pub fn as_tatom_into(self) -> Option<String> {
-        match self {
-            Tprim::Tatom(p0) => Some(p0),
-            _ => None,
         }
     }
 }

@@ -159,7 +159,6 @@ type t =
   | XHPExpression
   | XHPClose
   | TypeConstant
-  | PUAccess
   | VectorTypeSpecifier
   | KeysetTypeSpecifier
   | TupleTypeExplicitSpecifier
@@ -190,14 +189,6 @@ type t =
   | ErrorSyntax
   | ListItem
   | EnumAtomExpression
-  | PocketAtomExpression
-  | PocketIdentifierExpression
-  | PocketAtomMappingDeclaration
-  | PocketEnumDeclaration
-  | PocketFieldTypeExprDeclaration
-  | PocketFieldTypeDeclaration
-  | PocketMappingIdDeclaration
-  | PocketMappingTypeDeclaration
 
   [@@deriving show, eq]
 
@@ -344,7 +335,6 @@ let to_string kind =
   | XHPExpression                     -> "xhp_expression"
   | XHPClose                          -> "xhp_close"
   | TypeConstant                      -> "type_constant"
-  | PUAccess                          -> "pu_access"
   | VectorTypeSpecifier               -> "vector_type_specifier"
   | KeysetTypeSpecifier               -> "keyset_type_specifier"
   | TupleTypeExplicitSpecifier        -> "tuple_type_explicit_specifier"
@@ -375,11 +365,3 @@ let to_string kind =
   | ErrorSyntax                       -> "error"
   | ListItem                          -> "list_item"
   | EnumAtomExpression                -> "enum_atom"
-  | PocketAtomExpression              -> "pocket_atom"
-  | PocketIdentifierExpression        -> "pocket_identifier"
-  | PocketAtomMappingDeclaration      -> "pocket_atom_mapping"
-  | PocketEnumDeclaration             -> "pocket_enum_declaration"
-  | PocketFieldTypeExprDeclaration    -> "pocket_field_type_expr_declaration"
-  | PocketFieldTypeDeclaration        -> "pocket_field_type_declaration"
-  | PocketMappingIdDeclaration        -> "pocket_mapping_id_declaration"
-  | PocketMappingTypeDeclaration      -> "pocket_mapping_type_declaration"

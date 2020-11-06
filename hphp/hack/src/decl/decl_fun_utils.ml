@@ -135,8 +135,7 @@ let rec reinfer_type_to_string_exn ty =
     | Tarraykey -> "arraykey"
     | Tresource -> "resource"
     | Tnoreturn -> "noreturn"
-    | Tbool -> "bool"
-    | Tatom _id -> "atom")
+    | Tbool -> "bool")
   | Tapply ((_p, id), _tyl) -> cut_namespace id
   | Taccess (ty, id) ->
     let s = reinfer_type_to_string_exn (get_node ty) in

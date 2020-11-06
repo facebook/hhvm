@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b0b63cf3951ceaffa00c9f025078e43f>>
+// @generated SignedSource<<b2262d2cdedafba266d977e6b02f9f55>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -112,12 +112,6 @@ pub trait Visitor<'a> {
     fn visit_shallow_prop(&mut self, p: &'a ShallowProp<'a>) {
         p.recurse(self.object())
     }
-    fn visit_shallow_pu_enum(&mut self, p: &'a ShallowPuEnum<'a>) {
-        p.recurse(self.object())
-    }
-    fn visit_shallow_pu_member(&mut self, p: &'a ShallowPuMember<'a>) {
-        p.recurse(self.object())
-    }
     fn visit_shallow_typeconst(&mut self, p: &'a ShallowTypeconst<'a>) {
         p.recurse(self.object())
     }
@@ -139,7 +133,7 @@ pub trait Visitor<'a> {
     fn visit_tparam(&mut self, p: &'a Tparam<'a>) {
         p.recurse(self.object())
     }
-    fn visit_tprim(&mut self, p: &'a Tprim<'a>) {
+    fn visit_tprim(&mut self, p: &'a Tprim) {
         p.recurse(self.object())
     }
     fn visit_ty(&mut self, p: &'a Ty<'a>) {

@@ -609,10 +609,6 @@ impl<'src> SmartConstructors for FactsSmartConstructors<'src> {
         <Self as FlattenSmartConstructors<'src, HasScriptContent<'src>>>::make_type_constant(self, arg0, arg1, arg2)
     }
 
-    fn make_pu_access(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R) -> Self::R {
-        <Self as FlattenSmartConstructors<'src, HasScriptContent<'src>>>::make_pu_access(self, arg0, arg1, arg2)
-    }
-
     fn make_vector_type_specifier(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R) -> Self::R {
         <Self as FlattenSmartConstructors<'src, HasScriptContent<'src>>>::make_vector_type_specifier(self, arg0, arg1, arg2, arg3, arg4)
     }
@@ -731,38 +727,6 @@ impl<'src> SmartConstructors for FactsSmartConstructors<'src> {
 
     fn make_enum_atom_expression(&mut self, arg0: Self::R, arg1: Self::R) -> Self::R {
         <Self as FlattenSmartConstructors<'src, HasScriptContent<'src>>>::make_enum_atom_expression(self, arg0, arg1)
-    }
-
-    fn make_pocket_atom_expression(&mut self, arg0: Self::R, arg1: Self::R) -> Self::R {
-        <Self as FlattenSmartConstructors<'src, HasScriptContent<'src>>>::make_pocket_atom_expression(self, arg0, arg1)
-    }
-
-    fn make_pocket_identifier_expression(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R) -> Self::R {
-        <Self as FlattenSmartConstructors<'src, HasScriptContent<'src>>>::make_pocket_identifier_expression(self, arg0, arg1, arg2, arg3, arg4)
-    }
-
-    fn make_pocket_atom_mapping_declaration(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R, arg5: Self::R) -> Self::R {
-        <Self as FlattenSmartConstructors<'src, HasScriptContent<'src>>>::make_pocket_atom_mapping_declaration(self, arg0, arg1, arg2, arg3, arg4, arg5)
-    }
-
-    fn make_pocket_enum_declaration(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R, arg5: Self::R, arg6: Self::R) -> Self::R {
-        <Self as FlattenSmartConstructors<'src, HasScriptContent<'src>>>::make_pocket_enum_declaration(self, arg0, arg1, arg2, arg3, arg4, arg5, arg6)
-    }
-
-    fn make_pocket_field_type_expr_declaration(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R) -> Self::R {
-        <Self as FlattenSmartConstructors<'src, HasScriptContent<'src>>>::make_pocket_field_type_expr_declaration(self, arg0, arg1, arg2, arg3)
-    }
-
-    fn make_pocket_field_type_declaration(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R) -> Self::R {
-        <Self as FlattenSmartConstructors<'src, HasScriptContent<'src>>>::make_pocket_field_type_declaration(self, arg0, arg1, arg2, arg3)
-    }
-
-    fn make_pocket_mapping_id_declaration(&mut self, arg0: Self::R, arg1: Self::R) -> Self::R {
-        <Self as FlattenSmartConstructors<'src, HasScriptContent<'src>>>::make_pocket_mapping_id_declaration(self, arg0, arg1)
-    }
-
-    fn make_pocket_mapping_type_declaration(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R) -> Self::R {
-        <Self as FlattenSmartConstructors<'src, HasScriptContent<'src>>>::make_pocket_mapping_type_declaration(self, arg0, arg1, arg2, arg3)
     }
 
 }

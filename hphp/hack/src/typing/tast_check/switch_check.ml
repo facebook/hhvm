@@ -97,11 +97,6 @@ let rec check_exhaustiveness_ env pos ty caselist enum_coming_from_unresolved =
     let tc = unsafe_opt @@ Env.get_enum env id in
     check_enum_exhaustiveness pos tc caselist enum_coming_from_unresolved;
     env
-  | Tpu _
-  | Tpu_type_access _ ->
-    (* TODO(T36532263)
-     * we can implement exhaustiveness check here if need be *)
-    env
   | Terr
   | Tany _
   | Tnonnull

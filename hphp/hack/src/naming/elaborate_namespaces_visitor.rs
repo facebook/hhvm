@@ -167,12 +167,6 @@ impl<'ast> VisitorMut<'ast> for ElaborateNamespacesVisitor {
         m.recurse(&mut env, self.object())
     }
 
-    fn visit_pu_enum(&mut self, env: &mut Env, pue: &mut PuEnum) -> Result<(), ()> {
-        let mut env = env.clone();
-        env.extend_tparams(&pue.case_types);
-        pue.recurse(&mut env, self.object())
-    }
-
     fn visit_gconst(&mut self, env: &mut Env, gc: &mut Gconst) -> Result<(), ()> {
         let mut env = env.clone();
         env.namespace = gc.namespace.clone();
@@ -283,18 +277,6 @@ impl<'ast> VisitorMut<'ast> for ElaborateNamespacesVisitor {
                 sid.1 =
                     namespaces::elaborate_id(&env.namespace, namespaces::ElaborateKind::Const, sid)
                         .1;
-            }
-            Expr_::PUIdentifier(pui) => {
-                let class_id = &mut pui.0;
-                if let Some(e) = class_id.1.as_ciexpr_mut() {
-                    if let Some(sid) = e.1.as_id_mut() {
-                        env.elaborate_type_name(sid);
-                    } else {
-                        e.accept(env, self.object())?;
-                    }
-                } else {
-                    class_id.accept(env, self.object())?;
-                }
             }
             Expr_::New(n) => {
                 let (class_id, targs, args, unpacked_el) = (&mut n.0, &mut n.1, &mut n.2, &mut n.3);

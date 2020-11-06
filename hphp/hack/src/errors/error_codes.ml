@@ -152,16 +152,16 @@ module Naming = struct
     | MutabilityHintInNonRx [@value 2098]
     | InvalidReturnMutableHint [@value 2099]
     (* | NoTparamsOnTypeConstsDEPRECATED [@value 2100] *)
-    | PocketUniversesDuplication [@value 2101]
+    (* | PocketUniversesDuplicationDEPRECATED [@value 2101] *)
     | UnsupportedTraitUseAs [@value 2102]
     | UnsupportedInsteadOf [@value 2103]
     | InvalidTraitUseAsVisibility [@value 2104]
     | InvalidFunPointer [@value 2105]
     | IllegalUseOfDynamicallyCallable [@value 2106]
-    | PocketUniversesNotInClass [@value 2107]
-    | PocketUniversesAtomMissing [@value 2108]
-    | PocketUniversesAtomUnknown [@value 2109]
-    | PocketUniversesLocalization [@value 2110]
+    (* | PocketUniversesNotInClassDEPRECATED [@value 2107] *)
+    (* | PocketUniversesAtomMissingDEPRECATED [@value 2108] *)
+    (* | PocketUniversesAtomUnknownDEPRECATED [@value 2109] *)
+    (* | PocketUniversesLocalizationDEPRECATED [@value 2110] *)
     | ClassMethNonFinalSelf [@value 2111]
     | ParentInFunctionPointer [@value 2112]
     | SelfInNonFinalFunctionPointer [@value 2113]
@@ -618,8 +618,8 @@ module Typing = struct
     | ClassGetReified [@value 4346]
     | RequireGenericExplicit [@value 4347]
     | ClassConstantTypeMismatch [@value 4348]
-    | PocketUniversesExpansion [@value 4349]
-    | PocketUniversesTyping [@value 4350]
+    (* | PocketUniversesExpansionDEPRECATED [@value 4349] *)
+    (* | PocketUniversesTypingDEPRECATED [@value 4350] *)
     | RecordInitValueDoesNotMatchHint [@value 4351]
     | AbstractTconstNotAllowed [@value 4352]
     | NewAbstractRecord [@value 4353]
@@ -636,8 +636,8 @@ module Typing = struct
     | NotARecord [@value 4364]
     | TraitReuseInsideClass [@value 4365]
     | RedundantGeneric [@value 4366]
-    | PocketUniversesInvalidUpperBounds [@value 4367]
-    | PocketUniversesRefinement [@value 4368]
+    (* | PocketUniversesInvalidUpperBoundsDEPRECATED [@value 4367] *)
+    (* | PocketUniversesRefinementDEPRECATED [@value 4368] *)
     (* | PocketUniversesReservedSyntaxDEPRECATED [@value 4369] *)
     | ArrayAccessWrite [@value 4370]
     | InvalidArrayKeyWrite [@value 4371]
@@ -645,7 +645,7 @@ module Typing = struct
     | NonObjectMemberWrite [@value 4373]
     | ConcreteConstInterfaceOverride [@value 4374]
     | MethCallerTrait [@value 4375]
-    | PocketUniversesAttributes [@value 4376]
+    (* | PocketUniversesAttributesDEPRECATED [@value 4376] *)
     | DuplicateInterface [@value 4377]
     | TypeParameterNameAlreadyUsedNonShadow [@value 4378]
     | IllegalInformationFlow [@value 4379]

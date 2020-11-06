@@ -59,11 +59,6 @@ class type ['env] type_mapper_type =
 
     method on_tobject : 'env -> Reason.t -> 'env * locl_ty
 
-    method on_tpu : 'env -> Reason.t -> locl_ty -> Aast.sid -> 'env * locl_ty
-
-    method on_tpu_type_access :
-      'env -> Reason.t -> Aast.sid -> Aast.sid -> 'env * locl_ty
-
     method on_tshape :
       'env ->
       Reason.t ->
@@ -125,13 +120,6 @@ class ['env] shallow_type_mapper : ['env] type_mapper_type =
 
     method on_tobject env r = (env, mk (r, Tobject))
 
-    method on_tpu env r cls enum =
-      let (env, cls) = this#on_type env cls in
-      (env, mk (r, Tpu (cls, enum)))
-
-    method on_tpu_type_access env r member tyname =
-      (env, mk (r, Tpu_type_access (member, tyname)))
-
     method on_tshape env r shape_kind fdm =
       (env, mk (r, Tshape (shape_kind, fdm)))
 
@@ -163,9 +151,6 @@ class ['env] shallow_type_mapper : ['env] type_mapper_type =
       | Tclass (x, e, tyl) -> this#on_tclass env r x e tyl
       | Tdynamic -> this#on_tdynamic env r
       | Tobject -> this#on_tobject env r
-      | Tpu (base, enum) -> this#on_tpu env r base enum
-      | Tpu_type_access (member, tyname) ->
-        this#on_tpu_type_access env r member tyname
       | Tshape (shape_kind, fdm) -> this#on_tshape env r shape_kind fdm
       | Tvarray ty -> this#on_tvarray env r ty
       | Tdarray (ty1, ty2) -> this#on_tdarray env r ty1 ty2

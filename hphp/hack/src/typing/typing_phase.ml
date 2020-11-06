@@ -316,36 +316,6 @@ let rec localize ~ety_env env (dty : decl_ty) =
   | (r, Tshape (shape_kind, tym)) ->
     let (env, tym) = ShapeFieldMap.map_env (localize ~ety_env) env tym in
     (env, mk (r, Tshape (shape_kind, tym)))
-  | (r, Tpu_access (dbase, enum_or_tyname)) ->
-    (* Env.get_upper_bounds might not be populated every time localization
-     * is called, but so far it is when it really matters, so we'll stick
-     * with this approximation: if no upper bounds info is available,
-     * localization will return a Tpu
-     *)
-    let guess_if_pu env tp targs =
-      let upper_bounds = Env.get_upper_bounds env tp targs in
-      let res =
-        Typing_set.fold
-          (fun bound res ->
-            match get_node bound with
-            | Tpu (_, _) -> true
-            | _ -> res)
-          upper_bounds
-          false
-      in
-      res
-    in
-    let (env, base) = localize ~ety_env env dbase in
-    (match deref base with
-    | (r, Tgeneric (tp, targs)) ->
-      let member = (Reason.to_pos r, tp) in
-      if guess_if_pu env tp targs then
-        (env, mk (r, Tpu_type_access (member, enum_or_tyname)))
-      else
-        (env, mk (r, Tpu (base, enum_or_tyname)))
-    | (r, Tvar v) ->
-      Typing_subtype_pocket_universes.get_tyvar_pu_access env r v enum_or_tyname
-    | _ -> (env, mk (r, Tpu (base, enum_or_tyname))))
 
 (* Localize type arguments for something whose kinds is [kind] *)
 and localize_tparams_by_kind

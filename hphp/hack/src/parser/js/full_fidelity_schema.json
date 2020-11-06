@@ -1,6 +1,6 @@
 { "description" :
   "@generated JSON schema of the Hack Full Fidelity Parser AST",
-  "version" : "2020-10-29-0001",
+  "version" : "2020-11-02-0001",
   "trivia" : [
     { "trivia_kind_name" : "WhiteSpace",
       "trivia_type_name" : "whitespace" },
@@ -377,8 +377,6 @@
       "token_text" : "</" },
     { "token_kind" : "LessThanQuestion",
       "token_text" : "<?" },
-    { "token_kind" : "ColonAt",
-      "token_text" : ":@" },
     { "token_kind" : "Backtick",
       "token_text" : "`" },
     { "token_kind" : "XHP",
@@ -1805,15 +1803,6 @@
         { "field_name" : "separator" },
         { "field_name" : "right_type" }
       ] },
-    { "kind_name" : "PUAccess",
-      "type_name" : "pu_access",
-      "description" : "pu_access",
-      "prefix" : "pu_access",
-      "fields" : [
-        { "field_name" : "left_type" },
-        { "field_name" : "separator" },
-        { "field_name" : "right_type" }
-      ] },
     { "kind_name" : "VectorTypeSpecifier",
       "type_name" : "vector_type_specifier",
       "description" : "vector_type_specifier",
@@ -2099,88 +2088,6 @@
       "fields" : [
         { "field_name" : "hash" },
         { "field_name" : "expression" }
-      ] },
-    { "kind_name" : "PocketAtomExpression",
-      "type_name" : "pocket_atom_expression",
-      "description" : "pocket_atom",
-      "prefix" : "pocket_atom",
-      "fields" : [
-        { "field_name" : "glyph" },
-        { "field_name" : "expression" }
-      ] },
-    { "kind_name" : "PocketIdentifierExpression",
-      "type_name" : "pocket_identifier_expression",
-      "description" : "pocket_identifier",
-      "prefix" : "pocket_identifier",
-      "fields" : [
-        { "field_name" : "qualifier" },
-        { "field_name" : "pu_operator" },
-        { "field_name" : "field" },
-        { "field_name" : "operator" },
-        { "field_name" : "name" }
-      ] },
-    { "kind_name" : "PocketAtomMappingDeclaration",
-      "type_name" : "pocket_atom_mapping_declaration",
-      "description" : "pocket_atom_mapping",
-      "prefix" : "pocket_atom_mapping",
-      "fields" : [
-        { "field_name" : "glyph" },
-        { "field_name" : "name" },
-        { "field_name" : "left_paren" },
-        { "field_name" : "mappings" },
-        { "field_name" : "right_paren" },
-        { "field_name" : "semicolon" }
-      ] },
-    { "kind_name" : "PocketEnumDeclaration",
-      "type_name" : "pocket_enum_declaration",
-      "description" : "pocket_enum_declaration",
-      "prefix" : "pocket_enum",
-      "fields" : [
-        { "field_name" : "attributes" },
-        { "field_name" : "modifiers" },
-        { "field_name" : "enum" },
-        { "field_name" : "name" },
-        { "field_name" : "left_brace" },
-        { "field_name" : "fields" },
-        { "field_name" : "right_brace" }
-      ] },
-    { "kind_name" : "PocketFieldTypeExprDeclaration",
-      "type_name" : "pocket_field_type_expr_declaration",
-      "description" : "pocket_field_type_expr_declaration",
-      "prefix" : "pocket_field_type_expr",
-      "fields" : [
-        { "field_name" : "case" },
-        { "field_name" : "type" },
-        { "field_name" : "name" },
-        { "field_name" : "semicolon" }
-      ] },
-    { "kind_name" : "PocketFieldTypeDeclaration",
-      "type_name" : "pocket_field_type_declaration",
-      "description" : "pocket_field_type_declaration",
-      "prefix" : "pocket_field_type",
-      "fields" : [
-        { "field_name" : "case" },
-        { "field_name" : "type" },
-        { "field_name" : "type_parameter" },
-        { "field_name" : "semicolon" }
-      ] },
-    { "kind_name" : "PocketMappingIdDeclaration",
-      "type_name" : "pocket_mapping_id_declaration",
-      "description" : "pocket_mapping_id_declaration",
-      "prefix" : "pocket_mapping_id",
-      "fields" : [
-        { "field_name" : "name" },
-        { "field_name" : "initializer" }
-      ] },
-    { "kind_name" : "PocketMappingTypeDeclaration",
-      "type_name" : "pocket_mapping_type_declaration",
-      "description" : "pocket_mapping_type_declaration",
-      "prefix" : "pocket_mapping_type",
-      "fields" : [
-        { "field_name" : "keyword" },
-        { "field_name" : "name" },
-        { "field_name" : "equal" },
-        { "field_name" : "type" }
       ] },
 
     { "kind_name" : "Token",

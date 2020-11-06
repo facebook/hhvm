@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<66cc2e2eac7c2e0bf335d00e473a9925>>
+// @generated SignedSource<<8311c245456c4cc4566529170c5e4fef>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -21,25 +21,6 @@ use crate::*;
 pub use typing_defs_flags::*;
 
 pub use typing_defs_core::*;
-
-#[derive(
-    Clone,
-    Debug,
-    Eq,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-pub struct PuOrigin<'a> {
-    pub class: &'a str,
-    pub enum_: &'a str,
-}
-impl<'a> TrivialDrop for PuOrigin<'a> {}
 
 #[derive(
     Clone,
@@ -235,7 +216,6 @@ pub struct ClassType<'a> {
     pub where_constraints: &'a [&'a WhereConstraint<'a>],
     pub consts: s_map::SMap<'a, &'a ClassConst<'a>>,
     pub typeconsts: s_map::SMap<'a, &'a TypeconstType<'a>>,
-    pub pu_enums: s_map::SMap<'a, &'a PuEnumType<'a>>,
     pub props: s_map::SMap<'a, &'a ClassElt<'a>>,
     pub sprops: s_map::SMap<'a, &'a ClassElt<'a>>,
     pub methods: s_map::SMap<'a, &'a ClassElt<'a>>,
@@ -301,49 +281,6 @@ pub struct TypeconstType<'a> {
     pub reifiable: Option<&'a pos::Pos<'a>>,
 }
 impl<'a> TrivialDrop for TypeconstType<'a> {}
-
-#[derive(
-    Clone,
-    Debug,
-    Eq,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-pub struct PuEnumType<'a> {
-    pub name: nast::Sid<'a>,
-    pub is_final: bool,
-    pub case_types: s_map::SMap<'a, (&'a PuOrigin<'a>, &'a Tparam<'a>)>,
-    pub case_values: s_map::SMap<'a, (&'a PuOrigin<'a>, nast::Sid<'a>, &'a Ty<'a>)>,
-    pub members: s_map::SMap<'a, &'a PuMemberType<'a>>,
-}
-impl<'a> TrivialDrop for PuEnumType<'a> {}
-
-#[derive(
-    Clone,
-    Debug,
-    Eq,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-pub struct PuMemberType<'a> {
-    pub atom: nast::Sid<'a>,
-    pub origin: &'a PuOrigin<'a>,
-    pub types: s_map::SMap<'a, (&'a PuOrigin<'a>, nast::Sid<'a>, &'a Ty<'a>)>,
-    pub exprs: s_map::SMap<'a, (&'a PuOrigin<'a>, nast::Sid<'a>)>,
-}
-impl<'a> TrivialDrop for PuMemberType<'a> {}
 
 #[derive(
     Clone,

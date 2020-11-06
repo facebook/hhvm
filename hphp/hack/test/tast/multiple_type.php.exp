@@ -31,7 +31,7 @@
         ns_const_uses = <opaque>; ns_name = None; ns_auto_ns_map = [];
         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
       c_user_attributes = []; c_file_attributes = []; c_enum = None;
-      c_pu_enums = []; c_doc_comment = None; c_emit_id = None });
+      c_doc_comment = None; c_emit_id = None });
   (Class
      { c_span = [10:1-14:2]; c_annotation = (); c_mode = Mstrict;
        c_final = false; c_is_xhp = false; c_has_xhp_keyword = false;
@@ -67,7 +67,7 @@
          ns_const_uses = <opaque>; ns_name = None; ns_auto_ns_map = [];
          ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
        c_user_attributes = []; c_file_attributes = []; c_enum = None;
-       c_pu_enums = []; c_doc_comment = None; c_emit_id = None });
+       c_doc_comment = None; c_emit_id = None });
   (Fun
      { f_span = [16:1-19:2]; f_annotation = (); f_mode = Mstrict;
        f_ret = ((arraykey), (Some ([16:44-52], (Hprim Tarraykey))));

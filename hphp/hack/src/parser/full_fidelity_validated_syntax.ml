@@ -232,8 +232,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | Syntax.ShapeExpression _ -> tag validate_shape_expression (fun x -> ExprShape x) x
     | Syntax.TupleExpression _ -> tag validate_tuple_expression (fun x -> ExprTuple x) x
     | Syntax.EnumAtomExpression _ -> tag validate_enum_atom_expression (fun x -> ExprEnumAtom x) x
-    | Syntax.PocketAtomExpression _ -> tag validate_pocket_atom_expression (fun x -> ExprPocketAtom x) x
-    | Syntax.PocketIdentifierExpression _ -> tag validate_pocket_identifier_expression (fun x -> ExprPocketIdentifier x) x
     | s -> aggregation_fail Def.Expression s
   and invalidate_expression : expression invalidator = fun (value, thing) ->
     match thing with
@@ -284,8 +282,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | ExprShape                        thing -> invalidate_shape_expression               (value, thing)
     | ExprTuple                        thing -> invalidate_tuple_expression               (value, thing)
     | ExprEnumAtom                     thing -> invalidate_enum_atom_expression           (value, thing)
-    | ExprPocketAtom                   thing -> invalidate_pocket_atom_expression         (value, thing)
-    | ExprPocketIdentifier             thing -> invalidate_pocket_identifier_expression   (value, thing)
   and validate_specifier : specifier validator = fun x ->
     match Syntax.syntax x with
     | Syntax.SimpleTypeSpecifier _ -> tag validate_simple_type_specifier (fun x -> SpecSimple x) x
@@ -357,7 +353,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | Syntax.XHPChildrenDeclaration _ -> tag validate_xhp_children_declaration (fun x -> BodyXHPChildren x) x
     | Syntax.XHPCategoryDeclaration _ -> tag validate_xhp_category_declaration (fun x -> BodyXHPCategory x) x
     | Syntax.XHPClassAttributeDeclaration _ -> tag validate_xhp_class_attribute_declaration (fun x -> BodyXHPClassAttribute x) x
-    | Syntax.PocketEnumDeclaration _ -> tag validate_pocket_enum_declaration (fun x -> BodyPocketEnum x) x
     | s -> aggregation_fail Def.ClassBodyDeclaration s
   and invalidate_class_body_declaration : class_body_declaration invalidator = fun (value, thing) ->
     match thing with
@@ -370,7 +365,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | BodyXHPChildren              thing -> invalidate_xhp_children_declaration       (value, thing)
     | BodyXHPCategory              thing -> invalidate_xhp_category_declaration       (value, thing)
     | BodyXHPClassAttribute        thing -> invalidate_xhp_class_attribute_declaration (value, thing)
-    | BodyPocketEnum               thing -> invalidate_pocket_enum_declaration        (value, thing)
   and validate_statement : statement validator = fun x ->
     match Syntax.syntax x with
     | Syntax.InclusionDirective _ -> tag validate_inclusion_directive (fun x -> StmtInclusionDirective x) x
@@ -398,7 +392,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | Syntax.EchoStatement _ -> tag validate_echo_statement (fun x -> StmtEcho x) x
     | Syntax.ConcurrentStatement _ -> tag validate_concurrent_statement (fun x -> StmtConcurrent x) x
     | Syntax.TypeConstant _ -> tag validate_type_constant (fun x -> StmtTypeConstant x) x
-    | Syntax.PUAccess _ -> tag validate_pu_access (fun x -> StmtPUAccess x) x
     | s -> aggregation_fail Def.Statement s
   and invalidate_statement : statement invalidator = fun (value, thing) ->
     match thing with
@@ -427,7 +420,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | StmtEcho                         thing -> invalidate_echo_statement                 (value, thing)
     | StmtConcurrent                   thing -> invalidate_concurrent_statement           (value, thing)
     | StmtTypeConstant                 thing -> invalidate_type_constant                  (value, thing)
-    | StmtPUAccess                     thing -> invalidate_pu_access                      (value, thing)
   and validate_switch_label : switch_label validator = fun x ->
     match Syntax.syntax x with
     | Syntax.CaseLabel _ -> tag validate_case_label (fun x -> SwitchCase x) x
@@ -486,7 +478,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | Syntax.XHPExpression _ -> tag validate_xhp_expression (fun x -> LambdaXHP x) x
     | Syntax.ShapeExpression _ -> tag validate_shape_expression (fun x -> LambdaShape x) x
     | Syntax.TupleExpression _ -> tag validate_tuple_expression (fun x -> LambdaTuple x) x
-    | Syntax.PocketIdentifierExpression _ -> tag validate_pocket_identifier_expression (fun x -> LambdaPocketIdentifier x) x
     | s -> aggregation_fail Def.LambdaBody s
   and invalidate_lambda_body : lambda_body invalidator = fun (value, thing) ->
     match thing with
@@ -537,7 +528,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | LambdaXHP                          thing -> invalidate_xhp_expression                 (value, thing)
     | LambdaShape                        thing -> invalidate_shape_expression               (value, thing)
     | LambdaTuple                        thing -> invalidate_tuple_expression               (value, thing)
-    | LambdaPocketIdentifier             thing -> invalidate_pocket_identifier_expression   (value, thing)
   and validate_constructor_expression : constructor_expression validator = fun x ->
     match Syntax.syntax x with
     | Syntax.LiteralExpression _ -> tag validate_literal_expression (fun x -> CExprLiteral x) x
@@ -587,7 +577,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | Syntax.XHPExpression _ -> tag validate_xhp_expression (fun x -> CExprXHP x) x
     | Syntax.ShapeExpression _ -> tag validate_shape_expression (fun x -> CExprShape x) x
     | Syntax.TupleExpression _ -> tag validate_tuple_expression (fun x -> CExprTuple x) x
-    | Syntax.PocketIdentifierExpression _ -> tag validate_pocket_identifier_expression (fun x -> CExprPocketIdentifier x) x
     | s -> aggregation_fail Def.ConstructorExpression s
   and invalidate_constructor_expression : constructor_expression invalidator = fun (value, thing) ->
     match thing with
@@ -638,7 +627,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | CExprXHP                          thing -> invalidate_xhp_expression                 (value, thing)
     | CExprShape                        thing -> invalidate_shape_expression               (value, thing)
     | CExprTuple                        thing -> invalidate_tuple_expression               (value, thing)
-    | CExprPocketIdentifier             thing -> invalidate_pocket_identifier_expression   (value, thing)
   and validate_namespace_internals : namespace_internals validator = fun x ->
     match Syntax.syntax x with
     | Syntax.NamespaceBody _ -> tag validate_namespace_body (fun x -> NSINamespaceBody x) x
@@ -680,26 +668,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   and invalidate_name_aggregate : name_aggregate invalidator = fun (value, thing) ->
     match thing with
     | NameQualifiedName thing -> invalidate_qualified_name                 (value, thing)
-  and validate_pufield_aggregate : pufield_aggregate validator = fun x ->
-    match Syntax.syntax x with
-    | Syntax.PocketAtomMappingDeclaration _ -> tag validate_pocket_atom_mapping_declaration (fun x -> PocketFieldPocketAtomMappingDeclaration x) x
-    | Syntax.PocketFieldTypeExprDeclaration _ -> tag validate_pocket_field_type_expr_declaration (fun x -> PocketFieldPocketFieldTypeExprDeclaration x) x
-    | Syntax.PocketFieldTypeDeclaration _ -> tag validate_pocket_field_type_declaration (fun x -> PocketFieldPocketFieldTypeDeclaration x) x
-    | s -> aggregation_fail Def.PUField s
-  and invalidate_pufield_aggregate : pufield_aggregate invalidator = fun (value, thing) ->
-    match thing with
-    | PocketFieldPocketAtomMappingDeclaration   thing -> invalidate_pocket_atom_mapping_declaration (value, thing)
-    | PocketFieldPocketFieldTypeExprDeclaration thing -> invalidate_pocket_field_type_expr_declaration (value, thing)
-    | PocketFieldPocketFieldTypeDeclaration     thing -> invalidate_pocket_field_type_declaration  (value, thing)
-  and validate_pumapping_aggregate : pumapping_aggregate validator = fun x ->
-    match Syntax.syntax x with
-    | Syntax.PocketMappingIdDeclaration _ -> tag validate_pocket_mapping_id_declaration (fun x -> PocketMappingPocketMappingIdDeclaration x) x
-    | Syntax.PocketMappingTypeDeclaration _ -> tag validate_pocket_mapping_type_declaration (fun x -> PocketMappingPocketMappingTypeDeclaration x) x
-    | s -> aggregation_fail Def.PUMapping s
-  and invalidate_pumapping_aggregate : pumapping_aggregate invalidator = fun (value, thing) ->
-    match thing with
-    | PocketMappingPocketMappingIdDeclaration   thing -> invalidate_pocket_mapping_id_declaration  (value, thing)
-    | PocketMappingPocketMappingTypeDeclaration thing -> invalidate_pocket_mapping_type_declaration (value, thing)
 
   and validate_end_of_file : end_of_file validator = function
   | { Syntax.syntax = Syntax.EndOfFile x; value = v } -> v,
@@ -3155,22 +3123,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
       }
     ; Syntax.value = v
     }
-  and validate_pu_access : pu_access validator = function
-  | { Syntax.syntax = Syntax.PUAccess x; value = v } -> v,
-    { pu_access_right_type = validate_token x.pu_access_right_type
-    ; pu_access_separator = validate_token x.pu_access_separator
-    ; pu_access_left_type = validate_specifier x.pu_access_left_type
-    }
-  | s -> validation_fail (Some SyntaxKind.PUAccess) s
-  and invalidate_pu_access : pu_access invalidator = fun (v, x) ->
-    { Syntax.syntax =
-      Syntax.PUAccess
-      { pu_access_left_type = invalidate_specifier x.pu_access_left_type
-      ; pu_access_separator = invalidate_token x.pu_access_separator
-      ; pu_access_right_type = invalidate_token x.pu_access_right_type
-      }
-    ; Syntax.value = v
-    }
   and validate_vector_type_specifier : vector_type_specifier validator = function
   | { Syntax.syntax = Syntax.VectorTypeSpecifier x; value = v } -> v,
     { vector_type_right_angle = validate_token x.vector_type_right_angle
@@ -3654,154 +3606,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
       Syntax.EnumAtomExpression
       { enum_atom_hash = invalidate_token x.enum_atom_hash
       ; enum_atom_expression = invalidate_token x.enum_atom_expression
-      }
-    ; Syntax.value = v
-    }
-  and validate_pocket_atom_expression : pocket_atom_expression validator = function
-  | { Syntax.syntax = Syntax.PocketAtomExpression x; value = v } -> v,
-    { pocket_atom_expression = validate_token x.pocket_atom_expression
-    ; pocket_atom_glyph = validate_token x.pocket_atom_glyph
-    }
-  | s -> validation_fail (Some SyntaxKind.PocketAtomExpression) s
-  and invalidate_pocket_atom_expression : pocket_atom_expression invalidator = fun (v, x) ->
-    { Syntax.syntax =
-      Syntax.PocketAtomExpression
-      { pocket_atom_glyph = invalidate_token x.pocket_atom_glyph
-      ; pocket_atom_expression = invalidate_token x.pocket_atom_expression
-      }
-    ; Syntax.value = v
-    }
-  and validate_pocket_identifier_expression : pocket_identifier_expression validator = function
-  | { Syntax.syntax = Syntax.PocketIdentifierExpression x; value = v } -> v,
-    { pocket_identifier_name = validate_expression x.pocket_identifier_name
-    ; pocket_identifier_operator = validate_token x.pocket_identifier_operator
-    ; pocket_identifier_field = validate_expression x.pocket_identifier_field
-    ; pocket_identifier_pu_operator = validate_token x.pocket_identifier_pu_operator
-    ; pocket_identifier_qualifier = validate_expression x.pocket_identifier_qualifier
-    }
-  | s -> validation_fail (Some SyntaxKind.PocketIdentifierExpression) s
-  and invalidate_pocket_identifier_expression : pocket_identifier_expression invalidator = fun (v, x) ->
-    { Syntax.syntax =
-      Syntax.PocketIdentifierExpression
-      { pocket_identifier_qualifier = invalidate_expression x.pocket_identifier_qualifier
-      ; pocket_identifier_pu_operator = invalidate_token x.pocket_identifier_pu_operator
-      ; pocket_identifier_field = invalidate_expression x.pocket_identifier_field
-      ; pocket_identifier_operator = invalidate_token x.pocket_identifier_operator
-      ; pocket_identifier_name = invalidate_expression x.pocket_identifier_name
-      }
-    ; Syntax.value = v
-    }
-  and validate_pocket_atom_mapping_declaration : pocket_atom_mapping_declaration validator = function
-  | { Syntax.syntax = Syntax.PocketAtomMappingDeclaration x; value = v } -> v,
-    { pocket_atom_mapping_semicolon = validate_token x.pocket_atom_mapping_semicolon
-    ; pocket_atom_mapping_right_paren = validate_option_with (validate_token) x.pocket_atom_mapping_right_paren
-    ; pocket_atom_mapping_mappings = validate_list_with (validate_pumapping_aggregate) x.pocket_atom_mapping_mappings
-    ; pocket_atom_mapping_left_paren = validate_option_with (validate_token) x.pocket_atom_mapping_left_paren
-    ; pocket_atom_mapping_name = validate_expression x.pocket_atom_mapping_name
-    ; pocket_atom_mapping_glyph = validate_token x.pocket_atom_mapping_glyph
-    }
-  | s -> validation_fail (Some SyntaxKind.PocketAtomMappingDeclaration) s
-  and invalidate_pocket_atom_mapping_declaration : pocket_atom_mapping_declaration invalidator = fun (v, x) ->
-    { Syntax.syntax =
-      Syntax.PocketAtomMappingDeclaration
-      { pocket_atom_mapping_glyph = invalidate_token x.pocket_atom_mapping_glyph
-      ; pocket_atom_mapping_name = invalidate_expression x.pocket_atom_mapping_name
-      ; pocket_atom_mapping_left_paren = invalidate_option_with (invalidate_token) x.pocket_atom_mapping_left_paren
-      ; pocket_atom_mapping_mappings = invalidate_list_with (invalidate_pumapping_aggregate) x.pocket_atom_mapping_mappings
-      ; pocket_atom_mapping_right_paren = invalidate_option_with (invalidate_token) x.pocket_atom_mapping_right_paren
-      ; pocket_atom_mapping_semicolon = invalidate_token x.pocket_atom_mapping_semicolon
-      }
-    ; Syntax.value = v
-    }
-  and validate_pocket_enum_declaration : pocket_enum_declaration validator = function
-  | { Syntax.syntax = Syntax.PocketEnumDeclaration x; value = v } -> v,
-    { pocket_enum_right_brace = validate_token x.pocket_enum_right_brace
-    ; pocket_enum_fields = validate_list_with (validate_pufield_aggregate) x.pocket_enum_fields
-    ; pocket_enum_left_brace = validate_token x.pocket_enum_left_brace
-    ; pocket_enum_name = validate_token x.pocket_enum_name
-    ; pocket_enum_enum = validate_token x.pocket_enum_enum
-    ; pocket_enum_modifiers = validate_list_with (validate_token) x.pocket_enum_modifiers
-    ; pocket_enum_attributes = validate_option_with (validate_attribute_specification) x.pocket_enum_attributes
-    }
-  | s -> validation_fail (Some SyntaxKind.PocketEnumDeclaration) s
-  and invalidate_pocket_enum_declaration : pocket_enum_declaration invalidator = fun (v, x) ->
-    { Syntax.syntax =
-      Syntax.PocketEnumDeclaration
-      { pocket_enum_attributes = invalidate_option_with (invalidate_attribute_specification) x.pocket_enum_attributes
-      ; pocket_enum_modifiers = invalidate_list_with (invalidate_token) x.pocket_enum_modifiers
-      ; pocket_enum_enum = invalidate_token x.pocket_enum_enum
-      ; pocket_enum_name = invalidate_token x.pocket_enum_name
-      ; pocket_enum_left_brace = invalidate_token x.pocket_enum_left_brace
-      ; pocket_enum_fields = invalidate_list_with (invalidate_pufield_aggregate) x.pocket_enum_fields
-      ; pocket_enum_right_brace = invalidate_token x.pocket_enum_right_brace
-      }
-    ; Syntax.value = v
-    }
-  and validate_pocket_field_type_expr_declaration : pocket_field_type_expr_declaration validator = function
-  | { Syntax.syntax = Syntax.PocketFieldTypeExprDeclaration x; value = v } -> v,
-    { pocket_field_type_expr_semicolon = validate_token x.pocket_field_type_expr_semicolon
-    ; pocket_field_type_expr_name = validate_expression x.pocket_field_type_expr_name
-    ; pocket_field_type_expr_type = validate_specifier x.pocket_field_type_expr_type
-    ; pocket_field_type_expr_case = validate_token x.pocket_field_type_expr_case
-    }
-  | s -> validation_fail (Some SyntaxKind.PocketFieldTypeExprDeclaration) s
-  and invalidate_pocket_field_type_expr_declaration : pocket_field_type_expr_declaration invalidator = fun (v, x) ->
-    { Syntax.syntax =
-      Syntax.PocketFieldTypeExprDeclaration
-      { pocket_field_type_expr_case = invalidate_token x.pocket_field_type_expr_case
-      ; pocket_field_type_expr_type = invalidate_specifier x.pocket_field_type_expr_type
-      ; pocket_field_type_expr_name = invalidate_expression x.pocket_field_type_expr_name
-      ; pocket_field_type_expr_semicolon = invalidate_token x.pocket_field_type_expr_semicolon
-      }
-    ; Syntax.value = v
-    }
-  and validate_pocket_field_type_declaration : pocket_field_type_declaration validator = function
-  | { Syntax.syntax = Syntax.PocketFieldTypeDeclaration x; value = v } -> v,
-    { pocket_field_type_semicolon = validate_token x.pocket_field_type_semicolon
-    ; pocket_field_type_type_parameter = validate_type_parameter x.pocket_field_type_type_parameter
-    ; pocket_field_type_type = validate_token x.pocket_field_type_type
-    ; pocket_field_type_case = validate_token x.pocket_field_type_case
-    }
-  | s -> validation_fail (Some SyntaxKind.PocketFieldTypeDeclaration) s
-  and invalidate_pocket_field_type_declaration : pocket_field_type_declaration invalidator = fun (v, x) ->
-    { Syntax.syntax =
-      Syntax.PocketFieldTypeDeclaration
-      { pocket_field_type_case = invalidate_token x.pocket_field_type_case
-      ; pocket_field_type_type = invalidate_token x.pocket_field_type_type
-      ; pocket_field_type_type_parameter = invalidate_type_parameter x.pocket_field_type_type_parameter
-      ; pocket_field_type_semicolon = invalidate_token x.pocket_field_type_semicolon
-      }
-    ; Syntax.value = v
-    }
-  and validate_pocket_mapping_id_declaration : pocket_mapping_id_declaration validator = function
-  | { Syntax.syntax = Syntax.PocketMappingIdDeclaration x; value = v } -> v,
-    { pocket_mapping_id_initializer = validate_simple_initializer x.pocket_mapping_id_initializer
-    ; pocket_mapping_id_name = validate_expression x.pocket_mapping_id_name
-    }
-  | s -> validation_fail (Some SyntaxKind.PocketMappingIdDeclaration) s
-  and invalidate_pocket_mapping_id_declaration : pocket_mapping_id_declaration invalidator = fun (v, x) ->
-    { Syntax.syntax =
-      Syntax.PocketMappingIdDeclaration
-      { pocket_mapping_id_name = invalidate_expression x.pocket_mapping_id_name
-      ; pocket_mapping_id_initializer = invalidate_simple_initializer x.pocket_mapping_id_initializer
-      }
-    ; Syntax.value = v
-    }
-  and validate_pocket_mapping_type_declaration : pocket_mapping_type_declaration validator = function
-  | { Syntax.syntax = Syntax.PocketMappingTypeDeclaration x; value = v } -> v,
-    { pocket_mapping_type_type = validate_specifier x.pocket_mapping_type_type
-    ; pocket_mapping_type_equal = validate_token x.pocket_mapping_type_equal
-    ; pocket_mapping_type_name = validate_expression x.pocket_mapping_type_name
-    ; pocket_mapping_type_keyword = validate_token x.pocket_mapping_type_keyword
-    }
-  | s -> validation_fail (Some SyntaxKind.PocketMappingTypeDeclaration) s
-  and invalidate_pocket_mapping_type_declaration : pocket_mapping_type_declaration invalidator = fun (v, x) ->
-    { Syntax.syntax =
-      Syntax.PocketMappingTypeDeclaration
-      { pocket_mapping_type_keyword = invalidate_token x.pocket_mapping_type_keyword
-      ; pocket_mapping_type_name = invalidate_expression x.pocket_mapping_type_name
-      ; pocket_mapping_type_equal = invalidate_token x.pocket_mapping_type_equal
-      ; pocket_mapping_type_type = invalidate_specifier x.pocket_mapping_type_type
       }
     ; Syntax.value = v
     }

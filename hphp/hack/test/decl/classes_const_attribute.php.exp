@@ -6,7 +6,7 @@
        sc_where_constraints = []; sc_extends = []; sc_uses = [];
        sc_xhp_attr_uses = []; sc_req_extends = []; sc_req_implements = [];
        sc_implements = []; sc_implements_dynamic = false; sc_consts = [];
-       sc_typeconsts = []; sc_pu_enums = [];
+       sc_typeconsts = [];
        sc_props =
        [{ Shallow_decl_defs.sp_const = true; sp_xhp_attr = None;
           sp_lateinit = false; sp_lsb = false; sp_name = ([5:40-42], "p");
@@ -30,7 +30,6 @@
         sc_uses = []; sc_xhp_attr_uses = []; sc_req_extends = [];
         sc_req_implements = []; sc_implements = [];
         sc_implements_dynamic = false; sc_consts = []; sc_typeconsts = [];
-        sc_pu_enums = [];
         sc_props =
         [{ Shallow_decl_defs.sp_const = true; sp_xhp_attr = None;
            sp_lateinit = false; sp_lsb = false; sp_name = ([9:26-28], "p");

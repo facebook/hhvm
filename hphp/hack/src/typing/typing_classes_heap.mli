@@ -98,8 +98,6 @@ module Api : sig
 
   val get_typeconst : t -> string -> typeconst_type option
 
-  val get_pu_enum : t -> string -> pu_enum_type option
-
   val get_prop : t -> string -> class_elt option
 
   val get_sprop : t -> string -> class_elt option
@@ -125,8 +123,6 @@ module Api : sig
   val consts : t -> (string * class_const) list
 
   val typeconsts : t -> (string * typeconst_type) list
-
-  val pu_enums : t -> (string * pu_enum_type) list
 
   val props : t -> (string * class_elt) list
 

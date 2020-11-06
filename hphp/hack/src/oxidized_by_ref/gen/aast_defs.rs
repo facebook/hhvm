@@ -3,13 +3,14 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<955cbe59363c1ab8fdb1b9f731aec3d3>>
+// @generated SignedSource<<b23e101880ec0570f1bac93132599a7a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
 
 use arena_trait::TrivialDrop;
 use no_pos_hash::NoPosHash;
+use ocamlrep_derive::FromOcamlRep;
 use ocamlrep_derive::FromOcamlRepIn;
 use ocamlrep_derive::ToOcamlRep;
 use serde::Serialize;
@@ -172,11 +173,10 @@ pub enum Hint_<'a> {
     Hdarray(&'a (&'a Hint<'a>, &'a Hint<'a>)),
     Hvarray(&'a Hint<'a>),
     HvarrayOrDarray(&'a (Option<&'a Hint<'a>>, &'a Hint<'a>)),
-    Hprim(&'a Tprim<'a>),
+    Hprim(&'a Tprim),
     Hthis,
     Hdynamic,
     Hnothing,
-    HpuAccess(&'a (&'a Hint<'a>, Sid<'a>)),
     Hunion(&'a [&'a Hint<'a>]),
     Hintersection(&'a [&'a Hint<'a>]),
 }
@@ -188,6 +188,7 @@ impl<'a> TrivialDrop for Hint_<'a> {}
     Copy,
     Debug,
     Eq,
+    FromOcamlRep,
     FromOcamlRepIn,
     Hash,
     NoPosHash,
@@ -197,7 +198,7 @@ impl<'a> TrivialDrop for Hint_<'a> {}
     Serialize,
     ToOcamlRep
 )]
-pub enum Tprim<'a> {
+pub enum Tprim {
     Tnull,
     Tvoid,
     Tint,
@@ -208,11 +209,8 @@ pub enum Tprim<'a> {
     Tnum,
     Tarraykey,
     Tnoreturn,
-    /// plain Pocket Universe atom when we don't know which enum it is in.
-    /// E.g. `:@MyAtom`
-    Tatom(&'a str),
 }
-impl<'a> TrivialDrop for Tprim<'a> {}
+impl TrivialDrop for Tprim {}
 
 #[derive(
     Clone,

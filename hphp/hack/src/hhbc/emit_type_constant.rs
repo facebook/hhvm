@@ -356,11 +356,6 @@ fn hint_to_type_constant_list(
             hint_to_type_constant_list(opts, tparams, targ_map, h)?,
         ]
         .concat(),
-        HpuAccess(_, _) => {
-            //"TODO(T36532263) hint_to_type_constant_list"
-            // TODO(T55819007) for plans of updating
-            vec![]
-        }
         _ => return Err(unrecoverable("Hints not available on the original AST")),
     })
 }

@@ -212,7 +212,6 @@ module Full = struct
     | Nast.Tresource -> "resource"
     | Nast.Tarraykey -> "arraykey"
     | Nast.Tnoreturn -> "noreturn"
-    | Nast.Tatom s -> ":@" ^ s
 
   let tdarray k x y = list "darray<" k [x; y] ">"
 
@@ -273,8 +272,6 @@ module Full = struct
       | Open_shape -> fields @ [text "..."]
     in
     list "shape(" id fields ")"
-
-  let pu_concat k ty access = k ty ^^ text (":@" ^ access)
 
   let thas_member k hm =
     let { hm_name = (_, name); hm_type; hm_class_id = _; hm_explicit_targs } =
@@ -351,7 +348,6 @@ module Full = struct
     | Tunion tyl -> Concat [text "|"; ttuple k tyl]
     | Tintersection tyl -> Concat [text "&"; ttuple k tyl]
     | Tshape (shape_kind, fdm) -> tshape k to_doc shape_kind fdm
-    | Tpu_access (ty', (_, access)) -> pu_concat k ty' access
 
   let rec locl_ty : _ -> _ -> _ -> locl_ty -> Doc.t =
    fun to_doc st env ty ->
@@ -574,9 +570,6 @@ module Full = struct
       delimited_list (Space ^^ text "&" ^^ Space) "(" k tyl ")"
     | Tobject -> text "object"
     | Tshape (shape_kind, fdm) -> tshape k to_doc shape_kind fdm
-    | Tpu (base, (_, enum)) -> pu_concat k base enum
-    | Tpu_type_access ((_, member), (_, tyname)) ->
-      text member ^^ text (":@" ^ tyname)
     | Taccess (root_ty, id) -> Concat [k root_ty; text "::"; to_doc (snd id)]
 
   let rec constraint_type_ to_doc st env x =
@@ -754,7 +747,6 @@ module ErrorString = struct
     | Nast.Tresource -> "a resource"
     | Nast.Tarraykey -> "an array key (int | string)"
     | Nast.Tnoreturn -> "noreturn (throws or exits)"
-    | Nast.Tatom s -> "a PU atom " ^ s
 
   let varray = "a varray"
 
@@ -801,18 +793,6 @@ module ErrorString = struct
       "an object of type " ^ strip_ns x ^ inst env tyl
     | Tobject -> "an object"
     | Tshape _ -> "a shape"
-    | Tpu (ty, (_, enum)) ->
-      let ty =
-        match get_node ty with
-        | Tclass ((_, x), _, tyl) -> strip_ns x ^ inst env tyl
-        | _ -> "..."
-      in
-      "the pocket universe " ^ ty ^ ":@" ^ enum
-    | Tpu_type_access ((_, member), (_, tyname)) ->
-      "the projected Pocket Universe dependent type "
-      ^ tyname
-      ^ " associated with the type parameter"
-      ^ member
     | Tunapplied_alias _ ->
       (* FIXME it seems like this function is only for
          fully-applied types? Tunapplied_alias should only appear
@@ -894,7 +874,6 @@ module Json = struct
     | Nast.Tresource -> "resource"
     | Nast.Tarraykey -> "arraykey"
     | Nast.Tnoreturn -> "noreturn"
-    | Nast.Tatom s -> s
 
   let param_mode_to_string = function
     | FPnormal -> "normal"
@@ -1011,13 +990,6 @@ module Json = struct
       obj @@ kind p "varray_or_darray" @ args [ty1; ty2]
     | (p, Tdarray (ty1, ty2)) -> obj @@ kind p "darray" @ args [ty1; ty2]
     | (p, Tvarray ty) -> obj @@ kind p "varray" @ args [ty]
-    | (p, Tpu (base, enum)) ->
-      obj @@ kind p "pocket_universe" @ args [base] @ name (snd enum)
-    | (p, Tpu_type_access (member, typ)) ->
-      obj
-      @@ kind p "pocket_universe_type_access"
-      @ name (snd member)
-      @ name (snd typ)
     (* TODO akenn *)
     | (p, Taccess (ty, _id)) -> obj @@ kind p "type_constant" @ args [ty]
 

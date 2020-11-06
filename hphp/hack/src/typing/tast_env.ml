@@ -218,8 +218,6 @@ let restore_method_env env m = restore_saved_env env m.m_annotation
 
 let restore_fun_env env f = restore_saved_env env f.f_annotation
 
-let restore_pu_enum_env env pu = restore_saved_env env pu.pu_annotation
-
 let fun_env ctx f =
   let ctx =
     Provider_context.map_tcopt ctx ~f:(fun _tcopt -> f.f_annotation.tcopt)
@@ -299,14 +297,3 @@ let set_allow_wildcards env =
 let get_allow_wildcards env = env.Typing_env_types.allow_wildcards
 
 let condition_type_matches = Typing_reactivity.condition_type_matches
-
-(* ocaml being ocaml...
- * We need at least one explicit reference to the Typing_pocket_univereses
- * module otherwise the compiler will not include it in the resulting binary.
- * Because of cyclic module dependencies, this is never done directly (we
- * rely on references in Typing_utils), so I need this dummy occurence just
- * to make sure the code is present.
- *)
-let _ =
-  let _ = Typing_pocket_universes.expand_pocket_universes in
-  ()

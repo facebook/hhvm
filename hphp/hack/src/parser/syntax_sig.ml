@@ -844,11 +844,6 @@ module type Syntax_S = sig
     ; type_constant_separator                            : t
     ; type_constant_right_type                           : t
     }
-  | PUAccess                          of
-    { pu_access_left_type                                : t
-    ; pu_access_separator                                : t
-    ; pu_access_right_type                               : t
-    }
   | VectorTypeSpecifier               of
     { vector_type_keyword                                : t
     ; vector_type_left_angle                             : t
@@ -1014,56 +1009,6 @@ module type Syntax_S = sig
   | EnumAtomExpression                of
     { enum_atom_hash                                     : t
     ; enum_atom_expression                               : t
-    }
-  | PocketAtomExpression              of
-    { pocket_atom_glyph                                  : t
-    ; pocket_atom_expression                             : t
-    }
-  | PocketIdentifierExpression        of
-    { pocket_identifier_qualifier                        : t
-    ; pocket_identifier_pu_operator                      : t
-    ; pocket_identifier_field                            : t
-    ; pocket_identifier_operator                         : t
-    ; pocket_identifier_name                             : t
-    }
-  | PocketAtomMappingDeclaration      of
-    { pocket_atom_mapping_glyph                          : t
-    ; pocket_atom_mapping_name                           : t
-    ; pocket_atom_mapping_left_paren                     : t
-    ; pocket_atom_mapping_mappings                       : t
-    ; pocket_atom_mapping_right_paren                    : t
-    ; pocket_atom_mapping_semicolon                      : t
-    }
-  | PocketEnumDeclaration             of
-    { pocket_enum_attributes                             : t
-    ; pocket_enum_modifiers                              : t
-    ; pocket_enum_enum                                   : t
-    ; pocket_enum_name                                   : t
-    ; pocket_enum_left_brace                             : t
-    ; pocket_enum_fields                                 : t
-    ; pocket_enum_right_brace                            : t
-    }
-  | PocketFieldTypeExprDeclaration    of
-    { pocket_field_type_expr_case                        : t
-    ; pocket_field_type_expr_type                        : t
-    ; pocket_field_type_expr_name                        : t
-    ; pocket_field_type_expr_semicolon                   : t
-    }
-  | PocketFieldTypeDeclaration        of
-    { pocket_field_type_case                             : t
-    ; pocket_field_type_type                             : t
-    ; pocket_field_type_type_parameter                   : t
-    ; pocket_field_type_semicolon                        : t
-    }
-  | PocketMappingIdDeclaration        of
-    { pocket_mapping_id_name                             : t
-    ; pocket_mapping_id_initializer                      : t
-    }
-  | PocketMappingTypeDeclaration      of
-    { pocket_mapping_type_keyword                        : t
-    ; pocket_mapping_type_name                           : t
-    ; pocket_mapping_type_equal                          : t
-    ; pocket_mapping_type_type                           : t
     }
 
 
@@ -1239,7 +1184,6 @@ module type Syntax_S = sig
   val make_xhp_expression : t -> t -> t -> t
   val make_xhp_close : t -> t -> t -> t
   val make_type_constant : t -> t -> t -> t
-  val make_pu_access : t -> t -> t -> t
   val make_vector_type_specifier : t -> t -> t -> t -> t -> t
   val make_keyset_type_specifier : t -> t -> t -> t -> t -> t
   val make_tuple_type_explicit_specifier : t -> t -> t -> t -> t
@@ -1270,14 +1214,6 @@ module type Syntax_S = sig
   val make_error : t -> t
   val make_list_item : t -> t -> t
   val make_enum_atom_expression : t -> t -> t
-  val make_pocket_atom_expression : t -> t -> t
-  val make_pocket_identifier_expression : t -> t -> t -> t -> t -> t
-  val make_pocket_atom_mapping_declaration : t -> t -> t -> t -> t -> t -> t
-  val make_pocket_enum_declaration : t -> t -> t -> t -> t -> t -> t -> t
-  val make_pocket_field_type_expr_declaration : t -> t -> t -> t -> t
-  val make_pocket_field_type_declaration : t -> t -> t -> t -> t
-  val make_pocket_mapping_id_declaration : t -> t -> t
-  val make_pocket_mapping_type_declaration : t -> t -> t -> t -> t
 
 
   val position : Relative_path.t -> t -> Pos.t option
@@ -1422,7 +1358,6 @@ module type Syntax_S = sig
   val is_xhp_expression : t -> bool
   val is_xhp_close : t -> bool
   val is_type_constant : t -> bool
-  val is_pu_access : t -> bool
   val is_vector_type_specifier : t -> bool
   val is_keyset_type_specifier : t -> bool
   val is_tuple_type_explicit_specifier : t -> bool
@@ -1453,14 +1388,6 @@ module type Syntax_S = sig
   val is_error : t -> bool
   val is_list_item : t -> bool
   val is_enum_atom_expression : t -> bool
-  val is_pocket_atom_expression : t -> bool
-  val is_pocket_identifier_expression : t -> bool
-  val is_pocket_atom_mapping_declaration : t -> bool
-  val is_pocket_enum_declaration : t -> bool
-  val is_pocket_field_type_expr_declaration : t -> bool
-  val is_pocket_field_type_declaration : t -> bool
-  val is_pocket_mapping_id_declaration : t -> bool
-  val is_pocket_mapping_type_declaration : t -> bool
 
 
   val is_specific_token : TokenKind.t -> t -> bool

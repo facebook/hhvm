@@ -15,8 +15,7 @@ let print_tprim =
     | Tnull -> "null"
     | Tvoid -> "void"
     | Tresource -> "resource"
-    | Tnoreturn -> "noreturn"
-    | Tatom s -> ":@" ^ s)
+    | Tnoreturn -> "noreturn")
 
 let strip_ns str =
   let str' = Utils.strip_ns str in
@@ -89,9 +88,6 @@ let rec print_ty_exn ?(allow_nothing = false) ty =
       (print_ty_exn ty2)
   | Tdarray (ty1, ty2) ->
     Printf.sprintf "darray<%s, %s>" (print_ty_exn ty1) (print_ty_exn ty2)
-  | Tpu (ty, id) -> Printf.sprintf "(%s:@%s)" (print_ty_exn ty) (snd id)
-  | Tpu_type_access (member, tyname) ->
-    Printf.sprintf "(%s:@%s)" (snd member) (snd tyname)
   | Taccess (ty, id) -> Printf.sprintf "%s::%s" (print_ty_exn ty) (snd id)
 
 and print_tyl_exn tyl = String.concat ~sep:", " (List.map tyl ~f:print_ty_exn)

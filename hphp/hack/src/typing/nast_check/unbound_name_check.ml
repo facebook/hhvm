@@ -25,9 +25,6 @@ type env = {
   type_params: Aast.reify_kind SMap.t;
   (* Need some context to differentiate global consts and other Id's *)
   seen_names: Pos.t SMap.t;
-  (* Special context for pocket universes *)
-  pu_case_types: Aast.reify_kind SMap.t;
-  pu_member_types: Aast.sid list SMap.t;
   (* Contexts where typedefs are valid typenames *)
   class_id_allow_typedef: bool;
   hint_allow_typedef: bool;
@@ -164,8 +161,6 @@ let handler ctx =
         ctx;
         type_params = SMap.empty;
         seen_names = SMap.empty;
-        pu_case_types = SMap.empty;
-        pu_member_types = SMap.empty;
         class_id_allow_typedef = false;
         hint_allow_typedef = true;
         hint_context = Errors.TypeNamespace;
@@ -225,41 +220,6 @@ let handler ctx =
         env with
         type_params = extend_type_params env.type_params m.Aast.m_tparams;
       }
-
-    method! at_pu_enum env pu_enum =
-      let pu_case_types =
-        List.fold_left
-          ~init:SMap.empty
-          ~f:(fun acc Aast.{ tp_name = (_, name); tp_reified = reified; _ } ->
-            SMap.add name reified acc)
-          pu_enum.Aast.pu_case_types
-      in
-      let pu_member_types =
-        List.fold_left
-          pu_enum.Aast.pu_members
-          ~init:SMap.empty
-          ~f:(fun acc Aast.{ pum_atom = (_, name); pum_types; _ } ->
-            let pum_type_param_names = List.map ~f:fst pum_types in
-            match SMap.find_opt name acc with
-            | None -> SMap.add name pum_type_param_names acc
-            | Some types ->
-              SMap.add name (List.append pum_type_param_names types) acc)
-      in
-      { env with pu_case_types; pu_member_types }
-
-    method! at_pu_case_value env _ =
-      { env with type_params = SMap.union env.type_params env.pu_case_types }
-
-    method! at_pu_member env pu_member =
-      let pu_name = snd pu_member.Aast.pum_atom in
-      let member_types = SMap.find pu_name env.pu_member_types in
-      let type_params =
-        List.fold_left
-          member_types
-          ~init:env.type_params
-          ~f:(fun acc type_param -> SMap.add (snd type_param) Aast.Erased acc)
-      in
-      { env with type_params }
 
     method! at_targ env _ = { env with hint_allow_typedef = true }
 

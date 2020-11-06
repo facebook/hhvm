@@ -1612,9 +1612,6 @@ where
                 if ch1 == ':' {
                     self.advance(2);
                     TokenKind::ColonColon
-                } else if ch1 == '@' {
-                    self.advance(2);
-                    TokenKind::ColonAt
                 } else {
                     self.advance(1);
                     TokenKind::Colon

@@ -164,7 +164,6 @@ pub enum SyntaxVariant<'a, T, V> {
     XHPExpression(&'a XHPExpressionChildren<'a, T, V>),
     XHPClose(&'a XHPCloseChildren<'a, T, V>),
     TypeConstant(&'a TypeConstantChildren<'a, T, V>),
-    PUAccess(&'a PUAccessChildren<'a, T, V>),
     VectorTypeSpecifier(&'a VectorTypeSpecifierChildren<'a, T, V>),
     KeysetTypeSpecifier(&'a KeysetTypeSpecifierChildren<'a, T, V>),
     TupleTypeExplicitSpecifier(&'a TupleTypeExplicitSpecifierChildren<'a, T, V>),
@@ -195,14 +194,6 @@ pub enum SyntaxVariant<'a, T, V> {
     ErrorSyntax(&'a ErrorSyntaxChildren<'a, T, V>),
     ListItem(&'a ListItemChildren<'a, T, V>),
     EnumAtomExpression(&'a EnumAtomExpressionChildren<'a, T, V>),
-    PocketAtomExpression(&'a PocketAtomExpressionChildren<'a, T, V>),
-    PocketIdentifierExpression(&'a PocketIdentifierExpressionChildren<'a, T, V>),
-    PocketAtomMappingDeclaration(&'a PocketAtomMappingDeclarationChildren<'a, T, V>),
-    PocketEnumDeclaration(&'a PocketEnumDeclarationChildren<'a, T, V>),
-    PocketFieldTypeExprDeclaration(&'a PocketFieldTypeExprDeclarationChildren<'a, T, V>),
-    PocketFieldTypeDeclaration(&'a PocketFieldTypeDeclarationChildren<'a, T, V>),
-    PocketMappingIdDeclaration(&'a PocketMappingIdDeclarationChildren<'a, T, V>),
-    PocketMappingTypeDeclaration(&'a PocketMappingTypeDeclarationChildren<'a, T, V>),
 }
 
 #[derive(Debug, Clone)]
@@ -1295,13 +1286,6 @@ pub struct TypeConstantChildren<'a, T, V> {
 }
 
 #[derive(Debug, Clone)]
-pub struct PUAccessChildren<'a, T, V> {
-    pub left_type: Syntax<'a, T, V>,
-    pub separator: Syntax<'a, T, V>,
-    pub right_type: Syntax<'a, T, V>,
-}
-
-#[derive(Debug, Clone)]
 pub struct VectorTypeSpecifierChildren<'a, T, V> {
     pub keyword: Syntax<'a, T, V>,
     pub left_angle: Syntax<'a, T, V>,
@@ -1525,72 +1509,6 @@ pub struct ListItemChildren<'a, T, V> {
 pub struct EnumAtomExpressionChildren<'a, T, V> {
     pub hash: Syntax<'a, T, V>,
     pub expression: Syntax<'a, T, V>,
-}
-
-#[derive(Debug, Clone)]
-pub struct PocketAtomExpressionChildren<'a, T, V> {
-    pub glyph: Syntax<'a, T, V>,
-    pub expression: Syntax<'a, T, V>,
-}
-
-#[derive(Debug, Clone)]
-pub struct PocketIdentifierExpressionChildren<'a, T, V> {
-    pub qualifier: Syntax<'a, T, V>,
-    pub pu_operator: Syntax<'a, T, V>,
-    pub field: Syntax<'a, T, V>,
-    pub operator: Syntax<'a, T, V>,
-    pub name: Syntax<'a, T, V>,
-}
-
-#[derive(Debug, Clone)]
-pub struct PocketAtomMappingDeclarationChildren<'a, T, V> {
-    pub glyph: Syntax<'a, T, V>,
-    pub name: Syntax<'a, T, V>,
-    pub left_paren: Syntax<'a, T, V>,
-    pub mappings: Syntax<'a, T, V>,
-    pub right_paren: Syntax<'a, T, V>,
-    pub semicolon: Syntax<'a, T, V>,
-}
-
-#[derive(Debug, Clone)]
-pub struct PocketEnumDeclarationChildren<'a, T, V> {
-    pub attributes: Syntax<'a, T, V>,
-    pub modifiers: Syntax<'a, T, V>,
-    pub enum_: Syntax<'a, T, V>,
-    pub name: Syntax<'a, T, V>,
-    pub left_brace: Syntax<'a, T, V>,
-    pub fields: Syntax<'a, T, V>,
-    pub right_brace: Syntax<'a, T, V>,
-}
-
-#[derive(Debug, Clone)]
-pub struct PocketFieldTypeExprDeclarationChildren<'a, T, V> {
-    pub case: Syntax<'a, T, V>,
-    pub type_: Syntax<'a, T, V>,
-    pub name: Syntax<'a, T, V>,
-    pub semicolon: Syntax<'a, T, V>,
-}
-
-#[derive(Debug, Clone)]
-pub struct PocketFieldTypeDeclarationChildren<'a, T, V> {
-    pub case: Syntax<'a, T, V>,
-    pub type_: Syntax<'a, T, V>,
-    pub type_parameter: Syntax<'a, T, V>,
-    pub semicolon: Syntax<'a, T, V>,
-}
-
-#[derive(Debug, Clone)]
-pub struct PocketMappingIdDeclarationChildren<'a, T, V> {
-    pub name: Syntax<'a, T, V>,
-    pub initializer: Syntax<'a, T, V>,
-}
-
-#[derive(Debug, Clone)]
-pub struct PocketMappingTypeDeclarationChildren<'a, T, V> {
-    pub keyword: Syntax<'a, T, V>,
-    pub name: Syntax<'a, T, V>,
-    pub equal: Syntax<'a, T, V>,
-    pub type_: Syntax<'a, T, V>,
 }
 
 

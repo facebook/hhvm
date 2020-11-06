@@ -561,7 +561,6 @@ and type_ vgenv root variance env ty =
         type_ vgenv root variance env sft_ty
       end
       ty_map
-  | Tpu_access (base, _) -> type_ vgenv root variance env base
 
 (* `as` constraints on method type parameters must be contravariant
  * and `super` constraints on method type parameters are covariant. To
@@ -867,29 +866,3 @@ and get_typarams vgenv root env (ty : decl_ty) =
   | Tvarray ty -> get_typarams vgenv root env ty
   | Tvarray_or_darray (ty1, ty2) ->
     union (get_typarams vgenv root env ty1) (get_typarams vgenv root env ty2)
-  | Tpu_access _ ->
-    (* TODO(T64285771):
-     * Parser currently supports multiple :@ when the source code syntax only support one
-     * :@ . Since the syntax is still a moving target, I'll update this code
-     * once we settle with the final syntax and we no longer need to split the
-     * nested Tpu_access
-     *)
-    let rec split ty =
-      match get_node ty with
-      | Tpu_access (base, sid) ->
-        let (base, trailing) = split base in
-        (base, sid :: trailing)
-      | _ -> (ty, [])
-    in
-    let (base, _) = split ty in
-    let param =
-      match get_node base with
-      (* Tgeneric(tp):@T is a valid usage of tp and should not trigger the
-       * linter
-       *)
-      | Tgeneric (tp, []) ->
-        (* may want to handle case where there are type arguments *)
-        single tp (get_reason ty)
-      | _ -> empty
-    in
-    union param (flip param)

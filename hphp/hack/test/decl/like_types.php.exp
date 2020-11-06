@@ -109,8 +109,8 @@
             stc_name = ([11:23-24], "T"); stc_type = None;
             stc_enforceable = ([Pos.none], false); stc_reifiable = None }
            ];
-         sc_pu_enums = []; sc_props = []; sc_sprops = [];
-         sc_constructor = None; sc_static_methods = [];
+         sc_props = []; sc_sprops = []; sc_constructor = None;
+         sc_static_methods = [];
          sc_methods =
          [{ Shallow_decl_defs.sm_abstract = false; sm_final = false;
             sm_name = ([13:19-20], "f"); sm_override = false;

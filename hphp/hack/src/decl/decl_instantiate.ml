@@ -145,7 +145,6 @@ and instantiate_ subst x =
   | Tshape (shape_kind, fdm) ->
     let fdm = ShapeFieldMap.map (instantiate subst) fdm in
     Tshape (shape_kind, fdm)
-  | Tpu_access (base, sid) -> Tpu_access (instantiate subst base, sid)
 
 and instantiate_possibly_enforced_ty subst et =
   { et_type = instantiate subst et.et_type; et_enforced = et.et_enforced }

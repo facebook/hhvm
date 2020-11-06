@@ -456,12 +456,6 @@ module ApiEager = struct
     List.map ~f:(fun req -> snd req) (all_ancestor_reqs t)
     |> List.append (ApiShallow.upper_bounds_on_this_from_constraints t)
 
-  let get_pu_enum (decl, t) id =
-    Decl_counters.count_subdecl decl (Decl_counters.Get_pu_enum id) @@ fun () ->
-    match t with
-    | Lazy (_sc, lc) -> LSTable.get (Lazy.force lc).ih.pu_enums id
-    | Eager c -> SMap.find_opt id c.tc_pu_enums
-
   let consts (decl, t) =
     Decl_counters.count_subdecl decl Decl_counters.Consts @@ fun () ->
     match t with
@@ -473,12 +467,6 @@ module ApiEager = struct
     match t with
     | Lazy (_sc, lc) -> LSTable.to_list (Lazy.force lc).ih.typeconsts
     | Eager c -> SMap.bindings c.tc_typeconsts
-
-  let pu_enums (decl, t) =
-    Decl_counters.count_subdecl decl Decl_counters.Pu_enums @@ fun () ->
-    match t with
-    | Lazy (_sc, lc) -> LSTable.to_list (Lazy.force lc).ih.pu_enums
-    | Eager c -> SMap.bindings c.tc_pu_enums
 
   let props (decl, t) =
     Decl_counters.count_subdecl decl Decl_counters.Props @@ fun () ->

@@ -1407,15 +1407,6 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                     }
                 })
             },
-            PUAccess(x) => {
-                get_index(3).and_then(|index| { match index {
-                        0 => Some(&x.left_type),
-                    1 => Some(&x.separator),
-                    2 => Some(&x.right_type),
-                        _ => None,
-                    }
-                })
-            },
             VectorTypeSpecifier(x) => {
                 get_index(5).and_then(|index| { match index {
                         0 => Some(&x.keyword),
@@ -1698,88 +1689,6 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 get_index(2).and_then(|index| { match index {
                         0 => Some(&x.hash),
                     1 => Some(&x.expression),
-                        _ => None,
-                    }
-                })
-            },
-            PocketAtomExpression(x) => {
-                get_index(2).and_then(|index| { match index {
-                        0 => Some(&x.glyph),
-                    1 => Some(&x.expression),
-                        _ => None,
-                    }
-                })
-            },
-            PocketIdentifierExpression(x) => {
-                get_index(5).and_then(|index| { match index {
-                        0 => Some(&x.qualifier),
-                    1 => Some(&x.pu_operator),
-                    2 => Some(&x.field),
-                    3 => Some(&x.operator),
-                    4 => Some(&x.name),
-                        _ => None,
-                    }
-                })
-            },
-            PocketAtomMappingDeclaration(x) => {
-                get_index(6).and_then(|index| { match index {
-                        0 => Some(&x.glyph),
-                    1 => Some(&x.name),
-                    2 => Some(&x.left_paren),
-                    3 => Some(&x.mappings),
-                    4 => Some(&x.right_paren),
-                    5 => Some(&x.semicolon),
-                        _ => None,
-                    }
-                })
-            },
-            PocketEnumDeclaration(x) => {
-                get_index(7).and_then(|index| { match index {
-                        0 => Some(&x.attributes),
-                    1 => Some(&x.modifiers),
-                    2 => Some(&x.enum_),
-                    3 => Some(&x.name),
-                    4 => Some(&x.left_brace),
-                    5 => Some(&x.fields),
-                    6 => Some(&x.right_brace),
-                        _ => None,
-                    }
-                })
-            },
-            PocketFieldTypeExprDeclaration(x) => {
-                get_index(4).and_then(|index| { match index {
-                        0 => Some(&x.case),
-                    1 => Some(&x.type_),
-                    2 => Some(&x.name),
-                    3 => Some(&x.semicolon),
-                        _ => None,
-                    }
-                })
-            },
-            PocketFieldTypeDeclaration(x) => {
-                get_index(4).and_then(|index| { match index {
-                        0 => Some(&x.case),
-                    1 => Some(&x.type_),
-                    2 => Some(&x.type_parameter),
-                    3 => Some(&x.semicolon),
-                        _ => None,
-                    }
-                })
-            },
-            PocketMappingIdDeclaration(x) => {
-                get_index(2).and_then(|index| { match index {
-                        0 => Some(&x.name),
-                    1 => Some(&x.initializer),
-                        _ => None,
-                    }
-                })
-            },
-            PocketMappingTypeDeclaration(x) => {
-                get_index(4).and_then(|index| { match index {
-                        0 => Some(&x.keyword),
-                    1 => Some(&x.name),
-                    2 => Some(&x.equal),
-                    3 => Some(&x.type_),
                         _ => None,
                     }
                 })

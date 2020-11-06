@@ -472,7 +472,6 @@ where
             | TokenKind::Isset => self.parse_isset_expression(),
             | TokenKind::Define => self.parse_define_expression(),
             | TokenKind::Eval => self.parse_eval_expression(),
-            | TokenKind::ColonAt => self.parse_pocket_atom(),
             | TokenKind::Hash => self.parse_atom(),
             | TokenKind::Empty => {
                 self.with_error(Errors::empty_expression_illegal);
@@ -1353,10 +1352,6 @@ where
                         }
                         TokenKind::ColonColon => {
                             let result = self.parse_scope_resolution_expression(term);
-                            self.parse_remaining_expression(result)
-                        }
-                        TokenKind::ColonAt => {
-                            let result = self.parse_pocket_identifier_expression(term);
                             self.parse_remaining_expression(result)
                         }
                         TokenKind::PlusPlus | TokenKind::MinusMinus => {
@@ -3027,43 +3022,9 @@ where
         S!(make_scope_resolution_expression, self, qualifier, op, name)
     }
 
-    fn parse_pocket_identifier_expression(&mut self, qualifier: S::R) -> S::R {
-        // SPEC
-        // pocket-identifier-expression:
-        //   scope-resolution-qualifier  :@ name ::  name
-        //
-        // scope-resolution-qualifier:
-        //   qualified-name
-        //   variable-name
-        //   self
-        //   parent
-        //   static
-        //
-        // TODO: see TODO in parse_scope_resolution_expression
-        let op_pu = self.require_colonat();
-        let field_name = self.require_name();
-        let op = self.require_coloncolon();
-        let name = self.require_name();
-        S!(
-            make_pocket_identifier_expression,
-            self,
-            qualifier,
-            op_pu,
-            field_name,
-            op,
-            name
-        )
-    }
-
     fn parse_atom(&mut self) -> S::R {
         let hash = self.assert_token(TokenKind::Hash);
         let atom_name = self.require_name();
         S!(make_enum_atom_expression, self, hash, atom_name)
-    }
-
-    fn parse_pocket_atom(&mut self) -> S::R {
-        let glyph = self.assert_token(TokenKind::ColonAt);
-        let atom_name = self.require_name();
-        S!(make_pocket_atom_expression, self, glyph, atom_name)
     }
 }

@@ -98,10 +98,6 @@ pub type Method_<A> =
     aast::Method_<<A as Annot>::Ex, <A as Annot>::Fb, <A as Annot>::En, <A as Annot>::Hi>;
 pub type Program<A> =
     aast::Program<<A as Annot>::Ex, <A as Annot>::Fb, <A as Annot>::En, <A as Annot>::Hi>;
-pub type PuEnum<A> =
-    aast::PuEnum<<A as Annot>::Ex, <A as Annot>::Fb, <A as Annot>::En, <A as Annot>::Hi>;
-pub type PuMember<A> =
-    aast::PuMember<<A as Annot>::Ex, <A as Annot>::Fb, <A as Annot>::En, <A as Annot>::Hi>;
 pub type RecordDef<A> =
     aast::RecordDef<<A as Annot>::Ex, <A as Annot>::Fb, <A as Annot>::En, <A as Annot>::Hi>;
 pub type Stmt<A> =

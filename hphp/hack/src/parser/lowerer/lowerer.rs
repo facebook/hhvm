@@ -989,21 +989,6 @@ where
                     _ => Self::missing_syntax("type constant base", node, env),
                 }
             }
-            PUAccess(c) => {
-                let pos = Self::p_pos(&c.left_type, env);
-                let child = Self::pos_name(&c.right_type, env)?;
-                match Self::p_hint_(&c.left_type, env)? {
-                    h @ HpuAccess(_, _) => Ok(HpuAccess(ast::Hint::new(pos, h), child)),
-                    Happly(id, hints) => {
-                        if hints.is_empty() {
-                            Ok(HpuAccess(ast::Hint::new(pos, Happly(id, hints)), child))
-                        } else {
-                            Self::missing_syntax("pocket universe access base", node, env)
-                        }
-                    }
-                    _ => Self::missing_syntax("pocket universe access base", node, env),
-                }
-            }
             ReifiedTypeArgument(_) => {
                 Self::raise_parsing_error(node, env, &syntax_error::invalid_reified);
                 Self::missing_syntax("refied type", node, env)
@@ -2250,45 +2235,6 @@ where
                     Self::failwith("expect xhp open")
                 }
             }
-            PocketAtomExpression(c) => Ok(E_::PUAtom(Self::pos_name(&c.expression, env)?.1)),
-            PocketIdentifierExpression(c) => {
-                let mk_class_id = |e: ast::Expr| ast::ClassId(pos, ast::ClassId_::CIexpr(e));
-                let qual = Self::p_expr(&c.qualifier, env)?;
-                let qual = if env.codegen() {
-                    mk_class_id(qual)
-                } else if let E_::Lvar(a) = qual.1 {
-                    let p = qual.0;
-                    let expr = E::new(p.clone(), E_::mk_id(ast::Id(p, (a.1).1)));
-                    mk_class_id(expr)
-                } else {
-                    mk_class_id(qual)
-                };
-                let E(p, expr_) = Self::p_expr(&c.field, env)?;
-                let field = match expr_ {
-                    E_::String(id) => (
-                        p,
-                        String::from_utf8(id.into()).map_err(|e| Error::Failwith(e.to_string()))?,
-                    ),
-                    E_::Id(id) => {
-                        let ast::Id(p, n) = *id;
-                        (p, n)
-                    }
-                    _ => Self::missing_syntax("PocketIdentifierExpression field", node, env)?,
-                };
-                let E(p, expr_) = Self::p_expr(&c.name, env)?;
-                let name = match expr_ {
-                    E_::String(id) => (
-                        p,
-                        String::from_utf8(id.into()).map_err(|e| Error::Failwith(e.to_string()))?,
-                    ),
-                    E_::Id(id) => {
-                        let ast::Id(p, n) = *id;
-                        (p, n)
-                    }
-                    _ => Self::missing_syntax("PocketIdentifierExpression name", node, env)?,
-                };
-                Ok(E_::mk_puidentifier(qual, field, name))
-            }
             EnumAtomExpression(c) => Ok(E_::EnumAtom(Self::pos_name(&c.expression, env)?.1)),
             _ => Self::missing_syntax_(Some(E_::Null), "expression", node, env),
         }
@@ -2327,8 +2273,9 @@ where
             | Id(_) | Clone(_) | ClassConst(_) | Int(_) | Float(_) | PrefixedString(_)
             | String(_) | String2(_) | Yield(_) | YieldBreak | Await(_) | Suspend(_)
             | ExprList(_) | Cast(_) | Unop(_) | Binop(_) | Eif(_) | New(_) | Efun(_) | Lfun(_)
-            | Xml(_) | Import(_) | Pipe(_) | Callconv(_) | Is(_) | As(_) | ParenthesizedExpr(_)
-            | PUIdentifier(_) => raise("Invalid lvalue"),
+            | Xml(_) | Import(_) | Pipe(_) | Callconv(_) | Is(_) | As(_) | ParenthesizedExpr(_) => {
+                raise("Invalid lvalue")
+            }
             _ => {}
         }
     }
@@ -4395,67 +4342,6 @@ where
                 }
                 Ok(class.xhp_category = Some((p, categories)))
             }
-            PocketEnumDeclaration(c) => {
-                let is_final = Self::p_kinds(&c.modifiers, env)?.has(modifier::FINAL);
-                let user_attributes = Self::p_user_attributes(&c.attributes, env)?;
-                let id = Self::pos_name(&c.name, env)?;
-                let flds = c.fields.syntax_node_to_list_skip_separator();
-                let mut case_types = vec![];
-                let mut case_values = vec![];
-                let mut members = vec![];
-                for fld in flds {
-                    match &fld.children {
-                        PocketAtomMappingDeclaration(c) => {
-                            let id = Self::pos_name(&c.name, env)?;
-                            let maps = c.mappings.syntax_node_to_list_skip_separator();
-                            let mut types = vec![];
-                            let mut exprs = vec![];
-                            for map in maps {
-                                match &map.children {
-                                    PocketMappingIdDeclaration(c) => {
-                                        let id = Self::pos_name(&c.name, env)?;
-                                        let expr = Self::p_simple_initializer(&c.initializer, env)?;
-                                        exprs.push((id, expr));
-                                    }
-                                    PocketMappingTypeDeclaration(c) => {
-                                        let id = Self::pos_name(&c.name, env)?;
-                                        let hint = Self::p_hint(&c.type_, env)?;
-                                        types.push((id, hint));
-                                    }
-                                    _ => {
-                                        Self::missing_syntax("pumapping", map, env)?;
-                                    }
-                                }
-                            }
-                            members.push(ast::PuMember {
-                                atom: id,
-                                types,
-                                exprs,
-                            })
-                        }
-                        PocketFieldTypeExprDeclaration(c) => {
-                            let typ = Self::p_hint(&c.type_, env)?;
-                            let id = Self::pos_name(&c.name, env)?;
-                            case_values.push(ast::PuCaseValue(id, typ));
-                        }
-                        PocketFieldTypeDeclaration(c) => {
-                            case_types.push(Self::p_tparam(false, &c.type_parameter, env)?);
-                        }
-                        _ => {
-                            Self::missing_syntax("pufield", fld, env)?;
-                        }
-                    }
-                }
-                Ok(class.pu_enums.push(ast::PuEnum {
-                    annotation: (),
-                    name: id,
-                    user_attributes,
-                    is_final,
-                    case_types,
-                    case_values,
-                    members,
-                }))
-            }
             _ => Self::missing_syntax("class element", node, env),
         }
     }
@@ -4716,7 +4602,6 @@ where
                     user_attributes,
                     file_attributes: vec![],
                     enum_: None,
-                    pu_enums: vec![],
                     doc_comment: doc_comment_opt,
                     emit_id: None,
                 };
@@ -4839,7 +4724,6 @@ where
                     attributes: vec![],
                     xhp_children: vec![],
                     xhp_attrs: vec![],
-                    pu_enums: vec![],
                     emit_id: None,
                 })])
             }
@@ -4907,7 +4791,6 @@ where
                     attributes: vec![],
                     xhp_children: vec![],
                     xhp_attrs: vec![],
-                    pu_enums: vec![],
                     emit_id: None,
                 };
 

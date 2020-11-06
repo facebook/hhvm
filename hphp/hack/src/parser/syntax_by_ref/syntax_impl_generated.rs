@@ -163,7 +163,6 @@ impl<T: LexableToken, V> Syntax<'_, T, V> {
             SyntaxVariant::XHPExpression {..} => SyntaxKind::XHPExpression,
             SyntaxVariant::XHPClose {..} => SyntaxKind::XHPClose,
             SyntaxVariant::TypeConstant {..} => SyntaxKind::TypeConstant,
-            SyntaxVariant::PUAccess {..} => SyntaxKind::PUAccess,
             SyntaxVariant::VectorTypeSpecifier {..} => SyntaxKind::VectorTypeSpecifier,
             SyntaxVariant::KeysetTypeSpecifier {..} => SyntaxKind::KeysetTypeSpecifier,
             SyntaxVariant::TupleTypeExplicitSpecifier {..} => SyntaxKind::TupleTypeExplicitSpecifier,
@@ -194,14 +193,6 @@ impl<T: LexableToken, V> Syntax<'_, T, V> {
             SyntaxVariant::ErrorSyntax {..} => SyntaxKind::ErrorSyntax,
             SyntaxVariant::ListItem {..} => SyntaxKind::ListItem,
             SyntaxVariant::EnumAtomExpression {..} => SyntaxKind::EnumAtomExpression,
-            SyntaxVariant::PocketAtomExpression {..} => SyntaxKind::PocketAtomExpression,
-            SyntaxVariant::PocketIdentifierExpression {..} => SyntaxKind::PocketIdentifierExpression,
-            SyntaxVariant::PocketAtomMappingDeclaration {..} => SyntaxKind::PocketAtomMappingDeclaration,
-            SyntaxVariant::PocketEnumDeclaration {..} => SyntaxKind::PocketEnumDeclaration,
-            SyntaxVariant::PocketFieldTypeExprDeclaration {..} => SyntaxKind::PocketFieldTypeExprDeclaration,
-            SyntaxVariant::PocketFieldTypeDeclaration {..} => SyntaxKind::PocketFieldTypeDeclaration,
-            SyntaxVariant::PocketMappingIdDeclaration {..} => SyntaxKind::PocketMappingIdDeclaration,
-            SyntaxVariant::PocketMappingTypeDeclaration {..} => SyntaxKind::PocketMappingTypeDeclaration,
         }
     }
 }

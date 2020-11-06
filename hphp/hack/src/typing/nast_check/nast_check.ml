@@ -17,7 +17,6 @@ let visitor =
       Illegal_name_check.handler;
       Class_tparams_check.handler;
       Control_context_check.handler;
-      Pocket_universes_check.handler;
       Read_from_append_check.handler;
       Dynamically_callable_attr_check.handler;
       Nast_switch_check.handler;

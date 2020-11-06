@@ -324,6 +324,18 @@ impl<'a> NamespaceBuilder<'a> {
         }
     }
 
+    fn empty_with_ns_in(ns: &'a str, arena: &'a Bump) -> Self {
+        NamespaceBuilder {
+            arena,
+            stack: bumpalo::vec![in arena; NamespaceInfo {
+                name: ns,
+                types: AssocListMut::new_in(arena),
+                namespaces: AssocListMut::new_in(arena),
+                types_or_namespaces: AssocListMut::new_in(arena),
+            }],
+        }
+    }
+
     fn push_namespace(&mut self, name: Option<&str>) {
         let current = self.current_namespace();
         if let Some(name) = name {
@@ -2978,9 +2990,17 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
     }
 
     fn make_capability(&mut self, lb: Self::R, tys: Self::R, rb: Self::R) -> Self::R {
-        Rc::make_mut(&mut self.state.namespace_builder).push_namespace(Some("HH\\Contexts"));
+        let mut namespace_builder =
+            NamespaceBuilder::empty_with_ns_in("\\HH\\Contexts\\", self.state.arena);
+        std::mem::swap(
+            &mut namespace_builder,
+            Rc::make_mut(&mut self.state.namespace_builder),
+        );
         let cap = self.make_intersection_type_specifier(lb, tys, rb);
-        Rc::make_mut(&mut self.state.namespace_builder).pop_namespace();
+        std::mem::swap(
+            &mut namespace_builder,
+            Rc::make_mut(&mut self.state.namespace_builder),
+        );
         cap
     }
 
@@ -2993,7 +3013,21 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         _unsafe_ty: Self::R,
         _rb: Self::R,
     ) -> Self::R {
-        ty
+        let mut namespace_builder =
+            NamespaceBuilder::empty_with_ns_in("\\HH\\Contexts\\", self.state.arena);
+        std::mem::swap(
+            &mut namespace_builder,
+            Rc::make_mut(&mut self.state.namespace_builder),
+        );
+        let ty = self.node_to_ty(ty);
+        std::mem::swap(
+            &mut namespace_builder,
+            Rc::make_mut(&mut self.state.namespace_builder),
+        );
+        match ty {
+            Some(ty) => Node::Ty(ty),
+            None => Node::Ignored(SK::CapabilityProvisional),
+        }
     }
 
     fn make_function_declaration_header(

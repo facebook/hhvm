@@ -39,8 +39,6 @@ namespace {
 
 #ifdef __aarch64__
   constexpr size_t kNumGPRegs = 8;
-#elif defined(__powerpc64__)
-  constexpr size_t kNumGPRegs = 31;
 #else
   // amd64 calling convention (also used by x64): rdi, rsi, rdx, rcx, r8, r9
   constexpr size_t kNumGPRegs = 6;
@@ -99,10 +97,6 @@ void pushRval(Registers& regs, tv_rval tv, bool isFCallBuiltin) {
 void pushDouble(Registers& regs, const Value value) {
   if (regs.SIMD_count < kNumSIMDRegs) {
     regs.SIMD_regs[regs.SIMD_count++] = value.dbl;
-#if defined(__powerpc64__)
-    // Following ABI, we must increment the GP reg index for each double arg.
-    if (regs.GP_count < kNumGPRegs) regs.GP_regs[regs.GP_count++] = 0;
-#endif
   } else {
     assertx(regs.spilled_count < kMaxBuiltinArgs - kNumGPRegs);
     regs.spilled_args[regs.spilled_count++] = value.num;

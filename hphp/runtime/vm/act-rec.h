@@ -60,20 +60,12 @@ struct Unit;
  * state.
  */
 struct ActRec {
-#if defined(__powerpc64__)
-  ActRec* m_sfp;         // Previous hardware frame pointer/ActRec.
-  uint32_t m_savedCR;    // PPC64's sign flags (CR)
-  uint32_t m_reserved;   // Reserved word as on ABI
-  uint64_t m_savedRip;   // In-TC address to return to.
-  uint64_t m_savedToc;   // TOC save doubleword
-#else // X64 style
   // This pair of uint64_t's must be the first two elements in the structure
   // so that the pointer to the ActRec can also be used for RBP chaining.
   // Note that ActRecs are also native frames, so this is an implicit machine
   // dependency.
   ActRec* m_sfp;       // Previous hardware frame pointer/ActRec
   uint64_t m_savedRip; // native (in-TC) return address
-#endif
   FuncId m_funcId;
   // bit 0: LocalsDecRefd
   // bit 1: AsyncEagerRet

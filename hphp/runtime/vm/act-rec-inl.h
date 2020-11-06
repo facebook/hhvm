@@ -21,19 +21,11 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 inline const Func* ActRec::func() const {
-#ifdef USE_LOWPTR
-  return m_func;
-#else
   return Func::fromFuncId(m_funcId);
-#endif
 }
 
 inline void ActRec::setFunc(const Func* f) {
-#ifdef USE_LOWPTR
-  m_func = f;
-#else
   m_funcId = f->getFuncId();
-#endif
 }
 
 inline const Unit* ActRec::unit() const {

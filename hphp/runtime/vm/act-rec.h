@@ -74,11 +74,7 @@ struct ActRec {
   ActRec* m_sfp;       // Previous hardware frame pointer/ActRec
   uint64_t m_savedRip; // native (in-TC) return address
 #endif
-#ifdef USE_LOWPTR
-  LowPtr<const Func> m_func;
-#else
   FuncId m_funcId;
-#endif
   // bit 0: LocalsDecRefd
   // bit 1: AsyncEagerRet
   // bits 2-31: bc offset of call opcode from caller func entry
@@ -285,11 +281,7 @@ static_assert(offsetof(ActRec, m_sfp) == 0,
 /*
  * Size in bytes of the target architecture's call frame.
  */
-#ifdef USE_LOWPTR
-constexpr auto kNativeFrameSize = offsetof(ActRec, m_func);
-#else
 constexpr auto kNativeFrameSize = offsetof(ActRec, m_funcId);
-#endif
 static_assert(kNativeFrameSize % sizeof(TypedValue) == 0, "");
 
 /*

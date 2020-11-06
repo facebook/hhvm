@@ -75,12 +75,7 @@ void cgDefFuncEntryFP(IRLS& env, const IRInstruction* inst) {
   v << store{prevFP, newFP + AROFF(m_sfp)};
   v << unstublogue{};
   v << phplogue{newFP};
-#ifdef USE_LOWPTR
-  emitStLowPtr(v, v.cns(func), newFP[AROFF(m_func)],
-               sizeof(LowPtr<const Func>));
-#else
   v << storeli{(int32_t)func->getFuncId().toInt(), newFP[AROFF(m_funcId)]};
-#endif
 
   int32_t constexpr flagsDelta =
     CallFlags::Flags::CallOffsetStart - ActRec::CallOffsetStart;
@@ -183,11 +178,7 @@ void cgStFrameFunc(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
   auto const fp = srcLoc(env, inst, 0).reg();
   auto const func = inst->extra<StFrameFunc>()->func;
-#ifdef USE_LOWPTR
-  emitStLowPtr(v, v.cns(func), fp[AROFF(m_func)], sizeof(LowPtr<const Func>));
-#else
   v << storeli{(int32_t)func->getFuncId().toInt(), fp[AROFF(m_funcId)]};
-#endif
 }
 
 void cgDbgCheckLocalsDecRefd(IRLS& env, const IRInstruction* inst) {

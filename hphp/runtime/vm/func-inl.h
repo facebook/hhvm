@@ -119,7 +119,11 @@ inline bool Func::validate() const {
 inline FuncId Func::getFuncId() const {
   assertx(!m_funcId.isInvalid());
   assertx(fromFuncId(m_funcId) == this);
+#ifdef USE_LOWPTR
+  return FuncId{this};
+#else
   return m_funcId;
+#endif
 }
 
 ///////////////////////////////////////////////////////////////////////////////

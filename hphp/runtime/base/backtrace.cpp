@@ -70,13 +70,8 @@ BTContext::BTContext() {
 }
 
 const ActRec* BTContext::clone(const BTContext& src, const ActRec* fp) {
-#ifdef USE_LOWPTR
-  fakeAR[0].m_func = src.fakeAR[0].m_func;
-  fakeAR[1].m_func = src.fakeAR[1].m_func;
-#else
   fakeAR[0].m_funcId = src.fakeAR[0].m_funcId;
   fakeAR[1].m_funcId = src.fakeAR[1].m_funcId;
-#endif
 
   fakeAR[0].m_callOffAndFlags = src.fakeAR[0].m_callOffAndFlags;
   fakeAR[1].m_callOffAndFlags = src.fakeAR[1].m_callOffAndFlags;

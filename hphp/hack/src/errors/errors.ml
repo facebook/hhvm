@@ -5504,6 +5504,18 @@ let atom_invalid_parameter_in_enum_class pos =
         ^ Naming_special_names.Classes.cElt );
     ]
 
+let atom_invalid_generic pos name =
+  add_list
+    (Typing.err_code Typing.AtomInvalidParameter)
+    [
+      ( pos,
+        "The type "
+        ^ name
+        ^ " must be a type constant or a reified generic "
+        ^ "in order to be used with "
+        ^ Naming_special_names.UserAttributes.uaAtom );
+    ]
+
 let atom_unknown pos atom_name class_name =
   let class_name = strip_ns class_name in
   add_list

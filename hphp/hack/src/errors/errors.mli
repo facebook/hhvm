@@ -1424,6 +1424,8 @@ val atom_invalid_parameter : Pos.t -> unit
 
 val atom_invalid_parameter_in_enum_class : Pos.t -> unit
 
+val atom_invalid_generic : Pos.t -> string -> unit
+
 val atom_unknown : Pos.t -> string -> string -> unit
 
 val atom_as_expr : Pos.t -> unit

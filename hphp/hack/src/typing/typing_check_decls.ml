@@ -48,7 +48,45 @@ let check_hint_wellkindedness env hint =
 (* Check if the __Atom attributes is on the parameter. If that's the case,
  * we check that it is only involving an enum class or a generic
  *)
-let check_atom_on_param env pos lty =
+let check_atom_on_param env pos dty lty =
+  (* If lty is HH\Elt<Foo, Bar>, we need to check that Foo is
+   * - an enum class
+   * - a generic
+   *
+   * If it is a generic, we need to check that it is
+   * - a reified generic
+   * - a type constant
+   *
+   * in both cases, it must be bounded by an enum class
+   *
+   * In all cases, we check that the requested atom is part of the
+   * detected enum class
+   *)
+  let check_tgeneric name =
+    let is_taccess_this =
+      match get_node dty with
+      | Tapply ((_, _name), [ty_enum; _ty_interface]) ->
+        (match get_node ty_enum with
+        | Taccess (dty, _) ->
+          (match get_node dty with
+          | Tthis -> true
+          | _ -> false)
+        | _ -> false)
+      | _ -> assert false
+      (* we just checked that *)
+    in
+    let is_reified =
+      match Env.get_reified env name with
+      | Erased -> false
+      | Reified
+      | SoftReified ->
+        true
+    in
+    if is_taccess_this || is_reified then
+      ()
+    else
+      Errors.atom_invalid_generic pos name
+  in
   match get_node lty with
   (* Uncomment the next line to allow normal enums with __Atom *)
   (* | Tnewtype (enum_name, _, _) when Env.is_enum env enum_name -> () *)
@@ -57,6 +95,7 @@ let check_atom_on_param env pos lty =
     (match get_node ty_enum with
     | Tclass ((_, enum_name), _, _) when Env.is_enum_class env enum_name -> ()
     | Tgeneric (name, _) ->
+      let () = check_tgeneric name in
       let upper_bounds =
         Typing_utils.collect_enum_class_upper_bounds env name
       in
@@ -190,7 +229,7 @@ and check_happly ?(is_atom = false) unchecked_tparams env h =
   match get_node decl_ty with
   | Tapply _ ->
     let (env, locl_ty) = Phase.localize_with_self env decl_ty in
-    let () = if is_atom then check_atom_on_param env pos locl_ty in
+    let () = if is_atom then check_atom_on_param env pos decl_ty locl_ty in
     begin
       match get_node (TUtils.get_base_type env locl_ty) with
       | Tclass (cls, _, tyl) ->

@@ -31,6 +31,6 @@ function main(): void {
 }
 
 class C {}
-function wrong_upper_bound<T as C>(<<__Atom>> HH\Elt<T, Box> $x): mixed {
+function wrong_upper_bound<reify T as C>(<<__Atom>> HH\Elt<T, Box> $x): mixed {
   return $x->unwrap()->x;
 }

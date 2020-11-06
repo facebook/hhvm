@@ -1561,6 +1561,16 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                                     ty => ty,
                                 })?
                             };
+                            // These are illegal here--they can only be used on
+                            // parameters in a function type hint (see
+                            // make_closure_type_specifier and unwrap_mutability).
+                            // Unwrap them here anyway for better error recovery.
+                            let type_ = match type_ {
+                                Ty(_, Ty_::Tapply((Id(_, "\\Mutable"), [t]))) => t,
+                                Ty(_, Ty_::Tapply((Id(_, "\\OwnedMutable"), [t]))) => t,
+                                Ty(_, Ty_::Tapply((Id(_, "\\MaybeMutable"), [t]))) => t,
+                                _ => type_,
+                            };
                             let mut flags = match attributes.param_mutability {
                                 Some(ParamMutability::ParamBorrowedMutable) => {
                                     FunParamFlags::MUTABLE_FLAGS_BORROWED

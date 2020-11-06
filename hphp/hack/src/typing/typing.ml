@@ -5980,13 +5980,16 @@ and call
                       let upper_bounds =
                         Typing_utils.collect_enum_class_upper_bounds env name
                       in
-                      SSet.fold
-                        (fun enum_name result ->
-                          if Option.is_none result then
-                            expand_atom_in_enum enum_name atom_name ety
-                          else
-                            result)
-                        upper_bounds
+                      (* To avoid ambiguity, we only support the case where
+                       * there is a single upper bound that is an EnumClass.
+                       * We might want to relax that later (e.g. with  the
+                       * support for intersections.
+                       * See Typing_check_decls.check_atom_on_param.
+                       *)
+                      if SSet.cardinal upper_bounds = 1 then
+                        let enum_name = SSet.choose upper_bounds in
+                        expand_atom_in_enum enum_name atom_name ety
+                      else
                         None
                     | _ ->
                       (* Already reported, see Typing_check_decls *)

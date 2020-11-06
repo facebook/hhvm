@@ -156,6 +156,11 @@ impl<'a> DirectDeclSmartConstructors<'a> {
             Node::QualifiedName(&(parts, pos)) => {
                 Some(self.qualified_name_from_parts("", parts, pos))
             }
+            Node::Token(t) if t.kind() == TokenKind::XHP => {
+                let pos = self.token_pos(t);
+                let text = self.str_from_utf8(self.source_text_at_pos(pos));
+                Some(Id(pos, text))
+            }
             _ => None,
         }
     }
@@ -2063,7 +2068,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             | TokenKind::Tuple
             | TokenKind::Classname
             | TokenKind::SelfToken => Node::Name(self.alloc((token_text(self), token_pos(self)))),
-            TokenKind::XHP | TokenKind::XHPElementName => {
+            TokenKind::XHPElementName => {
                 Node::XhpName(self.alloc((token_text(self), token_pos(self))))
             }
             TokenKind::SingleQuotedStringLiteral => match escaper::unescape_single_in(
@@ -2190,6 +2195,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             | TokenKind::Const
             | TokenKind::Function
             | TokenKind::Namespace
+            | TokenKind::XHP
             | TokenKind::Required => Node::Token(FixedWidthToken::new(kind, token.start_offset())),
             TokenKind::EndOfFile
             | TokenKind::Attribute
@@ -3280,6 +3286,8 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         };
         let (is_xhp, name) = if name.starts_with(":") {
             (true, prefix_slash(self.state.arena, name))
+        } else if xhp_keyword.is_present() {
+            (true, self.prefix_ns(name))
         } else {
             (false, name)
         };

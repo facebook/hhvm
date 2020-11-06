@@ -9,13 +9,16 @@
 open Hh_prelude
 open Direct_decl_parser
 
-let popt auto_namespace_map =
+let popt ~auto_namespace_map ~enable_xhp_class_modifier =
   let po = ParserOptions.default in
   let po = ParserOptions.with_disable_xhp_element_mangling po false in
   let po = ParserOptions.with_auto_namespace_map po auto_namespace_map in
+  let po =
+    ParserOptions.with_enable_xhp_class_modifier po enable_xhp_class_modifier
+  in
   po
 
-let init root auto_namespace_map : Provider_context.t =
+let init root popt : Provider_context.t =
   Relative_path.(set_path_prefix Root root);
   let (_handle : SharedMem.handle) =
     SharedMem.init ~num_workers:0 SharedMem.default_config
@@ -27,7 +30,6 @@ let init root auto_namespace_map : Provider_context.t =
       tco_higher_kinded_types = true;
     }
   in
-  let popt = popt auto_namespace_map in
   (* TODO(hverr): Figure out 64-bit *)
   let ctx =
     Provider_context.empty_for_tool
@@ -137,6 +139,7 @@ let () =
   let expect_extension = ref ".exp" in
   let set_expect_extension s = expect_extension := s in
   let auto_namespace_map = ref [] in
+  let enable_xhp_class_modifier = ref false in
   Arg.parse
     [
       ( "--compare-direct-decl-parser",
@@ -155,6 +158,10 @@ let () =
           (fun m ->
             auto_namespace_map := ServerConfig.convert_auto_namespace_to_map m),
         "Namespace aliases" );
+      ( "--enable-xhp-class-modifier",
+        Arg.Set enable_xhp_class_modifier,
+        "Enable the XHP class modifier, xhp class name {} will define an xhp class."
+      );
     ]
     set_file
     usage;
@@ -178,7 +185,10 @@ let () =
           end
         in
         let file = Path.make file in
-        let ctx = init (Path.dirname file) !auto_namespace_map in
+        let auto_namespace_map = !auto_namespace_map in
+        let enable_xhp_class_modifier = !enable_xhp_class_modifier in
+        let popt = popt ~auto_namespace_map ~enable_xhp_class_modifier in
+        let ctx = init (Path.dirname file) popt in
         let file = Relative_path.(create Root (Path.to_string file)) in
         let files = Multifile.file_to_file_list file in
         let num_files = List.length files in

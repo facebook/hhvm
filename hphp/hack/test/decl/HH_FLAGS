@@ -1,1 +1,1 @@
---auto-namespace-map '{"Dict":"HH\\Lib\\Dict"}'
+--auto-namespace-map '{"Dict":"HH\\Lib\\Dict"}' --enable-xhp-class-modifier

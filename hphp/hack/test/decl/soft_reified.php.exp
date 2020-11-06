@@ -1,0 +1,37 @@
+[("\\test",
+  (Shallow_decl_defs.Fun
+     { Typing_defs.fe_deprecated = None;
+       fe_type =
+       (Rwitness (root|soft_reified.php line 3, characters 10-13),
+        (Tfun
+           { ft_arity = (Fstandard ());
+             ft_tparams =
+             [{ Typing_defs_core.tp_variance = Invariant;
+                tp_name = ([3:32-33], "T"); tp_tparams = [];
+                tp_constraints = []; tp_reified = SoftReified;
+                tp_user_attributes =
+                [{ Typing_defs_core.ua_name = ([3:17-23], "__Soft");
+                   ua_classname_params = [] }
+                  ]
+                }
+               ];
+             ft_where_constraints = []; ft_params = [];
+             ft_implicit_params =
+             { capability =
+               (Rhint (root|soft_reified.php line 3, characters 10-13),
+                (Tapply (([3:10-14], "\\HH\\Contexts\\defaults"), [])))
+               };
+             ft_ret =
+             { et_enforced = false;
+               et_type =
+               (Rhint (root|soft_reified.php line 3, characters 38-41),
+                (Tprim Tvoid))
+               };
+             ft_flags =
+             (make_ft_flags FSync None ~return_disposable:false
+               ~returns_mutable:false ~returns_void_to_rx:false);
+             ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC} }));
+       fe_pos = [3:10-14]; fe_php_std_lib = false }))
+  ]
+
+They matched!

@@ -2810,7 +2810,11 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 _ => Variance::Invariant,
             },
             reified: if reify.is_token(TokenKind::Reify) {
-                aast::ReifyKind::Reified
+                if user_attributes.iter().any(|node| node.name.1 == "__Soft") {
+                    aast::ReifyKind::SoftReified
+                } else {
+                    aast::ReifyKind::Reified
+                }
             } else {
                 aast::ReifyKind::Erased
             },

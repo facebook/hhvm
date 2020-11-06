@@ -1125,9 +1125,14 @@ impl<'a> DirectDeclSmartConstructors<'a> {
             atom: false,
         };
 
+        let nodes = match node {
+            Node::List(&nodes) | Node::BracketedList(&(_, nodes, _)) => nodes,
+            _ => return attributes,
+        };
+
         // If we see the attribute `__OnlyRxIfImpl(Foo::class)`, set
         // `reactivity_condition_type` to `Foo`.
-        attributes.reactivity_condition_type = node.iter().find_map(|attr| match attr {
+        attributes.reactivity_condition_type = nodes.iter().find_map(|attr| match attr {
             Node::Attribute(UserAttributeNode {
                 name: Id(_, "__OnlyRxIfImpl"),
                 classname_params: &[param],
@@ -1148,7 +1153,8 @@ impl<'a> DirectDeclSmartConstructors<'a> {
         };
         let mut ifc_already_policied = false;
 
-        for attribute in node.iter() {
+        // Iterate in reverse, to match the behavior of OCaml decl in error conditions.
+        for attribute in nodes.iter().rev() {
             if let Node::Attribute(attribute) = attribute {
                 match attribute.name.1.as_ref() {
                     // NB: It is an error to specify more than one of __Rx,

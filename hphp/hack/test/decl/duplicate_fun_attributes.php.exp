@@ -1,0 +1,27 @@
+[("\\f",
+  (Shallow_decl_defs.Fun
+     { Typing_defs.fe_deprecated = (Some "The function f is deprecated: a");
+       fe_type =
+       (Rwitness (root|duplicate_fun_attributes.php line 4, characters 10-10),
+        (Tfun
+           { ft_arity = (Fstandard ()); ft_tparams = [];
+             ft_where_constraints = []; ft_params = [];
+             ft_implicit_params =
+             { capability =
+               (Rhint (root|duplicate_fun_attributes.php line 4, characters 10-10),
+                (Tapply (([4:10-11], "\\HH\\Contexts\\defaults"), [])))
+               };
+             ft_ret =
+             { et_enforced = false;
+               et_type =
+               (Rwitness (root|duplicate_fun_attributes.php line 4, characters 10-10),
+                Tany)
+               };
+             ft_flags =
+             (make_ft_flags FSync None ~return_disposable:false
+               ~returns_mutable:false ~returns_void_to_rx:false);
+             ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC} }));
+       fe_pos = [4:10-11]; fe_php_std_lib = false }))
+  ]
+
+They matched!

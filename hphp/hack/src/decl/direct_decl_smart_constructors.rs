@@ -1515,7 +1515,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                                 let Id(pos, name) = id;
                                 let name = strip_dollar_prefix(name);
                                 properties.push(ShallowProp {
-                                    const_: false,
+                                    const_: attributes.const_,
                                     xhp_attr: None,
                                     lateinit: false,
                                     lsb: false,
@@ -3398,6 +3398,18 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         }
 
         props.extend(xhp_props.into_iter());
+
+        let class_attributes = self.to_attributes(attributes);
+        if class_attributes.const_ {
+            for prop in props.iter_mut() {
+                if !prop.const_ {
+                    *prop = self.alloc(ShallowProp {
+                        const_: true,
+                        ..**prop
+                    })
+                }
+            }
+        }
 
         let uses = uses.into_bump_slice();
         let xhp_attr_uses = xhp_attr_uses.into_bump_slice();

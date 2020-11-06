@@ -1,0 +1,6 @@
+File "const_attribute.php", line 4, characters 7-7:
+Cannot use experimental feature: The __Const attribute is not supported. (Other[0000])
+File "const_attribute.php", line 16, characters 7-7:
+Cannot use experimental feature: The __Const attribute is not supported. (Other[0000])
+File "const_attribute.php", line 25, characters 7-7:
+Cannot use experimental feature: The __Const attribute is not supported. (Other[0000])

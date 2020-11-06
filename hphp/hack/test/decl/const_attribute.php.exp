@@ -1,0 +1,175 @@
+[("\\A",
+  (Shallow_decl_defs.Class
+     { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
+       sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
+       sc_name = ([4:7-8], "\\A"); sc_tparams = [];
+       sc_where_constraints = []; sc_extends = []; sc_uses = [];
+       sc_xhp_attr_uses = []; sc_req_extends = []; sc_req_implements = [];
+       sc_implements = []; sc_implements_dynamic = false; sc_consts = [];
+       sc_typeconsts = []; sc_pu_enums = [];
+       sc_props =
+       [{ Shallow_decl_defs.sp_const = true; sp_xhp_attr = None;
+          sp_lateinit = false; sp_lsb = false; sp_name = ([5:14-16], "x");
+          sp_needs_init = true;
+          sp_type =
+          (Some (Rhint (root|const_attribute.php line 5, characters 10-12),
+                 (Tprim Tint)));
+          sp_abstract = false; sp_visibility = Public };
+         { Shallow_decl_defs.sp_const = true; sp_xhp_attr = None;
+           sp_lateinit = false; sp_lsb = false; sp_name = ([8:14-16], "y");
+           sp_needs_init = true;
+           sp_type =
+           (Some (Rhint (root|const_attribute.php line 8, characters 10-12),
+                  (Tprim Tint)));
+           sp_abstract = false; sp_visibility = Public }
+         ];
+       sc_sprops = [];
+       sc_constructor =
+       (Some { Shallow_decl_defs.sm_abstract = false; sm_final = false;
+               sm_name = ([10:19-30], "__construct"); sm_override = false;
+               sm_dynamicallycallable = false; sm_reactivity = None;
+               sm_type =
+               (Rwitness (root|const_attribute.php line 10, characters 19-29),
+                (Tfun
+                   { ft_arity = (Fstandard ()); ft_tparams = [];
+                     ft_where_constraints = []; ft_params = [];
+                     ft_implicit_params =
+                     { capability =
+                       (Rhint (root|const_attribute.php line 10, characters 19-29),
+                        (Tapply (([10:19-30], "\\HH\\Contexts\\defaults"), 
+                           [])))
+                       };
+                     ft_ret =
+                     { et_enforced = false;
+                       et_type =
+                       (Rwitness (root|const_attribute.php line 10, characters 19-29),
+                        (Tprim Tvoid))
+                       };
+                     ft_flags =
+                     (make_ft_flags FSync None ~return_disposable:false
+                       ~returns_mutable:false ~returns_void_to_rx:false);
+                     ft_reactive = Nonreactive;
+                     ft_ifc_decl = FDPolicied {PUBLIC} }));
+               sm_visibility = Public; sm_deprecated = None });
+       sc_static_methods = []; sc_methods = [];
+       sc_user_attributes =
+       [{ Typing_defs_core.ua_name = ([3:3-10], "__Const");
+          ua_classname_params = [] }
+         ];
+       sc_enum_type = None }));
+  ("\\B",
+   (Shallow_decl_defs.Class
+      { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
+        sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
+        sc_name = ([16:7-8], "\\B"); sc_tparams = [];
+        sc_where_constraints = []; sc_extends = []; sc_uses = [];
+        sc_xhp_attr_uses = []; sc_req_extends = []; sc_req_implements = [];
+        sc_implements = []; sc_implements_dynamic = false; sc_consts = [];
+        sc_typeconsts = []; sc_pu_enums = [];
+        sc_props =
+        [{ Shallow_decl_defs.sp_const = true; sp_xhp_attr = None;
+           sp_lateinit = false; sp_lsb = false; sp_name = ([18:14-16], "x");
+           sp_needs_init = true;
+           sp_type =
+           (Some (Rhint (root|const_attribute.php line 18, characters 10-12),
+                  (Tprim Tint)));
+           sp_abstract = false; sp_visibility = Public }
+          ];
+        sc_sprops = [];
+        sc_constructor =
+        (Some { Shallow_decl_defs.sm_abstract = false; sm_final = false;
+                sm_name = ([20:19-30], "__construct"); sm_override = false;
+                sm_dynamicallycallable = false; sm_reactivity = None;
+                sm_type =
+                (Rwitness (root|const_attribute.php line 20, characters 19-29),
+                 (Tfun
+                    { ft_arity = (Fstandard ()); ft_tparams = [];
+                      ft_where_constraints = []; ft_params = [];
+                      ft_implicit_params =
+                      { capability =
+                        (Rhint (root|const_attribute.php line 20, characters 19-29),
+                         (Tapply (([20:19-30], "\\HH\\Contexts\\defaults"),
+                            [])))
+                        };
+                      ft_ret =
+                      { et_enforced = false;
+                        et_type =
+                        (Rwitness (root|const_attribute.php line 20, characters 19-29),
+                         (Tprim Tvoid))
+                        };
+                      ft_flags =
+                      (make_ft_flags FSync None ~return_disposable:false
+                        ~returns_mutable:false ~returns_void_to_rx:false);
+                      ft_reactive = Nonreactive;
+                      ft_ifc_decl = FDPolicied {PUBLIC} }));
+                sm_visibility = Public; sm_deprecated = None });
+        sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
+        sc_enum_type = None }));
+  ("\\C",
+   (Shallow_decl_defs.Class
+      { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
+        sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
+        sc_name = ([25:7-8], "\\C"); sc_tparams = [];
+        sc_where_constraints = []; sc_extends = []; sc_uses = [];
+        sc_xhp_attr_uses = []; sc_req_extends = []; sc_req_implements = [];
+        sc_implements = []; sc_implements_dynamic = false; sc_consts = [];
+        sc_typeconsts = []; sc_pu_enums = [];
+        sc_props =
+        [{ Shallow_decl_defs.sp_const = true; sp_xhp_attr = None;
+           sp_lateinit = false; sp_lsb = false; sp_name = ([26:55-57], "x");
+           sp_needs_init = true;
+           sp_type =
+           (Some (Rhint (root|const_attribute.php line 26, characters 51-53),
+                  (Tprim Tint)));
+           sp_abstract = false; sp_visibility = Private }
+          ];
+        sc_sprops = [];
+        sc_constructor =
+        (Some { Shallow_decl_defs.sm_abstract = false; sm_final = false;
+                sm_name = ([26:19-30], "__construct"); sm_override = false;
+                sm_dynamicallycallable = false; sm_reactivity = None;
+                sm_type =
+                (Rwitness (root|const_attribute.php line 26, characters 19-29),
+                 (Tfun
+                    { ft_arity = (Fstandard ()); ft_tparams = [];
+                      ft_where_constraints = [];
+                      ft_params =
+                      [{ fp_pos = [26:55-57]; fp_name = (Some "$x");
+                         fp_type =
+                         { et_enforced = false;
+                           et_type =
+                           (Rhint (root|const_attribute.php line 26, characters 51-53),
+                            (Tprim Tint))
+                           };
+                         fp_rx_annotation = None;
+                         fp_flags =
+                         (make_fp_flags ~mutability:None
+                           ~accept_disposable:false ~has_default:false
+                           ~mode:Typing_defs_core.FPnormal
+                           ~ifc_external:false ~ifc_can_call:false
+                           ~is_atom:false);
+                          }
+                        ];
+                      ft_implicit_params =
+                      { capability =
+                        (Rhint (root|const_attribute.php line 26, characters 19-29),
+                         (Tapply (([26:19-30], "\\HH\\Contexts\\defaults"),
+                            [])))
+                        };
+                      ft_ret =
+                      { et_enforced = false;
+                        et_type =
+                        (Rwitness (root|const_attribute.php line 26, characters 19-29),
+                         (Tprim Tvoid))
+                        };
+                      ft_flags =
+                      (make_ft_flags FSync None ~return_disposable:false
+                        ~returns_mutable:false ~returns_void_to_rx:false);
+                      ft_reactive = Nonreactive;
+                      ft_ifc_decl = FDPolicied {PUBLIC} }));
+                sm_visibility = Public; sm_deprecated = None });
+        sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
+        sc_enum_type = None }))
+  ]
+
+They matched!

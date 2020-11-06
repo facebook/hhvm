@@ -5997,6 +5997,9 @@ and call
                   | _ ->
                     (* Already reported, see Typing_check_decls *)
                     None)
+                | Class_const _ when is_atom ->
+                  Errors.atom_invalid_argument pos;
+                  None
                 | _ -> None
               in
               let (env, te, ty) =

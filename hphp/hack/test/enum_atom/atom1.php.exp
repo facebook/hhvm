@@ -1,12 +1,12 @@
 File "atom1.php", line 34, characters 12-26:
 Unknown constant B in EE (Typing[4394])
 File "atom1.php", line 34, characters 24-25:
-Atoms are not allowed as single expressions (Typing[4396])
+Atoms are not allowed in this position. They are only allowed in function call, if the function parameter is annotated with __Atom (Typing[4396])
 File "atom1.php", line 49, characters 3-8:
 Unknown constant C in EE (Typing[4394])
 File "atom1.php", line 49, characters 6-7:
-Atoms are not allowed as single expressions (Typing[4396])
+Atoms are not allowed in this position. They are only allowed in function call, if the function parameter is annotated with __Atom (Typing[4396])
 File "atom1.php", line 51, characters 3-14:
 Unknown constant C in EE (Typing[4394])
 File "atom1.php", line 51, characters 12-13:
-Atoms are not allowed as single expressions (Typing[4396])
+Atoms are not allowed in this position. They are only allowed in function call, if the function parameter is annotated with __Atom (Typing[4396])

@@ -5525,7 +5525,17 @@ let atom_unknown pos atom_name class_name =
 let atom_as_expr pos =
   add_list
     (Typing.err_code Typing.AtomAsExpression)
-    [(pos, "Atoms are not allowed as single expressions")]
+    [
+      ( pos,
+        "Atoms are not allowed in this position. They are only allowed "
+        ^ "in function call, if the function parameter is annotated with "
+        ^ Naming_special_names.UserAttributes.uaAtom );
+    ]
+
+let atom_invalid_argument pos =
+  add_list
+    (Typing.err_code Typing.AtomInvalidArgument)
+    [(pos, "An atom is required here, not a class constant projection")]
 
 (*****************************************************************************)
 (* Printing *)

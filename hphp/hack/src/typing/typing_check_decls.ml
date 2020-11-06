@@ -138,6 +138,15 @@ and hint_no_kind_check env (p, h) = hint_ ~is_atom:false env p h
 
 and hint_ ~is_atom env p h_ =
   let hint env (p, h) = hint_ ~is_atom:false env p h in
+  let () =
+    if is_atom then
+      (* __Atom is only allowed on HH\Elt, so we check everything that
+       * is not a class with this, and make a more refined check for Happly
+       *)
+      match h_ with
+      | Happly _ -> () (* checked in check_happly *)
+      | _ -> Errors.atom_invalid_parameter p
+  in
   match h_ with
   | Hany
   | Herr

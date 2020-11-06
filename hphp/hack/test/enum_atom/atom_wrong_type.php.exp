@@ -1,0 +1,6 @@
+File "atom_wrong_type.php", line 4, characters 22-24:
+Attribute __Atom is only allowed on \HH\Elt (Typing[4395])
+File "atom_wrong_type.php", line 5, characters 22-27:
+Attribute __Atom is only allowed on \HH\Elt (Typing[4395])
+File "atom_wrong_type.php", line 9, characters 22-22:
+Attribute __Atom is only allowed on \HH\Elt (Typing[4395])

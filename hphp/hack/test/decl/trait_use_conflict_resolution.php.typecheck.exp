@@ -1,0 +1,4 @@
+File "trait_use_conflict_resolution.php", line 4, characters 11-11:
+Trait use as is a PHP feature that is unsupported in Hack (Naming[2102])
+File "trait_use_conflict_resolution.php", line 4, characters 7-7:
+Unbound name: `T` (a trait) (Naming[2049])

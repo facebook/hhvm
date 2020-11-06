@@ -3881,6 +3881,19 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         self.hint_ty(pos, Ty_::Ttuple(tys))
     }
 
+    fn make_tuple_type_explicit_specifier(
+        &mut self,
+        keyword: Self::R,
+        _left_angle: Self::R,
+        types: Self::R,
+        right_angle: Self::R,
+    ) -> Self::R {
+        let id = Id(self.get_pos(keyword), "\\tuple");
+        // This is an error--tuple syntax is (A, B), not tuple<A, B>.
+        // OCaml decl makes a Tapply rather than a Ttuple here.
+        self.make_apply(id, types, self.get_pos(right_angle))
+    }
+
     fn make_intersection_type_specifier(
         &mut self,
         left_paren: Self::R,

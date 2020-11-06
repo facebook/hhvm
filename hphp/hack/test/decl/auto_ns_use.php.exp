@@ -1,0 +1,99 @@
+[("\\HH\\Lib\\Dict\\MixedDict",
+  (Shallow_decl_defs.Typedef
+     { Typing_defs.td_pos = [5:10-19]; td_vis = Transparent; td_tparams = [];
+       td_constraint = None;
+       td_type =
+       (Rhint (root|auto_ns_use.php line 5, characters 22-42),
+        (Tapply (([5:22-26], "\\HH\\dict"),
+           [(Rhint (root|auto_ns_use.php line 5, characters 27-34),
+             (Tprim Tarraykey));
+             (Rhint (root|auto_ns_use.php line 5, characters 37-41), Tmixed)]
+           )))
+       }));
+  ("\\make_dict",
+   (Shallow_decl_defs.Fun
+      { Typing_defs.fe_deprecated = None;
+        fe_type =
+        (Rwitness (root|auto_ns_use.php line 8, characters 12-20),
+         (Tfun
+            { ft_arity = (Fstandard ()); ft_tparams = [];
+              ft_where_constraints = []; ft_params = [];
+              ft_implicit_params =
+              { capability =
+                (Rhint (root|auto_ns_use.php line 8, characters 12-20),
+                 (Tapply (([8:12-21], "\\HH\\Contexts\\defaults"), [])))
+                };
+              ft_ret =
+              { et_enforced = false;
+                et_type =
+                (Rhint (root|auto_ns_use.php line 8, characters 25-38),
+                 (Tapply (([8:25-39], "\\HH\\Lib\\Dict\\MixedDict"), [])))
+                };
+              ft_flags =
+              (make_ft_flags FSync None ~return_disposable:false
+                ~returns_mutable:false ~returns_void_to_rx:false);
+              ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC} }));
+        fe_pos = [8:12-21]; fe_php_std_lib = false }));
+  ("\\get_value",
+   (Shallow_decl_defs.Fun
+      { Typing_defs.fe_deprecated = None;
+        fe_type =
+        (Rwitness (root|auto_ns_use.php line 12, characters 12-20),
+         (Tfun
+            { ft_arity = (Fstandard ()); ft_tparams = [];
+              ft_where_constraints = [];
+              ft_params =
+              [{ fp_pos = [12:37-39]; fp_name = (Some "$d");
+                 fp_type =
+                 { et_enforced = false;
+                   et_type =
+                   (Rhint (root|auto_ns_use.php line 12, characters 22-35),
+                    (Tapply (([12:22-36], "\\HH\\Lib\\Dict\\MixedDict"), [])))
+                   };
+                 fp_rx_annotation = None;
+                 fp_flags =
+                 (make_fp_flags ~mutability:None ~accept_disposable:false
+                   ~has_default:false ~mode:Typing_defs_core.FPnormal
+                   ~ifc_external:false ~ifc_can_call:false ~is_atom:false);
+                  };
+                { fp_pos = [12:50-52]; fp_name = (Some "$k");
+                  fp_type =
+                  { et_enforced = false;
+                    et_type =
+                    (Rhint (root|auto_ns_use.php line 12, characters 41-48),
+                     (Tprim Tarraykey))
+                    };
+                  fp_rx_annotation = None;
+                  fp_flags =
+                  (make_fp_flags ~mutability:None ~accept_disposable:false
+                    ~has_default:false ~mode:Typing_defs_core.FPnormal
+                    ~ifc_external:false ~ifc_can_call:false ~is_atom:false);
+                   }
+                ];
+              ft_implicit_params =
+              { capability =
+                (Rhint (root|auto_ns_use.php line 12, characters 12-20),
+                 (Tapply (([12:12-21], "\\HH\\Contexts\\defaults"), [])))
+                };
+              ft_ret =
+              { et_enforced = false;
+                et_type =
+                (Rhint (root|auto_ns_use.php line 12, characters 55-59),
+                 Tmixed)
+                };
+              ft_flags =
+              (make_ft_flags FSync None ~return_disposable:false
+                ~returns_mutable:false ~returns_void_to_rx:false);
+              ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC} }));
+        fe_pos = [12:12-21]; fe_php_std_lib = false }));
+  ("\\MyDict",
+   (Shallow_decl_defs.Typedef
+      { Typing_defs.td_pos = [16:8-14]; td_vis = Transparent;
+        td_tparams = []; td_constraint = None;
+        td_type =
+        (Rhint (root|auto_ns_use.php line 16, characters 17-30),
+         (Tapply (([16:17-31], "\\HH\\Lib\\Dict\\MixedDict"), [])))
+        }))
+  ]
+
+They matched!

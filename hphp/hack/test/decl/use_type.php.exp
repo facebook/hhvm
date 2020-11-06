@@ -1,0 +1,79 @@
+[("\\NS\\C",
+  (Shallow_decl_defs.Class
+     { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
+       sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
+       sc_name = ([7:11-12], "\\NS\\C"); sc_tparams = [];
+       sc_where_constraints = []; sc_extends = []; sc_uses = [];
+       sc_xhp_attr_uses = []; sc_req_extends = []; sc_req_implements = [];
+       sc_implements = []; sc_implements_dynamic = false; sc_consts = [];
+       sc_typeconsts = []; sc_pu_enums = []; sc_props = []; sc_sprops = [];
+       sc_constructor = None; sc_static_methods = []; sc_methods = [];
+       sc_user_attributes = []; sc_enum_type = None }));
+  ("\\C\\X",
+   (Shallow_decl_defs.Class
+      { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
+        sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
+        sc_name = ([10:11-12], "\\C\\X"); sc_tparams = [];
+        sc_where_constraints = []; sc_extends = []; sc_uses = [];
+        sc_xhp_attr_uses = []; sc_req_extends = []; sc_req_implements = [];
+        sc_implements = []; sc_implements_dynamic = false; sc_consts = [];
+        sc_typeconsts = []; sc_pu_enums = []; sc_props = []; sc_sprops = [];
+        sc_constructor = None; sc_static_methods = []; sc_methods = [];
+        sc_user_attributes = []; sc_enum_type = None }));
+  ("\\D",
+   (Shallow_decl_defs.Class
+      { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
+        sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
+        sc_name = ([15:9-10], "\\D"); sc_tparams = [];
+        sc_where_constraints = [];
+        sc_extends =
+        [(Rhint (root|use_type.php line 15, characters 19-19),
+          (Tapply (([15:19-20], "\\NS\\C"), [])))];
+        sc_uses = []; sc_xhp_attr_uses = []; sc_req_extends = [];
+        sc_req_implements = []; sc_implements = [];
+        sc_implements_dynamic = false; sc_consts = []; sc_typeconsts = [];
+        sc_pu_enums = []; sc_props = []; sc_sprops = [];
+        sc_constructor = None; sc_static_methods = []; sc_methods = [];
+        sc_user_attributes = []; sc_enum_type = None }));
+  ("\\f",
+   (Shallow_decl_defs.Fun
+      { Typing_defs.fe_deprecated = None;
+        fe_type =
+        (Rwitness (root|use_type.php line 17, characters 12-12),
+         (Tfun
+            { ft_arity = (Fstandard ()); ft_tparams = [];
+              ft_where_constraints = [];
+              ft_params =
+              [{ fp_pos = [17:18-20]; fp_name = (Some "$x");
+                 fp_type =
+                 { et_enforced = false;
+                   et_type =
+                   (Rhint (root|use_type.php line 17, characters 14-16),
+                    (Tapply (([17:14-17], "\\C\\X"), [])))
+                   };
+                 fp_rx_annotation = None;
+                 fp_flags =
+                 (make_fp_flags ~mutability:None ~accept_disposable:false
+                   ~has_default:false ~mode:Typing_defs_core.FPnormal
+                   ~ifc_external:false ~ifc_can_call:false ~is_atom:false);
+                  }
+                ];
+              ft_implicit_params =
+              { capability =
+                (Rhint (root|use_type.php line 17, characters 12-12),
+                 (Tapply (([17:12-13], "\\HH\\Contexts\\defaults"), [])))
+                };
+              ft_ret =
+              { et_enforced = false;
+                et_type =
+                (Rhint (root|use_type.php line 17, characters 23-26),
+                 (Tprim Tvoid))
+                };
+              ft_flags =
+              (make_ft_flags FSync None ~return_disposable:false
+                ~returns_mutable:false ~returns_void_to_rx:false);
+              ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC} }));
+        fe_pos = [17:12-13]; fe_php_std_lib = false }))
+  ]
+
+They matched!

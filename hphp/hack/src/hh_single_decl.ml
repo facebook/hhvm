@@ -9,15 +9,13 @@
 open Hh_prelude
 open Direct_decl_parser
 
-let auto_namespace_map = []
-
-let popt =
+let popt auto_namespace_map =
   let po = ParserOptions.default in
   let po = ParserOptions.with_disable_xhp_element_mangling po false in
   let po = ParserOptions.with_auto_namespace_map po auto_namespace_map in
   po
 
-let init root : Provider_context.t =
+let init root auto_namespace_map : Provider_context.t =
   Relative_path.(set_path_prefix Root root);
   let (_handle : SharedMem.handle) =
     SharedMem.init ~num_workers:0 SharedMem.default_config
@@ -29,6 +27,7 @@ let init root : Provider_context.t =
       tco_higher_kinded_types = true;
     }
   in
+  let popt = popt auto_namespace_map in
   (* TODO(hverr): Figure out 64-bit *)
   let ctx =
     Provider_context.empty_for_tool
@@ -89,6 +88,8 @@ let compare_decls ctx fn text =
   let ast = Ast_provider.get_ast ctx fn in
   let legacy_decls = shallow_declare_ast ctx [] ast in
   let legacy_decls_str = show_decls (List.rev legacy_decls) ^ "\n" in
+  let popt = Provider_context.get_popt ctx in
+  let auto_namespace_map = ParserOptions.auto_namespace_map popt in
   let decls = parse_decls_ffi fn text auto_namespace_map in
   let decls_str = show_decls (List.rev decls) ^ "\n" in
   let matched = String.equal decls_str legacy_decls_str in
@@ -135,6 +136,7 @@ let () =
   let skip_if_errors = ref false in
   let expect_extension = ref ".exp" in
   let set_expect_extension s = expect_extension := s in
+  let auto_namespace_map = ref [] in
   Arg.parse
     [
       ( "--compare-direct-decl-parser",
@@ -148,6 +150,11 @@ let () =
         Arg.String set_expect_extension,
         "The extension with which the output of the legacy pipeline should be written"
       );
+      ( "--auto-namespace-map",
+        Arg.String
+          (fun m ->
+            auto_namespace_map := ServerConfig.convert_auto_namespace_to_map m),
+        "Namespace aliases" );
     ]
     set_file
     usage;
@@ -171,7 +178,7 @@ let () =
           end
         in
         let file = Path.make file in
-        let ctx = init (Path.dirname file) in
+        let ctx = init (Path.dirname file) !auto_namespace_map in
         let file = Relative_path.(create Root (Path.to_string file)) in
         let files = Multifile.file_to_file_list file in
         let num_files = List.length files in

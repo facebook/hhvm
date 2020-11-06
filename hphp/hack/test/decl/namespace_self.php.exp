@@ -1,0 +1,95 @@
+--- legacy
++++ direct decl
+@@ -1,90 +1,90 @@
+ [("\\NS1\\NS2\\C",
+   (Shallow_decl_defs.Class
+      { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
+        sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
+        sc_name = ([5:7-8], "\\NS1\\NS2\\C"); sc_tparams = [];
+        sc_where_constraints = []; sc_extends = []; sc_uses = [];
+        sc_xhp_attr_uses = []; sc_req_extends = []; sc_req_implements = [];
+        sc_implements = []; sc_implements_dynamic = false;
+        sc_consts =
+        [{ Shallow_decl_defs.scc_abstract = false;
+           scc_name = ([6:16-19], "KEY");
+           scc_type =
+           (Rhint (root|namespace_self.php line 6, characters 9-14),
+            (Tprim Tstring))
+           }
+          ];
+        sc_typeconsts =
+        [{ Shallow_decl_defs.stc_abstract = Typing_defs.TCConcrete;
+           stc_constraint = None; stc_name = ([8:14-18], "TInt");
+           stc_type =
+           (Some (Rhint (root|namespace_self.php line 8, characters 21-23),
+                  (Tprim Tint)));
+           stc_enforceable = ([Pos.none], false); stc_reifiable = None };
+          { Shallow_decl_defs.stc_abstract = Typing_defs.TCConcrete;
+            stc_constraint = None; stc_name = ([9:14-20], "TShape");
+            stc_type =
+            (Some (Rhint (root|namespace_self.php line 9, characters 23-61),
+                   (Tshape (Typing_defs_core.Closed_shape,
+                      { (SFclass_const (([10:5-9], "\\NS1\\NS2\\C"),
+                           ([10:11-14], "KEY"))) ->
+                        { sft_optional = false;
+                          sft_ty =
+                          (Rhint (root|namespace_self.php line 10, characters 18-27),
+                           (Taccess
+-                             ((Rhint (root|namespace_self.php line 10, characters 18-27),
++                             ((Rhint (root|namespace_self.php line 10, characters 18-21),
+                                (Tapply (([5:7-8], "\\NS1\\NS2\\C"), []))),
+                               [([10:24-28], "TInt")])))
+                          } }
+                      ))));
+            stc_enforceable = ([Pos.none], false); stc_reifiable = None }
+          ];
+        sc_pu_enums = []; sc_props = []; sc_sprops = [];
+        sc_constructor = None; sc_static_methods = [];
+        sc_methods =
+        [{ Shallow_decl_defs.sm_abstract = false; sm_final = false;
+           sm_name = ([13:19-20], "f"); sm_override = false;
+           sm_dynamicallycallable = false; sm_reactivity = None;
+           sm_type =
+           (Rwitness (root|namespace_self.php line 13, characters 19-19),
+            (Tfun
+               { ft_arity = (Fstandard ()); ft_tparams = [];
+                 ft_where_constraints = [];
+                 ft_params =
+                 [{ fp_pos = [13:32-34]; fp_name = (Some "$x");
+                    fp_type =
+                    { et_enforced = false;
+                      et_type =
+                      (Rhint (root|namespace_self.php line 13, characters 21-30),
+                       (Taccess
+-                         ((Rhint (root|namespace_self.php line 13, characters 21-30),
++                         ((Rhint (root|namespace_self.php line 13, characters 21-24),
+                            (Tapply (([5:7-8], "\\NS1\\NS2\\C"), []))),
+                           [([13:27-31], "TInt")])))
+                      };
+                    fp_rx_annotation = None;
+                    fp_flags =
+                    (make_fp_flags ~mutability:None ~accept_disposable:false
+                      ~has_default:false ~mode:Typing_defs_core.FPnormal
+                      ~ifc_external:false ~ifc_can_call:false ~is_atom:false);
+                     }
+                   ];
+                 ft_implicit_params =
+                 { capability =
+                   (Rhint (root|namespace_self.php line 13, characters 19-19),
+                    (Tapply (([13:19-20], "\\HH\\Contexts\\defaults"), [])))
+                   };
+                 ft_ret =
+                 { et_enforced = false;
+                   et_type =
+                   (Rhint (root|namespace_self.php line 13, characters 37-40),
+                    (Tprim Tvoid))
+                   };
+                 ft_flags =
+                 (make_ft_flags FSync None ~return_disposable:false
+                   ~returns_mutable:false ~returns_void_to_rx:false);
+                 ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC}
+                 }));
+           sm_visibility = Public; sm_deprecated = None }
+          ];
+        sc_user_attributes = []; sc_enum_type = None }))
+   ]

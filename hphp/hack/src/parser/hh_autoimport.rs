@@ -13,7 +13,7 @@ lazy_static! {
     pub static ref NAMESPACES_MAP: BTreeMap<String, String> = make_map(NAMESPACES);
 }
 
-static TYPES: &'static [&'static str] = &[
+pub static TYPES: &[&str] = &[
     "AnyArray",
     "AsyncFunctionWaitHandle",
     "AsyncGenerator",
@@ -65,7 +65,7 @@ static TYPES: &'static [&'static str] = &[
     "XenonSample",
 ];
 
-static FUNCS: &'static [&'static str] = &[
+static FUNCS: &[&str] = &[
     "asio_get_current_context_idx",
     "asio_get_running_in_context",
     "asio_get_running",
@@ -108,9 +108,9 @@ static FUNCS: &'static [&'static str] = &[
     "xenon_get_data",
 ];
 
-static CONSTS: &'static [&'static str] = &[];
+static CONSTS: &[&str] = &[];
 
-pub static NAMESPACES: &'static [&'static str] = &["Rx"];
+pub static NAMESPACES: &[&str] = &["Rx"];
 
 fn make_map(items: &[&str]) -> BTreeMap<String, String> {
     items.iter().fold(BTreeMap::new(), |mut map, s| {

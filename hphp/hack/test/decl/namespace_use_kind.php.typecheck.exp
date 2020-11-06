@@ -1,0 +1,8 @@
+File "namespace_use_kind.php", line 8, characters 10-12:
+Unbound name: `Foo` (Naming[2049])
+File "namespace_use_kind.php", line 9, characters 10-12:
+Unbound name: `UseNS\Bar` (Naming[2049])
+File "namespace_use_kind.php", line 10, characters 10-12:
+Unbound name: `Baz` (Naming[2049])
+File "namespace_use_kind.php", line 11, characters 10-15:
+Unbound name: `UseNS\NS\Qux` (Naming[2049])

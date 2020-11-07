@@ -38,6 +38,10 @@ type typing_result = {
   errors: Errors.t;
   dep_edges: Typing_deps.dep_edges;
   telemetry: Telemetry.t;
+  jobs_finished_to_end: Measure.record;
+      (** accumulates information about jobs where process_files finished every file in the bucket *)
+  jobs_finished_early: Measure.record;
+      (** accumulates information about jobs where process_files stopped early, due to memory pressure *)
 }
 
 (** This controls how much logging to do for each decl accessor.
@@ -60,6 +64,22 @@ type profile_decling =
 let accumulate_job_output
     (produced_by_job : typing_result) (accumulated_so_far : typing_result) :
     typing_result =
+  (* The Measure API is mutating, but we want to be functional, so we'll serialize+deserialize
+  This might sound expensive, but the actual implementation makes it cheap. *)
+  let acc_finished_to_end =
+    Measure.deserialize
+      (Measure.serialize accumulated_so_far.jobs_finished_to_end)
+  in
+  let acc_finished_early =
+    Measure.deserialize
+      (Measure.serialize accumulated_so_far.jobs_finished_early)
+  in
+  Measure.merge
+    ~record:acc_finished_to_end
+    ~from:produced_by_job.jobs_finished_to_end;
+  Measure.merge
+    ~record:acc_finished_early
+    ~from:produced_by_job.jobs_finished_early;
   {
     errors = Errors.merge produced_by_job.errors accumulated_so_far.errors;
     dep_edges =
@@ -68,6 +88,8 @@ let accumulate_job_output
         accumulated_so_far.dep_edges;
     telemetry =
       Telemetry.add produced_by_job.telemetry accumulated_so_far.telemetry;
+    jobs_finished_to_end = acc_finished_to_end;
+    jobs_finished_early = acc_finished_early;
   }
 
 type delegate_job_sig = unit -> typing_result * computation_progress

@@ -125,6 +125,8 @@ let neutral : unit -> typing_result =
     errors = Errors.empty;
     dep_edges = Typing_deps.dep_edges_make ();
     telemetry = Telemetry.create ();
+    jobs_finished_to_end = Measure.create ();
+    jobs_finished_early = Measure.create ();
   }
 
 (*****************************************************************************)
@@ -295,22 +297,6 @@ let process_file
     in
     Caml.Printexc.raise_with_backtrace e stack
 
-let should_exit ~(memory_cap : int option) =
-  match memory_cap with
-  | None -> false
-  | Some max_heap_mb ->
-    (* Use [quick_stat] instead of [stat] in order to avoid walking the major
-       heap on each call, and just check the major heap because the minor
-       heap is a) small and b) fixed size. *)
-    let heap_size_mb = Gc.((quick_stat ()).Stat.heap_words) * 8 / 1024 / 1024 in
-    if heap_size_mb > max_heap_mb then (
-      Hh_logger.debug
-        "Exiting worker due to memory pressure: %d MB"
-        heap_size_mb;
-      true
-    ) else
-      false
-
 let get_mem_telemetry () : Telemetry.t option =
   if SharedMem.hh_log_level () > 0 then
     Some
@@ -408,7 +394,8 @@ let read_counters () : Counters.time_in_sec * Telemetry.t =
 let process_files
     (dynamic_view_files : Relative_path.Set.t)
     (ctx : Provider_context.t)
-    ({ errors; dep_edges; telemetry } : typing_result)
+    ({ errors; dep_edges; telemetry; jobs_finished_early; jobs_finished_to_end } :
+      typing_result)
     (progress : computation_progress)
     ~(memory_cap : int option)
     ~(check_info : check_info) : typing_result * computation_progress =
@@ -428,10 +415,24 @@ let process_files
     Decl_counters.set_mode check_info.profile_decling;
     Counters.reset ~enabled_categories:(Counters.CategorySet.of_list categories)
   in
-  let (_start_time, start_counters) = read_counters () in
+  let (_start_counter_time, start_counters) = read_counters () in
+  let start_file_count = List.length progress.remaining in
+  let start_time = Unix.gettimeofday () in
 
   let rec process_or_exit errors progress =
+    (* If the major heap has exceeded the bounds, we'll decline to typecheck the remaining files.
+    We use [quick_stat] instead of [stat] in order to avoid walking the major heap,
+    and we don't change the minor heap because it's small and fixed-size.
+    The start-remaining test is to make sure we make at least one file of progress
+    even in case of a crazy low memory cap. *)
+    let heap_mb = Gc.((quick_stat ()).Stat.heap_words) * 8 / 1024 / 1024 in
+    let exit_now =
+      heap_mb > Option.value memory_cap ~default:Int.max_value
+      && start_file_count > List.length progress.remaining
+    in
     match progress.remaining with
+    | [] -> (errors, progress, heap_mb)
+    | _ when exit_now -> (errors, progress, heap_mb)
     | fn :: fns ->
       let (errors, deferred) =
         match fn with
@@ -479,15 +480,20 @@ let process_files
           deferred = List.concat [deferred; progress.deferred];
         }
       in
-      if should_exit memory_cap then
-        (errors, progress)
-      else
-        process_or_exit errors progress
-    | [] -> (errors, progress)
+      process_or_exit errors progress
   in
-  let (errors, progress) = process_or_exit errors progress in
 
-  let (_end_time, end_counters) = read_counters () in
+  (* Process as many files as we can, and merge in their errors *)
+  let (errors, progress, final_heap_mb) = process_or_exit errors progress in
+
+  (* Update edges *)
+  let new_dep_edges =
+    Typing_deps.flush_ideps_batch (Provider_context.get_deps_mode ctx)
+  in
+  let dep_edges = Typing_deps.merge_dep_edges dep_edges new_dep_edges in
+
+  (* Gather up our various forms of telemetry... *)
+  let (_end_counter_time, end_counters) = read_counters () in
   let telemetry =
     Telemetry.add
       telemetry
@@ -497,16 +503,28 @@ let process_files
          end_counters
          ~prev:start_counters)
   in
-
-  let new_dep_edges =
-    Typing_deps.flush_ideps_batch (Provider_context.get_deps_mode ctx)
+  let processed_file_count =
+    float_of_int (start_file_count - List.length progress.remaining)
   in
-  let dep_edges = Typing_deps.merge_dep_edges dep_edges new_dep_edges in
+  let processed_file_fraction =
+    processed_file_count /. float_of_int start_file_count
+  in
+  let record =
+    if List.is_empty progress.remaining then
+      jobs_finished_to_end
+    else
+      jobs_finished_early
+  in
+  Measure.sample ~record "seconds" (Unix.gettimeofday () -. start_time);
+  Measure.sample ~record "final_heap_mb" (float_of_int final_heap_mb);
+  Measure.sample ~record "files" processed_file_count;
+  Measure.sample ~record "files_fraction" processed_file_fraction;
 
   TypingLogger.flush_buffers ();
   Ast_provider.local_changes_pop_sharedmem_stack ();
   File_provider.local_changes_pop_sharedmem_stack ();
-  ({ errors; dep_edges; telemetry }, progress)
+  ( { errors; dep_edges; telemetry; jobs_finished_early; jobs_finished_to_end },
+    progress )
 
 let load_and_process_files
     (ctx : Provider_context.t)
@@ -934,17 +952,32 @@ let go_with_interrupt
     end
   in
   Typing_deps.register_discovered_dep_edges typing_result.dep_edges;
+
   if check_info.profile_log then
     Hh_logger.log
       "Typecheck perf: %s"
       (HackEventLogger.ProfileTypeCheck.get_telemetry_url
          ~init_id:check_info.init_id
          ~recheck_id:check_info.recheck_id);
+  let job_size_telemetry =
+    Telemetry.create ()
+    |> Telemetry.object_
+         ~key:"finished_to_end"
+         ~value:
+           (Measure.stats_to_telemetry
+              ~record:typing_result.jobs_finished_to_end
+              ())
+    |> Telemetry.object_
+         ~key:"finished_early"
+         ~value:
+           (Measure.stats_to_telemetry
+              ~record:typing_result.jobs_finished_early
+              ())
+  in
   let telemetry =
-    Telemetry.object_
-      telemetry
-      ~key:"profiling_info"
-      ~value:typing_result.telemetry
+    telemetry
+    |> Telemetry.object_ ~key:"profiling_info" ~value:typing_result.telemetry
+    |> Telemetry.object_ ~key:"job_sizes" ~value:job_size_telemetry
   in
   (typing_result.errors, delegate_state, telemetry, env, cancelled_fnl)
 

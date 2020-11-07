@@ -380,6 +380,40 @@ let read_counters () : Counters.time_in_sec * Telemetry.t =
     |> Telemetry.object_opt ~key:"memory" ~value:mem_telemetry
     |> Telemetry.object_ ~key:"operations" ~value:operations_counters )
 
+module ProcessFilesTally = struct
+  (** Counters for the [file_computation] of each sort being processed *)
+  type t = {
+    decls: int;  (** how many [Declare] items we performed *)
+    prefetches: int;  (** how many [Prefetch] items we performed *)
+    checks_done: int;  (** how many [Check] items we typechecked *)
+    checks_deferred: int;  (** how many [Check] items we deferred to later *)
+    decls_deferred: int;  (** how many [Declare] items we added for later *)
+  }
+
+  let empty =
+    {
+      decls = 0;
+      prefetches = 0;
+      checks_done = 0;
+      checks_deferred = 0;
+      decls_deferred = 0;
+    }
+
+  let incr_decls tally = { tally with decls = tally.decls + 1 }
+
+  let incr_prefetches tally = { tally with prefetches = tally.prefetches + 1 }
+
+  let incr_checks tally deferred_decls =
+    if List.is_empty deferred_decls then
+      { tally with checks_done = tally.checks_done + 1 }
+    else
+      {
+        tally with
+        checks_deferred = tally.checks_deferred + 1;
+        decls_deferred = tally.decls_deferred + List.length deferred_decls;
+      }
+end
+
 let process_files
     (dynamic_view_files : Relative_path.Set.t)
     (ctx : Provider_context.t)
@@ -405,10 +439,11 @@ let process_files
     Counters.reset ~enabled_categories:(Counters.CategorySet.of_list categories)
   in
   let (_start_counter_time, start_counters) = read_counters () in
+  let tally = ProcessFilesTally.empty in
   let start_file_count = List.length progress.remaining in
   let start_time = Unix.gettimeofday () in
 
-  let rec process_or_exit errors progress =
+  let rec process_or_exit errors progress tally =
     (* If the major heap has exceeded the bounds, we'll decline to typecheck the remaining files.
     We use [quick_stat] instead of [stat] in order to avoid walking the major heap,
     and we don't change the minor heap because it's small and fixed-size.
@@ -420,10 +455,10 @@ let process_files
       && start_file_count > List.length progress.remaining
     in
     match progress.remaining with
-    | [] -> (errors, progress, heap_mb)
-    | _ when exit_now -> (errors, progress, heap_mb)
+    | [] -> (errors, progress, tally, heap_mb)
+    | _ when exit_now -> (errors, progress, tally, heap_mb)
     | fn :: fns ->
-      let (errors, deferred) =
+      let (errors, deferred, tally) =
         match fn with
         | Check file ->
           let process_file () =
@@ -454,23 +489,23 @@ let process_files
             ) else
               process_file ()
           in
+          let tally =
+            ProcessFilesTally.incr_checks tally result.deferred_files
+          in
           let deferred =
             if List.is_empty result.deferred_files then
               []
             else
-              List.concat
-                [
-                  List.map result.deferred_files ~f:(fun fn -> Declare fn);
-                  [Check { file with deferred_count = file.deferred_count + 1 }];
-                ]
+              List.map result.deferred_files ~f:(fun fn -> Declare fn)
+              @ [Check { file with deferred_count = file.deferred_count + 1 }]
           in
-          (result.errors, deferred)
+          (result.errors, deferred, tally)
         | Declare path ->
           let errors = Decl_service.decl_file ctx errors path in
-          (errors, [])
+          (errors, [], ProcessFilesTally.incr_decls tally)
         | Prefetch paths ->
           Vfs.prefetch paths;
-          (errors, [])
+          (errors, [], ProcessFilesTally.incr_prefetches tally)
       in
       let progress =
         {
@@ -479,11 +514,13 @@ let process_files
           deferred = List.concat [deferred; progress.deferred];
         }
       in
-      process_or_exit errors progress
+      process_or_exit errors progress tally
   in
 
   (* Process as many files as we can, and merge in their errors *)
-  let (errors, progress, final_heap_mb) = process_or_exit errors progress in
+  let (errors, progress, tally, final_heap_mb) =
+    process_or_exit errors progress tally
+  in
 
   (* Update edges *)
   let new_dep_edges =
@@ -514,10 +551,16 @@ let process_files
     else
       jobs_finished_early
   in
+  let open ProcessFilesTally in
   Measure.sample ~record "seconds" (Unix.gettimeofday () -. start_time);
   Measure.sample ~record "final_heap_mb" (float_of_int final_heap_mb);
   Measure.sample ~record "files" processed_file_count;
   Measure.sample ~record "files_fraction" processed_file_fraction;
+  Measure.sample ~record "decls" (float_of_int tally.decls);
+  Measure.sample ~record "prefetches" (float_of_int tally.prefetches);
+  Measure.sample ~record "checks_done" (float_of_int tally.checks_done);
+  Measure.sample ~record "checks_deferred" (float_of_int tally.checks_deferred);
+  Measure.sample ~record "decls_deferred" (float_of_int tally.decls_deferred);
 
   TypingLogger.flush_buffers ();
   Ast_provider.local_changes_pop_sharedmem_stack ();

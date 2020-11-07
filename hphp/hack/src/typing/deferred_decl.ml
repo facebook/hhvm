@@ -8,8 +8,14 @@
 
 open Hh_prelude
 
+(** We raise [Defer d.php] if we're typechecking some file a.php, and find
+we need to fetch some decl D from d.php, but the typechecking of a.php had already
+needed just too many other decls. *)
 exception Defer of Relative_path.t
 
+(** A [deferment] is a file which contains a decl that we need to fetch before
+we continue with our scheduled typechecking work. The handler of exception [Defer d.php]
+will typically call [add_deferments d.php]. *)
 type deferment = Relative_path.t
 
 type deferments_t = Relative_path.Set.t
@@ -42,14 +48,21 @@ let reset ~(enable : bool) ~(threshold_opt : int option) : unit =
 let increment_counter () : unit =
   if !state.enabled then state := { !state with counter = !state.counter + 1 }
 
-let raise_if_should_defer ~(d : Relative_path.t) : unit =
+(** Call [raise_if_should_defer d.php] if you're typechecking some file a.php,
+and and discover that you need to fetch yet another decl "D" from file d.php. *)
+let raise_if_should_defer ~(file_with_decl : Relative_path.t) : unit =
   match (!state.enabled, !state.threshold_opt) with
-  | (true, Some threshold) when !state.counter >= threshold -> raise (Defer d)
+  | (true, Some threshold) when !state.counter >= threshold ->
+    raise (Defer file_with_decl)
   | _ -> ()
 
+(** [add_deferment d.php] is called for a file "d.php" which contains a decl
+that we need before we can proceed with our normal typechecking work. *)
 let add_deferment ~(d : deferment) : unit =
   state :=
     { !state with deferments = Relative_path.Set.add !state.deferments d }
 
-let get_deferments ~(f : deferment -> 'a) : 'a list =
-  !state.deferments |> Relative_path.Set.elements |> List.map ~f
+(** "deferments" are files which contain decls that we need to fetch
+before we can get on with our regular typechecking work. *)
+let get_deferments () : deferment list =
+  !state.deferments |> Relative_path.Set.elements

@@ -220,7 +220,7 @@ let should_enable_deferring
 
 type process_file_results = {
   errors: Errors.t;
-  computation: file_computation list;
+  deferred_files: Relative_path.t list;
 }
 
 let process_file
@@ -269,7 +269,9 @@ let process_file
             List.map gconsts ~f:snd |> List.iter ~f:(ignore_check_const ctx fn);
             (fun_tasts @ class_tasts, fun_global_tvenvs @ class_global_tvenvs))
       in
-      match Deferred_decl.get_deferments ~f:(fun d -> Declare d) with
+      (* "Deferments" are files with decls that we need to fetch before we can
+      usefully reattempt the current process_file that we're working on. *)
+      match Deferred_decl.get_deferments () with
       | [] -> Ok result
       | deferred_files -> Error deferred_files
     in
@@ -280,16 +282,8 @@ let process_file
           ctx
           tasts
           global_tvenvs;
-      { errors = Errors.merge errors' errors; computation = [] }
-    | Error deferred_files ->
-      let computation =
-        List.concat
-          [
-            deferred_files;
-            [Check { file with deferred_count = file.deferred_count + 1 }];
-          ]
-      in
-      { errors; computation }
+      { errors = Errors.merge errors' errors; deferred_files = [] }
+    | Error deferred_files -> { errors; deferred_files }
   with e ->
     let stack = Caml.Printexc.get_raw_backtrace () in
     let () =
@@ -325,14 +319,9 @@ let profile_log
       (Some duration, Some profile)
     | None -> (None, None)
   in
-  let { computation; _ } = result in
+  let { deferred_files; _ } = result in
   let times_checked = file.deferred_count + 1 in
-  let files_to_declare =
-    List.count computation ~f:(fun f ->
-        match f with
-        | Declare _ -> true
-        | _ -> false)
-  in
+  let files_to_declare = List.length deferred_files in
   (* "deciding_time" is what we compare against the threshold, *)
   (* to see if we should log. *)
   let deciding_time = Option.value duration_second_run ~default:duration in
@@ -465,7 +454,17 @@ let process_files
             ) else
               process_file ()
           in
-          (result.errors, result.computation)
+          let deferred =
+            if List.is_empty result.deferred_files then
+              []
+            else
+              List.concat
+                [
+                  List.map result.deferred_files ~f:(fun fn -> Declare fn);
+                  [Check { file with deferred_count = file.deferred_count + 1 }];
+                ]
+          in
+          (result.errors, deferred)
         | Declare path ->
           let errors = Decl_service.decl_file ctx errors path in
           (errors, [])

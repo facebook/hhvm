@@ -36,7 +36,7 @@ let test_dmesg_parser () =
     input
 
 let ensure_count (count : int) : unit =
-  let deferred = Deferred_decl.get_deferments ~f:(fun d -> d) in
+  let deferred = Deferred_decl.get_deferments () in
   Asserter.Int_asserter.assert_equals
     count
     (List.length deferred)
@@ -73,7 +73,7 @@ let ensure_threshold ~(threshold : int) ~(limit : int) ~(expected : int) : unit
     let path = Printf.sprintf "foo-%d" i in
     let relative_path = Relative_path.create Relative_path.Dummy path in
     try
-      Deferred_decl.raise_if_should_defer ~d:relative_path;
+      Deferred_decl.raise_if_should_defer ~file_with_decl:relative_path;
       Deferred_decl.increment_counter ()
     with Deferred_decl.Defer d ->
       Asserter.Bool_asserter.assert_equals
@@ -126,15 +126,15 @@ let test_process_file_deferring () =
         (Counters.CategorySet.of_list
            Counters.Category.[Decling; Disk_cat; Get_ast])
   in
-  let { Typing_check_service.computation; _ } =
+  let { Typing_check_service.deferred_files; _ } =
     Typing_check_service.process_file dynamic_view_files ctx errors file
   in
   let counters = Counters.get_counters () in
   Counters.restore_state prev_counter_state;
   Asserter.Int_asserter.assert_equals
-    2
-    (List.length computation)
-    "Should be two file computations";
+    1
+    (List.length deferred_files)
+    "Should be this many deferred_files";
 
   (* this test doesn't write back to cache, so num of decl_fetches isn't solid *)
   Asserter.Bool_asserter.assert_equals
@@ -142,38 +142,14 @@ let test_process_file_deferring () =
     (Telemetry_test_utils.int_exn counters "decling.count" > 0)
     "Should be at least one decl fetched";
 
-  (* Validate the deferred type check computation *)
-  let found_check =
-    List.exists computation ~f:(fun file_computation ->
-        match file_computation with
-        | Typing_check_service.(Check { path; deferred_count }) ->
-          Asserter.String_asserter.assert_equals
-            "Foo.php"
-            (Relative_path.suffix path)
-            "Check path must match the expected";
-          Asserter.Int_asserter.assert_equals
-            1
-            deferred_count
-            "Check deferred count must match the expected";
-          true
-        | _ -> false)
-  in
-  Asserter.Bool_asserter.assert_equals
-    true
-    found_check
-    "Should have found the check file computation";
-
   (* Validate the declare file computation *)
   let found_declare =
-    List.exists computation ~f:(fun file_computation ->
-        match file_computation with
-        | Typing_check_service.Declare path ->
-          Asserter.String_asserter.assert_equals
-            "Bar.php"
-            (Relative_path.suffix path)
-            "Declare path must match the expected";
-          true
-        | _ -> false)
+    List.exists deferred_files ~f:(fun deferred_file ->
+        Asserter.String_asserter.assert_equals
+          "Bar.php"
+          (Relative_path.suffix deferred_file)
+          "Declare path must match the expected";
+        true)
   in
   Asserter.Bool_asserter.assert_equals
     true

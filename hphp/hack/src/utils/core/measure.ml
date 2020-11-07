@@ -322,6 +322,24 @@ let print_stats ?record ?print_raw () =
   let record = get_record record in
   SMap.iter (fun name _ -> print_entry_stats ~record ?print_raw name) !record
 
+let stats_to_telemetry ?record () =
+  let record = get_record record in
+  let entry_to_json { count; mean; variance_sum; max; min; distribution = _ } =
+    Telemetry.create ()
+    |> Telemetry.float_ ~key:"count" ~value:count
+    |> Telemetry.float_ ~key:"mean" ~value:mean
+    |> Telemetry.float_
+         ~key:"stddev"
+         ~value:(Float.sqrt (variance_sum /. count))
+    |> Telemetry.float_ ~key:"min" ~value:min
+    |> Telemetry.float_ ~key:"max" ~value:max
+  in
+  let init = Telemetry.create () in
+  let f key entry acc =
+    Telemetry.object_ acc ~key ~value:(entry_to_json entry)
+  in
+  SMap.fold f !record init
+
 let rec print_buckets ~low ~high ~bucket_size buckets =
   if Float.(low <= high) then (
     let count =

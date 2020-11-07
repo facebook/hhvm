@@ -44,6 +44,8 @@ val print_entry_stats :
 
 val print_stats : ?record:record -> ?print_raw:(string -> unit) -> unit -> unit
 
+val stats_to_telemetry : ?record:record -> unit -> Telemetry.t
+
 val print_entry_distribution : ?record:record -> string -> unit
 
 val print_distributions : ?record:record -> unit -> unit

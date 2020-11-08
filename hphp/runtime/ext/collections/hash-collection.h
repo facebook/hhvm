@@ -66,7 +66,7 @@ struct HashCollection : ObjectData {
 
     if (UNLIKELY(ad->size() < m_size)) warnOnStrIntDup();
     assertx(m_size);
-    return Array::attach(ad);
+    return ad != arrayData() ? Array::attach(ad) : Array{ad};
   }
 
   Array toVArray();

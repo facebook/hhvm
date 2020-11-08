@@ -1,0 +1,81 @@
+=== mode=0, mark_legacy=0 ===
+dict(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+dict(2) {
+  [1]=>
+  string(1) "a"
+  ["x"]=>
+  string(1) "y"
+}
+=== mode=4, mark_legacy=0 ===
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+dict(2) {
+  [1]=>
+  string(1) "a"
+  ["x"]=>
+  string(1) "y"
+}
+=== mode=2, mark_legacy=0 ===
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+dict(2) {
+  ["1"]=>
+  string(1) "a"
+  ["x"]=>
+  string(1) "y"
+}
+=== mode=0, mark_legacy=1 ===
+dict(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+dict(2) {
+  [1]=>
+  string(1) "a"
+  ["x"]=>
+  string(1) "y"
+}
+=== mode=4, mark_legacy=1 ===
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+dict(2) {
+  [1]=>
+  string(1) "a"
+  ["x"]=>
+  string(1) "y"
+}
+=== mode=2, mark_legacy=1 ===
+dict(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+dict(2) {
+  ["1"]=>
+  string(1) "a"
+  ["x"]=>
+  string(1) "y"
+}

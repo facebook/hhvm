@@ -94,6 +94,7 @@ struct VariantControllerImpl {
         return HPHP::serialize::Type::MAP;
       case KindOfPersistentDict:
       case KindOfDict: {
+        if (RO::EvalHackArrDVArrs) return HPHP::serialize::Type::MAP;
         if (HackArraysMode == VariantControllerHackArraysMode::ON ||
             HackArraysMode == VariantControllerHackArraysMode::ON_AND_KEYSET) {
           return HPHP::serialize::Type::MAP;
@@ -107,6 +108,20 @@ struct VariantControllerImpl {
       }
       case KindOfPersistentVec:
       case KindOfVec: {
+        if (RO::EvalHackArrDVArrs) {
+          switch (HackArraysMode) {
+            case VariantControllerHackArraysMode::OFF:
+              return HPHP::serialize::Type::MAP;
+            case VariantControllerHackArraysMode::MIGRATORY:
+              return HPHP::serialize::Type::LIST;
+            case VariantControllerHackArraysMode::ON:
+            case VariantControllerHackArraysMode::ON_AND_KEYSET: {
+              auto const legacy = obj.rval().val().parr->isLegacyArray();
+              return legacy ? HPHP::serialize::Type::MAP
+                            : HPHP::serialize::Type::LIST;
+            }
+          }
+        }
         if (HackArraysMode == VariantControllerHackArraysMode::ON ||
             HackArraysMode == VariantControllerHackArraysMode::ON_AND_KEYSET) {
           return HPHP::serialize::Type::LIST;

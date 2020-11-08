@@ -151,7 +151,7 @@ inline void ActRec::trashThis() {
 /////////////////////////////////////////////////////////////////////////////
 
 inline RxLevel ActRec::rxMinLevel() const {
-  if (func()->isRxConditional()) return RxLevel::None;
+  if (func()->hasCoeffectRules()) return RxLevel::None;
   return func()->rxLevel();
 }
 

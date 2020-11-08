@@ -803,11 +803,6 @@ struct Func final {
   bool isRxDisabled() const;
 
   /*
-   * Is this function conditionally reactive?
-   */
-  bool isRxConditional() const;
-
-  /*
    * Does this function have coeffect rules?
    */
   bool hasCoeffectRules() const;

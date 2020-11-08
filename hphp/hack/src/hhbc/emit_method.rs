@@ -144,7 +144,7 @@ pub fn from_ast<'a>(
         }
     });
     let (ast_body_block, is_rx_body, rx_disabled) =
-        if let rx::Level::NonRx | rx::Level::Pure(_) = rx_level {
+        if let rx::Level::NonRx | rx::Level::Pure = rx_level {
             (&method.body.ast, false, false)
         } else {
             match rx::halves_of_is_enabled_body(&method.body) {

@@ -1,4 +1,4 @@
-.function [rx conditional_rx_local] foo() {
+.function [rx rx_local] foo() {
   Null
   RetC
 }

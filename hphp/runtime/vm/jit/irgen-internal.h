@@ -85,7 +85,7 @@ inline Offset nextBcOff(const IRGS& env) {
 
 inline RxLevel curRxLevel(const IRGS& env) {
   // Pessimize enforcements for conditional reactivity, as it is not tracked yet
-  if (curFunc(env)->isRxConditional()) return RxLevel::None;
+  if (curFunc(env)->hasCoeffectRules()) return RxLevel::None;
   return curFunc(env)->rxLevel();
 }
 

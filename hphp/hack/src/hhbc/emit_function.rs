@@ -92,7 +92,7 @@ pub fn emit_function<'a>(e: &mut Emitter, f: &'a tast::Fun_) -> Result<Vec<HhasF
 
     let rx_level = rx::Level::from_ast(&f.user_attributes).unwrap_or(rx::Level::NonRx);
     let (ast_body, rx_body) = {
-        if let rx::Level::NonRx | rx::Level::Pure(_) = rx_level {
+        if let rx::Level::NonRx | rx::Level::Pure = rx_level {
             (&f.body.ast, false)
         } else {
             match rx::halves_of_is_enabled_body(&f.body) {

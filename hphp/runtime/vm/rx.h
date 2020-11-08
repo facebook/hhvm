@@ -25,11 +25,10 @@ namespace HPHP {
 enum CoeffectAttr : uint16_t {
   CEAttrNone = 0,
   // The RxLevel attrs are used to encode the maximum level of reactivity
-  // of a function. RxNonConditional indicates level conditionality.
+  // of a function.
   CEAttrRxLevel0         = (1u << 0),
   CEAttrRxLevel1         = (1u << 1),
   CEAttrRxLevel2         = (1u << 2),
-  CEAttrRxNonConditional = (1u << 3),
 };
 
 constexpr CoeffectAttr operator|(CoeffectAttr a, CoeffectAttr b) {
@@ -64,7 +63,6 @@ constexpr uint16_t kRxAttrMask =
   CEAttrRxLevel0 | CEAttrRxLevel1 | CEAttrRxLevel2;
 constexpr uint16_t kRxLevelMask = 7u;
 static_assert(kRxAttrMask >> kRxAttrShift == kRxLevelMask, "");
-static_assert(CEAttrRxNonConditional == (8u << kRxAttrShift), "");
 
 
 constexpr RxLevel rxLevelFromAttr(CoeffectAttr attrs) {
@@ -73,13 +71,9 @@ constexpr RxLevel rxLevelFromAttr(CoeffectAttr attrs) {
   );
 }
 
-constexpr bool rxConditionalFromAttr(CoeffectAttr attrs) {
-  return !(attrs & CEAttrRxNonConditional);
-}
-
-constexpr CoeffectAttr rxMakeAttr(RxLevel level, bool conditional) {
-  return static_cast<CoeffectAttr>(static_cast<uint16_t>(level) << kRxAttrShift)
-    | (conditional ? CEAttrNone : CEAttrRxNonConditional);
+constexpr CoeffectAttr rxMakeAttr(RxLevel level) {
+  return
+    static_cast<CoeffectAttr>(static_cast<uint16_t>(level) << kRxAttrShift);
 }
 
 CoeffectAttr rxAttrsFromAttrString(const std::string& a);

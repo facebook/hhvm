@@ -560,10 +560,6 @@ inline bool Func::isRxDisabled() const {
   return shared()->m_allFlags.m_isRxDisabled;
 }
 
-inline bool Func::isRxConditional() const {
-  return rxConditionalFromAttr(m_coeffectAttrs);
-}
-
 inline bool Func::hasCoeffectRules() const {
   return shared()->m_allFlags.m_hasCoeffectRules;
 }

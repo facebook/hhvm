@@ -1,0 +1,6 @@
+File "function_return_2.bad.php", line 21, characters 10-19:
+Invalid return type (Typing[4110])
+  File "function_return_2.bad.php", line 20, characters 19-27:
+  Expected `SuperEnum`
+  File "function_return_2.bad.php", line 8, characters 22-24:
+  But got `int`

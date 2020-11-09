@@ -90,11 +90,19 @@ impl<'a> DirectDeclSmartConstructors<'a> {
         // Count the length of the qualified name, so that we can allocate
         // exactly the right amount of space for it in our arena.
         let mut len = namespace.len();
+        let mut contains_namespace_token = false;
         for part in parts {
             match part {
                 Node::Name(&(name, _)) => len += name.len(),
                 Node::Token(t) if t.kind() == TokenKind::Backslash => len += 1,
                 Node::ListItem(&(Node::Name(&(name, _)), _backslash)) => len += name.len() + 1,
+                Node::ListItem(&(Node::Token(t), _backslash))
+                    if t.kind() == TokenKind::Namespace =>
+                {
+                    // No +1 here because the current namespace includes a trailing backslash.
+                    len += self.state.namespace_builder.current_namespace().len();
+                    contains_namespace_token = true;
+                }
                 _ => {}
             }
         }
@@ -102,7 +110,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
         // we can just reference the fully qualified name in the original source
         // text instead of copying it.
         let source_len = pos.end_cnum() - pos.start_cnum();
-        if fully_qualified && source_len == len {
+        if fully_qualified && source_len == len && !contains_namespace_token {
             let qualified_name = self.str_from_utf8(self.source_text_at_pos(pos));
             return Id(pos, qualified_name);
         }
@@ -113,13 +121,20 @@ impl<'a> DirectDeclSmartConstructors<'a> {
             match part {
                 Node::Name(&(name, _pos)) => qualified_name.push_str(&name),
                 Node::Token(t) if t.kind() == TokenKind::Backslash => qualified_name.push('\\'),
+                &Node::ListItem(&(Node::Name(&(name, _)), _backslash)) => {
+                    qualified_name.push_str(&name);
+                    qualified_name.push_str("\\");
+                }
+                &Node::ListItem(&(Node::Token(t), _backslash))
+                    if t.kind() == TokenKind::Namespace =>
+                {
+                    qualified_name.push_str(self.state.namespace_builder.current_namespace());
+                }
                 Node::ListItem(listitem) => {
-                    if let (Node::Name(&(name, _)), _backslash) = &**listitem {
-                        qualified_name.push_str(&name);
-                        qualified_name.push_str("\\");
-                    } else {
-                        panic!("Expected a name or backslash, but got {:?}", listitem);
-                    }
+                    panic!(
+                        "Expected ListItem with name and backslash, but got {:?}",
+                        listitem
+                    );
                 }
                 n => {
                     panic!("Expected a name, backslash, or list item, but got {:?}", n);

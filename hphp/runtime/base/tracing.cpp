@@ -16,10 +16,13 @@
 
 #include "hphp/runtime/base/tracing.h"
 
+#include "hphp/runtime/base/init-fini-node.h"
+
 #include "hphp/runtime/server/cli-server.h"
 
 #include "hphp/util/assertions.h"
 #include "hphp/util/struct-log.h"
+#include "hphp/util/service-data.h"
 
 #include "folly/Random.h"
 
@@ -315,5 +318,13 @@ void setFactory(std::unique_ptr<RequestImplFactory> f) {
   assertx(!detail::s_factory);
   detail::s_factory = std::move(f);
 }
+
+static InitFiniNode initTracingTagIdCounter([] {
+  if (RuntimeOption::EvalTracingTagId.empty()) return;
+  auto counter = ServiceData::createCounter(
+    folly::sformat("vm.tracing_tag_id.{}", RuntimeOption::EvalTracingTagId)
+  );
+  counter->setValue(1);
+}, InitFiniNode::When::PostRuntimeOptions);
 
 }}

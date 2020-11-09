@@ -1558,7 +1558,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                                     lateinit: false,
                                     lsb: false,
                                     name: Id(pos, name),
-                                    needs_init: true,
+                                    needs_init: self.state.file_mode != Mode::Mdecl,
                                     type_: self.node_to_ty(hint),
                                     abstract_: false,
                                     visibility,
@@ -3574,7 +3574,11 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                         lateinit: attributes.late_init,
                         lsb: attributes.lsb,
                         name: Id(pos, name),
-                        needs_init: initializer.is_ignored(),
+                        needs_init: if self.state.file_mode == Mode::Mdecl {
+                            false
+                        } else {
+                            initializer.is_ignored()
+                        },
                         type_: ty,
                         abstract_: modifiers.is_abstract,
                         visibility: modifiers.visibility,

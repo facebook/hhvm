@@ -5612,6 +5612,14 @@ void interpStep(ISS& env, const Bytecode& bc) {
       env.flags.effectFree = true;
     }
 
+    // If we're doing inline interp, don't actually perform the
+    // constprop. If we do, we can infer static types that won't
+    // actually exist at runtime.
+    if (any(env.collect.opts & CollectionOpts::Inlining)) {
+      ITRACE(2, "   inlining, skipping actual constprop\n");
+      return false;
+    }
+
     rewind(env, bc);
 
     auto const numPop = bc.numPop();

@@ -1276,10 +1276,12 @@ dependencies = [
 name = "hh_compile"
 version = "0.0.0"
 dependencies = [
+ "aast_parser",
  "anyhow",
  "atty",
  "bumpalo",
  "compile_rust",
+ "direct_decl_parser",
  "minimal_parser",
  "multifile_rust",
  "ocamlrep",

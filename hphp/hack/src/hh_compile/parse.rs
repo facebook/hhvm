@@ -5,12 +5,16 @@
 
 use crate::utils;
 use ::anyhow::{anyhow, Context, Result};
+use aast_parser::{rust_aast_parser_types::Env as AastParserEnv, AastParser};
 use ocamlrep::rc::RcOc;
 use oxidized::relative_path::{self, RelativePath};
-use parser_core_types::{parser_env::ParserEnv, source_text::SourceText};
+use parser_core_types::{
+    indexed_source_text::IndexedSourceText, parser_env::ParserEnv, source_text::SourceText,
+};
 use rayon::prelude::*;
 use stack_limit::{StackLimit, KI, MI};
 use std::{
+    collections::BTreeMap,
     io::{stdin, BufRead, BufReader},
     iter::Iterator,
     path::PathBuf,
@@ -31,9 +35,11 @@ pub struct Opts {
 
 #[derive(Clone, Copy, Debug, Display, EnumString)]
 enum Parser {
+    Aast,
     Positioned,
     PositionedByRef,
     Minimal,
+    DirectDecl,
 }
 
 impl std::default::Default for Parser {
@@ -65,7 +71,7 @@ pub fn run(opts: Opts) -> Result<()> {
 
 fn parse_file(parser: Parser, filepath: PathBuf) -> anyhow::Result<()> {
     let content = utils::read_file(&filepath)?;
-    let ctx = &Arc::new((filepath.clone(), content));
+    let ctx = &Arc::new((filepath, content));
     let make_retryable = move || {
         let new_ctx = Arc::clone(ctx);
         Box::new(
@@ -95,6 +101,23 @@ fn parse_file(parser: Parser, filepath: PathBuf) -> anyhow::Result<()> {
                         let (_, _, _) =
                             minimal_parser::parse_script(&source_text, env, Some(stack_limit));
                     }
+                    Parser::DirectDecl => {
+                        let arena = bumpalo::Bump::new();
+                        let auto_namespace_map = BTreeMap::new();
+                        let (_, _, _, _) = direct_decl_parser::parse_script(
+                            &source_text,
+                            env,
+                            &auto_namespace_map,
+                            &arena,
+                            Some(stack_limit),
+                        );
+                    }
+                    Parser::Aast => {
+                        let indexed_source_text = IndexedSourceText::new(source_text);
+                        let env = AastParserEnv::default();
+                        let _ =
+                            AastParser::from_text(&env, &indexed_source_text, Some(stack_limit));
+                    }
                 }
                 Ok(())
             },
@@ -108,7 +131,7 @@ fn parse_file(parser: Parser, filepath: PathBuf) -> anyhow::Result<()> {
                 "[hrust] warning: exceeded stack of {} KiB on {:?}",
                 (stack_size_tried - utils::stack_slack_for_traversal_and_parsing(stack_size_tried))
                     / KI,
-                filepath,
+                ctx.0,
             );
         }
     };

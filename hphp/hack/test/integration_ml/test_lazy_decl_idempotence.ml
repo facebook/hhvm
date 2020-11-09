@@ -62,7 +62,6 @@ let test () =
       recheck_id = Some "";
       profile_log = false;
       profile_type_check_twice = false;
-      profile_total_typecheck_duration = false;
       profile_type_check_duration_threshold = 0.;
       profile_decling = Typing_service_types.DeclingOff;
     }

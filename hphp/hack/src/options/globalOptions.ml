@@ -53,7 +53,6 @@ type t = {
   po_rust_parser_errors: bool;
   profile_type_check_duration_threshold: float;
   profile_type_check_twice: bool;
-  profile_total_typecheck_duration: bool;
   profile_owner: string option;
   profile_desc: string;
   tco_like_type_hints: bool;
@@ -241,7 +240,6 @@ let default =
     po_rust_parser_errors = false;
     profile_type_check_duration_threshold = 0.05;
     profile_type_check_twice = false;
-    profile_total_typecheck_duration = false;
     profile_owner = None;
     profile_desc = "";
     tco_like_type_hints = false;
@@ -355,8 +353,6 @@ let make
     ?(profile_type_check_duration_threshold =
       default.profile_type_check_duration_threshold)
     ?(profile_type_check_twice = default.profile_type_check_twice)
-    ?(profile_total_typecheck_duration =
-      default.profile_total_typecheck_duration)
     ?profile_owner
     ?(profile_desc = default.profile_desc)
     ?(tco_like_type_hints = default.tco_like_type_hints)
@@ -477,7 +473,6 @@ let make
     po_rust_parser_errors;
     profile_type_check_duration_threshold;
     profile_type_check_twice;
-    profile_total_typecheck_duration;
     profile_owner;
     profile_desc;
     tco_like_type_hints;
@@ -638,8 +633,6 @@ let profile_type_check_duration_threshold t =
   t.profile_type_check_duration_threshold
 
 let profile_type_check_twice t = t.profile_type_check_twice
-
-let profile_total_typecheck_duration t = t.profile_total_typecheck_duration
 
 let profile_owner t = t.profile_owner
 

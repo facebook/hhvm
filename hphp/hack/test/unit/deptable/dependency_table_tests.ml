@@ -134,7 +134,6 @@ let test_dep_graph_blob () =
             init_id = "123";
             recheck_id = None;
             profile_log = false;
-            profile_total_typecheck_duration = false;
             profile_type_check_duration_threshold = 0.0;
             profile_type_check_twice = false;
             profile_decling = Typing_service_types.DeclingOff;

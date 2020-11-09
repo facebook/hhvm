@@ -52,7 +52,6 @@ impl Default for GlobalOptions {
             tco_shallow_class_decl: false,
             po_rust_parser_errors: false,
             profile_type_check_duration_threshold: 0.0,
-            profile_total_typecheck_duration: false,
             profile_type_check_twice: false,
             profile_owner: None,
             profile_desc: String::new(),

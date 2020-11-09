@@ -97,9 +97,6 @@ let get_check_info genv env : Typing_check_service.check_info =
     Typing_check_service.init_id = env.init_env.init_id;
     recheck_id = env.init_env.recheck_id;
     profile_log = ServerArgs.profile_log genv.options;
-    profile_total_typecheck_duration =
-      GlobalOptions.profile_total_typecheck_duration
-        (ServerConfig.typechecker_options genv.config);
     profile_decling = genv.local_config.ServerLocalConfig.profile_decling;
     profile_type_check_twice =
       genv.local_config.ServerLocalConfig.profile_type_check_twice;

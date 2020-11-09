@@ -120,12 +120,7 @@ let test_process_file_deferring () =
 
   (* Finally, this is what all the setup was for: process this file *)
   Decl_counters.set_mode Typing_service_types.DeclingTopCounts;
-  let prev_counter_state =
-    Counters.reset
-      ~enabled_categories:
-        (Counters.CategorySet.of_list
-           Counters.Category.[Decling; Disk_cat; Get_ast])
-  in
+  let prev_counter_state = Counters.reset () in
   let { Typing_check_service.deferred_files; _ } =
     Typing_check_service.process_file dynamic_view_files ctx errors file
   in

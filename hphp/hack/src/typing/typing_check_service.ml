@@ -426,18 +426,8 @@ let process_files
   File_provider.local_changes_push_sharedmem_stack ();
   Ast_provider.local_changes_push_sharedmem_stack ();
 
-  let _prev_counters_state =
-    let categories =
-      match
-        (check_info.profile_log, check_info.profile_total_typecheck_duration)
-      with
-      | (false, false) -> []
-      | (false, true) -> Counters.Category.[Typecheck; Decling]
-      | (true, _) -> Counters.Category.[Get_ast; Disk_cat; Typecheck; Decling]
-    in
-    Decl_counters.set_mode check_info.profile_decling;
-    Counters.reset ~enabled_categories:(Counters.CategorySet.of_list categories)
-  in
+  Decl_counters.set_mode check_info.profile_decling;
+  let _prev_counters_state = Counters.reset () in
   let (_start_counter_time, start_counters) = read_counters () in
   let tally = ProcessFilesTally.empty in
   let start_file_count = List.length progress.remaining in
@@ -530,6 +520,8 @@ let process_files
 
   (* Gather up our various forms of telemetry... *)
   let (_end_counter_time, end_counters) = read_counters () in
+  (* Note: the 'add' operation (performed here, and also later in case of
+  MultiWorker.merge) will strip all non-numbers from telemetry. *)
   let telemetry =
     Telemetry.add
       telemetry

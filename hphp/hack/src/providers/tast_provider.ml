@@ -54,12 +54,7 @@ let compute_tast_and_errors_unquarantined_internal
     let prev_ctx_telemetry = Provider_context.get_telemetry ctx in
     let prev_gc_telemetry = Telemetry.quick_gc_stat () in
     Decl_counters.set_mode Typing_service_types.DeclingTopCounts;
-    let prev_tally_state =
-      Counters.reset
-        ~enabled_categories:
-          (Counters.CategorySet.of_list
-             Counters.Category.[Decling; Disk_cat; Get_ast])
-    in
+    let prev_tally_state = Counters.reset () in
     let t = Unix.gettimeofday () in
 
     (* do the work *)

@@ -7,21 +7,29 @@
  *
  *)
 
+open Hh_prelude
+open Option.Monad_infix
 open Typing_defs
 open Decl_defs
 module Inst = Decl_instantiate
 
 exception Decl_heap_elems_bug
 
-let wrap_not_found child_class_name elem_name find x =
-  try find x (* TODO: t13396089 *)
+[@@@warning "-3"]
+
+let wrap_not_found (child_class_name : string) find member =
+  try find member (* TODO: t13396089 *)
   with Not_found ->
+    let (origin, name) = member in
     Hh_logger.log
-      "Decl_heap_elems_bug: could not find %s (inherited by %s):\n%s"
-      (elem_name ())
+      "Decl_heap_elems_bug: could not find %s::%s (inherited by %s):\n%s"
+      origin
+      name
       child_class_name
-      (Printexc.raw_backtrace_to_string (Printexc.get_callstack 100));
+      Stdlib.Printexc.(raw_backtrace_to_string @@ get_callstack 100);
     raise Decl_heap_elems_bug
+
+[@@@warning "+3"]
 
 let rec apply_substs substs class_context (pos, ty) =
   match SMap.find_opt class_context substs with
@@ -30,7 +38,7 @@ let rec apply_substs substs class_context (pos, ty) =
     apply_substs substs next_class_context (pos, Inst.instantiate subst ty)
 
 let element_to_class_elt
-    (ce_pos, ce_type)
+    (pty : (Pos.t * decl_ty) lazy_t)
     {
       elt_flags = ce_flags;
       elt_origin = ce_origin;
@@ -38,65 +46,100 @@ let element_to_class_elt
       elt_reactivity = _;
       elt_deprecated = ce_deprecated;
     } =
+  let (ce_pos, ce_type) =
+    (lazy (fst @@ Lazy.force pty), lazy (snd @@ Lazy.force pty))
+  in
   { ce_visibility; ce_origin; ce_type; ce_deprecated; ce_pos; ce_flags }
 
 let to_class_type
-    {
-      dc_need_init;
-      dc_members_fully_known;
-      dc_abstract;
-      dc_final;
-      dc_const;
-      dc_deferred_init_members;
-      dc_kind;
-      dc_is_xhp;
-      dc_has_xhp_keyword;
-      dc_is_disposable;
-      dc_name;
-      dc_pos;
-      dc_tparams;
-      dc_where_constraints;
-      dc_substs;
-      dc_consts;
-      dc_typeconsts;
-      dc_props;
-      dc_sprops;
-      dc_methods;
-      dc_smethods;
-      dc_construct;
-      dc_ancestors;
-      dc_implements_dynamic;
-      dc_req_ancestors;
-      dc_req_ancestors_extends;
-      dc_extends;
-      dc_sealed_whitelist;
-      dc_xhp_attr_deps = _;
-      dc_enum_type;
-      dc_decl_errors;
-      dc_condition_types = _;
-    } =
+    ( {
+        dc_need_init;
+        dc_members_fully_known;
+        dc_abstract;
+        dc_final;
+        dc_const;
+        dc_deferred_init_members;
+        dc_kind;
+        dc_is_xhp;
+        dc_has_xhp_keyword;
+        dc_is_disposable;
+        dc_name;
+        dc_pos;
+        dc_tparams;
+        dc_where_constraints;
+        dc_substs;
+        dc_consts;
+        dc_typeconsts;
+        dc_props;
+        dc_sprops;
+        dc_methods;
+        dc_smethods;
+        dc_construct;
+        dc_ancestors;
+        dc_implements_dynamic;
+        dc_req_ancestors;
+        dc_req_ancestors_extends;
+        dc_extends;
+        dc_sealed_whitelist;
+        dc_xhp_attr_deps = _;
+        dc_enum_type;
+        dc_decl_errors;
+        dc_condition_types = _;
+      },
+      (members : Decl_heap.class_members option) ) =
+  let find_in_local_or_heap find_in_local find_in_heap (origin, name) =
+    match find_in_local name with
+    | Some m -> m
+    | None -> wrap_not_found dc_name find_in_heap (origin, name)
+  in
+  let find_in_local project_members x =
+    members >>| project_members >>= SMap.find_opt x
+  in
+  let find_method =
+    find_in_local_or_heap
+      (find_in_local @@ fun m -> m.Decl_heap.m_methods)
+      Decl_heap.Methods.find_unsafe
+  in
+  let find_static_method =
+    find_in_local_or_heap
+      (find_in_local @@ fun m -> m.Decl_heap.m_static_methods)
+      Decl_heap.StaticMethods.find_unsafe
+  in
+  let find_property x =
+    let ty =
+      find_in_local_or_heap
+        (find_in_local @@ fun m -> m.Decl_heap.m_properties)
+        Decl_heap.Props.find_unsafe
+        x
+    in
+    (get_pos ty, ty)
+  in
+  let find_static_property x =
+    let ty =
+      find_in_local_or_heap
+        (find_in_local @@ fun m -> m.Decl_heap.m_static_properties)
+        Decl_heap.StaticProps.find_unsafe
+        x
+    in
+    (get_pos ty, ty)
+  in
+  let find_constructor class_ =
+    find_in_local_or_heap
+      (fun _ -> members >>= fun m -> m.Decl_heap.m_constructor)
+      (fun (class_, _) -> Decl_heap.Constructors.find_unsafe class_)
+      (class_, Naming_special_names.Members.__construct)
+  in
   let map_elements find elts =
     SMap.mapi
       begin
         fun name elt ->
-        let (pos, ty) =
-          let pos_and_ty =
-            lazy
-              begin
-                let elem_name () =
-                  Printf.sprintf "%s::%s" elt.elt_origin name
-                in
-                let elem =
-                  wrap_not_found dc_name elem_name find (elt.elt_origin, name)
-                in
-                apply_substs dc_substs elt.elt_origin @@ elem
-              end
-          in
-          let pos = lazy (fst (Lazy.force pos_and_ty)) in
-          let ty = lazy (snd (Lazy.force pos_and_ty)) in
-          (pos, ty)
+        let pty =
+          lazy
+            ( (elt.elt_origin, name)
+            |> find
+            |> apply_substs dc_substs elt.elt_origin )
         in
-        element_to_class_elt (pos, ty) elt
+        element_to_class_elt pty elt
       end
       elts
   in
@@ -108,26 +151,14 @@ let to_class_type
     match dc_construct with
     | (None, consistent) -> (None, consistent)
     | (Some elt, consistent) ->
-      let (pos, ty) =
-        let pos_and_ty =
-          lazy
-            begin
-              let name = Naming_special_names.Members.__construct in
-              let elem_name () = Printf.sprintf "%s::%s" elt.elt_origin name in
-              elt.elt_origin
-              |> wrap_not_found
-                   dc_name
-                   elem_name
-                   Decl_heap.Constructors.find_unsafe
-              |> fun_elt_to_ty
-              |> apply_substs dc_substs elt.elt_origin
-            end
-        in
-        let pos = lazy (fst (Lazy.force pos_and_ty)) in
-        let ty = lazy (snd (Lazy.force pos_and_ty)) in
-        (pos, ty)
+      let pty =
+        lazy
+          ( elt.elt_origin
+          |> find_constructor
+          |> fun_elt_to_ty
+          |> apply_substs dc_substs elt.elt_origin )
       in
-      let class_elt = element_to_class_elt (pos, ty) elt in
+      let class_elt = element_to_class_elt pty elt in
       (Some class_elt, consistent)
   in
   {
@@ -147,21 +178,10 @@ let to_class_type
     tc_where_constraints = dc_where_constraints;
     tc_consts = dc_consts;
     tc_typeconsts = dc_typeconsts;
-    tc_props =
-      map_elements
-        (fun x ->
-          let ty = Decl_heap.Props.find_unsafe x in
-          (get_pos ty, ty))
-        dc_props;
-    tc_sprops =
-      map_elements
-        (fun x ->
-          let ty = Decl_heap.StaticProps.find_unsafe x in
-          (get_pos ty, ty))
-        dc_sprops;
-    tc_methods = ft_map_elements Decl_heap.Methods.find_unsafe dc_methods;
-    tc_smethods =
-      ft_map_elements Decl_heap.StaticMethods.find_unsafe dc_smethods;
+    tc_props = map_elements find_property dc_props;
+    tc_sprops = map_elements find_static_property dc_sprops;
+    tc_methods = ft_map_elements find_method dc_methods;
+    tc_smethods = ft_map_elements find_static_method dc_smethods;
     tc_construct;
     tc_ancestors = dc_ancestors;
     tc_implements_dynamic = dc_implements_dynamic;

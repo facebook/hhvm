@@ -150,3 +150,13 @@ module StaticMethods =
 module Constructors =
   SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey) (Constructor)
     (Capacity)
+
+type class_members = {
+  m_properties: Property.t SMap.t;
+  m_static_properties: StaticProperty.t SMap.t;
+  m_methods: Method.t SMap.t;
+  m_static_methods: StaticMethod.t SMap.t;
+  m_constructor: Constructor.t option;
+}
+
+type class_entries = Class.t * class_members option

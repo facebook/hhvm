@@ -119,7 +119,8 @@ let declare_folded_class_in_file
     ~(sh : SharedMem.uses)
     (ctx : Provider_context.t)
     (file : Relative_path.t)
-    (name : string) : Decl_defs.decl_class_type =
+    (name : string) : Decl_defs.decl_class_type * Decl_heap.class_members option
+    =
   match Ast_provider.find_class_in_file ctx file name with
   | Some cls ->
     let (name, decl) = Decl_folded_class.class_decl_if_missing ~sh ctx cls in

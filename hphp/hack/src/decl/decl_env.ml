@@ -17,8 +17,6 @@ type env = {
   ctx: Provider_context.t;
 }
 
-let mode env = env.mode
-
 let tcopt env = Provider_context.get_tcopt env.ctx
 
 let deps_mode env = Provider_context.get_deps_mode env.ctx
@@ -37,10 +35,13 @@ let add_extends_dependency env x =
       Typing_deps.add_idep deps_mode root dep);
   ()
 
-let get_class_dep env x =
-  add_wclass env x;
+type class_cache = Decl_heap.class_entries SMap.t
+
+let get_class_add_dep env ?(cache : class_cache option) x =
   add_extends_dependency env x;
-  Decl_heap.Classes.get x
+  match Option.(cache >>= SMap.find_opt x >>| fst) with
+  | Some c -> Some c
+  | None -> Decl_heap.Classes.get x
 
 let get_construct env class_ =
   add_wclass env class_.dc_name;

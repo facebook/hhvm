@@ -15,17 +15,19 @@ open Typing_defs
 module Attrs = Naming_attributes
 module SN = Naming_special_names
 
+(** Helpers for checking initialization of class properties by looking at decls. *)
+
 let parent_init_prop = "parent::" ^ SN.Members.__construct
 
 (* If we need to call parent::__construct, we treat it as if it were
  * a class variable that needs to be initialized. It's a bit hacky
  * but it works. The idea here is that if the parent needs to be
  * initialized, we add a phony class variable. *)
-let add_parent_construct decl_env c props parent_ty =
+let add_parent_construct ?class_cache decl_env c props parent_ty =
   match get_node parent_ty with
   | Tapply ((_, parent), _) ->
     begin
-      match Decl_env.get_class_dep decl_env parent with
+      match Decl_env.get_class_add_dep decl_env parent ?cache:class_cache with
       | Some class_ when class_.dc_need_init && Option.is_some c.sc_constructor
         ->
         SSet.add parent_init_prop props
@@ -33,13 +35,13 @@ let add_parent_construct decl_env c props parent_ty =
     end
   | _ -> props
 
-let parent decl_env c acc =
+let parent ?class_cache decl_env c acc =
   if FileInfo.(equal_mode c.sc_mode Mdecl) then
     acc
   else if Ast_defs.(equal_class_kind c.sc_kind Ctrait) then
     List.fold_left
       c.sc_req_extends
-      ~f:(add_parent_construct decl_env c)
+      ~f:(add_parent_construct ?class_cache decl_env c)
       ~init:acc
   else
     match c.sc_extends with
@@ -83,7 +85,9 @@ let init_not_required_props c props =
       end
     ~init:props
 
-let parent_props decl_env c props =
+type class_cache = Decl_heap.class_entries SMap.t
+
+let parent_props ?(class_cache : class_cache option) decl_env c props =
   List.fold_left
     c.sc_extends
     ~f:
@@ -91,7 +95,9 @@ let parent_props decl_env c props =
         fun acc parent ->
         match get_node parent with
         | Tapply ((_, parent), _) ->
-          let tc = Decl_env.get_class_dep decl_env parent in
+          let tc =
+            Decl_env.get_class_add_dep decl_env parent ?cache:class_cache
+          in
           begin
             match tc with
             | None -> acc
@@ -107,12 +113,12 @@ let trait_props decl_env c props =
     c.sc_uses
     ~f:
       begin
-        fun acc ty ->
-        match get_node ty with
+        fun props_acc used_ty ->
+        match get_node used_ty with
         | Tapply ((_, trait), _) ->
-          let class_ = Decl_env.get_class_dep decl_env trait in
+          let class_ = Decl_env.get_class_add_dep decl_env trait in
           (match class_ with
-          | None -> acc
+          | None -> props_acc
           | Some { dc_construct = cstr; dc_deferred_init_members = members; _ }
             ->
             (* If our current class defines its own constructor, completely ignore
@@ -121,25 +127,25 @@ let trait_props decl_env c props =
              * If the curr. class does not have its own constructor, only fold in
              * the trait members if it would not have had its own constructor when
              * defining `dc_deferred_init_members`. See logic in `class_` for
-             * Ast_defs.Cabstract to see where this deviated for traits.
-             *)
+             * Ast_defs.Cabstract to see where this deviated for traits. *)
             begin
               match fst cstr with
-              | None -> SSet.union members acc
+              | None -> SSet.union members props_acc
               | Some cstr
                 when String.( <> ) cstr.elt_origin trait
                      || get_elt_abstract cstr ->
-                SSet.union members acc
-              | _ when Option.is_some c.sc_constructor -> SSet.union members acc
-              | _ -> acc
+                SSet.union members props_acc
+              | _ when Option.is_some c.sc_constructor ->
+                SSet.union members props_acc
+              | _ -> props_acc
             end)
-        | _ -> acc
+        | _ -> props_acc
       end
     ~init:props
 
-(* return a tuple of the private init-requiring props of the class
- * and all init-requiring props of the class and its ancestors *)
-let get_deferred_init_props decl_env c =
+(** return a tuple of the private init-requiring props of the class
+    and all init-requiring props of the class and its ancestors *)
+let get_deferred_init_props ?(class_cache : class_cache option) decl_env c =
   let (priv_props, props) =
     List.fold_left
       ~f:(fun (priv_props, props) sp ->
@@ -154,13 +160,13 @@ let get_deferred_init_props decl_env c =
       ~init:(SSet.empty, SSet.empty)
       c.sc_props
   in
-  let props = parent_props decl_env c props in
-  let props = parent decl_env c props in
+  let props = parent_props ?class_cache decl_env c props in
+  let props = parent ?class_cache decl_env c props in
   (priv_props, props)
 
-let class_ ~has_own_cstr decl_env c =
+let class_ ~has_own_cstr ?(class_cache : class_cache option) decl_env c =
   match c.sc_kind with
   | Ast_defs.Cabstract when not has_own_cstr ->
-    get_deferred_init_props decl_env c
+    get_deferred_init_props ?class_cache decl_env c
   | Ast_defs.Ctrait -> get_deferred_init_props decl_env c
   | _ -> (SSet.empty, SSet.empty)

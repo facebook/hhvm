@@ -15,6 +15,7 @@
 (*****************************************************************************)
 
 open Hh_prelude
+open Option.Monad_infix
 open Decl_defs
 open Shallow_decl_defs
 open Typing_defs
@@ -26,13 +27,13 @@ module Inst = Decl_instantiate
 
 type inherited = {
   ih_substs: subst_context SMap.t;
-  ih_cstr: element option * consistent_kind;
+  ih_cstr: (element * Decl_heap.Constructor.t option) option * consistent_kind;
   ih_consts: class_const SMap.t;
   ih_typeconsts: typeconst_type SMap.t;
-  ih_props: element SMap.t;
-  ih_sprops: element SMap.t;
-  ih_methods: element SMap.t;
-  ih_smethods: element SMap.t;
+  ih_props: (element * Decl_heap.Property.t option) SMap.t;
+  ih_sprops: (element * Decl_heap.StaticProperty.t option) SMap.t;
+  ih_methods: (element * Decl_heap.Method.t option) SMap.t;
+  ih_smethods: (element * Decl_heap.StaticMethod.t option) SMap.t;
 }
 
 let empty =
@@ -53,7 +54,7 @@ let empty =
  *)
 (*****************************************************************************)
 
-let should_keep_old_sig sig_ old_sig =
+let should_keep_old_sig (sig_, _) (old_sig, _) =
   ((not (get_elt_abstract old_sig)) && get_elt_abstract sig_)
   || Bool.equal (get_elt_abstract old_sig) (get_elt_abstract sig_)
      && (not (get_elt_synthesized old_sig))
@@ -86,7 +87,10 @@ let add_method name sig_ methods =
      * wins!), but not really OK when the naming conflict is trait vs
      * trait (we rely on HHVM to catch the error at runtime) *)
     else
-      SMap.add name (set_elt_override sig_ false) methods
+      let sig_ =
+        Tuple.T2.map_fst sig_ ~f:(fun elt -> set_elt_override elt false)
+      in
+      SMap.add name sig_ methods
 
 let add_methods methods' acc = SMap.fold add_method methods' acc
 
@@ -252,7 +256,9 @@ let make_substitution class_type class_parameters =
   Inst.make_subst class_type.dc_tparams class_parameters
 
 let mark_as_synthesized inh =
-  let mark_elt elt = set_elt_synthesized elt true in
+  let mark_elt elt =
+    Tuple.T2.map_fst elt ~f:(fun elt -> set_elt_synthesized elt true)
+  in
   {
     inh with
     ih_substs =
@@ -312,52 +318,80 @@ let chown_privates owner class_type =
 (* Builds the inherited type when the class lives in Hack *)
 (*****************************************************************************)
 
-let inherit_hack_class env c class_name class_type argl =
-  let subst = make_substitution class_type argl in
-  let class_type =
-    match class_type.dc_kind with
+let pair_with_heap_entries :
+    type heap_entry.
+    element SMap.t ->
+    heap_entry SMap.t option ->
+    (element * heap_entry option) SMap.t =
+ fun elts heap_entries ->
+  SMap.mapi (fun name elt -> (elt, heap_entries >>= SMap.find_opt name)) elts
+
+let inherit_hack_class
+    env
+    child
+    parent_name
+    parent
+    argl
+    (parent_members : Decl_heap.class_members option) : inherited =
+  let subst = make_substitution parent argl in
+  let parent =
+    match parent.dc_kind with
     | Ast_defs.Ctrait ->
       (* Change the private visibility to point to the inheriting class *)
-      chown_privates (snd c.sc_name) class_type
+      chown_privates (snd child.sc_name) parent
     | Ast_defs.Cnormal
     | Ast_defs.Cabstract
     | Ast_defs.Cinterface ->
-      filter_privates class_type
-    | Ast_defs.Cenum -> class_type
+      filter_privates parent
+    | Ast_defs.Cenum -> parent
   in
   let typeconsts =
-    SMap.map (Inst.instantiate_typeconst subst) class_type.dc_typeconsts
+    SMap.map (Inst.instantiate_typeconst subst) parent.dc_typeconsts
   in
-  let consts = SMap.map (Inst.instantiate_cc subst) class_type.dc_consts in
-  let props = class_type.dc_props in
-  let sprops = class_type.dc_sprops in
-  let methods = class_type.dc_methods in
-  let smethods = class_type.dc_smethods in
-  let cstr = Decl_env.get_construct env class_type in
+  let consts = SMap.map (Inst.instantiate_cc subst) parent.dc_consts in
+  let (cstr, constructor_consistency) = Decl_env.get_construct env parent in
   let subst_ctx =
     {
       sc_subst = subst;
-      sc_class_context = snd c.sc_name;
+      sc_class_context = snd child.sc_name;
       sc_from_req_extends = false;
     }
   in
-  let substs = SMap.add class_name subst_ctx class_type.dc_substs in
+  let substs = SMap.add parent_name subst_ctx parent.dc_substs in
   let result =
     {
       ih_substs = substs;
-      ih_cstr = cstr;
+      ih_cstr =
+        ( Option.map cstr ~f:(fun cstr ->
+              let constructor_heap_value =
+                parent_members >>= fun m -> m.Decl_heap.m_constructor
+              in
+              (cstr, constructor_heap_value)),
+          constructor_consistency );
       ih_consts = consts;
       ih_typeconsts = typeconsts;
-      ih_props = props;
-      ih_sprops = sprops;
-      ih_methods = methods;
-      ih_smethods = smethods;
+      ih_props =
+        pair_with_heap_entries
+          parent.dc_props
+          (parent_members >>| fun m -> m.Decl_heap.m_properties);
+      ih_sprops =
+        pair_with_heap_entries
+          parent.dc_sprops
+          (parent_members >>| fun m -> m.Decl_heap.m_static_properties);
+      ih_methods =
+        pair_with_heap_entries
+          parent.dc_methods
+          (parent_members >>| fun m -> m.Decl_heap.m_methods);
+      ih_smethods =
+        pair_with_heap_entries
+          parent.dc_smethods
+          (parent_members >>| fun m -> m.Decl_heap.m_static_methods);
     }
   in
   result
 
 (* mostly copy paste of inherit_hack_class *)
-let inherit_hack_class_constants_only class_type argl =
+let inherit_hack_class_constants_only class_type argl _parent_members =
   let subst = make_substitution class_type argl in
   let instantiate = SMap.map (Inst.instantiate_cc subst) in
   let consts = instantiate class_type.dc_consts in
@@ -369,7 +403,7 @@ let inherit_hack_class_constants_only class_type argl =
 
 (* This logic deals with importing XHP attributes from an XHP class
    via the "attribute :foo;" syntax. *)
-let inherit_hack_xhp_attrs_only class_type =
+let inherit_hack_xhp_attrs_only class_type members =
   (* Filter out properties that are not XHP attributes *)
   let props =
     SMap.fold
@@ -383,48 +417,74 @@ let inherit_hack_xhp_attrs_only class_type =
       class_type.dc_props
       SMap.empty
   in
-  let result = { empty with ih_props = props } in
+  let result =
+    {
+      empty with
+      ih_props =
+        pair_with_heap_entries
+          props
+          (members >>| fun m -> m.Decl_heap.m_properties);
+    }
+  in
   result
 
 (*****************************************************************************)
 
-let from_class env c ty =
-  let (_, (_, class_name), class_params) = Decl_utils.unwrap_class_type ty in
-  let class_type = Decl_env.get_class_dep env class_name in
-  match class_type with
+(** Return all the heap entries for a class names, i.e. the entry from the class heap
+    and optionally all the entries from the property and method heaps.
+    [classes] acts as a cache for entries we already have at hand.
+    Also add dependency to that class. *)
+let heap_entries env class_name (classes : Decl_heap.class_entries SMap.t) :
+    Decl_heap.class_entries option =
+  Decl_env.add_extends_dependency env class_name;
+  match SMap.find_opt class_name classes with
+  | Some _ as heap_entries -> heap_entries
+  | None -> Decl_heap.Classes.get class_name >>| fun class_ -> (class_, None)
+
+let from_class env c (parents : Decl_heap.class_entries SMap.t) parent_ty :
+    inherited =
+  let (_, (_, parent_name), parent_class_params) =
+    Decl_utils.unwrap_class_type parent_ty
+  in
+  match heap_entries env parent_name parents with
   | None ->
     (* The class lives in PHP, we don't know anything about it *)
     empty
-  | Some class_ ->
+  | Some (class_, parent_members) ->
     (* The class lives in Hack *)
-    inherit_hack_class env c class_name class_ class_params
+    inherit_hack_class
+      env
+      c
+      parent_name
+      class_
+      parent_class_params
+      parent_members
 
-(* mostly copy paste of from_class *)
-let from_class_constants_only env ty =
+let from_class_constants_only env (parents : Decl_heap.class_entries SMap.t) ty
+    =
   let (_, (_, class_name), class_params) = Decl_utils.unwrap_class_type ty in
-  let class_type = Decl_env.get_class_dep env class_name in
-  match class_type with
+  match heap_entries env class_name parents with
   | None ->
     (* The class lives in PHP, we don't know anything about it *)
     empty
-  | Some class_ ->
+  | Some (class_, parent_members) ->
     (* The class lives in Hack *)
-    inherit_hack_class_constants_only class_ class_params
+    inherit_hack_class_constants_only class_ class_params parent_members
 
-let from_class_xhp_attrs_only env ty =
+let from_class_xhp_attrs_only env (parents : Decl_heap.class_entries SMap.t) ty
+    =
   let (_, (_pos, class_name), _class_params) =
     Decl_utils.unwrap_class_type ty
   in
-  let class_type = Decl_env.get_class_dep env class_name in
-  match class_type with
+  match heap_entries env class_name parents with
   | None ->
     (* The class lives in PHP, we don't know anything about it *)
     empty
-  | Some class_ ->
+  | Some (class_, parent_members) ->
     (* The class lives in Hack *)
-    inherit_hack_xhp_attrs_only class_
+    inherit_hack_xhp_attrs_only class_ parent_members
 
-let from_parent env c =
+let from_parent env c (parents : Decl_heap.class_entries SMap.t) =
   let extends =
     (* In an abstract class or a trait, we assume the interfaces
      * will be implemented in the future, so we take them as
@@ -435,16 +495,18 @@ let from_parent env c =
     | Ast_defs.Ctrait -> c.sc_implements @ c.sc_extends @ c.sc_req_implements
     | _ -> c.sc_extends
   in
-  let inherited_l = List.map extends ~f:(from_class env c) in
+  let inherited_l = List.map extends ~f:(from_class env c parents) in
   List.fold_right ~f:add_inherited inherited_l ~init:empty
 
-let from_requirements env c acc reqs =
-  let inherited = from_class env c reqs in
+let from_requirements env c parents acc reqs =
+  let inherited = from_class env c parents reqs in
   let inherited = mark_as_synthesized inherited in
   add_inherited inherited acc
 
-let from_trait env c (acc, methods, smethods) uses =
-  let ({ ih_methods; ih_smethods; _ } as inherited) = from_class env c uses in
+let from_trait env c parents (acc, methods, smethods) uses =
+  let ({ ih_methods; ih_smethods; _ } as inherited) =
+    from_class env c parents uses
+  in
   let inherited =
     { inherited with ih_methods = SMap.empty; ih_smethods = SMap.empty }
   in
@@ -456,34 +518,41 @@ let from_trait env c (acc, methods, smethods) uses =
   let smethods = SMap.fold extend_methods ih_smethods smethods in
   (add_inherited inherited acc, methods, smethods)
 
-let from_xhp_attr_use env acc uses =
-  let inherited = from_class_xhp_attrs_only env uses in
+let from_xhp_attr_use env (parents : Decl_heap.class_entries SMap.t) acc uses =
+  let inherited = from_class_xhp_attrs_only env parents uses in
   add_inherited inherited acc
 
-let from_interface_constants env acc impls =
-  let inherited = from_class_constants_only env impls in
+let from_interface_constants
+    env (parents : Decl_heap.class_entries SMap.t) acc impls =
+  let inherited = from_class_constants_only env parents impls in
   add_inherited inherited acc
 
 (*****************************************************************************)
 (* The API to the outside *)
 (*****************************************************************************)
 
-let make env c =
+let make env c ~cache:(parents : Decl_heap.class_entries SMap.t) =
   (* members inherited from parent class ... *)
-  let (acc : inherited) = from_parent env c in
+  let (acc : inherited) = from_parent env c parents in
   let acc =
-    List.fold_left ~f:(from_requirements env c) ~init:acc c.sc_req_extends
+    List.fold_left
+      ~f:(from_requirements env c parents)
+      ~init:acc
+      c.sc_req_extends
   in
   (* ... are overridden with those inherited from used traits *)
   let (acc, methods, smethods) =
     List.fold_left
-      ~f:(from_trait env c)
+      ~f:(from_trait env c parents)
       ~init:(acc, SMap.empty, SMap.empty)
       c.sc_uses
   in
   let acc = collapse_trait_inherited methods smethods acc in
   let acc =
-    List.fold_left ~f:(from_xhp_attr_use env) ~init:acc c.sc_xhp_attr_uses
+    List.fold_left
+      ~f:(from_xhp_attr_use env parents)
+      ~init:acc
+      c.sc_xhp_attr_uses
   in
   (* todo: what about the same constant defined in different interfaces
    * we implement? We should forbid and say "constant already defined".
@@ -492,7 +561,7 @@ let make env c =
    *)
   let acc =
     List.fold_left
-      ~f:(from_interface_constants env)
+      ~f:(from_interface_constants env parents)
       ~init:acc
       c.sc_req_implements
   in
@@ -502,6 +571,12 @@ let make env c =
     | Some enum_type -> enum_type.te_includes
   in
   let acc =
-    List.fold_left ~f:(from_interface_constants env) ~init:acc included_enums
+    List.fold_left
+      ~f:(from_interface_constants env parents)
+      ~init:acc
+      included_enums
   in
-  List.fold_left ~f:(from_interface_constants env) ~init:acc c.sc_implements
+  List.fold_left
+    ~f:(from_interface_constants env parents)
+    ~init:acc
+    c.sc_implements

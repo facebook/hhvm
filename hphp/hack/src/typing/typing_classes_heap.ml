@@ -77,7 +77,7 @@ let make_lazy_class_type ctx class_name =
 
 let make_eager_class_type ctx class_name =
   match Decl_heap.Classes.get class_name with
-  | Some decl -> Some (Eager (Decl_class.to_class_type decl))
+  | Some decl -> Some (Eager (Decl_class.to_class_type (decl, None)))
   | None ->
     begin
       match Naming_provider.get_class_path ctx class_name with

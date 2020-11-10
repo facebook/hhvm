@@ -50,7 +50,7 @@ val declare_folded_class_in_file :
   Provider_context.t ->
   Relative_path.t ->
   string ->
-  Decl_defs.decl_class_type
+  Decl_defs.decl_class_type * Decl_heap.class_members option
 
 val declare_fun_in_file :
   write_shmem:bool ->

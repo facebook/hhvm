@@ -9,9 +9,13 @@
 
 (** Check if the class is already in the heap, and if not,
     declare it, its members and its ancestors and add them to
-    their respective shared heaps. *)
+    their respective shared heaps.
+    Return what has been added in the multiple heaps, i.e. the class
+    heap entry and the entries in the various member heaps. There is no
+    guarantee that it returns all the member heap entries for that class
+    as some might have already been added previously when decling the ancestors. *)
 val class_decl_if_missing :
   sh:SharedMem.uses ->
   Provider_context.t ->
   Nast.class_ ->
-  string * Decl_defs.decl_class_type
+  string * (Decl_defs.decl_class_type * Decl_heap.class_members option)

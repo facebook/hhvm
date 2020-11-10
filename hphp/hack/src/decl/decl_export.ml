@@ -74,7 +74,7 @@ let rec collect_legacy_class
             (* NOTE: the following relies on the fact that declaring a class puts
              * the inheritance hierarchy into the shared memory heaps. When that
              * invariant no longer holds, the following will no longer work. *)
-            let (_ : Decl_defs.decl_class_type) =
+            let (_ : _ * _) =
               Decl.declare_folded_class_in_file
                 ~sh:SharedMem.Uses
                 ctx

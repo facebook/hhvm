@@ -150,7 +150,7 @@ let test () =
   Test.assert_diagnostics loop_output bar107_cleared;
 
   (* Trigger next full recheck to get more global errors *)
-  let (env, loop_output) = Test.full_check env in
+  let (env, loop_output) = Test.full_check_status env in
   (* Notice that foo position is correct on line 5 *)
   Test.assert_diagnostics loop_output bar_108_foo_line_5_diagnostics;
 
@@ -164,7 +164,7 @@ let test () =
   let env = Test.wait env in
   let (env, loop_output) = Test.(run_loop_once env default_loop_input) in
   Test.assert_diagnostics loop_output bar106_cleared;
-  let (env, loop_output) = Test.full_check env in
+  let (env, loop_output) = Test.full_check_status env in
   (* Notice that foo position is back to line 3 *)
   Test.assert_diagnostics loop_output bar_109_foo_line_3_diagnostics;
   ignore env

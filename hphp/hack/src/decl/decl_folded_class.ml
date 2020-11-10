@@ -370,11 +370,11 @@ and class_decl
   let props =
     List.fold_left ~f:(prop_decl ~write_shmem:true c) ~init:props c.sc_props
   in
-  let m = inherited.Decl_inherit.ih_methods in
-  let (m, condition_types) =
+  let inherited_methods = inherited.Decl_inherit.ih_methods in
+  let (methods, condition_types) =
     List.fold_left
       ~f:(method_decl_acc ~write_shmem:true ~is_static:false c)
-      ~init:(m, SSet.empty)
+      ~init:(inherited_methods, SSet.empty)
       c.sc_methods
   in
   let consts = inherited.Decl_inherit.ih_consts in
@@ -396,14 +396,16 @@ and class_decl
       (typeconsts, consts)
   in
   let sclass_var = static_prop_decl ~write_shmem:true c in
-  let sprops = inherited.Decl_inherit.ih_sprops in
-  let sprops = List.fold_left c.sc_sprops ~f:sclass_var ~init:sprops in
-  let sm = inherited.Decl_inherit.ih_smethods in
-  let (sm, condition_types) =
+  let inherited_static_props = inherited.Decl_inherit.ih_sprops in
+  let static_props =
+    List.fold_left c.sc_sprops ~f:sclass_var ~init:inherited_static_props
+  in
+  let inherited_static_methods = inherited.Decl_inherit.ih_smethods in
+  let (static_methods, condition_types) =
     List.fold_left
       c.sc_static_methods
       ~f:(method_decl_acc ~write_shmem:true ~is_static:true c)
-      ~init:(sm, condition_types)
+      ~init:(inherited_static_methods, condition_types)
   in
   let parent_cstr = inherited.Decl_inherit.ih_cstr in
   let cstr = constructor_decl ~sh parent_cstr c in
@@ -495,9 +497,9 @@ and class_decl
       dc_consts = consts;
       dc_typeconsts = typeconsts;
       dc_props = props;
-      dc_sprops = sprops;
-      dc_methods = m;
-      dc_smethods = sm;
+      dc_sprops = static_props;
+      dc_methods = methods;
+      dc_smethods = static_methods;
       dc_construct = cstr;
       dc_ancestors = impl;
       dc_implements_dynamic = c.sc_implements_dynamic;

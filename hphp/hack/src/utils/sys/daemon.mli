@@ -7,10 +7,10 @@
  *
  *)
 
-(** Type-safe versions of the channels in Stdlib. *)
-
+(** Type-safe version of the in channel in Stdlib. *)
 type 'a in_channel
 
+(** Type-safe version of the out channel in Stdlib. *)
 type 'a out_channel
 
 type ('in_, 'out) channel_pair = 'in_ in_channel * 'out out_channel
@@ -45,7 +45,7 @@ val input_char : 'a in_channel -> char
 
 val input_value : 'a in_channel -> 'b
 
-(** Spawning new process *)
+(* Spawning new process *)
 
 (* In the absence of 'fork' on Windows, its usage must be restricted
    to Unix specifics parts.
@@ -61,13 +61,13 @@ val input_value : 'a in_channel -> 'b
 
  *)
 
-(* Alternate entry points *)
+(** Alternate entry points *)
 type ('param, 'input, 'output) entry
 
-(* Alternate entry points must be registered at toplevel, i.e.
-   every call to `Daemon.register_entry_point` must have been
-   evaluated when `Daemon.check_entry_point` is called at the
-   beginning of `ServerMain.start`. *)
+(** Alternate entry points must be registered at toplevel, i.e.
+     every call to `Daemon.register_entry_point` must have been
+     evaluated when `Daemon.check_entry_point` is called at the
+     beginning of `ServerMain.start`. *)
 val register_entry_point :
   string ->
   ('param -> ('input, 'output) channel_pair -> unit) ->
@@ -75,20 +75,20 @@ val register_entry_point :
 
 val name_of_entry : ('param, 'input, 'output) entry -> string
 
-(* Handler upon spawn and forked process. *)
+(** Handler upon spawn and forked process. *)
 type ('in_, 'out) handle = {
   channels: ('in_, 'out) channel_pair;
   pid: int;
 }
 
-(* for unit tests *)
+(** for unit tests *)
 val devnull : unit -> ('a, 'b) handle
 
 val fd_of_path : string -> Unix.file_descr
 
 val null_fd : unit -> Unix.file_descr
 
-(* Fork and run a function that communicates via the typed channels *)
+(** Fork and run a function that communicates via the typed channels *)
 val fork :
   ?channel_mode:[ `pipe | `socket ] ->
   (* Where the daemon's output should go *)
@@ -97,8 +97,8 @@ val fork :
   'param ->
   ('output, 'input) handle
 
-(* Spawn a new instance of the current process, and execute the
-   alternate entry point. *)
+(** Spawn a new instance of the current process, and execute the
+    alternate entry point. *)
 val spawn :
   ?channel_mode:[ `pipe | `socket ] ->
   ?name:string ->
@@ -108,13 +108,13 @@ val spawn :
   'param ->
   ('output, 'input) handle
 
-(* Close the typed channels associated to a 'spawned' child. *)
+(** Close the typed channels associated to a 'spawned' child. *)
 val close : ('a, 'b) handle -> unit
 
-(* Force quit the spawned child process and close the associated typed channels. *)
+(** Force quit the spawned child process and close the associated typed channels. *)
 val force_quit : ('a, 'b) handle -> unit
 
-(* Main function, that execute a alternate entry point.
-   It should be called only once. Just before the main entry point.
-   This function does not return when a custom entry point is selected. *)
+(** Main function, that executes an alternate entry point.
+    It should be called only once, just before the main entry point.
+    This function does not return when a custom entry point is selected. *)
 val check_entry_point : unit -> unit

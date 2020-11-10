@@ -9,9 +9,10 @@
 
 type pipe_from_server = Unix.file_descr
 
-let make_pipe_from_server fd = fd
+let make_pipe_from_server (fd : Unix.file_descr) : pipe_from_server = fd
 
-let read_from_server fd =
+let read_from_server (fd : pipe_from_server) :
+    MonitorRpc.server_to_monitor_message option =
   try
     let (readable, _, _) = Unix.select [fd] [] [] 0.0 in
     if readable = [] then
@@ -26,13 +27,15 @@ let read_from_server fd =
     Hh_logger.exc stack e;
     None
 
-let pipe_to_monitor_ref = ref None
+let pipe_to_monitor_ref : Unix.file_descr option ref = ref None
 
-let previous_message = ref None
+let previous_message : MonitorRpc.server_to_monitor_message option ref =
+  ref None
 
-let make_pipe_to_monitor fd = pipe_to_monitor_ref := Some fd
+let make_pipe_to_monitor (fd : Unix.file_descr) : unit =
+  pipe_to_monitor_ref := Some fd
 
-let send_to_monitor (msg : MonitorRpc.server_to_monitor_message) =
+let send_to_monitor (msg : MonitorRpc.server_to_monitor_message) : unit =
   match !pipe_to_monitor_ref with
   | None -> ()
   (* This function can be invoked in non-server code paths,

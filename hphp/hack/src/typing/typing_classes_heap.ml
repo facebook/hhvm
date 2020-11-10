@@ -101,9 +101,9 @@ let make_eager_class_type ctx class_name =
 
 let get (ctx : Provider_context.t) (class_name : string) : class_t option =
   (* Fetches either the [Lazy] class (if shallow decls are enabled)
-    or the [Eager] class (otherwise).
-    Note: Eager will always read+write to shmem Decl_heaps.
-    Lazy will solely go through the ctx provider. *)
+   * or the [Eager] class (otherwise).
+   * Note: Eager will always read+write to shmem Decl_heaps.
+   * Lazy will solely go through the ctx provider. *)
   try
     if TypecheckerOptions.shallow_class_decl (Provider_context.get_tcopt ctx)
     then

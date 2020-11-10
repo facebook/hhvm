@@ -130,7 +130,9 @@ let check_blocking () =
 
 let rec check_non_blocking env =
   if Queue.is_empty pending_queries then (
-    if ServerEnv.(is_full_check_done env.full_check) && !did_change_mergebase
+    if
+      ServerEnv.(is_full_check_done env.full_check_status)
+      && !did_change_mergebase
     then (
       Hh_logger.log
         "ServerRevisionTracker: Full check completed despite mergebase changes";

@@ -180,8 +180,9 @@ let rpc_with_retry
   let%lwt result = rpc args command ClientConnect.rpc_with_retry in
   Lwt.return result
 
-let rpc (args : ClientEnv.client_check_env) (command : 'a ServerCommandTypes.t)
-    : ('a * Telemetry.t) Lwt.t =
+let rpc
+    (args : ClientEnv.client_check_env) (command : 'result ServerCommandTypes.t)
+    : ('result * Telemetry.t) Lwt.t =
   rpc args command (fun conn_f ~desc command ->
       let%lwt conn = conn_f () in
       let%lwt (result, telemetry) = ClientConnect.rpc conn ~desc command in

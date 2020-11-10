@@ -108,7 +108,7 @@ val status :
   ServerEnv.env ->
   ServerEnv.env * (ServerCommandTypes.Server_status.t, 'a) loop_outputs
 
-val full_check : ServerEnv.env -> ServerEnv.env * ('a, unit) loop_outputs
+val full_check_status : ServerEnv.env -> ServerEnv.env * ('a, unit) loop_outputs
 
 val start_initial_full_check : ServerEnv.env -> ServerEnv.env * int
 

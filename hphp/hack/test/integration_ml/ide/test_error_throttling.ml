@@ -118,7 +118,7 @@ let test () =
     Test.fail "Expected diagnostics for baz.php";
 
   (* Trigger global recheck *)
-  let (env, loop_output) = Test.full_check env in
+  let (env, loop_output) = Test.full_check_status env in
   let diagnostics_map = get_diagnostics_map loop_output in
   let files_with_errors = get_files_with_errors diagnostics_map in
   SSet.iter files_with_errors ~f:print_endline;
@@ -136,5 +136,5 @@ let test () =
   Test.assert_diagnostics loop_output bar_10_clear_diagnostics;
 
   (* Trigger another global recheck to get more global errors *)
-  let (_, loop_output) = Test.full_check env in
+  let (_, loop_output) = Test.full_check_status env in
   Test.assert_diagnostics loop_output bar_107_diagnostics

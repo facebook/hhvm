@@ -414,7 +414,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
   | DISCONNECT -> (ServerFileSync.clear_sync_data env, ())
   | SUBSCRIBE_DIAGNOSTIC id ->
     let init =
-      if is_full_check_done env.full_check then
+      if is_full_check_done env.full_check_status then
         env.errorl
       else
         Errors.empty

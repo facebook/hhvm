@@ -422,7 +422,7 @@ let status ?(ignore_ide = false) ?(max_errors = None) ?(remote = false) env =
              (ServerCommandTypes.STATUS { ignore_ide; max_errors; remote }));
     }
 
-let full_check env =
+let full_check_status env =
   (* the empty string isn't just a test placeholder - when a file is deleted
      or renamed, the content is set to the empty string internally *)
   run_loop_once
@@ -437,13 +437,13 @@ let start_initial_full_check env =
   | ServerEnv.Initial_typechecking _ -> ()
   | _ -> assert false);
 
-  let (env, loop_output) = full_check env in
+  let (env, loop_output) = full_check_status env in
   (match env.ServerEnv.prechecked_files with
   | ServerEnv.Prechecked_files_ready _ -> ()
   | _ -> assert false);
 
   let { total_rechecked_count; _ } = loop_output in
-  (* full_check adds a dummy file to trigger a recheck, so we subtract one here
+  (* full_check_status adds a dummy file to trigger a recheck, so we subtract one here
      and return the number of rechecked non-dummy files. *)
   assert (total_rechecked_count >= 1);
   (env, total_rechecked_count - 1)

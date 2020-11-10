@@ -18,9 +18,9 @@ val read_from_server :
 
 (* Functions used by server *)
 
-(* This pipe is global per server process. There is only one monitor per server
- * lifetime, and the server wants to use this pipe in a lot of places where it's
- * annoying to thread it too *)
+(** This pipe is global per server process. There is only one monitor per server
+    lifetime, and the server wants to use this pipe in a lot of places where it's
+    annoying to thread it too *)
 val make_pipe_to_monitor : Unix.file_descr -> unit
 
 val send_to_monitor : MonitorRpc.server_to_monitor_message -> unit

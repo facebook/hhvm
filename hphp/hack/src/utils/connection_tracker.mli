@@ -6,8 +6,10 @@
  *
  *)
 
+(** Allow to record the timestamps on multiple connection events. *)
 type t
 
+(** The connection events whose timestamps we want to track. *)
 type key =
   | Client_start_connect  (** Client starts connection to monitor *)
   | Client_opened_socket  (** Has opened socket to monitor *)
@@ -41,12 +43,18 @@ type key =
   | Server_end_handle2  (** A bit more work; next up respond to client *)
   | Client_received_response  (** Received rpc response from server *)
 
+(** Create a connection tracker, which allows to record the timestamps
+    on multiple connection events. *)
 val create : unit -> t
 
+(** Get the unique ID of the tracker. *)
 val log_id : t -> string
 
+(** Add a timestampt to the tracker for event specified by [key]. *)
 val track : key:key -> ?time:float -> t -> t
 
+(** Get the timestamp corresponding to last [Server_start_handle] event. *)
 val get_server_unblocked_time : t -> float
 
+(** Retrieve all the timestamps recorded so far. *)
 val get_telemetry : t -> Telemetry.t

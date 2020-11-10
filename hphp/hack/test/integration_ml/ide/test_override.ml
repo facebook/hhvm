@@ -78,7 +78,7 @@ let test () =
   let (env, loop_output) = Test.(run_loop_once env default_loop_input) in
   Test.assert_no_diagnostics loop_output;
 
-  let (env, loop_output) = Test.full_check env in
+  let (env, loop_output) = Test.full_check_status env in
   Test.assert_env_errors env c_errors;
 
   Test.assert_diagnostics loop_output c_diagnostics;

@@ -11,6 +11,7 @@ open Hh_prelude
 type t = {
   id: string;
   telemetry: Telemetry.t;
+      (** A set of timestamps indexed by keys of type [key]. *)
   server_unblocked_time: float;
       (** this field is read by clientLsp: we store it explicitly
       here so we can read it, as well as inside the write-only Telemetry.t *)

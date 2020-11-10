@@ -573,15 +573,16 @@ module FullCheckKind : CheckKindType = struct
 
   let get_env_after_typing
       ~old_env ~errorl ~needs_phase2_redecl:_ ~needs_recheck ~diag_subscribe =
-    let (full_check, remote) =
+    let (full_check_status, remote) =
       if Relative_path.Set.is_empty needs_recheck then
         (Full_check_done, false)
       else
-        (old_env.full_check, old_env.remote)
+        (old_env.full_check_status, old_env.remote)
     in
     let why_needed_full_init =
       match old_env.init_env.why_needed_full_init with
-      | Some why_needed_full_init when not (is_full_check_done full_check) ->
+      | Some why_needed_full_init
+        when not (is_full_check_done full_check_status) ->
         Some why_needed_full_init
       | _ -> None
     in
@@ -596,7 +597,7 @@ module FullCheckKind : CheckKindType = struct
       errorl;
       needs_phase2_redecl = Relative_path.Set.empty;
       needs_recheck;
-      full_check;
+      full_check_status;
       remote;
       init_env = { old_env.init_env with why_needed_full_init };
       diag_subscribe;
@@ -691,8 +692,8 @@ module LazyCheckKind : CheckKindType = struct
   let get_env_after_typing
       ~old_env ~errorl ~needs_phase2_redecl ~needs_recheck ~diag_subscribe =
     (* If it was started, it's still started, otherwise it needs starting *)
-    let full_check =
-      match old_env.full_check with
+    let full_check_status =
+      match old_env.full_check_status with
       | Full_check_started -> Full_check_started
       | _ -> Full_check_needed
     in
@@ -708,7 +709,7 @@ module LazyCheckKind : CheckKindType = struct
       ide_needs_parsing = Relative_path.Set.empty;
       needs_phase2_redecl;
       needs_recheck;
-      full_check;
+      full_check_status;
       diag_subscribe;
     }
 
@@ -1113,7 +1114,7 @@ functor
       let telemetry = Telemetry.create () in
       let env =
         if CheckKind.is_full then
-          { env with full_check = Full_check_started }
+          { env with full_check_status = Full_check_started }
         else
           env
       in
@@ -1754,7 +1755,7 @@ let type_check_unsafe genv env kind start_time profiling =
       |> Telemetry.duration ~key:"core_end" ~start_time
       |> Telemetry.object_ ~key:"core" ~value:core_telemetry
     in
-    ( if is_full_check_done env.full_check then
+    ( if is_full_check_done env.full_check_status then
       let total = Errors.count env.ServerEnv.errorl in
       let (is_truncated, shown) =
         match env.ServerEnv.diag_subscribe with

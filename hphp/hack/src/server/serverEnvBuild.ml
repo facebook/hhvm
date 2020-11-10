@@ -316,14 +316,14 @@ let make_env ~init_id ~deps_mode config =
     needs_recheck = Relative_path.Set.empty;
     full_recheck_on_file_changes = Not_paused;
     remote = false;
-    full_check = Full_check_done;
+    full_check_status = Full_check_done;
     changed_files = Relative_path.Set.empty;
     prechecked_files = Prechecked_files_disabled;
     can_interrupt = true;
     interrupt_handlers = (fun _ _ -> []);
     pending_command_needs_writes = None;
     persistent_client_pending_command_needs_full_check = None;
-    default_client_pending_command_needs_full_check = None;
+    nonpersistent_client_pending_command_needs_full_check = None;
     init_env =
       {
         approach_name = "";

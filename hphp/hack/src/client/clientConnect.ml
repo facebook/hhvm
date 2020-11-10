@@ -136,8 +136,8 @@ let check_for_deadline deadline_opt =
     raise Exit_status.(Exit_with Out_of_time)
   | _ -> ()
 
-(* Sleeps until the server sends a message. While waiting, prints out spinner
- * and progress information using the argument callback. *)
+(** Sleeps until the server sends a message. While waiting, prints out spinner
+    and progress information using the argument callback. *)
 let rec wait_for_server_message
     ~(connection_log_id : string)
     ~(expected_message : 'a ServerCommandTypes.message_type option)

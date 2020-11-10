@@ -12,7 +12,7 @@ open ServerCommandTypes
 
 exception Client_went_away
 
-(* default pipe, priority pipe, force formant start only pipe *)
+(** default pipe, priority pipe, force formant start only pipe *)
 type t = Unix.file_descr * Unix.file_descr * Unix.file_descr
 
 type priority =
@@ -27,15 +27,11 @@ type client =
       priority: priority;
       mutable tracker: Connection_tracker.t;
     }
+      (** In practice this is hh_client. There can be multiple non-persistent clients. *)
   | Persistent_client of {
       fd: Unix.file_descr;
       mutable tracker: Connection_tracker.t;
-    }
-
-type select_outcome =
-  | Select_persistent
-  | Select_new of client
-  | Select_nothing
+    }  (** In practice this is the IDE. There is only one persistent client. *)
 
 let provider_from_file_descriptors x = x
 
@@ -77,7 +73,14 @@ let select ~idle_gc_slice fd_list timeout =
     ready_fds
   | ready_fds -> ready_fds
 
-(* sleep_and_check: waits up to 0.1 seconds and returns what to read from. *)
+type select_outcome =
+  | Select_persistent
+  | Select_new of client
+  | Select_nothing
+
+(** Waits up to 0.1 seconds and checks for new connection attempts.
+    Select what client to serve next and call
+    retrieve channels to client from monitor process. *)
 let sleep_and_check
     ((default_in_fd, priority_in_fd, force_dormant_start_only) :
       Unix.file_descr * Unix.file_descr * Unix.file_descr)
@@ -88,13 +91,13 @@ let sleep_and_check
     =
   let t_sleep_and_check = Unix.gettimeofday () in
   let in_fds = [default_in_fd; priority_in_fd; force_dormant_start_only] in
-  let l =
+  let fd_l =
     match (kind, persistent_client_opt) with
     | (`Force_dormant_start_only, _) -> [force_dormant_start_only]
     | (`Priority, _) -> [priority_in_fd]
     | (`Any, Some (Persistent_client { fd; _ })) ->
       (* If we are not sure that there are no more IDE commands, do not even
-       * look at non-persistent client to avoid race conditions.*)
+       * look at non-persistent client to avoid race conditions. *)
       if not ide_idle then
         [fd]
       else
@@ -106,7 +109,7 @@ let sleep_and_check
       assert false
     | (`Any, None) -> in_fds
   in
-  let ready_fd_l = select ~idle_gc_slice l 0.1 in
+  let ready_fd_l = select ~idle_gc_slice fd_l 0.1 in
   let t_monitor_fd_ready = Unix.gettimeofday () in
   (* Prioritize existing persistent client requests over command line ones *)
   let is_persistent fd =

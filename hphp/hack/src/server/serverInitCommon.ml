@@ -265,7 +265,7 @@ let type_check
             needs_recheck =
               Relative_path.Set.union env.needs_recheck needs_recheck;
             (* eagerly start rechecking after init *)
-            full_check = Full_check_started;
+            full_check_status = Full_check_started;
             init_env =
               { env.init_env with why_needed_full_init = Some init_telemetry };
           }

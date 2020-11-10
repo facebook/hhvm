@@ -30,8 +30,8 @@ let make_tmp_dir () =
   Relative_path.set_path_prefix Relative_path.Tmp tmpdir
 
 (** Main method of the server monitor daemon. The daemon is responsible for
- * listening to socket requests from hh_client, checking Build ID, and relaying
- * requests to the typechecker process. *)
+    listening to socket requests from hh_client, checking Build ID, and relaying
+    requests to the typechecker process. *)
 let monitor_daemon_main
     (options : ServerArgs.options) ~(proc_stack : string list) =
   let www_root = ServerArgs.root options in
@@ -156,7 +156,7 @@ let start_daemon (options : ServerArgs.options) ~(proc_stack : string list) :
   Exit_status.No_error
 
 (** Either starts a monitor daemon (which will spawn a typechecker daemon),
- * or just runs the typechecker if detachment not enabled. *)
+    or just runs the typechecker if detachment not enabled. *)
 let start () =
   (* TODO: Catch all exceptions that make it this high, log them, and exit with
    * the proper code *)

@@ -254,7 +254,7 @@ let handle_connection_ genv env client =
       in
       (* If the client connected in the middle of recheck, let them know it's
        * happening. *)
-      if is_full_check_started env.full_check then
+      if is_full_check_started env.full_check_status then
         ServerBusyStatus.send
           env
           (ServerCommandTypes.Doing_global_typecheck
@@ -431,8 +431,8 @@ let rec recheck_until_no_changes_left acc genv env select_outcome profiling =
       else
         `Skip
     (* Do not process any disk changes when there are pending persistent
-    * client requests - some of them might be edits, and we don't want to
-    * do analysis on mid-edit state of the world *)
+     * client requests - some of them might be edits, and we don't want to
+     * do analysis on mid-edit state of the world *)
     | ClientProvider.Select_persistent -> `Skip
   in
   let (env, updates, updates_stale, query_telemetry) =
@@ -463,16 +463,17 @@ let rec recheck_until_no_changes_left acc genv env select_outcome profiling =
       match env.full_recheck_on_file_changes with
       | Paused _ ->
         let () = Hh_logger.log "Skipping full check due to `hh --pause`" in
-        { env with disk_needs_parsing; full_check = Full_check_needed }
-      | _ -> { env with disk_needs_parsing; full_check = Full_check_started }
+        { env with disk_needs_parsing; full_check_status = Full_check_needed }
+      | _ ->
+        { env with disk_needs_parsing; full_check_status = Full_check_started }
   in
   let telemetry = Telemetry.duration telemetry ~key:"got_updates" ~start_time in
   let env =
-    match env.default_client_pending_command_needs_full_check with
+    match env.nonpersistent_client_pending_command_needs_full_check with
     (* We need to auto-restart the recheck to make progress towards handling
      * this command... *)
     | Some (_command, reason, client)
-      when is_full_check_needed env.full_check
+      when is_full_check_needed env.full_check_status
            (*... but we don't want to get into a battle with IDE edits stopping
             * rechecks and us restarting them. We're going to heavily favor edits and
             * restart only after a longer period since last edit. Note that we'll still
@@ -486,19 +487,22 @@ let rec recheck_until_no_changes_left acc genv env select_outcome profiling =
       in
       if still_there then (
         Hh_logger.log "Restarting full check due to %s" reason;
-        { env with full_check = Full_check_started }
+        { env with full_check_status = Full_check_started }
       ) else (
         ClientProvider.shutdown_client client;
-        { env with default_client_pending_command_needs_full_check = None }
+        {
+          env with
+          nonpersistent_client_pending_command_needs_full_check = None;
+        }
       )
     | _ -> env
   in
   (* Same as above, but for persistent clients *)
   let env =
     match env.persistent_client_pending_command_needs_full_check with
-    | Some (_command, reason) when is_full_check_needed env.full_check ->
+    | Some (_command, reason) when is_full_check_needed env.full_check_status ->
       Hh_logger.log "Restarting full check due to %s" reason;
-      { env with full_check = Full_check_started }
+      { env with full_check_status = Full_check_started }
     | _ -> env
   in
   let telemetry =
@@ -506,11 +510,12 @@ let rec recheck_until_no_changes_left acc genv env select_outcome profiling =
   in
   (* We have some new, or previously un-processed updates *)
   let full_check =
-    is_full_check_started env.full_check
+    is_full_check_started env.full_check_status
     (* Prioritize building search index over full rechecks. *)
     && ( Queue.is_empty SearchServiceRunner.SearchServiceRunner.queue
        (* Unless there is something actively waiting for this *)
-       || Option.is_some env.default_client_pending_command_needs_full_check )
+       || Option.is_some
+            env.nonpersistent_client_pending_command_needs_full_check )
   in
   let lazy_check =
     (not @@ Relative_path.Set.is_empty env.ide_needs_parsing) && is_idle
@@ -613,10 +618,11 @@ let main_loop_command_handler client_kind client result =
       | `Non_persistent ->
         (* We should not accept any new clients until this is cleared *)
         assert (
-          Option.is_none env.default_client_pending_command_needs_full_check );
+          Option.is_none
+            env.nonpersistent_client_pending_command_needs_full_check );
         {
           env with
-          default_client_pending_command_needs_full_check =
+          nonpersistent_client_pending_command_needs_full_check =
             Some (f, reason, client);
         }
       | `Persistent ->
@@ -651,9 +657,9 @@ let generate_and_update_recheck_id env =
 let serve_one_iteration genv env client_provider =
   let (env, recheck_id) = generate_and_update_recheck_id env in
   ServerMonitorUtils.exit_if_parent_dead ();
-  let client_kind =
+  let acceptable_new_client_kind =
     let has_default_client_pending =
-      Option.is_some env.default_client_pending_command_needs_full_check
+      Option.is_some env.nonpersistent_client_pending_command_needs_full_check
     in
     let can_accept_clients = not @@ ServerRevisionTracker.is_hg_updating () in
     match (can_accept_clients, has_default_client_pending) with
@@ -666,8 +672,8 @@ let serve_one_iteration genv env client_provider =
     | (false, true) -> None
     | (false, false) -> Some `Force_dormant_start_only
   in
-  let select_outcome =
-    match client_kind with
+  let selected_client =
+    match acceptable_new_client_kind with
     | None -> ClientProvider.Select_nothing
     | Some client_kind ->
       ClientProvider.sleep_and_check
@@ -679,27 +685,27 @@ let serve_one_iteration genv env client_provider =
   in
 
   (* We'll now update any waiting clients with our status.
-  (Or more precisely, we'll tell the monitor, so any waiting clients
-  will know when next they poll the monitor.)
-
-  By updating status now at the start of the serve_one_iteration,
-  it means there's no obligation on the "doing work" part of the previous
-  iteration to clean up its own status-reporting once done.
-  Caveat: that's not quite true, since ClientProvider.sleep_and_check will
-  wait up to 1s if there are no pending requests. So theoretically we
-  won't update our status for up to 1s after the previous work is done.
-  That doesn't really matter, since (1) if there are no pending requests
-  then no client will even ask for status, and (2) it's worth it to
-  keep the code clean and simple.
-
-  Note: the message here might soon be replaced. If we discover disk changes
-  that prompt a typecheck, then typechecking sends its own status updates.
-  And if the select_outcome was a request, then once we discover the nature
-  of that request then ServerCommand.handle will send its own status updates too.
-  *)
+   * (Or more precisely, we'll tell the monitor, so any waiting clients
+   * will know when they poll the monitor.)
+   *
+   * By updating status now at the start of the serve_one_iteration,
+   * it means there's no obligation on the "doing work" part of the previous
+   * iteration to clean up its own status-reporting once done.
+   * Caveat: that's not quite true, since ClientProvider.sleep_and_check will
+   * wait up to 1s if there are no pending requests. So theoretically we
+   * won't update our status for up to 1s after the previous work is done.
+   * That doesn't really matter, since (1) if there are no pending requests
+   * then no client will even ask for status, and (2) it's worth it to
+   * keep the code clean and simple.
+   *
+   * Note: the message here might soon be replaced. If we discover disk changes
+   * that prompt a typecheck, then typechecking sends its own status updates.
+   * And if the selected_client was a request, then once we discover the nature
+   * of that request then ServerCommand.handle will send its own status updates too.
+   *)
   ServerProgress.send_to_monitor
     (MonitorRpc.PROGRESS
-       (match select_outcome with
+       (match selected_client with
        | ClientProvider.Select_nothing ->
          if env.ide_idle then
            "ready"
@@ -707,7 +713,7 @@ let serve_one_iteration genv env client_provider =
            "HackIDE:active"
        | _ -> "working"));
   let env =
-    match select_outcome with
+    match selected_client with
     | ClientProvider.Select_nothing ->
       let last_stats = env.last_recheck_loop_stats in
       (* Ugly hack: We want GC_SHAREDMEM_RAN to record the last rechecked
@@ -735,9 +741,9 @@ let serve_one_iteration genv env client_provider =
       `Recheck
   in
   HackEventLogger.with_id ~stage recheck_id @@ fun () ->
-  (* We'll first do "recheck_loop" to handle all outstanding changes, so that *)
-  (* after that we'll be able to give an up-to-date answer to the client. *)
-  (* Except: this might be stopped early in some cases, e.g. IDE checks. *)
+  (* We'll first do "recheck_until_no_changes_left" to handle all outstanding changes, so that
+   * after that we'll be able to give an up-to-date answer to the client.
+   * Except: this might be stopped early in some cases, e.g. IDE checks. *)
   let t_start_recheck = Unix.gettimeofday () in
   let (recheck_loop_mem_stats, (stats, env)) =
     CgroupProfiler.profile_memory
@@ -747,7 +753,7 @@ let serve_one_iteration genv env client_provider =
            (empty_recheck_loop_stats ~recheck_id)
            genv
            env
-           select_outcome)
+           selected_client)
   in
   CgroupProfiler.print_summary_memory_table recheck_loop_mem_stats;
   let t_done_recheck = Unix.gettimeofday () in
@@ -812,14 +818,14 @@ let serve_one_iteration genv env client_provider =
   end;
 
   let env =
-    match select_outcome with
+    match selected_client with
     | ClientProvider.Select_persistent -> env
     | ClientProvider.Select_nothing -> env
     | ClientProvider.Select_new client ->
       begin
         try
-          (* client here is the new client (not the existing persistent client) *)
-          (* whose request we're going to handle.                               *)
+          (* client here is the new client (not the existing persistent client)
+           * whose request we're going to handle. *)
           ClientProvider.track
             client
             ~key:Connection_tracker.Server_start_recheck
@@ -887,14 +893,18 @@ let serve_one_iteration genv env client_provider =
   in
   let env =
     match env.persistent_client_pending_command_needs_full_check with
-    | Some (f, _reason) when is_full_check_done env.full_check ->
+    | Some (f, _reason) when is_full_check_done env.full_check_status ->
       { (f env) with persistent_client_pending_command_needs_full_check = None }
     | _ -> env
   in
   let env =
-    match env.default_client_pending_command_needs_full_check with
-    | Some (f, _reason, _client) when is_full_check_done env.full_check ->
-      { (f env) with default_client_pending_command_needs_full_check = None }
+    match env.nonpersistent_client_pending_command_needs_full_check with
+    | Some (f, _reason, _client) when is_full_check_done env.full_check_status
+      ->
+      {
+        (f env) with
+        nonpersistent_client_pending_command_needs_full_check = None;
+      }
     | _ -> env
   in
   env
@@ -955,7 +965,7 @@ let priority_client_interrupt_handler genv client_provider env =
       | ClientProvider.Select_persistent ->
         failwith "should only be looking at new priority clients"
       | ClientProvider.Select_nothing ->
-        (* This is possible because client might have went away during
+        (* This is possible because client might have gone away during
          * sleep_and_check. *)
         env
       | ClientProvider.Select_new client ->
@@ -1016,8 +1026,8 @@ let persistent_client_interrupt_handler genv env =
         },
         MultiThreadedCall.Continue )
     | ServerUtils.Needs_writes (env, f, should_restart_recheck, _) ->
-      let full_check =
-        match env.full_check with
+      let full_check_status =
+        match env.full_check_status with
         | Full_check_started when not should_restart_recheck ->
           Full_check_needed
         | x -> x
@@ -1025,7 +1035,7 @@ let persistent_client_interrupt_handler genv env =
       (* this should not be possible, because persistent client will not send
        * the next command before receiving results from the previous one *)
       assert (Option.is_none env.pending_command_needs_writes);
-      ( { env with pending_command_needs_writes = Some f; full_check },
+      ( { env with pending_command_needs_writes = Some f; full_check_status },
         MultiThreadedCall.Cancel )
     | ServerUtils.Done env -> (env, MultiThreadedCall.Continue))
 

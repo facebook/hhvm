@@ -56,14 +56,14 @@ let handle_prechecked_files ctx genv env dep f =
   let dep = Typing_deps.DepSet.singleton deps_mode dep in
   (* All the callers of this should be listed in ServerCommand.rpc_command_needs_full_check,
    * and server should never call this before completing full check *)
-  assert (is_full_check_done env.full_check);
+  assert (is_full_check_done env.full_check_status);
   let start_time = Unix.gettimeofday () in
   let (env, _telemetry) =
     ServerPrecheckedFiles.update_after_local_changes genv env dep ~start_time
   in
   (* If we added more things to recheck, we can't handle this command now, and
    * tell the client to retry instead. *)
-  if is_full_check_done env.full_check then
+  if is_full_check_done env.full_check_status then
     let () = Hh_logger.debug "ServerFindRefs.handle_prechecked_files: Done" in
     let callback_result = f () in
     (env, Done callback_result)

@@ -8,14 +8,11 @@
  *)
 
 type monitor_config = {
-  (* The socket file on which the monitor is listening for connections. *)
   socket_file: string;
-  (* This lock is held when a monitor is alive. *)
-  lock_file: string;
-  (* The path to the server log file *)
-  server_log_file: string;
-  (* The path to the monitor log file *)
-  monitor_log_file: string;
+      (** The socket file on which the monitor is listening for connections. *)
+  lock_file: string;  (** This lock is held when a monitor is alive. *)
+  server_log_file: string;  (** The path to the server log file *)
+  monitor_log_file: string;  (** The path to the monitor log file *)
 }
 
 (* In an Informant-directed restart, Watchman provided a new

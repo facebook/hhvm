@@ -81,7 +81,7 @@ let test () =
   let env = Test.open_file env foo_name ~contents:foo_returns_string in
   let env = Test.open_file env baz_name ~contents:baz_contents in
   let env = Test.wait env in
-  let (env, _) = Test.full_check env in
+  let (env, _) = Test.full_check_status env in
   let (env, loop_output) = Test.status env in
   Test.assert_error_count loop_output ~expected_count:4;
   let (env, loop_output) = Test.status ~max_errors:(Some 2) env in

@@ -26,13 +26,12 @@ let rec wait_for_rpc_response stack fd state callback =
   with e -> Lwt.return (Error (state, stack, e))
 
 (** Sends a message over the given `out_channel`, then listens for incoming
-messages - either an exception which it raises, or a push which it dispatches
-via the supplied callback, or a response which it returns.
+    messages - either an exception which it raises, or a push which it dispatches
+    via the supplied callback, or a response which it returns.
 
-Note: although this function returns a promise, it is not safe to call this
-function multiple times in parallel, since they are writing to the same output
-channel, and the server is not equipped to serve parallel requests anyways.
-*)
+    Note: although this function returns a promise, it is not safe to call this
+    function multiple times in parallel, since they are writing to the same output
+    channel, and the server is not equipped to serve parallel requests anyways. *)
 let rpc_persistent :
     type a s.
     Timeout.in_channel * Out_channel.t ->

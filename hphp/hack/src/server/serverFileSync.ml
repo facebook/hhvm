@@ -63,7 +63,9 @@ let open_file ~predeclare env path content =
     File_provider.remove_batch (Relative_path.Set.singleton path);
     File_provider.provide_file path (File_provider.Ide content);
     let (ide_needs_parsing, diag_subscribe) =
-      if String.equal content prev_content && is_full_check_done env.full_check
+      if
+        String.equal content prev_content
+        && is_full_check_done env.full_check_status
       then
         (* Try to avoid telling the user that a check is needed when the file
          * was unchanged. But even in this case, we might need to push

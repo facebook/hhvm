@@ -69,5 +69,5 @@ let test () =
   Test.assert_no_diagnostics loop_outputs;
 
   (* Asking for global error list will trigger recheck of bar.php *)
-  let (_, loop_outputs) = Test.full_check env in
+  let (_, loop_outputs) = Test.full_check_status env in
   Test.assert_diagnostics loop_outputs full_diagnostics

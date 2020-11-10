@@ -12,6 +12,7 @@ module type S = sig
 
   type client
 
+  (** What client to select next. *)
   type select_outcome =
     | Select_persistent
     | Select_new of client
@@ -24,6 +25,9 @@ module type S = sig
 
   val provider_for_test : unit -> t
 
+  (** Wait up to 0.1 seconds and checks for new connection attempts.
+      Select what client to serve next and retrieve channels to
+      client from monitor process (connection hand-off). *)
   val sleep_and_check :
     t ->
     (* Optional persistent client. *)

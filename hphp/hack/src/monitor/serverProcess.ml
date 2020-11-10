@@ -8,14 +8,13 @@
  *)
 
 type process_data = {
-  (* Process ID. *)
-  pid: int;
+  pid: int;  (** Process ID. *)
   finale_file: string;
   start_t: float;
-  (* Get occasional updates about status/busyness from typechecker here. *)
   in_fd: Unix.file_descr;
-  (* Send client's File Descriptors to the typechecker over this. *)
+      (** Get occasional updates about status/busyness from typechecker here. *)
   out_fds: (string * Unix.file_descr) list;
+      (** Send client's File Descriptors to the typechecker over this. *)
   last_request_handoff: float ref;
 }
 

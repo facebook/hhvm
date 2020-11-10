@@ -8,10 +8,9 @@
  *)
 
 type report =
-  (* Nothing to see here. *)
-  | Move_along
-  (* Kill the server (if one is running) and start a new one. *)
+  | Move_along  (** Nothing to see here. *)
   | Restart_server of ServerMonitorUtils.target_saved_state option
+      (** Kill the server (if one is running) and start a new one. *)
 
 type server_state =
   | Server_not_yet_started
@@ -19,12 +18,12 @@ type server_state =
   | Server_dead
 
 (** The informant collects information to tell the monitor when to
- * intelligently kill and restart the server daemon.
- *
- * For example: An informant may want to watch the repo state and tell
- * the monitor to restart the server when a significant change in
- * repo revision occurs since a fresh initialization could be faster
- * than an incremental type check. *)
+    intelligently kill and restart the server daemon.
+
+    For example: An informant may want to watch the repo state and tell
+    the monitor to restart the server when a significant change in
+    repo revision occurs since a fresh initialization could be faster
+    than an incremental type check. *)
 module type S = sig
   type t
 

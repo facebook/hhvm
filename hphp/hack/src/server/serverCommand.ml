@@ -121,7 +121,7 @@ let commands_needs_writes = function
 
 let full_recheck_if_needed' genv env reason profiling =
   if
-    ServerEnv.(is_full_check_done env.full_check)
+    ServerEnv.(is_full_check_done env.full_check_status)
     && Relative_path.Set.is_empty env.ServerEnv.ide_needs_parsing
   then
     env
@@ -133,7 +133,7 @@ let full_recheck_if_needed' genv env reason profiling =
       ServerTypeCheck.(type_check genv env Full_check start_time profiling)
     in
     let env = { env with ServerEnv.can_interrupt = true } in
-    assert (ServerEnv.(is_full_check_done env.full_check));
+    assert (ServerEnv.(is_full_check_done env.full_check_status));
     env
 
 let force_remote = function
@@ -264,8 +264,8 @@ let actually_handle genv client msg full_recheck_needed ~is_stale env =
   @@ fun () ->
   Errors.ignore_ @@ fun () ->
   assert (
-    (not full_recheck_needed) || ServerEnv.(is_full_check_done env.full_check)
-  );
+    (not full_recheck_needed)
+    || ServerEnv.(is_full_check_done env.full_check_status) );
 
   (* There might be additional rechecking required when there are unsaved IDE
    * changes and we asked for an answer that requires ignoring those.
@@ -362,7 +362,7 @@ let handle
      * by time sensitivie queries (like autocomplete). There is a constant cost
      * to stopping and resuming the global typechecking jobs, which leads to
      * flaky experience. To avoid this, we don't restart the global rechecking
-     * after IDE edits - you need to save the file againg to restart it. *)
+     * after IDE edits - you need to save the file again to restart it. *)
     ServerUtils.Needs_writes
       ( env,
         continuation,

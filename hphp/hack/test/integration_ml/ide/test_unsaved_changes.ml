@@ -65,14 +65,14 @@ let test () =
 
   let env = Test.connect_persistent_client env in
   let env = Test.open_file env foo_name ~contents:foo_takes_string_contents in
-  let (env, _) = Test.full_check env in
+  let (env, _) = Test.full_check_status env in
   let (env, loop_output) = Test.status env in
   Test.assert_status loop_output ide_diagnostics;
 
   let (env, loop_output) = Test.status ~ignore_ide:true env in
   Test.assert_status loop_output disk_diagnostics;
 
-  let (env, _) = Test.full_check env in
+  let (env, _) = Test.full_check_status env in
   let (env, loop_output) = Test.status ~ignore_ide:false env in
   Test.assert_status loop_output ide_diagnostics;
   ignore env

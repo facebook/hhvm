@@ -172,7 +172,8 @@ struct
     setup_autokill_server_on_exit server_process;
     Alive server_process
 
-  let maybe_start_first_server options informant =
+  let maybe_start_first_server options informant : ServerProcess.server_process
+      =
     if Informant.should_start_first_server informant then (
       Hh_logger.log "Starting first server";
       HackEventLogger.starting_first_server ();
@@ -277,33 +278,7 @@ struct
     else
       Hh_json.JSON_Object [("client_version", Hh_json.JSON_String s)]
 
-  let rec handle_monitor_rpc env client_fd =
-    let cmd : MonitorRpc.command =
-      Marshal_tools.from_fd_with_preamble client_fd
-    in
-    match cmd with
-    | MonitorRpc.HANDOFF_TO_SERVER (tracker, handoff_options) ->
-      let tracker =
-        Connection_tracker.(track tracker ~key:Monitor_received_handoff)
-      in
-      client_prehandoff
-        ~tracker
-        ~is_purgatory_client:false
-        env
-        handoff_options
-        client_fd
-    | MonitorRpc.SHUT_DOWN tracker ->
-      log "Got shutdown RPC. Shutting down." ~tracker;
-      let kill_signal_time = Unix.gettimeofday () in
-      kill_server_with_check env.server;
-      wait_for_server_exit_with_check env.server kill_signal_time;
-      Exit.exit Exit_status.No_error
-    | MonitorRpc.SERVER_PROGRESS _tracker ->
-      msg_to_channel client_fd (env.server_progress, env.server_progress_warning);
-      Unix.close client_fd;
-      env
-
-  and hand_off_client_connection ~tracker server_fd client_fd =
+  let hand_off_client_connection ~tracker server_fd client_fd =
     let status = Libancillary.ancil_send_fd server_fd client_fd in
     if status = 0 then begin
       let tracker = Connection_tracker.(track tracker ~key:Monitor_sent_fd) in
@@ -316,7 +291,7 @@ struct
 
   (* Sends the client connection FD to the server process then closes the
    * FD. *)
-  and hand_off_client_connection_with_retries
+  let rec hand_off_client_connection_with_retries
       ~tracker server_fd retries client_fd =
     let (_, ready_l, _) = Unix.select [] [server_fd] [] 0.5 in
     if not (List.is_empty ready_l) then
@@ -349,7 +324,7 @@ struct
     )
 
   (* Does not return. *)
-  and client_out_of_date_ client_fd mismatch_info =
+  let client_out_of_date_ client_fd mismatch_info =
     msg_to_channel client_fd (Build_id_mismatch_ex mismatch_info);
     HackEventLogger.out_of_date ()
 
@@ -359,7 +334,7 @@ struct
    * the client can wait for socket closure as indication that both the monitor
    * and server have exited.
    *)
-  and client_out_of_date env client_fd mismatch_info =
+  let client_out_of_date env client_fd mismatch_info =
     Hh_logger.log "Client out of date. Killing server.";
     kill_server_with_check env.server;
     let kill_signal_time = Unix.gettimeofday () in
@@ -373,9 +348,9 @@ struct
     wait_for_server_exit_with_check env.server kill_signal_time;
     Exit.exit Exit_status.Build_id_mismatch
 
-  (* Send (possibly empty) sequences of messages before handing off to
-   * server. *)
-  and client_prehandoff
+  (** Send (possibly empty) sequences of messages before handing off to
+      server. *)
+  let rec client_prehandoff
       ~tracker ~is_purgatory_client env handoff_options client_fd =
     let module PH = Prehandoff in
     match env.server with
@@ -465,7 +440,33 @@ struct
         in
         env
 
-  and ack_and_handoff_client env client_fd =
+  let handle_monitor_rpc env client_fd =
+    let cmd : MonitorRpc.command =
+      Marshal_tools.from_fd_with_preamble client_fd
+    in
+    match cmd with
+    | MonitorRpc.HANDOFF_TO_SERVER (tracker, handoff_options) ->
+      let tracker =
+        Connection_tracker.(track tracker ~key:Monitor_received_handoff)
+      in
+      client_prehandoff
+        ~tracker
+        ~is_purgatory_client:false
+        env
+        handoff_options
+        client_fd
+    | MonitorRpc.SHUT_DOWN tracker ->
+      log "Got shutdown RPC. Shutting down." ~tracker;
+      let kill_signal_time = Unix.gettimeofday () in
+      kill_server_with_check env.server;
+      wait_for_server_exit_with_check env.server kill_signal_time;
+      Exit.exit Exit_status.No_error
+    | MonitorRpc.SERVER_PROGRESS _tracker ->
+      msg_to_channel client_fd (env.server_progress, env.server_progress_warning);
+      Unix.close client_fd;
+      env
+
+  let ack_and_handoff_client env client_fd =
     try
       let json = read_version client_fd in
       let client_version =
@@ -488,7 +489,7 @@ struct
       Hh_logger.log "Malformed Build ID - %s" (Exception.to_string e);
       Exception.reraise e
 
-  and push_purgatory_clients env =
+  let push_purgatory_clients env =
     (* We create a queue and transfer all the purgatory clients to it before
      * processing to avoid repeatedly retrying the same client even after
      * an EBADF. Control flow is easier this way than trying to manage an
@@ -518,7 +519,7 @@ struct
     in
     env
 
-  and maybe_push_purgatory_clients env =
+  let maybe_push_purgatory_clients env =
     match (env.server, Queue.length env.purgatory_clients) with
     | (Alive _, 0) -> env
     | (Died_config_changed, _) ->

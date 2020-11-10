@@ -84,7 +84,7 @@ let update_after_recheck genv env rechecked ~start_time =
   in
   let env = update_rechecked_files env rechecked in
   let telemetry = Telemetry.duration telemetry ~key:"end" ~start_time in
-  match (env.full_check, env.prechecked_files) with
+  match (env.full_check_status, env.prechecked_files) with
   | ( Full_check_done,
       Initial_typechecking
         {
@@ -112,7 +112,7 @@ let update_after_recheck genv env rechecked ~start_time =
       if size = 0 then
         env
       else
-        let full_check = Full_check_started in
+        let full_check_status = Full_check_started in
         let why_needed_full_init =
           Some
             ( Telemetry.create ()
@@ -123,7 +123,7 @@ let update_after_recheck genv env rechecked ~start_time =
                  ~value:env.init_env.why_needed_full_init )
         in
         let init_env = { env.init_env with why_needed_full_init } in
-        { env with init_env; full_check }
+        { env with init_env; full_check_status }
     in
     let clean_local_deps = dirty_local_deps in
     let dirty_local_deps = Typing_deps.DepSet.make deps_mode in
@@ -206,12 +206,12 @@ let update_after_local_changes genv env changes ~start_time =
           if size = 0 then
             env
           else
-            let full_check =
-              match env.full_check with
+            let full_check_status =
+              match env.full_check_status with
               | Full_check_done -> Full_check_needed
               | x -> x
             in
-            { env with full_check }
+            { env with full_check_status }
         in
         let telemetry =
           telemetry
@@ -254,7 +254,7 @@ let expand_all env =
         let needs_recheck =
           Relative_path.Set.union env.needs_recheck needs_recheck
         in
-        { env with needs_recheck; full_check = Full_check_started }
+        { env with needs_recheck; full_check_status = Full_check_started }
       )
     in
     set

@@ -231,6 +231,8 @@ external connect : handle -> worker_id:int -> unit = "hh_connect"
 
 external get_handle : unit -> handle = "hh_get_handle"
 
+external get_worker_id : unit -> int = "hh_get_worker_id" [@@noalloc]
+
 (*****************************************************************************)
 (* Raw access for proxying across network.
  *)

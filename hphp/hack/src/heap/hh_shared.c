@@ -1141,6 +1141,14 @@ value hh_get_handle(void) {
   CAMLreturn(connector);
 }
 
+/* Master is 0, workers start at 1 */
+value hh_get_worker_id() {
+  CAMLparam0();
+  CAMLlocal1(result);
+  result = Val_long(worker_id);
+  CAMLreturn(result);
+}
+
 /*****************************************************************************/
 /* Counter
  *

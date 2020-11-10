@@ -75,7 +75,7 @@ let make_lazy_class_type ctx class_name =
     in
     Some (Lazy (sc, remainder))
 
-let make_eager_class_type ctx class_name =
+let make_eager_class_type ctx class_name declare_folded_class_in_file =
   match Decl_heap.Classes.get class_name with
   | Some decl -> Some (Eager (Decl_class.to_class_type (decl, None)))
   | None ->
@@ -87,19 +87,15 @@ let make_eager_class_type ctx class_name =
         (* declare_folded_class_in_file actual reads from Decl_heap.Classes.get
          * like what we do above, which makes our test redundant but cleaner.
          * It also writes into Decl_heap.Classes and other Decl_heaps. *)
-        let decl =
-          Errors.run_in_decl_mode file (fun () ->
-              Decl.declare_folded_class_in_file
-                ~sh:SharedMem.Uses
-                ctx
-                file
-                class_name)
-        in
+        let decl = declare_folded_class_in_file ctx file class_name in
         Deferred_decl.increment_counter ();
         Some (Eager (Decl_class.to_class_type decl))
     end
 
-let get (ctx : Provider_context.t) (class_name : string) : class_t option =
+let get
+    (ctx : Provider_context.t)
+    (class_name : string)
+    declare_folded_class_in_file : class_t option =
   (* Fetches either the [Lazy] class (if shallow decls are enabled)
    * or the [Eager] class (otherwise).
    * Note: Eager will always read+write to shmem Decl_heaps.
@@ -109,7 +105,7 @@ let get (ctx : Provider_context.t) (class_name : string) : class_t option =
     then
       make_lazy_class_type ctx class_name
     else
-      make_eager_class_type ctx class_name
+      make_eager_class_type ctx class_name declare_folded_class_in_file
   with Deferred_decl.Defer d ->
     Deferred_decl.add_deferment ~d;
     None

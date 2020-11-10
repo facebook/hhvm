@@ -113,6 +113,18 @@ module Cache =
       let capacity = 1000
     end)
 
+let declare_folded_class_in_file
+    (ctx : Provider_context.t) (file : Relative_path.t) (name : string) :
+    Decl_defs.decl_class_type * Decl_heap.class_members option =
+  match Ast_provider.find_class_in_file ctx file name with
+  | Some cls ->
+    let (_name, decl_and_members) =
+      Errors.run_in_decl_mode file (fun () ->
+          Decl_folded_class.class_decl_if_missing ~sh:SharedMem.Uses ctx cls)
+    in
+    decl_and_members
+  | None -> err_not_found file name
+
 let get_class
     ?(tracing_info : Decl_counters.tracing_info option)
     (ctx : Provider_context.t)
@@ -143,7 +155,9 @@ let get_class
       | Some t -> Some (counter, t)
       | None ->
         begin
-          match Typing_classes_heap.get ctx class_name with
+          match
+            Typing_classes_heap.get ctx class_name declare_folded_class_in_file
+          with
           | None -> None
           | Some v ->
             Cache.add class_name v;
@@ -158,7 +172,7 @@ let get_class
         ~key:(Provider_backend.Decl_cache_entry.Class_decl class_name)
         ~default:(fun () ->
           let v : Typing_classes_heap.class_t option =
-            Typing_classes_heap.get ctx class_name
+            Typing_classes_heap.get ctx class_name declare_folded_class_in_file
           in
           Option.map v ~f:Obj.repr)
     in

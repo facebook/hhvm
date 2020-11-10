@@ -19,14 +19,3 @@
  *)
 val make_env :
   sh:SharedMem.uses -> Provider_context.t -> Relative_path.t -> unit
-
-(** /!\ LEGACY DECL ONLY
-    Check whether the class is already in the heap and if not,
-    declare it, its members and its ancestors and add them to
-    their respective shared heaps. *)
-val declare_folded_class_in_file :
-  sh:SharedMem.uses ->
-  Provider_context.t ->
-  Relative_path.t ->
-  string ->
-  Decl_defs.decl_class_type * Decl_heap.class_members option

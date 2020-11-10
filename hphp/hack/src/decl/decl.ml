@@ -54,21 +54,3 @@ let make_env
   let ast = Ast_provider.get_ast ctx fn in
   name_and_declare_types_program ~sh ctx ast;
   ()
-
-let err_not_found (file : Relative_path.t) (name : string) : 'a =
-  let err_str =
-    Printf.sprintf "%s not found in %s" name (Relative_path.to_absolute file)
-  in
-  raise (Decl_defs.Decl_not_found err_str)
-
-let declare_folded_class_in_file
-    ~(sh : SharedMem.uses)
-    (ctx : Provider_context.t)
-    (file : Relative_path.t)
-    (name : string) : Decl_defs.decl_class_type * Decl_heap.class_members option
-    =
-  match Ast_provider.find_class_in_file ctx file name with
-  | Some cls ->
-    let (_name, decl) = Decl_folded_class.class_decl_if_missing ~sh ctx cls in
-    decl
-  | None -> err_not_found file name

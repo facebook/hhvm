@@ -13,7 +13,14 @@ open Typing_defs
 
 type class_t
 
-val get : Provider_context.t -> string -> class_t option
+val get :
+  Provider_context.t ->
+  string ->
+  (Provider_context.t ->
+  Relative_path.t ->
+  string ->
+  Decl_defs.decl_class_type * Decl_heap.class_members option) ->
+  class_t option
 
 module Api : sig
   (** This type "t" is what all APIs operate upon. It includes

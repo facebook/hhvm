@@ -1310,6 +1310,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "hh_fanout_dep_graph_stats_rust"
+version = "0.0.0"
+dependencies = [
+ "depgraph",
+ "env_logger",
+ "log",
+ "ocamlrep_ocamlpool",
+]
+
+[[package]]
 name = "hh_name_index"
 version = "0.0.0"
 dependencies = [

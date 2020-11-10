@@ -877,6 +877,35 @@ to be produced by hh_server
     ( const run $ edges_dir $ output,
       info "build" ~doc ~sdocs:Manpage.s_common_options ~man ~exits )
 
+let mode_dep_graph_stats = Dep_graph_stats.go
+
+let dep_graph_stats_subcommand =
+  let open Cmdliner in
+  let open Cmdliner.Arg in
+  let doc = "Calculate some statistics for the 64-bit dependency graph" in
+  let man =
+    [
+      `S Manpage.s_description;
+      `P
+        (String.strip
+           {|
+Calculate a bunch of statistics for a given 64-bit dependency graph.
+|});
+    ]
+  in
+  let exits = Term.default_exits in
+
+  let dep_graph =
+    let doc = "Path to a 64-bit dependency graph." in
+    required
+    & opt (some string) None
+    & info ["dep-graph"] ~doc ~docv:"DEP_GRAPH"
+  in
+  let run dep_graph = Lwt_main.run (mode_dep_graph_stats ~dep_graph) in
+  Term.
+    ( const run $ dep_graph,
+      info "dep-graph-stats" ~doc ~sdocs:Manpage.s_common_options ~man ~exits )
+
 let default_subcommand =
   let open Cmdliner in
   let sdocs = Manpage.s_common_options in
@@ -893,6 +922,7 @@ let () =
       calculate_errors_subcommand;
       clean_subcommand;
       debug_subcommand;
+      dep_graph_stats_subcommand;
       query_subcommand;
       query_path_subcommand;
       status_subcommand;

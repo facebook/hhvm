@@ -162,6 +162,13 @@ impl<'bytes> DepGraph<'bytes> {
         }
         acc
     }
+
+    /// A slice that contains all unique dependency hashes in the graph.
+    ///
+    /// This gives direct access to the `indexer` table.
+    pub fn all_hashes(&self) -> &'bytes [u64] {
+        self.indexer.hashes
+    }
 }
 
 /// The header of the structure.
@@ -380,6 +387,13 @@ impl<'bytes> HashList<'bytes> {
     #[inline]
     fn has_index(self, index: u32) -> bool {
         self.indices.binary_search(&index).is_ok()
+    }
+
+    /// Return all raw hash indices in this list.
+    ///
+    /// Provides raw access to the underlying list.
+    pub fn hash_indices(&self) -> &'bytes [u32] {
+        self.indices
     }
 }
 

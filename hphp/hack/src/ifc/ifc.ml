@@ -459,19 +459,16 @@ let rec object_policy = function
 
 let add_dependencies pl t = L.(pl <* PSet.elements (object_policy t))
 
-(* TODO: make a list version of it *)
-let policy_join ?(prefix = "join") renv p1 p2 =
-  let id ~pos:_ acc = acc in
-  match Logic.policy_join p1 p2 with
-  | Some p -> (id, p)
-  | None when equal_policy p1 p2 -> (id, p1)
-  | _ ->
+let join_policies ?(prefix = "join") ~pos renv env pl =
+  let drop_pbot (Pbot _ :: pl | pl) = pl in
+  match drop_pbot (List.dedup_and_sort ~compare:compare_policy pl) with
+  | [] -> (env, pbot)
+  | [p] -> (env, p)
+  | (Ptop _ as ptop) :: _ -> (env, ptop)
+  | pl ->
     let pv = Env.new_policy_var renv prefix in
-    (L.(p1 < pv && p2 < pv), pv)
-
-let policy_join_env ?prefix ~pos renv env p1 p2 =
-  let (facc, p) = policy_join ?prefix renv p1 p2 in
-  (Env.acc env (facc ~pos), p)
+    let env = Env.acc env (L.(pl <* [pv]) ~pos) in
+    (env, pv)
 
 let get_local_type ~pos env lid =
   match Env.get_local_type env lid with
@@ -523,7 +520,7 @@ let set_local_types env =
 let binop ~pos renv env ty1 ty2 =
   match (ty1, ty2) with
   | ((Tprim p1 | Tnull p1), (Tprim p2 | Tnull p2)) ->
-    let (env, pj) = policy_join_env ~pos renv env ~prefix:"bop" p1 p2 in
+    let (env, pj) = join_policies ~pos renv env ~prefix:"bop" [p1; p2] in
     (env, Tprim pj)
   | _ -> fail "unexpected Binop types"
 
@@ -573,10 +570,8 @@ let call ~pos renv env call_type that_pty_opt args_pty ret_ty =
   (* The PC of the function being called depends on the join of the current
    * PC dependencies, as well as the function's own self policy *)
   let (env, pc_joined) =
-    let join pc' (env, pc) =
-      policy_join_env ~pos renv env ~prefix:"pcjoin" pc pc'
-    in
-    PSet.fold join (Env.get_gpc renv env) (env, callee)
+    let pc_list = PSet.elements (Env.get_gpc renv env) in
+    join_policies ~pos renv env ~prefix:"pcjoin" pc_list
   in
   let hole_ty =
     {
@@ -1113,6 +1108,15 @@ and expr ~pos renv (env : Env.expr_env) (((_, ety), e) : Tast.expr) =
     in
     let (env, s) = List.fold ~f ~init:(env, Nast.ShapeMap.empty) s in
     (env, Tshape (T.Closed_shape, s))
+  | A.Is (e, _hint) ->
+    let (env, ety) = expr env e in
+    (* whether an object has one tag or another is governed
+       by its object policy *)
+    let (env, tag_policy) =
+      let tag_policy_list = PSet.elements (object_policy ety) in
+      join_policies ~pos ~prefix:"tag" renv env tag_policy_list
+    in
+    (env, Tprim tag_policy)
   (* --- A valid AST does not contain these nodes *)
   | A.Import _
   | A.Collection _

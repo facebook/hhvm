@@ -32,6 +32,10 @@ module PosSet = Set.Make (Pos)
    a name. The scope in a Pvar is used to store inline the
    creation point of a purpose variable. *)
 type policy =
+  (* Bottom policy; public *)
+  | Pbot of (PosSet.t[@equal (fun _ _ -> true)] [@compare (fun _ _ -> 0)])
+  (* Top policy; private *)
+  | Ptop of (PosSet.t[@equal (fun _ _ -> true)] [@compare (fun _ _ -> 0)])
   (* Bound variable; represented with a de Bruijn index *)
   | Pbound_var of int
   (* Free variable; relative to a scope *)
@@ -39,10 +43,6 @@ type policy =
   (* A policy allowing use for a single purpose *)
   | Ppurpose of
       (PosSet.t[@equal (fun _ _ -> true)] [@compare (fun _ _ -> 0)]) * purpose
-  (* Bottom policy; public *)
-  | Pbot of (PosSet.t[@equal (fun _ _ -> true)] [@compare (fun _ _ -> 0)])
-  (* Top policy; private *)
-  | Ptop of (PosSet.t[@equal (fun _ _ -> true)] [@compare (fun _ _ -> 0)])
 [@@deriving eq, ord]
 
 let pbot = Pbot PosSet.empty

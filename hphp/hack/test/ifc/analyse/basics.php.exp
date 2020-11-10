@@ -62,3 +62,23 @@ Analyzing \condition:
   Locals:
     { $a0 -> <$a0>; $a1 -> <$a1>; $a2 -> <$a2>; $x -> <$x'2> }
 
+Analyzing \is_expression:
+* pc: pc
+* This: None
+* Return: <ret>
+* Exception: \Exception<exn, exn_lump>
+* Params:
+  { $x ->
+    (\A<A, A_lump> | <$x> |
+       shape({ (SFlit_str ([36:41-46], "fld")) -> <$x'2, <$x'1>> })) }
+* Final environment:
+  Deps: {}
+  Constraints:
+    [37:3-18]
+      A_lump = A_lump'1, A < A'1, $x < $x'3, $x'2 < $x'5, $x'1 < $x'4,
+      $x'3 < tag, $x'4 < tag, A'1 < tag, tag < ret
+  Locals:
+    { $x ->
+      (\A<A'1, A_lump'1> | <$x'3> |
+         shape({ (SFlit_str ([36:41-46], "fld")) -> <$x'5, <$x'4>> })) }
+

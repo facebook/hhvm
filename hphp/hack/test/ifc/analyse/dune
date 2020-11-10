@@ -9,6 +9,7 @@
     --program %{exe:../../../src/hh_single_type_check.exe}
     --in-extension .php
     --flags
+    --union-intersection-type-hints
     --ifc analyse ""
     --error-format raw
     )))

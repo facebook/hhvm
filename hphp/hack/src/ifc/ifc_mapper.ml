@@ -13,7 +13,9 @@ open Ifc_types
 (* Shallow mappers *)
 
 let rec ptype fty fpol = function
+  | Tnull pol -> Tnull (fpol pol)
   | Tprim pol -> Tprim (fpol pol)
+  | Tnonnull (pself, plump) -> Tnonnull (fpol pself, fpol plump)
   | Tgeneric pol -> Tgeneric (fpol pol)
   | Ttuple tl -> Ttuple (List.map ~f:fty tl)
   | Tunion tl -> Tunion (List.map ~f:fty tl)
@@ -61,9 +63,13 @@ let iter_ptype2 fty fpol pt1 pt2 =
     | _ -> invalid_arg "iter_ptype2"
   in
   match (pt1, pt2) with
+  | (Tnull p1, Tnull p2)
   | (Tprim p1, Tprim p2)
   | (Tgeneric p1, Tgeneric p2) ->
     fpol p1 p2
+  | (Tnonnull (ps1, pl1), Tnonnull (ps2, pl2)) ->
+    fpol ps1 ps2;
+    fpol pl1 pl2
   | (Ttuple tl1, Ttuple tl2)
   | (Tunion tl1, Tunion tl2)
   | (Tinter tl1, Tinter tl2) ->

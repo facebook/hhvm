@@ -80,7 +80,9 @@ type array_kind =
 
 (* Types with policies *)
 type ptype =
+  | Tnull of policy
   | Tprim of policy
+  | Tnonnull of policy * policy (* self(covariant), lump(invariant) *)
   | Tgeneric of policy
   | Ttuple of ptype list
   | Tunion of ptype list

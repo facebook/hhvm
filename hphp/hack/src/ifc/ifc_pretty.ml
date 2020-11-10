@@ -59,9 +59,12 @@ let rec ptype fmt ty =
     fprintf fmt "(@[<hov2>%a@])" (list pp_sep ptype) l
   in
   match ty with
+  | Tnull p -> fprintf fmt "null<%a>" policy p
   | Tprim p
   | Tgeneric p ->
     fprintf fmt "<%a>" policy p
+  | Tnonnull (pself, plump) ->
+    fprintf fmt "nonnull<%a,%a>" policy pself policy plump
   | Ttuple tl -> list' "," tl
   | Tunion [] -> fprintf fmt "nothing"
   | Tunion tl -> list' " |" tl

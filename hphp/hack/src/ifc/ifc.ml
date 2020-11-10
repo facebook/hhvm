@@ -40,7 +40,10 @@ let rec policy_occurrences pty =
         (PSet.union s1 t1, PSet.union s2 t2, PSet.union s3 t3))
   in
   match pty with
-  | Tprim p -> (pol p, emp, emp)
+  | Tnull p
+  | Tprim p ->
+    (pol p, emp, emp)
+  | Tnonnull (pself, plump) -> (pol pself, pol plump, emp)
   | Tgeneric p -> (emp, pol p, emp)
   | Tinter tl
   | Tunion tl
@@ -83,21 +86,30 @@ let rec subtype ~pos t1 t2 acc =
       end
   in
   match (t1, t2) with
-  | (Tprim p1, Tprim p2) -> L.(p1 < p2) ~pos acc
+  | (Tnull p1, Tnull p2)
+  | (Tprim p1, Tprim p2) ->
+    L.(p1 < p2) ~pos acc
+  | (Tnull _, Tnonnull _) -> err "null is not a subtype of nonnull"
+  | (_, Tnonnull (pself, plump)) ->
+    let (cov, inv, _cnt) = policy_occurrences t1 in
+    (* we leave contravariant policies unconstrained;
+       that is sound and should not pose precision problems
+       since function types are seldom refined from `mixed` *)
+    L.(PSet.elements cov <* [pself] && [plump] =* PSet.elements inv) ~pos acc
   | (Tgeneric p1, _) ->
-    let (cv, inv, cn) = policy_occurrences t2 in
+    let (cov, inv, cnt) = policy_occurrences t2 in
     L.(
-      [p1] <* PSet.elements cv
-      && PSet.elements cn <* [p1]
-      && [p1] =* PSet.elements inv)
+      [p1] <* PSet.elements cov
+      && [p1] =* PSet.elements inv
+      && PSet.elements cnt <* [p1])
       ~pos
       acc
   | (_, Tgeneric p2) ->
-    let (cv, inv, cn) = policy_occurrences t1 in
+    let (cov, inv, cnt) = policy_occurrences t1 in
     L.(
-      PSet.elements cv <* [p2]
-      && [p2] <* PSet.elements cn
-      && [p2] =* PSet.elements inv)
+      PSet.elements cov <* [p2]
+      && [p2] =* PSet.elements inv
+      && [p2] <* PSet.elements cnt)
       ~pos
       acc
   | (Ttuple tl1, Ttuple tl2) ->
@@ -389,7 +401,11 @@ let adjust_ptype ?prefix ~pos ~adjustment renv env ty =
       (env, mk tl')
     in
     match ty with
+    | Tnull p -> simple_freshen env (fun p -> Tnull p) p
     | Tprim p -> simple_freshen env (fun p -> Tprim p) p
+    | Tnonnull (pself, plump) ->
+      (* plump is invariant, so we do not adjust it *)
+      simple_freshen env (fun pself -> Tnonnull (pself, plump)) pself
     | Tgeneric p -> simple_freshen env (fun p -> Tgeneric p) p
     | Ttuple tl -> on_list env (fun l -> Ttuple l) tl
     | Tunion tl -> on_list env (fun l -> Tunion l) tl
@@ -422,7 +438,9 @@ let adjust_ptype ?prefix ~pos ~adjustment renv env ty =
 (* Returns the set of policies, to be understood as a join,
    that governs an object with the argument type *)
 let rec object_policy = function
+  | Tnull pol
   | Tprim pol
+  | Tnonnull (pol, _)
   | Tgeneric pol
   | Tclass { c_self = pol; _ }
   | Tfun { f_self = pol; _ } ->
@@ -504,7 +522,7 @@ let set_local_types env =
 
 let binop ~pos renv env ty1 ty2 =
   match (ty1, ty2) with
-  | (Tprim p1, Tprim p2) ->
+  | ((Tprim p1 | Tnull p1), (Tprim p2 | Tnull p2)) ->
     let (env, pj) = policy_join_env ~pos renv env ~prefix:"bop" p1 p2 in
     (env, Tprim pj)
   | _ -> fail "unexpected Binop types"
@@ -843,7 +861,7 @@ and expr ~pos renv (env : Env.expr_env) (((_, ety), e) : Tast.expr) =
     (env, dict_pty)
   in
   match e with
-  | A.Null
+  | A.Null -> (env, Tnull (Env.new_policy_var renv "null"))
   | A.True
   | A.False
   | A.Int _

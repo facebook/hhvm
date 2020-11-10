@@ -55,7 +55,12 @@ let class_ty ?prefix ?lump renv name =
 let rec ty ?prefix ?lump renv (t : T.locl_ty) =
   let ty = ty ?prefix ?lump renv in
   match T.get_node t with
+  | T.Tprim Aast.Tnull -> Tnull (get_policy ?prefix lump renv)
   | T.Tprim _ -> Tprim (get_policy ?prefix lump renv)
+  | T.Tnonnull ->
+    let pself = get_policy ?prefix lump renv
+    and plump = get_policy ?prefix lump renv in
+    Tnonnull (pself, plump)
   | T.Tgeneric (_name, _targs) ->
     (* TODO(T69551141) Handle type arguments *)
     Tgeneric (get_policy ?prefix lump renv)
@@ -117,7 +122,7 @@ let rec ty ?prefix ?lump renv (t : T.locl_ty) =
     (* TODO(T72024862): This treatment ignores late static binding. *)
     ty tbound
   | T.Toption t ->
-    let tnull = Tprim (get_policy ?prefix lump renv) in
+    let tnull = Tnull (get_policy ?prefix lump renv) in
     Tunion [tnull; ty t]
   | T.Tshape (sh_kind, sh_type_map) ->
     let lift sft =
@@ -132,7 +137,6 @@ let rec ty ?prefix ?lump renv (t : T.locl_ty) =
   | T.Tdependent (_, _ty) -> fail "Tdependent"
   | T.Tany _sentinel -> fail "Tany"
   | T.Terr -> fail "Terr"
-  | T.Tnonnull -> fail "Tnonnull"
   | T.Tdynamic -> fail "Tdynamic"
   | T.Tnewtype (_name, _ty_list, _as_bound) -> fail "Tnewtype"
   | T.Tobject -> fail "Tobject"

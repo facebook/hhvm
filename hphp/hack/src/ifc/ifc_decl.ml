@@ -355,7 +355,12 @@ let make_callable_scheme renv pol fp args =
         let c = Env.new_policy_var renv "callable" in
         (L.(policy < c) ~pos acc, set_policy c ty)
     in
-    List.map2_env [] ~f fp.fp_type.f_args args
+
+    (* The length of arguments in the function type may not match that of
+       argument kinds which is derived from the decl. Since all default
+       arguments are public, we simply truncate the list. *)
+    let fp_args = fp.fp_type.f_args in
+    List.map2_env [] ~f fp_args (List.take args @@ List.length fp_args)
   in
   let fp' =
     {

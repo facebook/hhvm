@@ -113,8 +113,16 @@ let rec subtype ~pos t1 t2 acc =
        simple for now. *)
     L.(cl1.c_lump = cl2.c_lump && cl1.c_self < cl2.c_self) ~pos acc
   | (Tfun f1, Tfun f2) ->
+    (* TODO(T70139741): Account for variadic argument lists. *)
+    (* Truncate argument list on the right, in case the left one is shorter
+       due to omitted arguments to functions with default values.
+       TODO(T79395145): Default values can be arbitrary expressions and hence
+       they need to be conditionally executed and joined with the
+       environment. *)
+    let truncated_size = List.length f2.f_args in
+    let truncated_f1_args = List.take f1.f_args truncated_size in
     let zipped_args =
-      match List.zip f1.f_args f2.f_args with
+      match List.zip truncated_f1_args f2.f_args with
       | List.Or_unequal_lengths.Ok zip -> zip
       | List.Or_unequal_lengths.Unequal_lengths ->
         err "functions have different number of arguments"

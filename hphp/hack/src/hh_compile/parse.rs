@@ -74,54 +74,48 @@ fn parse_file(parser: Parser, filepath: PathBuf) -> anyhow::Result<()> {
     let ctx = &Arc::new((filepath, content));
     let make_retryable = move || {
         let new_ctx = Arc::clone(ctx);
-        Box::new(
-            move |
-                stack_limit: &StackLimit,
-                _nonmain_stack_size: Option<usize>,
-            | -> anyhow::Result<()> {
-                let env = ParserEnv::default();
-                let (filepath, content) = new_ctx.as_ref();
-                let path = RelativePath::make(relative_path::Prefix::Dummy, filepath.clone());
-                let source_text = SourceText::make(RcOc::new(path), content.as_slice());
-                match parser {
-                    Parser::PositionedByRef => {
-                        let arena = bumpalo::Bump::new();
-                        let (_, _, _) = positioned_by_ref_parser::parse_script(
-                            &arena,
-                            &source_text,
-                            env,
-                            Some(stack_limit),
-                        );
-                    }
-                    Parser::Positioned => {
-                        let (_, _, _) =
-                            positioned_parser::parse_script(&source_text, env, Some(stack_limit));
-                    }
-                    Parser::Minimal => {
-                        let (_, _, _) =
-                            minimal_parser::parse_script(&source_text, env, Some(stack_limit));
-                    }
-                    Parser::DirectDecl => {
-                        let arena = bumpalo::Bump::new();
-                        let auto_namespace_map = BTreeMap::new();
-                        let (_, _, _, _) = direct_decl_parser::parse_script(
-                            &source_text,
-                            env,
-                            &auto_namespace_map,
-                            &arena,
-                            Some(stack_limit),
-                        );
-                    }
-                    Parser::Aast => {
-                        let indexed_source_text = IndexedSourceText::new(source_text);
-                        let env = AastParserEnv::default();
-                        let _ =
-                            AastParser::from_text(&env, &indexed_source_text, Some(stack_limit));
-                    }
+        move |stack_limit: &StackLimit, _nonmain_stack_size: Option<usize>| -> anyhow::Result<()> {
+            let env = ParserEnv::default();
+            let (filepath, content) = new_ctx.as_ref();
+            let path = RelativePath::make(relative_path::Prefix::Dummy, filepath.clone());
+            let source_text = SourceText::make(RcOc::new(path), content.as_slice());
+            match parser {
+                Parser::PositionedByRef => {
+                    let arena = bumpalo::Bump::new();
+                    let (_, _, _) = positioned_by_ref_parser::parse_script(
+                        &arena,
+                        &source_text,
+                        env,
+                        Some(stack_limit),
+                    );
                 }
-                Ok(())
-            },
-        )
+                Parser::Positioned => {
+                    let (_, _, _) =
+                        positioned_parser::parse_script(&source_text, env, Some(stack_limit));
+                }
+                Parser::Minimal => {
+                    let (_, _, _) =
+                        minimal_parser::parse_script(&source_text, env, Some(stack_limit));
+                }
+                Parser::DirectDecl => {
+                    let arena = bumpalo::Bump::new();
+                    let auto_namespace_map = BTreeMap::new();
+                    let (_, _, _, _) = direct_decl_parser::parse_script(
+                        &source_text,
+                        env,
+                        &auto_namespace_map,
+                        &arena,
+                        Some(stack_limit),
+                    );
+                }
+                Parser::Aast => {
+                    let indexed_source_text = IndexedSourceText::new(source_text);
+                    let env = AastParserEnv::default();
+                    let _ = AastParser::from_text(&env, &indexed_source_text, Some(stack_limit));
+                }
+            }
+            Ok(())
+        }
     };
 
     let on_retry = &mut |stack_size_tried: usize| {
@@ -143,7 +137,7 @@ fn parse_file(parser: Parser, filepath: PathBuf) -> anyhow::Result<()> {
         ..Default::default()
     };
     match job.with_elastic_stack(
-        &make_retryable,
+        make_retryable,
         on_retry,
         utils::stack_slack_for_traversal_and_parsing,
     ) {

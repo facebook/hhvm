@@ -49,80 +49,78 @@ where
     let make_retryable = || {
         let env = env.clone();
         let parse_fn = parse_fn.clone();
-        Box::new(
-            move |stack_limit: &StackLimit, nonmain_stack_size: Option<usize>| {
-                // Safety: Requires no concurrent interaction with OCaml runtime
-                // from other threads.
-                let pool = unsafe { Pool::new() };
+        move |stack_limit: &StackLimit, nonmain_stack_size: Option<usize>| {
+            // Safety: Requires no concurrent interaction with OCaml runtime
+            // from other threads.
+            let pool = unsafe { Pool::new() };
 
-                // Safety: the parser asks for a stack limit with the same lifetime
-                // as the source text, but no syntax tree borrows the stack limit,
-                // so we really only need it to live as long as the parser.
-                // Unsafely extend its lifetime to satisfy the parser API.
-                let stack_limit_ref: &'a StackLimit =
-                    unsafe { (stack_limit as *const StackLimit).as_ref().unwrap() };
+            // Safety: the parser asks for a stack limit with the same lifetime
+            // as the source text, but no syntax tree borrows the stack limit,
+            // so we really only need it to live as long as the parser.
+            // Unsafely extend its lifetime to satisfy the parser API.
+            let stack_limit_ref: &'a StackLimit =
+                unsafe { (stack_limit as *const StackLimit).as_ref().unwrap() };
 
-                let arena = Bump::new();
+            let arena = Bump::new();
 
-                // Safety: Similarly, the arena just needs to outlive the returned
-                // Node and State (which may reference it). We ensure this by
-                // not destroying the arena until after converting the node and
-                // state to OCaml values.
-                let arena_ref: &'a Bump = unsafe { (&arena as *const Bump).as_ref().unwrap() };
+            // Safety: Similarly, the arena just needs to outlive the returned
+            // Node and State (which may reference it). We ensure this by
+            // not destroying the arena until after converting the node and
+            // state to OCaml values.
+            let arena_ref: &'a Bump = unsafe { (&arena as *const Bump).as_ref().unwrap() };
 
-                // We only convert the source text from OCaml in this innermost
-                // closure because it contains an Rc. If we converted it
-                // earlier, we'd need to pass it across an unwind boundary or
-                // send it between threads, but it has internal mutablility and
-                // is not Send.
-                let source_text = unsafe { SourceText::from_ocaml(ocaml_source_text).unwrap() };
-                let disable_modes = env.disable_modes;
-                let (root, errors, state) =
-                    parse_fn(arena_ref, &source_text, env, Some(stack_limit_ref));
-                // traversing the parsed syntax tree uses about 1/3 of the stack
-                let context = SerializationContext::new(ocaml_source_text);
-                let ocaml_root = unsafe { root.to_ocaml(&context) };
-                let ocaml_errors = pool.add(&errors);
-                let ocaml_state = unsafe { state.to_ocaml(&context) };
-                let tree = if leak_rust_tree {
-                    let (_, mut mode) = parse_mode(&source_text);
-                    if mode == Some(Mode::Mpartial) && disable_modes {
-                        mode = Some(Mode::Mstrict);
-                    }
-                    let tree = Box::new(SyntaxTree::build(
-                        &source_text,
-                        root,
-                        errors,
-                        mode,
-                        (),
-                        nonmain_stack_size,
-                    ));
-                    // A rust pointer of (&SyntaxTree, &Arena) is passed to Ocaml,
-                    // Ocaml will pass it back to `rust_parser_errors::rust_parser_errors_positioned`
-                    // PLEASE ENSURE TYPE SAFETY MANUALLY!!!
-                    let tree = Box::leak(tree) as *const SyntaxTree<_, ()> as usize;
-                    let arena = Box::leak(Box::new(arena)) as *const Bump as usize;
-                    Some(Box::leak(Box::new((tree, arena))) as *const (usize, usize) as usize)
-                } else {
-                    None
-                };
-                let ocaml_tree = pool.add(&tree);
+            // We only convert the source text from OCaml in this innermost
+            // closure because it contains an Rc. If we converted it
+            // earlier, we'd need to pass it across an unwind boundary or
+            // send it between threads, but it has internal mutablility and
+            // is not Send.
+            let source_text = unsafe { SourceText::from_ocaml(ocaml_source_text).unwrap() };
+            let disable_modes = env.disable_modes;
+            let (root, errors, state) =
+                parse_fn(arena_ref, &source_text, env, Some(stack_limit_ref));
+            // traversing the parsed syntax tree uses about 1/3 of the stack
+            let context = SerializationContext::new(ocaml_source_text);
+            let ocaml_root = unsafe { root.to_ocaml(&context) };
+            let ocaml_errors = pool.add(&errors);
+            let ocaml_state = unsafe { state.to_ocaml(&context) };
+            let tree = if leak_rust_tree {
+                let (_, mut mode) = parse_mode(&source_text);
+                if mode == Some(Mode::Mpartial) && disable_modes {
+                    mode = Some(Mode::Mstrict);
+                }
+                let tree = Box::new(SyntaxTree::build(
+                    &source_text,
+                    root,
+                    errors,
+                    mode,
+                    (),
+                    nonmain_stack_size,
+                ));
+                // A rust pointer of (&SyntaxTree, &Arena) is passed to Ocaml,
+                // Ocaml will pass it back to `rust_parser_errors::rust_parser_errors_positioned`
+                // PLEASE ENSURE TYPE SAFETY MANUALLY!!!
+                let tree = Box::leak(tree) as *const SyntaxTree<_, ()> as usize;
+                let arena = Box::leak(Box::new(arena)) as *const Bump as usize;
+                Some(Box::leak(Box::new((tree, arena))) as *const (usize, usize) as usize)
+            } else {
+                None
+            };
+            let ocaml_tree = pool.add(&tree);
 
-                let mut res = pool.block_with_size(4);
-                pool.set_field(&mut res, 0, unsafe {
-                    ocamlrep::OpaqueValue::from_bits(ocaml_state)
-                });
-                pool.set_field(&mut res, 1, unsafe {
-                    ocamlrep::OpaqueValue::from_bits(ocaml_root)
-                });
-                pool.set_field(&mut res, 2, ocaml_errors);
-                pool.set_field(&mut res, 3, ocaml_tree);
-                // Safety: The UnsafeOcamlPtr must point to the first field in
-                // the block. It must be handed back to OCaml before the garbage
-                // collector is given an opportunity to run.
-                unsafe { UnsafeOcamlPtr::new(res.build().to_bits()) }
-            },
-        )
+            let mut res = pool.block_with_size(4);
+            pool.set_field(&mut res, 0, unsafe {
+                ocamlrep::OpaqueValue::from_bits(ocaml_state)
+            });
+            pool.set_field(&mut res, 1, unsafe {
+                ocamlrep::OpaqueValue::from_bits(ocaml_root)
+            });
+            pool.set_field(&mut res, 2, ocaml_errors);
+            pool.set_field(&mut res, 3, ocaml_tree);
+            // Safety: The UnsafeOcamlPtr must point to the first field in
+            // the block. It must be handed back to OCaml before the garbage
+            // collector is given an opportunity to run.
+            unsafe { UnsafeOcamlPtr::new(res.build().to_bits()) }
+        }
     };
 
     fn stack_slack_for_traversal_and_parsing(stack_size: usize) -> usize {
@@ -156,7 +154,7 @@ where
     };
 
     match job.with_elastic_stack(
-        &make_retryable,
+        make_retryable,
         on_retry,
         stack_slack_for_traversal_and_parsing,
     ) {

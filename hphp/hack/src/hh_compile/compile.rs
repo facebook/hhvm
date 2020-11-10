@@ -148,12 +148,10 @@ fn process_single_file_with_retry(
     let ctx = &Arc::new((opts.clone(), filepath, content));
     let job_builder = move || {
         let new_ctx = Arc::clone(ctx);
-        Box::new(
-            move |stack_limit: &StackLimit, _nonmain_stack_size: Option<usize>| {
-                let (opts, filepath, content) = new_ctx.as_ref();
-                process_single_file_impl(opts, filepath, content.as_slice(), stack_limit)
-            },
-        )
+        move |stack_limit: &StackLimit, _nonmain_stack_size: Option<usize>| {
+            let (opts, filepath, content) = new_ctx.as_ref();
+            process_single_file_impl(opts, filepath, content.as_slice(), stack_limit)
+        }
     };
 
     // Assume peak is 2.5x of stack.
@@ -164,9 +162,9 @@ fn process_single_file_with_retry(
         // Not always printing warning here because this would fail some HHVM tests
         if atty::is(atty::Stream::Stderr) || std::env::var_os("HH_TEST_MODE").is_some() {
             eprintln!(
-                "[hrust] warning: hh_compile exceeded stack of {} KiB on: {}",
+                "[hrust] warning: hh_compile exceeded stack of {} KiB on: {:?}",
                 (stack_size_tried - stack_slack(stack_size_tried)) / KI,
-                ctx.as_ref().1.display(),
+                ctx.1,
             );
         }
     };
@@ -176,7 +174,7 @@ fn process_single_file_with_retry(
         nonmain_stack_max: None,
         ..Default::default()
     };
-    job.with_elastic_stack(&job_builder, on_retry, stack_slack)?
+    job.with_elastic_stack(job_builder, on_retry, stack_slack)?
 }
 
 fn process_single_file(

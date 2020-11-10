@@ -41,8 +41,8 @@ impl Job {
     /// so that the caller can easily report progress (stateful in general).
     pub fn with_elastic_stack<'a, F, T>(
         &self,
-        make_retryable: &dyn Fn() -> Box<F>,
-        on_retry: &mut dyn FnMut(usize),
+        make_retryable: impl Fn() -> F,
+        on_retry: &mut impl FnMut(usize),
         compute_stack_slack: StackSlackFunction,
     ) -> Result<T, JobFailed>
     where
@@ -71,7 +71,7 @@ impl Job {
                 stack_limit.reset();
                 let stack_limit_ref = &stack_limit;
                 match std::panic::catch_unwind(move || {
-                    (*retryable)(stack_limit_ref, nonmain_stack_size)
+                    retryable(stack_limit_ref, nonmain_stack_size)
                 }) {
                     Ok(result) => Some(result),
                     Err(_) if stack_limit.exceeded() => None,

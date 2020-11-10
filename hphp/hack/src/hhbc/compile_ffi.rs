@@ -47,19 +47,17 @@ extern "C" fn compile_from_text_ffi(
     ocamlrep_ocamlpool::catch_unwind_with_handler(
         || {
             let job_builder = move || {
-                Box::new(
-                    move |stack_limit: &StackLimit, _nomain_stack_size: Option<usize>| {
-                        let source_text = unsafe { SourceText::from_ocaml(source_text).unwrap() };
-                        let output_config =
-                            unsafe { RustOutputConfig::from_ocaml(rust_output_config).unwrap() };
-                        let env = unsafe { compile::Env::<OcamlStr>::from_ocaml(env).unwrap() };
-                        let mut w = String::new();
-                        match compile::from_text_(&env, stack_limit, &mut w, source_text) {
-                            Ok(profile) => print_output(w, output_config, &env.filepath, profile),
-                            Err(e) => Err(anyhow!("{}", e)),
-                        }
-                    },
-                )
+                move |stack_limit: &StackLimit, _nomain_stack_size: Option<usize>| {
+                    let source_text = unsafe { SourceText::from_ocaml(source_text).unwrap() };
+                    let output_config =
+                        unsafe { RustOutputConfig::from_ocaml(rust_output_config).unwrap() };
+                    let env = unsafe { compile::Env::<OcamlStr>::from_ocaml(env).unwrap() };
+                    let mut w = String::new();
+                    match compile::from_text_(&env, stack_limit, &mut w, source_text) {
+                        Ok(profile) => print_output(w, output_config, &env.filepath, profile),
+                        Err(e) => Err(anyhow!("{}", e)),
+                    }
+                }
             };
             // Assume peak is 2.5x of stack.
             // This is initial estimation, need to be improved later.
@@ -83,7 +81,7 @@ extern "C" fn compile_from_text_ffi(
             };
 
             let r: Result<(), String> = job
-                .with_elastic_stack(&job_builder, on_retry, stack_slack)
+                .with_elastic_stack(job_builder, on_retry, stack_slack)
                 .map_err(|e| format!("{}", e))
                 .expect("Retry Failed")
                 .map_err(|e| e.to_string());

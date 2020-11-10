@@ -52,8 +52,7 @@
                      ft_implicit_params =
                      { capability =
                        (Rhint (root|property_needs_init.hhi line 5, characters 19-29),
-                        (Tapply (([5:19-30], "\\HH\\Contexts\\defaults"), 
-                           [])))
+                        (Tunion []))
                        };
                      ft_ret =
                      { et_enforced = false;

@@ -40,7 +40,7 @@
                 ft_implicit_params =
                 { capability =
                   (Rhint (root|classes_inferred_constant_types.php line 8, characters 19-19),
-                   (Tapply (([8:19-20], "\\HH\\Contexts\\defaults"), [])))
+                   (Tunion []))
                   };
                 ft_ret =
                 { et_enforced = false;

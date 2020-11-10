@@ -20,7 +20,7 @@
                 ft_implicit_params =
                 { capability =
                   (Rhint (root|abstract_method.php line 4, characters 28-28),
-                   (Tapply (([4:28-29], "\\HH\\Contexts\\defaults"), [])))
+                   (Tunion []))
                   };
                 ft_ret =
                 { et_enforced = false;

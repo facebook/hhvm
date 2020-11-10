@@ -41,7 +41,7 @@
               ft_implicit_params =
               { capability =
                 (Rhint (root|tuples.php line 5, characters 10-20),
-                 (Tapply (([5:10-21], "\\HH\\Contexts\\defaults"), [])))
+                 (Tunion []))
                 };
               ft_ret =
               { et_enforced = false;
@@ -80,7 +80,7 @@
               ft_implicit_params =
               { capability =
                 (Rhint (root|tuples.php line 9, characters 10-22),
-                 (Tapply (([9:10-23], "\\HH\\Contexts\\defaults"), [])))
+                 (Tunion []))
                 };
               ft_ret =
               { et_enforced = false;
@@ -135,7 +135,7 @@
               ft_implicit_params =
               { capability =
                 (Rhint (root|tuples.php line 13, characters 10-22),
-                 (Tapply (([13:10-23], "\\HH\\Contexts\\defaults"), [])))
+                 (Tunion []))
                 };
               ft_ret =
               { et_enforced = false;

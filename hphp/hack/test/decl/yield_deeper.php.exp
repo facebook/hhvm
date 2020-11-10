@@ -9,7 +9,7 @@
              ft_implicit_params =
              { capability =
                (Rhint (root|yield_deeper.php line 3, characters 10-10),
-                (Tapply (([3:10-11], "\\HH\\Contexts\\defaults"), [])))
+                (Tunion []))
                };
              ft_ret =
              { et_enforced = false;
@@ -41,7 +41,7 @@
               ft_implicit_params =
               { capability =
                 (Rhint (root|yield_deeper.php line 7, characters 10-10),
-                 (Tapply (([7:10-11], "\\HH\\Contexts\\defaults"), [])))
+                 (Tunion []))
                 };
               ft_ret =
               { et_enforced = false;
@@ -65,7 +65,7 @@
               ft_implicit_params =
               { capability =
                 (Rhint (root|yield_deeper.php line 13, characters 10-10),
-                 (Tapply (([13:10-11], "\\HH\\Contexts\\defaults"), [])))
+                 (Tunion []))
                 };
               ft_ret =
               { et_enforced = false;
@@ -89,7 +89,7 @@
               ft_implicit_params =
               { capability =
                 (Rhint (root|yield_deeper.php line 19, characters 16-16),
-                 (Tapply (([19:16-17], "\\HH\\Contexts\\defaults"), [])))
+                 (Tunion []))
                 };
               ft_ret =
               { et_enforced = false;
@@ -116,7 +116,7 @@
               ft_implicit_params =
               { capability =
                 (Rhint (root|yield_deeper.php line 26, characters 16-16),
-                 (Tapply (([26:16-17], "\\HH\\Contexts\\defaults"), [])))
+                 (Tunion []))
                 };
               ft_ret =
               { et_enforced = false;

@@ -36,8 +36,7 @@
                      ft_implicit_params =
                      { capability =
                        (Rhint (root|const_attribute.php line 10, characters 19-29),
-                        (Tapply (([10:19-30], "\\HH\\Contexts\\defaults"), 
-                           [])))
+                        (Tunion []))
                        };
                      ft_ret =
                      { et_enforced = false;
@@ -88,8 +87,7 @@
                       ft_implicit_params =
                       { capability =
                         (Rhint (root|const_attribute.php line 20, characters 19-29),
-                         (Tapply (([20:19-30], "\\HH\\Contexts\\defaults"),
-                            [])))
+                         (Tunion []))
                         };
                       ft_ret =
                       { et_enforced = false;
@@ -153,8 +151,7 @@
                       ft_implicit_params =
                       { capability =
                         (Rhint (root|const_attribute.php line 26, characters 19-29),
-                         (Tapply (([26:19-30], "\\HH\\Contexts\\defaults"),
-                            [])))
+                         (Tunion []))
                         };
                       ft_ret =
                       { et_enforced = false;

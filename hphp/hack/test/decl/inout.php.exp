@@ -35,8 +35,7 @@
                         ft_implicit_params =
                         { capability =
                           (Rhint (root|inout.php line 3, characters 12-38),
-                           (Tapply (([3:12-39], "\\HH\\Contexts\\defaults"),
-                              [])))
+                           (Tunion []))
                           };
                         ft_ret =
                         { et_enforced = false;
@@ -59,8 +58,7 @@
                ];
              ft_implicit_params =
              { capability =
-               (Rhint (root|inout.php line 3, characters 10-10),
-                (Tapply (([3:10-11], "\\HH\\Contexts\\defaults"), [])))
+               (Rhint (root|inout.php line 3, characters 10-10), (Tunion []))
                };
              ft_ret =
              { et_enforced = false;

@@ -970,7 +970,3 @@ mod test {
         assert!(is_namespace_with_reserved_hh_name("Anything\\Else\\void"));
     }
 }
-
-pub mod coeffects {
-    pub const DEFAULTS: &str = "\\HH\\Contexts\\defaults";
-}

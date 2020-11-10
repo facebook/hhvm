@@ -10,7 +10,7 @@
              ft_implicit_params =
              { capability =
                (Rhint (root|deprecated_string_concat.php line 4, characters 10-21),
-                (Tapply (([4:10-22], "\\HH\\Contexts\\defaults"), [])))
+                (Tunion []))
                };
              ft_ret =
              { et_enforced = false;
@@ -35,7 +35,7 @@
               ft_implicit_params =
               { capability =
                 (Rhint (root|deprecated_string_concat.php line 7, characters 10-21),
-                 (Tapply (([7:10-22], "\\HH\\Contexts\\defaults"), [])))
+                 (Tunion []))
                 };
               ft_ret =
               { et_enforced = false;
@@ -60,7 +60,7 @@
               ft_implicit_params =
               { capability =
                 (Rhint (root|deprecated_string_concat.php line 10, characters 10-21),
-                 (Tapply (([10:10-22], "\\HH\\Contexts\\defaults"), [])))
+                 (Tunion []))
                 };
               ft_ret =
               { et_enforced = false;
@@ -85,7 +85,7 @@
               ft_implicit_params =
               { capability =
                 (Rhint (root|deprecated_string_concat.php line 13, characters 10-27),
-                 (Tapply (([13:10-28], "\\HH\\Contexts\\defaults"), [])))
+                 (Tunion []))
                 };
               ft_ret =
               { et_enforced = false;
@@ -110,7 +110,7 @@
               ft_implicit_params =
               { capability =
                 (Rhint (root|deprecated_string_concat.php line 19, characters 10-16),
-                 (Tapply (([19:10-17], "\\HH\\Contexts\\defaults"), [])))
+                 (Tunion []))
                 };
               ft_ret =
               { et_enforced = false;
@@ -135,7 +135,7 @@
               ft_implicit_params =
               { capability =
                 (Rhint (root|deprecated_string_concat.php line 25, characters 10-15),
-                 (Tapply (([25:10-16], "\\HH\\Contexts\\defaults"), [])))
+                 (Tunion []))
                 };
               ft_ret =
               { et_enforced = false;

@@ -255,14 +255,8 @@ fn tany() -> &'static Ty<'static> {
     TANY
 }
 
-fn default_capability<'a>(arena: &'a Bump, default_pos: &'a Pos<'a>) -> &'a Ty<'a> {
-    arena.alloc(Ty(
-        arena.alloc(Reason::hint(default_pos)),
-        Ty_::Tapply(arena.alloc((
-            Id(default_pos, naming_special_names::coeffects::DEFAULTS),
-            &[][..],
-        ))),
-    ))
+fn default_capability<'a>(arena: &'a Bump, r: Reason<'a>) -> &'a Ty<'a> {
+    arena.alloc(Ty(arena.alloc(r), Ty_::Tunion(&[])))
 }
 
 fn default_ifc_fun_decl<'a>() -> IfcFunDecl<'a> {
@@ -1405,9 +1399,10 @@ impl<'a> DirectDeclSmartConstructors<'a> {
         capability: Node<'a>,
         default_pos: &'a Pos<'a>,
     ) -> &'a FunImplicitParams<'a> {
-        let capability = self
-            .node_to_ty(capability)
-            .unwrap_or_else(|| default_capability(self.state.arena, default_pos));
+        let capability = self.node_to_ty(capability).unwrap_or_else(|| default_capability(
+            self.state.arena,
+            Reason::hint(default_pos),
+        ));
         self.alloc(FunImplicitParams { capability })
     }
 

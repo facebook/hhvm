@@ -31,7 +31,7 @@
                  ft_implicit_params =
                  { capability =
                    (Rhint (root|ifc_policied.php line 7, characters 19-19),
-                    (Tapply (([7:19-20], "\\HH\\Contexts\\defaults"), [])))
+                    (Tunion []))
                    };
                  ft_ret =
                  { et_enforced = false;
@@ -55,7 +55,7 @@
                   ft_implicit_params =
                   { capability =
                     (Rhint (root|ifc_policied.php line 10, characters 19-19),
-                     (Tapply (([10:19-20], "\\HH\\Contexts\\defaults"), [])))
+                     (Tunion []))
                     };
                   ft_ret =
                   { et_enforced = false;
@@ -80,7 +80,7 @@
                   ft_implicit_params =
                   { capability =
                     (Rhint (root|ifc_policied.php line 13, characters 19-26),
-                     (Tapply (([13:19-27], "\\HH\\Contexts\\defaults"), [])))
+                     (Tunion []))
                     };
                   ft_ret =
                   { et_enforced = false;
@@ -104,7 +104,7 @@
                   ft_implicit_params =
                   { capability =
                     (Rhint (root|ifc_policied.php line 16, characters 19-28),
-                     (Tapply (([16:19-29], "\\HH\\Contexts\\defaults"), [])))
+                     (Tunion []))
                     };
                   ft_ret =
                   { et_enforced = false;
@@ -128,7 +128,7 @@
                   ft_implicit_params =
                   { capability =
                     (Rhint (root|ifc_policied.php line 19, characters 19-27),
-                     (Tapply (([19:19-28], "\\HH\\Contexts\\defaults"), [])))
+                     (Tunion []))
                     };
                   ft_ret =
                   { et_enforced = false;
@@ -153,7 +153,7 @@
                   ft_implicit_params =
                   { capability =
                     (Rhint (root|ifc_policied.php line 22, characters 19-26),
-                     (Tapply (([22:19-27], "\\HH\\Contexts\\defaults"), [])))
+                     (Tunion []))
                     };
                   ft_ret =
                   { et_enforced = false;
@@ -200,9 +200,7 @@
                               ft_implicit_params =
                               { capability =
                                 (Rhint (root|ifc_policied.php line 26, characters 19-36),
-                                 (Tapply (
-                                    ([26:19-37], "\\HH\\Contexts\\defaults"),
-                                    [])))
+                                 (Tunion []))
                                 };
                               ft_ret =
                               { et_enforced = false;
@@ -229,7 +227,7 @@
                   ft_implicit_params =
                   { capability =
                     (Rhint (root|ifc_policied.php line 24, characters 19-27),
-                     (Tapply (([24:19-28], "\\HH\\Contexts\\defaults"), [])))
+                     (Tunion []))
                     };
                   ft_ret =
                   { et_enforced = false;
@@ -256,7 +254,7 @@
               ft_implicit_params =
               { capability =
                 (Rhint (root|ifc_policied.php line 31, characters 10-19),
-                 (Tapply (([31:10-20], "\\HH\\Contexts\\defaults"), [])))
+                 (Tunion []))
                 };
               ft_ret =
               { et_enforced = false;

@@ -72,7 +72,7 @@
                  ft_implicit_params =
                  { capability =
                    (Rhint (root|function_where_constraints.php line 7, characters 19-21),
-                    (Tapply (([7:19-22], "\\HH\\Contexts\\defaults"), [])))
+                    (Tunion []))
                    };
                  ft_ret =
                  { et_enforced = false;
@@ -145,7 +145,7 @@
                  ft_implicit_params =
                  { capability =
                    (Rhint (root|function_where_constraints.php line 11, characters 19-21),
-                    (Tapply (([11:19-22], "\\HH\\Contexts\\defaults"), [])))
+                    (Tunion []))
                    };
                  ft_ret =
                  { et_enforced = false;

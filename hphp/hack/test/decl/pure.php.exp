@@ -8,8 +8,7 @@
              ft_where_constraints = []; ft_params = [];
              ft_implicit_params =
              { capability =
-               (Rhint (root|pure.php line 4, characters 10-13),
-                (Tapply (([4:10-14], "\\HH\\Contexts\\defaults"), [])))
+               (Rhint (root|pure.php line 4, characters 10-13), (Tunion []))
                };
              ft_ret =
              { et_enforced = false;
@@ -44,7 +43,7 @@
                  ft_implicit_params =
                  { capability =
                    (Rhint (root|pure.php line 8, characters 19-19),
-                    (Tapply (([8:19-20], "\\HH\\Contexts\\defaults"), [])))
+                    (Tunion []))
                    };
                  ft_ret =
                  { et_enforced = false;

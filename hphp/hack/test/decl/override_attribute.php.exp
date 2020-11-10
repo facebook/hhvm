@@ -20,7 +20,7 @@
                 ft_implicit_params =
                 { capability =
                   (Rhint (root|override_attribute.php line 4, characters 19-19),
-                   (Tapply (([4:19-20], "\\HH\\Contexts\\defaults"), [])))
+                   (Tunion []))
                   };
                 ft_ret =
                 { et_enforced = false;
@@ -62,7 +62,7 @@
                  ft_implicit_params =
                  { capability =
                    (Rhint (root|override_attribute.php line 9, characters 19-19),
-                    (Tapply (([9:19-20], "\\HH\\Contexts\\defaults"), [])))
+                    (Tunion []))
                    };
                  ft_ret =
                  { et_enforced = false;

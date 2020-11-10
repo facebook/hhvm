@@ -12,10 +12,7 @@
          m_abstract = false; m_static = true; m_visibility = Public;
          m_name = ([4:26-35], "staticFoo"); m_tparams = [];
          m_where_constraints = []; m_variadic = FVnonVariadic; m_params = [];
-         m_cap =
-         (((HH\Capabilities\RxLocal & HH\Capabilities\IO & HH\Capabilities\CippGlobal & HH\Capabilities\Globals & HH\Capabilities\UnrestrictedMutation)),
-          None);
-         m_unsafe_cap = ((mixed), None);
+         m_cap = ((nothing), None); m_unsafe_cap = ((mixed), None);
          m_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () };
          m_fun_kind = FSync; m_user_attributes = [];
          m_ret = ((void), (Some ([4:39-43], (Hprim Tvoid))));
@@ -24,10 +21,7 @@
           m_abstract = false; m_static = false; m_visibility = Public;
           m_name = ([5:19-30], "instanceFoo"); m_tparams = [];
           m_where_constraints = []; m_variadic = FVnonVariadic;
-          m_params = [];
-          m_cap =
-          (((HH\Capabilities\RxLocal & HH\Capabilities\IO & HH\Capabilities\CippGlobal & HH\Capabilities\Globals & HH\Capabilities\UnrestrictedMutation)),
-           None);
+          m_params = []; m_cap = ((nothing), None);
           m_unsafe_cap = ((mixed), None);
           m_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () };
           m_fun_kind = FSync; m_user_attributes = [];
@@ -55,10 +49,7 @@
           param_name = "$c"; param_expr = None; param_callconv = None;
           param_user_attributes = []; param_visibility = None }
          ];
-       f_cap =
-       (((HH\Capabilities\RxLocal & HH\Capabilities\IO & HH\Capabilities\CippGlobal & HH\Capabilities\Globals & HH\Capabilities\UnrestrictedMutation)),
-        None);
-       f_unsafe_cap = ((mixed), None);
+       f_cap = ((nothing), None); f_unsafe_cap = ((mixed), None);
        f_body =
        { fb_ast =
          [([9:3-15],
@@ -142,10 +133,7 @@
        f_ret = ((void), (Some ([26:21-25], (Hprim Tvoid))));
        f_name = ([26:10-17], "\\rx_test"); f_tparams = [];
        f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
-       f_cap =
-       (((HH\Capabilities\RxLocal & HH\Capabilities\IO & HH\Capabilities\CippGlobal & HH\Capabilities\Globals & HH\Capabilities\UnrestrictedMutation)),
-        None);
-       f_unsafe_cap = ((mixed), None);
+       f_cap = ((nothing), None); f_unsafe_cap = ((mixed), None);
        f_body =
        { fb_ast =
          [([27:3-32],

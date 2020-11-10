@@ -23,7 +23,7 @@
                 ft_implicit_params =
                 { capability =
                   (Rhint (root|accept_disposable.php line 5, characters 19-27),
-                   (Tapply (([5:19-28], "\\HH\\Contexts\\defaults"), [])))
+                   (Tunion []))
                   };
                 ft_ret =
                 { et_enforced = false;
@@ -48,7 +48,7 @@
                  ft_implicit_params =
                  { capability =
                    (Rhint (root|accept_disposable.php line 6, characters 19-21),
-                    (Tapply (([6:19-22], "\\HH\\Contexts\\defaults"), [])))
+                    (Tunion []))
                    };
                  ft_ret =
                  { et_enforced = false;
@@ -90,7 +90,7 @@
               ft_implicit_params =
               { capability =
                 (Rhint (root|accept_disposable.php line 9, characters 10-10),
-                 (Tapply (([9:10-11], "\\HH\\Contexts\\defaults"), [])))
+                 (Tunion []))
                 };
               ft_ret =
               { et_enforced = false;

@@ -21,7 +21,7 @@
               ft_implicit_params =
               { capability =
                 (Rhint (root|auto_ns_use.php line 8, characters 12-20),
-                 (Tapply (([8:12-21], "\\HH\\Contexts\\defaults"), [])))
+                 (Tunion []))
                 };
               ft_ret =
               { et_enforced = false;
@@ -73,7 +73,7 @@
               ft_implicit_params =
               { capability =
                 (Rhint (root|auto_ns_use.php line 12, characters 12-20),
-                 (Tapply (([12:12-21], "\\HH\\Contexts\\defaults"), [])))
+                 (Tunion []))
                 };
               ft_ret =
               { et_enforced = false;

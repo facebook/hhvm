@@ -20,7 +20,7 @@
                 ft_implicit_params =
                 { capability =
                   (Rhint (root|cipp.php line 5, characters 19-29),
-                   (Tapply (([5:19-30], "\\HH\\Contexts\\defaults"), [])))
+                   (Tunion []))
                   };
                 ft_ret =
                 { et_enforced = false;
@@ -44,7 +44,7 @@
                  ft_implicit_params =
                  { capability =
                    (Rhint (root|cipp.php line 8, characters 19-36),
-                    (Tapply (([8:19-37], "\\HH\\Contexts\\defaults"), [])))
+                    (Tunion []))
                    };
                  ft_ret =
                  { et_enforced = false;
@@ -69,7 +69,7 @@
                  ft_implicit_params =
                  { capability =
                    (Rhint (root|cipp.php line 11, characters 19-35),
-                    (Tapply (([11:19-36], "\\HH\\Contexts\\defaults"), [])))
+                    (Tunion []))
                    };
                  ft_ret =
                  { et_enforced = false;
@@ -94,7 +94,7 @@
                  ft_implicit_params =
                  { capability =
                    (Rhint (root|cipp.php line 14, characters 19-32),
-                    (Tapply (([14:19-33], "\\HH\\Contexts\\defaults"), [])))
+                    (Tunion []))
                    };
                  ft_ret =
                  { et_enforced = false;
@@ -119,8 +119,7 @@
               ft_where_constraints = []; ft_params = [];
               ft_implicit_params =
               { capability =
-                (Rhint (root|cipp.php line 18, characters 10-22),
-                 (Tapply (([18:10-23], "\\HH\\Contexts\\defaults"), [])))
+                (Rhint (root|cipp.php line 18, characters 10-22), (Tunion []))
                 };
               ft_ret =
               { et_enforced = false;
@@ -143,8 +142,7 @@
               ft_where_constraints = []; ft_params = [];
               ft_implicit_params =
               { capability =
-                (Rhint (root|cipp.php line 21, characters 10-29),
-                 (Tapply (([21:10-30], "\\HH\\Contexts\\defaults"), [])))
+                (Rhint (root|cipp.php line 21, characters 10-29), (Tunion []))
                 };
               ft_ret =
               { et_enforced = false;
@@ -167,8 +165,7 @@
               ft_where_constraints = []; ft_params = [];
               ft_implicit_params =
               { capability =
-                (Rhint (root|cipp.php line 24, characters 10-28),
-                 (Tapply (([24:10-29], "\\HH\\Contexts\\defaults"), [])))
+                (Rhint (root|cipp.php line 24, characters 10-28), (Tunion []))
                 };
               ft_ret =
               { et_enforced = false;
@@ -192,8 +189,7 @@
               ft_where_constraints = []; ft_params = [];
               ft_implicit_params =
               { capability =
-                (Rhint (root|cipp.php line 27, characters 10-25),
-                 (Tapply (([27:10-26], "\\HH\\Contexts\\defaults"), [])))
+                (Rhint (root|cipp.php line 27, characters 10-25), (Tunion []))
                 };
               ft_ret =
               { et_enforced = false;

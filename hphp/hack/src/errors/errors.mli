@@ -905,19 +905,25 @@ val format_summary :
 
 val try_ : (unit -> 'a) -> (error -> 'a) -> 'a
 
-val try_with_result : (unit -> 'a) -> ('a -> error -> 'a) -> 'a
-
 val try_with_error : (unit -> 'a) -> (unit -> 'a) -> 'a
 
 (* The type of collections of errors *)
 type t [@@deriving eq]
 
+(** Return the list of errors caused by the function passed as parameter
+    along with its result. *)
 val do_ : (unit -> 'a) -> t * 'a
 
+(** Return the list of errors caused by the function passed as parameter
+    along with its result.
+    The phase parameter determine the phase of the returned errors. *)
 val do_with_context : Relative_path.t -> phase -> (unit -> 'a) -> t * 'a
 
 val run_in_context : Relative_path.t -> phase -> (unit -> 'a) -> 'a
 
+(** Turn on lazy decl mode for the duration of the closure.
+    This runs without returning the original state,
+    since we collect it later in do_with_lazy_decls_ *)
 val run_in_decl_mode : Relative_path.t -> (unit -> 'a) -> 'a
 
 (* Run this function with span for the definition being checked.

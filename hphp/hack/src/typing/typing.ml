@@ -5195,9 +5195,9 @@ and class_get_
           (p, mid)
       in
       let try_get_smember_from_constraints env class_info =
-        Errors.try_with_result
+        Errors.try_with_error
           (fun () -> get_smember_from_constraints env class_info)
-          (fun _ _ ->
+          (fun () ->
             TOG.smember_not_found
               p
               ~is_const
@@ -5320,9 +5320,9 @@ and class_get_
           let (env, member_ty) =
             if Cls.has_upper_bounds_on_this_from_constraints class_ then
               let ((env, (member_ty', _)), succeed) =
-                Errors.try_with_result
+                Errors.try_with_error
                   (fun () -> (get_smember_from_constraints env class_, true))
-                  (fun _ _ ->
+                  (fun () ->
                     (* No eligible functions found in constraints *)
                     ((env, (MakeType.mixed Reason.Rnone, [])), false))
               in

@@ -206,10 +206,12 @@ let try_with_result f1 f2 =
     in
     f2 result { code; claim = List.hd_exn l; reasons = List.tl_exn l }
 
+(* Reset errors before running [f] so that we can return the errors
+ * caused by f. These errors are not added in the global list of errors. *)
 let do_ f =
   let error_map_copy = !error_map in
-  let accumulate_errors_copy = !accumulate_errors in
   let applied_fixmes_copy = !applied_fixmes in
+  let accumulate_errors_copy = !accumulate_errors in
   error_map := Relative_path.Map.empty;
   applied_fixmes := Relative_path.Map.empty;
   accumulate_errors := true;
@@ -379,10 +381,9 @@ let set_current_list file_t_map new_list =
 
 let do_with_context path phase f = run_in_context path phase (fun () -> do_ f)
 
-(* Turn on lazy decl mode for the duration of the closure.
-   This runs without returning the original state,
-   since we collect it later in do_with_lazy_decls_
-*)
+(** Turn on lazy decl mode for the duration of the closure.
+    This runs without returning the original state,
+    since we collect it later in do_with_lazy_decls_ *)
 let run_in_decl_mode filename f =
   let old_in_lazy_decl = !in_lazy_decl in
   in_lazy_decl := Some filename;

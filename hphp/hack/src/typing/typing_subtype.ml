@@ -1920,27 +1920,27 @@ and simplify_subtype_has_member
         | None -> []
         | Some targs -> targs
       in
-      let (obj_get_ty, error_prop) =
-        Errors.try_with_result
-          (fun () ->
-            let (env, (obj_get_ty, _tal)) =
-              Typing_object_get.obj_get
-                ~obj_pos:(Reason.to_pos r)
-                ~is_method
-                ~coerce_from_ty:None
-                ~nullsafe
-                ~explicit_targs
-                env
-                ty_sub
-                class_id
-                name
-                subtype_env.on_error
-            in
-            (obj_get_ty, valid env))
-          (fun (obj_get_ty, (env, _)) error ->
-            (obj_get_ty, invalid env ~fail:(fun () -> Errors.add_error error)))
+      let (errors, (env, (obj_get_ty, _tal))) =
+        Errors.do_ (fun () ->
+            Typing_object_get.obj_get
+              ~obj_pos:(Reason.to_pos r)
+              ~is_method
+              ~coerce_from_ty:None
+              ~nullsafe
+              ~explicit_targs
+              env
+              ty_sub
+              class_id
+              name
+              subtype_env.on_error)
       in
-      error_prop &&& simplify_subtype ~subtype_env ~this_ty obj_get_ty member_ty)
+      let prop =
+        if Errors.is_empty errors then
+          valid env
+        else
+          invalid env ~fail:(fun () -> Errors.merge_into_current errors)
+      in
+      prop &&& simplify_subtype ~subtype_env ~this_ty obj_get_ty member_ty)
 
 and simplify_subtype_variance
     ~(subtype_env : subtype_env)

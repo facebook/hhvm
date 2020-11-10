@@ -210,6 +210,10 @@ let collect_legacy_decls ctx classes =
 type saved_shallow_decls = { classes: Shallow_decl_defs.shallow_class SMap.t }
 [@@deriving show]
 
+let class_naming_and_decl ctx c =
+  let c = Errors.ignore_ (fun () -> Naming.class_ ctx c) in
+  Shallow_decl.class_ ctx c
+
 let collect_shallow_decls ctx workers classnames =
   let classnames = SSet.elements classnames in
   (* We're only going to fetch the shallow-decls that were explicitly listed;
@@ -226,7 +230,7 @@ let collect_shallow_decls ctx workers classnames =
           Hh_logger.log "Missing shallow requested class %s" cid;
           acc
         | Some ast ->
-          let data = Shallow_classes_heap.class_naming_and_decl ctx ast in
+          let data = class_naming_and_decl ctx ast in
           SMap.add acc ~key:cid ~data)
   in
   (* The 'classnames' came from a SSet, and therefore all elements are unique.

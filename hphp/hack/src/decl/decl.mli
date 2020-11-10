@@ -20,27 +20,6 @@
 val make_env :
   sh:SharedMem.uses -> Provider_context.t -> Relative_path.t -> unit
 
-val declare_const_in_file :
-  write_shmem:bool ->
-  Provider_context.t ->
-  Relative_path.t ->
-  string ->
-  Typing_defs.decl_ty
-
-val declare_record_def_in_file :
-  write_shmem:bool ->
-  Provider_context.t ->
-  Relative_path.t ->
-  string ->
-  Typing_defs.record_def_type
-
-val declare_typedef_in_file :
-  write_shmem:bool ->
-  Provider_context.t ->
-  Relative_path.t ->
-  string ->
-  Typing_defs.typedef_type
-
 (** /!\ LEGACY DECL ONLY
     Check whether the class is already in the heap and if not,
     declare it, its members and its ancestors and add them to
@@ -51,14 +30,3 @@ val declare_folded_class_in_file :
   Relative_path.t ->
   string ->
   Decl_defs.decl_class_type * Decl_heap.class_members option
-
-val declare_fun_in_file :
-  write_shmem:bool ->
-  Provider_context.t ->
-  Relative_path.t ->
-  string ->
-  Typing_defs.fun_elt
-
-val start_tracking : unit -> unit
-
-val stop_tracking : unit -> FileInfo.names

@@ -32,6 +32,8 @@ type typedef_decl = Typing_defs.typedef_type
 
 type gconst_decl = Typing_defs.decl_ty
 
+val with_decl_tracking : (unit -> 'a) -> 'a * FileInfo.names
+
 val prepare_for_typecheck :
   Provider_context.t -> Relative_path.t -> string -> unit
 

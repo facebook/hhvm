@@ -56,29 +56,21 @@ let rec shallow_declare_ast ctx decls prog =
       | SetNamespaceEnv _ -> decls
       | FileAttributes _ -> decls
       | Fun f ->
-        let (name, decl) =
-          Decl_nast.fun_naming_and_decl ~write_shmem:false ctx f
-        in
+        let (name, decl) = Decl_nast.fun_naming_and_decl ctx f in
         (name, Shallow_decl_defs.Fun decl) :: decls
       | Class c ->
         let decl = Shallow_classes_provider.decl ~use_cache:false ctx c in
         let (_, name) = decl.Shallow_decl_defs.sc_name in
         (name, Shallow_decl_defs.Class decl) :: decls
       | RecordDef rd ->
-        let (name, decl) =
-          Decl_nast.record_def_naming_and_decl ~write_shmem:false ctx rd
-        in
+        let (name, decl) = Decl_nast.record_def_naming_and_decl ctx rd in
         (name, Shallow_decl_defs.Record decl) :: decls
       | Typedef typedef ->
-        let (name, decl) =
-          Decl_nast.typedef_naming_and_decl ~write_shmem:false ctx typedef
-        in
+        let (name, decl) = Decl_nast.typedef_naming_and_decl ctx typedef in
         (name, Shallow_decl_defs.Typedef decl) :: decls
       | Stmt _ -> decls
       | Constant cst ->
-        let (name, ty) =
-          Decl_nast.const_naming_and_decl ~write_shmem:false ctx cst
-        in
+        let (name, ty) = Decl_nast.const_naming_and_decl ctx cst in
         let decl = Typing_defs.{ cd_pos = fst cst.cst_name; cd_type = ty } in
         (name, Shallow_decl_defs.Const decl) :: decls)
 

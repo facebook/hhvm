@@ -11,31 +11,13 @@ val fun_decl_in_env :
   Decl_env.env -> is_lambda:bool -> Nast.fun_ -> Typing_defs.fun_elt
 
 val fun_naming_and_decl :
-  write_shmem:bool ->
-  Provider_context.t ->
-  Nast.fun_ ->
-  string * Typing_defs.fun_elt
+  Provider_context.t -> Nast.fun_ -> string * Typing_defs.fun_elt
 
 val record_def_naming_and_decl :
-  write_shmem:bool ->
-  Provider_context.t ->
-  Nast.record_def ->
-  string * Typing_defs.record_def_type
-
-val record_def_decl_if_missing :
-  sh:SharedMem.uses -> Provider_context.t -> Nast.record_def -> unit
+  Provider_context.t -> Nast.record_def -> string * Typing_defs.record_def_type
 
 val typedef_naming_and_decl :
-  write_shmem:bool ->
-  Provider_context.t ->
-  Nast.typedef ->
-  string * Typing_defs.typedef_type
-
-val typedef_decl_if_missing :
-  sh:SharedMem.uses -> Provider_context.t -> Nast.typedef -> unit
+  Provider_context.t -> Nast.typedef -> string * Typing_defs.typedef_type
 
 val const_naming_and_decl :
-  write_shmem:bool ->
-  Provider_context.t ->
-  Nast.gconst ->
-  string * Typing_defs.decl_ty
+  Provider_context.t -> Nast.gconst -> string * Typing_defs.decl_ty

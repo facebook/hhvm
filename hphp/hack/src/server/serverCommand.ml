@@ -243,17 +243,6 @@ let predeclare_ide_deps
           File_provider.local_changes_pop_sharedmem_stack ()
         end
 
-(* Run f while collecting all declarations that it caused. *)
-let with_decl_tracking f =
-  try
-    Decl.start_tracking ();
-    let res = f () in
-    (res, Decl.stop_tracking ())
-  with e ->
-    let stack = Caml.Printexc.get_raw_backtrace () in
-    let (_ : FileInfo.names) = Decl.stop_tracking () in
-    Caml.Printexc.raise_with_backtrace e stack
-
 (* Construct a continuation that will finish handling the command and update
  * the environment. Server can execute the continuation immediately, or store it
  * to be completed later (when full recheck is completed, when workers are
@@ -290,7 +279,8 @@ let actually_handle genv client msg full_recheck_needed ~is_stale env =
     Full_fidelity_parser_profiling.start_profiling ();
     let ((new_env, response), declared_names) =
       try
-        with_decl_tracking @@ fun () -> ServerRpc.handle ~is_stale genv env cmd
+        Decl_provider.with_decl_tracking @@ fun () ->
+        ServerRpc.handle ~is_stale genv env cmd
       with e ->
         let stack = Caml.Printexc.get_raw_backtrace () in
         if ServerCommandTypes.is_critical_rpc cmd then

@@ -29,6 +29,74 @@ type typedef_decl = Typing_defs.typedef_type
 
 type gconst_decl = Typing_defs.decl_ty
 
+let tracked_names : FileInfo.names option ref = ref None
+
+let start_tracking () : unit = tracked_names := Some FileInfo.empty_names
+
+let record_fun (s : string) : unit =
+  match !tracked_names with
+  | None -> ()
+  | Some names ->
+    tracked_names :=
+      Some FileInfo.{ names with n_funs = SSet.add s names.n_funs }
+
+let record_class (s : string) : unit =
+  match !tracked_names with
+  | None -> ()
+  | Some names ->
+    tracked_names :=
+      Some FileInfo.{ names with n_classes = SSet.add s names.n_classes }
+
+let record_record_def (s : string) : unit =
+  match !tracked_names with
+  | None -> ()
+  | Some names ->
+    tracked_names :=
+      Some
+        FileInfo.{ names with n_record_defs = SSet.add s names.n_record_defs }
+
+let record_typedef (s : string) : unit =
+  match !tracked_names with
+  | None -> ()
+  | Some names ->
+    tracked_names :=
+      Some FileInfo.{ names with n_types = SSet.add s names.n_types }
+
+let record_const (s : string) : unit =
+  match !tracked_names with
+  | None -> ()
+  | Some names ->
+    tracked_names :=
+      Some FileInfo.{ names with n_consts = SSet.add s names.n_consts }
+
+let stop_tracking () : FileInfo.names =
+  let res =
+    match !tracked_names with
+    | Some names -> names
+    | None ->
+      failwith
+        "Called Decl_provider.stop_tracking without corresponding start_tracking"
+  in
+  tracked_names := None;
+  res
+
+(* Run f while collecting the names of all declarations that it fetched. *)
+let with_decl_tracking f =
+  try
+    start_tracking ();
+    let res = f () in
+    (res, stop_tracking ())
+  with e ->
+    let stack = Caml.Printexc.get_raw_backtrace () in
+    let (_ : FileInfo.names) = stop_tracking () in
+    Caml.Printexc.raise_with_backtrace e stack
+
+let err_not_found (file : Relative_path.t) (name : string) : 'a =
+  let err_str =
+    Printf.sprintf "%s not found in %s" name (Relative_path.to_absolute file)
+  in
+  raise (Decl_defs.Decl_not_found err_str)
+
 (** This cache caches the result of full class computations
       (the class merged with all its inherited members.)  *)
 module Cache =
@@ -79,6 +147,7 @@ let get_class
           | None -> None
           | Some v ->
             Cache.add class_name v;
+            record_class class_name;
             Some (counter, v)
         end
     end
@@ -97,7 +166,18 @@ let get_class
     | None -> None
     | Some obj ->
       let v : Typing_classes_heap.class_t = Obj.obj obj in
+      record_class class_name;
       Some (counter, v))
+
+let declare_fun_in_file
+    (ctx : Provider_context.t) (file : Relative_path.t) (name : string) :
+    Typing_defs.fun_elt =
+  match Ast_provider.find_fun_in_file ctx file name with
+  | Some f ->
+    let (name, decl) = Decl_nast.fun_naming_and_decl ctx f in
+    record_fun name;
+    decl
+  | None -> err_not_found file name
 
 let get_fun
     ?(tracing_info : Decl_counters.tracing_info option)
@@ -114,8 +194,9 @@ let get_fun
       | Some filename ->
         let ft =
           Errors.run_in_decl_mode filename (fun () ->
-              Decl.declare_fun_in_file ~write_shmem:true ctx filename fun_name)
+              declare_fun_in_file ctx filename fun_name)
         in
+        Decl_heap.Funs.add fun_name ft;
         Some ft
       | None -> None))
   | Provider_backend.Local_memory { Provider_backend.decl_cache; _ } ->
@@ -127,16 +208,22 @@ let get_fun
         | Some filename ->
           let ft =
             Errors.run_in_decl_mode filename (fun () ->
-                Decl.declare_fun_in_file
-                  ~write_shmem:false
-                  ctx
-                  filename
-                  fun_name)
+                declare_fun_in_file ctx filename fun_name)
           in
           Some ft
         | None -> None)
   | Provider_backend.Decl_service { decl; _ } ->
     Decl_service_client.rpc_get_fun decl fun_name
+
+let declare_typedef_in_file
+    (ctx : Provider_context.t) (file : Relative_path.t) (name : string) :
+    Typing_defs.typedef_type =
+  match Ast_provider.find_typedef_in_file ctx file name with
+  | Some t ->
+    let (name, decl) = Decl_nast.typedef_naming_and_decl ctx t in
+    record_typedef name;
+    decl
+  | None -> err_not_found file name
 
 let get_typedef
     ?(tracing_info : Decl_counters.tracing_info option)
@@ -153,12 +240,10 @@ let get_typedef
       | Some filename ->
         let tdecl =
           Errors.run_in_decl_mode filename (fun () ->
-              Decl.declare_typedef_in_file
-                ~write_shmem:true
-                ctx
-                filename
-                typedef_name)
+              declare_typedef_in_file ctx filename typedef_name)
         in
+        Decl_heap.Typedefs.add typedef_name tdecl;
+        record_typedef typedef_name;
         Some tdecl
       | None -> None))
   | Provider_backend.Local_memory { Provider_backend.decl_cache; _ } ->
@@ -170,16 +255,22 @@ let get_typedef
         | Some filename ->
           let tdecl =
             Errors.run_in_decl_mode filename (fun () ->
-                Decl.declare_typedef_in_file
-                  ~write_shmem:false
-                  ctx
-                  filename
-                  typedef_name)
+                declare_typedef_in_file ctx filename typedef_name)
           in
           Some tdecl
         | None -> None)
   | Provider_backend.Decl_service { decl; _ } ->
     Decl_service_client.rpc_get_typedef decl typedef_name
+
+let declare_record_def_in_file
+    (ctx : Provider_context.t) (file : Relative_path.t) (name : string) :
+    Typing_defs.record_def_type =
+  match Ast_provider.find_record_def_in_file ctx file name with
+  | Some rd ->
+    let (name, decl) = Decl_nast.record_def_naming_and_decl ctx rd in
+    record_record_def name;
+    decl
+  | None -> err_not_found file name
 
 let get_record_def
     ?(tracing_info : Decl_counters.tracing_info option)
@@ -194,15 +285,13 @@ let get_record_def
     | None ->
       (match Naming_provider.get_record_def_path ctx record_name with
       | Some filename ->
-        let tdecl =
+        let record_decl =
           Errors.run_in_decl_mode filename (fun () ->
-              Decl.declare_record_def_in_file
-                ~write_shmem:true
-                ctx
-                filename
-                record_name)
+              declare_record_def_in_file ctx filename record_name)
         in
-        Some tdecl
+        Decl_heap.RecordDefs.add record_name record_decl;
+        record_record_def record_name;
+        Some record_decl
       | None -> None))
   | Provider_backend.Local_memory { Provider_backend.decl_cache; _ } ->
     Provider_backend.Decl_cache.find_or_add
@@ -213,16 +302,23 @@ let get_record_def
         | Some filename ->
           let rdecl =
             Errors.run_in_decl_mode filename (fun () ->
-                Decl.declare_record_def_in_file
-                  ~write_shmem:false
-                  ctx
-                  filename
-                  record_name)
+                declare_record_def_in_file ctx filename record_name)
           in
+          record_record_def record_name;
           Some rdecl
         | None -> None)
   | Provider_backend.Decl_service { decl; _ } ->
     Decl_service_client.rpc_get_record_def decl record_name
+
+let declare_const_in_file
+    (ctx : Provider_context.t) (file : Relative_path.t) (name : string) :
+    Typing_defs.decl_ty =
+  match Ast_provider.find_gconst_in_file ctx file name with
+  | Some cst ->
+    let (name, decl) = Decl_nast.const_naming_and_decl ctx cst in
+    record_const name;
+    decl
+  | None -> err_not_found file name
 
 let get_gconst
     ?(tracing_info : Decl_counters.tracing_info option)
@@ -239,12 +335,10 @@ let get_gconst
       | Some filename ->
         let gconst =
           Errors.run_in_decl_mode filename (fun () ->
-              Decl.declare_const_in_file
-                ~write_shmem:true
-                ctx
-                filename
-                gconst_name)
+              declare_const_in_file ctx filename gconst_name)
         in
+        Decl_heap.GConsts.add gconst_name gconst;
+        record_const gconst_name;
         Some gconst
       | None -> None))
   | Provider_backend.Local_memory { Provider_backend.decl_cache; _ } ->
@@ -256,12 +350,9 @@ let get_gconst
         | Some filename ->
           let gconst =
             Errors.run_in_decl_mode filename (fun () ->
-                Decl.declare_const_in_file
-                  ~write_shmem:false
-                  ctx
-                  filename
-                  gconst_name)
+                declare_const_in_file ctx filename gconst_name)
           in
+          record_const gconst_name;
           Some gconst
         | None -> None)
   | Provider_backend.Decl_service { decl; _ } ->

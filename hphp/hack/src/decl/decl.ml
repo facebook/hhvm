@@ -9,60 +9,6 @@
 
 open Hh_prelude
 
-let tracked_names : FileInfo.names option ref = ref None
-
-let start_tracking () : unit = tracked_names := Some FileInfo.empty_names
-
-let record_fun (s : string) : unit =
-  match !tracked_names with
-  | None -> ()
-  | Some names ->
-    tracked_names :=
-      Some FileInfo.{ names with n_funs = SSet.add s names.n_funs }
-
-let record_class (s : string) : unit =
-  match !tracked_names with
-  | None -> ()
-  | Some names ->
-    tracked_names :=
-      Some FileInfo.{ names with n_classes = SSet.add s names.n_classes }
-
-let record_record_def (s : string) : unit =
-  match !tracked_names with
-  | None -> ()
-  | Some names ->
-    tracked_names :=
-      Some
-        FileInfo.{ names with n_record_defs = SSet.add s names.n_record_defs }
-
-let record_typedef (s : string) : unit =
-  match !tracked_names with
-  | None -> ()
-  | Some names ->
-    tracked_names :=
-      Some FileInfo.{ names with n_types = SSet.add s names.n_types }
-
-let record_const (s : string) : unit =
-  match !tracked_names with
-  | None -> ()
-  | Some names ->
-    tracked_names :=
-      Some FileInfo.{ names with n_consts = SSet.add s names.n_consts }
-
-let stop_tracking () : FileInfo.names =
-  let res =
-    match !tracked_names with
-    | None ->
-      Hh_logger.log
-        "Warning: called Decl.stop_tracking without corresponding start_tracking";
-      FileInfo.empty_names
-    | Some names -> names
-  in
-  tracked_names := None;
-  res
-
-(*****************************************************************************)
-
 let shallow_decl_enabled (ctx : Provider_context.t) : bool =
   TypecheckerOptions.shallow_class_decl (Provider_context.get_tcopt ctx)
 
@@ -88,19 +34,19 @@ let rec name_and_declare_types_program
       | SetNamespaceEnv _ -> ()
       | FileAttributes _ -> ()
       | Fun f ->
-        let (_ : string * Typing_defs.fun_elt) =
-          Decl_nast.fun_naming_and_decl ~write_shmem:true ctx f
-        in
-        ()
+        let (name, decl) = Decl_nast.fun_naming_and_decl ctx f in
+        Decl_heap.Funs.add name decl
       | Class c -> class_decl_if_missing ~sh ctx c
-      | RecordDef rd -> Decl_nast.record_def_decl_if_missing ~sh ctx rd
-      | Typedef typedef -> Decl_nast.typedef_decl_if_missing ~sh ctx typedef
+      | RecordDef rd ->
+        let (name, decl) = Decl_nast.record_def_naming_and_decl ctx rd in
+        Decl_heap.RecordDefs.add name decl
+      | Typedef typedef ->
+        let (name, decl) = Decl_nast.typedef_naming_and_decl ctx typedef in
+        Decl_heap.Typedefs.add name decl
       | Stmt _ -> ()
       | Constant cst ->
-        let (_ : string * Typing_defs.decl_ty) =
-          Decl_nast.const_naming_and_decl ~write_shmem:true ctx cst
-        in
-        ())
+        let (name, decl) = Decl_nast.const_naming_and_decl ctx cst in
+        Decl_heap.GConsts.add name decl)
 
 let make_env
     ~(sh : SharedMem.uses) (ctx : Provider_context.t) (fn : Relative_path.t) :
@@ -123,57 +69,6 @@ let declare_folded_class_in_file
     =
   match Ast_provider.find_class_in_file ctx file name with
   | Some cls ->
-    let (name, decl) = Decl_folded_class.class_decl_if_missing ~sh ctx cls in
-    record_class name;
-    decl
-  | None -> err_not_found file name
-
-let declare_fun_in_file
-    ~(write_shmem : bool)
-    (ctx : Provider_context.t)
-    (file : Relative_path.t)
-    (name : string) : Typing_defs.fun_elt =
-  match Ast_provider.find_fun_in_file ctx file name with
-  | Some f ->
-    let (name, decl) = Decl_nast.fun_naming_and_decl ~write_shmem ctx f in
-    record_fun name;
-    decl
-  | None -> err_not_found file name
-
-let declare_record_def_in_file
-    ~(write_shmem : bool)
-    (ctx : Provider_context.t)
-    (file : Relative_path.t)
-    (name : string) : Typing_defs.record_def_type =
-  match Ast_provider.find_record_def_in_file ctx file name with
-  | Some rd ->
-    let (name, decl) =
-      Decl_nast.record_def_naming_and_decl ~write_shmem ctx rd
-    in
-    record_record_def name;
-    decl
-  | None -> err_not_found file name
-
-let declare_typedef_in_file
-    ~(write_shmem : bool)
-    (ctx : Provider_context.t)
-    (file : Relative_path.t)
-    (name : string) : Typing_defs.typedef_type =
-  match Ast_provider.find_typedef_in_file ctx file name with
-  | Some t ->
-    let (name, decl) = Decl_nast.typedef_naming_and_decl ~write_shmem ctx t in
-    record_typedef name;
-    decl
-  | None -> err_not_found file name
-
-let declare_const_in_file
-    ~(write_shmem : bool)
-    (ctx : Provider_context.t)
-    (file : Relative_path.t)
-    (name : string) : Typing_defs.decl_ty =
-  match Ast_provider.find_gconst_in_file ctx file name with
-  | Some cst ->
-    let (name, decl) = Decl_nast.const_naming_and_decl ~write_shmem ctx cst in
-    record_const name;
+    let (_name, decl) = Decl_folded_class.class_decl_if_missing ~sh ctx cls in
     decl
   | None -> err_not_found file name

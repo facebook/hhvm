@@ -206,14 +206,26 @@ let add_property_defn_fact ctx source_map prop decl_id progress =
   in
   add_fact PropertyDefinition (JSON_Object json_fields) progress
 
-let add_class_const_defn_fact ctx const decl_id progress =
+let add_class_const_defn_fact ctx source_map const decl_id progress =
   let base_fields = [("declaration", build_id_json decl_id)] in
   let json_fields =
-    match const.cc_type with
+    match const.cc_expr with
     | None -> base_fields
+    | Some ((expr_pos, _), _) ->
+      let fp = Relative_path.to_absolute (Pos.filename expr_pos) in
+      let value =
+        match SMap.find_opt fp source_map with
+        | Some st -> source_at_span st expr_pos
+        | None -> ""
+      in
+      ("value", JSON_String value) :: base_fields
+  in
+  let json_fields =
+    match const.cc_type with
+    | None -> json_fields
     | Some h ->
       let ty = get_type_from_hint ctx h in
-      ("type", build_type_json_nested ty) :: base_fields
+      ("type", build_type_json_nested ty) :: json_fields
   in
   add_fact ClassConstDefinition (JSON_Object json_fields) progress
 

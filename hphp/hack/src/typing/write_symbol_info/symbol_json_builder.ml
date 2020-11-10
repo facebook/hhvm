@@ -72,7 +72,7 @@ let process_container_decl ctx source_map con (all_decls, progress) =
         let (decl_id, prog) =
           process_decl_loc
             (add_class_const_decl_fact con_type con_decl_id)
-            (add_class_const_defn_fact ctx)
+            (add_class_const_defn_fact ctx source_map)
             build_class_const_decl_json_ref
             pos
             None

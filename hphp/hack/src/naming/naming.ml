@@ -264,7 +264,7 @@ end = struct
   let lvar (genv, env) (p, x) =
     let (p, ident) =
       if
-        String.(SN.Superglobals.globals = x || SN.Superglobals.is_superglobal x)
+        SN.Superglobals.is_superglobal x
         && FileInfo.equal_mode genv.in_mode FileInfo.Mpartial
       then
         (p, Local_id.make_unscoped x)

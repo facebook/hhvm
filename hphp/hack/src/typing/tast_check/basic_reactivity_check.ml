@@ -670,10 +670,7 @@ let check =
             match e with
             | (_, Lvar (p, id)) ->
               let local_id = Local_id.to_string id in
-              if
-                SN.Superglobals.is_superglobal local_id
-                || String.equal local_id SN.Superglobals.globals
-              then
+              if SN.Superglobals.is_superglobal local_id then
                 Errors.superglobal_in_reactive_context p local_id
             | (_, Class_get _) ->
               Errors.static_property_in_reactive_context (get_position expr);

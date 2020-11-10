@@ -366,7 +366,7 @@ let process_xrefs ctx (tasts : Tast.program list) progress =
         prog)
 
 let progress_to_json progress =
-  let ver = 3 in
+  let ver = 4 in
   let preds =
     (* The order is the reverse of how these items appear in the JSON,
     which is significant because later entries can refer to earlier ones

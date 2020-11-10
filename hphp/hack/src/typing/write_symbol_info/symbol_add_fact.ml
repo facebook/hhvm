@@ -207,12 +207,7 @@ let add_property_defn_fact ctx source_map prop decl_id progress =
   add_fact PropertyDefinition (JSON_Object json_fields) progress
 
 let add_class_const_defn_fact ctx const decl_id progress =
-  let base_fields =
-    [
-      ("declaration", build_id_json decl_id);
-      ("isAbstract", JSON_Bool (is_none const.cc_expr));
-    ]
-  in
+  let base_fields = [("declaration", build_id_json decl_id)] in
   let json_fields =
     match const.cc_type with
     | None -> base_fields

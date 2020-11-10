@@ -5,19 +5,13 @@ module C = Configurator.V1
 
 let () =
   C.main ~name:"hphpdir" (fun (c : C.t) ->
-      let split s =
+      let _split s =
         if s = "" then
           []
         else
           String.split_on_char ' ' s
       in
-      let flags =
-        match Sys.getenv "FB_LD_OPTS" with
-        | t ->
-          let flags = split t in
-          List.fold_left (fun acc x -> "-ccopt" :: x :: acc) [] flags
-        | exception Not_found -> []
-      in
+      let flags = ["-ccopt"; "-lpthread"] in
       let flags =
         match C.ocaml_config_var_exn c "system" with
         (* ocaml builds with `-no_compact_unwind`, which breaks libunwind on

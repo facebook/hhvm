@@ -1,10 +1,10 @@
 File "splice_state3.php", line 21, characters 7-35:
 Expected `ExprTree<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "splice_state3.php", line 12, characters 25-53:
+  File "splice_state3.php", line 12, characters 25-62:
   But got `dynamic` because it is an unenforceable type
 File "splice_state3.php", line 23, characters 7-33:
 Expected `ExprTree<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "splice_state3.php", line 12, characters 25-53:
+  File "splice_state3.php", line 12, characters 25-62:
   But got `dynamic` because it is an unenforceable type
 File "splice_state3.php", line 23, characters 23-31:
 Typing error (Typing[4110])

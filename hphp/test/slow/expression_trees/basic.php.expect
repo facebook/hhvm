@@ -1,1 +1,1 @@
-1 + foo("bar", )
+1 __plus foo("bar", )

@@ -1,1 +1,4 @@
-No errors
+File "splice_variable4.php", line 15, characters 5-10:
+You are trying to access the method `__plus` but this is an int (Typing[4062])
+  File "splice_variable4.php", line 10, characters 8-8:
+  Definition is here

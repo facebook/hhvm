@@ -140,7 +140,7 @@
                                                                     ([4:8-19],
                                                                     (Id
                                                                     ([4:8-19],
-                                                                    "plus"))),
+                                                                    "methCall"))),
                                                                     OG_nullthrows
                                                                     ))),
                                                                  [],
@@ -174,7 +174,7 @@
                                                                     ([4:8-14],
                                                                     (Id
                                                                     ([4:8-14],
-                                                                    "plus"))),
+                                                                    "methCall"))),
                                                                     OG_nullthrows
                                                                     ))), 
                                                                     [],
@@ -233,7 +233,14 @@
                                                                     ([4:8-9],
                                                                     $__0)))],
                                                                     None)));
+                                                                    ([Pos.none],
+                                                                    (String
+                                                                    "__plus"));
                                                                     ([4:12-14],
+                                                                    (ValCollection (
+                                                                    Vec,
+                                                                    None,
+                                                                    [([4:12-14],
                                                                     (Call (
                                                                     ([4:12-14],
                                                                     (Obj_get (
@@ -270,11 +277,20 @@
                                                                     (Lvar
                                                                     ([4:12-14],
                                                                     $__1)))],
-                                                                    None)))],
+                                                                    None)))]
+                                                                    )))],
                                                                     None)));
+                                                                   ([Pos.none],
+                                                                    (
+                                                                    String
+                                                                    "__plus"));
                                                                    ([4:17-19],
                                                                     (
-                                                                    Call (
+                                                                    ValCollection (
+                                                                    Vec,
+                                                                    None,
+                                                                    [([4:17-19],
+                                                                    (Call (
                                                                     ([4:17-19],
                                                                     (Obj_get (
                                                                     ([4:17-19],
@@ -309,7 +325,8 @@
                                                                     ([Pos.none],
                                                                     (String
                                                                     "$x"))],
-                                                                    None)))
+                                                                    None)))]
+                                                                    )))
                                                                    ],
                                                                  None))))))
                                                            ];
@@ -365,28 +382,46 @@
                                                            (Return
                                                               (Some (
                                                               [4:8-19],
-                                                              (Binop (Plus,
-                                                                 ([4:8-14],
-                                                                  (Binop (
-                                                                    Plus,
+                                                              (Call (
+                                                                 ([4:8-19],
+                                                                  (Obj_get (
+                                                                    ([4:8-14],
+                                                                    (Call (
+                                                                    ([4:8-14],
+                                                                    (Obj_get (
                                                                     ([4:8-9],
                                                                     (ET_Splice
                                                                     ([4:8-9],
                                                                     (Lvar
                                                                     ([4:8-9],
                                                                     $__0))))),
-                                                                    ([4:12-14],
+                                                                    ([4:8-14],
+                                                                    (Id
+                                                                    ([4:8-14],
+                                                                    "__plus"))),
+                                                                    OG_nullthrows
+                                                                    ))), 
+                                                                    [],
+                                                                    [([4:12-14],
                                                                     (ET_Splice
                                                                     ([4:12-14],
                                                                     (Lvar
                                                                     ([4:12-14],
                                                                     $__1)))))
+                                                                    ], None))),
+                                                                    ([4:8-19],
+                                                                    (Id
+                                                                    ([4:8-19],
+                                                                    "__plus"))),
+                                                                    OG_nullthrows
                                                                     ))),
-                                                                 ([4:17-19],
-                                                                  (Lvar
+                                                                 [],
+                                                                 [([4:17-19],
+                                                                   (Lvar
                                                                     ([4:17-19],
                                                                     $x)))
-                                                                 ))))))
+                                                                   ],
+                                                                 None))))))
                                                            ];
                                                          fb_annotation =
                                                          Named };

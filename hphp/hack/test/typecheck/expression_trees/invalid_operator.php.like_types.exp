@@ -12,7 +12,7 @@ File "invalid_operator.php", line 26, characters 22-39:
 Unsupported syntax for expression trees. (Parsing[1002])
 File "invalid_operator.php", line 27, characters 37-61:
 Unsupported syntax for expression trees. (Parsing[1002])
-File "invalid_operator.php", line 30, characters 18-19:
+File "invalid_operator.php", line 30, characters 25-26:
 Unsupported syntax for expression trees. (Parsing[1002])
 File "invalid_operator.php", line 33, characters 32-36:
 Unsupported syntax for expression trees. (Parsing[1002])
@@ -24,37 +24,41 @@ File "invalid_operator.php", line 23, characters 33-33:
 Variable `$__0` is undefined, or not always defined. (Naming[2050])
 File "invalid_operator.php", line 13, characters 13-13:
 Expected `ExprTree<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "invalid_operator.php", line 45, characters 46-76:
+  File "invalid_operator.php", line 47, characters 6-43:
   But got `dynamic` because it is an unenforceable type
 File "invalid_operator.php", line 13, characters 18-18:
 Expected `ExprTree<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "invalid_operator.php", line 45, characters 46-76:
+  File "invalid_operator.php", line 47, characters 6-43:
   But got `dynamic` because it is an unenforceable type
+File "invalid_operator.php", line 20, characters 13-24:
+You are trying to access the method `__plus` but this is an int (Typing[4062])
+  File "invalid_operator.php", line 9, characters 7-9:
+  Definition is here
 File "invalid_operator.php", line 20, characters 24-24:
 Expected `ExprTree<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "invalid_operator.php", line 45, characters 46-76:
+  File "invalid_operator.php", line 47, characters 6-43:
   But got `dynamic` because it is an unenforceable type
 File "invalid_operator.php", line 26, characters 34-37:
 Expected `ExprTree<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "invalid_operator.php", line 49, characters 5-36:
+  File "invalid_operator.php", line 51, characters 5-43:
   But got `dynamic` because it is an unenforceable type
-File "invalid_operator.php", line 30, characters 23-23:
+File "invalid_operator.php", line 30, characters 30-30:
 Expected `ExprTree<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "invalid_operator.php", line 45, characters 46-76:
+  File "invalid_operator.php", line 47, characters 6-43:
   But got `dynamic` because it is an unenforceable type
 File "invalid_operator.php", line 33, characters 35-35:
 Expected `ExprTree<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "invalid_operator.php", line 45, characters 46-76:
+  File "invalid_operator.php", line 47, characters 6-43:
   But got `dynamic` because it is an unenforceable type
 File "invalid_operator.php", line 33, characters 40-40:
 Expected `ExprTree<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "invalid_operator.php", line 45, characters 46-76:
+  File "invalid_operator.php", line 47, characters 6-43:
   But got `dynamic` because it is an unenforceable type
 File "invalid_operator.php", line 34, characters 42-42:
 Expected `ExprTree<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "invalid_operator.php", line 45, characters 46-76:
+  File "invalid_operator.php", line 47, characters 6-43:
   But got `dynamic` because it is an unenforceable type
 File "invalid_operator.php", line 37, characters 34-34:
 Expected `ExprTree<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "invalid_operator.php", line 45, characters 46-76:
+  File "invalid_operator.php", line 47, characters 6-43:
   But got `dynamic` because it is an unenforceable type

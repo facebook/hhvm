@@ -2,9 +2,9 @@ File "hover_type.php", line 7, characters 3-14:
   exact ExprTree<[unresolved], [unresolved], [unresolved]>
 File "hover_type.php", line 6, characters 14-14:
 Expected `ExprTree<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "hover_type.php", line 15, characters 46-76:
+  File "hover_type.php", line 17, characters 6-43:
   But got `dynamic` because it is an unenforceable type
 File "hover_type.php", line 6, characters 18-18:
 Expected `ExprTree<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "hover_type.php", line 15, characters 46-76:
+  File "hover_type.php", line 17, characters 6-43:
   But got `dynamic` because it is an unenforceable type

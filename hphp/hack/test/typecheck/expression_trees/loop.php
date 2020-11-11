@@ -3,7 +3,7 @@
 <<file:__EnableUnstableFeatures('expression_trees')>>
 
 function bar(): void {}
-function baz(int $_): void {}
+function baz(ExampleInt $_): void {}
 
 function foo(): void {
   $loop = Code`() ==> { while(true) { bar(); } }`;
@@ -15,11 +15,13 @@ function foo(): void {
 final class Code {
   const type TAst = mixed;
   // Lifting literals.
-  public static function intLiteral(int $_): ExprTree<this, this::TAst, int> {
+  public static function intLiteral(
+    int $_,
+  ): ExprTree<this, this::TAst, ExampleInt> {
     throw new Exception();
   }
   public static function boolLiteral(bool $_):
-    ExprTree<this, this::TAst, bool>
+    ExprTree<this, this::TAst, ExampleBool>
   {
     throw new Exception();
   }
@@ -45,27 +47,16 @@ final class Code {
   }
 
   // Operators
-  public function plus(
+  public function methCall(
     ?ExprPos $_,
     this::TAst $_,
-    this::TAst $_,
+    string $_,
+    vec<this::TAst> $_,
   ): this::TAst {
     throw new Exception();
   }
-  public function ampamp(
-    ?ExprPos $_,
-    this::TAst $_,
-    this::TAst $_,
-  ): this::TAst {
-    throw new Exception();
-  }
-  public function barbar(
-    ?ExprPos $_,
-    this::TAst $_,
-    this::TAst $_,
-  ): this::TAst {
-    throw new Exception();
-  }
+
+  // Old style operators
   public function exclamationMark(
     ?ExprPos $_,
     this::TAst $_,
@@ -157,4 +148,21 @@ final class ExprPos {
     private int $end_col,
   ) {}
 }
+
+final class ExampleInt {
+  public function __plus(ExampleInt $_): ExampleInt {
+    throw new Exception();
+  }
+}
+
+final class ExampleBool {
+  public function __ampamp(ExampleBool $_): ExampleBool {
+    throw new Exception();
+  }
+
+  public function __barbar(ExampleBool $_): ExampleBool {
+    throw new Exception();
+  }
+}
+
 //// END DEFS

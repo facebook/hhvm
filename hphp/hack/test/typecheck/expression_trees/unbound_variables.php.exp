@@ -1,1 +1,4 @@
-No errors
+File "unbound_variables.php", line 9, characters 13-18:
+You are trying to access the method `__plus` but this is an int (Typing[4062])
+  File "unbound_variables.php", line 6, characters 8-8:
+  Definition is here

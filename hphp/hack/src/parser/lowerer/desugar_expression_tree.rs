@@ -160,7 +160,7 @@ fn wrap_fun_<TF>(
 
 /// Preprocess expression
 ///   Virtualizes literals
-///   TODO: Reduces operators to method calls
+///   Reduces operators to method calls
 ///   TODO: Transforms function calls
 fn virtualize_expr(visitor_name: String, e: &Expr) -> Expr {
     let mut e_copy = e.clone();
@@ -182,13 +182,23 @@ impl<'ast> VisitorMut<'ast> for Virtualizer {
     }
 
     fn visit_expr(&mut self, env: &mut (), e: &mut Expr) -> Result<(), ()> {
+        fn dummy_expr() -> Expr {
+            Expr::new(Pos::make_none(), Expr_::Null)
+        }
+
+        fn virtualize_binop(lhs: &mut Expr, meth_name: &str, rhs: &mut Expr, pos: &Pos) -> Expr {
+            let lhs = std::mem::replace(lhs, dummy_expr());
+            let rhs = std::mem::replace(rhs, dummy_expr());
+            meth_call(lhs, meth_name, vec![rhs], pos)
+        }
+
         use aast::Expr_::*;
 
         let pos = e.0.clone();
 
         let mk_splice = |e: Expr| -> Expr { Expr::new(pos.clone(), Expr_::ETSplice(Box::new(e))) };
 
-        match e.1 {
+        match &mut e.1 {
             // Convert `1` to `__splice__(Visitor::intLiteral(1))`.
             Int(_) => {
                 *e = mk_splice(static_meth_call(
@@ -227,6 +237,25 @@ impl<'ast> VisitorMut<'ast> for Virtualizer {
             }
             // Do not want to recurse into splices
             ETSplice(_) => {}
+            Binop(ref mut bop) => {
+                let (ref op, ref mut lhs, ref mut rhs) = **bop;
+                // Recurse down the left and right hand sides
+                lhs.accept(env, self.object())?;
+                rhs.accept(env, self.object())?;
+
+                match op {
+                    // Convert `... + ...` to `$lhs->__plus(vec[$rhs])`.
+                    Bop::Plus => *e = virtualize_binop(lhs, "__plus", rhs, &e.0),
+                    // Convert `... && ...` to `$lhs->__ampamp(vec[rhs])`.
+                    Bop::Ampamp => *e = virtualize_binop(lhs, "__ampamp", rhs, &e.0),
+                    // Convert `... || ...` to `$lhs->__barbar(vec[$rhs])`.
+                    Bop::Barbar => *e = virtualize_binop(lhs, "__barbar", rhs, &e.0),
+                    // Assignment is special and not virtualized
+                    Bop::Eq(None) => {}
+                    // The rest should be parser errors from expression_tree_check
+                    _ => {}
+                }
+            }
             _ => e.recurse(env, self.object())?,
         }
         Ok(())
@@ -240,42 +269,35 @@ fn rewrite_expr(e: &Expr) -> Expr {
     let pos = exprpos(&e.0);
     match &e.1 {
         // Convert `$x` to `$v->localVar(new ExprPos(...), "$x")` (note the quoting).
-        Lvar(lid) => meth_call("localVar", vec![pos, string_literal(&((lid.1).1))], &e.0),
-        Binop(bop) => {
-            let args = {
-                let (_, lhs, rhs) = &**bop;
-                vec![pos, rewrite_expr(&lhs), rewrite_expr(&rhs)]
-            };
-            match &**bop {
-                // Convert `... + ...` to `$v->plus(new ExprPos(...), $v->..., $v->...)`.
-                (Bop::Plus, _, _) => meth_call("plus", args, &e.0),
-                // Convert `... = ...` to `$v->assign(new ExprPos(...), $v->..., $v->...)`.
-                (Bop::Eq(None), _, _) => meth_call("assign", args, &e.0),
-                // Convert `... && ...` to `$v->ampamp(new ExprPos(...), $v->..., $v->...)`.
-                (Bop::Ampamp, _, _) => meth_call("ampamp", args, &e.0),
-                // Convert `... || ...` to `$v->barbar(new ExprPos(...), $v->..., $v->...)`.
-                (Bop::Barbar, _, _) => meth_call("barbar", args, &e.0),
-                _ => meth_call(
-                    "unsupportedSyntax",
-                    vec![string_literal("bad binary operator")],
-                    &e.0,
-                ),
-            }
-        }
+        Lvar(lid) => v_meth_call("localVar", vec![pos, string_literal(&((lid.1).1))], &e.0),
+        // Convert `... = ...` to `$v->assign(new ExprPos(...), $v->..., $v->...)`.
+        Binop(bop) => match &**bop {
+            (Bop::Eq(None), lhs, rhs) => v_meth_call(
+                "assign",
+                vec![pos, rewrite_expr(&lhs), rewrite_expr(&rhs)],
+                &e.0,
+            ),
+            _ => v_meth_call(
+                "unsupportedSyntax",
+                vec![string_literal("bad binary operator")],
+                &e.0,
+            ),
+        },
         Unop(uop) => match &**uop {
             // Convert `!...` to `$v->exclamationMark(new ExprPos(...), $v->...)`.
             (Uop::Unot, operand) => {
-                meth_call("exclamationMark", vec![pos, rewrite_expr(&operand)], &e.0)
+                v_meth_call("exclamationMark", vec![pos, rewrite_expr(&operand)], &e.0)
             }
-            _ => meth_call(
+            _ => v_meth_call(
                 "unsupportedSyntax",
                 vec![string_literal("bad unary operator")],
                 &e.0,
             ),
         },
-        // Convert `foo(...)` to `$v->call(new ExprPos(...), 'foo', vec[...])`.
-        Call(call) => match &**call {
-            (recv, _, args, _) => match &recv.1 {
+        Call(call) => {
+            let (recv, _, args, _) = &**call;
+            match &recv.1 {
+                // Convert `foo(...)` to `$v->call(new ExprPos(...), 'foo', vec[...])`.
                 Id(sid) => {
                     let fn_name = string_literal(&*sid.1);
                     let desugared_args = vec![
@@ -283,15 +305,37 @@ fn rewrite_expr(e: &Expr) -> Expr {
                         fn_name,
                         vec_literal(args.iter().map(rewrite_expr).collect()),
                     ];
-                    meth_call("call", desugared_args, &e.0)
+                    v_meth_call("call", desugared_args, &e.0)
                 }
-                _ => meth_call(
+                // Convert `$foo->bar(args)` to
+                // `$v->methCall(new ExprPos(...), $foo, 'bar', vec[args])`
+                ObjGet(objget) => {
+                    let (receiver, meth, _) = &**objget;
+                    match &meth.1 {
+                        Id(sid) => {
+                            let fn_name = string_literal(&*sid.1);
+                            let desugared_args = vec![
+                                pos,
+                                rewrite_expr(&receiver),
+                                fn_name,
+                                vec_literal(args.iter().map(rewrite_expr).collect()),
+                            ];
+                            v_meth_call("methCall", desugared_args, &e.0)
+                        }
+                        _ => v_meth_call(
+                            "unsupportedSyntax",
+                            vec![string_literal("invalid function call")],
+                            &e.0,
+                        ),
+                    }
+                }
+                _ => v_meth_call(
                     "unsupportedSyntax",
                     vec![string_literal("invalid function call")],
                     &e.0,
                 ),
-            },
-        },
+            }
+        }
         // Convert `($x) ==> { ... }` to `$v->lambdaLiteral(new ExprPos(...), vec["$x"], vec[...])`.
         Lfun(lf) => {
             let fun_ = &lf.0;
@@ -302,17 +346,17 @@ fn rewrite_expr(e: &Expr) -> Expr {
                 .collect();
             let body_stmts = rewrite_stmts(&fun_.body.ast);
 
-            meth_call(
+            v_meth_call(
                 "lambdaLiteral",
                 vec![pos, vec_literal(param_names), vec_literal(body_stmts)],
                 &e.0,
             )
         }
         // Convert `{ expr }` to `$v->splice(new ExprPos(...), expr )`
-        ETSplice(e) => meth_call("splice", vec![pos, *e.clone()], &e.0),
+        ETSplice(e) => v_meth_call("splice", vec![pos, *e.clone()], &e.0),
         // Convert anything else to $v->unsupportedSyntax().
         // Type checking should prevent us hitting these cases.
-        _ => meth_call(
+        _ => v_meth_call(
             "unsupportedSyntax",
             vec![string_literal(&format!("{:#?}", &e.1))],
             &e.0,
@@ -334,13 +378,13 @@ fn rewrite_stmt(s: &Stmt) -> Option<Expr> {
         Expr(e) => Some(rewrite_expr(&e)),
         Return(e) => match &**e {
             // Convert `return ...;` to `$v->returnStatement(new ExprPos(...), $v->...)`.
-            Some(e) => Some(meth_call(
+            Some(e) => Some(v_meth_call(
                 "returnStatement",
                 vec![pos, rewrite_expr(&e)],
                 &s.0,
             )),
             // Convert `return;` to `$v->returnStatement(new ExprPos(...), null)`.
-            None => Some(meth_call(
+            None => Some(v_meth_call(
                 "returnStatement",
                 vec![pos, null_literal()],
                 &s.0,
@@ -348,36 +392,34 @@ fn rewrite_stmt(s: &Stmt) -> Option<Expr> {
         },
         // Convert `if (...) {...} else {...}` to
         // `$v->ifStatement(new ExprPos(...), $v->..., vec[...], vec[...])`.
-        If(if_stmt) => match &**if_stmt {
-            (e, then_block, else_block) => {
-                let then_stmts = rewrite_stmts(then_block);
-                let else_stmts = rewrite_stmts(else_block);
+        If(if_stmt) => {
+            let (e, then_block, else_block) = &**if_stmt;
+            let then_stmts = rewrite_stmts(then_block);
+            let else_stmts = rewrite_stmts(else_block);
 
-                Some(meth_call(
-                    "ifStatement",
-                    vec![
-                        pos,
-                        rewrite_expr(&e),
-                        vec_literal(then_stmts),
-                        vec_literal(else_stmts),
-                    ],
-                    &s.0,
-                ))
-            }
-        },
+            Some(v_meth_call(
+                "ifStatement",
+                vec![
+                    pos,
+                    rewrite_expr(&e),
+                    vec_literal(then_stmts),
+                    vec_literal(else_stmts),
+                ],
+                &s.0,
+            ))
+        }
         // Convert `while (...) {...}` to
         // `$v->whileStatement(new ExprPos(...), $v->..., vec[...])`.
-        While(w) => match &**w {
-            (e, body) => {
-                let body_stmts = rewrite_stmts(body);
+        While(w) => {
+            let (e, body) = &**w;
+            let body_stmts = rewrite_stmts(body);
 
-                Some(meth_call(
-                    "whileStatement",
-                    vec![pos, rewrite_expr(&e), vec_literal(body_stmts)],
-                    &s.0,
-                ))
-            }
-        },
+            Some(v_meth_call(
+                "whileStatement",
+                vec![pos, rewrite_expr(&e), vec_literal(body_stmts)],
+                &s.0,
+            ))
+        }
         // Convert `for (...; ...; ...) {...}` to
         // `$v->forStatement(new ExprPos(...), vec[...], ..., vec[...], vec[...])`.
         For(w) => {
@@ -391,7 +433,7 @@ fn rewrite_stmt(s: &Stmt) -> Option<Expr> {
 
             let body_stmts = rewrite_stmts(body);
 
-            Some(meth_call(
+            Some(v_meth_call(
                 "forStatement",
                 vec![
                     pos,
@@ -404,13 +446,13 @@ fn rewrite_stmt(s: &Stmt) -> Option<Expr> {
             ))
         }
         // Convert `break;` to `$v->breakStatement(new ExprPos(...))`
-        Break => Some(meth_call("breakStatement", vec![pos], &s.0)),
+        Break => Some(v_meth_call("breakStatement", vec![pos], &s.0)),
         // Convert `continue;` to `$v->continueStatement(new ExprPos(...))`
-        Continue => Some(meth_call("continueStatement", vec![pos], &s.0)),
+        Continue => Some(v_meth_call("continueStatement", vec![pos], &s.0)),
         Noop => None,
         // Convert anything else to $v->unsupportedSyntax().
         // Type checking should prevent us hitting these cases.
-        _ => Some(meth_call(
+        _ => Some(v_meth_call(
             "unsupportedSyntax",
             vec![string_literal(&format!("{:#?}", &s.1))],
             &s.0,
@@ -465,8 +507,26 @@ fn new_obj(pos: &Pos, classname: &str, args: Vec<Expr>) -> Expr {
 }
 
 /// Build `$v->meth_name(args)`.
-fn meth_call(meth_name: &str, args: Vec<Expr>, pos: &Pos) -> Expr {
+fn v_meth_call(meth_name: &str, args: Vec<Expr>, pos: &Pos) -> Expr {
     let receiver = Expr::mk_lvar(pos, "$v");
+    let meth = Expr::new(
+        pos.clone(),
+        Expr_::Id(Box::new(ast::Id(pos.clone(), meth_name.into()))),
+    );
+
+    let c = Expr_::Call(Box::new((
+        Expr::new(
+            pos.clone(),
+            Expr_::ObjGet(Box::new((receiver, meth, OgNullFlavor::OGNullthrows))),
+        ),
+        vec![],
+        args,
+        None,
+    )));
+    Expr::new(pos.clone(), c)
+}
+
+fn meth_call(receiver: Expr, meth_name: &str, args: Vec<Expr>, pos: &Pos) -> Expr {
     let meth = Expr::new(
         pos.clone(),
         Expr_::Id(Box::new(ast::Id(pos.clone(), meth_name.into()))),

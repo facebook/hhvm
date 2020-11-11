@@ -1,8 +1,12 @@
 File "splice_variable4.php", line 13, characters 5-28:
 Expected `ExprTree<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "splice_variable4.php", line 5, characters 25-53:
+  File "splice_variable4.php", line 5, characters 25-62:
   But got `dynamic` because it is an unenforceable type
+File "splice_variable4.php", line 15, characters 5-10:
+You are trying to access the method `__plus` but this is an int (Typing[4062])
+  File "splice_variable4.php", line 10, characters 8-8:
+  Definition is here
 File "splice_variable4.php", line 15, characters 10-10:
 Expected `ExprTree<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "splice_variable4.php", line 25, characters 46-76:
+  File "splice_variable4.php", line 27, characters 6-43:
   But got `dynamic` because it is an unenforceable type

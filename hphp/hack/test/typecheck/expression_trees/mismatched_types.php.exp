@@ -1,6 +1,4 @@
 File "mismatched_types.php", line 8, characters 5-10:
-Typing error (Typing[4110])
-  File "mismatched_types.php", line 8, characters 5-6:
-  Expected `num` because this is used in an arithmetic operation
-  File "mismatched_types.php", line 26, characters 32-37:
-  But got `string`
+You are trying to access the method `__plus` but this is a string (Typing[4062])
+  File "mismatched_types.php", line 28, characters 32-37:
+  Definition is here

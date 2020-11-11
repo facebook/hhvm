@@ -12,7 +12,7 @@ File "invalid_operator.php", line 26, characters 22-39:
 Unsupported syntax for expression trees. (Parsing[1002])
 File "invalid_operator.php", line 27, characters 37-61:
 Unsupported syntax for expression trees. (Parsing[1002])
-File "invalid_operator.php", line 30, characters 18-19:
+File "invalid_operator.php", line 30, characters 25-26:
 Unsupported syntax for expression trees. (Parsing[1002])
 File "invalid_operator.php", line 33, characters 32-36:
 Unsupported syntax for expression trees. (Parsing[1002])
@@ -22,3 +22,25 @@ File "invalid_operator.php", line 37, characters 28-34:
 Unsupported syntax for expression trees. (Parsing[1002])
 File "invalid_operator.php", line 23, characters 33-33:
 Variable `$__0` is undefined, or not always defined. (Naming[2050])
+File "invalid_operator.php", line 13, characters 13-18:
+Typing error (Typing[4110])
+  File "invalid_operator.php", line 13, characters 13-13:
+  Expected `int` because this is used in an arithmetic operation
+  File "invalid_operator.php", line 47, characters 33-42:
+  But got `ExampleInt`
+File "invalid_operator.php", line 13, characters 13-18:
+Typing error (Typing[4110])
+  File "invalid_operator.php", line 13, characters 18-18:
+  Expected `int` because this is used in an arithmetic operation
+  File "invalid_operator.php", line 47, characters 33-42:
+  But got `ExampleInt`
+File "invalid_operator.php", line 20, characters 13-24:
+You are trying to access the method `__plus` but this is an int (Typing[4062])
+  File "invalid_operator.php", line 9, characters 7-9:
+  Definition is here
+File "invalid_operator.php", line 37, characters 28-34:
+Typing error (Typing[4110])
+  File "invalid_operator.php", line 37, characters 34-34:
+  Expected `num` because this is used in an arithmetic operation
+  File "invalid_operator.php", line 47, characters 33-42:
+  But got `ExampleInt`

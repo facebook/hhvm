@@ -36,11 +36,17 @@ final class MyVisitor {
     );
   }
 
-  public function plus(ExprPos $_, mixed $lhs, mixed $rhs): string {
+  public function methCall(
+    ExprPos $_,
+    mixed $lhs,
+    string $meth_name,
+    vec<mixed> $rhs,
+  ): string {
+    $rhs = $rhs[0];
     if ($lhs is string && $rhs is string) {
-      return "$lhs + $rhs";
+      return "$lhs $meth_name $rhs";
     }
-    return "lhs + rhs";
+    return "lhs $meth_name rhs";
   }
 
   public function call(ExprPos $_, string $name, vec<mixed> $args): string {

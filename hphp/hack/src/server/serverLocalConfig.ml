@@ -484,6 +484,8 @@ type t = {
   tico_invalidate_files: bool;
   (* Use finer grain hh_server dependencies *)
   tico_invalidate_smart: bool;
+  (* Enable use of the direct decl parser for parsing type signatures. *)
+  use_direct_decl_parser: bool;
   (* If --profile-log, we'll record telemetry on typechecks that took longer than the threshold. In case of profile_type_check_twice we judge by the second type check. *)
   profile_type_check_duration_threshold: float;
   (* The flag "--config profile_type_check_twice=true" causes each file to be typechecked twice in succession. If --profile-log then both times are logged. *)
@@ -572,6 +574,7 @@ let default =
     symbolindex_file = None;
     tico_invalidate_files = false;
     tico_invalidate_smart = false;
+    use_direct_decl_parser = false;
     profile_type_check_duration_threshold = 0.05;
     profile_type_check_twice = false;
     profile_decling = Typing_service_types.DeclingOff;
@@ -1001,6 +1004,12 @@ let load_ fn ~silent ~current_version overrides =
       ~default:default.tico_invalidate_smart
       config
   in
+  let use_direct_decl_parser =
+    bool_if_version
+      "use_direct_decl_parser"
+      ~default:default.use_direct_decl_parser
+      config
+  in
   let profile_type_check_duration_threshold =
     float_
       "profile_type_check_duration_threshold"
@@ -1110,6 +1119,7 @@ let load_ fn ~silent ~current_version overrides =
     symbolindex_file;
     tico_invalidate_files;
     tico_invalidate_smart;
+    use_direct_decl_parser;
     profile_type_check_duration_threshold;
     profile_type_check_twice;
     profile_decling;

@@ -276,6 +276,8 @@ type t = {
   po_disallow_hash_comments: bool;
   (* Disable parsing of fun() and class_meth() *)
   po_disallow_fun_and_cls_meth_pseudo_funcs: bool;
+  (* Enable use of the direct decl parser for parsing type signatures. *)
+  tco_use_direct_decl_parser: bool;
 }
 [@@deriving eq, show]
 
@@ -384,6 +386,7 @@ val make :
   ?tco_enable_sound_dynamic:bool ->
   ?po_disallow_hash_comments:bool ->
   ?po_disallow_fun_and_cls_meth_pseudo_funcs:bool ->
+  ?tco_use_direct_decl_parser:bool ->
   unit ->
   t
 
@@ -628,3 +631,5 @@ val tco_enable_sound_dynamic : t -> bool
 val po_disallow_hash_comments : t -> bool
 
 val po_disallow_fun_and_cls_meth_pseudo_funcs : t -> bool
+
+val tco_use_direct_decl_parser : t -> bool

@@ -113,6 +113,7 @@ impl Default for GlobalOptions {
             tco_enable_sound_dynamic: false,
             po_disallow_hash_comments: false,
             po_disallow_fun_and_cls_meth_pseudo_funcs: false,
+            tco_use_direct_decl_parser: false,
         }
     }
 }

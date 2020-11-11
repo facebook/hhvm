@@ -113,6 +113,7 @@ type t = {
   tco_enable_sound_dynamic: bool;
   po_disallow_hash_comments: bool;
   po_disallow_fun_and_cls_meth_pseudo_funcs: bool;
+  tco_use_direct_decl_parser: bool;
 }
 [@@deriving eq, show]
 
@@ -300,6 +301,7 @@ let default =
     tco_enable_sound_dynamic = false;
     po_disallow_hash_comments = false;
     po_disallow_fun_and_cls_meth_pseudo_funcs = false;
+    tco_use_direct_decl_parser = false;
   }
 
 let make
@@ -426,6 +428,7 @@ let make
     ?(po_disallow_hash_comments = default.po_disallow_hash_comments)
     ?(po_disallow_fun_and_cls_meth_pseudo_funcs =
       default.po_disallow_fun_and_cls_meth_pseudo_funcs)
+    ?(tco_use_direct_decl_parser = default.tco_use_direct_decl_parser)
     () =
   {
     tco_experimental_features;
@@ -533,6 +536,7 @@ let make
     tco_enable_sound_dynamic;
     po_disallow_hash_comments;
     po_disallow_fun_and_cls_meth_pseudo_funcs;
+    tco_use_direct_decl_parser;
   }
 
 let tco_experimental_feature_enabled t s =
@@ -765,3 +769,5 @@ let po_disallow_hash_comments t = t.po_disallow_hash_comments
 
 let po_disallow_fun_and_cls_meth_pseudo_funcs t =
   t.po_disallow_fun_and_cls_meth_pseudo_funcs
+
+let tco_use_direct_decl_parser t = t.tco_use_direct_decl_parser

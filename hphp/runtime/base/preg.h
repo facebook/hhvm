@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/base/type-string.h"
 
+#include <folly/File.h>
 #include <folly/Optional.h>
 
 #include <cstdint>
@@ -111,9 +112,9 @@ void pcre_reinit();
 void pcre_session_exit();
 
 /*
- * Dump the contents of the PCRE cache to filename.
+ * Dump the contents of the PCRE cache to the given file.
  */
-void pcre_dump_cache(const std::string& filename);
+void pcre_dump_cache(folly::File& file);
 
 ///////////////////////////////////////////////////////////////////////////////
 // PHP API

@@ -80,9 +80,6 @@ val is_enum_class : env -> class_key -> bool
 
 val get_enum_constraint : env -> class_key -> decl_ty option
 
-(** Add a dependency on specified class of the declaration being checked in the dependency graph. *)
-val make_depend_on_class : env -> string -> unit
-
 (** Get class declaration from the appropriate backend and add dependency. *)
 val get_class : env -> class_key -> class_decl option
 

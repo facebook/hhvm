@@ -153,8 +153,7 @@ and hint_ p env = function
         (* TODO: handle function parameters with <<CanCall>> *)
         ft_ifc_decl = default_ifc_fun_decl;
       }
-  | Happly (((_p, c) as id), argl) ->
-    Decl_env.add_wclass env c;
+  | Happly (id, argl) ->
     let argl = List.map argl (hint env) in
     Tapply (id, argl)
   | Haccess (root_ty, ids) ->

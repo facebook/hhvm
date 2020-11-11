@@ -290,61 +290,17 @@ and simplify_union_ env ty1 ty2 r =
       Typing_defs.error_Tunapplied_alias_in_illegal_context ()
     (* TODO with Tclass, union type arguments if covariant *)
     | ( ( _,
-          ( ( Tprim _ | Tdynamic | Tgeneric _ | Tnewtype _ | Tdependent _
-            | Tclass _ | Ttuple _ | Tfun _ | Tobject | Tshape _ | Terr | Tvar _
-            | Tvarray _ | Tdarray _
-            | Tvarray_or_darray _
-            (* If T cannot be null, `union T nonnull = nonnull`. However, it's hard
-             * to say whether a given T can be null - e.g. opaque newtypes, dependent
-             * types, etc. - so for now we leave it here.
-             * TODO improve that. *)
-            | Tnonnull | Tany _ | Tintersection _ | Toption _ | Tunion _
-            | Taccess _ ) as ty1_ ) ),
-        (_, ty2_) ) ->
-      (* Make sure to add a dependency on any classes referenced here, even if
-       * we're in an error state (i.e., where we are right now). The need for
-       * this is extremely subtle. Consider this function:
-       *
-       * function f(): blah {
-       *   // ...
-       * }
-       *
-       * Suppose that "blah" isn't currently defined, and we send the result
-       * of f() into a function that expects an int. We'll hit a unification
-       * error here, as we should. But, we might later define "blah" to be a
-       * type alias, "type blah = int", in another file. In that case, f()
-       * needs to be rechecked with the new definition of "blah" present.
-       *
-       * Normally this isn't a problem. The presence of the error in f() in
-       * the first place will cause it to be rechecked when "blah" pops into
-       * existance anyways. (And in strict mode, or with assume_php=false, you
-       * can't refer to the undefined "blah" anyways.) But there's one
-       * important case where this does matter: the JS cross-compile of the
-       * typechecker. The JS driver code uses the presence of dependencies to
-       * figure out what code to pull into the browser, and it's pretty aggro
-       * about not pulling in things it doesn't need. If this dep is missing,
-       * it will never pull in "blah" -- which actually does exist, but is
-       * "undefined" as far as the typechecker is concerned because the JS
-       * driver hasn't pulled it into the browser *yet*. The presence of this
-       * dep causes that to happen.
-       *
-       * Another way to do this might be to look up blah and see if it's
-       * defined (and doing this will add the dep for us), and suppress the
-       * error if it isn't. We typically say that undefined classes could live
-       * in PHP and thus be anything -- but the only way it could unify with
-       * a non-class is if it's a type alias, which isn't a PHP feature, so
-       * the strictness (and subtlety) is warranted here.
-       *
-       * And the dep is correct anyways: if there weren't a unification error
-       * like this, we'd be pulling in the declaration of "blah" (and adding
-       * the dep) anyways.
-       *)
-      let add env = function
-        | Tclass ((_, cid), _, _) -> Env.make_depend_on_class env cid
-        | _ -> ()
-      in
-      add env ty1_;
-      add env ty2_;
+          ( Tprim _ | Tdynamic | Tgeneric _ | Tnewtype _ | Tdependent _
+          | Tclass _ | Ttuple _ | Tfun _ | Tobject | Tshape _ | Terr | Tvar _
+          | Tvarray _ | Tdarray _
+          | Tvarray_or_darray _
+          (* If T cannot be null, `union T nonnull = nonnull`. However, it's hard
+           * to say whether a given T can be null - e.g. opaque newtypes, dependent
+           * types, etc. - so for now we leave it here.
+           * TODO improve that. *)
+          | Tnonnull | Tany _ | Tintersection _ | Toption _ | Tunion _
+          | Taccess _ ) ),
+        (_, _) ) ->
       ty_equiv env ty1 ty2 ~are_ty_param:false
   with Dont_simplify -> (env, None)
 

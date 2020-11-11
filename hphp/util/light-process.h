@@ -129,6 +129,10 @@ private:
   Mutex m_procMutex;
   int m_afdt_fd;
   std::map<FILE*, pid_t> m_popenMap;
+
+ public:
+  // whether to abort when user change fails.
+  static bool g_strictUser;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

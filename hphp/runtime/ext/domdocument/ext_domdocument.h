@@ -51,7 +51,9 @@ struct DOMNode {
   // for __clone
   DOMNode& operator=(const DOMNode& copy);
 
-  req::ptr<XMLDocumentData> doc() const { return m_node->doc(); }
+  req::ptr<XMLDocumentData> doc() const {
+    return m_node ? m_node->doc() : nullptr;
+  }
   XMLNode node() const { return m_node; }
   xmlNodePtr nodep() const {
     return m_node ? m_node->nodep() : nullptr;

@@ -36,6 +36,14 @@ end = struct
   let go genv options init_fun =
     let root = ServerArgs.root options in
     let t = Unix.gettimeofday () in
+    let pid = Unix.getpid () in
+    begin
+      match ProcFS.first_cgroup_for_pid pid with
+      | Ok cgroup ->
+        Hh_logger.log "Server Pid: %d" pid;
+        Hh_logger.log "Server cGroup: %s" cgroup
+      | _ -> ()
+    end;
     Hh_logger.log "Initializing Server (This might take some time)";
 
     (* note: we only run periodical tasks on the root, not extras *)

@@ -19,6 +19,7 @@ HHVM_REMOVE_MATCHES_FROM_LISTS(files MATCHES
   "/lib/py/"
   "/lib/py3/"
   "/lib/php/"
+  "/lib/rust/"
   "/testutil/"
   "/tutorial/"
   "/example/"

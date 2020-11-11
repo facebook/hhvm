@@ -19,8 +19,16 @@ let class_naming_and_decl ctx c =
   let c = Errors.ignore_ (fun () -> Naming.class_ ctx c) in
   Shallow_decl.class_ ctx c
 
+let direct_decl_parse_and_cache ctx filename name =
+  match Direct_decl_utils.direct_decl_parse_and_cache ctx filename with
+  | None -> err_not_found filename name
+  | Some decls -> decls
+
 let shallow_decl_enabled ctx =
   TypecheckerOptions.shallow_class_decl (Provider_context.get_tcopt ctx)
+
+let use_direct_decl_parser ctx =
+  TypecheckerOptions.use_direct_decl_parser (Provider_context.get_tcopt ctx)
 
 (** Fetches the shallow decl, optionally keeping it in cache.
 When might we want to keep it in cache? e.g. if we're using lazy (shallow)
@@ -54,23 +62,41 @@ let get (ctx : Provider_context.t) (name : string) : shallow_class option =
       (match Naming_provider.get_class_path ctx name with
       | None -> None
       | Some path ->
-        Some
-          (match Ast_provider.find_class_in_file ctx path name with
-          | None -> err_not_found path name
-          | Some class_ ->
-            let decl = class_naming_and_decl ctx class_ in
-            if shallow_decl_enabled ctx then
-              Shallow_classes_heap.Classes.add name decl;
-            decl)))
+        if use_direct_decl_parser ctx then
+          direct_decl_parse_and_cache ctx path name
+          |> List.find_map ~f:(function
+                 | (n, Shallow_decl_defs.Class decl) when String.equal name n ->
+                   Some decl
+                 | _ -> None)
+        else
+          Some
+            (match Ast_provider.find_class_in_file ctx path name with
+            | None -> err_not_found path name
+            | Some class_ ->
+              let decl = class_naming_and_decl ctx class_ in
+              if shallow_decl_enabled ctx then
+                Shallow_classes_heap.Classes.add name decl;
+              decl)))
   | Provider_backend.Local_memory { Provider_backend.shallow_decl_cache; _ } ->
     Provider_backend.Shallow_decl_cache.find_or_add
       shallow_decl_cache
       ~key:(Provider_backend.Shallow_decl_cache_entry.Shallow_class_decl name)
       ~default:(fun () ->
-        let open Option.Monad_infix in
-        Naming_provider.get_class_path ctx name >>= fun path ->
-        Ast_provider.find_class_in_file ctx path name >>| fun class_ ->
-        class_naming_and_decl ctx class_)
+        match Naming_provider.get_class_path ctx name with
+        | None -> None
+        | Some path ->
+          if use_direct_decl_parser ctx then
+            direct_decl_parse_and_cache ctx path name
+            |> List.find_map ~f:(function
+                   | (n, Shallow_decl_defs.Class decl) when String.equal name n
+                     ->
+                     Some decl
+                   | _ -> None)
+          else
+            Some
+              (match Ast_provider.find_class_in_file ctx path name with
+              | None -> err_not_found path name
+              | Some class_ -> class_naming_and_decl ctx class_))
   | Provider_backend.Decl_service { decl; _ } ->
     Decl_service_client.rpc_get_class decl name
 

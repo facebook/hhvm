@@ -90,8 +90,10 @@
     decl_counters
     decl_class
     decl_service_client
+    direct_decl_utils
     provider_backend
     shallow_classes_provider
+    shallow_decl_defs
     linearization_provider
     typing_heap)
   (preprocess (pps ppx_deriving.std)))
@@ -153,6 +155,7 @@
   (modules shallow_classes_provider)
   (libraries
     decl_service_client
+    direct_decl_utils
     provider_backend
     provider_context
     shallow_classes_heap)
@@ -185,4 +188,31 @@
     naming_sqlite
     provider_backend
     provider_context)
+  (preprocess (pps ppx_deriving.std)))
+
+(library
+  (name direct_decl_utils)
+  (modules direct_decl_utils)
+  (libraries
+    annotated_ast
+    ast_provider
+    collections
+    decl_defs
+    decl_heap
+    direct_decl_parser
+    errors
+    file_provider
+    full_fidelity
+    heap_shared_mem
+    naming
+    naming_provider
+    nast
+    parser
+    parser_options
+    provider_backend
+    provider_context
+    relative_path
+    shallow_classes_heap
+    shallow_decl_defs
+    typechecker_options)
   (preprocess (pps ppx_deriving.std)))

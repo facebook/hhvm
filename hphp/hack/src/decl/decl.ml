@@ -12,6 +12,9 @@ open Hh_prelude
 let shallow_decl_enabled (ctx : Provider_context.t) : bool =
   TypecheckerOptions.shallow_class_decl (Provider_context.get_tcopt ctx)
 
+let use_direct_decl_parser ctx =
+  TypecheckerOptions.use_direct_decl_parser (Provider_context.get_tcopt ctx)
+
 let class_decl_if_missing
     ~(sh : SharedMem.uses) (ctx : Provider_context.t) (c : Nast.class_) : unit =
   if shallow_decl_enabled ctx then
@@ -53,6 +56,12 @@ let rec name_and_declare_types_program
 let make_env
     ~(sh : SharedMem.uses) (ctx : Provider_context.t) (fn : Relative_path.t) :
     unit =
-  let ast = Ast_provider.get_ast ctx fn in
-  name_and_declare_types_program ~sh ctx ast;
-  ()
+  if use_direct_decl_parser ctx then
+    let (_ : (string * Shallow_decl_defs.decl) list option) =
+      Direct_decl_utils.direct_decl_parse_and_cache ctx fn
+    in
+    ()
+  else
+    let ast = Ast_provider.get_ast ctx fn in
+    name_and_declare_types_program ~sh ctx ast;
+    ()

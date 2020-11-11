@@ -97,6 +97,14 @@ let err_not_found (file : Relative_path.t) (name : string) : 'a =
   in
   raise (Decl_defs.Decl_not_found err_str)
 
+let direct_decl_parse_and_cache ctx filename name =
+  match Direct_decl_utils.direct_decl_parse_and_cache ctx filename with
+  | None -> err_not_found filename name
+  | Some decls -> decls
+
+let use_direct_decl_parser ctx =
+  TypecheckerOptions.use_direct_decl_parser (Provider_context.get_tcopt ctx)
+
 (** This cache caches the result of full class computations
       (the class merged with all its inherited members.)  *)
 module Cache =
@@ -204,12 +212,20 @@ let get_fun
     | None ->
       (match Naming_provider.get_fun_path ctx fun_name with
       | Some filename ->
-        let ft =
-          Errors.run_in_decl_mode filename (fun () ->
-              declare_fun_in_file ctx filename fun_name)
-        in
-        Decl_heap.Funs.add fun_name ft;
-        Some ft
+        if use_direct_decl_parser ctx then
+          direct_decl_parse_and_cache ctx filename fun_name
+          |> List.find_map ~f:(function
+                 | (name, Shallow_decl_defs.Fun decl)
+                   when String.equal fun_name name ->
+                   Some decl
+                 | _ -> None)
+        else
+          let ft =
+            Errors.run_in_decl_mode filename (fun () ->
+                declare_fun_in_file ctx filename fun_name)
+          in
+          Decl_heap.Funs.add fun_name ft;
+          Some ft
       | None -> None))
   | Provider_backend.Local_memory { Provider_backend.decl_cache; _ } ->
     Provider_backend.Decl_cache.find_or_add
@@ -218,11 +234,19 @@ let get_fun
       ~default:(fun () ->
         match Naming_provider.get_fun_path ctx fun_name with
         | Some filename ->
-          let ft =
-            Errors.run_in_decl_mode filename (fun () ->
-                declare_fun_in_file ctx filename fun_name)
-          in
-          Some ft
+          if use_direct_decl_parser ctx then
+            direct_decl_parse_and_cache ctx filename fun_name
+            |> List.find_map ~f:(function
+                   | (name, Shallow_decl_defs.Fun decl)
+                     when String.equal fun_name name ->
+                     Some decl
+                   | _ -> None)
+          else
+            let ft =
+              Errors.run_in_decl_mode filename (fun () ->
+                  declare_fun_in_file ctx filename fun_name)
+            in
+            Some ft
         | None -> None)
   | Provider_backend.Decl_service { decl; _ } ->
     Decl_service_client.rpc_get_fun decl fun_name
@@ -250,13 +274,21 @@ let get_typedef
     | None ->
       (match Naming_provider.get_typedef_path ctx typedef_name with
       | Some filename ->
-        let tdecl =
-          Errors.run_in_decl_mode filename (fun () ->
-              declare_typedef_in_file ctx filename typedef_name)
-        in
-        Decl_heap.Typedefs.add typedef_name tdecl;
-        record_typedef typedef_name;
-        Some tdecl
+        if use_direct_decl_parser ctx then
+          direct_decl_parse_and_cache ctx filename typedef_name
+          |> List.find_map ~f:(function
+                 | (name, Shallow_decl_defs.Typedef decl)
+                   when String.equal typedef_name name ->
+                   Some decl
+                 | _ -> None)
+        else
+          let tdecl =
+            Errors.run_in_decl_mode filename (fun () ->
+                declare_typedef_in_file ctx filename typedef_name)
+          in
+          Decl_heap.Typedefs.add typedef_name tdecl;
+          record_typedef typedef_name;
+          Some tdecl
       | None -> None))
   | Provider_backend.Local_memory { Provider_backend.decl_cache; _ } ->
     Provider_backend.Decl_cache.find_or_add
@@ -265,11 +297,19 @@ let get_typedef
       ~default:(fun () ->
         match Naming_provider.get_typedef_path ctx typedef_name with
         | Some filename ->
-          let tdecl =
-            Errors.run_in_decl_mode filename (fun () ->
-                declare_typedef_in_file ctx filename typedef_name)
-          in
-          Some tdecl
+          if use_direct_decl_parser ctx then
+            direct_decl_parse_and_cache ctx filename typedef_name
+            |> List.find_map ~f:(function
+                   | (name, Shallow_decl_defs.Typedef decl)
+                     when String.equal typedef_name name ->
+                     Some decl
+                   | _ -> None)
+          else
+            let tdecl =
+              Errors.run_in_decl_mode filename (fun () ->
+                  declare_typedef_in_file ctx filename typedef_name)
+            in
+            Some tdecl
         | None -> None)
   | Provider_backend.Decl_service { decl; _ } ->
     Decl_service_client.rpc_get_typedef decl typedef_name
@@ -297,13 +337,21 @@ let get_record_def
     | None ->
       (match Naming_provider.get_record_def_path ctx record_name with
       | Some filename ->
-        let record_decl =
-          Errors.run_in_decl_mode filename (fun () ->
-              declare_record_def_in_file ctx filename record_name)
-        in
-        Decl_heap.RecordDefs.add record_name record_decl;
-        record_record_def record_name;
-        Some record_decl
+        if use_direct_decl_parser ctx then
+          direct_decl_parse_and_cache ctx filename record_name
+          |> List.find_map ~f:(function
+                 | (name, Shallow_decl_defs.Record decl)
+                   when String.equal record_name name ->
+                   Some decl
+                 | _ -> None)
+        else
+          let record_decl =
+            Errors.run_in_decl_mode filename (fun () ->
+                declare_record_def_in_file ctx filename record_name)
+          in
+          Decl_heap.RecordDefs.add record_name record_decl;
+          record_record_def record_name;
+          Some record_decl
       | None -> None))
   | Provider_backend.Local_memory { Provider_backend.decl_cache; _ } ->
     Provider_backend.Decl_cache.find_or_add
@@ -312,12 +360,20 @@ let get_record_def
       ~default:(fun () ->
         match Naming_provider.get_record_def_path ctx record_name with
         | Some filename ->
-          let rdecl =
-            Errors.run_in_decl_mode filename (fun () ->
-                declare_record_def_in_file ctx filename record_name)
-          in
-          record_record_def record_name;
-          Some rdecl
+          if use_direct_decl_parser ctx then
+            direct_decl_parse_and_cache ctx filename record_name
+            |> List.find_map ~f:(function
+                   | (name, Shallow_decl_defs.Record decl)
+                     when String.equal record_name name ->
+                     Some decl
+                   | _ -> None)
+          else
+            let rdecl =
+              Errors.run_in_decl_mode filename (fun () ->
+                  declare_record_def_in_file ctx filename record_name)
+            in
+            record_record_def record_name;
+            Some rdecl
         | None -> None)
   | Provider_backend.Decl_service { decl; _ } ->
     Decl_service_client.rpc_get_record_def decl record_name
@@ -345,13 +401,21 @@ let get_gconst
     | None ->
       (match Naming_provider.get_const_path ctx gconst_name with
       | Some filename ->
-        let gconst =
-          Errors.run_in_decl_mode filename (fun () ->
-              declare_const_in_file ctx filename gconst_name)
-        in
-        Decl_heap.GConsts.add gconst_name gconst;
-        record_const gconst_name;
-        Some gconst
+        if use_direct_decl_parser ctx then
+          direct_decl_parse_and_cache ctx filename gconst_name
+          |> List.find_map ~f:(function
+                 | (name, Shallow_decl_defs.Const decl)
+                   when String.equal gconst_name name ->
+                   Some decl.Typing_defs.cd_type
+                 | _ -> None)
+        else
+          let gconst =
+            Errors.run_in_decl_mode filename (fun () ->
+                declare_const_in_file ctx filename gconst_name)
+          in
+          Decl_heap.GConsts.add gconst_name gconst;
+          record_const gconst_name;
+          Some gconst
       | None -> None))
   | Provider_backend.Local_memory { Provider_backend.decl_cache; _ } ->
     Provider_backend.Decl_cache.find_or_add
@@ -360,12 +424,20 @@ let get_gconst
       ~default:(fun () ->
         match Naming_provider.get_const_path ctx gconst_name with
         | Some filename ->
-          let gconst =
-            Errors.run_in_decl_mode filename (fun () ->
-                declare_const_in_file ctx filename gconst_name)
-          in
-          record_const gconst_name;
-          Some gconst
+          if use_direct_decl_parser ctx then
+            direct_decl_parse_and_cache ctx filename gconst_name
+            |> List.find_map ~f:(function
+                   | (name, Shallow_decl_defs.Const decl)
+                     when String.equal gconst_name name ->
+                     Some decl.Typing_defs.cd_type
+                   | _ -> None)
+          else
+            let gconst =
+              Errors.run_in_decl_mode filename (fun () ->
+                  declare_const_in_file ctx filename gconst_name)
+            in
+            record_const gconst_name;
+            Some gconst
         | None -> None)
   | Provider_backend.Decl_service { decl; _ } ->
     Decl_service_client.rpc_get_gconst decl gconst_name

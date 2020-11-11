@@ -1295,13 +1295,13 @@ let anon anon_lenv env f =
   let outer_fun_kind = get_fn_kind env in
   let env = { env with lenv = anon_lenv } in
   (* Typing *)
-  let (env, tfun, result) = f env in
+  let (env, ret) = f env in
   (* Cleaning up the environment. *)
   let env = { env with lenv = old_lenv } in
   let env = set_params env old_params in
   let env = set_return env old_return in
   let env = set_fn_kind env outer_fun_kind in
-  (env, tfun, result)
+  (env, ret)
 
 let in_try env f =
   let old_in_try = env.in_try in

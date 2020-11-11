@@ -2658,29 +2658,6 @@ and expr_
       | _ -> ()
     end;
 
-    (* Extract capabilities from AAST and add them to the environment *)
-    let (env, capability) =
-      match (hint_of_type_hint f.f_cap, hint_of_type_hint f.f_unsafe_cap) with
-      | (None, None) ->
-        (* if the closure has no explicit coeffect annotations,
-           do _not_ insert (unsafe) capabilities into the environment;
-           instead, rely on the fact that a capability from an enclosing
-           scope can simply be captured, which has the same semantics
-           as redeclaring and shadowing with another same-typed capability.
-           This avoid unnecessary overhead in the most common case, i.e.,
-           when a closure does not need a different (usually smaller)
-           set of capabilities. *)
-        (env, Env.get_local env Typing_coeffects.local_capability_id)
-      | (_, _) ->
-        let (env, f_cap, f_unsafe_cap) =
-          type_capability env f.f_cap f.f_unsafe_cap (fst f.f_name)
-        in
-        Typing_coeffects.register_capabilities
-          env
-          (type_of_type_hint f_cap)
-          (type_of_type_hint f_unsafe_cap)
-    in
-
     (* Is the return type declared? *)
     let is_explicit_ret = Option.is_some (hint_of_type_hint f.f_ret) in
     let reactivity =
@@ -2696,13 +2673,12 @@ and expr_
         {
           ft with
           ft_reactive = reactivity;
-          ft_implicit_params = { capability };
           ft_flags =
             Typing_defs_flags.(
               set_bit ft_flags_is_coroutine is_coroutine ft.ft_flags);
         }
       in
-      let (env, tefun, ty) = anon_make ?ret_ty env p f ft idl is_anon in
+      let (env, (tefun, ty, ft)) = anon_make ?ret_ty env p f ft idl is_anon in
       let env = Env.set_env_reactive env old_reactivity in
       let inferred_ty =
         mk
@@ -3221,30 +3197,48 @@ and stash_conts_for_anon env p is_anon captured f =
         let tpenv = Env.get_tpenv env in
         (initial_locals, initial_fakes, tpenv))
   in
-  let (env, (tfun, result)) =
-    Typing_lenv.stash_and_do env (Env.all_continuations env) (fun env ->
-        let env =
-          match init with
-          | None -> env
-          | Some (initial_locals, initial_fakes, tpenv) ->
-            let env = Env.reinitialize_locals env in
-            let env = Env.set_locals env initial_locals in
-            let env = Env.set_fake_members env initial_fakes in
-            let env = Env.env_with_tpenv env tpenv in
-            env
-        in
-        let (env, tfun, result) = f env in
-        (env, (tfun, result)))
-  in
-  (env, tfun, result)
+  Typing_lenv.stash_and_do env (Env.all_continuations env) (fun env ->
+      let env =
+        match init with
+        | None -> env
+        | Some (initial_locals, initial_fakes, tpenv) ->
+          let env = Env.reinitialize_locals env in
+          let env = Env.set_locals env initial_locals in
+          let env = Env.set_fake_members env initial_fakes in
+          let env = Env.env_with_tpenv env tpenv in
+          env
+      in
+      f env)
 
 (* Make a type-checking function for an anonymous function. *)
 (* Here ret_ty should include Awaitable wrapper *)
 (* TODO: ?el is never set; so we need to fix variadic use of lambda *)
 and anon_make ?el ?ret_ty env lambda_pos f ft idl is_anon =
-  let anon_lenv = env.lenv in
   let nb = Nast.assert_named_body f.f_body in
-  Env.anon anon_lenv env (fun env ->
+  Env.anon env.lenv env (fun env ->
+      (* Extract capabilities from AAST and add them to the environment *)
+      let (env, capability) =
+        match (hint_of_type_hint f.f_cap, hint_of_type_hint f.f_unsafe_cap) with
+        | (None, None) ->
+          (* if the closure has no explicit coeffect annotations,
+            do _not_ insert (unsafe) capabilities into the environment;
+            instead, rely on the fact that a capability from an enclosing
+            scope can simply be captured, which has the same semantics
+            as redeclaring and shadowing with another same-typed capability.
+            This avoid unnecessary overhead in the most common case, i.e.,
+            when a closure does not need a different (usually smaller)
+            set of capabilities. *)
+          (env, Env.get_local env Typing_coeffects.local_capability_id)
+        | (_, _) ->
+          let (env, f_cap, f_unsafe_cap) =
+            type_capability env f.f_cap f.f_unsafe_cap (fst f.f_name)
+          in
+          Typing_coeffects.register_capabilities
+            env
+            (type_of_type_hint f_cap)
+            (type_of_type_hint f_unsafe_cap)
+      in
+      let ft = { ft with ft_implicit_params = { capability } } in
       stash_conts_for_anon env lambda_pos is_anon idl (fun env ->
           let env = Env.clear_params env in
           let make_variadic_arg env varg tyl =
@@ -3401,7 +3395,6 @@ and anon_make ?el ?ret_ty env lambda_pos f ft idl is_anon =
               Aast.f_file_attributes = [];
               Aast.f_user_attributes = user_attributes;
               Aast.f_body = { Aast.fb_ast = tb; fb_annotation = () };
-              (* TODO(T70095684) definitely fix f_cap *)
               Aast.f_cap;
               Aast.f_unsafe_cap;
               Aast.f_params = t_params;
@@ -3424,10 +3417,9 @@ and anon_make ?el ?ret_ty env lambda_pos f ft idl is_anon =
                 Aast.Lfun (tfun_, idl) )
           in
           let env = Env.set_tyvar_variance env ty in
-          (env, te, hret)))
-
-(* stash_conts_for_anon *)
-(* Env.anon *)
+          (env, (te, hret, ft))
+          (* stash_conts_for_anon *))
+      (* Env.anon *))
 
 (*****************************************************************************)
 (* End of anonymous functions. *)

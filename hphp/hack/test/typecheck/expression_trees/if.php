@@ -3,9 +3,9 @@
 <<file:__EnableUnstableFeatures('expression_trees')>>
 
 function foo(): void {
-  $if = Code`(bool $x) ==> { if($x) { return 1; } return 2; }`;
+  $if = Code`(ExampleBool $x) ==> { if($x) { return 1; } return 2; }`;
 
-  $if_else = Code`(bool $x, bool $y) ==> {
+  $if_else = Code`(ExampleBool $x, ExampleBool $y) ==> {
     if ($x) {
       return 1;
     } else if ($y) {
@@ -169,6 +169,9 @@ final class ExampleBool {
   public function __barbar(ExampleBool $_): ExampleBool {
     throw new Exception();
   }
-}
 
+  public function __bool(): bool {
+    throw new Exception();
+  }
+}
 //// END DEFS

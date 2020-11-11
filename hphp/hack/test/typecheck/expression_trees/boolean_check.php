@@ -2,8 +2,8 @@
 
 <<file:__EnableUnstableFeatures('expression_trees')>>
 
-function nullable_bool(): ?bool { return null; }
-function a_bool(): bool { return true; }
+function nullable_bool(): ?ExampleBool { throw new Exception(); }
+function a_bool(): ExampleBool { throw new Exception(); }
 
 /**
  * Since all Hack types are truthy, typically, most syntactic places that
@@ -219,6 +219,9 @@ final class ExampleBool {
   public function __barbar(ExampleBool $_): ExampleBool {
     throw new Exception();
   }
-}
 
+  public function __bool(): bool {
+    throw new Exception();
+  }
+}
 //// END DEFS

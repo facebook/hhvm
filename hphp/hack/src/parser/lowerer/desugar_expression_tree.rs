@@ -161,6 +161,7 @@ fn wrap_fun_<TF>(
 /// Preprocess expression
 ///   Virtualizes literals
 ///   Reduces operators to method calls
+///   Adds boolean coercion checks
 ///   TODO: Transforms function calls
 fn virtualize_expr(visitor_name: String, e: &Expr) -> Expr {
     let mut e_copy = e.clone();
@@ -174,6 +175,10 @@ struct Virtualizer {
     visitor_name: String,
 }
 
+fn dummy_expr() -> Expr {
+    Expr::new(Pos::make_none(), aast::Expr_::Null)
+}
+
 impl<'ast> VisitorMut<'ast> for Virtualizer {
     type P = AstParams<(), ()>;
 
@@ -182,10 +187,6 @@ impl<'ast> VisitorMut<'ast> for Virtualizer {
     }
 
     fn visit_expr(&mut self, env: &mut (), e: &mut Expr) -> Result<(), ()> {
-        fn dummy_expr() -> Expr {
-            Expr::new(Pos::make_none(), Expr_::Null)
-        }
-
         fn virtualize_binop(lhs: &mut Expr, meth_name: &str, rhs: &mut Expr, pos: &Pos) -> Expr {
             let lhs = std::mem::replace(lhs, dummy_expr());
             let rhs = std::mem::replace(rhs, dummy_expr());
@@ -257,6 +258,64 @@ impl<'ast> VisitorMut<'ast> for Virtualizer {
                 }
             }
             _ => e.recurse(env, self.object())?,
+        }
+        Ok(())
+    }
+
+    fn visit_stmt_(&mut self, env: &mut (), s: &mut Stmt_) -> Result<(), ()> {
+        use aast::Stmt_::*;
+
+        // Converts `expr` to `expr->coerceToBool()`
+        fn coerce_to_bool(receiver: &mut ast::Expr) -> ast::Expr {
+            let pos = receiver.0.clone();
+            let receiver = std::mem::replace(receiver, dummy_expr());
+            meth_call(receiver, "__bool", vec![], &pos)
+        }
+
+        match s {
+            // Convert `while(condition) { block }` to
+            //   `while(condition->coerceToBool()) { block }`
+            While(ref mut w) => {
+                let (ref mut condition, ref mut block) = **w;
+                condition.accept(env, self.object())?;
+                block.accept(env, self.object())?;
+
+                let block = std::mem::replace(block, vec![]);
+                *s = While(Box::new((coerce_to_bool(condition), block)))
+            }
+            // Convert `if(condition) { block }` to
+            //   `if(condition->coerceToBool()) { block }`
+            If(i) => {
+                let (ref mut condition, ref mut b1, ref mut b2) = **i;
+                condition.accept(env, self.object())?;
+                b1.accept(env, self.object())?;
+                b2.accept(env, self.object())?;
+
+                let b1 = std::mem::replace(b1, vec![]);
+                let b2 = std::mem::replace(b2, vec![]);
+                *s = If(Box::new((coerce_to_bool(condition), b1, b2)))
+            }
+            // Convert `for(i; condition; j) { block }` to
+            //   `for(i; condition->coerceToBool(); j) { block }`
+            For(f) => {
+                let (ref mut inits, ref mut condition, ref mut increments, ref mut block) = **f;
+                inits.accept(env, self.object())?;
+                increments.accept(env, self.object())?;
+                block.accept(env, self.object())?;
+
+                let inits = std::mem::replace(inits, vec![]);
+                let increments = std::mem::replace(increments, vec![]);
+                let block = std::mem::replace(block, vec![]);
+                let condition = if let Some(c) = condition {
+                    c.accept(env, self.object())?;
+                    Some(coerce_to_bool(c))
+                } else {
+                    None
+                };
+
+                *s = For(Box::new((inits, condition, increments, block)))
+            }
+            _ => s.recurse(env, self.object())?,
         }
         Ok(())
     }

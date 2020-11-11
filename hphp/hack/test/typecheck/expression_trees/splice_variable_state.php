@@ -174,6 +174,9 @@ final class ExampleBool {
   public function __barbar(ExampleBool $_): ExampleBool {
     throw new Exception();
   }
-}
 
+  public function __bool(): bool {
+    throw new Exception();
+  }
+}
 //// END DEFS

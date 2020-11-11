@@ -1,24 +1,56 @@
+File "boolean_check.php", line 18, characters 11-25:
+You are trying to access the method `__bool` but this object can be null. (Typing[4064])
+  File "boolean_check.php", line 5, characters 27-38:
+  This can be null
+File "boolean_check.php", line 19, characters 11-25:
+You are trying to access the method `__bool` but this object can be null. (Typing[4064])
+  File "boolean_check.php", line 5, characters 27-38:
+  This can be null
+File "boolean_check.php", line 25, characters 16-30:
+You are trying to access the method `__bool` but this object can be null. (Typing[4064])
+  File "boolean_check.php", line 5, characters 27-38:
+  This can be null
+File "boolean_check.php", line 28, characters 16-30:
+You are trying to access the method `__bool` but this object can be null. (Typing[4064])
+  File "boolean_check.php", line 5, characters 27-38:
+  This can be null
+File "boolean_check.php", line 36, characters 13-27:
+You are trying to access the method `__bool` but this object can be null. (Typing[4064])
+  File "boolean_check.php", line 5, characters 27-38:
+  This can be null
+File "boolean_check.php", line 42, characters 13-27:
+You are trying to access the method `__bool` but this object can be null. (Typing[4064])
+  File "boolean_check.php", line 5, characters 27-38:
+  This can be null
+File "boolean_check.php", line 43, characters 20-34:
+You are trying to access the method `__bool` but this object can be null. (Typing[4064])
+  File "boolean_check.php", line 5, characters 27-38:
+  This can be null
+File "boolean_check.php", line 44, characters 14-28:
+You are trying to access the method `__bool` but this object can be null. (Typing[4064])
+  File "boolean_check.php", line 5, characters 27-38:
+  This can be null
+File "boolean_check.php", line 45, characters 20-34:
+You are trying to access the method `__bool` but this object can be null. (Typing[4064])
+  File "boolean_check.php", line 5, characters 27-38:
+  This can be null
 File "boolean_check.php", line 53, characters 7-33:
 You are trying to access the method `__barbar` but this object can be null. (Typing[4064])
-  File "boolean_check.php", line 5, characters 27-31:
+  File "boolean_check.php", line 5, characters 27-38:
   This can be null
-File "boolean_check.php", line 54, characters 7-33:
-You are trying to access the method `__barbar` but this is a bool (Typing[4062])
-  File "boolean_check.php", line 6, characters 20-23:
-  Definition is here
-File "boolean_check.php", line 55, characters 7-26:
-You are trying to access the method `__barbar` but this is a bool (Typing[4062])
-  File "boolean_check.php", line 6, characters 20-23:
-  Definition is here
+File "boolean_check.php", line 54, characters 19-33:
+Invalid argument (Typing[4110])
+  File "boolean_check.php", line 219, characters 28-38:
+  Expected `ExampleBool`
+  File "boolean_check.php", line 5, characters 27-38:
+  But got `?ExampleBool`
 File "boolean_check.php", line 58, characters 7-33:
 You are trying to access the method `__ampamp` but this object can be null. (Typing[4064])
-  File "boolean_check.php", line 5, characters 27-31:
+  File "boolean_check.php", line 5, characters 27-38:
   This can be null
-File "boolean_check.php", line 59, characters 7-33:
-You are trying to access the method `__ampamp` but this is a bool (Typing[4062])
-  File "boolean_check.php", line 6, characters 20-23:
-  Definition is here
-File "boolean_check.php", line 60, characters 7-26:
-You are trying to access the method `__ampamp` but this is a bool (Typing[4062])
-  File "boolean_check.php", line 6, characters 20-23:
-  Definition is here
+File "boolean_check.php", line 59, characters 19-33:
+Invalid argument (Typing[4110])
+  File "boolean_check.php", line 215, characters 28-38:
+  Expected `ExampleBool`
+  File "boolean_check.php", line 5, characters 27-38:
+  But got `?ExampleBool`

@@ -389,6 +389,39 @@
                                                                     ([4:29-33],
                                                                     (Id
                                                                     ([4:29-33],
+                                                                    "methCall"))),
+                                                                    OG_nullthrows
+                                                                    ))), 
+                                                                    [],
+                                                                    [([4:29-33],
+                                                                    (New (
+                                                                    ([4:29-33],
+                                                                    (CI
+                                                                    ([4:29-33],
+                                                                    "\\ExprPos"))),
+                                                                    [],
+                                                                    [([Pos.none],
+                                                                    (Int "4"));
+                                                                    ([Pos.none],
+                                                                    (Int "28"));
+                                                                    ([Pos.none],
+                                                                    (Int "4"));
+                                                                    ([Pos.none],
+                                                                    (Int "32"))
+                                                                    ], None,
+                                                                    [4:29-33]
+                                                                    )));
+                                                                    ([4:29-33],
+                                                                    (Call (
+                                                                    ([4:29-33],
+                                                                    (Obj_get (
+                                                                    ([4:29-33],
+                                                                    (Lvar
+                                                                    ([4:29-33],
+                                                                    $v))),
+                                                                    ([4:29-33],
+                                                                    (Id
+                                                                    ([4:29-33],
                                                                     "splice"))),
                                                                     OG_nullthrows
                                                                     ))), 
@@ -415,6 +448,15 @@
                                                                     (Lvar
                                                                     ([4:29-33],
                                                                     $__1)))],
+                                                                    None)));
+                                                                    ([Pos.none],
+                                                                    (String
+                                                                    "__bool"));
+                                                                    ([Pos.none],
+                                                                    (ValCollection (
+                                                                    Vec,
+                                                                    None, 
+                                                                    [])))],
                                                                     None)));
                                                                     ([4:35-46],
                                                                     (ValCollection (
@@ -759,11 +801,24 @@
                                                                     (Some (
                                                                     [4:29-33],
                                                                     (
-                                                                    ET_Splice
+                                                                    Call (
+                                                                    ([4:29-33],
+                                                                    (Obj_get (
+                                                                    ([4:29-33],
+                                                                    (ET_Splice
                                                                     ([4:29-33],
                                                                     (Lvar
                                                                     ([4:29-33],
-                                                                    $__1)))))),
+                                                                    $__1))))),
+                                                                    ([4:29-33],
+                                                                    (Id
+                                                                    ([4:29-33],
+                                                                    "__bool"))),
+                                                                    OG_nullthrows
+                                                                    ))), 
+                                                                    [], 
+                                                                    [], None
+                                                                    )))),
                                                                     [([4:35-46],
                                                                     (Binop (
                                                                     (Eq None),

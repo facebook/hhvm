@@ -33,8 +33,10 @@ def lookup_func(val):
     funcid = val.cast(T('HPHP::FuncId'))
     try:
         # Not LowPtr
-        result = idx.atomic_low_ptr_vector_at(V('HPHP::Func::s_funcVec'), funcid)
+        result = idx.atomic_low_ptr_vector_at(V('HPHP::Func::s_funcVec'), funcid['m_id'])
         return result.cast(T('HPHP::Func').pointer())
+    except gdb.MemoryError:
+        raise
     except:
         # LowPtr
         return rawptr(funcid).cast(T('HPHP::Func').pointer())

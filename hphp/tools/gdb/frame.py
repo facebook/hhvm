@@ -48,7 +48,7 @@ def php_filename(func):
     filename = rawptr(rawptr(func['m_shared'])['m_originalFilename'])
 
     if filename == nullptr():
-        filename = rawptr(func['m_unit']['m_filepath'])
+        filename = rawptr(func['m_unit']['m_origFilepath'])
 
     return string_data_val(filename)
 

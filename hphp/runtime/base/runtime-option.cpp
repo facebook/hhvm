@@ -54,6 +54,7 @@
 #include "hphp/util/gzip.h"
 #include "hphp/util/hardware-counter.h"
 #include "hphp/util/hdf.h"
+#include "hphp/util/light-process.h"
 #include "hphp/util/log-file-flusher.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/network.h"
@@ -754,6 +755,7 @@ bool RuntimeOption::AdminServerStatsNeedPassword = true;
 std::string RuntimeOption::AdminPassword;
 std::set<std::string> RuntimeOption::AdminPasswords;
 std::set<std::string> RuntimeOption::HashedAdminPasswords;
+std::string RuntimeOption::AdminDumpPath;
 
 std::string RuntimeOption::ProxyOriginRaw;
 int RuntimeOption::ProxyPercentageRaw = 0;
@@ -2398,6 +2400,8 @@ void RuntimeOption::Load(
                  "Server.LightProcessFilePrefix", "./lightprocess");
     Config::Bind(LightProcessCount, ini, config,
                  "Server.LightProcessCount", 0);
+    Config::Bind(LightProcess::g_strictUser, ini, config,
+                 "Server.LightProcessStrictUser", false);
     Config::Bind(ForceServerNameToHeader, ini, config,
                  "Server.ForceServerNameToHeader");
     Config::Bind(AllowDuplicateCookies, ini, config,
@@ -2513,6 +2517,8 @@ void RuntimeOption::Load(
     AdminPasswords = Config::GetSet(ini, config, "AdminServer.Passwords");
     HashedAdminPasswords =
       Config::GetSet(ini, config, "AdminServer.HashedPasswords");
+    Config::Bind(AdminDumpPath, ini, config,
+                 "AdminServer.DumpPath", "/tmp/hhvm_admin_dump");
   }
   {
     // Proxy

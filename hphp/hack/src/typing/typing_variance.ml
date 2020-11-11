@@ -10,7 +10,6 @@
 open Hh_prelude
 open Typing_defs
 open Utils
-module Env = Typing_env
 module SN = Naming_special_names
 module TGen = Typing_generic
 module Cls = Decl_provider.Class
@@ -299,7 +298,7 @@ let get_class_variance vgenv root (pos, class_name) =
 (*****************************************************************************)
 
 (* impl is the list of `implements`, `extends`, and `use` types *)
-let rec class_ vgenv class_name class_type impl =
+let rec class_def vgenv class_name class_type impl =
   let root = (Typing_deps.Dep.Class class_name, Some class_type) in
   let tparams = Cls.tparams class_type in
   let env =

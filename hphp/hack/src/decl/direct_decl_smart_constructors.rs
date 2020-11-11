@@ -1399,10 +1399,9 @@ impl<'a> DirectDeclSmartConstructors<'a> {
         capability: Node<'a>,
         default_pos: &'a Pos<'a>,
     ) -> &'a FunImplicitParams<'a> {
-        let capability = self.node_to_ty(capability).unwrap_or_else(|| default_capability(
-            self.state.arena,
-            Reason::hint(default_pos),
-        ));
+        let capability = self
+            .node_to_ty(capability)
+            .unwrap_or_else(|| default_capability(self.state.arena, Reason::hint(default_pos)));
         self.alloc(FunImplicitParams { capability })
     }
 

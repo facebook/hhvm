@@ -667,7 +667,9 @@ module Typing = struct
     | AtomInvalidParameter [@value 4395]
     | AtomAsExpression [@value 4396]
     | AtomInvalidArgument [@value 4397]
-    | IFCInternalError [@value 4398] (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
+    | IFCInternalError [@value 4398]
+    | IFCExternalContravariant [@value 4399]
+    | IFCPolicyMismatch [@value 4400] (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum

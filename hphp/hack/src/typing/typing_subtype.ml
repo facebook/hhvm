@@ -2010,6 +2010,7 @@ and simplify_subtype_params
     ?(is_method : bool = false)
     ?(check_params_reactivity = false)
     ?(check_params_mutability = false)
+    ?(check_params_ifc = false)
     (subl : locl_fun_param list)
     (superl : locl_fun_param list)
     (variadic_sub_ty : locl_possibly_enforced_ty option)
@@ -2085,6 +2086,12 @@ and simplify_subtype_params
     env
     |> simplify_param_modes ~subtype_env sub super
     &&& simplify_param_accept_disposable ~subtype_env sub super
+    &&& begin
+          if check_params_ifc then
+            simplify_param_ifc ~subtype_env sub super
+          else
+            valid
+        end
     &&& begin
           fun env ->
           match (get_fp_mode sub, get_fp_mode super) with
@@ -2630,6 +2637,26 @@ and simplify_param_accept_disposable ~subtype_env param1 param2 env =
       env
   | (_, _) -> valid env
 
+and simplify_param_ifc ~subtype_env sub super env =
+  let { fp_pos = pos1; _ } = sub in
+  let { fp_pos = pos2; _ } = super in
+  (* TODO: also handle <<CanCall>> *)
+  match (get_fp_ifc_external sub, get_fp_ifc_external super) with
+  | (true, false) ->
+    invalid
+      ~fail:(fun () ->
+        Errors.ifc_external_contravariant pos2 pos1 subtype_env.on_error)
+      env
+  | _ -> valid env
+
+and ifc_policy_matches (ifc1 : ifc_fun_decl) (ifc2 : ifc_fun_decl) =
+  match (ifc1, ifc2) with
+  | (FDPolicied (Some s1), FDPolicied (Some s2)) when String.equal s1 s2 -> true
+  | (FDPolicied None, FDPolicied None) -> true
+  (* TODO(T79510128): IFC needs to check that the constraints inferred by the parent entail those by the subtype *)
+  | (FDInferFlows, FDInferFlows) -> true
+  | _ -> false
+
 (* Helper function for subtyping on function types: performs all checks that
  * don't involve actual types:
  *   <<__ReturnDisposable>> attribute
@@ -2637,6 +2664,7 @@ and simplify_param_accept_disposable ~subtype_env param1 param2 env =
  *   <<__Rx>> attribute
  *   <<__Mutable>> attribute
  *   variadic arity
+ *  <<__Policied>> attribute
  *)
 and simplify_subtype_funs_attributes
     ~subtype_env
@@ -2648,7 +2676,7 @@ and simplify_subtype_funs_attributes
     env =
   let p_sub = Reason.to_pos r_sub in
   let p_super = Reason.to_pos r_super in
-  let on_error ?code:_ _ =
+  let on_error_reactivity ?code:_ _ =
     Errors.fun_reactivity_mismatch
       p_super
       (TUtils.reactivity_to_string env ft_super.ft_reactive)
@@ -2656,14 +2684,28 @@ and simplify_subtype_funs_attributes
       (TUtils.reactivity_to_string env ft_sub.ft_reactive)
       subtype_env.on_error
   in
+  let ifc_policy_err_str = function
+    | FDPolicied (Some s) -> s
+    | FDPolicied None -> "the existential policy"
+    | FDInferFlows -> "an inferred policy"
+  in
   simplify_subtype_reactivity
-    ~subtype_env:{ subtype_env with on_error }
+    ~subtype_env:{ subtype_env with on_error = on_error_reactivity }
     ?extra_info
     p_sub
     ft_sub.ft_reactive
     p_super
     ft_super.ft_reactive
     env
+  |> check_with
+       (ifc_policy_matches ft_sub.ft_ifc_decl ft_super.ft_ifc_decl)
+       (fun () ->
+         Errors.ifc_policy_mismatch
+           p_sub
+           p_super
+           (ifc_policy_err_str ft_sub.ft_ifc_decl)
+           (ifc_policy_err_str ft_super.ft_ifc_decl)
+           subtype_env.on_error)
   |> check_with
        (Bool.equal
           (get_ft_return_disposable ft_sub)
@@ -2833,6 +2875,15 @@ and simplify_subtype_funs
         let check_params_mutability =
           any_reactive ft_super.ft_reactive && any_reactive ft_sub.ft_reactive
         in
+        (* If both fun policies are IFC public, there's no need to check for inheritance issues *)
+        (* There is the chance that the super function has an <<__External>> argument and the sub function does not,
+          but <<__External>> on a public policied function literally just means the argument must be governed by the public policy,
+          so should be an error in any case.
+          *)
+        let check_params_ifc =
+          non_public_ifc ft_super.ft_ifc_decl
+          || non_public_ifc ft_sub.ft_ifc_decl
+        in
         let is_method =
           Option.equal
             Bool.equal
@@ -2843,6 +2894,7 @@ and simplify_subtype_funs
           ~is_method
           ~check_params_reactivity:(should_check_fun_params_reactivity ft_super)
           ~check_params_mutability
+          ~check_params_ifc
           ft_super.ft_params
           ft_sub.ft_params
           variadic_subtype

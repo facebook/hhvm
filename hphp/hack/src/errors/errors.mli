@@ -1060,6 +1060,8 @@ val must_extend_disposable : Pos.t -> unit
 val accept_disposable_invariant :
   Pos.t -> Pos.t -> typing_error_callback -> unit
 
+val ifc_external_contravariant : Pos.t -> Pos.t -> typing_error_callback -> unit
+
 val inout_params_special : Pos.t -> unit
 
 val inout_params_memoize : Pos.t -> Pos.t -> unit
@@ -1439,3 +1441,6 @@ val atom_as_expr : Pos.t -> unit
 val atom_invalid_argument : Pos.t -> unit
 
 val ifc_internal_error : Pos.t -> string -> unit
+
+val ifc_policy_mismatch :
+  Pos.t -> Pos.t -> string -> string -> typing_error_callback -> unit

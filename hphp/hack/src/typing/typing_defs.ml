@@ -848,6 +848,11 @@ and any_reactive r =
   | CippGlobal ->
     false
 
+and non_public_ifc ifc =
+  match ifc with
+  | FDPolicied (Some "PUBLIC") -> false
+  | _ -> true
+
 and equal_param_rx_annotation pa1 pa2 =
   match (pa1, pa2) with
   | (Param_rx_var, Param_rx_var) -> true

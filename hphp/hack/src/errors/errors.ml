@@ -2614,6 +2614,15 @@ let accept_disposable_invariant pos1 pos2 (on_error : typing_error_callback) =
   let msg2 = (pos2, "This parameter is not marked `<<__AcceptDisposable>>`") in
   on_error ~code:(Typing.err_code Typing.AcceptDisposableInvariant) [msg1; msg2]
 
+let ifc_external_contravariant pos1 pos2 (on_error : typing_error_callback) =
+  let msg1 =
+    ( pos1,
+      "Parameters with `<<__External>>` must be overridden by other parameters with <<__External>>. This parameter is marked `<<__External>>`"
+    )
+  in
+  let msg2 = (pos2, "But this parameter is not marked `<<__External>>`") in
+  on_error ~code:(Typing.err_code Typing.IFCExternalContravariant) [msg1; msg2]
+
 let field_kinds pos1 pos2 =
   add_list
     (Typing.err_code Typing.FieldKinds)
@@ -4075,6 +4084,20 @@ let return_disposable_mismatch
         else
           m1 );
     ]
+
+let ifc_policy_mismatch
+    pos_sub pos_super policy_sub policy_super (on_error : typing_error_callback)
+    =
+  let m1 =
+    "IFC policies must be invariant with respect to inheritance. This method is policied with "
+    ^ policy_sub
+  in
+  let m2 =
+    "This is incompatible with its inherited policy, which is " ^ policy_super
+  in
+  on_error
+    ~code:(Typing.err_code Typing.IFCPolicyMismatch)
+    [(pos_sub, m1); (pos_super, m2)]
 
 let return_void_to_rx_mismatch
     ~pos1_has_attribute pos1 pos2 (on_error : typing_error_callback) =

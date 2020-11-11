@@ -2378,6 +2378,7 @@ size_t hh_save_dep_table_blob_helper(
 
   // Allocate space for all the values
   FILE* dep_table_blob_file = fopen(out_filename, "wb+");
+  assert(dep_table_blob_file != NULL);
 
   // TODO: T38685427 - write MAGIC_CONSTANT
   // TODO: write the format version

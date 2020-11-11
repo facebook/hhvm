@@ -1812,6 +1812,8 @@ let handle_mode
             ~ctx
             ~f:(fun () ->
               let files_contents = Multifile.file_to_files filename in
+              Relative_path.Map.iter files_contents ~f:(fun filename contents ->
+                  File_provider.(provide_file filename (Disk contents)));
               let (parse_errors, individual_file_info) =
                 parse_name_and_decl ctx files_contents
               in
@@ -2023,6 +2025,8 @@ let decl_and_run_mode
         end
       ~init:files_contents
   in
+  Relative_path.Map.iter files_contents ~f:(fun filename contents ->
+      File_provider.(provide_file filename (Disk contents)));
   (* Don't declare all the filenames in batch_errors mode *)
   let to_decl =
     if batch_mode then

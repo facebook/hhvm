@@ -74,18 +74,12 @@ let rec collect_legacy_class
             (* NOTE: the following relies on the fact that declaring a class puts
              * the inheritance hierarchy into the shared memory heaps. When that
              * invariant no longer holds, the following will no longer work. *)
-            let () =
-              match Ast_provider.find_class_in_file ctx filename cid with
-              | Some cls ->
-                let (_ : _ * _) =
-                  Errors.run_in_decl_mode filename (fun () ->
-                      Decl_folded_class.class_decl_if_missing
-                        ~sh:SharedMem.Uses
-                        ctx
-                        cls)
-                in
-                ()
-              | None -> ()
+            let (_ : (_ * _) option) =
+              Errors.run_in_decl_mode filename (fun () ->
+                  Decl_folded_class.class_decl_if_missing
+                    ~sh:SharedMem.Uses
+                    ctx
+                    cid)
             in
             collect_legacy_class
               ctx

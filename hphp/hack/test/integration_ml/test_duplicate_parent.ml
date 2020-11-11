@@ -59,6 +59,8 @@ let test () =
   let bar_error =
     "File \"/bar.php\", line 5, characters 22-23:\n"
     ^ "No class variable `$y` in `Bar` (Typing[4090])\n"
+    ^ "  File \"/foo.php\", line 3, characters 23-24:\n"
+    ^ "  Did you mean `$x` instead?\n"
     ^ "  File \"/bar.php\", line 2, characters 13-15:\n"
     ^ "  Declaration of `Bar` is here\n"
   in

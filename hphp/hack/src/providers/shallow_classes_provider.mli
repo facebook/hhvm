@@ -15,12 +15,7 @@ return it.
 Raises [Failure] if [shallow_class_decl] is not enabled. *)
 val get : Provider_context.t -> string -> shallow_class option
 
-(** If a shallow declaration for the class with the given name is present in the
-    cache, return it. Otherwise, convert the given class AST to a shallow class
-    declaration, store it in the cache, and return it.
-
-    Raises [Failure] if [shallow_class_decl] is not enabled. *)
-val decl : Provider_context.t -> use_cache:bool -> Nast.class_ -> shallow_class
+val decl : Provider_context.t -> Nast.class_ -> shallow_class
 
 val get_batch : Provider_context.t -> SSet.t -> shallow_class option SMap.t
 

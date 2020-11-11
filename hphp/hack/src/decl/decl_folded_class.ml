@@ -244,24 +244,21 @@ let check_if_cyclic (class_env : class_env) ((pos, cid) : Pos.t * string) : bool
   if is_cyclic then Errors.cyclic_class_def stack pos;
   is_cyclic
 
-let rec class_naming_and_decl
-    ~(sh : SharedMem.uses) (class_env : class_env) (c : Nast.class_) :
-    string * (Decl_defs.decl_class_type * Decl_heap.class_members) =
-  let class_env =
-    { class_env with stack = SSet.add (snd c.c_name) class_env.stack }
-  in
-  let shallow_class =
-    Shallow_classes_provider.decl class_env.ctx ~use_cache:false c
-  in
+let rec declare_class_and_parents
+    ~(sh : SharedMem.uses)
+    (class_env : class_env)
+    (shallow_class : Shallow_decl_defs.shallow_class) :
+    string * Decl_heap.class_entries =
+  let (_, name) = shallow_class.sc_name in
+  let class_env = { class_env with stack = SSet.add name class_env.stack } in
   let (errors, (tc, member_heaps_values)) =
     Errors.do_ (fun () ->
         let parents = class_parents_decl ~sh class_env shallow_class in
         class_decl ~sh class_env.ctx shallow_class parents)
   in
-  let name = snd shallow_class.sc_name in
   let class_ = { tc with dc_decl_errors = Some errors } in
   Decl_heap.Classes.add name class_;
-  (name, (class_, member_heaps_values))
+  (name, (class_, Some member_heaps_values))
 
 and class_parents_decl
     ~(sh : SharedMem.uses)
@@ -309,17 +306,12 @@ and class_decl_if_missing
   match Decl_heap.Classes.get class_name with
   | Some decl -> Some (class_name, (decl, None))
   | None ->
-    (match Naming_provider.get_class_path class_env.ctx class_name with
+    (match Shallow_classes_provider.get class_env.ctx class_name with
     | None -> None
-    | Some fn ->
-      (match Ast_provider.find_class_in_file class_env.ctx fn class_name with
-      | None -> None
-      | Some class_ ->
-        Errors.run_in_context fn Errors.Decl @@ fun () ->
-        let (name, (class_, members)) =
-          class_naming_and_decl ~sh class_env class_
-        in
-        Some (name, (class_, Some members))))
+    | Some shallow_class ->
+      let fn = Pos.filename (fst shallow_class.sc_name) in
+      Errors.run_in_context fn Errors.Decl @@ fun () ->
+      Some (declare_class_and_parents ~sh class_env shallow_class))
 
 and class_is_abstract (c : Shallow_decl_defs.shallow_class) : bool =
   match c.sc_kind with
@@ -899,16 +891,12 @@ and method_decl_acc
   (acc, condition_types)
 
 let class_decl_if_missing
-    ~(sh : SharedMem.uses) (ctx : Provider_context.t) (c : Nast.class_) :
-    string * Decl_heap.class_entries =
-  let (_, class_name) = c.c_name in
+    ~(sh : SharedMem.uses) (ctx : Provider_context.t) (class_name : string) :
+    (string * Decl_heap.class_entries) option =
   match Decl_heap.Classes.get class_name with
-  | Some class_ -> (class_name, (class_, None))
+  | Some class_ -> Some (class_name, (class_, None))
   | None ->
     (* Class elements are in memory if and only if the class itself is there.
      * Exiting before class declaration is ready would break this invariant *)
     WorkerCancel.with_no_cancellations @@ fun () ->
-    let (name, (class_, members)) =
-      class_naming_and_decl ~sh { ctx; stack = SSet.empty } c
-    in
-    (name, (class_, Some members))
+    class_decl_if_missing ~sh { ctx; stack = SSet.empty } class_name

@@ -16,11 +16,13 @@ let class_decl_if_missing
     ~(sh : SharedMem.uses) (ctx : Provider_context.t) (c : Nast.class_) : unit =
   if shallow_decl_enabled ctx then
     let (_ : Shallow_decl_defs.shallow_class) =
-      Shallow_classes_provider.decl ctx ~use_cache:true c
+      Shallow_classes_provider.decl ctx c
     in
     ()
   else
-    let (_ : _ * _) = Decl_folded_class.class_decl_if_missing ~sh ctx c in
+    let (_ : (_ * _) option) =
+      Decl_folded_class.class_decl_if_missing ~sh ctx (snd c.Aast.c_name)
+    in
     ()
 
 let rec name_and_declare_types_program

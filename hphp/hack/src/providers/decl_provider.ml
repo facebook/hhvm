@@ -116,14 +116,12 @@ module Cache =
 let declare_folded_class_in_file
     (ctx : Provider_context.t) (file : Relative_path.t) (name : string) :
     Decl_defs.decl_class_type * Decl_heap.class_members option =
-  match Ast_provider.find_class_in_file ctx file name with
-  | Some cls ->
-    let (_name, decl_and_members) =
-      Errors.run_in_decl_mode file (fun () ->
-          Decl_folded_class.class_decl_if_missing ~sh:SharedMem.Uses ctx cls)
-    in
-    decl_and_members
+  match
+    Errors.run_in_decl_mode file (fun () ->
+        Decl_folded_class.class_decl_if_missing ~sh:SharedMem.Uses ctx name)
+  with
   | None -> err_not_found file name
+  | Some (_name, decl_and_members) -> decl_and_members
 
 let get_class
     ?(tracing_info : Decl_counters.tracing_info option)

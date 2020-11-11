@@ -17,5 +17,5 @@
 val class_decl_if_missing :
   sh:SharedMem.uses ->
   Provider_context.t ->
-  Nast.class_ ->
-  string * (Decl_defs.decl_class_type * Decl_heap.class_members option)
+  string ->
+  (string * Decl_heap.class_entries) option

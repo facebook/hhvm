@@ -59,7 +59,7 @@ let rec shallow_declare_ast ctx decls prog =
         let (name, decl) = Decl_nast.fun_naming_and_decl ctx f in
         (name, Shallow_decl_defs.Fun decl) :: decls
       | Class c ->
-        let decl = Shallow_classes_provider.decl ~use_cache:false ctx c in
+        let decl = Shallow_classes_provider.decl ctx c in
         let (_, name) = decl.Shallow_decl_defs.sc_name in
         (name, Shallow_decl_defs.Class decl) :: decls
       | RecordDef rd ->

@@ -16,8 +16,8 @@ if __name__ == "__main__":
     hh_paths.hh_server = args.hh_server
     hh_paths.hh_client = args.hh_client
     hh_paths.hh_single_type_check = args.hh_single_type_check
-    import test_save_mini
     import test_fresh_init
+    import test_save_mini
 
     suite = unittest.defaultTestLoader.loadTestsFromTestCase(
         test_save_mini.TestSaveMiniState

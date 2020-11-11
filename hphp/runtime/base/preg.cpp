@@ -49,6 +49,7 @@
 #include "hphp/util/logger.h"
 #include "hphp/util/concurrent-scalable-cache.h"
 
+#include <folly/FileUtil.h>
 #include <folly/json.h>
 
 /* Only defined in pcre >= 8.32 */
@@ -217,7 +218,7 @@ public:
             TempKeyCache& keyCache);
   void insert(Accessor& accessor, const StringData* regex,
               TempKeyCache& keyCache, const pcre_cache_entry* ent);
-  void dump(const std::string& filename);
+  void dump(folly::File& file);
   size_t size() const;
 
 private:
@@ -512,12 +513,12 @@ void PCRECache::insert(
   }
 }
 
-void PCRECache::dump(const std::string& filename) {
-  std::ofstream out(filename.c_str());
+void PCRECache::dump(folly::File& file) {
   switch (m_kind) {
     case CacheKind::Static:
       for (auto& it : *m_staticCache) {
-        out << it.first->data() << "\n";
+        folly::writeFull(file.fd(), it.first->data(), it.first->size());
+        folly::writeFull(file.fd(), "\n", 1);
       }
       break;
     case CacheKind::Lru:
@@ -530,12 +531,12 @@ void PCRECache::dump(const std::string& filename) {
           m_scalableCache->snapshotKeys(keys);
         }
         for (auto& key: keys) {
-          out << key.c_str() << "\n";
+          folly::writeFull(file.fd(), key.data(), key.size());
+          folly::writeFull(file.fd(), "\n", 1);
         }
       }
       break;
   }
-  out.close();
 }
 
 size_t PCRECache::size() const {
@@ -572,8 +573,8 @@ void pcre_reinit() {
 void pcre_init() {
 }
 
-void pcre_dump_cache(const std::string& filename) {
-  s_pcreCache.dump(filename);
+void pcre_dump_cache(folly::File& file) {
+  s_pcreCache.dump(file);
 }
 
 static pcre_jit_stack* alloc_jit_stack(void* /*data*/) {

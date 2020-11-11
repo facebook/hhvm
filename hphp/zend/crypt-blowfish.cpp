@@ -696,7 +696,10 @@ static char *BF_crypt(const char *key, const char *setting,
   }
 
   count = (BF_word)1 << ((setting[4] - '0') * 10 + (setting[5] - '0'));
-  if (count < min || BF_decode(data.binary.salt, &setting[7], 16)) {
+  if (count < min ||
+      BF_decode(data.binary.salt, &setting[7], 16) ||
+      ((unsigned int)(setting[7 + 22 - 1] - 0x20) >= 0x60)
+     ) {
     __set_errno(EINVAL);
     return NULL;
   }
@@ -914,4 +917,3 @@ char *_crypt_gensalt_blowfish_rn(const char *prefix, unsigned long count,
   return output;
 }
 #endif
-

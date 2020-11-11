@@ -19,6 +19,7 @@
     collections
     depgraph
     file_info
+    heap_shared_mem
     heap_shared_mem_hash
     ocamlpool
     relative_path

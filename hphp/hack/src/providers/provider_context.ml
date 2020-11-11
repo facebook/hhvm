@@ -108,6 +108,9 @@ let get_backend (t : t) : Provider_backend.t = t.backend
 
 let get_deps_mode (t : t) : Typing_deps_mode.t = t.deps_mode
 
+let map_deps_mode (t : t) ~(f : Typing_deps_mode.t -> Typing_deps_mode.t) : t =
+  { t with deps_mode = f t.deps_mode }
+
 let get_entries (t : t) : entries = t.entries
 
 let read_file_contents_exn (entry : entry) : string =

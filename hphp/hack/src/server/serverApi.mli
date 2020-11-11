@@ -14,6 +14,7 @@ val make_local_server_api :
   root:string ->
   init_id:string ->
   ignore_hh_version:bool ->
+  deps_mode:Typing_deps_mode.t ->
   (module LocalServerApi)
 
 val make_remote_server_api :

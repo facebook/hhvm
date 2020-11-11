@@ -195,6 +195,38 @@ val merge_dep_edges : dep_edges -> dep_edges -> dep_edges
 
 val register_discovered_dep_edges : dep_edges -> unit
 
+(** Save discovered edges to a binary file.
+  *
+  * - If mode is [SQLiteMode], the full dep table in shared memory is saved.
+  * - If mode is [CustomMode], the dep table delta in [typing.rs] is saved.
+  * - If mode is [SaveCustomMode], an exception is raised.
+  *
+  * Setting [reset_state_after_saving] will empty either shared memory or the
+  * dep table delta in [typing.rs], depending on the mode.
+  *
+  * Currently, [build_revision] is ignored.
+  *)
+val save_discovered_edges :
+  Mode.t ->
+  dest:string ->
+  build_revision:string ->
+  reset_state_after_saving:bool ->
+  int
+
+(** Load discovered edges from a binary file.
+  *
+  * - If mode is [SQLiteMode], the binary file is assumed to contain 32-bit
+  *   hashes, and they will all be added to the shared memory table.
+  * - If mode is [CustomMode], the binary file is assumed to contain 64-bit
+  *   hashes and they will be added to the dep table delta in [typing.rs].
+  *   If we have an existing table attached, we will first filter out edges
+  *   that are already present in the attached table.
+  * - If mode is [SaveCustomMode], an exception is raised.
+  *
+  * Currently, [ignore_hh_version] is ignored.
+  *)
+val load_discovered_edges : Mode.t -> string -> ignore_hh_version:bool -> int
+
 val get_ideps_from_hash : Mode.t -> Dep.t -> DepSet.t
 
 val get_ideps : Mode.t -> Dep.dependency Dep.variant -> DepSet.t

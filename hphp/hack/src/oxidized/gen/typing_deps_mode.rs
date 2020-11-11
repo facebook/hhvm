@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<3ae6b9bfebc1a0eb88e550bc817fbda4>>
+// @generated SignedSource<<cdab29ce377466a372df95789bc7e525>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -38,7 +38,7 @@ pub enum TypingDepsMode {
     SQLiteMode,
     /// Custom mode, with the new custom dependency graph format.
     /// The parameter is the path to the database.
-    CustomMode(String),
+    CustomMode(Option<String>),
     /// Mode to produce both the legacy SQLite saved-state dependency graph,
     /// and, along side it, the new custom 64-bit dependency graph.
     ///

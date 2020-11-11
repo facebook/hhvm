@@ -11,7 +11,7 @@
 (***********************************************)
 type t =
   | SQLiteMode  (** Legacy mode, with SQLite saved-state dependency graph *)
-  | CustomMode of string
+  | CustomMode of string option
       (** Custom mode, with the new custom dependency graph format.
         * The parameter is the path to the database. *)
   | SaveCustomMode of {
@@ -29,7 +29,7 @@ type t =
 type hash_mode =
   | Hash32Bit
   | Hash64Bit
-[@@deriving show]
+[@@deriving show, eq]
 
 let hash_mode : t -> hash_mode = function
   | SQLiteMode -> Hash32Bit

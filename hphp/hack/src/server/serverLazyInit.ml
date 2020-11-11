@@ -1050,7 +1050,7 @@ let post_saved_state_initialization
           | Some new_edges_dir ->
             Typing_deps_mode.SaveCustomMode
               { graph = Some deptable_fn; new_edges_dir }
-          | None -> Typing_deps_mode.CustomMode deptable_fn
+          | None -> Typing_deps_mode.CustomMode (Some deptable_fn)
         else
           Typing_deps_mode.SQLiteMode );
     }

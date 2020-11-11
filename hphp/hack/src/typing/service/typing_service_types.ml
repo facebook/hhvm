@@ -188,6 +188,7 @@ type delegate_env = {
   recheck_id: string;
   root: string;
   tcopt: TypecheckerOptions.t;
+  hash_mode: Typing_deps_mode.hash_mode;
   (* This module exposes to the controller the limited set of operations that
     it needs, without exposing the underlying types or implementation details.
     It is also helpful in simplifying the isolation of the controller

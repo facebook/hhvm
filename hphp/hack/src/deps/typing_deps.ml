@@ -554,6 +554,11 @@ module CustomGraph = struct
     = "hh_custom_dep_graph_register_discovered_dep_edge"
     [@@noalloc]
 
+  external save_delta : string -> bool -> int = "hh_custom_dep_graph_save_delta"
+
+  external load_delta : Mode.t -> string -> int
+    = "hh_custom_dep_graph_load_delta"
+
   let add_all_deps mode x = x |> add_extend_deps mode |> add_typing_deps mode
 
   type dep_edge = {
@@ -871,6 +876,21 @@ let register_discovered_dep_edges : dep_edges -> unit = function
       "Registering %d discovered 64-bit dependency edges"
       (CustomGraph.DepEdgeSet.cardinal batch);
     CustomGraph.register_discovered_dep_edges batch
+
+let save_discovered_edges mode ~dest ~build_revision ~reset_state_after_saving =
+  match mode with
+  | SQLiteMode ->
+    SharedMem.save_dep_table_blob dest build_revision ~reset_state_after_saving
+  | CustomMode _ -> CustomGraph.save_delta dest reset_state_after_saving
+  | SaveCustomMode _ ->
+    failwith "save_discovered_edges not supported for SaveCustomMode"
+
+let load_discovered_edges mode source ~ignore_hh_version =
+  match mode with
+  | SQLiteMode -> SharedMem.load_dep_table_blob source ignore_hh_version
+  | CustomMode _ -> CustomGraph.load_delta mode source
+  | SaveCustomMode _ ->
+    failwith "load_discovered_edges not supported for SaveCustomMode"
 
 let get_ideps_from_hash mode hash =
   let open DepSet in

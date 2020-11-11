@@ -171,6 +171,9 @@ val get_backend : t -> Provider_backend.t
 (** Get the [Typing_deps_mode.t] that backs this [t]. *)
 val get_deps_mode : t -> Typing_deps_mode.t
 
+(** Update the [Typing_deps_mode.t] that backs this [t]. *)
+val map_deps_mode : t -> f:(Typing_deps_mode.t -> Typing_deps_mode.t) -> t
+
 (** Get the entries currently contained in this [t]. *)
 val get_entries : t -> entries
 

@@ -14,7 +14,8 @@ let make_local_server_api
     (naming_table : Naming_table.t)
     ~(root : string)
     ~(init_id : string)
-    ~(ignore_hh_version : bool) : (module LocalServerApi) =
+    ~(ignore_hh_version : bool)
+    ~(deps_mode : Typing_deps_mode.t) : (module LocalServerApi) =
   ( module struct
     let send_progress (message : string) : unit =
       ServerProgress.send_progress_to_monitor "%s" message
@@ -27,7 +28,10 @@ let make_local_server_api
       HackEventLogger.with_id ~stage:`Recheck check_id @@ fun () ->
       let start_t = Unix.gettimeofday () in
       let edges =
-        SharedMem.load_dep_table_blob state_filename ignore_hh_version
+        Typing_deps.load_discovered_edges
+          deps_mode
+          state_filename
+          ~ignore_hh_version
       in
       HackEventLogger.remote_scheduler_update_dependency_graph_end edges start_t;
       let (_t : float) =
@@ -187,7 +191,7 @@ let make_remote_server_api
                    naming_table_base
                in
                HackEventLogger.remote_worker_load_naming_end t;
-               let _t =
+               let _t : float =
                  Hh_logger.log_duration "Loaded naming table from SQLite" t
                in
                Ok (Some naming_table)
@@ -225,12 +229,13 @@ let make_remote_server_api
           Hh_logger.log_duration "Type checked files in remote worker" t
         in
         let dep_table_edges_added =
-          SharedMem.save_dep_table_blob
-            state_filename
-            Build_id.build_revision
+          Typing_deps.save_discovered_edges
+            (Provider_context.get_deps_mode ctx)
+            ~dest:state_filename
+            ~build_revision:Build_id.build_revision
             ~reset_state_after_saving:true
         in
-        let _t =
+        let _t : float =
           Hh_logger.log_duration
             (Printf.sprintf
                "Saved partial dependency graph (%d edges)"

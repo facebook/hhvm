@@ -145,6 +145,14 @@ impl<'bytes> DepGraph<'bytes> {
         }
     }
 
+    /// Return whether the given dependent-to-dependency edge is in the graph.
+    pub fn dependent_dependency_edge_exists(&self, dependent: Dep, dependency: Dep) -> bool {
+        match self.hash_list_for(dependency) {
+            Some(hash_list) => self.hash_list_contains(hash_list, dependent),
+            None => false,
+        }
+    }
+
     /// Add the direct typing dependencies for one dependency.
     pub fn add_typing_deps_for_dep(&self, acc: &mut OrdSet<Dep>, dep: Dep) {
         if let Some(dept_hash_list) = self.hash_list_for(dep) {

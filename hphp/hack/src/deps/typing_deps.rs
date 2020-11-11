@@ -16,8 +16,10 @@ use oxidized::typing_deps_mode::{HashMode, TypingDepsMode};
 use std::cell::RefCell;
 use std::collections::{BTreeMap, BTreeSet, VecDeque};
 use std::convert::TryInto;
+use std::ffi::OsString;
 use std::hash::Hasher;
-use std::io::Write;
+use std::io;
+use std::io::{Read, Write};
 use std::panic;
 use std::sync::Mutex;
 
@@ -132,14 +134,15 @@ impl UnsafeDepGraph {
                 TypingDepsMode::SQLiteMode => {
                     panic!("programming error: cannot call load in SQLite mode")
                 }
-                TypingDepsMode::SaveCustomMode {
+                TypingDepsMode::CustomMode(None)
+                | TypingDepsMode::SaveCustomMode {
                     graph: None,
                     new_edges_dir: _,
                 } => {
                     // Enabled, but we don't have a saved-state, so we can't open it
                     Ok(None)
                 }
-                TypingDepsMode::CustomMode(depgraph_fn)
+                TypingDepsMode::CustomMode(Some(depgraph_fn))
                 | TypingDepsMode::SaveCustomMode {
                     graph: Some(depgraph_fn),
                     new_edges_dir: _,
@@ -201,8 +204,32 @@ impl UnsafeDepGraph {
             Some(g) => f(g.depgraph()),
         }
     }
+
+    /// Run the closure with the loaded dep graph. If the custom dep graph
+    /// mode was enabled without a saved-state, the closure is run without
+    /// a dep graph.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the graph is not loaded, and custom mode was not enabled.
+    ///
+    /// Panics if the graph is not yet loaded, and opening
+    /// the graph results in an error.
+    ///
+    /// # Safety
+    ///
+    /// The pointer to the dependency graph mode should still be pointing
+    /// to a valid OCaml object.
+    pub unsafe fn with_option<F, R>(mode: RawTypingDepsMode, f: F) -> R
+    where
+        for<'a> F: FnOnce(Option<&'a DepGraph<'a>>) -> R,
+    {
+        let g = Self::load(mode).unwrap();
+        f(g.map(|g| g.depgraph()))
+    }
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct DepGraphDelta(BTreeMap<Dep, BTreeSet<Dep>>);
 
 impl DepGraphDelta {
@@ -225,6 +252,79 @@ impl DepGraphDelta {
 
     pub fn get(&self, dependency: Dep) -> Option<&BTreeSet<Dep>> {
         self.0.get(&dependency)
+    }
+
+    /// Write all edges in the delta to the writer in a custom format.
+    pub fn write_to<W: Write>(&self, w: &mut W) -> io::Result<usize> {
+        let mut edges_added = 0;
+        for (&dependency, dependents) in self.0.iter() {
+            if dependents.is_empty() {
+                continue;
+            }
+
+            let dependency: u64 = dependency.into();
+            w.write_all(&dependency.to_be_bytes())?;
+            for &dependent in dependents.iter() {
+                let dependent: u64 = dependent.into();
+
+                // Hashes are 63-bits, so we have one bit left to distinguish
+                // between dependencies and dependents. Dependents have their
+                // MSB set.
+                let dependent = dependent | (1 << 63);
+                w.write_all(&dependent.to_be_bytes())?;
+                edges_added += 1;
+            }
+        }
+
+        Ok(edges_added)
+    }
+
+    /// Load all edges into the delta.
+    ///
+    /// The predicate determines whether or not to add a loaded edge to the delta.
+    /// If the predicate returns true for a given dependent-dependency edge
+    /// (in that order), the edge is added.
+    ///
+    /// Returns the number of edges actually read.
+    pub fn read_from<R: Read>(
+        &mut self,
+        r: &mut R,
+        f: impl Fn(Dep, Dep) -> bool,
+    ) -> io::Result<usize> {
+        let mut edges_read = 0;
+        let mut dependency: Option<Dep> = None;
+        loop {
+            let mut bytes: [u8; 8] = [0; 8];
+            match r.read_exact(&mut bytes) {
+                Err(err) if err.kind() == io::ErrorKind::UnexpectedEof => {
+                    break;
+                }
+                r => r?,
+            };
+
+            let hash = u64::from_be_bytes(bytes);
+            if (hash & (1 << 63)) == 0 {
+                // This is a dependency hash.
+                dependency = Some(Dep::new(hash));
+            } else {
+                // This is a dependent hash.
+                let hash = hash & !(1 << 63);
+                let dependent = Dep::new(hash);
+                let dependency =
+                    dependency.expect("Expected a dependent hash before a dependency hash");
+
+                if f(dependent, dependency) {
+                    self.insert(dependent, dependency);
+                    edges_read += 1;
+                }
+            }
+        }
+
+        Ok(edges_read)
+    }
+
+    pub fn clear(&mut self) {
+        self.0.clear();
     }
 
     pub fn with_cell<R>(f: impl FnOnce(&Mutex<Self>) -> R) -> R {
@@ -557,10 +657,7 @@ ocaml_ffi! {
         // Safety: we don't call into OCaml again, so mode will remain valid.
         unsafe {
             UnsafeDepGraph::with_default(mode, false, move |g| {
-                match g.hash_list_for(dependency) {
-                    Some(hash_list) => g.hash_list_contains(hash_list, dependent),
-                    None => false,
-                }
+                g.dependent_dependency_edge_exists(dependent, dependency)
             })
         }
     }
@@ -645,6 +742,57 @@ ocaml_ffi! {
         DepGraphDelta::with_mut(move |s| {
             s.insert(dependent, dependency);
         });
+    }
+
+    fn hh_custom_dep_graph_save_delta(dest: OsString, reset_state_after_saving: bool) -> usize {
+        let f = std::fs::OpenOptions::new()
+            .create(true)
+            .write(true)
+            .append(true)
+            .open(&dest).unwrap();
+        let mut w = std::io::BufWriter::new(f);
+        let hashes_added = DepGraphDelta::with(move |s| {
+            s.write_to(&mut w).unwrap()
+        });
+
+        if reset_state_after_saving {
+            DepGraphDelta::with_mut(|s| {
+                s.clear();
+            });
+        }
+        hashes_added
+    }
+
+    fn hh_custom_dep_graph_load_delta(mode: RawTypingDepsMode, source: OsString) -> usize {
+        let f = std::fs::OpenOptions::new()
+            .read(true)
+            .open(&source).unwrap();
+        let mut r = std::io::BufReader::new(f);
+
+        // Safety: we don't call into OCaml again, so mode will remain valid.
+        unsafe {
+            UnsafeDepGraph::with_option(mode, move |g| {
+                DepGraphDelta::with_mut(|s| {
+                    let result = match g {
+                        Some(g) => {
+                            s.read_from(
+                                &mut r,
+                                |dependent, dependency| {
+                                    // Only add when it's not already in
+                                    // the graph!
+                                    !g.dependent_dependency_edge_exists(
+                                        dependent,
+                                        dependency,
+                                    )
+                                },
+                            )
+                        }
+                        None => s.read_from(&mut r, |_, _| true),
+                    };
+                    result.unwrap()
+                })
+            })
+        }
     }
 }
 
@@ -841,6 +989,38 @@ mod tests {
         let buf = x.serialize();
         let y = DepSet::deserialize(&buf);
 
+        assert_eq!(x, y);
+    }
+
+    #[test]
+    fn test_dep_graph_delta_serialize_empty() {
+        let x = DepGraphDelta::new();
+        let mut bytes = Vec::new();
+        x.write_to(&mut bytes).unwrap();
+
+        let mut y = DepGraphDelta::new();
+        let mut bytes_read: &[u8] = &bytes;
+        let num_loaded = y.read_from(&mut bytes_read, |_, _| true).unwrap();
+
+        assert_eq!(num_loaded, 0);
+        assert_eq!(x, y);
+    }
+
+    #[test]
+    fn test_dep_graph_delta_serialize_non_empty() {
+        let mut x = DepGraphDelta::new();
+        x.insert(Dep::new(10), Dep::new(1));
+        x.insert(Dep::new(10), Dep::new(2));
+        x.insert(Dep::new(11), Dep::new(2));
+        x.insert(Dep::new(12), Dep::new(3));
+        let mut bytes = Vec::new();
+        x.write_to(&mut bytes).unwrap();
+
+        let mut y = DepGraphDelta::new();
+        let mut bytes_read: &[u8] = &bytes;
+        let num_loaded = y.read_from(&mut bytes_read, |_, _| true).unwrap();
+
+        assert_eq!(num_loaded, 4);
         assert_eq!(x, y);
     }
 }

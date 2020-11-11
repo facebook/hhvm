@@ -185,8 +185,8 @@ gdImagePtr gdImageCreateTrueColor (int sx, int sy)
 
   // Check for OOM before doing a potentially large allocation.
   auto allocsz = sizeof(gdImage)
-    + sy * (sizeof(int *) + sizeof(unsigned char *))
-    + sx * sy * (sizeof(int) + sizeof(unsigned char));
+    + (sizeof(int *) + sizeof(unsigned char *)) * sy
+    + (sizeof(int) + sizeof(unsigned char)) * sx * sy;
   if (UNLIKELY(precheckOOM(allocsz))) {
     // Don't throw here because GD might need to do its own cleanup.
     return NULL;

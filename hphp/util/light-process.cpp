@@ -44,6 +44,7 @@
 #include "hphp/util/hugetlb.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
+#include "hphp/util/struct-log.h"
 #include "hphp/util/timer.h"
 #include "hphp/util/user-info.h"
 
@@ -51,6 +52,8 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 // helper functions
+
+bool LightProcess::g_strictUser = false;
 
 namespace {
 
@@ -399,23 +402,63 @@ void do_change_user(int afdt_fd) {
   lwp_read(afdt_fd, uname);
   if (!uname.length()) return;
 
+  StructuredLogEntry* log = nullptr;
+  int err = 0;
+  SCOPE_EXIT {
+    if (log) {
+      log->setInt("errno", err);
+      log->setStr("new_user", uname);
+      StructuredLog::log("hhvm_lightprocess_error", *log);
+      delete log;
+    }
+  };
   auto buf = PasswdBuffer{};
   struct passwd *pw;
   if (getpwnam_r(uname.c_str(), &buf.ent, buf.data.get(), buf.size, &pw)) {
-    // TODO(alexeyt) should we log something and/or fail to start?
+    err = errno;
+    log = new StructuredLogEntry();
+    log->setStr("function", "getpwnam_r");
+    if (LightProcess::g_strictUser) {
+      throw std::runtime_error{"getpwnam_r(): " + folly::errnoStr(err)};
+    }
     return;
   }
   if (!pw) {
-    // TODO(alexeyt) should we log something and/or fail to start?
+    log = new StructuredLogEntry();
+    log->setStr("function", "getpwnam_r");
+    if (LightProcess::g_strictUser) {
+      throw std::runtime_error{"getpwnam_r(): not found"};
+    }
     return;
   }
-
   if (pw->pw_gid) {
-    initgroups(pw->pw_name, pw->pw_gid);
-    setgid(pw->pw_gid);
+    if (initgroups(pw->pw_name, pw->pw_gid)) {
+      err = errno;
+      log = new StructuredLogEntry();
+      log->setStr("function", "initgroups");
+    }
+    if (setgid(pw->pw_gid)) {
+      if (!log) {
+        err = errno;
+        log = new StructuredLogEntry();
+        log->setStr("function", "setgid");
+        if (LightProcess::g_strictUser) {
+          throw std::runtime_error{"setgid():" + folly::errnoStr(err)};
+        }
+      }
+    }
   }
   if (pw->pw_uid) {
-    setuid(pw->pw_uid);
+    if (setuid(pw->pw_uid)) {
+      if (!log) {
+        err = errno;
+        log = new StructuredLogEntry();
+        log->setStr("function", "setuid");
+        if (LightProcess::g_strictUser) {
+          throw std::runtime_error{"setuid():" + folly::errnoStr(err)};
+        }
+      }
+    }
   }
 }
 

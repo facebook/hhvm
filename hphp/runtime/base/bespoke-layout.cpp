@@ -25,7 +25,6 @@
 namespace HPHP {
 
 using namespace jit;
-using namespace jit::irgen;
 
 BespokeLayout::BespokeLayout(const bespoke::Layout* layout)
   : m_layout(layout)

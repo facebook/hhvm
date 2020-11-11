@@ -1322,6 +1322,10 @@ impl<'ast, 'a> VisitorMut<'ast> for ClosureConvertVisitor<'a> {
                 x.recurse(env, self.object())?;
                 Expr_::Await(x)
             }
+            Expr_::ExpressionTree(mut x) => {
+                x.desugared_expr.recurse(env, self.object())?;
+                Expr_::ExpressionTree(x)
+            }
             mut x => {
                 x.recurse(env, self.object())?;
                 x

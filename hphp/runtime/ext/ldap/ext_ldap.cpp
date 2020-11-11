@@ -2139,7 +2139,7 @@ String HHVM_FUNCTION(ldap_escape,
 
   char hex[] = "0123456789abcdef";
 
-  String result(3 * value.size(), ReserveString);
+  String result(3UL * value.size(), ReserveString);
   char *rdata = result.get()->mutableData(), *r = rdata;
 
   for (int i = 0; i < value.size(); i++) {

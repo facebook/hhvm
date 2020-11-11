@@ -496,6 +496,8 @@ struct RuntimeOption {
   static std::set<std::string> AdminPasswords;
   static std::set<std::string> HashedAdminPasswords;
 
+  static std::string AdminDumpPath;
+
   /*
    * Options related to reverse proxying. ProxyOriginRaw and ProxyPercentageRaw
    * may be mutated by background threads and should only be read or written

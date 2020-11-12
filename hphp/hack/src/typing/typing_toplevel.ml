@@ -953,11 +953,7 @@ and class_def_ env c tc =
       env
       (Cls.where_constraints tc)
   in
-  Typing_variance.class_def
-    (Typing_variance.make_vgenv (Env.get_ctx env) (Env.get_file env))
-    (snd c.c_name)
-    tc
-    impl;
+  Typing_variance.class_def env tc impl;
   let check_where_constraints env ht =
     let (_, (p, _), _) = TUtils.unwrap_class_type ht in
     let (env, locl_ty) = Phase.localize_with_self env ht in

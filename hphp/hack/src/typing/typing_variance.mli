@@ -7,20 +7,15 @@
  *
  *)
 
-(** variance global environment *)
-type vgenv = {
-  ctx: Provider_context.t;
-  tracing_info: Decl_counters.tracing_info;
-}
-
-val make_vgenv : Provider_context.t -> Relative_path.t -> vgenv
-
 (** Check a class definition for correct usage of variant generic parameters *)
 val class_def :
-  vgenv -> string -> Decl_provider.Class.t -> Typing_defs.decl_ty list -> unit
+  Typing_env_types.env ->
+  Decl_provider.Class.t ->
+  Typing_defs.decl_ty list ->
+  unit
 
 (** Check a type definition for correct usage of variant generic parameters *)
-val typedef : vgenv -> string -> unit
+val typedef : Typing_env_types.env -> string -> unit
 
 type variance
 
@@ -33,7 +28,7 @@ val make_tparam_variance : Typing_defs.decl_tparam -> variance
  * from the enclosing class, if any.
  *)
 val get_typarams :
-  vgenv ->
+  Typing_env_types.env ->
   Typing_deps.Dep.dependent Typing_deps.Dep.variant * 'a ->
   variance SMap.t ->
   Typing_defs.decl_ty ->

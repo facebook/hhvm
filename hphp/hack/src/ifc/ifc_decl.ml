@@ -139,24 +139,6 @@ let get_attr attr attrs =
   | [a] -> Some a
   | _ -> fail ("multiple '" ^ attr ^ "' attributes found")
 
-let fun_ ctx { A.f_name = (_, name); _ } =
-  let callable_name = make_callable_name ~is_static:false None name in
-  let result =
-    match get_callable_decl ctx callable_name with
-    | Some c -> c
-    | None -> fail ("Can't find fun " ^ name)
-  in
-  (callable_name, result)
-
-let meth ctx class_name { A.m_name = (_, name); m_static = is_static; _ } =
-  let callable_name = make_callable_name ~is_static (Some class_name) name in
-  let result =
-    match get_callable_decl ctx callable_name with
-    | Some c -> c
-    | None -> fail ("Can't find method " ^ class_name ^ " " ^ name)
-  in
-  (callable_name, result)
-
 let immediate_supers { A.c_uses; A.c_extends; _ } =
   let id_of_hint = function
     | (_, A.Happly (id, _)) -> snd id
@@ -225,7 +207,7 @@ let mk_policied_prop
   | `No_policy -> None
   | `Policy pp_purpose -> Some { pp_name; pp_visibility; pp_purpose; pp_pos }
 
-let class_ ctx class_decl_env class_ =
+let class_ class_decl_env class_ =
   let { A.c_name = (_, name); c_vars = properties; _ } = class_ in
 
   (* Class decl using the immediately available information of the base class *)
@@ -244,16 +226,7 @@ let class_ ctx class_decl_env class_ =
   in
   let class_decl = { cd_policied_properties } in
 
-  (* Function declarations out of methods *)
-  let fun_decls =
-    List.map
-      ~f:(fun x ->
-        let (cn, decl) = meth ctx name x in
-        (callable_name_to_string cn, decl))
-      class_.A.c_methods
-  in
-
-  (name, class_decl, fun_decls)
+  (name, class_decl)
 
 let magic_class_decls =
   SMap.of_list
@@ -295,36 +268,22 @@ let topsort_classes classes =
   List.rev !schedule
 
 (* Removes all the auxiliary info needed only during declaration analysis. *)
-let collect_sigs ctx defs =
+let collect_sigs defs =
   let pick = function
-    | A.Class class_ -> `Fst class_
-    | A.Fun fun_ -> `Snd fun_
-    | _ -> `Trd ()
+    | A.Class class_ -> Some class_
+    | _ -> None
   in
-  let (classes, funs, _) = List.partition3_map ~f:pick defs in
-  let classes = topsort_classes classes in
-
-  (* Process and accumulate function decls *)
-  let fun_decls =
-    SMap.of_list
-      (List.map
-         ~f:(fun x ->
-           let (cn, decl) = fun_ ctx x in
-           (callable_name_to_string cn, decl))
-         funs)
-  in
-
+  let classes = List.filter_map ~f:pick defs |> topsort_classes in
   (* Process and accumulate class decls *)
-  let init = { de_class = magic_class_decls; de_fun = fun_decls } in
-  let add_class_decl { de_class; de_fun } cls =
-    let (class_name, class_decl, meth_decls) = class_ ctx de_class cls in
+  let init = { de_class = magic_class_decls } in
+  let add_class_decl { de_class } cls =
+    let (class_name, class_decl) = class_ de_class cls in
     let de_class = SMap.add class_name class_decl de_class in
-    let de_fun = SMap.union (SMap.of_list meth_decls) de_fun in
-    { de_class; de_fun }
+    { de_class }
   in
   List.fold ~f:add_class_decl ~init classes
 
-let property_policy { de_class; _ } cname pname =
+let property_policy { de_class } cname pname =
   Option.(
     SMap.find_opt cname de_class >>= fun cls ->
     List.find

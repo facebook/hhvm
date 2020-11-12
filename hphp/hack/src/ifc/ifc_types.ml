@@ -245,8 +245,6 @@ type fun_decl = {
 type decl_env = {
   (* policy decls for classes indexed by class name *)
   de_class: class_decl SMap.t;
-  (* policy decls for functions indexed by function name *)
-  de_fun: fun_decl SMap.t;
 }
 
 (* Mode of operation.

@@ -34,7 +34,7 @@ let catch_ifc_internal_errors pos f =
       pos
       ("Unexpected IFC exception: " ^ Exn.to_string e)
 
-let decl_env : decl_env = { de_class = SMap.empty; de_fun = SMap.empty }
+let decl_env : decl_env = { de_class = SMap.empty }
 
 let check_errors_from_callable_result result =
   let open Ifc in

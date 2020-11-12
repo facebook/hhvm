@@ -1753,7 +1753,7 @@ let get_solver_result results =
 
 let check opts tast ctx =
   (* Declaration phase *)
-  let decl_env = Decl.collect_sigs ctx tast in
+  let decl_env = Decl.collect_sigs tast in
   if should_print ~user_mode:opts.opt_mode ~phase:Mdecl then
     Format.printf "%a@." Pp.decl_env decl_env;
 

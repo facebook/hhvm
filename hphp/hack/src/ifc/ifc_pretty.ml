@@ -220,25 +220,12 @@ let class_decl fmt { cd_policied_properties = props; _ } =
   let properties fmt = list comma_sep policied_property fmt in
   fprintf fmt "{ policied_props = [@[<hov>%a@]] }" properties props
 
-let fun_decl fmt decl =
-  let kind =
-    match decl.fd_kind with
-    | FDPolicied (Some policy) -> show_policy policy
-    | FDPolicied None -> "implicit"
-    | FDInferFlows -> "infer"
-  in
-  fprintf fmt "{ kind = %s }" kind
-
 let decl_env fmt de =
   let handle_class name decl =
     fprintf fmt "class %s: %a@ " name class_decl decl
   in
   fprintf fmt "Decls:@.  @[<v>";
-  let handle_fun name decl =
-    fprintf fmt "function %s: %a@ " name fun_decl decl
-  in
   SMap.iter handle_class de.de_class;
-  SMap.iter handle_fun de.de_fun;
   fprintf fmt "@]"
 
 let implicit_violation fmt (l, r) =

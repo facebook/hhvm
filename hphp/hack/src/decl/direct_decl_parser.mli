@@ -20,5 +20,5 @@ type ns_map = (string * string) list
 
 val parse_decls_ffi : Relative_path.t -> string -> ns_map -> decls
 
-val parse_decl_lists_ffi :
-  Relative_path.t -> string -> ns_map -> decl_lists * FileInfo.mode option
+val parse_decls_and_mode_ffi :
+  Relative_path.t -> string -> ns_map -> decls * FileInfo.mode option

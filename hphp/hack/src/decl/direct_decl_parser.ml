@@ -17,9 +17,10 @@ type decl_lists = {
 
 type ns_map = (string * string) list
 
-external parse_decls_ffi : Relative_path.t -> string -> ns_map -> decls
-  = "hh_parse_decls_ffi"
+external parse_decls_and_mode_ffi :
+  Relative_path.t -> string -> ns_map -> decls * FileInfo.mode option
+  = "hh_parse_decls_and_mode_ffi"
 
-external parse_decl_lists_ffi :
-  Relative_path.t -> string -> ns_map -> decl_lists * FileInfo.mode option
-  = "hh_parse_decl_lists_ffi"
+let parse_decls_ffi (path : Relative_path.t) (text : string) (ns_map : ns_map) :
+    decls =
+  parse_decls_and_mode_ffi path text ns_map |> fst

@@ -211,6 +211,15 @@ impl<'ast> VisitorMut<'ast> for TypeVirtualizer {
                     &pos,
                 ))
             }
+            // Convert `1.0` to `__splice__(Visitor::floatLiteral(1.0))`.
+            Float(_) => {
+                *e = mk_splice(static_meth_call(
+                    &self.visitor_name,
+                    "floatLiteral",
+                    vec![e.clone()],
+                    &pos,
+                ))
+            }
             // Convert `"foo"` to `__splice__(Visitor::stringLiteral("foo"))`
             String(_) => {
                 *e = mk_splice(static_meth_call(

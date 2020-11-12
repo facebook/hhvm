@@ -1,6 +1,6 @@
 File "mismatched_types.php", line 7, characters 10-16:
 Expected `ExprTree<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
-  File "mismatched_types.php", line 28, characters 5-45:
+  File "mismatched_types.php", line 33, characters 5-45:
   But got `dynamic` because it is an unenforceable type
 File "mismatched_types.php", line 8, characters 10-10:
 Expected `ExprTree<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])

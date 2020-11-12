@@ -22,6 +22,11 @@ final class Code {
   ): ExprTree<this, this::TAst, ExampleInt> {
     throw new Exception();
   }
+  public static function floatLiteral(
+    float $_,
+  ): ExprTree<this, this::TAst, ExampleFloat> {
+    throw new Exception();
+  }
   public static function boolLiteral(bool $_):
     ExprTree<this, this::TAst, ExampleBool>
   {
@@ -204,5 +209,7 @@ final class ExampleBool {
 final class ExampleString {}
 
 final class ExampleContext {}
+
+final class ExampleFloat {}
 
 //// END DEFS

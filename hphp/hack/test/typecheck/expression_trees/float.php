@@ -2,14 +2,8 @@
 
 <<file:__EnableUnstableFeatures('expression_trees')>>
 
-function bar(
-  ExampleContext $_,
-): ExprTree<Code, Code::TAst, (function(ExampleString): ExampleInt)> {
-  throw new Exception();
-}
-
-function foo(): void {
-  $fun_call = Code`bar("baz")`;
+function test(): void {
+  Code`2.0`;
 }
 
 //// BEGIN DEFS
@@ -197,11 +191,11 @@ final class ExampleBool {
     throw new Exception();
   }
 
-  public function __bool(): bool {
+  public function __exclamationMark(): ExampleBool {
     throw new Exception();
   }
 
-  public function __exclamationMark(): ExampleBool {
+  public function coerceToBool(): bool {
     throw new Exception();
   }
 }

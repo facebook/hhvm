@@ -100,8 +100,9 @@ impl<'ast> Visitor<'ast> for Checker {
 
         if c.in_expression_tree {
             let valid_syntax = match &e.1 {
-                // Allow integer, string, boolean and null literals.
+                // Allow integer, float, string, boolean and null literals.
                 Int(_) => true,
+                Float(_) => true,
                 String(_) => true,
                 True | False | Null => true,
                 // Allow local variables $foo.

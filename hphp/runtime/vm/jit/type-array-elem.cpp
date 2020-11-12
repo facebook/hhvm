@@ -85,7 +85,7 @@ std::pair<Type, bool> vecElemType(Type arr, Type idx, const Class* ctx) {
     // If both the array and idx are known statically, we can resolve it to the
     // precise type.
     if (idx.hasConstVal()) {
-      auto const tv = PackedArray::NvGetInt(arr.arrLikeVal(), idx.intVal());
+      auto const tv = arr.arrLikeVal()->get(idx.intVal());
       if (tv.is_init()) return {Type::cns(tv), true};
       return {TBottom, false};
     }
@@ -93,7 +93,7 @@ std::pair<Type, bool> vecElemType(Type arr, Type idx, const Class* ctx) {
     // Otherwise we can constrain the type according to the union of all the
     // types present in the vec/varray.
     auto type = TBottom;
-    PackedArray::IterateV(
+    IterateV(
       arr.arrLikeVal(),
       [&](TypedValue v) { type |= Type::cns(v); }
     );
@@ -144,11 +144,11 @@ std::pair<Type, bool> dictElemType(Type arr, Type idx) {
     // If both the array and idx are known statically, we can resolve it to the
     // precise type.
     if (idx.hasConstVal(TInt)) {
-      auto const tv = MixedArray::NvGetInt(arr.arrLikeVal(), idx.intVal());
+      auto const tv = arr.arrLikeVal()->get(idx.intVal());
       if (tv.is_init()) return {Type::cns(tv), true};
       return {TBottom, false};
     } else if (idx.hasConstVal(TStr)) {
-      auto const tv = MixedArray::NvGetStr(arr.arrLikeVal(), idx.strVal());
+      auto const tv = arr.arrLikeVal()->get(idx.strVal());
       if (tv.is_init()) return {Type::cns(tv), true};
       return {TBottom, false};
     }
@@ -156,8 +156,8 @@ std::pair<Type, bool> dictElemType(Type arr, Type idx) {
     // Otherwise we can constrain the type according to the union of all the
     // types present in the dict.
     auto type = TBottom;
-    MixedArray::IterateKV(
-      MixedArray::asMixed(arr.arrLikeVal()),
+    IterateKV(
+      arr.arrLikeVal(),
       [&](TypedValue k, TypedValue v) {
         // Ignore values which can't correspond to the key's type
         if (isIntType(k.m_type)) {
@@ -183,11 +183,11 @@ std::pair<Type, bool> keysetElemType(Type arr, Type idx) {
     // If both the array and idx are known statically, we can resolve it to the
     // precise type.
     if (idx.hasConstVal(TInt)) {
-      auto const tv = SetArray::NvGetInt(arr.vecVal(), idx.intVal());
+      auto const tv = arr.arrLikeVal()->get(idx.intVal());
       if (tv.is_init()) return {Type::cns(tv), true};
       return {TBottom, false};
     } else if (idx.hasConstVal(TStr)) {
-      auto const tv = SetArray::NvGetStr(arr.vecVal(), idx.strVal());
+      auto const tv = arr.arrLikeVal()->get(idx.strVal());
       if (tv.is_init()) return {Type::cns(tv), true};
       return {TBottom, false};
     }
@@ -195,8 +195,8 @@ std::pair<Type, bool> keysetElemType(Type arr, Type idx) {
     // Otherwise we can constrain the type according to the union of all the
     // types present in the keyset.
     auto type = TBottom;
-    SetArray::Iterate(
-      SetArray::asSet(arr.keysetVal()),
+    IterateV(
+      arr.arrLikeVal(),
       [&](TypedValue v) {
         // Ignore values which can't correspond to the key's type
         if (isIntType(v.m_type)) {
@@ -217,6 +217,13 @@ std::pair<Type, bool> keysetElemType(Type arr, Type idx) {
   if (idx <= TStr) type &= TStr;
   if (arr <= TPersistentKeyset) type &= TUncountedInit;
   return {type, false};
+}
+
+std::pair<Type, bool> arrLikeElemType(Type arr, Type idx, const Class* ctx) {
+  assertx(arr.isKnownDataType());
+  if (arr <= (TVArr|TVec))  return vecElemType(arr, idx, ctx);
+  if (arr <= (TDArr|TDict)) return dictElemType(arr, idx);
+  return keysetElemType(arr, idx);
 }
 
 std::pair<Type, bool> vecFirstLastType(Type arr,
@@ -286,7 +293,7 @@ std::pair<Type, bool> keysetFirstLastType(Type arr, bool isFirst) {
   assertx(arr <= TKeyset);
 
   if (arr.hasConstVal()) {
-    auto val = arr.keysetVal();
+    auto val = arr.arrLikeVal();
     if (val->empty()) return {TBottom, false};
     auto const pos = isFirst ? val->iter_begin() : val->iter_last();
     return {Type::cns(val->nvGetVal(pos)), true};
@@ -295,6 +302,17 @@ std::pair<Type, bool> keysetFirstLastType(Type arr, bool isFirst) {
   auto type = TStr | TInt;
   if (arr <= TUncounted) type &= TUncountedInit;
   return {type, false};
+}
+
+std::pair<Type, bool> arrLikeFirstLastType(
+    Type arr, bool isFirst, bool isKey, const Class* ctx) {
+  assertx(arr.isKnownDataType());
+  if (arr <= (TVArr|TVec)) {
+    if (isKey) return {TInt, false};
+    return vecFirstLastType(arr, isFirst, ctx);
+  }
+  if (arr <= (TDArr|TDict)) return dictFirstLastType(arr, isFirst, isKey);
+  return keysetFirstLastType(arr, isFirst);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -237,6 +237,8 @@ external get_worker_id : unit -> int = "hh_get_worker_id" [@@noalloc]
 (* Raw access for proxying across network.
  *)
 (*****************************************************************************)
+external mem_raw : string -> bool = "hh_mem"
+
 external get_raw : string -> 'a heap_entry = "hh_get_raw"
 
 external add_raw : string -> 'a heap_entry -> unit = "hh_add_raw"

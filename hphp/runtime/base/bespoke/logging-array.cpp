@@ -137,7 +137,7 @@ ArrayData* maybeMakeLoggingArray(ArrayData* ad, LoggingProfile* profile) {
   if (!g_emitLoggingArrays.load(std::memory_order_relaxed)) return ad;
 
   if (ad->isSampledArray() || !ad->isVanilla()) {
-    assertx(isArrLikeCastOp(profile->source.op()));
+    assertx(isArrLikeCastOp(profile->key.op()));
     FTRACE(5, "Skipping logging for {} array.\n",
            ad->isSampledArray() ? "sampled" : "bespoke");
     return ad;
@@ -153,12 +153,12 @@ ArrayData* maybeMakeLoggingArray(ArrayData* ad, LoggingProfile* profile) {
   }();
 
   if (!shouldEmitBespoke) {
-    FTRACE(5, "Emit vanilla at {}\n", profile->source.getSymbol());
+    FTRACE(5, "Emit vanilla at {}\n", profile->key.toString());
     auto const cached = profile->staticSampledArray;
     return cached ? cached : makeSampledArray(ad);
   }
 
-  FTRACE(5, "Emit bespoke at {}\n", profile->source.getSymbol());
+  FTRACE(5, "Emit bespoke at {}\n", profile->key.toString());
   profile->loggingArraysEmitted++;
   auto const cached = profile->staticLoggingArray;
   if (cached) return cached;

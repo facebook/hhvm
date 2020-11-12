@@ -78,6 +78,47 @@ ARRAY_OPS
 // Internal storage detail of EventMap.
 struct EventKey;
 
+// We profile some bytecodes (array constructors or casts) and prop init vals.
+struct LoggingProfileKey {
+  struct TbbHashCompare;
+
+  explicit LoggingProfileKey(SrcKey sk) : sk(sk), index(-1) {}
+  explicit LoggingProfileKey(const Class* cls, uint32_t index)
+    : cls(cls), index(safe_cast<int32_t>(index)) {}
+
+  Op op() const {
+    return index < 0 ? sk.op() : Op::NewObjD;
+  }
+
+  std::string toString() const {
+    if (index < 0) return sk.getSymbol();
+    auto const& prop = cls->declProperties()[index];
+    return folly::sformat("{}->{}", cls->name(), prop.name);
+  }
+
+  std::string toStringDetail() const {
+    if (index < 0) return sk.showInst();
+    return folly::sformat("NewObjD \"{}\"", cls->name());
+  }
+
+  union {
+    SrcKey sk;
+    const Class* cls;
+    uintptr_t ptr;
+  };
+  // The logical index of a property on cls, or -1 if sk is set.
+  int32_t index;
+};
+
+struct LoggingProfileKey::TbbHashCompare {
+  static size_t hash(const LoggingProfileKey& key) {
+    return folly::hash::hash_combine(hash_int64(key.ptr), key.index);
+  }
+  static bool equal(const LoggingProfileKey& a, const LoggingProfileKey& b) {
+    return a.ptr == b.ptr && a.index == b.index;
+  }
+};
+
 // We'll store a LoggingProfile for each array construction site SrcKey.
 // It tracks the operations that happen on arrays coming from that site.
 struct LoggingProfile {
@@ -89,8 +130,8 @@ struct LoggingProfile {
   using EventMap = tbb::concurrent_hash_map<EventMapKey, size_t,
                                             EventMapHasher>;
 
-  // The key maps the EntryType before the operation to the EntryType after the
-  // operation
+  // The first element of the key is the EntryTypes before the operation;
+  // the second element is the EntryTypes after it.
   using EntryTypesMapKey = std::pair<uint16_t, uint16_t>;
   using EntryTypesMapHasher = pairHashCompare<uint16_t, uint16_t,
                                               integralHashCompare<uint16_t>,
@@ -98,7 +139,7 @@ struct LoggingProfile {
   using EntryTypesMap = tbb::concurrent_hash_map<EntryTypesMapKey, size_t,
                                                  EntryTypesMapHasher>;
 
-  explicit LoggingProfile(SrcKey source) : source(source) {}
+  explicit LoggingProfile(LoggingProfileKey key) : key(key) {}
 
   double getSampleCountMultiplier() const;
   uint64_t getTotalEvents() const;
@@ -119,7 +160,8 @@ private:
   void logEventImpl(const EventKey& key);
 
 public:
-  SrcKey source;
+  LoggingProfileKey key;
+
   std::atomic<uint64_t> sampleCount = 0;
   std::atomic<uint64_t> loggingArraysEmitted = 0;
   LoggingArray* staticLoggingArray = nullptr;
@@ -129,7 +171,7 @@ public:
 };
 
 // We split sinks by profiling tracelet so we can condition on array type.
-using SinkKey = std::pair<TransID, SrcKey>;
+using SinkProfileKey = std::pair<TransID, SrcKey>;
 
 // We'll store a SinkProfile for each place where an array is used.
 struct SinkProfile {
@@ -147,7 +189,7 @@ public:
   static constexpr size_t kNoValTypes = kNumValTypes - 2;
   static constexpr size_t kAnyValType = kNumValTypes - 1;
 
-  SinkKey sink;
+  SinkProfileKey key;
 
   std::atomic<uint64_t> arrCounts[kNumArrTypes] = {};
   std::atomic<uint64_t> keyCounts[kNumKeyTypes] = {};

@@ -250,7 +250,7 @@ void LoggingProfile::logEventImpl(const EventKey& key) {
   } else {
     it->second++;
   }
-  FTRACE(6, "{} -> {}: {} [count={}]\n", source.getSymbol(),
+  FTRACE(6, "{} -> {}: {} [count={}]\n", key.toString(),
          (sink.valid() ? sink.getSymbol() : "<unknown>"),
          EventKey(key).toString(), it->second);
 }
@@ -420,13 +420,14 @@ struct EntryTypesEscalationOutputData {
 };
 
 struct SourceFrequencyData {
-  SourceFrequencyData(SrcKey sk, uint64_t count) : sk(sk), count(count) {}
+  SourceFrequencyData(const std::string& source, uint64_t count)
+    : source(source), count(count) {}
 
   bool operator<(const SourceFrequencyData& other) const {
     return count > other.count;
   }
 
-  SrcKey sk;
+  std::string source;
   uint64_t count;
 };
 
@@ -527,9 +528,9 @@ struct SinkOutputData {
   explicit SinkOutputData(const SinkProfile* profile)
     : profile(profile)
   {
-    std::map<SrcKey, uint64_t> sourceCounts;
+    std::map<std::string, uint64_t> sourceCounts;
     for (auto const& it : profile->sources) {
-      sourceCounts[it.first->source] += it.second;
+      sourceCounts[it.first->key.toString()] += it.second;
       loggedCount += it.second;
     }
     for (auto const& it : sourceCounts) {
@@ -563,13 +564,13 @@ struct SinkOutputData {
 };
 
 using ProfileOutputData = std::vector<SourceOutputData>;
-using ProfileMap = tbb::concurrent_hash_map<SrcKey, LoggingProfile*,
-                                            SrcKey::TbbHashCompare>;
+using ProfileMap = tbb::concurrent_hash_map<LoggingProfileKey, LoggingProfile*,
+                                            LoggingProfileKey::TbbHashCompare>;
 
-using SinkKeyHashCompare = pairHashCompare<
+using SinkProfileKeyHashCompare = pairHashCompare<
   TransID, SrcKey, integralHashCompare<TransID>, SrcKey::TbbHashCompare>;
 using SinkMap = tbb::concurrent_hash_map<
-  SinkKey, SinkProfile*, SinkKeyHashCompare>;
+  SinkProfileKey, SinkProfile*, SinkProfileKeyHashCompare>;
 
 ProfileMap s_profileMap;
 SinkMap s_sinkMap;
@@ -622,13 +623,12 @@ bool exportSortedProfiles(FILE* file, const ProfileOutputData& profileData) {
 
   for (auto const& sourceData : profileData) {
     auto const sourceProfile = sourceData.profile;
-    auto const sourceSk = sourceProfile->source;
 
     LOG_OR_RETURN(file, "{} [{}/{} sampled, {:.2f} weight]\n",
-                  sourceSk.getSymbol(),
+                  sourceProfile->key.toString(),
                   sourceProfile->loggingArraysEmitted.load(),
                   sourceProfile->sampleCount.load(), sourceData.weight);
-    LOG_OR_RETURN(file, "  {}\n", sourceSk.showInst());
+    LOG_OR_RETURN(file, "  {}\n", sourceProfile->key.toStringDetail());
     LOG_OR_RETURN(file, "  {} reads, {} writes, {} distinct sinks\n",
                   sourceData.readCount, sourceData.writeCount,
                   sourceData.numDistinctSinks);
@@ -662,7 +662,7 @@ bool exportSortedSinks(FILE* file, const std::vector<SinkOutputData>& sinks) {
   LOG_OR_RETURN(file, "Sinks:\n\n");
 
   for (auto const& sink : sinks) {
-    auto const sk = sink.profile->sink.second;
+    auto const sk = sink.profile->key.second;
     LOG_OR_RETURN(file, "{} [{}/{} sampled, {} logged]\n",
                   sk.getSymbol(), sink.sampledCount,
                   sink.weight, sink.loggedCount);
@@ -674,7 +674,7 @@ bool exportSortedSinks(FILE* file, const std::vector<SinkOutputData>& sinks) {
 
     LOG_OR_RETURN(file, "  Sources:\n");
     for (auto const& edge : sink.sources) {
-      LOG_OR_RETURN(file, "  {: >6}x {}\n", edge.count, edge.sk.getSymbol());
+      LOG_OR_RETURN(file, "  {: >6}x {}\n", edge.count, edge.source);
     }
 
     LOG_OR_RETURN(file, "\n");
@@ -754,14 +754,10 @@ ProfileOutputData sortProfileData() {
   ProfileOutputData profileData;
   profileData.reserve(s_profileMap.size());
 
-  // Process each profile, then sort the results
   std::transform(
     s_profileMap.begin(), s_profileMap.end(), std::back_inserter(profileData),
-    [](const std::pair<SrcKey, LoggingProfile*>& sourceData) {
-      return sortSourceData(sourceData.second);
-    }
+    [](auto const& pair) { return sortSourceData(pair.second); }
   );
-
   std::sort(profileData.begin(), profileData.end());
 
   return profileData;
@@ -839,13 +835,13 @@ bool shouldLogAtSrcKey(SrcKey sk) {
 }
 }
 
-LoggingProfile* getLoggingProfile(SrcKey skRaw) {
-  if (!shouldLogAtSrcKey(skRaw)) return nullptr;
+LoggingProfile* getLoggingProfile(SrcKey sk) {
+  if (!shouldLogAtSrcKey(sk)) return nullptr;
 
-  auto const sk = canonicalize(skRaw);
+  auto const key = LoggingProfileKey { canonicalize(sk) };
   {
     ProfileMap::const_accessor it;
-    if (s_profileMap.find(it, sk)) return it->second;
+    if (s_profileMap.find(it, key)) return it->second;
   }
 
   // Hold the read mutex for the duration of the mutation so that export cannot
@@ -854,17 +850,17 @@ LoggingProfile* getLoggingProfile(SrcKey skRaw) {
   if (s_exportStarted.load(std::memory_order_relaxed)) return nullptr;
 
   auto const ad = [&]() -> ArrayData* {
-    auto const op = sk.op();
+    auto const op = key.op();
     if (op != Op::Array && op != Op::Vec &&
         op != Op::Dict && op != Op::Keyset) {
       return nullptr;
     }
-    auto const unit = sk.func()->unit();
-    auto const result = unit->lookupArrayId(getImm(sk.pc(), 0).u_AA);
+    auto const unit = key.sk.func()->unit();
+    auto const result = unit->lookupArrayId(getImm(key.sk.pc(), 0).u_AA);
     return const_cast<ArrayData*>(result);
   }();
 
-  auto profile = std::make_unique<LoggingProfile>(sk);
+  auto profile = std::make_unique<LoggingProfile>(key);
   if (ad) {
     profile->staticLoggingArray = LoggingArray::MakeStatic(ad, profile.get());
     profile->staticSampledArray = ad->makeSampledStaticArray();
@@ -872,7 +868,7 @@ LoggingProfile* getLoggingProfile(SrcKey skRaw) {
 
   auto const result = [&]{
     ProfileMap::accessor insert;
-    if (s_profileMap.insert(insert, sk)) {
+    if (s_profileMap.insert(insert, key)) {
       insert->second = profile.release();
     }
     return insert->second;
@@ -894,7 +890,7 @@ LoggingProfile* getLoggingProfile(SrcKey skRaw) {
 }
 
 SinkProfile* getSinkProfile(TransID id, SrcKey skRaw) {
-  auto const key = SinkKey { id, canonicalize(skRaw) };
+  auto const key = SinkProfileKey { id, canonicalize(skRaw) };
   {
     SinkMap::const_accessor it;
     if (s_sinkMap.find(it, key)) return it->second;
@@ -906,7 +902,7 @@ SinkProfile* getSinkProfile(TransID id, SrcKey skRaw) {
   if (s_exportStarted.load(std::memory_order_relaxed)) return nullptr;
 
   auto profile = std::make_unique<SinkProfile>();
-  profile->sink = key;
+  profile->key = key;
 
   auto const result = [&]{
     SinkMap::accessor insert;

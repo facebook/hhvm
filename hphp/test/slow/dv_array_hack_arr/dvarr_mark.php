@@ -72,4 +72,6 @@ function bar<reify T>(vec<T> $v, int $i) {
 function main() {
   foo(1);
   bar<int>(vec[1, 2], 0);
+  var_dump(gettype(varray[]));
+  var_dump(gettype(darray['a' => 10]));
 }

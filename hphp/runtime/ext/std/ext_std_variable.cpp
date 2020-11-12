@@ -73,6 +73,9 @@ String HHVM_FUNCTION(gettype, const Variant& v) {
   // OH NO. This string could be used by logic in Hack, so we can't do the
   // sensible thing here and return "varray" or "darray" for dvarrays.
   if (isArrayType(v.getType())) return s_array;
+  if (isArrayLikeType(v.getType()) && v.getArrayData()->isLegacyArray()) {
+    return s_array;
+  }
   return getDataTypeString(v.getType());
 }
 

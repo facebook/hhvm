@@ -190,6 +190,11 @@ impl<'ast> VisitorMut<'ast> for TypeVirtualizer {
             meth_call(lhs, meth_name, vec![rhs], pos)
         }
 
+        fn virtualize_unop(operand: &mut Expr, meth_name: &str, pos: &Pos) -> Expr {
+            let operand = std::mem::replace(operand, dummy_expr());
+            meth_call(operand, meth_name, vec![], pos)
+        }
+
         use aast::Expr_::*;
 
         let pos = e.0.clone();
@@ -257,6 +262,17 @@ impl<'ast> VisitorMut<'ast> for TypeVirtualizer {
                     Bop::Diff2 => *e = virtualize_binop(lhs, "__notTripleEquals", rhs, &e.0),
                     // Assignment is special and not virtualized
                     Bop::Eq(None) => {}
+                    // The rest should be parser errors from expression_tree_check
+                    _ => {}
+                }
+            }
+            Unop(ref mut unop) => {
+                let (ref op, ref mut operand) = **unop;
+                // Recurse into the operand
+                operand.accept(env, self.object())?;
+
+                match op {
+                    Uop::Unot => *e = virtualize_unop(operand, "__exclamationMark", &e.0),
                     // The rest should be parser errors from expression_tree_check
                     _ => {}
                 }
@@ -410,17 +426,6 @@ fn rewrite_expr(e: &Expr) -> Expr {
             _ => v_meth_call(
                 "unsupportedSyntax",
                 vec![string_literal("bad binary operator")],
-                &e.0,
-            ),
-        },
-        Unop(uop) => match &**uop {
-            // Convert `!...` to `$v->exclamationMark(new ExprPos(...), $v->...)`.
-            (Uop::Unot, operand) => {
-                v_meth_call("exclamationMark", vec![pos, rewrite_expr(&operand)], &e.0)
-            }
-            _ => v_meth_call(
-                "unsupportedSyntax",
-                vec![string_literal("bad unary operator")],
                 &e.0,
             ),
         },

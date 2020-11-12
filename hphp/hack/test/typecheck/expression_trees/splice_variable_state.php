@@ -76,12 +76,6 @@ final class Code {
   }
 
   // Old style operators
-  public function exclamationMark(
-    ?ExprPos $_,
-    this::TAst $_,
-  ): this::TAst {
-    throw new Exception();
-  }
   public function call<T>(
     ?ExprPos $_,
     this::TAst $_callee,
@@ -208,6 +202,10 @@ final class ExampleBool {
   }
 
   public function __bool(): bool {
+    throw new Exception();
+  }
+
+  public function __exclamationMark(): ExampleBool {
     throw new Exception();
   }
 }

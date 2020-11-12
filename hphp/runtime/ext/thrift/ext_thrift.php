@@ -67,5 +67,8 @@ final class RpcOptions {
   public function setHeader(string $key, string $value): RpcOptions;
 
   <<__Native>>
+  public function setLoggingContext(string $logging_metadata): RpcOptions;
+
+  <<__Native>>
   public function __toString(): string;
 }

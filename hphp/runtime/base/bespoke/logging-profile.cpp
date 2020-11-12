@@ -47,6 +47,9 @@ bool fits(U u) {
 }
 constexpr int8_t kInt8Min = std::numeric_limits<int8_t>::min();
 
+// The number of events we render inline before dropping key specializations.
+constexpr size_t kMaxNumDetailedEvents = 32;
+
 folly::SharedMutex s_exportStartedLock;
 std::atomic<bool> s_exportStarted{false};
 
@@ -94,11 +97,19 @@ struct alignas(8) EventKey {
     static_assert(sizeof(EventKey) == sizeof(uint64_t), "");
     memmove(this, &value, sizeof(EventKey));
   }
+
+  EventKey dropKeySpecialization() const {
+    auto result = *this;
+    result.m_key = kInvalidId;
+    return result;
+  }
+
   uint64_t toUInt64() const {
     uint64_t value;
     memmove(&value, this, sizeof(EventKey));
     return value;
   }
+
   ArrayOp getOp() const {
     return m_op;
   }
@@ -149,7 +160,7 @@ private:
   Spec m_key_spec = Spec::None;
   Spec m_val_spec = Spec::None;
   DataType m_val_type = kInvalidDataType;
-  uint32_t m_key = 0; // Set for Spec::Int8 and Spec::Str32
+  uint32_t m_key = kInvalidId; // May be set for Spec::Int8 and Spec::Str32
 };
 
 // Dispatch to the setters above. There must be a better way...
@@ -179,13 +190,15 @@ std::string EventKey::toString() const {
   auto const key = [&]() -> std::string {
     auto const spec = m_key_spec;
     if (spec == Spec::None) return "";
-    if (spec == Spec::Int8) {
-      auto const i = safe_cast<int8_t>(safe_cast<int16_t>(m_key) + kInt8Min);
-      return folly::sformat(" key=[i8:{}]", i);
-    }
-    if (spec == Spec::Str32) {
-      auto const s = ((StringData*)safe_cast<uintptr_t>(m_key))->data();
-      return folly::sformat(" key=[s32:\"{}\"]", folly::cEscape<std::string>(s));
+    if (m_key != kInvalidId) {
+      assertx(spec == Spec::Int8 || spec == Spec::Str32);
+      if (spec == Spec::Int8) {
+        auto const i = safe_cast<int8_t>(safe_cast<int16_t>(m_key) + kInt8Min);
+        return folly::sformat(" key=[i8:{}]", i);
+      } else {
+        auto const s = ((StringData*)safe_cast<uintptr_t>(m_key))->data();
+        return folly::sformat(" key=[s32:\"{}\"]", folly::cEscape<std::string>(s));
+      }
     }
     return folly::sformat(" key=[{}]", specToStr(spec));
   }();
@@ -379,7 +392,17 @@ struct OperationOutputData {
     totalCount += count;
   }
 
-  void sortEvents() {
+  void formatEvents() {
+    if (events.size() > kMaxNumDetailedEvents) {
+      std::map<uint64_t, uint64_t> deduped;
+      for (auto const& event : events) {
+        deduped[event.event.dropKeySpecialization().toUInt64()] += event.count;
+      }
+      events.clear();
+      for (auto const& pair : deduped) {
+        events.emplace_back(EventKey(pair.first), pair.second);
+      }
+    }
     std::sort(events.begin(), events.end());
   }
 
@@ -707,7 +730,7 @@ SourceOutputData sortSourceData(const LoggingProfile* profile) {
   }
 
   for (auto& operation : opsGrouped) {
-    operation.second.sortEvents();
+    operation.second.formatEvents();
   }
 
   // Flatten to vectors

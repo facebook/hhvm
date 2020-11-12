@@ -2,19 +2,11 @@
 
 <<file:__EnableUnstableFeatures('expression_trees')>>
 
-function lift<T>(T $_): ExprTree<Code, Code::TAst, ExampleInt> {
-  throw new Exception();
-}
-
-function test(): void {
-  $x = 1;
-
-  $_ = Code`() ==> {
-    __splice__(lift($x + 1));
-    // Make sure that typing environment doesn't escape past splice
-    $x + 1;
-    return;
-  }`;
+function foo(): void {
+  $infinite_for =
+    Code`() ==> {
+      for (;;) {}
+    }`;
 }
 
 //// BEGIN DEFS

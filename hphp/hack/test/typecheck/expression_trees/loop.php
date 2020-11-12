@@ -2,8 +2,16 @@
 
 <<file:__EnableUnstableFeatures('expression_trees')>>
 
-function bar(): void {}
-function baz(ExampleInt $_): void {}
+function bar(
+  ExampleContext $_,
+): ExprTree<Code, Code::TAst, (function(): void)> {
+  throw new Exception();
+}
+function baz(
+  ExampleContext $_,
+): ExprTree<Code, Code::TAst, (function(ExampleInt): void)> {
+  throw new Exception();
+}
 
 function foo(): void {
   $loop = Code`() ==> { while(true) { bar(); } }`;
@@ -26,11 +34,19 @@ final class Code {
     throw new Exception();
   }
   public static function stringLiteral(string $_):
-    ExprTree<this, this::TAst, string>
+    ExprTree<this, this::TAst, ExampleString>
   {
     throw new Exception();
   }
   public static function nullLiteral(): ExprTree<this, this::TAst, null> {
+    throw new Exception();
+  }
+
+  // Symbols
+  public static function symbol<T>(
+    string $_,
+    (function(ExampleContext): ExprTree<this, this::TAst, T>) $_,
+  ): ExprTree<this, this::TAst, T> {
     throw new Exception();
   }
 
@@ -63,9 +79,9 @@ final class Code {
   ): this::TAst {
     throw new Exception();
   }
-  public function call(
+  public function call<T>(
     ?ExprPos $_,
-    string $_fnName,
+    this::TAst $_callee,
     vec<this::TAst> $_args,
   ): this::TAst {
     throw new Exception();
@@ -168,4 +184,9 @@ final class ExampleBool {
     throw new Exception();
   }
 }
+
+final class ExampleString {}
+
+final class ExampleContext {}
+
 //// END DEFS

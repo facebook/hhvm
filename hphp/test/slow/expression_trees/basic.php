@@ -2,6 +2,12 @@
 
 <<file:__EnableUnstableFeatures('expression_trees')>>
 
+function foo(
+  ExampleContext $_,
+): ExprTree<Code, Code::TAst, (function(string): int)> {
+  throw new Exception();
+}
+
 <<__EntryPoint>>
 function test(): void {
   $et = MyVisitor`1 + foo("bar")`;
@@ -49,8 +55,12 @@ final class MyVisitor {
     return "lhs $meth_name rhs";
   }
 
-  public function call(ExprPos $_, string $name, vec<mixed> $args): string {
-    $call = "$name(";
+  public function call<T>(
+    ?ExprPos $_,
+    this::TAst $callee,
+    vec<this::TAst> $args,
+  ): this::TAst {
+    $call = "$callee(";
     foreach ($args as $arg) {
       if ($arg is string) {
         $call = $call . "$arg, ";
@@ -66,6 +76,18 @@ final class MyVisitor {
     ExprTree<MyVisitor, mixed, mixed> $et,
   ): mixed {
     return $et->construct($this);
+  }
+
+  public static function symbol<T>(
+    string $name,
+    (function(ExampleContext): ExprTree<this, this::TAst, T>) $_,
+  ): ExprTree<this, this::TAst, T> {
+    return new ExprTree(
+      null,
+      null,
+      (MyVisitor $_) ==> { return $name; },
+      () ==> { throw new Exception(); },
+    );
   }
 }
 

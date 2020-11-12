@@ -32,7 +32,9 @@ pub fn desugar<TF>(hint: &aast::Hint, e: &Expr, env: &Env<TF>) -> Expr {
         }
     };
 
-    let e = virtualize_expr(visitor_name.to_string(), e);
+    let mut e = e.clone();
+    let mut e = virtualize_expr_types(visitor_name.to_string(), &mut e);
+    let e = virtualize_expr_calls(visitor_name.to_string(), &mut e);
     let (e, extracted_splices) = extract_and_replace_splices(&e);
     let temp_pos = e.0.clone();
 
@@ -158,20 +160,15 @@ fn wrap_fun_<TF>(
     }
 }
 
-/// Preprocess expression
-///   Virtualizes literals
-///   Reduces operators to method calls
-///   Adds boolean coercion checks
-///   TODO: Transforms function calls
-fn virtualize_expr(visitor_name: String, e: &Expr) -> Expr {
-    let mut e_copy = e.clone();
-
-    let mut visitor = Virtualizer { visitor_name };
-    visitor.visit_expr(&mut (), &mut e_copy).unwrap();
-    e_copy
+/// Virtualizes expressions that could leak Hack type semantics
+///   Converts literals, operators, and implicit boolean checks
+fn virtualize_expr_types(visitor_name: String, mut e: &mut Expr) -> &mut Expr {
+    let mut visitor = TypeVirtualizer { visitor_name };
+    visitor.visit_expr(&mut (), &mut e).unwrap();
+    e
 }
 
-struct Virtualizer {
+struct TypeVirtualizer {
     visitor_name: String,
 }
 
@@ -179,7 +176,7 @@ fn dummy_expr() -> Expr {
     Expr::new(Pos::make_none(), aast::Expr_::Null)
 }
 
-impl<'ast> VisitorMut<'ast> for Virtualizer {
+impl<'ast> VisitorMut<'ast> for TypeVirtualizer {
     type P = AstParams<(), ()>;
 
     fn object(&mut self) -> &mut dyn VisitorMut<'ast, P = Self::P> {
@@ -321,6 +318,73 @@ impl<'ast> VisitorMut<'ast> for Virtualizer {
     }
 }
 
+/// Virtualizes function calls
+fn virtualize_expr_calls(visitor_name: String, mut e: &mut Expr) -> &mut Expr {
+    let mut visitor = CallVirtualizer { visitor_name };
+    visitor.visit_expr(&mut (), &mut e).unwrap();
+    e
+}
+
+struct CallVirtualizer {
+    visitor_name: String,
+}
+
+impl<'ast> VisitorMut<'ast> for CallVirtualizer {
+    type P = AstParams<(), ()>;
+
+    fn object(&mut self) -> &mut dyn VisitorMut<'ast, P = Self::P> {
+        self
+    }
+
+    fn visit_expr(&mut self, env: &mut (), e: &mut Expr) -> Result<(), ()> {
+        use aast::Expr_::*;
+
+        let pos = e.0.clone();
+
+        let mk_splice = |e: Expr| -> Expr { Expr::new(pos.clone(), Expr_::ETSplice(Box::new(e))) };
+
+        match &mut e.1 {
+            // Convert `foo(...)` to `__splice__(Visitor::symbol('foo', foo<>))(...)`
+            Call(ref mut call) => {
+                let (ref recv, ref mut targs, ref mut args, ref mut variadic) = **call;
+                match &recv.1 {
+                    Id(sid) => {
+                        let fn_name = string_literal(&*sid.1);
+                        targs.accept(env, self.object())?;
+                        let targs = std::mem::replace(targs, vec![]);
+
+                        let fp = Expr::new(
+                            pos.clone(),
+                            Expr_::FunctionPointer(Box::new((
+                                ast::FunctionPtrId::FPId((**sid).clone()),
+                                targs,
+                            ))),
+                        );
+                        let callee = mk_splice(static_meth_call(
+                            &self.visitor_name,
+                            "symbol",
+                            vec![fn_name, fp],
+                            &pos,
+                        ));
+
+                        args.accept(env, self.object())?;
+                        variadic.accept(env, self.object())?;
+
+                        let args = std::mem::replace(args, vec![]);
+                        let variadic = variadic.take();
+                        e.1 = Call(Box::new((callee, vec![], args, variadic)))
+                    }
+                    _ => e.recurse(env, self.object())?,
+                }
+            }
+            // Do not want to recurse into splices
+            ETSplice(_) => {}
+            _ => e.recurse(env, self.object())?,
+        }
+        Ok(())
+    }
+}
+
 /// Convert expression tree expressions to method calls.
 fn rewrite_expr(e: &Expr) -> Expr {
     use aast::Expr_::*;
@@ -356,16 +420,6 @@ fn rewrite_expr(e: &Expr) -> Expr {
         Call(call) => {
             let (recv, _, args, _) = &**call;
             match &recv.1 {
-                // Convert `foo(...)` to `$v->call(new ExprPos(...), 'foo', vec[...])`.
-                Id(sid) => {
-                    let fn_name = string_literal(&*sid.1);
-                    let desugared_args = vec![
-                        pos,
-                        fn_name,
-                        vec_literal(args.iter().map(rewrite_expr).collect()),
-                    ];
-                    v_meth_call("call", desugared_args, &e.0)
-                }
                 // Convert `$foo->bar(args)` to
                 // `$v->methCall(new ExprPos(...), $foo, 'bar', vec[args])`
                 ObjGet(objget) => {
@@ -387,6 +441,15 @@ fn rewrite_expr(e: &Expr) -> Expr {
                             &e.0,
                         ),
                     }
+                }
+                // Convert __splice__( ... )(args) to `$v->call(new ExprPos(..), $v->splice, vec[args])`
+                ETSplice(_) => {
+                    let args = vec![
+                        pos,
+                        rewrite_expr(recv),
+                        vec_literal(args.iter().map(rewrite_expr).collect()),
+                    ];
+                    v_meth_call("call", args, &e.0)
                 }
                 _ => v_meth_call(
                     "unsupportedSyntax",

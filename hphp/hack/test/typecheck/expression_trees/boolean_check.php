@@ -2,8 +2,17 @@
 
 <<file:__EnableUnstableFeatures('expression_trees')>>
 
-function nullable_bool(): ?ExampleBool { throw new Exception(); }
-function a_bool(): ExampleBool { throw new Exception(); }
+function nullable_bool(
+  ExampleContext $_,
+): ExprTree<Code, Code::TAst, (function(): ?ExampleBool)> {
+  throw new Exception();
+}
+
+function a_bool(
+  ExampleContext $_,
+): ExprTree<Code, Code::TAst, (function(): ExampleBool)> {
+  throw new Exception();
+}
 
 /**
  * Since all Hack types are truthy, typically, most syntactic places that
@@ -36,9 +45,6 @@ function test(): void {
       while(nullable_bool()) {}
       while(a_bool()) {}
 
-      // for (;;) {}
-      for (;;) {}
-
       for (;nullable_bool();) {}
       for ($i = 0; nullable_bool();) {}
       for (; nullable_bool(); $i = $i + 1) {}
@@ -49,19 +55,10 @@ function test(): void {
       for (; a_bool(); $i = $i + 1) {}
       for ($i = 0; a_bool(); $i = $i + 1) {}
 
-      // Boolean ||
-      nullable_bool() || a_bool();
-      a_bool() || nullable_bool();
-      a_bool() || a_bool();
-
-      // Boolean &&
-      nullable_bool() && a_bool();
-      a_bool() && nullable_bool();
-      a_bool() && a_bool();
-
-      // Boolean !
-      !nullable_bool();
-      !a_bool();
+      // Represents an infinite loop and should be the last item
+      // As the typechecker may not throw type errors afterwards,
+      // due to the flow sensitive nature of the typechecker.
+      for (;;) {}
     }
   `;
 }
@@ -82,11 +79,19 @@ final class Code {
     throw new Exception();
   }
   public static function stringLiteral(string $_):
-    ExprTree<this, this::TAst, string>
+    ExprTree<this, this::TAst, ExampleString>
   {
     throw new Exception();
   }
   public static function nullLiteral(): ExprTree<this, this::TAst, null> {
+    throw new Exception();
+  }
+
+  // Symbols
+  public static function symbol<T>(
+    string $_,
+    (function(ExampleContext): ExprTree<this, this::TAst, T>) $_,
+  ): ExprTree<this, this::TAst, T> {
     throw new Exception();
   }
 
@@ -119,9 +124,9 @@ final class Code {
   ): this::TAst {
     throw new Exception();
   }
-  public function call(
+  public function call<T>(
     ?ExprPos $_,
-    string $_fnName,
+    this::TAst $_callee,
     vec<this::TAst> $_args,
   ): this::TAst {
     throw new Exception();
@@ -224,4 +229,9 @@ final class ExampleBool {
     throw new Exception();
   }
 }
+
+final class ExampleString {}
+
+final class ExampleContext {}
+
 //// END DEFS

@@ -2,19 +2,42 @@
 
 <<file:__EnableUnstableFeatures('expression_trees')>>
 
-function lift<T>(T $_): ExprTree<Code, Code::TAst, ExampleInt> {
+function nullable_bool(
+  ExampleContext $_,
+): ExprTree<Code, Code::TAst, (function(): ?ExampleBool)> {
   throw new Exception();
 }
 
-function test(): void {
-  $x = 1;
+function a_bool(
+  ExampleContext $_,
+): ExprTree<Code, Code::TAst, (function(): ExampleBool)> {
+  throw new Exception();
+}
 
-  $_ = Code`() ==> {
-    __splice__(lift($x + 1));
-    // Make sure that typing environment doesn't escape past splice
-    $x + 1;
-    return;
-  }`;
+/**
+ * Since all Hack types are truthy, typically, most syntactic places that
+ * expect booleans allow all types. However, as to not leak these truthy
+ * Hack semantics to Expression Trees, ensure that those syntactic positions
+ * only accept types that may be coerced to booleans.
+ */
+function test(): void {
+  $y = Code`
+    () ==> {
+      // Boolean ||
+      nullable_bool() || a_bool();
+      a_bool() || nullable_bool();
+      a_bool() || a_bool();
+
+      // Boolean &&
+      nullable_bool() && a_bool();
+      a_bool() && nullable_bool();
+      a_bool() && a_bool();
+
+      // Boolean !
+      !nullable_bool();
+      !a_bool();
+    }
+  `;
 }
 
 //// BEGIN DEFS

@@ -1,4 +1,6 @@
 File "mismatched_types.php", line 8, characters 5-10:
-You are trying to access the method `__plus` but this is a string (Typing[4062])
-  File "mismatched_types.php", line 28, characters 32-37:
-  Definition is here
+No method `__plus` in `ExampleString` (Typing[4053])
+  File "mismatched_types.php", line 28, characters 32-44:
+  This is why I think it is an object of type ExampleString
+  File "mismatched_types.php", line 179, characters 13-25:
+  Declaration of `ExampleString` is here

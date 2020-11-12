@@ -3,8 +3,9 @@
 .filepath "test.php";
 
 .adata A_0 = """Y:3:{s:4:\"kind\";i:101;s:9:\"classname\";s:3:\"Box\";s:13:\"generic_types\";y:1:{Y:1:{s:4:\"kind\";i:4;}}}""";
-.adata A_1 = """Y:3:{s:4:\"kind\";i:101;s:9:\"classname\";s:6:\"HH\\Elt\";s:13:\"generic_types\";y:2:{Y:3:{s:4:\"kind\";i:102;s:9:\"root_name\";s:7:\"HH\\this\";s:11:\"access_list\";y:1:{s:5:\"TEnum\";}}Y:3:{s:4:\"kind\";i:101;s:9:\"classname\";s:3:\"Box\";s:13:\"generic_types\";y:1:{Y:2:{s:4:\"kind\";i:13;s:4:\"name\";s:1:\"_\";}}}}}""";
-.adata A_2 = """Y:3:{s:4:\"kind\";i:102;s:9:\"root_name\";s:7:\"HH\\this\";s:11:\"access_list\";y:1:{s:5:\"TEnum\";}}""";
+.adata A_1 = """Y:2:{s:4:\"kind\";i:13;s:4:\"name\";s:1:\"_\";}""";
+.adata A_2 = """Y:3:{s:4:\"kind\";i:101;s:9:\"classname\";s:6:\"HH\\Elt\";s:13:\"generic_types\";y:2:{Y:3:{s:4:\"kind\";i:102;s:9:\"root_name\";s:7:\"HH\\this\";s:11:\"access_list\";y:1:{s:5:\"TEnum\";}}Y:3:{s:4:\"kind\";i:101;s:9:\"classname\";s:3:\"Box\";s:13:\"generic_types\";y:1:{Y:2:{s:4:\"kind\";i:13;s:4:\"name\";s:1:\"_\";}}}}}""";
+.adata A_3 = """Y:3:{s:4:\"kind\";i:102;s:9:\"root_name\";s:7:\"HH\\this\";s:11:\"access_list\";y:1:{s:5:\"TEnum\";}}""";
 
 .function {} ["__EntryPoint"("""y:0:{}""")] (55,63) <"HH\\void" N > main() {
   .srcloc 56:3,56:16;
@@ -182,9 +183,9 @@
   .method {}{} [protected no_injection] (21,23) 86reifiedinit(<"HH\\varray" "HH\\varray" > $__typestructures) {
     NullUninit
     NullUninit
-    CheckThis
-    BaseH
-    QueryM 0 CGet PT:"86reified_prop"
+    Array @A_1
+    CombineAndResolveTypeStruct 1
+    NewVArray 1
     RecordReifiedGeneric
     FCallClsMethodSD <> 1 1 "" - "" "" Parent "86reifiedinit"
     PopC
@@ -226,7 +227,7 @@
   .const TEnum isType;
   .method {}{} [public static] (32,34) <"T" "T" extended_hint type_var> get(<"HH\\Elt<HH\\this::TEnum, Box<T>>" "HH\\Elt" > $enum) {
     .srcloc 32:17,34:110;
-    Array @A_1
+    Array @A_2
     VerifyParamTypeTS $enum
     .srcloc 33:12,33:16;
     CGetL $enum
@@ -242,7 +243,7 @@
   }
   .method {}{} [public static] (36,39) <"HH\\void" N > show(<"HH\\Elt<HH\\this::TEnum, Box<T>>" "HH\\Elt" > $enum) {
     .srcloc 36:17,39:124;
-    Array @A_1
+    Array @A_2
     VerifyParamTypeTS $enum
     .srcloc 37:10,37:27;
     NullUninit
@@ -267,9 +268,9 @@
   }
   .method {}{} [public static] (41,44) <"HH\\void" N > show_atom(["__Atom"("""y:0:{}""")]<"HH\\string" "HH\\string" > $enum) {
     .srcloc 41:17,44:139;
-    Array @A_1
-    VerifyParamTypeTS $enum
     Array @A_2
+    VerifyParamTypeTS $enum
+    Array @A_3
     CombineAndResolveTypeStruct 1
     BaseC 0 None
     QueryM 1 CGetQuiet ET:"classname"

@@ -1798,7 +1798,10 @@ pub fn emit_reified_targs(e: &mut Emitter, env: &Env, pos: &Pos, targs: &[&tast:
         tparams.len() == targs.len()
             && tparams.iter().zip(targs).all(|(tp, ta)| {
                 ta.1.as_happly().map_or(false, |(id, hs)| {
-                    id.1 == tp.name.1 && hs.is_empty() && !is_soft(&tp.user_attributes)
+                    id.1 == tp.name.1
+                        && hs.is_empty()
+                        && !is_soft(&tp.user_attributes)
+                        && tp.reified.is_reified()
                 })
             })
     };

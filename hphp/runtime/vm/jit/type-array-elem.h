@@ -51,7 +51,6 @@ PackedBounds packedArrayBoundsStaticCheck(Type, folly::Optional<int64_t>);
  * specific behavior of the failure case). If the bool member of the returned
  * pair is true, then `arr[idx]` definitely exists.
  */
-std::pair<Type, bool> arrElemType(Type arr, Type idx, const Class* ctx);
 std::pair<Type, bool> vecElemType(Type arr, Type idx, const Class* ctx);
 std::pair<Type, bool> dictElemType(Type arr, Type idx);
 std::pair<Type, bool> keysetElemType(Type arr, Type idx);

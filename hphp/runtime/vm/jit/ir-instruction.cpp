@@ -491,9 +491,8 @@ Type ptrIterReturn(const IRInstruction* inst) {
   auto const arr = inst->src(0)->type();
   assertx(arr <= TArrLike);
   auto const value = [&]{
-    if (arr <= TArr)  return arrElemType(arr, TInt | TStr, inst->ctx()).first;
-    if (arr <= TVec)  return vecElemType(arr, TInt, inst->ctx()).first;
-    if (arr <= TDict) return dictElemType(arr, TInt | TStr).first;
+    if (arr <= (TVArr|TVec))  return vecElemType(arr, TInt, inst->ctx()).first;
+    if (arr <= (TDArr|TDict)) return dictElemType(arr, TInt | TStr).first;
     return TCell;
   }();
   return value.ptr(Ptr::Elem);

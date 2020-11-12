@@ -122,13 +122,9 @@ struct LoggingProfileKey::TbbHashCompare {
 // We'll store a LoggingProfile for each array construction site SrcKey.
 // It tracks the operations that happen on arrays coming from that site.
 struct LoggingProfile {
-  using EventMapKey = std::pair<SrcKey, uint64_t>;
-  using EventMapHasher = pairHashCompare<
-    SrcKey, uint64_t, SrcKey::TbbHashCompare, integralHashCompare<uint64_t>>;
-
   // Values in the event map are sampled event counts.
-  using EventMap = tbb::concurrent_hash_map<EventMapKey, size_t,
-                                            EventMapHasher>;
+  using EventMap = tbb::concurrent_hash_map<uint64_t, size_t,
+                                            integralHashCompare<uint64_t>>;
 
   // The first element of the key is the EntryTypes before the operation;
   // the second element is the EntryTypes after it.
@@ -167,7 +163,7 @@ public:
   LoggingArray* staticLoggingArray = nullptr;
   ArrayData* staticSampledArray = nullptr;
   EventMap events;
-  EntryTypesMap monotypeEvents;
+  EntryTypesMap entryTypes;
 };
 
 // We split sinks by profiling tracelet so we can condition on array type.

@@ -256,13 +256,13 @@ void LoggingProfile::logEventImpl(const EventKey& key) {
   if (s_exportStarted.load(std::memory_order_relaxed)) return;
 
   EventMap::accessor it;
-  auto const has_sink = key.getOp() != ArrayOp::ReleaseUncounted;
-  auto const sink = has_sink ? getSrcKey() : SrcKey{};
-  if (events.insert(it, {sink, key.toUInt64()})) {
+  if (events.insert(it, key.toUInt64())) {
     it->second = 1;
   } else {
     it->second++;
   }
+  DEBUG_ONLY auto const has_sink = key.getOp() != ArrayOp::ReleaseUncounted;
+  DEBUG_ONLY auto const sink = has_sink ? getSrcKey() : SrcKey{};
   FTRACE(6, "{} -> {}: {} [count={}]\n", key.toString(),
          (sink.valid() ? sink.getSymbol() : "<unknown>"),
          EventKey(key).toString(), it->second);
@@ -275,7 +275,7 @@ void LoggingProfile::logEntryTypes(EntryTypes before, EntryTypes after) {
   if (s_exportStarted.load(std::memory_order_relaxed)) return;
 
   EntryTypesMap::accessor it;
-  if (monotypeEvents.insert(it, {before.asInt16(), after.asInt16()})) {
+  if (entryTypes.insert(it, {before.asInt16(), after.asInt16()})) {
     it->second = 1;
   } else {
     it->second++;
@@ -504,12 +504,10 @@ std::vector<SinkTypeData> populateSortedCounts(
 
 struct SourceOutputData {
   SourceOutputData(const LoggingProfile* profile,
-                   size_t numDistinctSinks,
                    std::vector<OperationOutputData>&& operations,
                    std::vector<EntryTypesEscalationOutputData>&& monoEscalations,
                    std::vector<EntryTypesUseOutputData>&& monoUses)
     : profile(profile)
-    , numDistinctSinks(numDistinctSinks)
     , monotypeEscalations(std::move(monoEscalations))
     , monotypeUses(std::move(monoUses))
   {
@@ -537,7 +535,6 @@ struct SourceOutputData {
   }
 
   const LoggingProfile* profile;
-  size_t numDistinctSinks;
   std::vector<OperationOutputData> readOperations;
   std::vector<OperationOutputData> writeOperations;
   std::vector<EntryTypesEscalationOutputData> monotypeEscalations;
@@ -652,9 +649,8 @@ bool exportSortedProfiles(FILE* file, const ProfileOutputData& profileData) {
                   sourceProfile->loggingArraysEmitted.load(),
                   sourceProfile->sampleCount.load(), sourceData.weight);
     LOG_OR_RETURN(file, "  {}\n", sourceProfile->key.toStringDetail());
-    LOG_OR_RETURN(file, "  {} reads, {} writes, {} distinct sinks\n",
-                  sourceData.readCount, sourceData.writeCount,
-                  sourceData.numDistinctSinks);
+    LOG_OR_RETURN(file, "  {} reads, {} writes\n",
+                  sourceData.readCount, sourceData.writeCount);
 
     LOG_OR_RETURN(file, "  Read operations:\n");
     if (!exportOperationSet(file, sourceData.readOperations)) return false;
@@ -707,20 +703,9 @@ bool exportSortedSinks(FILE* file, const std::vector<SinkOutputData>& sinks) {
 }
 
 SourceOutputData sortSourceData(const LoggingProfile* profile) {
-  // Aggregate total events by event key
-  std::map<uint64_t, uint64_t> eventCounts;
-  std::map<SrcKey, uint64_t> sinkCounts;
-  for (auto const& eventRecord : profile->events) {
-    auto const count = eventRecord.second;
-    auto const eventKey = eventRecord.first.second;
-
-    eventCounts[eventKey] += count;
-    sinkCounts[eventRecord.first.first] += count;
-  }
-
   // Group events by their operation
   std::map<ArrayOp, OperationOutputData> opsGrouped;
-  for (auto const& eventAndCount : eventCounts) {
+  for (auto const& eventAndCount : profile->events) {
     auto const event = EventKey(eventAndCount.first);
     auto const count = eventAndCount.second;
 
@@ -746,7 +731,7 @@ SourceOutputData sortSourceData(const LoggingProfile* profile) {
   // Determine monotype operations
   std::vector<EntryTypesEscalationOutputData> escalations;
   std::map<uint16_t, uint64_t> usesMap;
-  for (auto const& statesAndCount : profile->monotypeEvents) {
+  for (auto const& statesAndCount : profile->entryTypes) {
     auto const before = statesAndCount.first.first;
     auto const after = statesAndCount.first.second;
     auto const count = statesAndCount.second;
@@ -769,7 +754,7 @@ SourceOutputData sortSourceData(const LoggingProfile* profile) {
     }
   );
 
-  return SourceOutputData(profile, sinkCounts.size(), std::move(operations),
+  return SourceOutputData(profile, std::move(operations),
                           std::move(escalations), std::move(uses));
 }
 

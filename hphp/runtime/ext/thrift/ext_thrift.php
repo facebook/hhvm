@@ -70,5 +70,11 @@ final class RpcOptions {
   public function setLoggingContext(string $logging_metadata): RpcOptions;
 
   <<__Native>>
+  public function setOverallTimeout(int $overall_timeout): RpcOptions;
+
+  <<__Native>>
+  public function setProcessingTimeout(int $processing_timeout): RpcOptions;
+
+  <<__Native>>
   public function __toString(): string;
 }

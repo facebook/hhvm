@@ -76,6 +76,18 @@ Object HHVM_METHOD(RpcOptions, setLoggingContext, const String& loggingContext) 
   return Object(this_);
 }
 
+Object HHVM_METHOD(RpcOptions, setOverallTimeout, int64_t overall_timeout) {
+  auto data = RpcOptions::GetDataOrThrowException(this_);
+  data->rpcOptions.setOverallTimeout(std::chrono::milliseconds(overall_timeout));
+  return Object(this_);
+}
+
+Object HHVM_METHOD(RpcOptions, setProcessingTimeout, int64_t processing_timeout) {
+  auto data = RpcOptions::GetDataOrThrowException(this_);
+  data->rpcOptions.setProcessingTimeout(std::chrono::milliseconds(processing_timeout));
+  return Object(this_);
+}
+
 String HHVM_METHOD(RpcOptions, __toString) {
   auto data = RpcOptions::GetDataOrThrowException(this_);
   std::string result("RpcOptions(");
@@ -84,6 +96,10 @@ String HHVM_METHOD(RpcOptions, __toString) {
   result += "routingKey: \"" + data->rpcOptions.getRoutingKey() + "\"; ";
   result += "shardId: \"" + data->rpcOptions.getShardId() + "\"; ";
   result += "loggingContext: \"" + data->rpcOptions.getLoggingContext() + "\"; ";
+  result += "overallTimeout: " +
+    std::to_string(data->rpcOptions.getOverallTimeout().count()) + "ms; ";
+  result += "processingTimeout: " +
+    std::to_string(data->rpcOptions.getProcessingTimeout().count()) + "ms; ";
   result += "headers: {";
   bool first = true;
   for (const auto& it : data->rpcOptions.getWriteHeaders()) {
@@ -121,6 +137,8 @@ static struct ThriftExtension final : Extension {
     HHVM_ME(RpcOptions, setWriteHeader);
     HHVM_ME(RpcOptions, setHeader);
     HHVM_ME(RpcOptions, setLoggingContext);
+    HHVM_ME(RpcOptions, setOverallTimeout);
+    HHVM_ME(RpcOptions, setProcessingTimeout);
     HHVM_ME(RpcOptions, __toString);
 
     loadSystemlib("thrift");

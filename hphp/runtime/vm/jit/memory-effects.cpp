@@ -1093,7 +1093,9 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     }
 
   case NewLoggingArray:
-    // May read any data referenced by the input array, but not locals/stack.
+  case ProfileArrLikeProps:
+    // These ops may read anything referenced by the input array or object,
+    // but not any of the locals or stack frame slots.
     return may_load_store(AHeapAny | livefp(inst), AEmpty);
 
   case NewKeysetArray:

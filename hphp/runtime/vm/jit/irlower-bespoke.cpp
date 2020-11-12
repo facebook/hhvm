@@ -48,6 +48,12 @@ void cgNewLoggingArray(IRLS& env, const IRInstruction* inst) {
                argGroup(env, inst).ssa(0).immPtr(data->profile));
 }
 
+void cgProfileArrLikeProps(IRLS& env, const IRInstruction* inst) {
+  auto const target = CallSpec::direct(bespoke::profileArrLikeProps);
+  cgCallHelper(vmain(env), env, target, callDest(env, inst), SyncOptions::Sync,
+               argGroup(env, inst).ssa(0));
+}
+
 //////////////////////////////////////////////////////////////////////////////
 
 void cgBespokeSet(IRLS& env, const IRInstruction* inst) {

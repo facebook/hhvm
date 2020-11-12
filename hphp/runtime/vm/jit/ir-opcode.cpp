@@ -861,6 +861,7 @@ bool opcodeMayRaise(Opcode opc) {
   case OrdStr:
   case OrInt:
   case PairIsset:
+  case ProfileArrLikeProps:
   case ProfileCall:
   case ProfileDecRef:
   case ProfileDictAccess:

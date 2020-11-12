@@ -46,6 +46,7 @@ ArrayData* maybeMakeLoggingArray(ArrayData*);
 const ArrayData* maybeMakeLoggingArray(const ArrayData*);
 ArrayData* maybeMakeLoggingArray(ArrayData*, LoggingProfile*);
 ArrayData* makeBespokeForTesting(ArrayData*, LoggingProfile*);
+void profileArrLikeProps(ObjectData*);
 void setLoggingEnabled(bool);
 void exportProfiles();
 void waitOnExportProfiles();

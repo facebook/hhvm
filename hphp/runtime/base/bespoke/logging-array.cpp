@@ -137,7 +137,8 @@ ArrayData* maybeMakeLoggingArray(ArrayData* ad, LoggingProfile* profile) {
   if (!g_emitLoggingArrays.load(std::memory_order_relaxed)) return ad;
 
   if (ad->isSampledArray() || !ad->isVanilla()) {
-    assertx(isArrLikeCastOp(profile->key.op()));
+    DEBUG_ONLY auto const op = profile->key.op();
+    assertx(isArrLikeCastOp(op) || op == Op::NewObjD);
     FTRACE(5, "Skipping logging for {} array.\n",
            ad->isSampledArray() ? "sampled" : "bespoke");
     return ad;
@@ -170,6 +171,23 @@ ArrayData* maybeMakeLoggingArray(ArrayData* ad, LoggingProfile* profile) {
                   : profile->logEvent(ArrayOp::ConstructInt, val(k).num, v);
   });
   return LoggingArray::Make(ad, profile, EntryTypes::ForArray(ad));
+}
+
+void profileArrLikeProps(ObjectData* obj) {
+  if (!g_emitLoggingArrays.load(std::memory_order_relaxed)) return;
+
+  auto const cls = obj->getVMClass();
+  if (cls->needsInitThrowable()) return;
+
+  for (auto slot = 0; slot < cls->numDeclProperties(); slot++) {
+    if (cls->declProperties()[slot].attrs & AttrIsConst) continue;
+    auto lval = obj->propLvalAtOffset(slot);
+    if (!tvIsArrayLike(lval)) continue;
+    auto const profile = getLoggingProfile(cls, slot);
+    if (!profile) continue;
+    auto const arr = maybeMakeLoggingArray(lval.val().parr, profile);
+    tvCopy(make_array_like_tv(arr), lval);
+  }
 }
 
 //////////////////////////////////////////////////////////////////////////////

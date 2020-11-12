@@ -843,6 +843,53 @@ void emitLoggingDiamond(
   );
 }
 
+bool canProfilePropsInline(const Class* cls) {
+  if (!cls) return false;
+  if (!cls->pinitVec().empty()) return false;
+  if (cls->hasReifiedGenerics() || cls->hasReifiedParent()) return false;
+
+  auto num_array_props = 0;
+  auto const limit = RO::EvalHHIRInliningMaxInitObjProps;
+  for (auto slot = 0; slot < cls->numDeclProperties(); slot++) {
+    if (cls->declProperties()[slot].attrs & AttrIsConst) return false;
+    auto const index = cls->propSlotToIndex(slot);
+    auto const tv = cls->declPropInit()[index].val.tv();
+    if (!tvIsArrayLike(tv)) continue;
+    if ((++num_array_props) > limit) return false;
+  }
+  return true;
+}
+
+void emitProfileArrLikeProps(IRGS& env) {
+  auto const obj = topC(env);
+  auto const cls = obj->type().clsSpec().exactCls();
+
+  if (cls && cls->needsInitThrowable()) return;
+
+  if (!canProfilePropsInline(cls)) {
+    gen(env, ProfileArrLikeProps, obj);
+    return;
+  }
+
+  for (auto slot = 0; slot < cls->numDeclProperties(); slot++) {
+    auto const index = cls->propSlotToIndex(slot);
+    auto const tv = cls->declPropInit()[index].val.tv();
+    if (!tvIsArrayLike(tv)) continue;
+    auto const profile = bespoke::getLoggingProfile(cls, slot);
+    if (!profile) continue;
+
+    auto const arr = gen(
+      env,
+      NewLoggingArray,
+      LoggingProfileData(profile),
+      cns(env, tv.val().parr)
+    );
+    auto const data = IndexData(index);
+    auto const addr = gen(env, LdPropAddr, data, TLvalToPropCell, obj);
+    gen(env, StMem, addr, arr);
+  }
+}
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -886,14 +933,16 @@ void handleVanillaOutputs(IRGS& env, SrcKey sk) {
       !shouldTestBespokeArrayLikes()) {
     return;
   }
+
   auto const op = sk.op();
-  if (!isArrLikeConstructorOp(op) && !isArrLikeCastOp(op)) return;
-
-  auto const profile = bespoke::getLoggingProfile(sk);
-  if (!profile) return;
-
-  auto const data = LoggingProfileData(profile);
-  push(env, gen(env, NewLoggingArray, data, popC(env)));
+  if (op == Op::NewObjD || op == Op::NewObjRD) {
+    emitProfileArrLikeProps(env);
+  } else if (isArrLikeConstructorOp(op) || isArrLikeCastOp(op)) {
+    auto const profile = bespoke::getLoggingProfile(sk);
+    if (!profile) return;
+    auto const data = LoggingProfileData(profile);
+    push(env, gen(env, NewLoggingArray, data, popC(env)));
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

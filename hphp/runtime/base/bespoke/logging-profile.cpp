@@ -833,24 +833,28 @@ bool shouldLogAtSrcKey(SrcKey sk) {
 
   return true;
 }
-}
 
-LoggingProfile* getLoggingProfile(SrcKey sk) {
-  if (!shouldLogAtSrcKey(sk)) return nullptr;
-
-  auto const key = LoggingProfileKey { canonicalize(sk) };
+LoggingProfile* getLoggingProfile(LoggingProfileKey key) {
   {
     ProfileMap::const_accessor it;
     if (s_profileMap.find(it, key)) return it->second;
   }
 
-  // Hold the read mutex for the duration of the mutation so that export cannot
-  // begin until the mutation is complete.
+  // Hold the read mutex for the duration of the mutation so that export
+  // cannot begin until the mutation is complete.
   folly::SharedMutex::ReadHolder lock{s_exportStartedLock};
   if (s_exportStarted.load(std::memory_order_relaxed)) return nullptr;
 
+  // See if this source is always a particular static array. For properties,
+  // that means it's a scalar array in declPropInit; for bytecodes, it means
+  // it's one of the static array constructors in {Array, Vec, Dict, Keyset}.
   auto const ad = [&]() -> ArrayData* {
-    auto const op = key.op();
+    if (key.slot != kInvalidSlot) {
+      auto const index = key.cls->propSlotToIndex(key.slot);
+      auto const tv = key.cls->declPropInit()[index].val.tv();
+      return tvIsArrayLike(tv) ? tv.val().parr : nullptr;
+    }
+    auto const op = key.sk.op();
     if (op != Op::Array && op != Op::Vec &&
         op != Op::Dict && op != Op::Keyset) {
       return nullptr;
@@ -874,19 +878,31 @@ LoggingProfile* getLoggingProfile(SrcKey sk) {
     return insert->second;
   }();
 
+  // If the array was static, we must either log the new static memory we used
+  // or free that memory, depending on whether we won the race to set profile.
   if (ad) {
     if (profile) {
-      // We lost the race to set profile. Free the static arrays we allocated.
-      // We do so in reverse order in case we're using a static bump allocator.
       freeStaticArray(profile->staticSampledArray);
       freeStaticArray(profile->staticLoggingArray);
     } else {
-      // We won the race to set profile, so we log the new static allocations.
       MemoryStats::LogAlloc(AllocKind::StaticArray, sizeof(LoggingArray));
       MemoryStats::LogAlloc(AllocKind::StaticArray, allocSize(ad));
     }
   }
   return result;
+}
+}
+
+LoggingProfile* getLoggingProfile(SrcKey sk) {
+  if (!shouldLogAtSrcKey(sk)) return nullptr;
+  return getLoggingProfile(LoggingProfileKey(canonicalize(sk)));
+}
+
+LoggingProfile* getLoggingProfile(const Class* cls, Slot slot) {
+  if (cls->declProperties()[slot].name == s_86reified_prop.get()) {
+    return nullptr;
+  }
+  return getLoggingProfile(LoggingProfileKey(cls, slot));
 }
 
 SinkProfile* getSinkProfile(TransID id, SrcKey skRaw) {

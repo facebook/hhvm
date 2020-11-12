@@ -82,22 +82,22 @@ struct EventKey;
 struct LoggingProfileKey {
   struct TbbHashCompare;
 
-  explicit LoggingProfileKey(SrcKey sk) : sk(sk), index(-1) {}
-  explicit LoggingProfileKey(const Class* cls, uint32_t index)
-    : cls(cls), index(safe_cast<int32_t>(index)) {}
+  explicit LoggingProfileKey(SrcKey sk) : sk(sk), slot(kInvalidSlot) {}
+  explicit LoggingProfileKey(const Class* cls, Slot slot)
+    : cls(cls), slot(slot) {}
 
   Op op() const {
-    return index < 0 ? sk.op() : Op::NewObjD;
+    return slot == kInvalidSlot ? sk.op() : Op::NewObjD;
   }
 
   std::string toString() const {
-    if (index < 0) return sk.getSymbol();
-    auto const& prop = cls->declProperties()[index];
+    if (slot == kInvalidSlot) return sk.getSymbol();
+    auto const& prop = cls->declProperties()[slot];
     return folly::sformat("{}->{}", cls->name(), prop.name);
   }
 
   std::string toStringDetail() const {
-    if (index < 0) return sk.showInst();
+    if (slot == kInvalidSlot) return sk.showInst();
     return folly::sformat("NewObjD \"{}\"", cls->name());
   }
 
@@ -106,16 +106,16 @@ struct LoggingProfileKey {
     const Class* cls;
     uintptr_t ptr;
   };
-  // The logical index of a property on cls, or -1 if sk is set.
-  int32_t index;
+  // The logical slot of a property on cls, or kInvalidSlot if sk is set.
+  Slot slot;
 };
 
 struct LoggingProfileKey::TbbHashCompare {
   static size_t hash(const LoggingProfileKey& key) {
-    return folly::hash::hash_combine(hash_int64(key.ptr), key.index);
+    return folly::hash::hash_combine(hash_int64(key.ptr), key.slot);
   }
   static bool equal(const LoggingProfileKey& a, const LoggingProfileKey& b) {
-    return a.ptr == b.ptr && a.index == b.index;
+    return a.ptr == b.ptr && a.slot == b.slot;
   }
 };
 
@@ -204,6 +204,7 @@ public:
 // exists, a new one is made. If we're done profiling or it's not useful to
 // profile this bytecode, this function will return nullptr.
 LoggingProfile* getLoggingProfile(SrcKey sk);
+LoggingProfile* getLoggingProfile(const Class* cls, Slot slot);
 
 // Return a profile for the given profiling tracelet and (valid) sink SrcKey.
 // If no profile for the sink exists, a new one is made. May return nullptr.

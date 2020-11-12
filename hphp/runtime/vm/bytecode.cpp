@@ -4377,6 +4377,7 @@ void newObjDImpl(Id id, ArrayData* reified_types) {
   auto this_ = newObjImpl(cls, reified_types);
   if (reified_types) vmStack().popC();
   vmStack().pushObjectNoRc(this_);
+  bespoke::profileArrLikeProps(this_);
 }
 
 } // namespace

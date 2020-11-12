@@ -704,6 +704,7 @@ bool canDCE(IRInstruction* inst) {
   case ArrayUnmarkLegacyShallow:
   case ArrayUnmarkLegacyRecursive:
   case TagProvenanceHere:
+  case ProfileArrLikeProps:
     return false;
 
   case IsTypeStruct:

@@ -1433,6 +1433,12 @@ To string conversions:
   may be based on flags or sampling. If we don't create an array, we return S0
   unchanged. The result will match S0 in type and static-ness.
 
+| ProfileArrLikeProps, ND, S(Obj), NF
+
+  Maybe create LoggingArrays wrapping each of the vanilla array-likes in the
+  properties of the newly-initialized object S0. The decision may be based on
+  flags or sampling. This op mutates the object's props in place.
+
 | LogArrayReach<TransSrcKey>, ND, S(ArrLike), LA
 
   If the supplied array is a LoggingArray, log the current tracelet and SrcKey

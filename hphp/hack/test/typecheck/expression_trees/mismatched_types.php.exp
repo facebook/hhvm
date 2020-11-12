@@ -2,5 +2,5 @@ File "mismatched_types.php", line 8, characters 5-10:
 No method `__plus` in `ExampleString` (Typing[4053])
   File "mismatched_types.php", line 28, characters 32-44:
   This is why I think it is an object of type ExampleString
-  File "mismatched_types.php", line 179, characters 13-25:
+  File "mismatched_types.php", line 203, characters 13-25:
   Declaration of `ExampleString` is here

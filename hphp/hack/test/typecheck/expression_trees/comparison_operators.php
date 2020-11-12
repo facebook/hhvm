@@ -3,7 +3,14 @@
 <<file:__EnableUnstableFeatures('expression_trees')>>
 
 function test(): void {
-  Code`!false`;
+  Code`() ==> {
+    2 < 3;
+    2 <= 3;
+    2 > 3;
+    2 >= 3;
+    2 === 3;
+    2 !== 3;
+  }`;
 }
 
 //// BEGIN DEFS
@@ -192,7 +199,7 @@ final class ExampleBool {
     throw new Exception();
   }
 
-  public function __bool(): bool {
+  public function coerceToBool(): bool {
     throw new Exception();
   }
 }

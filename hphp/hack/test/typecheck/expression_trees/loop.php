@@ -169,6 +169,30 @@ final class ExampleInt {
   public function __plus(ExampleInt $_): ExampleInt {
     throw new Exception();
   }
+
+  public function __lessThan(ExampleInt $_): ExampleBool {
+    throw new Exception();
+  }
+
+  public function __lessThanEqual(ExampleInt $_): ExampleBool {
+    throw new Exception();
+  }
+
+  public function __greaterThan(ExampleInt $_): ExampleBool {
+    throw new Exception();
+  }
+
+  public function __greaterThanEqual(ExampleInt $_): ExampleBool {
+    throw new Exception();
+  }
+
+  public function __tripleEquals(ExampleInt $_): ExampleBool {
+    throw new Exception();
+  }
+
+  public function __notTripleEquals(ExampleInt $_): ExampleBool {
+    throw new Exception();
+  }
 }
 
 final class ExampleBool {

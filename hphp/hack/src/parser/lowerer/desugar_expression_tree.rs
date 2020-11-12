@@ -248,6 +248,13 @@ impl<'ast> VisitorMut<'ast> for TypeVirtualizer {
                     Bop::Ampamp => *e = virtualize_binop(lhs, "__ampamp", rhs, &e.0),
                     // Convert `... || ...` to `$lhs->__barbar(vec[$rhs])`.
                     Bop::Barbar => *e = virtualize_binop(lhs, "__barbar", rhs, &e.0),
+                    // Convert comparison operators
+                    Bop::Lt => *e = virtualize_binop(lhs, "__lessThan", rhs, &e.0),
+                    Bop::Lte => *e = virtualize_binop(lhs, "__lessThanEqual", rhs, &e.0),
+                    Bop::Gt => *e = virtualize_binop(lhs, "__greaterThan", rhs, &e.0),
+                    Bop::Gte => *e = virtualize_binop(lhs, "__greaterThanEqual", rhs, &e.0),
+                    Bop::Eqeqeq => *e = virtualize_binop(lhs, "__tripleEquals", rhs, &e.0),
+                    Bop::Diff2 => *e = virtualize_binop(lhs, "__notTripleEquals", rhs, &e.0),
                     // Assignment is special and not virtualized
                     Bop::Eq(None) => {}
                     // The rest should be parser errors from expression_tree_check

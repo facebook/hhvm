@@ -115,6 +115,13 @@ impl<'ast> Visitor<'ast> for Checker {
                     (Bop::Ampamp, _, _) => true,
                     // Allow boolean || operator
                     (Bop::Barbar, _, _) => true,
+                    // Allow comparison operators
+                    (Bop::Lt, _, _) => true,
+                    (Bop::Lte, _, _) => true,
+                    (Bop::Gt, _, _) => true,
+                    (Bop::Gte, _, _) => true,
+                    (Bop::Eqeqeq, _, _) => true,
+                    (Bop::Diff2, _, _) => true,
                     _ => false,
                 },
                 Unop(uop) => match **uop {

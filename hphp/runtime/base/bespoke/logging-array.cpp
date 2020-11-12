@@ -118,12 +118,13 @@ SSATmp* LoggingLayout::emitAppend(IRGS& env, SSATmp* base, SSATmp* val) const {
 
 //////////////////////////////////////////////////////////////////////////////
 
-void setLoggingEnabled(bool val) {
-  g_emitLoggingArrays.store(val, std::memory_order_relaxed);
+void setLoggingEnabled(bool value) {
+  if (allowBespokeArrayLikes() && !value) stopProfiling();
+  g_emitLoggingArrays.store(value, std::memory_order_release);
 }
 
 ArrayData* maybeMakeLoggingArray(ArrayData* ad) {
-  if (!g_emitLoggingArrays.load(std::memory_order_relaxed)) return ad;
+  if (!g_emitLoggingArrays.load(std::memory_order_acquire)) return ad;
 
   auto const profile = getLoggingProfile(getSrcKey());
   return profile ? maybeMakeLoggingArray(ad, profile) : ad;
@@ -134,7 +135,7 @@ const ArrayData* maybeMakeLoggingArray(const ArrayData* ad) {
 }
 
 ArrayData* maybeMakeLoggingArray(ArrayData* ad, LoggingProfile* profile) {
-  if (!g_emitLoggingArrays.load(std::memory_order_relaxed)) return ad;
+  if (!g_emitLoggingArrays.load(std::memory_order_acquire)) return ad;
 
   if (ad->isSampledArray() || !ad->isVanilla()) {
     DEBUG_ONLY auto const op = profile->key.op();
@@ -174,7 +175,7 @@ ArrayData* maybeMakeLoggingArray(ArrayData* ad, LoggingProfile* profile) {
 }
 
 void profileArrLikeProps(ObjectData* obj) {
-  if (!g_emitLoggingArrays.load(std::memory_order_relaxed)) return;
+  if (!g_emitLoggingArrays.load(std::memory_order_acquire)) return;
 
   auto const cls = obj->getVMClass();
   if (cls->needsInitThrowable()) return;

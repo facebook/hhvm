@@ -358,7 +358,10 @@ void retranslateAll() {
   auto const nFuncs = sortedFuncs.size();
 
   // 2) Perform bespoke coloring and finalize the layout hierarchy.
-  if (allowBespokeArrayLikes()) BespokeLayout::FinalizeHierarchy();
+  if (allowBespokeArrayLikes()) {
+    bespoke::setLoggingEnabled(false);
+    BespokeLayout::FinalizeHierarchy();
+  }
 
   // 3) Check if we should dump profile data. We may exit here in
   //    SerializeAndExit mode, without really doing the JIT, unless
@@ -689,11 +692,6 @@ void checkRetranslateAll(bool force) {
   if (s_retranslateAllScheduled.exchange(true)) {
     // Another thread beat us.
     return;
-  }
-
-  if (allowBespokeArrayLikes()) {
-    bespoke::setLoggingEnabled(false);
-    Treadmill::enqueue([] { bespoke::exportProfiles(); });
   }
 
   if (!force && serverMode) {

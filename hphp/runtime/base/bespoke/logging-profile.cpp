@@ -50,8 +50,8 @@ constexpr int8_t kInt8Min = std::numeric_limits<int8_t>::min();
 // The number of events we render inline before dropping key specializations.
 constexpr size_t kMaxNumDetailedEvents = 32;
 
-folly::SharedMutex s_exportStartedLock;
-std::atomic<bool> s_exportStarted{false};
+folly::SharedMutex s_profilingLock;
+std::atomic<bool> s_profiling{true};
 
 std::string arrayOpToString(ArrayOp op) {
   switch (op) {
@@ -250,10 +250,10 @@ void LoggingProfile::logEvent(ArrayOp op, const StringData* k, TypedValue v) {
 }
 
 void LoggingProfile::logEventImpl(const EventKey& key) {
-  // Hold the read mutex for the duration of the mutation so that export cannot
-  // begin until the mutation is complete.
-  folly::SharedMutex::ReadHolder lock{s_exportStartedLock};
-  if (s_exportStarted.load(std::memory_order_relaxed)) return;
+  // Hold the read mutex for the duration of the mutation so that profiling
+  // cannot be interrupted until the mutation is complete.
+  folly::SharedMutex::ReadHolder lock{s_profilingLock};
+  if (!s_profiling.load(std::memory_order_acquire)) return;
 
   EventMap::accessor it;
   if (events.insert(it, key.toUInt64())) {
@@ -269,10 +269,10 @@ void LoggingProfile::logEventImpl(const EventKey& key) {
 }
 
 void LoggingProfile::logEntryTypes(EntryTypes before, EntryTypes after) {
-  // Hold the read mutex for the duration of the mutation so that export cannot
-  // begin until the mutation is complete.
-  folly::SharedMutex::ReadHolder lock{s_exportStartedLock};
-  if (s_exportStarted.load(std::memory_order_relaxed)) return;
+  // Hold the read mutex for the duration of the mutation so that profiling
+  // cannot be interrupted until the mutation is complete.
+  folly::SharedMutex::ReadHolder lock{s_profilingLock};
+  if (!s_profiling.load(std::memory_order_acquire)) return;
 
   EntryTypesMap::accessor it;
   if (entryTypes.insert(it, {before.asInt16(), after.asInt16()})) {
@@ -312,10 +312,10 @@ void SinkProfile::reduce(const SinkProfile& other) {
 }
 
 void SinkProfile::update(const ArrayData* ad) {
-  folly::SharedMutex::ReadHolder lock{s_exportStartedLock};
-  if (s_exportStarted.load(std::memory_order_relaxed)) return;
+  folly::SharedMutex::ReadHolder lock{s_profilingLock};
+  if (!s_profiling.load(std::memory_order_acquire)) return;
 
-  // Because the export hasn't started yet, any bespoke arrays should be
+  // Because profiling hasn't stopped yet, any bespoke arrays should be
   // LoggingArrays at this point. Bail out if we get a non-logging bespoke.
   const LoggingArray* lad = nullptr;
   if (!ad->isVanilla()) {
@@ -785,15 +785,18 @@ std::vector<SinkOutputData> sortSinkData() {
 
 }
 
-void exportProfiles() {
+void stopProfiling() {
   assertx(allowBespokeArrayLikes());
 
-  if (RO::EvalExportLoggingArrayDataPath.empty()) return;
+  if (!s_profiling.load(std::memory_order_relaxed)) return;
 
   {
-    folly::SharedMutex::WriteHolder lock{s_exportStartedLock};
-    s_exportStarted.store(true, std::memory_order_relaxed);
+    auto expected = true;
+    folly::SharedMutex::WriteHolder lock{s_profilingLock};
+    if (!s_profiling.compare_exchange_strong(expected, false)) return;
   }
+
+  if (RO::EvalExportLoggingArrayDataPath.empty()) return;
 
   s_exportProfilesThread = std::thread([] {
     auto const sources = sortProfileData();
@@ -809,7 +812,7 @@ void exportProfiles() {
 }
 
 void waitOnExportProfiles() {
-  if (s_exportStarted.load(std::memory_order_relaxed)) {
+  if (s_exportProfilesThread.joinable()) {
     s_exportProfilesThread.join();
   }
 }
@@ -850,8 +853,8 @@ LoggingProfile* getLoggingProfile(LoggingProfileKey key) {
 
   // Hold the read mutex for the duration of the mutation so that export
   // cannot begin until the mutation is complete.
-  folly::SharedMutex::ReadHolder lock{s_exportStartedLock};
-  if (s_exportStarted.load(std::memory_order_relaxed)) return nullptr;
+  folly::SharedMutex::ReadHolder lock{s_profilingLock};
+  if (!s_profiling.load(std::memory_order_acquire)) return nullptr;
 
   // See if this source is always a particular static array. For properties,
   // that means it's a scalar array in declPropInit; for bytecodes, it means
@@ -922,8 +925,8 @@ SinkProfile* getSinkProfile(TransID id, SrcKey skRaw) {
 
   // Hold the read mutex for the duration of the mutation so that export cannot
   // begin until the mutation is complete.
-  folly::SharedMutex::ReadHolder lock{s_exportStartedLock};
-  if (s_exportStarted.load(std::memory_order_relaxed)) return nullptr;
+  folly::SharedMutex::ReadHolder lock{s_profilingLock};
+  if (!s_profiling.load(std::memory_order_acquire)) return nullptr;
 
   auto profile = std::make_unique<SinkProfile>();
   profile->key = key;

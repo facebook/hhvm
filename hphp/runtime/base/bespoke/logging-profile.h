@@ -209,6 +209,9 @@ SinkProfile* getSinkProfile(TransID id, SrcKey sk);
 // Attempt to get the current SrcKey. May fail and return an invalid SrcKey.
 SrcKey getSrcKey();
 
+// Stops profiling. If an export path is set, kicks off the export thread.
+void stopProfiling();
+
 }}
 
 #endif // HPHP_LOGGING_PROFILE_H_

@@ -47,15 +47,15 @@ let test_deferred_decl_add () =
   ensure_count 0;
 
   Deferred_decl.add_deferment
-    ~d:(Relative_path.create Relative_path.Dummy "foo");
+    ~d:(Relative_path.create Relative_path.Dummy "foo", "\\Foo");
   ensure_count 1;
 
   Deferred_decl.add_deferment
-    ~d:(Relative_path.create Relative_path.Dummy "foo");
+    ~d:(Relative_path.create Relative_path.Dummy "foo", "\\Foo");
   ensure_count 1;
 
   Deferred_decl.add_deferment
-    ~d:(Relative_path.create Relative_path.Dummy "bar");
+    ~d:(Relative_path.create Relative_path.Dummy "bar", "\\Bar");
   ensure_count 2;
 
   Deferred_decl.reset ~enable:true ~threshold_opt:None;
@@ -73,9 +73,9 @@ let ensure_threshold ~(threshold : int) ~(limit : int) ~(expected : int) : unit
     let path = Printf.sprintf "foo-%d" i in
     let relative_path = Relative_path.create Relative_path.Dummy path in
     try
-      Deferred_decl.raise_if_should_defer ~file_with_decl:relative_path;
+      Deferred_decl.raise_if_should_defer ~deferment:(relative_path, "\\Foo");
       Deferred_decl.increment_counter ()
-    with Deferred_decl.Defer d ->
+    with Deferred_decl.Defer (d, _) ->
       Asserter.Bool_asserter.assert_equals
         (i >= threshold)
         true
@@ -121,15 +121,15 @@ let test_process_file_deferring () =
   (* Finally, this is what all the setup was for: process this file *)
   Decl_counters.set_mode Typing_service_types.DeclingTopCounts;
   let prev_counter_state = Counters.reset () in
-  let { Typing_check_service.deferred_files; _ } =
+  let { Typing_check_service.deferred_decls; _ } =
     Typing_check_service.process_file dynamic_view_files ctx errors file
   in
   let counters = Counters.get_counters () in
   Counters.restore_state prev_counter_state;
   Asserter.Int_asserter.assert_equals
     1
-    (List.length deferred_files)
-    "Should be this many deferred_files";
+    (List.length deferred_decls)
+    "Should be this many deferred_decls";
 
   (* this test doesn't write back to cache, so num of decl_fetches isn't solid *)
   Asserter.Bool_asserter.assert_equals
@@ -139,7 +139,7 @@ let test_process_file_deferring () =
 
   (* Validate the declare file computation *)
   let found_declare =
-    List.exists deferred_files ~f:(fun deferred_file ->
+    List.exists deferred_decls ~f:(fun (deferred_file, _) ->
         Asserter.String_asserter.assert_equals
           "Bar.php"
           (Relative_path.suffix deferred_file)

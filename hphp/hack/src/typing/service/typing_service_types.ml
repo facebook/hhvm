@@ -14,7 +14,7 @@ type check_file_computation = {
 
 type file_computation =
   | Check of check_file_computation
-  | Declare of Relative_path.t
+  | Declare of (Relative_path.t * string)
   | Prefetch of Relative_path.t list
 [@@deriving show]
 

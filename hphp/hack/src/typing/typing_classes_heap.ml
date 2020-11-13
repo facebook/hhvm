@@ -83,7 +83,7 @@ let make_eager_class_type ctx class_name declare_folded_class_in_file =
       match Naming_provider.get_class_path ctx class_name with
       | None -> None
       | Some file ->
-        Deferred_decl.raise_if_should_defer ~file_with_decl:file;
+        Deferred_decl.raise_if_should_defer ~deferment:(file, class_name);
         (* declare_folded_class_in_file actual reads from Decl_heap.Classes.get
          * like what we do above, which makes our test redundant but cleaner.
          * It also writes into Decl_heap.Classes and other Decl_heaps. *)

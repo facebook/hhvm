@@ -219,7 +219,7 @@ let should_enable_deferring
 
 type process_file_results = {
   errors: Errors.t;
-  deferred_files: Relative_path.t list;
+  deferred_decls: Deferred_decl.deferment list;
 }
 
 let process_file
@@ -272,7 +272,7 @@ let process_file
       usefully reattempt the current process_file that we're working on. *)
       match Deferred_decl.get_deferments () with
       | [] -> Ok result
-      | deferred_files -> Error deferred_files
+      | deferred_decls -> Error deferred_decls
     in
     match result with
     | Ok (errors', (tasts, global_tvenvs)) ->
@@ -281,8 +281,8 @@ let process_file
           ctx
           tasts
           global_tvenvs;
-      { errors = Errors.merge errors' errors; deferred_files = [] }
-    | Error deferred_files -> { errors; deferred_files }
+      { errors = Errors.merge errors' errors; deferred_decls = [] }
+    | Error deferred_decls -> { errors; deferred_decls }
   with e ->
     let stack = Caml.Printexc.get_raw_backtrace () in
     let () =
@@ -318,9 +318,9 @@ let profile_log
       (Some duration, Some profile)
     | None -> (None, None)
   in
-  let { deferred_files; _ } = result in
+  let { deferred_decls; _ } = result in
   let times_checked = file.deferred_count + 1 in
-  let files_to_declare = List.length deferred_files in
+  let files_to_declare = List.length deferred_decls in
   (* "deciding_time" is what we compare against the threshold, *)
   (* to see if we should log. *)
   let deciding_time = Option.value duration_second_run ~default:duration in
@@ -479,19 +479,21 @@ let process_files
               process_file ()
           in
           let tally =
-            ProcessFilesTally.incr_checks tally result.deferred_files
+            ProcessFilesTally.incr_checks tally result.deferred_decls
           in
           let deferred =
-            if List.is_empty result.deferred_files then
+            if List.is_empty result.deferred_decls then
               []
             else
-              List.map result.deferred_files ~f:(fun fn -> Declare fn)
+              List.map result.deferred_decls ~f:(fun fn -> Declare fn)
               @ [Check { file with deferred_count = file.deferred_count + 1 }]
           in
           (result.errors, deferred, tally)
-        | Declare path ->
-          let errors = Decl_service.decl_file ctx errors path in
-          (errors, [], ProcessFilesTally.incr_decls tally)
+        | Declare (_path, class_name) ->
+          let (_ : Decl_provider.class_decl option) =
+            Decl_provider.get_class ctx class_name
+          in
+          (Errors.empty, [], ProcessFilesTally.incr_decls tally)
         | Prefetch paths ->
           Vfs.prefetch paths;
           (errors, [], ProcessFilesTally.incr_prefetches tally)
@@ -617,7 +619,7 @@ let merge
       let files_to_prefetch =
         List.fold progress.deferred ~init:[] ~f:(fun acc computation ->
             match computation with
-            | Declare path -> path :: acc
+            | Declare (path, _) -> path :: acc
             | _ -> acc)
       in
       Prefetch files_to_prefetch :: !files_to_process

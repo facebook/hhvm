@@ -1287,20 +1287,6 @@ where
         Self::could_map(p_expr, node, env)
     }
 
-    fn p_expr_l_with_loc(
-        loc: ExprLocation,
-        node: S<'a, T, V>,
-        env: &mut Env<'a, TF>,
-    ) -> Result<ast::Expr> {
-        let p_expr = |n: S<'a, T, V>, e: &mut Env<'a, TF>| -> Result<ast::Expr> {
-            Self::p_expr_with_loc(loc, n, e)
-        };
-        Ok(ast::Expr::new(
-            Self::p_pos(node, env),
-            E_::ExprList(Self::could_map(p_expr, node, env)?),
-        ))
-    }
-
     fn p_expr(node: S<'a, T, V>, env: &mut Env<'a, TF>) -> Result<ast::Expr> {
         Self::p_expr_with_loc(ExprLocation::TopLevel, node, env)
     }
@@ -2271,9 +2257,9 @@ where
             }
             Darray(_) | Varray(_) | Shape(_) | Collection(_) | Record(_) | Null | True | False
             | Id(_) | Clone(_) | ClassConst(_) | Int(_) | Float(_) | PrefixedString(_)
-            | String(_) | String2(_) | Yield(_) | YieldBreak | Await(_) | Suspend(_)
-            | ExprList(_) | Cast(_) | Unop(_) | Binop(_) | Eif(_) | New(_) | Efun(_) | Lfun(_)
-            | Xml(_) | Import(_) | Pipe(_) | Callconv(_) | Is(_) | As(_) | ParenthesizedExpr(_) => {
+            | String(_) | String2(_) | Yield(_) | YieldBreak | Await(_) | Suspend(_) | Cast(_)
+            | Unop(_) | Binop(_) | Eif(_) | New(_) | Efun(_) | Lfun(_) | Xml(_) | Import(_)
+            | Pipe(_) | Callconv(_) | Is(_) | As(_) | ParenthesizedExpr(_) => {
                 raise("Invalid lvalue")
             }
             _ => {}

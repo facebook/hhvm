@@ -415,11 +415,6 @@ pub fn emit_expr(emitter: &mut Emitter, env: &Env, expression: &tast::Expr) -> R
         Expr_::As(e) => emit_as(emitter, env, pos, e),
         Expr_::Cast(e) => emit_cast(emitter, env, pos, &(e.0).1, &e.1),
         Expr_::Eif(e) => emit_conditional_expr(emitter, env, pos, &e.0, &e.1, &e.2),
-        Expr_::ExprList(es) => Ok(InstrSeq::gather(
-            es.iter()
-                .map(|e| emit_expr(emitter, env, e))
-                .collect::<Result<Vec<_>>>()?,
-        )),
         Expr_::ArrayGet(e) => {
             let (base_expr, opt_elem_expr) = &**e;
             Ok(emit_array_get(
@@ -5001,14 +4996,10 @@ pub fn emit_ignored_exprs(
 
 // TODO(hrust): change pos from &Pos to Option<&Pos>, since Pos::make_none() still allocate mem.
 pub fn emit_ignored_expr(emitter: &mut Emitter, env: &Env, pos: &Pos, expr: &tast::Expr) -> Result {
-    if let Some(es) = expr.1.as_expr_list() {
-        emit_ignored_exprs(emitter, env, pos, es)
-    } else {
-        Ok(InstrSeq::gather(vec![
-            emit_expr(emitter, env, expr)?,
-            emit_pos_then(pos, instr::popc()),
-        ]))
-    }
+    Ok(InstrSeq::gather(vec![
+        emit_expr(emitter, env, expr)?,
+        emit_pos_then(pos, instr::popc()),
+    ]))
 }
 
 pub fn emit_lval_op(
@@ -5092,7 +5083,6 @@ fn can_use_as_rhs_in_list_assignment(expr: &tast::Expr_) -> Result<bool> {
         | E_::FunctionPointer(_)
         | E_::New(_)
         | E_::Record(_)
-        | E_::ExprList(_)
         | E_::Yield(_)
         | E_::Cast(_)
         | E_::Eif(_)

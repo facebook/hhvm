@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<39cdb052f48c6a4c6976ce79c311f491>>
+// @generated SignedSource<<9e8a107bf1de845877847409251faf6a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -395,7 +395,6 @@ pub enum Expr_<'a, Ex, Fb, En, Hi> {
     Await(&'a Expr<'a, Ex, Fb, En, Hi>),
     Suspend(&'a Expr<'a, Ex, Fb, En, Hi>),
     List(&'a [&'a Expr<'a, Ex, Fb, En, Hi>]),
-    ExprList(&'a [&'a Expr<'a, Ex, Fb, En, Hi>]),
     Cast(&'a (&'a Hint<'a>, &'a Expr<'a, Ex, Fb, En, Hi>)),
     Unop(&'a (oxidized::ast_defs::Uop, &'a Expr<'a, Ex, Fb, En, Hi>)),
     Binop(

@@ -522,8 +522,6 @@ module Visitor_DEPRECATED = struct
 
       method on_pair : 'a -> (targ * targ) option -> expr -> expr -> 'a
 
-      method on_expr_list : 'a -> expr list -> 'a
-
       method on_cast : 'a -> hint -> expr -> 'a
 
       method on_expression_tree : 'a -> expression_tree -> 'a
@@ -801,7 +799,6 @@ module Visitor_DEPRECATED = struct
         | List el -> this#on_list acc el
         | Assert ae -> this#on_assert acc ae
         | Clone e -> this#on_clone acc e
-        | Expr_list el -> this#on_expr_list acc el
         | Obj_get (e1, e2, _) -> this#on_obj_get acc e1 e2
         | Array_get (e1, e2) -> this#on_array_get acc e1 e2
         | Class_get (cid, e) -> this#on_class_get acc cid e
@@ -987,10 +984,6 @@ module Visitor_DEPRECATED = struct
         in
         let acc = this#on_expr acc e1 in
         let acc = this#on_expr acc e2 in
-        acc
-
-      method on_expr_list acc el =
-        let acc = List.fold_left el ~f:this#on_expr ~init:acc in
         acc
 
       method on_cast acc _ e = this#on_expr acc e

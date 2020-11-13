@@ -179,7 +179,6 @@ and ('ex, 'fb, 'en, 'hi) expr_ =
   | Await of ('ex, 'fb, 'en, 'hi) expr
   | Suspend of ('ex, 'fb, 'en, 'hi) expr
   | List of ('ex, 'fb, 'en, 'hi) expr list
-  | Expr_list of ('ex, 'fb, 'en, 'hi) expr list
   | Cast of hint * ('ex, 'fb, 'en, 'hi) expr
   | Unop of Ast_defs.uop * ('ex, 'fb, 'en, 'hi) expr
   | Binop of

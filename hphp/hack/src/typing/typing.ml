@@ -2026,11 +2026,6 @@ and expr_
     in
     let ty = MakeType.pair (Reason.Rwitness p) ty1 ty2 in
     make_result env p (Aast.Pair (th, te1, te2)) ty
-  | Expr_list el ->
-    (* TODO: use expected type to determine tuple component types *)
-    let (env, tel, tyl) = exprs env el in
-    let ty = MakeType.tuple (Reason.Rwitness p) tyl in
-    make_result env p (Aast.Expr_list tel) ty
   | Array_get (e, None) ->
     let (env, te, _) = update_array_type p env e valkind in
     let env = might_throw env in
@@ -6480,14 +6475,9 @@ and condition
     =
   let condition = condition ?lhs_of_null_coalesce in
   match e with
-  | Aast.True
-  | Aast.Expr_list []
-    when not tparamet ->
+  | Aast.True when not tparamet ->
     (LEnv.drop_cont env C.Next, Local_id.Set.empty)
   | Aast.False when tparamet -> (LEnv.drop_cont env C.Next, Local_id.Set.empty)
-  | Aast.Expr_list [] -> (env, Local_id.Set.empty)
-  | Aast.Expr_list [x] -> condition env tparamet x
-  | Aast.Expr_list (_ :: xs) -> condition env tparamet (pty, Aast.Expr_list xs)
   | Aast.Call ((_, Aast.Id (_, func)), _, [param], None)
     when String.equal SN.PseudoFunctions.isset func
          && tparamet

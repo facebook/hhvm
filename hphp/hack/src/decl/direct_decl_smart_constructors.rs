@@ -1043,7 +1043,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                         ArrayGet(_) | As(_) | Assert(_) | Await(_) | Binop(_) | BracedExpr(_)
                         | Call(_) | Callconv(_) | Cast(_) | ClassConst(_) | ClassGet(_)
                         | Clone(_) | Collection(_) | Darray(_) | Dollardollar(_) | Efun(_)
-                        | Eif(_) | EnumAtom(_) | ETSplice(_) | ExpressionTree(_) | ExprList(_)
+                        | Eif(_) | EnumAtom(_) | ETSplice(_) | ExpressionTree(_)
                         | FunctionPointer(_) | FunId(_) | Id(_) | Import(_) | Is(_)
                         | KeyValCollection(_) | Lfun(_) | List(_) | Lplaceholder(_) | Lvar(_)
                         | MethodCaller(_) | MethodId(_) | New(_) | ObjGet(_) | Omitted

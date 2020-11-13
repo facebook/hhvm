@@ -2910,9 +2910,7 @@ fn print_expr<W: Write>(
         E_::Lfun(_) => Err(Error::fail(
             "expected Lfun to be converted to Efun during closure conversion print_expr",
         )),
-        E_::Suspend(_) | E_::Callconv(_) | E_::ExprList(_) => {
-            Err(Error::fail("illegal default value"))
-        }
+        E_::Suspend(_) | E_::Callconv(_) => Err(Error::fail("illegal default value")),
         _ => Err(Error::fail(
             "TODO Unimplemented: We are missing a lot of cases in the case match. Delete this catchall",
         )),

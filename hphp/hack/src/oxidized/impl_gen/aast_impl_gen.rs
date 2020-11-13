@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<577370638ed81bc0c16dbb944893db29>>
+// @generated SignedSource<<ecc7e4093ccfbc1891e999ba4829fb36>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -1066,9 +1066,6 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
     pub fn mk_list(p0: Vec<Expr<Ex, Fb, En, Hi>>) -> Self {
         Expr_::List(p0)
     }
-    pub fn mk_expr_list(p0: Vec<Expr<Ex, Fb, En, Hi>>) -> Self {
-        Expr_::ExprList(p0)
-    }
     pub fn mk_cast(p0: Hint, p1: Expr<Ex, Fb, En, Hi>) -> Self {
         Expr_::Cast(Box::new((p0, p1)))
     }
@@ -1352,12 +1349,6 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
     pub fn is_list(&self) -> bool {
         match self {
             Expr_::List(..) => true,
-            _ => false,
-        }
-    }
-    pub fn is_expr_list(&self) -> bool {
-        match self {
-            Expr_::ExprList(..) => true,
             _ => false,
         }
     }
@@ -1694,12 +1685,6 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
     pub fn as_list(&self) -> Option<&Vec<Expr<Ex, Fb, En, Hi>>> {
         match self {
             Expr_::List(p0) => Some(p0),
-            _ => None,
-        }
-    }
-    pub fn as_expr_list(&self) -> Option<&Vec<Expr<Ex, Fb, En, Hi>>> {
-        match self {
-            Expr_::ExprList(p0) => Some(p0),
             _ => None,
         }
     }
@@ -2086,12 +2071,6 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
             _ => None,
         }
     }
-    pub fn as_expr_list_mut(&mut self) -> Option<&mut Vec<Expr<Ex, Fb, En, Hi>>> {
-        match self {
-            Expr_::ExprList(p0) => Some(p0),
-            _ => None,
-        }
-    }
     pub fn as_cast_mut(&mut self) -> Option<(&mut Hint, &mut Expr<Ex, Fb, En, Hi>)> {
         match self {
             Expr_::Cast(p0) => Some((&mut p0.0, &mut p0.1)),
@@ -2472,12 +2451,6 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
     pub fn as_list_into(self) -> Option<Vec<Expr<Ex, Fb, En, Hi>>> {
         match self {
             Expr_::List(p0) => Some(p0),
-            _ => None,
-        }
-    }
-    pub fn as_expr_list_into(self) -> Option<Vec<Expr<Ex, Fb, En, Hi>>> {
-        match self {
-            Expr_::ExprList(p0) => Some(p0),
             _ => None,
         }
     }

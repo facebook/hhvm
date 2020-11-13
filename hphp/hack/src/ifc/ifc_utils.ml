@@ -94,7 +94,6 @@ let expr_name = function
   | A.Await _ -> "Await"
   | A.Suspend _ -> "Suspend"
   | A.List _ -> "List"
-  | A.Expr_list _ -> "Expr"
   | A.Cast _ -> "Cast"
   | A.Unop _ -> "Unop"
   | A.Binop _ -> "Binop"

@@ -575,7 +575,6 @@ and expr_ env acc p e =
   | List _ ->
     (* List is always an lvalue *)
     acc
-  | Expr_list el -> exprl acc el
   | New (_, _, el, unpacked_element, _) ->
     let acc = exprl acc el in
     let acc = Option.value_map ~default:acc ~f:(expr acc) unpacked_element in

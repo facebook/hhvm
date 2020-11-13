@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<3b3acdce96170e5ece3d4427ac321eb5>>
+// @generated SignedSource<<7a3c763f7889ff099b337ab49b2bdad4>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -357,7 +357,6 @@ pub enum Expr_<Ex, Fb, En, Hi> {
     Await(Box<Expr<Ex, Fb, En, Hi>>),
     Suspend(Box<Expr<Ex, Fb, En, Hi>>),
     List(Vec<Expr<Ex, Fb, En, Hi>>),
-    ExprList(Vec<Expr<Ex, Fb, En, Hi>>),
     Cast(Box<(Hint, Expr<Ex, Fb, En, Hi>)>),
     Unop(Box<(ast_defs::Uop, Expr<Ex, Fb, En, Hi>)>),
     Binop(Box<(ast_defs::Bop, Expr<Ex, Fb, En, Hi>, Expr<Ex, Fb, En, Hi>)>),

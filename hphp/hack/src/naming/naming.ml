@@ -2172,7 +2172,6 @@ and expr_ env p (e : Nast.expr_) =
   | Aast.Await e -> N.Await (expr env e)
   | Aast.Suspend e -> N.Suspend (expr env e)
   | Aast.List el -> N.List (exprl env el)
-  | Aast.Expr_list el -> N.Expr_list (exprl env el)
   | Aast.Cast (ty, e2) ->
     let ((p, x), hl) =
       match ty with

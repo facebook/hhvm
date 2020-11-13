@@ -768,18 +768,21 @@ impl<'a> smart_constructors::NodeType for Node<'a> {
 
     fn is_abstract(&self) -> bool {
         self.is_token(TokenKind::Abstract)
+            || matches!(self, Node::Ignored(SK::Token(TokenKind::Abstract)))
     }
     fn is_name(&self) -> bool {
-        matches!(self, Node::Name(..))
+        matches!(self, Node::Name(..)) || matches!(self, Node::Ignored(SK::Token(TokenKind::Name)))
     }
     fn is_qualified_name(&self) -> bool {
-        matches!(self, Node::QualifiedName(..))
+        matches!(self, Node::QualifiedName(..)) || matches!(self, Node::Ignored(SK::QualifiedName))
     }
     fn is_prefix_unary_expression(&self) -> bool {
         matches!(self, Node::Expr(aast::Expr(_, aast::Expr_::Unop(..))))
+            || matches!(self, Node::Ignored(SK::PrefixUnaryExpression))
     }
     fn is_scope_resolution_expression(&self) -> bool {
         matches!(self, Node::Expr(aast::Expr(_, aast::Expr_::ClassConst(..))))
+            || matches!(self, Node::Ignored(SK::ScopeResolutionExpression))
     }
     fn is_missing(&self) -> bool {
         matches!(self, Node::Ignored(SK::Missing))

@@ -326,6 +326,7 @@ public:
   static ArrayData* Copy(const ArrayData*);
   static ArrayData* CopyStatic(const ArrayData*);
   static ArrayData* Append(ArrayData*, TypedValue v);
+  static ArrayData* AppendMove(ArrayData*, TypedValue v);
   static ArrayData* Merge(ArrayData*, const ArrayData* elems);
   static ArrayData* Pop(ArrayData*, Variant& value);
   static ArrayData* ToDVArray(ArrayData*, bool copy);

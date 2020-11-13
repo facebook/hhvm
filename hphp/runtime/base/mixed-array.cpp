@@ -1268,6 +1268,13 @@ ArrayData* MixedArray::Append(ArrayData* ad, TypedValue v) {
   return AppendImpl(ad, v, ad->cowCheck());
 }
 
+ArrayData* MixedArray::AppendMove(ArrayData* ad, TypedValue v) {
+  auto const result = AppendImpl(ad, v, ad->cowCheck());
+  if (ad != result && ad->decReleaseCheck()) Release(ad);
+  tvDecRefGen(v);
+  return result;
+}
+
 /*
  * Copy an array to a new array of mixed kind, with a particular
  * pre-reserved size.

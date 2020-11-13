@@ -141,10 +141,10 @@ TypedValue BespokeArray::NvGetStr(const ArrayData* ad, const StringData* key) {
   return asBespoke(ad)->vtable()->fnGetStr(ad, key);
 }
 TypedValue BespokeArray::GetPosKey(const ArrayData* ad, ssize_t pos) {
-  return asBespoke(ad)->vtable()->fnGetKey(ad, pos);
+  return asBespoke(ad)->vtable()->fnGetPosKey(ad, pos);
 }
 TypedValue BespokeArray::GetPosVal(const ArrayData* ad, ssize_t pos) {
-  return asBespoke(ad)->vtable()->fnGetVal(ad, pos);
+  return asBespoke(ad)->vtable()->fnGetPosVal(ad, pos);
 }
 ssize_t BespokeArray::NvGetIntPos(const ArrayData* ad, int64_t key) {
   return asBespoke(ad)->vtable()->fnGetIntPos(ad, key);

@@ -190,7 +190,7 @@ void cgBespokeIterGetKey(IRLS& env, const IRInstruction* inst) {
     auto const layout = inst->extra<BespokeLayoutData>()->layout;
     if (layout) {
       auto const vtable = layout->vtable();
-      return CallSpec::direct(vtable->fnGetKey);
+      return CallSpec::direct(vtable->fnGetPosKey);
     } else {
       return CallSpec::direct(BespokeArray::GetPosKey);
     }
@@ -206,7 +206,7 @@ void cgBespokeIterGetVal(IRLS& env, const IRInstruction* inst) {
     auto const layout = inst->extra<BespokeLayoutData>()->layout;
     if (layout) {
       auto const vtable = layout->vtable();
-      return CallSpec::direct(vtable->fnGetVal);
+      return CallSpec::direct(vtable->fnGetPosVal);
     } else {
       return CallSpec::direct(BespokeArray::GetPosVal);
     }

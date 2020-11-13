@@ -548,8 +548,12 @@ const ArrayFunctions g_array_funcs = {
    *   Append a new value to the array, with the next available integer key,
    *   copying or escalating as necessary. If there is no available integer
    *   key, no value is appended, but this method may still copy the array.
+   *
+   *   AppendMove is equivalent to calling Append, dec-ref-ing the value,
+   *   and (if copy or escalation was needed), dec-ref-ing the old array.
    */
   DISPATCH(Append)
+  DISPATCH(AppendMove)
 
   /*
    * ArrayData* Pop(ArrayData*, Variant& value);

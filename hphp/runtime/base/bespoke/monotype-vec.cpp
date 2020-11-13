@@ -204,11 +204,11 @@ TypedValue EmptyMonotypeVec::GetStr(const EmptyMonotypeVec*,
   return make_tv<KindOfUninit>();
 }
 
-TypedValue EmptyMonotypeVec::GetKey(const EmptyMonotypeVec*, ssize_t) {
+TypedValue EmptyMonotypeVec::GetPosKey(const EmptyMonotypeVec*, ssize_t) {
   always_assert(false);
 }
 
-TypedValue EmptyMonotypeVec::GetVal(const EmptyMonotypeVec*, ssize_t) {
+TypedValue EmptyMonotypeVec::GetPosVal(const EmptyMonotypeVec*, ssize_t) {
   always_assert(false);
 }
 
@@ -594,12 +594,12 @@ TypedValue MonotypeVec::GetStr(const MonotypeVec* mad, const StringData*) {
   return make_tv<KindOfUninit>();
 }
 
-TypedValue MonotypeVec::GetKey(const MonotypeVec* mad, ssize_t pos) {
+TypedValue MonotypeVec::GetPosKey(const MonotypeVec* mad, ssize_t pos) {
   assertx(pos < mad->size());
   return make_tv<KindOfInt64>(pos);
 }
 
-TypedValue MonotypeVec::GetVal(const MonotypeVec* mad, ssize_t pos) {
+TypedValue MonotypeVec::GetPosVal(const MonotypeVec* mad, ssize_t pos) {
   assertx(size_t(pos) < mad->size());
   return mad->typedValueUnchecked(pos);
 }

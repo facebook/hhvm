@@ -645,6 +645,13 @@ ArrayData* SetArray::Append(ArrayData* ad, TypedValue v) {
   return AppendImpl(ad, tvClassToString(v), ad->cowCheck());
 }
 
+ArrayData* SetArray::AppendMove(ArrayData* ad, TypedValue v) {
+  auto const result = AppendImpl(ad, tvClassToString(v), ad->cowCheck());
+  if (ad != result && ad->decReleaseCheck()) Release(ad);
+  tvDecRefGen(v);
+  return result;
+}
+
 ArrayData* SetArray::Pop(ArrayData* ad, Variant& value) {
   auto a = asSet(ad);
   if (a->cowCheck()) a = a->copySet();

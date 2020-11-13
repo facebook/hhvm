@@ -133,10 +133,10 @@ TypedValue EmptyMonotypeDict::GetInt(const Self* ad, int64_t k) {
 TypedValue EmptyMonotypeDict::GetStr(const Self* ad, const StringData* k) {
   return make_tv<KindOfUninit>();
 }
-TypedValue EmptyMonotypeDict::GetKey(const Self* ad, ssize_t pos) {
+TypedValue EmptyMonotypeDict::GetPosKey(const Self* ad, ssize_t pos) {
   always_assert(false);
 }
-TypedValue EmptyMonotypeDict::GetVal(const Self* ad, ssize_t pos) {
+TypedValue EmptyMonotypeDict::GetPosVal(const Self* ad, ssize_t pos) {
   always_assert(false);
 }
 ssize_t EmptyMonotypeDict::GetIntPos(const Self* ad, int64_t k) {
@@ -990,7 +990,7 @@ TypedValue MonotypeDict<Key>::GetStr(const Self* mad, const StringData* k) {
 }
 
 template <typename Key>
-TypedValue MonotypeDict<Key>::GetKey(const Self* mad, ssize_t pos) {
+TypedValue MonotypeDict<Key>::GetPosKey(const Self* mad, ssize_t pos) {
   auto const elm = mad->elmAtIndex(pos);
   assertx(elm->key != getTombstone<Key>());
   if constexpr (std::is_same<Key, int64_t>::value) {
@@ -1005,7 +1005,7 @@ TypedValue MonotypeDict<Key>::GetKey(const Self* mad, ssize_t pos) {
 }
 
 template <typename Key>
-TypedValue MonotypeDict<Key>::GetVal(const Self* mad, ssize_t pos) {
+TypedValue MonotypeDict<Key>::GetPosVal(const Self* mad, ssize_t pos) {
   auto const elm = mad->elmAtIndex(pos);
   assertx(elm->key != getTombstone<Key>());
   return { elm->val, mad->type() };
@@ -1158,8 +1158,8 @@ ArrayData* MonotypeDict<Key>::Pop(Self* mad, Variant& value) {
     return mad;
   }
   auto const pos = IterLast(mad);
-  auto const key = GetKey(mad, pos);
-  value = tvAsCVarRef(GetVal(mad, pos));
+  auto const key = GetPosKey(mad, pos);
+  value = tvAsCVarRef(GetPosVal(mad, pos));
   return tvIsString(key) ? RemoveStr(mad, val(key).pstr)
                          : RemoveInt(mad, val(key).num);
 }

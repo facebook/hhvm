@@ -450,8 +450,12 @@ public:
   /**
    * Append `v' to the array, making a copy first if necessary. Returns `this`
    * if copy/escalation are not needed, or a copied/escalated ArrayData.
+   *
+   * appendMove dec-refs the old array if we needed copy / escalation, and
+   * does not do any refcounting ops on the value.
    */
   ArrayData* append(TypedValue v);
+  ArrayData* appendMove(TypedValue v);
 
   /////////////////////////////////////////////////////////////////////////////
   // Iteration.
@@ -810,6 +814,7 @@ struct ArrayFunctions {
   bool (*uasort[NK])(ArrayData* ad, const Variant& cmp_function);
   ArrayData* (*copyStatic[NK])(const ArrayData*);
   ArrayData* (*append[NK])(ArrayData*, TypedValue v);
+  ArrayData* (*appendMove[NK])(ArrayData*, TypedValue v);
   ArrayData* (*pop[NK])(ArrayData*, Variant& value);
   ArrayData* (*toDVArray[NK])(ArrayData*, bool copy);
   ArrayData* (*toHackArr[NK])(ArrayData*, bool copy);

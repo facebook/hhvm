@@ -50,8 +50,8 @@ void logBespokeDispatch(const ArrayData* ad, const char* fn);
   X(bool, IsVectorData, const T*) \
   X(TypedValue, GetInt, const T*, int64_t) \
   X(TypedValue, GetStr, const T*, const StringData*) \
-  X(TypedValue, GetKey, const T*, ssize_t pos) \
-  X(TypedValue, GetVal, const T*, ssize_t pos) \
+  X(TypedValue, GetPosKey, const T*, ssize_t pos) \
+  X(TypedValue, GetPosVal, const T*, ssize_t pos) \
   X(ssize_t, GetIntPos, const T*, int64_t) \
   X(ssize_t, GetStrPos, const T*, const StringData*) \
   X(ssize_t, IterBegin, const T*) \
@@ -134,11 +134,11 @@ struct LayoutFunctionDispatcher {
   static TypedValue GetStr(const ArrayData* ad, const StringData* k) {
     return Array::GetStr(Cast(ad, __func__), k);
   }
-  static TypedValue GetKey(const ArrayData* ad, ssize_t pos) {
-    return Array::GetKey(Cast(ad, __func__), pos);
+  static TypedValue GetPosKey(const ArrayData* ad, ssize_t pos) {
+    return Array::GetPosKey(Cast(ad, __func__), pos);
   }
-  static TypedValue GetVal(const ArrayData* ad, ssize_t pos) {
-    return Array::GetVal(Cast(ad, __func__), pos);
+  static TypedValue GetPosVal(const ArrayData* ad, ssize_t pos) {
+    return Array::GetPosVal(Cast(ad, __func__), pos);
   }
   static ssize_t GetIntPos(const ArrayData* ad, int64_t k) {
     return Array::GetIntPos(Cast(ad, __func__), k);

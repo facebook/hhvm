@@ -400,6 +400,7 @@ public:
   static ArrayData* Copy(const ArrayData*);
   static ArrayData* CopyStatic(const ArrayData*);
   static ArrayData* Append(ArrayData*, TypedValue);
+  static ArrayData* AppendMove(ArrayData*, TypedValue);
   static ArrayData* Pop(ArrayData*, Variant&);
   static ArrayData* ToDVArray(ArrayData*, bool copy);
   static ArrayData* ToHackArr(ArrayData*, bool copy);

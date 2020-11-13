@@ -164,6 +164,12 @@ inline ArrayData* ArrayData::append(TypedValue v) {
   return g_array_funcs.append[kind()](this, v);
 }
 
+inline ArrayData* ArrayData::appendMove(TypedValue v) {
+  assertx(v.m_type != KindOfUninit);
+  assertx(cowCheck() || notCyclic(v));
+  return g_array_funcs.appendMove[kind()](this, v);
+}
+
 inline ssize_t ArrayData::iter_begin() const {
   return g_array_funcs.iterBegin[kind()](this);
 }

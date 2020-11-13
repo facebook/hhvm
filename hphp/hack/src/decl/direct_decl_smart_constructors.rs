@@ -474,7 +474,14 @@ impl<'a> ClassishNameBuilder<'a> {
     ) {
         use ClassishNameBuilder::*;
         match self {
-            NotInClassish => *self = InClassish(arena.alloc((name, pos, token_kind))),
+            NotInClassish => {
+                let name = if name.starts_with(':') {
+                    prefix_slash(arena, name)
+                } else {
+                    name
+                };
+                *self = InClassish(arena.alloc((name, pos, token_kind)))
+            }
             InClassish(_) => {}
         }
     }

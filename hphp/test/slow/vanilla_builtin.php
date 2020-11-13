@@ -1,6 +1,6 @@
 <?hh
 
-<<__NeverInline>>
+<<__NEVER_INLINE>>
 function dup($x, $y) {
   return $x;
 }
@@ -8,7 +8,7 @@ function dup($x, $y) {
 abstract class MyClass {
   abstract const type TTest;
 
-  <<__NeverInline>>
+  <<__NEVER_INLINE>>
   function doCheck($v) {
     $type = type_structure(static::class, 'TTest');
     $x = dup($v, $type['classname']);

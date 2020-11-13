@@ -35,7 +35,7 @@ function main() {
     },
     function ($pp) {
       // __isset()
-      return isset($v->nonExistentProperty) ? "true" : "false";
+      return isset($pp->nonExistentProperty) ? "true" : "false";
     },
     function ($pp) {
       // __unset()

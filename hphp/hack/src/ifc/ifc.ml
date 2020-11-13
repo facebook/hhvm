@@ -517,13 +517,6 @@ let lift_params renv =
 let set_local_types env =
   List.fold ~init:env ~f:(fun env (lid, pty) -> Env.set_local_type env lid pty)
 
-let binop ~pos renv env ty1 ty2 =
-  match (ty1, ty2) with
-  | ((Tprim p1 | Tnull p1), (Tprim p2 | Tnull p2)) ->
-    let (env, pj) = join_policies ~pos renv env ~prefix:"bop" [p1; p2] in
-    (env, Tprim pj)
-  | _ -> fail "unexpected Binop types"
-
 let receiver_of_obj_get obj_ptype property =
   match obj_ptype with
   | Tclass class_ -> class_
@@ -810,24 +803,8 @@ let seq ~run (env, out) x =
         before `x` with the ones after `x` *)
     (env, Env.merge_out out_exceptional out)
 
-(* Assignment helper that accounts for flows when there is an operator
-   attached to the assignment, e.g., `$x += 42`. *)
-let rec assign_with_op ~pos renv env op lhs_exp rhs_exp =
-  let expr = expr ~pos renv in
-  let (env, rhs_pty) =
-    if Option.is_none op then
-      expr env rhs_exp
-    else
-      (* increment-like operations (e.g., $a += $b) *)
-      let (env, lhs_pty) = expr env lhs_exp in
-      let (env, rhs_pty) = expr env rhs_exp in
-      binop ~pos renv env lhs_pty rhs_pty
-  in
-  let env = assign ~expr ~pos renv env lhs_exp rhs_pty in
-  (env, rhs_pty)
-
 (* Generate flow constraints for an expression *)
-and expr ~pos renv (env : Env.expr_env) (((_, ety), e) : Tast.expr) =
+let rec expr ~pos renv (env : Env.expr_env) (((epos, ety), e) : Tast.expr) =
   let expr = expr ~pos renv in
   let vec_literal ~prefix exprs =
     (* Each element of the array is a subtype of the array's value parameter. *)
@@ -864,11 +841,80 @@ and expr ~pos renv (env : Env.expr_env) (((_, ety), e) : Tast.expr) =
   | A.String _ ->
     (* literals are public *)
     (env, Tprim (Env.new_policy_var renv "lit"))
-  | A.Binop (Ast_defs.Eq op, e1, e2) -> assign_with_op ~pos renv env op e1 e2
-  | A.Binop (_, e1, e2) ->
+  | A.Binop (Ast_defs.Eq None, e1, e2) ->
+    let (env, ty2) = expr env e2 in
+    let env = assign ~expr ~pos renv env e1 ty2 in
+    (env, ty2)
+  | A.Binop (Ast_defs.Eq (Some op), e1, e2) ->
+    (* it is simpler to create a fake expression e1 = e1 op e2 to
+       make sure all operations (e.g., ??) are handled correctly *)
+    expr
+      env
+      ( (epos, ety),
+        A.Binop (Ast_defs.Eq None, e1, ((epos, ety), A.Binop (op, e1, e2))) )
+  | A.Binop (Ast_defs.QuestionQuestion, e1, e2) ->
     let (env, ty1) = expr env e1 in
     let (env, ty2) = expr env e2 in
-    binop ~pos renv env ty1 ty2
+    let ty = Lift.ty ~prefix:"qq" renv ety in
+    let null_policy = Env.new_policy_var renv "nullqq" in
+    let env =
+      Env.acc env
+      @@ L.(
+           subtype ty1 (Tunion [ty; Tnull null_policy])
+           && subtype ty2 ty
+           && add_dependencies [null_policy] ty)
+           ~pos
+    in
+    (env, ty)
+  | A.Binop
+      ( Ast_defs.(
+          ( Plus | Minus | Star | Slash | Starstar | Percent | Ltlt | Gtgt | Xor
+          | Amp | Bar | Dot )),
+        e1,
+        e2 ) ->
+    (* arithmetic and bitwise operations all take primitive types
+       and return a primitive type; string concatenation (Dot) is
+       also handled here although it might need special casing
+       because of HH\FormatString<T> (TODO) *)
+    let (env, ty1) = expr env e1 in
+    let (env, ty2) = expr env e2 in
+    let ty = Tprim (Env.new_policy_var renv "arith") in
+    let env = Env.acc env (subtype ~pos ty1 ty) in
+    let env = Env.acc env (subtype ~pos ty2 ty) in
+    (env, ty)
+  | A.Binop
+      ( ( Ast_defs.(
+            ( Eqeqeq | Diff2 | Barbar | Ampamp | LogXor | Eqeq | Diff | Lt | Lte
+            | Gt | Gte | Cmp )) as op ),
+        e1,
+        e2 ) ->
+    let (env, ty1) = expr env e1 in
+    let (env, ty2) = expr env e2 in
+    let deps =
+      let gather_policies =
+        match op with
+        | Ast_defs.(Eqeqeq | Diff2 | Barbar | Ampamp | LogXor) ->
+          (* === and !== check for object identity, the resulting
+             boolean is thus governed by the object policies of
+             the two operands
+             || and && are also safely handled by object_policy
+             since they either look at a boolean value or test
+             if an object is null *)
+          object_policy
+        | _ ->
+          (* other comparison operators can inspect mutable fields
+             when applied to DateTime objects, so we conservatively
+             use all policies of both arguments *)
+          fun t ->
+           let (cov, inv, cnt) = policy_occurrences t in
+           PSet.union cov (PSet.union inv cnt)
+      in
+      PSet.union (gather_policies ty1) (gather_policies ty2)
+    in
+    let (env, cmp_policy) =
+      join_policies ~pos ~prefix:"cmp" renv env (PSet.elements deps)
+    in
+    (env, Tprim cmp_policy)
   | A.Unop (op, e) ->
     begin
       match op with
@@ -877,7 +923,11 @@ and expr ~pos renv (env : Env.expr_env) (((_, ety), e) : Tast.expr) =
       | Ast_defs.Udecr
       | Ast_defs.Upincr
       | Ast_defs.Updecr ->
-        assign_with_op ~pos renv env None e e
+        (* register constraints that'd be generated if
+           e = e +/- 1 were being analyzed *)
+        let (env, tye) = expr env e in
+        let env = assign ~expr ~pos renv env e tye in
+        (env, tye)
       (* Prim operators that don't mutate *)
       | Ast_defs.Utild
       | Ast_defs.Unot

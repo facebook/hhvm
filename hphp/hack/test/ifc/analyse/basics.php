@@ -28,11 +28,3 @@ function condition(int $a0, int $a1, int $a2): int {
   }
   return $x;
 }
-
-class A { }
-class B extends A { }
-
-<<__InferFlows>>
-function is_expression((A | int | shape('fld' => int)) $x): bool {
-  return $x is B;
-}

@@ -10,6 +10,7 @@ class :foo {
   attribute ?int d = null;
   attribute enum {'a', 'b'} e;
   attribute int f @lateinit;
+  attribute mixed g;
   attribute :bar;
   public ?string $after;
 }

@@ -16,8 +16,8 @@
         sc_name = ([5:7-11], "\\:foo"); sc_tparams = [];
         sc_where_constraints = []; sc_extends = []; sc_uses = [];
         sc_xhp_attr_uses =
-        [(Rhint (root|xhp_attr.php line 13, characters 13-16),
-          (Tapply (([13:13-17], "\\:bar"), [])))];
+        [(Rhint (root|xhp_attr.php line 14, characters 13-16),
+          (Tapply (([14:13-17], "\\:bar"), [])))];
         sc_req_extends = []; sc_req_implements = []; sc_implements = [];
         sc_implements_dynamic = false; sc_consts = []; sc_typeconsts = [];
         sc_props =
@@ -32,11 +32,11 @@
            sp_abstract = false; sp_visibility = Public };
           { Shallow_decl_defs.sp_const = false; sp_xhp_attr = None;
             sp_lateinit = false; sp_lsb = false;
-            sp_name = ([14:18-24], "after"); sp_needs_init = true;
+            sp_name = ([15:18-24], "after"); sp_needs_init = true;
             sp_type =
-            (Some (Rhint (root|xhp_attr.php line 14, characters 10-16),
+            (Some (Rhint (root|xhp_attr.php line 15, characters 10-16),
                    (Toption
-                      (Rhint (root|xhp_attr.php line 14, characters 11-16),
+                      (Rhint (root|xhp_attr.php line 15, characters 11-16),
                        (Tprim Tstring)))));
             sp_abstract = false; sp_visibility = Public };
           { Shallow_decl_defs.sp_const = false;
@@ -102,6 +102,15 @@
             sp_type =
             (Some (Rhint (root|xhp_attr.php line 12, characters 13-15),
                    (Tprim Tint)));
+            sp_abstract = false; sp_visibility = Public };
+          { Shallow_decl_defs.sp_const = false;
+            sp_xhp_attr =
+            (Some { Typing_defs_core.xa_tag = None; xa_has_default = false });
+            sp_lateinit = false; sp_lsb = false;
+            sp_name = ([13:19-20], ":g"); sp_needs_init = true;
+            sp_type =
+            (Some (Rhint (root|xhp_attr.php line 13, characters 13-17),
+                   Tmixed));
             sp_abstract = false; sp_visibility = Public }
           ];
         sc_sprops = []; sc_constructor = None; sc_static_methods = [];

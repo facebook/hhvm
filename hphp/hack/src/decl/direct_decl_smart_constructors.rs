@@ -3621,8 +3621,10 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             let type_ = self.node_to_ty(node.hint);
             let type_ = if node.nullable && node.tag.is_none() {
                 type_.and_then(|x| match x {
-                    Ty(_, Ty_::Toption(_)) => type_, // already nullable
-                    _ => self.node_to_ty(self.hint_ty(x.get_pos()?, Ty_::Toption(x))), // make nullable
+                    // already nullable
+                    Ty(_, Ty_::Toption(_)) | Ty(_, Ty_::Tmixed) => type_,
+                    // make nullable
+                    _ => self.node_to_ty(self.hint_ty(x.get_pos()?, Ty_::Toption(x))),
                 })
             } else {
                 type_

@@ -556,7 +556,8 @@ pub struct FunParamDecl<'a> {
     visibility: Node<'a>,
     kind: ParamMode,
     hint: Node<'a>,
-    id: Id<'a>,
+    pos: &'a Pos<'a>,
+    name: Option<&'a str>,
     variadic: bool,
     initializer: Node<'a>,
 }
@@ -976,9 +977,13 @@ impl<'a> DirectDeclSmartConstructors<'a> {
     }
 
     fn get_pos(&self, node: Node<'a>) -> &'a Pos<'a> {
-        match node {
+        self.get_pos_opt(node).unwrap_or(Pos::none())
+    }
+
+    fn get_pos_opt(&self, node: Node<'a>) -> Option<&'a Pos<'a>> {
+        let pos = match node {
             Node::Name(&(_, pos)) => pos,
-            Node::Ty(ty) => ty.get_pos().unwrap_or(Pos::none()),
+            Node::Ty(ty) => return ty.get_pos(),
             Node::XhpName(&(_, pos)) => pos,
             Node::QualifiedName(&(_, pos)) => pos,
             Node::IntLiteral(&(_, pos))
@@ -993,8 +998,9 @@ impl<'a> DirectDeclSmartConstructors<'a> {
             ),
             Node::Expr(&aast::Expr(pos, _)) => pos,
             Node::Token(token) => self.token_pos(token),
-            _ => Pos::none(),
-        }
+            _ => return None,
+        };
+        if pos.is_none() { None } else { Some(pos) }
     }
 
     fn token_pos(&self, token: FixedWidthToken) -> &'a Pos<'a> {
@@ -1544,14 +1550,15 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                             visibility,
                             kind,
                             hint,
-                            id,
+                            pos,
+                            name,
                             variadic,
                             initializer,
                         }) => {
                             let attributes = self.to_attributes(attributes);
 
                             if let Some(visibility) = visibility.as_visibility() {
-                                let Id(pos, name) = id;
+                                let name = name.unwrap_or("");
                                 let name = strip_dollar_prefix(name);
                                 properties.push(ShallowProp {
                                     const_: attributes.const_,
@@ -1567,7 +1574,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                             }
 
                             let type_ = if hint.is_ignored() {
-                                self.tany_with_pos(id.0)
+                                self.tany_with_pos(pos)
                             } else {
                                 self.node_to_ty(hint).map(|ty| match ty {
                                     &Ty(r, Ty_::Tfun(fun_type))
@@ -1639,7 +1646,14 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                             }
                             let variadic = initializer.is_ignored() && variadic;
                             let type_ = if variadic {
-                                self.alloc(Ty(self.alloc(Reason::RvarParam(id.0)), type_.1))
+                                self.alloc(Ty(
+                                    self.alloc(if name.is_some() {
+                                        Reason::RvarParam(pos)
+                                    } else {
+                                        Reason::witness(pos)
+                                    }),
+                                    type_.1,
+                                ))
                             } else {
                                 type_
                             };
@@ -1651,8 +1665,8 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                                     .map(|ty| ParamRxAnnotation::ParamRxIfImpl(ty))
                             };
                             let param = self.alloc(FunParam {
-                                pos: id.0,
-                                name: Some(id.1),
+                                pos,
+                                name,
                                 type_: self.alloc(PossiblyEnforcedTy {
                                     enforced: false,
                                     type_,
@@ -2936,21 +2950,21 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         name: Self::R,
         initializer: Self::R,
     ) -> Self::R {
-        let (variadic, id) = match name {
+        let (variadic, pos, name) = match name {
             Node::ListItem(&(ellipsis, id)) => {
-                let id = match id.as_id() {
+                let Id(pos, name) = match id.as_id() {
                     Some(id) => id,
                     None => return Node::Ignored(SK::ParameterDeclaration),
                 };
                 let variadic = ellipsis.is_token(TokenKind::DotDotDot);
-                (variadic, id)
+                (variadic, pos, Some(name))
             }
             name => {
-                let name = match name.as_id() {
-                    Some(name) => name,
+                let Id(pos, name) = match name.as_id() {
+                    Some(id) => id,
                     None => return Node::Ignored(SK::ParameterDeclaration),
                 };
-                (false, name)
+                (false, pos, Some(name))
             }
         };
         let kind = if inout.is_token(TokenKind::Inout) {
@@ -2963,22 +2977,28 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             visibility,
             kind,
             hint,
-            id,
+            pos,
+            name,
             variadic,
             initializer,
         }))
     }
 
-    fn make_variadic_parameter(&mut self, _: Self::R, hint: Self::R, _: Self::R) -> Self::R {
-        Node::FunParam(self.alloc(FunParamDecl {
-            attributes: Node::Ignored(SK::Missing),
-            visibility: Node::Ignored(SK::Missing),
-            kind: ParamMode::FPnormal,
-            hint,
-            id: Id(self.get_pos(hint), "".into()),
-            variadic: true,
-            initializer: Node::Ignored(SK::Missing),
-        }))
+    fn make_variadic_parameter(&mut self, _: Self::R, hint: Self::R, ellipsis: Self::R) -> Self::R {
+        Node::FunParam(
+            self.alloc(FunParamDecl {
+                attributes: Node::Ignored(SK::Missing),
+                visibility: Node::Ignored(SK::Missing),
+                kind: ParamMode::FPnormal,
+                hint,
+                pos: self
+                    .get_pos_opt(hint)
+                    .unwrap_or_else(|| self.get_pos(ellipsis)),
+                name: None,
+                variadic: true,
+                initializer: Node::Ignored(SK::Missing),
+            }),
+        )
     }
 
     fn make_function_declaration(
@@ -4354,7 +4374,8 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             visibility: Node::Ignored(SK::Missing),
             kind,
             hint,
-            id: Id(self.get_pos(hint), "".into()),
+            pos: self.get_pos(hint),
+            name: Some(""),
             variadic: false,
             initializer: Node::Ignored(SK::Missing),
         }))

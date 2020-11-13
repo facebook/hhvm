@@ -806,6 +806,9 @@ let seq ~run (env, out) x =
 (* Generate flow constraints for an expression *)
 let rec expr ~pos renv (env : Env.expr_env) (((epos, ety), e) : Tast.expr) =
   let expr = expr ~pos renv in
+  let expr_with_deps env deps e =
+    Env.expr_with_pc_deps env deps (fun env -> expr env e)
+  in
   let vec_literal ~prefix exprs =
     (* Each element of the array is a subtype of the array's value parameter. *)
     let arry_pty = Lift.ty ~prefix renv ety in
@@ -852,9 +855,10 @@ let rec expr ~pos renv (env : Env.expr_env) (((epos, ety), e) : Tast.expr) =
       env
       ( (epos, ety),
         A.Binop (Ast_defs.Eq None, e1, ((epos, ety), A.Binop (op, e1, e2))) )
-  | A.Binop (Ast_defs.QuestionQuestion, e1, e2) ->
+  | A.Binop (Ast_defs.QuestionQuestion, e1, e2)
+  | A.Eif (e1, None, e2) ->
     let (env, ty1) = expr env e1 in
-    let (env, ty2) = expr env e2 in
+    let (env, ty2) = expr_with_deps env (object_policy ty1) e2 in
     let ty = Lift.ty ~prefix:"qq" renv ety in
     let null_policy = Env.new_policy_var renv "nullqq" in
     let env =
@@ -865,6 +869,13 @@ let rec expr ~pos renv (env : Env.expr_env) (((epos, ety), e) : Tast.expr) =
            && add_dependencies [null_policy] ty)
            ~pos
     in
+    (env, ty)
+  | A.Eif (e1, Some e2, e3) ->
+    let (env, ty1) = expr env e1 in
+    let (env, ty2) = expr_with_deps env (object_policy ty1) e2 in
+    let (env, ty3) = expr_with_deps env (object_policy ty1) e3 in
+    let ty = Lift.ty ~prefix:"eif" renv ety in
+    let env = Env.acc env (L.(subtype ty2 ty && subtype ty3 ty) ~pos) in
     (env, ty)
   | A.Binop
       ( Ast_defs.(

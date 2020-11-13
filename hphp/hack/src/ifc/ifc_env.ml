@@ -111,6 +111,12 @@ let with_pc env pc (fn : stmt_env -> blank_env * 'a) =
 
 let with_pc_deps env deps = with_pc env (PSet.union (get_lpc env) deps)
 
+let expr_with_pc_deps env deps (fn : expr_env -> expr_env * 'a) =
+  let lpc = get_lpc env in
+  let env = set_pc env (PSet.union lpc deps) in
+  let (env, res) = fn env in
+  (set_pc env lpc, res)
+
 let acc env update = { env with e_acc = update env.e_acc }
 
 let add_dep env name = { env with e_deps = SSet.add name env.e_deps }

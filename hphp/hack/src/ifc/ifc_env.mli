@@ -74,6 +74,11 @@ val with_pc :
 val with_pc_deps :
   stmt_env -> PSet.t -> (stmt_env -> blank_env * 'a) -> blank_env * 'a
 
+(* expr_with_pc_deps runs a closure in an environment locally extended
+   with additional control flow dependencies *)
+val expr_with_pc_deps :
+  expr_env -> PSet.t -> (expr_env -> expr_env * 'a) -> expr_env * 'a
+
 val get_locals : (yes, 'a) env -> ptype LMap.t
 
 val get_next : (yes, 'a) env -> cont

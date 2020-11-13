@@ -7,8 +7,6 @@
  *
  *)
 
-let log_lambda_counts _ = ()
-
 module InferenceCnstr = struct
   let log _ ~pos:_ ~size:_ ~n_disj:_ ~n_conj:_ = ()
 end

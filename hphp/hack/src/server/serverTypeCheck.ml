@@ -1525,7 +1525,7 @@ functor
         errors;
         telemetry = typecheck_telemetry;
         files_checked;
-        full_check_done;
+        full_check_done = _;
         needs_recheck;
         total_rechecked_count;
       } =
@@ -1601,30 +1601,18 @@ functor
       in
 
       (* STATS LOGGING *********************************************************)
+      if SharedMem.hh_log_level () > 0 then begin
+        Measure.print_stats ();
+        Measure.print_distributions ()
+      end;
       let telemetry =
-        if
-          SharedMem.hh_log_level () = 0
-          && not (GlobalOptions.tco_language_feature_logging env.tcopt)
-        then
-          telemetry
-        else begin
-          Measure.print_stats ();
-          Measure.print_distributions ();
-
-          (* Log lambda counts for full checks where we don't load from a saved state *)
-          if
-            genv.ServerEnv.options |> ServerArgs.no_load
-            && full_check_done
-            && reparse_count = 0
-            (* Ignore incremental updates *)
-          then
-            TypingLogger.log_lambda_counts ();
-
+        if SharedMem.hh_log_level () > 0 then
           Telemetry.object_
             telemetry
             ~key:"shmem"
             ~value:(SharedMem.get_telemetry ())
-        end
+        else
+          telemetry
       in
       ServerDebug.info genv "incremental_done";
 

@@ -1905,6 +1905,16 @@ impl<'a> DirectDeclSmartConstructors<'a> {
         }
     }
 
+    fn rewrite_taccess_reasons(&self, ty: &'a Ty<'a>, r: &'a Reason<'a>) -> &'a Ty<'a> {
+        let ty_ = match ty.1 {
+            Ty_::Taccess(&TaccessType(ty, id)) => {
+                Ty_::Taccess(self.alloc(TaccessType(self.rewrite_taccess_reasons(ty, r), id)))
+            }
+            ty_ => ty_,
+        };
+        self.alloc(Ty(r, ty_))
+    }
+
     fn user_attribute_to_decl(
         &self,
         attr: &UserAttributeNode<'a>,
@@ -4443,6 +4453,10 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             },
         };
         let reason = self.alloc(Reason::hint(pos));
+        // The reason-rewriting here is only necessary to match the
+        // behavior of OCaml decl (which flattens and then unflattens
+        // Haccess hints, losing some position information).
+        let ty = self.rewrite_taccess_reasons(ty, reason);
         Node::Ty(self.alloc(Ty(reason, Ty_::Taccess(self.alloc(TaccessType(ty, id))))))
     }
 

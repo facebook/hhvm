@@ -3232,6 +3232,8 @@ bool canReduceToDontResolveList(SArray tsList, bool checkArrays) {
   return result;
 }
 
+const StaticString s_hh_type_structure_no_throw("HH\\type_structure_no_throw");
+
 } // namespace
 
 void in(ISS& env, const bc::IsLateBoundCls& op) {
@@ -3254,9 +3256,27 @@ void in(ISS& env, const bc::IsTypeStructC& op) {
     popC(env);
     return push(env, TBool);
   }
-  if (op.subop1 == TypeStructResolveOp::Resolve &&
-      canReduceToDontResolve(a->m_data.parr, false)) {
-    return reduce(env, bc::IsTypeStructC { TypeStructResolveOp::DontResolve });
+  if (op.subop1 == TypeStructResolveOp::Resolve) {
+    if (canReduceToDontResolve(a->m_data.parr, false)) {
+      return reduce(
+        env,
+        bc::IsTypeStructC { TypeStructResolveOp::DontResolve }
+      );
+    }
+    if (auto const val = get_ts_this_type_access(a->m_data.parr)) {
+      // Convert `$x is this::T` into
+      // `$x is type_structure_no_throw(static::class, 'T')`
+      // to take advantage of the caching that comes with the type_structure
+      return reduce(
+        env,
+        bc::PopC {},
+        bc::LateBoundCls {},
+        bc::ClassName {},
+        bc::String {val},
+        bc::FCallBuiltin {2, 2, 0, s_hh_type_structure_no_throw.get()},
+        bc::IsTypeStructC { TypeStructResolveOp::DontResolve }
+      );
+    }
   }
   isTypeStructImpl(env, a->m_data.parr);
 }

@@ -29,6 +29,7 @@
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/runtime/vm/jit/translator-runtime.h"
 #include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/vm/native-prop-handler.h"
 
@@ -560,7 +561,9 @@ namespace {
 
 const StaticString s_classname("classname");
 
-Array implTypeStructure(const Variant& cls_or_obj, const Variant& cns_name) {
+Array implTypeStructure(const Variant& cls_or_obj,
+                        const Variant& cns_name,
+                        bool no_throw) {
   auto const cns_sd = cns_name.getStringDataOrNull();
   if (!cns_sd) {
     auto name = cls_or_obj.toString();
@@ -601,16 +604,8 @@ Array implTypeStructure(const Variant& cls_or_obj, const Variant& cns_name) {
                 cls_sd->data(), cns_sd->data());
   }
 
-  auto typeCns = cls->clsCnsGet(cns_sd, ClsCnsLookup::IncludeTypes);
-  if (typeCns.m_type == KindOfUninit) {
-    raise_error("Type constant %s::%s is abstract",
-                cls_sd->data(), cns_sd->data());
-  }
-
-  assertx(isArrayLikeType(typeCns.m_type));
-  assertx(typeCns.m_data.parr->isHAMSafeDArray());
-  assertx(typeCns.m_data.parr->isStatic());
-  return Array::attach(typeCns.m_data.parr);
+  auto ad = jit::loadClsTypeCnsHelper(cls, cns_sd, no_throw);
+  return Array::attach(ad);
 }
 
 } // namespace
@@ -625,12 +620,17 @@ Array implTypeStructure(const Variant& cls_or_obj, const Variant& cns_name) {
  */
 Array HHVM_FUNCTION(type_structure,
                     const Variant& cls_or_obj, const Variant& cns_name) {
-  return implTypeStructure(cls_or_obj, cns_name);
+  return implTypeStructure(cls_or_obj, cns_name, false);
+}
+
+Array HHVM_FUNCTION(type_structure_no_throw,
+                    const Variant& cls_or_obj, const Variant& cns_name) {
+  return implTypeStructure(cls_or_obj, cns_name, true);
 }
 
 String HHVM_FUNCTION(type_structure_classname,
                      const Variant& cls_or_obj, const Variant& cns_name) {
-  auto const ts = implTypeStructure(cls_or_obj, cns_name);
+  auto const ts = implTypeStructure(cls_or_obj, cns_name, false);
   return ts[s_classname].asCStrRef();
 }
 
@@ -2102,6 +2102,7 @@ struct ReflectionExtension final : Extension {
     HHVM_FE(hphp_set_property);
     HHVM_FE(hphp_set_static_property);
     HHVM_FALIAS(HH\\type_structure, type_structure);
+    HHVM_FALIAS(HH\\type_structure_no_throw, type_structure_no_throw);
     HHVM_FALIAS(HH\\type_structure_classname, type_structure_classname);
 
     HHVM_ME(ReflectionFunctionAbstract, getName);

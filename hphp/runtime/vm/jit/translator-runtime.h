@@ -183,6 +183,12 @@ ArrayData* errorOnIsAsExpressionInvalidTypesHelper(ArrayData*);
  */
 ArrayData* recordReifiedGenericsAndGetTSList(ArrayData*);
 
+ArrayData* loadClsTypeCnsHelper(
+  const Class* cls,
+  const StringData* name,
+  bool no_throw_on_undefined
+);
+
 [[noreturn]] void throwOOBException(TypedValue base, TypedValue key);
 [[noreturn]] void invalidArrayKeyHelper(const ArrayData* ad, TypedValue key);
 

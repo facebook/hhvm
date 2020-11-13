@@ -387,31 +387,11 @@ void cgLdTypeCns(IRLS& env, const IRInstruction* inst) {
   v << xorqi{0x1, cns, ret, v.makeReg()};
 }
 
-static ArrayData* loadClsTypeCnsHelper(
-  const Class* cls, const StringData* name
-) {
-  auto typeCns = cls->clsCnsGet(name, ClsCnsLookup::IncludeTypes);
-  if (typeCns.m_type == KindOfUninit) {
-    if (cls->hasTypeConstant(name, true)) {
-      raise_error("Type constant %s::%s is abstract",
-                  cls->name()->data(), name->data());
-    } else {
-      raise_error("Non-existent type constant %s::%s",
-                  cls->name()->data(), name->data());
-    }
-  }
-
-  assertx(isArrayLikeType(typeCns.m_type));
-  assertx(typeCns.m_data.parr->isHAMSafeDArray());
-  assertx(typeCns.m_data.parr->isStatic());
-  return typeCns.m_data.parr;
-}
-
 const StaticString s_classname("classname");
 
 static StringData* loadClsTypeCnsClsNameHelper(const Class* cls,
                                               const StringData* name) {
-  auto const ts = loadClsTypeCnsHelper(cls, name);
+  auto const ts = loadClsTypeCnsHelper(cls, name, false);
   auto const classname_field = ts->get(s_classname.get());
   if (classname_field.is_init()) {
     assertx(isStringType(classname_field.type()));
@@ -422,7 +402,8 @@ static StringData* loadClsTypeCnsClsNameHelper(const Class* cls,
 }
 
 void cgLdClsTypeCns(IRLS& env, const IRInstruction* inst) {
-  auto const args = argGroup(env, inst).ssa(0).ssa(1);
+  auto const extra = inst->extra<LdClsTypeCnsData>();
+  auto const args = argGroup(env, inst).ssa(0).ssa(1).imm(extra->noThrow);
   cgCallHelper(vmain(env), env, CallSpec::direct(loadClsTypeCnsHelper),
                callDest(env, inst), SyncOptions::Sync, args);
 }

@@ -1373,6 +1373,15 @@ namespace HH {
   function type_structure(mixed $cls_or_obj, ?string $cns_name = null): darray;
 
   /**
+   * Same as type_structure but does not throw when there's an undefined symbol
+   */
+  <<__Native, __Pure>>
+  function type_structure_no_throw(
+    mixed $cls_or_obj,
+    ?string $cns_name = null
+  ): darray;
+
+  /**
    * Retrieves the classname on the the TypeStructure pointed by a type
    * constant or a type alias.
    */
@@ -1392,3 +1401,7 @@ namespace HH {
     return type_structure($cls_or_obj, null);
   }
 }
+
+namespace HH\__internal {
+  class type_structure_non_existant_class {}
+} // HH\__internal

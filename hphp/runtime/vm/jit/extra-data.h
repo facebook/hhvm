@@ -360,6 +360,17 @@ struct FuncArgTypeData : IRExtraData {
   const StringData* type;
 };
 
+struct LdClsTypeCnsData : IRExtraData {
+  explicit LdClsTypeCnsData(bool no_throw) : noThrow(no_throw) {}
+
+  std::string show() const { return folly::to<std::string>(noThrow); }
+
+  bool equals(LdClsTypeCnsData o) const { return noThrow == o.noThrow; }
+  size_t hash() const { return noThrow ? 1 : 0; }
+
+  bool noThrow;
+};
+
 /*
  * Local variable ID.
  */
@@ -1827,6 +1838,7 @@ X(BespokeIterAdvancePos,        BespokeLayoutData);
 X(BespokeIterGetKey,            BespokeLayoutData);
 X(BespokeIterGetVal,            BespokeLayoutData);
 X(LdUnitPerRequestFilepath,     RDSHandleData);
+X(LdClsTypeCns,                 LdClsTypeCnsData);
 
 #undef X
 

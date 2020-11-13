@@ -176,6 +176,19 @@ ALWAYS_INLINE bool isWildCard(const ArrayData* ts) {
          get_ts_name(ts)->equal(s_wildcard.get());
 }
 
+ALWAYS_INLINE
+const StringData* get_ts_this_type_access(const ArrayData* ts) {
+  if (get_ts_kind(ts) != TypeStructure::Kind::T_typeaccess ||
+      !get_ts_root_name(ts)->isame(s_hh_this.get())) {
+    return nullptr;
+  }
+  auto const accList = get_ts_access_list(ts);
+  if (accList->size() != 1) return nullptr;
+  auto const name = accList->at(int64_t(0));
+  if (!tvIsString(&name)) return nullptr;
+  return name.m_data.pstr;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }

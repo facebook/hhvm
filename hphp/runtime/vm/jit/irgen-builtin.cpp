@@ -514,7 +514,7 @@ SSATmp* opt_array_key_cast(IRGS& env, const ParamPrep& params) {
 }
 
 SSATmp* impl_opt_type_structure(IRGS& env, const ParamPrep& params,
-                                bool getName) {
+                                bool getName, bool no_throw) {
   if (params.size() != 2) return nullptr;
   auto const clsNameTmp = params[0].value;
   auto const cnsNameTmp = params[1].value;
@@ -552,12 +552,19 @@ SSATmp* impl_opt_type_structure(IRGS& env, const ParamPrep& params,
       },
       [&] (SSATmp* cns) { return cns; },
       [&] /* taken */ {
+        auto const extra = LdClsTypeCnsData { no_throw };
         return gen(
-          env, LdClsTypeCns, make_opt_catch(env, params), clsTmp, cnsNameTmp
+          env,
+          LdClsTypeCns,
+          extra,
+          make_opt_catch(env, params),
+          clsTmp,
+          cnsNameTmp
         );
       }
     );
   }
+  assert(!no_throw);
   return cond(
     env,
     [&] (Block* taken) {
@@ -578,10 +585,13 @@ SSATmp* impl_opt_type_structure(IRGS& env, const ParamPrep& params,
 }
 
 SSATmp* opt_type_structure(IRGS& env, const ParamPrep& params) {
-  return impl_opt_type_structure(env, params, false);
+  return impl_opt_type_structure(env, params, false, false);
+}
+SSATmp* opt_type_structure_no_throw(IRGS& env, const ParamPrep& params) {
+  return impl_opt_type_structure(env, params, false, true);
 }
 SSATmp* opt_type_structure_classname(IRGS& env, const ParamPrep& params) {
-  return impl_opt_type_structure(env, params, true);
+  return impl_opt_type_structure(env, params, true, false);
 }
 
 SSATmp* opt_is_list_like(IRGS& env, const ParamPrep& params) {
@@ -1169,6 +1179,7 @@ const hphp_fast_string_imap<OptEmitFn> s_opt_emit_fns{
   {"chr", opt_chr},
   {"hh\\array_key_cast", opt_array_key_cast},
   {"hh\\type_structure", opt_type_structure},
+  {"hh\\type_structure_no_throw", opt_type_structure_no_throw},
   {"hh\\type_structure_classname", opt_type_structure_classname},
   {"hh\\is_list_like", opt_is_list_like},
   {"HH\\is_dict_or_darray", opt_is_dict_or_darray},

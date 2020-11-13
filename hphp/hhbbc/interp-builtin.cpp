@@ -373,10 +373,11 @@ ArrayData* impl_type_structure_opts(ISS& env, const bc::FCallBuiltin& op,
   return nullptr;
 }
 
-bool builtin_type_structure(ISS& env, const bc::FCallBuiltin& op) {
+bool impl_builtin_type_structure(ISS& env, const bc::FCallBuiltin& op,
+                                 bool no_throw) {
   bool fail = false;
   auto const ts = impl_type_structure_opts(env, op, fail);
-  if (fail) {
+  if (fail && !no_throw) {
     unreachable(env);
     popT(env);
     popT(env);
@@ -388,6 +389,14 @@ bool builtin_type_structure(ISS& env, const bc::FCallBuiltin& op) {
   RuntimeOption::EvalHackArrDVArrs
     ? reduce(env, bc::Dict { ts }) : reduce(env, bc::Array { ts });
   return true;
+}
+
+bool builtin_type_structure(ISS& env, const bc::FCallBuiltin& op) {
+  return impl_builtin_type_structure(env, op, false);
+}
+
+bool builtin_type_structure_no_throw(ISS& env, const bc::FCallBuiltin& op) {
+  return impl_builtin_type_structure(env, op, true);
 }
 
 const StaticString s_classname("classname");
@@ -495,6 +504,7 @@ bool builtin_shapes_idx(ISS& env, const bc::FCallBuiltin& op) {
   X(is_callable, is_callable)                                           \
   X(is_list_like, HH\\is_list_like)                                     \
   X(type_structure, HH\\type_structure)                                 \
+  X(type_structure_no_throw, HH\\type_structure_no_throw)               \
   X(type_structure_classname, HH\\type_structure_classname)             \
   X(shapes_idx, HH\\Shapes::idx)                                        \
 

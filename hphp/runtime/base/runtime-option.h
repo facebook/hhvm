@@ -825,7 +825,7 @@ struct RuntimeOption {
   F(double,   JitLayoutColdThreshold,  0.0005)                          \
   F(int32_t,  JitLayoutMainFactor,     1000)                            \
   F(int32_t,  JitLayoutColdFactor,     5)                               \
-  F(bool,     JitLayoutExtTSP,         false)                           \
+  F(bool,     JitLayoutExtTSP,         true)                            \
   F(double,   JitLayoutMaxMergeRatio,  1000000)                         \
   F(bool,     JitAHotSizeRoundUp,      true)                            \
   F(uint32_t, GdbSyncChunks,           128)                             \

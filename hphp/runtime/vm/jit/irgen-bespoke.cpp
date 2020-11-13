@@ -207,7 +207,7 @@ SSATmp* emitIsset(BespokeLayout layout, IRGS& env, SSATmp* key) {
   return cond(
     env,
     [&](Block* taken) { return typedEmitGet(layout, env, base, key, taken); },
-    [&](SSATmp* val) { return gen(env, IsNType, TNull, val); },
+    [&](SSATmp* val) { return gen(env, IsNType, TInitNull, val); },
     [&] { return cns(env, false); }
   );
 }

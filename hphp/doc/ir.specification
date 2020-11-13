@@ -3000,59 +3000,57 @@ fields of that struct for holding intermediate values.
   Set element with key S1 in S0 to S2. The dest will be a new Dict that should
   replace S0.
 
-| BespokeGet<T,Layout>, DParam(Cell), SBespokeArr S(Int,Str), B
+| BespokeGet<T>, DParam(Cell), SKnownArrLike S(Int,Str), LA
 
-  Get element of type T with key S1 in bespoke array S0 using the GetInt/GetStr
-  implementations on the layout provided. If no layout is provided, the general
-  BespokeArray dispatch is used.
+  Get an elements of type T with key S1 in the array S0, which may have an
+  arbitrary layout. This op returns TUninit if the key is not in the array.
 
-| BespokeElem<T,Layout>, DLvalToElemParam, SLvalToBespokeArr S(Int,Str) C(Bool), MElem
+| BespokeElem<T>, DLvalToElemParam, S(LvalToArrLike) S(Int,Str) C(Bool), LA|MElem
 
-  Get a half-lval to an element of type T with key S1 in the bespoke array at
-  S0 using the ElemInt/ElemStr implementations on the layout provided. If
-  copying or escalation are performed, the array in S0 is updated. S2 specifies
-  if an exception should be thrown if the value is not present. If no layout is
-  provided, the general BespokeArray dispatch is used.
+  Get a half-lval to an element of type T with key S1 in the array S0, which
+  may have an arbitrary layout. The op will copy or escalate the S0 as needed,
+  with ElemInt/ElemStr semantics.
 
-| BespokeSet<T,Layout>, DParam(ArrLike), SBespokeArr S(Int,Str) S(Cell), PRc|CRc
+  If the key is missing in the array, we'll use S2 to determine what to do.
+  If S2 is true, we'll throw; else, we'll return an immutable lval to null.
 
-  Set element with key S1 in bespoke array S0 to S2 using the SetMove
-  implementation on the layout provided, returning an array of type T. If no
-  layout is provided, the general BespokeArray dispatch is used.
+| BespokeSet, DModified(0), SKnownArrLike S(Int,Str) S(Cell), LA|PRc|CRc
 
-| BespokeAppend<T,Layout>, DParam(ArrLike), SBespokeArr S(Cell), PRc|CRc
+  Set element with key S1 in the array S0, which may have an arbitrary layout.
+  This op has SetMove semantics; it consumes a refcount on the input array and
+  produces one on the output, and does no refcounting to the value S2.
 
-  Append element S1 to bespoke array S0 using the Append implementation on the
-  layout provided, returning an array of type T. If no layout is provided, the
-  general BespokeArray dispatch is used.
+| BespokeAppend, DModified(0), SKnownArrLike S(Cell), LA|PRc|CRc
 
-| BespokeIterFirstPos<Layout>, D(Int), SBespokeArr, NF
+  Set element with key S1 in the array S0, which may have an arbitrary layout.
+  This op has AppendMove semantics; it consumes a refcount on the input array
+  and produces one on the output, and does no refcounting to the value S2.
 
-  Obtain the pos coresponding to the first valid element in bespoke array S0
-  using the IterBegin implementation on the layout provided.
+| BespokeIterFirstPos, D(Int), S(ArrLike), LA
 
-| BespokeIterLastPos<Layout>, D(Int), SBespokeArr, NF
+  Obtain the pos coresponding to the first valid element in the non-empty
+  array S0, which may have an arbitrary layout.
 
-  Obtain the pos coresponding to the last valid element in bespoke array S0
-  using the IterLast implementation on the layout provided.
+| BespokeIterLastPos, D(Int), S(ArrLike), LA
 
-| BespokeIterAdvancePos<Layout>, D(Int), SBespokeArr S(Int), NF
+  Obtain the pos coresponding to the last valid element in the non-empty
+  array S0, which may have an arbitrary layout.
 
-  Advance the pos S1 for bespoke array S0 forward, returning the result.
+| BespokeIterAdvancePos, D(Int), S(ArrLike) S(Int), LA
 
-| BespokeIterGetKey<T, Layout>, DParam(Int|Str), SBespokeArr S(Int), NF
+  Advance the pos S1 for the array S0 forward, returning the result.
 
-  Obtain the key at pos S1 in bespoke array S0.
+| BespokeIterGetKey<T>, DParam(Int|Str), S(ArrLike) S(Int), LA
 
-| BespokeIterGetVal<T, Layout>, DParam(Cell), SBespokeArr S(Int), NF
+  Obtain the key at the valid pos S1 in the array S0.
 
-  Obtain the value at pos S1 in bespoke array S0.
+| BespokeIterGetVal<T>, DParam(InitCell), S(ArrLike) S(Int), LA
 
-| BespokeEscalateToVanilla<Layout>, DEscalateToVanilla, SBespokeArr CStr, NF
+  Obtain the value at the valid pos S1 in the array S0.
 
-  Escalate bespoke array S0 to a vanilla array for the reason S1 using the
-  EscalateToVanilla implementation on the layout provided. If no layout is
-  provided, the general BespokeArray dispatch is used.
+| BespokeEscalateToVanilla<Layout>, DEscalateToVanilla, SBespokeArr CStr, PRc
+
+  Escalate the bespoke array S0 to a vanilla array for the reason S1.
 
 | MapSet, ND, S(Obj) S(Int,Str) S(Cell), CRc
 

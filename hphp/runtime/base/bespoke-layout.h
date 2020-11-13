@@ -40,12 +40,11 @@ namespace irgen { struct IRGS; }
 namespace bespoke { struct Layout; struct ConcreteLayout; }
 
 /*
- * Identifies information about a bespoke layout necessary to JIT code handling
- * arrays of that layout
+ * Identifies information about a bespoke layout necessary to JIT code
+ * handling * arrays of that layout.
  */
 struct BespokeLayout {
   explicit BespokeLayout(const bespoke::Layout* layout);
-  explicit BespokeLayout(const bespoke::ConcreteLayout* layout);
 
   bool operator==(const BespokeLayout& o) const {
     return o.m_layout == m_layout;
@@ -58,6 +57,9 @@ struct BespokeLayout {
   folly::Optional<BespokeLayout> operator&(const BespokeLayout& o) const;
   BespokeLayout getLiveableAncestor() const;
   static void FinalizeHierarchy();
+
+  /* non-null iff the layout is concrete */
+  const bespoke::ConcreteLayout* concreteLayout() const;
 
   /* get the index of this layout */
   uint16_t index() const;

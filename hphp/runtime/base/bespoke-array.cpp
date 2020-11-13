@@ -135,10 +135,10 @@ bool BespokeArray::IsVectorData(const ArrayData* ad) {
 
 // RO access
 TypedValue BespokeArray::NvGetInt(const ArrayData* ad, int64_t key) {
-  return asBespoke(ad)->vtable()->fnGetInt(ad, key);
+  return asBespoke(ad)->vtable()->fnNvGetInt(ad, key);
 }
 TypedValue BespokeArray::NvGetStr(const ArrayData* ad, const StringData* key) {
-  return asBespoke(ad)->vtable()->fnGetStr(ad, key);
+  return asBespoke(ad)->vtable()->fnNvGetStr(ad, key);
 }
 TypedValue BespokeArray::GetPosKey(const ArrayData* ad, ssize_t pos) {
   return asBespoke(ad)->vtable()->fnGetPosKey(ad, pos);

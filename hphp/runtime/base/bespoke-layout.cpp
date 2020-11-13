@@ -32,12 +32,6 @@ BespokeLayout::BespokeLayout(const bespoke::Layout* layout)
   assertx(layout);
 }
 
-BespokeLayout::BespokeLayout(const bespoke::ConcreteLayout* layout)
-  : m_layout(layout)
-{
-  assertx(layout);
-}
-
 BespokeLayout BespokeLayout::FromIndex(uint16_t index) {
   return BespokeLayout{bespoke::Layout::FromIndex({index})};
 }
@@ -48,6 +42,10 @@ BespokeLayout BespokeLayout::LoggingLayout() {
 
 BespokeLayout BespokeLayout::TopLayout() {
   return BespokeLayout::FromIndex(bespoke::BespokeTop::GetLayoutIndex().raw);
+}
+
+const bespoke::ConcreteLayout* BespokeLayout::concreteLayout() const {
+  return dynamic_cast<const bespoke::ConcreteLayout*>(m_layout);
 }
 
 uint16_t BespokeLayout::index() const {

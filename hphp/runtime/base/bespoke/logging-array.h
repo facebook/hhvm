@@ -56,9 +56,6 @@ struct LoggingArray : BespokeArray {
 
 struct LoggingLayout : ConcreteLayout {
   LoggingLayout();
-
-  SSATmp* emitSet(IRGS& env, SSATmp* base, SSATmp* key, SSATmp* val) const override;
-  SSATmp* emitAppend(IRGS& env, SSATmp* base, SSATmp* val) const override;
 };
 
 }}

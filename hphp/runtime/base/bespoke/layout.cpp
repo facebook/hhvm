@@ -342,13 +342,6 @@ const Layout* Layout::FromIndex(LayoutIndex index) {
   return layout;
 }
 
-SSATmp* Layout::emitEscalateToVanilla(IRGS& env, SSATmp* arr,
-                                      const char* reason) const {
-  auto const data = BespokeLayoutData { nullptr };
-  auto const str = cns(env, makeStaticString(reason));
-  return gen(env, BespokeEscalateToVanilla, data, arr, str);
-}
-
 struct Layout::Initializer {
   Initializer() {
     assertx(s_layoutTableIndex.load(std::memory_order_relaxed) == 0);
@@ -359,6 +352,63 @@ struct Layout::Initializer {
   }
 };
 Layout::Initializer Layout::s_initializer;
+
+//////////////////////////////////////////////////////////////////////////////
+
+SSATmp* Layout::emitGet(
+    IRGS& env, SSATmp* arr, SSATmp* key, Block* taken) const {
+  auto const val = gen(env, BespokeGet, TCell, arr, key);
+  return gen(env, CheckType, TInitCell, taken, val);
+}
+
+SSATmp* Layout::emitElem(
+    IRGS& env, SSATmp* arr, SSATmp* key, bool throwOnMissing) const {
+  return gen(env, BespokeElem, TInitCell, arr, key, cns(env, throwOnMissing));
+}
+
+SSATmp* Layout::emitSet(
+    IRGS& env, SSATmp* arr, SSATmp* key, SSATmp* val) const {
+  return gen(env, BespokeSet, arr, key, val);
+}
+
+SSATmp* Layout::emitAppend(IRGS& env, SSATmp* arr, SSATmp* val) const {
+  return gen(env, BespokeAppend, arr, val);
+}
+
+SSATmp* Layout::emitEscalateToVanilla(
+    IRGS& env, SSATmp* arr, const char* reason) const {
+  auto const str = cns(env, makeStaticString(reason));
+  return gen(env, BespokeEscalateToVanilla, arr, str);
+}
+
+SSATmp* Layout::emitIterFirstPos(IRGS& env, SSATmp* arr) const {
+  return gen(env, BespokeIterFirstPos, arr);
+}
+
+SSATmp* Layout::emitIterLastPos(IRGS& env, SSATmp* arr) const {
+  return gen(env, BespokeIterLastPos, arr);
+}
+
+SSATmp* Layout::emitIterPos(IRGS& env, SSATmp* arr, SSATmp* idx) const {
+  return idx;
+}
+
+SSATmp* Layout::emitIterAdvancePos(IRGS& env, SSATmp* arr, SSATmp* pos) const {
+  return gen(env, BespokeIterAdvancePos, arr, pos);
+}
+
+SSATmp* Layout::emitIterElm(IRGS& env, SSATmp* arr, SSATmp* pos) const {
+  return pos;
+}
+
+SSATmp* Layout::emitIterGetKey(IRGS& env, SSATmp* arr, SSATmp* elm) const {
+  auto const type = arr->isA(TVec|TVArr) ? TInt : TInt|TStr;
+  return gen(env, BespokeIterGetKey, type, arr, elm);
+}
+
+SSATmp* Layout::emitIterGetVal(IRGS& env, SSATmp* arr, SSATmp* elm) const {
+  return gen(env, BespokeIterGetVal, TInitCell, arr, elm);
+}
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -381,76 +431,6 @@ ConcreteLayout::ConcreteLayout(LayoutIndex index,
   , m_vtable(vtable)
 {
   assertx(vtable);
-}
-
-SSATmp* ConcreteLayout::emitGet(
-    IRGS& env, SSATmp* arr, SSATmp* key, Block* taken) const {
-  auto const data = BespokeLayoutData { this };
-  return gen(env, BespokeGet, TCell, data, taken, arr, key);
-}
-
-SSATmp* ConcreteLayout::emitElem(
-    IRGS& env, SSATmp* arr, SSATmp* key, bool throwOnMissing) const {
-  auto const data = BespokeLayoutData { this };
-  return gen(env, BespokeElem, TCell, data, arr, key, cns(env, throwOnMissing));
-}
-
-SSATmp* ConcreteLayout::emitSet(
-    IRGS& env, SSATmp* arr, SSATmp* key, SSATmp* val) const {
-  PUNT(unimpl_bespoke_emitSet);
-}
-
-SSATmp* ConcreteLayout::emitAppend(IRGS& env, SSATmp* arr, SSATmp* val) const {
-  PUNT(unimpl_bespoke_emitAppend);
-}
-
-SSATmp* ConcreteLayout::emitEscalateToVanilla(IRGS& env, SSATmp* arr,
-                                              const char* reason) const {
-  auto const data = BespokeLayoutData { this };
-  auto const str = cns(env, makeStaticString(reason));
-  return gen(env, BespokeEscalateToVanilla, data, arr, str);
-}
-
-SSATmp* ConcreteLayout::emitIterFirstPos(IRGS& env, SSATmp* arr) const {
-  auto const data = BespokeLayoutData { this };
-  return gen(env, BespokeIterFirstPos, data, arr);
-}
-
-SSATmp* ConcreteLayout::emitIterLastPos(IRGS& env, SSATmp* arr) const {
-  auto const data = BespokeLayoutData { this };
-  return gen(env, BespokeIterLastPos, data, arr);
-}
-
-SSATmp* ConcreteLayout::emitIterPos(
-    IRGS& env, SSATmp* arr, SSATmp* idx) const {
-  PUNT(unimpl_bespoke_iterpos);
-}
-
-SSATmp* ConcreteLayout::emitIterAdvancePos(
-    IRGS& env, SSATmp* arr, SSATmp* pos) const {
-  auto const data = BespokeLayoutData { this };
-  return gen(env, BespokeIterAdvancePos, data, arr, pos);
-}
-
-SSATmp* ConcreteLayout::emitIterElm(IRGS& env, SSATmp* arr, SSATmp* pos) const {
-  return pos;
-}
-
-SSATmp* ConcreteLayout::emitIterGetKey(
-    IRGS& env, SSATmp* arr, SSATmp* elm) const {
-  auto const data = BespokeLayoutData { this };
-  auto const retType = arr->isA(TVec|TVArr) ? TInt : TInt|TStr;
-  return gen(env, BespokeIterGetKey, retType, data, arr, elm);
-}
-
-/**
- * This default implementation invokes the layout-specific GetPosVal method
- * without virtualization.
- */
-SSATmp* ConcreteLayout::emitIterGetVal(
-    IRGS& env, SSATmp* arr, SSATmp* elm) const {
-  auto const data = BespokeLayoutData { this };
-  return gen(env, BespokeIterGetVal, TCell, data, arr, elm);
 }
 
 const ConcreteLayout* ConcreteLayout::FromConcreteIndex(LayoutIndex index) {

@@ -1575,19 +1575,6 @@ struct MethCallerData : IRExtraData {
   bool isCls;
 };
 
-struct BespokeLayoutData : IRExtraData {
-  explicit BespokeLayoutData(const bespoke::ConcreteLayout* layout)
-    : layout(layout)
-  {}
-
-  std::string show() const {
-    return layout ? folly::sformat("{}", BespokeLayout{layout}.describe())
-                  : "Generic";
-  }
-
-  const bespoke::ConcreteLayout* layout;
-};
-
 struct LoggingProfileData : IRExtraData {
   explicit LoggingProfileData(bespoke::LoggingProfile* profile)
     : profile(profile)
@@ -1827,16 +1814,6 @@ X(FuncHasAttr,                  AttrData);
 X(LdMethCallerName,             MethCallerData);
 X(LdRecDescCached,              RecNameData);
 X(LdRecDescCachedSafe,          RecNameData);
-X(BespokeGet,                   BespokeLayoutData);
-X(BespokeElem,                  BespokeLayoutData);
-X(BespokeEscalateToVanilla,     BespokeLayoutData);
-X(BespokeSet,                   BespokeLayoutData);
-X(BespokeAppend,                BespokeLayoutData);
-X(BespokeIterFirstPos,          BespokeLayoutData);
-X(BespokeIterLastPos,           BespokeLayoutData);
-X(BespokeIterAdvancePos,        BespokeLayoutData);
-X(BespokeIterGetKey,            BespokeLayoutData);
-X(BespokeIterGetVal,            BespokeLayoutData);
 X(LdUnitPerRequestFilepath,     RDSHandleData);
 X(LdClsTypeCns,                 LdClsTypeCnsData);
 

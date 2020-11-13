@@ -127,10 +127,10 @@ void EmptyMonotypeDict::Release(Self* ad) {
 bool EmptyMonotypeDict::IsVectorData(const Self* ad) {
   return true;
 }
-TypedValue EmptyMonotypeDict::GetInt(const Self* ad, int64_t k) {
+TypedValue EmptyMonotypeDict::NvGetInt(const Self* ad, int64_t k) {
   return make_tv<KindOfUninit>();
 }
-TypedValue EmptyMonotypeDict::GetStr(const Self* ad, const StringData* k) {
+TypedValue EmptyMonotypeDict::NvGetStr(const Self* ad, const StringData* k) {
   return make_tv<KindOfUninit>();
 }
 TypedValue EmptyMonotypeDict::GetPosKey(const Self* ad, ssize_t pos) {
@@ -980,12 +980,12 @@ bool MonotypeDict<Key>::IsVectorData(const Self* mad) {
 }
 
 template <typename Key>
-TypedValue MonotypeDict<Key>::GetInt(const Self* mad, int64_t k) {
+TypedValue MonotypeDict<Key>::NvGetInt(const Self* mad, int64_t k) {
   return mad->getImpl(coerceKey<Key>(k));
 }
 
 template <typename Key>
-TypedValue MonotypeDict<Key>::GetStr(const Self* mad, const StringData* k) {
+TypedValue MonotypeDict<Key>::NvGetStr(const Self* mad, const StringData* k) {
   return mad->getImpl(coerceKey<Key>(k));
 }
 

@@ -30,29 +30,6 @@ struct BespokeTop : public Layout {
   static void InitializeLayouts();
   static LayoutIndex GetLayoutIndex();
 
-  SSATmp* emitElem(
-      IRGS& env, SSATmp* arr, SSATmp* key, bool throwOnMissing) const override;
-  SSATmp* emitGet(
-      IRGS& env, SSATmp* arr, SSATmp* key, Block* taken) const override;
-  SSATmp* emitSet(
-      IRGS& env, SSATmp* arr, SSATmp* key, SSATmp* val) const override;
-  SSATmp* emitAppend(
-      IRGS& env, SSATmp* arr, SSATmp* val) const override;
-  SSATmp* emitIterFirstPos(
-      IRGS& env, SSATmp* arr) const override;
-  SSATmp* emitIterLastPos(
-      IRGS& env, SSATmp* arr) const override;
-  SSATmp* emitIterPos(
-      IRGS& env, SSATmp* arr, SSATmp* idx) const override;
-  SSATmp* emitIterAdvancePos(
-      IRGS& env, SSATmp* arr, SSATmp* pos) const override;
-  SSATmp* emitIterElm(
-      IRGS& env, SSATmp* arr, SSATmp* pos) const override;
-  SSATmp* emitIterGetKey(
-      IRGS& env, SSATmp* arr, SSATmp* elm) const override;
-  SSATmp* emitIterGetVal(
-      IRGS& env, SSATmp* arr, SSATmp* elm) const override;
-
 private:
   BespokeTop();
 };

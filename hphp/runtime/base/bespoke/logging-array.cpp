@@ -100,22 +100,6 @@ LoggingLayout::LoggingLayout()
                    /*liveable=*/ false)
 {}
 
-using namespace jit;
-using namespace jit::irgen;
-
-SSATmp* LoggingLayout::emitSet(IRGS& env, SSATmp* base, SSATmp* key,
-                               SSATmp* val) const {
-  auto const outputType = base->type().modified();
-  return gen(env, BespokeSet, outputType, BespokeLayoutData { this }, base,
-             key, val);
-}
-
-SSATmp* LoggingLayout::emitAppend(IRGS& env, SSATmp* base, SSATmp* val) const {
-  auto const outputType = base->type().modified();
-  return gen(env, BespokeAppend, outputType, BespokeLayoutData { this }, base,
-             val);
-}
-
 //////////////////////////////////////////////////////////////////////////////
 
 void setLoggingEnabled(bool value) {
@@ -318,11 +302,11 @@ bool LoggingArray::IsVectorData(const LoggingArray* lad) {
   logEvent(lad, ArrayOp::IsVectorData);
   return lad->wrapped->isVectorData();
 }
-TypedValue LoggingArray::GetInt(const LoggingArray* lad, int64_t k) {
+TypedValue LoggingArray::NvGetInt(const LoggingArray* lad, int64_t k) {
   logEvent(lad, ArrayOp::GetInt, k);
   return lad->wrapped->get(k);
 }
-TypedValue LoggingArray::GetStr(const LoggingArray* lad, const StringData* k) {
+TypedValue LoggingArray::NvGetStr(const LoggingArray* lad, const StringData* k) {
   logEvent(lad, ArrayOp::GetStr, k);
   return lad->wrapped->get(k);
 }

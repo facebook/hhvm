@@ -413,27 +413,12 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* /*unit*/) {
     return true;
   };
 
-  auto const checkBespokeArr = [&] (bool lval) {
-    auto const tRaw = src()->type();
-    if (lval) check(tRaw <= TLvalToCell, tRaw, "Lval");
-    auto const t = lval ? tRaw.deref() : tRaw;
-    if (t == TBottom) {
-      ++curSrc;
-      return;
+  auto checkBespokeArr = [&] {
+    auto const t = src()->type();
+    if (t != TBottom) {
+      auto const bespoke = t.arrSpec().bespokeLayout().has_value();
+      check(bespoke, Type(), "TArrLike=Bespoke");
     }
-    check(t.isKnownDataType() && t <= TArrLike, t, "Known ArrLike");
-
-    auto const srcLayout = t.arrSpec().bespokeLayout();
-    check(srcLayout.has_value(), t, "Bespoke ArrLike");
-
-    auto const givenLayout = inst->extra<BespokeLayoutData>()->layout;
-    if (givenLayout) {
-      auto const expected = BespokeLayout(givenLayout);
-      auto const errMsg =
-        folly::sformat("Bespoke with Layout={}", expected.describe()).c_str();
-      check(expected == *srcLayout, t, errMsg);
-    }
-
     ++curSrc;
   };
 
@@ -518,10 +503,10 @@ using TypeNames::TCA;
                           checkMultiple(src(), types, names);               \
                         }                                                   \
                       }
-#define SVArr               checkArr(false /* is_kv */, false /* is_const */);
-#define SDArr               checkArr(true  /* is_kv */, false /* is_const */);
-#define SBespokeArr         checkBespokeArr(false /* lval */);
-#define SLvalToBespokeArr   checkBespokeArr(true /* lval */);
+#define SBespokeArr   checkBespokeArr();
+#define SKnownArrLike S(VArr,DArr,Vec,Dict,Keyset)
+#define SVArr         checkArr(false /* is_kv */, false /* is_const */);
+#define SDArr         checkArr(true  /* is_kv */, false /* is_const */);
 #define CDArr         checkArr(true  /* is_kv */, true  /* is_const */);
 #define ND
 #define DMulti
@@ -590,9 +575,9 @@ using TypeNames::TCA;
 #undef SVArr
 #undef SVArrOrNull
 #undef SDArr
-#undef SBespokeArr
-#undef SLvalToBespokeArr
 #undef CDArr
+#undef SBespokeArr
+#undef SKnownArrLike
 
 #undef ND
 #undef D

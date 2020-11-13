@@ -195,11 +195,11 @@ bool EmptyMonotypeVec::IsVectorData(const EmptyMonotypeVec*) {
   return true;
 }
 
-TypedValue EmptyMonotypeVec::GetInt(const EmptyMonotypeVec*, int64_t) {
+TypedValue EmptyMonotypeVec::NvGetInt(const EmptyMonotypeVec*, int64_t) {
   return make_tv<KindOfUninit>();
 }
 
-TypedValue EmptyMonotypeVec::GetStr(const EmptyMonotypeVec*,
+TypedValue EmptyMonotypeVec::NvGetStr(const EmptyMonotypeVec*,
                                     const StringData*) {
   return make_tv<KindOfUninit>();
 }
@@ -585,12 +585,12 @@ bool MonotypeVec::IsVectorData(const MonotypeVec* mad) {
   return true;
 }
 
-TypedValue MonotypeVec::GetInt(const MonotypeVec* mad, int64_t k) {
+TypedValue MonotypeVec::NvGetInt(const MonotypeVec* mad, int64_t k) {
   if (size_t(k) >= mad->size()) return make_tv<KindOfUninit>();
   return mad->typedValueUnchecked(k);
 }
 
-TypedValue MonotypeVec::GetStr(const MonotypeVec* mad, const StringData*) {
+TypedValue MonotypeVec::NvGetStr(const MonotypeVec* mad, const StringData*) {
   return make_tv<KindOfUninit>();
 }
 

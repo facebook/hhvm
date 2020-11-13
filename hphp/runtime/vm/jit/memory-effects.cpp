@@ -1068,16 +1068,14 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   }
 
   case BespokeGet: {
-    // TODO(mcolavita): This should be PureLoad once it no longer branches
     auto const base = inst.src(0);
     auto const key  = inst.src(1);
     if (key->isA(TInt)) {
-      return may_load_store(
+      return PureLoad {
         key->hasConstVal() ? AElemI { base, key->intVal() } : AElemIAny,
-        AEmpty
-      );
+      };
     } else {
-      return may_load_store(AElemAny, AEmpty);
+      return PureLoad { AElemAny };
     }
   }
 

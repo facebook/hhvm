@@ -83,5 +83,27 @@ let direct_decl_parse_and_cache ctx file =
     let popt = Provider_context.get_popt ctx in
     let ns_map = ParserOptions.auto_namespace_map popt in
     let decls = Direct_decl_parser.parse_decls_ffi file contents ns_map in
+    let deregister_php_stdlib =
+      Relative_path.is_hhi (Relative_path.prefix file)
+      && ParserOptions.deregister_php_stdlib popt
+    in
+    let is_deregistered_stdlib_fun fun_decl =
+      deregister_php_stdlib && fun_decl.Typing_defs.fe_php_std_lib
+    in
+    let is_deregistered_stdlib_class c =
+      deregister_php_stdlib
+      && List.exists c.Shallow_decl_defs.sc_user_attributes ~f:(fun a ->
+             String.equal
+               Naming_special_names.UserAttributes.uaPHPStdLib
+               (snd a.Typing_defs_core.ua_name))
+    in
+    let decls =
+      List.filter decls ~f:(function
+          | (_, Shallow_decl_defs.Fun decl) ->
+            not (is_deregistered_stdlib_fun decl)
+          | (_, Shallow_decl_defs.Class decl) ->
+            not (is_deregistered_stdlib_class decl)
+          | _ -> true)
+    in
     cache_decls ctx decls;
     Some decls

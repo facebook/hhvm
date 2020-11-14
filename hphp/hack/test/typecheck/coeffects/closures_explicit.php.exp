@@ -1,13 +1,13 @@
 File "closures_explicit.php", line 12, characters 5-22:
 This call is not allowed because its coeffects are incompatible with the context (Typing[4390])
   File "closures_explicit.php", line 11, characters 25-28:
-  From this declaration, the context of this function body provides the capability set {Server}
+  From this declaration, the context of this function body provides the capability Server
   File "closures_explicit.php", line 7, characters 24-36:
   But the function being called requires the capability set {IO, NonDet, Rx}
 File "closures_explicit.php", line 13, characters 5-16:
 This call is not allowed because its coeffects are incompatible with the context (Typing[4390])
   File "closures_explicit.php", line 11, characters 25-28:
-  From this declaration, the context of this function body provides the capability set {Server}
+  From this declaration, the context of this function body provides the capability Server
   File "closures_explicit.php", line 6, characters 22-25:
   But the function being called requires the capability set {IO, Rx}
 File "closures_explicit.php", line 19, characters 5-22:
@@ -21,13 +21,13 @@ This call is not allowed because its coeffects are incompatible with the context
   File "closures_explicit.php", line 25, characters 5-8:
   From this declaration, the context of this function body provides the capability set {IO, Rx}
   File "closures_explicit.php", line 23, characters 36-44:
-  But the function being called requires the capability set {NonDet}
+  But the function being called requires the capability NonDet
 File "closures_explicit.php", line 38, characters 7-25:
 This call is not allowed because its coeffects are incompatible with the context (Typing[4390])
   File "closures_explicit.php", line 35, characters 18-21:
   From this declaration, the context of this function body provides the capability set {IO, Rx}
   File "closures_explicit.php", line 31, characters 26-32:
-  But the function being called requires the capability set {NonDet}
+  But the function being called requires the capability NonDet
 File "closures_explicit.php", line 41, characters 7-18:
 This call is not allowed because its coeffects are incompatible with the context (Typing[4390])
   File "closures_explicit.php", line 40, characters 7-8:
@@ -45,4 +45,4 @@ This call is not allowed because its coeffects are incompatible with the context
   File "closures_explicit.php", line 40, characters 7-8:
   From this declaration, the context of this function body provides the capability set {}
   File "closures_explicit.php", line 31, characters 26-32:
-  But the function being called requires the capability set {NonDet}
+  But the function being called requires the capability NonDet

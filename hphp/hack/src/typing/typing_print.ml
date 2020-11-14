@@ -1835,9 +1835,10 @@ let coeffects env ty =
   "the capability "
   ^
   try
-    "set {"
-    ^ ( desugar_simple_intersection ty
-      |> List.sort ~compare:String.compare
-      |> String.concat ~sep:", " )
-    ^ "}"
+    match desugar_simple_intersection ty with
+    | [cap] -> cap
+    | caps ->
+      "set {"
+      ^ (caps |> List.sort ~compare:String.compare |> String.concat ~sep:", ")
+      ^ "}"
   with UndesugarableCoeffect _ -> to_string ty

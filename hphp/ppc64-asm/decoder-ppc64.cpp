@@ -16,6 +16,8 @@
 
 #include "hphp/ppc64-asm/decoder-ppc64.h"
 
+#include <folly/Math.h>
+
 #include <sstream>
 
 #include "hphp/ppc64-asm/branch-ppc64.h"
@@ -681,7 +683,7 @@ int32_t Decoder::searchInstr(int32_t opd_index,
   PPC64Instr operand;
   auto first = opd_index;
   auto last = opd_index + opc_size -1;
-  auto middle = (first + last)/2;
+  auto middle = folly::midpoint(first, last);
 
   while (first <= last) {
     operand = m_decoder_table[middle]->opcode() & kOperandMask;
@@ -692,9 +694,9 @@ int32_t Decoder::searchInstr(int32_t opd_index,
       return middle;
     }
     else {
-      last = middle -1;
+      last = middle - 1;
     }
-    middle = (first + last)/2;
+    middle = folly::midpoint(first, last);
   }
 
   return -1;

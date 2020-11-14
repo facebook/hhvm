@@ -14,4 +14,6 @@ decl_rust = { path = "../decl_rust" }
 ocamlrep = { path = "../../ocamlrep" }
 ocamlrep_ocamlpool = { path = "../../ocamlrep_ocamlpool" }
 oxidized = { path = "../../oxidized" }
+stack_limit = { path = "../../utils/stack_limit" }
+atty = "0.2"
 bumpalo = { version = "3.2.1", features = ["collections"] }

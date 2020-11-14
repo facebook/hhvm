@@ -95,6 +95,8 @@ impl StackLimit {
     }
 }
 
+pub const STACK_SLACK_1K: retry::StackSlackFunction = |_| KI;
+
 /// Initializes the global state, more precisely modifes panic hook such that:
 /// - panics raised from StackLimit::panic_if_exceeded() are silenced;
 /// - other panics are passed through the original panic hook.

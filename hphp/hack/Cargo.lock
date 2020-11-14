@@ -487,6 +487,7 @@ dependencies = [
  "oxidized",
  "oxidized_by_ref",
  "parser_core_types",
+ "stack_limit",
  "typing_collections_rust",
  "typing_defs_rust",
 ]
@@ -495,11 +496,13 @@ dependencies = [
 name = "decl_rust_ffi"
 version = "0.0.0"
 dependencies = [
+ "atty",
  "bumpalo",
  "decl_rust",
  "ocamlrep",
  "ocamlrep_ocamlpool",
  "oxidized",
+ "stack_limit",
 ]
 
 [[package]]

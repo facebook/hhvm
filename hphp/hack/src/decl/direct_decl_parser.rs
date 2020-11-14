@@ -12,12 +12,14 @@ use ocamlrep::rc::RcOc;
 use oxidized::relative_path::RelativePath;
 use oxidized_by_ref::{direct_decl_parser::Decls, file_info};
 use parser_core_types::{parser_env::ParserEnv, source_text::SourceText};
+use stack_limit::StackLimit;
 
 pub fn parse_decls_and_mode<'a>(
     filename: RelativePath,
     text: &'a [u8],
     auto_namespace_map: &'a BTreeMap<String, String>,
     arena: &'a Bump,
+    stack_limit: Option<&'a StackLimit>,
 ) -> (Decls<'a>, Option<file_info::Mode>) {
     let text = SourceText::make(RcOc::new(filename), text);
     let (_, _errors, state, mode) = direct_decl_parser::parse_script(
@@ -25,7 +27,7 @@ pub fn parse_decls_and_mode<'a>(
         ParserEnv::default(),
         auto_namespace_map,
         arena,
-        None,
+        stack_limit,
     );
     (state.decls, mode)
 }
@@ -35,6 +37,7 @@ pub fn parse_decls<'a>(
     text: &'a [u8],
     auto_namespace_map: &'a BTreeMap<String, String>,
     arena: &'a Bump,
+    stack_limit: Option<&'a StackLimit>,
 ) -> Decls<'a> {
-    parse_decls_and_mode(filename, text, auto_namespace_map, arena).0
+    parse_decls_and_mode(filename, text, auto_namespace_map, arena, stack_limit).0
 }

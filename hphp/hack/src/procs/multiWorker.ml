@@ -26,9 +26,8 @@ let single_threaded_call_with_worker_id job merge neutral next =
   while not (Hh_bucket.is_done !x) do
     match !x with
     | Hh_bucket.Wait ->
-      (* this state should never be reached in single threaded mode, since
-           there is no hope for ever getting out of this state *)
-      failwith "stuck!"
+      (* May waiting for remote worker to finish *)
+      x := next ()
     | Hh_bucket.Job l ->
       let res = job (0, neutral) l in
       acc := merge (0, res) !acc;

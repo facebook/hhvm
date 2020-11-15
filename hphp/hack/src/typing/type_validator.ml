@@ -84,9 +84,10 @@ class virtual type_validator =
       if Env.is_enum acc.env name && List.is_empty tyl then
         this#on_enum acc r (pos, name)
       else
-        match Env.get_typedef acc.env name with
-        | None -> this#on_class acc r (pos, name) tyl
-        | Some { td_pos; td_vis; td_tparams; td_type; td_constraint } ->
+        match Env.get_class_or_typedef acc.env name with
+        | Some
+            (Env.TypedefResult
+              { td_pos; td_vis; td_tparams; td_type; td_constraint }) ->
           if SSet.mem name acc.expanded_typedefs then
             acc
           else
@@ -111,6 +112,7 @@ class virtual type_validator =
               in
               this#on_newtype acc r (pos, name) tyl td_constraint td_type
             | _ -> this#on_alias acc r (pos, name) tyl td_type)
+        | _ -> this#on_class acc r (pos, name) tyl
 
     (* Use_pos is the primary error position *)
     method validate_type

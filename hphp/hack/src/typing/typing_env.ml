@@ -27,6 +27,10 @@ module TPEnv = Type_parameter_env
 module KDefs = Typing_kinding_defs
 module TySet = Typing_set
 
+type class_or_typedef_result =
+  | ClassResult of Typing_classes_heap.Api.t
+  | TypedefResult of Typing_defs.typedef_type
+
 let show_env _ = "<env>"
 
 let pp_env _ _ = Printf.printf "%s\n" "<env>"
@@ -673,6 +677,16 @@ let get_class (env : env) (name : string) : Cls.t option =
        ?tracing_info:(get_tracing_info env)
        (get_ctx env)
        name)
+
+let get_class_or_typedef env x =
+  if is_typedef env x then
+    match get_typedef env x with
+    | None -> None
+    | Some td -> Some (TypedefResult td)
+  else
+    match get_class env x with
+    | None -> None
+    | Some cd -> Some (ClassResult cd)
 
 let get_class_dep env x =
   Decl_env.add_extends_dependency env.decl_env x;

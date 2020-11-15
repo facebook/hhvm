@@ -23,22 +23,19 @@ let is_enforceable (env : env) (ty : decl_ty) =
     match get_node ty with
     | Tthis -> false
     | Tapply ((_, name), _) when Env.is_enum env name -> false
-    | Tapply ((_, name), _) when Env.is_typedef env name ->
+    | Tapply ((_, name), tyl) ->
       (* Cyclic type definition error will be produced elsewhere *)
-      (not (SSet.mem name visited))
-      &&
+      SSet.mem name visited
+      ||
       begin
-        match Env.get_typedef env name with
-        | Some { td_vis = Aast.Transparent; td_tparams; td_type; _ } ->
+        match Env.get_class_or_typedef env name with
+        | Some
+            (Env.TypedefResult
+              { td_vis = Aast.Transparent; td_tparams; td_type; _ }) ->
           (* So that the check does not collide with reified generics *)
           let env = Env.add_generic_parameters env td_tparams in
           is_enforceable env (SSet.add name visited) td_type
-        | _ -> false
-      end
-    | Tapply ((_, name), tyl) ->
-      begin
-        match Env.get_class env name with
-        | Some tc ->
+        | Some (Env.ClassResult tc) ->
           begin
             match tyl with
             | [] -> true
@@ -67,7 +64,7 @@ let is_enforceable (env : env) (ty : decl_ty) =
                   | Unequal_lengths -> true
                 end)
           end
-        | None -> true
+        | _ -> false
       end
     | Tgeneric _ ->
       (* Previously we allowed dynamic ~> T when T is an __Enforceable generic,

@@ -13,6 +13,10 @@ type t = env [@@deriving show]
 
 exception Not_in_class
 
+type class_or_typedef_result =
+  | ClassResult of Decl_provider.class_decl
+  | TypedefResult of Typing_defs.typedef_type
+
 (** Return a string representation of the given type using Hack-like syntax. *)
 val print_ty : env -> Typing_defs.locl_ty -> string
 
@@ -61,6 +65,9 @@ val get_parent_id : env -> string option
 (** Return the info of the given class from the typing heap. *)
 val get_class :
   env -> Decl_provider.class_key -> Decl_provider.class_decl option
+
+val get_class_or_typedef :
+  env -> Decl_provider.class_key -> class_or_typedef_result option
 
 (** Return {true} when in the definition of a static property or method. *)
 val is_static : env -> bool

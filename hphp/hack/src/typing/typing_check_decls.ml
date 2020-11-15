@@ -197,26 +197,17 @@ and hint_ ~is_atom env p h_ =
   | Happly ((p, "\\Tuple"), _)
   | Happly ((p, "\\tuple"), _) ->
     Errors.tuple_syntax p
-  | Happly ((_, x), hl) as h when Env.is_typedef env.tenv x ->
+  | Happly ((_, x), hl) as h ->
     begin
-      match
-        Decl_provider.get_typedef
-          ~tracing_info:(get_tracing_info env)
-          (get_ctx env)
-          x
-      with
-      | Some _ ->
+      match Env.get_class_or_typedef env.tenv x with
+      | None -> ()
+      | Some (Env.TypedefResult _) ->
         check_happly env.typedef_tparams env.tenv (p, h);
         List.iter hl (hint env)
-      | None -> ()
+      | Some (Env.ClassResult _) ->
+        check_happly ~is_atom env.typedef_tparams env.tenv (p, h);
+        List.iter hl (hint env)
     end
-  | Happly ((_, x), hl) as h ->
-    (match Env.get_class env.tenv x with
-    | None -> ()
-    | Some _ ->
-      check_happly ~is_atom env.typedef_tparams env.tenv (p, h);
-      List.iter hl (hint env));
-    ()
   | Hshape { nsi_allows_unknown_fields = _; nsi_field_map } ->
     let compute_hint_for_shape_field_info { sfi_hint; _ } = hint env sfi_hint in
     List.iter ~f:compute_hint_for_shape_field_info nsi_field_map

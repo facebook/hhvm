@@ -398,17 +398,13 @@ module Simple = struct
       end
     | Tapply ((_p, cid), argl) ->
       begin
-        match Env.get_class env cid with
-        | Some class_info ->
+        match Env.get_class_or_typedef env cid with
+        | Some (Env.ClassResult class_info) ->
           let tparams = Cls.tparams class_info in
           check_against_tparams (Cls.pos class_info) argl tparams
-        | None ->
-          begin
-            match Env.get_typedef env cid with
-            | Some typedef ->
-              check_against_tparams typedef.td_pos argl typedef.td_tparams
-            | None -> ()
-          end
+        | Some (Env.TypedefResult typedef) ->
+          check_against_tparams typedef.td_pos argl typedef.td_tparams
+        | None -> ()
       end
 
   and check_well_kinded env (ty : decl_ty) (expected_nkind : Simple.named_kind)
@@ -438,20 +434,16 @@ module Simple = struct
       match get_node ty with
       | Tapply ((_pos, name), []) ->
         begin
-          match Env.get_class env name with
-          | Some class_info ->
+          match Env.get_class_or_typedef env name with
+          | Some (Env.ClassResult class_info) ->
             let tparams = Cls.tparams class_info in
             check_class_usable_as_hk_type use_pos class_info;
             check_against_tparams tparams
-          | None ->
-            begin
-              match Env.get_typedef env name with
-              | Some typedef ->
-                let tparams = typedef.td_tparams in
-                check_typedef_usable_as_hk_type env use_pos name typedef;
-                check_against_tparams tparams
-              | None -> ()
-            end
+          | Some (Env.TypedefResult typedef) ->
+            let tparams = typedef.td_tparams in
+            check_typedef_usable_as_hk_type env use_pos name typedef;
+            check_against_tparams tparams
+          | None -> ()
         end
       | Tgeneric (name, []) ->
         begin

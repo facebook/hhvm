@@ -225,7 +225,13 @@ let rec localize ~ety_env env (dty : decl_ty) =
             localize_class_instantiation ~ety_env env r_inst id targs class_info
           | (_ :: _, Tnewtype (id, [], _))
           | (_ :: _, Tunapplied_alias id) ->
-            localize_typedef_instantiation ~ety_env env r_inst id targs
+            localize_typedef_instantiation
+              ~ety_env
+              env
+              r_inst
+              id
+              targs
+              (Env.get_typedef env id)
           | (_ :: _, Tgeneric (x', [])) -> localize_tgeneric x' r_inst
           | (_, ty_) -> (env, mk (r_inst, ty_))
         end
@@ -248,17 +254,18 @@ let rec localize ~ety_env env (dty : decl_ty) =
     localize ~ety_env env (mk (r, Tlike arg))
   | (r, Tapply (((_p, cid) as cls), argl)) ->
     begin
-      match Env.get_class env cid with
-      | None ->
-        (* If it isn't a class, try fetching it as a typedef instead.
-         * We attempt fetching as a class first since it is the common case.
-         *)
-        if Env.is_typedef env cid then
-          localize_typedef_instantiation ety_env env r cid argl
-        else
-          localize_class_instantiation ~ety_env env r cls argl None
-      | Some class_info ->
+      match Env.get_class_or_typedef env cid with
+      | Some (Env.ClassResult class_info) ->
         localize_class_instantiation ~ety_env env r cls argl (Some class_info)
+      | Some (Env.TypedefResult typedef_info) ->
+        localize_typedef_instantiation
+          ety_env
+          env
+          r
+          cid
+          argl
+          (Some typedef_info)
+      | None -> localize_class_instantiation ~ety_env env r cls argl None
     end
   | (r, Ttuple tyl) ->
     let (env, tyl) = List.map_env env tyl (localize ~ety_env) in
@@ -455,8 +462,9 @@ and localize_class_instantiation ~ety_env env r sid tyargs class_info =
       in
       (env, mk (r, Tclass (sid, Nonexact, tyl))))
 
-and localize_typedef_instantiation ~ety_env env r type_name tyargs =
-  match Env.get_typedef env type_name with
+and localize_typedef_instantiation ~ety_env env r type_name tyargs typedef_info
+    =
+  match typedef_info with
   | Some typedef_info ->
     let tparams = typedef_info.Typing_defs.td_tparams in
     let nkinds = KindDefs.Simple.named_kinds_of_decl_tparams tparams in
@@ -487,8 +495,8 @@ and localize_with_kind
     match dty_ with
     | Tapply (((_pos, name) as id), []) ->
       begin
-        match Env.get_class env name with
-        | Some class_info ->
+        match Env.get_class_or_typedef env name with
+        | Some (Env.ClassResult class_info) ->
           let tparams = Cls.tparams class_info in
           let class_kind =
             KindDefs.Simple.type_with_params_to_simple_kind tparams
@@ -498,21 +506,16 @@ and localize_with_kind
             (env, mk (r, Tclass (id, Nonexact, [])))
           else
             (env, mk (Reason.none, Terr))
+        | Some (Env.TypedefResult typedef) ->
+          if is_newtype typedef then
+            (* The bound is unused until the newtype is fully applied, thus supplying dummy Tany *)
+            (env, mk (r, Tnewtype (name, [], mk (Reason.none, make_tany ()))))
+          else
+            (env, mk (r, Tunapplied_alias name))
         | None ->
-          begin
-            match Env.get_typedef env name with
-            | Some typedef ->
-              if is_newtype typedef then
-                (* The bound is unused until the newtype is fully applied, thus supplying dummy Tany *)
-                ( env,
-                  mk (r, Tnewtype (name, [], mk (Reason.none, make_tany ()))) )
-              else
-                (env, mk (r, Tunapplied_alias name))
-            | None ->
-              (* We are expected to localize a higher-kinded type, but are given an unknown class name.
+          (* We are expected to localize a higher-kinded type, but are given an unknown class name.
                 Not much we can do. *)
-              (env, mk (Reason.none, Terr))
-          end
+          (env, mk (Reason.none, Terr))
       end
     | Tgeneric (name, []) ->
       begin

@@ -10,6 +10,10 @@
 open Hh_prelude
 open Aast
 
+type class_or_typedef_result =
+  | ClassResult of Decl_provider.class_decl
+  | TypedefResult of Typing_defs.typedef_type
+
 (** {!Tast_env.env} is just an alias to {!Typing_env.env}, and the functions we
     provide for it are largely just aliases to functions that take a
     {!Typing_env.env}.
@@ -61,6 +65,12 @@ let get_self_ty_exn env =
   | None -> raise Not_in_class
 
 let get_class = Typing_env.get_class
+
+let get_class_or_typedef env x =
+  match Typing_env.get_class_or_typedef env x with
+  | Some (Typing_env.ClassResult cd) -> Some (ClassResult cd)
+  | Some (Typing_env.TypedefResult td) -> Some (TypedefResult td)
+  | None -> None
 
 let is_static = Typing_env.is_static
 

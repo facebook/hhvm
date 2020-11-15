@@ -256,13 +256,12 @@ let get_class_variance tenv (pos, class_name) =
     [Vcovariant [(pos, Rtype_argument (Utils.strip_ns name), Pcovariant)]]
   | _ ->
     let tparams =
-      match Env.get_typedef tenv class_name with
-      | Some { td_tparams; _ } -> td_tparams
-      | None ->
-        (match Env.get_class tenv class_name with
-        | None -> []
-        | Some cls -> Cls.tparams cls)
+      match Env.get_class_or_typedef tenv class_name with
+      | Some (Env.TypedefResult { td_tparams; _ }) -> td_tparams
+      | Some (Env.ClassResult cls) -> Cls.tparams cls
+      | None -> []
     in
+
     List.map tparams make_tparam_variance
 
 (*****************************************************************************)

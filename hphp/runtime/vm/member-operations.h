@@ -535,44 +535,29 @@ inline void ElemDBespokeUpdateBase(tv_lval base, arr_lval result) {
   }
 }
 
-template <bool Elem>
 inline tv_lval ElemDBespokePre(tv_lval base, int64_t key) {
-  if constexpr (Elem) {
-    return BespokeArray::ElemInt(base, key, true);
-  } else {
-    auto const result = BespokeArray::LvalInt(base.val().parr, key);
-    ElemDBespokeUpdateBase(base, result);
-    return result;
-  }
+  return BespokeArray::ElemInt(base, key, true);
 }
 
-template <bool Elem>
 inline tv_lval ElemDBespokePre(tv_lval base, StringData* key) {
-  if constexpr (Elem) {
-    return BespokeArray::ElemStr(base, key, true);
-  } else {
-    auto const result = BespokeArray::LvalStr(base.val().parr, key);
-    ElemDBespokeUpdateBase(base, result);
-    return result;
-  }
+  return BespokeArray::ElemStr(base, key, true);
 }
 
-template <bool Elem>
 inline tv_lval ElemDBespokePre(tv_lval base, TypedValue key) {
   auto const dt = key.m_type;
-  if (isIntType(dt))    return ElemDBespokePre<Elem>(base, key.m_data.num);
-  if (isStringType(dt)) return ElemDBespokePre<Elem>(base, key.m_data.pstr);
+  if (isIntType(dt))    return ElemDBespokePre(base, key.m_data.num);
+  if (isStringType(dt)) return ElemDBespokePre(base, key.m_data.pstr);
   throwInvalidArrayKeyException(&key, base.val().parr);
 }
 
-template <KeyType keyType, bool Elem = true>
+template <KeyType keyType>
 inline tv_lval ElemDBespoke(tv_lval base, key_type<keyType> key) {
   assertx(tvIsArrayLike(base));
   assertx(tvIsPlausible(*base));
 
   assertx(!base.val().parr->isVanilla());
-  auto const result = ElemDBespokePre<Elem>(base, key);
-  assertx(IMPLIES(Elem, result.type() == dt_modulo_persistence(result.type())));
+  auto const result = ElemDBespokePre(base, key);
+  assertx(result.type() == dt_modulo_persistence(result.type()));
   assertx(tvIsPlausible(*base));
   assertx(result.type() != KindOfUninit);
   return result;
@@ -788,9 +773,7 @@ tv_lval ElemD(tv_lval base, key_type<keyType> key) {
   assertx(type(immutable_null_base) == KindOfNull);
 
   if (tvIsArrayLike(base) && !base.val().parr->isVanilla()) {
-    auto const result = ElemDBespoke<keyType>(base, key);
-    auto const dt_may_change = result.type() == KindOfClsMeth;
-    return dt_may_change ? ElemDBespoke<keyType, false>(base, key) : result;
+    return ElemDBespoke<keyType>(base, key);
   }
 
   switch (base.type()) {

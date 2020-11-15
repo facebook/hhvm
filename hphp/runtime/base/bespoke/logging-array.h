@@ -54,10 +54,6 @@ struct LoggingArray : BespokeArray {
   EntryTypes entryTypes;
 };
 
-struct LoggingLayout : ConcreteLayout {
-  LoggingLayout();
-};
-
 }}
 
 #endif // HPHP_LOGGING_ARRAY_H_

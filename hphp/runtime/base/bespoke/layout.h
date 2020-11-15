@@ -274,10 +274,7 @@ constexpr LayoutFunctions fromArray() {
  *
  * Once the type hierarchy has been created, we supply the standard <=, meet
  * (&), and join (|) operations for the layouts, which are used from ArraySpec
- * for type operations. We further expose getLiveableAncestor to obtain a
- * layout's least liveable ancestor. Note that several of these operations
- * cannot be correctly implemented until the layout hierarchy is finalized
- * (which occurs when FinalizeHierarchy is invoked).
+ * for type operations.
  *
  * When the layout hierarchy is final, all type operations are valid. Before
  * the layout hierarchy is final, only type operations on BespokeTop are
@@ -303,11 +300,6 @@ struct Layout {
   LayoutIndex index() const { return m_index; }
   const std::string& describe() const { return m_description; }
   virtual bool isConcrete() const { return false; }
-  /*
-   * Checks whether the layout is marked as "liveable"--general enough to be
-   * used as a guard type in a live translation.
-   */
-  bool isLiveable() const { return m_liveable; }
 
   /*
    * In order to support efficient layout type tests in the JIT, we let
@@ -325,14 +317,6 @@ struct Layout {
    * all type operations are valid but no new layouts can be created.
    */
   static void FinalizeHierarchy();
-
-  /*
-   * Returns the layout's unique least liveable ancestor for use in a live
-   * translation. If the type hierarchy is not finalized, we simply return
-   * BespokeTop. This enables us to support live translations that may be
-   * created before RTA has finalized the hierarchy.
-   */
-  const Layout* getLiveableAncestor() const;
 
   bool operator<=(const Layout& other) const;
   const Layout* operator|(const Layout& other) const;
@@ -436,10 +420,7 @@ struct Layout {
 
 
 protected:
-  explicit Layout(const std::string& description, LayoutSet&& parents,
-                  bool liveable);
-  Layout(LayoutIndex index, const std::string& description, LayoutSet&& parents,
-         bool liveable);
+  Layout(LayoutIndex index, std::string description, LayoutSet parents);
 
 private:
   bool checkInvariants() const;
@@ -458,7 +439,18 @@ private:
   const LayoutFunctions* m_vtable;
   LayoutSet m_parents;
   LayoutSet m_children;
-  bool m_liveable;
+};
+
+/*
+ * An abstract bespoke layout, providing precious little on top of Layout.
+ */
+struct AbstractLayout : public Layout {
+  AbstractLayout(LayoutIndex index, std::string description, LayoutSet parents);
+  virtual ~AbstractLayout() {}
+
+  static void InitializeLayouts();
+
+  static LayoutIndex GetBespokeTopIndex();
 };
 
 /*
@@ -467,11 +459,8 @@ private:
  * various JIT helpers in terms of the vtable methods.
  */
 struct ConcreteLayout : public Layout {
-  ConcreteLayout(const std::string& description, const LayoutFunctions* vtable,
-                 LayoutSet&& parents, bool liveable);
-  ConcreteLayout(LayoutIndex index, const std::string& description,
-                 const LayoutFunctions* vtable, LayoutSet&& parents,
-                 bool liveable);
+  ConcreteLayout(LayoutIndex index, std::string description,
+                 const LayoutFunctions* vtable, LayoutSet parents);
   virtual ~ConcreteLayout() {}
 
   const LayoutFunctions* vtable() const { return m_vtable; }

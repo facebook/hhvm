@@ -27,67 +27,14 @@ namespace bespoke {
 namespace testing {
 
 struct MockLayout : public Layout {
-  MockLayout(const std::string& description, LayoutSet&& parents, bool liveable)
-    : Layout(description, std::move(parents), liveable)
+  MockLayout(std::string description, LayoutSet parents)
+    : Layout(Layout::ReserveIndices(1), std::move(description),
+             std::move(parents))
   {}
-
-  virtual SSATmp* emitGet(
-      IRGS& env, SSATmp* arr, SSATmp* key, Block* taken) const override {
-    return nullptr;
-  }
-
-  virtual SSATmp* emitElem(
-      IRGS& env, SSATmp* lval, SSATmp* key, bool) const override {
-    return nullptr;
-  }
-
-  virtual SSATmp* emitSet(
-      IRGS& env, SSATmp* arr, SSATmp* key, SSATmp* val) const override {
-    return nullptr;
-  }
-
-  virtual SSATmp* emitAppend(
-    IRGS& env, SSATmp* arr, SSATmp* val) const override {
-    return nullptr;
-  }
-
-  virtual SSATmp* emitIterFirstPos(IRGS& env, SSATmp* arr) const override {
-    return nullptr;
-  }
-
-  virtual SSATmp* emitIterLastPos(IRGS& env, SSATmp* arr) const override {
-    return nullptr;
-  }
-
-  virtual SSATmp* emitIterPos(
-      IRGS& env, SSATmp* arr, SSATmp* idx) const override {
-    return nullptr;
-  }
-
-  virtual SSATmp* emitIterAdvancePos(
-      IRGS& env, SSATmp* arr, SSATmp* pos) const override {
-    return nullptr;
-  }
-
-  virtual SSATmp* emitIterElm(
-      IRGS& env, SSATmp* arr, SSATmp* pos) const override {
-    return nullptr;
-  }
-
-  virtual SSATmp* emitIterGetKey(
-      IRGS& env, SSATmp* arr, SSATmp* elm) const override {
-    return nullptr;
-  }
-
-  virtual SSATmp* emitIterGetVal(
-      IRGS& env, SSATmp* arr, SSATmp* elm) const override {
-    return nullptr;
-  }
 };
 
-inline Layout* makeDummyLayout(const std::string& name,
-                               const std::vector<BespokeLayout>& parents,
-                               bool liveable) {
+inline Layout* makeDummyLayout(std::string name,
+                               std::vector<BespokeLayout> parents) {
   using ::testing::Mock;
 
   Layout::LayoutSet indices;
@@ -98,7 +45,7 @@ inline Layout* makeDummyLayout(const std::string& name,
       return bespoke::LayoutIndex{bl.index()};
     }
   );
-  auto const ret = new MockLayout(name, std::move(indices), liveable);
+  auto const ret = new MockLayout(std::move(name), std::move(indices));
   Mock::AllowLeak(ret);
   return ret;
 }

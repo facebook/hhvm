@@ -16,7 +16,6 @@
 
 #include "hphp/runtime/base/bespoke/layout.h"
 
-#include "hphp/runtime/base/bespoke/bespoke-top.h"
 #include "hphp/runtime/base/bespoke/logging-array.h"
 #include "hphp/runtime/base/bespoke/logging-profile.h"
 #include "hphp/runtime/base/bespoke/monotype-dict.h"
@@ -43,30 +42,17 @@ using namespace jit::irgen;
 namespace {
 std::atomic<size_t> s_layoutTableIndex;
 std::array<Layout*, Layout::kMaxIndex.raw + 1> s_layoutTable;
-bool s_hierarchyFinal = false;
+std::atomic<bool> s_hierarchyFinal = false;
+
+constexpr LayoutIndex kBespokeTopIndex = {0};
 }
 
-Layout::Layout(const std::string& description, LayoutSet&& parents,
-               bool liveable)
-  : m_index(ReserveIndices(1))
-  , m_description(description)
-  , m_parents(std::move(parents))
-  , m_liveable(liveable)
-{
-  assertx(!s_hierarchyFinal);
-  assertx(s_layoutTable[m_index.raw] == nullptr);
-  s_layoutTable[m_index.raw] = this;
-  assertx(checkInvariants());
-}
-
-Layout::Layout(LayoutIndex index, const std::string& description,
-               LayoutSet&& parents, bool liveable)
+Layout::Layout(LayoutIndex index, std::string description, LayoutSet parents)
   : m_index(index)
-  , m_description(description)
+  , m_description(std::move(description))
   , m_parents(std::move(parents))
-  , m_liveable(liveable)
 {
-  assertx(!s_hierarchyFinal);
+  assertx(!s_hierarchyFinal.load(std::memory_order_acquire));
   assertx(s_layoutTable[m_index.raw] == nullptr);
   s_layoutTable[m_index.raw] = this;
   assertx(checkInvariants());
@@ -80,7 +66,7 @@ struct Layout::BFSWalker {
     : m_workQ({initIdx})
     , m_upward(upward)
   {
-    assertx(IMPLIES(!upward, s_hierarchyFinal));
+    assertx(IMPLIES(!upward, s_hierarchyFinal.load(std::memory_order_acquire)));
   }
 
   template <typename C>
@@ -88,7 +74,7 @@ struct Layout::BFSWalker {
     : m_workQ(col.cbegin(), col.cend())
     , m_upward(upward)
   {
-    assertx(IMPLIES(!upward, s_hierarchyFinal));
+    assertx(IMPLIES(!upward, s_hierarchyFinal.load(std::memory_order_acquire)));
   }
 
   /*
@@ -188,7 +174,7 @@ const Layout* Layout::nearestBound(bool upward, const Layout* other) const {
  * agrees with nearestBound.
  */
 const Layout* Layout::nearestBoundDebug(bool upward, const Layout* other) const {
-  assertx(IMPLIES(!upward, s_hierarchyFinal));
+  assertx(IMPLIES(!upward, s_hierarchyFinal.load(std::memory_order_acquire)));
   LayoutSet myClosure = upward ? computeAncestors() : computeDescendents();
   LayoutSet otherClosure =
     upward ? other->computeAncestors() : other->computeDescendents();
@@ -253,19 +239,12 @@ bool Layout::checkInvariants() const {
     assertx(lub == other->nearestBoundDebug(true, this));
   }
 
-  // 4. Liveable ancestor is unique. This is true iff a liveable node is the
-  // unique parent of each of its non-liveable children.
-  for (auto const DEBUG_ONLY parent : m_parents) {
-    assertx(IMPLIES(!m_liveable && FromIndex(parent)->m_liveable,
-                    m_parents.size() == 1));
-  }
-
   return true;
 }
 
 void Layout::FinalizeHierarchy() {
   assertx(allowBespokeArrayLikes());
-  assertx(!s_hierarchyFinal);
+  assertx(!s_hierarchyFinal.load(std::memory_order_acquire));
   for (size_t i = 0; i < s_layoutTableIndex; i++) {
     auto const layout = s_layoutTable[i];
     if (!layout) continue;
@@ -276,23 +255,22 @@ void Layout::FinalizeHierarchy() {
       parent->m_children.insert(layout->index());
     }
   }
-  s_hierarchyFinal = true;
+  s_hierarchyFinal.store(true, std::memory_order_release);
 }
 
 bool Layout::operator<=(const Layout& other) const {
-  if (!s_hierarchyFinal) {
-    // If the hierarchy is not final, then we can only deal with BespokeTop.
-    always_assert(index() == BespokeTop::GetLayoutIndex());
-    always_assert(other.index() == BespokeTop::GetLayoutIndex());
+  if (!s_hierarchyFinal.load(std::memory_order_acquire)) {
+    always_assert(index() == kBespokeTopIndex);
+    always_assert(other.index() == kBespokeTopIndex);
     return true;
   }
   return isDescendentOf(&other);
 }
 
 const Layout* Layout::operator|(const Layout& other) const {
-  if (!s_hierarchyFinal) {
-    always_assert(index() == BespokeTop::GetLayoutIndex());
-    always_assert(other.index() == BespokeTop::GetLayoutIndex());
+  if (!s_hierarchyFinal.load(std::memory_order_acquire)) {
+    always_assert(index() == kBespokeTopIndex);
+    always_assert(other.index() == kBespokeTopIndex);
     return this;
   }
   auto const bound = nearestBound(true, &other);
@@ -302,24 +280,14 @@ const Layout* Layout::operator|(const Layout& other) const {
 }
 
 const Layout* Layout::operator&(const Layout& other) const {
-  if (!s_hierarchyFinal) {
-    always_assert(index() == BespokeTop::GetLayoutIndex());
-    always_assert(other.index() == BespokeTop::GetLayoutIndex());
+  if (!s_hierarchyFinal.load(std::memory_order_acquire)) {
+    always_assert(index() == kBespokeTopIndex);
+    always_assert(other.index() == kBespokeTopIndex);
     return this;
   }
   auto const bound = nearestBound(false, &other);
   assertx(bound == nearestBoundDebug(false, &other));
   return bound;
-}
-
-const Layout* Layout::getLiveableAncestor() const {
-  if (!s_hierarchyFinal) return FromIndex(BespokeTop::GetLayoutIndex());
-  BFSWalker walker(true, index());
-  while (auto const idx = walker.next()) {
-    auto const layout = FromIndex(*idx);
-    if (layout->isLiveable()) return layout;
-  }
-  always_assert(false);
 }
 
 LayoutIndex Layout::ReserveIndices(size_t count) {
@@ -344,8 +312,7 @@ const Layout* Layout::FromIndex(LayoutIndex index) {
 
 struct Layout::Initializer {
   Initializer() {
-    assertx(s_layoutTableIndex.load(std::memory_order_relaxed) == 0);
-    BespokeTop::InitializeLayouts();
+    AbstractLayout::InitializeLayouts();
     LoggingArray::InitializeLayouts();
     MonotypeVec::InitializeLayouts();
     EmptyMonotypeDict::InitializeLayouts();
@@ -412,22 +379,27 @@ SSATmp* Layout::emitIterGetVal(IRGS& env, SSATmp* arr, SSATmp* elm) const {
 
 //////////////////////////////////////////////////////////////////////////////
 
-ConcreteLayout::ConcreteLayout(const std::string& description,
-                               const LayoutFunctions* vtable,
-                               LayoutSet&& parents,
-                               bool liveable)
-  : Layout(description, std::move(parents), liveable)
-  , m_vtable(vtable)
-{
-  assertx(vtable);
+AbstractLayout::AbstractLayout(LayoutIndex index,
+                               std::string description,
+                               LayoutSet parents)
+  : Layout(index, std::move(description), std::move(parents))
+{}
+
+void AbstractLayout::InitializeLayouts() {
+  auto const index = Layout::ReserveIndices(1);
+  always_assert(index == kBespokeTopIndex);
+  new AbstractLayout(index, "BespokeTop", {});
+}
+
+LayoutIndex AbstractLayout::GetBespokeTopIndex() {
+  return kBespokeTopIndex;
 }
 
 ConcreteLayout::ConcreteLayout(LayoutIndex index,
-                               const std::string& description,
+                               std::string description,
                                const LayoutFunctions* vtable,
-                               LayoutSet&& parents,
-                               bool liveable)
-  : Layout(index, description, std::move(parents), liveable)
+                               LayoutSet parents)
+  : Layout(index, std::move(description), std::move(parents))
   , m_vtable(vtable)
 {
   assertx(vtable);

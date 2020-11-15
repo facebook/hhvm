@@ -924,9 +924,7 @@ Type typeFromTV(tv_rval tv, const Class* ctx) {
     if (val(tv).parr->isVanilla()) {
       return result.narrowToVanilla();
     } else {
-      auto const bad = BespokeArray::asBespoke(val(tv).parr);
-      auto const liveable = bad->layout().getLiveableAncestor();
-      return result.narrowToBespokeLayout(liveable);
+      return result.narrowToBespokeLayout(BespokeLayout::TopLayout());
     }
   }
 

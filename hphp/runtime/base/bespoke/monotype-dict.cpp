@@ -18,7 +18,6 @@
 #include "hphp/runtime/base/bespoke/monotype-dict.h"
 
 #include "hphp/runtime/base/array-data-defs.h"
-#include "hphp/runtime/base/bespoke/bespoke-top.h"
 #include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/memory-manager-defs.h"
@@ -1229,8 +1228,7 @@ void EmptyMonotypeDict::InitializeLayouts() {
 
   static auto const empty_vtable = fromArray<EmptyMonotypeDict>();
   new ConcreteLayout(getEmptyLayoutIndex(), "MonotypeDict<Empty,Empty>",
-                     &empty_vtable, {BespokeTop::GetLayoutIndex()},
-                     /*liveable=*/ true);
+                     &empty_vtable, {AbstractLayout::GetBespokeTopIndex()});
 
   static auto const int_vtable = fromArray<MonotypeDict<int64_t>>();
   static auto const str_vtable = fromArray<MonotypeDict<StringData*>>();
@@ -1242,11 +1240,11 @@ void EmptyMonotypeDict::InitializeLayouts() {
     auto strs = getStrLayoutIndex(KindOf##name);                             \
     auto s32s = getStaticStrLayoutIndex(KindOf##name);                       \
     new ConcreteLayout(ints, "MonotypeDict<Int,"#name">", &int_vtable,       \
-                       {BespokeTop::GetLayoutIndex()}, /*liveable=*/ true);  \
+                       {AbstractLayout::GetBespokeTopIndex()});              \
     new ConcreteLayout(strs, "MonotypeDict(Str,"#name">", &str_vtable,       \
-                       {BespokeTop::GetLayoutIndex()}, /*liveable=*/ true);  \
+                       {AbstractLayout::GetBespokeTopIndex()});              \
     new ConcreteLayout(s32s, "MonotypeDict<StaticStr,"#name">", &s32_vtable, \
-                       {BespokeTop::GetLayoutIndex()}, /*liveable=*/ true);  \
+                       {AbstractLayout::GetBespokeTopIndex()});              \
   }
 DATATYPES
 #undef DT

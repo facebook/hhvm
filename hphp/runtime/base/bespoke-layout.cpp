@@ -18,7 +18,6 @@
 
 #include "hphp/runtime/base/bespoke/layout.h"
 #include "hphp/runtime/base/bespoke/logging-array.h"
-#include "hphp/runtime/base/bespoke/bespoke-top.h"
 #include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 
@@ -41,7 +40,8 @@ BespokeLayout BespokeLayout::LoggingLayout() {
 }
 
 BespokeLayout BespokeLayout::TopLayout() {
-  return BespokeLayout::FromIndex(bespoke::BespokeTop::GetLayoutIndex().raw);
+  auto const index = bespoke::AbstractLayout::GetBespokeTopIndex();
+  return BespokeLayout::FromIndex(index.raw);
 }
 
 const bespoke::ConcreteLayout* BespokeLayout::concreteLayout() const {
@@ -71,10 +71,6 @@ folly::Optional<BespokeLayout>
   return folly::none;
 }
 
-BespokeLayout BespokeLayout::getLiveableAncestor() const {
-  return BespokeLayout{m_layout->getLiveableAncestor()};
-}
-
 void BespokeLayout::FinalizeHierarchy() {
   bespoke::Layout::FinalizeHierarchy();
 }
@@ -83,9 +79,7 @@ namespace {
 bool checkLayoutMatches(const bespoke::Layout* layout, SSATmp* arr) {
   auto const DEBUG_ONLY layoutType =
     arr->type().unspecialize().narrowToBespokeLayout(BespokeLayout(layout));
-  // TODO(mcolavita): Once we have a type hierarchy, we don't need IMPLIES
-  assertx(IMPLIES(layout->isConcrete(), arr->type() <= layoutType));
-
+  assertx(arr->type() <= layoutType);
   return true;
 }
 }

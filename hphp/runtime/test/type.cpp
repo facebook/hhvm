@@ -891,18 +891,10 @@ TEST(Type, VanillaVec) {
 
 TEST(Type, BespokeVec) {
   auto const foo_layout = BespokeLayout{
-    bespoke::testing::makeDummyLayout(
-      "foo",
-      {BespokeLayout::TopLayout()},
-      true
-    )
+    bespoke::testing::makeDummyLayout("foo", {BespokeLayout::TopLayout()})
   };
   auto const bar_layout = BespokeLayout{
-    bespoke::testing::makeDummyLayout(
-      "bar",
-      {BespokeLayout::TopLayout()},
-      true
-    )
+    bespoke::testing::makeDummyLayout("bar", {BespokeLayout::TopLayout()})
   };
 
   auto const vecFoo = TVec.narrowToBespokeLayout(foo_layout);
@@ -924,18 +916,10 @@ TEST(Type, BespokeVec) {
 
 TEST(Type, BespokeVecRAT) {
   auto const foo_layout = BespokeLayout{
-    bespoke::testing::makeDummyLayout(
-      "foo",
-      {BespokeLayout::TopLayout()},
-      true
-    )
+    bespoke::testing::makeDummyLayout("foo", {BespokeLayout::TopLayout()})
   };
   auto const bar_layout = BespokeLayout{
-    bespoke::testing::makeDummyLayout(
-      "bar",
-      {BespokeLayout::TopLayout()},
-      true
-    )
+    bespoke::testing::makeDummyLayout("bar", {BespokeLayout::TopLayout()})
   };
 
   ArrayTypeTable::Builder ratBuilder;
@@ -996,39 +980,19 @@ TEST(Type, BespokeHierarchy) {
    */
   RO::EvalBespokeArrayLikeMode = 2;
   auto const foo_layout = BespokeLayout{
-    bespoke::testing::makeDummyLayout(
-      "foo",
-      {BespokeLayout::TopLayout()},
-      true
-    )
+    bespoke::testing::makeDummyLayout("foo", {BespokeLayout::TopLayout()})
   };
   auto const baz_layout = BespokeLayout{
-    bespoke::testing::makeDummyLayout(
-      "baz",
-      {BespokeLayout::TopLayout()},
-      false
-    )
+    bespoke::testing::makeDummyLayout("baz", {BespokeLayout::TopLayout()})
   };
   auto const bar_layout = BespokeLayout{
-    bespoke::testing::makeDummyLayout(
-      "bar",
-      {foo_layout},
-      false
-    )
+    bespoke::testing::makeDummyLayout("bar", {foo_layout})
   };
   auto const bat_layout = BespokeLayout{
-    bespoke::testing::makeDummyLayout(
-      "bat",
-      {foo_layout, baz_layout},
-      true
-    )
+    bespoke::testing::makeDummyLayout("bat", {foo_layout, baz_layout})
   };
   auto const ter_layout = BespokeLayout{
-    bespoke::testing::makeDummyLayout(
-      "ter",
-      {baz_layout},
-      false
-    )
+    bespoke::testing::makeDummyLayout("ter", {baz_layout})
   };
   BespokeLayout::FinalizeHierarchy();
   auto const top = TVec.narrowToBespokeLayout(BespokeLayout::TopLayout());
@@ -1174,15 +1138,6 @@ TEST(Type, BespokeHierarchy) {
   EXPECT_EQ(bot, ter & bar);
   EXPECT_EQ(bot, ter & bat);
   EXPECT_EQ(ter, ter & ter);
-
-  // Liveable ancestors
-  auto const top_layout = BespokeLayout::TopLayout();
-  EXPECT_EQ(top_layout, top_layout.getLiveableAncestor());
-  EXPECT_EQ(foo_layout, foo_layout.getLiveableAncestor());
-  EXPECT_EQ(top_layout, baz_layout.getLiveableAncestor());
-  EXPECT_EQ(foo_layout, bar_layout.getLiveableAncestor());
-  EXPECT_EQ(bat_layout, bat_layout.getLiveableAncestor());
-  EXPECT_EQ(top_layout, ter_layout.getLiveableAncestor());
 }
 
 TEST(Type, PtrKinds) {

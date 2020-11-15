@@ -52,31 +52,38 @@ struct BespokeLayout {
   bool operator!=(const BespokeLayout& o) const {
     return !(*this == o);
   }
+
+  /* type operators, with limited support until FinalizeHierarchy is called */
   bool operator<=(const BespokeLayout& o) const;
   BespokeLayout operator|(const BespokeLayout& o) const;
   folly::Optional<BespokeLayout> operator&(const BespokeLayout& o) const;
-  BespokeLayout getLiveableAncestor() const;
-  static void FinalizeHierarchy();
 
   /* non-null iff the layout is concrete */
   const bespoke::ConcreteLayout* concreteLayout() const;
 
+  /* get a human-readable string describing the layout */
+  const std::string& describe() const;
+
   /* get the index of this layout */
   uint16_t index() const;
+
+  /**************************************************************************
+   * Static helprs to retrieve layouts
+   **************************************************************************/
 
   /* retrieve a layout by index */
   static BespokeLayout FromIndex(uint16_t index);
 
-  /* retrieve the logging layout */
+  /* retrieve specific layouts */
   static BespokeLayout LoggingLayout();
   static BespokeLayout TopLayout();
 
-  /* get a human-readable string describing the layout */
-  const std::string& describe() const;
+  /* complete the bespoke type lattice */
+  static void FinalizeHierarchy();
 
-  /****************************************************************************
-   * access to arraydata methods
-   ****************************************************************************/
+  /**************************************************************************
+   * JIT support at the irgen level
+   **************************************************************************/
 
   using SSATmp = jit::SSATmp;
   using Block = jit::Block;

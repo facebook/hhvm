@@ -1,0 +1,26 @@
+vec(6) {
+  string(18) "nothot:add: addval"
+  string(18) "nothot:add: addval"
+  string(22) "nothot:store: storeval"
+  string(22) "nothot:store: storeval"
+  string(24) "nothot:extend: extendval"
+  string(24) "nothot:extend: extendval"
+}
+vec(6) {
+  string(18) "hothot:add: addval"
+  string(18) "hothot:add: addval"
+  string(22) "hothot:store: storeval"
+  string(22) "hothot:store: storeval"
+  string(24) "hothot:extend: extendval"
+  string(24) "hothot:extend: extendval"
+}
+vec(3) {
+  string(12) "nothot:add: "
+  string(14) "nothot:store: "
+  string(15) "nothot:extend: "
+}
+vec(3) {
+  string(12) "hothot:add: "
+  string(14) "hothot:store: "
+  string(15) "hothot:extend: "
+}

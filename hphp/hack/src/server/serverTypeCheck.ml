@@ -1577,6 +1577,21 @@ functor
         |> Telemetry.int_
              ~key:"typecheck_lazy_check_later_count"
              ~value:(Relative_path.Set.cardinal lazy_check_later)
+        |> Telemetry.int_opt
+             ~key:"typecheck_mem_cap"
+             ~value:
+               genv.local_config
+                 .ServerLocalConfig.max_typechecker_worker_memory_mb
+        |> Telemetry.int_opt
+             ~key:"typecheck_defer_decl_threshold"
+             ~value:
+               genv.local_config
+                 .ServerLocalConfig.defer_class_declaration_threshold
+        |> Telemetry.int_opt
+             ~key:"typecheck_defer_mem_threshold"
+             ~value:
+               genv.local_config
+                 .ServerLocalConfig.defer_class_memory_mb_threshold
       in
 
       (* INVALIDATE FILES (EXPERIMENTAL TYPES IN CODEGEN) **********************)

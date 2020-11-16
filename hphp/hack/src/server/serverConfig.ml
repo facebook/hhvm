@@ -297,6 +297,8 @@ let load ~silent config_filename options : t * ServerLocalConfig.t =
       ?tco_num_local_workers:local_config.num_local_workers
       ~tco_parallel_type_checking_threshold:
         local_config.parallel_type_checking_threshold
+      ?tco_max_typechecker_worker_memory_mb:
+        local_config.max_typechecker_worker_memory_mb
       ?tco_defer_class_declaration_threshold:
         local_config.defer_class_declaration_threshold
       ?tco_max_times_to_defer_type_checking:

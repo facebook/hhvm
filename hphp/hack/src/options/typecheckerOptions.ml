@@ -14,6 +14,9 @@ let num_local_workers = GlobalOptions.tco_num_local_workers
 let parallel_type_checking_threshold =
   GlobalOptions.tco_parallel_type_checking_threshold
 
+let max_typechecker_worker_memory_mb =
+  GlobalOptions.tco_max_typechecker_worker_memory_mb
+
 let defer_class_declaration_threshold =
   GlobalOptions.tco_defer_class_declaration_threshold
 

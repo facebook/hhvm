@@ -28,6 +28,8 @@ type t = {
     will be type checked sequentially (in the master process). Otherwise,
     the files will be type checked in parallel (in MultiWorker workers). *)
   tco_parallel_type_checking_threshold: int;
+  (* If set, typechecker workers will quit after they exceed this limit *)
+  tco_max_typechecker_worker_memory_mb: int option;
   (* If set, defers class declarations after N lazy declarations; if not set,
     always lazily declares classes not already in cache. *)
   tco_defer_class_declaration_threshold: int option;
@@ -293,6 +295,7 @@ val make :
   ?tco_dynamic_view:bool ->
   ?tco_num_local_workers:int ->
   ?tco_parallel_type_checking_threshold:int ->
+  ?tco_max_typechecker_worker_memory_mb:int ->
   ?tco_defer_class_declaration_threshold:int ->
   ?tco_max_times_to_defer_type_checking:int ->
   ?tco_prefetch_deferred_files:bool ->
@@ -399,6 +402,8 @@ val tco_dynamic_view : t -> bool
 val tco_num_local_workers : t -> int option
 
 val tco_parallel_type_checking_threshold : t -> int
+
+val tco_max_typechecker_worker_memory_mb : t -> int option
 
 val tco_defer_class_declaration_threshold : t -> int option
 

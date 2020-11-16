@@ -11,6 +11,7 @@ const DEFAULT: GlobalOptions<'_> = GlobalOptions {
     tco_dynamic_view: false,
     tco_num_local_workers: None,
     tco_parallel_type_checking_threshold: 10,
+    tco_max_typechecker_worker_memory_mb: None,
     tco_defer_class_declaration_threshold: None,
     tco_max_times_to_defer_type_checking: None,
     tco_prefetch_deferred_files: false,

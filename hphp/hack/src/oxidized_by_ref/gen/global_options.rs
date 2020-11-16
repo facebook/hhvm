@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<da37ce5b022b5f3a9caec013cbd05a6c>>
+// @generated SignedSource<<f28f53dc73bb10593c147c462b826c39>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -31,6 +31,7 @@ pub struct GlobalOptions<'a> {
     pub tco_dynamic_view: bool,
     pub tco_num_local_workers: Option<isize>,
     pub tco_parallel_type_checking_threshold: isize,
+    pub tco_max_typechecker_worker_memory_mb: Option<isize>,
     pub tco_defer_class_declaration_threshold: Option<isize>,
     pub tco_max_times_to_defer_type_checking: Option<isize>,
     pub tco_prefetch_deferred_files: bool,

@@ -1005,9 +1005,6 @@ functor
           Relative_path.Set.empty
       in
       let interrupt = get_interrupt_config genv env in
-      let memory_cap =
-        genv.local_config.ServerLocalConfig.max_typechecker_worker_memory_mb
-      in
       let fnl = Relative_path.Set.elements files_to_check in
       let (errorl', delegate_state, telemetry, env', cancelled) =
         let ctx = Provider_utils.ctx_from_server_env env in
@@ -1023,7 +1020,6 @@ functor
               dynamic_view_files
               fnl
               ~interrupt
-              ~memory_cap
               ~check_info:(get_check_info genv env))
       in
       CgroupProfiler.log_to_scuba ~stage:"type check" ~profiling;

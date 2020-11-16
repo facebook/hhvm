@@ -419,8 +419,10 @@ let process_files
     ({ errors; dep_edges; telemetry; jobs_finished_early; jobs_finished_to_end } :
       typing_result)
     (progress : computation_progress)
-    ~(memory_cap : int option)
     ~(check_info : check_info) : typing_result * computation_progress =
+  let opts = Provider_context.get_tcopt ctx in
+  let memory_cap = GlobalOptions.tco_max_typechecker_worker_memory_mb opts in
+
   SharedMem.invalidate_caches ();
   File_provider.local_changes_push_sharedmem_stack ();
   Ast_provider.local_changes_push_sharedmem_stack ();
@@ -566,20 +568,13 @@ let load_and_process_files
     (dynamic_view_files : Relative_path.Set.t)
     (typing_result : typing_result)
     (progress : computation_progress)
-    ~(memory_cap : int option)
     ~(check_info : check_info) : typing_result * computation_progress =
   (* When the type-checking worker receives SIGUSR1, display a position which
      corresponds approximately with the function/expression being checked. *)
   Sys_utils.set_signal
     Sys.sigusr1
     (Sys.Signal_handle Typing.debug_print_last_pos);
-  process_files
-    dynamic_view_files
-    ctx
-    typing_result
-    progress
-    ~memory_cap
-    ~check_info
+  process_files dynamic_view_files ctx typing_result progress ~check_info
 
 (*****************************************************************************)
 (* Let's go! That's where the action is *)
@@ -782,7 +777,6 @@ let process_in_parallel
     (telemetry : Telemetry.t)
     (fnl : file_computation list)
     ~(interrupt : 'a MultiWorker.interrupt_config)
-    ~(memory_cap : int option)
     ~(check_info : check_info) :
     typing_result * Delegate.state * Telemetry.t * 'a * Relative_path.t list =
   let delegate_state = ref delegate_state in
@@ -806,9 +800,7 @@ let process_in_parallel
     && TypecheckerOptions.prefetch_deferred_files
          (Provider_context.get_tcopt ctx)
   in
-  let job =
-    load_and_process_files ctx dynamic_view_files ~memory_cap ~check_info
-  in
+  let job = load_and_process_files ctx dynamic_view_files ~check_info in
   let job (typing_result : typing_result) (progress : progress) =
     let (typing_result, computation_progress) =
       match progress.kind with
@@ -920,7 +912,6 @@ let go_with_interrupt
     (dynamic_view_files : Relative_path.Set.t)
     (fnl : Relative_path.t list)
     ~(interrupt : 'a MultiWorker.interrupt_config)
-    ~(memory_cap : int option)
     ~(check_info : check_info) :
     (Errors.t, Delegate.state, Telemetry.t, 'a) job_result =
   let opts = Provider_context.get_tcopt ctx in
@@ -950,13 +941,7 @@ let go_with_interrupt
       Hh_logger.log "Type checking service will process files sequentially";
       let progress = { completed = []; remaining = fnl; deferred = [] } in
       let (typing_result, _progress) =
-        process_files
-          dynamic_view_files
-          ctx
-          (neutral ())
-          progress
-          ~memory_cap:None
-          ~check_info
+        process_files dynamic_view_files ctx (neutral ()) progress ~check_info
       in
       ( typing_result,
         delegate_state,
@@ -982,7 +967,6 @@ let go_with_interrupt
         telemetry
         fnl
         ~interrupt
-        ~memory_cap
         ~check_info
     end
   in
@@ -1023,7 +1007,6 @@ let go
     (telemetry : Telemetry.t)
     (dynamic_view_files : Relative_path.Set.t)
     (fnl : Relative_path.t list)
-    ~(memory_cap : int option)
     ~(check_info : check_info) : Errors.t * Delegate.state * Telemetry.t =
   let interrupt = MultiThreadedCall.no_interrupt () in
   let (res, delegate_state, telemetry, (), cancelled) =
@@ -1035,7 +1018,6 @@ let go
       dynamic_view_files
       fnl
       ~interrupt
-      ~memory_cap
       ~check_info
   in
   assert (List.is_empty cancelled);

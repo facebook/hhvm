@@ -238,7 +238,10 @@ let process_file
   in
   Deferred_decl.reset
     ~enable:(should_enable_deferring opts file)
-    ~threshold_opt:(GlobalOptions.tco_defer_class_declaration_threshold opts);
+    ~declaration_threshold_opt:
+      (GlobalOptions.tco_defer_class_declaration_threshold opts)
+    ~memory_mb_threshold_opt:
+      (GlobalOptions.tco_defer_class_memory_mb_threshold opts);
   let (funs, classes, record_defs, typedefs, gconsts) = Nast.get_defs ast in
   let ctx = Provider_context.map_tcopt ctx ~f:(fun _tcopt -> opts) in
   let ignore_type_record_def opts fn name =

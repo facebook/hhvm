@@ -451,6 +451,8 @@ type t = {
   (* If set, defers class declarations after N lazy declarations; if not set,
     always lazily declares classes not already in cache. *)
   defer_class_declaration_threshold: int option;
+  (* If set, defers class declaration if worker memory exceeds threshold. *)
+  defer_class_memory_mb_threshold: int option;
   (* If set, prevents type checking of files from being deferred more than
     the number of times greater than or equal to the threshold. If not set,
     defers class declarations indefinitely. *)
@@ -557,6 +559,7 @@ let default =
     num_local_workers = None;
     parallel_type_checking_threshold = 10;
     defer_class_declaration_threshold = None;
+    defer_class_memory_mb_threshold = None;
     max_times_to_defer_type_checking = None;
     prefetch_deferred_files = false;
     recheck_capture = RecheckCapture.default;
@@ -930,6 +933,9 @@ let load_ fn ~silent ~current_version overrides =
   let defer_class_declaration_threshold =
     int_opt "defer_class_declaration_threshold" config
   in
+  let defer_class_memory_mb_threshold =
+    int_opt "defer_class_memory_mb_threshold" config
+  in
   let max_times_to_defer_type_checking =
     int_opt "max_times_to_defer_type_checking" config
   in
@@ -1102,6 +1108,7 @@ let load_ fn ~silent ~current_version overrides =
     num_local_workers;
     parallel_type_checking_threshold;
     defer_class_declaration_threshold;
+    defer_class_memory_mb_threshold;
     max_times_to_defer_type_checking;
     prefetch_deferred_files;
     recheck_capture;

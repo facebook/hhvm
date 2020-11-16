@@ -30,7 +30,11 @@ module Deferment_set :
     module type of Reordered_argument_set (Caml.Set.Make (Deferment))
 
 (** Reset the internal state and the set of accumulated deferments. *)
-val reset : enable:bool -> threshold_opt:int option -> unit
+val reset :
+  enable:bool ->
+  declaration_threshold_opt:int option ->
+  memory_mb_threshold_opt:int option ->
+  unit
 
 (** [add_deferment ~d:("d.php", "\\D")] is called for a file "d.php" which contains a decl "\\D"
     that we need before we can proceed with our normal typechecking work. *)

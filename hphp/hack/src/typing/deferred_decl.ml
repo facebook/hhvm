@@ -36,8 +36,10 @@ type state = {
   deferments: deferments_t;
   counter: int;
       (** Counter for decls needing to be computed out of the ASTs. *)
-  threshold_opt: int option;
+  declaration_threshold_opt: int option;
       (** If [counter] goes beyond this threshold, we raise and defer the typechecking. *)
+  memory_mb_threshold_opt: int option;
+      (** If memory goes beyond this threshold, we raise and defer the typechecking. *)
 }
 
 let state : state ref =
@@ -46,16 +48,21 @@ let state : state ref =
       enabled = true;
       deferments = Deferment_set.empty;
       counter = 0;
-      threshold_opt = None;
+      declaration_threshold_opt = None;
+      memory_mb_threshold_opt = None;
     }
 
-let reset ~(enable : bool) ~(threshold_opt : int option) : unit =
+let reset
+    ~(enable : bool)
+    ~(declaration_threshold_opt : int option)
+    ~(memory_mb_threshold_opt : int option) : unit =
   state :=
     {
       enabled = enable;
       counter = 0;
       deferments = Deferment_set.empty;
-      threshold_opt;
+      declaration_threshold_opt;
+      memory_mb_threshold_opt;
     }
 
 (** Increment the counter of decls needing computing. *)
@@ -66,7 +73,7 @@ let increment_counter () : unit =
     and discover that you need to fetch yet another class "\\D" from file d.php.
     This will raise if the counter for computed decls is over the set up threshold. *)
 let raise_if_should_defer ~(deferment : deferment) : unit =
-  match (!state.enabled, !state.threshold_opt) with
+  match (!state.enabled, !state.declaration_threshold_opt) with
   | (true, Some threshold) when !state.counter >= threshold ->
     raise (Defer deferment)
   | _ -> ()

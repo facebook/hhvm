@@ -33,6 +33,12 @@ type t = {
   (* If set, defers class declarations after N lazy declarations; if not set,
     always lazily declares classes not already in cache. *)
   tco_defer_class_declaration_threshold: int option;
+  (* If set, defers class declarations if worker memory exceeds threshold.
+    This prevents OOMs due to a single file fetching a lot of decls, which would
+    not be prevented by [tco_max_typechecker_worker_memory_mb] which is checked
+    only after each file. It doesn't make sense to set this higher
+    than [tco_max_typechecker_worker_memory_mb]. *)
+  tco_defer_class_memory_mb_threshold: int option;
   (* If set, prevents type checking of files from being deferred more than
     the number of times greater than or equal to the threshold. If not set,
     defers class declarations indefinitely. *)
@@ -297,6 +303,7 @@ val make :
   ?tco_parallel_type_checking_threshold:int ->
   ?tco_max_typechecker_worker_memory_mb:int ->
   ?tco_defer_class_declaration_threshold:int ->
+  ?tco_defer_class_memory_mb_threshold:int ->
   ?tco_max_times_to_defer_type_checking:int ->
   ?tco_prefetch_deferred_files:bool ->
   ?tco_remote_type_check_threshold:int ->
@@ -406,6 +413,8 @@ val tco_parallel_type_checking_threshold : t -> int
 val tco_max_typechecker_worker_memory_mb : t -> int option
 
 val tco_defer_class_declaration_threshold : t -> int option
+
+val tco_defer_class_memory_mb_threshold : t -> int option
 
 val tco_max_times_to_defer_type_checking : t -> int option
 

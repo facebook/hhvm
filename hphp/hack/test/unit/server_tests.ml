@@ -43,7 +43,10 @@ let ensure_count (count : int) : unit =
     "The number of deferred items should match the expected value"
 
 let test_deferred_decl_add () =
-  Deferred_decl.reset ~enable:true ~threshold_opt:None;
+  Deferred_decl.reset
+    ~enable:true
+    ~declaration_threshold_opt:None
+    ~memory_mb_threshold_opt:None;
   ensure_count 0;
 
   Deferred_decl.add_deferment
@@ -58,14 +61,20 @@ let test_deferred_decl_add () =
     ~d:(Relative_path.create Relative_path.Dummy "bar", "\\Bar");
   ensure_count 2;
 
-  Deferred_decl.reset ~enable:true ~threshold_opt:None;
+  Deferred_decl.reset
+    ~enable:true
+    ~declaration_threshold_opt:None
+    ~memory_mb_threshold_opt:None;
   ensure_count 0;
 
   true
 
 let ensure_threshold ~(threshold : int) ~(limit : int) ~(expected : int) : unit
     =
-  Deferred_decl.reset ~enable:true ~threshold_opt:(Some threshold);
+  Deferred_decl.reset
+    ~enable:true
+    ~declaration_threshold_opt:(Some threshold)
+    ~memory_mb_threshold_opt:None;
   ensure_count 0;
 
   let deferred_count = ref 0 in

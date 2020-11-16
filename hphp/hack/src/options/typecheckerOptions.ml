@@ -20,6 +20,9 @@ let max_typechecker_worker_memory_mb =
 let defer_class_declaration_threshold =
   GlobalOptions.tco_defer_class_declaration_threshold
 
+let defer_class_memory_mb_threshold =
+  GlobalOptions.tco_defer_class_memory_mb_threshold
+
 let max_times_to_defer_type_checking =
   GlobalOptions.tco_max_times_to_defer_type_checking
 

@@ -106,6 +106,8 @@ let err r = mk (r, Terr)
 
 let taccess r ty id = mk (r, Taccess (ty, id))
 
+let new_type r name tyl = mk (r, Tnewtype (name, tyl, mixed r))
+
 let nullable_decl r ty =
   (* Cheap avoidance of double nullable *)
   match get_node ty with

@@ -177,7 +177,7 @@ let rec const_string_of (env : env) (e : Nast.expr) :
 
 let get_format_string_type_arg t =
   match get_node t with
-  | Tclass ((_, fs), _, [ty]) when SN.Classes.is_format_string fs -> Some ty
+  | Tnewtype (fs, [ty], _) when SN.Classes.is_format_string fs -> Some ty
   | _ -> None
 
 let get_opt_format_string_type_arg t =

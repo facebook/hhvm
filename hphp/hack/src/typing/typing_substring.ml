@@ -32,7 +32,7 @@ let sub_string (p : Pos.Map.key) (env : env) (ty : locl_ty) : env =
       MakeType.float r;
       MakeType.resource r;
       MakeType.dynamic r;
-      MakeType.class_type r SN.Classes.cHHFormatString [formatter_tyvar];
+      MakeType.new_type r SN.Classes.cHHFormatString [formatter_tyvar];
     ]
   in
   let stringish = MakeType.class_type r SN.Classes.cStringish [] in

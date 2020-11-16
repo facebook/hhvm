@@ -68,10 +68,7 @@ let expand_typedef_ ?(force_expand = false) ety_env env r x argl =
         in
         (env, mk (r, Tnewtype (x, argl, td_constraint)))
     in
-    if Naming_special_names.Classes.is_format_string x then
-      (env, (ety_env, MakeType.class_type r x argl))
-    else
-      (env, (ety_env, with_reason expanded_ty r))
+    (env, (ety_env, with_reason expanded_ty r))
 
 let expand_typedef ety_env env r type_name argl =
   let (env, (_, ty)) = expand_typedef_ ety_env env r type_name argl in

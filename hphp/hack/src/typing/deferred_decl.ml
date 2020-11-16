@@ -73,8 +73,19 @@ let increment_counter () : unit =
     and discover that you need to fetch yet another class "\\D" from file d.php.
     This will raise if the counter for computed decls is over the set up threshold. *)
 let raise_if_should_defer ~(deferment : deferment) : unit =
-  match (!state.enabled, !state.declaration_threshold_opt) with
-  | (true, Some threshold) when !state.counter >= threshold ->
+  match
+    ( !state.enabled,
+      !state.declaration_threshold_opt,
+      !state.memory_mb_threshold_opt )
+  with
+  | (true, Some declaration_threshold, _)
+    when !state.counter >= declaration_threshold ->
+    raise (Defer deferment)
+  | (true, _, Some memory_mb_threshold)
+    when let word_bytes = Sys.word_size / 8 in
+         let megabyte = 1024 * 1024 in
+         Gc.((quick_stat ()).Stat.heap_words) * word_bytes / megabyte
+         >= memory_mb_threshold ->
     raise (Defer deferment)
   | _ -> ()
 

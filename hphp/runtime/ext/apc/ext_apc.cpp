@@ -222,6 +222,8 @@ void apcExtension::moduleInit() {
     s_apc_file_storage.enable(FileStoragePrefix, FileStorageChunkSize);
   }
 
+  apc_store().init();
+
   HHVM_RC_INT(APC_ITER_TYPE, 0x1);
   HHVM_RC_INT(APC_ITER_KEY, 0x2);
   HHVM_RC_INT(APC_ITER_FILENAME, 0x4);

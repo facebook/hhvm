@@ -1134,7 +1134,6 @@ bool ConcurrentTableSharedStore::constructPrime(const Variant& v,
 }
 
 void ConcurrentTableSharedStore::primeDone() {
-  s_hotCache.initialize();
   if (s_apc_file_storage.getState() !=
       APCFileStorage::StorageState::Invalid) {
     s_apc_file_storage.seal();
@@ -1186,6 +1185,13 @@ void ConcurrentTableSharedStore::adviseOut() {
   if (m_snapshotLoader.get()) {
     m_snapshotLoader->adviseOut();
   }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// init
+
+void ConcurrentTableSharedStore::init() {
+  s_hotCache.initialize();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

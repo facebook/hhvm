@@ -315,6 +315,11 @@ struct ConcurrentTableSharedStore {
   void adviseOut();
 
   /*
+   * Init
+   */
+  void init();
+
+  /*
    * Debugging.  Dump information about the table to an output stream.
    *
    * This is extremely expensive and not recommended for use outside of

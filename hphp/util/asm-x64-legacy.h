@@ -1049,6 +1049,7 @@ public:
     if (dispSize == sz::dword) {
       if (ripRelative) {
         disp -= (int64_t)codeBlock.frontier() + immSize + dispSize;
+        always_assert(deltaFits(disp, sz::dword));
       }
       dword(disp);
     } else if (dispSize == sz::byte) {

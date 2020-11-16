@@ -122,6 +122,7 @@ void emit_svcreq(CodeBlock& cb,
           break;
         case Arg::Kind::Address:
           FTRACE(2, "{}(%rip), ", arg.imm);
+          always_assert(deltaFits(arg.addr - start, sz::dword));
           v << leap{reg::rip[arg.imm], r};
           break;
         case Arg::Kind::CondCode:
@@ -176,12 +177,12 @@ TCA emit_bindjmp_stub(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
 
 TCA emit_bindaddr_stub(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
                        FPInvOffset spOff, TCA* addr, SrcKey target) {
-  // Right now it's possible that addr isn't PIC addressable, as it may be into
-  // the heap (SSwitchMap binds addresses directly into its heap memory,
-  // see #10347945). Passing a TCA generates an RIP relative address which can
+  // Right now it's possible that addr may not belong to the data segment,
+  // as is the case with SSwitchMap (see #10347945) and thus may not be PIC
+  // addressable. Passing a TCA generates an RIP relative address which can
   // be handled by the relocation logic, while a TCA* will generate an immediate
   // address which will not be remapped.
-  if (deltaFits((TCA)addr - cb.frontier(), sz::dword)) {
+  if (data.contains((TCA)addr)) {
     return emit_ephemeral(
       cb,
       data,

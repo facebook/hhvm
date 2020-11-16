@@ -66,7 +66,7 @@ std::string show(const StoreValue& sval) {
 
 void StoreValue::set(APCHandle* v, int64_t ttl) {
   setHandle(v);
-  mtime = time(nullptr);
+  uint32_t mtime = time(nullptr);
   if (c_time == 0)  c_time = mtime;
   expireRequestIdx.store(Treadmill::kIdleGenCount, std::memory_order_relaxed);
   expireTime.store(ttl ? mtime + ttl : 0, std::memory_order_release);
@@ -1201,7 +1201,7 @@ EntryInfo ConcurrentTableSharedStore::makeEntryInfo(const char* key,
     if (ttl == 0) ttl = 1; // don't want to confuse with primed keys
   }
 
-  return EntryInfo(key, inMem, size, ttl, type, sval->c_time, sval->mtime);
+  return EntryInfo(key, inMem, size, ttl, type, sval->c_time);
 }
 
 std::vector<EntryInfo> ConcurrentTableSharedStore::getEntriesInfo() {

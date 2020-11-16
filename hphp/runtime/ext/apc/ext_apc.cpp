@@ -629,7 +629,6 @@ const StaticString s_in_memory("in_memory");
 const StaticString s_mem_size("mem_size");
 const StaticString s_type("type");
 const StaticString s_c_time("creation_time");
-const StaticString s_mtime("mtime");
 
 // This is a guess to the size of the info array. It is significantly
 // bigger than what we need but hard to control all the info that we
@@ -669,7 +668,6 @@ Array HHVM_FUNCTION(
       ent.add(s_mem_size, entry.size);
       ent.add(s_type, static_cast<int64_t>(entry.type));
       ent.add(s_c_time, entry.c_time);
-      ent.add(s_mtime, entry.mtime);
       ents.append(ent.toArray());
     }
     info.add(s_cache_list, ents.toArray(), false);

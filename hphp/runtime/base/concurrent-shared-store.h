@@ -58,7 +58,6 @@ struct StoreValue {
     , kind(o.kind)
     , readOnly(o.readOnly)
     , c_time{o.c_time}
-    , mtime{o.mtime}
     // Copy everything except the lock
   {
     hotIndex.store(o.hotIndex.load(std::memory_order_relaxed),
@@ -133,7 +132,6 @@ struct StoreValue {
   char padding[2];  // Make APCMap nodes cache-line sized (it static_asserts).
   mutable std::atomic<int64_t> expireRequestIdx{Treadmill::kIdleGenCount};
   uint32_t c_time{0}; // Creation time; 0 for primed values
-  uint32_t mtime{0}; // Modification time
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -171,15 +169,13 @@ struct EntryInfo {
             int32_t size,
             int64_t ttl,
             Type type,
-            int64_t c_time,
-            int64_t mtime)
+            int64_t c_time)
     : key(apckey)
     , inMem(inMem)
     , size(size)
     , ttl(ttl)
     , type(type)
     , c_time(c_time)
-    , mtime(mtime)
   {}
 
   static Type getAPCType(const APCHandle* handle);
@@ -190,7 +186,6 @@ struct EntryInfo {
   int64_t ttl;
   Type type;
   int64_t c_time;
-  int64_t mtime;
 };
 
 //////////////////////////////////////////////////////////////////////

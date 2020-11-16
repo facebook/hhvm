@@ -446,12 +446,8 @@ private:
    *
    * In the current implementation, that means that if an element is
    * updated before it expires, when its entry in m_expQueue is
-   * processed, it does nothing; and from then on, the item has no
-   * entry in the queue. I think this is intentional, because items
-   * that are updated frequently (or at all) are probably read
-   * frequently; so it will be expired naturally. It also means that
-   * we don't bother updating the queue every time for keys that are
-   * updated frequently.
+   * processed, it does nothing; except being put back into the queue
+   * again with the new expiry time.
    *
    * This implementation uses the apc key's address as the key into
    * m_expMap, and as the identifier in ExpirationPair. We ensure that
@@ -476,4 +472,3 @@ private:
 //////////////////////////////////////////////////////////////////////
 
 }
-

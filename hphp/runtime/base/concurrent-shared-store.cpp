@@ -434,6 +434,18 @@ bool ConcurrentTableSharedStore::eraseImpl(const char* key,
     return false;
   }
   if (expired && !acc->second.expired()) {
+    // If we got an expAcc it means that we are iterating over m_expQueue and
+    // expiring things. But if the item is not expired yet we need to put it back
+    // into the queue with the correct expire time. It happens if expire time was
+    // updated either by apc_extend_tll or by setting a new value with a TTL on
+    // an existing key
+    if (expAcc) {
+      auto expiry = acc->second.rawExpire();
+      if (expiry) {
+        auto ikey = intptr_t(acc->first);
+        m_expQueue.push({ ikey, expiry });
+      }
+    }
     return false;
   }
 

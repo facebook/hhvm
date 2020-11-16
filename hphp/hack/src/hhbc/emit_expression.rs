@@ -2459,7 +2459,7 @@ fn emit_special_function(
                             &vec![ /* targs */ ],
                             // FIXME: This is not safe--string literals are binary strings.
                             // There's no guarantee that they're valid UTF-8.
-                            unsafe { std::str::from_utf8_unchecked(func_name.as_slice().into()) },
+                            unsafe { std::str::from_utf8_unchecked(func_name.as_slice()) },
                         )?))
                     }
                     _ => Err(emit_fatal::raise_fatal_runtime(

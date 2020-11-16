@@ -2251,17 +2251,14 @@ let enum_constant_type_bad pos ty_pos ty trail =
     trail
 
 let enum_type_bad pos ty_dependent ty trail =
+  let ty = Markdown_lite.md_codify ty in
   let msg =
     if ty_dependent then
-      "Enum classes base type must be an interface without generic "
-      ^ "parameters, not "
+      "Invalid base type for an enum class: "
     else
       "Enums must be `int` or `string` or `arraykey`, not "
   in
-  add_with_trail
-    (Typing.err_code Typing.EnumTypeBad)
-    [(pos, msg ^ Markdown_lite.md_codify ty)]
-    trail
+  add_with_trail (Typing.err_code Typing.EnumTypeBad) [(pos, msg ^ ty)] trail
 
 let enum_type_typedef_nonnull pos =
   add

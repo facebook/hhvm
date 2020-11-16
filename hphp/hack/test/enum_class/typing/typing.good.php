@@ -69,3 +69,37 @@ function iterate(): void {
     echo "\n";
   }
 }
+
+/* Listing some valid base types */
+interface I0<T> {}
+
+// closed interface
+enum class EI0 : I0<IBox> {}
+
+class C0<T> {}
+
+// closed class
+enum class EC0 : C0<IBox> {}
+
+
+// nonnull and mixed
+enum class ENN : nonnull {
+  A<int>(42);
+  B<string>("zuck");
+  C<Box<int>>(new IBox(42));
+}
+
+enum class EM : mixed {
+  A<int>(42);
+  B<?string>(null);
+  C<Box<int>>(new IBox(42));
+}
+
+// tuples
+enum class ETuple : (IBox, IBox) {}
+
+
+// primitive types
+enum class Ints : int {}
+
+enum class Strings : string {}

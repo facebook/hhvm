@@ -1126,7 +1126,8 @@ and enum_ env enum_name e =
     if is_enum_class then
       (* Turn the base type of the enum class into Elt<E, base> *)
       let elt = (pos, SN.Classes.cElt) in
-      (pos, Happly (elt, [enum_hint; old_base]))
+      let h = (pos, Happly (elt, [enum_hint; old_base])) in
+      hint env h
     else
       enum_hint
   in

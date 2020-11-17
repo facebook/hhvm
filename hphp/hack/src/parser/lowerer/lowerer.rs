@@ -3052,7 +3052,9 @@ where
                 let markup_hashbang = &c.hashbang;
                 let pos = Self::p_pos(node, env);
                 let f = pos.filename();
-                if f.has_extension("hack") || f.has_extension("hackpartial") {
+                if (f.has_extension("hack") || f.has_extension("hackpartial"))
+                    && !(&c.suffix.is_missing())
+                {
                     let ext = f.path().extension().unwrap(); // has_extension ensures this is a Some
                     Self::raise_parsing_error(
                         node,

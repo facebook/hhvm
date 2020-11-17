@@ -350,16 +350,28 @@ where
         // proceed successfully if we've consumed <?..., or dont need it
         // We purposefully ignore leading trivia before the <?hh, and handle
         // the error on a later pass
+        let file_path = self.lexer().source().file_path();
         if has_suffix {
             self.continue_from(parser1);
             Some(markup_section)
         } else {
-            if self.lexer().source().length() > 0
-                && self.lexer().source().file_path().has_extension("php")
-            {
-                self.with_error(Errors::error1001);
+            if self.lexer().source().length() > 0 {
+                if file_path.has_extension("php") {
+                    self.with_error(Errors::error1001);
+                    None
+                } else if file_path.has_extension("hack") || file_path.has_extension("hackpartial")
+                {
+                    // a .hack or .hackpartial file with a hashbang
+                    // parse the hashbang correctly and continue
+                    self.continue_from(parser1);
+                    Some(markup_section)
+                } else {
+                    // Otherwise it's a non .php file with no <?
+                    None
+                }
+            } else {
+                None
             }
-            None
         }
     }
 
@@ -2491,7 +2503,6 @@ where
     }
 
     pub fn parse_script(&mut self) -> S::R {
-        // TODO(kasper): no_markup for ".hack" files
         let header = self.parse_leading_markup_section();
         let mut declarations = vec![];
         if let Some(x) = header {

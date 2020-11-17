@@ -1815,15 +1815,13 @@ where
     fn scan_php_trivium(&mut self) -> Option<Trivium<TF>> {
         match self.peek_char(0) {
             '#' => {
-                if !self.disallow_hash_comments || self.peek_char(1) == '!' {
-                    // We still support hash comments if the next character would make a hashbang
-
-                    self.start_new_lexeme();
-                    Some(self.scan_hash_comment())
-                } else {
+                if self.disallow_hash_comments {
                     self.start_new_lexeme();
                     // Not trivia
                     None
+                } else {
+                    self.start_new_lexeme();
+                    Some(self.scan_hash_comment())
                 }
             }
             '/' => {
@@ -2369,6 +2367,7 @@ where
     }
 
     fn skip_to_end_of_header(&mut self) -> (TF::Token, Option<(TF::Token, Option<TF::Token>)>) {
+        let mut is_hashbang = false;
         let start_offset = {
             // if leading section starts with #! - it should span the entire line
             let index = self.offset;
@@ -2376,6 +2375,7 @@ where
                 panic!("Should only try to lex header at start of document")
             };
             if self.peek_def(index, INVALID) == '#' && self.peek_def(index + 1, INVALID) == '!' {
+                is_hashbang = true;
                 self.skip_while_to_offset(&Self::not_newline) + 1
             } else {
                 // this should really just be `index` - but, skip whitespace as the FFP
@@ -2390,7 +2390,12 @@ where
         if self.peek(start_offset) == '<' && self.peek_def(start_offset + 1, INVALID) == '?' {
             self.with_offset(start_offset);
             self.make_hashbang_and_suffix()
+        } else if is_hashbang {
+            self.with_offset(start_offset);
+            (self.make_hashbang_token(), None)
         } else {
+            // Makes a 0-length hashbang token with no markup
+            // TODO: remove the legacy behavior and turn this into missing syntax
             (self.make_hashbang_token(), None)
         }
     }

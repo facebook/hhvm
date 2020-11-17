@@ -436,10 +436,20 @@ let inherit_hack_xhp_attrs_only class_type members =
     Also add dependency to that class. *)
 let heap_entries env class_name (classes : Decl_heap.class_entries SMap.t) :
     Decl_heap.class_entries option =
-  Decl_env.add_extends_dependency env class_name;
   match SMap.find_opt class_name classes with
-  | Some _ as heap_entries -> heap_entries
-  | None -> Decl_heap.Classes.get class_name >>| fun class_ -> (class_, None)
+  | Some (class_, _) as heap_entries ->
+    if not (Pos.is_hhi class_.dc_pos) then
+      Decl_env.add_extends_dependency env class_name;
+    heap_entries
+  | None ->
+    (match Decl_heap.Classes.get class_name with
+    | None ->
+      Decl_env.add_extends_dependency env class_name;
+      None
+    | Some class_ ->
+      if not (Pos.is_hhi class_.dc_pos) then
+        Decl_env.add_extends_dependency env class_name;
+      Some (class_, None))
 
 let from_class env c (parents : Decl_heap.class_entries SMap.t) parent_ty :
     inherited =

@@ -247,6 +247,8 @@ let overlaps pos1 pos2 =
   && end1 > start2
   && start1 < end2
 
+let is_hhi pos = Relative_path.is_hhi (Relative_path.prefix (filename pos))
+
 let make_from_lexing_pos pos_file pos_start pos_end =
   match
     ( File_pos_small.of_lexing_pos pos_start,

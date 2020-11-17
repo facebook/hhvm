@@ -21,6 +21,8 @@ let tcopt env = Provider_context.get_tcopt env.ctx
 
 let deps_mode env = Provider_context.get_deps_mode env.ctx
 
+let is_hhi cd = Pos.is_hhi cd.dc_pos
+
 let add_wclass env x =
   let dep = Dep.Class x in
   Option.iter env.droot (fun root ->
@@ -38,16 +40,23 @@ let add_extends_dependency env x =
 type class_cache = Decl_heap.class_entries SMap.t
 
 let get_class_add_dep env ?(cache : class_cache option) x =
-  add_extends_dependency env x;
-  match Option.(cache >>= SMap.find_opt x >>| fst) with
-  | Some c -> Some c
-  | None -> Decl_heap.Classes.get x
+  let res =
+    match Option.(cache >>= SMap.find_opt x >>| fst) with
+    | Some c -> Some c
+    | None -> Decl_heap.Classes.get x
+  in
+  Option.iter res (fun cd ->
+      if not (is_hhi cd) then add_extends_dependency env x);
+  res
 
 let get_construct env class_ =
-  add_wclass env class_.dc_name;
-  let dep = Dep.Cstr class_.dc_name in
-  Option.iter env.droot (fun root ->
-      Typing_deps.add_idep (deps_mode env) root dep);
+  if not (is_hhi class_) then begin
+    add_wclass env class_.dc_name;
+    let dep = Dep.Cstr class_.dc_name in
+    Option.iter env.droot (fun root ->
+        Typing_deps.add_idep (deps_mode env) root dep)
+  end;
+
   class_.dc_construct
 
 let add_constructor_dependency env class_name =

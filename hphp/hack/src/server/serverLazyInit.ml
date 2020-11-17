@@ -788,72 +788,6 @@ let initialize_naming_table
     let t = update_files genv env.naming_table ctx t ~profiling in
     naming env t ~profile_label:"naming" ~profiling
 
-let load_naming_table
-    (genv : ServerEnv.genv)
-    (env : ServerEnv.env)
-    (profiling : CgroupProfiler.Profiling.t) : ServerEnv.env * float =
-  let ignore_hh_version = ServerArgs.ignore_hh_version genv.options in
-  let loader_future =
-    State_loader_futures.load
-      ~watchman_opts:
-        Saved_state_loader.Watchman_options.
-          {
-            root = Path.make Relative_path.(path_of_prefix Root);
-            sockname = None;
-          }
-      ~ignore_hh_version
-      ~saved_state_type:Saved_state_loader.Naming_table
-  in
-  match
-    State_loader_futures.wait_for_finish_with_debug_details loader_future
-  with
-  | Ok { Saved_state_loader.saved_state_info; changed_files; _ } ->
-    let { Saved_state_loader.Naming_table_info.naming_table_path } =
-      saved_state_info
-    in
-    let ctx = Provider_utils.ctx_from_server_env env in
-    let naming_table_path = Path.to_string naming_table_path in
-    let naming_table =
-      CgroupProfiler.collect_cgroup_stats
-        ~profiling
-        ~stage:"load NT from sqilte"
-        ~f:(fun () -> Naming_table.load_from_sqlite ctx naming_table_path)
-    in
-    let (env, t) =
-      initialize_naming_table
-        ~fnl:(Some changed_files)
-        ~do_naming:true
-        "full initialization (with loaded naming table)"
-        genv
-        env
-        profiling
-    in
-    let t =
-      CgroupProfiler.collect_cgroup_stats
-        ~profiling
-        ~stage:"naming from saved state"
-        ~f:(fun () ->
-          naming_from_saved_state
-            ctx
-            env.naming_table
-            (Relative_path.set_of_list changed_files)
-            (Some naming_table_path)
-            t)
-    in
-    ( {
-        env with
-        naming_table = Naming_table.combine naming_table env.naming_table;
-      },
-      t )
-  | Error e ->
-    Hh_logger.log "Failed to load naming table: %s" e;
-    initialize_naming_table
-      ~do_naming:true
-      "full initialization (failed to load naming table)"
-      genv
-      env
-      profiling
-
 let write_symbol_info_init
     (genv : ServerEnv.genv)
     (env : ServerEnv.env)
@@ -936,29 +870,17 @@ let full_init
   in
   let is_check_mode = ServerArgs.check_mode genv.options in
   let (env, t) =
-    if
-      not
-        genv.ServerEnv.local_config.SLC.remote_type_check
-          .SLC.RemoteTypeCheck.load_naming_table_on_full_init
-    then (
-      let res =
-        initialize_naming_table
-          ~do_naming:true
-          "full initialization"
-          genv
-          env
-          profiling
-      in
-      CgroupProfiler.log_to_scuba ~stage:"parsing" ~profiling;
-      CgroupProfiler.log_to_scuba ~stage:"naming" ~profiling;
-      res
-    ) else
-      let res = load_naming_table genv env profiling in
-      CgroupProfiler.log_to_scuba
-        ~stage:"loading NT from saved state"
-        ~profiling;
-      CgroupProfiler.log_to_scuba ~stage:"naming from saved state" ~profiling;
-      res
+    let res =
+      initialize_naming_table
+        ~do_naming:true
+        "full initialization"
+        genv
+        env
+        profiling
+    in
+    CgroupProfiler.log_to_scuba ~stage:"parsing" ~profiling;
+    CgroupProfiler.log_to_scuba ~stage:"naming" ~profiling;
+    res
   in
   if not is_check_mode then
     SearchServiceRunner.update_fileinfo_map env.naming_table SearchUtils.Init;

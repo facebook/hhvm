@@ -964,7 +964,19 @@ static void pcre_log_error(const char* func, int line, int pcre_code,
   free((void *)escapedRepl);
 }
 
-static void pcre_handle_exec_error(int pcre_code) {
+namespace {
+
+ALWAYS_INLINE Variant preg_return_internal_error(Variant&& return_value) {
+  *rl_last_error_code = PHP_PCRE_INTERNAL_ERROR;
+  return std::move(return_value);
+}
+
+ALWAYS_INLINE Variant preg_return_bad_regex_error(Variant&& return_value) {
+  *rl_last_error_code = PHP_PCRE_BAD_REGEX_ERROR;
+  return std::move(return_value);
+}
+
+void pcre_handle_exec_error(int pcre_code) {
   int preg_code = 0;
   switch (pcre_code) {
   case PCRE_ERROR_MATCHLIMIT:
@@ -986,19 +998,32 @@ static void pcre_handle_exec_error(int pcre_code) {
   *rl_last_error_code = preg_code;
 }
 
+ALWAYS_INLINE Variant
+preg_return_pcre_error(int pcre_code, Variant&& return_value) {
+  pcre_handle_exec_error(pcre_code);
+  return std::move(return_value);
+}
+
+ALWAYS_INLINE Variant preg_return_no_error(Variant&& return_value) {
+  *rl_last_error_code = PHP_PCRE_NO_ERROR;
+  return std::move(return_value);
+}
+
+} // namespace
+
 ///////////////////////////////////////////////////////////////////////////////
 
 Variant preg_grep(const String& pattern, const Array& input, int flags /* = 0 */) {
   PCRECache::Accessor accessor;
   if (!pcre_get_compiled_regex_cache(accessor, pattern.get())) {
-    return false;
+    return preg_return_bad_regex_error(false);
   }
   const pcre_cache_entry* pce = accessor.get();
 
   int size_offsets = 0;
   int* offsets = create_offset_array(pce, size_offsets);
   if (offsets == nullptr) {
-    return false;
+    return preg_return_internal_error(false);
   }
   SmartFreeHelper freer(offsets);
 
@@ -1006,7 +1031,6 @@ Variant preg_grep(const String& pattern, const Array& input, int flags /* = 0 */
 
   /* Initialize return array */
   auto ret = hackArrOutput ? Array::CreateDict() : Array::CreateDArray();
-  *rl_last_error_code = PHP_PCRE_NO_ERROR;
 
   /* Go through the input array */
   bool invert = (flags & PREG_GREP_INVERT);
@@ -1032,8 +1056,8 @@ Variant preg_grep(const String& pattern, const Array& input, int flags /* = 0 */
                        "", 0,
                        flags);
       }
-      pcre_handle_exec_error(count);
-      break;
+      // NOTE: this returns an error together with a partial result :-(
+      return preg_return_pcre_error(count, std::move(ret));
     }
 
     /* If the entry fits our requirements */
@@ -1045,7 +1069,7 @@ Variant preg_grep(const String& pattern, const Array& input, int flags /* = 0 */
     }
   }
 
-  return ret;
+  return preg_return_no_error(std::move(ret));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1056,7 +1080,7 @@ static Variant preg_match_impl(const StringData* pattern,
                                bool global) {
   PCRECache::Accessor accessor;
   if (!pcre_get_compiled_regex_cache(accessor, pattern)) {
-    return false;
+    return preg_return_bad_regex_error(false);
   }
   const pcre_cache_entry* pce = accessor.get();
 
@@ -1086,7 +1110,7 @@ static Variant preg_match_impl(const StringData* pattern,
                     subpats_order > PREG_SET_ORDER)) ||
         (!global && subpats_order != 0)) {
       raise_warning("Invalid flags specified");
-      return init_null();
+      return preg_return_internal_error(init_null());
     }
   }
 
@@ -1103,12 +1127,12 @@ static Variant preg_match_impl(const StringData* pattern,
   SmartFreeHelper offsetsFreer(offsets);
   int num_subpats = size_offsets / 3;
   if (offsets == nullptr) {
-    return false;
+    return preg_return_internal_error(false);
   }
 
   const char* const* subpat_names = get_subpat_names(pce);
   if (subpat_names == nullptr) {
-    return false;
+    return preg_return_internal_error(false);
   }
 
   /* Allocate match sets array and initialize the values. */
@@ -1123,7 +1147,6 @@ static Variant preg_match_impl(const StringData* pattern,
   }
 
   int matched = 0;
-  *rl_last_error_code = PHP_PCRE_NO_ERROR;
 
   int g_notempty = 0; // If the match should not be empty
   const char** stringlist; // Holds list of subpatterns
@@ -1169,7 +1192,7 @@ static Variant preg_match_impl(const StringData* pattern,
             pcre_get_substring_list(subject->data(), offsets, count,
                                     &stringlist) < 0) {
           raise_warning("Get subpatterns list failed");
-          return false;
+          return preg_return_internal_error(false);
         }
 
         if (global) {  /* global pattern matching */
@@ -1278,8 +1301,7 @@ static Variant preg_match_impl(const StringData* pattern,
                        "", 0,
                        flags, start_offset, g_notempty, global);
       }
-      pcre_handle_exec_error(count);
-      return false;
+      return preg_return_pcre_error(count, false);
     }
 
     /* If we have matched an empty string, mimic what Perl's /g options does.
@@ -1302,7 +1324,7 @@ static Variant preg_match_impl(const StringData* pattern,
       arr.set(i, match_sets[i]);
     }
   }
-  return matched;
+  return preg_return_no_error(std::move(matched));
 }
 
 Variant preg_match(const String& pattern, const String& subject,
@@ -1391,7 +1413,7 @@ static Variant php_pcre_replace(const String& pattern, const String& subject,
                                 int limit, int* replace_count) {
   PCRECache::Accessor accessor;
   if (!pcre_get_compiled_regex_cache(accessor, pattern.get())) {
-    return init_null();
+    return preg_return_bad_regex_error(init_null());
   }
   const pcre_cache_entry* pce = accessor.get();
   if (pce->preg_options & PREG_REPLACE_EVAL) {
@@ -1405,12 +1427,12 @@ static Variant php_pcre_replace(const String& pattern, const String& subject,
   int* offsets = create_offset_array(pce, size_offsets);
   SmartFreeHelper offsetsFreer(offsets);
   if (offsets == nullptr) {
-    return init_null();
+    return preg_return_internal_error(init_null());
   }
 
   const char* const* subpat_names = get_subpat_names(pce);
   if (subpat_names == nullptr) {
-    return init_null();
+    return preg_return_internal_error(init_null());
   }
 
   const char* replace = nullptr;
@@ -1432,7 +1454,6 @@ static Variant php_pcre_replace(const String& pattern, const String& subject,
     /* Initialize */
     const char* match = nullptr;
     int start_offset = 0;
-    *rl_last_error_code = PHP_PCRE_NO_ERROR;
     pcre_extra extra;
     init_local_extra(&extra, pce->extra);
 
@@ -1573,8 +1594,7 @@ static Variant php_pcre_replace(const String& pattern, const String& subject,
                          s, size,
                          callable, limit, start_offset, g_notempty);
         }
-        pcre_handle_exec_error(count);
-        return init_null();
+        return preg_return_pcre_error(count, init_null());
       }
 
       /* If we have matched an empty string, mimic what Perl's /g options does.
@@ -1587,7 +1607,7 @@ static Variant php_pcre_replace(const String& pattern, const String& subject,
       start_offset = offsets[1];
     }
 
-    return result.detach();
+    return preg_return_no_error(result.detach());
   } catch (...) {
     throw;
   }
@@ -1609,12 +1629,12 @@ static Variant php_replace_in_subject(const Variant& regex, const Variant& repla
                                   limit, replace_count);
       if (!ret.isString()) {
         assertx(ret.isNull());
-        return ret;
+        return ret; // php_pcre_replace already set error
       }
       subject = ret.asStrRef();
       assertx(!subject.isNull());
     }
-    return subject;
+    return preg_return_no_error(std::move(subject));
   }
 
   Array arrReplace = replace.toDArray();
@@ -1632,12 +1652,12 @@ static Variant php_replace_in_subject(const Variant& regex, const Variant& repla
                                 limit, replace_count);
     if (!ret.isString()) {
       assertx(ret.isNull());
-      return ret;
+      return ret; // php_pcre_replace already set error
     }
     subject = ret.asStrRef();
     assertx(!subject.isNull());
   }
-  return subject;
+  return preg_return_no_error(std::move(subject));
 }
 
 Variant preg_replace_impl(const Variant& pattern, const Variant& replacement,
@@ -1648,7 +1668,7 @@ Variant preg_replace_impl(const Variant& pattern, const Variant& replacement,
       replacement.isArray() && !pattern.isArray()) {
     raise_warning("Parameter mismatch, pattern is a string while "
                     "replacement is an array");
-    return false;
+    return preg_return_internal_error(false);
   }
 
   int replace_count = 0;
@@ -1656,11 +1676,13 @@ Variant preg_replace_impl(const Variant& pattern, const Variant& replacement,
     auto ret = php_replace_in_subject(pattern, replacement, subject.toString(),
                                       limit, is_callable, &replace_count);
 
-    if (ret.isNull()) return ret;
+    if (ret.isNull()) return ret; // php_replace_in_subject already set error
     assertx(ret.isString());
     if (count) *count = replace_count;
-    if (is_filter && replace_count == 0) return init_null();
-    return ret;
+    if (is_filter && replace_count == 0) {
+      return preg_return_internal_error(init_null());
+    }
+    return preg_return_no_error(std::move(ret));
   }
 
   Array return_value = Array::CreateDArray();
@@ -1676,7 +1698,7 @@ Variant preg_replace_impl(const Variant& pattern, const Variant& replacement,
     }
   }
   if (count) *count = replace_count;
-  return return_value;
+  return preg_return_no_error(std::move(return_value));
 }
 
 int preg_replace(Variant& result,
@@ -1703,11 +1725,17 @@ int preg_replace_callback(Variant& result,
 
 ///////////////////////////////////////////////////////////////////////////////
 
+namespace {
+
+const StaticString s_OneUnicodeCharPattern("/./us");
+
+} // namespace
+
 Variant preg_split(const String& pattern, const String& subject,
                    int limit /* = -1 */, int flags /* = 0 */) {
   PCRECache::Accessor accessor;
   if (!pcre_get_compiled_regex_cache(accessor, pattern.get())) {
-    return false;
+    return preg_return_bad_regex_error(false);
   }
   const pcre_cache_entry* pce = accessor.get();
 
@@ -1723,14 +1751,13 @@ Variant preg_split(const String& pattern, const String& subject,
   int* offsets = create_offset_array(pce, size_offsets);
   SmartFreeHelper offsetsFreer(offsets);
   if (offsets == nullptr) {
-    return false;
+    return preg_return_internal_error(false);
   }
 
   /* Start at the beginning of the string */
   int start_offset = 0;
   int next_offset = 0;
   const char* last_match = subject.data();
-  *rl_last_error_code = PHP_PCRE_NO_ERROR;
   pcre_extra extra;
   init_local_extra(&extra, pce->extra);
 
@@ -1801,10 +1828,9 @@ Variant preg_split(const String& pattern, const String& subject,
       if (g_notempty != 0 && start_offset < subject.size()) {
         if (pce->compile_options & PCRE_UTF8) {
           if (bump_pce == nullptr) {
-            if (!pcre_get_compiled_regex_cache(bump_accessor,
-                                               String("/./us").get())) {
-              return false;
-            }
+            auto const DEBUG_ONLY ok = pcre_get_compiled_regex_cache(
+              bump_accessor, s_OneUnicodeCharPattern.get());
+            assertx(ok);
             bump_pce = bump_accessor.get();
           }
           pcre_extra bump_extra;
@@ -1838,8 +1864,20 @@ Variant preg_split(const String& pattern, const String& subject,
                        "", 0,
                        limit, flags, start_offset, g_notempty);
       }
-      pcre_handle_exec_error(count);
-      break;
+      // NOTE: this returns an error together with a partial result :-(
+      start_offset = last_match - subject.data(); /* offset might have
+                                                   * been incremented,
+                                                   * but without further
+                                                   * successful matches */
+      if (!no_empty || start_offset < subject.size()) {
+        auto const match = subject.substr(start_offset);
+        auto const value = offset_capture
+          ? Variant(str_offset_pair(match, start_offset, hackArrOutput))
+          : Variant(match);
+        assertx(result->isVectorData());
+        result.set(safe_cast<int64_t>(result.size()), value);
+      }
+      return preg_return_pcre_error(count, std::move(result));
     }
 
     /* If we have matched an empty string, mimic what Perl's /g options does.
@@ -1865,7 +1903,7 @@ Variant preg_split(const String& pattern, const String& subject,
     result.set(safe_cast<int64_t>(result.size()), value);
   }
 
-  return result;
+  return preg_return_no_error(std::move(result));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

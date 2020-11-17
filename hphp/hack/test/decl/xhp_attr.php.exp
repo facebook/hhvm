@@ -21,97 +21,81 @@
         sc_req_extends = []; sc_req_implements = []; sc_implements = [];
         sc_implements_dynamic = false; sc_consts = []; sc_typeconsts = [];
         sc_props =
-        [{ Shallow_decl_defs.sp_const = false; sp_xhp_attr = None;
-           sp_lateinit = false; sp_lsb = false;
-           sp_name = ([6:18-25], "before"); sp_needs_init = true;
+        [{ Shallow_decl_defs.sp_name = ([6:18-25], "before");
+           sp_xhp_attr = None;
            sp_type =
            (Some (Rhint (root|xhp_attr.php line 6, characters 10-16),
                   (Toption
                      (Rhint (root|xhp_attr.php line 6, characters 11-16),
                       (Tprim Tstring)))));
-           sp_abstract = false; sp_visibility = Public };
-          { Shallow_decl_defs.sp_const = false; sp_xhp_attr = None;
-            sp_lateinit = false; sp_lsb = false;
-            sp_name = ([15:18-24], "after"); sp_needs_init = true;
+           sp_visibility = Public; sp_flags = needs_init };
+          { Shallow_decl_defs.sp_name = ([15:18-24], "after");
+            sp_xhp_attr = None;
             sp_type =
             (Some (Rhint (root|xhp_attr.php line 15, characters 10-16),
                    (Toption
                       (Rhint (root|xhp_attr.php line 15, characters 11-16),
                        (Tprim Tstring)))));
-            sp_abstract = false; sp_visibility = Public };
-          { Shallow_decl_defs.sp_const = false;
+            sp_visibility = Public; sp_flags = needs_init };
+          { Shallow_decl_defs.sp_name = ([7:17-18], ":a");
             sp_xhp_attr =
             (Some { Typing_defs_core.xa_tag = None; xa_has_default = true });
-            sp_lateinit = false; sp_lsb = false; sp_name = ([7:17-18], ":a");
-            sp_needs_init = false;
             sp_type =
             (Some (Rhint (root|xhp_attr.php line 7, characters 13-15),
                    (Tprim Tint)));
-            sp_abstract = false; sp_visibility = Public };
-          { Shallow_decl_defs.sp_const = false;
+            sp_visibility = Public; sp_flags = (empty) };
+          { Shallow_decl_defs.sp_name = ([8:17-18], ":b");
             sp_xhp_attr =
             (Some { Typing_defs_core.xa_tag = None; xa_has_default = false });
-            sp_lateinit = false; sp_lsb = false; sp_name = ([8:17-18], ":b");
-            sp_needs_init = true;
             sp_type =
             (Some (Rhint (root|xhp_attr.php line 8, characters 13-15),
                    (Toption
                       (Rhint (root|xhp_attr.php line 8, characters 13-15),
                        (Tprim Tint)))));
-            sp_abstract = false; sp_visibility = Public };
-          { Shallow_decl_defs.sp_const = false;
+            sp_visibility = Public; sp_flags = needs_init };
+          { Shallow_decl_defs.sp_name = ([9:17-18], ":c");
             sp_xhp_attr =
             (Some { Typing_defs_core.xa_tag =
                     (Some Typing_defs_core.Required); xa_has_default = false
                     });
-            sp_lateinit = false; sp_lsb = false; sp_name = ([9:17-18], ":c");
-            sp_needs_init = true;
             sp_type =
             (Some (Rhint (root|xhp_attr.php line 9, characters 13-15),
                    (Tprim Tint)));
-            sp_abstract = false; sp_visibility = Public };
-          { Shallow_decl_defs.sp_const = false;
+            sp_visibility = Public; sp_flags = needs_init };
+          { Shallow_decl_defs.sp_name = ([10:18-19], ":d");
             sp_xhp_attr =
             (Some { Typing_defs_core.xa_tag = None; xa_has_default = true });
-            sp_lateinit = false; sp_lsb = false;
-            sp_name = ([10:18-19], ":d"); sp_needs_init = false;
             sp_type =
             (Some (Rhint (root|xhp_attr.php line 10, characters 13-16),
                    (Toption
                       (Rhint (root|xhp_attr.php line 10, characters 14-16),
                        (Tprim Tint)))));
-            sp_abstract = false; sp_visibility = Public };
-          { Shallow_decl_defs.sp_const = false;
+            sp_visibility = Public; sp_flags = (empty) };
+          { Shallow_decl_defs.sp_name = ([11:29-30], ":e");
             sp_xhp_attr =
             (Some { Typing_defs_core.xa_tag = None; xa_has_default = false });
-            sp_lateinit = false; sp_lsb = false;
-            sp_name = ([11:29-30], ":e"); sp_needs_init = true;
             sp_type =
             (Some (Rhint (root|xhp_attr.php line 11, characters 13-27),
                    (Toption
                       (Rhint (root|xhp_attr.php line 11, characters 13-27),
                        (Tprim Tstring)))));
-            sp_abstract = false; sp_visibility = Public };
-          { Shallow_decl_defs.sp_const = false;
+            sp_visibility = Public; sp_flags = needs_init };
+          { Shallow_decl_defs.sp_name = ([12:17-18], ":f");
             sp_xhp_attr =
             (Some { Typing_defs_core.xa_tag =
                     (Some Typing_defs_core.Lateinit); xa_has_default = false
                     });
-            sp_lateinit = false; sp_lsb = false;
-            sp_name = ([12:17-18], ":f"); sp_needs_init = true;
             sp_type =
             (Some (Rhint (root|xhp_attr.php line 12, characters 13-15),
                    (Tprim Tint)));
-            sp_abstract = false; sp_visibility = Public };
-          { Shallow_decl_defs.sp_const = false;
+            sp_visibility = Public; sp_flags = needs_init };
+          { Shallow_decl_defs.sp_name = ([13:19-20], ":g");
             sp_xhp_attr =
             (Some { Typing_defs_core.xa_tag = None; xa_has_default = false });
-            sp_lateinit = false; sp_lsb = false;
-            sp_name = ([13:19-20], ":g"); sp_needs_init = true;
             sp_type =
             (Some (Rhint (root|xhp_attr.php line 13, characters 13-17),
                    Tmixed));
-            sp_abstract = false; sp_visibility = Public }
+            sp_visibility = Public; sp_flags = needs_init }
           ];
         sc_sprops = []; sc_constructor = None; sc_static_methods = [];
         sc_methods = []; sc_user_attributes = []; sc_enum_type = None }))

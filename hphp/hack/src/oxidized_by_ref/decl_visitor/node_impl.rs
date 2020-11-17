@@ -13,6 +13,8 @@ impl<'a> Node<'a> for bstr::BStr {}
 impl<'a> Node<'a> for crate::pos::Pos<'a> {}
 impl<'a> Node<'a> for crate::tany_sentinel::TanySentinel {}
 impl<'a> Node<'a> for crate::file_info::Mode {}
+impl<'a> Node<'a> for crate::method_flags::MethodFlags {}
+impl<'a> Node<'a> for crate::prop_flags::PropFlags {}
 impl<'a> Node<'a> for crate::typing_defs_flags::FunTypeFlags {}
 impl<'a> Node<'a> for crate::typing_defs_flags::FunParamFlags {}
 

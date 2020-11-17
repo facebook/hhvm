@@ -7,7 +7,132 @@
  *
  *)
 
+open Hh_prelude
 open Typing_defs
+
+(* Is this bit set in the flags? *)
+let is_set bit flags = not (Int.equal 0 (Int.bit_and bit flags))
+
+(* Set a single bit to a boolean value *)
+let set_bit bit value flags =
+  if value then
+    Int.bit_or bit flags
+  else
+    Int.bit_and (Int.bit_not bit) flags
+
+module PropFlags = struct
+  type t = int [@@deriving eq]
+
+  let empty = 0
+
+  let abstract_bit    = 1 lsl 0
+  let const_bit       = 1 lsl 1
+  let lateinit_bit    = 1 lsl 2
+  let lsb_bit         = 1 lsl 3
+  let needs_init_bit  = 1 lsl 4
+
+  let get_abstract    = is_set abstract_bit
+  let get_const       = is_set const_bit
+  let get_lateinit    = is_set lateinit_bit
+  let get_lsb         = is_set lsb_bit
+  let get_needs_init  = is_set needs_init_bit
+
+  let set_abstract    = set_bit abstract_bit
+  let set_const       = set_bit const_bit
+  let set_lateinit    = set_bit lateinit_bit
+  let set_lsb         = set_bit lsb_bit
+  let set_needs_init  = set_bit needs_init_bit
+
+  let make
+      ~abstract
+      ~const
+      ~lateinit
+      ~lsb
+      ~needs_init
+      =
+    empty
+    |> set_abstract abstract
+    |> set_const const
+    |> set_lateinit lateinit
+    |> set_lsb lsb
+    |> set_needs_init needs_init
+
+  let pp fmt t =
+    if t = empty then
+      Format.pp_print_string fmt "(empty)"
+    else (
+      Format.fprintf fmt "@[<2>";
+      let sep = ref false in
+      let print s =
+        if !sep then Format.fprintf fmt " |@ ";
+        Format.pp_print_string fmt s;
+        sep := true
+      in
+      if get_abstract t then print "abstract";
+      if get_const t then print "const";
+      if get_lateinit t then print "lateinit";
+      if get_lsb t then print "lsb";
+      if get_needs_init t then print "needs_init";
+      Format.fprintf fmt "@,@]"
+    )
+
+  let show = Format.asprintf "%a" pp
+end
+[@@ocamlformat "disable"]
+
+module MethodFlags = struct
+  type t = int [@@deriving eq]
+
+  let empty = 0
+
+  let abstract_bit            = 1 lsl 0
+  let final_bit               = 1 lsl 1
+  let override_bit            = 1 lsl 2
+  let dynamicallycallable_bit = 1 lsl 3
+
+  let get_abstract            = is_set abstract_bit
+  let get_final               = is_set final_bit
+  let get_override            = is_set override_bit
+  let get_dynamicallycallable = is_set dynamicallycallable_bit
+
+  let set_abstract            = set_bit abstract_bit
+  let set_final               = set_bit final_bit
+  let set_override            = set_bit override_bit
+  let set_dynamicallycallable = set_bit dynamicallycallable_bit
+
+  let make
+      ~abstract
+      ~final
+      ~override
+      ~dynamicallycallable
+      =
+    empty
+    |> set_abstract abstract
+    |> set_final final
+    |> set_override override
+    |> set_dynamicallycallable dynamicallycallable
+
+  let pp fmt t =
+    if t = empty then
+      Format.pp_print_string fmt "(empty)"
+    else (
+      Format.fprintf fmt "@[<2>";
+      let sep = ref false in
+      let print s =
+        if !sep then Format.fprintf fmt " |@ ";
+        Format.pp_print_string fmt s;
+        sep := true
+      in
+      if get_abstract t then print "abstract";
+      if get_final t then print "final";
+      if get_override t then print "override";
+      if get_dynamicallycallable t then print "dynamicallycallable";
+      Format.fprintf fmt "@,@]"
+    )
+
+  let show = Format.asprintf "%a" pp
+end
+[@@ocamlformat "disable"]
 
 type shallow_class_const = {
   scc_abstract: bool;
@@ -27,28 +152,21 @@ type shallow_typeconst = {
 [@@deriving eq, show]
 
 type shallow_prop = {
-  sp_const: bool;
-  sp_xhp_attr: xhp_attr option;
-  sp_lateinit: bool;
-  sp_lsb: bool;
   sp_name: Ast_defs.id;
-  sp_needs_init: bool;
+  sp_xhp_attr: xhp_attr option;
   sp_type: decl_ty option;
-  sp_abstract: bool;
   sp_visibility: Ast_defs.visibility;
+  sp_flags: PropFlags.t;
 }
 [@@deriving eq, show]
 
 type shallow_method = {
-  sm_abstract: bool;
-  sm_final: bool;
   sm_name: Ast_defs.id;
-  sm_override: bool;
-  sm_dynamicallycallable: bool;
   sm_reactivity: Decl_defs.method_reactivity option;
   sm_type: decl_ty;
   sm_visibility: Ast_defs.visibility;
   sm_deprecated: string option;
+  sm_flags: MethodFlags.t;
 }
 [@@deriving eq, show]
 
@@ -79,6 +197,24 @@ type shallow_class = {
   sc_enum_type: enum_type option;
 }
 [@@deriving eq, show]
+
+let sp_abstract sp = PropFlags.get_abstract sp.sp_flags
+
+let sp_const sp = PropFlags.get_const sp.sp_flags
+
+let sp_lateinit sp = PropFlags.get_lateinit sp.sp_flags
+
+let sp_lsb sp = PropFlags.get_lsb sp.sp_flags
+
+let sp_needs_init sp = PropFlags.get_needs_init sp.sp_flags
+
+let sm_abstract sm = MethodFlags.get_abstract sm.sm_flags
+
+let sm_final sm = MethodFlags.get_final sm.sm_flags
+
+let sm_override sm = MethodFlags.get_override sm.sm_flags
+
+let sm_dynamicallycallable sm = MethodFlags.get_dynamicallycallable sm.sm_flags
 
 type fun_decl = fun_elt [@@deriving show]
 

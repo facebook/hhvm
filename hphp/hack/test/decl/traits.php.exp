@@ -9,9 +9,8 @@
        sc_typeconsts = []; sc_props = []; sc_sprops = [];
        sc_constructor = None; sc_static_methods = [];
        sc_methods =
-       [{ Shallow_decl_defs.sm_abstract = false; sm_final = false;
-          sm_name = ([4:19-28], "doNothing"); sm_override = false;
-          sm_dynamicallycallable = false; sm_reactivity = None;
+       [{ Shallow_decl_defs.sm_name = ([4:19-28], "doNothing");
+          sm_reactivity = None;
           sm_type =
           (Rwitness (root|traits.php line 4, characters 19-27),
            (Tfun
@@ -33,7 +32,7 @@
                   ~returns_mutable:false ~returns_void_to_rx:false);
                 ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC}
                 }));
-          sm_visibility = Public; sm_deprecated = None }
+          sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) }
          ];
        sc_user_attributes = []; sc_enum_type = None }));
   ("\\TMyTrait2",
@@ -50,9 +49,8 @@
         sc_typeconsts = []; sc_props = []; sc_sprops = [];
         sc_constructor = None; sc_static_methods = [];
         sc_methods =
-        [{ Shallow_decl_defs.sm_abstract = false; sm_final = false;
-           sm_name = ([10:19-32], "doMoreNothing"); sm_override = false;
-           sm_dynamicallycallable = false; sm_reactivity = None;
+        [{ Shallow_decl_defs.sm_name = ([10:19-32], "doMoreNothing");
+           sm_reactivity = None;
            sm_type =
            (Rwitness (root|traits.php line 10, characters 19-31),
             (Tfun
@@ -74,7 +72,7 @@
                    ~returns_mutable:false ~returns_void_to_rx:false);
                  ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC}
                  }));
-           sm_visibility = Public; sm_deprecated = None }
+           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) }
           ];
         sc_user_attributes = []; sc_enum_type = None }));
   ("\\TMyTrait3",
@@ -88,9 +86,8 @@
         sc_typeconsts = []; sc_props = []; sc_sprops = [];
         sc_constructor = None; sc_static_methods = [];
         sc_methods =
-        [{ Shallow_decl_defs.sm_abstract = false; sm_final = false;
-           sm_name = ([14:19-35], "doYetMoreNothing"); sm_override = false;
-           sm_dynamicallycallable = false; sm_reactivity = None;
+        [{ Shallow_decl_defs.sm_name = ([14:19-35], "doYetMoreNothing");
+           sm_reactivity = None;
            sm_type =
            (Rwitness (root|traits.php line 14, characters 19-34),
             (Tfun
@@ -112,7 +109,7 @@
                    ~returns_mutable:false ~returns_void_to_rx:false);
                  ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC}
                  }));
-           sm_visibility = Public; sm_deprecated = None }
+           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) }
           ];
         sc_user_attributes = []; sc_enum_type = None }));
   ("\\MyTraitUsingClass",

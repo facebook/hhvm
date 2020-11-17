@@ -30,7 +30,7 @@ let check_override_annotations cls ~static =
       sc.sc_methods
   in
   List.iter methods (fun meth ->
-      if not meth.sm_override then
+      if not (sm_override meth) then
         ()
       else
         let (get_method, all_methods_named) =

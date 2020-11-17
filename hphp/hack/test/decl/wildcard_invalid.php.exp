@@ -86,19 +86,17 @@
         sc_implements = []; sc_implements_dynamic = false; sc_consts = [];
         sc_typeconsts = [];
         sc_props =
-        [{ Shallow_decl_defs.sp_const = false; sp_xhp_attr = None;
-           sp_lateinit = false; sp_lsb = false;
-           sp_name = ([10:41-45], "foo"); sp_needs_init = true;
+        [{ Shallow_decl_defs.sp_name = ([10:41-45], "foo");
+           sp_xhp_attr = None;
            sp_type =
            (Some (Rhint (root|wildcard_invalid.php line 10, characters 39-39),
                   Terr));
-           sp_abstract = false; sp_visibility = Private }
+           sp_visibility = Private; sp_flags = needs_init }
           ];
         sc_sprops = [];
         sc_constructor =
-        (Some { Shallow_decl_defs.sm_abstract = false; sm_final = false;
-                sm_name = ([10:19-30], "__construct"); sm_override = false;
-                sm_dynamicallycallable = false; sm_reactivity = None;
+        (Some { Shallow_decl_defs.sm_name = ([10:19-30], "__construct");
+                sm_reactivity = None;
                 sm_type =
                 (Rwitness (root|wildcard_invalid.php line 10, characters 19-29),
                  (Tfun
@@ -137,7 +135,8 @@
                         ~returns_mutable:false ~returns_void_to_rx:false);
                       ft_reactive = Nonreactive;
                       ft_ifc_decl = FDPolicied {PUBLIC} }));
-                sm_visibility = Public; sm_deprecated = None });
+                sm_visibility = Public; sm_deprecated = None;
+                sm_flags = (empty) });
         sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
         sc_enum_type = None }))
   ]

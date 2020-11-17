@@ -20,9 +20,8 @@
         sc_typeconsts = []; sc_props = []; sc_sprops = [];
         sc_constructor = None; sc_static_methods = [];
         sc_methods =
-        [{ Shallow_decl_defs.sm_abstract = false; sm_final = false;
-           sm_name = ([7:19-20], "f"); sm_override = false;
-           sm_dynamicallycallable = false; sm_reactivity = None;
+        [{ Shallow_decl_defs.sm_name = ([7:19-20], "f");
+           sm_reactivity = None;
            sm_type =
            (Rwitness (root|ifc_policied.php line 7, characters 19-19),
             (Tfun
@@ -43,10 +42,9 @@
                  (make_ft_flags FSync None ~return_disposable:false
                    ~returns_mutable:false ~returns_void_to_rx:false);
                  ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {Test} }));
-           sm_visibility = Public; sm_deprecated = None };
-          { Shallow_decl_defs.sm_abstract = false; sm_final = false;
-            sm_name = ([10:19-20], "g"); sm_override = false;
-            sm_dynamicallycallable = false; sm_reactivity = None;
+           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) };
+          { Shallow_decl_defs.sm_name = ([10:19-20], "g");
+            sm_reactivity = None;
             sm_type =
             (Rwitness (root|ifc_policied.php line 10, characters 19-19),
              (Tfun
@@ -68,10 +66,10 @@
                     ~returns_mutable:false ~returns_void_to_rx:false);
                   ft_reactive = Nonreactive;
                   ft_ifc_decl = FDPolicied {Public} }));
-            sm_visibility = Public; sm_deprecated = None };
-          { Shallow_decl_defs.sm_abstract = false; sm_final = false;
-            sm_name = ([13:19-27], "implicit"); sm_override = false;
-            sm_dynamicallycallable = false; sm_reactivity = None;
+            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty)
+            };
+          { Shallow_decl_defs.sm_name = ([13:19-27], "implicit");
+            sm_reactivity = None;
             sm_type =
             (Rwitness (root|ifc_policied.php line 13, characters 19-26),
              (Tfun
@@ -92,10 +90,10 @@
                   (make_ft_flags FSync None ~return_disposable:false
                     ~returns_mutable:false ~returns_void_to_rx:false);
                   ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {} }));
-            sm_visibility = Public; sm_deprecated = None };
-          { Shallow_decl_defs.sm_abstract = false; sm_final = false;
-            sm_name = ([16:19-29], "inferflows"); sm_override = false;
-            sm_dynamicallycallable = false; sm_reactivity = None;
+            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty)
+            };
+          { Shallow_decl_defs.sm_name = ([16:19-29], "inferflows");
+            sm_reactivity = None;
             sm_type =
             (Rwitness (root|ifc_policied.php line 16, characters 19-28),
              (Tfun
@@ -116,10 +114,10 @@
                   (make_ft_flags FSync None ~return_disposable:false
                     ~returns_mutable:false ~returns_void_to_rx:false);
                   ft_reactive = Nonreactive; ft_ifc_decl = FDInferFlows }));
-            sm_visibility = Public; sm_deprecated = None };
-          { Shallow_decl_defs.sm_abstract = false; sm_final = false;
-            sm_name = ([19:19-28], "classname"); sm_override = false;
-            sm_dynamicallycallable = false; sm_reactivity = None;
+            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty)
+            };
+          { Shallow_decl_defs.sm_name = ([19:19-28], "classname");
+            sm_reactivity = None;
             sm_type =
             (Rwitness (root|ifc_policied.php line 19, characters 19-27),
              (Tfun
@@ -141,10 +139,10 @@
                     ~returns_mutable:false ~returns_void_to_rx:false);
                   ft_reactive = Nonreactive;
                   ft_ifc_decl = FDPolicied {\Policy} }));
-            sm_visibility = Public; sm_deprecated = None };
-          { Shallow_decl_defs.sm_abstract = false; sm_final = false;
-            sm_name = ([22:19-27], "defaults"); sm_override = false;
-            sm_dynamicallycallable = false; sm_reactivity = None;
+            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty)
+            };
+          { Shallow_decl_defs.sm_name = ([22:19-27], "defaults");
+            sm_reactivity = None;
             sm_type =
             (Rwitness (root|ifc_policied.php line 22, characters 19-26),
              (Tfun
@@ -166,10 +164,10 @@
                     ~returns_mutable:false ~returns_void_to_rx:false);
                   ft_reactive = Nonreactive;
                   ft_ifc_decl = FDPolicied {PUBLIC} }));
-            sm_visibility = Public; sm_deprecated = None };
-          { Shallow_decl_defs.sm_abstract = false; sm_final = false;
-            sm_name = ([24:19-28], "with_args"); sm_override = false;
-            sm_dynamicallycallable = false; sm_reactivity = None;
+            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty)
+            };
+          { Shallow_decl_defs.sm_name = ([24:19-28], "with_args");
+            sm_reactivity = None;
             sm_type =
             (Rwitness (root|ifc_policied.php line 24, characters 19-27),
              (Tfun
@@ -240,7 +238,8 @@
                     ~returns_mutable:false ~returns_void_to_rx:false);
                   ft_reactive = Nonreactive;
                   ft_ifc_decl = FDPolicied {PUBLIC} }));
-            sm_visibility = Public; sm_deprecated = None }
+            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty)
+            }
           ];
         sc_user_attributes = []; sc_enum_type = None }));
   ("\\inferflows",

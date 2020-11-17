@@ -8,15 +8,13 @@
        sc_implements = []; sc_implements_dynamic = false; sc_consts = [];
        sc_typeconsts = []; sc_props = [];
        sc_sprops =
-       [{ Shallow_decl_defs.sp_const = false; sp_xhp_attr = None;
-          sp_lateinit = false; sp_lsb = false; sp_name = ([4:16-18], "$b");
-          sp_needs_init = true;
+       [{ Shallow_decl_defs.sp_name = ([4:16-18], "$b"); sp_xhp_attr = None;
           sp_type =
           (Some (Rhint (root|prop_without_visibility_modifier.php line 4, characters 10-14),
                  (Toption
                     (Rhint (root|prop_without_visibility_modifier.php line 4, characters 11-14),
                      (Tprim Tbool)))));
-          sp_abstract = false; sp_visibility = Public }
+          sp_visibility = Public; sp_flags = needs_init }
          ];
        sc_constructor = None; sc_static_methods = []; sc_methods = [];
        sc_user_attributes = []; sc_enum_type = None }))

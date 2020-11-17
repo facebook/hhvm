@@ -108,15 +108,17 @@ let prop env cv =
   let const = Attrs.mem SN.UserAttributes.uaConst cv.cv_user_attributes in
   let lateinit = Attrs.mem SN.UserAttributes.uaLateInit cv.cv_user_attributes in
   {
-    sp_const = const;
-    sp_xhp_attr = make_xhp_attr cv;
-    sp_lateinit = lateinit;
-    sp_lsb = false;
     sp_name = cv.cv_id;
-    sp_needs_init = Option.is_none cv.cv_expr;
+    sp_xhp_attr = make_xhp_attr cv;
     sp_type = ty;
-    sp_abstract = cv.cv_abstract;
     sp_visibility = cv.cv_visibility;
+    sp_flags =
+      PropFlags.make
+        ~const
+        ~lateinit
+        ~lsb:false
+        ~needs_init:(Option.is_none cv.cv_expr)
+        ~abstract:cv.cv_abstract;
   }
 
 and static_prop env cv =
@@ -133,15 +135,17 @@ and static_prop env cv =
   let lsb = Attrs.mem SN.UserAttributes.uaLSB cv.cv_user_attributes in
   let const = Attrs.mem SN.UserAttributes.uaConst cv.cv_user_attributes in
   {
-    sp_const = const;
-    sp_xhp_attr = make_xhp_attr cv;
-    sp_lateinit = lateinit;
-    sp_lsb = lsb;
     sp_name = (cv_pos, id);
-    sp_needs_init = Option.is_none cv.cv_expr;
+    sp_xhp_attr = make_xhp_attr cv;
     sp_type = ty;
-    sp_abstract = cv.cv_abstract;
     sp_visibility = cv.cv_visibility;
+    sp_flags =
+      PropFlags.make
+        ~const
+        ~lateinit
+        ~lsb
+        ~needs_init:(Option.is_none cv.cv_expr)
+        ~abstract:cv.cv_abstract;
   }
 
 let method_type env m =
@@ -247,15 +251,17 @@ let method_ env m =
       m.m_user_attributes
   in
   {
-    sm_abstract = m.m_abstract;
-    sm_final = m.m_final;
     sm_name = m.m_name;
-    sm_override = override;
-    sm_dynamicallycallable = has_dynamicallycallable;
     sm_reactivity = reactivity;
     sm_type = mk (Reason.Rwitness pos, Tfun ft);
     sm_visibility = m.m_visibility;
     sm_deprecated;
+    sm_flags =
+      MethodFlags.make
+        ~abstract:m.m_abstract
+        ~final:m.m_final
+        ~override
+        ~dynamicallycallable:has_dynamicallycallable;
   }
 
 let class_ ctx c =

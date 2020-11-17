@@ -52,10 +52,10 @@ let is_lateinit cv =
 let prop_may_need_init sp =
   if Option.is_some sp.sp_xhp_attr then
     false
-  else if sp.sp_lateinit then
+  else if sp_lateinit sp then
     false
   else
-    sp.sp_needs_init
+    sp_needs_init sp
 
 let own_props c props =
   List.fold_left

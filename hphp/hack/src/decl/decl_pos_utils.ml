@@ -331,28 +331,21 @@ struct
 
   and shallow_prop sp =
     {
-      sp_const = sp.sp_const;
-      sp_xhp_attr = sp.sp_xhp_attr;
-      sp_lateinit = sp.sp_lateinit;
-      sp_lsb = sp.sp_lsb;
       sp_name = string_id sp.sp_name;
-      sp_needs_init = sp.sp_needs_init;
+      sp_xhp_attr = sp.sp_xhp_attr;
       sp_type = Option.map sp.sp_type ty;
-      sp_abstract = sp.sp_abstract;
       sp_visibility = sp.sp_visibility;
+      sp_flags = sp.sp_flags;
     }
 
   and shallow_method sm =
     {
-      sm_abstract = sm.sm_abstract;
-      sm_final = sm.sm_final;
       sm_name = string_id sm.sm_name;
-      sm_override = sm.sm_override;
-      sm_dynamicallycallable = sm.sm_dynamicallycallable;
       sm_reactivity = sm.sm_reactivity;
       sm_type = ty sm.sm_type;
       sm_visibility = sm.sm_visibility;
       sm_deprecated = sm.sm_deprecated;
+      sm_flags = sm.sm_flags;
     }
 end
 

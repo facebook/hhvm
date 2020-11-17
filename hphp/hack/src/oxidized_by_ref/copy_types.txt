@@ -36,6 +36,7 @@ i_map::IMap
 i_set::ISet
 ident::Ident
 local_id::map::Map
+method_flags::MethodFlags
 nast::FuncBodyAnn
 nast::shape_map::ShapeMap
 nast::Sid
@@ -93,6 +94,7 @@ oxidized::file_info::NameType
 oxidized::naming_types::KindOfType
 phase_map::PhaseMap
 prim_defs::Comment
+prop_flags::PropFlags
 relative_path::map::Map
 s_map::SMap
 s_set::SSet

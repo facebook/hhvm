@@ -8,26 +8,21 @@
        sc_implements = []; sc_implements_dynamic = false; sc_consts = [];
        sc_typeconsts = [];
        sc_props =
-       [{ Shallow_decl_defs.sp_const = true; sp_xhp_attr = None;
-          sp_lateinit = false; sp_lsb = false; sp_name = ([5:14-16], "x");
-          sp_needs_init = true;
+       [{ Shallow_decl_defs.sp_name = ([5:14-16], "x"); sp_xhp_attr = None;
           sp_type =
           (Some (Rhint (root|const_attribute.php line 5, characters 10-12),
                  (Tprim Tint)));
-          sp_abstract = false; sp_visibility = Public };
-         { Shallow_decl_defs.sp_const = true; sp_xhp_attr = None;
-           sp_lateinit = false; sp_lsb = false; sp_name = ([8:14-16], "y");
-           sp_needs_init = true;
+          sp_visibility = Public; sp_flags = const | needs_init };
+         { Shallow_decl_defs.sp_name = ([8:14-16], "y"); sp_xhp_attr = None;
            sp_type =
            (Some (Rhint (root|const_attribute.php line 8, characters 10-12),
                   (Tprim Tint)));
-           sp_abstract = false; sp_visibility = Public }
+           sp_visibility = Public; sp_flags = const | needs_init }
          ];
        sc_sprops = [];
        sc_constructor =
-       (Some { Shallow_decl_defs.sm_abstract = false; sm_final = false;
-               sm_name = ([10:19-30], "__construct"); sm_override = false;
-               sm_dynamicallycallable = false; sm_reactivity = None;
+       (Some { Shallow_decl_defs.sm_name = ([10:19-30], "__construct");
+               sm_reactivity = None;
                sm_type =
                (Rwitness (root|const_attribute.php line 10, characters 19-29),
                 (Tfun
@@ -49,7 +44,8 @@
                        ~returns_mutable:false ~returns_void_to_rx:false);
                      ft_reactive = Nonreactive;
                      ft_ifc_decl = FDPolicied {PUBLIC} }));
-               sm_visibility = Public; sm_deprecated = None });
+               sm_visibility = Public; sm_deprecated = None;
+               sm_flags = (empty) });
        sc_static_methods = []; sc_methods = [];
        sc_user_attributes =
        [{ Typing_defs_core.ua_name = ([3:3-10], "__Const");
@@ -66,19 +62,16 @@
         sc_implements = []; sc_implements_dynamic = false; sc_consts = [];
         sc_typeconsts = [];
         sc_props =
-        [{ Shallow_decl_defs.sp_const = true; sp_xhp_attr = None;
-           sp_lateinit = false; sp_lsb = false; sp_name = ([18:14-16], "x");
-           sp_needs_init = true;
+        [{ Shallow_decl_defs.sp_name = ([18:14-16], "x"); sp_xhp_attr = None;
            sp_type =
            (Some (Rhint (root|const_attribute.php line 18, characters 10-12),
                   (Tprim Tint)));
-           sp_abstract = false; sp_visibility = Public }
+           sp_visibility = Public; sp_flags = const | needs_init }
           ];
         sc_sprops = [];
         sc_constructor =
-        (Some { Shallow_decl_defs.sm_abstract = false; sm_final = false;
-                sm_name = ([20:19-30], "__construct"); sm_override = false;
-                sm_dynamicallycallable = false; sm_reactivity = None;
+        (Some { Shallow_decl_defs.sm_name = ([20:19-30], "__construct");
+                sm_reactivity = None;
                 sm_type =
                 (Rwitness (root|const_attribute.php line 20, characters 19-29),
                  (Tfun
@@ -100,7 +93,8 @@
                         ~returns_mutable:false ~returns_void_to_rx:false);
                       ft_reactive = Nonreactive;
                       ft_ifc_decl = FDPolicied {PUBLIC} }));
-                sm_visibility = Public; sm_deprecated = None });
+                sm_visibility = Public; sm_deprecated = None;
+                sm_flags = (empty) });
         sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
         sc_enum_type = None }));
   ("\\C",
@@ -113,19 +107,16 @@
         sc_implements = []; sc_implements_dynamic = false; sc_consts = [];
         sc_typeconsts = [];
         sc_props =
-        [{ Shallow_decl_defs.sp_const = true; sp_xhp_attr = None;
-           sp_lateinit = false; sp_lsb = false; sp_name = ([26:55-57], "x");
-           sp_needs_init = true;
+        [{ Shallow_decl_defs.sp_name = ([26:55-57], "x"); sp_xhp_attr = None;
            sp_type =
            (Some (Rhint (root|const_attribute.php line 26, characters 51-53),
                   (Tprim Tint)));
-           sp_abstract = false; sp_visibility = Private }
+           sp_visibility = Private; sp_flags = const | needs_init }
           ];
         sc_sprops = [];
         sc_constructor =
-        (Some { Shallow_decl_defs.sm_abstract = false; sm_final = false;
-                sm_name = ([26:19-30], "__construct"); sm_override = false;
-                sm_dynamicallycallable = false; sm_reactivity = None;
+        (Some { Shallow_decl_defs.sm_name = ([26:19-30], "__construct");
+                sm_reactivity = None;
                 sm_type =
                 (Rwitness (root|const_attribute.php line 26, characters 19-29),
                  (Tfun
@@ -164,7 +155,8 @@
                         ~returns_mutable:false ~returns_void_to_rx:false);
                       ft_reactive = Nonreactive;
                       ft_ifc_decl = FDPolicied {PUBLIC} }));
-                sm_visibility = Public; sm_deprecated = None });
+                sm_visibility = Public; sm_deprecated = None;
+                sm_flags = (empty) });
         sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
         sc_enum_type = None }))
   ]

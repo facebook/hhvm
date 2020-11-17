@@ -10,22 +10,19 @@
          (Tapply (([3:20-37], "\\HH\\ClassAttribute"), [])))];
        sc_implements_dynamic = false; sc_consts = []; sc_typeconsts = [];
        sc_props =
-       [{ Shallow_decl_defs.sp_const = false; sp_xhp_attr = None;
-          sp_lateinit = false; sp_lsb = false; sp_name = ([4:49-51], "i");
-          sp_needs_init = true;
+       [{ Shallow_decl_defs.sp_name = ([4:49-51], "i"); sp_xhp_attr = None;
           sp_type =
           (Some (Rhint (root|explicit_type_collection.php line 4, characters 38-47),
                  (Tapply (([4:38-41], "\\HH\\vec"),
                     [(Rhint (root|explicit_type_collection.php line 4, characters 42-46),
                       Tmixed)]
                     ))));
-          sp_abstract = false; sp_visibility = Public }
+          sp_visibility = Public; sp_flags = needs_init }
          ];
        sc_sprops = [];
        sc_constructor =
-       (Some { Shallow_decl_defs.sm_abstract = false; sm_final = false;
-               sm_name = ([4:19-30], "__construct"); sm_override = false;
-               sm_dynamicallycallable = false; sm_reactivity = None;
+       (Some { Shallow_decl_defs.sm_name = ([4:19-30], "__construct");
+               sm_reactivity = None;
                sm_type =
                (Rwitness (root|explicit_type_collection.php line 4, characters 19-29),
                 (Tfun
@@ -66,7 +63,8 @@
                        ~returns_mutable:false ~returns_void_to_rx:false);
                      ft_reactive = Nonreactive;
                      ft_ifc_decl = FDPolicied {PUBLIC} }));
-               sm_visibility = Public; sm_deprecated = None });
+               sm_visibility = Public; sm_deprecated = None;
+               sm_flags = (empty) });
        sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
        sc_enum_type = None }));
   ("\\Foo",

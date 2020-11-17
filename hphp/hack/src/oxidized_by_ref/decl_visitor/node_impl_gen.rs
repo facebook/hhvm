@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<6e9e01f46dc67d703da64ab4af854596>>
+// @generated SignedSource<<eede747f5e1f496e96878c014a05bbe9>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -679,15 +679,12 @@ impl<'a> Node<'a> for ShallowMethod<'a> {
     fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
         match self {
             ShallowMethod {
-                abstract_: ref __binding_0,
-                final_: ref __binding_1,
-                name: ref __binding_2,
-                override_: ref __binding_3,
-                dynamicallycallable: ref __binding_4,
-                reactivity: ref __binding_5,
-                type_: ref __binding_6,
-                visibility: ref __binding_7,
-                deprecated: ref __binding_8,
+                name: ref __binding_0,
+                reactivity: ref __binding_1,
+                type_: ref __binding_2,
+                visibility: ref __binding_3,
+                deprecated: ref __binding_4,
+                flags: ref __binding_5,
             } => {
                 {
                     __binding_0.accept(v)
@@ -704,16 +701,7 @@ impl<'a> Node<'a> for ShallowMethod<'a> {
                 {
                     __binding_4.accept(v)
                 }
-                {
-                    __binding_5.accept(v)
-                }
-                {
-                    __binding_6.accept(v)
-                }
-                {
-                    __binding_7.accept(v)
-                }
-                { __binding_8.accept(v) }
+                { __binding_5.accept(v) }
             }
         }
     }
@@ -725,15 +713,11 @@ impl<'a> Node<'a> for ShallowProp<'a> {
     fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
         match self {
             ShallowProp {
-                const_: ref __binding_0,
+                name: ref __binding_0,
                 xhp_attr: ref __binding_1,
-                lateinit: ref __binding_2,
-                lsb: ref __binding_3,
-                name: ref __binding_4,
-                needs_init: ref __binding_5,
-                type_: ref __binding_6,
-                abstract_: ref __binding_7,
-                visibility: ref __binding_8,
+                type_: ref __binding_2,
+                visibility: ref __binding_3,
+                flags: ref __binding_4,
             } => {
                 {
                     __binding_0.accept(v)
@@ -747,19 +731,7 @@ impl<'a> Node<'a> for ShallowProp<'a> {
                 {
                     __binding_3.accept(v)
                 }
-                {
-                    __binding_4.accept(v)
-                }
-                {
-                    __binding_5.accept(v)
-                }
-                {
-                    __binding_6.accept(v)
-                }
-                {
-                    __binding_7.accept(v)
-                }
-                { __binding_8.accept(v) }
+                { __binding_4.accept(v) }
             }
         }
     }

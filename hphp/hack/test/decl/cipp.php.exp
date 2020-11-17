@@ -9,9 +9,8 @@
        sc_typeconsts = []; sc_props = []; sc_sprops = [];
        sc_constructor = None; sc_static_methods = [];
        sc_methods =
-       [{ Shallow_decl_defs.sm_abstract = false; sm_final = false;
-          sm_name = ([5:19-30], "cipp_method"); sm_override = false;
-          sm_dynamicallycallable = false; sm_reactivity = None;
+       [{ Shallow_decl_defs.sm_name = ([5:19-30], "cipp_method");
+          sm_reactivity = None;
           sm_type =
           (Rwitness (root|cipp.php line 5, characters 19-29),
            (Tfun
@@ -32,10 +31,9 @@
                 (make_ft_flags FSync None ~return_disposable:false
                   ~returns_mutable:false ~returns_void_to_rx:false);
                 ft_reactive = Cipp {\C}; ft_ifc_decl = FDPolicied {PUBLIC} }));
-          sm_visibility = Public; sm_deprecated = None };
-         { Shallow_decl_defs.sm_abstract = false; sm_final = false;
-           sm_name = ([8:19-37], "cipp_global_method"); sm_override = false;
-           sm_dynamicallycallable = false; sm_reactivity = None;
+          sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) };
+         { Shallow_decl_defs.sm_name = ([8:19-37], "cipp_global_method");
+           sm_reactivity = None;
            sm_type =
            (Rwitness (root|cipp.php line 8, characters 19-36),
             (Tfun
@@ -57,10 +55,9 @@
                    ~returns_mutable:false ~returns_void_to_rx:false);
                  ft_reactive = CippGlobal; ft_ifc_decl = FDPolicied {PUBLIC}
                  }));
-           sm_visibility = Public; sm_deprecated = None };
-         { Shallow_decl_defs.sm_abstract = false; sm_final = false;
-           sm_name = ([11:19-36], "cipp_local_method"); sm_override = false;
-           sm_dynamicallycallable = false; sm_reactivity = None;
+           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) };
+         { Shallow_decl_defs.sm_name = ([11:19-36], "cipp_local_method");
+           sm_reactivity = None;
            sm_type =
            (Rwitness (root|cipp.php line 11, characters 19-35),
             (Tfun
@@ -82,10 +79,9 @@
                    ~returns_mutable:false ~returns_void_to_rx:false);
                  ft_reactive = CippLocal {a};
                  ft_ifc_decl = FDPolicied {PUBLIC} }));
-           sm_visibility = Public; sm_deprecated = None };
-         { Shallow_decl_defs.sm_abstract = false; sm_final = false;
-           sm_name = ([14:19-33], "cipp_rx_method"); sm_override = false;
-           sm_dynamicallycallable = false; sm_reactivity = None;
+           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) };
+         { Shallow_decl_defs.sm_name = ([14:19-33], "cipp_rx_method");
+           sm_reactivity = None;
            sm_type =
            (Rwitness (root|cipp.php line 14, characters 19-32),
             (Tfun
@@ -106,7 +102,7 @@
                  (make_ft_flags FSync None ~return_disposable:false
                    ~returns_mutable:false ~returns_void_to_rx:false);
                  ft_reactive = CippRx; ft_ifc_decl = FDPolicied {PUBLIC} }));
-           sm_visibility = Public; sm_deprecated = None }
+           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) }
          ];
        sc_user_attributes = []; sc_enum_type = None }));
   ("\\cipp_function",

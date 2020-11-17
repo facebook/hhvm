@@ -9,9 +9,7 @@
        sc_typeconsts = []; sc_props = []; sc_sprops = [];
        sc_constructor = None; sc_static_methods = [];
        sc_methods =
-       [{ Shallow_decl_defs.sm_abstract = false; sm_final = false;
-          sm_name = ([5:19-21], "f1"); sm_override = false;
-          sm_dynamicallycallable = false;
+       [{ Shallow_decl_defs.sm_name = ([5:19-21], "f1");
           sm_reactivity = (Some (Decl_defs.Method_reactive None));
           sm_type =
           (Rwitness (root|rx.php line 5, characters 19-20),
@@ -67,10 +65,8 @@
                   ~returns_mutable:false ~returns_void_to_rx:false);
                 ft_reactive = Reactive {}; ft_ifc_decl = FDPolicied {PUBLIC}
                 }));
-          sm_visibility = Public; sm_deprecated = None };
-         { Shallow_decl_defs.sm_abstract = false; sm_final = false;
-           sm_name = ([7:19-21], "f2"); sm_override = false;
-           sm_dynamicallycallable = false;
+          sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) };
+         { Shallow_decl_defs.sm_name = ([7:19-21], "f2");
            sm_reactivity = (Some (Decl_defs.Method_reactive None));
            sm_type =
            (Rwitness (root|rx.php line 7, characters 19-20),
@@ -126,10 +122,8 @@
                    ~returns_mutable:false ~returns_void_to_rx:false);
                  ft_reactive = Reactive {}; ft_ifc_decl = FDPolicied {PUBLIC}
                  }));
-           sm_visibility = Public; sm_deprecated = None };
-         { Shallow_decl_defs.sm_abstract = false; sm_final = false;
-           sm_name = ([9:19-21], "f3"); sm_override = false;
-           sm_dynamicallycallable = false;
+           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) };
+         { Shallow_decl_defs.sm_name = ([9:19-21], "f3");
            sm_reactivity = (Some (Decl_defs.Method_reactive None));
            sm_type =
            (Rwitness (root|rx.php line 9, characters 19-20),
@@ -185,10 +179,8 @@
                    ~returns_mutable:false ~returns_void_to_rx:false);
                  ft_reactive = Reactive {}; ft_ifc_decl = FDPolicied {PUBLIC}
                  }));
-           sm_visibility = Public; sm_deprecated = None };
-         { Shallow_decl_defs.sm_abstract = false; sm_final = false;
-           sm_name = ([11:19-21], "f4"); sm_override = false;
-           sm_dynamicallycallable = false;
+           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) };
+         { Shallow_decl_defs.sm_name = ([11:19-21], "f4");
            sm_reactivity = (Some (Decl_defs.Method_reactive None));
            sm_type =
            (Rwitness (root|rx.php line 11, characters 19-20),
@@ -245,7 +237,7 @@
                    ~returns_mutable:false ~returns_void_to_rx:false);
                  ft_reactive = Reactive {}; ft_ifc_decl = FDPolicied {PUBLIC}
                  }));
-           sm_visibility = Public; sm_deprecated = None }
+           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) }
          ];
        sc_user_attributes = []; sc_enum_type = None }))
   ]

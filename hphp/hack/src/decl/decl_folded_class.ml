@@ -608,8 +608,8 @@ and build_constructor
       elt_flags =
         make_ce_flags
           ~xhp_attr:None
-          ~final:method_.sm_final
-          ~abstract:method_.sm_abstract
+          ~final:(sm_final method_)
+          ~abstract:(sm_abstract method_)
           ~lateinit:false
           ~const:false
           ~lsb:false
@@ -689,9 +689,9 @@ and prop_decl
           ~lsb:false
           ~synthesized:false
           ~override:false
-          ~const:sp.sp_const
-          ~lateinit:sp.sp_lateinit
-          ~abstract:sp.sp_abstract
+          ~const:(sp_const sp)
+          ~lateinit:(sp_lateinit sp)
+          ~abstract:(sp_abstract sp)
           ~dynamicallycallable:false;
       elt_visibility = vis;
       elt_origin = snd c.sc_name;
@@ -722,11 +722,11 @@ and static_prop_decl
         make_ce_flags
           ~xhp_attr:sp.sp_xhp_attr
           ~final:true
-          ~const:sp.sp_const
-          ~lateinit:sp.sp_lateinit
-          ~lsb:sp.sp_lsb
+          ~const:(sp_const sp)
+          ~lateinit:(sp_lateinit sp)
+          ~lsb:(sp_lsb sp)
           ~override:false
-          ~abstract:sp.sp_abstract
+          ~abstract:(sp_abstract sp)
           ~synthesized:false
           ~dynamicallycallable:false;
       elt_visibility = vis;
@@ -828,7 +828,7 @@ and method_decl_acc
     (Decl_defs.element * Decl_heap.Method.t option) SMap.t * SSet.t =
   (* If method doesn't override anything but has the <<__Override>> attribute, then
    * set the override flag in ce_flags and let typing emit an appropriate error *)
-  let check_override = m.sm_override && not (SMap.mem (snd m.sm_name) acc) in
+  let check_override = sm_override m && not (SMap.mem (snd m.sm_name) acc) in
   let (pos, id) = m.sm_name in
   let get_reactivity t =
     match get_node t with
@@ -860,14 +860,14 @@ and method_decl_acc
       elt_flags =
         make_ce_flags
           ~xhp_attr:None
-          ~final:m.sm_final
-          ~abstract:m.sm_abstract
+          ~final:(sm_final m)
+          ~abstract:(sm_abstract m)
           ~override:check_override
           ~synthesized:false
           ~lsb:false
           ~const:false
           ~lateinit:false
-          ~dynamicallycallable:m.sm_dynamicallycallable;
+          ~dynamicallycallable:(sm_dynamicallycallable m);
       elt_visibility = vis;
       elt_origin = snd c.sc_name;
       elt_reactivity = m.sm_reactivity;

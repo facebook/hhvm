@@ -37,15 +37,12 @@ let base_visibility origin_class_name = function
 
 let shallow_method_to_class_elt child_class mro subst meth : class_elt =
   let {
-    sm_abstract = abstract;
-    sm_final = final;
     sm_name = (pos, _);
-    sm_dynamicallycallable = dynamicallycallable;
-    sm_override = override;
     sm_reactivity = _;
     sm_type = ty;
     sm_visibility;
     sm_deprecated;
+    sm_flags = _;
   } =
     meth
   in
@@ -69,13 +66,13 @@ let shallow_method_to_class_elt child_class mro subst meth : class_elt =
       make_ce_flags
         ~xhp_attr:None
         ~synthesized:(is_set mro_via_req_extends mro.mro_flags)
-        ~abstract
-        ~final
+        ~abstract:(sm_abstract meth)
+        ~final:(sm_final meth)
         ~const:false
         ~lateinit:false
         ~lsb:false
-        ~override
-        ~dynamicallycallable;
+        ~override:(sm_override meth)
+        ~dynamicallycallable:(sm_dynamicallycallable meth);
   }
 
 let shallow_method_to_telt child_class mro subst meth : tagged_elt =
@@ -86,17 +83,8 @@ let shallow_method_to_telt child_class mro subst meth : tagged_elt =
   }
 
 let shallow_prop_to_telt child_class mro subst prop : tagged_elt =
-  let {
-    sp_const = const;
-    sp_xhp_attr = xhp_attr;
-    sp_lateinit = lateinit;
-    sp_lsb = lsb;
-    sp_name;
-    sp_needs_init = _;
-    sp_type;
-    sp_abstract;
-    sp_visibility;
-  } =
+  let { sp_xhp_attr = xhp_attr; sp_name; sp_type; sp_visibility; sp_flags = _ }
+      =
     prop
   in
   let visibility = base_visibility mro.mro_name sp_visibility in
@@ -127,10 +115,10 @@ let shallow_prop_to_telt child_class mro subst prop : tagged_elt =
         ce_flags =
           make_ce_flags
             ~xhp_attr
-            ~lsb
-            ~const
-            ~lateinit
-            ~abstract:sp_abstract
+            ~lsb:(sp_lsb prop)
+            ~const:(sp_const prop)
+            ~lateinit:(sp_lateinit prop)
+            ~abstract:(sp_abstract prop)
             ~final:true
             ~override:false
             ~synthesized:false

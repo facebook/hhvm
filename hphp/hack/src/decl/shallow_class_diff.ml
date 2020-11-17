@@ -84,7 +84,7 @@ let diff_prop p1 p2 : member_change option =
     None
   else if
     (not (Aast.equal_visibility p1.sp_visibility p2.sp_visibility))
-    || Bool.( <> ) p1.sp_abstract p2.sp_abstract
+    || Bool.( <> ) (sp_abstract p1) (sp_abstract p2)
   then
     Some Changed_inheritance
   else
@@ -97,7 +97,7 @@ let diff_method m1 m2 : member_change option =
     None
   else if
     (not (Aast.equal_visibility m1.sm_visibility m2.sm_visibility))
-    || Bool.( <> ) m1.sm_abstract m2.sm_abstract
+    || Bool.( <> ) (sm_abstract m1) (sm_abstract m2)
   then
     Some Changed_inheritance
   else

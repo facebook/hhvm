@@ -12,9 +12,8 @@
        sc_props = []; sc_sprops = []; sc_constructor = None;
        sc_static_methods = [];
        sc_methods =
-       [{ Shallow_decl_defs.sm_abstract = false; sm_final = false;
-          sm_name = ([5:19-28], "__dispose"); sm_override = false;
-          sm_dynamicallycallable = false; sm_reactivity = None;
+       [{ Shallow_decl_defs.sm_name = ([5:19-28], "__dispose");
+          sm_reactivity = None;
           sm_type =
           (Rwitness (root|accept_disposable.php line 5, characters 19-27),
            (Tfun
@@ -36,10 +35,9 @@
                   ~returns_mutable:false ~returns_void_to_rx:false);
                 ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC}
                 }));
-          sm_visibility = Public; sm_deprecated = None };
-         { Shallow_decl_defs.sm_abstract = false; sm_final = false;
-           sm_name = ([6:19-22], "foo"); sm_override = false;
-           sm_dynamicallycallable = false; sm_reactivity = None;
+          sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) };
+         { Shallow_decl_defs.sm_name = ([6:19-22], "foo");
+           sm_reactivity = None;
            sm_type =
            (Rwitness (root|accept_disposable.php line 6, characters 19-21),
             (Tfun
@@ -61,7 +59,7 @@
                    ~returns_mutable:false ~returns_void_to_rx:false);
                  ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC}
                  }));
-           sm_visibility = Public; sm_deprecated = None }
+           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) }
          ];
        sc_user_attributes = []; sc_enum_type = None }));
   ("\\f",

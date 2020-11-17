@@ -144,7 +144,7 @@ module Env = struct
     (let open Shallow_decl_defs in
     let has_own_cstr =
       match sc.sc_constructor with
-      | Some s -> not s.sm_abstract
+      | Some s -> not (sm_abstract s)
       | None -> false
     in
     let (private_props, _) =

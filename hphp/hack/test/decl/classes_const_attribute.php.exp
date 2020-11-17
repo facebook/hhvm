@@ -8,13 +8,11 @@
        sc_implements = []; sc_implements_dynamic = false; sc_consts = [];
        sc_typeconsts = [];
        sc_props =
-       [{ Shallow_decl_defs.sp_const = true; sp_xhp_attr = None;
-          sp_lateinit = false; sp_lsb = false; sp_name = ([5:40-42], "p");
-          sp_needs_init = true;
+       [{ Shallow_decl_defs.sp_name = ([5:40-42], "p"); sp_xhp_attr = None;
           sp_type =
           (Some (Rhint (root|classes_const_attribute.php line 5, characters 31-38),
                  (Tprim Tarraykey)));
-          sp_abstract = true; sp_visibility = Public }
+          sp_visibility = Public; sp_flags = abstract | const | needs_init }
          ];
        sc_sprops = []; sc_constructor = None; sc_static_methods = [];
        sc_methods = []; sc_user_attributes = []; sc_enum_type = None }));
@@ -31,13 +29,11 @@
         sc_req_implements = []; sc_implements = [];
         sc_implements_dynamic = false; sc_consts = []; sc_typeconsts = [];
         sc_props =
-        [{ Shallow_decl_defs.sp_const = true; sp_xhp_attr = None;
-           sp_lateinit = false; sp_lsb = false; sp_name = ([9:26-28], "p");
-           sp_needs_init = false;
+        [{ Shallow_decl_defs.sp_name = ([9:26-28], "p"); sp_xhp_attr = None;
            sp_type =
            (Some (Rhint (root|classes_const_attribute.php line 9, characters 22-24),
                   (Tprim Tint)));
-           sp_abstract = false; sp_visibility = Public }
+           sp_visibility = Public; sp_flags = const }
           ];
         sc_sprops = []; sc_constructor = None; sc_static_methods = [];
         sc_methods = []; sc_user_attributes = []; sc_enum_type = None }))

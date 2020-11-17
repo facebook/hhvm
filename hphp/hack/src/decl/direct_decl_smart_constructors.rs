@@ -23,8 +23,10 @@ use oxidized_by_ref::{
     decl_defs::MethodReactivity,
     direct_decl_parser::Decls,
     file_info::Mode,
+    method_flags::MethodFlags,
     nast,
     pos::Pos,
+    prop_flags::PropFlags,
     relative_path::RelativePath,
     shallow_decl_defs::{
         self, Decl, ShallowClassConst, ShallowMethod, ShallowProp, ShallowTypeconst,
@@ -1562,16 +1564,18 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                             if let Some(visibility) = visibility.as_visibility() {
                                 let name = name.unwrap_or("");
                                 let name = strip_dollar_prefix(name);
+                                let mut flags = PropFlags::empty();
+                                flags.set(PropFlags::CONST, attributes.const_);
+                                flags.set(
+                                    PropFlags::NEEDS_INIT,
+                                    self.state.file_mode != Mode::Mdecl,
+                                );
                                 properties.push(ShallowProp {
-                                    const_: attributes.const_,
                                     xhp_attr: None,
-                                    lateinit: false,
-                                    lsb: false,
                                     name: Id(pos, name),
-                                    needs_init: self.state.file_mode != Mode::Mdecl,
                                     type_: self.node_to_ty(hint),
-                                    abstract_: false,
                                     visibility,
+                                    flags,
                                 });
                             }
 
@@ -3508,9 +3512,9 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         let class_attributes = self.to_attributes(attributes);
         if class_attributes.const_ {
             for prop in props.iter_mut() {
-                if !prop.const_ {
+                if !prop.flags.contains(PropFlags::CONST) {
                     *prop = self.alloc(ShallowProp {
-                        const_: true,
+                        flags: prop.flags | PropFlags::CONST,
                         ..**prop
                     })
                 }
@@ -3601,20 +3605,23 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                         strip_dollar_prefix(name)
                     };
                     let ty = self.node_to_ty(hint);
+                    let needs_init = if self.state.file_mode == Mode::Mdecl {
+                        false
+                    } else {
+                        initializer.is_ignored()
+                    };
+                    let mut flags = PropFlags::empty();
+                    flags.set(PropFlags::CONST, attributes.const_);
+                    flags.set(PropFlags::LATEINIT, attributes.late_init);
+                    flags.set(PropFlags::LSB, attributes.lsb);
+                    flags.set(PropFlags::NEEDS_INIT, needs_init);
+                    flags.set(PropFlags::ABSTRACT, modifiers.is_abstract);
                     Some(ShallowProp {
-                        const_: attributes.const_,
                         xhp_attr: None,
-                        lateinit: attributes.late_init,
-                        lsb: attributes.lsb,
                         name: Id(pos, name),
-                        needs_init: if self.state.file_mode == Mode::Mdecl {
-                            false
-                        } else {
-                            initializer.is_ignored()
-                        },
                         type_: ty,
-                        abstract_: modifiers.is_abstract,
                         visibility: modifiers.visibility,
+                        flags,
                     })
                 }
                 n => panic!("Expected a ListItem, but was {:?}", n),
@@ -3651,19 +3658,17 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             } else {
                 type_
             };
+            let mut flags = PropFlags::empty();
+            flags.set(PropFlags::NEEDS_INIT, node.needs_init);
             Some(ShallowProp {
-                abstract_: false,
-                const_: false,
-                lateinit: false,
-                lsb: false,
                 name: Id(pos, name),
-                needs_init: node.needs_init,
                 visibility: aast::Visibility::Public,
                 type_,
                 xhp_attr: Some(shallow_decl_defs::XhpAttr {
                     tag: node.tag,
                     has_default: !node.needs_init,
                 }),
+                flags,
             })
         }));
 
@@ -3767,11 +3772,19 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 }
             })
         }
+        let mut flags = MethodFlags::empty();
+        flags.set(
+            MethodFlags::ABSTRACT,
+            self.state.classish_name_builder.in_interface() || modifiers.is_abstract,
+        );
+        flags.set(MethodFlags::FINAL, modifiers.is_final);
+        flags.set(MethodFlags::OVERRIDE, attributes.override_);
+        flags.set(
+            MethodFlags::DYNAMICALLYCALLABLE,
+            attributes.dynamically_callable,
+        );
         let method = self.alloc(ShallowMethod {
-            abstract_: self.state.classish_name_builder.in_interface() || modifiers.is_abstract,
-            final_: modifiers.is_final,
             name: id,
-            override_: attributes.override_,
             reactivity: match attributes.reactivity {
                 Reactivity::Local(condition_type) => Some(MethodReactivity::MethodLocal(
                     get_condition_type_name(condition_type),
@@ -3793,10 +3806,10 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 | Reactivity::CippGlobal
                 | Reactivity::CippRx => None,
             },
-            dynamicallycallable: attributes.dynamically_callable,
             type_: ty,
             visibility: modifiers.visibility,
             deprecated,
+            flags,
         });
         if is_constructor {
             Node::Constructor(self.alloc(ConstructorNode { method, properties }))

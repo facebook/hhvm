@@ -1,11 +1,13 @@
-aast::Tprim
 aast_defs::Tprim
+aast::Tprim
 decl_defs::ConsistentKind
 decl_defs::LinearizationKind
 decl_defs::SourceType
 decl_defs::XhpAttr
 ident::Ident
 lazy::Lazy
+method_flags::MethodFlags
+prop_flags::PropFlags
 shallow_decl_defs::Visibility
 shallow_decl_defs::XhpAttr
 tany_sentinel::TanySentinel

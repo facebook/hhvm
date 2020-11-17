@@ -1391,7 +1391,7 @@ static Variant php_pcre_replace(const String& pattern, const String& subject,
                                 int limit, int* replace_count) {
   PCRECache::Accessor accessor;
   if (!pcre_get_compiled_regex_cache(accessor, pattern.get())) {
-    return false;
+    return init_null();
   }
   const pcre_cache_entry* pce = accessor.get();
   if (pce->preg_options & PREG_REPLACE_EVAL) {
@@ -1405,12 +1405,12 @@ static Variant php_pcre_replace(const String& pattern, const String& subject,
   int* offsets = create_offset_array(pce, size_offsets);
   SmartFreeHelper offsetsFreer(offsets);
   if (offsets == nullptr) {
-    return false;
+    return init_null();
   }
 
   const char* const* subpat_names = get_subpat_names(pce);
   if (subpat_names == nullptr) {
-    return false;
+    return init_null();
   }
 
   const char* replace = nullptr;
@@ -1597,34 +1597,22 @@ static Variant php_replace_in_subject(const Variant& regex, const Variant& repla
                                       String subject, int limit, bool callable,
                                       int* replace_count) {
   if (!regex.isArray()) {
-    Variant ret = php_pcre_replace(regex.toString(), subject, replace,
-                                   callable, limit, replace_count);
-
-    if (ret.isBoolean()) {
-      assertx(!ret.toBoolean());
-      return init_null();
-    }
-
-    return ret;
+    return php_pcre_replace(regex.toString(), subject, replace, callable,
+                            limit, replace_count);
   }
 
   if (callable || !replace.isArray()) {
     Array arr = regex.toDArray();
     for (ArrayIter iterRegex(arr); iterRegex; ++iterRegex) {
       String regex_entry = iterRegex.second().toString();
-      Variant ret = php_pcre_replace(regex_entry, subject, replace,
-                                     callable, limit, replace_count);
-      if (ret.isBoolean()) {
-        assertx(!ret.toBoolean());
-        return init_null();
-      }
+      auto ret = php_pcre_replace(regex_entry, subject, replace, callable,
+                                  limit, replace_count);
       if (!ret.isString()) {
+        assertx(ret.isNull());
         return ret;
       }
       subject = ret.asStrRef();
-      if (subject.isNull()) {
-        return subject;
-      }
+      assertx(!subject.isNull());
     }
     return subject;
   }
@@ -1640,20 +1628,14 @@ static Variant php_replace_in_subject(const Variant& regex, const Variant& repla
       ++iterReplace;
     }
 
-    Variant ret = php_pcre_replace(regex_entry, subject, replace_value,
-                                   callable, limit, replace_count);
-
-    if (ret.isBoolean()) {
-      assertx(!ret.toBoolean());
-      return init_null();
-    }
+    auto ret = php_pcre_replace(regex_entry, subject, replace_value, callable,
+                                limit, replace_count);
     if (!ret.isString()) {
+      assertx(ret.isNull());
       return ret;
     }
     subject = ret.asStrRef();
-    if (subject.isNull()) {
-      return subject;
-    }
+    assertx(!subject.isNull());
   }
   return subject;
 }
@@ -1671,19 +1653,13 @@ Variant preg_replace_impl(const Variant& pattern, const Variant& replacement,
 
   int replace_count = 0;
   if (!isContainer(subject)) {
-    Variant ret = php_replace_in_subject(pattern, replacement,
-                                         subject.toString(),
-                                         limit, is_callable, &replace_count);
+    auto ret = php_replace_in_subject(pattern, replacement, subject.toString(),
+                                      limit, is_callable, &replace_count);
 
-    if (ret.isString()) {
-      if (count) *count = replace_count;
-      if (is_filter && replace_count == 0) {
-        return init_null();
-      } else {
-        return ret.asStrRef();
-      }
-    }
-
+    if (ret.isNull()) return ret;
+    assertx(ret.isString());
+    if (count) *count = replace_count;
+    if (is_filter && replace_count == 0) return init_null();
     return ret;
   }
 
@@ -1692,11 +1668,10 @@ Variant preg_replace_impl(const Variant& pattern, const Variant& replacement,
   for (ArrayIter iter(arrSubject); iter; ++iter) {
     auto old_replace_count = replace_count;
     String subject_entry = iter.second().toString();
-    Variant ret = php_replace_in_subject(pattern, replacement, subject_entry,
-                                         limit, is_callable, &replace_count);
+    auto ret = php_replace_in_subject(pattern, replacement, subject_entry,
+                                      limit, is_callable, &replace_count);
 
-    if (ret.isString() && !ret.isNull() &&
-        (!is_filter || replace_count > old_replace_count)) {
+    if (ret.isString() && (!is_filter || replace_count > old_replace_count)) {
       return_value.set(iter.first(), ret.asStrRef());
     }
   }

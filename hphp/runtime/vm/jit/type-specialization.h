@@ -17,9 +17,9 @@
 #pragma once
 
 #include "hphp/runtime/base/array-data.h"
-#include "hphp/runtime/base/bespoke-layout.h"
-#include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/base/repo-auth-type.h"
+#include "hphp/runtime/vm/class.h"
+#include "hphp/runtime/vm/jit/array-layout.h"
 
 #include <folly/Optional.h>
 
@@ -37,43 +37,35 @@ namespace jit {
 /*
  * Array type specialization.
  *
- * This type lattice is logically the following cross product:
- *  (Maybe ArrayKind) x (Maybe RepoAuthoritativeType) x LayoutTag
+ * This type lattice is a simple cross product:
+ *
+ *   ArrayLayout x (Maybe RepoAuthoritativeType)
  *
  * HHBBC doesn't know about vanilla or bespoke layouts, so when HHBBC provides
- * us an ArrayKind or an RAT, we include those values in this specialization
- * bit but we have an "unknown" layout tag. This tag makes the kind / type info
- * unusable until we check that the array is vanilla.
+ * us an RAT for an array, we include it in the specialization but we set the
+ * layout to ArrayLayout::Top().
  *
- * In the JIT, if we create an array with a known kind (e.g. with AllocVArray)
- * or we test the kind (e.g. with CheckType), we'll also get the vanilla bit.
+ * In the JIT, if we create an array of a known layout (e.g. with AllocVArray)
+ * or we test the layout (e.g. with CheckType), we'll get the layout info.
  */
 struct ArraySpec {
-  enum class LayoutTag { Unknown, Vanilla };
+  /*
+   * Constructors.
+   */
+  constexpr ArraySpec();
+  explicit ArraySpec(ArrayLayout layout);
+  explicit ArraySpec(const RepoAuthType::Array* type);
 
   /*
-   * Constructors. If an ArrayKind is provided as one of the arguments, then
-   * we'll also set the vanilla bit, but otherwise, we'll leave it unset.
+   * Update the layout of the ArraySpec wit the given info, if it is possible
+   * to do so without a contradiction - otherwise, return Bottom.
    */
-  constexpr explicit ArraySpec(LayoutTag = LayoutTag::Unknown);
-  explicit ArraySpec(const RepoAuthType::Array* arrTy);
-  explicit ArraySpec(BespokeLayout layout);
-
-  /*
-   * Set the vanilla bits on an ArraySpec.
-   */
-  ArraySpec narrowToVanilla() const;
-
-  /*
-   * Assign the bespoke layout of the ArraySpec, if it is possible
-   * to do so without a contradiction--otherwise return Bottom.
-   */
-  ArraySpec narrowToBespokeLayout(BespokeLayout layout) const;
+  ArraySpec narrowToLayout(ArrayLayout layout) const;
 
   /*
    * Only for post-deserialization fixup.
    *
-   * As a precondition, the ArraySpec must already have a RAT type
+   * As a precondition, the ArraySpec must already have a RAT type.
    */
   void setType(const RepoAuthType::Array* adjusted);
 
@@ -89,13 +81,10 @@ struct ArraySpec {
    * type() returns nullptr if no RAT is set.
    */
   uintptr_t bits() const;
+  ArrayLayout layout() const;
   const RepoAuthType::Array* type() const;
   bool vanilla() const;
-
-  /*
-   * Retrieve and lookup the bespoke layout for this ArraySpec, if present
-   */
-  std::optional<BespokeLayout> bespokeLayout() const;
+  bool bespoke() const;
 
   /*
    * Casts.
@@ -141,32 +130,12 @@ private:
   bool checkInvariants() const;
 
   /*
-   * Allowed values of m_sort. Anything above Sort::Vanilla denotes a bespoke
-   * layout with index m_sort - Sort::Vanilla
-   */
-  enum class Sort : uint16_t {
-    /* possibly vanilla or bespoke */
-    Top = 0,
-    Bottom,
-    /* definitely vanilla */
-    Vanilla
-    /* larger values mean definitely a particular bespoke layout */
-  };
-
-  // Convert a BespokeLayout to a sort or vice versa.
-  static Sort sortForBespokeLayout(const BespokeLayout& l);
-  static std::optional<BespokeLayout> bespokeLayoutForSort(Sort);
-
-  /*
    * Data members.
    */
   union {
     struct {
-      Sort m_sort : 16;
-      /*
-       * holds the repo-auth type, or nullptr if there isn't one
-       */
-      uintptr_t m_ptr : 48;
+      uint16_t m_layout;    // an ArrayLayout's toUint16 data
+      uintptr_t m_type: 48; // const RepoAuthType::Array*, or nullptr
     };
     uintptr_t m_bits;
   };

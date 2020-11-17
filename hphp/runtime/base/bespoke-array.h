@@ -48,6 +48,7 @@ ArrayData* maybeMakeLoggingArray(ArrayData*, LoggingProfile*);
 ArrayData* makeBespokeForTesting(ArrayData*, LoggingProfile*);
 void profileArrLikeProps(ObjectData*);
 void setLoggingEnabled(bool);
+void selectBespokeLayouts();
 void waitOnExportProfiles();
 
 // Type-safe layout index, so that we can't mix it up with other ints.

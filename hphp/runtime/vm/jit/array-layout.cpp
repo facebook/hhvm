@@ -194,16 +194,7 @@ std::string ArrayLayout::describe() const {
 
 namespace {
 bool checkLayoutMatches(const ArrayLayout& layout, SSATmp* arr) {
-  auto const spec = arr->type().arrSpec();
-  DEBUG_ONLY auto const converted = [&]{
-    if (spec == ArraySpec::Bottom()) return ArrayLayout::Bottom();
-    if (spec.vanilla())              return ArrayLayout::Vanilla();
-    if (auto const l = spec.bespokeLayout()) {
-      return ArrayLayout(l->index());
-    }
-    return ArrayLayout::Top();
-  }();
-  assertx(converted <= layout);
+  assertx(arr->type().arrSpec().layout() <= layout);
   return true;
 }
 }

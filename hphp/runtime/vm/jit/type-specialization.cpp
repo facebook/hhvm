@@ -46,27 +46,12 @@ bool ArraySpec::operator<=(const ArraySpec& rhs) const {
   assertx(rhs.checkInvariants());
   auto const& lhs = *this;
 
-  if (rhs == Top()) return true;
-  if (lhs == Bottom()) return true;
-  if (rhs == Bottom()) return false; // since lhs is not Bottom
-  if (lhs == Top()) return false; // since rhs is not Top
-
-  if (rhs.vanilla()) {
-    if (!lhs.vanilla()) {
-      return false;
-    }
-  } else if (auto const rLay = rhs.bespokeLayout()) {
-    if (auto const lLay = lhs.bespokeLayout()) {
-      return *lLay <= *rLay;
-    } else {
-      return false;
-    }
-  }
+  if (!(lhs.layout() <= rhs.layout())) return false;
 
   // It's possible to subtype RAT::Array types, but it's potentially O(n), so
   // we just don't do it. It's okay for <= to return false negative results.
 
-  // if LHS drops RHS's type, it's bigger
+  // If LHS drops RHS's type, it's bigger.
   if (rhs.type() && lhs.type() != rhs.type()) {
     return false;
   }
@@ -79,32 +64,13 @@ ArraySpec ArraySpec::operator|(const ArraySpec& rhs) const {
   assertx(rhs.checkInvariants());
   auto const& lhs = *this;
 
-  if (lhs <= rhs) return rhs;
-  if (rhs <= lhs) return lhs;
+  if (lhs.layout() == ArrayLayout::Bottom()) return rhs;
+  if (rhs.layout() == ArrayLayout::Bottom()) return lhs;
 
-  auto result = lhs;
+  auto result = ArraySpec(lhs.layout() | rhs.layout());
 
-  // lhs and rhs are both neither top nor bottom
-  // but we can still have m_sort of Top and a RAT specialization
-  assertx(lhs.m_sort != Sort::Bottom);
-  assertx(rhs.m_sort != Sort::Bottom);
-
-  auto const lLay = lhs.bespokeLayout();
-  auto const rLay = rhs.bespokeLayout();
-  if (lhs.m_sort == Sort::Top ||
-      rhs.m_sort == Sort::Top) {
-    result.m_sort = Sort::Top;
-  } else if (lLay && rLay) {
-    result.m_sort = sortForBespokeLayout(*lLay | *rLay);
-  } else if (lhs.vanilla() != rhs.vanilla()) {
-    result.m_sort = Sort::Top;
-  }
-
-  // now address the RAT types
-  if (rhs.type() == lhs.type()) {
-    result.m_ptr = rhs.m_ptr;
-  } else {
-    result.m_ptr = 0;
+  if (lhs.m_type == rhs.m_type) {
+    result.m_type = rhs.m_type;
   }
 
   assertx(result.checkInvariants());
@@ -116,72 +82,43 @@ ArraySpec ArraySpec::operator&(const ArraySpec& rhs) const {
   assertx(rhs.checkInvariants());
   auto const& lhs = *this;
 
-  if (lhs <= rhs) return lhs;
-  if (rhs <= lhs) return rhs;
+  auto const layout = lhs.layout() & rhs.layout();
+  if (layout == ArrayLayout::Bottom()) return Bottom();
 
-  auto result = lhs;
-  // lhs and rhs are both neither top nor bottom
-  // but we can still have m_sort of Top and a RAT specialization
-  assertx(lhs.m_sort != Sort::Bottom);
-  assertx(rhs.m_sort != Sort::Bottom);
+  auto result = ArraySpec(layout);
 
-  if (lhs.m_sort == Sort::Top) {
-    result.m_sort = rhs.m_sort;
-  } else if (rhs.m_sort == Sort::Top) {
-    result.m_sort = lhs.m_sort;
-  } else if (lhs.vanilla() != rhs.vanilla()) {
-    return Bottom();
-  } else if (auto const lLay = lhs.bespokeLayout()) {
-    if (auto const rLay = rhs.bespokeLayout()) {
-      auto const meet = *lLay & *rLay;
-      if (meet) {
-        result.m_sort = sortForBespokeLayout(*meet);
-      } else {
-        return Bottom();
-      }
-    } else {
-      return Bottom();
-    }
-  }
-
-  if (!rhs.type()) {
-    result.m_ptr = lhs.m_ptr;
-  } else if (!lhs.type()) {
-    result.m_ptr = rhs.m_ptr;
-  } else if (lhs.type() != rhs.type()) {
+  if (lhs.m_type == rhs.m_type) {
+    result.m_type = rhs.m_type;
+  } else if (lhs.m_type == 0) {
+    result.m_type = rhs.m_type;
+  } else if (rhs.m_type == 0) {
+    result.m_type = lhs.m_type;
+  } else {
     // If both types have an RAT and they differ, keep the "better" one.
-    // (see above)
-    auto const rat = chooseRATArray(lhs.type(), rhs.type());
-    result.m_ptr = reinterpret_cast<uintptr_t>(rat);
+    auto const type = chooseRATArray(lhs.type(), rhs.type());
+    result.m_type = reinterpret_cast<uintptr_t>(type);
   }
 
   result.checkInvariants();
   return result;
 }
 
-std::optional<BespokeLayout> ArraySpec::bespokeLayout() const {
-  return bespokeLayoutForSort(m_sort);
-}
-
 std::string ArraySpec::toString() const {
   std::string result;
 
-  if (vanilla()) {
-    result += "=Vanilla";
-  } else if (auto const layout = bespokeLayout()) {
-    folly::format(&result, "=Bespoke({})", layout->describe());
+  if (vanilla() || bespoke()) {
+    folly::format(&result, "={}", layout().describe());
   }
 
-  if (auto const ty = type()) {
+  if (auto const t = type()) {
     auto const sign = result.empty() ? '=' : ':';
-    result += folly::to<std::string>(sign, show(*ty));
+    result += folly::to<std::string>(sign, show(*t));
   }
   return result;
 }
 
 bool ArraySpec::checkInvariants() const {
-  // if m_sort is bottom, we should _not_ have a RAT type set
-  assertx(IMPLIES(m_sort == Sort::Bottom, !type()));
+  assertx(IMPLIES(layout() == ArrayLayout::Bottom(), !type()));
   return true;
 }
 

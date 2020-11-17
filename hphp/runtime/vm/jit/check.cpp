@@ -415,10 +415,7 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* /*unit*/) {
 
   auto checkBespokeArr = [&] {
     auto const t = src()->type();
-    if (t != TBottom) {
-      auto const bespoke = t.arrSpec().bespokeLayout().has_value();
-      check(bespoke, Type(), "TArrLike=Bespoke");
-    }
+    if (t != TBottom) check(t.arrSpec().bespoke(), Type(), "TArrLike=Bespoke");
     ++curSrc;
   };
 

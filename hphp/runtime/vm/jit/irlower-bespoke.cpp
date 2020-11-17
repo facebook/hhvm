@@ -61,12 +61,6 @@ void cgProfileArrLikeProps(IRLS& env, const IRInstruction* inst) {
 //////////////////////////////////////////////////////////////////////////////
 
 namespace {
-const bespoke::ConcreteLayout* getConcreteLayout(Type type) {
-  assertx(type <= TArrLike);
-  auto const layout = type.arrSpec().bespokeLayout();
-  return layout ? layout->concreteLayout() : nullptr;
-}
-
 static TypedValue getInt(const ArrayData* ad, int64_t key) {
   return ad->get(key);
 }
@@ -78,22 +72,21 @@ static TypedValue getStr(const ArrayData* ad, const StringData* key) {
 
 // This macro returns a CallSpec to one of several static functions:
 //
-//    - the one on a specific, concrete BespokeLayout;
+//    - the one on a specific, concrete bespoke layout;
 //    - the generic one on BespokeArray;
 //    - the ones on the vanilla arrays (Packed, Mixed, Set);
 //    - failing all those options, the CallSpec Generic
 //
 #define CALL_TARGET(Type, Fn, Generic)                                    \
   [&]{                                                                    \
-    auto const spec = Type.arrSpec();                                     \
-    auto const layout = spec.bespokeLayout();                             \
-    if (layout) {                                                         \
-      if (auto const concrete = layout->concreteLayout()) {               \
+    auto const layout = Type.arrSpec().layout();                          \
+    if (layout.bespoke()) {                                               \
+      if (auto const concrete = layout.concreteLayout()) {                \
         return CallSpec::direct(concrete->vtable()->fn##Fn);              \
       }                                                                   \
       return CallSpec::direct(BespokeArray::Fn);                          \
     }                                                                     \
-    if (spec.vanilla()) {                                                 \
+    if (layout.vanilla()) {                                               \
       if (arr <= (TVArr|TVec))  return CallSpec::direct(PackedArray::Fn); \
       if (arr <= (TDArr|TDict)) return CallSpec::direct(MixedArray::Fn);  \
       if (arr <= TKeyset)       return CallSpec::direct(SetArray::Fn);    \
@@ -202,9 +195,8 @@ void cgBespokeIterGetVal(IRLS& env, const IRInstruction* inst) {
 
 void cgBespokeEscalateToVanilla(IRLS& env, const IRInstruction* inst) {
   auto const target = [&] {
-    auto const layout = inst->src(0)->type().arrSpec().bespokeLayout();
-    assertx(layout);
-    if (auto const concrete = layout->concreteLayout()) {
+    auto const layout = inst->src(0)->type().arrSpec().layout();
+    if (auto const concrete = layout.concreteLayout()) {
       return CallSpec::direct(concrete->vtable()->fnEscalateToVanilla);
     } else {
       return CallSpec::direct(BespokeArray::ToVanilla);
@@ -225,11 +217,11 @@ void cgBespokeElem(IRLS& env, const IRInstruction* inst) {
   auto const target = [&] {
     auto const arr = inst->src(0);
     auto const key = inst->src(1);
-    auto const layout = arr->type().arrSpec().bespokeLayout();
+    auto const layout = arr->type().arrSpec().layout();
 
     // Bespoke arrays always have specific Elem helper functions.
-    if (layout) {
-      if (auto const concrete = layout->concreteLayout()) {
+    if (layout.bespoke()) {
+      if (auto const concrete = layout.concreteLayout()) {
         return key->isA(TStr) ? CallSpec::direct(concrete->vtable()->fnElemStr)
                               : CallSpec::direct(concrete->vtable()->fnElemInt);
       } else {
@@ -242,7 +234,7 @@ void cgBespokeElem(IRLS& env, const IRInstruction* inst) {
     // the ones we already have symbols for in the MInstrHelpers namespace.
     using namespace MInstrHelpers;
     auto const throwOnMissing = inst->src(2)->boolVal();
-    if (arr->isA(TVanillaArrLike)) {
+    if (layout.vanilla()) {
       if (arr->isA(TDArr|TDict)) {
         return key->isA(TStr)
           ? CallSpec::direct(throwOnMissing ? elemDictSD : elemDictSU)

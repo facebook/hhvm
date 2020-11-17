@@ -34,15 +34,16 @@ struct MockLayout : public Layout {
 };
 
 inline Layout* makeDummyLayout(std::string name,
-                               std::vector<BespokeLayout> parents) {
+                               std::vector<jit::ArrayLayout> parents) {
   using ::testing::Mock;
 
   Layout::LayoutSet indices;
   std::transform(
     parents.cbegin(), parents.cend(),
     std::inserter(indices, indices.end()),
-    [&](BespokeLayout bl) {
-      return bespoke::LayoutIndex{bl.index()};
+    [&](jit::ArrayLayout parent) {
+      always_assert(parent.bespoke());
+      return *parent.layoutIndex();
     }
   );
   auto const ret = new MockLayout(std::move(name), std::move(indices));

@@ -21,7 +21,6 @@
 
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/array-init.h"
-#include "hphp/runtime/base/bespoke-layout.h"
 #include "hphp/runtime/base/repo-auth-type-array.h"
 #include "hphp/runtime/test/bespoke-layout-mock.h"
 #include "hphp/runtime/vm/jit/array-layout.h"
@@ -149,7 +148,7 @@ TEST(Type, ArrayLayout) {
   auto const bespoke = ArrayLayout::Bespoke();
   auto const bottom  = ArrayLayout::Bottom();
   auto const foo = ArrayLayout{
-    bespoke::testing::makeDummyLayout("foo", {BespokeLayout::TopLayout()})
+    bespoke::testing::makeDummyLayout("foo", {ArrayLayout::Bespoke()})
   };
 
   EXPECT_EQ("Top",          top.describe());
@@ -343,7 +342,7 @@ TEST(Type, Ptr) {
 
   EXPECT_EQ(TBottom, TBottom.deref());
 
-  auto const vanillaSpec = ArraySpec::Top().narrowToVanilla();
+  auto const vanillaSpec = ArraySpec(ArrayLayout::Vanilla());
   auto const vecData = ArrayData::GetScalarArray(make_vec_array(1, 2, 3, 4));
   auto const ptrToConstVec  = Type::cns(vecData).ptr(Ptr::Ptr);
   EXPECT_TRUE(ptrToConstVec < TPtrToStaticVec);
@@ -1002,14 +1001,14 @@ TEST(Type, VanillaVec) {
 }
 
 TEST(Type, BespokeVec) {
-  auto const foo_layout = BespokeLayout{
-    bespoke::testing::makeDummyLayout("foo", {BespokeLayout::TopLayout()})
+  auto const foo_layout = ArrayLayout{
+    bespoke::testing::makeDummyLayout("foo", {ArrayLayout::Bespoke()})
   };
-  auto const bar_layout = BespokeLayout{
-    bespoke::testing::makeDummyLayout("bar", {BespokeLayout::TopLayout()})
+  auto const bar_layout = ArrayLayout{
+    bespoke::testing::makeDummyLayout("bar", {ArrayLayout::Bespoke()})
   };
 
-  auto const vecFoo = TVec.narrowToBespokeLayout(foo_layout);
+  auto const vecFoo = TVec.narrowToLayout(foo_layout);
   EXPECT_EQ("Vec=Bespoke(foo)", vecFoo.toString());
   EXPECT_FALSE(TVec <= vecFoo);
   EXPECT_FALSE(TVanillaVec <= vecFoo);
@@ -1019,34 +1018,36 @@ TEST(Type, BespokeVec) {
   EXPECT_EQ(vecFoo | TVec, TVec);
   EXPECT_EQ(vecFoo & TVec, vecFoo);
 
-  auto const vecBar = TVec.narrowToBespokeLayout(bar_layout);
+  auto const vecBar = TVec.narrowToLayout(bar_layout);
   EXPECT_EQ("Vec=Bespoke(bar)", vecBar.toString());
 
-  auto const vecVanillaBar = TVanillaVec.narrowToBespokeLayout(bar_layout);
+  auto const vecVanillaBar = TVanillaVec.narrowToLayout(bar_layout);
   EXPECT_EQ(TBottom, vecVanillaBar);
 }
 
 TEST(Type, BespokeVecRAT) {
-  auto const foo_layout = BespokeLayout{
-    bespoke::testing::makeDummyLayout("foo", {BespokeLayout::TopLayout()})
+  RO::EvalBespokeArrayLikeMode = 2;
+  auto const foo_layout = ArrayLayout{
+    bespoke::testing::makeDummyLayout("foo", {ArrayLayout::Bespoke()})
   };
-  auto const bar_layout = BespokeLayout{
-    bespoke::testing::makeDummyLayout("bar", {BespokeLayout::TopLayout()})
+  auto const bar_layout = ArrayLayout{
+    bespoke::testing::makeDummyLayout("bar", {ArrayLayout::Bespoke()})
   };
+  bespoke::selectBespokeLayouts();
 
   ArrayTypeTable::Builder ratBuilder;
   auto const rat = ratBuilder.packedn(RepoAuthType::Array::Empty::No,
                                       RepoAuthType(RepoAuthType::Tag::Str));
   auto const vecRat = Type::Vec(rat);
   EXPECT_EQ("Vec=N([Str])", vecRat.toString());
-  auto const vecRatBespoke = vecRat.narrowToBespokeLayout(foo_layout);
+  auto const vecRatBespoke = vecRat.narrowToLayout(foo_layout);
   EXPECT_EQ("Vec=Bespoke(foo):N([Str])", vecRatBespoke.toString());
   auto const vecRatVanilla = vecRat.narrowToVanilla();
   EXPECT_EQ("Vec=Vanilla:N([Str])", vecRatVanilla.toString());
 
   EXPECT_EQ(TBottom, vecRatBespoke.narrowToVanilla());
-  EXPECT_EQ(TBottom, vecRatVanilla.narrowToBespokeLayout(foo_layout));
-  EXPECT_EQ(TBottom, vecRatBespoke.narrowToBespokeLayout(bar_layout));
+  EXPECT_EQ(TBottom, vecRatVanilla.narrowToLayout(foo_layout));
+  EXPECT_EQ(TBottom, vecRatBespoke.narrowToLayout(bar_layout));
 }
 
 TEST(Type, VanillaVecRAT) {
@@ -1091,28 +1092,29 @@ TEST(Type, BespokeHierarchy) {
    * bar  bat(L) ter
    */
   RO::EvalBespokeArrayLikeMode = 2;
-  auto const foo_layout = BespokeLayout{
-    bespoke::testing::makeDummyLayout("foo", {BespokeLayout::TopLayout()})
+  auto const foo_layout = ArrayLayout{
+    bespoke::testing::makeDummyLayout("foo", {ArrayLayout::Bespoke()})
   };
-  auto const baz_layout = BespokeLayout{
-    bespoke::testing::makeDummyLayout("baz", {BespokeLayout::TopLayout()})
+  auto const baz_layout = ArrayLayout{
+    bespoke::testing::makeDummyLayout("baz", {ArrayLayout::Bespoke()})
   };
-  auto const bar_layout = BespokeLayout{
+  auto const bar_layout = ArrayLayout{
     bespoke::testing::makeDummyLayout("bar", {foo_layout})
   };
-  auto const bat_layout = BespokeLayout{
+  auto const bat_layout = ArrayLayout{
     bespoke::testing::makeDummyLayout("bat", {foo_layout, baz_layout})
   };
-  auto const ter_layout = BespokeLayout{
+  auto const ter_layout = ArrayLayout{
     bespoke::testing::makeDummyLayout("ter", {baz_layout})
   };
-  BespokeLayout::FinalizeHierarchy();
-  auto const top = TVec.narrowToBespokeLayout(BespokeLayout::TopLayout());
-  auto const foo = TVec.narrowToBespokeLayout(foo_layout);
-  auto const baz = TVec.narrowToBespokeLayout(baz_layout);
-  auto const bar = TVec.narrowToBespokeLayout(bar_layout);
-  auto const bat = TVec.narrowToBespokeLayout(bat_layout);
-  auto const ter = TVec.narrowToBespokeLayout(ter_layout);
+  bespoke::selectBespokeLayouts();
+
+  auto const top = TVec.narrowToLayout(ArrayLayout::Bespoke());
+  auto const foo = TVec.narrowToLayout(foo_layout);
+  auto const baz = TVec.narrowToLayout(baz_layout);
+  auto const bar = TVec.narrowToLayout(bar_layout);
+  auto const bat = TVec.narrowToLayout(bat_layout);
+  auto const ter = TVec.narrowToLayout(ter_layout);
   auto const bot = TBottom;
 
   // Subtypes

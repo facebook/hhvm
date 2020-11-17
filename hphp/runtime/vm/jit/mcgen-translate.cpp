@@ -42,7 +42,6 @@
 #include "hphp/runtime/vm/workload-stats.h"
 
 #include "hphp/runtime/base/bespoke-array.h"
-#include "hphp/runtime/base/bespoke-layout.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/tracing.h"
 #include "hphp/runtime/base/vm-worker.h"
@@ -358,10 +357,7 @@ void retranslateAll() {
   auto const nFuncs = sortedFuncs.size();
 
   // 2) Perform bespoke coloring and finalize the layout hierarchy.
-  if (allowBespokeArrayLikes()) {
-    bespoke::setLoggingEnabled(false);
-    BespokeLayout::FinalizeHierarchy();
-  }
+  if (allowBespokeArrayLikes()) bespoke::selectBespokeLayouts();
 
   // 3) Check if we should dump profile data. We may exit here in
   //    SerializeAndExit mode, without really doing the JIT, unless

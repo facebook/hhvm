@@ -169,16 +169,16 @@ void emitSpecializedTypeTest(Vout& v, IRLS& /*env*/, Type type, Loc dataSrc,
     return;
   }
 
-  DEBUG_ONLY auto const arrSpec = type.arrSpec();
+  auto const spec = type.arrSpec();
   assertx(allowBespokeArrayLikes());
-  assertx(!arrSpec.type());
+  assertx(!spec.type());
 
   auto const r = materialize(v, dataSrc);
-  if (arrSpec.vanilla()) {
+  if (spec.vanilla()) {
     v << testbim{ArrayData::kBespokeKindMask, r[HeaderKindOffset], sf};
     doJcc(CC_Z, sf);
-  } else if (auto const layout = arrSpec.bespokeLayout()) {
-    auto const value = BespokeArray::kExtraMagicBit.raw | layout->index().raw;
+  } else if (auto const index = spec.layout().layoutIndex()) {
+    auto const value = BespokeArray::kExtraMagicBit.raw | index->raw;
     v << cmpwim{
       static_cast<int16_t>(value),
       r[ArrayData::offsetOfBespokeIndex()],

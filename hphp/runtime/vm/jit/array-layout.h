@@ -60,6 +60,9 @@ struct ArrayLayout {
   // Return a human-readable debug string describing the layout.
   std::string describe() const;
 
+  // Simple "serialization" allowing us to pack this struct in ArraySpec.
+  constexpr uint16_t toUint16() const { return uint16_t(sort); }
+
   /**************************************************************************
    * Static helpers to get basic layouts
    **************************************************************************/
@@ -68,6 +71,10 @@ struct ArrayLayout {
   static constexpr ArrayLayout Vanilla() { return ArrayLayout(Sort::Vanilla); }
   static constexpr ArrayLayout Bespoke() { return ArrayLayout(Sort::Bespoke); }
   static constexpr ArrayLayout Bottom()  { return ArrayLayout(Sort::Bottom); }
+
+  static constexpr ArrayLayout FromUint16(uint16_t x) {
+    return ArrayLayout(Sort(x));
+  }
 
   /**************************************************************************
    * JIT support at the irgen level

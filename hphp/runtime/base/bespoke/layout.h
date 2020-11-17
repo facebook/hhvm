@@ -14,9 +14,7 @@
   +----------------------------------------------------------------------+
 */
 
-// don't mix this file up with runtime/base/bespoke-layout.h !
-#ifndef HPHP_BESPOKEDIR_LAYOUT_H_
-#define HPHP_BESPOKEDIR_LAYOUT_H_
+#pragma once
 
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/bespoke-array.h"
@@ -328,7 +326,7 @@ struct Layout {
    * JIT support
    *
    * In all the irgen emit helpers below, `arr` is guaranteed to be an array
-   * matching this BespokeLayout's type class.
+   * matching this bespoke layout's type class.
    *
    * For those methods that take `key`, it is guaranteed to be a valid key
    * for the base's type. For example, if `arr` is a dict, then `key` is an
@@ -473,5 +471,3 @@ private:
 };
 
 }}
-
-#endif // HPHP_BESPOKEDIR_LAYOUT_H_

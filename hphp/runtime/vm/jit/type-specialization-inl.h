@@ -160,82 +160,55 @@ inline TypeSpec TypeSpec::operator-(const TypeSpec& rhs) const {
 ///////////////////////////////////////////////////////////////////////////////
 // ArraySpec.
 
-inline ArraySpec::Sort ArraySpec::sortForBespokeLayout(const BespokeLayout& l) {
-  return safe_cast<ArraySpec::Sort>(
-    static_cast<uint16_t>(ArraySpec::Sort::Vanilla) + l.index().raw + 1
-  );
-}
+static_assert(sizeof(ArraySpec) == 8);
 
-inline std::optional<BespokeLayout>
-ArraySpec::bespokeLayoutForSort(ArraySpec::Sort s) {
-  auto const sort = static_cast<uint16_t>(s);
-  auto constexpr vanilla = static_cast<uint16_t>(Sort::Vanilla);
-  if (sort > vanilla) {
-    auto const index = safe_cast<uint16_t>(sort - (vanilla + 1));
-    return BespokeLayout::FromIndex({index});
-  } else {
-    return {};
-  }
-}
-
-constexpr inline ArraySpec::ArraySpec(LayoutTag tag)
-  : m_sort(tag == LayoutTag::Vanilla ? Sort::Vanilla : Sort::Top)
-  , m_ptr(0)
+constexpr inline ArraySpec::ArraySpec()
+  : m_layout(ArrayLayout::Top().toUint16())
+  , m_type(0)
 {}
 
 constexpr inline ArraySpec::ArraySpec(ArraySpec::BottomTag)
-  : m_sort(Sort::Bottom)
-  , m_ptr(0)
+  : m_layout(ArrayLayout::Bottom().toUint16())
+  , m_type(0)
 {}
 
-inline ArraySpec::ArraySpec(const RepoAuthType::Array* arrTy)
-  : m_sort(Sort::Top)
-  , m_ptr(reinterpret_cast<uintptr_t>(arrTy))
+inline ArraySpec::ArraySpec(ArrayLayout layout)
+  : m_layout(layout.toUint16())
+  , m_type(0)
 {
   assertx(checkInvariants());
 }
 
-inline ArraySpec::ArraySpec(BespokeLayout layout)
-  : m_sort(sortForBespokeLayout(layout))
-  , m_ptr(0)
-{}
-
-
-inline ArraySpec ArraySpec::narrowToVanilla() const {
-  auto result = *this;
-  if (m_sort == Sort::Top) {
-    result.m_sort = Sort::Vanilla;
-  } else if (m_sort != Sort::Vanilla) {
-    return Bottom();
-  }
-
-  return result;
+inline ArraySpec::ArraySpec(const RepoAuthType::Array* type)
+  : m_layout(ArrayLayout::Top().toUint16())
+  , m_type(reinterpret_cast<uintptr_t>(type))
+{
+  assertx(checkInvariants());
 }
 
-inline ArraySpec ArraySpec::narrowToBespokeLayout(BespokeLayout layout) const {
-  auto result = *this;
-
-  auto const target = sortForBespokeLayout(layout);
-  if (m_sort == Sort::Top) {
-    result.m_sort = target;
-  } else if (m_sort != target) {
-    return Bottom();
-  }
-
-  return result;
+inline ArraySpec ArraySpec::narrowToLayout(ArrayLayout layout) const {
+  return *this & ArraySpec(layout);
 }
 
 inline void ArraySpec::setType(const RepoAuthType::Array* adjusted) {
   assertx(type() && adjusted);
-  m_ptr = reinterpret_cast<uintptr_t>(adjusted);
+  m_type = reinterpret_cast<uintptr_t>(adjusted);
+}
+
+inline ArrayLayout ArraySpec::layout() const {
+  return ArrayLayout::FromUint16(m_layout);
 }
 
 inline const RepoAuthType::Array* ArraySpec::type() const {
-  return reinterpret_cast<const RepoAuthType::Array*>(m_ptr);
+  return reinterpret_cast<const RepoAuthType::Array*>(m_type);
 }
 
 inline bool ArraySpec::vanilla() const {
-  return m_sort == Sort::Vanilla;
+  return layout().vanilla();
+}
+
+inline bool ArraySpec::bespoke() const {
+  return layout().bespoke();
 }
 
 IMPLEMENT_SPEC_OPERS(ArraySpec, false)

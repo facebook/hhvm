@@ -17,7 +17,6 @@
 #pragma once
 
 #include "hphp/runtime/base/array-data.h"
-#include "hphp/runtime/base/bespoke-layout.h"
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/repo-auth-type.h"
@@ -773,12 +772,11 @@ public:
   Type narrowToVanilla() const;
 
   /*
-   * Return a copy of this type with an ArraySpec for the given bespoke index
-   *   TVanillaArr.narrowToBespokeLayout(<some layout>) == TBottom
-   *   TVec.narrowToBespokeLayout(<some layout>) == TVec=Bespoke(<some layout>)
-   *   (TVec|TInt).narrowToBespokeLayout(<some layout>) == TVec=Bespoke(<some layout>)|TInt
+   * Return a copy of this type with an ArraySpec for the given layout
+   *   TVec.narrowToLayout(<some layout>) == TVec=<some layout>
+   *   (TVec|TInt).narrowToLayout(<some layout>) == TVec=<some layout>|TInt
    */
-  Type narrowToBespokeLayout(BespokeLayout) const;
+  Type narrowToLayout(ArrayLayout) const;
 
   /*
    * Return a copy of this Type with the specialization dropped.

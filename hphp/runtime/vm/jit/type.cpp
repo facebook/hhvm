@@ -17,7 +17,6 @@
 #include "hphp/runtime/vm/jit/type.h"
 
 #include "hphp/runtime/base/bespoke-array.h"
-#include "hphp/runtime/base/bespoke-layout.h"
 #include "hphp/runtime/base/repo-auth-type-array.h"
 #include "hphp/runtime/base/tv-type.h"
 #include "hphp/runtime/vm/jit/guard-constraint.h"
@@ -72,19 +71,15 @@ constexpr Type::bits_t Type::kClsSpecBits;
 // Vanilla array-spec manipulation.
 
 Type Type::narrowToVanilla() const {
-  if (!supports(SpecKind::Array)) return *this;
-  if (supports(SpecKind::Class) || supports(SpecKind::Record)) return *this;
-  auto const newSpec = arrSpec().narrowToVanilla();
-  if (newSpec == ArraySpec::Bottom()) return TBottom;
-  return Type(*this, newSpec);
+  return narrowToLayout(ArrayLayout::Vanilla());
 }
 
-Type Type::narrowToBespokeLayout(BespokeLayout layout) const {
+Type Type::narrowToLayout(ArrayLayout layout) const {
   if (!supports(SpecKind::Array)) return *this;
   if (supports(SpecKind::Class) || supports(SpecKind::Record)) return *this;
-  auto const newSpec = arrSpec().narrowToBespokeLayout(layout);
-  if (newSpec == ArraySpec::Bottom()) return TBottom;
-  return Type(*this, newSpec);
+  auto const spec = arrSpec().narrowToLayout(layout);
+  if (spec == ArraySpec::Bottom()) return TBottom;
+  return Type(*this, spec);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -628,7 +623,7 @@ Type Type::modified() const {
   if (t.maybe(TDict))   t |= TDict;
   if (t.maybe(TKeyset)) t |= TKeyset;
   if (t.maybe(TStr))    t |= TStr;
-  auto const spec = ArraySpec(ArraySpec::LayoutTag::Vanilla);
+  auto const spec = ArraySpec(ArrayLayout::Vanilla());
   return arrSpec().vanilla() ? Type(t, spec) : t;
 }
 
@@ -642,10 +637,10 @@ static bool arrayFitsSpec(const ArrayData* arr, ArraySpec spec) {
 
   if (spec.vanilla() && !arr->isVanilla()) {
     return false;
-  } else if (auto const layout = spec.bespokeLayout()) {
+  } else if (spec.bespoke()) {
     if (arr->isVanilla()) return false;
     auto const index = BespokeArray::asBespoke(arr)->layoutIndex();
-    if (!(BespokeLayout::FromIndex(index) <= layout)) return false;
+    if (!(ArrayLayout(index) <= spec.layout())) return false;
   }
 
   if (!spec.type()) return true;
@@ -924,7 +919,7 @@ Type typeFromTV(tv_rval tv, const Class* ctx) {
     if (val(tv).parr->isVanilla()) {
       return result.narrowToVanilla();
     } else {
-      return result.narrowToBespokeLayout(BespokeLayout::TopLayout());
+      return result.narrowToLayout(ArrayLayout::Bespoke());
     }
   }
 

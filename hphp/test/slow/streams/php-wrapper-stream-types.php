@@ -12,7 +12,7 @@ function main() {
     varray['php://output', 'w'],
   ];
   foreach ($to_open as $target) {
-    $stream = call_user_func_array(fun('fopen'), $target);
+    $stream = call_user_func_array(fopen<>, $target);
     $metadata = stream_get_meta_data($stream);
     var_dump(
       darray[

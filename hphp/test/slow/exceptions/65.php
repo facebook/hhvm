@@ -32,7 +32,7 @@ function test($f) {
 <<__EntryPoint>>
 function main_65() {
 error_reporting(-1);
-set_error_handler(fun('handle'));
+set_error_handler(handle<>);
 test('test1');
 test('test2');
 test('test3');

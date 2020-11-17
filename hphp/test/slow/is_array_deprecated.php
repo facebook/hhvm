@@ -8,7 +8,7 @@ function main(): void {
     42,
     Vector {},
   ] |> __hhvm_intrinsics\launder_value($$);
-  $fn = __hhvm_intrinsics\launder_value(fun('is_array'));
+  $fn = __hhvm_intrinsics\launder_value(is_array<>);
 
   foreach ($values as $v) {
     echo " --- Direct is_array call --- \n";

@@ -8,6 +8,6 @@ function handler($code, $msg) {
 
  <<__EntryPoint>>
 function main_1367() {
-set_error_handler(fun('handler'));
+set_error_handler(handler<>);
 user_error('system error');
 }

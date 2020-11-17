@@ -20,7 +20,7 @@ async function z() {
 }
 
 async function x() {
-  ClassContext::genStart(new D, fun('z'));
+  ClassContext::genStart(new D, z<>);
 }
 
 async function g() {
@@ -28,7 +28,7 @@ async function g() {
     echo 'Expecting C got ' . ClassContext::getContext()->name() . "\n";
     // Async entry point already has an instance of the scheduler
     // lets add another
-    $a = ClassContext::genStart(new D, fun('y'));
+    $a = ClassContext::genStart(new D, y<>);
     echo 'Expecting C got ' . ClassContext::getContext()->name() . "\n";
     \HH\Asio\join(AwaitAllWaitHandle::fromVec(vec[x(), Foo::$bar]));
     echo 'Expecting C got ' . ClassContext::getContext()->name() . "\n";

@@ -11,7 +11,7 @@ async function g() {
     echo 'Expecting C got ' . ClassContext::getContext()->name() . "\n";
     // Async entry point already has an instance of the scheduler
     // lets add another
-    \HH\Asio\join(ClassContext::genStart(new D, fun('f')));
+    \HH\Asio\join(ClassContext::genStart(new D, f<>));
     echo 'Expecting C got ' . ClassContext::getContext()->name() . "\n";
   });
 }

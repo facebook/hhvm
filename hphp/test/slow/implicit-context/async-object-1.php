@@ -40,5 +40,5 @@ async function f() {
 async function main() {
   include 'async-implicit.inc';
 
-  await ClassContext::genStart(new C, fun('f'));
+  await ClassContext::genStart(new C, f<>);
 }

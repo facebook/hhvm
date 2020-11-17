@@ -13,7 +13,7 @@ $fruits = darray[
   "b" => "banana",
   "c" => "apple"
 ];
-uasort(inout $fruits, fun('reverse_strcasecmp'));
+uasort(inout $fruits, reverse_strcasecmp<>);
 var_dump($fruits);
 
 $fruits = darray[
@@ -22,7 +22,7 @@ $fruits = darray[
   "b" => "banana",
   "c" => "apple"
 ];
-uksort(inout $fruits, fun('reverse_strcasecmp'));
+uksort(inout $fruits, reverse_strcasecmp<>);
 var_dump($fruits);
 
 uasort(inout $fruits, "undefined_function_");

@@ -9,7 +9,7 @@ function main_1562() {
 ob_start();
 echo "from first level\n";
 ob_start();
-ob_start(fun("callback"));
+ob_start(callback<>);
 echo "foobar!\n";
 exit;
 }

@@ -13,7 +13,7 @@ list($a, $b) = stream_socket_pair(STREAM_PF_UNIX, STREAM_SOCK_STREAM,
                                   STREAM_IPPROTO_IP);
 fclose($b);
 
-set_error_handler(fun("handler"));
+set_error_handler(handler<>);
 var_dump(fwrite($a, "foo"));
 
 restore_error_handler();

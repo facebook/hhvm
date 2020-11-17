@@ -19,5 +19,5 @@ async function main() {
       echo "Correct: no context!\n";
     }
   });
-  await ClassContext::genStart(new C, fun('f'));
+  await ClassContext::genStart(new C, f<>);
 }

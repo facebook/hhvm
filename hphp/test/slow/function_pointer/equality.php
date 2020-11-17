@@ -30,7 +30,7 @@ function main(): void {
 
   comp(foo<int>, 'foo');
 
-  comp(foo<int>, fun('foo'));
+  comp(foo<int>, foo<>);
 
   comp(foo<int>, true);
 

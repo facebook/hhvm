@@ -3,7 +3,7 @@
 
 <<__EntryPoint>>
 function main() {
-  set_error_handler(fun('handler'));
+  set_error_handler(handler<>);
   handler(E_NOTICE, 'my test', __FILE__, __LINE__);
   trigger_error('foobar');
 }

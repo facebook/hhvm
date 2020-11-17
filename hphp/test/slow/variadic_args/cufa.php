@@ -5,11 +5,11 @@ function test_cufa($args) {
   var_dump($args);
 
   echo "\n", '========= functions ==========', "\n";
-  call_user_func_array(fun('variadic_only_no_vv'), $args);
-  call_user_func_array(fun('variadic_only'), $args);
-  try { call_user_func_array(fun('variadic_some'), $args); } catch (Exception $e) { var_dump($e->getMessage()); }
-  call_user_func_array(fun('variadic_hack_only'), $args);
-  try { call_user_func_array(fun('variadic_hack_some'), $args); } catch (Exception $e) { var_dump($e->getMessage()); }
+  call_user_func_array(variadic_only_no_vv<>, $args);
+  call_user_func_array(variadic_only<>, $args);
+  try { call_user_func_array(variadic_some<>, $args); } catch (Exception $e) { var_dump($e->getMessage()); }
+  call_user_func_array(variadic_hack_only<>, $args);
+  try { call_user_func_array(variadic_hack_some<>, $args); } catch (Exception $e) { var_dump($e->getMessage()); }
   echo "\n", '========= static methods ==========', "\n";
   call_user_func_array(varray['C', 'st_variadic_only'], $args);
   try { call_user_func_array(varray['C', 'st_variadic_some'], $args); } catch (Exception $e) { var_dump($e->getMessage()); }
@@ -25,11 +25,11 @@ function test_cufa($args) {
 
 function test_cuf() {
   echo "\n", '********* ', __FUNCTION__, ' **********', "\n";
-  call_user_func(fun('variadic_only_no_vv'), 'a', 'b', 'c');
-  call_user_func(fun('variadic_only'), 'a', 'b', 'c');
-  call_user_func(fun('variadic_some'), 'a', 'b', 'c');
-  call_user_func(fun('variadic_hack_only'), 'a', 'b', 'c');
-  call_user_func(fun('variadic_hack_some'), 'a', 'b', 'c');
+  call_user_func(variadic_only_no_vv<>, 'a', 'b', 'c');
+  call_user_func(variadic_only<>, 'a', 'b', 'c');
+  call_user_func(variadic_some<>, 'a', 'b', 'c');
+  call_user_func(variadic_hack_only<>, 'a', 'b', 'c');
+  call_user_func(variadic_hack_some<>, 'a', 'b', 'c');
   echo "\n", '========= static methods ==========', "\n";
   call_user_func(varray['C', 'st_variadic_only'], 'a', 'b', 'c');
   call_user_func(varray['C', 'st_variadic_some'], 'a', 'b', 'c');
@@ -45,11 +45,11 @@ function test_cuf() {
 
 function test_cuf_insuffient_calls() {
   echo "\n", '********* ', __FUNCTION__, ' **********', "\n";
-  call_user_func(fun('variadic_only_no_vv'));
-  call_user_func(fun('variadic_only'));
-  try { call_user_func(fun('variadic_some')); } catch (Exception $e) { var_dump($e->getMessage()); }
-  call_user_func(fun('variadic_hack_only'));
-  try { call_user_func(fun('variadic_hack_some')); } catch (Exception $e) { var_dump($e->getMessage()); }
+  call_user_func(variadic_only_no_vv<>);
+  call_user_func(variadic_only<>);
+  try { call_user_func(variadic_some<>); } catch (Exception $e) { var_dump($e->getMessage()); }
+  call_user_func(variadic_hack_only<>);
+  try { call_user_func(variadic_hack_some<>); } catch (Exception $e) { var_dump($e->getMessage()); }
   echo "\n", '========= static methods ==========', "\n";
   call_user_func(varray['C', 'st_variadic_only']);
   try { call_user_func(varray['C', 'st_variadic_some']); } catch (Exception $e) { var_dump($e->getMessage()); }

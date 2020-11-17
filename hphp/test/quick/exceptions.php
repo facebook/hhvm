@@ -70,7 +70,7 @@ class A {
 
 function main2() {
   try {
-    call_user_func(fun("hphp_create_object"), "A", NULL);
+    call_user_func(hphp_create_object<>, "A", NULL);
   } catch (Exception $e) {
     print "caught exception\n";
   }

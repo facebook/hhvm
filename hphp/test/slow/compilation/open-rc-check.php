@@ -8,7 +8,7 @@ function fatal_handler() {
 
 <<__EntryPoint>>
 function main_open_rc_check() {
-register_shutdown_function(fun('fatal_handler'));
+register_shutdown_function(fatal_handler<>);
 
 $file = tempnam(sys_get_temp_dir(), 'cannotopen');
 $data = "//Nothing";

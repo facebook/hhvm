@@ -11,7 +11,7 @@ async function g() {
 async function f() {
   echo "in f should be C got ";
   echo ClassContext::getContext()->name() . "\n";
-  $a = ClassContext::genStart(new D, fun('g'));
+  $a = ClassContext::genStart(new D, g<>);
   echo "before await in f should be C got ";
   echo ClassContext::getContext()->name() . "\n";
   await $a;
@@ -23,5 +23,5 @@ async function f() {
 async function main() {
   include 'async-implicit.inc';
 
-  await ClassContext::genStart(new C, fun('f'));
+  await ClassContext::genStart(new C, f<>);
 }

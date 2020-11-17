@@ -5,6 +5,6 @@ function handle_error() {
 }
 <<__EntryPoint>>
 function main() {
-  set_error_handler(fun('handle_error'));
+  set_error_handler(handle_error<>);
   date_default_timezone_set(...varray['America/Gotham_City']);
 }

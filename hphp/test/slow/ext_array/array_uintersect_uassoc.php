@@ -16,5 +16,5 @@ $array2 = dict[
   "1" => "red"
 ];
 var_dump(
-  array_uintersect_uassoc($array1, $array2, 'strcasecmp', fun('strcasecmp')));
+  array_uintersect_uassoc($array1, $array2, 'strcasecmp', strcasecmp<>));
 }

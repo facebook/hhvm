@@ -69,6 +69,6 @@ function main() {
 <<__EntryPoint>>
 function main_array_typehint() {
 error_reporting(-1);
-set_error_handler(fun('handler'));
+set_error_handler(handler<>);
 main();
 }

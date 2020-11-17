@@ -9,7 +9,7 @@ function reverse_comp_func($n1,$n2) {
 <<__EntryPoint>>
 function main_usort() {
 $a = varray[3, 2, 5, 6, 10];
-usort(inout $a, fun("reverse_comp_func"));
+usort(inout $a, reverse_comp_func<>);
 var_dump($a);
 
 usort(inout $a, "undefined_function_");

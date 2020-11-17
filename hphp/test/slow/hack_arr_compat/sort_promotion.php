@@ -39,14 +39,14 @@ function utest($name, $sf) {
 <<__EntryPoint>>
 function main() {
   echo "====== never promote varray => darray ======\n";
-  test( 'sort',  fun('sort'));
-  test( 'rsort', fun('rsort'));
-  utest('usort', fun('usort'));
-  test( 'ksort', fun('ksort'));
+  test( 'sort',  sort<>);
+  test( 'rsort', rsort<>);
+  utest('usort', usort<>);
+  test( 'ksort', ksort<>);
   echo "====== always promote varray => darray ======\n";
-  test( 'krsort', fun('krsort'));
-  utest('uksort', fun('uksort'));
-  test( 'asort',  fun('asort'));
-  test( 'arsort', fun('arsort'));
-  utest('uasort', fun('uasort'));
+  test( 'krsort', krsort<>);
+  utest('uksort', uksort<>);
+  test( 'asort',  asort<>);
+  test( 'arsort', arsort<>);
+  utest('uasort', uasort<>);
 }

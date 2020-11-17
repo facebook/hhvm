@@ -9,15 +9,15 @@ function multiply($x, $y) {
 
 function test_mapping() {
   echo "* ", __FUNCTION__, " *\n";
-  var_dump(array_map(fun('plusOne'), Vector {3, 5, 7}));
-  var_dump(array_map(fun('plusOne'), Map {2 => 0, 5 => 2, 6 => 4}));
-  var_dump(array_map(fun('plusOne'), Set {3}));
-  var_dump(array_map(fun('plusOne'), Pair {11, 22}));
+  var_dump(array_map(plusOne<>, Vector {3, 5, 7}));
+  var_dump(array_map(plusOne<>, Map {2 => 0, 5 => 2, 6 => 4}));
+  var_dump(array_map(plusOne<>, Set {3}));
+  var_dump(array_map(plusOne<>, Pair {11, 22}));
   echo "========\n";
-  var_dump(array_map(fun('multiply'), darray[2 => 0, 4 => 2, 6 => 4], Vector {3, 5}));
-  var_dump(array_map(fun('multiply'), Map {2 => 0, 4 => 2}, varray[3, 5, 7]));
-  var_dump(array_map(fun('multiply'), Map {4 => 2}, Set {3}));
-  var_dump(array_map(fun('multiply'), Pair {11, 22}, Pair {33, 44}));
+  var_dump(array_map(multiply<>, darray[2 => 0, 4 => 2, 6 => 4], Vector {3, 5}));
+  var_dump(array_map(multiply<>, Map {2 => 0, 4 => 2}, varray[3, 5, 7]));
+  var_dump(array_map(multiply<>, Map {4 => 2}, Set {3}));
+  var_dump(array_map(multiply<>, Pair {11, 22}, Pair {33, 44}));
   echo "========\n";
   var_dump(array_map(null, Vector {3, 5, 7}));
   var_dump(array_map(null, Map {2 => 0, 4 => 2, 6 => 4}));

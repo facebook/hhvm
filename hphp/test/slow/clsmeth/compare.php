@@ -53,9 +53,9 @@ function WRAPD($x) { $r = new stdclass; $r->x = $x; return LV($r); }
   $cm = class_meth(Foo::class, 'bar');
   $va = varray[Foo::class, 'bar'];
   $oa = varray[new StrObj(Foo::class), new StrObj('bar')];
-  $fa = varray[Foo::class, fun('bar')];
+  $fa = varray[Foo::class, bar<>];
   $ca = varray[CLS('Foo'), 'bar'];
-  $pa = varray[CLS('Foo'), fun('bar')];
+  $pa = varray[CLS('Foo'), bar<>];
 
   $xx = varray[$cm]; $vx = varray[$va]; $ox = varray[$oa]; $fx = varray[$fa];
   $cx = varray[$ca]; $px = varray[$pa];
@@ -204,9 +204,9 @@ function WRAPD($x) { $r = new stdclass; $r->x = $x; return LV($r); }
   $cm = LV(class_meth(Foo::class, 'bar'));
   $va = LV(varray[Foo::class, 'bar']);
   $oa = LV(varray[new StrObj(Foo::class), new StrObj('bar')]);
-  $fa = LV(varray[Foo::class, fun('bar')]);
+  $fa = LV(varray[Foo::class, bar<>]);
   $ca = LV(varray[CLS('Foo'), 'bar']);
-  $pa = LV(varray[CLS('Foo'), fun('bar')]);
+  $pa = LV(varray[CLS('Foo'), bar<>]);
 
   $xx = WRAPA($cm); $vx = WRAPA($va); $ox = WRAPA($oa); $fx = WRAPA($fa);
   $cx = WRAPA($ca); $px = WRAPA($pa);

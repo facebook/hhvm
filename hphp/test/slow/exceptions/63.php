@@ -2,7 +2,7 @@
 function test() {
   for ($i = 0; $i < 4000; $i++) {
     try {
-      call_user_func(fun('bar'));
+      call_user_func(bar<>);
     }
     catch (Exception $e) {
     }

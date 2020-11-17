@@ -86,7 +86,7 @@ function testInvalidKeys() {
   // Also check that foreign arrays work for indirect calls
   apc_store('foo', varray["a"]);
   $a = __hhvm_intrinsics\apc_fetch_no_check('foo');
-  $b = call_user_func_array(fun("strtoupper"), $a);
+  $b = call_user_func_array(strtoupper<>, $a);
   var_dump($b);
 
   testKeyTypes();

@@ -15,8 +15,8 @@ function entrypoint_error_get_last_error(): void {
   // at the start it should be NULL
   var_dump(error_get_last());
 
-  set_error_handler(fun('handleError'));
-  register_shutdown_function(fun('shutdownFunc'));
+  set_error_handler(handleError<>);
+  register_shutdown_function(shutdownFunc<>);
 
   if ($x) {
     echo "x\n";

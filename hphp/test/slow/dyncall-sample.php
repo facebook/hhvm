@@ -13,14 +13,14 @@ function main() {
   echo "Raw function call\n";
   foo(); bar();
 
-  $ffun = fun('foo');
-  $bfun = fun('bar');
+  $ffun = foo<>;
+  $bfun = bar<>;
 
   echo "Function pointer call\n";
   $ffun(); $bfun();
 
-  $ffun2 = __hhvm_intrinsics\launder_value(fun('foo'));
-  $bfun2 = __hhvm_intrinsics\launder_value(fun('bar'));
+  $ffun2 = __hhvm_intrinsics\launder_value(foo<>);
+  $bfun2 = __hhvm_intrinsics\launder_value(bar<>);
 
   echo "Function pointer call (laundered)\n";
   $ffun2(); $bfun2();

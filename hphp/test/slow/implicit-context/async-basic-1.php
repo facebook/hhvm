@@ -9,5 +9,5 @@ async function addFive() {
 async function main() {
   include 'async-implicit.inc';
 
-  var_dump(await IntContext::genStart(5, fun('addFive')));
+  var_dump(await IntContext::genStart(5, addFive<>));
 }

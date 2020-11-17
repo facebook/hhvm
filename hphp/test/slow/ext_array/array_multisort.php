@@ -25,7 +25,7 @@ function b() {
 
 function c() {
   $array = varray["Alpha", "atomic", "Beta", "bank"];
-  $array_lowercase = array_map(fun("strtolower"), $array);
+  $array_lowercase = array_map(strtolower<>, $array);
   $asc = SORT_ASC;
   $string = SORT_STRING;
   array_multisort4(inout $array_lowercase,

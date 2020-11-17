@@ -31,7 +31,7 @@ function main(): void {
 
   comp($f, 'foo');
 
-  comp($f, fun('foo'));
+  comp($f, foo<>);
 
   comp($f, vec[]);
 }

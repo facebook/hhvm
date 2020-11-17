@@ -12,7 +12,7 @@ $v = new Vector;
 $v[] = 'c';
 $v[] = 'a';
 $v[] = 'b';
-usort(inout $v, fun('cmp'));
+usort(inout $v, cmp<>);
 foreach ($v as $key => $val) {
   echo $key . ' ' . $val . "\n";
 }
@@ -23,12 +23,12 @@ $m['v'] = 4;
 $m['y'] = 3;
 $m['x'] = 5;
 $m['z'] = 1;
-uksort(inout $m, fun('cmp'));
+uksort(inout $m, cmp<>);
 foreach ($m as $key => $val) {
   echo $key . ' ' . $val . "\n";
 }
 echo "------------------------\n";
-uasort(inout $m, fun('cmp'));
+uasort(inout $m, cmp<>);
 foreach ($m as $key => $val) {
   echo $key . ' ' . $val . "\n";
 }

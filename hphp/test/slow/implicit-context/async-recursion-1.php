@@ -4,7 +4,7 @@ async function aux() {
   $x = IntContext::getContext();
   if ($x > 10) return;
   var_dump($x);
-  await IntContext::genStart($x+1, fun('aux'));
+  await IntContext::genStart($x+1, aux<>);
   var_dump(IntContext::getContext());
 }
 
@@ -12,5 +12,5 @@ async function aux() {
 async function main() {
   include 'async-implicit.inc';
 
-  await IntContext::genStart(0, fun('aux'));
+  await IntContext::genStart(0, aux<>);
 }

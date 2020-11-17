@@ -16,7 +16,7 @@ class z {
 <<__EntryPoint>>
 function main_1212() {
 $x = varray[1,2,3];
-array_map(fun('t'), $x);
+array_map(t<>, $x);
 $m = new z();
 $m->q();
 }

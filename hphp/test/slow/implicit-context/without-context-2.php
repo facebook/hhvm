@@ -21,17 +21,17 @@ async function g() {
 async function main() {
   include 'async-implicit.inc';
 
-  HH\gen_without_implicit_context(fun('f'));
+  HH\gen_without_implicit_context(f<>);
   await ClassContext::genStart(new C, async () ==> {
-    await HH\gen_without_implicit_context(fun('f'));
+    await HH\gen_without_implicit_context(f<>);
   });
-  await HH\gen_without_implicit_context(fun('g'));
+  await HH\gen_without_implicit_context(g<>);
   try {
-    await ClassContext::genStart(new C, fun('g'));
+    await ClassContext::genStart(new C, g<>);
   } catch (Exception $e) {
     echo $e->getMessage() . "\n";
   }
   await ClassContext::genStart(new C, async () ==> {
-    await HH\gen_without_implicit_context(fun('g'));
+    await HH\gen_without_implicit_context(g<>);
   });
 }

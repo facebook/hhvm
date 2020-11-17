@@ -20,7 +20,7 @@ async function z() {
 }
 
 async function x() {
-  ClassContext::genStart(new D, fun('z'));
+  ClassContext::genStart(new D, z<>);
 }
 
 async function f() {
@@ -31,5 +31,5 @@ async function f() {
 <<__EntryPoint>>
 async function main() {
   include 'async-implicit.inc';
-  await ClassContext::genStart(new C, fun('f'));
+  await ClassContext::genStart(new C, f<>);
 }

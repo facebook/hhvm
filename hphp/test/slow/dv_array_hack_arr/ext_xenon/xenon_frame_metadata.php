@@ -3,7 +3,7 @@
 function bar($name) {
   echo "calling bar($name)\n";
   // do something silly to force existence of bar() frame
-  call_user_func(fun('debug_backtrace'));
+  call_user_func(debug_backtrace<>);
 }
 
 function foo(string $name) {

@@ -6,7 +6,7 @@ function error_handler($errno, $errstr) {
 
 <<__EntryPoint>>
 function main() {
-  set_error_handler(fun('error_handler'));
+  set_error_handler(error_handler<>);
   var_dump(bcpow("2", "100.1"));
   var_dump(bcpow("2", "10000000000"));
   var_dump(bcpowmod("2.1", "3", "100"));

@@ -23,7 +23,7 @@
                            (([5:10-12], A<arraykey>), (Lvar ([5:10-12], $x))),
                            (([5:14-17], (function(): ?arraykey)),
                             (Id ([5:14-17], "get"))),
-                           OG_nullthrows))),
+                           OG_nullthrows, false))),
                        [], [], None))))))
           ];
         fb_annotation = () };

@@ -889,6 +889,7 @@ fn convert_meth_caller_to_func_ptr<'a>(
                     obj_lvar,
                     Expr(pos(), Expr_::mk_id(Id(pf.clone(), fname.to_owned()))),
                     OgNullFlavor::OGNullthrows,
+                    false,
                 ))),
             ),
             vec![],
@@ -1251,7 +1252,7 @@ impl<'ast, 'a> VisitorMut<'ast> for ClosureConvertVisitor<'a> {
             Expr_::Call(x)
                 if (x.0)
                     .as_class_get()
-                    .and_then(|(id, _)| id.as_ciexpr())
+                    .and_then(|(id, _, _)| id.as_ciexpr())
                     .and_then(|x| x.as_id())
                     .map(string_utils::is_parent)
                     .unwrap_or(false)

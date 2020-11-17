@@ -1053,7 +1053,6 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                         String2(_) => Some(Ty_::Tprim(arena.alloc(aast::Tprim::Tstring))),
                         PrefixedString(_) => Some(Ty_::Tprim(arena.alloc(aast::Tprim::Tstring))),
                         Unop(&(_op, expr)) => expr_to_ty(arena, expr),
-                        ParenthesizedExpr(expr) => expr_to_ty(arena, expr),
                         Any => Some(TANY_),
 
                         ArrayGet(_) | As(_) | Assert(_) | Await(_) | Binop(_) | BracedExpr(_)

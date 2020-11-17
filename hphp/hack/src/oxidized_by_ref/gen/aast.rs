@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<9e8a107bf1de845877847409251faf6a>>
+// @generated SignedSource<<92bd04b0abb63205685e90f0b19a57fb>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -356,23 +356,25 @@ pub enum Expr_<'a, Ex, Fb, En, Hi> {
     Lvar(&'a Lid<'a>),
     Dollardollar(&'a Lid<'a>),
     Clone(&'a Expr<'a, Ex, Fb, En, Hi>),
-    ObjGet(
-        &'a (
-            &'a Expr<'a, Ex, Fb, En, Hi>,
-            &'a Expr<'a, Ex, Fb, En, Hi>,
-            oxidized::aast::OgNullFlavor,
-        ),
-    ),
     ArrayGet(
         &'a (
             &'a Expr<'a, Ex, Fb, En, Hi>,
             Option<&'a Expr<'a, Ex, Fb, En, Hi>>,
         ),
     ),
+    ObjGet(
+        &'a (
+            &'a Expr<'a, Ex, Fb, En, Hi>,
+            &'a Expr<'a, Ex, Fb, En, Hi>,
+            oxidized::aast::OgNullFlavor,
+            bool,
+        ),
+    ),
     ClassGet(
         &'a (
             &'a ClassId<'a, Ex, Fb, En, Hi>,
             ClassGetExpr<'a, Ex, Fb, En, Hi>,
+            bool,
         ),
     ),
     ClassConst(&'a (&'a ClassId<'a, Ex, Fb, En, Hi>, &'a Pstring<'a>)),
@@ -456,7 +458,6 @@ pub enum Expr_<'a, Ex, Fb, En, Hi> {
         ),
     ),
     BracedExpr(&'a Expr<'a, Ex, Fb, En, Hi>),
-    ParenthesizedExpr(&'a Expr<'a, Ex, Fb, En, Hi>),
     ExpressionTree(&'a ExpressionTree<'a, Ex, Fb, En, Hi>),
     Lplaceholder(&'a Pos<'a>),
     FunId(&'a Sid<'a>),

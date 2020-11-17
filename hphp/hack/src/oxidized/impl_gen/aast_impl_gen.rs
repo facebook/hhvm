@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ecc7e4093ccfbc1891e999ba4829fb36>>
+// @generated SignedSource<<ef1396ce13f2898d5ac73a076cdcb250>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -1009,18 +1009,23 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
     pub fn mk_clone(p0: Expr<Ex, Fb, En, Hi>) -> Self {
         Expr_::Clone(Box::new(p0))
     }
+    pub fn mk_array_get(p0: Expr<Ex, Fb, En, Hi>, p1: Option<Expr<Ex, Fb, En, Hi>>) -> Self {
+        Expr_::ArrayGet(Box::new((p0, p1)))
+    }
     pub fn mk_obj_get(
         p0: Expr<Ex, Fb, En, Hi>,
         p1: Expr<Ex, Fb, En, Hi>,
         p2: OgNullFlavor,
+        p3: bool,
     ) -> Self {
-        Expr_::ObjGet(Box::new((p0, p1, p2)))
+        Expr_::ObjGet(Box::new((p0, p1, p2, p3)))
     }
-    pub fn mk_array_get(p0: Expr<Ex, Fb, En, Hi>, p1: Option<Expr<Ex, Fb, En, Hi>>) -> Self {
-        Expr_::ArrayGet(Box::new((p0, p1)))
-    }
-    pub fn mk_class_get(p0: ClassId<Ex, Fb, En, Hi>, p1: ClassGetExpr<Ex, Fb, En, Hi>) -> Self {
-        Expr_::ClassGet(Box::new((p0, p1)))
+    pub fn mk_class_get(
+        p0: ClassId<Ex, Fb, En, Hi>,
+        p1: ClassGetExpr<Ex, Fb, En, Hi>,
+        p2: bool,
+    ) -> Self {
+        Expr_::ClassGet(Box::new((p0, p1, p2)))
     }
     pub fn mk_class_const(p0: ClassId<Ex, Fb, En, Hi>, p1: Pstring) -> Self {
         Expr_::ClassConst(Box::new((p0, p1)))
@@ -1131,9 +1136,6 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
     }
     pub fn mk_braced_expr(p0: Expr<Ex, Fb, En, Hi>) -> Self {
         Expr_::BracedExpr(Box::new(p0))
-    }
-    pub fn mk_parenthesized_expr(p0: Expr<Ex, Fb, En, Hi>) -> Self {
-        Expr_::ParenthesizedExpr(Box::new(p0))
     }
     pub fn mk_expression_tree(p0: ExpressionTree<Ex, Fb, En, Hi>) -> Self {
         Expr_::ExpressionTree(Box::new(p0))
@@ -1256,15 +1258,15 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
             _ => false,
         }
     }
-    pub fn is_obj_get(&self) -> bool {
-        match self {
-            Expr_::ObjGet(..) => true,
-            _ => false,
-        }
-    }
     pub fn is_array_get(&self) -> bool {
         match self {
             Expr_::ArrayGet(..) => true,
+            _ => false,
+        }
+    }
+    pub fn is_obj_get(&self) -> bool {
+        match self {
+            Expr_::ObjGet(..) => true,
             _ => false,
         }
     }
@@ -1448,12 +1450,6 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
             _ => false,
         }
     }
-    pub fn is_parenthesized_expr(&self) -> bool {
-        match self {
-            Expr_::ParenthesizedExpr(..) => true,
-            _ => false,
-        }
-    }
     pub fn is_expression_tree(&self) -> bool {
         match self {
             Expr_::ExpressionTree(..) => true,
@@ -1587,25 +1583,34 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
             _ => None,
         }
     }
-    pub fn as_obj_get(
-        &self,
-    ) -> Option<(&Expr<Ex, Fb, En, Hi>, &Expr<Ex, Fb, En, Hi>, &OgNullFlavor)> {
-        match self {
-            Expr_::ObjGet(p0) => Some((&p0.0, &p0.1, &p0.2)),
-            _ => None,
-        }
-    }
     pub fn as_array_get(&self) -> Option<(&Expr<Ex, Fb, En, Hi>, &Option<Expr<Ex, Fb, En, Hi>>)> {
         match self {
             Expr_::ArrayGet(p0) => Some((&p0.0, &p0.1)),
             _ => None,
         }
     }
+    pub fn as_obj_get(
+        &self,
+    ) -> Option<(
+        &Expr<Ex, Fb, En, Hi>,
+        &Expr<Ex, Fb, En, Hi>,
+        &OgNullFlavor,
+        &bool,
+    )> {
+        match self {
+            Expr_::ObjGet(p0) => Some((&p0.0, &p0.1, &p0.2, &p0.3)),
+            _ => None,
+        }
+    }
     pub fn as_class_get(
         &self,
-    ) -> Option<(&ClassId<Ex, Fb, En, Hi>, &ClassGetExpr<Ex, Fb, En, Hi>)> {
+    ) -> Option<(
+        &ClassId<Ex, Fb, En, Hi>,
+        &ClassGetExpr<Ex, Fb, En, Hi>,
+        &bool,
+    )> {
         match self {
-            Expr_::ClassGet(p0) => Some((&p0.0, &p0.1)),
+            Expr_::ClassGet(p0) => Some((&p0.0, &p0.1, &p0.2)),
             _ => None,
         }
     }
@@ -1812,12 +1817,6 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
             _ => None,
         }
     }
-    pub fn as_parenthesized_expr(&self) -> Option<&Expr<Ex, Fb, En, Hi>> {
-        match self {
-            Expr_::ParenthesizedExpr(p0) => Some(&p0),
-            _ => None,
-        }
-    }
     pub fn as_expression_tree(&self) -> Option<&ExpressionTree<Ex, Fb, En, Hi>> {
         match self {
             Expr_::ExpressionTree(p0) => Some(&p0),
@@ -1959,18 +1958,6 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
             _ => None,
         }
     }
-    pub fn as_obj_get_mut(
-        &mut self,
-    ) -> Option<(
-        &mut Expr<Ex, Fb, En, Hi>,
-        &mut Expr<Ex, Fb, En, Hi>,
-        &mut OgNullFlavor,
-    )> {
-        match self {
-            Expr_::ObjGet(p0) => Some((&mut p0.0, &mut p0.1, &mut p0.2)),
-            _ => None,
-        }
-    }
     pub fn as_array_get_mut(
         &mut self,
     ) -> Option<(&mut Expr<Ex, Fb, En, Hi>, &mut Option<Expr<Ex, Fb, En, Hi>>)> {
@@ -1979,14 +1966,28 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
             _ => None,
         }
     }
+    pub fn as_obj_get_mut(
+        &mut self,
+    ) -> Option<(
+        &mut Expr<Ex, Fb, En, Hi>,
+        &mut Expr<Ex, Fb, En, Hi>,
+        &mut OgNullFlavor,
+        &mut bool,
+    )> {
+        match self {
+            Expr_::ObjGet(p0) => Some((&mut p0.0, &mut p0.1, &mut p0.2, &mut p0.3)),
+            _ => None,
+        }
+    }
     pub fn as_class_get_mut(
         &mut self,
     ) -> Option<(
         &mut ClassId<Ex, Fb, En, Hi>,
         &mut ClassGetExpr<Ex, Fb, En, Hi>,
+        &mut bool,
     )> {
         match self {
-            Expr_::ClassGet(p0) => Some((&mut p0.0, &mut p0.1)),
+            Expr_::ClassGet(p0) => Some((&mut p0.0, &mut p0.1, &mut p0.2)),
             _ => None,
         }
     }
@@ -2212,12 +2213,6 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
             _ => None,
         }
     }
-    pub fn as_parenthesized_expr_mut(&mut self) -> Option<&mut Expr<Ex, Fb, En, Hi>> {
-        match self {
-            Expr_::ParenthesizedExpr(p0) => Some(p0.as_mut()),
-            _ => None,
-        }
-    }
     pub fn as_expression_tree_mut(&mut self) -> Option<&mut ExpressionTree<Ex, Fb, En, Hi>> {
         match self {
             Expr_::ExpressionTree(p0) => Some(p0.as_mut()),
@@ -2351,25 +2346,30 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
             _ => None,
         }
     }
-    pub fn as_obj_get_into(
-        self,
-    ) -> Option<(Expr<Ex, Fb, En, Hi>, Expr<Ex, Fb, En, Hi>, OgNullFlavor)> {
-        match self {
-            Expr_::ObjGet(p0) => Some(((*p0).0, (*p0).1, (*p0).2)),
-            _ => None,
-        }
-    }
     pub fn as_array_get_into(self) -> Option<(Expr<Ex, Fb, En, Hi>, Option<Expr<Ex, Fb, En, Hi>>)> {
         match self {
             Expr_::ArrayGet(p0) => Some(((*p0).0, (*p0).1)),
             _ => None,
         }
     }
+    pub fn as_obj_get_into(
+        self,
+    ) -> Option<(
+        Expr<Ex, Fb, En, Hi>,
+        Expr<Ex, Fb, En, Hi>,
+        OgNullFlavor,
+        bool,
+    )> {
+        match self {
+            Expr_::ObjGet(p0) => Some(((*p0).0, (*p0).1, (*p0).2, (*p0).3)),
+            _ => None,
+        }
+    }
     pub fn as_class_get_into(
         self,
-    ) -> Option<(ClassId<Ex, Fb, En, Hi>, ClassGetExpr<Ex, Fb, En, Hi>)> {
+    ) -> Option<(ClassId<Ex, Fb, En, Hi>, ClassGetExpr<Ex, Fb, En, Hi>, bool)> {
         match self {
-            Expr_::ClassGet(p0) => Some(((*p0).0, (*p0).1)),
+            Expr_::ClassGet(p0) => Some(((*p0).0, (*p0).1, (*p0).2)),
             _ => None,
         }
     }
@@ -2573,12 +2573,6 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
     pub fn as_braced_expr_into(self) -> Option<Expr<Ex, Fb, En, Hi>> {
         match self {
             Expr_::BracedExpr(p0) => Some(*p0),
-            _ => None,
-        }
-    }
-    pub fn as_parenthesized_expr_into(self) -> Option<Expr<Ex, Fb, En, Hi>> {
-        match self {
-            Expr_::ParenthesizedExpr(p0) => Some(*p0),
             _ => None,
         }
     }

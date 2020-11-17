@@ -38,7 +38,7 @@
                     (([16:5-13], Vector<T>),
                      (Obj_get ((([16:5-10], this), This),
                         (([16:12-13], Vector<T>), (Id ([16:12-13], "x"))),
-                        OG_nullthrows))),
+                        OG_nullthrows, false))),
                     (([16:16-25], Vector<T>),
                      (ValCollection (Vector, None, [])))
                     )))))
@@ -70,7 +70,7 @@
                          (([20:5-13], Vector<T>),
                           (Obj_get ((([20:5-10], this), This),
                              (([20:12-13], Vector<T>), (Id ([20:12-13], "x"))),
-                             OG_nullthrows))),
+                             OG_nullthrows, false))),
                          None))),
                      (([20:18-20], T), (Lvar ([20:18-20], $x))))))))
               ];
@@ -100,7 +100,7 @@
                             (Obj_get ((([24:12-17], this), This),
                                (([24:19-20], Vector<T>),
                                 (Id ([24:19-20], "x"))),
-                               OG_nullthrows))),
+                               OG_nullthrows, false))),
                            (Some (([24:21-22], int), (Int "0")))))))))
               ];
             fb_annotation = () };
@@ -212,7 +212,7 @@
                        (([34:3-5], MyPhonyVector<X>), (Lvar ([34:3-5], $x))),
                        (([34:7-10], (function(X $x): void)),
                         (Id ([34:7-10], "add"))),
-                       OG_nullthrows))),
+                       OG_nullthrows, false))),
                    [],
                    [(([34:11-18], B),
                      (New ((([34:15-16], B), (CI ([34:15-16], "\\B"))), 
@@ -228,7 +228,7 @@
                        (([35:3-5], MyPhonyVector<X>), (Lvar ([35:3-5], $x))),
                        (([35:7-10], (function(X $x): void)),
                         (Id ([35:7-10], "add"))),
-                       OG_nullthrows))),
+                       OG_nullthrows, false))),
                    [],
                    [(([35:11-18], A),
                      (New ((([35:15-16], A), (CI ([35:15-16], "\\A"))), 

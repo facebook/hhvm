@@ -150,8 +150,8 @@
                                                                     (Id
                                                                     ([4:8-26],
                                                                     "lambdaLiteral"))),
-                                                                    OG_nullthrows
-                                                                    ))),
+                                                                    OG_nullthrows,
+                                                                    false))),
                                                                  [],
                                                                  [([4:8-26],
                                                                    (New (
@@ -194,8 +194,8 @@
                                                                     (Id
                                                                     ([4:17-23],
                                                                     "assign"))),
-                                                                    OG_nullthrows
-                                                                    ))), 
+                                                                    OG_nullthrows,
+                                                                    false))),
                                                                     [],
                                                                     [([4:17-23],
                                                                     (New (
@@ -227,8 +227,8 @@
                                                                     (Id
                                                                     ([4:17-19],
                                                                     "localVar"))),
-                                                                    OG_nullthrows
-                                                                    ))), 
+                                                                    OG_nullthrows,
+                                                                    false))),
                                                                     [],
                                                                     [([4:17-19],
                                                                     (New (
@@ -264,8 +264,8 @@
                                                                     (Id
                                                                     ([4:22-23],
                                                                     "splice"))),
-                                                                    OG_nullthrows
-                                                                    ))), 
+                                                                    OG_nullthrows,
+                                                                    false))),
                                                                     [],
                                                                     [([4:22-23],
                                                                     (New (

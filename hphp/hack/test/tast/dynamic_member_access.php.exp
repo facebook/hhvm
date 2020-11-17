@@ -42,18 +42,18 @@
                (([7:3-10], dynamic),
                 (Obj_get ((([7:3-5], dynamic), (Lvar ([7:3-5], $c))),
                    (([7:7-10], dynamic), (Id ([7:7-10], "foo"))),
-                   OG_nullthrows)))));
+                   OG_nullthrows, false)))));
            ([8:3-12],
             (Expr
                (([8:3-11], dynamic),
                 (Obj_get ((([8:3-5], dynamic), (Lvar ([8:3-5], $c))),
                    (([8:7-11], dynamic), (Lvar ([8:7-11], $foo))),
-                   OG_nullthrows)))));
+                   OG_nullthrows, false)))));
            ([9:3-31],
             (Expr
                (([9:3-30], dynamic),
                 (Obj_get ((([9:3-5], dynamic), (Lvar ([9:3-5], $c))),
-                   (([9:8-29], dynamic), Any), OG_nullthrows)))))
+                   (([9:8-29], dynamic), Any), OG_nullthrows, false)))))
            ];
          fb_annotation = () };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];

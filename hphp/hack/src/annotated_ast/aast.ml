@@ -154,11 +154,28 @@ and ('ex, 'fb, 'en, 'hi) expr_ =
   | Lvar of lid
   | Dollardollar of lid
   | Clone of ('ex, 'fb, 'en, 'hi) expr
-  | Obj_get of
-      ('ex, 'fb, 'en, 'hi) expr * ('ex, 'fb, 'en, 'hi) expr * og_null_flavor
   | Array_get of ('ex, 'fb, 'en, 'hi) expr * ('ex, 'fb, 'en, 'hi) expr option
+  | Obj_get of
+      ('ex, 'fb, 'en, 'hi) expr
+      * ('ex, 'fb, 'en, 'hi) expr
+      * og_null_flavor
+      * (* is prop call *) bool
+  (* This flag can only ever be true when the expression is in a call
+     position. If the expression is not in a call position it will
+     always be false. If in a call position then:
+     - `false` => `$x->foo(...)` (object method call);
+     - `true` => `($x->foo)(...)` (function call through an object property).
+   *)
   | Class_get of
-      ('ex, 'fb, 'en, 'hi) class_id * ('ex, 'fb, 'en, 'hi) class_get_expr
+      ('ex, 'fb, 'en, 'hi) class_id
+      * ('ex, 'fb, 'en, 'hi) class_get_expr
+      * (* is prop call *) bool
+  (* This flag can only ever be true when the expression is in a call
+     position. If the expression is not in a call position it will
+     always be false. If in a call position then:
+     - `false` => `Foo::bar(...)` (static method call);
+     - `true` => `(Foo::$bar)(...)` (function call through a static property).
+   *)
   | Class_const of ('ex, 'fb, 'en, 'hi) class_id * pstring
   | Call of
       ('ex, 'fb, 'en, 'hi) expr
@@ -210,7 +227,6 @@ and ('ex, 'fb, 'en, 'hi) expr_ =
       sid * 'hi collection_targ option * ('ex, 'fb, 'en, 'hi) afield list
       (** TODO: T38184446 Consolidate collections in AAST *)
   | BracedExpr of ('ex, 'fb, 'en, 'hi) expr
-  | ParenthesizedExpr of ('ex, 'fb, 'en, 'hi) expr
   | ExpressionTree of ('ex, 'fb, 'en, 'hi) expression_tree
   (* None of these constructors exist in the AST *)
   | Lplaceholder of pos

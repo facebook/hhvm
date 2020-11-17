@@ -60,7 +60,11 @@ impl<Fb, En, Hi> Expr<Pos, Fb, En, Hi> {
 
     pub fn as_class_get(
         &self,
-    ) -> Option<(&ClassId<Pos, Fb, En, Hi>, &ClassGetExpr<Pos, Fb, En, Hi>)> {
+    ) -> Option<(
+        &ClassId<Pos, Fb, En, Hi>,
+        &ClassGetExpr<Pos, Fb, En, Hi>,
+        &bool,
+    )> {
         self.1.as_class_get()
     }
 

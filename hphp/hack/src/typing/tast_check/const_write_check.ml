@@ -45,7 +45,7 @@ let check_prop env c pid cty_opt =
 
 let rec check_expr env (_, e) =
   match e with
-  | Class_get (((_, cty), _), CGstring pid) ->
+  | Class_get (((_, cty), _), CGstring pid, _) ->
     let (env, cty) = Env.expand_type env cty in
     begin
       match get_node cty with
@@ -66,7 +66,7 @@ let rec check_expr env (_, e) =
         Typing_set.iter check_class upper_bounds
       | _ -> ()
     end
-  | Obj_get (((_, cty), _), (_, Id id), _) ->
+  | Obj_get (((_, cty), _), (_, Id id), _, _) ->
     let (env, cty) = Env.expand_type env cty in
     begin
       match get_node cty with

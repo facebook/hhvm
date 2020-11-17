@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<7a3c763f7889ff099b337ab49b2bdad4>>
+// @generated SignedSource<<9c9cb73565574e07dd68f06261b25881>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -334,9 +334,16 @@ pub enum Expr_<Ex, Fb, En, Hi> {
     Lvar(Box<Lid>),
     Dollardollar(Box<Lid>),
     Clone(Box<Expr<Ex, Fb, En, Hi>>),
-    ObjGet(Box<(Expr<Ex, Fb, En, Hi>, Expr<Ex, Fb, En, Hi>, OgNullFlavor)>),
     ArrayGet(Box<(Expr<Ex, Fb, En, Hi>, Option<Expr<Ex, Fb, En, Hi>>)>),
-    ClassGet(Box<(ClassId<Ex, Fb, En, Hi>, ClassGetExpr<Ex, Fb, En, Hi>)>),
+    ObjGet(
+        Box<(
+            Expr<Ex, Fb, En, Hi>,
+            Expr<Ex, Fb, En, Hi>,
+            OgNullFlavor,
+            bool,
+        )>,
+    ),
+    ClassGet(Box<(ClassId<Ex, Fb, En, Hi>, ClassGetExpr<Ex, Fb, En, Hi>, bool)>),
     ClassConst(Box<(ClassId<Ex, Fb, En, Hi>, Pstring)>),
     Call(
         Box<(
@@ -395,7 +402,6 @@ pub enum Expr_<Ex, Fb, En, Hi> {
     /// TODO: T38184446 Consolidate collections in AAST
     Collection(Box<(Sid, Option<CollectionTarg<Hi>>, Vec<Afield<Ex, Fb, En, Hi>>)>),
     BracedExpr(Box<Expr<Ex, Fb, En, Hi>>),
-    ParenthesizedExpr(Box<Expr<Ex, Fb, En, Hi>>),
     ExpressionTree(Box<ExpressionTree<Ex, Fb, En, Hi>>),
     Lplaceholder(Box<Pos>),
     FunId(Box<Sid>),

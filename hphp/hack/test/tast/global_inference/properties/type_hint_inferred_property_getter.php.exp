@@ -35,7 +35,7 @@
                     (([7:5-13], int),
                      (Obj_get ((([7:5-10], this), This),
                         (([7:12-13], int), (Id ([7:12-13], "x"))),
-                        OG_nullthrows))),
+                        OG_nullthrows, false))),
                     (([7:16-18], int), (Lvar ([7:16-18], $x))))))))
              ];
            fb_annotation = () };
@@ -58,7 +58,7 @@
                      (([11:10-18], int),
                       (Obj_get ((([11:10-15], this), This),
                          (([11:17-18], int), (Id ([11:17-18], "x"))),
-                         OG_nullthrows)))
+                         OG_nullthrows, false)))
                      )))));
               ([12:5-15],
                (Return (Some (([12:12-14], int), (Lvar ([12:12-14], $y))))))
@@ -105,7 +105,7 @@
                          (Obj_get ((([18:7-9], A), (Lvar ([18:7-9], $a))),
                             (([18:11-14], (function(): int)),
                              (Id ([18:11-14], "get"))),
-                            OG_nullthrows))),
+                            OG_nullthrows, false))),
                         [], [], None)))
                      ],
                    None)))))

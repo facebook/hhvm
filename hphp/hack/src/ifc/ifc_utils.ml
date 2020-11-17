@@ -110,7 +110,6 @@ let expr_name = function
   | A.Import _ -> "Import"
   | A.Collection _ -> "Collection"
   | A.BracedExpr _ -> "BracedExpr"
-  | A.ParenthesizedExpr _ -> "ParenthesizedExpr"
   | A.ExpressionTree _ -> "ExpressionTree"
   | A.Lplaceholder _ -> "Lplaceholder"
   | A.Fun_id _ -> "Fun_id"

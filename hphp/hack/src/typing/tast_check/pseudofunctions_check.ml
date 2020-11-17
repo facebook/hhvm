@@ -22,12 +22,16 @@ let handler =
         (* isset($var) *)
         | Call ((_, Id (_, pseudo_func)), _, [(_, Lvar _)], _)
         (* isset($var->thing) but not isset($foo->$bar) *)
-        | Call ((_, Id (_, pseudo_func)), _, [(_, Obj_get (_, (_, Id _), _))], _)
+        | Call
+            ( (_, Id (_, pseudo_func)),
+              _,
+              [(_, Obj_get (_, (_, Id _), _, false))],
+              _ )
         (* isset($var::thing) but not isset($foo::$bar) *)
         | Call
             ( (_, Id (_, pseudo_func)),
               _,
-              [(_, Class_get (_, CGexpr (_, Id _)))],
+              [(_, Class_get (_, CGexpr (_, Id _), _))],
               _ )
           when String.equal pseudo_func SN.PseudoFunctions.isset ->
           Errors.isset_in_strict p

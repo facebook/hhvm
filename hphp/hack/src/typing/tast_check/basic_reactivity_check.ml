@@ -87,7 +87,7 @@ let rec is_valid_mutable_subscript_expression_target env v =
   | ((_, ty), Array_get (e, _)) ->
     is_byval_collection_or_string_or_any_type env ty
     && is_valid_mutable_subscript_expression_target env e
-  | ((_, ty), Obj_get (e, _, _)) ->
+  | ((_, ty), Obj_get (e, _, _, _)) ->
     is_byval_collection_or_string_or_any_type env ty
     && ( is_valid_mutable_subscript_expression_target env e
        || expr_is_valid_borrowed_arg env e )
@@ -112,7 +112,7 @@ let check_assignment_or_unset_target
   let p = get_position te1 in
   match snd te1 with
   (* Setting mutable locals is okay *)
-  | Obj_get (e1, _, _) when expr_is_valid_borrowed_arg env e1 -> ()
+  | Obj_get (e1, _, _, _) when expr_is_valid_borrowed_arg env e1 -> ()
   | Array_get (e1, i)
     when is_assignment && not (is_valid_append_target env (get_type e1)) ->
     Errors.nonreactive_indexing
@@ -379,7 +379,7 @@ let enforce_mutable_call (env : Env.env) (te : expr) =
     let (env, efun_ty) = Env.expand_type env fun_ty in
     check_mutability_fun_params env Borrowable_args.empty efun_ty el
   (* $x->method() where method is mutable *)
-  | Call (((pos, fun_ty), Obj_get (expr, _, _)), _, el, _) ->
+  | Call (((pos, fun_ty), Obj_get (expr, _, _, _)), _, el, _) ->
     let (env, efun_ty) = Env.expand_type env fun_ty in
     begin
       match get_node efun_ty with

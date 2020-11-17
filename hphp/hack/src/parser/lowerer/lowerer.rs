@@ -1475,8 +1475,17 @@ where
                 };
                 let recv = Self::p_expr(recv, e)?;
                 let recv = match (&recv.1, pos_if_has_parens) {
-                    (E_::ObjGet(_), Some(p)) => E::new(p, E_::mk_parenthesized_expr(recv)),
-                    (E_::ClassGet(_), Some(p)) => E::new(p, E_::mk_parenthesized_expr(recv)),
+                    (E_::ObjGet(t), Some(ref _p)) => {
+                        let (a, b, c, _false) = &**t;
+                        E::new(
+                            recv.0.clone(),
+                            E_::mk_obj_get(a.clone(), b.clone(), c.clone(), true),
+                        )
+                    }
+                    (E_::ClassGet(c), Some(ref _p)) => {
+                        let (a, b, _false) = &**c;
+                        E::new(recv.0.clone(), E_::mk_class_get(a.clone(), b.clone(), true))
+                    }
                     _ => recv,
                 };
                 let (args, varargs) = split_args_vararg(args, e)?;
@@ -1494,7 +1503,7 @@ where
             let recv = Self::p_expr(recv, e)?;
             let name = Self::p_expr_with_loc(ExprLocation::MemberSelect, name, e)?;
             let op = Self::p_null_flavor(op, e)?;
-            Ok(E_::mk_obj_get(recv, name, op))
+            Ok(E_::mk_obj_get(recv, name, op, false))
         };
         let pos = match parent_pos {
             None => Self::p_pos(node, env),
@@ -1692,9 +1701,16 @@ where
                         let is_splice = Self::text_str(recv, env) == special_functions::SPLICE;
                         let recv = Self::p_expr(recv, env)?;
                         let recv = match (&recv.1, pos_if_has_parens) {
-                            (E_::ObjGet(_), Some(p)) => E::new(p, E_::mk_parenthesized_expr(recv)),
-                            (E_::ClassGet(_), Some(p)) => {
-                                E::new(p, E_::mk_parenthesized_expr(recv))
+                            (E_::ObjGet(t), Some(ref _p)) => {
+                                let (a, b, c, _false) = &**t;
+                                E::new(
+                                    recv.0.clone(),
+                                    E_::mk_obj_get(a.clone(), b.clone(), c.clone(), true),
+                                )
+                            }
+                            (E_::ClassGet(c), Some(ref _p)) => {
+                                let (a, b, _false) = &**c;
+                                E::new(recv.0.clone(), E_::mk_class_get(a.clone(), b.clone(), true))
                             }
                             _ => recv,
                         };
@@ -1952,6 +1968,7 @@ where
                         Ok(E_::mk_class_get(
                             ast::ClassId(pos, ast::ClassId_::CIexpr(qual)),
                             ast::ClassGetExpr::CGstring((p, name)),
+                            false,
                         ))
                     }
                     _ => {
@@ -1977,11 +1994,13 @@ where
                                 Ok(E_::mk_class_get(
                                     ast::ClassId(pos, ast::ClassId_::CIexpr(qual)),
                                     ast::ClassGetExpr::CGstring((p, n)),
+                                    false,
                                 ))
                             }
                             _ => Ok(E_::mk_class_get(
                                 ast::ClassId(pos, ast::ClassId_::CIexpr(qual)),
                                 ast::ClassGetExpr::CGexpr(E(p, expr_)),
+                                false,
                             )),
                         }
                     }
@@ -2230,15 +2249,21 @@ where
         use aast::Expr_::*;
         let mut raise = |s| Self::raise_parsing_error_pos(p, env, s);
         match expr_ {
-            ObjGet(og) => match og.as_ref() {
-                (_, ast::Expr(_, Id(_)), ast::OgNullFlavor::OGNullsafe) => {
-                    raise("?-> syntax is not supported for lvalues")
+            ObjGet(og) => {
+                if og.as_ref().3 {
+                    raise("Invalid lvalue")
+                } else {
+                    match og.as_ref() {
+                        (_, ast::Expr(_, Id(_)), ast::OgNullFlavor::OGNullsafe, _) => {
+                            raise("?-> syntax is not supported for lvalues")
+                        }
+                        (_, ast::Expr(_, Id(sid)), _, _) if sid.1.as_bytes()[0] == b':' => {
+                            raise("->: syntax is not supported for lvalues")
+                        }
+                        _ => {}
+                    }
                 }
-                (_, ast::Expr(_, Id(sid)), _) if sid.1.as_bytes()[0] == b':' => {
-                    raise("->: syntax is not supported for lvalues")
-                }
-                _ => {}
-            },
+            }
             ArrayGet(ag) => {
                 if let ClassConst(_) = (ag.0).1 {
                     raise("Array-like class consts are not valid lvalues");
@@ -2259,9 +2284,7 @@ where
             | Id(_) | Clone(_) | ClassConst(_) | Int(_) | Float(_) | PrefixedString(_)
             | String(_) | String2(_) | Yield(_) | YieldBreak | Await(_) | Suspend(_) | Cast(_)
             | Unop(_) | Binop(_) | Eif(_) | New(_) | Efun(_) | Lfun(_) | Xml(_) | Import(_)
-            | Pipe(_) | Callconv(_) | Is(_) | As(_) | ParenthesizedExpr(_) => {
-                raise("Invalid lvalue")
-            }
+            | Pipe(_) | Callconv(_) | Is(_) | As(_) => raise("Invalid lvalue"),
             _ => {}
         }
     }
@@ -4058,6 +4081,7 @@ where
                                     e(E_::mk_lvar(lid(special_idents::THIS))),
                                     e(E_::mk_id(ast::Id(p.clone(), cvname.to_string()))),
                                     ast::OgNullFlavor::OGNullthrows,
+                                    false,
                                 )),
                                 e(E_::mk_lvar(lid(&param.name))),
                             ))),

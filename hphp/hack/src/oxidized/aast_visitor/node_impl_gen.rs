@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ff9b42d321800691a66ebf9ed6b0df29>>
+// @generated SignedSource<<becce3f7a163882c509207f2751fd31f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -732,20 +732,22 @@ impl<P: Params> Node<P> for Expr_<P::Ex, P::Fb, P::En, P::Hi> {
                 a0.accept(c, v)?;
                 Ok(())
             }
-            Expr_::ObjGet(a) => {
-                a.0.accept(c, v)?;
-                a.1.accept(c, v)?;
-                a.2.accept(c, v)?;
-                Ok(())
-            }
             Expr_::ArrayGet(a) => {
                 a.0.accept(c, v)?;
                 a.1.accept(c, v)?;
                 Ok(())
             }
+            Expr_::ObjGet(a) => {
+                a.0.accept(c, v)?;
+                a.1.accept(c, v)?;
+                a.2.accept(c, v)?;
+                a.3.accept(c, v)?;
+                Ok(())
+            }
             Expr_::ClassGet(a) => {
                 a.0.accept(c, v)?;
                 a.1.accept(c, v)?;
+                a.2.accept(c, v)?;
                 Ok(())
             }
             Expr_::ClassConst(a) => {
@@ -888,10 +890,6 @@ impl<P: Params> Node<P> for Expr_<P::Ex, P::Fb, P::En, P::Hi> {
                 Ok(())
             }
             Expr_::BracedExpr(a0) => {
-                a0.accept(c, v)?;
-                Ok(())
-            }
-            Expr_::ParenthesizedExpr(a0) => {
                 a0.accept(c, v)?;
                 Ok(())
             }

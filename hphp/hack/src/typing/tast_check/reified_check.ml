@@ -119,7 +119,7 @@ let handler =
     method! at_expr env x =
       (* only considering functions where one or more params are reified *)
       match x with
-      | ((call_pos, _), Class_get ((_, CI (_, t)), _)) ->
+      | ((call_pos, _), Class_get ((_, CI (_, t)), _, _)) ->
         if equal_reify_kind (Env.get_reified env t) Reified then
           Errors.class_get_reified call_pos
       | ((pos, fun_ty), Method_caller _)

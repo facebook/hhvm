@@ -1861,7 +1861,6 @@ and expr env (p, e) = (p, expr_ env p e)
 
 and expr_ env p (e : Nast.expr_) =
   match e with
-  | Aast.ParenthesizedExpr e -> N.ParenthesizedExpr (expr env e)
   | Aast.Varray (ta, l) ->
     N.Varray (Option.map ~f:(targ env) ta, List.map l (expr env))
   | Aast.Darray (tap, l) ->
@@ -1942,26 +1941,27 @@ and expr_ env p (e : Nast.expr_) =
   | Aast.Lvar x ->
     let x = (fst x, Local_id.to_string @@ snd x) in
     N.Lvar (Env.lvar env x)
-  | Aast.Obj_get (e1, e2, nullsafe) ->
+  | Aast.Obj_get (e1, e2, nullsafe, in_parens) ->
     (* If we encounter Obj_get(_,_,true) by itself, then it means "?->"
        is being used for instance property access; see the case below for
        handling nullsafe instance method calls to see how this works *)
-    N.Obj_get (expr env e1, expr_obj_get_name env e2, nullsafe)
+    N.Obj_get (expr env e1, expr_obj_get_name env e2, nullsafe, in_parens)
   | Aast.Array_get ((p, Aast.Lvar x), None) ->
     let x = (fst x, Local_id.to_string @@ snd x) in
     let id = (p, N.Lvar (Env.lvar env x)) in
     N.Array_get (id, None)
   | Aast.Array_get (e1, e2) -> N.Array_get (expr env e1, oexpr env e2)
-  | Aast.Class_get ((_, Aast.CIexpr (_, Aast.Id x1)), Aast.CGstring x2) ->
-    N.Class_get (make_class_id env x1, N.CGstring x2)
-  | Aast.Class_get ((_, Aast.CIexpr (_, Aast.Lvar (p, lid))), Aast.CGstring x2)
-    ->
+  | Aast.Class_get
+      ((_, Aast.CIexpr (_, Aast.Id x1)), Aast.CGstring x2, in_parens) ->
+    N.Class_get (make_class_id env x1, N.CGstring x2, in_parens)
+  | Aast.Class_get
+      ((_, Aast.CIexpr (_, Aast.Lvar (p, lid))), Aast.CGstring x2, in_parens) ->
     let x1 = (p, Local_id.to_string lid) in
-    N.Class_get (make_class_id env x1, N.CGstring x2)
-  | Aast.Class_get ((_, Aast.CIexpr x1), Aast.CGstring _) ->
+    N.Class_get (make_class_id env x1, N.CGstring x2, in_parens)
+  | Aast.Class_get ((_, Aast.CIexpr x1), Aast.CGstring _, _) ->
     ensure_name_not_dynamic env x1;
     N.Any
-  | Aast.Class_get ((_, Aast.CIexpr x1), Aast.CGexpr x2) ->
+  | Aast.Class_get ((_, Aast.CIexpr x1), Aast.CGexpr x2, _) ->
     ensure_name_not_dynamic env x1;
     ensure_name_not_dynamic env x2;
     N.Any
@@ -2144,10 +2144,14 @@ and expr_ env p (e : Nast.expr_) =
      to match the entire "Call(Obj_get(..), ..)" pattern here so that we
      only match instance method calls *)
   | Aast.Call
-      ((p, Aast.Obj_get (e1, e2, Aast.OG_nullsafe)), tal, el, unpacked_element)
-    ->
+      ( (p, Aast.Obj_get (e1, e2, Aast.OG_nullsafe, in_parens)),
+        tal,
+        el,
+        unpacked_element ) ->
     N.Call
-      ( (p, N.Obj_get (expr env e1, expr_obj_get_name env e2, N.OG_nullsafe)),
+      ( ( p,
+          N.Obj_get
+            (expr env e1, expr_obj_get_name env e2, N.OG_nullsafe, in_parens) ),
         targl env p tal,
         exprl env el,
         oexpr env unpacked_element )

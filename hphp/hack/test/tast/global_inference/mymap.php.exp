@@ -23,7 +23,7 @@
                      (([5:3-5], MyMap<string, int>), (Lvar ([5:3-5], $m))),
                      (([5:7-10], (function(string $x, int $y): void)),
                       (Id ([5:7-10], "add"))),
-                     OG_nullthrows))),
+                     OG_nullthrows, false))),
                  [],
                  [(([5:11-16], string), (String "hey"));
                    (([5:18-20], int), (Int "40"))],
@@ -38,7 +38,7 @@
                              (Lvar ([6:10-12], $m))),
                             (([6:14-17], (function(string $x): ?int)),
                              (Id ([6:14-17], "get"))),
-                            OG_nullthrows))),
+                            OG_nullthrows, false))),
                         [], [(([6:18-22], string), (String "ho"))], None))))))
           ];
         fb_annotation = () };

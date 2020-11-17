@@ -109,7 +109,7 @@
                               (Lvar ([18:10-12], $x))),
                              (([18:14-17], (function(): (int | string))),
                               (Id ([18:14-17], "foo"))),
-                             OG_nullthrows))),
+                             OG_nullthrows, false))),
                          [], [], None))))))
            ];
          fb_annotation = () };

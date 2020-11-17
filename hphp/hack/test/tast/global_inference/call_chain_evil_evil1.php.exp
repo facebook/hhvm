@@ -115,7 +115,7 @@
                         (Obj_get ((([4:10-12], B), (Lvar ([4:10-12], $b))),
                            (([4:14-15], (function(string $x): string)),
                             (Id ([4:14-15], "f"))),
-                           OG_nullthrows))),
+                           OG_nullthrows, false))),
                        [],
                        [(([4:16-25], string),
                          (Call (
@@ -124,7 +124,7 @@
                                 (([4:16-18], A), (Lvar ([4:16-18], $a))),
                                 (([4:20-21], (function(string $x): string)),
                                  (Id ([4:20-21], "f"))),
-                                OG_nullthrows))),
+                                OG_nullthrows, false))),
                             [], [(([4:22-24], string), (String ""))], None)))
                          ],
                        None))))))

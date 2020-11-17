@@ -1470,9 +1470,6 @@ and expr_
   | Omitted ->
     let ty = Typing_utils.mk_tany env p in
     make_result env p Aast.Omitted ty
-  | ParenthesizedExpr e ->
-    let (env, te, ty) = expr ?in_await env e in
-    make_result env p (Aast.ParenthesizedExpr te) ty
   | Any -> expr_error env (Reason.Rwitness p) outer
   | Varray (th, el)
   | ValCollection (_, th, el) ->
@@ -2265,7 +2262,7 @@ and expr_
         expr_error env (Reason.Rwitness p) outer
     end
   | Class_const (cid, mid) -> class_const env p (cid, mid)
-  | Class_get ((cpos, cid), CGstring mid)
+  | Class_get ((cpos, cid), CGstring mid, in_parens)
     when Env.FakeMembers.is_valid_static env cid (snd mid) ->
     let (env, local) = Env.FakeMembers.make_static env cid (snd mid) p in
     let local = (p, Lvar (p, local)) in
@@ -2273,8 +2270,8 @@ and expr_
     let (env, _tal, te, _) =
       static_class_id ~check_constraints:false cpos env [] cid
     in
-    make_result env p (Aast.Class_get (te, Aast.CGstring mid)) ty
-  | Class_get ((cpos, cid), CGstring mid) ->
+    make_result env p (Aast.Class_get (te, Aast.CGstring mid, in_parens)) ty
+  | Class_get ((cpos, cid), CGstring mid, in_parens) ->
     let (env, _tal, te, cty) =
       static_class_id ~check_constraints:false cpos env [] cid
     in
@@ -2290,22 +2287,23 @@ and expr_
         cid
     in
     let (env, ty) = Env.FakeMembers.check_static_invalid env cid (snd mid) ty in
-    make_result env p (Aast.Class_get (te, Aast.CGstring mid)) ty
+    make_result env p (Aast.Class_get (te, Aast.CGstring mid, in_parens)) ty
   (* Fake member property access. For example:
    *   if ($x->f !== null) { ...$x->f... }
    *)
-  | Class_get (_, CGexpr _) ->
+  | Class_get (_, CGexpr _, _) ->
     failwith "AST should not have any CGexprs after naming"
-  | Obj_get (e, (pid, Id (py, y)), nf) when Env.FakeMembers.is_valid env e y ->
+  | Obj_get (e, (pid, Id (py, y)), nf, in_parens)
+    when Env.FakeMembers.is_valid env e y ->
     let env = might_throw env in
     let (env, local) = Env.FakeMembers.make env e y p in
     let local = (p, Lvar (p, local)) in
     let (env, _, ty) = expr env local in
     let (env, t_lhs, _) = expr ~accept_using_var:true env e in
     let t_rhs = Tast.make_typed_expr pid ty (Aast.Id (py, y)) in
-    make_result env p (Aast.Obj_get (t_lhs, t_rhs, nf)) ty
+    make_result env p (Aast.Obj_get (t_lhs, t_rhs, nf, in_parens)) ty
   (* Statically-known instance property access e.g. $x->f *)
-  | Obj_get (e1, (pm, Id m), nullflavor) ->
+  | Obj_get (e1, (pm, Id m), nullflavor, in_parens) ->
     let nullsafe =
       match nullflavor with
       | OG_nullthrows -> None
@@ -2367,10 +2365,13 @@ and expr_
       env
       p
       (Aast.Obj_get
-         (te1, Tast.make_typed_expr pm result_ty (Aast.Id m), nullflavor))
+         ( te1,
+           Tast.make_typed_expr pm result_ty (Aast.Id m),
+           nullflavor,
+           in_parens ))
       result_ty
   (* Dynamic instance property access e.g. $x->$f *)
-  | Obj_get (e1, e2, nullflavor) ->
+  | Obj_get (e1, e2, nullflavor, in_parens) ->
     let (env, te1, ty1) = expr ~accept_using_var:true env e1 in
     let (env, te2, _) = expr env e2 in
     let ty =
@@ -2382,7 +2383,7 @@ and expr_
     let ((pos, _), te2) = te2 in
     let env = might_throw env in
     let te2 = Tast.make_typed_expr pos ty te2 in
-    make_result env p (Aast.Obj_get (te1, te2, nullflavor)) ty
+    make_result env p (Aast.Obj_get (te1, te2, nullflavor, in_parens)) ty
   | Yield_break ->
     make_result env p Aast.Yield_break (Typing_utils.mk_tany env p)
   | Yield af ->
@@ -3865,7 +3866,7 @@ and assign_ p ur env e1 ty2 =
     (* If we ever extend fake members from $x->a to more complicated lvalues
       such as $x->a->b, we would need to call forget_prefixed_members on
       other lvalues as well. *)
-    | (_, Obj_get (_, (_, Id (_, property)), _)) ->
+    | (_, Obj_get (_, (_, Id (_, property)), _, _)) ->
       Env.forget_suffixed_members env property Reason.(Blame (p, BSassignment))
     | _ -> env
   in
@@ -3892,7 +3893,9 @@ and assign_ p ur env e1 ty2 =
           (env, te :: tel))
     in
     make_result env (fst e1) (Aast.List (List.rev reversed_tel)) ty2
-  | (pobj, Obj_get (obj, (pm, Id ((_, member_name) as m)), nullflavor)) ->
+  | ( pobj,
+      Obj_get (obj, (pm, Id ((_, member_name) as m)), nullflavor, in_parens) )
+    ->
     let lenv = env.lenv in
     let nullsafe =
       match nullflavor with
@@ -3919,7 +3922,10 @@ and assign_ p ur env e1 ty2 =
         pobj
         result
         (Aast.Obj_get
-           (tobj, Tast.make_typed_expr pm result (Aast.Id m), nullflavor))
+           ( tobj,
+             Tast.make_typed_expr pm result (Aast.Id m),
+             nullflavor,
+             in_parens ))
     in
     let env = { env with lenv } in
     begin
@@ -3950,9 +3956,9 @@ and assign_ p ur env e1 ty2 =
         Errors.unify_error
     in
     (env, te1, ty2)
-  | (_, Class_get (_, CGexpr _)) ->
+  | (_, Class_get (_, CGexpr _, _)) ->
     failwith "AST should not have any CGexprs after naming"
-  | (_, Class_get ((pos_classid, x), CGstring (pos_member, y))) ->
+  | (_, Class_get ((pos_classid, x), CGstring (pos_member, y), _)) ->
     let lenv = env.lenv in
     let no_fakes = LEnv.env_with_empty_fakes env in
     let (env, te1, _) = lvalue no_fakes e1 in
@@ -4261,7 +4267,7 @@ and dispatch_call
         env
     in
     (match el with
-    | [(p, Obj_get (_, _, OG_nullsafe))] ->
+    | [(p, Obj_get (_, _, OG_nullsafe, _))] ->
       Errors.nullsafe_property_write_context p;
       make_call_special_from_def env id tel (TUtils.terr env)
     | _ -> make_call_special_from_def env id tel MakeType.void)
@@ -4358,7 +4364,7 @@ and dispatch_call
         let cid =
           match e1 with
           | (_, Class_const (cid, (_, x)))
-          | (_, Class_get (cid, CGstring (_, x)))
+          | (_, Class_get (cid, CGstring (_, x), _))
             when String.equal x SN.Members.mClass ->
             cid
           | _ -> (fst e1, CIexpr e1)
@@ -4720,7 +4726,7 @@ and dispatch_call
       typed_unpack_element
       ty
   (* Call instance method *)
-  | Obj_get (e1, (pos_id, Id m), nullflavor)
+  | Obj_get (e1, (pos_id, Id m), nullflavor, false)
     when not (TypecheckerOptions.method_call_inference (Env.get_tcopt env)) ->
     let (env, te1, ty1) = expr ~accept_using_var:true env e1 in
     let nullsafe =
@@ -4764,13 +4770,16 @@ and dispatch_call
          fpos
          tfty
          (Aast.Obj_get
-            (te1, Tast.make_typed_expr pos_id tfty (Aast.Id m), nullflavor)))
+            ( te1,
+              Tast.make_typed_expr pos_id tfty (Aast.Id m),
+              nullflavor,
+              false )))
       tal
       tel
       typed_unpack_element
       ty
   (* Call instance method using new method call inference *)
-  | Obj_get (receiver, (pos_id, Id meth), nullflavor) ->
+  | Obj_get (receiver, (pos_id, Id meth), nullflavor, false) ->
     (*****
       Typecheck `Obj_get` by enforcing that:
       - `<instance_type>` <: `Thas_member(m, #1)`
@@ -4880,7 +4889,8 @@ and dispatch_call
          (Aast.Obj_get
             ( typed_receiver,
               Tast.make_typed_expr pos_id method_ty (Aast.Id meth),
-              nullflavor )))
+              nullflavor,
+              false )))
       typed_targs
       typed_params
       typed_unpack_element
@@ -6393,12 +6403,13 @@ and bad_call env p ty = Errors.bad_call p (Typing_print.error env ty)
 
 and make_a_local_of env e =
   match e with
-  | (p, Class_get ((_, cname), CGstring (_, member_name))) ->
+  | (p, Class_get ((_, cname), CGstring (_, member_name), _)) ->
     let (env, local) = Env.FakeMembers.make_static env cname member_name p in
     (env, Some (p, local))
   | ( p,
-      Obj_get ((((_, This) | (_, Lvar _)) as obj), (_, Id (_, member_name)), _)
-    ) ->
+      Obj_get
+        ((((_, This) | (_, Lvar _)) as obj), (_, Id (_, member_name)), _, _) )
+    ->
     let (env, local) = Env.FakeMembers.make env obj member_name p in
     (env, Some (p, local))
   | (_, Lvar x)
@@ -6763,18 +6774,19 @@ and safely_refine_class_type
 
 and is_instance_var = function
   | (_, (Lvar _ | This | Dollardollar _)) -> true
-  | (_, Obj_get ((_, This), (_, Id _), _)) -> true
-  | (_, Obj_get ((_, Lvar _), (_, Id _), _)) -> true
-  | (_, Class_get (_, _)) -> true
+  | (_, Obj_get ((_, This), (_, Id _), _, _)) -> true
+  | (_, Obj_get ((_, Lvar _), (_, Id _), _, _)) -> true
+  | (_, Class_get (_, _, _)) -> true
   | _ -> false
 
 and get_instance_var env = function
-  | (p, Class_get ((_, cname), CGstring (_, member_name))) ->
+  | (p, Class_get ((_, cname), CGstring (_, member_name), _)) ->
     let (env, local) = Env.FakeMembers.make_static env cname member_name p in
     (env, (p, local))
   | ( p,
-      Obj_get ((((_, This) | (_, Lvar _)) as obj), (_, Id (_, member_name)), _)
-    ) ->
+      Obj_get
+        ((((_, This) | (_, Lvar _)) as obj), (_, Id (_, member_name)), _, _) )
+    ->
     let (env, local) = Env.FakeMembers.make env obj member_name p in
     (env, (p, local))
   | (_, Dollardollar (p, x))

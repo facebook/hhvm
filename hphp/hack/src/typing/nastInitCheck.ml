@@ -387,7 +387,7 @@ and assign _env acc x = S.add x acc
 
 and assign_expr env acc e1 =
   match e1 with
-  | (_, Obj_get ((_, This), (_, Id (_, y)), _)) -> assign env acc y
+  | (_, Obj_get ((_, This), (_, Id (_, y)), _, false)) -> assign env acc y
   | (_, List el) -> List.fold_left ~f:(assign_expr env) ~init:acc el
   | _ -> acc
 
@@ -515,16 +515,17 @@ and expr_ env acc p e =
   | Lplaceholder _
   | Dollardollar _ ->
     acc
-  | Obj_get ((_, This), (_, Id ((_, vx) as v)), _) ->
+  | Obj_get ((_, This), (_, Id ((_, vx) as v)), _, false) ->
     if SMap.mem vx env.props && not (S.mem vx acc) then (
       Errors.read_before_write v;
       acc
     ) else
       acc
   | Clone e -> expr acc e
-  | Obj_get (e1, e2, _) ->
+  | Obj_get (e1, e2, _, false) ->
     let acc = expr acc e1 in
     expr acc e2
+  | Obj_get _ -> acc
   | Array_get (e, eo) ->
     let acc = expr acc e in
     (match eo with
@@ -533,7 +534,7 @@ and expr_ env acc p e =
   | Class_const _
   | Class_get _ ->
     acc
-  | Call ((p, Obj_get ((_, This), (_, Id (_, f)), _)), _, _, _) ->
+  | Call ((p, Obj_get ((_, This), (_, Id (_, f)), _, false)), _, _, _) ->
     let method_ = Env.get_method env f in
     (match method_ with
     | None ->
@@ -631,7 +632,6 @@ and expr_ env acc p e =
   | Import _ -> acc
   | Collection _ -> acc
   | BracedExpr _ -> acc
-  | ParenthesizedExpr _ -> acc
   | FunctionPointer _ -> acc
   | ET_Splice e -> expr acc e
 

@@ -2865,7 +2865,6 @@ fn print_expr<W: Write>(
             print_expr(ctx, w, env, &eif.2)
         }
         E_::BracedExpr(e) => braces(w, |w| print_expr(ctx, w, env, e)),
-        E_::ParenthesizedExpr(e) => paren(w, |w| print_expr(ctx, w, env, e)),
         E_::Cast(c) => {
             paren(w, |w| print_hint(w, false, &c.0))?;
             print_expr(ctx, w, env, &c.1)

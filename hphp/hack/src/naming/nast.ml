@@ -799,9 +799,9 @@ module Visitor_DEPRECATED = struct
         | List el -> this#on_list acc el
         | Assert ae -> this#on_assert acc ae
         | Clone e -> this#on_clone acc e
-        | Obj_get (e1, e2, _) -> this#on_obj_get acc e1 e2
+        | Obj_get (e1, e2, _, _) -> this#on_obj_get acc e1 e2
         | Array_get (e1, e2) -> this#on_array_get acc e1 e2
-        | Class_get (cid, e) -> this#on_class_get acc cid e
+        | Class_get (cid, e, _) -> this#on_class_get acc cid e
         | Class_const (cid, id) -> this#on_class_const acc cid id
         | Call (e, _, el, unpacked_element) ->
           this#on_call acc e el unpacked_element
@@ -831,7 +831,6 @@ module Visitor_DEPRECATED = struct
         | Import (_, e) -> this#on_expr acc e
         | Collection (_, tal, fl) -> this#on_collection acc tal fl
         | BracedExpr e -> this#on_expr acc e
-        | ParenthesizedExpr e -> this#on_expr acc e
         | ET_Splice e -> this#on_et_splice acc e
         | EnumAtom sid -> this#on_enum_atom acc sid
 

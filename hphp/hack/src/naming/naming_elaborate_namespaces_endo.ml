@@ -250,8 +250,8 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
         let targs = List.map targs ~f:(self#on_targ env) in
         FunctionPointer
           (FP_class_const ((p1, CIexpr (p2, Id name)), meth_name), targs)
-      | Obj_get (e1, (p, Id x), null_safe) ->
-        Obj_get (self#on_expr env e1, (p, Id x), null_safe)
+      | Obj_get (e1, (p, Id x), null_safe, in_parens) ->
+        Obj_get (self#on_expr env e1, (p, Id x), null_safe, in_parens)
       | Id ((_, name) as sid) ->
         if
           (String.equal name "NAN" || String.equal name "INF") && in_codegen env
@@ -277,9 +277,10 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
       | Class_const ((p1, CIexpr (p2, Id x1)), pstr) ->
         let name = elaborate_type_name env x1 in
         Class_const ((p1, CIexpr (p2, Id name)), pstr)
-      | Class_get ((p1, CIexpr (p2, Id x1)), cge) ->
+      | Class_get ((p1, CIexpr (p2, Id x1)), cge, in_parens) ->
         let x1 = elaborate_type_name env x1 in
-        Class_get ((p1, CIexpr (p2, Id x1)), self#on_class_get_expr env cge)
+        Class_get
+          ((p1, CIexpr (p2, Id x1)), self#on_class_get_expr env cge, in_parens)
       | Xml (id, al, el) ->
         let id =
           (* if XHP element mangling is disabled, namespaces are supported *)

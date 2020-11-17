@@ -126,7 +126,7 @@ class visitor =
         match snd e with
         | Tast.Id (pos, name) -> self#fun_call env Function name pos
         | Tast.Class_const (((_, ty), _), mid)
-        | Tast.Obj_get (((_, ty), _), (_, Tast.Id mid), _) ->
+        | Tast.Obj_get (((_, ty), _), (_, Tast.Id mid), _, _) ->
           let target_type =
             if String.equal (snd mid) SN.Members.__construct then
               Constructor

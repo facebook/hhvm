@@ -141,8 +141,8 @@
                                                                     (Id
                                                                     ([4:8-19],
                                                                     "methCall"))),
-                                                                    OG_nullthrows
-                                                                    ))),
+                                                                    OG_nullthrows,
+                                                                    false))),
                                                                  [],
                                                                  [([4:8-19],
                                                                    (New (
@@ -175,8 +175,8 @@
                                                                     (Id
                                                                     ([4:8-14],
                                                                     "methCall"))),
-                                                                    OG_nullthrows
-                                                                    ))), 
+                                                                    OG_nullthrows,
+                                                                    false))),
                                                                     [],
                                                                     [([4:8-14],
                                                                     (New (
@@ -208,8 +208,8 @@
                                                                     (Id
                                                                     ([4:8-9],
                                                                     "splice"))),
-                                                                    OG_nullthrows
-                                                                    ))), 
+                                                                    OG_nullthrows,
+                                                                    false))),
                                                                     [],
                                                                     [([4:8-9],
                                                                     (New (
@@ -252,8 +252,8 @@
                                                                     (Id
                                                                     ([4:12-14],
                                                                     "splice"))),
-                                                                    OG_nullthrows
-                                                                    ))), 
+                                                                    OG_nullthrows,
+                                                                    false))),
                                                                     [],
                                                                     [([4:12-14],
                                                                     (New (
@@ -301,8 +301,8 @@
                                                                     (Id
                                                                     ([4:17-19],
                                                                     "localVar"))),
-                                                                    OG_nullthrows
-                                                                    ))), 
+                                                                    OG_nullthrows,
+                                                                    false))),
                                                                     [],
                                                                     [([4:17-19],
                                                                     (New (
@@ -399,8 +399,8 @@
                                                                     (Id
                                                                     ([4:8-14],
                                                                     "__plus"))),
-                                                                    OG_nullthrows
-                                                                    ))), 
+                                                                    OG_nullthrows,
+                                                                    false))),
                                                                     [],
                                                                     [([4:12-14],
                                                                     (ET_Splice
@@ -413,8 +413,8 @@
                                                                     (Id
                                                                     ([4:8-19],
                                                                     "__plus"))),
-                                                                    OG_nullthrows
-                                                                    ))),
+                                                                    OG_nullthrows,
+                                                                    false))),
                                                                  [],
                                                                  [([4:17-19],
                                                                    (Lvar

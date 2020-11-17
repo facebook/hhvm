@@ -287,7 +287,7 @@ let handler ctx =
         env
       | Aast.Class_const ((_, Aast.CI _), (_, s)) when String.equal s "class" ->
         { env with class_id_allow_typedef = true }
-      | Aast.Obj_get (_, (_, Aast.Id (p, name)), _) ->
+      | Aast.Obj_get (_, (_, Aast.Id (p, name)), _, _) ->
         { env with seen_names = SMap.add name p env.seen_names }
       | _ -> env
 

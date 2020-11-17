@@ -443,8 +443,9 @@ fn rewrite_expr(e: &Expr) -> Expr {
             match &recv.1 {
                 // Convert `$foo->bar(args)` to
                 // `$v->methCall(new ExprPos(...), $foo, 'bar', vec[args])`
-                ObjGet(objget) => {
-                    let (receiver, meth, _) = &**objget;
+                // Parenthesized expressions e.g. `($foo->bar)(args)` unsupported.
+                ObjGet(objget) if !objget.as_ref().3 => {
+                    let (receiver, meth, _, _) = &**objget;
                     match &meth.1 {
                         Id(sid) => {
                             let fn_name = string_literal(&*sid.1);
@@ -660,7 +661,12 @@ fn v_meth_call(meth_name: &str, args: Vec<Expr>, pos: &Pos) -> Expr {
     let c = Expr_::Call(Box::new((
         Expr::new(
             pos.clone(),
-            Expr_::ObjGet(Box::new((receiver, meth, OgNullFlavor::OGNullthrows))),
+            Expr_::ObjGet(Box::new((
+                receiver,
+                meth,
+                OgNullFlavor::OGNullthrows,
+                false,
+            ))),
         ),
         vec![],
         args,
@@ -678,7 +684,12 @@ fn meth_call(receiver: Expr, meth_name: &str, args: Vec<Expr>, pos: &Pos) -> Exp
     let c = Expr_::Call(Box::new((
         Expr::new(
             pos.clone(),
-            Expr_::ObjGet(Box::new((receiver, meth, OgNullFlavor::OGNullthrows))),
+            Expr_::ObjGet(Box::new((
+                receiver,
+                meth,
+                OgNullFlavor::OGNullthrows,
+                false,
+            ))),
         ),
         vec![],
         args,

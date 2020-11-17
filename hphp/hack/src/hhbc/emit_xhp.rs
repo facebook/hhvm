@@ -60,6 +60,7 @@ pub fn from_attribute_declaration<'a>(
         mk_expr(Expr_::mk_class_get(
             ClassId(Pos::make_none(), ClassId_::CIexpr(self_)),
             ClassGetExpr::CGstring((Pos::make_none(), "$__xhpAttributeDeclarationCache".into())),
+            false,
         ))
     };
     let token1 = mk_stmt(Stmt_::mk_expr(mk_expr(Expr_::mk_binop(

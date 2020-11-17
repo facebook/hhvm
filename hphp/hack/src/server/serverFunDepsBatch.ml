@@ -62,7 +62,7 @@ let collect_in_decl =
       let ( + ) = self#plus in
       let acc =
         match snd e with
-        | T.Obj_get (((_, ty), _), (_, T.Id mid), _) ->
+        | T.Obj_get (((_, ty), _), (_, T.Id mid), _, _) ->
           process_method env ty mid
         | T.Id id -> process_function id
         | T.Class_const (((_, ty), _), mid) -> process_method env ty mid

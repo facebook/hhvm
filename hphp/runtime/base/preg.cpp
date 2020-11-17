@@ -1726,17 +1726,6 @@ int preg_replace_callback(Variant& result,
   return count;
 }
 
-int preg_filter(Variant& result,
-                const Variant& pattern,
-                const Variant& replacement,
-                const Variant& subject,
-                int limit /* = -1 */) {
-  int64_t count;
-  result = preg_replace_impl(pattern, replacement, subject,
-                             limit, &count, false, true);
-  return count;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 Variant preg_split(const String& pattern, const String& subject,

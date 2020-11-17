@@ -150,11 +150,6 @@ int preg_replace_callback(Variant& result,
                           const Variant& callback,
                           const Variant& subject,
                           int limit = -1);
-int preg_filter(Variant& result,
-                const Variant& pattern,
-                const Variant& replacement,
-                const Variant& subject,
-                int limit = -1);
 
 Variant preg_split(const String& pattern,
                    const String& subject,

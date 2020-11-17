@@ -159,6 +159,10 @@ int64_t Scale::findProfCount(Vlabel blk) const {
   return 1;
 }
 
+static bool is_catch(const Vblock& block) {
+  return block.code.size() >= 1 && block.code[0].op == Vinstr::landingpad;
+}
+
 void Scale::computeArcWeights() {
   FTRACE(3, "[vasm-layout] computeArcWeights:\n");
 
@@ -167,6 +171,10 @@ void Scale::computeArcWeights() {
   for (auto b : m_blocks) {
     auto succSet = succs(m_unit.blocks[b]);
     for (auto s : succSet) {
+      if (RuntimeOption::EvalJitLayoutPruneCatchArcs &&
+          is_catch(m_unit.blocks[s])) {
+        continue;
+      }
       auto arcid = arcId(b, s);
       m_arcWgts[arcid] = succSet.size()    == 1 ? weight(b)
                        : m_preds[s].size() == 1 ? weight(s)

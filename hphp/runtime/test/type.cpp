@@ -24,6 +24,7 @@
 #include "hphp/runtime/base/bespoke-layout.h"
 #include "hphp/runtime/base/repo-auth-type-array.h"
 #include "hphp/runtime/test/bespoke-layout-mock.h"
+#include "hphp/runtime/vm/jit/array-layout.h"
 #include "hphp/runtime/vm/jit/guard-constraint.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/type.h"
@@ -140,6 +141,117 @@ TEST(Type, KnownDataType) {
     EXPECT_FALSE(t.isKnownDataType())
       << "!" << t.toString() << ".isKnownDataType()";
   }
+}
+
+TEST(Type, ArrayLayout) {
+  auto const top     = ArrayLayout::Top();
+  auto const vanilla = ArrayLayout::Vanilla();
+  auto const bespoke = ArrayLayout::Bespoke();
+  auto const bottom  = ArrayLayout::Bottom();
+  auto const foo = ArrayLayout{
+    bespoke::testing::makeDummyLayout("foo", {BespokeLayout::TopLayout()})
+  };
+
+  EXPECT_EQ("Top",          top.describe());
+  EXPECT_EQ("Vanilla",      vanilla.describe());
+  EXPECT_EQ("Bespoke",      bespoke.describe());
+  EXPECT_EQ("Bottom",       bottom.describe());
+  EXPECT_EQ("Bespoke(foo)", foo.describe());
+
+  EXPECT_EQ(top, top);
+  EXPECT_EQ(vanilla, vanilla);
+  EXPECT_EQ(bespoke, bespoke);
+  EXPECT_EQ(bottom, bottom);
+  EXPECT_EQ(foo, foo);
+
+  EXPECT_NE(top, vanilla);
+  EXPECT_NE(top, bespoke);
+  EXPECT_NE(top, bottom);
+  EXPECT_NE(top, foo);
+  EXPECT_NE(vanilla, bespoke);
+  EXPECT_NE(vanilla, bottom);
+  EXPECT_NE(vanilla, foo);
+  EXPECT_NE(bespoke, bottom);
+  EXPECT_NE(bespoke, foo);
+  EXPECT_NE(bottom, foo);
+
+  EXPECT_TRUE(top <= top);
+  EXPECT_FALSE(top <= vanilla);
+  EXPECT_FALSE(top <= bespoke);
+  EXPECT_FALSE(top <= bottom);
+  EXPECT_FALSE(top <= foo);
+  EXPECT_TRUE(vanilla <= top);
+  EXPECT_TRUE(vanilla <= vanilla);
+  EXPECT_FALSE(vanilla <= bespoke);
+  EXPECT_FALSE(vanilla <= bottom);
+  EXPECT_FALSE(vanilla <= foo);
+  EXPECT_TRUE(bespoke <= top);
+  EXPECT_FALSE(bespoke <= vanilla);
+  EXPECT_TRUE(bespoke <= bespoke);
+  EXPECT_FALSE(bespoke <= bottom);
+  EXPECT_FALSE(bespoke <= foo);
+  EXPECT_TRUE(bottom <= top);
+  EXPECT_TRUE(bottom <= vanilla);
+  EXPECT_TRUE(bottom <= bespoke);
+  EXPECT_TRUE(bottom <= bottom);
+  EXPECT_TRUE(bottom <= foo);
+  EXPECT_TRUE(foo <= top);
+  EXPECT_FALSE(foo <= vanilla);
+  EXPECT_TRUE(foo <= bespoke);
+  EXPECT_FALSE(foo <= bottom);
+  EXPECT_TRUE(foo <= foo);
+
+  EXPECT_EQ(top | top,         top);
+  EXPECT_EQ(top | vanilla,     top);
+  EXPECT_EQ(top | bespoke,     top);
+  EXPECT_EQ(top | bottom,      top);
+  EXPECT_EQ(top | foo,         top);
+  EXPECT_EQ(vanilla | top,     top);
+  EXPECT_EQ(vanilla | vanilla, vanilla);
+  EXPECT_EQ(vanilla | bespoke, top);
+  EXPECT_EQ(vanilla | bottom,  vanilla);
+  EXPECT_EQ(vanilla | foo,     top);
+  EXPECT_EQ(bespoke | top,     top);
+  EXPECT_EQ(bespoke | vanilla, top);
+  EXPECT_EQ(bespoke | bespoke, bespoke);
+  EXPECT_EQ(bespoke | bottom,  bespoke);
+  EXPECT_EQ(bespoke | foo,     bespoke);
+  EXPECT_EQ(bottom | top,      top);
+  EXPECT_EQ(bottom | vanilla,  vanilla);
+  EXPECT_EQ(bottom | bespoke,  bespoke);
+  EXPECT_EQ(bottom | bottom,   bottom);
+  EXPECT_EQ(bottom | foo,      foo);
+  EXPECT_EQ(foo | top,         top);
+  EXPECT_EQ(foo | vanilla,     top);
+  EXPECT_EQ(foo | bespoke,     bespoke);
+  EXPECT_EQ(foo | bottom,      foo);
+  EXPECT_EQ(foo | foo,         foo);
+
+  EXPECT_EQ(top & top,         top);
+  EXPECT_EQ(top & vanilla,     vanilla);
+  EXPECT_EQ(top & bespoke,     bespoke);
+  EXPECT_EQ(top & bottom,      bottom);
+  EXPECT_EQ(top & foo,         foo);
+  EXPECT_EQ(vanilla & top,     vanilla);
+  EXPECT_EQ(vanilla & vanilla, vanilla);
+  EXPECT_EQ(vanilla & bespoke, bottom);
+  EXPECT_EQ(vanilla & bottom,  bottom);
+  EXPECT_EQ(vanilla & foo,     bottom);
+  EXPECT_EQ(bespoke & top,     bespoke);
+  EXPECT_EQ(bespoke & vanilla, bottom);
+  EXPECT_EQ(bespoke & bespoke, bespoke);
+  EXPECT_EQ(bespoke & bottom,  bottom);
+  EXPECT_EQ(bespoke & foo,     foo);
+  EXPECT_EQ(bottom & top,      bottom);
+  EXPECT_EQ(bottom & vanilla,  bottom);
+  EXPECT_EQ(bottom & bespoke,  bottom);
+  EXPECT_EQ(bottom & bottom,   bottom);
+  EXPECT_EQ(bottom & foo,      bottom);
+  EXPECT_EQ(foo & top,         foo);
+  EXPECT_EQ(foo & vanilla,     bottom);
+  EXPECT_EQ(foo & bespoke,     foo);
+  EXPECT_EQ(foo & bottom,      bottom);
+  EXPECT_EQ(foo & foo,         foo);
 }
 
 TEST(Type, ToString) {

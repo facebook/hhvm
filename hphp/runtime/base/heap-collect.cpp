@@ -343,6 +343,10 @@ NEVER_INLINE void Collector::init() {
 //    this way are treated similarly.
 
 void Collector::collect() {
+#if FOLLY_SANITIZE
+  // TODO(#31665421)
+  return;
+#endif
   init();
   if (type_scan::hasNonConservative() && RuntimeOption::EvalTwoPhaseGC) {
     traceConservative();
@@ -453,6 +457,10 @@ NEVER_INLINE void Collector::traceAll() {
 // another pass through the heap, this time using the PtrMap we computed
 // in init(). Free and maybe quarantine unmarked objects.
 NEVER_INLINE void Collector::sweep() {
+#if FOLLY_SANITIZE
+  // TODO(#31665421)
+  return;
+#endif
   auto& mm = *tl_heap;
   auto const t0 = cpu_ns();
   auto const usage0 = mm.currentUsage();

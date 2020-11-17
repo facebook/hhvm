@@ -75,7 +75,7 @@ $array_arg = darray[
   2 => new SimpleClass1(100),
   3 => new SimpleClass1(50)
 ];
-var_dump( uasort(inout $array_arg, fun('simple_cmp')) );
+var_dump( uasort(inout $array_arg, simple_cmp<>) );
 var_dump($array_arg);
 
 // array of SimpleClass objects having more than one members
@@ -84,7 +84,7 @@ $array_arg = darray[
   1 => new SimpleClass2(10, 1.2, "apple"),
   2 => new SimpleClass2(5, 2.5, "orange"),
 ];
-var_dump( uasort(inout $array_arg, fun('multiple_cmp')) );
+var_dump( uasort(inout $array_arg, multiple_cmp<>) );
 var_dump($array_arg);
 
 echo "Done";

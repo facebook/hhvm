@@ -25,7 +25,7 @@ function bar($a) {
 
 function foo2($a) {
   try {
-    call_user_func(fun("bar"), $a);
+    call_user_func(bar<>, $a);
   } catch (Ex1 $e) {
     print "caught 1\n";
   }
@@ -45,7 +45,7 @@ function main1() {
 
   foreach ($b as $c) {
     try {
-      array_map(fun("foo"), $a);
+      array_map(foo<>, $a);
     } catch (Ex2 $e) {
       print "caught 2\n";
     }
@@ -102,7 +102,7 @@ function main3() {
 
   $b = varray[3];
   try {
-    array_map(fun("foo"), $b);
+    array_map(foo<>, $b);
   } catch (Ex3 $e) {
     print "caught 3\n";
     throw $e;

@@ -95,8 +95,8 @@ $inputs = darray[
 // loop through each element of the array for arr1
 foreach($inputs as $key =>$value) {
       echo "\n--$key--\n";
-      var_dump( array_diff_ukey($value, $array2, fun('key_compare_func')) );
-      var_dump( array_diff_ukey($value, $array2, $array3, fun('key_compare_func')) );
+      var_dump( array_diff_ukey($value, $array2, key_compare_func<>) );
+      var_dump( array_diff_ukey($value, $array2, $array3, key_compare_func<>) );
 };
 
 fclose($fp);

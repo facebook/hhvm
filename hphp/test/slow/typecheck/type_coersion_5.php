@@ -21,7 +21,7 @@ function check($kind, $builtin_fn, $user_fn) {
 function main_type_coersion_5() {
 require_once('fix_exceptions.inc');
 
-set_error_handler(fun('errHandler'), E_ALL);
+set_error_handler(errHandler<>, E_ALL);
 
 check("Boolean", function ($v) { return sha1("abc", $v); },
       function (<<__Soft>> bool $v) { });

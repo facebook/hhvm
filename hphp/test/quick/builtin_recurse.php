@@ -14,7 +14,7 @@ function foo($s) {
 
   // Throw an exception throw nested builtin calls.
   try {
-    call_user_func_array(fun("call_user_func_array"), varray[fun("foo"), varray["foo arg"]]);
+    call_user_func_array(fun("call_user_func_array"), varray[foo<>, varray["foo arg"]]);
   } catch (Exception $e) {
     print "Caught exception\n";
   }

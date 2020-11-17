@@ -3,7 +3,7 @@
 function foo() {}
 
 function getFun() {
-  return __hhvm_intrinsics\launder_value(HH\fun('foo'));
+  return __hhvm_intrinsics\launder_value(foo<>);
 }
 
 function getStr() {

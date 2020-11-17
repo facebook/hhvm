@@ -16,7 +16,7 @@ function g<reify T>(C<T> $x) {
 
 <<__EntryPoint>>
 function main() {
-  set_error_handler(fun("handler"));
+  set_error_handler(handler<>);
   // pass type hint but fail is
   f<shape('a' => int)>(shape());
   // pass type hint and is

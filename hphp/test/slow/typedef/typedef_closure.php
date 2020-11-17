@@ -11,5 +11,5 @@ function asd(mixed $k): bool { return true; }
 
 <<__EntryPoint>>
 function main_typedef_closure() {
-foo(fun('asd'));
+foo(asd<>);
 }

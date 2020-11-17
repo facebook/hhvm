@@ -3,7 +3,7 @@ function ignore_err() {}
 <<__EntryPoint>>
 function main_entry(): void {
   $funcs = get_extension_funcs("intl");
-  set_error_handler(fun("ignore_err"));
+  set_error_handler(ignore_err<>);
   $arg = new stdClass();
   foreach($funcs as $func) {
           $rfunc = new ReflectionFunction($func);

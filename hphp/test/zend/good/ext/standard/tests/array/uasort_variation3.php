@@ -85,7 +85,7 @@ $array_arg = darray[
   $multiline_heredoc => 200,
 ];
 
-var_dump( uasort(inout $array_arg, fun('cmp_function')) );
+var_dump( uasort(inout $array_arg, cmp_function<>) );
 echo "-- Sorted array after uasort() function call --\n";
 var_dump($array_arg);
 

@@ -12,7 +12,7 @@ class test {
     }
 }
 <<__EntryPoint>> function main(): void {
-set_error_handler(fun("err"));
+set_error_handler(err<>);
 
 $t = new test;
 try {

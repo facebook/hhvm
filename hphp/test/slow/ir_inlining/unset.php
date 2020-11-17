@@ -20,7 +20,7 @@ function thrower() {
 }
 
 function test7() {
-  set_error_handler(fun('thrower'));
+  set_error_handler(thrower<>);
   try {
     $obj = new NonExistProp();
     $obj->unsetIt();

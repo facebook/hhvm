@@ -14,8 +14,8 @@ function baz($a) {
 }
 <<__EntryPoint>> function main(): void {
 $a = varray[1, 2];
-array_map(fun("foo"), $a);
+array_map(foo<>, $a);
 
-$a = call_user_func(fun("baz"), $a);
+$a = call_user_func(baz<>, $a);
 var_dump($a);
 }

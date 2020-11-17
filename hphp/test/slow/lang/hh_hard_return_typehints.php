@@ -36,6 +36,6 @@ function main(): void {
 <<__EntryPoint>>
 function entrypoint_hh_hard_return_typehints(): void {
   error_reporting(-1);
-  set_error_handler(fun('handler'));
+  set_error_handler(handler<>);
   main();
 }

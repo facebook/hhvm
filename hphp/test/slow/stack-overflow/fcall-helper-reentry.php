@@ -10,7 +10,7 @@ function bar($x) {
 
 function main() {
   $arr = varray[1, 'foo', varray['bar', 3], false];
-  array_map(fun('hello_my_name_is_mwang'), $arr);
+  array_map(hello_my_name_is_mwang<>, $arr);
 }
 
 

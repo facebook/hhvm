@@ -16,7 +16,7 @@ function check($kind, $builtin_fn) {
 
 <<__EntryPoint>>
 function main_type_coersion_hh() {
-set_error_handler(fun('errHandler'), E_WARNING);
+set_error_handler(errHandler<>, E_WARNING);
 
 check("Boolean", function ($v) { return sha1("abc", $v); });
 check("Int64", function ($v) { return str_pad("abc", $v); });

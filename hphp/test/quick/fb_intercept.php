@@ -25,11 +25,11 @@ function test_standard_function() {
   // Intercept a function
   fb_intercept('frap', 'handler', 'data');
   frap('claptrap');
-  call_user_func(fun('frap'), 'callfunc');
+  call_user_func(frap<>, 'callfunc');
 
   fb_intercept('frap', 'passthrough_handler');
   frap('claptrap');
-  call_user_func(fun('frap'), 'callfunc');
+  call_user_func(frap<>, 'callfunc');
 
   // Replace with closure
   fb_intercept('frap', mkh(function () { echo "Closure! wooooo\n"; }));
@@ -53,11 +53,11 @@ function test_variadic_function() {
   // Intercept a function
   fb_intercept('var_frap', 'handler', 'data');
   var_frap('claptrap', 'blah');
-  call_user_func(fun('var_frap'), 'callfunc');
+  call_user_func(var_frap<>, 'callfunc');
 
   fb_intercept('var_frap', 'passthrough_handler');
   var_frap('claptrap', 'blah');
-  call_user_func(fun('var_frap'), 'callfunc');
+  call_user_func(var_frap<>, 'callfunc');
 
   // Replace with closure
   fb_intercept('var_frap', mkh(function () { echo "Closure! wooooo\n"; }));

@@ -28,7 +28,7 @@ function entrypoint_mb_decode_mimeheader_variation1(): void {
    */
 
   echo "*** Testing mb_decode_mimeheader() : usage variation ***\n";
-  set_error_handler(fun('test_error_handler'));
+  set_error_handler(test_error_handler<>);
 
   // Initialise function arguments not being substituted (if any)
 

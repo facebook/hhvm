@@ -29,14 +29,14 @@ function baz($a, $b, $c, $d, $e) {
   W(() ==> $a > $e);   W(() ==> $a >= $e);
 
   W(() ==> 
-    ($e === 'bar' ? fun('foo') : fun('bar')) === ($d === 'foo' ? 'foo' : 'bar')
+    ($e === 'bar' ? foo<> : bar<>) === ($d === 'foo' ? 'foo' : 'bar')
   );
   W(() ==> 
-    ($e === 'bar' ? fun('foo') : fun('bar')) !== ($d === 'foo' ? 'foo' : 'bar')
+    ($e === 'bar' ? foo<> : bar<>) !== ($d === 'foo' ? 'foo' : 'bar')
   );
 }
 
 <<__EntryPoint>>
 function main() {
-  baz(fun('foo'), fun('foo'), fun('bar'), 'foo', 'bar');
+  baz(foo<>, foo<>, bar<>, 'foo', 'bar');
 }

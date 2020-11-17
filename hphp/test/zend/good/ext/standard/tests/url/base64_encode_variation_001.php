@@ -13,7 +13,7 @@ function entrypoint_base64_encode_variation_001(): void {
    */
 
   echo "*** Testing base64_encode() : usage variations ***\n";
-  set_error_handler(fun('test_error_handler'));
+  set_error_handler(test_error_handler<>);
 
   // Initialise function arguments not being substituted (if any)
 

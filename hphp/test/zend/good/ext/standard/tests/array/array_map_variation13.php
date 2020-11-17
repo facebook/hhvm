@@ -35,19 +35,19 @@ $array1 = varray[1, 2, 3];
 $array2 = varray[3, 4, 5];
 
 echo "-- with integer return value --\n";
-var_dump( array_map(fun('callback_int'), $array1, $array2));
+var_dump( array_map(callback_int<>, $array1, $array2));
 
 echo "-- with string return value --\n";
-var_dump( array_map(fun('callback_string'), $array1, $array2));
+var_dump( array_map(callback_string<>, $array1, $array2));
 
 echo "-- with bool return value --\n";
-var_dump( array_map(fun('callback_bool'), $array1, $array2));
+var_dump( array_map(callback_bool<>, $array1, $array2));
 
 echo "-- with null return value --\n";
-var_dump( array_map(fun('callback_null'), $array1));
+var_dump( array_map(callback_null<>, $array1));
 
 echo "-- with no return value --\n";
-var_dump( array_map(fun('callback_without_ret'), $array1));
+var_dump( array_map(callback_without_ret<>, $array1));
 
 echo "Done";
 }

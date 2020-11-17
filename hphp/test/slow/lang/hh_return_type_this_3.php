@@ -161,6 +161,6 @@ function main() {
 <<__EntryPoint>>
 function main_hh_return_type_this_3() {
 error_reporting(-1);
-set_error_handler(fun('handler'));
+set_error_handler(handler<>);
 main();
 }

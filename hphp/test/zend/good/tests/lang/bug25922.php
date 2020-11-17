@@ -12,7 +12,7 @@ function test()
 }
 
 <<__EntryPoint>> function main(): void {
-set_error_handler(fun('my_error_handler'));
+set_error_handler(my_error_handler<>);
 
 test();
 }

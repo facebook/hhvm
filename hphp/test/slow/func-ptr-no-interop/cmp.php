@@ -9,7 +9,7 @@ function getStr() {
 }
 
 function getFunc() {
-  return __hhvm_intrinsics\launder_value(HH\fun("foo"));
+  return __hhvm_intrinsics\launder_value(foo<>);
 }
 
 function wrap($fun) {

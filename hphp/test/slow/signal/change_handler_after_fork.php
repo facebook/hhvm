@@ -42,8 +42,8 @@ function waitForSignal($nsec) {
 }
 
 function main() {
-  pcntl_signal(SIGUSR1, fun("handler"));
-  pcntl_signal(SIGUSR2, fun("handler"));
+  pcntl_signal(SIGUSR1, handler<>);
+  pcntl_signal(SIGUSR2, handler<>);
 
   SignalChangeHandlerAfterForkPhp::$child = pcntl_fork();  // 0 in the child process
 

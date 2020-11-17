@@ -22,8 +22,8 @@ $input_arrays = darray[
 
 foreach($input_arrays as $key =>$value) {
       echo "\n--$key--\n";
-      var_dump( array_diff_ukey($value, $input_array, fun('key_compare_func')) );
-      var_dump( array_diff_ukey($input_array, $value, fun('key_compare_func')) );
+      var_dump( array_diff_ukey($value, $input_array, key_compare_func<>) );
+      var_dump( array_diff_ukey($input_array, $value, key_compare_func<>) );
 }
 echo "===DONE===\n";
 }

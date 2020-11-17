@@ -7,7 +7,7 @@ function printImplicit() {
 function aux() {
   $x = IntContext::getContext();
   var_dump($x);
-  IntContext::start($x+1, fun('printImplicit'));
+  IntContext::start($x+1, printImplicit<>);
   var_dump(IntContext::getContext());
 }
 
@@ -15,5 +15,5 @@ function aux() {
 function main() {
   include 'implicit.inc';
 
-  IntContext::start(0, fun('aux'));
+  IntContext::start(0, aux<>);
 }

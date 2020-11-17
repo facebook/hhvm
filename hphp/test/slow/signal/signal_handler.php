@@ -20,9 +20,9 @@ function main_entry(): void {
 
   $signo = 0;
 
-  pcntl_signal(SIGUSR1, fun("handler"));
-  pcntl_signal(SIGUSR2, fun("handler"));
-  pcntl_signal(SIGTERM, fun("handler"));
+  pcntl_signal(SIGUSR1, handler<>);
+  pcntl_signal(SIGUSR2, handler<>);
+  pcntl_signal(SIGTERM, handler<>);
 
   $pid = posix_getpid();
   for ($i = 0; $i < 5; ++$i) {

@@ -88,10 +88,10 @@ $input = varray[
 var_dump( array_filter($input) );
 
 // with always_true callback function
-var_dump( array_filter($input, fun("always_true")) );
+var_dump( array_filter($input, always_true<>) );
 
 // with always_false callback function
-var_dump( array_filter($input, fun("always_false")) );
+var_dump( array_filter($input, always_false<>) );
 
 echo "Done";
 }

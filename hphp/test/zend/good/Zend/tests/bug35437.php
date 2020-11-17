@@ -13,7 +13,7 @@ class TestClass
     }
 }
 <<__EntryPoint>> function main(): void {
-set_error_handler(fun('err2exception'));
+set_error_handler(err2exception<>);
 
 try {
     TestClass::testMethod();

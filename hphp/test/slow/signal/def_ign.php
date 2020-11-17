@@ -5,7 +5,7 @@ function handler($signo) {
   pcntl_signal($signo, SIG_IGN);
 }
 <<__EntryPoint>> function main(): void {
-pcntl_signal(SIGINT, fun("handler"));
+pcntl_signal(SIGINT, handler<>);
 
 $pid = posix_getpid();
 for ($i = 0; $i < 3; ++$i) {

@@ -23,36 +23,36 @@ foreach ($c_f as $k => $_) { $c_f[$k] =$k*2;}
 foreach ($d_f as $k => $_) { $d_f[$k] =$k*2;}
 
 var_dump(array_intersect_key($a_f, $b_f));// keys -> 2, -20, -2500
-var_dump(array_intersect_ukey($a_f, $b_f, fun("comp_func")));// 2, 20, -2500
+var_dump(array_intersect_ukey($a_f, $b_f, comp_func<>));// 2, 20, -2500
 var_dump(array_intersect_key($a_f, $c_f));// keys -> 6, 2, -20, -2500
-var_dump(array_intersect_ukey($a_f, $c_f, fun("comp_func")));// 6, 2, -20, -2500
+var_dump(array_intersect_ukey($a_f, $c_f, comp_func<>));// 6, 2, -20, -2500
 var_dump(array_intersect_key($a_f, $d_f));// -20
-var_dump(array_intersect_ukey($a_f, $d_f, fun("comp_func")));// -20
+var_dump(array_intersect_ukey($a_f, $d_f, comp_func<>));// -20
 
 var_dump(array_intersect_key($a_f, $b_f, $c_f));// 2, -20, -2500
-var_dump(array_intersect_ukey($a_f, $b_f, $c_f, fun("comp_func")));// 2, -20, -2500
+var_dump(array_intersect_ukey($a_f, $b_f, $c_f, comp_func<>));// 2, -20, -2500
 var_dump(array_intersect_key($a_f, $b_f, $d_f));// -20
-var_dump(array_intersect_ukey($a_f, $b_f, $d_f, fun("comp_func")));// -20
+var_dump(array_intersect_ukey($a_f, $b_f, $d_f, comp_func<>));// -20
 
 var_dump(array_intersect_key($a_f, $b_f, $c_f, $d_f));// -20
-var_dump(array_intersect_ukey($a_f, $b_f, $c_f, $d_f, fun("comp_func")));//-20
+var_dump(array_intersect_ukey($a_f, $b_f, $c_f, $d_f, comp_func<>));//-20
 
 
 var_dump(array_intersect_key($b_f, $c_f));// 0, 2, -20, -2500
-var_dump(array_intersect_ukey($b_f, $c_f, fun("comp_func")));//0, 2, -20, 2500
+var_dump(array_intersect_ukey($b_f, $c_f, comp_func<>));//0, 2, -20, 2500
 
 var_dump(array_intersect_key($b_f, $d_f));// -20
-var_dump(array_intersect_ukey($b_f, $d_f, fun("comp_func")));// -20
+var_dump(array_intersect_ukey($b_f, $d_f, comp_func<>));// -20
 
 var_dump(array_intersect_key($b_f, $c_f, $d_f));// -20
-var_dump(array_intersect_ukey($b_f, $c_f,  $d_f, fun("comp_func")));// -20
+var_dump(array_intersect_ukey($b_f, $c_f,  $d_f, comp_func<>));// -20
 
 
 echo "----- Now testing array_intersect() ------- \n";
 var_dump(array_intersect($a, $b_f));
-var_dump(array_uintersect($a, $b, fun("comp_func")));
+var_dump(array_uintersect($a, $b, comp_func<>));
 var_dump(array_intersect($a, $b, $c));
-var_dump(array_uintersect($a, $b, $c, fun("comp_func")));
+var_dump(array_uintersect($a, $b, $c, comp_func<>));
 var_dump(array_intersect($a, $b, $c, $d));
-var_dump(array_uintersect($a, $b, $c, $d, fun("comp_func")));
+var_dump(array_uintersect($a, $b, $c, $d, comp_func<>));
 }

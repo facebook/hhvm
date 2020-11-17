@@ -20,7 +20,7 @@ function Error2Exception($errno, $errstr, $errfile, $errline)
 }
 <<__EntryPoint>> function main(): void {
 $err_msg = 'no exception';
-set_error_handler(fun('Error2Exception'));
+set_error_handler(Error2Exception<>);
 
 try
 {

@@ -12,8 +12,8 @@ function cb2 ($a,$b) {return varray [$a,$b];}
 echo "*** Testing array_map() : string keys ***\n";
 
 $arr = darray["stringkey" => "value"];
-var_dump( array_map(fun("cb1"), $arr));
-var_dump( array_map(fun("cb2"), $arr,$arr));
+var_dump( array_map(cb1<>, $arr));
+var_dump( array_map(cb2<>, $arr,$arr));
 var_dump( array_map(null,  $arr));
 var_dump( array_map(null, $arr, $arr));
 echo "Done";

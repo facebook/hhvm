@@ -8,7 +8,7 @@ function errorHandler($errno, $errstr, $errfile, $errline) {
     throw new Exception();
 }
 <<__EntryPoint>> function main(): void {
-set_error_handler(fun('errorHandler'), E_USER_ERROR);
+set_error_handler(errorHandler<>, E_USER_ERROR);
 
 try{
     test();

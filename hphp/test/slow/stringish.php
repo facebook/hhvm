@@ -132,7 +132,7 @@ function test_reflection() {
 
 <<__EntryPoint>>
 function main_stringish() {
-set_error_handler(fun('err'));
+set_error_handler(err<>);
 
 test_functionality();
 test_reflection();

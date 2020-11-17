@@ -38,7 +38,7 @@ $array_arg = darray[
 ];
 
 echo "\n-- Sorting \$array_arg containing different references --\n";
-var_dump( usort(inout $array_arg, fun('cmp_function')) );
+var_dump( usort(inout $array_arg, cmp_function<>) );
 var_dump($array_arg);
 echo "===DONE===\n";
 }

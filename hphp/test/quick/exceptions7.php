@@ -33,14 +33,14 @@ function main_entry(): void {
   // Intercept a function
   fb_intercept('frap', 'handler', 'data');
   try {
-    call_user_func(fun('frap'), 'callfunc');
+    call_user_func(frap<>, 'callfunc');
   } catch (Exception $e) {
     echo "caught call user func 1\n";
   }
 
   fb_intercept('frap', 'passthrough_handler');
   try {
-    call_user_func(fun('frap'), 'callfunc');
+    call_user_func(frap<>, 'callfunc');
   } catch (Exception $e) {
     echo "caught call user func 2\n";
   }
@@ -51,7 +51,7 @@ function main_entry(): void {
                          throw new Exception;
                        });
   try {
-    call_user_func(fun("frap"), 'claptrap');
+    call_user_func(frap<>, 'claptrap');
   } catch (Exception $e) {
     echo "caught closure 1\n";
   }
@@ -91,7 +91,7 @@ function main_entry(): void {
   fb_intercept('frap', 'handler');
   fb_intercept('handler', 'passthrough_handler');
   try {
-    call_user_func(fun("frap"), 'claptrap');
+    call_user_func(frap<>, 'claptrap');
   } catch (Exception $e) {
     echo "caught double intercept 1\n";
   }

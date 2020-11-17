@@ -23,17 +23,17 @@ $arr1 = varray[1, 2, 3];
 $arr2 = varray[4, 5, 6];
 
 echo "-- With two integer array --\n";
-var_dump( array_map(fun('multiply'), $arr1, $arr2) );
+var_dump( array_map(multiply<>, $arr1, $arr2) );
 
 echo "-- With single integer array --\n";
-var_dump( array_map(fun('square'), $arr1) );
+var_dump( array_map(square<>, $arr1) );
 
 // string array
 $arr1 = varray["one", "two"];
 $arr2 = varray["single", "double"];
 
 echo "-- With string array --\n";
-var_dump( array_map(fun('concatenate'), $arr1, $arr2) );
+var_dump( array_map(concatenate<>, $arr1, $arr2) );
 
 echo "Done";
 }

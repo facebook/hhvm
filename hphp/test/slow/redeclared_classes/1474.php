@@ -18,7 +18,7 @@ function test() {
 
   include '1474-classes.inc';
 
-  set_error_handler(fun('nop'));
+  set_error_handler(nop<>);
 
   $x = new X;
   $x->bar();

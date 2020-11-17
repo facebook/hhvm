@@ -21,8 +21,8 @@ $arr_float = darray[0 => 1.00, 1 => 2.00, 2 => 3.00, 3 => 4.00];
 
 
 echo "\n-- Result of comparing integers and floating point numbers --\n";
-var_dump( array_diff_uassoc($arr_default_int, $arr_float, fun("key_compare_func")) );
-var_dump( array_diff_uassoc($arr_float, $arr_default_int, fun("key_compare_func")) );
+var_dump( array_diff_uassoc($arr_default_int, $arr_float, key_compare_func<>) );
+var_dump( array_diff_uassoc($arr_float, $arr_default_int, key_compare_func<>) );
 
 echo "===DONE===\n";
 }

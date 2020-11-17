@@ -35,7 +35,7 @@ function getTestcase(int $num) {
     0, 1,
     0.0, 1.0,
     "Array",
-    HH\fun("wrap"),
+    wrap<>,
     Vector {'A', 'func1'},
     varray['A', 'func1'],
     vec['A', 'func1'],

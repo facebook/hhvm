@@ -18,7 +18,7 @@ function test_hard(int $foo) {
 
 <<__EntryPoint>>
 function main() {
-  set_error_handler(fun('error_handler'));
+  set_error_handler(error_handler<>);
   test_soft(0.0);
   test_hard(0.0);
   echo "done with main (unreachable)\n";

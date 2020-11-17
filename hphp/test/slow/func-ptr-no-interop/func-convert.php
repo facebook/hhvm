@@ -28,7 +28,7 @@ function baz(): string {
 }
 
 function buz() {
-  return HH\fun('buz');
+  return fun('buz');
 }
 
 function io(inout string $a, inout $b): string {

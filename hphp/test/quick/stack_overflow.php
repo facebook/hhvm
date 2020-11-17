@@ -3,7 +3,7 @@
 abstract final class StackOverflow { public static $g; }
 function cmp($a, $b) {
   $g = StackOverflow::$g;
-  usort(inout $g, fun('cmp'));
+  usort(inout $g, cmp<>);
   StackOverflow::$g = $g;
   fiz();
 }

@@ -20,7 +20,7 @@ function main() {
 
   f();
   try {
-    ClassContext::start(new C, fun('f'));
+    ClassContext::start(new C, f<>);
     echo "Failure2!\n";
   } catch (Exception $e) {
     echo $e->getMessage() . "\n";

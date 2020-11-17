@@ -17,7 +17,7 @@ function foo(somecls $z) {
 
 <<__EntryPoint>>
 function main_nullsafe_nullbase() {
-set_error_handler(fun('err'));
+set_error_handler(err<>);
 
 foo(new somecls);
 }

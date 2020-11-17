@@ -5,6 +5,6 @@ function exn_throw($exn) {
 }
 <<__EntryPoint>>
 function main() {
-  set_exception_handler(fun('exn_throw'));
+  set_exception_handler(exn_throw<>);
   throw new Exception('throwing first');
 }

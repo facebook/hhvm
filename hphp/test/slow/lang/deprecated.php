@@ -73,7 +73,7 @@ function main() {
 <<__EntryPoint>>
 function entrypoint_deprecated(): void {
   error_reporting(-1);
-  set_error_handler(fun('err_handler'));
+  set_error_handler(err_handler<>);
 
   main();
 }

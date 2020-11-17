@@ -41,19 +41,19 @@ echo "*** Testing array_filter() : usage variations - callback function with dif
 $input = varray[0, 1, -1, 10, 100, 1000, 'Hello', null, true];
 
 echo "callback function with int return value\n";
-var_dump( array_filter($input, fun('callback1')) );
+var_dump( array_filter($input, callback1<>) );
 
 echo "callback function with float return value\n";
-var_dump( array_filter($input, fun('callback2')) );
+var_dump( array_filter($input, callback2<>) );
 
 echo "callback function with string return value\n";
-var_dump( array_filter($input, fun('callback3')) );
+var_dump( array_filter($input, callback3<>) );
 
 echo "callback function with null return value\n";
-var_dump( array_filter($input, fun('callback4')) );
+var_dump( array_filter($input, callback4<>) );
 
 echo "callback function with array as return value\n";
-var_dump( array_filter($input, fun('callback5')) );
+var_dump( array_filter($input, callback5<>) );
 
 echo "Done";
 }

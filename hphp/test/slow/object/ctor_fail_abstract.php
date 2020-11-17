@@ -7,6 +7,6 @@ abstract class Asd {
 
 function x() { new Asd(); } <<__EntryPoint>>
 function entrypoint_ctor_fail_abstract(): void {
-  set_error_handler(fun('err'));
+  set_error_handler(err<>);
   x();
 }

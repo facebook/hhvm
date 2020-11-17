@@ -40,8 +40,8 @@ for($count = 0; $count < count($input_values); $count++)
 {
   echo "-- Iteration ".($count + 1). " --\n";
   var_dump( array_filter($input_values[$count]) );
-  var_dump( array_filter($input_values[$count], fun('always_true')) );
-  var_dump( array_filter($input_values[$count], fun('always_false')) );
+  var_dump( array_filter($input_values[$count], always_true<>) );
+  var_dump( array_filter($input_values[$count], always_false<>) );
 }
 
 echo "Done";

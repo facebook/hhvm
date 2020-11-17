@@ -38,7 +38,7 @@ function main(): void {
   $rf = foo<int>;
   $fp = bar<>;
   $lambda = () ==> 1;
-  $fun = fun('bar');
+  $fun = bar<>;
   $clsmeth = class_meth('Foo', 'baz');
   $rclsmeth = Foo::bar<int>;
 

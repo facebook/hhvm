@@ -7,7 +7,7 @@ function foo($e) {
 class test extends Exception {
 }
 <<__EntryPoint>> function main(): void {
-set_exception_handler(fun("foo"));
+set_exception_handler(foo<>);
 
 throw new test();
 

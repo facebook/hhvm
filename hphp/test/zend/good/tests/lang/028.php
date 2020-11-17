@@ -19,7 +19,7 @@ function dafna()
 {
 
     print "Dafna!\n";
-    print call_user_func(fun("still_working"))."\n";
+    print call_user_func(still_working<>)."\n";
     DafnaStatics::$foo++;
     return (string) DafnaStatics::$foo;
 }
@@ -42,8 +42,8 @@ error_reporting(1023);
 
 for ($i=0; $i<200; $i++) {
     print "$i\n";
-    call_user_func(fun("dafna"));
-    call_user_func(fun("print_stuff"),"Hey there!!\n");
+    call_user_func(dafna<>);
+    call_user_func(print_stuff<>,"Hey there!!\n");
     print "$i\n";
 }
 

@@ -26,7 +26,7 @@ function foo() {
 <<__EntryPoint>>
 function main_exceptions_001() {
 error_reporting(-1);
-set_error_handler(fun('heh'));
+set_error_handler(heh<>);
 
 foo();
 }

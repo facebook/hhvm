@@ -17,11 +17,11 @@ function memo_cptr($cptr, int $x) {
 
 <<__EntryPoint>>
 function main() {
-  memo_fptr(fun('foo'), 1);
-  memo_fptr(__hhvm_intrinsics\launder_value(fun('foo')), 2);
+  memo_fptr(foo<>, 1);
+  memo_fptr(__hhvm_intrinsics\launder_value(foo<>), 2);
 
-  memo_fptr(fun('foo'), 1);
-  memo_fptr(__hhvm_intrinsics\launder_value(fun('foo')), 2);
+  memo_fptr(foo<>, 1);
+  memo_fptr(__hhvm_intrinsics\launder_value(foo<>), 2);
 
   memo_fptr('foo', 1);
   memo_fptr(__hhvm_intrinsics\launder_value('foo'), 2);

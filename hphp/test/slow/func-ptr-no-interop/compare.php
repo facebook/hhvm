@@ -41,7 +41,7 @@ function WRAPD($x) { $r = new stdclass; $r->x = $x; return LV($r); }
 }
 
 <<__NEVER_INLINE>> function static_compare() {
-  $cm = fun('foobar');
+  $cm = foobar<>;
   $va = 'foobar';
   $oa = new StrObj('foobar');
   $fa = CLS('foobar');
@@ -116,7 +116,7 @@ function WRAPD($x) { $r = new stdclass; $r->x = $x; return LV($r); }
 }
 
 <<__NEVER_INLINE>> function dynamic_compare() {
-  $cm = LV(fun('foobar'));
+  $cm = LV(foobar<>);
   $va = LV('foobar');
   $oa = LV(new StrObj('foobar'));
   $fa = LV(CLS('foobar'));

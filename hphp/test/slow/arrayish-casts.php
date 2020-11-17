@@ -32,7 +32,7 @@ function keysetCast($x) {
 }
 
 function getFun() {
-  return __hhvm_intrinsics\launder_value(fun('foo'));
+  return __hhvm_intrinsics\launder_value(foo<>);
 }
 
 function getMeth() {

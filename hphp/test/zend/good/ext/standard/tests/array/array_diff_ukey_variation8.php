@@ -17,8 +17,8 @@ $boolean_indx_array = darray[1 => 'boolt', 0 => 'boolf', 1 => 'boolT', 0 => 'boo
 
 echo "\n-- Testing array_diff_ukey() function with boolean indexed array --\n";
 
-var_dump( array_diff_ukey($boolean_indx_array, $input_array, fun('key_compare_func')) );
-var_dump( array_diff_ukey($input_array, $boolean_indx_array, fun('key_compare_func')) );
+var_dump( array_diff_ukey($boolean_indx_array, $input_array, key_compare_func<>) );
+var_dump( array_diff_ukey($input_array, $boolean_indx_array, key_compare_func<>) );
 
 echo "===DONE===\n";
 }

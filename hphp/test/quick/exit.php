@@ -12,5 +12,5 @@ function g() {
   f($x, exit($x), $x + 1);
 }
 <<__EntryPoint>> function main(): void {
-call_user_func(fun("g"));
+call_user_func(g<>);
 }

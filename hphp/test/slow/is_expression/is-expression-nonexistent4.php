@@ -24,7 +24,7 @@ function main(): void {
       'constant' => dict[],
       'function' => dict[],
       'type' => dict[],
-      'failure' => fun('fail'),
+      'failure' => fail<>,
     ],
     __DIR__.'/',
   );

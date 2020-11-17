@@ -10,7 +10,7 @@ function my_handler($errno, $errmsg) {
   var_dump($errmsg);
 }
 function main() {
-  set_error_handler(fun('my_handler'));
+  set_error_handler(my_handler<>);
   $obj = new C;
   $str = (string)$obj;
   echo "Result: ";

@@ -32,13 +32,13 @@ echo "*** Testing uasort() : 'cmp_function' with reference arguments ***\n";
 // Int array with default keys
 $int_values = varray[1, 8, 9, 3, 2, 6, 7];
 echo "-- Passing integer values to 'cmp_function' --\n";
-var_dump( uasort(inout $int_values, fun('cmp')) );
+var_dump( uasort(inout $int_values, cmp<>) );
 var_dump($int_values);
 
 // String array with default keys
 $string_values = varray["Mango", "Apple", "Orange", "Banana"];
 echo "-- Passing string values to 'cmp_function' --\n";
-var_dump( uasort(inout $string_values, fun('cmp')) );
+var_dump( uasort(inout $string_values, cmp<>) );
 var_dump($string_values);
 
 echo "Done";

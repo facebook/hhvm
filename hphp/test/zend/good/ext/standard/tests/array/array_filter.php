@@ -14,13 +14,13 @@ $array2 = varray[6, 7, 8, 9, 10, 11, 12, 0];
 $array3 = varray[TRUE, FALSE, NULL];
 
 echo "Odd :\n";
-var_dump(array_filter($array1, fun("odd")));
-var_dump(array_filter($array2, fun("odd")));
-var_dump(array_filter($array3, fun("odd")));
+var_dump(array_filter($array1, odd<>));
+var_dump(array_filter($array2, odd<>));
+var_dump(array_filter($array3, odd<>));
 echo "Even:\n";
-var_dump(array_filter($array1, fun("even")));
-var_dump(array_filter($array2, fun("even")));
-var_dump(array_filter($array3, fun("even")));
+var_dump(array_filter($array1, even<>));
+var_dump(array_filter($array2, even<>));
+var_dump(array_filter($array3, even<>));
 
 var_dump(array_filter(varray[]));
 var_dump(array_filter(varray[], varray[]));

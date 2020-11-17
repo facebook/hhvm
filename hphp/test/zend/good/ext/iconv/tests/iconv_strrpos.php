@@ -19,7 +19,7 @@ function foo($haystk, $needle, $to_charset = false, $from_charset = false)
 
 <<__EntryPoint>>
 function main_entry(): void {
-  set_error_handler(fun('my_error_handler'));
+  set_error_handler(my_error_handler<>);
   foo("abecdbcdabcdef", "bcd");
   foo(str_repeat("abcab", 60)."abcdb".str_repeat("adabc", 60), "abcd");
   foo(str_repeat("あいうえお", 30)."いうおえあ".str_repeat("あいえおう", 30), "うお", "EUC-JP");

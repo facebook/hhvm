@@ -18,7 +18,7 @@ function foo($haystk, $needle, $offset, $to_charset = false, $from_charset = fal
 
 <<__EntryPoint>>
 function main_entry(): void {
-  set_error_handler(fun('my_error_handler'));
+  set_error_handler(my_error_handler<>);
   foo("abecdbcdabef", "bcd", -1);
   foo("abecdbcdabef", "bcd", 100000);
   foo("abcabcabcdabcababcdabc", "bcd", 0);

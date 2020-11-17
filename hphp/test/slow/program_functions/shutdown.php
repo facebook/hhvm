@@ -11,6 +11,6 @@ function baz() {
 
 <<__EntryPoint>>
 function main_shutdown() {
-register_shutdown_function(fun("shut"));
-register_shutdown_function(fun("baz"));
+register_shutdown_function(shut<>);
+register_shutdown_function(baz<>);
 }

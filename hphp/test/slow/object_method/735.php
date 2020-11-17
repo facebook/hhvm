@@ -20,6 +20,6 @@ function test($y,$z) {
 
 <<__EntryPoint>>
 function main_735() {
-set_error_handler(fun('foo'), E_ALL);
+set_error_handler(foo<>, E_ALL);
 test(new Y, 'bar');
 }

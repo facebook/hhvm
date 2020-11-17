@@ -20,7 +20,7 @@ function entrypoint_type_annotation_autoloader(): void {
         'testreflectiontypealias' => 'type_annotation_autoloader-3.inc',
         'testtypestructuretypealias' => 'type_annotation_autoloader-4.inc',
       },
-      'failure' => fun('autoload_miss'),
+      'failure' => autoload_miss<>,
     },
     __DIR__.'/'
   );

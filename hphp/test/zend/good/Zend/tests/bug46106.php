@@ -13,7 +13,7 @@ function test($x) {
 <<__EntryPoint>> function main(): void {
 ZendGoodZendTestsBug46106::$foo = varray[1];
 
-set_error_handler(fun('foobar'));
+set_error_handler(foobar<>);
 
 $x = new ReflectionFunction('str_pad');
 test($x);

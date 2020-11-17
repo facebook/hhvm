@@ -233,7 +233,7 @@ function test_preg_replace_callback() {
   $text = "April fools day is 04/01/2002\n".
     "Last christmas was 12/24/2001\n";
   $count = -1;
-  $text = preg_replace_callback("|(\\d{2}/\\d{2}/)(\\d{4})|", fun("next_year"),
+  $text = preg_replace_callback("|(\\d{2}/\\d{2}/)(\\d{4})|", next_year<>,
                                 $text, -1, inout $count);
   VS($text, "April fools day is 04/01/2003\nLast christmas was 12/24/2002\n");
 }

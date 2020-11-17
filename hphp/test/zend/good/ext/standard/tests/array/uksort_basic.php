@@ -11,7 +11,7 @@ function cmp($a, $b) {
 }
 <<__EntryPoint>> function main(): void {
 $a = varray[3, 2, 5, 6, 1];
-uasort(inout $a, fun("cmp"));
+uasort(inout $a, cmp<>);
 foreach($a as $key => $value) {
     echo "$key: $value\n";
 }

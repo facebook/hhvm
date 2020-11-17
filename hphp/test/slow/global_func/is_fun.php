@@ -11,7 +11,7 @@ class A {
 function positive_tests() {
   $func = 'func';
   var_dump('==================== positive tests (true) ====================');
-  var_dump(HH\is_fun(fun('func')));
+  var_dump(HH\is_fun(func<>));
   var_dump(HH\is_fun(HH\dynamic_fun($func)));
 }
 

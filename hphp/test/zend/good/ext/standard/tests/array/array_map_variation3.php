@@ -47,7 +47,7 @@ $arrays = varray [
 $iterator = 1;
 foreach($arrays as $arr1) {
   echo "-- Iteration $iterator --\n";
-  var_dump( array_map(fun('callback'), $arr1) );
+  var_dump( array_map(callback<>, $arr1) );
   $iterator++;
 }
 

@@ -13,14 +13,14 @@ require(dirname(__FILE__) . '/data.inc');
 $data = data();
 
 echo " -- Testing uasort() -- \n";
-uasort(inout $data, fun('cmp'));
+uasort(inout $data, cmp<>);
 var_dump($data);
 
 echo "\n -- Testing uksort() -- \n";
-uksort(inout $data, fun('cmp'));
+uksort(inout $data, cmp<>);
 var_dump($data);
 
 echo "\n -- Testing usort() -- \n";
-usort(inout $data, fun('cmp'));
+usort(inout $data, cmp<>);
 var_dump($data);
 }

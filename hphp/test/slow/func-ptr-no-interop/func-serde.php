@@ -46,7 +46,7 @@ function W($f) {
 
 <<__EntryPoint>>
 function main() {
-  $func = fun('test');
+  $func = test<>;
 
   print_r($func);
   print "\n";

@@ -22,7 +22,7 @@ function bar() {
 }
 <<__EntryPoint>>
 function main_entry(): void {
-  set_error_handler(fun('handler'));
+  set_error_handler(handler<>);
   foo();
   bar();
 }

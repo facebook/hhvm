@@ -1,11 +1,11 @@
 <?hh
 
 function bar(): <<__Soft>> string {
-  return HH\fun('bar');
+  return bar<>;
 }
 
 function foo(): string {
-  return HH\fun('foo');
+  return foo<>;
 }
 
 <<__EntryPoint>>

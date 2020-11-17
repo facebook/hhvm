@@ -98,7 +98,7 @@ function do_all_op($op) {
 }
 <<__EntryPoint>>
 function entrypoint_hex_numerics(): void {
-  set_error_handler(fun('errorHandler'));
+  set_error_handler(errorHandler<>);
 
   print("\n# is_numeric tests\n");
   printf("#%9s, %5s, %7s, %7s\n",

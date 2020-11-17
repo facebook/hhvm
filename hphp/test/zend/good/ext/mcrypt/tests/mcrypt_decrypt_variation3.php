@@ -28,7 +28,7 @@ function entrypoint_mcrypt_decrypt_variation3(): void {
    */
 
   echo "*** Testing mcrypt_decrypt() : usage variation ***\n";
-  set_error_handler(fun('test_error_handler'));
+  set_error_handler(test_error_handler<>);
 
   // Initialise function arguments not being substituted (if any)
   $cipher = MCRYPT_TRIPLEDES;

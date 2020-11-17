@@ -44,7 +44,7 @@ $arr = vec[
   shape('wow' => "hi"),
 ];
 
-test($arr, fun('f'));
-test($arr, fun('g'));
-test($arr, fun('h'));
+test($arr, f<>);
+test($arr, g<>);
+test($arr, h<>);
 }

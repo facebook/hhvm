@@ -35,10 +35,10 @@ $arr1 = darray[
   $value2 => $value2
 ];
 echo "-- with one array --\n";
-var_dump( array_map(fun('callback1'), $arr1) );
+var_dump( array_map(callback1<>, $arr1) );
 
 echo "-- with two arrays --\n";
-var_dump( array_map(fun('callback_cat'), $arr1, $arr1) );
+var_dump( array_map(callback_cat<>, $arr1, $arr1) );
 
 echo "Done";
 }

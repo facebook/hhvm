@@ -22,12 +22,12 @@ $arr1_string_float = darray['0.00' => '1.00', '1.00' => '2.00'];
 $arr2_string_float = darray['0.00' => '1.00', '1.00' => '3.00'];
 
 echo "\n-- Result of strings containing integers intersection --\n";
-var_dump( array_intersect_ukey($arr1_string_int, $arr2_string_int, fun('key_compare_func')) );
+var_dump( array_intersect_ukey($arr1_string_int, $arr2_string_int, key_compare_func<>) );
 
 echo "\n-- Result of strings containing floating points intersection --\n";
-var_dump( array_intersect_ukey($arr1_string_float, $arr2_string_float, fun('key_compare_func')) );
+var_dump( array_intersect_ukey($arr1_string_float, $arr2_string_float, key_compare_func<>) );
 
 echo "\n-- Result of strings containing integers and strings containing floating points intersection --\n";
-var_dump( array_intersect_ukey($arr1_string_int, $arr2_string_float, fun('key_compare_func')) );
+var_dump( array_intersect_ukey($arr1_string_int, $arr2_string_float, key_compare_func<>) );
 echo "===DONE===\n";
 }

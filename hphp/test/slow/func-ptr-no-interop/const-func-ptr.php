@@ -10,12 +10,12 @@ function foo() { return __FUNCTION__; }
 
 class A {
   public static $arr = dict[
-    'foo' => fun('foo'),
+    'foo' => foo<>,
     'meth' => class_meth(Cls::class, 'meth'),
   ];
 
   const arr2 = dict[
-    'foo' => fun('foo'),
+    'foo' => foo<>,
     'meth' => class_meth(Cls::class, 'meth'),
   ];
 }

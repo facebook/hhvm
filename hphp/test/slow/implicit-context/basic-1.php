@@ -8,5 +8,5 @@ function addFive() {
 function main() {
   include 'implicit.inc';
 
-  var_dump(IntContext::start(5, fun('addFive')));
+  var_dump(IntContext::start(5, addFive<>));
 }

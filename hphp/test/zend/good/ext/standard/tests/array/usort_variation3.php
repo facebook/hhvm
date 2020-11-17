@@ -67,7 +67,7 @@ $array_arg = darray[
   53 => 1,
 ];
 
-var_dump( usort(inout $array_arg, fun('cmp_function')) );
+var_dump( usort(inout $array_arg, cmp_function<>) );
 echo "\n-- Sorted array after usort() function call --\n";
 var_dump($array_arg);
 echo "===DONE===\n";

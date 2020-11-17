@@ -9,6 +9,6 @@ function bar() {
   var_dump('bar');
 }
 <<__EntryPoint>> function main(): void {
-register_postsend_function(fun('bar'));
-register_shutdown_function(fun('foo'));
+register_postsend_function(bar<>);
+register_shutdown_function(foo<>);
 }

@@ -10,7 +10,7 @@ function parseTagsRecursive($input)
     }
 
     $count = -1;
-    return preg_replace_callback($regex, fun('parseTagsRecursive'), $input, -1, inout $count);
+    return preg_replace_callback($regex, parseTagsRecursive<>, $input, -1, inout $count);
 }
 <<__EntryPoint>>
 function main_entry(): void {

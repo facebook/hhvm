@@ -15,7 +15,7 @@ catch (Exception $e)
 }
 try
 {
-    call_user_func(fun('bar'),'second try');
+    call_user_func(bar<>,'second try');
 }
 catch (Exception $e)
 {

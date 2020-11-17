@@ -33,6 +33,6 @@ class B extends A {
   }
 }
 <<__EntryPoint>> function main(): void {
-set_error_handler(fun('err'));
+set_error_handler(err<>);
 (new B())->test();
 }

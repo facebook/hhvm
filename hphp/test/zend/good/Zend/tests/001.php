@@ -23,9 +23,9 @@ test2(1);
 try { test2(); } catch (Exception $e) { var_dump($e->getMessage()); }
 test3(1,2);
 
-call_user_func(fun("test1"));
-try { call_user_func(fun("test3"), 1); } catch (Exception $e) { var_dump($e->getMessage()); }
-call_user_func(fun("test3"), 1, 2);
+call_user_func(test1<>);
+try { call_user_func(test3<>, 1); } catch (Exception $e) { var_dump($e->getMessage()); }
+call_user_func(test3<>, 1, 2);
 
 test::test1(1);
 

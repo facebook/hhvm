@@ -91,7 +91,7 @@ $unexpected_inputs = varray[
 // loop through each element of $unexpected_inputs to check the behavior of array_map
 for($count = 0; $count < count($unexpected_inputs); $count++) {
   echo "-- Iteration ".($count + 1)." --\n";
-  var_dump( array_map(fun('callback'), $unexpected_inputs[$count]));
+  var_dump( array_map(callback<>, $unexpected_inputs[$count]));
 };
 
 fclose($fp);

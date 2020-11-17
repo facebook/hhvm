@@ -45,13 +45,13 @@ function main_entry(): void {
 
   call_user_func(fun('var_dump'), 1);
 
-  $f = fun('foo');
+  $f = foo<>;
   $x = 0;
   $f(inout $x);
   var_dump($x);
 
   bar(fun('var_dump'));
-  var_dump(call_f(fun('inc')));
+  var_dump(call_f(inc<>));
 
   $v = Vector {
     Vector {1, 2, 3},

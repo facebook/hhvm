@@ -14,6 +14,6 @@ function x() { $name = get_name(); new $name(); }
 
 <<__EntryPoint>>
 function entrypoint_ctor_fail_abstract2(): void {
-  set_error_handler(fun('err'));
+  set_error_handler(err<>);
   x();
 }

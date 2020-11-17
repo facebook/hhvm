@@ -27,7 +27,7 @@ class classWithoutToString
 <<__EntryPoint>> function main(): void {
 echo "*** Testing class_uses() : variation ***\n";
 
-set_error_handler(fun('test_error_handler'));
+set_error_handler(test_error_handler<>);
 
 // Initialise function arguments not being substituted (if any)
 $autoload = true;

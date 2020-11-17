@@ -46,7 +46,7 @@ $array_arg = darray[
 ];
 
 echo "-- Sorting 'array_arg' containing different references --\n";
-var_dump( uasort(inout $array_arg, fun('cmp_function')) );  // expecting: bool(true)
+var_dump( uasort(inout $array_arg, cmp_function<>) );  // expecting: bool(true)
 var_dump($array_arg);
 
 echo "Done";

@@ -65,6 +65,6 @@ function main() {
 }
 <<__EntryPoint>>
 function main_entry(): void {
-  set_error_handler(fun('err'));
+  set_error_handler(err<>);
   main();
 }

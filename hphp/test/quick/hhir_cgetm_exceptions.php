@@ -36,7 +36,7 @@ function thrower() {
 }
 
 function main() {
-  set_error_handler(fun('thrower'));
+  set_error_handler(thrower<>);
   $k = new Unsetter;
   $k->useX(new Something());
 }

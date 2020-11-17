@@ -18,7 +18,7 @@ class c {
   }
 }
 function main() {
-  set_error_handler(fun('error_handler'));
+  set_error_handler(error_handler<>);
   $c = new c(false);
   $c->get();
   echo "Error\n";

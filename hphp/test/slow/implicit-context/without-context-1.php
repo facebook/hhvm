@@ -21,17 +21,17 @@ function g() {
 function main() {
   include 'implicit.inc';
 
-  HH\without_implicit_context(fun('f'));
+  HH\without_implicit_context(f<>);
   ClassContext::start(new C, () ==> {
-    HH\without_implicit_context(fun('f'));
+    HH\without_implicit_context(f<>);
   });
-  HH\without_implicit_context(fun('g'));
+  HH\without_implicit_context(g<>);
   try {
-    ClassContext::start(new C, fun('g'));
+    ClassContext::start(new C, g<>);
   } catch (Exception $e) {
     echo $e->getMessage() . "\n";
   }
   ClassContext::start(new C, () ==> {
-    HH\without_implicit_context(fun('g'));
+    HH\without_implicit_context(g<>);
   });
 }

@@ -14,7 +14,7 @@ function main_entry(): void {
   } else if (defined("pass2")) {
     include 'bug35634-2.inc';
   } else {
-    set_error_handler(fun('errorHandler'));
+    set_error_handler(errorHandler<>);
     include(__FILE__);
     print "ok\n";
   }

@@ -8,14 +8,14 @@ class Cls {
 
 class A {
   public static $arr = dict[
-    'foo' => fun('foo'),
+    'foo' => foo<>,
     'meth' => class_meth(Cls::class, 'meth'),
   ];
 }
 
 class B {
   const f = dict[
-    'foo' => fun('foo'),
+    'foo' => foo<>,
     'meth' => class_meth(Cls::class, 'meth'),
   ];
 }

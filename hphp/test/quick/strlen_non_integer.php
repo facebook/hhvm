@@ -50,7 +50,7 @@ function main2() {
   }
 }
 <<__EntryPoint>> function main_entry(): void {
-set_error_handler(fun('none'));
+set_error_handler(none<>);
 
 main();
 main();

@@ -24,8 +24,8 @@ function call_wrapper($f) {
 }
 
 function main() {
-  call_wrapper(fun('return_implicit'));
-  call_wrapper(fun('return_on_its_own'));
+  call_wrapper(return_implicit<>);
+  call_wrapper(return_on_its_own<>);
   echo 'Done', "\n";
 }
 
@@ -33,7 +33,7 @@ function main() {
 <<__EntryPoint>>
 function main_hh_return_type_noreturn() {
 error_reporting(-1);
-set_error_handler(fun('handler'));
+set_error_handler(handler<>);
 
 main();
 }

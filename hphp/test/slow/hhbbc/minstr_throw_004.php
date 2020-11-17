@@ -13,6 +13,6 @@ function foo() {
 
 <<__EntryPoint>>
 function main_minstr_throw_004() {
-set_error_handler(fun('err'));
+set_error_handler(err<>);
 foo();
 }

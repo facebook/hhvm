@@ -27,19 +27,19 @@ function main() {
   ];
 
   // this should end up using the hack implementation
-  $ret = array_map(fun('f_variadic'), $a);
-  var_dump($ret === array_map(fun('g1'), $a));
-  var_dump($ret === array_map(fun('g2'), $a));
+  $ret = array_map(f_variadic<>, $a);
+  var_dump($ret === array_map(g1<>, $a));
+  var_dump($ret === array_map(g2<>, $a));
 
   // using a collection to break out of hack implementation
-  $basic_v = array_map(fun('f_variadic'), $v);
-  var_dump($ret === array_map(fun('g1'), $a));
-  var_dump($ret === array_map(fun('g2'), $a));
+  $basic_v = array_map(f_variadic<>, $v);
+  var_dump($ret === array_map(g1<>, $a));
+  var_dump($ret === array_map(g2<>, $a));
 
   echo "\n\n = Multi-arg ArrayMap =\n";
-  $ret = array_map(fun('f_variadic'), $a, varray['a', 'b', 'c', 'd']);
-  var_dump($ret === array_map(fun('g1'), $a, varray['a', 'b', 'c', 'd']));
-  var_dump($ret === array_map(fun('g2'), $a, varray['a', 'b', 'c', 'd']));
+  $ret = array_map(f_variadic<>, $a, varray['a', 'b', 'c', 'd']);
+  var_dump($ret === array_map(g1<>, $a, varray['a', 'b', 'c', 'd']));
+  var_dump($ret === array_map(g2<>, $a, varray['a', 'b', 'c', 'd']));
 }
 
 

@@ -26,7 +26,7 @@ function main() {
   echo "Returning from main\n";
 }
 <<__EntryPoint>> function main_entry() {
-set_error_handler(fun('my_handler'));
+set_error_handler(my_handler<>);
 echo "Calling main()\n";
 main();
 echo "Back from main()\n";

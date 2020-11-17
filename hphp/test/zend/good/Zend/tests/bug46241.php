@@ -34,8 +34,8 @@ set_error_handler(varray[$err, 'errorHandler2']);
 
 trigger_error('Foo', E_USER_WARNING);
 
-set_error_handler(fun('errorHandler1'));
-set_error_handler(fun('errorHandler2'));
+set_error_handler(errorHandler1<>);
+set_error_handler(errorHandler2<>);
 
 trigger_error('Foo', E_USER_WARNING);
 

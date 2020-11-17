@@ -11,7 +11,7 @@ function main1() {
 
 function main2() {
   $foo = varray[1,2,3];
-  call_user_func_array(fun('no_return'), $foo);
+  call_user_func_array(no_return<>, $foo);
 }
 
 

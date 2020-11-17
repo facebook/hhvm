@@ -16,7 +16,7 @@ function test($a) {
 
 <<__EntryPoint>>
 function main_ref_type_fail() {
-set_error_handler(fun('handler'));
+set_error_handler(handler<>);
 
 test("hello");
 test(varray[1,2,3]);

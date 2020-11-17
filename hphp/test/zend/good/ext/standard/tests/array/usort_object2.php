@@ -67,7 +67,7 @@ $array_arg = darray[
   2 => new StaticClass(15),
   3 => new StaticClass(70),
 ];
-var_dump( usort(inout $array_arg, fun('cmp_function')) );
+var_dump( usort(inout $array_arg, cmp_function<>) );
 var_dump($array_arg);
 
 // Testing uasort with EmptyClass objects as elements of 'array_arg'
@@ -78,7 +78,7 @@ $array_arg = darray[
   2 => new EmptyClass(),
   3 => new EmptyClass(),
 ];
-var_dump( usort(inout $array_arg, fun('cmp_function')) );
+var_dump( usort(inout $array_arg, cmp_function<>) );
 var_dump($array_arg);
 
 // Testing uasort with ChildClass objects as elements of 'array_arg'
@@ -89,7 +89,7 @@ $array_arg = darray[
   2 => new ChildClass(15),
   3 => new ChildClass(700),
 ];
-var_dump( usort(inout $array_arg, fun('cmp_function')) );
+var_dump( usort(inout $array_arg, cmp_function<>) );
 var_dump($array_arg);
 echo "===DONE===\n";
 }

@@ -158,6 +158,6 @@ function main_entry(): void {
 
 
   error_reporting(-1);
-  set_error_handler(fun('handler'));
+  set_error_handler(handler<>);
   main();
 }

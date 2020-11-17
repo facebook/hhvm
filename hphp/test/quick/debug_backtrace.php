@@ -28,7 +28,7 @@ function error_handler($errno, $errstr, $errfile, $errline, $errcontext) {
 function main() {
   foo();
 
-  set_error_handler(fun('error_handler'));
+  set_error_handler(error_handler<>);
 }
 <<__EntryPoint>>
 function entrypoint_debug_backtrace(): void {

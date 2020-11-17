@@ -26,6 +26,6 @@ function main() {
   try_takes_nothing(null);
 }
 <<__EntryPoint>> function main_entry(): void {
-set_error_handler(fun('my_handler'));
+set_error_handler(my_handler<>);
 main();
 }

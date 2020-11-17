@@ -28,7 +28,7 @@ function entrypoint_mb_stristr_variation1(): void {
    */
 
   echo "*** Testing mb_stristr() : usage variation ***\n";
-  set_error_handler(fun('test_error_handler'));
+  set_error_handler(test_error_handler<>);
 
   // Initialise function arguments not being substituted (if any)
   $needle = b'string_val';

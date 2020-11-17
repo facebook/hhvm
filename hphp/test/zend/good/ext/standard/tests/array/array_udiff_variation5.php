@@ -21,13 +21,13 @@ $arr1 = varray[1];
 $arr2 = varray[1];
 
 echo "\n-- comparison function with an incorrect return value --\n";
-var_dump(array_udiff($arr1, $arr2, fun('incorrect_return_value')));
+var_dump(array_udiff($arr1, $arr2, incorrect_return_value<>));
 
 echo "\n-- comparison function taking too many parameters --\n";
-try { var_dump(array_udiff($arr1, $arr2, fun('too_many_parameters'))); } catch (Exception $e) { var_dump($e->getMessage()); }
+try { var_dump(array_udiff($arr1, $arr2, too_many_parameters<>)); } catch (Exception $e) { var_dump($e->getMessage()); }
 
 echo "\n-- comparison function taking too few parameters --\n";
-var_dump(array_udiff($arr1, $arr2, fun('too_few_parameters')));
+var_dump(array_udiff($arr1, $arr2, too_few_parameters<>));
 
 echo "===DONE===\n";
 }

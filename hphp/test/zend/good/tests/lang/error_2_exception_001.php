@@ -21,7 +21,7 @@ function ErrorsToExceptions($errno, $errmsg) {
 
 <<__EntryPoint>>
 function main() {
-  set_error_handler(fun("ErrorsToExceptions"));
+  set_error_handler(ErrorsToExceptions<>);
 
   // make sure it isn't catching exceptions that weren't
   // thrown...

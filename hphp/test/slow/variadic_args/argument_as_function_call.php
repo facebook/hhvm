@@ -14,7 +14,7 @@ function g() : varray<int> {
 
 <<__EntryPoint>>
 function main_argument_as_function_call() {
-$h = fun("g");
+$h = g<>;
 
 f(...$h());
 }

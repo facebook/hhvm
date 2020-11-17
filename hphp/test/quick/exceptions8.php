@@ -32,6 +32,6 @@ function main2() {
 <<__EntryPoint>>
 function main_entry(): void {
   error_reporting(-1);
-  set_error_handler(fun('doThrow'));
+  set_error_handler(doThrow<>);
   main();
 }

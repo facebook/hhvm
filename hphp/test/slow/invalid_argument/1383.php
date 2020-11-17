@@ -15,6 +15,6 @@ class x {
 
 <<__EntryPoint>>
 function main_1383() {
-set_error_handler(fun('handler'));
+set_error_handler(handler<>);
 var_dump(new X(null));
 }

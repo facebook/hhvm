@@ -125,6 +125,6 @@ function test() {
   $o->set("d", $func_name);
 
   // bad argument
-  \HH\meth_caller_get_class(\HH\fun('afunc'));
+  \HH\meth_caller_get_class(\afunc<>);
 }
 }

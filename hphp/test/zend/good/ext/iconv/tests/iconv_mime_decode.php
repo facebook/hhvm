@@ -57,7 +57,7 @@ abstract final class ZendGoodExtIconvTestsIconvMimeDecode {
 }
 <<__EntryPoint>>
 function entrypoint_iconv_mime_decode(): void {
-  set_error_handler(fun('my_error_handler'));
+  set_error_handler(my_error_handler<>);
 
   ZendGoodExtIconvTestsIconvMimeDecode::$mode = 0;
   do_regression_test();

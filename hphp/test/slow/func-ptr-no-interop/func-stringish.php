@@ -7,5 +7,5 @@ function foo(Stringish $s) {
 <<__EntryPoint>>
 function main() {
   foo('hello');
-  foo(fun('main'));
+  foo(main<>);
 }

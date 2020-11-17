@@ -13,10 +13,10 @@ function W($f) {
 
 <<__EntryPoint>>
 function main() {
-  W(() ==> array_column(varray[darray[fun('foo') => 't1'], darray['foo' => 't2'], darray['bar' => 't3']], fun('foo')));
-  W(() ==> array_count_values(varray[fun('foo'), 'foo', 1]));
-  W(() ==> array_key_exists(fun('foo'), darray['foo' => 1]));
-  W(() ==> array_key_exists(fun('foo'), darray[fun('foo') => 1]));
-  W(() ==> array_replace(darray[fun('foo') => 1], darray[fun('foo') => 2]));
-  W(() ==> array_flip(darray[fun('foo') => fun('bar')]));
+  W(() ==> array_column(varray[darray[foo<> => 't1'], darray['foo' => 't2'], darray['bar' => 't3']], foo<>));
+  W(() ==> array_count_values(varray[foo<>, 'foo', 1]));
+  W(() ==> array_key_exists(foo<>, darray['foo' => 1]));
+  W(() ==> array_key_exists(foo<>, darray[foo<> => 1]));
+  W(() ==> array_replace(darray[foo<> => 1], darray[foo<> => 2]));
+  W(() ==> array_flip(darray[foo<> => bar<>]));
 }

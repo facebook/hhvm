@@ -16,7 +16,7 @@ function err_handler($errno, $str, $file, $line, $ctx) {
 
 <<__EntryPoint>>
 function main() {
-  set_error_handler(fun("err_handler"));
+  set_error_handler(err_handler<>);
   $cls = new ReflectionClass("A");
   $meths = $cls->getMethods();
   var_dump($meths[0]->getParameters()[0]->getDefaultValue());

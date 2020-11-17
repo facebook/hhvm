@@ -160,21 +160,19 @@ inline TypeSpec TypeSpec::operator-(const TypeSpec& rhs) const {
 ///////////////////////////////////////////////////////////////////////////////
 // ArraySpec.
 
-inline ArraySpec::Sort ArraySpec::sortForBespokeIndex(uint16_t index) {
+inline ArraySpec::Sort ArraySpec::sortForBespokeLayout(const BespokeLayout& l) {
   return safe_cast<ArraySpec::Sort>(
-    static_cast<uint16_t>(ArraySpec::Sort::Vanilla) + index + 1
+    static_cast<uint16_t>(ArraySpec::Sort::Vanilla) + l.index().raw + 1
   );
 }
 
-inline ArraySpec::Sort ArraySpec::sortForBespokeLayout(const BespokeLayout& l) {
-  return sortForBespokeIndex(l.index());
-}
-
-inline std::optional<uint16_t> ArraySpec::bespokeIndexForSort(ArraySpec::Sort s) {
+inline std::optional<BespokeLayout>
+ArraySpec::bespokeLayoutForSort(ArraySpec::Sort s) {
   auto const sort = static_cast<uint16_t>(s);
   auto constexpr vanilla = static_cast<uint16_t>(Sort::Vanilla);
   if (sort > vanilla) {
-    return sort - (vanilla + 1);
+    auto const index = safe_cast<uint16_t>(sort - (vanilla + 1));
+    return BespokeLayout::FromIndex({index});
   } else {
     return {};
   }
@@ -198,7 +196,7 @@ inline ArraySpec::ArraySpec(const RepoAuthType::Array* arrTy)
 }
 
 inline ArraySpec::ArraySpec(BespokeLayout layout)
-  : m_sort(sortForBespokeIndex(layout.index()))
+  : m_sort(sortForBespokeLayout(layout))
   , m_ptr(0)
 {}
 
@@ -217,7 +215,7 @@ inline ArraySpec ArraySpec::narrowToVanilla() const {
 inline ArraySpec ArraySpec::narrowToBespokeLayout(BespokeLayout layout) const {
   auto result = *this;
 
-  auto const target = sortForBespokeIndex(layout.index());
+  auto const target = sortForBespokeLayout(layout);
   if (m_sort == Sort::Top) {
     result.m_sort = target;
   } else if (m_sort != target) {
@@ -238,10 +236,6 @@ inline const RepoAuthType::Array* ArraySpec::type() const {
 
 inline bool ArraySpec::vanilla() const {
   return m_sort == Sort::Vanilla;
-}
-
-inline std::optional<uint16_t> ArraySpec::bespokeIndex() const {
-  return bespokeIndexForSort(m_sort);
 }
 
 IMPLEMENT_SPEC_OPERS(ArraySpec, false)

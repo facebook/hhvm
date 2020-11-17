@@ -21,7 +21,6 @@
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/data-walker.h"
 #include "hphp/runtime/base/typed-value.h"
-#include "hphp/runtime/base/bespoke-layout.h"
 
 namespace HPHP {
 
@@ -36,6 +35,7 @@ inline bool shouldTestBespokeArrayLikes() {
 namespace bespoke {
 
 // Hide Layout and its implementations to the rest of the codebase.
+struct ConcreteLayout;
 struct Layout;
 struct LayoutFunctions;
 struct LoggingProfile;
@@ -84,10 +84,9 @@ struct BespokeArray : ArrayData {
   static BespokeArray* asBespoke(ArrayData*);
   static const BespokeArray* asBespoke(const ArrayData*);
 
-  BespokeLayout layout() const;
+  bespoke::LayoutIndex layoutIndex() const;
 
 protected:
-  bespoke::LayoutIndex layoutIndex() const;
   const bespoke::LayoutFunctions* vtable() const;
   void setLayoutIndex(bespoke::LayoutIndex index);
 

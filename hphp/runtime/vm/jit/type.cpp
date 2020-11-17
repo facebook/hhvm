@@ -644,8 +644,8 @@ static bool arrayFitsSpec(const ArrayData* arr, ArraySpec spec) {
     return false;
   } else if (auto const layout = spec.bespokeLayout()) {
     if (arr->isVanilla()) return false;
-    auto const bad = BespokeArray::asBespoke(arr);
-    if (bad->layout() != *layout) return false;
+    auto const index = BespokeArray::asBespoke(arr)->layoutIndex();
+    if (!(BespokeLayout::FromIndex(index) <= layout)) return false;
   }
 
   if (!spec.type()) return true;

@@ -160,11 +160,7 @@ ArraySpec ArraySpec::operator&(const ArraySpec& rhs) const {
 }
 
 std::optional<BespokeLayout> ArraySpec::bespokeLayout() const {
-  if (auto const index = bespokeIndex()) {
-    return BespokeLayout::FromIndex(*index);
-  } else {
-    return {};
-  }
+  return bespokeLayoutForSort(m_sort);
 }
 
 std::string ArraySpec::toString() const {

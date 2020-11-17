@@ -178,8 +178,9 @@ void emitSpecializedTypeTest(Vout& v, IRLS& /*env*/, Type type, Loc dataSrc,
     v << testbim{ArrayData::kBespokeKindMask, r[HeaderKindOffset], sf};
     doJcc(CC_Z, sf);
   } else if (auto const layout = arrSpec.bespokeLayout()) {
+    auto const value = BespokeArray::kExtraMagicBit.raw | layout->index().raw;
     v << cmpwim{
-      static_cast<int16_t>((1 << 15) | layout->index()),
+      static_cast<int16_t>(value),
       r[ArrayData::offsetOfBespokeIndex()],
       sf
     };

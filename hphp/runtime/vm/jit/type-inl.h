@@ -565,7 +565,8 @@ inline ArraySpec Type::arrSpec() const {
   if (m_hasConstVal) {
     if (m_ptr != Ptr::NotPtr) return ArraySpec::Top();
     if (m_arrVal->isVanilla()) return ArraySpec{ArraySpec::LayoutTag::Vanilla};
-    return ArraySpec{BespokeArray::asBespoke(m_arrVal)->layout()};
+    auto const index = BespokeArray::asBespoke(m_arrVal)->layoutIndex();
+    return ArraySpec(BespokeLayout::FromIndex(index));
   }
 
   assertx(m_arrSpec != ArraySpec::Bottom());

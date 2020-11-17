@@ -417,7 +417,8 @@ const ConcreteLayout* ConcreteLayout::FromConcreteIndex(LayoutIndex index) {
 
 void logBespokeDispatch(const ArrayData* ad, const char* fn) {
   DEBUG_ONLY auto const sk = getSrcKey();
-  DEBUG_ONLY auto const layout = BespokeArray::asBespoke(ad)->layout();
+  DEBUG_ONLY auto const index = BespokeArray::asBespoke(ad)->layoutIndex();
+  DEBUG_ONLY auto const layout = BespokeLayout::FromIndex(index);
   TRACE_MOD(Trace::bespoke, 6, "Bespoke dispatch: %s: %s::%s\n",
             sk.getSymbol().data(), layout.describe().data(), fn);
 }

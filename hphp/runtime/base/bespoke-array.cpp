@@ -36,12 +36,6 @@ const BespokeArray* BespokeArray::asBespoke(const ArrayData* ad) {
   return asBespoke(const_cast<ArrayData*>(ad));
 }
 
-BespokeLayout BespokeArray::layout() const {
-  auto const layout =
-    bespoke::ConcreteLayout::FromConcreteIndex(layoutIndex());
-  return BespokeLayout{layout};
-}
-
 bespoke::LayoutIndex BespokeArray::layoutIndex() const {
   return {safe_cast<uint16_t>(m_extra_hi16 & ~kExtraMagicBit.raw)};
 }

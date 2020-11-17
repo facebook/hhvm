@@ -319,8 +319,8 @@ void SinkProfile::update(const ArrayData* ad) {
   // LoggingArrays at this point. Bail out if we get a non-logging bespoke.
   const LoggingArray* lad = nullptr;
   if (!ad->isVanilla()) {
-    auto const index = BespokeArray::asBespoke(ad)->layout().index();
-    if (index != LoggingArray::GetLayoutIndex().raw) return;
+    auto const index = BespokeArray::asBespoke(ad)->layoutIndex();
+    if (index != LoggingArray::GetLayoutIndex()) return;
     lad = LoggingArray::As(ad);
   }
 

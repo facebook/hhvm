@@ -20,6 +20,7 @@
 #include <cstdint>
 #include <string>
 
+#include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/util/assertions.h"
 
@@ -36,8 +37,6 @@ struct IRInstruction;
 namespace irgen { struct IRGS; }
 
 } // namespace jit
-
-namespace bespoke { struct Layout; struct ConcreteLayout; }
 
 /*
  * Identifies information about a bespoke layout necessary to JIT code
@@ -65,17 +64,16 @@ struct BespokeLayout {
   const std::string& describe() const;
 
   /* get the index of this layout */
-  uint16_t index() const;
+  bespoke::LayoutIndex index() const;
 
   /**************************************************************************
    * Static helprs to retrieve layouts
    **************************************************************************/
 
   /* retrieve a layout by index */
-  static BespokeLayout FromIndex(uint16_t index);
+  static BespokeLayout FromIndex(bespoke::LayoutIndex index);
 
   /* retrieve specific layouts */
-  static BespokeLayout LoggingLayout();
   static BespokeLayout TopLayout();
 
   /* complete the bespoke type lattice */

@@ -177,14 +177,14 @@ class SoapClient {
     darray $options = darray[],
     mixed $input_headers = null,
   ): mixed {
-    $args = self::cleanArrays($args, darray[]);
+    $args = self::cleanArrays($args, HH\array_mark_legacy(darray[]));
     $ret = $this->soapcallImpl(
       $name,
       varray($args),
       $options,
       $input_headers,
     );
-    return self::cleanArrays($ret, darray[]);
+    return self::cleanArrays($ret, HH\array_mark_legacy(darray[]));
   }
 
   <<__Native>>

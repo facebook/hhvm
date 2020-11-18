@@ -265,12 +265,6 @@ let make_hover_attr_docs name =
       "Ignore this built-in function or class, so the type checker errors if code uses it."
       ^ " This only applies to code in .hhi files by default, but can apply everywhere with `deregister_php_stdlib`.";
     ]
-  | "__PPL" ->
-    [
-      "Converts all methods to coroutines, except the constructor."
-      ^ " Local method calls are converted suspend calls."
-      ^ " The functions `sample`, `factor`, `observe` and `condition` are converted to method calls on an implicit `Infer` object.";
-    ]
   | "__ProvenanceSkipFrame" ->
     [
       "Don't track Hack arrays created by this function."

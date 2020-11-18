@@ -782,25 +782,6 @@ module Superglobals = struct
     (fun x -> HashSet.mem superglobals x)
 end
 
-module PPLFunctions = struct
-  let all_reserved =
-    HashSet.of_list
-      [
-        "sample";
-        "\\sample";
-        "factor";
-        "\\factor";
-        "observe";
-        "\\observe";
-        "condition";
-        "\\condition";
-        "sample_model";
-        "\\sample_model";
-      ]
-
-  let is_reserved name = HashSet.mem all_reserved name
-end
-
 module Regex = struct
   let tPattern = "\\HH\\Lib\\Regex\\Pattern"
 end

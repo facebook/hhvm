@@ -64,7 +64,6 @@ private:
   void forEachCountableValue(CountableFn c, MaybeCountableFn mc);
   void decRefValues();
   void incRefValues();
-  bool adjustTypePersistence(DataType dt);
 
   template <bool Move>
   ArrayData* appendImpl(TypedValue v);

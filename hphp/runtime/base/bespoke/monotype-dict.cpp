@@ -168,8 +168,7 @@ namespace {
 template <typename Key>
 ArrayData* makeStrMonotypeDict(
     HeaderKind kind, bool legacy, StringData* k, TypedValue v) {
-  auto const dt = dt_modulo_persistence(type(v));
-  auto const mad = MonotypeDict<Key>::MakeReserve(kind, legacy, 1, dt);
+  auto const mad = MonotypeDict<Key>::MakeReserve(kind, legacy, 1, type(v));
   auto const result = MonotypeDict<Key>::SetStr(mad, k, v);
   assertx(result == mad);
   return result;
@@ -194,9 +193,8 @@ tv_lval EmptyMonotypeDict::ElemStr(
 }
 
 ArrayData* EmptyMonotypeDict::SetInt(Self* ad, int64_t k, TypedValue v) {
-  auto const dt = dt_modulo_persistence(type(v));
   auto const mad = MonotypeDict<int64_t>::MakeReserve(
-      ad->m_kind, ad->isLegacyArray(), 1, dt);
+      ad->m_kind, ad->isLegacyArray(), 1, type(v));
   auto const result = MonotypeDict<int64_t>::SetInt(mad, k, v);
   assertx(result == mad);
   return result;
@@ -447,7 +445,6 @@ bool MonotypeDict<Key>::checkInvariants() const {
   static_assert(kElmSize == sizeof(Elm));
   static_assert(kIndexSize == sizeof(Index));
   assertx(isRealType(type()));
-  assertx(type() == dt_modulo_persistence(type()));
   assertx(isDArray() || isDictType());
   assertx(isValidSizeIndex(sizeIndex()));
   assertx(layoutIndex() == getLayoutIndex<Key>(type()));
@@ -559,11 +556,10 @@ arr_lval MonotypeDict<Key>::elemImpl(Key key, K k, bool throwOnMissing) {
     if (throwOnMissing) throwOOBArrayKeyException(k, this);
     return {this, const_cast<TypedValue*>(&immutable_null_base)};
   }
-  if (type() == KindOfClsMeth) {
-    // If we have a ClsMeth, we need to return a proper lval, so we escalate to
-    // vanilla.
-    return lvalDispatch(k);
-  }
+
+  auto const dt = type();
+  if (dt == KindOfClsMeth) return lvalDispatch(k);
+
   auto const old = findForGet(key, getHash(key));
   if (old == nullptr) {
     if (throwOnMissing) throwOOBArrayKeyException(k, this);
@@ -573,6 +569,7 @@ arr_lval MonotypeDict<Key>::elemImpl(Key key, K k, bool throwOnMissing) {
   auto const mad = cowCheck() ? copy() : this;
   auto const elm = old - elms() + mad->elms();
   assertx(keysEqual(elm->key, key));
+  mad->setLayoutIndex(getLayoutIndex<Key>(dt_modulo_persistence(dt)));
 
   static_assert(folly::kIsLittleEndian);
   auto const type_ptr = reinterpret_cast<DataType*>(&mad->m_extra_hi16);
@@ -582,8 +579,9 @@ arr_lval MonotypeDict<Key>::elemImpl(Key key, K k, bool throwOnMissing) {
 
 template <typename Key> template <bool Move, typename K>
 ArrayData* MonotypeDict<Key>::setImpl(Key key, K k, TypedValue v) {
+  auto const dt = type();
   if (key == getTombstone<Key>() || used() == kMaxNumElms ||
-      dt_modulo_persistence(v.type()) != type()) {
+      !equivDataTypes(dt, v.type())) {
     auto const ad = escalateWithCapacity(size() + 1);
     auto const result = ad->set(k, v);
     assertx(ad == result);
@@ -597,9 +595,12 @@ ArrayData* MonotypeDict<Key>::setImpl(Key key, K k, TypedValue v) {
     tvIncRefGen(v);
   }
   auto const result = prepareForInsert();
+  if (dt != v.type()) {
+    result->setLayoutIndex(getLayoutIndex<Key>(dt_with_rc(dt)));
+  }
   auto const update = result->template find<Update>(key, getHash(key));
   if (update.elm != nullptr) {
-    tvDecRefGen(TypedValue { update.elm->val, type() });
+    tvDecRefGen(TypedValue { update.elm->val, dt });
     update.elm->val = v.val();
   } else {
     incRefKey(key);
@@ -622,18 +623,19 @@ void MonotypeDict<Key>::forEachElm(
   auto const dt = type();
   auto const limit = used();
   if (m_size == limit) {
-    if (static_cast<data_type_t>(dt) & kHasPersistentMask) {
-      assertx(isRefcountedType(dt));
-      for (auto i = 0; i < limit; i++) {
-        auto const elm = elmAtIndex(i);
-        k(i, elm->key);
-        m(TypedValue { elm->val, dt });
-      }
-    } else if (isRefcountedType(dt)) {
-      for (auto i = 0; i < limit; i++) {
-        auto const elm = elmAtIndex(i);
-        k(i, elm->key);
-        c(TypedValue { elm->val, dt });
+    if (isRefcountedType(dt)) {
+      if (static_cast<data_type_t>(dt) & kHasPersistentMask) {
+        for (auto i = 0; i < limit; i++) {
+          auto const elm = elmAtIndex(i);
+          k(i, elm->key);
+          m(TypedValue { elm->val, dt });
+        }
+      } else {
+        for (auto i = 0; i < limit; i++) {
+          auto const elm = elmAtIndex(i);
+          k(i, elm->key);
+          c(TypedValue { elm->val, dt });
+        }
       }
     } else {
       for (auto i = 0; i < limit; i++) {
@@ -643,20 +645,21 @@ void MonotypeDict<Key>::forEachElm(
       }
     }
   } else {
-    if (static_cast<data_type_t>(dt) & kHasPersistentMask) {
-      assertx(isRefcountedType(dt));
-      for (auto i = 0; i < limit; i++) {
-        auto const elm = elmAtIndex(i);
-        if (elm->key == getTombstone<Key>()) continue;
-        k(i, elm->key);
-        m(TypedValue { elm->val, dt });
-      }
-    } else if (isRefcountedType(dt)) {
-      for (auto i = 0; i < limit; i++) {
-        auto const elm = elmAtIndex(i);
-        if (elm->key == getTombstone<Key>()) continue;
-        k(i, elm->key);
-        c(TypedValue { elm->val, dt });
+    if (isRefcountedType(dt)) {
+      if (static_cast<data_type_t>(dt) & kHasPersistentMask) {
+        for (auto i = 0; i < limit; i++) {
+          auto const elm = elmAtIndex(i);
+          if (elm->key == getTombstone<Key>()) continue;
+          k(i, elm->key);
+          m(TypedValue { elm->val, dt });
+        }
+      } else {
+        for (auto i = 0; i < limit; i++) {
+          auto const elm = elmAtIndex(i);
+          if (elm->key == getTombstone<Key>()) continue;
+          k(i, elm->key);
+          c(TypedValue { elm->val, dt });
+        }
       }
     } else {
       for (auto i = 0; i < limit; i++) {
@@ -935,6 +938,11 @@ void MonotypeDict<Key>::ConvertToUncounted(
     ConvertTvToUncounted(tv_lval(&dt_mut, &elm_mut->val), seen);
     assertx(equivDataTypes(dt_mut, dt));
   });
+
+  auto const newType = static_cast<data_type_t>(dt) & kHasPersistentMask
+    ? dt_with_persistence(dt)
+    : dt;
+  mad->setLayoutIndex(getLayoutIndex<Key>(newType));
 }
 
 template <typename Key>
@@ -1234,8 +1242,7 @@ void EmptyMonotypeDict::InitializeLayouts() {
   static auto const str_vtable = fromArray<MonotypeDict<StringData*>>();
   static auto const s32_vtable = fromArray<MonotypeDict<LowStringPtr>>();
 
-#define DT(name, value) \
-  if (dt_modulo_persistence(KindOf##name) == KindOf##name) {                 \
+#define DT(name, value) {                                                    \
     auto ints = getIntLayoutIndex(KindOf##name);                             \
     auto strs = getStrLayoutIndex(KindOf##name);                             \
     auto s32s = getStaticStrLayoutIndex(KindOf##name);                       \

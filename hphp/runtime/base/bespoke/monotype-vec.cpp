@@ -298,9 +298,8 @@ ArrayData* EmptyMonotypeVec::Append(EmptyMonotypeVec* ead, TypedValue v) {
 }
 
 ArrayData* EmptyMonotypeVec::AppendMove(EmptyMonotypeVec* ead, TypedValue v) {
-  auto const dt = dt_modulo_persistence(type(v));
   auto const mad = MonotypeVec::MakeReserve(
-      ead->m_kind, ead->isLegacyArray(), 1, dt);
+      ead->m_kind, ead->isLegacyArray(), 1, type(v));
   auto const res = MonotypeVec::AppendMove(mad, v);
   assertx(mad == res);
   return res;
@@ -559,10 +558,10 @@ void MonotypeVec::ConvertToUncounted(MonotypeVec* madIn,
     ConvertTvToUncounted(lval, seen);
     assertx(equivDataTypes(dt, madIn->type()));
   }
-  auto narrowedType = static_cast<data_type_t>(oldType) & kHasPersistentMask
+  auto const newType = static_cast<data_type_t>(oldType) & kHasPersistentMask
     ? dt_with_persistence(oldType)
     : oldType;
-  madIn->setLayoutIndex(getLayoutIndex(narrowedType));
+  madIn->setLayoutIndex(getLayoutIndex(newType));
 }
 
 void MonotypeVec::ReleaseUncounted(MonotypeVec* mad) {
@@ -627,14 +626,14 @@ arr_lval MonotypeVec::elemImpl(int64_t k, bool throwOnMissing) {
     if (throwOnMissing) throwOOBArrayKeyException(k, this);
     return {this, const_cast<TypedValue*>(&immutable_null_base)};
   }
-  if (type() == KindOfClsMeth) {
-    // If we have a ClsMeth, we need to return a proper lval, so we escalate to
-    // vanilla.
-    return LvalInt(this, k);
-  }
+
+  auto const dt = type();
+  if (dt == KindOfClsMeth) return LvalInt(this, k);
+
   auto const cow = cowCheck();
   auto const mad = cow ? copy() : this;
-  mad->adjustTypePersistence(dt_with_rc(mad->type()));
+  mad->setLayoutIndex(getLayoutIndex(dt_modulo_persistence(dt)));
+
   static_assert(folly::kIsLittleEndian);
   auto const type_ptr = reinterpret_cast<DataType*>(&mad->m_extra_hi16);
   assertx(*type_ptr == mad->type());
@@ -657,14 +656,6 @@ tv_lval MonotypeVec::ElemStr(tv_lval lval, StringData* k, bool throwOnMissing) {
   return const_cast<TypedValue*>(&immutable_null_base);
 }
 
-bool MonotypeVec::adjustTypePersistence(DataType dt) {
-  auto const mtype = type();
-  if (dt == mtype) return true;
-  if (!equivDataTypes(mtype, dt)) return false;
-  setLayoutIndex(getLayoutIndex(dt_with_rc(dt)));
-  return true;
-}
-
 template <bool Move>
 ArrayData* MonotypeVec::setIntImpl(int64_t k, TypedValue v) {
   assertx(cowCheck() || notCyclic(v));
@@ -673,7 +664,8 @@ ArrayData* MonotypeVec::setIntImpl(int64_t k, TypedValue v) {
     throwOOBArrayKeyException(k, this);
   }
 
-  if (!adjustTypePersistence(v.m_type)) {
+  auto const dt = type();
+  if (!equivDataTypes(dt, v.type())) {
     auto const vad = EscalateToVanilla(this, __func__);
     auto const res = vad->set(k, v);
     assertx(vad == res);
@@ -689,11 +681,13 @@ ArrayData* MonotypeVec::setIntImpl(int64_t k, TypedValue v) {
   }
   auto const cow = cowCheck();
   auto const mad = cow ? copy() : this;
+  if (dt != v.type()) {
+    mad->setLayoutIndex(getLayoutIndex(dt_with_rc(dt)));
+  }
   mad->valueRefUnchecked(k) = val(v);
   if constexpr (Move) {
     if (cow && decReleaseCheck()) Release(this);
   }
-
   return mad;
 }
 
@@ -755,15 +749,18 @@ ssize_t MonotypeVec::IterRewind(const MonotypeVec* mad, ssize_t pos) {
 
 template <bool Move>
 ArrayData* MonotypeVec::appendImpl(TypedValue v) {
-  if (!adjustTypePersistence(v.m_type)) {
-    // Type doesn't match; escalate to vanilla
+  auto const dt = type();
+  if (!equivDataTypes(dt, v.type())) {
     auto const ad = escalateWithCapacity(size() + 1);
-    auto const res = PackedArray::Append(ad, v);
-    assertx(ad == res);
-    return res;
+    auto const result = PackedArray::Append(ad, v);
+    assertx(ad == result);
+    return result;
   }
 
   auto const mad = prepareForInsert();
+  if (dt != v.type()) {
+    mad->setLayoutIndex(getLayoutIndex(dt_with_rc(dt)));
+  }
   mad->valueRefUnchecked(mad->m_size++) = val(v);
 
   if constexpr (Move) {

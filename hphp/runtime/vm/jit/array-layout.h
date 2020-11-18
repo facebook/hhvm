@@ -20,6 +20,7 @@
 #include <string>
 
 #include "hphp/runtime/base/bespoke-array.h"
+#include "hphp/runtime/base/req-tiny-vector.h"
 
 #include <folly/Optional.h>
 
@@ -56,6 +57,8 @@ struct ArrayLayout {
   const bespoke::Layout* bespokeLayout() const;
   const bespoke::ConcreteLayout* concreteLayout() const;
   folly::Optional<bespoke::LayoutIndex> layoutIndex() const;
+
+  req::TinyVector<MaskAndCompare, 2> bespokeMaskAndCompareSet() const;
 
   // Return a human-readable debug string describing the layout.
   std::string describe() const;

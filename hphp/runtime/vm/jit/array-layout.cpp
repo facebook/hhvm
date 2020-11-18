@@ -173,6 +173,13 @@ folly::Optional<bespoke::LayoutIndex> ArrayLayout::layoutIndex() const {
   return bespoke::LayoutIndex { safe_cast<uint16_t>(index) };
 }
 
+req::TinyVector<MaskAndCompare, 2>
+ArrayLayout::bespokeMaskAndCompareSet() const {
+  auto const& layout = assertBespoke(*this);
+  if (isBasicSort(sort)) return {MaskAndCompare{0,0}};
+  return layout.maskAndCompareSet();
+}
+
 const bespoke::Layout* ArrayLayout::irgenLayout() const {
   auto const index = std::max(int(sort) - int(Sort::Bespoke), 0);
   return bespoke::Layout::FromIndex({safe_cast<uint16_t>(index)});

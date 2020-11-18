@@ -27,14 +27,22 @@ namespace bespoke {
 namespace testing {
 
 struct MockLayout : public Layout {
-  MockLayout(std::string description, LayoutSet parents)
-    : Layout(Layout::ReserveIndices(1), std::move(description),
-             std::move(parents))
+  MockLayout(const std::string& description, LayoutSet&& parents,
+             LayoutIndex idx, bool concrete)
+    : Layout(idx, description, std::move(parents))
+    , m_concrete(concrete)
   {}
+
+  bool isConcrete() const override { return m_concrete; }
+
+private:
+  bool m_concrete;
 };
 
-inline Layout* makeDummyLayout(std::string name,
-                               std::vector<jit::ArrayLayout> parents) {
+inline Layout* makeDummyLayout(const std::string& name,
+                               std::vector<jit::ArrayLayout> parents,
+                               bespoke::LayoutIndex idx,
+                               bool concrete = true) {
   using ::testing::Mock;
 
   Layout::LayoutSet indices;
@@ -46,7 +54,7 @@ inline Layout* makeDummyLayout(std::string name,
       return *parent.layoutIndex();
     }
   );
-  auto const ret = new MockLayout(std::move(name), std::move(indices));
+  auto const ret = new MockLayout(name, std::move(indices), idx, concrete);
   Mock::AllowLeak(ret);
   return ret;
 }

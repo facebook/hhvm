@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/bespoke-array.h"
+#include "hphp/runtime/base/req-tiny-vector.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/util/type-scan.h"
 
@@ -416,6 +417,13 @@ struct Layout {
    */
   virtual SSATmp* emitIterGetVal(IRGS& env, SSATmp* arr, SSATmp* elm) const;
 
+  ///////////////////////////////////////////////////////////////////////////
+
+  /**
+   * Retrieve the set of masks and compares to use for a type test for this
+   * layout.
+   */
+  req::TinyVector<MaskAndCompare, 2> maskAndCompareSet() const;
 
 protected:
   Layout(LayoutIndex index, std::string description, LayoutSet parents);
@@ -424,6 +432,7 @@ private:
   bool checkInvariants() const;
   LayoutSet computeAncestors() const;
   LayoutSet computeDescendants() const;
+  req::TinyVector<MaskAndCompare, 2> computeMaskAndCompareSet() const;
 
   bool isDescendantOfDebug(const Layout* other) const;
   const Layout* nearestBoundDebug(bool upward, const Layout* other) const;
@@ -440,6 +449,7 @@ private:
   LayoutSet m_children;
   std::vector<Layout*> m_descendants;
   std::vector<Layout*> m_ancestors;
+  req::TinyVector<MaskAndCompare, 2> m_maskAndCompareSet;
 
   struct DescendantOrdering;
   struct AncestorOrdering;

@@ -187,6 +187,7 @@ bool Layout::checkInvariants() const {
     auto const DEBUG_ONLY layout = FromIndex(parent);
     assertx(layout);
     assertx(layout->m_topoIndex < m_topoIndex);
+    assertx(!layout->isConcrete());
   }
 
   // 1. The parents provided are immediate parents (i.e. the descendant graph
@@ -234,9 +235,11 @@ struct Layout::AncestorOrdering {
 void Layout::FinalizeHierarchy() {
   assertx(allowBespokeArrayLikes());
   assertx(!s_hierarchyFinal.load(std::memory_order_acquire));
+  std::vector<Layout*> allLayouts;
   for (size_t i = 0; i < s_layoutTableIndex; i++) {
     auto const layout = s_layoutTable[i];
     if (!layout) continue;
+    allLayouts.push_back(layout);
     assertx(layout->checkInvariants());
     for (auto const pIdx : layout->m_parents) {
       auto const parent = s_layoutTable[pIdx.raw];
@@ -245,6 +248,8 @@ void Layout::FinalizeHierarchy() {
     }
   }
 
+  // TODO(mcolavita): implement these by merging in topological order instead
+  // of repeated BFS
   for (size_t i = 0; i < s_layoutTableIndex; i++) {
     auto layout = s_layoutTable[i];
     if (!layout) continue;
@@ -265,6 +270,13 @@ void Layout::FinalizeHierarchy() {
               DescendantOrdering{});
     std::sort(layout->m_ancestors.begin(), layout->m_ancestors.end(),
               AncestorOrdering{});
+  }
+
+  // Compute mask and compare sets in topological order so that they can use
+  // their children's masks if necessary.
+  std::sort(allLayouts.begin(), allLayouts.end(), AncestorOrdering{});
+  for (auto const layout : allLayouts) {
+    layout->m_maskAndCompareSet = layout->computeMaskAndCompareSet();
   }
 
   s_hierarchyFinal.store(true, std::memory_order_release);
@@ -335,6 +347,122 @@ const Layout* Layout::FromIndex(LayoutIndex index) {
   assertx(layout != nullptr);
   assertx(layout->index() == index);
   return layout;
+}
+
+req::TinyVector<MaskAndCompare, 2> Layout::computeMaskAndCompareSet() const {
+  // The set of all concrete layouts that descend from the layout.
+  std::vector<uint16_t> liveVec;
+  for(auto const layout : m_descendants) {
+    if (!layout->isConcrete()) continue;
+    liveVec.push_back(layout->m_index.raw);
+  }
+
+  assertx(!liveVec.empty());
+  if (liveVec.size() == 1) return {MaskAndCompare::fullCompare(liveVec[0])};
+  std::sort(liveVec.begin(), liveVec.end());
+
+  // The set of all possible concrete layouts.
+  std::vector<uint16_t> allConcrete;
+  for (size_t i = 0; i < s_layoutTableIndex; i++) {
+    auto const layout = s_layoutTable[i];
+    if (!layout) continue;
+    if (!layout->isConcrete()) continue;
+    allConcrete.push_back(layout->m_index.raw);
+  }
+
+  // The set of all concrete layouts that do *not* descend from this layout.
+  std::vector<uint16_t> deadVec;
+  std::set_difference(
+    allConcrete.cbegin(), allConcrete.cend(),
+    liveVec.cbegin(), liveVec.cend(),
+    std::back_inserter(deadVec)
+  );
+
+  auto const checks = [&] () -> req::TinyVector<MaskAndCompare, 2> {
+    // 1. Attempt to find a single mask to cover.
+    {
+      uint16_t mask = 0xffff;
+      for (auto const live : liveVec) {
+        auto const disagree = live ^ liveVec[0];
+        mask &= ~disagree;
+      }
+      uint16_t comp = liveVec[0] & mask;
+      bool okay = true;
+      for (auto const dead : deadVec) {
+        if ((dead & mask) == comp) {
+          okay = false;
+          break;
+        }
+      }
+
+      if (okay) return {MaskAndCompare{mask, comp}};
+    }
+
+    // 2. If we have two children with simple masks, just use them.
+    if (m_children.size() == 2) {
+      auto const& lMask = FromIndex(*m_children.begin())->m_maskAndCompareSet;
+      auto const& rMask = FromIndex(*m_children.rbegin())->m_maskAndCompareSet;
+      assertx(!lMask.empty() && !rMask.empty());
+      if (lMask.size() == 1 && rMask.size() == 1) {
+        return {lMask[0], rMask[0]};
+      }
+    }
+
+    // 3. Give up
+    SCOPE_ASSERT_DETAIL("bespoke::Layout::computeMaskAndCompareSet") {
+      std::string ret = folly::sformat("{:04x}: {}\n", m_index.raw, describe());
+      ret += folly::sformat("  Live:\n");
+      for (auto const live : liveVec) {
+        auto const layout = s_layoutTable[live];
+        ret += folly::sformat("  - {:04x}: {}\n", live, layout->describe());
+      }
+      ret += folly::sformat("  Dead:\n");
+      for (auto const dead : deadVec) {
+        auto const layout = s_layoutTable[dead];
+        ret += folly::sformat("  - {:04x}: {}\n", dead, layout->describe());
+      }
+      return ret;
+    };
+    always_assert(false);
+  }();
+
+  if (debug) {
+    // Verify that the mask set is correct
+    for (auto const DEBUG_ONLY dead : deadVec) {
+      for (auto const DEBUG_ONLY check : checks) {
+        assertx(!check.accepts(dead));
+      }
+    }
+
+    for (auto const live : liveVec) {
+      bool UNUSED satisfied = false;
+      for (auto const& check : checks) {
+        if (check.accepts(live)) {
+          satisfied = true;
+          break;
+        }
+      }
+      assertx(satisfied);
+    }
+
+    for (auto const& check : checks) {
+      bool UNUSED satisfied = false;
+      for (auto const live : liveVec) {
+        if (check.accepts(live)) {
+          satisfied = true;
+          break;
+        }
+      }
+      assertx(satisfied);
+    }
+  }
+
+  return checks;
+}
+
+req::TinyVector<MaskAndCompare, 2> Layout::maskAndCompareSet() const {
+  assertx(s_hierarchyFinal.load(std::memory_order_acquire));
+  return m_maskAndCompareSet;
 }
 
 struct Layout::Initializer {

@@ -32,6 +32,23 @@ inline bool shouldTestBespokeArrayLikes() {
   return RO::EvalBespokeArrayLikeMode == 1;
 }
 
+/**
+ * An MaskAndCompare consists of a base and a mask. A value v is considered to
+ * be pass the check if (v & mask) == base.
+ */
+struct MaskAndCompare {
+  uint16_t mask;
+  uint16_t base;
+
+  static MaskAndCompare fullCompare(uint16_t val) {
+    return {0xffff, val};
+  }
+
+  bool accepts(uint16_t val) const {
+    return (val & mask) == base;
+  }
+};
+
 namespace bespoke {
 
 // Hide Layout and its implementations to the rest of the codebase.

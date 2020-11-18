@@ -132,6 +132,39 @@ inline Vreg materialize(Vout& v, Vptr data) {
 }
 inline Vreg materialize(Vout&, Vreg data) { return data; }
 
+template <class JmpFn>
+void emitBespokeLayoutTest(Vout& v, ArrayLayout layout, Vreg r, Vreg sf,
+                           JmpFn doJcc) {
+  auto const checks = layout.bespokeMaskAndCompareSet();
+  assertx(!checks.empty());
+
+  auto const bits = v.makeReg();
+  auto const doneBlock = v.makeBlock();
+  v << loadw{r[ArrayData::offsetOfBespokeIndex()], bits};
+  for (int i = 0; i < checks.size(); i++) {
+    auto const mask =
+      static_cast<int16_t>(BespokeArray::kExtraMagicBit.raw | checks[i].mask);
+    auto const comp =
+      static_cast<int16_t>(BespokeArray::kExtraMagicBit.raw | checks[i].base);
+    // TODO(mcolavita): mask == 0xff00 should be a special case
+    if (mask == 0xffff) {
+      v << cmpwi{comp, bits, sf};
+    } else {
+      auto const maskedBits = v.makeReg();
+      v << andwi{mask, bits, maskedBits, v.makeReg()};
+      v << cmpwi{comp, maskedBits, sf};
+    }
+    if (i != checks.size() - 1) {
+      auto const nextBlock = v.makeBlock();
+      v << jcc{CC_Z, sf, {nextBlock, doneBlock}, StringTag{}};
+      v = nextBlock;
+    }
+  }
+  doJcc(CC_Z, sf);
+  v << jmp{doneBlock};
+  v = doneBlock;
+}
+
 /*
  * Test whether the value given by `dataSrc' has the same type specialization
  * as `type' does.
@@ -177,14 +210,8 @@ void emitSpecializedTypeTest(Vout& v, IRLS& /*env*/, Type type, Loc dataSrc,
   if (spec.vanilla()) {
     v << testbim{ArrayData::kBespokeKindMask, r[HeaderKindOffset], sf};
     doJcc(CC_Z, sf);
-  } else if (auto const index = spec.layout().layoutIndex()) {
-    auto const value = BespokeArray::kExtraMagicBit.raw | index->raw;
-    v << cmpwim{
-      static_cast<int16_t>(value),
-      r[ArrayData::offsetOfBespokeIndex()],
-      sf
-    };
-    doJcc(CC_Z, sf);
+  } else if (spec.bespoke()) {
+    emitBespokeLayoutTest(v, spec.layout(), r, sf, doJcc);
   } else {
     always_assert(false);
   }

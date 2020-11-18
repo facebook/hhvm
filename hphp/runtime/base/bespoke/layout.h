@@ -422,10 +422,10 @@ protected:
 
 private:
   bool checkInvariants() const;
-  bool isDescendentOf(const Layout* other) const;
   LayoutSet computeAncestors() const;
-  LayoutSet computeDescendents() const;
-  const Layout* nearestBound(bool upward, const Layout* other) const;
+  LayoutSet computeDescendants() const;
+
+  bool isDescendantOfDebug(const Layout* other) const;
   const Layout* nearestBoundDebug(bool upward, const Layout* other) const;
 
   struct Initializer;
@@ -433,10 +433,16 @@ private:
   struct BFSWalker;
 
   LayoutIndex m_index;
+  size_t m_topoIndex;
   std::string m_description;
   const LayoutFunctions* m_vtable;
   LayoutSet m_parents;
   LayoutSet m_children;
+  std::vector<Layout*> m_descendants;
+  std::vector<Layout*> m_ancestors;
+
+  struct DescendantOrdering;
+  struct AncestorOrdering;
 };
 
 /*

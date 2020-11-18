@@ -43,7 +43,8 @@ namespace {
 std::atomic<size_t> s_layoutTableIndex;
 std::array<Layout*, Layout::kMaxIndex.raw + 1> s_layoutTable;
 std::atomic<bool> s_hierarchyFinal = false;
-
+std::mutex s_layoutCreationMutex;
+size_t s_topoIndex;
 constexpr LayoutIndex kBespokeTopIndex = {0};
 }
 
@@ -52,9 +53,11 @@ Layout::Layout(LayoutIndex index, std::string description, LayoutSet parents)
   , m_description(std::move(description))
   , m_parents(std::move(parents))
 {
+  std::lock_guard<std::mutex> lock(s_layoutCreationMutex);
   assertx(!s_hierarchyFinal.load(std::memory_order_acquire));
   assertx(s_layoutTable[m_index.raw] == nullptr);
   s_layoutTable[m_index.raw] = this;
+  m_topoIndex = s_topoIndex++;
   assertx(checkInvariants());
 }
 
@@ -65,17 +68,13 @@ struct Layout::BFSWalker {
   BFSWalker(bool upward, LayoutIndex initIdx)
     : m_workQ({initIdx})
     , m_upward(upward)
-  {
-    assertx(IMPLIES(!upward, s_hierarchyFinal.load(std::memory_order_acquire)));
-  }
+  {}
 
   template <typename C>
   BFSWalker(bool upward, C&& col)
     : m_workQ(col.cbegin(), col.cend())
     , m_upward(upward)
-  {
-    assertx(IMPLIES(!upward, s_hierarchyFinal.load(std::memory_order_acquire)));
-  }
+  {}
 
   /*
    * Return the next new node in the graph discovered by BFS, or folly::none if
@@ -116,11 +115,11 @@ private:
 };
 
 /*
- * Computes whether the layout is a descendent of another layout. To do so, we
+ * Computes whether the layout is a descendant of another layout. To do so, we
  * simply perform an upward BFS from the current layout until we encounter the
  * other layout or the BFS terminates.
  */
-bool Layout::isDescendentOf(const Layout* other) const {
+bool Layout::isDescendantOfDebug(const Layout* other) const {
   BFSWalker walker(true, index());
   while (auto const idx = walker.next()) {
     if (idx == other->index()) return true;
@@ -138,46 +137,25 @@ Layout::LayoutSet Layout::computeAncestors() const {
 }
 
 /*
- * Compute the full set of descendents by running downward DFS until
+ * Compute the full set of descendants by running downward DFS until
  * termination.
  */
-Layout::LayoutSet Layout::computeDescendents() const {
+Layout::LayoutSet Layout::computeDescendants() const {
   BFSWalker walker(false, index());
   while (walker.next()) {}
   return walker.allSeen();
 }
 
 /*
- * Computes the least upper bound or the greatest lower bound via BFS. Because
- * the edges in our graph represent the covering relation of the lattice, the
- * greatest upper bound is the first node found by an upward BFS on the two
- * layouts, and the least upper bound is the first node found by a downward BFS
- * on the two layouts.
- */
-const Layout* Layout::nearestBound(bool upward, const Layout* other) const {
-  BFSWalker walkerA(upward, index());
-  BFSWalker walkerB(upward, other->index());
-  while (true) {
-    auto const idxA = walkerA.next();
-    if (idxA && walkerB.hasSeen(*idxA)) return FromIndex(*idxA);
-    auto const idxB = walkerB.next();
-    if (idxB && walkerA.hasSeen(*idxB)) return FromIndex(*idxB);
-
-    if (!idxA && !idxB) return nullptr;
-  }
-}
-
-/*
  * A less efficient implementation of least upper and greatest lower bound that
  * does not assume uniqueness. This implementation works for general DAGs and
- * is used to validate that the DAG is a lattice. For a lattice, it always
- * agrees with nearestBound.
+ * is used to validate that the DAG is a lattice.
  */
 const Layout* Layout::nearestBoundDebug(bool upward, const Layout* other) const {
   assertx(IMPLIES(!upward, s_hierarchyFinal.load(std::memory_order_acquire)));
-  LayoutSet myClosure = upward ? computeAncestors() : computeDescendents();
+  LayoutSet myClosure = upward ? computeAncestors() : computeDescendants();
   LayoutSet otherClosure =
-    upward ? other->computeAncestors() : other->computeDescendents();
+    upward ? other->computeAncestors() : other->computeDescendants();
   LayoutSet common;
   std::set_intersection(myClosure.cbegin(), myClosure.cend(),
                         otherClosure.cbegin(), otherClosure.cend(),
@@ -194,8 +172,10 @@ const Layout* Layout::nearestBoundDebug(bool upward, const Layout* other) const 
   assertx(common.size() <= 1);
   if (common.empty()) return nullptr;
   auto const layout = FromIndex(*common.cbegin());
-  assertx(upward ? isDescendentOf(layout) : layout->isDescendentOf(this));
-  assertx(upward ? other->isDescendentOf(layout) : layout->isDescendentOf(other));
+  assertx(upward ? isDescendantOfDebug(layout)
+                 : layout->isDescendantOfDebug(this));
+  assertx(upward ? other->isDescendantOfDebug(layout)
+                 : layout->isDescendantOfDebug(other));
   return layout;
 }
 
@@ -204,15 +184,12 @@ bool Layout::checkInvariants() const {
 
   // 0. Parents are valid.
   for (auto const DEBUG_ONLY parent : m_parents) {
-    assertx(FromIndex(parent));
+    auto const DEBUG_ONLY layout = FromIndex(parent);
+    assertx(layout);
+    assertx(layout->m_topoIndex < m_topoIndex);
   }
 
-  // 1. Indices are a topological ordering for the descendent graph.
-  for (auto const DEBUG_ONLY parent : m_parents) {
-    assertx(parent < index());
-  }
-
-  // 2. The parents provided are immediate parents (i.e. the descendent graph
+  // 1. The parents provided are immediate parents (i.e. the descendant graph
   // is a covering relation).
   {
     LayoutSet grandparents;
@@ -230,7 +207,7 @@ bool Layout::checkInvariants() const {
     assertx(inter.empty());
   }
 
-  // 3. Least upper bound exists and is unique.
+  // 2. Least upper bound exists and is unique.
   for (size_t i = 0; i < index().raw; i++) {
     auto const other = s_layoutTable[i];
     if (!other) continue;
@@ -241,6 +218,18 @@ bool Layout::checkInvariants() const {
 
   return true;
 }
+
+struct Layout::DescendantOrdering {
+  bool operator()(const Layout* a, const Layout* b) const {
+    return a->m_topoIndex < b->m_topoIndex;
+  }
+};
+
+struct Layout::AncestorOrdering {
+  bool operator()(const Layout* a, const Layout* b) const {
+    return a->m_topoIndex > b->m_topoIndex;
+  }
+};
 
 void Layout::FinalizeHierarchy() {
   assertx(allowBespokeArrayLikes());
@@ -255,6 +244,29 @@ void Layout::FinalizeHierarchy() {
       parent->m_children.insert(layout->index());
     }
   }
+
+  for (size_t i = 0; i < s_layoutTableIndex; i++) {
+    auto layout = s_layoutTable[i];
+    if (!layout) continue;
+    auto const descendants = layout->computeDescendants();
+    std::transform(
+      descendants.begin(), descendants.end(),
+      std::back_inserter(layout->m_descendants),
+      [&] (LayoutIndex i) { return s_layoutTable[i.raw]; }
+    );
+    auto const ancestors = layout->computeAncestors();
+    std::transform(
+      ancestors.begin(), ancestors.end(),
+      std::back_inserter(layout->m_ancestors),
+      [&] (LayoutIndex i) { return s_layoutTable[i.raw]; }
+    );
+
+    std::sort(layout->m_descendants.begin(), layout->m_descendants.end(),
+              DescendantOrdering{});
+    std::sort(layout->m_ancestors.begin(), layout->m_ancestors.end(),
+              AncestorOrdering{});
+  }
+
   s_hierarchyFinal.store(true, std::memory_order_release);
 }
 
@@ -264,7 +276,10 @@ bool Layout::operator<=(const Layout& other) const {
     always_assert(other.index() == kBespokeTopIndex);
     return true;
   }
-  return isDescendentOf(&other);
+  auto const res = std::binary_search(m_ancestors.begin(), m_ancestors.end(),
+                                      &other, AncestorOrdering{});
+  assertx(isDescendantOfDebug(&other) == res);
+  return res;
 }
 
 const Layout* Layout::operator|(const Layout& other) const {
@@ -273,10 +288,21 @@ const Layout* Layout::operator|(const Layout& other) const {
     always_assert(other.index() == kBespokeTopIndex);
     return this;
   }
-  auto const bound = nearestBound(true, &other);
-  assertx(bound == nearestBoundDebug(true, &other));
-  always_assert(bound);
-  return bound;
+  auto lIter = m_ancestors.cbegin();
+  auto rIter = other.m_ancestors.cbegin();
+  auto const lt = AncestorOrdering{};
+  while (lIter != m_ancestors.cend() && rIter != other.m_ancestors.cend()) {
+    if (*lIter == *rIter) {
+      assertx(*lIter == nearestBoundDebug(true, &other));
+      return *lIter;
+    }
+    if (lt(*lIter, *rIter)) {
+      lIter++;
+    } else {
+      rIter++;
+    }
+  }
+  not_reached();
 }
 
 const Layout* Layout::operator&(const Layout& other) const {
@@ -285,9 +311,22 @@ const Layout* Layout::operator&(const Layout& other) const {
     always_assert(other.index() == kBespokeTopIndex);
     return this;
   }
-  auto const bound = nearestBound(false, &other);
-  assertx(bound == nearestBoundDebug(false, &other));
-  return bound;
+  auto lIter = m_descendants.cbegin();
+  auto rIter = other.m_descendants.cbegin();
+  auto const lt = DescendantOrdering{};
+  while (lIter != m_descendants.cend() && rIter != other.m_descendants.cend()) {
+    if (*lIter == *rIter) {
+      assertx(*lIter == nearestBoundDebug(false, &other));
+      return *lIter;
+    }
+    if (lt(*lIter, *rIter)) {
+      lIter++;
+    } else {
+      rIter++;
+    }
+  }
+  assertx(!nearestBoundDebug(false, &other));
+  return nullptr;
 }
 
 LayoutIndex Layout::ReserveIndices(size_t count) {

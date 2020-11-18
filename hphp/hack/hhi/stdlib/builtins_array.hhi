@@ -201,10 +201,10 @@ function array_multisort9(
 );
 <<__PHPStdLib, __Pure>>
 function array_pad(<<__MaybeMutable>> $input, int $pad_size, $pad_value);
-<<__PHPStdLib>>
-function array_pop(inout $array);
-<<__PHPStdLib>>
-function array_push(inout $array, $var, ...$args);
+<<__PHPStdLib, __Pure, __AtMostRxAsArgs>>
+function array_pop(<<__OnlyRxIfImpl(AnyArray::class)>> inout $array);
+<<__PHPStdLib, __Pure, __AtMostRxAsArgs>>
+function array_push(<<__OnlyRxIfImpl(AnyArray::class)>> inout $array, $var, ...$args);
 <<__PHPStdLib>>
 function array_rand($input, int $num_req = 1);
 <<__PHPStdLib>>
@@ -213,8 +213,8 @@ function array_reduce($input, $callback, $initial = null);
 function array_reverse(<<__MaybeMutable>> $array, bool $preserve_keys = false);
 <<__PHPStdLib, __Pure>>
 function array_search($needle, <<__MaybeMutable>> $haystack, bool $strict = false);
-<<__PHPStdLib>>
-function array_shift(inout $array);
+<<__PHPStdLib, __Pure, __AtMostRxAsArgs>>
+function array_shift(<<__OnlyRxIfImpl(AnyArray::class)>> inout $array);
 <<__PHPStdLib, __Pure>>
 function array_slice(<<__MaybeMutable>> $array, int $offset, $length = null, bool $preserve_keys = false);
 <<__PHPStdLib>>
@@ -226,8 +226,8 @@ function array_splice(
 );
 <<__PHPStdLib, __Pure>>
 function array_unique(<<__MaybeMutable>> $array, int $sort_flags = 2);
-<<__PHPStdLib>>
-function array_unshift(inout $array, $var, ...$args);
+<<__PHPStdLib, __Pure, __AtMostRxAsArgs>>
+function array_unshift(<<__OnlyRxIfImpl(AnyArray::class)>> inout $array, $var, ...$args);
 <<__PHPStdLib, __Pure>>
 function array_values<Tv>(<<__MaybeMutable>> Container<Tv> $input): varray<Tv>;
 <<__PHPStdLib>>

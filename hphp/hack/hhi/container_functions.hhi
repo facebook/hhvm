@@ -24,48 +24,57 @@ function array_sum/*<T>*/(<<__MaybeMutable>> /*Container<T>*/ $input)/*: num*/;
 <<__PHPStdLib, __Pure>>
 function array_product/*<T>*/(<<__MaybeMutable>> /*Container<T>*/ $input)/*: num*/;
 
-<<__PHPStdLib>>
+<<__PHPStdLib, __Pure, __AtMostRxAsArgs>>
 function sort<T as Container<mixed>>(
+  <<__OnlyRxIfImpl(AnyArray::class)>>
   inout T $arg,
   int $sort_flags = SORT_REGULAR,
 ): bool;
-<<__PHPStdLib>>
+<<__PHPStdLib, __Pure, __AtMostRxAsArgs>>
 function rsort<T as Container<mixed>>(
+  <<__OnlyRxIfImpl(AnyArray::class)>>
   inout T $arg,
   int $sort_flags = SORT_REGULAR,
 ): bool;
-<<__PHPStdLib>>
+<<__PHPStdLib, __Pure, __AtMostRxAsArgs>>
 function asort<Tk as arraykey, Tv>(
+  <<__OnlyRxIfImpl(AnyArray::class)>>
   inout KeyedContainer<Tk, Tv> $arg,
   int $sort_flags = SORT_REGULAR,
 ): bool;
-<<__PHPStdLib>>
+<<__PHPStdLib, __Pure, __AtMostRxAsArgs>>
 function arsort<Tk as arraykey, Tv>(
+  <<__OnlyRxIfImpl(AnyArray::class)>>
   inout KeyedContainer<Tk, Tv> $arg,
   int $sort_flags = SORT_REGULAR,
 ): bool;
-<<__PHPStdLib>>
+<<__PHPStdLib, __Pure, __AtMostRxAsArgs>>
 function ksort<T as KeyedContainer<arraykey, mixed>>(
+  <<__OnlyRxIfImpl(AnyArray::class)>>
   inout T $arg,
   int $sort_flags = SORT_REGULAR,
 ): bool;
-<<__PHPStdLib>>
+<<__PHPStdLib, __Pure, __AtMostRxAsArgs>>
 function krsort<Tk as arraykey, Tv>(
+  <<__OnlyRxIfImpl(AnyArray::class)>>
   inout KeyedContainer<Tk, Tv> $arg,
   int $sort_flags = SORT_REGULAR,
 ): bool;
-<<__PHPStdLib>>
+<<__PHPStdLib, __Pure, __AtMostRxAsArgs>>
 function usort<Tv, T as Container<Tv>>(
+  <<__OnlyRxIfImpl(AnyArray::class)>>
   inout T $arg,
   (function(Tv, Tv): num) $c,
 ): bool;
-<<__PHPStdLib>>
+<<__PHPStdLib, __Pure, __AtMostRxAsArgs>>
 function uasort<Tk as arraykey, Tv>(
+  <<__OnlyRxIfImpl(AnyArray::class)>>
   inout KeyedContainer<Tk, Tv> $arg,
   (function(Tv, Tv): num) $c,
 ): bool;
-<<__PHPStdLib>>
+<<__PHPStdLib, __Pure, __AtMostRxAsArgs>>
 function uksort<Tk as arraykey, Tv>(
+  <<__OnlyRxIfImpl(AnyArray::class)>>
   inout KeyedContainer<Tk, Tv> $arg,
   (function(Tk, Tk): num) $c,
 ): bool;

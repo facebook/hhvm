@@ -130,6 +130,7 @@ bool canDCE(IRInstruction* inst) {
   case CmpRes:
   case EqRecDesc:
   case EqCls:
+  case EqLazyCls:
   case EqFunc:
   case EqStrPtr:
   case EqArrayDataPtr:

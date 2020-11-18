@@ -635,6 +635,7 @@ bool opcodeMayRaise(Opcode opc) {
   case EqArrayDataPtr:
   case EqBool:
   case EqCls:
+  case EqLazyCls:
   case EqDbl:
   case EqFunc:
   case EqInt:

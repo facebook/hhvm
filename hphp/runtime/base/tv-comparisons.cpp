@@ -878,8 +878,100 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, const Func* val) {
 }
 
 template<class Op>
-typename Op::RetType tvRelOp(Op, TypedValue, LazyClassData) {
-  not_reached(); //TODO (T68823357)
+typename Op::RetType tvRelOp(Op op, TypedValue cell, LazyClassData val) {
+  assertx(tvIsPlausible(cell));
+  assertx(val.name() != nullptr && val.name()->isStatic());
+
+  switch (cell.m_type) {
+    case KindOfUninit:
+    case KindOfNull:
+      return op(staticEmptyString(), lazyClassToStringHelper(val));
+
+    case KindOfInt64: {
+      auto const num = stringToNumeric(lazyClassToStringHelper(val));
+      return num.m_type == KindOfInt64  ? op(cell.m_data.num, num.m_data.num) :
+             num.m_type == KindOfDouble ? op(cell.m_data.num, num.m_data.dbl) :
+             op(cell.m_data.num, 0);
+    }
+    case KindOfBoolean:
+      return op(!!cell.m_data.num, true);
+
+    case KindOfDouble: {
+      auto const num = stringToNumeric(lazyClassToStringHelper(val));
+      return num.m_type == KindOfInt64  ? op(cell.m_data.dbl, num.m_data.num) :
+             num.m_type == KindOfDouble ? op(cell.m_data.dbl, num.m_data.dbl) :
+             op(cell.m_data.dbl, 0);
+    }
+
+    case KindOfPersistentString:
+    case KindOfString:
+      return op(cell.m_data.pstr, lazyClassToStringHelper(val));
+
+    case KindOfPersistentVec:
+    case KindOfVec:
+      return op.vecVsNonVec();
+
+    case KindOfPersistentDict:
+    case KindOfDict:
+      return op.dictVsNonDict();
+
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:
+      return op.keysetVsNonKeyset();
+
+    case KindOfPersistentDArray:
+    case KindOfDArray:
+    case KindOfPersistentVArray:
+    case KindOfVArray:
+      lazyClassToStringHelper(val); // warn
+      return op.phpArrVsNonArr();
+
+    case KindOfObject: {
+      auto od = cell.m_data.pobj;
+      if (od->isCollection()) return op.collectionVsNonObj();
+      if (od->hasToString()) {
+        String str(od->invokeToString());
+        return op(str.get(), lazyClassToStringHelper(val));
+      }
+      return op(true, false);
+    }
+
+    case KindOfResource: {
+      auto const rd = cell.m_data.pres;
+      return op(rd->data()->o_toDouble(),
+                lazyClassToStringHelper(val)->toDouble());
+    }
+
+    case KindOfFunc:
+      return op.funcVsNonFunc();
+
+    case KindOfClass:
+      return op(cell.m_data.pclass, val);
+
+    case KindOfLazyClass:
+      return op(cell.m_data.plazyclass.name(), val.name());
+
+    case KindOfClsMeth:
+      if (RuntimeOption::EvalHackArrDVArrs) {
+        return op.clsmethVsNonClsMeth();
+      } else {
+        if (UNLIKELY(op.warnOnClsMethNonClsMeth())) {
+          raiseClsMethNonClsMethRelCompareWarning();
+        }
+        lazyClassToStringHelper(val); // warn
+        return op(true, false);
+      }
+
+    case KindOfRClsMeth:
+      return op.rclsMethVsNonRClsMeth();
+
+    case KindOfRFunc:
+      return op.rfuncVsNonRFunc();
+
+    case KindOfRecord:
+      return op.recordVsNonRecord();
+  }
+  not_reached();
 }
 
 template<class Op>
@@ -953,8 +1045,7 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, const Class* val) {
       return op(cell.m_data.pclass, val);
 
     case KindOfLazyClass:
-      return op(lazyClassToStringHelper(cell.m_data.plazyclass),
-                classToStringHelper(val));
+      return op(cell.m_data.plazyclass, val);
 
     case KindOfClsMeth:
       if (RuntimeOption::EvalHackArrDVArrs) {
@@ -1061,6 +1152,13 @@ struct Eq {
 
   bool operator()(const Func* f1, const Func* f2) const { return f1 == f2; }
   bool operator()(const Class* c1, const Class* c2) const { return c1 == c2; }
+
+  bool operator()(const Class* c1, LazyClassData c2) const {
+    return c1->name() == c2.name();
+  }
+  bool operator()(LazyClassData c1, const Class* c2) const {
+    return c1.name() == c2->name();
+  }
 
   bool operator()(const ObjectData* od1, const ObjectData* od2) const {
     assertx(od1);
@@ -1175,6 +1273,13 @@ struct CompareBase {
   }
   RetType operator()(const ResourceHdr* rd1, const ResourceHdr* rd2) const {
     return operator()(rd1->data()->o_toInt64(), rd2->data()->o_toInt64());
+  }
+
+  RetType operator()(const Class* c1, LazyClassData c2) const {
+    return operator()(classToStringHelper(c1), lazyClassToStringHelper(c2));
+  }
+  RetType operator()(LazyClassData c1, const Class* c2) const {
+    return operator()(lazyClassToStringHelper(c1), classToStringHelper(c2));
   }
 
   RetType dict(const ArrayData* ad1, const ArrayData* ad2) const {
@@ -1428,6 +1533,10 @@ bool tvSame(TypedValue c1, TypedValue c2) {
       if (isClassType(c2.m_type)) {
         return c1.m_data.pstr->same(classToStringHelper(c2.m_data.pclass));
       }
+      if (isLazyClassType(c2.m_type)) {
+        return
+          c1.m_data.pstr->same(lazyClassToStringHelper(c2.m_data.plazyclass));
+      }
       if (!isStringType(c2.m_type)) return false;
       return c1.m_data.pstr->same(c2.m_data.pstr);
 
@@ -1443,17 +1552,19 @@ bool tvSame(TypedValue c1, TypedValue c2) {
       if (isStringType(c2.m_type)) {
         return classToStringHelper(c1.m_data.pclass)->same(c2.m_data.pstr);
       }
+      if (isLazyClassType(c2.m_type)) {
+        return c1.m_data.pclass->name()->same(c2.m_data.plazyclass.name());
+      }
       if (c2.m_type != KindOfClass) return false;
       return c1.m_data.pclass == c2.m_data.pclass;
 
     case KindOfLazyClass:
       if (isStringType(c2.m_type)) {
-        return lazyClassToStringHelper(c1.m_data.plazyclass)->same(c2.m_data.pstr);
+        return
+          lazyClassToStringHelper(c1.m_data.plazyclass)->same(c2.m_data.pstr);
       }
       if (isClassType(c2.m_type)) {
-        return
-          lazyClassToStringHelper(c1.m_data.plazyclass)
-            ->same(classToStringHelper(c2.m_data.pclass));
+        return c1.m_data.plazyclass.name()->same(c2.m_data.pclass->name());
       }
       if (c2.m_type != KindOfLazyClass) return false;
       return c1.m_data.plazyclass.name() == c2.m_data.plazyclass.name();

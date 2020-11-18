@@ -1388,6 +1388,15 @@ SSATmp* simplifyEqCls(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
+SSATmp* simplifyEqLazyCls(State& env, const IRInstruction* inst) {
+  auto const left = inst->src(0);
+  auto const right = inst->src(1);
+  if (left->hasConstVal() && right->hasConstVal()) {
+    return cns(env, left->lclsVal().name() == right->lclsVal().name());
+  }
+  return nullptr;
+}
+
 SSATmp* simplifyEqStrPtr(State& env, const IRInstruction* inst) {
   auto const left = inst->src(0);
   auto const right = inst->src(1);
@@ -3515,6 +3524,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(NeqRes)
   X(CmpRes)
   X(EqCls)
+  X(EqLazyCls)
   X(EqStrPtr)
   X(EqArrayDataPtr)
   X(DictGet)

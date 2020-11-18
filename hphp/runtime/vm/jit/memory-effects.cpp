@@ -1505,6 +1505,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case EnterPrologue:
   case EqBool:
   case EqCls:
+  case EqLazyCls:
   case EqRecDesc:
   case EqFunc:
   case EqStrPtr:

@@ -999,6 +999,12 @@ void implStrCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
     }
     right = gen(env, LdClsName, right);
   }
+  if (right->isA(TLazyCls)) {
+    if (RuntimeOption::EvalRaiseClassConversionWarning) {
+      gen(env, RaiseWarning, cns(env, s_clsToStringWarning.get()));
+    }
+    right = gen(env, LdLazyClsName, right);
+  }
 
   auto const rightTy = right->type();
 
@@ -1174,6 +1180,21 @@ void implObjCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
         [&]{ return emitObjStrCmp(env, op, left, gen(env, LdClsName, right)); }
       )
     );
+  } else if (rightTy <= TLazyCls) {
+    if (RuntimeOption::EvalRaiseClassConversionWarning) {
+      gen(env, RaiseWarning, cns(env, s_clsToStringWarning.get()));
+    }
+    push(
+      env,
+      emitCollectionCheck(
+        env,
+        op,
+        left,
+        [&]{
+          return emitObjStrCmp(env, op, left, gen(env, LdLazyClsName, right));
+        }
+      )
+    );
   } else if (rightTy <= TArr) {
     // Object is always greater than array, but we need a collection check
     // first.
@@ -1313,6 +1334,44 @@ void implFunCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
   return;
 }
 
+void implLazyClsCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
+  auto const rightTy = right->type();
+
+  if (rightTy <= TLazyCls) {
+    if (op == Op::Eq || op == Op::Same) {
+      push(env, gen(env, EqLazyCls, left, right));
+      return;
+    }
+    if (op == Op::Neq || op == Op::NSame) {
+      push(
+        env,
+        gen(env, XorBool, gen(env, EqLazyCls, left, right), cns(env, true))
+      );
+      return;
+    }
+  }
+
+  if (rightTy <= TStr) {
+    if (RuntimeOption::EvalRaiseClassConversionWarning) {
+      gen(env, RaiseWarning, cns(env, s_clsToStringWarning.get()));
+    }
+    auto const str = gen(env, LdLazyClsName, left);
+    implStrCmp(env, op, str, right);
+    return;
+  }
+
+  if (rightTy <= TCls) {
+    if (op == Op::Eq || op == Op::Neq || op == Op::Same || op == Op::NSame) {
+      auto const lstr = gen(env, LdLazyClsName, left);
+      auto const rstr = gen(env, LdClsName, right);
+      implStrCmp(env, op, lstr, rstr);
+      return;
+    }
+  }
+
+  PUNT(LazyCls-cmp);
+}
+
 void implClsCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
   auto const rightTy = right->type();
 
@@ -1335,6 +1394,15 @@ void implClsCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
     auto const str = gen(env, LdClsName, left);
     implStrCmp(env, op, str, right);
     return;
+  }
+
+  if (rightTy <= TLazyCls) {
+    if (op == Op::Eq || op == Op::Neq || op == Op::Same || op == Op::NSame) {
+      auto const lstr = gen(env, LdClsName, left);
+      auto const rstr = gen(env, LdLazyClsName, right);
+      implStrCmp(env, op, lstr, rstr);
+      return;
+    }
   }
 
   PUNT(Cls-cmp);
@@ -1500,13 +1568,17 @@ void implCmp(IRGS& env, Op op) {
     return
       equivDataTypes(leftTy.toDataType(), rightTy.toDataType()) ||
       (isArrayType(leftTy.toDataType()) && isArrayType(rightTy.toDataType())) ||
-      (isFuncType(leftTy.toDataType()) && isClassType(rightTy.toDataType())) ||
-      (isClassType(leftTy.toDataType()) && isFuncType(rightTy.toDataType())) ||
-      (isFuncType(leftTy.toDataType()) && isStringType(rightTy.toDataType())) ||
-      (isStringType(leftTy.toDataType()) && isFuncType(rightTy.toDataType())) ||
       (isClassType(leftTy.toDataType()) && isStringType(rightTy.toDataType()))||
+      (isClassType(leftTy.toDataType()) &&
+       isLazyClassType(rightTy.toDataType()))||
+      (isLazyClassType(leftTy.toDataType()) &&
+       isClassType(rightTy.toDataType()))||
+      (isLazyClassType(leftTy.toDataType()) &&
+       isStringType(rightTy.toDataType()))||
       (isStringType(leftTy.toDataType()) &&
         isClassType(rightTy.toDataType())) ||
+      (isStringType(leftTy.toDataType()) &&
+        isLazyClassType(rightTy.toDataType())) ||
       (isClsMethType(leftTy.toDataType()) &&
         isArrayLikeType(rightTy.toDataType())) ||
       (isArrayLikeType(leftTy.toDataType()) &&
@@ -1532,6 +1604,7 @@ void implCmp(IRGS& env, Op op) {
   else if (leftTy <= TRes) implResCmp(env, op, left, right);
   else if (leftTy <= TFunc) implFunCmp(env, op, left, right);
   else if (leftTy <= TCls) implClsCmp(env, op, left, right);
+  else if (leftTy <= TLazyCls) implLazyClsCmp(env, op, left, right);
   else if (leftTy <= TClsMeth) implClsMethCmp(env, op, left, right);
   else if (leftTy <= TRecord) implRecordCmp(env, op, left, right);
   else if (leftTy <= TRFunc) implRFuncCmp(env, op, left, right);

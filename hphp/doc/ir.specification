@@ -668,6 +668,10 @@ To string conversions:
 
   Checks if two Class values are equal.
 
+| EqLazyCls,                   D(Bool), S(LazyCls) S(LazyCls),            NF
+
+  Checks if two Lazy class values are equal.
+
 | EqRecDesc,                   D(Bool), S(RecDesc) S(RecDesc),            NF
 
   Checks if two record types are equal.

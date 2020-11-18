@@ -245,6 +245,7 @@ bool supportsGVN(const IRInstruction* inst) {
   case NeqRes:
   case CmpRes:
   case EqCls:
+  case EqLazyCls:
   case EqFunc:
   case EqStrPtr:
   case InstanceOf:

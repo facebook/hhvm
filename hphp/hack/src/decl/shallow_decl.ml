@@ -107,6 +107,9 @@ let prop env cv =
   in
   let const = Attrs.mem SN.UserAttributes.uaConst cv.cv_user_attributes in
   let lateinit = Attrs.mem SN.UserAttributes.uaLateInit cv.cv_user_attributes in
+  let php_std_lib =
+    Attrs.mem SN.UserAttributes.uaPHPStdLib cv.cv_user_attributes
+  in
   {
     sp_name = cv.cv_id;
     sp_xhp_attr = make_xhp_attr cv;
@@ -118,7 +121,8 @@ let prop env cv =
         ~lateinit
         ~lsb:false
         ~needs_init:(Option.is_none cv.cv_expr)
-        ~abstract:cv.cv_abstract;
+        ~abstract:cv.cv_abstract
+        ~php_std_lib;
   }
 
 and static_prop env cv =
@@ -134,6 +138,9 @@ and static_prop env cv =
   let lateinit = Attrs.mem SN.UserAttributes.uaLateInit cv.cv_user_attributes in
   let lsb = Attrs.mem SN.UserAttributes.uaLSB cv.cv_user_attributes in
   let const = Attrs.mem SN.UserAttributes.uaConst cv.cv_user_attributes in
+  let php_std_lib =
+    Attrs.mem SN.UserAttributes.uaPHPStdLib cv.cv_user_attributes
+  in
   {
     sp_name = (cv_pos, id);
     sp_xhp_attr = make_xhp_attr cv;
@@ -145,7 +152,8 @@ and static_prop env cv =
         ~lateinit
         ~lsb
         ~needs_init:(Option.is_none cv.cv_expr)
-        ~abstract:cv.cv_abstract;
+        ~abstract:cv.cv_abstract
+        ~php_std_lib;
   }
 
 let method_type env m =
@@ -211,6 +219,9 @@ let method_ env m =
   let has_dynamicallycallable =
     Attrs.mem SN.UserAttributes.uaDynamicallyCallable m.m_user_attributes
   in
+  let php_std_lib =
+    Attrs.mem SN.UserAttributes.uaPHPStdLib m.m_user_attributes
+  in
   let ft = method_type env m in
   let reactivity =
     match ft.ft_reactive with
@@ -261,7 +272,8 @@ let method_ env m =
         ~abstract:m.m_abstract
         ~final:m.m_final
         ~override
-        ~dynamicallycallable:has_dynamicallycallable;
+        ~dynamicallycallable:has_dynamicallycallable
+        ~php_std_lib;
   }
 
 let class_ ctx c =

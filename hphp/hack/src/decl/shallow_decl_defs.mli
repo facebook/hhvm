@@ -19,12 +19,14 @@ module PropFlags : sig
   val get_lateinit    : t -> bool
   val get_lsb         : t -> bool
   val get_needs_init  : t -> bool
+  val get_php_std_lib : t -> bool
 
   val set_abstract    : bool -> t -> t
   val set_const       : bool -> t -> t
   val set_lateinit    : bool -> t -> t
   val set_lsb         : bool -> t -> t
   val set_needs_init  : bool -> t -> t
+  val set_php_std_lib : bool -> t -> t
 
   val make :
     abstract:bool ->
@@ -32,6 +34,7 @@ module PropFlags : sig
     lateinit:bool ->
     lsb:bool ->
     needs_init:bool ->
+    php_std_lib:bool ->
     t
 end
 [@@ocamlformat "disable"]
@@ -45,17 +48,20 @@ module MethodFlags : sig
   val get_final               : t -> bool
   val get_override            : t -> bool
   val get_dynamicallycallable : t -> bool
+  val get_php_std_lib         : t -> bool
 
   val set_abstract            : bool -> t -> t
   val set_final               : bool -> t -> t
   val set_override            : bool -> t -> t
   val set_dynamicallycallable : bool -> t -> t
+  val set_php_std_lib         : bool -> t -> t
 
   val make :
     abstract:bool ->
     final:bool ->
     override:bool ->
     dynamicallycallable:bool ->
+    php_std_lib:bool ->
     t
 end
 [@@ocamlformat "disable"]
@@ -134,6 +140,8 @@ val sp_lsb : shallow_prop -> bool
 
 val sp_needs_init : shallow_prop -> bool
 
+val sp_php_std_lib : shallow_prop -> bool
+
 val sm_abstract : shallow_method -> bool
 
 val sm_final : shallow_method -> bool
@@ -141,6 +149,8 @@ val sm_final : shallow_method -> bool
 val sm_override : shallow_method -> bool
 
 val sm_dynamicallycallable : shallow_method -> bool
+
+val sm_php_std_lib : shallow_method -> bool
 
 type fun_decl = fun_elt [@@deriving show]
 

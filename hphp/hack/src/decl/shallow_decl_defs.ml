@@ -30,18 +30,21 @@ module PropFlags = struct
   let lateinit_bit    = 1 lsl 2
   let lsb_bit         = 1 lsl 3
   let needs_init_bit  = 1 lsl 4
+  let php_std_lib_bit = 1 lsl 5
 
   let get_abstract    = is_set abstract_bit
   let get_const       = is_set const_bit
   let get_lateinit    = is_set lateinit_bit
   let get_lsb         = is_set lsb_bit
   let get_needs_init  = is_set needs_init_bit
+  let get_php_std_lib = is_set php_std_lib_bit
 
   let set_abstract    = set_bit abstract_bit
   let set_const       = set_bit const_bit
   let set_lateinit    = set_bit lateinit_bit
   let set_lsb         = set_bit lsb_bit
   let set_needs_init  = set_bit needs_init_bit
+  let set_php_std_lib = set_bit php_std_lib_bit
 
   let make
       ~abstract
@@ -49,6 +52,7 @@ module PropFlags = struct
       ~lateinit
       ~lsb
       ~needs_init
+      ~php_std_lib
       =
     empty
     |> set_abstract abstract
@@ -56,6 +60,7 @@ module PropFlags = struct
     |> set_lateinit lateinit
     |> set_lsb lsb
     |> set_needs_init needs_init
+    |> set_php_std_lib php_std_lib
 
   let pp fmt t =
     if t = empty then
@@ -73,6 +78,7 @@ module PropFlags = struct
       if get_lateinit t then print "lateinit";
       if get_lsb t then print "lsb";
       if get_needs_init t then print "needs_init";
+      if get_php_std_lib t then print "php_std_lib";
       Format.fprintf fmt "@,@]"
     )
 
@@ -89,28 +95,33 @@ module MethodFlags = struct
   let final_bit               = 1 lsl 1
   let override_bit            = 1 lsl 2
   let dynamicallycallable_bit = 1 lsl 3
+  let php_std_lib_bit         = 1 lsl 4
 
   let get_abstract            = is_set abstract_bit
   let get_final               = is_set final_bit
   let get_override            = is_set override_bit
   let get_dynamicallycallable = is_set dynamicallycallable_bit
+  let get_php_std_lib         = is_set php_std_lib_bit
 
   let set_abstract            = set_bit abstract_bit
   let set_final               = set_bit final_bit
   let set_override            = set_bit override_bit
   let set_dynamicallycallable = set_bit dynamicallycallable_bit
+  let set_php_std_lib         = set_bit php_std_lib_bit
 
   let make
       ~abstract
       ~final
       ~override
       ~dynamicallycallable
+      ~php_std_lib
       =
     empty
     |> set_abstract abstract
     |> set_final final
     |> set_override override
     |> set_dynamicallycallable dynamicallycallable
+    |> set_php_std_lib php_std_lib
 
   let pp fmt t =
     if t = empty then
@@ -127,6 +138,7 @@ module MethodFlags = struct
       if get_final t then print "final";
       if get_override t then print "override";
       if get_dynamicallycallable t then print "dynamicallycallable";
+      if get_php_std_lib t then print "php_std_lib";
       Format.fprintf fmt "@,@]"
     )
 
@@ -208,6 +220,8 @@ let sp_lsb sp = PropFlags.get_lsb sp.sp_flags
 
 let sp_needs_init sp = PropFlags.get_needs_init sp.sp_flags
 
+let sp_php_std_lib sp = PropFlags.get_php_std_lib sp.sp_flags
+
 let sm_abstract sm = MethodFlags.get_abstract sm.sm_flags
 
 let sm_final sm = MethodFlags.get_final sm.sm_flags
@@ -215,6 +229,8 @@ let sm_final sm = MethodFlags.get_final sm.sm_flags
 let sm_override sm = MethodFlags.get_override sm.sm_flags
 
 let sm_dynamicallycallable sm = MethodFlags.get_dynamicallycallable sm.sm_flags
+
+let sm_php_std_lib sm = MethodFlags.get_php_std_lib sm.sm_flags
 
 type fun_decl = fun_elt [@@deriving show]
 

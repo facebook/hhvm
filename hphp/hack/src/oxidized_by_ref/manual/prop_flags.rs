@@ -16,6 +16,7 @@ bitflags! {
         const LATEINIT    = 1 << 2;
         const LSB         = 1 << 3;
         const NEEDS_INIT  = 1 << 4;
+        const PHP_STD_LIB = 1 << 5;
     }
 }
 

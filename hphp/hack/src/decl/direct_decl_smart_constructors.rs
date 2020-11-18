@@ -1569,6 +1569,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                                     PropFlags::NEEDS_INIT,
                                     self.state.file_mode != Mode::Mdecl,
                                 );
+                                flags.set(PropFlags::PHP_STD_LIB, attributes.php_std_lib);
                                 properties.push(ShallowProp {
                                     xhp_attr: None,
                                     name: Id(pos, name),
@@ -3615,6 +3616,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                     flags.set(PropFlags::LSB, attributes.lsb);
                     flags.set(PropFlags::NEEDS_INIT, needs_init);
                     flags.set(PropFlags::ABSTRACT, modifiers.is_abstract);
+                    flags.set(PropFlags::PHP_STD_LIB, attributes.php_std_lib);
                     Some(ShallowProp {
                         xhp_attr: None,
                         name: Id(pos, name),
@@ -3782,6 +3784,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             MethodFlags::DYNAMICALLYCALLABLE,
             attributes.dynamically_callable,
         );
+        flags.set(MethodFlags::PHP_STD_LIB, attributes.php_std_lib);
         let method = self.alloc(ShallowMethod {
             name: id,
             reactivity: match attributes.reactivity {

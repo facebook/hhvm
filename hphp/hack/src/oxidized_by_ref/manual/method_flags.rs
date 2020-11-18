@@ -15,6 +15,7 @@ bitflags! {
         const FINAL               = 1 << 1;
         const OVERRIDE            = 1 << 2;
         const DYNAMICALLYCALLABLE = 1 << 3;
+        const PHP_STD_LIB         = 1 << 4;
     }
 }
 

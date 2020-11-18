@@ -11,17 +11,11 @@ open Hh_prelude
 open Aast
 module SN = Naming_special_names
 
-let attribute_exists x1 x2 attrs =
-  List.exists attrs (fun { ua_name; _ } ->
-      String.equal x1 (snd ua_name) || String.equal x2 (snd ua_name))
+let attribute_exists x1 attrs =
+  List.exists attrs (fun { ua_name; _ } -> String.equal x1 (snd ua_name))
 
 let static_memoized_check m =
-  if
-    attribute_exists
-      SN.UserAttributes.uaMemoize
-      SN.UserAttributes.uaMemoizeLSB
-      m.m_user_attributes
-  then
+  if attribute_exists SN.UserAttributes.uaMemoize m.m_user_attributes then
     Errors.static_memoized_function (fst m.m_name)
 
 let unnecessary_memoize_lsb c m =

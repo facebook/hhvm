@@ -552,7 +552,7 @@ let rage_experiments_and_config
       local_config.ServerLocalConfig.experiments_config_meta )
 
 (** Human-readable text relating to what shell commands the user has executed *)
-let rage_command_history () : string Lwt.t =
+let rage_command_history (env : env) : string Lwt.t =
   (* .bash_history - a record of commands the user did, if they use bash. *)
   let re = Str.regexp "^#[0-9]+$" in
   let fn = Sys_utils.expanduser "~/.bash_history" in
@@ -591,7 +591,7 @@ let rage_command_history () : string Lwt.t =
     Lwt_utils.exec_checked
       ~timeout:30.0
       Exec_command.Hg
-      [| "journal"; "--limit"; "300" |]
+      [| "journal"; "--limit"; "300"; "--cwd"; Path.to_string env.root |]
   in
   let journal =
     match journal_result with
@@ -746,7 +746,7 @@ let main (env : env) : Exit_status.t Lwt.t =
   let hostname = Unix.gethostname () in
   let%lwt ooms = Extra_rage.ooms () in
   add ("host", hostname ^ "\n\n" ^ ooms);
-  let%lwt command_history = rage_command_history () in
+  let%lwt command_history = rage_command_history env in
   add ("command_history", command_history);
 
   (* We've assembled everything! now log it. *)

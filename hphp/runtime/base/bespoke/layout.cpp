@@ -271,11 +271,7 @@ void Layout::FinalizeHierarchy() {
 }
 
 bool Layout::operator<=(const Layout& other) const {
-  if (!s_hierarchyFinal.load(std::memory_order_acquire)) {
-    always_assert(index() == kBespokeTopIndex);
-    always_assert(other.index() == kBespokeTopIndex);
-    return true;
-  }
+  assertx(s_hierarchyFinal.load(std::memory_order_acquire));
   auto const res = std::binary_search(m_ancestors.begin(), m_ancestors.end(),
                                       &other, AncestorOrdering{});
   assertx(isDescendantOfDebug(&other) == res);
@@ -283,11 +279,7 @@ bool Layout::operator<=(const Layout& other) const {
 }
 
 const Layout* Layout::operator|(const Layout& other) const {
-  if (!s_hierarchyFinal.load(std::memory_order_acquire)) {
-    always_assert(index() == kBespokeTopIndex);
-    always_assert(other.index() == kBespokeTopIndex);
-    return this;
-  }
+  assertx(s_hierarchyFinal.load(std::memory_order_acquire));
   auto lIter = m_ancestors.cbegin();
   auto rIter = other.m_ancestors.cbegin();
   auto const lt = AncestorOrdering{};
@@ -306,11 +298,7 @@ const Layout* Layout::operator|(const Layout& other) const {
 }
 
 const Layout* Layout::operator&(const Layout& other) const {
-  if (!s_hierarchyFinal.load(std::memory_order_acquire)) {
-    always_assert(index() == kBespokeTopIndex);
-    always_assert(other.index() == kBespokeTopIndex);
-    return this;
-  }
+  assertx(s_hierarchyFinal.load(std::memory_order_acquire));
   auto lIter = m_descendants.cbegin();
   auto rIter = other.m_descendants.cbegin();
   auto const lt = DescendantOrdering{};

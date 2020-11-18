@@ -87,23 +87,36 @@ let direct_decl_parse_and_cache ctx file =
       Relative_path.is_hhi (Relative_path.prefix file)
       && ParserOptions.deregister_php_stdlib popt
     in
-    let is_deregistered_stdlib_fun fun_decl =
-      deregister_php_stdlib && fun_decl.Typing_defs.fe_php_std_lib
-    in
-    let is_deregistered_stdlib_class c =
-      deregister_php_stdlib
-      && List.exists c.Shallow_decl_defs.sc_user_attributes ~f:(fun a ->
-             String.equal
-               Naming_special_names.UserAttributes.uaPHPStdLib
-               (snd a.Typing_defs_core.ua_name))
+    let is_stdlib_fun fun_decl = fun_decl.Typing_defs.fe_php_std_lib in
+    let is_stdlib_class c =
+      List.exists c.Shallow_decl_defs.sc_user_attributes ~f:(fun a ->
+          String.equal
+            Naming_special_names.UserAttributes.uaPHPStdLib
+            (snd a.Typing_defs_core.ua_name))
     in
     let decls =
-      List.filter decls ~f:(function
-          | (_, Shallow_decl_defs.Fun decl) ->
-            not (is_deregistered_stdlib_fun decl)
-          | (_, Shallow_decl_defs.Class decl) ->
-            not (is_deregistered_stdlib_class decl)
-          | _ -> true)
+      if not deregister_php_stdlib then
+        decls
+      else
+        let open Shallow_decl_defs in
+        List.filter_map decls ~f:(function
+            | (_, Fun f) when is_stdlib_fun f -> None
+            | (_, Class c) when is_stdlib_class c -> None
+            | (name, Class c) ->
+              let keep_prop sp = not (sp_php_std_lib sp) in
+              let keep_meth sm = not (sm_php_std_lib sm) in
+              let c =
+                {
+                  c with
+                  sc_props = List.filter c.sc_props ~f:keep_prop;
+                  sc_sprops = List.filter c.sc_sprops ~f:keep_prop;
+                  sc_methods = List.filter c.sc_methods ~f:keep_meth;
+                  sc_static_methods =
+                    List.filter c.sc_static_methods ~f:keep_meth;
+                }
+              in
+              Some (name, Class c)
+            | name_and_decl -> Some name_and_decl)
     in
     cache_decls ctx decls;
     Some decls

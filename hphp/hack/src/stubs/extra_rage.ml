@@ -13,3 +13,5 @@ let create_repro ~mergebase ~patch_script =
 let ooms () = Lwt.return ""
 
 let shell () = Lwt.return ""
+
+let verify_typechecker_err_src () = ()

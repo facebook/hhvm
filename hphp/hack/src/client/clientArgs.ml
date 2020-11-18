@@ -1060,9 +1060,10 @@ let parse_rage_args () =
           ("hh stuck in infinite loop", `Verbose_hh_start)
         else if String.equal response "3" then
           ("hh monitor problem", `Verbose_hh_start)
-        else if String.equal response "4" then
+        else if String.equal response "4" then begin
+          Extra_rage.verify_typechecker_err_src ();
           ("internal typecheck bug", `No_info)
-        else if String.equal response "5" then
+        end else if String.equal response "5" then
           let () =
             Printf.printf
               "Please elaborate on which errors are incorrect...\nrage> %!"

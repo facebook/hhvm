@@ -131,13 +131,15 @@ module Process_failure = struct
       ^^ "Exit code: %s\n"
       ^^ "%s -- %s\n"
       ^^ "Exception: %s\n"
-      ^^ "Stderr: %s" )
+      ^^ "Stderr: %s\n"
+      ^^ "Stdout: %s" )
       process_failure.command_line
       exit_code
       (Utils.timestring process_failure.start_time)
       (Utils.timestring process_failure.end_time)
       exn_message
       stderr
+      process_failure.stdout
 end
 
 let exec_checked

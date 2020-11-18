@@ -45,6 +45,7 @@ let rec ptype fty fpol = function
       }
     in
     Tshape (kind, Nast.ShapeMap.map field fs)
+  | Tdynamic pol -> Tdynamic (fpol pol)
 
 and fun_ fty fpol f =
   let ptype = ptype fty fpol in
@@ -65,7 +66,8 @@ let iter_ptype2 fty fpol pt1 pt2 =
   match (pt1, pt2) with
   | (Tnull p1, Tnull p2)
   | (Tprim p1, Tprim p2)
-  | (Tgeneric p1, Tgeneric p2) ->
+  | (Tgeneric p1, Tgeneric p2)
+  | (Tdynamic p1, Tdynamic p2) ->
     fpol p1 p2
   | (Tnonnull (ps1, pl1), Tnonnull (ps2, pl2)) ->
     fpol ps1 ps2;

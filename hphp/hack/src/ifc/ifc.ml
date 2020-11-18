@@ -45,6 +45,7 @@ let rec policy_occurrences pty =
     (pol p, emp, emp)
   | Tnonnull (pself, plump) -> (pol pself, pol plump, emp)
   | Tgeneric p -> (emp, pol p, emp)
+  | Tdynamic p -> (emp, pol p, emp)
   | Tinter tl
   | Tunion tl
   | Ttuple tl ->
@@ -96,7 +97,7 @@ let rec subtype ~pos t1 t2 acc =
        that is sound and should not pose precision problems
        since function types are seldom refined from `mixed` *)
     L.(PSet.elements cov <* [pself] && [plump] =* PSet.elements inv) ~pos acc
-  | (Tgeneric p1, _) ->
+  | ((Tgeneric p1 | Tdynamic p1), _) ->
     let (cov, inv, cnt) = policy_occurrences t2 in
     L.(
       [p1] <* PSet.elements cov
@@ -104,7 +105,7 @@ let rec subtype ~pos t1 t2 acc =
       && PSet.elements cnt <* [p1])
       ~pos
       acc
-  | (_, Tgeneric p2) ->
+  | (_, (Tgeneric p2 | Tdynamic p2)) ->
     let (cov, inv, cnt) = policy_occurrences t1 in
     L.(
       PSet.elements cov <* [p2]
@@ -406,7 +407,8 @@ let adjust_ptype ?prefix ~pos ~adjustment renv env ty =
     | Tnonnull (pself, plump) ->
       (* plump is invariant, so we do not adjust it *)
       simple_freshen env (fun pself -> Tnonnull (pself, plump)) pself
-    | Tgeneric p -> simple_freshen env (fun p -> Tgeneric p) p
+    | Tgeneric p -> (env, Tgeneric p)
+    | Tdynamic p -> (env, Tdynamic p)
     | Ttuple tl -> on_list env (fun l -> Ttuple l) tl
     | Tunion tl -> on_list env (fun l -> Tunion l) tl
     | Tinter tl -> on_list env (fun l -> Tinter l) tl
@@ -442,6 +444,7 @@ let rec object_policy = function
   | Tprim pol
   | Tnonnull (pol, _)
   | Tgeneric pol
+  | Tdynamic pol
   | Tclass { c_self = pol; _ }
   | Tfun { f_self = pol; _ } ->
     PSet.singleton pol
@@ -517,15 +520,22 @@ let lift_params renv =
 let set_local_types env =
   List.fold ~init:env ~f:(fun env (lid, pty) -> Env.set_local_type env lid pty)
 
-let receiver_of_obj_get obj_ptype property =
+let receiver_of_obj_get pos obj_ptype property =
   match obj_ptype with
   | Tclass class_ -> class_
+  | Tdynamic pol ->
+    (* While it is sound to set the class's lump policy to be the dynamic's
+       (invariant) policy, we do not know if the property we are looking for
+       is policied, therefore we guess that it has the lump policy and emit an
+       error in case we are wrong *)
+    Errors.unknown_information_flow pos "property access of dynamic";
+    { c_name = "<dynamic>"; c_self = pol; c_lump = pol }
   | _ -> fail "couldn't find a class for the property '%s'" property
 
 (* We generate a ptype out of the property type and fill it with either the
  * purpose of property or the lump policy of some object root. *)
-let property_ptype renv obj_ptype property property_ty =
-  let class_ = receiver_of_obj_get obj_ptype property in
+let property_ptype pos renv obj_ptype property property_ty =
+  let class_ = receiver_of_obj_get pos obj_ptype property in
   let prop_pol =
     match Decl.property_policy renv.re_decl class_.c_name property with
     | Some policy -> policy
@@ -665,8 +675,8 @@ let assign_helper
     env
   | A.Obj_get (obj, (_, A.Id (_, property)), _, _) ->
     let (env, obj_pty) = expr env obj in
-    let obj_pol = (receiver_of_obj_get obj_pty property).c_self in
-    let lhs_pty = property_ptype renv obj_pty property lhs_ty in
+    let obj_pol = (receiver_of_obj_get pos obj_pty property).c_self in
+    let lhs_pty = property_ptype pos renv obj_pty property lhs_ty in
     let pc =
       if use_pc then
         PSet.elements (Env.get_gpc renv env)
@@ -952,12 +962,12 @@ let rec expr ~pos renv (env : Env.expr_env) (((epos, ety), e) : Tast.expr) =
   | A.Lvar (_pos, lid) -> refresh_local_type ~pos renv env lid ety
   | A.Obj_get (obj, (_, A.Id (_, property)), _, _) ->
     let (env, obj_ptype) = expr env obj in
-    let prop_pty = property_ptype renv obj_ptype property ety in
+    let prop_pty = property_ptype pos renv obj_ptype property ety in
     let prefix = "." ^ property in
     let (env, super_pty) =
       adjust_ptype ~pos ~prefix ~adjustment:Aweaken renv env prop_pty
     in
-    let obj_pol = (receiver_of_obj_get obj_ptype property).c_self in
+    let obj_pol = (receiver_of_obj_get pos obj_ptype property).c_self in
     let env = Env.acc env (add_dependencies ~pos [obj_pol] super_pty) in
     (env, super_pty)
   | A.This ->

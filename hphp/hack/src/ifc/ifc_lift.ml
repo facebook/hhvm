@@ -61,6 +61,7 @@ let rec ty ?prefix ?lump renv (t : T.locl_ty) =
     let pself = get_policy ?prefix lump renv
     and plump = get_policy ?prefix lump renv in
     Tnonnull (pself, plump)
+  | T.Tdynamic -> Tdynamic (get_policy ?prefix lump renv)
   | T.Tgeneric (_name, _targs) ->
     (* TODO(T69551141) Handle type arguments *)
     Tgeneric (get_policy ?prefix lump renv)
@@ -137,7 +138,6 @@ let rec ty ?prefix ?lump renv (t : T.locl_ty) =
   | T.Tdependent (_, _ty) -> fail "Tdependent"
   | T.Tany _sentinel -> fail "Tany"
   | T.Terr -> fail "Terr"
-  | T.Tdynamic -> fail "Tdynamic"
   | T.Tnewtype (_name, _ty_list, _as_bound) -> fail "Tnewtype"
   | T.Tobject -> fail "Tobject"
   | T.Taccess (_locl_ty, _ids) -> fail "Taccess"

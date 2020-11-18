@@ -61,7 +61,8 @@ let rec ptype fmt ty =
   match ty with
   | Tnull p -> fprintf fmt "null<%a>" policy p
   | Tprim p
-  | Tgeneric p ->
+  | Tgeneric p
+  | Tdynamic p ->
     fprintf fmt "<%a>" policy p
   | Tnonnull (pself, plump) ->
     fprintf fmt "nonnull<%a,%a>" policy pself policy plump

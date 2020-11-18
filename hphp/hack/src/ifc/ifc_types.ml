@@ -91,6 +91,7 @@ type ptype =
   | Tfun of fun_
   | Tcow_array of cow_array
   | Tshape of Type.shape_kind * shape_field_type Nast.ShapeMap.t
+  | Tdynamic of policy
 
 (* Copy-on-write indexed collection used for Hack containers i.e. vec, dict,
    keyset, varray, and darray *)

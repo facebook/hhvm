@@ -336,6 +336,7 @@ let make_env ~init_id ~deps_mode config =
         why_needed_full_init = None;
         recheck_id = None;
         state_distance = None;
+        naming_table_manifold_path = None;
       };
     diag_subscribe = None;
     last_recheck_loop_stats = empty_recheck_loop_stats ~recheck_id:"<none>";

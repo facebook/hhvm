@@ -99,13 +99,19 @@ let merge_saved_state_futures
       Error (Load_state_unhandled_exception { exn; stack })
     | Ok (Error error) -> Error (Load_state_loader_failure error)
     | Ok (Ok result) ->
-      let (downloaded_naming_table_path, dirty_naming_files) =
+      let ( downloaded_naming_table_path,
+            naming_table_manifold_path,
+            dirty_naming_files ) =
         match naming_table_saved_state_result with
-        | Ok (Ok None) -> (None, [])
+        | Ok (Ok None) -> (None, None, [])
         | Ok
             (Ok
-              (Some { Saved_state_loader.saved_state_info; changed_files; _ }))
-          ->
+              (Some
+                {
+                  Saved_state_loader.saved_state_info;
+                  changed_files;
+                  manifold_path;
+                })) ->
           let (_ : float) =
             Hh_logger.log_duration "Finished downloading naming table." t
           in
@@ -113,15 +119,15 @@ let merge_saved_state_futures
             saved_state_info
               .Saved_state_loader.Naming_table_info.naming_table_path
           in
-          (Some (Path.to_string path), changed_files)
+          (Some (Path.to_string path), Some manifold_path, changed_files)
         | Ok (Error err) ->
           Hh_logger.warn "Failed to download naming table saved state: %s" err;
-          (None, [])
+          (None, None, [])
         | Error error ->
           Hh_logger.warn
             "Failed to download the naming table saved state: %s"
             (Future.error_to_string error);
-          (None, [])
+          (None, None, [])
       in
       let ignore_hh_version =
         ServerArgs.ignore_hh_version genv.ServerEnv.options
@@ -169,6 +175,7 @@ let merge_saved_state_futures
             old_naming_table;
             old_errors;
             state_distance = Some result.State_loader.state_distance;
+            naming_table_manifold_path;
           })
   in
   let merge left right = Ok (merge left right) in
@@ -321,6 +328,7 @@ let use_precomputed_state_exn
     old_naming_table;
     old_errors;
     state_distance = None;
+    naming_table_manifold_path = None;
   }
 
 (* Run naming from a fast generated from saved state.
@@ -958,6 +966,7 @@ let post_saved_state_initialization
     saved_state_fn = _;
     corresponding_rev = _;
     state_distance = _;
+    naming_table_manifold_path;
   } =
     loaded_info
   in
@@ -965,7 +974,12 @@ let post_saved_state_initialization
   let env =
     {
       env with
-      init_env = { env.init_env with mergebase = get_mergebase mergebase };
+      init_env =
+        {
+          env.init_env with
+          mergebase = get_mergebase mergebase;
+          naming_table_manifold_path;
+        };
       deps_mode =
         ( if deptable_is_64bit then
           match ServerArgs.save_64bit genv.options with

@@ -96,6 +96,9 @@ type loaded_info = {
   old_naming_table: Naming_table.t;
   old_errors: SaveStateServiceTypes.saved_state_errors;
   state_distance: int option;
+  (* The manifold path for naming table saved state, to be used by remote type checker
+     for downloading the naming table in the case of a saved-state init *)
+  naming_table_manifold_path: string option;
 }
 
 (* Laziness *)

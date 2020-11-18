@@ -203,4 +203,5 @@ type delegate_env = {
   worker_min_log_level: Hh_logger.Level.t;
   (* Optional transport channel used by remote type checking. None means default. *)
   transport_channel: string option;
+  naming_table_manifold_path: string option;
 }

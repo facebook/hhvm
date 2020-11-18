@@ -58,7 +58,6 @@ and fun_kind =
   | FAsync
   | FGenerator
   | FAsyncGenerator
-  | FCoroutine
 
 and bop =
   | Plus

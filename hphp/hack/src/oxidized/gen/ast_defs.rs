@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<bd3ee5f9d50be7cafce640d591eb7a2a>>
+// @generated SignedSource<<e1259c8ed42c3a2bc65783bc874cadf0>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -202,7 +202,6 @@ pub enum FunKind {
     FAsync,
     FGenerator,
     FAsyncGenerator,
-    FCoroutine,
 }
 impl TrivialDrop for FunKind {}
 

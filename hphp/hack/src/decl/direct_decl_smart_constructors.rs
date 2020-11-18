@@ -1483,7 +1483,6 @@ impl<'a> DirectDeclSmartConstructors<'a> {
             FunKind::FAsync => FunTypeFlags::ASYNC,
             FunKind::FGenerator => FunTypeFlags::GENERATOR,
             FunKind::FAsyncGenerator => FunTypeFlags::ASYNC | FunTypeFlags::GENERATOR,
-            FunKind::FCoroutine => FunTypeFlags::IS_COROUTINE,
         };
         if attributes.returns_mutable {
             flags |= FunTypeFlags::RETURNS_MUTABLE;

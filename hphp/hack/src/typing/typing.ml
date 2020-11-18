@@ -415,7 +415,6 @@ and fun_implicit_return env pos ret = function
   | Ast_defs.FGenerator
   | Ast_defs.FAsyncGenerator ->
     env
-  | Ast_defs.FCoroutine
   | Ast_defs.FSync ->
     (* A function without a terminal block has an implicit return; the
      * "void" type *)
@@ -2394,7 +2393,6 @@ and expr_
       | (AFvalue (p, _), None) ->
         begin
           match Env.get_fn_kind env with
-          | Ast_defs.FCoroutine
           | Ast_defs.FSync
           | Ast_defs.FAsync ->
             Errors.internal_error p "yield found in non-generator";
@@ -2409,10 +2407,6 @@ and expr_
     in
     let rty =
       match Env.get_fn_kind env with
-      | Ast_defs.FCoroutine ->
-        (* yield in coroutine is already reported as error in Nast_check *)
-        let (_, _, ty) = expr_error env (Reason.Rwitness p) outer in
-        ty
       | Ast_defs.FGenerator ->
         MakeType.generator (Reason.Ryield_gen p) key value send
       | Ast_defs.FAsyncGenerator ->
@@ -2664,16 +2658,7 @@ and expr_
     let check_body_under_known_params env ?ret_ty ft : env * _ * locl_ty =
       let old_reactivity = env_reactivity env in
       let env = Env.set_env_reactive env reactivity in
-      let is_coroutine = Ast_defs.(equal_fun_kind f.f_fun_kind FCoroutine) in
-      let ft =
-        {
-          ft with
-          ft_reactive = reactivity;
-          ft_flags =
-            Typing_defs_flags.(
-              set_bit ft_flags_is_coroutine is_coroutine ft.ft_flags);
-        }
-      in
+      let ft = { ft with ft_reactive = reactivity } in
       let (env, (tefun, ty, ft)) = anon_make ?ret_ty env p f ft idl is_anon in
       let env = Env.set_env_reactive env old_reactivity in
       let inferred_ty =

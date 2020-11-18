@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<becce3f7a163882c509207f2751fd31f>>
+// @generated SignedSource<<9ce8aef1153d3d2bb18c51af4486fc4f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -1015,7 +1015,6 @@ impl<P: Params> Node<P> for FunKind {
             FunKind::FAsync => Ok(()),
             FunKind::FGenerator => Ok(()),
             FunKind::FAsyncGenerator => Ok(()),
-            FunKind::FCoroutine => Ok(()),
         }
     }
 }

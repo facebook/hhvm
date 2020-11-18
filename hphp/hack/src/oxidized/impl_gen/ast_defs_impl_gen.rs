@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d6a2e442ef34ec3d43ffb81d577328d0>>
+// @generated SignedSource<<24f2b59d7c4fd6b91188ac30dd51a0c6>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -238,9 +238,6 @@ impl FunKind {
     pub fn mk_fasync_generator() -> Self {
         FunKind::FAsyncGenerator
     }
-    pub fn mk_fcoroutine() -> Self {
-        FunKind::FCoroutine
-    }
     pub fn is_fsync(&self) -> bool {
         match self {
             FunKind::FSync => true,
@@ -262,12 +259,6 @@ impl FunKind {
     pub fn is_fasync_generator(&self) -> bool {
         match self {
             FunKind::FAsyncGenerator => true,
-            _ => false,
-        }
-    }
-    pub fn is_fcoroutine(&self) -> bool {
-        match self {
-            FunKind::FCoroutine => true,
             _ => false,
         }
     }

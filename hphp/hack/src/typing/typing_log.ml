@@ -438,7 +438,6 @@ let fun_kind_to_string k =
   | Ast_defs.FAsync -> "async"
   | Ast_defs.FGenerator -> "generator"
   | Ast_defs.FAsyncGenerator -> "async generator"
-  | Ast_defs.FCoroutine -> "coroutine"
 
 let val_kind_to_string k =
   match k with

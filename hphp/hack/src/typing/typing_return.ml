@@ -86,9 +86,7 @@ let make_info fun_kind attributes env ~is_explicit locl_ty decl_ty =
 (* For async functions, wrap Awaitable<_> around the return type *)
 let wrap_awaitable env p rty =
   match Env.get_fn_kind env with
-  | Ast_defs.FCoroutine
-  | Ast_defs.FSync ->
-    rty
+  | Ast_defs.FSync -> rty
   | Ast_defs.FGenerator
   (* Is an error, but caught in Nast_check. *)
   | Ast_defs.FAsyncGenerator ->

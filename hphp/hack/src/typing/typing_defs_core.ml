@@ -426,14 +426,11 @@ module Flags = struct
     is_set ft.ft_flags ft_flags_is_function_pointer
 
   let get_ft_fun_kind ft =
-    if get_ft_is_coroutine ft then
-      Ast_defs.FCoroutine
-    else
-      match (get_ft_async ft, get_ft_generator ft) with
-      | (false, false) -> Ast_defs.FSync
-      | (true, false) -> Ast_defs.FAsync
-      | (false, true) -> Ast_defs.FGenerator
-      | (true, true) -> Ast_defs.FAsyncGenerator
+    match (get_ft_async ft, get_ft_generator ft) with
+    | (false, false) -> Ast_defs.FSync
+    | (true, false) -> Ast_defs.FAsync
+    | (false, true) -> Ast_defs.FGenerator
+    | (true, true) -> Ast_defs.FAsyncGenerator
 
   let from_mutable_flags flags =
     let masked = Int.bit_and flags mutable_flags_mask in
@@ -469,7 +466,6 @@ module Flags = struct
     | Ast_defs.FAsync -> ft_flags_async
     | Ast_defs.FGenerator -> ft_flags_generator
     | Ast_defs.FAsyncGenerator -> Int.bit_or ft_flags_async ft_flags_generator
-    | Ast_defs.FCoroutine -> ft_flags_is_coroutine
 
   let make_ft_flags
       kind param_mutable ~return_disposable ~returns_mutable ~returns_void_to_rx

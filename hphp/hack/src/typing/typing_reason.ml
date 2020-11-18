@@ -238,9 +238,7 @@ let rec to_string prefix r =
         | Ast_defs.FGenerator ->
           prefix ^ " (result of function containing a `yield`)"
         | Ast_defs.FAsync -> prefix ^ " (result of an `async` function)"
-        | Ast_defs.FCoroutine
-        | Ast_defs.FSync ->
-          prefix );
+        | Ast_defs.FSync -> prefix );
     ]
   | Rhint _ -> [(p, prefix)]
   | Rthrow _ -> [(p, prefix ^ " because it is used as an exception")]

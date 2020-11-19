@@ -701,7 +701,7 @@ void MonotypeDict<Key>::forEachElm(
   auto const limit = used();
   if (m_size == limit) {
     if (isRefcountedType(dt)) {
-      if (static_cast<data_type_t>(dt) & kHasPersistentMask) {
+      if (hasPersistentFlavor(dt)) {
         for (auto i = 0; i < limit; i++) {
           auto const elm = elmAtIndex(i);
           k(i, elm->key);
@@ -723,7 +723,7 @@ void MonotypeDict<Key>::forEachElm(
     }
   } else {
     if (isRefcountedType(dt)) {
-      if (static_cast<data_type_t>(dt) & kHasPersistentMask) {
+      if (hasPersistentFlavor(dt)) {
         for (auto i = 0; i < limit; i++) {
           auto const elm = elmAtIndex(i);
           if (elm->key == getTombstone<Key>()) continue;

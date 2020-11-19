@@ -326,7 +326,7 @@ template <typename CountableFn, typename MaybeCountableFn>
 void MonotypeVec::forEachCountableValue(CountableFn c, MaybeCountableFn mc) {
   auto const dt = type();
   if (isRefcountedType(dt)) {
-    if (static_cast<data_type_t>(dt) & kHasPersistentMask) {
+    if (hasPersistentFlavor(dt)) {
       for (auto i = 0; i < m_size; i++) {
         mc(dt, valueRefUnchecked(i).pcnt);
       }
@@ -535,7 +535,7 @@ void MonotypeVec::ConvertToUncounted(MonotypeVec* madIn,
     ConvertTvToUncounted(lval, seen);
     assertx(equivDataTypes(dt, madIn->type()));
   }
-  auto const newType = static_cast<data_type_t>(oldType) & kHasPersistentMask
+  auto const newType = hasPersistentFlavor(oldType)
     ? dt_with_persistence(oldType)
     : oldType;
   madIn->setLayoutIndex(getLayoutIndex(newType));

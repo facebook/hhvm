@@ -33,15 +33,19 @@ ALWAYS_INLINE bool tvIsNull(const TypedValue* tv) {
 
 // We don't expose isVArrayType or isDArrayType. They shouldn't be used.
 ALWAYS_INLINE bool isHAMSafeDArrayType(DataType t) {
-  return RO::EvalHackArrDVArrs ? isDictType(t) : dt_with_rc(t) == KindOfDArray;
+  return RO::EvalHackArrDVArrs
+    ? isDictType(t)
+    : t == KindOfPersistentDArray || t == KindOfDArray;
 }
 ALWAYS_INLINE bool isHAMSafeVArrayType(DataType t) {
-  return RO::EvalHackArrDVArrs ? isVecType(t) : dt_with_rc(t) == KindOfVArray;
+  return RO::EvalHackArrDVArrs
+    ? isVecType(t)
+    : t == KindOfPersistentVArray || t == KindOfVArray;
 }
 ALWAYS_INLINE bool isHAMSafeDVArrayType(DataType t) {
   if (RO::EvalHackArrDVArrs) return isVecType(t) || isDictType(t);
-  auto const dtrc = dt_with_rc(t);
-  return dtrc == KindOfVArray || dtrc == KindOfDArray;
+  return t == KindOfPersistentVArray || t == KindOfVArray ||
+         t == KindOfPersistentDArray || t == KindOfDArray;
 }
 
 #define CASE(ty)                                                        \

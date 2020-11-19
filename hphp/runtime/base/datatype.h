@@ -127,14 +127,31 @@ auto constexpr kMaxRefCountedDataType = dt_t(KindOfRClsMeth);
  * A DataType is a refcounted type if and only if it has this bit set.
  */
 constexpr int kRefCountedBit = 0x1;
+constexpr int kHasPersistentMask = -128;
+
+/*
+ * Whether a type is refcounted.
+ */
+constexpr bool isRefcountedType(DataType t) {
+  return dt_t(t) & kRefCountedBit;
+}
+
+/*
+ * Whether a type is or has a persistent version.
+ */
+constexpr bool hasPersistentFlavor(DataType t) {
+  return dt_t(t) & kHasPersistentMask;
+}
 
 /*
  * Return `dt` with or without the refcount bit set.
  */
 constexpr DataType dt_with_rc(DataType dt) {
+  assertx(hasPersistentFlavor(dt) || isRefcountedType(dt));
   return static_cast<DataType>(dt_t(dt) | kRefCountedBit);
 }
 constexpr DataType dt_with_persistence(DataType dt) {
+  assertx(hasPersistentFlavor(dt) || !isRefcountedType(dt));
   return static_cast<DataType>(dt_t(dt) & ~kRefCountedBit);
 }
 
@@ -233,13 +250,6 @@ constexpr unsigned typeToDestrIdx(DataType t) {
 constexpr bool isRealType(DataType t) {
   return t >= static_cast<DataType>(kMinDataType) &&
     t <= static_cast<DataType>(kMaxDataType);
-}
-
-/*
- * Whether a type is refcounted.
- */
-constexpr bool isRefcountedType(DataType t) {
-  return dt_t(t) & kRefCountedBit;
 }
 
 /*
@@ -372,8 +382,6 @@ constexpr bool isClassType(DataType t) { return t == KindOfClass; }
 constexpr bool isClsMethType(DataType t) { return t == KindOfClsMeth; }
 constexpr bool isRClsMethType(DataType t) { return t == KindOfRClsMeth; }
 constexpr bool isLazyClassType(DataType t) { return t == KindOfLazyClass; }
-
-constexpr int kHasPersistentMask = -128;
 
 /*
  * Return whether two DataTypes for primitive types are "equivalent" as far as

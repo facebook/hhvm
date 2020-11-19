@@ -150,13 +150,13 @@ private:
   static constexpr Index kTombstoneIndex = Index(-2);
 
   // Different modes for the core find() implementation.
-  struct Add { Index* index; };
+  struct Add { Index* index; size_t chain_length; };
   struct Get { const Elm* elm; };
   struct Remove { ssize_t hash_pos; };
   struct Update { Elm* elm; Index* index; };
   template <typename Result> Result find(Key key, strhash_t hash);
 
-  Index* findForAdd(strhash_t hash);
+  Add findForAdd(strhash_t hash);
   const Elm* findForGet(Key key, strhash_t hash) const;
 
   TypedValue getImpl(Key key) const;

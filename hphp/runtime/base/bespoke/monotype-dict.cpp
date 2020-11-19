@@ -331,6 +331,15 @@ void decRefKey(Key key) {
   }
 }
 
+// NOTE: Coercion may fail, for both int and string `input`, in which case the
+// functions below will return the "tombstone" key for the Key type.
+//
+// If coercion fails for an int input, the key is DEFINITELY not in the array.
+// If coercion fails for a string input, the input may be a non-static  copy
+// of a static string (if Key == LowStringPtr). Otherwise, it's missing.
+//
+// Callers can use `fallbackForStaticStr` to check the static/non-static case.
+
 template <typename Key>
 Key coerceKey(int64_t input) {
   if constexpr (std::is_same<Key, int64_t>::value) {
@@ -344,9 +353,17 @@ Key coerceKey(const StringData* input) {
   if constexpr (std::is_same<Key, StringData*>::value) {
     return const_cast<StringData*>(input);
   } else if constexpr (std::is_same<Key, LowStringPtr>::value) {
-    return input->isStatic() ? input : lookupStaticString(input);
+    return input->isStatic() ? static_cast<Key>(input) : getTombstone<Key>();
   }
   return getTombstone<Key>();
+}
+
+template <typename Key>
+bool fallbackForStaticStr(const StringData* input) {
+  if constexpr (std::is_same<Key, LowStringPtr>::value) {
+    return !input->isStatic();
+  }
+  return false;
 }
 
 template <typename Key>
@@ -359,6 +376,8 @@ bool keysEqual(Key a, Key b) {
     return a == b;
   }
 }
+
+using StringDict = MonotypeDict<StringData*>;
 
 }
 
@@ -447,9 +466,14 @@ bool MonotypeDict<Key>::checkInvariants() const {
   assertx(isRealType(type()));
   assertx(isDArray() || isDictType());
   assertx(isValidSizeIndex(sizeIndex()));
-  assertx(layoutIndex() == getLayoutIndex<Key>(type()));
   assertx(size() <= used());
   assertx(IMPLIES(!isZombie(), used() <= numElms()));
+
+  // We may call StringDict's methods on a dict of static strings.
+  assertx(layoutIndex() == getLayoutIndex<Key>(type()) ||
+          (std::is_same<Self, StringDict>::value &&
+           layoutIndex() == getLayoutIndex<LowStringPtr>(type())));
+
   return true;
 }
 
@@ -489,16 +513,16 @@ Result MonotypeDict<Key>::find(Key key, strhash_t hash) {
     }
   }
 
-  if constexpr (IsAdd) return {&data[i]};
+  if constexpr (IsAdd) return {&data[i], safe_cast<size_t>(delta)};
   if constexpr (IsGet) return {nullptr};
   if constexpr (IsRemove) return {-1};
   if constexpr (IsUpdate) return {nullptr, &data[first ? first - 1 : i]};
 }
 
 template <typename Key>
-typename MonotypeDict<Key>::Index*
+typename MonotypeDict<Key>::Add
 MonotypeDict<Key>::findForAdd(strhash_t hash) {
-  return find<Add>(getTombstone<Key>(), hash).index;
+  return find<Add>(getTombstone<Key>(), hash);
 }
 
 template <typename Key>
@@ -594,10 +618,16 @@ ArrayData* MonotypeDict<Key>::setImpl(Key key, K k, TypedValue v) {
   if constexpr (!Move) {
     tvIncRefGen(v);
   }
+
+  // Handle escalation, both from a persistent value type to a counted one,
+  // and from a dict with static string keys to one with string keys.
   auto const result = prepareForInsert();
   if (dt != v.type()) {
     result->setLayoutIndex(getLayoutIndex<Key>(dt_with_rc(dt)));
+  } else if constexpr (std::is_same<Self, StringDict>::value) {
+    result->setLayoutIndex(getLayoutIndex<Key>(dt));
   }
+
   auto const update = result->template find<Update>(key, getHash(key));
   if (update.elm != nullptr) {
     tvDecRefGen(TypedValue { update.elm->val, dt });
@@ -776,9 +806,19 @@ MonotypeDict<Key>* MonotypeDict<Key>::resize(uint8_t index, bool copy) {
   ad->initHeader_16(m_kind, OneReference, aux);
   ad->initHash();
 
+  // We don't want to check the chain condition on each insert, so we use a
+  // kind of approximate max by taking bitwise-ORs.
+  size_t chain = 0;
   ad->forEachElm([&](auto i, auto elm) {
-    *ad->findForAdd(getHash(elm->key)) = i;
+    auto const add = ad->findForAdd(getHash(elm->key));
+    chain |= add.chain_length;
+    *add.index = i;
   });
+
+  if (chain > 2048 && chain > folly::nextPowTwo(size_t(RO::MaxArrayChain))) {
+    tl_heap->objFreeIndex(ad, index);
+    raise_error("Array is too unbalanced (%u)", RO::MaxArrayChain + 1);
+  }
 
   if (copy) {
     ad->incRefElms();
@@ -993,6 +1033,9 @@ TypedValue MonotypeDict<Key>::NvGetInt(const Self* mad, int64_t k) {
 
 template <typename Key>
 TypedValue MonotypeDict<Key>::NvGetStr(const Self* mad, const StringData* k) {
+  if (fallbackForStaticStr<Key>(k)) {
+    return StringDict::NvGetStr(reinterpret_cast<const StringDict*>(mad), k);
+  }
   return mad->getImpl(coerceKey<Key>(k));
 }
 
@@ -1025,6 +1068,9 @@ ssize_t MonotypeDict<Key>::GetIntPos(const Self* mad, int64_t k) {
 
 template <typename Key>
 ssize_t MonotypeDict<Key>::GetStrPos(const Self* mad, const StringData* k) {
+  if (fallbackForStaticStr<Key>(k)) {
+    return StringDict::GetStrPos(reinterpret_cast<const StringDict*>(mad), k);
+  }
   return mad->getPosImpl(coerceKey<Key>(k));
 }
 
@@ -1090,6 +1136,9 @@ tv_lval MonotypeDict<Key>::ElemInt(
 template <typename Key>
 tv_lval MonotypeDict<Key>::ElemStr(
     tv_lval lvalIn, StringData* k, bool throwOnMissing) {
+  if (fallbackForStaticStr<Key>(k)) {
+    return StringDict::ElemStr(lvalIn, k, throwOnMissing);
+  }
   auto const madIn = As(lvalIn.val().parr);
   auto const lval = madIn->elemImpl(coerceKey<Key>(k), k, throwOnMissing);
   if (lval.arr != madIn) {
@@ -1112,11 +1161,17 @@ ArrayData* MonotypeDict<Key>::SetIntMove(Self* mad, int64_t k, TypedValue v) {
 
 template <typename Key>
 ArrayData* MonotypeDict<Key>::SetStr(Self* mad, StringData* k, TypedValue v) {
+  if (fallbackForStaticStr<Key>(k)) {
+    return StringDict::SetStr(reinterpret_cast<StringDict*>(mad), k, v);
+  }
   return mad->setImpl<false>(coerceKey<Key>(k), k, v);
 }
 
 template <typename Key>
 ArrayData* MonotypeDict<Key>::SetStrMove(Self* mad, StringData* k, TypedValue v) {
+  if (fallbackForStaticStr<Key>(k)) {
+    return StringDict::SetStrMove(reinterpret_cast<StringDict*>(mad), k, v);
+  }
   return mad->setImpl<true>(coerceKey<Key>(k), k, v);
 }
 
@@ -1127,6 +1182,9 @@ ArrayData* MonotypeDict<Key>::RemoveInt(Self* mad, int64_t k) {
 
 template <typename Key>
 ArrayData* MonotypeDict<Key>::RemoveStr(Self* mad, const StringData* k) {
+  if (fallbackForStaticStr<Key>(k)) {
+    return StringDict::RemoveStr(reinterpret_cast<StringDict*>(mad), k);
+  }
   return mad->removeImpl(coerceKey<Key>(k));
 }
 

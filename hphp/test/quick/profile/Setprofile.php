@@ -30,7 +30,7 @@ function gen() {
 
 function main() {
   pure_function_2(1, 2);
-  fb_setprofile('profiler');
+  fb_setprofile(profiler<>);
   pure_function_2(3, 4);
   srand(0xdeadbeef);
   try {

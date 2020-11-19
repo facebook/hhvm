@@ -2,7 +2,7 @@
 
 function handler($name, $obj, inout $args) {
   var_dump($obj);
-  return shape('prepend_this' => true, 'callback' => 'bar');
+  return shape('prepend_this' => true, 'callback' => bar<>);
 }
 
 function bar($_this, $arg) {
@@ -18,6 +18,6 @@ static function foo($arg) {
 
 <<__EntryPoint>>
 function main() {
-  fb_intercept2('C::foo', 'handler');
+  fb_intercept2('C::foo', handler<>);
   C::foo(1);
 }

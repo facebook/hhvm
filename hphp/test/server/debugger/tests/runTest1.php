@@ -14,5 +14,5 @@ function test1Controller($hphpdOutput, $hphpdProcessId, $serverPort) {
 function main() {
   require_once('test_base.inc');
   init();
-  runTest('test1', "test1Controller");
+  runTest('test1', test1Controller<>);
 }

@@ -6,7 +6,7 @@
 
 function main() {
   $a = varray[4, 5, 6];
-  fb_setprofile('prof');
+  fb_setprofile(prof<>);
   test(1,2,3);
   test(...$a);
 }

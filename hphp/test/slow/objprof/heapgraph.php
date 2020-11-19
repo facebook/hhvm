@@ -216,21 +216,21 @@ function entrypoint_heapgraph(): void {
   // TRAVERSAL
   echo "\nTraversing second capture:\n";
   ObjprofHeapgraphPhp::$hg_for_closure = $hg2;
-  heapgraph_foreach_node($hg2, 'showTestClasses');
+  heapgraph_foreach_node($hg2, showTestClasses<>);
   echo_flush();
 
   echo "\nTraversing first capture:\n";
   ObjprofHeapgraphPhp::$hg_for_closure = $hg;
-  heapgraph_foreach_node($hg, 'showTestClasses');
+  heapgraph_foreach_node($hg, showTestClasses<>);
   echo_flush();
 
   echo "\nTraversing edges for first capture:\n";
   ObjprofHeapgraphPhp::$hg_for_closure = $hg;
-  heapgraph_foreach_edge($hg, 'showTestEdge');
+  heapgraph_foreach_edge($hg, showTestEdge<>);
   echo_flush();
 
   echo "\nTraversing roots for first capture:\n";
-  heapgraph_foreach_root($hg, 'showTestEdge');
+  heapgraph_foreach_root($hg, showTestEdge<>);
   echo_flush();
 
   // CHILDREN / PARENTS
@@ -246,12 +246,12 @@ function entrypoint_heapgraph(): void {
 
   // DFS NODES
   echo "\nDoing DFS from root class on nodes:\n";
-  heapgraph_dfs_nodes($hg, varray[ObjprofHeapgraphPhp::$id_of_rootclass], varray[], 'showClassOnly');
+  heapgraph_dfs_nodes($hg, varray[ObjprofHeapgraphPhp::$id_of_rootclass], varray[], showClassOnly<>);
   echo_flush();
 
   echo "\nDoing DFS from root class on nodes (skipping root):\n";
   heapgraph_dfs_nodes(
-    $hg, varray[ObjprofHeapgraphPhp::$id_of_rootclass], varray[ObjprofHeapgraphPhp::$id_of_rootclass], 'showClass'
+    $hg, varray[ObjprofHeapgraphPhp::$id_of_rootclass], varray[ObjprofHeapgraphPhp::$id_of_rootclass], showClass<>
   );
   echo_flush();
 

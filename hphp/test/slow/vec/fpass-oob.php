@@ -18,6 +18,6 @@ function foo($f, $ref) {
   }
 }
 <<__EntryPoint>> function main(): void {
-foo('non', false);
-foo('ref', true);
+foo(non<>, false);
+foo(ref<>, true);
 }

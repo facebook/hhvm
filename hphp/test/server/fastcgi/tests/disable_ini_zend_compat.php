@@ -10,9 +10,9 @@ function disableIniZendCompatController($port) {
 require_once('test_base.inc');
 init();
 echo "---Enable Ini Zend Compat ON---\n";
-runTest("disableIniZendCompatController",
+runTest(disableIniZendCompatController<>,
         "-dhhvm.enable_zend_ini_compat=true");
 echo "\n---Enable Ini Zend Compat OFF---\n";
-runTest("disableIniZendCompatController",
+runTest(disableIniZendCompatController<>,
         "-dhhvm.enable_zend_ini_compat=false");
 }

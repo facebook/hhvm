@@ -13,7 +13,7 @@ class thinger {
     $this->things[3] = 'three';
     $this->things[44] = 'forty four';
     $this->things[45] = 'forty five';
-    $this->fn = 'id';
+    $this->fn = id<>;
   }
 
   private function process($history, inout $updated) {

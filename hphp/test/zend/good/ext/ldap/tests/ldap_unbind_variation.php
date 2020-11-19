@@ -20,7 +20,7 @@ abstract final class ZendGoodExtLdapTestsLdapUnbindVariation {
 <<__EntryPoint>>
 function main_entry(): void {
   $link = ldap_connect_and_bind($host, $port, ZendGoodExtLdapTestsLdapUnbindVariation::$user, ZendGoodExtLdapTestsLdapUnbindVariation::$passwd, ZendGoodExtLdapTestsLdapUnbindVariation::$protocol_version);
-  ldap_set_rebind_proc($link, "rebind_proc");
+  ldap_set_rebind_proc($link, rebind_proc<>);
 
   var_dump(ldap_unbind($link));
 

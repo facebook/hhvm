@@ -22,6 +22,6 @@ function GoodAuthDigestTestController($serverPort) {
 <<__EntryPoint>> function main(): void {
 require_once('test_base.inc');
 init();
-runTest("BadAuthDigestTestController");
-runTest("GoodAuthDigestTestController");
+runTest(BadAuthDigestTestController<>);
+runTest(GoodAuthDigestTestController<>);
 }

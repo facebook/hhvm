@@ -28,7 +28,7 @@ function memCallback() : void {
 <<__EntryPoint>>
 function main() : void {
   $int_max = 0x7FFFFFFFFFFFFFFF;
-  HH\set_mem_threshold_callback($int_max, "memCallback");
+  HH\set_mem_threshold_callback($int_max, memCallback<>);
   echo "Iteration " . getCount() . "\n";
   if (getCount() < 20) {
     // Store garbage.

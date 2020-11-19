@@ -10,7 +10,7 @@ HH\autoload_set_paths(
     'class' => varray[],
     'constant' => varray[],
     'function' => varray[],
-    'failure' => 'autoload_miss',
+    'failure' => autoload_miss<>,
     'type' => darray['foo' => 'autoload-type-alias-bug-2.inc'],
   ],
   __DIR__.'/'

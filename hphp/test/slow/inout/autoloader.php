@@ -14,7 +14,7 @@ function loader($kind, $name) {
 }
 
 function main() {
-  HH\autoload_set_paths(darray['function' => varray[], 'failure' =>'loader'], '');
+  HH\autoload_set_paths(darray['function' => varray[], 'failure' =>loader<>], '');
 
   $v = null;
   hit1(inout $v);

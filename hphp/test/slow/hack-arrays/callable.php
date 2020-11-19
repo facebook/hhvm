@@ -11,12 +11,12 @@ function call2($c, $x) { return call_user_func($c, $x); }
 function call3($c, $x) { return array_map($c, $x); }
 
 function make_tests($tests, $c1, $c2) {
-  if ($c1) $tests[] = vec['call1', $c1, count($tests)+1];
-  if ($c2) $tests[] = vec['call1', $c2, count($tests)+1];
-  if ($c1) $tests[] = vec['call2', $c1, count($tests)+1];
-  if ($c2) $tests[] = vec['call2', $c2, count($tests)+1];
-  if ($c1) $tests[] = vec['call3', $c1, varray[count($tests)+1]];
-  if ($c2) $tests[] = vec['call3', $c2, varray[count($tests)+1]];
+  if ($c1) $tests[] = vec[call1<>, $c1, count($tests)+1];
+  if ($c2) $tests[] = vec[call1<>, $c2, count($tests)+1];
+  if ($c1) $tests[] = vec[call2<>, $c1, count($tests)+1];
+  if ($c2) $tests[] = vec[call2<>, $c2, count($tests)+1];
+  if ($c1) $tests[] = vec[call3<>, $c1, varray[count($tests)+1]];
+  if ($c2) $tests[] = vec[call3<>, $c2, varray[count($tests)+1]];
   return $tests;
 }
 

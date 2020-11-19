@@ -30,7 +30,7 @@ function fb_setprofile_this($event, $name, $info) {
 
 <<__EntryPoint>>
 function main_setprofile_native() {
-fb_setprofile("fb_setprofile_callback1");
+fb_setprofile(fb_setprofile_callback1<>);
 
 $x = false;
 echo("x="); var_dump($x);
@@ -46,7 +46,7 @@ echo("DONE!\n");
 
 fb_setprofile(null);
 fb_setprofile(
-  "fb_setprofile_callback2",
+  fb_setprofile_callback2<>,
   SETPROFILE_FLAGS_DEFAULT,
   vec['hash_init', 123],  // Non string input should not crash hhvm
 );
@@ -55,7 +55,7 @@ echo("hash="); var_dump($hash);
 
 fb_setprofile(null);
 fb_setprofile(
-  "fb_setprofile_this",
+  fb_setprofile_this<>,
   SETPROFILE_FLAGS_DEFAULT | SETPROFILE_FLAGS_FRAME_PTRS |
     SETPROFILE_FLAGS_THIS_OBJECT__MAY_BREAK,
   vec['SetProfileSimpleObject::test', 'SetProfileSimpleObject::testStatic']

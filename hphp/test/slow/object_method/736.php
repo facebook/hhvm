@@ -122,7 +122,7 @@ $fix249639=0;
 $g = new G(5);
 // test simple function case
 echo "600 == ",
-     call_user_func_array('f2',varray[call_user_func_array('f4',varray[0])]), "\n";
+     call_user_func_array(f2<>,varray[call_user_func_array(f4<>,varray[0])]), "\n";
 
 // test C::o_invoke, C::o_invoke_few_args, lookup in call_user_func
 // static method call (in G::f4).

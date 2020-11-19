@@ -43,7 +43,7 @@ function entrypoint_typemap001(): void {
   		'actor'   =>'http://schemas.nothing.com',
   		'typemap' => varray[darray["type_ns"   => "http://schemas.nothing.com",
   		                         "type_name" => "book",
-  		                         "from_xml"  => "book_from_xml"]]
+  		                         "from_xml"  => book_from_xml<>]]
   		];
 
   $server = new SoapServer(dirname(__FILE__)."/classmap.wsdl",$options);

@@ -6,7 +6,7 @@ function foo() {
 }
 
 function main() {
-  var_dump(pcntl_signal(SIGUSR1, 'foo'));
+  var_dump(pcntl_signal(SIGUSR1, foo<>));
   $pid = posix_getpid();
   posix_kill($pid, SIGUSR1);
 

@@ -320,12 +320,12 @@ function ut_main6()
 <<__EntryPoint>>
 function main_1810() {
 $test_num = 1;
-ut_run('ut_main1');
-ut_run('ut_main2');
-ut_run('ut_main3');
-ut_run('ut_main4');
-ut_run('ut_main5');
-ut_run('ut_main6');
+ut_run(ut_main1<>);
+ut_run(ut_main2<>);
+ut_run(ut_main3<>);
+ut_run(ut_main4<>);
+ut_run(ut_main5<>);
+ut_run(ut_main6<>);
 }
 
 abstract final class ExtCollator1810 {

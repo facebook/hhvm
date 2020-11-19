@@ -43,7 +43,7 @@ function main() {
       'function' => darray['a_foo' => __DIR__.'/multi-file-a.inc'],
       'constant' => varray[],
       'type' => varray[],
-      'failure' => 'handle_autoload',
+      'failure' => handle_autoload<>,
     ],
     __DIR__
   );

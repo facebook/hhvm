@@ -20,7 +20,7 @@ function entrypoint_autoloadfail(): void {
     darray['class' => darray[
             'c' => 'autoload-fail-c.inc', // syntax error
           ],
-          'failure' => 'fail',
+          'failure' => fail<>,
          ],
     __DIR__ . '/'
   );

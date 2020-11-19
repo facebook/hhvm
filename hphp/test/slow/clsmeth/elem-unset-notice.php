@@ -65,7 +65,7 @@ function handle_error($_no, $msg, ...) {
 
 <<__EntryPoint>>
 function main() {
-  set_error_handler('handle_error');
+  set_error_handler(handle_error<>);
 
   unset_static();  unset_static();
   unset_dynamic(); unset_dynamic();

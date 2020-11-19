@@ -10,7 +10,7 @@ class C {
 
 <<__EntryPoint>>
 function main() {
-  fb_setprofile('profiler');
+  fb_setprofile(profiler<>);
   $c = new C();
   $c->f<int>();
 }

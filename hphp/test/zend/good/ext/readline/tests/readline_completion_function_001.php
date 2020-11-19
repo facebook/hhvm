@@ -3,8 +3,8 @@
 function foo() { }
 <<__EntryPoint>> function main(): void {
 $data = varray[
-    'foo',
-    'strtolower',
+    foo<>,
+    strtolower<>,
     1,
     1.1231
 ];

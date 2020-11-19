@@ -8,5 +8,5 @@ function httpsTestController($serverPort) {
 <<__EntryPoint>> function main(): void {
   require_once('test_base.inc');
   init();
-  runTest("httpsTestController");
+  runTest(httpsTestController<>);
 }

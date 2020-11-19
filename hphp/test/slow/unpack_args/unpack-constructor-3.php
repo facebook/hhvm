@@ -12,7 +12,7 @@ class C {
 }
 
 function foo($x) {
-  fb_setprofile('handler');
+  fb_setprofile(handler<>);
   new C(...$x);
 }
 

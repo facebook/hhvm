@@ -123,7 +123,7 @@ function test_dynamic() {
 
 <<__EntryPoint>>
 function main() {
-  set_error_handler('handle_error');
+  set_error_handler(handle_error<>);
 
   test_static();  test_static();  test_static();
   test_dynamic(); test_dynamic(); test_dynamic();

@@ -18,7 +18,7 @@ function entrypoint_autoloadfailhoist(): void {
             'i1' => 'autoload-fail-e.inc',
             'i2' => 'autoload-fail-e.inc',
           ],
-          'failure' => 'fail',
+          'failure' => fail<>,
          ],
     __DIR__ . '/'
   );

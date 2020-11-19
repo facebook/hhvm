@@ -2,7 +2,7 @@
 function f(inout $a) { $a++; print $a; }
 function g($a) { $a++; print $a; }
 <<__EntryPoint>> function main(): void {
-$a = 'f';
+$a = f<>;
 if (0) $a(3);
 $val4 = 4;
 if (0) f(inout $val4);

@@ -8,5 +8,5 @@ function headerTestController($serverPort) {
 <<__EntryPoint>> function main(): void {
   require_once('test_base.inc');
   init();
-  runTest("headerTestController");
+  runTest(headerTestController<>);
 }

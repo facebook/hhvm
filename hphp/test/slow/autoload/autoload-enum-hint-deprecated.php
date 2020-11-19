@@ -12,7 +12,7 @@ fb_autoload_map(
                      'baz' => 'autoload-enum-hint-4.inc'],
     'constant' => varray[],
     'function' => varray[],
-    'failure' => 'autoload_miss',
+    'failure' => autoload_miss<>,
     'type' => varray[],
   ],
   __DIR__.'/'

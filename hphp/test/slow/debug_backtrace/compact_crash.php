@@ -15,6 +15,6 @@ class X {
 }
 <<__EntryPoint>>
 function main() {
-  fb_setprofile('profile');
+  fb_setprofile(profile<>);
   (new X)->foo();
 }

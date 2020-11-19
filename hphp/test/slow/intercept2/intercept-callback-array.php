@@ -16,6 +16,6 @@ static function foo($arg) {
 
 <<__EntryPoint>>
 function main() {
-  fb_intercept2('C::foo', 'handler');
+  fb_intercept2('C::foo', handler<>);
   C::foo(1);
 }

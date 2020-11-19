@@ -23,6 +23,6 @@ function foo<reify Ta, reify Tb>($arg) {
 
 <<__EntryPoint>>
 function main() {
-  fb_intercept2('foo', 'handler');
+  fb_intercept2('foo', handler<>);
   var_dump(foo<int, string>("Hey!"));
 }

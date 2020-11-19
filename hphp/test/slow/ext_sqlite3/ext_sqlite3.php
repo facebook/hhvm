@@ -70,13 +70,13 @@ VS($db->querysingle("SELECT * FROM foo", true), darray["bar" => "ABC"]);
 
 // testing UDF
 {
-  VERIFY($db->createfunction("tolower", "lower", 1));
+  VERIFY($db->createfunction("tolower", lower<>, 1));
   $res = $db->query("SELECT tolower(bar) FROM foo");
   VS($res->fetcharray(SQLITE3_NUM), darray[0 => "abc"]);
   $res->finalize();
 }
 {
-  VERIFY($db->createaggregate("sumlen", "sumlen_step", "sumlen_fini", 1));
+  VERIFY($db->createaggregate("sumlen", sumlen_step<>, sumlen_fini<>, 1));
   $res = $db->query("SELECT sumlen(bar) FROM foo");
   VS($res->fetcharray(SQLITE3_NUM), darray[0 => 6]);
   $res->finalize();

@@ -99,7 +99,7 @@ function is_as_shuffle_dynamic() {
 
 <<__EntryPoint>>
 function main() {
-  set_error_handler('handle_error');
+  set_error_handler(handle_error<>);
 
   is_as_static();          is_as_static();          is_as_static();
   is_as_dynamic();         is_as_dynamic();         is_as_dynamic();

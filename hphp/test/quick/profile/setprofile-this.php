@@ -54,6 +54,6 @@ function main() {
 <<__EntryPoint>>
 function entrypoint_setprofilethis(): void {
 
-  fb_setprofile('profiler');
+  fb_setprofile(profiler<>);
   main();
 }

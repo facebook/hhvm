@@ -17,7 +17,7 @@ function print_cover_maps(dict<string, vec<int>> $map) {
 
 <<__EntryPoint>>
 function main() {
-  hh\autoload_set_paths(darray['failure' => 'handle_autoload'], __DIR__);
+  hh\autoload_set_paths(darray['failure' => handle_autoload<>], __DIR__);
   hh\enable_per_file_coverage(keyset[
     __DIR__.'/interface-definition.inc',
   ]);

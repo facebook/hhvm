@@ -34,7 +34,7 @@ function profiler(...$args) {
 
 <<__EntryPoint>> function main(): void {
   pure_function_2(1, 2);
-  fb_setprofile('profiler');
+  fb_setprofile(profiler<>);
   pure_function_2(3, 4);
   fb_setprofile(null);
   pure_function_2(5, 6);

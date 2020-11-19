@@ -11,7 +11,7 @@ function bar($_1, $_2, inout $_3, $_4, inout $_5) {
 }
 function test() {
   X::foo();
-  fb_intercept('X::foo', 'bar', 'bar');
+  fb_intercept('X::foo', bar<>, bar<>);
   X::foo();
 }
 

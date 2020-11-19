@@ -11,8 +11,8 @@ function handler($signo) {
       exit;
     } else {
       echo "parent: I received SIGUSR2, switching to new handler\n";
-      pcntl_signal(SIGUSR1, "newhandler");
-      pcntl_signal(SIGUSR2, "newhandler");
+      pcntl_signal(SIGUSR1, newhandler<>);
+      pcntl_signal(SIGUSR2, newhandler<>);
       echo "parent: sending SIGUSR2 to child as ack\n";
       posix_kill(SignalChangeHandlerAfterForkPhp::$child, SIGUSR2);
     }

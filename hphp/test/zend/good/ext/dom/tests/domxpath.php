@@ -20,7 +20,7 @@ $dom->loadXML(b'<root xmlns="urn::default"><child>myval</child></root>');
 
 $xpath = new DOMXPath($dom);
 
-$xpath->registerPHPFunctions('MyAverage');
+$xpath->registerPHPFunctions(MyAverage<>);
 $xpath->registerNamespace("php", "http://php.net/xpath");
 
 $xpath->registerNamespace("def", "urn::default");

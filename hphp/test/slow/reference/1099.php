@@ -24,6 +24,6 @@ class Ag {
 function main_1099() {
 $af = new Af;
 $ag = new Ag;
-$af->g('f', 30);
-$ag->g('g', 30);
+$af->g(f<>, 30);
+$ag->g(g<>, 30);
 }

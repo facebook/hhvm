@@ -76,7 +76,7 @@ function run($c1, $c2) {
 }
 
 function main() {
-  run('alwaysThrows1', 'alwaysThrows2');
+  run(alwaysThrows1<>, alwaysThrows2<>);
   run('Cls1::alwaysThrows1', 'Cls1::alwaysThrows2');
   $a = new Cls2();
   $b = new Cls3();

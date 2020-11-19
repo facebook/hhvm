@@ -28,23 +28,23 @@ $y = (float)$x;
  return $y;
  }
 function rf1($x) {
- if ($x) return 'f1';
+ if ($x) return f1<>;
  return 0;
  }
 function rf2($x) {
- if ($x) return 'f2';
+ if ($x) return f2<>;
  return 0;
  }
 function rf4($x) {
- if ($x) return 'f4';
+ if ($x) return f4<>;
  return 0;
  }
 function rf5($x) {
- if ($x) return 'f5';
+ if ($x) return f5<>;
  return 0;
  }
 function rf6($x) {
- if ($x) return 'f6';
+ if ($x) return f6<>;
  return 0;
  }
 

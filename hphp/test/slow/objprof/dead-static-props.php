@@ -38,6 +38,6 @@ function entrypoint_deadstaticprops(): void {
   $c = new C;
   $c->f(); // access static prop
   $hg = heapgraph_create();
-  HH\heapgraph_foreach_root_node($hg, 'visit_root');
+  HH\heapgraph_foreach_root_node($hg, visit_root<>);
   unlink(\HH\global_get('filename'));
 }

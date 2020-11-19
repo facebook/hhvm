@@ -12,7 +12,7 @@ function check<reify T>($x): T {
 
 <<__EntryPoint>>
 function main() {
-  set_error_handler('handle_error');
+  set_error_handler(handle_error<>);
 
   print("\n===================================\nTesting tuple:\n");
   print("\nUsing empty tuple:\n"); $tuple = varray[];

@@ -14,7 +14,7 @@ function mem_threshold_callback_as_func2() {
 
 function mem_threshold_callback_as_func() {
   echo "Threshold crossed again, peak: ".memory_get_peak_usage(true)."\n";
-  HH\set_mem_threshold_callback(70 * 1024 * 1024, 'mem_threshold_callback_as_func2');
+  HH\set_mem_threshold_callback(70 * 1024 * 1024, mem_threshold_callback_as_func2<>);
 }
 
 
@@ -32,7 +32,7 @@ ini_set('memory_limit', 90 * 1024 * 1024);
 
 HH\set_mem_threshold_callback(40 * 1024 * 1024, ()==> {
   echo "Threshold crossed, current peak: ".memory_get_peak_usage(true)."\n";
-  HH\set_mem_threshold_callback(50 * 1024 * 1024, 'mem_threshold_callback_as_func');
+  HH\set_mem_threshold_callback(50 * 1024 * 1024, mem_threshold_callback_as_func<>);
 });
 
 $longstr = "123456789012345678901234567890123456789012345678901234567890";

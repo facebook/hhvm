@@ -19,7 +19,7 @@ function test($a) {
 
 <<__EntryPoint>>
 function main() {
-  fb_setprofile('handler');
+  fb_setprofile(handler<>);
   test(varray[]);
   test(vec[]);
 }

@@ -17,6 +17,6 @@ function handler($name, $obj, inout $args, $data, inout $done) {
 <<__EntryPoint>>
 function main_intercept_methods() {
 main(new A);
-fb_intercept('A::foo', 'handler');
+fb_intercept('A::foo', handler<>);
 main(new A);
 }

@@ -18,11 +18,11 @@ function main_1104() {
 $x = 1;
 test(foo());
 var_dump($x);
-$f = f('foo');
+$f = f(foo<>);
 $x = 1;
 test($f());
 var_dump($x);
-$t = f('test');
+$t = f(test<>);
 $x = 1;
 $t(foo());
 var_dump($x);

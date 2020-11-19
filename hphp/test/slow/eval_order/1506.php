@@ -31,7 +31,7 @@ function main_1506() {
 echo "sfc
 ";
 x(p(1), p(2), p(3), 4);
-$y = 'x';
+$y = x<>;
 echo "dfc
 ";
 $y(p(1), p(2), p(3), 4);

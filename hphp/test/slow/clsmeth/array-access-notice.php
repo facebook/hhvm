@@ -79,7 +79,7 @@ function array_set_dynamic() {
 
 <<__EntryPoint>>
 function main() {
-  set_error_handler('handle_error');
+  set_error_handler(handle_error<>);
 
   array_get_static();  array_get_static();  array_get_static();
   array_get_dynamic(); array_get_dynamic(); array_get_dynamic();

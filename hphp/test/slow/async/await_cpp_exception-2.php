@@ -22,7 +22,7 @@ async function foo() {
 
 <<__EntryPoint>>
 async function main() {
-  fb_setprofile('handler');
+  fb_setprofile(handler<>);
   foreach (foo() await as $_) {}
   echo "NOOOOO!\n";
 }

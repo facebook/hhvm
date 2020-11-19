@@ -27,5 +27,5 @@ function invalidTestController($port) {
 <<__EntryPoint>> function main(): void {
   require_once('test_base.inc');
   init();
-  runTest("invalidTestController");
+  runTest(invalidTestController<>);
 }

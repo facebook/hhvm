@@ -20,7 +20,7 @@ $hReadHandle = fopen($sReadFile, 'r');
 $oCurl = curl_init();
 curl_setopt($oCurl, CURLOPT_URL,          $sWriteUrl);
 curl_setopt($oCurl, CURLOPT_UPLOAD,       1);
-curl_setopt($oCurl, CURLOPT_READFUNCTION, "custom_readfunction" );
+curl_setopt($oCurl, CURLOPT_READFUNCTION, custom_readfunction<> );
 curl_setopt($oCurl, CURLOPT_INFILE,       $hReadHandle );
 curl_exec($oCurl);
 curl_close($oCurl);

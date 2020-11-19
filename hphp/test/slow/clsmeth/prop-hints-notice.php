@@ -291,7 +291,7 @@ function dump_pub_props(Props $p) {
 
 <<__EntryPoint>>
 function main() {
-  set_error_handler('handle_error');
+  set_error_handler(handle_error<>);
 
   Props::assign_priv_sprop_static();   Props::assign_priv_sprop_static();
   Props::assign_priv_sprop_dynamic1(); Props::assign_priv_sprop_dynamic1();

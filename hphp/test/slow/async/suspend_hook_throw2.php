@@ -31,7 +31,7 @@ function get($y) {
 
 <<__EntryPoint>>
 function main_suspend_hook_throw2() {
-fb_setprofile('thrower');
+fb_setprofile(thrower<>);
 $y = thing();
 
 $x = get($y);

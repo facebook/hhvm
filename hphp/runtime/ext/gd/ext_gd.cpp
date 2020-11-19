@@ -137,53 +137,57 @@ struct ImageMemoryAlloc final : RequestEventHandler {
 , int ln
 #endif
   ) {
-    assertx(m_mallocSize < (size_t)RuntimeOption::ImageMemoryMaxBytes);
-    if (m_mallocSize + size < (size_t)RuntimeOption::ImageMemoryMaxBytes) {
-#ifdef IM_MEMORY_CHECK
-      void *ptr = local_malloc(sizeof(ln) + sizeof(size) + size);
-      if (!ptr) return nullptr;
-      memcpy(ptr, &ln, sizeof(ln));
-      memcpy((char*)ptr + sizeof(ln), &size, sizeof(size));
-      m_mallocSize += size;
-      m_alloced.insert(ptr);
-      return ((char *)ptr + sizeof(ln) + sizeof(size));
-#else
-      void *ptr = local_malloc(sizeof(size) + size);
-      if (!ptr) return nullptr;
-      memcpy(ptr, &size, sizeof(size));
-      m_mallocSize += size;
-      return ((char *)ptr + sizeof(size));
-#endif
+    assertx(m_mallocSize <= (size_t)RuntimeOption::ImageMemoryMaxBytes);
+    if (size > (size_t)RuntimeOption::ImageMemoryMaxBytes ||
+        m_mallocSize + size > (size_t)RuntimeOption::ImageMemoryMaxBytes) {
+      return nullptr;
     }
-    return nullptr;
+
+#ifdef IM_MEMORY_CHECK
+    void *ptr = local_malloc(sizeof(ln) + sizeof(size) + size);
+    if (!ptr) return nullptr;
+    memcpy(ptr, &ln, sizeof(ln));
+    memcpy((char*)ptr + sizeof(ln), &size, sizeof(size));
+    m_mallocSize += size;
+    m_alloced.insert(ptr);
+    return ((char *)ptr + sizeof(ln) + sizeof(size));
+#else
+    void *ptr = local_malloc(sizeof(size) + size);
+    if (!ptr) return nullptr;
+    memcpy(ptr, &size, sizeof(size));
+    m_mallocSize += size;
+    return ((char *)ptr + sizeof(size));
+#endif
   }
   void *imCalloc(size_t nmemb, size_t size
 #ifdef IM_MEMORY_CHECK
 , int ln
 #endif
   ) {
-    assertx(m_mallocSize < (size_t)RuntimeOption::ImageMemoryMaxBytes);
+    assertx(m_mallocSize <= (size_t)RuntimeOption::ImageMemoryMaxBytes);
     size_t bytes = nmemb * size;
-    if (m_mallocSize + bytes < (size_t)RuntimeOption::ImageMemoryMaxBytes) {
-#ifdef IM_MEMORY_CHECK
-      void *ptr = local_malloc(sizeof(ln) + sizeof(size) + bytes);
-      if (!ptr) return nullptr;
-      memset(ptr, 0, sizeof(ln) + sizeof(size) + bytes);
-      memcpy(ptr, &ln, sizeof(ln));
-      memcpy((char*)ptr + sizeof(ln), &bytes, sizeof(bytes));
-      m_mallocSize += bytes;
-      m_alloced.insert(ptr);
-      return ((char *)ptr + sizeof(ln) + sizeof(size));
-#else
-      void *ptr = local_malloc(sizeof(size) + bytes);
-      if (!ptr) return nullptr;
-      memcpy(ptr, &bytes, sizeof(bytes));
-      memset((char *)ptr + sizeof(size), 0, bytes);
-      m_mallocSize += bytes;
-      return ((char *)ptr + sizeof(size));
-#endif
+    if (bytes > (size_t)RuntimeOption::ImageMemoryMaxBytes ||
+        m_mallocSize + bytes > (size_t)RuntimeOption::ImageMemoryMaxBytes) {
+      return nullptr;
     }
-    return nullptr;
+
+#ifdef IM_MEMORY_CHECK
+    void *ptr = local_malloc(sizeof(ln) + sizeof(size) + bytes);
+    if (!ptr) return nullptr;
+    memset(ptr, 0, sizeof(ln) + sizeof(size) + bytes);
+    memcpy(ptr, &ln, sizeof(ln));
+    memcpy((char*)ptr + sizeof(ln), &bytes, sizeof(bytes));
+    m_mallocSize += bytes;
+    m_alloced.insert(ptr);
+    return ((char *)ptr + sizeof(ln) + sizeof(size));
+#else
+    void *ptr = local_malloc(sizeof(size) + bytes);
+    if (!ptr) return nullptr;
+    memcpy(ptr, &bytes, sizeof(bytes));
+    memset((char *)ptr + sizeof(size), 0, bytes);
+    m_mallocSize += bytes;
+    return ((char *)ptr + sizeof(size));
+#endif
   }
   void imFree(void *ptr
 #ifdef IM_MEMORY_CHECK
@@ -198,10 +202,10 @@ struct ImageMemoryAlloc final : RequestEventHandler {
     void *lnPtr = (char *)sizePtr - sizeof(ln);
     int count = m_alloced.erase((char*)sizePtr - sizeof(ln));
     assertx(count == 1); // double free on failure
-    assertx(m_mallocSize < (size_t)RuntimeOption::ImageMemoryMaxBytes);
+    assertx(m_mallocSize <= (size_t)RuntimeOption::ImageMemoryMaxBytes);
     local_free(lnPtr);
 #else
-    assertx(m_mallocSize < (size_t)RuntimeOption::ImageMemoryMaxBytes);
+    assertx(m_mallocSize <= (size_t)RuntimeOption::ImageMemoryMaxBytes);
     local_free(sizePtr);
 #endif
   }
@@ -212,7 +216,7 @@ struct ImageMemoryAlloc final : RequestEventHandler {
 , int ln
 #endif
   ) {
-    assertx(m_mallocSize < (size_t)RuntimeOption::ImageMemoryMaxBytes);
+    assertx(m_mallocSize <= (size_t)RuntimeOption::ImageMemoryMaxBytes);
 
 #ifdef IM_MEMORY_CHECK
     if (!ptr) return imMalloc(size, ln);
@@ -230,12 +234,13 @@ struct ImageMemoryAlloc final : RequestEventHandler {
     void *sizePtr = (char *)ptr - sizeof(size);
     size_t oldSize = 0;
     if (ptr) memcpy(&oldSize, sizePtr, sizeof(oldSize));
-    int diff = size - oldSize;
+    ssize_t diff = size - oldSize;
     void *tmp;
 
 #ifdef IM_MEMORY_CHECK
     void *lnPtr = (char *)sizePtr - sizeof(ln);
-    if (m_mallocSize + diff > (size_t)RuntimeOption::ImageMemoryMaxBytes ||
+    if (size > (size_t)RuntimeOption::ImageMemoryMaxBytes ||
+        m_mallocSize + diff > (size_t)RuntimeOption::ImageMemoryMaxBytes ||
         !(tmp = local_realloc(lnPtr, sizeof(ln) + sizeof(size) + size))) {
       int count = m_alloced.erase(ptr);
       assertx(count == 1); // double free on failure
@@ -252,7 +257,8 @@ struct ImageMemoryAlloc final : RequestEventHandler {
     }
     return ((char *)tmp + sizeof(ln) + sizeof(size));
 #else
-    if (m_mallocSize + diff > (size_t)RuntimeOption::ImageMemoryMaxBytes ||
+    if (size > (size_t)RuntimeOption::ImageMemoryMaxBytes ||
+        m_mallocSize + diff > (size_t)RuntimeOption::ImageMemoryMaxBytes ||
         !(tmp = local_realloc(sizePtr, sizeof(size) + size))) {
       local_free(sizePtr);
       return nullptr;

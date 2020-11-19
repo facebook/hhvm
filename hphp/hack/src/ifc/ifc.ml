@@ -474,13 +474,18 @@ let join_policies ?(prefix = "join") ~pos renv env pl =
     (env, pv)
 
 let get_local_type ~pos env lid =
-  match Env.get_local_type env lid with
-  | None ->
-    let name = Local_id.get_name lid in
+  let name = Local_id.get_name lid in
+  let should_skip_error =
     (* TODO: deal with co-effect thingies *)
-    ( if not (String.equal (String.sub name ~pos:0 ~len:2) "$#") then
-      let msg = "local " ^ name ^ " missing from env" in
-      Errors.unknown_information_flow pos msg );
+    String.equal (String.sub name ~pos:0 ~len:2) "$#"
+    || String.equal name "$this"
+  in
+
+  match Env.get_local_type env lid with
+  | None when should_skip_error -> None
+  | None ->
+    let msg = "local " ^ name ^ " missing from env" in
+    Errors.unknown_information_flow pos msg;
     None
   | pty_opt -> pty_opt
 

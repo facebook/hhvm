@@ -914,6 +914,7 @@ pub mod regex {
 pub mod emitter_special_functions {
     pub const EVAL: &str = "\\eval";
     pub const SET_FRAME_METADATA: &str = "\\HH\\set_frame_metadata";
+    pub const SYSTEMLIB_REIFIED_GENERICS: &str = "\\__systemlib_reified_generics";
 }
 
 pub mod math {

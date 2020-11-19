@@ -3019,6 +3019,18 @@ fn emit_eval(e: &mut Emitter, env: &Env, pos: &Pos, expr: &tast::Expr) -> Result
     ]))
 }
 
+fn has_reified_types(env: &Env) -> bool {
+    for param in env.scope.get_tparams() {
+        match param.reified {
+            oxidized::ast::ReifyKind::Reified => {
+                return true;
+            }
+            _ => {}
+        }
+    }
+    false
+}
+
 fn emit_call_expr(
     e: &mut Emitter,
     env: &Env,
@@ -3077,6 +3089,22 @@ fn emit_call_expr(
         {
             let exit = emit_exit(e, env, Some(arg1))?;
             Ok(emit_pos_then(pos, exit))
+        }
+        (E_::Id(id), [], _)
+            if id.1 == emitter_special_functions::SYSTEMLIB_REIFIED_GENERICS
+                && e.systemlib()
+                && has_reified_types(env) =>
+        {
+            // Rewrite __systemlib_reified_generics() to $0ReifiedGenerics,
+            // but only in systemlib functions that take a reified generic.
+            let lvar = E::new(
+                pos.clone(),
+                E_::Lvar(Box::new(tast::Lid(
+                    pos.clone(),
+                    local_id::make_unscoped(string_utils::reified::GENERICS_LOCAL_NAME),
+                ))),
+            );
+            emit_expr(e, env, &lvar)
         }
         (_, _, _) => {
             let instrs = emit_call(

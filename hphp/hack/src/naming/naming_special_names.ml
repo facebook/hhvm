@@ -794,6 +794,8 @@ module EmitterSpecialFunctions = struct
   let eval = "\\eval"
 
   let set_frame_metadata = "\\HH\\set_frame_metadata"
+
+  let systemlib_reified_generics = "\\__systemlib_reified_generics"
 end
 
 module XHP = struct

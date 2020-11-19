@@ -505,7 +505,7 @@ namespace HH\ReifiedGenerics {
    */
   <<__Pure>>
   function get_type_structure<reify T>(): mixed {
-    return ${'0ReifiedGenerics'}[0];
+    return \__systemlib_reified_generics()[0];
   }
 
   /**

@@ -38,6 +38,12 @@ TRACE_SET_MOD(bespoke);
 
 namespace {
 
+struct StaticStrPtr {
+  bool operator==(const StaticStrPtr& o) const { return value == o.value; }
+  bool operator!=(const StaticStrPtr& o) const { return value != o.value; }
+  const StringData* value;
+};
+
 uint16_t packSizeIndexAndAuxBits(uint8_t index, uint8_t aux) {
   return (static_cast<uint16_t>(index) << 8) | aux;
 }
@@ -52,10 +58,10 @@ std::aligned_storage<sizeof(EmptyMonotypeDict), 16>::type s_emptyDArray;
 std::aligned_storage<sizeof(EmptyMonotypeDict), 16>::type s_emptyMarkedDict;
 std::aligned_storage<sizeof(EmptyMonotypeDict), 16>::type s_emptyMarkedDArray;
 
-auto const empty_vtable = fromArray<EmptyMonotypeDict>();
-auto const int_vtable   = fromArray<MonotypeDict<int64_t>>();
-auto const str_vtable   = fromArray<MonotypeDict<StringData*>>();
-auto const s32_vtable   = fromArray<MonotypeDict<LowStringPtr>>();
+auto const empty_vtable      = fromArray<EmptyMonotypeDict>();
+auto const int_vtable        = fromArray<MonotypeDict<int64_t>>();
+auto const str_vtable        = fromArray<MonotypeDict<StringData*>>();
+auto const static_str_vtable = fromArray<MonotypeDict<StaticStrPtr>>();
 
 constexpr DataType kEmptyDataType = static_cast<DataType>(1);
 constexpr DataType kAbstractDataTypeMask = static_cast<DataType>(0x80);
@@ -80,7 +86,7 @@ const LayoutFunctions* getVtableForKeyTypes(KeyTypes kt) {
   switch (kt) {
     case KeyTypes::Ints:          return &int_vtable;
     case KeyTypes::Strings:       return &str_vtable;
-    case KeyTypes::StaticStrings: return &s32_vtable;
+    case KeyTypes::StaticStrings: return &static_str_vtable;
     default: always_assert(false);
   }
 }
@@ -254,7 +260,7 @@ ArrayData* EmptyMonotypeDict::SetIntMove(Self* ad, int64_t k, TypedValue v) {
 ArrayData* EmptyMonotypeDict::SetStr(Self* ad, StringData* k, TypedValue v) {
   auto const legacy = ad->isLegacyArray();
   return k->isStatic()
-    ? makeStrMonotypeDict<LowStringPtr>(ad->m_kind, legacy, k, v)
+    ? makeStrMonotypeDict<StaticStrPtr>(ad->m_kind, legacy, k, v)
     : makeStrMonotypeDict<StringData*>(ad->m_kind, legacy, k, v);
 }
 ArrayData* EmptyMonotypeDict::SetStrMove(Self* ad, StringData* k, TypedValue v) {
@@ -336,7 +342,7 @@ constexpr LayoutIndex getLayoutIndex(DataType type) {
   } else if constexpr (std::is_same<Key, StringData*>::value) {
     return getStrLayoutIndex(type);
   } else {
-    static_assert(std::is_same<Key, LowStringPtr>::value);
+    static_assert(std::is_same<Key, StaticStrPtr>::value);
     return getStaticStrLayoutIndex(type);
   }
 }
@@ -348,8 +354,8 @@ constexpr strhash_t getHash(Key key) {
   } else if constexpr (std::is_same<Key, StringData*>::value) {
     return key->hash();
   } else {
-    static_assert(std::is_same<Key, LowStringPtr>::value);
-    return key->hashStatic();
+    static_assert(std::is_same<Key, StaticStrPtr>::value);
+    return key.value->hashStatic();
   }
 }
 
@@ -359,8 +365,8 @@ constexpr Key getTombstone() {
     return std::numeric_limits<Key>::min();
   } else {
     static_assert(std::is_same<Key, StringData*>::value ||
-                  std::is_same<Key, LowStringPtr>::value);
-    return nullptr;
+                  std::is_same<Key, StaticStrPtr>::value);
+    return Key { nullptr };
   }
 }
 
@@ -383,7 +389,7 @@ void decRefKey(Key key) {
 //
 // If coercion fails for an int input, the key is DEFINITELY not in the array.
 // If coercion fails for a string input, the input may be a non-static  copy
-// of a static string (if Key == LowStringPtr). Otherwise, it's missing.
+// of a static string (if Key == StaticStr). Otherwise, it's missing.
 //
 // Callers can use `fallbackForStaticStr` to check the static/non-static case.
 
@@ -399,15 +405,15 @@ template <typename Key>
 Key coerceKey(const StringData* input) {
   if constexpr (std::is_same<Key, StringData*>::value) {
     return const_cast<StringData*>(input);
-  } else if constexpr (std::is_same<Key, LowStringPtr>::value) {
-    return input->isStatic() ? static_cast<Key>(input) : getTombstone<Key>();
+  } else if constexpr (std::is_same<Key, StaticStrPtr>::value) {
+    return input->isStatic() ? Key { input } : getTombstone<Key>();
   }
   return getTombstone<Key>();
 }
 
 template <typename Key>
 bool fallbackForStaticStr(const StringData* input) {
-  if constexpr (std::is_same<Key, LowStringPtr>::value) {
+  if constexpr (std::is_same<Key, StaticStrPtr>::value) {
     return !input->isStatic();
   }
   return false;
@@ -419,7 +425,7 @@ bool keysEqual(Key a, Key b) {
     return a == b || a->same(b);
   } else {
     static_assert(std::is_same<Key, int64_t>::value ||
-                  std::is_same<Key, LowStringPtr>::value);
+                  std::is_same<Key, StaticStrPtr>::value);
     return a == b;
   }
 }
@@ -519,7 +525,7 @@ bool MonotypeDict<Key>::checkInvariants() const {
   // We may call StringDict's methods on a dict of static strings.
   assertx(layoutIndex() == getLayoutIndex<Key>(type()) ||
           (std::is_same<Self, StringDict>::value &&
-           layoutIndex() == getLayoutIndex<LowStringPtr>(type())));
+           layoutIndex() == getLayoutIndex<StaticStrPtr>(type())));
 
   return true;
 }
@@ -901,8 +907,8 @@ ArrayData* MonotypeDict<Key>::escalateWithCapacity(size_t capacity) const {
       } else if constexpr (std::is_same<Key, StringData*>::value) {
         return MixedArray::SetStr(ad, elm->key, tv);
       } else {
-        static_assert(std::is_same<Key, LowStringPtr>::value);
-        auto const key = const_cast<StringData*>(elm->key.get());
+        static_assert(std::is_same<Key, StaticStrPtr>::value);
+        auto const key = const_cast<StringData*>(elm->key.value);
         return MixedArray::SetStr(ad, key, tv);
       }
     }();
@@ -1095,8 +1101,8 @@ TypedValue MonotypeDict<Key>::GetPosKey(const Self* mad, ssize_t pos) {
   } else if constexpr (std::is_same<Key, StringData*>::value) {
     return make_tv<KindOfString>(elm->key);
   } else {
-    static_assert(std::is_same<Key, LowStringPtr>::value);
-    auto const key = const_cast<StringData*>(elm->key.get());
+    static_assert(std::is_same<Key, StaticStrPtr>::value);
+    auto const key = const_cast<StringData*>(elm->key.value);
     return make_tv<KindOfPersistentString>(key);
   }
 }
@@ -1306,7 +1312,7 @@ ArrayData* MonotypeDictPostSort(MixedArray* mad, DataType dt) {
   auto const keys = mad->keyTypes();
   auto const result = [&]() -> ArrayData* {
     if (keys.mustBeStaticStrs()) {
-      return MonotypeDict<LowStringPtr>::MakeFromVanilla(mad, dt);
+      return MonotypeDict<StaticStrPtr>::MakeFromVanilla(mad, dt);
     } else if (keys.mustBeStrs()) {
       return MonotypeDict<StringData*>::MakeFromVanilla(mad, dt);
     } else if (keys.mustBeInts()) {
@@ -1449,7 +1455,7 @@ ArrayData* MakeMonotypeDictFromVanilla(
     case KeyTypes::Strings:
       return MonotypeDict<StringData*>::MakeFromVanilla(ad, dt);
     case KeyTypes::StaticStrings:
-      return MonotypeDict<LowStringPtr>::MakeFromVanilla(ad, dt);
+      return MonotypeDict<StaticStrPtr>::MakeFromVanilla(ad, dt);
     default: always_assert(false);
   }
 }

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<fea1e8b1ba8f74f918de0f8491f8fea6>>
+// @generated SignedSource<<59e9311360e0cdf5eaca4201a6bdc9d6>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -587,6 +587,26 @@ pub enum Reactivity<'a> {
 }
 impl<'a> TrivialDrop for Reactivity<'a> {}
 
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+pub enum Capability<'a> {
+    CapDefaults(&'a pos::Pos<'a>),
+    CapTy(&'a Ty<'a>),
+}
+impl<'a> TrivialDrop for Capability<'a> {}
+
 /// Companion to fun_params type, intended to consolidate checking of
 /// implicit params for functions.
 #[derive(
@@ -603,7 +623,7 @@ impl<'a> TrivialDrop for Reactivity<'a> {}
     ToOcamlRep
 )]
 pub struct FunImplicitParams<'a> {
-    pub capability: &'a Ty<'a>,
+    pub capability: Capability<'a>,
 }
 impl<'a> TrivialDrop for FunImplicitParams<'a> {}
 

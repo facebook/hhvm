@@ -16,11 +16,7 @@
            (Tfun
               { ft_arity = (Fstandard ()); ft_tparams = [];
                 ft_where_constraints = []; ft_params = [];
-                ft_implicit_params =
-                { capability =
-                  (Rhint (root|interface.php line 4, characters 19-21),
-                   (Tunion []))
-                  };
+                ft_implicit_params = { capability = (CapDefaults [4:19-22]) };
                 ft_ret =
                 { et_enforced = false;
                   et_type =

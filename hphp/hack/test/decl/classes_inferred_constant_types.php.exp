@@ -35,11 +35,7 @@
            (Tfun
               { ft_arity = (Fstandard ()); ft_tparams = [];
                 ft_where_constraints = []; ft_params = [];
-                ft_implicit_params =
-                { capability =
-                  (Rhint (root|classes_inferred_constant_types.php line 8, characters 19-19),
-                   (Tunion []))
-                  };
+                ft_implicit_params = { capability = (CapDefaults [8:19-20]) };
                 ft_ret =
                 { et_enforced = false;
                   et_type =

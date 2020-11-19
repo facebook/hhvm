@@ -16,11 +16,7 @@
                 }
                ];
              ft_where_constraints = []; ft_params = [];
-             ft_implicit_params =
-             { capability =
-               (Rhint (root|soft_reified.php line 3, characters 10-13),
-                (Tunion []))
-               };
+             ft_implicit_params = { capability = (CapDefaults [3:10-14]) };
              ft_ret =
              { et_enforced = false;
                et_type =

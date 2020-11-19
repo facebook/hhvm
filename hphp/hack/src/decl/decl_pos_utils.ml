@@ -108,6 +108,7 @@ struct
     | Rglobal_fun_ret p -> Rglobal_fun_ret (pos p)
     | Rsplice p -> Rsplice (pos p)
     | Ret_boolean p -> Ret_boolean (pos p)
+    | Rdefault_capability p -> Rdefault_capability (pos p)
 
   let rec ty t =
     let (p, x) = deref t in
@@ -144,7 +145,12 @@ struct
 
   and possibly_enforced_ty et = { et with et_type = ty et.et_type }
 
-  and fun_implicit_params implicit = { capability = ty implicit.capability }
+  and capability = function
+    | CapTy cap -> CapTy (ty cap)
+    | CapDefaults p -> CapDefaults (pos p)
+
+  and fun_implicit_params implicit =
+    { capability = capability implicit.capability }
 
   and fun_type ft =
     {

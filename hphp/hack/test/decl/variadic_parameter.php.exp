@@ -34,10 +34,7 @@
                         ft_tparams = []; ft_where_constraints = [];
                         ft_params = [];
                         ft_implicit_params =
-                        { capability =
-                          (Rhint (root|variadic_parameter.php line 3, characters 15-40),
-                           (Tunion []))
-                          };
+                        { capability = (CapDefaults [3:15-41]) };
                         ft_ret =
                         { et_enforced = false;
                           et_type =
@@ -57,11 +54,7 @@
                   ~ifc_external:false ~ifc_can_call:false ~is_atom:false);
                  }
                ];
-             ft_implicit_params =
-             { capability =
-               (Rhint (root|variadic_parameter.php line 3, characters 10-13),
-                (Tunion []))
-               };
+             ft_implicit_params = { capability = (CapDefaults [3:10-14]) };
              ft_ret =
              { et_enforced = false;
                et_type =

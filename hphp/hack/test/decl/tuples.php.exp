@@ -38,11 +38,7 @@
                    ~ifc_external:false ~ifc_can_call:false ~is_atom:false);
                   }
                 ];
-              ft_implicit_params =
-              { capability =
-                (Rhint (root|tuples.php line 5, characters 10-20),
-                 (Tunion []))
-                };
+              ft_implicit_params = { capability = (CapDefaults [5:10-21]) };
               ft_ret =
               { et_enforced = false;
                 et_type =
@@ -77,11 +73,7 @@
                    ~ifc_external:false ~ifc_can_call:false ~is_atom:false);
                   }
                 ];
-              ft_implicit_params =
-              { capability =
-                (Rhint (root|tuples.php line 9, characters 10-22),
-                 (Tunion []))
-                };
+              ft_implicit_params = { capability = (CapDefaults [9:10-23]) };
               ft_ret =
               { et_enforced = false;
                 et_type =
@@ -132,11 +124,7 @@
                    ~ifc_external:false ~ifc_can_call:false ~is_atom:false);
                   }
                 ];
-              ft_implicit_params =
-              { capability =
-                (Rhint (root|tuples.php line 13, characters 10-22),
-                 (Tunion []))
-                };
+              ft_implicit_params = { capability = (CapDefaults [13:10-23]) };
               ft_ret =
               { et_enforced = false;
                 et_type =

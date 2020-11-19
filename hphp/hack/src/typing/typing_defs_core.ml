@@ -333,9 +333,13 @@ and reactivity =
   | CippGlobal
   | CippRx
 
+and 'ty capability =
+  | CapDefaults of Pos.t
+  | CapTy of 'ty
+
 (** Companion to fun_params type, intended to consolidate checking of
  * implicit params for functions. *)
-and 'ty fun_implicit_params = { capability: 'ty }
+and 'ty fun_implicit_params = { capability: 'ty capability }
 
 (** The type of a function AND a method.
  * A function has a min and max arity because of optional arguments *)
@@ -768,13 +772,24 @@ module Pp = struct
     Format.fprintf fmt "@]";
     Format.fprintf fmt "@ }@]"
 
+  and pp_capability : type a. Format.formatter -> a ty capability -> unit =
+   fun fmt -> function
+    | CapTy ty ->
+      Format.pp_print_string fmt "(CapTy ";
+      pp_ty fmt ty;
+      Format.pp_print_string fmt ")"
+    | CapDefaults pos ->
+      Format.pp_print_string fmt "(CapDefaults ";
+      Pos.pp fmt pos;
+      Format.pp_print_string fmt ")"
+
   and pp_fun_implicit_params :
       type a. Format.formatter -> a ty fun_implicit_params -> unit =
    fun fmt x ->
     Format.fprintf fmt "@[<2>{ ";
 
     Format.fprintf fmt "@[%s =@ " "capability";
-    pp_ty fmt x.capability;
+    pp_capability fmt x.capability;
     Format.fprintf fmt "@]";
 
     Format.fprintf fmt "@ }@]"

@@ -21,11 +21,7 @@
                   ~ifc_external:false ~ifc_can_call:false ~is_atom:false);
                  }
                ];
-             ft_implicit_params =
-             { capability =
-               (Rhint (root|soft_type_hint.php line 3, characters 10-10),
-                (Tunion []))
-               };
+             ft_implicit_params = { capability = (CapDefaults [3:10-11]) };
              ft_ret =
              { et_enforced = false;
                et_type =

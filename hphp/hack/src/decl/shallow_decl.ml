@@ -166,13 +166,10 @@ let method_type env m =
   let return_disposable = has_return_disposable_attribute m.m_user_attributes in
   let params = make_params env ~is_lambda:false m.m_params in
   let capability =
-    hint_to_type
-      ~is_lambda:false
-      ~default:
-        (Typing_make_type.default_capability (Reason.Rhint (fst m.m_name)))
-      env
-      (Reason.Rwitness (fst m.m_name))
+    Option.value_map
       (hint_of_type_hint m.m_cap)
+      ~f:(fun h -> CapTy (Decl_hint.hint env h))
+      ~default:(CapDefaults (fst m.m_name))
   in
   let ret =
     ret_from_fun_kind

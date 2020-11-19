@@ -29,10 +29,7 @@
                    { ft_arity = (Fstandard ()); ft_tparams = [];
                      ft_where_constraints = []; ft_params = [];
                      ft_implicit_params =
-                     { capability =
-                       (Rhint (root|const_attribute.php line 10, characters 19-29),
-                        (Tunion []))
-                       };
+                     { capability = (CapDefaults [10:19-30]) };
                      ft_ret =
                      { et_enforced = false;
                        et_type =
@@ -78,10 +75,7 @@
                     { ft_arity = (Fstandard ()); ft_tparams = [];
                       ft_where_constraints = []; ft_params = [];
                       ft_implicit_params =
-                      { capability =
-                        (Rhint (root|const_attribute.php line 20, characters 19-29),
-                         (Tunion []))
-                        };
+                      { capability = (CapDefaults [20:19-30]) };
                       ft_ret =
                       { et_enforced = false;
                         et_type =
@@ -140,10 +134,7 @@
                           }
                         ];
                       ft_implicit_params =
-                      { capability =
-                        (Rhint (root|const_attribute.php line 26, characters 19-29),
-                         (Tunion []))
-                        };
+                      { capability = (CapDefaults [26:19-30]) };
                       ft_ret =
                       { et_enforced = false;
                         et_type =

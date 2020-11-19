@@ -46,10 +46,7 @@
                          }
                        ];
                      ft_implicit_params =
-                     { capability =
-                       (Rhint (root|generic_classes.php line 6, characters 19-29),
-                        (Tunion []))
-                       };
+                     { capability = (CapDefaults [6:19-30]) };
                      ft_ret =
                      { et_enforced = false;
                        et_type =
@@ -73,10 +70,7 @@
               { ft_arity = (Fstandard ()); ft_tparams = [];
                 ft_where_constraints = []; ft_params = [];
                 ft_implicit_params =
-                { capability =
-                  (Rhint (root|generic_classes.php line 10, characters 19-21),
-                   (Tunion []))
-                  };
+                { capability = (CapDefaults [10:19-22]) };
                 ft_ret =
                 { et_enforced = false;
                   et_type =
@@ -140,10 +134,7 @@
                           }
                         ];
                       ft_implicit_params =
-                      { capability =
-                        (Rhint (root|generic_classes.php line 18, characters 19-29),
-                         (Tunion []))
-                        };
+                      { capability = (CapDefaults [18:19-30]) };
                       ft_ret =
                       { et_enforced = false;
                         et_type =
@@ -208,10 +199,7 @@
                           }
                         ];
                       ft_implicit_params =
-                      { capability =
-                        (Rhint (root|generic_classes.php line 26, characters 19-29),
-                         (Tunion []))
-                        };
+                      { capability = (CapDefaults [26:19-30]) };
                       ft_ret =
                       { et_enforced = false;
                         et_type =
@@ -235,10 +223,7 @@
                { ft_arity = (Fstandard ()); ft_tparams = [];
                  ft_where_constraints = []; ft_params = [];
                  ft_implicit_params =
-                 { capability =
-                   (Rhint (root|generic_classes.php line 30, characters 19-21),
-                    (Tunion []))
-                   };
+                 { capability = (CapDefaults [30:19-22]) };
                  ft_ret =
                  { et_enforced = false;
                    et_type =

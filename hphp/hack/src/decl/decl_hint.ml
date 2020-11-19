@@ -113,10 +113,9 @@ and hint_ p env = function
     let paraml = List.map3_exn hl kl muts ~f:make_param in
     let implicit_params =
       let capability =
-        Option.value_map
-          cap_opt
-          ~default:(Typing_make_type.default_capability (Reason.Rhint p))
-          ~f:(hint env)
+        match cap_opt with
+        | Some cap -> CapTy (hint env cap)
+        | None -> CapDefaults p
       in
       { capability }
     in

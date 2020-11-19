@@ -18,11 +18,7 @@
          (Tfun
             { ft_arity = (Fstandard ()); ft_tparams = [];
               ft_where_constraints = []; ft_params = [];
-              ft_implicit_params =
-              { capability =
-                (Rhint (root|auto_ns_use.php line 8, characters 12-20),
-                 (Tunion []))
-                };
+              ft_implicit_params = { capability = (CapDefaults [8:12-21]) };
               ft_ret =
               { et_enforced = false;
                 et_type =
@@ -70,11 +66,7 @@
                     ~ifc_external:false ~ifc_can_call:false ~is_atom:false);
                    }
                 ];
-              ft_implicit_params =
-              { capability =
-                (Rhint (root|auto_ns_use.php line 12, characters 12-20),
-                 (Tunion []))
-                };
+              ft_implicit_params = { capability = (CapDefaults [12:12-21]) };
               ft_ret =
               { et_enforced = false;
                 et_type =

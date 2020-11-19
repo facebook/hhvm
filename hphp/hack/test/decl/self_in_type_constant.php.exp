@@ -77,10 +77,7 @@
                { ft_arity = (Fstandard ()); ft_tparams = [];
                  ft_where_constraints = []; ft_params = [];
                  ft_implicit_params =
-                 { capability =
-                   (Rhint (root|self_in_type_constant.php line 15, characters 28-28),
-                    (Tunion []))
-                   };
+                 { capability = (CapDefaults [15:28-29]) };
                  ft_ret =
                  { et_enforced = false;
                    et_type =

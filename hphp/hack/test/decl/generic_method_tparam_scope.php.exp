@@ -36,11 +36,7 @@
                      ~ifc_external:false ~ifc_can_call:false ~is_atom:false);
                     }
                   ];
-                ft_implicit_params =
-                { capability =
-                  (Rhint (root|generic_method_tparam_scope.php line 4, characters 19-19),
-                   (Tunion []))
-                  };
+                ft_implicit_params = { capability = (CapDefaults [4:19-20]) };
                 ft_ret =
                 { et_enforced = false;
                   et_type =
@@ -82,10 +78,7 @@
                      }
                    ];
                  ft_implicit_params =
-                 { capability =
-                   (Rhint (root|generic_method_tparam_scope.php line 8, characters 19-19),
-                    (Tunion []))
-                   };
+                 { capability = (CapDefaults [8:19-20]) };
                  ft_ret =
                  { et_enforced = false;
                    et_type =

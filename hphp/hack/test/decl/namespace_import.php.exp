@@ -25,11 +25,7 @@
          (Tfun
             { ft_arity = (Fstandard ()); ft_tparams = [];
               ft_where_constraints = []; ft_params = [];
-              ft_implicit_params =
-              { capability =
-                (Rhint (root|namespace_import.php line 15, characters 12-15),
-                 (Tunion []))
-                };
+              ft_implicit_params = { capability = (CapDefaults [15:12-16]) };
               ft_ret =
               { et_enforced = false;
                 et_type =

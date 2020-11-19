@@ -45,10 +45,7 @@
                          }
                        ];
                      ft_implicit_params =
-                     { capability =
-                       (Rhint (root|property_needs_init.hhi line 5, characters 19-29),
-                        (Tunion []))
-                       };
+                     { capability = (CapDefaults [5:19-30]) };
                      ft_ret =
                      { et_enforced = false;
                        et_type =

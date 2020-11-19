@@ -89,11 +89,7 @@
                    ~ifc_external:false ~ifc_can_call:false ~is_atom:false);
                   }
                 ];
-              ft_implicit_params =
-              { capability =
-                (Rhint (root|higher_kinded.php line 7, characters 10-15),
-                 (Tunion []))
-                };
+              ft_implicit_params = { capability = (CapDefaults [7:10-16]) };
               ft_ret =
               { et_enforced = false;
                 et_type =

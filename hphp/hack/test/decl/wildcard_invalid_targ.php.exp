@@ -86,11 +86,7 @@
                    ~ifc_external:false ~ifc_can_call:false ~is_atom:false);
                   }
                 ];
-              ft_implicit_params =
-              { capability =
-                (Rhint (root|wildcard_invalid_targ.php line 9, characters 10-13),
-                 (Tunion []))
-                };
+              ft_implicit_params = { capability = (CapDefaults [9:10-14]) };
               ft_ret =
               { et_enforced = false;
                 et_type =

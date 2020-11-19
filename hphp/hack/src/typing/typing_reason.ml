@@ -92,6 +92,7 @@ type t =
   | Rglobal_fun_ret of Pos.t
   | Rsplice of Pos.t
   | Ret_boolean of Pos.t
+  | Rdefault_capability of Pos.t
 
 and arg_position =
   | Aonly
@@ -488,6 +489,8 @@ let rec to_string prefix r =
         prefix
         ^ " because Expression Trees do not allow coercion of truthy values" );
     ]
+  | Rdefault_capability p ->
+    [(p, prefix ^ " because the function did not have an explicit context")]
 
 and to_pos r =
   if !Errors.report_pos_from_reason then
@@ -573,6 +576,7 @@ and to_raw_pos r =
   | Rglobal_fun_ret p -> p
   | Rsplice p -> p
   | Ret_boolean p -> p
+  | Rdefault_capability p -> p
 
 (* This is a mapping from internal expression ids to a standardized int.
  * Used for outputting cleaner error messages to users
@@ -688,6 +692,7 @@ let to_constructor_string r =
   | Rglobal_fun_ret _ -> "Rglobal_fun_ret"
   | Rsplice _ -> "Rsplice"
   | Ret_boolean _ -> "Ret_boolean"
+  | Rdefault_capability _ -> "Rdefault_capability"
 
 let pp fmt r =
   let pos = to_raw_pos r in

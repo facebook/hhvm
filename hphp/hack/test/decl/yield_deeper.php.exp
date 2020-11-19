@@ -6,11 +6,7 @@
         (Tfun
            { ft_arity = (Fstandard ()); ft_tparams = [];
              ft_where_constraints = []; ft_params = [];
-             ft_implicit_params =
-             { capability =
-               (Rhint (root|yield_deeper.php line 3, characters 10-10),
-                (Tunion []))
-               };
+             ft_implicit_params = { capability = (CapDefaults [3:10-11]) };
              ft_ret =
              { et_enforced = false;
                et_type =
@@ -38,11 +34,7 @@
          (Tfun
             { ft_arity = (Fstandard ()); ft_tparams = [];
               ft_where_constraints = []; ft_params = [];
-              ft_implicit_params =
-              { capability =
-                (Rhint (root|yield_deeper.php line 7, characters 10-10),
-                 (Tunion []))
-                };
+              ft_implicit_params = { capability = (CapDefaults [7:10-11]) };
               ft_ret =
               { et_enforced = false;
                 et_type =
@@ -62,11 +54,7 @@
          (Tfun
             { ft_arity = (Fstandard ()); ft_tparams = [];
               ft_where_constraints = []; ft_params = [];
-              ft_implicit_params =
-              { capability =
-                (Rhint (root|yield_deeper.php line 13, characters 10-10),
-                 (Tunion []))
-                };
+              ft_implicit_params = { capability = (CapDefaults [13:10-11]) };
               ft_ret =
               { et_enforced = false;
                 et_type =
@@ -86,11 +74,7 @@
          (Tfun
             { ft_arity = (Fstandard ()); ft_tparams = [];
               ft_where_constraints = []; ft_params = [];
-              ft_implicit_params =
-              { capability =
-                (Rhint (root|yield_deeper.php line 19, characters 16-16),
-                 (Tunion []))
-                };
+              ft_implicit_params = { capability = (CapDefaults [19:16-17]) };
               ft_ret =
               { et_enforced = false;
                 et_type =
@@ -113,11 +97,7 @@
          (Tfun
             { ft_arity = (Fstandard ()); ft_tparams = [];
               ft_where_constraints = []; ft_params = [];
-              ft_implicit_params =
-              { capability =
-                (Rhint (root|yield_deeper.php line 26, characters 16-16),
-                 (Tunion []))
-                };
+              ft_implicit_params = { capability = (CapDefaults [26:16-17]) };
               ft_ret =
               { et_enforced = false;
                 et_type =

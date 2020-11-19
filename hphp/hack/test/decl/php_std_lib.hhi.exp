@@ -6,11 +6,7 @@
         (Tfun
            { ft_arity = (Fstandard ()); ft_tparams = [];
              ft_where_constraints = []; ft_params = [];
-             ft_implicit_params =
-             { capability =
-               (Rhint (root|php_std_lib.hhi line 4, characters 10-10),
-                (Tunion []))
-               };
+             ft_implicit_params = { capability = (CapDefaults [4:10-11]) };
              ft_ret =
              { et_enforced = false;
                et_type =
@@ -60,10 +56,7 @@
                { ft_arity = (Fstandard ()); ft_tparams = [];
                  ft_where_constraints = []; ft_params = [];
                  ft_implicit_params =
-                 { capability =
-                   (Rhint (root|php_std_lib.hhi line 18, characters 26-26),
-                    (Tunion []))
-                   };
+                 { capability = (CapDefaults [18:26-27]) };
                  ft_ret =
                  { et_enforced = false;
                    et_type =
@@ -87,10 +80,7 @@
                { ft_arity = (Fstandard ()); ft_tparams = [];
                  ft_where_constraints = []; ft_params = [];
                  ft_implicit_params =
-                 { capability =
-                   (Rhint (root|php_std_lib.hhi line 15, characters 19-19),
-                    (Tunion []))
-                   };
+                 { capability = (CapDefaults [15:19-20]) };
                  ft_ret =
                  { et_enforced = false;
                    et_type =

@@ -105,6 +105,7 @@ tast::Reactivity
 tast::TypeParamMutability
 tast::ValKind
 typing_cont_key::TypingContKey
+typing_defs_core::Capability
 typing_defs_core::CeVisibility
 typing_defs_core::ConsistentKind
 typing_defs_core::ConstraintType

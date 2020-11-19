@@ -836,7 +836,11 @@ and localize_ft
   in
   let (env, implicit_params) =
     let (env, capability) =
-      localize ~ety_env env ft.ft_implicit_params.capability
+      match ft.ft_implicit_params.capability with
+      | CapTy c ->
+        let (env, ty) = localize ~ety_env env c in
+        (env, CapTy ty)
+      | CapDefaults p -> (env, CapDefaults p)
     in
     (env, { capability })
   in

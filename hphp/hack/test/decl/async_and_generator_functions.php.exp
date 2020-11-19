@@ -6,11 +6,7 @@
         (Tfun
            { ft_arity = (Fstandard ()); ft_tparams = [];
              ft_where_constraints = []; ft_params = [];
-             ft_implicit_params =
-             { capability =
-               (Rhint (root|async_and_generator_functions.php line 3, characters 10-22),
-                (Tunion []))
-               };
+             ft_implicit_params = { capability = (CapDefaults [3:10-23]) };
              ft_ret =
              { et_enforced = false;
                et_type =
@@ -30,11 +26,7 @@
          (Tfun
             { ft_arity = (Fstandard ()); ft_tparams = [];
               ft_where_constraints = []; ft_params = [];
-              ft_implicit_params =
-              { capability =
-                (Rhint (root|async_and_generator_functions.php line 5, characters 16-29),
-                 (Tunion []))
-                };
+              ft_implicit_params = { capability = (CapDefaults [5:16-30]) };
               ft_ret =
               { et_enforced = false;
                 et_type =
@@ -57,11 +49,7 @@
          (Tfun
             { ft_arity = (Fstandard ()); ft_tparams = [];
               ft_where_constraints = []; ft_params = [];
-              ft_implicit_params =
-              { capability =
-                (Rhint (root|async_and_generator_functions.php line 10, characters 10-27),
-                 (Tunion []))
-                };
+              ft_implicit_params = { capability = (CapDefaults [10:10-28]) };
               ft_ret =
               { et_enforced = false;
                 et_type =
@@ -89,11 +77,7 @@
          (Tfun
             { ft_arity = (Fstandard ()); ft_tparams = [];
               ft_where_constraints = []; ft_params = [];
-              ft_implicit_params =
-              { capability =
-                (Rhint (root|async_and_generator_functions.php line 14, characters 10-40),
-                 (Tunion []))
-                };
+              ft_implicit_params = { capability = (CapDefaults [14:10-41]) };
               ft_ret =
               { et_enforced = false;
                 et_type =
@@ -121,11 +105,7 @@
          (Tfun
             { ft_arity = (Fstandard ()); ft_tparams = [];
               ft_where_constraints = []; ft_params = [];
-              ft_implicit_params =
-              { capability =
-                (Rhint (root|async_and_generator_functions.php line 18, characters 16-30),
-                 (Tunion []))
-                };
+              ft_implicit_params = { capability = (CapDefaults [18:16-31]) };
               ft_ret =
               { et_enforced = false;
                 et_type =

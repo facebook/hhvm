@@ -324,9 +324,17 @@ and reactivity =
   | CippGlobal
   | CippRx
 
-(* Companion to fun_params type, intended to consolidate checking of
+(* Because Tfun is currently used as both a decl and locl ty, without this,
+ * the HH\Contexts\defaults alias must be stored in shared memory for a
+ * decl Tfun record. We can eliminate this if the majority of usages end up
+ * explicit or if we separate decl and locl Tfuns. *)
+and 'ty capability =
+  | CapDefaults of Pos.t (* Should not be used for lambda inference *)
+  | CapTy of 'ty
+
+(** Companion to fun_params type, intended to consolidate checking of
  * implicit params for functions. *)
-and 'ty fun_implicit_params = { capability: 'ty }
+and 'ty fun_implicit_params = { capability: 'ty capability }
 
 (* The type of a function AND a method.
  * A function has a min and max arity because of optional arguments *)

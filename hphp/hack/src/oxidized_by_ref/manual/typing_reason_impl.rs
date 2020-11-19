@@ -95,7 +95,8 @@ impl<'a> Reason<'a> {
             | RglobalFunParam(p)
             | RglobalFunRet(p)
             | Rsplice(p)
-            | RetBoolean(p) => Some(p),
+            | RetBoolean(p)
+            | RdefaultCapability(p) => Some(p),
             RlostInfo((_, r, _))
             | Rinstantiate((_, _, r))
             | Rtypeconst((r, _, _, _))

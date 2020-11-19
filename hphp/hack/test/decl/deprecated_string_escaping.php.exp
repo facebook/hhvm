@@ -7,11 +7,7 @@
         (Tfun
            { ft_arity = (Fstandard ()); ft_tparams = [];
              ft_where_constraints = []; ft_params = [];
-             ft_implicit_params =
-             { capability =
-               (Rhint (root|deprecated_string_escaping.php line 4, characters 10-15),
-                (Tunion []))
-               };
+             ft_implicit_params = { capability = (CapDefaults [4:10-16]) };
              ft_ret =
              { et_enforced = false;
                et_type =
@@ -32,11 +28,7 @@
          (Tfun
             { ft_arity = (Fstandard ()); ft_tparams = [];
               ft_where_constraints = []; ft_params = [];
-              ft_implicit_params =
-              { capability =
-                (Rhint (root|deprecated_string_escaping.php line 7, characters 10-15),
-                 (Tunion []))
-                };
+              ft_implicit_params = { capability = (CapDefaults [7:10-16]) };
               ft_ret =
               { et_enforced = false;
                 et_type =

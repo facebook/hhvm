@@ -561,8 +561,7 @@ let default_constructor_ce class_ =
       ft_tparams = [];
       ft_where_constraints = [];
       ft_params = [];
-      ft_implicit_params = { capability = MakeType.default_capability r };
-      (* TODO(coeffects) relate constructor caps to class caps? *)
+      ft_implicit_params = { capability = CapDefaults pos };
       ft_ret = { et_type = MakeType.void r; et_enforced = false };
       ft_flags = 0;
       ft_reactive = Nonreactive;

@@ -33,10 +33,10 @@ use oxidized_by_ref::{
     },
     shape_map::ShapeField,
     typing_defs::{
-        self, ConstDecl, EnumType, FunArity, FunElt, FunImplicitParams, FunParam, FunParams,
-        FunType, IfcFunDecl, ParamMode, ParamMutability, ParamRxAnnotation, PossiblyEnforcedTy,
-        Reactivity, RecordFieldReq, ShapeFieldType, ShapeKind, TaccessType, Tparam, Ty, Ty_,
-        TypeconstAbstractKind, TypedefType, WhereConstraint, XhpAttrTag,
+        self, Capability::*, ConstDecl, EnumType, FunArity, FunElt, FunImplicitParams, FunParam,
+        FunParams, FunType, IfcFunDecl, ParamMode, ParamMutability, ParamRxAnnotation,
+        PossiblyEnforcedTy, Reactivity, RecordFieldReq, ShapeFieldType, ShapeKind, TaccessType,
+        Tparam, Ty, Ty_, TypeconstAbstractKind, TypedefType, WhereConstraint, XhpAttrTag,
     },
     typing_defs_flags::{FunParamFlags, FunTypeFlags},
     typing_reason::Reason,
@@ -255,10 +255,6 @@ const TANY: &Ty<'_> = &Ty(Reason::none(), TANY_);
 
 fn tany() -> &'static Ty<'static> {
     TANY
-}
-
-fn default_capability<'a>(arena: &'a Bump, r: Reason<'a>) -> &'a Ty<'a> {
-    arena.alloc(Ty(arena.alloc(r), Ty_::Tunion(&[])))
 }
 
 fn default_ifc_fun_decl<'a>() -> IfcFunDecl<'a> {
@@ -1416,9 +1412,10 @@ impl<'a> DirectDeclSmartConstructors<'a> {
         capability: Node<'a>,
         default_pos: &'a Pos<'a>,
     ) -> &'a FunImplicitParams<'a> {
-        let capability = self
-            .node_to_ty(capability)
-            .unwrap_or_else(|| default_capability(self.state.arena, Reason::hint(default_pos)));
+        let capability = match self.node_to_ty(capability) {
+            Some(ty) => CapTy(ty),
+            None => CapDefaults(default_pos),
+        };
         self.alloc(FunImplicitParams { capability })
     }
 
@@ -1753,11 +1750,15 @@ impl<'a> DirectDeclSmartConstructors<'a> {
         // type (i.e., pointing to `Rx<(function(): void)>` rather than just
         // `(function(): void)`), so we extend the hint position similarly here.
         let extend_capability_pos = |implicit_params: &'a FunImplicitParams| {
+            let capability = match implicit_params.capability {
+                CapTy(ty) => {
+                    let ty = self.alloc(Ty(self.alloc(Reason::hint(pos)), ty.1));
+                    CapTy(ty)
+                }
+                CapDefaults(p) => CapDefaults(p),
+            };
             self.alloc(FunImplicitParams {
-                capability: self.alloc(Ty(
-                    self.alloc(Reason::hint(pos)),
-                    implicit_params.capability.1,
-                )),
+                capability,
                 ..*implicit_params
             })
         };

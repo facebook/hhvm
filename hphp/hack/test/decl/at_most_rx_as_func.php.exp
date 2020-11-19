@@ -39,10 +39,7 @@
                             }
                           ];
                         ft_implicit_params =
-                        { capability =
-                          (Rhint (root|at_most_rx_as_func.php line 5, characters 24-42),
-                           (Tunion []))
-                          };
+                        { capability = (CapDefaults [5:24-43]) };
                         ft_ret =
                         { et_enforced = false;
                           et_type =
@@ -75,11 +72,7 @@
                    ~ifc_external:false ~ifc_can_call:false ~is_atom:false);
                   }
                ];
-             ft_implicit_params =
-             { capability =
-               (Rhint (root|at_most_rx_as_func.php line 4, characters 10-10),
-                (Tunion []))
-               };
+             ft_implicit_params = { capability = (CapDefaults [4:10-11]) };
              ft_ret =
              { et_enforced = false;
                et_type =

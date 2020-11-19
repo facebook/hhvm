@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<1169b9a4b18d4140df1fad80ae1ee65b>>
+// @generated SignedSource<<e5b43dc6405103097b840aa9083b2f97>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -48,6 +48,17 @@ impl<'a> Node<'a> for BlameSource {
             BlameSource::BSlambda => {}
             BlameSource::BSassignment => {}
             BlameSource::BSoutOfScope => {}
+        }
+    }
+}
+impl<'a> Node<'a> for Capability<'a> {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_capability(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            Capability::CapDefaults(ref __binding_0) => __binding_0.accept(v),
+            Capability::CapTy(ref __binding_0) => __binding_0.accept(v),
         }
     }
 }
@@ -487,6 +498,7 @@ impl<'a> Node<'a> for Reason<'a> {
             Reason::RglobalFunRet(ref __binding_0) => __binding_0.accept(v),
             Reason::Rsplice(ref __binding_0) => __binding_0.accept(v),
             Reason::RetBoolean(ref __binding_0) => __binding_0.accept(v),
+            Reason::RdefaultCapability(ref __binding_0) => __binding_0.accept(v),
         }
     }
 }

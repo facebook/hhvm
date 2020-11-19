@@ -138,12 +138,7 @@ let transform_special_fun_ty fty id nargs =
                    ft_where_constraints = [];
                    ft_params = List.map vars TUtils.default_fun_param;
                    ft_ret = MakeType.unenforced tr;
-                   ft_implicit_params =
-                     {
-                       capability =
-                         MakeType.default_capability
-                           (Reason.Rhint (Reason.to_pos r1));
-                     };
+                   ft_implicit_params = { capability = CapDefaults (fst id) };
                    ft_flags = fty.ft_flags;
                    ft_reactive = fty.ft_reactive;
                    ft_ifc_decl = fty.ft_ifc_decl;

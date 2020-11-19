@@ -15,11 +15,7 @@
            (Tfun
               { ft_arity = (Fstandard ()); ft_tparams = [];
                 ft_where_constraints = []; ft_params = [];
-                ft_implicit_params =
-                { capability =
-                  (Rhint (root|classes_inheritance.php line 4, characters 19-19),
-                   (Tunion []))
-                  };
+                ft_implicit_params = { capability = (CapDefaults [4:19-20]) };
                 ft_ret =
                 { et_enforced = false;
                   et_type =
@@ -40,10 +36,7 @@
                { ft_arity = (Fstandard ()); ft_tparams = [];
                  ft_where_constraints = []; ft_params = [];
                  ft_implicit_params =
-                 { capability =
-                   (Rhint (root|classes_inheritance.php line 5, characters 19-19),
-                    (Tunion []))
-                   };
+                 { capability = (CapDefaults [5:19-20]) };
                  ft_ret =
                  { et_enforced = false;
                    et_type =
@@ -81,10 +74,7 @@
                { ft_arity = (Fstandard ()); ft_tparams = [];
                  ft_where_constraints = []; ft_params = [];
                  ft_implicit_params =
-                 { capability =
-                   (Rhint (root|classes_inheritance.php line 9, characters 19-19),
-                    (Tunion []))
-                   };
+                 { capability = (CapDefaults [9:19-20]) };
                  ft_ret =
                  { et_enforced = false;
                    et_type =
@@ -105,10 +95,7 @@
                 { ft_arity = (Fstandard ()); ft_tparams = [];
                   ft_where_constraints = []; ft_params = [];
                   ft_implicit_params =
-                  { capability =
-                    (Rhint (root|classes_inheritance.php line 10, characters 19-19),
-                     (Tunion []))
-                    };
+                  { capability = (CapDefaults [10:19-20]) };
                   ft_ret =
                   { et_enforced = false;
                     et_type =
@@ -143,10 +130,7 @@
                { ft_arity = (Fstandard ()); ft_tparams = [];
                  ft_where_constraints = []; ft_params = [];
                  ft_implicit_params =
-                 { capability =
-                   (Rhint (root|classes_inheritance.php line 14, characters 19-19),
-                    (Tunion []))
-                   };
+                 { capability = (CapDefaults [14:19-20]) };
                  ft_ret =
                  { et_enforced = false;
                    et_type =
@@ -185,10 +169,7 @@
                { ft_arity = (Fstandard ()); ft_tparams = [];
                  ft_where_constraints = []; ft_params = [];
                  ft_implicit_params =
-                 { capability =
-                   (Rhint (root|classes_inheritance.php line 18, characters 19-19),
-                    (Tunion []))
-                   };
+                 { capability = (CapDefaults [18:19-20]) };
                  ft_ret =
                  { et_enforced = false;
                    et_type =
@@ -226,10 +207,7 @@
                { ft_arity = (Fstandard ()); ft_tparams = [];
                  ft_where_constraints = []; ft_params = [];
                  ft_implicit_params =
-                 { capability =
-                   (Rhint (root|classes_inheritance.php line 22, characters 19-19),
-                    (Tunion []))
-                   };
+                 { capability = (CapDefaults [22:19-20]) };
                  ft_ret =
                  { et_enforced = false;
                    et_type =
@@ -270,10 +248,7 @@
                { ft_arity = (Fstandard ()); ft_tparams = [];
                  ft_where_constraints = []; ft_params = [];
                  ft_implicit_params =
-                 { capability =
-                   (Rhint (root|classes_inheritance.php line 26, characters 19-19),
-                    (Tunion []))
-                   };
+                 { capability = (CapDefaults [26:19-20]) };
                  ft_ret =
                  { et_enforced = false;
                    et_type =

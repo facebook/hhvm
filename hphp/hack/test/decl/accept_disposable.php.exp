@@ -19,11 +19,7 @@
            (Tfun
               { ft_arity = (Fstandard ()); ft_tparams = [];
                 ft_where_constraints = []; ft_params = [];
-                ft_implicit_params =
-                { capability =
-                  (Rhint (root|accept_disposable.php line 5, characters 19-27),
-                   (Tunion []))
-                  };
+                ft_implicit_params = { capability = (CapDefaults [5:19-28]) };
                 ft_ret =
                 { et_enforced = false;
                   et_type =
@@ -44,10 +40,7 @@
                { ft_arity = (Fstandard ()); ft_tparams = [];
                  ft_where_constraints = []; ft_params = [];
                  ft_implicit_params =
-                 { capability =
-                   (Rhint (root|accept_disposable.php line 6, characters 19-21),
-                    (Tunion []))
-                   };
+                 { capability = (CapDefaults [6:19-22]) };
                  ft_ret =
                  { et_enforced = false;
                    et_type =
@@ -85,11 +78,7 @@
                    ~ifc_external:false ~ifc_can_call:false ~is_atom:false);
                   }
                 ];
-              ft_implicit_params =
-              { capability =
-                (Rhint (root|accept_disposable.php line 9, characters 10-10),
-                 (Tunion []))
-                };
+              ft_implicit_params = { capability = (CapDefaults [9:10-11]) };
               ft_ret =
               { et_enforced = false;
                 et_type =

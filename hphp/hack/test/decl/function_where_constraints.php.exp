@@ -69,10 +69,7 @@
                    ];
                  ft_params = [];
                  ft_implicit_params =
-                 { capability =
-                   (Rhint (root|function_where_constraints.php line 7, characters 19-21),
-                    (Tunion []))
-                   };
+                 { capability = (CapDefaults [7:19-22]) };
                  ft_ret =
                  { et_enforced = false;
                    et_type =
@@ -141,10 +138,7 @@
                    ];
                  ft_params = [];
                  ft_implicit_params =
-                 { capability =
-                   (Rhint (root|function_where_constraints.php line 11, characters 19-21),
-                    (Tunion []))
-                   };
+                 { capability = (CapDefaults [11:19-22]) };
                  ft_ret =
                  { et_enforced = false;
                    et_type =

@@ -6,11 +6,7 @@
         (Tfun
            { ft_arity = (Fstandard ()); ft_tparams = [];
              ft_where_constraints = []; ft_params = [];
-             ft_implicit_params =
-             { capability =
-               (Rhint (root|ret_from_kind.php line 3, characters 16-28),
-                (Tunion []))
-               };
+             ft_implicit_params = { capability = (CapDefaults [3:16-29]) };
              ft_ret =
              { et_enforced = false;
                et_type =
@@ -33,11 +29,7 @@
          (Tfun
             { ft_arity = (Fstandard ()); ft_tparams = [];
               ft_where_constraints = []; ft_params = [];
-              ft_implicit_params =
-              { capability =
-                (Rhint (root|ret_from_kind.php line 5, characters 10-26),
-                 (Tunion []))
-                };
+              ft_implicit_params = { capability = (CapDefaults [5:10-27]) };
               ft_ret =
               { et_enforced = false;
                 et_type =
@@ -65,11 +57,7 @@
          (Tfun
             { ft_arity = (Fstandard ()); ft_tparams = [];
               ft_where_constraints = []; ft_params = [];
-              ft_implicit_params =
-              { capability =
-                (Rhint (root|ret_from_kind.php line 9, characters 16-38),
-                 (Tunion []))
-                };
+              ft_implicit_params = { capability = (CapDefaults [9:16-39]) };
               ft_ret =
               { et_enforced = false;
                 et_type =

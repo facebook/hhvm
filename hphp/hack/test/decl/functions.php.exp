@@ -6,11 +6,7 @@
         (Tfun
            { ft_arity = (Fstandard ()); ft_tparams = [];
              ft_where_constraints = []; ft_params = [];
-             ft_implicit_params =
-             { capability =
-               (Rhint (root|functions.php line 3, characters 10-24),
-                (Tunion []))
-               };
+             ft_implicit_params = { capability = (CapDefaults [3:10-25]) };
              ft_ret =
              { et_enforced = false;
                et_type =
@@ -30,11 +26,7 @@
          (Tfun
             { ft_arity = (Fstandard ()); ft_tparams = [];
               ft_where_constraints = []; ft_params = [];
-              ft_implicit_params =
-              { capability =
-                (Rhint (root|functions.php line 4, characters 10-28),
-                 (Tunion []))
-                };
+              ft_implicit_params = { capability = (CapDefaults [4:10-29]) };
               ft_ret =
               { et_enforced = false;
                 et_type =
@@ -54,11 +46,7 @@
          (Tfun
             { ft_arity = (Fstandard ()); ft_tparams = [];
               ft_where_constraints = []; ft_params = [];
-              ft_implicit_params =
-              { capability =
-                (Rhint (root|functions.php line 7, characters 10-34),
-                 (Tunion []))
-                };
+              ft_implicit_params = { capability = (CapDefaults [7:10-35]) };
               ft_ret =
               { et_enforced = false;
                 et_type =
@@ -106,11 +94,7 @@
                     ~ifc_external:false ~ifc_can_call:false ~is_atom:false);
                    }
                 ];
-              ft_implicit_params =
-              { capability =
-                (Rhint (root|functions.php line 11, characters 10-27),
-                 (Tunion []))
-                };
+              ft_implicit_params = { capability = (CapDefaults [11:10-28]) };
               ft_ret =
               { et_enforced = false;
                 et_type =
@@ -153,11 +137,7 @@
                    ~ifc_external:false ~ifc_can_call:false ~is_atom:false);
                   }
                 ];
-              ft_implicit_params =
-              { capability =
-                (Rhint (root|functions.php line 14, characters 10-41),
-                 (Tunion []))
-                };
+              ft_implicit_params = { capability = (CapDefaults [14:10-42]) };
               ft_ret =
               { et_enforced = false;
                 et_type =
@@ -198,11 +178,7 @@
                    ~ifc_external:false ~ifc_can_call:false ~is_atom:false);
                   }
                 ];
-              ft_implicit_params =
-              { capability =
-                (Rhint (root|functions.php line 18, characters 10-25),
-                 (Tunion []))
-                };
+              ft_implicit_params = { capability = (CapDefaults [18:10-26]) };
               ft_ret =
               { et_enforced = false;
                 et_type =
@@ -268,11 +244,7 @@
                     ~ifc_external:false ~ifc_can_call:false ~is_atom:false);
                    }
                 ];
-              ft_implicit_params =
-              { capability =
-                (Rhint (root|functions.php line 22, characters 10-37),
-                 (Tunion []))
-                };
+              ft_implicit_params = { capability = (CapDefaults [22:10-38]) };
               ft_ret =
               { et_enforced = false;
                 et_type =
@@ -292,11 +264,7 @@
          (Tfun
             { ft_arity = (Fstandard ()); ft_tparams = [];
               ft_where_constraints = []; ft_params = [];
-              ft_implicit_params =
-              { capability =
-                (Rhint (root|functions.php line 29, characters 10-29),
-                 (Tunion []))
-                };
+              ft_implicit_params = { capability = (CapDefaults [29:10-30]) };
               ft_ret =
               { et_enforced = false;
                 et_type =
@@ -336,11 +304,7 @@
                    ~ifc_external:false ~ifc_can_call:false ~is_atom:false);
                   }
                 ];
-              ft_implicit_params =
-              { capability =
-                (Rhint (root|functions.php line 33, characters 10-23),
-                 (Tunion []))
-                };
+              ft_implicit_params = { capability = (CapDefaults [33:10-24]) };
               ft_ret =
               { et_enforced = false;
                 et_type =
@@ -375,11 +339,7 @@
                    ~ifc_external:false ~ifc_can_call:false ~is_atom:false);
                   }
                 ];
-              ft_implicit_params =
-              { capability =
-                (Rhint (root|functions.php line 35, characters 10-15),
-                 (Tunion []))
-                };
+              ft_implicit_params = { capability = (CapDefaults [35:10-16]) };
               ft_ret =
               { et_enforced = false;
                 et_type =
@@ -445,10 +405,7 @@
                               }
                             ];
                           ft_implicit_params =
-                          { capability =
-                            (Rhint (root|functions.php line 39, characters 3-22),
-                             (Tunion []))
-                            };
+                          { capability = (CapDefaults [39:3-23]) };
                           ft_ret =
                           { et_enforced = false;
                             et_type =
@@ -468,11 +425,7 @@
                     ~ifc_external:false ~ifc_can_call:false ~is_atom:false);
                    }
                 ];
-              ft_implicit_params =
-              { capability =
-                (Rhint (root|functions.php line 37, characters 10-36),
-                 (Tunion []))
-                };
+              ft_implicit_params = { capability = (CapDefaults [37:10-37]) };
               ft_ret =
               { et_enforced = false;
                 et_type =
@@ -508,10 +461,7 @@
                                      }
                                    ];
                                  ft_implicit_params =
-                                 { capability =
-                                   (Rhint (root|functions.php line 40, characters 14-33),
-                                    (Tunion []))
-                                   };
+                                 { capability = (CapDefaults [40:14-34]) };
                                  ft_ret =
                                  { et_enforced = false;
                                    et_type =
@@ -536,10 +486,7 @@
                           }
                         ];
                       ft_implicit_params =
-                      { capability =
-                        (Rhint (root|functions.php line 40, characters 4-41),
-                         (Tunion []))
-                        };
+                      { capability = (CapDefaults [40:4-42]) };
                       ft_ret =
                       { et_enforced = false;
                         et_type =
@@ -586,11 +533,7 @@
                    ~ifc_external:false ~ifc_can_call:false ~is_atom:false);
                   }
                 ];
-              ft_implicit_params =
-              { capability =
-                (Rhint (root|functions.php line 46, characters 10-27),
-                 (Tunion []))
-                };
+              ft_implicit_params = { capability = (CapDefaults [46:10-28]) };
               ft_ret =
               { et_enforced = false;
                 et_type =
@@ -616,11 +559,7 @@
          (Tfun
             { ft_arity = (Fstandard ()); ft_tparams = [];
               ft_where_constraints = []; ft_params = [];
-              ft_implicit_params =
-              { capability =
-                (Rhint (root|functions.php line 51, characters 10-26),
-                 (Tunion []))
-                };
+              ft_implicit_params = { capability = (CapDefaults [51:10-27]) };
               ft_ret =
               { et_enforced = false;
                 et_type =
@@ -640,11 +579,7 @@
          (Tfun
             { ft_arity = (Fstandard ()); ft_tparams = [];
               ft_where_constraints = []; ft_params = [];
-              ft_implicit_params =
-              { capability =
-                (Rhint (root|functions.php line 54, characters 10-34),
-                 (Tunion []))
-                };
+              ft_implicit_params = { capability = (CapDefaults [54:10-35]) };
               ft_ret =
               { et_enforced = false;
                 et_type =
@@ -664,11 +599,7 @@
          (Tfun
             { ft_arity = (Fstandard ()); ft_tparams = [];
               ft_where_constraints = []; ft_params = [];
-              ft_implicit_params =
-              { capability =
-                (Rhint (root|functions.php line 57, characters 10-32),
-                 (Tunion []))
-                };
+              ft_implicit_params = { capability = (CapDefaults [57:10-33]) };
               ft_ret =
               { et_enforced = false;
                 et_type =
@@ -735,11 +666,7 @@
                     ~ifc_can_call:false ~is_atom:false);
                    }
                 ];
-              ft_implicit_params =
-              { capability =
-                (Rhint (root|functions.php line 60, characters 10-39),
-                 (Tunion []))
-                };
+              ft_implicit_params = { capability = (CapDefaults [60:10-40]) };
               ft_ret =
               { et_enforced = false;
                 et_type =
@@ -770,11 +697,7 @@
          (Tfun
             { ft_arity = (Fstandard ()); ft_tparams = [];
               ft_where_constraints = []; ft_params = [];
-              ft_implicit_params =
-              { capability =
-                (Rhint (root|functions.php line 70, characters 10-13),
-                 (Tunion []))
-                };
+              ft_implicit_params = { capability = (CapDefaults [70:10-14]) };
               ft_ret =
               { et_enforced = false;
                 et_type =
@@ -821,11 +744,7 @@
                    ~ifc_external:false ~ifc_can_call:false ~is_atom:false);
                   }
                 ];
-              ft_implicit_params =
-              { capability =
-                (Rhint (root|functions.php line 74, characters 10-23),
-                 (Tunion []))
-                };
+              ft_implicit_params = { capability = (CapDefaults [74:10-24]) };
               ft_ret =
               { et_enforced = false;
                 et_type =
@@ -860,11 +779,7 @@
                    ~ifc_external:false ~ifc_can_call:false ~is_atom:false);
                   }
                 ];
-              ft_implicit_params =
-              { capability =
-                (Rhint (root|functions.php line 78, characters 10-27),
-                 (Tunion []))
-                };
+              ft_implicit_params = { capability = (CapDefaults [78:10-28]) };
               ft_ret =
               { et_enforced = false;
                 et_type =
@@ -884,11 +799,7 @@
          (Tfun
             { ft_arity = (Fstandard ()); ft_tparams = [];
               ft_where_constraints = []; ft_params = [];
-              ft_implicit_params =
-              { capability =
-                (Rhint (root|functions.php line 82, characters 10-27),
-                 (Tunion []))
-                };
+              ft_implicit_params = { capability = (CapDefaults [82:10-28]) };
               ft_ret =
               { et_enforced = false;
                 et_type =
@@ -923,11 +834,7 @@
                     }
                  ));
               ft_tparams = []; ft_where_constraints = []; ft_params = [];
-              ft_implicit_params =
-              { capability =
-                (Rhint (root|functions.php line 87, characters 10-26),
-                 (Tunion []))
-                };
+              ft_implicit_params = { capability = (CapDefaults [87:10-27]) };
               ft_ret =
               { et_enforced = false;
                 et_type =

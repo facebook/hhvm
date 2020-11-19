@@ -48,10 +48,7 @@
                          }
                        ];
                      ft_implicit_params =
-                     { capability =
-                       (Rhint (root|explicit_type_collection.php line 4, characters 19-29),
-                        (Tunion []))
-                       };
+                     { capability = (CapDefaults [4:19-30]) };
                      ft_ret =
                      { et_enforced = false;
                        et_type =

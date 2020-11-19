@@ -28,3 +28,9 @@ let register_capabilities env (cap_ty : locl_ty) (unsafe_cap_ty : locl_ty) =
   let (env, ty) = Typing_intersection.simplify_intersections env ty in
   (* The implicit argument for ft_implicit_params.capability *)
   (Env.set_local env capability_id ty cap_pos, ty)
+
+let get_type : locl_ty capability -> locl_ty =
+ fun capability ->
+  match capability with
+  | CapTy cap -> cap
+  | CapDefaults p -> Typing_make_type.default_capability (Reason.Rhint p)

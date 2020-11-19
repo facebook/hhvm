@@ -3219,7 +3219,9 @@ and anon_make ?el ?ret_ty env lambda_pos f ft idl is_anon =
             (type_of_type_hint f_cap)
             (type_of_type_hint f_unsafe_cap)
       in
-      let ft = { ft with ft_implicit_params = { capability } } in
+      let ft =
+        { ft with ft_implicit_params = { capability = CapTy capability } }
+      in
       stash_conts_for_anon env lambda_pos is_anon idl (fun env ->
           let env = Env.clear_params env in
           let make_variadic_arg env varg tyl =
@@ -6062,7 +6064,9 @@ and call
           (* Same as above, but checks the types of the implicit arguments, which are
            * read from the context *)
           let check_implicit_args env =
-            let { capability } = ft.ft_implicit_params in
+            let capability =
+              Typing_coeffects.get_type ft.ft_implicit_params.capability
+            in
             if not (TypecheckerOptions.coeffects (Env.get_tcopt env)) then
               env
             else
@@ -6242,12 +6246,7 @@ and call
             let ft_tparams = [] in
             let ft_where_constraints = [] in
             let ft_params = List.map ~f:mk_fun_param type_of_el in
-            let ft_implicit_params =
-              let capability =
-                Typing_make_type.default_capability Reason.Rnone
-              in
-              { capability }
-            in
+            let ft_implicit_params = { capability = CapDefaults pos } in
             let (env, return_ty) = Env.fresh_type env pos in
             let return_ty =
               match in_await with

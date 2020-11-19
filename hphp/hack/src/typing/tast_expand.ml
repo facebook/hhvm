@@ -96,7 +96,12 @@ let expand_ty ?var_hook ?pos env ty =
       fp_flags;
     }
   and exp_fun_implicit_params { capability } =
-    { capability = exp_ty capability }
+    let capability =
+      match capability with
+      | CapTy ty -> CapTy (exp_ty ty)
+      | CapDefaults p -> CapDefaults p
+    in
+    { capability }
   and exp_possibly_enforced_ty { et_type; et_enforced } =
     { et_type = exp_ty et_type; et_enforced }
   and exp_sft { sft_optional; sft_ty } =

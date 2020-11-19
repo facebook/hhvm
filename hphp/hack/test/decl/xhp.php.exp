@@ -65,10 +65,7 @@
                    ~ifc_external:false ~ifc_can_call:false ~is_atom:false);
                   }
                 ];
-              ft_implicit_params =
-              { capability =
-                (Rhint (root|xhp.php line 7, characters 10-32), (Tunion []))
-                };
+              ft_implicit_params = { capability = (CapDefaults [7:10-33]) };
               ft_ret =
               { et_enforced = false;
                 et_type =

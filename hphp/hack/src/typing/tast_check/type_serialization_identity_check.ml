@@ -63,7 +63,14 @@ let rec strip_ty ty =
         }
       in
       let ft_params = List.map ft_params ~f:strip_param in
-      let ft_implicit_params = { capability = strip_ty capability } in
+      let ft_implicit_params =
+        {
+          capability =
+            (match capability with
+            | CapTy cap -> CapTy (strip_ty cap)
+            | CapDefaults p -> CapDefaults p);
+        }
+      in
       let ft_ret = strip_possibly_enforced_ty ft_ret in
       Tfun
         {

@@ -875,7 +875,14 @@ and equal_decl_ft_params params1 params2 =
   List.equal equal_decl_fun_param params1 params2
 
 and equal_decl_ft_implicit_params { capability = cap1 } { capability = cap2 } =
-  equal_decl_ty cap1 cap2
+  (* TODO(coeffects): could rework this so that implicit defaults and explicit
+   * [defaults] are considered equal *)
+  match (cap1, cap2) with
+  | (CapDefaults p1, CapDefaults p2) -> Pos.equal p1 p2
+  | (CapTy c1, CapTy c2) -> equal_decl_ty c1 c2
+  | (CapDefaults _, CapTy _)
+  | (CapTy _, CapDefaults _) ->
+    false
 
 let equal_typeconst_abstract_kind ak1 ak2 =
   match (ak1, ak2) with

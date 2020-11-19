@@ -8,8 +8,8 @@
              ft_where_constraints = []; ft_params = [];
              ft_implicit_params =
              { capability =
-               (Rhint (root|rx_example_provisional.php line 4, characters 16-17),
-                (Tapply (([4:16-18], "\\HH\\Contexts\\rx"), [])))
+               (CapTy (Rhint (root|rx_example_provisional.php line 4, characters 16-17),
+                       (Tapply (([4:16-18], "\\HH\\Contexts\\rx"), []))))
                };
              ft_ret =
              { et_enforced = false;
@@ -32,8 +32,9 @@
               ft_where_constraints = []; ft_params = [];
               ft_implicit_params =
               { capability =
-                (Rhint (root|rx_example_provisional.php line 8, characters 16-23),
-                 (Tapply (([8:16-24], "\\HH\\Contexts\\defaults"), [])))
+                (CapTy (Rhint (root|rx_example_provisional.php line 8, characters 16-23),
+                        (Tapply (([8:16-24], "\\HH\\Contexts\\defaults"), 
+                           []))))
                 };
               ft_ret =
               { et_enforced = false;

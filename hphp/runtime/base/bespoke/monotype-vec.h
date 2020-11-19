@@ -106,15 +106,29 @@ private:
   friend MonotypeVec;
 };
 
+struct TopMonotypeVecLayout : public AbstractLayout {
+  TopMonotypeVecLayout();
+  static LayoutIndex Index();
+};
+
+struct EmptyOrMonotypeVecLayout : public AbstractLayout {
+  explicit EmptyOrMonotypeVecLayout(DataType type);
+  static LayoutIndex Index(DataType type);
+  DataType m_fixedType;
+};
+
 struct EmptyMonotypeVecLayout : public ConcreteLayout {
-  explicit EmptyMonotypeVecLayout(LayoutIndex index);
+  EmptyMonotypeVecLayout();
+  static LayoutIndex Index();
 };
 
 struct MonotypeVecLayout : public ConcreteLayout {
-  MonotypeVecLayout(LayoutIndex index, DataType type);
-  static std::string makeDescription(DataType type);
+  explicit MonotypeVecLayout(DataType type);
+  static LayoutIndex Index(DataType type);
   DataType m_fixedType;
 };
+
+bool isMonotypeVecLayout(LayoutIndex index);
 
 }}
 

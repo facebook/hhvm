@@ -40,12 +40,57 @@ using namespace jit;
 using namespace jit::irgen;
 
 namespace {
+
+std::atomic<size_t> s_topoIndex;
 std::atomic<size_t> s_layoutTableIndex;
 std::array<Layout*, Layout::kMaxIndex.raw + 1> s_layoutTable;
 std::atomic<bool> s_hierarchyFinal = false;
 std::mutex s_layoutCreationMutex;
-size_t s_topoIndex;
+
 constexpr LayoutIndex kBespokeTopIndex = {0};
+
+bool isSingletonLayout(LayoutIndex index) {
+  return index == EmptyMonotypeVecLayout::Index() ||
+         index == EmptyMonotypeDictLayout::Index();
+}
+
+using Split = std::pair<uint16_t, std::vector<uint16_t>>;
+
+// If the list of layout indices contains exactly one singleton layout,
+// returns that layout alone plus the remainder.
+folly::Optional<Split> splitSingletonLayout(
+    const std::vector<uint16_t>& liveVec) {
+  int singleton = -1;
+  std::vector<uint16_t> remainder;
+  for (auto const live : liveVec) {
+    if (isSingletonLayout({live})) {
+      if (singleton >= 0) return folly::none;
+      singleton = live;
+    } else {
+      remainder.push_back(live);
+    }
+  }
+  if (singleton < 0) return folly::none;
+  return folly::make_optional<Split>(safe_cast<uint16_t>(singleton), remainder);
+}
+
+folly::Optional<MaskAndCompare> computeMaskAndCompare(
+    const std::vector<uint16_t>& liveVec,
+    const std::vector<uint16_t>& deadVec) {
+  uint16_t mask = 0xffff;
+  for (auto const live : liveVec) {
+    auto const disagree = live ^ liveVec[0];
+    mask &= ~disagree;
+  }
+  uint16_t base = liveVec[0] & mask;
+  for (auto const dead : deadVec) {
+    if ((dead & mask) == base) {
+      return folly::none;
+    }
+  }
+  return MaskAndCompare{mask, base};
+}
+
 }
 
 Layout::Layout(LayoutIndex index, std::string description, LayoutSet parents)
@@ -169,6 +214,17 @@ const Layout* Layout::nearestBoundDebug(bool upward, const Layout* other) const 
       common.erase(iter);
     }
   }
+
+  SCOPE_ASSERT_DETAIL("bespoke::Layout::nearestBoundDebug") {
+    std::string result = folly::sformat(
+        "Found multiple nodes when computing {} bound for {} and {}:\n",
+        upward ? "an upper" : "a lower", describe(), other->describe());
+    for (auto const item : common) {
+      result += folly::sformat("  {}\n", Layout::FromIndex(item)->describe());
+    }
+    return result;
+  };
+
   assertx(common.size() <= 1);
   if (common.empty()) return nullptr;
   auto const layout = FromIndex(*common.cbegin());
@@ -380,25 +436,18 @@ req::TinyVector<MaskAndCompare, 2> Layout::computeMaskAndCompareSet() const {
 
   auto const checks = [&] () -> req::TinyVector<MaskAndCompare, 2> {
     // 1. Attempt to find a single mask to cover.
-    {
-      uint16_t mask = 0xffff;
-      for (auto const live : liveVec) {
-        auto const disagree = live ^ liveVec[0];
-        mask &= ~disagree;
-      }
-      uint16_t comp = liveVec[0] & mask;
-      bool okay = true;
-      for (auto const dead : deadVec) {
-        if ((dead & mask) == comp) {
-          okay = false;
-          break;
-        }
-      }
-
-      if (okay) return {MaskAndCompare{mask, comp}};
+    if (auto const result = computeMaskAndCompare(liveVec, deadVec)) {
+      return {*result};
     }
 
-    // 2. If we have two children with simple masks, just use them.
+    // 2. See if we can test a "singleton" layout, then mask/compare the rest.
+    if (auto const split = splitSingletonLayout(liveVec)) {
+      if (auto const result = computeMaskAndCompare(split->second, deadVec)) {
+        return {MaskAndCompare::fullCompare(split->first), *result};
+      }
+    }
+
+    // 3. If we have two children with simple masks, just use them.
     if (m_children.size() == 2) {
       auto const& lMask = FromIndex(*m_children.begin())->m_maskAndCompareSet;
       auto const& rMask = FromIndex(*m_children.rbegin())->m_maskAndCompareSet;
@@ -408,7 +457,7 @@ req::TinyVector<MaskAndCompare, 2> Layout::computeMaskAndCompareSet() const {
       }
     }
 
-    // 3. Give up
+    // 4. Give up.
     SCOPE_ASSERT_DETAIL("bespoke::Layout::computeMaskAndCompareSet") {
       std::string ret = folly::sformat("{:04x}: {}\n", m_index.raw, describe());
       ret += folly::sformat("  Live:\n");
@@ -427,13 +476,7 @@ req::TinyVector<MaskAndCompare, 2> Layout::computeMaskAndCompareSet() const {
   }();
 
   if (debug) {
-    // Verify that the mask set is correct
-    for (auto const DEBUG_ONLY dead : deadVec) {
-      for (auto const DEBUG_ONLY check : checks) {
-        assertx(!check.accepts(dead));
-      }
-    }
-
+    // The checks should pass on live values and fail on dead values.
     for (auto const live : liveVec) {
       bool UNUSED satisfied = false;
       for (auto const& check : checks) {
@@ -444,7 +487,13 @@ req::TinyVector<MaskAndCompare, 2> Layout::computeMaskAndCompareSet() const {
       }
       assertx(satisfied);
     }
+    for (auto const DEBUG_ONLY dead : deadVec) {
+      for (auto const DEBUG_ONLY check : checks) {
+        assertx(!check.accepts(dead));
+      }
+    }
 
+    // Every one of the checks is should actually get used.
     for (auto const& check : checks) {
       bool UNUSED satisfied = false;
       for (auto const live : liveVec) {

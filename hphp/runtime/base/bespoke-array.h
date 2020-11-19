@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/data-walker.h"
+#include "hphp/runtime/base/req-tiny-vector.h"
 #include "hphp/runtime/base/typed-value.h"
 
 namespace HPHP {
@@ -33,7 +34,7 @@ inline bool shouldTestBespokeArrayLikes() {
 }
 
 /**
- * An MaskAndCompare consists of a base and a mask. A value v is considered to
+ * A MaskAndCompare consists of a base and a mask. A value v is considered to
  * be pass the check if (v & mask) == base.
  */
 struct MaskAndCompare {
@@ -48,6 +49,8 @@ struct MaskAndCompare {
     return (val & mask) == base;
   }
 };
+
+using MaskAndCompareSet = req::TinyVector<MaskAndCompare,2>;
 
 namespace bespoke {
 

@@ -58,7 +58,7 @@ struct ArrayLayout {
   const bespoke::ConcreteLayout* concreteLayout() const;
   folly::Optional<bespoke::LayoutIndex> layoutIndex() const;
 
-  req::TinyVector<MaskAndCompare, 2> bespokeMaskAndCompareSet() const;
+  MaskAndCompareSet bespokeMaskAndCompareSet() const;
 
   // Return a human-readable debug string describing the layout.
   std::string describe() const;

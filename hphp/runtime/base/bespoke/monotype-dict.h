@@ -204,6 +204,33 @@ private:
   bool isZombie() const;
 };
 
+struct TopMonotypeDictLayout : public AbstractLayout {
+  explicit TopMonotypeDictLayout(KeyTypes kt);
+  static LayoutIndex Index(KeyTypes kt);
+  KeyTypes m_keyType;
+};
+
+struct EmptyOrMonotypeDictLayout : public AbstractLayout {
+  EmptyOrMonotypeDictLayout(KeyTypes kt, DataType type);
+  static LayoutIndex Index(KeyTypes kt, DataType type);
+  KeyTypes m_keyType;
+  DataType m_valType;
+};
+
+struct EmptyMonotypeDictLayout : public ConcreteLayout {
+  explicit EmptyMonotypeDictLayout();
+  static LayoutIndex Index();
+};
+
+struct MonotypeDictLayout : public ConcreteLayout {
+  MonotypeDictLayout(KeyTypes kt, DataType type);
+  static LayoutIndex Index(KeyTypes kt, DataType type);
+  KeyTypes m_keyType;
+  DataType m_valType;
+};
+
+bool isMonotypeDictLayout(const Layout* layout);
+
 ArrayData* MakeMonotypeDictFromVanilla(ArrayData* ad, DataType dt, KeyTypes kt);
 
 }}

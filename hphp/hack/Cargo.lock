@@ -333,6 +333,7 @@ dependencies = [
  "oxidized",
  "parser_core_types",
  "profile_rust",
+ "rewrite_program",
  "stack_limit",
 ]
 
@@ -678,7 +679,6 @@ dependencies = [
 name = "emit_class_rust"
 version = "0.0.0"
 dependencies = [
- "closure_convert_rust",
  "emit_attribute_rust",
  "emit_body_rust",
  "emit_expression_rust",
@@ -929,24 +929,19 @@ name = "emit_program_rust"
 version = "0.0.0"
 dependencies = [
  "bitflags",
- "closure_convert_rust",
  "emit_adata_rust",
- "emit_body_rust",
  "emit_class_rust",
  "emit_constant_rust",
- "emit_fatal_rust",
  "emit_file_attributes_rust",
  "emit_function_rust",
  "emit_record_def_rust",
  "emit_symbol_refs_rust",
  "emit_typedef_rust",
  "env",
- "hhas_body_rust",
  "hhas_program_rust",
  "hhbc_ast_rust",
  "instruction_sequence_rust",
  "ocamlrep",
- "options",
  "oxidized",
 ]
 
@@ -1360,7 +1355,6 @@ name = "hhas_class_rust"
 version = "0.0.0"
 dependencies = [
  "bitflags",
- "closure_convert_rust",
  "hhas_attribute_rust",
  "hhas_constant_rust",
  "hhas_method_rust",
@@ -2427,6 +2421,17 @@ dependencies = [
  "minimal_parser",
  "parser",
  "positioned_parser",
+]
+
+[[package]]
+name = "rewrite_program"
+version = "0.0.0"
+dependencies = [
+ "closure_convert_rust",
+ "emit_fatal_rust",
+ "env",
+ "instruction_sequence_rust",
+ "oxidized",
 ]
 
 [[package]]

@@ -25,6 +25,7 @@ use oxidized::{
 use parser_core_types::{
     indexed_source_text::IndexedSourceText, source_text::SourceText, syntax_error::ErrorType,
 };
+use rewrite_program::rewrite_program;
 use stack_limit::StackLimit;
 
 /// Common input needed for compilation.  Extra care is taken
@@ -160,7 +161,7 @@ where
             // TODO(shiqicao): change opts to Rc<Option> to avoid cloning
             elaborate_namespaces_visitor::elaborate_program(RcOc::clone(&namespace), ast);
             let e = &mut emitter;
-            time(move || emit(e, &env, namespace, ast))
+            time(move || rewrite_and_emit(e, &env, namespace, ast))
         }
         Either::Left((pos, msg, is_runtime_error)) => {
             time(|| emit_fatal(*is_runtime_error, pos, msg))
@@ -191,6 +192,30 @@ where
     } else {
         Ok(None)
     }
+}
+
+fn rewrite_and_emit<'p, S: AsRef<str>>(
+    emitter: &mut Emitter,
+    env: &Env<S>,
+    namespace: RcOc<NamespaceEnv>,
+    ast: &'p mut Tast::Program,
+) -> Result<HhasProgram<'p>, Error> {
+    // First rewrite.
+    let result = rewrite(emitter, ast); // Modifies `ast` in place.
+    match result {
+        Ok(()) => {
+            // Rewrite ok, now emit.
+            emit(emitter, &env, namespace, ast)
+        }
+        Err(Error::IncludeTimeFatalException(op, pos, msg)) => {
+            emit_program::emit_fatal_program(op, &pos, msg)
+        }
+        Err(e) => Err(e),
+    }
+}
+
+fn rewrite<'p>(emitter: &mut Emitter, ast: &'p mut Tast::Program) -> Result<(), Error> {
+    rewrite_program(emitter, ast)
 }
 
 fn emit<'p, S: AsRef<str>>(

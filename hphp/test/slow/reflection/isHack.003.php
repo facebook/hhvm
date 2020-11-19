@@ -6,7 +6,7 @@ class A {
 
 class B extends ReflectionClass {}
 
-function c() {}
+<<__DynamicallyCallable>> function c() {}
 
 
 <<__EntryPoint>>

@@ -74,28 +74,28 @@ function test_all_hints($x) {
   echo "====================================================\n";
   var_dump($x);
   $funs = vec[
-    'takes_keyset1',
-    'takes_keyset2',
-    'takes_keyset3',
-    'takes_keyset4',
-    'takes_container1',
-    'takes_container2',
-    'takes_keyed_container',
-    'takes_traversable',
-    'takes_keyed_traversable',
-    'takes_vec',
-    'takes_dict',
-    'takes_bool',
-    'takes_string',
-    'takes_array1',
-    'takes_array2',
-    'takes_xhp_child',
-    'takes_foo',
-    'takes_vector_container',
-    'takes_map_container',
-    'takes_null',
-    'takes_nonnull',
-    'takes_mixed',
+    takes_keyset1<>,
+    takes_keyset2<>,
+    takes_keyset3<>,
+    takes_keyset4<>,
+    takes_container1<>,
+    takes_container2<>,
+    takes_keyed_container<>,
+    takes_traversable<>,
+    takes_keyed_traversable<>,
+    takes_vec<>,
+    takes_dict<>,
+    takes_bool<>,
+    takes_string<>,
+    takes_array1<>,
+    takes_array2<>,
+    takes_xhp_child<>,
+    takes_foo<>,
+    takes_vector_container<>,
+    takes_map_container<>,
+    takes_null<>,
+    takes_nonnull<>,
+    takes_mixed<>,
    ];
 
   foreach($funs as $fun) {
@@ -112,10 +112,10 @@ function test_keyset_hint($x) {
   echo "====================================================\n";
   var_dump($x);
   $funs = vec[
-    'takes_keyset1',
-    'takes_keyset2',
-    'takes_keyset3',
-    'takes_keyset4',
+    takes_keyset1<>,
+    takes_keyset2<>,
+    takes_keyset3<>,
+    takes_keyset4<>,
   ];
   foreach($funs as $fun) {
     try {

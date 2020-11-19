@@ -80,30 +80,30 @@ function test_all_hints($x) {
   echo "====================================================\n";
   var_dump($x);
   $funs = vec[
-    'takes_vec1',
-    'takes_vec2',
-    'takes_vec3',
-    'takes_container1',
-    'takes_container2',
-    'takes_keyed_container',
-    'takes_traversable',
-    'takes_keyed_traversable',
-    'takes_dict',
-    'takes_keyset',
-    'takes_bool',
-    'takes_string',
-    'takes_array1',
-    'takes_array2',
-    'takes_xhp_child',
-    'takes_foo',
-    'takes_vector_container',
-    'takes_map_container',
-    'takes_null',
-    'takes_nonnull',
-    'takes_mixed',
-    'takes_vec_or_dict1',
-    'takes_vec_or_dict2',
-    'takes_vec_or_dict3',
+    takes_vec1<>,
+    takes_vec2<>,
+    takes_vec3<>,
+    takes_container1<>,
+    takes_container2<>,
+    takes_keyed_container<>,
+    takes_traversable<>,
+    takes_keyed_traversable<>,
+    takes_dict<>,
+    takes_keyset<>,
+    takes_bool<>,
+    takes_string<>,
+    takes_array1<>,
+    takes_array2<>,
+    takes_xhp_child<>,
+    takes_foo<>,
+    takes_vector_container<>,
+    takes_map_container<>,
+    takes_null<>,
+    takes_nonnull<>,
+    takes_mixed<>,
+    takes_vec_or_dict1<>,
+    takes_vec_or_dict2<>,
+    takes_vec_or_dict3<>,
   ];
 
   foreach($funs as $fun) {
@@ -120,12 +120,12 @@ function test_vec_hint($x) {
   echo "====================================================\n";
   var_dump($x);
   $funs = vec[
-    'takes_vec1',
-    'takes_vec2',
-    'takes_vec3',
-    'takes_vec_or_dict1',
-    'takes_vec_or_dict2',
-    'takes_vec_or_dict3',
+    takes_vec1<>,
+    takes_vec2<>,
+    takes_vec3<>,
+    takes_vec_or_dict1<>,
+    takes_vec_or_dict2<>,
+    takes_vec_or_dict3<>,
   ];
   foreach($funs as $fun) {
     try {

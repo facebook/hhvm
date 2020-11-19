@@ -9,7 +9,7 @@
 include('compare_function.inc');
 echo "*** Testing array_uintersect_assoc() : basic functionality - testing with multiple array arguments ***\n";
 
-$data_compare_function = 'compare_function';
+$data_compare_function = compare_function<>;
 
 // Initialise all required variables
 $arr1 = darray["one" => "one", "02" => "two", '3' => "three", 0 => "four", "0.5" => 5, 0 => 6, "0x7" => "seven"];

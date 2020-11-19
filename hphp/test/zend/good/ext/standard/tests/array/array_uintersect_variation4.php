@@ -24,7 +24,7 @@ echo "*** Testing array_uintersect() : usage variation ***\n";
 $arr1 = varray[1, 2];
 $arr2 = varray[1, 2];
 
-$data_compare_function = 'compare_function';
+$data_compare_function = compare_function<>;
 
 //get an unset variable
 $unset_var = 10;

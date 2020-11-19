@@ -1,5 +1,6 @@
 <?hh
 
+<<__DynamicallyCallable>>
 function f1()
 {
     echo "Inside function " . __FUNCTION__ . "\n";

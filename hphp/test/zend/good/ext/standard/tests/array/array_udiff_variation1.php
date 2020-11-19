@@ -23,7 +23,7 @@ echo "*** Testing array_udiff() : usage variation ***\n";
 // Initialise function arguments not being substituted (if any)
 $arr2 = varray[1, 2];
 
-$data_comp_func = 'compare_function';
+$data_comp_func = compare_function<>;
 
 //get an unset variable
 $unset_var = 10;

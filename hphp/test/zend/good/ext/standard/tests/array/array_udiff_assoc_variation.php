@@ -8,7 +8,7 @@
 include('compare_function.inc');
 echo "*** Testing array_udiff_assoc() : variation - testing with multiple array arguments ***\n";
 
-$key_compare_function = 'compare_function';
+$key_compare_function = compare_function<>;
 
 // Initialise all required variables
 $arr1 = darray["one" => "one", "02" => "two", '3' => "three", 0 => "four", "0.5" => 5, 6 => 6, "seven" => "0x7"];

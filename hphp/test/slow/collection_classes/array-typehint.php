@@ -50,16 +50,27 @@ function main() {
     'stdClass' => new stdClass()
   };
   $first = true;
+
+  $funcs = vec[
+    tuple("f1", f1<>),
+    tuple("f2", f2<>),
+    tuple("f3", f3<>),
+    tuple("f4", f4<>),
+    tuple("f5", f5<>),
+    tuple("f6", f6<>),
+    tuple("f7", f7<>),
+    tuple("f8", f8<>),
+  ];
+
   foreach ($containers as $name => $c) {
     echo "==== $name ====\n";
-    for ($i = 1; $i <= 8; ++$i) {
-      $fn = 'f' . $i;
-      echo "$fn:\n";
+    foreach ($funcs as $i => list($name, $fn)) {
+      echo "$name:\n";
       $x = ($c is Collection) ? clone $c : $c;
       try {
-        $i <= 4 ? $fn($x) : $fn(inout $x);
+        $i <= 3 ? $fn($x) : $fn(inout $x);
       } catch (Exception $e) {
-        echo $fn . "() threw an exception\n";
+        echo $name . "() threw an exception\n";
       }
       unset($x);
     }

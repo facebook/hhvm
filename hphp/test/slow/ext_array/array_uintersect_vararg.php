@@ -7,6 +7,6 @@ function main_array_uintersect_vararg() {
   $array2 = darray["a" => "GREEN", "B" => "brown", 0 => "yellow", 1 => "red"];
   $array3 = darray["a" => "grEEN", 0 => "white"];
 
-print_r(array_uintersect($array1, $array2, "strcasecmp"));
-print_r(array_uintersect($array1, $array2, $array3, "strcasecmp"));
+print_r(array_uintersect($array1, $array2, strcasecmp<>));
+print_r(array_uintersect($array1, $array2, $array3, strcasecmp<>));
 }

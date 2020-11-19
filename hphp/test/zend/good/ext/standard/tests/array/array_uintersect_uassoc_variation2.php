@@ -23,8 +23,8 @@ echo "*** Testing array_uintersect_uassoc() : usage variation ***\n";
 // Initialise function arguments not being substituted (if any)
 $arr1 = varray[1, 2];
 
-$data_compare_func = 'compare_function';
-$key_compare_func = 'compare_function';
+$data_compare_func = compare_function<>;
+$key_compare_func = compare_function<>;
 
 //get an unset variable
 $unset_var = 10;

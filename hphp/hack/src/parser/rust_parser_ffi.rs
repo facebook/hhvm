@@ -27,11 +27,11 @@ pub fn parse<'a, ParseFn, Node, State>(
 ) -> UnsafeOcamlPtr
 where
     ParseFn: Fn(
-            &'a Bump,
-            &SourceText<'a>,
-            ParserEnv,
-            Option<&'a StackLimit>,
-        ) -> (Node, Vec<SyntaxError>, State)
+        &'a Bump,
+        &SourceText<'a>,
+        ParserEnv,
+        Option<&'a StackLimit>,
+    ) -> (Node, Vec<SyntaxError>, State)
         + Clone
         + Send
         + Sync

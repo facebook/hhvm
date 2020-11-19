@@ -367,8 +367,8 @@ pub const expected_simple_offset_expression: Error =
 pub const expected_user_attribute: Error = Cow::Borrowed("A user attribute is expected here.");
 pub const expected_as_or_insteadof: Error =
     Cow::Borrowed("The `as` keyword or the `insteadof` keyword is expected here.");
-pub const missing_double_quote : Error = /* error0010 analogue */ Cow::Borrowed(
-  "A double quote is expected here.");
+pub const missing_double_quote: Error = /* error0010 analogue */
+    Cow::Borrowed("A double quote is expected here.");
 pub const instanceof_disabled: Error = Cow::Borrowed(
     "The `instanceof` operator is not supported in Hack; use the `is` operator or `is_a()`",
 );

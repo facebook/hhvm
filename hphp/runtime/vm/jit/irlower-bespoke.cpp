@@ -214,6 +214,9 @@ void cgBespokeEscalateToVanilla(IRLS& env, const IRInstruction* inst) {
 void cgBespokeElem(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
   auto const dest = callDest(env, inst);
+
+  auto args = argGroup(env, inst).ssa(0).ssa(1);
+
   auto const target = [&] {
     auto const arr = inst->src(0);
     auto const key = inst->src(1);
@@ -221,6 +224,7 @@ void cgBespokeElem(IRLS& env, const IRInstruction* inst) {
 
     // Bespoke arrays always have specific Elem helper functions.
     if (layout.bespoke()) {
+      args.ssa(2);
       if (auto const concrete = layout.concreteLayout()) {
         return key->isA(TStr) ? CallSpec::direct(concrete->vtable()->fnElemStr)
                               : CallSpec::direct(concrete->vtable()->fnElemInt);
@@ -250,7 +254,6 @@ void cgBespokeElem(IRLS& env, const IRInstruction* inst) {
       ? CallSpec::direct(throwOnMissing ? elemSD : elemSU)
       : CallSpec::direct(throwOnMissing ? elemID : elemIU);
   }();
-  auto const args = argGroup(env, inst).ssa(0).ssa(1).ssa(2);
   cgCallHelper(v, env, target, dest, SyncOptions::Sync, args);
 }
 

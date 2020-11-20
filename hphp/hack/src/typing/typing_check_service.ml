@@ -228,70 +228,76 @@ let process_file
     (errors : Errors.t)
     (file : check_file_computation) : process_file_results =
   let fn = file.path in
-  let ast = Ast_provider.get_ast ~full:true ctx fn in
-  let opts =
-    {
-      (Provider_context.get_tcopt ctx) with
-      GlobalOptions.tco_dynamic_view =
-        Relative_path.Set.mem dynamic_view_files fn;
-    }
-  in
-  Deferred_decl.reset
-    ~enable:(should_enable_deferring opts file)
-    ~declaration_threshold_opt:
-      (GlobalOptions.tco_defer_class_declaration_threshold opts)
-    ~memory_mb_threshold_opt:
-      (GlobalOptions.tco_defer_class_memory_mb_threshold opts);
-  let (funs, classes, record_defs, typedefs, gconsts) = Nast.get_defs ast in
-  let ctx = Provider_context.map_tcopt ctx ~f:(fun _tcopt -> opts) in
-  let ignore_type_record_def opts fn name =
-    ignore (type_record_def opts fn name)
-  in
-  let ignore_check_typedef opts fn name = ignore (check_typedef opts fn name) in
-  let ignore_check_const opts fn name = ignore (check_const opts fn name) in
-  try
-    let result =
+  let (err, ast) = Ast_provider.get_ast_with_error ~full:true ctx fn in
+  if not (Errors.is_empty err) then
+    { errors = err; deferred_decls = [] }
+  else
+    let opts =
+      {
+        (Provider_context.get_tcopt ctx) with
+        GlobalOptions.tco_dynamic_view =
+          Relative_path.Set.mem dynamic_view_files fn;
+      }
+    in
+    Deferred_decl.reset
+      ~enable:(should_enable_deferring opts file)
+      ~declaration_threshold_opt:
+        (GlobalOptions.tco_defer_class_declaration_threshold opts)
+      ~memory_mb_threshold_opt:
+        (GlobalOptions.tco_defer_class_memory_mb_threshold opts);
+    let (funs, classes, record_defs, typedefs, gconsts) = Nast.get_defs ast in
+    let ctx = Provider_context.map_tcopt ctx ~f:(fun _tcopt -> opts) in
+    let ignore_type_record_def opts fn name =
+      ignore (type_record_def opts fn name)
+    in
+    let ignore_check_typedef opts fn name =
+      ignore (check_typedef opts fn name)
+    in
+    let ignore_check_const opts fn name = ignore (check_const opts fn name) in
+    try
       let result =
-        Errors.do_with_context fn Errors.Typing (fun () ->
-            let (fun_tasts, fun_global_tvenvs) =
-              List.map funs ~f:snd
-              |> List.filter_map ~f:(type_fun ctx fn)
-              |> List.unzip
-            in
-            let (class_tasts, class_global_tvenvs) =
-              List.map classes ~f:snd
-              |> List.filter_map ~f:(type_class ctx fn)
-              |> List.unzip
-            in
-            let class_global_tvenvs = List.concat class_global_tvenvs in
-            List.map record_defs ~f:snd
-            |> List.iter ~f:(ignore_type_record_def ctx fn);
-            List.map typedefs ~f:snd
-            |> List.iter ~f:(ignore_check_typedef ctx fn);
-            List.map gconsts ~f:snd |> List.iter ~f:(ignore_check_const ctx fn);
-            (fun_tasts @ class_tasts, fun_global_tvenvs @ class_global_tvenvs))
+        let result =
+          Errors.do_with_context fn Errors.Typing (fun () ->
+              let (fun_tasts, fun_global_tvenvs) =
+                List.map funs ~f:snd
+                |> List.filter_map ~f:(type_fun ctx fn)
+                |> List.unzip
+              in
+              let (class_tasts, class_global_tvenvs) =
+                List.map classes ~f:snd
+                |> List.filter_map ~f:(type_class ctx fn)
+                |> List.unzip
+              in
+              let class_global_tvenvs = List.concat class_global_tvenvs in
+              List.map record_defs ~f:snd
+              |> List.iter ~f:(ignore_type_record_def ctx fn);
+              List.map typedefs ~f:snd
+              |> List.iter ~f:(ignore_check_typedef ctx fn);
+              List.map gconsts ~f:snd
+              |> List.iter ~f:(ignore_check_const ctx fn);
+              (fun_tasts @ class_tasts, fun_global_tvenvs @ class_global_tvenvs))
+        in
+        (* "Deferments" are files with decls that we need to fetch before we can
+        usefully reattempt the current process_file that we're working on. *)
+        match Deferred_decl.get_deferments () with
+        | [] -> Ok result
+        | deferred_decls -> Error deferred_decls
       in
-      (* "Deferments" are files with decls that we need to fetch before we can
-      usefully reattempt the current process_file that we're working on. *)
-      match Deferred_decl.get_deferments () with
-      | [] -> Ok result
-      | deferred_decls -> Error deferred_decls
-    in
-    match result with
-    | Ok (errors', (tasts, global_tvenvs)) ->
-      if GlobalOptions.tco_global_inference opts then
-        Typing_global_inference.StateSubConstraintGraphs.build_and_save
-          ctx
-          tasts
-          global_tvenvs;
-      { errors = Errors.merge errors' errors; deferred_decls = [] }
-    | Error deferred_decls -> { errors; deferred_decls }
-  with e ->
-    let stack = Caml.Printexc.get_raw_backtrace () in
-    let () =
-      prerr_endline ("Exception on file " ^ Relative_path.S.to_string fn)
-    in
-    Caml.Printexc.raise_with_backtrace e stack
+      match result with
+      | Ok (errors', (tasts, global_tvenvs)) ->
+        if GlobalOptions.tco_global_inference opts then
+          Typing_global_inference.StateSubConstraintGraphs.build_and_save
+            ctx
+            tasts
+            global_tvenvs;
+        { errors = Errors.merge errors' errors; deferred_decls = [] }
+      | Error deferred_decls -> { errors; deferred_decls }
+    with e ->
+      let stack = Caml.Printexc.get_raw_backtrace () in
+      let () =
+        prerr_endline ("Exception on file " ^ Relative_path.S.to_string fn)
+      in
+      Caml.Printexc.raise_with_backtrace e stack
 
 let get_mem_telemetry () : Telemetry.t option =
   if SharedMem.hh_log_level () > 0 then

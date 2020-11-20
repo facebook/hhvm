@@ -50,17 +50,17 @@ module LocalParserCache =
 let parse
     (popt : ParserOptions.t)
     ~(full : bool)
-    ~(keep_errors : bool)
-    ~(source_text : Full_fidelity_source_text.t) : Parser_return.t =
+    ~(source_text : Full_fidelity_source_text.t) : Errors.t * Parser_return.t =
   let path = source_text.Full_fidelity_source_text.file_path in
   let parser_env =
     Full_fidelity_ast.make_env
       ~quick_mode:(not full)
-      ~keep_errors
+      ~keep_errors:true
       ~parser_options:popt
       path
   in
-  let result =
+  let (err, result) =
+    Errors.do_with_context path Errors.Parsing @@ fun () ->
     Full_fidelity_ast.from_source_text_with_legacy parser_env source_text
   in
   let ast = result.Parser_return.ast in
@@ -73,12 +73,13 @@ let parse
     else
       ast
   in
-  { result with Parser_return.ast }
+  (err, { result with Parser_return.ast })
 
 let get_from_local_cache ~full ctx file_name =
+  let with_no_err ast = (Errors.empty, ast) in
   let fn = Relative_path.to_absolute file_name in
   match LocalParserCache.get file_name with
-  | Some ast -> ast
+  | Some ast -> with_no_err ast
   | None ->
     let popt = Provider_context.get_popt ctx in
     let f contents =
@@ -89,23 +90,28 @@ let get_from_local_cache ~full ctx file_name =
           ""
       in
       match Ide_parser_cache.get_ast_if_active popt file_name contents with
-      | Some ast -> ast.Parser_return.ast
+      | Some ast -> with_no_err ast.Parser_return.ast
       | None ->
         let source = Full_fidelity_source_text.make file_name contents in
         (match Full_fidelity_parser.parse_mode source with
-        | None -> []
+        | None -> with_no_err []
         | Some _ ->
           (* It's up to Parsing_service to add parsing errors. *)
-          Errors.ignore_ @@ fun () ->
-          (Full_fidelity_ast.defensive_program
-             ~quick:(not full)
-             popt
-             file_name
-             contents)
-            .Parser_return.ast)
+          let (err, result) =
+            Errors.do_with_context file_name Errors.Parsing @@ fun () ->
+            Full_fidelity_ast.defensive_program
+              ~quick:(not full)
+              popt
+              file_name
+              contents
+          in
+          (err, result.Parser_return.ast))
     in
-    let ast =
-      Option.value_map ~default:[] ~f (File_provider.get_contents file_name)
+    let (err, ast) =
+      Option.value_map
+        ~default:(with_no_err [])
+        ~f
+        (File_provider.get_contents file_name)
     in
     let ast =
       if
@@ -116,8 +122,8 @@ let get_from_local_cache ~full ctx file_name =
       else
         ast
     in
-    let () = if full then LocalParserCache.add file_name ast in
-    ast
+    if full && Errors.is_empty err then LocalParserCache.add file_name ast;
+    (err, ast)
 
 let compute_source_text ~(entry : Provider_context.entry) :
     Full_fidelity_source_text.t =
@@ -146,12 +152,7 @@ let compute_parser_return_and_ast_errors
     (parser_return, ast_errors)
   | _ ->
     let source_text = compute_source_text entry in
-    let (ast_errors, parser_return) =
-      Errors.do_with_context
-        entry.Provider_context.path
-        Errors.Parsing
-        (fun () -> parse popt ~full:true ~keep_errors:true ~source_text)
-    in
+    let (ast_errors, parser_return) = parse popt ~full:true ~source_text in
     entry.Provider_context.ast_errors <- Some ast_errors;
     entry.Provider_context.parser_return <- Some parser_return;
     (parser_return, ast_errors)
@@ -168,12 +169,17 @@ let compute_cst ~(ctx : Provider_context.t) ~(entry : Provider_context.entry) :
     entry.Provider_context.cst <- Some cst;
     cst
 
-let compute_ast ~(popt : ParserOptions.t) ~(entry : Provider_context.entry) :
-    Nast.program =
-  let ({ Parser_return.ast; _ }, _ast_errors) =
+let compute_ast_with_error
+    ~(popt : ParserOptions.t) ~(entry : Provider_context.entry) :
+    Errors.t * Nast.program =
+  let ({ Parser_return.ast; _ }, ast_errors) =
     compute_parser_return_and_ast_errors ~popt ~entry
   in
-  ast
+  (ast_errors, ast)
+
+let compute_ast ~(popt : ParserOptions.t) ~(entry : Provider_context.entry) :
+    Nast.program =
+  compute_ast_with_error ~popt ~entry |> snd
 
 let compute_comments ~(popt : ParserOptions.t) ~(entry : Provider_context.entry)
     : Parser_return.comments =
@@ -314,7 +320,7 @@ let get_gconst defs name =
   in
   get None defs
 
-let get_ast ?(full = false) ctx path =
+let get_ast_with_error ?(full = false) ctx path =
   Counters.count Counters.Category.Get_ast @@ fun () ->
   (* If there's a ctx, and this file is in the ctx, then use ctx. *)
   (* Otherwise, the way we fetch/cache ASTs depends on the provider. *)
@@ -330,7 +336,7 @@ let get_ast ?(full = false) ctx path =
       a partial one. Our principle is that an ctx entry always indicates that
       the file is open in the IDE, and so will benefit from a full AST at
       some time, so we might as well get it now. *)
-    compute_ast (Provider_context.get_popt ctx) entry
+    compute_ast_with_error (Provider_context.get_popt ctx) entry
   | (_, Provider_backend.Shared_memory) ->
     begin
       (* Note that we might be looking up the shared ParserHeap directly, *)
@@ -343,28 +349,26 @@ let get_ast ?(full = false) ctx path =
         get_from_local_cache ~full ctx path
       | (None, false) ->
         (* This is the case where we will write into the parser heap. *)
-        let ast = get_from_local_cache ~full ctx path in
-        ParserHeap.add path (ast, Decl);
-        ast
+        let (err, ast) = get_from_local_cache ~full ctx path in
+        if Errors.is_empty err then ParserHeap.add path (ast, Decl);
+        (err, ast)
       | (Some (ast, _), _) ->
         (* It's in the parser-heap! hurrah! *)
-        ast
+        (Errors.empty, ast)
     end
   | (_, Provider_backend.Local_memory _) ->
     (* We never cache ASTs for this provider. There'd be no use. *)
     (* The only valuable caching is to cache decls. *)
     let contents = Sys_utils.cat (Relative_path.to_absolute path) in
     let source_text = Full_fidelity_source_text.make path contents in
-    let { Parser_return.ast; _ } =
-      parse
-        (Provider_context.get_popt ctx)
-        ~full
-        ~keep_errors:false
-        ~source_text
+    let (err, { Parser_return.ast; _ }) =
+      parse (Provider_context.get_popt ctx) ~full ~source_text
     in
-    ast
+    (err, ast)
   | (_, Provider_backend.Decl_service _) ->
     failwith "Ast_provider.get_ast not supported with decl memory provider"
+
+let get_ast ?(full = false) ctx path = get_ast_with_error ~full ctx path |> snd
 
 let find_class_in_file
     ?(full = false) ?(case_insensitive = false) ctx file_name class_name =

@@ -142,21 +142,22 @@ void emitBespokeLayoutTest(Vout& v, ArrayLayout layout, Vreg r, Vreg sf,
   auto const doneBlock = v.makeBlock();
   v << loadw{r[ArrayData::offsetOfBespokeIndex()], bits};
   for (int i = 0; i < checks.size(); i++) {
-    auto const mask =
-      static_cast<int16_t>(BespokeArray::kExtraMagicBit.raw | checks[i].mask);
-    auto const comp =
-      static_cast<int16_t>(BespokeArray::kExtraMagicBit.raw | checks[i].base);
+    auto const final = i == checks.size() - 1;
+    auto const flags = final ? sf : v.makeReg();
+    auto const extra = BespokeArray::kExtraMagicBit.raw;
+    auto const mask = static_cast<int16_t>(extra | checks[i].mask);
+    auto const base = static_cast<int16_t>(extra | checks[i].base);
     // TODO(mcolavita): mask == 0xff00 should be a special case
     if (mask == 0xffff) {
-      v << cmpwi{comp, bits, sf};
+      v << cmpwi{base, bits, flags};
     } else {
       auto const maskedBits = v.makeReg();
       v << andwi{mask, bits, maskedBits, v.makeReg()};
-      v << cmpwi{comp, maskedBits, sf};
+      v << cmpwi{base, maskedBits, flags};
     }
-    if (i != checks.size() - 1) {
+    if (!final) {
       auto const nextBlock = v.makeBlock();
-      v << jcc{CC_Z, sf, {nextBlock, doneBlock}, StringTag{}};
+      v << jcc{CC_Z, flags, {nextBlock, doneBlock}, StringTag{}};
       v = nextBlock;
     }
   }

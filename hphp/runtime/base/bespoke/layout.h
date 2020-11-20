@@ -372,8 +372,8 @@ struct Layout {
 
   /*
    * Escalate the bespoke array to vanilla. The default implementation invokes
-   * the general BespokeArray implementation. It performs no refcounting
-   * operations.
+   * the general BespokeArray implementation. It consumes a ref on `arr` and
+   * produces a ref on the result.
    */
   virtual SSATmp* emitEscalateToVanilla(
       IRGS& env, SSATmp* arr, const char* reason) const;

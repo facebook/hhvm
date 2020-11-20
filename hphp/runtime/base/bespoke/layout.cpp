@@ -22,6 +22,7 @@
 #include "hphp/runtime/base/bespoke/monotype-vec.h"
 #include "hphp/runtime/base/packed-array-defs.h"
 #include "hphp/runtime/vm/jit/irgen.h"
+#include "hphp/runtime/vm/jit/irgen-internal.h"
 #include "hphp/runtime/vm/jit/mcgen-translate.h"
 #include "hphp/runtime/vm/jit/punt.h"
 #include "hphp/util/trace.h"
@@ -549,7 +550,9 @@ SSATmp* Layout::emitAppend(IRGS& env, SSATmp* arr, SSATmp* val) const {
 SSATmp* Layout::emitEscalateToVanilla(
     IRGS& env, SSATmp* arr, const char* reason) const {
   auto const str = cns(env, makeStaticString(reason));
-  return gen(env, BespokeEscalateToVanilla, arr, str);
+  auto const result = gen(env, BespokeEscalateToVanilla, arr, str);
+  decRef(env, arr);
+  return result;
 }
 
 SSATmp* Layout::emitIterFirstPos(IRGS& env, SSATmp* arr) const {

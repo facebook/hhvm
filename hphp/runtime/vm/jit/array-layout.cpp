@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/base/bespoke/layout.h"
 #include "hphp/runtime/base/bespoke-array.h"
+#include "hphp/runtime/vm/jit/irgen-internal.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 
 namespace HPHP { namespace jit {
@@ -232,7 +233,21 @@ SSATmp* ArrayLayout::emitAppend(IRGS& env, SSATmp* arr, SSATmp* val) const {
 SSATmp* ArrayLayout::emitEscalateToVanilla(
     IRGS& env, SSATmp* arr, const char* reason) const {
   assertx(checkLayoutMatches(*this, arr));
-  return irgenLayout()->emitEscalateToVanilla(env, arr, reason);
+  auto const layout = irgenLayout();
+  if (vanilla()) return arr;
+  if (bespoke()) return layout->emitEscalateToVanilla(env, arr, reason);
+  return cond(
+    env,
+    [&](Block* taken) {
+      return gen(env, CheckType, TVanillaArrLike, taken, arr);
+    },
+    [&](SSATmp* vanilla) { return vanilla; },
+    [&]{
+      auto const type = TArrLike.narrowToLayout(ArrayLayout(layout));
+      auto const bespoke = gen(env, AssertType, type, arr);
+      return layout->emitEscalateToVanilla(env, bespoke, reason);
+    }
+  );
 }
 
 SSATmp* ArrayLayout::emitIterFirstPos(IRGS& env, SSATmp* arr) const {

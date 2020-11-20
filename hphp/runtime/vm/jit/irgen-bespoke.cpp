@@ -462,7 +462,6 @@ void emitBespokeColFromArray(ArrayLayout layout, IRGS& env,
   }
   auto const vanilla = layout.emitEscalateToVanilla(env, arr, "ColFromArray");
   auto const col = gen(env, NewColFromArray, NewColData { type }, vanilla);
-  decRef(env, arr);
   push(env, col);
 }
 

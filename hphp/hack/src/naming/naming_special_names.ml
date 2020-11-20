@@ -822,3 +822,7 @@ module Coeffects = struct
 
   let local_capability = "$#local_capability"
 end
+
+module Capabilities = struct
+  let defaults = "\\HH\\Contexts\\defaults"
+end

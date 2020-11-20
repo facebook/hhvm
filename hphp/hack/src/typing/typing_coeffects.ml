@@ -29,8 +29,12 @@ let register_capabilities env (cap_ty : locl_ty) (unsafe_cap_ty : locl_ty) =
   (* The implicit argument for ft_implicit_params.capability *)
   (Env.set_local env capability_id ty cap_pos, ty)
 
-let get_type : locl_ty capability -> locl_ty =
- fun capability ->
+let get_type :
+    Typing_env_types.env -> locl_ty capability -> Typing_env_types.env * locl_ty
+    =
+ fun env capability ->
   match capability with
-  | CapTy cap -> cap
-  | CapDefaults p -> Typing_make_type.default_capability (Reason.Rhint p)
+  | CapTy cap -> (env, cap)
+  | CapDefaults p ->
+    Typing_make_type.default_capability (Reason.Rhint p)
+    |> Typing_phase.localize_with_self env

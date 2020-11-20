@@ -79,7 +79,10 @@
            param_name = "$_"; param_expr = None; param_callconv = None;
            param_user_attributes = []; param_visibility = None }
          ];
-       f_cap = ((nothing), None); f_unsafe_cap = ((mixed), None);
+       f_cap =
+       (((HH\Capabilities\RxLocal & HH\Capabilities\IO & HH\Capabilities\CippGlobal & HH\Capabilities\Globals & HH\Capabilities\UnrestrictedMutation)),
+        None);
+       f_unsafe_cap = ((mixed), None);
        f_body =
        { fb_ast =
          [([9:3-25],
@@ -121,7 +124,10 @@
           param_name = "$_"; param_expr = None; param_callconv = None;
           param_user_attributes = []; param_visibility = None }
          ];
-       f_cap = ((nothing), None); f_unsafe_cap = ((mixed), None);
+       f_cap =
+       (((HH\Capabilities\RxLocal & HH\Capabilities\IO & HH\Capabilities\CippGlobal & HH\Capabilities\Globals & HH\Capabilities\UnrestrictedMutation)),
+        None);
+       f_unsafe_cap = ((mixed), None);
        f_body =
        { fb_ast =
          [([13:3-25],
@@ -147,7 +153,10 @@
        f_ret = ((void), (Some ([16:18-22], (Hprim Tvoid))));
        f_name = ([16:10-14], "\\test"); f_tparams = [];
        f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
-       f_cap = ((nothing), None); f_unsafe_cap = ((mixed), None);
+       f_cap =
+       (((HH\Capabilities\RxLocal & HH\Capabilities\IO & HH\Capabilities\CippGlobal & HH\Capabilities\Globals & HH\Capabilities\UnrestrictedMutation)),
+        None);
+       f_unsafe_cap = ((mixed), None);
        f_body =
        { fb_ast =
          [([17:3-22],

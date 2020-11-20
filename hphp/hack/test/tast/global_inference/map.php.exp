@@ -11,7 +11,10 @@
          param_expr = None; param_callconv = None;
          param_user_attributes = []; param_visibility = None }
         ];
-      f_cap = ((nothing), None); f_unsafe_cap = ((mixed), None);
+      f_cap =
+      (((HH\Capabilities\RxLocal & HH\Capabilities\IO & HH\Capabilities\CippGlobal & HH\Capabilities\Globals & HH\Capabilities\UnrestrictedMutation)),
+       None);
+      f_unsafe_cap = ((mixed), None);
       f_body =
       { fb_ast =
         [([6:3-18],

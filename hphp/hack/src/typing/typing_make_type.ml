@@ -179,5 +179,4 @@ let simple_variadic_splat r ty =
            } ))
 
 let default_capability r =
-  (* TODO(coeffects) Replace with type alias from HHI *)
-  nothing r
+  apply r (Reason.to_pos r, Naming_special_names.Capabilities.defaults) []

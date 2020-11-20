@@ -13,7 +13,10 @@ Errors:
     { f_span = [3:1-16:2]; f_annotation = (); f_mode = Mstrict;
       f_ret = ((void), (Some ([3:15-19], (Hprim Tvoid))));
       f_name = ([3:10-11], "\\f"); f_tparams = []; f_where_constraints = [];
-      f_variadic = FVnonVariadic; f_params = []; f_cap = ((nothing), None);
+      f_variadic = FVnonVariadic; f_params = [];
+      f_cap =
+      (((HH\Capabilities\RxLocal & HH\Capabilities\IO & HH\Capabilities\CippGlobal & HH\Capabilities\Globals & HH\Capabilities\UnrestrictedMutation)),
+       None);
       f_unsafe_cap = ((mixed), None);
       f_body =
       { fb_ast =
@@ -100,7 +103,10 @@ Errors:
           param_name = "$pattern"; param_expr = None; param_callconv = None;
           param_user_attributes = []; param_visibility = None }
          ];
-       f_cap = ((nothing), None); f_unsafe_cap = ((mixed), None);
+       f_cap =
+       (((HH\Capabilities\RxLocal & HH\Capabilities\IO & HH\Capabilities\CippGlobal & HH\Capabilities\Globals & HH\Capabilities\UnrestrictedMutation)),
+        None);
+       f_unsafe_cap = ((mixed), None);
        f_body =
        { fb_ast =
          [([19:3-25],
@@ -126,7 +132,10 @@ Errors:
        f_ret = ((void), (Some ([24:25-29], (Hprim Tvoid))));
        f_name = ([24:10-21], "\\bad_pattern"); f_tparams = [];
        f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
-       f_cap = ((nothing), None); f_unsafe_cap = ((mixed), None);
+       f_cap =
+       (((HH\Capabilities\RxLocal & HH\Capabilities\IO & HH\Capabilities\CippGlobal & HH\Capabilities\Globals & HH\Capabilities\UnrestrictedMutation)),
+        None);
+       f_unsafe_cap = ((mixed), None);
        f_body =
        { fb_ast =
          [([25:3-34],
@@ -325,7 +334,10 @@ Errors:
        f_ret = ((void), (Some ([46:31-35], (Hprim Tvoid))));
        f_name = ([46:10-27], "\\missing_delimiter"); f_tparams = [];
        f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
-       f_cap = ((nothing), None); f_unsafe_cap = ((mixed), None);
+       f_cap =
+       (((HH\Capabilities\RxLocal & HH\Capabilities\IO & HH\Capabilities\CippGlobal & HH\Capabilities\Globals & HH\Capabilities\UnrestrictedMutation)),
+        None);
+       f_unsafe_cap = ((mixed), None);
        f_body =
        { fb_ast =
          [([47:3-21],
@@ -430,7 +442,10 @@ Errors:
        f_ret = ((void), (Some ([61:35-39], (Hprim Tvoid))));
        f_name = ([61:10-31], "\\parentheses_are_weird"); f_tparams = [];
        f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
-       f_cap = ((nothing), None); f_unsafe_cap = ((mixed), None);
+       f_cap =
+       (((HH\Capabilities\RxLocal & HH\Capabilities\IO & HH\Capabilities\CippGlobal & HH\Capabilities\Globals & HH\Capabilities\UnrestrictedMutation)),
+        None);
+       f_unsafe_cap = ((mixed), None);
        f_body =
        { fb_ast =
          [([64:3-77],

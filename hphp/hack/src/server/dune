@@ -307,6 +307,7 @@
     folly_stubs
     load_script
     lwt
+    hh_builder
     parent
     provider_backend
     security_stubs

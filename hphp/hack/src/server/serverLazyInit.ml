@@ -19,7 +19,10 @@
      Full Parsing -> Naming -> Full Typecheck (with lazy decl)
 *)
 
+(* module Hack_bucket = Bucket *)
 open Hh_prelude
+
+(* module Bucket = Hack_bucket *)
 open GlobalOptions
 open Result.Export
 open Reordered_argument_collections
@@ -876,48 +879,86 @@ let full_init
     |> Telemetry.string_ ~key:"reason" ~value:"lazy_full_init"
   in
   let is_check_mode = ServerArgs.check_mode genv.options in
-  let (env, t) =
-    let res =
-      initialize_naming_table
-        ~do_naming:true
-        "full initialization"
+  let run () =
+    let (env, t) =
+      let res =
+        initialize_naming_table
+          ~do_naming:true
+          "full initialization"
+          genv
+          env
+          profiling
+      in
+      CgroupProfiler.log_to_scuba ~stage:"parsing" ~profiling;
+      CgroupProfiler.log_to_scuba ~stage:"naming" ~profiling;
+      res
+    in
+    if not is_check_mode then
+      SearchServiceRunner.update_fileinfo_map env.naming_table SearchUtils.Init;
+    let fast = Naming_table.to_fast env.naming_table in
+    let failed_parsing = Errors.get_failed_files env.errorl Errors.Parsing in
+    let fast =
+      Relative_path.Set.fold
+        failed_parsing
+        ~f:(fun x m -> Relative_path.Map.remove m x)
+        ~init:fast
+    in
+    let fnl = Relative_path.Map.keys fast in
+    let env =
+      if is_check_mode then
+        start_delegate_if_needed env genv (List.length fnl) env.errorl
+      else
+        env
+    in
+    let typecheck_result =
+      type_check
         genv
         env
-        profiling
+        fnl
+        init_telemetry
+        t
+        ~profile_label:"type check"
+        ~profiling
     in
-    CgroupProfiler.log_to_scuba ~stage:"parsing" ~profiling;
-    CgroupProfiler.log_to_scuba ~stage:"naming" ~profiling;
-    res
+    CgroupProfiler.log_to_scuba ~stage:"type check" ~profiling;
+    typecheck_result
   in
-  if not is_check_mode then
-    SearchServiceRunner.update_fileinfo_map env.naming_table SearchUtils.Init;
-  let fast = Naming_table.to_fast env.naming_table in
-  let failed_parsing = Errors.get_failed_files env.errorl Errors.Parsing in
-  let fast =
-    Relative_path.Set.fold
-      failed_parsing
-      ~f:(fun x m -> Relative_path.Map.remove m x)
-      ~init:fast
+  let run_experiment () =
+    let ctx = Provider_utils.ctx_from_server_env env in
+    let t_full_init = Unix.gettimeofday () in
+    let fast = Direct_decl_service.go ctx genv.workers (fst (indexing genv)) in
+    let t = Hh_logger.log_duration "parsing decl" t_full_init in
+    let naming_table = Naming_table.update_many env.naming_table fast in
+    let t = Hh_logger.log_duration "updating naming table" t in
+    let env = { env with naming_table } in
+    let t = update_files genv env.naming_table ctx t ~profiling in
+    let (env, t) = naming env t ~profile_label:"naming" ~profiling in
+    let fnl = Relative_path.Map.keys fast in
+    if not is_check_mode then
+      SearchServiceRunner.update_fileinfo_map env.naming_table SearchUtils.Init;
+    let type_check_result =
+      type_check
+        genv
+        env
+        fnl
+        init_telemetry
+        t
+        ~profile_label:"type check"
+        ~profiling
+    in
+    Hh_logger.log_duration "full init" t_full_init |> ignore;
+    type_check_result
   in
-  let fnl = Relative_path.Map.keys fast in
-  let env =
-    if is_check_mode then
-      start_delegate_if_needed env genv (List.length fnl) env.errorl
-    else
-      env
-  in
-  let typecheck_result =
-    type_check
-      genv
-      env
-      fnl
-      init_telemetry
-      t
-      ~profile_label:"type check"
-      ~profiling
-  in
-  CgroupProfiler.log_to_scuba ~stage:"type check" ~profiling;
-  typecheck_result
+  if
+    GlobalOptions.tco_use_direct_decl_parser
+      (ServerConfig.parser_options genv.config)
+  then (
+    Hh_logger.log "full init experiment";
+    run_experiment ()
+  ) else (
+    Hh_logger.log "full init";
+    run ()
+  )
 
 let parse_only_init
     (genv : ServerEnv.genv)

@@ -9,4 +9,4 @@
 val direct_decl_parse_and_cache :
   Provider_context.t ->
   Relative_path.t ->
-  (string * Shallow_decl_defs.decl) list option
+  ((string * Shallow_decl_defs.decl) list * FileInfo.mode option) option

@@ -408,3 +408,18 @@
     relative_path
     typing_service_api)
   (preprocess (pps ppx_deriving.std)))
+
+(library
+  (name direct_decl_service)
+  (modules direct_decl_service)
+  (libraries
+    direct_decl_utils
+    direct_decl_parser
+    shallow_decl_defs
+    file_info
+    relative_path
+    typing_defs
+    provider_context
+    utils_find
+    procs_procs)
+  (preprocess (pps ppx_deriving.std)))

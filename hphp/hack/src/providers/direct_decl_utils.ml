@@ -82,7 +82,9 @@ let direct_decl_parse_and_cache ctx file =
   | Some contents ->
     let popt = Provider_context.get_popt ctx in
     let ns_map = ParserOptions.auto_namespace_map popt in
-    let decls = Direct_decl_parser.parse_decls_ffi file contents ns_map in
+    let (decls, mode) =
+      Direct_decl_parser.parse_decls_and_mode_ffi file contents ns_map
+    in
     let deregister_php_stdlib =
       Relative_path.is_hhi (Relative_path.prefix file)
       && ParserOptions.deregister_php_stdlib popt
@@ -119,4 +121,4 @@ let direct_decl_parse_and_cache ctx file =
             | name_and_decl -> Some name_and_decl)
     in
     cache_decls ctx decls;
-    Some decls
+    Some (decls, mode)

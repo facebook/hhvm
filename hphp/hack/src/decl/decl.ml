@@ -57,7 +57,9 @@ let make_env
     ~(sh : SharedMem.uses) (ctx : Provider_context.t) (fn : Relative_path.t) :
     unit =
   if use_direct_decl_parser ctx then
-    let (_ : (string * Shallow_decl_defs.decl) list option) =
+    let (_
+          : ((string * Shallow_decl_defs.decl) list * FileInfo.mode option)
+            option) =
       Direct_decl_utils.direct_decl_parse_and_cache ctx fn
     in
     ()

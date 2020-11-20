@@ -40,3 +40,33 @@ namespace HH\Lib\Regex {
    */
   newtype Pattern<+T as Match> = string;
 }
+
+namespace HH\Lib\_Private\_Regex {
+  /**
+   * Tries to match $pattern in $haystack (starting at $offset). If it matches
+   * then $offset is updated to the start of the match, and a 2-tuple with
+   * the matches and a null error is returned. If it does not match but there
+   * is no error, a 2-tuple with 2 nulls is returned. If there is an error, a
+   * 2-tuple with the error number in the second position is returned.
+   */
+  <<__Pure>>
+  function match<T as \HH\Lib\Regex\Match>(
+    string $haystack,
+    \HH\Lib\Regex\Pattern<T> $pattern,
+    inout int $offset,
+  ): (?T, ?int);
+
+  /**
+   * Tries to match $pattern in $haystack, replacing any matches with
+   * $replacement (with backreference support in the replacement). On success
+   * a 2-tuple with the resulting string and a null error is returned (no
+   * match is a success and returns the $haystack unmodified). On error, a
+   * 2-tuple with the error number in the second position is returned.
+   */
+  <<__Pure>>
+  function replace(
+    string $haystack,
+    \HH\Lib\Regex\Pattern<\HH\Lib\Regex\Match> $pattern,
+    string $replacement,
+  ): (?string, ?int);
+}

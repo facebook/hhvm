@@ -370,7 +370,7 @@ bool PGSQLResult::convertFieldRow(const Variant& row, const Variant& field,
     fn_name = "__internal_pgsql_func";
   }
 
-  if (field.isInitialized()) {
+  if (!field.isNull()) {
     actual_row = row.toInt64();
     actual_field = field;
   } else {

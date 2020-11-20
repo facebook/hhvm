@@ -86,7 +86,7 @@ static char* _readline_command_generator(const char* text, int state) {
 }
 
 static char** readline_completion_cb(const char* text, int start, int end) {
-  if (!s_readline->completion.isInitialized()) {
+  if (s_readline->completion.isNull()) {
     return nullptr;
   }
   char** matches = nullptr;

@@ -243,13 +243,13 @@ bool HHVM_FUNCTION(stream_context_set_option,
     return false;
   }
   if (wrapper_or_options.isArray() &&
-      !option.isInitialized() &&
-      !value.isInitialized()) {
+      option.isNull() &&
+      value.isNull()) {
     return stream_context_set_option0(context, wrapper_or_options.toArray());
   } else if (wrapper_or_options.isString() &&
-             option.isInitialized() &&
+             !option.isNull() &&
              option.isString() &&
-             value.isInitialized()) {
+             !value.isNull()) {
     return stream_context_set_option1(context, wrapper_or_options.toString(),
                                       option.toString(), value);
   } else {

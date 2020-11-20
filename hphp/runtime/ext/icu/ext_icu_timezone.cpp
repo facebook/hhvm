@@ -319,7 +319,7 @@ static Variant HHVM_STATIC_METHOD(IntlTimeZone, createTimeZoneIDEnumeration,
 
   int32_t *pofs = nullptr;
   int32_t   ofs = 0;
-  if (offset.isInitialized()) {
+  if (!offset.isNull()) {
     ofs = offset.toInt64();
     pofs = &ofs;
   }

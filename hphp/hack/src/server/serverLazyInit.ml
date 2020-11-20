@@ -358,8 +358,7 @@ let naming_with_fast
         ~typedefs
         ~consts);
   HackEventLogger.fast_naming_end t;
-  let hs = SharedMem.heap_size () in
-  Hh_logger.log "Heap size: %d" hs;
+  hh_log_heap ();
   Hh_logger.log_duration "Naming fast" t
 
 let naming_from_saved_state

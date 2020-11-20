@@ -7,6 +7,8 @@
  *
  *)
 
+val hh_log_heap : unit -> unit
+
 val indexing : ServerEnv.genv -> Relative_path.t list Bucket.next * float
 
 val parsing :

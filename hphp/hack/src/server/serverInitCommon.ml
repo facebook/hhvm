@@ -11,6 +11,11 @@ open Hh_prelude
 module Bucket = Hack_bucket
 open ServerEnv
 
+let hh_log_heap () =
+  let to_g n = Float.of_int n /. (1024.0 *. 1024.0 *. 1024.0) in
+  let hs = SharedMem.heap_size () in
+  Hh_logger.log "Heap size: %fG" (to_g hs)
+
 let no_incremental_check (options : ServerArgs.options) : bool =
   let in_check_mode = ServerArgs.check_mode options in
   let full_init = Option.is_none (SharedMem.loaded_dep_table_filename ()) in
@@ -60,8 +65,8 @@ let parsing
           env.popt
       in
       let naming_table = Naming_table.update_many env.naming_table fast in
+      hh_log_heap ();
       let hs = SharedMem.heap_size () in
-      Hh_logger.log "Heap size: %d" hs;
       Stats.(stats.init_parsing_heap_size <- hs);
 
       (* The true count of how many files we parsed is wrapped up in the get_next closure.
@@ -121,9 +126,8 @@ let naming
             end
           ~init:env
       in
-      let hs = SharedMem.heap_size () in
-      Hh_logger.log "Heap size: %d" hs;
-      HackEventLogger.global_naming_end t hs;
+      hh_log_heap ();
+      HackEventLogger.global_naming_end t (SharedMem.heap_size ());
       (env, Hh_logger.log_duration "Naming" t))
 
 let is_path_in_range (path : string) (range : ServerArgs.files_to_check_range) :
@@ -222,8 +226,7 @@ let type_check
             files_to_check
             ~check_info:(ServerCheckUtils.get_check_info genv env)
         in
-        let heap_size = SharedMem.heap_size () in
-        Hh_logger.log "Heap size: %d" heap_size;
+        hh_log_heap ();
         let hash_telemetry =
           ServerUtils.log_and_get_sharedmem_load_telemetry ()
         in
@@ -235,7 +238,7 @@ let type_check
         in
         HackEventLogger.type_check_end
           (Some telemetry)
-          ~heap_size
+          ~heap_size:(SharedMem.heap_size ())
           ~started_count:count
           ~count
           ~experiments:genv.local_config.ServerLocalConfig.experiments

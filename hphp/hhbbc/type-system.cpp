@@ -5963,7 +5963,7 @@ std::pair<Type,Type> array_like_newelem(Type arr,
                                         const Type& val,
                                         ProvTag src) {
 
-  if (arr.couldBe(BKeyset)) {
+  if (arr.subtypeOrNull(BKeyset)) {
     auto const key = disect_strict_key(val);
     if (key.type == TBottom) return { TBottom, TInitCell };
     return { array_like_set(std::move(arr), key, key.type, src).first, val };
@@ -5972,10 +5972,13 @@ std::pair<Type,Type> array_like_newelem(Type arr,
   const bool maybeEmpty = arr.couldBe(BArrLikeE);
   const bool isVector = arr.subtypeOrNull(BVec);
   const bool isVArray = arr.subtypeOrNull(BVArr);
-  assertx(isVector == arr.couldBe(BVec));
 
   trep bits = combine_dv_arr_like_bits(arr.bits(), BArrLikeN);
   bits &= ~BArrLikeE;
+
+  // Right now, we always pessimize appends to TArrLike. We can probably do
+  // better if we have a non-trivial DataTag.
+  if (bits & BKeyset) return { Type(bits), TArrKey };
 
   if (!arr.couldBe(BArrLikeN)) {
     assert(maybeEmpty);

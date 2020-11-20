@@ -4503,7 +4503,7 @@ void iopFCallBuiltin(
   }
   Native::callFunc(func, vmfp(), ctx, args, ret, true);
 
-  frame_free_args(args, numNonDefault);
+  frame_free_args(args, numArgs);
   vmStack().ndiscard(numArgs);
   tvCopy(ret, *vmStack().allocTV());
 }

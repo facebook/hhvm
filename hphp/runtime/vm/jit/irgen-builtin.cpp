@@ -647,8 +647,7 @@ SSATmp* opt_is_dict_or_darray(IRGS& env, const ParamPrep& params) {
 
 SSATmp* opt_foldable(IRGS& env,
                      const Func* func,
-                     const ParamPrep& params,
-                     uint32_t numNonDefaultArgs) {
+                     const ParamPrep& params) {
   if (!func->isFoldable()) return nullptr;
 
   // Tag arrprov with the last non-ProvenanceSkipFrame SrcKey in inlineState.
@@ -676,6 +675,7 @@ SSATmp* opt_foldable(IRGS& env,
 
   ArrayData* variadicArgs = nullptr;
   uint32_t numVariadicArgs = 0;
+  auto numNonDefaultArgs = params.size();
   if (numNonDefaultArgs > func->numNonVariadicParams()) {
     assertx(params.size() == func->numParams());
     auto const variadic = params.info.back().value;
@@ -1228,13 +1228,12 @@ bool skipLayoutSensitiveNativeImpl(IRGS& env, const StringData* fname) {
 
 SSATmp* optimizedFCallBuiltin(IRGS& env,
                               const Func* func,
-                              const ParamPrep& params,
-                              uint32_t numNonDefault) {
+                              const ParamPrep& params) {
   auto const result = [&]() -> SSATmp* {
 
     auto const fname = func->fullName();
 
-    if (auto const retVal = opt_foldable(env, func, params, numNonDefault)) {
+    if (auto const retVal = opt_foldable(env, func, params)) {
       // Check if any of the parameters are in-out. If not, we don't
       // need any special handling.
       auto const numInOut = std::count_if(
@@ -1342,7 +1341,7 @@ Type param_target_type(const Func* callee, uint32_t paramIdx) {
 template <class LoadParam>
 ParamPrep
 prepare_params(IRGS& /*env*/, const Func* callee, SSATmp* ctx,
-               uint32_t numArgs, uint32_t numNonDefault, bool forNativeImpl,
+               uint32_t numArgs, bool forNativeImpl,
                LoadParam loadParam) {
   auto ret = ParamPrep{numArgs, callee};
   ret.ctx = ctx;
@@ -1357,7 +1356,7 @@ prepare_params(IRGS& /*env*/, const Func* callee, SSATmp* ctx,
 
     cur.value = loadParam(offset, ty);
     // If ty > TBottom, it had some kind of type hint.
-    cur.needsConversion = (offset < numNonDefault && ty > TBottom);
+    cur.needsConversion = ty > TBottom;
     cur.isInOut = callee->isInOut(offset);
     // We do actually mean exact type equality here.  We're only capable of
     // passing the following primitives through registers; everything else goes
@@ -1802,7 +1801,6 @@ SSATmp* builtinInValue(IRGS& env, const Func* builtin, uint32_t i) {
 SSATmp* builtinCall(IRGS& env,
                     const Func* callee,
                     ParamPrep& params,
-                    int32_t numNonDefault,
                     const CatchMaker& catchMaker) {
   assertx(callee->nativeFuncPtr());
 
@@ -1810,7 +1808,7 @@ SSATmp* builtinCall(IRGS& env,
     // For FCallBuiltin, params are TypedValues, while for NativeImpl, they're
     // pointers to these values on the frame. We only optimize native calls
     // when we have the values.
-    auto const opt = optimizedFCallBuiltin(env, callee, params, numNonDefault);
+    auto const opt = optimizedFCallBuiltin(env, callee, params);
     if (opt) return opt;
 
     /*
@@ -1912,7 +1910,6 @@ SSATmp* builtinCall(IRGS& env,
       spOffBCFromIRSP(env),
       retOff,
       callee,
-      numNonDefault
     },
     catchMaker.makeUnusualCatch(),
     std::make_pair(realized.size(), decayedPtr)
@@ -1947,13 +1944,11 @@ void nativeImplInlined(IRGS& env) {
   auto const numArgs = callee->numParams();
   auto const paramThis = callee->isMethod() ? ldCtx(env) : nullptr;
 
-  auto numNonDefault = fp(env)->inst()->extra<BeginInlining>()->numArgs;
   auto params = prepare_params(
     env,
     callee,
     paramThis,
     numArgs,
-    numNonDefault,
     false,
     [&] (uint32_t i, const Type) {
       return ldLoc(env, i, DataTypeSpecific);
@@ -1968,7 +1963,7 @@ void nativeImplInlined(IRGS& env) {
     &params
   };
 
-  push(env, builtinCall(env, callee, params, numNonDefault, catcher));
+  push(env, builtinCall(env, callee, params, catcher));
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -2037,7 +2032,7 @@ void emitFCallBuiltin(IRGS& env,
 
   auto params = prepare_params(
     env, callee, ctx,
-    numArgs, numNonDefault, false, [&](uint32_t /*i*/, const Type ty) {
+    numArgs, false, [&](uint32_t /*i*/, const Type ty) {
       auto specificity =
         ty == TBottom ? DataTypeGeneric : DataTypeSpecific;
       return pop(env, specificity);
@@ -2049,7 +2044,7 @@ void emitFCallBuiltin(IRGS& env,
     &params
   };
 
-  push(env, builtinCall(env, callee, params, numNonDefault, catcher));
+  push(env, builtinCall(env, callee, params, catcher));
 }
 
 void emitNativeImpl(IRGS& env) {
@@ -2077,7 +2072,6 @@ void emitNativeImpl(IRGS& env) {
     callee,
     ctx,
     callee->numParams(),
-    callee->numParams(),
     true,
     [&] (uint32_t i, const Type) {
       return gen(env, LdLocAddr, LocalId(i), fp(env));
@@ -2089,7 +2083,7 @@ void emitNativeImpl(IRGS& env) {
     &params
   };
 
-  push(env, builtinCall(env, callee, params, callee->numParams(), catcher));
+  push(env, builtinCall(env, callee, params, catcher));
   emitRetC(env);
 }
 

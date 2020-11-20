@@ -768,27 +768,23 @@ struct StFrameMetaData : IRExtraData {
 struct CallBuiltinData : IRExtraData {
   explicit CallBuiltinData(IRSPRelOffset spOffset,
                            folly::Optional<IRSPRelOffset> retSpOffset,
-                           const Func* callee,
-                           int32_t numNonDefault)
+                           const Func* callee)
     : spOffset(spOffset)
     , retSpOffset(retSpOffset)
     , callee{callee}
-    , numNonDefault{numNonDefault}
   {}
 
   std::string show() const {
     return folly::to<std::string>(
       spOffset.offset, ',',
       retSpOffset ? folly::to<std::string>(retSpOffset->offset) : "*", ',',
-      callee->fullName()->data(), ',',
-      numNonDefault
+      callee->fullName()->data()
     );
   }
 
   IRSPRelOffset spOffset; // offset from StkPtr to last passed arg
   folly::Optional<IRSPRelOffset> retSpOffset; // offset from StkPtr after a return
   const Func* callee;
-  int32_t numNonDefault;
 };
 
 struct CallData : IRExtraData {

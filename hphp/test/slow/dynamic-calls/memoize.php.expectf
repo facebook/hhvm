@@ -1,0 +1,49 @@
+====================== positive tests (A) ==================
+
+Notice: 'func1' called dynamically but is not __DynamicallyCallable in %s/test/slow/dynamic-calls/memoize.php on line 17
+
+Notice: 'func1$memoize_impl' called dynamically but is not __DynamicallyCallable in %s/test/slow/dynamic-calls/memoize.php on line 18
+
+Notice: 'func4$memoize_impl' called dynamically but is not __DynamicallyCallable in %s/test/slow/dynamic-calls/memoize.php on line 19
+
+Notice: 'A::func3' called dynamically but is not __DynamicallyCallable in %s/test/slow/dynamic-calls/memoize.php on line 22
+
+Notice: 'A::func3$memoize_impl' called dynamically but is not __DynamicallyCallable in %s/test/slow/dynamic-calls/memoize.php on line 23
+
+Notice: 'A::func3' called dynamically but is not __DynamicallyCallable in %s/test/slow/dynamic-calls/memoize.php on line 27
+
+Notice: 'A::func3$memoize_impl' called dynamically but is not __DynamicallyCallable in %s/test/slow/dynamic-calls/memoize.php on line 28
+
+Notice: 'A::func2' called dynamically but is not __DynamicallyCallable in %s/test/slow/dynamic-calls/memoize.php on line 30
+
+Notice: 'A::func2$memoize_impl' called dynamically but is not __DynamicallyCallable in %s/test/slow/dynamic-calls/memoize.php on line 31
+
+Notice: 'A::func3' called dynamically but is not __DynamicallyCallable in %s/test/slow/dynamic-calls/memoize.php on line 32
+
+Notice: 'A::func3$memoize_impl' called dynamically but is not __DynamicallyCallable in %s/test/slow/dynamic-calls/memoize.php on line 33
+
+Notice: 'A::func3' called dynamically but is not __DynamicallyCallable in %s/test/slow/dynamic-calls/memoize.php on line 36
+
+Notice: 'A::func3' called dynamically but is not __DynamicallyCallable in %s/test/slow/dynamic-calls/memoize.php on line 40
+
+Notice: 'A::func3$memoize_impl' called dynamically but is not __DynamicallyCallable in %s/test/slow/dynamic-calls/memoize.php on line 41
+
+Notice: 'A::func2' called dynamically but is not __DynamicallyCallable in %s/test/slow/dynamic-calls/memoize.php on line 43
+
+Notice: 'A::func2$memoize_impl' called dynamically but is not __DynamicallyCallable in %s/test/slow/dynamic-calls/memoize.php on line 44
+====================== positive tests (B) ==================
+
+Notice: 'func4$memoize_impl' called dynamically but is not __DynamicallyCallable in %s/test/slow/dynamic-calls/memoize.php on line 58
+
+Notice: 'B::func6$memoize_impl' called dynamically but is not __DynamicallyCallable in %s/test/slow/dynamic-calls/memoize.php on line 59
+
+Notice: 'B::func6$memoize_impl' called dynamically but is not __DynamicallyCallable in %s/test/slow/dynamic-calls/memoize.php on line 62
+
+Notice: 'B::func5$memoize_impl' called dynamically but is not __DynamicallyCallable in %s/test/slow/dynamic-calls/memoize.php on line 64
+
+Notice: 'B::func6$memoize_impl' called dynamically but is not __DynamicallyCallable in %s/test/slow/dynamic-calls/memoize.php on line 65
+
+Notice: 'B::func6$memoize_impl' called dynamically but is not __DynamicallyCallable in %s/test/slow/dynamic-calls/memoize.php on line 68
+
+Notice: 'B::func5$memoize_impl' called dynamically but is not __DynamicallyCallable in %s/test/slow/dynamic-calls/memoize.php on line 70
+====================== negative tests ======================

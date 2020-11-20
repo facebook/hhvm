@@ -110,7 +110,7 @@ struct Repo::GlobalData {
   int32_t ForbidDynamicCallsToClsMeth = 0;
   int32_t ForbidDynamicCallsToInstMeth = 0;
   int32_t ForbidDynamicConstructs = 0;
-  bool ForbidDynamicCallsWithAttr = false;
+  bool ForbidDynamicCallsWithAttr = true;
 
   /*
   * If set to true calls to class methods of form $cls::meth() will not be

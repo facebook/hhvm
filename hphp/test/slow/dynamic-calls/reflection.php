@@ -1,7 +1,7 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-function wrap($e) { echo "Exception: {$e->getMessage()}\n"; }
+
 
 function func1() {}
 <<__DynamicallyCallable>> function func4() {}
@@ -18,9 +18,9 @@ class B {
 
 function positive_tests() {
   echo "=========================== positive tests ===================\n";
-  try { (new ReflectionFunction('func1'))->invoke(); } catch (Exception $e) { wrap($e); }
-  try { (new ReflectionMethod('A::func2'))->invoke(new A); } catch (Exception $e) { wrap($e); }
-  try { (new ReflectionMethod('A::func3'))->invoke(new A); } catch (Exception $e) { wrap($e); }
+  (new ReflectionFunction('func1'))->invoke();
+  (new ReflectionMethod('A::func2'))->invoke(new A);
+  (new ReflectionMethod('A::func3'))->invoke(new A);
 }
 
 function negative_tests() {

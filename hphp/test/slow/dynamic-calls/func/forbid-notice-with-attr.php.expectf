@@ -1,0 +1,35 @@
+=============== positive tests =====================
+Exception: 'func' called dynamically but is not __DynamicallyCallable
+Exception: 'async_func' called dynamically but is not __DynamicallyCallable
+Exception: 'func' called dynamically but is not __DynamicallyCallable
+Exception: 'func' called dynamically but is not __DynamicallyCallable
+Exception: 'func' called dynamically but is not __DynamicallyCallable
+Exception: 'func' called dynamically but is not __DynamicallyCallable
+Exception: 'cmp' called dynamically but is not __DynamicallyCallable
+=============== negative tests =====================
+
+Notice: 'count' called dynamically without using a function pointer in %s/forbid-notice-with-attr.php on line %d
+
+Notice: 'count' called dynamically without using a function pointer in %s/forbid-notice-with-attr.php on line %d
+
+Notice: 'count' called dynamically without using a function pointer in %s/forbid-notice-with-attr.php on line %d
+
+Notice: 'count' called dynamically without using a function pointer in %s/forbid-notice-with-attr.php on line %d
+
+Notice: 'count' called dynamically without using a function pointer in %s/forbid-notice-with-attr.php on line %d
+
+Notice: 'array_map' called dynamically without using a function pointer in %s/forbid-notice-with-attr.php on line %d
+
+Notice: 'func2' called dynamically without using a function pointer in %s/forbid-notice-with-attr.php on line %d
+
+Notice: 'async_func2' called dynamically without using a function pointer in %s/forbid-notice-with-attr.php on line %d
+
+Notice: 'func2' called dynamically without using a function pointer in %s/forbid-notice-with-attr.php on line %d
+
+Notice: 'func2' called dynamically without using a function pointer in %s/forbid-notice-with-attr.php on line %d
+
+Notice: 'func2' called dynamically without using a function pointer in %s/forbid-notice-with-attr.php on line %d
+
+Notice: 'func2' called dynamically without using a function pointer in %s/forbid-notice-with-attr.php on line %d
+
+Notice: 'cmp2' called dynamically without using a function pointer in %s/forbid-notice-with-attr.php on line %d

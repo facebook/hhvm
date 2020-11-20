@@ -45,13 +45,15 @@ function test() {
   $a1 = 'A1';
   $flob = 'flob';
 
-  $corge();
-  $a1_obj->$corge();
-  $a1_flob();
-  $a1_corge();
+  try { $corge(); } catch (Exception $e) { wrap($e); }
+  try { $a1_obj->$corge(); } catch (Exception $e) { wrap($e); }
+  try { $a1_flob(); } catch (Exception $e) { wrap($e); }
+  try { $a1_corge(); } catch (Exception $e) { wrap($e); }
 
   echo "======== Not marked dynamic ========\n\n";
 
   HH\dynamic_fun($corge)();
   HH\dynamic_class_meth($a1, $flob)();
 }
+
+function wrap($e) { echo "Exception: {$e->getMessage()}\n"; }

@@ -103,7 +103,8 @@ void emitCallerInOutChecksUnknown(IRGS& env, SSATmp* callee,
 
 void emitCallerDynamicCallChecksKnown(IRGS& env, const Func* callee) {
   assertx(callee);
-  if (callee->isDynamicallyCallable() && !RO::EvalForbidDynamicCallsWithAttr) {
+  auto const dynCallable = callee->isDynamicallyCallable();
+  if (dynCallable && !RO::EvalForbidDynamicCallsWithAttr) {
     return;
   }
   auto const level = callee->isMethod()
@@ -112,6 +113,7 @@ void emitCallerDynamicCallChecksKnown(IRGS& env, const Func* callee) {
         : RO::EvalForbidDynamicCallsToInstMeth)
     : RO::EvalForbidDynamicCallsToFunc;
   if (level <= 0) return;
+  if (dynCallable && level < 2) return;
   gen(env, RaiseForbiddenDynCall, cns(env, callee));
 }
 

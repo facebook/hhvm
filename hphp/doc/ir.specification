@@ -2125,8 +2125,6 @@ To string conversions:
   `ForbidDynamicCallsToClsMeth` and `ForbidDynamicCallsToInstMeth` runtime
   options, either raise a warning or throw an exception indicating that the
   func specified in S0 was called dynamically (and should not be).
-  If `ForbidDynamicCallsWithAttr` is false, warnings and exceptions will not be
-  raised for functions and methods with `__DynamicallyCallable` attribute.
 
 | RaiseForbiddenDynConstruct, ND, S(Cls), NF
 

@@ -1187,14 +1187,12 @@ struct RuntimeOption {
    * Control dynamic calls to functions and dynamic constructs of       \
    * classes which haven't opted into being called that way.            \
    *                                                                    \
-   * 0 - Nothing                                                        \
-   * 1 - Warn if target is not annotated or dynamic callsite is using   \
-   *     a raw string or array                                          \
-   *     (depending on ForbidDynamicCallsWithAttr setting)              \
-   * 2 - Throw exception if target is not annotated, and warn if        \
-   *     dynamic callsite is using a raw string or array                \
+   * 0 - Do nothing                                                     \
+   * 1 - Warn if target is not annotated                                \
+   * 2 - Throw exception if target is not annotated; warn if dynamic    \
+   *     callsite is using a raw string or array (depending on          \
+   *     ForbidDynamicCallsWithAttr setting)                            \
    * 3 - Throw exception                                                \
-   *                                                                    \
    */                                                                   \
   F(int32_t, ForbidDynamicCallsToFunc, 0)                               \
   F(int32_t, ForbidDynamicCallsToClsMeth, 0)                            \
@@ -1204,7 +1202,7 @@ struct RuntimeOption {
    * Keep logging dynamic calls according to options above even if      \
    * __DynamicallyCallable attribute is present at declaration.         \
    */                                                                   \
-  F(bool, ForbidDynamicCallsWithAttr, false)                            \
+  F(bool, ForbidDynamicCallsWithAttr, true)                             \
   /* Toggles logging for expressions of type $var::name() */            \
   F(bool, LogKnownMethodsAsDynamicCalls, true)                          \
   /*                                                                    \

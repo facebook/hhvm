@@ -1,1 +1,1 @@
--vRuntime.Eval.ForbidDynamicCallsToFunc=1 -vRuntime.Eval.ForbidDynamicCallsWithAttr=true
+-vRuntime.Eval.ForbidDynamicCallsToFunc=1

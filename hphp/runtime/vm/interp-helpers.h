@@ -82,6 +82,7 @@ inline void callerDynamicCallChecks(const Func* func,
         : RO::EvalForbidDynamicCallsToInstMeth)
     : RO::EvalForbidDynamicCallsToFunc;
   if (level <= 0) return;
+  if (dynCallable && level < 2) return;
 
   if (auto const rate = func->dynCallSampleRate()) {
     if (folly::Random::rand32(*rate) != 0) return;

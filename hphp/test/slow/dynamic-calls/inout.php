@@ -1,7 +1,7 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-function wrap($e) { echo "Exception: {$e->getMessage()}\n"; }
+
 
 function func1(inout $x) {}
 <<__DynamicallyCallable>> function func4(inout $x) {}
@@ -20,23 +20,23 @@ function positive_tests() {
   echo "====================== positive tests ========================\n";
   $v = 123;
 
-  try { $x = 'func1'; $x(inout $v); } catch (Exception $e) { wrap($e); }
-  try { $x = 'A::func3'; $x(inout $v); } catch (Exception $e) { wrap($e); }
+  $x = 'func1'; $x(inout $v);
+  $x = 'A::func3'; $x(inout $v);
 
-  try { $x = varray['A', 'func3']; $x(inout $v); } catch (Exception $e) { wrap($e); }
+  $x = varray['A', 'func3']; $x(inout $v);
 
-  try { $x = varray[new A, 'func2']; $x(inout $v); } catch (Exception $e) { wrap($e); }
-  try { $x = varray[new A, 'func3']; $x(inout $v); } catch (Exception $e) { wrap($e); }
-
-
-
-  try { $x = 'A'; $x::func3(inout $v); } catch (Exception $e) { wrap($e); }
+  $x = varray[new A, 'func2']; $x(inout $v);
+  $x = varray[new A, 'func3']; $x(inout $v);
 
 
 
-  try { $x = 'func3'; A::$x(inout $v); } catch (Exception $e) { wrap($e); }
+  $x = 'A'; $x::func3(inout $v);
 
-  try { $obj = new A; $x = 'func2'; $obj->$x(inout $v); } catch (Exception $e) { wrap($e); }
+
+
+  $x = 'func3'; A::$x(inout $v);
+
+  $obj = new A; $x = 'func2'; $obj->$x(inout $v);
 
 
 }

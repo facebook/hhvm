@@ -1,1 +1,2 @@
 -vEval.ForbidDynamicCallsToInstMeth=2
+-vEval.ForbidDynamicCallsWithAttr=false

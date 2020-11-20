@@ -1,0 +1,18 @@
+====================== positive tests ========================
+
+Notice: 'func1' called dynamically but is not __DynamicallyCallable in %s/test/slow/dynamic-calls/inout.php on line 23
+
+Notice: 'A::func3' called dynamically but is not __DynamicallyCallable in %s/test/slow/dynamic-calls/inout.php on line 24
+
+Notice: 'A::func3' called dynamically but is not __DynamicallyCallable in %s/test/slow/dynamic-calls/inout.php on line 26
+
+Notice: 'A::func2' called dynamically but is not __DynamicallyCallable in %s/test/slow/dynamic-calls/inout.php on line 28
+
+Notice: 'A::func3' called dynamically but is not __DynamicallyCallable in %s/test/slow/dynamic-calls/inout.php on line 29
+
+Notice: 'A::func3' called dynamically but is not __DynamicallyCallable in %s/test/slow/dynamic-calls/inout.php on line 33
+
+Notice: 'A::func3' called dynamically but is not __DynamicallyCallable in %s/test/slow/dynamic-calls/inout.php on line 37
+
+Notice: 'A::func2' called dynamically but is not __DynamicallyCallable in %s/test/slow/dynamic-calls/inout.php on line 39
+====================== negative tests ========================

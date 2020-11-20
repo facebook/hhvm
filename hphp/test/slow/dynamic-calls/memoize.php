@@ -1,7 +1,7 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-function wrap($e) { echo "Exception: {$e->getMessage()}\n"; }
+
 
 <<__Memoize>> function func1($x) {}
 <<__Memoize, __DynamicallyCallable>> function func4($x) {}
@@ -14,34 +14,34 @@ class A {
     echo "====================== positive tests (A) ==================\n";
     $v = 123;
 
-    try { $x = 'func1'; $x($v); } catch (Exception $e) { wrap($e); }
-    try { $x = 'func1$memoize_impl'; $x($v); } catch (Exception $e) { wrap($e); }
-    try { $x = 'func4$memoize_impl'; $x($v); } catch (Exception $e) { wrap($e); }
-    //try { $x = 'A::func2'; $x($v); } catch (Exception $e) { wrap($e); } // fatal
-    //try { $x = 'A::func2$memoize_impl'; $x($v); } catch (Exception $e) { wrap($e); } // fatal
-    try { $x = 'A::func3'; $x($v); } catch (Exception $e) { wrap($e); }
-    try { $x = 'A::func3$memoize_impl'; $x($v); } catch (Exception $e) { wrap($e); }
+    $x = 'func1'; $x($v);
+    $x = 'func1$memoize_impl'; $x($v);
+    $x = 'func4$memoize_impl'; $x($v);
+    //$x = 'A::func2'; $x($v); // fatal
+    //$x = 'A::func2$memoize_impl'; $x($v); // fatal
+    $x = 'A::func3'; $x($v);
+    $x = 'A::func3$memoize_impl'; $x($v);
 
-    //try { $x = varray['A', 'func2']; $x($v); } catch (Exception $e) { wrap($e); } // fatal
-    //try { $x = varray['A', 'func2$memoize_impl']; $x($v); } catch (Exception $e) { wrap($e); } // fatal
-    try { $x = varray['A', 'func3']; $x($v); } catch (Exception $e) { wrap($e); }
-    try { $x = varray['A', 'func3$memoize_impl']; $x($v); } catch (Exception $e) { wrap($e); }
+    //$x = varray['A', 'func2']; $x($v); // fatal
+    //$x = varray['A', 'func2$memoize_impl']; $x($v); // fatal
+    $x = varray['A', 'func3']; $x($v);
+    $x = varray['A', 'func3$memoize_impl']; $x($v);
 
-    try { $x = varray[new A, 'func2']; $x($v); } catch (Exception $e) { wrap($e); }
-    try { $x = varray[new A, 'func2$memoize_impl']; $x($v); } catch (Exception $e) { wrap($e); }
-    try { $x = varray[new A, 'func3']; $x($v); } catch (Exception $e) { wrap($e); }
-    try { $x = varray[new A, 'func3$memoize_impl']; $x($v); } catch (Exception $e) { wrap($e); }
-
-
-    try { $x = 'A'; $x::func3($v); } catch (Exception $e) { wrap($e); }
+    $x = varray[new A, 'func2']; $x($v);
+    $x = varray[new A, 'func2$memoize_impl']; $x($v);
+    $x = varray[new A, 'func3']; $x($v);
+    $x = varray[new A, 'func3$memoize_impl']; $x($v);
 
 
+    $x = 'A'; $x::func3($v);
 
-    try { $x = 'func3'; A::$x($v); } catch (Exception $e) { wrap($e); }
-    try { $x = 'func3$memoize_impl'; A::$x($v); } catch (Exception $e) { wrap($e); }
 
-    try { $obj = new A; $x = 'func2'; $obj->$x($v); } catch (Exception $e) { wrap($e); }
-    try { $obj = new A; $x = 'func2$memoize_impl'; $obj->$x($v); } catch (Exception $e) { wrap($e); }
+
+    $x = 'func3'; A::$x($v);
+    $x = 'func3$memoize_impl'; A::$x($v);
+
+    $obj = new A; $x = 'func2'; $obj->$x($v);
+    $obj = new A; $x = 'func2$memoize_impl'; $obj->$x($v);
 
 
   }
@@ -55,19 +55,19 @@ class B {
     echo "====================== positive tests (B) ==================\n";
     $v = 123;
 
-    try { $x = 'func4$memoize_impl'; $x($v); } catch (Exception $e) { wrap($e); }
-    try { $x = 'B::func6$memoize_impl'; $x($v); } catch (Exception $e) { wrap($e); }
+    $x = 'func4$memoize_impl'; $x($v);
+    $x = 'B::func6$memoize_impl'; $x($v);
 
-    //try { $x = varray['B', 'func5$memoize_impl']; $x($v); } catch (Exception $e) { wrap($e); } // fatal
-    try { $x = varray['B', 'func6$memoize_impl']; $x($v); } catch (Exception $e) { wrap($e); }
+    //$x = varray['B', 'func5$memoize_impl']; $x($v); // fatal
+    $x = varray['B', 'func6$memoize_impl']; $x($v);
 
-    try { $x = varray[new B, 'func5$memoize_impl']; $x($v); } catch (Exception $e) { wrap($e); }
-    try { $x = varray[new B, 'func6$memoize_impl']; $x($v); } catch (Exception $e) { wrap($e); }
+    $x = varray[new B, 'func5$memoize_impl']; $x($v);
+    $x = varray[new B, 'func6$memoize_impl']; $x($v);
 
 
-    try { $x = 'func6$memoize_impl'; B::$x($v); } catch (Exception $e) { wrap($e); }
+    $x = 'func6$memoize_impl'; B::$x($v);
 
-    try { $obj = new B; $x = 'func5$memoize_impl'; $obj->$x($v); } catch (Exception $e) { wrap($e); }
+    $obj = new B; $x = 'func5$memoize_impl'; $obj->$x($v);
 
   }
 

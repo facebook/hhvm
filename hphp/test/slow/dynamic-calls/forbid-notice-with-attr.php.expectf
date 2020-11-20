@@ -12,14 +12,10 @@ Notice: 'A::foo' called dynamically without using a function pointer in %s/forbi
 
 ======== Not __DynamicallyCallable ========
 
-
-Notice: 'corge' called dynamically but is not __DynamicallyCallable in %s/forbid-notice-with-attr.php on line 48
-
-Notice: 'A1::corge' called dynamically but is not __DynamicallyCallable in %s/forbid-notice-with-attr.php on line 49
-
-Notice: 'A1::flob' called dynamically but is not __DynamicallyCallable in %s/forbid-notice-with-attr.php on line 50
-
-Notice: 'A1::corge' called dynamically but is not __DynamicallyCallable in %s/forbid-notice-with-attr.php on line 51
+Exception: 'corge' called dynamically but is not __DynamicallyCallable
+Exception: 'A1::corge' called dynamically but is not __DynamicallyCallable
+Exception: 'A1::flob' called dynamically but is not __DynamicallyCallable
+Exception: 'A1::corge' called dynamically but is not __DynamicallyCallable
 ======== Not marked dynamic ========
 
 

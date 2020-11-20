@@ -1,0 +1,8 @@
+=========================== positive tests ===================
+
+Notice: 'func1' called dynamically but is not __DynamicallyCallable in %s/test/slow/dynamic-calls/reflection.php on line 21
+
+Notice: 'A::func2' called dynamically but is not __DynamicallyCallable in %s/test/slow/dynamic-calls/reflection.php on line 22
+
+Notice: 'A::func3' called dynamically but is not __DynamicallyCallable in %s/test/slow/dynamic-calls/reflection.php on line 23
+=========================== negative tests ===================

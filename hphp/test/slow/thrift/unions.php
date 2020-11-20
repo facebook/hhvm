@@ -199,14 +199,12 @@ class ComplexUnion {
   $p = new DummyProtocol();
   $v1 = new ComplexUnion();
   $v1->set_stringValue('What is the answer?');
-  thrift_protocol_write_compact($p, 'foomethod', 1, $v1, 20);
-  $p->getTransport()->buff[1] = pack('C', 0x42);
+  thrift_protocol_write_compact($p, 'foomethod', 2, $v1, 20);
   var_dump(thrift_protocol_read_compact($p, 'ComplexUnion'));
 
   $p = new DummyProtocol();
   $v1 = new ComplexUnion();
   $v1->set_intValue(42);
-  thrift_protocol_write_compact($p, 'foomethod', 1, $v1, 20);
-  $p->getTransport()->buff[1] = pack('C', 0x42);
+  thrift_protocol_write_compact($p, 'foomethod', 2, $v1, 20);
   var_dump(thrift_protocol_read_compact($p, 'ComplexUnion'));
 }

@@ -1,35 +1,5 @@
 <?hh
 
-class TProtocolException extends Exception {}
-
-class TType {
-  const STRING = 11;
-}
-
-class DummyProtocol {
-  public $t;
-  function __construct() {
-    $this->t = new DummyTransport();
-  }
-  function getTransport() {
-    return $this->t;
-  }
-}
-
-class DummyTransport {
-  public $buff = '';
-  public $pos = 0;
-  function flush() {}
-  function write($buff) {
-    $this->buff .= $buff;
-  }
-  function read($n) {
-    $r = substr($this->buff, $this->pos, $n);
-    $this->pos += $n;
-    return $r;
-  }
-}
-
 class TestStruct {
   const SPEC = darray[
     1 => darray[
@@ -60,13 +30,13 @@ function test_binary($var) {
 function test_compact($var) {
   $p = new DummyProtocol();
   $v1 = new TestStruct($var);
-  thrift_protocol_write_compact($p, 'foo', 1, $v1, 20);
-  $p->getTransport()->buff[1] = pack('C', 0x42);
+  thrift_protocol_write_compact($p, 'foo', 2, $v1, 20);
   var_dump(thrift_protocol_read_compact($p, 'TestStruct'));
 }
 
 <<__EntryPoint>>
 function test() {
+  require 'common.inc';
   echo "--- binary ---\n";
   _try(() ==> test_binary('asdf'));
   _try(() ==> test_binary(123));

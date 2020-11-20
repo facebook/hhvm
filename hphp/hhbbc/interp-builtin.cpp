@@ -734,9 +734,8 @@ void finish_builtin(ISS& env, const php::Func* func, const FCallArgs& fca) {
         }
         continue;
       }
-      auto cell = pi.defaultValue.m_type == KindOfNull && !pi.builtinType ?
-        make_tv<KindOfUninit>() : pi.defaultValue;
-      repl.emplace_back(gen_constant(cell));
+      assertx(pi.defaultValue.m_type != KindOfUninit);
+      repl.emplace_back(gen_constant(pi.defaultValue));
     }
 
     if (func->params.size() &&

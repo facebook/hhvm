@@ -181,33 +181,17 @@ fn from_ast(
 pub fn emit_param_default_value_setter(
     emitter: &mut Emitter,
     env: &Env,
-    is_native: bool,
     pos: &Pos,
     params: &[HhasParam],
 ) -> Result<(InstrSeq, InstrSeq)> {
     let param_to_setter = |param: &HhasParam| {
-        let (is_optional, is_mixed, is_callable) = match &param.type_info {
-            Some(Info {
-                user_type: Some(s), ..
-            }) => (
-                s.starts_with("?"),
-                s.trim_start_matches("?") == "HH\\mixed",
-                s.trim_start_matches("?") == "callable",
-            ),
-            _ => (false, false, false),
-        };
         param.default_value.as_ref().map(|(lbl, expr)| {
-            let instrs =
-                if is_native && expr.1.is_null() && (is_mixed || (is_optional && is_callable)) {
-                    instr::nop()
-                } else {
-                    InstrSeq::gather(vec![
-                        emit_expression::emit_expr(emitter, env, &expr)?,
-                        emit_pos::emit_pos(pos),
-                        instr::setl(local::Type::Named(param.name.clone())),
-                        instr::popc(),
-                    ])
-                };
+            let instrs = InstrSeq::gather(vec![
+                emit_expression::emit_expr(emitter, env, &expr)?,
+                emit_pos::emit_pos(pos),
+                instr::setl(local::Type::Named(param.name.clone())),
+                instr::popc(),
+            ]);
             Ok(InstrSeq::gather(vec![instr::label(lbl.to_owned()), instrs]))
         })
     };

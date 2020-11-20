@@ -237,13 +237,8 @@ fn make_body_instrs(
         env.do_function(emitter, &body, emit_ast_body)?
     };
 
-    let (begin_label, default_value_setters) = emit_param::emit_param_default_value_setter(
-        emitter,
-        env,
-        flags.contains(Flags::NATIVE),
-        pos,
-        params,
-    )?;
+    let (begin_label, default_value_setters) =
+        emit_param::emit_param_default_value_setter(emitter, env, pos, params)?;
 
     let header_content = make_header_content(
         emitter,

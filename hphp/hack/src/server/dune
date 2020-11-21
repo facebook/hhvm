@@ -304,10 +304,10 @@
     build
     ci_util
     cgroup
+    direct_decl_service
     folly_stubs
     load_script
     lwt
-    hh_builder
     parent
     provider_backend
     security_stubs

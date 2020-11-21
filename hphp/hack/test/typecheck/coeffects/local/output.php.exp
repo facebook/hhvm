@@ -1,0 +1,12 @@
+File "output.php", line 11, characters 3-6:
+`echo` or `print` builtin requires the capability IO, which is not provided by the context. (Typing[4401])
+  File "output.php", line 10, characters 23-24:
+  The local (enclosing) context provides the capability set {}
+File "output.php", line 12, characters 3-6:
+`echo` or `print` builtin requires the capability IO, which is not provided by the context. (Typing[4401])
+  File "output.php", line 10, characters 23-24:
+  The local (enclosing) context provides the capability set {}
+File "output.php", line 16, characters 3-6:
+`echo` or `print` builtin requires the capability IO, which is not provided by the context. (Typing[4401])
+  File "output.php", line 15, characters 23-31:
+  The local (enclosing) context provides the capability NonDet

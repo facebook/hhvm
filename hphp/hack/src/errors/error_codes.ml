@@ -495,9 +495,9 @@ module Typing = struct
     | EllipsisStrictMode [@value 4223]
     | UntypedLambdaStrictMode [@value 4224]
     (* | BindingRefInArrayDEPRECATED [@value 4225] *)
-    | EchoInReactiveContext [@value 4226]
+    | OutputInWrongContext [@value 4226]
     | SuperglobalInReactiveContext [@value 4227]
-    | StaticPropertyInReactiveContext [@value 4228]
+    | StaticPropertyInWrongContext [@value 4228]
     (* | StaticInReactiveContextDEPRECATED [@value 4229] *)
     (* | GlobalInReactiveContextDEPRECATED [@value 4230] *)
     | WrongExpressionKindAttribute [@value 4231]
@@ -669,7 +669,8 @@ module Typing = struct
     | AtomInvalidArgument [@value 4397]
     | IFCInternalError [@value 4398]
     | IFCExternalContravariant [@value 4399]
-    | IFCPolicyMismatch [@value 4400] (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
+    | IFCPolicyMismatch [@value 4400]
+    | OpCoeffects [@value 4401] (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum

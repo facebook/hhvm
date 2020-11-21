@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<1289c3c8eaf8142595ec313036ccaea5>>
+// @generated SignedSource<<e65e3d970d302458bac3822895685ca9>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -421,9 +421,9 @@ pub enum Typing {
     AmbiguousLambda = 4222,
     EllipsisStrictMode = 4223,
     UntypedLambdaStrictMode = 4224,
-    EchoInReactiveContext = 4226,
+    OutputInWrongContext = 4226,
     SuperglobalInReactiveContext = 4227,
-    StaticPropertyInReactiveContext = 4228,
+    StaticPropertyInWrongContext = 4228,
     WrongExpressionKindAttribute = 4231,
     InvalidTypeForOnlyrxIfRxfuncParameter = 4233,
     MissingAnnotationForOnlyrxIfRxfuncParameter = 4234,
@@ -571,6 +571,7 @@ pub enum Typing {
     IFCInternalError = 4398,
     IFCExternalContravariant = 4399,
     IFCPolicyMismatch = 4400,
+    OpCoeffects = 4401,
 }
 impl TrivialDrop for Typing {}
 

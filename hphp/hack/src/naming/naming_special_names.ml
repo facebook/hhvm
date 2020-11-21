@@ -825,4 +825,10 @@ end
 
 module Capabilities = struct
   let defaults = "\\HH\\Contexts\\defaults"
+
+  let prefix = "\\HH\\Capabilities\\"
+
+  let globals = prefix ^ "Globals"
+
+  let io = prefix ^ "IO"
 end

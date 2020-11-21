@@ -2082,6 +2082,12 @@ and expr_
            None ))
       ty
   | Call (e, explicit_targs, el, unpacked_element) ->
+    let env =
+      match snd e with
+      | Id (pos, f) when String.equal f SN.SpecialFunctions.echo ->
+        Typing_local_ops.enforce_output pos env
+      | _ -> env
+    in
     let env = might_throw env in
     let (env, te, ty) =
       check_call
@@ -2270,7 +2276,7 @@ and expr_
       static_class_id ~check_constraints:false cpos env [] cid
     in
     make_result env p (Aast.Class_get (te, Aast.CGstring mid, in_parens)) ty
-  | Class_get ((cpos, cid), CGstring mid, in_parens) ->
+  | Class_get ((cpos, cid), CGstring ((ppos, _) as mid), in_parens) ->
     let (env, _tal, te, cty) =
       static_class_id ~check_constraints:false cpos env [] cid
     in
@@ -2286,6 +2292,7 @@ and expr_
         cid
     in
     let (env, ty) = Env.FakeMembers.check_static_invalid env cid (snd mid) ty in
+    let env = Typing_local_ops.enforce_static_property_access ppos env in
     make_result env p (Aast.Class_get (te, Aast.CGstring mid, in_parens)) ty
   (* Fake member property access. For example:
    *   if ($x->f !== null) { ...$x->f... }
@@ -6085,10 +6092,11 @@ and call
                 (fun ?code:_c _subtype_error_list ->
                   Errors.call_coeffect_error
                     pos
-                    (Typing_defs.get_pos env_capability)
-                    (Typing_print.coeffects env env_capability)
-                    (Typing_defs.get_pos capability)
-                    (Typing_print.coeffects env capability))
+                    ~available_incl_unsafe:
+                      (Typing_print.coeffects env env_capability)
+                    ~available_pos:(Typing_defs.get_pos env_capability)
+                    ~required_pos:(Typing_defs.get_pos capability)
+                    ~required:(Typing_print.coeffects env capability))
           in
 
           (* First check the non-lambda arguments. For generic functions, this

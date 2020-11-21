@@ -3251,12 +3251,6 @@ let untyped_lambda_strict_mode pos =
   in
   add (Typing.err_code Typing.UntypedLambdaStrictMode) pos msg
 
-let echo_in_reactive_context pos =
-  add
-    (Typing.err_code Typing.EchoInReactiveContext)
-    pos
-    "`echo` or `print` are not allowed in reactive functions."
-
 let expected_tparam
     ~use_pos ~definition_pos n (on_error : typing_error_callback option) =
   let errl =
@@ -4187,6 +4181,20 @@ let php_lambda_disallowed pos =
     pos
     "PHP style anonymous functions are not allowed."
 
+module CoeffectEnforcedOp = struct
+  let output pos =
+    add
+      (Typing.err_code Typing.OutputInWrongContext)
+      pos
+      "`echo` or `print` are not allowed in reactive functions."
+
+  let static_property_access pos =
+    add
+      (Typing.err_code Typing.StaticPropertyInWrongContext)
+      pos
+      "Static property cannot be used in a reactive context."
+end
+
 (*****************************************************************************)
 (* Typing decl errors *)
 (*****************************************************************************)
@@ -4890,12 +4898,6 @@ let superglobal_in_reactive_context pos name =
     ^ Markdown_lite.md_codify name
     ^ " cannot be used in a reactive context." )
 
-let static_property_in_reactive_context pos =
-  add
-    (Typing.err_code Typing.StaticPropertyInReactiveContext)
-    pos
-    "Static property cannot be used in a reactive context."
-
 let returns_void_to_rx_function_as_non_expression_statement pos fpos =
   add_list
     (Typing.err_code Typing.ReturnsVoidToRxAsNonExpressionStatement)
@@ -5399,17 +5401,29 @@ let enum_inclusion_not_enum
     ]
 
 let call_coeffect_error
-    call_pos pos_env_capability env_capability pos_capability capability =
+    ~available_incl_unsafe ~available_pos ~required ~required_pos call_pos =
   add_list
     (Typing.err_code Typing.CallCoeffects)
     [
       ( call_pos,
         "This call is not allowed because its coeffects are incompatible with the context"
       );
-      ( pos_env_capability,
+      ( available_pos,
         "From this declaration, the context of this function body provides "
-        ^ env_capability );
-      (pos_capability, "But the function being called requires " ^ capability);
+        ^ available_incl_unsafe );
+      (required_pos, "But the function being called requires " ^ required);
+    ]
+
+let op_coeffect_error
+    ~locally_available ~available_pos ~err_code ~required op op_pos =
+  add_list
+    err_code
+    [
+      ( op_pos,
+        op ^ " requires " ^ required ^ ", which is not provided by the context."
+      );
+      ( available_pos,
+        "The local (enclosing) context provides " ^ locally_available );
     ]
 
 let abstract_function_pointer cname meth_name call_pos decl_pos =

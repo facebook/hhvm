@@ -1068,8 +1068,6 @@ val inout_params_memoize : Pos.t -> Pos.t -> unit
 
 val obj_set_reactive : Pos.t -> unit
 
-val static_property_in_reactive_context : Pos.t -> unit
-
 val inout_annotation_missing : Pos.t -> Pos.t -> unit
 
 val inout_annotation_unexpected : Pos.t -> Pos.t -> bool -> unit
@@ -1110,8 +1108,6 @@ val multiple_conditionally_reactive_annotations : Pos.t -> string -> unit
 
 val conditionally_reactive_annotation_invalid_arguments :
   is_method:bool -> Pos.t -> unit
-
-val echo_in_reactive_context : Pos.t -> unit
 
 val superglobal_in_reactive_context : Pos.t -> string -> unit
 
@@ -1402,7 +1398,32 @@ val incompatible_enum_inclusion_constraint : Pos.t -> string -> string -> unit
 
 val enum_inclusion_not_enum : Pos.t -> string -> string -> unit
 
-val call_coeffect_error : Pos.t -> Pos.t -> string -> Pos.t -> string -> unit
+val call_coeffect_error :
+  available_incl_unsafe:string ->
+  available_pos:Pos.t ->
+  required:string ->
+  required_pos:Pos.t ->
+  Pos.t ->
+  unit
+
+val op_coeffect_error :
+  locally_available:string ->
+  available_pos:Pos.t ->
+  err_code:int ->
+  required:string ->
+  string ->
+  Pos.t ->
+  unit
+
+module CoeffectEnforcedOp : sig
+  (* Note: All these errors will be migrated to use `op_coeffect_error` once
+  coeffects are globally enabled and Rx/Pure attributes desugar to contexts.
+  The respective error code enum values have the suffix `InWrongContext`. *)
+
+  val output : Pos.t -> unit
+
+  val static_property_access : Pos.t -> unit
+end
 
 val abstract_function_pointer : string -> string -> Pos.t -> Pos.t -> unit
 

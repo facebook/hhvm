@@ -436,6 +436,8 @@ void publishOptFuncCode(FuncMetaInfo& info,
   size_t prologueIdx = 0;
   size_t translationIdx = 0;
 
+  auto const fcallHelperStub = jit::tc::ustubs().fcallHelperThunk;
+
   for (auto kind : info.order) {
     switch (kind) {
       case FuncMetaInfo::Kind::Prologue: {
@@ -450,6 +452,11 @@ void publishOptFuncCode(FuncMetaInfo& info,
           assertx(succeeded);
           smashFuncCallers(tca, rec);
           if (succeeded && publishedSet) publishedSet->insert(tca);
+        } else {
+          // If we failed to emit the prologue (e.g. the TC filled up), redirect
+          // all the callers to the fcallHelperThunk so that they stop calling
+          // the profile code.
+          smashFuncCallers(fcallHelperStub, rec);
         }
         prologueIdx++;
         break;

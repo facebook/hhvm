@@ -296,7 +296,7 @@ bool in(StatsSS& env, const bc::FCallBuiltin& op) {
 
   default_dispatch(env, op);
 
-  auto builtin = op.str4;
+  auto builtin = op.str3;
   {
     BuiltinInfo::accessor acc;
     auto inserted = env.stats.builtins.builtinsInfo.insert(acc, builtin);

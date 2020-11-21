@@ -771,9 +771,9 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
     while (idx < numPops) m_tmp_sig[idx++] = CV;
     return m_tmp_sig;
   }
-  case Op::FCallBuiltin: { //TWO(IVA, SA), CALLNATIVE,  CALLNATIVE
+  case Op::FCallBuiltin: { //THREE(IVA, IVA, SA), CALLNATIVE,  CALLNATIVE
     auto const nargs = getImm(pc, 0).u_IVA;
-    auto const nout  = getImm(pc, 2).u_IVA;
+    auto const nout  = getImm(pc, 1).u_IVA;
     assertx(instrNumPops(pc) == nargs + nout);
     for (int i = 0; i < nout; ++i) {
       m_tmp_sig[i] = UV;

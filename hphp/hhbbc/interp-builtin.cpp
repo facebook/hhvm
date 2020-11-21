@@ -38,10 +38,6 @@ namespace {
 bool builtin_get_class(ISS& env, const bc::FCallBuiltin& op) {
   if (op.arg1 != 1) return false;
   auto const ty = topT(env);
-  if (op.arg2 == 0) {
-    // Support for get_class() is being removed.
-    return false;
-  }
 
   if (!ty.subtypeOf(BObj)) return false;
 
@@ -259,7 +255,7 @@ bool builtin_array_key_cast(ISS& env, const bc::FCallBuiltin& op) {
 
 bool builtin_is_callable(ISS& env, const bc::FCallBuiltin& op) {
   // Do not handle syntax-only checks or name output.
-  if (op.arg1 != 1 && (op.arg1 != 2 || topC(env) != TFalse)) return false;
+  if (op.arg1 != 1 && topC(env) != TFalse) return false;
   auto const ty = topC(env, 1);
   if (ty == TInitCell) return false;
   auto const res = [&]() -> folly::Optional<bool> {
@@ -513,7 +509,7 @@ bool builtin_shapes_idx(ISS& env, const bc::FCallBuiltin& op) {
 #undef X
 
 bool handle_builtin(ISS& env, const bc::FCallBuiltin& op) {
-#define X(x, y) if (op.str4->isame(s_##x.get())) return builtin_##x(env, op);
+#define X(x, y) if (op.str3->isame(s_##x.get())) return builtin_##x(env, op);
   SPECIAL_BUILTINS
 #undef X
 
@@ -527,7 +523,7 @@ bool handle_builtin(ISS& env, const bc::FCallBuiltin& op) {
 namespace interp_step {
 
 void in(ISS& env, const bc::FCallBuiltin& op) {
-  auto const name = op.str4;
+  auto const name = op.str3;
   auto const func = env.index.resolve_func(env.ctx, name);
   auto const exactFunc = func.exactFunc();
 
@@ -556,7 +552,7 @@ void in(ISS& env, const bc::FCallBuiltin& op) {
 
       // If there's no in-out parameters, we're done and can just push
       // the result.
-      if (!op.arg3) {
+      if (!op.arg2) {
         if (needsRuntimeProvenance) {
           BytecodeVec repl;
           popInArgs(repl);
@@ -579,18 +575,18 @@ void in(ISS& env, const bc::FCallBuiltin& op) {
       assertx(tvIsHAMSafeVArray(*v));
       auto const ad = v->m_data.parr;
       assertx(ad->isStatic());
-      assertx(ad->size() == op.arg3 + 1);
+      assertx(ad->size() == op.arg2 + 1);
 
       BytecodeVec repl;
       popInArgs(repl);
 
       // Pop the placeholder uninit values
-      for (uint32_t i = 0; i < op.arg3; ++i) {
+      for (uint32_t i = 0; i < op.arg2; ++i) {
         repl.push_back(bc::PopU {});
       }
       // Push the in-out returns
-      for (uint32_t i = 0; i < op.arg3; ++i) {
-        repl.push_back(gen_constant(ad->nvGetVal(op.arg3 - i)));
+      for (uint32_t i = 0; i < op.arg2; ++i) {
+        repl.push_back(gen_constant(ad->nvGetVal(op.arg2 - i)));
       }
       // Push the actual result, tagging it in ProvenanceSkipFrame functions.
       repl.push_back(gen_constant(ad->nvGetVal(0)));
@@ -636,7 +632,7 @@ void in(ISS& env, const bc::FCallBuiltin& op) {
     return *precise_ty;
   }();
 
-  auto const num_out = op.arg3;
+  auto const num_out = op.arg2;
   for (auto i = uint32_t{0}; i < num_args + num_out; ++i) popT(env);
 
   for (auto i = num_out; i > 0; --i) {
@@ -757,13 +753,13 @@ void finish_builtin(ISS& env, const php::Func* func, const FCallArgs& fca) {
   auto const numParams = static_cast<uint32_t>(func->params.size());
   if (func->cls == nullptr) {
     repl.emplace_back(
-      bc::FCallBuiltin { numParams, numArgs, fca.numRets() - 1, func->name });
+      bc::FCallBuiltin { numParams, fca.numRets() - 1, func->name });
   } else {
     assertx(func->attrs & AttrStatic);
     auto const fullname =
       makeStaticString(folly::sformat("{}::{}", func->cls->name, func->name));
     repl.emplace_back(
-      bc::FCallBuiltin { numParams, numArgs, fca.numRets() - 1, fullname });
+      bc::FCallBuiltin { numParams, fca.numRets() - 1, fullname });
   }
   if (fca.numRets() != 1) {
     repl.emplace_back(bc::PopFrame { fca.numRets() });

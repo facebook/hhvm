@@ -2018,7 +2018,6 @@ SSATmp* optimizedCallIsObject(IRGS& env, SSATmp* src) {
 
 void emitFCallBuiltin(IRGS& env,
                       uint32_t numArgs,
-                      uint32_t numNonDefault,
                       uint32_t numOut,
                       const StringData* funcName) {
   auto const callee = Func::lookupBuiltin(funcName);

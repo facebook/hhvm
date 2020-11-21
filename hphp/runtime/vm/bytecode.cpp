@@ -4474,9 +4474,7 @@ OPTBLD_INLINE void iopLockObj() {
 }
 
 OPTBLD_INLINE
-void iopFCallBuiltin(
-  uint32_t numArgs, uint32_t numNonDefault, uint32_t numOut, Id id
-) {
+void iopFCallBuiltin(uint32_t numArgs, uint32_t numOut, Id id) {
   auto const ne = vmfp()->func()->unit()->lookupNamedEntityId(id);
   auto const func = ne->uniqueFunc();
   if (func == nullptr || !func->isBuiltin()) {

@@ -192,7 +192,7 @@ BTFrame initBTContextAt(BTContext& ctx, jit::CTCA ip, BTFrame frm) {
     auto const pc = func->unit()->entry() + frm.pc;
     if (peek_op(pc) != OpFCallBuiltin) return nullptr;
 
-    auto const ne = func->unit()->lookupNamedEntityId(getImm(pc, 3).u_SA);
+    auto const ne = func->unit()->lookupNamedEntityId(getImm(pc, 2).u_SA);
     return Func::lookup(ne);
   };
 

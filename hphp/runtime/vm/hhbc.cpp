@@ -459,7 +459,7 @@ int instrNumPops(PC pc) {
   if (n == -3) return getImm(pc, 0).u_IVA;
   // FCallBuiltin pops numArgs and numOut uninit values
   if (n == -5) {
-    return getImm(pc, 0).u_IVA + getImm(pc, 2).u_IVA;
+    return getImm(pc, 0).u_IVA + getImm(pc, 1).u_IVA;
   }
   // FCall* opcodes pop number of opcode specific inputs, unpack, numArgs,
   // 2 cells/uninits reserved for ActRec and (numRets - 1) uninit values.
@@ -514,7 +514,7 @@ int instrNumPushes(PC pc) {
   int n = numberOfPushes[size_t(op)];
 
   // FCallBuiltin pushes numOut + 1 return values
-  if (n == -3) return getImm(pc, 2).u_IVA + 1;
+  if (n == -3) return getImm(pc, 1).u_IVA + 1;
   // The PopFrame opcode push all arguments onto the stack
   if (n == -2) return getImm(pc, 0).u_IVA;
   // The FCall* opcodes pushes all return values onto the stack
@@ -554,7 +554,7 @@ FlavorDesc fcallFlavor(PC op, uint32_t i) {
 }
 
 FlavorDesc fcallBuiltinFlavor(PC op, uint32_t i) {
-  assertx(i < getImm(op, 0).u_IVA + getImm(op, 2).u_IVA);
+  assertx(i < getImm(op, 0).u_IVA + getImm(op, 1).u_IVA);
   auto const nargs = getImm(op, 0).u_IVA;
   if (i < nargs) return CUV;
   return UV;

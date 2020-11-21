@@ -499,7 +499,7 @@ int64_t getStackPopped(PC pc) {
       return getImm(pc, 0).u_IVA;
 
     case Op::FCallBuiltin:
-      return getImm(pc, 0).u_IVA + getImm(pc, 2).u_IVA;
+      return getImm(pc, 0).u_IVA + getImm(pc, 1).u_IVA;
 
     case Op::PopFrame:
       return getImm(pc, 0).u_IVA + kNumActRecCells;
@@ -539,7 +539,7 @@ int64_t getStackPushed(PC pc) {
     case Op::FCallObjMethodD:
       return getImm(pc, 0).u_FCA.numRets;
     case Op::FCallBuiltin:
-      return getImm(pc, 2).u_IVA + 1;
+      return getImm(pc, 1).u_IVA + 1;
     case Op::PopFrame:
       return getImm(pc, 0).u_IVA;
     default:
@@ -1180,7 +1180,7 @@ void translateInstr(irgen::IRGS& irgs, const NormalizedInstruction& ni) {
   assertx(curSrcKey(irgs) == ni.source);
   const Func* builtinFunc = nullptr;
   if (ni.op() == OpFCallBuiltin) {
-    auto str = ni.m_unit->lookupLitstrId(ni.imm[3].u_SA);
+    auto str = ni.m_unit->lookupLitstrId(ni.imm[2].u_SA);
     builtinFunc = Func::lookupBuiltin(str);
   }
   auto pc = ni.pc();

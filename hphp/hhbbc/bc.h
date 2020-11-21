@@ -995,7 +995,7 @@ namespace imm {
                       return i < arg1 ? Flavor::C : Flavor::U;    \
                     }
 
-#define POP_CALLNATIVE uint32_t numPop() const { return arg1 + arg3; }  \
+#define POP_CALLNATIVE uint32_t numPop() const { return arg1 + arg2; }  \
                        Flavor popFlavor(uint32_t i) const {             \
                          assert(i < numPop());                          \
                          return i < arg1 ? Flavor::CU : Flavor::U;     \
@@ -1017,7 +1017,7 @@ namespace imm {
 
 #define PUSH_CMANY        uint32_t numPush() const { return arg1; }
 #define PUSH_FCALL        uint32_t numPush() const { return fca.numRets(); }
-#define PUSH_CALLNATIVE   uint32_t numPush() const { return arg3 + 1; }
+#define PUSH_CALLNATIVE   uint32_t numPush() const { return arg2 + 1; }
 
 #define O(opcode, imms, inputs, outputs, flags) \
   struct opcode {                               \

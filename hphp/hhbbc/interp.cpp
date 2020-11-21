@@ -3273,7 +3273,7 @@ void in(ISS& env, const bc::IsTypeStructC& op) {
         bc::LateBoundCls {},
         bc::ClassName {},
         bc::String {val},
-        bc::FCallBuiltin {2, 2, 0, s_hh_type_structure_no_throw.get()},
+        bc::FCallBuiltin {2, 0, s_hh_type_structure_no_throw.get()},
         bc::IsTypeStructC { TypeStructResolveOp::DontResolve }
       );
     }

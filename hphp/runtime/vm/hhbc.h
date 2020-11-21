@@ -705,7 +705,7 @@ constexpr uint32_t kMaxConcatN = 4;
                                        FCALL(1, 1),     FCALL,      CF) \
   O(FCallObjMethodD, FOUR(FCA,SA,OA(ObjMethodOp),SA),                   \
                                        FCALL(0, 1),     FCALL,      CF) \
-  O(FCallBuiltin,    FOUR(IVA,IVA,IVA,SA),CALLNATIVE,   CALLNATIVE, NF) \
+  O(FCallBuiltin,    THREE(IVA,IVA,SA),CALLNATIVE,      CALLNATIVE, NF) \
   O(IterInit,        TWO(ITA,BA),      ONE(CV),         NOV,        CF) \
   O(LIterInit,       THREE(ITA,LA,BA), NOV,             NOV,        CF) \
   O(IterNext,        TWO(ITA,BA),      NOV,             NOV,        CF) \

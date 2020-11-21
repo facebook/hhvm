@@ -616,7 +616,7 @@ const hphp_fast_string_imap<BespokeOptEmitFn> s_bespoke_builtin_impls{
 
 void emitBespokeFCallBuiltin(
     ArrayLayout layout, IRGS& env, uint32_t numArgs,
-    uint32_t numNonDefault, uint32_t numOut, const StringData* funcName) {
+    uint32_t numOut, const StringData* funcName) {
   auto const it = s_bespoke_builtin_impls.find(funcName->data());
   assertx(it != s_bespoke_builtin_impls.end());
   assertx(it->second);
@@ -661,8 +661,8 @@ void translateDispatchBespoke(ArrayLayout layout, IRGS& env,
       return;
     case Op::FCallBuiltin:
       emitBespokeFCallBuiltin(
-        layout, env, ni.imm[0].u_IVA, ni.imm[1].u_IVA, ni.imm[2].u_IVA,
-        ni.unit()->lookupLitstrId(ni.imm[3].u_SA));
+        layout, env, ni.imm[0].u_IVA, ni.imm[1].u_IVA,
+        ni.unit()->lookupLitstrId(ni.imm[2].u_SA));
       return;
     case Op::IterInit:
     case Op::LIterInit:
@@ -679,13 +679,13 @@ folly::Optional<Location> getVanillaLocationForBuiltin(const IRGS& env,
 
   assertx(sk.op() == Op::FCallBuiltin);
   auto const func =
-    Func::lookupBuiltin(sk.unit()->lookupLitstrId(getImm(sk.pc(), 3).u_SA));
+    Func::lookupBuiltin(sk.unit()->lookupLitstrId(getImm(sk.pc(), 2).u_SA));
   if (!func) return folly::none;
   auto const param = getBuiltinVanillaParam(func->fullName()->data());
   if (param < 0) return folly::none;
 
   if (getImm(sk.pc(), 0).u_IVA != func->numParams()) return folly::none;
-  if (getImm(sk.pc(), 2).u_IVA != func->numInOutParams()) return folly::none;
+  if (getImm(sk.pc(), 1).u_IVA != func->numInOutParams()) return folly::none;
   return {Location::Stack{soff - func->numParams() + 1 + param}};
 }
 

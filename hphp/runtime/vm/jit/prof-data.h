@@ -448,11 +448,10 @@ struct ProfData {
    */
   bool profiling(const Func* func) const {
     assertx(func);
-    return func->atomicFlags().check(Func::Flags::Profiling);
+    return profiling(func->getFuncId());
   }
   bool profiling(FuncId funcId) const {
-    auto const func = Func::fromFuncId(funcId);
-    return profiling(func);
+    return m_profilingFuncs.find(funcId.toInt()) != m_profilingFuncs.end();
   }
 
   /*
@@ -460,15 +459,12 @@ struct ProfData {
    */
   void setProfiling(const Func* func) {
     assertx(func);
-    if (func->atomicFlags().set(Func::Flags::Profiling)) {
-      // If previously set due to a race condition between two threads,
-      // lets stop here
+
+    auto const funcId = func->getFuncId();
+    if (!m_profilingFuncs.emplace(funcId.toInt(), true).second) {
+      // Someone else beat us, just return.
       return;
     }
-    auto const index =
-      m_nextProfilingFuncIndex.fetch_add(1, std::memory_order_relaxed);
-    m_profilingFuncs.ensureSize(index + 1);
-    m_profilingFuncs[index] = func;
 
     auto const bcSize = func->past() - func->base();
     m_profilingBCSize.fetch_add(bcSize, std::memory_order_relaxed);
@@ -478,8 +474,13 @@ struct ProfData {
     bcSizeCounter->setValue(profilingBCSize());
   }
 
-  const AtomicLowPtrVector<const Func>& getProfilingFuncs() const {
-    return m_profilingFuncs;
+  template<class Fn>
+  void forEachProfilingFunc(Fn fn) {
+    for (auto it : m_profilingFuncs) {
+      auto funcId = FuncId::fromInt(it.first);
+      auto func = Func::fromFuncId(funcId);
+      fn(func);
+    }
   }
 
   /*
@@ -487,7 +488,7 @@ struct ProfData {
    * optimized, respectively.
    */
   int64_t profilingFuncs() const {
-    return m_nextProfilingFuncIndex.load(std::memory_order_relaxed);
+    return m_profilingFuncs.size();
   }
   int64_t optimizedFuncs() const {
     return m_optimizedFuncCount.load(std::memory_order_relaxed);
@@ -596,8 +597,7 @@ struct ProfData {
    */
   std::atomic<int64_t> m_profilingBCSize{0};
   std::atomic<int64_t> m_optimizedFuncCount{0};
-  AtomicLowPtrVector<const Func> m_profilingFuncs;
-  std::atomic<uint32_t> m_nextProfilingFuncIndex{0};
+  folly::AtomicHashMap<FuncId::Int, bool> m_profilingFuncs;
 
   /*
    * SrcKeys that have already been optimized. SrcKeys are marked as not
@@ -657,4 +657,3 @@ struct ProfData {
 //////////////////////////////////////////////////////////////////////
 
 }}
-

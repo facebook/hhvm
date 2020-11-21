@@ -714,16 +714,16 @@ void invalidateFuncsProfSrcKeys() {
                          RuntimeOption::ServerExecutionMode());
   auto const pd = profData();
   assertx(pd);
-  pd->getProfilingFuncs().foreach([&](auto const& func) {
-    if (!func) return;
+  pd->forEachProfilingFunc([&](auto const& func) {
+    always_assert(func);
 
     invalidateFuncProfSrcKeys(func);
 
     // clear the func body and prologues
-    const_cast<Func*>(func.get())->resetFuncBody();
+    const_cast<Func*>(func)->resetFuncBody();
     auto const numPrologues = func->numPrologues();
     for (int p = 0; p < numPrologues; p++) {
-      const_cast<Func*>(func.get())->resetPrologue(p);
+      const_cast<Func*>(func)->resetPrologue(p);
     }
   });
 }

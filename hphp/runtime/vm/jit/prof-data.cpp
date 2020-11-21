@@ -78,7 +78,8 @@ ProfData::ProfData()
   : m_counters(RuntimeOption::ServerExecutionMode()
                  ? std::numeric_limits<int64_t>::max()
                  : RuntimeOption::EvalJitPGOThreshold)
-  , m_profilingFuncs(RuntimeOption::EvalPGOFuncCountHint, nullptr)
+  , m_profilingFuncs(RuntimeOption::EvalPGOFuncCountHint,
+                     makeAHMConfig<decltype(m_profilingFuncs)>())
   , m_optimizedSKs(RuntimeOption::EvalPGOFuncCountHint,
                    makeAHMConfig<decltype(m_optimizedSKs)>())
   , m_proflogueDB(RuntimeOption::EvalPGOFuncCountHint * 2,

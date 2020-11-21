@@ -196,8 +196,8 @@ void write_units_preload(ProfDataSerializer& ser) {
     };
   auto const pd = profData();
   assertx(pd);
-  pd->getProfilingFuncs().foreach([&](auto const& func) {
-    if (!func) return;
+  pd->forEachProfilingFunc([&](auto const& func) {
+    always_assert(func);
     auto const u = func->unit();
     if (!check_unit(u)) return;
     if (seen.insert(u).second) units.push_back(u);
@@ -691,8 +691,8 @@ bool read_named_type(ProfDataDeserializer& ser) {
 }
 
 void write_profiled_funcs(ProfDataSerializer& ser, ProfData* pd) {
-  pd->getProfilingFuncs().foreach([&](auto const& func) {
-    if (!func) return;
+  pd->forEachProfilingFunc([&](auto const& func) {
+    always_assert(func);
     write_func(ser, func);
   });
   write_raw(ser, uintptr_t{});
@@ -707,8 +707,8 @@ void read_profiled_funcs(ProfDataDeserializer& ser, ProfData* pd) {
 void write_named_types(ProfDataSerializer& ser, ProfData* pd) {
   // in an attempt to get a sensible order for these, start with the
   // ones referenced by params and return constraints.
-  pd->getProfilingFuncs().foreach([&](auto const& func) {
-    if (!func) return;
+  pd->forEachProfilingFunc([&](auto const& func) {
+    always_assert(func);
     for (auto const& p : func->params()) {
       write_named_type(ser, p.typeConstraint.namedEntity());
     }

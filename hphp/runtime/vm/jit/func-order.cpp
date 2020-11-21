@@ -80,8 +80,8 @@ createCallGraphFromProfCode(jit::hash_map<hfsort::TargetId, FuncId>& funcID) {
 
   // Create one node (aka target) for each function that was profiled.
   FTRACE(1, "createCallGraph\n");
-  pd->getProfilingFuncs().foreach([&](auto const& func) {
-    if (!func) return;
+  pd->forEachProfilingFunc([&](auto const& func) {
+    always_assert(func);
     auto const baseOffset = func->base();
     auto const fid = func->getFuncId();
     auto const transIds = pd->funcProfTransIDs(fid);
@@ -132,9 +132,8 @@ createCallGraphFromProfCode(jit::hash_map<hfsort::TargetId, FuncId>& funcID) {
     }
   };
 
-  pd->getProfilingFuncs().foreach([&] (auto const& func) {
-    if (!func) return;
-
+  pd->forEachProfilingFunc([&] (auto const& func) {
+    always_assert(func);
     auto const fid = func->getFuncId();
     auto const calleeTargetId = targetID[fid];
     auto const transIds = pd->funcProfTransIDs(fid);

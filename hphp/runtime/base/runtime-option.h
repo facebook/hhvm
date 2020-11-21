@@ -1084,12 +1084,16 @@ struct RuntimeOption {
   F(int32_t, BespokeArrayLikeMode, 0)                                   \
   F(uint64_t, EmitLoggingArraySampleRate, 1000)                         \
   F(string, ExportLoggingArrayDataPath, "")                             \
+  /* We will use specialized layouts for a given array if they cover    \
+   * the given percent of operations logged during profiling. */        \
+  F(double, BespokeArraySourceSpecializationThreshold, 95.0)            \
+  F(double, BespokeArraySinkSpecializationThreshold,   99.0)            \
   /* Raise notices on various array operations which may present        \
    * compatibility issues with Hack arrays.                             \
    *                                                                    \
    * The various *Notices options independently control separate        \
    * subsets of notices.  The Check* options are subordinate to the     \
-   * HackArrCompatNotices option, and control whether various runtime
+   * HackArrCompatNotices option, and control whether various runtime   \
    * checks are made; they do not affect any optimizations. */          \
   F(bool, HackArrCompatNotices, false)                                  \
   F(bool, HackArrCompatCheckCompare, false)                             \

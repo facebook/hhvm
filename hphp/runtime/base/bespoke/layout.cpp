@@ -681,11 +681,6 @@ ArrayData* makeBespokeForTesting(ArrayData* ad, LoggingProfile* profile) {
   return ad;
 }
 
-void selectBespokeLayouts() {
-  setLoggingEnabled(false);
-  Layout::FinalizeHierarchy();
-}
-
 //////////////////////////////////////////////////////////////////////////////
 
 }}

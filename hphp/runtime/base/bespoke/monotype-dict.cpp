@@ -1438,9 +1438,9 @@ LayoutIndex MonotypeDictLayout::Index(KeyTypes kt, DataType type) {
   }
 }
 
-bool isMonotypeDictLayout(const Layout* layout) {
-  auto const index = layout->index().raw;
-  return kBaseLayoutIndex.raw <= index && index < 2 * kBaseLayoutIndex.raw;
+bool isMonotypeDictLayout(LayoutIndex index) {
+  return kBaseLayoutIndex.raw <= index.raw &&
+         index.raw < 2 * kBaseLayoutIndex.raw;
 }
 
 ArrayData* MakeMonotypeDictFromVanilla(

@@ -17,10 +17,10 @@
 #ifndef HPHP_LOGGING_PROFILE_H_
 #define HPHP_LOGGING_PROFILE_H_
 
-#include "hphp/runtime/vm/srckey.h"
-
 #include "hphp/runtime/base/bespoke/entry-types.h"
 #include "hphp/runtime/base/program-functions.h"
+#include "hphp/runtime/vm/srckey.h"
+#include "hphp/runtime/vm/jit/array-layout.h"
 
 #include <folly/String.h>
 #include <tbb/concurrent_hash_map.h>
@@ -160,10 +160,13 @@ public:
 
   std::atomic<uint64_t> sampleCount = 0;
   std::atomic<uint64_t> loggingArraysEmitted = 0;
+  BespokeArray* staticBespokeArray = nullptr;
   LoggingArray* staticLoggingArray = nullptr;
   ArrayData* staticSampledArray = nullptr;
   EventMap events;
   EntryTypesMap entryTypes;
+
+  jit::ArrayLayout layout = jit::ArrayLayout::Bottom();
 };
 
 // We split sinks by profiling tracelet so we can condition on array type.
@@ -194,6 +197,8 @@ public:
   std::atomic<uint64_t> sampledCount = 0;
   std::atomic<uint64_t> unsampledCount = 0;
   SourceMap sources;
+
+  jit::ArrayLayout layout = jit::ArrayLayout::Bottom();
 };
 
 // Return a profile for the given (valid) SrcKey. If no profile for the SrcKey
@@ -209,8 +214,16 @@ SinkProfile* getSinkProfile(TransID id, SrcKey sk);
 // Attempt to get the current SrcKey. May fail and return an invalid SrcKey.
 SrcKey getSrcKey();
 
-// Stops profiling. If an export path is set, kicks off the export thread.
+// Hooks called by layout selection at the appropriate times.
 void stopProfiling();
+void startExportProfiles();
+
+// Global views, used for layout selection.
+void eachSource(std::function<void(LoggingProfile& profile)> fn);
+void eachSink(std::function<void(SinkProfile& profile)> fn);
+
+// Accessors for logged events. TODO(kshaunak): Expose a better API.
+ArrayOp getArrayOp(uint64_t key);
 
 }}
 

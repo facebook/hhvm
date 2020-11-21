@@ -649,6 +649,8 @@ bool exportSortedProfiles(FILE* file, const ProfileOutputData& profileData) {
                   sourceProfile->loggingArraysEmitted.load(),
                   sourceProfile->sampleCount.load(), sourceData.weight);
     LOG_OR_RETURN(file, "  {}\n", sourceProfile->key.toStringDetail());
+    LOG_OR_RETURN(file, "  Selected Layout: {}\n",
+                  sourceProfile->layout.describe());
     LOG_OR_RETURN(file, "  {} reads, {} writes\n",
                   sourceData.readCount, sourceData.writeCount);
 
@@ -686,6 +688,8 @@ bool exportSortedSinks(FILE* file, const std::vector<SinkOutputData>& sinks) {
                   sk.getSymbol(), sink.sampledCount,
                   sink.weight, sink.loggedCount);
     LOG_OR_RETURN(file, "  {}\n", sk.showInst());
+    LOG_OR_RETURN(file, "  Selected Layout: {}\n",
+                  sink.profile->layout.describe());
 
     if (!exportTypeCounts(file, "Array", sink.arrCounts)) return false;
     if (!exportTypeCounts(file, "Key",   sink.keyCounts)) return false;
@@ -787,15 +791,16 @@ std::vector<SinkOutputData> sortSinkData() {
 
 void stopProfiling() {
   assertx(allowBespokeArrayLikes());
-
-  if (!s_profiling.load(std::memory_order_relaxed)) return;
+  assertx(s_profiling.load(std::memory_order_relaxed));
 
   {
     auto expected = true;
     folly::SharedMutex::WriteHolder lock{s_profilingLock};
     if (!s_profiling.compare_exchange_strong(expected, false)) return;
   }
+}
 
+void startExportProfiles() {
   if (RO::EvalExportLoggingArrayDataPath.empty()) return;
 
   s_exportProfilesThread = std::thread([] {
@@ -958,6 +963,20 @@ SrcKey getSrcKey() {
   auto const result = SrcKey(func, vmpc(), ResumeMode::None);
   assertx(canonicalize(result) == result);
   return result;
+}
+
+void eachSource(std::function<void(LoggingProfile& profile)> fn) {
+  assertx(!s_profiling.load(std::memory_order_acquire));
+  for (auto& it : s_profileMap) fn(*it.second);
+}
+
+void eachSink(std::function<void(SinkProfile& profile)> fn) {
+  assertx(!s_profiling.load(std::memory_order_acquire));
+  for (auto& it : s_sinkMap) fn(*it.second);
+}
+
+ArrayOp getArrayOp(uint64_t key) {
+  return EventKey(key).getOp();
 }
 
 //////////////////////////////////////////////////////////////////////////////

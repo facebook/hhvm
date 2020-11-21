@@ -16,6 +16,7 @@
 #include "hphp/runtime/vm/jit/irgen-bespoke.h"
 
 #include "hphp/runtime/base/bespoke-array.h"
+#include "hphp/runtime/base/bespoke/layout-selection.h"
 #include "hphp/runtime/base/bespoke/logging-array.h"
 #include "hphp/runtime/base/bespoke/logging-profile.h"
 #include "hphp/runtime/base/type-structure-helpers-defs.h"
@@ -746,27 +747,23 @@ folly::Optional<Location> getLocationToGuard(const IRGS& env, SrcKey sk) {
   return needsGuard ? loc : folly::none;
 }
 
-// Strengthen the guards for a layout-sensitive location prior to irgen for the
-// bytecode, returning false if standard vanilla translation should be used and
-// true if bespoke translation should be used.
+// Decide on what layout to specialize code for. In live translations,
+// we simply use the known layout of the array, which allows us to completely
+// avoid guarding on layouts (and thus over-specializing these translations).
 //
-// Right now, we strengthen the guard based only on the type of the array-like
-// at that location. In the future, we'll still do that for live translations,
-// but we'll use profiling for optimized translations.
+// In optimized translations, we use the layout chosen by layout selection,
+// emitting a check if necessary to refine the array's type to that layout.
 ArrayLayout guardToLayout(IRGS& env, SrcKey sk, Location loc, Type type) {
+  auto const kind = env.context.kind;
   assertx(env.context.kind != TransKind::Profile);
   assertx(!env.irb->guardFailBlock());
 
-  auto const known = type.arrSpec().layout();
-  auto const layout = known.bespoke() ? known : ArrayLayout::Vanilla();
-  auto const target_type = TArrLike.narrowToLayout(layout);
-
-  FTRACE_MOD(Trace::hhir, 2, "At {}: {}: guard input {} to layout: {}\n",
-             sk.offset(), opcodeToName(sk.op()), show(loc), target_type);
-  auto const gc = GuardConstraint(DataTypeSpecialized).setArrayLayoutSensitive();
-  env.irb->constrainLocation(loc, gc);
-  checkType(env, loc, target_type, bcOff(env));
-  return layout;
+  if (kind == TransKind::Optimize) {
+    auto const layout = bespoke::layoutForSink(env.profTransIDs, sk);
+    checkType(env, loc, TArrLike.narrowToLayout(layout), bcOff(env));
+    return layout;
+  }
+  return type.arrSpec().layout();
 }
 
 void emitLogArrayReach(IRGS& env, Location loc, SrcKey sk) {
@@ -914,6 +911,21 @@ void emitProfileArrLikeProps(IRGS& env) {
   }
 }
 
+bool specializeSource(IRGS& env, SrcKey sk) {
+  if (env.context.kind != TransKind::Optimize) return false;
+
+  auto const op = sk.op();
+  if (isArrLikeConstructorOp(op) || isArrLikeCastOp(op)) {
+    auto const profile = bespoke::getLoggingProfile(sk);
+    if (profile && profile->staticBespokeArray) {
+      assertx(isArrLikeConstructorOp(op));
+      push(env, cns(env, profile->staticBespokeArray));
+      return true;
+    }
+  }
+  return false;
+}
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -921,6 +933,7 @@ void emitProfileArrLikeProps(IRGS& env) {
 void handleBespokeInputs(IRGS& env, const NormalizedInstruction& ni,
                          std::function<void(IRGS&)> emitVanilla) {
   auto const sk = ni.source;
+  if (specializeSource(env, sk)) return;
   auto const loc = getLocationToGuard(env, sk);
   if (!loc) return emitVanilla(env);
 

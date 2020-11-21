@@ -229,7 +229,7 @@ struct MonotypeDictLayout : public ConcreteLayout {
   DataType m_valType;
 };
 
-bool isMonotypeDictLayout(const Layout* layout);
+bool isMonotypeDictLayout(LayoutIndex index);
 
 ArrayData* MakeMonotypeDictFromVanilla(ArrayData* ad, DataType dt, KeyTypes kt);
 

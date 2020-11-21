@@ -1517,10 +1517,12 @@ void VariableSerializer::serializeClass(const Class* cls) {
       m_buf->append(')');
       break;
     case Type::VarDump:
+      if (RuntimeOption::EvalClassAsStringVarDump) {
+        write(StrNR(cls->name()));
+        break;
+      }
+      // fall-through
     case Type::DebugDump:
-      // TODO (T29639296)
-      // For now we use function(foo) to dump function pointers in most cases,
-      // and this can be changed in the future.
       indent();
       m_buf->append("class(");
       m_buf->append(cls->name());
@@ -1553,6 +1555,11 @@ void VariableSerializer::serializeLazyClass(LazyClassData lcls) {
       m_buf->append(')');
       break;
     case Type::VarDump:
+      if (RuntimeOption::EvalClassAsStringVarDump) {
+        write(StrNR(lcls.name()));
+        break;
+      }
+      // fall-through
     case Type::DebugDump:
       indent();
       m_buf->append("class(");

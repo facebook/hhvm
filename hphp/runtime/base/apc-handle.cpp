@@ -78,16 +78,22 @@ APCHandle::Pair APCHandle::Create(const_variant_ref source,
       }
       invalidFuncConversion("string");
     }
-    case KindOfClass:
-    case KindOfLazyClass:
+    case KindOfClass: {
+      auto const cls = val(cell).pclass;
+      if (cls->isPersistent()) {
+        auto const value = new APCTypedValue(cls);
+        return {value->getHandle(), sizeof(APCTypedValue)};
+      }
+      auto const value = new APCNamedEntity(cls);
+      return {value->getHandle(), sizeof(APCNamedEntity)};
+    }
+    case KindOfLazyClass: {
+      auto const value = new APCTypedValue(val(cell).plazyclass);
+      return {value->getHandle(), sizeof(APCTypedValue)};
+    }
     case KindOfPersistentString:
     case KindOfString: {
-      auto const s =
-        isClassType(cell.type())
-          ? const_cast<StringData*>(classToStringHelper(val(cell).pclass)) :
-        isLazyClassType(cell.type())
-          ? const_cast<StringData*>(lazyClassToStringHelper(val(cell).plazyclass))
-          : val(cell).pstr;
+      auto const s = val(cell).pstr;
       if (serialized) {
         // It is priming, and there might not be the right class definitions
         // for unserialization.
@@ -184,6 +190,8 @@ Variant APCHandle::toLocalHelper() const {
     case APCKind::Int:
     case APCKind::Double:
     case APCKind::PersistentFunc:
+    case APCKind::PersistentClass:
+    case APCKind::LazyClass:
     case APCKind::StaticString:
     case APCKind::UncountedString:
     case APCKind::StaticArray:
@@ -197,6 +205,9 @@ Variant APCHandle::toLocalHelper() const {
       not_reached();
 
     case APCKind::FuncEntity:
+      return APCNamedEntity::fromHandle(this)->getEntityOrNull();
+
+    case APCKind::ClassEntity:
       return APCNamedEntity::fromHandle(this)->getEntityOrNull();
 
     case APCKind::SharedString:
@@ -303,10 +314,16 @@ void APCHandle::deleteShared() {
     case APCKind::StaticDict:
     case APCKind::StaticKeyset:
     case APCKind::PersistentFunc:
+    case APCKind::PersistentClass:
+    case APCKind::LazyClass:
       delete APCTypedValue::fromHandle(this);
       return;
 
     case APCKind::FuncEntity:
+      delete APCNamedEntity::fromHandle(this);
+      return;
+
+    case APCKind::ClassEntity:
       delete APCNamedEntity::fromHandle(this);
       return;
 
@@ -381,6 +398,12 @@ bool APCHandle::checkInvariants() const {
     case APCKind::PersistentFunc:
       assertx(m_type == KindOfFunc);
       return true;
+    case APCKind::PersistentClass:
+      assertx(m_type == KindOfClass);
+      return true;
+    case APCKind::LazyClass:
+      assertx(m_type == KindOfLazyClass);
+      return true;
     case APCKind::StaticString:
     case APCKind::UncountedString:
       assertx(m_type == KindOfPersistentString);
@@ -408,6 +431,7 @@ bool APCHandle::checkInvariants() const {
     case APCKind::SharedMarkedDArray:
       assertx(!RuntimeOption::EvalHackArrDVArrs);
     case APCKind::FuncEntity:
+    case APCKind::ClassEntity:
     case APCKind::RFunc:
     case APCKind::RClsMeth:
     case APCKind::SharedString:

@@ -88,6 +88,9 @@ EntryInfo::Type EntryInfo::getAPCType(const APCHandle* handle) {
     case APCKind::Bool:
     case APCKind::Int:
     case APCKind::Double:
+    case APCKind::PersistentClass:
+    case APCKind::ClassEntity:
+    case APCKind::LazyClass:
     case APCKind::PersistentFunc:
     case APCKind::FuncEntity:
     case APCKind::StaticString:

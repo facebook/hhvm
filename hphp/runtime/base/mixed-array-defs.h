@@ -194,12 +194,10 @@ void ConvertTvToUncounted(
     }
     invalidFuncConversion("string");
     case KindOfClass:
-      // Fall-through
-    case KindOfLazyClass:
-      data.pstr = isClassType(type)
-          ? const_cast<StringData*>(classToStringHelper(data.pclass))
-          : const_cast<StringData*>(lazyClassToStringHelper(data.plazyclass));
-      // Fall-through
+      if (data.pclass->isPersistent()) break;
+      data.plazyclass = LazyClassData::create(data.pclass->name());
+      type = KindOfLazyClass;
+      break;
     case KindOfString:
       type = KindOfPersistentString;
       // Fall-through.
@@ -324,6 +322,7 @@ void ConvertTvToUncounted(
         break;
       }
     }
+    case KindOfLazyClass:
     case KindOfNull:
     case KindOfBoolean:
     case KindOfInt64:

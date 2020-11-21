@@ -49,6 +49,19 @@ struct APCTypedValue {
     assertx(checkInvariants());
   }
 
+  explicit APCTypedValue(const Class* data)
+    : m_handle(APCKind::PersistentClass, KindOfClass) {
+    assertx(data->isPersistent());
+    m_data.cls = data;
+    assertx(checkInvariants());
+  }
+
+  explicit APCTypedValue(LazyClassData data)
+    : m_handle(APCKind::LazyClass, KindOfLazyClass) {
+    m_data.str = const_cast<StringData*>(data.name());
+    assertx(checkInvariants());
+  }
+
   enum class StaticStr {};
   APCTypedValue(StaticStr, StringData* data)
     : m_handle(APCKind::StaticString, KindOfPersistentString) {
@@ -253,6 +266,7 @@ private:
     StringData* str;
     ArrayData* arr;
     const Func* func;
+    const Class* cls;
   } m_data;
   APCHandle m_handle;
 };

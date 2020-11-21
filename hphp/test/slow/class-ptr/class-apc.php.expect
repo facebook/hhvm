@@ -1,6 +1,6 @@
-string(4) "main"
+class(main)
 varray(3) {
   int(1)
-  string(4) "main"
+  class(main)
   string(3) "foo"
 }

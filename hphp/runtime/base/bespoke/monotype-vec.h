@@ -50,6 +50,12 @@ struct MonotypeVec : public BespokeArray {
   static MonotypeVec* As(ArrayData* ad);
   static const MonotypeVec* As(const ArrayData* ad);
 
+  static uint64_t entriesOffset() { return sizeof(MonotypeVec); }
+  static uint64_t typeOffset() {
+    static_assert(folly::kIsLittleEndian);
+    return offsetof(MonotypeVec, m_extra_hi16);
+  }
+
 #define X(Return, Name, Args...) static Return Name(Args);
   BESPOKE_LAYOUT_FUNCTIONS(MonotypeVec)
 #undef X
@@ -106,26 +112,50 @@ private:
   friend MonotypeVec;
 };
 
-struct TopMonotypeVecLayout : public AbstractLayout {
-  TopMonotypeVecLayout();
-  static LayoutIndex Index();
-};
-
-struct EmptyOrMonotypeVecLayout : public AbstractLayout {
-  explicit EmptyOrMonotypeVecLayout(DataType type);
-  static LayoutIndex Index(DataType type);
-  DataType m_fixedType;
-};
-
 struct EmptyMonotypeVecLayout : public ConcreteLayout {
   EmptyMonotypeVecLayout();
   static LayoutIndex Index();
+
+  virtual SSATmp* emitGet(
+      IRGS& env, SSATmp* arr, SSATmp* key, Block* taken) const override;
 };
 
 struct MonotypeVecLayout : public ConcreteLayout {
   explicit MonotypeVecLayout(DataType type);
   static LayoutIndex Index(DataType type);
+
+  virtual SSATmp* emitGet(
+      IRGS& env, SSATmp* arr, SSATmp* key, Block* taken) const override;
+
   DataType m_fixedType;
+};
+
+struct EmptyOrMonotypeVecLayout : public AbstractLayout {
+  explicit EmptyOrMonotypeVecLayout(DataType type);
+  static LayoutIndex Index(DataType type);
+  const MonotypeVecLayout* getNonEmptyLayout() const {
+    auto const layout =
+      Layout::FromIndex(MonotypeVecLayout::Index(m_fixedType));
+    if (debug) {
+      auto const mlayout = dynamic_cast<const MonotypeVecLayout*>(layout);
+      assertx(mlayout != nullptr);
+      return mlayout;
+    }
+    return static_cast<const MonotypeVecLayout*>(layout);
+  }
+
+  virtual SSATmp* emitGet(
+      IRGS& env, SSATmp* arr, SSATmp* key, Block* taken) const override;
+
+  DataType m_fixedType;
+};
+
+struct TopMonotypeVecLayout : public AbstractLayout {
+  TopMonotypeVecLayout();
+  static LayoutIndex Index();
+
+  virtual SSATmp* emitGet(
+      IRGS& env, SSATmp* arr, SSATmp* key, Block* taken) const override;
 };
 
 bool isMonotypeVecLayout(LayoutIndex index);

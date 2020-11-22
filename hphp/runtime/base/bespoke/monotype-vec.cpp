@@ -24,6 +24,10 @@
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/tv-refcount.h"
 
+#include "hphp/runtime/vm/jit/irgen.h"
+#include "hphp/runtime/vm/jit/irgen-state.h"
+#include "hphp/runtime/vm/jit/ssa-tmp.h"
+
 #include "hphp/util/word-mem.h"
 
 namespace HPHP { namespace bespoke {
@@ -865,7 +869,8 @@ LayoutIndex TopMonotypeVecLayout::Index() {
 EmptyOrMonotypeVecLayout::EmptyOrMonotypeVecLayout(DataType type)
   : AbstractLayout(
       Index(type), folly::sformat("MonotypeVec<Empty|{}>", tname(type)),
-      {TopMonotypeVecLayout::Index()})
+      {TopMonotypeVecLayout::Index()}),
+    m_fixedType(type)
 {}
 
 LayoutIndex EmptyOrMonotypeVecLayout::Index(DataType type) {
@@ -903,5 +908,46 @@ bool isMonotypeVecLayout(LayoutIndex index) {
 }
 
 //////////////////////////////////////////////////////////////////////////////
+// JIT implementations
+//////////////////////////////////////////////////////////////////////////////
+
+using namespace jit;
+using namespace jit::irgen;
+
+namespace {
+SSATmp* emitMonotypeGet(IRGS& env, SSATmp* arr, SSATmp* key, Block* taken,
+                        const MonotypeVecLayout* nonEmptyLayout) {
+  assertx(arr->type().subtypeOfAny(TVec, TVArr));
+
+  auto const sz = gen(env, Count, arr);
+  auto const sf = gen(env, LtInt, key, sz);
+  gen(env, JmpZero, taken, sf);
+  // TODO(mcolavita): we can't do our AssertType correctly until we have
+  // concrete inner nodes.
+  auto const retType = nonEmptyLayout ? Type(nonEmptyLayout->m_fixedType)
+                                      : TInitCell;
+  return gen(env, LdMonotypeVecElem, retType, arr, key);
+}
+}
+
+SSATmp* TopMonotypeVecLayout::emitGet(
+    IRGS& env, SSATmp* arr, SSATmp* key, Block* taken) const {
+  return emitMonotypeGet(env, arr, key, taken, nullptr);
+}
+
+SSATmp* MonotypeVecLayout::emitGet(
+    IRGS& env, SSATmp* arr, SSATmp* key, Block* taken) const {
+  return emitMonotypeGet(env, arr, key, taken, this);
+}
+
+SSATmp* EmptyOrMonotypeVecLayout::emitGet(
+    IRGS& env, SSATmp* arr, SSATmp* key, Block* taken) const {
+  return emitMonotypeGet(env, arr, key, taken, getNonEmptyLayout());
+}
+
+SSATmp* EmptyMonotypeVecLayout::emitGet(
+    IRGS& env, SSATmp* arr, SSATmp* key, Block* taken) const {
+  return gen(env, Jmp, taken);
+}
 
 }}

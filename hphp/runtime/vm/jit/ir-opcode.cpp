@@ -791,6 +791,7 @@ bool opcodeMayRaise(Opcode opc) {
   case LdTypeCns:
   case LdUnitPerRequestFilepath:
   case LdUnwinderValue:
+  case LdMonotypeVecElem:
   case LdVecElem:
   case LdVecElemAddr:
   case LdVectorSize:

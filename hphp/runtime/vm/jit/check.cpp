@@ -30,6 +30,7 @@
 
 #include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/perf-warning.h"
+#include "hphp/runtime/base/bespoke/monotype-vec.h"
 #include "hphp/runtime/ext/std/ext_std_closure.h"
 
 #include <folly/Format.h>
@@ -419,6 +420,17 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* /*unit*/) {
     ++curSrc;
   };
 
+  auto checkMonotypeVec = [&] {
+    auto const t = src()->type();
+    if (t != TBottom) {
+      check(t.arrSpec().bespoke(), Type(), "TArrLike=Bespoke");
+      auto const topLayout = ArrayLayout(bespoke::TopMonotypeVecLayout::Index());
+      auto const monotypeTop = (TVec|TVArr).narrowToLayout(topLayout);
+      check(t <= monotypeTop, Type(), "TArrLike=MonotypeVec");
+    }
+    ++curSrc;
+  };
+
   auto checkArr = [&] (bool is_kv, bool is_const) {
     auto const t = src()->type();
     auto const cond_type = RuntimeOption::EvalHackArrDVArrs
@@ -501,6 +513,7 @@ using TypeNames::TCA;
                         }                                                   \
                       }
 #define SBespokeArr   checkBespokeArr();
+#define SMonotypeVec  checkMonotypeVec();
 #define SKnownArrLike S(VArr,DArr,Vec,Dict,Keyset)
 #define SVArr         checkArr(false /* is_kv */, false /* is_const */);
 #define SDArr         checkArr(true  /* is_kv */, false /* is_const */);
@@ -574,6 +587,7 @@ using TypeNames::TCA;
 #undef SDArr
 #undef CDArr
 #undef SBespokeArr
+#undef SMonotypeVec
 #undef SKnownArrLike
 
 #undef ND

@@ -3054,6 +3054,12 @@ fields of that struct for holding intermediate values.
 
   Escalate the bespoke array S0 to a vanilla array for the reason S1.
 
+| LdMonotypeVecElem, DParam(InitCell), SMonotypeVec S(Int), NF
+
+  Loads the element of the monotype vec in S0 at offset S1. This instruction
+  assumes that the vec actually contains an element at that offset (i.e. the
+  index is within bounds).
+
 | MapSet, ND, S(Obj) S(Int,Str) S(Cell), CRc
 
   Set element with key S1 in S0 to S2.

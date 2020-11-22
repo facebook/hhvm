@@ -3060,6 +3060,18 @@ SSATmp* simplifyLdStrLen(State& env, const IRInstruction* inst) {
   return src->hasConstVal(TStr) ? cns(env, src->strVal()->size()) : nullptr;
 }
 
+SSATmp* simplifyLdMonotypeVecElem(State& env, const IRInstruction* inst) {
+  auto const src0 = inst->src(0);
+  auto const src1 = inst->src(1);
+  if (src0->hasConstVal() && src1->hasConstVal()) {
+    auto const arr = src0->arrLikeVal();
+    auto const idx = src1->intVal();
+    auto const tv = arr->get(idx);
+    return tv.is_init() ? cns(env, tv) : nullptr;
+  }
+  return nullptr;
+}
+
 SSATmp* simplifyLdVecElem(State& env, const IRInstruction* inst) {
   auto const src0 = inst->src(0);
   auto const src1 = inst->src(1);
@@ -3468,6 +3480,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(LookupSPropSlot)
   X(LdClsMethod)
   X(LdStrLen)
+  X(LdMonotypeVecElem)
   X(LdVecElem)
   X(MethodExists)
   X(FuncHasAttr)

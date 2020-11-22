@@ -16,10 +16,12 @@
 
 #include "hphp/runtime/base/bespoke/layout.h"
 #include "hphp/runtime/base/bespoke/logging-profile.h"
+#include "hphp/runtime/base/bespoke/monotype-vec.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/set-array.h"
 
+#include "hphp/runtime/vm/jit/code-gen-helpers.h"
 #include "hphp/runtime/vm/jit/irlower.h"
 #include "hphp/runtime/vm/jit/irlower-internal.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
@@ -255,6 +257,28 @@ void cgBespokeElem(IRLS& env, const IRInstruction* inst) {
       : CallSpec::direct(throwOnMissing ? elemID : elemIU);
   }();
   cgCallHelper(v, env, target, dest, SyncOptions::Sync, args);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+void cgLdMonotypeVecElem(IRLS& env, const IRInstruction* inst) {
+  auto const rarr = srcLoc(env, inst, 0).reg();
+  auto const ridx = srcLoc(env, inst, 1).reg();
+  auto const idx = inst->src(1);
+
+  auto const type = rarr[bespoke::MonotypeVec::typeOffset()];
+  auto const value = [&] {
+    if (idx->hasConstVal()) {
+      auto const vOffset = bespoke::MonotypeVec::entriesOffset() +
+                           idx->intVal() * sizeof(Value);
+      if (deltaFits(vOffset, sz::dword)) return rarr[vOffset];
+    }
+
+    return rarr[ridx * int(sizeof(Value)) + bespoke::MonotypeVec::entriesOffset()];
+  }();
+
+  loadTV(vmain(env), inst->dst()->type(), dstLoc(env, inst, 0),
+         type, value);
 }
 
 //////////////////////////////////////////////////////////////////////////////

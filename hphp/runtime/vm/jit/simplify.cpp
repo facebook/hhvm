@@ -3344,6 +3344,29 @@ SSATmp* simplifyCheckClsMethFunc(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
+SSATmp* simplifyBespokeGet(State& env, const IRInstruction* inst) {
+  auto const src0 = inst->src(0);
+  auto const src1 = inst->src(1);
+
+  if (!src0->hasConstVal()) return nullptr;
+
+  auto const arr = src0->arrLikeVal();
+  if (arr->empty()) return cns(env, TUninit);
+
+  if (!src1->hasConstVal()) return nullptr;
+
+  assertx(src1->isA(TInt | TStr));
+  auto const tv = [&] {
+    if (src1->isA(TInt)) {
+      return arr->get(src1->intVal());
+    } else {
+      return arr->get(src1->strVal());
+    }
+  }();
+
+  return cns(env, tv);
+}
+
 //////////////////////////////////////////////////////////////////////
 
 SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
@@ -3557,6 +3580,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(RaiseErrorOnInvalidIsAsExpressionType)
   X(LdFrameCls)
   X(CheckClsMethFunc)
+  X(BespokeGet)
   default: break;
   }
 #undef X

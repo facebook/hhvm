@@ -244,7 +244,6 @@ bool Layout::checkInvariants() const {
     auto const DEBUG_ONLY layout = FromIndex(parent);
     assertx(layout);
     assertx(layout->m_topoIndex < m_topoIndex);
-    assertx(!layout->isConcrete());
   }
 
   // 1. The parents provided are immediate parents (i.e. the descendant graph

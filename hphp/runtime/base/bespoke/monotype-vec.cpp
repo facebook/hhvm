@@ -107,6 +107,14 @@ Layout::LayoutSet getAllEmptyOrMonotypeVecLayouts() {
   return result;
 }
 
+LayoutIndex getMonotypeParentLayout(DataType dt) {
+  if (!hasPersistentFlavor(dt) || isRefcountedType(dt)) {
+    return EmptyOrMonotypeVecLayout::Index(dt_modulo_persistence(dt));
+  }
+
+  return MonotypeVecLayout::Index(dt_modulo_persistence(dt));
+}
+
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -836,7 +844,22 @@ void MonotypeVec::InitializeLayouts() {
 
   new EmptyMonotypeVecLayout();
 
-#define DT(name, value) new MonotypeVecLayout(KindOf##name);
+  // Create all the potentially internal concrete layouts first
+#define DT(name, value) {                      \
+    auto const type = KindOf##name;            \
+    if (type == dt_modulo_persistence(type)) { \
+      new MonotypeVecLayout(type);             \
+    }                                          \
+  }
+  DATATYPES
+#undef DT
+
+#define DT(name, value) {                      \
+    auto const type = KindOf##name;            \
+    if (type != dt_modulo_persistence(type)) { \
+      new MonotypeVecLayout(type);             \
+    }                                          \
+  }
   DATATYPES
 #undef DT
 
@@ -894,7 +917,7 @@ MonotypeVecLayout::MonotypeVecLayout(DataType type)
       Index(type),
       folly::sformat("MonotypeVec<{}>", tname(type)),
       &s_monotypeVecVtable,
-      {EmptyOrMonotypeVecLayout::Index(dt_modulo_persistence(type))})
+      {getMonotypeParentLayout(type)})
   , m_fixedType(type)
 {}
 
@@ -922,8 +945,11 @@ SSATmp* emitMonotypeGet(IRGS& env, SSATmp* arr, SSATmp* key, Block* taken,
   auto const sz = gen(env, Count, arr);
   auto const sf = gen(env, LtInt, key, sz);
   gen(env, JmpZero, taken, sf);
-  // TODO(mcolavita): we can't do our AssertType correctly until we have
-  // concrete inner nodes.
+  if (nonEmptyLayout) {
+    auto const nonEmptyType =
+      arr->type().narrowToLayout(ArrayLayout(nonEmptyLayout->index()));
+    gen(env, AssertType, nonEmptyType, arr);
+  }
   auto const retType = nonEmptyLayout ? Type(nonEmptyLayout->m_fixedType)
                                       : TInitCell;
   return gen(env, LdMonotypeVecElem, retType, arr, key);

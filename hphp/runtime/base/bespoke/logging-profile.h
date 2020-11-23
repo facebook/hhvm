@@ -162,6 +162,7 @@ public:
   std::atomic<uint64_t> loggingArraysEmitted = 0;
   BespokeArray* staticBespokeArray = nullptr;
   LoggingArray* staticLoggingArray = nullptr;
+  std::atomic<ArrayData*> staticMonotypeArray{nullptr};
   ArrayData* staticSampledArray = nullptr;
   EventMap events;
   EntryTypesMap entryTypes;

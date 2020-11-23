@@ -630,7 +630,7 @@ void logBespokeDispatch(const ArrayData* ad, const char* fn) {
 }
 
 namespace {
-ArrayData* maybeMonoify(ArrayData* ad) {
+ArrayData* maybeMonoify(ArrayData* ad, LoggingProfile* profile) {
   if (!ad->isVanilla() || ad->isKeysetType()) return ad;
 
   auto const et = EntryTypes::ForArray(ad);
@@ -653,20 +653,38 @@ ArrayData* maybeMonoify(ArrayData* ad) {
 
   auto const legacy = ad->isLegacyArray();
 
-  if (et.valueTypes == ValueTypes::Empty) {
-    switch (ad->toDataType()) {
-      case KindOfVArray: return EmptyMonotypeVec::GetVArray(legacy);
-      case KindOfVec:    return EmptyMonotypeVec::GetVec(legacy);
-      case KindOfDArray: return EmptyMonotypeDict::GetDArray(legacy);
-      case KindOfDict:   return EmptyMonotypeDict::GetDict(legacy);
-      default: always_assert(false);
-    }
+  if (ad->isStatic() &&
+      profile->staticMonotypeArray.load(std::memory_order_relaxed)) {
+    return profile->staticMonotypeArray;
   }
 
-  auto const dt = et.valueDatatype;
-  return ad->isDArray() || ad->isDictType()
-    ? MakeMonotypeDictFromVanilla(ad, dt, et.keyTypes)
-    : MonotypeVec::MakeFromVanilla(ad, dt);
+  auto const mad = [&] () -> ArrayData* {
+    if (et.valueTypes == ValueTypes::Empty) {
+      switch (ad->toDataType()) {
+        case KindOfVArray: return EmptyMonotypeVec::GetVArray(legacy);
+        case KindOfVec:    return EmptyMonotypeVec::GetVec(legacy);
+        case KindOfDArray: return EmptyMonotypeDict::GetDArray(legacy);
+        case KindOfDict:   return EmptyMonotypeDict::GetDict(legacy);
+        default: always_assert(false);
+      }
+    }
+
+    auto const dt = et.valueDatatype;
+    return ad->isDArray() || ad->isDictType()
+      ? MakeMonotypeDictFromVanilla(ad, dt, et.keyTypes)
+      : MonotypeVec::MakeFromVanilla(ad, dt);
+  }();
+
+  if (!ad->isStatic()) return mad;
+
+  // Cache the static array.
+  ArrayData* current = nullptr;
+  if (profile->staticMonotypeArray.compare_exchange_strong(current, mad)) {
+    return mad;
+  }
+  // Someone beat us, free the one we just made.
+  RO::EvalLowStaticArrays ? low_free(mad) : uncounted_free(mad);
+  return current;
 }
 }
 
@@ -676,7 +694,7 @@ ArrayData* makeBespokeForTesting(ArrayData* ad, LoggingProfile* profile) {
   }
   auto const mod = requestCount() % 3;
   if (mod == 1) return bespoke::maybeMakeLoggingArray(ad, profile);
-  if (mod == 2) return bespoke::maybeMonoify(ad);
+  if (mod == 2) return bespoke::maybeMonoify(ad, profile);
   return ad;
 }
 

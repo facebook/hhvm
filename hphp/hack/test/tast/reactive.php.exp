@@ -12,10 +12,7 @@
                    hf_is_mutable_return = false }))));
       f_name = ([4:10-13], "\\foo"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
-      f_cap =
-      (((HH\Capabilities\RxLocal & HH\Capabilities\IO & HH\Capabilities\CippGlobal & HH\Capabilities\Globals & HH\Capabilities\UnrestrictedMutation)),
-       None);
-      f_unsafe_cap = ((mixed), None);
+      f_cap = ((nothing), None); f_unsafe_cap = ((mixed), None);
       f_body =
       { fb_ast =
         [([5:3-25],

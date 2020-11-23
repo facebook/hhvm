@@ -3453,9 +3453,8 @@ and type_capability env cap unsafe_cap default_pos =
   let (env, cap_ty) =
     Option.value_map
       cap_hint_opt
-      ~default:(MakeType.default_capability (Reason.Rhint default_pos))
-      ~f:(Decl_hint.hint env.decl_env)
-    |> Phase.localize_with_self env
+      ~default:(env, MakeType.default_capability (Reason.Rhint default_pos))
+      ~f:(Phase.localize_hint_with_self env)
   in
   let unsafe_cap_hint_opt = hint_of_type_hint unsafe_cap in
   let (env, unsafe_cap_ty) =
@@ -6072,8 +6071,8 @@ and call
           (* Same as above, but checks the types of the implicit arguments, which are
            * read from the context *)
           let check_implicit_args env =
-            let (env, capability) =
-              Typing_coeffects.get_type env ft.ft_implicit_params.capability
+            let capability =
+              Typing_coeffects.get_type ft.ft_implicit_params.capability
             in
             if not (TypecheckerOptions.coeffects (Env.get_tcopt env)) then
               env
@@ -6255,13 +6254,7 @@ and call
             let ft_tparams = [] in
             let ft_where_constraints = [] in
             let ft_params = List.map ~f:mk_fun_param type_of_el in
-            let ft_implicit_params =
-              {
-                capability =
-                  CapDefaults pos
-                  (* TODO(coeffects) should this be a different type? *);
-              }
-            in
+            let ft_implicit_params = { capability = CapDefaults pos } in
             let (env, return_ty) = Env.fresh_type env pos in
             let return_ty =
               match in_await with

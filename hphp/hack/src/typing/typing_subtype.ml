@@ -2133,10 +2133,10 @@ and simplify_subtype_implicit_params
     match (sub_cap, super_cap) with
     | (CapTy sub, CapTy super) -> simplify_subtype ~subtype_env sub super env
     | (CapTy sub, CapDefaults _p) ->
-      let (env, super) = Typing_coeffects.get_type env super_cap in
+      let super = Typing_coeffects.get_type super_cap in
       simplify_subtype ~subtype_env sub super env
     | (CapDefaults _p, CapTy super) ->
-      let (env, sub) = Typing_coeffects.get_type env sub_cap in
+      let sub = Typing_coeffects.get_type sub_cap in
       simplify_subtype ~subtype_env sub super env
     | (CapDefaults _p1, CapDefaults _p2) -> valid env
   else

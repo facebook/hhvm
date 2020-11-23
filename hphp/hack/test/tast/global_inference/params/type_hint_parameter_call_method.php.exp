@@ -19,10 +19,7 @@
             param_callconv = None; param_user_attributes = [];
             param_visibility = None }
            ];
-         m_cap =
-         (((HH\Capabilities\RxLocal & HH\Capabilities\IO & HH\Capabilities\CippGlobal & HH\Capabilities\Globals & HH\Capabilities\UnrestrictedMutation)),
-          None);
-         m_unsafe_cap = ((mixed), None);
+         m_cap = ((nothing), None); m_unsafe_cap = ((mixed), None);
          m_body =
          { fb_ast =
            [([5:5-13],
@@ -58,10 +55,7 @@
           param_name = "$_"; param_expr = None; param_callconv = None;
           param_user_attributes = []; param_visibility = None }
          ];
-       f_cap =
-       (((HH\Capabilities\RxLocal & HH\Capabilities\IO & HH\Capabilities\CippGlobal & HH\Capabilities\Globals & HH\Capabilities\UnrestrictedMutation)),
-        None);
-       f_unsafe_cap = ((mixed), None);
+       f_cap = ((nothing), None); f_unsafe_cap = ((mixed), None);
        f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
        f_external = false;

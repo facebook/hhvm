@@ -14,10 +14,7 @@
          param_expr = None; param_callconv = None;
          param_user_attributes = []; param_visibility = None }
         ];
-      f_cap =
-      (((HH\Capabilities\RxLocal & HH\Capabilities\IO & HH\Capabilities\CippGlobal & HH\Capabilities\Globals & HH\Capabilities\UnrestrictedMutation)),
-       None);
-      f_unsafe_cap = ((mixed), None);
+      f_cap = ((nothing), None); f_unsafe_cap = ((mixed), None);
       f_body =
       { fb_ast =
         [([3:58-68],
@@ -36,10 +33,7 @@
        f_ret = ((void), (Some ([5:18-22], (Hprim Tvoid))));
        f_name = ([5:10-14], "\\test"); f_tparams = [];
        f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
-       f_cap =
-       (((HH\Capabilities\RxLocal & HH\Capabilities\IO & HH\Capabilities\CippGlobal & HH\Capabilities\Globals & HH\Capabilities\UnrestrictedMutation)),
-        None);
-       f_unsafe_cap = ((mixed), None);
+       f_cap = ((nothing), None); f_unsafe_cap = ((mixed), None);
        f_body =
        { fb_ast =
          [([6:3-8:5],
@@ -54,10 +48,7 @@
                         f_mode = Mstrict; f_ret = ((Awaitable<void>), None);
                         f_name = ([6:9-8:4], ";anonymous"); f_tparams = [];
                         f_where_constraints = []; f_variadic = FVnonVariadic;
-                        f_params = [];
-                        f_cap =
-                        (((HH\Capabilities\RxLocal & HH\Capabilities\IO & HH\Capabilities\CippGlobal & HH\Capabilities\Globals & HH\Capabilities\UnrestrictedMutation)),
-                         None);
+                        f_params = []; f_cap = ((nothing), None);
                         f_unsafe_cap = ((mixed), None);
                         f_body =
                         { fb_ast =
@@ -114,9 +105,7 @@
                             param_user_attributes = [];
                             param_visibility = None }
                            ];
-                         f_cap =
-                         (((HH\Capabilities\RxLocal & HH\Capabilities\IO & HH\Capabilities\CippGlobal & HH\Capabilities\Globals & HH\Capabilities\UnrestrictedMutation)),
-                          None);
+                         f_cap = ((nothing), None);
                          f_unsafe_cap = ((mixed), None);
                          f_body =
                          { fb_ast =

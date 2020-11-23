@@ -12,10 +12,7 @@
          m_abstract = false; m_static = false; m_visibility = Public;
          m_name = ([5:19-22], "foo"); m_tparams = [];
          m_where_constraints = []; m_variadic = FVnonVariadic; m_params = [];
-         m_cap =
-         (((HH\Capabilities\RxLocal & HH\Capabilities\IO & HH\Capabilities\CippGlobal & HH\Capabilities\Globals & HH\Capabilities\UnrestrictedMutation)),
-          None);
-         m_unsafe_cap = ((mixed), None);
+         m_cap = ((nothing), None); m_unsafe_cap = ((mixed), None);
          m_body =
          { fb_ast =
            [([6:5-14], (Return (Some (([6:12-13], int), (Int "5")))))];
@@ -46,10 +43,7 @@
           m_abstract = false; m_static = false; m_visibility = Public;
           m_name = ([11:19-22], "foo"); m_tparams = [];
           m_where_constraints = []; m_variadic = FVnonVariadic;
-          m_params = [];
-          m_cap =
-          (((HH\Capabilities\RxLocal & HH\Capabilities\IO & HH\Capabilities\CippGlobal & HH\Capabilities\Globals & HH\Capabilities\UnrestrictedMutation)),
-           None);
+          m_params = []; m_cap = ((nothing), None);
           m_unsafe_cap = ((mixed), None);
           m_body =
           { fb_ast =
@@ -92,10 +86,7 @@
            param_name = "$cond"; param_expr = None; param_callconv = None;
            param_user_attributes = []; param_visibility = None }
          ];
-       f_cap =
-       (((HH\Capabilities\RxLocal & HH\Capabilities\IO & HH\Capabilities\CippGlobal & HH\Capabilities\Globals & HH\Capabilities\UnrestrictedMutation)),
-        None);
-       f_unsafe_cap = ((mixed), None);
+       f_cap = ((nothing), None); f_unsafe_cap = ((mixed), None);
        f_body =
        { fb_ast =
          [([17:3-26],

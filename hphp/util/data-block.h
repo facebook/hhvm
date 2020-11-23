@@ -181,7 +181,7 @@ struct DataBlock {
 
   void bytes(size_t n, const uint8_t *bs) {
     assertCanEmit(n);
-    if (n <= 8 && m_destBase == m_base) {
+    if (n <= 8 && canEmit(8) && m_destBase == m_base) {
       // If it is a modest number of bytes, try executing in one machine
       // store. This allows control-flow edges, including nop, to be
       // appear idempotent on other CPUs. If m_destBase != m_base then the

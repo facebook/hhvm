@@ -826,11 +826,14 @@ void waitOnExportProfiles() {
 
 namespace {
 void freeStaticArray(ArrayData* ad) {
+  // TODO(T80237666): make this less fragile by moving this logic right next
+  // to the corresponding allocation logic
   assertx(ad->isStatic());
-  auto const alloc = ad->hasStrKeyTable()
-    ? reinterpret_cast<char*>(ad->mutableStrKeyTable())
-    : reinterpret_cast<char*>(ad);
- RO::EvalLowStaticArrays ? low_free(alloc) : uncounted_free(alloc);
+  auto const extra = ad->hasStrKeyTable()
+    ? (sizeof(StrKeyTable) + 15) & ~15ull
+    : 0;
+  auto const alloc = reinterpret_cast<char*>(ad) - extra;
+  RO::EvalLowStaticArrays ? low_free(alloc) : uncounted_free(alloc);
 }
 
 bool shouldLogAtSrcKey(SrcKey sk) {

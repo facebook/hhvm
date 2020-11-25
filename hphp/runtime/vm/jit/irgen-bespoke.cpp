@@ -760,7 +760,14 @@ ArrayLayout guardToLayout(IRGS& env, SrcKey sk, Location loc, Type type) {
 
   if (kind == TransKind::Optimize) {
     auto const layout = bespoke::layoutForSink(env.profTransIDs, sk);
-    checkType(env, loc, TArrLike.narrowToLayout(layout), bcOff(env));
+    auto const target = TArrLike.narrowToLayout(layout);
+    if ((type & target) == TBottom) {
+      // If the target is incompatible with the known type, don't produce an
+      // impossible CheckType.
+      assertx(type.arrSpec().vanilla() || type.arrSpec().bespoke());
+      return type.arrSpec().layout();
+    }
+    checkType(env, loc, target, bcOff(env));
     return layout;
   }
   return type.arrSpec().layout();

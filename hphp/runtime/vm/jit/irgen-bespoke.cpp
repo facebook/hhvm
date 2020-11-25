@@ -99,7 +99,7 @@ SSATmp* memberKey(IRGS& env, MemberKey mk) {
       case MW:
         return nullptr;
       case MEL: case MPL:
-        return ldLocWarn(env, mk.local, DataTypeSpecific);
+        return ldLoc(env, mk.local.id, DataTypeSpecific);
       case MEC: case MPC:
         return topC(env, BCSPRelOffset{int32_t(mk.iva)});
       case MEI:
@@ -111,6 +111,7 @@ SSATmp* memberKey(IRGS& env, MemberKey mk) {
   }();
   if (!res) return nullptr;
 
+  if (res->type().maybe(TUninit)) PUNT(MInstr-Uninit-Key);
   if (!res->type().isKnownDataType()) PUNT(MInstr-KeyNotKnown);
   return classConvertPuntOnRaise(env, res);
 }

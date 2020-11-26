@@ -9,7 +9,7 @@ Analyzing \dict_lit_flow:
 * Final environment:
   Deps: {}
   Constraints:
-    [5:12-30] dict < $value, dict'1 < $key
+    [5:12-30] Dict < $value, Dict'1 < $key
   Locals:
     { $#capability -> nothing; $#local_capability -> nothing }
 

@@ -69,6 +69,10 @@ let rec ty ?prefix ?lump renv (t : T.locl_ty) =
   | T.Tunion tyl -> Tunion (List.map ~f:ty tyl)
   | T.Tintersection tyl -> Tinter (List.map ~f:ty tyl)
   | T.Tvarray element_ty
+  | T.Tclass ((_, "\\HH\\ConstSet"), _, [element_ty])
+  | T.Tclass ((_, "\\HH\\ConstVector"), _, [element_ty])
+  | T.Tclass ((_, "\\HH\\ImmSet"), _, [element_ty])
+  | T.Tclass ((_, "\\HH\\ImmVector"), _, [element_ty])
   | T.Tclass ((_, "\\HH\\vec"), _, [element_ty]) ->
     Tcow_array
       {
@@ -80,6 +84,8 @@ let rec ty ?prefix ?lump renv (t : T.locl_ty) =
       }
   | T.Tvarray_or_darray (key_ty, value_ty)
   | T.Tdarray (key_ty, value_ty)
+  | T.Tclass ((_, "\\HH\\ConstMap"), _, [key_ty; value_ty])
+  | T.Tclass ((_, "\\HH\\ImmMap"), _, [key_ty; value_ty])
   | T.Tclass ((_, "\\HH\\dict"), _, [key_ty; value_ty]) ->
     Tcow_array
       {

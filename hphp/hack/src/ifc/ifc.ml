@@ -1049,11 +1049,14 @@ let rec expr ~pos renv (env : Env.expr_env) (((epos, ety), e) : Tast.expr) =
         call env (Clocal ifc_fty) None
     end
   | A.Varray (_, exprs) -> vec_literal ~prefix:"varray" exprs
-  | A.ValCollection (((A.Vec | A.Keyset) as kind), _, exprs) ->
+  | A.ValCollection
+      (((A.Vec | A.Keyset | A.ImmSet | A.ImmVector) as kind), _, exprs) ->
     let prefix = A.show_vc_kind kind in
     vec_literal ~prefix exprs
   | A.Darray (_, fields) -> dict_literal ~prefix:"darray" fields
-  | A.KeyValCollection (A.Dict, _, fields) -> dict_literal ~prefix:"dict" fields
+  | A.KeyValCollection (((A.Dict | A.ImmMap) as kind), _, fields) ->
+    let prefix = A.show_kvc_kind kind in
+    dict_literal ~prefix fields
   | A.Array_get (arry, ix_opt) ->
     (* Evaluate the array *)
     let (env, arry_pty) = expr env arry in

@@ -139,11 +139,11 @@ let make_default_return ~is_method env name =
   else
     mk (r, Typing_utils.tany env)
 
-let async_suggest_return fkind hint pos =
+let async_suggest_return fkind (pos, hint) =
   let is_async = Ast_defs.(equal_fun_kind FAsync fkind) in
   if is_async then
     let e_func = Errors.expecting_awaitable_return_type_hint in
-    match snd hint with
+    match hint with
     | Aast.Hlike (_, Aast.Happly (s, _))
     | Aast.Happly (s, _) ->
       if String.( <> ) (snd s) Naming_special_names.Classes.cAwaitable then

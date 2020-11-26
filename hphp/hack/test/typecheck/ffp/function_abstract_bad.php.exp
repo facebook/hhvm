@@ -2,15 +2,15 @@ File "function_abstract_bad.php", line 4, characters 7-14:
 Top-level functions cannot be declared `abstract` (Parsing[1002])
 File "function_abstract_bad.php", line 4, characters 25-27:
 Invalid return type (Typing[4336])
-File "function_abstract_bad.php", line 4, characters 25-27:
-Expected `Awaitable<void>` because this function does not always return a value
-File "function_abstract_bad.php", line 4, characters 32-35:
-But got `void`
+  File "function_abstract_bad.php", line 4, characters 25-27:
+  Expected `Awaitable<void>` because this function does not always return a value
+  File "function_abstract_bad.php", line 4, characters 32-35:
+  But got `void`
 File "function_abstract_bad.php", line 4, characters 25-27:
 Invalid return type (Typing[4336])
+  File "function_abstract_bad.php", line 4, characters 32-35:
+  Expected `void`
+  File "function_abstract_bad.php", line 4, characters 25-27:
+  But got `Awaitable<void>` because this function does not always return a value
 File "function_abstract_bad.php", line 4, characters 32-35:
-Expected `void`
-File "function_abstract_bad.php", line 4, characters 25-27:
-But got `Awaitable<void>` because this function does not always return a value
-File "function_abstract_bad.php", line 4, characters 25-27:
 Was expecting an `Awaitable` return type hint (Typing[4174])

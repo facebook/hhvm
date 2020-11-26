@@ -397,7 +397,7 @@ let rec fun_def ctx f :
         match hint_of_type_hint f.f_ret with
         | None ->
           if partial_callback 4030 then Errors.expecting_return_type_hint pos
-        | Some hint -> Typing_return.async_suggest_return f.f_fun_kind hint pos
+        | Some hint -> Typing_return.async_suggest_return f.f_fun_kind hint
       end;
       let (env, tparams) = List.map_env env f.f_tparams Typing.type_param in
       let (env, user_attributes) =
@@ -594,7 +594,7 @@ and method_def env cls m =
           if partial_callback 4030 then Errors.expecting_return_type_hint pos;
           None
         | Some hint ->
-          Typing_return.async_suggest_return m.m_fun_kind hint (fst m.m_name);
+          Typing_return.async_suggest_return m.m_fun_kind hint;
           hint_of_type_hint m.m_ret
       in
       let m = { m with m_ret = (fst m.m_ret, type_hint') } in

@@ -20,8 +20,7 @@ val make_info :
   Typing_defs.decl_ty option ->
   Typing_env_return_info.t
 
-val async_suggest_return :
-  Ast_defs.fun_kind -> 'a * Aast.hint_ -> Ast_defs.pos -> unit
+val async_suggest_return : Ast_defs.fun_kind -> Aast.hint -> unit
 
 val implicit_return :
   env ->

@@ -2,15 +2,15 @@ File "function_static_bad.php", line 4, characters 7-12:
 Top-level functions cannot be declared `static` (Parsing[1002])
 File "function_static_bad.php", line 4, characters 23-25:
 Invalid return type (Typing[4336])
-File "function_static_bad.php", line 4, characters 23-25:
-Expected `Awaitable<void>` because this function does not always return a value
-File "function_static_bad.php", line 4, characters 30-33:
-But got `void`
+  File "function_static_bad.php", line 4, characters 23-25:
+  Expected `Awaitable<void>` because this function does not always return a value
+  File "function_static_bad.php", line 4, characters 30-33:
+  But got `void`
 File "function_static_bad.php", line 4, characters 23-25:
 Invalid return type (Typing[4336])
+  File "function_static_bad.php", line 4, characters 30-33:
+  Expected `void`
+  File "function_static_bad.php", line 4, characters 23-25:
+  But got `Awaitable<void>` because this function does not always return a value
 File "function_static_bad.php", line 4, characters 30-33:
-Expected `void`
-File "function_static_bad.php", line 4, characters 23-25:
-But got `Awaitable<void>` because this function does not always return a value
-File "function_static_bad.php", line 4, characters 23-25:
 Was expecting an `Awaitable` return type hint (Typing[4174])

@@ -2,15 +2,15 @@ File "function_private_bad.php", line 4, characters 7-13:
 Top-level functions cannot be declared `private` (Parsing[1002])
 File "function_private_bad.php", line 4, characters 24-26:
 Invalid return type (Typing[4336])
-File "function_private_bad.php", line 4, characters 24-26:
-Expected `Awaitable<void>` because this function does not always return a value
-File "function_private_bad.php", line 4, characters 31-34:
-But got `void`
+  File "function_private_bad.php", line 4, characters 24-26:
+  Expected `Awaitable<void>` because this function does not always return a value
+  File "function_private_bad.php", line 4, characters 31-34:
+  But got `void`
 File "function_private_bad.php", line 4, characters 24-26:
 Invalid return type (Typing[4336])
+  File "function_private_bad.php", line 4, characters 31-34:
+  Expected `void`
+  File "function_private_bad.php", line 4, characters 24-26:
+  But got `Awaitable<void>` because this function does not always return a value
 File "function_private_bad.php", line 4, characters 31-34:
-Expected `void`
-File "function_private_bad.php", line 4, characters 24-26:
-But got `Awaitable<void>` because this function does not always return a value
-File "function_private_bad.php", line 4, characters 24-26:
 Was expecting an `Awaitable` return type hint (Typing[4174])

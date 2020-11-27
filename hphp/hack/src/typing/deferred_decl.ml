@@ -98,3 +98,11 @@ let add_deferment ~(d : deferment) : unit =
     before we can get on with our regular typechecking work. *)
 let get_deferments () : deferment list =
   !state.deferments |> Deferment_set.elements
+
+let with_deferred_decls
+    ~enable ~declaration_threshold_opt ~memory_mb_threshold_opt f =
+  reset ~enable ~declaration_threshold_opt ~memory_mb_threshold_opt;
+  let result = f () in
+  match get_deferments () with
+  | [] -> Ok result
+  | deferred_files -> Error deferred_files

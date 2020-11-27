@@ -239,12 +239,6 @@ let process_file
           Relative_path.Set.mem dynamic_view_files fn;
       }
     in
-    Deferred_decl.reset
-      ~enable:(should_enable_deferring opts file)
-      ~declaration_threshold_opt:
-        (GlobalOptions.tco_defer_class_declaration_threshold opts)
-      ~memory_mb_threshold_opt:
-        (GlobalOptions.tco_defer_class_memory_mb_threshold opts);
     let (funs, classes, record_defs, typedefs, gconsts) = Nast.get_defs ast in
     let ctx = Provider_context.map_tcopt ctx ~f:(fun _tcopt -> opts) in
     let ignore_type_record_def opts fn name =
@@ -256,32 +250,30 @@ let process_file
     let ignore_check_const opts fn name = ignore (check_const opts fn name) in
     try
       let result =
-        let result =
-          Errors.do_with_context fn Errors.Typing (fun () ->
-              let (fun_tasts, fun_global_tvenvs) =
-                List.map funs ~f:snd
-                |> List.filter_map ~f:(type_fun ctx fn)
-                |> List.unzip
-              in
-              let (class_tasts, class_global_tvenvs) =
-                List.map classes ~f:snd
-                |> List.filter_map ~f:(type_class ctx fn)
-                |> List.unzip
-              in
-              let class_global_tvenvs = List.concat class_global_tvenvs in
-              List.map record_defs ~f:snd
-              |> List.iter ~f:(ignore_type_record_def ctx fn);
-              List.map typedefs ~f:snd
-              |> List.iter ~f:(ignore_check_typedef ctx fn);
-              List.map gconsts ~f:snd
-              |> List.iter ~f:(ignore_check_const ctx fn);
-              (fun_tasts @ class_tasts, fun_global_tvenvs @ class_global_tvenvs))
+        Deferred_decl.with_deferred_decls
+          ~enable:(should_enable_deferring opts file)
+          ~declaration_threshold_opt:
+            (GlobalOptions.tco_defer_class_declaration_threshold opts)
+          ~memory_mb_threshold_opt:
+            (GlobalOptions.tco_defer_class_memory_mb_threshold opts)
+        @@ fun () ->
+        Errors.do_with_context fn Errors.Typing @@ fun () ->
+        let (fun_tasts, fun_global_tvenvs) =
+          List.map funs ~f:snd
+          |> List.filter_map ~f:(type_fun ctx fn)
+          |> List.unzip
         in
-        (* "Deferments" are files with decls that we need to fetch before we can
-        usefully reattempt the current process_file that we're working on. *)
-        match Deferred_decl.get_deferments () with
-        | [] -> Ok result
-        | deferred_decls -> Error deferred_decls
+        let (class_tasts, class_global_tvenvs) =
+          List.map classes ~f:snd
+          |> List.filter_map ~f:(type_class ctx fn)
+          |> List.unzip
+        in
+        let class_global_tvenvs = List.concat class_global_tvenvs in
+        List.map record_defs ~f:snd
+        |> List.iter ~f:(ignore_type_record_def ctx fn);
+        List.map typedefs ~f:snd |> List.iter ~f:(ignore_check_typedef ctx fn);
+        List.map gconsts ~f:snd |> List.iter ~f:(ignore_check_const ctx fn);
+        (fun_tasts @ class_tasts, fun_global_tvenvs @ class_global_tvenvs)
       in
       match result with
       | Ok (errors', (tasts, global_tvenvs)) ->

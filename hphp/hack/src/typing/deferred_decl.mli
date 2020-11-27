@@ -6,6 +6,7 @@
  *
  *)
 
+open Hh_prelude
 open Reordered_argument_collections
 
 (** A [deferment] is a file which contains a decl that we need to fetch before
@@ -51,3 +52,10 @@ val increment_counter : unit -> unit
     and discover that you need to fetch yet another class "\\D" from file d.php.
     This will raise if the counter for computed decls is over the set up threshold. *)
 val raise_if_should_defer : deferment:deferment -> unit
+
+val with_deferred_decls :
+  enable:bool ->
+  declaration_threshold_opt:int option ->
+  memory_mb_threshold_opt:int option ->
+  (unit -> 'res) ->
+  ('res, deferment list) Result.t

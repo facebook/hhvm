@@ -128,8 +128,13 @@ struct EmptyMonotypeDict : BespokeArray {
 template <typename Key>
 struct MonotypeDict : BespokeArray {
   static uint8_t ComputeSizeIndex(size_t size);
+
+  // Create a new, empty MonotypeDict with the given capacity. The result will
+  // have a refcount of 1, but if Static is true, it will be in static memory.
+  template <bool Static = false>
   static MonotypeDict* MakeReserve(
       HeaderKind kind, bool legacy, size_t capacity, DataType dt);
+
   static MonotypeDict* MakeFromVanilla(ArrayData* ad, DataType dt);
 
   static MonotypeDict* As(ArrayData* ad);
@@ -231,6 +236,7 @@ struct MonotypeDictLayout : public ConcreteLayout {
 
 bool isMonotypeDictLayout(LayoutIndex index);
 
-ArrayData* MakeMonotypeDictFromVanilla(ArrayData* ad, DataType dt, KeyTypes kt);
+// Returns nullptr on failure (e.g. on exceeding the max MonotypeDict size).
+BespokeArray* MakeMonotypeDictFromVanilla(ArrayData*, DataType, KeyTypes);
 
 }}

@@ -364,12 +364,18 @@ void MonotypeVec::incRefValues() {
   );
 }
 
+template <bool Static>
 MonotypeVec* MonotypeVec::MakeReserve(
     HeaderKind hk, bool legacy, uint32_t capacity, DataType dt) {
   auto const bytes = sizeof(MonotypeVec) + capacity * sizeof(Value);
   auto const index = std::max(MemoryManager::size2Index(bytes), kMinSizeIndex);
+  auto const alloc = [&]{
+    if (!Static) return tl_heap->objMallocIndex(index);
+    auto const size = MemoryManager::sizeIndex2Size(index);
+    return RO::EvalLowStaticArrays ? low_malloc(size) : uncounted_malloc(size);
+  }();
 
-  auto const mad = static_cast<MonotypeVec*>(tl_heap->objMallocIndex(index));
+  auto const mad = static_cast<MonotypeVec*>(alloc);
   auto const aux = packSizeIndexAndAuxBits(
       index, legacy ? ArrayData::kLegacyArray : 0);
 
@@ -385,7 +391,9 @@ MonotypeVec* MonotypeVec::MakeFromVanilla(ArrayData* ad, DataType dt) {
   assertx(ad->hasVanillaPackedLayout());
   auto const kind = ad->isVArray() ? HeaderKind::BespokeVArray
                                    : HeaderKind::BespokeVec;
-  auto result = MakeReserve(kind, ad->isLegacyArray(), ad->size(), dt);
+  auto result = ad->isStatic()
+    ? MakeReserve<true>(kind, ad->isLegacyArray(), ad->size(), dt)
+    : MakeReserve<false>(kind, ad->isLegacyArray(), ad->size(), dt);
 
   PackedArray::IterateVNoInc(ad, [&](auto v) {
     auto const next = Append(result, v);
@@ -394,15 +402,9 @@ MonotypeVec* MonotypeVec::MakeFromVanilla(ArrayData* ad, DataType dt) {
   });
 
   if (ad->isStatic()) {
-    auto const size = HeapSize(result);
-    auto const copy = static_cast<MonotypeVec*>(
-        RO::EvalLowStaticArrays ? low_malloc(size) : uncounted_malloc(size));
-    memcpy16_inline(copy, result, size);
     auto const aux = packSizeIndexAndAuxBits(
       result->sizeIndex(), result->auxBits());
-    copy->initHeader_16(kind, StaticValue, aux);
-    Release(result);
-    result = copy;
+    result->initHeader_16(kind, StaticValue, aux);
   }
 
   assertx(result->checkInvariants());

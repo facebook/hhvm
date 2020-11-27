@@ -118,25 +118,6 @@ DataType selectValType(const SinkProfile& profile, double p_cutoff) {
   return kInvalidDataType;
 }
 
-BespokeArray* computeStaticMonotypeArray(ArrayData* ad) {
-  assertx(ad->isVanilla());
-  if (ad->isKeysetType()) return nullptr;
-
-  // TODO(kshaunak): We should produce monotype versions of non-empty arrays.
-  if (!ad->empty()) return nullptr;
-
-  auto const legacy = ad->isLegacyArray();
-
-  switch (ad->kind()) {
-    using AK = ArrayData::ArrayKind;
-    case AK::kPackedKind: return EmptyMonotypeVec::GetVArray(legacy);
-    case AK::kVecKind:    return EmptyMonotypeVec::GetVec(legacy);
-    case AK::kMixedKind:  return EmptyMonotypeDict::GetDArray(legacy);
-    case AK::kDictKind:   return EmptyMonotypeDict::GetDict(legacy);
-    default: always_assert(false);
-  }
-}
-
 ArrayLayout selectSourceLayout(LoggingProfile& profile) {
   auto const load = [](auto& x) { return x.load(std::memory_order_relaxed); };
 
@@ -167,9 +148,9 @@ ArrayLayout selectSourceLayout(LoggingProfile& profile) {
 
   auto const p_monotype = 1.0 * monotype / total;
   if (p_monotype >= p_cutoff) {
-    auto const ad = profile.staticSampledArray;
-    if (ad == nullptr) return ArrayLayout::Vanilla();
-    auto const mad = computeStaticMonotypeArray(ad);
+    auto const sad = profile.staticSampledArray;
+    if (sad == nullptr) return ArrayLayout::Vanilla();
+    auto const mad = maybeMonoify(sad);
     if (mad == nullptr) return ArrayLayout::Vanilla();
 
     profile.staticBespokeArray = mad;
@@ -183,9 +164,7 @@ ArrayLayout selectSourceLayout(LoggingProfile& profile) {
       lval.val().parr = mad;
     }
 
-    return ad->isVecType() || ad->isVArray()
-      ? ArrayLayout(EmptyMonotypeVecLayout::Index())
-      : ArrayLayout(EmptyMonotypeDictLayout::Index());
+    return ArrayLayout(mad->layoutIndex());
   }
 
   return ArrayLayout::Vanilla();

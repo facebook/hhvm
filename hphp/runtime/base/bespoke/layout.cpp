@@ -621,6 +621,28 @@ const ConcreteLayout* ConcreteLayout::FromConcreteIndex(LayoutIndex index) {
 
 //////////////////////////////////////////////////////////////////////////////
 
+namespace {
+ArrayData* maybeMonoifyForTesting(ArrayData* ad, LoggingProfile* profile) {
+  auto const mad = profile->staticMonotypeArray.load(std::memory_order_relaxed);
+  if (mad) return mad;
+
+  auto const result = maybeMonoify(ad);
+  if (!result) return ad;
+  ad->decRefAndRelease();
+
+  // We should cache a staticMonotypeArray iff this profile is for a static
+  // array constructor or static prop - i.e. iff staticLoggingArray is set.
+  if (!profile->staticLoggingArray) return result;
+
+  ArrayData* current = nullptr;
+  if (profile->staticMonotypeArray.compare_exchange_strong(current, result)) {
+    return result;
+  }
+  RO::EvalLowStaticArrays ? low_free(result) : uncounted_free(result);
+  return current;
+}
+}
+
 void logBespokeDispatch(const ArrayData* ad, const char* fn) {
   DEBUG_ONLY auto const sk = getSrcKey();
   DEBUG_ONLY auto const index = BespokeArray::asBespoke(ad)->layoutIndex();
@@ -629,9 +651,8 @@ void logBespokeDispatch(const ArrayData* ad, const char* fn) {
             sk.getSymbol().data(), layout->describe().data(), fn);
 }
 
-namespace {
-ArrayData* maybeMonoify(ArrayData* ad, LoggingProfile* profile) {
-  if (!ad->isVanilla() || ad->isKeysetType()) return ad;
+BespokeArray* maybeMonoify(ArrayData* ad) {
+  if (!ad->isVanilla() || ad->isKeysetType()) return nullptr;
 
   auto const et = EntryTypes::ForArray(ad);
   auto const monotype_keys =
@@ -646,46 +667,25 @@ ArrayData* maybeMonoify(ArrayData* ad, LoggingProfile* profile) {
   assertx(IMPLIES(ad->isVArray() || ad->isVecType(), monotype_keys));
 
   if (!(monotype_keys && monotype_vals)) {
-    return ad;
+    return nullptr;
   }
-
-  SCOPE_EXIT { ad->decRefAndRelease(); };
 
   auto const legacy = ad->isLegacyArray();
 
-  if (ad->isStatic() &&
-      profile->staticMonotypeArray.load(std::memory_order_relaxed)) {
-    return profile->staticMonotypeArray;
-  }
-
-  auto const mad = [&] () -> ArrayData* {
-    if (et.valueTypes == ValueTypes::Empty) {
-      switch (ad->toDataType()) {
-        case KindOfVArray: return EmptyMonotypeVec::GetVArray(legacy);
-        case KindOfVec:    return EmptyMonotypeVec::GetVec(legacy);
-        case KindOfDArray: return EmptyMonotypeDict::GetDArray(legacy);
-        case KindOfDict:   return EmptyMonotypeDict::GetDict(legacy);
-        default: always_assert(false);
-      }
+  if (et.valueTypes == ValueTypes::Empty) {
+    switch (ad->toDataType()) {
+      case KindOfVArray: return EmptyMonotypeVec::GetVArray(legacy);
+      case KindOfVec:    return EmptyMonotypeVec::GetVec(legacy);
+      case KindOfDArray: return EmptyMonotypeDict::GetDArray(legacy);
+      case KindOfDict:   return EmptyMonotypeDict::GetDict(legacy);
+      default: always_assert(false);
     }
-
-    auto const dt = et.valueDatatype;
-    return ad->isDArray() || ad->isDictType()
-      ? MakeMonotypeDictFromVanilla(ad, dt, et.keyTypes)
-      : MonotypeVec::MakeFromVanilla(ad, dt);
-  }();
-
-  if (!ad->isStatic()) return mad;
-
-  // Cache the static array.
-  ArrayData* current = nullptr;
-  if (profile->staticMonotypeArray.compare_exchange_strong(current, mad)) {
-    return mad;
   }
-  // Someone beat us, free the one we just made.
-  RO::EvalLowStaticArrays ? low_free(mad) : uncounted_free(mad);
-  return current;
-}
+
+  auto const dt = et.valueDatatype;
+  return ad->isDArray() || ad->isDictType()
+    ? MakeMonotypeDictFromVanilla(ad, dt, et.keyTypes)
+    : MonotypeVec::MakeFromVanilla(ad, dt);
 }
 
 ArrayData* makeBespokeForTesting(ArrayData* ad, LoggingProfile* profile) {
@@ -694,7 +694,7 @@ ArrayData* makeBespokeForTesting(ArrayData* ad, LoggingProfile* profile) {
   }
   auto const mod = requestCount() % 3;
   if (mod == 1) return bespoke::maybeMakeLoggingArray(ad, profile);
-  if (mod == 2) return bespoke::maybeMonoify(ad, profile);
+  if (mod == 2) return bespoke::maybeMonoifyForTesting(ad, profile);
   return ad;
 }
 

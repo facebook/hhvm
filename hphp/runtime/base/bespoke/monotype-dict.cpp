@@ -449,23 +449,28 @@ uint8_t MonotypeDict<Key>::ComputeSizeIndex(size_t size) {
   return result;
 }
 
-template <typename Key>
+template <typename Key> template <bool Static>
 MonotypeDict<Key>* MonotypeDict<Key>::MakeReserve(
-    HeaderKind kind, bool legacy, size_t size, DataType dt) {
-  auto const index = ComputeSizeIndex(size);
-  auto const mem = tl_heap->objMallocIndex(index);
-  auto const ad = reinterpret_cast<MonotypeDict<Key>*>(mem);
+    HeaderKind kind, bool legacy, size_t capacity, DataType dt) {
+  auto const index = ComputeSizeIndex(capacity);
+  auto const alloc = [&]{
+    if (!Static) return tl_heap->objMallocIndex(index);
+    auto const size = MemoryManager::sizeIndex2Size(index);
+    return RO::EvalLowStaticArrays ? low_malloc(size) : uncounted_malloc(size);
+  }();
 
+  auto const mad = static_cast<MonotypeDict<Key>*>(alloc);
   auto const aux = packSizeIndexAndAuxBits(
       index, legacy ? ArrayData::kLegacyArray : 0);
-  ad->initHeader_16(kind, OneReference, aux);
-  ad->setLayoutIndex(getLayoutIndex<Key>(dt));
-  ad->m_extra_lo16 = 0;
-  ad->m_size = 0;
-  ad->initHash();
 
-  assertx(ad->checkInvariants());
-  return ad;
+  mad->initHeader_16(kind, OneReference, aux);
+  mad->setLayoutIndex(getLayoutIndex<Key>(dt));
+  mad->m_extra_lo16 = 0;
+  mad->m_size = 0;
+  mad->initHash();
+
+  assertx(mad->checkInvariants());
+  return mad;
 }
 
 template <typename Key>
@@ -475,7 +480,9 @@ MonotypeDict<Key>* MonotypeDict<Key>::MakeFromVanilla(
   assertx(ad->hasVanillaMixedLayout());
   auto const kind = ad->isDArray() ? HeaderKind::BespokeDArray
                                    : HeaderKind::BespokeDict;
-  auto result = MakeReserve(kind, ad->isLegacyArray(), ad->size(), dt);
+  auto result = ad->isStatic()
+    ? MakeReserve<true>(kind, ad->isLegacyArray(), ad->size(), dt)
+    : MakeReserve<false>(kind, ad->isLegacyArray(), ad->size(), dt);
 
   MixedArray::IterateKV(MixedArray::asMixed(ad), [&](auto k, auto v) {
     auto const next = tvIsString(k) ? SetStr(result, val(k).pstr, v)
@@ -485,15 +492,9 @@ MonotypeDict<Key>* MonotypeDict<Key>::MakeFromVanilla(
   });
 
   if (ad->isStatic()) {
-    auto const size = HeapSize(result);
-    auto const copy = static_cast<Self*>(
-        RO::EvalLowStaticArrays ? low_malloc(size) : uncounted_malloc(size));
-    memcpy16_inline(copy, result, size);
     auto const aux = packSizeIndexAndAuxBits(
       result->sizeIndex(), result->auxBits());
-    copy->initHeader_16(kind, StaticValue, aux);
-    Release(result);
-    result = copy;
+    result->initHeader_16(kind, StaticValue, aux);
   }
 
   assertx(result->checkInvariants());
@@ -1443,12 +1444,9 @@ bool isMonotypeDictLayout(LayoutIndex index) {
          index.raw < 2 * kBaseLayoutIndex.raw;
 }
 
-ArrayData* MakeMonotypeDictFromVanilla(
+BespokeArray* MakeMonotypeDictFromVanilla(
     ArrayData* ad, DataType dt, KeyTypes kt) {
-  if (ad->size() > kMaxNumElms) {
-    ad->incRefCount();
-    return ad;
-  }
+  if (ad->size() > kMaxNumElms) return nullptr;
   switch (kt) {
     case KeyTypes::Ints:
       return MonotypeDict<int64_t>::MakeFromVanilla(ad, dt);

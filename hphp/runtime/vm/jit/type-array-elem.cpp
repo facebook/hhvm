@@ -234,7 +234,7 @@ std::pair<Type, bool> vecFirstLastType(Type arr,
   if (arr.hasConstVal()) {
     auto const val = arr.arrLikeVal();
     if (val->empty()) return {TBottom, false};
-    auto const pos = isFirst ? val->iter_begin() : val->iter_end();
+    auto const pos = isFirst ? val->iter_begin() : val->iter_last();
     return {Type::cns(val->nvGetVal(pos)), true};
   }
 

@@ -39,6 +39,9 @@ namespace bespoke {
 
 void logBespokeDispatch(const ArrayData* ad, const char* fn);
 
+// Return a monotype copy of a vanilla array, or nullptr if it's not monotype.
+BespokeArray* maybeMonoify(ArrayData*);
+
 #define BESPOKE_LAYOUT_FUNCTIONS(T) \
   X(size_t, HeapSize, const T* ad) \
   X(void, Scan, const T* ad, type_scan::Scanner& scanner) \

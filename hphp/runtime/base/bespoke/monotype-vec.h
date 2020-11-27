@@ -35,8 +35,10 @@ struct MonotypeVec : public BespokeArray {
   static void InitializeLayouts();
 
   /**
-   * Create a new, empty MonotypeVec with the given capacity.
+   * Create a new, empty MonotypeVec with the given capacity. The result will
+   * have a refcount of 1, but if Static is true, it will be in static memory.
    */
+  template <bool Static = false>
   static MonotypeVec* MakeReserve(
       HeaderKind hk, bool legacy, uint32_t capacity, DataType dt);
 

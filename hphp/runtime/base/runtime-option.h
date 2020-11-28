@@ -1084,6 +1084,13 @@ struct RuntimeOption {
   F(int32_t, BespokeArrayLikeMode, 0)                                   \
   F(uint64_t, EmitLoggingArraySampleRate, 1000)                         \
   F(string, ExportLoggingArrayDataPath, "")                             \
+  /* Choice of layout selection algorithms:                             \
+   *                                                                    \
+   * 0 - Default layout selection algorithm based on profiling.         \
+   *     May use a mix of vanilla and bespoke array-likes.              \
+   * 1 - Specialize all sources and sinks on vanilla layouts.           \
+   * 2 - Specialize sources on vanilla, but sinks on top. */            \
+  F(int32_t, BespokeArraySpecializationMode, 0)                         \
   /* We will use specialized layouts for a given array if they cover    \
    * the given percent of operations logged during profiling. */        \
   F(double, BespokeArraySourceSpecializationThreshold, 95.0)            \

@@ -760,9 +760,9 @@ ArrayLayout guardToLayout(IRGS& env, SrcKey sk, Location loc, Type type) {
   if (kind == TransKind::Optimize) {
     auto const layout = bespoke::layoutForSink(env.profTransIDs, sk);
     auto const target = TArrLike.narrowToLayout(layout);
-    if ((type & target) == TBottom) {
-      // If the target is incompatible with the known type, don't produce an
-      // impossible CheckType.
+    if (!type.maybe(target)) {
+      // If the predicted type is incompatible with the known type, avoid
+      // generating an impossible CheckType followed by unreachable code.
       assertx(type.arrSpec().vanilla() || type.arrSpec().bespoke());
       return type.arrSpec().layout();
     }

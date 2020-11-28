@@ -119,6 +119,9 @@ DataType selectValType(const SinkProfile& profile, double p_cutoff) {
 }
 
 ArrayLayout selectSourceLayout(LoggingProfile& profile) {
+  auto const mode = RO::EvalBespokeArraySpecializationMode;
+  if (mode == 1 || mode == 2) return ArrayLayout::Vanilla();
+
   auto const load = [](auto& x) { return x.load(std::memory_order_relaxed); };
 
   auto const logging = load(profile.loggingArraysEmitted);
@@ -171,6 +174,10 @@ ArrayLayout selectSourceLayout(LoggingProfile& profile) {
 }
 
 ArrayLayout selectSinkLayout(const SinkProfile& profile) {
+  auto const mode = RO::EvalBespokeArraySpecializationMode;
+  if (mode == 1) return ArrayLayout::Vanilla();
+  if (mode == 2) return ArrayLayout::Top();
+
   auto const load = [](auto& x) { return x.load(std::memory_order_relaxed); };
 
   auto const sampled = load(profile.sampledCount);
@@ -244,6 +251,11 @@ ArrayLayout layoutForSource(SrcKey sk) {
 }
 
 ArrayLayout layoutForSink(const jit::TransIDSet& ids, SrcKey sk) {
+  // TODO(kshaunak): Delete this block when we can ser/de bespoke profiles.
+  auto const mode = RO::EvalBespokeArraySpecializationMode;
+  if (mode == 1) return ArrayLayout::Vanilla();
+  if (mode == 2) return ArrayLayout::Top();
+
   if (ids.empty()) return ArrayLayout::Top();
   auto result = ArrayLayout::Bottom();
   for (auto const id : ids) {

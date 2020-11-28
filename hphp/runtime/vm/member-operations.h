@@ -1590,8 +1590,6 @@ inline void SetNewElemVecMove(tv_lval base, TypedValue* value) {
   if (a2 != a) {
     type(base) = dt_with_rc(type(base));
     val(base).parr = a2;
-    assertx(tvIsPlausible(*base));
-    a->decRefAndRelease();
   }
 }
 

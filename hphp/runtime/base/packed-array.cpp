@@ -740,12 +740,14 @@ ssize_t PackedArray::IterRewind(const ArrayData* ad, ssize_t pos) {
   return ad->m_size;
 }
 
-ArrayData* PackedArray::AppendImpl(ArrayData* adIn, TypedValue v, bool copy, bool move) {
+ArrayData* PackedArray::AppendImpl(
+    ArrayData* adIn, TypedValue v, bool copy, bool move) {
   assertx(checkInvariants(adIn));
   assertx(v.m_type != KindOfUninit);
   assertx(copy || adIn->notCyclic(v));
   auto const ad = PrepareForInsert(adIn, copy);
   if (move) {
+    if (ad != adIn && adIn->decReleaseCheck()) Release(adIn);
     tvCopy(v, LvalUncheckedInt(ad, ad->m_size++));
   } else {
     tvDup(v, LvalUncheckedInt(ad, ad->m_size++));

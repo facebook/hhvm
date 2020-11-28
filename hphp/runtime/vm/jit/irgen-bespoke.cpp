@@ -728,10 +728,8 @@ folly::Optional<Location> getVanillaLocation(const IRGS& env, SrcKey sk) {
 }
 
 // Returns a location that we should do some layout-sensitive guards for.
-// Unlike getVanillaLocation, this helper checks options, known types, etc.
+// Unlike getVanillaLocation, this helper checks known types.
 folly::Optional<Location> getLocationToGuard(const IRGS& env, SrcKey sk) {
-  if (!allowBespokeArrayLikes()) return folly::none;
-
   // If this check fails, the bytecode is not layout-sensitive.
   auto const loc = getVanillaLocation(env, sk);
   if (!loc) return folly::none;
@@ -940,6 +938,7 @@ bool specializeSource(IRGS& env, SrcKey sk) {
 
 void handleBespokeInputs(IRGS& env, const NormalizedInstruction& ni,
                          std::function<void(IRGS&)> emitVanilla) {
+  if (!allowBespokeArrayLikes()) return emitVanilla(env);
   auto const sk = ni.source;
   if (specializeSource(env, sk)) return;
   auto const loc = getLocationToGuard(env, sk);

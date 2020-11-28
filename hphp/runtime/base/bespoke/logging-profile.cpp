@@ -854,6 +854,7 @@ bool shouldLogAtSrcKey(SrcKey sk) {
 }
 
 LoggingProfile* getLoggingProfile(LoggingProfileKey key) {
+  assertx(allowBespokeArrayLikes());
   {
     ProfileMap::const_accessor it;
     if (s_profileMap.find(it, key)) return it->second;
@@ -925,6 +926,7 @@ LoggingProfile* getLoggingProfile(const Class* cls, Slot slot) {
 }
 
 SinkProfile* getSinkProfile(TransID id, SrcKey skRaw) {
+  assertx(allowBespokeArrayLikes());
   auto const key = SinkProfileKey { id, canonicalize(skRaw) };
   {
     SinkMap::const_accessor it;

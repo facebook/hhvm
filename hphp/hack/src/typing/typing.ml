@@ -1484,8 +1484,7 @@ and expr_
             arraykey_value p class_name
           | Vector
           | ImmVector
-          | Vec
-          | Pair_ ->
+          | Vec ->
             array_value
         in
         ( get_vc_inst kind,

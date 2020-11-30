@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<9ce8aef1153d3d2bb18c51af4486fc4f>>
+// @generated SignedSource<<bf0499b5d1b1e4d7bd71cf09808bbce9>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -2067,7 +2067,6 @@ impl<P: Params> Node<P> for VcKind {
             VcKind::Vec => Ok(()),
             VcKind::Set => Ok(()),
             VcKind::ImmSet => Ok(()),
-            VcKind::Pair_ => Ok(()),
             VcKind::Keyset => Ok(()),
         }
     }

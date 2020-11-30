@@ -179,7 +179,6 @@ let vc_kind_to_name kind =
   | Set -> SN.Collections.cSet
   | ImmSet -> SN.Collections.cImmSet
   | Keyset -> SN.Collections.cKeyset
-  | Pair_ -> SN.Collections.cPair
 
 (* XHP attribute helpers *)
 let map_xhp_attr (f : pstring -> pstring) (g : expr -> expr) = function

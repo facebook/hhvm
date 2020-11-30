@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b0ca2cbdae299f19ea0224a3bc411dd4>>
+// @generated SignedSource<<1024fa91ad42205dbc40a283ab695052>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -869,9 +869,6 @@ impl VcKind {
     pub fn mk_imm_set() -> Self {
         VcKind::ImmSet
     }
-    pub fn mk_pair_() -> Self {
-        VcKind::Pair_
-    }
     pub fn mk_keyset() -> Self {
         VcKind::Keyset
     }
@@ -902,12 +899,6 @@ impl VcKind {
     pub fn is_imm_set(&self) -> bool {
         match self {
             VcKind::ImmSet => true,
-            _ => false,
-        }
-    }
-    pub fn is_pair_(&self) -> bool {
-        match self {
-            VcKind::Pair_ => true,
             _ => false,
         }
     }

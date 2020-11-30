@@ -170,7 +170,6 @@ and vc_kind =
   | Vec
   | Set
   | ImmSet
-  | Pair_
   | Keyset
 [@@visitors.opaque]
 

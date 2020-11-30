@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<31c9d190052702d0593e92e77cc88a74>>
+// @generated SignedSource<<2f3331bca3e7d3a5ef41c72980ce218e>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -382,7 +382,6 @@ pub enum VcKind {
     Vec,
     Set,
     ImmSet,
-    Pair_,
     Keyset,
 }
 impl TrivialDrop for VcKind {}

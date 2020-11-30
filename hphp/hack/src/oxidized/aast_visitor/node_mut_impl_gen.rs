@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<5a5cbc5ddd470a6fb5e92ec52fd264c7>>
+// @generated SignedSource<<4843e2c14369a01edb5e931df9a502c2>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -2067,7 +2067,6 @@ impl<P: Params> NodeMut<P> for VcKind {
             VcKind::Vec => Ok(()),
             VcKind::Set => Ok(()),
             VcKind::ImmSet => Ok(()),
-            VcKind::Pair_ => Ok(()),
             VcKind::Keyset => Ok(()),
         }
     }

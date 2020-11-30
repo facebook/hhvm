@@ -293,11 +293,9 @@ let use_precomputed_state_exn
   let deptable =
     deptable_with_filename ~is_64bit:deptable_is_64bit deptable_fn
   in
-  CgroupProfiler.collect_cgroup_stats
-    ~profiling
-    ~stage:"load deptable"
-    ~f:(fun () ->
-      lock_and_load_deptable deptable ~ignore_hh_version ~fail_if_missing);
+  CgroupProfiler.collect_cgroup_stats ~profiling ~stage:"load deptable"
+  @@ fun () ->
+  lock_and_load_deptable deptable ~ignore_hh_version ~fail_if_missing;
   let changes = Relative_path.set_of_list changes in
   let naming_changes = Relative_path.set_of_list naming_changes in
   let prechecked_changes = Relative_path.set_of_list prechecked_changes in
@@ -305,16 +303,14 @@ let use_precomputed_state_exn
   let shallow_decls = genv.local_config.SLC.shallow_class_decl in
   let naming_table_fallback_path = get_naming_table_fallback_path genv None in
   let (old_naming_table, old_errors) =
-    CgroupProfiler.collect_cgroup_stats
-      ~profiling
-      ~stage:"load saved state"
-      ~f:(fun () ->
-        SaveStateService.load_saved_state
-          ctx
-          saved_state_fn
-          ~naming_table_fallback_path
-          ~load_decls
-          ~shallow_decls)
+    CgroupProfiler.collect_cgroup_stats ~profiling ~stage:"load saved state"
+    @@ fun () ->
+    SaveStateService.load_saved_state
+      ctx
+      saved_state_fn
+      ~naming_table_fallback_path
+      ~load_decls
+      ~shallow_decls
   in
   {
     saved_state_fn;
@@ -369,7 +365,12 @@ let naming_from_saved_state
     (old_naming_table : Naming_table.t)
     (parsing_files : Relative_path.Set.t)
     (naming_table_fn : string option)
-    (t : float) : float =
+    (t : float)
+    ~(profiling : CgroupProfiler.Profiling.t) : float =
+  CgroupProfiler.collect_cgroup_stats
+    ~profiling
+    ~stage:"naming from saved state"
+  @@ fun () ->
   (* If we're falling back to SQLite we don't need to explicitly do a naming
      pass, but if we're not then we do. *)
   match naming_table_fn with
@@ -795,7 +796,15 @@ let initialize_naming_table
     (env, t)
   else
     let ctx = Provider_utils.ctx_from_server_env env in
-    let t = update_files genv env.naming_table ctx t ~profiling in
+    let t =
+      update_files
+        genv
+        env.naming_table
+        ctx
+        t
+        ~profile_label:"update file deps"
+        ~profiling
+    in
     naming env t ~profile_label:"naming" ~profiling
 
 let write_symbol_info_init
@@ -815,7 +824,15 @@ let write_symbol_info_init
       profiling
   in
   let ctx = Provider_utils.ctx_from_server_env env in
-  let t = update_files genv env.naming_table ctx t profiling in
+  let t =
+    update_files
+      genv
+      env.naming_table
+      ctx
+      t
+      ~profile_label:"update file deps"
+      ~profiling
+  in
   let (env, t) = naming env t ~profile_label:"naming" ~profiling in
   let index_paths = env.swriteopt.symbol_write_index_paths in
   let files =
@@ -931,7 +948,15 @@ let full_init
     let naming_table = Naming_table.update_many env.naming_table fast in
     let t = Hh_logger.log_duration "updating naming table" t in
     let env = { env with naming_table } in
-    let t = update_files genv env.naming_table ctx t ~profiling in
+    let t =
+      update_files
+        genv
+        env.naming_table
+        ctx
+        t
+        ~profile_label:"update files"
+        ~profiling
+    in
     let (env, t) = naming env t ~profile_label:"naming" ~profiling in
     let fnl = Relative_path.Map.keys fast in
     if not is_check_mode then
@@ -1077,7 +1102,8 @@ let post_saved_state_initialization
   let parsing_files =
     Relative_path.Set.filter dirty_files ~f:FindUtils.path_filter
   in
-  Fixme_provider.remove_batch parsing_files;
+  ( CgroupProfiler.collect_cgroup_stats ~stage:"remove fixmes" ~profiling
+  @@ fun () -> Fixme_provider.remove_batch parsing_files );
   let parsing_files_list = Relative_path.Set.elements parsing_files in
   (* Parse dirty files only *)
   let next = MultiWorker.next genv.workers parsing_files_list in
@@ -1098,9 +1124,23 @@ let post_saved_state_initialization
     env.naming_table
     SearchUtils.TypeChecker;
   let ctx = Provider_utils.ctx_from_server_env env in
-  let t = update_files genv env.naming_table ctx t ~profiling in
   let t =
-    naming_from_saved_state ctx old_naming_table parsing_files naming_table_fn t
+    update_files
+      genv
+      env.naming_table
+      ctx
+      t
+      ~profile_label:"update file deps"
+      ~profiling
+  in
+  let t =
+    naming_from_saved_state
+      ctx
+      old_naming_table
+      parsing_files
+      naming_table_fn
+      t
+      ~profiling
   in
   (* Do global naming on all dirty files *)
   let (env, t) = naming env t ~profile_label:"naming dirty files" ~profiling in
@@ -1159,7 +1199,15 @@ let post_saved_state_initialization
     }
   in
   (* Update the fileinfo object's dependencies now that we have full fast *)
-  let t = update_files genv env.naming_table ctx t ~profiling in
+  let t =
+    update_files
+      genv
+      env.naming_table
+      ctx
+      t
+      ~profile_label:"update files again"
+      ~profiling
+  in
   type_check_dirty
     genv
     env
@@ -1207,27 +1255,20 @@ let saved_state_init
   (* following function will be run under the timeout *)
   let do_ (_id : Timeout.t) : (loaded_info, load_state_error) result =
     let state_result =
-      CgroupProfiler.collect_cgroup_stats
-        ~profiling
-        ~stage:"load saved state"
-        ~f:(fun () ->
-          match load_state_approach with
-          | Precomputed info ->
-            Ok (use_precomputed_state_exn genv ctx info profiling)
-          | Load_state_natively use_canary ->
-            download_and_load_state_exn
-              ~use_canary
-              ~target:None
-              ~genv
-              ~ctx
-              ~root
-          | Load_state_natively_with_target target ->
-            download_and_load_state_exn
-              ~use_canary:false
-              ~target:(Some target)
-              ~genv
-              ~ctx
-              ~root)
+      CgroupProfiler.collect_cgroup_stats ~profiling ~stage:"load saved state"
+      @@ fun () ->
+      match load_state_approach with
+      | Precomputed info ->
+        Ok (use_precomputed_state_exn genv ctx info profiling)
+      | Load_state_natively use_canary ->
+        download_and_load_state_exn ~use_canary ~target:None ~genv ~ctx ~root
+      | Load_state_natively_with_target target ->
+        download_and_load_state_exn
+          ~use_canary:false
+          ~target:(Some target)
+          ~genv
+          ~ctx
+          ~root
     in
     CgroupProfiler.log_to_scuba ~stage:"load saved state" ~profiling;
     state_result

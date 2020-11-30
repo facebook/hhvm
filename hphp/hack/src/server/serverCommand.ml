@@ -162,14 +162,12 @@ let full_recheck_if_needed genv env msg =
   if ignore_ide msg then
     let (ide, disk) = get_unsaved_changes env in
     let env = apply_changes env disk in
-    let (_, env) =
-      CgroupProfiler.profile_memory
-        ~event:"full recheck"
-        ~f:
-          (full_recheck_if_needed'
-             genv
-             { env with ServerEnv.remote = force_remote msg }
-             (reason msg))
+    let env =
+      CgroupProfiler.profile_memory ~event:`Recheck
+      @@ full_recheck_if_needed'
+           genv
+           { env with ServerEnv.remote = force_remote msg }
+           (reason msg)
     in
     apply_changes env ide
   else

@@ -14,10 +14,10 @@ module Profiling : sig
 end
 
 val collect_cgroup_stats :
-  profiling:Profiling.t -> stage:string -> f:(unit -> 'a) -> 'a
+  profiling:Profiling.t -> stage:string -> (unit -> 'a) -> 'a
 
-val profile_memory : event:string -> f:(Profiling.t -> 'a) -> Profiling.t * 'a
+val profile_memory : event:[ `Init | `Recheck ] -> (Profiling.t -> 'a) -> 'a
 
 val log_to_scuba : stage:string -> profiling:Profiling.t -> unit
 
-val print_summary_memory_table : Profiling.t -> unit
+val print_summary_memory_table : event:[ `Init | `Recheck ] -> unit

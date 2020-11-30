@@ -1,15 +1,22 @@
 module Profiling = struct
   type values = {
+    (* memory at the start of a stage *)
     start: float;
+    (* the change in memory at the end of a stage *)
     delta: float;
+    (* the maximum change in memory throughout a stage *)
     high_water_mark_delta: float;
   }
 
+  (* mapping from metrics to their corresponding values *)
   and result = values SMap.t
 
   and profiling = {
+    (* the event that is being profiled, e.g. Init, Recheck, etc. *)
     event: string;
+    (* the various stages of an event in reverse order *)
     stages_rev: string list;
+    (* stage mapped to result *)
     results: result SMap.t;
   }
 
@@ -68,16 +75,17 @@ module Profiling = struct
       set_metric ~stage ~metric new_metric profiling
 
   let print_summary_memory_table =
-    let pretty_num f =
+    let pretty_num ~format f =
+      let num_format = format_of_string format in
       let abs_f = abs_float f in
       if abs_f > 1000000000.0 then
-        Printf.sprintf "%+7.2fG" (f /. 1000000000.0)
+        Printf.sprintf (num_format ^^ "G") (f /. 1000000000.0)
       else if abs_f > 1000000.0 then
-        Printf.sprintf "%+7.2fM" (f /. 1000000.0)
+        Printf.sprintf (num_format ^^ "M") (f /. 1000000.0)
       else if abs_f > 1000.0 then
-        Printf.sprintf "%+7.2fK" (f /. 1000.0)
+        Printf.sprintf (num_format ^^ "K") (f /. 1000.0)
       else
-        Printf.sprintf "%+7.2f " f
+        Printf.sprintf (num_format ^^ " ") f
     in
     let pretty_pct num denom =
       if denom = 0.0 then
@@ -97,10 +105,10 @@ module Profiling = struct
       let indent = String.make indent ' ' in
       Printf.eprintf
         "%s        %s %s    %s %s    %s%s\n%!"
-        (pretty_num result.start)
-        (pretty_num result.delta)
+        (pretty_num result.start ~format:"%7.2f")
+        (pretty_num result.delta ~format:"%+7.2f")
         (pretty_pct result.delta result.start)
-        (pretty_num result.high_water_mark_delta)
+        (pretty_num result.high_water_mark_delta ~format:"%+7.2f")
         (pretty_pct result.high_water_mark_delta result.start)
         indent
         key
@@ -158,6 +166,16 @@ module Profiling = struct
       )
 end
 
+module Results = struct
+  type t = Profiling.t SMap.t
+
+  let results : t ref = ref SMap.empty
+
+  let add ~event ~profiling = results := SMap.add event profiling !results
+
+  let get ~event = SMap.find event !results
+end
+
 let sample_cgroup_mem ~(profiling : Profiling.t) ~(stage : string) : unit =
   let cgroup_stats = CGroup.get_stats () in
   match cgroup_stats with
@@ -189,20 +207,33 @@ let sample_cgroup_mem ~(profiling : Profiling.t) ~(stage : string) : unit =
       ~metric:"cgroup_file"
       ~value:(float file)
 
-let collect_cgroup_stats ~profiling ~stage ~f =
+let collect_cgroup_stats ~profiling ~stage f =
   sample_cgroup_mem ~profiling ~stage;
-  let ret = f () in
+  let result = f () in
   sample_cgroup_mem ~profiling ~stage;
-  ret
+  result
 
-let profile_memory ~event ~f =
+let profile_memory ~event f =
+  let event =
+    match event with
+    | `Init -> "init"
+    | `Recheck -> "recheck"
+  in
   let profiling =
     ref Profiling.{ event; stages_rev = []; results = SMap.empty }
   in
-  let ret = f profiling in
-  (profiling, ret)
+  let result = f profiling in
+  Results.add ~event ~profiling;
+  result
 
-let print_summary_memory_table = Profiling.print_summary_memory_table
+let print_summary_memory_table ~event =
+  let event =
+    match event with
+    | `Init -> "init"
+    | `Recheck -> "recheck"
+  in
+  let profiling_result = Results.get ~event in
+  Profiling.print_summary_memory_table profiling_result
 
 let log_result_to_scuba
     ~(event : string) ~(stage : string) (result : Profiling.result) : unit =

@@ -28,6 +28,7 @@ val update_files :
   Naming_table.t ->
   Provider_context.t ->
   float ->
+  profile_label:string ->
   profiling:CgroupProfiler.Profiling.t ->
   float
 

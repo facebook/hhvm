@@ -318,11 +318,8 @@ let parsing genv env to_check ~stop_at_errors profiling =
     MultiWorker.next genv.workers (Relative_path.Set.elements disk_files)
   in
   let (fast, errors, failed_parsing) =
-    CgroupProfiler.collect_cgroup_stats
-      ~profiling
-      ~stage:"parsing"
-      ~f:(fun () ->
-        Parsing_service.go genv.workers ide_files ~get_next env.popt ~trace:true)
+    CgroupProfiler.collect_cgroup_stats ~profiling ~stage:"parsing" @@ fun () ->
+    Parsing_service.go genv.workers ide_files ~get_next env.popt ~trace:true
   in
   SearchServiceRunner.update_fileinfo_map
     (Naming_table.create fast)
@@ -383,16 +380,12 @@ let parsing genv env to_check ~stop_at_errors profiling =
 
 let update_naming_table env fast_parsed profiling =
   let naming_table =
-    CgroupProfiler.collect_cgroup_stats
-      ~profiling
-      ~stage:"update_deps"
-      ~f:(fun () ->
-        let ctx = Provider_utils.ctx_from_server_env env in
-        let deps_mode = Provider_context.get_deps_mode ctx in
-        Relative_path.Map.iter
-          fast_parsed
-          (Typing_deps.Files.update_file deps_mode);
-        Naming_table.update_many env.naming_table fast_parsed)
+    CgroupProfiler.collect_cgroup_stats ~profiling ~stage:"update_deps"
+    @@ fun () ->
+    let ctx = Provider_utils.ctx_from_server_env env in
+    let deps_mode = Provider_context.get_deps_mode ctx in
+    Relative_path.Map.iter fast_parsed (Typing_deps.Files.update_file deps_mode);
+    Naming_table.update_many env.naming_table fast_parsed
   in
   CgroupProfiler.log_to_scuba ~stage:"update_deps" ~profiling;
   naming_table
@@ -816,27 +809,23 @@ functor
         ~(stop_at_errors : bool)
         ~(profiling : CgroupProfiler.Profiling.t) : naming_result =
       let (errors, failed_naming, fast) =
-        CgroupProfiler.collect_cgroup_stats
-          ~profiling
-          ~stage:"naming"
-          ~f:(fun () ->
-            let (errorl', failed_naming, fast) =
-              declare_names env fast_parsed
-            in
-            let errors =
-              Errors.(incremental_update_map errors errorl' fast Naming)
-            in
-            (* failed_naming can be a superset of keys in fast - see comment in
-             * Naming_global.ndecl_file *)
-            let fast = extend_fast genv fast naming_table failed_naming in
-            (* COMPUTES WHAT MUST BE REDECLARED  *)
-            let failed_decl = CheckKind.get_defs_to_redecl files_to_parse env in
-            let fast = extend_fast genv fast naming_table failed_decl in
-            let fast = add_old_decls env.naming_table fast in
-            let fast =
-              remove_failed_parsing_map fast stop_at_errors env failed_parsing
-            in
-            (errors, failed_naming, fast))
+        CgroupProfiler.collect_cgroup_stats ~profiling ~stage:"naming"
+        @@ fun () ->
+        let (errorl', failed_naming, fast) = declare_names env fast_parsed in
+        let errors =
+          Errors.(incremental_update_map errors errorl' fast Naming)
+        in
+        (* failed_naming can be a superset of keys in fast - see comment in
+         * Naming_global.ndecl_file *)
+        let fast = extend_fast genv fast naming_table failed_naming in
+        (* COMPUTES WHAT MUST BE REDECLARED  *)
+        let failed_decl = CheckKind.get_defs_to_redecl files_to_parse env in
+        let fast = extend_fast genv fast naming_table failed_decl in
+        let fast = add_old_decls env.naming_table fast in
+        let fast =
+          remove_failed_parsing_map fast stop_at_errors env failed_parsing
+        in
+        (errors, failed_naming, fast)
       in
       CgroupProfiler.log_to_scuba ~stage:"naming" ~profiling;
       { errors_after_naming = errors; failed_naming; fast }
@@ -864,21 +853,18 @@ functor
         to_redecl = to_redecl_phase2_deps;
         to_recheck = to_recheck1;
       } =
-        CgroupProfiler.collect_cgroup_stats
-          ~profiling
-          ~stage:"redecl phase 1"
-          ~f:(fun () ->
-            Decl_redecl_service.redo_type_decl
-              ~conservative_redecl:
-                (not
-                   genv.local_config
-                     .ServerLocalConfig.disable_conservative_redecl)
-              ~bucket_size
-              ctx
-              genv.workers
-              (get_classes naming_table)
-              ~previously_oldified_defs:oldified_defs
-              ~defs:fast)
+        CgroupProfiler.collect_cgroup_stats ~profiling ~stage:"redecl phase 1"
+        @@ fun () ->
+        Decl_redecl_service.redo_type_decl
+          ~conservative_redecl:
+            (not
+               genv.local_config.ServerLocalConfig.disable_conservative_redecl)
+          ~bucket_size
+          ctx
+          genv.workers
+          (get_classes naming_table)
+          ~previously_oldified_defs:oldified_defs
+          ~defs:fast
       in
       CgroupProfiler.log_to_scuba ~stage:"redecl phase 1" ~profiling;
       (* Things that were redeclared are no longer in old heap, so we substract
@@ -922,21 +908,18 @@ functor
         to_redecl = _;
         to_recheck = to_recheck2;
       } =
-        CgroupProfiler.collect_cgroup_stats
-          ~profiling
-          ~stage:"redecl phase 2"
-          ~f:(fun () ->
-            Decl_redecl_service.redo_type_decl
-              ~conservative_redecl:
-                (not
-                   genv.local_config
-                     .ServerLocalConfig.disable_conservative_redecl)
-              ~bucket_size
-              ctx
-              genv.workers
-              (get_classes naming_table)
-              ~previously_oldified_defs:oldified_defs
-              ~defs:fast_redecl_phase2_now)
+        CgroupProfiler.collect_cgroup_stats ~profiling ~stage:"redecl phase 2"
+        @@ fun () ->
+        Decl_redecl_service.redo_type_decl
+          ~conservative_redecl:
+            (not
+               genv.local_config.ServerLocalConfig.disable_conservative_redecl)
+          ~bucket_size
+          ctx
+          genv.workers
+          (get_classes naming_table)
+          ~previously_oldified_defs:oldified_defs
+          ~defs:fast_redecl_phase2_now
       in
       let errors =
         Errors.(
@@ -1008,19 +991,17 @@ functor
       let fnl = Relative_path.Set.elements files_to_check in
       let (errorl', delegate_state, telemetry, env', cancelled) =
         let ctx = Provider_utils.ctx_from_server_env env in
-        CgroupProfiler.collect_cgroup_stats
-          ~profiling
-          ~stage:"type check"
-          ~f:(fun () ->
-            Typing_check_service.go_with_interrupt
-              ctx
-              genv.workers
-              env.typing_service.delegate_state
-              telemetry
-              dynamic_view_files
-              fnl
-              ~interrupt
-              ~check_info:(get_check_info genv env))
+        CgroupProfiler.collect_cgroup_stats ~profiling ~stage:"type check"
+        @@ fun () ->
+        Typing_check_service.go_with_interrupt
+          ctx
+          genv.workers
+          env.typing_service.delegate_state
+          telemetry
+          dynamic_view_files
+          fnl
+          ~interrupt
+          ~check_info:(get_check_info genv env)
       in
       CgroupProfiler.log_to_scuba ~stage:"type check" ~profiling;
       log_if_diag_subscribe_changed

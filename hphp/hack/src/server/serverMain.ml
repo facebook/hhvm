@@ -577,6 +577,7 @@ let rec recheck_until_no_changes_left acc genv env select_outcome profiling =
     begin
       match (needed_full_init, env.init_env.why_needed_full_init) with
       | (Some needed_full_init, None) ->
+        Hh_logger.log "finalize_init after recheck";
         finalize_init env.init_env telemetry needed_full_init
       | _ -> ()
     end;
@@ -753,17 +754,14 @@ let serve_one_iteration genv env client_provider =
    * after that we'll be able to give an up-to-date answer to the client.
    * Except: this might be stopped early in some cases, e.g. IDE checks. *)
   let t_start_recheck = Unix.gettimeofday () in
-  let (recheck_loop_mem_stats, (stats, env)) =
-    CgroupProfiler.profile_memory
-      ~event:"recheck loop"
-      ~f:
-        (recheck_until_no_changes_left
-           (empty_recheck_loop_stats ~recheck_id)
-           genv
-           env
-           selected_client)
+  let (stats, env) =
+    CgroupProfiler.profile_memory ~event:`Recheck
+    @@ recheck_until_no_changes_left
+         (empty_recheck_loop_stats ~recheck_id)
+         genv
+         env
+         selected_client
   in
-  CgroupProfiler.print_summary_memory_table recheck_loop_mem_stats;
   let t_done_recheck = Unix.gettimeofday () in
   let did_work = stats.total_rechecked_count > 0 in
   let env =
@@ -822,7 +820,8 @@ let serve_one_iteration genv env client_provider =
     Hh_logger.log
       "RECHECK_END (recheck_id %s):\n%s"
       recheck_id
-      (Telemetry.to_string telemetry)
+      (Telemetry.to_string telemetry);
+    CgroupProfiler.print_summary_memory_table ~event:`Recheck
   end;
 
   let env =
@@ -1114,8 +1113,10 @@ let serve genv env in_fds =
          ~value:"serve_due_to_disabled_typecheck_after_init"
   in
   let typecheck_telemetry = Telemetry.create () in
-  if Option.is_none env.init_env.why_needed_full_init then
-    finalize_init env.init_env typecheck_telemetry init_telemetry;
+  if Option.is_none env.init_env.why_needed_full_init then (
+    Hh_logger.log "finalize init after program_init";
+    finalize_init env.init_env typecheck_telemetry init_telemetry
+  );
 
   let env = setup_interrupts env client_provider in
   let env = ref env in
@@ -1199,18 +1200,14 @@ let program_init genv env =
   in
   let (init_approach, approach_name) = resolve_init_approach genv in
   Hh_logger.log "Initing with approach: %s" approach_name;
-  let (env, mem_stats, init_type, init_error, init_error_stack, state_distance)
-      =
-    let (mem_stats, (env, init_result)) =
-      ServerInit.init ~init_approach genv env
-    in
+  let (env, init_type, init_error, init_error_stack, state_distance) =
+    let (env, init_result) = ServerInit.init ~init_approach genv env in
     match init_approach with
-    | ServerInit.Remote_init _ -> (env, mem_stats, "remote", None, None, None)
+    | ServerInit.Remote_init _ -> (env, "remote", None, None, None)
     | ServerInit.Write_symbol_info
     | ServerInit.Full_init ->
-      (env, mem_stats, "fresh", None, None, None)
-    | ServerInit.Parse_only_init ->
-      (env, mem_stats, "parse-only", None, None, None)
+      (env, "fresh", None, None, None)
+    | ServerInit.Parse_only_init -> (env, "parse-only", None, None, None)
     | ServerInit.Saved_state_init _ ->
       begin
         match init_result with
@@ -1222,11 +1219,11 @@ let program_init genv env =
             | None -> "state_load_blob"
             | Some _ -> "state_load_sqlite"
           in
-          (env, mem_stats, init_type, None, None, distance)
+          (env, init_type, None, None, distance)
         | ServerInit.Load_state_failed (err, stack) ->
-          (env, mem_stats, "state_load_failed", Some err, Some stack, None)
+          (env, "state_load_failed", Some err, Some stack, None)
         | ServerInit.Load_state_declined reason ->
-          (env, mem_stats, "state_load_declined", Some reason, None, None)
+          (env, "state_load_declined", Some reason, None, None)
       end
   in
   let env =
@@ -1253,7 +1250,6 @@ let program_init genv env =
   in
   EventLogger.set_init_type init_type;
   let telemetry = ServerUtils.log_and_get_sharedmem_load_telemetry () in
-  CgroupProfiler.print_summary_memory_table mem_stats;
   HackEventLogger.init_lazy_end
     telemetry
     ~informant_use_xdb
@@ -1542,6 +1538,7 @@ let daemon_main_exn ~informant_managed options monitor_pid in_fds =
   );
   HackEventLogger.with_id ~stage:`Init env.init_env.init_id @@ fun () ->
   let env = MainInit.go genv options (fun () -> program_init genv env) in
+  CgroupProfiler.print_summary_memory_table ~event:`Init;
   serve genv env in_fds
 
 let daemon_main

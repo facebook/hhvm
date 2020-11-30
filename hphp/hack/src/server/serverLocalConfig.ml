@@ -503,6 +503,8 @@ type t = {
   (* Allows unstabled features to be enabled within a file via the '__EnableUnstableFeatures' attribute *)
   allow_unstable_features: bool;
   watchman: Watchman.t;
+  (* If enabled, saves naming table into a temp folder and uploads it to the remote typechecker *)
+  save_and_upload_naming_table: bool;
 }
 
 let default =
@@ -587,6 +589,7 @@ let default =
     go_to_implementation = true;
     allow_unstable_features = false;
     watchman = Watchman.default;
+    save_and_upload_naming_table = false;
   }
 
 let path =
@@ -1056,6 +1059,12 @@ let load_ fn ~silent ~current_version overrides =
       ~default:default.allow_unstable_features
       config
   in
+  let save_and_upload_naming_table =
+    bool_if_version
+      "save_and_upload_naming_table"
+      ~default:default.save_and_upload_naming_table
+      config
+  in
   {
     min_log_level;
     attempt_fix_credentials;
@@ -1136,6 +1145,7 @@ let load_ fn ~silent ~current_version overrides =
     allow_unstable_features;
     watchman;
     force_remote_type_check;
+    save_and_upload_naming_table;
   }
 
 let load ~silent ~current_version config_overrides =

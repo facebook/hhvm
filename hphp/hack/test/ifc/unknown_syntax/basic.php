@@ -2,15 +2,6 @@
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
 <<__InferFlows>>
-function casting(num $x): int {
-  if ($x as int) {
-    return $x;
-  } else {
-    return 0;
-  }
-}
-
-<<__InferFlows>>
 function variable_in_scope(): int {
   do {
     // $x is always in scope

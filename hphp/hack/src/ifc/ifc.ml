@@ -473,19 +473,21 @@ let join_policies ?(prefix = "join") ~pos renv env pl =
     let env = Env.acc env (L.(pl <* [pv]) ~pos) in
     (env, pv)
 
-let get_local_type ~pos env lid =
-  let name = Local_id.get_name lid in
-  let should_skip_error =
-    (* TODO: deal with co-effect thingies *)
-    String.equal (String.sub name ~pos:0 ~len:2) "$#"
-    || String.equal name "$this"
-  in
+let is_special_var =
+  (* skip co-effect magic variables and fake members *)
+  (* the $this local used in the Hack typechecker is
+     not used in Hack IFC, instead the type of $this is
+     in renv.re_this *)
+  let re = Str.regexp "^\\$\\(#\\|.*->\\|this\\)" in
+  (fun s -> Str.string_match re s 0)
 
+let get_local_type ~pos env lid =
   match Env.get_local_type env lid with
-  | None when should_skip_error -> None
   | None ->
-    let msg = "local " ^ name ^ " missing from env" in
-    Errors.unknown_information_flow pos msg;
+    let name = Local_id.get_name lid in
+    ( if not (is_special_var name) then
+      let msg = "local " ^ name ^ " missing from env" in
+      Errors.unknown_information_flow pos msg );
     None
   | pty_opt -> pty_opt
 
@@ -955,8 +957,20 @@ let rec expr ~pos renv (env : Env.expr_env) (((epos, ety), e) : Tast.expr) =
         let env = assign ~expr ~pos renv env e tye in
         (env, tye)
       (* Prim operators that don't mutate *)
+      | Ast_defs.Unot ->
+        let (env, tye) = expr env e in
+        (* use object_policy to account for both booleans
+           and null checks *)
+        let (env, not_policy) =
+          join_policies
+            ~prefix:"not"
+            ~pos
+            renv
+            env
+            (PSet.elements (object_policy tye))
+        in
+        (env, Tprim not_policy)
       | Ast_defs.Utild
-      | Ast_defs.Unot
       | Ast_defs.Uplus
       | Ast_defs.Uminus ->
         expr env e
@@ -1195,6 +1209,32 @@ let rec expr ~pos renv (env : Env.expr_env) (((epos, ety), e) : Tast.expr) =
       join_policies ~pos ~prefix:"tag" renv env tag_policy_list
     in
     (env, Tprim tag_policy)
+  | A.As (e, _hint, is_nullable) ->
+    let (env, ty) = expr env e in
+    let tag_policies = object_policy ty in
+    let (env, tag_test_ty) =
+      if is_nullable then
+        (* The 'e ?as Thint' construct can be seen as
+             ((e is Thint) ? e : null) as ?Thint
+           that is, we can see the construct as *first* setting e's
+           value to null if it is not a subtype of Thint, *then*
+           performing a refinement with ?Thint. Note that the 'as'
+           refinement above will always succeed because the ternary
+           evaluates either to e that has type Thint (<: ?Thint), or
+           null that has type null (<: ?Thint).
+           
+           The result of this as refinement is in ety, so here, we
+           construct the type of ternary expression. *)
+        let (env, tag_policy) =
+          join_policies ~pos ~prefix:"tag" renv env (PSet.elements tag_policies)
+        in
+        (env, Tunion [ty; Tnull tag_policy])
+      else
+        let exn = Lift.class_ty ~prefix:"as" renv Decl.exception_id in
+        let env = may_throw ~pos renv env tag_policies exn in
+        (env, ty)
+    in
+    (env, refine renv tag_test_ty (pos, ety))
   (* --- A valid AST does not contain these nodes *)
   | A.Import _
   | A.Collection _

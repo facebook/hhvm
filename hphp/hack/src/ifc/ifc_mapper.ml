@@ -36,7 +36,12 @@ let rec ptype fty fpol = function
         a_value = fty a_value;
         a_length = fpol a_length;
       }
-  | Tshape (kind, fs) ->
+  | Tshape { sh_kind; sh_fields } ->
+    let sh_kind =
+      match sh_kind with
+      | Open_shape ty -> Open_shape (fty ty)
+      | Closed_shape -> Closed_shape
+    in
     let field sft =
       {
         sft with
@@ -44,7 +49,7 @@ let rec ptype fty fpol = function
         sft_ty = ptype fty fpol sft.sft_ty;
       }
     in
-    Tshape (kind, Nast.ShapeMap.map field fs)
+    Tshape { sh_kind; sh_fields = Nast.ShapeMap.map field sh_fields }
   | Tdynamic pol -> Tdynamic (fpol pol)
 
 and fun_ fty fpol f =
@@ -91,7 +96,7 @@ let iter_ptype2 fty fpol pt1 pt2 =
     fty a1.a_key a2.a_key;
     fty a1.a_value a2.a_value;
     fpol a1.a_length a2.a_length
-  | (Tshape (_k1, s1), Tshape (_k2, s2)) ->
+  | (Tshape s1, Tshape s2) ->
     let combine _ f1 f2 =
       match (f1, f2) with
       | (Some t1, Some t2) ->
@@ -99,7 +104,13 @@ let iter_ptype2 fty fpol pt1 pt2 =
         None
       | _ -> invalid_arg "iter_ptype2"
     in
-    ignore (Nast.ShapeMap.merge combine s1 s2)
+    begin
+      match (s1.sh_kind, s2.sh_kind) with
+      | (Closed_shape, Closed_shape) -> ()
+      | (Open_shape t1, Open_shape t2) -> fty t1 t2
+      | (_, _) -> invalid_arg "iter_ptype2"
+    end;
+    ignore (Nast.ShapeMap.merge combine s1.sh_fields s2.sh_fields)
   | _ -> invalid_arg "iter_ptype2"
 
 (* "fprop: int -> prop -> prop" takes as first argument the

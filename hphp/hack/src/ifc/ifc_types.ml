@@ -90,7 +90,7 @@ type ptype =
   | Tclass of class_
   | Tfun of fun_
   | Tcow_array of cow_array
-  | Tshape of Type.shape_kind * shape_field_type Nast.ShapeMap.t
+  | Tshape of shape
   | Tdynamic of policy
 
 (* Copy-on-write indexed collection used for Hack containers i.e. vec, dict,
@@ -101,6 +101,17 @@ and cow_array = {
   a_value: ptype;
   a_length: policy;
 }
+
+and shape = {
+  sh_kind: shape_kind;
+  sh_fields: shape_field_type Nast.ShapeMap.t;
+}
+
+and shape_kind =
+  (* An open shape has a "magic" field of type mixed that holds the policy of
+     all the unnamed data *)
+  | Open_shape of ptype
+  | Closed_shape
 
 and shape_field_type = {
   (* The policy of the field is essentially the PC at the time that it is
@@ -130,7 +141,7 @@ type callable_name =
 
 type array =
   | Aarray of cow_array
-  | Ashape of Type.shape_kind * shape_field_type Nast.ShapeMap.t
+  | Ashape of shape
 
 type fun_proto = {
   fp_name: string;
@@ -152,6 +163,10 @@ type prop =
   (* holes are introduced by calls to functions for which
      we do not have a flow type at hand *)
   | Chole of (Pos.t * fun_proto)
+
+let is_open = function
+  | Open_shape _ -> true
+  | Closed_shape -> false
 
 let unique_pos_of_prop =
   let is_real pos = not @@ Pos.equal pos Pos.none in

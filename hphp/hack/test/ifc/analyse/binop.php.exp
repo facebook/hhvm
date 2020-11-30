@@ -92,7 +92,7 @@ Analyzing \is_:
   Constraints:
     [33:3-18]
       A_lump = A_lump'1, A < A'1, $x < $x'3, $x'2 < $x'5, $x'1 < $x'4,
-      $x'3 < tag, $x'4 < tag, A'1 < tag, tag < ret
+      $x'3 < tag, $x'4 < tag, $x'5 < tag, A'1 < tag, tag < ret
   Locals:
     { $x ->
       (\A<A'1, A_lump'1> | <$x'3> |

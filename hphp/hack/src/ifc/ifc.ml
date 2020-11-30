@@ -68,9 +68,16 @@ let rec policy_occurrences pty =
         policy_occurrences a_key;
         policy_occurrences a_value;
       ]
-  | Tshape (_, m) ->
-    let f sft = policy_occurrences sft.sft_ty in
-    Nast.ShapeMap.values m |> List.map ~f |> on_list
+  | Tshape { sh_kind; sh_fields } ->
+    let f acc { sft_ty; sft_policy; _ } =
+      (pol sft_policy, emp, emp) :: policy_occurrences sft_ty :: acc
+    in
+    let init =
+      match sh_kind with
+      | Closed_shape -> []
+      | Open_shape ty -> [policy_occurrences ty]
+    in
+    Nast.ShapeMap.values sh_fields |> List.fold ~f ~init |> on_list
 
 exception SubtypeFailure of string * ptype * ptype
 
@@ -159,45 +166,50 @@ let rec subtype ~pos t1 t2 acc =
     acc
     |> L.(PSet.elements cov <* [cl.c_self]) ~pos
     |> L.(PSet.elements inv =* [cl.c_lump]) ~pos
-  | (Tshape (k1, s1), Tshape (k2, s2)) ->
-    begin
-      match (k1, k2) with
-      | (T.Open_shape, T.Closed_shape) ->
+  | (Tshape s1, Tshape s2) ->
+    let acc =
+      match (s1.sh_kind, s2.sh_kind) with
+      | (Open_shape _, Closed_shape) ->
         err "An open shape cannot subtype a closed shape"
-      | _ ->
-        let preprocess shape_kind = function
-          (* A missing field of an open shape becomes an optional field of type mixed *)
-          | None when T.equal_shape_kind shape_kind T.Open_shape ->
-            Some { sft_optional = true; sft_policy = pbot; sft_ty = Tinter [] }
-          (* If a field is optional with type nothing, consider it missing.
-             Since it has type nothing, it can never be assigned and therefore
-             we do not need to consider its policy *)
-          | Some { sft_ty = Tunion []; sft_optional = true; _ } -> None
-          | sft -> sft
-        in
-        let process_field acc _ f1 f2 =
-          let f1 = preprocess k1 f1 in
-          let f2 = preprocess k2 f2 in
-          match (f1, f2) with
-          | (Some { sft_optional = true; _ }, Some { sft_optional = false; _ })
-            ->
-            err "optional field cannot be subtype of required"
-          | ( Some { sft_ty = t1; sft_policy = p1; _ },
-              Some { sft_ty = t2; sft_policy = p2; _ } ) ->
-            (L.(p1 < p2) ~pos acc |> subtype t1 t2, None)
-          | (Some _, None) -> err "missing field"
-          | (None, Some { sft_optional; _ }) ->
-            if sft_optional then
-              (acc, None)
-            else
-              err "missing field"
-          | (None, None) -> (acc, None)
-        in
-        let (acc, _) =
-          Nast.ShapeMap.merge_env ~combine:process_field acc s1 s2
-        in
-        acc
-    end
+      | (Open_shape t1, Open_shape t2) -> subtype t1 t2 acc
+      | _ -> acc
+    in
+    let preprocess kind = function
+      (* A missing field of an open shape becomes an optional field of type mixed *)
+      | None ->
+        begin
+          match kind with
+          | Open_shape sft_ty ->
+            Some { sft_optional = true; sft_policy = pbot; sft_ty }
+          | Closed_shape -> None
+        end
+      (* If a field is optional with type nothing, consider it missing.
+          Since it has type nothing, it can never be assigned and therefore
+          we do not need to consider its policy *)
+      | Some { sft_ty = Tunion []; sft_optional = true; _ } -> None
+      | sft -> sft
+    in
+    let combine acc _ f1 f2 =
+      let f1 = preprocess s1.sh_kind f1 in
+      let f2 = preprocess s2.sh_kind f2 in
+      match (f1, f2) with
+      | (Some { sft_optional = true; _ }, Some { sft_optional = false; _ }) ->
+        err "optional field cannot be subtype of required"
+      | ( Some { sft_ty = t1; sft_policy = p1; _ },
+          Some { sft_ty = t2; sft_policy = p2; _ } ) ->
+        (L.(p1 < p2) ~pos acc |> subtype t1 t2, None)
+      | (Some _, None) -> err "missing field"
+      | (None, Some { sft_optional; _ }) ->
+        if sft_optional then
+          (acc, None)
+        else
+          err "missing field"
+      | (None, None) -> (acc, None)
+    in
+    let (acc, _) =
+      Nast.ShapeMap.merge_env ~combine acc s1.sh_fields s2.sh_fields
+    in
+    acc
   | (Tunion tl, _) ->
     List.fold tl ~init:acc ~f:(fun acc t1 -> subtype t1 t2 acc)
   | (_, Tinter tl) ->
@@ -427,13 +439,21 @@ let adjust_ptype ?prefix ~pos ~adjustment renv env ty =
       let (env, a_value) = freshen_cov env arr.a_value in
       let (env, a_length) = freshen_pol_cov env arr.a_length in
       (env, Tcow_array { a_kind = arr.a_kind; a_key; a_value; a_length })
-    | Tshape (k, s) ->
+    | Tshape { sh_kind; sh_fields } ->
       let f env _ sft =
         let (env, ty) = freshen_cov env sft.sft_ty in
-        (env, { sft with sft_ty = ty })
+        let (env, p) = freshen_pol_cov env sft.sft_policy in
+        (env, { sft_ty = ty; sft_policy = p; sft_optional = sft.sft_optional })
       in
-      let (env, s) = Nast.ShapeMap.map_env f env s in
-      (env, Tshape (k, s))
+      let (env, sh_fields) = Nast.ShapeMap.map_env f env sh_fields in
+      let (env, sh_kind) =
+        match sh_kind with
+        | Open_shape ty ->
+          let (env, ty) = freshen_cov env ty in
+          (env, Open_shape ty)
+        | Closed_shape -> (env, Closed_shape)
+      in
+      (env, Tshape { sh_kind; sh_fields })
   in
   freshen adjustment env ty
 
@@ -456,9 +476,16 @@ let rec object_policy = function
   | Tcow_array { a_key; a_value; a_length; _ } ->
     PSet.union (object_policy a_key) (object_policy a_value)
     |> PSet.add a_length
-  | Tshape (_, s) ->
-    let f _ sft acc = PSet.union (object_policy sft.sft_ty) acc in
-    Nast.ShapeMap.fold f s PSet.empty
+  | Tshape { sh_kind; sh_fields; _ } ->
+    let f _ { sft_ty; sft_policy; _ } acc =
+      acc |> PSet.add sft_policy |> PSet.union (object_policy sft_ty)
+    in
+    let pols =
+      match sh_kind with
+      | Open_shape ty -> object_policy ty
+      | Closed_shape -> PSet.empty
+    in
+    Nast.ShapeMap.fold f sh_fields pols
 
 let add_dependencies pl t = L.(pl <* PSet.elements (object_policy t))
 
@@ -561,16 +588,61 @@ let may_throw ~pos renv env pc_deps exn_ty =
   let env = Env.acc env (add_dependencies deps renv.re_exn ~pos) in
   env
 
-let call ~pos renv env call_type that_pty_opt args_pty ret_ty =
-  let name =
-    match call_type with
-    | Cconstructor callable_name
-    | Cglobal (callable_name, _) ->
-      Decl.callable_name_to_string callable_name
-    | Clocal _ -> "anonymous"
+let shape_field_name renv ix =
+  let ix =
+    (* The utility function does not expect a TAST *)
+    let ((p, _), e) = ix in
+    (p, e)
   in
+  (* TODO(T72024862): This does not support late static binding *)
+  let this =
+    lazy
+      (match renv.re_this with
+      | Some (Tclass cls) -> Some (fst ix, cls.c_name)
+      | _ -> None)
+  in
+  match Typing_utils.shape_field_name_ this ix with
+  | Ok fld -> Some fld
+  | Error _ -> None
+
+let call_special ~pos renv env args ret = function
+  | StaticMethod ("\\HH\\Shapes", "idx") ->
+    let (ty, key, def) =
+      match args with
+      | [(ty, _); (_, key)] -> (ty, key, None)
+      | [(ty, _); (_, key); (def, _)] -> (ty, key, Some def)
+      | _ -> fail "incorrect arguments to Shapes::idx"
+    in
+    let key =
+      match shape_field_name renv key with
+      | Some k -> k
+      | None -> fail "invalid shape key"
+    in
+    let field =
+      {
+        sft_policy = Env.new_policy_var renv "shape";
+        sft_ty = ret;
+        sft_optional = true;
+      }
+    in
+    let tshape =
+      let sh_fields = Nast.ShapeMap.singleton key field in
+      Tshape { sh_fields; sh_kind = Open_shape (Tinter []) }
+    in
+    let env =
+      Env.acc env
+      @@ L.(subtype ty tshape && add_dependencies [field.sft_policy] ret) ~pos
+    in
+    let env =
+      match def with
+      | None -> env
+      | Some def -> Env.acc env @@ subtype ~pos def ret
+    in
+    Some (env, ret)
+  | _ -> None
+
+let call_regular ~pos renv env call_type name that_pty_opt args_pty ret_pty =
   let callee = Env.new_policy_var renv (name ^ "_self") in
-  let ret_pty = Lift.ty ~prefix:(name ^ "_ret") renv ret_ty in
   let env = Env.acc env (add_dependencies ~pos [callee] ret_pty) in
   let (env, callee_exn) =
     let exn = Lift.class_ty ~prefix:(name ^ "_exn") renv Decl.exception_id in
@@ -628,12 +700,32 @@ let call ~pos renv env call_type that_pty_opt args_pty ret_ty =
     let env = Env.acc env (fun acc -> call_constraint :: acc) in
     (env, ret_pty)
 
+let call ~pos renv env call_type that_pty_opt args ret_ty =
+  let name =
+    match call_type with
+    | Cconstructor callable_name
+    | Cglobal (callable_name, _) ->
+      Decl.callable_name_to_string callable_name
+    | Clocal _ -> "anonymous"
+  in
+  let ret_pty = Lift.ty ~prefix:(name ^ "_ret") renv ret_ty in
+  let special =
+    match call_type with
+    | Cglobal (cn, _) -> call_special ~pos renv env args ret_pty cn
+    | _ -> None
+  in
+  match special with
+  | Some res -> res
+  | None ->
+    let args_pty = List.map ~f:fst args in
+    call_regular ~pos renv env call_type name that_pty_opt args_pty ret_pty
+
 (* Return either an array or a shape (anything that uses Array_get syntax for
    reads/writes) *)
 let any_cow_array ~get_array ~mk_array ~pos renv ty =
   let rec f = function
     | Tcow_array arry -> Some (Aarray arry)
-    | Tshape (k, s) -> Some (Ashape (k, s))
+    | Tshape s -> Some (Ashape s)
     | Tinter tys -> List.find_map tys f
     | _ -> None
   in
@@ -710,23 +802,6 @@ let may_throw_out_of_bounds_exn ~pos renv env arry ix_pty =
   let pc_deps = PSet.add arry.a_length (object_policy ix_pty) in
   may_throw ~pos renv env pc_deps exn_ty
 
-let shape_field_name renv ix =
-  let ix =
-    (* The utility function does not expect a TAST *)
-    let ((p, _), e) = ix in
-    (p, e)
-  in
-  (* NOTE: This does not support late static binding *)
-  let this =
-    lazy
-      (match renv.re_this with
-      | Some (Tclass cls) -> Some (fst ix, cls.c_name)
-      | _ -> None)
-  in
-  match Typing_utils.shape_field_name_ this ix with
-  | Ok fld -> Some fld
-  | Error _ -> None
-
 (* A wrapper around assign_helper that deals with Hack arrays' syntactic
    sugar; this accounts for the CoW semantics of Hack arrays:
 
@@ -738,25 +813,22 @@ let rec assign ?(use_pc = true) ~expr ~pos renv env lhs rhs_pty =
   match snd lhs with
   | A.Array_get ((((_, arry_ty), _) as arry_exp), ix_opt) ->
     (* Evaluate the array *)
-    let (env, arry_pty, arry) =
-      let (env, old_arry_pty) = expr env arry_exp in
-      let arry_pty = Lift.ty ~prefix:"arr" renv arry_ty in
+    let (env, old_arry_pty) = expr env arry_exp in
+    let new_arry_pty = Lift.ty ~prefix:"arr" renv arry_ty in
+    let arry = array_or_shape ~pos renv old_arry_pty in
 
-      (* Here we achieve two things:
-       * 1. CoW semantics by using a fresh array type that will be used from now on.
-       * 2. Account for the assignment destination type. This is the type the
-       *    LHS would receive _after_ the assignment.
-       *)
-      let env = Env.acc env (subtype ~pos old_arry_pty arry_pty) in
-
-      let arry = array_or_shape ~pos renv arry_pty in
-      (env, arry_pty, arry)
-    in
-
-    let (env, arry_pty, use_pc) =
+    let (env, use_pc) =
       match arry with
-      | Aarray arry ->
+      | Aarray _ ->
         (* TODO(T68269878): track flows due to length changes *)
+        let arry = cow_array ~pos renv new_arry_pty in
+        (* Here we achieve two things:
+         * 1. CoW semantics by using a fresh array type that will be used from now on.
+         * 2. Account for the assignment destination type. This is the type the
+         *    LHS would receive _after_ the assignment.
+         *)
+        let env = Env.acc env (subtype ~pos old_arry_pty new_arry_pty) in
+
         (* Evaluate the index *)
         let (env, ix_pty_opt) =
           match ix_opt with
@@ -780,8 +852,8 @@ let rec assign ?(use_pc = true) ~expr ~pos renv env lhs rhs_pty =
 
         (* Do the assignment *)
         let env = Env.acc env (subtype ~pos rhs_pty arry.a_value) in
-        (env, arry_pty, true)
-      | Ashape (kind, fm) ->
+        (env, true)
+      | Ashape { sh_kind; sh_fields } ->
         begin
           match Option.(ix_opt >>= shape_field_name renv) with
           | Some key ->
@@ -789,22 +861,26 @@ let rec assign ?(use_pc = true) ~expr ~pos renv env lhs rhs_pty =
               it is always public *)
             let p = Env.new_policy_var renv "field" in
             let pc = Env.get_lpc env |> PSet.elements in
-            let env = Env.acc env @@ L.(pc <* [p]) ~pos in
-            let fm =
+            let env =
+              Env.acc env @@ L.(pc <* [p] && add_dependencies pc rhs_pty) ~pos
+            in
+            let sh_fields =
               Nast.ShapeMap.add
                 key
                 { sft_optional = false; sft_policy = p; sft_ty = rhs_pty }
-                fm
+                sh_fields
             in
-            (env, Tshape (kind, fm), false)
+            let tshape = Tshape { sh_kind; sh_fields } in
+            let env = Env.acc env (subtype ~pos tshape new_arry_pty) in
+            (env, false)
           | None ->
             Errors.unknown_information_flow pos "shape key";
-            (env, Tshape (kind, fm), true)
+            (env, true)
         end
     in
 
     (* assign the array/shape to itself *)
-    assign ~use_pc ~expr ~pos renv env arry_exp arry_pty
+    assign ~use_pc ~expr ~pos renv env arry_exp new_arry_pty
   | _ -> assign_helper ~use_pc ~expr ~pos renv env lhs rhs_pty
 
 let seq ~run (env, out) x =
@@ -851,6 +927,13 @@ let rec expr ~pos renv (env : Env.expr_env) (((epos, ety), e) : Tast.expr) =
     in
     let env = List.fold ~f:mk_element_subtype ~init:env fields in
     (env, dict_pty)
+  in
+  let funargs env =
+    let f env e =
+      let (env, ty) = expr env e in
+      (env, (ty, e))
+    in
+    List.map_env env ~f
   in
   match e with
   | A.Null -> (env, Tnull (Env.new_policy_var renv "null"))
@@ -999,7 +1082,7 @@ let rec expr ~pos renv (env : Env.expr_env) (((epos, ety), e) : Tast.expr) =
   (* TODO(T68414656): Support calls with type arguments *)
   | A.Call (e, _type_args, args, _extra_args) ->
     let fty = Tast.get_type e in
-    let (env, args_pty) = List.map_env ~f:expr env args in
+    let (env, args_pty) = funargs env args in
     let call env call_type this_pty =
       call ~pos renv env call_type this_pty args_pty ety
     in
@@ -1093,19 +1176,15 @@ let rec expr ~pos renv (env : Env.expr_env) (((epos, ety), e) : Tast.expr) =
         let env = may_throw_out_of_bounds_exn ~pos renv env arry ix_pty in
 
         (env, arry.a_value)
-      | Ashape (_, fm) ->
+      | Ashape { sh_fields; _ } ->
         let sft =
           Option.(
             shape_field_name renv ix_exp >>= fun f ->
-            Nast.ShapeMap.find_opt f fm)
+            Nast.ShapeMap.find_opt f sh_fields)
         in
         begin
           match sft with
-          | Some { sft_ty; sft_policy; _ } ->
-            let env =
-              Env.acc env @@ add_dependencies ~pos [sft_policy] sft_ty
-            in
-            (env, sft_ty)
+          | Some { sft_ty; _ } -> (env, sft_ty)
           | None ->
             Errors.unknown_information_flow pos "nonexistent shape field";
             (env, Lift.ty renv ety)
@@ -1115,7 +1194,7 @@ let rec expr ~pos renv (env : Env.expr_env) (((epos, ety), e) : Tast.expr) =
     (* TODO(T70139741): support variadic functions and constructors
      * TODO(T70139893): support classes with type parameters
      *)
-    let (env, args_pty) = List.map_env ~f:expr env args in
+    let (env, args_pty) = funargs env args in
     let env =
       match cid with
       | A.CIexpr e -> fst @@ expr env e
@@ -1198,8 +1277,8 @@ let rec expr ~pos renv (env : Env.expr_env) (((epos, ety), e) : Tast.expr) =
       let sft = { sft_ty = t; sft_optional = false; sft_policy = p } in
       (env, Nast.ShapeMap.add key sft m)
     in
-    let (env, s) = List.fold ~f ~init:(env, Nast.ShapeMap.empty) s in
-    (env, Tshape (T.Closed_shape, s))
+    let (env, sh_fields) = List.fold ~f ~init:(env, Nast.ShapeMap.empty) s in
+    (env, Tshape { sh_kind = Closed_shape; sh_fields })
   | A.Is (e, _hint) ->
     let (env, ety) = expr env e in
     (* whether an object has one tag or another is governed

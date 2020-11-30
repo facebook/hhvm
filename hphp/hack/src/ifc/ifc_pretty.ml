@@ -76,16 +76,16 @@ let rec ptype fmt ty =
   | Tcow_array { a_key; a_value; a_length; a_kind } ->
     fprintf fmt "%a" array_kind a_kind;
     fprintf fmt "<%a => %a; |%a|>" ptype a_key ptype a_value policy a_length
-  | Tshape (kind, m) ->
+  | Tshape { sh_kind; sh_fields } ->
     let field fmt { sft_policy; sft_optional; sft_ty } =
       if sft_optional then fprintf fmt "?";
       fprintf fmt "<%a, %a>" policy sft_policy ptype sft_ty
     in
     fprintf fmt "shape(";
-    Nast.ShapeMap.pp field fmt m;
-    (match kind with
-    | T.Closed_shape -> fprintf fmt ")"
-    | T.Open_shape -> fprintf fmt ", ...)")
+    Nast.ShapeMap.pp field fmt sh_fields;
+    (match sh_kind with
+    | Closed_shape -> fprintf fmt ")"
+    | Open_shape ty -> fprintf fmt ", <%a>)" ptype ty)
 
 (* Format: <pc, self>(arg1, arg2, ...): ret [exn] *)
 and fun_ fmt fn =

@@ -40,7 +40,7 @@ pub fn emit_program<'p>(
     emitter: &mut Emitter,
     flags: FromAstFlags,
     namespace: RcOc<namespace_env::Env>,
-    tast: &'p mut Tast::Program,
+    tast: &'p Tast::Program,
 ) -> Result<HhasProgram<'p>> {
     let result = emit_program_(emitter, flags, namespace, tast);
     match result {
@@ -53,7 +53,7 @@ fn emit_program_<'p>(
     emitter: &mut Emitter,
     _flags: FromAstFlags,
     namespace: RcOc<namespace_env::Env>,
-    prog: &'p mut Tast::Program,
+    prog: &'p Tast::Program,
 ) -> Result<HhasProgram<'p>> {
     let mut functions = emit_functions_from_program(emitter, prog)?;
     let classes = emit_classes_from_program(emitter, prog)?;

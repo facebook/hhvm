@@ -8,7 +8,7 @@ function rx_context()[rx]: void {
     rx_context(); // ok
   };
 
-  $less_permissive = ()[pure] ==> {
+  $less_permissive = ()[] ==> {
     $more_permissive(); // error (missing non_det)
     rx_context(); // error (pure </: rx)
   };

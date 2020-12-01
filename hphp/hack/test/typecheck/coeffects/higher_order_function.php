@@ -19,7 +19,7 @@ function hof_fail<Te>(
   $f(4); // Te not in scope
 }
 
-function plus_one_pure(int $i)[pure]: int {
+function plus_one_pure(int $i)[]: int {
   return $i + 1;
 }
 
@@ -28,7 +28,7 @@ function plus_one_impure(int $i): int {
   return $i + 1;
 }
 
-function pure_caller(vec<int> $v)[pure]: void {
+function pure_caller(vec<int> $v)[]: void {
   vec_map($v, fun('plus_one_pure'));
 
   vec_map($v, fun('plus_one_impure')); // error

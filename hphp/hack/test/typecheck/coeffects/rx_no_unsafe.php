@@ -12,12 +12,8 @@ function rx_fn()[rx]: void {
   non_rx_fn(); // error (non_rx context requires different capabilities)
 }
 
-function pure_fn()[pure]: void {
+function pure_fn()[]: void {
   rx_fn(); // error (pure context lacks the Rx capability)
-  purest_fn();
+  pure_fn();
 }
 
-function purest_fn()[]: void {
-  pure_fn(); // error, purest has capabilities {} but pure is {Server}
-  purest_fn(); // ok
-}

@@ -3,7 +3,7 @@
 
 <<file: __EnableUnstableFeatures('coeffects_provisional')>>
 
-function at_least_rx((function()[rx]: void) $f)[pure]: void {}
+function at_least_rx((function()[rx]: void) $f)[]: void {}
 
 function ok_rx()[rx]: (function()[rx]: void) {
   $l = () ==> {};
@@ -11,9 +11,9 @@ function ok_rx()[rx]: (function()[rx]: void) {
   return $l;
 }
 
-function ok_pure()[pure]: (function()[pure]: void) {
+function ok_pure()[]: (function()[]: void) {
   $l = () ==> {};
-  at_least_rx($l); // ok: ()[pure] <: ()[rx]
+  at_least_rx($l); // ok: ()[] <: ()[rx]
   return $l;
 }
 
@@ -26,7 +26,7 @@ function unsafe_context()[rx_shallow]: void {
 
 function needs_rx_local()[rx_local]: void {}
 
-function at_least_rx_shallow((function ()[rx_shallow]: void) $f)[pure]: void {}
+function at_least_rx_shallow((function ()[rx_shallow]: void) $f)[]: void {}
 
 function f()[rx_shallow]: void {
   $g = () ==> needs_rx_local();

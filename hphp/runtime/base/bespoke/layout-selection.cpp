@@ -34,11 +34,6 @@ namespace {
 
 using jit::ArrayLayout;
 
-bool isMonotypeLayout(ArrayLayout layout) {
-  auto const index = layout.layoutIndex();
-  return index && (isMonotypeVecLayout(*index) || isMonotypeDictLayout(*index));
-}
-
 bool isMonotypeLayout(const EntryTypes& et) {
   auto const monotype_key = [&]{
     switch (et.keyTypes) {
@@ -200,7 +195,7 @@ ArrayLayout selectSinkLayout(const SinkProfile& profile) {
   for (auto const& it : profile.data->sources) {
     if (it.first->layout.vanilla()) {
       vanilla += it.second;
-    } else if (isMonotypeLayout(it.first->layout)) {
+    } else if (it.first->layout.monotype()) {
       monotype += it.second;
     }
     total += it.second;

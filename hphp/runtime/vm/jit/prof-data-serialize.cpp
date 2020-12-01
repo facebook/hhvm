@@ -34,6 +34,7 @@
 #include "hphp/runtime/vm/instance-bits.h"
 #include "hphp/runtime/vm/jit/array-access-profile.h"
 #include "hphp/runtime/vm/jit/array-iter-profile.h"
+#include "hphp/runtime/vm/jit/array-layout.h"
 #include "hphp/runtime/vm/jit/call-target-profile.h"
 #include "hphp/runtime/vm/jit/cls-cns-profile.h"
 #include "hphp/runtime/vm/jit/containers.h"
@@ -1278,6 +1279,9 @@ void write_array(ProfDataSerializer& ser, const ArrayData* arr) {
   uint32_t sz = str.size();
   write_raw(ser, sz);
   write_raw(ser, str.data(), sz);
+
+  if (!allowBespokeArrayLikes()) return;
+  write_raw(ser, ArrayLayout::FromArray(arr).toUint16());
 }
 
 ArrayData* read_array(ProfDataDeserializer& ser) {
@@ -1295,7 +1299,12 @@ ArrayData* read_array(ProfDataDeserializer& ser) {
         s.size(),
         VariableUnserializer::Type::Internal
       );
-      return ArrayData::GetScalarArray(std::move(v));
+      auto const result = ArrayData::GetScalarArray(std::move(v));
+
+      if (!allowBespokeArrayLikes()) return result;
+      uint16_t raw_layout = 0;
+      read_raw(ser, raw_layout);
+      return ArrayLayout::FromUint16(raw_layout).apply(result);
     }
   );
 }

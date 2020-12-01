@@ -53,6 +53,10 @@ struct ArrayLayout {
   bool vanilla() const { return sort == Sort::Vanilla; }
   bool bespoke() const { return sort >= Sort::Bespoke; }
 
+  // Test for specific kinds of bespoke layouts.
+  bool logging() const;
+  bool monotype() const;
+
   // The result is non-null iff the layout is a (concrete) bespoke layout.
   const bespoke::Layout* bespokeLayout() const;
   const bespoke::ConcreteLayout* concreteLayout() const;
@@ -63,8 +67,12 @@ struct ArrayLayout {
   // Return a human-readable debug string describing the layout.
   std::string describe() const;
 
-  // Simple "serialization" allowing us to pack this struct in ArraySpec.
+  // Serialization support, used to pack ArrayLayout in binary formats.
   constexpr uint16_t toUint16() const { return uint16_t(sort); }
+
+  // "apply" applies this layout to a static array, so we can deserialize it.
+  // Careful: serialization does NOT round-trip logging arrays.
+  ArrayData* apply(ArrayData* ad) const;
 
   /**************************************************************************
    * Static helpers to get basic layouts
@@ -77,6 +85,11 @@ struct ArrayLayout {
 
   static constexpr ArrayLayout FromUint16(uint16_t x) {
     return ArrayLayout(Sort(x));
+  }
+
+  static ArrayLayout FromArray(const ArrayData* ad) {
+    if (ad->isVanilla()) return Vanilla();
+    return ArrayLayout(BespokeArray::asBespoke(ad)->layoutIndex());
   }
 
   /**************************************************************************

@@ -560,13 +560,10 @@ inline ArraySpec Type::arrSpec() const {
   }
 
   // For constant pointers, we don't have an array-like val, so return Top.
-  // For constant non-vanilla array-likes, return Top until we have the ability
-  // to represent "bespoke" ArraySpecs. (We're punning array-like vals here.)
+  // Else, use the layout of the array val. (We pun array-like types here.)
   if (m_hasConstVal) {
     if (m_ptr != Ptr::NotPtr) return ArraySpec::Top();
-    if (m_arrVal->isVanilla()) return ArraySpec(ArrayLayout::Vanilla());
-    auto const index = BespokeArray::asBespoke(m_arrVal)->layoutIndex();
-    return ArraySpec(ArrayLayout(index));
+    return ArraySpec(ArrayLayout::FromArray(m_arrVal));
   }
 
   assertx(m_arrSpec != ArraySpec::Bottom());

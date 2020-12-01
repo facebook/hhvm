@@ -17,6 +17,9 @@
 #include "hphp/runtime/vm/jit/array-layout.h"
 
 #include "hphp/runtime/base/bespoke/layout.h"
+#include "hphp/runtime/base/bespoke/logging-array.h"
+#include "hphp/runtime/base/bespoke/monotype-dict.h"
+#include "hphp/runtime/base/bespoke/monotype-vec.h"
 #include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
@@ -151,16 +154,26 @@ ArrayLayout ArrayLayout::operator&(const ArrayLayout& o) const {
   return result ? ArrayLayout(result) : Bottom();
 }
 
+bool ArrayLayout::logging() const {
+  auto const index = layoutIndex();
+  return index && *index == bespoke::LoggingArray::GetLayoutIndex();
+}
+
+bool ArrayLayout::monotype() const {
+  auto const index = layoutIndex();
+  if (!index) return false;
+  return bespoke::isMonotypeVecLayout(*index) ||
+         bespoke::isMonotypeDictLayout(*index);
+}
+
 const bespoke::Layout* ArrayLayout::bespokeLayout() const {
-  auto const index = int(sort) - int(Sort::Bespoke);
-  if (index < 0) return nullptr;
-  return bespoke::Layout::FromIndex({safe_cast<uint16_t>(index)});
+  auto const index = layoutIndex();
+  if (!index) return nullptr;
+  return bespoke::Layout::FromIndex(*index);
 }
 
 const bespoke::ConcreteLayout* ArrayLayout::concreteLayout() const {
-  auto const index = int(sort) - int(Sort::Bespoke);
-  if (index < 0) return nullptr;
-  auto const layout = bespoke::Layout::FromIndex({safe_cast<uint16_t>(index)});
+  auto const layout = bespokeLayout();
   auto const result = layout->isConcrete()
     ? reinterpret_cast<const bespoke::ConcreteLayout*>(layout)
     : nullptr;
@@ -196,6 +209,21 @@ std::string ArrayLayout::describe() const {
     }
   }
   return folly::sformat("Bespoke({})", assertBespoke(*this).describe());
+}
+
+ArrayData* ArrayLayout::apply(ArrayData* ad) const {
+  assertx(ad->isStatic());
+  assertx(ad->isVanilla());
+
+  auto const result = [&]() -> ArrayData* {
+    if (vanilla() || logging()) return ad;
+    if (monotype()) return bespoke::maybeMonoify(ad);
+    return nullptr;
+  }();
+
+  SCOPE_ASSERT_DETAIL("ArrayLayout::apply") { return describe(); };
+  always_assert(result != nullptr);
+  return result;
 }
 
 //////////////////////////////////////////////////////////////////////////////

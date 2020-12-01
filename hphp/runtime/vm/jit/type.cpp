@@ -621,12 +621,8 @@ static bool arrayFitsSpec(const ArrayData* arr, ArraySpec spec) {
   if (spec == ArraySpec::Top()) return true;
   if (spec == ArraySpec::Bottom()) return false;
 
-  if (spec.vanilla() && !arr->isVanilla()) {
+  if (!(ArrayLayout::FromArray(arr) <= spec.layout())) {
     return false;
-  } else if (spec.bespoke()) {
-    if (arr->isVanilla()) return false;
-    auto const index = BespokeArray::asBespoke(arr)->layoutIndex();
-    if (!(ArrayLayout(index) <= spec.layout())) return false;
   }
 
   if (!spec.type()) return true;

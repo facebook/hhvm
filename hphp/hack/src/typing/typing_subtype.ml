@@ -275,7 +275,10 @@ let rec describe_ty_super env ty =
         let locl_descr =
           match locl_tyl with
           | [] -> ""
-          | tyl -> "of type " ^ String.concat ~sep:" & " (List.map tyl ~f:print)
+          | tyl ->
+            "of type "
+            ^ ( String.concat ~sep:" & " (List.map tyl ~f:print)
+              |> Markdown_lite.md_codify )
         in
         let cstr_descr =
           String.concat
@@ -284,8 +287,8 @@ let rec describe_ty_super env ty =
         in
         "something " ^ locl_descr ^ sep ^ cstr_descr)
     | Toption ty when is_tyvar ty ->
-      "null or " ^ describe_ty_super env (LoclType ty)
-    | _ -> default ())
+      "`null` or " ^ describe_ty_super env (LoclType ty)
+    | _ -> Markdown_lite.md_codify (default ()))
   | ConstraintType ty ->
     (match deref_constraint_type ty with
     | (_, Thas_member hm) ->
@@ -301,8 +304,9 @@ let rec describe_ty_super env ty =
       | None -> Printf.sprintf "an object with property `%s`" name
       | Some _ -> Printf.sprintf "an object with method `%s`" name)
     | (_, Tdestructure _) ->
-      Typing_print.with_blank_tyvars (fun () ->
-          Typing_print.full_strip_ns_i env (ConstraintType ty))
+      Markdown_lite.md_codify
+        (Typing_print.with_blank_tyvars (fun () ->
+             Typing_print.full_strip_ns_i env (ConstraintType ty)))
     | (_, TCunion (lty, cty)) ->
       Printf.sprintf
         "%s or %s"
@@ -544,16 +548,16 @@ and simplify_subtype_i
     let r_sub = reason ety_sub in
     let ty_super_descr = describe_ty_super env ety_super in
     let ty_sub_descr =
-      Typing_print.with_blank_tyvars (fun () ->
-          Typing_print.full_strip_ns_i env ety_sub)
+      Markdown_lite.md_codify
+        (Typing_print.with_blank_tyvars (fun () ->
+             Typing_print.full_strip_ns_i env ety_sub))
     in
     let (ty_super_descr, ty_sub_descr) =
-      let wrapped s = "`" ^ s ^ "`" in
       if String.equal ty_super_descr ty_sub_descr then
-        ( "exactly the type " ^ wrapped ty_super_descr,
-          "the nonexact type " ^ wrapped ty_sub_descr )
+        ( "exactly the type " ^ ty_super_descr,
+          "the nonexact type " ^ ty_sub_descr )
       else
-        (wrapped ty_super_descr, wrapped ty_sub_descr)
+        (ty_super_descr, ty_sub_descr)
     in
     let left = Reason.to_string ("Expected " ^ ty_super_descr) r_super in
     let right = Reason.to_string ("But got " ^ ty_sub_descr) r_sub @ suffix in

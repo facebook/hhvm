@@ -115,6 +115,11 @@ struct pairHashCompare {
   UHash uhash;
 
   using PairType = std::pair<T, U>;
+
+  size_t operator() (const PairType& pair) const {
+    return hash(pair);
+  }
+
   size_t hash(const PairType& pair) const {
     return hash_int64_pair(thash.hash(pair.first), uhash.hash(pair.second));
   }

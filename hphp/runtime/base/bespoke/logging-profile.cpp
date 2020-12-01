@@ -78,6 +78,24 @@ SrcKey canonicalize(SrcKey sk) {
   return SrcKey(sk.func(), sk.offset(), ResumeMode::None);
 }
 
+template <typename M, typename L, typename K>
+size_t incrementCounter(M& map, L& mutex, K key) {
+  {
+    folly::SharedMutex::ReadHolder lock{mutex};
+    auto it = map.find(key);
+    if (it != map.end()) {
+      it->second.value++;
+      return it->second;
+    }
+  }
+
+  folly::SharedMutex::WriteHolder lock{mutex};
+  auto [it, didInsert] = map.emplace(key, 0);
+  it->second.value++;
+
+  return it->second;
+}
+
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -273,17 +291,13 @@ void LoggingProfile::logEventImpl(const EventKey& key) {
 
   assertx(data);
 
-  EventMap::accessor it;
-  if (data->events.insert(it, key.toUInt64())) {
-    it->second = 1;
-  } else {
-    it->second++;
-  }
+  DEBUG_ONLY auto const count =
+    incrementCounter(data->events, data->mapLock, key.toUInt64());
   DEBUG_ONLY auto const has_sink = key.getOp() != ArrayOp::ReleaseUncounted;
   DEBUG_ONLY auto const sink = has_sink ? getSrcKey() : SrcKey{};
   FTRACE(6, "{} -> {}: {} [count={}]\n", key.toString(),
          (sink.valid() ? sink.getSymbol() : "<unknown>"),
-         EventKey(key).toString(), it->second);
+         EventKey(key).toString(), count);
 }
 
 void LoggingProfile::logEntryTypes(EntryTypes before, EntryTypes after) {
@@ -294,15 +308,8 @@ void LoggingProfile::logEntryTypes(EntryTypes before, EntryTypes after) {
 
   assertx(data);
 
-  EntryTypesMap::accessor it;
-  if (data->entryTypes.insert(it, {before.asInt16(), after.asInt16()})) {
-    it->second = 1;
-  } else {
-    it->second++;
-  }
-
-  FTRACE(6, "EntryTypes escalation {} -> {} [count={}]\n", before.toString(),
-         after.toString(), it->second);
+  auto const key = std::make_pair(before.asInt16(), after.asInt16());
+  incrementCounter(data->entryTypes, data->mapLock, key);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -312,32 +319,6 @@ SinkProfile::SinkProfile(): data(std::make_unique<SinkProfileData>()) {
 }
 
 SinkProfile::SinkProfile(jit::ArrayLayout layout): layout(layout) {}
-
-void SinkProfile::reduce(const SinkProfile& other) {
-  assertx(data);
-  assertx(other.data);
-  for (auto i = 0; i < kNumArrTypes; i++) {
-    data->arrCounts[i] += other.data->arrCounts[i];
-  }
-  for (auto i = 0; i < kNumKeyTypes; i++) {
-    data->keyCounts[i] += other.data->keyCounts[i];
-  }
-  for (auto i = 0; i < kNumValTypes; i++) {
-    data->valCounts[i] += other.data->valCounts[i];
-  }
-
-  data->sampledCount += other.data->sampledCount;
-  data->unsampledCount += other.data->unsampledCount;
-
-  for (auto entry : other.data->sources) {
-    SourceMap::accessor it;
-    if (data->sources.insert(it, entry.first)) {
-      it->second = entry.second;
-    } else {
-      it->second += entry.second;
-    }
-  }
-}
 
 void SinkProfile::update(const ArrayData* ad) {
   folly::SharedMutex::ReadHolder lock{s_profilingLock};
@@ -383,12 +364,7 @@ void SinkProfile::update(const ArrayData* ad) {
   data->keyCounts[key]++;
   data->valCounts[val]++;
 
-  SourceMap::accessor it;
-  if (data->sources.insert(it, lad->profile)) {
-    it->second = 1;
-  } else {
-    it->second++;
-  }
+  incrementCounter(data->sources, data->mapLock, lad->profile);
 }
 
 //////////////////////////////////////////////////////////////////////////////

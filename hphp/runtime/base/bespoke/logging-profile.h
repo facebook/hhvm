@@ -23,7 +23,7 @@
 #include "hphp/runtime/vm/jit/array-layout.h"
 
 #include <folly/String.h>
-#include <tbb/concurrent_hash_map.h>
+#include <folly/container/F14Map.h>
 
 #include <algorithm>
 #include <atomic>
@@ -119,12 +119,34 @@ struct LoggingProfileKey::TbbHashCompare {
   }
 };
 
+// A wrapper around std::atomic offering copy construction/assignment. This
+// wrapper should only be used to store an atomic inside a container when we
+// have properly synchronized all potential internal value copies (e.g.
+// resizes).
+template <typename T>
+struct CopyAtomic {
+  /* implicit */ CopyAtomic(T value): value(value) {}
+
+  CopyAtomic(const CopyAtomic<T>& other)
+    : value(other.value.load())
+  {}
+
+  CopyAtomic& operator=(const CopyAtomic<T>& other) {
+    value = other.value.load();
+  }
+
+  operator T() const {
+    return value;
+  }
+
+  std::atomic<T> value;
+};
+
 // We'll store a LoggingProfile for each array construction site SrcKey.
 // It tracks the operations that happen on arrays coming from that site.
 struct LoggingProfile {
   // Values in the event map are sampled event counts.
-  using EventMap = tbb::concurrent_hash_map<uint64_t, size_t,
-                                            integralHashCompare<uint64_t>>;
+  using EventMap = folly::F14FastMap<uint64_t, CopyAtomic<size_t>>;
 
   // The first element of the key is the EntryTypes before the operation;
   // the second element is the EntryTypes after it.
@@ -132,11 +154,12 @@ struct LoggingProfile {
   using EntryTypesMapHasher = pairHashCompare<uint16_t, uint16_t,
                                               integralHashCompare<uint16_t>,
                                               integralHashCompare<uint16_t>>;
-  using EntryTypesMap = tbb::concurrent_hash_map<EntryTypesMapKey, size_t,
-                                                 EntryTypesMapHasher>;
+  using EntryTypesMap = folly::F14FastMap<EntryTypesMapKey, CopyAtomic<size_t>,
+                                          EntryTypesMapHasher>;
 
   // The content of the logging profile that can be freed after layout selection.
   struct LoggingProfileData {
+    folly::SharedMutex mapLock;
     std::atomic<uint64_t> sampleCount = 0;
     std::atomic<uint64_t> loggingArraysEmitted = 0;
     LoggingArray* staticLoggingArray = nullptr;
@@ -183,8 +206,7 @@ using SinkProfileKey = std::pair<TransID, SrcKey>;
 
 // We'll store a SinkProfile for each place where an array is used.
 struct SinkProfile {
-  using SourceMap = tbb::concurrent_hash_map<LoggingProfile*, size_t,
-                                             pointer_hash<LoggingProfile>>;
+  using SourceMap = folly::F14FastMap<LoggingProfile*, CopyAtomic<size_t>>;
 
   static constexpr size_t kNumArrTypes = ArrayData::kNumKinds / 2;
   static constexpr size_t kNumKeyTypes = int(KeyTypes::Any) + 1;
@@ -196,6 +218,8 @@ struct SinkProfile {
   // The content of the sink profile that can be released after layout
   // selection.
   struct SinkProfileData {
+    folly::SharedMutex mapLock;
+
     std::atomic<uint64_t> arrCounts[kNumArrTypes] = {};
     std::atomic<uint64_t> keyCounts[kNumKeyTypes] = {};
     std::atomic<uint64_t> valCounts[kNumValTypes] = {};
@@ -205,7 +229,6 @@ struct SinkProfile {
     SourceMap sources;
   };
 
-  void reduce(const SinkProfile& other);
   void update(const ArrayData* ad);
 
   SinkProfile();

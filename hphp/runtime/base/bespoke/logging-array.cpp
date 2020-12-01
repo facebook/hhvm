@@ -111,6 +111,7 @@ const ArrayData* maybeMakeLoggingArray(const ArrayData* ad) {
 
 ArrayData* maybeMakeLoggingArray(ArrayData* ad, LoggingProfile* profile) {
   if (!g_emitLoggingArrays.load(std::memory_order_acquire)) return ad;
+  assertx(profile->data);
 
   if (ad->isSampledArray() || !ad->isVanilla()) {
     DEBUG_ONLY auto const op = profile->key.op();
@@ -124,20 +125,20 @@ ArrayData* maybeMakeLoggingArray(ArrayData* ad, LoggingProfile* profile) {
     if (shouldTestBespokeArrayLikes()) return true;
     if (RO::EvalEmitLoggingArraySampleRate == 0) return false;
 
-    auto const skCount = profile->sampleCount++;
+    auto const skCount = profile->data->sampleCount++;
     FTRACE(5, "Observe SrcKey count: {}\n", skCount);
     return (skCount - 1) % RO::EvalEmitLoggingArraySampleRate == 0;
   }();
 
   if (!shouldEmitBespoke) {
     FTRACE(5, "Emit vanilla at {}\n", profile->key.toString());
-    auto const cached = profile->staticSampledArray;
+    auto const cached = profile->data->staticSampledArray;
     return cached ? cached : makeSampledArray(ad);
   }
 
   FTRACE(5, "Emit bespoke at {}\n", profile->key.toString());
-  profile->loggingArraysEmitted++;
-  auto const cached = profile->staticLoggingArray;
+  profile->data->loggingArraysEmitted++;
+  auto const cached = profile->data->staticLoggingArray;
   if (cached) return cached;
 
   // Non-static array constructors are basically a sequence of sets or appends.

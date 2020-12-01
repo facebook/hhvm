@@ -623,7 +623,9 @@ const ConcreteLayout* ConcreteLayout::FromConcreteIndex(LayoutIndex index) {
 
 namespace {
 ArrayData* maybeMonoifyForTesting(ArrayData* ad, LoggingProfile* profile) {
-  auto const mad = profile->staticMonotypeArray.load(std::memory_order_relaxed);
+  assertx(profile->data);
+  auto& profileMonotype = profile->data->staticMonotypeArray;
+  auto const mad = profileMonotype.load(std::memory_order_relaxed);
   if (mad) return mad;
 
   auto const result = maybeMonoify(ad);
@@ -632,10 +634,10 @@ ArrayData* maybeMonoifyForTesting(ArrayData* ad, LoggingProfile* profile) {
 
   // We should cache a staticMonotypeArray iff this profile is for a static
   // array constructor or static prop - i.e. iff staticLoggingArray is set.
-  if (!profile->staticLoggingArray) return result;
+  if (!profile->data->staticLoggingArray) return result;
 
   ArrayData* current = nullptr;
-  if (profile->staticMonotypeArray.compare_exchange_strong(current, result)) {
+  if (profileMonotype.compare_exchange_strong(current, result)) {
     return result;
   }
   RO::EvalLowStaticArrays ? low_free(result) : uncounted_free(result);

@@ -135,7 +135,22 @@ struct LoggingProfile {
   using EntryTypesMap = tbb::concurrent_hash_map<EntryTypesMapKey, size_t,
                                                  EntryTypesMapHasher>;
 
-  explicit LoggingProfile(LoggingProfileKey key) : key(key) {}
+  // The content of the logging profile that can be freed after layout selection.
+  struct LoggingProfileData {
+    std::atomic<uint64_t> sampleCount = 0;
+    std::atomic<uint64_t> loggingArraysEmitted = 0;
+    LoggingArray* staticLoggingArray = nullptr;
+    std::atomic<ArrayData*> staticMonotypeArray{nullptr};
+    ArrayData* staticSampledArray = nullptr;
+    EventMap events;
+    EntryTypesMap entryTypes;
+  };
+
+  explicit LoggingProfile(LoggingProfileKey key);
+  explicit LoggingProfile(
+      LoggingProfileKey key, jit::ArrayLayout layout, BespokeArray* bad);
+
+  void releaseData() { data.reset(); }
 
   double getSampleCountMultiplier() const;
   uint64_t getTotalEvents() const;
@@ -157,17 +172,10 @@ private:
 
 public:
   LoggingProfileKey key;
-
-  std::atomic<uint64_t> sampleCount = 0;
-  std::atomic<uint64_t> loggingArraysEmitted = 0;
-  BespokeArray* staticBespokeArray = nullptr;
-  LoggingArray* staticLoggingArray = nullptr;
-  std::atomic<ArrayData*> staticMonotypeArray{nullptr};
-  ArrayData* staticSampledArray = nullptr;
-  EventMap events;
-  EntryTypesMap entryTypes;
-
   jit::ArrayLayout layout = jit::ArrayLayout::Bottom();
+  // TODO(mcolavita): these can technically be a union.
+  std::unique_ptr<LoggingProfileData> data;
+  BespokeArray* staticBespokeArray = nullptr;
 };
 
 // We split sinks by profiling tracelet so we can condition on array type.
@@ -178,10 +186,6 @@ struct SinkProfile {
   using SourceMap = tbb::concurrent_hash_map<LoggingProfile*, size_t,
                                              pointer_hash<LoggingProfile>>;
 
-  void reduce(const SinkProfile& other);
-  void update(const ArrayData* ad);
-
-public:
   static constexpr size_t kNumArrTypes = ArrayData::kNumKinds / 2;
   static constexpr size_t kNumKeyTypes = int(KeyTypes::Any) + 1;
   static constexpr size_t kNumValTypes = kMaxDataType - kMinDataType + 3;
@@ -189,16 +193,30 @@ public:
   static constexpr size_t kNoValTypes = kNumValTypes - 2;
   static constexpr size_t kAnyValType = kNumValTypes - 1;
 
+  // The content of the sink profile that can be released after layout
+  // selection.
+  struct SinkProfileData {
+    std::atomic<uint64_t> arrCounts[kNumArrTypes] = {};
+    std::atomic<uint64_t> keyCounts[kNumKeyTypes] = {};
+    std::atomic<uint64_t> valCounts[kNumValTypes] = {};
+
+    std::atomic<uint64_t> sampledCount = 0;
+    std::atomic<uint64_t> unsampledCount = 0;
+    SourceMap sources;
+  };
+
+  void reduce(const SinkProfile& other);
+  void update(const ArrayData* ad);
+
+  SinkProfile();
+  explicit SinkProfile(jit::ArrayLayout layout);
+
+  void releaseData() { data.reset(); }
+
+public:
   SinkProfileKey key;
-
-  std::atomic<uint64_t> arrCounts[kNumArrTypes] = {};
-  std::atomic<uint64_t> keyCounts[kNumKeyTypes] = {};
-  std::atomic<uint64_t> valCounts[kNumValTypes] = {};
-
-  std::atomic<uint64_t> sampledCount = 0;
-  std::atomic<uint64_t> unsampledCount = 0;
-  SourceMap sources;
-
+  // TODO(mcolavita): these can technically be a union.
+  std::unique_ptr<SinkProfileData> data;
   jit::ArrayLayout layout = jit::ArrayLayout::Bottom();
 };
 

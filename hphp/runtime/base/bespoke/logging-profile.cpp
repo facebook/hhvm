@@ -213,15 +213,31 @@ std::string EventKey::toString() const {
 
 //////////////////////////////////////////////////////////////////////////////
 
-double LoggingProfile::getSampleCountMultiplier() const {
-  if (loggingArraysEmitted == 0) return 0;
+LoggingProfile::LoggingProfile(LoggingProfileKey key)
+  : key(key)
+  , data(std::make_unique<LoggingProfileData>())
+{
+  assertx(s_profiling.load(std::memory_order_acquire));
+}
 
-  return sampleCount / (double) loggingArraysEmitted;
+LoggingProfile::LoggingProfile(
+    LoggingProfileKey key, jit::ArrayLayout layout, BespokeArray* bad)
+  : key(key)
+  , layout(layout)
+  , staticBespokeArray(bad)
+{}
+
+double LoggingProfile::getSampleCountMultiplier() const {
+  assertx(data);
+  if (data->loggingArraysEmitted == 0) return 0;
+
+  return data->sampleCount / (double) data->loggingArraysEmitted;
 }
 
 uint64_t LoggingProfile::getTotalEvents() const {
+  assertx(data);
   size_t total = 0;
-  for (auto const& event : events) total += event.second;
+  for (auto const& event : data->events) total += event.second;
 
   return total;
 }
@@ -255,8 +271,10 @@ void LoggingProfile::logEventImpl(const EventKey& key) {
   folly::SharedMutex::ReadHolder lock{s_profilingLock};
   if (!s_profiling.load(std::memory_order_acquire)) return;
 
+  assertx(data);
+
   EventMap::accessor it;
-  if (events.insert(it, key.toUInt64())) {
+  if (data->events.insert(it, key.toUInt64())) {
     it->second = 1;
   } else {
     it->second++;
@@ -274,8 +292,10 @@ void LoggingProfile::logEntryTypes(EntryTypes before, EntryTypes after) {
   folly::SharedMutex::ReadHolder lock{s_profilingLock};
   if (!s_profiling.load(std::memory_order_acquire)) return;
 
+  assertx(data);
+
   EntryTypesMap::accessor it;
-  if (entryTypes.insert(it, {before.asInt16(), after.asInt16()})) {
+  if (data->entryTypes.insert(it, {before.asInt16(), after.asInt16()})) {
     it->second = 1;
   } else {
     it->second++;
@@ -287,23 +307,31 @@ void LoggingProfile::logEntryTypes(EntryTypes before, EntryTypes after) {
 
 //////////////////////////////////////////////////////////////////////////////
 
+SinkProfile::SinkProfile(): data(std::make_unique<SinkProfileData>()) {
+  assertx(s_profiling.load(std::memory_order_acquire));
+}
+
+SinkProfile::SinkProfile(jit::ArrayLayout layout): layout(layout) {}
+
 void SinkProfile::reduce(const SinkProfile& other) {
+  assertx(data);
+  assertx(other.data);
   for (auto i = 0; i < kNumArrTypes; i++) {
-    arrCounts[i] += other.arrCounts[i];
+    data->arrCounts[i] += other.data->arrCounts[i];
   }
   for (auto i = 0; i < kNumKeyTypes; i++) {
-    keyCounts[i] += other.keyCounts[i];
+    data->keyCounts[i] += other.data->keyCounts[i];
   }
   for (auto i = 0; i < kNumValTypes; i++) {
-    valCounts[i] += other.valCounts[i];
+    data->valCounts[i] += other.data->valCounts[i];
   }
 
-  sampledCount += other.sampledCount;
-  unsampledCount += other.unsampledCount;
+  data->sampledCount += other.data->sampledCount;
+  data->unsampledCount += other.data->unsampledCount;
 
-  for (auto entry : other.sources) {
+  for (auto entry : other.data->sources) {
     SourceMap::accessor it;
-    if (sources.insert(it, entry.first)) {
+    if (data->sources.insert(it, entry.first)) {
       it->second = entry.second;
     } else {
       it->second += entry.second;
@@ -314,6 +342,8 @@ void SinkProfile::reduce(const SinkProfile& other) {
 void SinkProfile::update(const ArrayData* ad) {
   folly::SharedMutex::ReadHolder lock{s_profilingLock};
   if (!s_profiling.load(std::memory_order_acquire)) return;
+
+  assertx(data);
 
   // Because profiling hasn't stopped yet, any bespoke arrays should be
   // LoggingArrays at this point. Bail out if we get a non-logging bespoke.
@@ -327,19 +357,18 @@ void SinkProfile::update(const ArrayData* ad) {
   // Update array-like-generic fields: the sampled bit and the array type.
 
   if (lad != nullptr || ad->isSampledArray()) {
-    sampledCount++;
+    data->sampledCount++;
   } else {
-    unsampledCount++;
+    data->unsampledCount++;
   }
 
   auto const kind = ad->kind() / 2;
   assertx(kind < kNumArrTypes);
-  arrCounts[kind]++;
+  data->arrCounts[kind]++;
 
   if (lad == nullptr) return;
 
   // Update LoggingArray-only fields: key type, val type, and array source.
-
   auto const& et = lad->entryTypes;
   auto const key = size_t(et.keyTypes);
   auto const val = [&]{
@@ -351,11 +380,11 @@ void SinkProfile::update(const ArrayData* ad) {
 
   assertx(key < kNumKeyTypes);
   assertx(val < kNumValTypes);
-  keyCounts[key]++;
-  valCounts[val]++;
+  data->keyCounts[key]++;
+  data->valCounts[val]++;
 
   SourceMap::accessor it;
-  if (sources.insert(it, lad->profile)) {
+  if (data->sources.insert(it, lad->profile)) {
     it->second = 1;
   } else {
     it->second++;
@@ -548,8 +577,10 @@ struct SinkOutputData {
   explicit SinkOutputData(const SinkProfile* profile)
     : profile(profile)
   {
+    assertx(profile->data);
+
     std::map<std::string, uint64_t> sourceCounts;
-    for (auto const& it : profile->sources) {
+    for (auto const& it : profile->data->sources) {
       sourceCounts[it.first->key.toString()] += it.second;
       loggedCount += it.second;
     }
@@ -558,12 +589,12 @@ struct SinkOutputData {
     }
     std::sort(sources.begin(), sources.end());
 
-    arrCounts = populateSortedCounts(profile->arrCounts, getArrTypeStr);
-    keyCounts = populateSortedCounts(profile->keyCounts, getKeyTypeStr);
-    valCounts = populateSortedCounts(profile->valCounts, getValTypeStr);
+    arrCounts = populateSortedCounts(profile->data->arrCounts, getArrTypeStr);
+    keyCounts = populateSortedCounts(profile->data->keyCounts, getKeyTypeStr);
+    valCounts = populateSortedCounts(profile->data->valCounts, getValTypeStr);
 
-    sampledCount = profile->sampledCount.load(std::memory_order_relaxed);
-    unsampledCount = profile->unsampledCount.load(std::memory_order_relaxed);
+    sampledCount = profile->data->sampledCount.load(std::memory_order_relaxed);
+    unsampledCount = profile->data->unsampledCount.load(std::memory_order_relaxed);
 
     weight = sampledCount + unsampledCount;
   }
@@ -643,11 +674,12 @@ bool exportSortedProfiles(FILE* file, const ProfileOutputData& profileData) {
 
   for (auto const& sourceData : profileData) {
     auto const sourceProfile = sourceData.profile;
+    assertx(sourceProfile->data);
 
     LOG_OR_RETURN(file, "{} [{}/{} sampled, {:.2f} weight]\n",
                   sourceProfile->key.toString(),
-                  sourceProfile->loggingArraysEmitted.load(),
-                  sourceProfile->sampleCount.load(), sourceData.weight);
+                  sourceProfile->data->loggingArraysEmitted.load(),
+                  sourceProfile->data->sampleCount.load(), sourceData.weight);
     LOG_OR_RETURN(file, "  {}\n", sourceProfile->key.toStringDetail());
     LOG_OR_RETURN(file, "  Selected Layout: {}\n",
                   sourceProfile->layout.describe());
@@ -707,9 +739,10 @@ bool exportSortedSinks(FILE* file, const std::vector<SinkOutputData>& sinks) {
 }
 
 SourceOutputData sortSourceData(const LoggingProfile* profile) {
+  assertx(profile->data);
   // Group events by their operation
   std::map<ArrayOp, OperationOutputData> opsGrouped;
-  for (auto const& eventAndCount : profile->events) {
+  for (auto const& eventAndCount : profile->data->events) {
     auto const event = EventKey(eventAndCount.first);
     auto const count = eventAndCount.second;
 
@@ -735,7 +768,7 @@ SourceOutputData sortSourceData(const LoggingProfile* profile) {
   // Determine monotype operations
   std::vector<EntryTypesEscalationOutputData> escalations;
   std::map<uint16_t, uint64_t> usesMap;
-  for (auto const& statesAndCount : profile->entryTypes) {
+  for (auto const& statesAndCount : profile->data->entryTypes) {
     auto const before = statesAndCount.first.first;
     auto const after = statesAndCount.first.second;
     auto const count = statesAndCount.second;
@@ -800,10 +833,29 @@ void stopProfiling() {
   }
 }
 
+namespace {
+void freeProfileData() {
+  if (shouldTestBespokeArrayLikes()) {
+    // When testing bespoke array-likes, we use the data struct to cache
+    // logging and monotype arrays. Therefore, we do not free them after layout
+    // selection.
+    return;
+  }
+
+  eachSource([](auto& x) { x.releaseData(); });
+  eachSink([](auto& x) { x.releaseData(); });
+}
+}
+
 void startExportProfiles() {
-  if (RO::EvalExportLoggingArrayDataPath.empty()) return;
+  if (RO::EvalExportLoggingArrayDataPath.empty()) {
+    freeProfileData();
+    return;
+  }
 
   s_exportProfilesThread = std::thread([] {
+    SCOPE_EXIT { freeProfileData(); };
+
     auto const sources = sortProfileData();
     auto const sinks = sortSinkData();
     auto const file = fopen(RO::EvalExportLoggingArrayDataPath.c_str(), "w");
@@ -886,8 +938,8 @@ LoggingProfile* getLoggingProfile(LoggingProfileKey key) {
 
   auto profile = std::make_unique<LoggingProfile>(key);
   if (ad) {
-    profile->staticLoggingArray = LoggingArray::MakeStatic(ad, profile.get());
-    profile->staticSampledArray = ad->makeSampledStaticArray();
+    profile->data->staticLoggingArray = LoggingArray::MakeStatic(ad, profile.get());
+    profile->data->staticSampledArray = ad->makeSampledStaticArray();
   }
 
   auto const result = [&]{
@@ -902,8 +954,8 @@ LoggingProfile* getLoggingProfile(LoggingProfileKey key) {
   // or free that memory, depending on whether we won the race to set profile.
   if (ad) {
     if (profile) {
-      freeStaticArray(profile->staticSampledArray);
-      freeStaticArray(profile->staticLoggingArray);
+      freeStaticArray(profile->data->staticSampledArray);
+      freeStaticArray(profile->data->staticLoggingArray);
     } else {
       MemoryStats::LogAlloc(AllocKind::StaticArray, sizeof(LoggingArray));
       MemoryStats::LogAlloc(AllocKind::StaticArray, allocSize(ad));

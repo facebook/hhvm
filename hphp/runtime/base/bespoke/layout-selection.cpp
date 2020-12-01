@@ -64,13 +64,15 @@ bool isMonotypeLayout(const EntryTypes& et) {
 
 // Returns KeyTypes::Any if there's no good key type to specialize on.
 KeyTypes selectKeyType(const SinkProfile& profile, double p_cutoff) {
+  assertx(profile.data);
+
   auto const load = [](auto& x) { return x.load(std::memory_order_relaxed); };
 
-  auto const empty = load(profile.keyCounts[int(KeyTypes::Empty)]);
-  auto const ints  = load(profile.keyCounts[int(KeyTypes::Ints)]);
-  auto const strs  = load(profile.keyCounts[int(KeyTypes::Strings)]);
-  auto const sstrs = load(profile.keyCounts[int(KeyTypes::StaticStrings)]);
-  auto const any   = load(profile.keyCounts[int(KeyTypes::Any)]);
+  auto const empty = load(profile.data->keyCounts[int(KeyTypes::Empty)]);
+  auto const ints  = load(profile.data->keyCounts[int(KeyTypes::Ints)]);
+  auto const strs  = load(profile.data->keyCounts[int(KeyTypes::Strings)]);
+  auto const sstrs = load(profile.data->keyCounts[int(KeyTypes::StaticStrings)]);
+  auto const any   = load(profile.data->keyCounts[int(KeyTypes::Any)]);
 
   auto const total = empty + ints + strs + sstrs + any;
   if (!total) return KeyTypes::Any;
@@ -88,10 +90,12 @@ KeyTypes selectKeyType(const SinkProfile& profile, double p_cutoff) {
 // Returns kKindOfUninit if we should specialize on "monotype of unknown type".
 // Returns kInvalidDataType if we should not specialize this sink on a monotype.
 DataType selectValType(const SinkProfile& profile, double p_cutoff) {
+  assertx(profile.data);
+
   auto const load = [](auto& x) { return x.load(std::memory_order_relaxed); };
 
-  auto const empty = load(profile.valCounts[SinkProfile::kNoValTypes]);
-  auto const any   = load(profile.valCounts[SinkProfile::kAnyValType]);
+  auto const empty = load(profile.data->valCounts[SinkProfile::kNoValTypes]);
+  auto const any   = load(profile.data->valCounts[SinkProfile::kAnyValType]);
 
   uint64_t total = 0;
   uint64_t max_count = 0;
@@ -100,7 +104,7 @@ DataType selectValType(const SinkProfile& profile, double p_cutoff) {
   static_assert(SinkProfile::kNoValTypes == SinkProfile::kNumValTypes - 2);
   static_assert(SinkProfile::kAnyValType == SinkProfile::kNumValTypes - 1);
   for (auto i = 0; i < SinkProfile::kNoValTypes; i++) {
-    auto const count = load(profile.valCounts[i]);
+    auto const count = load(profile.data->valCounts[i]);
     total += count;
     if (count > max_count) {
       max_count = count;
@@ -119,17 +123,19 @@ DataType selectValType(const SinkProfile& profile, double p_cutoff) {
 }
 
 ArrayLayout selectSourceLayout(LoggingProfile& profile) {
+  assertx(profile.data);
+
   auto const mode = RO::EvalBespokeArraySpecializationMode;
   if (mode == 1 || mode == 2) return ArrayLayout::Vanilla();
 
   auto const load = [](auto& x) { return x.load(std::memory_order_relaxed); };
 
-  auto const logging = load(profile.loggingArraysEmitted);
+  auto const logging = load(profile.data->loggingArraysEmitted);
 
   if (!logging) return ArrayLayout::Vanilla();
 
   uint64_t escalated = 0;
-  for (auto const& it : profile.events) {
+  for (auto const& it : profile.data->events) {
     auto const op = getArrayOp(it.first);
     if (op == ArrayOp::EscalateToVanilla) escalated += it.second;
   }
@@ -142,7 +148,7 @@ ArrayLayout selectSourceLayout(LoggingProfile& profile) {
   uint64_t monotype = 0;
   uint64_t total = 0;
 
-  for (auto const& it : profile.entryTypes) {
+  for (auto const& it : profile.data->entryTypes) {
     if (isMonotypeLayout(EntryTypes(it.first.second))) {
       monotype += it.second;
     }
@@ -151,7 +157,7 @@ ArrayLayout selectSourceLayout(LoggingProfile& profile) {
 
   auto const p_monotype = 1.0 * monotype / total;
   if (p_monotype >= p_cutoff) {
-    auto const sad = profile.staticSampledArray;
+    auto const sad = profile.data->staticSampledArray;
     if (sad == nullptr) return ArrayLayout::Vanilla();
     auto const mad = maybeMonoify(sad);
     if (mad == nullptr) return ArrayLayout::Vanilla();
@@ -174,14 +180,16 @@ ArrayLayout selectSourceLayout(LoggingProfile& profile) {
 }
 
 ArrayLayout selectSinkLayout(const SinkProfile& profile) {
+  assertx(profile.data);
+
   auto const mode = RO::EvalBespokeArraySpecializationMode;
   if (mode == 1) return ArrayLayout::Vanilla();
   if (mode == 2) return ArrayLayout::Top();
 
   auto const load = [](auto& x) { return x.load(std::memory_order_relaxed); };
 
-  auto const sampled = load(profile.sampledCount);
-  auto const unsampled = load(profile.unsampledCount);
+  auto const sampled = load(profile.data->sampledCount);
+  auto const unsampled = load(profile.data->unsampledCount);
 
   if (!sampled) return unsampled ? ArrayLayout::Vanilla() : ArrayLayout::Top();
 
@@ -189,7 +197,7 @@ ArrayLayout selectSinkLayout(const SinkProfile& profile) {
   uint64_t monotype = 0;
   uint64_t total = 0;
 
-  for (auto const& it : profile.sources) {
+  for (auto const& it : profile.data->sources) {
     if (it.first->layout.vanilla()) {
       vanilla += it.second;
     } else if (isMonotypeLayout(it.first->layout)) {
@@ -209,11 +217,11 @@ ArrayLayout selectSinkLayout(const SinkProfile& profile) {
 
   if (p_monotype >= p_cutoff) {
     using AK = ArrayData::ArrayKind;
-    auto const vec = load(profile.arrCounts[AK::kVecKind / 2]) +
-                     load(profile.arrCounts[AK::kPackedKind / 2]);
-    auto const dict = load(profile.arrCounts[AK::kDictKind / 2]) +
-                      load(profile.arrCounts[AK::kMixedKind / 2]);
-    auto const keyset = load(profile.arrCounts[AK::kKeysetKind / 2]);
+    auto const vec = load(profile.data->arrCounts[AK::kVecKind / 2]) +
+                     load(profile.data->arrCounts[AK::kPackedKind / 2]);
+    auto const dict = load(profile.data->arrCounts[AK::kDictKind / 2]) +
+                      load(profile.data->arrCounts[AK::kMixedKind / 2]);
+    auto const keyset = load(profile.data->arrCounts[AK::kKeysetKind / 2]);
 
     assertx(vec || dict || keyset);
     if (bool(vec) + bool(dict) + bool(keyset) != 1) return ArrayLayout::Top();

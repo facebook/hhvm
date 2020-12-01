@@ -1286,7 +1286,8 @@ EntryInfo ConcurrentTableSharedStore::makeEntryInfo(const char* key,
 
   auto ttl = calcTTL(sval->rawExpire());
   auto maxTTL = calcTTL(sval->maxExpireTime.load(std::memory_order_acquire));
-  return EntryInfo(key, inMem, size, ttl, maxTTL, sval->bumpTTL.load(std::memory_order_acquire), type, sval->c_time);
+  return EntryInfo(key, inMem, size, ttl, maxTTL, sval->bumpTTL.load(std::memory_order_acquire),
+                   type, sval->c_time, s_hotCache.hasValue(String(key).get()));
 }
 
 std::vector<EntryInfo> ConcurrentTableSharedStore::getEntriesInfo() {
@@ -1343,7 +1344,7 @@ static void dumpOneKeyAndValue(std::ostream &out,
 }
 
 static void dumpEntriesInfo(std::vector<EntryInfo> entries, std::ostream& out) {
-  out << "key inmem size ttl type maxttl bumpttl\n";
+  out << "key inmem size ttl type maxttl bumpttl inhotcache\n";
   for (auto entry : entries) {
     out << entry.key << " "
         << static_cast<int32_t>(entry.inMem) << " "
@@ -1351,7 +1352,8 @@ static void dumpEntriesInfo(std::vector<EntryInfo> entries, std::ostream& out) {
         << entry.ttl << " "
         << static_cast<int32_t>(entry.type) << " "
         << entry.maxTTL << " "
-        << entry.bumpTTL << '\n';
+        << entry.bumpTTL << " "
+        << (entry.inHotCache ? "1" : "0") << '\n';
   }
 }
 

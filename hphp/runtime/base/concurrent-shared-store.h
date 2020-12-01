@@ -175,7 +175,8 @@ struct EntryInfo {
             int64_t maxTTL,
             uint16_t bumpTTL,
             Type type,
-            int64_t c_time)
+            int64_t c_time,
+            bool inHotCache)
     : key(apckey)
     , inMem(inMem)
     , size(size)
@@ -184,6 +185,7 @@ struct EntryInfo {
     , bumpTTL(bumpTTL)
     , type(type)
     , c_time(c_time)
+    , inHotCache(inHotCache)
   {}
 
   static Type getAPCType(const APCHandle* handle);
@@ -196,6 +198,7 @@ struct EntryInfo {
   uint16_t bumpTTL;
   Type type;
   int64_t c_time;
+  bool inHotCache;
 };
 
 //////////////////////////////////////////////////////////////////////

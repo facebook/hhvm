@@ -635,6 +635,7 @@ const StaticString s_type("type");
 const StaticString s_c_time("creation_time");
 const StaticString s_max_ttl("max_ttl");
 const StaticString s_bump_ttl("bump_ttl");
+const StaticString s_in_hotcache("in_hotcache");
 
 // This is a guess to the size of the info array. It is significantly
 // bigger than what we need but hard to control all the info that we
@@ -642,7 +643,7 @@ const StaticString s_bump_ttl("bump_ttl");
 // Try to keep it such that we do not have to resize the array
 const uint32_t kCacheInfoSize = 40;
 // Number of elements in the entry array
-const int32_t kEntryInfoSize = 9;
+const int32_t kEntryInfoSize = 10;
 
 Array HHVM_FUNCTION(
   apc_cache_info,
@@ -676,6 +677,7 @@ Array HHVM_FUNCTION(
       ent.add(s_c_time, entry.c_time);
       ent.add(s_max_ttl, entry.maxTTL);
       ent.add(s_bump_ttl, entry.bumpTTL);
+      ent.add(s_in_hotcache, entry.inHotCache);
       ents.append(ent.toArray());
     }
     info.add(s_cache_list, ents.toArray(), false);

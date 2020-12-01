@@ -95,6 +95,7 @@ ArrayData* makeSampledArray(ArrayData* vad) {
 //////////////////////////////////////////////////////////////////////////////
 
 void setLoggingEnabled(bool value) {
+  if (!value && allowBespokeArrayLikes()) stopProfiling();
   g_emitLoggingArrays.store(value, std::memory_order_release);
 }
 

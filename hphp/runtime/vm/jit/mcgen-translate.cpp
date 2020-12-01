@@ -357,7 +357,11 @@ void retranslateAll() {
   auto const nFuncs = sortedFuncs.size();
 
   // 2) Perform bespoke coloring and finalize the layout hierarchy.
-  if (allowBespokeArrayLikes()) bespoke::selectBespokeLayouts();
+  //    Jumpstart consumers use the coloring computed by the seeder.
+
+  if (allowBespokeArrayLikes() && !isJitDeserializing()) {
+    bespoke::selectBespokeLayouts();
+  }
 
   // 3) Check if we should dump profile data. We may exit here in
   //    SerializeAndExit mode, without really doing the JIT, unless

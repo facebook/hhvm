@@ -225,32 +225,6 @@ void read_units_preload(ProfDataDeserializer& ser) {
   read_container(ser, [&] { read_unit_preload(ser); });
 }
 
-void write_srckey(ProfDataSerializer& ser, SrcKey sk) {
-  ITRACE(2, "SrcKey>\n");
-  if (!sk.func()->wasSerialized()) {
-    Trace::Indent _i;
-    write_raw(ser, uintptr_t(-1));
-    write_func(ser, sk.func());
-  }
-  write_raw(ser, sk.toAtomicInt());
-  ITRACE(2, "SrcKey: {}\n", show(sk));
-}
-
-SrcKey read_srckey(ProfDataDeserializer& ser) {
-  ITRACE(2, "SrcKey>\n");
-  auto orig = read_raw<SrcKey::AtomicInt>(ser);
-  if (orig == uintptr_t(-1)) {
-    Trace::Indent _i;
-    read_func(ser);
-    orig = read_raw<SrcKey::AtomicInt>(ser);
-  }
-  auto const id = SrcKey::fromAtomicInt(orig).funcID().toInt();
-  assertx(uint32_t(orig) == id);
-  auto const sk = SrcKey::fromAtomicInt(orig - id + ser.getFid(id));
-  ITRACE(2, "SrcKey: {}\n", show(sk));
-  return sk;
-}
-
 void write_type(ProfDataSerializer& ser, Type t) {
   t.serialize(ser);
 }
@@ -1281,7 +1255,7 @@ void write_array(ProfDataSerializer& ser, const ArrayData* arr) {
   write_raw(ser, str.data(), sz);
 
   if (!allowBespokeArrayLikes()) return;
-  write_raw(ser, ArrayLayout::FromArray(arr).toUint16());
+  write_layout(ser, ArrayLayout::FromArray(arr));
 }
 
 ArrayData* read_array(ProfDataDeserializer& ser) {
@@ -1302,9 +1276,7 @@ ArrayData* read_array(ProfDataDeserializer& ser) {
       auto const result = ArrayData::GetScalarArray(std::move(v));
 
       if (!allowBespokeArrayLikes()) return result;
-      uint16_t raw_layout = 0;
-      read_raw(ser, raw_layout);
-      return ArrayLayout::FromUint16(raw_layout).apply(result);
+      return read_layout(ser).apply(result);
     }
   );
 }
@@ -1591,6 +1563,40 @@ RegionEntryKey read_regionkey(ProfDataDeserializer& des) {
   return RegionEntryKey(srcKey, guards);
 }
 
+void write_srckey(ProfDataSerializer& ser, SrcKey sk) {
+  ITRACE(2, "SrcKey>\n");
+  if (!sk.func()->wasSerialized()) {
+    Trace::Indent _i;
+    write_raw(ser, uintptr_t(-1));
+    write_func(ser, sk.func());
+  }
+  write_raw(ser, sk.toAtomicInt());
+  ITRACE(2, "SrcKey: {}\n", show(sk));
+}
+
+SrcKey read_srckey(ProfDataDeserializer& ser) {
+  ITRACE(2, "SrcKey>\n");
+  auto orig = read_raw<SrcKey::AtomicInt>(ser);
+  if (orig == uintptr_t(-1)) {
+    Trace::Indent _i;
+    read_func(ser);
+    orig = read_raw<SrcKey::AtomicInt>(ser);
+  }
+  auto const id = SrcKey::fromAtomicInt(orig).funcID().toInt();
+  assertx(uint32_t(orig) == id);
+  auto const sk = SrcKey::fromAtomicInt(orig - id + ser.getFid(id));
+  ITRACE(2, "SrcKey: {}\n", show(sk));
+  return sk;
+}
+
+void write_layout(ProfDataSerializer& ser, ArrayLayout layout) {
+  write_raw(ser, layout.toUint16());
+}
+
+ArrayLayout read_layout(ProfDataDeserializer& ser) {
+  return ArrayLayout::FromUint16(read_raw<uint16_t>(ser));
+}
+
 std::string serializeProfData(const std::string& filename) {
   try {
     ProfDataSerializer ser{filename, ProfDataSerializer::FileMode::Create};
@@ -1637,6 +1643,10 @@ std::string serializeProfData(const std::string& filename) {
     // that haven't been otherwise mentioned (eg VerifyParamType,
     // InstanceOfD etc).
     write_named_types(ser, pd);
+
+    if (allowBespokeArrayLikes()) {
+      serializeBespokeLayouts(ser);
+    }
 
     ser.finalize();
 
@@ -1733,6 +1743,10 @@ std::string deserializeProfData(const std::string& filename, int numWorkers) {
     read_target_profiles(ser);
 
     read_named_types(ser);
+
+    if (allowBespokeArrayLikes()) {
+      deserializeBespokeLayouts(ser);
+    }
 
     if (!ser.done()) {
       // We have profile data for the optimized code, so deserialize it too.

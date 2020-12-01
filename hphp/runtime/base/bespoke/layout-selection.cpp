@@ -269,7 +269,6 @@ ArrayLayout layoutForSink(const jit::TransIDSet& ids, SrcKey sk) {
 }
 
 void selectBespokeLayouts() {
-  stopProfiling();
   setLoggingEnabled(false);
   eachSource([](auto& x) { x.layout = selectSourceLayout(x); });
   eachSink([](auto& x) { x.layout = selectSinkLayout(x); });

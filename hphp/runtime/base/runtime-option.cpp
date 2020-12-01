@@ -2841,7 +2841,8 @@ void RuntimeOption::Load(
     specializeVanillaDestructors();
     bespoke::setLoggingEnabled(false);
   } else {
-    bespoke::setLoggingEnabled(true);
+    auto const log = !isJitDeserializing();
+    bespoke::setLoggingEnabled(log);
   }
 
   // Hack Array Compats

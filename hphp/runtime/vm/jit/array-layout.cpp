@@ -18,10 +18,12 @@
 
 #include "hphp/runtime/base/bespoke/layout.h"
 #include "hphp/runtime/base/bespoke/logging-array.h"
+#include "hphp/runtime/base/bespoke/logging-profile.h"
 #include "hphp/runtime/base/bespoke/monotype-dict.h"
 #include "hphp/runtime/base/bespoke/monotype-vec.h"
 #include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
+#include "hphp/runtime/vm/jit/prof-data-serialize.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 
 namespace HPHP { namespace jit {
@@ -306,6 +308,70 @@ SSATmp* ArrayLayout::emitIterGetKey(IRGS& env, SSATmp* arr, SSATmp* elm) const {
 SSATmp* ArrayLayout::emitIterGetVal(IRGS& env, SSATmp* arr, SSATmp* elm) const {
   assertx(checkLayoutMatches(*this, arr));
   return irgenLayout()->emitIterGetVal(env, arr, elm);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+namespace {
+using bespoke::LoggingProfileKey;
+using bespoke::SinkProfileKey;
+
+void write_source_key(ProfDataSerializer& ser, const LoggingProfileKey& key) {
+  write_raw(ser, key.slot);
+  if (key.slot == kInvalidSlot) {
+    write_srckey(ser, key.sk);
+  } else {
+    write_class(ser, key.cls);
+  }
+}
+
+LoggingProfileKey read_source_key(ProfDataDeserializer& des) {
+  LoggingProfileKey key(SrcKey{});
+  read_raw(des, key.slot);
+  if (key.slot == kInvalidSlot) {
+    key.sk = read_srckey(des);
+  } else {
+    key.cls = read_class(des);
+  }
+  return key;
+}
+
+void write_sink_key(ProfDataSerializer& ser, const SinkProfileKey& key) {
+  write_raw(ser, key.first);
+  write_srckey(ser, key.second);
+}
+
+SinkProfileKey read_sink_key(ProfDataDeserializer& des) {
+  auto const trans = read_raw<TransID>(des);
+  return SinkProfileKey(trans, read_srckey(des));
+}
+}
+
+void serializeBespokeLayouts(ProfDataSerializer& ser) {
+  write_raw(ser, bespoke::countSources());
+  bespoke::eachSource([&](auto const& profile) {
+    write_source_key(ser, profile.key);
+    write_raw(ser, profile.layout);
+  });
+  write_raw(ser, bespoke::countSinks());
+  bespoke::eachSink([&](auto const& profile) {
+    write_sink_key(ser, profile.key);
+    write_raw(ser, profile.layout);
+  });
+}
+
+void deserializeBespokeLayouts(ProfDataDeserializer& des) {
+  auto const sources = read_raw<size_t>(des);
+  for (auto i = 0; i < sources; i++) {
+    auto const key = read_source_key(des);
+    bespoke::deserializeSource(key, read_layout(des));
+  }
+  auto const sinks = read_raw<size_t>(des);
+  for (auto i = 0; i < sinks; i++) {
+    auto const key = read_sink_key(des);
+    bespoke::deserializeSink(key, read_layout(des));
+  }
+  bespoke::Layout::FinalizeHierarchy();
 }
 
 //////////////////////////////////////////////////////////////////////////////

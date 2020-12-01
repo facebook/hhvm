@@ -78,6 +78,23 @@ SrcKey canonicalize(SrcKey sk) {
   return SrcKey(sk.func(), sk.offset(), ResumeMode::None);
 }
 
+// If the given source always produces a particular static array, return it.
+ArrayData* getStaticArray(LoggingProfileKey key) {
+  if (key.slot != kInvalidSlot) {
+    auto const index = key.cls->propSlotToIndex(key.slot);
+    auto const tv = key.cls->declPropInit()[index].val.tv();
+    return tvIsArrayLike(tv) ? tv.val().parr : nullptr;
+  }
+  auto const op = key.sk.op();
+  if (op != Op::Array && op != Op::Vec &&
+      op != Op::Dict && op != Op::Keyset) {
+    return nullptr;
+  }
+  auto const unit = key.sk.func()->unit();
+  auto const result = unit->lookupArrayId(getImm(key.sk.pc(), 0).u_AA);
+  return const_cast<ArrayData*>(result);
+}
+
 template <typename M, typename L, typename K>
 size_t incrementCounter(M& map, L& mutex, K key) {
   {
@@ -88,11 +105,9 @@ size_t incrementCounter(M& map, L& mutex, K key) {
       return it->second;
     }
   }
-
   folly::SharedMutex::WriteHolder lock{mutex};
   auto [it, didInsert] = map.emplace(key, 0);
   it->second.value++;
-
   return it->second;
 }
 
@@ -238,12 +253,15 @@ LoggingProfile::LoggingProfile(LoggingProfileKey key)
   assertx(s_profiling.load(std::memory_order_acquire));
 }
 
-LoggingProfile::LoggingProfile(
-    LoggingProfileKey key, jit::ArrayLayout layout, BespokeArray* bad)
+LoggingProfile::LoggingProfile(LoggingProfileKey key, jit::ArrayLayout layout)
   : key(key)
   , layout(layout)
-  , staticBespokeArray(bad)
-{}
+  , staticBespokeArray(nullptr)
+{
+  if (layout.vanilla()) return;
+  auto const ad = getStaticArray(key);
+  if (ad) staticBespokeArray = BespokeArray::asBespoke(layout.apply(ad));
+}
 
 double LoggingProfile::getSampleCountMultiplier() const {
   assertx(data);
@@ -314,11 +332,17 @@ void LoggingProfile::logEntryTypes(EntryTypes before, EntryTypes after) {
 
 //////////////////////////////////////////////////////////////////////////////
 
-SinkProfile::SinkProfile(): data(std::make_unique<SinkProfileData>()) {
+SinkProfile::SinkProfile(SinkProfileKey key)
+  : key(key)
+  , data(std::make_unique<SinkProfileData>())
+{
   assertx(s_profiling.load(std::memory_order_acquire));
 }
 
-SinkProfile::SinkProfile(jit::ArrayLayout layout): layout(layout) {}
+SinkProfile::SinkProfile(SinkProfileKey key, jit::ArrayLayout layout)
+  : key(key)
+  , layout(layout)
+{}
 
 void SinkProfile::update(const ArrayData* ad) {
   folly::SharedMutex::ReadHolder lock{s_profilingLock};
@@ -854,8 +878,8 @@ void waitOnExportProfiles() {
 
 namespace {
 void freeStaticArray(ArrayData* ad) {
-  // TODO(T80237666): make this less fragile by moving this logic right next
-  // to the corresponding allocation logic
+  // TODO(T80237666): Make this code less fragile by moving this logic next
+  // to the corresponding allocation logic in HashTable::staticAlloc().
   assertx(ad->isStatic());
   auto const extra = ad->hasStrKeyTable()
     ? (sizeof(StrKeyTable) + 15) & ~15ull
@@ -893,26 +917,8 @@ LoggingProfile* getLoggingProfile(LoggingProfileKey key) {
   folly::SharedMutex::ReadHolder lock{s_profilingLock};
   if (!s_profiling.load(std::memory_order_acquire)) return nullptr;
 
-  // See if this source is always a particular static array. For properties,
-  // that means it's a scalar array in declPropInit; for bytecodes, it means
-  // it's one of the static array constructors in {Array, Vec, Dict, Keyset}.
-  auto const ad = [&]() -> ArrayData* {
-    if (key.slot != kInvalidSlot) {
-      auto const index = key.cls->propSlotToIndex(key.slot);
-      auto const tv = key.cls->declPropInit()[index].val.tv();
-      return tvIsArrayLike(tv) ? tv.val().parr : nullptr;
-    }
-    auto const op = key.sk.op();
-    if (op != Op::Array && op != Op::Vec &&
-        op != Op::Dict && op != Op::Keyset) {
-      return nullptr;
-    }
-    auto const unit = key.sk.func()->unit();
-    auto const result = unit->lookupArrayId(getImm(key.sk.pc(), 0).u_AA);
-    return const_cast<ArrayData*>(result);
-  }();
-
   auto profile = std::make_unique<LoggingProfile>(key);
+  auto const ad = getStaticArray(key);
   if (ad) {
     profile->data->staticLoggingArray = LoggingArray::MakeStatic(ad, profile.get());
     profile->data->staticSampledArray = ad->makeSampledStaticArray();
@@ -966,8 +972,7 @@ SinkProfile* getSinkProfile(TransID id, SrcKey skRaw) {
   folly::SharedMutex::ReadHolder lock{s_profilingLock};
   if (!s_profiling.load(std::memory_order_acquire)) return nullptr;
 
-  auto profile = std::make_unique<SinkProfile>();
-  profile->key = key;
+  auto profile = std::make_unique<SinkProfile>(key);
 
   auto const result = [&]{
     SinkMap::accessor insert;
@@ -1006,6 +1011,26 @@ void eachSource(std::function<void(LoggingProfile& profile)> fn) {
 void eachSink(std::function<void(SinkProfile& profile)> fn) {
   assertx(!s_profiling.load(std::memory_order_acquire));
   for (auto& it : s_sinkMap) fn(*it.second);
+}
+
+void deserializeSource(LoggingProfileKey key, jit::ArrayLayout layout) {
+  ProfileMap::accessor insert;
+  always_assert(s_profileMap.insert(insert, key));
+  insert->second = new LoggingProfile(key, layout);
+}
+
+void deserializeSink(SinkProfileKey key, jit::ArrayLayout layout) {
+  SinkMap::accessor insert;
+  always_assert(s_sinkMap.insert(insert, key));
+  insert->second = new SinkProfile(key, layout);
+}
+
+size_t countSources() {
+  return s_profileMap.size();
+}
+
+size_t countSinks() {
+  return s_sinkMap.size();
 }
 
 ArrayOp getArrayOp(uint64_t key) {

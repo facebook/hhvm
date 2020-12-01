@@ -28,6 +28,8 @@ namespace HPHP { namespace jit {
 
 struct Block;
 struct SSATmp;
+struct ProfDataSerializer;
+struct ProfDataDeserializer;
 
 namespace irgen { struct IRGS; }
 
@@ -132,5 +134,9 @@ private:
 
   Sort sort;
 };
+
+// Jumpstart support for our layout selection decisions.
+void serializeBespokeLayouts(ProfDataSerializer& ser);
+void deserializeBespokeLayouts(ProfDataDeserializer& des);
 
 }}

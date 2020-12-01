@@ -170,8 +170,7 @@ struct LoggingProfile {
   };
 
   explicit LoggingProfile(LoggingProfileKey key);
-  explicit LoggingProfile(
-      LoggingProfileKey key, jit::ArrayLayout layout, BespokeArray* bad);
+  LoggingProfile(LoggingProfileKey key, jit::ArrayLayout layout);
 
   void releaseData() { data.reset(); }
 
@@ -196,7 +195,7 @@ private:
 public:
   LoggingProfileKey key;
   jit::ArrayLayout layout = jit::ArrayLayout::Bottom();
-  // TODO(mcolavita): these can technically be a union.
+  // TODO(mcolavita): These fields could become a union.
   std::unique_ptr<LoggingProfileData> data;
   BespokeArray* staticBespokeArray = nullptr;
 };
@@ -231,14 +230,14 @@ struct SinkProfile {
 
   void update(const ArrayData* ad);
 
-  SinkProfile();
-  explicit SinkProfile(jit::ArrayLayout layout);
+  explicit SinkProfile(SinkProfileKey key);
+  SinkProfile(SinkProfileKey key, jit::ArrayLayout layout);
 
   void releaseData() { data.reset(); }
 
 public:
   SinkProfileKey key;
-  // TODO(mcolavita): these can technically be a union.
+  // TODO(mcolavita): These fields could become a union.
   std::unique_ptr<SinkProfileData> data;
   jit::ArrayLayout layout = jit::ArrayLayout::Bottom();
 };
@@ -260,9 +259,13 @@ SrcKey getSrcKey();
 void stopProfiling();
 void startExportProfiles();
 
-// Global views, used for layout selection.
+// Global views, used for layout selection and serialization.
 void eachSource(std::function<void(LoggingProfile& profile)> fn);
 void eachSink(std::function<void(SinkProfile& profile)> fn);
+void deserializeSource(LoggingProfileKey key, jit::ArrayLayout layout);
+void deserializeSink(SinkProfileKey key, jit::ArrayLayout layout);
+size_t countSources();
+size_t countSinks();
 
 // Accessors for logged events. TODO(kshaunak): Expose a better API.
 ArrayOp getArrayOp(uint64_t key);

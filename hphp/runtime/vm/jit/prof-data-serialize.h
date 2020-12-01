@@ -189,6 +189,10 @@ void write_clsmeth(ProfDataSerializer& ser, ClsMethDataRef clsMeth);
 ClsMethDataRef read_clsmeth(ProfDataDeserializer& ser);
 void write_regionkey(ProfDataSerializer& ser, const RegionEntryKey& regionkey);
 RegionEntryKey read_regionkey(ProfDataDeserializer& des);
+void write_srckey(ProfDataSerializer& ser, SrcKey sk);
+SrcKey read_srckey(ProfDataDeserializer& des);
+void write_layout(ProfDataSerializer& ser, ArrayLayout layout);
+ArrayLayout read_layout(ProfDataDeserializer& des);
 
 // Return an empty string upon success, and a string that describes the reason
 // of failure otherwise.

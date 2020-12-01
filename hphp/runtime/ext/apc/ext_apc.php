@@ -26,7 +26,8 @@
 <<__Native, __NonRx('APC')>>
 function apc_add(mixed $key_or_array,
                  mixed $var = null,
-                 int $ttl = 0): mixed;
+                 int $ttl = 0,
+                 int $bump_ttl = 0): mixed;
 
 /**
  * Cache a variable in the data store. Unlike many other mechanisms in PHP,
@@ -52,7 +53,8 @@ function apc_add(mixed $key_or_array,
 <<__Native, __NonRx('APC')>>
 function apc_store(mixed $key_or_array,
                    mixed $var = null,
-                   int $ttl = 0): mixed;
+                   int $ttl = 0,
+                   int $bump_ttl = 0): mixed;
 
 /**
  * Simlar to apc_store() but TTL is always 0 and there is TTL cap applied. Do

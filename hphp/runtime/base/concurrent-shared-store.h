@@ -57,7 +57,9 @@ struct StoreValue {
     , dataSize{o.dataSize}
     , kind(o.kind)
     , readOnly(o.readOnly)
+    , bumpTTL{o.bumpTTL.load(std::memory_order_relaxed)}
     , c_time{o.c_time}
+    , maxExpireTime{o.maxExpireTime.load(std::memory_order_relaxed)}
     // Copy everything except the lock
   {
     hotIndex.store(o.hotIndex.load(std::memory_order_relaxed),
@@ -82,11 +84,12 @@ struct StoreValue {
   Variant toLocal() const {
     return data().left()->toLocal();
   }
-  void set(APCHandle* v, int64_t ttl);
+  void set(APCHandle* v, int64_t expireTTL, int64_t maxTTL, int64_t bumpTTL);
   bool expired() const;
   uint32_t rawExpire() const {
     return expireTime.load(std::memory_order_acquire);
   }
+  uint32_t queueExpire() const;
 
   int32_t getSerializedSize() const {
     assertx(data().right() != nullptr);
@@ -129,9 +132,10 @@ struct StoreValue {
   mutable std::atomic<HotCacheIdx> hotIndex{kHotCacheUnknown};
   APCKind kind;  // Only valid if data is an APCHandle*.
   bool readOnly{false}; // Set for primed entries that will never change.
-  char padding[2];  // Make APCMap nodes cache-line sized (it static_asserts).
+  mutable std::atomic<uint16_t> bumpTTL{0};
   mutable std::atomic<int64_t> expireRequestIdx{Treadmill::kIdleGenCount};
   uint32_t c_time{0}; // Creation time; 0 for primed values
+  mutable std::atomic<uint32_t> maxExpireTime{};
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -168,12 +172,16 @@ struct EntryInfo {
             bool inMem,
             int32_t size,
             int64_t ttl,
+            int64_t maxTTL,
+            uint16_t bumpTTL,
             Type type,
             int64_t c_time)
     : key(apckey)
     , inMem(inMem)
     , size(size)
     , ttl(ttl)
+    , maxTTL(maxTTL)
+    , bumpTTL(bumpTTL)
     , type(type)
     , c_time(c_time)
   {}
@@ -184,6 +192,8 @@ struct EntryInfo {
   bool inMem;
   int32_t size;
   int64_t ttl;
+  int64_t maxTTL;
+  uint16_t bumpTTL;
   Type type;
   int64_t c_time;
 };
@@ -230,7 +240,7 @@ struct ConcurrentTableSharedStore {
    * Returns: true if the value was added, including if we've replaced an
    * expired value.
    */
-  bool add(const String& key, const Variant& val, int64_t ttl);
+  bool add(const String& key, const Variant& val, int64_t max_ttl, int64_t bump_ttl);
 
   /*
    * Set the value for `key' to `val'.  If there was an existing value, it is
@@ -239,7 +249,7 @@ struct ConcurrentTableSharedStore {
    * The requested ttl is limited by the ApcTTLLimit, unless we're overwriting
    * a primed key.
    */
-  void set(const String& key, const Variant& val, int64_t ttl);
+  void set(const String& key, const Variant& val, int64_t max_ttl, int64_t bump_ttl);
 
   /*
    * Set the value for `key' to `val', without any TTL, even if it wasn't
@@ -428,9 +438,9 @@ private:
   };
 
 private:
-  bool deferredExpire(const String& keyStr, Map::const_accessor& acc);
+  bool checkExpire(const String& keyStr, Map::const_accessor& acc);
   bool eraseImpl(const char*, bool, int64_t, ExpMap::accessor* expAcc);
-  bool storeImpl(const String&, const Variant&, int64_t, bool, bool);
+  bool storeImpl(const String&, const Variant&, int64_t, int64_t, bool, bool);
   bool handlePromoteObj(const String&, APCHandle*, const Variant&);
   APCHandle* unserialize(const String&, StoreValue*);
   void dumpKeyAndValue(std::ostream&);

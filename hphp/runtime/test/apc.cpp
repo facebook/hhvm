@@ -108,7 +108,7 @@ const StaticString s_value2("value2");
 TEST(APC, Basic) {
   auto store = new_store();
 
-  EXPECT_EQ(store->add(s_key, Variant(s_value1), 1500), true);
+  EXPECT_EQ(store->add(s_key, Variant(s_value1), 1500, 0), true);
   EXPECT_EQ(store->exists(s_key), true);
   Variant got;
   EXPECT_EQ(store->get(s_key, got), true);
@@ -121,12 +121,12 @@ TEST(APC, Basic) {
 TEST(APC, SetOverwrite) {
   auto store = new_store();
 
-  store->set(s_key, Variant(s_value1), 1500);
+  store->set(s_key, Variant(s_value1), 1500, 0);
   Variant got;
   EXPECT_EQ(store->get(s_key, got), true);
   EXPECT_TRUE(tvSame(*got.asTypedValue(),
               make_tv<KindOfPersistentString>(s_value1.get())));
-  store->set(s_key, Variant(s_value2), 1500);
+  store->set(s_key, Variant(s_value2), 1500, 0);
   EXPECT_EQ(store->get(s_key, got), true);
   EXPECT_TRUE(tvSame(*got.asTypedValue(),
               make_tv<KindOfPersistentString>(s_value2.get())));
@@ -135,8 +135,8 @@ TEST(APC, SetOverwrite) {
 TEST(APC, Clear) {
   auto store = new_store();
 
-  EXPECT_EQ(store->add(s_key, Variant(s_value1), 1500), true);
-  EXPECT_EQ(store->add(s_key2, Variant(s_value2), 1500), true);
+  EXPECT_EQ(store->add(s_key, Variant(s_value1), 1500, 0), true);
+  EXPECT_EQ(store->add(s_key2, Variant(s_value2), 1500, 0), true);
   EXPECT_EQ(store->exists(s_key), true);
   EXPECT_EQ(store->exists(s_key2), true);
   store->clear();
@@ -148,7 +148,7 @@ TEST(APC, IncCas) {
   auto store = new_store();
   bool found = false;
 
-  store->set(s_key, Variant(1), 1500);
+  store->set(s_key, Variant(1), 1500, 0);
   EXPECT_EQ(store->inc(s_key, 1, found), 2);
   EXPECT_TRUE(found);
   EXPECT_EQ(store->inc(s_key, 1, found), 3);
@@ -158,7 +158,7 @@ TEST(APC, IncCas) {
   EXPECT_EQ(store->inc(s_key, 1, found), 5);
   EXPECT_TRUE(found);
 
-  store->set(s_key, Variant(1.0), 1500);
+  store->set(s_key, Variant(1.0), 1500, 0);
   EXPECT_EQ(store->inc(s_key, 1, found), 2);
   EXPECT_TRUE(found);
   EXPECT_EQ(store->inc(s_key, 1, found), 3);
@@ -168,14 +168,14 @@ TEST(APC, IncCas) {
   EXPECT_EQ(store->inc(s_key, 1, found), 5);
   EXPECT_TRUE(found);
 
-  store->set(s_key, Variant(1), 1500);
+  store->set(s_key, Variant(1), 1500, 0);
   EXPECT_TRUE(store->cas(s_key, 1, 2));
   EXPECT_TRUE(store->cas(s_key, 2, 3));
   EXPECT_TRUE(store->cas(s_key, 3, 4));
   EXPECT_TRUE(store->cas(s_key, 4, 5));
   EXPECT_FALSE(store->cas(s_key, 4, 5));
 
-  store->set(s_key, Variant(1.0), 1500);
+  store->set(s_key, Variant(1.0), 1500, 0);
   EXPECT_TRUE(store->cas(s_key, 1, 2));
   EXPECT_TRUE(store->cas(s_key, 2, 3));
   EXPECT_TRUE(store->cas(s_key, 3, 4));
@@ -184,7 +184,7 @@ TEST(APC, IncCas) {
 
   // make sure it doesn't work on some non-doubles/ints
 
-  store->set(s_key, Variant(s_value2), 1500);
+  store->set(s_key, Variant(s_value2), 1500, 0);
   EXPECT_EQ(store->inc(s_key, 1, found), 0);
   EXPECT_FALSE(found);
   EXPECT_FALSE(store->cas(s_key, 1, 2));
@@ -218,7 +218,7 @@ TEST(APC, SampleEntries) {
   auto entries = store->sampleEntriesInfo(10);
   EXPECT_EQ(entries.size(), 0);
   // Single-element store results in repetition.
-  store->set(s_foo, s_value1, 1500);
+  store->set(s_foo, s_value1, 1500, 0);
   for (uint32_t count = 0; count <= 10; ++count) {
     entries = store->sampleEntriesInfo(count);
     EXPECT_EQ(entries.size(), count);
@@ -227,8 +227,8 @@ TEST(APC, SampleEntries) {
     }
   }
   // More entries.
-  store->set(s_key, s_value1, 1500);
-  store->set(s_key2, s_value2, 1500);
+  store->set(s_key, s_value1, 1500, 0);
+  store->set(s_key2, s_value2, 1500, 0);
   for (uint32_t count = 0; count <= 10; ++count) {
     entries = store->sampleEntriesInfo(count);
     EXPECT_EQ(entries.size(), count);

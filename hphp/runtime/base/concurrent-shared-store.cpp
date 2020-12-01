@@ -30,6 +30,7 @@
 #include "hphp/util/timer.h"
 #include "hphp/util/trace.h"
 
+#include <atomic>
 #include <mutex>
 #include <set>
 #include <string>
@@ -64,12 +65,14 @@ std::string show(const StoreValue& sval) {
 
 //////////////////////////////////////////////////////////////////////
 
-void StoreValue::set(APCHandle* v, int64_t ttl) {
+void StoreValue::set(APCHandle* v, int64_t expire_ttl, int64_t max_ttl, int64_t bump_ttl) {
   setHandle(v);
   uint32_t mtime = time(nullptr);
   if (c_time == 0)  c_time = mtime;
   expireRequestIdx.store(Treadmill::kIdleGenCount, std::memory_order_relaxed);
-  expireTime.store(ttl ? mtime + ttl : 0, std::memory_order_release);
+  expireTime.store(expire_ttl ? mtime + expire_ttl : 0, std::memory_order_release);
+  bumpTTL.store(bump_ttl, std::memory_order_release);
+  maxExpireTime.store(max_ttl ? mtime + max_ttl : 0, std::memory_order_release);
 }
 
 bool StoreValue::expired() const {
@@ -77,6 +80,27 @@ bool StoreValue::expired() const {
   if (c_time == 0) return false;
   auto const e = rawExpire();
   return e && time(nullptr) >= e;
+}
+
+uint32_t StoreValue::queueExpire() const {
+  assertx(c_time != 0); // Should not call queueExpire for primed values
+
+  auto expire = expireTime.load(std::memory_order_acquire);
+  if (!expire) {
+    return expire;
+  }
+
+  auto bump = bumpTTL.load(std::memory_order_acquire);
+  if (bump == 0) {
+    return expire;
+  }
+
+  auto now = time(nullptr);
+  auto halftimeExpire = expire - (bump / 2);
+  if (halftimeExpire > now) {
+    return halftimeExpire;
+  }
+  return expire;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -436,15 +460,18 @@ bool ConcurrentTableSharedStore::eraseImpl(const char* key,
   if (!m_vars.find(acc, key)) {
     return false;
   }
-  if (expired && !acc->second.expired()) {
-    // If we got an expAcc it means that we are iterating over m_expQueue and
-    // expiring things. But if the item is not expired yet we need to put it back
-    // into the queue with the correct expire time. It happens if expire time was
-    // updated either by apc_extend_tll or by setting a new value with a TTL on
-    // an existing key
-    if (expAcc) {
-      auto expiry = acc->second.rawExpire();
-      if (expiry) {
+  auto& storeVal = acc->second;
+  if (expired && !storeVal.expired()) {
+    auto expiry = storeVal.queueExpire();
+    if (expiry) {
+      s_hotCache.clearValue(storeVal);
+
+      // If we got an expAcc it means that we are iterating over m_expQueue and
+      // expiring things. But if the item is not expired yet we need to put it back
+      // into the queue with the correct expire time. It happens if expire time was
+      // updated either by apc_extend_tll or by setting a new value with a TTL on
+      // an existing key
+      if (expAcc) {
         auto ikey = intptr_t(acc->first);
         m_expQueue.push({ ikey, expiry });
       }
@@ -452,7 +479,6 @@ bool ConcurrentTableSharedStore::eraseImpl(const char* key,
     return false;
   }
 
-  auto& storeVal = acc->second;
   bool wasCached = s_hotCache.clearValue(storeVal);
 
   FTRACE(2, "Remove {} {}\n", acc->first, show(acc->second));
@@ -645,7 +671,7 @@ APCHandle* ConcurrentTableSharedStore::unserialize(const String& key,
   }
 }
 
-bool ConcurrentTableSharedStore::deferredExpire(const String& keyStr,
+bool ConcurrentTableSharedStore::checkExpire(const String& keyStr,
                                                 Map::const_accessor& acc) {
   auto const tag = tagStringData(keyStr.get());
   if (!m_vars.find(acc, tag)) return true;
@@ -669,35 +695,51 @@ bool ConcurrentTableSharedStore::deferredExpire(const String& keyStr,
     FTRACE(5, "Expired by {}, we are {}\n",
            sval->expireRequestIdx.load(std::memory_order_acquire),
            Treadmill::getRequestGenCount());
-  } else if (e != 0 && time(nullptr) >= e) {
-    if (!apcExtension::DeferredExpiration) {
-      acc.release();
-      eraseImpl(tag, true,
-                apcExtension::UseUncounted ?
-                HPHP::Treadmill::getOldestStartTime() : 0, nullptr);
-      return true;
+  } else if (e != 0) {
+    auto now = time(nullptr);
+    if (now >= e) {
+      if (!apcExtension::DeferredExpiration) {
+        acc.release();
+        eraseImpl(tag, true,
+                  apcExtension::UseUncounted ?
+                  HPHP::Treadmill::getOldestStartTime() : 0, nullptr);
+        return true;
+      }
+      // Try to mark entry as expired.
+      auto expected = Treadmill::kIdleGenCount;
+      auto const desired = Treadmill::getRequestGenCount();
+      if (sval->expireRequestIdx.compare_exchange_strong(expected, desired)) {
+        FTRACE(3, "Deferred expire: {}\n", show(*sval));
+        sval->expireTime.store(1, std::memory_order_release);
+        auto const key = intptr_t(acc->first);
+        // release acc so the m_expMap.erase won't deadlock with a
+        // concurrent purgeExpired.
+        acc.release();
+        // make sure purgeExpired doesn't kill it before we have a
+        // chance to refill it.
+        m_expMap.erase(key);
+        g_context->enqueueAPCDeferredExpire(keyStr);
+        return true;
+      }
+      if (expected == Treadmill::kPurgedGenCount) {
+        // purgeExpired killed this entry, so don't return it.
+        return true;
+      }
+      // Another thread raced us and won, so not expired.
+    } else {
+      auto diff = e - now;
+      auto bumpTTL = sval->bumpTTL.load(std::memory_order_acquire);
+      if (bumpTTL != 0 && diff <= (bumpTTL / 2)) {
+        auto maxExpireTime = sval->maxExpireTime.load(std::memory_order_acquire);
+        auto expireTime = sval->expireTime.load(std::memory_order_acquire);
+        if (expireTime < maxExpireTime) {
+          uint32_t newExpire = now + bumpTTL;
+          newExpire = maxExpireTime == 0 ? newExpire : std::min(newExpire, maxExpireTime);
+          FTRACE(3, "Expire soon so extend to {}: {}\n", newExpire, show(*sval));
+          sval->expireTime.store(newExpire, std::memory_order_release);
+        }
+      }
     }
-    // Try to mark entry as expired.
-    auto expected = Treadmill::kIdleGenCount;
-    auto const desired = Treadmill::getRequestGenCount();
-    if (sval->expireRequestIdx.compare_exchange_strong(expected, desired)) {
-      FTRACE(3, "Deferred expire: {}\n", show(*sval));
-      sval->expireTime.store(1, std::memory_order_release);
-      auto const key = intptr_t(acc->first);
-      // release acc so the m_expMap.erase won't deadlock with a
-      // concurrent purgeExpired.
-      acc.release();
-      // make sure purgeExpired doesn't kill it before we have a
-      // chance to refill it.
-      m_expMap.erase(key);
-      g_context->enqueueAPCDeferredExpire(keyStr);
-      return true;
-    }
-    if (expected == Treadmill::kPurgedGenCount) {
-      // purgeExpired killed this entry, so don't return it.
-      return true;
-    }
-    // Another thread raced us and won, so not expired.
   }
   return false;
 }
@@ -713,7 +755,7 @@ bool ConcurrentTableSharedStore::get(const String& keyStr, Variant& value) {
   bool needsToLocal = false;
   {
     Map::const_accessor acc;
-    if (deferredExpire(keyStr, acc)) {
+    if (checkExpire(keyStr, acc)) {
       return false;
     }
     sval = &acc->second;
@@ -863,7 +905,7 @@ bool ConcurrentTableSharedStore::exists(const String& keyStr) {
   SharedMutex::ReadHolder l(m_lock);
   {
     Map::const_accessor acc;
-    if (deferredExpire(keyStr, acc)) {
+    if (checkExpire(keyStr, acc)) {
       return false;
     }
   }
@@ -934,11 +976,15 @@ bool ConcurrentTableSharedStore::bumpTTL(const String& key, int64_t new_ttl) {
   // This API can't be used to breach the ttl cap.
   if (new_ttl == 0) {
     sval.expireTime.store(0, std::memory_order_release);
+    sval.bumpTTL.store(0, std::memory_order_release);
+    sval.maxExpireTime.store(0, std::memory_order_release);
     return true;
   }
   auto new_expire = time(nullptr) + new_ttl;
   if (new_expire > old_expire) {
     sval.expireTime.store(new_expire, std::memory_order_release);
+    sval.bumpTTL.store(0, std::memory_order_release);
+    sval.maxExpireTime.store(new_expire, std::memory_order_release);
     return true;
   }
   return false;
@@ -947,24 +993,27 @@ bool ConcurrentTableSharedStore::bumpTTL(const String& key, int64_t new_ttl) {
 
 bool ConcurrentTableSharedStore::add(const String& key,
                                      const Variant& val,
-                                     int64_t ttl) {
-  return storeImpl(key, val, ttl, false, true);
+                                     int64_t max_ttl,
+                                     int64_t bump_ttl) {
+  return storeImpl(key, val, max_ttl, bump_ttl, false, true);
 }
 
 void ConcurrentTableSharedStore::set(const String& key,
                                      const Variant& val,
-                                     int64_t ttl) {
-  storeImpl(key, val, ttl, true, true);
+                                     int64_t max_ttl,
+                                     int64_t bump_ttl) {
+  storeImpl(key, val, max_ttl, bump_ttl, true, true);
 }
 
 void ConcurrentTableSharedStore::setWithoutTTL(const String& key,
                                                const Variant& val) {
-  storeImpl(key, val, 0, true, false);
+  storeImpl(key, val, 0, 0, true, false);
 }
 
 bool ConcurrentTableSharedStore::storeImpl(const String& key,
                                            const Variant& value,
-                                           int64_t ttl,
+                                           int64_t max_ttl,
+                                           int64_t bump_ttl,
                                            bool overwrite,
                                            bool limit_ttl) {
   StoreValue *sval;
@@ -1010,14 +1059,24 @@ bool ConcurrentTableSharedStore::storeImpl(const String& key,
       APCStats::getAPCStats().addKey(keyLen);
     }
 
-    int64_t adjustedTtl = adjust_ttl(ttl, overwritePrime || !limit_ttl);
-    if (adjustedTtl > apcExtension::TTLMaxFinite) {
-      adjustedTtl = 0;
+    int64_t adjustedMaxTTL = adjust_ttl(max_ttl, overwritePrime || !limit_ttl);
+    if (adjustedMaxTTL > apcExtension::TTLMaxFinite) {
+      adjustedMaxTTL = 0;
+    }
+
+    if (bump_ttl < 0 || (adjustedMaxTTL != 0 && bump_ttl >= adjustedMaxTTL)) {
+      bump_ttl = 0;
+    }
+    bump_ttl = std::min(bump_ttl, (int64_t)std::numeric_limits<uint16_t>::max());
+
+    auto expire_ttl = bump_ttl;
+    if (expire_ttl <= 0 || (adjustedMaxTTL > 0 && expire_ttl >= adjustedMaxTTL)) {
+      expire_ttl = adjustedMaxTTL;
     }
 
     auto svar = APCHandle::Create(value, false, APCHandleLevel::Outer, false);
     if (current) {
-      if (sval->rawExpire() == 0 && adjustedTtl != 0) {
+      if (sval->rawExpire() == 0 && adjustedMaxTTL != 0) {
         APCStats::getAPCStats().removeAPCValue(
           sval->dataSize, current, true, sval->expired());
         APCStats::getAPCStats().addAPCValue(svar.handle, svar.size, false);
@@ -1031,9 +1090,9 @@ bool ConcurrentTableSharedStore::storeImpl(const String& key,
       APCStats::getAPCStats().addAPCValue(svar.handle, svar.size, present);
     }
 
-    sval->set(svar.handle, adjustedTtl);
+    sval->set(svar.handle, expire_ttl, adjustedMaxTTL, bump_ttl);
     sval->dataSize = svar.size;
-    expiry = sval->rawExpire();
+    expiry = sval->queueExpire();
     if (expiry) {
       auto ikey = intptr_t(acc->first);
       if (m_expMap.insert({ ikey, 0 })) {
@@ -1078,7 +1137,7 @@ void ConcurrentTableSharedStore::prime(std::vector<KeyValuePair>&& vars) {
     acc->second.readOnly = apcExtension::EnableConstLoad && item.readOnly;
     if (item.inMem()) {
       APCStats::getAPCStats().addAPCValue(item.value, item.sSize, true);
-      acc->second.set(item.value, 0);
+      acc->second.set(item.value, 0, 0, 0);
       acc->second.dataSize = item.sSize;
     } else {
       acc->second.tagged_data.store(item.sAddr, std::memory_order_release);
@@ -1160,7 +1219,7 @@ void ConcurrentTableSharedStore::primeDone() {
     }
     auto const pair =
       APCHandle::Create(Variant(1), false, APCHandleLevel::Outer, false);
-    acc->second.set(pair.handle, 0);
+    acc->second.set(pair.handle, 0, 0, 0);
     acc->second.dataSize = pair.size;
     APCStats::getAPCStats().addAPCValue(pair.handle, pair.size, true);
   }
@@ -1216,13 +1275,18 @@ EntryInfo ConcurrentTableSharedStore::makeEntryInfo(const char* key,
         return false;
       });
 
-  int64_t ttl = 0;
-  if (inMem && sval->rawExpire()) {
-    ttl = sval->rawExpire() - curr_time;
-    if (ttl == 0) ttl = 1; // don't want to confuse with primed keys
-  }
+  auto calcTTL = [&](uint32_t expire) -> int64_t {
+    if (inMem && expire) {
+      int64_t ttl = expire - curr_time;
+      if (ttl == 0) ttl = 1; // don't want to confuse with primed keys
+      return ttl;
+    }
+    return 0;
+  };
 
-  return EntryInfo(key, inMem, size, ttl, type, sval->c_time);
+  auto ttl = calcTTL(sval->rawExpire());
+  auto maxTTL = calcTTL(sval->maxExpireTime.load(std::memory_order_acquire));
+  return EntryInfo(key, inMem, size, ttl, maxTTL, sval->bumpTTL.load(std::memory_order_acquire), type, sval->c_time);
 }
 
 std::vector<EntryInfo> ConcurrentTableSharedStore::getEntriesInfo() {
@@ -1279,13 +1343,15 @@ static void dumpOneKeyAndValue(std::ostream &out,
 }
 
 static void dumpEntriesInfo(std::vector<EntryInfo> entries, std::ostream& out) {
-  out << "key inmem size ttl type\n";
+  out << "key inmem size ttl type maxttl bumpttl\n";
   for (auto entry : entries) {
     out << entry.key << " "
         << static_cast<int32_t>(entry.inMem) << " "
         << entry.size << " "
         << entry.ttl << " "
-        << static_cast<int32_t>(entry.type) << '\n';
+        << static_cast<int32_t>(entry.type) << " "
+        << entry.maxTTL << " "
+        << entry.bumpTTL << '\n';
   }
 }
 

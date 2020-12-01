@@ -1,0 +1,36 @@
+vec(3) {
+  string(21) "nothot:foofoo: fooval"
+  string(21) "nothot:barbar: barval"
+  string(21) "nothot:bazbaz: bazval"
+}
+vec(3) {
+  string(18) "hot:foofoo: fooval"
+  string(18) "hot:barbar: barval"
+  string(18) "hot:bazbaz: bazval"
+}
+vec(1) {
+  string(21) "nothot:bazbaz: bazval"
+}
+vec(1) {
+  string(18) "hot:bazbaz: bazval"
+}
+vec(1) {
+  string(21) "nothot:foofoo: fooval"
+}
+vec(1) {
+  string(18) "hot:foofoo: fooval"
+}
+vec(1) {
+  string(15) "nothot:bazbaz: "
+}
+vec(1) {
+  string(12) "hot:bazbaz: "
+}
+vec(2) {
+  string(21) "nothot:foofoo: fooval"
+  string(15) "nothot:barbar: "
+}
+vec(2) {
+  string(18) "hot:foofoo: fooval"
+  string(12) "hot:barbar: "
+}

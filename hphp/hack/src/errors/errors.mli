@@ -676,7 +676,7 @@ val override_lsb :
 
 val should_be_override : Pos.t -> string -> string -> unit
 
-val override_per_trait : Pos.t * string -> string -> Pos.t -> unit
+val override_per_trait : Pos.t * string -> string -> string -> Pos.t -> unit
 
 val missing_assign : Pos.t -> unit
 

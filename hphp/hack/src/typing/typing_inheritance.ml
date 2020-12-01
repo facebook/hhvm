@@ -82,6 +82,7 @@ let check_trait_override_annotations env cls ~static =
                 Errors.override_per_trait
                   (Cls.pos cls, Cls.name cls)
                   id
+                  meth.ce_origin
                   (get_pos ty)
           ))
 

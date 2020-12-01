@@ -901,7 +901,7 @@ and class_def_ env c tc =
             then
               ()
             else
-              Errors.override_per_trait c.c_name id pos
+              Errors.override_per_trait c.c_name id ce.ce_origin pos
     in
 
     List.iter (Cls.methods tc) (check_override ~is_static:false);

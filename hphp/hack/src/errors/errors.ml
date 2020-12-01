@@ -3068,8 +3068,7 @@ let parent_in_trait pos =
   add
     (Typing.err_code Typing.ParentInTrait)
     pos
-    ( "`parent::` inside a trait is undefined"
-    ^ " without `require extends` of a class defined in <?hh" )
+    "You can only use `parent::` in traits that specify `require extends SomeClass`"
 
 let parent_undefined pos =
   add (Typing.err_code Typing.ParentUndefined) pos "parent is undefined"
@@ -4418,20 +4417,21 @@ let should_be_override pos class_id id =
        (strip_ns class_id |> Markdown_lite.md_codify)
        (Markdown_lite.md_codify id))
 
-let override_per_trait class_name id m_pos =
+let override_per_trait class_name meth_name trait_name m_pos =
   let (c_pos, c_name) = class_name in
   let err_msg =
-    "Method "
-    ^ Markdown_lite.md_codify (strip_ns c_name ^ "::" ^ id)
-    ^ " should be an override per the declaring trait; "
-    ^ "no non-private parent definition found or overridden parent is defined in non-<?hh code"
+    Printf.sprintf
+      "`%s::%s` is marked `__Override` but `%s` does not define or inherit a `%s` method."
+      (strip_ns trait_name)
+      meth_name
+      (strip_ns c_name)
+      meth_name
   in
   add_list
     (Typing.err_code Typing.OverridePerTrait)
     [
       (c_pos, err_msg);
-      ( m_pos,
-        "Declaration of " ^ Markdown_lite.md_codify (id ^ "()") ^ " is here" );
+      (m_pos, "Declaration of " ^ Markdown_lite.md_codify meth_name ^ " is here");
     ]
 
 let missing_assign pos =

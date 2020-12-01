@@ -227,7 +227,7 @@ void read_units_preload(ProfDataDeserializer& ser) {
 
 void write_srckey(ProfDataSerializer& ser, SrcKey sk) {
   ITRACE(2, "SrcKey>\n");
-  if (ser.serialize(sk.func())) {
+  if (!sk.func()->wasSerialized()) {
     Trace::Indent _i;
     write_raw(ser, uintptr_t(-1));
     write_func(ser, sk.func());
@@ -1554,12 +1554,12 @@ void write_clsmeth(ProfDataSerializer& ser, ClsMethDataRef clsMeth) {
     );
   };
   ITRACE(2, "ClsMeth>\n");
-  if (ser.serialize(clsMeth->getCls())) {
+  if (!clsMeth->getCls()->wasSerialized()) {
     Trace::Indent _i;
     write_raw(ser, uintptr_t(-1));
     write_class(ser, clsMeth->getCls());
   }
-  if (ser.serialize(clsMeth->getFunc())) {
+  if (!clsMeth->getFunc()->wasSerialized()) {
     Trace::Indent _i;
     write_raw(ser, uintptr_t(-1));
     write_func(ser, clsMeth->getFunc());

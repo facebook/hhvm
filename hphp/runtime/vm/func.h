@@ -1107,6 +1107,9 @@ struct Func final {
   // been serialized yet (see prof-data-serialize.cpp).
   bool serialize() const;
 
+  // Returns true if this function has already been serialized.
+  bool wasSerialized() const { return m_serialized; }
+
   /////////////////////////////////////////////////////////////////////////////
   // Offset accessors.                                                 [static]
 

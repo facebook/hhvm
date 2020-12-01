@@ -291,6 +291,8 @@ struct Vgen {
   void emit(unpcklpd i) { noncommute(i); a.unpcklpd(i.s0, i.d); }
   void emit(xorb i) { commuteSF(i); a.xorb(i.s0, i.d); }
   void emit(xorbi i) { binary(i); a.xorb(i.s0, i.d); }
+  void emit(xorw i) { commuteSF(i); a.xorw(i.s0, i.d); }
+  void emit(xorwi i) { binary(i); a.xorw(i.s0, i.d); }
   void emit(xorl i) { commuteSF(i); a.xorl(i.s0, i.d); }
   void emit(xorq i);
   void emit(xorqi i) { binary(i); a.xorq(i.s0, i.d); }

@@ -411,6 +411,8 @@ struct Vgen {
   void emit(const unpcklpd&);
   void emit(const xorb& i);
   void emit(const xorbi& i);
+  void emit(const xorw& i);
+  void emit(const xorwi& i);
   void emit(const xorl& i);
   void emit(const xorq& i);
   void emit(const xorqi& i);
@@ -1097,6 +1099,8 @@ Y(orqi, Orr, X, i.s0.q(), xzr);
 Y(orq, Orr, X, X(i.s0), xzr);
 Y(xorb, Eor, W, W(i.s0), wzr);
 Y(xorbi, Eor, W, i.s0.ub(), wzr);
+Y(xorw, Eor, W, W(i.s0), wzr);
+Y(xorwi, Eor, W, i.s0.uw(), wzr);
 Y(xorl, Eor, W, W(i.s0), wzr);
 Y(xorq, Eor, X, X(i.s0), xzr);
 Y(xorqi, Eor, X, i.s0.q(), xzr);

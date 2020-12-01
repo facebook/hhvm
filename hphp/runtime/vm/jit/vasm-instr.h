@@ -211,6 +211,8 @@ struct Vunit;
   O(subsd, Inone, UA(s0) U(s1), D(d))\
   O(xorb, I(fl), U(s0) UH(s1,d), DH(d,s1) D(sf))          \
   O(xorbi, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf))\
+  O(xorw, I(fl), U(s0) UH(s1,d), DH(d,s1) D(sf))          \
+  O(xorwi, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf))\
   O(xorl, I(fl), U(s0) UH(s1,d), DH(d,s1) D(sf))   \
   O(xorq, I(fl), U(s0) UH(s1,d), DH(d,s1) D(sf))     \
   O(xorqi, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf))\
@@ -1047,6 +1049,8 @@ struct subsd { VregDbl s0, s1, d; };
 // xor: s0 ^ s1 => d, sf
 struct xorb { Vreg8 s0, s1, d; VregSF sf; Vflags fl; };
 struct xorbi { Immed s0; Vreg8 s1, d; VregSF sf; Vflags fl; };
+struct xorw { Vreg16 s0, s1, d; VregSF sf; Vflags fl; };
+struct xorwi { Immed s0; Vreg16 s1, d; VregSF sf; Vflags fl; };
 struct xorl { Vreg32 s0, s1, d; VregSF sf; Vflags fl; };
 struct xorq { Vreg64 s0, s1, d; VregSF sf; Vflags fl; };
 struct xorqi { Immed s0; Vreg64 s1, d; VregSF sf; Vflags fl; };

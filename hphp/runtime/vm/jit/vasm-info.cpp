@@ -282,6 +282,8 @@ bool effectsImpl(const Vinstr& inst, bool pure) {
     case Vinstr::unpcklpd:
     case Vinstr::xorb:
     case Vinstr::xorbi:
+    case Vinstr::xorw:
+    case Vinstr::xorwi:
     case Vinstr::xorl:
     case Vinstr::xorq:
     case Vinstr::xorqi:

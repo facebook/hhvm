@@ -361,6 +361,10 @@ struct Vgen {
     a.xor(Reg64(i.d), Reg64(i.s0), Reg64(i.s1), true);
     copyCR0toCR1(a, rAsm);
   }
+  void emit(const xorw& i) {
+    a.xor(Reg64(i.d), Reg64(i.s0), Reg64(i.s1), true);
+    copyCR0toCR1(a, rAsm);
+  }
   void emit(const xorl& i) {
     a.xor(Reg64(i.d), Reg64(i.s0), Reg64(i.s1), true);
     copyCR0toCR1(a, rAsm);
@@ -443,6 +447,11 @@ struct Vgen {
     }
   }
   void emit(const xorbi& i) {
+    a.li64(rAsm, i.s0.l(), false);
+    a.xor(Reg64(i.d), Reg64(i.s1), rAsm, true /** xor. implies Rc = 1 **/);
+    copyCR0toCR1(a, rAsm);
+  }
+  void emit(const xorwi& i) {
     a.li64(rAsm, i.s0.l(), false);
     a.xor(Reg64(i.d), Reg64(i.s1), rAsm, true /** xor. implies Rc = 1 **/);
     copyCR0toCR1(a, rAsm);

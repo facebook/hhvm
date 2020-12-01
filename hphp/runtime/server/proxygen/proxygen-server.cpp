@@ -501,10 +501,10 @@ void ProxygenServer::start() {
 
 void ProxygenServer::waitForEnd() {
   Logger::Info("%p: Waiting for ProxygenServer port=%d", this, m_port);
-  // worker.wait is always safe to call from any thread at any time.
-  for (auto& worker : m_workers) {
-    worker->wait();
-  }
+  // Event base 0 waits for all workers and cleans them up.  We are
+  // left taking care of only worker 0.
+  m_workers[0]->wait();
+  always_assert(m_workers.size() == 1);
 }
 
 // Server shutdown - Explained
@@ -608,13 +608,16 @@ void ProxygenServer::stopListening(bool hard) {
           });
         };
 
-        for (auto const& worker : m_workers) {
+        for (int i = 1; i < m_workers.size(); i++) {
+          auto const& worker = m_workers[i];
           auto evb = worker->getEventBase();
           evb->runInEventBaseThread([w = worker.get(), accelerateShutdown] {
             w->abortPendingTransports();
             accelerateShutdown();
           });
         }
+        m_workers[0]->abortPendingTransports();
+        accelerateShutdown();
       }, delayMilliSeconds);
     }
   } else {
@@ -748,7 +751,10 @@ void ProxygenServer::forceStop() {
   // requests from other workers.
   for (int i = 1; i < m_workers.size(); i++) {
     m_workers[i]->stopWhenIdle();
-    m_workers[i]->wait();
+  }
+  while (m_workers.size() > 1) {
+    m_workers.back()->wait();
+    m_workers.pop_back();
   }
   // We are running on event base 0 we can't wait for it here.  Let it get
   // cleaned up by the ProxygenServer destructor.

@@ -1841,43 +1841,12 @@ where
                             None,
                         )),
                         Some(TK::Dollar) => {
-                            let E(_, expr_) = expr;
-                            match expr_ {
-                                E_::String(s) => {
-                                    if !env.codegen() {
-                                        Self::raise_parsing_error(
-                                            op,
-                                            env,
-                                            &syntax_error::invalid_variable_name,
-                                        )
-                                    }
-                                    let id = String::with_capacity(1 + s.len())
-                                        + "$"
-                                        + s.to_str().map_err(|e| Error::Failwith(e.to_string()))?;
-                                    let lid = ast::Lid(pos, (0, id));
-                                    Ok(E_::mk_lvar(lid))
-                                }
-                                E_::Int(s) | E_::Float(s) => {
-                                    if !env.codegen() {
-                                        Self::raise_parsing_error(
-                                            op,
-                                            env,
-                                            &syntax_error::invalid_variable_name,
-                                        )
-                                    }
-                                    let id = String::with_capacity(1 + s.len()) + "$" + &s;
-                                    let lid = ast::Lid(pos, (0, id));
-                                    Ok(E_::mk_lvar(lid))
-                                }
-                                _ => {
-                                    Self::raise_parsing_error(
-                                        op,
-                                        env,
-                                        &syntax_error::invalid_variable_variable,
-                                    );
-                                    Ok(E_::Omitted)
-                                }
-                            }
+                            Self::raise_parsing_error(
+                                op,
+                                env,
+                                &syntax_error::invalid_variable_name,
+                            );
+                            Ok(E_::Omitted)
                         }
                         _ => Self::missing_syntax("unary operator", node, env),
                     }

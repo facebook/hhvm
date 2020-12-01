@@ -11,10 +11,6 @@ echo "\n" . '$i=f(): ';
 echo $a[$i=f()][++$i];
 unset($i);
 
-echo "\n" . '${\'i\'}=f(): ';
-echo $a[${'i'}=f()][++${'i'}];
-unset(${'i'});
-
 echo "\n" . '$i[0]=f(): ';
 $i = darray[];
 echo $a[$i[0]=f()][++$i[0]];

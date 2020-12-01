@@ -102,14 +102,6 @@ function test() {
   label:foo::bar();
   $x=$y?: foo::bar();
   $x=$y? :foo::bar() : 0;
-  $x=${'y'}? : foo();
-  $x=${'y'} ?: foo();
-  $x=${'y'}?: foo();
-  $x=${'y'} ? : foo();
-  $x=${'y'}? : foo;
-  $x=${'y'}?: foo;
-  $x=${'y'} ?: foo;
-  $x=${'y'} ? : foo;
   $x=$y?$y:foo::bar();
   $x=$y?$y: foo::bar();
   $x=$y?$y :foo();
@@ -122,8 +114,6 @@ function test() {
   $x=$obj->{'foo'}? : foo::bar();
   $x=true?$obj->{'foo'}: foo::bar();
   $x=true?$obj->{'foo'} : foo::bar();
-  $x=${'y'}?:foo();
-  $x=$y?${'y'}:foo();
   $x=$y?$y:foo();
   $x=$y?($y):foo();
   if(0){} :foo::bar();
@@ -146,8 +136,6 @@ function test() {
    */
 
   // $x=$y?:foo::bar():$z;
-  // $x=${'y'}?:foo::bar():$z;
-  // $x=$y?:foo::bar():$z;
   // if(0){}:foo::bar();
 
   /**
@@ -158,10 +146,6 @@ function test() {
   // $x=$y? :FOO;
   // $x=$y? :foo::bar();
   // $x=$y? :foo::BAR;
-  // $x=${'y'} ? :foo();
-  // $x=${'y'} ? :FOO;
-  // $x=${'y'} ? :foo::bar();
-  // $x=${'y'} ? :foo::BAR;
   // $x=$obj->{'foo'}? :foo();
   // $x=$obj->{'foo'}? :FOO;
   // $x=$obj->{'foo'}? :foo::bar();

@@ -1,6 +1,5 @@
 
 $i=f(): good
-${'i'}=f(): good
 $i[0]=f(): good
 $i[0][0]=f(): good
 $i->p=f(): good

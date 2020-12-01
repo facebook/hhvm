@@ -245,7 +245,7 @@ let find_type_with_exact_negation env tyl =
   in
   find env tyl []
 
-let rec describe_ty_super env ?(short = false) ty =
+let rec describe_ty_super env ty =
   let print ty =
     Typing_print.with_blank_tyvars (fun () ->
         Typing_print.full_strip_ns_i env ty)
@@ -267,12 +267,6 @@ let rec describe_ty_super env ?(short = false) ty =
       | [] -> "some type not known yet"
       | tyl ->
         let (locl_tyl, cstr_tyl) = List.partition_tf tyl ~f:is_locl_type in
-        let prefix =
-          if short then
-            ""
-          else
-            "something "
-        in
         let sep =
           match (locl_tyl, cstr_tyl) with
           | (_ :: _, _ :: _) -> " and "
@@ -281,21 +275,14 @@ let rec describe_ty_super env ?(short = false) ty =
         let locl_descr =
           match locl_tyl with
           | [] -> ""
-          | tyl ->
-            let prefix =
-              if short then
-                ""
-              else
-                "of type "
-            in
-            prefix ^ String.concat ~sep:" & " (List.map tyl ~f:print)
+          | tyl -> "of type " ^ String.concat ~sep:" & " (List.map tyl ~f:print)
         in
         let cstr_descr =
           String.concat
             ~sep:" and "
             (List.map cstr_tyl ~f:(describe_ty_super env))
         in
-        prefix ^ locl_descr ^ sep ^ cstr_descr)
+        "something " ^ locl_descr ^ sep ^ cstr_descr)
     | Toption ty when is_tyvar ty ->
       "null or " ^ describe_ty_super env (LoclType ty)
     | _ -> default ())

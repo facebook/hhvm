@@ -119,6 +119,13 @@ external convert_to_ocamlrep : 'a -> 'a = "convert_to_ocamlrep"
 
 external realloc_in_ocaml_heap : 'a -> 'a = "realloc_in_ocaml_heap"
 
+(* int64 tests *)
+external roundtrip_int64 : Int64.t -> Int64.t = "roundtrip_int64"
+
+let test_int64 () =
+  let cases = [Int64.max_value; Int64.min_value; 2L; 0xfaceb00cL] in
+  List.iter ~f:(fun x -> assert (Int64.equal (roundtrip_int64 x) x)) cases
+
 let test_char () =
   let x = get_a () in
   assert (Char.equal x 'a')
@@ -700,6 +707,7 @@ let test_realloc_shared_value () =
 
 let test_cases =
   [
+    test_int64;
     test_char;
     test_int;
     test_true;

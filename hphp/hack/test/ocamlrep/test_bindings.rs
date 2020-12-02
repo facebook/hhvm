@@ -284,3 +284,9 @@ pub extern "C" fn get_sset(_unit: usize) -> usize {
     set.insert(String::from("c"));
     val(set)
 }
+
+#[no_mangle]
+pub extern "C" fn roundtrip_int64(value: usize) -> usize {
+    let i = unsafe { ocamlrep_caml_builtins::Int64::from_ocaml(value).unwrap() };
+    val(i)
+}

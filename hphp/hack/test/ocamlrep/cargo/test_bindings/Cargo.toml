@@ -10,5 +10,6 @@ path = "../../test_bindings.rs"
 
 [dependencies]
 ocamlrep = { path = "../../../../src/ocamlrep" }
+ocamlrep_caml_builtins = { path = "../../../../src/utils/ocamlrep_caml_builtins" }
 ocamlrep_derive = { path = "../../../../src/ocamlrep_derive" }
 ocamlrep_ocamlpool = { path = "../../../../src/ocamlrep_ocamlpool" }

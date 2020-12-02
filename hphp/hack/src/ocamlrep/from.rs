@@ -56,6 +56,17 @@ pub fn expect_block_tag(block: Block<'_>, tag: u8) -> Result<(), FromError> {
     Ok(())
 }
 
+pub fn expect_block_with_size_and_tag(
+    value: Value,
+    size: usize,
+    tag: u8,
+) -> Result<Block, FromError> {
+    let block = expect_block(value)?;
+    expect_block_size(block, size)?;
+    expect_block_tag(block, tag)?;
+    Ok(block)
+}
+
 pub fn expect_tuple<'a>(value: Value<'a>, size: usize) -> Result<Block<'a>, FromError> {
     let block = expect_block(value)?;
     expect_block_size(block, size)?;

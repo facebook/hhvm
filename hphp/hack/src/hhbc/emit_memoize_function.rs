@@ -24,17 +24,11 @@ use oxidized::{ast as T, pos::Pos};
 use runtime::TypedValue;
 use rx_rust as rx;
 
-pub(crate) fn is_interceptable(fun_id: FunId, opts: &Options) -> bool {
-    let difs = opts.hhvm.dynamic_invoke_functions.get();
+pub(crate) fn is_interceptable(opts: &Options) -> bool {
     opts.hhvm
         .flags
         .contains(HhvmFlags::JIT_ENABLE_RENAME_FUNCTION)
         && !opts.repo_flags.contains(RepoFlags::AUTHORITATIVE)
-        || !difs.is_empty() && {
-            let mut name: String = fun_id.into();
-            name.make_ascii_lowercase(); // in-place is more efficient if fun_id is owned
-            difs.get(&name).is_some()
-        }
 }
 
 pub(crate) fn emit_wrapper_function<'a>(
@@ -93,7 +87,7 @@ pub(crate) fn emit_wrapper_function<'a>(
 
     let mut flags = HhasFunctionFlags::empty();
     flags.set(HhasFunctionFlags::ASYNC, f.fun_kind.is_fasync());
-    let is_interceptable = is_interceptable(FunId::from_ast_name(&(f.name).1), emitter.options());
+    let is_interceptable = is_interceptable(emitter.options());
     flags.set(HhasFunctionFlags::INTERCEPTABLE, is_interceptable);
 
     Ok(HhasFunction {

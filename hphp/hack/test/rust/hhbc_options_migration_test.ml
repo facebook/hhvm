@@ -30,9 +30,6 @@ let assert_opts_equal caml rust =
     Hhbc_options.(hack_arr_dv_arrs caml)
     Hhbc_options.(hack_arr_dv_arrs rust);
   assert_equal
-    Hhbc_options.(dynamic_invoke_functions caml)
-    Hhbc_options.(dynamic_invoke_functions rust);
-  assert_equal
     Hhbc_options.(repo_authoritative caml)
     Hhbc_options.(repo_authoritative rust);
   assert_equal
@@ -287,9 +284,6 @@ let test_all_overrides_json_only _ =
   \"hhvm.array_provenance\": {
     \"global_value\": true
   },
-  \"hhvm.dynamic_invoke_functions\": {
-    \"global_value\": [\"f\", \"g\"]
-  },
   \"hhvm.emit_cls_meth_pointers\": {
     \"global_value\": true
   },
@@ -421,8 +415,6 @@ module CliArgOverrides = struct
 
   let hhvm'array_provenance = "-vhhvm.array_provenance=true"
 
-  (* let hhvm'dynamic_invoke_functions = "UNSUPPORTED BY CLI" *)
-
   let hhvm'emit_cls_meth_pointers = "-vhhvm.emit_cls_meth_pointers=1"
 
   let hhvm'emit_inst_meth_pointers = "-vhhvm.emit_inst_meth_pointers=0"
@@ -525,7 +517,6 @@ let test_all_overrides_cli_only _ =
       hack'compiler'optimize_null_checks;
       (* hhvm'aliased_namespaces; *)
       hhvm'array_provenance;
-      (* hhvm'dynamic_invoke_functions; *)
       hhvm'emit_cls_meth_pointers;
       hhvm'emit_inst_meth_pointers;
       hhvm'emit_meth_caller_func_pointers;

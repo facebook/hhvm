@@ -69,7 +69,6 @@ pub fn to_json(key: &str) -> ParseFn {
 lazy_static! {
     static ref BY_JSON_KEY: HashMap<&'static str, ParseFn> = {
         let mut m = HashMap::new();
-        m.insert("hhvm.dynamic_invoke_functions", parse_csv_strs as ParseFn);
         m.insert("hhvm.include_roots", parse_csv_keyval_strs as ParseFn);
         m
     };
@@ -77,16 +76,6 @@ lazy_static! {
 
 fn parse_str(s: &str) -> Option<Json> {
     Some(json!(s))
-}
-
-fn parse_csv_strs(s: &str) -> Option<Json> {
-    let mut ret = json!([]);
-    ret.as_array_mut().map(|v| {
-        for val in s.split(",") {
-            v.push(json!(val));
-        }
-    });
-    Some(ret)
 }
 
 fn parse_csv_keyval_strs(s: &str) -> Option<Json> {

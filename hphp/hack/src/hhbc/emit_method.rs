@@ -13,7 +13,7 @@ use global_state::LazyState;
 use hhas_attribute_rust as hhas_attribute;
 use hhas_method_rust::{HhasMethod, HhasMethodFlags};
 use hhas_pos_rust::Span;
-use hhbc_id_rust::{class, method, Id};
+use hhbc_id_rust::method;
 use hhbc_string_utils_rust as string_utils;
 use instruction_sequence_rust::{instr, Result};
 use naming_special_names_rust::{special_idents, user_attributes};
@@ -222,7 +222,7 @@ pub fn from_ast<'a>(
         };
         name
     };
-    let is_interceptable = is_method_interceptable(class, &name, emitter.options());
+    let is_interceptable = is_method_interceptable(emitter.options());
     let span = if is_native_opcode_impl {
         Span(0, 0)
     } else {
@@ -251,20 +251,8 @@ pub fn from_ast<'a>(
     })
 }
 
-fn is_method_interceptable(
-    ast_class: &T::Class_,
-    original_id: &method::Type,
-    opts: &Options,
-) -> bool {
-    let difs = opts.hhvm.dynamic_invoke_functions.get();
+fn is_method_interceptable(opts: &Options) -> bool {
     opts.hhvm
         .flags
         .contains(HhvmFlags::JIT_ENABLE_RENAME_FUNCTION)
-        || (!difs.is_empty() && {
-            let class_id = class::Type::from_ast_name(&ast_class.name.1);
-            let class_name = class::Type::to_unmangled_str(&class_id);
-            let method_name = method::Type::to_raw_string(original_id);
-            let name = format!("{}::{}", class_name, method_name).to_ascii_lowercase();
-            difs.contains(&name)
-        })
 }

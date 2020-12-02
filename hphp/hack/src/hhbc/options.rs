@@ -52,11 +52,7 @@ use serde_derive::{Deserialize, Serialize};
 use serde_json::{json, value::Value as Json};
 
 use itertools::Either;
-use std::{
-    cell::RefCell,
-    collections::{BTreeMap, BTreeSet},
-    iter::empty,
-};
+use std::{cell::RefCell, collections::BTreeMap, iter::empty};
 
 /// Provides uniform access to bitflags-generated structs in JSON SerDe
 trait PrefixedFlags:
@@ -187,9 +183,6 @@ pub struct Hhvm {
     pub aliased_namespaces: Arg<BTreeMapOrEmptyVec<String, String>>,
 
     #[serde(default)]
-    pub dynamic_invoke_functions: Arg<BTreeSet<String>>,
-
-    #[serde(default)]
     pub include_roots: Arg<BTreeMap<String, String>>, // TODO(leoo) change to HashMap if order doesn't matter
 
     #[serde(default = "defaults::emit_class_pointers")]
@@ -210,7 +203,6 @@ impl Default for Hhvm {
     fn default() -> Self {
         Self {
             aliased_namespaces: Default::default(),
-            dynamic_invoke_functions: Default::default(),
             include_roots: Default::default(),
             emit_class_pointers: defaults::emit_class_pointers(),
             flags: Default::default(),
@@ -673,9 +665,6 @@ mod tests {
   "hhvm.array_provenance": {
     "global_value": false
   },
-  "hhvm.dynamic_invoke_functions": {
-    "global_value": []
-  },
   "hhvm.emit_class_pointers": {
     "global_value": "0"
   },
@@ -923,22 +912,6 @@ mod tests {
     }
 
     #[test]
-    fn test_options_set_str_json_de() {
-        let act: Options = serde_json::value::from_value(json!({
-            "hhvm.dynamic_invoke_functions": { "global_value": ["f", "g", "h"] }
-        }))
-        .unwrap();
-        assert_eq!(
-            act.hhvm
-                .dynamic_invoke_functions
-                .get()
-                .iter()
-                .collect::<Vec<&String>>(),
-            vec!["f", "g", "h"],
-        );
-    }
-
-    #[test]
     fn test_options_merge() {
         let mut dst = json!({
             "uniqueAtDst": "DST",
@@ -1047,19 +1020,6 @@ mod tests {
         });
         let act = Options::from_configs_(&[json.to_string()], &cli_args).unwrap();
         assert!(act.hhvm.flags.contains(HhvmFlags::HACK_ARR_COMPAT_NOTICES));
-    }
-
-    #[test]
-    fn test_options_de_from_cli_comma_separated_strings() {
-        let mut exp_dynamic_invoke_functions = BTreeSet::<String>::new();
-        exp_dynamic_invoke_functions.insert("foo".into());
-        exp_dynamic_invoke_functions.insert("bar".into());
-        let act = Options::from_configs_(&EMPTY_STRS, &["hhvm.dynamic_invoke_functions=foo,bar"])
-            .unwrap();
-        assert_eq!(
-            act.hhvm.dynamic_invoke_functions.global_value,
-            exp_dynamic_invoke_functions,
-        );
     }
 
     #[test]

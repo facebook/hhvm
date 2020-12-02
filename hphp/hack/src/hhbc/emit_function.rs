@@ -52,7 +52,7 @@ pub fn emit_function<'a>(e: &mut Emitter, f: &'a tast::Fun_) -> Result<Vec<HhasF
     };
     flags.set(
         Flags::INTERCEPTABLE,
-        emit_memoize_function::is_interceptable(original_id.clone(), e.options()),
+        emit_memoize_function::is_interceptable(e.options()),
     );
     let is_meth_caller = f.name.1.starts_with("\\MethCaller$");
     let call_context = if is_meth_caller {

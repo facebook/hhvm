@@ -9,9 +9,9 @@
  */
 
 <<__PHPStdLib, __NonRx('APC')>>
-function apc_add($key, $var, int $ttl = 0) { }
+function apc_add($key, $var, int $ttl = 0, int $bump_ttl = 0) { }
 <<__PHPStdLib, __NonRx('APC')>>
-function apc_store($key, $var, int $ttl = 0) { }
+function apc_store($key, $var, int $ttl = 0, int $bump_ttl = 0) { }
 <<__PHPStdLib, __NonRx('APC')>>
 function apc_fetch($key, inout $success) { }
 <<__PHPStdLib, __NonRx('APC')>>

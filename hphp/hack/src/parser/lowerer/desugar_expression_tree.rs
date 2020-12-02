@@ -528,8 +528,8 @@ fn rewrite_expr(e: &Expr) -> Expr {
                         ),
                     }
                 }
-                // Convert __splice__( ... )(args) to `$v->call(new ExprPos(..), $v->splice, vec[args])`
-                ETSplice(_) => {
+                // Convert expr( ... )(args) to `$v->call(new ExprPos(..), rewrite_expr(expr), vec[args])`
+                _ => {
                     let args = vec![
                         pos,
                         rewrite_expr(recv),
@@ -537,11 +537,6 @@ fn rewrite_expr(e: &Expr) -> Expr {
                     ];
                     v_meth_call("call", args, &e.0)
                 }
-                _ => v_meth_call(
-                    "unsupportedSyntax",
-                    vec![string_literal("invalid function call")],
-                    &e.0,
-                ),
             }
         }
         // Convert `($x) ==> { ... }` to `$v->lambdaLiteral(new ExprPos(...), vec["$x"], vec[...])`.

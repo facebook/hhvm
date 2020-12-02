@@ -1,0 +1,8 @@
+File "lambda_call.php", line 6, characters 53-59:
+Expected `ExprTree<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
+  File "lambda_call.php", line 30, characters 5-45:
+  But got `dynamic` because it is an unenforceable type
+File "lambda_call.php", line 6, characters 65-65:
+Expected `ExprTree<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
+  File "lambda_call.php", line 16, characters 6-43:
+  But got `dynamic` because it is an unenforceable type

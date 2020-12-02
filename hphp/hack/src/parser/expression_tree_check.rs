@@ -158,7 +158,12 @@ impl<'ast> Visitor<'ast> for Checker {
                                 }
                                 _ => false,
                             },
-                            _ => false,
+                            _ => {
+                                // Recurse on the callee and only allow calls to valid expressions
+                                recv.accept(c, self)?;
+                                args.accept(c, self)?;
+                                return Ok(());
+                            }
                         }
                     }
                 },

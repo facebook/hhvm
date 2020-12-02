@@ -86,6 +86,15 @@ final class Code {
     throw new Exception();
   }
 
+  public function ternary(
+    ?ExprPos $_,
+    this::TAst $_condition,
+    ?this::TAst $_truthy,
+    this::TAst $_falsy,
+  ): this::TAst {
+    throw new Exception();
+  }
+
   // Statements.
   public function ifStatement(
     ?ExprPos $_,

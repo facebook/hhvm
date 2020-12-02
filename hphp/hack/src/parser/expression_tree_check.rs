@@ -123,6 +123,8 @@ impl<'ast> Visitor<'ast> for Checker {
                     (Uop::Unot, _) => true,
                     _ => false,
                 },
+                // Allow ternary _ ? _ : _, but not Elvis operator _ ?: _
+                Eif(eif) => (eif.1).is_some(),
                 // Allow simple function calls.
                 Call(call) => match &**call {
                     // Ban variadic calls foo(...$x);

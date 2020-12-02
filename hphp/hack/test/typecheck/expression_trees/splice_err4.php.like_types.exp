@@ -12,7 +12,7 @@ Expected `ExprTree<[unresolved], [unresolved], [unresolved]>` because this is be
   But got `int`
 File "splice_err4.php", line 13, characters 28-29:
 Invalid argument (Typing[4110])
-  File "splice_err4.php", line 133, characters 5-33:
+  File "splice_err4.php", line 142, characters 5-33:
   Expected `ExprTree<Code, mixed, [unresolved]>`
   File "splice_err4.php", line 9, characters 10-10:
   But got `int`

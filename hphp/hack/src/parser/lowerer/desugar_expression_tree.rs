@@ -176,6 +176,13 @@ fn dummy_expr() -> Expr {
     Expr::new(Pos::make_none(), aast::Expr_::Null)
 }
 
+// Converts `expr` to `expr->__bool()`
+fn coerce_to_bool(receiver: &mut ast::Expr) -> ast::Expr {
+    let pos = receiver.0.clone();
+    let receiver = std::mem::replace(receiver, dummy_expr());
+    meth_call(receiver, "__bool", vec![], &pos)
+}
+
 impl<'ast> VisitorMut<'ast> for TypeVirtualizer {
     type P = AstParams<(), ()>;
 
@@ -288,6 +295,18 @@ impl<'ast> VisitorMut<'ast> for TypeVirtualizer {
                     _ => {}
                 }
             }
+            // Convert `condition ? e1 : e2` to
+            //   `condition->__bool() ? e1 : e2`
+            Eif(ref mut eif) => {
+                let (ref mut e1, ref mut e2, ref mut e3) = **eif;
+                e1.accept(env, self.object())?;
+                e2.accept(env, self.object())?;
+                e3.accept(env, self.object())?;
+
+                let e2 = e2.take();
+                let e3 = std::mem::replace(e3, dummy_expr());
+                *e = Expr::new(pos, Eif(Box::new((coerce_to_bool(e1), e2, e3))))
+            }
             _ => e.recurse(env, self.object())?,
         }
         Ok(())
@@ -295,13 +314,6 @@ impl<'ast> VisitorMut<'ast> for TypeVirtualizer {
 
     fn visit_stmt_(&mut self, env: &mut (), s: &mut Stmt_) -> Result<(), ()> {
         use aast::Stmt_::*;
-
-        // Converts `expr` to `expr->coerceToBool()`
-        fn coerce_to_bool(receiver: &mut ast::Expr) -> ast::Expr {
-            let pos = receiver.0.clone();
-            let receiver = std::mem::replace(receiver, dummy_expr());
-            meth_call(receiver, "__bool", vec![], &pos)
-        }
 
         match s {
             // Convert `while(condition) { block }` to
@@ -476,6 +488,20 @@ fn rewrite_expr(e: &Expr) -> Expr {
                 &e.0,
             ),
         },
+        // Convert ... ? ... : ... to `$v->ternary(new ExprPos(...), $v->..., $v->..., $v->...)`
+        Eif(eif) => {
+            let (e1, e2o, e3) = &**eif;
+            let e2 = if let Some(e2) = e2o {
+                rewrite_expr(&e2)
+            } else {
+                null_literal()
+            };
+            v_meth_call(
+                "ternary",
+                vec![pos, rewrite_expr(&e1), e2, rewrite_expr(&e3)],
+                &e.0,
+            )
+        }
         Call(call) => {
             let (recv, _, args, _) = &**call;
             match &recv.1 {

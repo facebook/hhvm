@@ -36,7 +36,6 @@ pub fn desugar<TF>(hint: &aast::Hint, e: &Expr, env: &Env<TF>) -> Expr {
     let mut e = virtualize_expr_types(visitor_name.to_string(), &mut e);
     let e = virtualize_expr_calls(visitor_name.to_string(), &mut e);
     let (e, extracted_splices) = extract_and_replace_splices(&e);
-    let splice_count = extracted_splices.len();
     let temp_pos = e.0.clone();
 
     // Create assignments of extracted splices
@@ -54,20 +53,6 @@ pub fn desugar<TF>(hint: &aast::Hint, e: &Expr, env: &Env<TF>) -> Expr {
             )
         })
         .collect();
-
-    // Create dict of spliced values
-    let key_value_pairs = (0..splice_count)
-        .into_iter()
-        .map(|i| {
-            let key = Expr::new(
-                Pos::make_none(),
-                Expr_::String(BString::from(temp_lvar_string(i))),
-            );
-            let value = temp_lvar(&Pos::make_none(), i);
-            (key, value)
-        })
-        .collect();
-    let spliced_dict = dict_literal(key_value_pairs);
 
     // Make anonymous function of smart constructor calls
     let visitor_expr = wrap_return(rewrite_expr(&e), &temp_pos.clone());
@@ -115,7 +100,6 @@ pub fn desugar<TF>(hint: &aast::Hint, e: &Expr, env: &Env<TF>) -> Expr {
             vec![
                 exprpos(&temp_pos),
                 Expr::new(temp_pos.clone(), Expr_::Id(Box::new(make_id("__FILE__")))),
-                spliced_dict,
                 visitor_lambda,
                 typing_lambda,
             ],
@@ -190,13 +174,6 @@ struct TypeVirtualizer {
 
 fn dummy_expr() -> Expr {
     Expr::new(Pos::make_none(), aast::Expr_::Null)
-}
-
-// Converts `expr` to `expr->__bool()`
-fn coerce_to_bool(receiver: &mut ast::Expr) -> ast::Expr {
-    let pos = receiver.0.clone();
-    let receiver = std::mem::replace(receiver, dummy_expr());
-    meth_call(receiver, "__bool", vec![], &pos)
 }
 
 impl<'ast> VisitorMut<'ast> for TypeVirtualizer {
@@ -279,15 +256,13 @@ impl<'ast> VisitorMut<'ast> for TypeVirtualizer {
                 rhs.accept(env, self.object())?;
 
                 match op {
-                    // Convert arithmetic operators `... + ...` to `$lhs->__plus(vec[$rhs])`
+                    // Convert `... + ...` to `$lhs->__plus(vec[$rhs])`.
                     Bop::Plus => *e = virtualize_binop(lhs, "__plus", rhs, &e.0),
-                    Bop::Minus => *e = virtualize_binop(lhs, "__minus", rhs, &e.0),
-                    Bop::Star => *e = virtualize_binop(lhs, "__star", rhs, &e.0),
-                    Bop::Slash => *e = virtualize_binop(lhs, "__slash", rhs, &e.0),
-                    // Convert boolean &&, ||
+                    // Convert `... && ...` to `$lhs->__ampamp(vec[rhs])`.
                     Bop::Ampamp => *e = virtualize_binop(lhs, "__ampamp", rhs, &e.0),
+                    // Convert `... || ...` to `$lhs->__barbar(vec[$rhs])`.
                     Bop::Barbar => *e = virtualize_binop(lhs, "__barbar", rhs, &e.0),
-                    // Convert comparison operators, <, <=, >, >=, ===, !==
+                    // Convert comparison operators
                     Bop::Lt => *e = virtualize_binop(lhs, "__lessThan", rhs, &e.0),
                     Bop::Lte => *e = virtualize_binop(lhs, "__lessThanEqual", rhs, &e.0),
                     Bop::Gt => *e = virtualize_binop(lhs, "__greaterThan", rhs, &e.0),
@@ -311,18 +286,6 @@ impl<'ast> VisitorMut<'ast> for TypeVirtualizer {
                     _ => {}
                 }
             }
-            // Convert `condition ? e1 : e2` to
-            //   `condition->__bool() ? e1 : e2`
-            Eif(ref mut eif) => {
-                let (ref mut e1, ref mut e2, ref mut e3) = **eif;
-                e1.accept(env, self.object())?;
-                e2.accept(env, self.object())?;
-                e3.accept(env, self.object())?;
-
-                let e2 = e2.take();
-                let e3 = std::mem::replace(e3, dummy_expr());
-                *e = Expr::new(pos, Eif(Box::new((coerce_to_bool(e1), e2, e3))))
-            }
             _ => e.recurse(env, self.object())?,
         }
         Ok(())
@@ -330,6 +293,13 @@ impl<'ast> VisitorMut<'ast> for TypeVirtualizer {
 
     fn visit_stmt_(&mut self, env: &mut (), s: &mut Stmt_) -> Result<(), ()> {
         use aast::Stmt_::*;
+
+        // Converts `expr` to `expr->coerceToBool()`
+        fn coerce_to_bool(receiver: &mut ast::Expr) -> ast::Expr {
+            let pos = receiver.0.clone();
+            let receiver = std::mem::replace(receiver, dummy_expr());
+            meth_call(receiver, "__bool", vec![], &pos)
+        }
 
         match s {
             // Convert `while(condition) { block }` to
@@ -436,42 +406,6 @@ impl<'ast> VisitorMut<'ast> for CallVirtualizer {
                         let variadic = variadic.take();
                         e.1 = Call(Box::new((callee, vec![], args, variadic)))
                     }
-                    // Convert `Foo::bar(...)` to `${ Visitor::symbol('Foo::bar', Foo::bar<>) }(...)`
-                    ClassConst(cc) => {
-                        let (ref cid, ref s) = **cc;
-                        let fn_name = if let ClassId_::CIexpr(Expr(_, Id(sid))) = &cid.1 {
-                            let name = format!("{}::{}", &*sid.1, &s.1);
-                            string_literal(&name)
-                        } else {
-                            // Should be unreachable
-                            string_literal("__ILLEGAL_STATIC_CALL_IN_EXPRESSION_TREE")
-                        };
-
-                        targs.accept(env, self.object())?;
-                        let targs = std::mem::replace(targs, vec![]);
-
-                        let fp = Expr::new(
-                            pos.clone(),
-                            Expr_::FunctionPointer(Box::new((
-                                aast::FunctionPtrId::FPClassConst(cid.clone(), s.clone()),
-                                targs,
-                            ))),
-                        );
-
-                        let callee = mk_splice(static_meth_call(
-                            &self.visitor_name,
-                            "symbol",
-                            vec![fn_name, fp],
-                            &pos,
-                        ));
-
-                        args.accept(env, self.object())?;
-                        variadic.accept(env, self.object())?;
-
-                        let args = std::mem::replace(args, vec![]);
-                        let variadic = variadic.take();
-                        e.1 = Call(Box::new((callee, vec![], args, variadic)))
-                    }
                     _ => e.recurse(env, self.object())?,
                 }
             }
@@ -504,20 +438,6 @@ fn rewrite_expr(e: &Expr) -> Expr {
                 &e.0,
             ),
         },
-        // Convert ... ? ... : ... to `$v->ternary(new ExprPos(...), $v->..., $v->..., $v->...)`
-        Eif(eif) => {
-            let (e1, e2o, e3) = &**eif;
-            let e2 = if let Some(e2) = e2o {
-                rewrite_expr(&e2)
-            } else {
-                null_literal()
-            };
-            v_meth_call(
-                "ternary",
-                vec![pos, rewrite_expr(&e1), e2, rewrite_expr(&e3)],
-                &e.0,
-            )
-        }
         Call(call) => {
             let (recv, _, args, _) = &**call;
             match &recv.1 {
@@ -544,8 +464,8 @@ fn rewrite_expr(e: &Expr) -> Expr {
                         ),
                     }
                 }
-                // Convert expr( ... )(args) to `$v->call(new ExprPos(..), rewrite_expr(expr), vec[args])`
-                _ => {
+                // Convert __splice__( ... )(args) to `$v->call(new ExprPos(..), $v->splice, vec[args])`
+                ETSplice(_) => {
                     let args = vec![
                         pos,
                         rewrite_expr(recv),
@@ -553,6 +473,11 @@ fn rewrite_expr(e: &Expr) -> Expr {
                     ];
                     v_meth_call("call", args, &e.0)
                 }
+                _ => v_meth_call(
+                    "unsupportedSyntax",
+                    vec![string_literal("invalid function call")],
+                    &e.0,
+                ),
             }
         }
         // Convert `($x) ==> { ... }` to `$v->lambdaLiteral(new ExprPos(...), vec["$x"], vec[...])`.
@@ -571,17 +496,8 @@ fn rewrite_expr(e: &Expr) -> Expr {
                 &e.0,
             )
         }
-        // Convert `{ expr }` to `$v->splice(new ExprPos(...), "\$var_name", expr )`
-        ETSplice(e) => {
-            // Assumes extract and replace has already occurred
-            let s = if let Lvar(lid) = &e.1 {
-                let aast::Lid(_, (_, lid)) = &**lid;
-                Expr::new(Pos::make_none(), Expr_::String(BString::from(lid.clone())))
-            } else {
-                null_literal()
-            };
-            v_meth_call("splice", vec![pos, s, *e.clone()], &e.0)
-        }
+        // Convert `{ expr }` to `$v->splice(new ExprPos(...), expr )`
+        ETSplice(e) => v_meth_call("splice", vec![pos, *e.clone()], &e.0),
         // Convert anything else to $v->unsupportedSyntax().
         // Type checking should prevent us hitting these cases.
         _ => v_meth_call(
@@ -707,18 +623,6 @@ fn vec_literal(items: Vec<Expr>) -> Expr {
     Expr::new(
         position,
         Expr_::Collection(Box::new((make_id("vec"), None, fields))),
-    )
-}
-
-fn dict_literal(key_value_pairs: Vec<(Expr, Expr)>) -> Expr {
-    let pos = Pos::make_none();
-    let fields = key_value_pairs
-        .into_iter()
-        .map(|(k, v)| ast::Afield::AFkvalue(k, v))
-        .collect();
-    Expr::new(
-        pos,
-        Expr_::Collection(Box::new((make_id("dict"), None, fields))),
     )
 }
 
@@ -871,12 +775,8 @@ impl<'ast> VisitorMut<'ast> for SpliceExtractor {
     }
 }
 
-fn temp_lvar_string(num: usize) -> String {
-    format!("$__{}", num.to_string())
-}
-
 fn temp_lvar(pos: &Pos, num: usize) -> Expr {
-    Expr::mk_lvar(pos, &temp_lvar_string(num))
+    Expr::mk_lvar(pos, &(format!("$__{}", num.to_string())))
 }
 
 /// Given a Pos, returns `new ExprPos(...)`

@@ -94,16 +94,6 @@
                                                   (Id
                                                      ([Pos.none],
                                                       "\\__FILE__")));
-                                                 ([Pos.none],
-                                                  (KeyValCollection (Dict,
-                                                     None,
-                                                     [(([Pos.none],
-                                                        (String "$__0")),
-                                                       ([Pos.none],
-                                                        (Lvar
-                                                           ([Pos.none], $__0))))
-                                                       ]
-                                                     )));
                                                  ([4:8-26],
                                                   (Lfun (
                                                      { f_span = [4:8-26];
@@ -295,9 +285,6 @@
                                                                     ], None,
                                                                     [4:22-23]
                                                                     )));
-                                                                    ([Pos.none],
-                                                                    (String
-                                                                    "$__0"));
                                                                     ([4:22-23],
                                                                     (Lvar
                                                                     ([4:22-23],

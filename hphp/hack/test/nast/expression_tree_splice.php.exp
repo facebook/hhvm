@@ -102,26 +102,6 @@
                                                   (Id
                                                      ([Pos.none],
                                                       "\\__FILE__")));
-                                                 ([Pos.none],
-                                                  (KeyValCollection (Dict,
-                                                     None,
-                                                     [(([Pos.none],
-                                                        (String "$__0")),
-                                                       ([Pos.none],
-                                                        (Lvar
-                                                           ([Pos.none], $__0))));
-                                                       (([Pos.none],
-                                                         (String "$__1")),
-                                                        ([Pos.none],
-                                                         (Lvar
-                                                            ([Pos.none], $__1))));
-                                                       (([Pos.none],
-                                                         (String "$__2")),
-                                                        ([Pos.none],
-                                                         (Lvar
-                                                            ([Pos.none], $__2))))
-                                                       ]
-                                                     )));
                                                  ([4:8-35],
                                                   (Lfun (
                                                      { f_span = [4:8-35];
@@ -265,9 +245,6 @@
                                                                     (Int "8"))
                                                                     ], None,
                                                                     [4:8-9])));
-                                                                    ([Pos.none],
-                                                                    (String
-                                                                    "$__0"));
                                                                     ([4:8-9],
                                                                     (Lvar
                                                                     ([4:8-9],
@@ -313,9 +290,6 @@
                                                                     ], None,
                                                                     [4:12-14]
                                                                     )));
-                                                                    ([Pos.none],
-                                                                    (String
-                                                                    "$__1"));
                                                                     ([4:12-14],
                                                                     (Lvar
                                                                     ([4:12-14],
@@ -365,9 +339,6 @@
                                                                     ], None,
                                                                     [4:17-35]
                                                                     )));
-                                                                    ([Pos.none],
-                                                                    (String
-                                                                    "$__2"));
                                                                     ([4:28-34],
                                                                     (Lvar
                                                                     ([4:28-34],

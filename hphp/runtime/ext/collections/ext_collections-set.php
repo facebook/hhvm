@@ -286,7 +286,7 @@ final class Set implements \MutableSet {
   public function retain(<<__AtMostRxAsFunc>> mixed $callback): \HH\Set {
     foreach ($this as $k => $v) {
       if (!$callback($v)) {
-        unset($this[$k]);
+        $this->remove($k);
       }
     }
     return $this;
@@ -301,7 +301,7 @@ final class Set implements \MutableSet {
   public function retainWithKey(<<__AtMostRxAsFunc>> mixed $callback): \HH\Set {
     foreach ($this as $k => $v) {
       if (!$callback($k, $v)) {
-        unset($this[$k]);
+        $this->remove($k);
       }
     }
     return $this;

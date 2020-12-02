@@ -337,7 +337,7 @@ final class Map implements \MutableMap {
   public function retain(mixed $callback): \HH\Map {
     foreach ($this as $k => $v) {
       if (!$callback($v)) {
-        unset($this[$k]);
+        $this->removeKey($k);
       }
     }
     return $this;
@@ -351,7 +351,7 @@ final class Map implements \MutableMap {
   public function retainWithKey(mixed $callback): \HH\Map {
     foreach ($this as $k => $v) {
       if (!$callback($k, $v)) {
-        unset($this[$k]);
+        $this->removeKey($k);
       }
     }
     return $this;

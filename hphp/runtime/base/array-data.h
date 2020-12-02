@@ -164,12 +164,12 @@ public:
   /*
    * Create a new empty ArrayData with the appropriate ArrayKind.
    */
-  static ArrayData* Create();
-  static ArrayData* CreateVec(arrprov::Tag tag = {});
-  static ArrayData* CreateDict(arrprov::Tag tag = {});
+  static ArrayData* Create(bool legacy = false);
+  static ArrayData* CreateVec(bool legacy = false);
+  static ArrayData* CreateDict(bool legacy = false);
   static ArrayData* CreateKeyset();
-  static ArrayData* CreateVArray(arrprov::Tag tag = {});
-  static ArrayData* CreateDArray(arrprov::Tag tag = {});
+  static ArrayData* CreateVArray(arrprov::Tag tag = {}, bool legacy = false);
+  static ArrayData* CreateDArray(arrprov::Tag tag = {}, bool legacy = false);
 
   /*
    * Create a new kPackedKind ArrayData with a single element, `value'.

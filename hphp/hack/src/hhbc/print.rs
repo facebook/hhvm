@@ -2905,6 +2905,38 @@ fn print_expr<W: Write>(
         }
         E_::Xml(x) => print_xml(ctx, w, env, &(x.0).1, &x.1, &x.2),
         E_::Efun(f) => print_efun(ctx, w, env, &f.0, &f.1),
+        E_::FunctionPointer(fp) => {
+            let (fp_id, targs) = &**fp;
+            match fp_id {
+                ast::FunctionPtrId::FPId(ast::Id(_, sid)) => {
+                    w.write(lstrip(adjust_id(env, &sid).as_ref(), "\\\\"))?
+                }
+                ast::FunctionPtrId::FPClassConst(ast::ClassId(_, class_id), (_, meth_name)) => {
+                    match class_id {
+                        ast::ClassId_::CIexpr(e) => match e.as_id() {
+                            Some(id) => w.write(&get_class_name_from_id(
+                                ctx,
+                                env.codegen_env,
+                                true,  /* should_format */
+                                false, /* is_class_constant */
+                                &id.1,
+                            ))?,
+                            _ => print_expr(ctx, w, env, e)?,
+                        },
+                        _ => {
+                            return Err(Error::fail(
+                                "TODO Unimplemented unexpected non-CIexpr in function pointer",
+                            ));
+                        }
+                    }
+                    w.write("::")?;
+                    w.write(meth_name)?
+                }
+            };
+            wrap_by_(w, "<", ">", |w| {
+                concat_by(w, ", ", targs, |w, _targ| w.write("_"))
+            })
+        }
         E_::Omitted => Ok(()),
         E_::Lfun(_) => Err(Error::fail(
             "expected Lfun to be converted to Efun during closure conversion print_expr",

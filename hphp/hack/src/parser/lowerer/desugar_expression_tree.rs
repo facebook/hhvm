@@ -36,6 +36,7 @@ pub fn desugar<TF>(hint: &aast::Hint, e: &Expr, env: &Env<TF>) -> Expr {
     let mut e = virtualize_expr_types(visitor_name.to_string(), &mut e);
     let e = virtualize_expr_calls(visitor_name.to_string(), &mut e);
     let (e, extracted_splices) = extract_and_replace_splices(&e);
+    let splice_count = extracted_splices.len();
     let temp_pos = e.0.clone();
 
     // Create assignments of extracted splices
@@ -53,6 +54,20 @@ pub fn desugar<TF>(hint: &aast::Hint, e: &Expr, env: &Env<TF>) -> Expr {
             )
         })
         .collect();
+
+    // Create dict of spliced values
+    let key_value_pairs = (0..splice_count)
+        .into_iter()
+        .map(|i| {
+            let key = Expr::new(
+                Pos::make_none(),
+                Expr_::String(BString::from(temp_lvar_string(i))),
+            );
+            let value = temp_lvar(&Pos::make_none(), i);
+            (key, value)
+        })
+        .collect();
+    let spliced_dict = dict_literal(key_value_pairs);
 
     // Make anonymous function of smart constructor calls
     let visitor_expr = wrap_return(rewrite_expr(&e), &temp_pos.clone());
@@ -100,6 +115,7 @@ pub fn desugar<TF>(hint: &aast::Hint, e: &Expr, env: &Env<TF>) -> Expr {
             vec![
                 exprpos(&temp_pos),
                 Expr::new(temp_pos.clone(), Expr_::Id(Box::new(make_id("__FILE__")))),
+                spliced_dict,
                 visitor_lambda,
                 typing_lambda,
             ],
@@ -555,8 +571,17 @@ fn rewrite_expr(e: &Expr) -> Expr {
                 &e.0,
             )
         }
-        // Convert `{ expr }` to `$v->splice(new ExprPos(...), expr )`
-        ETSplice(e) => v_meth_call("splice", vec![pos, *e.clone()], &e.0),
+        // Convert `{ expr }` to `$v->splice(new ExprPos(...), "\$var_name", expr )`
+        ETSplice(e) => {
+            // Assumes extract and replace has already occurred
+            let s = if let Lvar(lid) = &e.1 {
+                let aast::Lid(_, (_, lid)) = &**lid;
+                Expr::new(Pos::make_none(), Expr_::String(BString::from(lid.clone())))
+            } else {
+                null_literal()
+            };
+            v_meth_call("splice", vec![pos, s, *e.clone()], &e.0)
+        }
         // Convert anything else to $v->unsupportedSyntax().
         // Type checking should prevent us hitting these cases.
         _ => v_meth_call(
@@ -682,6 +707,18 @@ fn vec_literal(items: Vec<Expr>) -> Expr {
     Expr::new(
         position,
         Expr_::Collection(Box::new((make_id("vec"), None, fields))),
+    )
+}
+
+fn dict_literal(key_value_pairs: Vec<(Expr, Expr)>) -> Expr {
+    let pos = Pos::make_none();
+    let fields = key_value_pairs
+        .into_iter()
+        .map(|(k, v)| ast::Afield::AFkvalue(k, v))
+        .collect();
+    Expr::new(
+        pos,
+        Expr_::Collection(Box::new((make_id("dict"), None, fields))),
     )
 }
 
@@ -834,8 +871,12 @@ impl<'ast> VisitorMut<'ast> for SpliceExtractor {
     }
 }
 
+fn temp_lvar_string(num: usize) -> String {
+    format!("$__{}", num.to_string())
+}
+
 fn temp_lvar(pos: &Pos, num: usize) -> Expr {
-    Expr::mk_lvar(pos, &(format!("$__{}", num.to_string())))
+    Expr::mk_lvar(pos, &temp_lvar_string(num))
 }
 
 /// Given a Pos, returns `new ExprPos(...)`

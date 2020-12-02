@@ -57,39 +57,115 @@ bool isSingletonLayout(LayoutIndex index) {
 
 using Split = std::pair<uint16_t, std::vector<uint16_t>>;
 
-// If the list of layout indices contains exactly one singleton layout,
-// returns that layout alone plus the remainder.
-folly::Optional<Split> splitSingletonLayout(
-    const std::vector<uint16_t>& liveVec) {
-  int singleton = -1;
-  std::vector<uint16_t> remainder;
-  for (auto const live : liveVec) {
-    if (isSingletonLayout({live})) {
-      if (singleton >= 0) return folly::none;
-      singleton = live;
-    } else {
-      remainder.push_back(live);
-    }
-  }
-  if (singleton < 0) return folly::none;
-  return folly::make_optional<Split>(safe_cast<uint16_t>(singleton), remainder);
-}
-
-folly::Optional<MaskAndCompare> computeMaskAndCompare(
+folly::Optional<MaskAndCompare> computeSimpleMaskAndCompare(
     const std::vector<uint16_t>& liveVec,
     const std::vector<uint16_t>& deadVec) {
-  uint16_t mask = 0xffff;
+  uint16_t liveAgree = 0xffff;
   for (auto const live : liveVec) {
-    auto const disagree = live ^ liveVec[0];
-    mask &= ~disagree;
+    auto const agree = ~(live ^ liveVec[0]);
+    liveAgree &= agree;
   }
-  uint16_t base = liveVec[0] & mask;
+
+  const uint16_t base = liveVec[0] & liveAgree;
   for (auto const dead : deadVec) {
-    if ((dead & mask) == base) {
+    if ((dead & liveAgree) == base) {
       return folly::none;
     }
   }
-  return MaskAndCompare{mask, base};
+
+  return MaskAndCompare{base, liveAgree, 0};
+}
+
+folly::Optional<MaskAndCompare> computeXORMaskAndCompare(
+    const std::vector<uint16_t>& liveVec,
+    const std::vector<uint16_t>& deadVec) {
+  std::vector<uint16_t> remainingLive(liveVec);
+  std::vector<uint16_t> remainingDead(deadVec);
+
+  // We process each bit from most significant to least significant,
+  // determining the proper assignment for that bit in the XOR and CMP
+  // values.
+  //
+  // For each bit, there three relevant scenarios:
+  //
+  // 1. All live layouts agree on this bit having value x. We should
+  // XOR with x and CMP with 0.
+  //
+  // 2. Live layouts do not agree on the bit, but dead layouts agree on
+  // it having value y. We should XOR with ~y and CMP with 1.
+  //
+  // 3. Live layouts do not agree on the bit, and neither do dead
+  // layouts.  We must exclude this bit in the mask.
+  //
+  // After each action, we remove all dead layouts that are guaranteed
+  // the fail our test and all live layouts that are guaranteed to pass
+  // it.
+  auto const recomputeLive = [&] () -> std::pair<uint16_t, uint16_t> {
+    uint16_t liveAgree = 0xffff;
+    for (auto const live : remainingLive) {
+      auto const agree = ~(live ^ remainingLive[0]);
+      liveAgree &= agree;
+    }
+    uint16_t deadAgree = 0xffff;
+    for (auto const dead : remainingDead) {
+      auto const agree = ~(dead ^ remainingDead[0]);
+      deadAgree &= agree;
+    }
+    return {liveAgree, deadAgree};
+  };
+
+  uint16_t xorVal = 0;
+  uint16_t cmpVal = 0;
+  uint16_t andVal = 0xffff;
+  auto [liveAgree, deadAgree] = recomputeLive();
+  for (int i = 0; i < 16; i++) {
+    // The bit currently being examined.
+    const uint16_t mask = (1 << (15 - i));
+
+    if (remainingDead.empty() && remainingLive.empty()) break;
+
+    if (!remainingLive.empty() && (liveAgree & mask)) {
+      xorVal |= remainingLive[0] & mask;
+    } else if (!remainingDead.empty() && (deadAgree & mask)) {
+      xorVal |= (~remainingDead[0]) & mask;
+      cmpVal |= mask;
+    } else if (remainingDead.empty()) {
+      cmpVal |= mask;
+    } else if (!remainingLive.empty()) {
+      andVal ^= mask;
+      // Nothing will be filtered out as we have not constrained our mask, so
+      // reuse the agreement sets from the prior round.
+      continue;
+    }
+
+    // The set of bits that have already been fixed and will not be masked
+    // away. This is a prefix of the set of bits that will be fixed and is used
+    // for determining which live and dead layouts must pass or fail the test,
+    // regardless of the decisions made for future (less significant) bits.
+    const uint16_t cmpMask = andVal & ~(mask - 1);
+
+    remainingDead.erase(
+      std::remove_if(remainingDead.begin(), remainingDead.end(),
+        [&](auto v) { return ((v ^ xorVal) & cmpMask) > cmpVal; }),
+      remainingDead.end());
+    remainingLive.erase(
+      std::remove_if(remainingLive.begin(), remainingLive.end(),
+        [&](auto v) { return ((v ^ xorVal) & cmpMask) < cmpVal; }),
+      remainingLive.end());
+
+    auto const [liveAgreeNew, deadAgreeNew] = recomputeLive();
+    liveAgree = liveAgreeNew;
+    deadAgree = deadAgreeNew;
+  }
+
+  if (!remainingDead.empty() && !remainingLive.empty()) {
+    return folly::none;
+  }
+
+  // If it came down to the last bit, adjust the comparison accordingly.
+  if (!remainingDead.empty()) cmpVal--;
+
+  return MaskAndCompare{xorVal, andVal, cmpVal};
 }
 
 }
@@ -332,7 +408,7 @@ void Layout::FinalizeHierarchy() {
   // their children's masks if necessary.
   std::sort(allLayouts.begin(), allLayouts.end(), AncestorOrdering{});
   for (auto const layout : allLayouts) {
-    layout->m_maskAndCompareSet = layout->computeMaskAndCompareSet();
+    layout->m_maskAndCompare = layout->computeMaskAndCompare();
   }
 
   s_hierarchyFinal.store(true, std::memory_order_release);
@@ -405,7 +481,9 @@ const Layout* Layout::FromIndex(LayoutIndex index) {
   return layout;
 }
 
-req::TinyVector<MaskAndCompare, 2> Layout::computeMaskAndCompareSet() const {
+MaskAndCompare Layout::computeMaskAndCompare() const {
+  FTRACE_MOD(Trace::bespoke, 1, "Try: {}\n", describe());
+
   // The set of all concrete layouts that descend from the layout.
   std::vector<uint16_t> liveVec;
   for(auto const layout : m_descendants) {
@@ -434,31 +512,19 @@ req::TinyVector<MaskAndCompare, 2> Layout::computeMaskAndCompareSet() const {
     std::back_inserter(deadVec)
   );
 
-  auto const checks = [&] () -> req::TinyVector<MaskAndCompare, 2> {
-    // 1. Attempt to find a single mask to cover.
-    if (auto const result = computeMaskAndCompare(liveVec, deadVec)) {
-      return {*result};
+  auto const check = [&] () -> MaskAndCompare {
+    // 1. Attempt to find a trivial mask to cover.
+    if (auto const result = computeSimpleMaskAndCompare(liveVec, deadVec)) {
+      return *result;
     }
 
-    // 2. See if we can test a "singleton" layout, then mask/compare the rest.
-    if (auto const split = splitSingletonLayout(liveVec)) {
-      if (auto const result = computeMaskAndCompare(split->second, deadVec)) {
-        return {MaskAndCompare::fullCompare(split->first), *result};
-      }
+    // 2. Attempt to find a single mask to cover.
+    if (auto const result = computeXORMaskAndCompare(liveVec, deadVec)) {
+      return *result;
     }
 
-    // 3. If we have two children with simple masks, just use them.
-    if (m_children.size() == 2) {
-      auto const& lMask = FromIndex(*m_children.begin())->m_maskAndCompareSet;
-      auto const& rMask = FromIndex(*m_children.rbegin())->m_maskAndCompareSet;
-      assertx(!lMask.empty() && !rMask.empty());
-      if (lMask.size() == 1 && rMask.size() == 1) {
-        return {lMask[0], rMask[0]};
-      }
-    }
-
-    // 4. Give up.
-    SCOPE_ASSERT_DETAIL("bespoke::Layout::computeMaskAndCompareSet") {
+    // 3. Give up.
+    SCOPE_ASSERT_DETAIL("bespoke::Layout::computeMaskAndCompare") {
       std::string ret = folly::sformat("{:04x}: {}\n", m_index.raw, describe());
       ret += folly::sformat("  Live:\n");
       for (auto const live : liveVec) {
@@ -476,42 +542,17 @@ req::TinyVector<MaskAndCompare, 2> Layout::computeMaskAndCompareSet() const {
   }();
 
   if (debug) {
-    // The checks should pass on live values and fail on dead values.
-    for (auto const live : liveVec) {
-      bool UNUSED satisfied = false;
-      for (auto const& check : checks) {
-        if (check.accepts(live)) {
-          satisfied = true;
-          break;
-        }
-      }
-      assertx(satisfied);
-    }
-    for (auto const DEBUG_ONLY dead : deadVec) {
-      for (auto const DEBUG_ONLY check : checks) {
-        assertx(!check.accepts(dead));
-      }
-    }
-
-    // Every one of the checks is should actually get used.
-    for (auto const& check : checks) {
-      bool UNUSED satisfied = false;
-      for (auto const live : liveVec) {
-        if (check.accepts(live)) {
-          satisfied = true;
-          break;
-        }
-      }
-      assertx(satisfied);
-    }
+    // The check should pass on live values and fail on dead values.
+    for (auto const live : liveVec) always_assert(check.accepts(live));
+    for (auto const dead : deadVec) always_assert(!check.accepts(dead));
   }
 
-  return checks;
+  return check;
 }
 
-req::TinyVector<MaskAndCompare, 2> Layout::maskAndCompareSet() const {
+MaskAndCompare Layout::maskAndCompare() const {
   assertx(s_hierarchyFinal.load(std::memory_order_acquire));
-  return m_maskAndCompareSet;
+  return m_maskAndCompare;
 }
 
 struct Layout::Initializer {

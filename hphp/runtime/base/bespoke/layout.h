@@ -426,7 +426,7 @@ struct Layout {
    * Retrieve the set of masks and compares to use for a type test for this
    * layout.
    */
-  MaskAndCompareSet maskAndCompareSet() const;
+  MaskAndCompare maskAndCompare() const;
 
 protected:
   Layout(LayoutIndex index, std::string description, LayoutSet parents);
@@ -435,7 +435,7 @@ private:
   bool checkInvariants() const;
   LayoutSet computeAncestors() const;
   LayoutSet computeDescendants() const;
-  MaskAndCompareSet computeMaskAndCompareSet() const;
+  MaskAndCompare computeMaskAndCompare() const;
 
   bool isDescendantOfDebug(const Layout* other) const;
   const Layout* nearestBoundDebug(bool upward, const Layout* other) const;
@@ -452,7 +452,7 @@ private:
   LayoutSet m_children;
   std::vector<Layout*> m_descendants;
   std::vector<Layout*> m_ancestors;
-  MaskAndCompareSet m_maskAndCompareSet;
+  MaskAndCompare m_maskAndCompare;
 
   struct DescendantOrdering;
   struct AncestorOrdering;

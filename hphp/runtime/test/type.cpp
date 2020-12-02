@@ -1362,13 +1362,13 @@ TEST(Type, BespokeRanges) {
   bespoke::selectBespokeLayouts();
 
   auto const top_layout = ArrayLayout::Bespoke();
-  EXPECT_EQ(1, top_layout.bespokeMaskAndCompareSet().size());
-  EXPECT_EQ(2, foo_layout.bespokeMaskAndCompareSet().size());
-  EXPECT_EQ(1, baz_layout.bespokeMaskAndCompareSet().size());
-  EXPECT_EQ(1, bar_layout.bespokeMaskAndCompareSet().size());
-  EXPECT_EQ(1, bat_layout.bespokeMaskAndCompareSet().size());
-  EXPECT_EQ(1, ter_layout.bespokeMaskAndCompareSet().size());
-  EXPECT_EQ(1, qop_layout.bespokeMaskAndCompareSet().size());
+  top_layout.bespokeMaskAndCompare();
+  foo_layout.bespokeMaskAndCompare();
+  baz_layout.bespokeMaskAndCompare();
+  bar_layout.bespokeMaskAndCompare();
+  bat_layout.bespokeMaskAndCompare();
+  ter_layout.bespokeMaskAndCompare();
+  qop_layout.bespokeMaskAndCompare();
 }
 
 TEST(Type, PtrKinds) {

@@ -38,19 +38,18 @@ inline bool shouldTestBespokeArrayLikes() {
  * be pass the check if (v & mask) == base.
  */
 struct MaskAndCompare {
-  uint16_t mask;
-  uint16_t base;
+  uint16_t xorVal;
+  uint16_t andVal;
+  uint16_t cmpVal;
 
   static MaskAndCompare fullCompare(uint16_t val) {
-    return {0xffff, val};
+    return {val, 0xffff, 0};
   }
 
   bool accepts(uint16_t val) const {
-    return (val & mask) == base;
+    return ((val ^ xorVal) & andVal) <= cmpVal;
   }
 };
-
-using MaskAndCompareSet = req::TinyVector<MaskAndCompare,2>;
 
 namespace bespoke {
 

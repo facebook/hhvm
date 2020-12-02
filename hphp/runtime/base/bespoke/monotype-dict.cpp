@@ -48,7 +48,7 @@ uint16_t packSizeIndexAndAuxBits(uint8_t index, uint8_t aux) {
   return (static_cast<uint16_t>(index) << 8) | aux;
 }
 
-constexpr LayoutIndex kBaseLayoutIndex = {1 << 10};
+constexpr LayoutIndex kBaseLayoutIndex = {1 << 11};
 
 constexpr size_t kEmptySizeIndex = 0;
 static_assert(kSizeIndex2Size[kEmptySizeIndex] == sizeof(EmptyMonotypeDict));
@@ -67,18 +67,18 @@ constexpr DataType kEmptyDataType = static_cast<DataType>(1);
 constexpr DataType kAbstractDataTypeMask = static_cast<DataType>(0x80);
 
 constexpr LayoutIndex getEmptyLayoutIndex() {
-  return LayoutIndex{uint16_t(kBaseLayoutIndex.raw + uint8_t(kEmptyDataType))};
-}
-constexpr LayoutIndex getIntLayoutIndex(DataType type) {
-  auto constexpr offset = 1 * (1 << 8);
-  return LayoutIndex{uint16_t(kBaseLayoutIndex.raw + uint8_t(type) + offset)};
+  auto constexpr offset = (1 << 10);
+  return LayoutIndex{uint16_t(kBaseLayoutIndex.raw) + offset};
 }
 constexpr LayoutIndex getStrLayoutIndex(DataType type) {
-  auto constexpr offset = 2 * (1 << 8);
-  return LayoutIndex{uint16_t(kBaseLayoutIndex.raw + uint8_t(type) + offset)};
+  return LayoutIndex{uint16_t(kBaseLayoutIndex.raw + uint8_t(type))};
 }
 constexpr LayoutIndex getStaticStrLayoutIndex(DataType type) {
-  auto constexpr offset = 3 * (1 << 8);
+  auto constexpr offset = (1 << 8);
+  return LayoutIndex{uint16_t(kBaseLayoutIndex.raw + uint8_t(type) + offset)};
+}
+constexpr LayoutIndex getIntLayoutIndex(DataType type) {
+  auto constexpr offset = (1 << 9);
   return LayoutIndex{uint16_t(kBaseLayoutIndex.raw + uint8_t(type) + offset)};
 }
 
@@ -1343,7 +1343,7 @@ ArrayData* MonotypeDict<Key>::SetLegacyArray(
 //////////////////////////////////////////////////////////////////////////////
 
 void EmptyMonotypeDict::InitializeLayouts() {
-  auto const base = Layout::ReserveIndices(1 << 10);
+  auto const base = Layout::ReserveIndices(1 << 11);
   always_assert(base == kBaseLayoutIndex);
 
   new TopMonotypeDictLayout(KeyTypes::Ints);

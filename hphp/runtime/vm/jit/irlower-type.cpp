@@ -93,8 +93,7 @@ void cgCheckType(IRLS& env, const IRInstruction* inst) {
    */
   if (typeParam.isSpecialized() &&
       typeParam.unspecialize() >= src->type()) {
-    detail::emitSpecializedTypeTest(v, env, typeParam, srcData,
-                                    v.makeReg(), doJcc);
+    detail::emitSpecializedTypeTest(v, env, typeParam, srcData, doJcc);
     doMov();
     return;
   }
@@ -117,8 +116,7 @@ void cgCheckType(IRLS& env, const IRInstruction* inst) {
       v << jmp{label(env, inst->taken())};
       return;
     }
-    detail::emitSpecializedTypeTest(v, env, typeParam, srcData,
-                                    v.makeReg(), doJcc);
+    detail::emitSpecializedTypeTest(v, env, typeParam, srcData, doJcc);
     doMov();
     return;
   }

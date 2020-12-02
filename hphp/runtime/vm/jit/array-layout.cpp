@@ -189,11 +189,10 @@ folly::Optional<bespoke::LayoutIndex> ArrayLayout::layoutIndex() const {
   return bespoke::LayoutIndex { safe_cast<uint16_t>(index) };
 }
 
-req::TinyVector<MaskAndCompare, 2>
-ArrayLayout::bespokeMaskAndCompareSet() const {
+MaskAndCompare ArrayLayout::bespokeMaskAndCompare() const {
   auto const& layout = assertBespoke(*this);
-  if (isBasicSort(sort)) return {MaskAndCompare{0,0}};
-  return layout.maskAndCompareSet();
+  if (isBasicSort(sort)) return MaskAndCompare{0,0,0};
+  return layout.maskAndCompare();
 }
 
 const bespoke::Layout* ArrayLayout::irgenLayout() const {

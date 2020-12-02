@@ -79,7 +79,7 @@ StaticVec s_emptyMonotypeVecMarked;
 StaticVec s_emptyMonotypeVArrayMarked;
 
 static_assert(sizeof(DataType) == 1);
-constexpr LayoutIndex kBaseLayoutIndex = {1 << 8};
+constexpr LayoutIndex kBaseLayoutIndex = {1 << 9};
 auto const s_monotypeVecVtable = fromArray<MonotypeVec>();
 auto const s_emptyMonotypeVecVtable = fromArray<EmptyMonotypeVec>();
 
@@ -91,7 +91,8 @@ constexpr LayoutIndex getLayoutIndex(DataType type) {
 }
 
 constexpr LayoutIndex getEmptyLayoutIndex() {
-  return getLayoutIndex(kEmptyDataType);
+  auto constexpr offset = (1 << 8);
+  return LayoutIndex{uint16_t(kBaseLayoutIndex.raw) + offset};
 }
 
 Layout::LayoutSet getAllEmptyOrMonotypeVecLayouts() {
@@ -830,7 +831,7 @@ ArrayData* MonotypeVec::SetLegacyArray(MonotypeVec* madIn,
 //////////////////////////////////////////////////////////////////////////////
 
 void MonotypeVec::InitializeLayouts() {
-  auto const base = Layout::ReserveIndices(1 << 8);
+  auto const base = Layout::ReserveIndices(1 << 9);
   always_assert(base == kBaseLayoutIndex);
 
   new TopMonotypeVecLayout();

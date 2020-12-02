@@ -305,9 +305,6 @@ struct Accessor {
   // Branches to exit if the base doesn't match the iter's specialized type.
   virtual SSATmp* checkBase(IRGS& env, SSATmp* base, Block* exit) const = 0;
 
-  // Given a type-checked SSATmp for the base, this method returns its size.
-  virtual SSATmp* getSize(IRGS& env, SSATmp* arr) const = 0;
-
   // Given a base and a logical iter index, this method returns the value that
   // we should use as the iter's pos (e.g. a pointer, for pointer iters).
   //
@@ -344,10 +341,6 @@ struct PackedAccessor : public Accessor {
 
   SSATmp* checkBase(IRGS& env, SSATmp* base, Block* exit) const override {
     return gen(env, CheckType, exit, arr_type, base);
-  }
-
-  SSATmp* getSize(IRGS& env, SSATmp* arr) const override {
-    return gen(env, CountVec, arr);
   }
 
   SSATmp* getPos(IRGS& env, SSATmp* arr, SSATmp* idx) const override {
@@ -394,10 +387,6 @@ struct MixedAccessor : public Accessor {
     auto const arr = gen(env, CheckType, exit, arr_type, base);
     gen(env, CheckDictKeys, exit, key_type, arr);
     return arr;
-  }
-
-  SSATmp* getSize(IRGS& env, SSATmp* arr) const override {
-    return gen(env, CountDict, arr);
   }
 
   SSATmp* getPos(IRGS& env, SSATmp* arr, SSATmp* idx) const override {
@@ -571,7 +560,7 @@ void emitSpecializedInit(IRGS& env, const Accessor& accessor,
                          const IterArgs& data, bool local, Block* header,
                          Block* done, SSATmp* base) {
   auto const arr = accessor.checkBase(env, base, makeExitSlow(env));
-  auto const size = accessor.getSize(env, arr);
+  auto const size = gen(env, Count, arr);
   if (!local) discard(env, 1);
 
   ifThen(env,
@@ -725,14 +714,6 @@ void specializeIterInit(IRGS& env, Offset doneOffset,
   }
   auto const accessor = getAccessor(iter_type);
   if (!base->type().maybe(accessor->arr_type)) return despecialize();
-
-  // Don't specialize mixed-layout arrays with key types we can't check.
-  // TODO: Remove this code when we track static strings in MixedArrayKeys.
-  auto const mixed = iter_type.base_type == IterSpecialization::Mixed ||
-                     iter_type.base_type == IterSpecialization::Dict;
-  if (mixed && !MixedArrayKeys::getMask(getKeyType(iter_type))) {
-    return despecialize();
-  }
 
   // We're committing to the specialization. Hide the specialized code behind
   // a placeholder so that we won't use it unless we also specialize the next.

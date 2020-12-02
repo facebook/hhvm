@@ -387,6 +387,11 @@ inline void liter_key_cell_local_impl(Iter* iter,
   tvDecRefGen(oldVal);
 }
 
+NEVER_INLINE void clearOutputLocal(TypedValue* local) {
+  tvDecRefCountable(local);
+  local->m_type = KindOfNull;
+}
+
 }
 
 // These release methods are called by the iter_next_* implementations below
@@ -461,8 +466,7 @@ int64_t new_iter_array(Iter* dest, ArrayData* ad, TypedValue* valOut) {
     return 0;
   }
   if (UNLIKELY(isRefcountedType(valOut->type()))) {
-    tvDecRefCountable(valOut);
-    tvCopy(make_tv<KindOfNull>(), valOut);
+    clearOutputLocal(valOut);
   }
 
   // We are transferring ownership of the array to the iterator, therefore
@@ -531,12 +535,10 @@ int64_t new_iter_array_key(Iter*       dest,
     return 0;
   }
   if (UNLIKELY(isRefcountedType(valOut->type()))) {
-    tvDecRefCountable(valOut);
-    tvCopy(make_tv<KindOfNull>(), valOut);
+    clearOutputLocal(valOut);
   }
   if (UNLIKELY(isRefcountedType(keyOut->type()))) {
-    tvDecRefCountable(keyOut);
-    tvCopy(make_tv<KindOfNull>(), keyOut);
+    clearOutputLocal(keyOut);
   }
 
   // We are transferring ownership of the array to the iterator, therefore

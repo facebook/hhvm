@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/base/bespoke/layout.h"
 #include "hphp/runtime/base/bespoke/logging-profile.h"
+#include "hphp/runtime/base/bespoke/monotype-dict.h"
 #include "hphp/runtime/base/bespoke/monotype-vec.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/packed-array.h"
@@ -165,13 +166,13 @@ void cgBespokeIterLastPos(IRLS& env, const IRInstruction* inst) {
   cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
 }
 
-void cgBespokeIterAdvancePos(IRLS& env, const IRInstruction* inst) {
+void cgBespokeIterEnd(IRLS& env, const IRInstruction* inst) {
   auto const arr = inst->src(0)->type();
-  auto const iterAdvance = CallSpec::method(&ArrayData::iter_advance);
-  auto const target = CALL_TARGET(arr, IterAdvance, iterAdvance);
+  auto const iterEnd = CallSpec::method(&ArrayData::iter_end);
+  auto const target = CALL_TARGET(arr, IterEnd, iterEnd);
 
   auto& v = vmain(env);
-  auto const args = argGroup(env, inst).ssa(0).ssa(1);
+  auto const args = argGroup(env, inst).ssa(0);
   cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
 }
 
@@ -260,6 +261,19 @@ void cgBespokeElem(IRLS& env, const IRInstruction* inst) {
 }
 
 //////////////////////////////////////////////////////////////////////////////
+
+void cgLdMonotypeDictEnd(IRLS& env, const IRInstruction* inst) {
+  using MonotypeDict = bespoke::MonotypeDict<int64_t>;
+  static_assert(MonotypeDict::usedSize() == 2);
+
+  auto const rarr = srcLoc(env, inst, 0).reg();
+  auto const used = dstLoc(env, inst, 0).reg();
+
+  auto& v = vmain(env);
+  auto const tmp = v.makeReg();
+  v << loadw{rarr[MonotypeDict::usedOffset()], tmp};
+  v << movzwq{tmp, used};
+}
 
 void cgLdMonotypeVecElem(IRLS& env, const IRInstruction* inst) {
   auto const rarr = srcLoc(env, inst, 0).reg();

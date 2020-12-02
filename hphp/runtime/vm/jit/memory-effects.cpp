@@ -1246,6 +1246,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
 
   case DictFirstKey:
   case DictLastKey:
+  case LdMonotypeDictEnd:
     return may_load_store(AEmpty, AEmpty);
 
   case CheckDictKeys:
@@ -1493,7 +1494,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case AssertLoc:
   case AssertStk:
   case AssertMBase:
-  case BespokeIterAdvancePos:
+  case BespokeIterEnd:
   case BespokeIterFirstPos:
   case BespokeIterLastPos:
   case DefFrameRelSP:

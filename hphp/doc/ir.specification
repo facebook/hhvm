@@ -3038,9 +3038,10 @@ fields of that struct for holding intermediate values.
   Obtain the pos coresponding to the last valid element in the non-empty
   array S0, which may have an arbitrary layout.
 
-| BespokeIterAdvancePos, D(Int), S(ArrLike) S(Int), LA
+| BespokeIterEnd, D(Int), S(ArrLike), LA
 
-  Advance the pos S1 for the array S0 forward, returning the result.
+  Returns the "end" iterator position for the given array. Unlike the "last"
+  iterator position, the end is never a valid iterator position.
 
 | BespokeIterGetKey<T>, DParam(Int|Str), S(ArrLike) S(Int), LA
 
@@ -3053,6 +3054,10 @@ fields of that struct for holding intermediate values.
 | BespokeEscalateToVanilla<Layout>, DEscalateToVanilla, SBespokeArr CStr, PRc
 
   Escalate the bespoke array S0 to a vanilla array for the reason S1.
+
+| LdMonotypeDictEnd, D(Int), SMonotypeDict, NF
+
+  Specialization of BespokeIterEnd when the base is a monotype dict.
 
 | LdMonotypeVecElem, DParam(InitCell), SMonotypeVec S(Int), NF
 

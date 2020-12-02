@@ -107,10 +107,11 @@ struct ArrayLayout {
   SSATmp* emitEscalateToVanilla(IRGS& env, SSATmp* arr, const char* reason) const;
   SSATmp* emitIterFirstPos(IRGS& env, SSATmp* arr) const;
   SSATmp* emitIterLastPos(IRGS& env, SSATmp* arr) const;
-  SSATmp* emitIterPos(IRGS& env, SSATmp* arr, SSATmp* idx) const;
+  SSATmp* emitIterEnd(IRGS& env, SSATmp* arr) const;
   SSATmp* emitIterElm(IRGS& env, SSATmp* arr, SSATmp* pos) const;
   SSATmp* emitIterGetKey(IRGS& env, SSATmp* arr, SSATmp* elm) const;
   SSATmp* emitIterGetVal(IRGS& env, SSATmp* arr, SSATmp* elm) const;
+  SSATmp* emitIterAdvanceElm(IRGS& env, SSATmp* elm, int16_t n) const;
 
   /**************************************************************************
    * Representation as a simple uint16_t

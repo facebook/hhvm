@@ -195,6 +195,7 @@ bool canDCE(IRInstruction* inst) {
   case LdFuncName:
   case LdMethCallerName:
   case LdStrLen:
+  case LdMonotypeDictEnd:
   case LdMonotypeVecElem:
   case LdVecElem:
   case LdVecElemAddr:
@@ -288,7 +289,7 @@ bool canDCE(IRInstruction* inst) {
   case DirFromFilepath:
   case BespokeIterFirstPos:
   case BespokeIterLastPos:
-  case BespokeIterAdvancePos:
+  case BespokeIterEnd:
   case BespokeIterGetKey:
   case BespokeIterGetVal:
     assertx(!inst->isControlFlow());

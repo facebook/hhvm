@@ -513,7 +513,7 @@ bool opcodeMayRaise(Opcode opc) {
   case BespokeGet:
   case BespokeIterFirstPos:
   case BespokeIterLastPos:
-  case BespokeIterAdvancePos:
+  case BespokeIterEnd:
   case BespokeIterGetKey:
   case BespokeIterGetVal:
   case Ceil:
@@ -791,6 +791,7 @@ bool opcodeMayRaise(Opcode opc) {
   case LdTypeCns:
   case LdUnitPerRequestFilepath:
   case LdUnwinderValue:
+  case LdMonotypeDictEnd:
   case LdMonotypeVecElem:
   case LdVecElem:
   case LdVecElemAddr:

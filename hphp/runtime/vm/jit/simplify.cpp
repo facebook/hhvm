@@ -3029,6 +3029,35 @@ X(CountKeyset)
 
 #undef X
 
+SSATmp* simplifyBespokeIterEnd(State& env, const IRInstruction* inst) {
+  auto const val = inst->src(0);
+  auto const type = val->type();
+
+  if (type.hasConstVal()) {
+    auto const end = type.arrLikeVal()->iter_end();
+    return cns(env, end);
+  }
+
+  if (type <= (TVArr|TVec)) {
+    return gen(env, CountVec, val);
+  } else if (type <= (TDArr|TDict) && type.arrSpec().layout().monotype()) {
+    return gen(env, LdMonotypeDictEnd, val);
+  }
+
+  return nullptr;
+}
+
+SSATmp* simplifyLdMonotypeDictEnd(State& env, const IRInstruction* inst) {
+  auto const type = inst->src(0)->type();
+
+  if (type.hasConstVal()) {
+    auto const end = type.arrLikeVal()->iter_end();
+    return cns(env, end);
+  }
+
+  return nullptr;
+}
+
 SSATmp* simplifyLdClsName(State& env, const IRInstruction* inst) {
   auto const src = inst->src(0);
   return src->hasConstVal(TCls) ? cns(env, src->clsVal()->name()) : nullptr;
@@ -3480,6 +3509,8 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(LookupSPropSlot)
   X(LdClsMethod)
   X(LdStrLen)
+  X(BespokeIterEnd)
+  X(LdMonotypeDictEnd)
   X(LdMonotypeVecElem)
   X(LdVecElem)
   X(MethodExists)

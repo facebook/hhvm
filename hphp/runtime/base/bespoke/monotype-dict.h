@@ -140,6 +140,13 @@ struct MonotypeDict : BespokeArray {
   static MonotypeDict* As(ArrayData* ad);
   static const MonotypeDict* As(const ArrayData* ad);
 
+  static constexpr size_t usedOffset() {
+    return offsetof(MonotypeDict, m_extra_lo16);
+  }
+  static constexpr size_t usedSize() {
+    return sizeof(m_extra_lo16);
+  }
+
   bool checkInvariants() const;
 
 #define X(Return, Name, Args...) static Return Name(Args);

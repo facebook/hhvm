@@ -289,9 +289,9 @@ SSATmp* ArrayLayout::emitIterLastPos(IRGS& env, SSATmp* arr) const {
   return irgenLayout()->emitIterLastPos(env, arr);
 }
 
-SSATmp* ArrayLayout::emitIterPos(IRGS& env, SSATmp* arr, SSATmp* idx) const {
+SSATmp* ArrayLayout::emitIterEnd(IRGS& env, SSATmp* arr) const {
   assertx(checkLayoutMatches(*this, arr));
-  return irgenLayout()->emitIterPos(env, arr, idx);
+  return irgenLayout()->emitIterEnd(env, arr);
 }
 
 SSATmp* ArrayLayout::emitIterElm(IRGS& env, SSATmp* arr, SSATmp* pos) const {
@@ -307,6 +307,10 @@ SSATmp* ArrayLayout::emitIterGetKey(IRGS& env, SSATmp* arr, SSATmp* elm) const {
 SSATmp* ArrayLayout::emitIterGetVal(IRGS& env, SSATmp* arr, SSATmp* elm) const {
   assertx(checkLayoutMatches(*this, arr));
   return irgenLayout()->emitIterGetVal(env, arr, elm);
+}
+
+SSATmp* ArrayLayout::emitIterAdvanceElm(IRGS& env, SSATmp* elm, int16_t n) const {
+  return irgenLayout()->emitIterAdvanceElm(env, elm, n);
 }
 
 //////////////////////////////////////////////////////////////////////////////

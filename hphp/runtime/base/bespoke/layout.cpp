@@ -652,12 +652,8 @@ SSATmp* Layout::emitIterLastPos(IRGS& env, SSATmp* arr) const {
   return gen(env, BespokeIterLastPos, arr);
 }
 
-SSATmp* Layout::emitIterPos(IRGS& env, SSATmp* arr, SSATmp* idx) const {
-  return idx;
-}
-
-SSATmp* Layout::emitIterAdvancePos(IRGS& env, SSATmp* arr, SSATmp* pos) const {
-  return gen(env, BespokeIterAdvancePos, arr, pos);
+SSATmp* Layout::emitIterEnd(IRGS& env, SSATmp* arr) const {
+  return gen(env, BespokeIterEnd, arr);
 }
 
 SSATmp* Layout::emitIterElm(IRGS& env, SSATmp* arr, SSATmp* pos) const {
@@ -671,6 +667,10 @@ SSATmp* Layout::emitIterGetKey(IRGS& env, SSATmp* arr, SSATmp* elm) const {
 
 SSATmp* Layout::emitIterGetVal(IRGS& env, SSATmp* arr, SSATmp* elm) const {
   return gen(env, BespokeIterGetVal, TInitCell, arr, elm);
+}
+
+SSATmp* Layout::emitIterAdvanceElm(IRGS& env, SSATmp* elm, int16_t n) const {
+  return gen(env, AddInt, elm, cns(env, n));
 }
 
 //////////////////////////////////////////////////////////////////////////////

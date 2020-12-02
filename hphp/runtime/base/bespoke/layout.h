@@ -396,16 +396,10 @@ struct Layout {
   virtual SSATmp* emitIterLastPos(IRGS& env, SSATmp* arr) const;
 
   /**
-   * Obtain the pos in the array corresponding to the specified index. It
-   * assumes that the array contains no tombstones.
+   * Get the "end" iterator position for the array - an invalid position
+   * that's off the end of the array's data.
    */
-  virtual SSATmp* emitIterPos(IRGS& env, SSATmp* arr, SSATmp* idx) const;
-
-  /**
-   * Advance the supplied pos a single step forward.
-   */
-  virtual SSATmp* emitIterAdvancePos(
-      IRGS& env, SSATmp* arr, SSATmp* pos) const;
+  virtual SSATmp* emitIterEnd(IRGS& env, SSATmp* arr) const;
 
   /**
    * Convert the supplied pos to an elm used to access the element.
@@ -421,6 +415,12 @@ struct Layout {
    * Obtain the value at the supplied elm.
    */
   virtual SSATmp* emitIterGetVal(IRGS& env, SSATmp* arr, SSATmp* elm) const;
+
+  /**
+   * Advance the supplied pos a single step forward. This operation may only
+   * be used if the array is "flat" - i.e. if its IterEnd equals its size.
+   */
+  virtual SSATmp* emitIterAdvanceElm(IRGS& env, SSATmp* elm, int16_t n) const;
 
   ///////////////////////////////////////////////////////////////////////////
 

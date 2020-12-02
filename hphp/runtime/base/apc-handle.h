@@ -40,6 +40,7 @@ enum class APCKind: uint8_t {
   PersistentFunc,
   PersistentClass,
   LazyClass,
+  PersistentClsMeth,
   UncountedString,
   UncountedArray,
   UncountedVec,
@@ -64,6 +65,7 @@ enum class APCKind: uint8_t {
   SerializedObject,
   FuncEntity,
   ClassEntity,
+  ClsMeth,
   RFunc,
   RClsMeth
 };

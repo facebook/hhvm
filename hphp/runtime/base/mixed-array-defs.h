@@ -301,6 +301,11 @@ void ConvertTvToUncounted(
       break;
     }
     case KindOfClsMeth: {
+      if (RO::EvalAPCSerializeClsMeth) {
+        assertx(use_lowptr);
+        assertx(data.pclsmeth->getCls()->isPersistent());
+        break;
+      }
       if (RuntimeOption::EvalHackArrDVArrs) {
         tvCastToVecInPlace(source);
         tvSetLegacyArrayInPlace(source, RuntimeOption::EvalHackArrDVArrMark);

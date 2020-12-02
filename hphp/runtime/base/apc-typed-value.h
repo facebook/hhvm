@@ -62,6 +62,13 @@ struct APCTypedValue {
     assertx(checkInvariants());
   }
 
+  explicit APCTypedValue(const ClsMethDataRef ref)
+    : m_handle(APCKind::PersistentClsMeth, KindOfClsMeth) {
+    assertx(use_lowptr);
+    assertx(ref->getCls()->isPersistent());
+    m_data.pclsmeth = ref;
+  }
+
   enum class StaticStr {};
   APCTypedValue(StaticStr, StringData* data)
     : m_handle(APCKind::StaticString, KindOfPersistentString) {
@@ -267,6 +274,7 @@ private:
     ArrayData* arr;
     const Func* func;
     const Class* cls;
+    ClsMethDataRef pclsmeth;
   } m_data;
   APCHandle m_handle;
 };

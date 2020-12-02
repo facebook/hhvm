@@ -71,7 +71,9 @@ size_t getMemSize(const APCHandle* handle) {
     case APCKind::ClassEntity:
     case APCKind::LazyClass:
     case APCKind::PersistentFunc:
+    case APCKind::PersistentClsMeth:
     case APCKind::FuncEntity:
+    case APCKind::ClsMeth:
     case APCKind::StaticString:
     case APCKind::StaticArray:
     case APCKind::StaticVec:
@@ -588,8 +590,10 @@ APCDetailedStats::counterFor(const APCHandle* handle) {
     case APCKind::PersistentClass:
     case APCKind::ClassEntity:
     case APCKind::PersistentFunc:
+    case APCKind::PersistentClsMeth:
     case APCKind::FuncEntity:
     case APCKind::LazyClass:
+    case APCKind::ClsMeth:
     case APCKind::StaticString:
     case APCKind::StaticArray:
     case APCKind::StaticVec:

@@ -116,7 +116,9 @@ EntryInfo::Type EntryInfo::getAPCType(const APCHandle* handle) {
     case APCKind::ClassEntity:
     case APCKind::LazyClass:
     case APCKind::PersistentFunc:
+    case APCKind::PersistentClsMeth:
     case APCKind::FuncEntity:
+    case APCKind::ClsMeth:
     case APCKind::StaticString:
     case APCKind::StaticArray:
     case APCKind::StaticVec:

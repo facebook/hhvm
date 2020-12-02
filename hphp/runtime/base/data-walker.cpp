@@ -91,6 +91,7 @@ bool DataWalker::visitTypedValue(TypedValue rval,
                                  PointerSet& visited,
                                  PointerMap* seenArrs) const {
   auto const serialize_funcs = RuntimeOption::EvalAPCSerializeFuncs;
+  auto const serialize_clsmeth = RO::EvalAPCSerializeClsMeth;
 
   if (rval.m_type == KindOfObject) {
     features.hasObjectOrResource = true;
@@ -105,6 +106,10 @@ bool DataWalker::visitTypedValue(TypedValue rval,
     if (!rval.m_data.pfunc->isPersistent()) features.hasObjectOrResource = true;
   } else if (rval.m_type == KindOfClass) {
     if (!rval.m_data.pclass->isPersistent()) {
+      features.hasObjectOrResource = true;
+    }
+  } else if (serialize_clsmeth && rval.m_type == KindOfClsMeth) {
+    if (!rval.m_data.pclsmeth->getCls()->isPersistent()) {
       features.hasObjectOrResource = true;
     }
   }

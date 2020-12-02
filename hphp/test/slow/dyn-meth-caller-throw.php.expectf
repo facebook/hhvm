@@ -1,0 +1,35 @@
+string(83) "dynamic_meth_caller(): Foo::inst_meth is not a dynamically callable instance method"
+string(85) "dynamic_meth_caller(): Foo::static_meth is not a dynamically callable instance method"
+string(84) "dynamic_meth_caller(): Foo::not_a_meth is not a dynamically callable instance method"
+
+Notice: Undefined variable: a in %s/dyn-meth-caller-throw.php on line 16
+
+Notice: Undefined variable: b in %s/dyn-meth-caller-throw.php on line 16
+
+Notice: Undefined variable: c in %s/dyn-meth-caller-throw.php on line 16
+object(__SystemLib\DynMethCallerHelper) (3) {
+  ["class":"__SystemLib\DynMethCallerHelper":private]=>
+  string(3) "Foo"
+  ["method":"__SystemLib\DynMethCallerHelper":private]=>
+  string(8) "inst_dyn"
+  ["lambda":"__SystemLib\DynMethCallerHelper":private]=>
+  object(Closure$main;9) (1) {
+    ["parameter"]=>
+    darray(3) {
+      ["$o"]=>
+      string(10) "<required>"
+      ["$m"]=>
+      string(10) "<required>"
+      ["$args"]=>
+      string(10) "<required>"
+    }
+  }
+}
+NULL
+NULL
+NULL
+inst_dyn
+
+Notice: Undefined variable: a in %s/dyn-meth-caller-throw.php on line 18
+
+Fatal error: Function name must be a string in %s/dyn-meth-caller-throw.php on line 18

@@ -1,0 +1,13 @@
+Foo::pub
+Foo::pub2
+Foo::prot
+Foo::prot2
+Foo::priv
+Foo::priv2
+Bar::pub
+Foo::pub2
+Bar::prot
+Foo::prot2
+Bar::priv
+
+Fatal error: Call to private method Foo::priv2() from context 'Bar' in %s/dyn-meth-caller-vis.php on line 38

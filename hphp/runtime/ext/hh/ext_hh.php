@@ -523,3 +523,13 @@ namespace HH\ReifiedGenerics {
   }
 
 }
+
+namespace __SystemLib {
+
+<<__Native, __IsFoldable, __Pure>>
+function is_dynamically_callable_inst_method(
+    string $class,
+    string $method
+): bool;
+
+}

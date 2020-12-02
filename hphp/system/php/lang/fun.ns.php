@@ -40,6 +40,53 @@ namespace __SystemLib {
       return $this->getMethodNameImpl();
     }
   }
+
+  final class DynMethCallerHelper {
+    public function __construct(
+      private string $class,
+      private string $method,
+      private mixed $lambda,
+    ) {
+    }
+    <<__ProvenanceSkipFrame>>
+    public function __invoke($x, ...$args) {
+      invariant(
+        \is_a($x, $this->class),
+        'object must be an instance of ('.$this->class.'), instead it is ('.
+        (\is_object($x) ? \get_class($x) : \gettype($x)).')'
+      );
+      return ($this->lambda)($x, $this->method, ...$args);
+    }
+    public function getClassNameImpl(): string {
+      return $this->class;
+    }
+    public function getMethodNameImpl(): string {
+      return $this->method;
+    }
+    public function getClassName(): string {
+      return $this->getClassNameImpl();
+    }
+    public function getMethodName(): string {
+      return $this->getMethodNameImpl();
+    }
+  }
+
+  function dynamic_meth_caller(string $class, string $method, mixed $lambda) {
+    if (!\__SystemLib\is_dynamically_callable_inst_method($class, $method)) {
+      $level = \ini_get('hhvm.forbid_dynamic_calls_to_meth_caller');
+      if ($level == 1) {
+        \trigger_error(
+          "dynamic_meth_caller(): $class::$method is not a dynamically ".
+          "callable instance method",
+          \E_USER_WARNING);
+      } else if ($level >= 2) {
+        throw new \InvalidArgumentException(
+          "dynamic_meth_caller(): $class::$method is not a dynamically ".
+          "callable instance method");
+      }
+    }
+    return new \__SystemLib\DynMethCallerHelper($class, $method, $lambda);
+  }
 }
 
 namespace HH {

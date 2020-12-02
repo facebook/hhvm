@@ -1211,6 +1211,7 @@ struct RuntimeOption {
   F(int32_t, ForbidDynamicCallsToFunc, 0)                               \
   F(int32_t, ForbidDynamicCallsToClsMeth, 0)                            \
   F(int32_t, ForbidDynamicCallsToInstMeth, 0)                           \
+  F(int32_t, ForbidDynamicCallsToMethCaller, 0)                         \
   F(int32_t, ForbidDynamicConstructs, 0)                                \
   /*                                                                    \
    * Keep logging dynamic calls according to options above even if      \

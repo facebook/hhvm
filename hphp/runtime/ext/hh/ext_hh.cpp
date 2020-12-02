@@ -1131,6 +1131,16 @@ int64_t HHVM_FUNCTION(set_implicit_context_by_index, int64_t index) {
   return prev_index;
 }
 
+bool HHVM_FUNCTION(is_dynamically_callable_inst_method, StringArg cls,
+                                                        StringArg meth) {
+  if (auto const c = Class::load(cls.get())) {
+    if (auto const m = c->lookupMethod(meth.get(), false)) {
+      return !m->isStatic() && m->isDynamicallyCallable();
+    }
+  }
+  return false;
+}
+
 static struct HHExtension final : Extension {
   HHExtension(): Extension("hh", NO_EXTENSION_VERSION_YET) { }
   void moduleInit() override {
@@ -1183,6 +1193,9 @@ static struct HHExtension final : Extension {
     X(AUTOLOAD_MAP_KIND_OF_CONSTANT, Constant);
     X(AUTOLOAD_MAP_KIND_OF_TYPE_ALIAS, TypeAlias);
 #undef X
+
+    HHVM_NAMED_FE(__SystemLib\\is_dynamically_callable_inst_method,
+                  HHVM_FN(is_dynamically_callable_inst_method));
 
     loadSystemlib();
   }

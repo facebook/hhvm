@@ -924,6 +924,93 @@ fn convert_meth_caller_to_func_ptr<'a>(
     return fun_handle;
 }
 
+fn make_dyn_meth_caller_lambda(
+    env: &Env,
+    st: &mut ClosureConvertVisitor,
+    pos: &Pos,
+    cexpr: &Expr,
+    fexpr: &Expr,
+) -> Expr_ {
+    fn get_scope_fmode(scope: &Scope) -> Mode {
+        scope
+            .iter()
+            .find_map(|item| match item {
+                ScopeItem::Class(cd) => Some(cd.get_mode()),
+                ScopeItem::Function(fd) => Some(fd.get_mode()),
+                _ => None,
+            })
+            .unwrap_or(Mode::Mstrict)
+    }
+    // TODO: Move dummy variable to tasl.rs once it exists.
+    let dummy_saved_env = ();
+    let pos = || pos.clone();
+    let obj_var = Box::new(Lid(pos(), local_id::make_unscoped("$o")));
+    let meth_var = Box::new(Lid(pos(), local_id::make_unscoped("$m")));
+    let obj_lvar = Expr(pos(), Expr_::Lvar(obj_var.clone()));
+    let meth_lvar = Expr(pos(), Expr_::Lvar(meth_var.clone()));
+    // AST for: return $o-><func>(...$args);
+    let args_var = Box::new(Lid(pos(), local_id::make_unscoped("$args")));
+    let variadic_param = make_fn_param(pos(), &args_var.1, true, false);
+    let invoke_method = Expr(
+        pos(),
+        Expr_::mk_call(
+            Expr(
+                pos(),
+                Expr_::ObjGet(Box::new((
+                    obj_lvar,
+                    meth_lvar,
+                    OgNullFlavor::OGNullthrows,
+                    false,
+                ))),
+            ),
+            vec![],
+            vec![],
+            Some(Expr(pos(), Expr_::Lvar(args_var))),
+        ),
+    );
+
+    let fd = Fun_ {
+        span: pos(),
+        annotation: dummy_saved_env,
+        mode: get_scope_fmode(&env.scope),
+        ret: TypeHint((), None),
+        name: Id(pos(), ";anonymous".to_string()),
+        tparams: vec![],
+        where_constraints: vec![],
+        variadic: FunVariadicity::FVvariadicArg(variadic_param.clone()),
+        params: vec![
+            make_fn_param(pos(), &obj_var.1, false, false),
+            make_fn_param(pos(), &meth_var.1, false, false),
+            variadic_param,
+        ],
+        cap: TypeHint((), None),        // TODO(T70095684)
+        unsafe_cap: TypeHint((), None), // TODO(T70095684)
+        body: FuncBody {
+            ast: vec![Stmt(pos(), Stmt_::Return(Box::new(Some(invoke_method))))],
+            annotation: (),
+        },
+        fun_kind: FunKind::FSync,
+        user_attributes: vec![],
+        file_attributes: vec![],
+        external: false,
+        namespace: RcOc::clone(&st.state.empty_namespace),
+        doc_comment: None,
+        static_: false,
+    };
+    let expr_id = |name: String| Expr(pos(), Expr_::mk_id(Id(pos(), name)));
+    let fun_handle: Expr_ = Expr_::mk_call(
+        expr_id("\\__systemlib\\dynamic_meth_caller".into()),
+        vec![],
+        vec![
+            cexpr.clone(),
+            fexpr.clone(),
+            Expr(pos(), Expr_::mk_efun(fd, vec![])),
+        ],
+        None,
+    );
+    fun_handle
+}
+
 fn convert_function_like_body<'a>(
     self_: &mut ClosureConvertVisitor<'a>,
     env: &mut Env<'a>,
@@ -1136,6 +1223,25 @@ impl<'ast, 'a> VisitorMut<'ast> for ClosureConvertVisitor<'a> {
             Expr_::Id(id) => {
                 add_generic(env, &mut self.state, id.name());
                 convert_id(env, *id)
+            }
+            Expr_::Call(mut x)
+                if {
+                    if let Expr_::Id(ref id) = (x.0).1 {
+                        strip_id(id).eq_ignore_ascii_case("hh\\dynamic_meth_caller")
+                    } else {
+                        false
+                    }
+                } =>
+            {
+                if let [cexpr, fexpr] = &mut *x.2 {
+                    let mut res = make_dyn_meth_caller_lambda(env, self, &*pos, &cexpr, &fexpr);
+                    res.recurse(env, self.object())?;
+                    res
+                } else {
+                    let mut res = Expr_::Call(x);
+                    res.recurse(env, self.object())?;
+                    res
+                }
             }
             Expr_::Call(mut x)
                 if {

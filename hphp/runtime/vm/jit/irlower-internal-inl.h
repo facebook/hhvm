@@ -153,6 +153,19 @@ void emitBespokeLayoutTest(Vout& v, ArrayLayout layout, Vreg r, JmpFn doJcc) {
       return std::make_pair(CC_Z, sf);
     }
 
+    {
+      // If our test can be reduced to a single bit test, do so.
+      const int16_t andXor = andVal & xorVal;
+      const int16_t andNotXor = andVal & ~xorVal;
+
+      if (andNotXor == 0 && folly::popcount(andXor) == 1 &&
+          (cmpVal == 0 || cmpVal == andXor)) {
+        auto const sf = v.makeReg();
+        v << testwi{andXor, bits, sf};
+        return std::make_pair(cmpVal == 0 ? CC_NZ : CC_Z, sf);
+      }
+    }
+
     auto const xoredBits = v.makeReg();
     auto const xoredSf = v.makeReg();
     v << xorwi{xorVal, bits, xoredBits, xoredSf};

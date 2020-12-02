@@ -29,6 +29,7 @@ function my_option_map(): OptionInfoMap {
                             'Which region selector to use (e.g \'method\')' },
 'no-pgo'          => Pair { '',  'Disable PGO' },
 'bespoke'         => Pair { '',  'Emit bespoke logging arrays' },
+'hadva'           => Pair { '',  'Enable HAM and automarking' },
 'pgo-threshold:'  => Pair { '',  'PGO threshold to use' },
 'no-obj-destruct' => Pair { '',
                             'Disable global object destructors in CLI mode' },
@@ -182,6 +183,8 @@ function determine_flags(OptionMap $opts): string {
     'no-pgo'          => '-v Eval.JitPGO=false ',
     'bespoke'         => '-v Eval.BespokeArrayLikeMode=2 '.
                          '-v Eval.EmitLoggingArraySampleRate=1000 ',
+     'hadva'          => '-v Eval.HackArrDVArrs=true '.
+                         '-v Eval.HackArrDVArrMark=true ',
     'hphpd'           => '-m debug ',
     'server'          => '-m server ',
   };

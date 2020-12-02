@@ -452,6 +452,7 @@ function get_options($argv) {
     '*hh_single_type_check:' => '',
     'write-to-checkout' => '',
     'bespoke' => '',
+    'hadva' => '',
   ];
   $options = darray[];
   $files = varray[];
@@ -915,6 +916,11 @@ function hhvm_cmd_impl(
 
     if (isset($options['bespoke'])) {
       $args[] = '-vEval.BespokeArrayLikeMode=1';
+    }
+
+    if (isset($options['hadva'])) {
+      $args[] = '-vEval.HackArrDVArrs=true';
+      $args[] = '-vEval.HackArrDVArrMark=true';
     }
 
     $cmds[] = implode(' ', array_merge($args, $extra_args));
@@ -2017,6 +2023,12 @@ function skip_test($options, $test, $run_skipif = true): ?string {
       file_exists("$test.$no_bespoke_tag")) {
       // Skip due to changes in array identity
       return 'skip-bespoke';
+  }
+
+  $no_hadva_tag = "nohadva";
+  if (isset($options['hadva']) &&
+      file_exists("$test.$no_hadva_tag")) {
+      return 'skip-hadva';
   }
 
   if (!$run_skipif) return null;

@@ -132,7 +132,7 @@ impl<'ast> Visitor<'ast> for Checker {
                     (recv, _targs, args, _variadic) => {
                         // Only allow direct function calls, so allow
                         // foo(), but don't allow (foo())().
-                        match recv.1 {
+                        match &recv.1 {
                             Id(_) => {
                                 // Recurse on the arguments manually,
                                 // so we don't end up visiting the
@@ -142,6 +142,20 @@ impl<'ast> Visitor<'ast> for Checker {
                                 args.accept(c, self)?;
                                 return Ok(());
                             }
+                            ClassConst(cc) => match (cc.0).1 {
+                                aast::ClassId_::CIexpr(aast::Expr(_, Id(ref id))) => {
+                                    if id.1 == naming_special_names_rust::classes::PARENT
+                                        || id.1 == naming_special_names_rust::classes::SELF
+                                        || id.1 == naming_special_names_rust::classes::STATIC
+                                    {
+                                        false
+                                    } else {
+                                        args.accept(c, self)?;
+                                        return Ok(());
+                                    }
+                                }
+                                _ => false,
+                            },
                             _ => false,
                         }
                     }

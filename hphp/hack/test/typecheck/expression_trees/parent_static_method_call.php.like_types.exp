@@ -1,0 +1,12 @@
+File "parent_static_method_call.php", line 15, characters 22-39:
+Unsupported syntax for expression trees. (Parsing[1002])
+File "parent_static_method_call.php", line 15, characters 22-27:
+Cannot use `parent::` in a function pointer due to class context ambiguity. Consider using `MyParent::bar` instead (Naming[2112])
+File "parent_static_method_call.php", line 15, characters 22-39:
+Expected `ExprTree<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
+  File "parent_static_method_call.php", line 52, characters 6-34:
+  But got `dynamic` because it is an unenforceable type
+File "parent_static_method_call.php", line 15, characters 34-38:
+Expected `ExprTree<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
+  File "parent_static_method_call.php", line 40, characters 5-45:
+  But got `dynamic` because it is an unenforceable type

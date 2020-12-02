@@ -2,38 +2,18 @@
 
 <<file:__EnableUnstableFeatures('expression_trees')>>
 
-class Foo {
-  public static function bar(): int { return 1; }
+class MyParent {
+  public static function bar(
+    ExampleContext $_,
+  ): ExprTree<Code, Code::TAst, (function(ExampleString): ExampleInt)> {
+    throw new Exception();
+  }
 }
 
-const int MY_CONST = 1;
-
-function foo(): void {
-  // Ban binary operators.
-  $x = Code`1 << 2`;
-
-  // Ban instantiation.
-  $z = Code`new Foo()`;
-
-  // Ban globals.
-  $g = Code`MY_CONST + 1`;
-
-  // Ban PHP-style lambdas.
-  $f = Code`function() { return 1; }`;
-
-  // Ban do-while and foreach loops.
-  $f = Code`() ==> { do {} while(true); }`;
-  $f = Code`(vec<int> $items) ==> { foreach ($items as $_) {} }`;
-
-  // Ban lambdas with default arguments.
-  $f = Code`(ExampleInt $x = 1) ==> { return $x; }`;
-
-  // Ban assignment to things that aren't simple variables.
-  $f = Code`(dynamic $x) ==> { $x[0] = 1; }`;
-  $f = Code`(dynamic $x) ==> { $x->foo = 1; }`;
-
-  // Ban assignments that mutate a local.
-  $f = Code`(int $x) ==> { $x += 1; }`;
+class MyClass extends MyParent {
+  public function test(): void {
+    $fun_call = Code`parent::bar("baz")`;
+  }
 }
 
 //// BEGIN DEFS

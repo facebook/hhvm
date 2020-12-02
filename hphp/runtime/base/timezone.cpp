@@ -403,8 +403,8 @@ Array TimeZone::transitions(int64_t timestamp_begin, /* = k_PHP_INT_MIN */
     return null_array;
   }
 
-  uint64_t timecnt;
-  timecnt = m_tzi->bit64.timecnt;
+  uint32_t timecnt;
+  timecnt = m_tzi->bit32.timecnt;
   uint32_t lastBefore = 0;
   for (uint32_t i = 0;
        i < timecnt && m_tzi->trans && m_tzi->trans[i] <= timestamp_begin;
@@ -430,11 +430,10 @@ Array TimeZone::transitions(int64_t timestamp_begin, /* = k_PHP_INT_MIN */
       s_abbr, String(abbr, CopyString)
     ));
   }
-
   for (uint32_t i = lastBefore;
        i < timecnt && m_tzi->trans && m_tzi->trans[i] < timestamp_end;
        ++i) {
-    int64_t timestamp = m_tzi->trans[i];
+    int timestamp = m_tzi->trans[i];
     if (timestamp_begin <= timestamp) {
       int index = m_tzi->trans_idx[i];
       auto dt = req::make<DateTime>(timestamp, req::make<TimeZone>("UTC"));

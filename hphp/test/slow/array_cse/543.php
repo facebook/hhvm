@@ -1,10 +1,8 @@
 <?hh
 
 function f1($x) {
-  if ($x[1]) goto x_t;
   var_dump($x[0]);
   var_dump($x[0]);
-  x_t:
   var_dump($x[0]);
 }
 function f2($x) {
@@ -33,13 +31,11 @@ function f5($x) {
   }
 }
 function f6($x, $y, $z) {
-  if ($z) goto my_clause;
   if ($y) {
  var_dump($y);
  }
   else if ($x[0]) {
     var_dump($x[0]);
-    my_clause:
     var_dump($x);
   }
 }

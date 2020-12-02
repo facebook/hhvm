@@ -34,7 +34,6 @@ function f()
                             // caller, and the exception currently uncaught is discarded.
         }
     }
-end:
     return 1;
 }
 <<__EntryPoint>>

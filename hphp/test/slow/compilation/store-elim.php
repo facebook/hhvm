@@ -4,17 +4,16 @@ function main($a, $b, $c) {
   $i = 0;
   if ($c) {
     $t = 0;
-    goto head;
   } else {
     $t = 1;
-    goto head;
   }
-  if ($a > 0) {
-    head:
+  if ($i & 1) {
+    $t = 2;
+  }
+  while (++$i < $a) {
     if ($i & 1) {
       $t = 2;
     }
-    if (++$i < $a) goto head;
   }
 
   if ($b == 42) {

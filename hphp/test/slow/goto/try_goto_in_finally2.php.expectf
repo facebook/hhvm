@@ -1,1 +1,0 @@
-Fatal error: 'goto' into finally statement is disallowed in %s/test/slow/goto/try_goto_in_finally2.php on line 3

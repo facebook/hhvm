@@ -1,17 +1,6 @@
 <?hh
 
 
-function gotoMain() {
-  echo "Entering main\n";
-  goto l2;
-  l1:
-  echo "In l1\n";
-  return;
-  l2:
-  echo "In l2, going to l1\n";
-  goto l1;
-}
-
 function jccMain($i) {
   if (!$i) {
     echo "i is falsey\n";
@@ -29,7 +18,6 @@ function jccMain($i) {
 
 <<__EntryPoint>>
 function main_jumps() {
-gotoMain();
 jccMain(0);
 jccMain(2);
 }

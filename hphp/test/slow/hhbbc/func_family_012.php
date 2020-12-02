@@ -10,13 +10,11 @@ class Obj extends Base {
 
 function foo(Base $x, Obj $y) {
   $b = true;
-loop:
-  if (!$b) goto done;
+  while($b) {
   $x = $b ? $x : $y;
   $foo = $x->asd();
   $b = false;
-  goto loop;
-done:
+  }
   var_dump($foo);
 }
 

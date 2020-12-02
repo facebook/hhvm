@@ -99,7 +99,6 @@ function test() {
   $x=$y?$y : foo::bar();
   $x=$y?$y :foo::bar();
   $x=:foo::bar();
-  label:foo::bar();
   $x=$y?: foo::bar();
   $x=$y? :foo::bar() : 0;
   $x=$y?$y:foo::bar();

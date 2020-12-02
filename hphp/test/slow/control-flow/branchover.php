@@ -5,11 +5,10 @@ function f($x) {
   if (($x & 15) != 0) {
     $x  = $x + 3;
     if ($x == 991919188238838) {
-      goto harmful;
+      return $x;
     }
   }
   $x++;
-  harmful:
   return $x;
 }
 

@@ -9,14 +9,13 @@ function findValue($table, $v)  // where $table is 2x3 array
                         if ($table[$row][$colm] == $v)
                         {
                                 echo "$v was found at row $row, column $colm\n";
-                                goto done; // not quite the same as break 2!
+                                return;
                         }
                 }
         }
 
         echo "$v was not found\n";
-done:
-        ;       // note that a label must always precede a statement
+        return;
 }
 
 /*

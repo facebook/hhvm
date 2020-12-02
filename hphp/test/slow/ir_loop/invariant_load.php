@@ -12,11 +12,12 @@ function alternator() {
 }
 function foo($x, $k) {
   foreach ($x as $j) {
-  loop:
-    echo "$j: ";
-    echo $k;
-    echo "\n";
-    if (alternator()) { goto loop; }
+    while(true) {
+      echo "$j: ";
+      echo $k;
+      echo "\n";
+      if (!alternator()) { break; }
+    }
     echo "ok\n";
   }
 

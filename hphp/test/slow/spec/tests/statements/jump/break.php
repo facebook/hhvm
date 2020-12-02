@@ -17,8 +17,7 @@ function findValue($table, $v)  // where $table is 2x3 array
         }
 
         echo "$v was not found\n";
-done:
-        ;
+        return;
 }
 
 // break;  // can't break from the outer-most level

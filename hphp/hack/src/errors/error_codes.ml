@@ -123,10 +123,10 @@ module Naming = struct
     | DollardollarUnused [@value 2069]
     | IllegalMemberVariableClass [@value 2070]
     | TooFewTypeArguments [@value 2071]
-    | GotoLabelAlreadyDefined [@value 2072]
-    | GotoLabelUndefined [@value 2073]
-    | GotoLabelDefinedInFinally [@value 2074]
-    | GotoInvokedInFinally [@value 2075]
+    (* | GotoLabelAlreadyDefinedDEPRECATED [@value 2072]
+    | GotoLabelUndefinedDEPRECATED [@value 2073]
+    | GotoLabelDefinedInFinallyDEPRECATED [@value 2074]
+    | GotoInvokedInFinallyDEPRECATED [@value 2075] *)
     (* | DynamicClassPropertyNameInStrictModeDEPRECATED [@value 2076] *)
     | ThisAsLexicalVariable [@value 2077]
     | DynamicClassNameInStrictMode [@value 2078]

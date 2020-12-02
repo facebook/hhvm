@@ -406,10 +406,7 @@ and stmt env acc st =
       S.Top
     else
       expr acc e
-  | GotoLabel _
-  | Goto _
-  | Break ->
-    acc
+  | Break -> acc
   | Continue -> acc
   | Throw _ -> S.Top
   | Return None ->

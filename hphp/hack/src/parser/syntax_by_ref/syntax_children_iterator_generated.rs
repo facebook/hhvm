@@ -806,23 +806,6 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                     }
                 })
             },
-            GotoLabel(x) => {
-                get_index(2).and_then(|index| { match index {
-                        0 => Some(&x.name),
-                    1 => Some(&x.colon),
-                        _ => None,
-                    }
-                })
-            },
-            GotoStatement(x) => {
-                get_index(3).and_then(|index| { match index {
-                        0 => Some(&x.keyword),
-                    1 => Some(&x.label_name),
-                    2 => Some(&x.semicolon),
-                        _ => None,
-                    }
-                })
-            },
             ThrowStatement(x) => {
                 get_index(3).and_then(|index| { match index {
                         0 => Some(&x.keyword),

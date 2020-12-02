@@ -2860,21 +2860,6 @@ where
                     Self::lift_awaits_in_statement(f, node, env)
                 }
             }
-            GotoLabel(c) => {
-                if env.is_typechecker() && !env.parser_options.po_allow_goto {
-                    Self::raise_parsing_error(node, env, &syntax_error::goto_label);
-                }
-                Ok(new(
-                    pos,
-                    S_::mk_goto_label((Self::p_pos(&c.name, env), Self::text(&c.name, env))),
-                ))
-            }
-            GotoStatement(c) => {
-                if env.is_typechecker() && !env.parser_options.po_allow_goto {
-                    Self::raise_parsing_error(node, env, &syntax_error::goto);
-                }
-                Ok(new(pos, S_::mk_goto(Self::p_pstring(&c.label_name, env)?)))
-            }
             EchoStatement(c) => {
                 let f = |e: &mut Env<'a, TF>| -> Result<ast::Stmt> {
                     let echo = match &c.keyword.children {

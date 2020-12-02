@@ -16,7 +16,6 @@ type t =
   | Exit
   | Fallthrough
   | Finally
-  | Goto of string
 [@@deriving eq, ord, show]
 
 let to_string = function
@@ -28,4 +27,3 @@ let to_string = function
   | Exit -> "Exit"
   | Fallthrough -> "Fallthrough"
   | Finally -> "Finally"
-  | Goto l -> "Goto " ^ l

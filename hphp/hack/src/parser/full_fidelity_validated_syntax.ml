@@ -139,8 +139,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | Syntax.ForeachStatement _ -> tag validate_foreach_statement (fun x -> TLDForeach x) x
     | Syntax.SwitchFallthrough _ -> tag validate_switch_fallthrough (fun x -> TLDSwitchFallthrough x) x
     | Syntax.ReturnStatement _ -> tag validate_return_statement (fun x -> TLDReturn x) x
-    | Syntax.GotoLabel _ -> tag validate_goto_label (fun x -> TLDGotoLabel x) x
-    | Syntax.GotoStatement _ -> tag validate_goto_statement (fun x -> TLDGoto x) x
     | Syntax.ThrowStatement _ -> tag validate_throw_statement (fun x -> TLDThrow x) x
     | Syntax.BreakStatement _ -> tag validate_break_statement (fun x -> TLDBreak x) x
     | Syntax.ContinueStatement _ -> tag validate_continue_statement (fun x -> TLDContinue x) x
@@ -177,8 +175,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | TLDForeach                      thing -> invalidate_foreach_statement              (value, thing)
     | TLDSwitchFallthrough            thing -> invalidate_switch_fallthrough             (value, thing)
     | TLDReturn                       thing -> invalidate_return_statement               (value, thing)
-    | TLDGotoLabel                    thing -> invalidate_goto_label                     (value, thing)
-    | TLDGoto                         thing -> invalidate_goto_statement                 (value, thing)
     | TLDThrow                        thing -> invalidate_throw_statement                (value, thing)
     | TLDBreak                        thing -> invalidate_break_statement                (value, thing)
     | TLDContinue                     thing -> invalidate_continue_statement             (value, thing)
@@ -384,8 +380,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | Syntax.SwitchStatement _ -> tag validate_switch_statement (fun x -> StmtSwitch x) x
     | Syntax.SwitchFallthrough _ -> tag validate_switch_fallthrough (fun x -> StmtSwitchFallthrough x) x
     | Syntax.ReturnStatement _ -> tag validate_return_statement (fun x -> StmtReturn x) x
-    | Syntax.GotoLabel _ -> tag validate_goto_label (fun x -> StmtGotoLabel x) x
-    | Syntax.GotoStatement _ -> tag validate_goto_statement (fun x -> StmtGoto x) x
     | Syntax.ThrowStatement _ -> tag validate_throw_statement (fun x -> StmtThrow x) x
     | Syntax.BreakStatement _ -> tag validate_break_statement (fun x -> StmtBreak x) x
     | Syntax.ContinueStatement _ -> tag validate_continue_statement (fun x -> StmtContinue x) x
@@ -412,8 +406,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | StmtSwitch                       thing -> invalidate_switch_statement               (value, thing)
     | StmtSwitchFallthrough            thing -> invalidate_switch_fallthrough             (value, thing)
     | StmtReturn                       thing -> invalidate_return_statement               (value, thing)
-    | StmtGotoLabel                    thing -> invalidate_goto_label                     (value, thing)
-    | StmtGoto                         thing -> invalidate_goto_statement                 (value, thing)
     | StmtThrow                        thing -> invalidate_throw_statement                (value, thing)
     | StmtBreak                        thing -> invalidate_break_statement                (value, thing)
     | StmtContinue                     thing -> invalidate_continue_statement             (value, thing)
@@ -2044,36 +2036,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
       { return_keyword = invalidate_token x.return_keyword
       ; return_expression = invalidate_option_with (invalidate_expression) x.return_expression
       ; return_semicolon = invalidate_option_with (invalidate_token) x.return_semicolon
-      }
-    ; Syntax.value = v
-    }
-  and validate_goto_label : goto_label validator = function
-  | { Syntax.syntax = Syntax.GotoLabel x; value = v } -> v,
-    { goto_label_colon = validate_token x.goto_label_colon
-    ; goto_label_name = validate_token x.goto_label_name
-    }
-  | s -> validation_fail (Some SyntaxKind.GotoLabel) s
-  and invalidate_goto_label : goto_label invalidator = fun (v, x) ->
-    { Syntax.syntax =
-      Syntax.GotoLabel
-      { goto_label_name = invalidate_token x.goto_label_name
-      ; goto_label_colon = invalidate_token x.goto_label_colon
-      }
-    ; Syntax.value = v
-    }
-  and validate_goto_statement : goto_statement validator = function
-  | { Syntax.syntax = Syntax.GotoStatement x; value = v } -> v,
-    { goto_statement_semicolon = validate_token x.goto_statement_semicolon
-    ; goto_statement_label_name = validate_token x.goto_statement_label_name
-    ; goto_statement_keyword = validate_token x.goto_statement_keyword
-    }
-  | s -> validation_fail (Some SyntaxKind.GotoStatement) s
-  and invalidate_goto_statement : goto_statement invalidator = fun (v, x) ->
-    { Syntax.syntax =
-      Syntax.GotoStatement
-      { goto_statement_keyword = invalidate_token x.goto_statement_keyword
-      ; goto_statement_label_name = invalidate_token x.goto_statement_label_name
-      ; goto_statement_semicolon = invalidate_token x.goto_statement_semicolon
       }
     ; Syntax.value = v
     }

@@ -31,7 +31,6 @@ function for() {}
 function foreach() {}
 function function() {}
 function global() {}
-function goto() {}
 function if() {}
 function implements() {}
 function include() {}
@@ -94,7 +93,6 @@ for();
 foreach();
 function();
 global();
-goto();
 if();
 implements();
 include();

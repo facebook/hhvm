@@ -436,9 +436,6 @@ pub const alternate_control_flow: Error =
     Cow::Borrowed("Alternate control flow syntax is not allowed in Hack files");
 pub const execution_operator: Error =
     Cow::Borrowed("The execution operator is not allowed in Hack files");
-pub const goto: Error = Cow::Borrowed("The `goto` operator is not allowed in Hack files");
-pub const goto_label: Error =
-    Cow::Borrowed("Labels are used only for `goto`, which is not allowed in Hack files");
 pub const non_re_prefix: Error = Cow::Borrowed("Only `re`-prefixed strings allowed.");
 pub const collection_intrinsic_generic: Error =
     Cow::Borrowed("Cannot initialize collection builtins with type parameters");

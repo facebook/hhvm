@@ -1330,22 +1330,6 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           return_semicolon = semi;
         } ->
       transform_keyword_expression_statement env kw expr semi
-    | Syntax.GotoLabel { goto_label_name; goto_label_colon } ->
-      Concat [t env goto_label_name; t env goto_label_colon; Newline]
-    | Syntax.GotoStatement
-        {
-          goto_statement_keyword;
-          goto_statement_label_name;
-          goto_statement_semicolon;
-        } ->
-      Concat
-        [
-          t env goto_statement_keyword;
-          Space;
-          t env goto_statement_label_name;
-          t env goto_statement_semicolon;
-          Newline;
-        ]
     | Syntax.ThrowStatement
         { throw_keyword = kw; throw_expression = expr; throw_semicolon = semi }
       ->

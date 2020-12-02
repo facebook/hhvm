@@ -425,16 +425,6 @@ where
         Self::R::make_return_statement(self.state_mut(), arg0, arg1, arg2)
     }
 
-    fn make_goto_label(&mut self, arg0 : Self::R, arg1 : Self::R) -> Self::R {
-        self.state_mut().next(&[&arg0, &arg1]);
-        Self::R::make_goto_label(self.state_mut(), arg0, arg1)
-    }
-
-    fn make_goto_statement(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> Self::R {
-        self.state_mut().next(&[&arg0, &arg1, &arg2]);
-        Self::R::make_goto_statement(self.state_mut(), arg0, arg1, arg2)
-    }
-
     fn make_throw_statement(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> Self::R {
         self.state_mut().next(&[&arg0, &arg1, &arg2]);
         Self::R::make_throw_statement(self.state_mut(), arg0, arg1, arg2)

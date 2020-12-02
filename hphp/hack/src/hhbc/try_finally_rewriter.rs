@@ -6,24 +6,19 @@
 use crate::emit_statement::{LazyState, Level};
 use crate::reified_generics_helpers as reified;
 
-use ast_scope_rust as ast_scope;
 use emit_expression_rust as emit_expression;
 use emit_fatal_rust as emit_fatal;
 use emit_pos_rust::emit_pos;
 use env::{emitter::Emitter, iterator, jump_targets as jt, local, Env};
 use hhbc_ast_rust::{self as hhbc_ast, Instruct};
-use instruction_sequence_rust::{instr, Error, InstrSeq, Result};
+use instruction_sequence_rust::{instr, InstrSeq, Result};
 use label::Label;
 use label_rust as label;
-use oxidized::{
-    aast_visitor::{visit, AstParams, Node, Visitor},
-    ast as tast,
-    pos::Pos,
-};
+use oxidized::pos::Pos;
 
 use bitflags::bitflags;
 use indexmap::IndexSet;
-use std::{borrow::Cow, collections::BTreeMap};
+use std::collections::BTreeMap;
 
 type LabelMap<'a> = BTreeMap<label::Id, &'a Instruct>;
 
@@ -49,7 +44,7 @@ impl JumpInstructions<'_> {
             &mut |mut acc: LabelMap<'a>, i| {
                 use hhbc_ast::Instruct::*;
                 use hhbc_ast::InstructControlFlow::{RetC, RetCSuspended, RetM};
-                use hhbc_ast::InstructSpecialFlow::{Break, Continue, Goto};
+                use hhbc_ast::InstructSpecialFlow::{Break, Continue};
                 match i {
                     &ISpecialFlow(Break(level)) => {
                         acc.insert(get_label_id(jt_gen, true, level as Level), i);
@@ -63,9 +58,6 @@ impl JumpInstructions<'_> {
                         }
                         _ => {}
                     },
-                    &ISpecialFlow(Goto(ref l)) => {
-                        acc.insert(jt_gen.get_id_for_label(Label::Named(l.clone())), i);
-                    }
                     _ => {}
                 };
                 acc
@@ -103,146 +95,6 @@ pub(super) fn emit_save_label_id(local_gen: &mut local::Gen, id: usize) -> Instr
         instr::setl(local_gen.get_label().clone()),
         instr::popc(),
     ])
-}
-
-fn get_pos_for_error<'a>(env: &'a Env<'a>) -> Cow<'a, Pos> {
-    for item in env.scope.iter() {
-        use ast_scope::ScopeItem;
-        match item {
-            ScopeItem::Function(fd) => return Pos::first_char_of_line(fd.get_span()),
-            // For methods, it points to class not the method.. weird
-            ScopeItem::Class(cd) => return Pos::first_char_of_line(cd.get_span()),
-            ScopeItem::Method(_) | ScopeItem::Lambda(_) | ScopeItem::LongLambda(_) => {}
-        }
-    }
-    Cow::Owned(Pos::make_none())
-}
-
-pub fn emit_goto(
-    in_finally_epilogue: bool,
-    label: String,
-    env: &mut Env,
-    local_gen: &mut local::Gen,
-) -> Result {
-    let in_using_opt = env
-        .jump_targets_gen
-        .get_labels_in_function()
-        .get(&label)
-        .copied();
-    match in_using_opt {
-        None => Err(emit_fatal::raise_fatal_parse(
-            &get_pos_for_error(env),
-            format!("'goto' to undefined label '{}'", label),
-        )),
-        Some(in_using) => {
-            // CONSIDER: we don't need to assign state id for label
-            // for cases when it is not necessary, i.e. when jump target is in the same
-            // scope. HHVM does not do this today, do the same for compatibility reasons
-            let jt_gen = &mut env.jump_targets_gen;
-            let label_id = jt_gen.get_id_for_label(Label::Named(label.clone()));
-            match jt_gen.jump_targets().find_goto_target(&label) {
-                jt::ResolvedGotoTarget::Label(iters) => {
-                    let preamble = if !in_finally_epilogue {
-                        instr::empty()
-                    } else {
-                        instr::unsetl(local_gen.get_label().clone())
-                    };
-                    Ok(InstrSeq::gather(vec![
-                        preamble,
-                        emit_jump_to_label(Label::Named(label), iters),
-                    ]))
-                }
-                jt::ResolvedGotoTarget::Finally(jt::ResolvedGotoFinally {
-                    rgf_finally_start_label,
-                    rgf_iterators_to_release,
-                }) => {
-                    let preamble = if in_finally_epilogue {
-                        instr::empty()
-                    } else {
-                        emit_save_label_id(local_gen, label_id)
-                    };
-                    Ok(InstrSeq::gather(vec![
-                        preamble,
-                        emit_jump_to_label(rgf_finally_start_label, rgf_iterators_to_release),
-                        // emit goto as an indicator for try/finally rewriter to generate
-                        // finally epilogue, try/finally rewriter will remove it.
-                        instr::goto(label),
-                    ]))
-                }
-                jt::ResolvedGotoTarget::GotoFromFinally => Err(emit_fatal::raise_fatal_runtime(
-                    &get_pos_for_error(env),
-                    "Goto to a label outside a finally block is not supported",
-                )),
-                jt::ResolvedGotoTarget::GotoInvalidLabel => Err(emit_fatal::raise_fatal_parse(
-                    &get_pos_for_error(env),
-                    if in_using {
-                        "'goto' into or across using statement is disallowed"
-                    } else {
-                        "'goto' into loop or switch statement is disallowed"
-                    },
-                )),
-            }
-        }
-    }
-}
-
-pub fn fail_if_goto_from_try_to_finally(
-    try_block: &tast::Block,
-    finally_block: &tast::Block,
-) -> Result<()> {
-    fn find_gotos_in<'a>(block: &'a tast::Block) -> Vec<&'a tast::Pstring> {
-        struct State<'a>(Vec<&'a tast::Pstring>);
-        impl<'ast> Visitor<'ast> for State<'ast> {
-            type P = AstParams<(), ()>;
-
-            fn object(&mut self) -> &mut dyn Visitor<'ast, P = Self::P> {
-                self
-            }
-
-            fn visit_stmt_(
-                &mut self,
-                c: &mut (),
-                s: &'ast tast::Stmt_,
-            ) -> std::result::Result<(), ()> {
-                match s {
-                    tast::Stmt_::Goto(l) => Ok(self.0.push(l)),
-                    _ => s.recurse(c, self),
-                }
-            }
-        }
-        let mut state = State(vec![]);
-        visit(&mut state, &mut (), block).unwrap();
-        state.0
-    }
-
-    struct GotoVisitor<'a>(std::marker::PhantomData<&'a ()>);
-    impl<'ast, 'a> Visitor<'ast> for GotoVisitor<'a> {
-        type P = AstParams<Vec<&'a tast::Pstring>, Error>;
-
-        fn object(&mut self) -> &mut dyn Visitor<'ast, P = Self::P> {
-            self
-        }
-
-        fn visit_stmt_(
-            &mut self,
-            c: &mut Vec<&'a tast::Pstring>,
-            s: &'ast tast::Stmt_,
-        ) -> Result<()> {
-            match s {
-                tast::Stmt_::GotoLabel(l) => match c.iter().rev().find(|label| label.1 == l.1) {
-                    Some((pos, _)) => Err(emit_fatal::raise_fatal_parse(
-                        pos,
-                        "'goto' into finally statement is disallowed",
-                    )),
-                    _ => Ok(()),
-                },
-                _ => s.recurse(c, self.object()),
-            }
-        }
-    }
-    let mut visitor = GotoVisitor(std::marker::PhantomData);
-    let mut goto_labels = find_gotos_in(try_block);
-    visit(&mut visitor, &mut goto_labels, finally_block)
 }
 
 pub(super) fn emit_return(e: &mut Emitter, in_finally_epilogue: bool, env: &mut Env) -> Result {
@@ -410,7 +262,7 @@ pub(super) fn emit_finally_epilogue(
     fn emit_instr(e: &mut Emitter, env: &mut Env, pos: &Pos, i: &Instruct) -> Result {
         use hhbc_ast::Instruct::*;
         use hhbc_ast::InstructControlFlow::{RetC, RetCSuspended, RetM};
-        use hhbc_ast::InstructSpecialFlow::{Break, Continue, Goto};
+        use hhbc_ast::InstructSpecialFlow::{Break, Continue};
         let fail = || {
             panic!("unexpected instruction: only Ret* or Break/Continue/Jmp(Named) are expected")
         };
@@ -433,9 +285,6 @@ pub(super) fn emit_finally_epilogue(
                 pos,
                 level as Level,
             )),
-            &ISpecialFlow(Goto(ref label)) => {
-                emit_goto(true, label.clone(), env, e.local_gen_mut())
-            }
             _ => fail(),
         }
     }

@@ -372,14 +372,6 @@ impl<'src> SmartConstructors for MinimalSmartConstructors {
         <Self as SyntaxSmartConstructors<MinimalSyntax, SimpleTokenFactoryImpl<MinimalToken>, NoState>>::make_return_statement(self, arg0, arg1, arg2)
     }
 
-    fn make_goto_label(&mut self, arg0: Self::R, arg1: Self::R) -> Self::R {
-        <Self as SyntaxSmartConstructors<MinimalSyntax, SimpleTokenFactoryImpl<MinimalToken>, NoState>>::make_goto_label(self, arg0, arg1)
-    }
-
-    fn make_goto_statement(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R) -> Self::R {
-        <Self as SyntaxSmartConstructors<MinimalSyntax, SimpleTokenFactoryImpl<MinimalToken>, NoState>>::make_goto_statement(self, arg0, arg1, arg2)
-    }
-
     fn make_throw_statement(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R) -> Self::R {
         <Self as SyntaxSmartConstructors<MinimalSyntax, SimpleTokenFactoryImpl<MinimalToken>, NoState>>::make_throw_statement(self, arg0, arg1, arg2)
     }

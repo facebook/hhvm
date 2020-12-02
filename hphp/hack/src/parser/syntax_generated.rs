@@ -864,25 +864,6 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_goto_label(_: &C, goto_label_name: Self, goto_label_colon: Self) -> Self {
-        let syntax = SyntaxVariant::GotoLabel(Box::new(GotoLabelChildren {
-            goto_label_name,
-            goto_label_colon,
-        }));
-        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
-        Self::make(syntax, value)
-    }
-
-    fn make_goto_statement(_: &C, goto_statement_keyword: Self, goto_statement_label_name: Self, goto_statement_semicolon: Self) -> Self {
-        let syntax = SyntaxVariant::GotoStatement(Box::new(GotoStatementChildren {
-            goto_statement_keyword,
-            goto_statement_label_name,
-            goto_statement_semicolon,
-        }));
-        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
-        Self::make(syntax, value)
-    }
-
     fn make_throw_statement(_: &C, throw_keyword: Self, throw_expression: Self, throw_semicolon: Self) -> Self {
         let syntax = SyntaxVariant::ThrowStatement(Box::new(ThrowStatementChildren {
             throw_keyword,
@@ -2479,19 +2460,6 @@ where
                 let acc = f(return_semicolon, acc);
                 acc
             },
-            SyntaxVariant::GotoLabel(x) => {
-                let GotoLabelChildren { goto_label_name, goto_label_colon } = *x;
-                let acc = f(goto_label_name, acc);
-                let acc = f(goto_label_colon, acc);
-                acc
-            },
-            SyntaxVariant::GotoStatement(x) => {
-                let GotoStatementChildren { goto_statement_keyword, goto_statement_label_name, goto_statement_semicolon } = *x;
-                let acc = f(goto_statement_keyword, acc);
-                let acc = f(goto_statement_label_name, acc);
-                let acc = f(goto_statement_semicolon, acc);
-                acc
-            },
             SyntaxVariant::ThrowStatement(x) => {
                 let ThrowStatementChildren { throw_keyword, throw_expression, throw_semicolon } = *x;
                 let acc = f(throw_keyword, acc);
@@ -3264,8 +3232,6 @@ where
             SyntaxVariant::CaseLabel {..} => SyntaxKind::CaseLabel,
             SyntaxVariant::DefaultLabel {..} => SyntaxKind::DefaultLabel,
             SyntaxVariant::ReturnStatement {..} => SyntaxKind::ReturnStatement,
-            SyntaxVariant::GotoLabel {..} => SyntaxKind::GotoLabel,
-            SyntaxVariant::GotoStatement {..} => SyntaxKind::GotoStatement,
             SyntaxVariant::ThrowStatement {..} => SyntaxKind::ThrowStatement,
             SyntaxVariant::BreakStatement {..} => SyntaxKind::BreakStatement,
             SyntaxVariant::ContinueStatement {..} => SyntaxKind::ContinueStatement,
@@ -3901,17 +3867,6 @@ where
                  return_semicolon: ts.pop().unwrap(),
                  return_expression: ts.pop().unwrap(),
                  return_keyword: ts.pop().unwrap(),
-                 
-             })),
-             (SyntaxKind::GotoLabel, 2) => SyntaxVariant::GotoLabel(Box::new(GotoLabelChildren {
-                 goto_label_colon: ts.pop().unwrap(),
-                 goto_label_name: ts.pop().unwrap(),
-                 
-             })),
-             (SyntaxKind::GotoStatement, 3) => SyntaxVariant::GotoStatement(Box::new(GotoStatementChildren {
-                 goto_statement_semicolon: ts.pop().unwrap(),
-                 goto_statement_label_name: ts.pop().unwrap(),
-                 goto_statement_keyword: ts.pop().unwrap(),
                  
              })),
              (SyntaxKind::ThrowStatement, 3) => SyntaxVariant::ThrowStatement(Box::new(ThrowStatementChildren {
@@ -5131,19 +5086,6 @@ pub struct ReturnStatementChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
-pub struct GotoLabelChildren<T, V> {
-    pub goto_label_name: Syntax<T, V>,
-    pub goto_label_colon: Syntax<T, V>,
-}
-
-#[derive(Debug, Clone)]
-pub struct GotoStatementChildren<T, V> {
-    pub goto_statement_keyword: Syntax<T, V>,
-    pub goto_statement_label_name: Syntax<T, V>,
-    pub goto_statement_semicolon: Syntax<T, V>,
-}
-
-#[derive(Debug, Clone)]
 pub struct ThrowStatementChildren<T, V> {
     pub throw_keyword: Syntax<T, V>,
     pub throw_expression: Syntax<T, V>,
@@ -5912,8 +5854,6 @@ pub enum SyntaxVariant<T, V> {
     CaseLabel(Box<CaseLabelChildren<T, V>>),
     DefaultLabel(Box<DefaultLabelChildren<T, V>>),
     ReturnStatement(Box<ReturnStatementChildren<T, V>>),
-    GotoLabel(Box<GotoLabelChildren<T, V>>),
-    GotoStatement(Box<GotoStatementChildren<T, V>>),
     ThrowStatement(Box<ThrowStatementChildren<T, V>>),
     BreakStatement(Box<BreakStatementChildren<T, V>>),
     ContinueStatement(Box<ContinueStatementChildren<T, V>>),
@@ -6787,23 +6727,6 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                         0 => Some(&x.return_keyword),
                     1 => Some(&x.return_expression),
                     2 => Some(&x.return_semicolon),
-                        _ => None,
-                    }
-                })
-            },
-            GotoLabel(x) => {
-                get_index(2).and_then(|index| { match index {
-                        0 => Some(&x.goto_label_name),
-                    1 => Some(&x.goto_label_colon),
-                        _ => None,
-                    }
-                })
-            },
-            GotoStatement(x) => {
-                get_index(3).and_then(|index| { match index {
-                        0 => Some(&x.goto_statement_keyword),
-                    1 => Some(&x.goto_statement_label_name),
-                    2 => Some(&x.goto_statement_semicolon),
                         _ => None,
                     }
                 })

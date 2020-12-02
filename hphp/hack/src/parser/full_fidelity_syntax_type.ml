@@ -609,15 +609,6 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; return_expression                                  : t
     ; return_semicolon                                   : t
     }
-  | GotoLabel                         of
-    { goto_label_name                                    : t
-    ; goto_label_colon                                   : t
-    }
-  | GotoStatement                     of
-    { goto_statement_keyword                             : t
-    ; goto_statement_label_name                          : t
-    ; goto_statement_semicolon                           : t
-    }
   | ThrowStatement                    of
     { throw_keyword                                      : t
     ; throw_expression                                   : t
@@ -1167,8 +1158,6 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | TLDForeach                      of foreach_statement
   | TLDSwitchFallthrough            of switch_fallthrough
   | TLDReturn                       of return_statement
-  | TLDGotoLabel                    of goto_label
-  | TLDGoto                         of goto_statement
   | TLDThrow                        of throw_statement
   | TLDBreak                        of break_statement
   | TLDContinue                     of continue_statement
@@ -1276,8 +1265,6 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | StmtSwitch                       of switch_statement
   | StmtSwitchFallthrough            of switch_fallthrough
   | StmtReturn                       of return_statement
-  | StmtGotoLabel                    of goto_label
-  | StmtGoto                         of goto_statement
   | StmtThrow                        of throw_statement
   | StmtBreak                        of break_statement
   | StmtContinue                     of continue_statement
@@ -1859,15 +1846,6 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { return_keyword: Token.t value
     ; return_expression: expression option value
     ; return_semicolon: Token.t option value
-    }
-  and goto_label =
-    { goto_label_name: Token.t value
-    ; goto_label_colon: Token.t value
-    }
-  and goto_statement =
-    { goto_statement_keyword: Token.t value
-    ; goto_statement_label_name: Token.t value
-    ; goto_statement_semicolon: Token.t value
     }
   and throw_statement =
     { throw_keyword: Token.t value

@@ -4443,7 +4443,7 @@ where
                 use TokenKind::*;
                 match token.kind() {
                     Name | Trait | Extends | Implements | Static | Abstract | Final | Private
-                    | Protected | Public | Global | Goto | Instanceof | Insteadof | Interface
+                    | Protected | Public | Global | Instanceof | Insteadof | Interface
                     | Namespace | New | Try | Use | Var | List | Clone | Include | Include_once
                     | Throw | Tuple | Print | Echo | Require | Require_once | Return | Else
                     | Elseif | Default | Break | Continue | Switch | Yield | Function | If

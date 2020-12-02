@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ef1396ce13f2898d5ac73a076cdcb250>>
+// @generated SignedSource<<aa8b23e46fb19c8cb64386388101d702>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -29,12 +29,6 @@ impl<Ex, Fb, En, Hi> Stmt_<Ex, Fb, En, Hi> {
     }
     pub fn mk_return(p0: Option<Expr<Ex, Fb, En, Hi>>) -> Self {
         Stmt_::Return(Box::new(p0))
-    }
-    pub fn mk_goto_label(p0: Pstring) -> Self {
-        Stmt_::GotoLabel(Box::new(p0))
-    }
-    pub fn mk_goto(p0: Pstring) -> Self {
-        Stmt_::Goto(Box::new(p0))
     }
     pub fn mk_awaitall(
         p0: Vec<(Option<Lid>, Expr<Ex, Fb, En, Hi>)>,
@@ -131,18 +125,6 @@ impl<Ex, Fb, En, Hi> Stmt_<Ex, Fb, En, Hi> {
             _ => false,
         }
     }
-    pub fn is_goto_label(&self) -> bool {
-        match self {
-            Stmt_::GotoLabel(..) => true,
-            _ => false,
-        }
-    }
-    pub fn is_goto(&self) -> bool {
-        match self {
-            Stmt_::Goto(..) => true,
-            _ => false,
-        }
-    }
     pub fn is_awaitall(&self) -> bool {
         match self {
             Stmt_::Awaitall(..) => true,
@@ -236,18 +218,6 @@ impl<Ex, Fb, En, Hi> Stmt_<Ex, Fb, En, Hi> {
     pub fn as_return(&self) -> Option<&Option<Expr<Ex, Fb, En, Hi>>> {
         match self {
             Stmt_::Return(p0) => Some(&p0),
-            _ => None,
-        }
-    }
-    pub fn as_goto_label(&self) -> Option<&Pstring> {
-        match self {
-            Stmt_::GotoLabel(p0) => Some(&p0),
-            _ => None,
-        }
-    }
-    pub fn as_goto(&self) -> Option<&Pstring> {
-        match self {
-            Stmt_::Goto(p0) => Some(&p0),
             _ => None,
         }
     }
@@ -368,18 +338,6 @@ impl<Ex, Fb, En, Hi> Stmt_<Ex, Fb, En, Hi> {
     pub fn as_return_mut(&mut self) -> Option<&mut Option<Expr<Ex, Fb, En, Hi>>> {
         match self {
             Stmt_::Return(p0) => Some(p0.as_mut()),
-            _ => None,
-        }
-    }
-    pub fn as_goto_label_mut(&mut self) -> Option<&mut Pstring> {
-        match self {
-            Stmt_::GotoLabel(p0) => Some(p0.as_mut()),
-            _ => None,
-        }
-    }
-    pub fn as_goto_mut(&mut self) -> Option<&mut Pstring> {
-        match self {
-            Stmt_::Goto(p0) => Some(p0.as_mut()),
             _ => None,
         }
     }
@@ -504,18 +462,6 @@ impl<Ex, Fb, En, Hi> Stmt_<Ex, Fb, En, Hi> {
     pub fn as_return_into(self) -> Option<Option<Expr<Ex, Fb, En, Hi>>> {
         match self {
             Stmt_::Return(p0) => Some(*p0),
-            _ => None,
-        }
-    }
-    pub fn as_goto_label_into(self) -> Option<Pstring> {
-        match self {
-            Stmt_::GotoLabel(p0) => Some(*p0),
-            _ => None,
-        }
-    }
-    pub fn as_goto_into(self) -> Option<Pstring> {
-        match self {
-            Stmt_::Goto(p0) => Some(*p0),
             _ => None,
         }
     }

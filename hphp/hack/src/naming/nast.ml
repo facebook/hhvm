@@ -426,10 +426,6 @@ module Visitor_DEPRECATED = struct
 
       method on_return : 'a -> expr option -> 'a
 
-      method on_goto_label : 'a -> pstring -> 'a
-
-      method on_goto : 'a -> pstring -> 'a
-
       method on_awaitall : 'a -> (id option * expr) list -> block -> 'a
 
       method on_stmt : 'a -> stmt -> 'a
@@ -633,10 +629,6 @@ module Visitor_DEPRECATED = struct
 
       method on_fallthrough acc = acc
 
-      method on_goto_label acc _ = acc
-
-      method on_goto acc _ = acc
-
       method on_markup acc _ = acc
 
       method on_throw acc e =
@@ -751,8 +743,6 @@ module Visitor_DEPRECATED = struct
         | Continue -> this#on_continue acc
         | Throw e -> this#on_throw acc e
         | Return eopt -> this#on_return acc eopt
-        | GotoLabel label -> this#on_goto_label acc label
-        | Goto label -> this#on_goto acc label
         | If (e, b1, b2) -> this#on_if acc e b1 b2
         | Do (b, e) -> this#on_do acc b e
         | While (e, b) -> this#on_while acc e b

@@ -870,25 +870,6 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_goto_label(ctx: &C, name: Self, colon: Self) -> Self {
-        let syntax = SyntaxVariant::GotoLabel(ctx.get_arena().alloc(GotoLabelChildren {
-            name,
-            colon,
-        }));
-        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
-        Self::make(syntax, value)
-    }
-
-    fn make_goto_statement(ctx: &C, keyword: Self, label_name: Self, semicolon: Self) -> Self {
-        let syntax = SyntaxVariant::GotoStatement(ctx.get_arena().alloc(GotoStatementChildren {
-            keyword,
-            label_name,
-            semicolon,
-        }));
-        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
-        Self::make(syntax, value)
-    }
-
     fn make_throw_statement(ctx: &C, keyword: Self, expression: Self, semicolon: Self) -> Self {
         let syntax = SyntaxVariant::ThrowStatement(ctx.get_arena().alloc(ThrowStatementChildren {
             keyword,

@@ -81,14 +81,6 @@ module Env : sig
 
   val lvar : genv * lenv -> Ast_defs.id -> positioned_ident
 
-  val goto_label : genv * lenv -> string -> Pos.t option
-
-  val new_goto_label : genv * lenv -> Aast.pstring -> unit
-
-  val new_goto_target : genv * lenv -> Aast.pstring -> unit
-
-  val check_goto_references : genv * lenv -> unit
-
   val scope : genv * lenv -> (genv * lenv -> 'a) -> 'a
 
   val remove_locals : genv * lenv -> Ast_defs.id list -> unit
@@ -107,15 +99,6 @@ end = struct
      * See expr_lambda for details.
      *)
     unbound_handler: unbound_handler option;
-    (*
-     * A map from goto label strings to named labels.
-     *)
-    goto_labels: Pos.t SMap.t ref;
-    (*
-     * A map from goto label used in a goto statement to the position of that
-     * goto label usage.
-     *)
-    goto_targets: Pos.t SMap.t ref;
   }
 
   let get_tparam_names paraml =
@@ -124,13 +107,7 @@ end = struct
       ~f:(fun { Aast.tp_name = (_, x); _ } acc -> SSet.add x acc)
       paraml
 
-  let empty_local unbound_handler =
-    {
-      locals = ref SMap.empty;
-      unbound_handler;
-      goto_labels = ref SMap.empty;
-      goto_targets = ref SMap.empty;
-    }
+  let empty_local unbound_handler = { locals = ref SMap.empty; unbound_handler }
 
   let make_class_genv ctx tparams mode (cid, ckind) namespace final =
     {
@@ -275,35 +252,6 @@ end = struct
         | None -> handle_undefined_variable (genv, env) (p, x)
     in
     (p, ident)
-
-  (**
-   * Returns the position of the goto label declaration, if it exists.
-   *)
-  let goto_label (_, { goto_labels; _ }) label =
-    SMap.find_opt label !goto_labels
-
-  (**
-   * Adds a goto label and the position of its declaration to the known labels.
-   *)
-  let new_goto_label (_, { goto_labels; _ }) (pos, label) =
-    goto_labels := SMap.add label pos !goto_labels
-
-  (**
-   * Adds a goto target and its reference position to the known targets.
-   *)
-  let new_goto_target (_, { goto_targets; _ }) (pos, label) =
-    goto_targets := SMap.add label pos !goto_targets
-
-  (**
-   * Ensures that goto statements do not reference goto labels that are not
-   * known within the current lenv.
-   *)
-  let check_goto_references (_, { goto_labels; goto_targets; _ }) =
-    let check_label referenced_label referenced_label_pos =
-      if not (SMap.mem referenced_label !goto_labels) then
-        Errors.goto_label_undefined referenced_label_pos referenced_label
-    in
-    SMap.iter check_label !goto_targets
 
   (* Scope, keep the locals, go and name the body, and leave the
    * local environment intact
@@ -1436,7 +1384,7 @@ and method_ genv m =
       { N.fb_ast = []; fb_annotation = Nast.NamedWithUnsafeBlocks }
     | FileInfo.Mstrict
     | FileInfo.Mpartial ->
-      if Nast.is_body_named m.Aast.m_body then (
+      if Nast.is_body_named m.Aast.m_body then
         let env = List.fold_left ~f:Env.add_param m.N.m_params ~init:env in
         let env =
           match m.N.m_variadic with
@@ -1447,9 +1395,8 @@ and method_ genv m =
         in
         let fub_ast = block env m.N.m_body.N.fb_ast in
         let annotation = Nast.Named in
-        Env.check_goto_references env;
         { N.fb_ast = fub_ast; fb_annotation = annotation }
-      ) else
+      else
         failwith "ast_to_nast error unnamedbody in method_"
   in
   let attrs = user_attributes env m.Aast.m_user_attributes in
@@ -1564,7 +1511,6 @@ and fun_ ctx f =
         in
         let fb_ast = block env f.Aast.f_body.Aast.fb_ast in
         let annotation = Nast.Named in
-        let _ = Env.check_goto_references env in
         { N.fb_ast; fb_annotation = annotation }
       else
         failwith "ast_to_nast error unnamedbody in fun_"
@@ -1623,8 +1569,6 @@ and stmt env (pos, st) =
     | Aast.Continue -> Aast.Continue
     | Aast.Throw e -> N.Throw (expr env e)
     | Aast.Return e -> N.Return (Option.map e (expr env))
-    | Aast.GotoLabel label -> name_goto_label env label
-    | Aast.Goto label -> name_goto env label
     | Aast.Awaitall (el, b) -> awaitall_stmt env el b
     | Aast.If (e, b1, b2) -> if_stmt env e b1 b2
     | Aast.Do (b, e) -> do_stmt env b e
@@ -1800,33 +1744,6 @@ and block ?(new_scope = true) env stl =
     stmt_list stl env
 
 and branch env stmt_l = Env.scope env (stmt_list stmt_l)
-
-(**
- * Names a goto label.
- *
- * The goto label is added to the local labels if it is not already there.
- * Otherwise, an error is produced.
- *
- *)
-and name_goto_label env ((label_pos, label_name) as label) =
-  (match Env.goto_label env label_name with
-  | Some original_declaration_pos ->
-    Errors.goto_label_already_defined
-      label_name
-      label_pos
-      original_declaration_pos
-  | None -> Env.new_goto_label env label);
-  N.GotoLabel label
-
-(**
- * Names a goto target.
- *
- * The goto statement's target label is added to the local goto targets.
- *
- *)
-and name_goto env label =
-  Env.new_goto_target env label;
-  N.Goto label
 
 and awaitall_stmt env el b =
   let el =

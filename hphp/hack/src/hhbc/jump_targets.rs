@@ -44,20 +44,6 @@ pub enum ResolvedJumpTarget {
     ResolvedRegular(Label, Vec<iterator::Id>),
 }
 
-#[derive(Debug)]
-pub struct ResolvedGotoFinally {
-    pub rgf_finally_start_label: Label,
-    pub rgf_iterators_to_release: Vec<iterator::Id>,
-}
-
-#[derive(Debug)]
-pub enum ResolvedGotoTarget {
-    Label(Vec<iterator::Id>),
-    Finally(ResolvedGotoFinally),
-    GotoFromFinally,
-    GotoInvalidLabel,
-}
-
 #[derive(Clone, Debug, Default)]
 pub struct JumpTargets(Vec<Region>);
 impl JumpTargets {
@@ -90,54 +76,6 @@ impl JumpTargets {
                 None
             }
         })
-    }
-
-    pub fn find_goto_target(&self, label: &str) -> ResolvedGotoTarget {
-        assert_eq!(self.0.is_empty(), false);
-
-        let mut iters = vec![];
-        for r in self.0.iter().rev() {
-            match r {
-                Region::Loop(LoopLabels { iterator, .. }, labels) => {
-                    if labels.contains(label) {
-                        return ResolvedGotoTarget::Label(iters);
-                    } else {
-                        add_iterator(iterator.clone(), &mut iters);
-                    }
-                }
-                Region::Switch(_, labels) => {
-                    if labels.contains(label) {
-                        return ResolvedGotoTarget::Label(iters);
-                    }
-                }
-                Region::Using(finally_start, labels)
-                | Region::TryFinally(finally_start, labels) => {
-                    if labels.contains(label) {
-                        return ResolvedGotoTarget::Label(iters);
-                    } else {
-                        return ResolvedGotoTarget::Finally(ResolvedGotoFinally {
-                            rgf_finally_start_label: finally_start.clone(),
-                            rgf_iterators_to_release: iters,
-                        });
-                    }
-                }
-                Region::Finally(labels) => {
-                    if labels.contains(label) {
-                        return ResolvedGotoTarget::Label(iters);
-                    } else {
-                        return ResolvedGotoTarget::GotoFromFinally;
-                    }
-                }
-                Region::Function(labels) => {
-                    if labels.contains(label) {
-                        return ResolvedGotoTarget::Label(iters);
-                    } else {
-                        return ResolvedGotoTarget::GotoInvalidLabel;
-                    }
-                }
-            }
-        }
-        panic!("impossible")
     }
 
     /// Tries to find a target label given a level and a jump kind (break or continue)
@@ -228,7 +166,6 @@ pub enum IdKey {
 pub struct Gen {
     label_id_map: BTreeMap<IdKey, Id>,
     labels_in_function: BTreeMap<String, bool>,
-    function_has_goto: bool,
     jump_targets: JumpTargets,
 }
 
@@ -251,16 +188,8 @@ impl Gen {
         &self.labels_in_function
     }
 
-    pub fn get_function_has_goto(&self) -> bool {
-        self.function_has_goto
-    }
-
     pub fn set_labels_in_function(&mut self, labels_in_function: BTreeMap<String, bool>) {
         self.labels_in_function = labels_in_function;
-    }
-
-    pub fn set_function_has_goto(&mut self, function_has_goto: bool) {
-        self.function_has_goto = function_has_goto;
     }
 
     pub fn jump_targets(&self) -> &JumpTargets {
@@ -381,10 +310,6 @@ impl Gen {
                 let (try_block, catch_blocks, _) = &**x;
                 Self::collect_valid_target_labels_for_try_catch(acc, try_block, catch_blocks);
             }
-            GotoLabel(x) => {
-                let (_, s) = &**x;
-                acc.insert(s.to_string());
-            }
             If(x) => {
                 let (_, then_block, else_block) = &**x;
                 Self::collect_valid_target_labels_for_block_aux(acc, then_block);
@@ -448,15 +373,11 @@ impl Gen {
             .for_each(|def| Self::collect_valid_target_labels_for_def_aux(acc, def));
     }
 
-    fn collect_valid_target_labels<F>(&self, f: F) -> LabelSet
+    fn collect_valid_target_labels<F>(&self, _f: F) -> LabelSet
     where
         F: FnOnce(&mut LabelSet),
     {
-        let mut labels = HashSet::new();
-        if self.function_has_goto {
-            f(&mut labels);
-        };
-        labels
+        HashSet::new()
     }
 
     fn collect_valid_target_labels_for_block<Ex, Fb, En, Hi>(

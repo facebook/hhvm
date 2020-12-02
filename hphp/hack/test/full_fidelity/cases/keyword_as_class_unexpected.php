@@ -30,7 +30,6 @@ class for {}
 class foreach {}
 class function {}
 class global {}
-class goto {}
 class if {}
 class implements {}
 class include {}
@@ -94,7 +93,6 @@ new for();
 new foreach();
 new function();
 new global();
-new goto();
 new if();
 new implements();
 new include();

@@ -71,7 +71,6 @@ type t =
   | Function
   | Global
   | Concurrent
-  | Goto
   | If
   | Implements
   | Include
@@ -286,7 +285,6 @@ let from_string keyword ~only_reserved =
   | "function"                            -> Some Function
   | "global"                              -> Some Global
   | "concurrent"                          -> Some Concurrent
-  | "goto"                                -> Some Goto
   | "if"                                  -> Some If
   | "implements"                          -> Some Implements
   | "include"                             -> Some Include
@@ -475,7 +473,6 @@ let to_string kind =
   | Function                      -> "function"
   | Global                        -> "global"
   | Concurrent                    -> "concurrent"
-  | Goto                          -> "goto"
   | If                            -> "if"
   | Implements                    -> "implements"
   | Include                       -> "include"

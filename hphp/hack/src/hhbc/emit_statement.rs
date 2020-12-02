@@ -202,8 +202,6 @@ pub fn emit_stmt(e: &mut Emitter, env: &mut Env, stmt: &tast::Stmt) -> Result {
                 emit_return(e, env)?,
             ])),
         },
-        a::Stmt_::GotoLabel(l) => Ok(instr::label(Label::Named(l.1.clone()))),
-        a::Stmt_::Goto(l) => tfr::emit_goto(false, l.1.clone(), env, e.local_gen_mut()),
         a::Stmt_::Block(b) => emit_block(env, e, &b),
         a::Stmt_::If(f) => emit_if(e, env, pos, &f.0, &f.1, &f.2),
         a::Stmt_::While(x) => emit_while(e, env, &x.0, &x.1),
@@ -218,9 +216,6 @@ pub fn emit_stmt(e: &mut Emitter, env: &mut Env, stmt: &tast::Stmt) -> Result {
             instr::throw(),
         ])),
         a::Stmt_::Try(x) => {
-            if env.jump_targets_gen.get_function_has_goto() {
-                tfr::fail_if_goto_from_try_to_finally(&x.0, &x.2)?;
-            }
             let (try_block, catch_list, finally_block) = &**x;
             if catch_list.is_empty() {
                 emit_try_finally(e, env, pos, &try_block, &finally_block)
@@ -1441,7 +1436,7 @@ pub fn emit_dropthrough_return(e: &mut Emitter, env: &mut Env) -> Result {
 
 pub fn emit_final_stmt(e: &mut Emitter, env: &mut Env, stmt: &tast::Stmt) -> Result {
     match &stmt.1 {
-        a::Stmt_::Throw(_) | a::Stmt_::Return(_) | a::Stmt_::Goto(_) => emit_stmt(e, env, stmt),
+        a::Stmt_::Throw(_) | a::Stmt_::Return(_) => emit_stmt(e, env, stmt),
         a::Stmt_::Expr(expr) if expr.1.is_yield_break() => emit_stmt(e, env, stmt),
         a::Stmt_::Block(stmts) => emit_final_stmts(e, env, stmts),
         _ => {

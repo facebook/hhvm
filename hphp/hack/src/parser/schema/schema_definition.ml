@@ -1102,24 +1102,6 @@ let schema : schema_node list =
         ];
     };
     {
-      kind_name = "GotoLabel";
-      type_name = "goto_label";
-      func_name = "goto_label";
-      description = "goto_label";
-      prefix = "goto_label";
-      aggregates = [TopLevelDeclaration; Statement];
-      fields = [("name", Token); ("colon", Token)];
-    };
-    {
-      kind_name = "GotoStatement";
-      type_name = "goto_statement";
-      func_name = "goto_statement";
-      description = "goto_statement";
-      prefix = "goto_statement";
-      aggregates = [TopLevelDeclaration; Statement];
-      fields = [("keyword", Token); ("label_name", Token); ("semicolon", Token)];
-    };
-    {
       kind_name = "ThrowStatement";
       type_name = "throw_statement";
       func_name = "throw_statement";

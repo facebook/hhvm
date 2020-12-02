@@ -495,15 +495,6 @@ module type Syntax_S = sig
     ; return_expression                                  : t
     ; return_semicolon                                   : t
     }
-  | GotoLabel                         of
-    { goto_label_name                                    : t
-    ; goto_label_colon                                   : t
-    }
-  | GotoStatement                     of
-    { goto_statement_keyword                             : t
-    ; goto_statement_label_name                          : t
-    ; goto_statement_semicolon                           : t
-    }
   | ThrowStatement                    of
     { throw_keyword                                      : t
     ; throw_expression                                   : t
@@ -1121,8 +1112,6 @@ module type Syntax_S = sig
   val make_case_label : t -> t -> t -> t
   val make_default_label : t -> t -> t
   val make_return_statement : t -> t -> t -> t
-  val make_goto_label : t -> t -> t
-  val make_goto_statement : t -> t -> t -> t
   val make_throw_statement : t -> t -> t -> t
   val make_break_statement : t -> t -> t
   val make_continue_statement : t -> t -> t
@@ -1295,8 +1284,6 @@ module type Syntax_S = sig
   val is_case_label : t -> bool
   val is_default_label : t -> bool
   val is_return_statement : t -> bool
-  val is_goto_label : t -> bool
-  val is_goto_statement : t -> bool
   val is_throw_statement : t -> bool
   val is_break_statement : t -> bool
   val is_continue_statement : t -> bool

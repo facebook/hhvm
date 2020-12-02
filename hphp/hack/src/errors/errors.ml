@@ -1574,35 +1574,6 @@ let too_few_type_arguments p =
     p
     "Too few type arguments for this type"
 
-let goto_label_already_defined
-    label_name redeclaration_pos original_delcaration_pos =
-  add_list
-    (Naming.err_code Naming.GotoLabelAlreadyDefined)
-    [
-      ( redeclaration_pos,
-        "Cannot redeclare the goto label " ^ Markdown_lite.md_codify label_name
-      );
-      (original_delcaration_pos, "Declaration is here");
-    ]
-
-let goto_label_undefined pos label_name =
-  add
-    (Naming.err_code Naming.GotoLabelUndefined)
-    pos
-    ("Undefined goto label: " ^ Markdown_lite.md_codify label_name)
-
-let goto_label_defined_in_finally pos =
-  add
-    (Naming.err_code Naming.GotoLabelDefinedInFinally)
-    pos
-    "It is illegal to define a goto label within a `finally` block."
-
-let goto_invoked_in_finally pos =
-  add
-    (Naming.err_code Naming.GotoInvokedInFinally)
-    pos
-    "It is illegal to invoke goto within a `finally` block."
-
 let mk_method_needs_visibility pos =
   {
     code = Naming.err_code Naming.MethodNeedsVisibility;

@@ -101,8 +101,6 @@ pub enum SyntaxVariant<'a, T, V> {
     CaseLabel(&'a CaseLabelChildren<'a, T, V>),
     DefaultLabel(&'a DefaultLabelChildren<'a, T, V>),
     ReturnStatement(&'a ReturnStatementChildren<'a, T, V>),
-    GotoLabel(&'a GotoLabelChildren<'a, T, V>),
-    GotoStatement(&'a GotoStatementChildren<'a, T, V>),
     ThrowStatement(&'a ThrowStatementChildren<'a, T, V>),
     BreakStatement(&'a BreakStatementChildren<'a, T, V>),
     ContinueStatement(&'a ContinueStatementChildren<'a, T, V>),
@@ -807,19 +805,6 @@ pub struct DefaultLabelChildren<'a, T, V> {
 pub struct ReturnStatementChildren<'a, T, V> {
     pub keyword: Syntax<'a, T, V>,
     pub expression: Syntax<'a, T, V>,
-    pub semicolon: Syntax<'a, T, V>,
-}
-
-#[derive(Debug, Clone)]
-pub struct GotoLabelChildren<'a, T, V> {
-    pub name: Syntax<'a, T, V>,
-    pub colon: Syntax<'a, T, V>,
-}
-
-#[derive(Debug, Clone)]
-pub struct GotoStatementChildren<'a, T, V> {
-    pub keyword: Syntax<'a, T, V>,
-    pub label_name: Syntax<'a, T, V>,
     pub semicolon: Syntax<'a, T, V>,
 }
 

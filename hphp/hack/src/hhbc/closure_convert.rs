@@ -4,10 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use itertools::{Either, EitherOrBoth::*, Itertools};
-use std::{
-    collections::{BTreeMap, HashSet},
-    mem,
-};
+use std::{collections::HashSet, mem};
 
 use ast_constant_folder_rust as ast_constant_folder;
 use ast_scope_rust::{
@@ -78,8 +75,6 @@ struct Env<'a> {
 #[derive(Default, Clone)]
 struct PerFunctionState {
     pub has_finally: bool,
-    pub has_goto: bool,
-    pub labels: BTreeMap<String, bool>,
 }
 
 impl<'a> Env<'a> {
@@ -282,12 +277,6 @@ impl State {
     ) {
         if fun.has_finally {
             self.global_state.functions_with_finally.insert(key.clone());
-        }
-
-        if !fun.labels.is_empty() {
-            self.global_state
-                .function_to_labels_map
-                .insert(key.clone(), fun.labels);
         }
 
         if rx_of_scope != rx::Level::NonRx {
@@ -940,13 +929,13 @@ fn convert_function_like_body<'a>(
     env: &mut Env<'a>,
     body: &mut FuncBody,
 ) -> Result<PerFunctionState> {
-    // reset has_finally/goto_state values on the state
+    // reset has_finally values on the state
     let old_state = std::mem::replace(
         &mut self_.state.current_function_state,
         PerFunctionState::default(),
     );
     body.recurse(env, self_.object())?;
-    // restore old has_finally/goto_state values
+    // restore old has_finally values
     let function_state = std::mem::replace(&mut self_.state.current_function_state, old_state);
     Ok(function_state)
 }
@@ -1115,15 +1104,6 @@ impl<'ast, 'a> VisitorMut<'ast> for ClosureConvertVisitor<'a> {
                 }
                 env.with_in_using(true, |env| visit_mut(self, env, &mut x.block))?;
                 Ok(self.state.current_function_state.has_finally = true)
-            }
-            Stmt_::GotoLabel(x) => {
-                let label = &x.1;
-                // record known label in function
-                self.state
-                    .current_function_state
-                    .labels
-                    .insert(label.clone(), env.in_using);
-                Ok(())
             }
             _ => stmt.recurse(env, self.object()),
         }

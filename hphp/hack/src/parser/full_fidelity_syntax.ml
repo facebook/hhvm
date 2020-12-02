@@ -135,8 +135,6 @@ module WithToken(Token: TokenType) = struct
       | CaseLabel                         _ -> SyntaxKind.CaseLabel
       | DefaultLabel                      _ -> SyntaxKind.DefaultLabel
       | ReturnStatement                   _ -> SyntaxKind.ReturnStatement
-      | GotoLabel                         _ -> SyntaxKind.GotoLabel
-      | GotoStatement                     _ -> SyntaxKind.GotoStatement
       | ThrowStatement                    _ -> SyntaxKind.ThrowStatement
       | BreakStatement                    _ -> SyntaxKind.BreakStatement
       | ContinueStatement                 _ -> SyntaxKind.ContinueStatement
@@ -321,8 +319,6 @@ module WithToken(Token: TokenType) = struct
     let is_case_label                           = has_kind SyntaxKind.CaseLabel
     let is_default_label                        = has_kind SyntaxKind.DefaultLabel
     let is_return_statement                     = has_kind SyntaxKind.ReturnStatement
-    let is_goto_label                           = has_kind SyntaxKind.GotoLabel
-    let is_goto_statement                       = has_kind SyntaxKind.GotoStatement
     let is_throw_statement                      = has_kind SyntaxKind.ThrowStatement
     let is_break_statement                      = has_kind SyntaxKind.BreakStatement
     let is_continue_statement                   = has_kind SyntaxKind.ContinueStatement
@@ -1343,22 +1339,6 @@ module WithToken(Token: TokenType) = struct
          let acc = f acc return_keyword in
          let acc = f acc return_expression in
          let acc = f acc return_semicolon in
-         acc
-      | GotoLabel {
-        goto_label_name;
-        goto_label_colon;
-      } ->
-         let acc = f acc goto_label_name in
-         let acc = f acc goto_label_colon in
-         acc
-      | GotoStatement {
-        goto_statement_keyword;
-        goto_statement_label_name;
-        goto_statement_semicolon;
-      } ->
-         let acc = f acc goto_statement_keyword in
-         let acc = f acc goto_statement_label_name in
-         let acc = f acc goto_statement_semicolon in
          acc
       | ThrowStatement {
         throw_keyword;
@@ -3143,22 +3123,6 @@ module WithToken(Token: TokenType) = struct
         return_expression;
         return_semicolon;
       ]
-      | GotoLabel {
-        goto_label_name;
-        goto_label_colon;
-      } -> [
-        goto_label_name;
-        goto_label_colon;
-      ]
-      | GotoStatement {
-        goto_statement_keyword;
-        goto_statement_label_name;
-        goto_statement_semicolon;
-      } -> [
-        goto_statement_keyword;
-        goto_statement_label_name;
-        goto_statement_semicolon;
-      ]
       | ThrowStatement {
         throw_keyword;
         throw_expression;
@@ -4942,22 +4906,6 @@ module WithToken(Token: TokenType) = struct
         "return_keyword";
         "return_expression";
         "return_semicolon";
-      ]
-      | GotoLabel {
-        goto_label_name;
-        goto_label_colon;
-      } -> [
-        "goto_label_name";
-        "goto_label_colon";
-      ]
-      | GotoStatement {
-        goto_statement_keyword;
-        goto_statement_label_name;
-        goto_statement_semicolon;
-      } -> [
-        "goto_statement_keyword";
-        "goto_statement_label_name";
-        "goto_statement_semicolon";
       ]
       | ThrowStatement {
         throw_keyword;
@@ -6872,24 +6820,6 @@ module WithToken(Token: TokenType) = struct
           return_keyword;
           return_expression;
           return_semicolon;
-        }
-      | (SyntaxKind.GotoLabel, [
-          goto_label_name;
-          goto_label_colon;
-        ]) ->
-        GotoLabel {
-          goto_label_name;
-          goto_label_colon;
-        }
-      | (SyntaxKind.GotoStatement, [
-          goto_statement_keyword;
-          goto_statement_label_name;
-          goto_statement_semicolon;
-        ]) ->
-        GotoStatement {
-          goto_statement_keyword;
-          goto_statement_label_name;
-          goto_statement_semicolon;
         }
       | (SyntaxKind.ThrowStatement, [
           throw_keyword;
@@ -9101,30 +9031,6 @@ module WithToken(Token: TokenType) = struct
           return_keyword;
           return_expression;
           return_semicolon;
-        } in
-        let value = ValueBuilder.value_from_syntax syntax in
-        make syntax value
-
-      let make_goto_label
-        goto_label_name
-        goto_label_colon
-      =
-        let syntax = GotoLabel {
-          goto_label_name;
-          goto_label_colon;
-        } in
-        let value = ValueBuilder.value_from_syntax syntax in
-        make syntax value
-
-      let make_goto_statement
-        goto_statement_keyword
-        goto_statement_label_name
-        goto_statement_semicolon
-      =
-        let syntax = GotoStatement {
-          goto_statement_keyword;
-          goto_statement_label_name;
-          goto_statement_semicolon;
         } in
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value

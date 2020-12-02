@@ -100,8 +100,6 @@ impl<T: LexableToken, V> Syntax<'_, T, V> {
             SyntaxVariant::CaseLabel {..} => SyntaxKind::CaseLabel,
             SyntaxVariant::DefaultLabel {..} => SyntaxKind::DefaultLabel,
             SyntaxVariant::ReturnStatement {..} => SyntaxKind::ReturnStatement,
-            SyntaxVariant::GotoLabel {..} => SyntaxKind::GotoLabel,
-            SyntaxVariant::GotoStatement {..} => SyntaxKind::GotoStatement,
             SyntaxVariant::ThrowStatement {..} => SyntaxKind::ThrowStatement,
             SyntaxVariant::BreakStatement {..} => SyntaxKind::BreakStatement,
             SyntaxVariant::ContinueStatement {..} => SyntaxKind::ContinueStatement,

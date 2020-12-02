@@ -47,8 +47,6 @@ let stmt_name = function
   | A.Continue -> "Continue"
   | A.Throw _ -> "Throw"
   | A.Return _ -> "Return"
-  | A.GotoLabel _ -> "GotoLabel"
-  | A.Goto _ -> "Goto"
   | A.Awaitall _ -> "Awaitall"
   | A.If _ -> "If"
   | A.Do _ -> "Do"

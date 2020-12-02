@@ -58,8 +58,6 @@ and ('ex, 'fb, 'en, 'hi) stmt_ =
   | Continue
   | Throw of ('ex, 'fb, 'en, 'hi) expr
   | Return of ('ex, 'fb, 'en, 'hi) expr option
-  | GotoLabel of pstring
-  | Goto of pstring
   | Awaitall of
       (lid option * ('ex, 'fb, 'en, 'hi) expr) list * ('ex, 'fb, 'en, 'hi) block
   | If of

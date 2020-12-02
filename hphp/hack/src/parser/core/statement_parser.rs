@@ -227,10 +227,6 @@ where
                 self.with_error(Errors::error2004);
                 result
             }
-            TokenKind::Name if self.peek_token_kind_with_lookahead(1) == TokenKind::Colon => {
-                self.parse_goto_label()
-            }
-            TokenKind::Goto => self.parse_goto_statement(),
             TokenKind::Semicolon => self.parse_expression_statement(),
             // ERROR RECOVERY: when encountering a token that's invalid now but the
             // context says is expected later, make the whole statement missing
@@ -922,21 +918,6 @@ where
             let semi_token = self.require_semicolon();
             S!(make_return_statement, self, return_token, expr, semi_token)
         }
-    }
-
-    fn parse_goto_label(&mut self) -> S::R {
-        let goto_label_name = self.next_token_non_reserved_as_name();
-        let goto_label_name = S!(make_token, self, goto_label_name);
-        let colon = self.require_colon();
-        S!(make_goto_label, self, goto_label_name, colon)
-    }
-
-    fn parse_goto_statement(&mut self) -> S::R {
-        let goto = self.assert_token(TokenKind::Goto);
-        let goto_label_name = self.next_token_non_reserved_as_name();
-        let goto_label_name = S!(make_token, self, goto_label_name);
-        let semicolon = self.require_semicolon();
-        S!(make_goto_statement, self, goto, goto_label_name, semicolon)
     }
 
     fn parse_throw_statement(&mut self) -> S::R {

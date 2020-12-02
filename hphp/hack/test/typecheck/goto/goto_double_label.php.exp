@@ -1,4 +1,0 @@
-File "goto_double_label.php", line 4, characters 6-6:
-A semicolon `;` is expected here. (Parsing[1002])
-File "goto_double_label.php", line 4, characters 3-4:
-Unbound name: `L0` (a global constant) (Naming[2049])

@@ -19,7 +19,6 @@ module Env = Typing_env
 module Phase = Typing_phase
 module Partial = Partial_provider
 
-(** This happens, for example, when there are gotos *)
 exception Cant_check
 
 exception Not_implemented
@@ -188,8 +187,6 @@ let rec check_stmt env (stmt : ETast.stmt) (gamma : gamma) : delta =
   | Using _
   | Awaitall _ ->
     raise Not_implemented
-  | Goto _
-  | GotoLabel _
   | Block _
   | Markup _
   | AssertEnv _ ->

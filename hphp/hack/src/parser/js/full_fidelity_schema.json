@@ -1,6 +1,6 @@
 { "description" :
   "@generated JSON schema of the Hack Full Fidelity Parser AST",
-  "version" : "2020-11-02-0001",
+  "version" : "2020-12-01-0001",
   "trivia" : [
     { "trivia_kind_name" : "WhiteSpace",
       "trivia_type_name" : "whitespace" },
@@ -119,8 +119,6 @@
       "token_text" : "global" },
     { "token_kind" : "Concurrent",
       "token_text" : "concurrent" },
-    { "token_kind" : "Goto",
-      "token_text" : "goto" },
     { "token_kind" : "If",
       "token_text" : "if" },
     { "token_kind" : "Implements",
@@ -1200,23 +1198,6 @@
       "fields" : [
         { "field_name" : "keyword" },
         { "field_name" : "expression" },
-        { "field_name" : "semicolon" }
-      ] },
-    { "kind_name" : "GotoLabel",
-      "type_name" : "goto_label",
-      "description" : "goto_label",
-      "prefix" : "goto_label",
-      "fields" : [
-        { "field_name" : "name" },
-        { "field_name" : "colon" }
-      ] },
-    { "kind_name" : "GotoStatement",
-      "type_name" : "goto_statement",
-      "description" : "goto_statement",
-      "prefix" : "goto_statement",
-      "fields" : [
-        { "field_name" : "keyword" },
-        { "field_name" : "label_name" },
         { "field_name" : "semicolon" }
       ] },
     { "kind_name" : "ThrowStatement",

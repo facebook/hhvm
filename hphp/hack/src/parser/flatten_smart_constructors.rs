@@ -645,22 +645,6 @@ pub trait FlattenSmartConstructors<'src, State>
         }
     }
 
-    fn make_goto_label(&mut self, arg0: Self::R, arg1: Self::R) -> Self::R {
-        if Self::is_zero(&arg0) && Self::is_zero(&arg1) {
-          Self::zero(SyntaxKind::GotoLabel)
-        } else {
-          self.flatten(SyntaxKind::GotoLabel, vec!(arg0, arg1))
-        }
-    }
-
-    fn make_goto_statement(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R) -> Self::R {
-        if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) {
-          Self::zero(SyntaxKind::GotoStatement)
-        } else {
-          self.flatten(SyntaxKind::GotoStatement, vec!(arg0, arg1, arg2))
-        }
-    }
-
     fn make_throw_statement(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R) -> Self::R {
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) {
           Self::zero(SyntaxKind::ThrowStatement)

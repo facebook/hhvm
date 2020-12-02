@@ -5,5 +5,5 @@
 
 pub mod map {
     pub use crate::typing_cont_key::*;
-    pub type Map<'a, TV> = arena_collections::map::Map<'a, TypingContKey<'a>, TV>;
+    pub type Map<'a, TV> = arena_collections::map::Map<'a, TypingContKey, TV>;
 }

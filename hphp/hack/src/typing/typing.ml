@@ -583,12 +583,6 @@ and stmt_ env pos st =
         env
     in
     (env, Aast.Fallthrough)
-  | Goto (_, label) ->
-    let env = LEnv.move_and_merge_next_in_cont env (C.Goto label) in
-    (env, Aast.Noop)
-  | GotoLabel (_, label) ->
-    let env = LEnv.update_next_from_conts env [C.Next; C.Goto label] in
-    (env, Aast.Noop)
   | Noop -> (env, Aast.Noop)
   | AssertEnv _ -> (env, Aast.Noop)
   | Expr e ->

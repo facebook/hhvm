@@ -95,8 +95,6 @@ pub trait SyntaxType<C>: SyntaxTypeBase<C>
     fn make_case_label(ctx: &C, case_keyword: Self, case_expression: Self, case_colon: Self) -> Self;
     fn make_default_label(ctx: &C, default_keyword: Self, default_colon: Self) -> Self;
     fn make_return_statement(ctx: &C, return_keyword: Self, return_expression: Self, return_semicolon: Self) -> Self;
-    fn make_goto_label(ctx: &C, goto_label_name: Self, goto_label_colon: Self) -> Self;
-    fn make_goto_statement(ctx: &C, goto_statement_keyword: Self, goto_statement_label_name: Self, goto_statement_semicolon: Self) -> Self;
     fn make_throw_statement(ctx: &C, throw_keyword: Self, throw_expression: Self, throw_semicolon: Self) -> Self;
     fn make_break_statement(ctx: &C, break_keyword: Self, break_semicolon: Self) -> Self;
     fn make_continue_statement(ctx: &C, continue_keyword: Self, continue_semicolon: Self) -> Self;

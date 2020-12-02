@@ -2272,7 +2272,6 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             | TokenKind::From
             | TokenKind::Global
             | TokenKind::Concurrent
-            | TokenKind::Goto
             | TokenKind::If
             | TokenKind::Include
             | TokenKind::Includes

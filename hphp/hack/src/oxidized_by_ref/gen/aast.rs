@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<92bd04b0abb63205685e90f0b19a57fb>>
+// @generated SignedSource<<b447d1b27ed01e9db2da0cf4ae253fb9>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -68,8 +68,6 @@ pub enum Stmt_<'a, Ex, Fb, En, Hi> {
     Continue,
     Throw(&'a Expr<'a, Ex, Fb, En, Hi>),
     Return(Option<&'a Expr<'a, Ex, Fb, En, Hi>>),
-    GotoLabel(&'a Pstring<'a>),
-    Goto(&'a Pstring<'a>),
     Awaitall(
         &'a (
             &'a [(Option<&'a Lid<'a>>, &'a Expr<'a, Ex, Fb, En, Hi>)],

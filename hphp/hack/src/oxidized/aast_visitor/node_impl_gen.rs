@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<bf0499b5d1b1e4d7bd71cf09808bbce9>>
+// @generated SignedSource<<d29a1c31b2129c72363cb290d952b0f9>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -1692,14 +1692,6 @@ impl<P: Params> Node<P> for Stmt_<P::Ex, P::Fb, P::En, P::Hi> {
                 Ok(())
             }
             Stmt_::Return(a0) => {
-                a0.accept(c, v)?;
-                Ok(())
-            }
-            Stmt_::GotoLabel(a0) => {
-                a0.accept(c, v)?;
-                Ok(())
-            }
-            Stmt_::Goto(a0) => {
                 a0.accept(c, v)?;
                 Ok(())
             }

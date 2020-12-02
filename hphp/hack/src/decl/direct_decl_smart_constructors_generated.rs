@@ -357,14 +357,6 @@ impl<'src> SmartConstructors for DirectDeclSmartConstructors<'src> {
         <Self as FlattenSmartConstructors<'src, State<'src>>>::make_return_statement(self, keyword, expression, semicolon)
     }
 
-    fn make_goto_label(&mut self, name: Self::R, colon: Self::R) -> Self::R {
-        <Self as FlattenSmartConstructors<'src, State<'src>>>::make_goto_label(self, name, colon)
-    }
-
-    fn make_goto_statement(&mut self, keyword: Self::R, label_name: Self::R, semicolon: Self::R) -> Self::R {
-        <Self as FlattenSmartConstructors<'src, State<'src>>>::make_goto_statement(self, keyword, label_name, semicolon)
-    }
-
     fn make_throw_statement(&mut self, keyword: Self::R, expression: Self::R, semicolon: Self::R) -> Self::R {
         <Self as FlattenSmartConstructors<'src, State<'src>>>::make_throw_statement(self, keyword, expression, semicolon)
     }

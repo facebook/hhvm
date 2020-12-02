@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<e65e3d970d302458bac3822895685ca9>>
+// @generated SignedSource<<ba580a9836dbb28844a7922f1de99fc7>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -113,10 +113,6 @@ pub enum Naming {
     DollardollarUnused = 2069,
     IllegalMemberVariableClass = 2070,
     TooFewTypeArguments = 2071,
-    GotoLabelAlreadyDefined = 2072,
-    GotoLabelUndefined = 2073,
-    GotoLabelDefinedInFinally = 2074,
-    GotoInvokedInFinally = 2075,
     ThisAsLexicalVariable = 2077,
     DynamicClassNameInStrictMode = 2078,
     XhpOptionalRequiredAttr = 2079,

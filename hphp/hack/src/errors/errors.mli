@@ -993,14 +993,6 @@ val required_field_is_optional :
 
 val array_get_with_optional_field : Pos.t -> Pos.t -> string -> unit
 
-val goto_label_already_defined : string -> Pos.t -> Pos.t -> unit
-
-val goto_label_undefined : Pos.t -> string -> unit
-
-val goto_label_defined_in_finally : Pos.t -> unit
-
-val goto_invoked_in_finally : Pos.t -> unit
-
 val method_needs_visibility : Pos.t -> unit
 
 val mk_method_needs_visibility : Pos.t -> error

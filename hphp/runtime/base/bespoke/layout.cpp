@@ -32,6 +32,7 @@
 #include <folly/lang/Bits.h>
 #include <folly/Optional.h>
 #include <vector>
+#include <sstream>
 
 namespace HPHP { namespace bespoke {
 
@@ -479,6 +480,54 @@ const Layout* Layout::FromIndex(LayoutIndex index) {
   assertx(layout != nullptr);
   assertx(layout->index() == index);
   return layout;
+}
+
+std::string Layout::dumpAllLayouts() {
+  std::ostringstream ss;
+
+  for (size_t i = 0; i < s_layoutTableIndex; i++) {
+    auto const layout = s_layoutTable[i];
+    if (!layout) continue;
+
+    ss << layout->dumpInformation();
+  }
+
+  return ss.str();
+}
+
+std::string Layout::dumpInformation() const {
+  assertx(s_hierarchyFinal.load(std::memory_order_acquire));
+
+  auto const concreteDesc = [&](const Layout* layout) {
+    return layout->isConcrete() ? "Concrete" : "Abstract";
+  };
+
+  std::ostringstream ss;
+  ss << folly::format("{:04x}: {} [{}]\n", m_index.raw, describe(),
+                       concreteDesc(this));
+
+  ss << folly::format("  Type test:\n");
+  ss << folly::format("    XOR {:04x}\n", m_maskAndCompare.xorVal);
+  ss << folly::format("    AND {:04x}\n", m_maskAndCompare.andVal);
+  ss << folly::format("    CMP {:04x}\n", m_maskAndCompare.cmpVal);
+
+  ss << folly::format("  Ancestors:\n");
+  for (auto const ancestor : m_ancestors) {
+    ss << folly::format("  - {:04x}: {} [{}]\n",
+                        ancestor->m_index.raw, ancestor->describe(),
+                        concreteDesc(ancestor));
+  }
+
+  ss << folly::format("  Descendants:\n");
+  for (auto const descendant : m_descendants) {
+    ss << folly::format("  - {:04x}: {} [{}]\n",
+                        descendant->m_index.raw, descendant->describe(),
+                        concreteDesc(descendant));
+  }
+
+  ss << "\n";
+
+  return ss.str();
 }
 
 MaskAndCompare Layout::computeMaskAndCompare() const {

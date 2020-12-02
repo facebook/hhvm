@@ -301,6 +301,7 @@ struct Layout {
 
   LayoutIndex index() const { return m_index; }
   const std::string& describe() const { return m_description; }
+  std::string dumpInformation() const;
   virtual bool isConcrete() const { return false; }
 
   /*
@@ -312,6 +313,7 @@ struct Layout {
    */
   static LayoutIndex ReserveIndices(size_t size);
   static const Layout* FromIndex(LayoutIndex index);
+  static std::string dumpAllLayouts();
 
   /*
    * Seals the bespoke type hierarchy. Before this is invoked, type operations

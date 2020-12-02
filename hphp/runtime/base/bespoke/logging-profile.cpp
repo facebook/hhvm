@@ -18,6 +18,7 @@
 #include "hphp/runtime/base/bespoke/logging-profile.h"
 
 #include "hphp/runtime/base/bespoke/logging-array.h"
+#include "hphp/runtime/base/bespoke/layout.h"
 #include "hphp/runtime/base/memory-manager-defs.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/server/memory-stats.h"
@@ -738,6 +739,14 @@ bool exportSortedSinks(FILE* file, const std::vector<SinkOutputData>& sinks) {
   return true;
 }
 
+bool exportLayouts(FILE* file) {
+  LOG_OR_RETURN(file, "========================================================================\n");
+  LOG_OR_RETURN(file, "Layouts:\n\n");
+  LOG_OR_RETURN(file, "{}", Layout::dumpAllLayouts());
+
+  return true;
+}
+
 SourceOutputData sortSourceData(const LoggingProfile* profile) {
   assertx(profile->data);
   // Group events by their operation
@@ -863,6 +872,7 @@ void startExportProfiles() {
 
     SCOPE_EXIT { fclose(file); };
 
+    exportLayouts(file);
     exportSortedProfiles(file, sources);
     exportSortedSinks(file, sinks);
   });

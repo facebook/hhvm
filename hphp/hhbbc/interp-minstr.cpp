@@ -1192,7 +1192,19 @@ void miFinalSetOpElem(ISS& env, int32_t nDiscard,
   // Don't update static property state if we're in an unreachable state.
   if (env.state.unreachable) return miFinalUnreachable(env, nDiscard);
 
-  auto const resultTy = typeSetOp(subop, lhsTy, rhsTy);
+  // Scalar bases will raise notices and push null onto the stack. String and
+  // empty (Uninit, Null, False) types throw or fatal.
+  auto const baseTy = env.collect.mInstrState.base.type;
+  auto const scalar =
+    BInt | BDbl | BRes | BRFunc | BFunc | BRClsMeth | BCls | BLazyCls |
+    (RO::EvalIsCompatibleClsMethType ? BBottom : BClsMeth);
+
+  auto const resultTy = [&] {
+    if (baseTy.subtypeOf(scalar|BTrue)) return TInitNull;
+    auto const ty = typeSetOp(subop, lhsTy, rhsTy);
+    return baseTy.couldBe(scalar|BBool) ? union_of(ty, TInitNull) : ty;
+  }();
+
   pessimisticFinalElemD(env, key, resultTy);
   endBase(env, true, keyLoc);
   discard(env, nDiscard);

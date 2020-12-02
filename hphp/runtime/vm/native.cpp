@@ -380,6 +380,7 @@ void coerceFCallArgsImpl(int32_t numArgs, const Func* func, F args) {
       continue;
     }
     if (tvIsClsMeth(tv) && tc.convertClsMethToArrLike()) {
+      assertx(RO::EvalIsCompatibleClsMethType);
       if (RuntimeOption::EvalVecHintNotices) {
         raise_clsmeth_compat_type_hint(func, tc.displayName(func->cls()), i);
       };

@@ -1627,6 +1627,11 @@ void VariableSerializer::serializeClsMeth(
     case Type::APCSerialize:
     case Type::DebuggerSerialize:
     case Type::JSON: {
+      if (!RO::EvalIsCompatibleClsMethType) {
+        SystemLib::throwInvalidOperationExceptionObject(
+          "Unable to serialize class meth pointer"
+        );
+      }
       raiseClsMethToVecWarningHelper();
       auto const vec = clsMethToVecHelper(clsMeth);
       serializeArray(vec.get(), skipNestCheck);

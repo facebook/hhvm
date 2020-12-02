@@ -101,23 +101,55 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
+
+Notice: Comparing clsmeth with clsmeth relationally in %s/cmp_warn.php on line 16
 bool(false)
+
+Notice: Comparing clsmeth with clsmeth relationally in %s/cmp_warn.php on line 21
 bool(false)
+
+Notice: Comparing clsmeth with clsmeth relationally in %s/cmp_warn.php on line 27
 bool(true)
+
+Notice: Comparing clsmeth with clsmeth relationally in %s/cmp_warn.php on line 32
+bool(true)
+
+Notice: Comparing clsmeth with clsmeth relationally in %s/cmp_warn.php on line 38
+bool(false)
+
+Notice: Comparing clsmeth with clsmeth relationally in %s/cmp_warn.php on line 43
+bool(false)
+
+Notice: Comparing clsmeth with clsmeth relationally in %s/cmp_warn.php on line 49
+bool(true)
+
+Notice: Comparing clsmeth with clsmeth relationally in %s/cmp_warn.php on line 54
 bool(true)
 bool(false)
 bool(false)
+bool(false)
+bool(false)
+
+Notice: Comparing clsmeth with clsmeth relationally in %s/cmp_warn.php on line 16
 bool(true)
+
+Notice: Comparing clsmeth with clsmeth relationally in %s/cmp_warn.php on line 21
+bool(false)
+
+Notice: Comparing clsmeth with clsmeth relationally in %s/cmp_warn.php on line 27
 bool(true)
+
+Notice: Comparing clsmeth with clsmeth relationally in %s/cmp_warn.php on line 32
 bool(false)
+
+Notice: Comparing clsmeth with clsmeth relationally in %s/cmp_warn.php on line 38
 bool(false)
-bool(false)
-bool(false)
+
+Notice: Comparing clsmeth with clsmeth relationally in %s/cmp_warn.php on line 43
 bool(true)
+
+Notice: Comparing clsmeth with clsmeth relationally in %s/cmp_warn.php on line 49
 bool(false)
-bool(true)
-bool(false)
-bool(false)
-bool(true)
-bool(false)
+
+Notice: Comparing clsmeth with clsmeth relationally in %s/cmp_warn.php on line 54
 bool(true)

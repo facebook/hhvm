@@ -70,6 +70,10 @@ void raiseClsMethNonClsMethRelCompareWarning() {
   raise_notice("Comparing clsmeth with non-clsmeth relationally");
 }
 
+void raiseClsMethClsMethRelCompareWarning() {
+  raise_notice("Comparing clsmeth with clsmeth relationally");
+}
+
 void raiseClsMethToVecWarningHelper(const char* fn /* =nullptr */) {
   if (!RuntimeOption::EvalRaiseClsMethConversionWarning) return;
   const char* t = RuntimeOption::EvalHackArrDVArrs ? "vec" : "varray";
@@ -83,8 +87,16 @@ void raiseClsMethConvertWarningHelper(const char* toType) {
 }
 
 Array clsMethToVecHelper(ClsMethDataRef clsMeth) {
+  assertx(RO::EvalIsCompatibleClsMethType);
+
   ARRPROV_USE_RUNTIME_LOCATION();
   return make_varray(clsMeth->getClsStr(), clsMeth->getFuncStr());
+}
+
+void throwInvalidClsMethToType(const char* ty) {
+  SystemLib::throwRuntimeExceptionObject(folly::sformat(
+    "invalid conversion from clsmeth to {}", ty
+  ));
 }
 
 } // namespace HPHP

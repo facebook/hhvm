@@ -487,6 +487,9 @@ int64_t Variant::toInt64Helper(int base /* = 10 */) const {
     case KindOfLazyClass:
       return lazyClassToStringHelper(m_data.plazyclass)->toInt64();
     case KindOfClsMeth:
+      if (!RO::EvalIsCompatibleClsMethType) {
+        throwInvalidClsMethToType("int");
+      }
       raiseClsMethConvertWarningHelper("int");
       return 1;
     case KindOfRClsMeth:
@@ -539,6 +542,9 @@ Array Variant::toPHPArrayHelper() const {
         Variant{lazyClassToStringHelper(m_data.plazyclass),
                 PersistentStrInit{}}));
     case KindOfClsMeth:
+      if (!RO::EvalIsCompatibleClsMethType) {
+        throwInvalidClsMethToType("array");
+      }
       raiseClsMethConvertWarningHelper("array");
       return make_map_array(0, m_data.pclsmeth->getClsStr(),
                             1, m_data.pclsmeth->getFuncStr());
@@ -686,6 +692,9 @@ void Variant::setEvalScalar() {
       raise_error(Strings::RCLS_METH_NOT_SUPPORTED);
 
     case KindOfClsMeth:
+      if (!RO::EvalIsCompatibleClsMethType) {
+        raise_error(Strings::CLS_METH_NOT_SUPPORTED);
+      }
       raiseClsMethToVecWarningHelper();
       auto const clsMeth = m_data.pclsmeth;
       m_data.parr = clsMethToVecHelper(clsMeth).detach();

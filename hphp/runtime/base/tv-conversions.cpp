@@ -219,6 +219,9 @@ enable_if_lval_t<T, void> tvCastToDoubleInPlace(T tv) {
         continue;
 
       case KindOfClsMeth:
+        if (!RO::EvalIsCompatibleClsMethType) {
+          throwInvalidClsMethToType("double");
+        }
         raiseClsMethConvertWarningHelper("double");
         d = 1.0;
         tvDecRefClsMeth(tv);
@@ -312,6 +315,9 @@ enable_if_lval_t<T, void> tvCastToInt64InPlace(T tv) {
         continue;
 
       case KindOfClsMeth:
+        if (!RO::EvalIsCompatibleClsMethType) {
+          throwInvalidClsMethToType("int");
+        }
         raiseClsMethConvertWarningHelper("int");
         i = 1;
         tvDecRefClsMeth(tv);
@@ -386,6 +392,9 @@ double tvCastToDouble(TypedValue tv) {
       return lazyClassToStringHelper(tv.m_data.plazyclass)->toDouble();
 
     case KindOfClsMeth:
+      if (!RO::EvalIsCompatibleClsMethType) {
+        throwInvalidClsMethToType("double");
+      }
       raiseClsMethConvertWarningHelper("double");
       return 1.0;
 
@@ -647,6 +656,9 @@ ArrayData* tvCastToArrayLikeData(TypedValue tv) {
     }
 
     case KindOfClsMeth:
+      if (!RO::EvalIsCompatibleClsMethType) {
+        throwInvalidClsMethToType("array");
+      }
       raiseClsMethToVecWarningHelper();
       return clsMethToVecHelper(tv.m_data.pclsmeth).detach();
 
@@ -745,6 +757,9 @@ enable_if_lval_t<T, void> tvCastToArrayInPlace(T tv) {
         continue;
 
       case KindOfClsMeth: {
+        if (!RO::EvalIsCompatibleClsMethType) {
+          throwInvalidClsMethToType("array");
+        }
         raiseClsMethConvertWarningHelper("array");
         a = make_map_array(
           0, val(tv).pclsmeth->getClsStr(),
@@ -854,6 +869,9 @@ enable_if_lval_t<T, void> tvCastToVecInPlace(T tv) {
         );
 
       case KindOfClsMeth: {
+        if (!RO::EvalIsCompatibleClsMethType) {
+          throwInvalidClsMethToType("vec");
+        }
         raiseClsMethConvertWarningHelper("vec");
         a = make_vec_array(
           val(tv).pclsmeth->getClsStr(), val(tv).pclsmeth->getFuncStr()
@@ -959,6 +977,9 @@ enable_if_lval_t<T, void> tvCastToDictInPlace(T tv) {
         );
 
       case KindOfClsMeth: {
+        if (!RO::EvalIsCompatibleClsMethType) {
+          throwInvalidClsMethToType("dict");
+        }
         raiseClsMethConvertWarningHelper("dict");
         a = make_dict_array(
           0, val(tv).pclsmeth->getClsStr(),
@@ -1064,6 +1085,9 @@ enable_if_lval_t<T, void> tvCastToKeysetInPlace(T tv) {
         );
 
       case KindOfClsMeth: {
+        if (!RO::EvalIsCompatibleClsMethType) {
+          throwInvalidClsMethToType("keyset");
+        }
         raiseClsMethConvertWarningHelper("keyset");
         a = make_keyset_array(
           const_cast<StringData*>(val(tv).pclsmeth->getCls()->name()),
@@ -1168,6 +1192,9 @@ enable_if_lval_t<T, void> tvCastToVArrayInPlace(T tv) {
         );
 
       case KindOfClsMeth: {
+        if (!RO::EvalIsCompatibleClsMethType) {
+          throwInvalidClsMethToType("varray");
+        }
         raiseClsMethConvertWarningHelper("varray");
         a = make_varray(
           val(tv).pclsmeth->getClsStr(), val(tv).pclsmeth->getFuncStr()
@@ -1274,6 +1301,9 @@ enable_if_lval_t<T, void> tvCastToDArrayInPlace(T tv) {
         );
 
       case KindOfClsMeth: {
+        if (!RO::EvalIsCompatibleClsMethType) {
+          throwInvalidClsMethToType("darray");
+        }
         raiseClsMethConvertWarningHelper("darray");
         a = make_darray(
           0, val(tv).pclsmeth->getClsStr(),
@@ -1338,7 +1368,10 @@ ObjectData* tvCastToObjectData(TypedValue tv) {
       return tv.m_data.pobj;
 
     case KindOfClsMeth: {
-      raiseClsMethConvertWarningHelper("array");
+      if (!RO::EvalIsCompatibleClsMethType) {
+        throwInvalidClsMethToType("object");
+      }
+      raiseClsMethConvertWarningHelper("object");
       auto const arr = make_darray(0, val(tv).pclsmeth->getClsStr(),
                                    1, val(tv).pclsmeth->getFuncStr());
       return ObjectData::FromArray(arr.get()).detach();

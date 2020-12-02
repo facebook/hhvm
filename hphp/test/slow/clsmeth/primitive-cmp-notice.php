@@ -6,7 +6,8 @@ function handle_error($_errno, $msg, ...) {
   if (
     !preg_match('/Implicit clsmeth to [^ ]+ conversion/', $msg) &&
     strpos($msg, 'Comparing clsmeth with vec') === false &&
-    strpos($msg, 'Comparing clsmeth with non-clsmeth') === false
+    strpos($msg, 'Comparing clsmeth with non-clsmeth') === false &&
+    strpos($msg, 'Comparing clsmeth with clsmeth relationally') === false
   ) {
     return false;
   }

@@ -1,0 +1,3 @@
+string(6) "C::foo"
+
+Fatal error: Cannot call abstract method T::foo in %s/test/slow/clsmeth-nocompat/abstr-meth-static.php on line 6

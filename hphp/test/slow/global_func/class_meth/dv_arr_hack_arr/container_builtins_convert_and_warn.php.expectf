@@ -67,10 +67,10 @@ dict(2) {
 
 Notice: Implicit clsmeth to vec conversion in %s/container_builtins_convert_and_warn.php on line 34
 
-Notice: Implicit clsmeth to vec conversion for array_product() in %s/container_builtins_convert_and_warn.php on line 35
+Warning: Invalid operand type was used: array_product expects an array or collection as argument 1 in %s/container_builtins_convert_and_warn.php on line 35
 NULL
 
-Notice: Implicit clsmeth to vec conversion for array_sum() in %s/container_builtins_convert_and_warn.php on line 36
+Warning: Invalid operand type was used: array_sum expects an array or collection as argument 1 in %s/container_builtins_convert_and_warn.php on line 36
 NULL
 
 Notice: Implicit clsmeth to vec conversion in %s/container_builtins_convert_and_warn.php on line 38

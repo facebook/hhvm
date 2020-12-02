@@ -1,0 +1,132 @@
+$m is arraylike: False
+$m is shape(str,str): False
+$m is shape(...): False
+$m is Traversable: False
+$m is Container: False
+$m is (string,string): False
+handle_error(): [2]: Cannot use a scalar value as an array
+$m[0] is string: False
+handle_error(): [2]: Cannot use a scalar value as an array
+$m[1] is string: False
+Passed!
+shape!
+shape!
+Passed!
+Passed!
+Passed!
+handle_error(): [2]: Cannot use a scalar value as an array
+Passed!
+handle_error(): [2]: Cannot use a scalar value as an array
+Passed!
+Passed
+$m is arraylike: False
+$m is shape(str,str): False
+$m is shape(...): False
+$m is Traversable: False
+$m is Container: False
+$m is (string,string): False
+handle_error(): [2]: Cannot use a scalar value as an array
+$m[0] is string: False
+handle_error(): [2]: Cannot use a scalar value as an array
+$m[1] is string: False
+Passed!
+shape!
+shape!
+Passed!
+Passed!
+Passed!
+handle_error(): [2]: Cannot use a scalar value as an array
+Passed!
+handle_error(): [2]: Cannot use a scalar value as an array
+Passed!
+Passed
+$m is arraylike: False
+$m is shape(str,str): False
+$m is shape(...): False
+$m is Traversable: False
+$m is Container: False
+$m is (string,string): False
+handle_error(): [2]: Cannot use a scalar value as an array
+$m[0] is string: False
+handle_error(): [2]: Cannot use a scalar value as an array
+$m[1] is string: False
+Passed!
+shape!
+shape!
+Passed!
+Passed!
+Passed!
+handle_error(): [2]: Cannot use a scalar value as an array
+Passed!
+handle_error(): [2]: Cannot use a scalar value as an array
+Passed!
+Passed
+$m is arraylike: False
+$m is shape(str,str): False
+$m is shape(...): False
+$m is Traversable: False
+$m is Container: False
+$m is (string,string): False
+handle_error(): [2]: Cannot use a scalar value as an array
+$m[0] is string: False
+handle_error(): [2]: Cannot use a scalar value as an array
+$m[1] is string: False
+Passed!
+shape!
+shape!
+Passed!
+Passed!
+Passed!
+handle_error(): [2]: Cannot use a scalar value as an array
+Passed!
+handle_error(): [2]: Cannot use a scalar value as an array
+Passed!
+Passed
+$m is arraylike: False
+$m is shape(str,str): False
+$m is shape(...): False
+$m is Traversable: False
+$m is Container: False
+$m is (string,string): False
+handle_error(): [2]: Cannot use a scalar value as an array
+$m[0] is string: False
+handle_error(): [2]: Cannot use a scalar value as an array
+$m[1] is string: False
+Passed!
+shape!
+shape!
+Passed!
+Passed!
+Passed!
+handle_error(): [2]: Cannot use a scalar value as an array
+Passed!
+handle_error(): [2]: Cannot use a scalar value as an array
+Passed!
+Passed
+$m is arraylike: False
+$m is shape(str,str): False
+$m is shape(...): False
+$m is Traversable: False
+$m is Container: False
+$m is (string,string): False
+handle_error(): [2]: Cannot use a scalar value as an array
+$m[0] is string: False
+handle_error(): [2]: Cannot use a scalar value as an array
+$m[1] is string: False
+Passed!
+shape!
+shape!
+Passed!
+Passed!
+Passed!
+handle_error(): [2]: Cannot use a scalar value as an array
+Passed!
+handle_error(): [2]: Cannot use a scalar value as an array
+Passed!
+Passed
+Failed $m is array!
+Failed $m is array!
+Failed $m is array!
+Failed $m is array!
+Failed $m is array!
+Failed $m is array!

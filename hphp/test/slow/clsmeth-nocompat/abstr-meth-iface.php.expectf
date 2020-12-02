@@ -1,0 +1,1 @@
+Fatal error: Cannot call abstract method I::foo in %s/test/slow/clsmeth-nocompat/abstr-meth-iface.php on line 9

@@ -262,10 +262,12 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
         ? AnnotAction::CallableCheck : AnnotAction::Fail;
     case AnnotMetaType::VArrOrDArr:
       assertx(!RO::EvalHackArrDVArrs);
-      if (isClsMethType(dt)) return AnnotAction::ClsMethCheck;
+      if (isClsMethType(dt) && RO::EvalIsCompatibleClsMethType) {
+        return AnnotAction::ClsMethCheck;
+      }
       return isHAMSafeDVArrayType(dt) ? AnnotAction::Pass : AnnotAction::Fail;
     case AnnotMetaType::VecOrDict:
-      if (isClsMethType(dt)) {
+      if (isClsMethType(dt) && RO::EvalIsCompatibleClsMethType) {
         return RO::EvalHackArrDVArrs
           ? AnnotAction::ClsMethCheck
           : AnnotAction::Fail;
@@ -274,7 +276,9 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
         ? AnnotAction::Pass
         : AnnotAction::Fail;
     case AnnotMetaType::ArrayLike:
-      if (isClsMethType(dt)) return AnnotAction::ClsMethCheck;
+      if (isClsMethType(dt) && RO::EvalIsCompatibleClsMethType) {
+        return AnnotAction::ClsMethCheck;
+      }
       return isArrayLikeType(dt) ? AnnotAction::Pass : AnnotAction::Fail;
     case AnnotMetaType::Nothing:
     case AnnotMetaType::NoReturn:
@@ -292,7 +296,7 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
     return RuntimeOption::EvalClassStringHintNotices
       ? AnnotAction::WarnLazyClass : AnnotAction::ConvertLazyClass;
   }
-  if (isClsMethType(dt)) {
+  if (isClsMethType(dt) && RO::EvalIsCompatibleClsMethType) {
     auto const resolve = [] (bool okay) {
       return okay ? AnnotAction::ClsMethCheck : AnnotAction::Fail;
     };
@@ -352,7 +356,8 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
         }
         return AnnotAction::Fail;
       case KindOfClsMeth:
-        return interface_supports_arrlike(annotClsName) ?
+        return RO::EvalIsCompatibleClsMethType &&
+               interface_supports_arrlike(annotClsName) ?
           AnnotAction::ClsMethCheck : AnnotAction::Fail;
       case KindOfFunc:
       case KindOfRClsMeth:

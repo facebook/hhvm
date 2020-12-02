@@ -1,0 +1,5 @@
+Fatal error: Uncaught exception 'BadMethodCallException' with message 'Non-static method C::foo() cannot be called statically' in %s/inst-meth.php:9
+Stack trace:
+#0 %s/inst-meth.php(14): D->bar()
+#1 (): main()
+#2 {main}

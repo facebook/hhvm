@@ -1,5 +1,5 @@
 
-Notice: Implicit clsmeth to vec conversion for shuffle() in %s/container_builtins_warn.php on line %d
+Warning: Invalid operand type was used: shuffle expects array(s) in %s/container_builtins_warn.php on line %d
 bool(false)
 
 Warning: array_diff() expects parameter 1 to be an array or collection, clsmeth given in %s/container_builtins_warn.php on line %d

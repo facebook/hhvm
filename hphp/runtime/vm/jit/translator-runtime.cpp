@@ -166,6 +166,7 @@ ArrayData* convArrLikeToDArrHelper(ArrayData* adIn) {
 }
 
 ArrayData* convClsMethToVArrHelper(ClsMethDataRef clsmeth) {
+  assertx(RO::EvalIsCompatibleClsMethType);
   raiseClsMethConvertWarningHelper("varray");
   auto a = make_varray(clsmeth->getClsStr(), clsmeth->getFuncStr()).detach();
   decRefClsMeth(clsmeth);
@@ -173,6 +174,7 @@ ArrayData* convClsMethToVArrHelper(ClsMethDataRef clsmeth) {
 }
 
 ArrayData* convClsMethToVecHelper(ClsMethDataRef clsmeth) {
+  assertx(RO::EvalIsCompatibleClsMethType);
   raiseClsMethConvertWarningHelper("vec");
   auto a = make_vec_array(clsmeth->getClsStr(), clsmeth->getFuncStr()).detach();
   decRefClsMeth(clsmeth);
@@ -180,6 +182,7 @@ ArrayData* convClsMethToVecHelper(ClsMethDataRef clsmeth) {
 }
 
 ArrayData* convClsMethToDArrHelper(ClsMethDataRef clsmeth) {
+  assertx(RO::EvalIsCompatibleClsMethType);
   raiseClsMethConvertWarningHelper("darray");
   auto a = make_darray(
     0, clsmeth->getClsStr(), 1, clsmeth->getFuncStr()).detach();
@@ -188,6 +191,7 @@ ArrayData* convClsMethToDArrHelper(ClsMethDataRef clsmeth) {
 }
 
 ArrayData* convClsMethToDictHelper(ClsMethDataRef clsmeth) {
+  assertx(RO::EvalIsCompatibleClsMethType);
   raiseClsMethConvertWarningHelper("dict");
   auto a = make_dict_array(
     0, clsmeth->getClsStr(), 1, clsmeth->getFuncStr()).detach();
@@ -196,6 +200,7 @@ ArrayData* convClsMethToDictHelper(ClsMethDataRef clsmeth) {
 }
 
 ArrayData* convClsMethToKeysetHelper(ClsMethDataRef clsmeth) {
+  assertx(RO::EvalIsCompatibleClsMethType);
   raiseClsMethConvertWarningHelper("keyset");
   auto a = make_keyset_array(
     clsmeth->getClsStr(), clsmeth->getFuncStr()).detach();
@@ -247,6 +252,7 @@ void raiseClsMethPropConvertNotice(const TypeConstraint* tc,
                                    bool isSProp,
                                    const Class* cls,
                                    const StringData* name) {
+  assertx(RO::EvalIsCompatibleClsMethType);
   raise_notice(
     "class_meth Compat: %s '%s::%s' declared as type %s, clsmeth "
     "assigned",

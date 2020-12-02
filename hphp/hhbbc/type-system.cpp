@@ -3974,7 +3974,7 @@ folly::Optional<Type> type_of_type_structure(const Index& index,
     case TypeStructure::Kind::T_dict:
       return is_nullable ? TOptDict : TDict;
     case TypeStructure::Kind::T_vec:
-      if (RuntimeOption::EvalHackArrDVArrs) {
+      if (RO::EvalHackArrDVArrs && RO::EvalIsCompatibleClsMethType) {
         return is_nullable ? TOptVecCompat : TVecCompat;
       }
       return is_nullable ? TOptVec : TVec;
@@ -4962,7 +4962,9 @@ Type loosen_arrays(Type a) {
   if (a.couldBe(BVec))     a |= TVec;
   if (a.couldBe(BDict))    a |= TDict;
   if (a.couldBe(BKeyset))  a |= TKeyset;
-  if (a.couldBe(BClsMeth)) a |= RO::EvalHackArrDVArrs ? TVecCompat : TArrCompat;
+  if (RO::EvalIsCompatibleClsMethType && a.couldBe(BClsMeth)) {
+    a |= RO::EvalHackArrDVArrs ? TVecCompat : TArrCompat;
+  }
   return a;
 }
 
@@ -6281,7 +6283,7 @@ bool could_copy_on_write(const Type& t) {
 }
 
 bool is_type_might_raise(const Type& testTy, const Type& valTy) {
-  auto const hackarr = RO::EvalHackArrDVArrs;
+  auto const UNUSED hackarr = RO::EvalHackArrDVArrs;
 
   // Explanation for the array-like type test behaviors:
   //
@@ -6297,28 +6299,43 @@ bool is_type_might_raise(const Type& testTy, const Type& valTy) {
 
   auto const mayLogProv = RO::EvalArrayProvenance && valTy.couldBe(kProvBits);
 
+  auto const mayLogClsMeth =
+    RO::EvalIsVecNotices &&
+    (testTy == TArrCompat || testTy == TVArrCompat || testTy == TVecCompat ||
+     testTy == TArrLikeCompat) &&
+    valTy.couldBe(BClsMeth);
+
+  assertx(
+    !RO::EvalIsCompatibleClsMethType ||
+    (testTy != TVArr && testTy != (hackarr ? TVec : TArr))
+  );
+  assertx(
+    RO::EvalIsCompatibleClsMethType ||
+    (testTy != TVArrCompat && testTy != (hackarr ? TVecCompat : TArrCompat))
+  );
+  assertx(testTy != (hackarr ? TArrCompat : TVecCompat));
+  assertx(!mayLogClsMeth || RO::EvalIsCompatibleClsMethType);
+
   if (is_opt(testTy)) return is_type_might_raise(unopt(testTy), valTy);
   if (testTy == TStrLike) {
     return valTy.couldBe(BCls | BLazyCls);
   } else if (testTy == TArr || testTy == TArrCompat) {
-    return mayLogProv ||
-           (RO::EvalIsVecNotices && !hackarr && valTy.couldBe(BClsMeth));
+    return mayLogProv || mayLogClsMeth;
   } else if (testTy == TVArr || testTy == TVArrCompat) {
-    return mayLogProv ||
-           (RO::EvalIsVecNotices && valTy.couldBe(BClsMeth)) ||
+    return mayLogProv || mayLogClsMeth ||
            (RO::EvalHackArrCompatIsVecDictNotices && valTy.couldBe(BVec));
   } else if (testTy == TDArr) {
     return mayLogProv ||
            (RO::EvalHackArrCompatIsVecDictNotices && valTy.couldBe(BDict));
   } else if (testTy == TVec || testTy == TVecCompat) {
-    return mayLogProv ||
-           (RO::EvalIsVecNotices && hackarr && valTy.couldBe(BClsMeth)) ||
+    return mayLogProv || mayLogClsMeth ||
            (RO::EvalHackArrCompatIsVecDictNotices && valTy.couldBe(BVec));
   } else if (testTy == TDict) {
     return mayLogProv ||
            (RO::EvalHackArrCompatIsVecDictNotices && valTy.couldBe(BDArr));
   } else if (testTy == TArrLikeCompat) {
-    return RO::EvalIsVecNotices && valTy.couldBe(BClsMeth);
+    assertx(RO::EvalIsCompatibleClsMethType);
+    return mayLogClsMeth;
   }
   return false;
 }

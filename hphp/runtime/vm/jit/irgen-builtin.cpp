@@ -188,6 +188,7 @@ const StaticString
   s_conv_clsmeth_to_vec("Implicit clsmeth to vec conversion");
 
 void raiseClsMethToVecWarningHelper(IRGS& env, const ParamPrep& params) {
+  assertx(RO::EvalIsCompatibleClsMethType);
   if (RuntimeOption::EvalRaiseClsMethConversionWarning) {
     gen(
       env,
@@ -205,7 +206,7 @@ SSATmp* opt_count(IRGS& env, const ParamPrep& params) {
   auto const mode = params[1].value;
   auto const val = params[0].value;
 
-  if (val->isA(TClsMeth)) {
+  if (val->isA(TClsMeth) && RO::EvalIsCompatibleClsMethType) {
     raiseClsMethToVecWarningHelper(env, params);
     return cns(env, 2);
   }
@@ -597,7 +598,7 @@ SSATmp* opt_type_structure_classname(IRGS& env, const ParamPrep& params) {
 SSATmp* opt_is_list_like(IRGS& env, const ParamPrep& params) {
   if (params.size() != 1) return nullptr;
   auto const type = params[0].value->type();
-  if (type <= TClsMeth) {
+  if (type <= TClsMeth && RO::EvalIsCompatibleClsMethType) {
     raiseClsMethToVecWarningHelper(env, params);
     return cns(env, true);
   }
@@ -1603,7 +1604,8 @@ SSATmp* maybeCoerceValue(
     });
   }
 
-  if (target <= (RuntimeOption::EvalHackArrDVArrs ? TVec : TVArr)) {
+  if (target <= (RuntimeOption::EvalHackArrDVArrs ? TVec : TVArr) &&
+      RO::EvalIsCompatibleClsMethType) {
     if (!val->type().maybe(TClsMeth)) return bail();
     auto const& tc = func->params()[id].typeConstraint;
     if (!tc.convertClsMethToArrLike()) return bail();

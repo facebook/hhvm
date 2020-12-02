@@ -530,6 +530,7 @@ SSATmp* emitMixedClsMethCmp(IRGS& env, Op op) {
 namespace {
 
 void raiseClsMethCompareWarningHelper(IRGS& env, Op op) {
+  assertx(RO::EvalIsCompatibleClsMethType);
   if (!RuntimeOption::EvalRaiseClsMethComparisonWarning) return;
   switch (op) {
     case Op::Gt:
@@ -585,7 +586,7 @@ void implNullCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
       )
     );
   } else if (rightTy <= TClsMeth) {
-    if (RuntimeOption::EvalHackArrDVArrs) {
+    if (RuntimeOption::EvalHackArrDVArrs || !RO::EvalIsCompatibleClsMethType) {
       push(env, emitMixedClsMethCmp(env, op));
     } else {
       raiseClsMethCompareWarningHelper(env, op);
@@ -621,7 +622,7 @@ void implBoolCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
       )
     );
   } else if (rightTy <= TClsMeth) {
-    if (RuntimeOption::EvalHackArrDVArrs) {
+    if (RuntimeOption::EvalHackArrDVArrs || !RO::EvalIsCompatibleClsMethType) {
       push(env, emitMixedClsMethCmp(env, op));
     } else {
       raiseClsMethCompareWarningHelper(env, op);
@@ -704,7 +705,7 @@ void implIntCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
       )
     );
   } else if (rightTy <= TClsMeth) {
-    if (RuntimeOption::EvalHackArrDVArrs) {
+    if (RuntimeOption::EvalHackArrDVArrs || !RO::EvalIsCompatibleClsMethType) {
       push(env, emitMixedClsMethCmp(env, op));
     } else {
       raiseClsMethCompareWarningHelper(env, op);
@@ -769,7 +770,7 @@ void implDblCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
       )
     );
   } else if (rightTy <= TClsMeth) {
-    if (RuntimeOption::EvalHackArrDVArrs) {
+    if (RuntimeOption::EvalHackArrDVArrs || !RO::EvalIsCompatibleClsMethType) {
       push(env, emitMixedClsMethCmp(env, op));
     } else {
       raiseClsMethCompareWarningHelper(env, op);
@@ -824,6 +825,7 @@ SSATmp* equalClsMeth(IRGS& env, SSATmp* left, SSATmp* right) {
 }
 
 void raiseClsMethToVecWarningHelper(IRGS& env) {
+  assertx(RO::EvalIsCompatibleClsMethType);
   if (RuntimeOption::EvalRaiseClsMethConversionWarning) {
     gen(env, RaiseNotice, cns(env, makeStaticString(
       folly::sformat("Implicit clsmeth to {} conversion",
@@ -877,7 +879,7 @@ void implArrCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
   } else if (rightTy <= TKeyset) {
     push(env, emitMixedKeysetCmp(env, op));
   } else if (rightTy <= TClsMeth) {
-    if (RuntimeOption::EvalHackArrDVArrs) {
+    if (RuntimeOption::EvalHackArrDVArrs || !RO::EvalIsCompatibleClsMethType) {
       push(env, emitMixedClsMethCmp(env, op));
     } else {
       raiseClsMethToVecWarningHelper(env);
@@ -900,7 +902,7 @@ void implVecCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
     push(env, emitHackArrBoolCmp(env, op, left, gen(env, ConvTVToBool, right)));
   } else if (rightTy <= TVec) {
     push(env, gen(env, toArrLikeCmpOpcode(op), left, right));
-  } else if (rightTy <= TClsMeth) {
+  } else if (rightTy <= TClsMeth && RO::EvalIsCompatibleClsMethType) {
     if (RuntimeOption::EvalHackArrDVArrs) {
       raiseClsMethToVecWarningHelper(env);
       auto const arr = convertClsMethToVec(env, right);
@@ -1083,7 +1085,7 @@ void implStrCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
   } else if (rightTy <= TRClsMeth) {
     PUNT(RClsMeth-cmp);
   } else if (rightTy <= TClsMeth) {
-    if (RuntimeOption::EvalHackArrDVArrs) {
+    if (RuntimeOption::EvalHackArrDVArrs || !RO::EvalIsCompatibleClsMethType) {
       push(env, emitMixedClsMethCmp(env, op));
     } else {
       raiseClsMethCompareWarningHelper(env, op);
@@ -1214,7 +1216,7 @@ void implObjCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
   } else if (rightTy <= TKeyset) {
     push(env, emitMixedKeysetCmp(env, op));
   } else if (rightTy <= TClsMeth) {
-    if (RuntimeOption::EvalHackArrDVArrs) {
+    if (RuntimeOption::EvalHackArrDVArrs || !RO::EvalIsCompatibleClsMethType) {
       push(env, emitMixedClsMethCmp(env, op));
     } else {
       raiseClsMethCompareWarningHelper(env, op);
@@ -1288,7 +1290,7 @@ void implResCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
   } else if (rightTy <= TRClsMeth) {
     PUNT(RClsMeth-cmp);
   } else if (rightTy <= TClsMeth) {
-    if (RuntimeOption::EvalHackArrDVArrs) {
+    if (RuntimeOption::EvalHackArrDVArrs || !RO::EvalIsCompatibleClsMethType) {
       push(env, emitMixedClsMethCmp(env, op));
     } else {
       raiseClsMethCompareWarningHelper(env, op);
@@ -1322,7 +1324,8 @@ void implFunCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
     push(env, emitMixedDictCmp(env, op));
   } else if (rightTy <= TKeyset) {
     push(env, emitMixedKeysetCmp(env, op));
-  } else if (rightTy <= TClsMeth && RuntimeOption::EvalHackArrDVArrs) {
+  } else if (rightTy <= TClsMeth && RuntimeOption::EvalHackArrDVArrs &&
+             RO::EvalIsCompatibleClsMethType) {
     push(env, emitMixedClsMethCmp(env, op));
   } else if (rightTy <= TRFunc) {
     PUNT(RFunc-cmp);
@@ -1421,6 +1424,11 @@ void implClsMethCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
       return;
     }
     PUNT(ClsMeth-ClsMeth-cmp);
+  }
+
+  if (!RO::EvalIsCompatibleClsMethType) {
+    push(env, emitMixedClsMethCmp(env, op));
+    return;
   }
 
   if (RuntimeOption::EvalHackArrDVArrs) {
@@ -1532,9 +1540,12 @@ void implCmp(IRGS& env, Op op) {
     case Op::Cmp:
       if (is_php_arr_hack_arr_cmp) raiseHACCompareWarningHelper(env);
       else {
+        auto const arrLike = RO::EvalIsCompatibleClsMethType
+          ? TArr | TClsMeth
+          : TArr;
         auto const is_php_arr_non_arr_cmp =
-          ((leftTy <= TArr) != (rightTy <= (TArr|TClsMeth))) &&
-          ((leftTy <= (TArr|TClsMeth)) != (rightTy <= TArr));
+          ((leftTy <= TArr) != (rightTy <= arrLike)) &&
+          ((leftTy <= arrLike) != (rightTy <= TArr));
         if (is_php_arr_non_arr_cmp) {
           auto const nonArr = [&]{
             gen(
@@ -1580,9 +1591,11 @@ void implCmp(IRGS& env, Op op) {
       (isStringType(leftTy.toDataType()) &&
         isLazyClassType(rightTy.toDataType())) ||
       (isClsMethType(leftTy.toDataType()) &&
-        isArrayLikeType(rightTy.toDataType())) ||
+        isArrayLikeType(rightTy.toDataType()) &&
+        RO::EvalIsCompatibleClsMethType) ||
       (isArrayLikeType(leftTy.toDataType()) &&
-        isClsMethType(rightTy.toDataType()));
+        isClsMethType(rightTy.toDataType()) &&
+        RO::EvalIsCompatibleClsMethType);
   };
 
   // If it's a same-ish comparison and the types don't match (taking into

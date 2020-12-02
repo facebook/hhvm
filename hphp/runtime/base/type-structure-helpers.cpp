@@ -105,7 +105,8 @@ bool tvInstanceOfImpl(const TypedValue* tv, F lookupClass) {
 
     case KindOfClsMeth: {
       auto const cls = lookupClass();
-      if (cls && interface_supports_arrlike(cls->name())) {
+      if (cls && interface_supports_arrlike(cls->name()) &&
+          RO::EvalIsCompatibleClsMethType) {
         if (RO::EvalIsVecNotices) {
           raise_notice("Implicit clsmeth to %s conversion",
                        cls->name()->data());
@@ -626,7 +627,7 @@ bool checkTypeStructureMatchesTVImpl(
       return is_keyset(&c1);
 
     case TypeStructure::Kind::T_any_array:
-      if (isClsMethType(type)) {
+      if (isClsMethType(type) && RO::EvalIsCompatibleClsMethType) {
         if (RuntimeOption::EvalIsVecNotices) {
           raise_notice(Strings::CLSMETH_COMPAT_IS_ANY_ARR);
         }

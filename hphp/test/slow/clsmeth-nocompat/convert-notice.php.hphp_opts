@@ -1,0 +1,1 @@
+-vRuntime.Eval.EmitClsMethPointers=1 -vRuntime.Eval.IsVecNotices=1 -vRuntime.Eval.VecHintNotices=1

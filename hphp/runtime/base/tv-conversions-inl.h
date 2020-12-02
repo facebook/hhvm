@@ -102,6 +102,9 @@ inline int64_t tvToInt(TypedValue cell) {
     case KindOfLazyClass:
       return lazyClassToStringHelper(cell.m_data.plazyclass)->toInt64();
     case KindOfClsMeth:
+      if (!RO::EvalIsCompatibleClsMethType) {
+        throwInvalidClsMethToType("int");
+      }
       raiseClsMethConvertWarningHelper("int");
       return 1;
     case KindOfRClsMeth:      raise_convert_rcls_meth_to_type("int"); break;

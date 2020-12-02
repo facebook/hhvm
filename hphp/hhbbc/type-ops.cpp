@@ -137,6 +137,15 @@ Type typePow(Type t1, Type t2) {
   return TNum;
 }
 
+Type typeConcat(Type t1, Type t2) {
+  auto const tv = eval_const(t1, t2, [&] (auto v1, auto v2) {
+    tvConcatEq(&v1, v2);
+    return v1;
+  });
+  if (tv) return loosen_staticness(*tv);
+  return TStr;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 Type typeBitAnd(Type t1, Type t2) { return bitwise_impl(t1, t2, tvBitAnd); }
@@ -215,7 +224,7 @@ Type typeSetOp(SetOpOp op, Type lhs, Type rhs) {
   case SetOpOp::MinusEqualO: return typeSubO(lhs, rhs);
   case SetOpOp::MulEqualO:   return typeMulO(lhs, rhs);
 
-  case SetOpOp::ConcatEqual: return TStr;
+  case SetOpOp::ConcatEqual: return typeConcat(lhs, rhs);
   case SetOpOp::SlEqual:     return typeShl(lhs, rhs);
   case SetOpOp::SrEqual:     return typeShr(lhs, rhs);
   }

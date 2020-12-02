@@ -295,7 +295,7 @@ bool IterateV(const TypedValue& it,
     IterateV<ArrFn, false>(adata, arrFn);
     return true;
   }
-  if (isClsMethType(it.m_type)) {
+  if (RO::EvalIsCompatibleClsMethType && isClsMethType(it.m_type)) {
     raiseClsMethToVecWarningHelper();
     adata = clsMethToVecHelper(it.m_data.pclsmeth).detach();
     if (adata) goto do_array_no_incref;
@@ -381,7 +381,7 @@ bool IterateKV(const TypedValue& it,
     IterateKV<ArrFn, false>(adata, arrFn);
     return true;
   }
-  if (isClsMethType(it.m_type)) {
+  if (RO::EvalIsCompatibleClsMethType && isClsMethType(it.m_type)) {
     raiseClsMethToVecWarningHelper();
     adata = clsMethToVecHelper(it.m_data.pclsmeth).detach();
     if (adata) goto do_array_no_incref;

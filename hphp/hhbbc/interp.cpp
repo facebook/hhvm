@@ -4961,7 +4961,7 @@ void verifyRetImpl(ISS& env, const TCVec& tcs,
     }
 
     // VerifyRetType will convert TClsMeth to TVec/TVArr/TArr implicitly
-    if (stackT.couldBe(BClsMeth)) {
+    if (stackT.couldBe(BClsMeth) && RO::EvalIsCompatibleClsMethType) {
       if (tcT.couldBe(BVec)) {
         stackT |= TVec;
         dont_reduce = true;

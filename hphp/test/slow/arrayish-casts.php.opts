@@ -1,2 +1,3 @@
 -vEval.HackRecords=1
 --count=16
+-vEval.IsCompatibleClsMethType=1

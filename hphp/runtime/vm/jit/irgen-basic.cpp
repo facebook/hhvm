@@ -295,7 +295,10 @@ void emitCastVArray(IRGS& env) {
     [&] {
       if (src->isA(TVArr))   return src;
       if (src->isA(TArrLike)) return gen(env, ConvArrLikeToVArr, src);
-      if (src->isA(TClsMeth)) return gen(env, ConvClsMethToVArr, src);
+      if (src->isA(TClsMeth)) {
+        if (!RO::EvalIsCompatibleClsMethType) return raise("ClsMeth");
+        return gen(env, ConvClsMethToVArr, src);
+      }
       if (src->isA(TObj))    return gen(env, ConvObjToVArr, src);
       if (src->isA(TRecord)) PUNT(CastVArrayRecord); // TODO: T53309767
       if (src->isA(TNull))   return raise("Null");
@@ -332,7 +335,10 @@ void emitCastDArray(IRGS& env) {
     [&] {
       if (src->isA(TDArr))   return src;
       if (src->isA(TArrLike)) return gen(env, ConvArrLikeToDArr, src);
-      if (src->isA(TClsMeth)) return gen(env, ConvClsMethToDArr, src);
+      if (src->isA(TClsMeth)) {
+        if (!RO::EvalIsCompatibleClsMethType) return raise("ClsMeth");
+        return gen(env, ConvClsMethToDArr, src);
+      }
       if (src->isA(TObj))    return gen(env, ConvObjToDArr, src);
       if (src->isA(TRecord)) PUNT(CastDArrayRecord); // TODO: T53309767
       if (src->isA(TNull))   return raise("Null");
@@ -367,7 +373,10 @@ void emitCastVec(IRGS& env) {
     [&] {
       if (src->isA(TVec))     return src;
       if (src->isA(TArrLike)) return gen(env, ConvArrLikeToVec, src);
-      if (src->isA(TClsMeth)) return gen(env, ConvClsMethToVec, src);
+      if (src->isA(TClsMeth)) {
+        if (!RO::EvalIsCompatibleClsMethType) return raise("ClsMeth");
+        return gen(env, ConvClsMethToVec, src);
+      }
       if (src->isA(TObj))     return gen(env, ConvObjToVec, src);
       if (src->isA(TRecord))  PUNT(CastVecRecord); // TODO: T53309767
       if (src->isA(TNull))    return raise("Null");
@@ -402,7 +411,10 @@ void emitCastDict(IRGS& env) {
     [&] {
       if (src->isA(TDict))    return src;
       if (src->isA(TArrLike)) return gen(env, ConvArrLikeToDict, src);
-      if (src->isA(TClsMeth)) return gen(env, ConvClsMethToDict, src);
+      if (src->isA(TClsMeth)) {
+        if (!RO::EvalIsCompatibleClsMethType) return raise("ClsMeth");
+        return gen(env, ConvClsMethToDict, src);
+      }
       if (src->isA(TObj))     return gen(env, ConvObjToDict, src);
       if (src->isA(TRecord))  PUNT(CastDictRecord); // TODO: T53309767
       if (src->isA(TNull))    return raise("Null");
@@ -437,7 +449,10 @@ void emitCastKeyset(IRGS& env) {
     [&] {
       if (src->isA(TKeyset))  return src;
       if (src->isA(TArrLike)) return gen(env, ConvArrLikeToKeyset, src);
-      if (src->isA(TClsMeth)) return gen(env, ConvClsMethToKeyset, src);
+      if (src->isA(TClsMeth)) {
+        if (!RO::EvalIsCompatibleClsMethType) return raise("ClsMeth");
+        return gen(env, ConvClsMethToKeyset, src);
+      }
       if (src->isA(TObj))     return gen(env, ConvObjToKeyset, src);
       if (src->isA(TRecord))  PUNT(CastKeysetRecord); // TODO: T53309767
       if (src->isA(TNull))    return raise("Null");

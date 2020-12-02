@@ -243,7 +243,8 @@ inline int64_t countHelper(TypedValue tv) {
 #define getCheckedArrayRet(input, fail)                                        \
   auto const cell_##input = static_cast<const Variant&>(input).asTypedValue(); \
   if (UNLIKELY(!isArrayLikeType(cell_##input->m_type) &&                       \
-    !isClsMethType(cell_##input->m_type))) {                                   \
+    (!RO::EvalIsCompatibleClsMethType ||                                       \
+     !isClsMethType(cell_##input->m_type)))) {                                 \
     raise_expected_array_warning();                                            \
     return fail;                                                               \
   }                                                                            \

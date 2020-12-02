@@ -397,7 +397,8 @@ bool HHVM_FUNCTION(array_key_exists,
       return false;
     }
     return HHVM_FN(array_key_exists)(key, obj->toArray(false, true));
-  } else if (isClsMethType(searchCell->m_type)) {
+  } else if (isClsMethType(searchCell->m_type) &&
+             RO::EvalIsCompatibleClsMethType) {
     raiseClsMethToVecWarningHelper(__FUNCTION__+2);
     ad = clsMethToVecHelper(searchCell->m_data.pclsmeth).detach();
   } else {
@@ -414,8 +415,6 @@ bool HHVM_FUNCTION(array_key_exists,
       throwInvalidArrayKeyException(cell, ad);
 
     case KindOfClsMeth:
-      raiseClsMethToVecWarningHelper(__FUNCTION__+2);
-      // fallthrough
     case KindOfRClsMeth:
     case KindOfBoolean:
     case KindOfDouble:
@@ -768,10 +767,6 @@ TypedValue HHVM_FUNCTION(array_pop,
 
 TypedValue HHVM_FUNCTION(array_product,
                          const Variant& input) {
-  if (input.isClsMeth()) {
-    raiseClsMethToVecWarningHelper(__FUNCTION__+2);
-    return make_tv<KindOfNull>();
-  }
   if (UNLIKELY(!isContainer(input))) {
     raise_warning("Invalid operand type was used: %s expects "
                   "an array or collection as argument 1",
@@ -863,8 +858,8 @@ TypedValue HHVM_FUNCTION(array_push,
                          Variant& container,
                          const Variant& var,
                          const Array& args /* = null array */) {
-  if (LIKELY(container.isArray()) || container.isClsMeth()) {
-    castClsmethToContainerInplace(container.asTypedValue());
+  castClsmethToContainerInplace(container.asTypedValue());
+  if (LIKELY(container.isArray())) {
     /*
      * Important note: this *must* cast the parr in the inner cell to
      * the Array&---we can't copy it to the stack or anything because we
@@ -1012,7 +1007,7 @@ TypedValue HHVM_FUNCTION(array_slice,
     if (isArrayType(cell_input.m_type)) {
       return tvReturn(Variant{cell_input.m_data.parr});
     }
-    if (isClsMethType(cell_input.m_type)) {
+    if (isClsMethType(cell_input.m_type) && RO::EvalIsCompatibleClsMethType) {
       raiseClsMethToVecWarningHelper(__FUNCTION__+2);
       return tvReturn(clsMethToVecHelper(cell_input.m_data.pclsmeth));
     }
@@ -1074,10 +1069,6 @@ TypedValue HHVM_FUNCTION(array_splice,
 
 TypedValue HHVM_FUNCTION(array_sum,
                          const Variant& input) {
-  if (input.isClsMeth()) {
-    raiseClsMethToVecWarningHelper(__FUNCTION__+2);
-    return make_tv<KindOfNull>();
-  }
   if (UNLIKELY(!isContainer(input))) {
     raise_warning("Invalid operand type was used: %s expects "
                   "an array or collection as argument 1",
@@ -1284,10 +1275,6 @@ static int php_count_recursive(const Array& array) {
 
 bool HHVM_FUNCTION(shuffle,
                    Variant& array) {
-  if (array.isClsMeth()) {
-    raiseClsMethToVecWarningHelper(__FUNCTION__+2);
-    return false;
-  }
   if (!array.isArray()) {
     raise_expected_array_warning("shuffle");
     return false;
@@ -1339,6 +1326,9 @@ int64_t HHVM_FUNCTION(count,
       return var.getArrayData()->size();
 
     case KindOfClsMeth:
+      if (!RO::EvalIsCompatibleClsMethType) {
+        return 1;
+      }
       raiseClsMethToVecWarningHelper();
       return 2;
 

@@ -217,8 +217,7 @@ int32_t iteratorType(IterSpecialization specialization) {
     always_assert(false);
   }();
 
-  auto const type = IterImpl::packTypeFields(
-    IterImpl::TypeArray, nextHelperIndex, specialization);
+  auto const type = IterImpl::packTypeFields(nextHelperIndex, specialization);
   return safe_cast<int32_t>(type);
 }
 
@@ -264,10 +263,10 @@ void cgStIterBase(IRLS& env, const IRInstruction* inst) {
 }
 
 void cgStIterType(IRLS& env, const IRInstruction* inst) {
-  static_assert(IterImpl::typeSize() == 4, "");
+  static_assert(IterImpl::typeSize() == 2, "");
   auto const type = inst->extra<StIterType>()->type;
   auto const iter = iteratorPtr(env, inst, inst->extra<StIterType>());
-  vmain(env) << storeli{iteratorType(type), iter + IterImpl::typeOffset()};
+  vmain(env) << storewi{iteratorType(type), iter + IterImpl::typeOffset()};
 }
 
 void cgStIterPos(IRLS& env, const IRInstruction* inst) {

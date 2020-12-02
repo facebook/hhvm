@@ -103,15 +103,13 @@ bool IterImpl::checkInvariants(const ArrayData* ad /* = nullptr */) const {
         uintptr_t(m_data), size_t(m_typeFields), m_pos, m_end, uintptr_t(ad));
 
   // We can't make many assertions for iterators over objects.
-  if (m_itype == IterImpl::TypeIterator) {
+  if (!hasArrayData()) {
     assertx(ad == nullptr);
-    assertx(!hasArrayData());
     assertx(m_nextHelperIdx == IterNextIndex::Object);
     return true;
   }
 
   // Exactly one of the ArrayData pointers {ad, m_data} should be nullptr.
-  assertx(m_itype == IterImpl::TypeArray);
   assertx((ad == nullptr) != (m_data == nullptr));
   DEBUG_ONLY auto const arr = ad ? ad : m_data;
 
@@ -315,14 +313,7 @@ void Iter::free() {
 }
 
 std::string Iter::toString() const {
-  switch (m_iter.getIterType()) {
-    case IterImpl::TypeArray:
-      return "I:Array";
-    case IterImpl::TypeIterator:
-      return "I:Iterator";
-    default:
-      return "I:Trash";
-  }
+  return m_iter.hasArrayData() ? "I:Array" : "I:Iterator";
 }
 
 /*
@@ -349,8 +340,7 @@ static inline void iter_value_cell_local_impl(Iter* iter, TypedValue* out) {
   TRACE(2, "%s: typeArray: %s, I %p, out %p\n",
            __func__, typeArray ? "true" : "false", iter, out);
   auto& arrIter = *unwrap(iter);
-  assertx((typeArray && arrIter.getIterType() == IterImpl::TypeArray) ||
-         (!typeArray && arrIter.getIterType() == IterImpl::TypeIterator));
+  assertx(typeArray == arrIter.hasArrayData());
   if (typeArray) {
     tvDup(arrIter.nvSecond(), *out);
   } else {
@@ -365,8 +355,7 @@ static inline void iter_key_cell_local_impl(Iter* iter, TypedValue* out) {
   auto const oldVal = *out;
   TRACE(2, "%s: I %p, out %p\n", __func__, iter, out);
   auto& arrIter = *unwrap(iter);
-  assertx((typeArray && arrIter.getIterType() == IterImpl::TypeArray) ||
-         (!typeArray && arrIter.getIterType() == IterImpl::TypeIterator));
+  assertx(typeArray == arrIter.hasArrayData());
   if (typeArray) {
     tvDup(arrIter.nvFirst(), *out);
   } else {
@@ -381,7 +370,7 @@ inline void liter_value_cell_local_impl(Iter* iter,
                                         const ArrayData* ad) {
   auto const oldVal = *out;
   auto const& arrIter = *unwrap(iter);
-  assertx(arrIter.getIterType() == IterImpl::TypeArray);
+  assertx(arrIter.hasArrayData());
   assertx(!arrIter.getArrayData());
   tvDup(arrIter.nvSecondLocal(ad), *out);
   tvDecRefGen(oldVal);
@@ -392,7 +381,7 @@ inline void liter_key_cell_local_impl(Iter* iter,
                                       const ArrayData* ad) {
   auto const oldVal = *out;
   auto const& arrIter = *unwrap(iter);
-  assertx(arrIter.getIterType() == IterImpl::TypeArray);
+  assertx(arrIter.hasArrayData());
   assertx(!arrIter.getArrayData());
   tvDup(arrIter.nvFirstLocal(ad), *out);
   tvDecRefGen(oldVal);
@@ -471,8 +460,9 @@ int64_t new_iter_array(Iter* dest, ArrayData* ad, TypedValue* valOut) {
     dest->kill();
     return 0;
   }
-  if (UNLIKELY(isRefcountedType(valOut->m_type))) {
-    return new_iter_array_cold<Local>(dest, ad, valOut, nullptr);
+  if (UNLIKELY(isRefcountedType(valOut->type()))) {
+    tvDecRefCountable(valOut);
+    tvCopy(make_tv<KindOfNull>(), valOut);
   }
 
   // We are transferring ownership of the array to the iterator, therefore
@@ -540,15 +530,13 @@ int64_t new_iter_array_key(Iter*       dest,
     dest->kill();
     return 0;
   }
-  if (UNLIKELY(isRefcountedType(valOut->m_type))) {
-    return new_iter_array_cold<Local>(
-      dest, ad, valOut, keyOut
-    );
+  if (UNLIKELY(isRefcountedType(valOut->type()))) {
+    tvDecRefCountable(valOut);
+    tvCopy(make_tv<KindOfNull>(), valOut);
   }
-  if (UNLIKELY(isRefcountedType(keyOut->m_type))) {
-    return new_iter_array_cold<Local>(
-      dest, ad, valOut, keyOut
-    );
+  if (UNLIKELY(isRefcountedType(keyOut->type()))) {
+    tvDecRefCountable(keyOut);
+    tvCopy(make_tv<KindOfNull>(), keyOut);
   }
 
   // We are transferring ownership of the array to the iterator, therefore
@@ -617,15 +605,14 @@ struct FreeObj {
  */
 static int64_t new_iter_object_any(Iter* dest, ObjectData* obj, Class* ctx,
                                    TypedValue* valOut, TypedValue* keyOut) {
-  IterImpl::Type itType;
   auto const iter = unwrap(dest);
+  auto object_base = true;
   {
     FreeObj fo;
     if (obj->isIterator()) {
       TRACE(2, "%s: I %p, obj %p, ctx %p, collection or Iterator\n",
             __func__, dest, obj, ctx);
       new (iter) IterImpl(obj, IterImpl::noInc);
-      itType = IterImpl::TypeIterator;
     } else {
       bool isIteratorAggregate;
       /*
@@ -643,7 +630,6 @@ static int64_t new_iter_object_any(Iter* dest, ObjectData* obj, Class* ctx,
         TRACE(2, "%s: I %p, obj %p, ctx %p, IteratorAggregate\n",
               __func__, dest, obj, ctx);
         new (iter) IterImpl(itObj.detach(), IterImpl::noInc);
-        itType = IterImpl::TypeIterator;
       } else {
         TRACE(2, "%s: I %p, obj %p, ctx %p, iterate as array\n",
               __func__, dest, obj, ctx);
@@ -651,7 +637,7 @@ static int64_t new_iter_object_any(Iter* dest, ObjectData* obj, Class* ctx,
         Array iterArray(itObj->o_toIterArray(ctxStr));
         ArrayData* ad = iterArray.get();
         new (iter) IterImpl(ad);
-        itType = IterImpl::TypeArray;
+        object_base = false;
       }
     }
     try {
@@ -667,7 +653,7 @@ static int64_t new_iter_object_any(Iter* dest, ObjectData* obj, Class* ctx,
     }
   }
 
-  if (itType == IterImpl::TypeIterator) {
+  if (object_base) {
     iter_value_cell_local_impl<false>(dest, valOut);
     if (keyOut) {
       iter_key_cell_local_impl<false>(dest, keyOut);
@@ -710,8 +696,6 @@ int64_t new_iter_object(Iter* dest, ObjectData* obj, Class* ctx,
 NEVER_INLINE
 int64_t iter_next_cold(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
   auto const ai = unwrap(iter);
-  assertx(ai->getIterType() == IterImpl::TypeArray ||
-          ai->getIterType() == IterImpl::TypeIterator);
   assertx(ai->hasArrayData() || !ai->getObject()->isCollection());
   ai->next();
   if (ai->end()) {
@@ -719,7 +703,7 @@ int64_t iter_next_cold(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
     ai->~IterImpl();
     return 0;
   }
-  if (unwrap(iter)->getIterType() == IterImpl::TypeArray) {
+  if (ai->hasArrayData()) {
     iter_value_cell_local_impl<true>(iter, valOut);
     if (keyOut) {
       iter_key_cell_local_impl<true>(iter, keyOut);
@@ -744,7 +728,7 @@ int64_t liter_next_cold(Iter* iter,
                         TypedValue* valOut,
                         TypedValue* keyOut) {
   auto const ai = unwrap(iter);
-  assertx(ai->getIterType() == IterImpl::TypeArray);
+  assertx(ai->hasArrayData());
   assertx(!ai->getArrayData());
   if (ai->nextLocal(ad)) {
     ai->~IterImpl();

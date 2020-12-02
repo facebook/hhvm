@@ -115,11 +115,6 @@ std::string show(IterSpecialization::KeyTypes type);
  * type of mutating operations. Apparently, this pattern is somewhat common...
  */
 struct IterImpl {
-  enum Type : uint8_t {
-    TypeArray,
-    TypeIterator  // for objects that implement Iterator or IteratorAggregate
-  };
-
   enum NoInc { noInc = 0 };
   enum Local { local = 0 };
 
@@ -228,9 +223,6 @@ struct IterImpl {
   void setPos(ssize_t newPos) {
     m_pos = newPos;
   }
-  Type getIterType() const {
-    return m_itype;
-  }
 
   // It's valid to call end() on a killed iter, but the iter is otherwise dead.
   // In debug builds, this method will overwrite the iterator with garbage.
@@ -246,12 +238,11 @@ struct IterImpl {
   }
 
   // Used by native code and by the JIT to pack the m_typeFields components.
-  static uint32_t packTypeFields(
-      Type type, IterNextIndex index,
+  static uint16_t packTypeFields(
+      IterNextIndex index,
       IterSpecialization spec = IterSpecialization::generic()) {
-    return static_cast<uint32_t>(spec.as_byte) << 16 |
-           static_cast<uint32_t>(index) << 8 |
-           static_cast<uint32_t>(type);
+    return static_cast<uint16_t>(spec.as_byte) << 8 |
+           static_cast<uint16_t>(index);
   }
 
   // JIT helpers used for specializing iterators.
@@ -335,8 +326,7 @@ private:
   void setObject(ObjectData* obj) {
     assertx((intptr_t(obj) & objectBaseTag()) == 0);
     m_obj = (ObjectData*)((intptr_t)obj | objectBaseTag());
-    m_typeFields = packTypeFields(TypeIterator, IterNextIndex::Object);
-    assertx(m_itype == TypeIterator);
+    m_typeFields = packTypeFields(IterNextIndex::Object);
     assertx(m_nextHelperIdx == IterNextIndex::Object);
     assertx(!m_specialization.specialized);
   }
@@ -344,8 +334,7 @@ private:
   // Set the type fields of an array. These fields are packed so that we
   // can set them with a single mov-immediate to the union.
   void setArrayNext(IterNextIndex index) {
-    m_typeFields = packTypeFields(TypeArray, index);
-    assertx(m_itype == TypeArray);
+    m_typeFields = packTypeFields(index);
     assertx(m_nextHelperIdx == index);
     assertx(!m_specialization.specialized);
   }
@@ -359,11 +348,10 @@ private:
   // This field is a union so new_iter_array can set it in one instruction.
   union {
     struct {
-      Type m_itype;
       IterNextIndex m_nextHelperIdx;
       IterSpecialization m_specialization;
     };
-    uint32_t m_typeFields;
+    uint16_t m_typeFields;
   };
   // Current position. Beware that when m_data is null, m_pos is uninitialized.
   // For the pointer iteration types, we use the appropriate pointers instead.

@@ -1,0 +1,31 @@
+digraph G {
+  subgraph cluster_legend {
+    label="Legend: semantic model"
+
+    Cap2 -> Cap1 [label="extends"];
+
+    context [shape="rect", color=lightsteelblue1, style=filled];
+    context -> Cap1 [label="alias", style=dashed, color=blue];
+    context -> Cap2 [label="unsafe alias", color=red];
+
+    intersect_context [shape="rect", color=lightsteelblue1, style=filled];
+    intersect_context -> Cap3 [label="alias to (Cap3 & Cap4)", style=dashed, color=blue];
+    intersect_context -> Cap4 [style=dashed, color=blue];
+  };
+
+  // contexts
+  "defaults" [shape="rect", color=orange, style=filled];
+
+  // capabilities
+  "WriteProperty";
+  "AccessStaticVariable";
+  "IO";
+
+  // safe arrows
+  "defaults" -> "WriteProperty" [color="blue", style="dashed"];
+  "defaults" -> "AccessStaticVariable" [color="blue", style="dashed"];
+  "defaults" -> "IO" [color="blue", style="dashed"];
+
+  // makes arrows point bottom to top
+  rankdir = "BT"
+}

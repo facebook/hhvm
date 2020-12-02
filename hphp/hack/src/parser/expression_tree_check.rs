@@ -107,22 +107,15 @@ impl<'ast> Visitor<'ast> for Checker {
                 True | False | Null => true,
                 // Allow local variables $foo.
                 Lvar(_) => true,
-                Binop(bop) => match **bop {
-                    // Allow the addition operator.
-                    (Bop::Plus, _, _) => true,
+                Binop(bop) => match bop.0 {
+                    // Allow arithmetic operators
+                    Bop::Plus | Bop::Minus | Bop::Star | Bop::Slash => true,
                     // Allow $x = 1, but not $x += 1.
-                    (Bop::Eq(None), _, _) => true,
-                    // Allow boolean && operator
-                    (Bop::Ampamp, _, _) => true,
-                    // Allow boolean || operator
-                    (Bop::Barbar, _, _) => true,
+                    Bop::Eq(None) => true,
+                    // Allow boolean &&, || operators
+                    Bop::Ampamp | Bop::Barbar => true,
                     // Allow comparison operators
-                    (Bop::Lt, _, _) => true,
-                    (Bop::Lte, _, _) => true,
-                    (Bop::Gt, _, _) => true,
-                    (Bop::Gte, _, _) => true,
-                    (Bop::Eqeqeq, _, _) => true,
-                    (Bop::Diff2, _, _) => true,
+                    Bop::Lt | Bop::Lte | Bop::Gt | Bop::Gte | Bop::Eqeqeq | Bop::Diff2 => true,
                     _ => false,
                 },
                 Unop(uop) => match **uop {

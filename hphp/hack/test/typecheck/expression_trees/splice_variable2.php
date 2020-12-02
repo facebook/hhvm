@@ -162,6 +162,15 @@ final class ExampleInt {
   public function __plus(ExampleInt $_): ExampleInt {
     throw new Exception();
   }
+  public function __minus(ExampleInt $_): ExampleInt {
+    throw new Exception();
+  }
+  public function __star(ExampleInt $_): ExampleInt {
+    throw new Exception();
+  }
+  public function __slash(ExampleInt $_): ExampleInt {
+    throw new Exception();
+  }
 
   public function __lessThan(ExampleInt $_): ExampleBool {
     throw new Exception();

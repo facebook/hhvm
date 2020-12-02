@@ -156,6 +156,15 @@ final class ExampleInt {
   public function __plus(ExampleInt $_): ExampleInt {
     throw new Exception();
   }
+  public function __minus(ExampleInt $_): ExampleInt {
+    throw new Exception();
+  }
+  public function __star(ExampleInt $_): ExampleInt {
+    throw new Exception();
+  }
+  public function __slash(ExampleInt $_): ExampleInt {
+    throw new Exception();
+  }
 
   public function __lessThan(ExampleInt $_): ExampleBool {
     throw new Exception();
@@ -191,11 +200,11 @@ final class ExampleBool {
     throw new Exception();
   }
 
-  public function __exclamationMark(): ExampleBool {
+  public function __bool(): bool {
     throw new Exception();
   }
 
-  public function coerceToBool(): bool {
+  public function __exclamationMark(): ExampleBool {
     throw new Exception();
   }
 }

@@ -3,7 +3,10 @@
 <<file:__EnableUnstableFeatures('expression_trees')>>
 
 function foo(): void {
-  $addition = Code`1 + 2`;
+  Code`1 + 2`;
+  Code`1 - 2`;
+  Code`1 * 2`;
+  Code`1 / 2`;
 }
 
 
@@ -155,6 +158,15 @@ final class ExprPos {
 
 final class ExampleInt {
   public function __plus(ExampleInt $_): ExampleInt {
+    throw new Exception();
+  }
+  public function __minus(ExampleInt $_): ExampleInt {
+    throw new Exception();
+  }
+  public function __star(ExampleInt $_): ExampleInt {
+    throw new Exception();
+  }
+  public function __slash(ExampleInt $_): ExampleInt {
     throw new Exception();
   }
 

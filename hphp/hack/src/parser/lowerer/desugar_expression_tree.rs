@@ -256,13 +256,15 @@ impl<'ast> VisitorMut<'ast> for TypeVirtualizer {
                 rhs.accept(env, self.object())?;
 
                 match op {
-                    // Convert `... + ...` to `$lhs->__plus(vec[$rhs])`.
+                    // Convert arithmetic operators `... + ...` to `$lhs->__plus(vec[$rhs])`
                     Bop::Plus => *e = virtualize_binop(lhs, "__plus", rhs, &e.0),
-                    // Convert `... && ...` to `$lhs->__ampamp(vec[rhs])`.
+                    Bop::Minus => *e = virtualize_binop(lhs, "__minus", rhs, &e.0),
+                    Bop::Star => *e = virtualize_binop(lhs, "__star", rhs, &e.0),
+                    Bop::Slash => *e = virtualize_binop(lhs, "__slash", rhs, &e.0),
+                    // Convert boolean &&, ||
                     Bop::Ampamp => *e = virtualize_binop(lhs, "__ampamp", rhs, &e.0),
-                    // Convert `... || ...` to `$lhs->__barbar(vec[$rhs])`.
                     Bop::Barbar => *e = virtualize_binop(lhs, "__barbar", rhs, &e.0),
-                    // Convert comparison operators
+                    // Convert comparison operators, <, <=, >, >=, ===, !==
                     Bop::Lt => *e = virtualize_binop(lhs, "__lessThan", rhs, &e.0),
                     Bop::Lte => *e = virtualize_binop(lhs, "__lessThanEqual", rhs, &e.0),
                     Bop::Gt => *e = virtualize_binop(lhs, "__greaterThan", rhs, &e.0),

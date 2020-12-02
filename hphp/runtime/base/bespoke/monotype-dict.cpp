@@ -121,6 +121,14 @@ Layout::LayoutSet getAllEmptyOrMonotypeDictLayouts() {
   return result;
 }
 
+LayoutIndex getMonotypeParentLayout(KeyTypes kt, DataType dt) {
+  if (!hasPersistentFlavor(dt) || isRefcountedType(dt)) {
+    return EmptyOrMonotypeDictLayout::Index(kt, dt_modulo_persistence(dt));
+  }
+
+  return MonotypeDictLayout::Index(kt, dt_modulo_persistence(dt));
+}
+
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1363,11 +1371,24 @@ DATATYPES
 
   new EmptyMonotypeDictLayout();
 
-#define DT(name, value) {                                  \
-    auto const type = KindOf##name;                        \
-    new MonotypeDictLayout(KeyTypes::Ints, type);          \
-    new MonotypeDictLayout(KeyTypes::Strings, type);       \
-    new MonotypeDictLayout(KeyTypes::StaticStrings, type); \
+#define DT(name, value) {                                    \
+    auto const type = KindOf##name;                          \
+    if (type == dt_modulo_persistence(type)) {               \
+      new MonotypeDictLayout(KeyTypes::Ints, type);          \
+      new MonotypeDictLayout(KeyTypes::Strings, type);       \
+      new MonotypeDictLayout(KeyTypes::StaticStrings, type); \
+    }                                                        \
+  }
+DATATYPES
+#undef DT
+
+#define DT(name, value) {                                    \
+    auto const type = KindOf##name;                          \
+    if (type != dt_modulo_persistence(type)) {               \
+      new MonotypeDictLayout(KeyTypes::Ints, type);          \
+      new MonotypeDictLayout(KeyTypes::Strings, type);       \
+      new MonotypeDictLayout(KeyTypes::StaticStrings, type); \
+    }                                                        \
   }
 DATATYPES
 #undef DT
@@ -1425,7 +1446,7 @@ MonotypeDictLayout::MonotypeDictLayout(KeyTypes kt, DataType type)
       Index(kt, type),
       folly::sformat("MonotypeDict<{},{}>", show(kt), tname(type)),
       getVtableForKeyTypes(kt),
-      {EmptyOrMonotypeDictLayout::Index(kt, dt_modulo_persistence(type))})
+      {getMonotypeParentLayout(kt, type)})
   , m_keyType(kt)
   , m_valType(type)
 {}

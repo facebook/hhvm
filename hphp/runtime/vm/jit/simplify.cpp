@@ -3029,23 +3029,113 @@ X(CountKeyset)
 
 #undef X
 
-SSATmp* simplifyBespokeIterEnd(State& env, const IRInstruction* inst) {
-  auto const val = inst->src(0);
-  auto const type = val->type();
+// Simplify generic bespoke getters, either based on the DataType (often we
+// can make simplifications for all varrays and vecs) or specific layout.
 
-  if (type.hasConstVal()) {
-    auto const end = type.arrLikeVal()->iter_end();
-    return cns(env, end);
+SSATmp* simplifyBespokeGet(State& env, const IRInstruction* inst) {
+  auto const arr = inst->src(0);
+  auto const key = inst->src(1);
+  assertx(key->type().subtypeOfAny(TInt, TStr));
+
+  if (arr->hasConstVal()) {
+    auto const ad = arr->arrLikeVal();
+    if (ad->empty()) return cns(env, TUninit);
+    if (key->hasConstVal()) {
+      auto const tv = key->isA(TInt) ? ad->get(key->intVal())
+                                     : ad->get(key->strVal());
+      return cns(env, tv);
+    }
   }
 
-  if (type <= (TVArr|TVec)) {
-    return gen(env, CountVec, val);
-  } else if (type <= (TDArr|TDict) && type.arrSpec().layout().monotype()) {
-    return gen(env, LdMonotypeDictEnd, val);
+  if (arr->isA(TVArr|TVec)) {
+    if (key->isA(TStr)) return cns(env, TUninit);
+    if (arr->type().arrSpec().monotype() && !inst->typeParam().maybe(TUninit)) {
+      return gen(env, LdMonotypeVecElem, inst->typeParam(), arr, key);
+    }
   }
 
   return nullptr;
 }
+
+SSATmp* simplifyBespokeIterFirstPos(State& env, const IRInstruction* inst) {
+  auto const arr = inst->src(0);
+
+  if (arr->hasConstVal()) {
+    auto const pos = arr->type().arrLikeVal()->iter_begin();
+    return cns(env, pos);
+  }
+
+  if (arr->isA(TVArr|TVec)) {
+    return cns(env, 0);
+  }
+
+  return nullptr;
+}
+
+SSATmp* simplifyBespokeIterLastPos(State& env, const IRInstruction* inst) {
+  auto const arr = inst->src(0);
+
+  if (arr->hasConstVal()) {
+    auto const pos = arr->type().arrLikeVal()->iter_last();
+    return cns(env, pos);
+  }
+
+  if (arr->isA(TVArr|TVec)) {
+    auto const size = gen(env, CountVec, arr);
+    return gen(env, SubInt, size, cns(env, 1));
+  }
+
+  return nullptr;
+}
+
+SSATmp* simplifyBespokeIterEnd(State& env, const IRInstruction* inst) {
+  auto const arr = inst->src(0);
+
+  if (arr->hasConstVal()) {
+    auto const pos = arr->type().arrLikeVal()->iter_end();
+    return cns(env, pos);
+  }
+
+  if (arr->isA(TVArr|TVec)) {
+    return gen(env, CountVec, arr);
+  } else if (arr->isA(TDArr|TDict) && arr->type().arrSpec().monotype()) {
+    return gen(env, LdMonotypeDictEnd, arr);
+  }
+
+  return nullptr;
+}
+
+SSATmp* simplifyBespokeIterGetKey(State& env, const IRInstruction* inst) {
+  auto const arr = inst->src(0);
+  auto const pos = inst->src(1);
+
+  if (arr->hasConstVal() && pos->hasConstVal()) {
+    auto const key = arr->type().arrLikeVal()->nvGetKey(pos->intVal());
+    return cns(env, key);
+  }
+
+  if (arr->isA(TVArr|TVec)) return pos;
+
+  return nullptr;
+}
+
+SSATmp* simplifyBespokeIterGetVal(State& env, const IRInstruction* inst) {
+  auto const arr = inst->src(0);
+  auto const pos = inst->src(1);
+
+  if (arr->hasConstVal() && pos->hasConstVal()) {
+    auto const val = arr->type().arrLikeVal()->nvGetVal(pos->intVal());
+    return cns(env, val);
+  }
+
+  if (arr->isA(TVArr|TVec)) {
+    return gen(env, BespokeGet, inst->typeParam(), arr, pos);
+  }
+
+  return nullptr;
+}
+
+// Simplify layout-specific bespoke helpers.
 
 SSATmp* simplifyLdMonotypeDictEnd(State& env, const IRInstruction* inst) {
   auto const type = inst->src(0)->type();
@@ -3055,6 +3145,16 @@ SSATmp* simplifyLdMonotypeDictEnd(State& env, const IRInstruction* inst) {
     return cns(env, end);
   }
 
+  return nullptr;
+}
+
+SSATmp* simplifyLdMonotypeVecElem(State& env, const IRInstruction* inst) {
+  auto const arr = inst->src(0);
+  auto const key = inst->src(1);
+  if (arr->hasConstVal() && key->hasConstVal()) {
+    auto const tv = arr->arrLikeVal()->get(key->intVal());
+    return tv.is_init() ? cns(env, tv) : nullptr;
+  }
   return nullptr;
 }
 
@@ -3087,18 +3187,6 @@ SSATmp* simplifyLookupSPropSlot(State& env, const IRInstruction* inst) {
 SSATmp* simplifyLdStrLen(State& env, const IRInstruction* inst) {
   auto const src = inst->src(0);
   return src->hasConstVal(TStr) ? cns(env, src->strVal()->size()) : nullptr;
-}
-
-SSATmp* simplifyLdMonotypeVecElem(State& env, const IRInstruction* inst) {
-  auto const src0 = inst->src(0);
-  auto const src1 = inst->src(1);
-  if (src0->hasConstVal() && src1->hasConstVal()) {
-    auto const arr = src0->arrLikeVal();
-    auto const idx = src1->intVal();
-    auto const tv = arr->get(idx);
-    return tv.is_init() ? cns(env, tv) : nullptr;
-  }
-  return nullptr;
 }
 
 SSATmp* simplifyLdVecElem(State& env, const IRInstruction* inst) {
@@ -3385,29 +3473,6 @@ SSATmp* simplifyCheckClsMethFunc(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* simplifyBespokeGet(State& env, const IRInstruction* inst) {
-  auto const src0 = inst->src(0);
-  auto const src1 = inst->src(1);
-
-  if (!src0->hasConstVal()) return nullptr;
-
-  auto const arr = src0->arrLikeVal();
-  if (arr->empty()) return cns(env, TUninit);
-
-  if (!src1->hasConstVal()) return nullptr;
-
-  assertx(src1->isA(TInt | TStr));
-  auto const tv = [&] {
-    if (src1->isA(TInt)) {
-      return arr->get(src1->intVal());
-    } else {
-      return arr->get(src1->strVal());
-    }
-  }();
-
-  return cns(env, tv);
-}
-
 //////////////////////////////////////////////////////////////////////
 
 SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
@@ -3509,7 +3574,12 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(LookupSPropSlot)
   X(LdClsMethod)
   X(LdStrLen)
+  X(BespokeGet)
+  X(BespokeIterFirstPos)
+  X(BespokeIterLastPos)
   X(BespokeIterEnd)
+  X(BespokeIterGetKey)
+  X(BespokeIterGetVal)
   X(LdMonotypeDictEnd)
   X(LdMonotypeVecElem)
   X(LdVecElem)
@@ -3624,7 +3694,6 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(RaiseErrorOnInvalidIsAsExpressionType)
   X(LdFrameCls)
   X(CheckClsMethFunc)
-  X(BespokeGet)
   default: break;
   }
 #undef X

@@ -381,10 +381,8 @@ public:
   ssize_t nvGetStrPos(const StringData* k) const;
 
   /*
-   * Get the value or key for the element at raw position `pos'.
-   *
-   * nvGetKey will inc-ref the key before returning it, but nvGetVal will not
-   * do any refcount ops. TODO(kshaunak): Eliminate this discrepancy.
+   * Get the value or key for the element at raw position `pos'. This op
+   * never does any ref-counting on the key.
    *
    * @requires: `pos' refers to a valid array element.
    */

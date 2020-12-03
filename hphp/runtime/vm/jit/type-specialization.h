@@ -83,8 +83,14 @@ struct ArraySpec {
   uintptr_t bits() const;
   ArrayLayout layout() const;
   const RepoAuthType::Array* type() const;
-  bool vanilla() const;
-  bool bespoke() const;
+
+  /*
+   * Expose various ArrayLayout predicates.
+   */
+  bool vanilla() const  { return layout().vanilla(); }
+  bool bespoke() const  { return layout().bespoke(); }
+  bool logging() const  { return layout().logging(); }
+  bool monotype() const { return layout().monotype(); }
 
   /*
    * Casts.

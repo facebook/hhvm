@@ -203,14 +203,6 @@ inline const RepoAuthType::Array* ArraySpec::type() const {
   return reinterpret_cast<const RepoAuthType::Array*>(m_type);
 }
 
-inline bool ArraySpec::vanilla() const {
-  return layout().vanilla();
-}
-
-inline bool ArraySpec::bespoke() const {
-  return layout().bespoke();
-}
-
 IMPLEMENT_SPEC_OPERS(ArraySpec, false)
 
 ///////////////////////////////////////////////////////////////////////////////

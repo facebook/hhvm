@@ -574,7 +574,6 @@ template <bool isFirst, bool isKey>
 void emitBespokeFirstLast(ArrayLayout layout, IRGS& env, uint32_t numArgs) {
   if (numArgs != 1) PUNT(Bespoke-FirstLast-BadArgs);
   auto const arr = popC(env);
-  auto const size = gen(env, Count, arr);
   auto const elem = arrLikeFirstLastType(
     arr->type(), isFirst, isKey, curClass(env));
   auto const type = elem.first;
@@ -583,13 +582,10 @@ void emitBespokeFirstLast(ArrayLayout layout, IRGS& env, uint32_t numArgs) {
   auto const res = cond(
     env,
     [&](Block* taken) {
+      auto const size = gen(env, Count, arr);
       if (maybeEmpty) gen(env, JmpZero, taken, size);
     },
     [&] {
-      if (isKey && arr->isA(TVArr|TVec)) {
-        return isFirst ? cns(env, 0) : gen(env, SubInt, size, cns(env, 1));
-      }
-
       auto const pos = isFirst ? layout.emitIterFirstPos(env, arr)
                                : layout.emitIterLastPos(env, arr);
       auto const elm = layout.emitIterElm(env, arr, pos);

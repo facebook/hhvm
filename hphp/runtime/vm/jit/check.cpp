@@ -423,7 +423,7 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* /*unit*/) {
     auto const t = src()->type();
     if (t != TBottom) {
       check(t <= type, type, "");
-      check(t.arrSpec().layout().monotype(), Type(), "TArrLike=Monotype");
+      check(t.arrSpec().monotype(), Type(), "TArrLike=Monotype");
     }
     ++curSrc;
   };

@@ -66,20 +66,31 @@ auto const static_str_vtable = fromArray<MonotypeDict<StaticStrPtr>>();
 constexpr DataType kEmptyDataType = static_cast<DataType>(1);
 constexpr DataType kAbstractDataTypeMask = static_cast<DataType>(0x80);
 
+using StringDict = MonotypeDict<StringData*>;
+
 constexpr LayoutIndex getEmptyLayoutIndex() {
-  auto constexpr offset = (1 << 10);
-  return LayoutIndex{uint16_t(kBaseLayoutIndex.raw) + offset};
-}
-constexpr LayoutIndex getStrLayoutIndex(DataType type) {
-  return LayoutIndex{uint16_t(kBaseLayoutIndex.raw + uint8_t(type))};
-}
-constexpr LayoutIndex getStaticStrLayoutIndex(DataType type) {
-  auto constexpr offset = (1 << 8);
-  return LayoutIndex{uint16_t(kBaseLayoutIndex.raw + uint8_t(type) + offset)};
+  auto constexpr offset = 4 * (1 << 8);
+  auto constexpr base = kBaseLayoutIndex.raw;
+  static_assert((StringDict::intKeyMask().raw & (base + offset)) == 0);
+  return LayoutIndex{uint16_t(base + offset)};
 }
 constexpr LayoutIndex getIntLayoutIndex(DataType type) {
-  auto constexpr offset = (1 << 9);
-  return LayoutIndex{uint16_t(kBaseLayoutIndex.raw + uint8_t(type) + offset)};
+  auto constexpr offset = 2 * (1 << 8);
+  auto constexpr base = kBaseLayoutIndex.raw;
+  static_assert((StringDict::intKeyMask().raw & (base + offset)) != 0);
+  return LayoutIndex{uint16_t(base + offset + uint8_t(type))};
+}
+constexpr LayoutIndex getStrLayoutIndex(DataType type) {
+  auto constexpr offset = 1 * (1 << 8);
+  auto constexpr base = kBaseLayoutIndex.raw;
+  static_assert((StringDict::intKeyMask().raw & (base + offset)) == 0);
+  return LayoutIndex{uint16_t(base + offset + uint8_t(type))};
+}
+constexpr LayoutIndex getStaticStrLayoutIndex(DataType type) {
+  auto constexpr offset = 0 * (1 << 8);
+  auto constexpr base = kBaseLayoutIndex.raw;
+  static_assert((StringDict::intKeyMask().raw & (base + offset)) == 0);
+  return LayoutIndex{uint16_t(base + offset + uint8_t(type))};
 }
 
 const LayoutFunctions* getVtableForKeyTypes(KeyTypes kt) {
@@ -437,8 +448,6 @@ bool keysEqual(Key a, Key b) {
     return a == b;
   }
 }
-
-using StringDict = MonotypeDict<StringData*>;
 
 }
 
@@ -935,6 +944,7 @@ ArrayData* MonotypeDict<Key>::escalateWithCapacity(size_t capacity) const {
 
 template <typename Key>
 typename MonotypeDict<Key>::Elm* MonotypeDict<Key>::elms() {
+  static_assert(sizeof(*this) == entriesOffset());
   return reinterpret_cast<Elm*>(reinterpret_cast<char*>(this + 1));
 }
 

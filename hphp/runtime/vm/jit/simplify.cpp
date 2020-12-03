@@ -3098,7 +3098,9 @@ SSATmp* simplifyBespokeIterEnd(State& env, const IRInstruction* inst) {
 
   if (arr->isA(TVArr|TVec)) {
     return gen(env, CountVec, arr);
-  } else if (arr->isA(TDArr|TDict) && arr->type().arrSpec().monotype()) {
+  }
+
+  if (arr->isA(TDArr|TDict) && arr->type().arrSpec().monotype()) {
     return gen(env, LdMonotypeDictEnd, arr);
   }
 
@@ -3116,6 +3118,10 @@ SSATmp* simplifyBespokeIterGetKey(State& env, const IRInstruction* inst) {
 
   if (arr->isA(TVArr|TVec)) return pos;
 
+  if (arr->isA(TDArr|TDict) && arr->type().arrSpec().monotype()) {
+    return gen(env, LdMonotypeDictKey, inst->typeParam(), arr, pos);
+  }
+
   return nullptr;
 }
 
@@ -3132,6 +3138,10 @@ SSATmp* simplifyBespokeIterGetVal(State& env, const IRInstruction* inst) {
     return gen(env, BespokeGet, inst->typeParam(), arr, pos);
   }
 
+  if (arr->isA(TDArr|TDict) && arr->type().arrSpec().monotype()) {
+    return gen(env, LdMonotypeDictVal, inst->typeParam(), arr, pos);
+  }
+
   return nullptr;
 }
 
@@ -3145,6 +3155,26 @@ SSATmp* simplifyLdMonotypeDictEnd(State& env, const IRInstruction* inst) {
     return cns(env, end);
   }
 
+  return nullptr;
+}
+
+SSATmp* simplifyLdMonotypeDictKey(State& env, const IRInstruction* inst) {
+  auto const arr = inst->src(0);
+  auto const pos = inst->src(1);
+  if (arr->hasConstVal() && pos->hasConstVal()) {
+    auto const tv = arr->arrLikeVal()->nvGetKey(pos->intVal());
+    return tv.is_init() ? cns(env, tv) : nullptr;
+  }
+  return nullptr;
+}
+
+SSATmp* simplifyLdMonotypeDictVal(State& env, const IRInstruction* inst) {
+  auto const arr = inst->src(0);
+  auto const pos = inst->src(1);
+  if (arr->hasConstVal() && pos->hasConstVal()) {
+    auto const tv = arr->arrLikeVal()->nvGetVal(pos->intVal());
+    return tv.is_init() ? cns(env, tv) : nullptr;
+  }
   return nullptr;
 }
 
@@ -3581,6 +3611,8 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(BespokeIterGetKey)
   X(BespokeIterGetVal)
   X(LdMonotypeDictEnd)
+  X(LdMonotypeDictKey)
+  X(LdMonotypeDictVal)
   X(LdMonotypeVecElem)
   X(LdVecElem)
   X(MethodExists)

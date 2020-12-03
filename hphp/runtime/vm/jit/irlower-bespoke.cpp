@@ -262,8 +262,31 @@ void cgBespokeElem(IRLS& env, const IRInstruction* inst) {
 
 //////////////////////////////////////////////////////////////////////////////
 
+namespace {
+using MonotypeDict = bespoke::MonotypeDict<int64_t>;
+
+// Returns a pointer to a value `off` bytes into the MonotypeDict element at
+// the iterator position `pos` in the dict pointed to by `rarr`.
+Vptr ptrToMonotypeDictElm(Vout& v, Vreg rarr, Vreg rpos, Type pos, size_t off) {
+  auto const base = MonotypeDict::entriesOffset() + off;
+
+  if (pos.hasConstVal()) {
+    auto const offset = pos.intVal() * MonotypeDict::elmSize() + base;
+    if (deltaFits(offset, sz::dword)) return rarr[offset];
+  }
+
+  static_assert(MonotypeDict::elmSize() == 16);
+  auto posl = v.makeReg();
+  auto scaled_posl = v.makeReg();
+  auto scaled_pos = v.makeReg();
+  v << movtql{rpos, posl};
+  v << shlli{1, posl, scaled_posl, v.makeReg()};
+  v << movzlq{scaled_posl, scaled_pos};
+  return rarr[scaled_pos * int(MonotypeDict::elmSize() / 2) + base];
+}
+}
+
 void cgLdMonotypeDictEnd(IRLS& env, const IRInstruction* inst) {
-  using MonotypeDict = bespoke::MonotypeDict<int64_t>;
   static_assert(MonotypeDict::usedSize() == 2);
 
   auto const rarr = srcLoc(env, inst, 0).reg();
@@ -275,6 +298,44 @@ void cgLdMonotypeDictEnd(IRLS& env, const IRInstruction* inst) {
   v << movzwq{tmp, used};
 }
 
+void cgLdMonotypeDictKey(IRLS& env, const IRInstruction* inst) {
+  auto const rarr = srcLoc(env, inst, 0).reg();
+  auto const rpos = srcLoc(env, inst, 1).reg();
+  auto const pos = inst->src(1)->type();
+  auto const dst = dstLoc(env, inst, 0);
+
+  auto& v = vmain(env);
+  auto const off = MonotypeDict::elmKeyOffset();
+  auto const ptr = ptrToMonotypeDictElm(v, rarr, rpos, pos, off);
+  v << load{ptr, dst.reg(0)};
+
+  if (dst.hasReg(1)) {
+    auto const sf = v.makeReg();
+    auto const intb = v.cns(KindOfInt64);
+    auto const strb = v.cns(KindOfString);
+    auto const mask = safe_cast<int32_t>(MonotypeDict::intKeyMask().raw);
+    auto const layout = rarr[ArrayData::offsetOfBespokeIndex()];
+    v << testwim{mask, layout, sf};
+    v << cmovb{CC_Z, sf, intb, strb, dst.reg(1)};
+  }
+}
+
+void cgLdMonotypeDictVal(IRLS& env, const IRInstruction* inst) {
+  auto const rarr = srcLoc(env, inst, 0).reg();
+  auto const rpos = srcLoc(env, inst, 1).reg();
+  auto const pos = inst->src(1)->type();
+  auto const dst = dstLoc(env, inst, 0);
+
+  auto& v = vmain(env);
+  auto const off = MonotypeDict::elmValOffset();
+  auto const ptr = ptrToMonotypeDictElm(v, rarr, rpos, pos, off);
+  v << load{ptr, dst.reg(0)};
+
+  if (dst.hasReg(1)) {
+    v << loadb{rarr[MonotypeDict::typeOffset()], dst.reg(1)};
+  }
+}
+
 void cgLdMonotypeVecElem(IRLS& env, const IRInstruction* inst) {
   auto const rarr = srcLoc(env, inst, 0).reg();
   auto const ridx = srcLoc(env, inst, 1).reg();
@@ -282,13 +343,12 @@ void cgLdMonotypeVecElem(IRLS& env, const IRInstruction* inst) {
 
   auto const type = rarr[bespoke::MonotypeVec::typeOffset()];
   auto const value = [&] {
+    auto const base = bespoke::MonotypeVec::entriesOffset();
     if (idx->hasConstVal()) {
-      auto const vOffset = bespoke::MonotypeVec::entriesOffset() +
-                           idx->intVal() * sizeof(Value);
-      if (deltaFits(vOffset, sz::dword)) return rarr[vOffset];
+      auto const offset = idx->intVal() * sizeof(Value) + base;
+      if (deltaFits(offset, sz::dword)) return rarr[offset];
     }
-
-    return rarr[ridx * int(sizeof(Value)) + bespoke::MonotypeVec::entriesOffset()];
+    return rarr[ridx * int(sizeof(Value)) + base];
   }();
 
   loadTV(vmain(env), inst->dst()->type(), dstLoc(env, inst, 0),

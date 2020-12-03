@@ -3057,7 +3057,13 @@ fields of that struct for holding intermediate values.
 
 | LdMonotypeDictEnd, D(Int), SMonotypeDict, NF
 
-  Specialization of BespokeIterEnd when the base is a monotype dict.
+| LdMonotypeDictKey<T>, DParam(Int|Str), SMonotypeDict S(Int), NF
+
+| LdMonotypeDictVal<T>, DParam(InitCell), SMonotypeDict S(Int), NF
+
+  Specializations of BespokeIterEnd, BespokeIterGetKey, and BespokeIterGetVal
+  for when the base is a monotype dict. The GetKey and GetVal ops require that
+  S1 is a valid iterator position for S0.
 
 | LdMonotypeVecElem, DParam(InitCell), SMonotypeVec S(Int), NF
 

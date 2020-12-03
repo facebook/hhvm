@@ -1059,6 +1059,12 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     return PureStore { AElemS { arr, key }, val, arr };
   }
 
+  case LdMonotypeDictVal: {
+    // TODO(mcolavita): When we have a type-array-elem method to get the key
+    // of an arbitrary array-like type, use that to narrow this load.
+    return PureLoad { AElemAny };
+  }
+
   case LdMonotypeVecElem:
   case LdVecElem: {
     auto const base = inst.src(0);
@@ -1071,12 +1077,15 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case BespokeGet: {
     auto const base = inst.src(0);
     auto const key  = inst.src(1);
+    assertx(key->type().subtypeOfAny(TInt, TStr));
     if (key->isA(TInt)) {
       return PureLoad {
         key->hasConstVal() ? AElemI { base, key->intVal() } : AElemIAny,
       };
     } else {
-      return PureLoad { AElemAny };
+      return PureLoad {
+        key->hasConstVal() ? AElemS { base, key->strVal() } : AElemSAny,
+      };
     }
   }
 
@@ -1247,6 +1256,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case DictFirstKey:
   case DictLastKey:
   case LdMonotypeDictEnd:
+  case LdMonotypeDictKey:
     return may_load_store(AEmpty, AEmpty);
 
   case CheckDictKeys:

@@ -140,14 +140,36 @@ struct MonotypeDict : BespokeArray {
   static MonotypeDict* As(ArrayData* ad);
   static const MonotypeDict* As(const ArrayData* ad);
 
+  bool checkInvariants() const;
+
+  // Helpers used to JIT fast accessors for these array-likes. We can call
+  // these helpers on a MonotypeDict<Key> for any Key type.
+  static constexpr size_t entriesOffset() {
+    return sizeof(Self);
+  }
+  static constexpr size_t elmSize() {
+    return 2 * sizeof(Value);
+  }
+  static constexpr size_t elmKeyOffset() {
+    return offsetof(Elm, key);
+  }
+  static constexpr size_t elmValOffset() {
+    return offsetof(Elm, val);
+  }
   static constexpr size_t usedOffset() {
-    return offsetof(MonotypeDict, m_extra_lo16);
+    return offsetof(Self, m_extra_lo16);
   }
   static constexpr size_t usedSize() {
     return sizeof(m_extra_lo16);
   }
-
-  bool checkInvariants() const;
+  static constexpr size_t typeOffset() {
+    static_assert(folly::kIsLittleEndian);
+    return offsetof(Self, m_extra_hi16);
+  }
+  // This bit is set in our layout index iff we have int keys.
+  static constexpr LayoutIndex intKeyMask() {
+    return {0x0200};
+  }
 
 #define X(Return, Name, Args...) static Return Name(Args);
   BESPOKE_LAYOUT_FUNCTIONS(MonotypeDict<Key>)

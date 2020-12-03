@@ -830,6 +830,12 @@ function extra_args($options): string {
     $args .= ' -d auto_prepend_file=';
     $args .= escapeshellarg($vendor.'/hh_autoload.php');
   }
+
+  if (isset($options['hadva'])) {
+    $args .= ' -vEval.HackArrDVArrs=true';
+    $args .= ' -vEval.HackArrDVArrMark=true';
+  }
+
   return $args;
 }
 
@@ -916,11 +922,6 @@ function hhvm_cmd_impl(
 
     if (isset($options['bespoke'])) {
       $args[] = '-vEval.BespokeArrayLikeMode=1';
-    }
-
-    if (isset($options['hadva'])) {
-      $args[] = '-vEval.HackArrDVArrs=true';
-      $args[] = '-vEval.HackArrDVArrMark=true';
     }
 
     $cmds[] = implode(' ', array_merge($args, $extra_args));

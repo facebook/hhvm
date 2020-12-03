@@ -25,5 +25,6 @@ type inherited_members = {
 val make :
   Provider_context.t ->
   string ->
+  Decl_defs.linearization ->
   (string -> decl_ty option) ->
   inherited_members

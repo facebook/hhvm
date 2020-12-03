@@ -7,17 +7,23 @@
  *)
 open Hh_prelude
 
-type ancestor_caches = {
-  ancestors: Typing_defs.decl_ty Lazy_string_table.t;
-      (** Types of parents, interfaces, and traits *)
-  parents_and_traits: unit Lazy_string_table.t;
-      (** Names of parents and traits only *)
-  members_fully_known: bool Lazy.t;
-  req_ancestor_names: unit Lazy_string_table.t;
-  all_requirements: (Pos.t * Typing_defs.decl_ty) Sequence.t;
-  is_disposable: bool Lazy.t;
-}
+(** Types of parents, interfaces and traits *)
+val all_ancestors :
+  lin_ancestors_drop_one:Decl_defs.linearization ->
+  (string * Typing_defs.decl_ty) Sequence.t
 
-type class_name = string
+(** Names of parents and traits only *)
+val parents_and_traits :
+  lin_ancestors_drop_one:Decl_defs.linearization -> (string * unit) Sequence.t
 
-val make : Provider_context.t -> class_name -> ancestor_caches
+val members_fully_known :
+  lin_ancestors_drop_one:Decl_defs.linearization -> bool Lazy.t
+
+val req_ancestor_names :
+  lin_members:Decl_defs.linearization -> (string * unit) Sequence.t
+
+val all_requirements :
+  lin_members:Decl_defs.linearization ->
+  (Pos.t * Typing_defs.decl_ty) Sequence.t
+
+val is_disposable : lin_members:Decl_defs.linearization -> bool Lazy.t

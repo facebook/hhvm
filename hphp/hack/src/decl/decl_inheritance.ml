@@ -432,12 +432,9 @@ let construct class_name lin =
          ~init:(None, Inconsistent)
          ~f:(fold_constructors class_name) )
 
-let make ctx class_name get_ancestor =
-  let key = (class_name, Decl_defs.Member_resolution) in
+let make ctx class_name lin_members get_ancestor =
   let lin =
-    Decl_linearize.get_linearization ctx key
-    |> get_shallow_classes_and_substs ctx
-    |> Sequence.memoize
+    lin_members |> get_shallow_classes_and_substs ctx |> Sequence.memoize
   in
   let all_methods = get_all_methods class_name lin ~static:false in
   let all_smethods = get_all_methods class_name lin ~static:true in

@@ -17,8 +17,8 @@ module SN = Naming_special_names
 
 type lazy_class_type = {
   ih: inherited_members;
-  ancestors: decl_ty LSTable.t;
-  parents_and_traits: unit LSTable.t;
+  ancestors: decl_ty LSTable.t;  (** Types of parents, interfaces, and traits *)
+  parents_and_traits: unit LSTable.t;  (** Names of parents and traits only *)
   members_fully_known: bool Lazy.t;
   req_ancestor_names: unit LSTable.t;
   all_requirements: (Pos.t * decl_ty) Sequence.t;
@@ -48,29 +48,44 @@ let make_lazy_class_type ctx class_name =
   | Some sc ->
     let remainder =
       lazy
-        (let Decl_ancestors.
-               {
-                 ancestors;
-                 parents_and_traits;
-                 members_fully_known;
-                 req_ancestor_names;
-                 all_requirements;
-                 is_disposable;
-               } =
-           Decl_ancestors.make ctx class_name
+        (let lin_members =
+           Decl_linearize.get_linearization
+             ctx
+             (class_name, Decl_defs.Member_resolution)
          in
-         let get_ancestor = LSTable.get ancestors in
-         let inherited_members =
-           Decl_inheritance.make ctx class_name get_ancestor
+         let lin_ancestors =
+           Decl_linearize.get_linearization
+             ctx
+             (class_name, Decl_defs.Ancestor_types)
+         in
+         let lin_ancestors_drop_one = Sequence.drop_eagerly lin_ancestors 1 in
+         let is_canonical _ = true in
+         let merge ~earlier ~later:_ = earlier in
+         let ancestors =
+           LSTable.make
+             (Decl_ancestors.all_ancestors ~lin_ancestors_drop_one)
+             ~is_canonical
+             ~merge
          in
          {
-           ih = inherited_members;
+           ih =
+             Decl_inheritance.make ctx class_name lin_members (fun x ->
+                 LSTable.get ancestors x);
            ancestors;
-           parents_and_traits;
-           members_fully_known;
-           req_ancestor_names;
-           all_requirements;
-           is_disposable;
+           parents_and_traits =
+             LSTable.make
+               (Decl_ancestors.parents_and_traits ~lin_ancestors_drop_one)
+               ~is_canonical
+               ~merge;
+           members_fully_known =
+             Decl_ancestors.members_fully_known ~lin_ancestors_drop_one;
+           req_ancestor_names =
+             LSTable.make
+               (Decl_ancestors.req_ancestor_names ~lin_members)
+               ~is_canonical
+               ~merge;
+           all_requirements = Decl_ancestors.all_requirements ~lin_members;
+           is_disposable = Decl_ancestors.is_disposable ~lin_members;
          })
     in
     Some (Lazy (sc, remainder))

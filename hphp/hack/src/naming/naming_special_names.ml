@@ -828,7 +828,7 @@ module Capabilities = struct
 
   let prefix = "\\HH\\Capabilities\\"
 
-  let globals = prefix ^ "Globals"
+  let accessStaticVariable = prefix ^ "AccessStaticVariable"
 
   let io = prefix ^ "IO"
 end

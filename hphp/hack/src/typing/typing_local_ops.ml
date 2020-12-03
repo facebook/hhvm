@@ -44,7 +44,9 @@ module Capabilities = struct
 end
 
 let enforce_static_property_access =
-  enforce_local_capability Capabilities.(mk globals) "Static property access"
+  enforce_local_capability
+    Capabilities.(mk accessStaticVariable)
+    "Static property access"
 
 let enforce_output =
   enforce_local_capability Capabilities.(mk io) "`echo` or `print` builtin"

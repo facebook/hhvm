@@ -49,13 +49,13 @@ namespace HH\Capabilities {
   interface NonDet {}
 
   <<__Sealed()>>
-  interface Globals {}
+  interface AccessStaticVariable {}
 
   <<__Sealed()>>
   interface IO {}
 
   <<__Sealed()>>
-  interface UnrestrictedMutation {}
+  interface WriteProperty {}
 
   /**
    * The core capability present in every reactive context.

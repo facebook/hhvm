@@ -4,7 +4,7 @@
       f_name = ([5:10-11], "\\f"); f_tparams = []; f_where_constraints = [];
       f_variadic = FVnonVariadic; f_params = [];
       f_cap =
-      ((((HH\Capabilities\RxLocal & HH\Capabilities\IO & HH\Capabilities\CippGlobal & HH\Capabilities\Globals & HH\Capabilities\UnrestrictedMutation))),
+      ((((HH\Capabilities\IO & HH\Capabilities\AccessStaticVariable & HH\Capabilities\WriteProperty))),
        (Some ([5:13-23],
               (Hintersection
                  [([5:14-22],

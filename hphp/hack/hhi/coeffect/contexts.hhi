@@ -30,18 +30,15 @@ namespace HH\Contexts {
   /**
    * The default, normally unannotated context.
    */
-  // type defaults = (rx_local & cipp_global & UnrestrictedMutation);
   type defaults = (
-    \HH\Capabilities\RxLocal &
     \HH\Capabilities\IO &
-    \HH\Capabilities\CippGlobal &
-    \HH\Capabilities\Globals &
-    \HH\Capabilities\UnrestrictedMutation
+    \HH\Capabilities\AccessStaticVariable &
+    \HH\Capabilities\WriteProperty
   );
 
-  type cipp_global = (\HH\Capabilities\CippGlobal & \HH\Capabilities\IO & \HH\Capabilities\Globals);
+  type cipp_global = (\HH\Capabilities\CippGlobal & \HH\Capabilities\IO & \HH\Capabilities\AccessStaticVariable);
   // type cipp<T> = (\HH\Capabilities\Cipp<T> & cipp_global);
-  type cipp<T> = (\HH\Capabilities\Cipp<T> & \HH\Capabilities\IO & \HH\Capabilities\Globals);
+  type cipp<T> = (\HH\Capabilities\Cipp<T> & \HH\Capabilities\IO & \HH\Capabilities\AccessStaticVariable);
 
   type non_det = \HH\Capabilities\NonDet;
 

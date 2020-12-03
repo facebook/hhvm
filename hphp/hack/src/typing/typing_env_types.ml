@@ -60,6 +60,7 @@ type env = {
   in_loop: bool;
   in_try: bool;
   in_case: bool;
+  in_expr_tree: bool;
   inside_constructor: bool;
   tracing_info: Decl_counters.tracing_info option;
   (* A set of constraints that are global to a given method *)

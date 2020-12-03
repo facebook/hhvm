@@ -557,6 +557,7 @@ let env_as_value env =
     in_loop;
     in_try;
     in_case;
+    in_expr_tree;
     inside_constructor;
     global_tpenv;
     log_levels = _;
@@ -576,6 +577,7 @@ let env_as_value env =
       ("in_loop", bool_as_value in_loop);
       ("in_try", bool_as_value in_try);
       ("in_case", bool_as_value in_case);
+      ("in_expr_tree", bool_as_value in_expr_tree);
       ("inside_constructor", bool_as_value inside_constructor);
       ("global_tpenv", tpenv_as_value env global_tpenv);
       ("allow_wildcards", bool_as_value allow_wildcards);

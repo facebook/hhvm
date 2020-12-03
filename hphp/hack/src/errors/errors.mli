@@ -449,6 +449,8 @@ val member_not_found :
   typing_error_callback ->
   unit
 
+val expr_tree_unsupported_operator : string -> string -> Pos.t -> unit
+
 val parent_in_trait : Pos.t -> unit
 
 val parent_undefined : Pos.t -> unit

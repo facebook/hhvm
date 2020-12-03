@@ -564,6 +564,7 @@ let empty ?origin ?(mode = FileInfo.Mstrict) ctx file ~droot =
     in_loop = false;
     in_try = false;
     in_case = false;
+    in_expr_tree = false;
     inside_constructor = false;
     decl_env = { mode; droot; ctx };
     tracing_info =

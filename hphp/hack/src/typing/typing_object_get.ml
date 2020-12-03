@@ -57,39 +57,43 @@ let smember_not_found pos ~is_const ~is_method class_ member_name on_error =
     ()
   | (None, None) -> error `no_hint
 
-let member_not_found pos ~is_method class_ member_name r on_error =
-  let kind =
-    if is_method then
-      `method_
-    else
-      `property
-  in
-  let cid = (Cls.pos class_, Cls.name class_) in
-  let reason =
-    Reason.to_string
-      ( "This is why I think it is an object of type "
-      ^ strip_ns (Cls.name class_) )
-      r
-  in
-  let error hint =
-    Errors.member_not_found kind pos cid member_name hint reason on_error
-  in
-  let method_suggestion = Env.suggest_member is_method class_ member_name in
-  let static_suggestion =
-    Env.suggest_static_member is_method class_ member_name
-  in
-  match (method_suggestion, static_suggestion) with
-  (* Prefer suggesting a different method, unless there's a
+let member_not_found
+    (env : Typing_env_types.env) pos ~is_method class_ member_name r on_error =
+  let cls_name = strip_ns (Cls.name class_) in
+  if env.Typing_env_types.in_expr_tree && is_method then
+    Errors.expr_tree_unsupported_operator cls_name member_name pos
+  else
+    let kind =
+      if is_method then
+        `method_
+      else
+        `property
+    in
+    let cid = (Cls.pos class_, Cls.name class_) in
+    let reason =
+      Reason.to_string
+        ("This is why I think it is an object of type " ^ cls_name)
+        r
+    in
+    let error hint =
+      Errors.member_not_found kind pos cid member_name hint reason on_error
+    in
+    let method_suggestion = Env.suggest_member is_method class_ member_name in
+    let static_suggestion =
+      Env.suggest_static_member is_method class_ member_name
+    in
+    match (method_suggestion, static_suggestion) with
+    (* Prefer suggesting a different method, unless there's a
       static method whose name matches exactly. *)
-  | (Some _, Some (def_pos, v)) when String.equal v member_name ->
-    error (`closest (def_pos, v))
-  | (Some (def_pos, v), _) -> error (`did_you_mean (def_pos, v))
-  | (None, Some (def_pos, v)) -> error (`closest (def_pos, v))
-  | (None, None) when not (Cls.members_fully_known class_) ->
-    (* no error in this case ... the member might be present
-     * in one of the parents of class_ that the typing cannot see *)
-    ()
-  | (None, None) -> error `no_hint
+    | (Some _, Some (def_pos, v)) when String.equal v member_name ->
+      error (`closest (def_pos, v))
+    | (Some (def_pos, v), _) -> error (`did_you_mean (def_pos, v))
+    | (None, Some (def_pos, v)) -> error (`closest (def_pos, v))
+    | (None, None) when not (Cls.members_fully_known class_) ->
+      (* no error in this case ... the member might be present
+       * in one of the parents of class_ that the typing cannot see *)
+      ()
+    | (None, None) -> error `no_hint
 
 let widen_class_for_obj_get ~is_method ~nullsafe ~on_error member_name env ty =
   match deref ty with
@@ -273,14 +277,28 @@ let rec obj_get_concrete_ty
             Errors.try_with_error
               (fun () -> get_member_from_constraints env class_info)
               (fun () ->
-                member_not_found id_pos ~is_method class_info id_str r on_error;
+                member_not_found
+                  env
+                  id_pos
+                  ~is_method
+                  class_info
+                  id_str
+                  r
+                  on_error;
                 default ())
           | None when not is_method ->
             if not (SN.Members.is_special_xhp_attribute id_str) then
-              member_not_found id_pos ~is_method class_info id_str r on_error;
+              member_not_found
+                env
+                id_pos
+                ~is_method
+                class_info
+                id_str
+                r
+                on_error;
             default ()
           | None ->
-            member_not_found id_pos ~is_method class_info id_str r on_error;
+            member_not_found env id_pos ~is_method class_info id_str r on_error;
             default ()
           | Some
               ( {

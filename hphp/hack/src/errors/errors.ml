@@ -3035,6 +3035,29 @@ let member_not_found
      @ reason
      @ [(cpos, "Declaration of " ^ type_name ^ " is here")])
 
+let expr_tree_unsupported_operator cls_name meth_name pos =
+  let msg =
+    match String.chop_prefix meth_name ~prefix:"__to" with
+    | Some type_name ->
+      (* Complain about usage like `if ($not_bool)` that's virtualized to
+         `if ($not_bool->__toBool())`.
+        *)
+      Printf.sprintf
+        "`%s` cannot be used in a %s position (it has no `%s` method)"
+        cls_name
+        (String.lowercase type_name)
+        meth_name
+    | None ->
+      (* Complain about usage like `$not_int +` that's virtualized to
+         `$not_int->__plus(...)`.
+        *)
+      Printf.sprintf
+        "`%s` does not support this operator (it has no `%s` method)"
+        cls_name
+        meth_name
+  in
+  add (Typing.err_code Typing.MemberNotFound) pos msg
+
 let parent_in_trait pos =
   add
     (Typing.err_code Typing.ParentInTrait)

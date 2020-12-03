@@ -29,6 +29,7 @@ type env = {
   in_loop: bool;
   in_try: bool;
   in_case: bool;
+  in_expr_tree: bool;
   inside_constructor: bool;
   (* Tracing_info is a way, when we record telemetry on costs, to also record which
   area of the typing code should be considered the originator of that work,

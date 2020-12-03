@@ -42,12 +42,8 @@ let rec ptype fty fpol = function
       | Open_shape ty -> Open_shape (fty ty)
       | Closed_shape -> Closed_shape
     in
-    let field sft =
-      {
-        sft with
-        sft_policy = fpol sft.sft_policy;
-        sft_ty = ptype fty fpol sft.sft_ty;
-      }
+    let field { sft_optional; sft_policy; sft_ty } =
+      { sft_optional; sft_policy = fpol sft_policy; sft_ty = fty sft_ty }
     in
     Tshape { sh_kind; sh_fields = Nast.ShapeMap.map field sh_fields }
   | Tdynamic pol -> Tdynamic (fpol pol)
@@ -100,6 +96,7 @@ let iter_ptype2 fty fpol pt1 pt2 =
     let combine _ f1 f2 =
       match (f1, f2) with
       | (Some t1, Some t2) ->
+        fpol t1.sft_policy t2.sft_policy;
         fty t1.sft_ty t2.sft_ty;
         None
       | _ -> invalid_arg "iter_ptype2"

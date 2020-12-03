@@ -70,3 +70,8 @@ function pass_to_a_ko(C $c): void {
   // illegal
   takes_a($c->b);
 }
+
+<<__Policied("PUBLIC")>>
+function id(shape("x" => int) $s): shape("x" => int) {
+  return $s;
+}

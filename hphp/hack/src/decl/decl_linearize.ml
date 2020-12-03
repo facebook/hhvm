@@ -28,21 +28,58 @@ type env = {
 
 let get_ctx env = env.decl_env.Decl_env.ctx
 
+(** An "ancestor" is what we call the immediate parents of a type whose linearization
+we're working on. *)
+type ancestor = {
+  ty_pos: Pos.t;
+  class_name: Pos.t * string;
+  type_args: decl_ty list;
+  source: source_type;
+      (** Just to remember where we originally picked up this ancestor type -
+          was it by looking sc_implements, or sc_req_implements, or sc_uses, or ... *)
+}
+
 (** These state variants drive the Sequence generating the linearization. *)
 type state =
-  | Child of mro_element
-      (** [Child] contains the first element in the linearization, the class which
-      was linearized. *)
-  | Next_ancestor
-      (** [Next_ancestor] indicates that the next ancestor linearization should be
-      lazily computed and emitted. *)
-  | Ancestor of (string * linearization)
+  | Child of {
+      child: mro_element;
+      ancestors: ancestor list;
+          (** [ancestors] are the immediate parents of the type whose linearization we're getting.
+              This list is initialized when we start getting the linearization of a type.
+              The list is only ever shrunk, one by one, upon transition to Next_ancestor. *)
+    }
+      (** [Child] contains the first element in the linearization, the class which was linearized.
+      -> Next_ancestor
+      *)
+  | Next_ancestor of {
+      ancestors: ancestor list;
+      synths: mro_element list;
+          (** [synths] accumulates synthesized ancestors that we determined we needed during
+              the linearization. These are emitted at the end of the linearization
+              in Synthesized_elts, after all ancestors have been dealt with. For
+              Ancestor_types linearization, this is only ever Stringish (if we encounter a
+              method named to_string). For Member_resolution, it consists of all ancestors
+              reachable through a require-extends clause. *)
+    }
+      (** [Next_ancestor] picks the next ancestor off the list, lazily
+      generates its linearization, but doesn't emit any elements.
+      -> Ancestor
+      -> Synthesized_elts if there weren't any more ancestors in the list
+      *)
+  | Ancestor of {
+      ancestor: string * linearization;
+      ancestors: ancestor list;
+      synths: mro_element list;
+    }
       (** [Ancestor] indicates that we are in the middle of emitting an ancestor
       linearization. For each of its elements, the element should be emitted as
       an element of the current linearization (with the appropriate source and
       type parameters substituted) unless it was already emitted earlier in the
-      current linearization sequence. *)
-  | Synthesized_elts of mro_element list
+      current linearization sequence.
+      -> Ancestor if the current ancestor still has elements to go
+      -> Next_ancestor if it ran out
+      *)
+  | Synthesized_elts of { synths: mro_element list }
       (** A list of synthesized ancestor MRO elements (that is, classes which were
       specified in a require-extends clause, plus all ancestors of those
       classes) which were accumulated while we iterated over ancestor
@@ -57,38 +94,19 @@ type state =
       requirement). For each MRO element in the list, that element should be
       emitted as an element of the current linearization (with the appropriate
       type parameter substitutions) unless it was already emitted earlier in the
-      current linearization sequence. *)
-
-(** An "ancestor" is what we call the immediate parents of a type whose linearization
-we're working on. *)
-type ancestor = {
-  ty_pos: Pos.t;
-  class_name: Pos.t * string;
-  type_args: decl_ty list;
-  source: source_type;
-      (** Just to remember where we originally picked up this ancestor type -
-          was it by looking sc_implements, or sc_req_implements, or sc_uses, or ... *)
-}
+      current linearization sequence.
+      -> Synthesized_elts if there are still some synths left to go
+      -> Done if there are none.
+      *)
 
 (** This is the state for linearization-sequence-generator function [next_state] *)
 type seq_unfold_state = {
   state: state;
       (** Indicates what phase of linearization we're currently working through *)
-  ancestors: ancestor list;
-      (** These are the immediate parents of the type whose linearization we're getting.
-          This list is initialized when we start getting the linearization of a type.
-          The list is only ever shrunk, one by one, as we deal with each parent in turn. *)
   acc: Decl_defs.mro_element list;
       (** accumulates every mro_element we encountered during the linearization.
           This is solely used so that, if we happen to complete the linearization,
           then we can write the list into Linearization_provider.complete. *)
-  synths: Decl_defs.mro_element list;
-      (** accumulates synthesized ancestors that we determined we needed during
-          the linearization. These are emitted at the end of the linearization,
-          after all ancestors have been dealt with. For Ancestor_types linearization,
-          this is only ever Stringish (if we encounter a method named to_string).
-          For Member_resolution, it consists of all ancestors reachable through
-          a require-extends clause. *)
 }
 
 let ancestor_from_ty (source : source_type) (ty : decl_ty) : ancestor =
@@ -381,7 +399,7 @@ and linearize (env : env) (c : shallow_class) : linearization =
         ]
   in
   Sequence.unfold_step
-    ~init:{ state = Child child; ancestors; acc = []; synths = [] }
+    ~init:{ state = Child { child; ancestors }; acc = [] }
     ~f:(next_state env mro_name c.sc_kind (Caml.Hashtbl.create 32))
   |> Sequence.memoize
 
@@ -390,7 +408,7 @@ and next_state
     (class_name : string)
     (child_class_kind : Ast_defs.class_kind)
     (emitted_elements : (string, mro_element list) Caml.Hashtbl.t)
-    ({ state; ancestors; acc; synths } : seq_unfold_state) :
+    ({ state; acc } : seq_unfold_state) :
     (Decl_defs.mro_element, seq_unfold_state) Sequence.Step.t =
   let child_class_concrete =
     Ast_defs.equal_class_kind child_class_kind Ast_defs.Cnormal
@@ -403,11 +421,10 @@ and next_state
     in
     Caml.Hashtbl.replace emitted_elements mro.mro_name list
   in
-  let yield mro_element next_state ancestors synths =
+  let yield mro_element next_state =
     add_emitted mro_element;
     Sequence.Step.Yield
-      ( mro_element,
-        { state = next_state; ancestors; acc = mro_element :: acc; synths } )
+      (mro_element, { state = next_state; acc = mro_element :: acc })
   in
   let was_emitted mro =
     match Caml.Hashtbl.find_opt emitted_elements mro.mro_name with
@@ -415,18 +432,20 @@ and next_state
     | Some list -> List.mem list mro ~equal:emitted_mro_elements_equal
   in
   let name_was_emitted mro = Caml.Hashtbl.mem emitted_elements mro.mro_name in
-  match (state, ancestors) with
-  | (Child child, _) -> yield child Next_ancestor ancestors synths
-  | (Next_ancestor, ancestor :: ancestors) ->
+  match state with
+  | Child { child; ancestors } ->
+    yield child (Next_ancestor { ancestors; synths = [] })
+  | Next_ancestor { ancestors = ancestor :: ancestors; synths } ->
     let name_and_lin =
       ancestor_linearization env child_class_concrete ancestor
     in
-    Sequence.Step.Skip { state = Ancestor name_and_lin; ancestors; acc; synths }
-  | (Ancestor (name, lin), ancestors) ->
+    Sequence.Step.Skip
+      { state = Ancestor { ancestor = name_and_lin; ancestors; synths }; acc }
+  | Ancestor { ancestor = (name, lin); ancestors; synths } ->
     begin
       match Sequence.next lin with
       | None ->
-        Sequence.Step.Skip { state = Next_ancestor; ancestors; acc; synths }
+        Sequence.Step.Skip { state = Next_ancestor { ancestors; synths }; acc }
       (* Lazy.Undefined occurs if we attempt to include a linearization within
        itself. This will only happen when we have a class dependency cycle (and
        only in some particular circumstances), so it will not arise in legal
@@ -439,7 +458,7 @@ and next_state
             mro_cyclic = Some (SSet.add env.class_stack name);
           }
         in
-        yield next Next_ancestor ancestors synths
+        yield next (Next_ancestor { ancestors; synths })
       | Some (next, rest) ->
         let skip_or_mark_trait_reuse was_emitted =
           let is_trait class_name =
@@ -506,20 +525,22 @@ and next_state
         (match next with
         | None ->
           Sequence.Step.Skip
-            { state = Ancestor (name, rest); ancestors; acc; synths }
-        | Some next -> yield next (Ancestor (name, rest)) ancestors synths)
+            {
+              state = Ancestor { ancestor = (name, rest); ancestors; synths };
+              acc;
+            }
+        | Some next ->
+          yield next (Ancestor { ancestor = (name, rest); ancestors; synths }))
     end
-  | (Next_ancestor, []) ->
+  | Next_ancestor { ancestors = []; synths } ->
     let synths = List.rev synths in
-    Sequence.Step.Skip
-      { state = Synthesized_elts synths; ancestors; acc; synths }
-  | (Synthesized_elts (next :: synths), ancestors) ->
+    Sequence.Step.Skip { state = Synthesized_elts { synths }; acc }
+  | Synthesized_elts { synths = next :: synths } ->
     if was_emitted next then
-      Sequence.Step.Skip
-        { state = Synthesized_elts synths; ancestors; acc; synths }
+      Sequence.Step.Skip { state = Synthesized_elts { synths }; acc }
     else
-      yield next (Synthesized_elts synths) ancestors synths
-  | (Synthesized_elts [], _) ->
+      yield next (Synthesized_elts { synths })
+  | Synthesized_elts { synths = [] } ->
     let key = (class_name, env.linearization_kind) in
     Linearization_provider.complete (get_ctx env) key (List.rev acc);
     Sequence.Step.Done

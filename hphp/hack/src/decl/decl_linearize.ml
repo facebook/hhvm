@@ -41,18 +41,16 @@ type ancestor = {
 
 (** These state variants drive the Sequence generating the linearization. *)
 type state =
-  | Child of {
-      child: mro_element;
-      ancestors: ancestor list;
-          (** [ancestors] are the immediate parents of the type whose linearization we're getting.
-              This list is initialized when we start getting the linearization of a type.
-              The list is only ever shrunk, one by one, upon transition to Next_ancestor. *)
-    }
-      (** [Child] contains the first element in the linearization, the class which was linearized.
+  | Child of shallow_class
+      (** [Child] emits the first element in the linearization, the class which was linearized.
+      It also computes all immediate parents.
       -> Next_ancestor
       *)
   | Next_ancestor of {
       ancestors: ancestor list;
+          (** [ancestors] are the immediate parents of the type whose linearization we're getting.
+              This list is initialized upon exit of state [Child].
+              The list is only ever shrunk, one by one, upon transition to Next_ancestor. *)
       synths: mro_element list;
           (** [synths] accumulates synthesized ancestors that we determined we needed during
               the linearization. These are emitted at the end of the linearization
@@ -108,21 +106,6 @@ type seq_unfold_state = {
           This is solely used so that, if we happen to complete the linearization,
           then we can write the list into Linearization_provider.complete. *)
 }
-
-let ancestor_from_ty (source : source_type) (ty : decl_ty) : ancestor =
-  let (r, class_name, type_args) = Decl_utils.unwrap_class_type ty in
-  let ty_pos = Typing_reason.to_pos r in
-  { ty_pos; class_name; type_args; source }
-
-let from_parent (c : shallow_class) : decl_ty list =
-  (* In an abstract class or a trait, we assume the interfaces
-   * will be implemented in the future, so we take them as
-   * part of the class (as requested by dependency injection implementers)
-   *)
-  match c.sc_kind with
-  | Ast_defs.Cabstract -> c.sc_implements @ c.sc_extends
-  | Ast_defs.Ctrait -> c.sc_implements @ c.sc_extends @ c.sc_req_implements
-  | _ -> c.sc_extends
 
 (* Return true if the two given MRO elements are equal in everything except name
    (which is expected to be compared by the caller) and positions (which are
@@ -203,6 +186,82 @@ let is_includedEnum (source : source_type) =
   | XHPAttr
   | ReqExtends ->
     false
+
+let ancestor_from_ty (source : source_type) (ty : decl_ty) : ancestor =
+  let (r, class_name, type_args) = Decl_utils.unwrap_class_type ty in
+  let ty_pos = Typing_reason.to_pos r in
+  { ty_pos; class_name; type_args; source }
+
+let from_parent (c : shallow_class) : decl_ty list =
+  (* In an abstract class or a trait, we assume the interfaces
+   * will be implemented in the future, so we take them as
+   * part of the class (as requested by dependency injection implementers)
+   *)
+  match c.sc_kind with
+  | Ast_defs.Cabstract -> c.sc_implements @ c.sc_extends
+  | Ast_defs.Ctrait -> c.sc_implements @ c.sc_extends @ c.sc_req_implements
+  | _ -> c.sc_extends
+
+let get_ancestors (c : shallow_class) (linearization_kind : linearization_kind)
+    : ancestor list =
+  let get_ancestors kind = List.map ~f:(ancestor_from_ty kind) in
+  let interfaces c = get_ancestors Interface c.sc_implements in
+  let req_implements c = get_ancestors ReqImpl c.sc_req_implements in
+  let xhp_attr_uses c = get_ancestors XHPAttr c.sc_xhp_attr_uses in
+  let traits c = get_ancestors Trait c.sc_uses in
+  let req_extends c = get_ancestors ReqExtends c.sc_req_extends in
+  let parents c = get_ancestors Parent (from_parent c) in
+  let extends c = get_ancestors Parent c.sc_extends in
+  let includes c =
+    Aast.enum_includes_map c.sc_enum_type ~f:(fun enum_type ->
+        get_ancestors IncludedEnum enum_type.te_includes)
+  in
+  (* HHVM implicitly adds the Stringish interface to every class, interface, and
+     trait with a __toString method. The primitive type `string` is considered
+     to also implement this interface. *)
+  let stringish_interface c =
+    let module SN = Naming_special_names in
+    if String.equal (snd c.sc_name) SN.Classes.cStringish then
+      []
+    else
+      let is_to_string m = String.equal (snd m.sm_name) SN.Members.__toString in
+      match List.find c.sc_methods is_to_string with
+      | None -> []
+      | Some { sm_name = (pos, _); _ } ->
+        let ty =
+          mk (Typing_reason.Rhint pos, Tapply ((pos, SN.Classes.cStringish), []))
+        in
+        [ancestor_from_ty Interface ty]
+  in
+  match linearization_kind with
+  | Member_resolution ->
+    List.concat
+      [
+        List.rev (interfaces c);
+        List.rev (includes c);
+        List.rev (req_implements c);
+        List.rev (xhp_attr_uses c);
+        List.rev (traits c);
+        List.rev (req_extends c);
+        parents c;
+      ]
+  | Ancestor_types ->
+    (* In order to match the historical handling of ancestor types (that is,
+         the collection of "canonical" type parameterizations of each ancestor
+         of a class, which is used in subtyping), we need to build the
+         linearization in the order [extends; implements; uses]. Require-extends
+         and require-implements relationships need to be included only to
+         support Stringish (and can be removed here if we remove support for the
+         magic Stringish type, or require it to be explicitly implemented). *)
+    List.concat
+      [
+        extends c;
+        req_extends c;
+        req_implements c;
+        stringish_interface c;
+        interfaces c;
+        traits c;
+      ]
 
 let rec ancestor_linearization
     (env : env) (child_class_concrete : bool) (ancestor : ancestor) :
@@ -315,92 +374,9 @@ let rec ancestor_linearization
 
 (* Linearize a class declaration given its shallow declaration *)
 and linearize (env : env) (c : shallow_class) : linearization =
-  let mro_name = snd c.sc_name in
-  (* The first class doesn't have its type parameters filled in *)
-  let mro_flags =
-    set_bit
-      mro_copy_private_members
-      (Ast_defs.equal_class_kind c.sc_kind Ast_defs.Ctrait)
-      empty_mro_element.mro_flags
-  in
-  let mro_flags =
-    set_bit
-      mro_passthrough_abstract_typeconst
-      (not Ast_defs.(equal_class_kind c.sc_kind Cnormal))
-      mro_flags
-  in
-  let child =
-    {
-      empty_mro_element with
-      mro_name;
-      mro_use_pos = fst c.sc_name;
-      mro_ty_pos = fst c.sc_name;
-      mro_flags;
-    }
-  in
-  let get_ancestors kind = List.map ~f:(ancestor_from_ty kind) in
-  let interfaces c = get_ancestors Interface c.sc_implements in
-  let req_implements c = get_ancestors ReqImpl c.sc_req_implements in
-  let xhp_attr_uses c = get_ancestors XHPAttr c.sc_xhp_attr_uses in
-  let traits c = get_ancestors Trait c.sc_uses in
-  let req_extends c = get_ancestors ReqExtends c.sc_req_extends in
-  let parents c = get_ancestors Parent (from_parent c) in
-  let extends c = get_ancestors Parent c.sc_extends in
-  let includes c =
-    Aast.enum_includes_map c.sc_enum_type ~f:(fun enum_type ->
-        get_ancestors IncludedEnum enum_type.te_includes)
-  in
-  (* HHVM implicitly adds the Stringish interface to every class, interface, and
-     trait with a __toString method. The primitive type `string` is considered
-     to also implement this interface. *)
-  let stringish_interface c =
-    let module SN = Naming_special_names in
-    if String.equal mro_name SN.Classes.cStringish then
-      []
-    else
-      let is_to_string m = String.equal (snd m.sm_name) SN.Members.__toString in
-      match List.find c.sc_methods is_to_string with
-      | None -> []
-      | Some { sm_name = (pos, _); _ } ->
-        let ty =
-          mk (Typing_reason.Rhint pos, Tapply ((pos, SN.Classes.cStringish), []))
-        in
-        [ancestor_from_ty Interface ty]
-  in
-  let ancestors : ancestor list =
-    match env.linearization_kind with
-    | Member_resolution ->
-      List.concat
-        [
-          List.rev (interfaces c);
-          List.rev (includes c);
-          List.rev (req_implements c);
-          List.rev (xhp_attr_uses c);
-          List.rev (traits c);
-          List.rev (req_extends c);
-          parents c;
-        ]
-    | Ancestor_types ->
-      (* In order to match the historical handling of ancestor types (that is,
-         the collection of "canonical" type parameterizations of each ancestor
-         of a class, which is used in subtyping), we need to build the
-         linearization in the order [extends; implements; uses]. Require-extends
-         and require-implements relationships need to be included only to
-         support Stringish (and can be removed here if we remove support for the
-         magic Stringish type, or require it to be explicitly implemented). *)
-      List.concat
-        [
-          extends c;
-          req_extends c;
-          req_implements c;
-          stringish_interface c;
-          interfaces c;
-          traits c;
-        ]
-  in
   Sequence.unfold_step
-    ~init:{ state = Child { child; ancestors }; acc = [] }
-    ~f:(next_state env mro_name c.sc_kind (Caml.Hashtbl.create 32))
+    ~init:{ state = Child c; acc = [] }
+    ~f:(next_state env (snd c.sc_name) c.sc_kind (Caml.Hashtbl.create 32))
   |> Sequence.memoize
 
 and next_state
@@ -433,7 +409,25 @@ and next_state
   in
   let name_was_emitted mro = Caml.Hashtbl.mem emitted_elements mro.mro_name in
   match state with
-  | Child { child; ancestors } ->
+  | Child c ->
+    (* The first class doesn't have its type parameters filled in *)
+    let child =
+      {
+        empty_mro_element with
+        mro_name = snd c.sc_name;
+        mro_use_pos = fst c.sc_name;
+        mro_ty_pos = fst c.sc_name;
+        mro_flags =
+          empty_mro_element.mro_flags
+          |> set_bit
+               mro_copy_private_members
+               (Ast_defs.equal_class_kind c.sc_kind Ast_defs.Ctrait)
+          |> set_bit
+               mro_passthrough_abstract_typeconst
+               (not Ast_defs.(equal_class_kind c.sc_kind Cnormal));
+      }
+    in
+    let ancestors = get_ancestors c env.linearization_kind in
     yield child (Next_ancestor { ancestors; synths = [] })
   | Next_ancestor { ancestors = ancestor :: ancestors; synths } ->
     let name_and_lin =

@@ -59,11 +59,42 @@ type state =
       type parameter substitutions) unless it was already emitted earlier in the
       current linearization sequence. *)
 
-let ancestor_from_ty (source : source_type) (ty : decl_ty) :
-    Pos.t * (Pos.t * string) * decl_ty list * source_type =
+(** An "ancestor" is what we call the immediate parents of a type whose linearization
+we're working on. *)
+type ancestor = {
+  ty_pos: Pos.t;
+  class_name: Pos.t * string;
+  type_args: decl_ty list;
+  source: source_type;
+      (** Just to remember where we originally picked up this ancestor type -
+          was it by looking sc_implements, or sc_req_implements, or sc_uses, or ... *)
+}
+
+(** This is the state for linearization-sequence-generator function [next_state] *)
+type seq_unfold_state = {
+  state: state;
+      (** Indicates what phase of linearization we're currently working through *)
+  ancestors: ancestor list;
+      (** These are the immediate parents of the type whose linearization we're getting.
+          This list is initialized when we start getting the linearization of a type.
+          The list is only ever shrunk, one by one, as we deal with each parent in turn. *)
+  acc: Decl_defs.mro_element list;
+      (** accumulates every mro_element we encountered during the linearization.
+          This is solely used so that, if we happen to complete the linearization,
+          then we can write the list into Linearization_provider.complete. *)
+  synths: Decl_defs.mro_element list;
+      (** accumulates synthesized ancestors that we determined we needed during
+          the linearization. These are emitted at the end of the linearization,
+          after all ancestors have been dealt with. For Ancestor_types linearization,
+          this is only ever Stringish (if we encounter a method named to_string).
+          For Member_resolution, it consists of all ancestors reachable through
+          a require-extends clause. *)
+}
+
+let ancestor_from_ty (source : source_type) (ty : decl_ty) : ancestor =
   let (r, class_name, type_args) = Decl_utils.unwrap_class_type ty in
   let ty_pos = Typing_reason.to_pos r in
-  (ty_pos, class_name, type_args, source)
+  { ty_pos; class_name; type_args; source }
 
 let from_parent (c : shallow_class) : decl_ty list =
   (* In an abstract class or a trait, we assume the interfaces
@@ -156,11 +187,11 @@ let is_includedEnum (source : source_type) =
     false
 
 let rec ancestor_linearization
-    (env : env)
-    (child_class_concrete : bool)
-    (ancestor : Pos.t * (Pos.t * string) * decl_ty list * source_type) :
+    (env : env) (child_class_concrete : bool) (ancestor : ancestor) :
     string * linearization =
-  let (ty_pos, (use_pos, class_name), type_args, source) = ancestor in
+  let { ty_pos; class_name = (use_pos, class_name); type_args; source } =
+    ancestor
+  in
   Decl_env.add_extends_dependency env.decl_env class_name;
   let lin = get_linearization env class_name in
   let lin =
@@ -318,7 +349,7 @@ and linearize (env : env) (c : shallow_class) : linearization =
         in
         [ancestor_from_ty Interface ty]
   in
-  let ancestors =
+  let ancestors : ancestor list =
     match env.linearization_kind with
     | Member_resolution ->
       List.concat
@@ -350,7 +381,7 @@ and linearize (env : env) (c : shallow_class) : linearization =
         ]
   in
   Sequence.unfold_step
-    ~init:(Child child, ancestors, [], [])
+    ~init:{ state = Child child; ancestors; acc = []; synths = [] }
     ~f:(next_state env mro_name c.sc_kind (Caml.Hashtbl.create 32))
   |> Sequence.memoize
 
@@ -359,132 +390,139 @@ and next_state
     (class_name : string)
     (child_class_kind : Ast_defs.class_kind)
     (emitted_elements : (string, mro_element list) Caml.Hashtbl.t)
-    (state, ancestors, acc, synths) =
-  Sequence.Step.(
-    let child_class_concrete =
-      Ast_defs.equal_class_kind child_class_kind Ast_defs.Cnormal
-    in
-    let add_emitted mro =
-      let list =
-        match Caml.Hashtbl.find_opt emitted_elements mro.mro_name with
-        | Some list -> mro :: list
-        | None -> [mro]
-      in
-      Caml.Hashtbl.replace emitted_elements mro.mro_name list
-    in
-    let yield mro_element next_state ancestors synths =
-      add_emitted mro_element;
-      Yield (mro_element, (next_state, ancestors, mro_element :: acc, synths))
-    in
-    let was_emitted mro =
+    ({ state; ancestors; acc; synths } : seq_unfold_state) :
+    (Decl_defs.mro_element, seq_unfold_state) Sequence.Step.t =
+  let child_class_concrete =
+    Ast_defs.equal_class_kind child_class_kind Ast_defs.Cnormal
+  in
+  let add_emitted mro =
+    let list =
       match Caml.Hashtbl.find_opt emitted_elements mro.mro_name with
-      | None -> false
-      | Some list -> List.mem list mro ~equal:emitted_mro_elements_equal
+      | Some list -> mro :: list
+      | None -> [mro]
     in
-    let name_was_emitted mro = Caml.Hashtbl.mem emitted_elements mro.mro_name in
-    match (state, ancestors) with
-    | (Child child, _) -> yield child Next_ancestor ancestors synths
-    | (Next_ancestor, ancestor :: ancestors) ->
-      let name_and_lin =
-        ancestor_linearization env child_class_concrete ancestor
-      in
-      Skip (Ancestor name_and_lin, ancestors, acc, synths)
-    | (Ancestor (name, lin), ancestors) ->
-      begin
-        match Sequence.next lin with
-        | None -> Skip (Next_ancestor, ancestors, acc, synths)
-        (* Lazy.Undefined occurs if we attempt to include a linearization within
+    Caml.Hashtbl.replace emitted_elements mro.mro_name list
+  in
+  let yield mro_element next_state ancestors synths =
+    add_emitted mro_element;
+    Sequence.Step.Yield
+      ( mro_element,
+        { state = next_state; ancestors; acc = mro_element :: acc; synths } )
+  in
+  let was_emitted mro =
+    match Caml.Hashtbl.find_opt emitted_elements mro.mro_name with
+    | None -> false
+    | Some list -> List.mem list mro ~equal:emitted_mro_elements_equal
+  in
+  let name_was_emitted mro = Caml.Hashtbl.mem emitted_elements mro.mro_name in
+  match (state, ancestors) with
+  | (Child child, _) -> yield child Next_ancestor ancestors synths
+  | (Next_ancestor, ancestor :: ancestors) ->
+    let name_and_lin =
+      ancestor_linearization env child_class_concrete ancestor
+    in
+    Sequence.Step.Skip { state = Ancestor name_and_lin; ancestors; acc; synths }
+  | (Ancestor (name, lin), ancestors) ->
+    begin
+      match Sequence.next lin with
+      | None ->
+        Sequence.Step.Skip { state = Next_ancestor; ancestors; acc; synths }
+      (* Lazy.Undefined occurs if we attempt to include a linearization within
        itself. This will only happen when we have a class dependency cycle (and
        only in some particular circumstances), so it will not arise in legal
        programs. *)
-        | exception Lazy.Undefined ->
-          let next =
-            {
-              empty_mro_element with
-              mro_name = name;
-              mro_cyclic = Some (SSet.add env.class_stack name);
-            }
+      | exception Lazy.Undefined ->
+        let next =
+          {
+            empty_mro_element with
+            mro_name = name;
+            mro_cyclic = Some (SSet.add env.class_stack name);
+          }
+        in
+        yield next Next_ancestor ancestors synths
+      | Some (next, rest) ->
+        let skip_or_mark_trait_reuse was_emitted =
+          let is_trait class_name =
+            match Shallow_classes_provider.get (get_ctx env) class_name with
+            | Some { sc_kind = Ast_defs.Ctrait; _ } -> true
+            | _ -> false
           in
-          yield next Next_ancestor ancestors synths
-        | Some (next, rest) ->
-          let skip_or_mark_trait_reuse was_emitted =
-            let is_trait class_name =
-              match Shallow_classes_provider.get (get_ctx env) class_name with
-              | Some { sc_kind = Ast_defs.Ctrait; _ } -> true
-              | _ -> false
-            in
-            if
-              disallow_trait_reuse env
-              && Option.is_none next.mro_trait_reuse
-              && is_trait next.mro_name
-            then
-              (* When the disallow_trait_reuse feature is enabled, we want to report
+          if
+            disallow_trait_reuse env
+            && Option.is_none next.mro_trait_reuse
+            && is_trait next.mro_name
+          then
+            (* When the disallow_trait_reuse feature is enabled, we want to report
              an error for reused traits. Instead of skipping trait
              mro_elements when they are already present in the
              linearization, we emit an element with the trait_reuse flag
              set so that we can error later. *)
-              if name_was_emitted next then
-                Some { next with mro_trait_reuse = Some name }
-              else
-                Some next
-            else if was_emitted next then
-              None
+            if name_was_emitted next then
+              Some { next with mro_trait_reuse = Some name }
             else
               Some next
-          in
-          let (next, synths) =
-            match env.linearization_kind with
-            | Member_resolution ->
-              if is_set mro_via_req_extends next.mro_flags then
-                let synths =
-                  match (next.mro_required_at, child_class_kind) with
-                  (* Always aggregate synthesized ancestors for traits and
+          else if was_emitted next then
+            None
+          else
+            Some next
+        in
+        let (next, synths) =
+          match env.linearization_kind with
+          | Member_resolution ->
+            if is_set mro_via_req_extends next.mro_flags then
+              let synths =
+                match (next.mro_required_at, child_class_kind) with
+                (* Always aggregate synthesized ancestors for traits and
                  interfaces (necessary for typechecking) *)
-                  | (_, Ast_defs.(Ctrait | Cinterface))
-                  (* Otherwise, keep them only if they represent a requirement that
+                | (_, Ast_defs.(Ctrait | Cinterface))
+                (* Otherwise, keep them only if they represent a requirement that
                  we will need to validate later. *)
-                  | (Some _, Ast_defs.(Cnormal | Cabstract | Cenum)) ->
-                    next :: synths
-                  | (None, _) -> synths
-                in
-                (None, synths)
-              else
-                let next = skip_or_mark_trait_reuse was_emitted in
-                (next, synths)
-            | Ancestor_types ->
-              (* For ancestor types, we don't care about require-extends or
+                | (Some _, Ast_defs.(Cnormal | Cabstract | Cenum)) ->
+                  next :: synths
+                | (None, _) -> synths
+              in
+              (None, synths)
+            else
+              let next = skip_or_mark_trait_reuse was_emitted in
+              (next, synths)
+          | Ancestor_types ->
+            (* For ancestor types, we don't care about require-extends or
              require-implements relationships, except for the fact that we want
              Stringish as an ancestor if we have some ancestor which requires
              it. *)
-              let should_skip =
-                ( is_set mro_via_req_extends next.mro_flags
-                || is_set mro_via_req_impl next.mro_flags )
-                && String.( <> ) next.mro_name SN.Classes.cStringish
-              in
-              let next =
-                if should_skip then
-                  None
-                else
-                  skip_or_mark_trait_reuse name_was_emitted
-              in
-              (next, synths)
-          in
-          (match next with
-          | None -> Skip (Ancestor (name, rest), ancestors, acc, synths)
-          | Some next -> yield next (Ancestor (name, rest)) ancestors synths)
-      end
-    | (Next_ancestor, []) ->
-      let synths = List.rev synths in
-      Skip (Synthesized_elts synths, ancestors, acc, synths)
-    | (Synthesized_elts (next :: synths), ancestors) ->
-      if was_emitted next then
-        Skip (Synthesized_elts synths, ancestors, acc, synths)
-      else
-        yield next (Synthesized_elts synths) ancestors synths
-    | (Synthesized_elts [], _) ->
-      let key = (class_name, env.linearization_kind) in
-      Linearization_provider.complete (get_ctx env) key (List.rev acc);
-      Done)
+            let should_skip =
+              ( is_set mro_via_req_extends next.mro_flags
+              || is_set mro_via_req_impl next.mro_flags )
+              && String.( <> ) next.mro_name SN.Classes.cStringish
+            in
+            let next =
+              if should_skip then
+                None
+              else
+                skip_or_mark_trait_reuse name_was_emitted
+            in
+            (next, synths)
+        in
+        (match next with
+        | None ->
+          Sequence.Step.Skip
+            { state = Ancestor (name, rest); ancestors; acc; synths }
+        | Some next -> yield next (Ancestor (name, rest)) ancestors synths)
+    end
+  | (Next_ancestor, []) ->
+    let synths = List.rev synths in
+    Sequence.Step.Skip
+      { state = Synthesized_elts synths; ancestors; acc; synths }
+  | (Synthesized_elts (next :: synths), ancestors) ->
+    if was_emitted next then
+      Sequence.Step.Skip
+        { state = Synthesized_elts synths; ancestors; acc; synths }
+    else
+      yield next (Synthesized_elts synths) ancestors synths
+  | (Synthesized_elts [], _) ->
+    let key = (class_name, env.linearization_kind) in
+    Linearization_provider.complete (get_ctx env) key (List.rev acc);
+    Sequence.Step.Done
 
 and get_linearization (env : env) (class_name : string) : linearization =
   let { class_stack; linearization_kind; _ } = env in

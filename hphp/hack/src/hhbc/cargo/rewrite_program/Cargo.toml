@@ -14,3 +14,4 @@ emit_fatal_rust = { path = "../emit_fatal" }
 env = { path = "../env" }
 instruction_sequence_rust = { path = "../instruction_sequence" }
 oxidized = { path = "../../../oxidized" }
+rewrite_xml = { path = "../rewrite_xml" }

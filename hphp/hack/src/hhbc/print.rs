@@ -438,6 +438,7 @@ fn print_fun_def<W: Write>(
         ctx.block(w, |c, w| print_body(c, w, body, &fun_def.attributes))?;
         newline(w)
     })?;
+
     newline(w)
 }
 
@@ -2764,7 +2765,16 @@ fn print_expr<W: Write>(
                         }
                     })
                 }
-                None => not_impl!(),
+                None => {
+                    match cid.1.as_ci() {
+                        Some(id) => {
+                            // Xml exprs rewritten as New exprs come
+                            // through here.
+                            print_xml(ctx, w, env, &id.1, es)
+                        }
+                        None => not_impl!(),
+                    }
+                }
             }
         }
         E_::Record(r) => {
@@ -2903,7 +2913,9 @@ fn print_expr<W: Write>(
             w.write(" ")?;
             print_expr(ctx, w, env, &i.1)
         }
-        E_::Xml(x) => print_xml(ctx, w, env, &(x.0).1, &x.1, &x.2),
+        E_::Xml(_) => Err(Error::fail(
+            "expected Xml to be converted to New during rewriting",
+        )),
         E_::Efun(f) => print_efun(ctx, w, env, &f.0, &f.1),
         E_::FunctionPointer(fp) => {
             let (fp_id, targs) = &**fp;
@@ -2953,28 +2965,40 @@ fn print_xml<W: Write>(
     w: &mut W,
     env: &ExprEnv,
     id: &str,
-    attrs: &[ast::XhpAttribute],
-    children: &[ast::Expr],
+    es: &[ast::Expr],
 ) -> Result<(), W::Error> {
+    use ast::{Expr as E, Expr_ as E_};
+
+    fn syntax_error<W: Write>(_: &W) -> write::Error<<W as write::Write>::Error> {
+        Error::NotImpl(String::from("print_xml: unexpected syntax"))
+    }
     fn print_xhp_attr<W: Write>(
         ctx: &mut Context,
         w: &mut W,
         env: &ExprEnv,
-        attr: &ast::XhpAttribute,
-        spread_id: usize,
+        attr: &(ast_defs::ShapeFieldName, ast::Expr),
     ) -> Result<(), W::Error> {
-        let key_printer = |_: &mut Context, w: &mut W, _: &ExprEnv, k: &String| {
-            print_expr_string(w, k.as_bytes())
-        };
         match attr {
-            ast::XhpAttribute::XhpSimple((_, s), e) => {
-                print_key_value_(ctx, w, env, s, key_printer, e)
-            }
-            ast::XhpAttribute::XhpSpread(e) => {
-                print_key_value_(ctx, w, env, &format!("...${}", spread_id), key_printer, e)
-            }
+            (ast_defs::ShapeFieldName::SFlitStr(s), e) => print_key_value_(
+                ctx,
+                w,
+                env,
+                &s.1,
+                |_, w, _, k| print_expr_string(w, k.as_slice()),
+                e,
+            ),
+            _ => Err(syntax_error(w)),
         }
     }
+
+    let (attrs, children) = if es.len() < 2 {
+        Err(syntax_error(w))
+    } else {
+        match (&es[0], &es[1]) {
+            (E(_, E_::Shape(attrs)), E(_, E_::Varray(children))) => Ok((attrs, &children.1)),
+            _ => Err(syntax_error(w)),
+        }
+    }?;
     let env = ExprEnv {
         codegen_env: env.codegen_env,
         is_xhp: true,
@@ -2982,9 +3006,7 @@ fn print_xml<W: Write>(
     write!(w, "new {}", mangle(id.into()))?;
     paren(w, |w| {
         wrap_by_(w, "darray[", "]", |w| {
-            concat_by(w, ", ", attrs, |w, attr| {
-                print_xhp_attr(ctx, w, &env, attr, 0)
-            })
+            concat_by(w, ", ", attrs, |w, attr| print_xhp_attr(ctx, w, &env, attr))
         })?;
         w.write(", ")?;
         print_expr_varray(ctx, w, &env, children)?;

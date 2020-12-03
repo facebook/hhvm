@@ -8,6 +8,7 @@ use emit_fatal_rust as emit_fatal;
 use env::emitter::Emitter;
 use instruction_sequence_rust::{unrecoverable, Result};
 use oxidized::ast as Tast;
+use rewrite_xml::rewrite_xml;
 
 fn debugger_eval_should_modify(tast: &Tast::Program) -> Result<bool> {
     /*
@@ -54,5 +55,8 @@ pub fn rewrite_program<'p>(emitter: &mut Emitter, prog: &'p mut Tast::Program) -
     closure_convert::convert_toplevel_prog(emitter, prog)?;
 
     emitter.for_debugger_eval = for_debugger_eval;
+
+    rewrite_xml(emitter, prog)?;
+
     Ok(())
 }

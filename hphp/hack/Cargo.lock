@@ -2432,6 +2432,19 @@ dependencies = [
  "env",
  "instruction_sequence_rust",
  "oxidized",
+ "rewrite_xml",
+]
+
+[[package]]
+name = "rewrite_xml"
+version = "0.0.0"
+dependencies = [
+ "emit_symbol_refs_rust",
+ "env",
+ "hhbc_id_rust",
+ "instruction_sequence_rust",
+ "naming_special_names_rust",
+ "oxidized",
 ]
 
 [[package]]

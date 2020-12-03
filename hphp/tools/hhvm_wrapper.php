@@ -92,10 +92,8 @@ function determine_flags(OptionMap $opts): string {
   }
   // If no config files were given at the command line, use a default
   if (!$has_file) {
-    #
-    # The cli.hdf file is where Facebook puts its in-house
-    # default configuration information.
-    #
+    // The cli.hdf file is where Facebook puts its in-house
+    // default configuration information.
     $facebook_cli_config_file_name = '/usr/local/hphpi/cli.hdf';
     if (file_exists($facebook_cli_config_file_name)) {
       $flags .= "-c $facebook_cli_config_file_name ";

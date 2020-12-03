@@ -1656,6 +1656,7 @@ functor
         Telemetry.duration telemetry ~key:"stop_typing_service" ~start_time
       in
 
+      (* CAUTION! Lots of alerts/dashboards depend on this event, particularly start_t  *)
       HackEventLogger.type_check_end
         (Option.some_if CheckKind.is_full telemetry)
         ~heap_size
@@ -1672,6 +1673,7 @@ functor
     - the `type_check_unsafe` function below:
       - logs the names into the server log
       - uses HackEventLogger to log the names as the check_kind column value
+      - lots of dashboards depend on it
     - serverMain writes it into telemetry
     - HhMonitorInformant greps for it in the server log in order to set
         HackEventLogger's is_lazy_incremental column to true/false
@@ -1694,6 +1696,7 @@ let type_check_unsafe genv env kind start_time profiling =
   | Lazy_check -> HackEventLogger.set_lazy_incremental ()
   | Full_check -> ());
 
+  (* CAUTION! Lots of alerts/dashboards depend on the exact string of check_kind *)
   HackEventLogger.with_check_kind check_kind @@ fun () ->
   Printf.eprintf "******************************************\n";
   match kind with

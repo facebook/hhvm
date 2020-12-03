@@ -47,6 +47,7 @@ type subdecl_kind =
   | Decl_errors
   | Implements_dynamic
   (* Lazy *)
+  | Linearization
   | Construct
   | Need_init
   | Get_ancestor of string

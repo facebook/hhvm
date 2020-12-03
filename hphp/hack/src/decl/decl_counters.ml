@@ -44,6 +44,7 @@ type subdecl_kind =
   | Decl_errors
   | Implements_dynamic
   (* Lazy *)
+  | Linearization
   | Construct
   | Need_init
   | Get_ancestor of string [@printer (fun fmt _s -> fprintf fmt "Get_ancestor")]
@@ -128,6 +129,7 @@ let subdecl_eagerness (subdecl_kind : subdecl_kind) : string =
   | Decl_errors
   | Implements_dynamic ->
     "shallow"
+  | Linearization
   | Construct
   | Need_init
   | Get_ancestor _

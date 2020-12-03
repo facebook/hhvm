@@ -16,6 +16,8 @@ module LSTable = Lazy_string_table
 module SN = Naming_special_names
 
 type lazy_class_type = {
+  lin_members: Decl_defs.linearization;
+  lin_ancestors: Decl_defs.linearization;
   ih: inherited_members;
   ancestors: decl_ty LSTable.t;  (** Types of parents, interfaces, and traits *)
   parents_and_traits: unit LSTable.t;  (** Names of parents and traits only *)
@@ -68,6 +70,8 @@ let make_lazy_class_type ctx class_name =
              ~merge
          in
          {
+           lin_members;
+           lin_ancestors;
            ih =
              Decl_inheritance.make ctx class_name lin_members (fun x ->
                  LSTable.get ancestors x);
@@ -418,6 +422,15 @@ module ApiLazy = struct
 end
 
 module ApiEager = struct
+  let linearization (decl, t) kind : Decl_defs.mro_element list =
+    Decl_counters.count_subdecl decl Decl_counters.Linearization @@ fun () ->
+    match (t, kind) with
+    | (Lazy (_sc, lc), Decl_defs.Member_resolution) ->
+      (Lazy.force lc).lin_members |> Sequence.to_list
+    | (Lazy (_sc, lc), Decl_defs.Ancestor_types) ->
+      (Lazy.force lc).lin_ancestors |> Sequence.to_list
+    | (Eager _, _) -> failwith "shallow_class_decl is disabled"
+
   let members_fully_known (decl, t) =
     Decl_counters.count_subdecl decl Decl_counters.Members_fully_known
     @@ fun () ->

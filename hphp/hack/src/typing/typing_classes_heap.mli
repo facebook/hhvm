@@ -35,6 +35,9 @@ module Api : sig
 
   val members_fully_known : t -> bool
 
+  val linearization :
+    t -> Decl_defs.linearization_kind -> Decl_defs.mro_element list
+
   val abstract : t -> bool
 
   val final : t -> bool

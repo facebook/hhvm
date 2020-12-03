@@ -62,11 +62,7 @@ RegionContext getContext(SrcKey sk, bool profiling) {
   auto const ctxClass = func->cls();
   auto const addLiveType = [&](Location loc, tv_rval tv) {
     auto const type = typeFromTV(tv, ctxClass);
-    auto const typeLayoutAdjusted = [&] {
-      if (!profiling || !allowBespokeArrayLikes()) return type;
-      return type <= TArrLike ? type.unspecialize() : type;
-    }();
-    ctx.liveTypes.push_back({loc, typeLayoutAdjusted});
+    ctx.liveTypes.push_back({loc, type});
 
     FTRACE(2, "Added live type: {}\n", show(ctx.liveTypes.back()));
   };

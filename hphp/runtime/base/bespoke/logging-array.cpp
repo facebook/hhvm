@@ -122,6 +122,11 @@ ArrayData* maybeMakeLoggingArray(ArrayData* ad, LoggingProfile* profile) {
     return ad;
   }
 
+  if (!arrayTypeMaybeBespoke(ad->toDataType())) {
+    FTRACE(5, "Skipping logging for ineligible array type.\n");
+    return ad;
+  }
+
   auto const shouldEmitBespoke = [&]{
     if (shouldTestBespokeArrayLikes()) return true;
     if (RO::EvalEmitLoggingArraySampleRate == 0) return false;

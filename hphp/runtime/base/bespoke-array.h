@@ -33,6 +33,10 @@ inline bool shouldTestBespokeArrayLikes() {
   return RO::EvalBespokeArrayLikeMode == 1;
 }
 
+inline bool arrayTypeMaybeBespoke(DataType t) {
+  return !isKeysetType(t);
+}
+
 /**
  * A MaskAndCompare consists of a base and a mask. A value v is considered to
  * be pass the check if (v & mask) == base.

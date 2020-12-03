@@ -898,6 +898,7 @@ void emitProfileArrLikeProps(IRGS& env) {
     auto const index = cls->propSlotToIndex(slot);
     auto const tv = cls->declPropInit()[index].val.tv();
     if (!tvIsArrayLike(tv)) continue;
+    if (!arrayTypeMaybeBespoke(tv.val().parr->toDataType())) continue;
     auto const profile = bespoke::getLoggingProfile(cls, slot);
     if (!profile) continue;
 
@@ -920,6 +921,7 @@ bool specializeSource(IRGS& env, SrcKey sk) {
   if (isArrLikeConstructorOp(op) || isArrLikeCastOp(op)) {
     auto const profile = bespoke::getLoggingProfile(sk);
     if (profile && profile->staticBespokeArray) {
+      assertx(arrayTypeMaybeBespoke(profile->staticBespokeArray->toDataType()));
       assertx(isArrLikeConstructorOp(op));
       push(env, cns(env, profile->staticBespokeArray));
       return true;
@@ -942,6 +944,11 @@ void handleBespokeInputs(IRGS& env, const NormalizedInstruction& ni,
 
   auto const type = env.irb->typeOf(*loc, DataTypeGeneric);
   assertx(type <= TArrLike);
+  if (type.isKnownDataType() &&
+      !arrayTypeMaybeBespoke(type.toDataType())) {
+    assertTypeLocation(env, *loc, TVanillaArrLike);
+    return emitVanilla(env);
+  }
 
   emitLogArrayReach(env, *loc, sk);
 
@@ -978,6 +985,10 @@ void handleVanillaOutputs(IRGS& env, SrcKey sk) {
   if (op == Op::NewObjD || op == Op::NewObjRD) {
     emitProfileArrLikeProps(env);
   } else if (isArrLikeConstructorOp(op) || isArrLikeCastOp(op)) {
+    auto const newArr = topC(env);
+    assertx(newArr->type().isKnownDataType());
+    if (!arrayTypeMaybeBespoke(newArr->type().toDataType())) return;
+
     auto const profile = bespoke::getLoggingProfile(sk);
     if (!profile) return;
     auto const data = LoggingProfileData(profile);

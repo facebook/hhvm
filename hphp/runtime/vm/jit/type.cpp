@@ -898,11 +898,7 @@ Type typeFromTV(tv_rval tv, const Class* ctx) {
   auto const result = Type(dt_modulo_persistence(type(tv)));
 
   if (isArrayLikeType(type(tv))) {
-    if (val(tv).parr->isVanilla()) {
-      return result.narrowToVanilla();
-    } else {
-      return result.narrowToLayout(ArrayLayout::Bespoke());
-    }
+    return allowBespokeArrayLikes() ? result : result.narrowToVanilla();
   }
 
   return result;

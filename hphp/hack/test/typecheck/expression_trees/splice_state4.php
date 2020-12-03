@@ -103,6 +103,15 @@ final class Code {
     throw new Exception();
   }
 
+  public function ternary(
+    ?ExprPos $_,
+    this::TAst $_condition,
+    ?this::TAst $_truthy,
+    this::TAst $_falsy,
+  ): this::TAst {
+    throw new Exception();
+  }
+
   // Statements.
   public function ifStatement(
     ?ExprPos $_,
@@ -144,6 +153,7 @@ final class Code {
   // Splice
   public function splice<T>(
     ?ExprPos $_,
+    string $_key,
     ExprTree<this, this::TAst, T> $_,
   ): this::TAst {
     throw new Exception();
@@ -159,6 +169,7 @@ final class ExprTree<TVisitor, TResult, TInfer>{
   public function __construct(
     private ?ExprPos $pos,
     private string $filepath,
+    private dict<string, mixed> $spliced_values,
     private (function(TVisitor): TResult) $x,
     private (function(): TInfer) $err,
   ) {}
@@ -175,6 +186,15 @@ final class ExprPos {
 
 final class ExampleInt {
   public function __plus(ExampleInt $_): ExampleInt {
+    throw new Exception();
+  }
+  public function __minus(ExampleInt $_): ExampleInt {
+    throw new Exception();
+  }
+  public function __star(ExampleInt $_): ExampleInt {
+    throw new Exception();
+  }
+  public function __slash(ExampleInt $_): ExampleInt {
     throw new Exception();
   }
 

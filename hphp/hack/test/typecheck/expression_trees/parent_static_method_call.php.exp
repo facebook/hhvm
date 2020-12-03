@@ -1,0 +1,4 @@
+File "parent_static_method_call.php", line 15, characters 22-39:
+Unsupported syntax for expression trees. (Parsing[1002])
+File "parent_static_method_call.php", line 15, characters 22-27:
+Cannot use `parent::` in a function pointer due to class context ambiguity. Consider using `MyParent::bar` instead (Naming[2112])

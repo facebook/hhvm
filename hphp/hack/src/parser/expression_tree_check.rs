@@ -107,22 +107,15 @@ impl<'ast> Visitor<'ast> for Checker {
                 True | False | Null => true,
                 // Allow local variables $foo.
                 Lvar(_) => true,
-                Binop(bop) => match **bop {
-                    // Allow the addition operator.
-                    (Bop::Plus, _, _) => true,
+                Binop(bop) => match bop.0 {
+                    // Allow arithmetic operators
+                    Bop::Plus | Bop::Minus | Bop::Star | Bop::Slash => true,
                     // Allow $x = 1, but not $x += 1.
-                    (Bop::Eq(None), _, _) => true,
-                    // Allow boolean && operator
-                    (Bop::Ampamp, _, _) => true,
-                    // Allow boolean || operator
-                    (Bop::Barbar, _, _) => true,
+                    Bop::Eq(None) => true,
+                    // Allow boolean &&, || operators
+                    Bop::Ampamp | Bop::Barbar => true,
                     // Allow comparison operators
-                    (Bop::Lt, _, _) => true,
-                    (Bop::Lte, _, _) => true,
-                    (Bop::Gt, _, _) => true,
-                    (Bop::Gte, _, _) => true,
-                    (Bop::Eqeqeq, _, _) => true,
-                    (Bop::Diff2, _, _) => true,
+                    Bop::Lt | Bop::Lte | Bop::Gt | Bop::Gte | Bop::Eqeqeq | Bop::Diff2 => true,
                     _ => false,
                 },
                 Unop(uop) => match **uop {
@@ -130,6 +123,8 @@ impl<'ast> Visitor<'ast> for Checker {
                     (Uop::Unot, _) => true,
                     _ => false,
                 },
+                // Allow ternary _ ? _ : _, but not Elvis operator _ ?: _
+                Eif(eif) => (eif.1).is_some(),
                 // Allow simple function calls.
                 Call(call) => match &**call {
                     // Ban variadic calls foo(...$x);
@@ -139,7 +134,7 @@ impl<'ast> Visitor<'ast> for Checker {
                     (recv, _targs, args, _variadic) => {
                         // Only allow direct function calls, so allow
                         // foo(), but don't allow (foo())().
-                        match recv.1 {
+                        match &recv.1 {
                             Id(_) => {
                                 // Recurse on the arguments manually,
                                 // so we don't end up visiting the
@@ -149,7 +144,26 @@ impl<'ast> Visitor<'ast> for Checker {
                                 args.accept(c, self)?;
                                 return Ok(());
                             }
-                            _ => false,
+                            ClassConst(cc) => match (cc.0).1 {
+                                aast::ClassId_::CIexpr(aast::Expr(_, Id(ref id))) => {
+                                    if id.1 == naming_special_names_rust::classes::PARENT
+                                        || id.1 == naming_special_names_rust::classes::SELF
+                                        || id.1 == naming_special_names_rust::classes::STATIC
+                                    {
+                                        false
+                                    } else {
+                                        args.accept(c, self)?;
+                                        return Ok(());
+                                    }
+                                }
+                                _ => false,
+                            },
+                            _ => {
+                                // Recurse on the callee and only allow calls to valid expressions
+                                recv.accept(c, self)?;
+                                args.accept(c, self)?;
+                                return Ok(());
+                            }
                         }
                     }
                 },

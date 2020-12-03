@@ -26,6 +26,7 @@ final class MyVisitor {
     return new ExprTree(
       null,
       null,
+      dict[],
       (MyVisitor $_) ==> (string)$i,
       () ==> { throw new Exception(); },
     );
@@ -37,6 +38,7 @@ final class MyVisitor {
     return new ExprTree(
       null,
       null,
+      dict[],
       (MyVisitor $_) ==> "\"$s\"",
       () ==> { throw new Exception(); },
     );
@@ -73,6 +75,7 @@ final class MyVisitor {
 
   public function splice(
     ExprPos $_,
+    string $_key,
     ExprTree<MyVisitor, mixed, mixed> $et,
   ): mixed {
     return $et->construct($this);
@@ -85,6 +88,7 @@ final class MyVisitor {
     return new ExprTree(
       null,
       null,
+      dict[],
       (MyVisitor $_) ==> { return $name; },
       () ==> { throw new Exception(); },
     );
@@ -95,6 +99,7 @@ final class ExprTree<TVisitor, TResult, TInfer>{
   public function __construct(
     private ?ExprPos $pos,
     private ?string $filepath,
+    private dict<string, mixed> $cached_dict,
     private (function(TVisitor): TResult) $ast,
     private (function(): TInfer) $err,
   ) {}

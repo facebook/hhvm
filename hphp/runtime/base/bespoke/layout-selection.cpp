@@ -92,7 +92,7 @@ DataType selectValType(const SinkProfile& profile, double p_cutoff) {
   auto const empty = load(profile.data->valCounts[SinkProfile::kNoValTypes]);
   auto const any   = load(profile.data->valCounts[SinkProfile::kAnyValType]);
 
-  uint64_t total = 0;
+  uint64_t total = empty + any;
   uint64_t max_count = 0;
   auto max_index = safe_cast<int>(SinkProfile::kNumValTypes);
 
@@ -109,11 +109,14 @@ DataType selectValType(const SinkProfile& profile, double p_cutoff) {
 
   if (!total) return kInvalidDataType;
 
-  auto const p_max  = 1.0 * (empty + max_count) / total;
-  auto const p_mono = 1.0 * (total - any) / total;
+  auto const p_empty = 1.0 * empty / total;
+  auto const p_max   = 1.0 * (empty + max_count) / total;
+  auto const p_mono  = 1.0 * (total - any) / total;
 
-  if (p_max >= p_cutoff)  return safe_cast<DataType>(max_index + kMinDataType);
-  if (p_mono >= p_cutoff) return KindOfUninit;
+  // TODO(kshaunak): We may want to specialize on empty in the future.
+  if (p_empty >= p_cutoff) return KindOfUninit;
+  if (p_max >= p_cutoff)   return safe_cast<DataType>(max_index + kMinDataType);
+  if (p_mono >= p_cutoff)  return KindOfUninit;
   return kInvalidDataType;
 }
 

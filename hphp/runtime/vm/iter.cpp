@@ -52,6 +52,7 @@ const StaticString
 //////////////////////////////////////////////////////////////////////
 
 std::string show(IterSpecialization type) {
+  if (!type.specialized) return "Unspecialized";
   auto const base_const = type.base_const ? "BaseConst" : "BaseMutable";
   auto const base_type  = show((IterSpecialization::BaseType)type.base_type);
   if (type.output_key) {

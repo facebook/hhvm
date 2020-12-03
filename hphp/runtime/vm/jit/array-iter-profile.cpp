@@ -109,6 +109,10 @@ ArrayIterProfile::Result ArrayIterProfile::result() const {
 }
 
 void ArrayIterProfile::update(const ArrayData* arr, bool is_kviter) {
+  // Generally speaking, bespoke arrays that we encounter during profiling
+  // should be LoggingArrays. Don't include them in our profile.
+  if (!arr->isVanilla()) return;
+
   auto const size = arr->size();
   auto const specialization = getIterSpecialization(arr);
   if (specialization.specialized) {

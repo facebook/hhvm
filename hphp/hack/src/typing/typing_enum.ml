@@ -47,7 +47,13 @@ let member_type env member_ce =
              (Cls.get_ancestor tc)
          with
         | None -> default_result
-        | Some (_base, enum_ty, _constraint, _interface) ->
+        | Some
+            {
+              Decl_enum.base = _;
+              type_ = enum_ty;
+              constraint_ = _;
+              interface = _;
+            } ->
           let ty = mk (get_reason default_result, get_node enum_ty) in
           ty))
     | _ -> default_result
@@ -118,7 +124,13 @@ let enum_class_check env tc consts const_types =
       (Cls.get_ancestor tc)
   in
   match enum_info_opt with
-  | Some (ty_exp, _, ty_constraint, ty_interface) ->
+  | Some
+      {
+        Decl_enum.base = ty_exp;
+        type_ = _;
+        constraint_ = ty_constraint;
+        interface = ty_interface;
+      } ->
     let ety_env = Phase.env_with_self env in
     let (env, ty_exp) = Phase.localize ~ety_env env ty_exp in
     let (env, ty_interface) =

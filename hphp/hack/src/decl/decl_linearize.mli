@@ -7,7 +7,9 @@
  *
  *)
 
+type class_name = string
+
 val get_linearization :
   Provider_context.t ->
-  string * Decl_defs.linearization_kind ->
+  class_name * Decl_defs.linearization_kind ->
   Decl_defs.linearization

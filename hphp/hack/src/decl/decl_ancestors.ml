@@ -23,6 +23,8 @@ type ancestor_caches = {
   is_disposable: bool Lazy.t;
 }
 
+type class_name = string
+
 let type_of_mro_element mro =
   let { mro_name; mro_type_args; mro_use_pos; mro_ty_pos; _ } = mro in
   mk (Reason.Rhint mro_ty_pos, Tapply ((mro_use_pos, mro_name), mro_type_args))

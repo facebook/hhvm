@@ -18,6 +18,8 @@ open Typing_defs
    shallow classes used in this module must be accounted for in the function
    Shallow_class_diff.mro_unchanged! *)
 
+type class_name = string
+
 type env = {
   class_stack: SSet.t;
   decl_env: Decl_env.env;

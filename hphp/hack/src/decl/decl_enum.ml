@@ -12,17 +12,22 @@ open Aast
 open Typing_defs
 module SN = Naming_special_names
 
-(* Figures out if a class needs to be treated like an enum and if so returns
- * Some(base, type, constraint), where base is the underlying type of the
- * enum, type is the actual type of enum elements, and constraint is
- * an optional subtyping constraint. For subclasses of Enum, both
- * base and type these are T.
- * For first-class enums, we distinguish between these.
- *
- * For enum classes, we also return the raw interface I,
- * as provided by the user, while the base is updated to be HH\Elt<E, I>
- *)
-let enum_kind name enum inner_ty get_ancestor =
+type t = {
+  base: Typing_defs.decl_ty;
+      (** Underlying type of the enum, e.g. int or string.
+          For subclasses of Enum, this is the type parameter of Enum.
+          For enum classes, this is HH\Elt<E, I>. *)
+  type_: Typing_defs.decl_ty;
+      (** Type containing the enum name.
+          For subclasses of Enum, this is also the type parameter of Enum. *)
+  constraint_: Typing_defs.decl_ty option;
+      (** Reflects what's after the [as] keyword in the enum definition. *)
+  interface: Typing_defs.decl_ty option;
+      (** For enum classes, this is the raw interface I, as provided by the user. *)
+}
+
+(** Figures out if a class needs to be treated like an enum. *)
+let enum_kind name enum inner_ty ~get_ancestor =
   match enum with
   | None ->
     (match get_ancestor SN.FB.cEnum with
@@ -30,7 +35,13 @@ let enum_kind name enum inner_ty get_ancestor =
       begin
         match get_node enum with
         | Tapply ((_, enum), [ty_exp]) when String.equal enum SN.FB.cEnum ->
-          Some (ty_exp, ty_exp, None, None)
+          Some
+            {
+              base = ty_exp;
+              type_ = ty_exp;
+              constraint_ = None;
+              interface = None;
+            }
         | Tapply ((_, enum_class), _) when String.equal enum_class SN.FB.cEnum
           ->
           let ty_exp =
@@ -44,7 +55,13 @@ let enum_kind name enum inner_ty get_ancestor =
                 (get_reason enum, Taccess (this, (get_pos enum, SN.FB.tInner)))
             | Some ty -> ty
           in
-          Some (ty_exp, ty_exp, None, None)
+          Some
+            {
+              base = ty_exp;
+              type_ = ty_exp;
+              constraint_ = None;
+              interface = None;
+            }
         | _ -> None
       end
     | _ -> None)
@@ -65,19 +82,20 @@ let enum_kind name enum inner_ty get_ancestor =
         (enum.te_base, None)
     in
     Some
-      ( te_base,
-        Typing_defs.mk (get_reason enum.te_base, Tapply (name, [])),
-        enum.te_constraint,
-        te_interface )
+      {
+        base = te_base;
+        type_ = Typing_defs.mk (get_reason enum.te_base, Tapply (name, []));
+        constraint_ = enum.te_constraint;
+        interface = te_interface;
+      }
 
-(* If a class is an Enum, we give all of the constants in the class the type
- * of the Enum. We don't do this for Enum<mixed> and Enum<arraykey>, since
- * that could *lose* type information.
- *)
-let rewrite_class name enum inner_ty get_ancestor consts =
-  match enum_kind name enum inner_ty get_ancestor with
+(** If a class is an Enum, we give all of the constants in the class the type
+    of the Enum. We don't do this for Enum<mixed> and Enum<arraykey>, since
+    that could *lose* type information. *)
+let rewrite_class name enum inner_ty ~get_ancestor consts =
+  match enum_kind name enum inner_ty ~get_ancestor with
   | None -> consts
-  | Some (_, ty, _, te_interface) ->
+  | Some { base = _; type_ = ty; constraint_ = _; interface = te_interface } ->
     let te_enum_class = Option.is_some te_interface in
     (match get_node ty with
     | Tmixed
@@ -96,12 +114,13 @@ let rewrite_class name enum inner_ty get_ancestor consts =
             { c with cc_type = ty })
         consts)
 
-(* Same as above, but for use when shallow_class_decl is enabled *)
+(** Same as [rewrite_class], but for use when shallow_class_decl is enabled *)
 let rewrite_class_consts enum_kind =
   Sequence.map ~f:(fun ((k, c) as pair) ->
       match Lazy.force enum_kind with
       | None -> pair
-      | Some (_, ty, _, te_interface) ->
+      | Some { base = _; type_ = ty; constraint_ = _; interface = te_interface }
+        ->
         let te_enum_class = Option.is_some te_interface in
         (match get_node ty with
         | Tmixed

@@ -143,15 +143,15 @@ CodeCache::CodeCache()
 
 #if USE_JEMALLOC_EXTENT_HOOKS
   if (use_lowptr) {
-    // in LOWPTR builds, TC must fit in lower 1G address.  If it doesn't, we
+    // in LOWPTR builds, TC must fit below lowArenaMinAddr().  If it doesn't, we
     // shrink things to make it so.
-    if (currBase + (32u << 20) > kLowArenaMinAddr) {
+    if (currBase + (32u << 20) > lowArenaMinAddr()) {
       fprintf(stderr, "brk is too big for LOWPTR build\n");
       exit(1);
     }
     auto const endAddr = currBase + m_totalSize;
-    if (endAddr > kLowArenaMinAddr) {
-      cutTCSizeTo(kLowArenaMinAddr - kRoundUp - currBase - thread_local_size);
+    if (endAddr > lowArenaMinAddr()) {
+      cutTCSizeTo(lowArenaMinAddr() - kRoundUp - currBase - thread_local_size);
       new (this) CodeCache;
       return;
     }

@@ -20,7 +20,13 @@
 #include <cinttypes>
 #include <folly/portability/SysMman.h>
 
-namespace HPHP { namespace alloc {
+namespace HPHP {
+
+HHVM_ATTRIBUTE_WEAK uintptr_t lowArenaMinAddr() {
+  return 1ull << 30;
+}
+
+namespace alloc {
 
 void RangeState::reserve() {
   auto const base = reinterpret_cast<void*>(low());

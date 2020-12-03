@@ -29,6 +29,7 @@
 #include <folly/portability/SysMman.h>
 #include <folly/portability/SysResource.h>
 
+#include "hphp/util/address-range.h"
 #include "hphp/util/bump-mapper.h"
 #include "hphp/util/extent-hooks.h"
 #include "hphp/util/hugetlb.h"
@@ -274,7 +275,9 @@ unsigned allocate2MPagesToRange(AddrRangeClass c, unsigned pages) {
 }
 
 void setup_low_arena(PageSpec s) {
-  assert(reinterpret_cast<uintptr_t>(sbrk(0)) <= kLowArenaMinAddr);
+  assert(reinterpret_cast<uintptr_t>(sbrk(0)) <= lowArenaMinAddr());
+  always_assert_flog(lowArenaMinAddr() < (2ull << 30),
+                     "low arena min addr must be below 2GB");
   // Initialize mappers for the VeryLow and Low address ranges.
   auto& veryLowRange = getRange(AddrRangeClass::VeryLow);
   auto& lowRange = getRange(AddrRangeClass::Low);

@@ -525,10 +525,13 @@ and get_linearization (env : env) (class_name : string) : linearization =
         Sequence.singleton
           { empty_mro_element with mro_name = class_name; mro_flags })
 
-let get_linearization
-    (ctx : Provider_context.t) (key : string * Decl_defs.linearization_kind) :
-    Decl_defs.linearization =
-  let (class_name, kind) = key in
+type linearizations = {
+  lin_members: Decl_defs.linearization;
+  lin_ancestors: Decl_defs.linearization;
+}
+
+let get_linearizations (ctx : Provider_context.t) (class_name : string) :
+    linearizations =
   let decl_env =
     {
       Decl_env.mode = FileInfo.Mstrict;
@@ -536,5 +539,22 @@ let get_linearization
       ctx;
     }
   in
-  let env = { class_stack = SSet.empty; decl_env; linearization_kind = kind } in
-  get_linearization env class_name
+  let lin_members =
+    get_linearization
+      {
+        class_stack = SSet.empty;
+        decl_env;
+        linearization_kind = Decl_defs.Member_resolution;
+      }
+      class_name
+  in
+  let lin_ancestors =
+    get_linearization
+      {
+        class_stack = SSet.empty;
+        decl_env;
+        linearization_kind = Decl_defs.Ancestor_types;
+      }
+      class_name
+  in
+  { lin_ancestors; lin_members }

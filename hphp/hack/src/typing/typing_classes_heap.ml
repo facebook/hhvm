@@ -50,15 +50,8 @@ let make_lazy_class_type ctx class_name =
   | Some sc ->
     let remainder =
       lazy
-        (let lin_members =
-           Decl_linearize.get_linearization
-             ctx
-             (class_name, Decl_defs.Member_resolution)
-         in
-         let lin_ancestors =
-           Decl_linearize.get_linearization
-             ctx
-             (class_name, Decl_defs.Ancestor_types)
+        (let { Decl_linearize.lin_members; lin_ancestors } =
+           Decl_linearize.get_linearizations ctx class_name
          in
          let lin_ancestors_drop_one = Sequence.drop_eagerly lin_ancestors 1 in
          let is_canonical _ = true in

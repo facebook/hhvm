@@ -1888,10 +1888,11 @@ let handle_mode
         let { FileInfo.classes; _ } = info in
         List.iter classes ~f:(fun (_, classname) ->
             Printf.printf "Linearization for class %s:\n" classname;
-            let key = (classname, Decl_defs.Member_resolution) in
-            let linearization = Decl_linearize.get_linearization ctx key in
+            let { Decl_linearize.lin_members; _ } =
+              Decl_linearize.get_linearizations ctx classname
+            in
             let linearization =
-              Sequence.map linearization (fun mro ->
+              Sequence.map lin_members (fun mro ->
                   let name = mro.Decl_defs.mro_name in
                   let targs =
                     List.map

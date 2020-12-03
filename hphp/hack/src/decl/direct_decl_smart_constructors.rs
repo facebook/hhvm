@@ -1755,7 +1755,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                     let ty = self.alloc(Ty(self.alloc(Reason::hint(pos)), ty.1));
                     CapTy(ty)
                 }
-                CapDefaults(p) => CapDefaults(p),
+                CapDefaults(_) => CapDefaults(pos),
             };
             self.alloc(FunImplicitParams {
                 capability,

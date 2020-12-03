@@ -34,6 +34,7 @@
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/vm/type-constraint.h"
 #include "hphp/system/systemlib.h"
 
 #include <folly/tracing/StaticTracepoint.h>
@@ -389,12 +390,16 @@ inline int64_t ElemStringPre(StringData* key) {
 inline int64_t ElemStringPre(TypedValue key) {
   if (LIKELY(isIntType(key.m_type))) {
     return key.m_data.num;
-  } else if (LIKELY(isStringType(key.m_type))) {
-    return key.m_data.pstr->toInt64(10);
-  } else {
-    raise_notice("String offset cast occurred");
-    return tvAsCVarRef(key).toInt64();
   }
+  if (LIKELY(isStringType(key.m_type))) {
+    return key.m_data.pstr->toInt64(10);
+  }
+  SystemLib::throwInvalidArgumentExceptionObject(
+    folly::sformat(
+      "Invalid string key: expected a key of type int or string, {} given",
+      describe_actual_type(&key)
+    )
+  );
 }
 
 /**

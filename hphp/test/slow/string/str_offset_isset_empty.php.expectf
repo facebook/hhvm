@@ -1,19 +1,13 @@
 NULL
-
-Notice: String offset cast occurred in %s/test/slow/string/str_offset_isset_empty.php on line 9
-string(1) "A"
+InvalidArgumentException: Invalid string key: expected a key of type int or string, null given
 bool(true)
 
 bool(false)
-
-Notice: String offset cast occurred in %s/test/slow/string/str_offset_isset_empty.php on line 9
-string(1) "A"
+InvalidArgumentException: Invalid string key: expected a key of type int or string, bool given
 bool(true)
 
 bool(true)
-
-Notice: String offset cast occurred in %s/test/slow/string/str_offset_isset_empty.php on line 9
-string(1) "B"
+InvalidArgumentException: Invalid string key: expected a key of type int or string, bool given
 bool(true)
 
 int(3)
@@ -21,54 +15,40 @@ string(1) "D"
 bool(true)
 
 float(4)
-
-Notice: String offset cast occurred in %s/test/slow/string/str_offset_isset_empty.php on line 9
-string(1) "E"
+InvalidArgumentException: Invalid string key: expected a key of type int or string, float given
 bool(true)
 
 float(5.3)
-
-Notice: String offset cast occurred in %s/test/slow/string/str_offset_isset_empty.php on line 9
-string(1) "F"
+InvalidArgumentException: Invalid string key: expected a key of type int or string, float given
 bool(true)
 
 float(6.7)
-
-Notice: String offset cast occurred in %s/test/slow/string/str_offset_isset_empty.php on line 9
-string(1) "G"
+InvalidArgumentException: Invalid string key: expected a key of type int or string, float given
 bool(true)
 
 int(-2)
 
-Notice: Uninitialized string offset: -2 in %s/test/slow/string/str_offset_isset_empty.php on line 9
+Notice: Uninitialized string offset: -2 in %s/test/slow/string/str_offset_isset_empty.php on line 20
 string(0) ""
 bool(false)
 
 float(-2.5)
-
-Notice: String offset cast occurred in %s/test/slow/string/str_offset_isset_empty.php on line 9
-
-Notice: Uninitialized string offset: -2 in %s/test/slow/string/str_offset_isset_empty.php on line 9
-string(0) ""
+InvalidArgumentException: Invalid string key: expected a key of type int or string, float given
 bool(false)
 
 int(21)
 
-Notice: Uninitialized string offset: 21 in %s/test/slow/string/str_offset_isset_empty.php on line 9
+Notice: Uninitialized string offset: 21 in %s/test/slow/string/str_offset_isset_empty.php on line 20
 string(0) ""
 bool(false)
 
 float(22.5)
-
-Notice: String offset cast occurred in %s/test/slow/string/str_offset_isset_empty.php on line 9
-
-Notice: Uninitialized string offset: 22 in %s/test/slow/string/str_offset_isset_empty.php on line 9
-string(0) ""
+InvalidArgumentException: Invalid string key: expected a key of type int or string, float given
 bool(false)
 
 int(9223372036854775807)
 
-Notice: Uninitialized string offset: 9223372036854775807 in %s/test/slow/string/str_offset_isset_empty.php on line 9
+Notice: Uninitialized string offset: 9223372036854775807 in %s/test/slow/string/str_offset_isset_empty.php on line 20
 string(0) ""
 bool(false)
 
@@ -107,7 +87,7 @@ bool(true)
 
 string(27) "999999999999999999999999999"
 
-Notice: Uninitialized string offset: 9223372036854775807 in %s/test/slow/string/str_offset_isset_empty.php on line 9
+Notice: Uninitialized string offset: 9223372036854775807 in %s/test/slow/string/str_offset_isset_empty.php on line 20
 string(0) ""
 bool(false)
 
@@ -133,32 +113,24 @@ bool(false)
 
 varray(0) {
 }
-
-Notice: String offset cast occurred in %s/test/slow/string/str_offset_isset_empty.php on line 9
-string(1) "A"
+InvalidArgumentException: Invalid string key: expected a key of type int or string, varray given
 bool(false)
 
 varray(1) {
   int(1)
 }
-
-Notice: String offset cast occurred in %s/test/slow/string/str_offset_isset_empty.php on line 9
-string(1) "B"
+InvalidArgumentException: Invalid string key: expected a key of type int or string, varray given
 bool(false)
 
 object(stdClass) (0) {
 }
+InvalidArgumentException: Invalid string key: expected a key of type int or string, stdClass given
 
-Notice: String offset cast occurred in %s/test/slow/string/str_offset_isset_empty.php on line 9
-
-Notice: Object of class stdClass could not be converted to int in %s/test/slow/string/str_offset_isset_empty.php on line 9
-string(1) "B"
-
-Notice: Object of class stdClass could not be converted to int in %s/test/slow/string/str_offset_isset_empty.php on line 10
+Notice: Object of class stdClass could not be converted to int in %s/test/slow/string/str_offset_isset_empty.php on line 21
 bool(false)
 
 int(4294967300)
 
-Notice: Uninitialized string offset: 4294967300 in %s/test/slow/string/str_offset_isset_empty.php on line 9
+Notice: Uninitialized string offset: 4294967300 in %s/test/slow/string/str_offset_isset_empty.php on line 20
 string(0) ""
 bool(false)

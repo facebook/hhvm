@@ -725,19 +725,20 @@ let call ~pos renv env call_type that_pty_opt args ret_ty =
     let args_pty = List.map ~f:fst args in
     call_regular ~pos renv env call_type name that_pty_opt args_pty ret_pty
 
-let array_like ~cow ~shape ~klass ty =
+let array_like ~cow ~shape ~klass ~tuple ty =
   let rec search ty =
     match ty with
     | Tcow_array _ when cow -> Some ty
     | Tshape _ when shape -> Some ty
     | Tclass _ when klass -> Some ty
+    | Ttuple _ when tuple -> Some ty
     | Tinter tys -> List.find_map tys search
     | _ -> None
   in
   search ty
 
-let array_like_with_default ~cow ~shape ~klass ~pos renv ty =
-  match array_like ~cow ~shape ~klass ty with
+let array_like_with_default ~cow ~shape ~klass ~tuple ~pos renv ty =
+  match array_like ~cow ~shape ~klass ~tuple ty with
   | Some ty -> ty
   | None ->
     Errors.unknown_information_flow pos "Hack array";
@@ -760,12 +761,21 @@ let array_like_with_default ~cow ~shape ~klass ~pos renv ty =
         }
     else if shape then
       Tshape { sh_kind = Closed_shape; sh_fields = A.ShapeMap.empty }
+    else if tuple then
+      Ttuple []
     else
       fail "`array_like_with_default` has no options turned on"
 
 let cow_array ~pos renv ty =
   let cow_array =
-    array_like_with_default ~cow:true ~shape:false ~klass:false ~pos renv ty
+    array_like_with_default
+      ~cow:true
+      ~shape:false
+      ~klass:false
+      ~tuple:false
+      ~pos
+      renv
+      ty
   in
   match cow_array with
   | Tcow_array arry -> arry
@@ -818,6 +828,25 @@ let may_throw_out_of_bounds_exn ~pos renv env arry ix_pty =
   let pc_deps = PSet.add arry.a_length (object_policy ix_pty) in
   may_throw ~pos renv env pc_deps exn_ty
 
+let int_of_exp ix_exp =
+  match ix_exp with
+  | (_, A.Int i) -> int_of_string i
+  | _ -> fail "expected an integer literal while indexing a tuple"
+
+let nth_tuple_pty ptys ix_exp =
+  let ix = int_of_exp ix_exp in
+  match List.nth ptys ix with
+  | Some pty -> pty
+  | None -> fail "tuple arity is too little"
+
+let overwrite_nth_pty tuple_pty ix_exp pty =
+  let ix = int_of_exp ix_exp in
+  match tuple_pty with
+  | Ttuple ptys ->
+    let ptys = List.take ptys ix @ (pty :: List.drop ptys (ix + 1)) in
+    Ttuple ptys
+  | _ -> fail "policy type overwrite expected a tuple"
+
 (* A wrapper around assign_helper that deals with Hack arrays' syntactic
    sugar; this accounts for the CoW semantics of Hack arrays:
 
@@ -836,6 +865,7 @@ let rec assign ?(use_pc = true) ~expr ~pos renv env lhs rhs_pty =
         ~cow:true
         ~shape:true
         ~klass:false
+        ~tuple:true
         ~pos
         renv
         new_arry_pty
@@ -901,6 +931,15 @@ let rec assign ?(use_pc = true) ~expr ~pos renv env lhs rhs_pty =
             Errors.unknown_information_flow pos "shape key";
             (env, true)
         end
+      | Ttuple _ ->
+        let ix =
+          match ix_opt with
+          | Some ix_exp -> ix_exp
+          | _ -> fail "indexed tuple assignment requires an index"
+        in
+        let tuple_pty = overwrite_nth_pty old_arry_pty ix rhs_pty in
+        let env = Env.acc env (subtype ~pos tuple_pty new_arry_pty) in
+        (env, true)
       | _ -> fail "the default type for array assignment is not handled"
     in
 
@@ -1187,6 +1226,7 @@ let rec expr ~pos renv (env : Env.expr_env) (((epos, ety), e) : Tast.expr) =
         ~cow:true
         ~shape:true
         ~klass:false
+        ~tuple:true
         ~pos
         renv
         arry_pty
@@ -1222,6 +1262,9 @@ let rec expr ~pos renv (env : Env.expr_env) (((epos, ety), e) : Tast.expr) =
             Errors.unknown_information_flow pos "nonexistent shape field";
             (env, Lift.ty renv ety)
         end
+      | Ttuple ptys ->
+        let indexed_pty = nth_tuple_pty ptys ix_exp in
+        (env, indexed_pty)
       | _ -> fail "the default type for array access is not handled"
     end
   | A.New (((_, lty), cid), _targs, args, _extra_args, _) ->
@@ -1539,6 +1582,7 @@ and stmt renv (env : Env.stmt_env) ((pos, s) : Tast.stmt) =
         ~cow:true
         ~shape:false
         ~klass:true
+        ~tuple:false
         ~pos
         renv
         collection_pty

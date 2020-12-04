@@ -42,9 +42,6 @@ class COW {
 
   // copy-on-write semantics means $this->vx is vec[$x] and thus
   // does not depend on $this->y
-  //
-  // This test currently does not pass; the analysis detects the
-  // spurious flow
   <<__InferFlows>>
   public function copyOnWrite(vec<int> $v): void {
     $v[] = $this->x;

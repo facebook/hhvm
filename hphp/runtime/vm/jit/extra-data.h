@@ -1601,6 +1601,22 @@ struct SinkProfileData : IRExtraData {
   bespoke::SinkProfile* profile;
 };
 
+struct BespokeGetData : IRExtraData {
+  enum class KeyState { Present, Unknown };
+
+  explicit BespokeGetData(KeyState state) : state(state) {}
+
+  std::string show() const {
+    switch (state) {
+      case KeyState::Present: return "Present";
+      case KeyState::Unknown: return "Unknown";
+    }
+    always_assert(false);
+  }
+
+  KeyState state;
+};
+
 //////////////////////////////////////////////////////////////////////
 
 #define X(op, data)                                                   \
@@ -1674,6 +1690,7 @@ X(CheckCold,                    TransIDData);
 X(IncProfCounter,               TransIDData);
 X(LogArrayReach,                SinkProfileData);
 X(NewLoggingArray,              LoggingProfileData);
+X(BespokeGet,                   BespokeGetData);
 X(DefFuncEntryFP,               FuncData);
 X(Call,                         CallData);
 X(CallBuiltin,                  CallBuiltinData);

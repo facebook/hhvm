@@ -51,10 +51,13 @@ SSATmp* emitGet(IRGS& env, SSATmp* arr, SSATmp* key, Block* taken) {
   auto const result = [&]{
     if (arr->isA(TVArr|TVec)) {
       gen(env, CheckVecBounds, taken, arr, key);
-      return gen(env, BespokeGet, TInitCell, arr, key);
+      auto const data = BespokeGetData { BespokeGetData::KeyState::Present };
+      return gen(env, BespokeGet, data, TInitCell, arr, key);
+    } else {
+      auto const data = BespokeGetData { BespokeGetData::KeyState::Unknown };
+      auto const result = gen(env, BespokeGet, data, TCell, arr, key);
+      return gen(env, CheckType, TInitCell, taken, result);
     }
-    auto const result = gen(env, BespokeGet, TCell, arr, key);
-    return gen(env, CheckType, TInitCell, taken, result);
   }();
   auto const type = arrLikeElemType(arr->type(), key->type(), curClass(env));
   // TODO(kshaunak): We should also pull in TypeProfile information here.

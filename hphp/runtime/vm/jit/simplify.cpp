@@ -3049,7 +3049,8 @@ SSATmp* simplifyBespokeGet(State& env, const IRInstruction* inst) {
 
   if (arr->isA(TVArr|TVec)) {
     if (key->isA(TStr)) return cns(env, TUninit);
-    if (arr->type().arrSpec().monotype() && !inst->typeParam().maybe(TUninit)) {
+    if (arr->type().arrSpec().monotype() &&
+        inst->extra<BespokeGet>()->state == BespokeGetData::KeyState::Present) {
       return gen(env, LdMonotypeVecElem, inst->typeParam(), arr, key);
     }
   }
@@ -3135,7 +3136,8 @@ SSATmp* simplifyBespokeIterGetVal(State& env, const IRInstruction* inst) {
   }
 
   if (arr->isA(TVArr|TVec)) {
-    return gen(env, BespokeGet, inst->typeParam(), arr, pos);
+    auto const data = BespokeGetData { BespokeGetData::KeyState::Present };
+    return gen(env, BespokeGet, data, inst->typeParam(), arr, pos);
   }
 
   if (arr->isA(TDArr|TDict) && arr->type().arrSpec().monotype()) {

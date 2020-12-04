@@ -999,6 +999,8 @@ struct RuntimeOption {
   F(uint32_t, HeapAllocSampleRequests, 0)                               \
   F(uint32_t, HeapAllocSampleBytes,    256 * 1024)                      \
   F(uint32_t, SlabAllocAlign,          64)                              \
+  F(uint32_t, MemTrackStart,           3500)                            \
+  F(uint32_t, MemTrackEnd,             3700)                            \
   F(int64_t, GCMinTrigger,             64L<<20)                         \
   F(double, GCTriggerPct,              0.5)                             \
   F(bool, TwoPhaseGC,                  false)                           \

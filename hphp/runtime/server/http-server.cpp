@@ -193,7 +193,13 @@ HttpServer::HttpServer() {
       auto const sat_requests = getSatelliteRequestCount();
       counters["satellite_inflight_requests"] = sat_requests.first;
       counters["satellite_queued_requests"] = sat_requests.second;
-      counters["uptime"] = f_server_uptime();
+      auto const uptime = f_server_uptime();
+      counters["uptime"] = uptime;
+
+      // Temporary counter that is available only during a short uptime window.
+      if (uptime > RO::EvalMemTrackStart && uptime < RO::EvalMemTrackEnd) {
+        counters["windowed_rss"] = ProcStatus::adjustedRssKb();
+      }
     }
   );
 

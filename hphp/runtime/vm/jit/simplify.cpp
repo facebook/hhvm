@@ -2667,10 +2667,10 @@ SSATmp* simplifyCheckVecBounds(State& env, const IRInstruction* inst) {
   auto const idxVal = idx->hasConstVal()
     ? folly::Optional<int64_t>(idx->intVal())
     : folly::none;
-  switch (packedArrayBoundsStaticCheck(array->type(), idxVal)) {
-  case PackedBounds::In:       return gen(env, Nop);
-  case PackedBounds::Out:      return gen(env, Jmp, inst->taken());
-  case PackedBounds::Unknown:  break;
+  switch (vecBoundsStaticCheck(array->type(), idxVal)) {
+  case VecBounds::In:       return gen(env, Nop);
+  case VecBounds::Out:      return gen(env, Jmp, inst->taken());
+  case VecBounds::Unknown:  break;
   }
 
   return mergeBranchDests(env, inst);

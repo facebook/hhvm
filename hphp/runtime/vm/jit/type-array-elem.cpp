@@ -35,39 +35,37 @@ namespace HPHP { namespace jit {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-PackedBounds packedArrayBoundsStaticCheck(Type arrayType,
-                                          folly::Optional<int64_t> idx) {
+VecBounds vecBoundsStaticCheck(Type arrayType, folly::Optional<int64_t> idx) {
   assertx(arrayType.subtypeOfAny(TArr, TVec));
-  if (idx && (*idx < 0 || *idx > MixedArray::MaxSize)) return PackedBounds::Out;
+  if (idx && (*idx < 0 || *idx > MixedArray::MaxSize)) return VecBounds::Out;
 
   if (arrayType.hasConstVal()) {
     auto const val = arrayType.arrLikeVal();
-    assertx(val->hasVanillaPackedLayout());
-    if (val->empty()) return PackedBounds::Out;
-    if (!idx) return PackedBounds::Unknown;
-    return *idx < val->size() ? PackedBounds::In : PackedBounds::Out;
+    if (val->empty()) return VecBounds::Out;
+    if (!idx) return VecBounds::Unknown;
+    return *idx < val->size() ? VecBounds::In : VecBounds::Out;
   };
 
-  if (!idx) return PackedBounds::Unknown;
+  if (!idx) return VecBounds::Unknown;
 
   auto const at = arrayType.arrSpec().type();
-  if (!at) return PackedBounds::Unknown;
+  if (!at) return VecBounds::Unknown;
 
   using A = RepoAuthType::Array;
   switch (at->tag()) {
   case A::Tag::Packed:
     if (at->emptiness() == A::Empty::No) {
-      return *idx < at->size() ? PackedBounds::In : PackedBounds::Out;
+      return *idx < at->size() ? VecBounds::In : VecBounds::Out;
     } else if (*idx >= at->size()) {
-      return PackedBounds::Out;
+      return VecBounds::Out;
     }
-    return PackedBounds::Unknown;
+    return VecBounds::Unknown;
   case A::Tag::PackedN:
     if (*idx == 0 && at->emptiness() == A::Empty::No) {
-      return PackedBounds::In;
+      return VecBounds::In;
     }
   }
-  return PackedBounds::Unknown;
+  return VecBounds::Unknown;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -31,13 +31,13 @@ struct SSATmp;
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- * Statically check whether a packed array access is within bounds, based on the
- * type of the array. If the index isn't provided, a check valid for all
+ * Statically check whether a vec or varray access is within bounds, based on
+ * the type of the array. If the index isn't provided, a check valid for all
  * possible indices will be done (which only returns Out if the array is known
  * to be empty).
  */
-enum class PackedBounds { In, Out, Unknown };
-PackedBounds packedArrayBoundsStaticCheck(Type, folly::Optional<int64_t>);
+enum class VecBounds { In, Out, Unknown };
+VecBounds vecBoundsStaticCheck(Type, folly::Optional<int64_t>);
 
 /*
  * Get the type of `arr[idx]` for different array types, considering constness,

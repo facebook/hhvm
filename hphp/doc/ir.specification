@@ -3206,7 +3206,7 @@ fields of that struct for holding intermediate values.
 
   Profile the access to property S(1) with base class S(0).
 
-| CheckVecBounds, ND, S(VArr,Vec) S(Int), B
+| CheckVecBounds, ND, S(VArr,Vec) S(Int), B|LA
 
   Checks that the index in S1 is within the bounds of the packed array or
   vector array in S0. Branches to B if the index is out of bounds.

@@ -945,9 +945,7 @@ SSATmp* emitMonotypeGet(IRGS& env, SSATmp* arr, SSATmp* key, Block* taken,
                         const MonotypeVecLayout* nonEmptyLayout) {
   assertx(arr->type().subtypeOfAny(TVec, TVArr));
 
-  auto const sz = gen(env, Count, arr);
-  auto const sf = gen(env, LtInt, key, sz);
-  gen(env, JmpZero, taken, sf);
+  gen(env, CheckVecBounds, taken, arr, key);
   if (nonEmptyLayout) {
     auto const nonEmptyType =
       arr->type().narrowToLayout(ArrayLayout(nonEmptyLayout->index()));

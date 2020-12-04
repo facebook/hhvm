@@ -554,17 +554,22 @@ let lift_params renv =
 let set_local_types env =
   List.fold ~init:env ~f:(fun env (lid, pty) -> Env.set_local_type env lid pty)
 
-let receiver_of_obj_get pos obj_ptype property =
-  match obj_ptype with
+let class_ pos msg = function
   | Tclass class_ -> class_
   | Tdynamic pol ->
     (* While it is sound to set the class's lump policy to be the dynamic's
        (invariant) policy, we do not know if the property we are looking for
        is policied, therefore we guess that it has the lump policy and emit an
        error in case we are wrong *)
-    Errors.unknown_information_flow pos "property access of dynamic";
+    Errors.unknown_information_flow pos "dynamic";
     { c_name = "<dynamic>"; c_self = pol; c_lump = pol }
-  | _ -> fail "couldn't find a class for the property '%s'" property
+  | _ -> fail "%s" msg
+
+let receiver_of_obj_get pos obj_ptype property =
+  let msg =
+    Format.asprintf "couldn't find a class for the property '%s'" property
+  in
+  class_ pos msg obj_ptype
 
 (* We generate a ptype out of the property type and fill it with either the
  * purpose of property or the lump policy of some object root. *)
@@ -720,24 +725,32 @@ let call ~pos renv env call_type that_pty_opt args ret_ty =
     let args_pty = List.map ~f:fst args in
     call_regular ~pos renv env call_type name that_pty_opt args_pty ret_pty
 
-let array_like ~cow ~shape ty =
+let array_like ~cow ~shape ~klass ty =
   let rec search ty =
     match ty with
     | Tcow_array _ when cow -> Some ty
     | Tshape _ when shape -> Some ty
+    | Tclass _ when klass -> Some ty
     | Tinter tys -> List.find_map tys search
     | _ -> None
   in
   search ty
 
-let array_like_with_default ~cow ~shape ~pos renv ty =
-  match array_like ~cow ~shape ty with
+let array_like_with_default ~cow ~shape ~klass ~pos renv ty =
+  match array_like ~cow ~shape ~klass ty with
   | Some ty -> ty
   | None ->
     Errors.unknown_information_flow pos "Hack array";
     (* The default is completely arbitrary but it should be the least
        precisely handled array structure given the search options. *)
-    if cow then
+    if klass then
+      Tclass
+        {
+          c_name = "fake";
+          c_self = Env.new_policy_var renv "fake_self";
+          c_lump = Env.new_policy_var renv "fake_lump";
+        }
+    else if cow then
       Tcow_array
         {
           a_kind = Adict;
@@ -751,7 +764,9 @@ let array_like_with_default ~cow ~shape ~pos renv ty =
       fail "`array_like_with_default` has no options turned on"
 
 let cow_array ~pos renv ty =
-  let cow_array = array_like_with_default ~cow:true ~shape:false ~pos renv ty in
+  let cow_array =
+    array_like_with_default ~cow:true ~shape:false ~klass:false ~pos renv ty
+  in
   match cow_array with
   | Tcow_array arry -> arry
   | _ -> fail "expected Hack array"
@@ -817,7 +832,13 @@ let rec assign ?(use_pc = true) ~expr ~pos renv env lhs rhs_pty =
     let (env, old_arry_pty) = expr env arry_exp in
     let new_arry_pty = Lift.ty ~prefix:"arr" renv arry_ty in
     let arry =
-      array_like_with_default ~cow:true ~shape:true ~pos renv new_arry_pty
+      array_like_with_default
+        ~cow:true
+        ~shape:true
+        ~klass:false
+        ~pos
+        renv
+        new_arry_pty
     in
 
     let (env, use_pc) =
@@ -1162,7 +1183,13 @@ let rec expr ~pos renv (env : Env.expr_env) (((epos, ety), e) : Tast.expr) =
     (* Evaluate the array *)
     let (env, arry_pty) = expr env arry in
     let arry =
-      array_like_with_default ~cow:true ~shape:true ~pos renv arry_pty
+      array_like_with_default
+        ~cow:true
+        ~shape:true
+        ~klass:false
+        ~pos
+        renv
+        arry_pty
     in
 
     (* Evaluate the index, it might have side-effects! *)
@@ -1506,23 +1533,67 @@ and stmt renv (env : Env.stmt_env) ((pos, s) : Tast.stmt) =
 
     (* TODO: pc should also flow into cty because the condition is evaluated
        unconditionally only the first time around the loop. *)
-    let (env, array_pty, cthrow) = expr ~pos renv env collection in
-    let array = cow_array ~pos renv array_pty in
-
+    let (env, collection_pty, cthrow) = expr ~pos renv env collection in
+    let collection_pty =
+      array_like_with_default
+        ~cow:true
+        ~shape:false
+        ~klass:true
+        ~pos
+        renv
+        collection_pty
+    in
     let env = Env.prep_expr env in
     let expr = expr_ ~pos renv in
-    let env =
+    let (env, pc_policies) =
       match as_exp with
-      | Aast.As_v value
-      | Aast.Await_as_v (_, value) ->
-        assign_helper ~expr ~pos renv env value array.a_value
-      | Aast.As_kv (key, value)
-      | Aast.Await_as_kv (_, key, value) ->
-        let env = assign_helper ~expr ~pos renv env value array.a_value in
-        assign_helper ~expr ~pos renv env key array.a_key
+      | Aast.As_v (((_, value_ty), _) as value)
+      | Aast.Await_as_v (_, (((_, value_ty), _) as value)) ->
+        let (env, value_pty, pc_policies) =
+          match collection_pty with
+          | Tcow_array arry -> (env, arry.a_value, PSet.singleton arry.a_length)
+          | Tclass class_ ->
+            (* TODO(T80403715): Ensure during class definition that Iterable
+               instances behave sensibly. Otherwise, this treatment is unsound. *)
+            (* Value is, in effect, a field access, hence governed by the
+            lump policy of the class. *)
+            let value_pty = Lift.ty ~lump:class_.c_lump renv value_ty in
+            (* Length, key, and value are governed by the self policy if the
+               class is in fact a Hack array and by the lump policy otherwise. *)
+            let cl_pols = [class_.c_self; class_.c_lump] in
+            let env = Env.acc env (add_dependencies ~pos cl_pols value_pty) in
+            (env, value_pty, PSet.of_list cl_pols)
+          | _ -> fail "Collection is neither a class nor a cow array"
+        in
+        let env = assign_helper ~expr ~pos renv env value value_pty in
+        (env, pc_policies)
+      | Aast.As_kv ((((_, key_ty), _) as key), (((_, value_ty), _) as value))
+      | Aast.Await_as_kv
+          (_, (((_, key_ty), _) as key), (((_, value_ty), _) as value)) ->
+        let (env, key_pty, value_pty, pc_policies) =
+          match collection_pty with
+          | Tcow_array arry ->
+            (env, arry.a_key, arry.a_value, PSet.singleton arry.a_length)
+          | Tclass class_ ->
+            (* TODO(T80403715): Ensure during class definition that Iterable
+               instances behave sensibly. Otherwise, this treatment is unsound. *)
+            (* Key and value are, in effect, a field accesses, hence governed
+            by the lump policy of the class. *)
+            let key_pty = Lift.ty ~lump:class_.c_lump renv key_ty in
+            let value_pty = Lift.ty ~lump:class_.c_lump renv value_ty in
+            (* Length, key, and value are governed by the self policy if the
+               class is in fact a Hack array and by the lump policy otherwise. *)
+            let cl_pols = [class_.c_self; class_.c_lump] in
+            let env = Env.acc env (add_dependencies ~pos cl_pols value_pty) in
+            let env = Env.acc env (add_dependencies ~pos cl_pols key_pty) in
+            (env, key_pty, value_pty, PSet.of_list cl_pols)
+          | _ -> fail "Collection is neither a class nor a cow array"
+        in
+        let env = assign_helper ~expr ~pos renv env key key_pty in
+        let env = assign_helper ~expr ~pos renv env value value_pty in
+        (env, pc_policies)
     in
 
-    let pc_policies = PSet.singleton array.a_length in
     let (env, ethrow) = Env.close_expr env in
     if not @@ KMap.is_empty ethrow then fail "foreach collection threw";
     Env.with_pc_deps env pc_policies @@ fun env ->

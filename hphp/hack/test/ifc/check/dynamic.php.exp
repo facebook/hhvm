@@ -1,10 +1,10 @@
 === IFC analysis results for dynamic.php
 File "dynamic.php", line 28, characters 3-21:
-Unable to analyze information flow for property access of dynamic. This might be unsafe. (Typing[4385])
+Unable to analyze information flow for dynamic. This might be unsafe. (Typing[4385])
 File "dynamic.php", line 33, characters 3-20:
-Unable to analyze information flow for property access of dynamic. This might be unsafe. (Typing[4385])
+Unable to analyze information flow for dynamic. This might be unsafe. (Typing[4385])
 File "dynamic.php", line 38, characters 3-17:
-Unable to analyze information flow for property access of dynamic. This might be unsafe. (Typing[4385])
+Unable to analyze information flow for dynamic. This might be unsafe. (Typing[4385])
 File "dynamic.php", line 51, characters 3-25:
 Context-implicit policy leaks into `PUBLIC` via `pc`. (Typing[4380])
   File "dynamic.php", line 9, characters 14-21:

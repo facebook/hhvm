@@ -34,7 +34,7 @@ inline bool shouldTestBespokeArrayLikes() {
 }
 
 inline bool arrayTypeMaybeBespoke(DataType t) {
-  return !isKeysetType(t);
+  return shouldTestBespokeArrayLikes() || !isKeysetType(t);
 }
 
 /**

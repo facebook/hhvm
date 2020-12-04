@@ -1,14 +1,14 @@
 File "iface_require_extends2.php", line 23, characters 10-22:
-No method `methodOfSuper` in `IMarked` (Typing[4053])
-File "iface_require_extends2.php", line 19, characters 19-32:
-Did you mean `methodOfMarked` instead?
-File "iface_require_extends2.php", line 22, characters 19-25:
-This is why I think it is an object of type IMarked
-File "iface_require_extends2.php", line 16, characters 11-17:
-Declaration of `IMarked` is here
+No instance method `methodOfSuper` in `IMarked` (Typing[4053])
+  File "iface_require_extends2.php", line 19, characters 19-32:
+  Did you mean `methodOfMarked` instead?
+  File "iface_require_extends2.php", line 22, characters 19-25:
+  This is why I think it is an object of type IMarked
+  File "iface_require_extends2.php", line 16, characters 11-17:
+  Declaration of `IMarked` is here
 File "iface_require_extends2.php", line 24, characters 11-15:
 Invalid argument (Typing[4110])
-File "iface_require_extends2.php", line 29, characters 18-22:
-Expected `Super`
-File "iface_require_extends2.php", line 22, characters 19-25:
-But got `IMarked`
+  File "iface_require_extends2.php", line 29, characters 18-22:
+  Expected `Super`
+  File "iface_require_extends2.php", line 22, characters 19-25:
+  But got `IMarked`

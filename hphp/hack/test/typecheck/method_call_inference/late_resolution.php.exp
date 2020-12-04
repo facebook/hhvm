@@ -1,7 +1,7 @@
 File "late_resolution.php", line 44, characters 10-15:
 Invalid return type (Typing[4053])
   File "late_resolution.php", line 43, characters 17-19:
-  No method `foo` in `B`
+  No instance method `foo` in `B`
   File "late_resolution.php", line 41, characters 28-28:
   This is why I think it is an object of type B
   File "late_resolution.php", line 41, characters 28-28:

@@ -1,16 +1,16 @@
 File "multi_as_invoke_bad.php", line 24, characters 9-12:
-No method `Bong` in `I` (Typing[4053])
-File "multi_as_invoke_bad.php", line 5, characters 19-21:
-Did you mean `Foo` instead?
-File "multi_as_invoke_bad.php", line 11, characters 19-19:
-This is why I think it is an object of type I
-File "multi_as_invoke_bad.php", line 4, characters 11-11:
-Declaration of `I` is here
+No instance method `Bong` in `I` (Typing[4053])
+  File "multi_as_invoke_bad.php", line 5, characters 19-21:
+  Did you mean `Foo` instead?
+  File "multi_as_invoke_bad.php", line 11, characters 19-19:
+  This is why I think it is an object of type I
+  File "multi_as_invoke_bad.php", line 4, characters 11-11:
+  Declaration of `I` is here
 File "multi_as_invoke_bad.php", line 24, characters 9-12:
-No method `Bong` in `J` (Typing[4053])
-File "multi_as_invoke_bad.php", line 8, characters 19-21:
-Did you mean `Bar` instead?
-File "multi_as_invoke_bad.php", line 11, characters 14-14:
-This is why I think it is an object of type J
-File "multi_as_invoke_bad.php", line 7, characters 11-11:
-Declaration of `J` is here
+No instance method `Bong` in `J` (Typing[4053])
+  File "multi_as_invoke_bad.php", line 8, characters 19-21:
+  Did you mean `Bar` instead?
+  File "multi_as_invoke_bad.php", line 11, characters 14-14:
+  This is why I think it is an object of type J
+  File "multi_as_invoke_bad.php", line 7, characters 11-11:
+  Declaration of `J` is here

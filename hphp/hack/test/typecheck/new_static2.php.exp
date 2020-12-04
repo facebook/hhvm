@@ -1,5 +1,5 @@
 File "new_static2.php", line 19, characters 9-11:
-No method `xxx` in `A` (Typing[4053])
+No instance method `xxx` in `A` (Typing[4053])
   File "new_static2.php", line 15, characters 19-21:
   Did you mean `foo` instead?
   File "new_static2.php", line 13, characters 16-16:

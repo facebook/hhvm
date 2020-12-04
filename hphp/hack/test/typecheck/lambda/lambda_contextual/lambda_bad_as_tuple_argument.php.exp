@@ -1,5 +1,5 @@
 File "lambda_bad_as_tuple_argument.php", line 32, characters 17-30:
-No method `missing_method` in `MyClass` (Typing[4053])
+No instance method `missing_method` in `MyClass` (Typing[4053])
   File "lambda_bad_as_tuple_argument.php", line 5, characters 19-23:
   Did you mean `hello` instead?
   File "lambda_bad_as_tuple_argument.php", line 22, characters 20-26:

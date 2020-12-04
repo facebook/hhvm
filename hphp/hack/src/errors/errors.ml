@@ -3013,7 +3013,7 @@ let member_not_found
   let type_name = strip_ns type_name |> Markdown_lite.md_codify in
   let kind =
     match kind with
-    | `method_ -> "method"
+    | `method_ -> "instance method"
     | `property -> "property"
   in
   let msg =

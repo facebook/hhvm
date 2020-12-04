@@ -1,5 +1,5 @@
 File "protected_non_static_member_01.php", line 20, characters 12-13:
-No method `me` in `T` (Typing[4053])
+No instance method `me` in `T` (Typing[4053])
   File "protected_non_static_member_01.php", line 18, characters 19-21:
   Did you mean `foo` instead?
   File "protected_non_static_member_01.php", line 20, characters 5-9:
@@ -11,7 +11,7 @@ You cannot access this member (Typing[4112])
   File "protected_non_static_member_01.php", line 13, characters 20-21:
   This member is private
 File "protected_non_static_member_01.php", line 29, characters 12-13:
-No method `me` in `T2` (Typing[4053])
+No instance method `me` in `T2` (Typing[4053])
   File "protected_non_static_member_01.php", line 27, characters 19-21:
   Did you mean `foo` instead?
   File "protected_non_static_member_01.php", line 29, characters 5-9:

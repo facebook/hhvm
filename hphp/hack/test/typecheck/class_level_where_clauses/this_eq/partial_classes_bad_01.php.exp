@@ -15,7 +15,7 @@ A `where` type constraint is violated here (Typing[4323])
   File "partial_classes_bad_01.php", line 16, characters 13-14:
   But got `C2`
 File "partial_classes_bad_01.php", line 28, characters 40-41:
-No method `me` in `PartialC` (Typing[4053])
+No instance method `me` in `PartialC` (Typing[4053])
   File "partial_classes_bad_01.php", line 28, characters 19-21:
   Did you mean `foo` instead?
   File "partial_classes_bad_01.php", line 28, characters 33-37:

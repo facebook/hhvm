@@ -1,5 +1,5 @@
 File "lambda_bad_as_cond_result.php", line 30, characters 17-30:
-No method `missing_method` in `MyClass` (Typing[4053])
+No instance method `missing_method` in `MyClass` (Typing[4053])
   File "lambda_bad_as_cond_result.php", line 5, characters 19-23:
   Did you mean `hello` instead?
   File "lambda_bad_as_cond_result.php", line 26, characters 46-52:
@@ -9,7 +9,7 @@ No method `missing_method` in `MyClass` (Typing[4053])
   File "lambda_bad_as_cond_result.php", line 4, characters 7-13:
   Declaration of `MyClass` is here
 File "lambda_bad_as_cond_result.php", line 36, characters 17-39:
-No method `another_missing_methodO` in `MyClass` (Typing[4053])
+No instance method `another_missing_methodO` in `MyClass` (Typing[4053])
   File "lambda_bad_as_cond_result.php", line 5, characters 19-23:
   Did you mean `hello` instead?
   File "lambda_bad_as_cond_result.php", line 26, characters 46-52:

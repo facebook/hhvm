@@ -5,10 +5,10 @@ Unbound name: `Y` (an object type) (Naming[2049])
 File "suggest_method_name3.php", line 13, characters 26-33:
 This method is not declared as abstract, it must have a body (NastCheck[3014])
 File "suggest_method_name3.php", line 18, characters 7-14:
-No method `mymethod` in `X` (Typing[4053])
-File "suggest_method_name3.php", line 13, characters 26-33:
-Did you mean static method `my~~M~~ethod` instead (which only differs by case)?
-File "suggest_method_name3.php", line 17, characters 12-12:
-This is why I think it is an object of type X
-File "suggest_method_name3.php", line 12, characters 7-7:
-Declaration of `X` is here
+No instance method `mymethod` in `X` (Typing[4053])
+  File "suggest_method_name3.php", line 13, characters 26-33:
+  Did you mean static method `my~~M~~ethod` instead (which only differs by case)?
+  File "suggest_method_name3.php", line 17, characters 12-12:
+  This is why I think it is an object of type X
+  File "suggest_method_name3.php", line 12, characters 7-7:
+  Declaration of `X` is here

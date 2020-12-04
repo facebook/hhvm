@@ -1,5 +1,5 @@
 File "lambda_bad_predicate.php", line 40, characters 27-30:
-No method `hell` in `MyClass` (Typing[4053])
+No instance method `hell` in `MyClass` (Typing[4053])
   File "lambda_bad_predicate.php", line 27, characters 19-23:
   Did you mean `hello` instead?
   File "lambda_bad_predicate.php", line 32, characters 45-51:

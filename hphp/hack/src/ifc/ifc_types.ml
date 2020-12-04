@@ -139,10 +139,6 @@ type callable_name =
   (* toplevel function *)
   | Function of string
 
-type array =
-  | Aarray of cow_array
-  | Ashape of shape
-
 type fun_proto = {
   fp_name: string;
   fp_this: ptype option;

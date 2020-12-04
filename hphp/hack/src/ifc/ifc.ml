@@ -720,40 +720,41 @@ let call ~pos renv env call_type that_pty_opt args ret_ty =
     let args_pty = List.map ~f:fst args in
     call_regular ~pos renv env call_type name that_pty_opt args_pty ret_pty
 
-(* Return either an array or a shape (anything that uses Array_get syntax for
-   reads/writes) *)
-let any_cow_array ~get_array ~mk_array ~pos renv ty =
-  let rec f = function
-    | Tcow_array arry -> Some (Aarray arry)
-    | Tshape s -> Some (Ashape s)
-    | Tinter tys -> List.find_map tys f
+let array_like ~cow ~shape ty =
+  let rec search ty =
+    match ty with
+    | Tcow_array _ when cow -> Some ty
+    | Tshape _ when shape -> Some ty
+    | Tinter tys -> List.find_map tys search
     | _ -> None
   in
-  match Option.(f ty >>= get_array) with
-  | Some arry -> arry
+  search ty
+
+let array_like_with_default ~cow ~shape ~pos renv ty =
+  match array_like ~cow ~shape ty with
+  | Some ty -> ty
   | None ->
     Errors.unknown_information_flow pos "Hack array";
-    (* The following CoW array is completely arbitrary. *)
-    mk_array
-      {
-        a_kind = Adict;
-        a_key = Tprim (Env.new_policy_var renv "fake_key");
-        a_value = Tprim (Env.new_policy_var renv "fake_value");
-        a_length = Env.new_policy_var renv "fake_length";
-      }
+    (* The default is completely arbitrary but it should be the least
+       precisely handled array structure given the search options. *)
+    if cow then
+      Tcow_array
+        {
+          a_kind = Adict;
+          a_key = Tprim (Env.new_policy_var renv "fake_key");
+          a_value = Tprim (Env.new_policy_var renv "fake_value");
+          a_length = Env.new_policy_var renv "fake_length";
+        }
+    else if shape then
+      Tshape { sh_kind = Closed_shape; sh_fields = A.ShapeMap.empty }
+    else
+      fail "`array_like_with_default` has no options turned on"
 
-let array_or_shape =
-  let get_array a = Some a in
-  let mk_array a = Aarray a in
-  any_cow_array ~get_array ~mk_array
-
-let cow_array =
-  let get_array = function
-    | Aarray a -> Some a
-    | Ashape _ -> None
-  in
-  let mk_array a = a in
-  any_cow_array ~get_array ~mk_array
+let cow_array ~pos renv ty =
+  let cow_array = array_like_with_default ~cow:true ~shape:false ~pos renv ty in
+  match cow_array with
+  | Tcow_array arry -> arry
+  | _ -> fail "expected Hack array"
 
 (* Deals with an assignment to a local variable or an object property *)
 let assign_helper
@@ -815,11 +816,13 @@ let rec assign ?(use_pc = true) ~expr ~pos renv env lhs rhs_pty =
     (* Evaluate the array *)
     let (env, old_arry_pty) = expr env arry_exp in
     let new_arry_pty = Lift.ty ~prefix:"arr" renv arry_ty in
-    let arry = array_or_shape ~pos renv old_arry_pty in
+    let arry =
+      array_like_with_default ~cow:true ~shape:true ~pos renv new_arry_pty
+    in
 
     let (env, use_pc) =
       match arry with
-      | Aarray _ ->
+      | Tcow_array _ ->
         (* TODO(T68269878): track flows due to length changes *)
         let arry = cow_array ~pos renv new_arry_pty in
         (* Here we achieve two things:
@@ -853,7 +856,7 @@ let rec assign ?(use_pc = true) ~expr ~pos renv env lhs rhs_pty =
         (* Do the assignment *)
         let env = Env.acc env (subtype ~pos rhs_pty arry.a_value) in
         (env, true)
-      | Ashape { sh_kind; sh_fields } ->
+      | Tshape { sh_kind; sh_fields } ->
         begin
           match Option.(ix_opt >>= shape_field_name renv) with
           | Some key ->
@@ -877,6 +880,7 @@ let rec assign ?(use_pc = true) ~expr ~pos renv env lhs rhs_pty =
             Errors.unknown_information_flow pos "shape key";
             (env, true)
         end
+      | _ -> fail "the default type for array assignment is not handled"
     in
 
     (* assign the array/shape to itself *)
@@ -1157,7 +1161,9 @@ let rec expr ~pos renv (env : Env.expr_env) (((epos, ety), e) : Tast.expr) =
   | A.Array_get (arry, ix_opt) ->
     (* Evaluate the array *)
     let (env, arry_pty) = expr env arry in
-    let arry = array_or_shape ~pos renv arry_pty in
+    let arry =
+      array_like_with_default ~cow:true ~shape:true ~pos renv arry_pty
+    in
 
     (* Evaluate the index, it might have side-effects! *)
     let (env, ix_exp, ix_pty) =
@@ -1169,14 +1175,14 @@ let rec expr ~pos renv (env : Env.expr_env) (((epos, ety), e) : Tast.expr) =
     in
     begin
       match arry with
-      | Aarray arry ->
+      | Tcow_array arry ->
         (* The index flows into the array key which flows into the array value *)
         let env = Env.acc env @@ subtype ~pos ix_pty arry.a_key in
 
         let env = may_throw_out_of_bounds_exn ~pos renv env arry ix_pty in
 
         (env, arry.a_value)
-      | Ashape { sh_fields; _ } ->
+      | Tshape { sh_fields; _ } ->
         let sft =
           Option.(
             shape_field_name renv ix_exp >>= fun f ->
@@ -1189,6 +1195,7 @@ let rec expr ~pos renv (env : Env.expr_env) (((epos, ety), e) : Tast.expr) =
             Errors.unknown_information_flow pos "nonexistent shape field";
             (env, Lift.ty renv ety)
         end
+      | _ -> fail "the default type for array access is not handled"
     end
   | A.New (((_, lty), cid), _targs, args, _extra_args, _) ->
     (* TODO(T70139741): support variadic functions and constructors
@@ -1301,7 +1308,7 @@ let rec expr ~pos renv (env : Env.expr_env) (((epos, ety), e) : Tast.expr) =
            refinement above will always succeed because the ternary
            evaluates either to e that has type Thint (<: ?Thint), or
            null that has type null (<: ?Thint).
-           
+
            The result of this as refinement is in ety, so here, we
            construct the type of ternary expression. *)
         let (env, tag_policy) =

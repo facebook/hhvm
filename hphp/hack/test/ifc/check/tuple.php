@@ -20,17 +20,27 @@ function ok(C $c): void {
 
   $tuple[3] = $c->i;
   $c->i = $tuple[1];
+
+  $pair = Pair { $c->i, $c->j };
+  $c->i = $pair[0];
 }
 
 <<__InferFlows>>
-function leak_through_access(C $c): void {
+function leak_through_access_tuple(C $c): void {
   $tuple = tuple($c->s, $c->i, $c->b, $c->j);
   // J leaks to I
   $c->i = $tuple[3];
 }
 
 <<__InferFlows>>
-function leak_through_assignment(C $c): void {
+function leak_through_access_pair(C $c): void {
+  $pair = Pair { $c->i, $c->j };
+  // J leaks to I
+  $c->i = $pair[1];
+}
+
+<<__InferFlows>>
+function leak_through_assignment_tuple(C $c): void {
   $tuple = tuple($c->s, $c->i, $c->b, $c->j);
   $tuple[1] = $c->j;
   // J leaks to I

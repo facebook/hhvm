@@ -1334,8 +1334,11 @@ let rec expr ~pos renv (env : Env.expr_env) (((epos, ety), e) : Tast.expr) =
     in
     (env, ty)
   | A.Await e -> expr env e
+  | A.Pair (_, e0, e1) ->
+    let (env, ptys) = List.map_env env [e0; e1] ~f:expr in
+    (env, Ttuple ptys)
   | A.List es ->
-    let (env, ptys) = List.map_env env es ~f:(fun env e -> expr env e) in
+    let (env, ptys) = List.map_env env es ~f:expr in
     (env, Ttuple ptys)
   | A.Pipe ((_, dollardollar), e1, e2) ->
     let (env, t1) = expr env e1 in

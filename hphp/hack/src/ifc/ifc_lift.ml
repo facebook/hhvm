@@ -65,7 +65,9 @@ let rec ty ?prefix ?lump renv (t : T.locl_ty) =
   | T.Tgeneric (_name, _targs) ->
     (* TODO(T69551141) Handle type arguments *)
     Tgeneric (get_policy ?prefix lump renv)
-  | T.Ttuple tyl -> Ttuple (List.map ~f:ty tyl)
+  | T.Tclass ((_, "\\HH\\Pair"), _, tyl)
+  | T.Ttuple tyl ->
+    Ttuple (List.map ~f:ty tyl)
   | T.Tunion tyl -> Tunion (List.map ~f:ty tyl)
   | T.Tintersection tyl -> Tinter (List.map ~f:ty tyl)
   | T.Tvarray element_ty

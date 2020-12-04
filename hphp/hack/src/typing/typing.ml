@@ -3446,8 +3446,8 @@ and type_capability env cap unsafe_cap default_pos =
   let (env, cap_ty) =
     Option.value_map
       cap_hint_opt
-      ~default:(env, MakeType.default_capability (Reason.Rhint default_pos))
-      ~f:(Phase.localize_hint_with_self env)
+      ~default:(env, MakeType.default_capability)
+      ~f:(fun h -> Phase.localize_with_self env (Decl_hint.hint env.decl_env h))
   in
   let unsafe_cap_hint_opt = hint_of_type_hint unsafe_cap in
   let (env, unsafe_cap_ty) =
@@ -6247,7 +6247,13 @@ and call
             let ft_tparams = [] in
             let ft_where_constraints = [] in
             let ft_params = List.map ~f:mk_fun_param type_of_el in
-            let ft_implicit_params = { capability = CapDefaults pos } in
+            let ft_implicit_params =
+              {
+                capability =
+                  CapDefaults pos
+                  (* TODO(coeffects) should this be a different type? *);
+              }
+            in
             let (env, return_ty) = Env.fresh_type env pos in
             let return_ty =
               match in_await with

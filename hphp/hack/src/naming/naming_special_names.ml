@@ -828,6 +828,8 @@ module Capabilities = struct
 
   let prefix = "\\HH\\Capabilities\\"
 
+  let writeProperty = prefix ^ "WriteProperty"
+
   let accessStaticVariable = prefix ^ "AccessStaticVariable"
 
   let io = prefix ^ "IO"

@@ -178,6 +178,14 @@ let simple_variadic_splat r ty =
              d_kind = SplatUnpack;
            } ))
 
-let default_capability r =
-  (* TODO(coeffects) Replace with type alias from HHI *)
-  nothing r
+let default_capability =
+  intersection
+    Reason.Rnone
+    [
+      class_type Reason.Rnone Naming_special_names.Capabilities.io [];
+      class_type
+        Reason.Rnone
+        Naming_special_names.Capabilities.accessStaticVariable
+        [];
+      class_type Reason.Rnone Naming_special_names.Capabilities.writeProperty [];
+    ]

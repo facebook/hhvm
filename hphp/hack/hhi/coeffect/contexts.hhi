@@ -28,7 +28,9 @@ namespace HH\Contexts {
    */
 
   /**
-   * The default, normally unannotated context.
+   * The default, normally unannotated context. This is currently hardcoded in
+   * Typing_make_type.default_capability for performance reasons. The alias is
+   * still present so that it may be directly used as [defaults]
    */
   type defaults = (
     \HH\Capabilities\IO &

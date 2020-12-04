@@ -15,7 +15,10 @@
           param_callconv = None; param_user_attributes = [];
           param_visibility = None }
         ];
-      f_cap = ((nothing), None); f_unsafe_cap = ((mixed), None);
+      f_cap =
+      (((HH\Capabilities\IO & HH\Capabilities\AccessStaticVariable & HH\Capabilities\WriteProperty)),
+       None);
+      f_unsafe_cap = ((mixed), None);
       f_body =
       { fb_ast =
         [([7:3-10:5],

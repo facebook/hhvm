@@ -1,5 +1,5 @@
 File "invalid_operator.php", line 13, characters 13-18:
-Unsupported syntax for expression trees. (Parsing[1002])
+Expression trees only support comparison (`<`, `===` etc) and basic arithmetic operators (`+` etc). (Parsing[1002])
 File "invalid_operator.php", line 16, characters 13-21:
 Unsupported syntax for expression trees. (Parsing[1002])
 File "invalid_operator.php", line 19, characters 13-20:
@@ -7,17 +7,17 @@ Unsupported syntax for expression trees. (Parsing[1002])
 File "invalid_operator.php", line 22, characters 13-36:
 Unsupported syntax for expression trees. (Parsing[1002])
 File "invalid_operator.php", line 25, characters 22-39:
-Unsupported syntax for expression trees. (Parsing[1002])
+Expression trees do not support this statement syntax. (Parsing[1002])
 File "invalid_operator.php", line 26, characters 37-61:
-Unsupported syntax for expression trees. (Parsing[1002])
+Expression trees do not support this statement syntax. (Parsing[1002])
 File "invalid_operator.php", line 29, characters 25-26:
-Unsupported syntax for expression trees. (Parsing[1002])
+Expression trees do not support parameters with default values. (Parsing[1002])
 File "invalid_operator.php", line 32, characters 32-36:
 Unsupported syntax for expression trees. (Parsing[1002])
 File "invalid_operator.php", line 33, characters 32-38:
 Unsupported syntax for expression trees. (Parsing[1002])
 File "invalid_operator.php", line 36, characters 28-34:
-Unsupported syntax for expression trees. (Parsing[1002])
+Expression trees only support comparison (`<`, `===` etc) and basic arithmetic operators (`+` etc). (Parsing[1002])
 File "invalid_operator.php", line 22, characters 33-33:
 Variable `$__0` is undefined, or not always defined. (Naming[2050])
 File "invalid_operator.php", line 13, characters 13-18:

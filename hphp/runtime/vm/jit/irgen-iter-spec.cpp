@@ -444,7 +444,7 @@ struct BespokeAccessor : public Accessor {
     auto const result = gen(env, CheckType, exit, arr_type, base);
     if (result->isA(TDArr|TDict)) {
       auto const size = gen(env, Count, result);
-      auto const used = layout.emitIterEnd(env, result);
+      auto const used = gen(env, BespokeIterEnd, result);
       auto const same = gen(env, EqInt, size, used);
       gen(env, JmpZero, exit, same);
     }
@@ -456,15 +456,15 @@ struct BespokeAccessor : public Accessor {
   }
 
   SSATmp* getElm(IRGS& env, SSATmp* arr, SSATmp* pos) const override {
-    return layout.emitIterElm(env, arr, pos);
+    return pos;
   }
 
   SSATmp* getKey(IRGS& env, SSATmp* arr, SSATmp* elm) const override {
-    return layout.emitIterGetKey(env, arr, elm);
+    return gen(env, BespokeIterGetKey, TInt|TStr, arr, elm);
   }
 
   SSATmp* getVal(IRGS& env, SSATmp* arr, SSATmp* elm) const override {
-    return layout.emitIterGetVal(env, arr, elm);
+    return gen(env, BespokeIterGetVal, TInitCell, arr, elm);
   }
 
   SSATmp* advancePos(IRGS& env, SSATmp* pos, int16_t offset) const override {

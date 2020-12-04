@@ -117,17 +117,11 @@ private:
 struct EmptyMonotypeVecLayout : public ConcreteLayout {
   EmptyMonotypeVecLayout();
   static LayoutIndex Index();
-
-  virtual SSATmp* emitGet(
-      IRGS& env, SSATmp* arr, SSATmp* key, Block* taken) const override;
 };
 
 struct MonotypeVecLayout : public ConcreteLayout {
   explicit MonotypeVecLayout(DataType type);
   static LayoutIndex Index(DataType type);
-
-  virtual SSATmp* emitGet(
-      IRGS& env, SSATmp* arr, SSATmp* key, Block* taken) const override;
 
   DataType m_fixedType;
 };
@@ -146,18 +140,12 @@ struct EmptyOrMonotypeVecLayout : public AbstractLayout {
     return static_cast<const MonotypeVecLayout*>(layout);
   }
 
-  virtual SSATmp* emitGet(
-      IRGS& env, SSATmp* arr, SSATmp* key, Block* taken) const override;
-
   DataType m_fixedType;
 };
 
 struct TopMonotypeVecLayout : public AbstractLayout {
   TopMonotypeVecLayout();
   static LayoutIndex Index();
-
-  virtual SSATmp* emitGet(
-      IRGS& env, SSATmp* arr, SSATmp* key, Block* taken) const override;
 };
 
 bool isMonotypeVecLayout(LayoutIndex index);

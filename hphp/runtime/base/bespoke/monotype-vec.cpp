@@ -933,48 +933,4 @@ bool isMonotypeVecLayout(LayoutIndex index) {
          index.raw < 2 * kBaseLayoutIndex.raw;
 }
 
-//////////////////////////////////////////////////////////////////////////////
-// JIT implementations
-//////////////////////////////////////////////////////////////////////////////
-
-using namespace jit;
-using namespace jit::irgen;
-
-namespace {
-SSATmp* emitMonotypeGet(IRGS& env, SSATmp* arr, SSATmp* key, Block* taken,
-                        const MonotypeVecLayout* nonEmptyLayout) {
-  assertx(arr->type().subtypeOfAny(TVec, TVArr));
-
-  gen(env, CheckVecBounds, taken, arr, key);
-  if (nonEmptyLayout) {
-    auto const nonEmptyType =
-      arr->type().narrowToLayout(ArrayLayout(nonEmptyLayout->index()));
-    gen(env, AssertType, nonEmptyType, arr);
-  }
-  auto const retType = nonEmptyLayout ? Type(nonEmptyLayout->m_fixedType)
-                                      : TInitCell;
-  return gen(env, LdMonotypeVecElem, retType, arr, key);
-}
-}
-
-SSATmp* TopMonotypeVecLayout::emitGet(
-    IRGS& env, SSATmp* arr, SSATmp* key, Block* taken) const {
-  return emitMonotypeGet(env, arr, key, taken, nullptr);
-}
-
-SSATmp* MonotypeVecLayout::emitGet(
-    IRGS& env, SSATmp* arr, SSATmp* key, Block* taken) const {
-  return emitMonotypeGet(env, arr, key, taken, this);
-}
-
-SSATmp* EmptyOrMonotypeVecLayout::emitGet(
-    IRGS& env, SSATmp* arr, SSATmp* key, Block* taken) const {
-  return emitMonotypeGet(env, arr, key, taken, getNonEmptyLayout());
-}
-
-SSATmp* EmptyMonotypeVecLayout::emitGet(
-    IRGS& env, SSATmp* arr, SSATmp* key, Block* taken) const {
-  return gen(env, Jmp, taken);
-}
-
 }}

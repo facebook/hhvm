@@ -95,25 +95,6 @@ struct ArrayLayout {
   }
 
   /**************************************************************************
-   * JIT support at the irgen level
-   **************************************************************************/
-
-  using IRGS = irgen::IRGS;
-
-  SSATmp* emitGet(IRGS& env, SSATmp* arr, SSATmp* key, Block* taken) const;
-  SSATmp* emitElem(IRGS& env, SSATmp* arr, SSATmp* key, bool throwOnMissing) const;
-  SSATmp* emitSet(IRGS& env, SSATmp* arr, SSATmp* key, SSATmp* val) const;
-  SSATmp* emitAppend(IRGS& env, SSATmp* arr, SSATmp* val) const;
-  SSATmp* emitEscalateToVanilla(IRGS& env, SSATmp* arr, const char* reason) const;
-  SSATmp* emitIterFirstPos(IRGS& env, SSATmp* arr) const;
-  SSATmp* emitIterLastPos(IRGS& env, SSATmp* arr) const;
-  SSATmp* emitIterEnd(IRGS& env, SSATmp* arr) const;
-  SSATmp* emitIterElm(IRGS& env, SSATmp* arr, SSATmp* pos) const;
-  SSATmp* emitIterGetKey(IRGS& env, SSATmp* arr, SSATmp* elm) const;
-  SSATmp* emitIterGetVal(IRGS& env, SSATmp* arr, SSATmp* elm) const;
-  SSATmp* emitIterAdvanceElm(IRGS& env, SSATmp* elm, int16_t n) const;
-
-  /**************************************************************************
    * Representation as a simple uint16_t
    **************************************************************************/
 

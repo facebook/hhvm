@@ -616,65 +616,6 @@ Layout::Initializer Layout::s_initializer;
 
 //////////////////////////////////////////////////////////////////////////////
 
-SSATmp* Layout::emitGet(
-    IRGS& env, SSATmp* arr, SSATmp* key, Block* taken) const {
-  auto const val = gen(env, BespokeGet, TCell, arr, key);
-  return gen(env, CheckType, TInitCell, taken, val);
-}
-
-SSATmp* Layout::emitElem(
-    IRGS& env, SSATmp* arr, SSATmp* key, bool throwOnMissing) const {
-  return gen(env, BespokeElem, TInitCell, arr, key, cns(env, throwOnMissing));
-}
-
-SSATmp* Layout::emitSet(
-    IRGS& env, SSATmp* arr, SSATmp* key, SSATmp* val) const {
-  return gen(env, BespokeSet, arr, key, val);
-}
-
-SSATmp* Layout::emitAppend(IRGS& env, SSATmp* arr, SSATmp* val) const {
-  return gen(env, BespokeAppend, arr, val);
-}
-
-SSATmp* Layout::emitEscalateToVanilla(
-    IRGS& env, SSATmp* arr, const char* reason) const {
-  auto const str = cns(env, makeStaticString(reason));
-  auto const result = gen(env, BespokeEscalateToVanilla, arr, str);
-  decRef(env, arr);
-  return result;
-}
-
-SSATmp* Layout::emitIterFirstPos(IRGS& env, SSATmp* arr) const {
-  return gen(env, BespokeIterFirstPos, arr);
-}
-
-SSATmp* Layout::emitIterLastPos(IRGS& env, SSATmp* arr) const {
-  return gen(env, BespokeIterLastPos, arr);
-}
-
-SSATmp* Layout::emitIterEnd(IRGS& env, SSATmp* arr) const {
-  return gen(env, BespokeIterEnd, arr);
-}
-
-SSATmp* Layout::emitIterElm(IRGS& env, SSATmp* arr, SSATmp* pos) const {
-  return pos;
-}
-
-SSATmp* Layout::emitIterGetKey(IRGS& env, SSATmp* arr, SSATmp* elm) const {
-  auto const type = arr->isA(TVec|TVArr) ? TInt : TInt|TStr;
-  return gen(env, BespokeIterGetKey, type, arr, elm);
-}
-
-SSATmp* Layout::emitIterGetVal(IRGS& env, SSATmp* arr, SSATmp* elm) const {
-  return gen(env, BespokeIterGetVal, TInitCell, arr, elm);
-}
-
-SSATmp* Layout::emitIterAdvanceElm(IRGS& env, SSATmp* elm, int16_t n) const {
-  return gen(env, AddInt, elm, cns(env, n));
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
 AbstractLayout::AbstractLayout(LayoutIndex index,
                                std::string description,
                                LayoutSet parents)

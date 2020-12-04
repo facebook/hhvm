@@ -41,27 +41,63 @@ namespace HPHP { namespace jit { namespace irgen {
 
 namespace {
 
-// The following wrappers around the BespkeLayout's virtual emit helpers are
-// reponsible for providing layout-generic type information about the result.
+StaticString s_ColFromArray("ColFromArray");
 
-SSATmp* typedEmitGet(ArrayLayout layout, IRGS& env,
-                     SSATmp* arr, SSATmp* key, Block* taken) {
-  auto const result = layout.emitGet(env, arr, key, taken);
-  auto const elem = arrLikeElemType(arr->type(), key->type(), curClass(env));
+// Simple code-gen helpers that do a single bespoke op, possibly with a few
+// additional ops around them to produce better types. All of the mutating
+// helpers here consume a ref on the input and produce one on the output.
+
+SSATmp* emitGet(IRGS& env, SSATmp* arr, SSATmp* key, Block* taken) {
+  auto const result = [&]{
+    if (arr->isA(TVArr|TVec)) {
+      gen(env, CheckVecBounds, taken, arr, key);
+      return gen(env, BespokeGet, TInitCell, arr, key);
+    }
+    auto const result = gen(env, BespokeGet, TCell, arr, key);
+    return gen(env, CheckType, TInitCell, taken, result);
+  }();
+  auto const type = arrLikeElemType(arr->type(), key->type(), curClass(env));
   // TODO(kshaunak): We should also pull in TypeProfile information here.
-  return gen(env, AssertType, elem.first, result);
+  return gen(env, AssertType, type.first, result);
 }
 
-SSATmp* typedEmitSet(ArrayLayout layout, IRGS& env,
-                     SSATmp* arr, SSATmp* key, SSATmp* val) {
-  auto const result = layout.emitSet(env, arr, key, val);
+SSATmp* emitElem(IRGS& env, SSATmp* arr, SSATmp* key, bool throwOnMissing) {
+  return gen(env, BespokeElem, TInitCell, arr, key, cns(env, throwOnMissing));
+}
+
+SSATmp* emitSet(IRGS& env, SSATmp* arr, SSATmp* key, SSATmp* val) {
+  auto const result = gen(env, BespokeSet, arr, key, val);
   return gen(env, AssertType, TCounted, result);
 }
 
-SSATmp* typedEmitAppend(ArrayLayout layout, IRGS& env,
-                        SSATmp* arr, SSATmp* val) {
-  auto const result = layout.emitAppend(env, arr, val);
+SSATmp* emitAppend(IRGS& env, SSATmp* arr, SSATmp* val) {
+  auto const result = gen(env, BespokeAppend, arr, val);
   return gen(env, AssertType, TCounted, result);
+}
+
+SSATmp* emitEscalateToVanilla(
+    IRGS& env, SSATmp* arr, const StaticString& reason) {
+  auto const layout = arr->type().arrSpec().layout();
+  if (layout.vanilla()) return arr;
+  if (layout.bespoke()) {
+    auto const str = cns(env, reason.get());
+    auto const result = gen(env, BespokeEscalateToVanilla, arr, str);
+    decRef(env, arr);
+    return result;
+  }
+  return cond(
+    env,
+    [&](Block* taken) {
+      return gen(env, CheckType, TVanillaArrLike, taken, arr);
+    },
+    [&](SSATmp* vanilla) { return vanilla; },
+    [&]{
+      auto const str = cns(env, reason.get());
+      auto const type = TArrLike.narrowToLayout(ArrayLayout::Bespoke());
+      auto const bespoke = gen(env, AssertType, type, arr);
+      return gen(env, BespokeEscalateToVanilla, bespoke, str);
+    }
+  );
 }
 
 void stMBase(IRGS& env, SSATmp* base) {
@@ -116,7 +152,7 @@ SSATmp* memberKey(IRGS& env, MemberKey mk) {
   return classConvertPuntOnRaise(env, res);
 }
 
-SSATmp* emitSetNewElem(ArrayLayout layout, IRGS& env, SSATmp* origValue) {
+SSATmp* emitSetNewElem(IRGS& env, SSATmp* origValue) {
   auto const baseType = env.irb->fs().mbase().type;
   auto const base = extractBase(env);
   auto const value = [&] {
@@ -139,7 +175,7 @@ SSATmp* emitSetNewElem(ArrayLayout layout, IRGS& env, SSATmp* origValue) {
     return value;
   }
 
-  auto const newArr = typedEmitAppend(layout, env, base, value);
+  auto const newArr = emitAppend(env, base, value);
 
   // Update the base's location with the new array.
   updateCanonicalBase(env, baseLoc, newArr);
@@ -147,8 +183,7 @@ SSATmp* emitSetNewElem(ArrayLayout layout, IRGS& env, SSATmp* origValue) {
   return value;
 }
 
-SSATmp* emitSetElem(ArrayLayout layout, IRGS& env,
-                    SSATmp* key, SSATmp* value) {
+SSATmp* emitSetElem(IRGS& env, SSATmp* key, SSATmp* value) {
   auto const baseType = env.irb->fs().mbase().type;
   auto const base = extractBase(env);
   auto const isVec = baseType.subtypeOfAny(TVec, TVArr);
@@ -169,7 +204,7 @@ SSATmp* emitSetElem(ArrayLayout layout, IRGS& env,
     return value;
   }
 
-  auto const newArr = typedEmitSet(layout, env, base, key, value);
+  auto const newArr = emitSet(env, base, key, value);
 
   // Update the base's location with the new array.
   updateCanonicalBase(env, baseLoc, newArr);
@@ -177,24 +212,23 @@ SSATmp* emitSetElem(ArrayLayout layout, IRGS& env,
   return value;
 }
 
-void emitBespokeSetM(ArrayLayout layout, IRGS& env,
-                     uint32_t nDiscard, MemberKey mk) {
+void emitBespokeSetM(IRGS& env, uint32_t nDiscard, MemberKey mk) {
   auto const value = topC(env, BCSPRelOffset{0}, DataTypeGeneric);
   auto const result = [&] () -> SSATmp* {
     if (mcodeIsProp(mk.mcode)) PUNT(BespokeSetMProp);
     if (mk.mcode == MW) {
-      return emitSetNewElem(layout, env, value);
+      return emitSetNewElem(env, value);
     }
 
     assertx(mcodeIsElem(mk.mcode));
     auto const key = memberKey(env, mk);
-    return emitSetElem(layout, env, key, value);
+    return emitSetElem(env, key, value);
   }();
   popC(env, DataTypeGeneric);
   mFinalImpl(env, nDiscard, result);
 }
 
-SSATmp* emitIsset(ArrayLayout layout, IRGS& env, SSATmp* key) {
+SSATmp* emitIsset(IRGS& env, SSATmp* key) {
   auto const baseType = env.irb->fs().mbase().type;
   auto const base = extractBase(env);
 
@@ -208,13 +242,13 @@ SSATmp* emitIsset(ArrayLayout layout, IRGS& env, SSATmp* key) {
 
   return cond(
     env,
-    [&](Block* taken) { return typedEmitGet(layout, env, base, key, taken); },
+    [&](Block* taken) { return emitGet(env, base, key, taken); },
     [&](SSATmp* val) { return gen(env, IsNType, TInitNull, val); },
     [&] { return cns(env, false); }
   );
 }
 
-SSATmp* emitGetElem(ArrayLayout layout, IRGS& env, SSATmp* key, bool quiet) {
+SSATmp* emitGetElem(IRGS& env, SSATmp* key, bool quiet) {
   auto const baseType = env.irb->fs().mbase().type;
   auto const base = extractBase(env);
 
@@ -232,7 +266,7 @@ SSATmp* emitGetElem(ArrayLayout layout, IRGS& env, SSATmp* key, bool quiet) {
   return cond(
     env,
     [&](Block* taken) {
-      return typedEmitGet(layout, env, base, key, taken);
+      return emitGet(env, base, key, taken);
     },
     [&](SSATmp* val) {
       gen(env, IncRef, val);
@@ -248,8 +282,8 @@ SSATmp* emitGetElem(ArrayLayout layout, IRGS& env, SSATmp* key, bool quiet) {
   );
 }
 
-void emitBespokeQueryM(ArrayLayout layout, IRGS& env,
-                       uint32_t nDiscard, QueryMOp query, MemberKey mk) {
+void emitBespokeQueryM(
+    IRGS& env, uint32_t nDiscard, QueryMOp query, MemberKey mk) {
   if (mk.mcode == MW) PUNT(BespokeQueryMNewElem);
   if (mcodeIsProp(mk.mcode)) PUNT(BespokeQueryMProp);
   auto const key = memberKey(env, mk);
@@ -257,18 +291,18 @@ void emitBespokeQueryM(ArrayLayout layout, IRGS& env,
     switch (query) {
       case QueryMOp::InOut:
       case QueryMOp::CGet:
-        return emitGetElem(layout, env, key, false);
+        return emitGetElem(env, key, false);
       case QueryMOp::CGetQuiet:
-        return emitGetElem(layout, env, key, true);
+        return emitGetElem(env, key, true);
       case QueryMOp::Isset:
-        return emitIsset(layout, env, key);
+        return emitIsset(env, key);
     }
     not_reached();
   }();
   mFinalImpl(env, nDiscard, result);
 }
 
-void emitBespokeIdx(ArrayLayout layout, IRGS& env) {
+void emitBespokeIdx(IRGS& env) {
   auto const def = topC(env, BCSPRelOffset{0});
   auto const base = topC(env, BCSPRelOffset{2});
   auto const origKey = topC(env, BCSPRelOffset{1}, DataTypeGeneric);
@@ -301,7 +335,7 @@ void emitBespokeIdx(ArrayLayout layout, IRGS& env) {
   cond(
     env,
     [&](Block* taken) {
-      return typedEmitGet(layout, env, base, key, taken);
+      return emitGet(env, base, key, taken);
     },
     [&](SSATmp* val) {
       finish(val);
@@ -314,7 +348,7 @@ void emitBespokeIdx(ArrayLayout layout, IRGS& env) {
   );
 }
 
-void emitBespokeAKExists(ArrayLayout layout, IRGS& env) {
+void emitBespokeAKExists(IRGS& env) {
   auto const base = popC(env);
   auto const origKey = popC(env);
   if (!origKey->type().isKnownDataType()) PUNT(Bespoke-AKExists-KeyNotKnown);
@@ -346,7 +380,7 @@ void emitBespokeAKExists(ArrayLayout layout, IRGS& env) {
   ifThenElse(
     env,
     [&](Block* taken) {
-      return typedEmitGet(layout, env, base, key, taken);
+      return emitGet(env, base, key, taken);
     },
     [&] { finish(true); },
     [&] { finish(false); }
@@ -363,7 +397,7 @@ SSATmp* baseValueToLval(IRGS& env, SSATmp* base) {
   return gen(env, ConvPtrToLval, temp);
 }
 
-SSATmp* bespokeElemImpl(ArrayLayout layout, IRGS& env,
+SSATmp* bespokeElemImpl(IRGS& env,
                         MOpMode mode, Type baseType, SSATmp* key) {
   auto const base = extractBase(env);
   auto const baseLval = gen(env, LdMBase, TLvalToCell);
@@ -387,12 +421,12 @@ SSATmp* bespokeElemImpl(ArrayLayout layout, IRGS& env,
   }
 
   if (needsLval) {
-    return layout.emitElem(env, baseLval, key, shouldThrow);
+    return emitElem(env, baseLval, key, shouldThrow);
   } else {
     return cond(
       env,
       [&](Block* taken) {
-        return typedEmitGet(layout, env, base, key, taken);
+        return emitGet(env, base, key, taken);
       },
       [&](SSATmp* val) {
         return baseValueToLval(env, val);
@@ -405,20 +439,19 @@ SSATmp* bespokeElemImpl(ArrayLayout layout, IRGS& env,
   }
 }
 
-void emitBespokeDim(ArrayLayout layout, IRGS& env,
-                    MOpMode mode, MemberKey mk) {
+void emitBespokeDim(IRGS& env, MOpMode mode, MemberKey mk) {
   auto const key = memberKey(env, mk);
   if (mk.mcode == MW) PUNT(BespokeDimNewElem);
   if (mcodeIsProp(mk.mcode)) PUNT(BespokeDimProp);
   assertx(mcodeIsElem(mk.mcode));
 
   auto const baseType = env.irb->fs().mbase().type;
-  auto const val = bespokeElemImpl(layout, env, mode, baseType, key);
+  auto const val = bespokeElemImpl(env, mode, baseType, key);
 
   stMBase(env, val);
 }
 
-void emitBespokeAddElemC(ArrayLayout layout, IRGS& env) {
+void emitBespokeAddElemC(IRGS& env) {
   auto const keyType = topC(env, BCSPRelOffset{1})->type();
   auto const arrType = topC(env, BCSPRelOffset{2})->type();
   if (!arrType.subtypeOfAny(TDict, TDArr)) {
@@ -431,12 +464,12 @@ void emitBespokeAddElemC(ArrayLayout layout, IRGS& env) {
   auto const value = popC(env, DataTypeGeneric);
   auto const key = classConvertPuntOnRaise(env, popC(env));
   auto const arr = popC(env);
-  auto const newArr = typedEmitSet(layout, env, arr, key, value);
+  auto const newArr = emitSet(env, arr, key, value);
   push(env, newArr);
   decRef(env, key);
 }
 
-void emitBespokeAddNewElemC(ArrayLayout layout, IRGS& env) {
+void emitBespokeAddNewElemC(IRGS& env) {
   auto const arrType = topC(env, BCSPRelOffset{1})->type();
   if (!arrType.subtypeOfAny(TKeyset, TVec, TVArr)) {
     PUNT(AddNewElemC-Bespoke-WrongType);
@@ -444,11 +477,11 @@ void emitBespokeAddNewElemC(ArrayLayout layout, IRGS& env) {
 
   auto const value = popC(env, DataTypeGeneric);
   auto const arr = popC(env);
-  auto const newArr = typedEmitAppend(layout, env, arr, value);
+  auto const newArr = emitAppend(env, arr, value);
   push(env, newArr);
 }
 
-void emitBespokeColFromArray(ArrayLayout layout, IRGS& env,
+void emitBespokeColFromArray(IRGS& env,
                              CollectionType type) {
   assertx(type != CollectionType::Pair);
   auto const arr = popC(env);
@@ -462,12 +495,12 @@ void emitBespokeColFromArray(ArrayLayout layout, IRGS& env,
       (type == CollectionType::Vector || type == CollectionType::ImmVector)) {
     PUNT(Bespoke-ColTypeMismatch);
   }
-  auto const vanilla = layout.emitEscalateToVanilla(env, arr, "ColFromArray");
+  auto const vanilla = emitEscalateToVanilla(env, arr, s_ColFromArray);
   auto const col = gen(env, NewColFromArray, NewColData { type }, vanilla);
   push(env, col);
 }
 
-void emitBespokeClassGetTS(ArrayLayout layout, IRGS& env) {
+void emitBespokeClassGetTS(IRGS& env) {
   auto const reqType = RO::EvalHackArrDVArrs ? TDict : TDArr;
   auto const arr = topC(env);
   auto const arrType = arr->type();
@@ -483,7 +516,7 @@ void emitBespokeClassGetTS(ArrayLayout layout, IRGS& env) {
   auto const generics = cns(env, s_generic_types.get());
   ifElse(
     env,
-    [&](Block* taken) { typedEmitGet(layout, env, arr, generics, taken); },
+    [&](Block* taken) { emitGet(env, arr, generics, taken); },
     [&] { gen(env, Jmp, makeExitSlow(env)); }
   );
 
@@ -491,7 +524,7 @@ void emitBespokeClassGetTS(ArrayLayout layout, IRGS& env) {
   auto const classVal = cond(
     env,
     [&](Block* taken) {
-      return typedEmitGet(layout, env, arr, classKey, taken);
+      return emitGet(env, arr, classKey, taken);
     },
     [&] (SSATmp* val) { return val; },
     [&] {
@@ -519,7 +552,7 @@ void emitBespokeClassGetTS(ArrayLayout layout, IRGS& env) {
   push(env, cns(env, TInitNull));
 }
 
-void emitBespokeShapesIdx(ArrayLayout layout, IRGS& env, uint32_t numArgs) {
+void emitBespokeShapesIdx(IRGS& env, uint32_t numArgs) {
   if (numArgs != 2 && numArgs != 3) PUNT(Bespoke-ShapesIdx-BadArgs);
 
   auto const def = [&] {
@@ -553,7 +586,7 @@ void emitBespokeShapesIdx(ArrayLayout layout, IRGS& env, uint32_t numArgs) {
   auto const res = cond(
     env,
     [&] (Block* taken) {
-      return typedEmitGet(layout, env, arr, key, taken);
+      return emitGet(env, arr, key, taken);
     },
     [&] (SSATmp* val) {
       gen(env, IncRef, val);
@@ -571,7 +604,7 @@ void emitBespokeShapesIdx(ArrayLayout layout, IRGS& env, uint32_t numArgs) {
 }
 
 template <bool isFirst, bool isKey>
-void emitBespokeFirstLast(ArrayLayout layout, IRGS& env, uint32_t numArgs) {
+void emitBespokeFirstLast(IRGS& env, uint32_t numArgs) {
   if (numArgs != 1) PUNT(Bespoke-FirstLast-BadArgs);
   auto const arr = popC(env);
   auto const elem = arrLikeFirstLastType(
@@ -586,11 +619,12 @@ void emitBespokeFirstLast(ArrayLayout layout, IRGS& env, uint32_t numArgs) {
       if (maybeEmpty) gen(env, JmpZero, taken, size);
     },
     [&] {
-      auto const pos = isFirst ? layout.emitIterFirstPos(env, arr)
-                               : layout.emitIterLastPos(env, arr);
-      auto const elm = layout.emitIterElm(env, arr, pos);
-      auto const val = isKey ? layout.emitIterGetKey(env, arr, elm)
-                             : layout.emitIterGetVal(env, arr, elm);
+      auto const pos = isFirst
+        ? gen(env, BespokeIterFirstPos, arr)
+        : gen(env, BespokeIterLastPos, arr);
+      auto const val = isKey
+        ? gen(env, BespokeIterGetKey, TInt|TStr, arr, pos)
+        : gen(env, BespokeIterGetVal, TInitCell, arr, pos);
       auto const result = gen(env, AssertType, type, val);
 
       gen(env, IncRef, result);
@@ -602,7 +636,7 @@ void emitBespokeFirstLast(ArrayLayout layout, IRGS& env, uint32_t numArgs) {
   decRef(env, arr);
 }
 
-using BespokeOptEmitFn = void (*)(ArrayLayout, IRGS&, uint32_t);
+using BespokeOptEmitFn = void (*)(IRGS&, uint32_t);
 const hphp_fast_string_imap<BespokeOptEmitFn> s_bespoke_builtin_impls{
   {"HH\\Shapes::idx", emitBespokeShapesIdx},
   {"HH\\Lib\\_Private\\Native\\first", emitBespokeFirstLast<true, false>},
@@ -612,54 +646,50 @@ const hphp_fast_string_imap<BespokeOptEmitFn> s_bespoke_builtin_impls{
 };
 
 void emitBespokeFCallBuiltin(
-    ArrayLayout layout, IRGS& env, uint32_t numArgs,
-    uint32_t numOut, const StringData* funcName) {
+    IRGS& env, uint32_t numArgs, uint32_t numOut, const StringData* funcName) {
   auto const it = s_bespoke_builtin_impls.find(funcName->data());
   assertx(it != s_bespoke_builtin_impls.end());
   assertx(it->second);
-  it->second(layout, env, numArgs);
+  it->second(env, numArgs);
 }
 
-void translateDispatchBespoke(ArrayLayout layout, IRGS& env,
-                              const NormalizedInstruction& ni) {
-  assertx(!layout.vanilla());
+void translateDispatchBespoke(IRGS& env, const NormalizedInstruction& ni) {
   auto const DEBUG_ONLY sk = ni.source;
   FTRACE_MOD(Trace::hhir, 2, "At {}: {}: perform bespoke translation\n",
              sk.offset(), opcodeToName(sk.op()));
   switch (ni.op()) {
     case Op::QueryM:
-      emitBespokeQueryM(layout, env, ni.imm[0].u_IVA,
-                        (QueryMOp) ni.imm[1].u_OA, ni.imm[2].u_KA);
+      emitBespokeQueryM(env, ni.imm[0].u_IVA, (QueryMOp) ni.imm[1].u_OA,
+                        ni.imm[2].u_KA);
       return;
     case Op::SetM:
-      emitBespokeSetM(layout, env, ni.imm[0].u_IVA, ni.imm[1].u_KA);
+      emitBespokeSetM(env, ni.imm[0].u_IVA, ni.imm[1].u_KA);
       return;
     case Op::Idx:
     case Op::ArrayIdx:
-      emitBespokeIdx(layout, env);
+      emitBespokeIdx(env);
       return;
     case Op::AKExists:
-      emitBespokeAKExists(layout, env);
+      emitBespokeAKExists(env);
       return;
     case Op::Dim:
-      emitBespokeDim(layout, env, (MOpMode) ni.imm[0].u_OA, ni.imm[1].u_KA);
+      emitBespokeDim(env, (MOpMode) ni.imm[0].u_OA, ni.imm[1].u_KA);
       return;
     case Op::AddElemC:
-      emitBespokeAddElemC(layout, env);
+      emitBespokeAddElemC(env);
       return;
     case Op::AddNewElemC:
-      emitBespokeAddNewElemC(layout, env);
+      emitBespokeAddNewElemC(env);
       return;
     case Op::ColFromArray:
-      emitBespokeColFromArray(layout, env, (CollectionType) ni.imm[0].u_OA);
+      emitBespokeColFromArray(env, (CollectionType) ni.imm[0].u_OA);
       return;
     case Op::ClassGetTS:
-      emitBespokeClassGetTS(layout, env);
+      emitBespokeClassGetTS(env);
       return;
     case Op::FCallBuiltin:
-      emitBespokeFCallBuiltin(
-        layout, env, ni.imm[0].u_IVA, ni.imm[1].u_IVA,
-        ni.unit()->lookupLitstrId(ni.imm[2].u_SA));
+      emitBespokeFCallBuiltin(env, ni.imm[0].u_IVA, ni.imm[1].u_IVA,
+                              ni.unit()->lookupLitstrId(ni.imm[2].u_SA));
       return;
     case Op::IterInit:
     case Op::LIterInit:
@@ -830,7 +860,7 @@ void emitLoggingDiamond(
       assertTypeLocation(env, loc, type);
 
       try {
-        translateDispatchBespoke(layout, env, ni);
+        translateDispatchBespoke(env, ni);
       } catch (const FailedIRGen& exn) {
         FTRACE_MOD(Trace::region, 1,
           "bespoke irgen for {} failed with {} while vanilla irgen succeeded\n",
@@ -969,7 +999,7 @@ void handleBespokeInputs(IRGS& env, const NormalizedInstruction& ni,
     if (layout.vanilla()) {
       emitVanilla(env);
     } else {
-      translateDispatchBespoke(layout, env, ni);
+      translateDispatchBespoke(env, ni);
     }
   }
 }

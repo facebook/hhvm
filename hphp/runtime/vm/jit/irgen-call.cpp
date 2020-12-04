@@ -1793,7 +1793,9 @@ Type callReturnType(const Func* callee) {
 
   if (callee->takesInOutParams()) {
     auto const ty = typeFromRAT(callee->repoReturnType(), callee->cls());
-    if (ty <= TVec) return vecElemType(ty, Type::cns(0), callee->cls()).first;
+    if (ty <= TVec) {
+      return arrLikeElemType(ty, Type::cns(0), callee->cls()).first;
+    }
     return TInitCell;
   }
 
@@ -1828,7 +1830,7 @@ Type callOutType(const Func* callee, uint32_t index) {
   auto const ty = typeFromRAT(callee->repoReturnType(), callee->cls());
   if (ty <= TVec) {
     auto const off = callee->numInOutParams() - index - 1;
-    return vecElemType(ty, Type::cns(off + 1), callee->cls()).first;
+    return arrLikeElemType(ty, Type::cns(off + 1), callee->cls()).first;
   }
   return TInitCell;
 }

@@ -40,31 +40,21 @@ enum class VecBounds { In, Out, Unknown };
 VecBounds vecBoundsStaticCheck(Type, folly::Optional<int64_t>);
 
 /*
- * Get the type of `arr[idx]` for different array types, considering constness,
- * staticness, and RAT types.
- *
- * Note that these functions do not require the existence of `arr[idx]`. If we
- * can statically determine that the access is out of bounds, TBottom is
- * returned. Otherwise we return a type `t`, such that when the access is within
- * bounds, `arr[idx].isA(t)` holds. (This, if this function is used in contexts
- * where the bounds are not statically known, one must account for the opcode
- * specific behavior of the failure case). If the bool member of the returned
- * pair is true, then `arr[idx]` definitely exists.
+* Get the most specific type of the element at idx for an array type using
+* available knowledge on the types. The first value is the type of the value
+* (if present). The second element is true if the key is guaranteed to be
+* present and false otherwise.
  */
-std::pair<Type, bool> vecElemType(Type arr, Type idx, const Class* ctx);
-std::pair<Type, bool> dictElemType(Type arr, Type idx);
-std::pair<Type, bool> keysetElemType(Type arr, Type idx);
 std::pair<Type, bool> arrLikeElemType(Type arr, Type idx, const Class* ctx);
 
 /*
-* Get the type of first or last element for different array type.
+* Get the type of first or last element or key for an array using available
+* knowledge on the types. The first element of the pair is the type of the
+* key/value (if present). The second element is true if the key is guaranteed
+* to be present and false otherwise.
 */
-std::pair<Type, bool> vecFirstLastType(
-  Type arr, bool isFirst, const Class* ctx);
-std::pair<Type, bool> dictFirstLastType(Type arr, bool isFirst, bool isKey);
-std::pair<Type, bool> keysetFirstLastType(Type arr, bool isFirst);
 std::pair<Type, bool> arrLikeFirstLastType(
-  Type arr, bool isFirst, bool isKey, const Class* ctx);
+    Type arr, bool isFirst, bool isKey, const Class* ctx);
 
 ///////////////////////////////////////////////////////////////////////////////
 

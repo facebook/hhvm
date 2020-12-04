@@ -314,45 +314,9 @@ Type allocObjReturn(const IRInstruction* inst) {
 /*
 * Analyze the type of return element (key or value) for different container.
 */
-Type vecFirstLastReturn(const IRInstruction* inst, bool first) {
-  assertx(inst->is(VecFirst, VecLast));
-  assertx(inst->src(0)->type().subtypeOfAny(TVArr, TVec));
-
-  auto elem = vecFirstLastType(inst->src(0)->type(), first, inst->ctx());
-  if (!elem.second) {
-    elem.first |= TInitNull;
-  }
-  if (inst->hasTypeParam()) {
-    elem.first &= inst->typeParam();
-  }
-  return elem.first;
-}
-
-Type dictFirstLastReturn(const IRInstruction* inst, bool first, bool isKey) {
-  assertx(inst->is(DictFirst, DictLast, DictFirstKey, DictLastKey));
-  assertx(inst->src(0)->type().subtypeOfAny(TDArr, TDict));
-
-  auto elem = dictFirstLastType(inst->src(0)->type(), isKey, first);
-  if (!elem.second) {
-    elem.first |= TInitNull;
-  }
-  if (inst->hasTypeParam()) {
-    elem.first &= inst->typeParam();
-  }
-  return elem.first;
-}
-
-Type keysetFirstLastReturn(const IRInstruction* inst, bool first) {
-  assertx(inst->is(KeysetFirst, KeysetLast));
-  assertx(inst->src(0)->isA(TKeyset));
-
-  auto elem = keysetFirstLastType(inst->src(0)->type(), first);
-  if (!elem.second) {
-    elem.first |= TInitNull;
-  }
-  if (inst->hasTypeParam()) {
-    elem.first &= inst->typeParam();
-  }
+Type arrFirstLastReturn(const IRInstruction* inst, bool first, bool isKey) {
+  auto elem = arrLikeFirstLastType(inst->src(0)->type(), first, isKey, inst->ctx());
+  if (!elem.second) elem.first |= TInitNull;
   return elem.first;
 }
 
@@ -361,9 +325,8 @@ Type vecElemReturn(const IRInstruction* inst) {
   assertx(inst->src(0)->type().subtypeOfAny(TVec, TVArr));
   assertx(inst->src(1)->isA(TInt));
 
-  auto resultType =
-    vecElemType(inst->src(0)->type(), inst->src(1)->type(), inst->ctx()).first;
-  if (inst->hasTypeParam()) resultType &= inst->typeParam();
+  auto resultType = arrLikeElemType(
+      inst->src(0)->type(), inst->src(1)->type(), inst->ctx()).first;
   return resultType;
 }
 
@@ -372,12 +335,12 @@ Type dictElemReturn(const IRInstruction* inst) {
   assertx(inst->src(0)->type().subtypeOfAny(TDict, TDArr));
   assertx(inst->src(1)->isA(TInt | TStr));
 
-  auto elem = dictElemType(inst->src(0)->type(), inst->src(1)->type());
+  auto elem =
+    arrLikeElemType(inst->src(0)->type(), inst->src(1)->type(), inst->ctx());
   if (!elem.second) {
     if (inst->is(DictGetQuiet)) elem.first |= TInitNull;
     if (inst->is(DictIdx)) elem.first |= inst->src(2)->type();
   }
-  if (inst->hasTypeParam()) elem.first &= inst->typeParam();
   return elem.first;
 }
 
@@ -386,12 +349,12 @@ Type keysetElemReturn(const IRInstruction* inst) {
   assertx(inst->src(0)->isA(TKeyset));
   assertx(inst->src(1)->isA(TInt | TStr));
 
-  auto elem = keysetElemType(inst->src(0)->type(), inst->src(1)->type());
+  auto elem =
+    arrLikeElemType(inst->src(0)->type(), inst->src(1)->type(), inst->ctx());
   if (!elem.second) {
     if (inst->is(KeysetGetQuiet)) elem.first |= TInitNull;
     if (inst->is(KeysetIdx)) elem.first |= inst->src(2)->type();
   }
-  if (inst->hasTypeParam()) elem.first &= inst->typeParam();
   return elem.first;
 }
 
@@ -495,8 +458,11 @@ Type ptrIterReturn(const IRInstruction* inst) {
   auto const arr = inst->src(0)->type();
   assertx(arr <= TArrLike);
   auto const value = [&]{
-    if (arr <= (TVArr|TVec))  return vecElemType(arr, TInt, inst->ctx()).first;
-    if (arr <= (TDArr|TDict)) return dictElemType(arr, TInt | TStr).first;
+    if (arr <= (TVArr|TVec)) {
+      return arrLikeElemType(arr, TInt, inst->ctx()).first;
+    } else if (arr <= (TDArr|TDict)) {
+      return arrLikeElemType(arr, TInt | TStr, inst->ctx()).first;
+    }
     return TCell;
   }();
   return value.ptr(Ptr::Elem);
@@ -580,15 +546,10 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #define DDictElem       return dictElemReturn(inst);
 #define DKeysetElem     return keysetElemReturn(inst);
 // Get the type of first or last element for different array type
-#define DVecFirstElem     return vecFirstLastReturn(inst, true);
-#define DVecLastElem      return vecFirstLastReturn(inst, false);
-#define DVecKey           return TInt | TInitNull;
-#define DDictFirstElem    return dictFirstLastReturn(inst, true, false);
-#define DDictLastElem     return dictFirstLastReturn(inst, false, false);
-#define DDictFirstKey     return dictFirstLastReturn(inst, true, true);
-#define DDictLastKey      return dictFirstLastReturn(inst, false, true);
-#define DKeysetFirstElem  return keysetFirstLastReturn(inst, true);
-#define DKeysetLastElem   return keysetFirstLastReturn(inst, false);
+#define DFirstElem        return arrFirstLastReturn(inst, true, false);
+#define DLastElem         return arrFirstLastReturn(inst, false, false);
+#define DFirstKey         return arrFirstLastReturn(inst, true, true);
+#define DLastKey          return arrFirstLastReturn(inst, false, true);
 #define DLoggingArrLike   return loggingArrLikeReturn(inst);
 #define DModified(n)      return inst->src(n)->type().modified();
 #define DVArr return checkLayoutFlags(RO::EvalHackArrDVArrs ? TVec : TVArr);
@@ -628,15 +589,11 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #undef DVecElem
 #undef DDictElem
 #undef DKeysetElem
-#undef DVecFirstElem
-#undef DVecLastElem
 #undef DVecKey
-#undef DDictFirstElem
-#undef DDictLastElem
-#undef DDictFirstKey
-#undef DDictLastKey
-#undef DKeysetFirstElem
-#undef DKeysetLastElem
+#undef DFirstElem
+#undef DLastElem
+#undef DFirstKey
+#undef DLastKey
 #undef DLoggingArrLike
 #undef DVArr
 #undef DDArr

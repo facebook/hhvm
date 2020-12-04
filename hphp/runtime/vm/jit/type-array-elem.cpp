@@ -35,41 +35,7 @@ namespace HPHP { namespace jit {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-VecBounds vecBoundsStaticCheck(Type arrayType, folly::Optional<int64_t> idx) {
-  assertx(arrayType.subtypeOfAny(TArr, TVec));
-  if (idx && (*idx < 0 || *idx > MixedArray::MaxSize)) return VecBounds::Out;
-
-  if (arrayType.hasConstVal()) {
-    auto const val = arrayType.arrLikeVal();
-    if (val->empty()) return VecBounds::Out;
-    if (!idx) return VecBounds::Unknown;
-    return *idx < val->size() ? VecBounds::In : VecBounds::Out;
-  };
-
-  if (!idx) return VecBounds::Unknown;
-
-  auto const at = arrayType.arrSpec().type();
-  if (!at) return VecBounds::Unknown;
-
-  using A = RepoAuthType::Array;
-  switch (at->tag()) {
-  case A::Tag::Packed:
-    if (at->emptiness() == A::Empty::No) {
-      return *idx < at->size() ? VecBounds::In : VecBounds::Out;
-    } else if (*idx >= at->size()) {
-      return VecBounds::Out;
-    }
-    return VecBounds::Unknown;
-  case A::Tag::PackedN:
-    if (*idx == 0 && at->emptiness() == A::Empty::No) {
-      return VecBounds::In;
-    }
-  }
-  return VecBounds::Unknown;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
+namespace {
 std::pair<Type, bool> vecElemType(Type arr, Type idx, const Class* ctx) {
   assertx(arr.subtypeOfAny(TVec, TVArr));
   assertx(idx <= TInt);
@@ -99,7 +65,7 @@ std::pair<Type, bool> vecElemType(Type arr, Type idx, const Class* ctx) {
   }
 
   // Array-likes always contain initialized cells.
-  auto type = arr <= TPersistent ? TUncountedInit : TInitCell;
+  auto type = arr <= TUncounted ? TUncountedInit : TInitCell;
 
   auto const arrTy = arr.arrSpec().type();
   if (!arrTy) return {type, false};
@@ -169,7 +135,8 @@ std::pair<Type, bool> dictElemType(Type arr, Type idx) {
   }
 
   // Array-likes always contain initialized cells.
-  auto const type = arr <= TPersistent ? TUncountedInit : TInitCell;
+  auto const type = arr <= TUncounted ? TUncountedInit : TInitCell;
+
   return {type, false};
 }
 
@@ -210,23 +177,12 @@ std::pair<Type, bool> keysetElemType(Type arr, Type idx) {
 
   // Keysets always contain strings or integers. We can further constrain this
   // if we know the idx type, as the key is always the value.
-  auto type = TStr | TInt;
-  if (idx <= TInt) type &= TInt;
-  if (idx <= TStr) type &= TStr;
-  if (arr <= TPersistentKeyset) type &= TUncountedInit;
-  return {type, false};
+  auto const type = arr <= TUncounted ? TUncountedInit : TInitCell;
+  return {type & idx, false};
 }
 
-std::pair<Type, bool> arrLikeElemType(Type arr, Type idx, const Class* ctx) {
-  assertx(arr.isKnownDataType());
-  if (arr <= (TVArr|TVec))  return vecElemType(arr, idx, ctx);
-  if (arr <= (TDArr|TDict)) return dictElemType(arr, idx);
-  return keysetElemType(arr, idx);
-}
-
-std::pair<Type, bool> vecFirstLastType(Type arr,
-                                       bool isFirst,
-                                       const Class* ctx) {
+std::pair<Type, bool> vecFirstLastValueType(
+    Type arr, bool isFirst, const Class* ctx) {
   assertx(arr.subtypeOfAny(TVArr, TVec));
 
   if (arr.hasConstVal()) {
@@ -236,11 +192,7 @@ std::pair<Type, bool> vecFirstLastType(Type arr,
     return {Type::cns(val->nvGetVal(pos)), true};
   }
 
-  auto type = [&] {
-    if (arr <= TUncounted) return TUncountedInit;
-    if (arr <= TVec) return TInitCell;
-    return TInitCell;
-  }();
+  auto type = arr <= TUncounted ? TUncountedInit : TInitCell;
 
   auto const arrTy = arr.arrSpec().type();
   if (!arrTy) return {type, false};
@@ -251,21 +203,44 @@ std::pair<Type, bool> vecFirstLastType(Type arr,
 
   switch (arrTy->tag()) {
     case T::Packed: {
-      auto sz = arrTy->size();
+      auto const sz = arrTy->size();
       if (sz == 0) return {TBottom, false};
-      if (isFirst) {
-        type &= typeFromRAT(arrTy->packedElem(0), ctx);
-      } else {
-        type &= typeFromRAT(arrTy->packedElem(sz - 1), ctx);
-      }
-      return {type, !maybeEmpty};
+      type = type & typeFromRAT(arrTy->packedElem(isFirst ? 0 : sz - 1), ctx);
+      break;
     }
     case T::PackedN: {
-      type &= typeFromRAT(arrTy->elemType(), ctx);
-      return {type, !maybeEmpty};
+      type = type & typeFromRAT(arrTy->elemType(), ctx);
+      break;
     }
   }
-  return {type, false};
+  return {type, !maybeEmpty};
+}
+
+std::pair<Type, bool> vecFirstLastKeyType(Type arr, bool isFirst) {
+  assertx(arr.subtypeOfAny(TVArr, TVec));
+
+  if (arr.hasConstVal()) {
+    auto const val = arr.arrLikeVal();
+    if (val->empty()) return {TBottom, false};
+    auto const pos = isFirst ? val->iter_begin() : val->iter_last();
+    return {Type::cns(val->nvGetKey(pos)), true};
+  }
+
+  auto const arrTy = arr.arrSpec().type();
+  if (!arrTy) return {TInt, false};
+
+  using E = RepoAuthType::Array::Empty;
+  using T = RepoAuthType::Array::Tag;
+
+  auto const maybeEmpty = arrTy->emptiness() == E::Maybe;
+
+  if (arrTy->tag() == T::Packed) {
+    auto const sz = arrTy->size();
+    if (sz == 0) return {TBottom, false};
+    return {Type::cns(isFirst ? 0 : sz - 1), !maybeEmpty};
+  }
+
+  return {isFirst ? Type::cns(0) : TInt, !maybeEmpty};
 }
 
 std::pair<Type, bool> dictFirstLastType(Type arr, bool isFirst, bool isKey) {
@@ -279,19 +254,22 @@ std::pair<Type, bool> dictFirstLastType(Type arr, bool isFirst, bool isKey) {
     return {Type::cns(tv), true};
   }
 
-  auto const type = [&] {
-    if (arr <= TUncounted) return TUncountedInit;
-    if (arr <= TDict) return TInitCell;
-    return TInitCell;
-  }();
-  return {type, false};
+  auto const type = arr <= TUncounted ? TUncountedInit : TInitCell;
+
+  auto const arrTy = arr.arrSpec().type();
+  if (!arrTy) return {type, false};
+
+  using E = RepoAuthType::Array::Empty;
+  auto const maybeEmpty = arrTy->emptiness() == E::Maybe;
+
+  return {type, !maybeEmpty};
 }
 
 std::pair<Type, bool> keysetFirstLastType(Type arr, bool isFirst) {
   assertx(arr <= TKeyset);
 
   if (arr.hasConstVal()) {
-    auto val = arr.arrLikeVal();
+    auto const val = arr.arrLikeVal();
     if (val->empty()) return {TBottom, false};
     auto const pos = isFirst ? val->iter_begin() : val->iter_last();
     return {Type::cns(val->nvGetVal(pos)), true};
@@ -299,18 +277,73 @@ std::pair<Type, bool> keysetFirstLastType(Type arr, bool isFirst) {
 
   auto type = TStr | TInt;
   if (arr <= TUncounted) type &= TUncountedInit;
-  return {type, false};
+
+  auto const arrTy = arr.arrSpec().type();
+  if (!arrTy) return {type, false};
+
+  using E = RepoAuthType::Array::Empty;
+  auto const maybeEmpty = arrTy->emptiness() == E::Maybe;
+
+  return {type, !maybeEmpty};
+}
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+std::pair<Type, bool> arrLikeElemType(Type arr, Type idx, const Class* ctx) {
+  assertx(idx <= (TInt | TStr));
+  assertx(arr.isKnownDataType());
+  if (arr <= TBottom) return {TBottom, false};
+  if (arr <= (TVArr|TVec)) return vecElemType(arr, idx, ctx);
+  if (arr <= (TDArr|TDict)) return dictElemType(arr, idx);
+  return keysetElemType(arr, idx);
 }
 
 std::pair<Type, bool> arrLikeFirstLastType(
     Type arr, bool isFirst, bool isKey, const Class* ctx) {
   assertx(arr.isKnownDataType());
+  if (arr <= TBottom) return {TBottom, false};
   if (arr <= (TVArr|TVec)) {
-    if (isKey) return {TInt, false};
-    return vecFirstLastType(arr, isFirst, ctx);
+    return isKey ? vecFirstLastKeyType(arr, isFirst)
+                 : vecFirstLastValueType(arr, isFirst, ctx);
   }
   if (arr <= (TDArr|TDict)) return dictFirstLastType(arr, isFirst, isKey);
   return keysetFirstLastType(arr, isFirst);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+VecBounds vecBoundsStaticCheck(Type arrayType, folly::Optional<int64_t> idx) {
+  assertx(arrayType.subtypeOfAny(TArr, TVec));
+  if (idx && (*idx < 0 || *idx > MixedArray::MaxSize)) return VecBounds::Out;
+
+  if (arrayType.hasConstVal()) {
+    auto const val = arrayType.arrLikeVal();
+    if (val->empty()) return VecBounds::Out;
+    if (!idx) return VecBounds::Unknown;
+    return *idx < val->size() ? VecBounds::In : VecBounds::Out;
+  };
+
+  if (!idx) return VecBounds::Unknown;
+
+  auto const at = arrayType.arrSpec().type();
+  if (!at) return VecBounds::Unknown;
+
+  using A = RepoAuthType::Array;
+  switch (at->tag()) {
+  case A::Tag::Packed:
+    if (at->emptiness() == A::Empty::No) {
+      return *idx < at->size() ? VecBounds::In : VecBounds::Out;
+    } else if (*idx >= at->size()) {
+      return VecBounds::Out;
+    }
+    return VecBounds::Unknown;
+  case A::Tag::PackedN:
+    if (*idx == 0 && at->emptiness() == A::Empty::No) {
+      return VecBounds::In;
+    }
+  }
+  return VecBounds::Unknown;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

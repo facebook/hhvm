@@ -1011,7 +1011,7 @@ SSATmp* vecElemImpl(IRGS& env, MOpMode mode, Type baseType, SSATmp* key) {
     if (key->isA(TInt)) {
       auto const base = extractBase(env);
       checkVecBounds(env, base, key);
-      auto const elemType = vecElemType(
+      auto const elemType = arrLikeElemType(
         base->type(),
         key->type(),
         curClass(env)
@@ -1029,7 +1029,7 @@ SSATmp* vecElemImpl(IRGS& env, MOpMode mode, Type baseType, SSATmp* key) {
         gen(env, CheckVecBounds, taken, base, key);
       },
       [&] {
-        auto const elemType = vecElemType(
+        auto const elemType = arrLikeElemType(
           base->type(),
           key->type(),
           curClass(env)

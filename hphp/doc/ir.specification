@@ -3245,42 +3245,42 @@ fields of that struct for holding intermediate values.
   Returns whether a collection instance is empty or not.  S0 must be known to
   be an instance of a collection class at compile time.
 
-| VecFirst, DVecFirstElem, S(VArr,Vec), NF
+| VecFirst, DFirstElem, S(VArr,Vec), NF
 
   Returns the first value from the packed or vec array in S0.
   If the array is empty, it will return NULL.
 
-| VecLast, DVecLastElem, S(VArr,Vec), NF
+| VecLast, DLastElem, S(VArr,Vec), NF
 
   Returns the last value from the packed or vec array in S0.
   If the array is empty, it will return NULL.
 
-| DictFirst, DDictFirstElem, S(DArr,Dict), NF
+| DictFirst, DFirstElem, S(DArr,Dict), NF
 
   Returns the first value from the mixed or dict array in S0.
   If the array is empty, it will return NULL.
 
-| DictLast, DDictLastElem, S(DArr,Dict), NF
+| DictLast, DLastElem, S(DArr,Dict), NF
 
   Returns the last value from the mixed or dict array in S0.
   If the array is empty, it will return NULL.
 
-| DictFirstKey, DDictFirstKey, S(DArr,Dict), NF
+| DictFirstKey, DFirstKey, S(DArr,Dict), NF
 
   Returns the first key from the mixed or dict array in S0.
   If the array is empty, it will return NULL.
 
-| DictLastKey, DDictLastKey, S(DArr,Dict), NF
+| DictLastKey, DLastKey, S(DArr,Dict), NF
 
   Returns the last key from the mixed or dict array in S0.
   If the array is empty, it will return NULL.
 
-| KeysetFirst, DKeysetFirstElem, S(Keyset), NF
+| KeysetFirst, DFirstElem, S(Keyset), NF
 
   Returns the first value(key) from the keyset in S0.
   If the array is empty, it will return NULL.
 
-| KeysetLast, DKeysetLastElem, S(Keyset), NF
+| KeysetLast, DLastElem, S(Keyset), NF
 
   Returns the first value(key) from the keyset in S0.
   If the array is empty, it will return NULL.

@@ -207,12 +207,6 @@ let sample_cgroup_mem ~(profiling : Profiling.t) ~(stage : string) : unit =
       ~metric:"cgroup_file"
       ~value:(float file)
 
-let collect_cgroup_stats ~profiling ~stage f =
-  sample_cgroup_mem ~profiling ~stage;
-  let result = f () in
-  sample_cgroup_mem ~profiling ~stage;
-  result
-
 let profile_memory ~event f =
   let event =
     match event with
@@ -253,3 +247,13 @@ let log_to_scuba ~(stage : string) ~(profiling : Profiling.t) : unit =
   | None -> ()
   | Some result ->
     log_result_to_scuba ~event:!profiling.Profiling.event ~stage result
+
+let collect_cgroup_stats ~profiling ~stage f =
+  (* sample memory stats before running f *)
+  sample_cgroup_mem ~profiling ~stage;
+  let result = f () in
+  (* sample memory stats after running f *)
+  sample_cgroup_mem ~profiling ~stage;
+  (* log the recorded stats to scuba as well *)
+  log_to_scuba ~stage ~profiling;
+  result

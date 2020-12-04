@@ -718,7 +718,6 @@ let type_check_dirty
         ~profile_label:"type check dirty files"
         ~profiling
     in
-    CgroupProfiler.log_to_scuba ~stage:"type check dirty files" ~profiling;
     HackEventLogger.type_check_dirty
       ~start_t
       ~dirty_count:(Relative_path.Set.cardinal dirty_files_changed_hash)
@@ -898,17 +897,12 @@ let full_init
   let is_check_mode = ServerArgs.check_mode genv.options in
   let run () =
     let (env, t) =
-      let res =
-        initialize_naming_table
-          ~do_naming:true
-          "full initialization"
-          genv
-          env
-          profiling
-      in
-      CgroupProfiler.log_to_scuba ~stage:"parsing" ~profiling;
-      CgroupProfiler.log_to_scuba ~stage:"naming" ~profiling;
-      res
+      initialize_naming_table
+        ~do_naming:true
+        "full initialization"
+        genv
+        env
+        profiling
     in
     if not is_check_mode then
       SearchServiceRunner.update_fileinfo_map env.naming_table SearchUtils.Init;
@@ -927,18 +921,14 @@ let full_init
       else
         env
     in
-    let typecheck_result =
-      type_check
-        genv
-        env
-        fnl
-        init_telemetry
-        t
-        ~profile_label:"type check"
-        ~profiling
-    in
-    CgroupProfiler.log_to_scuba ~stage:"type check" ~profiling;
-    typecheck_result
+    type_check
+      genv
+      env
+      fnl
+      init_telemetry
+      t
+      ~profile_label:"type check"
+      ~profiling
   in
   let run_experiment () =
     let ctx = Provider_utils.ctx_from_server_env env in
@@ -1119,7 +1109,6 @@ let post_saved_state_initialization
       ~profile_label:"parse dirty files"
       ~profiling
   in
-  CgroupProfiler.log_to_scuba ~stage:"parse dirty files" ~profiling;
   SearchServiceRunner.update_fileinfo_map
     env.naming_table
     SearchUtils.TypeChecker;
@@ -1144,7 +1133,6 @@ let post_saved_state_initialization
   in
   (* Do global naming on all dirty files *)
   let (env, t) = naming env t ~profile_label:"naming dirty files" ~profiling in
-  CgroupProfiler.log_to_scuba ~stage:"naming dirty files" ~profiling;
 
   (* Add all files from fast to the files_info object *)
   let fast = Naming_table.to_fast env.naming_table in
@@ -1270,7 +1258,6 @@ let saved_state_init
           ~ctx
           ~root
     in
-    CgroupProfiler.log_to_scuba ~stage:"load saved state" ~profiling;
     state_result
   in
   let state_result =

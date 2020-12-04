@@ -387,7 +387,6 @@ let update_naming_table env fast_parsed profiling =
     Relative_path.Map.iter fast_parsed (Typing_deps.Files.update_file deps_mode);
     Naming_table.update_many env.naming_table fast_parsed
   in
-  CgroupProfiler.log_to_scuba ~stage:"update_deps" ~profiling;
   naming_table
 
 (*****************************************************************************)
@@ -784,7 +783,6 @@ functor
       let (env, fast_parsed, errorl, failed_parsing) =
         parsing genv env files_to_parse ~stop_at_errors profiling
       in
-      CgroupProfiler.log_to_scuba ~stage:"parsing" ~profiling;
       let errors = env.errorl in
       let errors =
         Errors.(incremental_update_set errors errorl files_to_parse Parsing)
@@ -827,7 +825,6 @@ functor
         in
         (errors, failed_naming, fast)
       in
-      CgroupProfiler.log_to_scuba ~stage:"naming" ~profiling;
       { errors_after_naming = errors; failed_naming; fast }
 
     type redecl_phase1_result = {
@@ -866,7 +863,6 @@ functor
           ~previously_oldified_defs:oldified_defs
           ~defs:fast
       in
-      CgroupProfiler.log_to_scuba ~stage:"redecl phase 1" ~profiling;
       (* Things that were redeclared are no longer in old heap, so we substract
        * defs_ro_redecl from oldified_defs *)
       let oldified_defs =
@@ -941,7 +937,6 @@ functor
              env
              ctx)
       in
-      CgroupProfiler.log_to_scuba ~stage:"redecl phase 2" ~profiling;
       { errors_after_phase2 = errors; needs_phase2_redecl; to_recheck2 }
 
     (** Merge the results of the two redecl phases. *)
@@ -1003,7 +998,6 @@ functor
           ~interrupt
           ~check_info:(get_check_info genv env)
       in
-      CgroupProfiler.log_to_scuba ~stage:"type check" ~profiling;
       log_if_diag_subscribe_changed
         "type_checking.go_with_interrupt"
         ~before:env.diag_subscribe

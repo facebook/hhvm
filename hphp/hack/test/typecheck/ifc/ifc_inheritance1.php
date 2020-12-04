@@ -1,4 +1,5 @@
 <?hh
+<<file:__EnableUnstableFeatures('ifc')>>
 
 class A {
   <<__Policied("A")>>

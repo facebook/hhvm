@@ -70,8 +70,6 @@ let experimental_forbid_nullable_cast =
 
 let experimental_coroutines = GlobalOptions.tco_experimental_coroutines
 
-let experimental_ifc = GlobalOptions.tco_experimental_ifc
-
 let experimental_infer_flows = GlobalOptions.tco_experimental_infer_flows
 
 let experimental_disallow_static_memoized =
@@ -111,6 +109,10 @@ let shallow_class_decl = GlobalOptions.tco_shallow_class_decl
 let coeffects = GlobalOptions.coeffects
 
 let set_coeffects = GlobalOptions.set_coeffects
+
+let enable_ifc = GlobalOptions.enable_ifc
+
+let ifc_enabled = GlobalOptions.ifc_enabled
 
 let like_type_hints = GlobalOptions.tco_like_type_hints
 

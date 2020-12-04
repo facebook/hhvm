@@ -1,5 +1,5 @@
 <?hh
-
+<<file:__EnableUnstableFeatures('ifc')>>
 class Policy {}
 
 class C {

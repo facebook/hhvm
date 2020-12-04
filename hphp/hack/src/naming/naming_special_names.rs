@@ -297,6 +297,12 @@ pub mod user_attributes {
 
     pub const ATOM: &str = "__Atom";
 
+    pub const POLICIED: &str = "__Policied";
+
+    pub const INFERFLOWS: &str = "__InferFlows";
+
+    pub const EXTERNAL: &str = "__External";
+
     lazy_static! {
         static ref AS_SET: HashSet<&'static str> = vec![
             OVERRIDE,
@@ -344,6 +350,9 @@ pub mod user_attributes {
             ENABLE_UNSTABLE_FEATURES,
             ENUM_CLASS,
             ATOM,
+            POLICIED,
+            INFERFLOWS,
+            EXTERNAL,
         ]
         .into_iter()
         .collect();

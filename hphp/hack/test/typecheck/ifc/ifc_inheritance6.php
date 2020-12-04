@@ -1,4 +1,5 @@
 <?hh
+<<file:__EnableUnstableFeatures('ifc')>>
 
 class C {}
 trait TA {

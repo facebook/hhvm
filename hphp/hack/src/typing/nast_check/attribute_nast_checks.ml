@@ -52,16 +52,6 @@ let check_deprecated_static attrs =
   | _ -> ()
 
 let check_ifc_enabled tcopt attrs =
-  let governed_opt = find_attribute SN.UserAttributes.uaPolicied attrs in
-  (match
-     ( governed_opt,
-       TypecheckerOptions.experimental_feature_enabled
-         tcopt
-         TypecheckerOptions.experimental_ifc )
-   with
-  | (Some { ua_name = (pos, _); _ }, false) ->
-    Errors.experimental_feature pos "information flow control"
-  | _ -> ());
   let inferflows_opt = find_attribute SN.UserAttributes.uaInferFlows attrs in
   match
     ( inferflows_opt,

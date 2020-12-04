@@ -1,5 +1,5 @@
 <?hh
-
+<<file:__EnableUnstableFeatures('ifc')>>
 // Methods
 class C {
   <<__Policied("Test")>>

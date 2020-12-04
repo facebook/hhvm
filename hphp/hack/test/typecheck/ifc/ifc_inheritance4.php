@@ -1,4 +1,5 @@
 <?hh
+<<file:__EnableUnstableFeatures('ifc')>>
 
 interface IA {
   <<__Policied("A")>>

@@ -4,7 +4,6 @@
 class C {
   public function __construct(public int $a, public int $b) {}
 
-  <<__Policied("A")>>
   public function getA() : int {
     return $this->a;
   }

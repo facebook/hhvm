@@ -114,6 +114,7 @@ const DEFAULT: GlobalOptions<'_> = GlobalOptions {
     po_disallow_hash_comments: false,
     po_disallow_fun_and_cls_meth_pseudo_funcs: false,
     tco_use_direct_decl_parser: false,
+    tco_ifc_enabled: false,
 };
 
 impl GlobalOptions<'static> {

@@ -286,6 +286,8 @@ type t = {
   po_disallow_fun_and_cls_meth_pseudo_funcs: bool;
   (* Enable use of the direct decl parser for parsing type signatures. *)
   tco_use_direct_decl_parser: bool;
+  (* Enable ifc *)
+  tco_ifc_enabled: bool;
 }
 [@@deriving eq, show]
 
@@ -397,6 +399,7 @@ val make :
   ?po_disallow_hash_comments:bool ->
   ?po_disallow_fun_and_cls_meth_pseudo_funcs:bool ->
   ?tco_use_direct_decl_parser:bool ->
+  ?tco_ifc_enabled:bool ->
   unit ->
   t
 
@@ -490,8 +493,6 @@ val tco_experimental_type_param_shadowing : string
 
 val tco_experimental_abstract_type_const_with_default : string
 
-val tco_experimental_ifc : string
-
 val tco_experimental_infer_flows : string
 
 val tco_experimental_case_sensitive_inheritance : string
@@ -529,6 +530,10 @@ val tco_union_intersection_type_hints : t -> bool
 val coeffects : t -> bool
 
 val set_coeffects : t -> t
+
+val ifc_enabled : t -> bool
+
+val enable_ifc : t -> t
 
 val tco_like_casts : t -> bool
 

@@ -815,6 +815,8 @@ end
  * to the typechecker *)
 module UnstableFeatures = struct
   let coeffects_provisional = "coeffects_provisional"
+
+  let ifc = "ifc"
 end
 
 module Coeffects = struct

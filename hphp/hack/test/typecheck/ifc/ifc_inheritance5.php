@@ -1,4 +1,5 @@
 <?hh
+<<file:__EnableUnstableFeatures('ifc')>>
 
 interface IA {
   public function foo() : void;

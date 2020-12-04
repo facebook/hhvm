@@ -1,4 +1,5 @@
 <?hh
+<<file:__EnableUnstableFeatures('ifc')>>
 
 class C {
   public function __construct(public int $a, public int $b) {}

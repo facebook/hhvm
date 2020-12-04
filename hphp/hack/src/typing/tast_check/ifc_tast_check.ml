@@ -51,10 +51,6 @@ let has_attr (name : string) (attrs : Tast.user_attribute list) : bool =
   in
   List.exists ~f:matches_name attrs
 
-(* We only run IFC checks on methods that have policies. Funs and methods without an explicit policy
-  are assumed to have the PUBLIC policy by default, but are not checked by IFC. *)
-let has_policy attrs = has_attr SN.UserAttributes.uaPolicied attrs
-
 (* Run IFC on a single method, catching exceptions *)
 let handle_method
     (class_name : string)
@@ -67,25 +63,23 @@ let handle_method
        m_ret = (return, _);
        m_span = pos;
        m_static = is_static;
-       m_user_attributes = attrs;
        _;
      } :
       Tast.method_) : unit =
-  if has_policy attrs then
-    catch_ifc_internal_errors pos (fun () ->
-        Ifc.analyse_callable
-          ~opts:options
-          ~class_name
-          ~pos
-          ~decl_env
-          ~is_static
-          ~saved_env
-          ~ctx
-          name
-          params
-          body
-          return
-        |> check_errors_from_callable_result)
+  catch_ifc_internal_errors pos (fun () ->
+      Ifc.analyse_callable
+        ~opts:options
+        ~class_name
+        ~pos
+        ~decl_env
+        ~is_static
+        ~saved_env
+        ~ctx
+        name
+        params
+        body
+        return
+      |> check_errors_from_callable_result)
 
 (* Run IFC on a single toplevel function, catching exceptions *)
 let handle_fun
@@ -97,30 +91,26 @@ let handle_fun
        f_body = body;
        f_ret = (return, _);
        f_span = pos;
-       f_user_attributes = attrs;
        _;
      } :
       Tast.fun_) =
-  if has_policy attrs then
-    catch_ifc_internal_errors pos (fun () ->
-        Ifc.analyse_callable
-          ~opts:options
-          ~pos
-          ~decl_env
-          ~is_static:false
-          ~saved_env
-          ~ctx
-          name
-          params
-          body
-          return
-        |> check_errors_from_callable_result)
+  catch_ifc_internal_errors pos (fun () ->
+      Ifc.analyse_callable
+        ~opts:options
+        ~pos
+        ~decl_env
+        ~is_static:false
+        ~saved_env
+        ~ctx
+        name
+        params
+        body
+        return
+      |> check_errors_from_callable_result)
 
 let should_run_ifc tcopt =
   match
-    ( TypecheckerOptions.experimental_feature_enabled
-        tcopt
-        TypecheckerOptions.experimental_ifc,
+    ( TypecheckerOptions.ifc_enabled tcopt,
       TypecheckerOptions.experimental_feature_enabled
         tcopt
         TypecheckerOptions.experimental_infer_flows )

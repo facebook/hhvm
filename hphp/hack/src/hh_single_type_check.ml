@@ -615,6 +615,12 @@ let parse_options () =
     | [] -> die usage
     | x -> x
   in
+  let is_ifc_mode =
+    match !mode with
+    | Ifc _ -> true
+    | _ -> false
+  in
+
   let tcopt =
     GlobalOptions.make
       ?po_disable_array_typehint:(Some false)
@@ -687,6 +693,7 @@ let parse_options () =
       ~po_disallow_hash_comments:!disallow_hash_comments
       ~po_disallow_fun_and_cls_meth_pseudo_funcs:
         !disallow_fun_and_cls_meth_pseudo_funcs
+      ~tco_ifc_enabled:is_ifc_mode
       ()
   in
   Errors.allowed_fixme_codes_strict :=
@@ -697,11 +704,6 @@ let parse_options () =
     GlobalOptions.codes_not_raised_partial tcopt;
   Errors.report_pos_from_reason :=
     GlobalOptions.tco_report_pos_from_reason tcopt;
-  let is_ifc_mode =
-    match !mode with
-    | Ifc _ -> true
-    | _ -> false
-  in
   let tcopt =
     {
       tcopt with

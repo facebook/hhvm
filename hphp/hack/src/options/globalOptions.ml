@@ -116,6 +116,7 @@ type t = {
   po_disallow_hash_comments: bool;
   po_disallow_fun_and_cls_meth_pseudo_funcs: bool;
   tco_use_direct_decl_parser: bool;
+  tco_ifc_enabled: bool;
 }
 [@@deriving eq, show]
 
@@ -157,12 +158,6 @@ let tco_experimental_abstract_type_const_with_default =
   "abstract_type_const_with_default"
 
 (*
-* Turn on information flow control attributes (i.e. Governed) in
-* the typechecker
-*)
-let tco_experimental_ifc = "ifc_enabled"
-
-(*
 * Allow typechecker to do global inference and infer IFC flows
 * with the <<InferFlows>> flag
 *
@@ -186,7 +181,6 @@ let tco_experimental_all =
          tco_experimental_coroutines;
          tco_experimental_disallow_static_memoized;
          tco_experimental_abstract_type_const_with_default;
-         tco_experimental_ifc;
          tco_experimental_infer_flows;
          tco_experimental_case_sensitive_inheritance;
        ]
@@ -306,6 +300,7 @@ let default =
     po_disallow_hash_comments = false;
     po_disallow_fun_and_cls_meth_pseudo_funcs = false;
     tco_use_direct_decl_parser = false;
+    tco_ifc_enabled = false;
   }
 
 let make
@@ -435,6 +430,7 @@ let make
     ?(po_disallow_fun_and_cls_meth_pseudo_funcs =
       default.po_disallow_fun_and_cls_meth_pseudo_funcs)
     ?(tco_use_direct_decl_parser = default.tco_use_direct_decl_parser)
+    ?(tco_ifc_enabled = default.tco_ifc_enabled)
     () =
   {
     tco_experimental_features;
@@ -545,6 +541,7 @@ let make
     po_disallow_hash_comments;
     po_disallow_fun_and_cls_meth_pseudo_funcs;
     tco_use_direct_decl_parser;
+    tco_ifc_enabled;
   }
 
 let tco_experimental_feature_enabled t s =
@@ -663,6 +660,10 @@ let tco_union_intersection_type_hints t = t.tco_union_intersection_type_hints
 let coeffects t = t.tco_coeffects
 
 let set_coeffects t = { t with tco_coeffects = true }
+
+let ifc_enabled t = t.tco_ifc_enabled
+
+let enable_ifc t = { t with tco_ifc_enabled = true }
 
 let tco_like_casts t = t.tco_like_casts
 

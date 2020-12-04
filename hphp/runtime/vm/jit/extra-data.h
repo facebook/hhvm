@@ -476,19 +476,23 @@ struct IterData : IRExtraData {
 };
 
 struct IterTypeData : IRExtraData {
-  IterTypeData(uint32_t iterId, IterSpecialization type)
+  IterTypeData(uint32_t iterId, IterSpecialization type, ArrayLayout layout)
     : iterId{iterId}
     , type{type}
+    , layout{layout}
   {
     always_assert(type.specialized);
   }
 
   std::string show() const {
-    return folly::format("{}::{}", iterId, HPHP::show(type)).str();
+    auto const type_str = HPHP::show(type);
+    auto const layout_str = layout.describe();
+    return folly::format("{}::{}::{}", iterId, type_str, layout_str).str();
   }
 
   uint32_t iterId;
   IterSpecialization type;
+  ArrayLayout layout;
 };
 
 struct IterOffsetData : IRExtraData {

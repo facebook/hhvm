@@ -978,7 +978,7 @@ To string conversions:
   Map, Set, ImmMap, or ImmSet, and that specific object type must be known at
   compile time.
 
-| LdIterBase<T,iterId>, DParam(ArrLike), S(FramePtr), NF
+| LdIterBase<T,iterId>, DParam(ArrLike), S(FramePtr), LA
 
   Load the base of the iterator with type `T` at `iterId`. `T` must be a valid,
   DataTypeSpecific-or-better type for the iterator's base; for example, it may
@@ -1724,7 +1724,7 @@ To string conversions:
   Store S1 to the local variables corresponding to localIds, on the frame
   pointed to by S0.
 
-| StIterBase<iterId>, ND, S(FramePtr) S(ArrLike,Nullptr), NF
+| StIterBase<iterId>, ND, S(FramePtr) S(ArrLike,Nullptr), LA
 
   Sets the base of the iterator at `iterId` to the pointer S1. The array must
   match the specialized type of the iterator, or be null (for local iterators).

@@ -148,7 +148,7 @@ struct MonotypeDict : BespokeArray {
     return sizeof(Self);
   }
   static constexpr size_t elmSize() {
-    return 2 * sizeof(Value);
+    return sizeof(Elm);
   }
   static constexpr size_t elmKeyOffset() {
     return offsetof(Elm, key);

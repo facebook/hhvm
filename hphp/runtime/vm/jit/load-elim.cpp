@@ -315,6 +315,12 @@ void clear_everything(Local& env) {
   env.state.avail.reset();
 }
 
+// Construct an immediate that represents all of an iterator's type fields.
+int64_t iter_type_immediate(const IterTypeData& data) {
+  return static_cast<uint32_t>(data.type.as_byte) << 16 |
+         static_cast<uint32_t>(data.layout.toUint16());
+}
+
 TrackedLoc* find_tracked(State& state,
                          folly::Optional<ALocMeta> meta) {
   if (!meta) return nullptr;
@@ -500,7 +506,8 @@ Flags handle_general_effects(Local& env,
     if (!meta || !env.state.avail[meta->index]) break;
     auto const& type = env.state.tracked[meta->index].knownType;
     if (!type.hasConstVal(TInt)) break;
-    auto const match = type.intVal() == inst.extra<CheckIter>()->type.as_byte;
+    auto const value = iter_type_immediate(*inst.extra<CheckIter>());
+    auto const match = type.intVal() == value;
     return match ? Flags{FJmpNext{}} : Flags{FJmpTaken{}};
   }
 
@@ -879,10 +886,10 @@ Flags analyze_inst(Local& env, const IRInstruction& inst) {
   case StIterType: {
     // StIterType stores an immediate to the iter's type fields. We construct a
     // tmp to represent the immediate. (memory-effects can't do so w/o a unit.)
-    auto const iter = inst.extra<StIterType>()->iterId;
-    auto const type = inst.extra<StIterType>()->type;
-    auto const acls = canonicalize(aiter_type(inst.src(0), iter));
-    store(env, acls, env.global.unit.cns(type.as_byte));
+    auto const extra = inst.extra<StIterType>();
+    auto const value = iter_type_immediate(*extra);
+    auto const acls = canonicalize(aiter_type(inst.src(0), extra->iterId));
+    store(env, acls, env.global.unit.cns(value));
     break;
   }
   default:

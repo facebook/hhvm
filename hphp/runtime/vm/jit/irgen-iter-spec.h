@@ -35,6 +35,7 @@ struct IRGS;
 // equivalent if they share the same loop entry block, and we store a map from
 // loop entry block -> SpecializedIterator struct in IRGS. See cpp for details.
 struct SpecializedIterator {
+  ArrayLayout layout;
   IterSpecialization iter_type;
   std::vector<IRInstruction*> placeholders;
   Block* header;

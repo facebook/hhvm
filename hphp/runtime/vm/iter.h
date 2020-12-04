@@ -86,6 +86,7 @@ struct IterSpecialization {
       bool specialized: 1;
       bool output_key: 1;
       bool base_const: 1;
+      bool bespoke: 1;
     };
   };
 };
@@ -238,11 +239,14 @@ struct IterImpl {
   }
 
   // Used by native code and by the JIT to pack the m_typeFields components.
-  static uint16_t packTypeFields(
-      IterNextIndex index,
-      IterSpecialization spec = IterSpecialization::generic()) {
-    return static_cast<uint16_t>(spec.as_byte) << 8 |
-           static_cast<uint16_t>(index);
+  static uint32_t packTypeFields(IterNextIndex index) {
+    return static_cast<uint32_t>(index) << 24;
+  }
+  static uint32_t packTypeFields(
+      IterNextIndex index, IterSpecialization spec, uint16_t layout) {
+    return static_cast<uint32_t>(index) << 24 |
+           static_cast<uint32_t>(spec.as_byte) << 16 |
+           static_cast<uint32_t>(layout);
   }
 
   // JIT helpers used for specializing iterators.
@@ -348,10 +352,11 @@ private:
   // This field is a union so new_iter_array can set it in one instruction.
   union {
     struct {
-      IterNextIndex m_nextHelperIdx;
+      uint16_t m_layout;
       IterSpecialization m_specialization;
+      IterNextIndex m_nextHelperIdx;
     };
-    uint16_t m_typeFields;
+    uint32_t m_typeFields;
   };
   // Current position. Beware that when m_data is null, m_pos is uninitialized.
   // For the pointer iteration types, we use the appropriate pointers instead.

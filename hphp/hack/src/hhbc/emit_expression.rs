@@ -507,7 +507,6 @@ pub fn emit_expr(emitter: &mut Emitter, env: &Env, expression: &tast::Expr) -> R
         }
 
         Expr_::String2(es) => emit_string2(emitter, env, pos, es),
-        Expr_::BracedExpr(e) => emit_expr(emitter, env, e),
         Expr_::Id(e) => Ok(emit_pos_then(pos, emit_id(emitter, env, e)?)),
         Expr_::Xml(_) => Err(unrecoverable(
             "emit_xhp: syntax should have been converted during rewriting",
@@ -5578,8 +5577,7 @@ fn emit_class_expr(
     };
     Ok(match &cexpr {
         ClassExpr::Expr(expr)
-            if expr.1.is_braced_expr()
-                || expr.1.is_call()
+            if expr.1.is_call()
                 || expr.1.is_binop()
                 || expr.1.is_class_get()
                 || expr

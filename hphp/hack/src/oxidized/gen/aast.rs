@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<8f8b6c85b114e71f27e3dd3cc0a0224b>>
+// @generated SignedSource<<a59c9c3aa1ea9161668908d2aa5ca295>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -399,7 +399,6 @@ pub enum Expr_<Ex, Fb, En, Hi> {
     Import(Box<(ImportFlavor, Expr<Ex, Fb, En, Hi>)>),
     /// TODO: T38184446 Consolidate collections in AAST
     Collection(Box<(Sid, Option<CollectionTarg<Hi>>, Vec<Afield<Ex, Fb, En, Hi>>)>),
-    BracedExpr(Box<Expr<Ex, Fb, En, Hi>>),
     ExpressionTree(Box<ExpressionTree<Ex, Fb, En, Hi>>),
     Lplaceholder(Box<Pos>),
     FunId(Box<Sid>),

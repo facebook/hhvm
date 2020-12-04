@@ -819,7 +819,6 @@ module Visitor_DEPRECATED = struct
         | Lfun (f, idl) -> this#on_lfun acc f idl
         | Import (_, e) -> this#on_expr acc e
         | Collection (_, tal, fl) -> this#on_collection acc tal fl
-        | BracedExpr e -> this#on_expr acc e
         | ET_Splice e -> this#on_et_splice acc e
         | EnumAtom sid -> this#on_enum_atom acc sid
 

@@ -1459,8 +1459,7 @@ and expr_
   in
   match e with
   | Import _
-  | Collection _
-  | BracedExpr _ ->
+  | Collection _ ->
     failwith "AST should not contain these nodes"
   | Omitted ->
     let ty = Typing_utils.mk_tany env p in

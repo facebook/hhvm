@@ -1307,15 +1307,12 @@ where
     ) -> Result<ast::Expr> {
         match &node.children {
             BracedExpression(c) => {
-                let expr = &c.expression;
-                let inner = Self::p_expr_impl(location, expr, env, parent_pos)?;
-                let inner_pos = &inner.0;
-                let inner_expr_ = &inner.1;
-                use aast::Expr_::*;
-                match inner_expr_ {
-                    Lvar(_) | String(_) | Int(_) | Float(_) => Ok(inner),
-                    _ => Ok(ast::Expr::new(inner_pos.clone(), E_::mk_braced_expr(inner))),
-                }
+                // Either a dynamic method lookup on a dynamic value:
+                //   $foo->{$meth_name}();
+                // or an XHP splice.
+                //   <p id={$id}>hello</p>;
+                // In both cases, unwrap, consistent with parentheses.
+                Self::p_expr_impl(location, &c.expression, env, parent_pos)
             }
             ParenthesizedExpression(c) => {
                 Self::p_expr_impl(location, &c.expression, env, parent_pos)
@@ -2283,11 +2280,7 @@ where
                 Ok(ast::Expr::new(p, E_::make_string(s)))
             }
         } else {
-            let expr = Self::p_expr(node, env)?;
-            match expr.1 {
-                E_::BracedExpr(e) => Ok(*e),
-                _ => Ok(expr),
-            }
+            Self::p_expr(node, env)
         }
     }
 

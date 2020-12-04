@@ -1053,15 +1053,15 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                         Unop(&(_op, expr)) => expr_to_ty(arena, expr),
                         Any => Some(TANY_),
 
-                        ArrayGet(_) | As(_) | Assert(_) | Await(_) | Binop(_) | BracedExpr(_)
-                        | Call(_) | Callconv(_) | Cast(_) | ClassConst(_) | ClassGet(_)
-                        | Clone(_) | Collection(_) | Darray(_) | Dollardollar(_) | Efun(_)
-                        | Eif(_) | EnumAtom(_) | ETSplice(_) | ExpressionTree(_)
-                        | FunctionPointer(_) | FunId(_) | Id(_) | Import(_) | Is(_)
-                        | KeyValCollection(_) | Lfun(_) | List(_) | Lplaceholder(_) | Lvar(_)
-                        | MethodCaller(_) | MethodId(_) | New(_) | ObjGet(_) | Omitted
-                        | Pair(_) | Pipe(_) | Record(_) | Shape(_) | SmethodId(_) | Suspend(_)
-                        | ValCollection(_) | Varray(_) | Xml(_) | Yield(_) | YieldBreak => None,
+                        ArrayGet(_) | As(_) | Assert(_) | Await(_) | Binop(_) | Call(_)
+                        | Callconv(_) | Cast(_) | ClassConst(_) | ClassGet(_) | Clone(_)
+                        | Collection(_) | Darray(_) | Dollardollar(_) | Efun(_) | Eif(_)
+                        | EnumAtom(_) | ETSplice(_) | ExpressionTree(_) | FunctionPointer(_)
+                        | FunId(_) | Id(_) | Import(_) | Is(_) | KeyValCollection(_) | Lfun(_)
+                        | List(_) | Lplaceholder(_) | Lvar(_) | MethodCaller(_) | MethodId(_)
+                        | New(_) | ObjGet(_) | Omitted | Pair(_) | Pipe(_) | Record(_)
+                        | Shape(_) | SmethodId(_) | Suspend(_) | ValCollection(_) | Varray(_)
+                        | Xml(_) | Yield(_) | YieldBreak => None,
                     }
                 }
 

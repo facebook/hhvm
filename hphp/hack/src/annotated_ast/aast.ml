@@ -224,7 +224,6 @@ and ('ex, 'fb, 'en, 'hi) expr_ =
   | Collection of
       sid * 'hi collection_targ option * ('ex, 'fb, 'en, 'hi) afield list
       (** TODO: T38184446 Consolidate collections in AAST *)
-  | BracedExpr of ('ex, 'fb, 'en, 'hi) expr
   | ExpressionTree of ('ex, 'fb, 'en, 'hi) expression_tree
   (* None of these constructors exist in the AST *)
   | Lplaceholder of pos

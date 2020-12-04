@@ -1396,8 +1396,7 @@ let rec expr ~pos renv (env : Env.expr_env) (((epos, ety), e) : Tast.expr) =
     (env, refine renv tag_test_ty (pos, ety))
   (* --- A valid AST does not contain these nodes *)
   | A.Import _
-  | A.Collection _
-  | A.BracedExpr _ ->
+  | A.Collection _ ->
     failwith "AST should not contain these nodes"
   (* --- expressions below are not yet supported *)
   | _ ->

@@ -1366,14 +1366,6 @@ impl<'ast, 'a> VisitorMut<'ast> for ClosureConvertVisitor<'a> {
                 res.recurse(env, self.object())?;
                 res
             }
-            Expr_::BracedExpr(mut x) => {
-                x.recurse(env, self.object())?;
-                match x.1 {
-                    Expr_::Lvar(_) => x.1,
-                    Expr_::String(_) => x.1,
-                    _ => Expr_::BracedExpr(x),
-                }
-            }
             Expr_::As(x) if (x.1).is_hlike() => {
                 let mut res = x.0;
                 res.recurse(env, self.object())?;

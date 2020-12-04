@@ -483,7 +483,6 @@ pub fn expr_to_typed_value_(
                 class_const_to_typed_value(emitter, &x.0, &x.1)
             }
         }
-        BracedExpr(x) => expr_to_typed_value_(emitter, ns, x, allow_maps, false),
         ClassGet(_) => Err(Error::UserDefinedConstant),
         As(x) if (x.1).1.is_hlike() => expr_to_typed_value_(emitter, ns, &x.0, allow_maps, false),
         _ => Err(Error::NotLiteral),

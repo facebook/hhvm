@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<aa8b23e46fb19c8cb64386388101d702>>
+// @generated SignedSource<<836b4aab1fc8f42247c099d7da09990d>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -1080,9 +1080,6 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
     ) -> Self {
         Expr_::Collection(Box::new((p0, p1, p2)))
     }
-    pub fn mk_braced_expr(p0: Expr<Ex, Fb, En, Hi>) -> Self {
-        Expr_::BracedExpr(Box::new(p0))
-    }
     pub fn mk_expression_tree(p0: ExpressionTree<Ex, Fb, En, Hi>) -> Self {
         Expr_::ExpressionTree(Box::new(p0))
     }
@@ -1387,12 +1384,6 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
     pub fn is_collection(&self) -> bool {
         match self {
             Expr_::Collection(..) => true,
-            _ => false,
-        }
-    }
-    pub fn is_braced_expr(&self) -> bool {
-        match self {
-            Expr_::BracedExpr(..) => true,
             _ => false,
         }
     }
@@ -1754,12 +1745,6 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
     )> {
         match self {
             Expr_::Collection(p0) => Some((&p0.0, &p0.1, &p0.2)),
-            _ => None,
-        }
-    }
-    pub fn as_braced_expr(&self) -> Option<&Expr<Ex, Fb, En, Hi>> {
-        match self {
-            Expr_::BracedExpr(p0) => Some(&p0),
             _ => None,
         }
     }
@@ -2153,12 +2138,6 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
             _ => None,
         }
     }
-    pub fn as_braced_expr_mut(&mut self) -> Option<&mut Expr<Ex, Fb, En, Hi>> {
-        match self {
-            Expr_::BracedExpr(p0) => Some(p0.as_mut()),
-            _ => None,
-        }
-    }
     pub fn as_expression_tree_mut(&mut self) -> Option<&mut ExpressionTree<Ex, Fb, En, Hi>> {
         match self {
             Expr_::ExpressionTree(p0) => Some(p0.as_mut()),
@@ -2513,12 +2492,6 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
     ) -> Option<(Sid, Option<CollectionTarg<Hi>>, Vec<Afield<Ex, Fb, En, Hi>>)> {
         match self {
             Expr_::Collection(p0) => Some(((*p0).0, (*p0).1, (*p0).2)),
-            _ => None,
-        }
-    }
-    pub fn as_braced_expr_into(self) -> Option<Expr<Ex, Fb, En, Hi>> {
-        match self {
-            Expr_::BracedExpr(p0) => Some(*p0),
             _ => None,
         }
     }

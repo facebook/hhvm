@@ -628,7 +628,6 @@ and expr_ env acc p e =
   | Omitted -> acc
   | Import _ -> acc
   | Collection _ -> acc
-  | BracedExpr _ -> acc
   | FunctionPointer _ -> acc
   | ET_Splice e -> expr acc e
 

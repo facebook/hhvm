@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<988ff9c3fd13931fc0dd1edc6b4ecf64>>
+// @generated SignedSource<<0a780cc7016108394d5e5af1e67fa8df>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -887,10 +887,6 @@ impl<P: Params> NodeMut<P> for Expr_<P::Ex, P::Fb, P::En, P::Hi> {
                 a.0.accept(c, v)?;
                 a.1.accept(c, v)?;
                 a.2.accept(c, v)?;
-                Ok(())
-            }
-            Expr_::BracedExpr(a0) => {
-                a0.accept(c, v)?;
                 Ok(())
             }
             Expr_::ExpressionTree(a0) => {

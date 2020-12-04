@@ -107,7 +107,6 @@ let expr_name = function
   | A.Callconv _ -> "Callconv"
   | A.Import _ -> "Import"
   | A.Collection _ -> "Collection"
-  | A.BracedExpr _ -> "BracedExpr"
   | A.ExpressionTree _ -> "ExpressionTree"
   | A.Lplaceholder _ -> "Lplaceholder"
   | A.Fun_id _ -> "Fun_id"

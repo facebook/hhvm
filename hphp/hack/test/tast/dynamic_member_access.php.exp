@@ -59,7 +59,12 @@
             (Expr
                (([9:3-30], dynamic),
                 (Obj_get ((([9:3-5], dynamic), (Lvar ([9:3-5], $c))),
-                   (([9:8-29], dynamic), Any), OG_nullthrows, false)))))
+                   (([9:8-29], dynamic),
+                    (Call (
+                       (([9:8-27], (function(): string)),
+                        (Id ([9:8-27], "\\returnsTheStringFoo"))),
+                       [], [], None))),
+                   OG_nullthrows, false)))))
            ];
          fb_annotation = () };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];

@@ -151,6 +151,7 @@ let read_si_results (stmt : Sqlite3.stmt) : si_results =
   let results = ref [] in
   while is_row (Sqlite3.step stmt) do
     let name = Sqlite3.Data.to_string (Sqlite3.column stmt 0) in
+    let name = Option.value_exn name in
     let kindnum = to_int (Sqlite3.column stmt 1) in
     let kind = int_to_kind kindnum in
     let filehash = to_int64 (Sqlite3.column stmt 2) in
@@ -292,6 +293,7 @@ let fetch_namespaces ~(sienv : si_env) : string list =
   let namespace_list = ref [] in
   while is_row (Sqlite3.step stmt) do
     let name = Sqlite3.Data.to_string (Sqlite3.column stmt 0) in
+    let name = Option.value_exn name in
     namespace_list := name :: !namespace_list
   done;
   !namespace_list

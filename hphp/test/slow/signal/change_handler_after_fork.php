@@ -47,6 +47,9 @@ function main() {
 
   SignalChangeHandlerAfterForkPhp::$child = pcntl_fork();  // 0 in the child process
 
+  // FIXME(T80291213): fix race condition in dbgo mode
+  sleep(1);
+
   if (SignalChangeHandlerAfterForkPhp::$child == 0) {
     echo "do some work in child process\n";
     posix_kill(SignalChangeHandlerAfterForkPhp::$parent, SIGUSR2);

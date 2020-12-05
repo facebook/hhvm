@@ -656,7 +656,7 @@ function serial_only_tests($tests) {
 function exec_find(mixed $files, string $extra): mixed {
   $results = varray[];
   foreach (array_chunk($files, 500) as $chunk) {
-    $efa = implode(' ', array_map(fun('escapeshellarg'), $chunk));
+    $efa = implode(' ', array_map(escapeshellarg<>, $chunk));
     $output = shell_exec("find $efa $extra");
     foreach (explode("\n", $output) as $result) {
       // Collect the (non-empty) results, which should all be file paths.
@@ -1404,7 +1404,7 @@ enum TempDirRemove: int {
   NEVER = 2;
 }
 
-class Status {
+final class Status {
   private static $results = varray[];
   private static $mode = 0;
 
@@ -1609,9 +1609,9 @@ class Status {
     } else {
       self::$temp_dir_remove = TempDirRemove::ON_RUN_SUCCESS;
     }
-    register_shutdown_function(class_meth(self::class, 'destroy'));
-    pcntl_signal(SIGTERM, class_meth(self::class, 'destroyFromSignal'));
-    pcntl_signal(SIGINT, class_meth(self::class, 'destroyFromSignal'));
+    register_shutdown_function(self::destroy<>);
+    pcntl_signal(SIGTERM, self::destroyFromSignal<>);
+    pcntl_signal(SIGINT, self::destroyFromSignal<>);
   }
 
   public static function serverRestarted() {

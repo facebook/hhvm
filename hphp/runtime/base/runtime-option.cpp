@@ -116,17 +116,18 @@ std::vector<std::string> s_RelativeConfigs;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-char mangleForKey(bool b) { return b ? '1' : '0'; }
-std::string mangleForKey(const RepoOptions::StringMap& map) {
-  std::string s;
+void mangleForKey(bool b, std::string& s) { s += (b ? '1' : '0'); }
+void mangleForKey(const RepoOptions::StringMap& map, std::string& s) {
   s += folly::to<std::string>(map.size());
   s += '\0';
-  for (auto& par : map) {
-    s += par.first + '\0' + par.second + '\0';
+  for (auto const& par : map) {
+    s += par.first;
+    s += '\0';
+    s += par.second;
+    s += '\0';
   }
-  return s;
 }
-std::string mangleForKey(std::string s) { return s; }
+void mangleForKey(const std::string& s1, std::string& s2) { s2 += s1; }
 void hdfExtract(const Hdf& hdf, const char* name, bool& val, bool dv) {
   val = hdf[name].configGetBool(dv);
 }
@@ -341,22 +342,19 @@ const RepoOptions& RepoOptions::forFile(const char* path) {
   return ret ? *ret : defaults();
 }
 
-std::string RepoOptions::cacheKeyRaw() const {
-  return std::string("")
-#define N(_, n, ...) + mangleForKey(n)
-#define P(_, n, ...) + mangleForKey(n)
-#define H(_, n, ...) + mangleForKey(n)
-#define E(_, n, ...) + mangleForKey(n)
+void RepoOptions::calcCacheKey() {
+  std::string raw;
+#define N(_, n, ...) mangleForKey(n, raw);
+#define P(_, n, ...) mangleForKey(n, raw);
+#define H(_, n, ...) mangleForKey(n, raw);
+#define E(_, n, ...) mangleForKey(n, raw);
 PARSERFLAGS()
-AUTOLOADFLAGS();
+AUTOLOADFLAGS()
 #undef N
 #undef P
 #undef H
 #undef E
-}
-
-std::string RepoOptions::cacheKeySha1() const {
-  return string_sha1(cacheKeyRaw());
+  m_sha1 = SHA1{string_sha1(raw)};
 }
 
 std::string RepoOptions::toJSON() const {
@@ -390,20 +388,6 @@ AUTOLOADFLAGS();
 #undef OUT
 
   return json;
-}
-
-bool RepoOptions::operator==(const RepoOptions& o) const {
-#define N(_, n, ...) if (n != o.n) return false;
-#define P(_, n, ...) if (n != o.n) return false;
-#define H(_, n, ...) if (n != o.n) return false;
-#define E(_, n, ...) if (n != o.n) return false;
-PARSERFLAGS()
-AUTOLOADFLAGS();
-#undef N
-#undef P
-#undef H
-#undef E
-  return true;
 }
 
 const RepoOptions& RepoOptions::defaults() {
@@ -456,6 +440,7 @@ AUTOLOADFLAGS();
 #undef E
 
   filterNamespaces();
+  calcCacheKey();
 }
 
 void RepoOptions::initDefaults(const Hdf& hdf, const IniSettingMap& ini) {
@@ -472,6 +457,7 @@ AUTOLOADFLAGS()
 
   filterNamespaces();
   m_path.clear();
+  calcCacheKey();
 }
 
 void RepoOptions::setDefaults(const Hdf& hdf, const IniSettingMap& ini) {

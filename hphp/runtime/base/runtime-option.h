@@ -32,9 +32,11 @@
 #include "hphp/runtime/base/config.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/types.h"
+
 #include "hphp/util/compilation-flags.h"
-#include "hphp/util/hash-map.h"
 #include "hphp/util/functional.h"
+#include "hphp/util/hash-map.h"
+#include "hphp/util/sha1.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -112,15 +114,18 @@ struct RepoOptions {
   /**/
 
   std::string path() const { return m_path; }
-  std::string cacheKeyRaw() const;
-  std::string cacheKeySha1() const;
+  SHA1 cacheKeySha1() const { return m_sha1; }
   std::string toJSON() const;
   folly::dynamic toDynamic() const;
   struct stat stat() const { return m_stat; }
   std::string autoloadQuery() const noexcept { return Query; }
   std::string trustedDBPath() const noexcept { return TrustedDBPath; }
 
-  bool operator==(const RepoOptions& o) const;
+  bool operator==(const RepoOptions& o) const {
+    // If we have hash collisions of unequal RepoOptions, we have
+    // bigger problems.
+    return m_sha1 == o.m_sha1;
+  }
 
   static const RepoOptions& defaults();
   static void setDefaults(const Hdf& hdf, const IniSettingMap& ini);
@@ -133,6 +138,7 @@ private:
 
   void filterNamespaces();
   void initDefaults(const Hdf& hdf, const IniSettingMap& ini);
+  void calcCacheKey();
 
 #define N(t, n, ...) t n;
 #define P(t, n, ...) t n;
@@ -147,6 +153,8 @@ AUTOLOADFLAGS()
 
   std::string m_path;
   struct stat m_stat;
+
+  SHA1 m_sha1;
 
   static bool s_init;
   static RepoOptions s_defaults;

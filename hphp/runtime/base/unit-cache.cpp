@@ -374,7 +374,7 @@ bool isChanged(
 #endif
          cachedUnit->ino != s->st_ino ||
          cachedUnit->devId != s->st_dev ||
-         cachedUnit->repoOptionsHash != SHA1{options.cacheKeySha1()} ||
+         cachedUnit->repoOptionsHash != options.cacheKeySha1() ||
          stressUnitCache();
 }
 
@@ -1315,7 +1315,7 @@ std::string mangleUnitSha1(const std::string& fileSha1,
     + (RuntimeOption::EvalEmitMethCallerFuncPointers ? '1' : '0')
     + std::to_string(RuntimeOption::EvalAssemblerMaxScalarSize)
     + std::to_string(RuntimeOption::EvalEmitClassPointers)
-    + opts.cacheKeyRaw()
+    + opts.cacheKeySha1().toString()
     + mangleExtension(fileName)
     + mangleUnitPHP7Options()
     + hackc_version();

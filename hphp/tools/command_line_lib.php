@@ -4,7 +4,7 @@
  */
 
 function error(string $message): void {
-  error_unsafe($message);
+  throw new Error($message);
 }
 
 //////////////////////////////////////////////////////////////////////

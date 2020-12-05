@@ -8,7 +8,7 @@ function my_option_map(): OptionInfoMap {
 'help'            => Pair { 'h', 'Print help message' },
 'bin:'            => Pair { 'b', 'Use a specific HHVM binary' },
 'gdb'             => Pair { 'g', 'Run the whole command in agdb' },
-'server'          => Pair { 's', 'Run a server, port 80, pwd as the root' },
+'server'          => Pair { '',  'Run a server, port 80, pwd as the root' },
 'interp'          => Pair { 'i', 'Disable the JIT compiler' },
 'opt-ir'          => Pair { 'o', 'Disable debug assertions in IR output' },
 'dump-tc'         => Pair { 'j', 'Dump the contents of the translation cache' },
@@ -23,7 +23,7 @@ function my_option_map(): OptionInfoMap {
 'retranslate-all:'=> Pair { 'r', 'Emit optimized code after n profiling runs' },
 'php7'            => Pair { '7', 'Enable PHP7 mode' },
 'jit-gdb'         => Pair { '',  'Enable JIT symbols in GDB' },
-'jit-deserialize:'=> Pair { '', 'Enable jit deserialization' },
+'jit-serialize'   => Pair { 's', 'Jumpstart after doing retranslate-all' },
 'print-command'   => Pair { '',  'Just print the command, don\'t run it' },
 'region-mode:'    => Pair { '',
                             'Which region selector to use (e.g \'method\')' },
@@ -126,19 +126,16 @@ function determine_flags(OptionMap $opts): string {
       '';
   }
 
-  if ($opts->containsKey('jit-deserialize')) {
-    if (!$opts->containsKey('repo')) {
-      error('jit-deserialize requires that you specify a repo.');
+  if ($opts->containsKey('jit-serialize')) {
+    if (!$opts->containsKey('compile') && !$opts->containsKey('repo')) {
+      error('jit-serialize requires that you specify a repo.');
     }
     if ($opts->containsKey('region-mode') && $opts['region-mode'] === 'method') {
-      error('jit-deserialize option is not compatible with region-mode==method');
+      error('jit-serialize option is not compatible with region-mode==method');
     }
     if (!$opts->containsKey('retranslate-all')) {
       $opts['retranslate-all'] = 1;
     }
-    $jit_serdes_file = (string)$opts['jit-deserialize'];
-    $flags .= '-v Eval.JitSerdesFile='.$jit_serdes_file.' ';
-    $flags .= '-v Eval.JitSerdesMode=DeserializeOrFail ';
   }
 
   if ($opts->containsKey('retranslate-all')) {
@@ -250,7 +247,6 @@ function argv_for_shell(): string {
 
 function compile_a_repo(bool $unoptimized, OptionMap $opts): string {
   $echo_command = $opts->containsKey('print-command');
-  echo "Compiling with hphp...";
   $runtime_flags = determine_flags($opts);
   $hphpc_flags = $runtime_flags
     |> preg_replace("/-v\s*/", "-vRuntime.", $$)
@@ -269,7 +265,6 @@ function compile_a_repo(bool $unoptimized, OptionMap $opts): string {
   }
   $return_var = -1;
   system($cmd, inout $return_var);
-  echo "done.\n";
 
   $compile_dir = rtrim(shell_exec(
     'grep "all files saved in" '.$hphp_out.
@@ -293,8 +288,7 @@ function repo_auth_flags(string $flags, string $repo): string {
   return $flags .
     '-v Repo.Authoritative=true '.
     '-v Repo.Local.Mode=r- '.
-    "-v Repo.Local.Path=$repo ".
-    '--file ';
+    "-v Repo.Local.Path=$repo ";
 }
 
 function compile_with_hphp(string $flags, OptionMap $opts): string {
@@ -305,6 +299,26 @@ function create_repo(OptionMap $opts): void {
   $repo = compile_a_repo(true, $opts);
   $return_var = -1;
   system("cp $repo ./hhvm.hhbc", inout $return_var);
+}
+
+function do_jumpstart(string $flags, OptionMap $opts): string {
+  $hhvm = get_hhvm_path($opts);
+  $prof = '/tmp/jit.prof.'.posix_getpid();
+  $requests = $opts->get('jit-serialize');
+  $cmd = "$hhvm $flags --file ".argv_for_shell()
+    ." -v Eval.JitSerdesFile=$prof"
+    .' -v Eval.JitSerdesMode=SerializeAndExit'
+    .' >/dev/null 2>&1';
+
+  if ($opts->containsKey('print-command')) {
+    echo "\n", $cmd, "\n";
+  }
+  $code = -1;
+  system($cmd, inout $code);
+  if ($code != 0) throw new Error('Jumpstart failed!');
+  return $flags
+    ." -v Eval.JitSerdesFile=$prof"
+    .' -v Eval.JitSerdesMode=DeserializeOrFail';
 }
 
 function run_hhvm(OptionMap $opts): void {
@@ -319,13 +333,17 @@ function run_hhvm(OptionMap $opts): void {
     $flags = compile_with_hphp($flags, $opts);
   }
 
+  if ($opts->containsKey('jit-serialize')) {
+    $flags = do_jumpstart($flags, $opts);
+  }
+
   $pfx = determine_trace_env($opts);
   $pfx .= $opts->containsKey('gdb') ? 'agdb --args ' : '';
   if ($opts->containsKey('perf')) {
     $pfx .= 'perf record -g -o ' . $opts['perf'] . ' ';
   }
   $hhvm = get_hhvm_path($opts);
-  $cmd = "$pfx $hhvm $flags ".argv_for_shell();
+  $cmd = "$pfx $hhvm $flags --file ".argv_for_shell();
   if ($opts->containsKey('print-command')) {
     echo "\n$cmd\n\n";
   } else {

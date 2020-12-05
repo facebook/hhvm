@@ -54,48 +54,65 @@ TCA emitSmashableMovq(CodeBlock& cb, CGMeta& fixups, uint64_t imm,
   return ARCH_SWITCH_CALL(emitSmashableMovq, cb, fixups, imm, d);
 }
 TCA emitSmashableCall(CodeBlock& cb, CGMeta& fixups, TCA target) {
+  always_assert(target);
   return ARCH_SWITCH_CALL(emitSmashableCall, cb, fixups, target);
 }
 TCA emitSmashableJmp(CodeBlock& cb, CGMeta& fixups, TCA target) {
+  always_assert(target);
   return ARCH_SWITCH_CALL(emitSmashableJmp, cb, fixups, target);
 }
 TCA emitSmashableJcc(CodeBlock& cb, CGMeta& fixups, TCA target,
                      ConditionCode cc) {
+  always_assert(target);
   return ARCH_SWITCH_CALL(emitSmashableJcc, cb, fixups, target, cc);
 }
 
 void smashMovq(TCA inst, uint64_t imm) {
+  always_assert(inst);
   return ARCH_SWITCH_CALL(smashMovq, inst, imm);
 }
 void smashCmpq(TCA inst, uint32_t imm) {
+  always_assert(inst);
   return ARCH_SWITCH_CALL(smashCmpq, inst, imm);
 }
 void smashCall(TCA inst, TCA target) {
+  always_assert(inst);
+  always_assert(target);
   return ARCH_SWITCH_CALL(smashCall, inst, target);
 }
 void smashJmp(TCA inst, TCA target) {
+  always_assert(inst);
+  always_assert(target);
   return ARCH_SWITCH_CALL(smashJmp, inst, target);
 }
 void smashJcc(TCA inst, TCA target) {
+  always_assert(inst);
+  always_assert(target);
   return ARCH_SWITCH_CALL(smashJcc, inst, target);
 }
 
 uint64_t smashableMovqImm(TCA inst) {
+  always_assert(inst);
   return ARCH_SWITCH_CALL(smashableMovqImm, inst);
 }
 uint32_t smashableCmpqImm(TCA inst) {
+  always_assert(inst);
   return ARCH_SWITCH_CALL(smashableCmpqImm, inst);
 }
 TCA smashableCallTarget(TCA inst) {
+  always_assert(inst);
   return ARCH_SWITCH_CALL(smashableCallTarget, inst);
 }
 TCA smashableJmpTarget(TCA inst) {
+  always_assert(inst);
   return ARCH_SWITCH_CALL(smashableJmpTarget, inst);
 }
 TCA smashableJccTarget(TCA inst) {
+  always_assert(inst);
   return ARCH_SWITCH_CALL(smashableJccTarget, inst);
 }
 ConditionCode smashableJccCond(TCA inst) {
+  always_assert(inst);
   return ARCH_SWITCH_CALL(smashableJccCond, inst);
 }
 
@@ -105,18 +122,22 @@ ConditionCode smashableJccCond(TCA inst) {
  * the sizeof* routine will probably need to take a TCA).
  */
 TCA smashableCallFromRet(TCA ret) {
+  always_assert(ret);
   return ret - smashableCallLen();
 }
 
 bool optimizeSmashedCall(TCA inst) {
+  always_assert(inst);
   return ARCH_SWITCH_CALL(optimizeSmashedCall, inst);
 }
 
 bool optimizeSmashedJmp(TCA inst) {
+  always_assert(inst);
   return ARCH_SWITCH_CALL(optimizeSmashedJmp, inst);
 }
 
 bool optimizeSmashedJcc(TCA inst) {
+  always_assert(inst);
   return ARCH_SWITCH_CALL(optimizeSmashedJcc, inst);
 }
 

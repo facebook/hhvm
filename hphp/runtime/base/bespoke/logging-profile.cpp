@@ -260,8 +260,9 @@ LoggingProfile::LoggingProfile(LoggingProfileKey key, jit::ArrayLayout layout)
   , staticBespokeArray(nullptr)
 {
   if (layout.vanilla()) return;
-  auto const ad = getStaticArray(key);
-  if (ad) staticBespokeArray = BespokeArray::asBespoke(layout.apply(ad));
+  if (auto const ad = getStaticArray(key)) {
+    setStaticBespokeArray(BespokeArray::asBespoke(layout.apply(ad)));
+  }
 }
 
 double LoggingProfile::getSampleCountMultiplier() const {
@@ -329,6 +330,26 @@ void LoggingProfile::logEntryTypes(EntryTypes before, EntryTypes after) {
 
   auto const key = std::make_pair(before.asInt16(), after.asInt16());
   incrementCounter(data->entryTypes, data->mapLock, key);
+}
+
+BespokeArray* LoggingProfile::getStaticBespokeArray() const {
+  return staticBespokeArray;
+}
+
+void LoggingProfile::setStaticBespokeArray(BespokeArray* bad) {
+  assertx(bad != nullptr);
+  assertx(staticBespokeArray == nullptr);
+  assertx(getStaticArray(key) != nullptr);
+
+  staticBespokeArray = bad;
+
+  if (key.slot != kInvalidSlot) {
+    auto const index = key.cls->propSlotToIndex(key.slot);
+    auto props = const_cast<Class::PropInitVec*>(&key.cls->declPropInit());
+    auto const lval = (*props)[index].val;
+    assertx(tvIsArrayLike(lval));
+    lval.val().parr = bad;
+  }
 }
 
 //////////////////////////////////////////////////////////////////////////////

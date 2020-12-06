@@ -953,10 +953,11 @@ bool specializeSource(IRGS& env, SrcKey sk) {
   auto const op = sk.op();
   if (isArrLikeConstructorOp(op) || isArrLikeCastOp(op)) {
     auto const profile = bespoke::getLoggingProfile(sk);
-    if (profile && profile->staticBespokeArray) {
-      assertx(arrayTypeMaybeBespoke(profile->staticBespokeArray->toDataType()));
+    if (profile == nullptr) return false;
+    if (auto const bad = profile->getStaticBespokeArray()) {
+      assertx(arrayTypeMaybeBespoke(bad->toDataType()));
       assertx(isArrLikeConstructorOp(op));
-      push(env, cns(env, profile->staticBespokeArray));
+      push(env, cns(env, bad));
       return true;
     }
   }

@@ -34,29 +34,6 @@ namespace {
 
 using jit::ArrayLayout;
 
-bool isMonotypeLayout(const EntryTypes& et) {
-  auto const monotype_key = [&]{
-    switch (et.keyTypes) {
-      case KeyTypes::Empty:         return true;
-      case KeyTypes::Ints:          return true;
-      case KeyTypes::StaticStrings: return true;
-      case KeyTypes::Strings:       return true;
-      case KeyTypes::Any:           return false;
-    }
-    always_assert(false);
-  }();
-  auto const monotype_val = [&]{
-    switch (et.valueTypes) {
-      case ValueTypes::Empty:            return true;
-      case ValueTypes::Monotype:         return true;
-      case ValueTypes::MonotypeNullable: return false;
-      case ValueTypes::Any:              return false;
-    }
-    always_assert(false);
-  }();
-  return monotype_key && monotype_val;
-}
-
 // Returns KeyTypes::Any if there's no good key type to specialize on.
 KeyTypes selectKeyType(const SinkProfile& profile, double p_cutoff) {
   assertx(profile.data);
@@ -147,7 +124,7 @@ ArrayLayout selectSourceLayout(LoggingProfile& profile) {
   uint64_t total = 0;
 
   for (auto const& it : profile.data->entryTypes) {
-    if (isMonotypeLayout(EntryTypes(it.first.second))) {
+    if (EntryTypes(it.first.second).isMonotypeState()) {
       monotype += it.second;
     }
     total += it.second;
@@ -159,18 +136,7 @@ ArrayLayout selectSourceLayout(LoggingProfile& profile) {
     if (sad == nullptr) return ArrayLayout::Vanilla();
     auto const mad = maybeMonoify(sad);
     if (mad == nullptr) return ArrayLayout::Vanilla();
-
-    profile.staticBespokeArray = mad;
-
-    if (profile.key.slot != kInvalidSlot) {
-      auto const cls = profile.key.cls;
-      auto const index = cls->propSlotToIndex(profile.key.slot);
-      auto props = const_cast<Class::PropInitVec*>(&cls->declPropInit());
-      auto const lval = (*props)[index].val;
-      assertx(tvIsArrayLike(lval));
-      lval.val().parr = mad;
-    }
-
+    profile.setStaticBespokeArray(mad);
     return ArrayLayout(mad->layoutIndex());
   }
 

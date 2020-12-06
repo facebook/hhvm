@@ -688,20 +688,7 @@ BespokeArray* maybeMonoify(ArrayData* ad) {
   if (!ad->isVanilla() || ad->isKeysetType()) return nullptr;
 
   auto const et = EntryTypes::ForArray(ad);
-  auto const monotype_keys =
-    et.keyTypes == KeyTypes::Ints ||
-    et.keyTypes == KeyTypes::Strings ||
-    et.keyTypes == KeyTypes::StaticStrings ||
-    et.keyTypes == KeyTypes::Empty;
-  auto const monotype_vals =
-    et.valueTypes == ValueTypes::Monotype ||
-    et.valueTypes == ValueTypes::Empty;
-
-  assertx(IMPLIES(ad->isVArray() || ad->isVecType(), monotype_keys));
-
-  if (!(monotype_keys && monotype_vals)) {
-    return nullptr;
-  }
+  if (!et.isMonotypeState()) return nullptr;
 
   auto const legacy = ad->isLegacyArray();
 

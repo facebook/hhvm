@@ -189,6 +189,12 @@ struct LoggingProfile {
 
   void logEntryTypes(EntryTypes before, EntryTypes after);
 
+  // TODO(kshaunak): Refactor this class so that we automatically construct
+  // this cached array when we set the layout. (We should make layout.apply
+  // a LayoutFunction - MakeFromVanilla - to do so as cleanly as possible.)
+  BespokeArray* getStaticBespokeArray() const;
+  void setStaticBespokeArray(BespokeArray* array);
+
 private:
   void logEventImpl(const EventKey& key);
 
@@ -197,6 +203,8 @@ public:
   jit::ArrayLayout layout = jit::ArrayLayout::Bottom();
   // TODO(mcolavita): These fields could become a union.
   std::unique_ptr<LoggingProfileData> data;
+
+private:
   BespokeArray* staticBespokeArray = nullptr;
 };
 

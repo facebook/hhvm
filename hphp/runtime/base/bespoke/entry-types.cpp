@@ -124,6 +124,29 @@ EntryTypes EntryTypes::pessimizeValueTypes() const {
   return EntryTypes(keyTypes, ValueTypes::Any, kInvalidDataType);
 }
 
+bool EntryTypes::isMonotypeState() const {
+  auto const monotype_key = [&]{
+    switch (keyTypes) {
+      case KeyTypes::Empty:         return true;
+      case KeyTypes::Ints:          return true;
+      case KeyTypes::StaticStrings: return true;
+      case KeyTypes::Strings:       return true;
+      case KeyTypes::Any:           return false;
+    }
+    always_assert(false);
+  }();
+  auto const monotype_val = [&]{
+    switch (valueTypes) {
+      case ValueTypes::Empty:            return true;
+      case ValueTypes::Monotype:         return true;
+      case ValueTypes::MonotypeNullable: return false;
+      case ValueTypes::Any:              return false;
+    }
+    always_assert(false);
+  }();
+  return monotype_key && monotype_val;
+}
+
 std::string EntryTypes::toString() const {
   auto const valueSt = [&] {
     switch (valueTypes) {

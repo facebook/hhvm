@@ -308,7 +308,7 @@ void emitBespokeQueryM(
 void emitBespokeIdx(IRGS& env) {
   auto const def = topC(env, BCSPRelOffset{0});
   auto const base = topC(env, BCSPRelOffset{2});
-  auto const origKey = topC(env, BCSPRelOffset{1}, DataTypeGeneric);
+  auto const origKey = topC(env, BCSPRelOffset{1});
   if (!origKey->type().isKnownDataType()) PUNT(Bespoke-Idx-KeyNotKnown);
   auto const key = classConvertPuntOnRaise(env, origKey);
 

@@ -170,10 +170,14 @@ ArrayLayout selectSinkLayout(const SinkProfile& profile) {
     total += it.second;
   }
 
-  if (!total) return ArrayLayout::Top();
-
   auto const p_cutoff = RO::EvalBespokeArraySinkSpecializationThreshold / 100;
   auto const p_sampled = 1.0 * sampled / (sampled + unsampled);
+
+  if (!total) {
+    if ((1 - p_sampled) >= p_cutoff) return ArrayLayout::Vanilla();
+    return ArrayLayout::Top();
+  }
+
   auto const p_vanilla = p_sampled * vanilla / total + (1 - p_sampled);
   auto const p_monotype = p_sampled * monotype / total;
 

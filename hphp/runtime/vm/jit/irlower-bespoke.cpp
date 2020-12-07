@@ -14,6 +14,9 @@
   +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/vm/jit/irlower-bespoke.h"
+
+#include "hphp/runtime/base/bespoke/layout.h"
 #include "hphp/runtime/base/bespoke/layout.h"
 #include "hphp/runtime/base/bespoke/logging-profile.h"
 #include "hphp/runtime/base/bespoke/monotype-dict.h"
@@ -96,6 +99,12 @@ static TypedValue getStr(const ArrayData* ad, const StringData* key) {
     }                                                                     \
     return Generic;                                                       \
   }()
+
+CallSpec destructorForArrayLike(Type arr) {
+  assertx(arr <= TArrLike);
+  assertx(allowBespokeArrayLikes());
+  return CALL_TARGET(arr, Release, CallSpec::method(&ArrayData::release));
+}
 
 void cgBespokeGet(IRLS& env, const IRInstruction* inst) {
   using GetInt = TypedValue (ArrayData::*)(int64_t) const;

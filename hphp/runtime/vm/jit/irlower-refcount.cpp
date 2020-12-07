@@ -39,6 +39,7 @@
 #include "hphp/runtime/vm/jit/incref-profile.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
+#include "hphp/runtime/vm/jit/irlower-bespoke.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/target-profile.h"
@@ -236,7 +237,6 @@ void cgIncRef(IRLS& env, const IRInstruction* inst) {
   );
 }
 
-
 namespace {
 
 /*
@@ -263,11 +263,9 @@ float decRefDestroyedPercent(Vout& v, IRLS& /*env*/,
 
 CallSpec makeDtorCall(Vout& v, Type ty, Vloc loc, ArgGroup& args) {
   // Even if allowBespokeArrayLikes() is true, we can optimize destructors
-  // if the value being destructed is a vanilla array-like.
-  if (ty.arrSpec().vanilla()) {
-    if (ty <= (TVArr|TVec))  return CallSpec::direct(PackedArray::Release);
-    if (ty <= (TDArr|TDict)) return CallSpec::direct(MixedArray::Release);
-    if (ty <= TKeyset)       return CallSpec::direct(SetArray::Release);
+  // if we have some layout information about the given array-like.
+  if (ty <= TArrLike && allowBespokeArrayLikes()) {
+    return destructorForArrayLike(ty);
   }
 
   if (ty <= TObj) {

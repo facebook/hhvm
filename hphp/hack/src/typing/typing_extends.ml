@@ -284,14 +284,14 @@ let check_override
       else
         `property );
   if check_params then (
-    let on_error ?code:_ errorl =
+    let on_error ?code:_ claim reasons =
       ( if is_method then
         Errors.bad_method_override
       else
         Errors.bad_prop_override )
         pos
         member_name
-        errorl
+        (claim :: reasons)
         on_error
     in
     let (lazy fty_child) = class_elt.ce_type in
@@ -901,15 +901,15 @@ let check_implements env parent_type type_to_be_checked =
       env
       (parent_class, parent_type)
       (class_, type_to_be_checked)
-      (fun ?code:_ errorl ->
+      (fun ?code:_ claim reasons ->
         (* sadly, enum error reporting requires this to keep the error in the file
            with the enum *)
         if String.equal parent_name_str SN.Classes.cHH_BuiltinEnum then
-          Errors.bad_enum_decl name_pos errorl
+          Errors.bad_enum_decl name_pos (claim :: reasons)
         else
           Errors.bad_decl_override
             parent_name_pos
             parent_name_str
             name_pos
             name_str
-            errorl)
+            (claim :: reasons))

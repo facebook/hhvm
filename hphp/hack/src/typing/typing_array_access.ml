@@ -141,7 +141,7 @@ let check_arraykey_index error env pos container_ty index_ty =
       env
       index_ty
       { et_type = ty_arraykey; et_enforced = true }
-      (fun ?code:_ _ ->
+      (fun ?code:_ _ _ ->
         error pos (info_of_type container_ty) (info_of_type index_ty))
   else
     env

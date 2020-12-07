@@ -3771,7 +3771,7 @@ and check_shape_keys_validity env pos keys =
           env
           ty
           (MakeType.arraykey r)
-          (fun ?code:_ _ ->
+          (fun ?code:_ _ _ ->
             Errors.invalid_shape_field_type
               key_pos
               (get_pos ty)
@@ -6079,7 +6079,7 @@ and call
                 env
                 env_capability
                 capability
-                (fun ?code:_c _subtype_error_list ->
+                (fun ?code:_c _ _ ->
                   Errors.call_coeffect_error
                     pos
                     ~available_incl_unsafe:

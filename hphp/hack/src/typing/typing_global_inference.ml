@@ -32,25 +32,25 @@ module StateErrors = struct
   let cardinal t = IdentMap.fold (fun _ l acc -> acc + List.length l) !t 0
 end
 
-let make_error_callback errors var ?code msgl =
+let convert_on_error : (Errors.error -> unit) -> Errors.typing_error_callback =
+ fun on_error ?code claim reasons ->
   let code =
     Option.value code ~default:Error_codes.Typing.(err_code UnifyError)
   in
-  StateErrors.add errors var (Errors.make_error code msgl)
+  on_error (Errors.make_error code claim reasons)
 
 let catch_exc
     pos
-    (on_error : Errors.typing_error_callback)
+    (on_error : Errors.error -> unit)
     (r : 'a)
     ?(verbose = false)
     (f : Errors.typing_error_callback -> 'a) : 'a =
   try
     let (other_errors, v) =
       Errors.do_with_context (Pos.filename pos) Errors.Typing (fun () ->
-          f on_error)
+          f @@ convert_on_error on_error)
     in
-    List.iter (Errors.get_error_list other_errors) ~f:(fun error ->
-        on_error (Errors.to_list error));
+    List.iter (Errors.get_error_list other_errors) ~f:on_error;
     v
   with Inf.InconsistentTypeVarState _ as e ->
     if verbose then (
@@ -59,7 +59,8 @@ let catch_exc
       Caml.Printexc.print_raw_backtrace stderr stack
     );
     let e = Printf.sprintf "Exception: %s" (Exn.to_string e) in
-    on_error [(pos, e)];
+    on_error
+      (Errors.make_error Error_codes.Typing.(err_code UnifyError) (pos, e) []);
     r
 
 let is_ordered_solving env = GlobalOptions.tco_ordered_solving env.genv.tcopt
@@ -204,7 +205,7 @@ module StateConstraintGraph = struct
     in
     let ty = MakeType.tyvar Reason.Rnone var
     and ty' = MakeType.tyvar Reason.Rnone var' in
-    let on_err = make_error_callback errors var in
+    let on_err = StateErrors.add errors var in
     let env = catch_exc on_err env (Sub.sub_type env ty ty') in
     let env = catch_exc on_err env (Sub.sub_type env ty' ty) in
     let (env, vars_in_lower_bounds, vars_in_upper_bounds) =
@@ -320,9 +321,10 @@ module StateSolvedGraph = struct
           else
             env)
     in
-    let make_on_error = make_error_callback errors in
+    let make_on_error = StateErrors.add errors in
     let env =
       catch_exc Pos.none (make_on_error 0) env @@ fun _ ->
+      let make_on_error v = convert_on_error @@ make_on_error v in
       if is_ordered_solving env then
         Typing_ordered_solver.solve_env env make_on_error
       else

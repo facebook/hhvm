@@ -168,7 +168,7 @@ let check_reactivity_matches
     callee_reactivity
     pos
     caller_reactivity
-    (fun ?code:_ _ ->
+    (fun ?code:_ _ _ ->
       (* for better error reporting remove rxvar from caller reactivity *)
       let caller_reactivity =
         match caller_reactivity with

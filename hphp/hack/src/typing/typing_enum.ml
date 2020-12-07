@@ -99,7 +99,7 @@ let enum_check_type env pos ur ty_interface ty _on_error =
         [];
     env
   | None ->
-    Typing_ops.sub_type pos ur env ty ty_arraykey (fun ?code:_ _ ->
+    Typing_ops.sub_type pos ur env ty ty_arraykey (fun ?code:_ _ _ ->
         Errors.enum_type_bad pos false (Typing_print.full_strip_ns env ty) [])
 
 (* Check an enum declaration of the form

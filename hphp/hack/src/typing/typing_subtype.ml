@@ -565,7 +565,10 @@ and simplify_subtype_i
     | (Reason.Rcstr_on_generics (p, tparam), _)
     | (_, Reason.Rcstr_on_generics (p, tparam)) ->
       Errors.violated_constraint p tparam left right subtype_env.on_error
-    | _ -> subtype_env.on_error (left @ right)
+    | _ ->
+      let claim = List.hd_exn left in
+      let reasons = List.tl_exn left @ right in
+      subtype_env.on_error claim reasons
   in
   let fail () = fail_with_suffix [] in
   let ( ||| ) = ( ||| ) ~fail in
@@ -2167,7 +2170,7 @@ and simplify_subtype_reactivity
     let msg_sub =
       "This function is " ^ TUtils.reactivity_to_string env r_sub ^ "."
     in
-    subtype_env.on_error [(p_super, msg_super); (p_sub, msg_sub)]
+    subtype_env.on_error (p_super, msg_super) [(p_sub, msg_sub)]
   in
   let ( ||| ) = ( ||| ) ~fail in
   let invalid_env env = invalid ~fail env in
@@ -2586,7 +2589,7 @@ and simplify_subtype_fun_params_reactivity
       {
         subtype_env with
         on_error =
-          (fun ?code:_ _ ->
+          (fun ?code:_ _ _ ->
             Errors.rx_parameter_condition_mismatch
               SN.UserAttributes.uaOnlyRxIfImpl
               p_sub.fp_pos
@@ -2675,7 +2678,7 @@ and simplify_subtype_funs_attributes
     env =
   let p_sub = Reason.to_pos r_sub in
   let p_super = Reason.to_pos r_super in
-  let on_error_reactivity ?code:_ _ =
+  let on_error_reactivity ?code:_ _ _ =
     Errors.fun_reactivity_mismatch
       p_super
       (TUtils.reactivity_to_string env ft_super.ft_reactive)
@@ -3678,7 +3681,7 @@ let subtype_funs
     old_env
 
 let sub_type_or_fail env ty1 ty2 fail =
-  sub_type env ty1 ty2 (fun ?code:_ _ -> fail ())
+  sub_type env ty1 ty2 (fun ?code:_ _ _ -> fail ())
 
 let set_fun_refs () =
   Typing_utils.sub_type_ref := sub_type;

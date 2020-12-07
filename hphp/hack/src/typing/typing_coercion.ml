@@ -36,7 +36,8 @@ module MakeType = Typing_make_type
 *)
 
 (* does coercion, including subtyping *)
-let coerce_type_impl env ty_have ty_expect on_error =
+let coerce_type_impl
+    env ty_have ty_expect (on_error : Errors.typing_error_callback) =
   let complex_coercion =
     TypecheckerOptions.complex_coercion (Typing_env.get_tcopt env)
   in
@@ -62,10 +63,10 @@ let coerce_type_impl env ty_have ty_expect on_error =
       on_error
   | _ -> Typing_utils.sub_type env ty_have ty_expect.et_type on_error
 
-let coerce_type p ur env ty_have ty_expect on_error =
-  coerce_type_impl env ty_have ty_expect (fun ?code errl ->
-      let errl = (p, Reason.string_of_ureason ur) :: errl in
-      on_error ?code errl)
+let coerce_type
+    p ur env ty_have ty_expect (on_error : Errors.typing_error_callback) =
+  coerce_type_impl env ty_have ty_expect (fun ?code claim reasons ->
+      on_error ?code (p, Reason.string_of_ureason ur) (claim :: reasons))
 
 (* does coercion if possible, returning Some env with resultant coercion constraints
  * otherwise suppresses errors from attempted coercion and returns None *)

@@ -51,7 +51,8 @@ type format =
   | Raw
   | Highlighted
 
-type typing_error_callback = ?code:int -> (Pos.t * string) list -> unit
+type typing_error_callback =
+  ?code:int -> Pos.t * string -> (Pos.t * string) list -> unit
 
 type name_context =
   | FunctionNamespace
@@ -107,7 +108,7 @@ val get_severity : 'a error_ -> severity
 
 val get_messages : 'a error_ -> 'a message list
 
-val make_error : int -> (Pos.t * string) list -> error
+val make_error : int -> Pos.t * string -> (Pos.t * string) list -> error
 
 val make_absolute_error :
   int -> (Pos.absolute * string) list -> Pos.absolute error_
@@ -144,6 +145,7 @@ val explain_constraint :
   use_pos:Pos.t ->
   definition_pos:Pos.t ->
   param_name:string ->
+  Pos.t * string ->
   (Pos.t * string) list ->
   unit
 
@@ -151,6 +153,7 @@ val explain_where_constraint :
   in_class:bool ->
   use_pos:Pos.t ->
   definition_pos:Pos.t ->
+  Pos.t * string ->
   (Pos.t * string) list ->
   unit
 

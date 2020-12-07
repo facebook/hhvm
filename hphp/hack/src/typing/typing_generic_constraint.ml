@@ -14,7 +14,8 @@ module Env = Typing_env
 open Typing_defs
 open Typing_env_types
 
-let check_constraint env ck ty ~cstr_ty on_error =
+let check_constraint
+    env ck ty ~cstr_ty (on_error : Errors.typing_error_callback) =
   Typing_log.(
     log_with_level env "sub" 1 (fun () ->
         log_types
@@ -53,14 +54,20 @@ let check_constraint env ck ty ~cstr_ty on_error =
       TUtils.sub_type env ecstr_ty ty on_error
 
 let check_tparams_constraint (env : env) ~use_pos (pos, name) ck cstr_ty ty =
-  check_constraint env ck ty ~cstr_ty (fun ?code:_ err ->
+  check_constraint env ck ty ~cstr_ty (fun ?code:_ claim reasons ->
       Errors.explain_constraint
         ~use_pos
         ~definition_pos:pos
         ~param_name:name
-        err)
+        claim
+        reasons)
 
 let check_where_constraint
     ~in_class (env : env) ~use_pos ~definition_pos ck cstr_ty ty =
-  check_constraint env ck ty ~cstr_ty (fun ?code:_ err ->
-      Errors.explain_where_constraint ~in_class ~use_pos ~definition_pos err)
+  check_constraint env ck ty ~cstr_ty (fun ?code:_ claim reasons ->
+      Errors.explain_where_constraint
+        ~in_class
+        ~use_pos
+        ~definition_pos
+        claim
+        reasons)

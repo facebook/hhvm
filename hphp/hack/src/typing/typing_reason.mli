@@ -178,4 +178,4 @@ val none : t
 val compare : t -> t -> int
 
 val explain_generic_constraint :
-  Pos.t -> t -> string -> (Pos.t * string) list -> unit
+  Pos.t -> t -> string -> Pos.t * string -> (Pos.t * string) list -> unit

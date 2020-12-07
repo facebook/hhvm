@@ -1832,23 +1832,46 @@ void emitPow(IRGS& env) {
   // Special-case exponent of 2 or 3, i.e.
   // $x**2 becomes $x*$x,
   // $x**3 becomes ($x*$x)*$x
-  // TODO(t14096669) if input will result in integer overflow,
-  // compute double result and return instead of slow exit path.
   auto exponent = topC(env);
   auto base = topC(env, BCSPRelOffset{1});
   if ((exponent->hasConstVal(2) || exponent->hasConstVal(3)) &&
       (base->isA(TDbl) || base->isA(TInt))) {
-    auto intVal = exponent->intVal();
+    auto const intVal = exponent->intVal();
+    auto const isCube = intVal == 3;
+
+    auto makeExitPow = [&] (SSATmp* src, bool computeSquare) {
+      auto const exit = defBlock(env, Block::Hint::Unlikely);
+      BlockPusher bp(*env.irb, makeMarker(env, curSrcKey(env)), exit);
+      assertx(src->isA(TInt));
+      src = gen(env, ConvIntToDbl, src);
+      SSATmp* genPowResult;
+      if (computeSquare) {
+        genPowResult = gen(env, MulDbl, src, src);
+        if (isCube) {
+          genPowResult = gen(env, MulDbl, genPowResult, src);
+        }
+      } else {
+        assertx(base->isA(TInt));
+        auto const src1 = gen(env, ConvIntToDbl, base);
+        genPowResult = gen(env, MulDbl, src, src1);
+      }
+      discard(env, 2);
+      push(env, genPowResult);
+      gen(env, Jmp, makeExit(env, nextSrcKey(env)));
+      return exit;
+    };
+
     SSATmp* genPowResult;
-    auto const exitSlow = makeExitSlow(env);
     if (base->isA(TInt)) {
-      genPowResult = gen(env, MulIntO, exitSlow, base, base);
+      auto const exitPow = makeExitPow(base, true);
+      genPowResult = gen(env, MulIntO, exitPow, base, base);
     } else {
       genPowResult = gen(env, MulDbl, base, base);
     }
-    if (intVal == 3) {
+    if (isCube) {
       if (genPowResult->isA(TInt)) {
-        genPowResult = gen(env, MulIntO, exitSlow, genPowResult, base);
+        auto const exitPow = makeExitPow(genPowResult, false);
+        genPowResult = gen(env, MulIntO, exitPow, genPowResult, base);
       } else {
         genPowResult = gen(env, MulDbl, genPowResult, base);
       }

@@ -20,7 +20,7 @@ let write_file file_dir num_tasts json_chunks =
       "glean_symbol_info_chunk_"
       ".json"
   in
-  let json_string = json_to_string ~pretty:true (JSON_Array json_chunks) in
+  let json_string = json_to_string (JSON_Array json_chunks) in
   let json_length = String.length json_string in
   Out_channel.output_string channel json_string;
   Out_channel.close channel;

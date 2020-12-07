@@ -276,9 +276,9 @@ SSATmp* emitGetElem(IRGS& env, SSATmp* key, bool quiet) {
       return val;
     },
     [&] {
-      hint(env, Block::Hint::Unlikely);
       if (quiet) return cns(env, TInitNull);
 
+      hint(env, Block::Hint::Unlikely);
       gen(env, ThrowOutOfBounds, base, key);
       return cns(env, TBottom);
     }

@@ -122,11 +122,9 @@ let remote_init genv env root worker_key check_id _profiling =
   let t = Unix.gettimeofday () in
   let ctx = Provider_utils.ctx_from_server_env env in
   let open ServerLocalConfig in
-  let open RemoteTypeCheck in
   let { recli_version; remote_transport_channel = transport_channel; _ } =
     genv.local_config
   in
-  let { file_system_mode; _ } = genv.local_config.remote_type_check in
   let { init_id; ci_info; init_start_t; _ } = env.init_env in
   ServerRemoteInit.init
     ctx
@@ -135,7 +133,7 @@ let remote_init genv env root worker_key check_id _profiling =
     ~check_id
     ~recli_version
     ~transport_channel
-    ~file_system_mode
+    ~remote_type_check_config:genv.local_config.remote_type_check
     ~ci_info
     ~init_id
     ~init_start_t

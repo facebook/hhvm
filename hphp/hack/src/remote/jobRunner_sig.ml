@@ -32,6 +32,8 @@ module type S = sig
     transport_channel:string option ->
     file_system_mode:string ->
     recli_version:string ->
+    max_cas_bytes:int ->
+    max_inline_bytes:int ->
     root:string ->
     min_log_level:Hh_logger.Level.t ->
     version_specifier:string option ->

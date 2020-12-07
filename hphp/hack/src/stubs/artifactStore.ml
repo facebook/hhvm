@@ -21,6 +21,8 @@ type file_system_mode =
 type config = {
   mode: file_system_mode;
   temp_dir: Path.t;
+  max_cas_bytes: int;
+  max_inline_bytes: int;
 }
 
 let file_system_mode_of_string mode_str =
@@ -36,4 +38,9 @@ let string_of_file_system_mode file_system_mode =
 
 let default_config ~recli_version ~temp_dir =
   ignore recli_version;
-  { mode = Distributed; temp_dir }
+  {
+    mode = Distributed;
+    temp_dir;
+    max_cas_bytes = 50_000;
+    max_inline_bytes = 2000;
+  }

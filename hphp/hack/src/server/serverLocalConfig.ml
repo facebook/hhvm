@@ -121,6 +121,10 @@ module RemoteTypeCheck = struct
     worker_vfs_checkout_threshold: int;
     (* File system mode used by ArtifactStore *)
     file_system_mode: ArtifactStore.file_system_mode;
+    (* Max artifact size to use CAS; otherwise use everstore *)
+    max_cas_bytes: int;
+    (* Max artifact size to inline into transport channel *)
+    max_artifact_inline_bytes: int;
   }
 
   let default =
@@ -140,6 +144,8 @@ module RemoteTypeCheck = struct
       worker_min_log_level = Hh_logger.Level.Info;
       worker_vfs_checkout_threshold = 10_000;
       file_system_mode = ArtifactStore.Distributed;
+      max_cas_bytes = 50_000_000;
+      max_artifact_inline_bytes = 2000;
     }
 
   let load ~current_version ~default config =
@@ -165,6 +171,19 @@ module RemoteTypeCheck = struct
       | Some mode -> mode
       | None -> Distributed
     in
+
+    let max_cas_bytes =
+      int_ "max_cas_bytes" ~prefix ~default:default.max_cas_bytes config
+    in
+
+    let max_artifact_inline_bytes =
+      int_
+        "max_artifact_inline_bytes"
+        ~prefix
+        ~default:default.max_artifact_inline_bytes
+        config
+    in
+
     let enabled_on_errors =
       string_list
         "enabled_on_errors"
@@ -266,6 +285,8 @@ module RemoteTypeCheck = struct
       worker_min_log_level;
       worker_vfs_checkout_threshold;
       file_system_mode;
+      max_cas_bytes;
+      max_artifact_inline_bytes;
     }
 end
 

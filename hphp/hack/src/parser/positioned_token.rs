@@ -72,12 +72,18 @@ impl SimpleTokenFactory for PositionedToken {
     // before any sharing occurs
     fn with_leading(mut self, leading: PositionedTrivia) -> Self {
         let mut token = RcOc::make_mut(&mut self);
+        let token_start_offset = token.offset + token.leading_width;
+        let leading_width = leading.iter().map(|x| x.width).sum();
+        token.offset = token_start_offset - leading_width;
+        token.leading_width = leading_width;
         token.leading = leading;
         self
     }
 
     fn with_trailing(mut self, trailing: PositionedTrivia) -> Self {
         let mut token = RcOc::make_mut(&mut self);
+        let trailing_width = trailing.iter().map(|x| x.width).sum();
+        token.trailing_width = trailing_width;
         token.trailing = trailing;
         self
     }

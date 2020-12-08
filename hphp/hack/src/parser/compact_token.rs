@@ -285,11 +285,19 @@ impl SimpleTokenFactory for CompactToken {
     fn with_leading(mut self, leading: CompactTrivia) -> Self {
         match &mut self.repr {
             Large(token) => {
+                let token_start_offset = token.offset + token.leading_width;
+                token.offset = token_start_offset - leading.width;
                 token.leading_width = leading.width;
                 token.leading = leading.kinds;
             }
             Small(token) => {
-                if let Ok(leading_width) = leading.width.try_into() {
+                let token_start_offset = token.offset as usize + token.leading_width as usize;
+                let new_leading_start_offset = token_start_offset - leading.width;
+                if let (Ok(offset), Ok(leading_width)) = (
+                    new_leading_start_offset.try_into(),
+                    leading.width.try_into(),
+                ) {
+                    token.offset = offset;
                     token.leading_width = leading_width;
                     token.leading = leading.kinds;
                 } else {

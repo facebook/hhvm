@@ -194,7 +194,8 @@ impl<'a> token_factory::TokenFactory for TokenFactory<'a> {
 
     fn with_leading(&mut self, token: Self::Token, leading: CompactTrivia) -> Self::Token {
         let mut new = PositionedTokenImpl::clone(token.0);
-        new.offset = token.0.offset - (leading.width - token.0.leading_width);
+        let token_start_offset = token.0.offset + token.0.leading_width;
+        new.offset = token_start_offset - leading.width;
         new.leading_width = leading.width;
         new.leading = leading.kinds;
         PositionedToken(self.arena.alloc(new))
@@ -202,6 +203,7 @@ impl<'a> token_factory::TokenFactory for TokenFactory<'a> {
 
     fn with_trailing(&mut self, token: Self::Token, trailing: CompactTrivia) -> Self::Token {
         let mut new = PositionedTokenImpl::clone(token.0);
+        new.trailing_width = trailing.width;
         new.trailing = trailing.kinds;
         PositionedToken(self.arena.alloc(new))
     }

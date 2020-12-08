@@ -2,6 +2,7 @@
 *.format_out
 *.out
 *.decl_out
+*.direct_decl_out
 *.reparse_out
 *.tast_typecheck_out
 *.type_check_out

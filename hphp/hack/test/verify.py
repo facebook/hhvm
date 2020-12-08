@@ -674,6 +674,13 @@ def get_flags_cache(args_flags: List[str]) -> Callable[[str], List[str]]:
     return get_flags
 
 
+def get_flags_dummy(args_flags: List[str]) -> Callable[[str], List[str]]:
+    def get_flags(_: str) -> List[str]:
+        return args_flags
+
+    return get_flags
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("test_path", help="A file or a directory. ")
@@ -732,6 +739,9 @@ if __name__ == "__main__":
         help="Set the FORCE_ERROR_COLOR environment variable, "
         "which causes the test output to retain terminal escape codes.",
     )
+    parser.add_argument(
+        "--no-hh-flags", action="store_true", help="Do not read HH_FLAGS files"
+    )
     parser.epilog = (
         "%s looks for a file named HH_FLAGS in the same directory"
         " as the test files it is executing. If found, the "
@@ -759,7 +769,9 @@ if __name__ == "__main__":
         raise Exception("Could not find any files to test in " + args.test_path)
 
     mode_flag: List[str] = [] if args.mode_flag is None else [args.mode_flag]
-    get_flags: Callable[[str], List[str]] = get_flags_cache(args.flags)
+    get_flags: Callable[[str], List[str]] = (
+        get_flags_dummy(args.flags) if args.no_hh_flags else get_flags_cache(args.flags)
+    )
 
     results: List[Result] = run_tests(
         files,

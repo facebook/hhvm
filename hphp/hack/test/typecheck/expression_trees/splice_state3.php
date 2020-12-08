@@ -28,124 +28,124 @@ function test(): void {
 
 //// BEGIN DEFS
 // Placeholder definition so we don't get naming/typing errors.
-final class Code {
+class Code {
   const type TAst = mixed;
   // Lifting literals.
   public static function intLiteral(
     int $_,
-  ): ExprTree<this, this::TAst, ExampleInt> {
+  ): ExprTree<Code, Code::TAst, ExampleInt> {
     throw new Exception();
   }
   public static function floatLiteral(
     float $_,
-  ): ExprTree<this, this::TAst, ExampleFloat> {
+  ): ExprTree<Code, Code::TAst, ExampleFloat> {
     throw new Exception();
   }
   public static function boolLiteral(bool $_):
-    ExprTree<this, this::TAst, ExampleBool>
+    ExprTree<Code, Code::TAst, ExampleBool>
   {
     throw new Exception();
   }
   public static function stringLiteral(string $_):
-    ExprTree<this, this::TAst, ExampleString>
+    ExprTree<Code, Code::TAst, ExampleString>
   {
     throw new Exception();
   }
-  public static function nullLiteral(): ExprTree<this, this::TAst, null> {
+  public static function nullLiteral(): ExprTree<Code, Code::TAst, null> {
     throw new Exception();
   }
 
   // Symbols
   public static function symbol<T>(
     string $_,
-    (function(ExampleContext): ExprTree<this, this::TAst, T>) $_,
-  ): ExprTree<this, this::TAst, T> {
+    (function(ExampleContext): ExprTree<Code, Code::TAst, T>) $_,
+  ): ExprTree<Code, Code::TAst, T> {
     throw new Exception();
   }
 
   // Expressions
-  public function localVar(?ExprPos $_, string $_): this::TAst {
+  public function localVar(?ExprPos $_, string $_): Code::TAst {
     throw new Exception();
   }
   public function lambdaLiteral(
     ?ExprPos $_,
     vec<string> $_args,
-    vec<this::TAst> $_body,
-  ): this::TAst {
+    vec<Code::TAst> $_body,
+  ): Code::TAst {
     throw new Exception();
   }
 
   // Operators
   public function methCall(
     ?ExprPos $_,
-    this::TAst $_,
+    Code::TAst $_,
     string $_,
-    vec<this::TAst> $_,
-  ): this::TAst {
+    vec<Code::TAst> $_,
+  ): Code::TAst {
     throw new Exception();
   }
 
   // Old style operators
   public function call<T>(
     ?ExprPos $_,
-    this::TAst $_callee,
-    vec<this::TAst> $_args,
-  ): this::TAst {
+    Code::TAst $_callee,
+    vec<Code::TAst> $_args,
+  ): Code::TAst {
     throw new Exception();
   }
 
   public function assign(
     ?ExprPos $_,
-    this::TAst $_,
-    this::TAst $_,
-  ): this::TAst {
+    Code::TAst $_,
+    Code::TAst $_,
+  ): Code::TAst {
     throw new Exception();
   }
 
   public function ternary(
     ?ExprPos $_,
-    this::TAst $_condition,
-    ?this::TAst $_truthy,
-    this::TAst $_falsy,
-  ): this::TAst {
+    Code::TAst $_condition,
+    ?Code::TAst $_truthy,
+    Code::TAst $_falsy,
+  ): Code::TAst {
     throw new Exception();
   }
 
   // Statements.
   public function ifStatement(
     ?ExprPos $_,
-    this::TAst $_cond,
-    vec<this::TAst> $_then_body,
-    vec<this::TAst> $_else_body,
-  ): this::TAst {
+    Code::TAst $_cond,
+    vec<Code::TAst> $_then_body,
+    vec<Code::TAst> $_else_body,
+  ): Code::TAst {
     throw new Exception();
   }
   public function whileStatement(
     ?ExprPos $_,
-    this::TAst $_cond,
-    vec<this::TAst> $_body,
-  ): this::TAst {
+    Code::TAst $_cond,
+    vec<Code::TAst> $_body,
+  ): Code::TAst {
     throw new Exception();
   }
   public function returnStatement(
     ?ExprPos $_,
-    ?this::TAst $_,
-  ): this::TAst {
+    ?Code::TAst $_,
+  ): Code::TAst {
     throw new Exception();
   }
   public function forStatement(
     ?ExprPos $_,
-    vec<this::TAst> $_,
-    this::TAst $_,
-    vec<this::TAst> $_,
-    vec<this::TAst> $_,
-  ): this::TAst {
+    vec<Code::TAst> $_,
+    Code::TAst $_,
+    vec<Code::TAst> $_,
+    vec<Code::TAst> $_,
+  ): Code::TAst {
     throw new Exception();
   }
-  public function breakStatement(?ExprPos $_): this::TAst {
+  public function breakStatement(?ExprPos $_): Code::TAst {
     throw new Exception();
   }
-  public function continueStatement(?ExprPos $_,): this::TAst {
+  public function continueStatement(?ExprPos $_,): Code::TAst {
     throw new Exception();
   }
 
@@ -153,13 +153,13 @@ final class Code {
   public function splice<T>(
     ?ExprPos $_,
     string $_key,
-    ExprTree<this, this::TAst, T> $_,
-  ): this::TAst {
+    ExprTree<Code, Code::TAst, T> $_,
+  ): Code::TAst {
     throw new Exception();
   }
 
   // TODO: Discard unsupported syntax nodes while lowering
-  public function unsupportedSyntax(string $msg): this::TAst {
+  public function unsupportedSyntax(string $msg): Code::TAst {
     throw new Exception($msg);
   }
 }

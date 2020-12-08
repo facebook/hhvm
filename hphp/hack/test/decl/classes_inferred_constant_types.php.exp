@@ -24,22 +24,28 @@
            scc_type =
            (Rwitness (root|classes_inferred_constant_types.php line 6, characters 15-16),
             (Tprim Tint))
+           };
+         { Shallow_decl_defs.scc_abstract = false;
+           scc_name = ([7:9-12], "QUX");
+           scc_type =
+           (Rwitness (root|classes_inferred_constant_types.php line 7, characters 16-18),
+            (Tprim Tstring))
            }
          ];
        sc_typeconsts = []; sc_props = []; sc_sprops = [];
        sc_constructor = None; sc_static_methods = [];
        sc_methods =
-       [{ Shallow_decl_defs.sm_name = ([8:19-20], "f"); sm_reactivity = None;
+       [{ Shallow_decl_defs.sm_name = ([9:19-20], "f"); sm_reactivity = None;
           sm_type =
-          (Rwitness (root|classes_inferred_constant_types.php line 8, characters 19-19),
+          (Rwitness (root|classes_inferred_constant_types.php line 9, characters 19-19),
            (Tfun
               { ft_arity = (Fstandard ()); ft_tparams = [];
                 ft_where_constraints = []; ft_params = [];
-                ft_implicit_params = { capability = (CapDefaults [8:19-20]) };
+                ft_implicit_params = { capability = (CapDefaults [9:19-20]) };
                 ft_ret =
                 { et_enforced = false;
                   et_type =
-                  (Rhint (root|classes_inferred_constant_types.php line 8, characters 24-27),
+                  (Rhint (root|classes_inferred_constant_types.php line 9, characters 24-27),
                    (Tprim Tvoid))
                   };
                 ft_flags =

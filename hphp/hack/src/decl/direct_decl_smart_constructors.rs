@@ -1326,9 +1326,8 @@ impl<'a> DirectDeclSmartConstructors<'a> {
             | Node::IntLiteral(_)
             | Node::FloatingLiteral(_)
             | Node::Expr(aast::Expr(_, aast::Expr_::Unop(&(Uop::Uminus, _))))
-            | Node::Expr(aast::Expr(_, aast::Expr_::Unop(&(Uop::Uplus, _)))) => {
-                self.node_to_ty(node)
-            }
+            | Node::Expr(aast::Expr(_, aast::Expr_::Unop(&(Uop::Uplus, _))))
+            | Node::Expr(aast::Expr(_, aast::Expr_::String(..))) => self.node_to_ty(node),
             Node::Token(t) if t.kind() == TokenKind::NullLiteral => {
                 let pos = self.token_pos(t);
                 Some(self.alloc(Ty(
@@ -2632,16 +2631,11 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
 
     fn make_parenthesized_expression(
         &mut self,
-        lparen: Self::R,
+        _lparen: Self::R,
         expr: Self::R,
-        rparen: Self::R,
+        _rparen: Self::R,
     ) -> Self::R {
-        let pos = self.merge_positions(lparen, rparen);
-        let expr_ = match self.node_to_expr(expr) {
-            Some(expr) => expr.1,
-            None => return Node::Ignored(SK::ParenthesizedExpression),
-        };
-        Node::Expr(self.alloc(aast::Expr(pos, expr_)))
+        expr
     }
 
     fn make_list_item(&mut self, item: Self::R, sep: Self::R) -> Self::R {

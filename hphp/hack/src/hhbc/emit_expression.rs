@@ -285,6 +285,18 @@ pub fn wrap_array_mark_legacy(e: &Emitter, ins: InstrSeq) -> InstrSeq {
     }
 }
 
+pub fn wrap_array_unmark_legacy(e: &Emitter, ins: InstrSeq) -> InstrSeq {
+    if mark_as_legacy(e.options()) {
+        InstrSeq::gather(vec![
+            ins,
+            instr::false_(),
+            instr::instr(Instruct::IMisc(InstructMisc::ArrayUnmarkLegacy)),
+        ])
+    } else {
+        ins
+    }
+}
+
 pub fn get_type_structure_for_hint(
     e: &mut Emitter,
     tparams: &[&str],
@@ -2630,11 +2642,13 @@ fn emit_special_function(
                 ])),
                 _ => match get_call_builtin_func_info(e.options(), lower_fq_name) {
                     Some((nargs, i)) if nargs == args.len() => {
-                        let instrs = InstrSeq::gather(vec![
-                            emit_exprs(e, env, args)?,
-                            emit_pos(pos),
-                            instr::instr(i),
-                        ]);
+                        let inner = emit_exprs(e, env, args)?;
+                        let unmarked_inner = match lower_fq_name {
+                            "HH\\dict" | "HH\\vec" => wrap_array_unmark_legacy(e, inner),
+                            _ => inner,
+                        };
+                        let instrs =
+                            InstrSeq::gather(vec![unmarked_inner, emit_pos(pos), instr::instr(i)]);
                         match lower_fq_name {
                             "HH\\varray" | "HH\\darray" => Some(wrap_array_mark_legacy(e, instrs)),
                             _ => Some(instrs),

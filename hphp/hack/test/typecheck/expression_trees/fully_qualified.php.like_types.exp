@@ -1,0 +1,4 @@
+File "fully_qualified.php", line 6, characters 9-9:
+Expected `ExprTree<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
+  File "fully_qualified.php", line 16, characters 6-43:
+  But got `dynamic` because it is an unenforceable type

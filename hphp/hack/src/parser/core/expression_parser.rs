@@ -394,15 +394,6 @@ where
                         str_maybe, StringLiteralKind::LiteralDoubleQuoted);
                         S!(make_prefixed_string_expression, self, qualified_name, str_)
                     }
-                    | TokenKind::Backtick if !self.in_expression_tree() => {
-                        let prefix = S!(make_simple_type_specifier, self, qualified_name);
-                        let left_backtick = self.require_token(TokenKind::Backtick, Errors::error1065);
-                        self.in_expression_tree = true;
-                        let expr = self.parse_expression_with_reset_precedence();
-                        self.in_expression_tree = false;
-                        let right_backtick = self.require_token(TokenKind::Backtick, Errors::error1065);
-                        S!(make_prefixed_code_expression, self, prefix, left_backtick, expr, right_backtick)
-                    }
                     | _ => {
                         // Not a prefixed string or an attempt at one
                         self.parse_name_or_collection_literal_expression(qualified_name)
@@ -2176,6 +2167,8 @@ where
         )
     }
 
+    /// Parse a name, a collection literal like vec[1, 2] or an
+    /// expression tree literal Code`1`;
     fn parse_name_or_collection_literal_expression(&mut self, name: S::R) -> S::R {
         match self.peek_token_kind_with_possible_attributized_type_list() {
             TokenKind::LeftBrace => {
@@ -2202,6 +2195,22 @@ where
                 } else {
                     name
                 }
+            }
+            TokenKind::Backtick if !self.in_expression_tree() => {
+                let prefix = S!(make_simple_type_specifier, self, name);
+                let left_backtick = self.require_token(TokenKind::Backtick, Errors::error1065);
+                self.in_expression_tree = true;
+                let expr = self.parse_expression_with_reset_precedence();
+                self.in_expression_tree = false;
+                let right_backtick = self.require_token(TokenKind::Backtick, Errors::error1065);
+                S!(
+                    make_prefixed_code_expression,
+                    self,
+                    prefix,
+                    left_backtick,
+                    expr,
+                    right_backtick
+                )
             }
             _ => name,
         }

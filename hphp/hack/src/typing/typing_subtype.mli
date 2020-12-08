@@ -30,7 +30,11 @@ val is_sub_type_for_coercion : env -> locl_ty -> locl_ty -> bool
 
 val is_sub_type_ignore_generic_params : env -> locl_ty -> locl_ty -> bool
 
-val is_sub_type_for_union : env -> locl_ty -> locl_ty -> bool
+(** The optional allow_subtype_of_dynamic parameter determines whether types
+    (other than nothing) can be subtypes of dynamic
+*)
+val is_sub_type_for_union :
+  env -> ?allow_subtype_of_dynamic:bool -> locl_ty -> locl_ty -> bool
 
 val can_sub_type : env -> locl_ty -> locl_ty -> bool
 
@@ -43,8 +47,17 @@ val can_sub_type : env -> locl_ty -> locl_ty -> bool
  * Note that the [on_error] callback must prefix this list with a top-level
  * position and message identifying the primary source of the error (e.g.
  * an expression or statement).
+ * If the optional [allow_subtype_of_dynamic] boolean is true, then
+ * types can be subtypes of dynamic where sound to do so. Otherwise,
+ * only nothing is a subtype of dynamic.
  *)
-val sub_type : env -> locl_ty -> locl_ty -> Errors.typing_error_callback -> env
+val sub_type :
+  env ->
+  ?allow_subtype_of_dynamic:bool ->
+  locl_ty ->
+  locl_ty ->
+  Errors.typing_error_callback ->
+  env
 
 (**
  * As above, but with a simpler error handler that doesn't make use of the

@@ -32,6 +32,9 @@ type subtype_env = {
   seen_generic_params: SSet.t option;
   no_top_bottom: bool;
   treat_dynamic_as_bottom: bool;
+  (* Used with global flag --enable-sound-dynamic-type, allow_subtype_of_dynamic
+     controls whether types that implement dynamic can be subtypes of dynamic *)
+  allow_subtype_of_dynamic: bool;
   on_error: Errors.typing_error_callback;
 }
 
@@ -41,8 +44,15 @@ let make_subtype_env
     ?(seen_generic_params = empty_seen)
     ?(no_top_bottom = false)
     ?(treat_dynamic_as_bottom = false)
+    ?(allow_subtype_of_dynamic = false)
     on_error =
-  { seen_generic_params; no_top_bottom; treat_dynamic_as_bottom; on_error }
+  {
+    seen_generic_params;
+    no_top_bottom;
+    treat_dynamic_as_bottom;
+    allow_subtype_of_dynamic;
+    on_error;
+  }
 
 let add_seen_generic subtype_env name =
   match subtype_env.seen_generic_params with
@@ -1200,6 +1210,71 @@ and simplify_subtype_i
             | Tvarray _ | Tdarray _ | Tvarray_or_darray _ | Taccess _ ) ) ->
           valid env
         | _ -> default_subtype env))
+    | (_, Tdynamic)
+      when TypecheckerOptions.enable_sound_dynamic env.genv.tcopt
+           && subtype_env.allow_subtype_of_dynamic ->
+      (match ety_sub with
+      | ConstraintType _cty ->
+        (* TODO *)
+        default_subtype env
+      | LoclType lty_sub ->
+        (match deref lty_sub with
+        | (_, Tdynamic)
+        | (_, Tany _)
+        | (_, Terr)
+        | ( _,
+            Tprim
+              Aast_defs.(
+                Tnull | Tint | Tbool | Tfloat | Tstring | Tnum | Tarraykey) ) ->
+          valid env
+        | (_, Tprim Aast_defs.(Tvoid | Tresource | Tnoreturn))
+        | (_, Tnonnull)
+        | (_, Tfun _)
+        | (_, Tshape (Open_shape, _))
+        | (_, Tvar _)
+        | (_, Tunapplied_alias _)
+        | (_, Tnewtype _)
+        | (_, Tdependent _)
+        | (_, Tobject)
+        | (_, Taccess _)
+        | (_, Tunion _)
+        | (_, Tintersection _)
+        | (_, Tgeneric _) ->
+          default_subtype env
+        | (_, Toption ty)
+        | (_, Tdarray (_, ty))
+        | (_, Tvarray ty)
+        | (_, Tvarray_or_darray (_, ty)) ->
+          simplify_subtype ~subtype_env ty ty_super env
+        | (_, Ttuple tyl) ->
+          List.fold_left
+            ~init:(env, TL.valid)
+            ~f:(fun res ty_sub ->
+              res &&& simplify_subtype ~subtype_env ty_sub ty_super)
+            tyl
+        | (_, Tshape (Closed_shape, sftl)) ->
+          List.fold_left
+            ~init:(env, TL.valid)
+            ~f:(fun res sft ->
+              res &&& simplify_subtype ~subtype_env sft.sft_ty ty_super)
+            (Nast.ShapeMap.values sftl)
+        | (_, Tclass ((_, class_id), _, tyargs)) ->
+          let class_def_sub = Typing_env.get_class env class_id in
+          (match class_def_sub with
+          | None ->
+            (* This should have been caught already in the naming phase *)
+            valid env
+          | Some class_sub ->
+            if Cls.get_implements_dynamic class_sub then
+              valid env
+            else if String.equal (Cls.name class_sub) SN.Collections.cVec then
+              match tyargs with
+              | [tyarg] -> simplify_subtype ~subtype_env tyarg ty_super env
+              | _ ->
+                (* This ill-formed type should have been caught earlier *)
+                valid env
+            else
+              default_subtype env)))
     | (_, Tdynamic) ->
       (match ety_sub with
       | LoclType lty when is_dynamic lty -> valid env
@@ -2927,9 +3002,18 @@ and sub_type_i
   else
     old_env
 
-and sub_type env (ty_sub : locl_ty) (ty_super : locl_ty) on_error =
+and sub_type
+    env
+    ?(allow_subtype_of_dynamic = false)
+    (ty_sub : locl_ty)
+    (ty_super : locl_ty)
+    on_error =
   sub_type_i
-    ~subtype_env:(make_subtype_env ~treat_dynamic_as_bottom:false on_error)
+    ~subtype_env:
+      (make_subtype_env
+         ~allow_subtype_of_dynamic
+         ~treat_dynamic_as_bottom:false
+         on_error)
     env
     (LoclType ty_sub)
     (LoclType ty_super)
@@ -3175,7 +3259,13 @@ and sub_type_inner
   (env, succeeded)
 
 and is_sub_type_alt_i
-    ~ignore_generic_params ~no_top_bottom ~treat_dynamic_as_bottom env ty1 ty2 =
+    ~ignore_generic_params
+    ~no_top_bottom
+    ~treat_dynamic_as_bottom
+    ~allow_subtype_of_dynamic
+    env
+    ty1
+    ty2 =
   let (this_ty, pos) =
     match ty1 with
     | LoclType ty1 -> (Some ty1, get_pos ty1)
@@ -3192,6 +3282,7 @@ and is_sub_type_alt_i
               empty_seen );
           no_top_bottom;
           treat_dynamic_as_bottom;
+          allow_subtype_of_dynamic;
           on_error = Errors.unify_error_at pos;
         }
       ~this_ty
@@ -3222,6 +3313,7 @@ and is_sub_type env ty1 ty2 =
     ~ignore_generic_params:false
     ~no_top_bottom:false
     ~treat_dynamic_as_bottom:false
+    ~allow_subtype_of_dynamic:false
     env
     ty1
     ty2
@@ -3233,28 +3325,32 @@ and is_sub_type_for_coercion env ty1 ty2 =
     ~ignore_generic_params:false
     ~no_top_bottom:false
     ~treat_dynamic_as_bottom:true
+    ~allow_subtype_of_dynamic:true
     env
     ty1
     ty2
   = Some true
 
-and is_sub_type_for_union env ty1 ty2 =
+and is_sub_type_for_union env ?allow_subtype_of_dynamic:(asod = false) ty1 ty2 =
   let ( = ) = Option.equal Bool.equal in
   is_sub_type_alt
     ~ignore_generic_params:false
     ~no_top_bottom:true
     ~treat_dynamic_as_bottom:false
+    ~allow_subtype_of_dynamic:asod
     env
     ty1
     ty2
   = Some true
 
-and is_sub_type_for_union_i env ty1 ty2 =
+and is_sub_type_for_union_i env ?allow_subtype_of_dynamic:(asod = false) ty1 ty2
+    =
   let ( = ) = Option.equal Bool.equal in
   is_sub_type_alt_i
     ~ignore_generic_params:false
     ~no_top_bottom:true
     ~treat_dynamic_as_bottom:false
+    ~allow_subtype_of_dynamic:asod
     env
     ty1
     ty2
@@ -3266,6 +3362,7 @@ and can_sub_type env ty1 ty2 =
     ~ignore_generic_params:false
     ~no_top_bottom:true
     ~treat_dynamic_as_bottom:false
+    ~allow_subtype_of_dynamic:false
     env
     ty1
     ty2
@@ -3277,6 +3374,7 @@ and is_sub_type_ignore_generic_params env ty1 ty2 =
     ~ignore_generic_params:true
     ~no_top_bottom:true
     ~treat_dynamic_as_bottom:false
+    ~allow_subtype_of_dynamic:false
     env
     ty1
     ty2
@@ -3288,6 +3386,7 @@ and is_sub_type_ignore_generic_params_i env ty1 ty2 =
     ~ignore_generic_params:true
     ~no_top_bottom:true
     ~treat_dynamic_as_bottom:false
+    ~allow_subtype_of_dynamic:false
     env
     ty1
     ty2

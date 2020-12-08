@@ -9,6 +9,7 @@
 
 open Hh_prelude
 open Typing_defs
+open Typing_env_types
 module MakeType = Typing_make_type
 
 (*
@@ -38,30 +39,38 @@ module MakeType = Typing_make_type
 (* does coercion, including subtyping *)
 let coerce_type_impl
     env ty_have ty_expect (on_error : Errors.typing_error_callback) =
-  let complex_coercion =
-    TypecheckerOptions.complex_coercion (Typing_env.get_tcopt env)
-  in
-  let (env, ety_expect) = Typing_env.expand_type env ty_expect.et_type in
-  let (env, ety_have) = Typing_env.expand_type env ty_have in
-  match (get_node ety_have, get_node ety_expect) with
-  | (_, Tdynamic) -> env
-  | (Tdynamic, _) when ty_expect.et_enforced -> env
-  | _ when ty_expect.et_enforced ->
-    Typing_utils.sub_type_with_dynamic_as_bottom
+  if TypecheckerOptions.enable_sound_dynamic env.genv.tcopt then
+    Typing_utils.sub_type
+      ~allow_subtype_of_dynamic:true
       env
       ty_have
       ty_expect.et_type
       on_error
-  | _
-    when ( ((not ty_expect.et_enforced) && env.Typing_env_types.pessimize)
-         || Typing_utils.is_dynamic env ety_expect )
-         && complex_coercion ->
-    Typing_utils.sub_type_with_dynamic_as_bottom
-      env
-      ty_have
-      ty_expect.et_type
-      on_error
-  | _ -> Typing_utils.sub_type env ty_have ty_expect.et_type on_error
+  else
+    let complex_coercion =
+      TypecheckerOptions.complex_coercion (Typing_env.get_tcopt env)
+    in
+    let (env, ety_expect) = Typing_env.expand_type env ty_expect.et_type in
+    let (env, ety_have) = Typing_env.expand_type env ty_have in
+    match (get_node ety_have, get_node ety_expect) with
+    | (_, Tdynamic) -> env
+    | (Tdynamic, _) when ty_expect.et_enforced -> env
+    | _ when ty_expect.et_enforced ->
+      Typing_utils.sub_type_with_dynamic_as_bottom
+        env
+        ty_have
+        ty_expect.et_type
+        on_error
+    | _
+      when ( ((not ty_expect.et_enforced) && env.Typing_env_types.pessimize)
+           || Typing_utils.is_dynamic env ety_expect )
+           && complex_coercion ->
+      Typing_utils.sub_type_with_dynamic_as_bottom
+        env
+        ty_have
+        ty_expect.et_type
+        on_error
+    | _ -> Typing_utils.sub_type env ty_have ty_expect.et_type on_error
 
 let coerce_type
     p ur env ty_have ty_expect (on_error : Errors.typing_error_callback) =

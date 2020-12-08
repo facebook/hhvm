@@ -414,7 +414,9 @@ module ProfileTypeCheck = struct
 end
 
 module CGroup = struct
-  let profile ~event:_ ~stage:_ ~metric:_ ~start:_ ~delta:_ ~hwm_delta:_ = ()
+  let profile
+      ~cgroup:_ ~event:_ ~stage:_ ~metric:_ ~start:_ ~delta:_ ~hwm_delta:_ =
+    ()
 end
 
 module ProfileDecl = struct

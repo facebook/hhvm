@@ -210,7 +210,7 @@ let sample_cgroup_mem ~(profiling : Profiling.t) ~(stage : string) : unit =
 let profile_memory ~event f =
   let event =
     match event with
-    | `Init -> "init"
+    | `Init init_type -> init_type
     | `Recheck -> "recheck"
   in
   let profiling =
@@ -221,19 +221,28 @@ let profile_memory ~event f =
   result
 
 let print_summary_memory_table ~event =
-  let event =
-    match event with
-    | `Init -> "init"
-    | `Recheck -> "recheck"
-  in
-  let profiling_result = Results.get ~event in
-  Profiling.print_summary_memory_table profiling_result
+  match event with
+  | `Recheck ->
+    let profiling_result = Results.get ~event:"recheck" in
+    Profiling.print_summary_memory_table profiling_result
+  | `Init ->
+    SMap.iter
+      (fun event result ->
+        if not (String.equal event "recheck") then
+          Profiling.print_summary_memory_table result)
+      !Results.results
 
 let log_result_to_scuba
     ~(event : string) ~(stage : string) (result : Profiling.result) : unit =
+  let cgroup =
+    match ProcFS.first_cgroup_for_pid (Unix.getpid ()) with
+    | Ok cgroup -> cgroup
+    | Error err -> Printf.sprintf "Error getting cgroup: %s" err
+  in
   SMap.iter
     (fun metric value ->
       HackEventLogger.CGroup.profile
+        ~cgroup
         ~event
         ~stage
         ~metric

@@ -189,7 +189,11 @@ let lazy_saved_state_init genv env root load_state_approach profiling =
     | Exit_status.No_error ->
       ServerProgress.send_to_monitor
         (MonitorRpc.PROGRESS_WARNING (Some user_message));
-      ( ServerLazyInit.full_init genv env profiling |> post_init genv,
+      let fall_back_to_full_init profiling =
+        ServerLazyInit.full_init genv env profiling |> post_init genv
+      in
+      ( CgroupProfiler.profile_memory ~event:(`Init "lazy_full_init")
+        @@ fall_back_to_full_init,
         Load_state_failed (user_message, Utils.Callstack stack) )
     | _ -> Exit.exit ~msg:user_message ~stack next_step)
 
@@ -229,22 +233,25 @@ let init
     ) else
       (lazy_lev, init_approach)
   in
-  let init_method =
+  let (init_method, init_method_name) =
     match (lazy_lev, init_approach) with
     | (_, Remote_init { worker_key; check_id }) ->
-      remote_init genv env root worker_key check_id
-    | (Init, Full_init) -> lazy_full_init genv env
-    | (Init, Parse_only_init) -> lazy_parse_only_init genv env
+      (remote_init genv env root worker_key check_id, "remote_init")
+    | (Init, Full_init) -> (lazy_full_init genv env, "lazy_full_init")
+    | (Init, Parse_only_init) ->
+      (lazy_parse_only_init genv env, "lazy_parse_only_init")
     | (Init, Saved_state_init load_state_approach) ->
-      lazy_saved_state_init genv env root load_state_approach
+      ( lazy_saved_state_init genv env root load_state_approach,
+        "lazy_saved_state_init" )
     | (Off, Full_init)
     | (Decl, Full_init)
     | (Parse, Full_init) ->
-      eager_full_init genv env lazy_lev
+      (eager_full_init genv env lazy_lev, "eager full init")
     | (Off, _)
     | (Decl, _)
     | (Parse, _) ->
-      eager_init genv env lazy_lev
-    | (_, Write_symbol_info) -> lazy_write_symbol_info_init genv env
+      (eager_init genv env lazy_lev, "eager_init")
+    | (_, Write_symbol_info) ->
+      (lazy_write_symbol_info_init genv env, "lazy_write_symbol_info_init")
   in
-  CgroupProfiler.profile_memory ~event:`Init init_method
+  CgroupProfiler.profile_memory ~event:(`Init init_method_name) init_method

@@ -577,7 +577,6 @@ let rec recheck_until_no_changes_left acc genv env select_outcome profiling =
     begin
       match (needed_full_init, env.init_env.why_needed_full_init) with
       | (Some needed_full_init, None) ->
-        Hh_logger.log "finalize_init after recheck";
         finalize_init env.init_env telemetry needed_full_init
       | _ -> ()
     end;
@@ -1114,7 +1113,6 @@ let serve genv env in_fds =
   in
   let typecheck_telemetry = Telemetry.create () in
   if Option.is_none env.init_env.why_needed_full_init then (
-    Hh_logger.log "finalize init after program_init";
     finalize_init env.init_env typecheck_telemetry init_telemetry
   );
 

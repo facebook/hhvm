@@ -16,7 +16,8 @@ end
 val collect_cgroup_stats :
   profiling:Profiling.t -> stage:string -> (unit -> 'a) -> 'a
 
-val profile_memory : event:[ `Init | `Recheck ] -> (Profiling.t -> 'a) -> 'a
+val profile_memory :
+  event:[ `Init of string | `Recheck ] -> (Profiling.t -> 'a) -> 'a
 
 val log_to_scuba : stage:string -> profiling:Profiling.t -> unit
 

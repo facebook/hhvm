@@ -327,11 +327,12 @@ BaseSet::Clone(ObjectData* obj) {
 
 bool BaseSet::OffsetIsset(ObjectData* obj, const TypedValue* key) {
   auto set = static_cast<BaseSet*>(obj);
-  if (key->m_type == KindOfInt64) {
-    return set->contains(key->m_data.num);
+  auto const ktv = tvClassToString(*key);
+  if (ktv.m_type == KindOfInt64) {
+    return set->contains(ktv.m_data.num);
   }
-  if (isStringType(key->m_type)) {
-    return set->contains(key->m_data.pstr);
+  if (isStringType(ktv.m_type)) {
+    return set->contains(ktv.m_data.pstr);
   }
   throwBadValueType();
   return false;
@@ -339,11 +340,12 @@ bool BaseSet::OffsetIsset(ObjectData* obj, const TypedValue* key) {
 
 bool BaseSet::OffsetContains(ObjectData* obj, const TypedValue* key) {
   auto set = static_cast<BaseSet*>(obj);
-  if (key->m_type == KindOfInt64) {
-    return set->contains(key->m_data.num);
+  auto const ktv = tvClassToString(*key);
+  if (ktv.m_type == KindOfInt64) {
+    return set->contains(ktv.m_data.num);
   }
-  if (isStringType(key->m_type)) {
-    return set->contains(key->m_data.pstr);
+  if (isStringType(ktv.m_type)) {
+    return set->contains(ktv.m_data.pstr);
   }
   throwBadValueType();
   return false;
@@ -351,12 +353,13 @@ bool BaseSet::OffsetContains(ObjectData* obj, const TypedValue* key) {
 
 void BaseSet::OffsetUnset(ObjectData* obj, const TypedValue* key) {
   auto set = static_cast<BaseSet*>(obj);
-  if (key->m_type == KindOfInt64) {
-    set->remove(key->m_data.num);
+  auto const ktv = tvClassToString(*key);
+  if (ktv.m_type == KindOfInt64) {
+    set->remove(ktv.m_data.num);
     return;
   }
-  if (isStringType(key->m_type)) {
-    set->remove(key->m_data.pstr);
+  if (isStringType(ktv.m_type)) {
+    set->remove(ktv.m_data.pstr);
     return;
   }
   throwBadValueType();

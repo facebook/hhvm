@@ -1,18 +1,18 @@
 ===keyset:===
-Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 44
+Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 46
 
-Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 45
+Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 47
 keyset(2) {
   string(3) "Foo"
   string(3) "Bar"
 }
 
-Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 47
+Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 49
 
-Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 48
+Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 50
 bool(false)
 
-Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 49
+Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 51
 string(3) "Foo"
 ===dict:===
 Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 10
@@ -33,24 +33,29 @@ bool(true)
 Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 21
 int(10)
 ===Set===
-Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 54
+Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 56
 
-Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 55
+Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 57
 object(HH\Set) (2) {
   class(Foo)
   string(3) "Bar"
 }
 
-Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 57
-
-Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 58
-bool(false)
-
 Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 59
-class(Foo)
 
 Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 60
+bool(false)
+
+Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 61
 class(Foo)
+
+Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 62
+class(Foo)
+
+Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 63
+
+Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 64
+bool(true)
 ===Map:===
 Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 26
 
@@ -65,6 +70,11 @@ bool(false)
 
 Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 30
 int(42)
+
+Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 31
+
+Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 32
+int(10)
 ===vec:===vec(3) {
   class(Foo)
   class(Fizz)
@@ -90,19 +100,19 @@ varray(2) {
   int(1)
 }
 
-Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 80
+Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 84
 
-Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 81
+Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 85
 varray(2) {
   string(3) "Foo"
   string(3) "Baz"
 }
 ===shape===
-Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 87
+Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 91
 
-Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 88
+Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 92
 
-Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 90
+Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 94
 darray(3) {
   ["Foo"]=>
   int(3)
@@ -112,5 +122,5 @@ darray(3) {
   int(4)
 }
 
-Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 92
+Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 96
 int(3)

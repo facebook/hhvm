@@ -364,6 +364,7 @@ static Variant::AllowedAsConstantValue isAllowedAsConstantValueImpl(TypedValue t
     case KindOfResource:
     case KindOfFunc:
     case KindOfClsMeth:
+    case KindOfLazyClass:
       return Variant::AllowedAsConstantValue::Allowed;
 
     case KindOfDArray:
@@ -396,7 +397,6 @@ static Variant::AllowedAsConstantValue isAllowedAsConstantValueImpl(TypedValue t
 
     case KindOfUninit:
     case KindOfClass:
-    case KindOfLazyClass:
     case KindOfRFunc:
     case KindOfRClsMeth:
     case KindOfRecord:

@@ -176,7 +176,7 @@ static inline bool array_column_coerce_key(Variant &key, const char *name) {
   if (key.isInteger() || key.isDouble()) {
     key = key.toInt64();
     return true;
-  } else if (key.isString() || key.isObject() || key.isFunc() ||
+  } else if (key.isString() || key.isObject() || key.isLazyClass() ||
     key.isClass()) {
     key = key.toString();
     return true;
@@ -371,9 +371,10 @@ TypedValue HHVM_FUNCTION(array_flip,
   ArrayInit ret(getClsMethCompactContainerSize(transCell), ArrayInit::Mixed{});
   for (ArrayIter iter(transCell); iter; ++iter) {
     auto const inner = iter.secondValPlus();
-    if (isIntType(type(inner)) || isStringType(type(inner)) ||
-        isFuncType(type(inner))|| isClassType(type(inner))) {
+    if (isIntType(type(inner)) || isStringType(type(inner))) {
       ret.setUnknownKey<IntishCast::Cast>(VarNR(inner), iter.first());
+    } else if (isLazyClassType(type(inner)) || isClassType(type(inner))) {
+      ret.setValidKey(tvAsCVarRef(tvClassToString(inner)), iter.first());
     } else {
       raise_warning("Can only flip STRING and INTEGER values!");
     }

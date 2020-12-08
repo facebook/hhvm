@@ -37,6 +37,7 @@ protected:
   void addRaw(int64_t k);
   void addRaw(StringData* k);
   void addRaw(TypedValue tv) {
+    tv = tvClassToString(tv);
     if (tv.m_type == KindOfInt64) {
       addRaw(tv.m_data.num);
     } else if (isStringType(tv.m_type)) {
@@ -54,6 +55,7 @@ public:
   void add(int64_t k);
   void add(StringData* k);
   void add(TypedValue tv) {
+    tv = tvClassToString(tv);
     if (tv.m_type == KindOfInt64) {
       add(tv.m_data.num);
     } else if (isStringType(tv.m_type)) {
@@ -70,6 +72,7 @@ public:
   void addFront(int64_t k);
   void addFront(StringData* k);
   void addFront(TypedValue tv) {
+    tv = tvClassToString(tv);
     if (tv.m_type == KindOfInt64) {
       addFront(tv.m_data.num);
     } else if (isStringType(tv.m_type)) {
@@ -102,11 +105,12 @@ public:
   template <bool throwOnMiss>
   static TypedValue* OffsetAt(ObjectData* obj, const TypedValue* key) {
     auto set = static_cast<BaseSet*>(obj);
+    auto const ktv = tvClassToString(*key);
     ssize_t p;
-    if (key->m_type == KindOfInt64) {
-      p = set->find(key->m_data.num, hash_int64(key->m_data.num));
-    } else if (isStringType(key->m_type)) {
-      p = set->find(key->m_data.pstr, key->m_data.pstr->hash());
+    if (ktv.m_type == KindOfInt64) {
+      p = set->find(ktv.m_data.num, hash_int64(ktv.m_data.num));
+    } else if (isStringType(ktv.m_type)) {
+      p = set->find(ktv.m_data.pstr, ktv.m_data.pstr->hash());
     } else {
       BaseSet::throwBadValueType();
     }
@@ -116,11 +120,11 @@ public:
     if (!throwOnMiss) {
       return nullptr;
     }
-    if (key->m_type == KindOfInt64) {
-      collections::throwUndef(key->m_data.num);
+    if (ktv.m_type == KindOfInt64) {
+      collections::throwUndef(ktv.m_data.num);
     } else {
-      assertx(isStringType(key->m_type));
-      collections::throwUndef(key->m_data.pstr);
+      assertx(isStringType(ktv.m_type));
+      collections::throwUndef(ktv.m_data.pstr);
     }
   }
   static bool OffsetIsset(ObjectData* obj, const TypedValue* key);
@@ -207,12 +211,13 @@ protected:
 
   Object getIterator();
   bool php_contains(const Variant& key) {
-    DataType t = key.getType();
+    auto const ktv = tvClassToString(*key.asTypedValue());
+    DataType t = type(ktv);
     if (t == KindOfInt64) {
-      return contains(key.toInt64());
+      return contains(ktv.m_data.num);
     }
     if (isStringType(t)) {
-      return contains(key.getStringData());
+      return contains(ktv.m_data.pstr);
     }
     throwBadValueType();
   }
@@ -286,11 +291,12 @@ struct c_Set : BaseSet {
     return Object{this};
   }
   Object php_remove(const Variant& key) {
-    DataType t = key.getType();
+    auto const ktv = tvClassToString(*key.asTypedValue());
+    DataType t = type(ktv);
     if (t == KindOfInt64) {
-      remove(key.toInt64());
+      remove(ktv.m_data.num);
     } else if (isStringType(t)) {
-      remove(key.getStringData());
+      remove(ktv.m_data.pstr);
     } else {
       throwBadValueType();
     }
@@ -301,10 +307,11 @@ struct c_Set : BaseSet {
     ArrayIter iter = getArrayIterHelper(it, sz);
     for (; iter; ++iter) {
       Variant v = iter.second();
-      if (v.isInteger()) {
-        remove(v.toInt64());
-      } else if (v.isString()) {
-        remove(v.getStringData());
+      auto const vtv = tvClassToString(*v.asTypedValue());
+      if (type(vtv) == KindOfInt64) {
+        remove(vtv.m_data.num);
+      } else if (isStringType(type(vtv))) {
+        remove(vtv.m_data.pstr);
       } else {
         throwBadValueType();
       }

@@ -324,11 +324,12 @@ void BaseMap::OffsetSet(ObjectData* obj, const TypedValue* key,
 
 bool BaseMap::OffsetIsset(ObjectData* obj, const TypedValue* key) {
   auto map = static_cast<BaseMap*>(obj);
+  auto const ktv = tvClassToString(*key);
   TypedValue* result;
-  if (key->m_type == KindOfInt64) {
-    result = map->get(key->m_data.num);
-  } else if (isStringType(key->m_type)) {
-    result = map->get(key->m_data.pstr);
+  if (ktv.m_type == KindOfInt64) {
+    result = map->get(ktv.m_data.num);
+  } else if (isStringType(ktv.m_type)) {
+    result = map->get(ktv.m_data.pstr);
   } else {
     throwBadKeyType();
     result = nullptr;
@@ -338,23 +339,25 @@ bool BaseMap::OffsetIsset(ObjectData* obj, const TypedValue* key) {
 
 bool BaseMap::OffsetContains(ObjectData* obj, const TypedValue* key) {
   auto map = static_cast<BaseMap*>(obj);
-  if (key->m_type == KindOfInt64) {
-    return map->contains(key->m_data.num);
+  auto const ktv = tvClassToString(*key);
+  if (ktv.m_type == KindOfInt64) {
+    return map->contains(ktv.m_data.num);
   }
-  if (isStringType(key->m_type)) {
-    return map->contains(key->m_data.pstr);
+  if (isStringType(ktv.m_type)) {
+    return map->contains(ktv.m_data.pstr);
   }
   throwBadKeyType();
 }
 
 void BaseMap::OffsetUnset(ObjectData* obj, const TypedValue* key) {
   auto map = static_cast<BaseMap*>(obj);
-  if (key->m_type == KindOfInt64) {
-    map->remove(key->m_data.num);
+  auto const ktv = tvClassToString(*key);
+  if (ktv.m_type == KindOfInt64) {
+    map->remove(ktv.m_data.num);
     return;
   }
-  if (isStringType(key->m_type)) {
-    map->remove(key->m_data.pstr);
+  if (isStringType(ktv.m_type)) {
+    map->remove(ktv.m_data.pstr);
     return;
   }
   throwBadKeyType();

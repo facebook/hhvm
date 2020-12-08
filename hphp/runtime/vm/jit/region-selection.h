@@ -125,6 +125,7 @@ struct RegionDesc {
    * counts of these other blocks as well.
    */
   int64_t           blockProfCount(BlockId bid) const;
+  double            blockProfCountScale(BlockId bid) const;
 
   Block*            addBlock(SrcKey sk, int length, FPInvOffset spOffset);
   void              addBlock(BlockPtr newBlock);
@@ -144,6 +145,7 @@ struct RegionDesc {
   void              append(const RegionDesc&  other);
   void              prepend(const RegionDesc& other);
   void              chainRetransBlocks();
+  void              setBlockProfCountScale(BlockId, double);
   uint32_t          instrSize() const;
   std::string       toString() const;
 
@@ -171,6 +173,7 @@ private:
     BlockIdSet               merged; // other blocks that got merged into this
     BlockId                  prevRetransId{kInvalidTransID};
     BlockId                  nextRetransId{kInvalidTransID};
+    double                   profCountScale{1.0};
     bool                     hasIncoming{false};
     explicit BlockData(BlockPtr b = nullptr) : block(b) {}
   };
@@ -575,4 +578,3 @@ std::string show(const RegionDesc&);
 //////////////////////////////////////////////////////////////////////
 
 }}
-

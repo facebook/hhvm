@@ -274,6 +274,111 @@ private:
 
 //////////////////////////////////////////////////////////////////////
 
+/*
+ * blockProfCount() for a given block is the number of times that block was
+ * executed from all possible paths. However, the region we've formed might not
+ * contain all of those paths. Therefore the block counts might reflect
+ * execution that cannot happen in this region. For example, a block with a
+ * single predecessor might have a much higher prof count than its predecessor
+ * (because there was another predecessor which got pruned off).
+ *
+ * Attempt to scale the prof counts in the blocks to reflect this (in an
+ * approximate way). For each block, sum together the combined prof count of all
+ * its original predecessors, as well as sum only the precessors in the
+ * region. Scale the block's prof count by the ratio between the two.
+ */
+void scaleProfCounts(HotTransContext& ctx, RegionDescPtr region) {
+  jit::fast_map<TransID, double> scales;
+  jit::fast_set<TransID> inRegion;
+  jit::fast_map<TransID, TransIDSet> merged;
+
+  ITRACE(4, "scaleProfCounts:\n");
+
+  for (auto const& block : region->blocks()) {
+    auto const bid = block->id();
+    inRegion.emplace(bid);
+    for (auto const m : region->merged(bid)) {
+      inRegion.emplace(m);
+      merged[bid].emplace(m);
+    }
+  }
+
+  auto const setScale = [&] (TransID tid, double scale) {
+    assertx(!scales.count(tid));
+    scales.emplace(tid, scale);
+    for (auto const b : merged[tid]) {
+      assertx(!scales.count(b));
+      scales.emplace(b, scale);
+    }
+  };
+
+  for (auto const& block : region->blocks()) {
+    auto const bid = block->id();
+    ITRACE(5, "  {} (weight {})\n", bid, region->blockProfCount(bid));
+
+    assertx(region->blockProfCountScale(bid) == 1.0);
+
+    auto const& inArcs = ctx.cfg->inArcs(bid);
+    if (inArcs.empty()) {
+      assertx(bid == ctx.tid);
+      ITRACE(5, "    entry block. No scaling\n");
+      setScale(bid, 1.0);
+      continue;
+    }
+
+    int64_t totalPredWeight = 0;
+    int64_t includedPredWeight = 0;
+    for (auto const inArc : inArcs) {
+      auto const pred = inArc->src();
+      auto const predWeight = ctx.cfg->weight(pred);
+      ITRACE(5, "    pred {} (weight {})\n", pred, predWeight);
+
+      if (!inRegion.count(pred)) {
+        ITRACE(5, "      not in region\n");
+        totalPredWeight += predWeight;
+        continue;
+      }
+
+      // The predecessor wasn't processed yet. This can only happen if its loop
+      // back-edge. In this case, don't add the prof count to either
+      // total. We'll just totally ignore the loop and assume the loop counts
+      // will scale according to the non-loop predecessors.
+      auto const it = scales.find(pred);
+      if (it == scales.end()) {
+        ITRACE(5, "      not processed yet. Part of cycle, so ignoring\n");
+        continue;
+      }
+
+      ITRACE(5, "      scale = {}\n", it->second);
+      totalPredWeight += predWeight;
+      includedPredWeight += (predWeight * it->second);
+    }
+
+    auto const scale = [&] {
+      if (totalPredWeight == 0) return 0.0;
+      return includedPredWeight / (double)totalPredWeight;
+    }();
+
+    ITRACE(5, "    total pred = {}, included pred = {}, scale = {:.6f}\n",
+           totalPredWeight, includedPredWeight, scale);
+    setScale(bid, scale);
+  }
+
+  for (auto const& block : region->blocks()) {
+    auto const bid = block->id();
+    auto const it = scales.find(bid);
+    assertx(it != scales.end());
+    ITRACE(
+      4, "  {}: scale = {:.6f} (old weight = {}, new weight = {})\n",
+      bid,
+      it->second,
+      region->blockProfCount(bid),
+      int64_t(region->blockProfCount(bid) * it->second)
+    );
+    region->setBlockProfCountScale(bid, it->second);
+  }
+}
+
 }
 
 RegionDescPtr selectHotCFG(HotTransContext& ctx, bool* truncated) {
@@ -298,8 +403,12 @@ RegionDescPtr selectHotCFG(HotTransContext& ctx, bool* truncated) {
            show(*region));
     optimizeProfiledGuards(*region, *ctx.profData);
   }
+
   ITRACE(1, "selectHotCFG: final version after optimizeProfiledGuards:\n{}\n",
          show(*region));
+
+  scaleProfCounts(ctx, region);
+
   return region;
 }
 

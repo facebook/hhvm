@@ -322,7 +322,15 @@ int64_t RegionDesc::blockProfCount(RegionDesc::BlockId bid) const {
   for (auto mid : merged(bid)) {
     total += pd->transCounter(mid);
   }
-  return total;
+  return int64_t(total * blockProfCountScale(bid));
+}
+
+double RegionDesc::blockProfCountScale(RegionDesc::BlockId bid) const {
+  return data(bid).profCountScale;
+}
+
+void RegionDesc::setBlockProfCountScale(RegionDesc::BlockId bid, double scale) {
+  data(bid).profCountScale = scale;
 }
 
 void RegionDesc::renumberBlock(BlockId oldId, BlockId newId) {

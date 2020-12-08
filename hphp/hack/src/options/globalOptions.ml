@@ -140,11 +140,6 @@ let tco_experimental_forbid_nullable_cast = "forbid_nullable_cast"
 
 let tco_experimental_disallow_static_memoized = "disallow_static_memoized"
 
-(*
- * Allows parsing of coroutine functions/suspend operator
- *)
-let tco_experimental_coroutines = "coroutines"
-
 (**
  * Prevent type param names from shadowing class names
  *)
@@ -178,7 +173,6 @@ let tco_experimental_all =
          tco_experimental_isarray;
          tco_experimental_generics_arity;
          tco_experimental_forbid_nullable_cast;
-         tco_experimental_coroutines;
          tco_experimental_disallow_static_memoized;
          tco_experimental_abstract_type_const_with_default;
          tco_experimental_infer_flows;

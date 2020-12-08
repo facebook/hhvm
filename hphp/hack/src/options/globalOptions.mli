@@ -485,8 +485,6 @@ val tco_experimental_generics_arity : string
 
 val tco_experimental_forbid_nullable_cast : string
 
-val tco_experimental_coroutines : string
-
 val tco_experimental_disallow_static_memoized : string
 
 val tco_experimental_type_param_shadowing : string

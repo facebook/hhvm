@@ -35,8 +35,6 @@ type t = {
   ignored_paths: string list;
   (* A list of extra paths to search for declarations *)
   extra_paths: Path.t list;
-  (* A list of regexps for paths to ignore for typechecking coroutines *)
-  coroutine_whitelist_paths: string list;
   warn_on_non_opt_build: bool;
 }
 [@@deriving show]
@@ -166,10 +164,6 @@ let process_extra_paths config =
   | Some s -> Str.split config_list_regexp s |> List.map ~f:maybe_relative_path
   | _ -> []
 
-let process_coroutine_whitelist_paths config =
-  SMap.find_opt config "coroutine_whitelist_paths"
-  |> Option.value_map ~f:convert_paths ~default:[]
-
 let process_untrusted_mode config =
   match SMap.find_opt config "untrusted_mode" with
   | Some s ->
@@ -275,7 +269,6 @@ let load ~silent config_filename options : t * ServerLocalConfig.t =
   in
   let ignored_paths = process_ignored_paths config in
   let extra_paths = process_extra_paths config in
-  let coroutine_whitelist_paths = process_coroutine_whitelist_paths config in
   (* Since we use the unix alarm() for our timeouts, a timeout value of 0 means
    * to wait indefinitely *)
   let load_script_timeout = int_ "load_script_timeout" ~default:0 config in
@@ -460,7 +453,6 @@ let load ~silent config_filename options : t * ServerLocalConfig.t =
       config_hash = Some config_hash;
       ignored_paths;
       extra_paths;
-      coroutine_whitelist_paths;
       warn_on_non_opt_build;
     },
     local_config )
@@ -480,7 +472,6 @@ let default_config =
     config_hash = None;
     ignored_paths = [];
     extra_paths = [];
-    coroutine_whitelist_paths = [];
     warn_on_non_opt_build = false;
   }
 
@@ -512,8 +503,6 @@ let config_hash config = config.config_hash
 let ignored_paths config = config.ignored_paths
 
 let extra_paths config = config.extra_paths
-
-let coroutine_whitelist_paths config = config.coroutine_whitelist_paths
 
 let version config = config.version
 

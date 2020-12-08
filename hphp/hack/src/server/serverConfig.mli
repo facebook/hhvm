@@ -35,8 +35,6 @@ val ignored_paths : t -> string list
 
 val extra_paths : t -> Path.t list
 
-val coroutine_whitelist_paths : t -> string list
-
 val gc_control : t -> Gc.control
 
 val sharedmem_config : t -> SharedMem.config

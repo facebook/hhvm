@@ -9,31 +9,30 @@ use std::collections::BTreeMap;
 use bumpalo::Bump;
 
 use decl_rust::direct_decl_parser::parse_decls_and_mode;
-use ocamlrep::{bytes_from_ocamlrep, ptr::UnsafeOcamlPtr};
-use ocamlrep_ocamlpool::{ocaml_ffi, to_ocaml};
+use ocamlrep::{bytes_from_ocamlrep, FromOcamlRep};
 use oxidized::relative_path::RelativePath;
 use stack_limit::{StackLimit, KI, MI, STACK_SLACK_1K};
 
-ocaml_ffi! {
-    fn hh_parse_decls_and_mode_ffi(
-        filename_ptr: UnsafeOcamlPtr,
-        text_ptr: UnsafeOcamlPtr,
-        ns_map_ptr: UnsafeOcamlPtr,
-    ) -> UnsafeOcamlPtr {
+#[no_mangle]
+pub unsafe extern "C" fn hh_parse_decls_and_mode_ffi(
+    filename_ptr: usize,
+    text_ptr: usize,
+    ns_map_ptr: usize,
+) -> usize {
+    fn inner(filename_ptr: usize, text_ptr: usize, ns_map_ptr: usize) -> usize {
         let make_retryable = move || {
             move |stack_limit: &StackLimit, _nonmain_stack_size: Option<usize>| {
                 // SAFETY: the OCaml garbage collector must not run as long as text_ptr
                 // and text_value exist. We don't call into OCaml here or anywhere in
                 // the direct decl parser smart constructors, so it won't.
-                let text_value = unsafe { text_ptr.as_value() };
+                let text_value = unsafe { ocamlrep::Value::from_bits(text_ptr) };
                 let text = bytes_from_ocamlrep(text_value).expect("expected string");
 
                 // SAFETY: We trust we've been handed a valid, immutable OCaml value
-                let filename = unsafe { RelativePath::from_ocaml(filename_ptr.as_usize()).unwrap() };
+                let filename = unsafe { RelativePath::from_ocaml(filename_ptr).unwrap() };
 
                 // SAFETY: We trust we've been handed a valid, immutable OCaml value
-                let ns_map =
-                    unsafe { Vec::<(String, String)>::from_ocaml(ns_map_ptr.as_usize()).unwrap() };
+                let ns_map = unsafe { Vec::<(String, String)>::from_ocaml(ns_map_ptr).unwrap() };
                 let ns_map = ns_map.into_iter().collect::<BTreeMap<_, _>>();
 
                 let arena = Bump::new();
@@ -46,7 +45,7 @@ ocaml_ffi! {
                 // this function scope. Instead, we convert the decls to OCaml
                 // ourselves, and return the pointer (the converted OCaml value does not
                 // borrow the arena).
-                unsafe { UnsafeOcamlPtr::new(to_ocaml(&r)) }
+                unsafe { ocamlrep_ocamlpool::to_ocaml(&r) }
             }
         };
 
@@ -57,7 +56,7 @@ ocaml_ffi! {
                     "[hrust] warning: hh_compile exceeded stack of {} KiB on: {:?}",
                     (stack_size_tried - STACK_SLACK_1K(stack_size_tried)) / KI,
                     // SAFETY: We trust we've been handed a valid, immutable OCaml value
-                    unsafe { RelativePath::from_ocaml(filename_ptr.as_usize()).unwrap() },
+                    unsafe { RelativePath::from_ocaml(filename_ptr).unwrap() },
                 );
             }
         };
@@ -81,4 +80,5 @@ ocaml_ffi! {
             }
         }
     }
+    ocamlrep_ocamlpool::catch_unwind(|| inner(filename_ptr, text_ptr, ns_map_ptr))
 }

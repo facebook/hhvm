@@ -366,63 +366,39 @@ let process_xrefs ctx (tasts : Tast.program list) progress =
         prog)
 
 let progress_to_json progress =
-  let ver = 4 in
   let preds =
     (* The order is the reverse of how these items appear in the JSON,
     which is significant because later entries can refer to earlier ones
     by id only *)
     [
       ("src.FileLines.1", progress.resultJson.fileLines);
-      ( sprintf "hack.FileDeclarations.%d" ver,
-        progress.resultJson.fileDeclarations );
-      (sprintf "hack.FileXRefs.%d" ver, progress.resultJson.fileXRefs);
-      ( sprintf "hack.MethodDefinition.%d" ver,
-        progress.resultJson.methodDefinition );
-      ( sprintf "hack.FunctionDefinition.%d" ver,
-        progress.resultJson.functionDefinition );
-      (sprintf "hack.EnumDefinition.%d" ver, progress.resultJson.enumDefinition);
-      ( sprintf "hack.ClassConstDefinition.%d" ver,
-        progress.resultJson.classConstDefinition );
-      ( sprintf "hack.PropertyDefinition.%d" ver,
-        progress.resultJson.propertyDefinition );
-      ( sprintf "hack.TypeConstDefinition.%d" ver,
-        progress.resultJson.typeConstDefinition );
-      ( sprintf "hack.ClassDefinition.%d" ver,
-        progress.resultJson.classDefinition );
-      ( sprintf "hack.TraitDefinition.%d" ver,
-        progress.resultJson.traitDefinition );
-      ( sprintf "hack.InterfaceDefinition.%d" ver,
-        progress.resultJson.interfaceDefinition );
-      ( sprintf "hack.GlobalConstDefinition.%d" ver,
-        progress.resultJson.globalConstDefinition );
-      ( sprintf "hack.DeclarationComment.%d" ver,
-        progress.resultJson.declarationComment );
-      ( sprintf "hack.DeclarationLocation.%d" ver,
-        progress.resultJson.declarationLocation );
-      ( sprintf "hack.DeclarationSpan.%d" ver,
-        progress.resultJson.declarationSpan );
-      ( sprintf "hack.MethodDeclaration.%d" ver,
-        progress.resultJson.methodDeclaration );
-      ( sprintf "hack.ClassConstDeclaration.%d" ver,
-        progress.resultJson.classConstDeclaration );
-      ( sprintf "hack.PropertyDeclaration.%d" ver,
-        progress.resultJson.propertyDeclaration );
-      ( sprintf "hack.TypeConstDeclaration.%d" ver,
-        progress.resultJson.typeConstDeclaration );
-      ( sprintf "hack.FunctionDeclaration.%d" ver,
-        progress.resultJson.functionDeclaration );
-      (sprintf "hack.Enumerator.%d" ver, progress.resultJson.enumerator);
-      ( sprintf "hack.EnumDeclaration.%d" ver,
-        progress.resultJson.enumDeclaration );
-      ( sprintf "hack.ClassDeclaration.%d" ver,
-        progress.resultJson.classDeclaration );
-      ( sprintf "hack.TraitDeclaration.%d" ver,
-        progress.resultJson.traitDeclaration );
-      ( sprintf "hack.InterfaceDeclaration.%d" ver,
-        progress.resultJson.interfaceDeclaration );
-      ( sprintf "hack.TypedefDeclaration.%d" ver,
-        progress.resultJson.typedefDeclaration );
-      ( sprintf "hack.GlobalConstDeclaration.%d" ver,
+      ("hack.FileDeclarations.4", progress.resultJson.fileDeclarations);
+      ("hack.FileXRefs.4", progress.resultJson.fileXRefs);
+      ("hack.MethodDefinition.4", progress.resultJson.methodDefinition);
+      ("hack.FunctionDefinition.4", progress.resultJson.functionDefinition);
+      ("hack.EnumDefinition.4", progress.resultJson.enumDefinition);
+      ("hack.ClassConstDefinition.4", progress.resultJson.classConstDefinition);
+      ("hack.PropertyDefinition.4", progress.resultJson.propertyDefinition);
+      ("hack.TypeConstDefinition.4", progress.resultJson.typeConstDefinition);
+      ("hack.ClassDefinition.4", progress.resultJson.classDefinition);
+      ("hack.TraitDefinition.4", progress.resultJson.traitDefinition);
+      ("hack.InterfaceDefinition.4", progress.resultJson.interfaceDefinition);
+      ("hack.GlobalConstDefinition.4", progress.resultJson.globalConstDefinition);
+      ("hack.DeclarationComment.4", progress.resultJson.declarationComment);
+      ("hack.DeclarationLocation.4", progress.resultJson.declarationLocation);
+      ("hack.DeclarationSpan.4", progress.resultJson.declarationSpan);
+      ("hack.MethodDeclaration.4", progress.resultJson.methodDeclaration);
+      ("hack.ClassConstDeclaration.4", progress.resultJson.classConstDeclaration);
+      ("hack.PropertyDeclaration.4", progress.resultJson.propertyDeclaration);
+      ("hack.TypeConstDeclaration.4", progress.resultJson.typeConstDeclaration);
+      ("hack.FunctionDeclaration.4", progress.resultJson.functionDeclaration);
+      ("hack.Enumerator.4", progress.resultJson.enumerator);
+      ("hack.EnumDeclaration.4", progress.resultJson.enumDeclaration);
+      ("hack.ClassDeclaration.4", progress.resultJson.classDeclaration);
+      ("hack.TraitDeclaration.4", progress.resultJson.traitDeclaration);
+      ("hack.InterfaceDeclaration.4", progress.resultJson.interfaceDeclaration);
+      ("hack.TypedefDeclaration.4", progress.resultJson.typedefDeclaration);
+      ( "hack.GlobalConstDeclaration.4",
         progress.resultJson.globalConstDeclaration );
     ]
   in

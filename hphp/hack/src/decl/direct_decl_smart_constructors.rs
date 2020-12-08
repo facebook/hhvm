@@ -3865,11 +3865,16 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         let key = id.1;
         let consts = self.slice(cases.iter().filter_map(|node| match node {
             Node::ListItem(&(name, value)) => {
-                Some(self.alloc(shallow_decl_defs::ShallowClassConst {
-                    abstract_: false,
-                    name: name.as_id()?,
-                    type_: self.infer_const(name, value).unwrap_or_else(|| tany()),
-                }))
+                let id = name.as_id()?;
+                Some(
+                    self.alloc(shallow_decl_defs::ShallowClassConst {
+                        abstract_: false,
+                        name: id,
+                        type_: self
+                            .infer_const(name, value)
+                            .unwrap_or_else(|| self.tany_with_pos(id.0)),
+                    }),
+                )
             }
             n => panic!("Expected an enum case, got {:?}", n),
         }));

@@ -22,11 +22,16 @@
          { Shallow_decl_defs.scc_abstract = false;
            scc_name = ([5:3-6], "BAR");
            scc_type =
-           (Rwitness (root|enums.php line 5, characters 9-9), (Tprim Tint)) };
+           (Rwitness (root|enums.php line 5, characters 9-10), (Tprim Tint))
+           };
          { Shallow_decl_defs.scc_abstract = false;
            scc_name = ([6:3-6], "BAZ");
            scc_type =
-           (Rwitness (root|enums.php line 6, characters 9-9), (Tprim Tint)) }
+           (Rwitness (root|enums.php line 6, characters 3-5), Tany) };
+         { Shallow_decl_defs.scc_abstract = false;
+           scc_name = ([7:3-6], "QUX");
+           scc_type =
+           (Rwitness (root|enums.php line 7, characters 3-5), Tany) }
          ];
        sc_typeconsts = []; sc_props = []; sc_sprops = [];
        sc_constructor = None; sc_static_methods = []; sc_methods = [];
@@ -34,8 +39,10 @@
        sc_enum_type =
        (Some { Typing_defs.te_base =
                (Rhint (root|enums.php line 3, characters 11-13), (Tprim Tint));
-               te_constraint = None; te_includes = []; te_enum_class = false
-               })
+               te_constraint =
+               (Some (Rhint (root|enums.php line 3, characters 18-20),
+                      (Tprim Tint)));
+               te_includes = []; te_enum_class = false })
        }))
   ]
 

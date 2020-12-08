@@ -182,10 +182,6 @@ void raise_fatal_error(const char* msg,
                        bool recoverable /* = false */,
                        bool silent /* = false */,
                        bool throws /* = true */) {
-  if (RuntimeOption::PHP7_EngineExceptions && throws) {
-    VMRegAnchor _;
-    SystemLib::throwErrorObject(Variant(msg));
-  }
   auto ex = bt.isNull() && !recoverable
     ? FatalErrorException(msg)
     : FatalErrorException(msg, bt, recoverable);

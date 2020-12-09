@@ -251,6 +251,9 @@ Variant HHVM_FUNCTION(get_parent_class,
     } else if (object.isString()) {
       cls = Class::load(object.asCStrRef().get());
       if (!cls) return false;
+    } else if (object.isLazyClass()) {
+      cls = Class::load(object.toLazyClassVal().name());
+      if (!cls) return false;
     } else if (object.isClass()) {
       cls = object.toClassVal();
     } else {

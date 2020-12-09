@@ -131,7 +131,7 @@ bool array_is_valid_callback(const Array& arr) {
   }
   auto const elem0 = arr.lookup(0);
   if (!isStringType(elem0.type()) && !isObjectType(elem0.type()) &&
-      !isClassType(elem0.type())) {
+      !isClassType(elem0.type()) && !isLazyClassType(elem0.type())) {
     return false;
   }
   auto const elem1 = arr.lookup(1);
@@ -198,6 +198,8 @@ bool is_callable(const Variant& v, bool syntax_only, Variant* name) {
       clsString = clsname.val().pobj->getClassName().get();
     } else if (isStringType(clsname.type())) {
       clsString = clsname.val().pstr;
+    } else if (isLazyClassType(clsname.type())) {
+      clsString = const_cast<StringData*>(clsname.val().plazyclass.name());
     } else if (isClassType(clsname.type())) {
       clsString = const_cast<StringData*>(clsname.val().pclass->name());
     } else {
@@ -508,6 +510,8 @@ vm_decode_function(const_variant_ref function,
           cls = this_->getVMClass();
         } else if (elem0.isClass()) {
           cls = elem0.toClassVal();
+        } else if (elem0.isLazyClass()) {
+          cls = Class::load(elem0.toLazyClassVal().name());
         } else {
           raise_error("calling an ill-formed array without resolved "
                       "object/class pointer");
@@ -521,9 +525,11 @@ vm_decode_function(const_variant_ref function,
       pos = name.find("::");
       nameContainsClass =
         (pos != 0 && pos != String::npos && pos + 2 < name.size());
-      if (elem0.isString()) {
+      if (elem0.isString() || elem0.isLazyClass()) {
+        auto const clsName = elem0.isString() ?
+          elem0.toString() : StrNR{elem0.toLazyClassVal().name()};
         cls = vm_decode_class_from_name(
-          elem0.toString(), name, nameContainsClass, ar, forwarding, ctx,
+          clsName, name, nameContainsClass, ar, forwarding, ctx,
           flags);
         if (!cls) {
           if (flags == DecodeFlags::Warn) {

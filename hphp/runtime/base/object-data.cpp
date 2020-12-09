@@ -1613,7 +1613,9 @@ String ObjectData::invokeToString() {
     raiseImplicitInvokeToString();
   }
   auto const tv = g_context->invokeMethod(this, method, InvokeArgs{}, false);
-  if (!isStringType(tv.m_type) && !isClassType(tv.m_type)) {
+  if (!isStringType(tv.m_type) &&
+      !isClassType(tv.m_type) &&
+      !isLazyClassType(tv.m_type)) {
     // Discard the value returned by the __toString() method and raise
     // a recoverable error
     tvDecRefGen(tv);
@@ -1626,6 +1628,10 @@ String ObjectData::invokeToString() {
   }
 
   if (tvIsString(tv)) return String::attach(val(tv).pstr);
+  if (tvIsLazyClass(tv)) {
+    return StrNR{lazyClassToStringHelper(tv.m_data.plazyclass)};
+  }
+  assertx(isClassType(type(tv)));
   return StrNR(classToStringHelper(tv.m_data.pclass));
 }
 

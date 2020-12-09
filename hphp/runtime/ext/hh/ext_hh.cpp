@@ -209,7 +209,7 @@ namespace {
  * 10 (CONTAINER): any PHP array, collection, or hack array; data is the
  *                 keys and values of the container in insertion order,
  *                 serialized as above, followed by the STOP code
- * 11 (STOP): terminates a CONTAINER encoding
+ * 16 (STOP): terminates a CONTAINER encoding
  */
 
 enum SerializeMemoizeCode {
@@ -397,6 +397,11 @@ void serialize_memoize_tv(StringBuffer& sb, int depth, TypedValue tv) {
       serialize_memoize_string_data(sb, tv.m_data.pclass->name());
       break;
 
+    case KindOfLazyClass:
+      serialize_memoize_code(sb, SER_MC_CLS);
+      serialize_memoize_string_data(sb, tv.m_data.plazyclass.name());
+      break;
+
     case KindOfPersistentString:
     case KindOfString:
       serialize_memoize_code(sb, SER_MC_STRING);
@@ -438,7 +443,6 @@ void serialize_memoize_tv(StringBuffer& sb, int depth, TypedValue tv) {
       break;
 
     case KindOfResource:
-    case KindOfLazyClass: // TODO(T68810726)
     case KindOfRecord: { // TODO(T41025646)
       auto msg = folly::format(
         "Cannot Serialize unexpected type {}",

@@ -568,7 +568,7 @@ Array resolveShape(TSEnv& env, const TSCtx& ctx, const Array& arr) {
       // look up clsName::cnsName
       auto cls = getClass(env, ctx, String(clsName));
       if (!cls) throw Exception("failed to resolve shape classname");
-      auto cnsValue = cls->clsCnsGet(String(cnsName).get());
+      auto cnsValue = tvClassToString(cls->clsCnsGet(String(cnsName).get()));
 
       if (isStringType(cnsValue.m_type) || isIntType(cnsValue.m_type)) {
         key = tvAsVariant(&cnsValue);

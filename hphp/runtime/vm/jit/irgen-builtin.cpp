@@ -510,6 +510,26 @@ SSATmp* opt_array_key_cast(IRGS& env, const ParamPrep& params) {
   if (value->isA(TDbl))  return gen(env, ConvDblToInt, value);
   if (value->isA(TRes))  return gen(env, ConvResToInt, value);
   if (value->isA(TStr))  return gen(env, StrictlyIntegerConv, value);
+  if (value->isA(TLazyCls))  {
+		if (RuntimeOption::EvalRaiseClassConversionWarning) {
+      gen(
+        env,
+        RaiseWarning,
+        cns(env, makeStaticString(Strings::CLASS_TO_STRING))
+      );
+    }
+    return gen(env, LdLazyClsName, value);
+  }
+  if (value->isA(TCls))  {
+		if (RuntimeOption::EvalRaiseClassConversionWarning) {
+      gen(
+        env,
+        RaiseWarning,
+        cns(env, makeStaticString(Strings::CLASS_TO_STRING))
+      );
+    }
+    return gen(env, LdClsName, value);
+  }
 
   return nullptr;
 }

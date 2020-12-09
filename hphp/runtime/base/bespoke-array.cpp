@@ -74,35 +74,26 @@ bool BespokeArray::checkInvariants() const {
 ArrayData* BespokeArray::MakeUncounted(ArrayData* ad, bool hasApcTv,
                                        DataWalker::PointerMap* seen) {
   assertx(ad->isRefCounted());
-  auto const updateSeen = seen && ad->hasMultipleRefs();
-  if (updateSeen) {
-    auto const it = seen->find(ad);
-    assertx(it != seen->end());
-    if (auto const result = static_cast<ArrayData*>(it->second)) {
-      if (result->uncountedIncRef()) return result;
-    }
+
+  auto const vad = ToVanilla(ad, "BespokeArray::MakeUncounted");
+  SCOPE_EXIT { decRefArr(vad); };
+
+  if (seen) {
+    auto const mark = [&](TypedValue tv) {
+      if (isRefcountedType(type(tv)) && val(tv).pcnt->hasMultipleRefs()) {
+        seen->insert({val(tv).pcnt, nullptr});
+      }
+    };
+    if (vad->hasMultipleRefs()) seen->insert({vad, nullptr});
+    IterateKVNoInc(vad, [&](auto k, auto v) { mark(k); mark(v); });
   }
 
-  if (APCStats::IsCreated()) {
-    APCStats::getAPCStats().addAPCUncountedBlock();
+  if (vad->hasVanillaPackedLayout()) {
+    return PackedArray::MakeUncounted(vad, hasApcTv, seen);
+  } else if (vad->hasVanillaMixedLayout()) {
+    return MixedArray::MakeUncounted(vad, hasApcTv, seen);
   }
-  auto const vtable = asBespoke(ad)->vtable();
-  auto const extra = uncountedAllocExtra(ad, hasApcTv);
-  auto const bytes = vtable->fnHeapSize(ad);
-  assertx(extra % 16 == 0);
-
-  // "Help" out by copying the array's raw bytes to an uncounted allocation.
-  auto const mem = static_cast<char*>(uncounted_malloc(bytes + extra));
-  auto const result = reinterpret_cast<ArrayData*>(mem + extra);
-  memcpy8(reinterpret_cast<char*>(result),
-          reinterpret_cast<char*>(ad), bytes);
-  auto const aux = ad->m_aux16 | (hasApcTv ? ArrayData::kHasApcTv : 0);
-  result->initHeader_16(HeaderKind(ad->kind()), UncountedValue, aux);
-  assertx(asBespoke(result)->layoutIndex() == asBespoke(ad)->layoutIndex());
-
-  vtable->fnConvertToUncounted(result, seen);
-  if (updateSeen) (*seen)[ad] = result;
-  return result;
+  return SetArray::MakeUncounted(vad, hasApcTv, seen);
 }
 
 void BespokeArray::ReleaseUncounted(ArrayData* ad) {

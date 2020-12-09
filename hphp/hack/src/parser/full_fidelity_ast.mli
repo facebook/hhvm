@@ -21,7 +21,6 @@ val make_env (* Optional parts *) :
   ?keep_errors:bool ->
   ?quick_mode:bool ->
   ?show_all_errors:bool ->
-  ?lower_coroutines:bool ->
   ?fail_open:bool ->
   ?parser_options:ParserOptions.t (* Required parts *) ->
   ?disable_global_state_mutation:bool ->

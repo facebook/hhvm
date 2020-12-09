@@ -23,7 +23,6 @@ type env = {
    * until we can properly set up saved states to surface parse errors during
    * typechecking properly. *)
   show_all_errors: bool;
-  lower_coroutines: bool;
   fail_open: bool;
   parser_options: ParserOptions.t;
   file: Relative_path.t;
@@ -39,7 +38,6 @@ let make_env
     ?(keep_errors = true)
     ?(quick_mode = false)
     ?(show_all_errors = false)
-    ?(lower_coroutines = true)
     ?(fail_open = true)
     ?(parser_options = ParserOptions.default)
     ?(disable_global_state_mutation = false)
@@ -53,7 +51,6 @@ let make_env
     keep_errors;
     quick_mode = (not codegen) && quick_mode;
     show_all_errors;
-    lower_coroutines;
     parser_options;
     fail_open;
     file;
@@ -136,7 +133,6 @@ let from_text_rust (env : env) (source_text : SourceText.t) :
         keep_errors = env.keep_errors;
         quick_mode = env.quick_mode;
         show_all_errors = env.show_all_errors;
-        lower_coroutines = env.lower_coroutines;
         fail_open = env.fail_open;
         parser_options = env.parser_options;
       }

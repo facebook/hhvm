@@ -520,7 +520,6 @@ module LowererTest_ = struct
         ~show_all_errors:true
         ~keep_errors:true
         ~elaborate_namespaces:true
-        ~lower_coroutines:false
         ~parser_options:popt
     in
     try Tree (lower lower_env source_text)

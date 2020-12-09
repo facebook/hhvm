@@ -308,11 +308,6 @@ fn parse_file(
     aast_env.keep_errors = false;
     aast_env.elaborate_namespaces = elaborate_namespaces;
     aast_env.parser_options = create_parser_options(opts);
-    aast_env.lower_coroutines = opts
-        .hhvm
-        .hack_lang
-        .flags
-        .contains(LangFlags::ENABLE_COROUTINES);
 
     let indexed_source_text = IndexedSourceText::new(source_text);
     let ast_result = AastParser::from_text(&aast_env, &indexed_source_text, Some(stack_limit));

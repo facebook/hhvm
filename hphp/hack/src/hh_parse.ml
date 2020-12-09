@@ -54,7 +54,6 @@ module FullFidelityParseArgs = struct
     include_line_comments: bool;
     keep_errors: bool;
     quick_mode: bool;
-    lower_coroutines: bool;
     fail_open: bool;
     (* Defining the input *)
     files: string list;
@@ -95,7 +94,6 @@ module FullFidelityParseArgs = struct
       include_line_comments
       keep_errors
       quick_mode
-      lower_coroutines
       fail_open
       show_file_name
       files
@@ -134,7 +132,6 @@ module FullFidelityParseArgs = struct
       include_line_comments;
       keep_errors;
       quick_mode;
-      lower_coroutines;
       fail_open;
       show_file_name;
       files;
@@ -187,7 +184,6 @@ module FullFidelityParseArgs = struct
     let include_line_comments = ref false in
     let keep_errors = ref true in
     let quick_mode = ref false in
-    let lower_coroutines = ref true in
     let enable_hh_syntax = ref false in
     let fail_open = ref true in
     let show_file_name = ref false in
@@ -287,12 +283,6 @@ No errors are filtered out."
         ( "--no-quick-mode",
           Arg.Clear quick_mode,
           "Unset the quick_mode option for the parser." );
-        ( "--lower-coroutines",
-          Arg.Set lower_coroutines,
-          "Set the lower_coroutines option for the parser." );
-        ( "--no-lower-coroutines",
-          Arg.Clear lower_coroutines,
-          "Unset the lower_coroutines option for the parser." );
         ( "--fail-open",
           Arg.Set fail_open,
           "Set the fail_open option for the parser." );
@@ -399,7 +389,6 @@ No errors are filtered out."
       !include_line_comments
       !keep_errors
       !quick_mode
-      !lower_coroutines
       !fail_open
       !show_file_name
       (List.rev !files)
@@ -583,7 +572,6 @@ let handle_existing_file args filename =
             ~include_line_comments:args.include_line_comments
             ~keep_errors:(args.keep_errors || print_errors)
             ~quick_mode:args.quick_mode
-            ~lower_coroutines:args.lower_coroutines
             ~parser_options:popt
             ~fail_open:args.fail_open
             file

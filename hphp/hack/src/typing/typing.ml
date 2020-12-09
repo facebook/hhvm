@@ -50,6 +50,12 @@ module Partial = Partial_provider
 module Fake = Typing_fake_members
 module ExpectedTy = Typing_helpers.ExpectedTy
 
+type newable_class_info =
+  env
+  * Tast.targ list
+  * Tast.class_id
+  * [ `Class of sid * Cls.t * locl_ty | `Dynamic ] list
+
 (*****************************************************************************)
 (* Debugging *)
 (*****************************************************************************)
@@ -2871,12 +2877,12 @@ and expr_
     let (env, _tal, _te, classes) =
       class_id_for_new ~exact:Nonexact p env cid []
     in
+    (* OK to ignore rest of list; class_info only used for errors, and
+    * cid = CI sid cannot produce a union of classes anyhow *)
     let class_info =
-      match classes with
-      | [] -> None
-      (* OK to ignore rest of list; class_info only used for errors, and
-       * cid = CI sid cannot produce a union of classes anyhow *)
-      | (_, class_info, _) :: _ -> Some class_info
+      List.find_map classes ~f:(function
+          | `Dynamic -> None
+          | `Class (_, class_info, _) -> Some class_info)
     in
     let (env, _te, obj) =
       expr env (fst sid, New ((fst sid, cid), [], [], None, fst sid))
@@ -3650,8 +3656,23 @@ and new_object
       in
       ((env, tel, typed_unpack_element), (c_ty, ctor_fty))
   in
+  let (had_dynamic, classes) =
+    List.fold classes ~init:(false, []) ~f:(fun (seen_dynamic, classes) ->
+      function
+      | `Dynamic -> (true, classes)
+      | `Class (cname, class_info, c_ty) ->
+        (seen_dynamic, (cname, class_info, c_ty) :: classes))
+  in
   let ((env, tel, typed_unpack_element), class_types_and_ctor_types) =
     List.fold_map classes ~init:(env, [], None) ~f:gather
+  in
+  let class_types_and_ctor_types =
+    let r = Reason.Rdynamic_construct p in
+    let dyn = (mk (r, Tdynamic), mk (r, Tdynamic)) in
+    if had_dynamic then
+      dyn :: class_types_and_ctor_types
+    else
+      class_types_and_ctor_types
   in
   let (env, tel, typed_unpack_element, ty, ctor_fty) =
     match class_types_and_ctor_types with
@@ -3699,30 +3720,33 @@ and attributes_check_def env kind attrs =
     are inhabited, but not instantiable.
     To make this work with classname, we likely need to add something like
     concrete_classname<T>, where T cannot be an interface. *)
-and instantiable_cid ?(exact = Nonexact) p env cid explicit_targs =
+and instantiable_cid ?(exact = Nonexact) p env cid explicit_targs :
+    newable_class_info =
   let (env, tal, te, classes) =
     class_id_for_new ~exact p env cid explicit_targs
   in
-  List.iter classes (fun ((pos, name), class_info, c_ty) ->
-      if
-        Ast_defs.(equal_class_kind (Cls.kind class_info) Ctrait)
-        || Ast_defs.(equal_class_kind (Cls.kind class_info) Cenum)
-      then
-        match cid with
-        | CIexpr _
-        | CI _ ->
+  List.iter classes (function
+      | `Dynamic -> ()
+      | `Class ((pos, name), class_info, c_ty) ->
+        if
+          Ast_defs.(equal_class_kind (Cls.kind class_info) Ctrait)
+          || Ast_defs.(equal_class_kind (Cls.kind class_info) Cenum)
+        then
+          match cid with
+          | CIexpr _
+          | CI _ ->
+            uninstantiable_error env p cid (Cls.pos class_info) name pos c_ty
+          | CIstatic
+          | CIparent
+          | CIself ->
+            ()
+        else if
+          Ast_defs.(equal_class_kind (Cls.kind class_info) Cabstract)
+          && Cls.final class_info
+        then
           uninstantiable_error env p cid (Cls.pos class_info) name pos c_ty
-        | CIstatic
-        | CIparent
-        | CIself ->
-          ()
-      else if
-        Ast_defs.(equal_class_kind (Cls.kind class_info) Cabstract)
-        && Cls.final class_info
-      then
-        uninstantiable_error env p cid (Cls.pos class_info) name pos c_ty
-      else
-        ());
+        else
+          ());
   (env, tal, te, classes)
 
 and uninstantiable_error env reason_pos cid c_tc_pos c_name c_usage_pos c_ty =
@@ -5349,7 +5373,7 @@ and class_get_
 
 and class_id_for_new
     ~exact p env (cid : Nast.class_id_) (explicit_targs : Nast.targ list) :
-    env * Tast.targ list * Tast.class_id * (sid * Cls.t * locl_ty) list =
+    newable_class_info =
   let (env, tal, te, cid_ty) =
     static_class_id
       ~check_targs_well_kinded:true
@@ -5374,8 +5398,9 @@ and class_id_for_new
         (* Instantiation on an abstract class (e.g. from classname<T>) is
          * via the base type (to check constructor args), but the actual
          * type `ty` must be preserved. *)
-        (match get_class_type (TUtils.get_base_type env ty) with
-        | Some (sid, _, _) ->
+        (match get_node (TUtils.get_base_type env ty) with
+        | Tdynamic -> get_info (`Dynamic :: res) tyl
+        | Tclass (sid, _, _) ->
           let class_ = Env.get_class env (snd sid) in
           (match class_ with
           | None -> get_info res tyl
@@ -5388,11 +5413,11 @@ and class_id_for_new
               (* Only have this choosing behavior for new T(), not all generic types
                * i.e. new classname<T>, TODO: T41190512 *)
               if Tast_utils.valid_newable_class class_info then
-                get_info ((sid, class_info, ty) :: res) tyl
+                get_info (`Class (sid, class_info, ty) :: res) tyl
               else
                 get_info res tyl
-            | _ -> get_info ((sid, class_info, ty) :: res) tyl))
-        | None -> get_info res tyl))
+            | _ -> get_info (`Class (sid, class_info, ty) :: res) tyl))
+        | _ -> get_info res tyl))
   in
   get_info [] [cid_ty]
 

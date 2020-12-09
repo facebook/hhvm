@@ -89,6 +89,7 @@ type t =
   | Rusing of Pos.t
   | Rdynamic_prop of Pos.t
   | Rdynamic_call of Pos.t
+  | Rdynamic_construct of Pos.t
   | Ridx_dict of Pos.t
   | Rmissing_required_field of Pos.t * string
   | Rmissing_optional_field of Pos.t * string

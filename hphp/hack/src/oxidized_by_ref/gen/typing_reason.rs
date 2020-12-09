@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<e143120e898cd9ff50f48019c4f3d193>>
+// @generated SignedSource<<1ab340d6f523a36f25231a38debd6433>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -95,6 +95,7 @@ pub enum Reason<'a> {
     Rusing(&'a pos::Pos<'a>),
     RdynamicProp(&'a pos::Pos<'a>),
     RdynamicCall(&'a pos::Pos<'a>),
+    RdynamicConstruct(&'a pos::Pos<'a>),
     RidxDict(&'a pos::Pos<'a>),
     RmissingRequiredField(&'a (&'a pos::Pos<'a>, &'a str)),
     RmissingOptionalField(&'a (&'a pos::Pos<'a>, &'a str)),

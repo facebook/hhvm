@@ -70,6 +70,7 @@ type t =
   | Rusing of Pos.t
   | Rdynamic_prop of Pos.t
   | Rdynamic_call of Pos.t
+  | Rdynamic_construct of Pos.t
   | Ridx_dict of Pos.t
   | Rmissing_required_field of Pos.t * string
   | Rmissing_optional_field of Pos.t * string
@@ -390,6 +391,8 @@ let rec to_string prefix r =
     [(p, prefix ^ ", the result of accessing a property of a dynamic type")]
   | Rdynamic_call p ->
     [(p, prefix ^ ", the result of calling a dynamic type as a function")]
+  | Rdynamic_construct p ->
+    [(p, prefix ^ ", the result of constructing an object with a dynamic type")]
   | Ridx_dict _ ->
     [
       ( p,
@@ -549,6 +552,7 @@ and to_raw_pos r =
   | Rusing p -> p
   | Rdynamic_prop p -> p
   | Rdynamic_call p -> p
+  | Rdynamic_construct p -> p
   | Ridx_dict p -> p
   | Rmissing_required_field (p, _) -> p
   | Rmissing_optional_field (p, _) -> p
@@ -664,6 +668,7 @@ let to_constructor_string r =
   | Rusing _ -> "Rusing"
   | Rdynamic_prop _ -> "Rdynamic_prop"
   | Rdynamic_call _ -> "Rdynamic_call"
+  | Rdynamic_construct _ -> "Rdynamic_construct"
   | Ridx_dict _ -> "Ridx_dict"
   | Rmissing_required_field _ -> "Rmissing_required_field"
   | Rmissing_optional_field _ -> "Rmissing_optional_field"

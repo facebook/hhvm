@@ -71,6 +71,7 @@ impl<'a> Reason<'a> {
             | Rusing(p)
             | RdynamicProp(p)
             | RdynamicCall(p)
+            | RdynamicConstruct(p)
             | RidxDict(p)
             | RmissingRequiredField((p, _))
             | RmissingOptionalField((p, _))

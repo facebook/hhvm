@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<e5b43dc6405103097b840aa9083b2f97>>
+// @generated SignedSource<<b73ebbdc4ddbef51f88ff14d5d26a24a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -476,6 +476,7 @@ impl<'a> Node<'a> for Reason<'a> {
             Reason::Rusing(ref __binding_0) => __binding_0.accept(v),
             Reason::RdynamicProp(ref __binding_0) => __binding_0.accept(v),
             Reason::RdynamicCall(ref __binding_0) => __binding_0.accept(v),
+            Reason::RdynamicConstruct(ref __binding_0) => __binding_0.accept(v),
             Reason::RidxDict(ref __binding_0) => __binding_0.accept(v),
             Reason::RmissingRequiredField(ref __binding_0) => __binding_0.accept(v),
             Reason::RmissingOptionalField(ref __binding_0) => __binding_0.accept(v),

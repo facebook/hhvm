@@ -1109,7 +1109,7 @@ SSATmp* opt_enum_values(IRGS& env, const ParamPrep& params) {
 
 SSATmp* opt_enum_is_valid(IRGS& env, const ParamPrep& params) {
   if (params.size() != 1) return nullptr;
-  auto const value = params[0].value;
+  auto const value = convertClassKey(env, params[0].value);
   if (!value->type().isKnownDataType()) return nullptr;
   auto const enum_values = getEnumValues(env, params);
   if (!enum_values) return nullptr;

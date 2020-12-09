@@ -933,10 +933,20 @@ bool TypeConstraint::checkStringCompatible() const {
     return true;
   }
   if (!isObject()) return false;
-  if (auto alias = getTypeAliasWithAutoload(m_namedEntity, m_typeName)) {
-    return alias->type == AnnotType::String ||
-           alias->type == AnnotType::ArrayKey;
+  auto p = getNamedTypeWithAutoload(m_namedEntity, m_typeName);
+  if (auto ptd = boost::get<const TypeAlias*>(&p)) {
+    auto td = *ptd;
+    return td->type == AnnotType::String ||
+           td->type == AnnotType::ArrayKey;
   }
+  if (auto pc = boost::get<Class*>(&p)) {
+    auto c = *pc;
+    if (isEnum(c)) {
+      auto dt = c->enumBaseTy();
+      return !dt || isStringType(dt);
+    }
+  }
+
   return false;
 }
 

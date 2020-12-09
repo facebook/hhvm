@@ -56,7 +56,8 @@ static bool HHVM_STATIC_METHOD(BuiltinEnum, isValid, const Variant &value) {
 }
 
 static Variant HHVM_STATIC_METHOD(BuiltinEnum, coerce, const Variant &value) {
-  if (UNLIKELY(!value.isInteger() && !value.isString())) {
+  if (UNLIKELY(!value.isInteger() && !value.isString() &&
+               !value.isClass() && !value.isLazyClass())) {
     return init_null();
   }
 
@@ -69,6 +70,10 @@ static Variant HHVM_STATIC_METHOD(BuiltinEnum, coerce, const Variant &value) {
   if (value.isString() &&
       value.getStringData()->isStrictlyInteger(num)) {
     res = Variant(num);
+  } else if (value.isClass()) {
+    res = VarNR{value.toClassVal()->name()};
+  } else if (value.isLazyClass()) {
+    res = VarNR{value.toLazyClassVal().name()};
   }
 
   auto values = EnumCache::getValuesBuiltin(self_);

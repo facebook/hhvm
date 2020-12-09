@@ -25,7 +25,8 @@ namespace HPHP {
 bool enumHasValue(const Class* cls, const TypedValue* cell) {
   assertx(isEnum(cls));
   auto const type = cell->m_type;
-  if (UNLIKELY(type != KindOfInt64 && !isStringType(type))) {
+  if (UNLIKELY(type != KindOfInt64 && !isStringType(type) &&
+               !isClassType(type) && !isLazyClassType(type))) {
     return false;
   }
   auto const values = EnumCache::getValuesBuiltin(cls);
@@ -36,7 +37,8 @@ bool enumHasValue(const Class* cls, const TypedValue* cell) {
       cell->m_data.pstr->isStrictlyInteger(num)) {
    return values->names.exists(num);
   }
-  return values->names.exists(*cell);
+  auto const val = tvClassToString(*cell);
+  return values->names.exists(val);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

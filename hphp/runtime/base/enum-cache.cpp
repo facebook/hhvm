@@ -160,7 +160,9 @@ const EnumValues* EnumCache::loadEnumValues(
     }
     assertx(value.m_type != KindOfUninit);
     bool isEnumClass = klass->attrs() & AttrEnumClass;
-    if (!isEnumClass && !(isIntType(value.m_type) || tvIsString(&value))) {
+    if (!isEnumClass &&
+        !(isIntType(value.m_type) || tvIsString(&value) ||
+          tvIsClass(&value) || tvIsLazyClass(&value))) {
       // Enum values must be ints or strings. We can't get a static value here.
       if (require_static) return nullptr;
       std::string msg;
@@ -183,6 +185,12 @@ const EnumValues* EnumCache::loadEnumValues(
     if (tvIsString(&value) &&
         value.m_data.pstr->isStrictlyInteger(n)) {
       names.set(n, make_tv<KindOfPersistentString>(consts[i].name));
+    } else if (tvIsClass(&value)) {
+      names.set(StrNR{classToStringHelper(val(value).pclass)},
+                make_tv<KindOfPersistentString>(consts[i].name), true);
+    } else if (tvIsLazyClass(&value)) {
+      names.set(StrNR{lazyClassToStringHelper(val(value).plazyclass)},
+                make_tv<KindOfPersistentString>(consts[i].name), true);
     } else {
       names.set(value, make_tv<KindOfPersistentString>(consts[i].name), true);
     }

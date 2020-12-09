@@ -84,9 +84,8 @@ bool mayHaveData(trep bits) {
   switch (bits) {
   case BSStr:    case BStr:
   case BOptSStr: case BOptStr:
-  case BObj:     case BInt:    case BDbl:     case BRecord:
-  case BOptObj:  case BOptInt: case BOptDbl:  case BOptRecord:
-  case BCls:
+  case BObj:     case BInt:    case BDbl:     case BRecord: case BCls:
+  case BOptObj:  case BOptInt: case BOptDbl:  case BOptRecord: case BOptCls:
   case BArr:     case BSArr:     case BCArr:
   case BArrN:    case BSArrN:    case BCArrN:
   case BOptArr:  case BOptSArr:  case BOptCArr:
@@ -204,7 +203,6 @@ bool mayHaveData(trep bits) {
   case BOptArrKeyCompat:
   case BOptUncArrKeyCompat:
   case BOptFunc:
-  case BOptCls:
   case BClsMeth:
   case BOptClsMeth:
   case BRClsMeth:
@@ -4186,10 +4184,7 @@ Type from_DataType(DataType dt) {
   case KindOfRFunc:    return TRFunc;
   case KindOfFunc:     return TFunc;
   case KindOfClass:    return TCls;
-  case KindOfLazyClass: {
-    always_assert(false);
-    return TCls; // TODO (T68823001)
-  }
+  case KindOfLazyClass:  return TLazyCls;
   case KindOfClsMeth:  return TClsMeth;
   case KindOfRClsMeth: return TRClsMeth;
   }

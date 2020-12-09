@@ -554,16 +554,22 @@ let lift_params renv =
 let set_local_types env =
   List.fold ~init:env ~f:(fun env (lid, pty) -> Env.set_local_type env lid pty)
 
-let class_ pos msg = function
-  | Tclass class_ -> class_
-  | Tdynamic pol ->
-    (* While it is sound to set the class's lump policy to be the dynamic's
+let class_ pos msg ty =
+  let rec find_class = function
+    | Tclass class_ -> Some class_
+    | Tdynamic pol ->
+      (* While it is sound to set the class's lump policy to be the dynamic's
        (invariant) policy, we do not know if the property we are looking for
        is policied, therefore we guess that it has the lump policy and emit an
        error in case we are wrong *)
-    Errors.unknown_information_flow pos "dynamic";
-    { c_name = "<dynamic>"; c_self = pol; c_lump = pol }
-  | _ -> fail "%s" msg
+      Errors.unknown_information_flow pos "dynamic";
+      Some { c_name = "<dynamic>"; c_self = pol; c_lump = pol }
+    | Tinter tys -> List.find_map ~f:find_class tys
+    | _ -> None
+  in
+  match find_class ty with
+  | Some pty -> pty
+  | None -> fail "%s" msg
 
 let receiver_of_obj_get pos obj_ptype property =
   let msg =
@@ -966,31 +972,89 @@ let rec expr ~pos renv (env : Env.expr_env) (((epos, ety), e) : Tast.expr) =
   let expr_with_deps env deps e =
     Env.expr_with_pc_deps env deps (fun env -> expr env e)
   in
-  let vec_literal ~prefix exprs =
-    (* Each element of the array is a subtype of the array's value parameter. *)
-    let arry_pty = Lift.ty ~prefix renv ety in
-    let element_pty = (cow_array ~pos renv arry_pty).a_value in
+  let add_element_dependencies env exprs element_pty =
     let mk_element_subtype env exp =
       let (env, pty) = expr env exp in
       Env.acc env (subtype ~pos pty element_pty)
     in
-    let env = List.fold ~f:mk_element_subtype ~init:env exprs in
+    List.fold ~f:mk_element_subtype ~init:env exprs
+  in
+  (* Any copy-on-write collection with only values such as vec, keyset,
+     ImmVector. *)
+  let cow_array_literal ~prefix exprs =
+    let arry_pty = Lift.ty ~prefix renv ety in
+    let element_pty = (cow_array ~pos renv arry_pty).a_value in
+    (* Each element is a subtype of the collection's value. *)
+    let env = add_element_dependencies env exprs element_pty in
     (env, arry_pty)
   in
-  let dict_literal ~prefix fields =
-    (* Each field's key and value are subtypes of the array key and value
-       policy types. *)
+  (* Anything class that is a Collection, but in particular Vector and Set. *)
+  let mut_array_literal ~prefix exprs =
+    let class_pty = Lift.ty ~prefix renv ety in
+    let class_ = class_ pos "mutable array literal is not a class" class_pty in
+    let rec find_element_ty ty =
+      match T.get_node ty with
+      | T.Tclass (_, _, [element_ty]) -> Some element_ty
+      | T.Tintersection tys -> List.find_map tys find_element_ty
+      | _ -> None
+    in
+    let element_pty =
+      match find_element_ty ety with
+      | Some element_ty -> Lift.ty ~lump:class_.c_lump renv element_ty
+      | None ->
+        Errors.unknown_information_flow pos "mutable collection literal";
+        Tprim (Env.new_policy_var renv "fake_element")
+    in
+    let env = Env.acc env (add_dependencies ~pos [class_.c_self] element_pty) in
+    (* Each element is a subtype of the collection's value. *)
+    let env = add_element_dependencies env exprs element_pty in
+    (env, class_pty)
+  in
+  let add_key_value_dependencies env fields key_pty value_pty =
+    let mk_field_subtype env (key, value) =
+      let subtype = subtype ~pos in
+      let (env, key_pty') = expr env key in
+      let (env, value_pty') = expr env value in
+      Env.acc env @@ fun acc ->
+      acc |> subtype key_pty' key_pty |> subtype value_pty' value_pty
+    in
+    List.fold ~f:mk_field_subtype ~init:env fields
+  in
+  (* Any copy-on-write collection with keys and values such as dict, ImmMap,
+     ConstMap. *)
+  let cow_keyed_array_literal ~prefix fields =
     let dict_pty = Lift.ty ~prefix renv ety in
     let arr = cow_array ~pos renv dict_pty in
-    let mk_element_subtype env (key, value) =
-      let subtype = subtype ~pos in
-      let (env, key_pty) = expr env key in
-      let (env, value_pty) = expr env value in
-      Env.acc env @@ fun acc ->
-      acc |> subtype key_pty arr.a_key |> subtype value_pty arr.a_value
-    in
-    let env = List.fold ~f:mk_element_subtype ~init:env fields in
+    (* Each field is a subtype of collection keys and values. *)
+    let env = add_key_value_dependencies env fields arr.a_key arr.a_value in
     (env, dict_pty)
+  in
+  (* Any class that is a KeyedCollection, but in particular Map. *)
+  let mut_keyed_array_literal ~prefix fields =
+    (* Each element of the array is a subtype of the array's value parameter. *)
+    let class_pty = Lift.ty ~prefix renv ety in
+    let class_ = class_ pos "mutable array literal is not a class" class_pty in
+    let rec find_key_value_tys ty =
+      match T.get_node ty with
+      | T.Tclass (_, _, [key_ty; value_ty]) -> Some (key_ty, value_ty)
+      | T.Tintersection tys -> List.find_map tys find_key_value_tys
+      | _ -> None
+    in
+    let (key_pty, value_pty) =
+      match find_key_value_tys ety with
+      | Some (key_ty, value_ty) ->
+        ( Lift.ty ~lump:class_.c_lump renv key_ty,
+          Lift.ty ~lump:class_.c_lump renv value_ty )
+      | None ->
+        Errors.unknown_information_flow pos "mutable collection literal";
+        ( Tprim (Env.new_policy_var renv "fake_key"),
+          Tprim (Env.new_policy_var renv "fake_value") )
+    in
+    let env = Env.acc env (add_dependencies ~pos [class_.c_self] key_pty) in
+    let env = Env.acc env (add_dependencies ~pos [class_.c_self] value_pty) in
+    (* Each field is a subtype of collection keys and values. *)
+    let env = add_key_value_dependencies env fields key_pty value_pty in
+    (env, class_pty)
   in
   let funargs env =
     let f env e =
@@ -1209,15 +1273,21 @@ let rec expr ~pos renv (env : Env.expr_env) (((epos, ety), e) : Tast.expr) =
         in
         call env (Clocal ifc_fty) None
     end
-  | A.Varray (_, exprs) -> vec_literal ~prefix:"varray" exprs
+  | A.Varray (_, exprs) -> cow_array_literal ~prefix:"varray" exprs
   | A.ValCollection
       (((A.Vec | A.Keyset | A.ImmSet | A.ImmVector) as kind), _, exprs) ->
     let prefix = A.show_vc_kind kind in
-    vec_literal ~prefix exprs
-  | A.Darray (_, fields) -> dict_literal ~prefix:"darray" fields
+    cow_array_literal ~prefix exprs
+  | A.ValCollection (((A.Vector | A.Set) as kind), _, exprs) ->
+    let prefix = A.show_vc_kind kind in
+    mut_array_literal ~prefix exprs
+  | A.Darray (_, fields) -> cow_keyed_array_literal ~prefix:"darray" fields
   | A.KeyValCollection (((A.Dict | A.ImmMap) as kind), _, fields) ->
     let prefix = A.show_kvc_kind kind in
-    dict_literal ~prefix fields
+    cow_keyed_array_literal ~prefix fields
+  | A.KeyValCollection ((A.Map as kind), _, fields) ->
+    let prefix = A.show_kvc_kind kind in
+    mut_keyed_array_literal ~prefix fields
   | A.Array_get (arry, ix_opt) ->
     (* Evaluate the array *)
     let (env, arry_pty) = expr env arry in

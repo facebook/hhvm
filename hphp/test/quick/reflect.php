@@ -25,4 +25,5 @@ function dump($x) {
 
   var_dump(type_structure(Foo::class, 'Tvec'));
   var_dump(gettype(vec[]));
+  var_dump(gettype(Foo::class));
 }

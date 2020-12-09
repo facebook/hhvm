@@ -1191,7 +1191,10 @@ struct RuntimeOption {
   F(int32_t, EmitClassPointers, 0)                                      \
   /* When this flag is on, var_dump for
    * classes and lazy classes outputs string(...). */                   \
-  F(bool, ClassAsStringVarDump, false)                                  \
+  F(bool, ClassAsStringVarDump, true)                                   \
+  /* When this flag is on, gettype for
+   * classes and lazy classes outputs string. */                        \
+  F(bool, ClassAsStringGetType, true)                                   \
   /* false to skip type refinement for ClsMeth type at HHBBC. */        \
   F(bool, IsCompatibleClsMethType, false)                               \
   /* Raise warning if a ClsMeth type is compared to other types. */     \

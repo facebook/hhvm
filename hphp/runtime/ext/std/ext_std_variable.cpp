@@ -76,6 +76,10 @@ String HHVM_FUNCTION(gettype, const Variant& v) {
   if (isArrayLikeType(v.getType()) && v.getArrayData()->isLegacyArray()) {
     return s_array;
   }
+  if (RuntimeOption::EvalClassAsStringGetType &&
+      (v.isLazyClass() || v.isClass())) {
+    return s_string;
+  }
   return getDataTypeString(v.getType());
 }
 

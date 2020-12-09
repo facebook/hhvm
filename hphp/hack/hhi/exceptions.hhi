@@ -139,6 +139,11 @@ class DomainException extends LogicException {}
 class InvalidArgumentException extends LogicException {}
 class LengthException extends LogicException {}
 class OutOfRangeException extends LogicException {}
+final class InvalidCallbackArgumentException extends LogicException {}
+final class InvalidForeachArgumentException extends LogicException {}
+final class TypecastException extends LogicException {}
+final class UndefinedPropertyException extends LogicException {}
+final class UndefinedVariableException extends LogicException {}
 
 class RuntimeException extends Exception {}
 class OutOfBoundsException extends RuntimeException {}

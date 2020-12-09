@@ -137,3 +137,28 @@ class UnexpectedValueException extends RuntimeException {}
  * Exception thrown if as-expression type assertion is violated
  */
 final class TypeAssertionException extends RuntimeException {}
+
+/**
+ * Exception thrown when an invalid argument is used as a callback.
+ */
+final class InvalidCallbackArgumentException extends LogicException {}
+
+/**
+ * Exception thrown when attempting to foreach over a non-Traversable.
+ */
+final class InvalidForeachArgumentException extends LogicException {}
+
+/**
+ * Exception thrown when performing an invalid type coercion.
+ */
+final class TypecastException extends LogicException {}
+
+/**
+ * Exception thrown when accessing a property not defined on an object.
+ */
+final class UndefinedPropertyException extends LogicException {}
+
+/**
+ * Exception thrown when attempting to use a previously undeclared variable.
+ */
+final class UndefinedVariableException extends LogicException {}

@@ -124,3 +124,6 @@ darray(3) {
 
 Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 96
 int(3)
+
+Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 97
+int(3)

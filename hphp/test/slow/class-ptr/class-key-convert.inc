@@ -94,6 +94,7 @@ function shape_fun() {
   $x[Fizz::class] = 4;
   var_dump($x);
   var_dump(idx($x, Foo::class));
+  var_dump(Shapes::idx(__hhvm_intrinsics\launder_value($x), Foo::class, true));
 }
 
 function convert_key() {

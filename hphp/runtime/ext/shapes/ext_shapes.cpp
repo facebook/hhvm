@@ -42,7 +42,8 @@ TypedValue shapes_idx(const Class* self, const Variant& maybe_shape,
                       TypedValue key, TypedValue def /*= uninit */) {
   if (maybe_shape.isNull()) {
     // still check second arg type
-    if (!(isIntType(type(key)) || isStringType(type(key)))) {
+    if (!(isIntType(type(key)) || isStringType(type(key)) ||
+          isClassType(type(key)) || isLazyClassType(type(key)))) {
       raiseExpectedArrayKey(key);
       not_reached();
     }
@@ -50,6 +51,7 @@ TypedValue shapes_idx(const Class* self, const Variant& maybe_shape,
   }
 
   const Array& shape = maybe_shape.asCArrRef();
+  key = tvClassToString(key);
   if (isIntType(type(key))) {
     auto const result = shape->get(val(key).num);
     if (result.is_init()) return tvReturn(tvAsCVarRef(result));

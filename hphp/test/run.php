@@ -453,6 +453,7 @@ function get_options($argv) {
     'write-to-checkout' => '',
     'bespoke' => '',
     'hadva' => '',
+    'lazyclass' => '',
   ];
   $options = darray[];
   $files = varray[];
@@ -836,6 +837,9 @@ function extra_args($options): string {
     $args .= ' -vEval.HackArrDVArrMark=true';
   }
 
+  if (isset($options['lazyclass'])) {
+    $args .= ' -vEval.EmitClassPointers=2';
+  }
   return $args;
 }
 
@@ -2032,6 +2036,11 @@ function skip_test($options, $test, $run_skipif = true): ?string {
   if (isset($options['hadva']) &&
       file_exists("$test.$no_hadva_tag")) {
       return 'skip-hadva';
+  }
+  $no_lazyclass_tag = "nolazyclass";
+  if (isset($options['lazyclass']) &&
+      file_exists("$test.$no_lazyclass_tag")) {
+      return 'skip-lazyclass';
   }
 
   if (!$run_skipif) return null;

@@ -145,6 +145,29 @@ ArrayData* asArray(ObjectData* obj) {
   not_reached();
 }
 
+void replaceArray(ObjectData* obj, ArrayData* ad) {
+  assertx(obj->isCollection());
+  switch (obj->collectionType()) {
+  case CollectionType::ImmVector:
+  case CollectionType::Vector: {
+    auto const collection = static_cast<BaseVector*>(obj);
+    decRefArr(collection->arrayData());
+    return collection->setArrayData(ad);
+  }
+  case CollectionType::ImmMap:
+  case CollectionType::Map:
+  case CollectionType::ImmSet:
+  case CollectionType::Set: {
+    auto const collection = static_cast<HashCollection*>(obj);
+    decRefArr(collection->arrayData()->asArrayData());
+    return collection->setArrayData(MixedArray::asMixed(ad));
+  }
+  case CollectionType::Pair:
+    always_assert(false);
+  }
+  not_reached();
+}
+
 /////////////////////////////////////////////////////////////////////////////
 // Deep Copy
 

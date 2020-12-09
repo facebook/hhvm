@@ -307,6 +307,7 @@ ArrayData* tagStaticArr(ArrayData* ad, Tag tag = {});
 ///////////////////////////////////////////////////////////////////////////////
 
 namespace TagTVFlags {
+constexpr int64_t TAG_PROVENANCE_HERE_MUTATE_COLLECTIONS = 1;
 }
 
 /*

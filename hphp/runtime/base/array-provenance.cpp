@@ -21,10 +21,12 @@
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/backtrace.h"
+#include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/packed-array.h"
+#include "hphp/runtime/base/req-hash-set.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/srckey.h"
 #include "hphp/runtime/vm/vm-regs.h"
@@ -35,7 +37,6 @@
 #include "hphp/util/type-traits.h"
 
 #include <folly/AtomicHashMap.h>
-#include <folly/container/F14Map.h>
 #include <folly/Format.h>
 #include <folly/SharedMutex.h>
 #include <tbb/concurrent_hash_map.h>
@@ -484,13 +485,29 @@ namespace {
 
 static auto const kMaxMutationStackDepth = 512;
 
-template <typename Mutation>
+using IgnoreCollections = bool;
+using MutateCollections = req::fast_map<HeapObject*, ArrayData*>;
+
+template <typename Mutation, typename Collections = IgnoreCollections>
 struct MutationState {
   Mutation& mutation;
   const char* function_name;
   bool recursive = true;
   bool raised_stack_notice = false;
+  Collections visited{};
 };
+
+template <typename State>
+constexpr bool shouldMutateCollections() {
+  auto constexpr IsIgnoreCollections =
+    std::is_same<decltype(State::visited), IgnoreCollections>::value;
+  auto constexpr IsMutateCollections =
+    std::is_same<decltype(State::visited), MutateCollections>::value;
+
+  static_assert(IsIgnoreCollections || IsMutateCollections);
+
+  return IsMutateCollections;
+}
 
 template <typename State>
 ArrayData* apply_mutation(TypedValue tv, State& state,
@@ -518,11 +535,12 @@ ArrayData* apply_mutation_fast(ArrayData* in, ArrayData* result,
 
     auto const next = make_array_like_tv(ad);
     result = result ? result : cow ? Array::Copy(in) : in;
-    assertx(result->hasExactlyOneRef());
+    assertx(result->hasExactlyOneRef() || shouldMutateCollections<State>());
     assertx(Array::IterEnd(result) == Array::IterEnd(in));
     tvMove(next, LvalAtIterPos<Array>(result, pos));
   }
-  FTRACE(1, "Depth {}: {}\n", depth, result && result != in ? "copy" : "reuse");
+  FTRACE(1, "Depth {}: {} {}\n", depth,
+         result && result != in ? "copy" : "reuse", in);
   return result == in ? nullptr : result;
 }
 
@@ -548,8 +566,116 @@ ArrayData* apply_mutation_slow(ArrayData* in, ArrayData* result,
       assertx(result->hasExactlyOneRef());
     }
   });
-  FTRACE(1, "Depth {}: {}\n", depth, result && result != in ? "copy" : "reuse");
+  FTRACE(1, "Depth {}: {} {}\n", depth,
+         result && result != in ? "copy" : "reuse", in);
   return result == in ? nullptr : result;
+}
+
+template <typename State>
+ArrayData* apply_mutation_to_array(ArrayData* in, State& state,
+                                   bool cow, uint32_t depth) {
+  FTRACE(1, "Depth {}: mutating {} (cow = {})\n", depth, in, cow);
+
+  // Apply the mutation to the top-level array.
+  cow |= in->cowCheck();
+  auto result = state.mutation(in, cow);
+  if (!state.recursive) {
+    FTRACE(1, "Depth {}: {} {}\n", depth, result ? "copy" : "reuse", in);
+    return result;
+  }
+
+  // Recursively apply the mutation to the array's contents. For efficiency,
+  // we do the layout check outside of the iteration loop.
+  if (in->hasVanillaPackedLayout()) {
+    return apply_mutation_fast<PackedArray>(in, result, state, cow, depth);
+  } else if (in->hasVanillaMixedLayout()) {
+    return apply_mutation_fast<MixedArray>(in, result, state, cow, depth);
+  }
+  return apply_mutation_slow(in, result, state, cow, depth);
+}
+
+template <typename State>
+ArrayData* apply_mutation_ignore_collections(TypedValue tv, State& state,
+                                             bool cow, uint32_t depth) {
+  if (!tvIsArrayLike(tv) || tvIsKeyset(tv)) {
+    return nullptr;
+  }
+  assertx(tvIsArray(tv) || tvIsVec(tv) || tvIsDict(tv));
+  auto const arr = val(tv).parr;
+  return apply_mutation_to_array(arr, state, cow, depth);
+}
+
+template <typename State>
+ArrayData* apply_mutation_mutate_collections(TypedValue tv, State& state,
+                                             bool cow, uint32_t depth) {
+  // Visit each collection exactly once. When we do, we'll first mutate its
+  // inner array and then replace it, destroying the old one.
+  if (tvIsObject(tv) && val(tv).pobj->isCollection()) {
+    auto const obj = val(tv).pobj;
+    auto const ad = collections::asArray(obj);
+    if (!ad) return nullptr;
+    if (!state.visited.insert({obj, nullptr}).second) return nullptr;
+    auto result = apply_mutation(make_array_like_tv(ad), state, false, depth);
+    if (result != nullptr) collections::replaceArray(obj, result);
+    return nullptr;
+  }
+
+  if (!tvIsArrayLike(tv) || tvIsKeyset(tv)) {
+    return nullptr;
+  }
+  assertx(tvIsArray(tv) || tvIsVec(tv) || tvIsDict(tv));
+  auto const arr = val(tv).parr;
+
+  // We may revisit arrays. We store a cached value of nullptr the first time
+  // we visit any array. After we've evaluated it, we cache the final result.
+  //
+  // If we revisit an array before we've completed evaluating it, we must do
+  // something slow but correct. We handle this case by copying the array to
+  // get a new one (guaranteed to not be visited) and immediately caching it.
+  // We then mutate the copied array.
+  //
+  // It's critical that we can operate on the copy in place: that's what lets
+  // us hand it out as the answer the next time we visit the same array before
+  // before we've finished evaluating it! We use an always_assert to enforce
+  // this invariant in all environments.
+  //
+  // Overall, we visit each array in the input at most two times, which gives
+  // us a reasonable asymptotic runtime bound even on complex recursive cases.
+  auto const insert = state.visited.insert({arr, nullptr});
+  auto const cached = insert.first->second;
+  if (cached) {
+    cached->incRefCount();
+    return cached;
+  } else if (!insert.second) {
+    // NOTE: There is no longer any general-purpose API to copy an array-like.
+    // Certain empty bespoke array-like classes do not provide this facility.
+    //
+    // But we can still copy our input, because a) we know it's a dvarray,
+    // vec, or dict, and b) we only use this "mutate collections" option when
+    // array provenance is on, implying that bespoke array-likes are off.
+    //
+    // Since this invariant is delicate, we always_assert it. (If we break it
+    // in the future, we can "copy" an array by first escalating to vanilla.)
+    //
+    // Note that we may inc-ref and hand out this cached array in a recursive
+    // call issued while mutating it. The mutation only works because the two
+    // array types here are handled by apply_mutation_fast, which specifically
+    // allows for a mutation of arrays with refcount > 1 (see above).
+    auto const copy = [&]{
+      if (arr->hasVanillaPackedLayout()) return PackedArray::Copy(arr);
+      if (arr->hasVanillaMixedLayout())  return MixedArray::Copy(arr);
+      always_assert(false);
+    }();
+    insert.first->second = copy;
+    assertx(copy->hasExactlyOneRef());
+    auto const result = apply_mutation_to_array(copy, state, false, depth);
+    always_assert(result == nullptr);
+    return copy;
+  }
+
+  auto const result = apply_mutation_to_array(arr, state, cow, depth);
+  state.visited.insert({arr, result ? result : arr});
+  return result;
 }
 
 // This function applies `state.mutation` to `tv` to get a modified array-like.
@@ -566,9 +692,6 @@ ArrayData* apply_mutation_slow(ArrayData* in, ArrayData* result,
 // to handle cases such as a refcount 1 array contained in a refcount 2 array;
 // even though cowCheck return false for the refcount 1 array, we still need to
 // copy it to get a new value to store in the COW-ed containing array.
-//
-// This method doesn't recurse into object properties; instead, if we encounter
-// an object, we'll log (up to one) notice including `state.function_name`.
 template <typename State>
 ArrayData* apply_mutation(TypedValue tv, State& state,
                           bool cow, uint32_t depth) {
@@ -580,27 +703,10 @@ ArrayData* apply_mutation(TypedValue tv, State& state,
     return nullptr;
   }
 
-  if (!isArrayLikeType(type(tv))) {
-    return nullptr;
+  if constexpr (shouldMutateCollections<State>()) {
+    return apply_mutation_mutate_collections(tv, state, cow, depth);
   }
-
-  // Apply the mutation to the top-level array.
-  auto const in = val(tv).parr;
-  cow |= in->cowCheck();
-  auto result = state.mutation(in, cow);
-  if (!state.recursive) {
-    FTRACE(1, "Depth {}: {}\n", depth, result ? "copy" : "reuse");
-    return result;
-  }
-
-  // Recursively apply the mutation to the array's contents. For efficiency,
-  // we do the layout check outside of the iteration loop.
-  if (in->hasVanillaPackedLayout()) {
-    return apply_mutation_fast<PackedArray>(in, result, state, cow, depth);
-  } else if (in->hasVanillaMixedLayout()) {
-    return apply_mutation_fast<MixedArray>(in, result, state, cow, depth);
-  }
-  return apply_mutation_slow(in, result, state, cow, depth);
+  return apply_mutation_ignore_collections(tv, state, cow, depth);
 }
 
 TypedValue markTvImpl(TypedValue in, bool legacy, bool recursive) {
@@ -663,7 +769,8 @@ TypedValue markTvImpl(TypedValue in, bool legacy, bool recursive) {
   return ad ? make_array_like_tv(ad) : tvReturn(tvAsCVarRef(&in));
 }
 
-TypedValue tagTvImpl(TypedValue in, int64_t flags) {
+template <typename Collections>
+TypedValue tagTvImpl(TypedValue in) {
   // Closure state: an expensive-to-compute provenance tag.
   folly::Optional<arrprov::Tag> tag = folly::none;
 
@@ -681,7 +788,8 @@ TypedValue tagTvImpl(TypedValue in, int64_t flags) {
     return cow ? result : nullptr;
   };
 
-  auto state = MutationState<decltype(tag_tv)>{tag_tv, "tag_provenance_here"};
+  auto state = MutationState<decltype(tag_tv), Collections>{
+    tag_tv, "tag_provenance_here"};
   auto const ad = apply_mutation(in, state);
   return ad ? make_array_like_tv(ad) : tvReturn(tvAsCVarRef(&in));
 }
@@ -690,7 +798,9 @@ TypedValue tagTvImpl(TypedValue in, int64_t flags) {
 
 TypedValue tagTvRecursively(TypedValue in, int64_t flags) {
   if (!RO::EvalArrayProvenance) return tvReturn(tvAsCVarRef(&in));
-  return tagTvImpl(in, flags);
+  return flags & TagTVFlags::TAG_PROVENANCE_HERE_MUTATE_COLLECTIONS
+    ? tagTvImpl<MutateCollections>(in)
+    : tagTvImpl<IgnoreCollections>(in);
 }
 
 TypedValue markTvRecursively(TypedValue in, bool legacy) {

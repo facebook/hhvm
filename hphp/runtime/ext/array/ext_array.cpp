@@ -3218,10 +3218,8 @@ struct ArrayExtension final : Extension {
     HHVM_RC_INT_SAME(SORT_REGULAR);
     HHVM_RC_INT_SAME(SORT_STRING);
 
-    HHVM_RC_INT(
-        TAG_PROVENANCE_HERE_DONT_WARN_ON_OBJECTS,
-        1
-    );
+    HHVM_RC_INT(TAG_PROVENANCE_HERE_MUTATE_COLLECTIONS,
+                arrprov::TagTVFlags::TAG_PROVENANCE_HERE_MUTATE_COLLECTIONS);
 
     HHVM_FE(array_change_key_case);
     HHVM_FE(array_chunk);

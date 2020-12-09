@@ -111,6 +111,12 @@ inline const ArrayData* asArray(const ObjectData* obj) {
   return asArray(const_cast<ObjectData*>(obj));
 }
 
+/*
+ * Replace the inner-array for array-backed collections. May not be called on
+ * non-array-backed collections. This method is dangerous - take care!
+ */
+void replaceArray(ObjectData* obj, ArrayData* ad);
+
 /////////////////////////////////////////////////////////////////////////////
 // Read/Write
 

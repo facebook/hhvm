@@ -1,5 +1,5 @@
 class(A)
-class('A')
+A::class
 class(A)
 class(A)
 

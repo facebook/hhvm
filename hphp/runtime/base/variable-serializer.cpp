@@ -1512,9 +1512,8 @@ void VariableSerializer::serializeClass(const Class* cls) {
   switch (getType()) {
     case Type::VarExport:
     case Type::PHPOutput:
-      m_buf->append("class(");
-      write(cls->name()->data(), cls->name()->size());
-      m_buf->append(')');
+      m_buf->append(cls->name());
+      m_buf->append("::class");
       break;
     case Type::VarDump:
       if (RuntimeOption::EvalClassAsStringVarDump) {
@@ -1550,9 +1549,8 @@ void VariableSerializer::serializeLazyClass(LazyClassData lcls) {
   switch (getType()) {
     case Type::VarExport:
     case Type::PHPOutput:
-      m_buf->append("class(");
-      write(lcls.name()->data(), lcls.name()->size());
-      m_buf->append(')');
+      m_buf->append(lcls.name());
+      m_buf->append("::class");
       break;
     case Type::VarDump:
       if (RuntimeOption::EvalClassAsStringVarDump) {

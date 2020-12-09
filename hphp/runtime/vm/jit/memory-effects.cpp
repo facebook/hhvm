@@ -770,7 +770,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case CallBuiltin:
     {
       AliasClass out_stk = AEmpty;
-      auto const callee = inst.extra<CallBuiltin>()->callee;
+      auto const extra = inst.extra<CallBuiltin>();
+      auto const callee = extra->callee;
       auto const stk = [&] () -> AliasClass {
         AliasClass ret = AEmpty;
         for (auto i = uint32_t{2}; i < inst.numSrcs(); ++i) {
@@ -787,17 +788,12 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
         }
         return ret;
       }();
-      if (callee->isFoldable()) {
-        return may_load_store_kill(
-          stk | AHeapAny, out_stk | AHeapAny, AMIStateAny
-        );
-      } else {
-        return may_load_store_kill(
-          stk | AHeapAny | ARdsAny,
-          out_stk | AHeapAny | ARdsAny,
-          AMIStateAny
-        );
-      }
+      auto const foldable = callee->isFoldable() ? AEmpty : ARdsAny;
+      return may_load_store_kill(
+        stk | AHeapAny | foldable,
+        out_stk | AHeapAny | foldable,
+        stack_below(inst.src(1), extra->spOffset - 1) | AMIStateAny
+      );
     }
 
   // Resumable suspension takes everything from the frame and moves it into the

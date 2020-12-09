@@ -1183,6 +1183,7 @@ struct RuntimeOption {
   /* Raise warning when class pointers are used as strings. */          \
   F(bool, RaiseClassConversionWarning, false)                           \
   F(bool, EmitClsMethPointers, true)                                    \
+  F(bool, FoldLazyClassKeys, true)                                      \
   /* EmitClassPointers:
    * 0 => convert Foo::class to string "Foo"
    * 1 => convert Foo::class to class pointer

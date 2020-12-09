@@ -820,12 +820,21 @@ void VariableUnserializer::unserializeVariant(
   case 'l':
     {
       String c = unserializeString();
-      tvMove(
-        make_tv<KindOfLazyClass>(
-          LazyClassData::create(makeStaticString(c.get()))
-        ),
-        self
-      );
+      if (mode == UnserializeMode::Value) {
+        tvMove(
+          make_tv<KindOfLazyClass>(
+            LazyClassData::create(makeStaticString(c.get()))
+          ),
+          self
+        );
+      } else {
+        if (RuntimeOption::EvalRaiseClassConversionWarning) {
+          raise_warning(Strings::CLASS_TO_STRING);
+        }
+        tvMove(
+          make_tv<KindOfPersistentString>(makeStaticString(c.get())), self
+        );
+      }
     }
     break;
   case 's':

@@ -161,6 +161,7 @@ prefixed_flags!(
     EMIT_INST_METH_POINTERS,
     EMIT_METH_CALLER_FUNC_POINTERS,
     ENABLE_INTRINSICS_EXTENSION,
+    FOLD_LAZY_CLASS_KEYS,
     HACK_ARR_COMPAT_NOTICES,
     HACK_ARR_DV_ARR_MARK,
     HACK_ARR_DV_ARRS,
@@ -173,6 +174,7 @@ impl Default for HhvmFlags {
         HhvmFlags::EMIT_CLS_METH_POINTERS
             | HhvmFlags::EMIT_INST_METH_POINTERS
             | HhvmFlags::EMIT_METH_CALLER_FUNC_POINTERS
+            | HhvmFlags::FOLD_LAZY_CLASS_KEYS
     }
 }
 
@@ -680,6 +682,9 @@ mod tests {
   "hhvm.enable_intrinsics_extension": {
     "global_value": false
   },
+  "hhvm.fold_lazy_class_keys": {
+    "global_value": true
+  },
   "hhvm.hack.lang.abstract_static_props": {
     "global_value": false
   },
@@ -782,7 +787,7 @@ mod tests {
                 m.insert("bar".to_owned(), "baz".to_owned());
                 m.into()
             }),
-            flags: HhvmFlags::EMIT_METH_CALLER_FUNC_POINTERS,
+            flags: HhvmFlags::EMIT_METH_CALLER_FUNC_POINTERS | HhvmFlags::FOLD_LAZY_CLASS_KEYS,
             ..Default::default()
         });
         assert_eq!(HHVM_1, serde_json::to_string_pretty(&hhvm).unwrap(),);
@@ -1169,5 +1174,6 @@ bitflags! {
         const ALLOW_UNSTABLE_FEATURES = 1 << 55;
         const DISALLOW_HASH_COMMENTS = 1 << 56;
         const DISALLOW_FUN_AND_CLS_METH_PSEUDO_FUNCS = 1 << 57;
+        const FOLD_LAZY_CLASS_KEYS = 1 << 58;
     }
 }

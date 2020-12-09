@@ -242,8 +242,14 @@ fn key_expr_to_typed_value(
     expr: &tast::Expr,
 ) -> Result<TypedValue, Error> {
     let tv = expr_to_typed_value(emitter, ns, expr)?;
+    let fold_lc = emitter
+        .options()
+        .hhvm
+        .flags
+        .contains(HhvmFlags::FOLD_LAZY_CLASS_KEYS);
     match tv {
         TypedValue::Int(_) | TypedValue::String(_) => Ok(tv),
+        TypedValue::LazyClass(_) if fold_lc => Ok(tv),
         _ => Err(Error::NotLiteral),
     }
 }
@@ -254,8 +260,14 @@ fn keyset_value_afield_to_typed_value(
     afield: &tast::Afield,
 ) -> Result<TypedValue, Error> {
     let tv = value_afield_to_typed_value(emitter, ns, afield)?;
+    let fold_lc = emitter
+        .options()
+        .hhvm
+        .flags
+        .contains(HhvmFlags::FOLD_LAZY_CLASS_KEYS);
     match tv {
         TypedValue::Int(_) | TypedValue::String(_) => Ok(tv),
+        TypedValue::LazyClass(_) if fold_lc => Ok(tv),
         _ => Err(Error::NotLiteral),
     }
 }
@@ -443,6 +455,15 @@ pub fn expr_to_typed_value_(
                 .map(|e| {
                     expr_to_typed_value(emitter, ns, e).and_then(|tv| match tv {
                         TypedValue::Int(_) | TypedValue::String(_) => Ok(tv),
+                        TypedValue::LazyClass(_)
+                            if emitter
+                                .options()
+                                .hhvm
+                                .flags
+                                .contains(HhvmFlags::FOLD_LAZY_CLASS_KEYS) =>
+                        {
+                            Ok(tv)
+                        }
                         _ => Err(Error::NotLiteral),
                     })
                 })

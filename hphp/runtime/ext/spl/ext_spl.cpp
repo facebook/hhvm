@@ -99,8 +99,10 @@ Variant HHVM_FUNCTION(hphp_get_this) {
 Variant HHVM_FUNCTION(class_implements, const Variant& obj,
                                         bool autoload /* = true */) {
   Class* cls;
-  if (obj.isString()) {
-    cls = Class::get(obj.getStringData(), autoload);
+  if (obj.isString() || obj.isLazyClass()) {
+    auto const name = obj.isString() ? obj.getStringData() :
+                                       obj.toLazyClassVal().name();
+    cls = Class::get(name, autoload);
     if (!cls) {
       String err = "class_implements(): Class %s does not exist";
       if (autoload) {
@@ -111,6 +113,8 @@ Variant HHVM_FUNCTION(class_implements, const Variant& obj,
     }
   } else if (obj.isObject()) {
     cls = obj.getObjectData()->getVMClass();
+  } else if (obj.isClass()) {
+    cls = obj.toClassVal();
   } else {
     raise_warning("class_implements(): object or string expected");
     return false;
@@ -127,8 +131,10 @@ Variant HHVM_FUNCTION(class_implements, const Variant& obj,
 Variant HHVM_FUNCTION(class_parents, const Variant& obj,
                                      bool autoload /* = true */) {
   Class* cls;
-  if (obj.isString()) {
-    cls = Class::get(obj.getStringData(), autoload);
+  if (obj.isString() || obj.isLazyClass()) {
+    auto const name = obj.isString() ? obj.getStringData() :
+                                       obj.toLazyClassVal().name();
+    cls = Class::get(name, autoload);
     if (!cls) {
       String err = "class_parents(): Class %s does not exist";
       if (autoload) {
@@ -139,6 +145,8 @@ Variant HHVM_FUNCTION(class_parents, const Variant& obj,
     }
   } else if (obj.isObject()) {
     cls = obj.getObjectData()->getVMClass();
+  } else if (obj.isClass()) {
+    cls = obj.toClassVal();
   } else {
     raise_warning("class_parents(): object or string expected");
     return false;
@@ -153,8 +161,10 @@ Variant HHVM_FUNCTION(class_parents, const Variant& obj,
 Variant HHVM_FUNCTION(class_uses, const Variant& obj,
                                   bool autoload /* = true */) {
   Class* cls;
-  if (obj.isString()) {
-    cls = Class::get(obj.getStringData(), autoload);
+  if (obj.isString() || obj.isLazyClass()) {
+    auto const name = obj.isString() ? obj.getStringData() :
+                                       obj.toLazyClassVal().name();
+    cls = Class::get(name, autoload);
     if (!cls) {
       String err = "class_uses(): Class %s does not exist";
       if (autoload) {
@@ -165,6 +175,8 @@ Variant HHVM_FUNCTION(class_uses, const Variant& obj,
     }
   } else if (obj.isObject()) {
     cls = obj.getObjectData()->getVMClass();
+  } else if (obj.isClass()) {
+    cls = obj.toClassVal();
   } else {
     raise_warning("class_uses(): object or string expected");
     return false;

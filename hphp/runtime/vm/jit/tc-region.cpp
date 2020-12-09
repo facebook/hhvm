@@ -1004,7 +1004,7 @@ void publishOptFunc(FuncMetaInfo info) {
 void relocatePublishSortedOptFuncs(std::vector<FuncMetaInfo> infos) {
   // Grab the session now (which includes a Treadmill::Session) so
   // that no Func's get destroyed during this step
-  ProfData::Session pds;
+  ProfData::Session pds(Treadmill::SessionKind::RetranslateAll);
   const bool serverMode = RuntimeOption::ServerExecutionMode();
 
   PrologueTCAMap prologueTCAs;

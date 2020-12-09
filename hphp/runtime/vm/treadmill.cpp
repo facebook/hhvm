@@ -115,12 +115,33 @@ struct GenCountGuard {
 
 //////////////////////////////////////////////////////////////////////
 
-pthread_t getOldestRequestThreadId() {
+/*
+ * Get the ID of the thread to abort in case the treadmill gets stuck for too
+ * long.  In general, this is the oldest thread, but special treatment is used
+ * for retranslate-all.  When the main retranslate-all thread gets stuck, it's
+ * often because it's waiting for one of the JIT worker threads, which do the
+ * bulk of the JITing.  In such cases, we want to abort the oldest JIT worker,
+ * to capture its backtrace, instead of the main retranslate-all thread.
+ */
+pthread_t getThreadIdToAbort() {
   int64_t oldestStart = s_oldestRequestInFlight.load(std::memory_order_relaxed);
+  TreadmillRequestInfo* oldest = nullptr;
+  TreadmillRequestInfo* oldestWorker = nullptr;
   for (auto& req : s_inflightRequests) {
-    if (req.startTime == oldestStart) return req.pthreadId;
+    if (req.startTime == oldestStart) oldest = &req;
+    if (req.sessionKind == SessionKind::TranslateWorker &&
+        (oldestWorker == nullptr || req.startTime < oldestWorker->startTime)) {
+      oldestWorker = &req;
+    }
   }
-  not_reached();
+  always_assert(oldest != nullptr);
+  if (oldest->sessionKind != SessionKind::RetranslateAll) {
+    return oldest->pthreadId;
+  }
+  if (oldestWorker != nullptr) {
+    return oldestWorker->pthreadId;
+  }
+  return oldest->pthreadId;
 }
 
 void checkOldest() {
@@ -133,8 +154,8 @@ void checkOldest() {
     auto msg = folly::format("Oldest request has been running for {} "
                              "seconds. Aborting the server.", ageOldest).str();
     Logger::Error(msg);
-    pthread_t oldestTid = getOldestRequestThreadId();
-    pthread_kill(oldestTid, SIGABRT);
+    pthread_t abortTid = getThreadIdToAbort();
+    pthread_kill(abortTid, SIGABRT);
   }
 }
 
@@ -318,6 +339,7 @@ char const* getSessionKindName(SessionKind value) {
     case SessionKind::RpcRequest: return "RpcRequest";
     case SessionKind::TranslateWorker: return "TranslateWorker";
     case SessionKind::Retranslate: return "Retranslate";
+    case SessionKind::RetranslateAll: return "RetranslateAll";
     case SessionKind::ProfData: return "ProfData";
     case SessionKind::UnitTests: return "UnitTests";
     case SessionKind::CompileRepo: return "CompileRepo";

@@ -40,6 +40,7 @@ enum class SessionKind {
   RpcRequest,
   TranslateWorker,
   Retranslate,
+  RetranslateAll,
   ProfData,
   UnitTests,
   CompileRepo,

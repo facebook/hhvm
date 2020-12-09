@@ -211,8 +211,8 @@ module NastCheck = struct
     (* | AsyncInInterfaceDEPRECATED [@value 3035] *)
     | AwaitInCoroutine [@value 3036]
     | YieldInCoroutine [@value 3037]
-    | SuspendOutsideOfCoroutine [@value 3038]
-    | SuspendInFinally [@value 3039]
+    (* | SuspendOutsideOfCoroutine [@value 3038] *)
+    (* | SuspendInFinally [@value 3039] *)
     (* | BreakContinueNNotSupportedDEPRECATED [@value 3040] *)
     | StaticMemoizedFunction [@value 3041]
     | InoutParamsInCoroutine [@value 3042]
@@ -438,9 +438,9 @@ module Typing = struct
     | UnknownFieldDisallowedInShape [@value 4166]
     | NullableCast [@value 4167]
     (* | PassByRefAnnotationMissingDEPRECATED [@value 4168] *)
-    | NonCallArgumentInSuspend [@value 4169]
-    | NonCoroutineCallInSuspend [@value 4170]
-    | CoroutineCallOutsideOfSuspend [@value 4171]
+    (* | NonCallArgumentInSuspend [@value 4169] *)
+    (* | NonCoroutineCallInSuspend [@value 4170] *)
+    (* | CoroutineCallOutsideOfSuspend [@value 4171] *)
     | FunctionIsNotCoroutine [@value 4172]
     | CoroutinnessMismatch [@value 4173]
     | ExpectingAwaitableReturnTypeHint [@value 4174]

@@ -168,7 +168,6 @@ let given_text_tokens =
     make_token_node "Static" "static" ();
     make_token_node "String" "string" ~allowed_as_identifier:true ();
     make_token_node "Super" "super" ~allowed_as_identifier:true ();
-    make_token_node "Suspend" "suspend" ~allowed_as_identifier:true ();
     make_token_node "Switch" "switch" ();
     make_token_node "This" "this" ~allowed_as_identifier:true ();
     make_token_node "Throw" "throw" ();

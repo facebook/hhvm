@@ -5032,7 +5032,6 @@ where
             DecoratedExpression(x) => match Self::token_kind(&x.decorator) {
                 Some(TokenKind::Clone) => err(self, errors::not_allowed_in_write("`clone`")),
                 Some(TokenKind::Await) => err(self, errors::not_allowed_in_write("`await`")),
-                Some(TokenKind::Suspend) => err(self, errors::not_allowed_in_write("`suspend`")),
                 Some(TokenKind::QuestionQuestion) => {
                     err(self, errors::not_allowed_in_write("`??` operator"))
                 }

@@ -2449,25 +2449,6 @@ and expr_
     in
     let (env, ty) = Async.overload_extract_from_awaitable env p rty in
     make_result env p (Aast.Await te) ty
-  | Suspend e ->
-    let (env, te, ty) =
-      match e with
-      | (_, Call (e, explicit_targs, el, unpacked_element)) ->
-        let env = Env.open_tyvars env p in
-        (fun (env, te, ty) ->
-          (Typing_solver.close_tyvars_and_solve env Errors.unify_error, te, ty))
-        @@ check_call
-             ~is_using_clause
-             ~expected
-             env
-             p
-             e
-             explicit_targs
-             el
-             unpacked_element
-      | _ -> expr env e
-    in
-    make_result env p (Aast.Suspend te) ty
   | New ((pos, c), explicit_targs, el, unpacked_element, p1) ->
     let env = might_throw env in
     let (env, tc, tal, tel, typed_unpack_element, ty, ctor_fty) =

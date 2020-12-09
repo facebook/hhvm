@@ -44,7 +44,6 @@ pub enum Operator {
     UnaryMinusOperator,
     NotOperator,
     LogicalNotOperator,
-    SuspendOperator,
     RemainderOperator,
     MultiplicationOperator,
     DivisionOperator,

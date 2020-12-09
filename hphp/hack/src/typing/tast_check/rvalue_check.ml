@@ -66,7 +66,6 @@ let visitor =
         this#disallow_non_returning (fun () -> this#on_expr env e1);
         this#on_expr env e2
       | List el -> List.iter el (this#on_expr env)
-      | Suspend e -> this#allow_non_returning (fun () -> this#on_expr env e)
       | _ ->
         if not !non_returning_allowed then check_valid_rvalue p env ty;
         this#disallow_non_returning (fun () -> super#on_expr env te)

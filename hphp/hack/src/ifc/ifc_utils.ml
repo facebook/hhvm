@@ -90,7 +90,6 @@ let expr_name = function
   | A.Yield _ -> "Yield"
   | A.Yield_break -> "Yield"
   | A.Await _ -> "Await"
-  | A.Suspend _ -> "Suspend"
   | A.List _ -> "List"
   | A.Cast _ -> "Cast"
   | A.Unop _ -> "Unop"

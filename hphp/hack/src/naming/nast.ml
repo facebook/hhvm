@@ -511,8 +511,6 @@ module Visitor_DEPRECATED = struct
 
       method on_await : 'a -> expr -> 'a
 
-      method on_suspend : 'a -> expr -> 'a
-
       method on_list : 'a -> expr list -> 'a
 
       method on_pair : 'a -> (targ * targ) option -> expr -> expr -> 'a
@@ -784,7 +782,6 @@ module Visitor_DEPRECATED = struct
         | Yield_break -> this#on_yield_break acc
         | Yield e -> this#on_yield acc e
         | Await e -> this#on_await acc e
-        | Suspend e -> this#on_suspend acc e
         | List el -> this#on_list acc el
         | Assert ae -> this#on_assert acc ae
         | Clone e -> this#on_clone acc e
@@ -955,8 +952,6 @@ module Visitor_DEPRECATED = struct
       method on_yield acc e = this#on_afield acc e
 
       method on_await acc e = this#on_expr acc e
-
-      method on_suspend acc e = this#on_expr acc e
 
       method on_list acc el = List.fold_left el ~f:this#on_expr ~init:acc
 

@@ -717,8 +717,6 @@ val continue_in_switch : Pos.t -> unit
 
 val await_in_sync_function : Pos.t -> unit
 
-val suspend_in_finally : Pos.t -> unit
-
 val static_memoized_function : Pos.t -> unit
 
 val magic : Pos.t * string -> unit

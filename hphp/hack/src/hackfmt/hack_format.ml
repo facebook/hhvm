@@ -1463,8 +1463,7 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
             TokenKind.(
               (match Token.kind x with
               | Await
-              | Clone
-              | Suspend ->
+              | Clone ->
                 Space
               | Print ->
                 if is_parenthesized then

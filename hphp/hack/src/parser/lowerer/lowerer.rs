@@ -1826,7 +1826,6 @@ where
                         Some(TK::Minus) => mk_unop(Uminus, expr),
                         Some(TK::Inout) => Ok(E_::mk_callconv(ast::ParamKind::Pinout, expr)),
                         Some(TK::Await) => Self::lift_await(pos, expr, env, location),
-                        Some(TK::Suspend) => Ok(E_::mk_suspend(expr)),
                         Some(TK::Clone) => Ok(E_::mk_clone(expr)),
                         Some(TK::Print) => Ok(E_::mk_call(
                             E::new(
@@ -2248,9 +2247,9 @@ where
             }
             Darray(_) | Varray(_) | Shape(_) | Collection(_) | Record(_) | Null | True | False
             | Id(_) | Clone(_) | ClassConst(_) | Int(_) | Float(_) | PrefixedString(_)
-            | String(_) | String2(_) | Yield(_) | YieldBreak | Await(_) | Suspend(_) | Cast(_)
-            | Unop(_) | Binop(_) | Eif(_) | New(_) | Efun(_) | Lfun(_) | Xml(_) | Import(_)
-            | Pipe(_) | Callconv(_) | Is(_) | As(_) => raise("Invalid lvalue"),
+            | String(_) | String2(_) | Yield(_) | YieldBreak | Await(_) | Cast(_) | Unop(_)
+            | Binop(_) | Eif(_) | New(_) | Efun(_) | Lfun(_) | Xml(_) | Import(_) | Pipe(_)
+            | Callconv(_) | Is(_) | As(_) => raise("Invalid lvalue"),
             _ => {}
         }
     }

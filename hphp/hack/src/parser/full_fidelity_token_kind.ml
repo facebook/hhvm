@@ -113,7 +113,6 @@ type t =
   | Static
   | String
   | Super
-  | Suspend
   | Switch
   | This
   | Throw
@@ -327,7 +326,6 @@ let from_string keyword ~only_reserved =
   | "static"                              -> Some Static
   | "string"       when not only_reserved -> Some String
   | "super"        when not only_reserved -> Some Super
-  | "suspend"      when not only_reserved -> Some Suspend
   | "switch"                              -> Some Switch
   | "this"         when not only_reserved -> Some This
   | "throw"                               -> Some Throw
@@ -515,7 +513,6 @@ let to_string kind =
   | Static                        -> "static"
   | String                        -> "string"
   | Super                         -> "super"
-  | Suspend                       -> "suspend"
   | Switch                        -> "switch"
   | This                          -> "this"
   | Throw                         -> "throw"

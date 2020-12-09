@@ -41,7 +41,6 @@ module type Sig = sig
   | UnaryMinusOperator
   | NotOperator
   | LogicalNotOperator
-  | SuspendOperator
   | RemainderOperator
   | MultiplicationOperator
   | DivisionOperator
@@ -117,7 +116,6 @@ module Impl : Sig = struct
   | UnaryMinusOperator
   | NotOperator
   | LogicalNotOperator
-  | SuspendOperator
   | RemainderOperator
   | MultiplicationOperator
   | DivisionOperator

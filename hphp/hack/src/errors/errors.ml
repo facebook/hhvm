@@ -1864,12 +1864,6 @@ let interface_use_trait p =
     p
     "Interfaces cannot use traits"
 
-let suspend_in_finally p =
-  add
-    (NastCheck.err_code NastCheck.SuspendInFinally)
-    p
-    "`suspend` is not allowed inside finally blocks."
-
 let static_memoized_function p =
   add
     (NastCheck.err_code NastCheck.StaticMemoizedFunction)

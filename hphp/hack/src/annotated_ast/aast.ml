@@ -192,7 +192,6 @@ and ('ex, 'fb, 'en, 'hi) expr_ =
   | Yield of ('ex, 'fb, 'en, 'hi) afield
   | Yield_break
   | Await of ('ex, 'fb, 'en, 'hi) expr
-  | Suspend of ('ex, 'fb, 'en, 'hi) expr
   | List of ('ex, 'fb, 'en, 'hi) expr list
   | Cast of hint * ('ex, 'fb, 'en, 'hi) expr
   | Unop of Ast_defs.uop * ('ex, 'fb, 'en, 'hi) expr

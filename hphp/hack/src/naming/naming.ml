@@ -2092,7 +2092,6 @@ and expr_ env p (e : Nast.expr_) =
   | Aast.Yield_break -> N.Yield_break
   | Aast.Yield e -> N.Yield (afield env e)
   | Aast.Await e -> N.Await (expr env e)
-  | Aast.Suspend e -> N.Suspend (expr env e)
   | Aast.List el -> N.List (exprl env el)
   | Aast.Cast (ty, e2) ->
     let ((p, x), hl) =

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<836b4aab1fc8f42247c099d7da09990d>>
+// @generated SignedSource<<85510c012ef204a0a9510b0b8565be59>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -1011,9 +1011,6 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
     pub fn mk_await(p0: Expr<Ex, Fb, En, Hi>) -> Self {
         Expr_::Await(Box::new(p0))
     }
-    pub fn mk_suspend(p0: Expr<Ex, Fb, En, Hi>) -> Self {
-        Expr_::Suspend(Box::new(p0))
-    }
     pub fn mk_list(p0: Vec<Expr<Ex, Fb, En, Hi>>) -> Self {
         Expr_::List(p0)
     }
@@ -1282,12 +1279,6 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
     pub fn is_await(&self) -> bool {
         match self {
             Expr_::Await(..) => true,
-            _ => false,
-        }
-    }
-    pub fn is_suspend(&self) -> bool {
-        match self {
-            Expr_::Suspend(..) => true,
             _ => false,
         }
     }
@@ -1615,12 +1606,6 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
     pub fn as_await(&self) -> Option<&Expr<Ex, Fb, En, Hi>> {
         match self {
             Expr_::Await(p0) => Some(&p0),
-            _ => None,
-        }
-    }
-    pub fn as_suspend(&self) -> Option<&Expr<Ex, Fb, En, Hi>> {
-        match self {
-            Expr_::Suspend(p0) => Some(&p0),
             _ => None,
         }
     }
@@ -1991,12 +1976,6 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
             _ => None,
         }
     }
-    pub fn as_suspend_mut(&mut self) -> Option<&mut Expr<Ex, Fb, En, Hi>> {
-        match self {
-            Expr_::Suspend(p0) => Some(p0.as_mut()),
-            _ => None,
-        }
-    }
     pub fn as_list_mut(&mut self) -> Option<&mut Vec<Expr<Ex, Fb, En, Hi>>> {
         match self {
             Expr_::List(p0) => Some(p0),
@@ -2364,12 +2343,6 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
     pub fn as_await_into(self) -> Option<Expr<Ex, Fb, En, Hi>> {
         match self {
             Expr_::Await(p0) => Some(*p0),
-            _ => None,
-        }
-    }
-    pub fn as_suspend_into(self) -> Option<Expr<Ex, Fb, En, Hi>> {
-        match self {
-            Expr_::Suspend(p0) => Some(*p0),
             _ => None,
         }
     }

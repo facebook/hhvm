@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ba580a9836dbb28844a7922f1de99fc7>>
+// @generated SignedSource<<a30b17550c1d756a7033aa36cf01c544>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -187,8 +187,6 @@ pub enum NastCheck {
     MultipleXhpCategory = 3032,
     AwaitInCoroutine = 3036,
     YieldInCoroutine = 3037,
-    SuspendOutsideOfCoroutine = 3038,
-    SuspendInFinally = 3039,
     StaticMemoizedFunction = 3041,
     InoutParamsInCoroutine = 3042,
     InoutParamsSpecial = 3043,
@@ -368,9 +366,6 @@ pub enum Typing {
     ArrayGetWithOptionalField = 4165,
     UnknownFieldDisallowedInShape = 4166,
     NullableCast = 4167,
-    NonCallArgumentInSuspend = 4169,
-    NonCoroutineCallInSuspend = 4170,
-    CoroutineCallOutsideOfSuspend = 4171,
     FunctionIsNotCoroutine = 4172,
     CoroutinnessMismatch = 4173,
     ExpectingAwaitableReturnTypeHint = 4174,

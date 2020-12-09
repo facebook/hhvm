@@ -70,7 +70,7 @@ impl Operator {
             | GreaterThanOrEqualOperator => 16,
             LeftShiftOperator | RightShiftOperator => 17,
             AdditionOperator | SubtractionOperator | ConcatenationOperator => 18,
-            MultiplicationOperator | DivisionOperator | RemainderOperator | SuspendOperator => 19,
+            MultiplicationOperator | DivisionOperator | RemainderOperator => 19,
             LogicalNotOperator | NotOperator | UnaryPlusOperator | UnaryMinusOperator => 20,
             InstanceofOperator | IsOperator | AsOperator | NullableAsOperator => 21,
             CastOperator
@@ -131,13 +131,12 @@ impl Operator {
             | RemainderAssignmentOperator | AndAssignmentOperator
             | OrAssignmentOperator | ExclusiveOrAssignmentOperator
             | LeftShiftAssignmentOperator | RightShiftAssignmentOperator
-            | PrintOperator | SuspendOperator | AwaitOperator => Assoc::RightAssociative,
+            | PrintOperator | AwaitOperator => Assoc::RightAssociative,
         }
     }
 
     pub fn prefix_unary_from_token(token: TokenKind) -> Operator {
         match token {
-            TokenKind::Suspend => SuspendOperator,
             TokenKind::Await => AwaitOperator,
             TokenKind::Exclamation => LogicalNotOperator,
             TokenKind::Tilde => NotOperator,

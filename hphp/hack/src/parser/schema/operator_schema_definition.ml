@@ -41,7 +41,6 @@ let operators =
     make_operator "UnaryMinus";
     make_operator "Not";
     make_operator "LogicalNot";
-    make_operator "Suspend";
     make_operator "Remainder";
     make_operator "Multiplication";
     make_operator "Division";

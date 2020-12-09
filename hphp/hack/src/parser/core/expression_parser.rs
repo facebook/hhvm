@@ -414,8 +414,7 @@ where
             TokenKind::Static => self.parse_anon_or_awaitable_or_scope_resolution_or_name(),
             TokenKind::Yield => self.parse_yield_expression(),
             TokenKind::Dollar => self.parse_dollar_expression(),
-            TokenKind::Suspend
-            | TokenKind::Exclamation
+            TokenKind::Exclamation
             | TokenKind::PlusPlus
             | TokenKind::MinusMinus
             | TokenKind::Tilde

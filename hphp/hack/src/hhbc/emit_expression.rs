@@ -532,9 +532,6 @@ pub fn emit_expr(emitter: &mut Emitter, env: &Env, expression: &tast::Expr) -> R
         Expr_::Lfun(_) => Err(unrecoverable(
             "expected Lfun to be converted to Efun during closure conversion emit_expr",
         )),
-        Expr_::Suspend(_) => Err(unrecoverable(
-            "Codegen for 'suspend' operator is not supported",
-        )),
         Expr_::List(_) => Err(emit_fatal::raise_fatal_parse(
             pos,
             "list() can only be used as an lvar. Did you mean to use tuple()?",

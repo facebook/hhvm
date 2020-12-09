@@ -1060,8 +1060,8 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                         | FunId(_) | Id(_) | Import(_) | Is(_) | KeyValCollection(_) | Lfun(_)
                         | List(_) | Lplaceholder(_) | Lvar(_) | MethodCaller(_) | MethodId(_)
                         | New(_) | ObjGet(_) | Omitted | Pair(_) | Pipe(_) | Record(_)
-                        | Shape(_) | SmethodId(_) | Suspend(_) | ValCollection(_) | Varray(_)
-                        | Xml(_) | Yield(_) | YieldBreak => None,
+                        | Shape(_) | SmethodId(_) | ValCollection(_) | Varray(_) | Xml(_)
+                        | Yield(_) | YieldBreak => None,
                     }
                 }
 
@@ -2290,7 +2290,6 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             | TokenKind::Require
             | TokenKind::Require_once
             | TokenKind::Return
-            | TokenKind::Suspend
             | TokenKind::Switch
             | TokenKind::Throw
             | TokenKind::Try

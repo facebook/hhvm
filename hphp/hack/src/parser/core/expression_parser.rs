@@ -321,7 +321,7 @@ where
         let token = parser1.next_xhp_class_name_or_other_token();
         let allow_new_attr = self.env.allow_new_attribute_syntax;
         match token.kind() {
-            | TokenKind::DecimalLiteral
+            TokenKind::DecimalLiteral
             | TokenKind::OctalLiteral
             | TokenKind::HexadecimalLiteral
             | TokenKind::BinaryLiteral
@@ -335,51 +335,51 @@ where
                 let token = S!(make_token, self, token);
                 S!(make_literal_expression, self, token)
             }
-            | TokenKind::HeredocStringLiteral => {
+            TokenKind::HeredocStringLiteral => {
                 // We have a heredoc string literal but it might contain embedded
                 // expressions. Start over.
                 let (token, name) = self.next_docstring_header();
                 self.parse_heredoc_string(token, name)
             }
-            | TokenKind::HeredocStringLiteralHead
-            | TokenKind::DoubleQuotedStringLiteralHead => {
+            TokenKind::HeredocStringLiteralHead | TokenKind::DoubleQuotedStringLiteralHead => {
                 self.continue_from(parser1);
                 self.parse_double_quoted_like_string(token, StringLiteralKind::LiteralDoubleQuoted)
             }
-            | TokenKind::Variable => self.parse_variable_or_lambda(),
-            | TokenKind::XHPClassName => {
+            TokenKind::Variable => self.parse_variable_or_lambda(),
+            TokenKind::XHPClassName => {
                 self.continue_from(parser1);
                 let token = S!(make_token, self, token);
                 self.parse_name_or_collection_literal_expression(token)
             }
-            | TokenKind::Name => {
+            TokenKind::Name => {
                 self.continue_from(parser1);
                 let token = S!(make_token, self, token);
-                let qualified_name =self.scan_remaining_qualified_name(token);
+                let qualified_name = self.scan_remaining_qualified_name(token);
                 let mut parser1 = self.clone();
                 let str_maybe = parser1.next_token_no_trailing();
                 match str_maybe.kind() {
-                    TokenKind::NowdocStringLiteral
-                    // for now, try generic type argument list with attributes before resorting to bad prefix
-                    | TokenKind::HeredocStringLiteral => {
+                    TokenKind::NowdocStringLiteral | TokenKind::HeredocStringLiteral => {
+                        // for now, try generic type argument list with attributes before resorting to bad prefix
                         match self.try_parse_specified_function_call(&qualified_name) {
                             Some((type_arguments, p)) => {
                                 self.continue_from(p);
-                                self.do_parse_specified_function_call(qualified_name, type_arguments)
+                                self.do_parse_specified_function_call(
+                                    qualified_name,
+                                    type_arguments,
+                                )
                             }
                             _ => {
-                                self.with_error(Errors::prefixed_invalid_string_kind );
+                                self.with_error(Errors::prefixed_invalid_string_kind);
                                 self.parse_name_or_collection_literal_expression(qualified_name)
                             }
                         }
                     }
-                    | TokenKind::HeredocStringLiteralHead => {
+                    TokenKind::HeredocStringLiteralHead => {
                         // Treat as an attempt to prefix a non-double-quoted string
-                        self.with_error(Errors::prefixed_invalid_string_kind );
+                        self.with_error(Errors::prefixed_invalid_string_kind);
                         self.parse_name_or_collection_literal_expression(qualified_name)
                     }
-                    | TokenKind::SingleQuotedStringLiteral
-                    | TokenKind::DoubleQuotedStringLiteral => {
+                    TokenKind::SingleQuotedStringLiteral | TokenKind::DoubleQuotedStringLiteral => {
                         // This name prefixes a double-quoted string or a single
                         // quoted string
                         self.continue_from(parser1);
@@ -387,20 +387,22 @@ where
                         let str_ = S!(make_literal_expression, self, str_);
                         S!(make_prefixed_string_expression, self, qualified_name, str_)
                     }
-                    | TokenKind::DoubleQuotedStringLiteralHead => {
+                    TokenKind::DoubleQuotedStringLiteralHead => {
                         self.continue_from(parser1);
                         // This name prefixes a double-quoted string containing embedded expressions
                         let str_ = self.parse_double_quoted_like_string(
-                        str_maybe, StringLiteralKind::LiteralDoubleQuoted);
+                            str_maybe,
+                            StringLiteralKind::LiteralDoubleQuoted,
+                        );
                         S!(make_prefixed_string_expression, self, qualified_name, str_)
                     }
-                    | _ => {
+                    _ => {
                         // Not a prefixed string or an attempt at one
                         self.parse_name_or_collection_literal_expression(qualified_name)
                     }
                 }
             }
-            | TokenKind::Backslash => {
+            TokenKind::Backslash => {
                 self.continue_from(parser1);
                 let missing = S!(make_missing, self, self.pos());
                 let backslash = S!(make_token, self, token);
@@ -408,15 +410,11 @@ where
                 let qualified_name = self.scan_qualified_name(missing, backslash);
                 self.parse_name_or_collection_literal_expression(qualified_name)
             }
-            | TokenKind::SelfToken
-            | TokenKind::Parent => self.parse_scope_resolution_or_name(),
-            | TokenKind::Static =>
-                self.parse_anon_or_awaitable_or_scope_resolution_or_name(),
-            | TokenKind::Yield => self.parse_yield_expression(),
-            | TokenKind::Dollar => self.parse_dollar_expression(),
-            | TokenKind::Suspend
-            // TODO: The operand to a suspend is required to be a call to a
-            // coroutine. Give an error in a later pass if this isn't the case.
+            TokenKind::SelfToken | TokenKind::Parent => self.parse_scope_resolution_or_name(),
+            TokenKind::Static => self.parse_anon_or_awaitable_or_scope_resolution_or_name(),
+            TokenKind::Yield => self.parse_yield_expression(),
+            TokenKind::Dollar => self.parse_dollar_expression(),
+            TokenKind::Suspend
             | TokenKind::Exclamation
             | TokenKind::PlusPlus
             | TokenKind::MinusMinus
@@ -427,57 +425,57 @@ where
             | TokenKind::Clone
             | TokenKind::Print => self.parse_prefix_unary_expression(),
             // Allow error suppression prefix when not using new attributes
-            | TokenKind::At if !allow_new_attr => self.parse_prefix_unary_expression(),
-            | TokenKind::LeftParen => self.parse_cast_or_parenthesized_or_lambda_expression(),
-            | TokenKind::LessThan => {
+            TokenKind::At if !allow_new_attr => self.parse_prefix_unary_expression(),
+            TokenKind::LeftParen => self.parse_cast_or_parenthesized_or_lambda_expression(),
+            TokenKind::LessThan => {
                 self.continue_from(parser1);
-                self.parse_possible_xhp_expression(/*in_xhp_body:*/false, token)
+                self.parse_possible_xhp_expression(/*in_xhp_body:*/ false, token)
             }
-            | TokenKind::List  => self.parse_list_expression(),
-            | TokenKind::New => self.parse_object_creation_expression(),
-            | TokenKind::Varray => self.parse_varray_intrinsic_expression(),
-            | TokenKind::Vec => self.parse_vector_intrinsic_expression(),
-            | TokenKind::Darray => self.parse_darray_intrinsic_expression(),
-            | TokenKind::Dict => self.parse_dictionary_intrinsic_expression(),
-            | TokenKind::Keyset => self.parse_keyset_intrinsic_expression(),
-            | TokenKind::Tuple => self.parse_tuple_expression(),
-            | TokenKind::Shape => self.parse_shape_expression(),
-            | TokenKind::Function => {
+            TokenKind::List => self.parse_list_expression(),
+            TokenKind::New => self.parse_object_creation_expression(),
+            TokenKind::Varray => self.parse_varray_intrinsic_expression(),
+            TokenKind::Vec => self.parse_vector_intrinsic_expression(),
+            TokenKind::Darray => self.parse_darray_intrinsic_expression(),
+            TokenKind::Dict => self.parse_dictionary_intrinsic_expression(),
+            TokenKind::Keyset => self.parse_keyset_intrinsic_expression(),
+            TokenKind::Tuple => self.parse_tuple_expression(),
+            TokenKind::Shape => self.parse_shape_expression(),
+            TokenKind::Function => {
                 let attribute_spec = S!(make_missing, self, self.pos());
                 self.parse_anon(attribute_spec)
             }
-             | TokenKind::DollarDollar => {
+            TokenKind::DollarDollar => {
                 self.continue_from(parser1);
                 let token = S!(make_token, self, token);
                 S!(make_pipe_variable_expression, self, token)
             }
             // LessThanLessThan start attribute spec that is allowed on anonymous
             // functions or lambdas
-            | TokenKind::LessThanLessThan
-            | TokenKind::Async => self.parse_anon_or_lambda_or_awaitable(),
-            | TokenKind::At if allow_new_attr => self.parse_anon_or_lambda_or_awaitable(),
-            | TokenKind::Include
+            TokenKind::LessThanLessThan | TokenKind::Async => {
+                self.parse_anon_or_lambda_or_awaitable()
+            }
+            TokenKind::At if allow_new_attr => self.parse_anon_or_lambda_or_awaitable(),
+            TokenKind::Include
             | TokenKind::Include_once
             | TokenKind::Require
             | TokenKind::Require_once => self.parse_inclusion_expression(),
-            | TokenKind::Isset => self.parse_isset_expression(),
-            | TokenKind::Define => self.parse_define_expression(),
-            | TokenKind::Eval => self.parse_eval_expression(),
-            | TokenKind::Hash => self.parse_atom(),
-            | TokenKind::Empty => {
+            TokenKind::Isset => self.parse_isset_expression(),
+            TokenKind::Define => self.parse_define_expression(),
+            TokenKind::Eval => self.parse_eval_expression(),
+            TokenKind::Hash => self.parse_atom(),
+            TokenKind::Empty => {
                 self.with_error(Errors::empty_expression_illegal);
                 let token = self.next_token_non_reserved_as_name();
                 S!(make_token, self, token)
             }
-            | kind if self.expects(kind) => {
+            kind if self.expects(kind) => {
                 // ERROR RECOVERY: if we've prematurely found a token we're expecting
                 // later, mark the expression missing, throw an error, and do not advance
                 // the parser.
                 self.with_error(Errors::error1015);
                 S!(make_missing, self, self.pos())
             }
-            | TokenKind::EndOfFile
-            | _ => self.parse_as_name_or_error(),
+            TokenKind::EndOfFile | _ => self.parse_as_name_or_error(),
         }
     }
 

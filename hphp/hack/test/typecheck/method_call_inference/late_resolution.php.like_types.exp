@@ -3,19 +3,19 @@ Typing error (Typing[4110])
   File "late_resolution.php", line 28, characters 3-20:
   Expected `(function(): [unresolved])` because a type could not be determined here
   File "late_resolution.php", line 28, characters 16-18:
-  But got `dynamic`, the result of accessing a property of a dynamic type
+  But got `dynamic`, the result of accessing a property of a `dynamic` type
 File "late_resolution.php", line 35, characters 3-20:
 Typing error (Typing[4110])
   File "late_resolution.php", line 35, characters 3-20:
   Expected `(function(): [unresolved])` because a type could not be determined here
   File "late_resolution.php", line 35, characters 16-18:
-  But got `dynamic`, the result of accessing a property of a dynamic type
+  But got `dynamic`, the result of accessing a property of a `dynamic` type
 File "late_resolution.php", line 43, characters 3-21:
 Typing error (Typing[4110])
   File "late_resolution.php", line 43, characters 3-21:
   Expected `(function(): [unresolved])` because a type could not be determined here
   File "late_resolution.php", line 43, characters 17-19:
-  But got `dynamic`, the result of accessing a property of a dynamic type
+  But got `dynamic`, the result of accessing a property of a `dynamic` type
 File "late_resolution.php", line 44, characters 10-15:
 Invalid return type (Typing[4053])
   File "late_resolution.php", line 43, characters 17-19:
@@ -31,4 +31,4 @@ Typing error (Typing[4110])
   File "late_resolution.php", line 50, characters 3-21:
   Expected `(function(): [unresolved])` because a type could not be determined here
   File "late_resolution.php", line 50, characters 17-19:
-  But got `dynamic`, the result of accessing a property of a dynamic type
+  But got `dynamic`, the result of accessing a property of a `dynamic` type

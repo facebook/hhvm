@@ -388,11 +388,15 @@ let rec to_string prefix r =
     ]
   | Rusing p -> [(p, prefix ^ " because it was assigned in a `using` clause")]
   | Rdynamic_prop p ->
-    [(p, prefix ^ ", the result of accessing a property of a dynamic type")]
+    [(p, prefix ^ ", the result of accessing a property of a `dynamic` type")]
   | Rdynamic_call p ->
-    [(p, prefix ^ ", the result of calling a dynamic type as a function")]
+    [(p, prefix ^ ", the result of calling a `dynamic` type as a function")]
   | Rdynamic_construct p ->
-    [(p, prefix ^ ", the result of constructing an object with a dynamic type")]
+    [
+      ( p,
+        prefix ^ ", the result of constructing an object with a `dynamic` type"
+      );
+    ]
   | Ridx_dict _ ->
     [
       ( p,

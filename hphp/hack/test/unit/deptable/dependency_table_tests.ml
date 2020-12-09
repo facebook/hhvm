@@ -127,6 +127,7 @@ let test_dep_graph_blob () =
       let delegate_state = Typing_service_delegate.default in
       let opts = TypecheckerOptions.default in
       let dynamic_view_files = Relative_path.Set.empty in
+      let memory_cap = None in
       let check_info =
         Typing_service_types.
           {
@@ -155,6 +156,7 @@ let test_dep_graph_blob () =
             (Telemetry.create ())
             dynamic_view_files
             [Relative_path.from_root ~suffix:"baz.php"]
+            memory_cap
             check_info
         in
 

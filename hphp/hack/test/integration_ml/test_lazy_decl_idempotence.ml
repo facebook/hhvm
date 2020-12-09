@@ -55,6 +55,7 @@ let test () =
   (* Local caches need to be invalidated whenever things are removed from shared
    * memory (to avoid getting cached old versions of declarations) *)
   let empty = Relative_path.Set.empty in
+  let memory_cap = None in
   let check_info =
     {
       Typing_check_service.init_id = "";
@@ -74,6 +75,7 @@ let test () =
       (Telemetry.create ())
       empty
       [bar_path]
+      ~memory_cap
       ~check_info
   in
   Test.assert_errors errors "";
@@ -85,6 +87,7 @@ let test () =
       telemetry
       empty
       [bar_path]
+      ~memory_cap
       ~check_info
   in
   Test.assert_errors errors "";
@@ -97,6 +100,7 @@ let test () =
       telemetry
       empty
       [foo_path]
+      ~memory_cap
       ~check_info
   in
   Test.assert_errors errors expected_errors;
@@ -108,6 +112,7 @@ let test () =
       telemetry
       empty
       [foo_path]
+      ~memory_cap
       ~check_info
   in
   Test.assert_errors errors expected_errors;

@@ -92,6 +92,7 @@ let test () =
       Relative_path.Set.empty
       fnl
       ~interrupt
+      ~memory_cap:None
       ~check_info
   in
   (* Assert that we got the errors in bar2 only... *)

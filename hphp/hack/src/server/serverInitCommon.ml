@@ -207,6 +207,9 @@ let type_check
     let ( (errorl : Errors.t),
           (delegate_state : Typing_service_delegate.state),
           (typecheck_telemetry : Telemetry.t) ) =
+      let memory_cap =
+        genv.local_config.ServerLocalConfig.max_typechecker_worker_memory_mb
+      in
       let ctx = Provider_utils.ctx_from_server_env env in
       CgroupProfiler.collect_cgroup_stats ~profiling ~stage:profile_label
       @@ fun () ->
@@ -217,6 +220,7 @@ let type_check
         (Telemetry.create ())
         Relative_path.Set.empty
         files_to_check
+        ~memory_cap
         ~check_info:(ServerCheckUtils.get_check_info genv env)
     in
     hh_log_heap ();

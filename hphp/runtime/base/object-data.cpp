@@ -538,6 +538,10 @@ void ObjectData::o_getArray(Array& props,
       }
     }
   );
+
+  if (m_cls->needsInitThrowable()) {
+    throwable_mark_array(this, props);
+  }
 }
 
 template <IntishCast IC /* = IntishCast::None */>

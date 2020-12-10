@@ -17,6 +17,7 @@
 
 #include "hphp/system/systemlib.h"
 #include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/base/array-provenance.h"
 #include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/object-data.h"
@@ -211,7 +212,7 @@ namespace {
     return fp && fp->func()->isBuiltin();
   }
 
-  DEBUG_ONLY bool is_throwable(ObjectData* throwable) {
+  DEBUG_ONLY bool is_throwable(const ObjectData* throwable) {
     auto const erCls = SystemLib::s_ErrorClass;
     auto const exCls = SystemLib::s_ExceptionClass;
     return throwable->instanceof(erCls) || throwable->instanceof(exCls);
@@ -383,6 +384,20 @@ void throwable_recompute_backtrace_from_wh(ObjectData* throwable,
   auto tv = make_array_like_tv(trace.detach());
   tvMove(tv, trace_lval);
   throwable_init_file_and_line_from_trace(throwable);
+}
+
+void throwable_mark_array(const ObjectData* throwable, Array& props) {
+  assertx(is_throwable(throwable));
+  assertx(throwable_has_expected_props());
+
+  auto const prop = throwable->getVMClass()->declProperties()[s_traceSlot];
+  auto const name = StrNR(prop.mangledName).asString();
+  auto const base = props.lookup(name);
+  if (!tvIsArrayLike(base)) return;
+
+  auto const incref = Variant::wrap(base);
+  auto const marked = Variant::attach(arrprov::markTvRecursively(base, true));
+  props.set(name, marked);
 }
 
 String throwable_to_string(ObjectData* throwable) {

@@ -17,6 +17,7 @@
 #include "hphp/runtime/base/variable-serializer.h"
 
 #include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/base/array-provenance.h"
 #include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/comparisons.h"
@@ -1762,8 +1763,10 @@ void VariableSerializer::serializeResource(const ResourceData* res) {
   if (UNLIKELY(incNestedLevel(&tv))) {
     writeOverflow(&tv);
   } else if (auto trace = dynamic_cast<const CompactTrace*>(res)) {
-    auto const trace_array = trace->extract();
-    serializeArray(trace_array.get());
+    auto const trace_array = Variant(trace->extract());
+    auto const raw = *trace_array.asTypedValue();
+    auto const marked = Variant::attach(arrprov::markTvRecursively(raw, true));
+    serializeArray(marked.toArray().get());
   } else {
     serializeResourceImpl(res);
   }

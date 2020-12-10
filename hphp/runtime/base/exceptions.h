@@ -204,6 +204,12 @@ void throwable_init(ObjectData* throwable);
 void throwable_recompute_backtrace_from_wh(ObjectData* throwable,
                                            c_WaitableWaitHandle* wh);
 
+/*
+ * Mark the result of an array cast on a throwable object so that it's safe
+ * to perform Hack-Array-Migration-sensitive operations on it.
+ */
+void throwable_mark_array(const ObjectData* throwable, Array& props);
+
 String throwable_to_string(ObjectData* throwable);
 
 //////////////////////////////////////////////////////////////////////

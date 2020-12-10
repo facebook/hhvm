@@ -1,7 +1,7 @@
-<?hh // partial
+<?hh
 
 // ERROR
-function f(<<__OwnedMutable>> A $a) {
+function f(<<__OwnedMutable>> A $a): void {
 }
 
 interface A {}

@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 <<__Rx>>
 async function f(): Awaitable<void> {

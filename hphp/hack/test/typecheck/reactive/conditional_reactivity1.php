@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 <<__Rx, __AtMostRxAsArgs>>
 function map_with_key<Tk as arraykey, Tv1, Tv2>(
   <<
@@ -27,4 +27,4 @@ async function gen_filter_with_key<Tk as arraykey, Tv>(
 }
 
 <<__Rx>>
-function gen($_) {}
+async function gen(nonnull $_): Awaitable<nonnull> { return 42; }

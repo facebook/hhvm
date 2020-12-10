@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 class A_f11 {
   <<__Rx, __Mutable>>

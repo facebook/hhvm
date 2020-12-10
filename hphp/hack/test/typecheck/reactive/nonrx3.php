@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 // OK
 <<__NonRx("never rx")>>

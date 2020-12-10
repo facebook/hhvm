@@ -1,7 +1,7 @@
-<?hh // partial
+<?hh
 interface Rx {}
 interface A {}
 
 <<__Rx, __AtMostRxAsArgs>>
-function f(<<__OnlyRxIfImpl(Rx::class)>>?A $a = null) {
+function f(<<__OnlyRxIfImpl(Rx::class)>>?A $a = null): void {
 }

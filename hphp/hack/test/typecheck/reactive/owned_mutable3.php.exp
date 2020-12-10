@@ -1,2 +1,2 @@
-File "owned_mutable3.php", line 5, characters 21-52:
+File "owned_mutable3.php", line 5, characters 21-58:
 Parameter cannot have both `__Mutable` and `__OwnedMutable` annotations. (Parsing[1002])

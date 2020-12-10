@@ -1,6 +1,6 @@
-<?hh // partial
+<?hh
 
-function f() {
+function f(): void {
   // ERROR
   $x = (<<__OwnedMutable>> A $c) ==> {};
 }

@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 <<__RxShallow>>
 function rxshallow(): void {}

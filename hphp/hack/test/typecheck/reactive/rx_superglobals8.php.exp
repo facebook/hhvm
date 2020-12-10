@@ -1,2 +1,4 @@
 File "rx_superglobals8.php", line 5, characters 8-16:
+Variable `$_REQUEST` is undefined, not always defined, or unset afterwards. (Naming[2050])
+File "rx_superglobals8.php", line 5, characters 8-16:
 Superglobal `$_REQUEST` cannot be used in a reactive context. (Typing[4227])

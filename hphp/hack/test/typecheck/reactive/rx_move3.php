@@ -1,9 +1,9 @@
-<?hh // partial
+<?hh
 
 class C {}
 
 <<__Rx>>
-function f() {
+function f(): void {
     $a = \HH\Rx\mutable(new C());
     // ERROR
     $b = g($a);

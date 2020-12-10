@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 class A {
   <<__Rx, __MemoizeLSB, __Mutable>>

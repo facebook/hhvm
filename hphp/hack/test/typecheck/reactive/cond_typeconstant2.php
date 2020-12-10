@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 interface Base {}
 interface ILoader<T as Base> {}
 
@@ -19,7 +19,7 @@ abstract class Factory {
   const type TLoader as ILoader<Base> = ILoader<Base>;
 
   <<__LSB>>
-  private static $getLoader = null;
+  private static ?this::TLoader $getLoader = null;
 
   <<__RxShallow, __OnlyRxIfImpl(IRxFactory::class)>>
   final public static function get(): this::TLoader {

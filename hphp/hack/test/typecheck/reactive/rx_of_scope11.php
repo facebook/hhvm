@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 <<__Rx>>
 function f(): void {

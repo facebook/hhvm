@@ -1,6 +1,6 @@
-<?hh // partial
+<?hh
 
 <<__Rx>>
-function f($x) {
+function f(): void {
   $a = $_SERVER;
 }

@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 // ERROR
 <<__NonRx(1)>>

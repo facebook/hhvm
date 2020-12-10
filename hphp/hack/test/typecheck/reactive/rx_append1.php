@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 <<__Rx>>
 function a(Vector<int> $a): void {

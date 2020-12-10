@@ -1,9 +1,9 @@
-<?hh // partial
+<?hh
 
 class A {
   public ?int $a;
   <<__Rx, __Mutable>>
-  public function f(int $a) {
+  public function f(int $a): void {
     $this->a = $a;
   }
 }

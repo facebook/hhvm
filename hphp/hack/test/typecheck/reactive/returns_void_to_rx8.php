@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 class MyParent {
   <<__Rx, __Mutable, __ReturnsVoidToRx>>

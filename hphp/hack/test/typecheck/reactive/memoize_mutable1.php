@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 class A implements IMemoizeParam {
   public function getInstanceKey(): string {

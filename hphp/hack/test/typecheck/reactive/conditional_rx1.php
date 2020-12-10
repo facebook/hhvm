@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 <<__RxLocal, __AtMostRxAsArgs>>
 async function f(
@@ -9,6 +9,6 @@ async function f(
   return g($r);
 }
 
-function g(int $a) {
+function g(int $a): int {
   return $a;
 }

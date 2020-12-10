@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 class MyConditionalClassBase {}
 class MyConditionalClass extends MyConditionalClassBase {}
 class MyRxConditionalClass extends MyConditionalClassBase {}

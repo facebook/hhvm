@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 <<__Rx, __AtMostRxAsArgs>>
 async function gen_from_keys<Tk as arraykey, Tv>(
   <<__MaybeMutable, __OnlyRxIfImpl(\HH\Rx\Traversable::class)>>Traversable<Tk>

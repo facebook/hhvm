@@ -1,4 +1,5 @@
 <?hh
+<<file: __EnableUnstableFeatures('coeffects_provisional')>>
 
 class MyParent {
   <<__Rx, __Mutable, __ReturnsVoidToRx>>

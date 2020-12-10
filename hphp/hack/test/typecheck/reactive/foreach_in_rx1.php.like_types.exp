@@ -1,12 +1,12 @@
-File "foreach_in_rx1.php", line 43, characters 12-13:
+File "foreach_in_rx1.php", line 44, characters 12-13:
 Invalid `foreach` (Typing[4110])
-  File "foreach_in_rx1.php", line 43, characters 12-13:
+  File "foreach_in_rx1.php", line 44, characters 12-13:
   Expected `Traversable<[unresolved]>` because this is used in a `foreach` statement
-  File "foreach_in_rx1.php", line 40, characters 48-63:
+  File "foreach_in_rx1.php", line 41, characters 48-63:
   But got `~\HH\Traversable<int>#\HH\Rx\Traversable`
-File "foreach_in_rx1.php", line 67, characters 12-13:
+File "foreach_in_rx1.php", line 68, characters 12-13:
 Invalid `foreach` (Typing[4110])
-  File "foreach_in_rx1.php", line 67, characters 12-13:
+  File "foreach_in_rx1.php", line 68, characters 12-13:
   Expected `Traversable<[unresolved]>` because this is used in a `foreach` statement
-  File "foreach_in_rx1.php", line 61, characters 48-63:
+  File "foreach_in_rx1.php", line 62, characters 48-63:
   But got `~\HH\Traversable<int>#\HH\Rx\Traversable`

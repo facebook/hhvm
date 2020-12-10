@@ -1,4 +1,5 @@
 <?hh // partial
+<<file: __EnableUnstableFeatures('coeffects_provisional')>>
 
 class A {
   public ?int $v;

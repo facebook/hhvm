@@ -1,10 +1,10 @@
-File "mayberx14.php", line 10, characters 12-15:
+File "mayberx14.php", line 11, characters 12-15:
 Reactive functions can only call other reactive functions. (Typing[4200])
-File "mayberx14.php", line 9, characters 41-57:
-This function is normal.
-File "mayberx14.php", line 20, characters 3-33:
+  File "mayberx14.php", line 10, characters 41-57:
+  This function is normal.
+File "mayberx14.php", line 21, characters 3-33:
 Cannot invoke conditionally reactive function in reactive context, because at least one reactivity condition is not met. (Typing[4237])
-File "mayberx14.php", line 20, characters 8-8:
-Receiver type must be a subtype of `\Rx`, now `\B`.
-File "mayberx14.php", line 9, characters 19-19:
-This is the function declaration
+  File "mayberx14.php", line 21, characters 8-8:
+  Receiver type must be a subtype of `\Rx`, now `\B`.
+  File "mayberx14.php", line 10, characters 19-19:
+  This is the function declaration

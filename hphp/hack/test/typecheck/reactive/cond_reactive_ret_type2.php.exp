@@ -1,4 +1,4 @@
-File "cond_reactive_ret_type2.php", line 25, characters 10-18:
+File "cond_reactive_ret_type2.php", line 26, characters 10-18:
 Reactive functions can only call other reactive functions. (Typing[4200])
-File "cond_reactive_ret_type2.php", line 15, characters 19-21:
-This function is normal.
+  File "cond_reactive_ret_type2.php", line 16, characters 19-21:
+  This function is normal.

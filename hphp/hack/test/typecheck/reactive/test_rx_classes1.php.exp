@@ -1,6 +1,6 @@
-File "test_rx_classes1.php", line 24, characters 19-19:
+File "test_rx_classes1.php", line 25, characters 19-19:
 The method `f` is not compatible with the overridden method (Typing[4341])
-  File "test_rx_classes1.php", line 9, characters 19-19:
+  File "test_rx_classes1.php", line 10, characters 19-19:
   This function is local reactive.
-  File "test_rx_classes1.php", line 24, characters 19-19:
+  File "test_rx_classes1.php", line 25, characters 19-19:
   This function is normal.

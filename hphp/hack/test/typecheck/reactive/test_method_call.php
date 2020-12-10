@@ -1,4 +1,5 @@
 <?hh // strict
+<<file: __EnableUnstableFeatures('coeffects_provisional')>>
 class Something {
   public function __construct(public int $val) {}
 

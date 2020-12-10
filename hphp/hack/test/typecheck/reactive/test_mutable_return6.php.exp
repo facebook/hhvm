@@ -1,6 +1,6 @@
-File "test_mutable_return6.php", line 8, characters 10-11:
+File "test_mutable_return6.php", line 9, characters 10-11:
 Functions marked `<<__MutableReturn>>` must return mutably owned values: mutably owned local variables and results of calling `Rx\mutable`. (Typing[4216])
-File "test_mutable_return6.php", line 6, characters 10-13:
-This function is marked `<<__MutableReturn>>`
-File "test_mutable_return6.php", line 8, characters 10-11:
-This expression is (non-mutable)
+  File "test_mutable_return6.php", line 7, characters 10-13:
+  This function is marked `<<__MutableReturn>>`
+  File "test_mutable_return6.php", line 9, characters 10-11:
+  This expression is (non-mutable)

@@ -1,14 +1,14 @@
-File "test_rx_enabled2.php", line 14, characters 10-25:
+File "test_rx_enabled2.php", line 15, characters 10-25:
 `HH\Rx\IS_ENABLED` must be the only condition in an if-statement, and that if-statement must be the only statement in the function body. (NastCheck[3062])
-File "test_rx_enabled2.php", line 30, characters 10-25:
+File "test_rx_enabled2.php", line 31, characters 10-25:
 `HH\Rx\IS_ENABLED` must be the only condition in an if-statement, and that if-statement must be the only statement in the function body. (NastCheck[3062])
-File "test_rx_enabled2.php", line 45, characters 10-25:
+File "test_rx_enabled2.php", line 46, characters 10-25:
 `HH\Rx\IS_ENABLED` must be the only condition in an if-statement, and that if-statement must be the only statement in the function body. (NastCheck[3062])
-File "test_rx_enabled2.php", line 50, characters 13-28:
+File "test_rx_enabled2.php", line 51, characters 13-28:
 `HH\Rx\IS_ENABLED` must be the only condition in an if-statement, and that if-statement must be the only statement in the function body. (NastCheck[3062])
-File "test_rx_enabled2.php", line 56, characters 14-29:
+File "test_rx_enabled2.php", line 57, characters 14-29:
 `HH\Rx\IS_ENABLED` must be the only condition in an if-statement, and that if-statement must be the only statement in the function body. (NastCheck[3062])
-File "test_rx_enabled2.php", line 62, characters 7-22:
+File "test_rx_enabled2.php", line 63, characters 7-22:
 `HH\Rx\IS_ENABLED` must be the only condition in an if-statement, and that if-statement must be the only statement in the function body. (NastCheck[3062])
-File "test_rx_enabled2.php", line 70, characters 8-23:
+File "test_rx_enabled2.php", line 71, characters 8-23:
 `HH\Rx\IS_ENABLED` must be the only condition in an if-statement, and that if-statement must be the only statement in the function body. (NastCheck[3062])

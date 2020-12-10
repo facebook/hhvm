@@ -1,4 +1,5 @@
 <?hh // strict
+<<file: __EnableUnstableFeatures('coeffects_provisional')>>
 
 <<__Rx>>
 function f<Tv as arraykey>(bool $c, Tv $v1, Tv $v2): keyset<Tv> {

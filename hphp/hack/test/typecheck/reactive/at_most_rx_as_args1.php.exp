@@ -1,4 +1,4 @@
-File "at_most_rx_as_args1.php", line 4, characters 1-20:
+File "at_most_rx_as_args1.php", line 5, characters 1-20:
 `__OnlyRxIfImpl` and `__AtMostRxAsArgs` annotations cannot be used without `__Pure`, `__Rx`, `__RxShallow`, or `__RxLocal`. (Parsing[1002])
-File "at_most_rx_as_args1.php", line 4, characters 3-18:
+File "at_most_rx_as_args1.php", line 5, characters 3-18:
 Function or method annotated with `<<__AtMostRxAsArgs>>` attribute should have at least one parameter with `<<__AtMostRxAsFunc>>` or `<<__OnlyRxIfImpl>>` annotations. (NastCheck[3064])

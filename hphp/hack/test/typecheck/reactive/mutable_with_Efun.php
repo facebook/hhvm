@@ -1,4 +1,5 @@
 <?hh // strict
+<<file: __EnableUnstableFeatures('coeffects_provisional')>>
 
 abstract class A {
   public abstract function nonrx(string $foo): int;

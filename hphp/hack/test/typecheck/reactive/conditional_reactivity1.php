@@ -1,4 +1,5 @@
 <?hh
+<<file: __EnableUnstableFeatures('coeffects_provisional')>>
 <<__Rx, __AtMostRxAsArgs>>
 function map_with_key<Tk as arraykey, Tv1, Tv2>(
   <<

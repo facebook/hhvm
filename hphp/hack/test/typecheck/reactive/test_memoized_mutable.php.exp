@@ -1,8 +1,8 @@
-File "test_memoized_mutable.php", line 9, characters 11-19:
+File "test_memoized_mutable.php", line 10, characters 11-19:
 Memoized functions cannot have mutable `$this`. (Parsing[1002])
-File "test_memoized_mutable.php", line 13, characters 11-25:
+File "test_memoized_mutable.php", line 14, characters 11-25:
 Memoized functions cannot return mutable objects. (Parsing[1002])
-File "test_memoized_mutable.php", line 15, characters 16-18:
+File "test_memoized_mutable.php", line 16, characters 16-18:
 Reactive functions can only call other reactive functions. (Typing[4200])
-File "test_memoized_mutable.php", line 4, characters 19-29:
-This function is normal.
+  File "test_memoized_mutable.php", line 5, characters 19-29:
+  This function is normal.

@@ -1,4 +1,5 @@
 <?hh
+<<file: __EnableUnstableFeatures('coeffects_provisional')>>
 
 <<__Rx, __AtMostRxAsArgs>>
 function my_test_function(

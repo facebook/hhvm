@@ -1,4 +1,4 @@
-File "rx_superglobals3.php", line 5, characters 8-12:
+File "rx_superglobals3.php", line 6, characters 8-12:
 Variable `$_GET` is undefined, not always defined, or unset afterwards. (Naming[2050])
-File "rx_superglobals3.php", line 5, characters 8-12:
+File "rx_superglobals3.php", line 6, characters 8-12:
 Superglobal `$_GET` cannot be used in a reactive context. (Typing[4227])

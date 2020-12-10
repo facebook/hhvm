@@ -1,4 +1,5 @@
 <?hh
+<<file: __EnableUnstableFeatures('coeffects_provisional')>>
 
 class A_f11 {
   <<__Rx, __Mutable>>

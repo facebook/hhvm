@@ -1,4 +1,5 @@
 <?hh // strict
+<<file: __EnableUnstableFeatures('coeffects_provisional')>>
 
 function f(): int {
   if (HH\Rx\IS_ENABLED) {

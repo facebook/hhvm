@@ -1,4 +1,5 @@
 <?hh
+<<file: __EnableUnstableFeatures('coeffects_provisional')>>
 
 <<__Rx>>
 async function toasync(int $a): Awaitable<int> {

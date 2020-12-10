@@ -1,0 +1,30 @@
+Tiers {
+  arrprov_ShardedRollout {
+    Shard = 0
+    ShardCount = 1
+    overwrite {
+      Eval {
+        ArrayProvenance = true
+      }
+    }
+  }
+
+  test_DisableShards {
+    machine = /this-is-a-test-by-kshaunak/
+    DisableShards = true
+  }
+
+  log_arrprov_ShardedRollout {
+    Shard = 0
+    ShardCount = 1
+    overwrite {
+      Eval {
+        LogArrayProvenance = true
+      }
+    }
+  }
+}
+
+LintExcludePatterns {
+  * = *DisableShards.DisableShards
+}

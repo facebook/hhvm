@@ -1234,11 +1234,20 @@ static String todayDate() {
 }
 
 static bool matchShard(
+  bool enableShards,
   const std::string& hostname,
   const IniSetting::Map& ini, Hdf hdfPattern,
   std::vector<std::string>& messages
 ) {
   if (!hdfPattern.exists("Shard")) return true;
+
+  if (!enableShards) {
+    hdfPattern["Shard"].setVisited();
+    hdfPattern["ShardCount"].setVisited();
+    hdfPattern["ShardSalt"].setVisited();
+    return false;
+  }
+
   auto const shard = Config::GetInt64(ini, hdfPattern, "Shard", -1, false);
 
   auto const nshards =
@@ -1326,6 +1335,8 @@ static std::vector<std::string> getTierOverwrites(IniSetting::Map& ini,
   };
 
   std::vector<std::string> messages;
+  auto enableShards = true;
+
   // Tier overwrites
   {
     for (Hdf hdf = config["Tiers"].firstChild(); hdf.exists();
@@ -1342,9 +1353,13 @@ static std::vector<std::string> getTierOverwrites(IniSetting::Map& ini,
       // one fails to match, the later one is reported as unused.
       if (checkPatterns(hdf) &
           (!hdf.exists("exclude") || !checkPatterns(hdf["exclude"])) &
-          matchShard(hostname, ini, hdf, messages)) {
+          matchShard(enableShards, hostname, ini, hdf, messages)) {
         messages.emplace_back(folly::sformat(
                                 "Matched tier: {}", hdf.getName()));
+        if (enableShards && hdf["DisableShards"].configGetBool()) {
+          messages.emplace_back("Sharding is disabled.");
+          enableShards = false;
+        }
         if (hdf.exists("clear")) {
           std::vector<std::string> list;
           hdf["clear"].configGet(list);
@@ -1355,12 +1370,10 @@ static std::vector<std::string> getTierOverwrites(IniSetting::Map& ini,
         config.copy(hdf["overwrite"]);
         // no break here, so we can continue to match more overwrites
       }
-      hdf["overwrite"].setVisited(); // avoid lint complaining
-      if (hdf.exists("clear")) {
-        // when the tier does not match, "clear" is not accessed
-        // mark it visited, so the linter does not complain
-        hdf["clear"].setVisited();
-      }
+      // Avoid lint errors about unvisited nodes when the tier does not match.
+      hdf["DisableShards"].setVisited();
+      hdf["clear"].setVisited();
+      hdf["overwrite"].setVisited();
     }
   }
   return messages;

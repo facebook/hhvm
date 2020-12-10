@@ -133,7 +133,7 @@ let handler =
         let methods = c.c_methods in
         List.iter ~f:(handle_method classname ctx) methods
 
-    method! at_fun_ env f =
+    method! at_fun_def env f =
       if should_run_ifc (Tast_env.get_tcopt env) then
         let ctx : Provider_context.t = Tast_env.get_ctx env in
         handle_fun ctx f

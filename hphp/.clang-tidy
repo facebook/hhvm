@@ -16,5 +16,6 @@ facebook-hte-HPHPCapturingVout,
 -facebook-hte-NullableDereference,
 -facebook-hte-NullableReturn,
 -facebook-hte-ParameterUncheckedArrayBounds,
+-facebook-hte-BadImplicitCast
 '
 ...

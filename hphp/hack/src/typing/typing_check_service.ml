@@ -450,7 +450,7 @@ let process_files
     in
     let exit_now =
       if over_cap then begin
-        Ast_provider.clear_parser_cache ();
+        SharedMem.invalidate_caches ();
         Gc.full_major ();
         let heap_mb = get_heap_size () in
         heap_mb > cap

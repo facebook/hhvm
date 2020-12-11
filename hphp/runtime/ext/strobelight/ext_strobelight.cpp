@@ -229,5 +229,9 @@ void Strobelight::surpriseAll() {
   );
 }
 
+void Strobelight::shutdown() {
+  RuntimeOption::StrobelightEnabled = false;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

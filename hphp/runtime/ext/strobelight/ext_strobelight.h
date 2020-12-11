@@ -113,10 +113,10 @@ struct Strobelight final {
   void init();
   void log(c_WaitableWaitHandle* wh = nullptr) const;
   void surpriseAll();
+  static void shutdown();
 
  private:
   Strobelight() noexcept {};
 };
 
 }
-

@@ -2904,6 +2904,7 @@ void hphp_process_exit() noexcept {
   LOG_AND_IGNORE(g_context.destroy())
   LOG_AND_IGNORE(shutdownUnitPrefetcher());
   LOG_AND_IGNORE(shutdownUnitReaper());
+  LOG_AND_IGNORE(Strobelight::shutdown())
   LOG_AND_IGNORE(ExtensionRegistry::moduleShutdown())
   LOG_AND_IGNORE(compilers_shutdown())
 #ifndef _MSC_VER

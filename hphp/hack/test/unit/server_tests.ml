@@ -123,7 +123,7 @@ let test_process_file_deferring () =
   let { Common_setup.ctx; foo_path; _ } =
     Common_setup.setup ~sqlite:false tcopt_with_defer
   in
-  let file = Typing_check_service.{ path = foo_path; deferred_count = 0 } in
+  let file = Typing_service_types.{ path = foo_path; deferred_count = 0 } in
   let dynamic_view_files = Relative_path.Set.empty in
   let errors = Errors.empty in
 
@@ -229,7 +229,7 @@ let test_should_enable_deferring () =
     GlobalOptions.{ default with tco_max_times_to_defer_type_checking = Some 2 }
   in
   let file =
-    Typing_check_service.
+    Typing_service_types.
       {
         path =
           Relative_path.create Relative_path.Root
@@ -242,13 +242,13 @@ let test_should_enable_deferring () =
     (Typing_check_service.should_enable_deferring opts file)
     "File should be deferred twice - below max";
 
-  let file = Typing_check_service.{ file with deferred_count = 2 } in
+  let file = Typing_service_types.{ file with deferred_count = 2 } in
   Asserter.Bool_asserter.assert_equals
     false
     (Typing_check_service.should_enable_deferring opts file)
     "File should not be deferred - at max";
 
-  let file = Typing_check_service.{ file with deferred_count = 3 } in
+  let file = Typing_service_types.{ file with deferred_count = 3 } in
   Asserter.Bool_asserter.assert_equals
     false
     (Typing_check_service.should_enable_deferring opts file)

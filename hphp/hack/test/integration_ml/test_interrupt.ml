@@ -75,7 +75,7 @@ let test () =
   let fnl = Relative_path.Map.keys fast in
   let check_info =
     {
-      Typing_check_service.init_id = "";
+      Typing_service_types.init_id = "";
       recheck_id = Some "";
       profile_log = false;
       profile_type_check_twice = false;

@@ -92,9 +92,9 @@ let global_typecheck_kind genv env =
   else
     ServerCommandTypes.Blocking
 
-let get_check_info genv env : Typing_check_service.check_info =
+let get_check_info genv env : Typing_service_types.check_info =
   {
-    Typing_check_service.init_id = env.init_env.init_id;
+    Typing_service_types.init_id = env.init_env.init_id;
     recheck_id = env.init_env.recheck_id;
     profile_log = ServerArgs.profile_log genv.options;
     profile_decling = genv.local_config.ServerLocalConfig.profile_decling;

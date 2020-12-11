@@ -208,7 +208,7 @@ let make_remote_server_api
             recheck_id = Some check_id;
             profile_log = true;
             profile_type_check_twice = false;
-            profile_decling = Typing_check_service.DeclingOff;
+            profile_decling = Typing_service_types.DeclingOff;
             profile_type_check_duration_threshold = 0.0;
           }
         in
@@ -217,7 +217,7 @@ let make_remote_server_api
           go
             ctx
             workers
-            Typing_check_service.Delegate.default
+            Typing_service_delegate.default
             (Telemetry.create ())
             Relative_path.Set.empty
             files_to_check

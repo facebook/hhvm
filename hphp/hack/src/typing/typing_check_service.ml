@@ -9,7 +9,7 @@
 module Hack_bucket = Bucket
 open Hh_prelude
 module Bucket = Hack_bucket
-include Typing_service_types
+open Typing_service_types
 
 (*
 ####

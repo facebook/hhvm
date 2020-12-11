@@ -1109,8 +1109,9 @@ SSATmp* opt_enum_values(IRGS& env, const ParamPrep& params) {
 
 SSATmp* opt_enum_is_valid(IRGS& env, const ParamPrep& params) {
   if (params.size() != 1) return nullptr;
-  auto const value = convertClassKey(env, params[0].value);
-  if (!value->type().isKnownDataType()) return nullptr;
+  auto const origVal = params[0].value;
+  if (!origVal->type().isKnownDataType()) return nullptr;
+  auto const value = convertClassKey(env, origVal);
   auto const enum_values = getEnumValues(env, params);
   if (!enum_values) return nullptr;
   auto const ad = MixedArray::asMixed(enum_values->names.get());

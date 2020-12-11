@@ -44,6 +44,7 @@ SSATmp* convertClsMethToVec(IRGS& env, SSATmp* clsMeth) {
 }
 
 SSATmp* convertClassKey(IRGS& env, SSATmp* key) {
+  assertx (key->type().isKnownDataType());
   if (key->isA(TCls)) {
     if (RuntimeOption::EvalRaiseClassConversionWarning) {
       gen(env, RaiseWarning, cns(env, s_clsToStringWarning.get()));

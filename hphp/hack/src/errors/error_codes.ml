@@ -166,7 +166,8 @@ module Naming = struct
     | ParentInFunctionPointer [@value 2112]
     | SelfInNonFinalFunctionPointer [@value 2113]
     | ClassMethNonFinalCLASS [@value 2114]
-    | WildcardTypeParamDisallowed [@value 2115] (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
+    | WildcardTypeParamDisallowed [@value 2115]
+    | CallingAssert [@value 2116] (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum

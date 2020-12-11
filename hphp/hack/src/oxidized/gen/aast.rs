@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<e56a5c637b61bf58badde7f355bb5e53>>
+// @generated SignedSource<<3122311ac53b7b29aec0255a273072df>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -412,7 +412,6 @@ pub enum Expr_<Ex, Fb, En, Hi> {
             Expr<Ex, Fb, En, Hi>,
         )>,
     ),
-    Assert(Box<AssertExpr<Ex, Fb, En, Hi>>),
     ETSplice(Box<Expr<Ex, Fb, En, Hi>>),
     EnumAtom(String),
     Any,
@@ -435,24 +434,6 @@ pub enum Expr_<Ex, Fb, En, Hi> {
 pub enum ClassGetExpr<Ex, Fb, En, Hi> {
     CGstring(Pstring),
     CGexpr(Expr<Ex, Fb, En, Hi>),
-}
-
-#[derive(
-    Clone,
-    Debug,
-    Deserialize,
-    Eq,
-    FromOcamlRep,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-pub enum AssertExpr<Ex, Fb, En, Hi> {
-    AEAssert(Expr<Ex, Fb, En, Hi>),
 }
 
 #[derive(

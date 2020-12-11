@@ -1455,11 +1455,11 @@ let class_meth_non_final_CLASS pos is_trait class_name =
   in
   add (Naming.err_code Naming.ClassMethNonFinalCLASS) pos msg
 
-let assert_arity pos =
+let assert_banned pos =
   add
-    (Naming.err_code Naming.AssertArity)
+    (Naming.err_code Naming.CallingAssert)
     pos
-    "assert expects exactly one argument"
+    "assert() is banned in Hack. Did you mean `invariant()`?"
 
 let unexpected_ty_in_tast pos ~actual_ty ~expected_ty =
   add

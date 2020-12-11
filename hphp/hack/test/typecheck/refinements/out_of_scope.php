@@ -9,9 +9,9 @@ function foo(): void {}
 
 function testit(C $c): int {
   if (1 == 2) {
-    assert($c->j is nonnull);
+    invariant($c->j is nonnull, "");
     foo();
-    assert($c->i is nonnull);
+    invariant($c->i is nonnull, "");
   }
 
   return $c->i;

@@ -15,7 +15,6 @@ function test(C $c): void {
   isset($c);
   unset($c);
 
-  assert(true);
   invariant(true, 'foo');
   invariant_violation('foo');
 }

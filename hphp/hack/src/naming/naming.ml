@@ -2038,13 +2038,6 @@ and expr_ env p (e : Nast.expr_) =
         N.Any
     end
   | Aast.Call ((p, Aast.Id (_, cn)), _, el, unpacked_element)
-    when String.equal cn SN.SpecialFunctions.assert_ ->
-    arg_unpack_unexpected unpacked_element;
-    if List.length el <> 1 then Errors.assert_arity p;
-    N.Assert
-      (N.AE_assert
-         (Option.value_map (List.hd el) ~default:(p, N.Any) ~f:(expr env)))
-  | Aast.Call ((p, Aast.Id (_, cn)), _, el, unpacked_element)
     when String.equal cn SN.SpecialFunctions.tuple ->
     arg_unpack_unexpected unpacked_element;
     (match el with
@@ -2229,7 +2222,6 @@ and expr_ env p (e : Nast.expr_) =
   | Aast.Method_caller _
   | Aast.Smethod_id _
   | Aast.Pair _
-  | Aast.Assert _
   | Aast.Any ->
     Errors.internal_error
       p

@@ -46,8 +46,6 @@ pub type Afield<A> =
     aast::Afield<<A as Annot>::Ex, <A as Annot>::Fb, <A as Annot>::En, <A as Annot>::Hi>;
 pub type AsExpr<A> =
     aast::AsExpr<<A as Annot>::Ex, <A as Annot>::Fb, <A as Annot>::En, <A as Annot>::Hi>;
-pub type AssertExpr<A> =
-    aast::AssertExpr<<A as Annot>::Ex, <A as Annot>::Fb, <A as Annot>::En, <A as Annot>::Hi>;
 pub type Block<A> =
     aast::Block<<A as Annot>::Ex, <A as Annot>::Fb, <A as Annot>::En, <A as Annot>::Hi>;
 pub type CaField<A> =

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<5f18d14982173ab1539e30c3b3208e7b>>
+// @generated SignedSource<<4370679e1c6cfecef8d876745c19cb61>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -468,7 +468,6 @@ pub enum Expr_<'a, Ex, Fb, En, Hi> {
             &'a Expr<'a, Ex, Fb, En, Hi>,
         ),
     ),
-    Assert(&'a AssertExpr<'a, Ex, Fb, En, Hi>),
     ETSplice(&'a Expr<'a, Ex, Fb, En, Hi>),
     EnumAtom(&'a str),
     Any,
@@ -498,28 +497,6 @@ pub enum ClassGetExpr<'a, Ex, Fb, En, Hi> {
 }
 impl<'a, Ex: TrivialDrop, Fb: TrivialDrop, En: TrivialDrop, Hi: TrivialDrop> TrivialDrop
     for ClassGetExpr<'a, Ex, Fb, En, Hi>
-{
-}
-
-#[derive(
-    Clone,
-    Copy,
-    Debug,
-    Eq,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-pub enum AssertExpr<'a, Ex, Fb, En, Hi> {
-    AEAssert(&'a Expr<'a, Ex, Fb, En, Hi>),
-}
-impl<'a, Ex: TrivialDrop, Fb: TrivialDrop, En: TrivialDrop, Hi: TrivialDrop> TrivialDrop
-    for AssertExpr<'a, Ex, Fb, En, Hi>
 {
 }
 

@@ -565,7 +565,6 @@ and expr_ env acc p e =
   | String2 _
   | PrefixedString _ ->
     acc
-  | Assert (AE_assert e) -> expr acc e
   | Yield e -> afield acc e
   | Yield_break -> acc
   | Await e -> expr acc e

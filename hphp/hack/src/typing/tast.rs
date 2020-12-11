@@ -22,7 +22,6 @@ type Hi<'a> = crate::typing_defs::Ty<'a>;
 
 pub type Afield<'a> = aast::Afield<Ex<'a>, (), En, Hi<'a>>;
 pub type AsExpr<'a> = aast::AsExpr<Ex<'a>, (), En, Hi<'a>>;
-pub type AssertExpr<'a> = aast::AssertExpr<Ex<'a>, (), En, Hi<'a>>;
 pub type Block<'a> = aast::Block<Ex<'a>, (), En, Hi<'a>>;
 pub type CaField<'a> = aast::CaField<Ex<'a>, (), En, Hi<'a>>;
 pub type Case<'a> = aast::Case<Ex<'a>, (), En, Hi<'a>>;

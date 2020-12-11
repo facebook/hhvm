@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<85510c012ef204a0a9510b0b8565be59>>
+// @generated SignedSource<<e28ff1dd978e8a394dbcfd56291cd0a4>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -1102,9 +1102,6 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
     ) -> Self {
         Expr_::Pair(Box::new((p0, p1, p2)))
     }
-    pub fn mk_assert(p0: AssertExpr<Ex, Fb, En, Hi>) -> Self {
-        Expr_::Assert(Box::new(p0))
-    }
     pub fn mk_etsplice(p0: Expr<Ex, Fb, En, Hi>) -> Self {
         Expr_::ETSplice(Box::new(p0))
     }
@@ -1417,12 +1414,6 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
     pub fn is_pair(&self) -> bool {
         match self {
             Expr_::Pair(..) => true,
-            _ => false,
-        }
-    }
-    pub fn is_assert(&self) -> bool {
-        match self {
-            Expr_::Assert(..) => true,
             _ => false,
         }
     }
@@ -1778,12 +1769,6 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
     )> {
         match self {
             Expr_::Pair(p0) => Some((&p0.0, &p0.1, &p0.2)),
-            _ => None,
-        }
-    }
-    pub fn as_assert(&self) -> Option<&AssertExpr<Ex, Fb, En, Hi>> {
-        match self {
-            Expr_::Assert(p0) => Some(&p0),
             _ => None,
         }
     }
@@ -2165,12 +2150,6 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
             _ => None,
         }
     }
-    pub fn as_assert_mut(&mut self) -> Option<&mut AssertExpr<Ex, Fb, En, Hi>> {
-        match self {
-            Expr_::Assert(p0) => Some(p0.as_mut()),
-            _ => None,
-        }
-    }
     pub fn as_etsplice_mut(&mut self) -> Option<&mut Expr<Ex, Fb, En, Hi>> {
         match self {
             Expr_::ETSplice(p0) => Some(p0.as_mut()),
@@ -2516,12 +2495,6 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
             _ => None,
         }
     }
-    pub fn as_assert_into(self) -> Option<AssertExpr<Ex, Fb, En, Hi>> {
-        match self {
-            Expr_::Assert(p0) => Some(*p0),
-            _ => None,
-        }
-    }
     pub fn as_etsplice_into(self) -> Option<Expr<Ex, Fb, En, Hi>> {
         match self {
             Expr_::ETSplice(p0) => Some(*p0),
@@ -2588,29 +2561,6 @@ impl<Ex, Fb, En, Hi> ClassGetExpr<Ex, Fb, En, Hi> {
         match self {
             ClassGetExpr::CGexpr(p0) => Some(p0),
             _ => None,
-        }
-    }
-}
-impl<Ex, Fb, En, Hi> AssertExpr<Ex, Fb, En, Hi> {
-    pub fn mk_aeassert(p0: Expr<Ex, Fb, En, Hi>) -> Self {
-        AssertExpr::AEAssert(p0)
-    }
-    pub fn is_aeassert(&self) -> bool {
-        true
-    }
-    pub fn as_aeassert(&self) -> Option<&Expr<Ex, Fb, En, Hi>> {
-        match self {
-            AssertExpr::AEAssert(p0) => Some(p0),
-        }
-    }
-    pub fn as_aeassert_mut(&mut self) -> Option<&mut Expr<Ex, Fb, En, Hi>> {
-        match self {
-            AssertExpr::AEAssert(p0) => Some(p0),
-        }
-    }
-    pub fn as_aeassert_into(self) -> Option<Expr<Ex, Fb, En, Hi>> {
-        match self {
-            AssertExpr::AEAssert(p0) => Some(p0),
         }
     }
 }

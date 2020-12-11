@@ -235,7 +235,6 @@ and ('ex, 'fb, 'en, 'hi) expr_ =
       ('hi targ * 'hi targ) option
       * ('ex, 'fb, 'en, 'hi) expr
       * ('ex, 'fb, 'en, 'hi) expr
-  | Assert of ('ex, 'fb, 'en, 'hi) assert_expr
   | ET_Splice of ('ex, 'fb, 'en, 'hi) expr
   | EnumAtom of string
   | Any
@@ -243,14 +242,6 @@ and ('ex, 'fb, 'en, 'hi) expr_ =
 and ('ex, 'fb, 'en, 'hi) class_get_expr =
   | CGstring of pstring
   | CGexpr of ('ex, 'fb, 'en, 'hi) expr
-
-(* These are "very special" constructs that we look for in, among
- * other places, terminality checks. invariant does not appear here
- * because it gets rewritten to If + AE_invariant_violation.
- *
- * TODO: get rid of assert_expr entirely in favor of rewriting to if
- * and noreturn *)
-and ('ex, 'fb, 'en, 'hi) assert_expr = AE_assert of ('ex, 'fb, 'en, 'hi) expr
 
 and ('ex, 'fb, 'en, 'hi) case =
   | Default of pos * ('ex, 'fb, 'en, 'hi) block

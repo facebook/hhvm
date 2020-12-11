@@ -16,7 +16,7 @@ function foo(): mixed {
 function test(bool $statement): bool {
   if(!$statement) {
     $y = foo();
-    assert($y is Exception);
+    invariant($y is Exception, "");
     throw $y;
   }
   return $statement;

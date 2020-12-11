@@ -15,7 +15,6 @@ function foo(A $x): void {}
 
 function test1(?A $x): void {
   while ($x) {
-    assert($x is A);
     foo($x);
   }
 }
@@ -28,7 +27,6 @@ function test2(?A $x): void {
 
 function test3(?A $x): void {
   for (; $x; ) {
-    assert($x is A);
     foo($x);
   }
 }

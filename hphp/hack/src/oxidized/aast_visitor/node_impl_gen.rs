@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<8b7e754bc243da415f0b6fd0ed2748a6>>
+// @generated SignedSource<<b201a7bd4d85b1f62ae5401d54204623>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -71,27 +71,6 @@ impl<P: Params> Node<P> for AsExpr<P::Ex, P::Fb, P::En, P::Hi> {
                 a0.accept(c, v)?;
                 a1.accept(c, v)?;
                 a2.accept(c, v)?;
-                Ok(())
-            }
-        }
-    }
-}
-impl<P: Params> Node<P> for AssertExpr<P::Ex, P::Fb, P::En, P::Hi> {
-    fn accept<'node>(
-        &'node self,
-        c: &mut P::Context,
-        v: &mut dyn Visitor<'node, P = P>,
-    ) -> Result<(), P::Error> {
-        v.visit_assert_expr(c, self)
-    }
-    fn recurse<'node>(
-        &'node self,
-        c: &mut P::Context,
-        v: &mut dyn Visitor<'node, P = P>,
-    ) -> Result<(), P::Error> {
-        match self {
-            AssertExpr::AEAssert(a0) => {
-                a0.accept(c, v)?;
                 Ok(())
             }
         }
@@ -916,10 +895,6 @@ impl<P: Params> Node<P> for Expr_<P::Ex, P::Fb, P::En, P::Hi> {
                 a.0.accept(c, v)?;
                 a.1.accept(c, v)?;
                 a.2.accept(c, v)?;
-                Ok(())
-            }
-            Expr_::Assert(a0) => {
-                a0.accept(c, v)?;
                 Ok(())
             }
             Expr_::ETSplice(a0) => {

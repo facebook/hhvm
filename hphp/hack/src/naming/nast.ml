@@ -554,9 +554,6 @@ module Visitor_DEPRECATED = struct
 
       method on_callconv : 'a -> Ast_defs.param_kind -> expr -> 'a
 
-      method on_assert :
-        'a -> (Pos.t, func_body_ann, unit, unit) assert_expr -> 'a
-
       method on_clone : 'a -> expr -> 'a
 
       method on_field : 'a -> field -> 'a
@@ -783,7 +780,6 @@ module Visitor_DEPRECATED = struct
         | Yield e -> this#on_yield acc e
         | Await e -> this#on_await acc e
         | List el -> this#on_list acc el
-        | Assert ae -> this#on_assert acc ae
         | Clone e -> this#on_clone acc e
         | Obj_get (e1, e2, _, _) -> this#on_obj_get acc e1 e2
         | Array_get (e1, e2) -> this#on_array_get acc e1 e2
@@ -1050,10 +1046,6 @@ module Visitor_DEPRECATED = struct
         let acc = this#on_param_kind acc kind in
         let acc = this#on_expr acc e in
         acc
-
-      method on_assert acc =
-        function
-        | AE_assert e -> this#on_expr acc e
 
       method on_clone acc e = this#on_expr acc e
 

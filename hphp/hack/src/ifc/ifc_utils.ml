@@ -113,7 +113,6 @@ let expr_name = function
   | A.Method_caller _ -> "Method_caller"
   | A.Smethod_id _ -> "Smethod_id"
   | A.Pair _ -> "Pair"
-  | A.Assert _ -> "Assert"
   | A.ET_Splice _ -> "ET_splice"
   | A.EnumAtom _ -> "EnumAtom"
   | A.Any -> "Any"

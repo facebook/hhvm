@@ -43,7 +43,7 @@
       c_user_attributes = []; c_file_attributes = []; c_enum = None;
       c_doc_comment = None; c_emit_id = None });
   (Fun
-     { f_span = [8:1-23:2]; f_annotation = (); f_mode = Mpartial;
+     { f_span = [8:1-22:2]; f_annotation = (); f_mode = Mpartial;
        f_ret = ((void), (Some ([8:22-26], (Hprim Tvoid))));
        f_name = ([8:10-14], "\\test"); f_tparams = [];
        f_where_constraints = []; f_variadic = FVnonVariadic;
@@ -104,29 +104,25 @@
                    (([18:3-8], (function($x): void)),
                     (Id ([18:3-8], "\\unset"))),
                    [], [(([18:9-11], C), (Lvar ([18:9-11], $c)))], None)))));
-           ([20:3-16],
-            (Expr
-               (([20:3-15], void),
-                (Assert (AE_assert (([20:10-14], bool), True))))));
-           ([21:3-26],
+           ([20:3-26],
             (If (
-               (([21:13-17], bool), (Unop (Unot, (([21:13-17], bool), True)))),
-               [([21:3-25],
+               (([20:13-17], bool), (Unop (Unot, (([20:13-17], bool), True)))),
+               [([20:3-25],
                  (Expr
-                    (([21:3-25], noreturn),
+                    (([20:3-25], noreturn),
                      (Call (
-                        (([21:3-12], (function(HH\FormatString<PlainSprintf> $fmt, ...): noreturn)),
-                         (Id ([21:3-12], "\\HH\\invariant_violation"))),
-                        [], [(([21:19-24], string), (String "foo"))], None)))))
+                        (([20:3-12], (function(HH\FormatString<PlainSprintf> $fmt, ...): noreturn)),
+                         (Id ([20:3-12], "\\HH\\invariant_violation"))),
+                        [], [(([20:19-24], string), (String "foo"))], None)))))
                  ],
                [([Pos.none], Noop)])));
-           ([22:3-30],
+           ([21:3-30],
             (Expr
-               (([22:3-29], noreturn),
+               (([21:3-29], noreturn),
                 (Call (
-                   (([22:3-22], (function(HH\FormatString<PlainSprintf> $fmt, ...): noreturn)),
-                    (Id ([22:3-22], "\\HH\\invariant_violation"))),
-                   [], [(([22:23-28], string), (String "foo"))], None)))))
+                   (([21:3-22], (function(HH\FormatString<PlainSprintf> $fmt, ...): noreturn)),
+                    (Id ([21:3-22], "\\HH\\invariant_violation"))),
+                   [], [(([21:23-28], string), (String "foo"))], None)))))
            ];
          fb_annotation = () };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
@@ -138,9 +134,9 @@
          ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
        f_doc_comment = None; f_static = false });
   (Fun
-     { f_span = [25:1-29:2]; f_annotation = (); f_mode = Mpartial;
-       f_ret = ((void), (Some ([26:21-25], (Hprim Tvoid))));
-       f_name = ([26:10-17], "\\rx_test"); f_tparams = [];
+     { f_span = [24:1-28:2]; f_annotation = (); f_mode = Mpartial;
+       f_ret = ((void), (Some ([25:21-25], (Hprim Tvoid))));
+       f_name = ([25:10-17], "\\rx_test"); f_tparams = [];
        f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
        f_cap =
        (((HH\Capabilities\IO & HH\Capabilities\AccessStaticVariable & HH\Capabilities\WriteProperty)),
@@ -148,36 +144,36 @@
        f_unsafe_cap = ((mixed), None);
        f_body =
        { fb_ast =
-         [([27:3-32],
+         [([26:3-32],
            (Expr
-              (([27:3-31], C),
-               (Binop ((Eq None), (([27:3-5], C), (Lvar ([27:3-5], $c))),
-                  (([27:8-31], C),
+              (([26:3-31], C),
+               (Binop ((Eq None), (([26:3-5], C), (Lvar ([26:3-5], $c))),
+                  (([26:8-31], C),
                    (Call (
-                      (([27:8-22], (function<T>(C $x): C)),
-                       (Id ([27:8-22], "\\HH\\Rx\\mutable"))),
-                      [((C), ([27:8-22], (Happly (([Pos.none], "_"), []))))],
-                      [(([27:23-30], C),
-                        (New ((([27:27-28], C), (CI ([27:27-28], "\\C"))),
-                           [], [], None, ([27:27-28], _))))
+                      (([26:8-22], (function<T>(C $x): C)),
+                       (Id ([26:8-22], "\\HH\\Rx\\mutable"))),
+                      [((C), ([26:8-22], (Happly (([Pos.none], "_"), []))))],
+                      [(([26:23-30], C),
+                        (New ((([26:27-28], C), (CI ([26:27-28], "\\C"))),
+                           [], [], None, ([26:27-28], _))))
                         ],
                       None)))
                   )))));
-           ([28:3-27],
+           ([27:3-27],
             (Expr
-               (([28:3-26], C),
-                (Binop ((Eq None), (([28:3-6], C), (Lvar ([28:3-6], $c1))),
-                   (([28:9-26], C),
+               (([27:3-26], C),
+                (Binop ((Eq None), (([27:3-6], C), (Lvar ([27:3-6], $c1))),
+                   (([27:9-26], C),
                     (Call (
-                       (([28:9-22], (function<T>(C $x): C)),
-                        (Id ([28:9-22], "\\HH\\Rx\\freeze"))),
-                       [((C), ([28:9-22], (Happly (([Pos.none], "_"), []))))],
-                       [(([28:23-25], C), (Lvar ([28:23-25], $c)))], None)))
+                       (([27:9-22], (function<T>(C $x): C)),
+                        (Id ([27:9-22], "\\HH\\Rx\\freeze"))),
+                       [((C), ([27:9-22], (Happly (([Pos.none], "_"), []))))],
+                       [(([27:23-25], C), (Lvar ([27:23-25], $c)))], None)))
                    )))))
            ];
          fb_annotation = () };
        f_fun_kind = FSync;
-       f_user_attributes = [{ ua_name = ([25:3-7], "__Rx"); ua_params = [] }];
+       f_user_attributes = [{ ua_name = ([24:3-7], "__Rx"); ua_params = [] }];
        f_file_attributes = []; f_external = false;
        f_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;

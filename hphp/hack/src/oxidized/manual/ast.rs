@@ -26,7 +26,6 @@ type Hi = ();
 
 pub type Afield = aast::Afield<Ex, Fb, En, Hi>;
 pub type AsExpr = aast::AsExpr<Ex, Fb, En, Hi>;
-pub type AssertExpr = aast::AssertExpr<Ex, Fb, En, Hi>;
 pub type Block = aast::Block<Ex, Fb, En, Hi>;
 pub type CaField = aast::CaField<Ex, Fb, En, Hi>;
 pub type Case = aast::Case<Ex, Fb, En, Hi>;

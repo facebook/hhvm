@@ -293,7 +293,7 @@ val class_meth_non_final_self : Pos.t -> string -> unit
 
 val class_meth_non_final_CLASS : Pos.t -> bool -> string -> unit
 
-val assert_arity : Pos.t -> unit
+val assert_banned : Pos.t -> unit
 
 val unexpected_ty_in_tast :
   Pos.t -> actual_ty:string -> expected_ty:string -> unit

@@ -1612,15 +1612,6 @@ and expr_
     let r = Reason.Rwitness p in
     let ty = mk (r, TUtils.this_of (mk (r, get_node ty))) in
     make_result env p Aast.This ty
-  | Assert (AE_assert e) ->
-    let (env, te, _) = expr env e in
-    let env = LEnv.save_and_merge_next_in_cont env C.Exit in
-    let (env, _lset) = condition env true te in
-    make_result
-      env
-      p
-      (Aast.Assert (Aast.AE_assert te))
-      (MakeType.void (Reason.Rwitness p))
   | True -> make_result env p Aast.True (MakeType.bool (Reason.Rwitness p))
   | False -> make_result env p Aast.False (MakeType.bool (Reason.Rwitness p))
   (* TODO TAST: consider checking that the integer is in range. Right now

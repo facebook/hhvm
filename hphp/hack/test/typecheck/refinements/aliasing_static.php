@@ -12,7 +12,7 @@ function global_static_aliasing(C $alias): int {
   $alias->i = 42;
 
   $objC = S::$c;
-  assert($objC is nonnull);
+  invariant($objC is nonnull, "");
   $objC->i = null;
   // All properties with ->i should be invalidated here.
 

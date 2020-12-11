@@ -3,13 +3,13 @@
     {
       "name":"HH\\invariant_violation",
       "type":"Function",
-      "pos":{"filename":"pseudofunctions.php","line":19,"char_start":3,"char_end":11},
+      "pos":{"filename":"pseudofunctions.php","line":18,"char_start":3,"char_end":11},
       "caller":"test"
     },
     {
       "name":"HH\\invariant_violation",
       "type":"Function",
-      "pos":{"filename":"pseudofunctions.php","line":20,"char_start":3,"char_end":21},
+      "pos":{"filename":"pseudofunctions.php","line":19,"char_start":3,"char_end":21},
       "caller":"test"
     }
   ],

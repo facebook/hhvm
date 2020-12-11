@@ -121,8 +121,6 @@ let visitor =
     method! on_expr (env, ctx) (((p, ty), e) as te) =
       match e with
       | Unop (Ast_defs.Unot, e)
-      | Assert (AE_assert e) ->
-        this#on_expr (env, disallow_due_to_cast ctx env) e
       | Binop (Ast_defs.Eqeqeq, e, (_, Null))
       | Binop (Ast_defs.Eqeqeq, (_, Null), e)
       | Binop (Ast_defs.Diff2, e, (_, Null))

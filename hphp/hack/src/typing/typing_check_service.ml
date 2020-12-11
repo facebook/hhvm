@@ -414,6 +414,8 @@ module ProcessFilesTally = struct
       }
 end
 
+let get_heap_size () = Gc.((quick_stat ()).Stat.heap_words) * 8 / 1024 / 1024
+
 let process_files
     (dynamic_view_files : Relative_path.Set.t)
     (ctx : Provider_context.t)
@@ -434,15 +436,26 @@ let process_files
   let start_time = Unix.gettimeofday () in
 
   let rec process_or_exit errors progress tally =
-    (* If the major heap has exceeded the bounds, we'll decline to typecheck the remaining files.
-    We use [quick_stat] instead of [stat] in order to avoid walking the major heap,
+    (* If the major heap has exceeded the bounds, we
+      (1) first try and bring the size back down by flushing the parser cache and doing a major GC;
+      (2) if this fails, we decline to typecheck the remaining files.
+    We use [quick_stat] instead of [stat] in get_heap_size in order to avoid walking the major heap,
     and we don't change the minor heap because it's small and fixed-size.
     The start-remaining test is to make sure we make at least one file of progress
     even in case of a crazy low memory cap. *)
-    let heap_mb = Gc.((quick_stat ()).Stat.heap_words) * 8 / 1024 / 1024 in
+    let heap_mb = get_heap_size () in
+    let cap = Option.value memory_cap ~default:Int.max_value in
+    let over_cap =
+      heap_mb > cap && start_file_count > List.length progress.remaining
+    in
     let exit_now =
-      heap_mb > Option.value memory_cap ~default:Int.max_value
-      && start_file_count > List.length progress.remaining
+      if over_cap then begin
+        Ast_provider.clear_parser_cache ();
+        Gc.full_major ();
+        let heap_mb = get_heap_size () in
+        heap_mb > cap
+      end else
+        false
     in
     match progress.remaining with
     | [] -> (errors, progress, tally, heap_mb)
@@ -534,10 +547,10 @@ let process_files
          ~prev:start_counters)
   in
   let processed_file_count =
-    float_of_int (start_file_count - List.length progress.remaining)
+    start_file_count - List.length progress.remaining
   in
   let processed_file_fraction =
-    processed_file_count /. float_of_int start_file_count
+    float_of_int processed_file_count /. float_of_int start_file_count
   in
   let record =
     if List.is_empty progress.remaining then
@@ -548,7 +561,7 @@ let process_files
   let open ProcessFilesTally in
   Measure.sample ~record "seconds" (Unix.gettimeofday () -. start_time);
   Measure.sample ~record "final_heap_mb" (float_of_int final_heap_mb);
-  Measure.sample ~record "files" processed_file_count;
+  Measure.sample ~record "files" (float_of_int processed_file_count);
   Measure.sample ~record "files_fraction" processed_file_fraction;
   Measure.sample ~record "decls" (float_of_int tally.decls);
   Measure.sample ~record "prefetches" (float_of_int tally.prefetches);

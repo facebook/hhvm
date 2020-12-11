@@ -19,15 +19,11 @@ impl<'ast> VisitorMut<'ast> for RewriteXmlVisitor {
     }
 
     fn visit_expr(&mut self, emitter: &mut Emitter, e: &'ast mut tast::Expr) -> Result<()> {
-        let tast::Expr(ref pos, ref expr) = e;
-        match expr {
-            tast::Expr_::Xml(cs) => {
-                *e = rewrite_xml_(emitter, pos, cs.as_ref())?;
-                e.recurse(emitter, self.object())?
-            }
-            _ => e.recurse(emitter, self.object())?,
+        let tast::Expr(pos, expr) = e;
+        if let tast::Expr_::Xml(cs) = expr {
+            *e = rewrite_xml_(emitter, pos, cs.as_ref().clone())?;
         }
-
+        e.recurse(emitter, self.object())?;
         Ok(())
     }
 }
@@ -41,19 +37,18 @@ pub fn rewrite_xml<'p>(emitter: &mut Emitter, prog: &'p mut tast::Program) -> Re
 fn rewrite_xml_(
     e: &mut Emitter,
     pos: &Pos,
-    (id, attributes, children): &(tast::Sid, Vec<tast::XhpAttribute>, Vec<tast::Expr>),
+    (id, attributes, children): (tast::Sid, Vec<tast::XhpAttribute>, Vec<tast::Expr>),
 ) -> Result<tast::Expr> {
     use ast_defs::{Id, ShapeFieldName as SF};
     use tast::{ClassId, ClassId_, Expr as E, Expr_ as E_, XhpAttribute};
 
-    // TODO(hrust): avoid clone
     let (_, attributes) =
         attributes
-            .iter()
+            .into_iter()
             .fold((0, vec![]), |(mut spread_id, mut attrs), attr| {
                 match attr {
                     XhpAttribute::XhpSimple((pos, name), v) => {
-                        attrs.push((SF::SFlitStr((pos.clone(), name.clone().into())), v.clone()));
+                        attrs.push((SF::SFlitStr((pos, name.into())), v));
                     }
                     XhpAttribute::XhpSpread(expr) => {
                         attrs.push((
@@ -61,7 +56,7 @@ fn rewrite_xml_(
                                 expr.0.clone(),
                                 format!("...${}", spread_id.to_string()).into(),
                             )),
-                            expr.clone(),
+                            expr,
                         ));
                         spread_id += 1;
                     }
@@ -69,7 +64,7 @@ fn rewrite_xml_(
                 (spread_id, attrs)
             });
     let attribute_map = E(pos.clone(), E_::mk_shape(attributes));
-    let children_vec = E(pos.clone(), E_::mk_varray(None, children.clone()));
+    let children_vec = E(pos.clone(), E_::mk_varray(None, children));
     let filename = E(
         pos.clone(),
         E_::mk_id(Id(pos.clone(), pseudo_consts::G__FILE__.into())),

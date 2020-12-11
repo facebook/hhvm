@@ -366,6 +366,16 @@ auto_namespace_map = {"Herp": "Derp\\Lib\\Herp"}
 # directly instead of over RPC via hh_client
 class SavedStateClassicTestDriver(SavedStateTestDriver):
     @classmethod
+    # pyre-fixme[14]: `save_command` overrides method defined in
+    #  `SavedStateTestDriver` inconsistently.
+    # pyre-fixme[14]: `save_command` overrides method defined in
+    #  `SavedStateTestDriver` inconsistently.
+    # pyre-fixme[14]: `save_command` overrides method defined in
+    #  `SavedStateTestDriver` inconsistently.
+    # pyre-fixme[14]: `save_command` overrides method defined in
+    #  `SavedStateTestDriver` inconsistently.
+    # pyre-fixme[15]: `save_command` overrides method defined in
+    #  `SavedStateTestDriver` inconsistently.
     def save_command(cls, init_dir: str) -> None:
         stdout, stderr, retcode = cls.proc_call(
             [

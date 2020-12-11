@@ -6455,7 +6455,8 @@ bool inner_types_might_raise(const Type& t1, const Type& t2) {
 
 bool compare_might_raise(const Type& t1, const Type& t2) {
   if (!RuntimeOption::EvalHackArrCompatNotices &&
-      !RuntimeOption::EvalEmitClsMethPointers) {
+      !RuntimeOption::EvalEmitClsMethPointers &&
+      !RuntimeOption::EvalRaiseClassConversionWarning) {
     return false;
   }
 
@@ -6481,6 +6482,13 @@ bool compare_might_raise(const Type& t1, const Type& t2) {
       if (t1.couldBe(TClsMeth) && t2.couldBe(TVec))     return true;
       if (t1.couldBe(TVec)     && t2.couldBe(TClsMeth)) return true;
     }
+  }
+
+  if (RuntimeOption::EvalRaiseClassConversionWarning) {
+    if (t1.couldBe(TStr) && t2.couldBe(TLazyCls)) return true;
+    if (t1.couldBe(TStr) && t2.couldBe(TCls)) return true;
+    if (t1.couldBe(TLazyCls) && t2.couldBe(TStr)) return true;
+    if (t1.couldBe(TCls) && t2.couldBe(TStr)) return true;
   }
 
   return t1.couldBe(BObj) && t2.couldBe(BObj);

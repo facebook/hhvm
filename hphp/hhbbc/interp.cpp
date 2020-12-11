@@ -1448,7 +1448,8 @@ std::pair<Type,bool> resolveSame(ISS& env) {
   // arrays inside these arrays.
   auto warningsEnabled =
     (RuntimeOption::EvalHackArrCompatNotices ||
-     RuntimeOption::EvalEmitClsMethPointers);
+     RuntimeOption::EvalEmitClsMethPointers ||
+     RuntimeOption::EvalRaiseClassConversionWarning);
 
   auto const result = [&] {
     auto const v1 = tv(t1);
@@ -1550,6 +1551,8 @@ bool sameJmpImpl(ISS& env, Op sameOp, const JmpOp& jmp) {
   // Same currently lies about the distinction between Func/Cls/Str
   if (ty0.couldBe(BCls) && ty1.couldBe(BStr)) return false;
   if (ty1.couldBe(BCls) && ty0.couldBe(BStr)) return false;
+  if (ty0.couldBe(BLazyCls) && ty1.couldBe(BStr)) return false;
+  if (ty1.couldBe(BLazyCls) && ty0.couldBe(BStr)) return false;
 
   // We need to loosen provenance here because it doesn't affect same / equal.
   auto isect = intersection_of(loosen_provenance(ty0), loosen_provenance(ty1));

@@ -388,6 +388,7 @@ module ProcessFilesTally = struct
     checks_done: int;  (** how many [Check] items we typechecked *)
     checks_deferred: int;  (** how many [Check] items we deferred to later *)
     decls_deferred: int;  (** how many [Declare] items we added for later *)
+    exceeded_cap_count: int;  (** how many times we exceeded the memory cap *)
   }
 
   let empty =
@@ -397,9 +398,13 @@ module ProcessFilesTally = struct
       checks_done = 0;
       checks_deferred = 0;
       decls_deferred = 0;
+      exceeded_cap_count = 0;
     }
 
   let incr_decls tally = { tally with decls = tally.decls + 1 }
+
+  let incr_caps tally =
+    { tally with exceeded_cap_count = tally.exceeded_cap_count + 1 }
 
   let incr_prefetches tally = { tally with prefetches = tally.prefetches + 1 }
 
@@ -435,7 +440,7 @@ let process_files
   let start_file_count = List.length progress.remaining in
   let start_time = Unix.gettimeofday () in
 
-  let rec process_or_exit errors progress tally =
+  let rec process_or_exit errors progress tally max_heap_mb =
     (* If the major heap has exceeded the bounds, we
       (1) first try and bring the size back down by flushing the parser cache and doing a major GC;
       (2) if this fails, we decline to typecheck the remaining files.
@@ -444,22 +449,23 @@ let process_files
     The start-remaining test is to make sure we make at least one file of progress
     even in case of a crazy low memory cap. *)
     let heap_mb = get_heap_size () in
+    let max_heap_mb = Int.max heap_mb max_heap_mb in
     let cap = Option.value memory_cap ~default:Int.max_value in
     let over_cap =
       heap_mb > cap && start_file_count > List.length progress.remaining
     in
-    let exit_now =
+    let (exit_now, tally, heap_mb) =
       if over_cap then begin
         SharedMem.invalidate_caches ();
         Gc.full_major ();
-        let heap_mb = get_heap_size () in
-        heap_mb > cap
+        let new_heap_mb = get_heap_size () in
+        (new_heap_mb > cap, ProcessFilesTally.incr_caps tally, new_heap_mb)
       end else
-        false
+        (false, tally, heap_mb)
     in
     match progress.remaining with
-    | [] -> (errors, progress, tally, heap_mb)
-    | _ when exit_now -> (errors, progress, tally, heap_mb)
+    | [] -> (errors, progress, tally, heap_mb, max_heap_mb)
+    | _ when exit_now -> (errors, progress, tally, heap_mb, max_heap_mb)
     | fn :: fns ->
       let (errors, deferred, tally) =
         match fn with
@@ -519,12 +525,12 @@ let process_files
           deferred = List.concat [deferred; progress.deferred];
         }
       in
-      process_or_exit errors progress tally
+      process_or_exit errors progress tally max_heap_mb
   in
 
   (* Process as many files as we can, and merge in their errors *)
-  let (errors, progress, tally, final_heap_mb) =
-    process_or_exit errors progress tally
+  let (errors, progress, tally, final_heap_mb, max_heap_mb) =
+    process_or_exit errors progress tally 0
   in
 
   (* Update edges *)
@@ -568,6 +574,11 @@ let process_files
   Measure.sample ~record "checks_done" (float_of_int tally.checks_done);
   Measure.sample ~record "checks_deferred" (float_of_int tally.checks_deferred);
   Measure.sample ~record "decls_deferred" (float_of_int tally.decls_deferred);
+  Measure.sample
+    ~record
+    "exceeded_cap_count"
+    (float_of_int tally.exceeded_cap_count);
+  Measure.sample ~record "max_heap_mb" (float_of_int max_heap_mb);
 
   TypingLogger.flush_buffers ();
   Ast_provider.local_changes_pop_sharedmem_stack ();

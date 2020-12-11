@@ -20,7 +20,7 @@ hex = "0.4"
 md-5 = "0.8"
 serde = { version = "1.0", features = ["derive", "rc"] }
 serde_derive = "1.0"
-serde_json = "1.0"
+serde_json = { version = "1.0", features = ["float_roundtrip"] }
 sha-1 = "0.8"
 
 [dev-dependencies]

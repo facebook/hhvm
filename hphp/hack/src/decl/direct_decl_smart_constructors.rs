@@ -3884,7 +3884,6 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             n => panic!("Expected an enum case, got {:?}", n),
         }));
 
-        let attributes = attributes;
         let mut user_attributes = Vec::with_capacity_in(attributes.len(), self.state.arena);
         for attribute in attributes.iter() {
             match attribute {
@@ -3936,6 +3935,11 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             })),
         });
         self.add_class(key, cls);
+
+        self.state
+            .classish_name_builder
+            .parsed_classish_declaration();
+
         Node::Ignored(SK::EnumDeclaration)
     }
 
@@ -3947,6 +3951,148 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         _semicolon: Self::R,
     ) -> Self::R {
         Node::ListItem(self.alloc((name, value)))
+    }
+
+    fn make_enum_class_declaration(
+        &mut self,
+        attributes: Self::R,
+        _enum_keyword: Self::R,
+        _class_keyword: Self::R,
+        name: Self::R,
+        _colon: Self::R,
+        base: Self::R,
+        _extends_keyword: Self::R,
+        extends_list: Self::R,
+        _left_brace: Self::R,
+        elements: Self::R,
+        _right_brace: Self::R,
+    ) -> Self::R {
+        let name = match self.elaborate_name(name) {
+            Some(name) => name,
+            None => return Node::Ignored(SyntaxKind::EnumClassDeclaration),
+        };
+        let base = self
+            .node_to_ty(base)
+            .unwrap_or_else(|| self.tany_with_pos(name.0));
+
+        let builtin_enum_class_ty = {
+            let pos = name.0;
+            let enum_class_ty_ = Ty_::Tapply(self.alloc((name, &[])));
+            let enum_class_ty = self.alloc(Ty(self.alloc(Reason::hint(pos)), enum_class_ty_));
+            let elt_ty_ = Ty_::Tapply(self.alloc((
+                Id(pos, "\\HH\\Elt"),
+                bumpalo::vec![in self.state.arena; enum_class_ty, base].into_bump_slice(),
+            )));
+            let elt_ty = self.alloc(Ty(self.alloc(Reason::hint(pos)), elt_ty_));
+            let builtin_enum_ty_ = Ty_::Tapply(self.alloc((
+                Id(pos, "\\HH\\BuiltinEnumClass"),
+                std::slice::from_ref(self.alloc(elt_ty)),
+            )));
+            self.alloc(Ty(self.alloc(Reason::hint(pos)), builtin_enum_ty_))
+        };
+
+        let consts = self.slice(elements.iter().filter_map(|node| match node {
+            &Node::Const(const_) => Some(const_),
+            _ => None,
+        }));
+
+        let mut extends = Vec::with_capacity_in(extends_list.len() + 1, self.state.arena);
+        extends.push(builtin_enum_class_ty);
+        extends.extend(extends_list.iter().filter_map(|&n| self.node_to_ty(n)));
+        let extends = extends.into_bump_slice();
+        let includes = &extends[1..];
+
+        let mut user_attributes = Vec::with_capacity_in(attributes.len() + 1, self.state.arena);
+        user_attributes.push(self.alloc(shallow_decl_defs::UserAttribute {
+            name: Id(name.0, "__EnumClass"),
+            classname_params: &[],
+        }));
+        for attribute in attributes.iter() {
+            match attribute {
+                Node::Attribute(attr) => user_attributes.push(self.user_attribute_to_decl(attr)),
+                _ => {}
+            }
+        }
+        // Match ordering of attributes produced by the OCaml decl parser (even
+        // though it's the reverse of the syntactic ordering).
+        user_attributes.reverse();
+        let user_attributes = user_attributes.into_bump_slice();
+
+        let cls = self.alloc(shallow_decl_defs::ShallowClass {
+            mode: self.state.file_mode,
+            final_: false,
+            is_xhp: false,
+            has_xhp_keyword: false,
+            kind: ClassKind::Cenum,
+            name,
+            tparams: &[],
+            where_constraints: &[],
+            extends,
+            uses: &[],
+            xhp_attr_uses: &[],
+            req_extends: &[],
+            req_implements: &[],
+            implements: &[],
+            implements_dynamic: false,
+            consts,
+            typeconsts: &[],
+            props: &[],
+            sprops: &[],
+            constructor: None,
+            static_methods: &[],
+            methods: &[],
+            user_attributes,
+            enum_type: Some(self.alloc(EnumType {
+                base,
+                constraint: None,
+                includes,
+                enum_class: true,
+            })),
+        });
+        self.add_class(name.1, cls);
+
+        self.state
+            .classish_name_builder
+            .parsed_classish_declaration();
+
+        Node::Ignored(SyntaxKind::EnumClassDeclaration)
+    }
+
+    fn make_enum_class_enumerator(
+        &mut self,
+        name: Self::R,
+        _left_angle: Self::R,
+        type_: Self::R,
+        _right_angle: Self::R,
+        _left_paren: Self::R,
+        _initial_value: Self::R,
+        _right_paren: Self::R,
+        _semicolon: Self::R,
+    ) -> Self::R {
+        let name = match self.expect_name(name) {
+            Some(name) => name,
+            None => return Node::Ignored(SyntaxKind::EnumClassEnumerator),
+        };
+        let pos = name.0;
+        let type_ = self
+            .node_to_ty(type_)
+            .unwrap_or_else(|| self.tany_with_pos(name.0));
+        let class_name = match self.state.classish_name_builder.get_current_classish_name() {
+            Some(name) => name,
+            None => return Node::Ignored(SyntaxKind::EnumClassEnumerator),
+        };
+        let enum_class_ty_ = Ty_::Tapply(self.alloc((Id(pos, class_name.0), &[])));
+        let enum_class_ty = self.alloc(Ty(self.alloc(Reason::hint(pos)), enum_class_ty_));
+        let type_ = Ty_::Tapply(self.alloc((
+            Id(pos, "\\HH\\Elt"),
+            bumpalo::vec![in self.state.arena; enum_class_ty, type_].into_bump_slice(),
+        )));
+        let type_ = self.alloc(Ty(self.alloc(Reason::hint(pos)), type_));
+        Node::Const(self.alloc(ShallowClassConst {
+            abstract_: false,
+            name,
+            type_,
+        }))
     }
 
     fn make_tuple_type_specifier(

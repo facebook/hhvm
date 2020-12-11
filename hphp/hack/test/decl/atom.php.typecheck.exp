@@ -1,0 +1,40 @@
+File "atom.php", line 4, characters 17-17:
+Unbound name: `I` (Naming[2049])
+File "atom.php", line 4, characters 17-17:
+Unbound name: `I` (an object type) (Naming[2049])
+File "atom.php", line 5, characters 5-7:
+Unbound name: `Box` (Naming[2049])
+File "atom.php", line 5, characters 14-16:
+Unbound name: `Box` (an object type) (Naming[2049])
+File "atom.php", line 8, characters 17-17:
+Unbound name: `I` (Naming[2049])
+File "atom.php", line 8, characters 17-17:
+Unbound name: `I` (an object type) (Naming[2049])
+File "atom.php", line 9, characters 5-7:
+Unbound name: `Box` (Naming[2049])
+File "atom.php", line 9, characters 14-16:
+Unbound name: `Box` (an object type) (Naming[2049])
+File "atom.php", line 13, characters 7-9:
+Unbound name: `Box` (Naming[2049])
+File "atom.php", line 13, characters 24-26:
+Unbound name: `Box` (an object type) (Naming[2049])
+File "atom.php", line 16, characters 35-37:
+Unbound name: `Box` (Naming[2049])
+File "atom.php", line 5, characters 10-20:
+Invalid argument (Typing[4110])
+  File "atom.php", line 5, characters 5-7:
+  Expected `Box`
+  File "atom.php", line 5, characters 14-16:
+  But got `object`; this class name is unknown to Hack
+File "atom.php", line 9, characters 10-19:
+Invalid argument (Typing[4110])
+  File "atom.php", line 9, characters 5-7:
+  Expected `Box`
+  File "atom.php", line 9, characters 14-16:
+  But got `object`; this class name is unknown to Hack
+File "atom.php", line 13, characters 20-34:
+Invalid argument (Typing[4110])
+  File "atom.php", line 13, characters 7-17:
+  Expected `Box<string>`
+  File "atom.php", line 13, characters 24-26:
+  But got `object`; this class name is unknown to Hack

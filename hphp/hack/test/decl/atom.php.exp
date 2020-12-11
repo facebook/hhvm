@@ -1,0 +1,197 @@
+[("\\EE",
+  (Shallow_decl_defs.Class
+     { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
+       sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cenum;
+       sc_name = ([4:12-14], "\\EE"); sc_tparams = [];
+       sc_where_constraints = [];
+       sc_extends =
+       [(Rhint (root|atom.php line 4, characters 12-13),
+         (Tapply (([4:12-14], "\\HH\\BuiltinEnumClass"),
+            [(Rhint (root|atom.php line 4, characters 12-13),
+              (Tapply (([4:12-14], "\\HH\\Elt"),
+                 [(Rhint (root|atom.php line 4, characters 12-13),
+                   (Tapply (([4:12-14], "\\EE"), [])));
+                   (Rhint (root|atom.php line 4, characters 17-17),
+                    (Tapply (([4:17-18], "\\I"), [])))
+                   ]
+                 )))
+              ]
+            )))
+         ];
+       sc_uses = []; sc_xhp_attr_uses = []; sc_req_extends = [];
+       sc_req_implements = []; sc_implements = [];
+       sc_implements_dynamic = false;
+       sc_consts =
+       [{ Shallow_decl_defs.scc_abstract = false; scc_name = ([5:3-4], "A");
+          scc_type =
+          (Rhint (root|atom.php line 5, characters 3-3),
+           (Tapply (([5:3-4], "\\HH\\Elt"),
+              [(Rhint (root|atom.php line 5, characters 3-3),
+                (Tapply (([5:3-4], "\\EE"), [])));
+                (Rhint (root|atom.php line 5, characters 5-7),
+                 (Tapply (([5:5-8], "\\Box"), [])))
+                ]
+              )))
+          }
+         ];
+       sc_typeconsts = []; sc_props = []; sc_sprops = [];
+       sc_constructor = None; sc_static_methods = []; sc_methods = [];
+       sc_user_attributes =
+       [{ Typing_defs_core.ua_name = ([4:12-14], "__EnumClass");
+          ua_classname_params = [] }
+         ];
+       sc_enum_type =
+       (Some { Typing_defs.te_base =
+               (Rhint (root|atom.php line 4, characters 17-17),
+                (Tapply (([4:17-18], "\\I"), [])));
+               te_constraint = None; te_includes = []; te_enum_class = true })
+       }));
+  ("\\FF",
+   (Shallow_decl_defs.Class
+      { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
+        sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cenum;
+        sc_name = ([8:12-14], "\\FF"); sc_tparams = [];
+        sc_where_constraints = [];
+        sc_extends =
+        [(Rhint (root|atom.php line 8, characters 12-13),
+          (Tapply (([8:12-14], "\\HH\\BuiltinEnumClass"),
+             [(Rhint (root|atom.php line 8, characters 12-13),
+               (Tapply (([8:12-14], "\\HH\\Elt"),
+                  [(Rhint (root|atom.php line 8, characters 12-13),
+                    (Tapply (([8:12-14], "\\FF"), [])));
+                    (Rhint (root|atom.php line 8, characters 17-17),
+                     (Tapply (([8:17-18], "\\I"), [])))
+                    ]
+                  )))
+               ]
+             )));
+          (Rhint (root|atom.php line 8, characters 27-28),
+           (Tapply (([8:27-29], "\\EE"), [])))
+          ];
+        sc_uses = []; sc_xhp_attr_uses = []; sc_req_extends = [];
+        sc_req_implements = []; sc_implements = [];
+        sc_implements_dynamic = false;
+        sc_consts =
+        [{ Shallow_decl_defs.scc_abstract = false; scc_name = ([9:3-4], "C");
+           scc_type =
+           (Rhint (root|atom.php line 9, characters 3-3),
+            (Tapply (([9:3-4], "\\HH\\Elt"),
+               [(Rhint (root|atom.php line 9, characters 3-3),
+                 (Tapply (([9:3-4], "\\FF"), [])));
+                 (Rhint (root|atom.php line 9, characters 5-7),
+                  (Tapply (([9:5-8], "\\Box"), [])))
+                 ]
+               )))
+           }
+          ];
+        sc_typeconsts = []; sc_props = []; sc_sprops = [];
+        sc_constructor = None; sc_static_methods = []; sc_methods = [];
+        sc_user_attributes =
+        [{ Typing_defs_core.ua_name = ([8:12-14], "__EnumClass");
+           ua_classname_params = [] }
+          ];
+        sc_enum_type =
+        (Some { Typing_defs.te_base =
+                (Rhint (root|atom.php line 8, characters 17-17),
+                 (Tapply (([8:17-18], "\\I"), [])));
+                te_constraint = None;
+                te_includes =
+                [(Rhint (root|atom.php line 8, characters 27-28),
+                  (Tapply (([8:27-29], "\\EE"), [])))];
+                te_enum_class = true })
+        }));
+  ("\\Foo",
+   (Shallow_decl_defs.Class
+      { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
+        sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cenum;
+        sc_name = ([12:12-15], "\\Foo"); sc_tparams = [];
+        sc_where_constraints = [];
+        sc_extends =
+        [(Rhint (root|atom.php line 12, characters 12-14),
+          (Tapply (([12:12-15], "\\HH\\BuiltinEnumClass"),
+             [(Rhint (root|atom.php line 12, characters 12-14),
+               (Tapply (([12:12-15], "\\HH\\Elt"),
+                  [(Rhint (root|atom.php line 12, characters 12-14),
+                    (Tapply (([12:12-15], "\\Foo"), [])));
+                    (Rhint (root|atom.php line 12, characters 17-21), Tmixed)
+                    ]
+                  )))
+               ]
+             )))
+          ];
+        sc_uses = []; sc_xhp_attr_uses = []; sc_req_extends = [];
+        sc_req_implements = []; sc_implements = [];
+        sc_implements_dynamic = false;
+        sc_consts =
+        [{ Shallow_decl_defs.scc_abstract = false;
+           scc_name = ([13:3-6], "Str");
+           scc_type =
+           (Rhint (root|atom.php line 13, characters 3-5),
+            (Tapply (([13:3-6], "\\HH\\Elt"),
+               [(Rhint (root|atom.php line 13, characters 3-5),
+                 (Tapply (([13:3-6], "\\Foo"), [])));
+                 (Rhint (root|atom.php line 13, characters 7-17),
+                  (Tapply (([13:7-10], "\\Box"),
+                     [(Rhint (root|atom.php line 13, characters 11-16),
+                       (Tprim Tstring))]
+                     )))
+                 ]
+               )))
+           }
+          ];
+        sc_typeconsts = []; sc_props = []; sc_sprops = [];
+        sc_constructor = None; sc_static_methods = []; sc_methods = [];
+        sc_user_attributes =
+        [{ Typing_defs_core.ua_name = ([12:12-15], "__EnumClass");
+           ua_classname_params = [] }
+          ];
+        sc_enum_type =
+        (Some { Typing_defs.te_base =
+                (Rhint (root|atom.php line 12, characters 17-21), Tmixed);
+                te_constraint = None; te_includes = []; te_enum_class = true
+                })
+        }));
+  ("\\ff",
+   (Shallow_decl_defs.Fun
+      { Typing_defs.fe_deprecated = None;
+        fe_type =
+        (Rwitness (root|atom.php line 16, characters 10-11),
+         (Tfun
+            { ft_arity = (Fstandard ()); ft_tparams = [];
+              ft_where_constraints = [];
+              ft_params =
+              [{ fp_pos = [16:40-42]; fp_name = (Some "$x");
+                 fp_type =
+                 { et_enforced = false;
+                   et_type =
+                   (Rhint (root|atom.php line 16, characters 24-38),
+                    (Tapply (([16:24-30], "\\HH\\Elt"),
+                       [(Rhint (root|atom.php line 16, characters 31-32),
+                         (Tapply (([16:31-33], "\\EE"), [])));
+                         (Rhint (root|atom.php line 16, characters 35-37),
+                          (Tapply (([16:35-38], "\\Box"), [])))
+                         ]
+                       )))
+                   };
+                 fp_rx_annotation = None;
+                 fp_flags =
+                 (make_fp_flags ~mutability:None ~accept_disposable:false
+                   ~has_default:false ~mode:Typing_defs_core.FPnormal
+                   ~ifc_external:false ~ifc_can_call:false ~is_atom:true);
+                  }
+                ];
+              ft_implicit_params = { capability = (CapDefaults [16:10-12]) };
+              ft_ret =
+              { et_enforced = false;
+                et_type =
+                (Rhint (root|atom.php line 16, characters 46-48),
+                 (Tprim Tint))
+                };
+              ft_flags =
+              (make_ft_flags FSync None ~return_disposable:false
+                ~returns_mutable:false ~returns_void_to_rx:false);
+              ft_reactive = Nonreactive; ft_ifc_decl = FDPolicied {PUBLIC} }));
+        fe_pos = [16:10-12]; fe_php_std_lib = false }))
+  ]
+
+They matched!

@@ -3043,7 +3043,19 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             &mut namespace_builder,
             Rc::make_mut(&mut self.state.namespace_builder),
         );
-        let cap = self.make_intersection_type_specifier(lb, tys, rb);
+        let cap = match tys {
+            Node::List(tys_list) if tys_list.len() == 1 => {
+                let ty = self
+                    .node_to_ty(tys_list[0])
+                    .map(|t| {
+                        let Ty(_, t_) = t;
+                        Ty(self.alloc(Reason::hint(self.merge_positions(lb, rb))), *t_)
+                    })
+                    .unwrap();
+                Node::Ty(self.alloc(ty))
+            }
+            _ => self.make_intersection_type_specifier(lb, tys, rb),
+        };
         std::mem::swap(
             &mut namespace_builder,
             Rc::make_mut(&mut self.state.namespace_builder),

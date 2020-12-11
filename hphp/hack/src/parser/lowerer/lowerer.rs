@@ -3352,8 +3352,13 @@ where
         match &node.children {
             Missing => Ok((None, None)),
             Capability(c) => {
-                let hint_ =
-                    ast::Hint_::Hintersection(Self::could_map(&Self::p_hint, &c.types, env)?);
+                let mut hints = Self::could_map(&Self::p_hint, &c.types, env)?;
+                let hint_ = if hints.len() == 1 {
+                    *hints.pop().unwrap().1
+                } else {
+                    /* Could make [] into Hmixed, but it just turns into empty intersection anyway */
+                    ast::Hint_::Hintersection(hints)
+                };
                 let pos = Self::p_pos(node, env);
                 let hint = ast::Hint::new(pos, hint_);
                 let unsafe_hint = hint.clone();

@@ -13,7 +13,7 @@
          m_name = ([4:19-22], "foo"); m_tparams = [];
          m_where_constraints = []; m_variadic = FVnonVariadic; m_params = [];
          m_cap =
-         (((HH\Capabilities\IO & HH\Capabilities\AccessStaticVariable & HH\Capabilities\WriteProperty)),
+         (((HH\Capabilities\AccessStaticVariable & HH\Capabilities\WriteProperty & HH\Capabilities\Output)),
           None);
          m_unsafe_cap = ((mixed), None);
          m_body =
@@ -48,7 +48,7 @@
          m_name = ([4:19-22], "foo"); m_tparams = [];
          m_where_constraints = []; m_variadic = FVnonVariadic; m_params = [];
          m_cap =
-         (((HH\Capabilities\IO & HH\Capabilities\AccessStaticVariable & HH\Capabilities\WriteProperty)),
+         (((HH\Capabilities\AccessStaticVariable & HH\Capabilities\WriteProperty & HH\Capabilities\Output)),
           None);
          m_unsafe_cap = ((mixed), None);
          m_body =
@@ -83,7 +83,7 @@
          m_name = ([4:19-22], "foo"); m_tparams = [];
          m_where_constraints = []; m_variadic = FVnonVariadic; m_params = [];
          m_cap =
-         (((HH\Capabilities\IO & HH\Capabilities\AccessStaticVariable & HH\Capabilities\WriteProperty)),
+         (((HH\Capabilities\AccessStaticVariable & HH\Capabilities\WriteProperty & HH\Capabilities\Output)),
           None);
          m_unsafe_cap = ((mixed), None);
          m_body =

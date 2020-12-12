@@ -182,10 +182,10 @@ let default_capability =
   intersection
     Reason.Rnone
     [
-      class_type Reason.Rnone Naming_special_names.Capabilities.io [];
       class_type
         Reason.Rnone
         Naming_special_names.Capabilities.accessStaticVariable
         [];
       class_type Reason.Rnone Naming_special_names.Capabilities.writeProperty [];
+      class_type Reason.Rnone Naming_special_names.Capabilities.output [];
     ]

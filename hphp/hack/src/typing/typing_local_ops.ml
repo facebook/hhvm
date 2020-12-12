@@ -49,4 +49,4 @@ let enforce_static_property_access =
     "Static property access"
 
 let enforce_output =
-  enforce_local_capability Capabilities.(mk io) "`echo` or `print` builtin"
+  enforce_local_capability Capabilities.(mk output) "`echo` or `print` builtin"

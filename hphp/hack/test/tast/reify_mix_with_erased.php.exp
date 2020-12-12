@@ -24,7 +24,7 @@ Errors:
          param_user_attributes = []; param_visibility = None }
         ];
       f_cap =
-      (((HH\Capabilities\IO & HH\Capabilities\AccessStaticVariable & HH\Capabilities\WriteProperty)),
+      (((HH\Capabilities\AccessStaticVariable & HH\Capabilities\WriteProperty & HH\Capabilities\Output)),
        None);
       f_unsafe_cap = ((mixed), None);
       f_body =
@@ -46,7 +46,7 @@ Errors:
        f_name = ([7:10-11], "\\g"); f_tparams = []; f_where_constraints = [];
        f_variadic = FVnonVariadic; f_params = [];
        f_cap =
-       (((HH\Capabilities\IO & HH\Capabilities\AccessStaticVariable & HH\Capabilities\WriteProperty)),
+       (((HH\Capabilities\AccessStaticVariable & HH\Capabilities\WriteProperty & HH\Capabilities\Output)),
         None);
        f_unsafe_cap = ((mixed), None);
        f_body =

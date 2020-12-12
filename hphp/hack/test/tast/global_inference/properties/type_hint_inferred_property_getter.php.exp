@@ -26,7 +26,7 @@
             param_visibility = None }
            ];
          m_cap =
-         (((HH\Capabilities\IO & HH\Capabilities\AccessStaticVariable & HH\Capabilities\WriteProperty)),
+         (((HH\Capabilities\AccessStaticVariable & HH\Capabilities\WriteProperty & HH\Capabilities\Output)),
           None);
          m_unsafe_cap = ((mixed), None);
          m_body =
@@ -51,7 +51,7 @@
           m_where_constraints = []; m_variadic = FVnonVariadic;
           m_params = [];
           m_cap =
-          (((HH\Capabilities\IO & HH\Capabilities\AccessStaticVariable & HH\Capabilities\WriteProperty)),
+          (((HH\Capabilities\AccessStaticVariable & HH\Capabilities\WriteProperty & HH\Capabilities\Output)),
            None);
           m_unsafe_cap = ((mixed), None);
           m_body =
@@ -87,7 +87,7 @@
        f_name = ([16:10-13], "\\foo"); f_tparams = [];
        f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
        f_cap =
-       (((HH\Capabilities\IO & HH\Capabilities\AccessStaticVariable & HH\Capabilities\WriteProperty)),
+       (((HH\Capabilities\AccessStaticVariable & HH\Capabilities\WriteProperty & HH\Capabilities\Output)),
         None);
        f_unsafe_cap = ((mixed), None);
        f_body =
@@ -141,7 +141,7 @@
           param_user_attributes = []; param_visibility = None }
          ];
        f_cap =
-       (((HH\Capabilities\IO & HH\Capabilities\AccessStaticVariable & HH\Capabilities\WriteProperty)),
+       (((HH\Capabilities\AccessStaticVariable & HH\Capabilities\WriteProperty & HH\Capabilities\Output)),
         None);
        f_unsafe_cap = ((mixed), None);
        f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () };

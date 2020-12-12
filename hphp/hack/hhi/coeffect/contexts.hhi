@@ -33,20 +33,22 @@ namespace HH\Contexts {
    * still present so that it may be directly used as [defaults]
    */
   type defaults = (
-    \HH\Capabilities\IO &
     \HH\Capabilities\AccessStaticVariable &
-    \HH\Capabilities\WriteProperty
+    \HH\Capabilities\WriteProperty &
+    \HH\Capabilities\Output
   );
 
-  type cipp_global = (\HH\Capabilities\CippGlobal & \HH\Capabilities\IO & \HH\Capabilities\AccessStaticVariable);
+  type cipp_global = (\HH\Capabilities\CippGlobal & \HH\Capabilities\AccessStaticVariable & \HH\Capabilities\Output);
   // type cipp<T> = (\HH\Capabilities\Cipp<T> & cipp_global);
-  type cipp<T> = (\HH\Capabilities\Cipp<T> & \HH\Capabilities\IO & \HH\Capabilities\AccessStaticVariable);
+  type cipp<T> = (\HH\Capabilities\Cipp<T> & \HH\Capabilities\AccessStaticVariable & \HH\Capabilities\Output);
 
   type non_det = \HH\Capabilities\NonDet;
 
-  type rx = (\HH\Capabilities\Rx & \HH\Capabilities\IO);
+  type output = \HH\Capabilities\Output;
+
+  type rx = \HH\Capabilities\Rx;
   // type rx_shallow = (\HH\Capabilities\RxShallow & rx);
-  type rx_shallow = (\HH\Capabilities\RxShallow & \HH\Capabilities\IO);
+  type rx_shallow = \HH\Capabilities\RxShallow;
   // type rx_local = (\HH\Capabilities\RxLocal & rx_shallow);
-  type rx_local = (\HH\Capabilities\RxLocal & \HH\Capabilities\IO);
+  type rx_local = \HH\Capabilities\RxLocal;
 }

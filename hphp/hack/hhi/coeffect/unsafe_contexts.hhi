@@ -30,6 +30,8 @@ namespace HH\Contexts\Unsafe {
 
   type non_det = mixed;
 
+  type output = mixed;
+
   type rx = mixed;
   type rx_shallow = \HH\Capabilities\RxLocal;
   type rx_local = \HH\Contexts\defaults;

@@ -52,7 +52,7 @@ namespace HH\Capabilities {
   interface AccessStaticVariable {}
 
   <<__Sealed()>>
-  interface IO {}
+  interface Output {}
 
   <<__Sealed()>>
   interface WriteProperty {}

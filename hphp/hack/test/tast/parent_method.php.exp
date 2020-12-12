@@ -20,7 +20,7 @@
             param_user_attributes = []; param_visibility = None }
            ];
          m_cap =
-         (((HH\Capabilities\IO & HH\Capabilities\AccessStaticVariable & HH\Capabilities\WriteProperty)),
+         (((HH\Capabilities\AccessStaticVariable & HH\Capabilities\WriteProperty & HH\Capabilities\Output)),
           None);
          m_unsafe_cap = ((mixed), None);
          m_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () };
@@ -53,7 +53,7 @@
           m_where_constraints = []; m_variadic = FVnonVariadic;
           m_params = [];
           m_cap =
-          (((HH\Capabilities\IO & HH\Capabilities\AccessStaticVariable & HH\Capabilities\WriteProperty)),
+          (((HH\Capabilities\AccessStaticVariable & HH\Capabilities\WriteProperty & HH\Capabilities\Output)),
            None);
           m_unsafe_cap = ((mixed), None);
           m_body =

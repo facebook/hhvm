@@ -11,7 +11,7 @@
          param_user_attributes = []; param_visibility = None }
         ];
       f_cap =
-      (((HH\Capabilities\IO & HH\Capabilities\AccessStaticVariable & HH\Capabilities\WriteProperty)),
+      (((HH\Capabilities\AccessStaticVariable & HH\Capabilities\WriteProperty & HH\Capabilities\Output)),
        None);
       f_unsafe_cap = ((mixed), None);
       f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () };
@@ -41,7 +41,7 @@
            param_user_attributes = []; param_visibility = None }
          ];
        f_cap =
-       (((HH\Capabilities\IO & HH\Capabilities\AccessStaticVariable & HH\Capabilities\WriteProperty)),
+       (((HH\Capabilities\AccessStaticVariable & HH\Capabilities\WriteProperty & HH\Capabilities\Output)),
         None);
        f_unsafe_cap = ((mixed), None);
        f_body =

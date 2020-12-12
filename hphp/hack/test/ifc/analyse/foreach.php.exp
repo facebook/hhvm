@@ -10,41 +10,44 @@ Analyzing \dict_lit_flow:
   Deps: {}
   Constraints:
     [5:12-30]
-      HH\Capabilities\IO_lump = HH\Capabilities\IO_lump'1,
-      HH\Capabilities\IO < HH\Capabilities\IO'1,
-      HH\Capabilities\AccessStaticVariable_lump'1 = HH\Capabilities\IO_lump,
-      HH\Capabilities\IO < HH\Capabilities\AccessStaticVariable'1,
-      HH\Capabilities\IO_lump = HH\Capabilities\WriteProperty_lump'1,
-      HH\Capabilities\IO < HH\Capabilities\WriteProperty'1,
-      HH\Capabilities\IO_lump'2 = HH\Capabilities\IO_lump'3,
-      HH\Capabilities\IO'2 < HH\Capabilities\IO'3,
-      HH\Capabilities\AccessStaticVariable_lump'3 = HH\Capabilities\IO_lump'2,
-      HH\Capabilities\IO'2 < HH\Capabilities\AccessStaticVariable'3,
-      HH\Capabilities\IO_lump'2 = HH\Capabilities\WriteProperty_lump'3,
-      HH\Capabilities\IO'2 < HH\Capabilities\WriteProperty'3, Dict'1 < $key,
-      Dict < $value, HH\Capabilities\IO_lump'1 = HH\Capabilities\IO_lump'1,
-      HH\Capabilities\AccessStaticVariable_lump'1 = HH\Capabilities\IO_lump'1,
-      HH\Capabilities\IO'1 < HH\Capabilities\AccessStaticVariable'1,
-      HH\Capabilities\IO_lump'1 = HH\Capabilities\WriteProperty_lump'1,
-      HH\Capabilities\IO'1 < HH\Capabilities\WriteProperty'1,
-      HH\Capabilities\IO_lump'3 = HH\Capabilities\IO_lump'3,
-      HH\Capabilities\AccessStaticVariable_lump'3 = HH\Capabilities\IO_lump'3,
-      HH\Capabilities\IO'3 < HH\Capabilities\AccessStaticVariable'3,
-      HH\Capabilities\IO_lump'3 = HH\Capabilities\WriteProperty_lump'3,
-      HH\Capabilities\IO'3 < HH\Capabilities\WriteProperty'3
+      HH\Capabilities\Output_lump = HH\Capabilities\Output_lump'1,
+      HH\Capabilities\Output < HH\Capabilities\Output'1,
+      HH\Capabilities\AccessStaticVariable_lump'1 = HH\Capabilities\Output_lump,
+      HH\Capabilities\Output < HH\Capabilities\AccessStaticVariable'1,
+      HH\Capabilities\Output_lump = HH\Capabilities\WriteProperty_lump'1,
+      HH\Capabilities\Output < HH\Capabilities\WriteProperty'1,
+      HH\Capabilities\AccessStaticVariable_lump'2 = HH\Capabilities\AccessStaticVariable_lump'3,
+      HH\Capabilities\AccessStaticVariable'2 < HH\Capabilities\AccessStaticVariable'3,
+      HH\Capabilities\AccessStaticVariable_lump'2 = HH\Capabilities\WriteProperty_lump'3,
+      HH\Capabilities\AccessStaticVariable'2 < HH\Capabilities\WriteProperty'3,
+      HH\Capabilities\AccessStaticVariable_lump'2 = HH\Capabilities\Output_lump'3,
+      HH\Capabilities\AccessStaticVariable'2 < HH\Capabilities\Output'3,
+      Dict'1 < $key, Dict < $value,
+      HH\Capabilities\Output_lump'1 = HH\Capabilities\Output_lump'1,
+      HH\Capabilities\AccessStaticVariable_lump'1 = HH\Capabilities\Output_lump'1,
+      HH\Capabilities\Output'1 < HH\Capabilities\AccessStaticVariable'1,
+      HH\Capabilities\Output_lump'1 = HH\Capabilities\WriteProperty_lump'1,
+      HH\Capabilities\Output'1 < HH\Capabilities\WriteProperty'1,
+      HH\Capabilities\AccessStaticVariable_lump'3 = HH\Capabilities\AccessStaticVariable_lump'3,
+      HH\Capabilities\AccessStaticVariable_lump'3 = HH\Capabilities\WriteProperty_lump'3,
+      HH\Capabilities\AccessStaticVariable'3 < HH\Capabilities\WriteProperty'3,
+      HH\Capabilities\AccessStaticVariable_lump'3 = HH\Capabilities\Output_lump'3,
+      HH\Capabilities\AccessStaticVariable'3 < HH\Capabilities\Output'3
   Locals:
     { $#capability ->
-      (\HH\Capabilities\IO<HH\Capabilities\IO'1, HH\Capabilities\IO_lump'1> &
+      (\HH\Capabilities\Output<HH\Capabilities\Output'1,
+                                 HH\Capabilities\Output_lump'1> &
          \HH\Capabilities\AccessStaticVariable<HH\Capabilities\AccessStaticVariable'1,
                                                  HH\Capabilities\AccessStaticVariable_lump'1> &
          \HH\Capabilities\WriteProperty<HH\Capabilities\WriteProperty'1,
                                           HH\Capabilities\WriteProperty_lump'1>);
       $#local_capability ->
-      (\HH\Capabilities\IO<HH\Capabilities\IO'3, HH\Capabilities\IO_lump'3> &
-         \HH\Capabilities\AccessStaticVariable<HH\Capabilities\AccessStaticVariable'3,
-                                                 HH\Capabilities\AccessStaticVariable_lump'3> &
+      (\HH\Capabilities\AccessStaticVariable<HH\Capabilities\AccessStaticVariable'3,
+                                               HH\Capabilities\AccessStaticVariable_lump'3> &
          \HH\Capabilities\WriteProperty<HH\Capabilities\WriteProperty'3,
-                                          HH\Capabilities\WriteProperty_lump'3>) }
+                                          HH\Capabilities\WriteProperty_lump'3> &
+         \HH\Capabilities\Output<HH\Capabilities\Output'3,
+                                   HH\Capabilities\Output_lump'3>) }
 
 Analyzing \dict_var_flow:
 * pc: pc
@@ -57,43 +60,45 @@ Analyzing \dict_var_flow:
   Deps: {}
   Constraints:
     [10:12-17]
-      HH\Capabilities\IO_lump = HH\Capabilities\IO_lump'1,
-      HH\Capabilities\IO < HH\Capabilities\IO'1,
-      HH\Capabilities\AccessStaticVariable_lump'1 = HH\Capabilities\IO_lump,
-      HH\Capabilities\IO < HH\Capabilities\AccessStaticVariable'1,
-      HH\Capabilities\IO_lump = HH\Capabilities\WriteProperty_lump'1,
-      HH\Capabilities\IO < HH\Capabilities\WriteProperty'1,
-      HH\Capabilities\IO_lump'2 = HH\Capabilities\IO_lump'3,
-      HH\Capabilities\IO'2 < HH\Capabilities\IO'3,
-      HH\Capabilities\AccessStaticVariable_lump'3 = HH\Capabilities\IO_lump'2,
-      HH\Capabilities\IO'2 < HH\Capabilities\AccessStaticVariable'3,
-      HH\Capabilities\IO_lump'2 = HH\Capabilities\WriteProperty_lump'3,
-      HH\Capabilities\IO'2 < HH\Capabilities\WriteProperty'3,
+      HH\Capabilities\Output_lump = HH\Capabilities\Output_lump'1,
+      HH\Capabilities\Output < HH\Capabilities\Output'1,
+      HH\Capabilities\AccessStaticVariable_lump'1 = HH\Capabilities\Output_lump,
+      HH\Capabilities\Output < HH\Capabilities\AccessStaticVariable'1,
+      HH\Capabilities\Output_lump = HH\Capabilities\WriteProperty_lump'1,
+      HH\Capabilities\Output < HH\Capabilities\WriteProperty'1,
+      HH\Capabilities\AccessStaticVariable_lump'2 = HH\Capabilities\AccessStaticVariable_lump'3,
+      HH\Capabilities\AccessStaticVariable'2 < HH\Capabilities\AccessStaticVariable'3,
+      HH\Capabilities\AccessStaticVariable_lump'2 = HH\Capabilities\WriteProperty_lump'3,
+      HH\Capabilities\AccessStaticVariable'2 < HH\Capabilities\WriteProperty'3,
+      HH\Capabilities\AccessStaticVariable_lump'2 = HH\Capabilities\Output_lump'3,
+      HH\Capabilities\AccessStaticVariable'2 < HH\Capabilities\Output'3,
       $dict'1 < $dict'3, $dict < $dict'2, len < len'1, $dict'3 < $key,
       $dict'2 < $value,
-      HH\Capabilities\IO_lump'1 = HH\Capabilities\IO_lump'1,
-      HH\Capabilities\AccessStaticVariable_lump'1 = HH\Capabilities\IO_lump'1,
-      HH\Capabilities\IO'1 < HH\Capabilities\AccessStaticVariable'1,
-      HH\Capabilities\IO_lump'1 = HH\Capabilities\WriteProperty_lump'1,
-      HH\Capabilities\IO'1 < HH\Capabilities\WriteProperty'1,
-      HH\Capabilities\IO_lump'3 = HH\Capabilities\IO_lump'3,
-      HH\Capabilities\AccessStaticVariable_lump'3 = HH\Capabilities\IO_lump'3,
-      HH\Capabilities\IO'3 < HH\Capabilities\AccessStaticVariable'3,
-      HH\Capabilities\IO_lump'3 = HH\Capabilities\WriteProperty_lump'3,
-      HH\Capabilities\IO'3 < HH\Capabilities\WriteProperty'3
+      HH\Capabilities\Output_lump'1 = HH\Capabilities\Output_lump'1,
+      HH\Capabilities\AccessStaticVariable_lump'1 = HH\Capabilities\Output_lump'1,
+      HH\Capabilities\Output'1 < HH\Capabilities\AccessStaticVariable'1,
+      HH\Capabilities\Output_lump'1 = HH\Capabilities\WriteProperty_lump'1,
+      HH\Capabilities\Output'1 < HH\Capabilities\WriteProperty'1,
+      HH\Capabilities\AccessStaticVariable_lump'3 = HH\Capabilities\AccessStaticVariable_lump'3,
+      HH\Capabilities\AccessStaticVariable_lump'3 = HH\Capabilities\WriteProperty_lump'3,
+      HH\Capabilities\AccessStaticVariable'3 < HH\Capabilities\WriteProperty'3,
+      HH\Capabilities\AccessStaticVariable_lump'3 = HH\Capabilities\Output_lump'3,
+      HH\Capabilities\AccessStaticVariable'3 < HH\Capabilities\Output'3
   Locals:
     { $#capability ->
-      (\HH\Capabilities\IO<HH\Capabilities\IO'1, HH\Capabilities\IO_lump'1> &
+      (\HH\Capabilities\Output<HH\Capabilities\Output'1,
+                                 HH\Capabilities\Output_lump'1> &
          \HH\Capabilities\AccessStaticVariable<HH\Capabilities\AccessStaticVariable'1,
                                                  HH\Capabilities\AccessStaticVariable_lump'1> &
          \HH\Capabilities\WriteProperty<HH\Capabilities\WriteProperty'1,
                                           HH\Capabilities\WriteProperty_lump'1>);
       $#local_capability ->
-      (\HH\Capabilities\IO<HH\Capabilities\IO'3, HH\Capabilities\IO_lump'3> &
-         \HH\Capabilities\AccessStaticVariable<HH\Capabilities\AccessStaticVariable'3,
-                                                 HH\Capabilities\AccessStaticVariable_lump'3> &
+      (\HH\Capabilities\AccessStaticVariable<HH\Capabilities\AccessStaticVariable'3,
+                                               HH\Capabilities\AccessStaticVariable_lump'3> &
          \HH\Capabilities\WriteProperty<HH\Capabilities\WriteProperty'3,
-                                          HH\Capabilities\WriteProperty_lump'3>);
+                                          HH\Capabilities\WriteProperty_lump'3> &
+         \HH\Capabilities\Output<HH\Capabilities\Output'3,
+                                   HH\Capabilities\Output_lump'3>);
       $dict -> dict<<$dict'3> => <$dict'2>; |len'1|> }
 
 Analyzing \vec_lit_flow:
@@ -107,41 +112,44 @@ Analyzing \vec_lit_flow:
   Deps: {}
   Constraints:
     [15:12-22]
-      HH\Capabilities\IO_lump = HH\Capabilities\IO_lump'1,
-      HH\Capabilities\IO < HH\Capabilities\IO'1,
-      HH\Capabilities\AccessStaticVariable_lump'1 = HH\Capabilities\IO_lump,
-      HH\Capabilities\IO < HH\Capabilities\AccessStaticVariable'1,
-      HH\Capabilities\IO_lump = HH\Capabilities\WriteProperty_lump'1,
-      HH\Capabilities\IO < HH\Capabilities\WriteProperty'1,
-      HH\Capabilities\IO_lump'2 = HH\Capabilities\IO_lump'3,
-      HH\Capabilities\IO'2 < HH\Capabilities\IO'3,
-      HH\Capabilities\AccessStaticVariable_lump'3 = HH\Capabilities\IO_lump'2,
-      HH\Capabilities\IO'2 < HH\Capabilities\AccessStaticVariable'3,
-      HH\Capabilities\IO_lump'2 = HH\Capabilities\WriteProperty_lump'3,
-      HH\Capabilities\IO'2 < HH\Capabilities\WriteProperty'3, Vec < $value,
-      HH\Capabilities\IO_lump'1 = HH\Capabilities\IO_lump'1,
-      HH\Capabilities\AccessStaticVariable_lump'1 = HH\Capabilities\IO_lump'1,
-      HH\Capabilities\IO'1 < HH\Capabilities\AccessStaticVariable'1,
-      HH\Capabilities\IO_lump'1 = HH\Capabilities\WriteProperty_lump'1,
-      HH\Capabilities\IO'1 < HH\Capabilities\WriteProperty'1,
-      HH\Capabilities\IO_lump'3 = HH\Capabilities\IO_lump'3,
-      HH\Capabilities\AccessStaticVariable_lump'3 = HH\Capabilities\IO_lump'3,
-      HH\Capabilities\IO'3 < HH\Capabilities\AccessStaticVariable'3,
-      HH\Capabilities\IO_lump'3 = HH\Capabilities\WriteProperty_lump'3,
-      HH\Capabilities\IO'3 < HH\Capabilities\WriteProperty'3
+      HH\Capabilities\Output_lump = HH\Capabilities\Output_lump'1,
+      HH\Capabilities\Output < HH\Capabilities\Output'1,
+      HH\Capabilities\AccessStaticVariable_lump'1 = HH\Capabilities\Output_lump,
+      HH\Capabilities\Output < HH\Capabilities\AccessStaticVariable'1,
+      HH\Capabilities\Output_lump = HH\Capabilities\WriteProperty_lump'1,
+      HH\Capabilities\Output < HH\Capabilities\WriteProperty'1,
+      HH\Capabilities\AccessStaticVariable_lump'2 = HH\Capabilities\AccessStaticVariable_lump'3,
+      HH\Capabilities\AccessStaticVariable'2 < HH\Capabilities\AccessStaticVariable'3,
+      HH\Capabilities\AccessStaticVariable_lump'2 = HH\Capabilities\WriteProperty_lump'3,
+      HH\Capabilities\AccessStaticVariable'2 < HH\Capabilities\WriteProperty'3,
+      HH\Capabilities\AccessStaticVariable_lump'2 = HH\Capabilities\Output_lump'3,
+      HH\Capabilities\AccessStaticVariable'2 < HH\Capabilities\Output'3,
+      Vec < $value,
+      HH\Capabilities\Output_lump'1 = HH\Capabilities\Output_lump'1,
+      HH\Capabilities\AccessStaticVariable_lump'1 = HH\Capabilities\Output_lump'1,
+      HH\Capabilities\Output'1 < HH\Capabilities\AccessStaticVariable'1,
+      HH\Capabilities\Output_lump'1 = HH\Capabilities\WriteProperty_lump'1,
+      HH\Capabilities\Output'1 < HH\Capabilities\WriteProperty'1,
+      HH\Capabilities\AccessStaticVariable_lump'3 = HH\Capabilities\AccessStaticVariable_lump'3,
+      HH\Capabilities\AccessStaticVariable_lump'3 = HH\Capabilities\WriteProperty_lump'3,
+      HH\Capabilities\AccessStaticVariable'3 < HH\Capabilities\WriteProperty'3,
+      HH\Capabilities\AccessStaticVariable_lump'3 = HH\Capabilities\Output_lump'3,
+      HH\Capabilities\AccessStaticVariable'3 < HH\Capabilities\Output'3
   Locals:
     { $#capability ->
-      (\HH\Capabilities\IO<HH\Capabilities\IO'1, HH\Capabilities\IO_lump'1> &
+      (\HH\Capabilities\Output<HH\Capabilities\Output'1,
+                                 HH\Capabilities\Output_lump'1> &
          \HH\Capabilities\AccessStaticVariable<HH\Capabilities\AccessStaticVariable'1,
                                                  HH\Capabilities\AccessStaticVariable_lump'1> &
          \HH\Capabilities\WriteProperty<HH\Capabilities\WriteProperty'1,
                                           HH\Capabilities\WriteProperty_lump'1>);
       $#local_capability ->
-      (\HH\Capabilities\IO<HH\Capabilities\IO'3, HH\Capabilities\IO_lump'3> &
-         \HH\Capabilities\AccessStaticVariable<HH\Capabilities\AccessStaticVariable'3,
-                                                 HH\Capabilities\AccessStaticVariable_lump'3> &
+      (\HH\Capabilities\AccessStaticVariable<HH\Capabilities\AccessStaticVariable'3,
+                                               HH\Capabilities\AccessStaticVariable_lump'3> &
          \HH\Capabilities\WriteProperty<HH\Capabilities\WriteProperty'3,
-                                          HH\Capabilities\WriteProperty_lump'3>) }
+                                          HH\Capabilities\WriteProperty_lump'3> &
+         \HH\Capabilities\Output<HH\Capabilities\Output'3,
+                                   HH\Capabilities\Output_lump'3>) }
 
 Analyzing \vec_var_flow:
 * pc: pc
@@ -154,42 +162,44 @@ Analyzing \vec_var_flow:
   Deps: {}
   Constraints:
     [20:12-16]
-      HH\Capabilities\IO_lump = HH\Capabilities\IO_lump'1,
-      HH\Capabilities\IO < HH\Capabilities\IO'1,
-      HH\Capabilities\AccessStaticVariable_lump'1 = HH\Capabilities\IO_lump,
-      HH\Capabilities\IO < HH\Capabilities\AccessStaticVariable'1,
-      HH\Capabilities\IO_lump = HH\Capabilities\WriteProperty_lump'1,
-      HH\Capabilities\IO < HH\Capabilities\WriteProperty'1,
-      HH\Capabilities\IO_lump'2 = HH\Capabilities\IO_lump'3,
-      HH\Capabilities\IO'2 < HH\Capabilities\IO'3,
-      HH\Capabilities\AccessStaticVariable_lump'3 = HH\Capabilities\IO_lump'2,
-      HH\Capabilities\IO'2 < HH\Capabilities\AccessStaticVariable'3,
-      HH\Capabilities\IO_lump'2 = HH\Capabilities\WriteProperty_lump'3,
-      HH\Capabilities\IO'2 < HH\Capabilities\WriteProperty'3, key < key'1,
-      $vec < $vec'1, len < len'1, $vec'1 < $value,
-      HH\Capabilities\IO_lump'1 = HH\Capabilities\IO_lump'1,
-      HH\Capabilities\AccessStaticVariable_lump'1 = HH\Capabilities\IO_lump'1,
-      HH\Capabilities\IO'1 < HH\Capabilities\AccessStaticVariable'1,
-      HH\Capabilities\IO_lump'1 = HH\Capabilities\WriteProperty_lump'1,
-      HH\Capabilities\IO'1 < HH\Capabilities\WriteProperty'1,
-      HH\Capabilities\IO_lump'3 = HH\Capabilities\IO_lump'3,
-      HH\Capabilities\AccessStaticVariable_lump'3 = HH\Capabilities\IO_lump'3,
-      HH\Capabilities\IO'3 < HH\Capabilities\AccessStaticVariable'3,
-      HH\Capabilities\IO_lump'3 = HH\Capabilities\WriteProperty_lump'3,
-      HH\Capabilities\IO'3 < HH\Capabilities\WriteProperty'3
+      HH\Capabilities\Output_lump = HH\Capabilities\Output_lump'1,
+      HH\Capabilities\Output < HH\Capabilities\Output'1,
+      HH\Capabilities\AccessStaticVariable_lump'1 = HH\Capabilities\Output_lump,
+      HH\Capabilities\Output < HH\Capabilities\AccessStaticVariable'1,
+      HH\Capabilities\Output_lump = HH\Capabilities\WriteProperty_lump'1,
+      HH\Capabilities\Output < HH\Capabilities\WriteProperty'1,
+      HH\Capabilities\AccessStaticVariable_lump'2 = HH\Capabilities\AccessStaticVariable_lump'3,
+      HH\Capabilities\AccessStaticVariable'2 < HH\Capabilities\AccessStaticVariable'3,
+      HH\Capabilities\AccessStaticVariable_lump'2 = HH\Capabilities\WriteProperty_lump'3,
+      HH\Capabilities\AccessStaticVariable'2 < HH\Capabilities\WriteProperty'3,
+      HH\Capabilities\AccessStaticVariable_lump'2 = HH\Capabilities\Output_lump'3,
+      HH\Capabilities\AccessStaticVariable'2 < HH\Capabilities\Output'3,
+      key < key'1, $vec < $vec'1, len < len'1, $vec'1 < $value,
+      HH\Capabilities\Output_lump'1 = HH\Capabilities\Output_lump'1,
+      HH\Capabilities\AccessStaticVariable_lump'1 = HH\Capabilities\Output_lump'1,
+      HH\Capabilities\Output'1 < HH\Capabilities\AccessStaticVariable'1,
+      HH\Capabilities\Output_lump'1 = HH\Capabilities\WriteProperty_lump'1,
+      HH\Capabilities\Output'1 < HH\Capabilities\WriteProperty'1,
+      HH\Capabilities\AccessStaticVariable_lump'3 = HH\Capabilities\AccessStaticVariable_lump'3,
+      HH\Capabilities\AccessStaticVariable_lump'3 = HH\Capabilities\WriteProperty_lump'3,
+      HH\Capabilities\AccessStaticVariable'3 < HH\Capabilities\WriteProperty'3,
+      HH\Capabilities\AccessStaticVariable_lump'3 = HH\Capabilities\Output_lump'3,
+      HH\Capabilities\AccessStaticVariable'3 < HH\Capabilities\Output'3
   Locals:
     { $#capability ->
-      (\HH\Capabilities\IO<HH\Capabilities\IO'1, HH\Capabilities\IO_lump'1> &
+      (\HH\Capabilities\Output<HH\Capabilities\Output'1,
+                                 HH\Capabilities\Output_lump'1> &
          \HH\Capabilities\AccessStaticVariable<HH\Capabilities\AccessStaticVariable'1,
                                                  HH\Capabilities\AccessStaticVariable_lump'1> &
          \HH\Capabilities\WriteProperty<HH\Capabilities\WriteProperty'1,
                                           HH\Capabilities\WriteProperty_lump'1>);
       $#local_capability ->
-      (\HH\Capabilities\IO<HH\Capabilities\IO'3, HH\Capabilities\IO_lump'3> &
-         \HH\Capabilities\AccessStaticVariable<HH\Capabilities\AccessStaticVariable'3,
-                                                 HH\Capabilities\AccessStaticVariable_lump'3> &
+      (\HH\Capabilities\AccessStaticVariable<HH\Capabilities\AccessStaticVariable'3,
+                                               HH\Capabilities\AccessStaticVariable_lump'3> &
          \HH\Capabilities\WriteProperty<HH\Capabilities\WriteProperty'3,
-                                          HH\Capabilities\WriteProperty_lump'3>);
+                                          HH\Capabilities\WriteProperty_lump'3> &
+         \HH\Capabilities\Output<HH\Capabilities\Output'3,
+                                   HH\Capabilities\Output_lump'3>);
       $vec -> vec<<key'1> => <$vec'1>; |len'1|> }
 
 Analyzing \keyset_lit_flow:
@@ -203,41 +213,44 @@ Analyzing \keyset_lit_flow:
   Deps: {}
   Constraints:
     [25:12-25]
-      HH\Capabilities\IO_lump = HH\Capabilities\IO_lump'1,
-      HH\Capabilities\IO < HH\Capabilities\IO'1,
-      HH\Capabilities\AccessStaticVariable_lump'1 = HH\Capabilities\IO_lump,
-      HH\Capabilities\IO < HH\Capabilities\AccessStaticVariable'1,
-      HH\Capabilities\IO_lump = HH\Capabilities\WriteProperty_lump'1,
-      HH\Capabilities\IO < HH\Capabilities\WriteProperty'1,
-      HH\Capabilities\IO_lump'2 = HH\Capabilities\IO_lump'3,
-      HH\Capabilities\IO'2 < HH\Capabilities\IO'3,
-      HH\Capabilities\AccessStaticVariable_lump'3 = HH\Capabilities\IO_lump'2,
-      HH\Capabilities\IO'2 < HH\Capabilities\AccessStaticVariable'3,
-      HH\Capabilities\IO_lump'2 = HH\Capabilities\WriteProperty_lump'3,
-      HH\Capabilities\IO'2 < HH\Capabilities\WriteProperty'3,
-      Keyset < $value, HH\Capabilities\IO_lump'1 = HH\Capabilities\IO_lump'1,
-      HH\Capabilities\AccessStaticVariable_lump'1 = HH\Capabilities\IO_lump'1,
-      HH\Capabilities\IO'1 < HH\Capabilities\AccessStaticVariable'1,
-      HH\Capabilities\IO_lump'1 = HH\Capabilities\WriteProperty_lump'1,
-      HH\Capabilities\IO'1 < HH\Capabilities\WriteProperty'1,
-      HH\Capabilities\IO_lump'3 = HH\Capabilities\IO_lump'3,
-      HH\Capabilities\AccessStaticVariable_lump'3 = HH\Capabilities\IO_lump'3,
-      HH\Capabilities\IO'3 < HH\Capabilities\AccessStaticVariable'3,
-      HH\Capabilities\IO_lump'3 = HH\Capabilities\WriteProperty_lump'3,
-      HH\Capabilities\IO'3 < HH\Capabilities\WriteProperty'3
+      HH\Capabilities\Output_lump = HH\Capabilities\Output_lump'1,
+      HH\Capabilities\Output < HH\Capabilities\Output'1,
+      HH\Capabilities\AccessStaticVariable_lump'1 = HH\Capabilities\Output_lump,
+      HH\Capabilities\Output < HH\Capabilities\AccessStaticVariable'1,
+      HH\Capabilities\Output_lump = HH\Capabilities\WriteProperty_lump'1,
+      HH\Capabilities\Output < HH\Capabilities\WriteProperty'1,
+      HH\Capabilities\AccessStaticVariable_lump'2 = HH\Capabilities\AccessStaticVariable_lump'3,
+      HH\Capabilities\AccessStaticVariable'2 < HH\Capabilities\AccessStaticVariable'3,
+      HH\Capabilities\AccessStaticVariable_lump'2 = HH\Capabilities\WriteProperty_lump'3,
+      HH\Capabilities\AccessStaticVariable'2 < HH\Capabilities\WriteProperty'3,
+      HH\Capabilities\AccessStaticVariable_lump'2 = HH\Capabilities\Output_lump'3,
+      HH\Capabilities\AccessStaticVariable'2 < HH\Capabilities\Output'3,
+      Keyset < $value,
+      HH\Capabilities\Output_lump'1 = HH\Capabilities\Output_lump'1,
+      HH\Capabilities\AccessStaticVariable_lump'1 = HH\Capabilities\Output_lump'1,
+      HH\Capabilities\Output'1 < HH\Capabilities\AccessStaticVariable'1,
+      HH\Capabilities\Output_lump'1 = HH\Capabilities\WriteProperty_lump'1,
+      HH\Capabilities\Output'1 < HH\Capabilities\WriteProperty'1,
+      HH\Capabilities\AccessStaticVariable_lump'3 = HH\Capabilities\AccessStaticVariable_lump'3,
+      HH\Capabilities\AccessStaticVariable_lump'3 = HH\Capabilities\WriteProperty_lump'3,
+      HH\Capabilities\AccessStaticVariable'3 < HH\Capabilities\WriteProperty'3,
+      HH\Capabilities\AccessStaticVariable_lump'3 = HH\Capabilities\Output_lump'3,
+      HH\Capabilities\AccessStaticVariable'3 < HH\Capabilities\Output'3
   Locals:
     { $#capability ->
-      (\HH\Capabilities\IO<HH\Capabilities\IO'1, HH\Capabilities\IO_lump'1> &
+      (\HH\Capabilities\Output<HH\Capabilities\Output'1,
+                                 HH\Capabilities\Output_lump'1> &
          \HH\Capabilities\AccessStaticVariable<HH\Capabilities\AccessStaticVariable'1,
                                                  HH\Capabilities\AccessStaticVariable_lump'1> &
          \HH\Capabilities\WriteProperty<HH\Capabilities\WriteProperty'1,
                                           HH\Capabilities\WriteProperty_lump'1>);
       $#local_capability ->
-      (\HH\Capabilities\IO<HH\Capabilities\IO'3, HH\Capabilities\IO_lump'3> &
-         \HH\Capabilities\AccessStaticVariable<HH\Capabilities\AccessStaticVariable'3,
-                                                 HH\Capabilities\AccessStaticVariable_lump'3> &
+      (\HH\Capabilities\AccessStaticVariable<HH\Capabilities\AccessStaticVariable'3,
+                                               HH\Capabilities\AccessStaticVariable_lump'3> &
          \HH\Capabilities\WriteProperty<HH\Capabilities\WriteProperty'3,
-                                          HH\Capabilities\WriteProperty_lump'3>) }
+                                          HH\Capabilities\WriteProperty_lump'3> &
+         \HH\Capabilities\Output<HH\Capabilities\Output'3,
+                                   HH\Capabilities\Output_lump'3>) }
 
 Analyzing \keyset_var_flow:
 * pc: pc
@@ -250,42 +263,44 @@ Analyzing \keyset_var_flow:
   Deps: {}
   Constraints:
     [30:12-19]
-      HH\Capabilities\IO_lump = HH\Capabilities\IO_lump'1,
-      HH\Capabilities\IO < HH\Capabilities\IO'1,
-      HH\Capabilities\AccessStaticVariable_lump'1 = HH\Capabilities\IO_lump,
-      HH\Capabilities\IO < HH\Capabilities\AccessStaticVariable'1,
-      HH\Capabilities\IO_lump = HH\Capabilities\WriteProperty_lump'1,
-      HH\Capabilities\IO < HH\Capabilities\WriteProperty'1,
-      HH\Capabilities\IO_lump'2 = HH\Capabilities\IO_lump'3,
-      HH\Capabilities\IO'2 < HH\Capabilities\IO'3,
-      HH\Capabilities\AccessStaticVariable_lump'3 = HH\Capabilities\IO_lump'2,
-      HH\Capabilities\IO'2 < HH\Capabilities\AccessStaticVariable'3,
-      HH\Capabilities\IO_lump'2 = HH\Capabilities\WriteProperty_lump'3,
-      HH\Capabilities\IO'2 < HH\Capabilities\WriteProperty'3,
+      HH\Capabilities\Output_lump = HH\Capabilities\Output_lump'1,
+      HH\Capabilities\Output < HH\Capabilities\Output'1,
+      HH\Capabilities\AccessStaticVariable_lump'1 = HH\Capabilities\Output_lump,
+      HH\Capabilities\Output < HH\Capabilities\AccessStaticVariable'1,
+      HH\Capabilities\Output_lump = HH\Capabilities\WriteProperty_lump'1,
+      HH\Capabilities\Output < HH\Capabilities\WriteProperty'1,
+      HH\Capabilities\AccessStaticVariable_lump'2 = HH\Capabilities\AccessStaticVariable_lump'3,
+      HH\Capabilities\AccessStaticVariable'2 < HH\Capabilities\AccessStaticVariable'3,
+      HH\Capabilities\AccessStaticVariable_lump'2 = HH\Capabilities\WriteProperty_lump'3,
+      HH\Capabilities\AccessStaticVariable'2 < HH\Capabilities\WriteProperty'3,
+      HH\Capabilities\AccessStaticVariable_lump'2 = HH\Capabilities\Output_lump'3,
+      HH\Capabilities\AccessStaticVariable'2 < HH\Capabilities\Output'3,
       $keyset < $keyset'1, $keyset < $keyset'1, len < len'1,
       $keyset'1 < $value,
-      HH\Capabilities\IO_lump'1 = HH\Capabilities\IO_lump'1,
-      HH\Capabilities\AccessStaticVariable_lump'1 = HH\Capabilities\IO_lump'1,
-      HH\Capabilities\IO'1 < HH\Capabilities\AccessStaticVariable'1,
-      HH\Capabilities\IO_lump'1 = HH\Capabilities\WriteProperty_lump'1,
-      HH\Capabilities\IO'1 < HH\Capabilities\WriteProperty'1,
-      HH\Capabilities\IO_lump'3 = HH\Capabilities\IO_lump'3,
-      HH\Capabilities\AccessStaticVariable_lump'3 = HH\Capabilities\IO_lump'3,
-      HH\Capabilities\IO'3 < HH\Capabilities\AccessStaticVariable'3,
-      HH\Capabilities\IO_lump'3 = HH\Capabilities\WriteProperty_lump'3,
-      HH\Capabilities\IO'3 < HH\Capabilities\WriteProperty'3
+      HH\Capabilities\Output_lump'1 = HH\Capabilities\Output_lump'1,
+      HH\Capabilities\AccessStaticVariable_lump'1 = HH\Capabilities\Output_lump'1,
+      HH\Capabilities\Output'1 < HH\Capabilities\AccessStaticVariable'1,
+      HH\Capabilities\Output_lump'1 = HH\Capabilities\WriteProperty_lump'1,
+      HH\Capabilities\Output'1 < HH\Capabilities\WriteProperty'1,
+      HH\Capabilities\AccessStaticVariable_lump'3 = HH\Capabilities\AccessStaticVariable_lump'3,
+      HH\Capabilities\AccessStaticVariable_lump'3 = HH\Capabilities\WriteProperty_lump'3,
+      HH\Capabilities\AccessStaticVariable'3 < HH\Capabilities\WriteProperty'3,
+      HH\Capabilities\AccessStaticVariable_lump'3 = HH\Capabilities\Output_lump'3,
+      HH\Capabilities\AccessStaticVariable'3 < HH\Capabilities\Output'3
   Locals:
     { $#capability ->
-      (\HH\Capabilities\IO<HH\Capabilities\IO'1, HH\Capabilities\IO_lump'1> &
+      (\HH\Capabilities\Output<HH\Capabilities\Output'1,
+                                 HH\Capabilities\Output_lump'1> &
          \HH\Capabilities\AccessStaticVariable<HH\Capabilities\AccessStaticVariable'1,
                                                  HH\Capabilities\AccessStaticVariable_lump'1> &
          \HH\Capabilities\WriteProperty<HH\Capabilities\WriteProperty'1,
                                           HH\Capabilities\WriteProperty_lump'1>);
       $#local_capability ->
-      (\HH\Capabilities\IO<HH\Capabilities\IO'3, HH\Capabilities\IO_lump'3> &
-         \HH\Capabilities\AccessStaticVariable<HH\Capabilities\AccessStaticVariable'3,
-                                                 HH\Capabilities\AccessStaticVariable_lump'3> &
+      (\HH\Capabilities\AccessStaticVariable<HH\Capabilities\AccessStaticVariable'3,
+                                               HH\Capabilities\AccessStaticVariable_lump'3> &
          \HH\Capabilities\WriteProperty<HH\Capabilities\WriteProperty'3,
-                                          HH\Capabilities\WriteProperty_lump'3>);
+                                          HH\Capabilities\WriteProperty_lump'3> &
+         \HH\Capabilities\Output<HH\Capabilities\Output'3,
+                                   HH\Capabilities\Output_lump'3>);
       $keyset -> keyset<<$keyset'1> => <$keyset'1>; |len'1|> }
 

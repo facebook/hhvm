@@ -261,5 +261,9 @@ int64_t WorkloadStats::GetAndResetAvgRelativeInterp() {
   return requests ? (relativeInterp / requests) : relativeInterp;
 }
 
+void WorkloadStats::EnsureInit() {
+  s_request_workload_stats.getCheck();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

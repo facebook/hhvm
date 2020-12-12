@@ -55,6 +55,7 @@ struct WorkloadStats final {
   WorkloadStats& operator=(const WorkloadStats&) = delete;
 
   static int64_t GetAndResetAvgRelativeInterp();
+  static void EnsureInit();
 };
 
 }

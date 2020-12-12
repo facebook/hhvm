@@ -55,6 +55,9 @@ struct LeaseHolder {
   LeaseHolder(const Func* f, TransKind kind, bool isWorker = false);
   ~LeaseHolder();
 
+  LeaseHolder(const LeaseHolder&) = delete;
+  LeaseHolder& operator=(const LeaseHolder&) = delete;
+
   /*
    * Returns true iff all the necessary locks were acquired and it's ok to
    * continue with translation.

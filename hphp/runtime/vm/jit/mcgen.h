@@ -64,40 +64,6 @@ inline tracing::Props traceProps(const TransArgs& a) {
     .add("trans_kind", show(a.kind));
 }
 
-/*
- * The state of a partially-complete translation.
- *
- * It is used to transfer context between translate() and emitTranslation()
- * when the initial phase of translation can be done without the write lease.
- */
-struct TransEnv {
-  explicit TransEnv(const TransArgs& args) : args(args) {}
-  ~TransEnv();
-
-  TransEnv(TransEnv&&) = default;
-  TransEnv& operator=(TransEnv&&) = default;
-
-  /*
-   * Context for the translation process.
-   */
-  TransArgs args;
-  FPInvOffset initSpOffset;
-  TransID transID{kInvalidTransID};
-
-  /*
-   * hhir and vasm units. Both will be set iff bytecode -> hhir lowering was
-   * successful (hhir -> vasm lowering never fails).
-   */
-  std::unique_ptr<IRUnit> unit;
-  std::unique_ptr<Vunit> vunit;
-
-  /*
-   * Metadata collected during bytecode -> hhir lowering.
-   */
-  PostConditions pconds;
-  Annotations annotations;
-};
-
 ////////////////////////////////////////////////////////////////////////////////
 
 namespace mcgen {

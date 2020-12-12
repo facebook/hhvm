@@ -255,6 +255,11 @@ struct Vunit {
    * that must be lowered by xls.
    */
   bool needsRegAlloc() const;
+  /*
+   * Return true iff this Vunit needs to have frames computed for
+   * its blocks before being emitted.
+   */
+  bool needsFramesComputed() const;
 
   /////////////////////////////////////////////////////////////////////////////
   // Data members.

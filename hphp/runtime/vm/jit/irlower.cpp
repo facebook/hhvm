@@ -106,6 +106,10 @@ void genBlock(IRLS& env, Vout& v, Vout& vc, Block& block) {
   }
 }
 
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 void optimize(Vunit& unit, CodeKind kind, bool regAlloc) {
   auto const abi = jit::abi(kind);
   switch (arch()) {
@@ -120,10 +124,6 @@ void optimize(Vunit& unit, CodeKind kind, bool regAlloc) {
       break;
   }
 }
-
-}
-
-///////////////////////////////////////////////////////////////////////////////
 
 std::unique_ptr<Vunit> lowerUnit(const IRUnit& unit,
                                  CodeKind kind,

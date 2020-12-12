@@ -84,5 +84,9 @@ bool Vunit::needsRegAlloc() const {
   return false;
 }
 
+bool Vunit::needsFramesComputed() const {
+  return frames.empty();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }}

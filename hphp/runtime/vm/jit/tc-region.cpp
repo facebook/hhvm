@@ -14,11 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/vm/jit/tc-region.h"
+
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/tc-internal.h"
 #include "hphp/runtime/vm/jit/tc-prologue.h"
 #include "hphp/runtime/vm/jit/tc-record.h"
-#include "hphp/runtime/vm/jit/tc-relocate.h"
 
 #include "hphp/runtime/base/perf-warning.h"
 #include "hphp/runtime/vm/jit/align.h"
@@ -26,9 +27,10 @@
 #include "hphp/runtime/vm/jit/cg-meta.h"
 #include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/func-order.h"
-#include "hphp/runtime/vm/jit/func-prologue.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
+#include "hphp/runtime/vm/jit/irlower.h"
 #include "hphp/runtime/vm/jit/mcgen.h"
+#include "hphp/runtime/vm/jit/perf-counters.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/relocation.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
@@ -38,6 +40,7 @@
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/trans-db.h"
 #include "hphp/runtime/vm/jit/trans-rec.h"
+#include "hphp/runtime/vm/jit/translate-region.h"
 #include "hphp/runtime/vm/jit/vasm-emit.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vm-protect.h"
@@ -58,103 +61,11 @@ namespace HPHP { namespace jit { namespace tc {
 namespace {
 
 using PrologueTCAMap = jit::hash_map<PrologueID,TCA,PrologueID::Hasher>;
-
-using SrcKeyTransMap = jit::hash_map<SrcKey,jit::vector<TransMetaInfo*>,
+using SrcKeyTransMap = jit::hash_map<SrcKey,jit::vector<TCA>,
                                      SrcKey::Hasher>;
 
-/*
- * Attempt to emit code for the given IRUnit to `code'. Returns true on
- * success, false if codegen failed.
- */
-bool mcGenUnit(TransEnv& env, CodeCache::View codeView, CGMeta& fixups) {
-  auto const& unit = *env.unit;
-  try {
-    emitVunit(*env.vunit, unit, codeView, fixups,
-              mcgen::dumpTCAnnotation(env.args.kind) ? &env.annotations
-                                                     : nullptr);
-  } catch (const DataBlockFull& dbFull) {
-    if (dbFull.name == "hot") {
-      code().disableHot();
-      return false;
-    } else {
-      always_assert_flog(0, "data block = {}\nmessage: {}\n",
-                         dbFull.name, dbFull.what());
-    }
-  }
-
-  auto const startSk = unit.context().initSrcKey;
-  if (unit.context().kind == TransKind::Profile) {
-    profData()->setProfiling(startSk.func());
-  }
-
-  return true;
-}
-
-TransLocMaker relocateLocalTranslation(TransRange range, TransKind kind,
-                                       CodeCache::View srcView,
-                                       CGMeta& fixups,
-                                       CodeMetaLock* locker) {
-  auto reloc = [&] () -> folly::Optional<TransLocMaker> {
-    if (locker) locker->lock();
-
-    auto view = code().view(kind);
-    TransLocMaker tlm(view);
-    tlm.markStart();
-
-    RelocationInfo rel;
-    {
-      SCOPE_EXIT { if (locker) locker->unlock(); };
-      try {
-        auto origin = range.data;
-        if (!origin.empty()) {
-          view.data().bytes(origin.size(),
-                            srcView.data().toDestAddress(origin.begin()));
-
-          auto dest = tlm.dataRange();
-          auto oAddr = origin.begin();
-          auto dAddr = dest.begin();
-          while (oAddr != origin.end()) {
-            assertx(dAddr != dest.end());
-            rel.recordAddress(oAddr++, dAddr++, 0);
-          }
-        }
-
-        relocate(rel, view.main(), range.main.begin(), range.main.end(),
-                 srcView.main(), fixups, nullptr, AreaIndex::Main);
-        relocate(rel, view.cold(), range.cold.begin(), range.cold.end(),
-                 srcView.cold(), fixups, nullptr, AreaIndex::Cold);
-        if (&srcView.cold() != &srcView.frozen()) {
-          relocate(rel, view.frozen(), range.frozen.begin(),
-                   range.frozen.end(), srcView.frozen(), fixups, nullptr,
-                   AreaIndex::Frozen);
-        }
-
-        tlm.markEnd();
-      } catch (const DataBlockFull& dbFull) {
-        tlm.rollback();
-        if (dbFull.name == "hot") {
-          code().disableHot();
-          return folly::none;
-        }
-        throw;
-      }
-    }
-
-    adjustForRelocation(rel);
-    adjustMetaDataForRelocation(rel, nullptr, fixups);
-    adjustCodeForRelocation(rel, fixups);
-    return tlm;
-  };
-
-  if (auto tlm = reloc()) return *tlm;
-
-  auto tlm = reloc();
-  always_assert(tlm);
-  return *tlm;
-}
-
-bool checkLimit(const TransMetaInfo& info, const size_t numTrans) {
-  auto const limit = info.viewKind == TransKind::Profile
+bool checkLimit(TransKind kind, const size_t numTrans) {
+  auto const limit = kind == TransKind::Profile
     ? RuntimeOption::EvalJitMaxProfileTranslations
     : RuntimeOption::EvalJitMaxTranslations;
 
@@ -163,130 +74,8 @@ bool checkLimit(const TransMetaInfo& info, const size_t numTrans) {
   // interp translations to avoid a race where multiple threads believe there
   // are still available translations.
   if (numTrans == limit + 1) return false;
-  if (numTrans == limit && info.transKind != TransKind::Interp) return false;
+  if (numTrans == limit && kind != TransKind::Interp) return false;
   return true;
-}
-
-folly::Optional<TransLoc>
-relocateTranslation(TransMetaInfo& info, OptView optSrcView, CodeMetaLock* locker) {
-  auto const sk = info.sk;
-  auto range = info.range;
-  auto& fixups = info.meta;
-  auto& tr = info.transRec;
-  bool needsRelocate = optSrcView.has_value();
-
-  always_assert(
-    needsRelocate ||
-    code().isValidCodeAddress(info.range.main.begin())
-  );
-
-  // 1) If we are currently in a thread local TC we need to relocate into the
-  //    end of the real TC.
-  // 2) If reusable TC is enabled we need to relocate to an inner allocation if
-  //    sufficiently sized free blocks can be found
-  //
-  // Ideally we can combine (1) and (2), however, currently thread-local TC is
-  // only useful in production environments where we may want to emit optimize
-  // translations in parallel, while reusable TC is only meaningful in sandboxes
-  // where translations may be invalidates by source modifications.
-
-  auto optDstView = [&] () -> folly::Optional<CodeCache::View> {
-    if (!needsRelocate) return info.emitView;
-    try {
-      auto tlm = relocateLocalTranslation(range, info.viewKind, *optSrcView,
-                                          fixups, locker);
-      range = tlm.range();
-      return tlm.view();
-    } catch (const DataBlockFull& dbFull) {
-      return folly::none;
-    }
-  }();
-
-  if (!optDstView) return folly::none;
-  info.finalView = std::make_unique<CodeCache::View>(*optDstView);
-
-  auto loc = range.loc();
-  if (!locker) tryRelocateNewTranslation(sk, loc, *optDstView, fixups);
-  info.loc = loc;
-
-  // Update the machine-code addresses in the `tr' TransRec, which may have
-  // changed due to relocation.
-  if (tr.isValid() && needsRelocate) {
-    tr.aStart = loc.mainStart();
-    tr.acoldStart = loc.coldCodeStart();
-    tr.afrozenStart = loc.frozenCodeStart();
-    tr.aLen = loc.mainSize();
-    tr.acoldLen = loc.coldCodeSize();
-    tr.afrozenLen = loc.frozenCodeSize();
-    tr.bcMapping = fixups.bcMap;
-  }
-
-  return loc;
-}
-
-/*
- * Record various metadata about the translation into the global data
- * structures.
- */
-void publishTranslationMeta(TransMetaInfo& info) {
-  const auto sk = info.sk;
-  auto& fixups = info.meta;
-  auto& tr = info.transRec;
-  assertx(info.finalView);
-  const auto& view = *info.finalView;
-  const auto& loc = info.loc;
-  assertx(!loc.empty());
-
-  auto const srcRec = srcDB().find(sk);
-  always_assert(srcRec);
-  assertx(checkLimit(info, srcRec->numTrans()));
-
-  if (RuntimeOption::EvalProfileBC) {
-    TransBCMapping prev{};
-    for (auto& cur : fixups.bcMap) {
-      if (!cur.aStart) continue;
-      if (prev.aStart) {
-        recordBCInstr(uint32_t(prev.sk.op()), prev.aStart, cur.aStart, false);
-      } else {
-        recordBCInstr(OpTraceletGuard, loc.mainStart(), cur.aStart, false);
-      }
-      prev = cur;
-    }
-  }
-
-  recordGdbTranslation(sk, view.main(), loc.mainStart(), loc.mainEnd());
-  recordGdbTranslation(sk, view.cold(), loc.coldCodeStart(), loc.coldEnd());
-
-  transdb::addTranslation(tr);
-  FuncOrder::recordTranslation(tr);
-  if (RuntimeOption::EvalJitUseVtuneAPI) {
-    reportTraceletToVtune(sk.unit(), sk.func(), tr);
-  }
-
-  fixups.process(&info.tailBranches);
-}
-
-/*
- * Add a translation to the corresponding SrcRec, effectively making it
- * reachable.  This should be done after the metadata for the translation has
- * been published.
- */
-void publishTranslationCode(TransMetaInfo info) {
-  const auto loc = info.loc;
-  const auto srcRec = srcDB().find(info.sk);
-  always_assert(srcRec);
-
-  TRACE(1, "newTranslation: %p  sk: %s\n",
-        loc.entry(), showShort(info.sk).c_str());
-
-  srcRec->newTranslation(loc, info.tailBranches);
-
-  TRACE(1, "mcg: %u-byte translation (%u main, %u cold, %u frozen)\n",
-        loc.mainSize() + loc.coldCodeSize() + loc.frozenCodeSize(),
-        loc.mainSize(), loc.coldCodeSize(), loc.frozenCodeSize());
-  if (Trace::moduleEnabledRelease(Trace::tcspace, 1)) {
-    Trace::traceRelease("%s", getTCSpace().c_str());
-  }
 }
 
 void invalidateSrcKey(SrcKey sk) {
@@ -323,8 +112,8 @@ void invalidateFuncProfSrcKeys(const Func* func) {
 
 size_t infoSize(const FuncMetaInfo& info) {
   size_t sz = 0;
-  for (auto& trans : info.translations) {
-    auto& range = trans.range;
+  for (auto& trans : info.translators) {
+    auto const& range = trans->range();
     sz += range.main.size() + range.cold.size() + range.frozen.size();
   }
   return sz;
@@ -339,92 +128,58 @@ bool checkTCLimits() {
   return cold_under && froz_under && code().hotEnabled();
 }
 
-void relocateOptFunc(FuncMetaInfo& info, SrcKeyTransMap& srcKeyTrans,
-                     PrologueTCAMap* prologueTCAs = nullptr,
-                     size_t* failedBytes = nullptr, CodeMetaLock* locker = nullptr) {
+void relocateOptFunc(FuncMetaInfo& info,
+                     PrologueTCAMap& prologueTCAs,
+                     SrcKeyTransMap& srcKeyTrans,
+                     size_t* failedBytes = nullptr) {
   auto const func = info.func;
 
   // Relocate/emit all prologues and translations for func in order.
-  size_t prologueIdx = 0;
-  size_t translationIdx = 0;
+  for (auto& translator : info.translators) {
+    assertx(func == translator->sk.func());
+    auto const prologueTranslator =
+      dynamic_cast<PrologueTranslator*>(translator.get());
+    auto const regionTranslator =
+      dynamic_cast<RegionTranslator*>(translator.get());
 
-  for (auto kind : info.order) {
-    switch (kind) {
-      case FuncMetaInfo::Kind::Prologue: {
-        assertx(prologueIdx < info.prologues.size());
-        auto& prologueInfo = info.prologues[prologueIdx];
-        assertx(func == prologueInfo.transRec->func());
-        emitFuncPrologueOptInternal(prologueInfo, locker);
-        if (prologueTCAs != nullptr && prologueInfo.start != nullptr) {
-          const auto nargs = prologueInfo.transRec->prologueArgs();
-          const auto pid = PrologueID(func, nargs);
-          always_assert(code().inHotOrMain(prologueInfo.start));
-          (*prologueTCAs)[pid] = prologueInfo.start;
-        }
-        prologueIdx++;
-        break;
+    if (regionTranslator) {
+      auto const it = srcKeyTrans.find(translator->sk);
+      // We don't publish translations one at a time during optimized
+      // retranslation.  Use the srcKeyTransMap to establish if we hit the
+      // translation limit.
+      if (it != srcKeyTrans.end() &&
+          !checkLimit(regionTranslator->kind, it->second.size())) {
+        translator->reset();
+        continue;
       }
-      case FuncMetaInfo::Kind::Translation: {
-        assertx(translationIdx < info.translations.size());
-        auto& transInfo = info.translations[translationIdx];
-        translationIdx++;
-        FTRACE(3, "relocateOptFunc: trying to relocate translation at {}\n",
-               transInfo.range.main.begin());
-        auto it = srcKeyTrans.find(transInfo.sk);
-        if (it != srcKeyTrans.end()) {
-          auto& vec = it->second;
-          if (!checkLimit(transInfo, vec.size())) {
-            FTRACE(1, " - skipping translation that wouldn't be published!"
-                   "transInfo = {} sk = {} vec.size = {}\n",
-                   &transInfo, showShort(transInfo.sk), vec.size());
-            transInfo.loc = TransLoc{};
-            continue;
-          }
-        }
-        auto& range = transInfo.range;
-        auto bytes = range.main.size() + range.cold.size() +
-                     range.frozen.size();
-        auto loc = relocateTranslation(transInfo, info.tcBuf.view(), locker);
-        FTRACE(3, "relocateOptFunc: relocated to start loc {}\n",
-               loc ? loc->entry() : 0x0);
-        if (loc) {
-          auto& vec = srcKeyTrans[transInfo.sk];
-          auto const entry = transInfo.loc.entry();
-          assertx(vec.size() < RuntimeOption::EvalJitMaxTranslations);
-          always_assert(code().inHotOrMainOrColdOrFrozen(entry));
-          FTRACE(3, "appending transInfo {} (entry @ {}) to sk {} "
-                 "at index {}\n",
-                 &transInfo, entry, showShort(transInfo.sk), vec.size());
-          vec.emplace_back(&transInfo);
-        }
-        if (!loc && failedBytes) {
-          *failedBytes += bytes;
-        }
-        break;
+    } else if (prologueTranslator) {
+      assertx(!translator->translateSuccess());
+      // This is a prologue which hasn't been translated yet.
+      translator->translate();
+    }
+    if (!translator->translateSuccess()) continue;
+    auto const& range = translator->range();
+    auto const bytes = range.main.size() + range.cold.size() +
+                       range.frozen.size();
+    translator->relocate();
+
+    if (translator->entry()) {
+      always_assert(code().inHotOrMain(translator->entry()));
+      if (prologueTranslator) {
+        const auto pid = PrologueID(func, prologueTranslator->paramIndex());
+        prologueTCAs[pid] = translator->entry();
+      } else if (regionTranslator) {
+        srcKeyTrans[regionTranslator->sk].emplace_back(translator->entry());
       }
+    } else if (failedBytes) {
+      *failedBytes += bytes;
     }
   }
-  assertx(prologueIdx == info.prologues.size());
-  assertx(translationIdx == info.translations.size());
 }
 
 void publishOptFuncMeta(FuncMetaInfo& info) {
-  auto const func = info.func;
-
-  for (auto& prologueInfo : info.prologues) {
-    const auto tca = prologueInfo.start;
-    if (tca != nullptr) {
-      const auto nArgs = prologueInfo.transRec->prologueArgs();
-      publishFuncPrologueMeta(func, nArgs, TransKind::OptPrologue,
-                              prologueInfo);
-    }
-  }
-
-  for (auto& transInfo : info.translations) {
-    const auto loc = transInfo.loc;
-    if (!loc.empty()) {
-      publishTranslationMeta(transInfo);
-    }
+  for (auto const& translator : info.translators) {
+    if (translator->translateSuccess()) translator->publishMetaInternal();
   }
 }
 
@@ -433,54 +188,22 @@ void publishOptFuncCode(FuncMetaInfo& info,
   auto const func = info.func;
 
   // Publish all prologues and translations for func in order.
-  size_t prologueIdx = 0;
-  size_t translationIdx = 0;
-
-  auto const fcallHelperStub = jit::tc::ustubs().fcallHelperThunk;
-
-  for (auto kind : info.order) {
-    switch (kind) {
-      case FuncMetaInfo::Kind::Prologue: {
-        assertx(prologueIdx < info.prologues.size());
-        auto& prologueInfo = info.prologues[prologueIdx];
-        const auto rec = prologueInfo.transRec;
-        assertx(func == rec->func());
-        const auto tca = prologueInfo.start;
-        if (tca != nullptr) {
-          const auto nArgs = rec->prologueArgs();
-          bool succeeded = publishFuncPrologueCode(func, nArgs, prologueInfo);
-          assertx(succeeded);
-          smashFuncCallers(tca, rec);
-          if (succeeded && publishedSet) publishedSet->insert(tca);
-        } else {
-          // If we failed to emit the prologue (e.g. the TC filled up), redirect
-          // all the callers to the fcallHelperThunk so that they stop calling
-          // the profile code.
-          smashFuncCallers(fcallHelperStub, rec);
-        }
-        prologueIdx++;
-        break;
+  for (auto const& translator : info.translators) {
+    if (translator->translateSuccess()) {
+      translator->publishCodeInternal();
+      auto const tca = translator->entry();
+      if (publishedSet) publishedSet->insert(tca);
+      if (translator->sk == SrcKey{func, func->base(), ResumeMode::None} &&
+          func->numRequiredParams() == func->numNonVariadicParams()) {
+        func->setFuncBody(tca);
       }
-      case FuncMetaInfo::Kind::Translation: {
-        assertx(translationIdx < info.translations.size());
-        auto& transInfo = info.translations[translationIdx];
-        const auto regionSk = transInfo.sk;
-        const auto      loc = transInfo.loc;
-        if (!loc.empty()) {
-          publishTranslationCode(std::move(transInfo));
-          if (publishedSet) publishedSet->insert(loc.entry());
-          if (regionSk == SrcKey{func, func->base(), ResumeMode::None} &&
-              func->numRequiredParams() == func->numNonVariadicParams()) {
-            func->setFuncBody(loc.entry());
-          }
-        }
-        translationIdx++;
-        break;
-      }
+    } else {
+      // If we failed to emit the prologue (e.g. the TC filled up), redirect
+      // all the callers to the fcallHelperThunk so that they stop calling
+      // the profile code.
+      translator->smashBackup();
     }
   }
-  assertx(prologueIdx == info.prologues.size());
-  assertx(translationIdx == info.translations.size());
 }
 
 void relocateSortedOptFuncs(std::vector<FuncMetaInfo>& infos,
@@ -488,11 +211,12 @@ void relocateSortedOptFuncs(std::vector<FuncMetaInfo>& infos,
                             SrcKeyTransMap& srcKeyTrans) {
   size_t failedBytes = 0;
 
-  CodeMetaLock locker{false};
-
   bool shouldLog = RuntimeOption::ServerExecutionMode();
   for (auto& finfo : infos) {
+    // We clear the translations that are not relocated to ensure
+    // no one tries publishing such translations.
     if (!Func::isFuncIdValid(finfo.fid)) {
+      finfo.clear();
       continue;
     }
 
@@ -504,13 +228,14 @@ void relocateSortedOptFuncs(std::vector<FuncMetaInfo>& infos,
              "Skipping function {} {}\n", finfo.func->getFuncId(),
              finfo.func->fullName());
       failedBytes += infoSize(finfo);
+      finfo.clear();
       continue;
     }
     if (shouldLog) {
       shouldLog = false;
       Logger::Info("retranslateAll: starting to relocate functions");
     }
-    relocateOptFunc(finfo, srcKeyTrans, &prologueTCAs, &failedBytes, &locker);
+    relocateOptFunc(finfo, prologueTCAs, srcKeyTrans, &failedBytes);
   }
 
   if (failedBytes) {
@@ -522,20 +247,18 @@ void relocateSortedOptFuncs(std::vector<FuncMetaInfo>& infos,
 }
 
 /*
- * Smash and optimize the calls in `transInfo' to prologues in `prologueTCAs'.
+ * Smash and optimize the calls in `meta' to prologues in `srcKeyTrans'.
  */
-void smashOptCalls(TransMetaInfo& transInfo,
+void smashOptCalls(CGMeta& meta,
                    const PrologueTCAMap& prologueTCAs) {
-  assertx(!transInfo.loc.empty());
-
-  auto const oldSmashableCallData = std::move(transInfo.meta.smashableCallData);
+  auto const oldSmashableCallData = std::move(meta.smashableCallData);
   for (auto& pair : oldSmashableCallData) {
     TCA call = pair.first;
-    const PrologueID& pid = pair.second;
+    auto const& pid = pair.second;
     auto it = prologueTCAs.find(pid);
     if (it == prologueTCAs.end()) {
       // insert non-smashed call back into transInfo.meta.smashableCallData
-      transInfo.meta.smashableCallData.emplace(pair);
+      meta.smashableCallData.emplace(pair);
       continue;
     }
 
@@ -549,51 +272,57 @@ void smashOptCalls(TransMetaInfo& transInfo,
     smashCall(call, target);
     optimizeSmashedCall(call);
 
-    transInfo.meta.smashableLocations.erase(call);
+    meta.smashableLocations.erase(call);
   }
 }
 
 /*
  * Find the jump target for jumps of kind `jumpKind' within the translation
- * corresponding to `info' going to the SrcRec corresponding to `vec'.  `info'
- * is nullptr when the source translation is a prologue.
+ * corresponding to `curEntry' going to the SrcRec corresponding to `vec'.
+ * `curEntry' is the TCA of the start of the current tracelet.  For prologues
+ * this is nullptr.  It is used while smashing retranslations of the same
+ * srckey.
  */
-TCA findJumpTarget(const TransMetaInfo* info,
-                   const jit::vector<TransMetaInfo*>& vec,
+TCA findJumpTarget(TCA curEntry,
+                   const jit::vector<TCA>& vec,
                    CGMeta::JumpKind jumpKind) {
   always_assert(vec.size() > 0);
 
   using Kind = CGMeta::JumpKind;
   const bool isRetrans = jumpKind == Kind::Fallback ||
                          jumpKind == Kind::Fallbackcc;
-  always_assert(IMPLIES(info == nullptr, !isRetrans));
 
-  // Case 1: when the jump is in a prologue (info == nullptr) or it jumps to a
+  // It may seem like !isRetrans should imply that none of the elements in the
+  // retranslation chain vector is the curEntry.  In practice self loops may
+  // make that happen.
+  always_assert(IMPLIES(curEntry == nullptr, !isRetrans));
+
+  // Case 1: when the jump is in a prologue (curEntry == nullptr) or it jumps to a
   //         different SrcKey, we jump to the first translation in the list.
   if (!isRetrans) {
-    return vec.front()->loc.entry();
+    return vec.front();
   }
 
   // Case 2: when jumping to the same SrcKey, we jump to the translation
-  //         following this one (`info').
-  always_assert(info->sk == vec.front()->sk);
+  //         following this one (`curEntry').
   for (size_t i = 0; i < vec.size() - 1; i++) {
-    if (vec[i] == info) {
-      return vec[i + 1]->loc.entry();
+    if (vec[i] == curEntry) {
+      return vec[i + 1];
     }
   }
 
-  // We should only get here if `info' is the last translation.
-  always_assert(info == vec.back());
+  // We should only get here if `curEntry' is the last translation.
+  always_assert(curEntry == vec.back());
   return nullptr;
 }
 
 /*
- * Smash and optimize the jumps in `transInfo' going to the optimized
- * translations in `srcKeyTrans'.
+ * Smash and optimize the jumps in the translation starting at TCA entry (with
+ * tracked metadata in meta)  going to the optimized translations in
+ * `srcKeyTrans'.
  */
 void smashOptJumps(CGMeta& meta,
-                   const TransMetaInfo* transInfo, // nullptr for prologues
+                   TCA entry,  // nullptr for prologues
                    const SrcKeyTransMap& srcKeyTrans) {
   using Kind = CGMeta::JumpKind;
 
@@ -611,7 +340,7 @@ void smashOptJumps(CGMeta& meta,
       continue;
     }
     const auto& transVec = it->second;
-    TCA succTCA = findJumpTarget(transInfo, transVec, kind);
+    TCA succTCA = findJumpTarget(entry, transVec, kind);
     if (succTCA == nullptr) {
       newSmashableJumpData.emplace(pair);
       continue;
@@ -697,21 +426,17 @@ void smashOptSortedOptFuncs(std::vector<FuncMetaInfo>& infos,
   for (auto& finfo : infos) {
     if (!Func::isFuncIdValid(finfo.fid)) continue;
 
-    for (auto& transInfo : finfo.translations) {
+    for (auto& translator : finfo.translators) {
       // Skip if the translation wasn't relocated (e.g. ran out of TC space).
-      if (transInfo.loc.empty()) continue;
-      assertx(code().inHotOrMainOrColdOrFrozen(transInfo.loc.entry()));
+      if (!translator->entry()) continue;
+      assertx(code().inHotOrMainOrColdOrFrozen(translator->entry()));
 
-      smashOptCalls(transInfo, prologueTCAs);
-      smashOptJumps(transInfo.meta, &transInfo, srcKeyTrans);
-    }
-
-    for (auto& prologueInfo : finfo.prologues) {
-      // Skip if the prologue wasn't relocated (e.g. ran out of TC space).
-      if (prologueInfo.start == nullptr) continue;
-      assertx(code().inHotOrMain(prologueInfo.start));
-
-      smashOptJumps(prologueInfo.meta, nullptr, srcKeyTrans);
+      if (isPrologue(translator->kind)) {
+        smashOptJumps(translator->meta(), nullptr, srcKeyTrans);
+      } else {
+        smashOptCalls(translator->meta(), prologueTCAs);
+        smashOptJumps(translator->meta(), translator->entry(), srcKeyTrans);
+      }
     }
   }
 }
@@ -760,8 +485,8 @@ std::string show(const SrcKeyTransMap& map) {
   std::string ret;
   for (auto& skt : map) {
     folly::format(&ret, "  - [{}]:", showShort(skt.first));
-    for (auto tinfo : skt.second) {
-      folly::format(&ret, " {},", tinfo->loc.entry());
+    for (auto tca : skt.second) {
+      folly::format(&ret, " {},", tca);
     }
     ret += "\n";
   }
@@ -783,15 +508,14 @@ void checkPublishedAddresses(const PrologueTCAMap&     prologueTCAs,
                              const SrcKeyTransMap&     srcKeyTrans,
                              const jit::hash_set<TCA>& publishedSet) {
   for (auto& prologueTCA : prologueTCAs) {
-    checkPublishedAddr(prologueTCA.second, publishedSet);
+      checkPublishedAddr(prologueTCA.second, publishedSet);
   }
 
   for (auto& skt : srcKeyTrans) {
     auto& vec = skt.second;
-    for (auto tinfo : vec) {
-      auto loc = tinfo->loc;
-      if (!loc.empty()) {
-        checkPublishedAddr(loc.entry(), publishedSet);
+    for (auto tca : vec) {
+      if (tca) {
+        checkPublishedAddr(tca, publishedSet);
       }
     }
   }
@@ -875,125 +599,13 @@ void createSrcRec(SrcKey sk, FPInvOffset spOff) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-folly::Optional<TransMetaInfo> emitTranslation(TransEnv env, OptView optDst) {
-  Timer timer(Timer::mcg_finishTranslation);
-
-  tracing::Block _b{
-    "emit-translation",
-    [&] {
-      if (env.vunit) return traceProps(*env.vunit);
-      if (env.unit) return traceProps(*env.unit);
-      return tracing::Props{};
-    }
-  };
-
-  VMProtect _;
-
-  auto& args = env.args;
-  auto const sk = args.sk;
-
-  std::unique_lock<SimpleMutex> codeLock;
-  if (!optDst) {
-    codeLock = lockCode();
-  }
-
-  auto codeView = optDst ? *optDst : code().view(args.kind);
-  auto viewKind = args.kind;
-
-  CGMeta fixups;
-  TransLocMaker maker{codeView};
-  maker.markStart();
-
-  // mcGenUnit emits machine code from vasm
-  if (env.vunit && !mcGenUnit(env, codeView, fixups)) {
-    // mcGenUnit() failed. Roll back, drop the unit and region, and clear
-    // fixups.
-    maker.rollback();
-    maker.markStart();
-    env.unit.reset();
-    env.vunit.reset();
-    args.region.reset();
-    fixups.clear();
-  }
-
-  if (env.vunit) {
-    if (!newTranslation()) {
-      return folly::none;
-    }
-  } else {
-    // If we were trying to create profile translation, we just bail to the
-    // interpreter.  This prevents generating Interp translations in code.prof.
-    if (isProfiling(viewKind)) return folly::none;
-
-    args.kind = TransKind::Interp;
-    FTRACE(1, "emitting dispatchBB interp request for failed "
-           "translation (spOff = {})\n", env.initSpOffset.offset);
-    vwrap(codeView.main(), codeView.data(), fixups,
-          [&] (Vout& v) { emitInterpReq(v, sk, env.initSpOffset); },
-          CodeKind::Helper, false);
-  }
-
-  Timer metaTimer(Timer::mcg_finishTranslation_metadata);
-  auto range = maker.markEnd();
-
-  if (args.kind == TransKind::Profile) {
-    always_assert(args.region);
-    auto metaLock = lockMetadata();
-    profData()->addTransProfile(env.transID, args.region, env.pconds,
-                                range.main.size());
-  }
-
-  TransRec tr;
-  if (RuntimeOption::EvalJitUseVtuneAPI ||
-      Trace::moduleEnabledRelease(Trace::trans, 1) ||
-      transdb::enabled()) {
-    tr = maker.rec(sk, env.transID, args.kind, args.region, fixups.bcMap,
-                   std::move(env.annotations),
-                   env.unit && cfgHasLoop(*env.unit));
-  }
-
-  if (env.unit && env.unit->logEntry()) {
-    auto metaLock = lockMetadata();
-    logTranslation(env, range);
-  }
-
-  if (!RuntimeOption::EvalJitLogAllInlineRegions.empty() && env.vunit) {
-    logFrames(*env.vunit);
-  }
-
-  return TransMetaInfo{sk, codeView, viewKind, args.kind, range, nullptr,
-                       TransLoc{}, std::move(fixups), std::move(tr),
-                       GrowableVector<IncomingBranch>{}};
-}
-
-folly::Optional<TransLoc>
-publishTranslation(TransMetaInfo info, OptView optSrcView) {
-  auto const srcRec = srcDB().find(info.sk);
-  always_assert(srcRec);
-
-  if (!checkLimit(info, srcRec->numTrans())) return folly::none;
-
-  auto codeLock = lockCode();
-  auto metaLock = lockMetadata();
-
-  // Recheck after acquiring the lock.
-  if (!checkLimit(info, srcRec->numTrans())) return folly::none;
-
-  auto loc = relocateTranslation(info, optSrcView, nullptr);
-  if (loc) {
-    publishTranslationMeta(info);
-    publishTranslationCode(std::move(info));
-    updateCodeSizeCounters();
-  }
-  return loc;
-}
-
 void publishOptFunc(FuncMetaInfo info) {
+  PrologueTCAMap prologueTCAs;
+  SrcKeyTransMap srcKeyTrans;
+  relocateOptFunc(info, prologueTCAs, srcKeyTrans);
+
   auto codeLock = lockCode();
   auto metaLock = lockMetadata();
-
-  SrcKeyTransMap srcKeyTrans;
-  relocateOptFunc(info, srcKeyTrans);
   invalidateFuncProfSrcKeys(Func::fromFuncId(info.fid));
   publishOptFuncMeta(info);
   publishOptFuncCode(info);
@@ -1056,6 +668,186 @@ void relocatePublishSortedOptFuncs(std::vector<FuncMetaInfo> infos) {
   }
 
   updateCodeSizeCounters();
+}
+
+void RegionTranslator::computeKind() {
+  // Update the translation kind if it is invalid, or if it may
+  // have changed (original kind was a profiling kind)
+  if (kind == TransKind::Invalid || kind == TransKind::Profile) {
+    kind = profileFunc(sk.func()) ? TransKind::Profile
+                                  : TransKind::Live;
+  }
+}
+
+folly::Optional<TCA> RegionTranslator::getCached() {
+  auto const srcRec = srcDB().find(sk);
+  auto const numTrans = srcRec->numTrans();
+  if (prevNumTranslations != -1 && prevNumTranslations != numTrans) {
+    // A new translation was generated before we grabbed the lock.  Force
+    // execution to rerun through the retranslation chain.
+    return srcRec->getTopTranslation();
+  }
+  prevNumTranslations = numTrans;
+  // Check for potential interp anchor translation
+  if (kind == TransKind::Profile) {
+    if (numTrans > RuntimeOption::EvalJitMaxProfileTranslations) {
+      always_assert(numTrans ==
+                    RuntimeOption::EvalJitMaxProfileTranslations + 1);
+      return srcRec->getTopTranslation();
+    }
+  } else if (numTrans > RuntimeOption::EvalJitMaxTranslations) {
+    always_assert(numTrans == RuntimeOption::EvalJitMaxTranslations + 1);
+    return srcRec->getTopTranslation();
+  }
+  return folly::none;
+}
+
+void RegionTranslator::resetCached() {
+  invalidateSrcKey(sk);
+}
+
+void RegionTranslator::gen() {
+  auto const srcRec = srcDB().find(sk);
+  auto const fail = [&] {
+    if (isProfiling(kind)) return;
+
+    kind = TransKind::Interp;
+    if (!checkLimit(kind, srcRec->numTrans())) return;
+    FTRACE(1, "emitting dispatchBB interp request for failed "
+           "translation (spOff = {})\n", spOff.offset);
+    vunit = std::make_unique<Vunit>();
+    Vout vmain{*vunit, vunit->makeBlock(AreaIndex::Main)};
+    vunit->entry = Vlabel(vmain);
+
+    emitInterpReq(vmain, sk, spOff);
+
+    irlower::optimize(*vunit, CodeKind::Helper);
+  };
+
+  // Only start profiling new functions at their entry point. This reduces the
+  // chances of profiling the body of a function but not its entry (where we
+  // trigger retranslation) and helps remove bias towards larger functions that
+  // can cause variations in the size of code.prof.
+  if (kind == TransKind::Profile &&
+      !profData()->profiling(sk.funcID()) &&
+      !sk.func()->isEntry(sk.offset())) {
+    return;
+  }
+  if (!checkLimit(kind, srcRec->numTrans())) return fail();
+
+  if (!region) {
+    region = selectRegion(regionContext(), kind);
+  }
+  if (!region) return fail();
+
+  INC_TPC(translate);
+  Timer timer(Timer::mcg_translate);
+
+  tracing::Block _{"translate", [&] {
+		return traceProps(sk.func())
+			.add("sk", show(sk))
+			.add("trans_kind", show(kind));
+	}};
+  tracing::annotateBlock(
+    [&] {
+      return tracing::Props{}
+      .add("region_size", region->instrSize());
+    }
+  );
+
+  rqtrace::ScopeGuard trace{"JIT_TRANSLATE"};
+  trace.annotate("func_name", sk.func()->fullName()->data());
+  trace.annotate("trans_kind", show(kind));
+  trace.setEventPrefix("JIT_");
+  trace.annotate(
+    "region_size", folly::to<std::string>(region->instrSize()));
+
+  TransContext ctx {
+    transId == kInvalidTransID ? TransIDSet{} : TransIDSet{transId},
+    optIndex,
+    kind,
+    sk,
+    region.get()
+  };
+  unit = irGenRegion(*region, ctx, pconds);
+  assertx(unit);
+  auto const& uas = unit->annotationData->getAllAnnotations();
+  annotations.insert(annotations.end(), uas.begin(), uas.end());
+  hasLoop = cfgHasLoop(*unit);
+
+  vunit = irlower::lowerUnit(*unit);
+}
+
+/*
+ * Record various metadata about the translation into the global data
+ * structures.
+ */
+void RegionTranslator::publishMetaImpl() {
+  auto& fixups = transMeta->fixups;
+  const auto& view = transMeta->view;
+  const auto& loc = transMeta->range.loc();
+  assertx(!loc.empty());
+
+  auto const srcRec = srcDB().find(sk);
+  always_assert(srcRec);
+
+  if (RuntimeOption::EvalProfileBC) {
+    TransBCMapping prev{};
+    for (auto& cur : fixups.bcMap) {
+      if (!cur.aStart) continue;
+      if (prev.aStart) {
+        recordBCInstr(uint32_t(prev.sk.op()), prev.aStart, cur.aStart, false);
+      } else {
+        recordBCInstr(OpTraceletGuard, loc.mainStart(), cur.aStart, false);
+      }
+      prev = cur;
+    }
+  }
+
+  recordGdbTranslation(sk, view.main(), loc.mainStart(), loc.mainEnd());
+  recordGdbTranslation(sk, view.cold(), loc.coldCodeStart(), loc.coldEnd());
+
+  TransRec tr{sk, transId, kind, loc.mainStart(), loc.mainSize(),
+      loc.coldStart(), loc.coldSize(), loc.frozenStart(), loc.frozenSize(),
+      region, fixups.bcMap, std::move(annotations), hasLoop};
+  transdb::addTranslation(tr);
+  FuncOrder::recordTranslation(tr);
+  if (RuntimeOption::EvalJitUseVtuneAPI) {
+    reportTraceletToVtune(sk.unit(), sk.func(), tr);
+  }
+
+  fixups.process(&tailBranches);
+}
+
+/*
+ * Add a translation to the corresponding SrcRec, effectively making it
+ * reachable.  This should be done after the metadata for the translation has
+ * been published.
+ */
+void RegionTranslator::publishCodeImpl() {
+  const auto& loc = transMeta->range.loc();
+  const auto srcRec = srcDB().find(sk);
+  always_assert(srcRec);
+  assertx(checkLimit(kind, srcRec->numTrans()));
+
+  if (kind == TransKind::Profile) {
+    always_assert(region);
+    profData()->addTransProfile(transId, region, pconds,
+                                transMeta->range.main.size());
+  }
+
+  TRACE(1, "newTranslation: %p  sk: %s\n",
+        entry(), showShort(sk).c_str());
+
+  srcRec->newTranslation(loc, tailBranches);
+
+  TRACE(1, "mcg: %u-byte translation (%u main, %u cold, %u frozen)\n",
+        loc.mainSize() + loc.coldCodeSize() + loc.frozenCodeSize(),
+        loc.mainSize(), loc.coldCodeSize(), loc.frozenCodeSize());
+  if (Trace::moduleEnabledRelease(Trace::tcspace, 1)) {
+    Trace::traceRelease("%s", getTCSpace().c_str());
+  }
+  checkFreeProfData();
 }
 
 }}}

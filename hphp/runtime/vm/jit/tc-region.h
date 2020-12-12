@@ -16,14 +16,45 @@
 
 #pragma once
 
+#include "hphp/runtime/vm/jit/region-selection.h"
+#include "hphp/runtime/vm/jit/tc.h"
+#include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/srckey.h"
 
 namespace HPHP { namespace jit { namespace tc {
 
-/*
- * Invalidate the SrcDB entry for sk.
- */
-void invalidateSrcKey(SrcKey sk);
+struct RegionTranslator final : Translator {
+  PostConditions pconds;
+  Annotations annotations{};
+  // A sequential per function index to identify optimized
+  // translations in TRACE and StructuredLog output (in particular to
+  // make it possible to cross reference between the two).
+  int optIndex{0};
+  RegionDescPtr region{nullptr};
+  bool hasLoop{false};
+  FPInvOffset spOff{};
+  jit::vector<RegionContext::LiveType> liveTypes{};
+  int prevNumTranslations{-1};
+  GrowableVector<IncomingBranch> tailBranches;
+
+  explicit RegionTranslator(SrcKey sk, TransKind kind = TransKind::Invalid)
+    : Translator(sk, kind)
+  {}
+
+  RegionContext regionContext() {
+    RegionContext ret{sk, spOff};
+    ret.liveTypes = liveTypes;
+    return ret;
+  }
+  void computeKind() override;
+  folly::Optional<TCA> getCached() override;
+  void resetCached() override;
+  void smashBackup() override {}
+  Annotations* getAnnotations() override { return &annotations; }
+  void gen() override;
+  void publishMetaImpl() override;
+  void publishCodeImpl() override;
+};
 
 }}}
 

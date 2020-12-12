@@ -19,7 +19,6 @@
 #include "hphp/runtime/vm/jit/mcgen-prologue.h"
 #include "hphp/runtime/vm/jit/mcgen-translate.h"
 
-#include "hphp/runtime/vm/jit/func-prologue.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/trans-db.h"
@@ -36,8 +35,6 @@
 TRACE_SET_MOD(mcg);
 
 namespace HPHP { namespace jit {
-
-TransEnv::~TransEnv() {}
 
 namespace mcgen {
 

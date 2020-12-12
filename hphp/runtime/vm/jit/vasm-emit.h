@@ -62,7 +62,7 @@ void emitPPC64(Vunit&, Vtext&, CGMeta&, AsmInfo*);
  * Emit code for the given Vunit, which must already be register-allocated, to
  * the given CodeBlocks.
  */
-void emitVunit(Vunit& vunit, const IRUnit& unit,
+void emitVunit(Vunit& vunit, const IRUnit* unit,
                CodeCache::View code, CGMeta& fixups,
                Annotations* annotations = nullptr);
 

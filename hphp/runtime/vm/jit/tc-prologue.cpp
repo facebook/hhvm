@@ -14,21 +14,26 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/vm/jit/tc-prologue.h"
+
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/tc-internal.h"
 #include "hphp/runtime/vm/jit/tc-record.h"
 #include "hphp/runtime/vm/jit/tc-region.h"
-#include "hphp/runtime/vm/jit/tc-relocate.h"
 
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/jit/align.h"
 #include "hphp/runtime/vm/jit/cg-meta.h"
 #include "hphp/runtime/vm/jit/func-order.h"
-#include "hphp/runtime/vm/jit/func-prologue.h"
+#include "hphp/runtime/vm/jit/irgen.h"
+#include "hphp/runtime/vm/jit/irgen-func-prologue.h"
+#include "hphp/runtime/vm/jit/irlower.h"
 #include "hphp/runtime/vm/jit/mcgen.h"
+#include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/smashable-instr.h"
 #include "hphp/runtime/vm/jit/trans-db.h"
+#include "hphp/runtime/vm/jit/vasm-emit.h"
 #include "hphp/runtime/vm/jit/vm-protect.h"
 #include "hphp/runtime/vm/jit/vtune-jit.h"
 
@@ -37,178 +42,11 @@
 TRACE_SET_MOD(mcg);
 
 namespace HPHP { namespace jit { namespace tc {
-
 namespace {
-
-void emitFuncPrologueImpl(Func* func, int argc, TransKind kind,
-                          PrologueMetaInfo& info,
-                          CodeMetaLock* locker) {
-  assertx(isPrologue(kind));
-
-  if (!newTranslation()) {
-    info.start = nullptr;
-    return;
-  }
-
-  auto& transID = info.transID;
-  auto&     loc = info.loc;
-  auto&  fixups = info.meta;
-  const int nparams = func->numNonVariadicParams();
-  const int paramIndex = argc <= nparams ? argc : nparams + 1;
-
-  auto const funcBody =
-    SrcKey{func, func->getEntryForNumArgs(argc), SrcKey::PrologueTag{}};
-
-  // Give the prologue a TransID if we have profiling data.
-  transID = [&]{
-    if (kind == TransKind::ProfPrologue) {
-      auto const profData = jit::profData();
-      auto const id = profData->allocTransID();
-      profData->addTransProfPrologue(id, funcBody, paramIndex,
-        0 /* asmSize: updated below after machine code is generated */);
-      return id;
-    }
-    if (profData() && transdb::enabled()) {
-      return profData()->allocTransID();
-    }
-    return kInvalidTransID;
-  }();
-
-  auto res = genFuncPrologue(transID, kind, func, argc, code(), fixups, locker);
-  auto mainOrig = std::get<1>(res);
-  loc = std::get<0>(res);
-  info.start = loc.entry();
-  auto codeView = std::get<2>(res);
-
-  if (kind == TransKind::ProfPrologue) {
-    // Update the profiling prologue size now that we generated it.
-    profData()->transRec(transID)->setAsmSize(loc.mainSize());
-  }
-
-  if (RuntimeOption::EvalEnableReusableTC) {
-    if (locker) locker->lock();
-    SCOPE_EXIT { if (locker) locker->unlock(); };
-
-    assertOwnsCodeLock();
-    assertOwnsMetadataLock();
-
-    auto const entry = loc.entry();
-    auto const DEBUG_ONLY ms = loc.mainStart(), me = loc.mainEnd(),
-                          cs = loc.coldStart(), ce = loc.coldEnd(),
-                          fs = loc.frozenStart(), fe = loc.frozenEnd(),
-                          oldStart = info.start;
-
-    auto const did_relocate = relocateNewTranslation(loc, codeView, fixups,
-                                                     &info.start);
-
-    if (did_relocate) {
-      FTRACE_MOD(Trace::reusetc, 1,
-                 "Relocated prologue for func {} (id = {}) "
-                 "from M[{}, {}], C[{}, {}], F[{}, {}] to M[{}, {}] "
-                 "C[{}, {}] F[{}, {}] orig start @ {} new start @ {}\n",
-                 func->fullName()->data(), func->getFuncId(),
-                 ms, me, cs, ce, fs, fe, loc.mainStart(), loc.mainEnd(),
-                 loc.coldStart(), loc.coldEnd(), loc.frozenStart(),
-                 loc.frozenEnd(), oldStart, info.start);
-    } else {
-      FTRACE_MOD(Trace::reusetc, 1,
-                 "Created prologue for func {} (id = {}) at "
-                 "M[{}, {}], C[{}, {}], F[{}, {}] start @ {}\n",
-                 func->fullName()->data(), func->getFuncId(),
-                 ms, me, cs, ce, fs, fe, oldStart);
-    }
-
-    if (loc.entry() != entry) {
-      codeView.main().setFrontier(mainOrig); // we may have shifted to align
-    }
-  }
-
-  info.finalView = std::make_unique<CodeCache::View>(codeView);
-
-  assertx(code().isValidCodeAddress(info.start));
-}
-
-void emitFuncPrologueInternal(Func* func, int argc, TransKind kind,
-                              PrologueMetaInfo& info,
-                              CodeMetaLock* locker) {
-  try {
-    emitFuncPrologueImpl(func, argc, kind, info, locker);
-  } catch (const DataBlockFull& dbFull) {
-
-    // Fail hard if the block isn't code.hot.
-    always_assert_flog(dbFull.name == "hot",
-                       "data block = {}\nmessage: {}\n",
-                       dbFull.name, dbFull.what());
-
-    // Otherwise, fall back to code.main and retry.
-    code().disableHot();
-    info.meta.clear();
-    try {
-      emitFuncPrologueImpl(func, argc, kind, info, locker);
-    } catch (const DataBlockFull& dbStillFull) {
-      always_assert_flog(0, "data block = {}\nmessage: {}\n",
-                         dbStillFull.name, dbStillFull.what());
-    }
-  }
-}
-
-////////////////////////////////////////////////////////////////////////////////
-}
-
-bool publishFuncPrologueMeta(Func* func, int nArgs, TransKind kind,
-                             PrologueMetaInfo& info) {
-  assertOwnsMetadataLock();
-
-  const auto start = info.start;
-  if (start == nullptr) return false;
-
-  const auto transID = info.transID;
-  const auto&    loc = info.loc;
-  auto&         meta = info.meta;
-
-  auto codeView = *info.finalView;
-  auto const funcBody = SrcKey{func, func->getEntryForNumArgs(nArgs),
-                               SrcKey::PrologueTag{}};
-
-  if (RuntimeOption::EvalEnableReusableTC) {
-    recordFuncPrologue(func, loc);
-  }
-  meta.process(nullptr);
-
-  assertx(code().isValidCodeAddress(start));
-  assertx(isPrologue(kind));
-
-  TransRec tr{funcBody, transID, kind, loc.mainStart(), loc.mainSize(),
-      loc.coldStart(), loc.coldSize(), loc.frozenStart(), loc.frozenSize()};
-  transdb::addTranslation(tr);
-  FuncOrder::recordTranslation(tr);
-  if (RuntimeOption::EvalJitUseVtuneAPI) {
-    reportTraceletToVtune(func->unit(), func, tr);
-  }
-
-  recordGdbTranslation(funcBody, codeView.main(), loc.mainStart(),
-                       loc.mainEnd());
-  recordGdbTranslation(funcBody, codeView.cold(), loc.coldStart(),
-                       loc.coldEnd());
-  recordBCInstr(OpFuncPrologue, loc.mainStart(), loc.mainEnd(), false);
-  return true;
-}
-
-bool publishFuncPrologueCode(Func* func, int nArgs, PrologueMetaInfo& info) {
-  assertOwnsMetadataLock();
-
-  const auto start = info.start;
-  if (start == nullptr) return false;
-
-  const int nparams = func->numNonVariadicParams();
-  const int paramIndex = nArgs <= nparams ? nArgs : nparams + 1;
-
-  TRACE(2, "funcPrologue %s(%d) setting prologue %p\n",
-        func->fullName()->data(), nArgs, start);
-  func->setPrologue(paramIndex, start);
-  return true;
-}
-
+/*
+ * Smash the callers of the ProfPrologue associated with `rec' to call a new
+ * prologue at `start' address.
+ */
 void smashFuncCallers(TCA start, ProfTransRec* rec) {
   assertOwnsMetadataLock();
   assertx(rec->isProflogue());
@@ -221,73 +59,135 @@ void smashFuncCallers(TCA start, ProfTransRec* rec) {
 
   rec->clearAllCallers();
 }
+}
+////////////////////////////////////////////////////////////////////////////////
 
-/*
- * Emit an OptPrologue for the given `info', updating it accordingly.
- */
-void emitFuncPrologueOptInternal(PrologueMetaInfo& info,
-                                 CodeMetaLock* locker) {
-  if (!locker) {
-    assertOwnsCodeLock();
-    assertOwnsMetadataLock();
+void PrologueTranslator::computeKind() {
+  // Update the translation kind if it is invalid, or if it may
+  // have changed (original kind was a profililng kind)
+  if (kind == TransKind::Invalid || kind == TransKind::ProfPrologue) {
+    kind = profileFunc(func) ? TransKind::ProfPrologue
+                             : TransKind::LivePrologue;
+  }
+}
+
+int PrologueTranslator::paramIndex() const {
+  return paramIndexHelper(func, nPassed);
+}
+
+int PrologueTranslator::paramIndexHelper(const Func* f, int passed) {
+  int const numParams = f->numNonVariadicParams();
+  return passed <= numParams ? passed : numParams + 1;
+}
+
+folly::Optional<TCA> PrologueTranslator::getCached() {
+  if (UNLIKELY(RuntimeOption::EvalFailJitPrologs)) return nullptr;
+  auto const paramIdx = paramIndex();
+  TCA prologue = (TCA)func->getPrologue(paramIdx);
+  if (prologue != ustubs().fcallHelperThunk) {
+    TRACE(1, "cached prologue %s(%d) -> cached %p\n",
+          func->fullName()->data(), paramIdx, prologue);
+    assertx(isValidCodeAddress(prologue));
+    return prologue;
+  }
+  return folly::none;
+}
+
+void PrologueTranslator::resetCached() {
+  func->resetPrologue(paramIndex());
+}
+
+void PrologueTranslator::smashBackup() {
+  if (kind == TransKind::OptPrologue) {
+    assertx(transId != kInvalidTransID);
+    auto const rec = profData()->transRec(transId);
+    smashFuncCallers(jit::tc::ustubs().fcallHelperThunk, rec);
+  }
+}
+
+void PrologueTranslator::gen() {
+  if (transId != kInvalidTransID && isProfiling(kind)) {
+      profData()->addTransProfPrologue(transId, sk, paramIndex(),
+        0 /* asmSize: updated below after machine code is generated */);
+  }
+  auto const context = TransContext{
+    transId == kInvalidTransID ? TransIDSet{} : TransIDSet{transId},
+    0,  // optIndex
+    kind,
+    sk,
+    nullptr
+  };
+  tracing::Block _b{
+    kind == TransKind::OptPrologue ? "emit-func-prologue-opt"
+                                   : "emit-func-prologue",
+      [&] {
+        return traceProps(func)
+          .add("sk", show(sk))
+          .add("argc", paramIndex())
+          .add("trans_kind", show(kind));
+      }
+  };
+  tracing::Pause _p;
+
+  unit = std::make_unique<IRUnit>(context, std::make_unique<AnnotationData>());
+  irgen::IRGS env{*unit, nullptr, 0, nullptr};
+
+  irgen::emitFuncPrologue(env, func, nPassed, transId);
+  irgen::sealUnit(env);
+
+  printUnit(2, *unit, "After initial prologue generation");
+
+  vunit = irlower::lowerUnit(env.unit, CodeKind::Prologue);
+}
+
+void PrologueTranslator::publishMetaImpl() {
+  // Update the profiling prologue size now that we generated it.
+  if (transId != kInvalidTransID) {
+    profData()->transRec(transId)->setAsmSize(
+      transMeta->range.loc().mainSize());
   }
 
-  emitFuncPrologueInternal(info.transRec->func(), info.transRec->prologueArgs(),
-                           TransKind::OptPrologue, info, locker);
+  assertOwnsMetadataLock();
+  assertx(translateSuccess());
+  assertx(code().isValidCodeAddress(entry()));
+
+  transMeta->fixups.process(nullptr);
+
+  auto const& loc = transMeta->range.loc();
+  TransRec tr{sk, transId, kind, loc.mainStart(), loc.mainSize(),
+      loc.coldStart(), loc.coldSize(), loc.frozenStart(), loc.frozenSize()};
+  transdb::addTranslation(tr);
+  FuncOrder::recordTranslation(tr);
+  if (RuntimeOption::EvalJitUseVtuneAPI) {
+    reportTraceletToVtune(func->unit(), func, tr);
+  }
+  recordGdbTranslation(sk, transMeta->view.main(), loc.mainStart(),
+                       loc.mainEnd());
+  recordGdbTranslation(sk, transMeta->view.cold(), loc.coldStart(),
+                       loc.coldEnd());
+  recordBCInstr(OpFuncPrologue, loc.mainStart(), loc.mainEnd(), false);
 }
 
-TCA emitFuncPrologue(Func* func, int argc, TransKind kind) {
-  tracing::Block _b{
-    "emit-func-prologue",
-    [&] {
-      return traceProps(func)
-        .add("argc", argc)
-        .add("trans_kind", show(kind));
-    }
-  };
-  tracing::Pause _p;
+void PrologueTranslator::publishCodeImpl() {
+  assertOwnsMetadataLock();
+  assertOwnsCodeLock();
 
-  VMProtect _;
+  if (RuntimeOption::EvalEnableReusableTC) {
+    auto const& loc = transMeta->range.loc();
+    recordFuncPrologue(func, loc);
+  }
 
-  auto codeLock = lockCode();
-  auto metaLock = lockMetadata();
+  const auto start = entry();
+  assertx(start);
+  TRACE(2, "funcPrologue %s(%d) setting prologue %p\n",
+        func->fullName()->data(), nPassed, start);
+  func->setPrologue(paramIndex(), start);
 
-  PrologueMetaInfo info{nullptr};
-  emitFuncPrologueInternal(func, argc, kind, info, nullptr);
-  publishFuncPrologueMeta(func, argc, kind, info);
-  publishFuncPrologueCode(func, argc, info);
-
-  updateCodeSizeCounters();
-  return info.start;
-}
-
-/*
- * Emit and publish an OptPrologue for `rec'.
- */
-void emitFuncPrologueOpt(ProfTransRec* rec) {
-  tracing::Block _b{
-    "emit-func-prologue-opt",
-    [&] {
-      return traceProps(rec->func())
-        .add("sk", show(rec->srcKey()))
-        .add("argc", rec->prologueArgs())
-        .add("trans_kind", show(rec->kind()));
-    }
-  };
-  tracing::Pause _p;
-
-  VMProtect _;
-
-  auto codeLock = lockCode();
-  auto metaLock = lockMetadata();
-
-  PrologueMetaInfo info(rec);
-  emitFuncPrologueOptInternal(info, nullptr);
-  if (info.start) {
-    publishFuncPrologueMeta(rec->func(), rec->prologueArgs(),
-                            TransKind::OptPrologue, info);
-    publishFuncPrologueCode(rec->func(), rec->prologueArgs(), info);
-    smashFuncCallers(info.start, rec);
+  // If we are optimizing smash the callers of the proflogue.
+  if (kind == TransKind::OptPrologue) {
+    assertx(transId != kInvalidTransID);
+    auto const rec = profData()->transRec(transId);
+    smashFuncCallers(start, rec);
   }
 }
 

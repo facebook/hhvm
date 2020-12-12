@@ -63,7 +63,7 @@ void updateCodeSizeCounters();
 /*
  * Log statistics about a translation to scribe via StructuredLog.
  */
-void logTranslation(const TransEnv& env, const TransRange& range);
+void logTranslation(const Translator* trans, const TransRange& range);
 
 /*
  * Log inlined frames in unit via StructuredLog.

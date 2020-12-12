@@ -244,7 +244,7 @@ void vasm_emit(Vunit& unit, Vtext& text, CGMeta& fixups,
 
   // Lower inlinestart and inlineend instructions to jmps, and annotate blocks
   // with inlined function parents
-  computeFrames(unit);
+  if (unit.needsFramesComputed()) computeFrames(unit);
 
   Venv env { unit, text, fixups };
   env.addrs.resize(unit.blocks.size());

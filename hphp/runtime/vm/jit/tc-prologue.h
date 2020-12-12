@@ -16,44 +16,40 @@
 
 #pragma once
 
-#include "hphp/runtime/vm/jit/types.h"
+#include "hphp/runtime/vm/jit/tc.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP { namespace jit { namespace tc {
 
-struct ProfTransRec;
+struct PrologueTranslator final : Translator {
+  // Although the srckey (sk member of translator) knows the func,
+  // it holds it as a const Func* and won't work for the mutations
+  // required for publishing.
+  Func* func;
+  int nPassed;
+  PrologueTranslator(Func* func, int nPassed,
+                     TransKind kind = TransKind::Invalid)
+    : Translator(
+        SrcKey{
+          func,
+          func->getEntryForNumArgs(paramIndexHelper(func, nPassed)),
+          SrcKey::PrologueTag{}
+        },
+        kind
+      )
+    , func(func)
+    , nPassed(nPassed)
+  {}
+  int paramIndex() const;
+  folly::Optional<TCA> getCached() override;
+  void resetCached() override;
+  void smashBackup() override;
+  static int paramIndexHelper(const Func*, int);
+private:
+  void computeKind() override;
+  Annotations* getAnnotations() override { return nullptr; }
+  void gen() override;
+  void publishMetaImpl() override;
+  void publishCodeImpl() override;
+};
 
-namespace tc {
-
-struct CodeMetaLock;
-
-/*
- * Emit a function prologue from rec.
- *
- * Precondition: calling thread owns both code and metadata locks
- */
-void emitFuncPrologueOptInternal(PrologueMetaInfo& info,
-                                 CodeMetaLock* locker);
-
-/*
- * Publish the metadata for the given func prologue.  Returns whether or not it
- * succeeded.
- */
-bool publishFuncPrologueMeta(Func* func, int nArgs, TransKind kind,
-                             PrologueMetaInfo& info);
-
-/*
- * Publish the code for the given func prologue.  Returns whether or not it
- * succeeded.
- */
-bool publishFuncPrologueCode(Func* func, int nArgs, PrologueMetaInfo& info);
-
-/*
- * Smash the callers of the ProfPrologue associated with `rec' to call a new
- * prologue at `start' address.
- */
-void smashFuncCallers(TCA start, ProfTransRec* rec);
-
-}
-
-}}
-
+}}}

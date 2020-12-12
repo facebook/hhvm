@@ -25,6 +25,8 @@
 #include "hphp/runtime/vm/jit/stack-offsets.h"
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/unique-stubs.h"
+#include "hphp/runtime/vm/jit/vm-protect.h"
+#include "hphp/runtime/vm/jit/write-lease.h"
 #include "hphp/util/growable-vector.h"
 
 #include <folly/Optional.h>
@@ -59,33 +61,6 @@ struct TransRange {
   TransLoc loc() const;
 };
 
-using CodeViewPtr = std::unique_ptr<CodeCache::View>;
-
-struct TransMetaInfo {
-  SrcKey sk;
-  CodeCache::View emitView; // View code was emitted into (may be thread local)
-  TransKind   viewKind; // TransKind used to select code view
-  TransKind   transKind; // TransKind used for translation
-  TransRange  range;
-  CodeViewPtr finalView; // View where code finally ended up (after relocation)
-  TransLoc    loc; // final location of translation (after relocation)
-  CGMeta      meta;
-  TransRec    transRec;
-  GrowableVector<IncomingBranch> tailBranches;
-};
-
-struct PrologueMetaInfo {
-  PrologueMetaInfo(ProfTransRec* rec)
-    : transRec(rec)
-  { }
-  ProfTransRec* transRec{nullptr};
-  TransID       transID{kInvalidTransID};
-  TCA           start{0};
-  TransLoc      loc;
-  CGMeta        meta;
-  CodeViewPtr   finalView;
-};
-
 struct LocalTCBuffer {
   LocalTCBuffer() = default;
   explicit LocalTCBuffer(Address start, size_t initialSize);
@@ -101,6 +76,141 @@ private:
   CodeBlock m_frozen;
   DataBlock m_data;
 };
+
+struct Translator {
+  // Live translation is achieved through the following steps (things annotated
+  // with a * are generic and do not need to be implemented by individual
+  // translator types):
+  //   0) Initialize the kind and check if we should translate.  This includes
+  //      actions like verifying there isn't already a suitable translation
+  //   *) Acquiring a suitable lock for translation
+  //   *) Repeat step 0 now that we have the lock
+  //   1) Generate machine code into code buffers (these may be thread local)
+  //      this takes several steps, generally:
+  //        - Generate IR (possibly selecting a region to translate first)
+  //        - Optimize
+  //        - Lower to vasm
+  //        - Optimize
+  //        - Emit
+  //   *) Relocate the machine code into its final resting place (this is
+  //      necessarily done sequentially as code space is bump allocated).  This
+  //      step is a noop if it was emitted into the global code cache directly.
+  //   3) Publish the translations to the owning stores (ie. future
+  //      translation checks should find them)
+  //   *) Lock released
+  //
+  // This is slightly different for an optimized translation which might get
+  // emitted into local buffers and then relocated.  Optimized translation also
+  // make use of some of the internal publishing methods so they can hold the
+  // code and metadata locks across multiple operations.
+
+  // The following members are the inputs to the translation pipeline.
+  SrcKey sk;
+  TransKind kind;
+  TransID transId{kInvalidTransID};
+  explicit Translator(SrcKey sk, TransKind kind = TransKind::Invalid);
+  virtual ~Translator();
+
+  virtual folly::Optional<TCA> getCached() = 0;
+  virtual void resetCached() = 0;
+  virtual void smashBackup() = 0;
+
+  // Returns a TCA for already translated code if found, this can be nullptr if
+  // the desired behavior is to trigger use of non jited code.  If none is
+  // returned the locks for translation were successfully acquired.
+  folly::Optional<TCA> acquireLeaseAndRequisitePaperwork();
+  // Check on tc sizes and make sure we are looking to translate more
+  // translations of the specified type.
+  bool shouldTranslate(bool noSizeLimit = false);
+  // Generate and emit machine code into the provided view (if given) otherwise
+  // the default view.
+  void translate(folly::Optional<CodeCache::View> view = folly::none);
+
+  bool translateSuccess() const;
+
+  // Relocate the generated machine code to its final location.  This may be a
+  // no-op if it was initially emitted into the correct location.
+  void relocate();
+  // Publish the translation starts, ends etc. into the required metadata
+  // structures.  This includes publishing them as debug info, but also caching
+  // the translation start in a manner that would be detected in
+  // acquireLeaseAndRequisitePaperwork.  When publishing finishes the locks may
+  // be released, and if the translation isn't properly recorded in the SrcKey
+  // database (or other equivalent structure) we may end up with duplicate
+  // translations.
+  TCA publish();
+  void publishMetaInternal();
+  void publishCodeInternal();
+  TCA entry() const {
+    if (!transMeta) return nullptr;
+    assertx(!transMeta->view.isLocal());
+    return transMeta->range.loc().entry();
+  }
+  TransRange range() const {
+    if (!transMeta) return TransRange{};
+    return transMeta->range;
+  }
+  CGMeta& meta() {
+    assertx(transMeta.has_value());
+    return transMeta->fixups;
+  }
+  void reset() {
+    transMeta.reset();
+  }
+
+  // The gen method is responsible for building the vunit.  It may
+  // optionally set the IR unit, which was used for generation.
+  // This will enable the printir functionality during vasm emit,
+  // and relocation phases.
+  std::unique_ptr<IRUnit> unit;
+  std::unique_ptr<Vunit> vunit;
+
+protected:
+  folly::Optional<LeaseHolder> m_lease{};
+
+  struct TransMeta {
+    explicit TransMeta(CodeCache::View view)
+      : view(view)
+    {}
+    // Relocation and publication metadata.
+    // This info is generated from stage 1 (generation of machine code), and
+    // contains the info relevant to stages 2 and 3 (relocation and
+    // publication).  It holds TC address ranges, CGMeta fixup information, and
+    // anything else needed.
+
+    // The translation range holds the present location of the translation.  It
+    // is initially set during translation, and is updated during relocation.
+    // The same applies to the view.  It is set during translation, and updated
+    // during relocation.
+    TransRange range;
+    CodeCache::View view;
+    // The fixups are generated during translation, and used during relocation.
+    CGMeta fixups;
+  };
+
+  // The translation metadata is written during translation.  It will be none
+  // until successful translation.  This metadata is the output of the
+  // translation pipeline.  Publishing uses this info to write start addresses
+  // and ranges to make the code executable.
+  folly::Optional<TransMeta> transMeta{};
+
+  virtual void computeKind() = 0;
+  virtual Annotations* getAnnotations() = 0;
+  // This function is charged with producing the code to generate.
+  virtual void gen() = 0;
+  virtual void publishMetaImpl() = 0;
+  virtual void publishCodeImpl() = 0;
+
+private:
+  // This local buffer is only used in ReusableTC mode where the buffer is
+  // owned by the translator rather than the FuncMetaInfo.
+  std::unique_ptr<LocalTCBuffer> m_localTCBuffer;
+  std::unique_ptr<uint8_t[]> m_localBuffer;
+};
+
+////////////////////////////////////////////////////////////////////////////////
+
+using CodeViewPtr = std::unique_ptr<CodeCache::View>;
 
 struct FuncMetaInfo {
   enum class Kind : uint8_t {
@@ -122,56 +232,19 @@ struct FuncMetaInfo {
   Func* func;
   LocalTCBuffer tcBuf;
 
-  void add(ProfTransRec* p) {
-    prologues.emplace_back(p);
-    order.emplace_back(Kind::Prologue);
+  void add(std::unique_ptr<Translator>&& p) {
+    translators.emplace_back(std::move(p));
   }
 
-  void add(TransMetaInfo&& t) {
-    translations.emplace_back(std::move(t));
-    order.emplace_back(Kind::Translation);
+  void clear() {
+    translators.clear();
   }
 
-  // We rebuild a variant type here because using boosts fails on opensource
-  // builds because it at some point requires a copy construction.
-  // This vector has one entry per prologue/translation stored in the two
-  // vectors above, and it encodes the order in which they should be published.
-  std::vector<Kind> order;
-
-  std::vector<PrologueMetaInfo> prologues;
-  std::vector<TransMetaInfo>    translations;
+  // For now these are prolgoue translators.
+  std::vector<std::unique_ptr<Translator>> translators;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
-
-/*
- * Returns true iff we already have Eval.JitMaxTranslations translations
- * recorded in srcRec.
- */
-bool reachedTranslationLimit(TransKind kind, SrcKey sk, const SrcRec& srcRec);
-
-/*
- * Emit machine code for env. Returns folly::none if the global translation
- * limit has been reached, generates an interp request if vunit is null or
- * codegen fails. If optDst is set it must be a thread local view and the
- * code lock will not be acquired while writing to it.
- *
- * The resulting translation will not yet be live.
- */
-folly::Optional<TransMetaInfo> emitTranslation(
-  TransEnv env,
-  OptView optDst = folly::none
-);
-
-/*
- * Make a translation generated by emitTranslation live. If the translation was
- * emitted into a per-thread buffer then optSrcView must be the view into which
- * it was emitted, it will be relocated at the end of the live TC.
- */
-folly::Optional<TransLoc> publishTranslation(
-  TransMetaInfo info,
-  OptView optSrcView = folly::none
-);
 
 /*
  * Publish a set of optimized translations associated with a particular
@@ -189,20 +262,6 @@ void publishOptFunc(FuncMetaInfo info);
  *  4) publishing these translations.
  */
 void relocatePublishSortedOptFuncs(std::vector<FuncMetaInfo> infos);
-
-/*
- * Emit a new prologue for func-- returns nullptr if the global translation
- * limit has been reached.
- */
-TCA emitFuncPrologue(Func* func, int argc, TransKind kind);
-
-/*
- * Emits an optimized prologue for rec.
- *
- * Smashes the callers of the prologue for rec and updates the cached func
- * prologue.
- */
-void emitFuncPrologueOpt(ProfTransRec* rec);
 
 ////////////////////////////////////////////////////////////////////////////////
 

@@ -21,7 +21,8 @@
 
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/smashable-instr.h"
-#include "hphp/runtime/vm/jit/tc.h"
+#include "hphp/runtime/vm/jit/tc-prologue.h"
+#include "hphp/runtime/vm/jit/tc-region.h"
 #include "hphp/runtime/vm/jit/vm-protect.h"
 #include "hphp/runtime/vm/jit/write-lease.h"
 
@@ -66,17 +67,6 @@ namespace HPHP { namespace jit { namespace mcgen {
 
 namespace {
 
-TCA checkCachedPrologue(const Func* func, int paramIdx) {
-  TCA prologue = (TCA)func->getPrologue(paramIdx);
-  if (prologue != tc::ustubs().fcallHelperThunk) {
-    TRACE(1, "cached prologue %s(%d) -> cached %p\n",
-          func->fullName()->data(), paramIdx, prologue);
-    assertx(tc::isValidCodeAddress(prologue));
-    return prologue;
-  }
-  return nullptr;
-}
-
 /**
  * Given the proflogueTransId for a TransProflogue translation, regenerate the
  * prologue (as a TransPrologue).
@@ -99,23 +89,30 @@ bool regeneratePrologue(TransID prologueTransId, tc::FuncMetaInfo& info) {
     }
   };
 
-  func->resetPrologue(nArgs);
+  {
+    // The prologue translator may hold the code and metadata locks after a
+    // succesuful translation.
+    auto translatorPtr = std::make_unique<tc::PrologueTranslator>(
+      func, nArgs, TransKind::OptPrologue
+    );
+    auto& translator = *translatorPtr;
+    translator.transId = prologueTransId;
+    translator.resetCached();
 
-  // If we're regenerating a prologue, and we want to check shouldTranslate()
-  // but ignore the code size limits.  We still want to respect the global
-  // translation limit and other restrictions, though.
-  if (!tc::shouldTranslateNoSizeLimit(sk, TransKind::OptPrologue)) {
-    return false;
-  }
-
-  // Double check the prologue array now that we have the write lease
-  // in case another thread snuck in and set the prologue already.
-  if (checkCachedPrologue(func, nArgs)) return false;
-
-  if (retranslateAllEnabled()) {
-    info.add(rec);
-  } else {
-    tc::emitFuncPrologueOpt(rec);
+    // We don't acquire requisite paperwork etc. here since we are assuming that
+    // a lease/lock is already held for full function optimization.
+    if (retranslateAllEnabled()) {
+      // TODO: actually translate here, and push a translator to use for
+      // relocation.
+      info.add(std::move(translatorPtr));
+    } else {
+      if (!translator.shouldTranslate(/* noSizeLimit = */ true)) return false;
+      translator.translate();
+      if (translator.translateSuccess()) {
+        translator.relocate();
+        translator.publish();
+      }
+    }
   }
 
   // If this prologue has a DV funclet, then invalidate it and return its SrcKey
@@ -128,18 +125,23 @@ bool regeneratePrologue(TransID prologueTransId, tc::FuncMetaInfo& info) {
       if (!profData()->optimized(funcletSK)) {
         auto funcletTransId = profData()->dvFuncletTransId(funcletSK);
         if (funcletTransId != kInvalidTransID) {
-          auto args = TransArgs{funcletSK};
-          args.transId = funcletTransId;
-          args.kind = TransKind::Optimize;
-          args.region = selectHotRegion(funcletTransId);
-          auto const spOff = args.region->entry()->initialSpOffset();
+          auto translator = std::make_unique<tc::RegionTranslator>(
+            funcletSK, TransKind::Optimize
+          );
+          translator->transId = funcletTransId;
+          auto const region = selectHotRegion(funcletTransId);
+          translator->region = region;
+          auto const spOff = region->entry()->initialSpOffset();
+          translator->spOff = spOff;
           tc::createSrcRec(funcletSK, spOff);
-          if (auto res = translate(args, spOff, info.tcBuf.view())) {
+
+          translator->translate(info.tcBuf.view());
+          if (translator->translateSuccess()) {
             // Flag that this translation has been retranslated, so that
             // it's not retranslated again along with the function body.
             profData()->setOptimized(funcletSK);
             ret = true;
-            info.add(std::move(res.value()));
+            info.add(std::move(translator));
           }
         }
       }
@@ -221,50 +223,17 @@ TCA getFuncPrologue(Func* func, int nPassed) {
 
   func->validate();
   TRACE(1, "funcPrologue %s(%d)\n", func->fullName()->data(), nPassed);
-  int const numParams = func->numNonVariadicParams();
-  int paramIndex = nPassed <= numParams ? nPassed : numParams + 1;
 
-  // Do a quick test before grabbing the write lease
-  if (auto const p = checkCachedPrologue(func, paramIndex)) return p;
+  tc::PrologueTranslator translator(func, nPassed);
 
-  // Fail if we were asked to fail.
-  if (UNLIKELY(RuntimeOption::EvalFailJitPrologs)) return nullptr;
+  auto const tcAddr = translator.acquireLeaseAndRequisitePaperwork();
+  if (tcAddr) return *tcAddr;
 
-  auto const computeKind = [&] {
-    return tc::profileFunc(func) ? TransKind::ProfPrologue
-                                 : TransKind::LivePrologue;
-  };
+  translator.translate();
+  if (!translator.translateSuccess()) return nullptr;
 
-  const auto funcId = func->getFuncId();
-
-  // Avoid a race where we would create a LivePrologue while retranslateAll is
-  // in flight and we haven't generated an OptPrologue for the function yet.
-  if (retranslateAllPending() && computeKind() == TransKind::LivePrologue &&
-      profData() && profData()->profiling(funcId)) {
-    return nullptr;
-  }
-
-  LeaseHolder writer(func, computeKind());
-  if (!writer) return nullptr;
-
-  auto const kind = computeKind();
-  // Check again now that we have the write lease, in case the answer to
-  // profileFunc() changed.
-  if (!writer.checkKind(kind)) return nullptr;
-
-  SrcKey sk(func, func->getEntryForNumArgs(nPassed), SrcKey::PrologueTag());
-  if (!tc::shouldTranslate(sk, kind)) return nullptr;
-
-  if (UNLIKELY(RID().isJittingDisabled())) {
-    TRACE(2, "punting because jitting code was disabled\n");
-    return nullptr;
-  }
-
-  // Double check the prologue array now that we have the write lease
-  // in case another thread snuck in and set the prologue already.
-  if (auto const p = checkCachedPrologue(func, paramIndex)) return p;
-
-  return tc::emitFuncPrologue(func, nPassed, kind);
+  translator.relocate();
+  return translator.publish();
 }
 
 }}}

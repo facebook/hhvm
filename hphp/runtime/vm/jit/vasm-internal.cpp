@@ -24,6 +24,7 @@
 #include "hphp/runtime/vm/jit/smashable-instr.h"
 #include "hphp/runtime/vm/jit/srcdb.h"
 #include "hphp/runtime/vm/jit/tc.h"
+#include "hphp/runtime/vm/jit/tc-internal.h"
 #include "hphp/runtime/vm/jit/trans-db.h"
 #include "hphp/runtime/vm/jit/trans-rec.h"
 #include "hphp/runtime/vm/jit/unique-stubs.h"
@@ -256,7 +257,23 @@ bool emit(Venv& env, const jmps& i) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void emit_svcreq_stub(Venv& env, const Venv::SvcReqPatch& p) {
-  auto& frozen = env.text.frozen().code;
+  auto const reusableTC = RuntimeOption::EvalEnableReusableTC;
+  // Reusable TC must emit code into local TC buffers, and then relocate.
+  assertx(IMPLIES(
+    reusableTC,
+    !tc::code().frozen().contains(env.text.frozen().code.base())
+  ));
+  auto codeLock = tc::lockCode(reusableTC);
+  auto& frozen = [&] () -> CodeBlock& {
+    // This emits directly into the end of frozen.  This helps keep it out of
+    // the TransLoc of the translation.  Since the stubs emitted are ephemeral
+    // (and may be reused), it is important they aren't part of the TransLoc
+    // when running with ReusableTC options enabled.
+    if (reusableTC) {
+      return tc::code().view().frozen();
+    }
+    return env.text.frozen().code;
+  }();
 
   TCA stub = nullptr;
 

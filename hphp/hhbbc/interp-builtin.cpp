@@ -87,32 +87,6 @@ bool builtin_floor(ISS& env, const bc::FCallBuiltin& op) {
   return floatIfNumeric(env, op);
 }
 
-bool builtin_mt_rand(ISS& env, const bc::FCallBuiltin& op) {
-  // In PHP, the two arg version can return false on input failure, but we don't
-  // behave the same as PHP. we allow 1-arg calls and we allow the params to
-  // come in any order.
-  auto success = [&] {
-    popT(env);
-    popT(env);
-    push(env, TInt);
-    return true;
-  };
-
-  switch (op.arg1) {
-  case 0:
-    return success();
-  case 1:
-    return topT(env, 0).subtypeOf(BNum) ? success() : false;
-  case 2:
-    if (topT(env, 0).subtypeOf(BNum) &&
-        topT(env, 1).subtypeOf(BNum)) {
-      return success();
-    }
-    break;
-  }
-  return false;
-}
-
 /**
  * The compiler specializes the two-arg version of min() and max()
  * into an HNI provided helper. If both arguments are an integer
@@ -490,7 +464,6 @@ bool builtin_shapes_idx(ISS& env, const bc::FCallBuiltin& op) {
   X(get_class, get_class)                                               \
   X(max2, max2)                                                         \
   X(min2, min2)                                                         \
-  X(mt_rand, mt_rand)                                                   \
   X(strlen, strlen)                                                     \
   X(function_exists, function_exists)                                   \
   X(class_exists, class_exists)                                         \

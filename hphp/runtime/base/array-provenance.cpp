@@ -41,6 +41,7 @@
 #include <folly/SharedMutex.h>
 #include <tbb/concurrent_hash_map.h>
 
+#include <sys/mman.h>
 #include <type_traits>
 
 namespace HPHP { namespace arrprov {
@@ -81,9 +82,13 @@ static TagIDs s_tagIDs;
 
 TagStorage* getRawTagStorageArray() {
   assertx(!use_lowptr || RO::EvalArrayProvenance);
-  static auto const result = reinterpret_cast<TagStorage*>(
-    malloc((kMaxTagID + 1) * sizeof(TagStorage))
-  );
+  static auto const result = []{
+    auto const bytes = (kMaxTagID + 1) * sizeof(TagStorage);
+    auto const alloc = mmap(nullptr, bytes, PROT_READ|PROT_WRITE,
+                            MAP_ANONYMOUS|MAP_PRIVATE, -1, 0);
+    always_assert(alloc != nullptr);
+    return reinterpret_cast<TagStorage*>(alloc);
+  }();
   return result;
 }
 

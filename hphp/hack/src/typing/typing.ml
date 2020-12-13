@@ -244,8 +244,6 @@ let set_tcopt_unstable_features env { fa_user_attributes; _ } =
     let ( = ) = String.equal in
     List.fold ua_params ~init:env ~f:(fun env feature ->
         match snd feature with
-        | Aast.String s when s = SN.UnstableFeatures.coeffects_provisional ->
-          Env.map_tcopt ~f:TypecheckerOptions.set_coeffects env
         | Aast.String s when s = SN.UnstableFeatures.ifc ->
           Env.map_tcopt ~f:TypecheckerOptions.enable_ifc env
         | _ -> env)
@@ -6065,7 +6063,7 @@ and call
             let capability =
               Typing_coeffects.get_type ft.ft_implicit_params.capability
             in
-            if not (TypecheckerOptions.coeffects (Env.get_tcopt env)) then
+            if not (TypecheckerOptions.call_coeffects (Env.get_tcopt env)) then
               env
             else
               let env_capability =

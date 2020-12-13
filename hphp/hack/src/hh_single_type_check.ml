@@ -204,7 +204,8 @@ let parse_options () =
   let out_extension = ref ".out" in
   let like_type_hints = ref false in
   let union_intersection_type_hints = ref false in
-  let coeffects = ref false in
+  let call_coeffects = ref false in
+  let local_coeffects = ref false in
   let like_casts = ref false in
   let simple_pessimize = ref 0.0 in
   let complex_coercion = ref false in
@@ -281,6 +282,8 @@ let parse_options () =
         Arg.Unit (set_mode Ffp_autocomplete),
         " Produce autocomplete suggestions using the full-fidelity parse tree"
       );
+      ("--call-coeffects", Arg.Set call_coeffects, "Turns on call coeffects");
+      ("--local-coeffects", Arg.Set local_coeffects, "Turns on local coeffects");
       ("--colour", Arg.Unit (set_mode Color), " Produce colour output");
       ("--color", Arg.Unit (set_mode Color), " Produce color output");
       ("--coverage", Arg.Unit (set_mode Coverage), " Produce coverage output");
@@ -645,7 +648,8 @@ let parse_options () =
       ~tco_shallow_class_decl:!shallow_class_decl
       ~tco_like_type_hints:!like_type_hints
       ~tco_union_intersection_type_hints:!union_intersection_type_hints
-      ~tco_coeffects:!coeffects
+      ~tco_coeffects:!call_coeffects
+      ~tco_coeffects_local:!local_coeffects
       ~tco_like_casts:!like_casts
       ~tco_simple_pessimize:!simple_pessimize
       ~tco_complex_coercion:!complex_coercion

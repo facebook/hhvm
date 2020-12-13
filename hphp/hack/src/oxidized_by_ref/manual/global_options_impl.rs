@@ -58,6 +58,7 @@ const DEFAULT: GlobalOptions<'_> = GlobalOptions {
     tco_like_type_hints: false,
     tco_union_intersection_type_hints: false,
     tco_coeffects: false,
+    tco_coeffects_local: false,
     tco_like_casts: false,
     tco_simple_pessimize: 0.0,
     tco_complex_coercion: false,

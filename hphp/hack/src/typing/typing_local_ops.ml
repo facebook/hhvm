@@ -19,7 +19,7 @@ let enforce_local_capability
     (op_pos : Pos.t)
     env =
   (* gate the check behavior on coeffects TC option *)
-  if TypecheckerOptions.coeffects (Env.get_tcopt env) then
+  if TypecheckerOptions.local_coeffects (Env.get_tcopt env) then
     let available = Env.get_local env Typing_coeffects.local_capability_id in
     let (env, required) = mk_required env in
     Typing_subtype.sub_type_or_fail env available required (fun () ->

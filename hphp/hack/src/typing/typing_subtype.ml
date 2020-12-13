@@ -2198,7 +2198,7 @@ and simplify_subtype_params_with_variadic
 
 and simplify_subtype_implicit_params
     ~subtype_env { capability = sub_cap } { capability = super_cap } env =
-  if TypecheckerOptions.coeffects (Env.get_tcopt env) then
+  if TypecheckerOptions.any_coeffects (Env.get_tcopt env) then
     match (sub_cap, super_cap) with
     | (CapTy sub, CapTy super) -> simplify_subtype ~subtype_env sub super env
     | (CapTy sub, CapDefaults _p) ->

@@ -355,7 +355,8 @@ let load ~silent config_filename options : t * ServerLocalConfig.t =
       ?tco_like_type_hints:(bool_opt "like_type_hints" config)
       ?tco_union_intersection_type_hints:
         (bool_opt "union_intersection_type_hints" config)
-      ?tco_coeffects:(bool_opt "coeffects" config)
+      ?tco_coeffects:(bool_opt "call_coeffects" config)
+      ?tco_coeffects_local:(bool_opt "local_coeffects" config)
       ?tco_like_casts:(bool_opt "like_casts" config)
       ?tco_simple_pessimize:(float_opt "simple_pessimize" config)
       ?tco_complex_coercion:(bool_opt "complex_coercion" config)

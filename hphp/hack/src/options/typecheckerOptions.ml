@@ -104,9 +104,11 @@ let log_levels = GlobalOptions.log_levels
 
 let shallow_class_decl = GlobalOptions.tco_shallow_class_decl
 
-let coeffects = GlobalOptions.coeffects
+let call_coeffects = GlobalOptions.tco_call_coeffects
 
-let set_coeffects = GlobalOptions.set_coeffects
+let local_coeffects = GlobalOptions.tco_local_coeffects
+
+let any_coeffects t = call_coeffects t || local_coeffects t
 
 let enable_ifc = GlobalOptions.enable_ifc
 

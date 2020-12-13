@@ -60,6 +60,7 @@ type t = {
   tco_like_type_hints: bool;
   tco_union_intersection_type_hints: bool;
   tco_coeffects: bool;
+  tco_coeffects_local: bool;
   tco_like_casts: bool;
   tco_simple_pessimize: float;
   tco_complex_coercion: bool;
@@ -238,6 +239,7 @@ let default =
     tco_like_type_hints = false;
     tco_union_intersection_type_hints = false;
     tco_coeffects = false;
+    tco_coeffects_local = false;
     tco_like_casts = false;
     tco_simple_pessimize = 0.0;
     tco_complex_coercion = false;
@@ -356,6 +358,7 @@ let make
     ?(tco_union_intersection_type_hints =
       default.tco_union_intersection_type_hints)
     ?(tco_coeffects = default.tco_coeffects)
+    ?(tco_coeffects_local = default.tco_coeffects_local)
     ?(tco_like_casts = default.tco_like_casts)
     ?(tco_simple_pessimize = default.tco_simple_pessimize)
     ?(tco_complex_coercion = default.tco_complex_coercion)
@@ -479,6 +482,7 @@ let make
     tco_like_type_hints;
     tco_union_intersection_type_hints;
     tco_coeffects;
+    tco_coeffects_local;
     tco_like_casts;
     tco_simple_pessimize;
     tco_complex_coercion;
@@ -651,9 +655,9 @@ let tco_like_type_hints t = t.tco_like_type_hints
 
 let tco_union_intersection_type_hints t = t.tco_union_intersection_type_hints
 
-let coeffects t = t.tco_coeffects
+let tco_call_coeffects t = t.tco_coeffects
 
-let set_coeffects t = { t with tco_coeffects = true }
+let tco_local_coeffects t = t.tco_coeffects_local
 
 let ifc_enabled t = t.tco_ifc_enabled
 

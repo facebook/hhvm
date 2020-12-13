@@ -15,6 +15,7 @@
 */
 #include "hphp/hhbbc/interp.h"
 
+#include "hphp/util/match.h"
 #include "hphp/util/trace.h"
 
 #include "hphp/runtime/base/array-iterator.h"
@@ -40,37 +41,33 @@ const Type& getArg(ISS& env, const bc::FCallBuiltin& op, uint32_t idx) {
 
 //////////////////////////////////////////////////////////////////////
 
-bool builtin_get_class(ISS& env, const bc::FCallBuiltin& op) {
+struct Reduced {};
+struct NoReduced {};
+using TypeOrReduced = boost::variant<Type, Reduced, NoReduced>;
+
+//////////////////////////////////////////////////////////////////////
+
+TypeOrReduced builtin_get_class(ISS& env, const bc::FCallBuiltin& op) {
   auto const ty = getArg(env, op, 0);
 
-  if (!ty.subtypeOf(BObj)) return false;
+  if (!ty.subtypeOf(BObj)) return NoReduced{};
 
-  auto unknown_class = [&] {
-    popT(env);
-    push(env, TStr);
-    return true;
-  };
-
-  if (!is_specialized_obj(ty)) return unknown_class();
+  if (!is_specialized_obj(ty)) return TStr;
   auto const d = dobj_of(ty);
   switch (d.type) {
-  case DObj::Sub:   return unknown_class();
+  case DObj::Sub:   return TStr;
   case DObj::Exact: break;
   }
 
   constprop(env);
-  popT(env);
-  push(env, sval(d.cls.name()));
-  return true;
+  return sval(d.cls.name());
 }
 
-bool builtin_abs(ISS& env, const bc::FCallBuiltin& op) {
+TypeOrReduced builtin_abs(ISS& env, const bc::FCallBuiltin& op) {
   auto const ty = getArg(env, op, 0);
-  popC(env);
-  push(env, ty.subtypeOf(BInt) ? TInt :
+  return ty.subtypeOf(BInt) ? TInt :
             ty.subtypeOf(BDbl) ? TDbl :
-            TInitUnc);
-  return true;
+            TInitUnc;
 }
 
 /**
@@ -78,16 +75,14 @@ bool builtin_abs(ISS& env, const bc::FCallBuiltin& op) {
  * the result will be a double. Otherwise, the result is conditional
  * on a successful conversion and an accurate number of arguments.
  */
-bool floatIfNumeric(ISS& env, const bc::FCallBuiltin& op) {
+TypeOrReduced floatIfNumeric(ISS& env, const bc::FCallBuiltin& op) {
   auto const ty = getArg(env, op, 0);
-  popC(env);
-  push(env, ty.subtypeOf(BNum) ? TDbl : TInitUnc);
-  return true;
+  return ty.subtypeOf(BNum) ? TDbl : TInitUnc;
 }
-bool builtin_ceil(ISS& env, const bc::FCallBuiltin& op) {
+TypeOrReduced builtin_ceil(ISS& env, const bc::FCallBuiltin& op) {
   return floatIfNumeric(env, op);
 }
-bool builtin_floor(ISS& env, const bc::FCallBuiltin& op) {
+TypeOrReduced builtin_floor(ISS& env, const bc::FCallBuiltin& op) {
   return floatIfNumeric(env, op);
 }
 
@@ -98,44 +93,36 @@ bool builtin_floor(ISS& env, const bc::FCallBuiltin& op) {
  * return value. If they're both numeric, the result is at least
  * numeric.
  */
-bool minmax2(ISS& env, const bc::FCallBuiltin& op) {
+TypeOrReduced minmax2(ISS& env, const bc::FCallBuiltin& op) {
   auto const t0 = getArg(env, op, 0);
   auto const t1 = getArg(env, op, 1);
-  if (!t0.subtypeOf(BNum) || !t1.subtypeOf(BNum)) return false;
-  popC(env);
-  popC(env);
-  push(env, t0 == t1 ? t0 : TNum);
-  return true;
+  if (!t0.subtypeOf(BNum) || !t1.subtypeOf(BNum)) return NoReduced{};
+  return t0 == t1 ? t0 : TNum;
 }
-bool builtin_max2(ISS& env, const bc::FCallBuiltin& op) {
+TypeOrReduced builtin_max2(ISS& env, const bc::FCallBuiltin& op) {
   return minmax2(env, op);
 }
-bool builtin_min2(ISS& env, const bc::FCallBuiltin& op) {
+TypeOrReduced builtin_min2(ISS& env, const bc::FCallBuiltin& op) {
   return minmax2(env, op);
 }
 
-bool builtin_strlen(ISS& env, const bc::FCallBuiltin& op) {
+TypeOrReduced builtin_strlen(ISS& env, const bc::FCallBuiltin& op) {
   auto const ty = getArg(env, op, 0);
-  popC(env);
   // Returns null and raises a warning when input is an array, resource, or
   // object.
   if (ty.subtypeOfAny(TPrim, TStr)) nothrow(env);
-  push(env, ty.subtypeOfAny(TPrim, TStr) ? TInt : TOptInt);
-  return true;
+  return ty.subtypeOfAny(TPrim, TStr) ? TInt : TOptInt;
 }
 
-bool builtin_function_exists(ISS& env, const bc::FCallBuiltin& op) {
-  if (!handle_function_exists(env, getArg(env, op, 0))) return false;
-
+TypeOrReduced builtin_function_exists(ISS& env, const bc::FCallBuiltin& op) {
+  if (!handle_function_exists(env, getArg(env, op, 0))) return NoReduced{};
   constprop(env);
-  for (int i = 0; i < op.arg1; i++) popC(env);
-  push(env, TTrue);
-  return true;
+  return TTrue;
 }
 
-bool handle_oodecl_exists(ISS& env,
-                          const bc::FCallBuiltin& op,
-                          OODeclExistsOp subop) {
+TypeOrReduced handle_oodecl_exists(ISS& env,
+                                   const bc::FCallBuiltin& op,
+                                    OODeclExistsOp subop) {
   auto const name = getArg(env, op, 0);
   auto const autoload = getArg(env, op, 1);
   if (name.subtypeOf(BStr)) {
@@ -143,12 +130,12 @@ bool handle_oodecl_exists(ISS& env,
       reduce(env,
              bc::CastBool {},
              bc::OODeclExists { subop });
-      return true;
+      return Reduced{};
     }
     reduce(env, bc::OODeclExists { subop });
-    return true;
+    return Reduced{};
   }
-  if (!autoload.strictSubtypeOf(TBool)) return false;
+  if (!autoload.strictSubtypeOf(TBool)) return NoReduced{};
   auto const v = tv(autoload);
   assertx(v);
   reduce(env,
@@ -156,27 +143,27 @@ bool handle_oodecl_exists(ISS& env,
          bc::CastString {},
          gen_constant(*v),
          bc::OODeclExists { subop });
-  return true;
+  return Reduced{};
 }
 
-bool builtin_class_exists(ISS& env, const bc::FCallBuiltin& op) {
+TypeOrReduced builtin_class_exists(ISS& env, const bc::FCallBuiltin& op) {
   return handle_oodecl_exists(env, op, OODeclExistsOp::Class);
 }
 
-bool builtin_interface_exists(ISS& env, const bc::FCallBuiltin& op) {
+TypeOrReduced builtin_interface_exists(ISS& env, const bc::FCallBuiltin& op) {
   return handle_oodecl_exists(env, op, OODeclExistsOp::Interface);
 }
 
-bool builtin_trait_exists(ISS& env, const bc::FCallBuiltin& op) {
+TypeOrReduced builtin_trait_exists(ISS& env, const bc::FCallBuiltin& op) {
   return handle_oodecl_exists(env, op, OODeclExistsOp::Trait);
 }
 
-bool builtin_array_key_cast(ISS& env, const bc::FCallBuiltin& op) {
+TypeOrReduced builtin_array_key_cast(ISS& env, const bc::FCallBuiltin& op) {
   auto const ty = getArg(env, op, 0);
 
   if (ty.subtypeOf(BNum) || ty.subtypeOf(BBool) || ty.subtypeOf(BRes)) {
     reduce(env, bc::CastInt {});
-    return true;
+    return Reduced{};
   }
 
   auto retTy = TBottom;
@@ -218,20 +205,16 @@ bool builtin_array_key_cast(ISS& env, const bc::FCallBuiltin& op) {
     nothrow(env);
   }
 
-  popC(env);
-  push(env, retTy);
-
   if (retTy == TBottom) unreachable(env);
-
-  return true;
+  return retTy;
 }
 
-bool builtin_is_callable(ISS& env, const bc::FCallBuiltin& op) {
+TypeOrReduced builtin_is_callable(ISS& env, const bc::FCallBuiltin& op) {
   // Do not handle syntax-only checks or name output.
-  if (getArg(env, op, 1) != TFalse) return false;
+  if (getArg(env, op, 1) != TFalse) return NoReduced{};
 
   auto const ty = getArg(env, op, 0);
-  if (ty == TInitCell) return false;
+  if (ty == TInitCell) return NoReduced{};
   auto const res = [&]() -> folly::Optional<bool> {
     auto constexpr BFuncPtr = BClsMeth | BFunc;
     if (ty.subtypeOf(BFuncPtr)) return true;
@@ -242,13 +225,13 @@ bool builtin_is_callable(ISS& env, const bc::FCallBuiltin& op) {
     }
     return {};
   }();
-  if (!res) return false;
+  if (!res) return NoReduced{};
   reduce(env, bc::PopC {}, bc::PopC {});
   *res ? reduce(env, bc::True {}) : reduce(env, bc::False {});
-  return true;
+  return Reduced{};
 }
 
-bool builtin_is_list_like(ISS& env, const bc::FCallBuiltin& op) {
+TypeOrReduced builtin_is_list_like(ISS& env, const bc::FCallBuiltin& op) {
   auto const ty = getArg(env, op, 0);
 
   if (!ty.couldBe(TClsMeth)) {
@@ -256,31 +239,19 @@ bool builtin_is_list_like(ISS& env, const bc::FCallBuiltin& op) {
     nothrow(env);
   }
 
-  if (!ty.couldBeAny(TArr, TVec, TDict, TKeyset, TClsMeth)) {
-    popC(env);
-    push(env, TFalse);
-    return true;
-  }
+  if (!ty.couldBeAny(TArr, TVec, TDict, TKeyset, TClsMeth)) return TFalse;
 
-  if (ty.subtypeOfAny(TVec, TVArr, TClsMeth)) {
-    popC(env);
-    push(env, TTrue);
-    return true;
-  }
+  if (ty.subtypeOfAny(TVec, TVArr, TClsMeth)) return TTrue;
 
   switch (categorize_array(ty).cat) {
     case Type::ArrayCat::Empty:
     case Type::ArrayCat::Packed:
-      popC(env);
-      push(env, TTrue);
-      return true;
+      return TTrue;
     case Type::ArrayCat::Mixed:
     case Type::ArrayCat::Struct:
-      popC(env);
-      push(env, TFalse);
-      return true;
+      return TFalse;
     case Type::ArrayCat::None:
-      return false;
+      return NoReduced{};
   }
   always_assert(false);
 }
@@ -340,59 +311,52 @@ ArrayData* impl_type_structure_opts(ISS& env, const bc::FCallBuiltin& op,
   return nullptr;
 }
 
-bool impl_builtin_type_structure(ISS& env, const bc::FCallBuiltin& op,
-                                 bool no_throw) {
+TypeOrReduced impl_builtin_type_structure(ISS& env, const bc::FCallBuiltin& op,
+                                          bool no_throw) {
   bool fail = false;
   auto const ts = impl_type_structure_opts(env, op, fail);
   if (fail && !no_throw) {
     unreachable(env);
-    popT(env);
-    popT(env);
-    push(env, TBottom);
-    return true;
+    return TBottom;
   }
-  if (!ts) return false;
+  if (!ts) return NoReduced{};
   reduce(env, bc::PopC {}, bc::PopC {});
   RuntimeOption::EvalHackArrDVArrs
     ? reduce(env, bc::Dict { ts }) : reduce(env, bc::Array { ts });
-  return true;
+  return Reduced{};
 }
 
-bool builtin_type_structure(ISS& env, const bc::FCallBuiltin& op) {
+TypeOrReduced builtin_type_structure(ISS& env, const bc::FCallBuiltin& op) {
   return impl_builtin_type_structure(env, op, false);
 }
 
-bool builtin_type_structure_no_throw(ISS& env, const bc::FCallBuiltin& op) {
+TypeOrReduced builtin_type_structure_no_throw(ISS& env,
+                                              const bc::FCallBuiltin& op) {
   return impl_builtin_type_structure(env, op, true);
 }
 
 const StaticString s_classname("classname");
 
-bool builtin_type_structure_classname(ISS& env, const bc::FCallBuiltin& op) {
+TypeOrReduced builtin_type_structure_classname(ISS& env,
+                                               const bc::FCallBuiltin& op) {
   bool fail = false;
   auto const ts = impl_type_structure_opts(env, op, fail);
   if (fail) {
     unreachable(env);
-    popT(env);
-    popT(env);
-    push(env, TBottom);
-    return true;
+    return TBottom;
   }
   if (ts) {
     auto const classname_field = ts->get(s_classname.get());
     if (isStringType(classname_field.type())) {
       reduce(env, bc::PopC {}, bc::PopC {},
              bc::String { classname_field.val().pstr });
-      return true;
+      return Reduced{};
     }
   }
-  popT(env);
-  popT(env);
-  push(env, TSStr);
-  return true;
+  return TSStr;
 }
 
-bool builtin_shapes_idx(ISS& env, const bc::FCallBuiltin& op) {
+TypeOrReduced builtin_shapes_idx(ISS& env, const bc::FCallBuiltin& op) {
   auto def = to_cell(getArg(env, op, 2));
   auto const key = getArg(env, op, 1);
   auto const base = getArg(env, op, 0);
@@ -401,12 +365,10 @@ bool builtin_shapes_idx(ISS& env, const bc::FCallBuiltin& op) {
   if (!base.couldBe(optDArr) ||
       !key.couldBe(BArrKeyCompat)) {
     unreachable(env);
-    discard(env, 3);
-    push(env, TBottom);
-    return true;
+    return TBottom;
   }
   if (!base.subtypeOf(optDArr) || !key.subtypeOf(BOptArrKeyCompat)) {
-    return false;
+    return NoReduced{};
   }
 
   auto mightThrow = is_opt(key);
@@ -416,9 +378,7 @@ bool builtin_shapes_idx(ISS& env, const bc::FCallBuiltin& op) {
       constprop(env);
       effect_free(env);
     }
-    discard(env, 3);
-    push(env, std::move(def));
-    return true;
+    return std::move(def);
   }
 
   auto const unoptBase = is_opt(base) ? unopt(base) : base;
@@ -447,9 +407,7 @@ bool builtin_shapes_idx(ISS& env, const bc::FCallBuiltin& op) {
   auto res = elem.first;
   if (is_opt(base)) res |= def;
 
-  discard(env, 3);
-  push(env, std::move(res));
-  return true;
+  return std::move(res);
 }
 
 #define SPECIAL_BUILTINS                                                \
@@ -477,7 +435,20 @@ bool builtin_shapes_idx(ISS& env, const bc::FCallBuiltin& op) {
 #undef X
 
 bool handle_builtin(ISS& env, const bc::FCallBuiltin& op) {
-#define X(x, y) if (op.str3->isame(s_##x.get())) return builtin_##x(env, op);
+#define X(x, y)                                                         \
+  if (op.str3->isame(s_##x.get())) {                                    \
+    auto const result = builtin_##x(env, op);                           \
+    return match<bool>(                                                 \
+      result,                                                           \
+      [&] (NoReduced) { return false; },                                \
+      [&] (Reduced)   { return true;  },                                \
+      [&] (Type retType) {                                              \
+        for (int i = 0; i < op.arg1; ++i) popT(env);                    \
+        push(env, retType);                                             \
+        return true;                                                    \
+      }                                                                 \
+    );                                                                  \
+  }
   SPECIAL_BUILTINS
 #undef X
 

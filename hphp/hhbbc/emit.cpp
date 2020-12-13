@@ -499,13 +499,14 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState, UnitEmitter& ue,
 #define O(opcode, imms, inputs, outputs, flags)                 \
     auto emit_##opcode = [&] (OpInfo<bc::opcode> data) {        \
       if (RuntimeOption::EnableIntrinsicsExtension) {           \
-        if (Op::opcode == Op::FCallBuiltin &&                   \
-            inst.FCallBuiltin.str3->isame(                      \
+        if (Op::opcode == Op::FCallFuncD &&                     \
+            inst.FCallFuncD.str2->isame(                        \
               s_hhbbc_fail_verification.get())) {               \
           ue.emitOp(Op::CheckProp);                             \
           ue.emitInt32(                                         \
-            ue.mergeLitstr(inst.FCallBuiltin.str3));            \
+            ue.mergeLitstr(inst.FCallFuncD.str2));              \
           ue.emitOp(Op::PopC);                                  \
+          ret.maxStackDepth++;                                  \
         }                                                       \
       }                                                         \
       caller<Op::CreateCl>(createcl, data);                     \

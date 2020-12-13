@@ -490,6 +490,14 @@ bool handle_builtin(ISS& env, const bc::FCallBuiltin& op) {
   return false;
 }
 
+bool is_optimizable_builtin(const php::Func* func) {
+#define X(x, y) if (func->name->isame(s_##x.get())) return true;
+  SPECIAL_BUILTINS
+#undef X
+
+  return false;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 }
@@ -681,6 +689,8 @@ bool can_emit_builtin(ISS& env, const php::Func* func, const FCallArgs& fca) {
       return false;
     }
   }
+
+  if (!is_optimizable_builtin(func)) return false;
 
   return true;
 }

@@ -3900,9 +3900,7 @@ void in(ISS& env, const bc::FCallFuncD& op) {
   }
 
   if (auto const func = rfunc.exactFunc()) {
-    if (can_emit_builtin(env, func, op.fca)) {
-      return finish_builtin(env, func, op.fca);
-    }
+    if (optimize_builtin(env, func, op.fca)) return;
   }
 
   fcallKnownImpl(env, op.fca, rfunc, TBottom, false, 0, updateBC);
@@ -4275,13 +4273,14 @@ void in(ISS& env, const bc::FCallClsMethodD& op) {
 
   if (auto const func = rfunc.exactFunc()) {
     assertx(func->cls != nullptr);
-    if (func->cls->name->same(op.str3) && can_emit_builtin(env, func, op.fca)) {
+    if (func->cls->name->same(op.str3) &&
+        optimize_builtin(env, func, op.fca)) {
       // When we use FCallBuiltin to call a static method, the litstr method
       // name will be a fully qualified cls::fn (e.g. "HH\Map::fromItems").
       //
       // As a result, we can only do this optimization if the name of the
       // builtin function's class matches this op's class name immediate.
-      return finish_builtin(env, func, op.fca);
+      return;
     }
   }
 

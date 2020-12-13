@@ -561,7 +561,7 @@ void in(ISS& env, const bc::FCallBuiltin& op) {
 
 }
 
-bool can_emit_builtin(ISS& env, const php::Func* func, const FCallArgs& fca) {
+bool optimize_builtin(ISS& env, const php::Func* func, const FCallArgs& fca) {
   if (!will_reduce(env) ||
       any(env.collect.opts & CollectionOpts::Speculating) ||
       func->attrs & (AttrInterceptable | AttrNoFCallBuiltin) ||
@@ -623,10 +623,6 @@ bool can_emit_builtin(ISS& env, const php::Func* func, const FCallArgs& fca) {
 
   if (!is_optimizable_builtin(func)) return false;
 
-  return true;
-}
-
-void finish_builtin(ISS& env, const php::Func* func, const FCallArgs& fca) {
   BytecodeVec repl;
   assertx(!fca.hasGenerics());
   assertx(!fca.hasUnpack() ||
@@ -685,6 +681,7 @@ void finish_builtin(ISS& env, const php::Func* func, const FCallArgs& fca) {
   }
 
   reduce(env, std::move(repl));
+  return true;
 }
 
 bool handle_function_exists(ISS& env, const Type& name) {

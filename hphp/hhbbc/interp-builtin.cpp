@@ -33,11 +33,15 @@ namespace {
 
 //////////////////////////////////////////////////////////////////////
 
+const Type& getArg(ISS& env, const bc::FCallBuiltin& op, uint32_t idx) {
+  assertx(idx < op.arg1);
+  return topC(env, op.arg1 - idx - 1);
+}
+
 //////////////////////////////////////////////////////////////////////
 
 bool builtin_get_class(ISS& env, const bc::FCallBuiltin& op) {
-  assertx(op.arg1 == 1);
-  auto const ty = topT(env);
+  auto const ty = getArg(env, op, 0);
 
   if (!ty.subtypeOf(BObj)) return false;
 
@@ -61,8 +65,8 @@ bool builtin_get_class(ISS& env, const bc::FCallBuiltin& op) {
 }
 
 bool builtin_abs(ISS& env, const bc::FCallBuiltin& op) {
-  assertx(op.arg1 == 1);
-  auto const ty = popC(env);
+  auto const ty = getArg(env, op, 0);
+  popC(env);
   push(env, ty.subtypeOf(BInt) ? TInt :
             ty.subtypeOf(BDbl) ? TDbl :
             TInitUnc);
@@ -75,8 +79,8 @@ bool builtin_abs(ISS& env, const bc::FCallBuiltin& op) {
  * on a successful conversion and an accurate number of arguments.
  */
 bool floatIfNumeric(ISS& env, const bc::FCallBuiltin& op) {
-  assertx(op.arg1 == 1);
-  auto const ty = popC(env);
+  auto const ty = getArg(env, op, 0);
+  popC(env);
   push(env, ty.subtypeOf(BNum) ? TDbl : TInitUnc);
   return true;
 }
@@ -95,10 +99,8 @@ bool builtin_floor(ISS& env, const bc::FCallBuiltin& op) {
  * numeric.
  */
 bool minmax2(ISS& env, const bc::FCallBuiltin& op) {
-  assertx(op.arg1 == 2);
-
-  auto const t0 = topT(env, 0);
-  auto const t1 = topT(env, 1);
+  auto const t0 = getArg(env, op, 0);
+  auto const t1 = getArg(env, op, 1);
   if (!t0.subtypeOf(BNum) || !t1.subtypeOf(BNum)) return false;
   popC(env);
   popC(env);
@@ -113,8 +115,8 @@ bool builtin_min2(ISS& env, const bc::FCallBuiltin& op) {
 }
 
 bool builtin_strlen(ISS& env, const bc::FCallBuiltin& op) {
-  assertx(op.arg1 == 1);
-  auto const ty = popC(env);
+  auto const ty = getArg(env, op, 0);
+  popC(env);
   // Returns null and raises a warning when input is an array, resource, or
   // object.
   if (ty.subtypeOfAny(TPrim, TStr)) nothrow(env);
@@ -123,8 +125,7 @@ bool builtin_strlen(ISS& env, const bc::FCallBuiltin& op) {
 }
 
 bool builtin_function_exists(ISS& env, const bc::FCallBuiltin& op) {
-  assertx(op.arg1 == 2);
-  if (!handle_function_exists(env, topT(env, op.arg1 - 1))) return false;
+  if (!handle_function_exists(env, getArg(env, op, 0))) return false;
 
   constprop(env);
   for (int i = 0; i < op.arg1; i++) popC(env);
@@ -135,10 +136,10 @@ bool builtin_function_exists(ISS& env, const bc::FCallBuiltin& op) {
 bool handle_oodecl_exists(ISS& env,
                           const bc::FCallBuiltin& op,
                           OODeclExistsOp subop) {
-  assertx(op.arg1 == 2);
-  auto const& name = topT(env, 1);
+  auto const name = getArg(env, op, 0);
+  auto const autoload = getArg(env, op, 1);
   if (name.subtypeOf(BStr)) {
-    if (!topT(env).subtypeOf(BBool)) {
+    if (!autoload.subtypeOf(BBool)) {
       reduce(env,
              bc::CastBool {},
              bc::OODeclExists { subop });
@@ -147,8 +148,8 @@ bool handle_oodecl_exists(ISS& env,
     reduce(env, bc::OODeclExists { subop });
     return true;
   }
-  if (!topT(env).strictSubtypeOf(TBool)) return false;
-  auto const v = tv(topT(env));
+  if (!autoload.strictSubtypeOf(TBool)) return false;
+  auto const v = tv(autoload);
   assertx(v);
   reduce(env,
          bc::PopC {},
@@ -171,8 +172,7 @@ bool builtin_trait_exists(ISS& env, const bc::FCallBuiltin& op) {
 }
 
 bool builtin_array_key_cast(ISS& env, const bc::FCallBuiltin& op) {
-  assertx(op.arg1 == 1);
-  auto const ty = topC(env);
+  auto const ty = getArg(env, op, 0);
 
   if (ty.subtypeOf(BNum) || ty.subtypeOf(BBool) || ty.subtypeOf(BRes)) {
     reduce(env, bc::CastInt {});
@@ -227,11 +227,10 @@ bool builtin_array_key_cast(ISS& env, const bc::FCallBuiltin& op) {
 }
 
 bool builtin_is_callable(ISS& env, const bc::FCallBuiltin& op) {
-  assertx(op.arg1 == 2);
   // Do not handle syntax-only checks or name output.
-  if (topC(env) != TFalse) return false;
+  if (getArg(env, op, 1) != TFalse) return false;
 
-  auto const ty = topC(env, 1);
+  auto const ty = getArg(env, op, 0);
   if (ty == TInitCell) return false;
   auto const res = [&]() -> folly::Optional<bool> {
     auto constexpr BFuncPtr = BClsMeth | BFunc;
@@ -250,8 +249,7 @@ bool builtin_is_callable(ISS& env, const bc::FCallBuiltin& op) {
 }
 
 bool builtin_is_list_like(ISS& env, const bc::FCallBuiltin& op) {
-  assertx(op.arg1 == 1);
-  auto const ty = topC(env);
+  auto const ty = getArg(env, op, 0);
 
   if (!ty.couldBe(TClsMeth)) {
     constprop(env);
@@ -297,7 +295,6 @@ bool builtin_is_list_like(ISS& env, const bc::FCallBuiltin& op) {
  */
 ArrayData* impl_type_structure_opts(ISS& env, const bc::FCallBuiltin& op,
                                     bool& will_fail) {
-  assertx(op.arg1 == 2);
   auto const fail = [&] {
     will_fail = true;
     return nullptr;
@@ -316,9 +313,8 @@ ArrayData* impl_type_structure_opts(ISS& env, const bc::FCallBuiltin& op,
     if (!tvIsHAMSafeDArray(&*typeCns)) return nullptr;
     return resolveTSStatically(env, typeCns->m_data.parr, env.ctx.cls);
   };
-  if (op.arg1 != 2) return nullptr;
-  auto const cns_name = tv(topT(env));
-  auto const cls_or_obj = tv(topT(env, 1));
+  auto const cns_name = tv(getArg(env, op, 1));
+  auto const cls_or_obj = tv(getArg(env, op, 0));
   if (!cns_name || !tvIsString(&*cns_name)) return nullptr;
   auto const cns_sd = cns_name->m_data.pstr;
   if (!cls_or_obj) {
@@ -397,11 +393,9 @@ bool builtin_type_structure_classname(ISS& env, const bc::FCallBuiltin& op) {
 }
 
 bool builtin_shapes_idx(ISS& env, const bc::FCallBuiltin& op) {
-  assertx(op.arg1 == 3);
-
-  auto def = to_cell(topT(env));
-  auto const key = topC(env, 1);
-  auto const base = topC(env, 2);
+  auto def = to_cell(getArg(env, op, 2));
+  auto const key = getArg(env, op, 1);
+  auto const base = getArg(env, op, 0);
   const auto optDArr = RuntimeOption::EvalHackArrDVArrs ? BOptDict : BOptArr;
 
   if (!base.couldBe(optDArr) ||

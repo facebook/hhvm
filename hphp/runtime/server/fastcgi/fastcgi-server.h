@@ -91,6 +91,7 @@ struct FastCGIServer : public Server,
                 bool useFileSocket);
   ~FastCGIServer() override {
     waitForEnd();
+    m_socket.reset();
   }
 
   // These are currently unimplemented (TODO(#4129))
@@ -173,4 +174,3 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

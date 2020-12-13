@@ -505,6 +505,7 @@ bool is_optimizable_builtin(const php::Func* func) {
 namespace interp_step {
 
 void in(ISS& env, const bc::FCallBuiltin& op) {
+  always_assert(op.arg2 == 0);
   auto const name = op.str3;
   auto const func = env.index.resolve_func(env.ctx, name);
   auto const exactFunc = func.exactFunc();
@@ -514,70 +515,10 @@ void in(ISS& env, const bc::FCallBuiltin& op) {
     if (auto val = const_fold(env, op.arg1, 0, *exactFunc, true)) {
       constprop(env);
 
-      auto const needsRuntimeProvenance =
-        RO::EvalArrayProvenance &&
-        exactFunc->attrs & AttrProvenanceSkipFrame;
-
-      auto const popInArgs = [&](BytecodeVec& bcs) {
-        for (uint32_t i = 0; i < op.arg1; ++i) {
-          // FCallBuiltin has CU flavored args, so we need to check the
-          // type to know how to pop them.
-          auto const& popped = topT(env, i);
-          if (popped.subtypeOf(BUninit)) {
-            bcs.push_back(bc::PopU {});
-          } else {
-            assertx(popped.subtypeOf(BInitCell));
-            bcs.push_back(bc::PopC {});
-          }
-        }
-      };
-
-      // If there's no in-out parameters, we're done and can just push
-      // the result.
-      if (!op.arg2) {
-        if (needsRuntimeProvenance) {
-          BytecodeVec repl;
-          popInArgs(repl);
-          repl.push_back(gen_constant(*tv(*val)));
-          repl.push_back(bc::Int { 0 });
-          repl.push_back(bc::TagProvenanceHere {});
-          return reduce(env, std::move(repl));
-        }
-        discard(env, op.arg1);
-        return push(env, std::move(*val));
-      }
-
-      // Otherwise what we got from evaluating the function is
-      // actually a tuple of all the results. We need to extract the
-      // values out of the tuple and push them onto the stack in their
-      // proper order.
-      auto const v = tv(*val);
-      assertx(v);
-
-      assertx(tvIsHAMSafeVArray(*v));
-      auto const ad = v->m_data.parr;
-      assertx(ad->isStatic());
-      assertx(ad->size() == op.arg2 + 1);
-
-      BytecodeVec repl;
-      popInArgs(repl);
-
-      // Pop the placeholder uninit values
-      for (uint32_t i = 0; i < op.arg2; ++i) {
-        repl.push_back(bc::PopU {});
-      }
-      // Push the in-out returns
-      for (uint32_t i = 0; i < op.arg2; ++i) {
-        repl.push_back(gen_constant(ad->nvGetVal(op.arg2 - i)));
-      }
-      // Push the actual result, tagging it in ProvenanceSkipFrame functions.
-      repl.push_back(gen_constant(ad->nvGetVal(0)));
-      if (needsRuntimeProvenance) {
-        repl.push_back(bc::Int { 0 });
-        repl.push_back(bc::TagProvenanceHere {});
-      }
-
-      return reduce(env, std::move(repl));
+      always_assert(!RO::EvalArrayProvenance ||
+                    !(exactFunc->attrs & AttrProvenanceSkipFrame));
+      discard(env, op.arg1);
+      return push(env, std::move(*val));
     }
   }
 
@@ -614,17 +555,7 @@ void in(ISS& env, const bc::FCallBuiltin& op) {
     return *precise_ty;
   }();
 
-  auto const num_out = op.arg2;
-  for (auto i = uint32_t{0}; i < num_args + num_out; ++i) popT(env);
-
-  for (auto i = num_out; i > 0; --i) {
-    if (exactFunc) {
-      push(env, native_function_out_type(exactFunc, i - 1));
-    } else {
-      push(env, TInitCell);
-    }
-  }
-
+  for (auto i = uint32_t{0}; i < num_args; ++i) popT(env);
   push(env, rt);
 }
 

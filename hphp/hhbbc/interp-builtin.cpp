@@ -576,90 +576,33 @@ bool optimize_builtin(ISS& env, const php::Func* func, const FCallArgs& fca) {
   // We rely on strength reduction to convert builtins, but if we do
   // the analysis on the assumption that builtins will be created, but
   // don't actually create them, all sorts of things can go wrong.
-  if (!options.StrengthReduce) {
+  if (!options.StrengthReduce) return false;
+
+  // Do not allow for inout arguments, unpack and variadic arguments
+  if (func->hasInOutArgs ||
+      fca.hasUnpack() ||
+      (func->params.size() && func->params.back().isVariadic)) {
     return false;
   }
 
-  auto const variadic = func->params.size() && func->params.back().isVariadic;
-  auto const concrete_params = func->params.size() - (variadic ? 1 : 0);
+  // Argument not allowed to overrun the signature
+  if (fca.numArgs() > func->params.size()) return false;
 
-  // Only allowed to overrun the signature if we have somewhere to put it
-  if (!variadic && (fca.hasUnpack() || fca.numArgs() > concrete_params)) {
-    return false;
-  }
-
-  // Don't convert an FCall* with unpack unless we're calling a variadic
-  // function with the unpack in the right place to pass it directly.
-  if (variadic && fca.hasUnpack() && fca.numArgs() != concrete_params) {
-    return false;
-  }
-
-  // Don't convert to FCallBuiltin if there are too many variadic args.
-  if (variadic && !fca.hasUnpack() &&
-      fca.numArgs() - concrete_params > ArrayData::MaxElemsOnStack) {
-    return false;
-  }
-
-  if (fca.enforceInOut()) {
-    // Don't convert functions with mis-annotated inout arguments
-    for (int i = 0; i < func->params.size(); ++i) {
-      auto const isInOut = i < fca.numArgs() && fca.isInOut(i);
-      if (func->params[i].inout != isInOut) return false;
-    }
-
-    // Don't convert functions with extra inout arguments
-    for (int i = func->params.size(); i < fca.numArgs(); ++i) {
-      if (fca.isInOut(i)) return false;
-    }
-  }
-
-  // Check for missing non-optional arguments.
-  for (int i = fca.numArgs(); i < concrete_params; i++) {
+  // Check for missing non-optional arguments
+  for (int i = fca.numArgs(); i < func->params.size(); i++) {
     auto const& pi = func->params[i];
-    if (pi.defaultValue.m_type == KindOfUninit) {
-      return false;
-    }
+    assertx(!pi.isVariadic);
+    if (pi.defaultValue.m_type == KindOfUninit) return false;
   }
 
   if (!is_optimizable_builtin(func)) return false;
 
   BytecodeVec repl;
-  assertx(!fca.hasGenerics());
-  assertx(!fca.hasUnpack() ||
-          (fca.numArgs() + 1 == func->params.size() &&
-           func->params.back().isVariadic));
-
-  auto numArgs = fca.numInputs();
-  if (!fca.hasUnpack()) {
-    for (auto i = numArgs; i < func->params.size(); i++) {
-      auto const& pi = func->params[i];
-      if (pi.isVariadic) {
-        if (RuntimeOption::EvalHackArrDVArrs) {
-          repl.emplace_back(bc::Vec { staticEmptyVec() });
-        } else {
-          repl.emplace_back(bc::Array { staticEmptyVArray() });
-        }
-        continue;
-      }
-      assertx(pi.defaultValue.m_type != KindOfUninit);
-      repl.emplace_back(gen_constant(pi.defaultValue));
-    }
-
-    if (func->params.size() &&
-        func->params.back().isVariadic &&
-        numArgs >= func->params.size()) {
-
-      const uint32_t numToPack = numArgs - func->params.size() + 1;
-      if (RuntimeOption::EvalHackArrDVArrs) {
-        repl.emplace_back(bc::NewVec { numToPack });
-      } else {
-        repl.emplace_back(bc::NewVArray { numToPack });
-      }
-      numArgs = func->params.size();
-    }
+  for (auto i = fca.numArgs(); i < func->params.size(); i++) {
+    auto const& pi = func->params[i];
+    assertx(pi.defaultValue.m_type != KindOfUninit);
+    repl.emplace_back(gen_constant(pi.defaultValue));
   }
-
-  assert(numArgs <= func->params.size());
 
   auto const numParams = static_cast<uint32_t>(func->params.size());
   if (func->cls == nullptr) {
@@ -672,12 +615,8 @@ bool optimize_builtin(ISS& env, const php::Func* func, const FCallArgs& fca) {
     repl.emplace_back(
       bc::FCallBuiltin { numParams, fca.numRets() - 1, fullname });
   }
-  if (fca.numRets() != 1) {
-    repl.emplace_back(bc::PopFrame { fca.numRets() });
-  } else {
-    for (int i = 0; i < kNumActRecCells; ++i) {
-      repl.emplace_back(bc::PopU2 {});
-    }
+  for (int i = 0; i < kNumActRecCells; ++i) {
+    repl.emplace_back(bc::PopU2 {});
   }
 
   reduce(env, std::move(repl));

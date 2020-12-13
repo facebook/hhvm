@@ -91,24 +91,22 @@ ALWAYS_INLINE ArrayData* ArrayData::Create(bool legacy) {
 
 ALWAYS_INLINE ArrayData* ArrayData::CreateVArray(arrprov::Tag tag, /* = {} */
                                                  bool legacy /* = false */) {
-  auto const ad = RuntimeOption::EvalHackArrDVArrs ?
-    (RuntimeOption::EvalHackArrDVArrMark || legacy ?
-     staticEmptyMarkedVec() : staticEmptyVec()) :
-    (legacy ? staticEmptyMarkedVArray() : staticEmptyVArray());
-  return RO::EvalArrayProvenance
-    ? arrprov::tagStaticArr(ad, tag)
-    : ad;
+  if (RO::EvalHackArrDVArrs) {
+    return CreateVec(RO::EvalHackArrDVArrMark || legacy);
+  }
+  if (legacy) return staticEmptyMarkedVArray();
+  auto const ad = staticEmptyVArray();
+  return RO::EvalArrayProvenance ? arrprov::tagStaticArr(ad, tag) : ad;
 }
 
 ALWAYS_INLINE ArrayData* ArrayData::CreateDArray(arrprov::Tag tag, /* = {} */
                                                  bool legacy /* = false */) {
-  auto const ad = RuntimeOption::EvalHackArrDVArrs ?
-    (RuntimeOption::EvalHackArrDVArrMark || legacy ?
-     staticEmptyMarkedDictArray() : staticEmptyDictArray()) :
-    (legacy ? staticEmptyMarkedDArray() : staticEmptyDArray());
-  return RO::EvalArrayProvenance
-    ? arrprov::tagStaticArr(ad, tag)
-    : ad;
+  if (RO::EvalHackArrDVArrs) {
+    return CreateDict(RO::EvalHackArrDVArrMark || legacy);
+  }
+  if (legacy) return staticEmptyMarkedDArray();
+  auto const ad = staticEmptyDArray();
+  return RO::EvalArrayProvenance ? arrprov::tagStaticArr(ad, tag) : ad;
 }
 
 ALWAYS_INLINE ArrayData* ArrayData::CreateVec(bool legacy) {

@@ -491,6 +491,9 @@ where S: SmartConstructors<State = State>,
     fn make_varray_type_specifier(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R) -> Self::R {
         compose(SyntaxKind::VarrayTypeSpecifier, self.s.make_varray_type_specifier(arg0.1, arg1.1, arg2.1, arg3.1, arg4.1))
     }
+    fn make_function_ctx_type_specifier(&mut self, arg0 : Self::R, arg1 : Self::R) -> Self::R {
+        compose(SyntaxKind::FunctionCtxTypeSpecifier, self.s.make_function_ctx_type_specifier(arg0.1, arg1.1))
+    }
     fn make_type_parameter(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R, arg5 : Self::R) -> Self::R {
         compose(SyntaxKind::TypeParameter, self.s.make_type_parameter(arg0.1, arg1.1, arg2.1, arg3.1, arg4.1, arg5.1))
     }

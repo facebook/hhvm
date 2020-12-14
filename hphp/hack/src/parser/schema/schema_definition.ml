@@ -1979,6 +1979,15 @@ let schema : schema_node list =
         ];
     };
     {
+      kind_name = "FunctionCtxTypeSpecifier";
+      type_name = "function_ctx_type_specifier";
+      func_name = "function_ctx_type_specifier";
+      description = "function_ctx_type_specifier";
+      prefix = "function_ctx_type";
+      aggregates = [Specifier];
+      fields = [("keyword", Token); ("variable", Just "VariableExpression")];
+    };
+    {
       kind_name = "TypeParameter";
       type_name = "type_parameter";
       func_name = "type_parameter";

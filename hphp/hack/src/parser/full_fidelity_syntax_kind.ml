@@ -160,6 +160,7 @@ type t =
   | KeysetTypeSpecifier
   | TupleTypeExplicitSpecifier
   | VarrayTypeSpecifier
+  | FunctionCtxTypeSpecifier
   | TypeParameter
   | TypeConstraint
   | DarrayTypeSpecifier
@@ -333,6 +334,7 @@ let to_string kind =
   | KeysetTypeSpecifier               -> "keyset_type_specifier"
   | TupleTypeExplicitSpecifier        -> "tuple_type_explicit_specifier"
   | VarrayTypeSpecifier               -> "varray_type_specifier"
+  | FunctionCtxTypeSpecifier          -> "function_ctx_type_specifier"
   | TypeParameter                     -> "type_parameter"
   | TypeConstraint                    -> "type_constraint"
   | DarrayTypeSpecifier               -> "darray_type_specifier"

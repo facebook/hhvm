@@ -1420,6 +1420,14 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                     }
                 })
             },
+            FunctionCtxTypeSpecifier(x) => {
+                get_index(2).and_then(|index| { match index {
+                        0 => Some(&x.keyword),
+                    1 => Some(&x.variable),
+                        _ => None,
+                    }
+                })
+            },
             TypeParameter(x) => {
                 get_index(6).and_then(|index| { match index {
                         0 => Some(&x.attribute_spec),

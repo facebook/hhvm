@@ -966,6 +966,10 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; varray_trailing_comma                              : t
     ; varray_right_angle                                 : t
     }
+  | FunctionCtxTypeSpecifier          of
+    { function_ctx_type_keyword                          : t
+    ; function_ctx_type_variable                         : t
+    }
   | TypeParameter                     of
     { type_attribute_spec                                : t
     ; type_reified                                       : t
@@ -1210,6 +1214,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | SpecKeyset            of keyset_type_specifier
   | SpecTupleTypeExplicit of tuple_type_explicit_specifier
   | SpecVarray            of varray_type_specifier
+  | SpecFunctionCtx       of function_ctx_type_specifier
   | SpecDarray            of darray_type_specifier
   | SpecDictionary        of dictionary_type_specifier
   | SpecClosure           of closure_type_specifier
@@ -2194,6 +2199,10 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; varray_type: simple_type_specifier value
     ; varray_trailing_comma: Token.t option value
     ; varray_right_angle: Token.t value
+    }
+  and function_ctx_type_specifier =
+    { function_ctx_type_keyword: Token.t value
+    ; function_ctx_type_variable: variable_expression value
     }
   and type_parameter =
     { type_attribute_spec: attribute_specification option value

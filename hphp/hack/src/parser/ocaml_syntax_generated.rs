@@ -3062,6 +3062,24 @@ where
       Self { syntax, value }
     }
 
+    fn make_function_ctx_type_specifier(ctx: &C, arg0: Self, arg1: Self) -> Self {
+      let children = &[
+          arg0.value, 
+          arg1.value
+      ];
+      let value = V::from_values(children.iter());
+      let syntax = Self::make(
+          ctx,
+          SyntaxKind::FunctionCtxTypeSpecifier,
+          &value,
+          &[
+              arg0.syntax, 
+              arg1.syntax
+          ],
+      );
+      Self { syntax, value }
+    }
+
     fn make_type_parameter(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self, arg4: Self, arg5: Self) -> Self {
       let children = &[
           arg0.value, 

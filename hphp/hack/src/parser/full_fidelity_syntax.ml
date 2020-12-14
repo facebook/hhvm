@@ -199,6 +199,7 @@ module WithToken(Token: TokenType) = struct
       | KeysetTypeSpecifier               _ -> SyntaxKind.KeysetTypeSpecifier
       | TupleTypeExplicitSpecifier        _ -> SyntaxKind.TupleTypeExplicitSpecifier
       | VarrayTypeSpecifier               _ -> SyntaxKind.VarrayTypeSpecifier
+      | FunctionCtxTypeSpecifier          _ -> SyntaxKind.FunctionCtxTypeSpecifier
       | TypeParameter                     _ -> SyntaxKind.TypeParameter
       | TypeConstraint                    _ -> SyntaxKind.TypeConstraint
       | DarrayTypeSpecifier               _ -> SyntaxKind.DarrayTypeSpecifier
@@ -382,6 +383,7 @@ module WithToken(Token: TokenType) = struct
     let is_keyset_type_specifier                = has_kind SyntaxKind.KeysetTypeSpecifier
     let is_tuple_type_explicit_specifier        = has_kind SyntaxKind.TupleTypeExplicitSpecifier
     let is_varray_type_specifier                = has_kind SyntaxKind.VarrayTypeSpecifier
+    let is_function_ctx_type_specifier          = has_kind SyntaxKind.FunctionCtxTypeSpecifier
     let is_type_parameter                       = has_kind SyntaxKind.TypeParameter
     let is_type_constraint                      = has_kind SyntaxKind.TypeConstraint
     let is_darray_type_specifier                = has_kind SyntaxKind.DarrayTypeSpecifier
@@ -1989,6 +1991,13 @@ module WithToken(Token: TokenType) = struct
          let acc = f acc varray_type in
          let acc = f acc varray_trailing_comma in
          let acc = f acc varray_right_angle in
+         acc
+      | FunctionCtxTypeSpecifier {
+        function_ctx_type_keyword;
+        function_ctx_type_variable;
+      } ->
+         let acc = f acc function_ctx_type_keyword in
+         let acc = f acc function_ctx_type_variable in
          acc
       | TypeParameter {
         type_attribute_spec;
@@ -3756,6 +3765,13 @@ module WithToken(Token: TokenType) = struct
         varray_trailing_comma;
         varray_right_angle;
       ]
+      | FunctionCtxTypeSpecifier {
+        function_ctx_type_keyword;
+        function_ctx_type_variable;
+      } -> [
+        function_ctx_type_keyword;
+        function_ctx_type_variable;
+      ]
       | TypeParameter {
         type_attribute_spec;
         type_reified;
@@ -5522,6 +5538,13 @@ module WithToken(Token: TokenType) = struct
         "varray_type";
         "varray_trailing_comma";
         "varray_right_angle";
+      ]
+      | FunctionCtxTypeSpecifier {
+        function_ctx_type_keyword;
+        function_ctx_type_variable;
+      } -> [
+        "function_ctx_type_keyword";
+        "function_ctx_type_variable";
       ]
       | TypeParameter {
         type_attribute_spec;
@@ -7483,6 +7506,14 @@ module WithToken(Token: TokenType) = struct
           varray_type;
           varray_trailing_comma;
           varray_right_angle;
+        }
+      | (SyntaxKind.FunctionCtxTypeSpecifier, [
+          function_ctx_type_keyword;
+          function_ctx_type_variable;
+        ]) ->
+        FunctionCtxTypeSpecifier {
+          function_ctx_type_keyword;
+          function_ctx_type_variable;
         }
       | (SyntaxKind.TypeParameter, [
           type_attribute_spec;
@@ -9868,6 +9899,17 @@ module WithToken(Token: TokenType) = struct
           varray_type;
           varray_trailing_comma;
           varray_right_angle;
+        } in
+        let value = ValueBuilder.value_from_syntax syntax in
+        make syntax value
+
+      let make_function_ctx_type_specifier
+        function_ctx_type_keyword
+        function_ctx_type_variable
+      =
+        let syntax = FunctionCtxTypeSpecifier {
+          function_ctx_type_keyword;
+          function_ctx_type_variable;
         } in
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value

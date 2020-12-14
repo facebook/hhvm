@@ -1186,6 +1186,14 @@ impl<'src> SmartConstructors for VerifySmartConstructors
         r
     }
 
+    fn make_function_ctx_type_specifier(&mut self, arg0: Self::R, arg1: Self::R) -> Self::R {
+        let args = arg_kinds!(arg0, arg1);
+        let r = <Self as SyntaxSmartConstructors<PositionedSyntax, SimpleTokenFactoryImpl<PositionedToken>, State>>::make_function_ctx_type_specifier(self, arg0, arg1);
+        self.state_mut().verify(&args);
+        self.state_mut().push(r.kind());
+        r
+    }
+
     fn make_type_parameter(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R, arg5: Self::R) -> Self::R {
         let args = arg_kinds!(arg0, arg1, arg2, arg3, arg4, arg5);
         let r = <Self as SyntaxSmartConstructors<PositionedSyntax, SimpleTokenFactoryImpl<PositionedToken>, State>>::make_type_parameter(self, arg0, arg1, arg2, arg3, arg4, arg5);

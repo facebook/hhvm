@@ -2238,7 +2238,8 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             | TokenKind::Function
             | TokenKind::Namespace
             | TokenKind::XHP
-            | TokenKind::Required => Node::Token(FixedWidthToken::new(kind, token.start_offset())),
+            | TokenKind::Required
+            | TokenKind::Ctx => Node::Token(FixedWidthToken::new(kind, token.start_offset())),
             TokenKind::EndOfFile
             | TokenKind::Attribute
             | TokenKind::Await

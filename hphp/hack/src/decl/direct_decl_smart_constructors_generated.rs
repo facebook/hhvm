@@ -613,6 +613,10 @@ impl<'src> SmartConstructors for DirectDeclSmartConstructors<'src> {
         <Self as FlattenSmartConstructors<'src, State<'src>>>::make_varray_type_specifier(self, keyword, left_angle, type_, trailing_comma, right_angle)
     }
 
+    fn make_function_ctx_type_specifier(&mut self, keyword: Self::R, variable: Self::R) -> Self::R {
+        <Self as FlattenSmartConstructors<'src, State<'src>>>::make_function_ctx_type_specifier(self, keyword, variable)
+    }
+
     fn make_type_parameter(&mut self, attribute_spec: Self::R, reified: Self::R, variance: Self::R, name: Self::R, param_params: Self::R, constraints: Self::R) -> Self::R {
         <Self as FlattenSmartConstructors<'src, State<'src>>>::make_type_parameter(self, attribute_spec, reified, variance, name, param_params, constraints)
     }

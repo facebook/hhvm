@@ -1548,6 +1548,15 @@ where
         Self::make(syntax, value)
     }
 
+    fn make_function_ctx_type_specifier(ctx: &C, keyword: Self, variable: Self) -> Self {
+        let syntax = SyntaxVariant::FunctionCtxTypeSpecifier(ctx.get_arena().alloc(FunctionCtxTypeSpecifierChildren {
+            keyword,
+            variable,
+        }));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
+        Self::make(syntax, value)
+    }
+
     fn make_type_parameter(ctx: &C, attribute_spec: Self, reified: Self, variance: Self, name: Self, param_params: Self, constraints: Self) -> Self {
         let syntax = SyntaxVariant::TypeParameter(ctx.get_arena().alloc(TypeParameterChildren {
             attribute_spec,

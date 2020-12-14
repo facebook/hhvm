@@ -747,7 +747,16 @@ where
         if self.peek_token_kind() == TokenKind::LeftBracket {
             let (left_bracket, types, right_bracket) = self
                 .parse_bracketted_comma_list_opt_allow_trailing(|x: &mut Self| {
-                    x.parse_type_specifier(false, false)
+                    match x.peek_token_kind() {
+                        TokenKind::Ctx => {
+                            let ctx = x.assert_token(TokenKind::Ctx);
+                            let var = x.with_expression_parser(|p: &mut ExpressionParser<'a, S>| {
+                                p.parse_simple_variable()
+                            });
+                            S!(make_function_ctx_type_specifier, x, ctx, var)
+                        }
+                        _ => x.parse_type_specifier(false, false),
+                    }
                 });
             S!(make_capability, self, left_bracket, types, right_bracket)
         } else {

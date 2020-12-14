@@ -1542,6 +1542,15 @@ where
         Self::make(syntax, value)
     }
 
+    fn make_function_ctx_type_specifier(_: &C, function_ctx_type_keyword: Self, function_ctx_type_variable: Self) -> Self {
+        let syntax = SyntaxVariant::FunctionCtxTypeSpecifier(Box::new(FunctionCtxTypeSpecifierChildren {
+            function_ctx_type_keyword,
+            function_ctx_type_variable,
+        }));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
+        Self::make(syntax, value)
+    }
+
     fn make_type_parameter(_: &C, type_attribute_spec: Self, type_reified: Self, type_variance: Self, type_name: Self, type_param_params: Self, type_constraints: Self) -> Self {
         let syntax = SyntaxVariant::TypeParameter(Box::new(TypeParameterChildren {
             type_attribute_spec,
@@ -2932,6 +2941,12 @@ where
                 let acc = f(varray_right_angle, acc);
                 acc
             },
+            SyntaxVariant::FunctionCtxTypeSpecifier(x) => {
+                let FunctionCtxTypeSpecifierChildren { function_ctx_type_keyword, function_ctx_type_variable } = *x;
+                let acc = f(function_ctx_type_keyword, acc);
+                let acc = f(function_ctx_type_variable, acc);
+                acc
+            },
             SyntaxVariant::TypeParameter(x) => {
                 let TypeParameterChildren { type_attribute_spec, type_reified, type_variance, type_name, type_param_params, type_constraints } = *x;
                 let acc = f(type_attribute_spec, acc);
@@ -3271,6 +3286,7 @@ where
             SyntaxVariant::KeysetTypeSpecifier {..} => SyntaxKind::KeysetTypeSpecifier,
             SyntaxVariant::TupleTypeExplicitSpecifier {..} => SyntaxKind::TupleTypeExplicitSpecifier,
             SyntaxVariant::VarrayTypeSpecifier {..} => SyntaxKind::VarrayTypeSpecifier,
+            SyntaxVariant::FunctionCtxTypeSpecifier {..} => SyntaxKind::FunctionCtxTypeSpecifier,
             SyntaxVariant::TypeParameter {..} => SyntaxKind::TypeParameter,
             SyntaxVariant::TypeConstraint {..} => SyntaxKind::TypeConstraint,
             SyntaxVariant::DarrayTypeSpecifier {..} => SyntaxKind::DarrayTypeSpecifier,
@@ -4263,6 +4279,11 @@ where
                  varray_type: ts.pop().unwrap(),
                  varray_left_angle: ts.pop().unwrap(),
                  varray_keyword: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::FunctionCtxTypeSpecifier, 2) => SyntaxVariant::FunctionCtxTypeSpecifier(Box::new(FunctionCtxTypeSpecifierChildren {
+                 function_ctx_type_variable: ts.pop().unwrap(),
+                 function_ctx_type_keyword: ts.pop().unwrap(),
                  
              })),
              (SyntaxKind::TypeParameter, 6) => SyntaxVariant::TypeParameter(Box::new(TypeParameterChildren {
@@ -5536,6 +5557,12 @@ pub struct VarrayTypeSpecifierChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+pub struct FunctionCtxTypeSpecifierChildren<T, V> {
+    pub function_ctx_type_keyword: Syntax<T, V>,
+    pub function_ctx_type_variable: Syntax<T, V>,
+}
+
+#[derive(Debug, Clone)]
 pub struct TypeParameterChildren<T, V> {
     pub type_attribute_spec: Syntax<T, V>,
     pub type_reified: Syntax<T, V>,
@@ -5871,6 +5898,7 @@ pub enum SyntaxVariant<T, V> {
     KeysetTypeSpecifier(Box<KeysetTypeSpecifierChildren<T, V>>),
     TupleTypeExplicitSpecifier(Box<TupleTypeExplicitSpecifierChildren<T, V>>),
     VarrayTypeSpecifier(Box<VarrayTypeSpecifierChildren<T, V>>),
+    FunctionCtxTypeSpecifier(Box<FunctionCtxTypeSpecifierChildren<T, V>>),
     TypeParameter(Box<TypeParameterChildren<T, V>>),
     TypeConstraint(Box<TypeConstraintChildren<T, V>>),
     DarrayTypeSpecifier(Box<DarrayTypeSpecifierChildren<T, V>>),
@@ -7293,6 +7321,14 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                     2 => Some(&x.varray_type),
                     3 => Some(&x.varray_trailing_comma),
                     4 => Some(&x.varray_right_angle),
+                        _ => None,
+                    }
+                })
+            },
+            FunctionCtxTypeSpecifier(x) => {
+                get_index(2).and_then(|index| { match index {
+                        0 => Some(&x.function_ctx_type_keyword),
+                    1 => Some(&x.function_ctx_type_variable),
                         _ => None,
                     }
                 })

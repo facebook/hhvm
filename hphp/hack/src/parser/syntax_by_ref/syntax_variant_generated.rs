@@ -165,6 +165,7 @@ pub enum SyntaxVariant<'a, T, V> {
     KeysetTypeSpecifier(&'a KeysetTypeSpecifierChildren<'a, T, V>),
     TupleTypeExplicitSpecifier(&'a TupleTypeExplicitSpecifierChildren<'a, T, V>),
     VarrayTypeSpecifier(&'a VarrayTypeSpecifierChildren<'a, T, V>),
+    FunctionCtxTypeSpecifier(&'a FunctionCtxTypeSpecifierChildren<'a, T, V>),
     TypeParameter(&'a TypeParameterChildren<'a, T, V>),
     TypeConstraint(&'a TypeConstraintChildren<'a, T, V>),
     DarrayTypeSpecifier(&'a DarrayTypeSpecifierChildren<'a, T, V>),
@@ -1291,6 +1292,12 @@ pub struct VarrayTypeSpecifierChildren<'a, T, V> {
     pub type_: Syntax<'a, T, V>,
     pub trailing_comma: Syntax<'a, T, V>,
     pub right_angle: Syntax<'a, T, V>,
+}
+
+#[derive(Debug, Clone)]
+pub struct FunctionCtxTypeSpecifierChildren<'a, T, V> {
+    pub keyword: Syntax<'a, T, V>,
+    pub variable: Syntax<'a, T, V>,
 }
 
 #[derive(Debug, Clone)]

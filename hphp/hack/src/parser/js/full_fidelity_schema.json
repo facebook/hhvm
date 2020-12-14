@@ -61,6 +61,8 @@
       "token_text" : "__construct" },
     { "token_kind" : "Continue",
       "token_text" : "continue" },
+    { "token_kind" : "Ctx",
+      "token_text" : "ctx" },
     { "token_kind" : "Darray",
       "token_text" : "darray" },
     { "token_kind" : "Default",
@@ -1811,6 +1813,14 @@
         { "field_name" : "type" },
         { "field_name" : "trailing_comma" },
         { "field_name" : "right_angle" }
+      ] },
+    { "kind_name" : "FunctionCtxTypeSpecifier",
+      "type_name" : "function_ctx_type_specifier",
+      "description" : "function_ctx_type_specifier",
+      "prefix" : "function_ctx_type",
+      "fields" : [
+        { "field_name" : "keyword" },
+        { "field_name" : "variable" }
       ] },
     { "kind_name" : "TypeParameter",
       "type_name" : "type_parameter",

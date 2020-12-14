@@ -853,6 +853,10 @@ module type Syntax_S = sig
     ; varray_trailing_comma                              : t
     ; varray_right_angle                                 : t
     }
+  | FunctionCtxTypeSpecifier          of
+    { function_ctx_type_keyword                          : t
+    ; function_ctx_type_variable                         : t
+    }
   | TypeParameter                     of
     { type_attribute_spec                                : t
     ; type_reified                                       : t
@@ -1167,6 +1171,7 @@ module type Syntax_S = sig
   val make_keyset_type_specifier : t -> t -> t -> t -> t -> t
   val make_tuple_type_explicit_specifier : t -> t -> t -> t -> t
   val make_varray_type_specifier : t -> t -> t -> t -> t -> t
+  val make_function_ctx_type_specifier : t -> t -> t
   val make_type_parameter : t -> t -> t -> t -> t -> t -> t
   val make_type_constraint : t -> t -> t
   val make_darray_type_specifier : t -> t -> t -> t -> t -> t -> t -> t
@@ -1338,6 +1343,7 @@ module type Syntax_S = sig
   val is_keyset_type_specifier : t -> bool
   val is_tuple_type_explicit_specifier : t -> bool
   val is_varray_type_specifier : t -> bool
+  val is_function_ctx_type_specifier : t -> bool
   val is_type_parameter : t -> bool
   val is_type_constraint : t -> bool
   val is_darray_type_specifier : t -> bool

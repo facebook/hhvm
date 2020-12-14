@@ -3352,7 +3352,17 @@ where
         match &node.children {
             Missing => Ok((None, None)),
             Capability(c) => {
-                let mut hints = Self::could_map(&Self::p_hint, &c.types, env)?;
+                use ast::{Hint, Hint_};
+                let mut hints = Self::could_map(
+                    |n, e| match &n.children {
+                        FunctionCtxTypeSpecifier(_) => {
+                            Ok(Hint::new(Self::p_pos(n, e), Hint_::Hmixed))
+                        }
+                        _ => Self::p_hint(n, e),
+                    },
+                    &c.types,
+                    env,
+                )?;
                 let hint_ = if hints.len() == 1 {
                     *hints.pop().unwrap().1
                 } else {

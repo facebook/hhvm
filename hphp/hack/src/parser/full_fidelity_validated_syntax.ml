@@ -289,6 +289,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | Syntax.KeysetTypeSpecifier _ -> tag validate_keyset_type_specifier (fun x -> SpecKeyset x) x
     | Syntax.TupleTypeExplicitSpecifier _ -> tag validate_tuple_type_explicit_specifier (fun x -> SpecTupleTypeExplicit x) x
     | Syntax.VarrayTypeSpecifier _ -> tag validate_varray_type_specifier (fun x -> SpecVarray x) x
+    | Syntax.FunctionCtxTypeSpecifier _ -> tag validate_function_ctx_type_specifier (fun x -> SpecFunctionCtx x) x
     | Syntax.DarrayTypeSpecifier _ -> tag validate_darray_type_specifier (fun x -> SpecDarray x) x
     | Syntax.DictionaryTypeSpecifier _ -> tag validate_dictionary_type_specifier (fun x -> SpecDictionary x) x
     | Syntax.ClosureTypeSpecifier _ -> tag validate_closure_type_specifier (fun x -> SpecClosure x) x
@@ -315,6 +316,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | SpecKeyset            thing -> invalidate_keyset_type_specifier          (value, thing)
     | SpecTupleTypeExplicit thing -> invalidate_tuple_type_explicit_specifier  (value, thing)
     | SpecVarray            thing -> invalidate_varray_type_specifier          (value, thing)
+    | SpecFunctionCtx       thing -> invalidate_function_ctx_type_specifier    (value, thing)
     | SpecDarray            thing -> invalidate_darray_type_specifier          (value, thing)
     | SpecDictionary        thing -> invalidate_dictionary_type_specifier      (value, thing)
     | SpecClosure           thing -> invalidate_closure_type_specifier         (value, thing)
@@ -3136,6 +3138,20 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
       ; varray_type = invalidate_simple_type_specifier x.varray_type
       ; varray_trailing_comma = invalidate_option_with (invalidate_token) x.varray_trailing_comma
       ; varray_right_angle = invalidate_token x.varray_right_angle
+      }
+    ; Syntax.value = v
+    }
+  and validate_function_ctx_type_specifier : function_ctx_type_specifier validator = function
+  | { Syntax.syntax = Syntax.FunctionCtxTypeSpecifier x; value = v } -> v,
+    { function_ctx_type_variable = validate_variable_expression x.function_ctx_type_variable
+    ; function_ctx_type_keyword = validate_token x.function_ctx_type_keyword
+    }
+  | s -> validation_fail (Some SyntaxKind.FunctionCtxTypeSpecifier) s
+  and invalidate_function_ctx_type_specifier : function_ctx_type_specifier invalidator = fun (v, x) ->
+    { Syntax.syntax =
+      Syntax.FunctionCtxTypeSpecifier
+      { function_ctx_type_keyword = invalidate_token x.function_ctx_type_keyword
+      ; function_ctx_type_variable = invalidate_variable_expression x.function_ctx_type_variable
       }
     ; Syntax.value = v
     }

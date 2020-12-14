@@ -6,23 +6,23 @@
  *
  *)
 
-(** A BigList is just a list, but indicates that its contents might be huge
-and hence traversing the list might be costly. *)
+(** A BigList is like a list but with potentially huge contents.
+It keeps a "length" integer, so that BigList.length can be O(1) rather than O(t). *)
 type 'a t
 
 val empty : 'a t
 
 val cons : 'a -> 'a t -> 'a t
 
-(* No-op. Just changes the type signature. *)
+(* This is O(t) as it traverses input list to calculate length. *)
 val create : 'a list -> 'a t
 
-(* No-op. Just changes the type signature. *)
+(* This is O(1). It simply discards its memory of the length. *)
 val as_list : 'a t -> 'a list
 
 val is_empty : 'a t -> bool
 
-(* This is O(t). *)
+(* This is O(1). *)
 val length : 'a t -> int
 
 (* This is O(1). If the list is empty, returns None; otherwise returns Some(hd,tl). *)

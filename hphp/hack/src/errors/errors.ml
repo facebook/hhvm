@@ -5448,6 +5448,39 @@ let ifc_internal_error pos reason =
     ^ ". If you see this error and aren't expecting it, please `hh rage` and let the Hack team know."
     )
 
+let parent_implements_dynamic
+    pos class_name parent_name class_implements_dynamic =
+  let class_name = strip_ns class_name in
+  let parent_name = strip_ns parent_name in
+  add
+    (Typing.err_code Typing.ImplementsDynamic)
+    pos
+    ( "Class "
+    ^ class_name
+    ^ ( if class_implements_dynamic then
+        " cannot "
+      else
+        " must " )
+    ^ "implement dynamic because it extends class "
+    ^ parent_name
+    ^ " which does"
+    ^
+    if class_implements_dynamic then
+      " not"
+    else
+      "" )
+
+let method_is_not_dynamically_callable pos method_name class_name =
+  let class_name = strip_ns class_name in
+  add
+    (Typing.err_code Typing.ImplementsDynamic)
+    pos
+    ( "Class "
+    ^ class_name
+    ^ " cannot implement dynamic because method "
+    ^ method_name
+    ^ " is not dynamically callable" )
+
 (*****************************************************************************)
 (* Printing *)
 (*****************************************************************************)

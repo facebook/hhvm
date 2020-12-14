@@ -293,6 +293,7 @@ let return_info_as_value env return_info =
           return_mutable;
           return_explicit;
           return_void_to_rx;
+          return_dynamically_callable;
         } =
     return_info
   in
@@ -303,6 +304,7 @@ let return_info_as_value env return_info =
       ("return_mutable", Bool return_mutable);
       ("return_explicit", Bool return_explicit);
       ("return_void_to_rx", Bool return_void_to_rx);
+      ("return_dynamically_callable", Bool return_dynamically_callable);
     ]
 
 let local_id_map_as_value f m =

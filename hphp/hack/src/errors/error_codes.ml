@@ -671,7 +671,8 @@ module Typing = struct
     | IFCInternalError [@value 4398]
     | IFCExternalContravariant [@value 4399]
     | IFCPolicyMismatch [@value 4400]
-    | OpCoeffects [@value 4401] (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
+    | OpCoeffects [@value 4401]
+    | ImplementsDynamic [@value 4402] (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum

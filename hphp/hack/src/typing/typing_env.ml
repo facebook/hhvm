@@ -581,6 +581,7 @@ let empty ?origin ?(mode = FileInfo.Mstrict) ctx file ~droot =
             return_mutable = false;
             return_explicit = false;
             return_void_to_rx = false;
+            return_dynamically_callable = false;
           };
         params = LID.Map.empty;
         condition_types = SMap.empty;

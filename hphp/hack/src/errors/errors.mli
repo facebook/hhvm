@@ -1460,3 +1460,7 @@ val ifc_internal_error : Pos.t -> string -> unit
 
 val ifc_policy_mismatch :
   Pos.t -> Pos.t -> string -> string -> typing_error_callback -> unit
+
+val parent_implements_dynamic : Pos.t -> string -> string -> bool -> unit
+
+val method_is_not_dynamically_callable : Pos.t -> string -> string -> unit

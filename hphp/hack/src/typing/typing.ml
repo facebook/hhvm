@@ -656,6 +656,7 @@ and stmt_ env pos st =
             return_mutable;
             return_explicit;
             return_void_to_rx;
+            return_dynamically_callable = _;
           } =
       Env.get_return env
     in

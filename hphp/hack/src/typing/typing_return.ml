@@ -81,6 +81,7 @@ let make_info fun_kind attributes env ~is_explicit locl_ty decl_ty =
     return_mutable;
     return_explicit = is_explicit;
     return_void_to_rx;
+    return_dynamically_callable = false;
   }
 
 (* For async functions, wrap Awaitable<_> around the return type *)

@@ -1225,9 +1225,10 @@ and simplify_subtype_i
         | ( _,
             Tprim
               Aast_defs.(
-                Tnull | Tint | Tbool | Tfloat | Tstring | Tnum | Tarraykey) ) ->
+                ( Tnull | Tint | Tbool | Tfloat | Tstring | Tnum | Tarraykey
+                | Tvoid )) ) ->
           valid env
-        | (_, Tprim Aast_defs.(Tvoid | Tresource | Tnoreturn))
+        | (_, Tprim Aast_defs.(Tresource | Tnoreturn))
         | (_, Tnonnull)
         | (_, Tfun _)
         | (_, Tshape (Open_shape, _))

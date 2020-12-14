@@ -23,4 +23,6 @@ type t = {
   return_explicit: bool;
   (* Is function return type in rx context treated as void? *)
   return_void_to_rx: bool;
+  (* Must the function be dynamically callable? *)
+  return_dynamically_callable: bool;
 }

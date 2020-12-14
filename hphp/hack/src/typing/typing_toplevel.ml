@@ -608,6 +608,36 @@ and method_def env cls m =
       let env =
         Typing_solver.solve_all_unsolved_tyvars env Errors.bad_method_typevar
       in
+      (* if the class implements dynamic, then check that its methods are dynamically callable *)
+      if
+        TypecheckerOptions.enable_sound_dynamic
+          (Provider_context.get_tcopt (Env.get_ctx env))
+        && Cls.get_implements_dynamic cls
+      then begin
+        (* 1. check if all the parameters of the method are enforceable *)
+        List.iter params_decl_ty ~f:(fun dtyopt ->
+            match dtyopt with
+            | Some dty ->
+              let te_check = Typing_enforceability.is_enforceable env dty in
+              if not te_check then
+                Errors.method_is_not_dynamically_callable
+                  (fst m.m_name)
+                  (snd m.m_name)
+                  (Cls.name cls)
+            | None -> ());
+        (* 2. check if the return type is coercible *)
+        if
+          not
+            (Typing_subtype.is_sub_type_for_coercion
+               env
+               locl_ty
+               (mk (Reason.Rnone, Tdynamic)))
+        then
+          Errors.method_is_not_dynamically_callable
+            (fst m.m_name)
+            (snd m.m_name)
+            (Cls.name cls)
+      end;
       let method_def =
         {
           Aast.m_annotation = Env.save local_tpenv env;
@@ -1054,6 +1084,39 @@ and class_def_ env c tc =
   let env =
     Typing_solver.solve_all_unsolved_tyvars env Errors.bad_class_typevar
   in
+
+  let check_parent_implement_dynamic env child =
+    let parents =
+      (* for now, interfaces and traits are ignored *)
+      child.c_extends
+    in
+    List.iter parents (function
+        | (_, Happly ((_, name), _)) ->
+          begin
+            match Env.get_class_dep env name with
+            | Some parent_type ->
+              if
+                not
+                  (Bool.equal
+                     (Cls.get_implements_dynamic parent_type)
+                     c.c_implements_dynamic)
+              then
+                Errors.parent_implements_dynamic
+                  (fst child.c_name)
+                  (snd child.c_name)
+                  (Cls.name parent_type)
+                  c.c_implements_dynamic
+            | None -> ()
+          end
+        | _ -> ())
+  in
+  if TypecheckerOptions.enable_sound_dynamic (Provider_context.get_tcopt ctx)
+  then
+    (* two well-formedness checks are required: *)
+    (*  - a class that does not implements dynamic cannot extends a class that implement dynamic *)
+    (*  - if the superclass implements dynamic, then the class itself should implement dynamic *)
+    check_parent_implement_dynamic env c;
+
   ( {
       Aast.c_span = c.c_span;
       Aast.c_annotation = Env.save (Env.get_tpenv env) env;

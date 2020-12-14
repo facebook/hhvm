@@ -290,6 +290,7 @@ type t = {
   tco_use_direct_decl_parser: bool;
   (* Enable ifc *)
   tco_ifc_enabled: bool;
+  po_enable_coeffects: bool;
 }
 [@@deriving eq, show]
 
@@ -403,6 +404,7 @@ val make :
   ?po_disallow_fun_and_cls_meth_pseudo_funcs:bool ->
   ?tco_use_direct_decl_parser:bool ->
   ?tco_ifc_enabled:bool ->
+  ?po_enable_coeffects:bool ->
   unit ->
   t
 
@@ -627,6 +629,8 @@ val po_disable_xhp_element_mangling : t -> bool
 val po_disable_xhp_children_declarations : t -> bool
 
 val po_enable_enum_classes : t -> bool
+
+val po_enable_coeffects : t -> bool
 
 val po_disable_modes : t -> bool
 

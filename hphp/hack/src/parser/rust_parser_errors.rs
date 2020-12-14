@@ -437,6 +437,7 @@ where
             }
             UnstableFeatures::ClassLevelWhere => parser_options.po_enable_class_level_where_clauses,
             UnstableFeatures::IFC => parser_options.tco_ifc_enabled,
+            UnstableFeatures::CoeffectsProvisional => parser_options.po_enable_coeffects,
             _ => false,
         } || self.env.context.active_unstable_features.contains(feature);
         if !enabled {

@@ -285,6 +285,7 @@ fn create_parser_options(opts: &Options) -> ParserOptions {
     popt.po_disallow_hash_comments = hack_lang_flags(LangFlags::DISALLOW_HASH_COMMENTS);
     popt.po_disallow_fun_and_cls_meth_pseudo_funcs =
         hack_lang_flags(LangFlags::DISALLOW_FUN_AND_CLS_METH_PSEUDO_FUNCS);
+    popt.po_enable_coeffects = hack_lang_flags(LangFlags::ENABLE_COEFFECTS);
     popt
 }
 

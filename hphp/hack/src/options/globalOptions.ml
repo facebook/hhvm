@@ -118,6 +118,7 @@ type t = {
   po_disallow_fun_and_cls_meth_pseudo_funcs: bool;
   tco_use_direct_decl_parser: bool;
   tco_ifc_enabled: bool;
+  po_enable_coeffects: bool;
 }
 [@@deriving eq, show]
 
@@ -297,6 +298,7 @@ let default =
     po_disallow_fun_and_cls_meth_pseudo_funcs = false;
     tco_use_direct_decl_parser = false;
     tco_ifc_enabled = false;
+    po_enable_coeffects = false;
   }
 
 let make
@@ -428,6 +430,7 @@ let make
       default.po_disallow_fun_and_cls_meth_pseudo_funcs)
     ?(tco_use_direct_decl_parser = default.tco_use_direct_decl_parser)
     ?(tco_ifc_enabled = default.tco_ifc_enabled)
+    ?(po_enable_coeffects = default.po_enable_coeffects)
     () =
   {
     tco_experimental_features;
@@ -540,6 +543,7 @@ let make
     po_disallow_fun_and_cls_meth_pseudo_funcs;
     tco_use_direct_decl_parser;
     tco_ifc_enabled;
+    po_enable_coeffects;
   }
 
 let tco_experimental_feature_enabled t s =
@@ -757,6 +761,8 @@ let po_disable_xhp_children_declarations t =
   t.po_disable_xhp_children_declarations
 
 let po_enable_enum_classes t = t.po_enable_enum_classes
+
+let po_enable_coeffects t = t.po_enable_coeffects
 
 let po_disable_modes t = t.po_disable_modes
 

@@ -249,7 +249,6 @@
                       }
                     },
                     "function_capability":{"kind":"missing"},
-                    "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{"kind":"missing"},
                     "function_type":{"kind":"missing"},
                     "function_where_clause":{
@@ -362,5 +361,5 @@
     }
   },
   "program_text":"<?hh // strict\n// Copyright 2004-present Facebook. All Rights Reserved.\n\ninterface A {\n    function f<T>() where T\n",
-  "version":"2020-09-14-0000"
+  "version":"2020-12-09-0001"
 }

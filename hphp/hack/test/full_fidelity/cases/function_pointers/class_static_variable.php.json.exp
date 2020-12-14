@@ -117,7 +117,6 @@
               }
             },
             "function_capability":{"kind":"missing"},
-            "function_capability_provisional":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
               "token":{
@@ -340,5 +339,5 @@
     }
   },
   "program_text":"<?hh\n\nfunction test(): void {\n  $x = Vec::$foo<>;\n}\n",
-  "version":"2020-09-14-0000"
+  "version":"2020-12-09-0001"
 }

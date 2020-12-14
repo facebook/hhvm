@@ -121,7 +121,6 @@
               }
             },
             "function_capability":{"kind":"missing"},
-            "function_capability_provisional":{"kind":"missing"},
             "function_colon":{"kind":"missing"},
             "function_type":{"kind":"missing"},
             "function_where_clause":{"kind":"missing"}
@@ -375,5 +374,5 @@
     }
   },
   "program_text":"<?hh // strict\n\nfunction f() {\n  $a = g(await $c, inout $d);\n}\n",
-  "version":"2020-09-14-0000"
+  "version":"2020-12-09-0001"
 }

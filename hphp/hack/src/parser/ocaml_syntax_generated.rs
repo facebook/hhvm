@@ -618,7 +618,7 @@ where
       Self { syntax, value }
     }
 
-    fn make_function_declaration_header(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self, arg4: Self, arg5: Self, arg6: Self, arg7: Self, arg8: Self, arg9: Self, arg10: Self, arg11: Self) -> Self {
+    fn make_function_declaration_header(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self, arg4: Self, arg5: Self, arg6: Self, arg7: Self, arg8: Self, arg9: Self, arg10: Self) -> Self {
       let children = &[
           arg0.value, 
           arg1.value, 
@@ -630,8 +630,7 @@ where
           arg7.value, 
           arg8.value, 
           arg9.value, 
-          arg10.value, 
-          arg11.value
+          arg10.value
       ];
       let value = V::from_values(children.iter());
       let syntax = Self::make(
@@ -649,8 +648,7 @@ where
               arg7.syntax, 
               arg8.syntax, 
               arg9.syntax, 
-              arg10.syntax, 
-              arg11.syntax
+              arg10.syntax
           ],
       );
       Self { syntax, value }
@@ -671,32 +669,6 @@ where
               arg0.syntax, 
               arg1.syntax, 
               arg2.syntax
-          ],
-      );
-      Self { syntax, value }
-    }
-
-    fn make_capability_provisional(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self, arg4: Self, arg5: Self) -> Self {
-      let children = &[
-          arg0.value, 
-          arg1.value, 
-          arg2.value, 
-          arg3.value, 
-          arg4.value, 
-          arg5.value
-      ];
-      let value = V::from_values(children.iter());
-      let syntax = Self::make(
-          ctx,
-          SyntaxKind::CapabilityProvisional,
-          &value,
-          &[
-              arg0.syntax, 
-              arg1.syntax, 
-              arg2.syntax, 
-              arg3.syntax, 
-              arg4.syntax, 
-              arg5.syntax
           ],
       );
       Self { syntax, value }

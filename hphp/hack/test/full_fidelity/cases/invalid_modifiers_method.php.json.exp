@@ -313,7 +313,6 @@
                       }
                     },
                     "function_capability":{"kind":"missing"},
-                    "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{"kind":"missing"},
                     "function_type":{"kind":"missing"},
                     "function_where_clause":{"kind":"missing"}
@@ -448,7 +447,6 @@
                       }
                     },
                     "function_capability":{"kind":"missing"},
-                    "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{"kind":"missing"},
                     "function_type":{"kind":"missing"},
                     "function_where_clause":{"kind":"missing"}
@@ -508,5 +506,5 @@
     }
   },
   "program_text":"<?hh\n\nabstract class C {\n  // For now, methods are allowed to have all the possible modifiers, so this\n  // verifies that we only get errors about the way they're being combined\n  abstract final static private protected public async function f();\n\n  abstract abstract public function g();\n}\n",
-  "version":"2020-09-14-0000"
+  "version":"2020-12-09-0001"
 }

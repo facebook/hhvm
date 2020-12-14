@@ -3063,32 +3063,6 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         cap
     }
 
-    fn make_capability_provisional(
-        &mut self,
-        _at: Self::R,
-        _lb: Self::R,
-        ty: Self::R,
-        _plus: Self::R,
-        _unsafe_ty: Self::R,
-        _rb: Self::R,
-    ) -> Self::R {
-        let mut namespace_builder =
-            NamespaceBuilder::empty_with_ns_in("\\HH\\Contexts\\", self.state.arena);
-        std::mem::swap(
-            &mut namespace_builder,
-            Rc::make_mut(&mut self.state.namespace_builder),
-        );
-        let ty = self.node_to_ty(ty);
-        std::mem::swap(
-            &mut namespace_builder,
-            Rc::make_mut(&mut self.state.namespace_builder),
-        );
-        match ty {
-            Some(ty) => Node::Ty(ty),
-            None => Node::Ignored(SK::CapabilityProvisional),
-        }
-    }
-
     fn make_function_declaration_header(
         &mut self,
         modifiers: Self::R,
@@ -3099,18 +3073,12 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         param_list: Self::R,
         _right_paren: Self::R,
         capability: Self::R,
-        capability_provisional: Self::R,
         _colon: Self::R,
         ret_hint: Self::R,
         where_constraints: Self::R,
     ) -> Self::R {
         // Use the position of the left paren if the name is missing.
         let name = if name.is_ignored() { left_paren } else { name };
-        let capability = if capability.is_ignored() {
-            capability_provisional
-        } else {
-            capability
-        };
         Node::FunctionHeader(self.alloc(FunctionHeader {
             name,
             modifiers,

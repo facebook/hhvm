@@ -135,7 +135,6 @@
               }
             },
             "function_capability":{"kind":"missing"},
-            "function_capability_provisional":{"kind":"missing"},
             "function_colon":{"kind":"missing"},
             "function_type":{"kind":"missing"},
             "function_where_clause":{"kind":"missing"}
@@ -332,5 +331,5 @@
     }
   },
   "program_text":"<?hh\n\nasync function f() {\n  concurrent {\n    await genx();\n  }\n}\n",
-  "version":"2020-09-14-0000"
+  "version":"2020-12-09-0001"
 }

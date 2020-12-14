@@ -223,7 +223,6 @@
                       }
                     },
                     "function_capability":{"kind":"missing"},
-                    "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{"kind":"missing"},
                     "function_type":{"kind":"missing"},
                     "function_where_clause":{"kind":"missing"}
@@ -408,7 +407,6 @@
                       }
                     },
                     "function_capability":{"kind":"missing"},
-                    "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{"kind":"missing"},
                     "function_type":{"kind":"missing"},
                     "function_where_clause":{"kind":"missing"}
@@ -560,7 +558,6 @@
                       }
                     },
                     "function_capability":{"kind":"missing"},
-                    "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{"kind":"missing"},
                     "function_type":{"kind":"missing"},
                     "function_where_clause":{"kind":"missing"}
@@ -745,7 +742,6 @@
                       }
                     },
                     "function_capability":{"kind":"missing"},
-                    "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{"kind":"missing"},
                     "function_type":{"kind":"missing"},
                     "function_where_clause":{"kind":"missing"}
@@ -956,7 +952,6 @@
                       }
                     },
                     "function_capability":{"kind":"missing"},
-                    "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{"kind":"missing"},
                     "function_type":{"kind":"missing"},
                     "function_where_clause":{"kind":"missing"}
@@ -1167,7 +1162,6 @@
                       }
                     },
                     "function_capability":{"kind":"missing"},
-                    "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{"kind":"missing"},
                     "function_type":{"kind":"missing"},
                     "function_where_clause":{"kind":"missing"}
@@ -1365,7 +1359,6 @@
                       }
                     },
                     "function_capability":{"kind":"missing"},
-                    "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{"kind":"missing"},
                     "function_type":{"kind":"missing"},
                     "function_where_clause":{"kind":"missing"}
@@ -1443,5 +1436,5 @@
     }
   },
   "program_text":"<?hh\n\nclass C {\n  private function __construct($a) {}\n  public function __construct($a = null) {}\n  public function __construct($a) {}\n  private function __construct($a = null) {}\n  <<attr>> public function __construct ($a){}\n  <<attr>> public function __construct ($a) {}\n  public function __construct (public $a = null) {}\n}\n",
-  "version":"2020-09-14-0000"
+  "version":"2020-12-09-0001"
 }

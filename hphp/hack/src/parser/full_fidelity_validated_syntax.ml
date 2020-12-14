@@ -1148,7 +1148,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { function_where_clause = validate_option_with (validate_where_clause) x.function_where_clause
     ; function_type = validate_option_with (validate_attributized_specifier) x.function_type
     ; function_colon = validate_option_with (validate_token) x.function_colon
-    ; function_capability_provisional = validate_option_with (validate_capability_provisional) x.function_capability_provisional
     ; function_capability = validate_option_with (validate_capability) x.function_capability
     ; function_right_paren = validate_token x.function_right_paren
     ; function_parameter_list = validate_list_with (validate_parameter) x.function_parameter_list
@@ -1170,7 +1169,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
       ; function_parameter_list = invalidate_list_with (invalidate_parameter) x.function_parameter_list
       ; function_right_paren = invalidate_token x.function_right_paren
       ; function_capability = invalidate_option_with (invalidate_capability) x.function_capability
-      ; function_capability_provisional = invalidate_option_with (invalidate_capability_provisional) x.function_capability_provisional
       ; function_colon = invalidate_option_with (invalidate_token) x.function_colon
       ; function_type = invalidate_option_with (invalidate_attributized_specifier) x.function_type
       ; function_where_clause = invalidate_option_with (invalidate_where_clause) x.function_where_clause
@@ -1190,28 +1188,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
       { capability_left_bracket = invalidate_token x.capability_left_bracket
       ; capability_types = invalidate_list_with (invalidate_specifier) x.capability_types
       ; capability_right_bracket = invalidate_token x.capability_right_bracket
-      }
-    ; Syntax.value = v
-    }
-  and validate_capability_provisional : capability_provisional validator = function
-  | { Syntax.syntax = Syntax.CapabilityProvisional x; value = v } -> v,
-    { capability_provisional_right_brace = validate_token x.capability_provisional_right_brace
-    ; capability_provisional_unsafe_type = validate_option_with (validate_specifier) x.capability_provisional_unsafe_type
-    ; capability_provisional_unsafe_plus = validate_option_with (validate_token) x.capability_provisional_unsafe_plus
-    ; capability_provisional_type = validate_specifier x.capability_provisional_type
-    ; capability_provisional_left_brace = validate_token x.capability_provisional_left_brace
-    ; capability_provisional_at = validate_token x.capability_provisional_at
-    }
-  | s -> validation_fail (Some SyntaxKind.CapabilityProvisional) s
-  and invalidate_capability_provisional : capability_provisional invalidator = fun (v, x) ->
-    { Syntax.syntax =
-      Syntax.CapabilityProvisional
-      { capability_provisional_at = invalidate_token x.capability_provisional_at
-      ; capability_provisional_left_brace = invalidate_token x.capability_provisional_left_brace
-      ; capability_provisional_type = invalidate_specifier x.capability_provisional_type
-      ; capability_provisional_unsafe_plus = invalidate_option_with (invalidate_token) x.capability_provisional_unsafe_plus
-      ; capability_provisional_unsafe_type = invalidate_option_with (invalidate_specifier) x.capability_provisional_unsafe_type
-      ; capability_provisional_right_brace = invalidate_token x.capability_provisional_right_brace
       }
     ; Syntax.value = v
     }

@@ -117,7 +117,6 @@
               }
             },
             "function_capability":{"kind":"missing"},
-            "function_capability_provisional":{"kind":"missing"},
             "function_colon":{"kind":"missing"},
             "function_type":{"kind":"missing"},
             "function_where_clause":{"kind":"missing"}
@@ -206,7 +205,6 @@
                       }
                     },
                     "function_capability":{"kind":"missing"},
-                    "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{"kind":"missing"},
                     "function_type":{"kind":"missing"},
                     "function_where_clause":{"kind":"missing"}
@@ -863,7 +861,6 @@
                       }
                     },
                     "function_capability":{"kind":"missing"},
-                    "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{"kind":"missing"},
                     "function_type":{"kind":"missing"},
                     "function_where_clause":{"kind":"missing"}
@@ -1026,5 +1023,5 @@
     }
   },
   "program_text":"<?hh\n\nfunction earlier(){\n  function later(){\n      class BadClass{ // error2039\n      }\n      interface BadInterface{ // error2039\n      }\n      trait BadTrait{ // error2039\n      }\n    }\n}\n\nclass ThisIsFine{ // legal\n}\ninterface ThisIsFine{ // legal\n}\ntrait ThisIsFine{ // legal\n}\n\nclass C {\n  public function foo() {\n    class D {} // error2039 triggered from inside methods too\n  }\n}\n",
-  "version":"2020-09-14-0000"
+  "version":"2020-12-09-0001"
 }

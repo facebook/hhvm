@@ -197,7 +197,6 @@
               }
             },
             "function_capability":{"kind":"missing"},
-            "function_capability_provisional":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
               "token":{
@@ -452,7 +451,6 @@
               }
             },
             "function_capability":{"kind":"missing"},
-            "function_capability_provisional":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
               "token":{
@@ -707,7 +705,6 @@
               }
             },
             "function_capability":{"kind":"missing"},
-            "function_capability_provisional":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
               "token":{
@@ -799,5 +796,5 @@
     }
   },
   "program_text":"<?hh\nfunction f (...$a = null) : int {} // ERROR\nfunction f ($a, ...$b = null) : int {} // ERROR\nfunction f ($a = null, ...$b) : int {} // no error\n",
-  "version":"2020-09-14-0000"
+  "version":"2020-12-09-0001"
 }

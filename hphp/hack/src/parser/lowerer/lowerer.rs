@@ -3368,42 +3368,6 @@ where
         }
     }
 
-    fn p_capability_provisional(
-        node: S<'a, T, V>,
-        env: &mut Env<'a, TF>,
-    ) -> Result<(Option<ast::Hint>, Option<ast::Hint>)> {
-        match &node.children {
-            Missing => Ok((None, None)),
-            CapabilityProvisional(c) => {
-                let cap = Self::p_hint(&c.type_, env)?;
-                let unsafe_cap = Self::mp_optional(Self::p_hint, &c.unsafe_type, env)?;
-                Ok((Some(cap), unsafe_cap))
-            }
-            _ => Self::missing_syntax("capability_provisional", node, env),
-        }
-    }
-
-    /* Just temporary to handle both syntaxes. This will be removed when p_capability_provisional is removed */
-    fn p_cap(
-        capability: S<'a, T, V>,
-        capability_provisional: S<'a, T, V>,
-        env: &mut Env<'a, TF>,
-    ) -> Result<(Option<ast::Hint>, Option<ast::Hint>)> {
-        if !capability.is_missing() && !capability_provisional.is_missing() {
-            Self::raise_parsing_error(
-                capability_provisional,
-                env,
-                "Cannot use both the [ and @{ syntax for coeffects",
-            );
-            /* Not exactly missing, but this is the standard function used to get an Err result in the lowerer */
-            Self::missing_syntax("capability", capability, env)
-        } else if !capability.is_missing() {
-            Self::p_capability(capability, env)
-        } else {
-            Self::p_capability_provisional(capability_provisional, env)
-        }
-    }
-
     fn p_fun_hdr(node: S<'a, T, V>, env: &mut Env<'a, TF>) -> Result<FunHdr> {
         match &node.children {
             FunctionDeclarationHeader(FunctionDeclarationHeaderChildren {
@@ -3414,7 +3378,6 @@ where
                 parameter_list,
                 type_,
                 capability,
-                capability_provisional,
                 ..
             }) => {
                 if name.value.is_missing() {
@@ -3423,8 +3386,7 @@ where
                 let kinds = Self::p_kinds(modifiers, env)?;
                 let has_async = kinds.has(modifier::ASYNC);
                 let parameters = Self::could_map(Self::p_fun_param, parameter_list, env)?;
-                let (capability, unsafe_capability) =
-                    Self::p_cap(capability, capability_provisional, env)?;
+                let (capability, unsafe_capability) = Self::p_capability(capability, env)?;
                 let return_type = Self::mp_optional(Self::p_hint, type_, env)?;
                 let suspension_kind = Self::mk_suspension_kind_(has_async);
                 let name = Self::pos_name(name, env)?;

@@ -523,7 +523,6 @@
               }
             },
             "function_capability":{"kind":"missing"},
-            "function_capability_provisional":{"kind":"missing"},
             "function_colon":{"kind":"missing"},
             "function_type":{"kind":"missing"},
             "function_where_clause":{"kind":"missing"}
@@ -582,5 +581,5 @@
     }
   },
   "program_text":"<?hh\n<<foo(), bar(1+1), foo(1, 2, 3, 4)>> function f() {}\n",
-  "version":"2020-09-14-0000"
+  "version":"2020-12-09-0001"
 }

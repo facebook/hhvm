@@ -688,7 +688,6 @@
                       }
                     },
                     "function_capability":{"kind":"missing"},
-                    "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{
                       "kind":"token",
                       "token":{
@@ -986,7 +985,6 @@
               }
             },
             "function_capability":{"kind":"missing"},
-            "function_capability_provisional":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
               "token":{
@@ -1279,5 +1277,5 @@
     }
   },
   "program_text":"<?hh // strict\n\n@Attr1\n@Attr2\nclass C<T>{\n  @__Soft protected int $x;\n  <<__Soft, Attr3>> protected int $y;\n\n  @__Rx\n  public function f(): @__Soft void {}\n}\n\n@__Rx @__MutableReturn\nasync function f(): @__Soft Awaitable<@__Soft int> {\n  return 42;\n}\n",
-  "version":"2020-09-14-0000"
+  "version":"2020-12-09-0001"
 }

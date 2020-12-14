@@ -147,7 +147,6 @@
               }
             },
             "function_capability":{"kind":"missing"},
-            "function_capability_provisional":{"kind":"missing"},
             "function_colon":{"kind":"missing"},
             "function_type":{"kind":"missing"},
             "function_where_clause":{"kind":"missing"}
@@ -428,7 +427,6 @@
               }
             },
             "function_capability":{"kind":"missing"},
-            "function_capability_provisional":{"kind":"missing"},
             "function_colon":{"kind":"missing"},
             "function_type":{"kind":"missing"},
             "function_where_clause":{"kind":"missing"}
@@ -597,5 +595,5 @@
     }
   },
   "program_text":"<?hh\n\nfunction f($x) {\n  return $x{123}; // error: deprecated subscript syntax\n}\n\nfunction g($a, $b) {\n  return $a ? : $b; // error: expected elvis operator\n}\n",
-  "version":"2020-09-14-0000"
+  "version":"2020-12-09-0001"
 }

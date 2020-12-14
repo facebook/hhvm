@@ -55,7 +55,6 @@ pub enum SyntaxVariant<'a, T, V> {
     FunctionDeclaration(&'a FunctionDeclarationChildren<'a, T, V>),
     FunctionDeclarationHeader(&'a FunctionDeclarationHeaderChildren<'a, T, V>),
     Capability(&'a CapabilityChildren<'a, T, V>),
-    CapabilityProvisional(&'a CapabilityProvisionalChildren<'a, T, V>),
     WhereClause(&'a WhereClauseChildren<'a, T, V>),
     WhereConstraint(&'a WhereConstraintChildren<'a, T, V>),
     MethodishDeclaration(&'a MethodishDeclarationChildren<'a, T, V>),
@@ -418,7 +417,6 @@ pub struct FunctionDeclarationHeaderChildren<'a, T, V> {
     pub parameter_list: Syntax<'a, T, V>,
     pub right_paren: Syntax<'a, T, V>,
     pub capability: Syntax<'a, T, V>,
-    pub capability_provisional: Syntax<'a, T, V>,
     pub colon: Syntax<'a, T, V>,
     pub type_: Syntax<'a, T, V>,
     pub where_clause: Syntax<'a, T, V>,
@@ -429,16 +427,6 @@ pub struct CapabilityChildren<'a, T, V> {
     pub left_bracket: Syntax<'a, T, V>,
     pub types: Syntax<'a, T, V>,
     pub right_bracket: Syntax<'a, T, V>,
-}
-
-#[derive(Debug, Clone)]
-pub struct CapabilityProvisionalChildren<'a, T, V> {
-    pub at: Syntax<'a, T, V>,
-    pub left_brace: Syntax<'a, T, V>,
-    pub type_: Syntax<'a, T, V>,
-    pub unsafe_plus: Syntax<'a, T, V>,
-    pub unsafe_type: Syntax<'a, T, V>,
-    pub right_brace: Syntax<'a, T, V>,
 }
 
 #[derive(Debug, Clone)]

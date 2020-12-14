@@ -256,7 +256,6 @@
                       }
                     },
                     "function_capability":{"kind":"missing"},
-                    "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{"kind":"missing"},
                     "function_type":{"kind":"missing"},
                     "function_where_clause":{"kind":"missing"}
@@ -649,7 +648,6 @@
                       }
                     },
                     "function_capability":{"kind":"missing"},
-                    "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{"kind":"missing"},
                     "function_type":{"kind":"missing"},
                     "function_where_clause":{"kind":"missing"}
@@ -1090,7 +1088,6 @@
                       }
                     },
                     "function_capability":{"kind":"missing"},
-                    "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{"kind":"missing"},
                     "function_type":{"kind":"missing"},
                     "function_where_clause":{"kind":"missing"}
@@ -1347,7 +1344,6 @@
                       }
                     },
                     "function_capability":{"kind":"missing"},
-                    "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{"kind":"missing"},
                     "function_type":{"kind":"missing"},
                     "function_where_clause":{"kind":"missing"}
@@ -1604,7 +1600,6 @@
                       }
                     },
                     "function_capability":{"kind":"missing"},
-                    "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{"kind":"missing"},
                     "function_type":{"kind":"missing"},
                     "function_where_clause":{"kind":"missing"}
@@ -1875,7 +1870,6 @@
                       }
                     },
                     "function_capability":{"kind":"missing"},
-                    "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{"kind":"missing"},
                     "function_type":{"kind":"missing"},
                     "function_where_clause":{"kind":"missing"}
@@ -2132,7 +2126,6 @@
                       }
                     },
                     "function_capability":{"kind":"missing"},
-                    "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{
                       "kind":"token",
                       "token":{
@@ -2239,5 +2232,5 @@
     }
   },
   "program_text":"<?hh // strict\n\nclass GoodExample {\n  public function __construct(public int $p) {}\n}\n\nclass AlsoGoodBecauseNotOverlapping {\n  public int $p;\n  public function __construct(int $p, public int $q) {\n    $this->p = $p;\n  }\n}\n\nclass DuplicateDeclarations {\n  public int $p;\n  public function __construct(public int $p) {}\n}\n\ntrait PromoInTrait {\n  public function __construct(public int $p) {}\n}\n\ninterface PromoInInterface {\n  public function __construct(public int $p);\n}\n\nabstract class PromoInAbstractConstruct {\n  public abstract function __construct(public int $p) {}\n}\n\nclass PromoInMethod {\n  public function foo(public int $p): void {}\n}\n",
-  "version":"2020-09-14-0000"
+  "version":"2020-12-09-0001"
 }

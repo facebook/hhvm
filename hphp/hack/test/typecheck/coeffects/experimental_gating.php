@@ -2,6 +2,6 @@
 
 function f(
   (function (float)[bool]: void) $l
-)[int]@{ string }: void {
+)[int]: void {
   $y = ($i)[arraykey] ==> {};
 }

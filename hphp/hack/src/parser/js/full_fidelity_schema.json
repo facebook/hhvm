@@ -715,7 +715,6 @@
         { "field_name" : "parameter_list" },
         { "field_name" : "right_paren" },
         { "field_name" : "capability" },
-        { "field_name" : "capability_provisional" },
         { "field_name" : "colon" },
         { "field_name" : "type" },
         { "field_name" : "where_clause" }
@@ -728,18 +727,6 @@
         { "field_name" : "left_bracket" },
         { "field_name" : "types" },
         { "field_name" : "right_bracket" }
-      ] },
-    { "kind_name" : "CapabilityProvisional",
-      "type_name" : "capability_provisional",
-      "description" : "capability_provisional",
-      "prefix" : "capability_provisional",
-      "fields" : [
-        { "field_name" : "at" },
-        { "field_name" : "left_brace" },
-        { "field_name" : "type" },
-        { "field_name" : "unsafe_plus" },
-        { "field_name" : "unsafe_type" },
-        { "field_name" : "right_brace" }
       ] },
     { "kind_name" : "WhereClause",
       "type_name" : "where_clause",

@@ -254,7 +254,6 @@
                       }
                     },
                     "function_capability":{"kind":"missing"},
-                    "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{"kind":"missing"},
                     "function_type":{"kind":"missing"},
                     "function_where_clause":{"kind":"missing"}
@@ -527,7 +526,6 @@
                       }
                     },
                     "function_capability":{"kind":"missing"},
-                    "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{"kind":"missing"},
                     "function_type":{"kind":"missing"},
                     "function_where_clause":{"kind":"missing"}
@@ -1732,5 +1730,5 @@
     }
   },
   "program_text":"<?hh\n\nclass C {\n  public function f<T>() {}\n}\nclass D {\n  public static function f<T>() {}\n}\n\n$x = 'f';\n$c = new C();\n\n$c->f<int>();  // ok\n$c->$x<int>(); // parse error\n\n$c?->f<int>(); // ok\n$c?->$x<int>(); // parse errors\n\nD::f<int>();   // ok\nD::$x<int>();  // parse error\n",
-  "version":"2020-09-14-0000"
+  "version":"2020-12-09-0001"
 }

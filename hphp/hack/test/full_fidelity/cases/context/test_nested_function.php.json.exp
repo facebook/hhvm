@@ -193,7 +193,6 @@
                       }
                     },
                     "function_capability":{"kind":"missing"},
-                    "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{"kind":"missing"},
                     "function_type":{"kind":"missing"},
                     "function_where_clause":{"kind":"missing"}
@@ -317,7 +316,6 @@
                       }
                     },
                     "function_capability":{"kind":"missing"},
-                    "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{"kind":"missing"},
                     "function_type":{"kind":"missing"},
                     "function_where_clause":{"kind":"missing"}
@@ -544,7 +542,6 @@
                       }
                     },
                     "function_capability":{"kind":"missing"},
-                    "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{"kind":"missing"},
                     "function_type":{"kind":"missing"},
                     "function_where_clause":{"kind":"missing"}
@@ -668,7 +665,6 @@
                       }
                     },
                     "function_capability":{"kind":"missing"},
-                    "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{"kind":"missing"},
                     "function_type":{"kind":"missing"},
                     "function_where_clause":{"kind":"missing"}
@@ -866,7 +862,6 @@
                       }
                     },
                     "function_capability":{"kind":"missing"},
-                    "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{"kind":"missing"},
                     "function_type":{"kind":"missing"},
                     "function_where_clause":{"kind":"missing"}
@@ -990,7 +985,6 @@
                       }
                     },
                     "function_capability":{"kind":"missing"},
-                    "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{"kind":"missing"},
                     "function_type":{"kind":"missing"},
                     "function_where_clause":{"kind":"missing"}
@@ -1115,7 +1109,6 @@
                       }
                     },
                     "function_capability":{"kind":"missing"},
-                    "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{"kind":"missing"},
                     "function_type":{"kind":"missing"},
                     "function_where_clause":{"kind":"missing"}
@@ -1313,7 +1306,6 @@
                       }
                     },
                     "function_capability":{"kind":"missing"},
-                    "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{"kind":"missing"},
                     "function_type":{"kind":"missing"},
                     "function_where_clause":{"kind":"missing"}
@@ -1405,7 +1397,6 @@
                               }
                             },
                             "function_capability":{"kind":"missing"},
-                            "function_capability_provisional":{"kind":"missing"},
                             "function_colon":{"kind":"missing"},
                             "function_type":{"kind":"missing"},
                             "function_where_clause":{"kind":"missing"}
@@ -1505,5 +1496,5 @@
     }
   },
   "program_text":"<?hh\n\nclass C {\n  public function f() {\n                          // ERROR RECOVERY: report missing brace here\n  public function g() {\n  }\n} // instead of reporting it here, as was formerly done.\n\n// note that if there *is* a '}' at (9,1), the new behavior will report\n// two distinct errors: \"missing '}' on line 5,\" and \"extra '}' on line 9.\"\n\n// More cases.\n\nclass C {\n  public function f() {\n                          // ERROR RECOVERY: report missing brace here\n  private function g() {\n  }\n}\n\nclass C {\n  public function f() {\n                          // ERROR RECOVERY: report missing brace here\n  protected function g() {\n  }\n\n  public function h() {\n  }\n}\n\nclass C {\n  public function f(){\n\n  function g(){ // however, this is still parsed as a function inside method f.\n  }\n}\n// missing '}' reported here.\n",
-  "version":"2020-09-14-0000"
+  "version":"2020-12-09-0001"
 }

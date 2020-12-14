@@ -495,7 +495,6 @@
               }
             },
             "function_capability":{"kind":"missing"},
-            "function_capability_provisional":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
               "token":{
@@ -885,7 +884,6 @@
               }
             },
             "function_capability":{"kind":"missing"},
-            "function_capability_provisional":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
               "token":{
@@ -1233,7 +1231,6 @@
               }
             },
             "function_capability":{"kind":"missing"},
-            "function_capability_provisional":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
               "token":{
@@ -1592,7 +1589,6 @@
               }
             },
             "function_capability":{"kind":"missing"},
-            "function_capability_provisional":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
               "token":{
@@ -2012,7 +2008,6 @@
               }
             },
             "function_capability":{"kind":"missing"},
-            "function_capability_provisional":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
               "token":{
@@ -2211,5 +2206,5 @@
     }
   },
   "program_text":"<?hh // strict\n\n/**\n * Test cases for trailing commas in (sometimes) unexpected places. Try to do\n * this with *and* without line breaks (where trialing commas may add value).\n */\nclass Plain {\n}\n\nclass Parametric<T,> {\n}\n\nfunction foo(dict<int,Plain,> $x): dict<\n  int,\n  Plain,\n> {\n  return $x;\n}\n\nfunction bar(keyset<int,> $x): keyset<\n  int,\n> {\n  return $x;\n}\n\nfunction baz(vec<Plain,> $x): vec<\n  Plain,\n> {\n  return $x;\n}\n\nfunction qux(Parametric<T,> $x): Parametric<\n  T,\n> {\n  return $x;\n}\n\nfunction quux<T>(classname<T,> $x): classname<\n  T,\n> {\n  return $x;\n}\n",
-  "version":"2020-09-14-0000"
+  "version":"2020-12-09-0001"
 }

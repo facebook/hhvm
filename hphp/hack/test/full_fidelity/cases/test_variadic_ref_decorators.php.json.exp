@@ -184,7 +184,6 @@
               }
             },
             "function_capability":{"kind":"missing"},
-            "function_capability_provisional":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
               "token":{
@@ -365,7 +364,6 @@
               }
             },
             "function_capability":{"kind":"missing"},
-            "function_capability_provisional":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
               "token":{
@@ -577,7 +575,6 @@
               }
             },
             "function_capability":{"kind":"missing"},
-            "function_capability_provisional":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
               "token":{
@@ -729,7 +726,6 @@
             },
             "function_right_paren":{"kind":"missing"},
             "function_capability":{"kind":"missing"},
-            "function_capability_provisional":{"kind":"missing"},
             "function_colon":{"kind":"missing"},
             "function_type":{"kind":"missing"},
             "function_where_clause":{"kind":"missing"}
@@ -1012,7 +1008,6 @@
                       }
                     },
                     "function_capability":{"kind":"missing"},
-                    "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{
                       "kind":"token",
                       "token":{
@@ -1164,7 +1159,6 @@
                     },
                     "function_right_paren":{"kind":"missing"},
                     "function_capability":{"kind":"missing"},
-                    "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{"kind":"missing"},
                     "function_type":{"kind":"missing"},
                     "function_where_clause":{"kind":"missing"}
@@ -1352,5 +1346,5 @@
     }
   },
   "program_text":"<?hh // strict\n\nfunction variadic(mixed ... $x) : void {}\n\nfunction ref(int & $x) : void {}\n\nfunction varvar(mixed ... ... $x) : void {}\n\nfunction refref(int & & $x) : void {}\n\nfunction varref(int ... & $x) : void {}\n\nfunction refvar(mixed & ... $x) : void {}\n",
-  "version":"2020-10-15-0001"
+  "version":"2020-12-09-0001"
 }

@@ -197,7 +197,6 @@
                       }
                     },
                     "function_capability":{"kind":"missing"},
-                    "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{
                       "kind":"token",
                       "token":{
@@ -348,7 +347,6 @@
                       }
                     },
                     "function_capability":{"kind":"missing"},
-                    "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{
                       "kind":"token",
                       "token":{
@@ -636,7 +634,6 @@
                       }
                     },
                     "function_capability":{"kind":"missing"},
-                    "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{
                       "kind":"token",
                       "token":{
@@ -805,7 +802,6 @@
                       }
                     },
                     "function_capability":{"kind":"missing"},
-                    "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{
                       "kind":"token",
                       "token":{
@@ -1045,7 +1041,6 @@
                       }
                     },
                     "function_capability":{"kind":"missing"},
-                    "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{
                       "kind":"token",
                       "token":{
@@ -1315,7 +1310,6 @@
                       }
                     },
                     "function_capability":{"kind":"missing"},
-                    "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{
                       "kind":"token",
                       "token":{
@@ -1484,7 +1478,6 @@
                       }
                     },
                     "function_capability":{"kind":"missing"},
-                    "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{
                       "kind":"token",
                       "token":{
@@ -1724,7 +1717,6 @@
                       }
                     },
                     "function_capability":{"kind":"missing"},
-                    "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{
                       "kind":"token",
                       "token":{
@@ -1874,5 +1866,5 @@
     }
   },
   "program_text":"<?hh // strict\n\ninterface I {\n  public function i1(): void; // legal\n  public async function i2(): Awaitable<void>; // error2046\n}\n\nabstract class C {\n  public function c1(): void { } // legal\n  public async function c2(): Awaitable<void> { } // legal\n  public abstract async function c3(): Awaitable<void>; // error2046\n}\n\ntrait T {\n  public function t1(): void { } // legal\n  public async function t2(): Awaitable<void> { } // legal\n  public abstract async function t3(): Awaitable<void>; // error2046\n}\n",
-  "version":"2020-09-14-0000"
+  "version":"2020-12-09-0001"
 }

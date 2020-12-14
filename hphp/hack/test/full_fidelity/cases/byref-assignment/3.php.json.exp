@@ -121,7 +121,6 @@
               }
             },
             "function_capability":{"kind":"missing"},
-            "function_capability_provisional":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
               "token":{
@@ -523,5 +522,5 @@
     }
   },
   "program_text":"<?hh // strict\n\nfunction f(): void {\n  $a = $x ? $y = &$z + 1 : $z = &$x1 * 2;\n}\n",
-  "version":"2020-09-14-0000"
+  "version":"2020-12-09-0001"
 }

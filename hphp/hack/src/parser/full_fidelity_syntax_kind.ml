@@ -50,7 +50,6 @@ type t =
   | FunctionDeclaration
   | FunctionDeclarationHeader
   | Capability
-  | CapabilityProvisional
   | WhereClause
   | WhereConstraint
   | MethodishDeclaration
@@ -224,7 +223,6 @@ let to_string kind =
   | FunctionDeclaration               -> "function_declaration"
   | FunctionDeclarationHeader         -> "function_declaration_header"
   | Capability                        -> "capability"
-  | CapabilityProvisional             -> "capability_provisional"
   | WhereClause                       -> "where_clause"
   | WhereConstraint                   -> "where_constraint"
   | MethodishDeclaration              -> "methodish_declaration"

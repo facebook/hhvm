@@ -311,7 +311,7 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 })
             },
             FunctionDeclarationHeader(x) => {
-                get_index(12).and_then(|index| { match index {
+                get_index(11).and_then(|index| { match index {
                         0 => Some(&x.modifiers),
                     1 => Some(&x.keyword),
                     2 => Some(&x.name),
@@ -320,10 +320,9 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                     5 => Some(&x.parameter_list),
                     6 => Some(&x.right_paren),
                     7 => Some(&x.capability),
-                    8 => Some(&x.capability_provisional),
-                    9 => Some(&x.colon),
-                    10 => Some(&x.type_),
-                    11 => Some(&x.where_clause),
+                    8 => Some(&x.colon),
+                    9 => Some(&x.type_),
+                    10 => Some(&x.where_clause),
                         _ => None,
                     }
                 })
@@ -333,18 +332,6 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                         0 => Some(&x.left_bracket),
                     1 => Some(&x.types),
                     2 => Some(&x.right_bracket),
-                        _ => None,
-                    }
-                })
-            },
-            CapabilityProvisional(x) => {
-                get_index(6).and_then(|index| { match index {
-                        0 => Some(&x.at),
-                    1 => Some(&x.left_brace),
-                    2 => Some(&x.type_),
-                    3 => Some(&x.unsafe_plus),
-                    4 => Some(&x.unsafe_type),
-                    5 => Some(&x.right_brace),
                         _ => None,
                     }
                 })

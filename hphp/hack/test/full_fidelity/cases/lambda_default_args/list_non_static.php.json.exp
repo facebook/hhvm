@@ -121,7 +121,6 @@
               }
             },
             "function_capability":{"kind":"missing"},
-            "function_capability_provisional":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
               "token":{
@@ -305,7 +304,6 @@
               }
             },
             "function_capability":{"kind":"missing"},
-            "function_capability_provisional":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
               "token":{
@@ -902,5 +900,5 @@
     }
   },
   "program_text":"<?hh // strict\n\nfunction get(): int {\n  return 1;\n}\n\nfunction test(): void {\n  $_ = ((int, int, int) $list_tuple = list(get(), 3, 4)): void ==> {};\n}\n",
-  "version":"2020-09-14-0000"
+  "version":"2020-12-09-0001"
 }

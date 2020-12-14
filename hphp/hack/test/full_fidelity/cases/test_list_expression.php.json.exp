@@ -163,7 +163,6 @@
               }
             },
             "function_capability":{"kind":"missing"},
-            "function_capability_provisional":{"kind":"missing"},
             "function_colon":{"kind":"missing"},
             "function_type":{"kind":"missing"},
             "function_where_clause":{"kind":"missing"}
@@ -829,5 +828,5 @@
     }
   },
   "program_text":"<?hh\nfunction f(Bar $vector){\n  list($a, $b) = $vector;\n  list($a, list($b, $c)) = $vector;\n  list(,,$a,,) = $vector; // Missing binders should be `$_`-style ignores.\n}\n",
-  "version":"2020-09-14-0000"
+  "version":"2020-12-09-0001"
 }

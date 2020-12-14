@@ -189,7 +189,6 @@
               }
             },
             "function_capability":{"kind":"missing"},
-            "function_capability_provisional":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
               "token":{
@@ -442,7 +441,6 @@
               }
             },
             "function_capability":{"kind":"missing"},
-            "function_capability_provisional":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
               "token":{
@@ -530,5 +528,5 @@
     }
   },
   "program_text":"<?hh\n\n// Using `namespace` in any case as a name is not allowed\n\nclass Namespace {}\n\nfunction test(): void {\n  $y = new Namespace();\n}\n\nfunction Namespace(): void {}\n",
-  "version":"2020-10-15-0001"
+  "version":"2020-12-09-0001"
 }

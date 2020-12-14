@@ -339,7 +339,6 @@
                       }
                     },
                     "function_capability":{"kind":"missing"},
-                    "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{"kind":"missing"},
                     "function_type":{"kind":"missing"},
                     "function_where_clause":{"kind":"missing"}
@@ -571,7 +570,6 @@
                       }
                     },
                     "function_capability":{"kind":"missing"},
-                    "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{"kind":"missing"},
                     "function_type":{"kind":"missing"},
                     "function_where_clause":{"kind":"missing"}
@@ -720,5 +718,5 @@
     }
   },
   "program_text":"<?hh\nnamespace {}\nnamespace SampleNamespace {}\nnamespace SampleNamespace;\nnamespace SampleNamespace {\n  function f () {}\n  class C {}\n}\nnamespace {\n  function f () {}\n  class C {}\n}\n",
-  "version":"2020-09-14-0000"
+  "version":"2020-12-09-0001"
 }

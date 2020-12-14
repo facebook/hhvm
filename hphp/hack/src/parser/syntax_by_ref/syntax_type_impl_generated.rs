@@ -326,7 +326,7 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_function_declaration_header(ctx: &C, modifiers: Self, keyword: Self, name: Self, type_parameter_list: Self, left_paren: Self, parameter_list: Self, right_paren: Self, capability: Self, capability_provisional: Self, colon: Self, type_: Self, where_clause: Self) -> Self {
+    fn make_function_declaration_header(ctx: &C, modifiers: Self, keyword: Self, name: Self, type_parameter_list: Self, left_paren: Self, parameter_list: Self, right_paren: Self, capability: Self, colon: Self, type_: Self, where_clause: Self) -> Self {
         let syntax = SyntaxVariant::FunctionDeclarationHeader(ctx.get_arena().alloc(FunctionDeclarationHeaderChildren {
             modifiers,
             keyword,
@@ -336,7 +336,6 @@ where
             parameter_list,
             right_paren,
             capability,
-            capability_provisional,
             colon,
             type_,
             where_clause,
@@ -350,19 +349,6 @@ where
             left_bracket,
             types,
             right_bracket,
-        }));
-        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
-        Self::make(syntax, value)
-    }
-
-    fn make_capability_provisional(ctx: &C, at: Self, left_brace: Self, type_: Self, unsafe_plus: Self, unsafe_type: Self, right_brace: Self) -> Self {
-        let syntax = SyntaxVariant::CapabilityProvisional(ctx.get_arena().alloc(CapabilityProvisionalChildren {
-            at,
-            left_brace,
-            type_,
-            unsafe_plus,
-            unsafe_type,
-            right_brace,
         }));
         let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)

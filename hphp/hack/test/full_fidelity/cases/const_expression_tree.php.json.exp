@@ -259,7 +259,6 @@
               }
             },
             "function_capability":{"kind":"missing"},
-            "function_capability_provisional":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
               "token":{
@@ -430,5 +429,5 @@
     }
   },
   "program_text":"<?hh\n\n<<file:__EnableUnstableFeatures('expression_trees')>>\n\nfunction test(): void {\n  Code`MY_CONST`;\n}\n",
-  "version":"2020-10-01-0000"
+  "version":"2020-12-09-0001"
 }

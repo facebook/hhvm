@@ -193,7 +193,6 @@
                       }
                     },
                     "function_capability":{"kind":"missing"},
-                    "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{
                       "kind":"token",
                       "token":{
@@ -481,7 +480,6 @@
                       }
                     },
                     "function_capability":{"kind":"missing"},
-                    "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{
                       "kind":"token",
                       "token":{
@@ -863,7 +861,6 @@
                       }
                     },
                     "function_capability":{"kind":"missing"},
-                    "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{
                       "kind":"token",
                       "token":{
@@ -1133,7 +1130,6 @@
                       }
                     },
                     "function_capability":{"kind":"missing"},
-                    "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{
                       "kind":"token",
                       "token":{
@@ -1301,7 +1297,6 @@
                       }
                     },
                     "function_capability":{"kind":"missing"},
-                    "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{
                       "kind":"token",
                       "token":{
@@ -1482,7 +1477,6 @@
                       }
                     },
                     "function_capability":{"kind":"missing"},
-                    "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{
                       "kind":"token",
                       "token":{
@@ -1697,5 +1691,5 @@
     }
   },
   "program_text":"<?hh\n\ntrait T1 {\n  public function animal(): void {\n    echo \"Dog\";\n  }\n}\n\ntrait T2 {\n  public function animal(): void {\n    echo \"Cat\";\n  }\n}\n\nclass C {\n  use T1, T2;\n\n  public function animal(): void = T1::animal;\n}\n\nclass D {\n  public function animal(): void = animal;\n  public function animal(): void = T1::class;\n  public function animal(): void = \\MyNamespace\\T2::foo; // ok\n}\n",
-  "version":"2020-10-15-0001"
+  "version":"2020-12-09-0001"
 }

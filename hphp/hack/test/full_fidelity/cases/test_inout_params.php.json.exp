@@ -241,7 +241,6 @@
               }
             },
             "function_capability":{"kind":"missing"},
-            "function_capability_provisional":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
               "token":{
@@ -432,7 +431,6 @@
               }
             },
             "function_capability":{"kind":"missing"},
-            "function_capability_provisional":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
               "token":{
@@ -824,7 +822,6 @@
               }
             },
             "function_capability":{"kind":"missing"},
-            "function_capability_provisional":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
               "token":{
@@ -1442,7 +1439,6 @@
               }
             },
             "function_capability":{"kind":"missing"},
-            "function_capability_provisional":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
               "token":{
@@ -2468,7 +2464,6 @@
               }
             },
             "function_capability":{"kind":"missing"},
-            "function_capability_provisional":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
               "token":{
@@ -3313,7 +3308,6 @@
               }
             },
             "function_capability":{"kind":"missing"},
-            "function_capability_provisional":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
               "token":{
@@ -3497,7 +3491,6 @@
               }
             },
             "function_capability":{"kind":"missing"},
-            "function_capability_provisional":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
               "token":{
@@ -5643,5 +5636,5 @@
     }
   },
   "program_text":"<?hh // strict\n\nfunction noop<T>(inout T $_): void {}\n\nfunction add1(inout int $x): void {\n  $x += 1;\n}\n\nfunction swap<T>(inout T $a, inout T $b): void {\n  $tmp = $a;\n  $a = $b;\n  $b = $tmp;\n}\n\nfunction extend<T>(inout vec<T> $dst, Traversable<T> $src): bool {\n  if (!$src) {\n    return false;\n  }\n  foreach ($src as $e) {\n    $dst[] = $e;\n  }\n  return true;\n}\n\nfunction herp(\n  (function(inout vec<int>, Container<int>): mixed) $f,\n  inout vec<int> $dst,\n): void {\n  $f(inout $dst, keyset[5]);\n}\n\nfunction long_function_name_with_lots_of_args(\n  int $a,\n  string $b,\n  inout arraykey $c,\n  inout dict<int, vec<string>> $d,\n  inout bool $e,\n  int ...$f\n): bool {\n  return true;\n}\n\nfunction test(): void {\n  $i = 42;\n  $s = 'foo';\n  $b = true;\n\n  noop(inout $i);\n  add1(inout $i);\n\n  swap(inout $i, inout $s);\n\n  $v = vec[];\n  extend(inout $v, vec[0, 1, 2]);\n  herp(fun('extend'), inout $v);\n\n  $d = dict['derp' => dict[6 => vec['burp']]];\n  $derp = () ==> 'derp';\n  long_function_name_with_lots_of_args(\n    42,\n    'whatever',\n    inout $i,\n    inout $d[$derp()],\n    inout $b,\n    $v[0],\n    ...$v\n  );\n}\n",
-  "version":"2020-09-14-0000"
+  "version":"2020-12-09-0001"
 }

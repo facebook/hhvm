@@ -231,7 +231,6 @@
                       }
                     },
                     "function_capability":{"kind":"missing"},
-                    "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{
                       "kind":"token",
                       "token":{
@@ -441,7 +440,6 @@
               }
             },
             "function_capability":{"kind":"missing"},
-            "function_capability_provisional":{"kind":"missing"},
             "function_colon":{"kind":"missing"},
             "function_type":{"kind":"missing"},
             "function_where_clause":{"kind":"missing"}
@@ -658,7 +656,6 @@
               }
             },
             "function_capability":{"kind":"missing"},
-            "function_capability_provisional":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
               "token":{
@@ -911,7 +908,6 @@
               }
             },
             "function_capability":{"kind":"missing"},
-            "function_capability_provisional":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
               "token":{
@@ -5671,5 +5667,5 @@
     }
   },
   "program_text":"<?hh\n\nclass MyDisposable implements IDisposable {\n  public function __dispose(): void {}\n}\n\nfunction my_inout1(inout int $x) { $x++; }\nfunction my_inout2(inout int $x): int { $x++; return 0; }\n\nasync function foo(): void {\n  ($x = 42);\n  ($x += 42);\n  ($x -= 42);\n  ($x *= 42);\n  ($x /= 42);\n  ($x %= 42);\n  ($x **= 42);\n  ($x .= 42);\n  ($x &= 42);\n  ($x |= 42);\n  ($x ^= 42);\n  ($x <<= 42);\n  ($x >>= 42);\n  ($x ??= 42);\n  ($x++);\n  (++$x);\n  ($x--);\n  (--$x);\n  ($dict = dict[]);\n  for (($x = 42), ($x = 43); false; ($x = 44), ($x = 45)) {}\n  using (($x = new MyDisposable()));\n  using (($x = new MyDisposable()), ($y = new MyDisposable())) {}\n  (my_inout1(inout $x));\n  (my_inout1<int>(inout $x));\n  ($y = my_inout2(inout $x));\n  ($y = my_inout2<int>(inout $x));\n  $y = (my_inout2(inout $x));\n  $y = await (my_inout2(inout $x));\n  (list($x1, $x2, list($x3, $x4)) = tuple(1, 2, tuple(3, 4)));\n  $y = await my_inout2(inout $x);\n}\n",
-  "version":"2020-10-01-0000"
+  "version":"2020-12-09-0001"
 }

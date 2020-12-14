@@ -54,7 +54,6 @@ impl<T: LexableToken, V> Syntax<'_, T, V> {
             SyntaxVariant::FunctionDeclaration {..} => SyntaxKind::FunctionDeclaration,
             SyntaxVariant::FunctionDeclarationHeader {..} => SyntaxKind::FunctionDeclarationHeader,
             SyntaxVariant::Capability {..} => SyntaxKind::Capability,
-            SyntaxVariant::CapabilityProvisional {..} => SyntaxKind::CapabilityProvisional,
             SyntaxVariant::WhereClause {..} => SyntaxKind::WhereClause,
             SyntaxVariant::WhereConstraint {..} => SyntaxKind::WhereConstraint,
             SyntaxVariant::MethodishDeclaration {..} => SyntaxKind::MethodishDeclaration,

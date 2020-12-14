@@ -151,7 +151,6 @@
               }
             },
             "function_capability":{"kind":"missing"},
-            "function_capability_provisional":{"kind":"missing"},
             "function_colon":{"kind":"missing"},
             "function_type":{"kind":"missing"},
             "function_where_clause":{"kind":"missing"}
@@ -315,7 +314,6 @@
               }
             },
             "function_capability":{"kind":"missing"},
-            "function_capability_provisional":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
               "token":{
@@ -1043,5 +1041,5 @@
     }
   },
   "program_text":"<?hh // strict\nfunction foo($a) { // two errors; missing annotation on $a and foo.\n  return $a;\n}\nfunction bar() : void {\n  // No error; the annotations are not required on anonymous functions.\n  $x = function($b) { };\n  $y = <foo:bar:blah baz-abc=\"123\"/>; // no error on well-formed XHP\n}\nclass C\n{\n  public $x = 123; // error; type annotation is not optional in strict mode\n  public int $y = 456; // no error\n}\n",
-  "version":"2020-09-14-0000"
+  "version":"2020-12-09-0001"
 }

@@ -117,7 +117,6 @@
               }
             },
             "function_capability":{"kind":"missing"},
-            "function_capability_provisional":{"kind":"missing"},
             "function_colon":{"kind":"missing"},
             "function_type":{"kind":"missing"},
             "function_where_clause":{"kind":"missing"}
@@ -522,5 +521,5 @@
     }
   },
   "program_text":"<?hh\nfunction f(){\n  try {\n    $a++;\n  }\n  catch (Bar $a){\n    $b;\n  }\n  finally {\n    $c;\n  }\n}\n",
-  "version":"2020-09-14-0000"
+  "version":"2020-12-09-0001"
 }

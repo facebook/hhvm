@@ -121,7 +121,6 @@
               }
             },
             "function_capability":{"kind":"missing"},
-            "function_capability_provisional":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
               "token":{
@@ -505,5 +504,5 @@
     }
   },
   "program_text":"<?hh // strict\n\nfunction test(): void {\n  $_ = (bool $v = await genx()): void ==> {};\n}\n",
-  "version":"2020-09-14-0000"
+  "version":"2020-12-09-0001"
 }

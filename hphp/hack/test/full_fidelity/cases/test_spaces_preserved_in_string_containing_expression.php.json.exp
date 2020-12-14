@@ -117,7 +117,6 @@
               }
             },
             "function_capability":{"kind":"missing"},
-            "function_capability_provisional":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
               "token":{
@@ -485,5 +484,5 @@
     }
   },
   "program_text":"<?hh\nfunction bar() : void {\n  $a = 11;\n  $b = \"This ${a} is an interpolated   {$a}    string.\";\n}\n",
-  "version":"2020-09-14-0000"
+  "version":"2020-12-09-0001"
 }

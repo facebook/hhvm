@@ -125,6 +125,10 @@ module RemoteTypeCheck = struct
     max_cas_bytes: int;
     (* Max artifact size to inline into transport channel *)
     max_artifact_inline_bytes: int;
+    (* [0.0 - 1.0] ratio that specifies how much portion of the total payload
+    should be used in remote workers initial payload. Default is 0.0 which means
+    one bucket and no special bundling for initial payload *)
+    remote_initial_payload_ratio: float;
   }
 
   let default =
@@ -146,6 +150,7 @@ module RemoteTypeCheck = struct
       file_system_mode = ArtifactStore.Distributed;
       max_cas_bytes = 50_000_000;
       max_artifact_inline_bytes = 2000;
+      remote_initial_payload_ratio = 0.0;
     }
 
   let load ~current_version ~default config =
@@ -225,6 +230,13 @@ module RemoteTypeCheck = struct
         config
     in
     let recheck_threshold = int_opt "recheck_threshold" ~prefix config in
+    let remote_initial_payload_ratio =
+      float_
+        "remote_initial_payload_ratio"
+        ~prefix
+        ~default:default.remote_initial_payload_ratio
+        config
+    in
     let load_naming_table_on_full_init =
       bool_if_min_version
         "load_naming_table_on_full_init"
@@ -287,6 +299,7 @@ module RemoteTypeCheck = struct
       file_system_mode;
       max_cas_bytes;
       max_artifact_inline_bytes;
+      remote_initial_payload_ratio;
     }
 end
 

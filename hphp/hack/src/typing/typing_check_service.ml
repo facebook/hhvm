@@ -441,9 +441,7 @@ let process_files
   let start_time = Unix.gettimeofday () in
 
   let rec process_or_exit errors progress tally max_heap_mb =
-    (* If the major heap has exceeded the bounds, we
-      (1) first try and bring the size back down by flushing the parser cache and doing a major GC;
-      (2) if this fails, we decline to typecheck the remaining files.
+    (* If the major heap has exceeded the bounds, we decline to typecheck the remaining files.
     We use [quick_stat] instead of [stat] in get_heap_size in order to avoid walking the major heap,
     and we don't change the minor heap because it's small and fixed-size.
     The start-remaining test is to make sure we make at least one file of progress
@@ -455,12 +453,9 @@ let process_files
       heap_mb > cap && start_file_count > List.length progress.remaining
     in
     let (exit_now, tally, heap_mb) =
-      if over_cap then begin
-        SharedMem.invalidate_caches ();
-        Gc.full_major ();
-        let new_heap_mb = get_heap_size () in
-        (new_heap_mb > cap, ProcessFilesTally.incr_caps tally, new_heap_mb)
-      end else
+      if over_cap then
+        (true, ProcessFilesTally.incr_caps tally, heap_mb)
+      else
         (false, tally, heap_mb)
     in
     match progress.remaining with

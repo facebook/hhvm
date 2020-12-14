@@ -213,3 +213,10 @@
   (preprocess (pps lwt_ppx ppx_deriving.std ppx_deriving.enum)) ; See T41851208
   (libraries utils_core)
   (modules connection_tracker))
+
+(library
+  (name biglist)
+  (wrapped false)
+  (preprocess (pps lwt_ppx ppx_deriving.std ppx_deriving.enum)) ; See T41851208
+  (libraries utils_core)
+  (modules bigList))

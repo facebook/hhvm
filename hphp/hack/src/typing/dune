@@ -248,6 +248,7 @@
     typing_check_service
     typing_check_utils)
   (libraries
+    biglist
     core_kernel
     decl_counters
     decl_service

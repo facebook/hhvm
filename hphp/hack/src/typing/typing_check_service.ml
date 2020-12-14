@@ -739,47 +739,48 @@ let next
     | Some { current_bucket; remaining_jobs; job } ->
       return_bucket_job (DelegateProgress job) current_bucket remaining_jobs
     | None ->
-      begin
-        match (!files_to_process, stolen) with
-        | ([], []) when Hash_set.Poly.is_empty files_in_progress -> Bucket.Done
-        | ([], []) -> Bucket.Wait
-        | (jobs, stolen_jobs) ->
-          let jobs =
-            if List.length jobs > List.length stolen_jobs then
-              jobs
-            else begin
-              delegate_state := state;
-              Hh_logger.log
-                "Steal payload from local workers: %d jobs"
-                (List.length stolen_jobs);
-              let stolen_jobs =
-                List.map stolen_jobs ~f:(fun job ->
-                    Hash_set.Poly.remove files_in_progress job;
-                    match job with
-                    | Check { path; deferred_count } ->
-                      Check { path; deferred_count = deferred_count + 1 }
-                    | _ -> failwith "unexpected state")
-              in
-              List.rev_append stolen_jobs jobs
-            end
-          in
-          begin
-            match num_workers with
-            (* When num_workers is zero, the execution mode is delegate-only, so we give an empty bucket to MultiWorker for execution. *)
-            | 0 -> return_bucket_job Progress [] jobs
-            | _ ->
-              let bucket_size =
-                Bucket.calculate_bucket_size
-                  ~num_jobs:(List.length !files_to_process)
-                  ~num_workers
-                  ~max_size
-              in
-              let (current_bucket, remaining_jobs) =
-                List.split_n jobs bucket_size
-              in
-              return_bucket_job Progress current_bucket remaining_jobs
+      (* WARNING: the following List.length is costly - for a full init, files_to_process starts
+      out as the size of the entire repo, and we're traversing the entire list. *)
+      let files_to_process_length = List.length !files_to_process in
+      (match (files_to_process_length, stolen) with
+      | (0, []) when Hash_set.Poly.is_empty files_in_progress -> Bucket.Done
+      | (0, []) -> Bucket.Wait
+      | (_, stolen_jobs) ->
+        let jobs =
+          if files_to_process_length > List.length stolen_jobs then
+            !files_to_process
+          else begin
+            Hh_logger.log
+              "Steal payload from local workers: %d jobs"
+              (List.length stolen_jobs);
+            delegate_state := state;
+            let stolen_jobs =
+              List.map stolen_jobs ~f:(fun job ->
+                  Hash_set.Poly.remove files_in_progress job;
+                  match job with
+                  | Check { path; deferred_count } ->
+                    Check { path; deferred_count = deferred_count + 1 }
+                  | _ -> failwith "unexpected state")
+            in
+            List.rev_append stolen_jobs !files_to_process
           end
-      end
+        in
+        begin
+          match num_workers with
+          (* When num_workers is zero, the execution mode is delegate-only, so we give an empty bucket to MultiWorker for execution. *)
+          | 0 -> return_bucket_job Progress [] jobs
+          | _ ->
+            let bucket_size =
+              Bucket.calculate_bucket_size
+                ~num_jobs:files_to_process_length
+                ~num_workers
+                ~max_size
+            in
+            let (current_bucket, remaining_jobs) =
+              List.split_n jobs bucket_size
+            in
+            return_bucket_job Progress current_bucket remaining_jobs
+        end)
 
 let on_cancelled
     (next : unit -> 'a Bucket.bucket)

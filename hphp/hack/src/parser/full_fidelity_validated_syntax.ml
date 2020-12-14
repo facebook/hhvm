@@ -348,6 +348,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | Syntax.RequireClause _ -> tag validate_require_clause (fun x -> BodyRequireClause x) x
     | Syntax.ConstDeclaration _ -> tag validate_const_declaration (fun x -> BodyConst x) x
     | Syntax.TypeConstDeclaration _ -> tag validate_type_const_declaration (fun x -> BodyTypeConst x) x
+    | Syntax.ContextConstDeclaration _ -> tag validate_context_const_declaration (fun x -> BodyContextConst x) x
     | Syntax.XHPChildrenDeclaration _ -> tag validate_xhp_children_declaration (fun x -> BodyXHPChildren x) x
     | Syntax.XHPCategoryDeclaration _ -> tag validate_xhp_category_declaration (fun x -> BodyXHPCategory x) x
     | Syntax.XHPClassAttributeDeclaration _ -> tag validate_xhp_class_attribute_declaration (fun x -> BodyXHPClassAttribute x) x
@@ -360,6 +361,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | BodyRequireClause            thing -> invalidate_require_clause                 (value, thing)
     | BodyConst                    thing -> invalidate_const_declaration              (value, thing)
     | BodyTypeConst                thing -> invalidate_type_const_declaration         (value, thing)
+    | BodyContextConst             thing -> invalidate_context_const_declaration      (value, thing)
     | BodyXHPChildren              thing -> invalidate_xhp_children_declaration       (value, thing)
     | BodyXHPCategory              thing -> invalidate_xhp_category_declaration       (value, thing)
     | BodyXHPClassAttribute        thing -> invalidate_xhp_class_attribute_declaration (value, thing)
@@ -1460,6 +1462,34 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
       ; type_const_equal = invalidate_option_with (invalidate_token) x.type_const_equal
       ; type_const_type_specifier = invalidate_option_with (invalidate_specifier) x.type_const_type_specifier
       ; type_const_semicolon = invalidate_token x.type_const_semicolon
+      }
+    ; Syntax.value = v
+    }
+  and validate_context_const_declaration : context_const_declaration validator = function
+  | { Syntax.syntax = Syntax.ContextConstDeclaration x; value = v } -> v,
+    { context_const_semicolon = validate_token x.context_const_semicolon
+    ; context_const_ctx_list = validate_option_with (validate_capability) x.context_const_ctx_list
+    ; context_const_equal = validate_option_with (validate_token) x.context_const_equal
+    ; context_const_constraint = validate_list_with (validate_context_constraint) x.context_const_constraint
+    ; context_const_type_parameters = validate_option_with (validate_type_parameters) x.context_const_type_parameters
+    ; context_const_name = validate_token x.context_const_name
+    ; context_const_ctx_keyword = validate_token x.context_const_ctx_keyword
+    ; context_const_const_keyword = validate_token x.context_const_const_keyword
+    ; context_const_modifiers = validate_option_with (validate_token) x.context_const_modifiers
+    }
+  | s -> validation_fail (Some SyntaxKind.ContextConstDeclaration) s
+  and invalidate_context_const_declaration : context_const_declaration invalidator = fun (v, x) ->
+    { Syntax.syntax =
+      Syntax.ContextConstDeclaration
+      { context_const_modifiers = invalidate_option_with (invalidate_token) x.context_const_modifiers
+      ; context_const_const_keyword = invalidate_token x.context_const_const_keyword
+      ; context_const_ctx_keyword = invalidate_token x.context_const_ctx_keyword
+      ; context_const_name = invalidate_token x.context_const_name
+      ; context_const_type_parameters = invalidate_option_with (invalidate_type_parameters) x.context_const_type_parameters
+      ; context_const_constraint = invalidate_list_with (invalidate_context_constraint) x.context_const_constraint
+      ; context_const_equal = invalidate_option_with (invalidate_token) x.context_const_equal
+      ; context_const_ctx_list = invalidate_option_with (invalidate_capability) x.context_const_ctx_list
+      ; context_const_semicolon = invalidate_token x.context_const_semicolon
       }
     ; Syntax.value = v
     }
@@ -3188,6 +3218,20 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
       Syntax.TypeConstraint
       { constraint_keyword = invalidate_token x.constraint_keyword
       ; constraint_type = invalidate_specifier x.constraint_type
+      }
+    ; Syntax.value = v
+    }
+  and validate_context_constraint : context_constraint validator = function
+  | { Syntax.syntax = Syntax.ContextConstraint x; value = v } -> v,
+    { ctx_constraint_ctx_list = validate_option_with (validate_capability) x.ctx_constraint_ctx_list
+    ; ctx_constraint_keyword = validate_token x.ctx_constraint_keyword
+    }
+  | s -> validation_fail (Some SyntaxKind.ContextConstraint) s
+  and invalidate_context_constraint : context_constraint invalidator = fun (v, x) ->
+    { Syntax.syntax =
+      Syntax.ContextConstraint
+      { ctx_constraint_keyword = invalidate_token x.ctx_constraint_keyword
+      ; ctx_constraint_ctx_list = invalidate_option_with (invalidate_capability) x.ctx_constraint_ctx_list
       }
     ; Syntax.value = v
     }

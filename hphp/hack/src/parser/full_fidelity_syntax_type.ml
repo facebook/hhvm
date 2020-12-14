@@ -415,6 +415,17 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; type_const_type_specifier                          : t
     ; type_const_semicolon                               : t
     }
+  | ContextConstDeclaration           of
+    { context_const_modifiers                            : t
+    ; context_const_const_keyword                        : t
+    ; context_const_ctx_keyword                          : t
+    ; context_const_name                                 : t
+    ; context_const_type_parameters                      : t
+    ; context_const_constraint                           : t
+    ; context_const_equal                                : t
+    ; context_const_ctx_list                             : t
+    ; context_const_semicolon                            : t
+    }
   | DecoratedExpression               of
     { decorated_expression_decorator                     : t
     ; decorated_expression_expression                    : t
@@ -982,6 +993,10 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { constraint_keyword                                 : t
     ; constraint_type                                    : t
     }
+  | ContextConstraint                 of
+    { ctx_constraint_keyword                             : t
+    ; ctx_constraint_ctx_list                            : t
+    }
   | DarrayTypeSpecifier               of
     { darray_keyword                                     : t
     ; darray_left_angle                                  : t
@@ -1239,6 +1254,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | BodyRequireClause            of require_clause
   | BodyConst                    of const_declaration
   | BodyTypeConst                of type_const_declaration
+  | BodyContextConst             of context_const_declaration
   | BodyXHPChildren              of xhp_children_declaration
   | BodyXHPCategory              of xhp_category_declaration
   | BodyXHPClassAttribute        of xhp_class_attribute_declaration
@@ -1648,6 +1664,17 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; type_const_equal: Token.t option value
     ; type_const_type_specifier: specifier option value
     ; type_const_semicolon: Token.t value
+    }
+  and context_const_declaration =
+    { context_const_modifiers: Token.t option value
+    ; context_const_const_keyword: Token.t value
+    ; context_const_ctx_keyword: Token.t value
+    ; context_const_name: Token.t value
+    ; context_const_type_parameters: type_parameters option value
+    ; context_const_constraint: context_constraint listesque value
+    ; context_const_equal: Token.t option value
+    ; context_const_ctx_list: capability option value
+    ; context_const_semicolon: Token.t value
     }
   and decorated_expression =
     { decorated_expression_decorator: Token.t value
@@ -2215,6 +2242,10 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   and type_constraint =
     { constraint_keyword: Token.t value
     ; constraint_type: specifier value
+    }
+  and context_constraint =
+    { ctx_constraint_keyword: Token.t value
+    ; ctx_constraint_ctx_list: capability option value
     }
   and darray_type_specifier =
     { darray_keyword: Token.t value

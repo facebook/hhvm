@@ -485,6 +485,21 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                     }
                 })
             },
+            ContextConstDeclaration(x) => {
+                get_index(9).and_then(|index| { match index {
+                        0 => Some(&x.modifiers),
+                    1 => Some(&x.const_keyword),
+                    2 => Some(&x.ctx_keyword),
+                    3 => Some(&x.name),
+                    4 => Some(&x.type_parameters),
+                    5 => Some(&x.constraint),
+                    6 => Some(&x.equal),
+                    7 => Some(&x.ctx_list),
+                    8 => Some(&x.semicolon),
+                        _ => None,
+                    }
+                })
+            },
             DecoratedExpression(x) => {
                 get_index(2).and_then(|index| { match index {
                         0 => Some(&x.decorator),
@@ -1444,6 +1459,14 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 get_index(2).and_then(|index| { match index {
                         0 => Some(&x.keyword),
                     1 => Some(&x.type_),
+                        _ => None,
+                    }
+                })
+            },
+            ContextConstraint(x) => {
+                get_index(2).and_then(|index| { match index {
+                        0 => Some(&x.keyword),
+                    1 => Some(&x.ctx_list),
                         _ => None,
                     }
                 })

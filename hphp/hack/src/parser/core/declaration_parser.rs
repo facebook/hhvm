@@ -1207,6 +1207,11 @@ where
                 let const_ = self.assert_token(TokenKind::Const);
                 self.parse_type_const_declaration(attribute_spec, modifiers, const_)
             }
+            (TokenKind::Const, TokenKind::Ctx) => {
+                self.continue_from(parser1);
+                let const_ = self.assert_token(TokenKind::Const);
+                self.parse_context_const_declaration(modifiers, const_)
+            }
             _ => self.parse_methodish_or_property(attribute_spec),
         }
     }
@@ -1530,6 +1535,48 @@ where
             type_constraint,
             equal_token,
             type_specifier,
+            semicolon,
+        )
+    }
+
+    fn parse_context_const_declaration(&mut self, modifiers: S::R, const_: S::R) -> S::R {
+        // SPEC
+        // context-constant-declaration:
+        //   abstract-context-constant-declaration
+        //   concrete-context-constant-declaration
+        // abstract-context-constant-declaration:
+        //   abstract  const  ctx  name  context-constraint*  ;
+        // concrete-context-constant-declaration:
+        //   const  ctx  name  context-constraint*  =  context-list  ;
+        let ctx_keyword = self.assert_token(TokenKind::Ctx);
+        let name = self.require_name_allow_non_reserved();
+        let (tparam_list, ctx_constraints) = self.with_type_parser(|p| {
+            (
+                p.parse_generic_type_parameter_list_opt(),
+                p.parse_list_until_none(|p| p.parse_context_constraint_opt()),
+            )
+        });
+        let (equal, ctx_list) = if self.peek_token_kind() == TokenKind::Equal {
+            let equal = self.assert_token(TokenKind::Equal);
+            let ctx_list = self.with_type_parser(|p| p.parse_capability_opt());
+            (equal, ctx_list)
+        } else {
+            let missing1 = S!(make_missing, self, self.pos());
+            let missing2 = S!(make_missing, self, self.pos());
+            (missing1, missing2)
+        };
+        let semicolon = self.require_semicolon();
+        S!(
+            make_context_const_declaration,
+            self,
+            modifiers,
+            const_,
+            ctx_keyword,
+            name,
+            tparam_list,
+            ctx_constraints,
+            equal,
+            ctx_list,
             semicolon,
         )
     }
@@ -1998,6 +2045,11 @@ where
                 let modifiers = self.parse_modifiers();
                 let const_ = self.assert_token(TokenKind::Const);
                 self.parse_type_const_declaration(attributes, modifiers, const_)
+            }
+            (TokenKind::Const, TokenKind::Ctx, _) if kind2 != TokenKind::Equal => {
+                let modifiers = self.parse_modifiers();
+                let const_ = self.assert_token(TokenKind::Const);
+                self.parse_context_const_declaration(modifiers, const_)
             }
             (TokenKind::Const, _, _) => {
                 self.continue_from(parser1);

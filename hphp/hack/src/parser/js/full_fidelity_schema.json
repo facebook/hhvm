@@ -879,6 +879,21 @@
         { "field_name" : "type_specifier" },
         { "field_name" : "semicolon" }
       ] },
+    { "kind_name" : "ContextConstDeclaration",
+      "type_name" : "context_const_declaration",
+      "description" : "context_const_declaration",
+      "prefix" : "context_const",
+      "fields" : [
+        { "field_name" : "modifiers" },
+        { "field_name" : "const_keyword" },
+        { "field_name" : "ctx_keyword" },
+        { "field_name" : "name" },
+        { "field_name" : "type_parameters" },
+        { "field_name" : "constraint" },
+        { "field_name" : "equal" },
+        { "field_name" : "ctx_list" },
+        { "field_name" : "semicolon" }
+      ] },
     { "kind_name" : "DecoratedExpression",
       "type_name" : "decorated_expression",
       "description" : "decorated_expression",
@@ -1841,6 +1856,14 @@
       "fields" : [
         { "field_name" : "keyword" },
         { "field_name" : "type" }
+      ] },
+    { "kind_name" : "ContextConstraint",
+      "type_name" : "context_constraint",
+      "description" : "context_constraint",
+      "prefix" : "ctx_constraint",
+      "fields" : [
+        { "field_name" : "keyword" },
+        { "field_name" : "ctx_list" }
       ] },
     { "kind_name" : "DarrayTypeSpecifier",
       "type_name" : "darray_type_specifier",

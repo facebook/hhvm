@@ -665,6 +665,26 @@ let schema : schema_node list =
         ];
     };
     {
+      kind_name = "ContextConstDeclaration";
+      type_name = "context_const_declaration";
+      func_name = "context_const_declaration";
+      description = "context_const_declaration";
+      prefix = "context_const";
+      aggregates = [ClassBodyDeclaration];
+      fields =
+        [
+          ("modifiers", ZeroOrOne Token);
+          ("const_keyword", Token);
+          ("ctx_keyword", Token);
+          ("name", Token);
+          ("type_parameters", ZeroOrOne (Just "TypeParameters"));
+          ("constraint", ZeroOrMore (Just "ContextConstraint"));
+          ("equal", ZeroOrOne Token);
+          ("ctx_list", ZeroOrOne (Just "Capability"));
+          ("semicolon", Token);
+        ];
+    };
+    {
       kind_name = "DecoratedExpression";
       type_name = "decorated_expression";
       func_name = "decorated_expression";
@@ -2012,6 +2032,15 @@ let schema : schema_node list =
       prefix = "constraint";
       aggregates = [];
       fields = [("keyword", Token); ("type", Aggregate Specifier)];
+    };
+    {
+      kind_name = "ContextConstraint";
+      type_name = "context_constraint";
+      func_name = "context_constraint";
+      description = "context_constraint";
+      prefix = "ctx_constraint";
+      aggregates = [];
+      fields = [("keyword", Token); ("ctx_list", ZeroOrOne (Just "Capability"))];
     };
     {
       kind_name = "DarrayTypeSpecifier";

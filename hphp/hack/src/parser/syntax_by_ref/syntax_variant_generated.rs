@@ -69,6 +69,7 @@ pub enum SyntaxVariant<'a, T, V> {
     ConstDeclaration(&'a ConstDeclarationChildren<'a, T, V>),
     ConstantDeclarator(&'a ConstantDeclaratorChildren<'a, T, V>),
     TypeConstDeclaration(&'a TypeConstDeclarationChildren<'a, T, V>),
+    ContextConstDeclaration(&'a ContextConstDeclarationChildren<'a, T, V>),
     DecoratedExpression(&'a DecoratedExpressionChildren<'a, T, V>),
     ParameterDeclaration(&'a ParameterDeclarationChildren<'a, T, V>),
     VariadicParameter(&'a VariadicParameterChildren<'a, T, V>),
@@ -168,6 +169,7 @@ pub enum SyntaxVariant<'a, T, V> {
     FunctionCtxTypeSpecifier(&'a FunctionCtxTypeSpecifierChildren<'a, T, V>),
     TypeParameter(&'a TypeParameterChildren<'a, T, V>),
     TypeConstraint(&'a TypeConstraintChildren<'a, T, V>),
+    ContextConstraint(&'a ContextConstraintChildren<'a, T, V>),
     DarrayTypeSpecifier(&'a DarrayTypeSpecifierChildren<'a, T, V>),
     DictionaryTypeSpecifier(&'a DictionaryTypeSpecifierChildren<'a, T, V>),
     ClosureTypeSpecifier(&'a ClosureTypeSpecifierChildren<'a, T, V>),
@@ -548,6 +550,19 @@ pub struct TypeConstDeclarationChildren<'a, T, V> {
     pub type_constraint: Syntax<'a, T, V>,
     pub equal: Syntax<'a, T, V>,
     pub type_specifier: Syntax<'a, T, V>,
+    pub semicolon: Syntax<'a, T, V>,
+}
+
+#[derive(Debug, Clone)]
+pub struct ContextConstDeclarationChildren<'a, T, V> {
+    pub modifiers: Syntax<'a, T, V>,
+    pub const_keyword: Syntax<'a, T, V>,
+    pub ctx_keyword: Syntax<'a, T, V>,
+    pub name: Syntax<'a, T, V>,
+    pub type_parameters: Syntax<'a, T, V>,
+    pub constraint: Syntax<'a, T, V>,
+    pub equal: Syntax<'a, T, V>,
+    pub ctx_list: Syntax<'a, T, V>,
     pub semicolon: Syntax<'a, T, V>,
 }
 
@@ -1314,6 +1329,12 @@ pub struct TypeParameterChildren<'a, T, V> {
 pub struct TypeConstraintChildren<'a, T, V> {
     pub keyword: Syntax<'a, T, V>,
     pub type_: Syntax<'a, T, V>,
+}
+
+#[derive(Debug, Clone)]
+pub struct ContextConstraintChildren<'a, T, V> {
+    pub keyword: Syntax<'a, T, V>,
+    pub ctx_list: Syntax<'a, T, V>,
 }
 
 #[derive(Debug, Clone)]

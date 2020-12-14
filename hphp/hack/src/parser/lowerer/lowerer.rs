@@ -3934,6 +3934,7 @@ where
                     doc_comment: doc_comment_opt,
                 }))
             }
+            ContextConstDeclaration(_) => Ok(()), // TODO(coeffects) implement later
             PropertyDeclaration(c) => {
                 let user_attributes = Self::p_user_attributes(&c.attribute_spec, env)?;
                 let type_ = Self::mp_optional(Self::p_hint, &c.type_, env)?

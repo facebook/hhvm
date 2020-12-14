@@ -517,6 +517,22 @@ where
         Self::make(syntax, value)
     }
 
+    fn make_context_const_declaration(ctx: &C, modifiers: Self, const_keyword: Self, ctx_keyword: Self, name: Self, type_parameters: Self, constraint: Self, equal: Self, ctx_list: Self, semicolon: Self) -> Self {
+        let syntax = SyntaxVariant::ContextConstDeclaration(ctx.get_arena().alloc(ContextConstDeclarationChildren {
+            modifiers,
+            const_keyword,
+            ctx_keyword,
+            name,
+            type_parameters,
+            constraint,
+            equal,
+            ctx_list,
+            semicolon,
+        }));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
+        Self::make(syntax, value)
+    }
+
     fn make_decorated_expression(ctx: &C, decorator: Self, expression: Self) -> Self {
         let syntax = SyntaxVariant::DecoratedExpression(ctx.get_arena().alloc(DecoratedExpressionChildren {
             decorator,
@@ -1574,6 +1590,15 @@ where
         let syntax = SyntaxVariant::TypeConstraint(ctx.get_arena().alloc(TypeConstraintChildren {
             keyword,
             type_,
+        }));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
+        Self::make(syntax, value)
+    }
+
+    fn make_context_constraint(ctx: &C, keyword: Self, ctx_list: Self) -> Self {
+        let syntax = SyntaxVariant::ContextConstraint(ctx.get_arena().alloc(ContextConstraintChildren {
+            keyword,
+            ctx_list,
         }));
         let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)

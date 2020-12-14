@@ -229,6 +229,10 @@ impl<'src> SmartConstructors for DirectDeclSmartConstructors<'src> {
         <Self as FlattenSmartConstructors<'src, State<'src>>>::make_type_const_declaration(self, attribute_spec, modifiers, keyword, type_keyword, name, type_parameters, type_constraint, equal, type_specifier, semicolon)
     }
 
+    fn make_context_const_declaration(&mut self, modifiers: Self::R, const_keyword: Self::R, ctx_keyword: Self::R, name: Self::R, type_parameters: Self::R, constraint: Self::R, equal: Self::R, ctx_list: Self::R, semicolon: Self::R) -> Self::R {
+        <Self as FlattenSmartConstructors<'src, State<'src>>>::make_context_const_declaration(self, modifiers, const_keyword, ctx_keyword, name, type_parameters, constraint, equal, ctx_list, semicolon)
+    }
+
     fn make_decorated_expression(&mut self, decorator: Self::R, expression: Self::R) -> Self::R {
         <Self as FlattenSmartConstructors<'src, State<'src>>>::make_decorated_expression(self, decorator, expression)
     }
@@ -623,6 +627,10 @@ impl<'src> SmartConstructors for DirectDeclSmartConstructors<'src> {
 
     fn make_type_constraint(&mut self, keyword: Self::R, type_: Self::R) -> Self::R {
         <Self as FlattenSmartConstructors<'src, State<'src>>>::make_type_constraint(self, keyword, type_)
+    }
+
+    fn make_context_constraint(&mut self, keyword: Self::R, ctx_list: Self::R) -> Self::R {
+        <Self as FlattenSmartConstructors<'src, State<'src>>>::make_context_constraint(self, keyword, ctx_list)
     }
 
     fn make_darray_type_specifier(&mut self, keyword: Self::R, left_angle: Self::R, key: Self::R, comma: Self::R, value: Self::R, trailing_comma: Self::R, right_angle: Self::R) -> Self::R {

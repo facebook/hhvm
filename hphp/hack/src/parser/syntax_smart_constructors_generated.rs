@@ -265,6 +265,11 @@ where
         Self::R::make_type_const_declaration(self.state_mut(), arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9)
     }
 
+    fn make_context_const_declaration(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R, arg5 : Self::R, arg6 : Self::R, arg7 : Self::R, arg8 : Self::R) -> Self::R {
+        self.state_mut().next(&[&arg0, &arg1, &arg2, &arg3, &arg4, &arg5, &arg6, &arg7, &arg8]);
+        Self::R::make_context_const_declaration(self.state_mut(), arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8)
+    }
+
     fn make_decorated_expression(&mut self, arg0 : Self::R, arg1 : Self::R) -> Self::R {
         self.state_mut().next(&[&arg0, &arg1]);
         Self::R::make_decorated_expression(self.state_mut(), arg0, arg1)
@@ -758,6 +763,11 @@ where
     fn make_type_constraint(&mut self, arg0 : Self::R, arg1 : Self::R) -> Self::R {
         self.state_mut().next(&[&arg0, &arg1]);
         Self::R::make_type_constraint(self.state_mut(), arg0, arg1)
+    }
+
+    fn make_context_constraint(&mut self, arg0 : Self::R, arg1 : Self::R) -> Self::R {
+        self.state_mut().next(&[&arg0, &arg1]);
+        Self::R::make_context_constraint(self.state_mut(), arg0, arg1)
     }
 
     fn make_darray_type_specifier(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R, arg5 : Self::R, arg6 : Self::R) -> Self::R {

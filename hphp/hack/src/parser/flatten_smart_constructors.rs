@@ -389,6 +389,14 @@ pub trait FlattenSmartConstructors<'src, State>
         }
     }
 
+    fn make_context_const_declaration(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R, arg5: Self::R, arg6: Self::R, arg7: Self::R, arg8: Self::R) -> Self::R {
+        if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) && Self::is_zero(&arg4) && Self::is_zero(&arg5) && Self::is_zero(&arg6) && Self::is_zero(&arg7) && Self::is_zero(&arg8) {
+          Self::zero(SyntaxKind::ContextConstDeclaration)
+        } else {
+          self.flatten(SyntaxKind::ContextConstDeclaration, vec!(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8))
+        }
+    }
+
     fn make_decorated_expression(&mut self, arg0: Self::R, arg1: Self::R) -> Self::R {
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) {
           Self::zero(SyntaxKind::DecoratedExpression)
@@ -1178,6 +1186,14 @@ pub trait FlattenSmartConstructors<'src, State>
           Self::zero(SyntaxKind::TypeConstraint)
         } else {
           self.flatten(SyntaxKind::TypeConstraint, vec!(arg0, arg1))
+        }
+    }
+
+    fn make_context_constraint(&mut self, arg0: Self::R, arg1: Self::R) -> Self::R {
+        if Self::is_zero(&arg0) && Self::is_zero(&arg1) {
+          Self::zero(SyntaxKind::ContextConstraint)
+        } else {
+          self.flatten(SyntaxKind::ContextConstraint, vec!(arg0, arg1))
         }
     }
 

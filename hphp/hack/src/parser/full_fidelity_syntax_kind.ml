@@ -64,6 +64,7 @@ type t =
   | ConstDeclaration
   | ConstantDeclarator
   | TypeConstDeclaration
+  | ContextConstDeclaration
   | DecoratedExpression
   | ParameterDeclaration
   | VariadicParameter
@@ -163,6 +164,7 @@ type t =
   | FunctionCtxTypeSpecifier
   | TypeParameter
   | TypeConstraint
+  | ContextConstraint
   | DarrayTypeSpecifier
   | DictionaryTypeSpecifier
   | ClosureTypeSpecifier
@@ -238,6 +240,7 @@ let to_string kind =
   | ConstDeclaration                  -> "const_declaration"
   | ConstantDeclarator                -> "constant_declarator"
   | TypeConstDeclaration              -> "type_const_declaration"
+  | ContextConstDeclaration           -> "context_const_declaration"
   | DecoratedExpression               -> "decorated_expression"
   | ParameterDeclaration              -> "parameter_declaration"
   | VariadicParameter                 -> "variadic_parameter"
@@ -337,6 +340,7 @@ let to_string kind =
   | FunctionCtxTypeSpecifier          -> "function_ctx_type_specifier"
   | TypeParameter                     -> "type_parameter"
   | TypeConstraint                    -> "type_constraint"
+  | ContextConstraint                 -> "context_constraint"
   | DarrayTypeSpecifier               -> "darray_type_specifier"
   | DictionaryTypeSpecifier           -> "dictionary_type_specifier"
   | ClosureTypeSpecifier              -> "closure_type_specifier"

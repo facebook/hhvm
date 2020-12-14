@@ -859,6 +859,37 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           t env semi;
           Newline;
         ]
+    | Syntax.ContextConstDeclaration
+        {
+          context_const_modifiers = modifiers;
+          context_const_const_keyword = kw;
+          context_const_ctx_keyword = ctx_kw;
+          context_const_name = name;
+          context_const_type_parameters = type_params;
+          context_const_constraint = constraint_;
+          context_const_equal = eq;
+          context_const_ctx_list = ctx_list;
+          context_const_semicolon = semi;
+        } ->
+      Concat
+        [
+          handle_possible_list env ~after_each:(fun _ -> Space) modifiers;
+          Space;
+          t env kw;
+          Space;
+          t env ctx_kw;
+          Space;
+          t env name;
+          t env type_params;
+          when_present constraint_ space;
+          t env constraint_;
+          when_present eq space;
+          t env eq;
+          when_present ctx_list (fun _ ->
+              Concat [Space; SplitWith Cost.Base; Nest [t env ctx_list]]);
+          t env semi;
+          Newline;
+        ]
     | Syntax.ParameterDeclaration
         {
           parameter_attribute = attr;
@@ -2112,6 +2143,9 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
         ]
     | Syntax.TypeConstraint { constraint_keyword = kw; constraint_type } ->
       Concat [t env kw; Space; t env constraint_type]
+    | Syntax.ContextConstraint
+        { ctx_constraint_keyword = kw; ctx_constraint_ctx_list = ctx_list } ->
+      Concat [t env kw; Space; t env ctx_list]
     | Syntax.DarrayTypeSpecifier
         {
           darray_keyword = kw;

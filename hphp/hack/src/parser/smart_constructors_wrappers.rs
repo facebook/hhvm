@@ -203,6 +203,9 @@ where S: SmartConstructors<State = State>,
     fn make_type_const_declaration(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R, arg5 : Self::R, arg6 : Self::R, arg7 : Self::R, arg8 : Self::R, arg9 : Self::R) -> Self::R {
         compose(SyntaxKind::TypeConstDeclaration, self.s.make_type_const_declaration(arg0.1, arg1.1, arg2.1, arg3.1, arg4.1, arg5.1, arg6.1, arg7.1, arg8.1, arg9.1))
     }
+    fn make_context_const_declaration(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R, arg5 : Self::R, arg6 : Self::R, arg7 : Self::R, arg8 : Self::R) -> Self::R {
+        compose(SyntaxKind::ContextConstDeclaration, self.s.make_context_const_declaration(arg0.1, arg1.1, arg2.1, arg3.1, arg4.1, arg5.1, arg6.1, arg7.1, arg8.1))
+    }
     fn make_decorated_expression(&mut self, arg0 : Self::R, arg1 : Self::R) -> Self::R {
         compose(SyntaxKind::DecoratedExpression, self.s.make_decorated_expression(arg0.1, arg1.1))
     }
@@ -499,6 +502,9 @@ where S: SmartConstructors<State = State>,
     }
     fn make_type_constraint(&mut self, arg0 : Self::R, arg1 : Self::R) -> Self::R {
         compose(SyntaxKind::TypeConstraint, self.s.make_type_constraint(arg0.1, arg1.1))
+    }
+    fn make_context_constraint(&mut self, arg0 : Self::R, arg1 : Self::R) -> Self::R {
+        compose(SyntaxKind::ContextConstraint, self.s.make_context_constraint(arg0.1, arg1.1))
     }
     fn make_darray_type_specifier(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R, arg5 : Self::R, arg6 : Self::R) -> Self::R {
         compose(SyntaxKind::DarrayTypeSpecifier, self.s.make_darray_type_specifier(arg0.1, arg1.1, arg2.1, arg3.1, arg4.1, arg5.1, arg6.1))

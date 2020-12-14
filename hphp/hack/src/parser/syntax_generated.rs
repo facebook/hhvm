@@ -511,6 +511,22 @@ where
         Self::make(syntax, value)
     }
 
+    fn make_context_const_declaration(_: &C, context_const_modifiers: Self, context_const_const_keyword: Self, context_const_ctx_keyword: Self, context_const_name: Self, context_const_type_parameters: Self, context_const_constraint: Self, context_const_equal: Self, context_const_ctx_list: Self, context_const_semicolon: Self) -> Self {
+        let syntax = SyntaxVariant::ContextConstDeclaration(Box::new(ContextConstDeclarationChildren {
+            context_const_modifiers,
+            context_const_const_keyword,
+            context_const_ctx_keyword,
+            context_const_name,
+            context_const_type_parameters,
+            context_const_constraint,
+            context_const_equal,
+            context_const_ctx_list,
+            context_const_semicolon,
+        }));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
+        Self::make(syntax, value)
+    }
+
     fn make_decorated_expression(_: &C, decorated_expression_decorator: Self, decorated_expression_expression: Self) -> Self {
         let syntax = SyntaxVariant::DecoratedExpression(Box::new(DecoratedExpressionChildren {
             decorated_expression_decorator,
@@ -1573,6 +1589,15 @@ where
         Self::make(syntax, value)
     }
 
+    fn make_context_constraint(_: &C, ctx_constraint_keyword: Self, ctx_constraint_ctx_list: Self) -> Self {
+        let syntax = SyntaxVariant::ContextConstraint(Box::new(ContextConstraintChildren {
+            ctx_constraint_keyword,
+            ctx_constraint_ctx_list,
+        }));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
+        Self::make(syntax, value)
+    }
+
     fn make_darray_type_specifier(_: &C, darray_keyword: Self, darray_left_angle: Self, darray_key: Self, darray_comma: Self, darray_value: Self, darray_trailing_comma: Self, darray_right_angle: Self) -> Self {
         let syntax = SyntaxVariant::DarrayTypeSpecifier(Box::new(DarrayTypeSpecifierChildren {
             darray_keyword,
@@ -2196,6 +2221,19 @@ where
                 let acc = f(type_const_equal, acc);
                 let acc = f(type_const_type_specifier, acc);
                 let acc = f(type_const_semicolon, acc);
+                acc
+            },
+            SyntaxVariant::ContextConstDeclaration(x) => {
+                let ContextConstDeclarationChildren { context_const_modifiers, context_const_const_keyword, context_const_ctx_keyword, context_const_name, context_const_type_parameters, context_const_constraint, context_const_equal, context_const_ctx_list, context_const_semicolon } = *x;
+                let acc = f(context_const_modifiers, acc);
+                let acc = f(context_const_const_keyword, acc);
+                let acc = f(context_const_ctx_keyword, acc);
+                let acc = f(context_const_name, acc);
+                let acc = f(context_const_type_parameters, acc);
+                let acc = f(context_const_constraint, acc);
+                let acc = f(context_const_equal, acc);
+                let acc = f(context_const_ctx_list, acc);
+                let acc = f(context_const_semicolon, acc);
                 acc
             },
             SyntaxVariant::DecoratedExpression(x) => {
@@ -2963,6 +3001,12 @@ where
                 let acc = f(constraint_type, acc);
                 acc
             },
+            SyntaxVariant::ContextConstraint(x) => {
+                let ContextConstraintChildren { ctx_constraint_keyword, ctx_constraint_ctx_list } = *x;
+                let acc = f(ctx_constraint_keyword, acc);
+                let acc = f(ctx_constraint_ctx_list, acc);
+                acc
+            },
             SyntaxVariant::DarrayTypeSpecifier(x) => {
                 let DarrayTypeSpecifierChildren { darray_keyword, darray_left_angle, darray_key, darray_comma, darray_value, darray_trailing_comma, darray_right_angle } = *x;
                 let acc = f(darray_keyword, acc);
@@ -3190,6 +3234,7 @@ where
             SyntaxVariant::ConstDeclaration {..} => SyntaxKind::ConstDeclaration,
             SyntaxVariant::ConstantDeclarator {..} => SyntaxKind::ConstantDeclarator,
             SyntaxVariant::TypeConstDeclaration {..} => SyntaxKind::TypeConstDeclaration,
+            SyntaxVariant::ContextConstDeclaration {..} => SyntaxKind::ContextConstDeclaration,
             SyntaxVariant::DecoratedExpression {..} => SyntaxKind::DecoratedExpression,
             SyntaxVariant::ParameterDeclaration {..} => SyntaxKind::ParameterDeclaration,
             SyntaxVariant::VariadicParameter {..} => SyntaxKind::VariadicParameter,
@@ -3289,6 +3334,7 @@ where
             SyntaxVariant::FunctionCtxTypeSpecifier {..} => SyntaxKind::FunctionCtxTypeSpecifier,
             SyntaxVariant::TypeParameter {..} => SyntaxKind::TypeParameter,
             SyntaxVariant::TypeConstraint {..} => SyntaxKind::TypeConstraint,
+            SyntaxVariant::ContextConstraint {..} => SyntaxKind::ContextConstraint,
             SyntaxVariant::DarrayTypeSpecifier {..} => SyntaxKind::DarrayTypeSpecifier,
             SyntaxVariant::DictionaryTypeSpecifier {..} => SyntaxKind::DictionaryTypeSpecifier,
             SyntaxVariant::ClosureTypeSpecifier {..} => SyntaxKind::ClosureTypeSpecifier,
@@ -3632,6 +3678,18 @@ where
                  type_const_keyword: ts.pop().unwrap(),
                  type_const_modifiers: ts.pop().unwrap(),
                  type_const_attribute_spec: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::ContextConstDeclaration, 9) => SyntaxVariant::ContextConstDeclaration(Box::new(ContextConstDeclarationChildren {
+                 context_const_semicolon: ts.pop().unwrap(),
+                 context_const_ctx_list: ts.pop().unwrap(),
+                 context_const_equal: ts.pop().unwrap(),
+                 context_const_constraint: ts.pop().unwrap(),
+                 context_const_type_parameters: ts.pop().unwrap(),
+                 context_const_name: ts.pop().unwrap(),
+                 context_const_ctx_keyword: ts.pop().unwrap(),
+                 context_const_const_keyword: ts.pop().unwrap(),
+                 context_const_modifiers: ts.pop().unwrap(),
                  
              })),
              (SyntaxKind::DecoratedExpression, 2) => SyntaxVariant::DecoratedExpression(Box::new(DecoratedExpressionChildren {
@@ -4300,6 +4358,11 @@ where
                  constraint_keyword: ts.pop().unwrap(),
                  
              })),
+             (SyntaxKind::ContextConstraint, 2) => SyntaxVariant::ContextConstraint(Box::new(ContextConstraintChildren {
+                 ctx_constraint_ctx_list: ts.pop().unwrap(),
+                 ctx_constraint_keyword: ts.pop().unwrap(),
+                 
+             })),
              (SyntaxKind::DarrayTypeSpecifier, 7) => SyntaxVariant::DarrayTypeSpecifier(Box::new(DarrayTypeSpecifierChildren {
                  darray_right_angle: ts.pop().unwrap(),
                  darray_trailing_comma: ts.pop().unwrap(),
@@ -4811,6 +4874,19 @@ pub struct TypeConstDeclarationChildren<T, V> {
     pub type_const_equal: Syntax<T, V>,
     pub type_const_type_specifier: Syntax<T, V>,
     pub type_const_semicolon: Syntax<T, V>,
+}
+
+#[derive(Debug, Clone)]
+pub struct ContextConstDeclarationChildren<T, V> {
+    pub context_const_modifiers: Syntax<T, V>,
+    pub context_const_const_keyword: Syntax<T, V>,
+    pub context_const_ctx_keyword: Syntax<T, V>,
+    pub context_const_name: Syntax<T, V>,
+    pub context_const_type_parameters: Syntax<T, V>,
+    pub context_const_constraint: Syntax<T, V>,
+    pub context_const_equal: Syntax<T, V>,
+    pub context_const_ctx_list: Syntax<T, V>,
+    pub context_const_semicolon: Syntax<T, V>,
 }
 
 #[derive(Debug, Clone)]
@@ -5579,6 +5655,12 @@ pub struct TypeConstraintChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+pub struct ContextConstraintChildren<T, V> {
+    pub ctx_constraint_keyword: Syntax<T, V>,
+    pub ctx_constraint_ctx_list: Syntax<T, V>,
+}
+
+#[derive(Debug, Clone)]
 pub struct DarrayTypeSpecifierChildren<T, V> {
     pub darray_keyword: Syntax<T, V>,
     pub darray_left_angle: Syntax<T, V>,
@@ -5802,6 +5884,7 @@ pub enum SyntaxVariant<T, V> {
     ConstDeclaration(Box<ConstDeclarationChildren<T, V>>),
     ConstantDeclarator(Box<ConstantDeclaratorChildren<T, V>>),
     TypeConstDeclaration(Box<TypeConstDeclarationChildren<T, V>>),
+    ContextConstDeclaration(Box<ContextConstDeclarationChildren<T, V>>),
     DecoratedExpression(Box<DecoratedExpressionChildren<T, V>>),
     ParameterDeclaration(Box<ParameterDeclarationChildren<T, V>>),
     VariadicParameter(Box<VariadicParameterChildren<T, V>>),
@@ -5901,6 +5984,7 @@ pub enum SyntaxVariant<T, V> {
     FunctionCtxTypeSpecifier(Box<FunctionCtxTypeSpecifierChildren<T, V>>),
     TypeParameter(Box<TypeParameterChildren<T, V>>),
     TypeConstraint(Box<TypeConstraintChildren<T, V>>),
+    ContextConstraint(Box<ContextConstraintChildren<T, V>>),
     DarrayTypeSpecifier(Box<DarrayTypeSpecifierChildren<T, V>>),
     DictionaryTypeSpecifier(Box<DictionaryTypeSpecifierChildren<T, V>>),
     ClosureTypeSpecifier(Box<ClosureTypeSpecifierChildren<T, V>>),
@@ -6386,6 +6470,21 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                     7 => Some(&x.type_const_equal),
                     8 => Some(&x.type_const_type_specifier),
                     9 => Some(&x.type_const_semicolon),
+                        _ => None,
+                    }
+                })
+            },
+            ContextConstDeclaration(x) => {
+                get_index(9).and_then(|index| { match index {
+                        0 => Some(&x.context_const_modifiers),
+                    1 => Some(&x.context_const_const_keyword),
+                    2 => Some(&x.context_const_ctx_keyword),
+                    3 => Some(&x.context_const_name),
+                    4 => Some(&x.context_const_type_parameters),
+                    5 => Some(&x.context_const_constraint),
+                    6 => Some(&x.context_const_equal),
+                    7 => Some(&x.context_const_ctx_list),
+                    8 => Some(&x.context_const_semicolon),
                         _ => None,
                     }
                 })
@@ -7349,6 +7448,14 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 get_index(2).and_then(|index| { match index {
                         0 => Some(&x.constraint_keyword),
                     1 => Some(&x.constraint_type),
+                        _ => None,
+                    }
+                })
+            },
+            ContextConstraint(x) => {
+                get_index(2).and_then(|index| { match index {
+                        0 => Some(&x.ctx_constraint_keyword),
+                    1 => Some(&x.ctx_constraint_ctx_list),
                         _ => None,
                     }
                 })

@@ -302,6 +302,17 @@ module type Syntax_S = sig
     ; type_const_type_specifier                          : t
     ; type_const_semicolon                               : t
     }
+  | ContextConstDeclaration           of
+    { context_const_modifiers                            : t
+    ; context_const_const_keyword                        : t
+    ; context_const_ctx_keyword                          : t
+    ; context_const_name                                 : t
+    ; context_const_type_parameters                      : t
+    ; context_const_constraint                           : t
+    ; context_const_equal                                : t
+    ; context_const_ctx_list                             : t
+    ; context_const_semicolon                            : t
+    }
   | DecoratedExpression               of
     { decorated_expression_decorator                     : t
     ; decorated_expression_expression                    : t
@@ -869,6 +880,10 @@ module type Syntax_S = sig
     { constraint_keyword                                 : t
     ; constraint_type                                    : t
     }
+  | ContextConstraint                 of
+    { ctx_constraint_keyword                             : t
+    ; ctx_constraint_ctx_list                            : t
+    }
   | DarrayTypeSpecifier               of
     { darray_keyword                                     : t
     ; darray_left_angle                                  : t
@@ -1075,6 +1090,7 @@ module type Syntax_S = sig
   val make_const_declaration : t -> t -> t -> t -> t -> t
   val make_constant_declarator : t -> t -> t
   val make_type_const_declaration : t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t
+  val make_context_const_declaration : t -> t -> t -> t -> t -> t -> t -> t -> t -> t
   val make_decorated_expression : t -> t -> t
   val make_parameter_declaration : t -> t -> t -> t -> t -> t -> t
   val make_variadic_parameter : t -> t -> t -> t
@@ -1174,6 +1190,7 @@ module type Syntax_S = sig
   val make_function_ctx_type_specifier : t -> t -> t
   val make_type_parameter : t -> t -> t -> t -> t -> t -> t
   val make_type_constraint : t -> t -> t
+  val make_context_constraint : t -> t -> t
   val make_darray_type_specifier : t -> t -> t -> t -> t -> t -> t -> t
   val make_dictionary_type_specifier : t -> t -> t -> t -> t
   val make_closure_type_specifier : t -> t -> t -> t -> t -> t -> t -> t -> t -> t
@@ -1247,6 +1264,7 @@ module type Syntax_S = sig
   val is_const_declaration : t -> bool
   val is_constant_declarator : t -> bool
   val is_type_const_declaration : t -> bool
+  val is_context_const_declaration : t -> bool
   val is_decorated_expression : t -> bool
   val is_parameter_declaration : t -> bool
   val is_variadic_parameter : t -> bool
@@ -1346,6 +1364,7 @@ module type Syntax_S = sig
   val is_function_ctx_type_specifier : t -> bool
   val is_type_parameter : t -> bool
   val is_type_constraint : t -> bool
+  val is_context_constraint : t -> bool
   val is_darray_type_specifier : t -> bool
   val is_dictionary_type_specifier : t -> bool
   val is_closure_type_specifier : t -> bool

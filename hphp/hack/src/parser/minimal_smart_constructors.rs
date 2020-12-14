@@ -244,6 +244,10 @@ impl<'src> SmartConstructors for MinimalSmartConstructors {
         <Self as SyntaxSmartConstructors<MinimalSyntax, SimpleTokenFactoryImpl<MinimalToken>, NoState>>::make_type_const_declaration(self, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9)
     }
 
+    fn make_context_const_declaration(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R, arg5: Self::R, arg6: Self::R, arg7: Self::R, arg8: Self::R) -> Self::R {
+        <Self as SyntaxSmartConstructors<MinimalSyntax, SimpleTokenFactoryImpl<MinimalToken>, NoState>>::make_context_const_declaration(self, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8)
+    }
+
     fn make_decorated_expression(&mut self, arg0: Self::R, arg1: Self::R) -> Self::R {
         <Self as SyntaxSmartConstructors<MinimalSyntax, SimpleTokenFactoryImpl<MinimalToken>, NoState>>::make_decorated_expression(self, arg0, arg1)
     }
@@ -638,6 +642,10 @@ impl<'src> SmartConstructors for MinimalSmartConstructors {
 
     fn make_type_constraint(&mut self, arg0: Self::R, arg1: Self::R) -> Self::R {
         <Self as SyntaxSmartConstructors<MinimalSyntax, SimpleTokenFactoryImpl<MinimalToken>, NoState>>::make_type_constraint(self, arg0, arg1)
+    }
+
+    fn make_context_constraint(&mut self, arg0: Self::R, arg1: Self::R) -> Self::R {
+        <Self as SyntaxSmartConstructors<MinimalSyntax, SimpleTokenFactoryImpl<MinimalToken>, NoState>>::make_context_constraint(self, arg0, arg1)
     }
 
     fn make_darray_type_specifier(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R, arg5: Self::R, arg6: Self::R) -> Self::R {

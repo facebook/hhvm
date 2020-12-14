@@ -1062,6 +1062,27 @@ where
         }
     }
 
+    pub fn parse_context_constraint_opt(&mut self) -> Option<S::R> {
+        // SPEC
+        // context-constraint:
+        //   as  context-list
+        //   super  context-list
+        match self.peek_token_kind() {
+            TokenKind::As | TokenKind::Super => {
+                let constraint_token = self.next_token();
+                let constraint_token = S!(make_token, self, constraint_token);
+                let constraint_ctx = self.parse_capability_opt();
+                Some(S!(
+                    make_type_constraint,
+                    self,
+                    constraint_token,
+                    constraint_ctx
+                ))
+            }
+            _ => None,
+        }
+    }
+
     pub fn parse_return_type(&mut self) -> S::R {
         if self.peek_token_kind() == TokenKind::Noreturn {
             let token = self.next_token();

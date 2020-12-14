@@ -103,6 +103,7 @@ module WithToken(Token: TokenType) = struct
       | ConstDeclaration                  _ -> SyntaxKind.ConstDeclaration
       | ConstantDeclarator                _ -> SyntaxKind.ConstantDeclarator
       | TypeConstDeclaration              _ -> SyntaxKind.TypeConstDeclaration
+      | ContextConstDeclaration           _ -> SyntaxKind.ContextConstDeclaration
       | DecoratedExpression               _ -> SyntaxKind.DecoratedExpression
       | ParameterDeclaration              _ -> SyntaxKind.ParameterDeclaration
       | VariadicParameter                 _ -> SyntaxKind.VariadicParameter
@@ -202,6 +203,7 @@ module WithToken(Token: TokenType) = struct
       | FunctionCtxTypeSpecifier          _ -> SyntaxKind.FunctionCtxTypeSpecifier
       | TypeParameter                     _ -> SyntaxKind.TypeParameter
       | TypeConstraint                    _ -> SyntaxKind.TypeConstraint
+      | ContextConstraint                 _ -> SyntaxKind.ContextConstraint
       | DarrayTypeSpecifier               _ -> SyntaxKind.DarrayTypeSpecifier
       | DictionaryTypeSpecifier           _ -> SyntaxKind.DictionaryTypeSpecifier
       | ClosureTypeSpecifier              _ -> SyntaxKind.ClosureTypeSpecifier
@@ -287,6 +289,7 @@ module WithToken(Token: TokenType) = struct
     let is_const_declaration                    = has_kind SyntaxKind.ConstDeclaration
     let is_constant_declarator                  = has_kind SyntaxKind.ConstantDeclarator
     let is_type_const_declaration               = has_kind SyntaxKind.TypeConstDeclaration
+    let is_context_const_declaration            = has_kind SyntaxKind.ContextConstDeclaration
     let is_decorated_expression                 = has_kind SyntaxKind.DecoratedExpression
     let is_parameter_declaration                = has_kind SyntaxKind.ParameterDeclaration
     let is_variadic_parameter                   = has_kind SyntaxKind.VariadicParameter
@@ -386,6 +389,7 @@ module WithToken(Token: TokenType) = struct
     let is_function_ctx_type_specifier          = has_kind SyntaxKind.FunctionCtxTypeSpecifier
     let is_type_parameter                       = has_kind SyntaxKind.TypeParameter
     let is_type_constraint                      = has_kind SyntaxKind.TypeConstraint
+    let is_context_constraint                   = has_kind SyntaxKind.ContextConstraint
     let is_darray_type_specifier                = has_kind SyntaxKind.DarrayTypeSpecifier
     let is_dictionary_type_specifier            = has_kind SyntaxKind.DictionaryTypeSpecifier
     let is_closure_type_specifier               = has_kind SyntaxKind.ClosureTypeSpecifier
@@ -985,6 +989,27 @@ module WithToken(Token: TokenType) = struct
          let acc = f acc type_const_equal in
          let acc = f acc type_const_type_specifier in
          let acc = f acc type_const_semicolon in
+         acc
+      | ContextConstDeclaration {
+        context_const_modifiers;
+        context_const_const_keyword;
+        context_const_ctx_keyword;
+        context_const_name;
+        context_const_type_parameters;
+        context_const_constraint;
+        context_const_equal;
+        context_const_ctx_list;
+        context_const_semicolon;
+      } ->
+         let acc = f acc context_const_modifiers in
+         let acc = f acc context_const_const_keyword in
+         let acc = f acc context_const_ctx_keyword in
+         let acc = f acc context_const_name in
+         let acc = f acc context_const_type_parameters in
+         let acc = f acc context_const_constraint in
+         let acc = f acc context_const_equal in
+         let acc = f acc context_const_ctx_list in
+         let acc = f acc context_const_semicolon in
          acc
       | DecoratedExpression {
         decorated_expression_decorator;
@@ -2021,6 +2046,13 @@ module WithToken(Token: TokenType) = struct
          let acc = f acc constraint_keyword in
          let acc = f acc constraint_type in
          acc
+      | ContextConstraint {
+        ctx_constraint_keyword;
+        ctx_constraint_ctx_list;
+      } ->
+         let acc = f acc ctx_constraint_keyword in
+         let acc = f acc ctx_constraint_ctx_list in
+         acc
       | DarrayTypeSpecifier {
         darray_keyword;
         darray_left_angle;
@@ -2758,6 +2790,27 @@ module WithToken(Token: TokenType) = struct
         type_const_equal;
         type_const_type_specifier;
         type_const_semicolon;
+      ]
+      | ContextConstDeclaration {
+        context_const_modifiers;
+        context_const_const_keyword;
+        context_const_ctx_keyword;
+        context_const_name;
+        context_const_type_parameters;
+        context_const_constraint;
+        context_const_equal;
+        context_const_ctx_list;
+        context_const_semicolon;
+      } -> [
+        context_const_modifiers;
+        context_const_const_keyword;
+        context_const_ctx_keyword;
+        context_const_name;
+        context_const_type_parameters;
+        context_const_constraint;
+        context_const_equal;
+        context_const_ctx_list;
+        context_const_semicolon;
       ]
       | DecoratedExpression {
         decorated_expression_decorator;
@@ -3794,6 +3847,13 @@ module WithToken(Token: TokenType) = struct
         constraint_keyword;
         constraint_type;
       ]
+      | ContextConstraint {
+        ctx_constraint_keyword;
+        ctx_constraint_ctx_list;
+      } -> [
+        ctx_constraint_keyword;
+        ctx_constraint_ctx_list;
+      ]
       | DarrayTypeSpecifier {
         darray_keyword;
         darray_left_angle;
@@ -4532,6 +4592,27 @@ module WithToken(Token: TokenType) = struct
         "type_const_equal";
         "type_const_type_specifier";
         "type_const_semicolon";
+      ]
+      | ContextConstDeclaration {
+        context_const_modifiers;
+        context_const_const_keyword;
+        context_const_ctx_keyword;
+        context_const_name;
+        context_const_type_parameters;
+        context_const_constraint;
+        context_const_equal;
+        context_const_ctx_list;
+        context_const_semicolon;
+      } -> [
+        "context_const_modifiers";
+        "context_const_const_keyword";
+        "context_const_ctx_keyword";
+        "context_const_name";
+        "context_const_type_parameters";
+        "context_const_constraint";
+        "context_const_equal";
+        "context_const_ctx_list";
+        "context_const_semicolon";
       ]
       | DecoratedExpression {
         decorated_expression_decorator;
@@ -5568,6 +5649,13 @@ module WithToken(Token: TokenType) = struct
         "constraint_keyword";
         "constraint_type";
       ]
+      | ContextConstraint {
+        ctx_constraint_keyword;
+        ctx_constraint_ctx_list;
+      } -> [
+        "ctx_constraint_keyword";
+        "ctx_constraint_ctx_list";
+      ]
       | DarrayTypeSpecifier {
         darray_keyword;
         darray_left_angle;
@@ -6404,6 +6492,28 @@ module WithToken(Token: TokenType) = struct
           type_const_equal;
           type_const_type_specifier;
           type_const_semicolon;
+        }
+      | (SyntaxKind.ContextConstDeclaration, [
+          context_const_modifiers;
+          context_const_const_keyword;
+          context_const_ctx_keyword;
+          context_const_name;
+          context_const_type_parameters;
+          context_const_constraint;
+          context_const_equal;
+          context_const_ctx_list;
+          context_const_semicolon;
+        ]) ->
+        ContextConstDeclaration {
+          context_const_modifiers;
+          context_const_const_keyword;
+          context_const_ctx_keyword;
+          context_const_name;
+          context_const_type_parameters;
+          context_const_constraint;
+          context_const_equal;
+          context_const_ctx_list;
+          context_const_semicolon;
         }
       | (SyntaxKind.DecoratedExpression, [
           decorated_expression_decorator;
@@ -7539,6 +7649,14 @@ module WithToken(Token: TokenType) = struct
           constraint_keyword;
           constraint_type;
         }
+      | (SyntaxKind.ContextConstraint, [
+          ctx_constraint_keyword;
+          ctx_constraint_ctx_list;
+        ]) ->
+        ContextConstraint {
+          ctx_constraint_keyword;
+          ctx_constraint_ctx_list;
+        }
       | (SyntaxKind.DarrayTypeSpecifier, [
           darray_keyword;
           darray_left_angle;
@@ -8509,6 +8627,31 @@ module WithToken(Token: TokenType) = struct
           type_const_equal;
           type_const_type_specifier;
           type_const_semicolon;
+        } in
+        let value = ValueBuilder.value_from_syntax syntax in
+        make syntax value
+
+      let make_context_const_declaration
+        context_const_modifiers
+        context_const_const_keyword
+        context_const_ctx_keyword
+        context_const_name
+        context_const_type_parameters
+        context_const_constraint
+        context_const_equal
+        context_const_ctx_list
+        context_const_semicolon
+      =
+        let syntax = ContextConstDeclaration {
+          context_const_modifiers;
+          context_const_const_keyword;
+          context_const_ctx_keyword;
+          context_const_name;
+          context_const_type_parameters;
+          context_const_constraint;
+          context_const_equal;
+          context_const_ctx_list;
+          context_const_semicolon;
         } in
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value
@@ -9940,6 +10083,17 @@ module WithToken(Token: TokenType) = struct
         let syntax = TypeConstraint {
           constraint_keyword;
           constraint_type;
+        } in
+        let value = ValueBuilder.value_from_syntax syntax in
+        make syntax value
+
+      let make_context_constraint
+        ctx_constraint_keyword
+        ctx_constraint_ctx_list
+      =
+        let syntax = ContextConstraint {
+          ctx_constraint_keyword;
+          ctx_constraint_ctx_list;
         } in
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value

@@ -17,12 +17,14 @@ let create
     ~artifact_store_config
     ~max_batch_size
     ~min_batch_size
+    ~initial_payload_size
     ~raise_on_failure =
   ignore
     ( job_runner,
       artifact_store_config,
       max_batch_size,
       min_batch_size,
+      initial_payload_size,
       raise_on_failure )
 
 let start delegate_env state =

@@ -19,6 +19,7 @@ module type Delegate_sig = sig
     job_runner:(module JobRunner_sig.S) ->
     max_batch_size:int ->
     min_batch_size:int ->
+    initial_payload_size:int ->
     raise_on_failure:bool ->
     state
 

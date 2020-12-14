@@ -618,7 +618,7 @@ let load_and_process_files
 let merge
     ~(should_prefetch_deferred_files : bool)
     (delegate_state : Delegate.state ref)
-    (files_to_process : file_computation list ref)
+    (files_to_process : file_computation BigList.t ref)
     (files_initial_count : int)
     (files_in_progress : file_computation Hash_set.t)
     (files_checked_count : int ref)
@@ -633,10 +633,10 @@ let merge
   in
   let progress = progress.progress in
 
-  files_to_process := progress.remaining @ !files_to_process;
+  files_to_process := BigList.append progress.remaining !files_to_process;
 
   (* Let's also prepend the deferred files! *)
-  files_to_process := progress.deferred @ !files_to_process;
+  files_to_process := BigList.append progress.deferred !files_to_process;
 
   (* Prefetch the deferred files, if necessary *)
   files_to_process :=
@@ -647,7 +647,7 @@ let merge
             | Declare (path, _) -> path :: acc
             | _ -> acc)
       in
-      Prefetch files_to_prefetch :: !files_to_process
+      BigList.cons (Prefetch files_to_prefetch) !files_to_process
     else
       !files_to_process;
 
@@ -700,7 +700,7 @@ let merge
 let next
     (workers : MultiWorker.worker list option)
     (delegate_state : Delegate.state ref)
-    (files_to_process : file_computation list ref)
+    (files_to_process : file_computation BigList.t ref)
     (files_in_progress : file_computation Hash_set.Poly.t)
     (record : Measure.record) =
   let max_size = Bucket.max_size () in
@@ -741,7 +741,7 @@ let next
     | None ->
       (* WARNING: the following List.length is costly - for a full init, files_to_process starts
       out as the size of the entire repo, and we're traversing the entire list. *)
-      let files_to_process_length = List.length !files_to_process in
+      let files_to_process_length = BigList.length !files_to_process in
       (match (files_to_process_length, stolen) with
       | (0, []) when Hash_set.Poly.is_empty files_in_progress -> Bucket.Done
       | (0, []) -> Bucket.Wait
@@ -762,7 +762,7 @@ let next
                     Check { path; deferred_count = deferred_count + 1 }
                   | _ -> failwith "unexpected state")
             in
-            List.rev_append stolen_jobs !files_to_process
+            BigList.rev_append stolen_jobs !files_to_process
           end
         in
         begin
@@ -777,20 +777,20 @@ let next
                 ~max_size
             in
             let (current_bucket, remaining_jobs) =
-              List.split_n jobs bucket_size
+              BigList.split_n jobs bucket_size
             in
             return_bucket_job Progress current_bucket remaining_jobs
         end)
 
 let on_cancelled
     (next : unit -> 'a Bucket.bucket)
-    (files_to_process : 'b Hash_set.Poly.elt list ref)
+    (files_to_process : 'b Hash_set.Poly.elt BigList.t ref)
     (files_in_progress : 'b Hash_set.Poly.t) : unit -> 'a list =
  fun () ->
   (* The size of [files_to_process] is bounded only by repo size, but
       [files_in_progress] is capped at [(worker count) * (max bucket size)]. *)
   files_to_process :=
-    Hash_set.Poly.to_list files_in_progress @ !files_to_process;
+    BigList.append (Hash_set.Poly.to_list files_in_progress) !files_to_process;
   let rec add_next acc =
     match next () with
     | Bucket.Job j -> add_next (j :: acc)
@@ -811,7 +811,7 @@ let process_in_parallel
     (workers : MultiWorker.worker list option)
     (delegate_state : Delegate.state)
     (telemetry : Telemetry.t)
-    (fnl : file_computation list)
+    (fnl : file_computation BigList.t)
     ~(interrupt : 'a MultiWorker.interrupt_config)
     ~(memory_cap : int option)
     ~(check_info : check_info) :
@@ -822,7 +822,7 @@ let process_in_parallel
   let files_to_process = ref fnl in
   let files_in_progress = Hash_set.Poly.create () in
   let files_processed_count = ref 0 in
-  let files_initial_count = List.length fnl in
+  let files_initial_count = BigList.length fnl in
   let delegate_progress =
     Typing_service_delegate.get_progress !delegate_state
   in
@@ -894,9 +894,9 @@ type ('a, 'b, 'c, 'd) job_result = 'a * 'b * 'c * 'd * Relative_path.t list
 module type Mocking_sig = sig
   val with_test_mocking :
     (* real job payload, that we can modify... *)
-    file_computation list ->
+    file_computation BigList.t ->
     ((* ... before passing it to the real job executor... *)
-     file_computation list ->
+     file_computation BigList.t ->
     ('a, 'b, 'c, 'd) job_result) ->
     (* ... which output we can also modify. *)
     ('a, 'b, 'c, 'd) job_result
@@ -915,7 +915,7 @@ module TestMocking = struct
 
   let with_test_mocking fnl f =
     let (mock_cancelled, fnl) =
-      List.partition_map fnl ~f:(fun computation ->
+      List.partition_map (BigList.as_list fnl) ~f:(fun computation ->
           match computation with
           | Check { path; _ } ->
             if is_cancelled path then
@@ -926,7 +926,9 @@ module TestMocking = struct
     in
     (* Only cancel once to avoid infinite loops *)
     cancelled := Relative_path.Set.empty;
-    let (res, delegate_state, telemetry, env, cancelled) = f fnl in
+    let (res, delegate_state, telemetry, env, cancelled) =
+      f (BigList.create fnl)
+    in
     (res, delegate_state, telemetry, env, mock_cancelled @ cancelled)
 end
 
@@ -937,7 +939,7 @@ module Mocking =
         (module NoMocking : Mocking_sig) )
 
 let should_process_sequentially
-    (opts : TypecheckerOptions.t) (fnl : file_computation list) : bool =
+    (opts : TypecheckerOptions.t) (fnl : file_computation BigList.t) : bool =
   (* If decls can be deferred, then we should process in parallel, since
     we are likely to have more computations than there are files to type check. *)
   let defer_threshold =
@@ -946,7 +948,7 @@ let should_process_sequentially
   let parallel_threshold =
     TypecheckerOptions.parallel_type_checking_threshold opts
   in
-  match (defer_threshold, List.length fnl) with
+  match (defer_threshold, BigList.length fnl) with
   | (None, file_count) when file_count < parallel_threshold -> true
   | _ -> false
 
@@ -963,12 +965,13 @@ let go_with_interrupt
     (Errors.t, Delegate.state, Telemetry.t, 'a) job_result =
   let opts = Provider_context.get_tcopt ctx in
   let sample_rate = GlobalOptions.tco_typecheck_sample_rate opts in
+  let fnl = BigList.create fnl in
   let fnl =
     if sample_rate >= 1.0 then
       fnl
     else
       let result =
-        List.filter
+        BigList.filter
           ~f:(fun x ->
             float (Base.String.hash (Relative_path.suffix x) mod 1000000)
             <= sample_rate *. 1000000.0)
@@ -977,16 +980,20 @@ let go_with_interrupt
       Hh_logger.log
         "Sampling %f percent of files: %d out of %d"
         sample_rate
-        (List.length result)
-        (List.length fnl);
+        (BigList.length result)
+        (BigList.length fnl);
       result
   in
-  let fnl = List.map fnl ~f:(fun path -> Check { path; deferred_count = 0 }) in
+  let fnl =
+    BigList.map fnl ~f:(fun path -> Check { path; deferred_count = 0 })
+  in
   Mocking.with_test_mocking fnl @@ fun fnl ->
   let (typing_result, delegate_state, telemetry, env, cancelled_fnl) =
     if should_process_sequentially opts fnl then begin
       Hh_logger.log "Type checking service will process files sequentially";
-      let progress = { completed = []; remaining = fnl; deferred = [] } in
+      let progress =
+        { completed = []; remaining = BigList.as_list fnl; deferred = [] }
+      in
       let (typing_result, _progress) =
         process_files
           dynamic_view_files

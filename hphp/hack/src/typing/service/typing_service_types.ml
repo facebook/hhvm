@@ -112,13 +112,13 @@ type check_info = {
   profile_type_check_duration_threshold: float;
 }
 
-type files_to_process = file_computation list
+type files_to_process = file_computation BigList.t
 
 type files_in_progress = file_computation list
 
 type delegate_next_result = {
   current_bucket: file_computation list;
-  remaining_jobs: file_computation list;
+  remaining_jobs: file_computation BigList.t;
   job: delegate_job_sig;
 }
 

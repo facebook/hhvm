@@ -747,6 +747,9 @@ let next
               jobs
             else begin
               delegate_state := state;
+              Hh_logger.log
+                "Steal payload from local workers: %d jobs"
+                (List.length stolen_jobs);
               let stolen_jobs =
                 List.map stolen_jobs ~f:(fun job ->
                     Hash_set.Poly.remove files_in_progress job;

@@ -701,7 +701,8 @@ let next
     (workers : MultiWorker.worker list option)
     (delegate_state : Delegate.state ref)
     (files_to_process : file_computation list ref)
-    (files_in_progress : file_computation Hash_set.Poly.t) =
+    (files_in_progress : file_computation Hash_set.Poly.t)
+    (record : Measure.record) =
   let max_size = Bucket.max_size () in
   let num_workers =
     match workers with
@@ -720,6 +721,7 @@ let next
       }
   in
   fun () ->
+    Measure.time ~record "time" @@ fun () ->
     let (state, delegate_job) =
       Typing_service_delegate.next
         !files_to_process
@@ -813,6 +815,8 @@ let process_in_parallel
     ~(memory_cap : int option)
     ~(check_info : check_info) :
     typing_result * Delegate.state * Telemetry.t * 'a * Relative_path.t list =
+  let record = Measure.create () in
+  (* [record] is used by [next] *)
   let delegate_state = ref delegate_state in
   let files_to_process = ref fnl in
   let files_in_progress = Hash_set.Poly.create () in
@@ -828,7 +832,9 @@ let process_in_parallel
     ~unit:"files"
     ~extra:delegate_progress;
 
-  let next = next workers delegate_state files_to_process files_in_progress in
+  let next =
+    next workers delegate_state files_to_process files_in_progress record
+  in
   let should_prefetch_deferred_files =
     Vfs.is_vfs ()
     && TypecheckerOptions.prefetch_deferred_files
@@ -864,6 +870,9 @@ let process_in_parallel
   in
   let telemetry =
     Typing_service_delegate.add_telemetry !delegate_state telemetry
+    |> Telemetry.object_
+         ~key:"next"
+         ~value:(Measure.stats_to_telemetry ~record ())
   in
   let paths_of (cancelled_results : progress list) : Relative_path.t list =
     let paths_of (cancelled_progress : progress) =

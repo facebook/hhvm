@@ -9,7 +9,6 @@
 
 open Hh_prelude
 open Typing_defs
-module T = Aast
 module MakeType = Typing_make_type
 
 (* Eliminate residue of type inference:

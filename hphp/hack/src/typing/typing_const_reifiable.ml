@@ -9,8 +9,6 @@
 
 open Hh_prelude
 open Typing_defs
-module Cls = Decl_provider.Class
-module Env = Tast_env
 
 let check_reifiable env tc attr_pos =
   let check_impl kind ty_opt =

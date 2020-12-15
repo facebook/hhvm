@@ -203,7 +203,7 @@ struct PublicSPropEntry {
   bool everModified;
   /*
    * This flag is set during analysis to indicate that we resolved the
-   * intial value (and updated it on the php::Class). This doesn't
+   * initial value (and updated it on the php::Class). This doesn't
    * need to be atomic, because only one thread can resolve the value
    * (the one processing the 86sinit), and it's been joined by the
    * time we read the flag in refine_public_statics.
@@ -469,6 +469,12 @@ struct ClassInfo {
    * their ClassInfo structures, flattened across the hierarchy.
    */
   ISStringToOneT<const ClassInfo*> implInterfaces;
+
+  /*
+   * A vector of the included enums, in class order, mirroring the
+   * php::Class includedEnums vector.
+   */
+  CompactVector<const ClassInfo*> includedEnums;
 
   /*
    * A (case-sensitive) map from class constant name to the php::Const
@@ -1515,8 +1521,9 @@ bool build_class_constants(BuildClsInfo& info,
         continue;
       }
 
-      // A constant from an interface collides with an existing constant.
-      if (rparent->cls->attrs & AttrInterface) {
+      // A constant from an interface or from an included enum collides
+      // with an existing constant.
+      if (rparent->cls->attrs & (AttrInterface | AttrEnum)) {
         ITRACE(2,
                "build_cls_info_rec failed for `{}' because "
                "`{}' was defined by both `{}' and `{}'\n",
@@ -1809,6 +1816,13 @@ bool build_cls_info_rec(BuildClsInfo& info,
     if (!build_cls_info_rec(info, trait, true)) return false;
   }
 
+  for (auto const included_enum : rparent->includedEnums) {
+    if (!enforce_in_maybe_sealed_parent_whitelist(rparent, included_enum)) {
+      return false;
+    }
+    if (!build_cls_info_rec(info, included_enum, true)) return false;
+  }
+
   if (rparent->cls->attrs & AttrInterface) {
     /*
      * Make a flattened table of all the interfaces implemented by the class.
@@ -1923,6 +1937,7 @@ struct PhpTypeHelper<php::Class> {
     if (cls->parentName) fn(cls->parentName);
     for (auto& i : cls->interfaceNames) fn(i);
     for (auto& t : cls->usedTraitNames) fn(t);
+    for (auto& t : cls->includedEnumNames) fn(t);
   }
 
   static std::string name() { return "class"; }
@@ -2522,6 +2537,18 @@ void resolve_combinations(ClassNamingEnv& env,
     cinfo->declInterfaces.push_back(iface);
   }
 
+  for (auto& included_enum_name : cls->includedEnumNames) {
+    auto const included_enum = map.at(included_enum_name);
+    if (!(included_enum->cls->attrs & AttrEnum)) {
+      ITRACE(2,
+             "Resolve combinations failed for `{}' because `{}' "
+             "is not an enum\n",
+             cls->name, included_enum_name);
+      return;
+    }
+    cinfo->includedEnums.push_back(included_enum);
+  }
+
   for (auto& tname : cls->usedTraitNames) {
     auto const trait = map.at(tname);
     if (!(trait->cls->attrs & AttrTrait)) {
@@ -2620,9 +2647,20 @@ void compute_subclass_list_rec(IndexData& index,
   }
 }
 
+void compute_included_enums_list_rec(IndexData& index,
+                               ClassInfo* cinfo,
+                               ClassInfo* csub) {
+  for (auto const cincluded_enum : csub->includedEnums) {
+    auto const cie = const_cast<ClassInfo*>(cincluded_enum);
+    cie->subclassList.push_back(cinfo);
+    compute_included_enums_list_rec(index, cinfo, cie);
+  }
+}
+
 void compute_subclass_list(IndexData& index) {
   trace_time _("compute subclass list");
   auto fixupTraits = false;
+  auto fixupEnums = false;
   for (auto& cinfo : index.allClassInfos) {
     if (cinfo->cls->attrs & AttrInterface) continue;
     for (auto& cparent : cinfo->baseList) {
@@ -2632,6 +2670,12 @@ void compute_subclass_list(IndexData& index) {
         cinfo->usedTraits.size()) {
       fixupTraits = true;
       compute_subclass_list_rec(index, cinfo.get(), cinfo.get());
+    }
+    // Add the included enum lists if cinfo is an enum
+    if (!(cinfo->cls->attrs & AttrEnum) &&
+        cinfo->cls->includedEnumNames.size()) {
+      fixupEnums = true;
+      compute_included_enums_list_rec(index, cinfo.get(), cinfo.get());
     }
     // Also add instantiable classes to their interface's subclassLists
     if (cinfo->cls->attrs & (AttrTrait | AttrEnum | AttrAbstract)) continue;
@@ -2643,9 +2687,10 @@ void compute_subclass_list(IndexData& index) {
 
   for (auto& cinfo : index.allClassInfos) {
     auto& sub = cinfo->subclassList;
-    if (fixupTraits && cinfo->cls->attrs & AttrTrait) {
-      // traits can be reached by multiple paths, so we need to uniquify
-      // their subclassLists.
+    if ((fixupTraits && cinfo->cls->attrs & AttrTrait) ||
+        (fixupEnums && cinfo->cls->attrs & AttrEnum)) {
+      // traits and enums can be reached by multiple paths, so we need to
+      // uniquify their subclassLists.
       std::sort(begin(sub), end(sub));
       sub.erase(
         std::unique(begin(sub), end(sub)),

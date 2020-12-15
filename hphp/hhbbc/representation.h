@@ -526,7 +526,7 @@ struct Class : ClassBase {
   /*
    * Names of included enums.
    */
-  CompactVector<LowStringPtr> includedEnums;
+  CompactVector<LowStringPtr> includedEnumNames;
 
   /*
    * Names of used traits, number of declared (i.e., non-trait, non-inherited)
@@ -685,4 +685,3 @@ bool check(const Program&);
 //////////////////////////////////////////////////////////////////////
 
 }}}
-

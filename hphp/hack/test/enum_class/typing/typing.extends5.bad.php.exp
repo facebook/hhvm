@@ -9,7 +9,7 @@ Class `F` does not correctly implement all required members  (Typing[4340])
   File "BuiltinEnum.hhi", line 34, characters 60-60:
     via this generic `T`
   File "typing.extends5.bad.php", line 26, characters 12-12:
-  But got `HH\Elt<F, ExBox>`
+  But got `HH\EnumMember<F, ExBox>`
   File "BuiltinEnum.hhi", line 120, characters 60-60:
     via this generic `T`
 File "typing.extends5.bad.php", line 26, characters 12-12:

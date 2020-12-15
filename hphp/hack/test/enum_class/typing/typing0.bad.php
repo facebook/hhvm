@@ -32,10 +32,10 @@ enum class E: ExBox {
   B2<Box<int>>(new Box(42));
 }
 
-function e<T>(HH\Elt<E, Box<T>> $param): T {
-  return $param->unwrap()->data;
+function e<T>(HH\EnumMember<E, Box<T>> $param): T {
+  return $param->data()->data;
 }
 
 function testit(): void {
-  expect_int(E::A->unwrap()->data); // correctly errors, int vs string
+  expect_int(E::A->data()->data); // correctly errors, int vs string
 }

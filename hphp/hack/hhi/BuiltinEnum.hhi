@@ -83,7 +83,7 @@ const enumname<arraykey> BUILTIN_ENUM = BuiltinEnum::class;
 /**
  * Base helper class for the enum class feature
  */
-final class Elt<-TPhantom, +T> {
+final class EnumMember<-TPhantom, +T> {
   /* TODO(T77095784) How to make it private ? */
   public function __construct(private string $name, private T $data) {}
 
@@ -94,7 +94,7 @@ final class Elt<-TPhantom, +T> {
 
   /* TODO(T77095784) ask if this can be inlined/optimized */
   <<__Pure>>
-  public function unwrap(): T {
+  public function data(): T {
     return $this->data;
   }
 }
@@ -102,7 +102,7 @@ final class Elt<-TPhantom, +T> {
 /**
  * BuiltinEnumClass contains the utility methods provided by enum classes.
  * Under the hood, an enum class Foo : Bar will extend
- * BuiltinEnumClass<HH\Elt<this, Bar>>.
+ * BuiltinEnumClass<HH\EnumMember<this, Bar>>.
  *
  * HHVM provides a native implementation for this class. The PHP class
  * definition below is not actually used at run time; it is simply

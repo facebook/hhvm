@@ -9,7 +9,7 @@ namespace HH {
 /**
  * Base helper class for the enum class feature
  */
-final class Elt<-TPhantom, +T> {
+final class EnumMember<-TPhantom, +T> {
   public function __construct(private string $name, private T $data) {}
 
   <<__Pure>>
@@ -18,7 +18,7 @@ final class Elt<-TPhantom, +T> {
   }
 
   <<__Pure>>
-  public function unwrap(): T {
+  public function data(): T {
     return $this->data;
   }
 }

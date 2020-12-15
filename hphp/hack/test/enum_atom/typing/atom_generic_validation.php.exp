@@ -1,8 +1,8 @@
-File "atom_generic_validation.php", line 14, characters 37-52:
+File "atom_generic_validation.php", line 14, characters 38-60:
 The type TEnum must be a type constant or a reified generic in order to be used with __Atom (Typing[4395])
-File "atom_generic_validation.php", line 41, characters 40-67:
+File "atom_generic_validation.php", line 42, characters 16-50:
 The type \Controller::TEnum must be a type constant or a reified generic in order to be used with __Atom (Typing[4395])
-File "atom_generic_validation.php", line 41, characters 59-63:
+File "atom_generic_validation.php", line 42, characters 42-46:
 An abstract type constant is not allowed in this position. (Typing[4352])
   File "atom_generic_validation.php", line 23, characters 23-27:
   `TEnum` is abstract here.

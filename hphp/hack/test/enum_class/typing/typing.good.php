@@ -32,25 +32,27 @@ enum class E: ExBox {
   B2<Box<int>>(new Box(42));
 }
 
-function e<T>(HH\Elt<E, Box<T>> $param): T {
-  return $param->unwrap()->data;
+function e<T>(HH\EnumMember<E, Box<T>> $param): T {
+  return $param->data()->data;
 }
 
 function testit(): void {
-  expect_string(E::A->unwrap()->data);
-  expect_int(E::B->unwrap()->data);
+  expect_string(E::A->data()->data);
+  expect_int(E::B->data()->data);
 
   expect_string(e(E::A));
   expect_int(e(E::B));
 }
 
-function generic<TEnum as E, T>(HH\Elt<TEnum, Box<T>> $param): T {
-  return $param->unwrap()->data;
+function generic<TEnum as E, T>(HH\EnumMember<TEnum, Box<T>> $param): T {
+  return $param->data()->data;
 }
 
-function generic2<TEnum as E, TBox as IBox>(HH\Elt<TEnum, TBox> $param): int {
-  $param->unwrap()->add(42);
-  return $param->unwrap()->data;
+function generic2<TEnum as E, TBox as IBox>(
+  HH\EnumMember<TEnum, TBox> $param,
+): int {
+  $param->data()->add(42);
+  return $param->data()->data;
 }
 
 function testit2(): void {
@@ -63,7 +65,7 @@ function testit2(): void {
 function iterate(): void {
   foreach (E::getValues() as $key => $elt) {
     echo "$key = ";
-    $exbox = $elt->unwrap();
+    $exbox = $elt->data();
     $box = $exbox as Box<_>;
     echo $box->data;
     echo "\n";
@@ -74,32 +76,32 @@ function iterate(): void {
 interface I0<T> {}
 
 // closed interface
-enum class EI0 : I0<IBox> {}
+enum class EI0: I0<IBox> {}
 
 class C0<T> {}
 
 // closed class
-enum class EC0 : C0<IBox> {}
+enum class EC0: C0<IBox> {}
 
 
 // nonnull and mixed
-enum class ENN : nonnull {
+enum class ENN: nonnull {
   A<int>(42);
   B<string>("zuck");
   C<Box<int>>(new IBox(42));
 }
 
-enum class EM : mixed {
+enum class EM: mixed {
   A<int>(42);
   B<?string>(null);
   C<Box<int>>(new IBox(42));
 }
 
 // tuples
-enum class ETuple : (IBox, IBox) {}
+enum class ETuple: (IBox, IBox) {}
 
 
 // primitive types
-enum class Ints : int {}
+enum class Ints: int {}
 
-enum class Strings : string {}
+enum class Strings: string {}

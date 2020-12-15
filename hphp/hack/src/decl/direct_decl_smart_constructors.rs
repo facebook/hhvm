@@ -3950,7 +3950,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             let enum_class_ty_ = Ty_::Tapply(self.alloc((name, &[])));
             let enum_class_ty = self.alloc(Ty(self.alloc(Reason::hint(pos)), enum_class_ty_));
             let elt_ty_ = Ty_::Tapply(self.alloc((
-                Id(pos, "\\HH\\Elt"),
+                Id(pos, "\\HH\\EnumMember"),
                 bumpalo::vec![in self.state.arena; enum_class_ty, base].into_bump_slice(),
             )));
             let elt_ty = self.alloc(Ty(self.alloc(Reason::hint(pos)), elt_ty_));
@@ -4054,7 +4054,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         let enum_class_ty_ = Ty_::Tapply(self.alloc((Id(pos, class_name.0), &[])));
         let enum_class_ty = self.alloc(Ty(self.alloc(Reason::hint(pos)), enum_class_ty_));
         let type_ = Ty_::Tapply(self.alloc((
-            Id(pos, "\\HH\\Elt"),
+            Id(pos, "\\HH\\EnumMember"),
             bumpalo::vec![in self.state.arena; enum_class_ty, type_].into_bump_slice(),
         )));
         let type_ = self.alloc(Ty(self.alloc(Reason::hint(pos)), type_));

@@ -8,11 +8,11 @@ enum class E : I {
   A<C>(new C());
 }
 
-function show(HH\Elt<E, C> $enum) : void {
+function show(HH\EnumMember<E, C> $enum) : void {
   echo $enum->name();
 }
 
-function show_atom(<<__Atom>>HH\Elt<E, C> $enum): void {
+function show_atom(<<__Atom>>HH\EnumMember<E, C> $enum): void {
   echo $enum->name();
 }
 

@@ -13,6 +13,6 @@ enum class Foo: mixed {
   Str<Box<string>>(new Box('zuck'));
 }
 
-function ff(<<__Atom>> HH\Elt<EE, Box> $x) : int {
-  return $x->unwrap()->x;
+function ff(<<__Atom>> HH\EnumMember<EE, Box> $x) : int {
+  return $x->data()->x;
 }

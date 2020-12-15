@@ -4,7 +4,7 @@ Invalid argument (Typing[4110])
   Expected `F`
   File "typing.extends1.bad.php", line 58, characters 22-22:
   But got `E`
-  File "typing.extends1.bad.php", line 42, characters 33-43:
+  File "typing.extends1.bad.php", line 42, characters 40-50:
     resulting from expanding the type constant `Ext::TEnum`
   File "typing.extends1.bad.php", line 58, characters 22-22:
-  This type argument to `HH\Elt` only allows supertypes (it is contravariant)
+  This type argument to `HH\EnumMember` only allows supertypes (it is contravariant)

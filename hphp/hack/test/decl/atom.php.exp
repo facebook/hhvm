@@ -8,7 +8,7 @@
        [(Rhint (root|atom.php line 4, characters 12-13),
          (Tapply (([4:12-14], "\\HH\\BuiltinEnumClass"),
             [(Rhint (root|atom.php line 4, characters 12-13),
-              (Tapply (([4:12-14], "\\HH\\Elt"),
+              (Tapply (([4:12-14], "\\HH\\EnumMember"),
                  [(Rhint (root|atom.php line 4, characters 12-13),
                    (Tapply (([4:12-14], "\\EE"), [])));
                    (Rhint (root|atom.php line 4, characters 17-17),
@@ -25,7 +25,7 @@
        [{ Shallow_decl_defs.scc_abstract = false; scc_name = ([5:3-4], "A");
           scc_type =
           (Rhint (root|atom.php line 5, characters 3-3),
-           (Tapply (([5:3-4], "\\HH\\Elt"),
+           (Tapply (([5:3-4], "\\HH\\EnumMember"),
               [(Rhint (root|atom.php line 5, characters 3-3),
                 (Tapply (([5:3-4], "\\EE"), [])));
                 (Rhint (root|atom.php line 5, characters 5-7),
@@ -56,7 +56,7 @@
         [(Rhint (root|atom.php line 8, characters 12-13),
           (Tapply (([8:12-14], "\\HH\\BuiltinEnumClass"),
              [(Rhint (root|atom.php line 8, characters 12-13),
-               (Tapply (([8:12-14], "\\HH\\Elt"),
+               (Tapply (([8:12-14], "\\HH\\EnumMember"),
                   [(Rhint (root|atom.php line 8, characters 12-13),
                     (Tapply (([8:12-14], "\\FF"), [])));
                     (Rhint (root|atom.php line 8, characters 17-17),
@@ -75,7 +75,7 @@
         [{ Shallow_decl_defs.scc_abstract = false; scc_name = ([9:3-4], "C");
            scc_type =
            (Rhint (root|atom.php line 9, characters 3-3),
-            (Tapply (([9:3-4], "\\HH\\Elt"),
+            (Tapply (([9:3-4], "\\HH\\EnumMember"),
                [(Rhint (root|atom.php line 9, characters 3-3),
                  (Tapply (([9:3-4], "\\FF"), [])));
                  (Rhint (root|atom.php line 9, characters 5-7),
@@ -110,7 +110,7 @@
         [(Rhint (root|atom.php line 12, characters 12-14),
           (Tapply (([12:12-15], "\\HH\\BuiltinEnumClass"),
              [(Rhint (root|atom.php line 12, characters 12-14),
-               (Tapply (([12:12-15], "\\HH\\Elt"),
+               (Tapply (([12:12-15], "\\HH\\EnumMember"),
                   [(Rhint (root|atom.php line 12, characters 12-14),
                     (Tapply (([12:12-15], "\\Foo"), [])));
                     (Rhint (root|atom.php line 12, characters 17-21), Tmixed)
@@ -127,7 +127,7 @@
            scc_name = ([13:3-6], "Str");
            scc_type =
            (Rhint (root|atom.php line 13, characters 3-5),
-            (Tapply (([13:3-6], "\\HH\\Elt"),
+            (Tapply (([13:3-6], "\\HH\\EnumMember"),
                [(Rhint (root|atom.php line 13, characters 3-5),
                  (Tapply (([13:3-6], "\\Foo"), [])));
                  (Rhint (root|atom.php line 13, characters 7-17),
@@ -160,16 +160,16 @@
             { ft_arity = (Fstandard ()); ft_tparams = [];
               ft_where_constraints = [];
               ft_params =
-              [{ fp_pos = [16:40-42]; fp_name = (Some "$x");
+              [{ fp_pos = [16:47-49]; fp_name = (Some "$x");
                  fp_type =
                  { et_enforced = false;
                    et_type =
-                   (Rhint (root|atom.php line 16, characters 24-38),
-                    (Tapply (([16:24-30], "\\HH\\Elt"),
-                       [(Rhint (root|atom.php line 16, characters 31-32),
-                         (Tapply (([16:31-33], "\\EE"), [])));
-                         (Rhint (root|atom.php line 16, characters 35-37),
-                          (Tapply (([16:35-38], "\\Box"), [])))
+                   (Rhint (root|atom.php line 16, characters 24-45),
+                    (Tapply (([16:24-37], "\\HH\\EnumMember"),
+                       [(Rhint (root|atom.php line 16, characters 38-39),
+                         (Tapply (([16:38-40], "\\EE"), [])));
+                         (Rhint (root|atom.php line 16, characters 42-44),
+                          (Tapply (([16:42-45], "\\Box"), [])))
                          ]
                        )))
                    };
@@ -184,7 +184,7 @@
               ft_ret =
               { et_enforced = false;
                 et_type =
-                (Rhint (root|atom.php line 16, characters 46-48),
+                (Rhint (root|atom.php line 16, characters 53-55),
                  (Tprim Tint))
                 };
               ft_flags =

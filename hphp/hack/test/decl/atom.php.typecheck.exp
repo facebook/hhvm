@@ -18,7 +18,7 @@ File "atom.php", line 13, characters 7-9:
 Unbound name: `Box` (Naming[2049])
 File "atom.php", line 13, characters 24-26:
 Unbound name: `Box` (an object type) (Naming[2049])
-File "atom.php", line 16, characters 35-37:
+File "atom.php", line 16, characters 42-44:
 Unbound name: `Box` (Naming[2049])
 File "atom.php", line 5, characters 10-20:
 Invalid argument (Typing[4110])

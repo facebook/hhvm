@@ -29,16 +29,21 @@ enum class F : I extends E {
 abstract class Controller {
   abstract const type TEnum as E;
 
-  public static function get<T>(HH\Elt<this::TEnum, Box<T>> $enum) : T {
-    return $enum->unwrap()->data;
+  public static
+    function get<T>(HH\EnumMember<this::TEnum, Box<T>> $enum) : T {
+    return $enum->data()->data;
   }
 
-  public static function show<T>(HH\Elt<this::TEnum, Box<T>> $enum) : void {
+  public static
+    function show<T>(HH\EnumMember<this::TEnum, Box<T>> $enum) : void {
     echo static::get($enum);
     echo "\n";
   }
 
-  public static function show_atom<T>(<<__Atom>>HH\Elt<this::TEnum, Box<T>> $enum) : void {
+  public static
+    function show_atom<T>(
+      <<__Atom>>HH\EnumMember<this::TEnum, Box<T>> $enum
+    ) : void {
     echo static::get($enum);
     echo "\n";
   }

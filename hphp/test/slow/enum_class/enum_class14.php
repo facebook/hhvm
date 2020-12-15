@@ -9,7 +9,7 @@ enum class E : IBox {
   A<Box<string>>(new Box("world"));
 }
 function f<T>(<<__Atom>> E $elt) : T {
-  return $elt->unwrap()->data;
+  return $elt->data()->data;
 }
 
 <<__EntryPoint>>

@@ -651,7 +651,7 @@ fn atom_instrs(
             let label_done = emitter.label_gen_mut().next_regular();
             let label_not_a_class = emitter.label_gen_mut().next_regular();
             match &**h {
-                Happly(ast_defs::Id(_, ref ctor), vec) if ctor == "\\HH\\Elt" => {
+                Happly(ast_defs::Id(_, ref ctor), vec) if ctor == "\\HH\\EnumMember" => {
                     match &vec[..] {
                         [hint, _] => {
                             let Hint(_, e) = hint;
@@ -661,7 +661,7 @@ fn atom_instrs(
                                     if atom_helpers::is_erased_generic(tag, tparams) {
                                         Err(raise_fatal_parse(
                                             &pos,
-                                            "Erased generic as HH\\Elt enum type",
+                                            "Erased generic as HH\\EnumMember enum type",
                                         ))
                                     } else {
                                         if !atom_helpers::is_generic(tag, tparams) {
@@ -742,7 +742,7 @@ fn atom_instrs(
                                             if atom_helpers::is_erased_generic(tag, tparams) {
                                                 Err(raise_fatal_parse(
                                                     &pos,
-                                                    "Erased generic as HH\\Elt enum type",
+                                                    "Erased generic as HH\\EnumMember enum type",
                                                 ))
                                             } else {
                                                 //'tag' is a type constant.
@@ -774,19 +774,23 @@ fn atom_instrs(
                                             }
                                         }
                                         _ => Err(unrecoverable(
-                                            "Unexpected case for HH\\Elt enum type",
+                                            "Unexpected case for HH\\EnumMember enum type",
                                         )),
                                     }
                                 }
-                                _ => Err(unrecoverable("Unexpected case for HH\\Elt enum type")),
+                                _ => Err(unrecoverable(
+                                    "Unexpected case for HH\\EnumMember enum type",
+                                )),
                             }
                         }
-                        _ => Err(unrecoverable("Wrong number of type arguments to HH\\Elt")),
+                        _ => Err(unrecoverable(
+                            "Wrong number of type arguments to HH\\EnumMember",
+                        )),
                     }
                 }
                 _ => Err(raise_fatal_parse(
                     &ast_param.pos,
-                    "'__Atom' applied to a non-HH\\Elt parameter",
+                    "'__Atom' applied to a non-HH\\EnumMember parameter",
                 )),
             }
         }

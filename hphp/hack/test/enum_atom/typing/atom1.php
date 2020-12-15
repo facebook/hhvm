@@ -14,16 +14,16 @@ enum class FF : I extends EE {
   C<Box>(new Box(0));
 }
 
-function ff(<<__Atom>> HH\Elt<EE, Box> $x) : int {
-  return $x->unwrap()->x;
+function ff(<<__Atom>> HH\EnumMember<EE, Box> $x) : int {
+  return $x->data()->x;
 }
 
 abstract class Controller {
   abstract const type TEnum as EE;
 
   public static function get(
-    <<__Atom>>HH\Elt<this::TEnum, Box> $x): int {
-    return $x->unwrap()->x;
+    <<__Atom>>HH\EnumMember<this::TEnum, Box> $x): int {
+    return $x->data()->x;
   }
 
   public static function getA() : int {

@@ -32,20 +32,20 @@ enum class E: ExBox {
   B2<Box<int>>(new Box(42));
 }
 
-function e<T>(HH\Elt<E, Box<T>> $param): T {
-  return $param->unwrap()->data;
+function e<T>(HH\EnumMember<E, Box<T>> $param): T {
+  return $param->data()->data;
 }
 
-function generic<TEnum as E, T>(HH\Elt<TEnum, Box<T>> $param): T {
-  return $param->unwrap()->data;
+function generic<TEnum as E, T>(HH\EnumMember<TEnum, Box<T>> $param): T {
+  return $param->data()->data;
 }
 
 enum class F: ExBox extends E {
   C<Box<num>>(new Box(3.14));
 }
 
-function f<T>(HH\Elt<F, Box<T>> $param): T {
-  return $param->unwrap()->data;
+function f<T>(HH\EnumMember<F, Box<T>> $param): T {
+  return $param->data()->data;
 }
 
 function testit3(): void {
@@ -66,8 +66,8 @@ function testit3(): void {
 abstract class Base {
   abstract const type TEnum as E;
 
-  public function get<T>(HH\Elt<this::TEnum, Box<T>> $param): T {
-    return $param->unwrap()->data;
+  public function get<T>(HH\EnumMember<this::TEnum, Box<T>> $param): T {
+    return $param->data()->data;
   }
 
   public static function dictGen(): dict<string, ExBox> {
@@ -75,7 +75,7 @@ abstract class Base {
     $ts = type_structure(static::class, 'TEnum');
     $cls = $ts['classname'];
     foreach ($cls::getValues() as $key => $elt) {
-      $dict[$key] = $elt->unwrap();
+      $dict[$key] = $elt->data();
     }
     return $dict;
   }

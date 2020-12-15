@@ -5951,7 +5951,7 @@ and call
                 | EnumAtom atom_name when is_atom ->
                   (match get_node ety with
                   | Tclass ((_, name), _, [ty_enum; _ty_interface])
-                    when String.equal name SN.Classes.cElt ->
+                    when String.equal name SN.Classes.cEnumMember ->
                     (match get_node ty_enum with
                     | Tclass ((_, enum_name), _, _)
                       when Env.is_enum_class env enum_name ->

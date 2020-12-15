@@ -13,8 +13,8 @@ class C {
     const type T = E;
 }
 
-function f<T>(<<__Atom>> HH\Elt<C::T, Box<T>> $elt) : T {
-  return $elt->unwrap()->data;
+function f<T>(<<__Atom>> HH\EnumMember<C::T, Box<T>> $elt) : T {
+  return $elt->data()->data;
 }
 
 <<__EntryPoint>>

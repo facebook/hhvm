@@ -5,8 +5,8 @@ interface IBox {}
 class Box<T> implements IBox {
   public function __construct(public T $data) {}
 }
-function f<reify X, T>(<<__Atom>> HH\Elt<X, Box<T>> $elt) : T {
-    return $elt->unwrap()->data;
+function f<reify X, T>(<<__Atom>> HH\EnumMember<X, Box<T>> $elt) : T {
+    return $elt->data()->data;
 }
 
 <<__EntryPoint>>

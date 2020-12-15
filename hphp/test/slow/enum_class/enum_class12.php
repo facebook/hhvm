@@ -9,8 +9,8 @@ enum class E : IBox {
   A<Box<string>>(new Box("world"));
 }
 
-function f<reify X, T>(<<__Atom>> HH\Elt<X, Box<T>> $elt) : T {
-    return $elt->unwrap()->data;
+function f<reify X, T>(<<__Atom>> HH\EnumMember<X, Box<T>> $elt) : T {
+    return $elt->data()->data;
 }
 
 <<__EntryPoint>>

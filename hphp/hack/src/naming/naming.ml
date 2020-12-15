@@ -1072,8 +1072,8 @@ and enum_ env enum_name e =
   let new_base = hint env old_base in
   let bound =
     if is_enum_class then
-      (* Turn the base type of the enum class into Elt<E, base> *)
-      let elt = (pos, SN.Classes.cElt) in
+      (* Turn the base type of the enum class into EnumMember<E, base> *)
+      let elt = (pos, SN.Classes.cEnumMember) in
       let h = (pos, Happly (elt, [enum_hint; old_base])) in
       hint env h
     else

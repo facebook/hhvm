@@ -824,8 +824,8 @@ ObjectData* ObjectData::clone() {
 
 bool ObjectData::equal(const ObjectData& other) const {
   if (this == &other) return true;
-  if (getVMClass() == SystemLib::s_HH_EltClass ||
-      other.getVMClass() == SystemLib::s_HH_EltClass) {
+  if (getVMClass() == SystemLib::s_HH_EnumMemberClass ||
+      other.getVMClass() == SystemLib::s_HH_EnumMemberClass) {
     return false; // Never compare for structural equality.
   }
   if (isCollection()) {

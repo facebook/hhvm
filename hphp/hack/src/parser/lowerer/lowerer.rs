@@ -4688,12 +4688,12 @@ where
 
                 let name_s = name.1.clone(); // TODO: can I avoid this clone ?
 
-                // Helper to build X -> HH\Elt<enum_name, X>
+                // Helper to build X -> HH\EnumMember<enum_name, X>
                 let build_elt = |p: Pos, ty: ast::Hint| -> ast::Hint {
                     let enum_name = ast::Id(p.clone(), name_s.clone());
                     let enum_class = ast::Hint_::mk_happly(enum_name, vec![]);
                     let enum_class = ast::Hint::new(p.clone(), enum_class);
-                    let elt_id = ast::Id(p.clone(), special_classes::ELT.to_string());
+                    let elt_id = ast::Id(p.clone(), special_classes::ENUM_MEMBER.to_string());
                     let full_type = ast::Hint_::mk_happly(elt_id, vec![enum_class, ty]);
                     ast::Hint::new(p, full_type)
                 };
@@ -4747,7 +4747,7 @@ where
                             // we turn:
                             // - name<type>(args)
                             // into
-                            // - const Elt<enum_name, type> name = new Elt('name', args)
+                            // - const EnumMember<enum_name, type> name = new EnumMember('name', args)
                             let span = Self::p_pos(n, env);
                             let name = Self::pos_name(&c.name, env)?;
                             let pos = &name.0;
@@ -4757,7 +4757,8 @@ where
                             let full_type = build_elt(pos.clone(), elt_type);
                             let initial_value = Self::p_expr(&c.initial_value, env)?;
                             let elt_arguments = vec![string_name_expr, initial_value];
-                            let elt_id = ast::Id(pos.clone(), special_classes::ELT.to_string());
+                            let elt_id =
+                                ast::Id(pos.clone(), special_classes::ENUM_MEMBER.to_string());
                             let elt_name = E_::mk_id(elt_id.clone());
                             let elt_expr = ast::Expr::new(span.clone(), elt_name);
                             let cid_ = ast::ClassId_::CIexpr(elt_expr);

@@ -11,8 +11,8 @@ enum class E : IBox {
 class C {
     const type T = string;
 }
-function f<T>(<<__Atom>> HH\Elt<C::T, Box<T>> $elt) : T {
-  return $elt->unwrap()->data;
+function f<T>(<<__Atom>> HH\EnumMember<C::T, Box<T>> $elt) : T {
+  return $elt->data()->data;
 }
 
 <<__EntryPoint>>

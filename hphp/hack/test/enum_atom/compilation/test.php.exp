@@ -4,71 +4,71 @@
 
 .adata A_0 = """Y:3:{s:4:\"kind\";i:101;s:9:\"classname\";s:3:\"Box\";s:13:\"generic_types\";y:1:{Y:1:{s:4:\"kind\";i:4;}}}""";
 .adata A_1 = """Y:2:{s:4:\"kind\";i:13;s:4:\"name\";s:1:\"_\";}""";
-.adata A_2 = """Y:3:{s:4:\"kind\";i:101;s:9:\"classname\";s:6:\"HH\\Elt\";s:13:\"generic_types\";y:2:{Y:3:{s:4:\"kind\";i:102;s:9:\"root_name\";s:7:\"HH\\this\";s:11:\"access_list\";y:1:{s:5:\"TEnum\";}}Y:3:{s:4:\"kind\";i:101;s:9:\"classname\";s:3:\"Box\";s:13:\"generic_types\";y:1:{Y:2:{s:4:\"kind\";i:13;s:4:\"name\";s:1:\"_\";}}}}}""";
+.adata A_2 = """Y:3:{s:4:\"kind\";i:101;s:9:\"classname\";s:13:\"HH\\EnumMember\";s:13:\"generic_types\";y:2:{Y:3:{s:4:\"kind\";i:102;s:9:\"root_name\";s:7:\"HH\\this\";s:11:\"access_list\";y:1:{s:5:\"TEnum\";}}Y:3:{s:4:\"kind\";i:101;s:9:\"classname\";s:3:\"Box\";s:13:\"generic_types\";y:1:{Y:2:{s:4:\"kind\";i:13;s:4:\"name\";s:1:\"_\";}}}}}""";
 .adata A_3 = """Y:3:{s:4:\"kind\";i:102;s:9:\"root_name\";s:7:\"HH\\this\";s:11:\"access_list\";y:1:{s:5:\"TEnum\";}}""";
 
-.function {} ["__EntryPoint"("""y:0:{}""")] (55,63) <"HH\\void" N > main() {
-  .srcloc 56:3,56:16;
+.function {} ["__EntryPoint"("""y:0:{}""")] (60,68) <"HH\\void" N > main() {
+  .srcloc 61:3,61:16;
   NullUninit
   NullUninit
-  .srcloc 56:12,56:12;
+  .srcloc 61:12,61:12;
   ClsCnsD "A" "E"
-  .srcloc 56:3,56:16;
+  .srcloc 61:3,61:16;
   FCallClsMethodD <> 1 1 "0" - "" "" "CE" "show"
-  .srcloc 56:3,56:17;
+  .srcloc 61:3,61:17;
   PopC
-  .srcloc 57:3,57:16;
+  .srcloc 62:3,62:16;
   NullUninit
   NullUninit
-  .srcloc 57:12,57:12;
+  .srcloc 62:12,62:12;
   ClsCnsD "B" "E"
-  .srcloc 57:3,57:16;
+  .srcloc 62:3,62:16;
   FCallClsMethodD <> 1 1 "0" - "" "" "CE" "show"
-  .srcloc 57:3,57:17;
+  .srcloc 62:3,62:17;
   PopC
-  .srcloc 58:3,58:16;
+  .srcloc 63:3,63:16;
   NullUninit
   NullUninit
-  .srcloc 58:12,58:12;
+  .srcloc 63:12,63:12;
   ClsCnsD "C" "F"
-  .srcloc 58:3,58:16;
+  .srcloc 63:3,63:16;
   FCallClsMethodD <> 1 1 "0" - "" "" "CF" "show"
-  .srcloc 58:3,58:17;
+  .srcloc 63:3,63:17;
   PopC
-  .srcloc 59:8,59:11;
+  .srcloc 64:8,64:11;
   String "\n"
-  .srcloc 59:3,59:12;
+  .srcloc 64:3,64:12;
   Print
-  .srcloc 59:3,59:12;
+  .srcloc 64:3,64:12;
   PopC
-  .srcloc 60:3,60:19;
+  .srcloc 65:3,65:19;
   NullUninit
   NullUninit
-  .srcloc 60:17,60:18;
+  .srcloc 65:17,65:18;
   String "A"
-  .srcloc 60:3,60:19;
+  .srcloc 65:3,65:19;
   FCallClsMethodD <> 1 1 "0" - "" "" "CE" "show_atom"
-  .srcloc 60:3,60:20;
+  .srcloc 65:3,65:20;
   PopC
-  .srcloc 61:3,61:19;
+  .srcloc 66:3,66:19;
   NullUninit
   NullUninit
-  .srcloc 61:17,61:18;
+  .srcloc 66:17,66:18;
   String "B"
-  .srcloc 61:3,61:19;
+  .srcloc 66:3,66:19;
   FCallClsMethodD <> 1 1 "0" - "" "" "CE" "show_atom"
-  .srcloc 61:3,61:20;
+  .srcloc 66:3,66:20;
   PopC
-  .srcloc 62:3,62:19;
+  .srcloc 67:3,67:19;
   NullUninit
   NullUninit
-  .srcloc 62:17,62:18;
+  .srcloc 67:17,67:18;
   String "C"
-  .srcloc 62:3,62:19;
+  .srcloc 67:3,67:19;
   FCallClsMethodD <> 1 1 "0" - "" "" "CF" "show_atom"
-  .srcloc 62:3,62:20;
+  .srcloc 67:3,67:20;
   PopC
-  .srcloc 63:2,63:2;
+  .srcloc 68:2,68:2;
   Null
   RetC
 }
@@ -126,7 +126,7 @@
     SSwitch <"A":L0 -:L1>
   L0:
     .srcloc 17:3,17:27;
-    NewObjD "HH\\Elt"
+    NewObjD "HH\\EnumMember"
     Dup
     NullUninit
     .srcloc 17:3,17:3;
@@ -149,7 +149,7 @@
     Jmp L2
   L1:
     .srcloc 18:3,18:33;
-    NewObjD "HH\\Elt"
+    NewObjD "HH\\EnumMember"
     Dup
     NullUninit
     .srcloc 18:3,18:3;
@@ -199,7 +199,7 @@
   .const C = uninit;
   .method {}{} [private static no_injection] (25,27) 86cinit($constName) {
     .srcloc 26:3,26:31;
-    NewObjD "HH\\Elt"
+    NewObjD "HH\\EnumMember"
     Dup
     NullUninit
     .srcloc 26:3,26:3;
@@ -223,51 +223,51 @@
   }
 }
 
-.class {} [abstract] Controller (29,45) {
+.class {} [abstract] Controller (29,50) {
   .const TEnum isType;
-  .method {}{} [public static] (32,34) <"T" "T" extended_hint type_var> get(<"HH\\Elt<HH\\this::TEnum, Box<T>>" "HH\\Elt" > $enum) {
-    .srcloc 32:17,34:110;
+  .method {}{} [public static] (33,35) <"T" "T" extended_hint type_var> get(<"HH\\EnumMember<HH\\this::TEnum, Box<T>>" "HH\\EnumMember" > $enum) {
+    .srcloc 33:5,35:103;
     Array @A_2
     VerifyParamTypeTS $enum
-    .srcloc 33:12,33:16;
+    .srcloc 34:12,34:16;
     CGetL $enum
     NullUninit
-    .srcloc 33:12,33:26;
-    FCallObjMethodD <> 0 1 "" - "" "" NullThrows "unwrap"
-    .srcloc 33:12,33:26;
+    .srcloc 34:12,34:24;
+    FCallObjMethodD <> 0 1 "" - "" "" NullThrows "data"
+    .srcloc 34:12,34:24;
     BaseC 0 Warn
     QueryM 1 CGet PT:"data"
-    .srcloc 33:5,33:33;
+    .srcloc 34:5,34:31;
     VerifyRetTypeC
     RetC
   }
-  .method {}{} [public static] (36,39) <"HH\\void" N > show(<"HH\\Elt<HH\\this::TEnum, Box<T>>" "HH\\Elt" > $enum) {
-    .srcloc 36:17,39:124;
+  .method {}{} [public static] (38,41) <"HH\\void" N > show(<"HH\\EnumMember<HH\\this::TEnum, Box<T>>" "HH\\EnumMember" > $enum) {
+    .srcloc 38:5,41:119;
     Array @A_2
     VerifyParamTypeTS $enum
-    .srcloc 37:10,37:27;
+    .srcloc 39:10,39:27;
     NullUninit
     NullUninit
-    .srcloc 37:22,37:26;
+    .srcloc 39:22,39:26;
     CGetL $enum
-    .srcloc 37:10,37:27;
+    .srcloc 39:10,39:27;
     FCallClsMethodSD <> 1 1 "0" - "" "" Static "get"
-    .srcloc 37:5,37:28;
+    .srcloc 39:5,39:28;
     Print
-    .srcloc 37:5,37:28;
+    .srcloc 39:5,39:28;
     PopC
-    .srcloc 38:10,38:13;
+    .srcloc 40:10,40:13;
     String "\n"
-    .srcloc 38:5,38:14;
+    .srcloc 40:5,40:14;
     Print
-    .srcloc 38:5,38:14;
+    .srcloc 40:5,40:14;
     PopC
-    .srcloc 39:4,39:4;
+    .srcloc 41:4,41:4;
     Null
     RetC
   }
-  .method {}{} [public static] (41,44) <"HH\\void" N > show_atom(["__Atom"("""y:0:{}""")]<"HH\\string" "HH\\string" > $enum) {
-    .srcloc 41:17,44:139;
+  .method {}{} [public static] (44,49) <"HH\\void" N > show_atom(["__Atom"("""y:0:{}""")]<"HH\\string" "HH\\string" > $enum) {
+    .srcloc 44:5,49:146;
     Array @A_2
     VerifyParamTypeTS $enum
     Array @A_3
@@ -282,38 +282,38 @@
     PopL $enum
     Jmp L1
   L0:
-    .srcloc 41:56,41:59;
+    .srcloc 45:31,45:34;
     String "Type constant does not resolve to a class"
     Fatal Runtime
   L1:
-    .srcloc 42:10,42:27;
+    .srcloc 47:10,47:27;
     NullUninit
     NullUninit
-    .srcloc 42:22,42:26;
+    .srcloc 47:22,47:26;
     CGetL $enum
-    .srcloc 42:10,42:27;
+    .srcloc 47:10,47:27;
     FCallClsMethodSD <> 1 1 "0" - "" "" Static "get"
-    .srcloc 42:5,42:28;
+    .srcloc 47:5,47:28;
     Print
-    .srcloc 42:5,42:28;
+    .srcloc 47:5,47:28;
     PopC
-    .srcloc 43:10,43:13;
+    .srcloc 48:10,48:13;
     String "\n"
-    .srcloc 43:5,43:14;
+    .srcloc 48:5,48:14;
     Print
-    .srcloc 43:5,43:14;
+    .srcloc 48:5,48:14;
     PopC
-    .srcloc 44:4,44:4;
+    .srcloc 49:4,49:4;
     Null
     RetC
   }
 }
 
-.class {} [final] CE (47,49) extends Controller {
+.class {} [final] CE (52,54) extends Controller {
   .const TEnum isType = """Y:2:{s:4:\"kind\";i:101;s:9:\"classname\";s:1:\"E\";}""";
 }
 
-.class {} [final] CF (51,53) extends Controller {
+.class {} [final] CF (56,58) extends Controller {
   .const TEnum isType = """Y:2:{s:4:\"kind\";i:101;s:9:\"classname\";s:1:\"F\";}""";
 }
 

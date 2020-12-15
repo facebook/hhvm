@@ -24,26 +24,26 @@ enum class F : ExBox extends E {
 
 <<__EntryPoint>>
 function main(): void {
-  echo E::A->unwrap()->data;
+  echo E::A->data()->data;
   echo "\n";
 
   echo "Testing E's getValues()\n";
   foreach (E::getValues() as $key => $value) {
     echo "$key = ";
-    $box = $value->unwrap() as Box<_>;
+    $box = $value->data() as Box<_>;
     echo $box->data;
     echo "\n";
   }
 
   echo "Testing F\n";
-  echo F::A->unwrap()->data;
+  echo F::A->data()->data;
   echo "\n";
-  echo F::C->unwrap()->data;
+  echo F::C->data()->data;
   echo "\n";
   echo "Testing F's getValues()\n";
   foreach (F::getValues() as $key => $value) {
     echo "$key = ";
-    $box = $value->unwrap() as Box<_>;
+    $box = $value->data() as Box<_>;
     echo $box->data;
     echo "\n";
   }

@@ -20,8 +20,8 @@ enum class EE : I {
   A<Box>(new Box(42));
 }
 
-function ff(<<__Atom>> HH\Elt<EE, Box> $x) : int {
-  return $x->unwrap()->x;
+function ff(<<__Atom>> HH\EnumMember<EE, Box> $x) : int {
+  return $x->data()->x;
 }
 
 <<__EntryPoint>>
@@ -31,6 +31,8 @@ function main(): void {
 }
 
 class C {}
-function wrong_upper_bound<reify T as C>(<<__Atom>> HH\Elt<T, Box> $x): mixed {
-  return $x->unwrap()->x;
+function wrong_upper_bound<reify T as C>(
+    <<__Atom>> HH\EnumMember<T, Box> $x
+  ): mixed {
+  return $x->data()->x;
 }

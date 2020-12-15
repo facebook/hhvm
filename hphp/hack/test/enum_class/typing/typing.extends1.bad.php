@@ -39,8 +39,8 @@ enum class F: ExBox extends E {
 abstract class Base {
   abstract const type TEnum as E;
 
-  public function get<T>(HH\Elt<this::TEnum, Box<T>> $param): T {
-    return $param->unwrap()->data;
+  public function get<T>(HH\EnumMember<this::TEnum, Box<T>> $param): T {
+    return $param->data()->data;
   }
 
   public static function dictGen(): dict<string, ExBox> {
@@ -48,7 +48,7 @@ abstract class Base {
     $ts = type_structure(static::class, 'TEnum');
     $cls = $ts['classname'];
     foreach ($cls::getValues() as $key => $elt) {
-      $dict[$key] = $elt->unwrap();
+      $dict[$key] = $elt->data();
     }
     return $dict;
   }

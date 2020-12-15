@@ -32,8 +32,8 @@ enum class E: ExBox {
   B2<Box<int>>(new Box(42));
 }
 
-function generic<TEnum as E, T>(HH\Elt<TEnum, Box<T>> $param): T {
-  return $param->unwrap()->data;
+function generic<TEnum as E, T>(HH\EnumMember<TEnum, Box<T>> $param): T {
+  return $param->data()->data;
 }
 
 function testit2(): void {

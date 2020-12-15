@@ -1,1 +1,1 @@
-Catchable fatal error: Argument 1 passed to f() must be an instance of HH\Elt, string given in %s/enum_class13.php on line 18
+Catchable fatal error: Argument 1 passed to f() must be an instance of HH\EnumMember, string given in %s/enum_class13.php on line 18

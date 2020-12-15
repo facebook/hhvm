@@ -8,8 +8,8 @@ class Box<T> implements IBox {
 enum class E : IBox {
   A<Box<string>>(new Box("world"));
 }
-function f<T>(<<__Atom>> HH\Elt<E, Box<T>> $elt) : T {
-  return $elt->unwrap()->data;
+function f<T>(<<__Atom>> HH\EnumMember<E, Box<T>> $elt) : T {
+  return $elt->data()->data;
 }
 
 <<__EntryPoint>>

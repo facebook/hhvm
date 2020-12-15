@@ -10,9 +10,11 @@ enum class Foo: mixed {
 }
 
 class UseFoo {
-  public function input<T>(<<__Atom>> HH\Elt<Foo, Box<T>> $atom, T $x): void {}
-  public function output<T>(<<__Atom>> HH\Elt<Foo, Box<T>> $atom): T {
-    return $atom->unwrap()->x;
+  public function input<T>(
+    <<__Atom>> HH\EnumMember<Foo, Box<T>> $atom, T $x
+  ): void {}
+  public function output<T>(<<__Atom>> HH\EnumMember<Foo, Box<T>> $atom): T {
+    return $atom->data()->x;
   }
 }
 

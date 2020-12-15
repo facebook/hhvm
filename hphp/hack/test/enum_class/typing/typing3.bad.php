@@ -32,9 +32,11 @@ enum class E: ExBox {
   B2<Box<int>>(new Box(42));
 }
 
-function generic2<TEnum as E, TBox as IBox>(HH\Elt<TEnum, TBox> $param): int {
-  $param->unwrap()->add(42);
-  return $param->unwrap()->data;
+function generic2<TEnum as E, TBox as IBox>(
+  HH\EnumMember<TEnum, TBox> $param
+  ): int {
+  $param->data()->add(42);
+  return $param->data()->data;
 }
 
 function testit2(): void {

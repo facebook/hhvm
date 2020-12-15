@@ -32,8 +32,8 @@ enum class E: ExBox {
   B2<Box<int>>(new Box(42));
 }
 
-function e<T>(HH\Elt<E, Box<T>> $param): T {
-  return $param->unwrap()->data;
+function e<T>(HH\EnumMember<E, Box<T>> $param): T {
+  return $param->data()->data;
 }
 
 function testit(): void {

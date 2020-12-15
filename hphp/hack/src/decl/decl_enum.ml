@@ -16,7 +16,7 @@ type t = {
   base: Typing_defs.decl_ty;
       (** Underlying type of the enum, e.g. int or string.
           For subclasses of Enum, this is the type parameter of Enum.
-          For enum classes, this is HH\Elt<E, I>. *)
+          For enum classes, this is HH\EnumMember<E, I>. *)
   type_: Typing_defs.decl_ty;
       (** Type containing the enum name.
           For subclasses of Enum, this is also the type parameter of Enum. *)
@@ -73,7 +73,7 @@ let enum_kind name enum inner_ty ~get_ancestor =
       if enum.te_enum_class then
         let te_interface = enum.te_base in
         let te_base =
-          Tapply ((pos, SN.Classes.cElt), [enum_type; enum.te_base])
+          Tapply ((pos, SN.Classes.cEnumMember), [enum_type; enum.te_base])
         in
         (* TODO(T77095784) make a new reason ! *)
         let te_base = mk (reason, te_base) in

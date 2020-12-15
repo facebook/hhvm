@@ -3273,10 +3273,12 @@ void in(ISS& env, const bc::IsTypeStructC& op) {
       return reduce(
         env,
         bc::PopC {},
+        bc::NullUninit {},
+        bc::NullUninit {},
         bc::LateBoundCls {},
         bc::ClassName {},
         bc::String {val},
-        bc::FCallBuiltin {2, 0, s_hh_type_structure_no_throw.get()},
+        bc::FCallFuncD {FCallArgs(2), s_hh_type_structure_no_throw.get()},
         bc::IsTypeStructC { TypeStructResolveOp::DontResolve }
       );
     }

@@ -1490,18 +1490,17 @@ void in(ISS& env, const bc::QueryM& op) {
       if (auto const last = last_op(env, 0)) {
         if (last->op == Op::BaseC) {
           if (auto const prev = last_op(env, 1)) {
-            if (prev->op == Op::FCallBuiltin &&
-                prev->FCallBuiltin.str3->isame(s_type_structure.get()) &&
-                prev->FCallBuiltin.arg1 == 2) {
-              auto const params = prev->FCallBuiltin.arg1;
+            if (prev->op == Op::FCallFuncD &&
+                prev->FCallFuncD.str2->isame(s_type_structure.get()) &&
+                prev->FCallFuncD.fca.numArgs() == 2) {
+              auto const params = prev->FCallFuncD.fca.numArgs();
               rewind(env, op); // querym
-              rewind(env, 2);  // basec + fcallbuiltin
+              rewind(env, 2);  // basec + fcallfuncd
               env.collect.mInstrState.clear();
               return reduce(
                 env,
-                bc::FCallBuiltin {
-                  params,
-                  0,
+                bc::FCallFuncD {
+                  FCallArgs(params),
                   s_type_structure_classname.get()
                 }
               );

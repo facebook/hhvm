@@ -3358,6 +3358,12 @@ where
                         FunctionCtxTypeSpecifier(_) => {
                             Ok(Hint::new(Self::p_pos(n, e), Hint_::Hmixed))
                         }
+                        TypeConstant(c) => match &c.left_type.children {
+                            Token(token) if token.kind() == TK::Variable => {
+                                Ok(Hint::new(Self::p_pos(n, e), Hint_::Hmixed))
+                            }
+                            _ => Self::p_hint(n, e),
+                        },
                         _ => Self::p_hint(n, e),
                     },
                     &c.types,

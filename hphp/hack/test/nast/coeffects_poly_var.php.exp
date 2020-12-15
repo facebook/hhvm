@@ -1,0 +1,37 @@
+[(Fun
+    { f_span = [5:1-7:18]; f_annotation = (); f_mode = Mstrict;
+      f_ret = ((), (Some ([7:11-15], (Hprim Tvoid))));
+      f_name = ([5:10-14], "\\poly"); f_tparams = [];
+      f_where_constraints = []; f_variadic = FVnonVariadic;
+      f_params =
+      [{ param_annotation = [6:5-7];
+         param_type_hint =
+         ((), (Some ([6:3-4], (Happly (([6:3-4], "\\C"), [])))));
+         param_is_variadic = false; param_pos = [6:5-7]; param_name = "$f";
+         param_expr = None; param_callconv = None;
+         param_user_attributes = []; param_visibility = None }
+        ];
+      f_cap = ((), (Some ([7:2-9], Hmixed)));
+      f_unsafe_cap = ((), (Some ([7:2-9], Hmixed)));
+      f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = Named };
+      f_fun_kind = FSync; f_user_attributes = [];
+      f_file_attributes =
+      [{ fa_user_attributes =
+         [{ ua_name = ([3:9-33], "__EnableUnstableFeatures");
+            ua_params = [([3:34-57], (String "coeffects_provisional"))] }
+           ];
+         fa_namespace =
+         { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
+           ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;
+           ns_const_uses = <opaque>; ns_name = None; ns_auto_ns_map = [];
+           ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
+         }
+        ];
+      f_external = false;
+      f_namespace =
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
+        ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;
+        ns_const_uses = <opaque>; ns_name = None; ns_auto_ns_map = [];
+        ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+      f_doc_comment = None; f_static = false })
+  ]

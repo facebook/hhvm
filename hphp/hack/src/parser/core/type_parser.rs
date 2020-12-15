@@ -755,6 +755,13 @@ where
                             });
                             S!(make_function_ctx_type_specifier, x, ctx, var)
                         }
+                        TokenKind::Variable => {
+                            /* Keeping this isolated from the type constant parsing code for now */
+                            let var = x.assert_token(TokenKind::Variable);
+                            let colcol = x.require_coloncolon();
+                            let name = x.require_name();
+                            S!(make_type_constant, x, var, colcol, name)
+                        }
                         _ => x.parse_type_specifier(false, false),
                     }
                 });

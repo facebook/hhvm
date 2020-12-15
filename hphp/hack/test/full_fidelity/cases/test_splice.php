@@ -1,7 +1,7 @@
 <?hh
 
 function test(): void {
-  __splice__($foo);
+  ${$foo};
 
-  code`__splice__($foo)`;
+  code`${$foo}`;
 }

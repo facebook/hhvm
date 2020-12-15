@@ -481,6 +481,10 @@ impl<'src> SmartConstructors for DirectDeclSmartConstructors<'src> {
         <Self as FlattenSmartConstructors<'src, State<'src>>>::make_braced_expression(self, left_brace, expression, right_brace)
     }
 
+    fn make_et_splice_expression(&mut self, dollar: Self::R, left_brace: Self::R, expression: Self::R, right_brace: Self::R) -> Self::R {
+        <Self as FlattenSmartConstructors<'src, State<'src>>>::make_et_splice_expression(self, dollar, left_brace, expression, right_brace)
+    }
+
     fn make_embedded_braced_expression(&mut self, left_brace: Self::R, expression: Self::R, right_brace: Self::R) -> Self::R {
         <Self as FlattenSmartConstructors<'src, State<'src>>>::make_embedded_braced_expression(self, left_brace, expression, right_brace)
     }

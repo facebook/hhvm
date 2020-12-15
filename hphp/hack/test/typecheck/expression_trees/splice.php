@@ -4,7 +4,7 @@
 
 function test(): void {
   $x = Code`4`;
-  Code`__splice__($x)`;
+  Code`${$x}`;
 }
 
 //// BEGIN DEFS

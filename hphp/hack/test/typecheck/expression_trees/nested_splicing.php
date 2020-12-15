@@ -3,7 +3,7 @@
 <<file:__EnableUnstableFeatures('expression_trees')>>
 
 function test(): void {
-  Code`__splice__(__splice__(4))`;
+  Code`${${4}}`;
 }
 
 //// BEGIN DEFS

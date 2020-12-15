@@ -1592,6 +1592,21 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           WithRule
             (Rule.Parental, Concat [Nest [t env expr]; Split; t env right_p]);
         ]
+    | Syntax.ETSpliceExpression
+        {
+          et_splice_expression_dollar = dollar;
+          et_splice_expression_left_brace = left_p;
+          et_splice_expression_expression = expr;
+          et_splice_expression_right_brace = right_p;
+        } ->
+      Concat
+        [
+          t env dollar;
+          t env left_p;
+          Split;
+          WithRule
+            (Rule.Parental, Concat [Nest [t env expr]; Split; t env right_p]);
+        ]
     | Syntax.BracedExpression
         {
           braced_expression_left_brace = left_b;

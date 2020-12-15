@@ -1523,6 +1523,21 @@ let schema : schema_node list =
         ];
     };
     {
+      kind_name = "ETSpliceExpression";
+      type_name = "et_splice_expression";
+      func_name = "et_splice_expression";
+      description = "et_splice_expression";
+      prefix = "et_splice_expression";
+      aggregates = [Expression; ConstructorExpression; LambdaBody];
+      fields =
+        [
+          ("dollar", Token);
+          ("left_brace", Token);
+          ("expression", Aggregate Expression);
+          ("right_brace", Token);
+        ];
+    };
+    {
       kind_name = "EmbeddedBracedExpression";
       type_name = "embedded_braced_expression";
       func_name = "embedded_braced_expression";

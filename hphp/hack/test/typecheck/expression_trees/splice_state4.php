@@ -18,7 +18,7 @@ function test(): void {
 
   if ($x->x !== null) {
     $_ = Code`() ==> {
-      __splice__(lift($x->reset()));
+      ${lift($x->reset())};
       return;
     }`;
 

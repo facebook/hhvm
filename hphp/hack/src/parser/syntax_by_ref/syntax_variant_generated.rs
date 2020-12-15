@@ -132,6 +132,7 @@ pub enum SyntaxVariant<'a, T, V> {
     FunctionPointerExpression(&'a FunctionPointerExpressionChildren<'a, T, V>),
     ParenthesizedExpression(&'a ParenthesizedExpressionChildren<'a, T, V>),
     BracedExpression(&'a BracedExpressionChildren<'a, T, V>),
+    ETSpliceExpression(&'a ETSpliceExpressionChildren<'a, T, V>),
     EmbeddedBracedExpression(&'a EmbeddedBracedExpressionChildren<'a, T, V>),
     ListExpression(&'a ListExpressionChildren<'a, T, V>),
     CollectionLiteralExpression(&'a CollectionLiteralExpressionChildren<'a, T, V>),
@@ -1045,6 +1046,14 @@ pub struct ParenthesizedExpressionChildren<'a, T, V> {
 
 #[derive(Debug, Clone)]
 pub struct BracedExpressionChildren<'a, T, V> {
+    pub left_brace: Syntax<'a, T, V>,
+    pub expression: Syntax<'a, T, V>,
+    pub right_brace: Syntax<'a, T, V>,
+}
+
+#[derive(Debug, Clone)]
+pub struct ETSpliceExpressionChildren<'a, T, V> {
+    pub dollar: Syntax<'a, T, V>,
     pub left_brace: Syntax<'a, T, V>,
     pub expression: Syntax<'a, T, V>,
     pub right_brace: Syntax<'a, T, V>,

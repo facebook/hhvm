@@ -3291,15 +3291,6 @@ where
 
                 self.function_call_on_xhp_name_errors(recv);
 
-                if self.text(recv) == sn::special_functions::SPLICE
-                    && !self.env.context.active_expression_tree
-                {
-                    self.errors.push(Self::make_error_from_node(
-                        recv,
-                        errors::reserved_et_keyword,
-                    ))
-                }
-
                 let fun_and_clsmeth_disabled = self
                     .env
                     .parser_options
@@ -3321,6 +3312,14 @@ where
                     ))
                 }
             }
+
+            ETSpliceExpression(_) => {
+                if !self.env.context.active_expression_tree {
+                    self.errors
+                        .push(Self::make_error_from_node(node, errors::splice_outside_et))
+                }
+            }
+
             ListExpression(x) if x.members.is_missing() && self.env.is_hhvm_compat() => {
                 if let Some(Syntax {
                     children: ForeachStatement(x),
@@ -5584,9 +5583,7 @@ where
 
                 self.fold_child_nodes(node)
             }
-            FunctionCallExpression(x)
-                if self.text(&x.receiver) == sn::special_functions::SPLICE =>
-            {
+            ETSpliceExpression(_) => {
                 let previous_state = self.env.context.active_expression_tree;
                 self.env.context.active_expression_tree = false;
                 self.fold_child_nodes(node);

@@ -1108,6 +1108,16 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                     }
                 })
             },
+            ETSpliceExpression(x) => {
+                get_index(4).and_then(|index| { match index {
+                        0 => Some(&x.dollar),
+                    1 => Some(&x.left_brace),
+                    2 => Some(&x.expression),
+                    3 => Some(&x.right_brace),
+                        _ => None,
+                    }
+                })
+            },
             EmbeddedBracedExpression(x) => {
                 get_index(3).and_then(|index| { match index {
                         0 => Some(&x.left_brace),

@@ -127,6 +127,7 @@ type t =
   | FunctionPointerExpression
   | ParenthesizedExpression
   | BracedExpression
+  | ETSpliceExpression
   | EmbeddedBracedExpression
   | ListExpression
   | CollectionLiteralExpression
@@ -303,6 +304,7 @@ let to_string kind =
   | FunctionPointerExpression         -> "function_pointer_expression"
   | ParenthesizedExpression           -> "parenthesized_expression"
   | BracedExpression                  -> "braced_expression"
+  | ETSpliceExpression                -> "et_splice_expression"
   | EmbeddedBracedExpression          -> "embedded_braced_expression"
   | ListExpression                    -> "list_expression"
   | CollectionLiteralExpression       -> "collection_literal_expression"

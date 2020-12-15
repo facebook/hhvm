@@ -11,7 +11,7 @@ function test(): void {
 
   // Expression Trees do not inherit local variables from the outer scope
   // But splices do
-  $_ = Code`__splice__(lift($x))`;
+  $_ = Code`${lift($x)}`;
 }
 
 //// BEGIN DEFS

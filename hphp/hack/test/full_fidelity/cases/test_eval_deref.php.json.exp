@@ -88,8 +88,8 @@
               }
             },
             "binary_right_operand":{
-              "kind":"prefix_unary_expression",
-              "prefix_unary_operator":{
+              "kind":"et_splice_expression",
+              "et_splice_expression_dollar":{
                 "kind":"token",
                 "token":{
                   "kind":"$",
@@ -103,79 +103,45 @@
                   "line_number":3
                 }
               },
-              "prefix_unary_operand":{
-                "kind":"braced_expression",
-                "braced_expression_left_brace":{
-                  "kind":"token",
-                  "token":{
-                    "kind":"{",
-                    "text":"{",
-                    "offset":12,
-                    "leading_width":0,
-                    "width":1,
-                    "trailing_width":0,
-                    "leading":[],
-                    "trailing":[],
-                    "line_number":3
-                  }
-                },
-                "braced_expression_expression":{
-                  "kind":"binary_expression",
-                  "binary_left_operand":{
-                    "kind":"literal",
-                    "literal_expression":{
-                      "kind":"token",
-                      "token":{
-                        "kind":"double_quoted_string_literal",
-                        "text":"\"a\"",
-                        "offset":13,
-                        "leading_width":0,
-                        "width":3,
-                        "trailing_width":0,
-                        "leading":[],
-                        "trailing":[],
-                        "line_number":3
-                      }
-                    }
-                  },
-                  "binary_operator":{
+              "et_splice_expression_left_brace":{
+                "kind":"token",
+                "token":{
+                  "kind":"{",
+                  "text":"{",
+                  "offset":12,
+                  "leading_width":0,
+                  "width":1,
+                  "trailing_width":0,
+                  "leading":[],
+                  "trailing":[],
+                  "line_number":3
+                }
+              },
+              "et_splice_expression_expression":{
+                "kind":"binary_expression",
+                "binary_left_operand":{
+                  "kind":"literal",
+                  "literal_expression":{
                     "kind":"token",
                     "token":{
-                      "kind":".",
-                      "text":".",
-                      "offset":16,
+                      "kind":"double_quoted_string_literal",
+                      "text":"\"a\"",
+                      "offset":13,
                       "leading_width":0,
-                      "width":1,
+                      "width":3,
                       "trailing_width":0,
                       "leading":[],
                       "trailing":[],
                       "line_number":3
                     }
-                  },
-                  "binary_right_operand":{
-                    "kind":"literal",
-                    "literal_expression":{
-                      "kind":"token",
-                      "token":{
-                        "kind":"double_quoted_string_literal",
-                        "text":"\"x\"",
-                        "offset":17,
-                        "leading_width":0,
-                        "width":3,
-                        "trailing_width":0,
-                        "leading":[],
-                        "trailing":[],
-                        "line_number":3
-                      }
-                    }
                   }
                 },
-                "braced_expression_right_brace":{
+                "binary_operator":{
                   "kind":"token",
                   "token":{
-                    "kind":"}",
-                    "text":"}",
-                    "offset":20,
+                    "kind":".",
+                    "text":".",
+                    "offset":16,
                     "leading_width":0,
                     "width":1,
                     "trailing_width":0,
@@ -183,6 +149,37 @@
                     "trailing":[],
                     "line_number":3
                   }
+                },
+                "binary_right_operand":{
+                  "kind":"literal",
+                  "literal_expression":{
+                    "kind":"token",
+                    "token":{
+                      "kind":"double_quoted_string_literal",
+                      "text":"\"x\"",
+                      "offset":17,
+                      "leading_width":0,
+                      "width":3,
+                      "trailing_width":0,
+                      "leading":[],
+                      "trailing":[],
+                      "line_number":3
+                    }
+                  }
+                }
+              },
+              "et_splice_expression_right_brace":{
+                "kind":"token",
+                "token":{
+                  "kind":"}",
+                  "text":"}",
+                  "offset":20,
+                  "leading_width":0,
+                  "width":1,
+                  "trailing_width":0,
+                  "leading":[],
+                  "trailing":[],
+                  "line_number":3
                 }
               }
             }
@@ -223,5 +220,5 @@
     }
   },
   "program_text":"<?hh\n\n$x = ${\"a\".\"x\"};\n",
-  "version":"2020-06-30-0000"
+  "version":"2020-12-02-0001"
 }

@@ -7,7 +7,7 @@ function lift<T>(T $_): ExprTree<Code, Code::TAst, T> {
 }
 
 function test(): void {
-  Code`__splice__(lift(1 << 4))`;
+  Code`${lift(1 << 4)}`;
 }
 
 //// BEGIN DEFS

@@ -1,4 +1,4 @@
-File "splice_err2.php", line 9, characters 17-30:
+File "splice_err2.php", line 9, characters 17-21:
 Invalid argument (Typing[4110])
   File "splice_err2.php", line 170, characters 26-35:
   Expected `ExampleInt`

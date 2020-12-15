@@ -126,6 +126,7 @@ pub trait SyntaxType<C>: SyntaxTypeBase<C>
     fn make_function_pointer_expression(ctx: &C, function_pointer_receiver: Self, function_pointer_type_args: Self) -> Self;
     fn make_parenthesized_expression(ctx: &C, parenthesized_expression_left_paren: Self, parenthesized_expression_expression: Self, parenthesized_expression_right_paren: Self) -> Self;
     fn make_braced_expression(ctx: &C, braced_expression_left_brace: Self, braced_expression_expression: Self, braced_expression_right_brace: Self) -> Self;
+    fn make_et_splice_expression(ctx: &C, et_splice_expression_dollar: Self, et_splice_expression_left_brace: Self, et_splice_expression_expression: Self, et_splice_expression_right_brace: Self) -> Self;
     fn make_embedded_braced_expression(ctx: &C, embedded_braced_expression_left_brace: Self, embedded_braced_expression_expression: Self, embedded_braced_expression_right_brace: Self) -> Self;
     fn make_list_expression(ctx: &C, list_keyword: Self, list_left_paren: Self, list_members: Self, list_right_paren: Self) -> Self;
     fn make_collection_literal_expression(ctx: &C, collection_literal_name: Self, collection_literal_left_brace: Self, collection_literal_initializers: Self, collection_literal_right_brace: Self) -> Self;

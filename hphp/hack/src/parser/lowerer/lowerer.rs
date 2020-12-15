@@ -1317,6 +1317,17 @@ where
             ParenthesizedExpression(c) => {
                 Self::p_expr_impl(location, &c.expression, env, parent_pos)
             }
+            ETSpliceExpression(c) => {
+                let pos = Self::p_pos(node, env);
+
+                let inner_pos = Self::p_pos(&c.expression, env);
+                let inner_expr_ = Self::p_expr_impl_(location, &c.expression, env, parent_pos)?;
+                let inner_expr = ast::Expr::new(inner_pos, inner_expr_);
+                Ok(ast::Expr::new(
+                    pos,
+                    ast::Expr_::ETSplice(Box::new(inner_expr)),
+                ))
+            }
             _ => {
                 let pos = Self::p_pos(node, env);
                 let expr_ = Self::p_expr_impl_(location, node, env, parent_pos)?;
@@ -1695,7 +1706,6 @@ where
                             ParenthesizedExpression(_) => Some(Self::p_pos(recv, env)),
                             _ => None,
                         };
-                        let is_splice = Self::text_str(recv, env) == special_functions::SPLICE;
                         let recv = Self::p_expr(recv, env)?;
                         let recv = match (&recv.1, pos_if_has_parens) {
                             (E_::ObjGet(t), Some(ref _p)) => {
@@ -1712,13 +1722,6 @@ where
                             _ => recv,
                         };
                         let (args, varargs) = split_args_vararg(args, env)?;
-                        if is_splice {
-                            if args.len() == 1 && targs.len() == 0 && varargs == None {
-                                if let Some(e) = args.first() {
-                                    return Ok(E_::mk_etsplice(e.to_owned()));
-                                }
-                            }
-                        }
                         Ok(E_::mk_call(recv, targs, args, varargs))
                     }
                 }

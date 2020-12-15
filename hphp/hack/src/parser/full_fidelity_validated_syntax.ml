@@ -210,6 +210,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | Syntax.FunctionPointerExpression _ -> tag validate_function_pointer_expression (fun x -> ExprFunctionPointer x) x
     | Syntax.ParenthesizedExpression _ -> tag validate_parenthesized_expression (fun x -> ExprParenthesized x) x
     | Syntax.BracedExpression _ -> tag validate_braced_expression (fun x -> ExprBraced x) x
+    | Syntax.ETSpliceExpression _ -> tag validate_et_splice_expression (fun x -> ExprETSplice x) x
     | Syntax.EmbeddedBracedExpression _ -> tag validate_embedded_braced_expression (fun x -> ExprEmbeddedBraced x) x
     | Syntax.ListExpression _ -> tag validate_list_expression (fun x -> ExprList x) x
     | Syntax.CollectionLiteralExpression _ -> tag validate_collection_literal_expression (fun x -> ExprCollectionLiteral x) x
@@ -260,6 +261,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | ExprFunctionPointer              thing -> invalidate_function_pointer_expression    (value, thing)
     | ExprParenthesized                thing -> invalidate_parenthesized_expression       (value, thing)
     | ExprBraced                       thing -> invalidate_braced_expression              (value, thing)
+    | ExprETSplice                     thing -> invalidate_et_splice_expression           (value, thing)
     | ExprEmbeddedBraced               thing -> invalidate_embedded_braced_expression     (value, thing)
     | ExprList                         thing -> invalidate_list_expression                (value, thing)
     | ExprCollectionLiteral            thing -> invalidate_collection_literal_expression  (value, thing)
@@ -457,6 +459,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | Syntax.FunctionPointerExpression _ -> tag validate_function_pointer_expression (fun x -> LambdaFunctionPointer x) x
     | Syntax.ParenthesizedExpression _ -> tag validate_parenthesized_expression (fun x -> LambdaParenthesized x) x
     | Syntax.BracedExpression _ -> tag validate_braced_expression (fun x -> LambdaBraced x) x
+    | Syntax.ETSpliceExpression _ -> tag validate_et_splice_expression (fun x -> LambdaETSplice x) x
     | Syntax.EmbeddedBracedExpression _ -> tag validate_embedded_braced_expression (fun x -> LambdaEmbeddedBraced x) x
     | Syntax.ListExpression _ -> tag validate_list_expression (fun x -> LambdaList x) x
     | Syntax.CollectionLiteralExpression _ -> tag validate_collection_literal_expression (fun x -> LambdaCollectionLiteral x) x
@@ -507,6 +510,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | LambdaFunctionPointer              thing -> invalidate_function_pointer_expression    (value, thing)
     | LambdaParenthesized                thing -> invalidate_parenthesized_expression       (value, thing)
     | LambdaBraced                       thing -> invalidate_braced_expression              (value, thing)
+    | LambdaETSplice                     thing -> invalidate_et_splice_expression           (value, thing)
     | LambdaEmbeddedBraced               thing -> invalidate_embedded_braced_expression     (value, thing)
     | LambdaList                         thing -> invalidate_list_expression                (value, thing)
     | LambdaCollectionLiteral            thing -> invalidate_collection_literal_expression  (value, thing)
@@ -555,6 +559,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | Syntax.FunctionPointerExpression _ -> tag validate_function_pointer_expression (fun x -> CExprFunctionPointer x) x
     | Syntax.ParenthesizedExpression _ -> tag validate_parenthesized_expression (fun x -> CExprParenthesized x) x
     | Syntax.BracedExpression _ -> tag validate_braced_expression (fun x -> CExprBraced x) x
+    | Syntax.ETSpliceExpression _ -> tag validate_et_splice_expression (fun x -> CExprETSplice x) x
     | Syntax.EmbeddedBracedExpression _ -> tag validate_embedded_braced_expression (fun x -> CExprEmbeddedBraced x) x
     | Syntax.ListExpression _ -> tag validate_list_expression (fun x -> CExprList x) x
     | Syntax.CollectionLiteralExpression _ -> tag validate_collection_literal_expression (fun x -> CExprCollectionLiteral x) x
@@ -605,6 +610,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | CExprFunctionPointer              thing -> invalidate_function_pointer_expression    (value, thing)
     | CExprParenthesized                thing -> invalidate_parenthesized_expression       (value, thing)
     | CExprBraced                       thing -> invalidate_braced_expression              (value, thing)
+    | CExprETSplice                     thing -> invalidate_et_splice_expression           (value, thing)
     | CExprEmbeddedBraced               thing -> invalidate_embedded_braced_expression     (value, thing)
     | CExprList                         thing -> invalidate_list_expression                (value, thing)
     | CExprCollectionLiteral            thing -> invalidate_collection_literal_expression  (value, thing)
@@ -2582,6 +2588,24 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
       { braced_expression_left_brace = invalidate_token x.braced_expression_left_brace
       ; braced_expression_expression = invalidate_expression x.braced_expression_expression
       ; braced_expression_right_brace = invalidate_token x.braced_expression_right_brace
+      }
+    ; Syntax.value = v
+    }
+  and validate_et_splice_expression : et_splice_expression validator = function
+  | { Syntax.syntax = Syntax.ETSpliceExpression x; value = v } -> v,
+    { et_splice_expression_right_brace = validate_token x.et_splice_expression_right_brace
+    ; et_splice_expression_expression = validate_expression x.et_splice_expression_expression
+    ; et_splice_expression_left_brace = validate_token x.et_splice_expression_left_brace
+    ; et_splice_expression_dollar = validate_token x.et_splice_expression_dollar
+    }
+  | s -> validation_fail (Some SyntaxKind.ETSpliceExpression) s
+  and invalidate_et_splice_expression : et_splice_expression invalidator = fun (v, x) ->
+    { Syntax.syntax =
+      Syntax.ETSpliceExpression
+      { et_splice_expression_dollar = invalidate_token x.et_splice_expression_dollar
+      ; et_splice_expression_left_brace = invalidate_token x.et_splice_expression_left_brace
+      ; et_splice_expression_expression = invalidate_expression x.et_splice_expression_expression
+      ; et_splice_expression_right_brace = invalidate_token x.et_splice_expression_right_brace
       }
     ; Syntax.value = v
     }

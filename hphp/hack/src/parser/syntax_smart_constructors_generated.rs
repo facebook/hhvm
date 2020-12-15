@@ -580,6 +580,11 @@ where
         Self::R::make_braced_expression(self.state_mut(), arg0, arg1, arg2)
     }
 
+    fn make_et_splice_expression(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R) -> Self::R {
+        self.state_mut().next(&[&arg0, &arg1, &arg2, &arg3]);
+        Self::R::make_et_splice_expression(self.state_mut(), arg0, arg1, arg2, arg3)
+    }
+
     fn make_embedded_braced_expression(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> Self::R {
         self.state_mut().next(&[&arg0, &arg1, &arg2]);
         Self::R::make_embedded_braced_expression(self.state_mut(), arg0, arg1, arg2)

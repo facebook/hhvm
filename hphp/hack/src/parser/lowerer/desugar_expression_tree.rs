@@ -830,7 +830,7 @@ fn merge_positions(positions: &[&Pos]) -> Pos {
 /// placeholder variables.
 ///
 /// ```
-/// $c = Code`__splice__($x->foo()) + __splice__($y);
+/// $c = Code`${$x->foo()} + ${$y};
 /// $c_after = Code`$__splice_1 + $__splice_2`;
 /// ```
 ///

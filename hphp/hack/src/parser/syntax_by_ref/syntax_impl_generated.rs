@@ -131,6 +131,7 @@ impl<T: LexableToken, V> Syntax<'_, T, V> {
             SyntaxVariant::FunctionPointerExpression {..} => SyntaxKind::FunctionPointerExpression,
             SyntaxVariant::ParenthesizedExpression {..} => SyntaxKind::ParenthesizedExpression,
             SyntaxVariant::BracedExpression {..} => SyntaxKind::BracedExpression,
+            SyntaxVariant::ETSpliceExpression {..} => SyntaxKind::ETSpliceExpression,
             SyntaxVariant::EmbeddedBracedExpression {..} => SyntaxKind::EmbeddedBracedExpression,
             SyntaxVariant::ListExpression {..} => SyntaxKind::ListExpression,
             SyntaxVariant::CollectionLiteralExpression {..} => SyntaxKind::CollectionLiteralExpression,

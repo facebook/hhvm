@@ -5,7 +5,7 @@
 function test(): void {
   $x = Code`4`;
   $y = Code`5`;
-  Code`__splice__($x) + __splice__($y)`;
+  Code`${$x} + ${$y}`;
 }
 
 //// BEGIN DEFS

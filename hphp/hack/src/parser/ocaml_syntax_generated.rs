@@ -2372,6 +2372,28 @@ where
       Self { syntax, value }
     }
 
+    fn make_et_splice_expression(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self) -> Self {
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value, 
+          arg3.value
+      ];
+      let value = V::from_values(children.iter());
+      let syntax = Self::make(
+          ctx,
+          SyntaxKind::ETSpliceExpression,
+          &value,
+          &[
+              arg0.syntax, 
+              arg1.syntax, 
+              arg2.syntax, 
+              arg3.syntax
+          ],
+      );
+      Self { syntax, value }
+    }
+
     fn make_embedded_braced_expression(ctx: &C, arg0: Self, arg1: Self, arg2: Self) -> Self {
       let children = &[
           arg0.value, 

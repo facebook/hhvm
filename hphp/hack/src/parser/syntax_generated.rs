@@ -1197,6 +1197,17 @@ where
         Self::make(syntax, value)
     }
 
+    fn make_et_splice_expression(_: &C, et_splice_expression_dollar: Self, et_splice_expression_left_brace: Self, et_splice_expression_expression: Self, et_splice_expression_right_brace: Self) -> Self {
+        let syntax = SyntaxVariant::ETSpliceExpression(Box::new(ETSpliceExpressionChildren {
+            et_splice_expression_dollar,
+            et_splice_expression_left_brace,
+            et_splice_expression_expression,
+            et_splice_expression_right_brace,
+        }));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
+        Self::make(syntax, value)
+    }
+
     fn make_embedded_braced_expression(_: &C, embedded_braced_expression_left_brace: Self, embedded_braced_expression_expression: Self, embedded_braced_expression_right_brace: Self) -> Self {
         let syntax = SyntaxVariant::EmbeddedBracedExpression(Box::new(EmbeddedBracedExpressionChildren {
             embedded_braced_expression_left_brace,
@@ -2721,6 +2732,14 @@ where
                 let acc = f(braced_expression_right_brace, acc);
                 acc
             },
+            SyntaxVariant::ETSpliceExpression(x) => {
+                let ETSpliceExpressionChildren { et_splice_expression_dollar, et_splice_expression_left_brace, et_splice_expression_expression, et_splice_expression_right_brace } = *x;
+                let acc = f(et_splice_expression_dollar, acc);
+                let acc = f(et_splice_expression_left_brace, acc);
+                let acc = f(et_splice_expression_expression, acc);
+                let acc = f(et_splice_expression_right_brace, acc);
+                acc
+            },
             SyntaxVariant::EmbeddedBracedExpression(x) => {
                 let EmbeddedBracedExpressionChildren { embedded_braced_expression_left_brace, embedded_braced_expression_expression, embedded_braced_expression_right_brace } = *x;
                 let acc = f(embedded_braced_expression_left_brace, acc);
@@ -3299,6 +3318,7 @@ where
             SyntaxVariant::FunctionPointerExpression {..} => SyntaxKind::FunctionPointerExpression,
             SyntaxVariant::ParenthesizedExpression {..} => SyntaxKind::ParenthesizedExpression,
             SyntaxVariant::BracedExpression {..} => SyntaxKind::BracedExpression,
+            SyntaxVariant::ETSpliceExpression {..} => SyntaxKind::ETSpliceExpression,
             SyntaxVariant::EmbeddedBracedExpression {..} => SyntaxKind::EmbeddedBracedExpression,
             SyntaxVariant::ListExpression {..} => SyntaxKind::ListExpression,
             SyntaxVariant::CollectionLiteralExpression {..} => SyntaxKind::CollectionLiteralExpression,
@@ -4114,6 +4134,13 @@ where
                  braced_expression_right_brace: ts.pop().unwrap(),
                  braced_expression_expression: ts.pop().unwrap(),
                  braced_expression_left_brace: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::ETSpliceExpression, 4) => SyntaxVariant::ETSpliceExpression(Box::new(ETSpliceExpressionChildren {
+                 et_splice_expression_right_brace: ts.pop().unwrap(),
+                 et_splice_expression_expression: ts.pop().unwrap(),
+                 et_splice_expression_left_brace: ts.pop().unwrap(),
+                 et_splice_expression_dollar: ts.pop().unwrap(),
                  
              })),
              (SyntaxKind::EmbeddedBracedExpression, 3) => SyntaxVariant::EmbeddedBracedExpression(Box::new(EmbeddedBracedExpressionChildren {
@@ -5377,6 +5404,14 @@ pub struct BracedExpressionChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+pub struct ETSpliceExpressionChildren<T, V> {
+    pub et_splice_expression_dollar: Syntax<T, V>,
+    pub et_splice_expression_left_brace: Syntax<T, V>,
+    pub et_splice_expression_expression: Syntax<T, V>,
+    pub et_splice_expression_right_brace: Syntax<T, V>,
+}
+
+#[derive(Debug, Clone)]
 pub struct EmbeddedBracedExpressionChildren<T, V> {
     pub embedded_braced_expression_left_brace: Syntax<T, V>,
     pub embedded_braced_expression_expression: Syntax<T, V>,
@@ -5951,6 +5986,7 @@ pub enum SyntaxVariant<T, V> {
     FunctionPointerExpression(Box<FunctionPointerExpressionChildren<T, V>>),
     ParenthesizedExpression(Box<ParenthesizedExpressionChildren<T, V>>),
     BracedExpression(Box<BracedExpressionChildren<T, V>>),
+    ETSpliceExpression(Box<ETSpliceExpressionChildren<T, V>>),
     EmbeddedBracedExpression(Box<EmbeddedBracedExpressionChildren<T, V>>),
     ListExpression(Box<ListExpressionChildren<T, V>>),
     CollectionLiteralExpression(Box<CollectionLiteralExpressionChildren<T, V>>),
@@ -7097,6 +7133,16 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                         0 => Some(&x.braced_expression_left_brace),
                     1 => Some(&x.braced_expression_expression),
                     2 => Some(&x.braced_expression_right_brace),
+                        _ => None,
+                    }
+                })
+            },
+            ETSpliceExpression(x) => {
+                get_index(4).and_then(|index| { match index {
+                        0 => Some(&x.et_splice_expression_dollar),
+                    1 => Some(&x.et_splice_expression_left_brace),
+                    2 => Some(&x.et_splice_expression_expression),
+                    3 => Some(&x.et_splice_expression_right_brace),
                         _ => None,
                     }
                 })

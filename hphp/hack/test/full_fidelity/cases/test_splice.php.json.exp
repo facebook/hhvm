@@ -172,28 +172,27 @@
                 {
                   "kind":"expression_statement",
                   "expression_statement_expression":{
-                    "kind":"function_call_expression",
-                    "function_call_receiver":{
+                    "kind":"et_splice_expression",
+                    "et_splice_expression_dollar":{
                       "kind":"token",
                       "token":{
-                        "kind":"name",
-                        "text":"__splice__",
+                        "kind":"$",
+                        "text":"$",
                         "offset":30,
                         "leading_width":2,
-                        "width":10,
+                        "width":1,
                         "trailing_width":0,
                         "leading":[{"kind":"whitespace","text":"  ","offset":30,"width":2}],
                         "trailing":[],
                         "line_number":4
                       }
                     },
-                    "function_call_type_args":{"kind":"missing"},
-                    "function_call_left_paren":{
+                    "et_splice_expression_left_brace":{
                       "kind":"token",
                       "token":{
-                        "kind":"(",
-                        "text":"(",
-                        "offset":42,
+                        "kind":"{",
+                        "text":"{",
+                        "offset":33,
                         "leading_width":0,
                         "width":1,
                         "trailing_width":0,
@@ -202,38 +201,29 @@
                         "line_number":4
                       }
                     },
-                    "function_call_argument_list":{
-                      "kind":"list",
-                      "elements":[
-                        {
-                          "kind":"list_item",
-                          "list_item":{
-                            "kind":"variable",
-                            "variable_expression":{
-                              "kind":"token",
-                              "token":{
-                                "kind":"variable",
-                                "text":"$foo",
-                                "offset":43,
-                                "leading_width":0,
-                                "width":4,
-                                "trailing_width":0,
-                                "leading":[],
-                                "trailing":[],
-                                "line_number":4
-                              }
-                            }
-                          },
-                          "list_separator":{"kind":"missing"}
+                    "et_splice_expression_expression":{
+                      "kind":"variable",
+                      "variable_expression":{
+                        "kind":"token",
+                        "token":{
+                          "kind":"variable",
+                          "text":"$foo",
+                          "offset":34,
+                          "leading_width":0,
+                          "width":4,
+                          "trailing_width":0,
+                          "leading":[],
+                          "trailing":[],
+                          "line_number":4
                         }
-                      ]
+                      }
                     },
-                    "function_call_right_paren":{
+                    "et_splice_expression_right_brace":{
                       "kind":"token",
                       "token":{
-                        "kind":")",
-                        "text":")",
-                        "offset":47,
+                        "kind":"}",
+                        "text":"}",
+                        "offset":38,
                         "leading_width":0,
                         "width":1,
                         "trailing_width":0,
@@ -248,12 +238,12 @@
                     "token":{
                       "kind":";",
                       "text":";",
-                      "offset":48,
+                      "offset":39,
                       "leading_width":0,
                       "width":1,
                       "trailing_width":1,
                       "leading":[],
-                      "trailing":[{"kind":"end_of_line","text":"\n","offset":49,"width":1}],
+                      "trailing":[{"kind":"end_of_line","text":"\n","offset":40,"width":1}],
                       "line_number":4
                     }
                   }
@@ -269,13 +259,13 @@
                         "token":{
                           "kind":"name",
                           "text":"code",
-                          "offset":50,
+                          "offset":41,
                           "leading_width":3,
                           "width":4,
                           "trailing_width":0,
                           "leading":[
-                            {"kind":"end_of_line","text":"\n","offset":50,"width":1},
-                            {"kind":"whitespace","text":"  ","offset":51,"width":2}
+                            {"kind":"end_of_line","text":"\n","offset":41,"width":1},
+                            {"kind":"whitespace","text":"  ","offset":42,"width":2}
                           ],
                           "trailing":[],
                           "line_number":6
@@ -287,7 +277,7 @@
                       "token":{
                         "kind":"`",
                         "text":"`",
-                        "offset":57,
+                        "offset":48,
                         "leading_width":0,
                         "width":1,
                         "trailing_width":0,
@@ -297,28 +287,13 @@
                       }
                     },
                     "prefixed_code_expression":{
-                      "kind":"function_call_expression",
-                      "function_call_receiver":{
+                      "kind":"et_splice_expression",
+                      "et_splice_expression_dollar":{
                         "kind":"token",
                         "token":{
-                          "kind":"name",
-                          "text":"__splice__",
-                          "offset":58,
-                          "leading_width":0,
-                          "width":10,
-                          "trailing_width":0,
-                          "leading":[],
-                          "trailing":[],
-                          "line_number":6
-                        }
-                      },
-                      "function_call_type_args":{"kind":"missing"},
-                      "function_call_left_paren":{
-                        "kind":"token",
-                        "token":{
-                          "kind":"(",
-                          "text":"(",
-                          "offset":68,
+                          "kind":"$",
+                          "text":"$",
+                          "offset":49,
                           "leading_width":0,
                           "width":1,
                           "trailing_width":0,
@@ -327,38 +302,43 @@
                           "line_number":6
                         }
                       },
-                      "function_call_argument_list":{
-                        "kind":"list",
-                        "elements":[
-                          {
-                            "kind":"list_item",
-                            "list_item":{
-                              "kind":"variable",
-                              "variable_expression":{
-                                "kind":"token",
-                                "token":{
-                                  "kind":"variable",
-                                  "text":"$foo",
-                                  "offset":69,
-                                  "leading_width":0,
-                                  "width":4,
-                                  "trailing_width":0,
-                                  "leading":[],
-                                  "trailing":[],
-                                  "line_number":6
-                                }
-                              }
-                            },
-                            "list_separator":{"kind":"missing"}
-                          }
-                        ]
-                      },
-                      "function_call_right_paren":{
+                      "et_splice_expression_left_brace":{
                         "kind":"token",
                         "token":{
-                          "kind":")",
-                          "text":")",
-                          "offset":73,
+                          "kind":"{",
+                          "text":"{",
+                          "offset":50,
+                          "leading_width":0,
+                          "width":1,
+                          "trailing_width":0,
+                          "leading":[],
+                          "trailing":[],
+                          "line_number":6
+                        }
+                      },
+                      "et_splice_expression_expression":{
+                        "kind":"variable",
+                        "variable_expression":{
+                          "kind":"token",
+                          "token":{
+                            "kind":"variable",
+                            "text":"$foo",
+                            "offset":51,
+                            "leading_width":0,
+                            "width":4,
+                            "trailing_width":0,
+                            "leading":[],
+                            "trailing":[],
+                            "line_number":6
+                          }
+                        }
+                      },
+                      "et_splice_expression_right_brace":{
+                        "kind":"token",
+                        "token":{
+                          "kind":"}",
+                          "text":"}",
+                          "offset":55,
                           "leading_width":0,
                           "width":1,
                           "trailing_width":0,
@@ -373,7 +353,7 @@
                       "token":{
                         "kind":"`",
                         "text":"`",
-                        "offset":74,
+                        "offset":56,
                         "leading_width":0,
                         "width":1,
                         "trailing_width":0,
@@ -388,12 +368,12 @@
                     "token":{
                       "kind":";",
                       "text":";",
-                      "offset":75,
+                      "offset":57,
                       "leading_width":0,
                       "width":1,
                       "trailing_width":1,
                       "leading":[],
-                      "trailing":[{"kind":"end_of_line","text":"\n","offset":76,"width":1}],
+                      "trailing":[{"kind":"end_of_line","text":"\n","offset":58,"width":1}],
                       "line_number":6
                     }
                   }
@@ -405,12 +385,12 @@
               "token":{
                 "kind":"}",
                 "text":"}",
-                "offset":77,
+                "offset":59,
                 "leading_width":0,
                 "width":1,
                 "trailing_width":1,
                 "leading":[],
-                "trailing":[{"kind":"end_of_line","text":"\n","offset":78,"width":1}],
+                "trailing":[{"kind":"end_of_line","text":"\n","offset":60,"width":1}],
                 "line_number":7
               }
             }
@@ -423,7 +403,7 @@
             "token":{
               "kind":"end_of_file",
               "text":"",
-              "offset":79,
+              "offset":61,
               "leading_width":0,
               "width":0,
               "trailing_width":0,
@@ -436,6 +416,6 @@
       ]
     }
   },
-  "program_text":"<?hh\n\nfunction test(): void {\n  __splice__($foo);\n\n  code`__splice__($foo)`;\n}\n",
-  "version":"2020-12-09-0001"
+  "program_text":"<?hh\n\nfunction test(): void {\n  ${$foo};\n\n  code`${$foo}`;\n}\n",
+  "version":"2020-12-14-0001"
 }

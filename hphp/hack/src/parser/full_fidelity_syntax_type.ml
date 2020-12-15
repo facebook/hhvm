@@ -787,6 +787,12 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; braced_expression_expression                       : t
     ; braced_expression_right_brace                      : t
     }
+  | ETSpliceExpression                of
+    { et_splice_expression_dollar                        : t
+    ; et_splice_expression_left_brace                    : t
+    ; et_splice_expression_expression                    : t
+    ; et_splice_expression_right_brace                   : t
+    }
   | EmbeddedBracedExpression          of
     { embedded_braced_expression_left_brace              : t
     ; embedded_braced_expression_expression              : t
@@ -1203,6 +1209,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | ExprFunctionPointer              of function_pointer_expression
   | ExprParenthesized                of parenthesized_expression
   | ExprBraced                       of braced_expression
+  | ExprETSplice                     of et_splice_expression
   | ExprEmbeddedBraced               of embedded_braced_expression
   | ExprList                         of list_expression
   | ExprCollectionLiteral            of collection_literal_expression
@@ -1318,6 +1325,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | LambdaFunctionPointer              of function_pointer_expression
   | LambdaParenthesized                of parenthesized_expression
   | LambdaBraced                       of braced_expression
+  | LambdaETSplice                     of et_splice_expression
   | LambdaEmbeddedBraced               of embedded_braced_expression
   | LambdaList                         of list_expression
   | LambdaCollectionLiteral            of collection_literal_expression
@@ -1365,6 +1373,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | CExprFunctionPointer              of function_pointer_expression
   | CExprParenthesized                of parenthesized_expression
   | CExprBraced                       of braced_expression
+  | CExprETSplice                     of et_splice_expression
   | CExprEmbeddedBraced               of embedded_braced_expression
   | CExprList                         of list_expression
   | CExprCollectionLiteral            of collection_literal_expression
@@ -2037,6 +2046,12 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { braced_expression_left_brace: Token.t value
     ; braced_expression_expression: expression value
     ; braced_expression_right_brace: Token.t value
+    }
+  and et_splice_expression =
+    { et_splice_expression_dollar: Token.t value
+    ; et_splice_expression_left_brace: Token.t value
+    ; et_splice_expression_expression: expression value
+    ; et_splice_expression_right_brace: Token.t value
     }
   and embedded_braced_expression =
     { embedded_braced_expression_left_brace: Token.t value

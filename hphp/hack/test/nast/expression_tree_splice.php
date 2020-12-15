@@ -1,5 +1,5 @@
 <?hh
 
 function test(): void {
-  Code`4 + 10 + __splice__($x + 2)`;
+  Code`4 + 10 + ${$x + 2}`;
 }

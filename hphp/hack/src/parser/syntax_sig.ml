@@ -673,6 +673,12 @@ module type Syntax_S = sig
     ; braced_expression_expression                       : t
     ; braced_expression_right_brace                      : t
     }
+  | ETSpliceExpression                of
+    { et_splice_expression_dollar                        : t
+    ; et_splice_expression_left_brace                    : t
+    ; et_splice_expression_expression                    : t
+    ; et_splice_expression_right_brace                   : t
+    }
   | EmbeddedBracedExpression          of
     { embedded_braced_expression_left_brace              : t
     ; embedded_braced_expression_expression              : t
@@ -1154,6 +1160,7 @@ module type Syntax_S = sig
   val make_function_pointer_expression : t -> t -> t
   val make_parenthesized_expression : t -> t -> t -> t
   val make_braced_expression : t -> t -> t -> t
+  val make_et_splice_expression : t -> t -> t -> t -> t
   val make_embedded_braced_expression : t -> t -> t -> t
   val make_list_expression : t -> t -> t -> t -> t
   val make_collection_literal_expression : t -> t -> t -> t -> t
@@ -1328,6 +1335,7 @@ module type Syntax_S = sig
   val is_function_pointer_expression : t -> bool
   val is_parenthesized_expression : t -> bool
   val is_braced_expression : t -> bool
+  val is_et_splice_expression : t -> bool
   val is_embedded_braced_expression : t -> bool
   val is_list_expression : t -> bool
   val is_collection_literal_expression : t -> bool

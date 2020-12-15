@@ -963,8 +963,8 @@ pub fn invalid_use_of_enable_unstable_feature(message: &str) -> Error {
     ))
 }
 
-pub const reserved_et_keyword: Error =
-    Cow::Borrowed("This is a reserved keyword for expression trees that cannot be used");
+pub const splice_outside_et: Error =
+    Cow::Borrowed("Splicing can only occur inside expression tree literals (between backticks)");
 
 pub const invalid_enum_class_enumerator: Error = Cow::Borrowed("Invalid enum class constant");
 

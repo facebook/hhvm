@@ -392,6 +392,9 @@ where S: SmartConstructors<State = State>,
     fn make_braced_expression(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> Self::R {
         compose(SyntaxKind::BracedExpression, self.s.make_braced_expression(arg0.1, arg1.1, arg2.1))
     }
+    fn make_et_splice_expression(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R) -> Self::R {
+        compose(SyntaxKind::ETSpliceExpression, self.s.make_et_splice_expression(arg0.1, arg1.1, arg2.1, arg3.1))
+    }
     fn make_embedded_braced_expression(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> Self::R {
         compose(SyntaxKind::EmbeddedBracedExpression, self.s.make_embedded_braced_expression(arg0.1, arg1.1, arg2.1))
     }

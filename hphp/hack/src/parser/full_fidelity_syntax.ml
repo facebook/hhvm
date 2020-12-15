@@ -166,6 +166,7 @@ module WithToken(Token: TokenType) = struct
       | FunctionPointerExpression         _ -> SyntaxKind.FunctionPointerExpression
       | ParenthesizedExpression           _ -> SyntaxKind.ParenthesizedExpression
       | BracedExpression                  _ -> SyntaxKind.BracedExpression
+      | ETSpliceExpression                _ -> SyntaxKind.ETSpliceExpression
       | EmbeddedBracedExpression          _ -> SyntaxKind.EmbeddedBracedExpression
       | ListExpression                    _ -> SyntaxKind.ListExpression
       | CollectionLiteralExpression       _ -> SyntaxKind.CollectionLiteralExpression
@@ -352,6 +353,7 @@ module WithToken(Token: TokenType) = struct
     let is_function_pointer_expression          = has_kind SyntaxKind.FunctionPointerExpression
     let is_parenthesized_expression             = has_kind SyntaxKind.ParenthesizedExpression
     let is_braced_expression                    = has_kind SyntaxKind.BracedExpression
+    let is_et_splice_expression                 = has_kind SyntaxKind.ETSpliceExpression
     let is_embedded_braced_expression           = has_kind SyntaxKind.EmbeddedBracedExpression
     let is_list_expression                      = has_kind SyntaxKind.ListExpression
     let is_collection_literal_expression        = has_kind SyntaxKind.CollectionLiteralExpression
@@ -1668,6 +1670,17 @@ module WithToken(Token: TokenType) = struct
          let acc = f acc braced_expression_left_brace in
          let acc = f acc braced_expression_expression in
          let acc = f acc braced_expression_right_brace in
+         acc
+      | ETSpliceExpression {
+        et_splice_expression_dollar;
+        et_splice_expression_left_brace;
+        et_splice_expression_expression;
+        et_splice_expression_right_brace;
+      } ->
+         let acc = f acc et_splice_expression_dollar in
+         let acc = f acc et_splice_expression_left_brace in
+         let acc = f acc et_splice_expression_expression in
+         let acc = f acc et_splice_expression_right_brace in
          acc
       | EmbeddedBracedExpression {
         embedded_braced_expression_left_brace;
@@ -3472,6 +3485,17 @@ module WithToken(Token: TokenType) = struct
         braced_expression_expression;
         braced_expression_right_brace;
       ]
+      | ETSpliceExpression {
+        et_splice_expression_dollar;
+        et_splice_expression_left_brace;
+        et_splice_expression_expression;
+        et_splice_expression_right_brace;
+      } -> [
+        et_splice_expression_dollar;
+        et_splice_expression_left_brace;
+        et_splice_expression_expression;
+        et_splice_expression_right_brace;
+      ]
       | EmbeddedBracedExpression {
         embedded_braced_expression_left_brace;
         embedded_braced_expression_expression;
@@ -5275,6 +5299,17 @@ module WithToken(Token: TokenType) = struct
         "braced_expression_left_brace";
         "braced_expression_expression";
         "braced_expression_right_brace";
+      ]
+      | ETSpliceExpression {
+        et_splice_expression_dollar;
+        et_splice_expression_left_brace;
+        et_splice_expression_expression;
+        et_splice_expression_right_brace;
+      } -> [
+        "et_splice_expression_dollar";
+        "et_splice_expression_left_brace";
+        "et_splice_expression_expression";
+        "et_splice_expression_right_brace";
       ]
       | EmbeddedBracedExpression {
         embedded_braced_expression_left_brace;
@@ -7240,6 +7275,18 @@ module WithToken(Token: TokenType) = struct
           braced_expression_left_brace;
           braced_expression_expression;
           braced_expression_right_brace;
+        }
+      | (SyntaxKind.ETSpliceExpression, [
+          et_splice_expression_dollar;
+          et_splice_expression_left_brace;
+          et_splice_expression_expression;
+          et_splice_expression_right_brace;
+        ]) ->
+        ETSpliceExpression {
+          et_splice_expression_dollar;
+          et_splice_expression_left_brace;
+          et_splice_expression_expression;
+          et_splice_expression_right_brace;
         }
       | (SyntaxKind.EmbeddedBracedExpression, [
           embedded_braced_expression_left_brace;
@@ -9566,6 +9613,21 @@ module WithToken(Token: TokenType) = struct
           braced_expression_left_brace;
           braced_expression_expression;
           braced_expression_right_brace;
+        } in
+        let value = ValueBuilder.value_from_syntax syntax in
+        make syntax value
+
+      let make_et_splice_expression
+        et_splice_expression_dollar
+        et_splice_expression_left_brace
+        et_splice_expression_expression
+        et_splice_expression_right_brace
+      =
+        let syntax = ETSpliceExpression {
+          et_splice_expression_dollar;
+          et_splice_expression_left_brace;
+          et_splice_expression_expression;
+          et_splice_expression_right_brace;
         } in
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value

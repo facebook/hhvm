@@ -10,7 +10,7 @@ function foo(bool $z): void {
   }
 
   // Inferred type needs to be compatible
-  $y = Code`4 + __splice__($x)`;
+  $y = Code`4 + ${$x}`;
 }
 
 //// BEGIN DEFS

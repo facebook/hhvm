@@ -1133,8 +1133,8 @@
         {
           "kind":"expression_statement",
           "expression_statement_expression":{
-            "kind":"prefix_unary_expression",
-            "prefix_unary_operator":{
+            "kind":"et_splice_expression",
+            "et_splice_expression_dollar":{
               "kind":"token",
               "token":{
                 "kind":"$",
@@ -1148,49 +1148,46 @@
                 "line_number":10
               }
             },
-            "prefix_unary_operand":{
-              "kind":"braced_expression",
-              "braced_expression_left_brace":{
-                "kind":"token",
-                "token":{
-                  "kind":"{",
-                  "text":"{",
-                  "offset":226,
-                  "leading_width":0,
-                  "width":1,
-                  "trailing_width":0,
-                  "leading":[],
-                  "trailing":[],
-                  "line_number":10
-                }
-              },
-              "braced_expression_expression":{
-                "kind":"token",
-                "token":{
-                  "kind":"name",
-                  "text":"name",
-                  "offset":227,
-                  "leading_width":0,
-                  "width":4,
-                  "trailing_width":0,
-                  "leading":[],
-                  "trailing":[],
-                  "line_number":10
-                }
-              },
-              "braced_expression_right_brace":{
-                "kind":"token",
-                "token":{
-                  "kind":"}",
-                  "text":"}",
-                  "offset":231,
-                  "leading_width":0,
-                  "width":1,
-                  "trailing_width":0,
-                  "leading":[],
-                  "trailing":[],
-                  "line_number":10
-                }
+            "et_splice_expression_left_brace":{
+              "kind":"token",
+              "token":{
+                "kind":"{",
+                "text":"{",
+                "offset":226,
+                "leading_width":0,
+                "width":1,
+                "trailing_width":0,
+                "leading":[],
+                "trailing":[],
+                "line_number":10
+              }
+            },
+            "et_splice_expression_expression":{
+              "kind":"token",
+              "token":{
+                "kind":"name",
+                "text":"name",
+                "offset":227,
+                "leading_width":0,
+                "width":4,
+                "trailing_width":0,
+                "leading":[],
+                "trailing":[],
+                "line_number":10
+              }
+            },
+            "et_splice_expression_right_brace":{
+              "kind":"token",
+              "token":{
+                "kind":"}",
+                "text":"}",
+                "offset":231,
+                "leading_width":0,
+                "width":1,
+                "trailing_width":0,
+                "leading":[],
+                "trailing":[],
+                "line_number":10
               }
             }
           },
@@ -2515,5 +2512,5 @@
     }
   },
   "program_text":"<?hh // strict\n\n$f = &() ==> { $x = 5; return $x; }; // error\n$x = &$foo->bar?->baz; // error\n$f = &$x; // error\n$f = &my_func(); // error\n$f = &$x->member; // error\n$f = &$x->method(); // error\n$f = &$xs[$x]; // error\n$f = &${name}; // error\n$f = &self::$mySelfThing; // error\n$f = &$$s; // error\n$f = &new C(); // error\n$y = &$$$$$$x; // error\n$x = &($foo->bar()); // error\n$x = &(Arrays::slice(self::NORMALIZED_REQUIRED_COLUMN_NAMES, 0)); // error\n$x = &(PHP\\array_slice($app_alerts_array, -1)); // error\n",
-  "version":"2020-10-15-0001"
+  "version":"2020-12-02-0001"
 }

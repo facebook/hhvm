@@ -1203,6 +1203,17 @@ where
         Self::make(syntax, value)
     }
 
+    fn make_et_splice_expression(ctx: &C, dollar: Self, left_brace: Self, expression: Self, right_brace: Self) -> Self {
+        let syntax = SyntaxVariant::ETSpliceExpression(ctx.get_arena().alloc(ETSpliceExpressionChildren {
+            dollar,
+            left_brace,
+            expression,
+            right_brace,
+        }));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
+        Self::make(syntax, value)
+    }
+
     fn make_embedded_braced_expression(ctx: &C, left_brace: Self, expression: Self, right_brace: Self) -> Self {
         let syntax = SyntaxVariant::EmbeddedBracedExpression(ctx.get_arena().alloc(EmbeddedBracedExpressionChildren {
             left_brace,

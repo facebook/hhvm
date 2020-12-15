@@ -505,6 +505,10 @@ where
         <Self as SyntaxSmartConstructors<S, TF, State>>::make_braced_expression(self, arg0, arg1, arg2)
     }
 
+    fn make_et_splice_expression(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R) -> Self::R {
+        <Self as SyntaxSmartConstructors<S, TF, State>>::make_et_splice_expression(self, arg0, arg1, arg2, arg3)
+    }
+
     fn make_embedded_braced_expression(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R) -> Self::R {
         <Self as SyntaxSmartConstructors<S, TF, State>>::make_embedded_braced_expression(self, arg0, arg1, arg2)
     }

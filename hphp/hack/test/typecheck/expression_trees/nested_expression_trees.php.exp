@@ -1,14 +1,14 @@
-File "nested_expression_trees.php", line 6, characters 23-23:
-A right parenthesis `)` is expected here. (Parsing[1002])
-File "nested_expression_trees.php", line 6, characters 19-22:
+File "nested_expression_trees.php", line 6, characters 14-14:
+A right brace `}` is expected here. (Parsing[1002])
+File "nested_expression_trees.php", line 6, characters 18-19:
+Toplevel statements are not allowed. Use `__EntryPoint` attribute instead (Parsing[1002])
+File "nested_expression_trees.php", line 7, characters 1-1:
+Toplevel statements are not allowed. Use `__EntryPoint` attribute instead (Parsing[1002])
+File "nested_expression_trees.php", line 6, characters 10-13:
 Unbound name: `Code` (a global constant) (Naming[2049])
-File "nested_expression_trees.php", line 6, characters 25-25:
+File "nested_expression_trees.php", line 6, characters 16-16:
 Unbound name: ``` (a global constant) (Naming[2049])
-File "nested_expression_trees.php", line 6, characters 26-26:
-Unbound name: `)` (a global constant) (Naming[2049])
-File "nested_expression_trees.php", line 6, characters 19-22:
+File "nested_expression_trees.php", line 6, characters 10-13:
 Unbound global constant (Typing) (Typing[4106])
-File "nested_expression_trees.php", line 6, characters 25-25:
-Unbound global constant (Typing) (Typing[4106])
-File "nested_expression_trees.php", line 6, characters 26-26:
+File "nested_expression_trees.php", line 6, characters 16-16:
 Unbound global constant (Typing) (Typing[4106])

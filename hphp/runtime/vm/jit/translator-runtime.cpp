@@ -762,7 +762,9 @@ ArrayData* loadClsTypeCnsHelper(
             Variant(static_cast<uint8_t>(TypeStructure::Kind::T_class)));
     arr.add(s_classname,
             Variant(s_type_structure_non_existant_class));
-    return arr.create();
+    auto result = arr.create();
+    ArrayData::GetScalarArray(&result);
+    return result;
   };
   TypedValue typeCns;
   if (no_throw_on_undefined) {

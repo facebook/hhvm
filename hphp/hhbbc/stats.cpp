@@ -92,27 +92,6 @@ struct ISameCmp {
   }
 };
 
-/*
- * Information about builtins usage.
- *
- * The tuple contains the known return type for the builtin, the total
- * number of calls seen and the total number of calls that could be
- * reduced.  A builtin call is considered reducible if its output is a
- * constant and all its inputs are constants. That is not a guaranteed
- * condition but it gives us an idea of what's possible.
- */
-using BuiltinInfo = tbb::concurrent_hash_map<
-  SString,
-  std::tuple<Type,uint64_t,uint64_t>,
-  ISameCmp
->;
-
-struct Builtins {
-  std::atomic<uint64_t> totalBuiltins;
-  std::atomic<uint64_t> reducibleBuiltins;
-  BuiltinInfo builtinsInfo{};
-};
-
 #define TAG(x) 1 +
 constexpr uint32_t kNumRATTags = REPO_AUTH_TYPE_TAGS 0 ;
 #undef TAG
@@ -138,7 +117,6 @@ struct Stats {
   TypeStat privateStatics;
   TypeStat cgetmBase;
   TypeStat iterInitBase;
-  Builtins builtins;
 };
 
 namespace {
@@ -154,32 +132,6 @@ void type_stat_string(std::string& ret,
   STAT_TYPES
 #undef X
   ret += "\n";
-}
-
-std::string show(const Builtins& builtins) {
-  auto ret = std::string{};
-
-  if (builtins.builtinsInfo.begin() != builtins.builtinsInfo.end()) {
-    folly::format(&ret, "Total number of builtin calls: {: >15}\n",
-                  builtins.totalBuiltins.load());
-    folly::format(&ret, "Possible reducible builtins: {: >15}\n",
-                  builtins.reducibleBuiltins.load());
-
-    ret += "Builtins Info:\n";
-    for (auto it = builtins.builtinsInfo.begin();
-         it != builtins.builtinsInfo.end(); ++it) {
-      folly::format(
-        &ret,
-        "  {: >30} [tot:{: >8}, red:{: >8}]\t\ttype: {}\n",
-        it->first,
-        std::get<1>(it->second),
-        std::get<2>(it->second),
-        show(std::get<0>(it->second))
-      );
-    }
-    ret += "\n";
-  }
-  return ret;
 }
 
 std::string show(const Stats& stats) {
@@ -221,9 +173,6 @@ std::string show(const Stats& stats) {
     stats.persistentSPropsProt.load(),
     stats.persistentSPropsPriv.load()
   );
-
-  ret += "\n";
-  ret += show(stats.builtins);
 
   ret += "\n";
   using T = RepoAuthType::Tag;

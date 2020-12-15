@@ -202,6 +202,11 @@ void populateArgs(Registers& regs,
 
 /////////////////////////////////////////////////////////////////////////////
 
+/**
+ * Dispatches a call to the native function bound to <func>
+ * If <ctx> is not nullptr, it is prepended to <args> when
+ * calling.
+ */
 void callFunc(const Func* const func,
               const ActRec* fp,
               const void* const ctx,
@@ -406,15 +411,6 @@ void coerceFCallArgsFromLocals(const ActRec* fp,
   coerceFCallArgsImpl(
     numArgs, func,
     [&] (int32_t idx) { return frame_local(fp, idx); }
-  );
-}
-
-void coerceFCallArgsFromStack(TypedValue* args,
-                              int32_t numArgs,
-                              const Func* func) {
-  coerceFCallArgsImpl(
-    numArgs, func,
-    [&] (int32_t idx) { return &args[-idx]; }
   );
 }
 

@@ -455,7 +455,7 @@ pub fn emit_expr(emitter: &mut Emitter, env: &Env, expression: &tast::Expr) -> R
             }
         }
         Expr_::Call(c) => emit_call_expr(emitter, env, pos, None, c),
-        Expr_::New(e) => emit_new(emitter, env, pos, e),
+        Expr_::New(e) => emit_new(emitter, env, pos, e, false),
         Expr_::FunctionPointer(fp) => emit_function_pointer(emitter, env, pos, &fp.0, &fp.1),
         Expr_::Record(e) => emit_record(emitter, env, pos, e),
         Expr_::Darray(e) => Ok(emit_pos_then(
@@ -1925,6 +1925,37 @@ fn emit_call_lhs_and_fcall(
                             fcall_args,
                         )
                     }
+                    (E(pos, E_::New(new_exp)), E(_, E_::Id(id)), null_flavor, _)
+                        if fcall_args.1 == 0 =>
+                    {
+                        let cexpr = ClassExpr::class_id_to_class_expr(
+                            e, false, false, &env.scope, &new_exp.0,
+                        );
+                        match &cexpr {
+                            ClassExpr::Id(ast_defs::Id(_, name))
+                                if string_utils::strip_global_ns(name) == "ReflectionClass"
+                                    && (string_utils::strip_global_ns(&id.1) == "isAbstract") =>
+                            {
+                                let fcall_args =
+                                    FcallArgs::new(FcallFlags::default(), 1, vec![], None, 1, None);
+                                let newobj_instrs = emit_new(e, env, pos, &new_exp, true);
+                                Ok((
+                                    InstrSeq::gather(vec![
+                                        instr::nulluninit(),
+                                        instr::nulluninit(),
+                                        newobj_instrs?,
+                                    ]),
+                                    InstrSeq::gather(vec![instr::fcallfuncd(
+                                        fcall_args,
+                                        function::Type::from_ast_name(
+                                            "__SystemLib\\reflection_class_is_abstract",
+                                        ),
+                                    )]),
+                                ))
+                            }
+                            _ => emit_id(e, &o.as_ref().0, &id.1, null_flavor, fcall_args),
+                        }
+                    }
                     (obj, E(_, E_::Id(id)), null_flavor, _) => {
                         emit_id(e, obj, &id.1, null_flavor, fcall_args)
                     }
@@ -3166,6 +3197,7 @@ fn emit_new(
         Option<tast::Expr>,
         Pos,
     ),
+    is_reflection_class_builtin: bool,
 ) -> Result {
     if has_inout_arg(args) {
         return Err(unrecoverable("Unexpected inout arg in new expr"));
@@ -3211,68 +3243,83 @@ fn emit_new(
         },
         _ => (cexpr, H::NoGenerics),
     };
-    let newobj_instrs = match cexpr {
-        ClassExpr::Id(ast_defs::Id(_, cname)) => {
-            let id = class::Type::from_ast_name_and_mangle(&cname);
-            emit_symbol_refs::State::add_class(e, id.clone());
-            match has_generics {
-                H::NoGenerics => InstrSeq::gather(vec![emit_pos(pos), instr::newobjd(id)]),
-                H::HasGenerics => InstrSeq::gather(vec![
-                    emit_pos(pos),
-                    emit_reified_targs(
-                        e,
-                        env,
-                        pos,
-                        &targs.iter().map(|t| &t.1).collect::<Vec<_>>(),
-                    )?,
-                    instr::newobjrd(id),
-                ]),
-                H::MaybeGenerics => {
-                    return Err(unrecoverable(
-                        "Internal error: This case should have been transformed",
-                    ));
+    if is_reflection_class_builtin {
+        scope::with_unnamed_locals(e, |e| {
+            let (instr_args, _) = emit_args_inout_setters(e, env, args)?;
+            let instr_uargs = match uarg {
+                None => instr::empty(),
+                Some(uarg) => emit_expr(e, env, uarg)?,
+            };
+            Ok((
+                instr::empty(),
+                InstrSeq::gather(vec![instr_args, instr_uargs]),
+                instr::empty(),
+            ))
+        })
+    } else {
+        let newobj_instrs = match cexpr {
+            ClassExpr::Id(ast_defs::Id(_, cname)) => {
+                let id = class::Type::from_ast_name_and_mangle(&cname);
+                emit_symbol_refs::State::add_class(e, id.clone());
+                match has_generics {
+                    H::NoGenerics => InstrSeq::gather(vec![emit_pos(pos), instr::newobjd(id)]),
+                    H::HasGenerics => InstrSeq::gather(vec![
+                        emit_pos(pos),
+                        emit_reified_targs(
+                            e,
+                            env,
+                            pos,
+                            &targs.iter().map(|t| &t.1).collect::<Vec<_>>(),
+                        )?,
+                        instr::newobjrd(id),
+                    ]),
+                    H::MaybeGenerics => {
+                        return Err(unrecoverable(
+                            "Internal error: This case should have been transformed",
+                        ));
+                    }
                 }
             }
-        }
-        ClassExpr::Special(cls_ref) => {
-            InstrSeq::gather(vec![emit_pos(pos), instr::newobjs(cls_ref)])
-        }
-        ClassExpr::Reified(instrs) if has_generics == H::MaybeGenerics => {
-            InstrSeq::gather(vec![instrs, instr::classgetts(), instr::newobjr()])
-        }
-        _ => InstrSeq::gather(vec![
-            emit_load_class_ref(e, env, pos, cexpr)?,
-            instr::newobj(),
-        ]),
-    };
-    scope::with_unnamed_locals(e, |e| {
-        let (instr_args, _) = emit_args_inout_setters(e, env, args)?;
-        let instr_uargs = match uarg {
-            None => instr::empty(),
-            Some(uarg) => emit_expr(e, env, uarg)?,
-        };
-        Ok((
-            instr::empty(),
-            InstrSeq::gather(vec![
-                newobj_instrs,
-                instr::dup(),
-                instr::nulluninit(),
-                instr_args,
-                instr_uargs,
-                emit_pos(pos),
-                instr::fcallctor(get_fcall_args(
-                    args,
-                    uarg.as_ref(),
-                    None,
-                    env.call_context.clone(),
-                    true,
-                )),
-                instr::popc(),
-                instr::lockobj(),
+            ClassExpr::Special(cls_ref) => {
+                InstrSeq::gather(vec![emit_pos(pos), instr::newobjs(cls_ref)])
+            }
+            ClassExpr::Reified(instrs) if has_generics == H::MaybeGenerics => {
+                InstrSeq::gather(vec![instrs, instr::classgetts(), instr::newobjr()])
+            }
+            _ => InstrSeq::gather(vec![
+                emit_load_class_ref(e, env, pos, cexpr)?,
+                instr::newobj(),
             ]),
-            instr::empty(),
-        ))
-    })
+        };
+        scope::with_unnamed_locals(e, |e| {
+            let (instr_args, _) = emit_args_inout_setters(e, env, args)?;
+            let instr_uargs = match uarg {
+                None => instr::empty(),
+                Some(uarg) => emit_expr(e, env, uarg)?,
+            };
+            Ok((
+                instr::empty(),
+                InstrSeq::gather(vec![
+                    newobj_instrs,
+                    instr::dup(),
+                    instr::nulluninit(),
+                    instr_args,
+                    instr_uargs,
+                    emit_pos(pos),
+                    instr::fcallctor(get_fcall_args(
+                        args,
+                        uarg.as_ref(),
+                        None,
+                        env.call_context.clone(),
+                        true,
+                    )),
+                    instr::popc(),
+                    instr::lockobj(),
+                ]),
+                instr::empty(),
+            ))
+        })
+    }
 }
 
 fn emit_obj_get(

@@ -532,4 +532,9 @@ function is_dynamically_callable_inst_method(
     string $method
 ): bool;
 
+<<__Native, __Pure, __MaybeMutable>>
+function reflection_class_is_abstract(
+    mixed $class,
+): bool;
+
 }

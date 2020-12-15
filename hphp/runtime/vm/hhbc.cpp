@@ -425,8 +425,6 @@ int instrNumPops(PC pc) {
 #define MFINAL -3
 #define C_MFINAL(n) -10 - (n)
 #define CUMANY -3
-#define CMANY_U2 C_MFINAL(2)
-#define CALLNATIVE -5
 #define FCALL(nin, nobj) -20 - (nin)
 #define CMANY -3
 #define SMANY -1
@@ -442,8 +440,6 @@ int instrNumPops(PC pc) {
 #undef MFINAL
 #undef C_MFINAL
 #undef CUMANY
-#undef CMANY_U2
-#undef CALLNATIVE
 #undef FCALL
 #undef CMANY
 #undef SMANY
@@ -457,10 +453,6 @@ int instrNumPops(PC pc) {
   // NewPackedArray and some final member operations specify how
   // many values are popped in their first immediate
   if (n == -3) return getImm(pc, 0).u_IVA;
-  // FCallBuiltin pops numArgs and numOut uninit values
-  if (n == -5) {
-    return getImm(pc, 0).u_IVA + getImm(pc, 1).u_IVA;
-  }
   // FCall* opcodes pop number of opcode specific inputs, unpack, numArgs,
   // 2 cells/uninits reserved for ActRec and (numRets - 1) uninit values.
   if (n <= -20) {
@@ -493,9 +485,7 @@ int instrNumPushes(PC pc) {
 #define FOUR(...) 4
 #define FIVE(...) 5
 #define SIX(...) 6
-#define CMANY -2
 #define FCALL -1
-#define CALLNATIVE -3
 #define O(name, imm, pop, push, flags) push,
     OPCODES
 #undef NOV
@@ -505,18 +495,12 @@ int instrNumPushes(PC pc) {
 #undef FOUR
 #undef FIVE
 #undef SIX
-#undef CMANY
 #undef FCALL
-#undef CALLNATIVE
 #undef O
   };
   auto const op = peek_op(pc);
   int n = numberOfPushes[size_t(op)];
 
-  // FCallBuiltin pushes numOut + 1 return values
-  if (n == -3) return getImm(pc, 1).u_IVA + 1;
-  // The PopFrame opcode push all arguments onto the stack
-  if (n == -2) return getImm(pc, 0).u_IVA;
   // The FCall* opcodes pushes all return values onto the stack
   if (n == -1) return getImm(pc, 0).u_FCA.numRets;
 
@@ -553,13 +537,6 @@ FlavorDesc fcallFlavor(PC op, uint32_t i) {
   return UV;
 }
 
-FlavorDesc fcallBuiltinFlavor(PC op, uint32_t i) {
-  assertx(i < getImm(op, 0).u_IVA + getImm(op, 1).u_IVA);
-  auto const nargs = getImm(op, 0).u_IVA;
-  if (i < nargs) return CUV;
-  return UV;
-}
-
 }
 
 /**
@@ -576,8 +553,6 @@ FlavorDesc instrInputFlavor(PC op, uint32_t idx) {
 #define MFINAL return manyFlavor(op, idx, CV);
 #define C_MFINAL(n) return manyFlavor(op, idx, CV);
 #define CUMANY return manyFlavor(op, idx, CUV);
-#define CMANY_U2 return manyFlavor(op, idx, CUV);
-#define CALLNATIVE return fcallBuiltinFlavor(op, idx);
 #define FCALL(nin, nobj) return fcallFlavor<nin, nobj>(op, idx);
 #define CMANY return manyFlavor(op, idx, CV);
 #define SMANY return manyFlavor(op, idx, CV);
@@ -596,8 +571,6 @@ FlavorDesc instrInputFlavor(PC op, uint32_t idx) {
 #undef MFINAL
 #undef C_MFINAL
 #undef CUMANY
-#undef CMANY_U2
-#undef CALLNATIVE
 #undef FCALL
 #undef CMANY
 #undef SMANY
@@ -1135,7 +1108,6 @@ bool instrIsNonCallControlFlow(Op opcode) {
     case OpAwaitAll:
     case OpYield:
     case OpYieldK:
-    case OpFCallBuiltin:
       return false;
 
     default:

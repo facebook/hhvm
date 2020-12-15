@@ -1086,15 +1086,6 @@ OPTBLD_INLINE void iopPopU2() {
   vmStack().discard();
 }
 
-OPTBLD_INLINE void iopPopFrame(uint32_t nout) {
-  assertx(vmStack().indC(nout + 0)->m_type == KindOfUninit);
-  assertx(vmStack().indC(nout + 1)->m_type == KindOfUninit);
-  for (int32_t i = nout - 1; i >= 0; --i) {
-    *vmStack().indC(i + kNumActRecCells) = *vmStack().indC(i);
-  }
-  vmStack().ndiscard(kNumActRecCells);
-}
-
 OPTBLD_INLINE void iopPopL(tv_lval to) {
   TypedValue* fr = vmStack().topC();
   tvMove(*fr, to);
@@ -4473,39 +4464,6 @@ OPTBLD_INLINE void iopLockObj() {
   c1->m_data.pobj->lockObject();
 }
 
-OPTBLD_INLINE
-void iopFCallBuiltin(uint32_t numArgs, uint32_t numOut, Id id) {
-  auto const ne = vmfp()->func()->unit()->lookupNamedEntityId(id);
-  auto const func = ne->uniqueFunc();
-  if (func == nullptr || !func->isBuiltin()) {
-    raise_error("Call to undefined function %s()",
-                vmfp()->func()->unit()->lookupLitstrId(id)->data());
-  }
-
-  if (func->numInOutParams() != numOut) {
-    raise_error("Call to function %s() with incorrectly annotated inout "
-                "parameter", func->fullName()->data());
-  }
-
-  callerRxChecks(vmfp(), func);
-  assertx(!func->isMethod() || (func->isStatic() && func->cls()));
-  auto const ctx = func->isStatic() ? func->cls() : nullptr;
-
-  TypedValue* args = vmStack().indTV(numArgs-1);
-  TypedValue ret;
-  Native::coerceFCallArgsFromStack(args, numArgs, func);
-
-  if (func->hasVariadicCaptureParam()) {
-    assertx(numArgs > 0);
-    assertx(tvIsHAMSafeVArray(args[1 - safe_cast<int32_t>(numArgs)]));
-  }
-  Native::callFunc(func, vmfp(), ctx, args, ret, true);
-
-  frame_free_args(args, numArgs);
-  vmStack().ndiscard(numArgs);
-  tvCopy(ret, *vmStack().allocTV());
-}
-
 namespace {
 
 void implIterInit(PC& pc, const IterArgs& ita, TypedValue* base,
@@ -5813,8 +5771,7 @@ TCA dispatchImpl() {
     retAddr = iopWrap##name(pc);                              \
     vmpc() = pc;                                              \
     if (isFCallFunc(Op::name) ||                              \
-        Op::name == Op::NativeImpl ||                         \
-        Op::name == Op::FCallBuiltin) {                       \
+        Op::name == Op::NativeImpl) {                         \
       collectCoverage = checkCoverage();                      \
       optab = !collectCoverage ? optabDirect : optabCover;    \
       DEBUGGER_ATTACHED_ONLY(optab = optabDbg);               \

@@ -93,8 +93,6 @@ static const struct {
                     DontGuardStack1,  None,         OutNone         }},
   { OpPopU2,       {StackTop2|
                     DontGuardAny,     Stack1,       OutSameAsInput1 }},
-  { OpPopFrame,    {StackN|
-                    DontGuardAny,     StackN,       OutUnknown      }},
   { OpPopL,        {Stack1|Local,     Local,        OutNone         }},
   { OpDup,         {Stack1,           StackTop2,    OutSameAsInput1 }},
 
@@ -286,8 +284,6 @@ static const struct {
                    {Stack1,           StackN,       OutUnknown      }},
   { OpFCallObjMethodD,
                    {None,             StackN,       OutUnknown      }},
-  { OpFCallBuiltin,{BStackN|DontGuardAny,
-                                      StackN,       OutUnknown      }},
 
   /*** 11. Iterator instructions ***/
 
@@ -498,12 +494,6 @@ int64_t getStackPopped(PC pc) {
     case Op::CreateCl:
       return getImm(pc, 0).u_IVA;
 
-    case Op::FCallBuiltin:
-      return getImm(pc, 0).u_IVA + getImm(pc, 1).u_IVA;
-
-    case Op::PopFrame:
-      return getImm(pc, 0).u_IVA + kNumActRecCells;
-
     case Op::SetM:
     case Op::SetOpM:
       return getImm(pc, 0).u_IVA + 1;
@@ -538,10 +528,6 @@ int64_t getStackPushed(PC pc) {
     case Op::FCallObjMethod:
     case Op::FCallObjMethodD:
       return getImm(pc, 0).u_FCA.numRets;
-    case Op::FCallBuiltin:
-      return getImm(pc, 1).u_IVA + 1;
-    case Op::PopFrame:
-      return getImm(pc, 0).u_IVA;
     default:
       break;
   }
@@ -715,8 +701,6 @@ InputInfoVec getInputs(const NormalizedInstruction& ni, FPInvOffset bcSPOff) {
       case Op::CombineAndResolveTypeStruct:
       case Op::ConcatN:
         return ni.imm[0].u_IVA;
-      case Op::PopFrame:
-        return ni.imm[0].u_IVA + kNumActRecCells;
       default:
         return ni.immVec.numStackValues();
       }
@@ -838,7 +822,6 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::Jmp:
   case Op::JmpNS:
   case Op::ClsCnsD:
-  case Op::FCallBuiltin:
   case Op::NewStructDArray:
   case Op::NewStructDict:
   case Op::Switch:
@@ -991,7 +974,6 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::PopC:
   case Op::PopU:
   case Op::PopU2:
-  case Op::PopFrame:
   case Op::PopL:
   case Op::Print:
   case Op::PushL:
@@ -1178,11 +1160,6 @@ Type flavorToType(FlavorDesc f) {
 
 void translateInstr(irgen::IRGS& irgs, const NormalizedInstruction& ni) {
   assertx(curSrcKey(irgs) == ni.source);
-  const Func* builtinFunc = nullptr;
-  if (ni.op() == OpFCallBuiltin) {
-    auto str = ni.m_unit->lookupLitstrId(ni.imm[2].u_SA);
-    builtinFunc = Func::lookupBuiltin(str);
-  }
   auto pc = ni.pc();
   for (auto i = 0, num = instrNumPops(pc); i < num; ++i) {
     if (isFCall(ni.op()) && instrInputFlavor(pc, i) == UV) {
@@ -1192,8 +1169,7 @@ void translateInstr(irgen::IRGS& irgs, const NormalizedInstruction& ni) {
       // override them anyway so it's not worth guarding on them.
       break;
     }
-    auto const type =
-      !builtinFunc ? flavorToType(instrInputFlavor(pc, i)) : TCell;
+    auto const type = flavorToType(instrInputFlavor(pc, i));
     irgen::assertTypeStack(irgs, BCSPRelOffset{i}, type);
   }
 

@@ -281,38 +281,6 @@ bool in(StatsSS& env, const bc::IterInit& /*op*/) {
   return false;
 }
 
-bool in(StatsSS& env, const bc::FCallBuiltin& op) {
-  ++env.stats.builtins.totalBuiltins;
-
-  bool reducible = op.arg1 > 0;
-  for (auto i = uint32_t{0}; i < op.arg1; ++i) {
-    auto t = topT(env, i);
-    auto const v = tv(t);
-    if (!v || v->m_type == KindOfUninit) {
-      reducible = false;
-      break;
-    }
-  }
-
-  default_dispatch(env, op);
-
-  auto builtin = op.str3;
-  {
-    BuiltinInfo::accessor acc;
-    auto inserted = env.stats.builtins.builtinsInfo.insert(acc, builtin);
-    if (inserted) {
-      auto f = env.index.resolve_func(env.ctx, builtin);
-      auto t = env.index.lookup_return_type(env.ctx, f);
-      acc->second = std::make_tuple(t, 1, 0);
-    } else {
-      ++std::get<1>(acc->second);
-      if (reducible) ++std::get<2>(acc->second);
-    }
-  }
-
-  return true;
-}
-
 //////////////////////////////////////////////////////////////////////
 
 // Run the interpreter. The "bool in(StatsSS&, const bc::XX)" functions

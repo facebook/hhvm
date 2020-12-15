@@ -1244,7 +1244,7 @@ const hphp_fast_string_imap<int> s_vanilla_params{
 // not at an FCallBuiltin bytecode, don't emit an optimized implementation if
 // it's layout-sensitive.
 bool skipLayoutSensitiveNativeImpl(IRGS& env, const StringData* fname) {
-  return allowBespokeArrayLikes() && curSrcKey(env).op() != Op::FCallBuiltin &&
+  return allowBespokeArrayLikes() &&
          s_vanilla_params.find(fname->data()) != s_vanilla_params.end();
 }
 
@@ -2038,36 +2038,6 @@ SSATmp* optimizedCallIsObject(IRGS& env, SSATmp* src) {
 }
 
 //////////////////////////////////////////////////////////////////////
-
-void emitFCallBuiltin(IRGS& env,
-                      uint32_t numArgs,
-                      uint32_t numOut,
-                      const StringData* funcName) {
-  auto const callee = Func::lookupBuiltin(funcName);
-  if (!callee) PUNT(Missing-builtin);
-
-  if (callee->numInOutParams() != numOut) PUNT(bad-inout);
-
-  emitCallerRxChecksKnown(env, callee);
-  assertx(!callee->isMethod() || (callee->isStatic() && callee->cls()));
-  auto const ctx = callee->isStatic() ? cns(env, callee->cls()) : nullptr;
-
-  auto params = prepare_params(
-    env, callee, ctx,
-    numArgs, false, [&](uint32_t /*i*/, const Type ty) {
-      auto specificity =
-        ty == TBottom ? DataTypeGeneric : DataTypeSpecific;
-      return pop(env, specificity);
-    });
-
-  auto const catcher = CatchMaker {
-    env,
-    CatchMaker::Kind::NotInlining,
-    &params
-  };
-
-  push(env, builtinCall(env, callee, params, catcher));
-}
 
 void emitNativeImpl(IRGS& env) {
   if (isInlining(env)) return nativeImplInlined(env);

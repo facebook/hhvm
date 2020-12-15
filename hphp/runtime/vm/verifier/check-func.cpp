@@ -705,8 +705,6 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   static const FlavorDesc inputSigs[][kMaxHhbcImms] = {
   #define NOV { },
   #define CUMANY { },
-  #define CMANY_U2 { },
-  #define CALLNATIVE { },
   #define FCALL(nin, nobj) { nobj ? CV : UV },
   #define CMANY { },
   #define SMANY { },
@@ -724,8 +722,6 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   #undef MFINAL
   #undef C_MFINAL
   #undef CUMANY
-  #undef CMANY_U2
-  #undef CALLNATIVE
   #undef FCALL
   #undef CMANY
   #undef SMANY
@@ -771,20 +767,7 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
     while (idx < numPops) m_tmp_sig[idx++] = CV;
     return m_tmp_sig;
   }
-  case Op::FCallBuiltin: { //THREE(IVA, IVA, SA), CALLNATIVE,  CALLNATIVE
-    auto const nargs = getImm(pc, 0).u_IVA;
-    auto const nout  = getImm(pc, 1).u_IVA;
-    assertx(instrNumPops(pc) == nargs + nout);
-    for (int i = 0; i < nout; ++i) {
-      m_tmp_sig[i] = UV;
-    }
-    for (int i = nout; i < nargs + nout; i++) {
-      m_tmp_sig[i] = CUV;
-    }
-    return m_tmp_sig;
-  }
   case Op::CreateCl:  // TWO(IVA,SA),  CUMANY,   ONE(CV)
-  case Op::PopFrame:  // ONE(IVA),     CMANY_U2, CMANY
     for (int i = 0, n = instrNumPops(pc); i < n; ++i) {
       m_tmp_sig[i] = CUV;
     }
@@ -1386,7 +1369,6 @@ bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
   #define NOV { },
   #define CMANY { },
   #define FCALL { },
-  #define CALLNATIVE { },
   #define ONE(a) { a },
   #define TWO(a,b) { a, b },
   #define THREE(a,b,c) { a, b, c },
@@ -1412,9 +1394,7 @@ bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
   if (cur->stklen + pushes > maxStack()) reportStkOverflow(b, *cur, pc);
   FlavorDesc *outs = &cur->stk[cur->stklen];
   cur->stklen += pushes;
-  if (op == OpPopFrame) {
-    for (int i = 0; i < pushes; ++i) outs[i] = outs[i + kNumActRecCells];
-  } else if (isFCall(op) || op == OpFCallBuiltin) {
+  if (isFCall(op)) {
     for (int i = 0; i < pushes; ++i) {
       outs[i] = CV;
     }
@@ -1568,7 +1548,6 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op, bool pure) {
     case Op::PopC:
     case Op::PopU:
     case Op::PopU2:
-    case Op::PopFrame:
     case Op::PopL:
     case Op::CGetL:
     case Op::CGetQuietL:
@@ -1631,7 +1610,6 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op, bool pure) {
       return true;
 
     // function calling and object construction
-    case Op::FCallBuiltin:
     case Op::FCallClsMethod:
     case Op::FCallClsMethodD:
     case Op::FCallClsMethodS:

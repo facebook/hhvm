@@ -785,12 +785,6 @@ PopU2                 [U C:<T>]  ->  [C:<T>]
 
   Pop two. Discards the uninit underneath the cell on top of the stack.
 
-PopFrame<num-skip>    [UUUC..C] -> [C..C]
-
-  Pops three Uninit values from the stack which sit below num-skip cell values.
-  This instruction is used to pop the place holder uninit values pushed for a
-  frame that was never called.
-
 PopL <local variable id>    [C]  ->  []
 
   Teleport value from the stack into a local. This instruction marks the local
@@ -1917,20 +1911,6 @@ FCallCtor <fca> <class hint>  [C:Obj U C|V..C|V]  ->  [C]
   the class name with the implementation of __construct() that will be called.
 
   Constructors do not support inout, so the "num returns" in %1 must be 1.
-
-FCallBuiltin  <total params> <num out> <litstr id> [C|V|U..C|V|U]  -> [C]
-
-  Optimized builtin call without an ActRec. This instruction attempts to lookup
-  a builtin function named %3. If no function named %3 is defined, this
-  instruction throws a fatal error. Otherwise, this function gets address of
-  the builtin function named %3, transfers the top %1 values from the stack to
-  the callee as parameters, and then invokes the dispatcher to call the callee.
-  When the callee returns, it will transfer the return value onto
-  the caller's evaluation stack using the C flavor.
-
-  FCallBuiltin supports standalone methods and static methods for which the
-  class name is statically known. For static methods, the litstr id will be a
-  fully-qualified cls::fn name (e.g. "HH\Map::fromItems").
 
 
 9. Member operations

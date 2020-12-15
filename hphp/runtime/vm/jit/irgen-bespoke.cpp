@@ -648,14 +648,6 @@ const hphp_fast_string_imap<BespokeOptEmitFn> s_bespoke_builtin_impls{
   {"HH\\Lib\\_Private\\Native\\last_key", emitBespokeFirstLast<false, true>},
 };
 
-void emitBespokeFCallBuiltin(
-    IRGS& env, uint32_t numArgs, uint32_t numOut, const StringData* funcName) {
-  auto const it = s_bespoke_builtin_impls.find(funcName->data());
-  assertx(it != s_bespoke_builtin_impls.end());
-  assertx(it->second);
-  it->second(env, numArgs);
-}
-
 void translateDispatchBespoke(IRGS& env, const NormalizedInstruction& ni) {
   auto const DEBUG_ONLY sk = ni.source;
   FTRACE_MOD(Trace::hhir, 2, "At {}: {}: perform bespoke translation\n",
@@ -690,10 +682,6 @@ void translateDispatchBespoke(IRGS& env, const NormalizedInstruction& ni) {
     case Op::ClassGetTS:
       emitBespokeClassGetTS(env);
       return;
-    case Op::FCallBuiltin:
-      emitBespokeFCallBuiltin(env, ni.imm[0].u_IVA, ni.imm[1].u_IVA,
-                              ni.unit()->lookupLitstrId(ni.imm[2].u_SA));
-      return;
     case Op::IterInit:
     case Op::LIterInit:
     case Op::LIterNext:
@@ -703,29 +691,11 @@ void translateDispatchBespoke(IRGS& env, const NormalizedInstruction& ni) {
   }
 }
 
-folly::Optional<Location> getVanillaLocationForBuiltin(const IRGS& env,
-                                                        SrcKey sk) {
-  auto const soff = env.irb->fs().bcSPOff();
-
-  assertx(sk.op() == Op::FCallBuiltin);
-  auto const func =
-    Func::lookupBuiltin(sk.unit()->lookupLitstrId(getImm(sk.pc(), 2).u_SA));
-  if (!func) return folly::none;
-  auto const param = getBuiltinVanillaParam(func->fullName()->data());
-  if (param < 0) return folly::none;
-
-  if (getImm(sk.pc(), 0).u_IVA != func->numParams()) return folly::none;
-  if (getImm(sk.pc(), 1).u_IVA != func->numInOutParams()) return folly::none;
-  return {Location::Stack{soff - func->numParams() + 1 + param}};
-}
-
 folly::Optional<Location> getVanillaLocation(const IRGS& env, SrcKey sk) {
   auto const op = sk.op();
   auto const soff = env.irb->fs().bcSPOff();
 
-  if (op == Op::FCallBuiltin) {
-    return getVanillaLocationForBuiltin(env, sk);
-  } else if (isMemberDimOp(op) || (op == Op::QueryM || op == Op::SetM)) {
+  if (isMemberDimOp(op) || (op == Op::QueryM || op == Op::SetM)) {
     return {Location::MBase{}};
   }
 

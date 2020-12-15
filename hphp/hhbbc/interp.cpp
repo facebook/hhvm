@@ -821,20 +821,6 @@ void in(ISS& env, const bc::PopU2&) {
   push(env, std::move(val), equiv != StackDupId ? equiv : NoLocalId);
 }
 
-void in(ISS& env, const bc::PopFrame& op) {
-  effect_free(env);
-
-  std::vector<std::pair<Type, LocalId>> vals{op.arg1};
-  for (auto i = op.arg1; i > 0; --i) {
-    vals[i - 1] = {popC(env), topStkEquiv(env)};
-  }
-  for (uint32_t i = 0; i < 2; i++) popU(env);
-  for (auto& p : vals) {
-    push(
-      env, std::move(p.first), p.second != StackDupId ? p.second : NoLocalId);
-  }
-}
-
 void in(ISS& env, const bc::EntryNop&) { effect_free(env); }
 
 void in(ISS& env, const bc::Dup& /*op*/) {

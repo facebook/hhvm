@@ -1096,29 +1096,6 @@ void dce(Env& env, const bc::PopU2&)         {
   discard(env);
   env.dceState.stack.push_back(std::move(ui));
 }
-void dce(Env& env, const bc::PopFrame& op) {
-  std::vector<UseInfo> uis;
-  for (uint32_t i = 0; i < op.arg1; i++) {
-    uis.emplace_back(std::move(env.dceState.stack.back()));
-    env.dceState.stack.pop_back();
-
-    // As above this is overly conservative but in all likelihood won't matter
-    if (isLinked(uis.back())) {
-      markUisLive(env, true, uis.back());
-      uis.back() = UseInfo { Use::Used };
-    } else {
-      uis.back().actions.emplace(env.id, DceAction { DceAction::AdjustPop, 1 });
-    }
-  }
-
-  // Pop the Uninits from the frame
-  pop(env, Use::Not, DceActionMap {});
-  pop(env, Use::Not|Use::Linked, DceActionMap {{ env.id, DceAction::Kill }});
-
-  for (auto it = uis.rbegin(); it != uis.rend(); it++) {
-    env.dceState.stack.push_back(std::move(*it));
-  }
-}
 
 void dce(Env& env, const bc::Int&)           { pushRemovable(env); }
 void dce(Env& env, const bc::String&)        { pushRemovable(env); }
@@ -1679,7 +1656,6 @@ void dce(Env& env, const bc::CreateCl& op) { no_dce(env, op); }
 void dce(Env& env, const bc::CreateCont& op) { no_dce(env, op); }
 void dce(Env& env, const bc::EntryNop& op) { no_dce(env, op); }
 void dce(Env& env, const bc::Eval& op) { no_dce(env, op); }
-void dce(Env& env, const bc::FCallBuiltin& op) { no_dce(env, op); }
 void dce(Env& env, const bc::FCallClsMethod& op) { no_dce(env, op); }
 void dce(Env& env, const bc::FCallClsMethodD& op) { no_dce(env, op); }
 void dce(Env& env, const bc::FCallClsMethodS& op) { no_dce(env, op); }
@@ -2435,29 +2411,10 @@ void dce_perform(php::WideFunc& func, const DceActionMap& actionMap) {
       case DceAction::AdjustPop:
       {
         auto const op = b->hhbcs[id.idx].op;
-        always_assert(op == Op::PopU2 || op == Op::PopFrame);
-        if (op == Op::PopU2) {
-          assertx(dceAction.maskOrCount == 1);
-          b->hhbcs[id.idx].PopU = bc::PopU {};
-          b->hhbcs[id.idx].op = Op::PopU;
-        } else {
-          assertx(dceAction.maskOrCount > 0);
-          auto& popFrame = b->hhbcs[id.idx].PopFrame;
-          assertx(dceAction.maskOrCount <= popFrame.arg1);
-          popFrame.arg1 -= dceAction.maskOrCount;
-          if (popFrame.arg1 <= 1) {
-            auto const remaining = popFrame.arg1;
-            b->hhbcs.erase(b->hhbcs.begin() + id.idx);
-            b->hhbcs.insert(
-              b->hhbcs.begin() + id.idx,
-              2,
-              remaining == 0
-                ? Bytecode{ bc::PopU {} }
-                : Bytecode{ bc::PopU2 {} }
-            );
-            setloc(srcLoc, b->hhbcs.begin() + id.idx, 2);
-          }
-        }
+        always_assert(op == Op::PopU2);
+        assertx(dceAction.maskOrCount == 1);
+        b->hhbcs[id.idx].PopU = bc::PopU {};
+        b->hhbcs[id.idx].op = Op::PopU;
         break;
       }
       case DceAction::UnsetLocalsBefore: {

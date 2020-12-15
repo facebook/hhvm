@@ -524,13 +524,6 @@ void emitPopL(IRGS& env, int32_t id) {
   stLocMove(env, id, src);
 }
 
-void emitPopFrame(IRGS& env, uint32_t nout) {
-  jit::vector<SSATmp*> v{nout, nullptr};
-  for (auto i = nout; i > 0; --i) v[i - 1] = pop(env, DataTypeGeneric);
-  for (uint32_t i = 0; i < kNumActRecCells; ++i) popU(env);
-  for (auto tmp : v) push(env, tmp);
-}
-
 void emitDir(IRGS& env) {
   auto const unit = curUnit(env);
   auto const handle = unit->perRequestFilepathHandle();

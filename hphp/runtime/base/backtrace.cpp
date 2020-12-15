@@ -180,35 +180,6 @@ BTFrame initBTContextAt(BTContext& ctx, jit::CTCA ip, BTFrame frm) {
   // If we don't have an inlined frame, it's always safe to use pcOff() if
   // initBTContextAt() is being called for a leaf frame.
   if (frm.pc == kInvalidOffset) frm.pc = pcOff();
-
-  // The bytecode supports a limited form of inlining via FCallBuiltin. If the
-  // call itself was interpreted there won't be any fixup information, but
-  // we should still be able to extract the target from the bytecode on the
-  // stack and use that directly.
-  auto const getBuiltin = [&] () -> const Func* {
-    if (!frm) return nullptr;
-
-    auto const func = frm.fp->func();
-    auto const pc = func->unit()->entry() + frm.pc;
-    if (peek_op(pc) != OpFCallBuiltin) return nullptr;
-
-    auto const ne = func->unit()->lookupNamedEntityId(getImm(pc, 2).u_SA);
-    return Func::lookup(ne);
-  };
-
-  if (auto const f = getBuiltin()) {
-    auto const prevFP = &ctx.fakeAR[0];
-    prevFP->setFunc(f);
-    prevFP->m_callOffAndFlags = ActRec::encodeCallOffsetAndFlags(
-      frm.pc - frm.fp->func()->base(),
-      1 << ActRec::LocalsDecRefd  // don't attempt to read locals
-    );
-
-    ctx.stashedFrm = frm;
-
-    return BTFrame { prevFP, f->base() };
-  }
-
   return frm;
 }
 

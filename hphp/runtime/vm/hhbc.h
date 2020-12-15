@@ -527,7 +527,6 @@ constexpr uint32_t kMaxConcatN = 4;
   O(PopC,            NA,               ONE(CV),         NOV,        NF) \
   O(PopU,            NA,               ONE(UV),         NOV,        NF) \
   O(PopU2,           NA,               TWO(CV,UV),      ONE(CV),    NF) \
-  O(PopFrame,        ONE(IVA),         CMANY_U2,        CMANY,      NF) \
   O(PopL,            ONE(LA),          ONE(CV),         NOV,        NF) \
   O(Dup,             NA,               ONE(CV),         TWO(CV,CV), NF) \
   O(CGetCUNop,       NA,               ONE(CUV),        ONE(CV),    NF) \
@@ -705,7 +704,6 @@ constexpr uint32_t kMaxConcatN = 4;
                                        FCALL(1, 1),     FCALL,      CF) \
   O(FCallObjMethodD, FOUR(FCA,SA,OA(ObjMethodOp),SA),                   \
                                        FCALL(0, 1),     FCALL,      CF) \
-  O(FCallBuiltin,    THREE(IVA,IVA,SA),CALLNATIVE,      CALLNATIVE, NF) \
   O(IterInit,        TWO(ITA,BA),      ONE(CV),         NOV,        CF) \
   O(LIterInit,       THREE(ITA,LA,BA), NOV,             NOV,        CF) \
   O(IterNext,        TWO(ITA,BA),      NOV,             NOV,        CF) \

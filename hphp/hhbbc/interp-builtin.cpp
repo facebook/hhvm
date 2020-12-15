@@ -502,63 +502,7 @@ bool handle_builtin(ISS& env, const php::Func* func, const FCallArgs& fca) {
 
 //////////////////////////////////////////////////////////////////////
 
-}
-
-namespace interp_step {
-
-void in(ISS& env, const bc::FCallBuiltin& op) {
-  always_assert(op.arg2 == 0);
-  auto const name = op.str3;
-  auto const func = env.index.resolve_func(env.ctx, name);
-  auto const exactFunc = func.exactFunc();
-
-  if (options.ConstantFoldBuiltins && func.isFoldable()) {
-    assertx(exactFunc);
-    if (auto val = const_fold(env, op.arg1, 0, *exactFunc, true)) {
-      constprop(env);
-
-      always_assert(!RO::EvalArrayProvenance ||
-                    !(exactFunc->attrs & AttrProvenanceSkipFrame));
-      discard(env, op.arg1);
-      return push(env, std::move(*val));
-    }
-  }
-
-  auto const num_args = op.arg1;
-  auto const rt = [&]{
-    // If we know they'll be no parameter coercions, we can provide a slightly
-    // more precise type by ignoring AttrParamCoerceNull and
-    // AttrParamCoerceFalse. Since this is a FCallBuiltin, we already know the
-    // parameter count is exactly what the builtin expects.
-    auto const precise_ty = [&]() -> folly::Optional<Type> {
-      if (!exactFunc) return folly::none;
-      if (exactFunc->attrs & AttrVariadicParam) {
-        return folly::none;
-      }
-      assert(num_args == exactFunc->params.size());
-      // Check to see if all provided arguments are sub-types of what the
-      // builtin expects. If so, we know there won't be any coercions.
-      for (auto i = uint32_t{0}; i < num_args; ++i) {
-        auto const& param = exactFunc->params[i];
-        if (!param.builtinType || param.builtinType == KindOfUninit) {
-          return folly::none;
-        }
-        auto const param_ty = from_DataType(*param.builtinType);
-        if (!topT(env, num_args - i - 1).subtypeOf(param_ty)) {
-          return folly::none;
-        }
-      }
-      return native_function_return_type(exactFunc);
-    }();
-    if (!precise_ty) return env.index.lookup_return_type(env.ctx, func);
-    return *precise_ty;
-  }();
-
-  for (auto i = uint32_t{0}; i < num_args; ++i) popT(env);
-  push(env, rt);
-}
-
-}
+} // namespace
 
 bool optimize_builtin(ISS& env, const php::Func* func, const FCallArgs& fca) {
   if (!will_reduce(env) ||

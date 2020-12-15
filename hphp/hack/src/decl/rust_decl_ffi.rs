@@ -9,8 +9,12 @@ use std::collections::BTreeMap;
 use bumpalo::Bump;
 
 use decl_rust::direct_decl_parser::parse_decls_and_mode;
-use ocamlrep::{bytes_from_ocamlrep, FromOcamlRep};
+use no_pos_hash::position_insensitive_hash;
+use ocamlrep::{bytes_from_ocamlrep, FromOcamlRep, FromOcamlRepIn, Value};
+use ocamlrep_caml_builtins::Int64;
+use ocamlrep_ocamlpool::to_ocaml;
 use oxidized::relative_path::RelativePath;
+use oxidized_by_ref::direct_decl_parser::Decls;
 use stack_limit::{StackLimit, KI, MI, STACK_SLACK_1K};
 
 #[no_mangle]
@@ -81,4 +85,20 @@ pub unsafe extern "C" fn hh_parse_decls_and_mode_ffi(
         }
     }
     ocamlrep_ocamlpool::catch_unwind(|| inner(filename_ptr, text_ptr, ns_map_ptr))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn decls_hash(decls: usize) -> usize {
+    fn inner(decls: usize) -> usize {
+        let arena = Bump::new();
+        // SAFETY: While decls_value is in scope, no thread may interact with the
+        // OCaml runtime, and values reachable from decls_value can't be mutated.
+        let decls_value = unsafe { Value::from_bits(decls) };
+        let decls = Decls::from_ocamlrep_in(decls_value, &arena).expect("expected decls");
+        let hash = Int64(position_insensitive_hash(&decls) as i64);
+        // SAFETY: No threads may be interacting with the OCaml runtime
+        // while we invoke to_ocaml.
+        unsafe { to_ocaml(&hash) }
+    }
+    ocamlrep_ocamlpool::catch_unwind(|| inner(decls))
 }

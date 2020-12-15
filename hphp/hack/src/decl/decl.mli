@@ -7,6 +7,13 @@
  *
  *)
 
+val name_and_declare_types_program :
+  Direct_decl_parser.decls ->
+  sh:SharedMem.uses ->
+  Provider_context.t ->
+  Nast.program ->
+  Direct_decl_parser.decls
+
 (*
  * This function works by side effects. It is adding in the Naming_table the
  * nast produced from the filename passed as a parameter (the SharedMem must

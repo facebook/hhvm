@@ -5,6 +5,7 @@
 
 use arena_collections::List;
 use arena_trait::TrivialDrop;
+use no_pos_hash::NoPosHash;
 use ocamlrep::slab::OwnedSlab;
 use ocamlrep_derive::{FromOcamlRepIn, ToOcamlRep};
 use oxidized::file_info::NameType;
@@ -20,6 +21,7 @@ use crate::{
     Eq,
     FromOcamlRepIn,
     Hash,
+    NoPosHash,
     Ord,
     PartialEq,
     PartialOrd,

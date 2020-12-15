@@ -500,9 +500,12 @@ dependencies = [
  "atty",
  "bumpalo",
  "decl_rust",
+ "no_pos_hash",
  "ocamlrep",
+ "ocamlrep_caml_builtins",
  "ocamlrep_ocamlpool",
  "oxidized",
+ "oxidized_by_ref",
  "stack_limit",
 ]
 
@@ -1950,6 +1953,14 @@ dependencies = [
  "bumpalo",
  "nohash-hasher",
  "serde",
+]
+
+[[package]]
+name = "ocamlrep_caml_builtins"
+version = "0.0.0"
+dependencies = [
+ "ocamlrep",
+ "ocamlrep_custom",
 ]
 
 [[package]]

@@ -195,6 +195,7 @@ mod impls {
         <T> std::collections::BTreeSet<T>,
         <K, V> std::collections::HashMap<K, V>,
         <K, V> std::collections::BTreeMap<K, V>,
+        <T> arena_collections::list::List<'_, T>,
         <T> arena_collections::set::Set<'_, T>,
         <T> arena_collections::MultiSet<'_, T>,
         <T> arena_collections::MultiSetMut<'_, T>,

@@ -11,9 +11,12 @@ crate-type = ["lib", "staticlib"]
 
 [dependencies]
 decl_rust = { path = "../decl_rust" }
+no_pos_hash = { path = "../../utils/no_pos_hash" }
 ocamlrep = { path = "../../ocamlrep" }
+ocamlrep_caml_builtins = { path = "../../utils/ocamlrep_caml_builtins" }
 ocamlrep_ocamlpool = { path = "../../ocamlrep_ocamlpool" }
 oxidized = { path = "../../oxidized" }
+oxidized_by_ref = { path = "../../oxidized_by_ref" }
 stack_limit = { path = "../../utils/stack_limit" }
 atty = "0.2"
 bumpalo = { version = "3.2.1", features = ["collections"] }

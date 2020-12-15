@@ -29,29 +29,40 @@ let class_decl_if_missing
     ()
 
 let rec name_and_declare_types_program
-    ~(sh : SharedMem.uses) (ctx : Provider_context.t) (prog : Nast.program) :
-    unit =
+    (acc : Direct_decl_parser.decls)
+    ~(sh : SharedMem.uses)
+    (ctx : Provider_context.t)
+    (prog : Nast.program) : Direct_decl_parser.decls =
   let open Aast in
-  List.iter prog (fun def ->
+  List.fold prog ~init:acc ~f:(fun acc def ->
       match def with
-      | Namespace (_, prog) -> name_and_declare_types_program ~sh ctx prog
-      | NamespaceUse _ -> ()
-      | SetNamespaceEnv _ -> ()
-      | FileAttributes _ -> ()
+      | Namespace (_, prog) -> name_and_declare_types_program acc ~sh ctx prog
+      | NamespaceUse _ -> acc
+      | SetNamespaceEnv _ -> acc
+      | FileAttributes _ -> acc
       | Fun f ->
         let (name, decl) = Decl_nast.fun_naming_and_decl ctx f in
-        Decl_heap.Funs.add name decl
-      | Class c -> class_decl_if_missing ~sh ctx c
+        Decl_heap.Funs.add name decl;
+        (name, Shallow_decl_defs.Fun decl) :: acc
+      | Class c ->
+        class_decl_if_missing ~sh ctx c;
+        let class_ = Shallow_classes_provider.decl ctx c in
+        (snd class_.Shallow_decl_defs.sc_name, Shallow_decl_defs.Class class_)
+        :: acc
       | RecordDef rd ->
         let (name, decl) = Decl_nast.record_def_naming_and_decl ctx rd in
-        Decl_heap.RecordDefs.add name decl
+        Decl_heap.RecordDefs.add name decl;
+        (name, Shallow_decl_defs.Record decl) :: acc
       | Typedef typedef ->
         let (name, decl) = Decl_nast.typedef_naming_and_decl ctx typedef in
-        Decl_heap.Typedefs.add name decl
-      | Stmt _ -> ()
+        Decl_heap.Typedefs.add name decl;
+        (name, Shallow_decl_defs.Typedef decl) :: acc
+      | Stmt _ -> acc
       | Constant cst ->
         let (name, decl) = Decl_nast.const_naming_and_decl ctx cst in
-        Decl_heap.GConsts.add name decl)
+        Decl_heap.GConsts.add name decl;
+        let decl = Typing_defs.{ cd_pos = fst cst.cst_name; cd_type = decl } in
+        (name, Shallow_decl_defs.Const decl) :: acc)
 
 let make_env
     ~(sh : SharedMem.uses) (ctx : Provider_context.t) (fn : Relative_path.t) :
@@ -65,5 +76,7 @@ let make_env
     ()
   else
     let ast = Ast_provider.get_ast ctx fn in
-    name_and_declare_types_program ~sh ctx ast;
+    let (_ : Direct_decl_parser.decls) =
+      name_and_declare_types_program [] ~sh ctx ast
+    in
     ()

@@ -65,7 +65,7 @@ type state =
       -> Synthesized_elts if there weren't any more ancestors in the list
       *)
   | Ancestor of {
-      ancestor: string * linearization;
+      ancestor: string * mro_element list;
       ancestors: ancestor list;
       synths: mro_element list;
     }
@@ -96,16 +96,6 @@ type state =
       -> Synthesized_elts if there are still some synths left to go
       -> Done if there are none.
       *)
-
-(** This is the state for linearization-sequence-generator function [next_state] *)
-type seq_unfold_state = {
-  state: state;
-      (** Indicates what phase of linearization we're currently working through *)
-  acc: Decl_defs.mro_element list;
-      (** accumulates every mro_element we encountered during the linearization.
-          This is solely used so that, if we happen to complete the linearization,
-          then we can write the list into Linearization_provider.complete. *)
-}
 
 (* Return true if the two given MRO elements are equal in everything except name
    (which is expected to be compared by the caller) and positions (which are
@@ -265,14 +255,14 @@ let get_ancestors (c : shallow_class) (linearization_kind : linearization_kind)
 
 let rec ancestor_linearization
     (env : env) (child_class_concrete : bool) (ancestor : ancestor) :
-    string * linearization =
+    string * mro_element list =
   let { ty_pos; class_name = (use_pos, class_name); type_args; source } =
     ancestor
   in
   Decl_env.add_extends_dependency env.decl_env class_name;
   let lin = get_linearization env class_name in
   let lin =
-    Sequence.map lin ~f:(fun c ->
+    List.map lin ~f:(fun c ->
         let via_req_extends =
           is_set mro_via_req_extends c.mro_flags
           || equal_source_type source ReqExtends
@@ -316,9 +306,9 @@ let rec ancestor_linearization
           mro_flags;
         })
   in
-  match Sequence.next lin with
-  | None -> (class_name, Sequence.empty)
-  | Some (c, rest) ->
+  match lin with
+  | [] -> (class_name, [])
+  | c :: rest ->
     let c =
       {
         c with
@@ -342,7 +332,7 @@ let rec ancestor_linearization
     in
     let subst = Decl_subst.make_decl tparams type_args in
     let rest =
-      Sequence.map rest ~f:(fun c ->
+      List.map rest ~f:(fun c ->
           {
             c with
             (* Instantiate the remainder of this ancestor's linearization with the
@@ -368,24 +358,26 @@ let rec ancestor_linearization
       if not ancestor_checks_requirements then
         rest
       else
-        Sequence.map rest ~f:(fun mro -> { mro with mro_required_at = None })
+        List.map rest ~f:(fun mro -> { mro with mro_required_at = None })
     in
-    (class_name, Sequence.append (Sequence.singleton c) rest)
+    (class_name, c :: rest)
 
 (* Linearize a class declaration given its shallow declaration *)
-and linearize (env : env) (c : shallow_class) : linearization =
-  Sequence.unfold_step
-    ~init:{ state = Child c; acc = [] }
-    ~f:(next_state env (snd c.sc_name) c.sc_kind (Caml.Hashtbl.create 32))
-  |> Sequence.memoize
+and linearize (env : env) (c : shallow_class) : mro_element list =
+  let hash = Caml.Hashtbl.create 32 in
+  let rec unfold state acc =
+    match next_state env c.sc_kind hash state with
+    | Sequence.Step.Done -> List.rev acc
+    | Sequence.Step.Skip state -> unfold state acc
+    | Sequence.Step.Yield (mro, state) -> unfold state (mro :: acc)
+  in
+  unfold (Child c) []
 
 and next_state
     (env : env)
-    (class_name : string)
     (child_class_kind : Ast_defs.class_kind)
     (emitted_elements : (string, mro_element list) Caml.Hashtbl.t)
-    ({ state; acc } : seq_unfold_state) :
-    (Decl_defs.mro_element, seq_unfold_state) Sequence.Step.t =
+    (state : state) : (Decl_defs.mro_element, state) Sequence.Step.t =
   let child_class_concrete =
     Ast_defs.equal_class_kind child_class_kind Ast_defs.Cnormal
   in
@@ -399,8 +391,7 @@ and next_state
   in
   let yield mro_element next_state =
     add_emitted mro_element;
-    Sequence.Step.Yield
-      (mro_element, { state = next_state; acc = mro_element :: acc })
+    Sequence.Step.Yield (mro_element, next_state)
   in
   let was_emitted mro =
     match Caml.Hashtbl.find_opt emitted_elements mro.mro_name with
@@ -433,13 +424,11 @@ and next_state
     let name_and_lin =
       ancestor_linearization env child_class_concrete ancestor
     in
-    Sequence.Step.Skip
-      { state = Ancestor { ancestor = name_and_lin; ancestors; synths }; acc }
+    Sequence.Step.Skip (Ancestor { ancestor = name_and_lin; ancestors; synths })
   | Ancestor { ancestor = (name, lin); ancestors; synths } ->
     begin
-      match Sequence.next lin with
-      | None ->
-        Sequence.Step.Skip { state = Next_ancestor { ancestors; synths }; acc }
+      match lin with
+      | [] -> Sequence.Step.Skip (Next_ancestor { ancestors; synths })
       (* Lazy.Undefined occurs if we attempt to include a linearization within
        itself. This will only happen when we have a class dependency cycle (and
        only in some particular circumstances), so it will not arise in legal
@@ -453,7 +442,7 @@ and next_state
           }
         in
         yield next (Next_ancestor { ancestors; synths })
-      | Some (next, rest) ->
+      | next :: rest ->
         let skip_or_mark_trait_reuse was_emitted =
           let is_trait class_name =
             match Shallow_classes_provider.get (get_ctx env) class_name with
@@ -519,35 +508,30 @@ and next_state
         (match next with
         | None ->
           Sequence.Step.Skip
-            {
-              state = Ancestor { ancestor = (name, rest); ancestors; synths };
-              acc;
-            }
+            (Ancestor { ancestor = (name, rest); ancestors; synths })
         | Some next ->
           yield next (Ancestor { ancestor = (name, rest); ancestors; synths }))
     end
   | Next_ancestor { ancestors = []; synths } ->
     let synths = List.rev synths in
-    Sequence.Step.Skip { state = Synthesized_elts { synths }; acc }
+    Sequence.Step.Skip (Synthesized_elts { synths })
   | Synthesized_elts { synths = next :: synths } ->
     if was_emitted next then
-      Sequence.Step.Skip { state = Synthesized_elts { synths }; acc }
+      Sequence.Step.Skip (Synthesized_elts { synths })
     else
       yield next (Synthesized_elts { synths })
-  | Synthesized_elts { synths = [] } ->
-    let key = (class_name, env.linearization_kind) in
-    Linearization_provider.complete (get_ctx env) key (List.rev acc);
-    Sequence.Step.Done
+  | Synthesized_elts { synths = [] } -> Sequence.Step.Done
 
-and get_linearization (env : env) (class_name : string) : linearization =
+and get_linearization (env : env) (class_name : string) : mro_element list =
   let { class_stack; linearization_kind; _ } = env in
   if SSet.mem class_stack class_name then
-    Sequence.singleton
+    [
       {
         empty_mro_element with
         mro_name = class_name;
         mro_cyclic = Some class_stack;
-      }
+      };
+    ]
   else
     let class_stack = SSet.add class_stack class_name in
     let env = { env with class_stack } in
@@ -558,6 +542,7 @@ and get_linearization (env : env) (class_name : string) : linearization =
       (match Shallow_classes_provider.get (get_ctx env) class_name with
       | Some c ->
         let lin = linearize env c in
+        let key = (snd c.sc_name, env.linearization_kind) in
         Linearization_provider.add (get_ctx env) key lin;
         lin
       | None ->
@@ -575,8 +560,7 @@ and get_linearization (env : env) (class_name : string) : linearization =
           set_bit mro_class_not_found true empty_mro_element.mro_flags
         in
         (* This class is not known to exist! *)
-        Sequence.singleton
-          { empty_mro_element with mro_name = class_name; mro_flags })
+        [{ empty_mro_element with mro_name = class_name; mro_flags }])
 
 type linearizations = {
   lin_members: Decl_defs.linearization;
@@ -600,6 +584,7 @@ let get_linearizations (ctx : Provider_context.t) (class_name : string) :
         linearization_kind = Decl_defs.Member_resolution;
       }
       class_name
+    |> Sequence.of_list
   in
   let lin_ancestors =
     get_linearization
@@ -609,5 +594,6 @@ let get_linearizations (ctx : Provider_context.t) (class_name : string) :
         linearization_kind = Decl_defs.Ancestor_types;
       }
       class_name
+    |> Sequence.of_list
   in
   { lin_ancestors; lin_members }

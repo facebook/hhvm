@@ -66,8 +66,8 @@ module Shallow_decl_cache = Lru_cache.Cache (Shallow_decl_cache_entry)
 
 module Linearization_cache_entry = struct
   type _ t =
-    | Member_resolution_linearization : string -> Decl_defs.linearization t
-    | Ancestor_types_linearization : string -> Decl_defs.linearization t
+    | Member_resolution_linearization : string -> Decl_defs.mro_element list t
+    | Ancestor_types_linearization : string -> Decl_defs.mro_element list t
 
   type 'a key = 'a t
 

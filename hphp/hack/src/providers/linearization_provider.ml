@@ -12,7 +12,7 @@ open Reordered_argument_collections
 type key = string * Decl_defs.linearization_kind
 
 let key_to_local_key (key : key) :
-    Decl_defs.linearization Provider_backend.Linearization_cache_entry.t =
+    Decl_defs.mro_element list Provider_backend.Linearization_cache_entry.t =
   let (name, kind) = key in
   match kind with
   | Decl_defs.Member_resolution ->
@@ -42,6 +42,20 @@ module Cache =
       let capacity = 1000
     end)
 
+module DeclServiceLocalCache =
+  SharedMem.LocalCache
+    (CacheKey)
+    (struct
+      type t = Decl_defs.mro_element list
+
+      let prefix = Prefix.make ()
+
+      let description = "Decl_LocalLinearization"
+    end)
+    (struct
+      let capacity = 1000
+    end)
+
 let local_changes_push_sharedmem_stack () : unit =
   Cache.LocalChanges.push_stack ()
 
@@ -59,51 +73,23 @@ let remove_batch (_ctx : Provider_context.t) (classes : SSet.t) : unit =
   in
   Cache.remove_batch keys
 
-module LocalCache =
-  SharedMem.LocalCache
-    (CacheKey)
-    (struct
-      type t = Decl_defs.linearization
-
-      let prefix = Prefix.make ()
-
-      let description = "Decl_LazyLinearization"
-    end)
-    (struct
-      let capacity = 1000
-    end)
-
-let add (ctx : Provider_context.t) (key : key) (value : Decl_defs.linearization)
+let add
+    (ctx : Provider_context.t) (key : key) (value : Decl_defs.mro_element list)
     : unit =
   match Provider_context.get_backend ctx with
-  | Provider_backend.Shared_memory -> LocalCache.add key value
+  | Provider_backend.Shared_memory -> Cache.add key value
   | Provider_backend.Local_memory { Provider_backend.linearization_cache; _ } ->
     let key = key_to_local_key key in
     Provider_backend.Linearization_cache.add linearization_cache ~key ~value
   | Provider_backend.Decl_service _ ->
     (* TODO: Consider storing these in the provider context or decl-service
        instead of a global cache in the hh_worker process *)
-    LocalCache.add key value
+    DeclServiceLocalCache.add key value
 
-let complete
-    (ctx : Provider_context.t) (key : key) (value : Decl_defs.mro_element list)
-    : unit =
+let get (ctx : Provider_context.t) (key : key) :
+    Decl_defs.mro_element list option =
   match Provider_context.get_backend ctx with
-  | Provider_backend.Shared_memory ->
-    Cache.add key value;
-    LocalCache.remove key
-  | Provider_backend.Local_memory _ -> ()
-  | Provider_backend.Decl_service _ -> ()
-
-let get (ctx : Provider_context.t) (key : key) : Decl_defs.linearization option
-    =
-  match Provider_context.get_backend ctx with
-  | Provider_backend.Shared_memory ->
-    begin
-      match Cache.get key with
-      | Some lin -> Some (Sequence.of_list lin)
-      | None -> LocalCache.get key
-    end
+  | Provider_backend.Shared_memory -> Cache.get key
   | Provider_backend.Local_memory { Provider_backend.linearization_cache; _ } ->
     let key = key_to_local_key key in
     Provider_backend.Linearization_cache.find_or_add
@@ -113,4 +99,4 @@ let get (ctx : Provider_context.t) (key : key) : Decl_defs.linearization option
   | Provider_backend.Decl_service _ ->
     (* TODO: Consider storing these in the provider context or decl-service
        instead of a global cache in the hh_worker process *)
-    LocalCache.get key
+    DeclServiceLocalCache.get key

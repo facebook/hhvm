@@ -47,8 +47,8 @@ end
 
 module Linearization_cache_entry : sig
   type _ t =
-    | Member_resolution_linearization : string -> Decl_defs.linearization t
-    | Ancestor_types_linearization : string -> Decl_defs.linearization t
+    | Member_resolution_linearization : string -> Decl_defs.mro_element list t
+    | Ancestor_types_linearization : string -> Decl_defs.mro_element list t
 
   type 'a key = 'a t
 
@@ -162,15 +162,12 @@ type local_memory = {
 }
 
 type t =
-  | Shared_memory
-      (** Used by hh_server and hh_single_type_check *)
-  | Local_memory of local_memory
-      (** Used by serverless IDE *)
+  | Shared_memory  (** Used by hh_server and hh_single_type_check *)
+  | Local_memory of local_memory  (** Used by serverless IDE *)
   | Decl_service of {
       decl: Decl_service_client.t;
       fixmes: Fixmes.t;
-    }
-      (** Used by the hh_server rearchitecture (hh_decl/hh_worker) *)
+    }  (** Used by the hh_server rearchitecture (hh_decl/hh_worker) *)
 
 val t_to_string : t -> string
 

@@ -152,10 +152,6 @@ void relocateOptFunc(FuncMetaInfo& info,
         translator->reset();
         continue;
       }
-    } else if (prologueTranslator) {
-      assertx(!translator->translateSuccess());
-      // This is a prologue which hasn't been translated yet.
-      translator->translate();
     }
     if (!translator->translateSuccess()) continue;
     auto const& range = translator->range();

@@ -102,8 +102,7 @@ bool regeneratePrologue(TransID prologueTransId, tc::FuncMetaInfo& info) {
     // We don't acquire requisite paperwork etc. here since we are assuming that
     // a lease/lock is already held for full function optimization.
     if (retranslateAllEnabled()) {
-      // TODO: actually translate here, and push a translator to use for
-      // relocation.
+      translator.translate(info.tcBuf.view());
       info.add(std::move(translatorPtr));
     } else {
       if (!translator.shouldTranslate(/* noSizeLimit = */ true)) return false;

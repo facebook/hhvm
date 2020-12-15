@@ -56,7 +56,10 @@ Variant ArrayUtil::Splice(const Array& input, int offset, int64_t length,
     length = num_in - offset;
   }
 
-  Array out_hash = Array::CreateDArray();
+  auto const ad = ArrayData::CreateDArray(
+      arrprov::Tag{}, input->isLegacyArray());
+  auto out_hash = Array::attach(ad);
+
   int pos = 0;
   int64_t nextKI = 0;
   ArrayIter iter(input);
@@ -328,11 +331,7 @@ static void php_array_data_shuffle(std::vector<ssize_t> &indices) {
 }
 
 Variant ArrayUtil::Shuffle(const Array& input) {
-  int count = input.size();
-  if (count == 0) {
-    return input;
-  }
-
+  auto const count = input.size();
   std::vector<ssize_t> indices;
   indices.reserve(count);
   auto pos_limit = input->iter_end();

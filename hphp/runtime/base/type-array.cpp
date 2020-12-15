@@ -600,6 +600,8 @@ void Array::SortImpl(std::vector<int> &indices, const Array& source,
 void Array::sort(PFUNC_CMP cmp_func, bool by_key, bool renumber,
                  const void *data /* = NULL */) {
   Array sorted = Array::CreateDArray();
+  if (m_arr && m_arr->isLegacyArray()) sorted.setLegacyArray(true);
+
   SortData opaque;
   std::vector<int> indices;
   SortImpl(indices, *this, opaque, cmp_func, by_key, data);
@@ -657,7 +659,8 @@ bool Array::MultiSort(std::vector<SortData> &data) {
   for (unsigned int ki = 0; ki < data.size(); ki++) {
     SortData &opaque = data[ki];
     const Array& arr = *opaque.array;
-    Array sorted;
+    Array sorted = Array::CreateDArray();
+    if (arr->isLegacyArray()) sorted.setLegacyArray(true);
     int64_t nextKI = 0;
     for (int i = 0; i < count; i++) {
       ssize_t pos = opaque.positions[indices[i]];

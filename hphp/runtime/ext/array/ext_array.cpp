@@ -942,6 +942,7 @@ TypedValue HHVM_FUNCTION(array_shift,
     auto& arr_array = array.asArrRef();
     assertx(!arr_array.empty());
     auto newArray  = makeReserveLike(cell_array->m_type, arr_array.size() - 1);
+    if (arr_array->isLegacyArray()) newArray->setLegacyArrayInPlace(true);
     ArrayIter it(arr_array.detach(), ArrayIter::noInc);
     auto const result = it.second();
     ++it;
@@ -1169,8 +1170,10 @@ TypedValue HHVM_FUNCTION(array_unshift,
   }
   auto const dt = type(cell_array);
   if (isArrayLikeType(dt)) {
-    auto const size = val(cell_array).parr->size() + args.size() + 1;
+    auto const ad = val(cell_array).parr;
+    auto const size = ad->size() + args.size() + 1;
     auto newArray = makeReserveLike(dt, size);
+    if (ad->isLegacyArray()) newArray->setLegacyArrayInPlace(true);
     if (isDictOrDArrayType(dt)) {
       int64_t i = 0;
       newArray.set(i++, var);
@@ -1274,13 +1277,18 @@ static int php_count_recursive(const Array& array) {
   return cnt;
 }
 
-bool HHVM_FUNCTION(shuffle,
-                   Variant& array) {
+bool HHVM_FUNCTION(shuffle, Variant& array) {
   if (!array.isArray()) {
     raise_expected_array_warning("shuffle");
     return false;
   }
+
+  auto const ad = array.asCArrRef().get();
+  if (ad->empty()) return true;
+
+  auto const legacy = ad->isLegacyArray();
   array = ArrayUtil::Shuffle(array.asCArrRef());
+  if (legacy) array.asArrRef()->setLegacyArrayInPlace(true);
   return true;
 }
 
@@ -2546,15 +2554,24 @@ struct ArraySortTmp {
     assertx(m_ad->empty() || m_ad->hasExactlyOneRef());
   }
   ~ArraySortTmp() {
+    auto const old = val(m_tv).parr;
+    auto const legacy = old->isLegacyArray();
+
     // We must call BespokeArray::PostSort before cleaning up the old array,
     // because some bespoke arrays may move values from old -> m_ad at PreSort
     // and move them back at PostSort. (LoggingArray moves the entire array.)
-    auto const old = val(m_tv).parr;
     if (!old->isVanilla()) {
       m_ad = BespokeArray::PostSort(old, m_ad);
     }
     if (m_ad != old) {
       tvMove(make_array_like_tv(m_ad), m_tv);
+    }
+
+    // All sort functions preserve the legacy bit.
+    assertx(m_ad == val(m_tv).parr);
+    if (legacy != m_ad->isLegacyArray()) {
+      auto const marked = arrprov::markTvShallow(*m_tv, legacy);
+      tvMove(marked, m_tv);
     }
   }
   ArrayData* operator->() { return m_ad; }

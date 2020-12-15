@@ -1,0 +1,254 @@
+
+==============================================================
+test(0, []):
+  sort    (legacy: 0): []
+  asort   (legacy: 0): {}
+  ksort   (legacy: 0): []
+  rsort   (legacy: 0): []
+  arsort  (legacy: 0): {}
+  krsort  (legacy: 0): {}
+  clear   (legacy: 0): []
+  pop     (legacy: 0): []
+  push    (legacy: 0): [null]
+  shift   (legacy: 0): []
+  unshift (legacy: 0): [null]
+  splice  (legacy: 0): {}
+
+==============================================================
+test(0, [17]):
+  sort    (legacy: 0): [17]
+  asort   (legacy: 0): {"0":17}
+  ksort   (legacy: 0): [17]
+  rsort   (legacy: 0): [17]
+  arsort  (legacy: 0): {"0":17}
+  krsort  (legacy: 0): {"0":17}
+  clear   (legacy: 0): []
+  pop     (legacy: 0): []
+  push    (legacy: 0): [17,null]
+  shift   (legacy: 0): []
+  unshift (legacy: 0): [null,17]
+  splice  (legacy: 0): {"0":17}
+
+==============================================================
+test(0, [4,5,6]):
+  sort    (legacy: 0): [4,5,6]
+  asort   (legacy: 0): {"0":4,"1":5,"2":6}
+  ksort   (legacy: 0): [4,5,6]
+  rsort   (legacy: 0): [6,5,4]
+  arsort  (legacy: 0): {"2":6,"1":5,"0":4}
+  krsort  (legacy: 0): {"2":6,"1":5,"0":4}
+  clear   (legacy: 0): []
+  pop     (legacy: 0): [4,5]
+  push    (legacy: 0): [4,5,6,null]
+  shift   (legacy: 0): [5,6]
+  unshift (legacy: 0): [null,4,5,6]
+  splice  (legacy: 0): {"0":4,"1":6}
+
+==============================================================
+test(0, [4,6,5]):
+  sort    (legacy: 0): [4,5,6]
+  asort   (legacy: 0): {"0":4,"2":5,"1":6}
+  ksort   (legacy: 0): [4,6,5]
+  rsort   (legacy: 0): [6,5,4]
+  arsort  (legacy: 0): {"1":6,"2":5,"0":4}
+  krsort  (legacy: 0): {"2":5,"1":6,"0":4}
+  clear   (legacy: 0): []
+  pop     (legacy: 0): [4,6]
+  push    (legacy: 0): [4,6,5,null]
+  shift   (legacy: 0): [6,5]
+  unshift (legacy: 0): [null,4,6,5]
+  splice  (legacy: 0): {"0":4,"1":5}
+
+==============================================================
+test(0, {}):
+  sort    (legacy: 0): {}
+  asort   (legacy: 0): {}
+  ksort   (legacy: 0): {}
+  rsort   (legacy: 0): {}
+  arsort  (legacy: 0): {}
+  krsort  (legacy: 0): {}
+  clear   (legacy: 0): {}
+  pop     (legacy: 0): {}
+  push    (legacy: 0): {"0":null}
+  shift   (legacy: 0): {}
+  unshift (legacy: 0): {"0":null}
+  splice  (legacy: 0): {}
+
+==============================================================
+test(0, {"a":17}):
+  sort    (legacy: 0): {"0":17}
+  asort   (legacy: 0): {"a":17}
+  ksort   (legacy: 0): {"a":17}
+  rsort   (legacy: 0): {"0":17}
+  arsort  (legacy: 0): {"a":17}
+  krsort  (legacy: 0): {"a":17}
+  clear   (legacy: 0): {}
+  pop     (legacy: 0): {}
+  push    (legacy: 0): {"a":17,"0":null}
+  shift   (legacy: 0): {}
+  unshift (legacy: 0): {"0":null,"a":17}
+  splice  (legacy: 0): {"a":17}
+
+==============================================================
+test(0, {"a":17,"b":34,"c":51}):
+  sort    (legacy: 0): {"0":17,"1":34,"2":51}
+  asort   (legacy: 0): {"a":17,"b":34,"c":51}
+  ksort   (legacy: 0): {"a":17,"b":34,"c":51}
+  rsort   (legacy: 0): {"0":51,"1":34,"2":17}
+  arsort  (legacy: 0): {"c":51,"b":34,"a":17}
+  krsort  (legacy: 0): {"c":51,"b":34,"a":17}
+  clear   (legacy: 0): {}
+  pop     (legacy: 0): {"a":17,"b":34}
+  push    (legacy: 0): {"a":17,"b":34,"c":51,"0":null}
+  shift   (legacy: 0): {"b":34,"c":51}
+  unshift (legacy: 0): {"0":null,"a":17,"b":34,"c":51}
+  splice  (legacy: 0): {"a":17,"c":51}
+
+==============================================================
+test(0, {"a":17,"c":51,"b":34}):
+  sort    (legacy: 0): {"0":17,"1":34,"2":51}
+  asort   (legacy: 0): {"a":17,"b":34,"c":51}
+  ksort   (legacy: 0): {"a":17,"b":34,"c":51}
+  rsort   (legacy: 0): {"0":51,"1":34,"2":17}
+  arsort  (legacy: 0): {"c":51,"b":34,"a":17}
+  krsort  (legacy: 0): {"c":51,"b":34,"a":17}
+  clear   (legacy: 0): {}
+  pop     (legacy: 0): {"a":17,"c":51}
+  push    (legacy: 0): {"a":17,"c":51,"b":34,"0":null}
+  shift   (legacy: 0): {"c":51,"b":34}
+  unshift (legacy: 0): {"0":null,"a":17,"c":51,"b":34}
+  splice  (legacy: 0): {"a":17,"b":34}
+
+==============================================================
+test(1, []):
+  sort    (legacy: 1): []
+  asort   (legacy: 1): {}
+  ksort   (legacy: 1): []
+  rsort   (legacy: 1): []
+  arsort  (legacy: 1): {}
+  krsort  (legacy: 1): {}
+  clear   (legacy: 1): []
+  pop     (legacy: 1): []
+  push    (legacy: 1): [null]
+  shift   (legacy: 1): []
+  unshift (legacy: 1): [null]
+  splice  (legacy: 1): {}
+
+==============================================================
+test(1, [17]):
+  sort    (legacy: 1): [17]
+  asort   (legacy: 1): {"0":17}
+  ksort   (legacy: 1): [17]
+  rsort   (legacy: 1): [17]
+  arsort  (legacy: 1): {"0":17}
+  krsort  (legacy: 1): {"0":17}
+  clear   (legacy: 1): []
+  pop     (legacy: 1): []
+  push    (legacy: 1): [17,null]
+  shift   (legacy: 1): []
+  unshift (legacy: 1): [null,17]
+  splice  (legacy: 1): {"0":17}
+
+==============================================================
+test(1, [4,5,6]):
+  sort    (legacy: 1): [4,5,6]
+  asort   (legacy: 1): {"0":4,"1":5,"2":6}
+  ksort   (legacy: 1): [4,5,6]
+  rsort   (legacy: 1): [6,5,4]
+  arsort  (legacy: 1): {"2":6,"1":5,"0":4}
+  krsort  (legacy: 1): {"2":6,"1":5,"0":4}
+  clear   (legacy: 1): []
+  pop     (legacy: 1): [4,5]
+  push    (legacy: 1): [4,5,6,null]
+  shift   (legacy: 1): [5,6]
+  unshift (legacy: 1): [null,4,5,6]
+  splice  (legacy: 1): {"0":4,"1":6}
+
+==============================================================
+test(1, [4,6,5]):
+  sort    (legacy: 1): [4,5,6]
+  asort   (legacy: 1): {"0":4,"2":5,"1":6}
+  ksort   (legacy: 1): [4,6,5]
+  rsort   (legacy: 1): [6,5,4]
+  arsort  (legacy: 1): {"1":6,"2":5,"0":4}
+  krsort  (legacy: 1): {"2":5,"1":6,"0":4}
+  clear   (legacy: 1): []
+  pop     (legacy: 1): [4,6]
+  push    (legacy: 1): [4,6,5,null]
+  shift   (legacy: 1): [6,5]
+  unshift (legacy: 1): [null,4,6,5]
+  splice  (legacy: 1): {"0":4,"1":5}
+
+==============================================================
+test(1, {}):
+  sort    (legacy: 1): {}
+  asort   (legacy: 1): {}
+  ksort   (legacy: 1): {}
+  rsort   (legacy: 1): {}
+  arsort  (legacy: 1): {}
+  krsort  (legacy: 1): {}
+  clear   (legacy: 1): {}
+  pop     (legacy: 1): {}
+  push    (legacy: 1): {"0":null}
+  shift   (legacy: 1): {}
+  unshift (legacy: 1): {"0":null}
+  splice  (legacy: 1): {}
+
+==============================================================
+test(1, {"a":17}):
+  sort    (legacy: 1): {"0":17}
+  asort   (legacy: 1): {"a":17}
+  ksort   (legacy: 1): {"a":17}
+  rsort   (legacy: 1): {"0":17}
+  arsort  (legacy: 1): {"a":17}
+  krsort  (legacy: 1): {"a":17}
+  clear   (legacy: 1): {}
+  pop     (legacy: 1): {}
+  push    (legacy: 1): {"a":17,"0":null}
+  shift   (legacy: 1): {}
+  unshift (legacy: 1): {"0":null,"a":17}
+  splice  (legacy: 1): {"a":17}
+
+==============================================================
+test(1, {"a":17,"b":34,"c":51}):
+  sort    (legacy: 1): {"0":17,"1":34,"2":51}
+  asort   (legacy: 1): {"a":17,"b":34,"c":51}
+  ksort   (legacy: 1): {"a":17,"b":34,"c":51}
+  rsort   (legacy: 1): {"0":51,"1":34,"2":17}
+  arsort  (legacy: 1): {"c":51,"b":34,"a":17}
+  krsort  (legacy: 1): {"c":51,"b":34,"a":17}
+  clear   (legacy: 1): {}
+  pop     (legacy: 1): {"a":17,"b":34}
+  push    (legacy: 1): {"a":17,"b":34,"c":51,"0":null}
+  shift   (legacy: 1): {"b":34,"c":51}
+  unshift (legacy: 1): {"0":null,"a":17,"b":34,"c":51}
+  splice  (legacy: 1): {"a":17,"c":51}
+
+==============================================================
+test(1, {"a":17,"c":51,"b":34}):
+  sort    (legacy: 1): {"0":17,"1":34,"2":51}
+  asort   (legacy: 1): {"a":17,"b":34,"c":51}
+  ksort   (legacy: 1): {"a":17,"b":34,"c":51}
+  rsort   (legacy: 1): {"0":51,"1":34,"2":17}
+  arsort  (legacy: 1): {"c":51,"b":34,"a":17}
+  krsort  (legacy: 1): {"c":51,"b":34,"a":17}
+  clear   (legacy: 1): {}
+  pop     (legacy: 1): {"a":17,"c":51}
+  push    (legacy: 1): {"a":17,"c":51,"b":34,"0":null}
+  shift   (legacy: 1): {"c":51,"b":34}
+  unshift (legacy: 1): {"0":null,"a":17,"c":51,"b":34}
+  splice  (legacy: 1): {"a":17,"b":34}
+
+==============================================================
+test_multisort([], {}):
+  [0,0] => [0,0]: [], {}
+  [0,1] => [0,1]: [], {}
+  [1,0] => [1,0]: [], {}
+  [1,1] => [1,1]: [], {}
+
+==============================================================
+test_multisort([5,4], {"b":34,"a":17}):
+  [0,0] => [0,0]: {"0":4,"1":5}, {"a":17,"b":34}
+  [0,1] => [0,1]: {"0":4,"1":5}, {"a":17,"b":34}
+  [1,0] => [1,0]: {"0":4,"1":5}, {"a":17,"b":34}
+  [1,1] => [1,1]: {"0":4,"1":5}, {"a":17,"b":34}

@@ -2097,6 +2097,7 @@ where
                     Token(_) => mk_name_lid(n, e),
                     _ => Self::missing_syntax("use variable", n, e),
                 };
+                let (cap, unsafe_cap) = Self::p_capability(&c.ctx_list, env)?;
                 let p_use = |n: S<'a, T, V>, e: &mut Env<'a, TF>| match &n.children {
                     AnonymousFunctionUseClause(c) => Self::could_map(p_arg, &c.variables, e),
                     _ => Ok(vec![]),
@@ -2127,8 +2128,8 @@ where
                     fun_kind: Self::mk_fun_kind(suspension_kind, yield_),
                     variadic: Self::determine_variadicity(&params),
                     params,
-                    cap: ast::TypeHint((), None), // TODO(T70095684)
-                    unsafe_cap: ast::TypeHint((), None), // TODO(T70095684)
+                    cap: ast::TypeHint((), cap),
+                    unsafe_cap: ast::TypeHint((), unsafe_cap),
                     user_attributes,
                     file_attributes: vec![],
                     external,

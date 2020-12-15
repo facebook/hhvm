@@ -1381,6 +1381,7 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           anonymous_left_paren = lp;
           anonymous_parameters = params;
           anonymous_right_paren = rp;
+          anonymous_ctx_list = ctx_list;
           anonymous_colon = colon;
           anonymous_type = ret_type;
           anonymous_use = use;
@@ -1395,7 +1396,14 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           t env async_kw;
           when_present async_kw space;
           t env fun_kw;
-          transform_argish_with_return_type env lp params rp colon ret_type;
+          transform_argish_with_return_type
+            env
+            lp
+            params
+            rp
+            ctx_list
+            colon
+            ret_type;
           t env use;
           handle_possible_compound_statement
             env
@@ -2905,12 +2913,14 @@ and transform_fn_decl_args env params rightp =
       Concat [transform_possible_comma_list env ~allow_trailing params rightp]
     )
 
-and transform_argish_with_return_type env left_p params right_p colon ret_type =
+and transform_argish_with_return_type
+    env left_p params right_p ctx_list colon ret_type =
   Concat
     [
       t env left_p;
       when_present params split;
       transform_fn_decl_args env params right_p;
+      t env ctx_list;
       t env colon;
       when_present colon space;
       t env ret_type;

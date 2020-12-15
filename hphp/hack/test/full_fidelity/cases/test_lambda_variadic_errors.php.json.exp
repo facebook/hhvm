@@ -1234,6 +1234,7 @@
                         "line_number":11
                       }
                     },
+                    "anonymous_ctx_list":{"kind":"missing"},
                     "anonymous_colon":{
                       "kind":"token",
                       "token":{
@@ -1521,6 +1522,7 @@
                         "line_number":13
                       }
                     },
+                    "anonymous_ctx_list":{"kind":"missing"},
                     "anonymous_colon":{
                       "kind":"token",
                       "token":{
@@ -1788,6 +1790,7 @@
                         "line_number":15
                       }
                     },
+                    "anonymous_ctx_list":{"kind":"missing"},
                     "anonymous_colon":{
                       "kind":"token",
                       "token":{
@@ -2283,6 +2286,7 @@
                         "line_number":19
                       }
                     },
+                    "anonymous_ctx_list":{"kind":"missing"},
                     "anonymous_colon":{
                       "kind":"token",
                       "token":{
@@ -2403,5 +2407,5 @@
     }
   },
   "program_text":"<?hh\n\nfoo((...$x, $y) ==> {});\n\nfoo((int ...$x, int $y) ==> {});\n\nfoo((..., $y) ==> {});\n\nfoo((int ...$x,) ==> {});\n\nfoo(function (int ...$x, int $y): void {});\n\nfoo(function (...$x, int $y): void {});\n\nfoo(function (..., int $y): void {});\n\nfoo((inout int ...$x) ==> {});\n\nfoo(function (inout int ...$x): void {});\n",
-  "version":"2020-09-14-0000"
+  "version":"2020-12-09-0001"
 }

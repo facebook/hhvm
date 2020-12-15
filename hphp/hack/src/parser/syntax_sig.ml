@@ -542,6 +542,7 @@ module type Syntax_S = sig
     ; anonymous_left_paren                               : t
     ; anonymous_parameters                               : t
     ; anonymous_right_paren                              : t
+    ; anonymous_ctx_list                                 : t
     ; anonymous_colon                                    : t
     ; anonymous_type                                     : t
     ; anonymous_use                                      : t
@@ -1129,7 +1130,7 @@ module type Syntax_S = sig
   val make_concurrent_statement : t -> t -> t
   val make_simple_initializer : t -> t -> t
   val make_anonymous_class : t -> t -> t -> t -> t -> t -> t -> t -> t -> t
-  val make_anonymous_function : t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t
+  val make_anonymous_function : t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t
   val make_anonymous_function_use_clause : t -> t -> t -> t -> t
   val make_lambda_expression : t -> t -> t -> t -> t -> t
   val make_lambda_signature : t -> t -> t -> t -> t -> t -> t

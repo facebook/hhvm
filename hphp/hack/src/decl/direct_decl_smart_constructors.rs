@@ -2419,6 +2419,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         _left_paren: Self::R,
         _parameters: Self::R,
         _right_paren: Self::R,
+        _ctx_list: Self::R,
         _colon: Self::R,
         _type_: Self::R,
         _use_: Self::R,

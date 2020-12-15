@@ -872,6 +872,7 @@ pub struct AnonymousFunctionChildren<'a, T, V> {
     pub left_paren: Syntax<'a, T, V>,
     pub parameters: Syntax<'a, T, V>,
     pub right_paren: Syntax<'a, T, V>,
+    pub ctx_list: Syntax<'a, T, V>,
     pub colon: Syntax<'a, T, V>,
     pub type_: Syntax<'a, T, V>,
     pub use_: Syntax<'a, T, V>,

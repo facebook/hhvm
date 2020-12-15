@@ -938,7 +938,7 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_anonymous_function(_: &C, anonymous_attribute_spec: Self, anonymous_static_keyword: Self, anonymous_async_keyword: Self, anonymous_function_keyword: Self, anonymous_left_paren: Self, anonymous_parameters: Self, anonymous_right_paren: Self, anonymous_colon: Self, anonymous_type: Self, anonymous_use: Self, anonymous_body: Self) -> Self {
+    fn make_anonymous_function(_: &C, anonymous_attribute_spec: Self, anonymous_static_keyword: Self, anonymous_async_keyword: Self, anonymous_function_keyword: Self, anonymous_left_paren: Self, anonymous_parameters: Self, anonymous_right_paren: Self, anonymous_ctx_list: Self, anonymous_colon: Self, anonymous_type: Self, anonymous_use: Self, anonymous_body: Self) -> Self {
         let syntax = SyntaxVariant::AnonymousFunction(Box::new(AnonymousFunctionChildren {
             anonymous_attribute_spec,
             anonymous_static_keyword,
@@ -947,6 +947,7 @@ where
             anonymous_left_paren,
             anonymous_parameters,
             anonymous_right_paren,
+            anonymous_ctx_list,
             anonymous_colon,
             anonymous_type,
             anonymous_use,
@@ -2534,7 +2535,7 @@ where
                 acc
             },
             SyntaxVariant::AnonymousFunction(x) => {
-                let AnonymousFunctionChildren { anonymous_attribute_spec, anonymous_static_keyword, anonymous_async_keyword, anonymous_function_keyword, anonymous_left_paren, anonymous_parameters, anonymous_right_paren, anonymous_colon, anonymous_type, anonymous_use, anonymous_body } = *x;
+                let AnonymousFunctionChildren { anonymous_attribute_spec, anonymous_static_keyword, anonymous_async_keyword, anonymous_function_keyword, anonymous_left_paren, anonymous_parameters, anonymous_right_paren, anonymous_ctx_list, anonymous_colon, anonymous_type, anonymous_use, anonymous_body } = *x;
                 let acc = f(anonymous_attribute_spec, acc);
                 let acc = f(anonymous_static_keyword, acc);
                 let acc = f(anonymous_async_keyword, acc);
@@ -2542,6 +2543,7 @@ where
                 let acc = f(anonymous_left_paren, acc);
                 let acc = f(anonymous_parameters, acc);
                 let acc = f(anonymous_right_paren, acc);
+                let acc = f(anonymous_ctx_list, acc);
                 let acc = f(anonymous_colon, acc);
                 let acc = f(anonymous_type, acc);
                 let acc = f(anonymous_use, acc);
@@ -3951,11 +3953,12 @@ where
                  anonymous_class_class_keyword: ts.pop().unwrap(),
                  
              })),
-             (SyntaxKind::AnonymousFunction, 11) => SyntaxVariant::AnonymousFunction(Box::new(AnonymousFunctionChildren {
+             (SyntaxKind::AnonymousFunction, 12) => SyntaxVariant::AnonymousFunction(Box::new(AnonymousFunctionChildren {
                  anonymous_body: ts.pop().unwrap(),
                  anonymous_use: ts.pop().unwrap(),
                  anonymous_type: ts.pop().unwrap(),
                  anonymous_colon: ts.pop().unwrap(),
+                 anonymous_ctx_list: ts.pop().unwrap(),
                  anonymous_right_paren: ts.pop().unwrap(),
                  anonymous_parameters: ts.pop().unwrap(),
                  anonymous_left_paren: ts.pop().unwrap(),
@@ -5195,6 +5198,7 @@ pub struct AnonymousFunctionChildren<T, V> {
     pub anonymous_left_paren: Syntax<T, V>,
     pub anonymous_parameters: Syntax<T, V>,
     pub anonymous_right_paren: Syntax<T, V>,
+    pub anonymous_ctx_list: Syntax<T, V>,
     pub anonymous_colon: Syntax<T, V>,
     pub anonymous_type: Syntax<T, V>,
     pub anonymous_use: Syntax<T, V>,
@@ -6863,7 +6867,7 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 })
             },
             AnonymousFunction(x) => {
-                get_index(11).and_then(|index| { match index {
+                get_index(12).and_then(|index| { match index {
                         0 => Some(&x.anonymous_attribute_spec),
                     1 => Some(&x.anonymous_static_keyword),
                     2 => Some(&x.anonymous_async_keyword),
@@ -6871,10 +6875,11 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                     4 => Some(&x.anonymous_left_paren),
                     5 => Some(&x.anonymous_parameters),
                     6 => Some(&x.anonymous_right_paren),
-                    7 => Some(&x.anonymous_colon),
-                    8 => Some(&x.anonymous_type),
-                    9 => Some(&x.anonymous_use),
-                    10 => Some(&x.anonymous_body),
+                    7 => Some(&x.anonymous_ctx_list),
+                    8 => Some(&x.anonymous_colon),
+                    9 => Some(&x.anonymous_type),
+                    10 => Some(&x.anonymous_use),
+                    11 => Some(&x.anonymous_body),
                         _ => None,
                     }
                 })

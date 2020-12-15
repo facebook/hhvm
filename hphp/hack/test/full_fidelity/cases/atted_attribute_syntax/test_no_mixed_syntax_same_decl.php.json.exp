@@ -185,6 +185,7 @@
                   "line_number":6
                 }
               },
+              "anonymous_ctx_list":{"kind":"missing"},
               "anonymous_colon":{
                 "kind":"token",
                 "token":{
@@ -274,5 +275,5 @@
     }
   },
   "program_text":"<?hh\n\n@Attr1\n@Attr2\n<<Attr3, Attr4>>\nfunction f(): void {}\n",
-  "version":"2020-10-15-0001"
+  "version":"2020-12-09-0001"
 }

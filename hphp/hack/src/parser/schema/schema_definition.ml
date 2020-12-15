@@ -1203,6 +1203,7 @@ let schema : schema_node list =
           ("left_paren", Token);
           ("parameters", ZeroOrMore (Aggregate Parameter));
           ("right_paren", Token);
+          ("ctx_list", ZeroOrOne (Just "Capability"));
           ("colon", ZeroOrOne Token);
           ("type", ZeroOrOne (Aggregate Specifier));
           ("use", ZeroOrOne (Just "AnonymousFunctionUseClause"));

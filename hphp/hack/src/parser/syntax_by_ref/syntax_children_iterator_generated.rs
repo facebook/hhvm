@@ -874,7 +874,7 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 })
             },
             AnonymousFunction(x) => {
-                get_index(11).and_then(|index| { match index {
+                get_index(12).and_then(|index| { match index {
                         0 => Some(&x.attribute_spec),
                     1 => Some(&x.static_keyword),
                     2 => Some(&x.async_keyword),
@@ -882,10 +882,11 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                     4 => Some(&x.left_paren),
                     5 => Some(&x.parameters),
                     6 => Some(&x.right_paren),
-                    7 => Some(&x.colon),
-                    8 => Some(&x.type_),
-                    9 => Some(&x.use_),
-                    10 => Some(&x.body),
+                    7 => Some(&x.ctx_list),
+                    8 => Some(&x.colon),
+                    9 => Some(&x.type_),
+                    10 => Some(&x.use_),
+                    11 => Some(&x.body),
                         _ => None,
                     }
                 })

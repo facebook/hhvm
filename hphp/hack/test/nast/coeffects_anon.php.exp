@@ -1,0 +1,167 @@
+[(Fun
+    { f_span = [4:1-10:2]; f_annotation = (); f_mode = Mstrict;
+      f_ret = ((), (Some ([4:33-37], (Hprim Tvoid))));
+      f_name = ([4:10-29], "\\anons_with_ctx_list"); f_tparams = [];
+      f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
+      f_cap = ((), None); f_unsafe_cap = ((), None);
+      f_body =
+      { fb_ast =
+        [([5:3-63],
+          (Expr
+             ([5:3-62],
+              (Binop ((Eq None), ([5:3-15], (Lvar ([5:3-15], $anon_no_use))),
+                 ([5:18-62],
+                  (Efun (
+                     { f_span = [5:18-62]; f_annotation = ();
+                       f_mode = Mstrict;
+                       f_ret = ((), (Some ([5:38-41], (Hprim Tint))));
+                       f_name = ([5:18-62], ";anonymous"); f_tparams = [];
+                       f_where_constraints = []; f_variadic = FVnonVariadic;
+                       f_params = [];
+                       f_cap =
+                       ((),
+                        (Some ([5:28-36],
+                               (Happly (
+                                  ([5:29-35], "\\HH\\Contexts\\output"), 
+                                  [])))));
+                       f_unsafe_cap =
+                       ((),
+                        (Some ([5:28-36],
+                               (Happly (
+                                  ([5:29-35],
+                                   "\\HH\\Contexts\\Unsafe\\output"),
+                                  [])))));
+                       f_body =
+                       { fb_ast =
+                         [([5:51-60], (Return (Some ([5:58-59], (Int "0")))))
+                           ];
+                         fb_annotation = Named };
+                       f_fun_kind = FSync; f_user_attributes = [];
+                       f_file_attributes = []; f_external = false;
+                       f_namespace =
+                       { Namespace_env.ns_ns_uses = <opaque>;
+                         ns_class_uses = <opaque>;
+                         ns_record_def_uses = <opaque>;
+                         ns_fun_uses = <opaque>; ns_const_uses = <opaque>;
+                         ns_name = None; ns_auto_ns_map = [];
+                         ns_is_codegen = false;
+                         ns_disable_xhp_element_mangling = false };
+                       f_doc_comment = None; f_static = false },
+                     [])))
+                 )))));
+          ([7:3-10],
+           (Expr
+              ([7:3-9],
+               (Binop ((Eq None), ([7:3-5], (Lvar ([7:3-5], $x))),
+                  ([7:8-9], (Int "1")))))));
+          ([8:3-64],
+           (Expr
+              ([8:3-63],
+               (Binop ((Eq None),
+                  ([8:3-15], (Lvar ([8:3-15], $anon_no_ret))),
+                  ([8:18-63],
+                   (Efun (
+                      { f_span = [8:18-63]; f_annotation = ();
+                        f_mode = Mstrict; f_ret = ((), None);
+                        f_name = ([8:18-63], ";anonymous"); f_tparams = [];
+                        f_where_constraints = []; f_variadic = FVnonVariadic;
+                        f_params = [];
+                        f_cap =
+                        ((),
+                         (Some ([8:28-37],
+                                (Happly (
+                                   ([8:29-36], "\\HH\\Contexts\\non_det"), 
+                                   [])))));
+                        f_unsafe_cap =
+                        ((),
+                         (Some ([8:28-37],
+                                (Happly (
+                                   ([8:29-36],
+                                    "\\HH\\Contexts\\Unsafe\\non_det"),
+                                   [])))));
+                        f_body =
+                        { fb_ast =
+                          [([8:51-61],
+                            (Return
+                               (Some ([8:58-60], (Lvar ([8:58-60], $x))))))
+                            ];
+                          fb_annotation = Named };
+                        f_fun_kind = FSync; f_user_attributes = [];
+                        f_file_attributes = []; f_external = false;
+                        f_namespace =
+                        { Namespace_env.ns_ns_uses = <opaque>;
+                          ns_class_uses = <opaque>;
+                          ns_record_def_uses = <opaque>;
+                          ns_fun_uses = <opaque>; ns_const_uses = <opaque>;
+                          ns_name = None; ns_auto_ns_map = [];
+                          ns_is_codegen = false;
+                          ns_disable_xhp_element_mangling = false };
+                        f_doc_comment = None; f_static = false },
+                      [([8:43-47], $ret)])))
+                  )))));
+          ([9:3-57],
+           (Expr
+              ([9:3-56],
+               (Binop ((Eq None), ([9:3-8], (Lvar ([9:3-8], $anon))),
+                  ([9:11-56],
+                   (Efun (
+                      { f_span = [9:11-56]; f_annotation = ();
+                        f_mode = Mstrict;
+                        f_ret = ((), (Some ([9:27-30], (Hprim Tint))));
+                        f_name = ([9:11-56], ";anonymous"); f_tparams = [];
+                        f_where_constraints = []; f_variadic = FVnonVariadic;
+                        f_params = [];
+                        f_cap =
+                        ((),
+                         (Some ([9:21-25],
+                                (Happly (([9:22-24], "\\HH\\Contexts\\rx"),
+                                   [])))));
+                        f_unsafe_cap =
+                        ((),
+                         (Some ([9:21-25],
+                                (Happly (
+                                   ([9:22-24], "\\HH\\Contexts\\Unsafe\\rx"),
+                                   [])))));
+                        f_body =
+                        { fb_ast =
+                          [([9:44-54],
+                            (Return
+                               (Some ([9:51-53], (Lvar ([9:51-53], $x))))))
+                            ];
+                          fb_annotation = Named };
+                        f_fun_kind = FSync; f_user_attributes = [];
+                        f_file_attributes = []; f_external = false;
+                        f_namespace =
+                        { Namespace_env.ns_ns_uses = <opaque>;
+                          ns_class_uses = <opaque>;
+                          ns_record_def_uses = <opaque>;
+                          ns_fun_uses = <opaque>; ns_const_uses = <opaque>;
+                          ns_name = None; ns_auto_ns_map = [];
+                          ns_is_codegen = false;
+                          ns_disable_xhp_element_mangling = false };
+                        f_doc_comment = None; f_static = false },
+                      [([9:36-40], $ret)])))
+                  )))))
+          ];
+        fb_annotation = Named };
+      f_fun_kind = FSync; f_user_attributes = [];
+      f_file_attributes =
+      [{ fa_user_attributes =
+         [{ ua_name = ([2:9-33], "__EnableUnstableFeatures");
+            ua_params = [([2:34-57], (String "coeffects_provisional"))] }
+           ];
+         fa_namespace =
+         { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
+           ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;
+           ns_const_uses = <opaque>; ns_name = None; ns_auto_ns_map = [];
+           ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
+         }
+        ];
+      f_external = false;
+      f_namespace =
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
+        ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;
+        ns_const_uses = <opaque>; ns_name = None; ns_auto_ns_map = [];
+        ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+      f_doc_comment = None; f_static = false })
+  ]

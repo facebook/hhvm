@@ -2606,6 +2606,7 @@ where
         let async_ = self.optional_token(TokenKind::Async);
         let fn_ = self.assert_token(TokenKind::Function);
         let (left_paren, params, right_paren) = self.parse_parameter_list_opt();
+        let ctx_list = self.with_type_parser(|p| p.parse_capability_opt());
         let (colon, return_type) = self.parse_optional_return();
         let use_clause = self.parse_anon_use_opt();
         // Detect if the user has the type in the wrong place
@@ -2630,6 +2631,7 @@ where
             left_paren,
             params,
             right_paren,
+            ctx_list,
             colon,
             return_type,
             use_clause,

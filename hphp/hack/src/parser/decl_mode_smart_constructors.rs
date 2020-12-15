@@ -163,12 +163,27 @@ where
         r8: Self::R,
         r9: Self::R,
         r10: Self::R,
+        r11: Self::R,
         body: Self::R,
     ) -> Self::R {
         let saw_yield = self.state.pop_n(11);
         let body = replace_body(&mut self.token_factory, &mut self.state, body, saw_yield);
         self.state.push(false);
-        Self::R::make_anonymous_function(&self.state, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, body)
+        Self::R::make_anonymous_function(
+            &self.state,
+            r1,
+            r2,
+            r3,
+            r4,
+            r5,
+            r6,
+            r7,
+            r8,
+            r9,
+            r10,
+            r11,
+            body,
+        )
     }
 
     fn make_awaitable_creation_expression(

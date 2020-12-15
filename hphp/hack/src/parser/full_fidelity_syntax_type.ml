@@ -109,6 +109,7 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; anonymous_left_paren                               : t
     ; anonymous_parameters                               : t
     ; anonymous_right_paren                              : t
+    ; anonymous_ctx_list                                 : t
     ; anonymous_colon                                    : t
     ; anonymous_type                                     : t
     ; anonymous_use                                      : t
@@ -655,6 +656,7 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; anonymous_left_paren                               : t
     ; anonymous_parameters                               : t
     ; anonymous_right_paren                              : t
+    ; anonymous_ctx_list                                 : t
     ; anonymous_colon                                    : t
     ; anonymous_type                                     : t
     ; anonymous_use                                      : t
@@ -1905,6 +1907,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; anonymous_left_paren: Token.t value
     ; anonymous_parameters: parameter listesque value
     ; anonymous_right_paren: Token.t value
+    ; anonymous_ctx_list: capability option value
     ; anonymous_colon: Token.t option value
     ; anonymous_type: specifier option value
     ; anonymous_use: anonymous_function_use_clause option value

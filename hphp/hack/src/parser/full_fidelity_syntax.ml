@@ -1423,6 +1423,7 @@ module WithToken(Token: TokenType) = struct
         anonymous_left_paren;
         anonymous_parameters;
         anonymous_right_paren;
+        anonymous_ctx_list;
         anonymous_colon;
         anonymous_type;
         anonymous_use;
@@ -1435,6 +1436,7 @@ module WithToken(Token: TokenType) = struct
          let acc = f acc anonymous_left_paren in
          let acc = f acc anonymous_parameters in
          let acc = f acc anonymous_right_paren in
+         let acc = f acc anonymous_ctx_list in
          let acc = f acc anonymous_colon in
          let acc = f acc anonymous_type in
          let acc = f acc anonymous_use in
@@ -3224,6 +3226,7 @@ module WithToken(Token: TokenType) = struct
         anonymous_left_paren;
         anonymous_parameters;
         anonymous_right_paren;
+        anonymous_ctx_list;
         anonymous_colon;
         anonymous_type;
         anonymous_use;
@@ -3236,6 +3239,7 @@ module WithToken(Token: TokenType) = struct
         anonymous_left_paren;
         anonymous_parameters;
         anonymous_right_paren;
+        anonymous_ctx_list;
         anonymous_colon;
         anonymous_type;
         anonymous_use;
@@ -5026,6 +5030,7 @@ module WithToken(Token: TokenType) = struct
         anonymous_left_paren;
         anonymous_parameters;
         anonymous_right_paren;
+        anonymous_ctx_list;
         anonymous_colon;
         anonymous_type;
         anonymous_use;
@@ -5038,6 +5043,7 @@ module WithToken(Token: TokenType) = struct
         "anonymous_left_paren";
         "anonymous_parameters";
         "anonymous_right_paren";
+        "anonymous_ctx_list";
         "anonymous_colon";
         "anonymous_type";
         "anonymous_use";
@@ -6965,6 +6971,7 @@ module WithToken(Token: TokenType) = struct
           anonymous_left_paren;
           anonymous_parameters;
           anonymous_right_paren;
+          anonymous_ctx_list;
           anonymous_colon;
           anonymous_type;
           anonymous_use;
@@ -6978,6 +6985,7 @@ module WithToken(Token: TokenType) = struct
           anonymous_left_paren;
           anonymous_parameters;
           anonymous_right_paren;
+          anonymous_ctx_list;
           anonymous_colon;
           anonymous_type;
           anonymous_use;
@@ -9220,6 +9228,7 @@ module WithToken(Token: TokenType) = struct
         anonymous_left_paren
         anonymous_parameters
         anonymous_right_paren
+        anonymous_ctx_list
         anonymous_colon
         anonymous_type
         anonymous_use
@@ -9233,6 +9242,7 @@ module WithToken(Token: TokenType) = struct
           anonymous_left_paren;
           anonymous_parameters;
           anonymous_right_paren;
+          anonymous_ctx_list;
           anonymous_colon;
           anonymous_type;
           anonymous_use;
@@ -10479,6 +10489,7 @@ module WithToken(Token: TokenType) = struct
           anonymous_left_paren;
           anonymous_parameters;
           anonymous_right_paren;
+          anonymous_ctx_list;
           anonymous_colon;
           anonymous_type;
           anonymous_use;
@@ -10491,6 +10502,7 @@ module WithToken(Token: TokenType) = struct
           anonymous_left_paren;
           anonymous_parameters;
           anonymous_right_paren;
+          anonymous_ctx_list;
           anonymous_colon;
           anonymous_type;
           anonymous_use;
@@ -10611,6 +10623,7 @@ module WithToken(Token: TokenType) = struct
           anonymous_left_paren;
           anonymous_parameters;
           anonymous_right_paren;
+          anonymous_ctx_list;
           anonymous_colon;
           anonymous_type;
           anonymous_use;
@@ -10623,6 +10636,7 @@ module WithToken(Token: TokenType) = struct
           anonymous_left_paren;
           anonymous_parameters;
           anonymous_right_paren;
+          anonymous_ctx_list;
           anonymous_colon;
           anonymous_type;
           anonymous_use;

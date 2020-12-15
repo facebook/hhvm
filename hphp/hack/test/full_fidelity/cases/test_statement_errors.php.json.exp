@@ -983,6 +983,7 @@
                                   "line_number":10
                                 }
                               },
+                              "anonymous_ctx_list":{"kind":"missing"},
                               "anonymous_colon":{"kind":"missing"},
                               "anonymous_type":{"kind":"missing"},
                               "anonymous_use":{"kind":"missing"},

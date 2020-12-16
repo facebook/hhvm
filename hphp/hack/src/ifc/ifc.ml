@@ -860,9 +860,40 @@ let overwrite_nth_pty tuple_pty ix_exp pty =
 
    does not mutate an array cell, but the property p of
    the object $x instead.  *)
-let rec assign ?(use_pc = true) ~expr ~pos renv env lhs rhs_pty =
+let rec assign
+    ?(use_pc = true) ~expr ~pos renv env (((_, lhs_ty), _) as lhs) rhs_pty =
   match snd lhs with
   | A.Array_get ((((_, arry_ty), _) as arry_exp), ix_opt) ->
+    let handle_collection
+        env ~should_skip_exn old_array new_array key value length =
+      (* TODO(T68269878): track flows due to length changes *)
+      let env = Env.acc env (subtype ~pos old_array new_array) in
+
+      (* Evaluate the index *)
+      let (env, ix_pty_opt) =
+        match ix_opt with
+        | Some ix ->
+          let (env, ix_pty) = expr env ix in
+          (* The index flows to they key of the collection *)
+          let env = Env.acc env (subtype ~pos ix_pty key) in
+          (env, Some ix_pty)
+        | None -> (env, None)
+      in
+
+      (* Potentially raise `OutOfBoundsException` *)
+      let env =
+        match ix_pty_opt with
+        (* When there is no index, we add a new element, hence no exception. *)
+        | None -> env
+        (* Dictionaries don't throw on assignment, they register a new key. *)
+        | Some _ when should_skip_exn -> env
+        | Some ix_pty -> may_throw_out_of_bounds_exn ~pos renv env length ix_pty
+      in
+
+      (* Do the assignment *)
+      let env = Env.acc env (subtype ~pos rhs_pty value) in
+      (env, true)
+    in
     (* Evaluate the array *)
     let (env, old_arry_pty) = expr env arry_exp in
     let new_arry_pty = Lift.ty ~prefix:"arr" renv arry_ty in
@@ -873,7 +904,7 @@ let rec assign ?(use_pc = true) ~expr ~pos renv env lhs rhs_pty =
       array_like_with_default
         ~cow:true
         ~shape:true
-        ~klass:false
+        ~klass:true
         ~tuple:true
         ~pos
         renv
@@ -883,39 +914,15 @@ let rec assign ?(use_pc = true) ~expr ~pos renv env lhs rhs_pty =
     let (env, use_pc) =
       match new_arry_pty with
       | Tcow_array arry ->
-        (* TODO(T68269878): track flows due to length changes *)
-        (* Here we achieve two things:
-         * 1. CoW semantics by using a fresh array type that will be used from now on.
-         * 2. Account for the assignment destination type. This is the type the
-         *    LHS would receive _after_ the assignment.
-         *)
-        let env = Env.acc env (subtype ~pos old_arry_pty new_arry_pty) in
-
-        (* Evaluate the index *)
-        let (env, ix_pty_opt) =
-          match ix_opt with
-          | Some ix ->
-            let (env, ix_pty) = expr env ix in
-            (* The index flows to they key of the array *)
-            let env = Env.acc env (subtype ~pos ix_pty arry.a_key) in
-            (env, Some ix_pty)
-          | None -> (env, None)
-        in
-
-        (* Potentially raise `OutOfBoundsException` *)
-        let env =
-          match ix_pty_opt with
-          (* When there is no index, we add a new element, hence no exception. *)
-          | None -> env
-          (* Dictionaries don't throw on assignment, they register a new key. *)
-          | Some _ when equal_array_kind arry.a_kind Adict -> env
-          | Some ix_pty ->
-            may_throw_out_of_bounds_exn ~pos renv env arry.a_length ix_pty
-        in
-
-        (* Do the assignment *)
-        let env = Env.acc env (subtype ~pos rhs_pty arry.a_value) in
-        (env, true)
+        let should_skip_exn = equal_array_kind arry.a_kind Adict in
+        handle_collection
+          env
+          ~should_skip_exn
+          old_arry_pty
+          new_arry_pty
+          arry.a_key
+          arry.a_value
+          arry.a_length
       | Tshape { sh_kind; sh_fields } ->
         begin
           match Option.(ix_opt >>= shape_field_name renv) with
@@ -949,6 +956,22 @@ let rec assign ?(use_pc = true) ~expr ~pos renv env lhs rhs_pty =
         let tuple_pty = overwrite_nth_pty old_arry_pty ix rhs_pty in
         let env = Env.acc env (subtype ~pos tuple_pty new_arry_pty) in
         (env, true)
+      | Tclass { c_name; c_lump; c_self } ->
+        let should_skip_exn = String.equal c_name "\\HH\\Map" in
+        (* The key is an arraykey so it will always be a Tprim *)
+        let key_pty = Tprim c_lump in
+        let env = Env.acc env (add_dependencies ~pos [c_self] key_pty) in
+        (* The value is constructed as if a property access is made *)
+        let value_pty = Lift.ty ~lump:c_lump renv lhs_ty in
+        let env = Env.acc env (add_dependencies ~pos [c_self] value_pty) in
+        handle_collection
+          env
+          ~should_skip_exn
+          old_arry_pty
+          new_arry_pty
+          key_pty
+          value_pty
+          c_lump
       | _ -> fail "the default type for array assignment is not handled"
     in
 

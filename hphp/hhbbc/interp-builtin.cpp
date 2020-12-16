@@ -425,8 +425,8 @@ TypeOrReduced builtin_shapes_idx(ISS& env, const php::Func* func,
   auto const unoptKey = is_opt(key) ? unopt(key) : key;
 
   auto elem = RuntimeOption::EvalHackArrDVArrs
-    ? dict_elem(unoptBase, unoptKey, def)
-    : array_elem(unoptBase, unoptKey, def);
+    ? dictish_elem(unoptBase, unoptKey, def)
+    : array_like_elem(unoptBase, unoptKey, def, true);
   switch (elem.second) {
     case ThrowMode::None:
     case ThrowMode::MaybeMissingElement:

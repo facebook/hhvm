@@ -129,6 +129,18 @@ struct RepoAuthType {
     TAG(OptSKeyset)                               \
     TAG(Keyset)                                   \
     TAG(OptKeyset)                                \
+    TAG(SVecish)                                  \
+    TAG(OptSVecish)                               \
+    TAG(Vecish)                                   \
+    TAG(OptVecish)                                \
+    TAG(SDictish)                                 \
+    TAG(OptSDictish)                              \
+    TAG(Dictish)                                  \
+    TAG(OptDictish)                               \
+    TAG(SArrLike)                                 \
+    TAG(OptSArrLike)                              \
+    TAG(ArrLike)                                  \
+    TAG(OptArrLike)                               \
     /* Types where clsName() will be non-null. */ \
     TAG(ExactObj)                                 \
     TAG(SubObj)                                   \
@@ -248,8 +260,14 @@ struct RepoAuthType {
     case Tag::OptDict: case Tag::OptSDict: case Tag::Dict: case Tag::SDict:
     case Tag::OptKeyset: case Tag::OptSKeyset:
     case Tag::Keyset:    case Tag::SKeyset:
-    case Tag::ArrCompat:  case Tag::OptArrCompat:
-    case Tag::VecCompat:   case Tag::OptVecCompat:
+    case Tag::ArrCompat: case Tag::OptArrCompat:
+    case Tag::VecCompat: case Tag::OptVecCompat:
+    case Tag::OptVecish: case Tag::OptSVecish:
+    case Tag::Vecish:    case Tag::SVecish:
+    case Tag::OptDictish: case Tag::OptSDictish:
+    case Tag::Dictish:    case Tag::SDictish:
+    case Tag::OptArrLike: case Tag::OptSArrLike:
+    case Tag::ArrLike:    case Tag::SArrLike:
       return true;
     default:
       return false;
@@ -393,4 +411,3 @@ std::string show(RepoAuthType);
 //////////////////////////////////////////////////////////////////////
 
 }
-

@@ -172,8 +172,13 @@ folly::Optional<std::pair<Type, TriBool>> array_do_elem(ISS& env,
       case ThrowMode::BadOperation:
         // isset($a["abc"]) does not throw if $a is a vec, so we need to be
         // conservative here.
-        if (nullOnMissing && base.couldBe(BVec) && key.couldBe(TStr)) {
-          elem.first |= TInitNull;
+        if (nullOnMissing) {
+          if (base.couldBe(BVecish) && key.couldBe(BStr)) {
+            elem.first |= TInitNull;
+            if (base.subtypeOf(BOptVecish) && key.subtypeOf(BStr)) {
+              return TriBool::No;
+            }
+          }
         }
         return TriBool::Maybe;
     }
@@ -548,7 +553,7 @@ LocalId key_local(ISS& env, Op op) {
 Promotion handleElemUDBasePromos(ISS& env) {
   auto& base = env.collect.mInstrState.base.type;
   Promotion promotion;
-  std::tie(base, promotion) = promote_clsmeth_to_veclike(std::move(base));
+  std::tie(base, promotion) = promote_clsmeth_to_vecish(std::move(base));
   return promotion;
 }
 
@@ -1436,7 +1441,7 @@ Effects miFinalUnsetElem(ISS& env, int32_t nDiscard, const Type& key) {
 
   // Special case for varray or vec with string keys. These silently
   // do nothing.
-  if (base.subtypeOf(BOptVec | BOptVArr)) {
+  if (base.subtypeOf(BOptVecish)) {
     if (key.subtypeOf(BStr)) return end(false, Effects::None);
   }
 
@@ -1445,8 +1450,8 @@ Effects miFinalUnsetElem(ISS& env, int32_t nDiscard, const Type& key) {
   // nothing for string keys, but can throw with int keys.
   auto const noThrow = base.subtypeOf(
     doesNothing |
-    (key.subtypeOf(BArrKey) ? (BDict | BDArr | BKeyset) : BBottom) |
-    (key.subtypeOf(BStr) ? (BVec | BVArr) : BBottom)
+    (key.subtypeOf(BArrKey) ? (BDictish | BKeyset) : BBottom) |
+    (key.subtypeOf(BStr) ? BVecish : BBottom)
   );
 
   // We purposefully do not model the effects of unset on array

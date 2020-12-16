@@ -288,6 +288,26 @@ enum trep : uint64_t {
   BKeysetN  = BSKeysetN | BCKeysetN,
   BKeyset   = BKeysetE | BKeysetN,
 
+  BSVecishE = BSVecE | BSVArrE,
+  BCVecishE = BCVecE | BCVArrE,
+  BSVecishN = BSVecN | BSVArrN,
+  BCVecishN = BCVecN | BCVArrN,
+  BSVecish = BSVecishE | BSVecishN,
+  BCVecish = BCVecishE | BCVecishN,
+  BVecishE = BSVecishE | BCVecishE,
+  BVecishN = BSVecishN | BCVecishN,
+  BVecish  = BSVecish | BCVecish,
+
+  BSDictishE = BSDictE | BSDArrE,
+  BCDictishE = BCDictE | BCDArrE,
+  BSDictishN = BSDictN | BSDArrN,
+  BCDictishN = BCDictN | BCDArrN,
+  BSDictish = BSDictishE | BSDictishN,
+  BCDictish = BCDictishE | BCDictishN,
+  BDictishE = BSDictishE | BCDictishE,
+  BDictishN = BSDictishN | BCDictishN,
+  BDictish  = BSDictish | BCDictish,
+
   // Nullable types.
   BOptTrue     = BInitNull | BTrue,
   BOptFalse    = BInitNull | BFalse,
@@ -363,6 +383,26 @@ enum trep : uint64_t {
   BOptDArrE    = BInitNull | BDArrE,
   BOptDArrN    = BInitNull | BDArrN,
   BOptDArr     = BInitNull | BDArr,
+
+  BOptSVecishE   = BInitNull | BSVecishE,
+  BOptCVecishE   = BInitNull | BCVecishE,
+  BOptSVecishN   = BInitNull | BSVecishN,
+  BOptCVecishN   = BInitNull | BCVecishN,
+  BOptSVecish    = BInitNull | BSVecish,
+  BOptCVecish    = BInitNull | BCVecish,
+  BOptVecishE    = BInitNull | BVecishE,
+  BOptVecishN    = BInitNull | BVecishN,
+  BOptVecish     = BInitNull | BVecish,
+
+  BOptSDictishE   = BInitNull | BSDictishE,
+  BOptCDictishE   = BInitNull | BCDictishE,
+  BOptSDictishN   = BInitNull | BSDictishN,
+  BOptCDictishN   = BInitNull | BCDictishN,
+  BOptSDictish    = BInitNull | BSDictish,
+  BOptCDictish    = BInitNull | BCDictish,
+  BOptDictishE    = BInitNull | BDictishE,
+  BOptDictishN    = BInitNull | BDictishN,
+  BOptDictish     = BInitNull | BDictish,
 
   BUncArrKey    = BInt | BSStr,
   BArrKey       = BUncArrKey | BCStr,
@@ -831,7 +871,7 @@ private:
   friend Type setctx(Type, bool);
   friend Type unctx(Type);
   friend std::string show(const Type&);
-  friend ArrKey disect_array_key(const Type&);
+  friend ArrKey disect_array_key_legacy(const Type&);
   friend ProvTag arr_like_update_prov_tag(const Type&, ProvTag);
   friend std::pair<Type,bool> arr_val_elem(const Type& aval, const ArrKey& key);
   friend std::pair<Type,bool> arr_map_elem(const Type& map, const ArrKey& key);
@@ -861,7 +901,7 @@ private:
   friend RepoAuthType make_repo_type_arr(ArrayTypeTable::Builder&,
     const Type&);
 
-  friend struct ArrKey disect_vec_key(const Type&);
+  friend struct ArrKey disect_vecish_key(const Type&);
   friend struct ArrKey disect_strict_key(const Type&);
 
   friend Type spec_array_like_union(Type&, Type&, trep, trep);
@@ -893,7 +933,7 @@ private:
   friend Type remove_uninit(Type t);
   friend Type to_cell(Type t);
   friend bool inner_types_might_raise(const Type& t1, const Type& t2);
-  friend std::pair<Type, Promotion> promote_clsmeth_to_veclike(Type);
+  friend std::pair<Type, Promotion> promote_clsmeth_to_vecish(Type);
   friend std::pair<Type, Promotion> promote_classlike_to_key(Type);
 
 private:
@@ -1066,6 +1106,18 @@ X(SDArr)                                        \
 X(DArrE)                                        \
 X(DArrN)                                        \
 X(DArr)                                         \
+X(SVecishE)                                     \
+X(SVecishN)                                     \
+X(SVecish)                                      \
+X(VecishE)                                      \
+X(VecishN)                                      \
+X(Vecish)                                       \
+X(SDictishE)                                    \
+X(SDictishN)                                    \
+X(SDictish)                                     \
+X(DictishE)                                     \
+X(DictishN)                                     \
+X(Dictish)                                      \
 X(UncArrKey)                                    \
 X(ArrKey)                                       \
 X(FuncLike)                                     \
@@ -1137,6 +1189,18 @@ X(OptSDArr)                                     \
 X(OptDArrE)                                     \
 X(OptDArrN)                                     \
 X(OptDArr)                                      \
+X(OptSVecishE)                                  \
+X(OptSVecishN)                                  \
+X(OptSVecish)                                   \
+X(OptVecishE)                                   \
+X(OptVecishN)                                   \
+X(OptVecish)                                    \
+X(OptSDictishE)                                 \
+X(OptSDictishN)                                 \
+X(OptSDictish)                                  \
+X(OptDictishE)                                  \
+X(OptDictishN)                                  \
+X(OptDictish)                                   \
 X(OptUncArrKey)                                 \
 X(OptArrKey)                                    \
 X(OptFuncLike)                                  \
@@ -1200,6 +1264,12 @@ TYPES(X)
   X(CVec)                                       \
   X(CDict)                                      \
   X(CKeyset)                                    \
+  X(CVecishE)                                   \
+  X(CVecishN)                                   \
+  X(CVecish)                                    \
+  X(CDictishE)                                  \
+  X(CDictishN)                                  \
+  X(CDictish)                                   \
   X(OptCStr)                                    \
   X(OptCVArrE)                                  \
   X(OptCVArrN)                                  \
@@ -1219,6 +1289,12 @@ TYPES(X)
   X(OptCKeysetE)                                \
   X(OptCKeysetN)                                \
   X(OptCKeyset)                                 \
+  X(OptCVecishE)                                \
+  X(OptCVecishN)                                \
+  X(OptCVecish)                                 \
+  X(OptCDictishE)                               \
+  X(OptCDictishN)                               \
+  X(OptCDictish)                                \
   X(CArrLikeE)                                  \
   X(CArrLikeN)                                  \
   X(CArrLike)                                   \
@@ -1797,21 +1873,26 @@ Type assert_nonemptiness(Type);
  * The returned type will be TBottom if the operation will always throw.
  * ThrowMode indicates what kind of failures may occur.
  *
- * Pre: first arg is a subtype of TOptArr, TOptVec, TOptDict,
- * TOptKeyset, or TOptArrLike respectively, but not a subtype of
- * TNull. The optional types are allowed for convenience. The
- * functions do not attempt to model the effects of null.
+ * Pre: first arg is a subtype of TOptVecish, TOptDictish, TOptKeyset,
+ * or TOptArrLike respectively, but not a subtype of TNull. The
+ * optional types are allowed for convenience. The functions do not
+ * attempt to model the effects of null.
+ *
+ * Legacy key determines if legacy key coercion behavior should be
+ * modeled. This is only allowed if the array is definitely a TOptVArr
+ * or TOptDArr.
  */
-std::pair<Type,ThrowMode> array_elem(const Type& arr, const Type& key,
-                                     const Type& defaultTy = TBottom);
-std::pair<Type,ThrowMode> vec_elem(const Type& vec, const Type& key,
-                                   const Type& defaultTy = TBottom);
-std::pair<Type,ThrowMode> dict_elem(const Type& dict, const Type& key,
-                                    const Type& defaultTy = TBottom);
+std::pair<Type,ThrowMode> vecish_elem(const Type& vec, const Type& key,
+                                      const Type& defaultTy = TBottom,
+                                      bool legacyKey = false);
+std::pair<Type,ThrowMode> dictish_elem(const Type& dict, const Type& key,
+                                       const Type& defaultTy = TBottom,
+                                       bool legacyKey = false);
 std::pair<Type,ThrowMode> keyset_elem(const Type& keyset, const Type& key,
                                       const Type& defaultTy = TBottom);
 std::pair<Type,ThrowMode> array_like_elem(const Type& keyset, const Type& key,
-                                          const Type& defaultTy = TBottom);
+                                          const Type& defaultTy = TBottom,
+                                          bool legacyKey = false);
 
 /*
  * (array|vec|dict|keyset)_set
@@ -1821,15 +1902,15 @@ std::pair<Type,ThrowMode> array_like_elem(const Type& keyset, const Type& key,
  *
  * The returned type will be TBottom if the operation will always throw.
  *
- * Pre: first arg is a subtype of TOptArr, TOptVec, TOptDict,
- * TOptKeyset, or TOptArrLike respectively, but not a subtype of
- * TNull. The optional types are allowed for convenience. The
- * functions do not attempt to model the effects of null.
+ * Pre: first arg is a subtype of TOptVecish, TOptDictish, TOptKeyset,
+ * or TOptArrLike respectively, but not a subtype of TNull. The
+ * optional types are allowed for convenience. The functions do not
+ * attempt to model the effects of null.
  */
-std::pair<Type,bool> array_set(Type arr, const Type& key,
-                               const Type& val, ProvTag src);
-std::pair<Type,bool> vec_set(Type vec, const Type& key, const Type& val);
-std::pair<Type,bool> dict_set(Type dict, const Type& key, const Type& val);
+std::pair<Type,bool> vecish_set(Type vec, const Type& key,
+                                const Type& val, ProvTag src);
+std::pair<Type,bool> dictish_set(Type dict, const Type& key,
+                                 const Type& val, ProvTag src);
 std::pair<Type,bool> keyset_set(Type keyset, const Type& key, const Type& val);
 std::pair<Type,bool> array_like_set(Type arr, const Type& key,
                                     const Type& val, ProvTag src);
@@ -1843,14 +1924,13 @@ std::pair<Type,bool> array_like_set(Type arr, const Type& key,
  * throw. If the operation always throws, the new base will be
  * TBottom.
  *
- * Pre: first arg is a subtype of TOptArr, TOptVec, TOptDict,
- * TOptKeyset, TOptArrLike respectively, but not a subtype of
- * TNull. The optional types are allowed for convenience. The
- * functions do not attempt to model the effects of null.
+ * Pre: first arg is a subtype of TOptVecish, TOptDictish, TOptKeyset,
+ * or TOptArrLike respectively, but not a subtype of TNull. The
+ * optional types are allowed for convenience. The functions do not
+ * attempt to model the effects of null.
  */
-std::pair<Type,bool> array_newelem(Type arr, const Type& val, ProvTag src);
-std::pair<Type,bool> vec_newelem(Type vec, const Type& val);
-std::pair<Type,bool> dict_newelem(Type dict, const Type& val);
+std::pair<Type,bool> vecish_newelem(Type vec, const Type& val, ProvTag src);
+std::pair<Type,bool> dictish_newelem(Type dict, const Type& val, ProvTag src);
 std::pair<Type,bool> keyset_newelem(Type keyset, const Type& val);
 std::pair<Type,bool> array_like_newelem(Type arr, const Type& val, ProvTag src);
 
@@ -1908,7 +1988,7 @@ bool compare_might_raise(const Type& t1, const Type& t2);
  * post-promotion type, and whether the promotion happens with
  * potential throwing.
  */
-std::pair<Type, Promotion> promote_clsmeth_to_veclike(Type);
+std::pair<Type, Promotion> promote_clsmeth_to_vecish(Type);
 
 /*
  * Model potential promotion of TClsLike into a key for array

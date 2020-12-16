@@ -172,6 +172,18 @@ bool RepoAuthType::operator==(RepoAuthType o) const {
   case T::VArr:
   case T::SDArr:
   case T::DArr:
+  case T::SVecish:
+  case T::Vecish:
+  case T::OptSVecish:
+  case T::OptVecish:
+  case T::SDictish:
+  case T::Dictish:
+  case T::OptSDictish:
+  case T::OptDictish:
+  case T::SArrLike:
+  case T::ArrLike:
+  case T::OptSArrLike:
+  case T::OptArrLike:
   case T::VArrCompat:
   case T::VecCompat:
   case T::OptVArrCompat:
@@ -420,6 +432,72 @@ bool tvMatchesRepoAuthType(TypedValue tv, RepoAuthType ty) {
     }
     return true;
 
+  case T::OptSVecish:
+    if (initNull) return true;
+    // fallthrough
+  case T::SVecish:
+    if (!isVecOrVArrayType(tv.m_type) || !tv.m_data.parr->isStatic()) {
+      return false;
+    }
+    if (auto const arr = ty.array()) {
+      if (!tvMatchesArrayType(tv, arr)) return false;
+    }
+    return true;
+
+  case T::OptVecish:
+    if (initNull) return true;
+    // fallthrough
+  case T::Vecish:
+    if (!isVecOrVArrayType(tv.m_type)) return false;
+    if (auto const arr = ty.array()) {
+      if (!tvMatchesArrayType(tv, arr)) return false;
+    }
+    return true;
+
+  case T::OptSDictish:
+    if (initNull) return true;
+    // fallthrough
+  case T::SDictish:
+    if (!isDictOrDArrayType(tv.m_type) || !tv.m_data.parr->isStatic()) {
+      return false;
+    }
+    if (auto const arr = ty.array()) {
+      if (!tvMatchesArrayType(tv, arr)) return false;
+    }
+    return true;
+
+  case T::OptDictish:
+    if (initNull) return true;
+    // fallthrough
+  case T::Dictish:
+    if (!isDictOrDArrayType(tv.m_type)) return false;
+    if (auto const arr = ty.array()) {
+      if (!tvMatchesArrayType(tv, arr)) return false;
+    }
+    return true;
+
+  case T::OptSArrLike:
+    if (initNull) return true;
+    // fallthrough
+  case T::SArrLike:
+    if (!isArrayLikeType(tv.m_type) || !tv.m_data.parr->isStatic()) {
+      return false;
+    }
+    if (auto const arr = ty.array()) {
+      if (!tvMatchesArrayType(tv, arr)) return false;
+    }
+    return true;
+
+  case T::OptArrLike:
+    if (initNull) return true;
+    // fallthrough
+  case T::ArrLike:
+    if (!isArrayLikeType(tv.m_type)) return false;
+    if (auto const arr = ty.array()) {
+      if (!tvMatchesArrayType(tv, arr)) return false;
+    }
+    return true;
+
   case T::Null:
     return initNull || tv.m_type == KindOfUninit;
 
@@ -619,6 +697,18 @@ std::string show(RepoAuthType rat) {
   case T::Keyset:
   case T::OptSKeyset:
   case T::OptKeyset:
+  case T::SVecish:
+  case T::Vecish:
+  case T::OptSVecish:
+  case T::OptVecish:
+  case T::SDictish:
+  case T::Dictish:
+  case T::OptSDictish:
+  case T::OptDictish:
+  case T::SArrLike:
+  case T::ArrLike:
+  case T::OptSArrLike:
+  case T::OptArrLike:
   case T::VArrCompat:
   case T::VecCompat:
   case T::OptVArrCompat:
@@ -633,6 +723,9 @@ std::string show(RepoAuthType rat) {
           tag == T::OptVec    || tag == T::OptSVec ||
           tag == T::OptDict   || tag == T::OptSDict ||
           tag == T::OptKeyset || tag == T::OptSKeyset ||
+          tag == T::OptVecish || tag == T::OptSVecish ||
+          tag == T::OptDictish || tag == T::OptSDictish ||
+          tag == T::OptArrLike || tag == T::OptSArrLike ||
           tag == T::OptVArrCompat || tag == T::OptVecCompat ||
           tag == T::OptArrCompat) {
         ret += '?';
@@ -651,7 +744,10 @@ std::string show(RepoAuthType rat) {
           tag == T::SDArr   || tag == T::OptSDArr ||
           tag == T::SVec    || tag == T::OptSVec ||
           tag == T::SDict   || tag == T::OptSDict ||
-          tag == T::SKeyset || tag == T::OptSKeyset) {
+          tag == T::SKeyset || tag == T::OptSKeyset ||
+          tag == T::SVecish || tag == T::OptSVecish ||
+          tag == T::SDictish || tag == T::OptSDictish ||
+          tag == T::SArrLike || tag == T::OptSArrLike) {
         ret += 'S';
       }
       if (tag == T::OptArr  || tag == T::Arr ||
@@ -672,6 +768,15 @@ std::string show(RepoAuthType rat) {
       } else if (tag == T::OptKeyset  || tag == T::Keyset ||
                  tag == T::OptSKeyset || tag == T::SKeyset) {
         ret += "Keyset";
+      } else if (tag == T::OptVecish || tag == T::Vecish ||
+                 tag == T::OptSVecish || tag == T::SVecish) {
+        ret += "Vecish";
+      } else if (tag == T::OptDictish || tag == T::Dictish ||
+                 tag == T::OptSDictish || tag == T::SDictish) {
+        ret += "Dictish";
+      } else if (tag == T::OptArrLike || tag == T::ArrLike ||
+                 tag == T::OptSArrLike || tag == T::SArrLike) {
+        ret += "ArrLike";
       }
       if (rat.hasArrData()) folly::format(&ret, "{}", show(*rat.array()));
       return ret;

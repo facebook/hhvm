@@ -111,6 +111,18 @@ RepoAuthType decodeRATImpl(const unsigned char*& pc, LookupStr lookupStr,
   case T::OptSKeyset:
   case T::Keyset:
   case T::OptKeyset:
+  case T::SVecish:
+  case T::Vecish:
+  case T::OptSVecish:
+  case T::OptVecish:
+  case T::SDictish:
+  case T::Dictish:
+  case T::OptSDictish:
+  case T::OptDictish:
+  case T::SArrLike:
+  case T::ArrLike:
+  case T::OptSArrLike:
+  case T::OptArrLike:
   case T::VArrCompat:
   case T::VecCompat:
   case T::OptVArrCompat:
@@ -249,6 +261,18 @@ void encodeRAT(UnitEmitter& ue, RepoAuthType rat) {
   case T::OptSKeyset:
   case T::Keyset:
   case T::OptKeyset:
+  case T::SVecish:
+  case T::Vecish:
+  case T::OptSVecish:
+  case T::OptVecish:
+  case T::SDictish:
+  case T::Dictish:
+  case T::OptSDictish:
+  case T::OptDictish:
+  case T::SArrLike:
+  case T::ArrLike:
+  case T::OptSArrLike:
+  case T::OptArrLike:
   case T::VArrCompat:
   case T::VecCompat:
   case T::OptVArrCompat:

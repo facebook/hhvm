@@ -1052,6 +1052,19 @@ void merge_repo_auth_type(UnitEmitter& ue, RepoAuthType rat) {
   case T::OptKeyset:
   case T::SKeyset:
   case T::Keyset:
+  case T::SVecish:
+  case T::Vecish:
+  case T::OptSVecish:
+  case T::OptVecish:
+  case T::SDictish:
+  case T::Dictish:
+  case T::OptSDictish:
+  case T::OptDictish:
+  case T::SArrLike:
+  case T::ArrLike:
+  case T::OptSArrLike:
+  case T::OptArrLike:
+
   case T::ArrCompat:
   case T::VArrCompat:
   case T::VecCompat:

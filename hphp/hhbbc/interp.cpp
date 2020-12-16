@@ -1024,12 +1024,7 @@ void in(ISS& env, const bc::AddElemC& /*op*/) {
   auto const tag = provTagHere(env);
 
   auto outTy = [&] (Type ty) -> folly::Optional<std::pair<Type,bool>> {
-    if (ty.subtypeOf(BArr)) {
-      return array_set(std::move(ty), k, v, tag);
-    }
-    if (ty.subtypeOf(BDict)) {
-      return dict_set(std::move(ty), k, v);
-    }
+    if (ty.subtypeOf(BDictish)) return dictish_set(std::move(ty), k, v, tag);
     return folly::none;
   }(std::move(inTy));
 
@@ -1084,11 +1079,8 @@ void in(ISS& env, const bc::AddNewElemC&) {
   auto const tag = provTagHere(env);
 
   auto outTy = [&] (Type ty) -> folly::Optional<Type> {
-    if (ty.subtypeOf(BArr)) {
-      return array_newelem(std::move(ty), std::move(v), tag).first;
-    }
-    if (ty.subtypeOf(BVec)) {
-      return vec_newelem(std::move(ty), std::move(v)).first;
+    if (ty.subtypeOf(BVecish)) {
+      return vecish_newelem(std::move(ty), std::move(v), tag).first;
     }
     if (ty.subtypeOf(BKeyset)) {
       return keyset_newelem(std::move(ty), std::move(v)).first;
@@ -2540,13 +2532,13 @@ void in(ISS& env, const bc::AKExists& /*op*/) {
   // return false for Str.
   if (base.subtypeOrNull(BVec)) {
     if (key.subtypeOf(BStr)) return finish(TFalse, false);
-    return hackArr(vec_elem(base, key), TInt, TStr);
+    return hackArr(vecish_elem(base, key), TInt, TStr);
   }
 
   // Dicts and keysets will throw for any key other than Int or Str.
   if (base.subtypeOfAny(TOptDict, TOptKeyset)) {
     auto const elem = base.subtypeOrNull(BDict)
-      ? dict_elem(base, key)
+      ? dictish_elem(base, key)
       : keyset_elem(base, key);
     return hackArr(elem, TArrKeyCompat, TBottom);
   }
@@ -2554,7 +2546,7 @@ void in(ISS& env, const bc::AKExists& /*op*/) {
   if (base.subtypeOrNull(BArr)) {
     // Unlike Idx, AKExists will transform a null key on arrays into the static
     // empty string, so we don't need to do any fixups here.
-    auto const elem = array_elem(base, key);
+    auto const elem = array_like_elem(base, key, TBottom, true);
     switch (elem.second) {
       case ThrowMode::None:                return finish(TTrue, false);
       case ThrowMode::MaybeMissingElement: return finish(TBool, false);
@@ -3778,9 +3770,9 @@ void pushCallReturnType(ISS& env, Type&& ty, const FCallArgs& fca) {
     for (auto i = uint32_t{0}; i < numRets - 1; ++i) popU(env);
     if (is_specialized_vec(ty)) {
       for (int32_t i = 1; i < numRets; i++) {
-        push(env, vec_elem(ty, ival(i)).first);
+        push(env, vecish_elem(ty, ival(i)).first);
       }
-      push(env, vec_elem(ty, ival(0)).first);
+      push(env, vecish_elem(ty, ival(0)).first);
     } else {
       for (int32_t i = 0; i < numRets; i++) push(env, TInitCell);
     }
@@ -5273,14 +5265,14 @@ void idxImpl(ISS& env, bool arraysOnly) {
     // Vecs will throw for any key other than Int, Str, or Null, and will
     // silently return the default value for the latter two.
     if (key.subtypeOrNull(BStr)) return finish(def, false);
-    return hackArr(vec_elem(base, key, def), TInt, TOptStr);
+    return hackArr(vecish_elem(base, key, def), TInt, TOptStr);
   }
 
   if (base.subtypeOfAny(TOptDict, TOptKeyset)) {
     // Dicts and keysets will throw for any key other than Int, Str, or Null,
     // and will silently return the default value for Null.
     auto const elem = base.subtypeOrNull(BDict)
-      ? dict_elem(base, key, def)
+      ? dictish_elem(base, key, def)
       : keyset_elem(base, key, def);
     return hackArr(elem, TArrKeyCompat, TInitNull);
   }
@@ -5300,7 +5292,7 @@ void idxImpl(ISS& env, bool arraysOnly) {
       return key;
     }();
 
-    auto elem = array_elem(base, fixedKey, def);
+    auto elem = array_like_elem(base, fixedKey, def, true);
     // If the key was null, Idx will return the default value, so add to the
     // return type.
     if (maybeNull) elem.first |= def;

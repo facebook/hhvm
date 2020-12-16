@@ -1052,6 +1052,24 @@ Type typeFromRAT(RepoAuthType ty, const Class* ctx) {
     case T::OptVArrCompat:  return X(TVArr, VArr, CountedVArr)
                                    | TClsMeth | TInitNull;
 
+    // If these have specializations, its not clear which type to
+    // apply them to. Ignore them for now.
+    case T::SVecish:        return TStaticVec | TStaticVArr;
+    case T::Vecish:         return TVec | TVArr;
+    case T::OptSVecish:     return TStaticVec | TStaticVArr | TInitNull;
+    case T::OptVecish:      return TVec | TVArr | TInitNull;
+    case T::SDictish:       return TStaticDict | TStaticDArr;
+    case T::Dictish:        return TDict | TDArr;
+    case T::OptSDictish:    return TStaticDict | TStaticDArr | TInitNull;
+    case T::OptDictish:     return TDict | TDArr | TInitNull;
+    case T::SArrLike:       return TStaticVec | TStaticVArr | TStaticDict |
+                                   TStaticDArr | TStaticKeyset;
+    case T::ArrLike:        return TVec | TVArr | TDict | TDArr | TKeyset;
+    case T::OptSArrLike:    return TStaticVec | TStaticVArr | TStaticDict |
+                                   TStaticDArr | TStaticKeyset | TInitNull;
+    case T::OptArrLike:     return TVec | TVArr | TDict | TDArr |
+                                   TKeyset | TInitNull;
+
 #undef X
 
     case T::SubObj:

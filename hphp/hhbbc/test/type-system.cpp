@@ -2373,7 +2373,7 @@ TEST(Type, EmptyDict) {
     auto const possible_e = union_of(dict_packedn(TInt), dict_empty());
     EXPECT_TRUE(possible_e.couldBe(dict_empty()));
     EXPECT_TRUE(possible_e.couldBe(dict_packedn(TInt)));
-    EXPECT_EQ(dict_elem(possible_e, ival(0)).first, TInt);
+    EXPECT_EQ(dictish_elem(possible_e, ival(0)).first, TInt);
   }
 
   {
@@ -2382,8 +2382,8 @@ TEST(Type, EmptyDict) {
     EXPECT_TRUE(possible_e.couldBe(dict_packed({TInt, TInt})));
     EXPECT_FALSE(possible_e.couldBe(dict_packed({TInt, TInt, TInt})));
     EXPECT_FALSE(possible_e.subtypeOf(dict_packedn(TInt)));
-    EXPECT_EQ(dict_elem(possible_e, ival(0)).first, TInt);
-    EXPECT_EQ(dict_elem(possible_e, ival(1)).first, TInt);
+    EXPECT_EQ(dictish_elem(possible_e, ival(0)).first, TInt);
+    EXPECT_EQ(dictish_elem(possible_e, ival(1)).first, TInt);
   }
 
   {
@@ -2395,7 +2395,7 @@ TEST(Type, EmptyDict) {
     EXPECT_TRUE(estat.couldBe(BSDictE));
   }
 
-  EXPECT_EQ(dict_newelem(dict_empty(), ival(142)).first,
+  EXPECT_EQ(dictish_newelem(dict_empty(), ival(142), ProvTag::Top).first,
             dict_packed({ival(142)}));
 }
 
@@ -2450,13 +2450,13 @@ TEST(Type, DictBitCombos) {
   EXPECT_TRUE(u1.couldBe(BDictE));
   EXPECT_TRUE(u1.couldBe(BSDictE));
   EXPECT_TRUE(u1.couldBe(sdict_packedn(TInt)));
-  EXPECT_EQ(dict_elem(u1, ival(0)).first, TInt);
+  EXPECT_EQ(dictish_elem(u1, ival(0)).first, TInt);
 
   auto const u2 = union_of(TSDictE, dict_packedn(TInt));
   EXPECT_TRUE(u2.couldBe(BDictE));
   EXPECT_TRUE(u2.couldBe(BSDictE));
   EXPECT_TRUE(u2.couldBe(dict_packedn(TInt)));
-  EXPECT_EQ(dict_elem(u2, ival(0)).first, TInt);
+  EXPECT_EQ(dictish_elem(u2, ival(0)).first, TInt);
 }
 
 TEST(Type, ArrKey) {
@@ -3380,26 +3380,35 @@ TEST(Type, DictMapOptValues) {
   );
 
   EXPECT_EQ(
-    dict_set(dict_map(test_map_b), TSStr, TStr).first,
+    dictish_set(
+      dict_map(test_map_b), TSStr, TStr, ProvTag::Top
+    ).first,
     dict_map(test_map_g, TSStr, TStr)
   );
   EXPECT_EQ(
-    dict_set(dict_map(test_map_a), sval(s_B.get()), TStr).first,
+    dictish_set(
+      dict_map(test_map_a), sval(s_B.get()), TStr, ProvTag::Top
+    ).first,
     dict_map(test_map_h)
   );
   EXPECT_EQ(
-    dict_set(dict_map(test_map_a), sval(s_test.get()), TStr).first,
+    dictish_set(
+      dict_map(test_map_a), sval(s_test.get()), TStr, ProvTag::Top
+    ).first,
     dict_map(test_map_i)
   );
   EXPECT_EQ(
-    dict_set(dict_map(test_map_a, TSStr, TInt), sval(s_test.get()), TStr).first,
+    dictish_set(
+      dict_map(test_map_a, TSStr, TInt), sval(s_test.get()), TStr, ProvTag::Top
+    ).first,
     dict_map(test_map_a, TSStr, TArrKey)
   );
   EXPECT_EQ(
-    dict_set(
+    dictish_set(
       dict_map(test_map_a, sval(s_test.get()), TInt),
       sval(s_test.get()),
-      TStr
+      TStr,
+      ProvTag::Top
     ).first,
     dict_map(test_map_j)
   );

@@ -1070,6 +1070,18 @@ RepoAuthType read_repo_auth_type(AsmState& as) {
   X("?VArrCompat",T::OptVArrCompat);
   X("?ArrCompat",T::OptArrCompat);
   X("Uninit",   T::Uninit);
+  X("SVecish", T::SVecish);
+  X("?SVecish", T::OptSVecish);
+  X("Vecish", T::Vecish);
+  X("?Vecish", T::OptVecish);
+  X("SDictish", T::SDictish);
+  X("?SDictish", T::OptSDictish);
+  X("Dictish", T::Dictish);
+  X("?Dictish", T::OptDictish);
+  X("SArrLike", T::SArrLike);
+  X("?SArrLike", T::OptSArrLike);
+  X("ArrLike", T::ArrLike);
+  X("?ArrLike", T::OptArrLike);
 
 #undef X
 #undef Y
@@ -1116,6 +1128,18 @@ RepoAuthType read_repo_auth_type(AsmState& as) {
   case T::OptSKeyset:
   case T::Keyset:
   case T::OptKeyset:
+  case T::SVecish:
+  case T::Vecish:
+  case T::OptSVecish:
+  case T::OptVecish:
+  case T::SDictish:
+  case T::Dictish:
+  case T::OptSDictish:
+  case T::OptDictish:
+  case T::SArrLike:
+  case T::ArrLike:
+  case T::OptSArrLike:
+  case T::OptArrLike:
   case T::Obj:
   case T::OptObj:
   case T::Func:

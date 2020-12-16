@@ -1302,7 +1302,8 @@ void emit_class(EmitUnitState& state, UnitEmitter& ue, PreClassEmitter* pce,
 
   auto const privateProps   = state.index.lookup_private_props(&cls, true);
   auto const privateStatics = state.index.lookup_private_statics(&cls, true);
-  for (auto& prop : cls.properties) {
+  auto const publicStatics  = state.index.lookup_public_statics(&cls);
+  for (auto const& prop : cls.properties) {
     auto const makeRat = [&] (const Type& ty) -> RepoAuthType {
       if (!ty.subtypeOf(BCell)) return RepoAuthType{};
       if (ty.subtypeOf(BBottom)) {
@@ -1336,7 +1337,11 @@ void emit_class(EmitUnitState& state, UnitEmitter& ue, PreClassEmitter* pce,
     if (attrs & AttrPrivate) {
       propTy = privPropTy((attrs & AttrStatic) ? privateStatics : privateProps);
     } else if ((attrs & AttrPublic) && (attrs & AttrStatic)) {
-      propTy = state.index.lookup_public_static(Context{}, &cls, prop.name);
+      propTy = [&] {
+        auto const it = publicStatics.find(prop.name);
+        if (it == end(publicStatics)) return Type{};
+        return it->second.ty;
+      }();
     }
 
     pce->addProperty(

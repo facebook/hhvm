@@ -290,6 +290,7 @@ FuncAnalysis do_analyze_collect(const Index& index,
   auto const bump = trace_bump_for(ctx.cls, ctx.func);
   Trace::Bump bumper1{Trace::hhbbc, bump};
   Trace::Bump bumper2{Trace::hhbbc_cfg, bump};
+  Trace::Bump bumper3{Trace::hhbbc_index, bump};
 
   if (knownArgs) {
     FTRACE(2, "{:.^70}\n", "Inline Interp");
@@ -663,6 +664,7 @@ ClassAnalysis analyze_class(const Index& index, const Context& ctx) {
       auto& elem = clsAnalysis.privateProperties[prop.name];
       elem.ty = std::move(t);
       elem.tc = &prop.typeConstraint;
+      elem.attrs = prop.attrs;
     } else {
       // Same thing as the above regarding TUninit and TBottom.
       // Static properties don't need to exclude closures for this,
@@ -675,6 +677,7 @@ ClassAnalysis analyze_class(const Index& index, const Context& ctx) {
       auto& elem = clsAnalysis.privateStatics[prop.name];
       elem.ty = std::move(t);
       elem.tc = &prop.typeConstraint;
+      elem.attrs = prop.attrs;
     }
   }
 

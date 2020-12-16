@@ -30,6 +30,8 @@
 
 #include "hphp/util/compact-vector.h"
 #include "hphp/util/either.h"
+#include "hphp/util/tribool.h"
+
 #include "hphp/runtime/base/repo-auth-type-array.h"
 #include "hphp/runtime/vm/type-constraint.h"
 
@@ -46,11 +48,13 @@ struct FuncAnalysisResult;
 struct Context;
 struct ContextHash;
 struct CallContext;
+struct PropertiesInfo;
 
 extern const Type TTop;
 
 namespace php {
 struct Class;
+struct Prop;
 struct Record;
 struct Const;
 struct Func;
@@ -148,16 +152,48 @@ using ConstantMap = hphp_hash_map<SString, TypedValue>;
  * State of properties on a class.  Map from property name to its
  * Type.
  */
-template <typename T = Type>
+template <typename T = Type> // NB: The template param here is to
+                             // break a cyclic dependency on Type.
 struct PropStateElem {
   T ty;
   const TypeConstraint* tc = nullptr;
+  Attr attrs;
 
   bool operator==(const PropStateElem<T>& o) const {
-    return ty == o.ty && tc == o.tc;
+    return ty == o.ty && tc == o.tc && attrs == o.attrs;
   }
 };
 using PropState = std::map<LSString,PropStateElem<>>;
+
+/*
+ * The result of Index::lookup_static
+ */
+template <typename T = Type> // NB: The template parameter is here to
+                             // break a cyclic dependency on Type.
+struct PropLookupResult {
+  T ty; // The best known type of the property (TBottom if not found)
+  SString name; // The statically known name of the string, if any
+  TriBool found; // If the property was found
+  TriBool isConst; // If the property is AttrConst
+  TriBool lateInit; // If the property is AttrLateInit
+  bool classInitMightRaise; // If class initialization during the
+                            // property access can raise (unlike the
+                            // others, this is only no or maybe).
+};
+
+template <typename T>
+inline PropLookupResult<T>& operator|=(PropLookupResult<T>& a,
+                                       const PropLookupResult<T>& b) {
+  assertx(a.name == b.name);
+  a.ty |= b.ty;
+  a.found |= b.found;
+  a.isConst |= b.isConst;
+  a.lateInit |= b.lateInit;
+  a.classInitMightRaise |= b.classInitMightRaise;
+  return a;
+}
+
+std::string show(const PropLookupResult<Type>&);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -847,39 +883,28 @@ struct Index {
    */
   PropState lookup_private_statics(const php::Class*,
                                    bool move = false) const;
+  PropState lookup_public_statics(const php::Class*) const;
 
   /*
-   * Lookup the best known type for a public static property, with a given
-   * class and name.
-   *
-   * This function will always return TInitCell before refine_public_statics has
-   * been called, or if the AnalyzePublicStatics option is off.
+   * Lookup metadata about the static property access `cls'::`name',
+   * in the current context `ctx'. The returned metadata not only
+   * includes the best known type of the property, but whether it is
+   * definitely found, and whether the access might raise for various
+   * reasons. This function is responsible for walking the class
+   * hierarchy to find the appropriate property while applying
+   * accessibility rules. This is intended to be the source of truth
+   * about static properties during analysis.
    */
-  Type lookup_public_static(Context ctx, const Type& cls,
-                            const Type& name) const;
-  Type lookup_public_static(Context ctx, const php::Class*,
-                            SString name) const;
+  PropLookupResult<> lookup_static(Context ctx,
+                                   const PropertiesInfo& privateProps,
+                                   const Type& cls,
+                                   const Type& name) const;
 
   /*
    * Lookup if initializing (which is a side-effect of several bytecodes) the
    * given class might raise.
    */
   bool lookup_class_init_might_raise(Context, res::Class) const;
-
-  /*
-   * Lookup if a public static property with the given class and name might be
-   * AttrLateInit.
-   */
-  bool lookup_public_static_maybe_late_init(const Type& cls,
-                                            const Type& name) const;
-
-  /*
-   * Returns whether a public static property is known to be immutable.  This
-   * is used to add AttrPersistent flags to static properties, and relies on
-   * AnalyzePublicStatics (without this flag it will always return false).
-   */
-  bool lookup_public_static_immutable(const php::Class*,
-                                      SString name) const;
 
   /*
    * Lookup the best known type for a public (non-static) property. Since we
@@ -916,6 +941,23 @@ struct Index {
    * Must be called in single-threaded context.
    */
   void use_class_dependencies(bool f);
+
+  /*
+   * Merge the type `val' into the known type for static property
+   * `cls'::`name'. Depending on what we know about `cls' and `name',
+   * this might affect multiple properties. This function is
+   * responsible for walking the class hierarchy to find the
+   * appropriate property while applying accessibility
+   * rules. Mutations of AttrConst properties are ignored unless
+   * `ignoreConst' is set to true.
+   */
+  void merge_static_type(Context ctx,
+                         PublicSPropMutations& publicMutations,
+                         PropertiesInfo& privateProps,
+                         const Type& cls,
+                         const Type& name,
+                         const Type& val,
+                         bool ignoreConst = false) const;
 
   /*
    * Initialize the initial types for public static properties. This should be
@@ -1143,21 +1185,6 @@ private:
  * Used for collecting all mutations of public static property types.
  */
 struct PublicSPropMutations {
-  /*
-   * This function must be called anywhere the interpreter does something that
-   * could change the type of public static properties named `name' on classes
-   * of type `cls' to `val'.
-   *
-   * Note that if cls and name are both too generic this object will have to
-   * give up all information it knows about any public static properties.
-   */
-  void merge(const Index& index, Context ctx, const Type& cls,
-             const Type& name, const Type& val, bool ignoreConst = false);
-  void merge(const Index& index, Context ctx, ClassInfo* cinfo,
-             const Type& name, const Type& val, bool ignoreConst = false);
-  void merge(const Index& index, Context ctx, const php::Class& cls,
-             const Type& name, const Type& val, bool ignoreConst = false);
-
 private:
   friend struct Index;
 
@@ -1182,9 +1209,14 @@ private:
     KnownMap m_known;
   };
   std::unique_ptr<Data> m_data;
+
+  Data& get();
+
+  void mergeKnown(const ClassInfo* ci, const php::Prop& prop, const Type& val);
+  void mergeUnknownClass(SString prop, const Type& val);
+  void mergeUnknown(Context);
 };
 
 //////////////////////////////////////////////////////////////////////
 
 }}
-

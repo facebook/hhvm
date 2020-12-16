@@ -891,6 +891,7 @@ void optimize_func(const Index& index, FuncAnalysis&& ainfo,
   Trace::Bump bumper1{Trace::hhbbc, bump};
   Trace::Bump bumper2{Trace::hhbbc_cfg, bump};
   Trace::Bump bumper3{Trace::hhbbc_dce, bump};
+  Trace::Bump bumper4{Trace::hhbbc_index, bump};
   do_optimize(index, std::move(ainfo), func);
 }
 

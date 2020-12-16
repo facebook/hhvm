@@ -2416,52 +2416,35 @@ void in(ISS& env, const bc::CGetG&) { popC(env); push(env, TInitCell); }
 void in(ISS& env, const bc::CGetS& op) {
   auto const tcls  = popC(env);
   auto const tname = popC(env);
-  auto const vname = tv(tname);
-  auto const self  = selfCls(env);
 
-  if (vname && vname->m_type == KindOfPersistentString &&
-      self && tcls.subtypeOf(*self)) {
-    if (auto ty = selfPropAsCell(env, vname->m_data.pstr)) {
-      // Only nothrow when we know it's a private declared property (and thus
-      // accessible here), class initialization won't throw, and its not a
-      // LateInit prop (which will throw if not initialized).
-      if (!classInitMightRaise(env, tcls) &&
-          !isMaybeLateInitSelfProp(env, vname->m_data.pstr)) {
-        nothrow(env);
+  auto const throws = [&] {
+    unreachable(env);
+    return push(env, TBottom);
+  };
 
-        // We can only constprop here if we know for sure this is exactly the
-        // correct class.  The reason for this is that you could have a LSB
-        // class attempting to access a private static in a derived class with
-        // the same name as a private static in this class, which is supposed to
-        // fatal at runtime (for an example see test/quick/static_sprop2.php).
-        auto const selfExact = selfClsExact(env);
-        if (selfExact && tcls.subtypeOf(*selfExact)) constprop(env);
-      }
+  if (!tcls.couldBe(BCls)) return throws();
 
-      if (ty->subtypeOf(BBottom)) unreachable(env);
-      return push(env, std::move(*ty));
-    }
+  auto lookup = env.index.lookup_static(
+    env.ctx,
+    env.collect.props,
+    tcls,
+    tname
+  );
+
+  if (lookup.found == TriBool::No || lookup.ty.subtypeOf(BBottom)) {
+    return throws();
   }
 
-  auto indexTy = env.index.lookup_public_static(env.ctx, tcls, tname);
-  if (indexTy.subtypeOf(BInitCell)) {
-    /*
-     * Constant propagation here can change when we invoke autoload.
-     * It's safe not to check anything about private or protected static
-     * properties, because you can't override a public static property with
-     * a private or protected one---if the index gave us back a constant type,
-     * it's because it found a public static and it must be the property this
-     * would have read dynamically.
-     */
-    if (!classInitMightRaise(env, tcls) &&
-        !env.index.lookup_public_static_maybe_late_init(tcls, tname)) {
-      constprop(env);
-    }
-    if (indexTy.subtypeOf(BBottom)) unreachable(env);
-    return push(env, std::move(indexTy));
+  if (lookup.found == TriBool::Yes &&
+      lookup.lateInit == TriBool::No &&
+      !lookup.classInitMightRaise &&
+      tcls.subtypeOf(BCls) &&
+      tname.subtypeOf(BStr)) {
+    effect_free(env);
+    constprop(env);
   }
 
-  push(env, TInitCell);
+  push(env, std::move(lookup.ty));
 }
 
 void in(ISS& env, const bc::ClassGetC& op) {
@@ -2838,40 +2821,30 @@ void in(ISS& env, const bc::IsUnsetL& op) {
 void in(ISS& env, const bc::IssetS& op) {
   auto const tcls  = popC(env);
   auto const tname = popC(env);
-  auto const vname = tv(tname);
-  auto const self  = selfCls(env);
 
-  if (self && tcls.subtypeOf(*self) &&
-      vname && vname->m_type == KindOfPersistentString) {
-    if (auto const t = selfPropAsCell(env, vname->m_data.pstr)) {
-      if (isMaybeLateInitSelfProp(env, vname->m_data.pstr)) {
-        if (!classInitMightRaise(env, tcls)) constprop(env);
-        return push(env, t->subtypeOf(BBottom) ? TFalse : TBool);
-      }
-      if (t->subtypeOf(BNull)) {
-        if (!classInitMightRaise(env, tcls)) constprop(env);
-        return push(env, TFalse);
-      }
-      if (!t->couldBe(BNull)) {
-        if (!classInitMightRaise(env, tcls)) constprop(env);
-        return push(env, TTrue);
-      }
-    }
+  if (!tcls.couldBe(BCls)) {
+    unreachable(env);
+    return push(env, TBottom);
   }
 
-  auto const indexTy = env.index.lookup_public_static(env.ctx, tcls, tname);
-  if (indexTy.subtypeOf(BInitCell)) {
-    // See the comments in CGetS about constprop for public statics.
-    if (!classInitMightRaise(env, tcls)) {
-      constprop(env);
-    }
-    if (env.index.lookup_public_static_maybe_late_init(tcls, tname)) {
-      return push(env, indexTy.subtypeOf(BBottom) ? TFalse : TBool);
-    }
-    if (indexTy.subtypeOf(BNull))  { return push(env, TFalse); }
-    if (!indexTy.couldBe(BNull))   { return push(env, TTrue); }
+  auto lookup = env.index.lookup_static(
+    env.ctx,
+    env.collect.props,
+    tcls,
+    tname
+  );
+
+  if (!lookup.classInitMightRaise &&
+      tcls.subtypeOf(BCls) &&
+      tname.subtypeOf(BStr)) {
+    effect_free(env);
+    constprop(env);
   }
 
+  if (lookup.ty.subtypeOf(BNull)) return push(env, TFalse);
+  if (!lookup.ty.couldBe(BNull) && lookup.lateInit == TriBool::No) {
+    return push(env, TTrue);
+  }
   push(env, TBool);
 }
 
@@ -3434,30 +3407,20 @@ void in(ISS& env, const bc::SetG&) {
 }
 
 void in(ISS& env, const bc::SetS& op) {
-  auto const t1    = loosen_likeness(popC(env));
+  auto val         = loosen_likeness(popC(env));
   auto const tcls  = popC(env);
   auto const tname = popC(env);
-  auto const vname = tv(tname);
-  auto const self  = selfCls(env);
 
-  if (vname && vname->m_type == KindOfPersistentString &&
-      canSkipMergeOnConstProp(env, tcls, vname->m_data.pstr)) {
-      unreachable(env);
-      push(env, TBottom);
-      return;
-  }
+  env.index.merge_static_type(
+    env.ctx,
+    env.collect.publicSPropMutations,
+    env.collect.props,
+    tcls,
+    tname,
+    val
+  );
 
-  if (!self || tcls.couldBe(*self)) {
-    if (vname && vname->m_type == KindOfPersistentString) {
-      mergeSelfProp(env, vname->m_data.pstr, t1);
-    } else {
-      mergeEachSelfPropRaw(env, [&] (Type) { return t1; });
-    }
-  }
-
-  env.collect.publicSPropMutations.merge(env.index, env.ctx, tcls, tname, t1);
-
-  push(env, std::move(t1));
+  push(env, std::move(val));
 }
 
 void in(ISS& env, const bc::SetOpL& op) {
@@ -3504,28 +3467,15 @@ void in(ISS& env, const bc::SetOpS& op) {
   popC(env);
   auto const tcls  = popC(env);
   auto const tname = popC(env);
-  auto const vname = tv(tname);
-  auto const self  = selfCls(env);
 
-  if (vname && vname->m_type == KindOfPersistentString &&
-      canSkipMergeOnConstProp(env, tcls, vname->m_data.pstr)) {
-      unreachable(env);
-      push(env, TBottom);
-      return;
-  }
-
-  if (!self || tcls.couldBe(*self)) {
-    if (vname && vname->m_type == KindOfPersistentString) {
-      mergeSelfProp(env, vname->m_data.pstr, TInitCell);
-    } else {
-      killSelfProps(env);
-    }
-  }
-
-  env.collect.publicSPropMutations.merge(
-    env.index, env.ctx, tcls, tname, TInitCell
+  env.index.merge_static_type(
+    env.ctx,
+    env.collect.publicSPropMutations,
+    env.collect.props,
+    tcls,
+    tname,
+    TInitCell
   );
-
   push(env, TInitCell);
 }
 
@@ -3550,28 +3500,15 @@ void in(ISS& env, const bc::IncDecG&) { popC(env); push(env, TInitCell); }
 void in(ISS& env, const bc::IncDecS& op) {
   auto const tcls  = popC(env);
   auto const tname = popC(env);
-  auto const vname = tv(tname);
-  auto const self  = selfCls(env);
 
-  if (vname && vname->m_type == KindOfPersistentString &&
-      canSkipMergeOnConstProp(env, tcls, vname->m_data.pstr)) {
-      unreachable(env);
-      push(env, TBottom);
-      return;
-  }
-
-  if (!self || tcls.couldBe(*self)) {
-    if (vname && vname->m_type == KindOfPersistentString) {
-      mergeSelfProp(env, vname->m_data.pstr, TInitCell);
-    } else {
-      killSelfProps(env);
-    }
-  }
-
-  env.collect.publicSPropMutations.merge(
-    env.index, env.ctx, tcls, tname, TInitCell
+  env.index.merge_static_type(
+    env.ctx,
+    env.collect.publicSPropMutations,
+    env.collect.props,
+    tcls,
+    tname,
+    TInitCell
   );
-
   push(env, TInitCell);
 }
 
@@ -4726,7 +4663,7 @@ void inclOpImpl(ISS& env) {
   popC(env);
   killLocals(env);
   killThisProps(env);
-  killSelfProps(env);
+  killPrivateStatics(env);
   push(env, TInitCell);
 }
 
@@ -5385,9 +5322,14 @@ void in(ISS& env, const bc::InitProp& op) {
   auto const t = topC(env);
   switch (op.subop2) {
     case InitPropOp::Static:
-      mergeSelfProp(env, op.str1, t);
-      env.collect.publicSPropMutations.merge(
-        env.index, env.ctx, *env.ctx.cls, sval(op.str1), t, true
+      env.index.merge_static_type(
+        env.ctx,
+        env.collect.publicSPropMutations,
+        env.collect.props,
+        clsExact(env.index.resolve_class(env.ctx.cls)),
+        sval(op.str1),
+        t,
+        true
       );
       break;
     case InitPropOp::NonStatic:

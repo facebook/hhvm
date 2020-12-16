@@ -581,4 +581,18 @@ std::string show(Context ctx) {
 
 //////////////////////////////////////////////////////////////////////
 
+std::string show(const PropLookupResult<Type>& r) {
+  return folly::sformat(
+    "{{{},ty:{},found:{},const:{},late:{},init:{}}}",
+    r.name,
+    show(r.ty),
+    show(r.found),
+    show(r.isConst),
+    show(r.lateInit),
+    r.classInitMightRaise
+  );
+}
+
+//////////////////////////////////////////////////////////////////////
+
 }}

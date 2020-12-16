@@ -158,13 +158,7 @@ bool couldBeInProp(ISS& env, const Base& b) {
   return true;
 }
 
-bool couldBeInPrivateStatic(ISS& env, const Base& b) {
-  if (b.loc != BaseLoc::StaticProp) return false;
-  auto const selfTy = selfCls(env);
-  return !selfTy || b.locTy.couldBe(*selfTy);
-}
-
-bool couldBeInPublicStatic(const Base& b) {
+bool mustBeInStatic(const Base& b) {
   return b.loc == BaseLoc::StaticProp;
 }
 
@@ -350,32 +344,23 @@ void setStackForBase(ISS& env, Type ty) {
   }
 }
 
-void setPrivateStaticForBase(ISS& env, Type ty) {
-  assert(couldBeInPrivateStatic(env, env.collect.mInstrState.base));
-
-  if (auto const name = env.collect.mInstrState.base.locName) {
-    FTRACE(4, "      self::${} |= {}\n", name->data(), show(ty));
-    mergeSelfProp(env, name, std::move(ty));
-    return;
-  }
-  FTRACE(4, "      self::* |= {}\n", show(ty));
-  mergeEachSelfPropRaw(
-    env,
-    [&](const Type& old){ return old.subtypeOf(BInitCell) ? ty : TBottom; }
-  );
-}
-
-void setPublicStaticForBase(ISS& env, Type ty) {
+void setStaticForBase(ISS& env, Type ty) {
   auto const& base = env.collect.mInstrState.base;
-  assertx(couldBeInPublicStatic(base));
+  assertx(mustBeInStatic(base));
 
   auto const nameTy = base.locName ? sval(base.locName) : TStr;
   FTRACE(
-    4, "      public ({})::$({}) |= {}\n",
+    4, "      ({})::$({}) |= {}\n",
     show(base.locTy), show(nameTy), show(ty)
   );
-  env.collect.publicSPropMutations.merge(
-    env.index, env.ctx, base.locTy, nameTy, ty
+
+  env.index.merge_static_type(
+    env.ctx,
+    env.collect.publicSPropMutations,
+    env.collect.props,
+    base.locTy,
+    nameTy,
+    std::move(ty)
   );
 }
 
@@ -410,7 +395,7 @@ Type currentChainType(ISS& env, Type val) {
 
 Type resolveArrayChain(ISS& env, Type val) {
   static UNUSED const char prefix[] = "              ";
-  FTRACE(5, "{}chain\n", prefix, show(val));
+  FTRACE(5, "{}chain {}\n", prefix, show(val));
   auto const tag = provTagHere(env);
   do {
     auto arr = std::move(env.collect.mInstrState.arrayChain.back().base);
@@ -454,9 +439,9 @@ void updateBaseWithType(ISS& env,
   if (mustBeInStack(base)) {
     return setStackForBase(env, ty);
   }
-
-  if (couldBeInPrivateStatic(env, base)) setPrivateStaticForBase(env, ty);
-  if (couldBeInPublicStatic(base))       setPublicStaticForBase(env, ty);
+  if (mustBeInStatic(base)) {
+    return setStaticForBase(env, ty);
+  }
 }
 
 void startBase(ISS& env, Base base) {
@@ -592,31 +577,21 @@ void promoteBaseNewElem(ISS& env) {
 
 //////////////////////////////////////////////////////////////////////
 
-void handleInPublicStaticElemD(ISS& env) {
+void handleInStaticElemU(ISS& env) {
   auto const& base = env.collect.mInstrState.base;
-  if (!couldBeInPublicStatic(base)) return;
-
-  auto const name = baseLocNameType(base);
-  auto const ty = env.index.lookup_public_static(env.ctx, base.locTy, name);
-}
-
-void handleInThisElemD(ISS& env) {}
-
-// Currently NewElem and Elem InFoo effects don't need to do
-// anything different from each other.
-void handleInPublicStaticNewElem(ISS& env) { handleInPublicStaticElemD(env); }
-void handleInThisNewElem(ISS& env) { handleInThisElemD(env); }
-
-void handleInPublicStaticElemU(ISS& env) {
-  auto const& base = env.collect.mInstrState.base;
-  if (!couldBeInPublicStatic(base)) return;
+  if (!mustBeInStatic(base)) return;
 
   /*
    * Merging InitCell is correct, but very conservative, for now.
    */
-  auto const name = baseLocNameType(base);
-  env.collect.publicSPropMutations.merge(
-    env.index, env.ctx, base.locTy, name, TInitCell
+  auto const nameTy = base.locName ? sval(base.locName) : TStr;
+  env.index.merge_static_type(
+    env.ctx,
+    env.collect.publicSPropMutations,
+    env.collect.props,
+    base.locTy,
+    nameTy,
+    TInitCell
   );
 }
 
@@ -737,25 +712,6 @@ Base miBaseLocal(ISS& env, NamedLocal locBase, MOpMode mode) {
                 locBase.id };
 }
 
-Base miBaseSProp(ISS& env, Type cls, const Type& tprop) {
-  auto const self = selfCls(env);
-  auto const prop = tv(tprop);
-  auto const name = prop && prop->m_type == KindOfPersistentString
-                      ? prop->m_data.pstr : nullptr;
-  if (self && cls.subtypeOf(*self) && name) {
-    if (auto ty = selfPropAsCell(env, name)) {
-      return
-        Base { std::move(*ty), BaseLoc::StaticProp, std::move(cls), name };
-    }
-  }
-  auto indexTy = env.index.lookup_public_static(env.ctx, cls, tprop);
-  if (!indexTy.subtypeOf(BInitCell)) indexTy = TInitCell;
-  return Base { std::move(indexTy),
-                BaseLoc::StaticProp,
-                std::move(cls),
-                name };
-}
-
 //////////////////////////////////////////////////////////////////////
 // intermediate ops
 
@@ -860,7 +816,7 @@ void miElem(ISS& env, MOpMode mode, Type key, LocalId keyLoc) {
      * Elem dims with MOpMode::Unset can change a base from a static array into
      * a reference counted array.  It never promotes emptyish types, however.
      */
-    handleInPublicStaticElemU(env);
+    handleInStaticElemU(env);
     promoteBaseElemU(env);
 
     if (auto ty = array_do_elem(env, false, key)) {
@@ -879,8 +835,6 @@ void miElem(ISS& env, MOpMode mode, Type key, LocalId keyLoc) {
   }
 
   if (isDefine) {
-    handleInThisElemD(env);
-    handleInPublicStaticElemD(env);
     promoteBaseElemD(env);
   }
 
@@ -911,8 +865,6 @@ void miElem(ISS& env, MOpMode mode, Type key, LocalId keyLoc) {
 }
 
 void miNewElem(ISS& env) {
-  handleInThisNewElem(env);
-  handleInPublicStaticNewElem(env);
   promoteBaseNewElem(env);
 
   if (auto kty = array_do_newelem(env, TInitNull)) {
@@ -1114,9 +1066,6 @@ void miFinalSetElem(ISS& env,
                     LocalId keyLoc) {
   auto const t1  = popC(env);
 
-  handleInThisElemD(env);
-  handleInPublicStaticElemD(env);
-
   auto const finish = [&](Type ty) {
     endBase(env, true, keyLoc);
     discard(env, nDiscard);
@@ -1177,8 +1126,6 @@ void miFinalSetOpElem(ISS& env, int32_t nDiscard,
                       SetOpOp subop, const Type& key,
                       LocalId keyLoc) {
   auto const rhsTy = popC(env);
-  handleInThisElemD(env);
-  handleInPublicStaticElemD(env);
   promoteBaseElemD(env);
   auto const lhsTy = [&] {
     if (auto ty = array_do_elem(env, false, key)) {
@@ -1214,8 +1161,6 @@ void miFinalSetOpElem(ISS& env, int32_t nDiscard,
 void miFinalIncDecElem(ISS& env, int32_t nDiscard,
                        IncDecOp subop, const Type& key,
                        LocalId keyLoc) {
-  handleInThisElemD(env);
-  handleInPublicStaticElemD(env);
   promoteBaseElemD(env);
   auto const postTy = [&] {
     if (auto ty = array_do_elem(env, false, key)) {
@@ -1237,7 +1182,7 @@ void miFinalIncDecElem(ISS& env, int32_t nDiscard,
 }
 
 void miFinalUnsetElem(ISS& env, int32_t nDiscard, const Type&) {
-  handleInPublicStaticElemU(env);
+  handleInStaticElemU(env);
   promoteBaseElemU(env);
   // We don't handle inner-array types with unset yet.
   always_assert(env.collect.mInstrState.arrayChain.empty());
@@ -1259,9 +1204,6 @@ void pessimisticFinalNewElem(ISS& env, const Type& type) {
 
 void miFinalSetNewElem(ISS& env, int32_t nDiscard) {
   auto const t1 = popC(env);
-
-  handleInThisNewElem(env);
-  handleInPublicStaticNewElem(env);
   promoteBaseNewElem(env);
 
   auto const finish = [&](Type ty) {
@@ -1285,8 +1227,6 @@ void miFinalSetNewElem(ISS& env, int32_t nDiscard) {
 
 void miFinalSetOpNewElem(ISS& env, int32_t nDiscard) {
   popC(env);
-  handleInThisNewElem(env);
-  handleInPublicStaticNewElem(env);
   promoteBaseNewElem(env);
   pessimisticFinalNewElem(env, TInitCell);
   endBase(env);
@@ -1295,8 +1235,6 @@ void miFinalSetOpNewElem(ISS& env, int32_t nDiscard) {
 }
 
 void miFinalIncDecNewElem(ISS& env, int32_t nDiscard) {
-  handleInThisNewElem(env);
-  handleInPublicStaticNewElem(env);
   promoteBaseNewElem(env);
   pessimisticFinalNewElem(env, TInitCell);
   endBase(env);
@@ -1322,21 +1260,65 @@ void in(ISS& env, const bc::BaseGL& op) {
 }
 
 void in(ISS& env, const bc::BaseSC& op) {
-  auto cls = topC(env, op.arg2);
-  auto prop = topC(env, op.arg1);
+  auto tcls = topC(env, op.arg2);
+  auto const tname = topC(env, op.arg1);
 
-  auto const vname = tv(prop);
-  if (op.subop3 == MOpMode::Define || op.subop3 == MOpMode::Unset ||
-      op.subop3 == MOpMode::InOut ) {
-        if (vname && vname->m_type == KindOfPersistentString &&
-          canSkipMergeOnConstProp(env, cls, vname->m_data.pstr)) {
-          unreachable(env);
-          return;
-        }
+  // We'll raise an error if its not a class
+  if (!tcls.couldBe(BCls)) return unreachable(env);
+
+  // Lookup what we know about the property
+  auto lookup = env.index.lookup_static(
+    env.ctx,
+    env.collect.props,
+    tcls,
+    tname
+  );
+
+  // If we definitely didn't find anything, we'll definitely throw
+  if (lookup.found == TriBool::No || lookup.ty.subtypeOf(BBottom)) {
+    return unreachable(env);
   }
-  auto newBase = miBaseSProp(env, std::move(cls), prop);
-  if (newBase.type.subtypeOf(BBottom)) return unreachable(env);
-  startBase(env, std::move(newBase));
+
+  // Whether we might potentially throw because of AttrConst
+  auto mightConstThrow = false;
+  switch (op.subop3) {
+    case MOpMode::Define:
+    case MOpMode::Unset:
+    case MOpMode::InOut:
+      // If its definitely const, we'll always throw. Otherwise we'll
+      // potentially throw if there's a chance its AttrConst.
+      if (lookup.isConst == TriBool::Yes) return unreachable(env);
+      mightConstThrow = lookup.isConst == TriBool::Maybe;
+      break;
+    case MOpMode::None:
+    case MOpMode::Warn:
+      // These don't mutate the base, so AttrConst does not apply
+      break;
+  }
+
+  // Loading the base from a static property can be considered
+  // effect_free if there's no possibility of throwing. This requires
+  // a definitely found, non-AttrLateInit property with normal class
+  // initialization, and both the class and name have to be the normal
+  // types.
+  if (lookup.found == TriBool::Yes &&
+      lookup.lateInit == TriBool::No &&
+      !lookup.classInitMightRaise &&
+      !mightConstThrow &&
+      tcls.subtypeOf(BCls) &&
+      tname.subtypeOf(BStr)) {
+    effect_free(env);
+  }
+
+  return startBase(
+    env,
+    Base {
+      std::move(lookup.ty),
+      BaseLoc::StaticProp,
+      std::move(tcls),
+      lookup.name
+    }
+  );
 }
 
 void in(ISS& env, const bc::BaseL& op) {

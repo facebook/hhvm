@@ -94,17 +94,20 @@ void dump_class_state(std::ostream& out,
           << show(kv.second.ty) << '\n';
     }
 
-    auto const sprops = sorted_prop_state(
+    auto const private_sprops = sorted_prop_state(
       index.lookup_private_statics(c)
     );
-    for (auto const& kv : sprops) {
+    for (auto const& kv : private_sprops) {
       out << clsName << "::$" << kv.first->data() << " :: "
           << show(kv.second.ty) << '\n';
     }
 
-    for (auto const& prop : c->properties) {
-      out << clsName << "::$" << prop.name->data() << " :: "
-          << show(index.lookup_public_static(Context{}, c, prop.name)) << '\n';
+    auto const public_sprops = sorted_prop_state(
+      index.lookup_public_statics(c)
+    );
+    for (auto const& kv : public_sprops) {
+      out << clsName << "::$" << kv.first->data() << " :: "
+          << show(kv.second.ty) << '\n';
     }
   }
 

@@ -1571,6 +1571,7 @@ void dce(Env& env, const bc::CastKeyset&)       { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::CastString&)       { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::CastVArray&)       { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::CastVec&)          { pushRemovableIfNoThrow(env); }
+void dce(Env& env, const bc::CGetS&)            { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::Cmp&)              { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::CombineAndResolveTypeStruct&) {
   pushRemovableIfNoThrow(env);
@@ -1584,6 +1585,7 @@ void dce(Env& env, const bc::Gt&)               { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::Gte&)              { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::Idx&)              { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::IsLateBoundCls&)   { pushRemovableIfNoThrow(env); }
+void dce(Env& env, const bc::IssetS&)           { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::IsTypeStructC&)    { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::Lt&)               { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::Lte&)              { pushRemovableIfNoThrow(env); }
@@ -1633,7 +1635,6 @@ void dce(Env& env, const bc::BaseH& op) { no_dce(env, op); }
 void dce(Env& env, const bc::BreakTraceHint& op) { no_dce(env, op); }
 void dce(Env& env, const bc::CGetCUNop& op) { no_dce(env, op); }
 void dce(Env& env, const bc::CGetG& op) { no_dce(env, op); }
-void dce(Env& env, const bc::CGetS& op) { no_dce(env, op); }
 void dce(Env& env, const bc::ChainFaults& op) { no_dce(env, op); }
 void dce(Env& env, const bc::CheckReifiedGenericMismatch& op) {
   no_dce(env, op);
@@ -1676,7 +1677,6 @@ void dce(Env& env, const bc::InstanceOfD& op) { no_dce(env, op); }
 void dce(Env& env, const bc::IssetG& op) { no_dce(env, op); }
 void dce(Env& env, const bc::IssetL& op) { no_dce(env, op); }
 void dce(Env& env, const bc::IsUnsetL& op) { no_dce(env, op); }
-void dce(Env& env, const bc::IssetS& op) { no_dce(env, op); }
 void dce(Env& env, const bc::IterFree& op) { no_dce(env, op); }
 void dce(Env& env, const bc::Jmp& op) { no_dce(env, op); }
 void dce(Env& env, const bc::JmpNS& op) { no_dce(env, op); }

@@ -976,94 +976,12 @@ void unsetUnknownThisProp(ISS& env) {
 // Similar to $this properties above, we only track control-flow
 // insensitive types for these.
 
-PropStateElem<>* selfPropRaw(ISS& env, SString name) {
-  auto& privateStatics = env.collect.props.privateStatics();
-  auto it = privateStatics.find(name);
-  if (it != end(privateStatics)) {
-    return &it->second;
-  }
-  return nullptr;
-}
-
-void killSelfProps(ISS& env) {
-  FTRACE(2, "    killSelfProps\n");
+void killPrivateStatics(ISS& env) {
+  FTRACE(2, "    killPrivateStatics\n");
   for (auto& kv : env.collect.props.privateStatics()) {
     kv.second.ty |=
-      adjust_type_for_prop(env.index, *env.ctx.cls, kv.second.tc, TCell);
+      adjust_type_for_prop(env.index, *env.ctx.cls, kv.second.tc, TInitCell);
   }
-}
-
-void killSelfProp(ISS& env, SString name) {
-  FTRACE(2, "    killSelfProp {}\n", name->data());
-  if (auto elem = selfPropRaw(env, name)) {
-    elem->ty |= adjust_type_for_prop(env.index, *env.ctx.cls, elem->tc, TCell);
-  }
-}
-
-// TODO(#3684136): self::$foo can't actually ever be uninit.  Right
-// now uninits may find their way into here though.
-folly::Optional<Type> selfPropAsCell(ISS& env, SString name) {
-  auto const elem = selfPropRaw(env, name);
-  if (!elem) return folly::none;
-  return to_cell(elem->ty);
-}
-
-/*
- * Merges a type into tracked static properties on self, in the
- * sense of tvSet (i.e. setting the inner type on possible refs).
- */
-void mergeSelfProp(ISS& env, SString name, Type type) {
-  auto const elem = selfPropRaw(env, name);
-  if (!elem) return;
-  // Context types might escape to other contexts here.
-  auto const adjusted =
-    adjust_type_for_prop(env.index, *env.ctx.cls, elem->tc, unctx(type));
-  elem->ty |= adjusted;
-}
-
-/*
- * Similar to mergeEachThisPropRaw, but for self props.
- */
-template<class MapFn>
-void mergeEachSelfPropRaw(ISS& env, MapFn fn) {
-  for (auto& kv : env.collect.props.privateStatics()) {
-    mergeSelfProp(env, kv.first, fn(kv.second.ty));
-  }
-}
-
-bool isMaybeLateInitSelfProp(ISS& env, SString name) {
-  if (!env.ctx.cls) return false;
-  for (auto const& prop : env.ctx.cls->properties) {
-    if (prop.name == name &&
-        (prop.attrs & AttrPrivate) &&
-        (prop.attrs & AttrStatic)
-       ) {
-      return prop.attrs & AttrLateInit;
-    }
-  }
-  // Prop either doesn't exist, or is on an unflattened trait. Be conservative.
-  return true;
-}
-
-/*
- * Determines whether we can skip expanding the type of a
- * const property.
- * Requires propName is the value of a TypedValue with type
- * KindOfPersistentString
- */
-bool canSkipMergeOnConstProp(ISS&env, Type tcls, SString propName) {
-    if (is_specialized_cls(tcls)) {
-      DCls cls = dcls_of(tcls);
-      if (cls.type == DCls::Exact && cls.cls.resolved()) {
-          for (auto& prop : cls.cls.cls()->properties) {
-            if (prop.name == propName &&
-               (prop.attrs & AttrIsConst)) {
-                 return true;
-            }
-          }
-       }
-    }
-    return false;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1084,17 +1002,6 @@ ProvTag provTagHere(ISS& env) {
   );
 }
 
-/*
- * Check whether the class given by the type might raise when initialized.
- */
-bool classInitMightRaise(ISS& env, const Type& cls) {
-  if (RuntimeOption::EvalCheckPropTypeHints <= 0) return false;
-  if (!is_specialized_cls(cls)) return true;
-  auto const dcls = dcls_of(cls);
-  if (dcls.type != DCls::Exact) return true;
-  return env.index.lookup_class_init_might_raise(env.ctx, dcls.cls);
-}
-
 void badPropInitialValue(ISS& env) {
   FTRACE(2, "    badPropInitialValue\n");
   env.collect.props.setBadPropInitialValues();
@@ -1108,4 +1015,3 @@ void badPropInitialValue(ISS& env) {
 //////////////////////////////////////////////////////////////////////
 
 }}
-

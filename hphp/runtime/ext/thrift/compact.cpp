@@ -26,6 +26,7 @@
 #include "hphp/runtime/ext/collections/ext_collections-set.h"
 #include "hphp/runtime/ext/collections/ext_collections-vector.h"
 #include "hphp/runtime/ext/reflection/ext_reflection.h"
+#include "hphp/runtime/ext/thrift/adapter.h"
 #include "hphp/runtime/ext/thrift/spec-holder.h"
 #include "hphp/runtime/ext/thrift/transport.h"
 
@@ -249,7 +250,8 @@ struct CompactWriter {
         fieldInfo.cls = obj->getVMClass();
         fieldInfo.fieldName = field.name;
         fieldInfo.fieldNum = field.fieldNum;
-        writeField(fieldVal, fieldSpec.asArray(), fieldType, fieldInfo);
+        writeField(
+            fieldVal, fieldSpec.asArray(), fieldType, fieldInfo, field.adapter);
         writeFieldEnd();
       }
     }
@@ -284,7 +286,11 @@ struct CompactWriter {
             fieldInfo.cls = cls;
             fieldInfo.prop = &prop[slot];
             fieldInfo.fieldNum = fields[slot].fieldNum;
-            writeField(fieldVal, fieldSpec.asArray(), fieldType, fieldInfo);
+            writeField(fieldVal,
+                       fieldSpec.asArray(),
+                       fieldType,
+                       fieldInfo,
+                       fields[slot].adapter);
             writeFieldEnd();
           } else if (UNLIKELY(fieldVal.is(KindOfUninit)) &&
                      (prop[slot].attrs & AttrLateInit)) {
@@ -336,7 +342,18 @@ struct CompactWriter {
     void writeField(const Variant& value,
                     const Array& valueSpec,
                     TType type,
-                    const FieldInfo& fieldInfo) {
+                    const FieldInfo& fieldInfo,
+                    Class* adapter) {
+      const auto& thriftValue =
+          adapter ? transformToThriftType(value, *adapter) : value;
+      writeFieldInternal(thriftValue, valueSpec, type, fieldInfo);
+    }
+
+    void writeFieldInternal(
+        const Variant& value,
+        const Array& valueSpec,
+        TType type,
+        const FieldInfo& fieldInfo) {
       switch (type) {
         case T_STOP:
         case T_VOID:
@@ -457,9 +474,12 @@ struct CompactWriter {
         spec.lookup(s_val, AccessFlags::ErrorKey)
       );
 
+      auto keyAdapter = getAdapter(keySpec);
+      auto valueAdapter = getAdapter(valueSpec);
+
       auto elemWriter = [&](TypedValue k, TypedValue v) {
-        writeField(VarNR(k), keySpec, keyType, fieldInfo);
-        writeField(VarNR(v), valueSpec, valueType, fieldInfo);
+        writeField(VarNR(k), keySpec, keyType, fieldInfo, keyAdapter);
+        writeField(VarNR(v), valueSpec, valueType, fieldInfo, valueAdapter);
         return false;
       };
 
@@ -475,23 +495,23 @@ struct CompactWriter {
       writeCollectionEnd();
     }
 
-    void writeList(
-        const Variant& list,
-        const Array& spec,
-        CListType listType,
-        const FieldInfo& fieldInfo) {
+    void writeList(const Variant& list,
+                   const Array& spec,
+                   CListType listType,
+                   const FieldInfo& fieldInfo) {
       TType valueType = (TType)(char)tvCastToInt64(
         spec.lookup(s_etype, AccessFlags::ErrorKey)
       );
       auto valueSpec = tvCastToArrayLike(
         spec.lookup(s_elem, AccessFlags::ErrorKey)
       );
+      auto valueAdapter = getAdapter(valueSpec);
 
       auto const listWriter = [&](TypedValue v) {
-        writeField(VarNR(v), valueSpec, valueType, fieldInfo);
+        writeField(VarNR(v), valueSpec, valueType, fieldInfo, valueAdapter);
       };
       auto const setWriter = [&](TypedValue k, TypedValue /*v*/) {
-        writeField(VarNR(k), valueSpec, valueType, fieldInfo);
+        writeField(VarNR(k), valueSpec, valueType, fieldInfo, valueAdapter);
       };
 
       always_assert(listType == C_LIST_LIST ||
@@ -672,7 +692,8 @@ struct CompactReader {
 
           if (typesAreCompatible(fieldType, expectedType)) {
             readComplete = true;
-            Variant fieldValue = readField(fieldSpec, fieldType);
+            Variant fieldValue =
+                readField(fieldSpec, fieldType, getAdapter(fieldSpec));
             dest->o_set(fieldName, fieldValue, dest->getClassName());
             bool isUnion = tvCastToBoolean(spec.lookup(s_union));
             if (isUnion) {
@@ -726,7 +747,8 @@ struct CompactReader {
         }
         ArrNR fieldSpec(fields[slot].spec);
         auto index = cls->propSlotToIndex(slot);
-        tvSet(*readField(fieldSpec.asArray(), fieldType).asTypedValue(),
+        tvSet(*readField(fieldSpec.asArray(), fieldType, fields[slot].adapter)
+                   .asTypedValue(),
               objProp->at(index));
         if (!fields[slot].noTypeCheck) {
           dest->verifyPropTypeHint(slot);
@@ -796,7 +818,12 @@ struct CompactReader {
       state = STATE_FIELD_READ;
     }
 
-    Variant readField(const Array& spec, TType type) {
+    Variant readField(const Array& spec, TType type, Class* adapter) {
+      const auto thriftValue = readFieldInternal(spec, type);
+      return adapter ? transformToHackType(thriftValue, *adapter) : thriftValue;
+    }
+
+    Variant readFieldInternal(const Array& spec, TType type) {
       switch (type) {
         case T_STOP:
         case T_VOID:
@@ -993,6 +1020,8 @@ struct CompactReader {
       auto valueSpec = tvCastToArrayLike(
         spec.lookup(s_val, AccessFlags::Error)
       );
+      auto keyAdapter = getAdapter(keySpec);
+      auto valueAdapter = getAdapter(valueSpec);
       auto format = tvCastToString(spec.lookup(s_format));
       if (format.equal(s_harray)) {
         DictInit arr(size);
@@ -1002,14 +1031,14 @@ struct CompactReader {
             case TType::T_I16:
             case TType::T_I32:
             case TType::T_I64: {
-              int64_t key = readField(keySpec, keyType).toInt64();
-              Variant value = readField(valueSpec, valueType);
+              int64_t key = readField(keySpec, keyType, keyAdapter).toInt64();
+              Variant value = readField(valueSpec, valueType, valueAdapter);
               arr.set(key, value);
               break;
             }
             case TType::T_STRING: {
-              String key = readField(keySpec, keyType).toString();
-              Variant value = readField(valueSpec, valueType);
+              String key = readField(keySpec, keyType, keyAdapter).toString();
+              Variant value = readField(valueSpec, valueType, valueAdapter);
               arr.set(key, value);
               break;
             }
@@ -1024,8 +1053,8 @@ struct CompactReader {
       } else if (format.equal(s_collection)) {
         auto ret(req::make<c_Map>(size));
         for (uint32_t i = 0; i < size; i++) {
-          Variant key = readField(keySpec, keyType);
-          Variant value = readField(valueSpec, valueType);
+          Variant key = readField(keySpec, keyType, keyAdapter);
+          Variant value = readField(valueSpec, valueType, valueAdapter);
           BaseMap::OffsetSet(ret.get(), key.asTypedValue(), value.asTypedValue());
         }
         readCollectionEnd();
@@ -1036,8 +1065,8 @@ struct CompactReader {
           arr.setLegacyArray(true);
         }
         for (uint32_t i = 0; i < size; i++) {
-          auto key = readField(keySpec, keyType);
-          auto value = readField(valueSpec, valueType);
+          auto key = readField(keySpec, keyType, keyAdapter);
+          auto value = readField(valueSpec, valueType, valueAdapter);
           set_with_intish_key_cast(arr, key, value);
         }
         readCollectionEnd();
@@ -1053,11 +1082,12 @@ struct CompactReader {
       auto valueSpec = tvCastToArrayLike(
         spec.lookup(s_elem, AccessFlags::ErrorKey)
       );
+      auto valueAdapter = getAdapter(valueSpec);
       auto format = tvCastToString(spec.lookup(s_format));
       if (format.equal(s_harray)) {
         VecInit arr(size);
         for (uint32_t i = 0; i < size; i++) {
-          arr.append(readField(valueSpec, valueType));
+          arr.append(readField(valueSpec, valueType, valueAdapter));
         }
         readCollectionEnd();
         return arr.toVariant();
@@ -1069,7 +1099,7 @@ struct CompactReader {
         auto vec = req::make<c_Vector>(size);
         int64_t i = 0;
         do {
-          auto val = readField(valueSpec, valueType);
+          auto val = readField(valueSpec, valueType, valueAdapter);
           tvDup(*val.asTypedValue(), vec->appendForUnserialize(i));
         } while (++i < size);
         readCollectionEnd();
@@ -1080,7 +1110,7 @@ struct CompactReader {
           vai.setLegacyArray(true);
         }
         for (auto i = uint32_t{0}; i < size; ++i) {
-          vai.append(readField(valueSpec, valueType));
+          vai.append(readField(valueSpec, valueType, valueAdapter));
         }
         readCollectionEnd();
         return vai.toVariant();
@@ -1095,18 +1125,19 @@ struct CompactReader {
       auto valueSpec = tvCastToArrayLike(
         spec.lookup(s_elem, AccessFlags::ErrorKey)
       );
+      auto valueAdapter = getAdapter(valueSpec);
       auto format = tvCastToString(spec.lookup(s_format));
       if (format.equal(s_harray)) {
         KeysetInit arr(size);
         for (uint32_t i = 0; i < size; i++) {
-          arr.add(readField(valueSpec, valueType));
+          arr.add(readField(valueSpec, valueType, valueAdapter));
         }
         readCollectionEnd();
         return arr.toVariant();
       } else if (format.equal(s_collection)) {
         auto set_ret = req::make<c_Set>(size);
         for (uint32_t i = 0; i < size; i++) {
-          Variant value = readField(valueSpec, valueType);
+          Variant value = readField(valueSpec, valueType, valueAdapter);
           set_ret->add(value);
         }
         readCollectionEnd();
@@ -1117,7 +1148,7 @@ struct CompactReader {
           ainit.setLegacyArray(true);
         }
         for (uint32_t i = 0; i < size; i++) {
-          Variant value = readField(valueSpec, valueType);
+          Variant value = readField(valueSpec, valueType, valueAdapter);
           set_with_intish_key_cast(ainit, value, true);
         }
         readCollectionEnd();

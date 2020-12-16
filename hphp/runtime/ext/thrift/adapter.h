@@ -17,40 +17,18 @@
 
 #pragma once
 
-#include "hphp/runtime/base/array-init.h"
-#include "hphp/runtime/ext/thrift/transport.h"
+#include "hphp/runtime/base/type-array.h"
+#include "hphp/runtime/base/type-variant.h"
+#include "hphp/runtime/vm/class.h"
 
 namespace HPHP { namespace thrift {
+///////////////////////////////////////////////////////////////////////////////
 
-enum TError {
-  ERR_UNKNOWN = 0,
-  ERR_INVALID_DATA = 1,
-  ERR_BAD_VERSION = 4
-};
+Class* getAdapter(const Array& spec);
 
-[[noreturn]] inline void thrift_error(const String& what, TError why) {
-  throw_object(s_TProtocolException, make_vec_array(what, why));
-}
+Variant transformToHackType(Variant value, Class& adapter);
 
-inline void set_with_intish_key_cast(
-  DArrayInit& arr,
-  const Variant& key,
-  const Variant& value
-) {
-  if (key.isString()) {
-    int64_t intish_key;
-    if (key.getStringData()->isStrictlyInteger(intish_key)) {
-      arr.set(intish_key, value);
-    } else {
-      arr.set(key.toString(), value);
-    }
-  } else if (key.isInteger()) {
-    arr.set(key.toInt64(), value);
-  } else {
-    thrift_error(
-        "Unable to deserialize non int/string array keys",
-        ERR_INVALID_DATA);
-  }
-}
+Variant transformToThriftType(Variant value, Class& adapter);
 
+///////////////////////////////////////////////////////////////////////////////
 }}

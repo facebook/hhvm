@@ -1,0 +1,14 @@
+--- binary ---
+
+Warning: runtime/ext_thrift: Output buffer has %d unflushed bytes in %s/slow/thrift/hack_adapter_bad.php on line %d
+adapter class ThisAdapterDoesntExist doesn't exist
+
+Warning: runtime/ext_thrift: Output buffer has %d unflushed bytes in %s/slow/thrift/hack_adapter_bad.php on line %d
+adapter method BadAdapter::toThrift() doesn't exist
+--- compact ---
+
+Warning: runtime/ext_thrift: Output buffer has %d unflushed bytes in %s/slow/thrift/hack_adapter_bad.php on line %d
+adapter class ThisAdapterDoesntExist doesn't exist
+
+Warning: runtime/ext_thrift: Output buffer has %d unflushed bytes in %s/slow/thrift/hack_adapter_bad.php on line %d
+adapter method BadAdapter::toThrift() doesn't exist

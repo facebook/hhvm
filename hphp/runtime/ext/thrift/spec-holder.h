@@ -17,6 +17,7 @@
 
 #pragma once
 
+#include "hphp/runtime/ext/thrift/adapter.h"
 #include "hphp/runtime/ext/thrift/ext_thrift.h"
 #include "hphp/runtime/ext/thrift/transport.h"
 #include "hphp/runtime/ext/thrift/util.h"
@@ -35,6 +36,7 @@ struct FieldSpec {
   TType type;
   StringData* name;  // TODO(9396341): Consider using LowStringPtr.
   ArrayData* spec;
+  Class* adapter;
   bool isUnion;
   bool noTypeCheck; // If this field doesn't need type checking
                     // (conservatively).
@@ -146,6 +148,7 @@ struct SpecHolder {
       field.isUnion = tvCastToBoolean(
         fieldSpec.lookup(s_union, AccessFlags::Key)
       );
+      field.adapter = getAdapter(fieldSpec);
 
       // A union field also writes to a property named __type. If one exists, we
       // need to also verify that it accepts integer values. We only need to do
@@ -190,4 +193,3 @@ struct SpecHolder {
 };
 
 }}
-

@@ -731,26 +731,29 @@ let call ~pos renv env call_type that_pty_opt args ret_ty =
     let args_pty = List.map ~f:fst args in
     call_regular ~pos renv env call_type name that_pty_opt args_pty ret_pty
 
-let array_like ~cow ~shape ~klass ~tuple ty =
+let array_like ~cow ~shape ~klass ~tuple ~dynamic ty =
   let rec search ty =
     match ty with
     | Tcow_array _ when cow -> Some ty
     | Tshape _ when shape -> Some ty
     | Tclass _ when klass -> Some ty
     | Ttuple _ when tuple -> Some ty
+    | Tdynamic _ when dynamic -> Some ty
     | Tinter tys -> List.find_map tys search
     | _ -> None
   in
   search ty
 
-let array_like_with_default ~cow ~shape ~klass ~tuple ~pos renv ty =
-  match array_like ~cow ~shape ~klass ~tuple ty with
+let array_like_with_default ~cow ~shape ~klass ~tuple ~dynamic ~pos renv ty =
+  match array_like ~cow ~shape ~klass ~tuple ~dynamic ty with
   | Some ty -> ty
   | None ->
     Errors.unknown_information_flow pos "Hack array";
     (* The default is completely arbitrary but it should be the least
        precisely handled array structure given the search options. *)
-    if klass then
+    if dynamic then
+      Tdynamic (Env.new_policy_var renv "fake_dynamic")
+    else if klass then
       Tclass
         {
           c_name = "fake";
@@ -779,6 +782,7 @@ let cow_array ~pos renv ty =
       ~shape:false
       ~klass:false
       ~tuple:false
+      ~dynamic:false
       ~pos
       renv
       ty
@@ -906,6 +910,7 @@ let rec assign
         ~shape:true
         ~klass:true
         ~tuple:true
+        ~dynamic:false
         ~pos
         renv
         new_arry_pty
@@ -1323,6 +1328,7 @@ let rec expr ~pos renv (env : Env.expr_env) (((epos, ety), e) : Tast.expr) =
         ~shape:true
         ~klass:true
         ~tuple:true
+        ~dynamic:false
         ~pos
         renv
         arry_pty
@@ -1695,6 +1701,7 @@ and stmt renv (env : Env.stmt_env) ((pos, s) : Tast.stmt) =
         ~shape:false
         ~klass:true
         ~tuple:false
+        ~dynamic:true
         ~pos
         renv
         collection_pty
@@ -1719,6 +1726,9 @@ and stmt renv (env : Env.stmt_env) ((pos, s) : Tast.stmt) =
             let cl_pols = [class_.c_self; class_.c_lump] in
             let env = Env.acc env (add_dependencies ~pos cl_pols value_pty) in
             (env, value_pty, PSet.of_list cl_pols)
+          | Tdynamic dyn_pol ->
+            (* Deconstruction of dynamic also produces dynamic *)
+            (env, collection_pty, PSet.singleton dyn_pol)
           | _ -> fail "Collection is neither a class nor a cow array"
         in
         let env = assign_helper ~expr ~pos renv env value value_pty in
@@ -1743,6 +1753,9 @@ and stmt renv (env : Env.stmt_env) ((pos, s) : Tast.stmt) =
             let env = Env.acc env (add_dependencies ~pos cl_pols value_pty) in
             let env = Env.acc env (add_dependencies ~pos cl_pols key_pty) in
             (env, key_pty, value_pty, PSet.of_list cl_pols)
+          | Tdynamic dyn_pol ->
+            (* Deconstruction of dynamic also produces dynamic *)
+            (env, collection_pty, collection_pty, PSet.singleton dyn_pol)
           | _ -> fail "Collection is neither a class nor a cow array"
         in
         let env = assign_helper ~expr ~pos renv env key key_pty in

@@ -17,14 +17,14 @@
                      { hf_reactive_kind = FNonreactive;
                        hf_param_tys = [([3:35-38], (Hprim Tint))];
                        hf_param_kinds = [None]; hf_param_mutability = [None];
-                       hf_variadic_ty = None; hf_cap = None;
+                       hf_variadic_ty = None; hf_ctxs = None;
                        hf_return_ty = ([3:41-44], (Hprim Tint));
                        hf_is_mutable_return = false }))));
           param_is_variadic = false; param_pos = [3:46-48];
           param_name = "$f"; param_expr = None; param_callconv = None;
           param_user_attributes = []; param_visibility = None }
         ];
-      f_cap = None; f_unsafe_cap = None;
+      f_ctxs = None; f_unsafe_ctxs = None;
       f_body =
       { fb_ast =
         [([4:3-13],

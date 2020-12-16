@@ -3038,7 +3038,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         }
     }
 
-    fn make_capability(&mut self, lb: Self::R, tys: Self::R, rb: Self::R) -> Self::R {
+    fn make_contexts(&mut self, lb: Self::R, tys: Self::R, rb: Self::R) -> Self::R {
         let mut namespace_builder =
             NamespaceBuilder::empty_with_ns_in("\\HH\\Contexts\\", self.state.arena);
         std::mem::swap(

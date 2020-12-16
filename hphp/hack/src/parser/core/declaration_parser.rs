@@ -1558,7 +1558,7 @@ where
         });
         let (equal, ctx_list) = if self.peek_token_kind() == TokenKind::Equal {
             let equal = self.assert_token(TokenKind::Equal);
-            let ctx_list = self.with_type_parser(|p| p.parse_capability_opt());
+            let ctx_list = self.with_type_parser(|p| p.parse_contexts());
             (equal, ctx_list)
         } else {
             let missing1 = S!(make_missing, self, self.pos());
@@ -1930,8 +1930,7 @@ where
             p.parse_generic_type_parameter_list_opt()
         });
         let (left_paren_token, parameter_list, right_paren_token) = self.parse_parameter_list_opt();
-        let capability =
-            self.with_type_parser(|p: &mut TypeParser<'a, S>| p.parse_capability_opt());
+        let contexts = self.with_type_parser(|p: &mut TypeParser<'a, S>| p.parse_contexts());
         let (colon_token, return_type) = self.parse_return_type_hint_opt();
         let where_clause = self.parse_where_clause_opt();
         S!(
@@ -1944,7 +1943,7 @@ where
             left_paren_token,
             parameter_list,
             right_paren_token,
-            capability,
+            contexts,
             colon_token,
             return_type,
             where_clause,

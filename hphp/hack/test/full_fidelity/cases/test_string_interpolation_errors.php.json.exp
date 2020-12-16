@@ -116,7 +116,7 @@
                 "line_number":2
               }
             },
-            "function_capability":{"kind":"missing"},
+            "function_contexts":{"kind":"missing"},
             "function_colon":{"kind":"missing"},
             "function_type":{"kind":"missing"},
             "function_where_clause":{"kind":"missing"}
@@ -7897,7 +7897,7 @@
                 "line_number":62
               }
             },
-            "function_capability":{"kind":"missing"},
+            "function_contexts":{"kind":"missing"},
             "function_colon":{"kind":"missing"},
             "function_type":{"kind":"missing"},
             "function_where_clause":{"kind":"missing"}
@@ -11930,7 +11930,7 @@
                 "line_number":95
               }
             },
-            "function_capability":{"kind":"missing"},
+            "function_contexts":{"kind":"missing"},
             "function_colon":{"kind":"missing"},
             "function_type":{"kind":"missing"},
             "function_where_clause":{"kind":"missing"}
@@ -12389,5 +12389,5 @@
     }
   },
   "program_text":"<?hh\nfunction okay() {\n  $a = \"$b\";\n  $a = \"$b->c\";\n  $a = \"$b[0]\";\n  $a = \"$b[$c]\";\n  $a = \"$$b\";\n\n  // Note: only `$b->c` is interpolated, and `->d` is left as a literal string.\n  $a = \"$b->c->d\";\n  // Note: only `$b[0]` is interpolated, and `[1]` is left as a literal string.\n  $a = \"$b[0][1]\";\n  // Note: only `$b` is interpolated, and `\\[0]` is left as a literal string.\n  $a = \"$b\\[0]\";\n\n  $a = \"${b}\";\n  $a = \"${b[0]}\";\n  $a = \"${b[ 0 ]}\";\n  $a = \"${b['data']}\";\n  $a = \"${ b }\";\n  $a = \"${$b}\";\n  $a = \"${b + 1}\";\n  $a = \"${b.\"\"}\";\n  $a = \"${b && 1}\";\n  $a = \"${b !== 1}\";\n  $a = \"${b < 1}\";\n  $a = \"${b ?? 1}\";\n  $a = \"${b(print('foo'))}\";\n  $a = \"${b[print('foo')]}\";\n  $a = \"${b ? 1 : 2}\";\n  $a = \"${$b}\";\n\n  // These are effectively parsed as referring to the constant `b` instead of\n  // the variable `b`. If they were parsed as if they were referring to the\n  // variable `b`, then only a single layer of subscripting would be permitted.\n  $a = \"${ b[0][1]}\";\n  $a = \"${b [0][1]}\";\n\n  // Note: actually illegal in PHP (because member access is illegal on\n  // constants), but caught by the typechecker. HHVM throws a runtime error.\n  $a = \"${b->c}\";\n\n  // Still interpolates `$b` and `$c`, but doesn't fail because of the `{$` in\n  // the middle of the string.\n  $a = \"\\{$b foo $c\\}\";\n\n  $a = \"{$b[1]}\";\n  $a = \"{$b[1][2]}\";\n  $a = \"{$b[1]()}\";\n  $a = \"{$b[1]->c}\";\n  $a = \"{$b[1]->c[2]}\";\n  $a = \"{$b[print('hello')]}\";\n  $a = \"{$b->c}\";\n  $a = \"{$b[1]->c[2]}\";\n  $a = \"{$b()}\";\n  $a = \"{$b(c(1 + 2))}\";\n  $a = \"{$b()[1]}\";\n  $a = \"{$b()->c}\";\n  $a = \"{$$b}\";\n}\n\nfunction not_okay() {\n  $a = \"$b[\";\n  $a = \"$b[]\";\n  $a = \"$b[0\";\n  $a = \"$b[ 0]\";\n  $a = \"$b[0 ]\";\n  $a = \"$b[$$c]\";\n  $a = \"$b[$c->d]\";\n  $a = \"$b[0\\]\";\n\n  $a = \"${b[0][1]}\";\n  $a = \"${b = 1}\";\n  $a = \"${b += 1}\";\n\n  $a = \"{$b\";\n  $a = \"{$b foo $c}\";\n  $a = \"{$b is C}\";\n  $a = \"{$b.$c}\";\n  $a = \"{$b + 1}\";\n  $a = \"{$b = 1}\";\n  $a = \"{$b !== 1}\";\n  $a = \"{$b ?? 1}\";\n  $a = \"{$b[1] . 'c'}\";\n  $a = \"{$b() . 'c'}\";\n  $a = \"{$b::C}\";\n  $a = \"{$b++}\";\n  $a = \"{$b ? 1 : 2}\";\n\n  // Note: actually parses in PHP but appears to be mostly useless. At runtime,\n  // looks up the static property literally named '$c'.\n  $a = \"{$b::$c}\";\n}\n\nfunction implementation_defined_okay() {\n  $a = \"{$b?->c}\";\n  $a = \"{$b->c()?->d}\";\n}\n",
-  "version":"2020-12-09-0001"
+  "version":"2020-12-14-0001"
 }

@@ -19,7 +19,7 @@
             param_callconv = None; param_user_attributes = [];
             param_visibility = None }
            ];
-         m_cap = None; m_unsafe_cap = None;
+         m_ctxs = None; m_unsafe_ctxs = None;
          m_body =
          { fb_ast =
            [([5:5-15],

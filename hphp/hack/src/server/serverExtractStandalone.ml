@@ -379,7 +379,7 @@ let rec string_of_hint hint =
         hf_param_kinds;
         hf_param_mutability = _;
         hf_variadic_ty;
-        hf_cap = _;
+        hf_ctxs = _;
         (* TODO(vmladenov) support capability types here *)
         hf_return_ty;
         hf_is_mutable_return = _;

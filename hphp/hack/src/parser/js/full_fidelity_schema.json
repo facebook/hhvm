@@ -716,15 +716,15 @@
         { "field_name" : "left_paren" },
         { "field_name" : "parameter_list" },
         { "field_name" : "right_paren" },
-        { "field_name" : "capability" },
+        { "field_name" : "contexts" },
         { "field_name" : "colon" },
         { "field_name" : "type" },
         { "field_name" : "where_clause" }
       ] },
-    { "kind_name" : "Capability",
-      "type_name" : "capability",
-      "description" : "capability",
-      "prefix" : "capability",
+    { "kind_name" : "Contexts",
+      "type_name" : "contexts",
+      "description" : "contexts",
+      "prefix" : "contexts",
       "fields" : [
         { "field_name" : "left_bracket" },
         { "field_name" : "types" },
@@ -1314,7 +1314,7 @@
         { "field_name" : "left_paren" },
         { "field_name" : "parameters" },
         { "field_name" : "right_paren" },
-        { "field_name" : "capability" },
+        { "field_name" : "contexts" },
         { "field_name" : "colon" },
         { "field_name" : "type" }
       ] },
@@ -1909,7 +1909,7 @@
         { "field_name" : "inner_left_paren" },
         { "field_name" : "parameter_list" },
         { "field_name" : "inner_right_paren" },
-        { "field_name" : "capability" },
+        { "field_name" : "contexts" },
         { "field_name" : "colon" },
         { "field_name" : "return_type" },
         { "field_name" : "outer_right_paren" }

@@ -15,7 +15,7 @@ Errors:
                  )))));
       f_name = ([4:16-31], "\\gen_empty_shape"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
-      f_cap = None; f_unsafe_cap = None;
+      f_ctxs = None; f_unsafe_ctxs = None;
       f_body =
       { fb_ast =
         [([5:3-18], (Return (Some (([5:10-17], shape()), (Shape [])))))];
@@ -37,7 +37,7 @@ Errors:
                   [([8:34-38], (Hprim Tvoid))])))));
        f_name = ([8:16-20], "\\test"); f_tparams = [];
        f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
-       f_cap = None; f_unsafe_cap = None;
+       f_ctxs = None; f_unsafe_ctxs = None;
        f_body =
        { fb_ast =
          [([9:3-15:4],

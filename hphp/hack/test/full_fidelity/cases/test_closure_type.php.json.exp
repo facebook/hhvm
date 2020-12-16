@@ -203,7 +203,7 @@
                           "line_number":3
                         }
                       },
-                      "closure_capability":{"kind":"missing"},
+                      "closure_contexts":{"kind":"missing"},
                       "closure_colon":{
                         "kind":"token",
                         "token":{
@@ -284,7 +284,7 @@
                 "line_number":3
               }
             },
-            "function_capability":{"kind":"missing"},
+            "function_contexts":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
               "token":{
@@ -674,7 +674,7 @@
                           "line_number":8
                         }
                       },
-                      "closure_capability":{"kind":"missing"},
+                      "closure_contexts":{"kind":"missing"},
                       "closure_colon":{
                         "kind":"token",
                         "token":{
@@ -755,7 +755,7 @@
                 "line_number":8
               }
             },
-            "function_capability":{"kind":"missing"},
+            "function_contexts":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
               "token":{
@@ -1198,7 +1198,7 @@
                           "line_number":12
                         }
                       },
-                      "closure_capability":{"kind":"missing"},
+                      "closure_contexts":{"kind":"missing"},
                       "closure_colon":{
                         "kind":"token",
                         "token":{
@@ -1279,7 +1279,7 @@
                 "line_number":12
               }
             },
-            "function_capability":{"kind":"missing"},
+            "function_contexts":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
               "token":{
@@ -1630,5 +1630,5 @@
     }
   },
   "program_text":"<?hh // strict\n\nfunction foo ((function (int) : int) $f) : int {\n  $x = $f(0);\n  return $x;\n}\n\nfunction bar ((function (...) : int) $f) : int {\n  return $f(1, 2, 3);\n}\n\nfunction baz ((function (inout string, int) : void) $f) : string {\n  $y = 'zzz';\n  $f(inout $y, 42);\n  return $y;\n}\n",
-  "version":"2020-12-09-0001"
+  "version":"2020-12-14-0001"
 }

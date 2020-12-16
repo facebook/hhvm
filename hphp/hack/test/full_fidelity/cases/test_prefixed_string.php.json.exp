@@ -116,7 +116,7 @@
                 "line_number":3
               }
             },
-            "function_capability":{"kind":"missing"},
+            "function_contexts":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
               "token":{
@@ -3329,5 +3329,5 @@
     }
   },
   "program_text":"<?hh\n\nfunction f() : void {\n  $x = \"It\";\n  $y = \"worst\";\n  $z = f\"{$x} was the {$y} of times\";\n  $w = re\"blah blah\";\n  $a = re\"\";\n  // Consistent with `aks-A124jk12jhd()`; Parses as `aks` minus prefixed string\n  $a0 = aks-A124jk12jhd\"sosdk!nwekje@\";\n  // Parses as prefixed string\n  $a1 = aksA124jkhgf12jhdddsljs\"sosdk!nwekje@\";\n  // Parser error; `re!interpolator` is not a name\n  $a2 = re!interpolator\"Hello\";\n  $b = re\"//\";\n  $b0 = aaaaaa\"aaaaaa\";\n  $c = re\"/(.?)/\";\n  $d = re\"/.*/\";\n  $e = $c.$d;\n  $f = re\"//\".re\"//\";\n  $g = Regex\\re\"//\";\n  $h = Foo\\FooInterpolator\"\";\n\n  // Single quotes\n  $w = re'blah blah';\n  $a = re'';\n  // Consistent with `aks-A124jk12jhd()`; Parses as `aks` minus prefixed string\n  $a0 = aks-A124jk12jhd'sosdk!nwekje@';\n  // Parses as prefixed string\n  $a1 = aksA124jkhgf12jhdddsljs'sosdk!nwekje@';\n  // Parser error; `re!interpolator` is not a name\n  $a2 = re!interpolator'Hello';\n  $b = re'//';\n  $b0 = aaaaaa'aaaaaa';\n  $c = re'/(.?)/';\n  $d = re'/.*/';\n  $e = $c.$d;\n  $f = re'//'.re'//';\n  $g = Regex\\re'//';\n  $h = Foo\\FooInterpolator'';\n\n  // TODO(T19708752): Enable qualified names as prefixes\n  // $i = \\HH\\Lib\\Private\\Foo\\FooInterpolator\"\";\n  // $j = Private\\Foo\\FooInterpolator\"\";\n  // $h0 = Foo\\FooInterpolator\"hello$firstname{$lastname}, goodbye\";\n  // $i0 = \\HH\\Lib\\Private\\Foo\\FooInterpolator\"hello$x, goodbye\";\n  // $j0 = Private\\Foo\\FooInterpolator\"hello$x, goodbye\";\n}\n",
-  "version":"2020-12-09-0001"
+  "version":"2020-12-14-0001"
 }

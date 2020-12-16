@@ -116,7 +116,7 @@
                 "line_number":3
               }
             },
-            "function_capability":{"kind":"missing"},
+            "function_contexts":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
               "token":{

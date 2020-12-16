@@ -54,7 +54,7 @@
           param_expr = None; param_callconv = None;
           param_user_attributes = []; param_visibility = None }
         ];
-      f_cap = None; f_unsafe_cap = None;
+      f_ctxs = None; f_unsafe_ctxs = None;
       f_body =
       { fb_ast =
         [([11:3-52],
@@ -157,7 +157,7 @@
                            param_callconv = None; param_user_attributes = [];
                            param_visibility = None }
                           ];
-                        f_cap = None; f_unsafe_cap = None;
+                        f_ctxs = None; f_unsafe_ctxs = None;
                         f_body =
                         { fb_ast =
                           [([20:31-35],

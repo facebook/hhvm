@@ -234,7 +234,7 @@
                 "line_number":2
               }
             },
-            "function_capability":{"kind":"missing"},
+            "function_contexts":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
               "token":{
@@ -598,7 +598,7 @@
                         "line_number":5
                       }
                     },
-                    "function_capability":{"kind":"missing"},
+                    "function_contexts":{"kind":"missing"},
                     "function_colon":{
                       "kind":"token",
                       "token":{
@@ -705,5 +705,5 @@
     }
   },
   "program_text":"<?hh\nfunction foo(int $bar = 1, $blah) : void {\n}\nclass C {\n  public function foo(int $bar = 1, $blah, $baz) : void {\n  }\n}\n",
-  "version":"2020-12-09-0001"
+  "version":"2020-12-14-0001"
 }

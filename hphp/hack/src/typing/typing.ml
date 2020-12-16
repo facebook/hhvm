@@ -3180,7 +3180,7 @@ and anon_make ?el ?ret_ty env lambda_pos f ft idl is_anon =
   Env.anon env.lenv env (fun env ->
       (* Extract capabilities from AAST and add them to the environment *)
       let (env, capability) =
-        match (f.f_cap, f.f_unsafe_cap) with
+        match (f.f_ctxs, f.f_unsafe_ctxs) with
         | (None, None) ->
           (* if the closure has no explicit coeffect annotations,
             do _not_ insert (unsafe) capabilities into the environment;
@@ -3193,7 +3193,7 @@ and anon_make ?el ?ret_ty env lambda_pos f ft idl is_anon =
           (env, Env.get_local env Typing_coeffects.local_capability_id)
         | (_, _) ->
           let (env, cap_ty, unsafe_cap_ty) =
-            type_capability env f.f_cap f.f_unsafe_cap (fst f.f_name)
+            type_capability env f.f_ctxs f.f_unsafe_ctxs (fst f.f_name)
           in
           Typing_coeffects.register_capabilities env cap_ty unsafe_cap_ty
       in
@@ -3353,8 +3353,8 @@ and anon_make ?el ?ret_ty env lambda_pos f ft idl is_anon =
               Aast.f_file_attributes = [];
               Aast.f_user_attributes = user_attributes;
               Aast.f_body = { Aast.fb_ast = tb; fb_annotation = () };
-              Aast.f_cap = f.f_cap;
-              Aast.f_unsafe_cap = f.f_unsafe_cap;
+              Aast.f_ctxs = f.f_ctxs;
+              Aast.f_unsafe_ctxs = f.f_unsafe_ctxs;
               Aast.f_params = t_params;
               Aast.f_variadic = t_variadic;
               (* TODO TAST: Variadic efuns *)
@@ -3414,15 +3414,15 @@ and et_splice env p e =
 (*****************************************************************************)
 (* End expression trees *)
 (*****************************************************************************)
-and type_capability env cap unsafe_cap default_pos =
+and type_capability env ctxs unsafe_ctxs default_pos =
   let cc = Decl_hint.aast_contexts_to_decl_capability in
   let (env, cap_ty) =
-    match cc env.decl_env cap default_pos with
+    match cc env.decl_env ctxs default_pos with
     | CapTy ty -> Phase.localize_with_self env ty
     | CapDefaults _p -> (env, MakeType.default_capability)
   in
   let (env, unsafe_cap_ty) =
-    match cc env.decl_env unsafe_cap default_pos with
+    match cc env.decl_env unsafe_ctxs default_pos with
     | CapTy ty -> Phase.localize_with_self env ty
     | CapDefaults p ->
       (* default is no unsafe capabilities *)

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<5bc00506802cc9592a064556061eebb7>>
+// @generated SignedSource<<9780d652941df779e176b50beb5493cf>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -221,7 +221,7 @@ pub struct HintFun {
     pub param_kinds: Vec<Option<ast_defs::ParamKind>>,
     pub param_mutability: Vec<Option<ParamMutability>>,
     pub variadic_ty: VariadicHint,
-    pub cap: Option<Contexts>,
+    pub ctxs: Option<Contexts>,
     pub return_ty: Hint,
     pub is_mutable_return: MutableReturn,
 }

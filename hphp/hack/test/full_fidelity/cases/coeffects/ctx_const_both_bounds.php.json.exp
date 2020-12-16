@@ -354,8 +354,8 @@
                           }
                         },
                         "constraint_type":{
-                          "kind":"capability",
-                          "capability_left_bracket":{
+                          "kind":"contexts",
+                          "contexts_left_bracket":{
                             "kind":"token",
                             "token":{
                               "kind":"[",
@@ -369,7 +369,7 @@
                               "line_number":5
                             }
                           },
-                          "capability_types":{
+                          "contexts_types":{
                             "kind":"list",
                             "elements":[
                               {
@@ -395,7 +395,7 @@
                               }
                             ]
                           },
-                          "capability_right_bracket":{
+                          "contexts_right_bracket":{
                             "kind":"token",
                             "token":{
                               "kind":"]",
@@ -428,8 +428,8 @@
                           }
                         },
                         "constraint_type":{
-                          "kind":"capability",
-                          "capability_left_bracket":{
+                          "kind":"contexts",
+                          "contexts_left_bracket":{
                             "kind":"token",
                             "token":{
                               "kind":"[",
@@ -443,7 +443,7 @@
                               "line_number":5
                             }
                           },
-                          "capability_types":{
+                          "contexts_types":{
                             "kind":"list",
                             "elements":[
                               {
@@ -469,7 +469,7 @@
                               }
                             ]
                           },
-                          "capability_right_bracket":{
+                          "contexts_right_bracket":{
                             "kind":"token",
                             "token":{
                               "kind":"]",
@@ -502,8 +502,8 @@
                     }
                   },
                   "context_const_ctx_list":{
-                    "kind":"capability",
-                    "capability_left_bracket":{
+                    "kind":"contexts",
+                    "contexts_left_bracket":{
                       "kind":"token",
                       "token":{
                         "kind":"[",
@@ -517,7 +517,7 @@
                         "line_number":5
                       }
                     },
-                    "capability_types":{
+                    "contexts_types":{
                       "kind":"list",
                       "elements":[
                         {
@@ -543,7 +543,7 @@
                         }
                       ]
                     },
-                    "capability_right_bracket":{
+                    "contexts_right_bracket":{
                       "kind":"token",
                       "token":{
                         "kind":"]",
@@ -658,9 +658,9 @@
                         "line_number":7
                       }
                     },
-                    "function_capability":{
-                      "kind":"capability",
-                      "capability_left_bracket":{
+                    "function_contexts":{
+                      "kind":"contexts",
+                      "contexts_left_bracket":{
                         "kind":"token",
                         "token":{
                           "kind":"[",
@@ -674,7 +674,7 @@
                           "line_number":7
                         }
                       },
-                      "capability_types":{
+                      "contexts_types":{
                         "kind":"list",
                         "elements":[
                           {
@@ -728,7 +728,7 @@
                           }
                         ]
                       },
-                      "capability_right_bracket":{
+                      "contexts_right_bracket":{
                         "kind":"token",
                         "token":{
                           "kind":"]",
@@ -969,9 +969,9 @@
                 "line_number":12
               }
             },
-            "function_capability":{
-              "kind":"capability",
-              "capability_left_bracket":{
+            "function_contexts":{
+              "kind":"contexts",
+              "contexts_left_bracket":{
                 "kind":"token",
                 "token":{
                   "kind":"[",
@@ -985,7 +985,7 @@
                   "line_number":12
                 }
               },
-              "capability_types":{
+              "contexts_types":{
                 "kind":"list",
                 "elements":[
                   {
@@ -1011,7 +1011,7 @@
                   }
                 ]
               },
-              "capability_right_bracket":{
+              "contexts_right_bracket":{
                 "kind":"token",
                 "token":{
                   "kind":"]",
@@ -1254,8 +1254,8 @@
                           }
                         },
                         "constraint_type":{
-                          "kind":"capability",
-                          "capability_left_bracket":{
+                          "kind":"contexts",
+                          "contexts_left_bracket":{
                             "kind":"token",
                             "token":{
                               "kind":"[",
@@ -1269,7 +1269,7 @@
                               "line_number":15
                             }
                           },
-                          "capability_types":{
+                          "contexts_types":{
                             "kind":"list",
                             "elements":[
                               {
@@ -1295,7 +1295,7 @@
                               }
                             ]
                           },
-                          "capability_right_bracket":{
+                          "contexts_right_bracket":{
                             "kind":"token",
                             "token":{
                               "kind":"]",
@@ -1328,8 +1328,8 @@
                           }
                         },
                         "constraint_type":{
-                          "kind":"capability",
-                          "capability_left_bracket":{
+                          "kind":"contexts",
+                          "contexts_left_bracket":{
                             "kind":"token",
                             "token":{
                               "kind":"[",
@@ -1343,7 +1343,7 @@
                               "line_number":15
                             }
                           },
-                          "capability_types":{
+                          "contexts_types":{
                             "kind":"list",
                             "elements":[
                               {
@@ -1369,7 +1369,7 @@
                               }
                             ]
                           },
-                          "capability_right_bracket":{
+                          "contexts_right_bracket":{
                             "kind":"token",
                             "token":{
                               "kind":"]",
@@ -1402,8 +1402,8 @@
                     }
                   },
                   "context_const_ctx_list":{
-                    "kind":"capability",
-                    "capability_left_bracket":{
+                    "kind":"contexts",
+                    "contexts_left_bracket":{
                       "kind":"token",
                       "token":{
                         "kind":"[",
@@ -1417,7 +1417,7 @@
                         "line_number":15
                       }
                     },
-                    "capability_types":{
+                    "contexts_types":{
                       "kind":"list",
                       "elements":[
                         {
@@ -1443,7 +1443,7 @@
                         }
                       ]
                     },
-                    "capability_right_bracket":{
+                    "contexts_right_bracket":{
                       "kind":"token",
                       "token":{
                         "kind":"]",
@@ -1653,8 +1653,8 @@
                           }
                         },
                         "constraint_type":{
-                          "kind":"capability",
-                          "capability_left_bracket":{
+                          "kind":"contexts",
+                          "contexts_left_bracket":{
                             "kind":"token",
                             "token":{
                               "kind":"[",
@@ -1668,7 +1668,7 @@
                               "line_number":19
                             }
                           },
-                          "capability_types":{
+                          "contexts_types":{
                             "kind":"list",
                             "elements":[
                               {
@@ -1694,7 +1694,7 @@
                               }
                             ]
                           },
-                          "capability_right_bracket":{
+                          "contexts_right_bracket":{
                             "kind":"token",
                             "token":{
                               "kind":"]",
@@ -1727,8 +1727,8 @@
                           }
                         },
                         "constraint_type":{
-                          "kind":"capability",
-                          "capability_left_bracket":{
+                          "kind":"contexts",
+                          "contexts_left_bracket":{
                             "kind":"token",
                             "token":{
                               "kind":"[",
@@ -1742,7 +1742,7 @@
                               "line_number":19
                             }
                           },
-                          "capability_types":{
+                          "contexts_types":{
                             "kind":"list",
                             "elements":[
                               {
@@ -1768,7 +1768,7 @@
                               }
                             ]
                           },
-                          "capability_right_bracket":{
+                          "contexts_right_bracket":{
                             "kind":"token",
                             "token":{
                               "kind":"]",
@@ -1801,8 +1801,8 @@
                     }
                   },
                   "context_const_ctx_list":{
-                    "kind":"capability",
-                    "capability_left_bracket":{
+                    "kind":"contexts",
+                    "contexts_left_bracket":{
                       "kind":"token",
                       "token":{
                         "kind":"[",
@@ -1816,7 +1816,7 @@
                         "line_number":19
                       }
                     },
-                    "capability_types":{
+                    "contexts_types":{
                       "kind":"list",
                       "elements":[
                         {
@@ -1842,7 +1842,7 @@
                         }
                       ]
                     },
-                    "capability_right_bracket":{
+                    "contexts_right_bracket":{
                       "kind":"token",
                       "token":{
                         "kind":"]",
@@ -1954,9 +1954,9 @@
                         "line_number":20
                       }
                     },
-                    "function_capability":{
-                      "kind":"capability",
-                      "capability_left_bracket":{
+                    "function_contexts":{
+                      "kind":"contexts",
+                      "contexts_left_bracket":{
                         "kind":"token",
                         "token":{
                           "kind":"[",
@@ -1970,7 +1970,7 @@
                           "line_number":20
                         }
                       },
-                      "capability_types":{
+                      "contexts_types":{
                         "kind":"list",
                         "elements":[
                           {
@@ -2024,7 +2024,7 @@
                           }
                         ]
                       },
-                      "capability_right_bracket":{
+                      "contexts_right_bracket":{
                         "kind":"token",
                         "token":{
                           "kind":"]",
@@ -2145,5 +2145,5 @@
     }
   },
   "program_text":"<?hh\n<<file: __EnableUnstableFeatures('coeffects_provisional')>>\n\nabstract class AtLeastRxShallowButImpureIterator {\n  abstract const ctx C super [rx_shallow] as [rx] = [rx];\n\n  public function call_into_rx()[this::C]: void {\n    require_rx(); // ok (rx_shallow <: C <: rx)\n  }\n}\n\nfunction require_rx()[rx]: void {}\n\nclass ExactlyRxIterator extends AtLeastRxShallowButImpureIterator {\n  const ctx C super [rx_shallow] as [rx] = [rx];\n}\n\nclass ExactlyRxShallowIterator extends AtLeastRxShallowButImpureIterator {\n  const ctx C super [rx_shallow] as [rx] = [rx_shallow];\n  public function call_into_rx_shallow()[this::C]: void {}\n}\n",
-  "version":"2020-12-09-0001"
+  "version":"2020-12-14-0001"
 }

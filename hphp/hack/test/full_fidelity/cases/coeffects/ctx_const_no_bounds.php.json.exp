@@ -528,8 +528,8 @@
                     }
                   },
                   "context_const_ctx_list":{
-                    "kind":"capability",
-                    "capability_left_bracket":{
+                    "kind":"contexts",
+                    "contexts_left_bracket":{
                       "kind":"token",
                       "token":{
                         "kind":"[",
@@ -543,7 +543,7 @@
                         "line_number":9
                       }
                     },
-                    "capability_types":{
+                    "contexts_types":{
                       "kind":"list",
                       "elements":[
                         {
@@ -569,7 +569,7 @@
                         }
                       ]
                     },
-                    "capability_right_bracket":{
+                    "contexts_right_bracket":{
                       "kind":"token",
                       "token":{
                         "kind":"]",
@@ -793,8 +793,8 @@
                     }
                   },
                   "context_const_ctx_list":{
-                    "kind":"capability",
-                    "capability_left_bracket":{
+                    "kind":"contexts",
+                    "contexts_left_bracket":{
                       "kind":"token",
                       "token":{
                         "kind":"[",
@@ -808,7 +808,7 @@
                         "line_number":13
                       }
                     },
-                    "capability_types":{
+                    "contexts_types":{
                       "kind":"list",
                       "elements":[
                         {
@@ -834,7 +834,7 @@
                         }
                       ]
                     },
-                    "capability_right_bracket":{
+                    "contexts_right_bracket":{
                       "kind":"token",
                       "token":{
                         "kind":"]",
@@ -1040,8 +1040,8 @@
                     }
                   },
                   "context_const_ctx_list":{
-                    "kind":"capability",
-                    "capability_left_bracket":{
+                    "kind":"contexts",
+                    "contexts_left_bracket":{
                       "kind":"token",
                       "token":{
                         "kind":"[",
@@ -1055,7 +1055,7 @@
                         "line_number":17
                       }
                     },
-                    "capability_types":{
+                    "contexts_types":{
                       "kind":"list",
                       "elements":[
                         {
@@ -1115,7 +1115,7 @@
                         }
                       ]
                     },
-                    "capability_right_bracket":{
+                    "contexts_right_bracket":{
                       "kind":"token",
                       "token":{
                         "kind":"]",
@@ -1184,5 +1184,5 @@
     }
   },
   "program_text":"<?hh\n<<file: __EnableUnstableFeatures('coeffects_provisional')>>\n\ninterface Iterator {\n  abstract const ctx Tc;\n}\n\ninterface NonDetIterator extends Iterator {\n  abstract const ctx Tc = [non_det];\n}\n\ninterface ImpureIterator extends Iterator {\n  abstract const ctx Tc = [defaults];\n}\n\nclass ImpureIteratorImpl extends ImpureIterator {\n  const ctx Tc = [non_det, rx];\n}\n",
-  "version":"2020-12-09-0001"
+  "version":"2020-12-14-0001"
 }

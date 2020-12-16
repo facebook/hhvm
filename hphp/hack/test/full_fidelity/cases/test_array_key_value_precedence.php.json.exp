@@ -116,7 +116,7 @@
                 "line_number":2
               }
             },
-            "function_capability":{"kind":"missing"},
+            "function_contexts":{"kind":"missing"},
             "function_colon":{"kind":"missing"},
             "function_type":{"kind":"missing"},
             "function_where_clause":{"kind":"missing"}
@@ -384,5 +384,5 @@
     }
   },
   "program_text":"<?hh\nfunction f(){\n  await $x . darray[$a => b *= 1];\n}\n",
-  "version":"2020-12-09-0001"
+  "version":"2020-12-14-0001"
 }

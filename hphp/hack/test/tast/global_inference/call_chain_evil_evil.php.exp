@@ -19,7 +19,7 @@
             param_callconv = None; param_user_attributes = [];
             param_visibility = None }
            ];
-         m_cap = None; m_unsafe_cap = None;
+         m_ctxs = None; m_unsafe_ctxs = None;
          m_body =
          { fb_ast =
            [([5:5-15],
@@ -59,7 +59,7 @@
             param_callconv = None; param_user_attributes = [];
             param_visibility = None }
            ];
-         m_cap = None; m_unsafe_cap = None;
+         m_ctxs = None; m_unsafe_ctxs = None;
          m_body =
          { fb_ast =
            [([5:5-21],
@@ -109,7 +109,7 @@
             param_callconv = None; param_user_attributes = [];
             param_visibility = None }
            ];
-         m_cap = None; m_unsafe_cap = None;
+         m_ctxs = None; m_unsafe_ctxs = None;
          m_body =
          { fb_ast =
            [([5:5-27],
@@ -151,7 +151,7 @@
     { f_span = [3:1-5:2]; f_annotation = (); f_mode = Mpartial;
       f_ret = ((string), None); f_name = ([3:10-11], "\\f"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
-      f_cap = None; f_unsafe_cap = None;
+      f_ctxs = None; f_unsafe_ctxs = None;
       f_body =
       { fb_ast =
         [([4:3-31],

@@ -269,11 +269,11 @@ pub trait FlattenSmartConstructors<'src, State>
         }
     }
 
-    fn make_capability(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R) -> Self::R {
+    fn make_contexts(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R) -> Self::R {
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) {
-          Self::zero(SyntaxKind::Capability)
+          Self::zero(SyntaxKind::Contexts)
         } else {
-          self.flatten(SyntaxKind::Capability, vec!(arg0, arg1, arg2))
+          self.flatten(SyntaxKind::Contexts, vec!(arg0, arg1, arg2))
         }
     }
 

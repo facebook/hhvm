@@ -129,7 +129,7 @@
                 "line_number":4
               }
             },
-            "function_capability":{"kind":"missing"},
+            "function_contexts":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
               "token":{
@@ -321,7 +321,7 @@
                             "line_number":5
                           }
                         },
-                        "lambda_capability":{"kind":"missing"},
+                        "lambda_contexts":{"kind":"missing"},
                         "lambda_colon":{"kind":"missing"},
                         "lambda_type":{"kind":"missing"}
                       },
@@ -585,7 +585,7 @@
                                   "line_number":9
                                 }
                               },
-                              "lambda_capability":{"kind":"missing"},
+                              "lambda_contexts":{"kind":"missing"},
                               "lambda_colon":{"kind":"missing"},
                               "lambda_type":{"kind":"missing"}
                             },
@@ -761,5 +761,5 @@
     }
   },
   "program_text":"<?hh //strict\n\n/* There should be no errors due to the absence of typehints on $a and $b */\nfunction test():void {\n  $lambda = ($a, $b) ==> {\n    return 1;\n  };\n\n  bar(($a, $b) ==> {\n    return 1;\n  });\n}\n",
-  "version":"2020-12-09-0001"
+  "version":"2020-12-14-0001"
 }

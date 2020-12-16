@@ -5596,7 +5596,7 @@ where
             UnionTypeSpecifier(_) | IntersectionTypeSpecifier(_) => {
                 self.check_can_use_feature(node, &UnstableFeatures::UnionIntersectionTypeHints)
             }
-            Capability(_) => {
+            Contexts(_) => {
                 self.check_can_use_feature(node, &UnstableFeatures::CoeffectsProvisional)
             }
             ClassishDeclaration(x) => match &x.where_clause.children {

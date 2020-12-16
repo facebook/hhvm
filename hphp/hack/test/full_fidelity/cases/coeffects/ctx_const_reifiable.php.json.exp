@@ -354,8 +354,8 @@
                           }
                         },
                         "constraint_type":{
-                          "kind":"capability",
-                          "capability_left_bracket":{
+                          "kind":"contexts",
+                          "contexts_left_bracket":{
                             "kind":"token",
                             "token":{
                               "kind":"[",
@@ -369,7 +369,7 @@
                               "line_number":5
                             }
                           },
-                          "capability_types":{
+                          "contexts_types":{
                             "kind":"list",
                             "elements":[
                               {
@@ -395,7 +395,7 @@
                               }
                             ]
                           },
-                          "capability_right_bracket":{
+                          "contexts_right_bracket":{
                             "kind":"token",
                             "token":{
                               "kind":"]",
@@ -469,5 +469,5 @@
     }
   },
   "program_text":"<?hh\n<<file: __EnableUnstableFeatures('coeffects_provisional')>>\n\nabstract class Base {\n  <<__Reifiable>> abstract const ctx C super [output];\n}\n",
-  "version":"2020-12-09-0001"
+  "version":"2020-12-14-0001"
 }

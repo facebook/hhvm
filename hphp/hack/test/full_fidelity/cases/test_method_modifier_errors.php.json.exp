@@ -174,7 +174,7 @@
                         "line_number":4
                       }
                     },
-                    "function_capability":{"kind":"missing"},
+                    "function_contexts":{"kind":"missing"},
                     "function_colon":{"kind":"missing"},
                     "function_type":{"kind":"missing"},
                     "function_where_clause":{"kind":"missing"}
@@ -299,7 +299,7 @@
                         "line_number":5
                       }
                     },
-                    "function_capability":{"kind":"missing"},
+                    "function_contexts":{"kind":"missing"},
                     "function_colon":{"kind":"missing"},
                     "function_type":{"kind":"missing"},
                     "function_where_clause":{"kind":"missing"}
@@ -434,7 +434,7 @@
                         "line_number":6
                       }
                     },
-                    "function_capability":{"kind":"missing"},
+                    "function_contexts":{"kind":"missing"},
                     "function_colon":{"kind":"missing"},
                     "function_type":{"kind":"missing"},
                     "function_where_clause":{"kind":"missing"}
@@ -613,7 +613,7 @@
                         "line_number":10
                       }
                     },
-                    "function_capability":{"kind":"missing"},
+                    "function_contexts":{"kind":"missing"},
                     "function_colon":{"kind":"missing"},
                     "function_type":{"kind":"missing"},
                     "function_where_clause":{"kind":"missing"}
@@ -720,7 +720,7 @@
                         "line_number":11
                       }
                     },
-                    "function_capability":{"kind":"missing"},
+                    "function_contexts":{"kind":"missing"},
                     "function_colon":{"kind":"missing"},
                     "function_type":{"kind":"missing"},
                     "function_where_clause":{"kind":"missing"}
@@ -837,7 +837,7 @@
                         "line_number":12
                       }
                     },
-                    "function_capability":{"kind":"missing"},
+                    "function_contexts":{"kind":"missing"},
                     "function_colon":{"kind":"missing"},
                     "function_type":{"kind":"missing"},
                     "function_where_clause":{"kind":"missing"}
@@ -998,7 +998,7 @@
                         "line_number":16
                       }
                     },
-                    "function_capability":{"kind":"missing"},
+                    "function_contexts":{"kind":"missing"},
                     "function_colon":{"kind":"missing"},
                     "function_type":{"kind":"missing"},
                     "function_where_clause":{"kind":"missing"}
@@ -1123,7 +1123,7 @@
                         "line_number":17
                       }
                     },
-                    "function_capability":{"kind":"missing"},
+                    "function_contexts":{"kind":"missing"},
                     "function_colon":{"kind":"missing"},
                     "function_type":{"kind":"missing"},
                     "function_where_clause":{"kind":"missing"}
@@ -1258,7 +1258,7 @@
                         "line_number":18
                       }
                     },
-                    "function_capability":{"kind":"missing"},
+                    "function_contexts":{"kind":"missing"},
                     "function_colon":{"kind":"missing"},
                     "function_type":{"kind":"missing"},
                     "function_where_clause":{"kind":"missing"}
@@ -1336,5 +1336,5 @@
     }
   },
   "program_text":"<?hh\n\nclass A {\n  function a1() {} //error2054\n  static function a2() {}\n  protected static function a3() {}\n}\n\ninterface B {\n  function b1();  //error2054\n  final function b2();\n  public final function b3();\n}\n\ntrait C {\n  function c1() {}  //error2054\n  static function c2() {}\n  private static function c3() {}\n}\n",
-  "version":"2020-12-09-0001"
+  "version":"2020-12-14-0001"
 }

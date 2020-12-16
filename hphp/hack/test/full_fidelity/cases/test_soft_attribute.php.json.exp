@@ -647,7 +647,7 @@
                 "line_number":6
               }
             },
-            "function_capability":{"kind":"missing"},
+            "function_contexts":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
               "token":{
@@ -883,7 +883,7 @@
                 "line_number":8
               }
             },
-            "function_capability":{"kind":"missing"},
+            "function_contexts":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
               "token":{
@@ -1720,7 +1720,7 @@
                         "line_number":17
                       }
                     },
-                    "function_capability":{"kind":"missing"},
+                    "function_contexts":{"kind":"missing"},
                     "function_colon":{
                       "kind":"token",
                       "token":{
@@ -2247,5 +2247,5 @@
     }
   },
   "program_text":"<?hh\n\ntype t = <<__Soft>> darray<int, <<__Soft>> string>;\ntype u = varray<<<__Soft>> int>;\n\nfunction f<T>(): void {}\n\nfunction g(<<__Soft>> int $_): <<__Soft>> string {\n  f<<<__Soft>> float>();\n  return \"hello\";\n}\n\nabstract class C {\n  <<__Soft>> protected float $x;\n  const type T = <<__Soft>> int;\n\n  public async function f(): Awaitable<<<__Soft>> int> {\n    return 42;\n  }\n}\n\nclass D {\n  const <<__Soft>> int X = 0;\n}\n",
-  "version":"2020-12-09-0001"
+  "version":"2020-12-14-0001"
 }

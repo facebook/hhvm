@@ -190,9 +190,9 @@ where
         Self::R::make_function_declaration_header(self.state_mut(), arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10)
     }
 
-    fn make_capability(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> Self::R {
+    fn make_contexts(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> Self::R {
         self.state_mut().next(&[&arg0, &arg1, &arg2]);
-        Self::R::make_capability(self.state_mut(), arg0, arg1, arg2)
+        Self::R::make_contexts(self.state_mut(), arg0, arg1, arg2)
     }
 
     fn make_where_clause(&mut self, arg0 : Self::R, arg1 : Self::R) -> Self::R {

@@ -428,18 +428,18 @@ let schema : schema_node list =
           ("left_paren", Token);
           ("parameter_list", ZeroOrMore (Aggregate Parameter));
           ("right_paren", Token);
-          ("capability", ZeroOrOne (Just "Capability"));
+          ("contexts", ZeroOrOne (Just "Contexts"));
           ("colon", ZeroOrOne Token);
           ("type", ZeroOrOne (Just "AttributizedSpecifier"));
           ("where_clause", ZeroOrOne (Just "WhereClause"));
         ];
     };
     {
-      kind_name = "Capability";
-      type_name = "capability";
-      func_name = "capability";
-      description = "capability";
-      prefix = "capability";
+      kind_name = "Contexts";
+      type_name = "contexts";
+      func_name = "contexts";
+      description = "contexts";
+      prefix = "contexts";
       aggregates = [Specifier];
       fields =
         [
@@ -680,7 +680,7 @@ let schema : schema_node list =
           ("type_parameters", ZeroOrOne (Just "TypeParameters"));
           ("constraint", ZeroOrMore (Just "ContextConstraint"));
           ("equal", ZeroOrOne Token);
-          ("ctx_list", ZeroOrOne (Just "Capability"));
+          ("ctx_list", ZeroOrOne (Just "Contexts"));
           ("semicolon", Token);
         ];
     };
@@ -1203,7 +1203,7 @@ let schema : schema_node list =
           ("left_paren", Token);
           ("parameters", ZeroOrMore (Aggregate Parameter));
           ("right_paren", Token);
-          ("ctx_list", ZeroOrOne (Just "Capability"));
+          ("ctx_list", ZeroOrOne (Just "Contexts"));
           ("colon", ZeroOrOne Token);
           ("type", ZeroOrOne (Aggregate Specifier));
           ("use", ZeroOrOne (Just "AnonymousFunctionUseClause"));
@@ -1253,7 +1253,7 @@ let schema : schema_node list =
           ("left_paren", Token);
           ("parameters", ZeroOrMore (Aggregate Parameter));
           ("right_paren", Token);
-          ("capability", ZeroOrOne (Just "Capability"));
+          ("contexts", ZeroOrOne (Just "Contexts"));
           ("colon", ZeroOrOne Token);
           ("type", ZeroOrOne (Aggregate Specifier));
         ];
@@ -2056,7 +2056,7 @@ let schema : schema_node list =
       description = "context_constraint";
       prefix = "ctx_constraint";
       aggregates = [];
-      fields = [("keyword", Token); ("ctx_list", ZeroOrOne (Just "Capability"))];
+      fields = [("keyword", Token); ("ctx_list", ZeroOrOne (Just "Contexts"))];
     };
     {
       kind_name = "DarrayTypeSpecifier";
@@ -2105,7 +2105,7 @@ let schema : schema_node list =
           ("inner_left_paren", Token);
           ("parameter_list", ZeroOrMore (Just "ClosureParameterTypeSpecifier"));
           ("inner_right_paren", Token);
-          ("capability", ZeroOrOne (Just "Capability"));
+          ("contexts", ZeroOrOne (Just "Contexts"));
           ("colon", Token);
           ("return_type", Aggregate Specifier);
           ("outer_right_paren", Token);

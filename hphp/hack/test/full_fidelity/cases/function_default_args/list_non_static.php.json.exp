@@ -120,7 +120,7 @@
                 "line_number":3
               }
             },
-            "function_capability":{"kind":"missing"},
+            "function_contexts":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
               "token":{
@@ -642,7 +642,7 @@
                 "line_number":7
               }
             },
-            "function_capability":{"kind":"missing"},
+            "function_contexts":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
               "token":{
@@ -730,5 +730,5 @@
     }
   },
   "program_text":"<?hh // strict\n\nfunction get(): int {\n  return 1;\n}\n\nfunction f((int, int, int) $list_tuple = list(get(), 3, 4)): void{}\n",
-  "version":"2020-12-09-0001"
+  "version":"2020-12-14-0001"
 }

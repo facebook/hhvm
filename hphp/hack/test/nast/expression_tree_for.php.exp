@@ -3,7 +3,7 @@
       f_ret = ((), (Some ([3:18-22], (Hprim Tvoid))));
       f_name = ([3:10-14], "\\test"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
-      f_cap = None; f_unsafe_cap = None;
+      f_ctxs = None; f_unsafe_ctxs = None;
       f_body =
       { fb_ast =
         [([4:3-62],
@@ -19,7 +19,7 @@
                          f_name = ([4:8-60], ";anonymous"); f_tparams = [];
                          f_where_constraints = [];
                          f_variadic = FVnonVariadic; f_params = [];
-                         f_cap = None; f_unsafe_cap = None;
+                         f_ctxs = None; f_unsafe_ctxs = None;
                          f_body =
                          { fb_ast =
                            [([4:17-58],
@@ -72,7 +72,7 @@
                              f_name = ([Pos.none], ";anonymous");
                              f_tparams = []; f_where_constraints = [];
                              f_variadic = FVnonVariadic; f_params = [];
-                             f_cap = None; f_unsafe_cap = None;
+                             f_ctxs = None; f_unsafe_ctxs = None;
                              f_body =
                              { fb_ast =
                                [([4:26-27],
@@ -226,8 +226,8 @@
                                                           param_visibility =
                                                           None }
                                                          ];
-                                                       f_cap = None;
-                                                       f_unsafe_cap = None;
+                                                       f_ctxs = None;
+                                                       f_unsafe_ctxs = None;
                                                        f_body =
                                                        { fb_ast =
                                                          [([4:8-60],
@@ -841,8 +841,8 @@
                                                        f_variadic =
                                                        FVnonVariadic;
                                                        f_params = [];
-                                                       f_cap = None;
-                                                       f_unsafe_cap = None;
+                                                       f_ctxs = None;
+                                                       f_unsafe_ctxs = None;
                                                        f_body =
                                                        { fb_ast =
                                                          [([4:8-60],
@@ -869,9 +869,9 @@
                                                                    FVnonVariadic;
                                                                    f_params =
                                                                    [];
-                                                                   f_cap =
+                                                                   f_ctxs =
                                                                    None;
-                                                                   f_unsafe_cap =
+                                                                   f_unsafe_ctxs =
                                                                    None;
                                                                    f_body =
                                                                    { fb_ast =

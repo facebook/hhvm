@@ -368,7 +368,7 @@ and contexts env ctxs =
   let hl = List.map ~f:(hint env) hl in
   (pos, hl)
 
-and hfun env reactivity hl kl variadic_hint cap h =
+and hfun env reactivity hl kl variadic_hint ctxs h =
   let variadic_hint = Option.map variadic_hint (hint env) in
   let (muts, hl) =
     List.map
@@ -380,7 +380,7 @@ and hfun env reactivity hl kl variadic_hint cap h =
       hl
     |> List.unzip
   in
-  let cap = Option.map ~f:(contexts env) cap in
+  let ctxs = Option.map ~f:(contexts env) ctxs in
   let (ret_mut, rh) = unwrap_mutability h in
   let ret_mut =
     match ret_mut with
@@ -398,7 +398,7 @@ and hfun env reactivity hl kl variadic_hint cap h =
         hf_param_kinds = kl;
         hf_param_mutability = muts;
         hf_variadic_ty = variadic_hint;
-        hf_cap = cap;
+        hf_ctxs = ctxs;
         hf_return_ty = hint ~allow_retonly:true env rh;
         hf_is_mutable_return = ret_mut;
       }
@@ -439,11 +439,11 @@ and hint_
           hf_param_kinds = kl;
           hf_param_mutability = _;
           hf_variadic_ty = variadic_hint;
-          hf_cap = cap;
+          hf_ctxs = ctxs;
           hf_return_ty = h;
           hf_is_mutable_return = _;
         } ->
-    hfun env reactivity hl kl variadic_hint cap h
+    hfun env reactivity hl kl variadic_hint ctxs h
   (* Special case for Pure<function> *)
   | Aast.Happly
       ( (_, hname),
@@ -457,13 +457,13 @@ and hint_
                   hf_param_kinds = kl;
                   hf_param_mutability = _;
                   hf_variadic_ty = variadic_hint;
-                  hf_cap = cap;
+                  hf_ctxs = ctxs;
                   hf_return_ty = h;
                   hf_is_mutable_return = _;
                 } );
         ] )
     when String.equal hname SN.Rx.hPure ->
-    hfun env N.FPure hl kl variadic_hint cap h
+    hfun env N.FPure hl kl variadic_hint ctxs h
   (* Special case for Rx<function> *)
   | Aast.Happly
       ( (_, hname),
@@ -477,13 +477,13 @@ and hint_
                   hf_param_kinds = kl;
                   hf_param_mutability = _;
                   hf_variadic_ty = variadic_hint;
-                  hf_cap = cap;
+                  hf_ctxs = ctxs;
                   hf_return_ty = h;
                   hf_is_mutable_return = _;
                 } );
         ] )
     when String.equal hname SN.Rx.hRx ->
-    hfun env N.FReactive hl kl variadic_hint cap h
+    hfun env N.FReactive hl kl variadic_hint ctxs h
   (* Special case for RxShallow<function> *)
   | Aast.Happly
       ( (_, hname),
@@ -497,13 +497,13 @@ and hint_
                   hf_param_kinds = kl;
                   hf_param_mutability = _;
                   hf_variadic_ty = variadic_hint;
-                  hf_cap = cap;
+                  hf_ctxs = ctxs;
                   hf_return_ty = h;
                   hf_is_mutable_return = _;
                 } );
         ] )
     when String.equal hname SN.Rx.hRxShallow ->
-    hfun env N.FShallow hl kl variadic_hint cap h
+    hfun env N.FShallow hl kl variadic_hint ctxs h
   (* Special case for RxLocal<function> *)
   | Aast.Happly
       ( (_, hname),
@@ -517,13 +517,13 @@ and hint_
                   hf_param_kinds = kl;
                   hf_param_mutability = _;
                   hf_variadic_ty = variadic_hint;
-                  hf_cap = cap;
+                  hf_ctxs = ctxs;
                   hf_return_ty = h;
                   hf_is_mutable_return = _;
                 } );
         ] )
     when String.equal hname SN.Rx.hRxLocal ->
-    hfun env N.FLocal hl kl variadic_hint cap h
+    hfun env N.FLocal hl kl variadic_hint ctxs h
   | Aast.Happly (((p, _x) as id), hl) ->
     let hint_id =
       hint_id ~forbid_this ~allow_retonly ~allow_wildcard ~tp_depth env id hl
@@ -1405,8 +1405,8 @@ and method_ genv m =
         failwith "ast_to_nast error unnamedbody in method_"
   in
   let attrs = user_attributes env m.Aast.m_user_attributes in
-  let m_cap = Option.map ~f:(contexts env) m.Aast.m_cap in
-  let m_unsafe_cap = Option.map ~f:(contexts env) m.Aast.m_unsafe_cap in
+  let m_ctxs = Option.map ~f:(contexts env) m.Aast.m_ctxs in
+  let m_unsafe_ctxs = Option.map ~f:(contexts env) m.Aast.m_unsafe_ctxs in
   {
     N.m_annotation = ();
     N.m_span = m.Aast.m_span;
@@ -1418,8 +1418,8 @@ and method_ genv m =
     N.m_tparams = tparam_l;
     N.m_where_constraints = where_constraints;
     N.m_params = paraml;
-    N.m_cap;
-    N.m_unsafe_cap;
+    N.m_ctxs;
+    N.m_unsafe_ctxs;
     N.m_body = body;
     N.m_fun_kind = m.Aast.m_fun_kind;
     N.m_ret = ret;
@@ -1518,8 +1518,8 @@ and fun_ ctx f =
       else
         failwith "ast_to_nast error unnamedbody in fun_"
   in
-  let f_cap = Option.map ~f:(contexts env) f.Aast.f_cap in
-  let f_unsafe_cap = Option.map ~f:(contexts env) f.Aast.f_unsafe_cap in
+  let f_ctxs = Option.map ~f:(contexts env) f.Aast.f_ctxs in
+  let f_unsafe_ctxs = Option.map ~f:(contexts env) f.Aast.f_unsafe_ctxs in
   let file_attributes =
     file_attributes ctx f.Aast.f_mode f.Aast.f_file_attributes
   in
@@ -1533,9 +1533,9 @@ and fun_ ctx f =
       f_tparams;
       f_where_constraints = where_constraints;
       f_params = paraml;
-      (* TODO(T70095684) double-check f_cap *)
-      f_cap;
-      f_unsafe_cap;
+      (* TODO(T70095684) double-check f_ctxs *)
+      f_ctxs;
+      f_unsafe_ctxs;
       f_body = body;
       f_fun_kind = f_kind;
       f_variadic = variadicity;
@@ -2238,8 +2238,8 @@ and expr_lambda env f =
    * environment *)
   let body_nast = f_body env f.Aast.f_body in
   let annotation = Nast.Named in
-  let f_cap = Option.map ~f:(contexts env) f.Aast.f_cap in
-  let f_unsafe_cap = Option.map ~f:(contexts env) f.Aast.f_unsafe_cap in
+  let f_ctxs = Option.map ~f:(contexts env) f.Aast.f_ctxs in
+  let f_unsafe_ctxs = Option.map ~f:(contexts env) f.Aast.f_unsafe_ctxs in
   (* These could all be probably be replaced with a {... where ...} *)
   let body = { N.fb_ast = body_nast; fb_annotation = annotation } in
   {
@@ -2250,8 +2250,8 @@ and expr_lambda env f =
     f_name = f.Aast.f_name;
     f_params = paraml;
     f_tparams = [];
-    f_cap;
-    f_unsafe_cap;
+    f_ctxs;
+    f_unsafe_ctxs;
     f_where_constraints = [];
     f_body = body;
     f_fun_kind = f.Aast.f_fun_kind;

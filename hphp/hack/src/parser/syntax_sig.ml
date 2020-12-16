@@ -199,15 +199,15 @@ module type Syntax_S = sig
     ; function_left_paren                                : t
     ; function_parameter_list                            : t
     ; function_right_paren                               : t
-    ; function_capability                                : t
+    ; function_contexts                                  : t
     ; function_colon                                     : t
     ; function_type                                      : t
     ; function_where_clause                              : t
     }
-  | Capability                        of
-    { capability_left_bracket                            : t
-    ; capability_types                                   : t
-    ; capability_right_bracket                           : t
+  | Contexts                          of
+    { contexts_left_bracket                              : t
+    ; contexts_types                                     : t
+    ; contexts_right_bracket                             : t
     }
   | WhereClause                       of
     { where_clause_keyword                               : t
@@ -565,7 +565,7 @@ module type Syntax_S = sig
     { lambda_left_paren                                  : t
     ; lambda_parameters                                  : t
     ; lambda_right_paren                                 : t
-    ; lambda_capability                                  : t
+    ; lambda_contexts                                    : t
     ; lambda_colon                                       : t
     ; lambda_type                                        : t
     }
@@ -912,7 +912,7 @@ module type Syntax_S = sig
     ; closure_inner_left_paren                           : t
     ; closure_parameter_list                             : t
     ; closure_inner_right_paren                          : t
-    ; closure_capability                                 : t
+    ; closure_contexts                                   : t
     ; closure_colon                                      : t
     ; closure_return_type                                : t
     ; closure_outer_right_paren                          : t
@@ -1082,7 +1082,7 @@ module type Syntax_S = sig
   val make_namespace_use_clause : t -> t -> t -> t -> t
   val make_function_declaration : t -> t -> t -> t
   val make_function_declaration_header : t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t
-  val make_capability : t -> t -> t -> t
+  val make_contexts : t -> t -> t -> t
   val make_where_clause : t -> t -> t
   val make_where_constraint : t -> t -> t -> t
   val make_methodish_declaration : t -> t -> t -> t -> t
@@ -1257,7 +1257,7 @@ module type Syntax_S = sig
   val is_namespace_use_clause : t -> bool
   val is_function_declaration : t -> bool
   val is_function_declaration_header : t -> bool
-  val is_capability : t -> bool
+  val is_contexts : t -> bool
   val is_where_clause : t -> bool
   val is_where_constraint : t -> bool
   val is_methodish_declaration : t -> bool

@@ -572,7 +572,7 @@
                         "line_number":8
                       }
                     },
-                    "function_capability":{"kind":"missing"},
+                    "function_contexts":{"kind":"missing"},
                     "function_colon":{"kind":"missing"},
                     "function_type":{"kind":"missing"},
                     "function_where_clause":{"kind":"missing"}
@@ -910,7 +910,7 @@
                         "line_number":12
                       }
                     },
-                    "function_capability":{"kind":"missing"},
+                    "function_contexts":{"kind":"missing"},
                     "function_colon":{
                       "kind":"token",
                       "token":{
@@ -1350,7 +1350,7 @@
                         "line_number":18
                       }
                     },
-                    "function_capability":{"kind":"missing"},
+                    "function_contexts":{"kind":"missing"},
                     "function_colon":{
                       "kind":"token",
                       "token":{
@@ -2381,5 +2381,5 @@
     }
   },
   "program_text":"<?hh\n// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.\n<<file: __EnableUnstableFeatures('enum_class')>>\n\ninterface ExBox {}\n\nclass Box<T> implements ExBox {\n  public function __construct(public T $data) {}\n}\n\nclass IBox extends Box<int> {\n  public function add(int $x): void {\n    $this->data = $this->data + $x;\n  }\n}\n\nabstract final class Helper {\n  public static function ibox(): IBox {\n    return new IBox(42);\n  }\n}\n\nenum class E: ExBox {\n  A<Box<string>>(new Box('bli'));\n  B<IBox>(Helper::ibox());\n  C<Box<int>>(new Box(42));\n}\n",
-  "version":"2020-12-09-0001"
+  "version":"2020-12-14-0001"
 }

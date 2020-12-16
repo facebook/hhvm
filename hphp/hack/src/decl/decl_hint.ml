@@ -87,7 +87,7 @@ and hint_ p env = function
         hf_param_kinds = kl;
         hf_param_mutability = muts;
         hf_variadic_ty = vh;
-        hf_cap = cap_opt;
+        hf_ctxs = ctxs;
         hf_return_ty = h;
         hf_is_mutable_return = mut_ret;
       } ->
@@ -119,7 +119,7 @@ and hint_ p env = function
     in
     let paraml = List.map3_exn hl kl muts ~f:make_param in
     let implicit_params =
-      let capability = aast_contexts_to_decl_capability env cap_opt p in
+      let capability = aast_contexts_to_decl_capability env ctxs p in
       { capability }
     in
     let ret = possibly_enforced_hint env h in

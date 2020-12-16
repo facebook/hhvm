@@ -946,7 +946,7 @@
                         "line_number":9
                       }
                     },
-                    "function_capability":{"kind":"missing"},
+                    "function_contexts":{"kind":"missing"},
                     "function_colon":{
                       "kind":"token",
                       "token":{
@@ -1053,5 +1053,5 @@
     }
   },
   "program_text":"<?hh // strict\n// Copyright 2004-present Facebook. All Rights Reserved.\n\nclass A {\n  const string S = \"hello\";\n  public string $s = \"${A::S}\";\n  const string S1 = \"${A::S}\";\n\n  public function foo(string $p = \"${A::S}\"): void{}\n}\n",
-  "version":"2020-12-09-0001"
+  "version":"2020-12-14-0001"
 }

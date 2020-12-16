@@ -12,7 +12,7 @@
          m_abstract = false; m_static = false; m_visibility = Public;
          m_name = ([4:19-22], "foo"); m_tparams = [];
          m_where_constraints = []; m_variadic = FVnonVariadic; m_params = [];
-         m_cap = None; m_unsafe_cap = None;
+         m_ctxs = None; m_unsafe_ctxs = None;
          m_body =
          { fb_ast =
            [([5:5-14], (Return (Some (([5:12-13], int), (Int "1")))))];
@@ -44,7 +44,7 @@
          m_abstract = false; m_static = false; m_visibility = Public;
          m_name = ([4:19-22], "foo"); m_tparams = [];
          m_where_constraints = []; m_variadic = FVnonVariadic; m_params = [];
-         m_cap = None; m_unsafe_cap = None;
+         m_ctxs = None; m_unsafe_ctxs = None;
          m_body =
          { fb_ast =
            [([5:5-14], (Return (Some (([5:12-13], int), (Int "3")))))];
@@ -76,7 +76,7 @@
          m_abstract = false; m_static = false; m_visibility = Public;
          m_name = ([4:19-22], "foo"); m_tparams = [];
          m_where_constraints = []; m_variadic = FVnonVariadic; m_params = [];
-         m_cap = None; m_unsafe_cap = None;
+         m_ctxs = None; m_unsafe_ctxs = None;
          m_body =
          { fb_ast =
            [([5:5-14], (Return (Some (([5:12-13], int), (Int "2")))))];

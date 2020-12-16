@@ -53,7 +53,7 @@ impl<T: LexableToken, V> Syntax<'_, T, V> {
             SyntaxVariant::NamespaceUseClause {..} => SyntaxKind::NamespaceUseClause,
             SyntaxVariant::FunctionDeclaration {..} => SyntaxKind::FunctionDeclaration,
             SyntaxVariant::FunctionDeclarationHeader {..} => SyntaxKind::FunctionDeclarationHeader,
-            SyntaxVariant::Capability {..} => SyntaxKind::Capability,
+            SyntaxVariant::Contexts {..} => SyntaxKind::Contexts,
             SyntaxVariant::WhereClause {..} => SyntaxKind::WhereClause,
             SyntaxVariant::WhereConstraint {..} => SyntaxKind::WhereConstraint,
             SyntaxVariant::MethodishDeclaration {..} => SyntaxKind::MethodishDeclaration,

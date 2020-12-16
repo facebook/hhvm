@@ -197,7 +197,7 @@
                 "line_number":5
               }
             },
-            "function_capability":{"kind":"missing"},
+            "function_contexts":{"kind":"missing"},
             "function_colon":{"kind":"missing"},
             "function_type":{"kind":"missing"},
             "function_where_clause":{"kind":"missing"}
@@ -462,5 +462,5 @@
     }
   },
   "program_text":"<?hh\n\nnamespace X ;\n\nfunction f($x) {\n  $x = HH\\Vector {1, 2};\n}\n",
-  "version":"2020-12-09-0001"
+  "version":"2020-12-14-0001"
 }

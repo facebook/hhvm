@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<bb25e9d57785295e3df5497dd248eb0c>>
+// @generated SignedSource<<9b570b4902b27b16c9c41a19a98abf32>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -696,8 +696,8 @@ pub struct Fun_<'a, Ex, Fb, En, Hi> {
     pub where_constraints: &'a [&'a WhereConstraintHint<'a>],
     pub variadic: FunVariadicity<'a, Ex, Fb, En, Hi>,
     pub params: &'a [&'a FunParam<'a, Ex, Fb, En, Hi>],
-    pub cap: Option<&'a Contexts<'a>>,
-    pub unsafe_cap: Option<&'a Contexts<'a>>,
+    pub ctxs: Option<&'a Contexts<'a>>,
+    pub unsafe_ctxs: Option<&'a Contexts<'a>>,
     pub body: &'a FuncBody<'a, Ex, Fb, En, Hi>,
     pub fun_kind: oxidized::ast_defs::FunKind,
     pub user_attributes: &'a [&'a UserAttribute<'a, Ex, Fb, En, Hi>],
@@ -1184,8 +1184,8 @@ pub struct Method_<'a, Ex, Fb, En, Hi> {
     pub where_constraints: &'a [&'a WhereConstraintHint<'a>],
     pub variadic: FunVariadicity<'a, Ex, Fb, En, Hi>,
     pub params: &'a [&'a FunParam<'a, Ex, Fb, En, Hi>],
-    pub cap: Option<&'a Contexts<'a>>,
-    pub unsafe_cap: Option<&'a Contexts<'a>>,
+    pub ctxs: Option<&'a Contexts<'a>>,
+    pub unsafe_ctxs: Option<&'a Contexts<'a>>,
     pub body: &'a FuncBody<'a, Ex, Fb, En, Hi>,
     pub fun_kind: oxidized::ast_defs::FunKind,
     pub user_attributes: &'a [&'a UserAttribute<'a, Ex, Fb, En, Hi>],

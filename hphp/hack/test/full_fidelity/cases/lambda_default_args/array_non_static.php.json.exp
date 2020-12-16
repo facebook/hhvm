@@ -120,7 +120,7 @@
                 "line_number":3
               }
             },
-            "function_capability":{"kind":"missing"},
+            "function_contexts":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
               "token":{
@@ -303,7 +303,7 @@
                 "line_number":7
               }
             },
-            "function_capability":{"kind":"missing"},
+            "function_contexts":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
               "token":{
@@ -681,7 +681,7 @@
                             "line_number":8
                           }
                         },
-                        "lambda_capability":{"kind":"missing"},
+                        "lambda_contexts":{"kind":"missing"},
                         "lambda_colon":{
                           "kind":"token",
                           "token":{
@@ -816,5 +816,5 @@
     }
   },
   "program_text":"<?hh // strict\n\nfunction get(): int {\n  return 1;\n}\n\nfunction test(): void {\n  $_ = (array<int> $vec = varray[get(), 2]): void ==> {};\n}\n",
-  "version":"2020-12-09-0001"
+  "version":"2020-12-14-0001"
 }

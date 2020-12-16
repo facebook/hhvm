@@ -110,8 +110,8 @@ pub struct FunHdr {
     constrs: Vec<ast::WhereConstraintHint>,
     type_parameters: Vec<ast::Tparam>,
     parameters: Vec<ast::FunParam>,
-    capability: Option<ast::Contexts>,
-    unsafe_capability: Option<ast::Contexts>,
+    contexts: Option<ast::Contexts>,
+    unsafe_contexts: Option<ast::Contexts>,
     return_type: Option<ast::Hint>,
 }
 
@@ -123,8 +123,8 @@ impl FunHdr {
             constrs: vec![],
             type_parameters: vec![],
             parameters: vec![],
-            capability: None,
-            unsafe_capability: None,
+            contexts: None,
+            unsafe_contexts: None,
             return_type: None,
         }
     }
@@ -951,14 +951,14 @@ where
                         variadic_hints.len().to_string()
                     ));
                 }
-                let (cap, _) = Self::p_capability(&c.capability, env)?;
+                let (ctxs, _) = Self::p_contexts(&c.contexts, env)?;
                 Ok(Hfun(ast::HintFun {
                     reactive_kind: ast::FuncReactive::FNonreactive,
                     param_tys: type_hints,
                     param_kinds: kinds,
                     param_mutability: vec![],
                     variadic_ty: variadic_hints.into_iter().next().unwrap_or(None),
-                    cap,
+                    ctxs,
                     return_ty: Self::p_hint(&c.return_type, env)?,
                     is_mutable_return: true,
                 }))
@@ -1520,10 +1520,10 @@ where
         match &node.children {
             LambdaExpression(c) => {
                 let suspension_kind = Self::mk_suspension_kind(&c.async_);
-                let (params, (cap, unsafe_cap), ret) = match &c.signature.children {
+                let (params, (ctxs, unsafe_ctxs), ret) = match &c.signature.children {
                     LambdaSignature(c) => (
                         Self::could_map(Self::p_fun_param, &c.parameters, env)?,
-                        Self::p_capability(&c.capability, env)?,
+                        Self::p_contexts(&c.contexts, env)?,
                         Self::mp_optional(Self::p_hint, &c.type_, env)?,
                     ),
                     Token(_) => {
@@ -1568,8 +1568,8 @@ where
                     fun_kind: Self::mk_fun_kind(suspension_kind, yield_),
                     variadic: Self::determine_variadicity(&params),
                     params,
-                    cap,
-                    unsafe_cap,
+                    ctxs,
+                    unsafe_ctxs,
                     user_attributes: Self::p_user_attributes(&c.attribute_spec, env)?,
                     file_attributes: vec![],
                     external,
@@ -2100,7 +2100,7 @@ where
                     Token(_) => mk_name_lid(n, e),
                     _ => Self::missing_syntax("use variable", n, e),
                 };
-                let (cap, unsafe_cap) = Self::p_capability(&c.ctx_list, env)?;
+                let (ctxs, unsafe_ctxs) = Self::p_contexts(&c.ctx_list, env)?;
                 let p_use = |n: S<'a, T, V>, e: &mut Env<'a, TF>| match &n.children {
                     AnonymousFunctionUseClause(c) => Self::could_map(p_arg, &c.variables, e),
                     _ => Ok(vec![]),
@@ -2131,8 +2131,8 @@ where
                     fun_kind: Self::mk_fun_kind(suspension_kind, yield_),
                     variadic: Self::determine_variadicity(&params),
                     params,
-                    cap,
-                    unsafe_cap,
+                    ctxs,
+                    unsafe_ctxs,
                     user_attributes,
                     file_attributes: vec![],
                     external,
@@ -2170,8 +2170,8 @@ where
                     fun_kind: Self::mk_fun_kind(suspension_kind, yld),
                     variadic: Self::determine_variadicity(&[]),
                     params: vec![],
-                    cap: None,        // TODO(T70095684)
-                    unsafe_cap: None, // TODO(T70095684)
+                    ctxs: None,        // TODO(T70095684)
+                    unsafe_ctxs: None, // TODO(T70095684)
                     user_attributes,
                     file_attributes: vec![],
                     external,
@@ -3349,13 +3349,13 @@ where
         }
     }
 
-    fn p_capability(
+    fn p_contexts(
         node: S<'a, T, V>,
         env: &mut Env<'a, TF>,
     ) -> Result<(Option<ast::Contexts>, Option<ast::Contexts>)> {
         match &node.children {
             Missing => Ok((None, None)),
-            Capability(c) => {
+            Contexts(c) => {
                 use ast::{Hint, Hint_};
                 let hints = Self::could_map(
                     |n, e| match &n.children {
@@ -3378,7 +3378,7 @@ where
                 let unsafe_ctxs = ctxs.clone();
                 Ok((Some(ctxs), Some(unsafe_ctxs)))
             }
-            _ => Self::missing_syntax("capability", node, env),
+            _ => Self::missing_syntax("contexts", node, env),
         }
     }
 
@@ -3391,7 +3391,7 @@ where
                 type_parameter_list,
                 parameter_list,
                 type_,
-                capability,
+                contexts,
                 ..
             }) => {
                 if name.value.is_missing() {
@@ -3400,7 +3400,7 @@ where
                 let kinds = Self::p_kinds(modifiers, env)?;
                 let has_async = kinds.has(modifier::ASYNC);
                 let parameters = Self::could_map(Self::p_fun_param, parameter_list, env)?;
-                let (capability, unsafe_capability) = Self::p_capability(capability, env)?;
+                let (contexts, unsafe_contexts) = Self::p_contexts(contexts, env)?;
                 let return_type = Self::mp_optional(Self::p_hint, type_, env)?;
                 let suspension_kind = Self::mk_suspension_kind_(has_async);
                 let name = Self::pos_name(name, env)?;
@@ -3412,22 +3412,22 @@ where
                     constrs,
                     type_parameters,
                     parameters,
-                    capability,
-                    unsafe_capability,
+                    contexts,
+                    unsafe_contexts,
                     return_type,
                 })
             }
             LambdaSignature(LambdaSignatureChildren {
                 parameters,
-                capability,
+                contexts,
                 type_,
                 ..
             }) => {
                 let mut header = FunHdr::make_empty(env);
                 header.parameters = Self::could_map(Self::p_fun_param, parameters, env)?;
-                let (capability, unsafe_capability) = Self::p_capability(capability, env)?;
-                header.capability = capability;
-                header.unsafe_capability = unsafe_capability;
+                let (contexts, unsafe_contexts) = Self::p_contexts(contexts, env)?;
+                header.contexts = contexts;
+                header.unsafe_contexts = unsafe_contexts;
                 header.return_type = Self::mp_optional(Self::p_hint, type_, env)?;
                 Ok(header)
             }
@@ -4078,8 +4078,8 @@ where
                     where_constraints: hdr.constrs,
                     variadic: Self::determine_variadicity(&hdr.parameters),
                     params: hdr.parameters,
-                    cap: hdr.capability,
-                    unsafe_cap: hdr.unsafe_capability,
+                    ctxs: hdr.contexts,
+                    unsafe_ctxs: hdr.unsafe_contexts,
                     body: ast::FuncBody {
                         annotation: (),
                         ast: body,
@@ -4440,8 +4440,8 @@ where
                     tparams: hdr.type_parameters,
                     where_constraints: hdr.constrs,
                     params: hdr.parameters,
-                    cap: hdr.capability,
-                    unsafe_cap: hdr.unsafe_capability,
+                    ctxs: hdr.contexts,
+                    unsafe_ctxs: hdr.unsafe_contexts,
                     body: ast::FuncBody {
                         ast: block,
                         annotation: (),

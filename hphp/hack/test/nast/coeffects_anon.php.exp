@@ -3,7 +3,7 @@
       f_ret = ((), (Some ([4:33-37], (Hprim Tvoid))));
       f_name = ([4:10-29], "\\anons_with_ctx_list"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
-      f_cap = None; f_unsafe_cap = None;
+      f_ctxs = None; f_unsafe_ctxs = None;
       f_body =
       { fb_ast =
         [([5:3-63],
@@ -18,14 +18,14 @@
                        f_name = ([5:18-62], ";anonymous"); f_tparams = [];
                        f_where_constraints = []; f_variadic = FVnonVariadic;
                        f_params = [];
-                       f_cap =
+                       f_ctxs =
                        (Some ([5:28-36],
                               [([5:29-35],
                                 (Happly (
                                    ([5:29-35], "\\HH\\Contexts\\output"), 
                                    [])))
                                 ]));
-                       f_unsafe_cap =
+                       f_unsafe_ctxs =
                        (Some ([5:28-36],
                               [([5:29-35],
                                 (Happly (
@@ -68,14 +68,14 @@
                         f_name = ([8:18-63], ";anonymous"); f_tparams = [];
                         f_where_constraints = []; f_variadic = FVnonVariadic;
                         f_params = [];
-                        f_cap =
+                        f_ctxs =
                         (Some ([8:28-37],
                                [([8:29-36],
                                  (Happly (
                                     ([8:29-36], "\\HH\\Contexts\\non_det"),
                                     [])))
                                  ]));
-                        f_unsafe_cap =
+                        f_unsafe_ctxs =
                         (Some ([8:28-37],
                                [([8:29-36],
                                  (Happly (
@@ -115,13 +115,13 @@
                         f_name = ([9:11-56], ";anonymous"); f_tparams = [];
                         f_where_constraints = []; f_variadic = FVnonVariadic;
                         f_params = [];
-                        f_cap =
+                        f_ctxs =
                         (Some ([9:21-25],
                                [([9:22-24],
                                  (Happly (([9:22-24], "\\HH\\Contexts\\rx"),
                                     [])))
                                  ]));
-                        f_unsafe_cap =
+                        f_unsafe_ctxs =
                         (Some ([9:21-25],
                                [([9:22-24],
                                  (Happly (

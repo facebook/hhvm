@@ -23,7 +23,7 @@
                (Hoption ([5:24-25], (Happly (([5:24-25], "\\A"), [])))))));
        f_name = ([5:10-19], "\\get_A_opt"); f_tparams = [];
        f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
-       f_cap = None; f_unsafe_cap = None;
+       f_ctxs = None; f_unsafe_ctxs = None;
        f_body =
        { fb_ast =
          [([6:3-18],
@@ -46,7 +46,7 @@
        f_ret = ((void), (Some ([9:20-24], (Hprim Tvoid))));
        f_name = ([9:10-16], "\\fwhile"); f_tparams = [];
        f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
-       f_cap = None; f_unsafe_cap = None;
+       f_ctxs = None; f_unsafe_ctxs = None;
        f_body =
        { fb_ast =
          [([10:3-16],
@@ -94,7 +94,7 @@
        f_ret = ((void), (Some ([16:18-22], (Hprim Tvoid))));
        f_name = ([16:10-14], "\\ffor"); f_tparams = [];
        f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
-       f_cap = None; f_unsafe_cap = None;
+       f_ctxs = None; f_unsafe_ctxs = None;
        f_body =
        { fb_ast =
          [([17:3-18:4],

@@ -3,10 +3,10 @@
       f_ret = ((), (Some ([3:31-35], (Hprim Tvoid))));
       f_name = ([3:10-11], "\\f"); f_tparams = []; f_where_constraints = [];
       f_variadic = FVnonVariadic; f_params = [];
-      f_cap =
+      f_ctxs =
       ((),
        (Some ([3:16-18], (Happly (([3:16-18], "\\HH\\Contexts\\Rx"), [])))));
-      f_unsafe_cap =
+      f_unsafe_ctxs =
       ((),
        (Some ([3:21-27],
               (Happly (([3:21-27], "\\HH\\Contexts\\Unsafe\\NonDet"), [])))));

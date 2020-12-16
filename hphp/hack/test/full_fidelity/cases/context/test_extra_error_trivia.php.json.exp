@@ -206,7 +206,7 @@
                         "line_number":6
                       }
                     },
-                    "function_capability":{"kind":"missing"},
+                    "function_contexts":{"kind":"missing"},
                     "function_colon":{"kind":"missing"},
                     "function_type":{"kind":"missing"},
                     "function_where_clause":{"kind":"missing"}
@@ -355,7 +355,7 @@
                         "line_number":10
                       }
                     },
-                    "function_capability":{"kind":"missing"},
+                    "function_contexts":{"kind":"missing"},
                     "function_colon":{"kind":"missing"},
                     "function_type":{"kind":"missing"},
                     "function_where_clause":{"kind":"missing"}
@@ -542,7 +542,7 @@
                         "line_number":14
                       }
                     },
-                    "function_capability":{"kind":"missing"},
+                    "function_contexts":{"kind":"missing"},
                     "function_colon":{"kind":"missing"},
                     "function_type":{"kind":"missing"},
                     "function_where_clause":{"kind":"missing"}
@@ -728,7 +728,7 @@
                         "line_number":18
                       }
                     },
-                    "function_capability":{"kind":"missing"},
+                    "function_contexts":{"kind":"missing"},
                     "function_colon":{"kind":"missing"},
                     "function_type":{"kind":"missing"},
                     "function_where_clause":{"kind":"missing"}
@@ -806,5 +806,5 @@
     }
   },
   "program_text":"<?hh\n\nclass C {\n\n  // 'sta' becomes error trivia\n  public sta function f() {\n  }\n\n  // 'meaninglessword' becomes error trivia\n  public static meaninglessword function f() {\n  }\n\n  // no change in parsing\n  public meaninglessword static function f() {\n  }\n\n  // no change in parsing\n  public meaninglessword1 meaninglessword2 function f() {\n  }\n\n}\n",
-  "version":"2020-12-09-0001"
+  "version":"2020-12-14-0001"
 }

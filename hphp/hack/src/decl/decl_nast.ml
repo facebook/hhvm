@@ -46,7 +46,7 @@ and fun_decl_in_env (env : Decl_env.env) ~(is_lambda : bool) (f : Nast.fun_) :
   let return_disposable = has_return_disposable_attribute f.f_user_attributes in
   let params = make_params env ~is_lambda f.f_params in
   let capability =
-    Decl_hint.aast_contexts_to_decl_capability env f.f_cap (fst f.f_name)
+    Decl_hint.aast_contexts_to_decl_capability env f.f_ctxs (fst f.f_name)
   in
   let ret_ty =
     ret_from_fun_kind

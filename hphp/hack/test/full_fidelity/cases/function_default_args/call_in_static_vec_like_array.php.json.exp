@@ -206,7 +206,7 @@
                         "line_number":4
                       }
                     },
-                    "function_capability":{"kind":"missing"},
+                    "function_contexts":{"kind":"missing"},
                     "function_colon":{"kind":"missing"},
                     "function_type":{"kind":"missing"},
                     "function_where_clause":{"kind":"missing"}
@@ -558,7 +558,7 @@
                 "line_number":9
               }
             },
-            "function_capability":{"kind":"missing"},
+            "function_contexts":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
               "token":{
@@ -646,5 +646,5 @@
     }
   },
   "program_text":"<?hh\n\nclass C {\n  public static function f() {\n    return \"lol\";\n  }\n}\n\nfunction f($x = varray[C::f()]): void{}\n",
-  "version":"2020-12-09-0001"
+  "version":"2020-12-14-0001"
 }

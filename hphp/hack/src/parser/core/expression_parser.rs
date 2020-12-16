@@ -1845,8 +1845,7 @@ where
             S!(make_token, self, token)
         } else {
             let (left, params, right) = self.parse_parameter_list_opt();
-            let capability =
-                self.with_type_parser(|p: &mut TypeParser<'a, S>| p.parse_capability_opt());
+            let contexts = self.with_type_parser(|p: &mut TypeParser<'a, S>| p.parse_contexts());
             let (colon, return_type) = self.parse_optional_return();
             S!(
                 make_lambda_signature,
@@ -1854,7 +1853,7 @@ where
                 left,
                 params,
                 right,
-                capability,
+                contexts,
                 colon,
                 return_type
             )
@@ -2609,7 +2608,7 @@ where
         let async_ = self.optional_token(TokenKind::Async);
         let fn_ = self.assert_token(TokenKind::Function);
         let (left_paren, params, right_paren) = self.parse_parameter_list_opt();
-        let ctx_list = self.with_type_parser(|p| p.parse_capability_opt());
+        let ctx_list = self.with_type_parser(|p| p.parse_contexts());
         let (colon, return_type) = self.parse_optional_return();
         let use_clause = self.parse_anon_use_opt();
         // Detect if the user has the type in the wrong place

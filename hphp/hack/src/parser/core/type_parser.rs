@@ -743,7 +743,7 @@ where
         }
     }
 
-    pub fn parse_capability_opt(&mut self) -> S::R {
+    pub fn parse_contexts(&mut self) -> S::R {
         if self.peek_token_kind() == TokenKind::LeftBracket {
             let (left_bracket, types, right_bracket) = self
                 .parse_bracketted_comma_list_opt_allow_trailing(|x: &mut Self| {
@@ -765,7 +765,7 @@ where
                         _ => x.parse_type_specifier(false, false),
                     }
                 });
-            S!(make_capability, self, left_bracket, types, right_bracket)
+            S!(make_contexts, self, left_bracket, types, right_bracket)
         } else {
             S!(make_missing, self, self.pos())
         }
@@ -800,7 +800,7 @@ where
             let irp = self.require_right_paren();
             (pts, irp)
         };
-        let capability = self.parse_capability_opt();
+        let ctxs = self.parse_contexts();
         let col = self.require_colon();
         let ret = self.parse_type_specifier(false, true);
         let orp = self.require_right_paren();
@@ -812,7 +812,7 @@ where
             ilp,
             pts,
             irp,
-            capability,
+            ctxs,
             col,
             ret,
             orp
@@ -1078,7 +1078,7 @@ where
             TokenKind::As | TokenKind::Super => {
                 let constraint_token = self.next_token();
                 let constraint_token = S!(make_token, self, constraint_token);
-                let constraint_ctx = self.parse_capability_opt();
+                let constraint_ctx = self.parse_contexts();
                 Some(S!(
                     make_type_constraint,
                     self,

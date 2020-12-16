@@ -116,7 +116,7 @@
                 "line_number":3
               }
             },
-            "function_capability":{"kind":"missing"},
+            "function_contexts":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
               "token":{
@@ -421,7 +421,7 @@
                 "line_number":7
               }
             },
-            "function_capability":{"kind":"missing"},
+            "function_contexts":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
               "token":{
@@ -509,5 +509,5 @@
     }
   },
   "program_text":"<?hh\n\nfunction test() : void {\n  bar(&darray[]);\n}\n\nfunction bar(&$x) : void {\n}\n",
-  "version":"2020-12-09-0001"
+  "version":"2020-12-14-0001"
 }

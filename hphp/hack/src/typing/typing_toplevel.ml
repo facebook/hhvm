@@ -380,7 +380,7 @@ let rec fun_def ctx f :
           f.f_user_attributes
       in
       let (env, cap_ty, unsafe_cap_ty) =
-        Typing.type_capability env f.f_cap f.f_unsafe_cap (fst f.f_name)
+        Typing.type_capability env f.f_ctxs f.f_unsafe_ctxs (fst f.f_name)
       in
       let (env, _) =
         Typing_coeffects.register_capabilities env cap_ty unsafe_cap_ty
@@ -417,8 +417,8 @@ let rec fun_def ctx f :
           Aast.f_where_constraints = f.f_where_constraints;
           Aast.f_variadic = t_variadic;
           Aast.f_params = typed_params;
-          Aast.f_cap = f.f_cap;
-          Aast.f_unsafe_cap = f.f_unsafe_cap;
+          Aast.f_ctxs = f.f_ctxs;
+          Aast.f_unsafe_ctxs = f.f_unsafe_ctxs;
           Aast.f_fun_kind = f.f_fun_kind;
           Aast.f_file_attributes = file_attrs;
           Aast.f_user_attributes = user_attributes;
@@ -563,7 +563,7 @@ and method_def env cls m =
           m.m_user_attributes
       in
       let (env, cap_ty, unsafe_cap_ty) =
-        Typing.type_capability env m.m_cap m.m_unsafe_cap (fst m.m_name)
+        Typing.type_capability env m.m_ctxs m.m_unsafe_ctxs (fst m.m_name)
       in
       let (env, _) =
         Typing_coeffects.register_capabilities env cap_ty unsafe_cap_ty
@@ -645,8 +645,8 @@ and method_def env cls m =
           Aast.m_where_constraints = m.m_where_constraints;
           Aast.m_variadic = t_variadic;
           Aast.m_params = typed_params;
-          Aast.m_cap = m.m_cap;
-          Aast.m_unsafe_cap = m.m_unsafe_cap;
+          Aast.m_ctxs = m.m_ctxs;
+          Aast.m_unsafe_ctxs = m.m_unsafe_ctxs;
           Aast.m_fun_kind = m.m_fun_kind;
           Aast.m_user_attributes = user_attributes;
           Aast.m_ret = (locl_ty, hint_of_type_hint m.m_ret);

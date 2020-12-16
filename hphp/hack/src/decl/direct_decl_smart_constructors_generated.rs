@@ -165,12 +165,12 @@ impl<'src> SmartConstructors for DirectDeclSmartConstructors<'src> {
         <Self as FlattenSmartConstructors<'src, State<'src>>>::make_function_declaration(self, attribute_spec, declaration_header, body)
     }
 
-    fn make_function_declaration_header(&mut self, modifiers: Self::R, keyword: Self::R, name: Self::R, type_parameter_list: Self::R, left_paren: Self::R, parameter_list: Self::R, right_paren: Self::R, capability: Self::R, colon: Self::R, type_: Self::R, where_clause: Self::R) -> Self::R {
-        <Self as FlattenSmartConstructors<'src, State<'src>>>::make_function_declaration_header(self, modifiers, keyword, name, type_parameter_list, left_paren, parameter_list, right_paren, capability, colon, type_, where_clause)
+    fn make_function_declaration_header(&mut self, modifiers: Self::R, keyword: Self::R, name: Self::R, type_parameter_list: Self::R, left_paren: Self::R, parameter_list: Self::R, right_paren: Self::R, contexts: Self::R, colon: Self::R, type_: Self::R, where_clause: Self::R) -> Self::R {
+        <Self as FlattenSmartConstructors<'src, State<'src>>>::make_function_declaration_header(self, modifiers, keyword, name, type_parameter_list, left_paren, parameter_list, right_paren, contexts, colon, type_, where_clause)
     }
 
-    fn make_capability(&mut self, left_bracket: Self::R, types: Self::R, right_bracket: Self::R) -> Self::R {
-        <Self as FlattenSmartConstructors<'src, State<'src>>>::make_capability(self, left_bracket, types, right_bracket)
+    fn make_contexts(&mut self, left_bracket: Self::R, types: Self::R, right_bracket: Self::R) -> Self::R {
+        <Self as FlattenSmartConstructors<'src, State<'src>>>::make_contexts(self, left_bracket, types, right_bracket)
     }
 
     fn make_where_clause(&mut self, keyword: Self::R, constraints: Self::R) -> Self::R {
@@ -397,8 +397,8 @@ impl<'src> SmartConstructors for DirectDeclSmartConstructors<'src> {
         <Self as FlattenSmartConstructors<'src, State<'src>>>::make_lambda_expression(self, attribute_spec, async_, signature, arrow, body)
     }
 
-    fn make_lambda_signature(&mut self, left_paren: Self::R, parameters: Self::R, right_paren: Self::R, capability: Self::R, colon: Self::R, type_: Self::R) -> Self::R {
-        <Self as FlattenSmartConstructors<'src, State<'src>>>::make_lambda_signature(self, left_paren, parameters, right_paren, capability, colon, type_)
+    fn make_lambda_signature(&mut self, left_paren: Self::R, parameters: Self::R, right_paren: Self::R, contexts: Self::R, colon: Self::R, type_: Self::R) -> Self::R {
+        <Self as FlattenSmartConstructors<'src, State<'src>>>::make_lambda_signature(self, left_paren, parameters, right_paren, contexts, colon, type_)
     }
 
     fn make_cast_expression(&mut self, left_paren: Self::R, type_: Self::R, right_paren: Self::R, operand: Self::R) -> Self::R {
@@ -645,8 +645,8 @@ impl<'src> SmartConstructors for DirectDeclSmartConstructors<'src> {
         <Self as FlattenSmartConstructors<'src, State<'src>>>::make_dictionary_type_specifier(self, keyword, left_angle, members, right_angle)
     }
 
-    fn make_closure_type_specifier(&mut self, outer_left_paren: Self::R, function_keyword: Self::R, inner_left_paren: Self::R, parameter_list: Self::R, inner_right_paren: Self::R, capability: Self::R, colon: Self::R, return_type: Self::R, outer_right_paren: Self::R) -> Self::R {
-        <Self as FlattenSmartConstructors<'src, State<'src>>>::make_closure_type_specifier(self, outer_left_paren, function_keyword, inner_left_paren, parameter_list, inner_right_paren, capability, colon, return_type, outer_right_paren)
+    fn make_closure_type_specifier(&mut self, outer_left_paren: Self::R, function_keyword: Self::R, inner_left_paren: Self::R, parameter_list: Self::R, inner_right_paren: Self::R, contexts: Self::R, colon: Self::R, return_type: Self::R, outer_right_paren: Self::R) -> Self::R {
+        <Self as FlattenSmartConstructors<'src, State<'src>>>::make_closure_type_specifier(self, outer_left_paren, function_keyword, inner_left_paren, parameter_list, inner_right_paren, contexts, colon, return_type, outer_right_paren)
     }
 
     fn make_closure_parameter_type_specifier(&mut self, call_convention: Self::R, type_: Self::R) -> Self::R {

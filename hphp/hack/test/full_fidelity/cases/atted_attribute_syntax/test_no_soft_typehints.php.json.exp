@@ -187,7 +187,7 @@
                 "line_number":3
               }
             },
-            "function_capability":{"kind":"missing"},
+            "function_contexts":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
               "token":{
@@ -356,5 +356,5 @@
     }
   },
   "program_text":"<?hh\n\nfunction f(@int $_): @int {\n  return 42;\n}\n",
-  "version":"2020-12-09-0001"
+  "version":"2020-12-14-0001"
 }

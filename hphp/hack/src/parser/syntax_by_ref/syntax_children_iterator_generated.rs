@@ -319,7 +319,7 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                     4 => Some(&x.left_paren),
                     5 => Some(&x.parameter_list),
                     6 => Some(&x.right_paren),
-                    7 => Some(&x.capability),
+                    7 => Some(&x.contexts),
                     8 => Some(&x.colon),
                     9 => Some(&x.type_),
                     10 => Some(&x.where_clause),
@@ -327,7 +327,7 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                     }
                 })
             },
-            Capability(x) => {
+            Contexts(x) => {
                 get_index(3).and_then(|index| { match index {
                         0 => Some(&x.left_bracket),
                     1 => Some(&x.types),
@@ -917,7 +917,7 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                         0 => Some(&x.left_paren),
                     1 => Some(&x.parameters),
                     2 => Some(&x.right_paren),
-                    3 => Some(&x.capability),
+                    3 => Some(&x.contexts),
                     4 => Some(&x.colon),
                     5 => Some(&x.type_),
                         _ => None,
@@ -1512,7 +1512,7 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                     2 => Some(&x.inner_left_paren),
                     3 => Some(&x.parameter_list),
                     4 => Some(&x.inner_right_paren),
-                    5 => Some(&x.capability),
+                    5 => Some(&x.contexts),
                     6 => Some(&x.colon),
                     7 => Some(&x.return_type),
                     8 => Some(&x.outer_right_paren),

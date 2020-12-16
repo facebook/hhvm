@@ -12,7 +12,7 @@
          m_abstract = false; m_static = true; m_visibility = Public;
          m_name = ([4:26-35], "staticFoo"); m_tparams = [];
          m_where_constraints = []; m_variadic = FVnonVariadic; m_params = [];
-         m_cap = None; m_unsafe_cap = None;
+         m_ctxs = None; m_unsafe_ctxs = None;
          m_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () };
          m_fun_kind = FSync; m_user_attributes = [];
          m_ret = ((void), (Some ([4:39-43], (Hprim Tvoid))));
@@ -21,7 +21,7 @@
           m_abstract = false; m_static = false; m_visibility = Public;
           m_name = ([5:19-30], "instanceFoo"); m_tparams = [];
           m_where_constraints = []; m_variadic = FVnonVariadic;
-          m_params = []; m_cap = None; m_unsafe_cap = None;
+          m_params = []; m_ctxs = None; m_unsafe_ctxs = None;
           m_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () };
           m_fun_kind = FSync; m_user_attributes = [];
           m_ret = ((void), (Some ([5:34-38], (Hprim Tvoid))));
@@ -48,7 +48,7 @@
           param_name = "$c"; param_expr = None; param_callconv = None;
           param_user_attributes = []; param_visibility = None }
          ];
-       f_cap = None; f_unsafe_cap = None;
+       f_ctxs = None; f_unsafe_ctxs = None;
        f_body =
        { fb_ast =
          [([9:3-15],
@@ -128,7 +128,7 @@
        f_ret = ((void), (Some ([25:21-25], (Hprim Tvoid))));
        f_name = ([25:10-17], "\\rx_test"); f_tparams = [];
        f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
-       f_cap = None; f_unsafe_cap = None;
+       f_ctxs = None; f_unsafe_ctxs = None;
        f_body =
        { fb_ast =
          [([26:3-32],

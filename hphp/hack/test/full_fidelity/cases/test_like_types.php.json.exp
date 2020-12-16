@@ -594,7 +594,7 @@
                           "line_number":7
                         }
                       },
-                      "closure_capability":{"kind":"missing"},
+                      "closure_contexts":{"kind":"missing"},
                       "closure_colon":{
                         "kind":"token",
                         "token":{
@@ -1101,7 +1101,7 @@
                 "line_number":12
               }
             },
-            "function_capability":{"kind":"missing"},
+            "function_contexts":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
               "token":{
@@ -1189,5 +1189,5 @@
     }
   },
   "program_text":"<?hh\n\nfunction f(\n  ~int $a,\n  vec<~dict<int, string>> $b,\n  ~SomeClass::TFoo $c,\n  (function(~int): void) $d,\n  ?~int $e,\n  ~?int $f,\n  ~~int $g,\n  (int, ~string) $h,\n): void {}\n",
-  "version":"2020-12-09-0001"
+  "version":"2020-12-14-0001"
 }

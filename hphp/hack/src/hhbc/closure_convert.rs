@@ -455,8 +455,8 @@ fn make_closure(
         where_constraints: fd.where_constraints.clone(),
         variadic: fd.variadic.clone(),
         params: fd.params.clone(),
-        cap: None,        // TODO(T70095684)
-        unsafe_cap: None, // TODO(T70095684)
+        ctxs: None,        // TODO(T70095684)
+        unsafe_ctxs: None, // TODO(T70095684)
         body: fd.body.clone(),
         fun_kind: fd.fun_kind,
         user_attributes: fd.user_attributes.clone(),
@@ -900,8 +900,8 @@ fn convert_meth_caller_to_func_ptr<'a>(
             make_fn_param(pos(), &obj_var.1, false, false),
             variadic_param,
         ],
-        cap: None,        // TODO(T70095684)
-        unsafe_cap: None, // TODO(T70095684)
+        ctxs: None,        // TODO(T70095684)
+        unsafe_ctxs: None, // TODO(T70095684)
         body: FuncBody {
             ast: vec![
                 Stmt(pos(), Stmt_::Expr(Box::new(assert_invariant))),
@@ -983,8 +983,8 @@ fn make_dyn_meth_caller_lambda(
             make_fn_param(pos(), &meth_var.1, false, false),
             variadic_param,
         ],
-        cap: None,        // TODO(T70095684)
-        unsafe_cap: None, // TODO(T70095684)
+        ctxs: None,        // TODO(T70095684)
+        unsafe_ctxs: None, // TODO(T70095684)
         body: FuncBody {
             ast: vec![Stmt(pos(), Stmt_::Return(Box::new(Some(invoke_method))))],
             annotation: (),
@@ -1540,8 +1540,8 @@ fn extract_debugger_main(
         where_constraints: vec![],
         variadic: FunVariadicity::FVnonVariadic,
         params,
-        cap: None,        // TODO(T70095684)
-        unsafe_cap: None, // TODO(T70095684)
+        ctxs: None,        // TODO(T70095684)
+        unsafe_ctxs: None, // TODO(T70095684)
         body: FuncBody {
             ast: body,
             annotation: (),

@@ -166,7 +166,7 @@ let method_type env m =
   let return_disposable = has_return_disposable_attribute m.m_user_attributes in
   let params = make_params env ~is_lambda:false m.m_params in
   let capability =
-    Decl_hint.aast_contexts_to_decl_capability env m.m_cap (fst m.m_name)
+    Decl_hint.aast_contexts_to_decl_capability env m.m_ctxs (fst m.m_name)
   in
   let ret =
     ret_from_fun_kind

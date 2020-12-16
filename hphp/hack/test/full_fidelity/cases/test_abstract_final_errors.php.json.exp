@@ -620,7 +620,7 @@
                         "line_number":12
                       }
                     },
-                    "function_capability":{"kind":"missing"},
+                    "function_contexts":{"kind":"missing"},
                     "function_colon":{
                       "kind":"token",
                       "token":{
@@ -892,7 +892,7 @@
                         "line_number":16
                       }
                     },
-                    "function_capability":{"kind":"missing"},
+                    "function_contexts":{"kind":"missing"},
                     "function_colon":{
                       "kind":"token",
                       "token":{
@@ -999,5 +999,5 @@
     }
   },
   "program_text":"<?hh //strict\n\nabstract final class AbstractFinalClassWithWrongProperty {\n  public int $x;\n}\n\nabstract final class AbstractFinalClassWithRightProperty {\n  public static int $x;\n}\n\nabstract final class AbstractFinalClassWithWrongMethod {\n  public function x(): void {}\n}\n\nabstract final class AbstractFinalClassWithRightMethod {\n  public static function x(): void {}\n}\n",
-  "version":"2020-12-09-0001"
+  "version":"2020-12-14-0001"
 }

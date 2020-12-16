@@ -258,7 +258,7 @@
                 "line_number":4
               }
             },
-            "function_capability":{"kind":"missing"},
+            "function_contexts":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
               "token":{
@@ -395,8 +395,8 @@
                         }
                       },
                       "anonymous_ctx_list":{
-                        "kind":"capability",
-                        "capability_left_bracket":{
+                        "kind":"contexts",
+                        "contexts_left_bracket":{
                           "kind":"token",
                           "token":{
                             "kind":"[",
@@ -410,7 +410,7 @@
                             "line_number":5
                           }
                         },
-                        "capability_types":{
+                        "contexts_types":{
                           "kind":"list",
                           "elements":[
                             {
@@ -436,7 +436,7 @@
                             }
                           ]
                         },
-                        "capability_right_bracket":{
+                        "contexts_right_bracket":{
                           "kind":"token",
                           "token":{
                             "kind":"]",
@@ -784,8 +784,8 @@
                         }
                       },
                       "anonymous_ctx_list":{
-                        "kind":"capability",
-                        "capability_left_bracket":{
+                        "kind":"contexts",
+                        "contexts_left_bracket":{
                           "kind":"token",
                           "token":{
                             "kind":"[",
@@ -799,7 +799,7 @@
                             "line_number":8
                           }
                         },
-                        "capability_types":{
+                        "contexts_types":{
                           "kind":"list",
                           "elements":[
                             {
@@ -825,7 +825,7 @@
                             }
                           ]
                         },
-                        "capability_right_bracket":{
+                        "contexts_right_bracket":{
                           "kind":"token",
                           "token":{
                             "kind":"]",
@@ -1095,8 +1095,8 @@
                         }
                       },
                       "anonymous_ctx_list":{
-                        "kind":"capability",
-                        "capability_left_bracket":{
+                        "kind":"contexts",
+                        "contexts_left_bracket":{
                           "kind":"token",
                           "token":{
                             "kind":"[",
@@ -1110,7 +1110,7 @@
                             "line_number":9
                           }
                         },
-                        "capability_types":{
+                        "contexts_types":{
                           "kind":"list",
                           "elements":[
                             {
@@ -1136,7 +1136,7 @@
                             }
                           ]
                         },
-                        "capability_right_bracket":{
+                        "contexts_right_bracket":{
                           "kind":"token",
                           "token":{
                             "kind":"]",
@@ -1390,5 +1390,5 @@
     }
   },
   "program_text":"<?hh\n<<file: __EnableUnstableFeatures('coeffects_provisional')>>\n\nfunction anons_with_ctx_list(): void {\n  $anon_no_use = function()[defaults]: int use () { return 0; };\n\n  $x = 1;\n  $anon_no_ret = function()[defaults] use ($ret) { return $x; };\n  $anon = function()[defaults]: int use ($ret) { return $x; };\n}\n",
-  "version":"2020-12-09-0001"
+  "version":"2020-12-14-0001"
 }

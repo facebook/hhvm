@@ -206,7 +206,7 @@
                         "line_number":3
                       }
                     },
-                    "function_capability":{"kind":"missing"},
+                    "function_contexts":{"kind":"missing"},
                     "function_colon":{
                       "kind":"token",
                       "token":{
@@ -370,7 +370,7 @@
                         "line_number":4
                       }
                     },
-                    "function_capability":{"kind":"missing"},
+                    "function_contexts":{"kind":"missing"},
                     "function_colon":{"kind":"missing"},
                     "function_type":{"kind":"missing"},
                     "function_where_clause":{"kind":"missing"}
@@ -532,7 +532,7 @@
                         "line_number":5
                       }
                     },
-                    "function_capability":{"kind":"missing"},
+                    "function_contexts":{"kind":"missing"},
                     "function_colon":{"kind":"missing"},
                     "function_type":{"kind":"missing"},
                     "function_where_clause":{"kind":"missing"}
@@ -726,7 +726,7 @@
                         "line_number":6
                       }
                     },
-                    "function_capability":{"kind":"missing"},
+                    "function_contexts":{"kind":"missing"},
                     "function_colon":{
                       "kind":"token",
                       "token":{
@@ -833,5 +833,5 @@
     }
   },
   "program_text":"<?hh\nclass C {\n  public static function f () : void {}\n  public abstract function g () ;\n  <<attr>> public function h () {}\n  <<attr>> public static function ff () : void {}\n}\n",
-  "version":"2020-12-09-0001"
+  "version":"2020-12-14-0001"
 }

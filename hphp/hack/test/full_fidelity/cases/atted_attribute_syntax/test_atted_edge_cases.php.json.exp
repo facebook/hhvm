@@ -466,7 +466,7 @@
                 "line_number":9
               }
             },
-            "function_capability":{"kind":"missing"},
+            "function_contexts":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
               "token":{
@@ -659,7 +659,7 @@
                 "line_number":12
               }
             },
-            "function_capability":{"kind":"missing"},
+            "function_contexts":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
               "token":{
@@ -747,5 +747,5 @@
     }
   },
   "program_text":"<?hh\n\nclass :test {\n  attribute int id @required;\n  attribute string name @lateinit;\n}\n\n@@Attr\nfunction f(): void {}\n\n@Attr @\nfunction g(): void {}\n",
-  "version":"2020-12-09-0001"
+  "version":"2020-12-14-0001"
 }

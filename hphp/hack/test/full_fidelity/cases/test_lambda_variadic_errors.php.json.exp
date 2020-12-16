@@ -211,7 +211,7 @@
                           "line_number":3
                         }
                       },
-                      "lambda_capability":{"kind":"missing"},
+                      "lambda_contexts":{"kind":"missing"},
                       "lambda_colon":{"kind":"missing"},
                       "lambda_type":{"kind":"missing"}
                     },
@@ -487,7 +487,7 @@
                           "line_number":5
                         }
                       },
-                      "lambda_capability":{"kind":"missing"},
+                      "lambda_contexts":{"kind":"missing"},
                       "lambda_colon":{"kind":"missing"},
                       "lambda_type":{"kind":"missing"}
                     },
@@ -711,7 +711,7 @@
                           "line_number":7
                         }
                       },
-                      "lambda_capability":{"kind":"missing"},
+                      "lambda_contexts":{"kind":"missing"},
                       "lambda_colon":{"kind":"missing"},
                       "lambda_type":{"kind":"missing"}
                     },
@@ -945,7 +945,7 @@
                           "line_number":9
                         }
                       },
-                      "lambda_capability":{"kind":"missing"},
+                      "lambda_contexts":{"kind":"missing"},
                       "lambda_colon":{"kind":"missing"},
                       "lambda_type":{"kind":"missing"}
                     },
@@ -2039,7 +2039,7 @@
                           "line_number":17
                         }
                       },
-                      "lambda_capability":{"kind":"missing"},
+                      "lambda_contexts":{"kind":"missing"},
                       "lambda_colon":{"kind":"missing"},
                       "lambda_type":{"kind":"missing"}
                     },
@@ -2407,5 +2407,5 @@
     }
   },
   "program_text":"<?hh\n\nfoo((...$x, $y) ==> {});\n\nfoo((int ...$x, int $y) ==> {});\n\nfoo((..., $y) ==> {});\n\nfoo((int ...$x,) ==> {});\n\nfoo(function (int ...$x, int $y): void {});\n\nfoo(function (...$x, int $y): void {});\n\nfoo(function (..., int $y): void {});\n\nfoo((inout int ...$x) ==> {});\n\nfoo(function (inout int ...$x): void {});\n",
-  "version":"2020-12-09-0001"
+  "version":"2020-12-14-0001"
 }

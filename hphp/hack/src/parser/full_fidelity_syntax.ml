@@ -88,7 +88,7 @@ module WithToken(Token: TokenType) = struct
       | NamespaceUseClause                _ -> SyntaxKind.NamespaceUseClause
       | FunctionDeclaration               _ -> SyntaxKind.FunctionDeclaration
       | FunctionDeclarationHeader         _ -> SyntaxKind.FunctionDeclarationHeader
-      | Capability                        _ -> SyntaxKind.Capability
+      | Contexts                          _ -> SyntaxKind.Contexts
       | WhereClause                       _ -> SyntaxKind.WhereClause
       | WhereConstraint                   _ -> SyntaxKind.WhereConstraint
       | MethodishDeclaration              _ -> SyntaxKind.MethodishDeclaration
@@ -275,7 +275,7 @@ module WithToken(Token: TokenType) = struct
     let is_namespace_use_clause                 = has_kind SyntaxKind.NamespaceUseClause
     let is_function_declaration                 = has_kind SyntaxKind.FunctionDeclaration
     let is_function_declaration_header          = has_kind SyntaxKind.FunctionDeclarationHeader
-    let is_capability                           = has_kind SyntaxKind.Capability
+    let is_contexts                             = has_kind SyntaxKind.Contexts
     let is_where_clause                         = has_kind SyntaxKind.WhereClause
     let is_where_constraint                     = has_kind SyntaxKind.WhereConstraint
     let is_methodish_declaration                = has_kind SyntaxKind.MethodishDeclaration
@@ -794,7 +794,7 @@ module WithToken(Token: TokenType) = struct
         function_left_paren;
         function_parameter_list;
         function_right_paren;
-        function_capability;
+        function_contexts;
         function_colon;
         function_type;
         function_where_clause;
@@ -806,19 +806,19 @@ module WithToken(Token: TokenType) = struct
          let acc = f acc function_left_paren in
          let acc = f acc function_parameter_list in
          let acc = f acc function_right_paren in
-         let acc = f acc function_capability in
+         let acc = f acc function_contexts in
          let acc = f acc function_colon in
          let acc = f acc function_type in
          let acc = f acc function_where_clause in
          acc
-      | Capability {
-        capability_left_bracket;
-        capability_types;
-        capability_right_bracket;
+      | Contexts {
+        contexts_left_bracket;
+        contexts_types;
+        contexts_right_bracket;
       } ->
-         let acc = f acc capability_left_bracket in
-         let acc = f acc capability_types in
-         let acc = f acc capability_right_bracket in
+         let acc = f acc contexts_left_bracket in
+         let acc = f acc contexts_types in
+         let acc = f acc contexts_right_bracket in
          acc
       | WhereClause {
         where_clause_keyword;
@@ -1472,14 +1472,14 @@ module WithToken(Token: TokenType) = struct
         lambda_left_paren;
         lambda_parameters;
         lambda_right_paren;
-        lambda_capability;
+        lambda_contexts;
         lambda_colon;
         lambda_type;
       } ->
          let acc = f acc lambda_left_paren in
          let acc = f acc lambda_parameters in
          let acc = f acc lambda_right_paren in
-         let acc = f acc lambda_capability in
+         let acc = f acc lambda_contexts in
          let acc = f acc lambda_colon in
          let acc = f acc lambda_type in
          acc
@@ -2102,7 +2102,7 @@ module WithToken(Token: TokenType) = struct
         closure_inner_left_paren;
         closure_parameter_list;
         closure_inner_right_paren;
-        closure_capability;
+        closure_contexts;
         closure_colon;
         closure_return_type;
         closure_outer_right_paren;
@@ -2112,7 +2112,7 @@ module WithToken(Token: TokenType) = struct
          let acc = f acc closure_inner_left_paren in
          let acc = f acc closure_parameter_list in
          let acc = f acc closure_inner_right_paren in
-         let acc = f acc closure_capability in
+         let acc = f acc closure_contexts in
          let acc = f acc closure_colon in
          let acc = f acc closure_return_type in
          let acc = f acc closure_outer_right_paren in
@@ -2608,7 +2608,7 @@ module WithToken(Token: TokenType) = struct
         function_left_paren;
         function_parameter_list;
         function_right_paren;
-        function_capability;
+        function_contexts;
         function_colon;
         function_type;
         function_where_clause;
@@ -2620,19 +2620,19 @@ module WithToken(Token: TokenType) = struct
         function_left_paren;
         function_parameter_list;
         function_right_paren;
-        function_capability;
+        function_contexts;
         function_colon;
         function_type;
         function_where_clause;
       ]
-      | Capability {
-        capability_left_bracket;
-        capability_types;
-        capability_right_bracket;
+      | Contexts {
+        contexts_left_bracket;
+        contexts_types;
+        contexts_right_bracket;
       } -> [
-        capability_left_bracket;
-        capability_types;
-        capability_right_bracket;
+        contexts_left_bracket;
+        contexts_types;
+        contexts_right_bracket;
       ]
       | WhereClause {
         where_clause_keyword;
@@ -3286,14 +3286,14 @@ module WithToken(Token: TokenType) = struct
         lambda_left_paren;
         lambda_parameters;
         lambda_right_paren;
-        lambda_capability;
+        lambda_contexts;
         lambda_colon;
         lambda_type;
       } -> [
         lambda_left_paren;
         lambda_parameters;
         lambda_right_paren;
-        lambda_capability;
+        lambda_contexts;
         lambda_colon;
         lambda_type;
       ]
@@ -3916,7 +3916,7 @@ module WithToken(Token: TokenType) = struct
         closure_inner_left_paren;
         closure_parameter_list;
         closure_inner_right_paren;
-        closure_capability;
+        closure_contexts;
         closure_colon;
         closure_return_type;
         closure_outer_right_paren;
@@ -3926,7 +3926,7 @@ module WithToken(Token: TokenType) = struct
         closure_inner_left_paren;
         closure_parameter_list;
         closure_inner_right_paren;
-        closure_capability;
+        closure_contexts;
         closure_colon;
         closure_return_type;
         closure_outer_right_paren;
@@ -4423,7 +4423,7 @@ module WithToken(Token: TokenType) = struct
         function_left_paren;
         function_parameter_list;
         function_right_paren;
-        function_capability;
+        function_contexts;
         function_colon;
         function_type;
         function_where_clause;
@@ -4435,19 +4435,19 @@ module WithToken(Token: TokenType) = struct
         "function_left_paren";
         "function_parameter_list";
         "function_right_paren";
-        "function_capability";
+        "function_contexts";
         "function_colon";
         "function_type";
         "function_where_clause";
       ]
-      | Capability {
-        capability_left_bracket;
-        capability_types;
-        capability_right_bracket;
+      | Contexts {
+        contexts_left_bracket;
+        contexts_types;
+        contexts_right_bracket;
       } -> [
-        "capability_left_bracket";
-        "capability_types";
-        "capability_right_bracket";
+        "contexts_left_bracket";
+        "contexts_types";
+        "contexts_right_bracket";
       ]
       | WhereClause {
         where_clause_keyword;
@@ -5101,14 +5101,14 @@ module WithToken(Token: TokenType) = struct
         lambda_left_paren;
         lambda_parameters;
         lambda_right_paren;
-        lambda_capability;
+        lambda_contexts;
         lambda_colon;
         lambda_type;
       } -> [
         "lambda_left_paren";
         "lambda_parameters";
         "lambda_right_paren";
-        "lambda_capability";
+        "lambda_contexts";
         "lambda_colon";
         "lambda_type";
       ]
@@ -5731,7 +5731,7 @@ module WithToken(Token: TokenType) = struct
         closure_inner_left_paren;
         closure_parameter_list;
         closure_inner_right_paren;
-        closure_capability;
+        closure_contexts;
         closure_colon;
         closure_return_type;
         closure_outer_right_paren;
@@ -5741,7 +5741,7 @@ module WithToken(Token: TokenType) = struct
         "closure_inner_left_paren";
         "closure_parameter_list";
         "closure_inner_right_paren";
-        "closure_capability";
+        "closure_contexts";
         "closure_colon";
         "closure_return_type";
         "closure_outer_right_paren";
@@ -6320,7 +6320,7 @@ module WithToken(Token: TokenType) = struct
           function_left_paren;
           function_parameter_list;
           function_right_paren;
-          function_capability;
+          function_contexts;
           function_colon;
           function_type;
           function_where_clause;
@@ -6333,20 +6333,20 @@ module WithToken(Token: TokenType) = struct
           function_left_paren;
           function_parameter_list;
           function_right_paren;
-          function_capability;
+          function_contexts;
           function_colon;
           function_type;
           function_where_clause;
         }
-      | (SyntaxKind.Capability, [
-          capability_left_bracket;
-          capability_types;
-          capability_right_bracket;
+      | (SyntaxKind.Contexts, [
+          contexts_left_bracket;
+          contexts_types;
+          contexts_right_bracket;
         ]) ->
-        Capability {
-          capability_left_bracket;
-          capability_types;
-          capability_right_bracket;
+        Contexts {
+          contexts_left_bracket;
+          contexts_types;
+          contexts_right_bracket;
         }
       | (SyntaxKind.WhereClause, [
           where_clause_keyword;
@@ -7056,7 +7056,7 @@ module WithToken(Token: TokenType) = struct
           lambda_left_paren;
           lambda_parameters;
           lambda_right_paren;
-          lambda_capability;
+          lambda_contexts;
           lambda_colon;
           lambda_type;
         ]) ->
@@ -7064,7 +7064,7 @@ module WithToken(Token: TokenType) = struct
           lambda_left_paren;
           lambda_parameters;
           lambda_right_paren;
-          lambda_capability;
+          lambda_contexts;
           lambda_colon;
           lambda_type;
         }
@@ -7748,7 +7748,7 @@ module WithToken(Token: TokenType) = struct
           closure_inner_left_paren;
           closure_parameter_list;
           closure_inner_right_paren;
-          closure_capability;
+          closure_contexts;
           closure_colon;
           closure_return_type;
           closure_outer_right_paren;
@@ -7759,7 +7759,7 @@ module WithToken(Token: TokenType) = struct
           closure_inner_left_paren;
           closure_parameter_list;
           closure_inner_right_paren;
-          closure_capability;
+          closure_contexts;
           closure_colon;
           closure_return_type;
           closure_outer_right_paren;
@@ -8424,7 +8424,7 @@ module WithToken(Token: TokenType) = struct
         function_left_paren
         function_parameter_list
         function_right_paren
-        function_capability
+        function_contexts
         function_colon
         function_type
         function_where_clause
@@ -8437,7 +8437,7 @@ module WithToken(Token: TokenType) = struct
           function_left_paren;
           function_parameter_list;
           function_right_paren;
-          function_capability;
+          function_contexts;
           function_colon;
           function_type;
           function_where_clause;
@@ -8445,15 +8445,15 @@ module WithToken(Token: TokenType) = struct
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value
 
-      let make_capability
-        capability_left_bracket
-        capability_types
-        capability_right_bracket
+      let make_contexts
+        contexts_left_bracket
+        contexts_types
+        contexts_right_bracket
       =
-        let syntax = Capability {
-          capability_left_bracket;
-          capability_types;
-          capability_right_bracket;
+        let syntax = Contexts {
+          contexts_left_bracket;
+          contexts_types;
+          contexts_right_bracket;
         } in
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value
@@ -9334,7 +9334,7 @@ module WithToken(Token: TokenType) = struct
         lambda_left_paren
         lambda_parameters
         lambda_right_paren
-        lambda_capability
+        lambda_contexts
         lambda_colon
         lambda_type
       =
@@ -9342,7 +9342,7 @@ module WithToken(Token: TokenType) = struct
           lambda_left_paren;
           lambda_parameters;
           lambda_right_paren;
-          lambda_capability;
+          lambda_contexts;
           lambda_colon;
           lambda_type;
         } in
@@ -10212,7 +10212,7 @@ module WithToken(Token: TokenType) = struct
         closure_inner_left_paren
         closure_parameter_list
         closure_inner_right_paren
-        closure_capability
+        closure_contexts
         closure_colon
         closure_return_type
         closure_outer_right_paren
@@ -10223,7 +10223,7 @@ module WithToken(Token: TokenType) = struct
           closure_inner_left_paren;
           closure_parameter_list;
           closure_inner_right_paren;
-          closure_capability;
+          closure_contexts;
           closure_colon;
           closure_return_type;
           closure_outer_right_paren;
@@ -10515,7 +10515,7 @@ module WithToken(Token: TokenType) = struct
           function_left_paren;
           function_parameter_list;
           function_right_paren;
-          function_capability;
+          function_contexts;
           function_colon;
           function_type;
           function_where_clause;
@@ -10527,7 +10527,7 @@ module WithToken(Token: TokenType) = struct
           function_left_paren;
           function_parameter_list;
           function_right_paren;
-          function_capability;
+          function_contexts;
           function_colon;
           function_type;
           function_where_clause;
@@ -10587,14 +10587,14 @@ module WithToken(Token: TokenType) = struct
           lambda_left_paren;
           lambda_parameters;
           lambda_right_paren;
-          lambda_capability;
+          lambda_contexts;
           lambda_colon;
           lambda_type;
        } = LambdaSignature {
           lambda_left_paren;
           lambda_parameters;
           lambda_right_paren;
-          lambda_capability;
+          lambda_contexts;
           lambda_colon;
           lambda_type;
        }
@@ -10604,7 +10604,7 @@ module WithToken(Token: TokenType) = struct
           closure_inner_left_paren;
           closure_parameter_list;
           closure_inner_right_paren;
-          closure_capability;
+          closure_contexts;
           closure_colon;
           closure_return_type;
           closure_outer_right_paren;
@@ -10614,7 +10614,7 @@ module WithToken(Token: TokenType) = struct
           closure_inner_left_paren;
           closure_parameter_list;
           closure_inner_right_paren;
-          closure_capability;
+          closure_contexts;
           closure_colon;
           closure_return_type;
           closure_outer_right_paren;
@@ -10643,7 +10643,7 @@ module WithToken(Token: TokenType) = struct
           function_left_paren;
           function_parameter_list;
           function_right_paren;
-          function_capability;
+          function_contexts;
           function_colon;
           function_type;
           function_where_clause;
@@ -10655,7 +10655,7 @@ module WithToken(Token: TokenType) = struct
           function_left_paren;
           function_parameter_list;
           function_right_paren;
-          function_capability;
+          function_contexts;
           function_colon;
           function_type;
           function_where_clause;
@@ -10727,14 +10727,14 @@ module WithToken(Token: TokenType) = struct
           lambda_left_paren;
           lambda_parameters;
           lambda_right_paren;
-          lambda_capability;
+          lambda_contexts;
           lambda_colon;
           lambda_type;
             } -> {
           lambda_left_paren;
           lambda_parameters;
           lambda_right_paren;
-          lambda_capability;
+          lambda_contexts;
           lambda_colon;
           lambda_type;
            }
@@ -10747,7 +10747,7 @@ module WithToken(Token: TokenType) = struct
           closure_inner_left_paren;
           closure_parameter_list;
           closure_inner_right_paren;
-          closure_capability;
+          closure_contexts;
           closure_colon;
           closure_return_type;
           closure_outer_right_paren;
@@ -10757,7 +10757,7 @@ module WithToken(Token: TokenType) = struct
           closure_inner_left_paren;
           closure_parameter_list;
           closure_inner_right_paren;
-          closure_capability;
+          closure_contexts;
           closure_colon;
           closure_return_type;
           closure_outer_right_paren;

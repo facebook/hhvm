@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<fb7faf34bd7f2830d28251717080a1a5>>
+// @generated SignedSource<<7f4a338b21d391cf8e21bc66617d9cbd>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -1076,8 +1076,8 @@ impl<P: Params> Node<P> for Fun_<P::Ex, P::Fb, P::En, P::Hi> {
         self.where_constraints.accept(c, v)?;
         self.variadic.accept(c, v)?;
         self.params.accept(c, v)?;
-        self.cap.accept(c, v)?;
-        self.unsafe_cap.accept(c, v)?;
+        self.ctxs.accept(c, v)?;
+        self.unsafe_ctxs.accept(c, v)?;
         self.body.accept(c, v)?;
         self.fun_kind.accept(c, v)?;
         self.user_attributes.accept(c, v)?;
@@ -1215,7 +1215,7 @@ impl<P: Params> Node<P> for HintFun {
         self.param_kinds.accept(c, v)?;
         self.param_mutability.accept(c, v)?;
         self.variadic_ty.accept(c, v)?;
-        self.cap.accept(c, v)?;
+        self.ctxs.accept(c, v)?;
         self.return_ty.accept(c, v)?;
         self.is_mutable_return.accept(c, v)?;
         Ok(())
@@ -1430,8 +1430,8 @@ impl<P: Params> Node<P> for Method_<P::Ex, P::Fb, P::En, P::Hi> {
         self.where_constraints.accept(c, v)?;
         self.variadic.accept(c, v)?;
         self.params.accept(c, v)?;
-        self.cap.accept(c, v)?;
-        self.unsafe_cap.accept(c, v)?;
+        self.ctxs.accept(c, v)?;
+        self.unsafe_ctxs.accept(c, v)?;
         self.body.accept(c, v)?;
         self.fun_kind.accept(c, v)?;
         self.user_attributes.accept(c, v)?;

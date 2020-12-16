@@ -283,7 +283,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   and validate_specifier : specifier validator = fun x ->
     match Syntax.syntax x with
     | Syntax.SimpleTypeSpecifier _ -> tag validate_simple_type_specifier (fun x -> SpecSimple x) x
-    | Syntax.Capability _ -> tag validate_capability (fun x -> SpecCapability x) x
+    | Syntax.Contexts _ -> tag validate_contexts (fun x -> SpecContexts x) x
     | Syntax.VariadicParameter _ -> tag validate_variadic_parameter (fun x -> SpecVariadicParameter x) x
     | Syntax.LambdaSignature _ -> tag validate_lambda_signature (fun x -> SpecLambdaSignature x) x
     | Syntax.XHPEnumType _ -> tag validate_xhp_enum_type (fun x -> SpecXHPEnumType x) x
@@ -310,7 +310,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   and invalidate_specifier : specifier invalidator = fun (value, thing) ->
     match thing with
     | SpecSimple            thing -> invalidate_simple_type_specifier          (value, thing)
-    | SpecCapability        thing -> invalidate_capability                     (value, thing)
+    | SpecContexts          thing -> invalidate_contexts                       (value, thing)
     | SpecVariadicParameter thing -> invalidate_variadic_parameter             (value, thing)
     | SpecLambdaSignature   thing -> invalidate_lambda_signature               (value, thing)
     | SpecXHPEnumType       thing -> invalidate_xhp_enum_type                  (value, thing)
@@ -1158,7 +1158,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { function_where_clause = validate_option_with (validate_where_clause) x.function_where_clause
     ; function_type = validate_option_with (validate_attributized_specifier) x.function_type
     ; function_colon = validate_option_with (validate_token) x.function_colon
-    ; function_capability = validate_option_with (validate_capability) x.function_capability
+    ; function_contexts = validate_option_with (validate_contexts) x.function_contexts
     ; function_right_paren = validate_token x.function_right_paren
     ; function_parameter_list = validate_list_with (validate_parameter) x.function_parameter_list
     ; function_left_paren = validate_token x.function_left_paren
@@ -1178,26 +1178,26 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
       ; function_left_paren = invalidate_token x.function_left_paren
       ; function_parameter_list = invalidate_list_with (invalidate_parameter) x.function_parameter_list
       ; function_right_paren = invalidate_token x.function_right_paren
-      ; function_capability = invalidate_option_with (invalidate_capability) x.function_capability
+      ; function_contexts = invalidate_option_with (invalidate_contexts) x.function_contexts
       ; function_colon = invalidate_option_with (invalidate_token) x.function_colon
       ; function_type = invalidate_option_with (invalidate_attributized_specifier) x.function_type
       ; function_where_clause = invalidate_option_with (invalidate_where_clause) x.function_where_clause
       }
     ; Syntax.value = v
     }
-  and validate_capability : capability validator = function
-  | { Syntax.syntax = Syntax.Capability x; value = v } -> v,
-    { capability_right_bracket = validate_token x.capability_right_bracket
-    ; capability_types = validate_list_with (validate_specifier) x.capability_types
-    ; capability_left_bracket = validate_token x.capability_left_bracket
+  and validate_contexts : contexts validator = function
+  | { Syntax.syntax = Syntax.Contexts x; value = v } -> v,
+    { contexts_right_bracket = validate_token x.contexts_right_bracket
+    ; contexts_types = validate_list_with (validate_specifier) x.contexts_types
+    ; contexts_left_bracket = validate_token x.contexts_left_bracket
     }
-  | s -> validation_fail (Some SyntaxKind.Capability) s
-  and invalidate_capability : capability invalidator = fun (v, x) ->
+  | s -> validation_fail (Some SyntaxKind.Contexts) s
+  and invalidate_contexts : contexts invalidator = fun (v, x) ->
     { Syntax.syntax =
-      Syntax.Capability
-      { capability_left_bracket = invalidate_token x.capability_left_bracket
-      ; capability_types = invalidate_list_with (invalidate_specifier) x.capability_types
-      ; capability_right_bracket = invalidate_token x.capability_right_bracket
+      Syntax.Contexts
+      { contexts_left_bracket = invalidate_token x.contexts_left_bracket
+      ; contexts_types = invalidate_list_with (invalidate_specifier) x.contexts_types
+      ; contexts_right_bracket = invalidate_token x.contexts_right_bracket
       }
     ; Syntax.value = v
     }
@@ -1474,7 +1474,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   and validate_context_const_declaration : context_const_declaration validator = function
   | { Syntax.syntax = Syntax.ContextConstDeclaration x; value = v } -> v,
     { context_const_semicolon = validate_token x.context_const_semicolon
-    ; context_const_ctx_list = validate_option_with (validate_capability) x.context_const_ctx_list
+    ; context_const_ctx_list = validate_option_with (validate_contexts) x.context_const_ctx_list
     ; context_const_equal = validate_option_with (validate_token) x.context_const_equal
     ; context_const_constraint = validate_list_with (validate_context_constraint) x.context_const_constraint
     ; context_const_type_parameters = validate_option_with (validate_type_parameters) x.context_const_type_parameters
@@ -1494,7 +1494,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
       ; context_const_type_parameters = invalidate_option_with (invalidate_type_parameters) x.context_const_type_parameters
       ; context_const_constraint = invalidate_list_with (invalidate_context_constraint) x.context_const_constraint
       ; context_const_equal = invalidate_option_with (invalidate_token) x.context_const_equal
-      ; context_const_ctx_list = invalidate_option_with (invalidate_capability) x.context_const_ctx_list
+      ; context_const_ctx_list = invalidate_option_with (invalidate_contexts) x.context_const_ctx_list
       ; context_const_semicolon = invalidate_token x.context_const_semicolon
       }
     ; Syntax.value = v
@@ -2175,7 +2175,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; anonymous_use = validate_option_with (validate_anonymous_function_use_clause) x.anonymous_use
     ; anonymous_type = validate_option_with (validate_specifier) x.anonymous_type
     ; anonymous_colon = validate_option_with (validate_token) x.anonymous_colon
-    ; anonymous_ctx_list = validate_option_with (validate_capability) x.anonymous_ctx_list
+    ; anonymous_ctx_list = validate_option_with (validate_contexts) x.anonymous_ctx_list
     ; anonymous_right_paren = validate_token x.anonymous_right_paren
     ; anonymous_parameters = validate_list_with (validate_parameter) x.anonymous_parameters
     ; anonymous_left_paren = validate_token x.anonymous_left_paren
@@ -2195,7 +2195,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
       ; anonymous_left_paren = invalidate_token x.anonymous_left_paren
       ; anonymous_parameters = invalidate_list_with (invalidate_parameter) x.anonymous_parameters
       ; anonymous_right_paren = invalidate_token x.anonymous_right_paren
-      ; anonymous_ctx_list = invalidate_option_with (invalidate_capability) x.anonymous_ctx_list
+      ; anonymous_ctx_list = invalidate_option_with (invalidate_contexts) x.anonymous_ctx_list
       ; anonymous_colon = invalidate_option_with (invalidate_token) x.anonymous_colon
       ; anonymous_type = invalidate_option_with (invalidate_specifier) x.anonymous_type
       ; anonymous_use = invalidate_option_with (invalidate_anonymous_function_use_clause) x.anonymous_use
@@ -2245,7 +2245,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | { Syntax.syntax = Syntax.LambdaSignature x; value = v } -> v,
     { lambda_type = validate_option_with (validate_specifier) x.lambda_type
     ; lambda_colon = validate_option_with (validate_token) x.lambda_colon
-    ; lambda_capability = validate_option_with (validate_capability) x.lambda_capability
+    ; lambda_contexts = validate_option_with (validate_contexts) x.lambda_contexts
     ; lambda_right_paren = validate_token x.lambda_right_paren
     ; lambda_parameters = validate_list_with (validate_parameter) x.lambda_parameters
     ; lambda_left_paren = validate_token x.lambda_left_paren
@@ -2257,7 +2257,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
       { lambda_left_paren = invalidate_token x.lambda_left_paren
       ; lambda_parameters = invalidate_list_with (invalidate_parameter) x.lambda_parameters
       ; lambda_right_paren = invalidate_token x.lambda_right_paren
-      ; lambda_capability = invalidate_option_with (invalidate_capability) x.lambda_capability
+      ; lambda_contexts = invalidate_option_with (invalidate_contexts) x.lambda_contexts
       ; lambda_colon = invalidate_option_with (invalidate_token) x.lambda_colon
       ; lambda_type = invalidate_option_with (invalidate_specifier) x.lambda_type
       }
@@ -3249,7 +3249,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     }
   and validate_context_constraint : context_constraint validator = function
   | { Syntax.syntax = Syntax.ContextConstraint x; value = v } -> v,
-    { ctx_constraint_ctx_list = validate_option_with (validate_capability) x.ctx_constraint_ctx_list
+    { ctx_constraint_ctx_list = validate_option_with (validate_contexts) x.ctx_constraint_ctx_list
     ; ctx_constraint_keyword = validate_token x.ctx_constraint_keyword
     }
   | s -> validation_fail (Some SyntaxKind.ContextConstraint) s
@@ -3257,7 +3257,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { Syntax.syntax =
       Syntax.ContextConstraint
       { ctx_constraint_keyword = invalidate_token x.ctx_constraint_keyword
-      ; ctx_constraint_ctx_list = invalidate_option_with (invalidate_capability) x.ctx_constraint_ctx_list
+      ; ctx_constraint_ctx_list = invalidate_option_with (invalidate_contexts) x.ctx_constraint_ctx_list
       }
     ; Syntax.value = v
     }
@@ -3308,7 +3308,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { closure_outer_right_paren = validate_token x.closure_outer_right_paren
     ; closure_return_type = validate_specifier x.closure_return_type
     ; closure_colon = validate_token x.closure_colon
-    ; closure_capability = validate_option_with (validate_capability) x.closure_capability
+    ; closure_contexts = validate_option_with (validate_contexts) x.closure_contexts
     ; closure_inner_right_paren = validate_token x.closure_inner_right_paren
     ; closure_parameter_list = validate_list_with (validate_closure_parameter_type_specifier) x.closure_parameter_list
     ; closure_inner_left_paren = validate_token x.closure_inner_left_paren
@@ -3324,7 +3324,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
       ; closure_inner_left_paren = invalidate_token x.closure_inner_left_paren
       ; closure_parameter_list = invalidate_list_with (invalidate_closure_parameter_type_specifier) x.closure_parameter_list
       ; closure_inner_right_paren = invalidate_token x.closure_inner_right_paren
-      ; closure_capability = invalidate_option_with (invalidate_capability) x.closure_capability
+      ; closure_contexts = invalidate_option_with (invalidate_contexts) x.closure_contexts
       ; closure_colon = invalidate_token x.closure_colon
       ; closure_return_type = invalidate_specifier x.closure_return_type
       ; closure_outer_right_paren = invalidate_token x.closure_outer_right_paren

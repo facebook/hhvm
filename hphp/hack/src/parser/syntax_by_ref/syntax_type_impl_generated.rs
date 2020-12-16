@@ -326,7 +326,7 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_function_declaration_header(ctx: &C, modifiers: Self, keyword: Self, name: Self, type_parameter_list: Self, left_paren: Self, parameter_list: Self, right_paren: Self, capability: Self, colon: Self, type_: Self, where_clause: Self) -> Self {
+    fn make_function_declaration_header(ctx: &C, modifiers: Self, keyword: Self, name: Self, type_parameter_list: Self, left_paren: Self, parameter_list: Self, right_paren: Self, contexts: Self, colon: Self, type_: Self, where_clause: Self) -> Self {
         let syntax = SyntaxVariant::FunctionDeclarationHeader(ctx.get_arena().alloc(FunctionDeclarationHeaderChildren {
             modifiers,
             keyword,
@@ -335,7 +335,7 @@ where
             left_paren,
             parameter_list,
             right_paren,
-            capability,
+            contexts,
             colon,
             type_,
             where_clause,
@@ -344,8 +344,8 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_capability(ctx: &C, left_bracket: Self, types: Self, right_bracket: Self) -> Self {
-        let syntax = SyntaxVariant::Capability(ctx.get_arena().alloc(CapabilityChildren {
+    fn make_contexts(ctx: &C, left_bracket: Self, types: Self, right_bracket: Self) -> Self {
+        let syntax = SyntaxVariant::Contexts(ctx.get_arena().alloc(ContextsChildren {
             left_bracket,
             types,
             right_bracket,
@@ -986,12 +986,12 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_lambda_signature(ctx: &C, left_paren: Self, parameters: Self, right_paren: Self, capability: Self, colon: Self, type_: Self) -> Self {
+    fn make_lambda_signature(ctx: &C, left_paren: Self, parameters: Self, right_paren: Self, contexts: Self, colon: Self, type_: Self) -> Self {
         let syntax = SyntaxVariant::LambdaSignature(ctx.get_arena().alloc(LambdaSignatureChildren {
             left_paren,
             parameters,
             right_paren,
-            capability,
+            contexts,
             colon,
             type_,
         }));
@@ -1641,14 +1641,14 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_closure_type_specifier(ctx: &C, outer_left_paren: Self, function_keyword: Self, inner_left_paren: Self, parameter_list: Self, inner_right_paren: Self, capability: Self, colon: Self, return_type: Self, outer_right_paren: Self) -> Self {
+    fn make_closure_type_specifier(ctx: &C, outer_left_paren: Self, function_keyword: Self, inner_left_paren: Self, parameter_list: Self, inner_right_paren: Self, contexts: Self, colon: Self, return_type: Self, outer_right_paren: Self) -> Self {
         let syntax = SyntaxVariant::ClosureTypeSpecifier(ctx.get_arena().alloc(ClosureTypeSpecifierChildren {
             outer_left_paren,
             function_keyword,
             inner_left_paren,
             parameter_list,
             inner_right_paren,
-            capability,
+            contexts,
             colon,
             return_type,
             outer_right_paren,

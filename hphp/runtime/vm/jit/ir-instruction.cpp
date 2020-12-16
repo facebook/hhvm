@@ -315,9 +315,51 @@ Type allocObjReturn(const IRInstruction* inst) {
 * Analyze the type of return element (key or value) for different container.
 */
 Type arrFirstLastReturn(const IRInstruction* inst, bool first, bool isKey) {
-  auto elem = arrLikeFirstLastType(inst->src(0)->type(), first, isKey, inst->ctx());
+  auto elem = arrLikeFirstLastType(
+      inst->src(0)->type(), first, isKey, inst->ctx());
   if (!elem.second) elem.first |= TInitNull;
   return elem.first;
+}
+
+Type bespokeElemLvalReturn(const IRInstruction* inst) {
+  assertx(inst->is(BespokeElem));
+  assertx(inst->src(0)->type() <= TLvalToArrLike);
+  assertx(inst->src(2)->hasConstVal(TBool));
+
+  auto resultType = arrLikeElemType(
+      inst->src(0)->type().deref(), inst->src(1)->type(), inst->ctx());
+  auto const presentType = resultType.first;
+  if (inst->src(2)->boolVal()) {
+    return presentType.lval(Ptr::Elem);
+  } else {
+    auto const type = resultType.second ? presentType
+                                        : (presentType | TInitNull);
+    return type.lval(Ptr::Elem);
+  }
+}
+
+Type bespokeElemReturn(const IRInstruction* inst, bool present) {
+  assertx(inst->src(0)->type() <= TArrLike);
+
+  auto resultType = arrLikeElemType(
+      inst->src(0)->type(), inst->src(1)->type(), inst->ctx());
+  if (present) return resultType.first;
+
+  assertx(inst->is(BespokeGet));
+  auto const keyState = inst->extra<BespokeGet>()->state;
+  auto const knownPresent =
+    resultType.second || (keyState == BespokeGetData::KeyState::Present);
+  auto const type = knownPresent ? resultType.first
+                                 : (resultType.first | TUninit);
+  return type;
+}
+
+Type bespokePosReturn(const IRInstruction* inst, bool isKey) {
+  assertx(inst->src(0)->type() <= TArrLike);
+
+  auto resultType = arrLikePosType(
+      inst->src(0)->type(), inst->src(1)->type(), isKey, inst->ctx());
+  return resultType;
 }
 
 Type vecElemReturn(const IRInstruction* inst) {
@@ -542,6 +584,10 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
   return TCls;                                                     \
 }
 #define DAllocObj       return allocObjReturn(inst);
+#define DBespokeElem          return bespokeElemReturn(inst, true);
+#define DBespokeElemUninit    return bespokeElemReturn(inst, false);
+#define DBespokePosKey        return bespokePosReturn(inst, true);
+#define DBespokePosVal        return bespokePosReturn(inst, false);
 #define DVecElem        return vecElemReturn(inst);
 #define DDictElem       return dictElemReturn(inst);
 #define DKeysetElem     return keysetElemReturn(inst);
@@ -567,7 +613,7 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #define DLvalOfPtr      return ptrToLvalReturn(inst);
 #define DPtrIter        return ptrIterReturn(inst);
 #define DPtrIterVal     return ptrIterValReturn(inst);
-#define DLvalToElemParam return inst->typeParam().lval(Ptr::Elem);
+#define DBespokeElemLval return bespokeElemLvalReturn(inst);
 
 #define O(name, dstinfo, srcinfo, flags) case name: dstinfo not_reached();
 
@@ -586,6 +632,10 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #undef DEscalateToVanilla
 #undef DLdObjCls
 #undef DAllocObj
+#undef DBespokeElem
+#undef DBespokeElemUninit
+#undef DBespokePosKey
+#undef DBespokePosVal
 #undef DVecElem
 #undef DDictElem
 #undef DKeysetElem
@@ -610,7 +660,7 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #undef DLvalOfPtr
 #undef DPtrIter
 #undef DPtrIterVal
-#undef DLvalToElemParam
+#undef DBespokeElemLval
 }
 
 }}

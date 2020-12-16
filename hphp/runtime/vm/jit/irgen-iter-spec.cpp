@@ -460,11 +460,11 @@ struct BespokeAccessor : public Accessor {
   }
 
   SSATmp* getKey(IRGS& env, SSATmp* arr, SSATmp* elm) const override {
-    return gen(env, BespokeIterGetKey, TInt|TStr, arr, elm);
+    return gen(env, BespokeIterGetKey, arr, elm);
   }
 
   SSATmp* getVal(IRGS& env, SSATmp* arr, SSATmp* elm) const override {
-    return gen(env, BespokeIterGetVal, TInitCell, arr, elm);
+    return gen(env, BespokeIterGetVal, arr, elm);
   }
 
   SSATmp* advancePos(IRGS& env, SSATmp* pos, int16_t offset) const override {

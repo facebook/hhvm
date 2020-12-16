@@ -229,6 +229,24 @@ ArrayData* ArrayLayout::apply(ArrayData* ad) const {
 
 //////////////////////////////////////////////////////////////////////////////
 
+std::pair<Type, bool> ArrayLayout::elemType(Type key) const {
+  if (isBasicSort(sort)) return {TInitCell, false};
+  return bespokeLayout()->elemType(key);
+}
+
+std::pair<Type, bool> ArrayLayout::firstLastType(
+    bool isFirst, bool isKey) const {
+  if (isBasicSort(sort)) return {isKey ? (TInt | TStr) : TInitCell, false};
+  return bespokeLayout()->firstLastType(isFirst, isKey);
+}
+
+Type ArrayLayout::iterPosType(Type pos, bool isKey) const {
+  if (isBasicSort(sort)) return isKey ? (TInt | TStr) : TInitCell;
+  return bespokeLayout()->iterPosType(pos, isKey);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
 namespace {
 using bespoke::LoggingProfileKey;
 using bespoke::SinkProfileKey;

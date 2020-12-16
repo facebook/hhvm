@@ -293,22 +293,45 @@ std::pair<Type, bool> keysetFirstLastType(Type arr, bool isFirst) {
 std::pair<Type, bool> arrLikeElemType(Type arr, Type idx, const Class* ctx) {
   assertx(idx <= (TInt | TStr));
   assertx(arr.isKnownDataType());
-  if (arr <= TBottom) return {TBottom, false};
-  if (arr <= (TVArr|TVec)) return vecElemType(arr, idx, ctx);
-  if (arr <= (TDArr|TDict)) return dictElemType(arr, idx);
-  return keysetElemType(arr, idx);
+  auto const ratDeducedType = [&] () -> std::pair<Type, bool> {
+    if (arr <= TBottom) return {TBottom, false};
+    if (arr <= (TVArr|TVec)) return vecElemType(arr, idx, ctx);
+    if (arr <= (TDArr|TDict)) return dictElemType(arr, idx);
+    return keysetElemType(arr, idx);
+  }();
+  auto const layoutType = arr.arrSpec().layout().elemType(idx);
+  return {ratDeducedType.first & layoutType.first,
+          ratDeducedType.second || layoutType.second};
 }
 
 std::pair<Type, bool> arrLikeFirstLastType(
     Type arr, bool isFirst, bool isKey, const Class* ctx) {
   assertx(arr.isKnownDataType());
-  if (arr <= TBottom) return {TBottom, false};
-  if (arr <= (TVArr|TVec)) {
-    return isKey ? vecFirstLastKeyType(arr, isFirst)
-                 : vecFirstLastValueType(arr, isFirst, ctx);
-  }
-  if (arr <= (TDArr|TDict)) return dictFirstLastType(arr, isFirst, isKey);
-  return keysetFirstLastType(arr, isFirst);
+  auto const ratDeducedType = [&] () -> std::pair<Type, bool> {
+    if (arr <= TBottom) return {TBottom, false};
+    if (arr <= (TVArr|TVec)) {
+      return isKey ? vecFirstLastKeyType(arr, isFirst)
+                   : vecFirstLastValueType(arr, isFirst, ctx);
+    }
+    if (arr <= (TDArr|TDict)) return dictFirstLastType(arr, isFirst, isKey);
+    return keysetFirstLastType(arr, isFirst);
+  }();
+  auto const layoutType = arr.arrSpec().layout().firstLastType(isFirst, isKey);
+  return {ratDeducedType.first & layoutType.first,
+          ratDeducedType.second || layoutType.second};
+}
+
+Type arrLikePosType(Type arr, Type pos, bool isKey, const Class* ctx) {
+  assertx(arr.isKnownDataType());
+  auto const deducedType = [&] {
+    if (arr <= (TVArr|TVec)) {
+      return isKey ? TInt : vecElemType(arr, pos, ctx).first;
+    }
+    if (arr <= (TDArr|TDict)) return isKey ? (TInt | TStr) : TInitCell;
+    return TInt | TStr;
+  }();
+  auto const layoutType = arr.arrSpec().layout().iterPosType(pos, isKey);
+  return deducedType & layoutType;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

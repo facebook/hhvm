@@ -117,11 +117,17 @@ private:
 struct EmptyMonotypeVecLayout : public ConcreteLayout {
   EmptyMonotypeVecLayout();
   static LayoutIndex Index();
+  std::pair<Type, bool> elemType(Type key) const override;
+  std::pair<Type, bool> firstLastType(bool isFirst, bool isKey) const override;
+  Type iterPosType(Type pos, bool isKey) const override;
 };
 
 struct MonotypeVecLayout : public ConcreteLayout {
   explicit MonotypeVecLayout(DataType type);
   static LayoutIndex Index(DataType type);
+  std::pair<Type, bool> elemType(Type key) const override;
+  std::pair<Type, bool> firstLastType(bool isFirst, bool isKey) const override;
+  Type iterPosType(Type pos, bool isKey) const override;
 
   DataType m_fixedType;
 };
@@ -129,6 +135,9 @@ struct MonotypeVecLayout : public ConcreteLayout {
 struct EmptyOrMonotypeVecLayout : public AbstractLayout {
   explicit EmptyOrMonotypeVecLayout(DataType type);
   static LayoutIndex Index(DataType type);
+  std::pair<Type, bool> elemType(Type key) const override;
+  std::pair<Type, bool> firstLastType(bool isFirst, bool isKey) const override;
+  Type iterPosType(Type pos, bool isKey) const override;
   const MonotypeVecLayout* getNonEmptyLayout() const {
     auto const layout =
       Layout::FromIndex(MonotypeVecLayout::Index(m_fixedType));

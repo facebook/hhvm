@@ -289,6 +289,7 @@ bool canDCE(IRInstruction* inst) {
   case EqPtrIter:
   case LdUnitPerRequestFilepath:
   case DirFromFilepath:
+  case BespokeGet:
   case BespokeIterFirstPos:
   case BespokeIterLastPos:
   case BespokeIterEnd:
@@ -644,7 +645,6 @@ bool canDCE(IRInstruction* inst) {
   case CheckVecBounds:
   case CheckVecBoundsLA:
   case BespokeElem:
-  case BespokeGet:
   case BespokeEscalateToVanilla:
   case LdVectorSize:
   case BeginCatch:

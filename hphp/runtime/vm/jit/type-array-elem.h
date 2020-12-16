@@ -56,6 +56,13 @@ std::pair<Type, bool> arrLikeElemType(Type arr, Type idx, const Class* ctx);
 std::pair<Type, bool> arrLikeFirstLastType(
     Type arr, bool isFirst, bool isKey, const Class* ctx);
 
+/*
+* Get the type of the element or key at the given iterator position for an
+* array using available knowledge on the types. The first element of the pair
+* is the type of the key/value.
+*/
+Type arrLikePosType(Type arr, Type pos, bool isKey, const Class* ctx);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }}

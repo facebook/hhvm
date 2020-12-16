@@ -3093,7 +3093,7 @@ SSATmp* simplifyBespokeGet(State& env, const IRInstruction* inst) {
     if (key->isA(TStr)) return cns(env, TUninit);
     if (arr->type().arrSpec().monotype() &&
         inst->extra<BespokeGet>()->state == BespokeGetData::KeyState::Present) {
-      return gen(env, LdMonotypeVecElem, inst->typeParam(), arr, key);
+      return gen(env, LdMonotypeVecElem, arr, key);
     }
   }
 
@@ -3166,7 +3166,7 @@ SSATmp* simplifyBespokeIterGetKey(State& env, const IRInstruction* inst) {
   if (arr->isA(TVArr|TVec)) return pos;
 
   if (arr->isA(TDArr|TDict) && arr->type().arrSpec().monotype()) {
-    return gen(env, LdMonotypeDictKey, inst->typeParam(), arr, pos);
+    return gen(env, LdMonotypeDictKey, arr, pos);
   }
 
   return nullptr;
@@ -3187,11 +3187,11 @@ SSATmp* simplifyBespokeIterGetVal(State& env, const IRInstruction* inst) {
 
   if (arr->isA(TVArr|TVec)) {
     auto const data = BespokeGetData { BespokeGetData::KeyState::Present };
-    return gen(env, BespokeGet, data, inst->typeParam(), arr, pos);
+    return gen(env, BespokeGet, data, arr, pos);
   }
 
   if (arr->isA(TDArr|TDict) && arr->type().arrSpec().monotype()) {
-    return gen(env, LdMonotypeDictVal, inst->typeParam(), arr, pos);
+    return gen(env, LdMonotypeDictVal, arr, pos);
   }
 
   return nullptr;

@@ -30,6 +30,7 @@ struct Block;
 struct SSATmp;
 struct ProfDataSerializer;
 struct ProfDataDeserializer;
+struct Type;
 
 namespace irgen { struct IRGS; }
 
@@ -93,6 +94,14 @@ struct ArrayLayout {
     if (ad->isVanilla()) return Vanilla();
     return ArrayLayout(BespokeArray::asBespoke(ad)->layoutIndex());
   }
+
+  /**************************************************************************
+   * Type information for contents
+   **************************************************************************/
+
+  std::pair<Type, bool> elemType(Type key) const;
+  std::pair<Type, bool> firstLastType(bool isFirst, bool isKey) const;
+  Type iterPosType(Type pos, bool isKey) const;
 
   /**************************************************************************
    * Representation as a simple uint16_t

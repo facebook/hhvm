@@ -51,11 +51,15 @@ TRACE_SET_MOD(hhir);
 #define DParam(t)      HasDest
 #define DLdObjCls      HasDest
 #define DAllocObj      HasDest
+#define DBespokeElem   HasDest
+#define DBespokeElemUninit   HasDest
+#define DBespokePosKey HasDest
+#define DBespokePosVal HasDest
 #define DVecElem       HasDest
 #define DDictElem      HasDest
 #define DModified(n)   HasDest
 #define DKeysetElem    HasDest
-#define DLvalToElemParam  HasDest
+#define DBespokeElemLval  HasDest
 #define DVecKey           HasDest
 #define DFirstElem        HasDest
 #define DLastElem         HasDest
@@ -121,11 +125,15 @@ OpInfo g_opInfo[] = {
 #undef DRefineS
 #undef DParam
 #undef DLdObjCls
+#undef DBespokeElemUninit
+#undef DBespokeElem
+#undef DBespokePosKey
+#undef DBespokePosVal
 #undef DVecElem
 #undef DDictElem
 #undef DKeysetElem
 #undef DEscalateToVanilla
-#undef DLvalToElemParam
+#undef DBespokeElemLval
 #undef DVecFirstElem
 #undef DVecLastElem
 #undef DVecKey

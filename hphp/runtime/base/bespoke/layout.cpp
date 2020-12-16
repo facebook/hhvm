@@ -24,6 +24,7 @@
 #include "hphp/runtime/vm/jit/irgen.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 #include "hphp/runtime/vm/jit/mcgen-translate.h"
+#include "hphp/runtime/vm/jit/type.h"
 #include "hphp/runtime/vm/jit/punt.h"
 #include "hphp/util/trace.h"
 
@@ -613,6 +614,20 @@ struct Layout::Initializer {
   }
 };
 Layout::Initializer Layout::s_initializer;
+
+//////////////////////////////////////////////////////////////////////////////
+
+std::pair<Type, bool> Layout::elemType(Type key) const {
+  return {TInitCell, false};
+}
+
+std::pair<Type, bool> Layout::firstLastType(bool isFirst, bool isKey) const {
+  return {isKey ? (TInt | TStr) : TInitCell, false};
+}
+
+Type Layout::iterPosType(Type pos, bool isKey) const {
+  return isKey ? (TInt | TStr) : TInitCell;
+}
 
 //////////////////////////////////////////////////////////////////////////////
 

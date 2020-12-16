@@ -538,9 +538,13 @@ using TypeNames::TCA;
                          },                                                    \
                          IdxSeq<__VA_ARGS__>{}                                 \
                        );
-#define DLvalToElemParam requireTypeParam(Top);
+#define DBespokeElemLval
 #define DLdObjCls
 #define DAllocObj
+#define DBespokeElemUninit
+#define DBespokeElem
+#define DBespokePosKey
+#define DBespokePosVal
 #define DVecElem
 #define DDictElem
 #define DModified(n)
@@ -597,9 +601,13 @@ using TypeNames::TCA;
 #undef DRefineS
 #undef DEscalateToVanilla
 #undef DParam
-#undef DLvalToElemParam
+#undef DBespokeElemLval
 #undef DLdObjCls
 #undef DAllocObj
+#undef DBespokeElemUninit
+#undef DBespokeElem
+#undef DBespokePosKey
+#undef DBespokePosVal
 #undef DVecElem
 #undef DDictElem
 #undef DModified

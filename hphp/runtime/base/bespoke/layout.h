@@ -30,6 +30,7 @@ namespace jit {
 
 struct SSATmp;
 struct Block;
+struct Type;
 
 namespace irgen { struct IRGS; }
 
@@ -325,6 +326,31 @@ struct Layout {
   bool operator<=(const Layout& other) const;
   const Layout* operator|(const Layout& other) const;
   const Layout* operator&(const Layout& other) const;
+
+  ///////////////////////////////////////////////////////////////////////////
+
+  using Type = jit::Type;
+
+  /*
+   * Returns the most specific type known for the element at the given key for
+   * this bespoke layout. The pair returned contains this type, along with a
+   * boolean indicating if element is statically known to be present.
+   */
+  virtual std::pair<Type, bool> elemType(Type key) const;
+
+  /*
+   * Returns the most specific type known for the first or last key or value
+   * for this bespoke layout. The pair returned contains this type, along with
+   * a boolean indicating if key/value is statically known to be present.
+   */
+  virtual std::pair<Type, bool> firstLastType(bool isFirst, bool isKey) const;
+
+  /*
+   * Returns the most specific type known for the key or value at the specified
+   * iterator position for this bespoke layout. The iterator position can be
+   * assumed to be valid.
+   */
+  virtual Type iterPosType(Type pos, bool isKey) const;
 
   ///////////////////////////////////////////////////////////////////////////
 

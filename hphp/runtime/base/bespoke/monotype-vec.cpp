@@ -24,9 +24,7 @@
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/tv-refcount.h"
 
-#include "hphp/runtime/vm/jit/irgen.h"
-#include "hphp/runtime/vm/jit/irgen-state.h"
-#include "hphp/runtime/vm/jit/ssa-tmp.h"
+#include "hphp/runtime/vm/jit/type.h"
 
 #include "hphp/util/word-mem.h"
 
@@ -824,6 +822,50 @@ ArrayData* MonotypeVec::SetLegacyArray(MonotypeVec* madIn,
   auto const mad = copy ? madIn->copy() : madIn;
   mad->setLegacyArrayInPlace(legacy);
   return mad;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+using namespace jit;
+
+std::pair<Type, bool> EmptyMonotypeVecLayout::elemType(Type key) const {
+  return {TBottom, false};
+}
+
+std::pair<Type, bool> EmptyMonotypeVecLayout::firstLastType(
+    bool isFirst, bool isKey) const {
+  return {TBottom, false};
+}
+
+Type EmptyMonotypeVecLayout::iterPosType(Type pos, bool isKey) const {
+  return TBottom;
+}
+
+std::pair<Type, bool> MonotypeVecLayout::elemType(Type key) const {
+  return {Type(m_fixedType), false};
+}
+
+std::pair<Type, bool> MonotypeVecLayout::firstLastType(
+    bool isFirst, bool isKey) const {
+  return {isKey ? TInt : Type(m_fixedType), false};
+}
+
+Type MonotypeVecLayout::iterPosType(Type pos, bool isKey) const {
+  return isKey ? TInt : Type(m_fixedType);
+}
+
+
+std::pair<Type, bool> EmptyOrMonotypeVecLayout::elemType(Type key) const {
+  return {Type(m_fixedType), false};
+}
+
+std::pair<Type, bool> EmptyOrMonotypeVecLayout::firstLastType(
+    bool isFirst, bool isKey) const {
+  return {isKey ? TInt : Type(m_fixedType), false};
+}
+
+Type EmptyOrMonotypeVecLayout::iterPosType(Type pos, bool isKey) const {
+  return isKey ? TInt : Type(m_fixedType);
 }
 
 //////////////////////////////////////////////////////////////////////////////

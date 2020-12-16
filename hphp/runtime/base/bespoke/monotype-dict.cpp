@@ -24,7 +24,9 @@
 #include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/static-string-table.h"
+
 #include "hphp/runtime/vm/jit/mcgen-translate.h"
+#include "hphp/runtime/vm/jit/type.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
 #include <algorithm>
@@ -1356,6 +1358,98 @@ ArrayData* MonotypeDict<Key>::SetLegacyArray(
   auto const mad = copy ? madIn->copy() : madIn;
   mad->setLegacyArrayInPlace(legacy);
   return mad;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+using namespace jit;
+
+namespace {
+Type applicableKeyType(KeyTypes kt) {
+  switch (kt) {
+    case KeyTypes::Empty:
+      return TBottom;
+    case KeyTypes::Ints:
+      return TInt;
+    case KeyTypes::StaticStrings:
+    case KeyTypes::Strings:
+      return TStr;
+    case KeyTypes::Any:
+      return TInt | TStr;
+  }
+  not_reached();
+}
+
+Type resKeyType(KeyTypes kt) {
+  switch (kt) {
+    case KeyTypes::Empty:
+      return TBottom;
+    case KeyTypes::Ints:
+      return TInt;
+    case KeyTypes::StaticStrings:
+      return TStaticStr;
+    case KeyTypes::Strings:
+      return TStr;
+    case KeyTypes::Any:
+      return TInt | TStr;
+  }
+  not_reached();
+}
+}
+
+std::pair<Type, bool> TopMonotypeDictLayout::elemType(Type key) const {
+  auto const validKey = key.maybe(applicableKeyType(m_keyType));
+  return {validKey ? TInitCell : TBottom, false};
+}
+
+std::pair<Type, bool> TopMonotypeDictLayout::firstLastType(
+    bool isFirst, bool isKey) const {
+  return {isKey ? resKeyType(m_keyType) : TInitCell, false};
+}
+
+Type TopMonotypeDictLayout::iterPosType(Type pos, bool isKey) const {
+  return isKey ? resKeyType(m_keyType) : TInitCell;
+}
+
+std::pair<Type, bool> EmptyMonotypeDictLayout::elemType(Type key) const {
+  return {TBottom, false};
+}
+
+std::pair<Type, bool> EmptyMonotypeDictLayout::firstLastType(
+    bool isFirst, bool isKey) const {
+  return {TBottom, false};
+}
+
+Type EmptyMonotypeDictLayout::iterPosType(Type pos, bool isKey) const {
+  return TBottom;
+}
+
+std::pair<Type, bool> EmptyOrMonotypeDictLayout::elemType(Type key) const {
+  auto const validKey = key.maybe(applicableKeyType(m_keyType));
+  return {validKey ? Type(m_valType) : TBottom, false};
+}
+
+std::pair<Type, bool> EmptyOrMonotypeDictLayout::firstLastType(
+    bool isFirst, bool isKey) const {
+  return {isKey ? resKeyType(m_keyType) : Type(m_valType), false};
+}
+
+Type EmptyOrMonotypeDictLayout::iterPosType(Type pos, bool isKey) const {
+  return isKey ? resKeyType(m_keyType) : Type(m_valType);
+}
+
+std::pair<Type, bool> MonotypeDictLayout::elemType(Type key) const {
+  auto const validKey = key.maybe(applicableKeyType(m_keyType));
+  return {validKey ? Type(m_valType) : TBottom, false};
+}
+
+std::pair<Type, bool> MonotypeDictLayout::firstLastType(
+    bool isFirst, bool isKey) const {
+  return {isKey ? resKeyType(m_keyType) : Type(m_valType), false};
+}
+
+Type MonotypeDictLayout::iterPosType(Type pos, bool isKey) const {
+  return isKey ? resKeyType(m_keyType) : Type(m_valType);
 }
 
 //////////////////////////////////////////////////////////////////////////////

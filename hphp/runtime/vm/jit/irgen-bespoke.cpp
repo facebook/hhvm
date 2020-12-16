@@ -52,20 +52,24 @@ SSATmp* emitGet(IRGS& env, SSATmp* arr, SSATmp* key, Block* taken) {
     if (arr->isA(TVArr|TVec)) {
       gen(env, CheckVecBounds, taken, arr, key);
       auto const data = BespokeGetData { BespokeGetData::KeyState::Present };
-      return gen(env, BespokeGet, data, TInitCell, arr, key);
+      return gen(env, BespokeGet, data, arr, key);
     } else {
       auto const data = BespokeGetData { BespokeGetData::KeyState::Unknown };
-      auto const result = gen(env, BespokeGet, data, TCell, arr, key);
-      return gen(env, CheckType, TInitCell, taken, result);
+      auto const val = gen(env, BespokeGet, data, arr, key);
+      gen(env, CheckType, TInitCell, taken, val);
+      // TODO(mcolavita): this is here because we can lose constval information
+      // when unioning with TUninit.
+      auto resultType =
+        arrLikeElemType(arr->type(), key->type(), curClass(env));
+      return gen(env, AssertType, resultType.first, val);
     }
   }();
-  auto const type = arrLikeElemType(arr->type(), key->type(), curClass(env));
   // TODO(kshaunak): We should also pull in TypeProfile information here.
-  return gen(env, AssertType, type.first, result);
+  return result;
 }
 
 SSATmp* emitElem(IRGS& env, SSATmp* arr, SSATmp* key, bool throwOnMissing) {
-  return gen(env, BespokeElem, TInitCell, arr, key, cns(env, throwOnMissing));
+  return gen(env, BespokeElem, arr, key, cns(env, throwOnMissing));
 }
 
 SSATmp* emitSet(IRGS& env, SSATmp* arr, SSATmp* key, SSATmp* val) {
@@ -75,7 +79,11 @@ SSATmp* emitSet(IRGS& env, SSATmp* arr, SSATmp* key, SSATmp* val) {
 
 SSATmp* emitAppend(IRGS& env, SSATmp* arr, SSATmp* val) {
   auto const result = gen(env, BespokeAppend, arr, val);
-  return gen(env, AssertType, TCounted, result);
+  if (arr->type().maybe(TKeyset)) {
+    return gen(env, AssertType, arr->type() | TCountedKeyset, result);
+  } else {
+    return gen(env, AssertType, TCounted, result);
+  }
 }
 
 SSATmp* emitEscalateToVanilla(
@@ -610,9 +618,9 @@ template <bool isFirst, bool isKey>
 void emitBespokeFirstLast(IRGS& env, uint32_t numArgs) {
   if (numArgs != 1) PUNT(Bespoke-FirstLast-BadArgs);
   auto const arr = popC(env);
+  // TODO(mcolavita): this type knowledge should ideally be pushed lower.
   auto const elem = arrLikeFirstLastType(
     arr->type(), isFirst, isKey, curClass(env));
-  auto const type = elem.first;
   auto const maybeEmpty = !elem.second;
 
   auto const res = cond(
@@ -626,12 +634,11 @@ void emitBespokeFirstLast(IRGS& env, uint32_t numArgs) {
         ? gen(env, BespokeIterFirstPos, arr)
         : gen(env, BespokeIterLastPos, arr);
       auto const val = isKey
-        ? gen(env, BespokeIterGetKey, TInt|TStr, arr, pos)
-        : gen(env, BespokeIterGetVal, TInitCell, arr, pos);
-      auto const result = gen(env, AssertType, type, val);
+        ? gen(env, BespokeIterGetKey, arr, pos)
+        : gen(env, BespokeIterGetVal, arr, pos);
 
-      gen(env, IncRef, result);
-      return result;
+      gen(env, IncRef, val);
+      return val;
     },
     [&] { return cns(env, maybeEmpty ? TInitNull : TBottom); }
   );

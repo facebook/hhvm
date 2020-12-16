@@ -241,12 +241,20 @@ private:
 struct TopMonotypeDictLayout : public AbstractLayout {
   explicit TopMonotypeDictLayout(KeyTypes kt);
   static LayoutIndex Index(KeyTypes kt);
+  std::pair<Type, bool> elemType(Type key) const override;
+  std::pair<Type, bool> firstLastType(bool isFirst, bool isKey) const override;
+  Type iterPosType(Type pos, bool isKey) const override;
+
   KeyTypes m_keyType;
 };
 
 struct EmptyOrMonotypeDictLayout : public AbstractLayout {
   EmptyOrMonotypeDictLayout(KeyTypes kt, DataType type);
   static LayoutIndex Index(KeyTypes kt, DataType type);
+  std::pair<Type, bool> elemType(Type key) const override;
+  std::pair<Type, bool> firstLastType(bool isFirst, bool isKey) const override;
+  Type iterPosType(Type pos, bool isKey) const override;
+
   KeyTypes m_keyType;
   DataType m_valType;
 };
@@ -254,11 +262,18 @@ struct EmptyOrMonotypeDictLayout : public AbstractLayout {
 struct EmptyMonotypeDictLayout : public ConcreteLayout {
   explicit EmptyMonotypeDictLayout();
   static LayoutIndex Index();
+  std::pair<Type, bool> elemType(Type key) const override;
+  std::pair<Type, bool> firstLastType(bool isFirst, bool isKey) const override;
+  Type iterPosType(Type pos, bool isKey) const override;
 };
 
 struct MonotypeDictLayout : public ConcreteLayout {
   MonotypeDictLayout(KeyTypes kt, DataType type);
   static LayoutIndex Index(KeyTypes kt, DataType type);
+  std::pair<Type, bool> elemType(Type key) const override;
+  std::pair<Type, bool> firstLastType(bool isFirst, bool isKey) const override;
+  Type iterPosType(Type pos, bool isKey) const override;
+
   KeyTypes m_keyType;
   DataType m_valType;
 };

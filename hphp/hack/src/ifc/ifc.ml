@@ -866,7 +866,10 @@ let rec assign ?(use_pc = true) ~expr ~pos renv env lhs rhs_pty =
     (* Evaluate the array *)
     let (env, old_arry_pty) = expr env arry_exp in
     let new_arry_pty = Lift.ty ~prefix:"arr" renv arry_ty in
-    let arry =
+    (* If the array is in an intersection, we pull it out and if we cannot
+       find find something suitable return a fake type to make the analysis go
+       through. *)
+    let new_arry_pty =
       array_like_with_default
         ~cow:true
         ~shape:true
@@ -878,10 +881,9 @@ let rec assign ?(use_pc = true) ~expr ~pos renv env lhs rhs_pty =
     in
 
     let (env, use_pc) =
-      match arry with
-      | Tcow_array _ ->
+      match new_arry_pty with
+      | Tcow_array arry ->
         (* TODO(T68269878): track flows due to length changes *)
-        let arry = cow_array ~pos renv new_arry_pty in
         (* Here we achieve two things:
          * 1. CoW semantics by using a fresh array type that will be used from now on.
          * 2. Account for the assignment destination type. This is the type the

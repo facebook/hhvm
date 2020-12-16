@@ -177,6 +177,6 @@ private:
 }
 
 #define incl_HPHP_VM_RX_INL_H_
-#include "hphp/runtime/vm/rx-inl.h"
+#include "hphp/runtime/vm/coeffects-inl.h"
 #undef incl_HPHP_VM_RX_INL_H_
 

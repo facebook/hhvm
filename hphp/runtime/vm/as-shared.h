@@ -19,7 +19,7 @@
 #include <folly/Optional.h>
 
 #include "hphp/runtime/base/attr.h"
-#include "hphp/runtime/vm/rx.h"
+#include "hphp/runtime/vm/coeffects.h"
 #include "hphp/runtime/vm/type-constraint.h"
 
 namespace HPHP {

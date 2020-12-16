@@ -24,9 +24,9 @@
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/types.h"
+#include "hphp/runtime/vm/coeffects.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/unit.h"
-#include "hphp/runtime/vm/rx.h"
 
 #include <vector>
 

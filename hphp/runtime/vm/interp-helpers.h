@@ -24,11 +24,11 @@
 #include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/vm/act-rec.h"
 #include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/coeffects.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/reified-generics.h"
 #include "hphp/runtime/vm/runtime.h"
-#include "hphp/runtime/vm/rx.h"
 #include "hphp/util/text-util.h"
 #include "hphp/util/trace.h"
 

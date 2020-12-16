@@ -14,7 +14,6 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/vm/as-shared.h"
-#include "hphp/runtime/vm/rx.h"
 
 #include <folly/gen/Base.h>
 #include <folly/gen/String.h>

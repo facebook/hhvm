@@ -25,10 +25,10 @@
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/user-attributes.h"
 
+#include "hphp/runtime/vm/coeffects.h"
 #include "hphp/runtime/vm/indexed-string-map.h"
 #include "hphp/runtime/vm/iter.h"
 #include "hphp/runtime/vm/reified-generics-info.h"
-#include "hphp/runtime/vm/rx.h"
 #include "hphp/runtime/vm/type-constraint.h"
 #include "hphp/runtime/vm/unit.h"
 

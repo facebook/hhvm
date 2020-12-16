@@ -31,10 +31,10 @@
 #include "hphp/util/sha1.h"
 
 #include "hphp/runtime/base/user-attributes.h"
+#include "hphp/runtime/vm/coeffects.h"
 #include "hphp/runtime/vm/constant.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/preclass.h"
-#include "hphp/runtime/vm/rx.h"
 #include "hphp/runtime/vm/type-alias.h"
 #include "hphp/runtime/vm/type-constraint.h"
 

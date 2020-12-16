@@ -18,8 +18,8 @@
 
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/typed-value.h"
+#include "hphp/runtime/vm/coeffects.h"
 #include "hphp/runtime/vm/func.h"
-#include "hphp/runtime/vm/rx.h"
 #include "hphp/util/compact-tagged-ptrs.h"
 
 /*

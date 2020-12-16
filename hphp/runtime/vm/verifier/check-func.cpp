@@ -24,8 +24,8 @@
 #include "hphp/runtime/base/repo-auth-type-codec.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/type-structure-helpers.h"
+#include "hphp/runtime/vm/coeffects.h"
 #include "hphp/runtime/vm/native.h"
-#include "hphp/runtime/vm/rx.h"
 
 #include <folly/Range.h>
 

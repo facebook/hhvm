@@ -1933,25 +1933,46 @@ fn emit_call_lhs_and_fcall(
                         );
                         match &cexpr {
                             ClassExpr::Id(ast_defs::Id(_, name))
-                                if string_utils::strip_global_ns(name) == "ReflectionClass"
-                                    && (string_utils::strip_global_ns(&id.1) == "isAbstract") =>
+                                if string_utils::strip_global_ns(name) == "ReflectionClass" =>
                             {
-                                let fcall_args =
-                                    FcallArgs::new(FcallFlags::default(), 1, vec![], None, 1, None);
-                                let newobj_instrs = emit_new(e, env, pos, &new_exp, true);
-                                Ok((
-                                    InstrSeq::gather(vec![
-                                        instr::nulluninit(),
-                                        instr::nulluninit(),
-                                        newobj_instrs?,
-                                    ]),
-                                    InstrSeq::gather(vec![instr::fcallfuncd(
-                                        fcall_args,
-                                        function::Type::from_ast_name(
-                                            "__SystemLib\\reflection_class_is_abstract",
-                                        ),
-                                    )]),
-                                ))
+                                let fid = match string_utils::strip_global_ns(&id.1) {
+                                    "isAbstract" => {
+                                        Some("__SystemLib\\reflection_class_is_abstract")
+                                    }
+                                    "isInterface" => {
+                                        Some("__SystemLib\\reflection_class_is_interface")
+                                    }
+                                    "isFinal" => Some("__SystemLib\\reflection_class_is_final"),
+                                    "getName" => Some("__SystemLib\\reflection_class_get_name"),
+                                    _ => None,
+                                };
+                                match fid {
+                                    None => {
+                                        emit_id(e, &o.as_ref().0, &id.1, null_flavor, fcall_args)
+                                    }
+                                    Some(fid) => {
+                                        let fcall_args = FcallArgs::new(
+                                            FcallFlags::default(),
+                                            1,
+                                            vec![],
+                                            None,
+                                            1,
+                                            None,
+                                        );
+                                        let newobj_instrs = emit_new(e, env, pos, &new_exp, true);
+                                        Ok((
+                                            InstrSeq::gather(vec![
+                                                instr::nulluninit(),
+                                                instr::nulluninit(),
+                                                newobj_instrs?,
+                                            ]),
+                                            InstrSeq::gather(vec![instr::fcallfuncd(
+                                                fcall_args,
+                                                function::Type::from_ast_name(fid),
+                                            )]),
+                                        ))
+                                    }
+                                }
                             }
                             _ => emit_id(e, &o.as_ref().0, &id.1, null_flavor, fcall_args),
                         }

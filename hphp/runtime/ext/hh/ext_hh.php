@@ -533,8 +533,24 @@ function is_dynamically_callable_inst_method(
 ): bool;
 
 <<__Native, __Pure, __MaybeMutable>>
+function reflection_class_get_name(
+    mixed $class,
+): string;
+
+<<__Native, __Pure, __MaybeMutable>>
 function reflection_class_is_abstract(
     mixed $class,
 ): bool;
+
+<<__Native, __Pure, __MaybeMutable>>
+function reflection_class_is_final(
+    mixed $class,
+): bool;
+
+<<__Native, __Pure, __MaybeMutable>>
+function reflection_class_is_interface(
+    mixed $class,
+): bool;
+
 
 }

@@ -404,6 +404,8 @@ FuncAnalysis do_analyze_collect(const Index& index,
           }
         }
       }
+
+      ai.bdata[bid].noThrow = flags.noThrow;
     }
 
     if (any(collect.opts & CollectionOpts::EffectFreeOnly) &&
@@ -447,9 +449,10 @@ FuncAnalysis do_analyze_collect(const Index& index,
     for (auto& bd : ai.bdata) {
       folly::format(
         &ret,
-        "{}block {}:\nin {}",
+        "{}block {}{}:\nin {}",
         sep,
         ai.rpoBlocks[bd.rpoId],
+        bd.noThrow ? " (no throw)" : "",
         state_string(*ctx.func, bd.stateIn, collect)
       );
     }

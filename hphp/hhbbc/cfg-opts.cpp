@@ -72,6 +72,21 @@ void remove_unreachable_blocks(const FuncAnalysis& ainfo, php::WideFunc& func) {
     blk->exnNodeId = NoExnNodeId;
   }
 
+  // If we throw and end up in a block which will just immediately
+  // rethrow, we can instead jump to that block instead (this is
+  // basically jump threading for exceptions).
+  for (auto const bid : func.blockRange()) {
+    auto& cblk = blocks[bid];
+    auto const nextCatch =
+      next_catch_block(func, cblk->throwExit, cblk->exnNodeId);
+    if (nextCatch.first != cblk->throwExit ||
+        nextCatch.second != cblk->exnNodeId) {
+      auto const blk = cblk.mutate();
+      blk->throwExit = nextCatch.first;
+      blk->exnNodeId = nextCatch.second;
+    }
+  }
+
   if (!options.RemoveDeadBlocks) return;
 
   auto reachable = [&](BlockId id) {
@@ -94,6 +109,7 @@ void remove_unreachable_blocks(const FuncAnalysis& ainfo, php::WideFunc& func) {
         }
       }
     );
+
     if (!hasUnreachableTargets || reachableTarget == NoBlockId) continue;
     header();
     switch (blocks[bid]->hhbcs.back().op) {
@@ -145,6 +161,9 @@ struct MergeBlockInfo {
   uint8_t onlySwitch       : 1;
   // Block follows the "default" of a prior switch sequence
   uint8_t followsSwitch    : 1;
+
+  // Block will not throw
+  uint8_t noThrow          : 1;
 };
 
 struct SwitchInfo {
@@ -380,12 +399,14 @@ bool control_flow_opts(const FuncAnalysis& ainfo, php::WideFunc& func) {
     auto const& state = ainfo.bdata[id].stateIn;
     return state.initialized && !state.unreachable;
   };
+
   // find all the blocks with multiple preds; they can't be merged
   // into their predecessors
   for (auto bid : func.blockRange()) {
     auto& cblk = func.blocks()[bid];
     if (is_dead(cblk.get())) continue;
     auto& bbi = blockInfo[bid];
+    bbi.noThrow = ainfo.bdata[bid].noThrow;
     int numSucc = 0;
     if (!reachable(bid)) {
       bbi.multiplePreds = true;
@@ -411,6 +432,17 @@ bool control_flow_opts(const FuncAnalysis& ainfo, php::WideFunc& func) {
         numSucc++;
       }
     );
+    // Attempt to jump thread the catch blocks again, in the hope of
+    // having two adjacent blocks end up with the same catch block.
+    auto const nextCatch =
+      next_catch_block(func, cblk->throwExit, cblk->exnNodeId);
+    if (nextCatch.first != cblk->throwExit ||
+        nextCatch.second != cblk->exnNodeId) {
+      anyChanges = true;
+      auto const blk = cblk.mutate();
+      blk->throwExit = nextCatch.first;
+      blk->exnNodeId = nextCatch.second;
+    }
     if (cblk->throwExit != NoBlockId) handleSucc(cblk->throwExit);
     if (numSucc > 1) bbi.multipleSuccs = true;
   }
@@ -443,11 +475,35 @@ bool control_flow_opts(const FuncAnalysis& ainfo, php::WideFunc& func) {
     while (cblk->fallthrough != NoBlockId) {
       auto const nid = cblk->fallthrough;
       auto& cnxt = func.blocks()[nid];
-      if (blockInfo[bid].multipleSuccs ||
-          blockInfo[nid].multiplePreds ||
-          cblk->exnNodeId != cnxt->exnNodeId ||
+      if (blockInfo[bid].multipleSuccs || blockInfo[nid].multiplePreds) break;
+
+      // If the two blocks have different catch blocks, we might still
+      // be able to combine them. If one (or both) of the blocks are
+      // no throw, it doesn't matter what the catch block is, because
+      // its unreachable.
+      auto useNextCatch = false;
+      if (cblk->exnNodeId != cnxt->exnNodeId ||
           cblk->throwExit != cnxt->throwExit) {
-        break;
+        auto const noThrow = blockInfo[bid].noThrow;
+        auto const nextNoThrow = blockInfo[cblk->fallthrough].noThrow;
+        if (!nextNoThrow && !noThrow) break;
+
+        // Don't merge blocks containing these instructions because it
+        // can produce bytecode which will fail the verifier.
+        auto const unsafe = [] (const Bytecode& bc) {
+          switch (bc.op) {
+            case Op::IterFree:
+            case Op::LIterFree:
+            case Op::Silence:
+              return true;
+            default:
+              return false;
+          }
+        };
+        if (std::any_of(begin(cblk->hhbcs), end(cblk->hhbcs), unsafe)) break;
+        if (std::any_of(begin(cnxt->hhbcs), end(cnxt->hhbcs), unsafe)) break;
+
+        useNextCatch = noThrow;
       }
 
       FTRACE(2, "   merging: {} into {}\n", nid, bid);
@@ -456,18 +512,26 @@ bool control_flow_opts(const FuncAnalysis& ainfo, php::WideFunc& func) {
       bInfo.multipleSuccs = nInfo.multipleSuccs;
       bInfo.couldBeSwitch = nInfo.couldBeSwitch;
       bInfo.onlySwitch = false;
+      bInfo.noThrow &= nInfo.noThrow;
 
       auto const blk = func.blocks()[bid].mutate();
       blk->fallthrough = cnxt->fallthrough;
       blk->fallthroughNS = cnxt->fallthroughNS;
+      if (useNextCatch) {
+        blk->throwExit = cnxt->throwExit;
+        blk->exnNodeId = cnxt->exnNodeId;
+      }
       std::copy(cnxt->hhbcs.begin(), cnxt->hhbcs.end(),
                 std::back_inserter(blk->hhbcs));
       auto const nxt = func.blocks()[nid].mutate();
       nxt->fallthrough = NoBlockId;
+      nxt->throwExit = NoBlockId;
+      nxt->exnNodeId = NoExnNodeId;
       nxt->dead = true;
       nxt->hhbcs = { bc::Nop {} };
       anyChanges = true;
     }
+
     auto const& bInfo = blockInfo[bid];
     if (bInfo.couldBeSwitch &&
         (bInfo.multiplePreds || !bInfo.onlySwitch || !bInfo.followsSwitch)) {

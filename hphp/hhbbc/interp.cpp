@@ -5875,6 +5875,9 @@ RunFlags run(Interp& interp, const State& in, PropagateFn propagate) {
 
     interpOne(env, bc);
     auto const& flags = env.flags;
+
+    if (flags.wasPEI) ret.noThrow = false;
+
     if (interp.collect.effectFree && !flags.effectFree) {
       interp.collect.effectFree = false;
       if (any(interp.collect.opts & CollectionOpts::EffectFreeOnly)) {

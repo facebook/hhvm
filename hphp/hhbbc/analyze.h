@@ -123,7 +123,11 @@ struct FuncAnalysisResult {
 };
 
 struct FuncAnalysis : FuncAnalysisResult {
-  using BlockData = struct { uint32_t rpoId; State stateIn; };
+  struct BlockData {
+    uint32_t rpoId;
+    State stateIn;
+    bool noThrow{true};
+  };
 
   explicit FuncAnalysis(AnalysisContext);
 

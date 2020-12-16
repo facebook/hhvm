@@ -32,6 +32,7 @@ namespace detail {
 
 template<class Fun>
 void visitExnLeaves(const php::Func& func, const php::ExnNode& n, Fun f) {
+  if (n.idx == NoExnNodeId) return;
   for (auto& c : n.children) visitExnLeaves(func, func.exnNodes[c], f);
   f(n);
 }
@@ -48,10 +49,24 @@ inline bool is_single_nop(const php::Block& b) {
 }
 
 /*
+ * Returns whether a block consists of a single Throw instruction.
+ */
+inline bool is_single_throw(const php::Block& b) {
+  return b.hhbcs.size() == 1 && b.hhbcs.back().op == Op::Throw;
+}
+
+/*
  * Walk through single_nop blocks to the next block that actually does
  * something.
  */
 BlockId next_real_block(const php::WideFunc& func, BlockId id);
+
+/*
+ * Walk through catch blocks, stopping at the first block which does
+ * something other than just immediately throw.
+ */
+std::pair<BlockId, ExnNodeId>
+next_catch_block(const php::WideFunc& func, BlockId id, ExnNodeId exnId);
 
 /*
  * Call a function for every jump target of a given bytecode, or Op.
@@ -169,4 +184,3 @@ void visitExnLeaves(const php::Func& func, Fun f) {
 //////////////////////////////////////////////////////////////////////
 
 }}
-

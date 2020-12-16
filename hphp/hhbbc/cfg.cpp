@@ -170,6 +170,19 @@ BlockId next_real_block(const php::WideFunc& func, BlockId id) {
   return id;
 }
 
+std::pair<BlockId, ExnNodeId>
+next_catch_block(const php::WideFunc& func, BlockId id, ExnNodeId exnId) {
+  if (id == NoBlockId) return {id, exnId};
+  auto blk = func.blocks()[id].get();
+  while (is_single_throw(*blk)) {
+    id = blk->throwExit;
+    exnId = blk->exnNodeId;
+    if (id == NoBlockId) return {id, exnId};
+    blk = func.blocks()[id].get();
+  }
+  return {id, exnId};
+}
+
 //////////////////////////////////////////////////////////////////////
 
 }}

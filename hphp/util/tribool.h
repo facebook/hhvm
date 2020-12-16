@@ -41,12 +41,28 @@ inline TriBool operator|(TriBool a, TriBool b) {
   );
 }
 
+// Intersection represents sequentiality, so Yes wins over everything,
+// and No yields to anything else.
+inline TriBool operator&(TriBool a, TriBool b) {
+  if (a == TriBool::No) return b;
+  if (a == TriBool::Yes) return a;
+  if (b == TriBool::Yes) return b;
+  return a;
+}
+
 inline TriBool& operator|=(TriBool& a, TriBool b) {
   a = a | b;
   return a;
 }
 
+inline TriBool& operator&=(TriBool& a, TriBool b) {
+  a = a & b;
+  return a;
+}
+
 inline TriBool yesOrNo(bool b) { return b ? TriBool::Yes : TriBool::No; }
+inline TriBool yesOrMaybe(bool b) { return b ? TriBool::Yes : TriBool::Maybe; }
+inline TriBool maybeOrNo(bool b) { return b ? TriBool::Maybe : TriBool::No; }
 
 inline const char* show(TriBool b) {
   if (b == TriBool::Yes) return "yes";

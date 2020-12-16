@@ -593,6 +593,14 @@ std::string show(const PropLookupResult<Type>& r) {
   );
 }
 
+std::string show(const PropMergeResult<Type>& r) {
+  return folly::sformat(
+    "{{adjusted:{},throws:{}}}",
+    show(r.adjusted),
+    show(r.throws)
+  );
+}
+
 //////////////////////////////////////////////////////////////////////
 
 }}

@@ -207,6 +207,32 @@ Type typeIncDec(IncDecOp op, Type t) {
 }
 
 Type typeSetOp(SetOpOp op, Type lhs, Type rhs) {
+  auto const lhsV = tv(lhs);
+  auto const rhsV = tv(rhs);
+
+  if (lhsV && rhsV) {
+    // Can't constprop at this eval_cell, because of the effects on
+    // locals.
+    auto resultTy = eval_cell([&] {
+      TypedValue c = *lhsV;
+      TypedValue rhs = *rhsV;
+      setopBody(&c, op, &rhs);
+      return c;
+    });
+    if (!resultTy) resultTy = TInitCell;
+
+    // We may have inferred a TSStr or TSArr with a value here, but
+    // at runtime it will not be static.  For now just throw that
+    // away.  TODO(#3696042): should be able to loosen_staticness here.
+    if (resultTy->subtypeOf(BStr)) resultTy = TStr;
+    else if (resultTy->subtypeOf(BArr)) resultTy = TArr;
+    else if (resultTy->subtypeOf(BVec)) resultTy = TVec;
+    else if (resultTy->subtypeOf(BDict)) resultTy = TDict;
+    else if (resultTy->subtypeOf(BKeyset)) resultTy = TKeyset;
+
+    return *resultTy;
+  }
+
   switch (op) {
   case SetOpOp::PlusEqual:   return typeAdd(lhs, rhs);
   case SetOpOp::MinusEqual:  return typeSub(lhs, rhs);

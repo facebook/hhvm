@@ -195,6 +195,29 @@ inline PropLookupResult<T>& operator|=(PropLookupResult<T>& a,
 
 std::string show(const PropLookupResult<Type>&);
 
+/*
+ * The result of Index::merge_static_type
+ */
+template <typename T = Type> // NB: The template parameter is here to
+                             // break a cyclic dependency on Type
+struct PropMergeResult {
+  T adjusted; // The merged type, potentially adjusted according to
+              // the prop's type-constraint (it's the subtype of the
+              // merged type that would succeed).
+  TriBool throws; // Whether the mutation this merge representations
+                  // can throw.
+};
+
+template <typename T>
+inline PropMergeResult<T>& operator|=(PropMergeResult<T>& a,
+                                      const PropMergeResult<T>& b) {
+  a.adjusted |= b.adjusted;
+  a.throws |= b.throws;
+  return a;
+}
+
+std::string show(const PropMergeResult<Type>&);
+
 //////////////////////////////////////////////////////////////////////
 
 // private types
@@ -949,15 +972,22 @@ struct Index {
    * responsible for walking the class hierarchy to find the
    * appropriate property while applying accessibility
    * rules. Mutations of AttrConst properties are ignored unless
-   * `ignoreConst' is set to true.
+   * `ignoreConst' is set to true. If `checkUB' is true, upper-bound
+   * type constraints are consulted in addition to the normal type
+   * constraints.
+   *
+   * The result tells you the subtype of val that would be
+   * successfully set (according to the type constraints), and if the
+   * mutation would throw or not.
    */
-  void merge_static_type(Context ctx,
-                         PublicSPropMutations& publicMutations,
-                         PropertiesInfo& privateProps,
-                         const Type& cls,
-                         const Type& name,
-                         const Type& val,
-                         bool ignoreConst = false) const;
+  PropMergeResult<> merge_static_type(Context ctx,
+                                      PublicSPropMutations& publicMutations,
+                                      PropertiesInfo& privateProps,
+                                      const Type& cls,
+                                      const Type& name,
+                                      const Type& val,
+                                      bool checkUB = false,
+                                      bool ignoreConst = false) const;
 
   /*
    * Initialize the initial types for public static properties. This should be

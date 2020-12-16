@@ -3407,51 +3407,43 @@ void in(ISS& env, const bc::SetG&) {
 }
 
 void in(ISS& env, const bc::SetS& op) {
-  auto val         = loosen_likeness(popC(env));
+  auto const val   = popC(env);
   auto const tcls  = popC(env);
   auto const tname = popC(env);
 
-  env.index.merge_static_type(
+  auto const throws = [&] {
+    unreachable(env);
+    return push(env, TBottom);
+  };
+
+  if (!tcls.couldBe(BCls)) return throws();
+
+  auto merge = env.index.merge_static_type(
     env.ctx,
     env.collect.publicSPropMutations,
     env.collect.props,
     tcls,
     tname,
-    val
+    val,
+    true
   );
 
-  push(env, std::move(val));
+  if (merge.throws == TriBool::Yes || merge.adjusted.subtypeOf(BBottom)) {
+    return throws();
+  }
+
+  if (merge.throws == TriBool::No &&
+      tcls.subtypeOf(BCls) &&
+      tname.subtypeOf(BStr)) {
+    nothrow(env);
+  }
+
+  push(env, std::move(merge.adjusted));
 }
 
 void in(ISS& env, const bc::SetOpL& op) {
   auto const t1     = popC(env);
-  auto const v1     = tv(t1);
   auto const loc    = locAsCell(env, op.loc1);
-  auto const locVal = tv(loc);
-  if (v1 && locVal) {
-    // Can't constprop at this eval_cell, because of the effects on
-    // locals.
-    auto resultTy = eval_cell([&] {
-      TypedValue c = *locVal;
-      TypedValue rhs = *v1;
-      setopBody(&c, op.subop2, &rhs);
-      return c;
-    });
-    if (!resultTy) resultTy = TInitCell;
-
-    // We may have inferred a TSStr or TSArr with a value here, but
-    // at runtime it will not be static.  For now just throw that
-    // away.  TODO(#3696042): should be able to loosen_staticness here.
-    if (resultTy->subtypeOf(BStr)) resultTy = TStr;
-    else if (resultTy->subtypeOf(BArr)) resultTy = TArr;
-    else if (resultTy->subtypeOf(BVec)) resultTy = TVec;
-    else if (resultTy->subtypeOf(BDict)) resultTy = TDict;
-    else if (resultTy->subtypeOf(BKeyset)) resultTy = TKeyset;
-
-    setLoc(env, op.loc1, *resultTy);
-    push(env, *resultTy);
-    return;
-  }
 
   auto resultTy = typeSetOp(op.subop2, loc, t1);
   setLoc(env, op.loc1, resultTy);
@@ -3464,19 +3456,47 @@ void in(ISS& env, const bc::SetOpG&) {
 }
 
 void in(ISS& env, const bc::SetOpS& op) {
-  popC(env);
+  auto const rhs   = popC(env);
   auto const tcls  = popC(env);
   auto const tname = popC(env);
 
-  env.index.merge_static_type(
+  auto const throws = [&] {
+    unreachable(env);
+    return push(env, TBottom);
+  };
+
+  if (!tcls.couldBe(BCls)) return throws();
+
+  auto const lookup = env.index.lookup_static(
+    env.ctx,
+    env.collect.props,
+    tcls,
+    tname
+  );
+
+  if (lookup.found == TriBool::No || lookup.ty.subtypeOf(BBottom)) {
+    return throws();
+  }
+
+  auto const newTy = typeSetOp(op.subop1, lookup.ty, rhs);
+  if (newTy.subtypeOf(BBottom)) return throws();
+
+  auto merge = env.index.merge_static_type(
     env.ctx,
     env.collect.publicSPropMutations,
     env.collect.props,
     tcls,
     tname,
-    TInitCell
+    newTy
   );
-  push(env, TInitCell);
+
+  if (merge.throws == TriBool::Yes || merge.adjusted.subtypeOf(BBottom)) {
+    return throws();
+  }
+
+  // NB: Unlike IncDecS, SetOpS pushes the post-TypeConstraint
+  // adjustment value.
+  push(env, std::move(merge.adjusted));
 }
 
 void in(ISS& env, const bc::IncDecL& op) {
@@ -3484,9 +3504,7 @@ void in(ISS& env, const bc::IncDecL& op) {
   auto newT = typeIncDec(op.subop2, loc);
   auto const pre = isPre(op.subop2);
 
-  // If it's a non-numeric string, this may cause it to exceed the max length.
-  if (!locCouldBeUninit(env, op.nloc1.id) &&
-      !loc.couldBe(BStr)) {
+  if (!locCouldBeUninit(env, op.nloc1.id) && loc.subtypeOf(BNum)) {
     nothrow(env);
   }
 
@@ -3500,16 +3518,54 @@ void in(ISS& env, const bc::IncDecG&) { popC(env); push(env, TInitCell); }
 void in(ISS& env, const bc::IncDecS& op) {
   auto const tcls  = popC(env);
   auto const tname = popC(env);
+  auto const pre = isPre(op.subop1);
 
-  env.index.merge_static_type(
+  auto const throws = [&] {
+    unreachable(env);
+    return push(env, TBottom);
+  };
+
+  if (!tcls.couldBe(BCls)) return throws();
+
+  auto lookup = env.index.lookup_static(
+    env.ctx,
+    env.collect.props,
+    tcls,
+    tname
+  );
+
+  if (lookup.found == TriBool::No || lookup.ty.subtypeOf(BBottom)) {
+    return throws();
+  }
+
+  auto newTy = typeIncDec(op.subop1, lookup.ty);
+  if (newTy.subtypeOf(BBottom)) return throws();
+
+  auto const merge = env.index.merge_static_type(
     env.ctx,
     env.collect.publicSPropMutations,
     env.collect.props,
     tcls,
     tname,
-    TInitCell
+    newTy
   );
-  push(env, TInitCell);
+
+  if (merge.throws == TriBool::Yes || merge.adjusted.subtypeOf(BBottom)) {
+    return throws();
+  }
+
+  if (lookup.found == TriBool::Yes &&
+      lookup.lateInit == TriBool::No &&
+      !lookup.classInitMightRaise &&
+      merge.throws == TriBool::No &&
+      tcls.subtypeOf(BCls) &&
+      tname.subtypeOf(BStr) &&
+      lookup.ty.subtypeOf(BNum)) {
+    nothrow(env);
+  }
+
+  // NB: IncDecS pushes the value pre-TypeConstraint modification
+  push(env, pre ? std::move(newTy) : std::move(lookup.ty));
 }
 
 void in(ISS& env, const bc::UnsetL& op) {
@@ -5329,6 +5385,7 @@ void in(ISS& env, const bc::InitProp& op) {
         clsExact(env.index.resolve_class(env.ctx.cls)),
         sval(op.str1),
         t,
+        false,
         true
       );
       break;

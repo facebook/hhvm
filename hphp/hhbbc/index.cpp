@@ -3676,6 +3676,63 @@ bool class_init_might_raise(IndexData& data,
 }
 
 /*
+ * Calculate the effects of applying the given type against the
+ * type-constraints for the given prop. This includes the subtype
+ * which will succeed (if any), and if the type-constraint check might
+ * throw.
+ */
+PropMergeResult<> prop_tc_effects(const Index& index,
+                                  const ClassInfo* ci,
+                                  const php::Prop& prop,
+                                  const Type& val,
+                                  bool checkUB) {
+  assertx(prop.typeConstraint.validForProp());
+
+  using R = PropMergeResult<>;
+
+  // If we're not actually checking property type-hints, everything
+  // goes
+  if (RuntimeOption::EvalCheckPropTypeHints <= 0) return R{ val, TriBool::No };
+
+  auto const ctx = Context { nullptr, nullptr, ci->cls };
+
+  auto const check = [&] (const TypeConstraint& tc, const Type& t) {
+    // If the type as is satisfies the constraint, we won't throw and
+    // the type is unchanged.
+    if (index.satisfies_constraint(ctx, t, tc)) return R{ t, TriBool::No };
+    // Otherwise adjust the type. If we get a Bottom we'll definitely
+    // throw. We already know the type doesn't completely satisfy the
+    // constraint, so we'll at least maybe throw.
+    auto adjusted = adjust_type_for_prop(index, *ctx.cls, &tc, t);
+    auto const throws = yesOrMaybe(adjusted.subtypeOf(BBottom));
+    return R{ std::move(adjusted), throws };
+  };
+
+  // First check the main type-constraint.
+  auto result = check(prop.typeConstraint, val);
+  // If we're not checking generics upper-bounds, or if we already
+  // know we'll fail, we're done.
+  if (!checkUB ||
+      RuntimeOption::EvalEnforceGenericsUB <= 0 ||
+      result.throws == TriBool::Yes) {
+    return result;
+  }
+
+  // Otherwise check every generic upper-bound. We'll feed the
+  // narrowed type into each successive round. If we reach the point
+  // where we'll know we'll definitely fail, just stop.
+  for (auto ub : prop.ubs) {
+    applyFlagsToUB(ub, prop.typeConstraint);
+    auto r = check(ub, result.adjusted);
+    result.throws &= r.throws;
+    result.adjusted = std::move(r.adjusted);
+    if (result.throws == TriBool::Yes) break;
+  }
+
+  return result;
+}
+
+/*
  * Lookup data for the static property named `propName', starting from
  * the specified class `start'. If `propName' is nullptr, then any
  * accessible static property in the class hierarchy is considered. If
@@ -3832,15 +3889,17 @@ PropLookupResult<> lookup_static_impl(IndexData& data,
  * dependencies).
  */
 template <typename F>
-void merge_static_type_impl(const Index& index,
-                            F mergePublic,
-                            PropertiesInfo& privateProps,
-                            const ClassInfo* clsCtx,
-                            const ClassInfo* start,
-                            SString propName,
-                            const Type& val,
-                            bool ignoreConst,
-                            bool startOnly) {
+PropMergeResult<> merge_static_type_impl(IndexData& data,
+                                         Context ctx,
+                                         F mergePublic,
+                                         PropertiesInfo& privateProps,
+                                         const ClassInfo* clsCtx,
+                                         const ClassInfo* start,
+                                         SString propName,
+                                         const Type& val,
+                                         bool checkUB,
+                                         bool ignoreConst,
+                                         bool startOnly) {
   ITRACE(
     6, "merge_static_type_impl: {} {} {} {}\n",
     clsCtx ? clsCtx->cls->name->toCppString() : std::string{"-"},
@@ -3850,37 +3909,61 @@ void merge_static_type_impl(const Index& index,
   );
   Trace::Indent _;
 
+  assertx(!val.subtypeOf(BBottom));
+
+  // Perform the actual merge for a given property, returning the
+  // effects of that merge.
   auto const merge = [&] (const php::Prop& prop, const ClassInfo* ci) {
-    auto const adjusted =
-      unctx(adjust_type_for_prop(index, *ci->cls, &prop.typeConstraint, val));
+    // First calculate the effects of the type-constraint.
+    auto const effects = prop_tc_effects(*data.m_index, ci, prop, val, checkUB);
+    // No point in merging if the type-constraint will always fail.
+    if (effects.throws == TriBool::Yes) {
+      ITRACE(
+        6, "tc would throw on {}::${} with {}, skipping\n",
+        ci->cls->name, prop.name, show(val)
+      );
+      return effects;
+    }
+    assertx(!effects.adjusted.subtypeOf(BBottom));
 
     ITRACE(
       6, "merging {} into {}::${}\n",
-      show(adjusted), ci->cls->name, prop.name
+      show(effects.adjusted), ci->cls->name, prop.name
     );
 
     switch (prop.attrs & (AttrPublic|AttrProtected|AttrPrivate)) {
       case AttrPublic:
       case AttrProtected:
-        mergePublic(ci, prop, adjusted);
-        break;
+        mergePublic(ci, prop, unctx(effects.adjusted));
+        return effects;
       case AttrPrivate: {
         assertx(clsCtx == ci);
         auto& statics = privateProps.privateStatics();
         auto const it = statics.find(prop.name);
         if (it != end(statics)) {
-          ITRACE(6, " {} |= {}\n", show(it->second.ty), show(adjusted));
-          it->second.ty |= adjusted;
+          ITRACE(6, " {} |= {}\n", show(it->second.ty), show(effects.adjusted));
+          it->second.ty |= unctx(effects.adjusted);
         }
-        break;
+        return effects;
       }
     }
+    always_assert(false);
+  };
+
+  // If we don't find a property, then the mutation will definitely
+  // fail.
+  auto const notFound = [&] {
+    return PropMergeResult<>{
+      TBottom,
+      TriBool::Yes
+    };
   };
 
   if (!propName) {
     // We don't statically know the prop name. Walk up the hierarchy
     // and merge the type for any accessible static property.
     ITRACE(6, "no prop name, considering all accessible\n");
+    auto result = notFound();
     visit_parent_cinfo(
       start,
       [&] (const ClassInfo* ci) {
@@ -3897,20 +3980,20 @@ void merge_static_type_impl(const Index& index,
             ITRACE(6, "skipping const {}::${}\n", ci->cls->name, prop.name);
             continue;
           }
-          merge(prop, ci);
+          result |= merge(prop, ci);
         }
         return startOnly;
       }
     );
-    return;
+    return result;
   }
 
   // We statically know the prop name. Walk up the hierarchy and stop
   // at the first matching property and merge the type there.
   assertx(!startOnly);
-  auto const found = visit_parent_cinfo(
+  auto result = visit_parent_cinfo(
     start,
-    [&] (const ClassInfo* ci) {
+    [&] (const ClassInfo* ci) -> folly::Optional<PropMergeResult<>> {
       for (auto const& prop : ci->cls->properties) {
         if (prop.name != propName) continue;
         // We found a property with the right name, but its
@@ -3922,7 +4005,7 @@ void merge_static_type_impl(const Index& index,
             6, "{}::${} found but inaccessible, stopping\n",
             ci->cls->name, propName
           );
-          return true;
+          return notFound();
         }
         // Mutations to AttrConst properties will fail as well, unless
         // it we want to override that behavior.
@@ -3931,15 +4014,28 @@ void merge_static_type_impl(const Index& index,
             6, "{}:${} found but const, stopping\n",
             ci->cls->name, propName
           );
-          return true;
+          return notFound();
         }
-        merge(prop, ci);
-        return true;
+        return merge(prop, ci);
       }
-      return false;
+      return folly::none;
     }
   );
-  if (!found) ITRACE(6, "nothing found\n");
+  if (!result) {
+    ITRACE(6, "nothing found\n");
+    return notFound();
+  }
+
+  // If the mutation won't throw, we still need to check if the class
+  // initialization can throw. If we might already throw (or
+  // definitely will throw), this doesn't matter.
+  if (result->throws == TriBool::No) {
+    return PropMergeResult<>{
+      std::move(result->adjusted),
+      maybeOrNo(class_init_might_raise(data, ctx, start))
+    };
+  }
+  return *result;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -5762,13 +5858,15 @@ Index::lookup_iface_vtable_slot(const php::Class* cls) const {
  * found. Mutations to AttrConst properties are ignored, unless
  * `ignoreConst' is true.
  */
-void Index::merge_static_type(Context ctx,
-                              PublicSPropMutations& publicMutations,
-                              PropertiesInfo& privateProps,
-                              const Type& cls,
-                              const Type& name,
-                              const Type& val,
-                              bool ignoreConst) const {
+PropMergeResult<> Index::merge_static_type(
+    Context ctx,
+    PublicSPropMutations& publicMutations,
+    PropertiesInfo& privateProps,
+    const Type& cls,
+    const Type& name,
+    const Type& val,
+    bool checkUB,
+    bool ignoreConst) const {
   ITRACE(
     4, "merge_static_type: {} {}::${} {}\n",
     show(ctx), show(cls), show(name), show(val)
@@ -5777,10 +5875,12 @@ void Index::merge_static_type(Context ctx,
 
   assertx(val.subtypeOf(BInitCell));
 
+  using R = PropMergeResult<>;
+
   // In some cases we might try to merge Bottom if we're un
   // unreachable code. This won't affect anything, so just skip out
   // early.
-  if (val.subtypeOf(BBottom)) return;
+  if (val.subtypeOf(BBottom)) return R{ TBottom, TriBool::No };
 
   // Try to turn the given property name into a static string
   auto const sname = [&] () -> SString {
@@ -5791,6 +5891,15 @@ void Index::merge_static_type(Context ctx,
     if (!vname || vname->m_type != KindOfPersistentString) return nullptr;
     return vname->m_data.pstr;
   }();
+
+  // To be conservative, say we might throw and be conservative about
+  // conversions.
+  auto const conservative = [&] {
+    return PropMergeResult<>{
+      loosen_likeness(val),
+      TriBool::Maybe
+    };
+  };
 
   // The case where we don't know `cls':
   auto const unknownCls = [&] {
@@ -5806,14 +5915,14 @@ void Index::merge_static_type(Context ctx,
 
       // Private properties can only be affected if they're accessible
       // in the current context.
-      if (!ctx.cls) return;
+      if (!ctx.cls) return conservative();
 
       for (auto& kv : statics) {
         if (!ignoreConst && (kv.second.attrs & AttrIsConst)) continue;
         kv.second.ty |=
           unctx(adjust_type_for_prop(*this, *ctx.cls, kv.second.tc, val));
       }
-      return;
+      return conservative();
     }
 
     // Otherwise we don't know `cls', but do know the property
@@ -5825,13 +5934,14 @@ void Index::merge_static_type(Context ctx,
 
     // Assume that it could possibly affect any private property with
     // the same name.
-    if (!ctx.cls) return;
+    if (!ctx.cls) return conservative();
     auto it = statics.find(sname);
-    if (it == end(statics)) return;
-    if (!ignoreConst && (it->second.attrs & AttrIsConst)) return;
+    if (it == end(statics)) return conservative();
+    if (!ignoreConst && (it->second.attrs & AttrIsConst)) return conservative();
 
     it->second.ty |=
       unctx(adjust_type_for_prop(*this, *ctx.cls, it->second.tc, val));
+    return conservative();
   };
 
   // check if we can determine the class.
@@ -5847,7 +5957,7 @@ void Index::merge_static_type(Context ctx,
     // We should only be not able to resolve our own context if the
     // class is not instantiable. In that case, the merge can't
     // happen.
-    if (rCtx.val.left()) return;
+    if (rCtx.val.left()) return R{ TBottom, TriBool::No };
     ctxCls = rCtx.val.right();
   }
 
@@ -5858,42 +5968,58 @@ void Index::merge_static_type(Context ctx,
   };
 
   switch (dcls.type) {
-    case DCls::Sub:
+    case DCls::Sub: {
       // We know this class is either dcls.type, or a child class of
       // it. For every child of dcls.type (including dcls.type
       // itself), do the merge starting from it. To avoid redundant
       // work, only iterate into parent classes if we're dcls.type
       // (this is only a matter of efficiency. The merge is
       // idiompotent).
+      folly::Optional<PropMergeResult<>> result;
       for (auto const sub : cinfo->subclassList) {
-        merge_static_type_impl(
-          *this,
+        auto r = merge_static_type_impl(
+          *m_data,
+          ctx,
           mergePublic,
           privateProps,
           ctxCls,
           sub,
           sname,
           val,
+          checkUB,
           ignoreConst,
           !sname && sub != cinfo
         );
+        ITRACE(4, "{} -> {}\n", sub->cls->name, show(r));
+        if (!result) {
+          result.emplace(std::move(r));
+        } else {
+          *result |= r;
+        }
       }
-      return;
-    case DCls::Exact:
+      assertx(result.has_value());
+      ITRACE(4, "union -> {}\n", show(*result));
+      return *result;
+    }
+    case DCls::Exact: {
       // We know the class exactly. Do the merge starting from only
       // it.
-      merge_static_type_impl(
-        *this,
+      auto const r = merge_static_type_impl(
+        *m_data,
+        ctx,
         mergePublic,
         privateProps,
         ctxCls,
         cinfo,
         sname,
         val,
+        checkUB,
         ignoreConst,
         false
       );
-      return;
+      ITRACE(4, "{} -> {}\n", cinfo->cls->name, show(r));
+      return r;
+    }
   }
   always_assert(false);
 }

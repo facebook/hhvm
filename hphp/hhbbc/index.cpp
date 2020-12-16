@@ -3705,10 +3705,8 @@ PropLookupResult<> lookup_static_impl(IndexData& data,
                          const ClassInfo* ci) {
     switch (prop.attrs & (AttrPublic|AttrProtected|AttrPrivate)) {
       case AttrPublic:
-        return calc_public_static_type(data, ci, prop, prop.name);
       case AttrProtected:
-        // TODO: Handle protected like public
-        return TInitCell;
+        return calc_public_static_type(data, ci, prop, prop.name);
       case AttrPrivate: {
         assertx(clsCtx == ci);
         auto const& privateStatics = privateProps.privateStatics();
@@ -3863,10 +3861,8 @@ void merge_static_type_impl(const Index& index,
 
     switch (prop.attrs & (AttrPublic|AttrProtected|AttrPrivate)) {
       case AttrPublic:
-        mergePublic(ci, prop, adjusted);
-        break;
       case AttrProtected:
-        // TODO: Handle protected like public
+        mergePublic(ci, prop, adjusted);
         break;
       case AttrPrivate: {
         assertx(clsCtx == ci);
@@ -5577,7 +5573,10 @@ PropState Index::lookup_public_statics(const php::Class* cls) const {
 
   PropState state;
   for (auto const& prop : cls->properties) {
-    if (!(prop.attrs & AttrPublic) || !(prop.attrs & AttrStatic)) continue;
+    if (!(prop.attrs & (AttrPublic|AttrProtected)) ||
+        !(prop.attrs & AttrStatic)) {
+      continue;
+    }
     auto ty = cinfo
       ? calc_public_static_type(*m_data, cinfo, prop, prop.name)
       : TInitCell;
@@ -5915,7 +5914,8 @@ void Index::use_class_dependencies(bool f) {
 void Index::init_public_static_prop_types() {
   for (auto const& cinfo : m_data->allClassInfos) {
     for (auto const& prop : cinfo->cls->properties) {
-      if (!(prop.attrs & AttrPublic) || !(prop.attrs & AttrStatic)) {
+      if (!(prop.attrs & (AttrPublic|AttrProtected)) ||
+          !(prop.attrs & AttrStatic)) {
         continue;
       }
 

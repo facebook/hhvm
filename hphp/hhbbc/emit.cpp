@@ -1336,7 +1336,7 @@ void emit_class(EmitUnitState& state, UnitEmitter& ue, PreClassEmitter* pce,
     auto const attrs = prop.attrs;
     if (attrs & AttrPrivate) {
       propTy = privPropTy((attrs & AttrStatic) ? privateStatics : privateProps);
-    } else if ((attrs & AttrPublic) && (attrs & AttrStatic)) {
+    } else if ((attrs & (AttrPublic|AttrProtected)) && (attrs & AttrStatic)) {
       propTy = [&] {
         auto const it = publicStatics.find(prop.name);
         if (it == end(publicStatics)) return Type{};

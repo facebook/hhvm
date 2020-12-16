@@ -825,13 +825,13 @@ let assign_helper
 (* Hack array accesses and mutations may throw when the indexed
    element is not in the array. may_throw_out_of_bounds_exn is
    used to register this fact. *)
-let may_throw_out_of_bounds_exn ~pos renv env arry ix_pty =
+let may_throw_out_of_bounds_exn ~pos renv env length_pol ix_pty =
   let exn_ty = Lift.class_ty renv Decl.out_of_bounds_exception_id in
   (* both the indexing expression and the array length influence
      whether an exception is thrown or not; indeed, the check
      performed by the indexing is of the form:
        if ($ix >= $arry->length) { throw ...; } *)
-  let pc_deps = PSet.add arry.a_length (object_policy ix_pty) in
+  let pc_deps = PSet.add length_pol (object_policy ix_pty) in
   may_throw ~pos renv env pc_deps exn_ty
 
 let int_of_exp ix_exp =
@@ -907,7 +907,8 @@ let rec assign ?(use_pc = true) ~expr ~pos renv env lhs rhs_pty =
           | None -> env
           (* Dictionaries don't throw on assignment, they register a new key. *)
           | Some _ when equal_array_kind arry.a_kind Adict -> env
-          | Some ix_pty -> may_throw_out_of_bounds_exn ~pos renv env arry ix_pty
+          | Some ix_pty ->
+            may_throw_out_of_bounds_exn ~pos renv env arry.a_length ix_pty
         in
 
         (* Do the assignment *)
@@ -1295,7 +1296,7 @@ let rec expr ~pos renv (env : Env.expr_env) (((epos, ety), e) : Tast.expr) =
       array_like_with_default
         ~cow:true
         ~shape:true
-        ~klass:false
+        ~klass:true
         ~tuple:true
         ~pos
         renv
@@ -1316,7 +1317,9 @@ let rec expr ~pos renv (env : Env.expr_env) (((epos, ety), e) : Tast.expr) =
         (* The index flows into the array key which flows into the array value *)
         let env = Env.acc env @@ subtype ~pos ix_pty arry.a_key in
 
-        let env = may_throw_out_of_bounds_exn ~pos renv env arry ix_pty in
+        let env =
+          may_throw_out_of_bounds_exn ~pos renv env arry.a_length ix_pty
+        in
 
         (env, arry.a_value)
       | Tshape { sh_fields; _ } ->
@@ -1335,6 +1338,18 @@ let rec expr ~pos renv (env : Env.expr_env) (((epos, ety), e) : Tast.expr) =
       | Ttuple ptys ->
         let indexed_pty = nth_tuple_pty ptys ix_exp in
         (env, indexed_pty)
+      | Tclass { c_self = self; c_lump = lump; _ } ->
+        let value_pty = Lift.ty ~lump renv ety in
+        let env = Env.acc env (add_dependencies ~pos [self] value_pty) in
+        (* Collection keys are arraykey's which are Tprims. *)
+        let key_pty = Tprim lump in
+        let env = Env.acc env (add_dependencies ~pos [self] key_pty) in
+        (* Indexing expression flows into the key policy type of the collection . *)
+        let env = Env.acc env @@ subtype ~pos ix_pty key_pty in
+        (* Join of lump and self governs the length of the collection as well. *)
+        let (env, join_pol) = join_policies ~pos renv env [lump; self] in
+        let env = may_throw_out_of_bounds_exn ~pos renv env join_pol ix_pty in
+        (env, value_pty)
       | _ -> fail "the default type for array access is not handled"
     end
   | A.New (((_, lty), cid), _targs, args, _extra_args, _) ->

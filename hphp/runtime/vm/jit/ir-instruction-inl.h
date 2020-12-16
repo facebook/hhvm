@@ -343,6 +343,10 @@ inline void IRInstruction::clearEdges() {
   m_edges = nullptr;
 }
 
+inline bool IRInstruction::isNextEdgeUnreachable() const {
+  return hasDst() && !naryDst() && outputType(this) == TBottom;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }}

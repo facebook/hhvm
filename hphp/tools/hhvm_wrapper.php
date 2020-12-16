@@ -338,7 +338,7 @@ function run_hhvm(OptionMap $opts): void {
   }
 
   $pfx = determine_trace_env($opts);
-  $pfx .= $opts->containsKey('gdb') ? 'agdb --args ' : '';
+  $pfx .= $opts->containsKey('gdb') ? 'gdb --args ' : '';
   if ($opts->containsKey('perf')) {
     $pfx .= 'perf record -g -o ' . $opts['perf'] . ' ';
   }

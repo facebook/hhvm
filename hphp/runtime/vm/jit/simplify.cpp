@@ -92,6 +92,9 @@ SSATmp* cns(State& env, Args&&... cns) {
 }
 
 template<class... Args>
+SSATmp* gen(State& env, Opcode op, Args&&... args);
+
+template<class... Args>
 SSATmp* gen(State& env, Opcode op, BCContext bcctx, Args&&... args) {
   return makeInstruction(
     [&] (IRInstruction* inst) -> SSATmp* {
@@ -105,8 +108,18 @@ SSATmp* gen(State& env, Opcode op, BCContext bcctx, Args&&... args) {
         return newDest;
       } else {
         assertx(inst->isTransient());
+        if (!env.newInsts.empty() && env.newInsts.back()->is(Unreachable)) {
+          return cns(env, TBottom);
+        }
+
         inst = env.unit.clone(inst);
         env.newInsts.push_back(inst);
+
+        // If the new instruction's result is unreachable (and it is not block
+        // ending), indicate this in the IR stream.
+        if (inst->isNextEdgeUnreachable() && !inst->isBlockEnd()) {
+          gen(env, Unreachable, ASSERT_REASON);
+        }
 
         return inst->dst(0);
       }
@@ -285,6 +298,13 @@ SSATmp* mergeBranchDests(State& env, const IRInstruction* inst) {
                    CheckKeysetOffset));
   if (inst->next() != nullptr && inst->next() == inst->taken()) {
     return gen(env, Jmp, inst->next());
+  }
+  if (inst->taken() && inst->taken()->isUnreachable()) {
+    return gen(env, Nop);
+  }
+  if (inst->next() && inst->next()->isUnreachable()) {
+    assertx(inst->taken());
+    return gen(env, Jmp, inst->taken());
   }
   return nullptr;
 }
@@ -2351,7 +2371,8 @@ SSATmp* simplifyCheckType(State& env, const IRInstruction* inst) {
   auto const typeParam = inst->typeParam();
   auto const srcType = inst->src(0)->type();
 
-  if (!srcType.maybe(typeParam) || inst->next() == inst->taken()) {
+  if (!srcType.maybe(typeParam) || inst->next() == inst->taken() ||
+      (inst->next() && inst->next()->isUnreachable())) {
     /*
      * Convert the check into a Jmp.  The dest of the CheckType (which would've
      * been Bottom) is now never going to be defined, so we return a Bottom.
@@ -2367,16 +2388,19 @@ SSATmp* simplifyCheckType(State& env, const IRInstruction* inst) {
     return inst->src(0);
   }
 
+  if (inst->taken() && inst->taken()->isUnreachable()) {
+    return gen(env, AssertType, newType, inst->src(0));
+  }
+
   return nullptr;
 }
 
 SSATmp* simplifyCheckTypeMem(State& env, const IRInstruction* inst) {
-  if (inst->next() == inst->taken() ||
-      inst->typeParam() == TBottom) {
+  if (inst->typeParam() == TBottom) {
     return gen(env, Jmp, inst->taken());
   }
 
-  return nullptr;
+  return mergeBranchDests(env, inst);
 }
 
 SSATmp* simplifyAssertType(State& env, const IRInstruction* inst) {
@@ -2384,7 +2408,6 @@ SSATmp* simplifyAssertType(State& env, const IRInstruction* inst) {
 
   auto const newType = src->type() & inst->typeParam();
   if (newType == TBottom) {
-    gen(env, Unreachable, ASSERT_REASON);
     return cns(env, TBottom);
   }
 
@@ -2406,9 +2429,14 @@ SSATmp* simplifyCheckMBase(State& env, const IRInstruction* inst) {
 SSATmp* simplifyCheckNonNull(State& env, const IRInstruction* inst) {
   auto const type = inst->src(0)->type();
 
-  if (type <= TNullptr || inst->next() == inst->taken()) {
+  if (type <= TNullptr || inst->next() == inst->taken() ||
+      (inst->next() && inst->next()->isUnreachable())) {
     gen(env, Jmp, inst->taken());
     return cns(env, TBottom);
+  }
+
+  if (inst->taken() && inst->taken()->isUnreachable()) {
+    return gen(env, AssertType, type - TNullptr, inst->src(0));
   }
 
   if (!type.maybe(TNullptr)) return inst->src(0);
@@ -2482,6 +2510,14 @@ SSATmp* condJmpImpl(State& env, const IRInstruction* inst) {
     return gen(env, Jmp, inst->taken());
   }
 
+  if (inst->taken() && inst->taken()->isUnreachable()) {
+    return gen(env, Nop);
+  }
+
+  if (inst->next() && inst->next()->isUnreachable()) {
+    return gen(env, Jmp, inst->taken());
+  }
+
   auto const src = inst->src(0);
   auto const srcInst = src->inst();
 
@@ -2548,6 +2584,15 @@ SSATmp* simplifyJmpZero(State& env, const IRInstruction* i) {
 
 SSATmp* simplifyJmpNZero(State& env, const IRInstruction* i) {
   return condJmpImpl(env, i);
+}
+
+SSATmp* simplifyJmp(State& env, const IRInstruction* inst) {
+  assertx(inst->taken());
+  if (inst->taken()->isUnreachable()) {
+    return gen(env, Unreachable, ASSERT_REASON);
+  }
+
+  return nullptr;
 }
 
 SSATmp* simplifySelect(State& env, const IRInstruction* inst) {
@@ -2680,7 +2725,6 @@ SSATmp* simplifyReserveVecNewElem(State& env, const IRInstruction* inst) {
   auto const base = inst->src(0);
 
   if (base->type() <= (TPersistentArr|TPersistentVec)) {
-    gen(env, Unreachable, ASSERT_REASON);
     return cns(env, TBottom);
   }
   return nullptr;
@@ -2701,7 +2745,6 @@ SSATmp* arrGetKImpl(State& env, const IRInstruction* inst) {
   // The array doesn't contain a valid element at that offset. Since this
   // instruction should be guarded by a check, this (should be) unreachable.
   if (!tv) {
-    gen(env, Unreachable, ASSERT_REASON);
     return cns(env, TBottom);
   }
 
@@ -2876,7 +2919,6 @@ SSATmp* simplifyKeysetGetK(State& env, const IRInstruction* inst) {
   // The array doesn't contain a valid element at that offset. Since this
   // instruction should be guarded by a check, this (should be) unreachable.
   if (!tv) {
-    gen(env, Unreachable, ASSERT_REASON);
     return cns(env, TBottom);
   }
 
@@ -3113,6 +3155,10 @@ SSATmp* simplifyBespokeIterGetKey(State& env, const IRInstruction* inst) {
   auto const pos = inst->src(1);
 
   if (arr->hasConstVal() && pos->hasConstVal()) {
+    auto const idx = pos->intVal();
+    auto const ad = arr->type().arrLikeVal();
+    if (idx < 0 || idx >= ad->size()) return cns(env, TBottom);
+
     auto const key = arr->type().arrLikeVal()->nvGetKey(pos->intVal());
     return cns(env, key);
   }
@@ -3131,6 +3177,10 @@ SSATmp* simplifyBespokeIterGetVal(State& env, const IRInstruction* inst) {
   auto const pos = inst->src(1);
 
   if (arr->hasConstVal() && pos->hasConstVal()) {
+    auto const idx = pos->intVal();
+    auto const ad = arr->type().arrLikeVal();
+    if (idx < 0 || idx >= ad->size()) return cns(env, TBottom);
+
     auto const val = arr->type().arrLikeVal()->nvGetVal(pos->intVal());
     return cns(env, val);
   }
@@ -3509,229 +3559,269 @@ SSATmp* simplifyCheckClsMethFunc(State& env, const IRInstruction* inst) {
 
 SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   env.insts.push(inst);
+
   SCOPE_EXIT {
     assertx(env.insts.top() == inst);
     env.insts.pop();
   };
 
+  auto res = [&] () -> SSATmp* {
+    switch (inst->op()) {
 #define X(x) case x: return simplify##x(env, inst);
-  switch (inst->op()) {
-  X(Shl)
-  X(Shr)
-  X(Lshr)
-  X(AbsDbl)
-  X(AssertNonNull)
-  X(CallBuiltin)
-  X(Ceil)
-  X(CheckInit)
-  X(CheckInitMem)
-  X(CheckRDSInitialized)
-  X(MarkRDSInitialized)
-  X(CheckLoc)
-  X(CheckMBase)
-  X(CheckInOuts)
-  X(CheckStk)
-  X(CheckType)
-  X(CheckTypeMem)
-  X(AssertType)
-  X(CheckNonNull)
-  X(CheckVecBounds)
-  X(ReserveVecNewElem)
-  X(ConcatStrStr)
-  X(ConcatStr3)
-  X(ConcatStr4)
-  X(ConcatIntStr)
-  X(ConcatStrInt)
-  X(ConvBoolToDbl)
-  X(ConvBoolToInt)
-  X(ConvTVToBool)
-  X(ConvTVToDbl)
-  X(ConvTVToInt)
-  X(ConvTVToStr)
-  X(ConvDblToBool)
-  X(ConvDblToInt)
-  X(ConvDblToStr)
-  X(ConvIntToBool)
-  X(ConvIntToDbl)
-  X(ConvIntToStr)
-  X(ConvObjToBool)
-  X(ConvClsMethToVArr)
-  X(ConvClsMethToDArr)
-  X(ConvClsMethToVec)
-  X(ConvClsMethToDict)
-  X(ConvClsMethToKeyset)
-  X(ConvStrToBool)
-  X(ConvStrToDbl)
-  X(ConvStrToInt)
-  X(ConvArrLikeToVec)
-  X(ConvArrLikeToDict)
-  X(ConvArrLikeToKeyset)
-  X(ConvArrLikeToVArr)
-  X(ConvArrLikeToDArr)
-  X(DblAsBits)
-  X(Count)
-  X(CountVec)
-  X(CountDict)
-  X(CountKeyset)
-  X(DecRef)
-  X(DecRefNZ)
-  X(DefLabel)
-  X(DivDbl)
-  X(DivInt)
-  X(EqFunc)
-  X(ExtendsClass)
-  X(InstanceOfBitmask)
-  X(NInstanceOfBitmask)
-  X(Floor)
-  X(IncRef)
-  X(InitObjProps)
-  X(InitObjMemoSlots)
-  X(InstanceOf)
-  X(InstanceOfIface)
-  X(InstanceOfIfaceVtable)
-  X(IsNType)
-  X(IsType)
-  X(IsLegacyArrLike)
-  X(IsWaitHandle)
-  X(IsCol)
-  X(HasToString)
-  X(HasReifiedGenerics)
-  X(LdCls)
-  X(LdClsName)
-  X(LdLazyClsName)
-  X(LdWHResult)
-  X(LdWHState)
-  X(LdWHNotDone)
-  X(LookupClsRDS)
-  X(LookupSPropSlot)
-  X(LdClsMethod)
-  X(LdStrLen)
-  X(BespokeGet)
-  X(BespokeIterFirstPos)
-  X(BespokeIterLastPos)
-  X(BespokeIterEnd)
-  X(BespokeIterGetKey)
-  X(BespokeIterGetVal)
-  X(LdMonotypeDictEnd)
-  X(LdMonotypeDictKey)
-  X(LdMonotypeDictVal)
-  X(LdMonotypeVecElem)
-  X(LdVecElem)
-  X(MethodExists)
-  X(FuncHasAttr)
-  X(IsClsDynConstructible)
-  X(LdFuncRxLevel)
-  X(LdObjClass)
-  X(LdObjInvoke)
-  X(Mov)
-  X(JmpZero)
-  X(JmpNZero)
-  X(Select)
-  X(OrInt)
-  X(AddInt)
-  X(SubInt)
-  X(MulInt)
-  X(AddDbl)
-  X(SubDbl)
-  X(MulDbl)
-  X(Mod)
-  X(AndInt)
-  X(XorInt)
-  X(XorBool)
-  X(AddIntO)
-  X(SubIntO)
-  X(MulIntO)
-  X(GtBool)
-  X(GteBool)
-  X(LtBool)
-  X(LteBool)
-  X(EqBool)
-  X(NeqBool)
-  X(CmpBool)
-  X(GtInt)
-  X(GteInt)
-  X(LtInt)
-  X(LteInt)
-  X(EqInt)
-  X(NeqInt)
-  X(CmpInt)
-  X(GtStr)
-  X(GteStr)
-  X(LtStr)
-  X(LteStr)
-  X(EqStr)
-  X(NeqStr)
-  X(SameStr)
-  X(NSameStr)
-  X(CmpStr)
-  X(GtStrInt)
-  X(GteStrInt)
-  X(LtStrInt)
-  X(LteStrInt)
-  X(EqStrInt)
-  X(NeqStrInt)
-  X(CmpStrInt)
-  X(GtObj)
-  X(GteObj)
-  X(LtObj)
-  X(LteObj)
-  X(EqObj)
-  X(NeqObj)
-  X(SameObj)
-  X(NSameObj)
-  X(GtArrLike)
-  X(GteArrLike)
-  X(LtArrLike)
-  X(LteArrLike)
-  X(EqArrLike)
-  X(NeqArrLike)
-  X(SameArrLike)
-  X(NSameArrLike)
-  X(GtRes)
-  X(GteRes)
-  X(LtRes)
-  X(LteRes)
-  X(EqRes)
-  X(NeqRes)
-  X(CmpRes)
-  X(EqCls)
-  X(EqLazyCls)
-  X(EqStrPtr)
-  X(EqArrayDataPtr)
-  X(DictGet)
-  X(DictGetQuiet)
-  X(DictGetK)
-  X(KeysetGet)
-  X(KeysetGetQuiet)
-  X(KeysetGetK)
-  X(GetDictPtrIter)
-  X(GetVecPtrIter)
-  X(CheckDictKeys)
-  X(CheckMixedArrayOffset)
-  X(CheckDictOffset)
-  X(CheckKeysetOffset)
-  X(CheckArrayCOW)
-  X(CheckMissingKeyInArrLike)
-  X(DictIsset)
-  X(KeysetIsset)
-  X(DictIdx)
-  X(AKExistsDict)
-  X(KeysetIdx)
-  X(AKExistsKeyset)
-  X(OrdStr)
-  X(ChrInt)
-  X(JmpSwitchDest)
-  X(CheckRange)
-  X(GetMemoKey)
-  X(GetMemoKeyScalar)
-  X(StrictlyIntegerConv)
-  X(RaiseErrorOnInvalidIsAsExpressionType)
-  X(LdFrameCls)
-  X(CheckClsMethFunc)
-  default: break;
-  }
+      X(Shl)
+      X(Shr)
+      X(Lshr)
+      X(AbsDbl)
+      X(AssertNonNull)
+      X(CallBuiltin)
+      X(Ceil)
+      X(CheckInit)
+      X(CheckInitMem)
+      X(CheckRDSInitialized)
+      X(MarkRDSInitialized)
+      X(CheckLoc)
+      X(CheckMBase)
+      X(CheckInOuts)
+      X(CheckStk)
+      X(CheckType)
+      X(CheckTypeMem)
+      X(AssertType)
+      X(CheckNonNull)
+      X(CheckVecBounds)
+      X(ReserveVecNewElem)
+      X(ConcatStrStr)
+      X(ConcatStr3)
+      X(ConcatStr4)
+      X(ConcatIntStr)
+      X(ConcatStrInt)
+      X(ConvBoolToDbl)
+      X(ConvBoolToInt)
+      X(ConvTVToBool)
+      X(ConvTVToDbl)
+      X(ConvTVToInt)
+      X(ConvTVToStr)
+      X(ConvDblToBool)
+      X(ConvDblToInt)
+      X(ConvDblToStr)
+      X(ConvIntToBool)
+      X(ConvIntToDbl)
+      X(ConvIntToStr)
+      X(ConvObjToBool)
+      X(ConvClsMethToVArr)
+      X(ConvClsMethToDArr)
+      X(ConvClsMethToVec)
+      X(ConvClsMethToDict)
+      X(ConvClsMethToKeyset)
+      X(ConvStrToBool)
+      X(ConvStrToDbl)
+      X(ConvStrToInt)
+      X(ConvArrLikeToVec)
+      X(ConvArrLikeToDict)
+      X(ConvArrLikeToKeyset)
+      X(ConvArrLikeToVArr)
+      X(ConvArrLikeToDArr)
+      X(DblAsBits)
+      X(Count)
+      X(CountVec)
+      X(CountDict)
+      X(CountKeyset)
+      X(DecRef)
+      X(DecRefNZ)
+      X(DefLabel)
+      X(DivDbl)
+      X(DivInt)
+      X(EqFunc)
+      X(ExtendsClass)
+      X(InstanceOfBitmask)
+      X(NInstanceOfBitmask)
+      X(Floor)
+      X(IncRef)
+      X(InitObjProps)
+      X(InitObjMemoSlots)
+      X(InstanceOf)
+      X(InstanceOfIface)
+      X(InstanceOfIfaceVtable)
+      X(IsNType)
+      X(IsType)
+      X(IsLegacyArrLike)
+      X(IsWaitHandle)
+      X(IsCol)
+      X(HasToString)
+      X(HasReifiedGenerics)
+      X(LdCls)
+      X(LdClsName)
+      X(LdLazyClsName)
+      X(LdWHResult)
+      X(LdWHState)
+      X(LdWHNotDone)
+      X(LookupClsRDS)
+      X(LookupSPropSlot)
+      X(LdClsMethod)
+      X(LdStrLen)
+      X(BespokeGet)
+      X(BespokeIterFirstPos)
+      X(BespokeIterLastPos)
+      X(BespokeIterEnd)
+      X(BespokeIterGetKey)
+      X(BespokeIterGetVal)
+      X(LdMonotypeDictEnd)
+      X(LdMonotypeDictKey)
+      X(LdMonotypeDictVal)
+      X(LdMonotypeVecElem)
+      X(LdVecElem)
+      X(MethodExists)
+      X(FuncHasAttr)
+      X(IsClsDynConstructible)
+      X(LdFuncRxLevel)
+      X(LdObjClass)
+      X(LdObjInvoke)
+      X(Mov)
+      X(Jmp)
+      X(JmpZero)
+      X(JmpNZero)
+      X(Select)
+      X(OrInt)
+      X(AddInt)
+      X(SubInt)
+      X(MulInt)
+      X(AddDbl)
+      X(SubDbl)
+      X(MulDbl)
+      X(Mod)
+      X(AndInt)
+      X(XorInt)
+      X(XorBool)
+      X(AddIntO)
+      X(SubIntO)
+      X(MulIntO)
+      X(GtBool)
+      X(GteBool)
+      X(LtBool)
+      X(LteBool)
+      X(EqBool)
+      X(NeqBool)
+      X(CmpBool)
+      X(GtInt)
+      X(GteInt)
+      X(LtInt)
+      X(LteInt)
+      X(EqInt)
+      X(NeqInt)
+      X(CmpInt)
+      X(GtStr)
+      X(GteStr)
+      X(LtStr)
+      X(LteStr)
+      X(EqStr)
+      X(NeqStr)
+      X(SameStr)
+      X(NSameStr)
+      X(CmpStr)
+      X(GtStrInt)
+      X(GteStrInt)
+      X(LtStrInt)
+      X(LteStrInt)
+      X(EqStrInt)
+      X(NeqStrInt)
+      X(CmpStrInt)
+      X(GtObj)
+      X(GteObj)
+      X(LtObj)
+      X(LteObj)
+      X(EqObj)
+      X(NeqObj)
+      X(SameObj)
+      X(NSameObj)
+      X(GtArrLike)
+      X(GteArrLike)
+      X(LtArrLike)
+      X(LteArrLike)
+      X(EqArrLike)
+      X(NeqArrLike)
+      X(SameArrLike)
+      X(NSameArrLike)
+      X(GtRes)
+      X(GteRes)
+      X(LtRes)
+      X(LteRes)
+      X(EqRes)
+      X(NeqRes)
+      X(CmpRes)
+      X(EqCls)
+      X(EqLazyCls)
+      X(EqStrPtr)
+      X(EqArrayDataPtr)
+      X(DictGet)
+      X(DictGetQuiet)
+      X(DictGetK)
+      X(KeysetGet)
+      X(KeysetGetQuiet)
+      X(KeysetGetK)
+      X(GetDictPtrIter)
+      X(GetVecPtrIter)
+      X(CheckDictKeys)
+      X(CheckMixedArrayOffset)
+      X(CheckDictOffset)
+      X(CheckKeysetOffset)
+      X(CheckArrayCOW)
+      X(CheckMissingKeyInArrLike)
+      X(DictIsset)
+      X(KeysetIsset)
+      X(DictIdx)
+      X(AKExistsDict)
+      X(KeysetIdx)
+      X(AKExistsKeyset)
+      X(OrdStr)
+      X(ChrInt)
+      X(JmpSwitchDest)
+      X(CheckRange)
+      X(GetMemoKey)
+      X(GetMemoKeyScalar)
+      X(StrictlyIntegerConv)
+      X(RaiseErrorOnInvalidIsAsExpressionType)
+      X(LdFrameCls)
+      X(CheckClsMethFunc)
 #undef X
-  return nullptr;
+      default: break;
+    }
+    return nullptr;
+  }();
+
+  // If the new instruction list is empty, we are either returning a known
+  // value (res != nullptr), or leaving the instruction unchanged (res ==
+  // nullptr). We should mark the instruction as unreachable if the known value
+  // is Bottom. Cases where the new final instruction is a block-ending
+  // instruction are handled by consumers.
+
+  if (inst->hasDst() && !inst->naryDst() && env.newInsts.empty()) {
+    if (res && res->type() == TBottom) {
+      // The instruction has been simplified away, leaving only a bottom
+      // constant. Mark it as unreachable.
+      gen(env, Unreachable, ASSERT_REASON);
+    } else if (!res && outputType(inst) == TBottom && !inst->isBlockEnd()) {
+      // The instruction is passing through unchanged, but is known to have a
+      // bottom result. Replace it with the proper unreachable annotations.
+      res = cns(env, TBottom);
+      gen(env, Unreachable, ASSERT_REASON);
+    }
+  }
+
+  return res;
+}
+
+Block* unreachableBlock(IRUnit& unit, BCContext ctx) {
+  auto const unreachableBlock = unit.defBlock(1, Block::Hint::Unused);
+  makeInstruction(
+    [&] (IRInstruction* inst) -> SSATmp* {
+      unreachableBlock->push_back(unit.clone(inst));
+      return inst->dst(0);
+    },
+    Unreachable,
+    ctx,
+    ASSERT_REASON
+  );
+
+  return unreachableBlock;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -3758,7 +3848,14 @@ void simplifyInPlace(IRUnit& unit, IRInstruction* origInst) {
   auto res = simplify(unit, origInst);
 
   // No simplification occurred; nothing to do.
-  if (res.instrs.empty() && !res.dst) return;
+  if (res.instrs.empty() && !res.dst) {
+    // If we have narrowed the result of a block end instruction to a bottom
+    // type, its next block must be unreachable.
+    if (origInst->isNextEdgeUnreachable() && origInst->isBlockEnd()) {
+      origInst->setNext(unreachableBlock(unit, origInst->bcctx()));
+    }
+    return;
+  }
 
   FTRACE(1, "simplifying: {}\n", origInst->toString());
 
@@ -3808,6 +3905,12 @@ void simplifyInPlace(IRUnit& unit, IRInstruction* origInst) {
     // This can happen, e.g., 'Unreachable' may be created when the block is
     // unreachable.
     while (pos != block->end()) pos = block->erase(pos);
+  }
+
+  // If the last instruction is block-ending and produces a Bottom result, its
+  // next block should be unreachable.
+  if (last != nullptr && last->isNextEdgeUnreachable() && last->isBlockEnd()) {
+    last->setNext(unreachableBlock(unit, last->bcctx()));
   }
 
   if (need_mov) {
@@ -3878,23 +3981,52 @@ void simplifyPass(IRUnit& unit) {
   auto reachable = boost::dynamic_bitset<>(unit.numBlocks());
   reachable.set(unit.entry()->id());
 
-  for (auto block : rpoSortCfg(unit)) {
+  auto const sortedBlocks = rpoSortCfg(unit);
+  for (auto block : sortedBlocks) {
     if (!reachable.test(block->id())) continue;
 
-    if (block->back().is(Unreachable)) {
-      // Any code that's postdominated by Unreachable is also unreachable, so
-      // erase everything else in this block.
-      for (auto it = block->skipHeader(), end = block->backIter(); it != end;) {
-        auto toErase = it;
-        ++it;
-        block->erase(toErase);
-      }
-    } else {
+    if (!block->isUnreachable()) {
       for (auto& inst : *block) simplifyInPlace(unit, &inst);
     }
 
-    if (auto const b = block->next())  reachable.set(b->id());
-    if (auto const b = block->taken()) reachable.set(b->id());
+    if (auto const b = block->next()) {
+      if (!b->isUnreachable()) reachable.set(b->id());
+    }
+    if (auto const b = block->taken()) {
+      if (!b->isUnreachable()) reachable.set(b->id());
+    }
+  }
+
+  auto const markUnreachable = [&] (Block* block) {
+    // Any code that's postdominated by Unreachable is also unreachable, so
+    // erase everything else in this block.
+    unit.replace(&block->back(), Unreachable, ASSERT_REASON);
+    for (auto it = block->skipHeader(), end = block->backIter(); it != end;) {
+      auto toErase = it;
+      ++it;
+      block->erase(toErase);
+    }
+  };
+
+  // We may have introduced new unreachable blocks.
+  if (unit.numBlocks() > reachable.size()) reachable.resize(unit.numBlocks());
+
+  auto const poBlocks = poSortCfg(unit);
+  // Collapse unreachable blocks
+  std::deque<Block*> workQ(poBlocks.cbegin(), poBlocks.cend());
+  while (!workQ.empty()) {
+    auto const block = workQ.front();
+    workQ.pop_front();
+    if (!reachable.test(block->id())) continue;
+
+    auto& inst = block->back();
+    if (inst.hasEdges() &&
+        (!inst.next() || !reachable.test(inst.next()->id())) &&
+        (!inst.taken() || !reachable.test(inst.taken()->id()))) {
+      auto const& preds = block->preds();
+      for (auto const& pred : preds) workQ.push_back(pred.from());
+      markUnreachable(block);
+    }
   }
 }
 

@@ -107,6 +107,10 @@ struct Block {
     return !empty() && back().isTerminal() && (!taken() || taken()->isCatch());
   }
 
+  bool isUnreachable() const {
+    return !empty() && back().is(Unreachable);
+  }
+
   // If its a catch block, the BeginCatch's marker
   const BCMarker& catchMarker() const;
 

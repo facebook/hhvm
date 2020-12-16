@@ -158,6 +158,18 @@ void IRBuilder::appendInstruction(IRInstruction* inst) {
   m_curBlock->push_back(inst);
   m_state.update(inst);
   if (inst->isTerminal()) m_state.finishBlock(m_curBlock);
+
+  // If the instruction is block ending and introduces a bottom type, we are
+  // now in an unreachable state.
+  if (inst->isNextEdgeUnreachable() && inst->isBlockEnd()) {
+    assertx(!inst->isTerminal());
+    m_curBlock = m_unit.defBlock(1);
+    m_curBlock->setHint(Block::Hint::Unused);
+    inst->setNext(m_curBlock);
+    m_state.finishBlock(inst->block());
+    m_state.startBlock(m_curBlock, false);
+    gen(Unreachable, ASSERT_REASON);
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

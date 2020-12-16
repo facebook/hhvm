@@ -410,6 +410,11 @@ struct IRInstruction {
    */
   void clearEdges();
 
+  /*
+   * Whether the next() edge is unreachable based on type information.
+   */
+  bool isNextEdgeUnreachable() const;
+
 private:
   /*
    * Block/edge implementations.

@@ -72,6 +72,7 @@ inline CallDest callDest(Vreg reg0, Vreg reg1) {
 inline CallDest callDest(IRLS& env, const IRInstruction* inst) {
   if (inst->numDsts() == 0) return kVoidDest;
   assertx(inst->numDsts() == 1);
+  if (inst->dst()->isA(TBottom)) return kVoidDest;
 
   auto const loc = dstLoc(env, inst, 0);
   DEBUG_ONLY auto const maybe_lval = inst->dst()->type().maybe(TLvalToCell);

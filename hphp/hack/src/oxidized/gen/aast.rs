@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<3122311ac53b7b29aec0255a273072df>>
+// @generated SignedSource<<62f3fa09d766ce855f4fd2b7e2b5c3a2>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -601,8 +601,8 @@ pub struct Fun_<Ex, Fb, En, Hi> {
     pub where_constraints: Vec<WhereConstraintHint>,
     pub variadic: FunVariadicity<Ex, Fb, En, Hi>,
     pub params: Vec<FunParam<Ex, Fb, En, Hi>>,
-    pub cap: TypeHint<Hi>,
-    pub unsafe_cap: TypeHint<Hi>,
+    pub cap: Option<Contexts>,
+    pub unsafe_cap: Option<Contexts>,
     pub body: FuncBody<Ex, Fb, En, Hi>,
     pub fun_kind: ast_defs::FunKind,
     pub user_attributes: Vec<UserAttribute<Ex, Fb, En, Hi>>,
@@ -1107,8 +1107,8 @@ pub struct Method_<Ex, Fb, En, Hi> {
     pub where_constraints: Vec<WhereConstraintHint>,
     pub variadic: FunVariadicity<Ex, Fb, En, Hi>,
     pub params: Vec<FunParam<Ex, Fb, En, Hi>>,
-    pub cap: TypeHint<Hi>,
-    pub unsafe_cap: TypeHint<Hi>,
+    pub cap: Option<Contexts>,
+    pub unsafe_cap: Option<Contexts>,
     pub body: FuncBody<Ex, Fb, En, Hi>,
     pub fun_kind: ast_defs::FunKind,
     pub user_attributes: Vec<UserAttribute<Ex, Fb, En, Hi>>,

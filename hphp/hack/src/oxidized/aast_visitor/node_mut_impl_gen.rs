@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<127082229903dc79e267a28152835a06>>
+// @generated SignedSource<<65ea8b9131d947cfefbc65a29d8eb622>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -494,6 +494,24 @@ impl<P: Params> NodeMut<P> for ConstraintKind {
             ConstraintKind::ConstraintEq => Ok(()),
             ConstraintKind::ConstraintSuper => Ok(()),
         }
+    }
+}
+impl<P: Params> NodeMut<P> for Contexts {
+    fn accept<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, P = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_contexts(c, self)
+    }
+    fn recurse<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, P = P>,
+    ) -> Result<(), P::Error> {
+        self.0.accept(c, v)?;
+        self.1.accept(c, v)?;
+        Ok(())
     }
 }
 impl<P: Params> NodeMut<P> for Def<P::Ex, P::Fb, P::En, P::Hi> {

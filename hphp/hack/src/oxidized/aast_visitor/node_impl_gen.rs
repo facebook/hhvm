@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b201a7bd4d85b1f62ae5401d54204623>>
+// @generated SignedSource<<fb7faf34bd7f2830d28251717080a1a5>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -494,6 +494,24 @@ impl<P: Params> Node<P> for ConstraintKind {
             ConstraintKind::ConstraintEq => Ok(()),
             ConstraintKind::ConstraintSuper => Ok(()),
         }
+    }
+}
+impl<P: Params> Node<P> for Contexts {
+    fn accept<'node>(
+        &'node self,
+        c: &mut P::Context,
+        v: &mut dyn Visitor<'node, P = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_contexts(c, self)
+    }
+    fn recurse<'node>(
+        &'node self,
+        c: &mut P::Context,
+        v: &mut dyn Visitor<'node, P = P>,
+    ) -> Result<(), P::Error> {
+        self.0.accept(c, v)?;
+        self.1.accept(c, v)?;
+        Ok(())
     }
 }
 impl<P: Params> Node<P> for Def<P::Ex, P::Fb, P::En, P::Hi> {

@@ -14,10 +14,7 @@ Errors:
          param_expr = None; param_callconv = None;
          param_user_attributes = []; param_visibility = None }
         ];
-      f_cap =
-      (((HH\Capabilities\AccessStaticVariable & HH\Capabilities\WriteProperty & HH\Capabilities\Output)),
-       None);
-      f_unsafe_cap = ((mixed), None);
+      f_cap = None; f_unsafe_cap = None;
       f_body =
       { fb_ast =
         [([4:3-18],

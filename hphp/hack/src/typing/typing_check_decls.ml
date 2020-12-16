@@ -129,6 +129,8 @@ and where_constr env (h1, _, h2) =
   hint env h1;
   hint env h2
 
+and contexts env (_, hl) = List.iter ~f:(hint env) hl
+
 and hint ?(is_atom = false) env (p, h) =
   (* Do not use this one recursively to avoid quadratic runtime! *)
   check_hint_wellkindedness env.tenv (p, h);
@@ -193,7 +195,7 @@ and hint_ ~is_atom env p h_ =
     List.iter hl (hint env);
     hint env h;
     Option.iter variadic_hint (hint env);
-    maybe hint env cap_opt
+    Option.iter ~f:(contexts env) cap_opt
   | Happly ((p, "\\Tuple"), _)
   | Happly ((p, "\\tuple"), _) ->
     Errors.tuple_syntax p

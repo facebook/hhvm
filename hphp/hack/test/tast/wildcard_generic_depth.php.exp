@@ -27,11 +27,8 @@
      { f_span = [6:1-8:2]; f_annotation = (); f_mode = Mstrict;
        f_ret = ((void), (Some ([6:15-19], (Hprim Tvoid))));
        f_name = ([6:10-11], "\\f"); f_tparams = []; f_where_constraints = [];
-       f_variadic = FVnonVariadic; f_params = [];
-       f_cap =
-       (((HH\Capabilities\AccessStaticVariable & HH\Capabilities\WriteProperty & HH\Capabilities\Output)),
-        None);
-       f_unsafe_cap = ((mixed), None);
+       f_variadic = FVnonVariadic; f_params = []; f_cap = None;
+       f_unsafe_cap = None;
        f_body =
        { fb_ast =
          [([7:3-22],

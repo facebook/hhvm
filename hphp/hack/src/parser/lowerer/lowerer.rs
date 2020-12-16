@@ -110,8 +110,8 @@ pub struct FunHdr {
     constrs: Vec<ast::WhereConstraintHint>,
     type_parameters: Vec<ast::Tparam>,
     parameters: Vec<ast::FunParam>,
-    capability: Option<ast::Hint>,
-    unsafe_capability: Option<ast::Hint>,
+    capability: Option<ast::Contexts>,
+    unsafe_capability: Option<ast::Contexts>,
     return_type: Option<ast::Hint>,
 }
 
@@ -1520,7 +1520,7 @@ where
         match &node.children {
             LambdaExpression(c) => {
                 let suspension_kind = Self::mk_suspension_kind(&c.async_);
-                let (params, (capability, unsafe_capability), ret) = match &c.signature.children {
+                let (params, (cap, unsafe_cap), ret) = match &c.signature.children {
                     LambdaSignature(c) => (
                         Self::could_map(Self::p_fun_param, &c.parameters, env)?,
                         Self::p_capability(&c.capability, env)?,
@@ -1568,8 +1568,8 @@ where
                     fun_kind: Self::mk_fun_kind(suspension_kind, yield_),
                     variadic: Self::determine_variadicity(&params),
                     params,
-                    cap: ast::TypeHint((), capability),
-                    unsafe_cap: ast::TypeHint((), unsafe_capability),
+                    cap,
+                    unsafe_cap,
                     user_attributes: Self::p_user_attributes(&c.attribute_spec, env)?,
                     file_attributes: vec![],
                     external,
@@ -2131,8 +2131,8 @@ where
                     fun_kind: Self::mk_fun_kind(suspension_kind, yield_),
                     variadic: Self::determine_variadicity(&params),
                     params,
-                    cap: ast::TypeHint((), cap),
-                    unsafe_cap: ast::TypeHint((), unsafe_cap),
+                    cap,
+                    unsafe_cap,
                     user_attributes,
                     file_attributes: vec![],
                     external,
@@ -2170,8 +2170,8 @@ where
                     fun_kind: Self::mk_fun_kind(suspension_kind, yld),
                     variadic: Self::determine_variadicity(&[]),
                     params: vec![],
-                    cap: ast::TypeHint((), None), // TODO(T70095684)
-                    unsafe_cap: ast::TypeHint((), None), // TODO(T70095684)
+                    cap: None,        // TODO(T70095684)
+                    unsafe_cap: None, // TODO(T70095684)
                     user_attributes,
                     file_attributes: vec![],
                     external,
@@ -3352,12 +3352,12 @@ where
     fn p_capability(
         node: S<'a, T, V>,
         env: &mut Env<'a, TF>,
-    ) -> Result<(Option<ast::Hint>, Option<ast::Hint>)> {
+    ) -> Result<(Option<ast::Contexts>, Option<ast::Contexts>)> {
         match &node.children {
             Missing => Ok((None, None)),
             Capability(c) => {
                 use ast::{Hint, Hint_};
-                let mut hints = Self::could_map(
+                let hints = Self::could_map(
                     |n, e| match &n.children {
                         FunctionCtxTypeSpecifier(_) => {
                             Ok(Hint::new(Self::p_pos(n, e), Hint_::Hmixed))
@@ -3373,16 +3373,10 @@ where
                     &c.types,
                     env,
                 )?;
-                let hint_ = if hints.len() == 1 {
-                    *hints.pop().unwrap().1
-                } else {
-                    /* Could make [] into Hmixed, but it just turns into empty intersection anyway */
-                    ast::Hint_::Hintersection(hints)
-                };
                 let pos = Self::p_pos(node, env);
-                let hint = ast::Hint::new(pos, hint_);
-                let unsafe_hint = hint.clone();
-                Ok((Some(hint), Some(unsafe_hint)))
+                let ctxs = ast::Contexts(pos, hints);
+                let unsafe_ctxs = ctxs.clone();
+                Ok((Some(ctxs), Some(unsafe_ctxs)))
             }
             _ => Self::missing_syntax("capability", node, env),
         }
@@ -4072,8 +4066,6 @@ where
                 let is_abstract = kinds.has(modifier::ABSTRACT);
                 let is_external = !is_abstract && c.function_body.is_external();
                 let user_attributes = Self::p_user_attributes(&c.attribute, env)?;
-                let cap = ast::TypeHint((), hdr.capability);
-                let unsafe_cap = ast::TypeHint((), hdr.unsafe_capability);
                 let method = ast::Method_ {
                     span: Self::p_fun_pos(node, env),
                     annotation: (),
@@ -4086,8 +4078,8 @@ where
                     where_constraints: hdr.constrs,
                     variadic: Self::determine_variadicity(&hdr.parameters),
                     params: hdr.parameters,
-                    cap,
-                    unsafe_cap,
+                    cap: hdr.capability,
+                    unsafe_cap: hdr.unsafe_capability,
                     body: ast::FuncBody {
                         annotation: (),
                         ast: body,
@@ -4438,8 +4430,6 @@ where
                 };
                 let user_attributes = Self::p_user_attributes(attribute_spec, env)?;
                 let variadic = Self::determine_variadicity(&hdr.parameters);
-                let cap = ast::TypeHint((), hdr.capability);
-                let unsafe_cap = ast::TypeHint((), hdr.unsafe_capability);
                 let ret = ast::TypeHint((), hdr.return_type);
                 Ok(vec![ast::Def::mk_fun(ast::Fun_ {
                     span: Self::p_fun_pos(node, env),
@@ -4450,8 +4440,8 @@ where
                     tparams: hdr.type_parameters,
                     where_constraints: hdr.constrs,
                     params: hdr.parameters,
-                    cap,
-                    unsafe_cap,
+                    cap: hdr.capability,
+                    unsafe_cap: hdr.unsafe_capability,
                     body: ast::FuncBody {
                         ast: block,
                         annotation: (),

@@ -57,10 +57,7 @@ Errors:
           }
          ];
        f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
-       f_cap =
-       (((HH\Capabilities\AccessStaticVariable & HH\Capabilities\WriteProperty & HH\Capabilities\Output)),
-        None);
-       f_unsafe_cap = ((mixed), None);
+       f_cap = None; f_unsafe_cap = None;
        f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
        f_external = false;
@@ -85,10 +82,7 @@ Errors:
            }
          ];
        f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
-       f_cap =
-       (((HH\Capabilities\AccessStaticVariable & HH\Capabilities\WriteProperty & HH\Capabilities\Output)),
-        None);
-       f_unsafe_cap = ((mixed), None);
+       f_cap = None; f_unsafe_cap = None;
        f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
        f_external = false;
@@ -108,10 +102,7 @@ Errors:
           [{ ua_name = ([8:14-15], "\\B"); ua_params = [] }] }
          ];
        f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
-       f_cap =
-       (((HH\Capabilities\AccessStaticVariable & HH\Capabilities\WriteProperty & HH\Capabilities\Output)),
-        None);
-       f_unsafe_cap = ((mixed), None);
+       f_cap = None; f_unsafe_cap = None;
        f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
        f_external = false;
@@ -131,10 +122,7 @@ Errors:
           [{ ua_name = ([9:14-20], "__Soft"); ua_params = [] }] }
          ];
        f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
-       f_cap =
-       (((HH\Capabilities\AccessStaticVariable & HH\Capabilities\WriteProperty & HH\Capabilities\Output)),
-        None);
-       f_unsafe_cap = ((mixed), None);
+       f_cap = None; f_unsafe_cap = None;
        f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
        f_external = false;
@@ -157,10 +145,7 @@ Errors:
           }
          ];
        f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
-       f_cap =
-       (((HH\Capabilities\AccessStaticVariable & HH\Capabilities\WriteProperty & HH\Capabilities\Output)),
-        None);
-       f_unsafe_cap = ((mixed), None);
+       f_cap = None; f_unsafe_cap = None;
        f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
        f_external = false;

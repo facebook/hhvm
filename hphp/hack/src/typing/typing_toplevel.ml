@@ -379,14 +379,11 @@ let rec fun_def ctx f :
           SN.UserAttributes.uaDisableTypecheckerInternal
           f.f_user_attributes
       in
-      let (env, f_cap, f_unsafe_cap) =
+      let (env, cap_ty, unsafe_cap_ty) =
         Typing.type_capability env f.f_cap f.f_unsafe_cap (fst f.f_name)
       in
       let (env, _) =
-        Typing_coeffects.register_capabilities
-          env
-          (type_of_type_hint f_cap)
-          (type_of_type_hint f_unsafe_cap)
+        Typing_coeffects.register_capabilities env cap_ty unsafe_cap_ty
       in
       let (env, tb) =
         Typing.fun_ ~disable env return pos f.f_body f.f_fun_kind
@@ -420,8 +417,8 @@ let rec fun_def ctx f :
           Aast.f_where_constraints = f.f_where_constraints;
           Aast.f_variadic = t_variadic;
           Aast.f_params = typed_params;
-          Aast.f_cap;
-          Aast.f_unsafe_cap;
+          Aast.f_cap = f.f_cap;
+          Aast.f_unsafe_cap = f.f_unsafe_cap;
           Aast.f_fun_kind = f.f_fun_kind;
           Aast.f_file_attributes = file_attrs;
           Aast.f_user_attributes = user_attributes;
@@ -565,14 +562,11 @@ and method_def env cls m =
           SN.UserAttributes.uaDisableTypecheckerInternal
           m.m_user_attributes
       in
-      let (env, m_cap, m_unsafe_cap) =
+      let (env, cap_ty, unsafe_cap_ty) =
         Typing.type_capability env m.m_cap m.m_unsafe_cap (fst m.m_name)
       in
       let (env, _) =
-        Typing_coeffects.register_capabilities
-          env
-          (type_of_type_hint m_cap)
-          (type_of_type_hint m_unsafe_cap)
+        Typing_coeffects.register_capabilities env cap_ty unsafe_cap_ty
       in
       let (env, tb) =
         Typing.fun_
@@ -651,8 +645,8 @@ and method_def env cls m =
           Aast.m_where_constraints = m.m_where_constraints;
           Aast.m_variadic = t_variadic;
           Aast.m_params = typed_params;
-          Aast.m_cap;
-          Aast.m_unsafe_cap;
+          Aast.m_cap = m.m_cap;
+          Aast.m_unsafe_cap = m.m_unsafe_cap;
           Aast.m_fun_kind = m.m_fun_kind;
           Aast.m_user_attributes = user_attributes;
           Aast.m_ret = (locl_ty, hint_of_type_hint m.m_ret);

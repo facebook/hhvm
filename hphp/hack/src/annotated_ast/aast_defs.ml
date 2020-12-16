@@ -79,13 +79,15 @@ and mutable_return = bool
 
 and variadic_hint = hint option
 
+and contexts = pos * hint list
+
 and hint_fun = {
   hf_reactive_kind: func_reactive;
   hf_param_tys: hint list;
   hf_param_kinds: Ast_defs.param_kind option list;
   hf_param_mutability: param_mutability option list;
   hf_variadic_ty: variadic_hint;
-  hf_cap: hint option;
+  hf_cap: contexts option;
   hf_return_ty: hint;
   hf_is_mutable_return: mutable_return;
 }

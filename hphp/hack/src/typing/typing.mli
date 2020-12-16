@@ -61,7 +61,7 @@ val check_shape_keys_validity :
 
 val type_capability :
   Typing_env_types.env ->
-  Nast.type_hint ->
-  Nast.type_hint ->
+  Aast.contexts option ->
+  Aast.contexts option ->
   Pos.t ->
-  Typing_env_types.env * Tast.type_hint * Tast.type_hint
+  Typing_env_types.env * Typing_defs.locl_ty * Typing_defs.locl_ty

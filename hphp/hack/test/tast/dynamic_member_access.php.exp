@@ -3,10 +3,7 @@
       f_ret = ((string), (Some ([3:33-39], (Hprim Tstring))));
       f_name = ([3:10-29], "\\returnsTheStringFoo"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
-      f_cap =
-      (((HH\Capabilities\AccessStaticVariable & HH\Capabilities\WriteProperty & HH\Capabilities\Output)),
-       None);
-      f_unsafe_cap = ((mixed), None);
+      f_cap = None; f_unsafe_cap = None;
       f_body =
       { fb_ast =
         [([3:42-55], (Return (Some (([3:49-54], string), (String "foo")))))];
@@ -31,10 +28,7 @@
           param_name = "$c"; param_expr = None; param_callconv = None;
           param_user_attributes = []; param_visibility = None }
          ];
-       f_cap =
-       (((HH\Capabilities\AccessStaticVariable & HH\Capabilities\WriteProperty & HH\Capabilities\Output)),
-        None);
-       f_unsafe_cap = ((mixed), None);
+       f_cap = None; f_unsafe_cap = None;
        f_body =
        { fb_ast =
          [([6:3-16],

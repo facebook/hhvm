@@ -111,17 +111,10 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
 
     method on_'hi _ hi = hi
 
-    method private on_capabilities env (cap, unsafe_cap) =
+    method private with_ns env ns =
       let open Namespace_env in
-      let namespace =
-        { empty_with_default with ns_name = Some "HH\\Contexts" }
-      in
-      let cap = super#on_type_hint { env with namespace } cap in
-      let namespace =
-        { empty_with_default with ns_name = Some "HH\\Contexts\\Unsafe" }
-      in
-      let unsafe_cap = super#on_type_hint { env with namespace } unsafe_cap in
-      (cap, unsafe_cap)
+      let namespace = { empty_with_default with ns_name = Some ns } in
+      { env with namespace }
 
     (* Namespaces were already precomputed by ElaborateDefs
      * The following functions just set the namespace env correctly
@@ -143,15 +136,21 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
       super#on_fun_def env f
 
     method! on_fun_ env f =
-      let (f_cap, f_unsafe_cap) =
-        self#on_capabilities env (f.f_cap, f.f_unsafe_cap)
+      let ctx_env = self#with_ns env SN.Coeffects.contexts in
+      let f_cap = Option.map ~f:(super#on_contexts ctx_env) f.f_cap in
+      let unsafe_ctx_env = self#with_ns env SN.Coeffects.unsafe_contexts in
+      let f_unsafe_cap =
+        Option.map ~f:(super#on_contexts unsafe_ctx_env) f.f_unsafe_cap
       in
       { (super#on_fun_ env f) with f_cap; f_unsafe_cap }
 
     method! on_method_ env m =
       let env = extend_tparams env m.m_tparams in
-      let (m_cap, m_unsafe_cap) =
-        self#on_capabilities env (m.m_cap, m.m_unsafe_cap)
+      let ctx_env = self#with_ns env SN.Coeffects.contexts in
+      let m_cap = Option.map ~f:(super#on_contexts ctx_env) m.m_cap in
+      let unsafe_ctx_env = self#with_ns env SN.Coeffects.unsafe_contexts in
+      let m_unsafe_cap =
+        Option.map ~f:(super#on_contexts unsafe_ctx_env) m.m_unsafe_cap
       in
       { (super#on_method_ env m) with m_cap; m_unsafe_cap }
 
@@ -331,14 +330,9 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
       | _ -> super#on_hint_ env h
 
     method! on_hint_fun env hf =
-      let open Namespace_env in
-      let namespace =
-        { empty_with_default with ns_name = Some "HH\\Contexts" }
-      in
-      let cap_env = { env with namespace } in
-      let hf_cap = Option.map ~f:(self#on_hint cap_env) hf.hf_cap in
-      let hf = super#on_hint_fun env hf in
-      { hf with hf_cap }
+      let ctx_env = self#with_ns env SN.Coeffects.contexts in
+      let hf_cap = Option.map ~f:(super#on_contexts ctx_env) hf.hf_cap in
+      { (super#on_hint_fun env hf) with hf_cap }
 
     method! on_shape_field_name env sfn =
       match sfn with

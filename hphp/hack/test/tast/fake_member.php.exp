@@ -21,10 +21,7 @@
          m_abstract = false; m_static = false; m_visibility = Public;
          m_name = ([6:19-22], "get"); m_tparams = [];
          m_where_constraints = []; m_variadic = FVnonVariadic; m_params = [];
-         m_cap =
-         (((HH\Capabilities\AccessStaticVariable & HH\Capabilities\WriteProperty & HH\Capabilities\Output)),
-          None);
-         m_unsafe_cap = ((mixed), None);
+         m_cap = None; m_unsafe_cap = None;
          m_body =
          { fb_ast =
            [([7:5-9:6],

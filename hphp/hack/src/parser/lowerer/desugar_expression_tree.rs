@@ -165,8 +165,8 @@ fn wrap_fun_<TF>(
         params,
         body,
         fun_kind: ast::FunKind::FSync,
-        cap: ast::TypeHint((), None),        // TODO(T70095684)
-        unsafe_cap: ast::TypeHint((), None), // TODO(T70095684)
+        cap: None,        // TODO(T70095684)
+        unsafe_cap: None, // TODO(T70095684)
         user_attributes: vec![],
         file_attributes: vec![],
         external: false,

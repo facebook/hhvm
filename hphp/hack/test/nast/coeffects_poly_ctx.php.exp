@@ -12,16 +12,15 @@
                     { hf_reactive_kind = FNonreactive;
                       hf_param_tys = [([6:14-17], (Hprim Tint))];
                       hf_param_kinds = [None]; hf_param_mutability = [None];
-                      hf_variadic_ty = None;
-                      hf_cap = (Some ([6:18-20], (Hintersection [])));
+                      hf_variadic_ty = None; hf_cap = (Some ([6:18-20], []));
                       hf_return_ty = ([6:22-26], (Hprim Tvoid));
                       hf_is_mutable_return = false }))));
          param_is_variadic = false; param_pos = [6:28-30]; param_name = "$f";
          param_expr = None; param_callconv = None;
          param_user_attributes = []; param_visibility = None }
         ];
-      f_cap = ((), (Some ([7:2-10], Hmixed)));
-      f_unsafe_cap = ((), (Some ([7:2-10], Hmixed)));
+      f_cap = (Some ([7:2-10], [([7:3-9], Hmixed)]));
+      f_unsafe_cap = (Some ([7:2-10], [([7:3-9], Hmixed)]));
       f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = Named };
       f_fun_kind = FSync; f_user_attributes = [];
       f_file_attributes =

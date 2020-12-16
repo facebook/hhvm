@@ -363,6 +363,11 @@ and unwrap_mutability p =
     (Some N.POwnedMutable, t)
   | t -> (None, t)
 
+and contexts env ctxs =
+  let (pos, hl) = ctxs in
+  let hl = List.map ~f:(hint env) hl in
+  (pos, hl)
+
 and hfun env reactivity hl kl variadic_hint cap h =
   let variadic_hint = Option.map variadic_hint (hint env) in
   let (muts, hl) =
@@ -375,7 +380,7 @@ and hfun env reactivity hl kl variadic_hint cap h =
       hl
     |> List.unzip
   in
-  let cap = Option.map cap (hint env) in
+  let cap = Option.map ~f:(contexts env) cap in
   let (ret_mut, rh) = unwrap_mutability h in
   let ret_mut =
     match ret_mut with
@@ -1400,10 +1405,8 @@ and method_ genv m =
         failwith "ast_to_nast error unnamedbody in method_"
   in
   let attrs = user_attributes env m.Aast.m_user_attributes in
-  let m_cap = Aast.type_hint_option_map ~f:(hint env) m.Aast.m_cap in
-  let m_unsafe_cap =
-    Aast.type_hint_option_map ~f:(hint env) m.Aast.m_unsafe_cap
-  in
+  let m_cap = Option.map ~f:(contexts env) m.Aast.m_cap in
+  let m_unsafe_cap = Option.map ~f:(contexts env) m.Aast.m_unsafe_cap in
   {
     N.m_annotation = ();
     N.m_span = m.Aast.m_span;
@@ -1515,10 +1518,8 @@ and fun_ ctx f =
       else
         failwith "ast_to_nast error unnamedbody in fun_"
   in
-  let f_cap = Aast.type_hint_option_map ~f:(hint env) f.Aast.f_cap in
-  let f_unsafe_cap =
-    Aast.type_hint_option_map ~f:(hint env) f.Aast.f_unsafe_cap
-  in
+  let f_cap = Option.map ~f:(contexts env) f.Aast.f_cap in
+  let f_unsafe_cap = Option.map ~f:(contexts env) f.Aast.f_unsafe_cap in
   let file_attributes =
     file_attributes ctx f.Aast.f_mode f.Aast.f_file_attributes
   in
@@ -2237,10 +2238,8 @@ and expr_lambda env f =
    * environment *)
   let body_nast = f_body env f.Aast.f_body in
   let annotation = Nast.Named in
-  let f_cap = Aast.type_hint_option_map ~f:(hint env) f.Aast.f_cap in
-  let f_unsafe_cap =
-    Aast.type_hint_option_map ~f:(hint env) f.Aast.f_unsafe_cap
-  in
+  let f_cap = Option.map ~f:(contexts env) f.Aast.f_cap in
+  let f_unsafe_cap = Option.map ~f:(contexts env) f.Aast.f_unsafe_cap in
   (* These could all be probably be replaced with a {... where ...} *)
   let body = { N.fb_ast = body_nast; fb_annotation = annotation } in
   {

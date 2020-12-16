@@ -12,10 +12,7 @@ Errors:
          tp_user_attributes = [] }
         ];
       f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
-      f_cap =
-      (((HH\Capabilities\AccessStaticVariable & HH\Capabilities\WriteProperty & HH\Capabilities\Output)),
-       None);
-      f_unsafe_cap = ((mixed), None);
+      f_cap = None; f_unsafe_cap = None;
       f_body =
       { fb_ast =
         [([5:3-11],

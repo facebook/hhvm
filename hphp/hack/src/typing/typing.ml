@@ -3180,7 +3180,7 @@ and anon_make ?el ?ret_ty env lambda_pos f ft idl is_anon =
   Env.anon env.lenv env (fun env ->
       (* Extract capabilities from AAST and add them to the environment *)
       let (env, capability) =
-        match (hint_of_type_hint f.f_cap, hint_of_type_hint f.f_unsafe_cap) with
+        match (f.f_cap, f.f_unsafe_cap) with
         | (None, None) ->
           (* if the closure has no explicit coeffect annotations,
             do _not_ insert (unsafe) capabilities into the environment;
@@ -3192,13 +3192,10 @@ and anon_make ?el ?ret_ty env lambda_pos f ft idl is_anon =
             set of capabilities. *)
           (env, Env.get_local env Typing_coeffects.local_capability_id)
         | (_, _) ->
-          let (env, f_cap, f_unsafe_cap) =
+          let (env, cap_ty, unsafe_cap_ty) =
             type_capability env f.f_cap f.f_unsafe_cap (fst f.f_name)
           in
-          Typing_coeffects.register_capabilities
-            env
-            (type_of_type_hint f_cap)
-            (type_of_type_hint f_unsafe_cap)
+          Typing_coeffects.register_capabilities env cap_ty unsafe_cap_ty
       in
       let ft =
         { ft with ft_implicit_params = { capability = CapTy capability } }
@@ -3343,9 +3340,6 @@ and anon_make ?el ?ret_ty env lambda_pos f ft idl is_anon =
           let (env, user_attributes) =
             List.map_env env f.f_user_attributes user_attribute
           in
-          let (env, f_cap, f_unsafe_cap) =
-            type_capability env f.f_cap f.f_unsafe_cap (fst f.f_name)
-          in
           let tfun_ =
             {
               Aast.f_annotation = Env.save local_tpenv env;
@@ -3359,8 +3353,8 @@ and anon_make ?el ?ret_ty env lambda_pos f ft idl is_anon =
               Aast.f_file_attributes = [];
               Aast.f_user_attributes = user_attributes;
               Aast.f_body = { Aast.fb_ast = tb; fb_annotation = () };
-              Aast.f_cap;
-              Aast.f_unsafe_cap;
+              Aast.f_cap = f.f_cap;
+              Aast.f_unsafe_cap = f.f_unsafe_cap;
               Aast.f_params = t_params;
               Aast.f_variadic = t_variadic;
               (* TODO TAST: Variadic efuns *)
@@ -3420,24 +3414,21 @@ and et_splice env p e =
 (*****************************************************************************)
 (* End expression trees *)
 (*****************************************************************************)
-
-(* Goes from Nast.f_cap to Tast.f_cap (same for unsafe_cap) *)
 and type_capability env cap unsafe_cap default_pos =
-  let cap_hint_opt = hint_of_type_hint cap in
+  let cc = Decl_hint.aast_contexts_to_decl_capability in
   let (env, cap_ty) =
-    Option.value_map
-      cap_hint_opt
-      ~default:(env, MakeType.default_capability)
-      ~f:(fun h -> Phase.localize_with_self env (Decl_hint.hint env.decl_env h))
+    match cc env.decl_env cap default_pos with
+    | CapTy ty -> Phase.localize_with_self env ty
+    | CapDefaults _p -> (env, MakeType.default_capability)
   in
-  let unsafe_cap_hint_opt = hint_of_type_hint unsafe_cap in
   let (env, unsafe_cap_ty) =
-    Option.value_map
-      unsafe_cap_hint_opt (* default is no unsafe capabilities *)
-      ~default:(env, MakeType.mixed (Reason.Rhint default_pos))
-      ~f:(Phase.localize_hint_with_self env)
+    match cc env.decl_env unsafe_cap default_pos with
+    | CapTy ty -> Phase.localize_with_self env ty
+    | CapDefaults p ->
+      (* default is no unsafe capabilities *)
+      (env, MakeType.mixed (Reason.Rhint p))
   in
-  (env, (cap_ty, cap_hint_opt), (unsafe_cap_ty, unsafe_cap_hint_opt))
+  (env, cap_ty, unsafe_cap_ty)
 
 and requires_consistent_construct = function
   | CIstatic -> true

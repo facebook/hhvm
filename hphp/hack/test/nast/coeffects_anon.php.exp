@@ -3,7 +3,7 @@
       f_ret = ((), (Some ([4:33-37], (Hprim Tvoid))));
       f_name = ([4:10-29], "\\anons_with_ctx_list"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
-      f_cap = ((), None); f_unsafe_cap = ((), None);
+      f_cap = None; f_unsafe_cap = None;
       f_body =
       { fb_ast =
         [([5:3-63],
@@ -19,18 +19,20 @@
                        f_where_constraints = []; f_variadic = FVnonVariadic;
                        f_params = [];
                        f_cap =
-                       ((),
-                        (Some ([5:28-36],
-                               (Happly (
-                                  ([5:29-35], "\\HH\\Contexts\\output"), 
-                                  [])))));
+                       (Some ([5:28-36],
+                              [([5:29-35],
+                                (Happly (
+                                   ([5:29-35], "\\HH\\Contexts\\output"), 
+                                   [])))
+                                ]));
                        f_unsafe_cap =
-                       ((),
-                        (Some ([5:28-36],
-                               (Happly (
-                                  ([5:29-35],
-                                   "\\HH\\Contexts\\Unsafe\\output"),
-                                  [])))));
+                       (Some ([5:28-36],
+                              [([5:29-35],
+                                (Happly (
+                                   ([5:29-35],
+                                    "\\HH\\Contexts\\Unsafe\\output"),
+                                   [])))
+                                ]));
                        f_body =
                        { fb_ast =
                          [([5:51-60], (Return (Some ([5:58-59], (Int "0")))))
@@ -67,18 +69,20 @@
                         f_where_constraints = []; f_variadic = FVnonVariadic;
                         f_params = [];
                         f_cap =
-                        ((),
-                         (Some ([8:28-37],
-                                (Happly (
-                                   ([8:29-36], "\\HH\\Contexts\\non_det"), 
-                                   [])))));
+                        (Some ([8:28-37],
+                               [([8:29-36],
+                                 (Happly (
+                                    ([8:29-36], "\\HH\\Contexts\\non_det"),
+                                    [])))
+                                 ]));
                         f_unsafe_cap =
-                        ((),
-                         (Some ([8:28-37],
-                                (Happly (
-                                   ([8:29-36],
-                                    "\\HH\\Contexts\\Unsafe\\non_det"),
-                                   [])))));
+                        (Some ([8:28-37],
+                               [([8:29-36],
+                                 (Happly (
+                                    ([8:29-36],
+                                     "\\HH\\Contexts\\Unsafe\\non_det"),
+                                    [])))
+                                 ]));
                         f_body =
                         { fb_ast =
                           [([8:51-61],
@@ -112,16 +116,18 @@
                         f_where_constraints = []; f_variadic = FVnonVariadic;
                         f_params = [];
                         f_cap =
-                        ((),
-                         (Some ([9:21-25],
-                                (Happly (([9:22-24], "\\HH\\Contexts\\rx"),
-                                   [])))));
+                        (Some ([9:21-25],
+                               [([9:22-24],
+                                 (Happly (([9:22-24], "\\HH\\Contexts\\rx"),
+                                    [])))
+                                 ]));
                         f_unsafe_cap =
-                        ((),
-                         (Some ([9:21-25],
-                                (Happly (
-                                   ([9:22-24], "\\HH\\Contexts\\Unsafe\\rx"),
-                                   [])))));
+                        (Some ([9:21-25],
+                               [([9:22-24],
+                                 (Happly (
+                                    ([9:22-24], "\\HH\\Contexts\\Unsafe\\rx"),
+                                    [])))
+                                 ]));
                         f_body =
                         { fb_ast =
                           [([9:44-54],

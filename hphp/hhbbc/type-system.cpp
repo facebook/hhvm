@@ -84,14 +84,15 @@ bool mayHaveData(trep bits) {
   switch (bits) {
   case BSStr:    case BStr:
   case BOptSStr: case BOptStr:
-  case BObj:     case BInt:    case BDbl:     case BRecord: case BCls:
-  case BOptObj:  case BOptInt: case BOptDbl:  case BOptRecord: case BOptCls:
+  case BObj:     case BInt:    case BDbl:     case BRecord:
+  case BOptObj:  case BOptInt: case BOptDbl:  case BOptRecord:
+  case BCls:     case BOptCls:
   case BArr:     case BSArr:     case BCArr:
   case BArrN:    case BSArrN:    case BCArrN:
   case BOptArr:  case BOptSArr:  case BOptCArr:
   case BOptArrN: case BOptSArrN: case BOptCArrN:
-  case BFunc:
-  case BRFunc:   case BOptRFunc:
+  case BFunc:    case BOptFunc:
+  case BRFunc:    case BOptRFunc:
   case BFuncLike: case BOptFuncLike:
   case BVec:      case BSVec:      case BCVec:
   case BVecN:     case BSVecN:     case BCVecN:
@@ -202,7 +203,6 @@ bool mayHaveData(trep bits) {
   case BOptUncStrLike:
   case BOptArrKeyCompat:
   case BOptUncArrKeyCompat:
-  case BOptFunc:
   case BClsMeth:
   case BOptClsMeth:
   case BRClsMeth:
@@ -904,13 +904,18 @@ bool couldBeArrLike(SArray arr1, SArray arr2) {
 
 //////////////////////////////////////////////////////////////////////
 
-std::pair<Type,Type> val_key_values(SArray a) {
-  auto ret = std::make_pair(TBottom, TBottom);
+std::tuple<Type,Type,int64_t> val_key_values(SArray a) {
+  auto key = TBottom;
+  auto val = TBottom;
+  int64_t lastK = -1;
   for (ArrayIter iter(a); iter; ++iter) {
-    ret.first |= from_cell(*iter.first().asTypedValue());
-    ret.second |= from_cell(iter.secondVal());
+    auto const k = *iter.first().asTypedValue();
+    key |= from_cell(k);
+    val |= from_cell(iter.secondVal());
+    if (k.m_type != KindOfInt64) continue;
+    if (k.m_data.num > lastK) lastK = k.m_data.num;
   }
-  return ret;
+  return std::make_tuple(std::move(key), std::move(val), lastK);
 }
 
 std::pair<Type,Type> map_key_values(const DArrLikeMap& a) {
@@ -4779,6 +4784,30 @@ Type loosen_interfaces(Type t) {
   return t;
 }
 
+Type loosen_aggregate_staticness(Type t) {
+  auto bits = t.bits();
+  if (TInitUnc.subtypeOf(bits)) return union_of(t, TInitCell);
+
+  auto const check = [&] (trep a) {
+    if (bits & a) bits |= a;
+  };
+  check(BVArrE);
+  check(BVArrN);
+  check(BDArrE);
+  check(BDArrN);
+  check(BVecE);
+  check(BVecN);
+  check(BDictE);
+  check(BDictN);
+  check(BKeysetE);
+  check(BKeysetN);
+  // Records should go here once we allow them to be static
+
+  assertx(isPredefined(bits));
+  t.m_bits = bits;
+  return t;
+}
+
 Type loosen_staticness(Type t) {
   auto bits = t.bits();
   if (TInitUnc.subtypeOf(bits)) return union_of(t, TInitCell);
@@ -4961,6 +4990,27 @@ Type loosen_arrays(Type a) {
     a |= RO::EvalHackArrDVArrs ? TVecCompat : TArrCompat;
   }
   return a;
+}
+
+Type loosen_array_values(Type a) {
+  if (!a.couldBe(BArrLike)) return a;
+  switch (a.m_dataTag) {
+    case DataTag::ArrLikeVal:
+    case DataTag::ArrLikePacked:
+    case DataTag::ArrLikePackedN:
+    case DataTag::ArrLikeMap:
+    case DataTag::ArrLikeMapN:
+      return Type { a.bits() };
+    case DataTag::None:
+    case DataTag::Str:
+    case DataTag::Int:
+    case DataTag::Dbl:
+    case DataTag::Obj:
+    case DataTag::Cls:
+    case DataTag::Record:
+      return a;
+  }
+  not_reached();
 }
 
 Type loosen_values(Type a) {
@@ -5657,49 +5707,69 @@ bool arr_mapn_set(Type& map,
   return true;
 }
 
-Type arr_map_newelem(Type& map, const Type& val, ProvTag src) {
+bool arr_map_newelem(Type& map, const Type& val, bool update, ProvTag src) {
   assert(map.m_dataTag == DataTag::ArrLikeMap);
   auto const tag = arr_like_update_prov_tag(map, src);
+
+  // If the highest key is int64_t max, the chosen key will wrap
+  // around, which will trigger a warning and not actually append
+  // anything.
+  auto const findLastK = [&] {
+    int64_t lastK = -1;
+    for (auto const& kv : map.m_data.map->map) {
+      if (kv.first.m_type == KindOfInt64 &&
+          kv.first.m_data.num > lastK) {
+        lastK = kv.first.m_data.num;
+      }
+    }
+    return lastK;
+  };
 
   // If the Map has optional elements, we can't known what the new key
   // is (but it won't modify known keys).
   if (map.m_data.map->hasOptElements()) {
-    auto mutated = map.m_data.map.mutate();
-    mutated->optKey |= TInt;
-    mutated->optVal |= val;
-    return TInt;
-  }
-
-  int64_t lastK = -1;
-  for (auto const& kv : map.m_data.map->map) {
-    if (kv.first.m_type == KindOfInt64 &&
-        kv.first.m_data.num > lastK) {
-      lastK = kv.first.m_data.num;
+    // If the optional value is a single known key, we might still be
+    // able to infer if the append might throw or not.
+    auto mightThrow = true;
+    if (auto const v = tv(map.m_data.map->optKey)) {
+      auto lastK = findLastK();
+      if (v->m_type == KindOfInt64 && v->m_data.num > lastK) {
+        lastK = v->m_data.num;
+      }
+      mightThrow = (lastK == std::numeric_limits<int64_t>::max());
     }
+
+    if (update) {
+      auto mutated = map.m_data.map.mutate();
+      mutated->optKey |= TInt;
+      mutated->optVal |= val;
+    }
+    return mightThrow;
   }
 
-  if (lastK == std::numeric_limits<int64_t>::max()) {
-    return TInt;
+  auto const lastK = findLastK();
+  if (lastK == std::numeric_limits<int64_t>::max()) return true;
+  if (update) {
+    map.m_data.map.mutate()->map.emplace_back(
+      make_tv<KindOfInt64>(lastK + 1),
+      val
+    );
+    map.m_data.map.mutate()->provenance = tag;
   }
-  map.m_data.map.mutate()->map.emplace_back(make_tv<KindOfInt64>(lastK + 1),
-                                            val);
-  map.m_data.map.mutate()->provenance = tag;
-  return ival(lastK + 1);
+  // Otherwise we know the append will succeed without potentially
+  // throwing.
+  return false;
 }
 
-std::pair<Type, ThrowMode>
-array_like_elem(const Type& arr, const Type& origKey) {
-  auto const key = disect_strict_key(origKey);
-  if (key.type == TBottom) return {TBottom, ThrowMode::BadOperation};
-  return array_like_elem(std::move(arr), key, TBottom);
-}
-
-std::pair<Type, ThrowMode> array_like_elem(const Type& arr,
-                                           const ArrKey& key,
-                                           const Type& defaultTy) {
-  assert(arr.subtypeOrNull(BArrLike));
-  const bool maybeEmpty = arr.couldBe(BArrLikeE);
-  const bool mustBeStatic = arr.subtypeOrNull(BSArrLike);
+std::pair<Type, ThrowMode> array_like_elem_impl(const Type& arr,
+                                                const ArrKey& key,
+                                                const Type& defaultTy) {
+  // The array must be one of the exact array types, not a union. It
+  // can be optional, but not null.
+  assertx(arr.subtypeOfAny(TOptArr, TOptVec, TOptDict, TOptKeyset));
+  assertx(!arr.subtypeOf(BInitNull));
+  auto const maybeEmpty = arr.couldBe(BArrLikeE);
+  auto const mustBeStatic = arr.subtypeOrNull(BSArrLike);
 
   if (!arr.couldBe(BArrLikeN)) {
     assert(maybeEmpty);
@@ -5757,9 +5827,7 @@ std::pair<Type, ThrowMode> array_like_elem(const Type& arr,
   };
   if (!pair.second) ret.first |= defaultTy;
 
-  if (!ret.first.subtypeOf(BInitCell)) {
-    ret.first = TInitCell;
-  }
+  if (!ret.first.subtypeOf(BInitCell)) ret.first = TInitCell;
 
   if (maybeEmpty) {
     ret.first |= defaultTy;
@@ -5773,16 +5841,11 @@ std::pair<Type, ThrowMode> array_like_elem(const Type& arr,
 
 std::pair<Type,ThrowMode>
 array_elem(const Type& arr, const Type& undisectedKey, const Type& defaultTy) {
-  assert(arr.subtypeOrNull(BArr));
-  auto const key = disect_array_key(undisectedKey);
-  return array_like_elem(arr, key, defaultTy);
-}
+  assertx(arr.subtypeOf(BOptArr));
+  assertx(!arr.subtypeOf(BInitNull));
 
-std::pair<Type, ThrowMode>
-array_like_set(Type arr, const Type& origKey, const Type& val, ProvTag src) {
-  auto const key = disect_strict_key(origKey);
-  if (key.type == TBottom) return {TBottom, ThrowMode::BadOperation};
-  return array_like_set(std::move(arr), key, val, ProvTag::Top);
+  auto const key = disect_array_key(undisectedKey);
+  return array_like_elem_impl(arr, key, defaultTy);
 }
 
 /*
@@ -5800,10 +5863,15 @@ array_like_set(Type arr, const Type& origKey, const Type& val, ProvTag src) {
  * If the key could be an illegal key type, the array may remain empty.
  */
 
-std::pair<Type,ThrowMode> array_like_set(Type arr,
+std::pair<Type,bool> array_like_set_impl(Type arr,
                                          const ArrKey& key,
                                          const Type& valIn,
                                          ProvTag src) {
+  // The array must be one of the exact array types, not a union. It
+  // can be optional, but not null.
+  assertx(arr.subtypeOfAny(TOptArr, TOptVec, TOptDict, TOptKeyset));
+  assertx(!arr.subtypeOf(BInitNull));
+
   const bool maybeEmpty = arr.couldBe(BArrLikeE);
   DEBUG_ONLY const bool isVector = arr.subtypeOrNull(BVec);
   DEBUG_ONLY const bool isVArray = arr.subtypeOrNull(BVArr);
@@ -5813,8 +5881,7 @@ std::pair<Type,ThrowMode> array_like_set(Type arr,
   trep bits = combine_dv_arr_like_bits(arr.bits(), BArrLikeN);
   if (validKey) bits &= ~BArrLikeE;
 
-  auto const throwMode = validKey && !key.mayThrow ?
-    ThrowMode::None : ThrowMode::BadOperation;
+  auto const throwMode = validKey && !key.mayThrow ? false : true;
   auto const& val    = valIn;
   // We don't want to store types more general than TArrKey into specialized
   // array type keys. If the key was strange (array or object), it will be more
@@ -5827,7 +5894,7 @@ std::pair<Type,ThrowMode> array_like_set(Type arr,
   if (!arr.couldBe(BArrLikeN)) {
     auto const tag = arr_like_update_prov_tag(arr, src);
     assert(maybeEmpty);
-    if (vecish) return { TBottom, ThrowMode::BadOperation };
+    if (vecish) return { TBottom, true };
     if (fixedKey.i) {
       if (!*fixedKey.i) {
         return { packed_impl(bits, { val }, tag, arr.getMark()), throwMode };
@@ -5844,7 +5911,7 @@ std::pair<Type,ThrowMode> array_like_set(Type arr,
   }
 
   auto emptyHelper = [&] (const Type& inKey,
-                          const Type& inVal) -> std::pair<Type,ThrowMode> {
+                          const Type& inVal) -> std::pair<Type,bool> {
     return {
       mapn_impl_from_map(
         bits,
@@ -5868,15 +5935,15 @@ std::pair<Type,ThrowMode> array_like_set(Type arr,
     not_reached();
 
   case DataTag::None:
-    return { std::move(arr), ThrowMode::BadOperation };
+    return { std::move(arr), true };
 
   case DataTag::ArrLikeVal:
     if (maybeEmpty && !vecish) {
-      auto kv = val_key_values(arr.m_data.aval);
-      return emptyHelper(kv.first, kv.second);
+      auto [key, value, _] = val_key_values(arr.m_data.aval);
+      return emptyHelper(key, value);
     } else {
       if (auto d = toDArrLikePacked(arr.m_data.aval)) {
-        return array_like_set(
+        return array_like_set_impl(
           packed_impl(bits, std::move(d->elems), d->provenance, d->mark),
           key, valIn, src
         );
@@ -5885,7 +5952,7 @@ std::pair<Type,ThrowMode> array_like_set(Type arr,
       assert(!isVArray);
       // We know its not packed, so this should always succeed
       auto d = toDArrLikeMap(arr.m_data.aval);
-      return array_like_set(
+      return array_like_set_impl(
         map_impl(
           bits,
           std::move(d->map),
@@ -5908,7 +5975,7 @@ std::pair<Type,ThrowMode> array_like_set(Type arr,
       return emptyHelper(TInt, packed_values(*arr.m_data.packed));
     } else {
       auto const inRange = arr_packed_set(arr, fixedKey, val, src);
-      return { std::move(arr), inRange ? throwMode : ThrowMode::BadOperation };
+      return { std::move(arr), inRange ? throwMode : true };
     }
 
   case DataTag::ArrLikePackedN:
@@ -5916,7 +5983,7 @@ std::pair<Type,ThrowMode> array_like_set(Type arr,
       return emptyHelper(TInt, arr.m_data.packedn->type);
     } else {
       auto const inRange = arr_packedn_set(arr, fixedKey, val, false);
-      return { std::move(arr), inRange ? throwMode : ThrowMode::BadOperation };
+      return { std::move(arr), inRange ? throwMode : true };
     }
 
   case DataTag::ArrLikeMap:
@@ -5927,7 +5994,7 @@ std::pair<Type,ThrowMode> array_like_set(Type arr,
       return emptyHelper(std::move(mkv.first), std::move(mkv.second));
     } else {
       auto const inRange = arr_map_set(arr, fixedKey, val, src);
-      return { std::move(arr), inRange ? throwMode : ThrowMode::BadOperation };
+      return { std::move(arr), inRange ? throwMode : true };
     }
 
   case DataTag::ArrLikeMapN:
@@ -5937,34 +6004,71 @@ std::pair<Type,ThrowMode> array_like_set(Type arr,
       return emptyHelper(arr.m_data.mapn->key, arr.m_data.mapn->val);
     } else {
       auto const inRange = arr_mapn_set(arr, fixedKey, val);
-      return { std::move(arr), inRange ? throwMode : ThrowMode::BadOperation };
+      return { std::move(arr), inRange ? throwMode : true };
     }
   }
 
   not_reached();
 }
 
-std::pair<Type, ThrowMode> array_set(Type arr,
-                                     const Type& undisectedKey,
-                                     const Type& val,
-                                     ProvTag src) {
-  assert(arr.subtypeOf(BArr));
-  if (!val.couldBe(BInitCell)) return {TBottom, ThrowMode::BadOperation};
+std::pair<Type,bool> array_set(Type arr,
+                               const Type& undisectedKey,
+                               const Type& val,
+                               ProvTag src) {
+  assertx(arr.subtypeOf(BOptArr));
+  assertx(!arr.subtypeOf(BInitNull));
+
+  if (!val.couldBe(BInitCell)) return {TBottom, true};
 
   auto const key = disect_array_key(undisectedKey);
   assert(key.type != TBottom);
-  return array_like_set(std::move(arr), key, val, src);
+  return array_like_set_impl(std::move(arr), key, val, src);
 }
 
-std::pair<Type,Type> array_like_newelem(Type arr,
-                                        const Type& val,
-                                        ProvTag src) {
+std::pair<Type,bool> array_like_newelem_impl(Type arr,
+                                             const Type& val,
+                                             ProvTag src) {
+  // The array must be one of the exact array types, not a union. It
+  // can be optional, but not null.
+  assertx(arr.subtypeOfAny(TOptArr, TOptVec, TOptDict, TOptKeyset));
+  assertx(!arr.subtypeOf(BInitNull));
 
-  if (arr.subtypeOrNull(BKeyset)) {
+  // "Appends" on a keyset are actually modeled as a set with the same
+  // key and value.
+  if (arr.subtypeOf(BOptKeyset)) {
     auto const key = disect_strict_key(val);
-    if (key.type == TBottom) return { TBottom, TInitCell };
-    return { array_like_set(std::move(arr), key, key.type, src).first, val };
+    if (key.type.subtypeOf(BBottom)) return { TBottom, true };
+    return array_like_set_impl(std::move(arr), key, key.type, src);
   }
+
+  /*
+   * NB: Appends on dicts and darrays can potentially throw for two
+   * reasons:
+   *
+   * - If m_nextKI is negative, which means that the "next key" for
+   *   append would be a negative integer key. This raises a warning
+   *   (and does not append anything).
+   *
+   * - If m_nextKI does not match the highest integer key in the array
+   *   (and if Eval.DictDArrayAppendNotices is true, which we
+   *   assume). This raises a notice.
+   *
+   * Since HHBBC does not attempt to track m_nextKI for arrays, we
+   * have to be pessimistic and assume that any append on a darry or
+   * dict can throw. However we can avoid it in certain situations:
+   *
+   * Since HHBBC pessimizes its knowledge of inner array structure
+   * whenever it encounters an unset, if we have a specialized array
+   * type, we know there's never been an unset on the array. Therefore
+   * we can safely infer m_nextKI from what we know about the keys. If
+   * the array is static, or if have an ArrLikeMap, we can iterate
+   * over the keys. If we have a packed representation, we know the
+   * keys are contiguous (and thus can only wrap if we have 2^63
+   * values).
+   *
+   * This will have to be revisited if we ever decide to model unsets
+   * (hopefully m_nextKI would be gone by then).
+   */
 
   const bool maybeEmpty = arr.couldBe(BArrLikeE);
   const bool isVector = arr.subtypeOrNull(BVec);
@@ -5973,24 +6077,26 @@ std::pair<Type,Type> array_like_newelem(Type arr,
   trep bits = combine_dv_arr_like_bits(arr.bits(), BArrLikeN);
   bits &= ~BArrLikeE;
 
-  // Right now, we always pessimize appends to TArrLike. We can probably do
-  // better if we have a non-trivial DataTag.
-  if (bits & BKeyset) return { Type(bits), TArrKey };
-
   if (!arr.couldBe(BArrLikeN)) {
     assert(maybeEmpty);
-    return { packed_impl(bits, { val },
-                         arr_like_update_prov_tag(arr, src), arr.getMark()),
-             ival(0) };
+    return {
+      packed_impl(
+        bits, { val },
+        arr_like_update_prov_tag(arr, src), arr.getMark()
+      ),
+      // Appends cannot throw on any empty array
+      false
+    };
   }
 
-
-  auto emptyHelper = [&] (const Type& inKey,
-                          const Type& inVal,
-                          LegacyMark mark) -> std::pair<Type,Type> {
+  auto const emptyHelper = [&] (const Type& inKey,
+                                const Type& inVal,
+                                LegacyMark mark,
+                                bool mightThrow) -> std::pair<Type,bool> {
     if (isVector || isVArray) {
       assert(inKey.subtypeOf(BInt));
-      return { packedn_impl(bits, union_of(inVal, val)), TInt };
+      // Vecs and varrays never throw on append
+      return { packedn_impl(bits, union_of(inVal, val)), false };
     }
 
     return {
@@ -6000,7 +6106,11 @@ std::pair<Type,Type> array_like_newelem(Type arr,
         union_of(inVal, val),
         arr_like_update_prov_tag(arr, src)
       ),
-      TInt
+      // Dict and darray can throw on append depending on the state of
+      // the internal iterator. This isn't an issue for an empty
+      // array, so we use the possibility inferred from the non-empty
+      // case.
+      mightThrow
     };
   };
 
@@ -6015,15 +6125,19 @@ std::pair<Type,Type> array_like_newelem(Type arr,
 
   case DataTag::None:
     arr.m_bits = bits;
-    return { std::move(arr), TInt };
+    // Dict or darray can throw on append, vec and varray will not.
+    return { std::move(arr), !isVector && !isVArray };
 
   case DataTag::ArrLikeVal:
     if (maybeEmpty) {
-      auto kv = val_key_values(arr.m_data.aval);
-      return emptyHelper(kv.first, kv.second, arr.getMark());
+      auto [key, val, lastK] = val_key_values(arr.m_data.aval);
+      return emptyHelper(
+        key, val, arr.getMark(),
+        lastK == std::numeric_limits<int64_t>::max()
+      );
     } else {
       if (auto d = toDArrLikePacked(arr.m_data.aval)) {
-        return array_like_newelem(
+        return array_like_newelem_impl(
           packed_impl(bits, std::move(d->elems), d->provenance, d->mark),
           val, src);
       }
@@ -6031,7 +6145,7 @@ std::pair<Type,Type> array_like_newelem(Type arr,
       assert(!isVArray);
       // We know its not packed, so this should always succeed.
       auto d = toDArrLikeMap(arr.m_data.aval);
-      return array_like_newelem(
+      return array_like_newelem_impl(
         map_impl(
           bits,
           std::move(d->map),
@@ -6045,46 +6159,56 @@ std::pair<Type,Type> array_like_newelem(Type arr,
     }
 
   case DataTag::ArrLikePacked:
+    // Packed arrays have contiguous keys, so the internal iterator
+    // should match the size of the array. Therefore appends cannot
+    // throw.
     if (maybeEmpty) {
       return emptyHelper(TInt, packed_values(*arr.m_data.packed),
-                         arr.getMark());
+                         arr.getMark(), false);
     } else {
       arr.m_bits = bits;
-      auto len = arr.m_data.packed->elems.size();
       arr.m_data.packed.mutate()->elems.push_back(val);
       arr.m_data.packed.mutate()->provenance =
         arr_like_update_prov_tag(arr, src);
-      return { std::move(arr), ival(len) };
+      return { std::move(arr), false };
     }
 
   case DataTag::ArrLikePackedN:
+    // Ditto, with regards to packed array appends not throwing.
     if (maybeEmpty) {
-      return emptyHelper(TInt, arr.m_data.packedn->type, arr.getMark());
+      return emptyHelper(TInt, arr.m_data.packedn->type, arr.getMark(), false);
     } else {
       arr.m_bits = bits;
       auto packedn = arr.m_data.packedn.mutate();
       packedn->type |= val;
-      return { std::move(arr), TInt };
+      return { std::move(arr), false };
     }
 
   case DataTag::ArrLikeMap:
+    // We know the specific keys of the map, so we can precisely
+    // determine (inside arr_map_newelem) whether the append can throw
+    // or not (in fact we need to in order to track the append
+    // precisely).
     assert(!isVector);
     assert(!isVArray);
     if (maybeEmpty) {
+      auto const mightThrow = arr_map_newelem(arr, val, false, src);
       auto mkv = map_key_values(*arr.m_data.map);
-      return emptyHelper(mkv.first, mkv.second, arr.getMark());
+      return emptyHelper(mkv.first, mkv.second, arr.getMark(), mightThrow);
     } else {
       arr.m_bits = bits;
-      auto const idx = arr_map_newelem(arr, val, src);
-      return { std::move(arr), idx };
+      auto const mightThrow = arr_map_newelem(arr, val, true, src);
+      return { std::move(arr), mightThrow };
     }
 
   case DataTag::ArrLikeMapN:
+    // We don't know the specific keys of the map, so its possible the
+    // append could throw.
     assert(!isVector);
     assert(!isVArray);
     if (maybeEmpty) {
       return emptyHelper(arr.m_data.mapn->key, arr.m_data.mapn->val,
-                         arr.getMark());
+                         arr.getMark(), true);
     }
     return {
       mapn_impl_from_map(
@@ -6093,17 +6217,16 @@ std::pair<Type,Type> array_like_newelem(Type arr,
         union_of(arr.m_data.mapn->val, val),
         arr_like_update_prov_tag(arr, src)
       ),
-      TInt
+      true
     };
   }
 
   not_reached();
 }
 
-std::pair<Type,Type> array_newelem(Type arr, const Type& val, ProvTag src) {
-  assert(arr.subtypeOf(BArr));
-
-  return array_like_newelem(std::move(arr), val, src);
+std::pair<Type,bool> array_newelem(Type arr, const Type& val, ProvTag src) {
+  assertx(arr.subtypeOf(BOptArr));
+  return array_like_newelem_impl(std::move(arr), val, src);
 }
 
 IterTypes iter_types(const Type& iterable) {
@@ -6185,10 +6308,10 @@ IterTypes iter_types(const Type& iterable) {
   case DataTag::Record:
     always_assert(0);
   case DataTag::ArrLikeVal: {
-    auto kv = val_key_values(iterable.m_data.aval);
+    auto [key, val, _] = val_key_values(iterable.m_data.aval);
     return {
-      std::move(kv.first),
-      std::move(kv.second),
+      std::move(key),
+      std::move(val),
       count(iterable.m_data.aval->size()),
       mayThrow,
       false
@@ -6529,26 +6652,168 @@ ArrKey disect_vec_key(const Type& keyTy) {
 
 std::pair<Type, ThrowMode>
 vec_elem(const Type& vec, const Type& undisectedKey, const Type& defaultTy) {
-  assert(vec.subtypeOrNull(BVec));
+  assertx(vec.subtypeOf(BOptVec));
+  assertx(!vec.subtypeOf(BInitNull));
+
   auto const key = disect_vec_key(undisectedKey);
   if (key.type == TBottom) return {TBottom, ThrowMode::BadOperation};
-  return array_like_elem(vec, key, defaultTy);
+  return array_like_elem_impl(vec, key, defaultTy);
 }
 
-std::pair<Type, ThrowMode>
+std::pair<Type,bool>
 vec_set(Type vec, const Type& undisectedKey, const Type& val) {
-  if (!val.couldBe(BInitCell)) return {TBottom, ThrowMode::BadOperation};
+  assertx(vec.subtypeOf(BOptVec));
+  assertx(!vec.subtypeOf(BInitNull));
+
+  if (!val.couldBe(BInitCell)) return {TBottom, true};
 
   auto const key = disect_vec_key(undisectedKey);
-  if (key.type == TBottom) return {TBottom, ThrowMode::BadOperation};
+  if (key.type == TBottom) return {TBottom, true};
 
-  return array_like_set(std::move(vec), key, val, ProvTag::Top);
+  return array_like_set_impl(std::move(vec), key, val, ProvTag::Top);
 }
 
-std::pair<Type,Type> vec_newelem(Type vec, const Type& val) {
-  return array_like_newelem(std::move(vec),
-                            val.subtypeOf(BInitCell) ? val : TInitCell,
-                            ProvTag::Top);
+std::pair<Type,bool> vec_newelem(Type vec, const Type& val) {
+  assertx(vec.subtypeOf(BOptVec));
+  assertx(!vec.subtypeOf(BInitNull));
+  return array_like_newelem_impl(std::move(vec),
+                                 val.subtypeOf(BInitCell) ? val : TInitCell,
+                                 ProvTag::Top);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+std::pair<Type, ThrowMode> array_like_elem(const Type& arr,
+                                           const Type& key,
+                                           const Type& defaultTy) {
+  assertx(arr.subtypeOf(BOptArrLike));
+  assertx(!arr.subtypeOf(BInitNull));
+
+  // If the array-like is exactly one of the specific array types,
+  // just delegate to the more specific function.
+  if (arr.subtypeOf(BOptArr))    return array_elem(arr, key, defaultTy);
+  if (arr.subtypeOf(BOptVec))    return vec_elem(arr, key, defaultTy);
+  if (arr.subtypeOf(BOptDict))   return dict_elem(arr, key, defaultTy);
+  if (arr.subtypeOf(BOptKeyset)) return keyset_elem(arr, key, defaultTy);
+
+  // Otherwise we have a union of array types. Call the appropriate
+  // function for each specific array type the array-like could be,
+  // and union together the results.
+  folly::Optional<std::pair<Type, ThrowMode>> result;
+  auto const project = [&] (const Type& mask, auto f) {
+    if (!arr.couldBe(mask)) return;
+    auto r = f(intersection_of(arr, mask), key, defaultTy);
+    if (!result) {
+      result.emplace(std::move(r));
+    } else {
+      result->first |= r.first;
+      if (r.second != result->second) {
+        if (r.second == ThrowMode::MaybeBadKey ||
+            r.second == ThrowMode::BadOperation ||
+            result->second == ThrowMode::MaybeBadKey ||
+            result->second == ThrowMode::BadOperation) {
+          result->second = ThrowMode::MaybeBadKey;
+        } else {
+          result->second = ThrowMode::MaybeMissingElement;
+        }
+      }
+    }
+  };
+  project(TArr, array_elem);
+  project(TVec, vec_elem);
+  project(TDict, dict_elem);
+  project(TKeyset, keyset_elem);
+
+  assertx(result.has_value());
+  return *result;
+}
+
+std::pair<Type,bool> array_like_set(Type arr,
+                                    const Type& key,
+                                    const Type& val,
+                                    ProvTag src) {
+  assertx(arr.subtypeOf(BOptArrLike));
+  assertx(!arr.subtypeOf(BInitNull));
+
+  // If the array-like is exactly one of the specific array types,
+  // just delegate to the more specific function.
+  if (arr.subtypeOf(BOptArr))    return array_set(std::move(arr), key, val, src);
+  if (arr.subtypeOf(BOptVec))    return vec_set(std::move(arr), key, val);
+  if (arr.subtypeOf(BOptDict))   return dict_set(std::move(arr), key, val);
+  if (arr.subtypeOf(BOptKeyset)) return keyset_set(std::move(arr), key, val);
+
+  // Otherwise we have a union of array types. Call the appropriate
+  // function for each specific array type the array-like could be,
+  // and union together the results.
+  folly::Optional<std::pair<Type, bool>> result;
+  auto const project = [&] (const Type& mask, auto f) {
+    if (!arr.couldBe(mask)) return;
+    // The intersection here removes the optness. Add it back
+    // afterwards if necessary.
+    auto const nullish = arr.couldBe(BInitNull);
+    auto r = f(intersection_of(arr, mask), key, val);
+    if (nullish && !r.first.subtypeOf(BBottom)) {
+      r.first = opt(std::move(r.first));
+    }
+    if (!result) {
+      result.emplace(std::move(r));
+    } else {
+      result->first |= r.first;
+      result->second |= r.second;
+    }
+  };
+  namespace ph = std::placeholders;
+  project(TArr, std::bind(array_set, ph::_1, ph::_2, ph::_3, src));
+  project(TVec, vec_set);
+  project(TDict, dict_set);
+  project(TKeyset, keyset_set);
+
+  assertx(result.has_value());
+  return *result;
+
+}
+
+std::pair<Type,bool> array_like_newelem(Type arr,
+                                        const Type& val,
+                                        ProvTag src) {
+  assertx(arr.subtypeOf(BOptArrLike));
+  assertx(!arr.subtypeOf(BInitNull));
+
+  // If the array-like is exactly one of the specific array types,
+  // just delegate to the more specific function.
+  if (arr.subtypeOf(BOptArr))    return array_newelem(std::move(arr), val, src);
+  if (arr.subtypeOf(BOptVec))    return vec_newelem(std::move(arr), val);
+  if (arr.subtypeOf(BOptDict))   return dict_newelem(std::move(arr), val);
+  if (arr.subtypeOf(BOptKeyset)) return keyset_newelem(std::move(arr), val);
+
+  // Otherwise we have a union of array types. Call the appropriate
+  // function for each specific array type the array-like could be,
+  // and union together the results.
+  folly::Optional<std::pair<Type, bool>> result;
+  auto const project = [&] (const Type& mask, auto f) {
+    if (!arr.couldBe(mask)) return;
+    // The intersection here removes the optness. Add it back
+    // afterwards if necessary.
+    auto const nullish = arr.couldBe(BInitNull);
+    auto r = f(intersection_of(arr, mask), val);
+    if (nullish && !r.first.subtypeOf(BBottom)) {
+      r.first = opt(std::move(r.first));
+    }
+    if (!result) {
+      result.emplace(std::move(r));
+    } else {
+      result->first |= r.first;
+      result->second |= r.second;
+    }
+  };
+  namespace ph = std::placeholders;
+  project(TArr, std::bind(array_newelem, ph::_1, ph::_2, src));
+  project(TVec, vec_newelem);
+  project(TDict, dict_newelem);
+  project(TKeyset, keyset_newelem);
+
+  assertx(result.has_value());
+  return *result;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -6586,26 +6851,33 @@ ArrKey disect_strict_key(const Type& keyTy) {
 
 std::pair<Type, ThrowMode>
 dict_elem(const Type& dict, const Type& undisectedKey, const Type& defaultTy) {
-  assert(dict.subtypeOrNull(BDict));
+  assertx(dict.subtypeOf(BOptDict));
+  assertx(!dict.subtypeOf(BInitNull));
+
   auto const key = disect_strict_key(undisectedKey);
   if (key.type == TBottom) return {TBottom, ThrowMode::BadOperation};
-  return array_like_elem(dict, key, defaultTy);
+  return array_like_elem_impl(dict, key, defaultTy);
 }
 
-std::pair<Type, ThrowMode>
+std::pair<Type,bool>
 dict_set(Type dict, const Type& undisectedKey, const Type& val) {
-  if (!val.couldBe(BInitCell)) return {TBottom, ThrowMode::BadOperation};
+  assertx(dict.subtypeOf(BOptDict));
+  assertx(!dict.subtypeOf(BInitNull));
+
+  if (!val.couldBe(BInitCell)) return {TBottom, true};
 
   auto const key = disect_strict_key(undisectedKey);
-  if (key.type == TBottom) return {TBottom, ThrowMode::BadOperation};
+  if (key.type == TBottom) return {TBottom, true};
 
-  return array_like_set(std::move(dict), key, val, ProvTag::Top);
+  return array_like_set_impl(std::move(dict), key, val, ProvTag::Top);
 }
 
-std::pair<Type,Type> dict_newelem(Type dict, const Type& val) {
-  return array_like_newelem(std::move(dict),
-                            val.subtypeOf(BInitCell) ? val : TInitCell,
-                            ProvTag::Top);
+std::pair<Type,bool> dict_newelem(Type dict, const Type& val) {
+  assertx(dict.subtypeOf(BOptDict));
+  assertx(!dict.subtypeOf(BInitNull));
+  return array_like_newelem_impl(std::move(dict),
+                                 val.subtypeOf(BInitCell) ? val : TInitCell,
+                                 ProvTag::Top);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -6614,20 +6886,124 @@ std::pair<Type, ThrowMode>
 keyset_elem(const Type& keyset,
             const Type& undisectedKey,
             const Type& defaultTy) {
-  assert(keyset.subtypeOrNull(BKeyset));
+  assertx(keyset.subtypeOf(BOptKeyset));
+  assertx(!keyset.subtypeOf(BInitNull));
+
   auto const key = disect_strict_key(undisectedKey);
   if (key.type == TBottom) return {TBottom, ThrowMode::BadOperation};
-  return array_like_elem(keyset, key, defaultTy);
+  return array_like_elem_impl(keyset, key, defaultTy);
 }
 
-std::pair<Type, ThrowMode>
-keyset_set(Type /*keyset*/, const Type&, const Type&) {
+std::pair<Type,bool>
+keyset_set(Type keyset, const Type&, const Type&) {
+  assertx(keyset.subtypeOf(BOptKeyset));
+  assertx(!keyset.subtypeOf(BInitNull));
+
   // The set operation on keysets is not allowed.
-  return {TBottom, ThrowMode::BadOperation};
+  return {TBottom, true};
 }
 
-std::pair<Type,Type> keyset_newelem(Type keyset, const Type& val) {
-  return array_like_newelem(std::move(keyset), val, ProvTag::Top);
+std::pair<Type,bool> keyset_newelem(Type keyset, const Type& val) {
+  assertx(keyset.subtypeOf(BOptKeyset));
+  assertx(!keyset.subtypeOf(BInitNull));
+  return array_like_newelem_impl(std::move(keyset), val, ProvTag::Top);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+std::pair<Type, Promotion> promote_clsmeth_to_veclike(Type ty) {
+  // If it's not a ClsMeth, or if ClsMeth conversions aren't enabled,
+  // no promotion happens
+  if (!RO::EvalIsCompatibleClsMethType || !ty.couldBe(BClsMeth)) {
+    return std::make_pair(std::move(ty), Promotion::No);
+  }
+
+  // ClsMeths promote into a vec or varray with two elements, both
+  // static strings. If we had value data for ClsMeth, we could return
+  // a static array here.
+  auto const veclike = [] {
+    return RO::EvalHackArrDVArrs
+      ? vec({TSStr, TSStr})
+      : arr_packed_varray({TSStr, TSStr});
+  };
+
+  // If it's definitely an optional ClsMeth (we allow Opt to catch
+  // more cases), we can just return the post promotion type directly.
+  if (ty.subtypeOf(BOptClsMeth)) {
+    return std::make_pair(
+      is_opt(ty) ? opt(veclike()) : veclike(),
+      RO::EvalRaiseClsMethConversionWarning
+        ? Promotion::YesMightThrow
+        : Promotion::Yes
+    );
+  }
+
+  // We know it might be a ClsMeth, but its not definitely a
+  // ClsMeth. Since we're dropping the ClsMeth portion, we need to
+  // remove any values.
+  ty = loosen_values(std::move(ty));
+  // If we can remove the ClsMeth part of the type while staying
+  // predefined, do so. If not, we'll keep those bits and have a
+  // slightly larger type.
+  if (isPredefined(trep(ty.m_bits & ~BClsMeth))) ty.m_bits &= ~BClsMeth;
+  ty |= veclike();
+  return std::make_pair(
+    std::move(ty),
+    RO::EvalRaiseClsMethConversionWarning
+      ? Promotion::YesMightThrow
+      : Promotion::Yes
+  );
+}
+
+std::pair<Type, Promotion> promote_classlike_to_key(Type ty) {
+  // If it's not a ClsLike, no promotion happens
+  if (!ty.couldBe(BClsLike)) {
+    return std::make_pair(std::move(ty), Promotion::No);
+  }
+
+  // If it's definitely an optional ClsLike (we allow Opt to catch
+  // more cases), the post promotion type is a static string. If we
+  // know the class of the ClsLike, we can provide the exact
+  // string. Whether we can throw or not depends on whether conversion
+  // warnings are enabled.
+  if (ty.subtypeOf(BOptClsLike)) {
+    // We know its not a subtype of InitNull because of the above
+    // couldBe check.
+    if (is_specialized_cls(ty)) {
+      auto const dcls = dcls_of(ty);
+      if (dcls.type == DCls::Exact) {
+        auto const name = sval(dcls.cls.name());
+        return std::make_pair(
+          is_opt(ty) ? opt(name) : name,
+          RO::EvalRaiseClassConversionWarning
+            ? Promotion::YesMightThrow
+            : Promotion::Yes
+        );
+      }
+    }
+    return std::make_pair(
+      is_opt(ty) ? TOptSStr : TSStr,
+      RO::EvalRaiseClassConversionWarning
+        ? Promotion::YesMightThrow
+        : Promotion::Yes
+    );
+  }
+
+  // We know it might be a ClsLike, but its not definitely a
+  // ClsLike. Since we're dropping the ClsLike portion, we need to
+  // remove any values.
+  ty = loosen_values(std::move(ty));
+  // If we can remove the ClsLike part of the type while staying
+  // predefined, do so. If not, we'll keep those bits and have a
+  // slightly larger type.
+  if (isPredefined(trep(ty.m_bits & ~BClsLike))) ty.m_bits &= ~BClsLike;
+  ty |= TSStr;
+  return std::make_pair(
+    std::move(ty),
+    RO::EvalRaiseClassConversionWarning
+      ? Promotion::YesMightThrow
+      : Promotion::Yes
+  );
 }
 
 //////////////////////////////////////////////////////////////////////

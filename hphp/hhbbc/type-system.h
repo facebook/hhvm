@@ -342,7 +342,7 @@ enum trep : uint64_t {
   BOptRecord   = BInitNull | BRecord,
   BOptRFunc    = BInitNull | BRFunc,
   BOptRClsMeth = BInitNull | BRClsMeth,
-  BOptLazyCls     = BInitNull | BLazyCls,
+  BOptLazyCls  = BInitNull | BLazyCls,
 
   BOptSVArrE   = BInitNull | BSVArrE,
   BOptCVArrE   = BInitNull | BCVArrE,
@@ -661,6 +661,14 @@ enum class LegacyMark {
   Unknown // either
 };
 
+// Represents whether a promotion can happen, and whether that
+// promotion might throw.
+enum class Promotion {
+  No,
+  Yes,
+  YesMightThrow
+};
+
 //////////////////////////////////////////////////////////////////////
 
 struct Type {
@@ -831,15 +839,15 @@ private:
                                               const ArrKey& key);
   friend std::pair<Type,bool> arr_packedn_elem(const Type& pack,
                                                const ArrKey& key);
-  friend std::pair<Type,ThrowMode> array_like_elem(const Type& arr,
-                                                   const ArrKey& key,
-                                                   const Type& defaultTy);
-  friend std::pair<Type,ThrowMode> array_like_set(Type arr,
+  friend std::pair<Type,ThrowMode> array_like_elem_impl(const Type& arr,
+                                                        const ArrKey& key,
+                                                        const Type& defaultTy);
+  friend std::pair<Type,bool> array_like_set_impl(Type arr,
                                                   const ArrKey& key,
                                                   const Type& val,
                                                   ProvTag src);
-  friend std::pair<Type,Type> array_like_newelem(Type arr, const Type& val,
-                                                 ProvTag src);
+  friend std::pair<Type,bool> array_like_newelem_impl(Type arr, const Type& val,
+                                                      ProvTag src);
   friend bool arr_map_set(Type& map, const ArrKey& key,
                           const Type& val, ProvTag src);
   friend bool arr_packed_set(Type& pack, const ArrKey& key,
@@ -848,7 +856,7 @@ private:
   friend bool arr_packedn_set(Type& pack, const ArrKey& key,
                               const Type& val, bool maybeEmpty);
   friend bool arr_mapn_set(Type& map, const ArrKey& key, const Type& val);
-  friend Type arr_map_newelem(Type& map, const Type& val, ProvTag src);
+  friend bool arr_map_newelem(Type& map, const Type& val, bool, ProvTag src);
   friend IterTypes iter_types(const Type&);
   friend RepoAuthType make_repo_type_arr(ArrayTypeTable::Builder&,
     const Type&);
@@ -871,9 +879,11 @@ private:
   friend bool could_copy_on_write(const Type&);
   friend Type loosen_interfaces(Type);
   friend Type loosen_staticness(Type);
+  friend Type loosen_aggregate_staticness(Type);
   friend Type loosen_dvarrayness(Type);
   friend Type loosen_provenance(Type);
   friend Type loosen_values(Type);
+  friend Type loosen_array_values(Type);
   friend Type loosen_emptiness(Type);
   friend Type loosen_likeness(Type);
   friend Type add_nonemptiness(Type);
@@ -883,6 +893,9 @@ private:
   friend Type remove_uninit(Type t);
   friend Type to_cell(Type t);
   friend bool inner_types_might_raise(const Type& t1, const Type& t2);
+  friend std::pair<Type, Promotion> promote_clsmeth_to_veclike(Type);
+  friend std::pair<Type, Promotion> promote_classlike_to_key(Type);
+
 private:
   union Data {
     Data() {}
@@ -1009,7 +1022,7 @@ X(SArrN)                                        \
 X(Obj)                                          \
 X(Res)                                          \
 X(Cls)                                          \
-X(Func)                                        \
+X(Func)                                         \
 X(RFunc)                                        \
 X(ClsMeth)                                      \
 X(RClsMeth)                                     \
@@ -1088,7 +1101,7 @@ X(OptArrN)                                      \
 X(OptArr)                                       \
 X(OptObj)                                       \
 X(OptRes)                                       \
-X(OptFunc)                                     \
+X(OptFunc)                                      \
 X(OptCls)                                       \
 X(OptClsMeth)                                   \
 X(OptRClsMeth)                                  \
@@ -1684,6 +1697,13 @@ Type loosen_interfaces(Type);
 Type loosen_staticness(Type);
 
 /*
+ * Like loosen_staticness, but non-recursive and only affects
+ * array-likes (and eventually records). Used to model the potential
+ * COW effects during defining member instructions.
+ */
+Type loosen_aggregate_staticness(Type);
+
+/*
  * Discard any specific knowledge about whether the type is a d/varray. Force
  * any type which might contain any sub-types of VArr or DArr to contain Arr,
  * while keeping the same staticness and emptiness information.
@@ -1708,6 +1728,13 @@ Type loosen_arrays(Type);
  * TTrue or TFalse to TBool. Doesn't change the type otherwise.
  */
 Type loosen_values(Type t);
+
+/*
+ * Drop any knowledge about the inner structure of array-like types
+ * The type is unchanged otherwise. This is like loosen_values except
+ * it only modifies TArrLikes.
+ */
+Type loosen_array_values(Type t);
 
 /*
  * Discard any emptiness information about the type. Force any type which
@@ -1765,58 +1792,67 @@ Type assert_nonemptiness(Type);
  * (array|vec|dict|keyset)_elem
  *
  * Returns the best known type of an array inner element given a type
- * for the key.  The returned type is always a subtype of TInitCell.
+ * for the key. The returned type is always a subtype of TInitCell.
  *
  * The returned type will be TBottom if the operation will always throw.
  * ThrowMode indicates what kind of failures may occur.
  *
- * Pre: first arg is a subtype of TArr, TVec, TDict, TKeyset respectively.
+ * Pre: first arg is a subtype of TOptArr, TOptVec, TOptDict,
+ * TOptKeyset, or TOptArrLike respectively, but not a subtype of
+ * TNull. The optional types are allowed for convenience. The
+ * functions do not attempt to model the effects of null.
  */
 std::pair<Type,ThrowMode> array_elem(const Type& arr, const Type& key,
-                                     const Type& defaultTy = TInitNull);
-std::pair<Type, ThrowMode> vec_elem(const Type& vec, const Type& key,
-                                    const Type& defaultTy = TBottom);
-std::pair<Type, ThrowMode> dict_elem(const Type& dict, const Type& key,
                                      const Type& defaultTy = TBottom);
-std::pair<Type, ThrowMode> keyset_elem(const Type& keyset, const Type& key,
-                                       const Type& defaultTy = TBottom);
-std::pair<Type,ThrowMode> array_like_elem(const Type& arr, const Type& key);
+std::pair<Type,ThrowMode> vec_elem(const Type& vec, const Type& key,
+                                   const Type& defaultTy = TBottom);
+std::pair<Type,ThrowMode> dict_elem(const Type& dict, const Type& key,
+                                    const Type& defaultTy = TBottom);
+std::pair<Type,ThrowMode> keyset_elem(const Type& keyset, const Type& key,
+                                      const Type& defaultTy = TBottom);
+std::pair<Type,ThrowMode> array_like_elem(const Type& keyset, const Type& key,
+                                          const Type& defaultTy = TBottom);
 
 /*
  * (array|vec|dict|keyset)_set
  *
- * Perform an array-like set on types.  Returns a type that represents the
- * effects of arr[key] = val.
+ * Perform an array-like set on types. Returns a type that represents the
+ * effects of arr[key] = val and whether the set can possibly throw.
  *
  * The returned type will be TBottom if the operation will always throw.
- * ThrowMode indicates what kind of failures may occur.
  *
- * Pre: first arg is a subtype of TArr, TVec, TDict, TKeyset respectively.
+ * Pre: first arg is a subtype of TOptArr, TOptVec, TOptDict,
+ * TOptKeyset, or TOptArrLike respectively, but not a subtype of
+ * TNull. The optional types are allowed for convenience. The
+ * functions do not attempt to model the effects of null.
  */
-std::pair<Type, ThrowMode> array_set(Type arr, const Type& key,
-                                     const Type& val, ProvTag src);
-std::pair<Type, ThrowMode> vec_set(Type vec, const Type& key, const Type& val);
-std::pair<Type, ThrowMode> dict_set(Type dict, const Type& key, const Type& val);
-std::pair<Type, ThrowMode> keyset_set(Type keyset, const Type& key, const Type& val);
-std::pair<Type,ThrowMode> array_like_set(Type arr, const Type& key, const Type& val,
-                                         ProvTag src = ProvTag::Top);
+std::pair<Type,bool> array_set(Type arr, const Type& key,
+                               const Type& val, ProvTag src);
+std::pair<Type,bool> vec_set(Type vec, const Type& key, const Type& val);
+std::pair<Type,bool> dict_set(Type dict, const Type& key, const Type& val);
+std::pair<Type,bool> keyset_set(Type keyset, const Type& key, const Type& val);
+std::pair<Type,bool> array_like_set(Type arr, const Type& key,
+                                    const Type& val, ProvTag src);
 
 /*
  * (array|vec|dict|keyset)_newelem
  *
  * Perform a newelem operation on an array-like type.  Returns an
  * array that contains a new pushed-back element with the supplied
- * value, in the sense of arr[] = val, and the best known type of the
- * key that was added.
+ * value, in the sense of arr[] = val, and whether the operation might
+ * throw. If the operation always throws, the new base will be
+ * TBottom.
  *
- * Pre: first arg is a subtype of TArr, TVec, TDict, TKeyset respectively.
+ * Pre: first arg is a subtype of TOptArr, TOptVec, TOptDict,
+ * TOptKeyset, TOptArrLike respectively, but not a subtype of
+ * TNull. The optional types are allowed for convenience. The
+ * functions do not attempt to model the effects of null.
  */
-std::pair<Type,Type> array_newelem(Type arr, const Type& val, ProvTag src);
-std::pair<Type,Type> vec_newelem(Type vec, const Type& val);
-std::pair<Type,Type> dict_newelem(Type dict, const Type& val);
-std::pair<Type,Type> keyset_newelem(Type keyset, const Type& val);
-std::pair<Type,Type> array_like_newelem(Type arr, const Type& val,
-                                        ProvTag src = ProvTag::Top);
+std::pair<Type,bool> array_newelem(Type arr, const Type& val, ProvTag src);
+std::pair<Type,bool> vec_newelem(Type vec, const Type& val);
+std::pair<Type,bool> dict_newelem(Type dict, const Type& val);
+std::pair<Type,bool> keyset_newelem(Type keyset, const Type& val);
+std::pair<Type,bool> array_like_newelem(Type arr, const Type& val, ProvTag src);
 
 /*
  * Return the best known information for iteration of the supplied type. This is
@@ -1867,6 +1903,22 @@ bool is_type_might_raise(IsTypeOp testOp, const Type& valTy);
 bool compare_might_raise(const Type& t1, const Type& t2);
 
 /*
+ * Model the potential promotion of TClsMeth in varray/vec as a
+ * side-effect of certain member instructions. Returns the best known
+ * post-promotion type, and whether the promotion happens with
+ * potential throwing.
+ */
+std::pair<Type, Promotion> promote_clsmeth_to_veclike(Type);
+
+/*
+ * Model potential promotion of TClsLike into a key for array
+ * access. Class-likes will promote into a static string (of the class
+ * name). Returns the best known post-promotion type, and whether the
+ * promotion happens with potential throwing.
+ */
+std::pair<Type, Promotion> promote_classlike_to_key(Type);
+
+/*
  * Given a type, adjust the type for the given type-constraint. If there's no
  * type-constraint, or if property type-hints aren't being enforced, then return
  * the type as is. This might return TBottom if the type is not compatible with
@@ -1880,4 +1932,3 @@ Type adjust_type_for_prop(const Index& index,
 //////////////////////////////////////////////////////////////////////
 
 }}
-

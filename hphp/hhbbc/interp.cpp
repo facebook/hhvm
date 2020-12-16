@@ -56,6 +56,8 @@
 #include "hphp/hhbbc/unit-util.h"
 #include "hphp/hhbbc/wide-func.h"
 
+#include "hphp/hhbbc/stats.h"
+
 #include "hphp/hhbbc/interp-internal.h"
 
 namespace HPHP { namespace HHBBC {
@@ -1021,8 +1023,7 @@ void in(ISS& env, const bc::AddElemC& /*op*/) {
 
   auto const tag = provTagHere(env);
 
-  auto outTy = [&] (Type ty) ->
-    folly::Optional<std::pair<Type,ThrowMode>> {
+  auto outTy = [&] (Type ty) -> folly::Optional<std::pair<Type,bool>> {
     if (ty.subtypeOf(BArr)) {
       return array_set(std::move(ty), k, v, tag);
     }
@@ -1032,7 +1033,7 @@ void in(ISS& env, const bc::AddElemC& /*op*/) {
     return folly::none;
   }(std::move(inTy));
 
-  if (outTy && outTy->second == ThrowMode::None && will_reduce(env)) {
+  if (outTy && !outTy->second && will_reduce(env)) {
     if (!env.trackedElems.empty() &&
         env.trackedElems.back().depth + 3 == env.state.stack.size()) {
       auto const handled = [&] {
@@ -1069,7 +1070,7 @@ void in(ISS& env, const bc::AddElemC& /*op*/) {
 
   if (outTy->first.subtypeOf(BBottom)) {
     unreachable(env);
-  } else if (outTy->second == ThrowMode::None) {
+  } else if (!outTy->second) {
     effect_free(env);
     constprop(env);
   }
@@ -1226,7 +1227,7 @@ void in(ISS& env, const bc::ClassName& op) {
                     bc::String { dcls.cls.name() });
     }
   }
-  if (ty.subtypeOf(TCls)) nothrow(env);
+  if (ty.subtypeOf(TCls)) effect_free(env);
   popC(env);
   push(env, TSStr);
 }
@@ -1815,7 +1816,7 @@ void in(ISS& env, const bc::CastDArray&)  {
 }
 
 void in(ISS& env, const bc::DblAsBits&) {
-  nothrow(env);
+  effect_free(env);
   constprop(env);
 
   auto const ty = popC(env);
@@ -1860,7 +1861,7 @@ void in(ISS& env, const bc::Select& op) {
   auto const t = topC(env, 1);
   auto const f = topC(env, 2);
 
-  nothrow(env);
+  effect_free(env);
   constprop(env);
 
   switch (emptiness(cond)) {
@@ -2166,7 +2167,7 @@ void jmpImpl(ISS& env, const JmpOp& op) {
   }
 
   popC(env);
-  nothrow(env);
+  effect_free(env);
 
   if (location == NoLocalId) return env.propagate(op.target1, &env.state);
 
@@ -2340,7 +2341,7 @@ void in(ISS& env, const bc::CGetQuietL& op) {
     return reduce(env, bc::CGetQuietL { minLocEquiv });
   }
 
-  nothrow(env);
+  effect_free(env);
   constprop(env);
   mayReadLocal(env, op.loc1);
   push(env, locAsCell(env, op.loc1), op.loc1);
@@ -2348,20 +2349,12 @@ void in(ISS& env, const bc::CGetQuietL& op) {
 
 void in(ISS& env, const bc::CUGetL& op) {
   auto ty = locRaw(env, op.loc1);
-  if (ty.subtypeOf(BUninit)) {
-    return reduce(env, bc::NullUninit {});
-  }
-  nothrow(env);
-  if (!ty.couldBe(BUninit)) constprop(env);
-  if (!ty.subtypeOf(BCell)) ty = TCell;
+  effect_free(env);
+  constprop(env);
   push(env, std::move(ty), op.loc1);
 }
 
 void in(ISS& env, const bc::PushL& op) {
-  if (auto val = tv(peekLocRaw(env, op.loc1))) {
-    return reduce(env, bc::UnsetL { op.loc1 }, gen_constant(*val));
-  }
-
   auto const minLocEquiv = findMinLocEquiv(env, op.loc1, false);
   if (minLocEquiv != NoLocalId) {
     return reduce(env, bc::CGetQuietL { minLocEquiv }, bc::UnsetL { op.loc1 });
@@ -2380,6 +2373,10 @@ void in(ISS& env, const bc::PushL& op) {
       rewind(env, 1);
       return reduce(env, bc::UnsetL { op.loc1 });
     }
+  }
+
+  if (auto val = tv(peekLocRaw(env, op.loc1))) {
+    return reduce(env, bc::UnsetL { op.loc1 }, gen_constant(*val));
   }
 
   impl(env, bc::CGetQuietL { op.loc1 }, bc::UnsetL { op.loc1 });
@@ -2543,21 +2540,21 @@ void in(ISS& env, const bc::AKExists& /*op*/) {
   // return false for Str.
   if (base.subtypeOrNull(BVec)) {
     if (key.subtypeOf(BStr)) return finish(TFalse, false);
-    return hackArr(vec_elem(base, key, TBottom), TInt, TStr);
+    return hackArr(vec_elem(base, key), TInt, TStr);
   }
 
   // Dicts and keysets will throw for any key other than Int or Str.
   if (base.subtypeOfAny(TOptDict, TOptKeyset)) {
     auto const elem = base.subtypeOrNull(BDict)
-      ? dict_elem(base, key, TBottom)
-      : keyset_elem(base, key, TBottom);
+      ? dict_elem(base, key)
+      : keyset_elem(base, key);
     return hackArr(elem, TArrKeyCompat, TBottom);
   }
 
   if (base.subtypeOrNull(BArr)) {
     // Unlike Idx, AKExists will transform a null key on arrays into the static
     // empty string, so we don't need to do any fixups here.
-    auto const elem = array_elem(base, key, TBottom);
+    auto const elem = array_elem(base, key);
     switch (elem.second) {
       case ThrowMode::None:                return finish(TTrue, false);
       case ThrowMode::MaybeMissingElement: return finish(TBool, false);
@@ -2596,7 +2593,8 @@ void in(ISS& env, const bc::GetMemoKeyL& op) {
   // the IMemoizeParam interface, and if it doesn't, we'll throw.
   if (!locCouldBeUninit(env, op.nloc1.id) &&
       !inTy.couldBeAny(TObj, TArr, TVec, TDict)) {
-    nothrow(env); constprop(env);
+    effect_free(env);
+    constprop(env);
   }
 
   // If type constraints are being enforced and the local being turned into a
@@ -2801,7 +2799,7 @@ void in(ISS& env, const bc::IssetL& op) {
                   bc::IsTypeC { IsTypeOp::Null },
                   bc::Not {});
   }
-  nothrow(env);
+  effect_free(env);
   constprop(env);
   auto const loc = locAsCell(env, op.loc1);
   if (loc.subtypeOf(BNull))  return push(env, TFalse);
@@ -2810,7 +2808,7 @@ void in(ISS& env, const bc::IssetL& op) {
 }
 
 void in(ISS& env, const bc::IsUnsetL& op) {
-  nothrow(env);
+  effect_free(env);
   constprop(env);
   auto const loc = locAsCell(env, op.loc1);
   if (loc.subtypeOf(BUninit))  return push(env, TTrue);
@@ -2873,7 +2871,7 @@ void isTypeLImpl(ISS& env, const Op& op) {
   if (!locCouldBeUninit(env, op.nloc1.id) &&
       !is_type_might_raise(op.subop2, loc)) {
     constprop(env);
-    nothrow(env);
+    effect_free(env);
   }
 
   switch (op.subop2) {
@@ -2889,7 +2887,7 @@ void isTypeCImpl(ISS& env, const Op& op) {
   auto const t1 = popC(env);
   if (!is_type_might_raise(op.subop1, t1)) {
     constprop(env);
-    nothrow(env);
+    effect_free(env);
   }
 
   switch (op.subop1) {
@@ -3572,6 +3570,19 @@ void in(ISS& env, const bc::UnsetL& op) {
   if (locRaw(env, op.loc1).subtypeOf(TUninit)) {
     return reduce(env);
   }
+
+  if (auto const last = last_op(env)) {
+    // No point in popping into the local if we're just going to
+    // immediately unset it.
+    if (last->op == Op::PopL &&
+        last->PopL.loc1 == op.loc1) {
+      reprocess(env);
+      rewind(env, 1);
+      setLocRaw(env, op.loc1, TCell);
+      return reduce(env, bc::PopC {}, bc::UnsetL { op.loc1 });
+    }
+  }
+
   if (any(env.collect.opts & CollectionOpts::Speculating)) {
     nothrow(env);
   } else {
@@ -5370,7 +5381,7 @@ void in(ISS& env, const bc::CheckProp&) {
   if (env.ctx.cls->attrs & AttrNoOverride) {
     return reduce(env, bc::False {});
   }
-  nothrow(env);
+  effect_free(env);
   push(env, TBool);
 }
 
@@ -5480,7 +5491,7 @@ bool memoGetImpl(ISS& env, const Op& op, Rebind&& rebind) {
         }
       }
     }
-    nothrow(env);
+    effect_free(env);
   }
 
   if (retTy.first == TBottom) {

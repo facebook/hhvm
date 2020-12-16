@@ -1,1 +1,1 @@
--vCheckPropTypeHints=3
+-vCheckPropTypeHints=3 -vRuntime.Eval.RaiseClassConversionWarning=1

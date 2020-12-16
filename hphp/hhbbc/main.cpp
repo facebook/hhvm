@@ -307,6 +307,8 @@ std::vector<SString> load_input(F&& fun) {
   RO::EvalIsVecNotices = gd.IsVecNotices;
   RO::EvalIsCompatibleClsMethType = gd.IsCompatibleClsMethType;
   RO::EvalArrayProvenance = gd.ArrayProvenance;
+  RO::EvalRaiseClassConversionWarning = gd.RaiseClassConversionWarning;
+  RO::EvalRaiseClsMethConversionWarning = gd.RaiseClsMethConversionWarning;
   RO::StrictArrayFillKeys = gd.StrictArrayFillKeys;
   if (gd.HardGenericsUB) {
     RO::EvalEnforceGenericsUB = 2;
@@ -408,6 +410,10 @@ void write_global_data(
   gd.IsVecNotices = RuntimeOption::EvalIsVecNotices;
   gd.IsCompatibleClsMethType = RuntimeOption::EvalIsCompatibleClsMethType;
   gd.ArrayProvenance = RuntimeOption::EvalArrayProvenance;
+  gd.RaiseClassConversionWarning =
+    RuntimeOption::EvalRaiseClassConversionWarning;
+  gd.RaiseClsMethConversionWarning =
+    RuntimeOption::EvalRaiseClsMethConversionWarning;
   gd.StrictArrayFillKeys = RuntimeOption::StrictArrayFillKeys;
 
   for (auto const& elm : RuntimeOption::ConstantFunctions) {

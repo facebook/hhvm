@@ -127,7 +127,7 @@ TypeOrReduced builtin_strlen(ISS& env, const php::Func* func,
   auto const ty = getArg(env, func, fca, 0);
   // Returns null and raises a warning when input is an array, resource, or
   // object.
-  if (ty.subtypeOfAny(TPrim, TStr)) nothrow(env);
+  if (ty.subtypeOfAny(TPrim, TStr)) effect_free(env);
   return ty.subtypeOfAny(TPrim, TStr) ? TInt : TOptInt;
 }
 
@@ -226,7 +226,7 @@ TypeOrReduced builtin_array_key_cast(ISS& env, const php::Func* func,
 
   if (!ty.couldBe(BObj | BArr | BVec | BDict | BKeyset)) {
     constprop(env);
-    nothrow(env);
+    effect_free(env);
   }
 
   if (retTy == TBottom) unreachable(env);
@@ -265,7 +265,7 @@ TypeOrReduced builtin_is_list_like(ISS& env, const php::Func* func,
 
   if (!ty.couldBe(TClsMeth)) {
     constprop(env);
-    nothrow(env);
+    effect_free(env);
   }
 
   if (!ty.couldBeAny(TArr, TVec, TDict, TKeyset, TClsMeth)) return TFalse;

@@ -536,7 +536,7 @@ struct CollectedInfo {
      */
     Base base{};
 
-    bool noThrow{false};
+    bool effectFree{false};
     bool extraPop{false};
 
     /*

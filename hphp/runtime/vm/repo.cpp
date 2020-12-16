@@ -290,6 +290,11 @@ void Repo::loadGlobalData(bool readGlobalTables /* = true */) {
     RO::EvalHackArrCompatIsVecDictNotices =
       s_globalData.HackArrCompatIsVecDictNotices;
 
+    RO::EvalRaiseClassConversionWarning =
+      s_globalData.RaiseClassConversionWarning;
+    RO::EvalRaiseClsMethConversionWarning =
+      s_globalData.RaiseClsMethConversionWarning;
+
     RuntimeOption::ConstantFunctions.clear();
     for (auto const& elm : s_globalData.ConstantFunctions) {
       RuntimeOption::ConstantFunctions.insert(elm);

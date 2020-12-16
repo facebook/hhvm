@@ -1883,7 +1883,10 @@ void dce(Env& env, const bc::BaseSC& op)      {
 
 void dce(Env& env, const bc::BaseL& op) {
   addLocNameUse(env, op.nloc1);
-  if (!isLocLive(env, op.nloc1.id) &&
+  if ((op.subop2 == MOpMode::Warn ||
+       op.subop2 == MOpMode::None ||
+       op.subop2 == MOpMode::InOut) &&
+      !isLocLive(env, op.nloc1.id) &&
       !readCouldHaveSideEffects(locRaw(env, op.nloc1.id)) &&
       !isLocVolatile(env, op.nloc1.id)) {
     env.dceState.actionMap[env.id] = DceAction::MinstrPushBase;

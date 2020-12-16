@@ -154,6 +154,12 @@ struct Repo::GlobalData {
   /* Avoid optimizations that interfere with array provenance */
   bool ArrayProvenance = false;
 
+  /* Whether implicit class conversions can raise a warning */
+  bool RaiseClassConversionWarning = false;
+
+  /* Whether implicit class meth conversions can raise a warning */
+  bool RaiseClsMethConversionWarning = false;
+
   /*
    * The Hack.Lang.StrictArrayFillKeys option the repo was compiled with.
    */
@@ -195,6 +201,8 @@ struct Repo::GlobalData {
       (IsVecNotices)
       (IsCompatibleClsMethType)
       (ArrayProvenance)
+      (RaiseClassConversionWarning)
+      (RaiseClsMethConversionWarning)
       (StrictArrayFillKeys)
       ;
   }

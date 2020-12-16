@@ -714,19 +714,10 @@ void setLocRaw(ISS& env, LocalId l, Type t) {
   env.state.locals[l] = std::move(t);
 }
 
-// Read a local type in the sense of CGetL.  (TUninits turn into
-// TInitNull, and potentially reffy types return the "inner" type,
-// which is always a subtype of InitCell.)
+// Read a local type in the sense of CGetL. (TUninits turn into
+// TInitNull)
 Type locAsCell(ISS& env, LocalId l) {
   return to_cell(locRaw(env, l));
-}
-
-// Read a local type, dereferencing refs, but without converting
-// potential TUninits to TInitNull.
-Type derefLoc(ISS& env, LocalId l) {
-  auto v = locRaw(env, l);
-  if (v.subtypeOf(BCell)) return v;
-  return v.couldBe(BUninit) ? TCell : TInitCell;
 }
 
 bool peekLocCouldBeUninit(ISS& env, LocalId l) {

@@ -151,6 +151,7 @@ inline ObjectData* instanceFromTv(tv_rval tv) {
 
 namespace detail {
 
+[[noreturn]]
 inline void raiseFalseyPromotion(tv_rval base) {
   if (tvIsNull(base)) {
     throwFalseyPromoteException("null");
@@ -162,6 +163,7 @@ inline void raiseFalseyPromotion(tv_rval base) {
   always_assert(false);
 }
 
+[[noreturn]]
 inline void raiseEmptyObject() {
   if (RuntimeOption::PHP7_EngineExceptions) {
     SystemLib::throwErrorObject(Strings::SET_PROP_NON_OBJECT);
@@ -707,6 +709,7 @@ inline tv_lval ElemDKeyset(tv_lval base, key_type<keyType> key) {
 /**
  * ElemD when base is Null
  */
+[[noreturn]]
 inline tv_lval ElemDEmptyish(tv_lval base) {
   detail::raiseFalseyPromotion(base);
   not_reached();
@@ -731,10 +734,11 @@ inline tv_lval ElemDBoolean(tv_lval base) {
 /**
  * ElemD when base is a String
  */
+[[noreturn]]
 inline tv_lval ElemDString(tv_lval base) {
-  if (!base.val().pstr->size()) return ElemDEmptyish(base);
+  if (!base.val().pstr->size()) ElemDEmptyish(base);
   raise_error("Operator not supported for strings");
-  return tv_lval(nullptr);
+  not_reached();
 }
 
 /**
@@ -1075,6 +1079,7 @@ tv_lval ElemU(tv_lval base, key_type<keyType> key) {
 /**
  * NewElem when base is Null
  */
+[[noreturn]]
 inline tv_lval NewElemEmptyish(tv_lval base) {
   detail::raiseFalseyPromotion(base);
   not_reached();
@@ -1106,10 +1111,11 @@ inline tv_lval NewElemString(tv_lval base) {
 /**
  * NewElem when base is an Object
  */
+[[noreturn]]
 inline tv_lval NewElemObject(tv_lval base) {
   failOnNonCollectionObjArrayAccess(val(base).pobj);
   throw_cannot_use_newelem_for_lval_read_col();
-  return nullptr;
+  not_reached();
 }
 
 /**
@@ -1160,8 +1166,10 @@ inline tv_lval NewElem(tv_lval base) {
 /**
  * SetElem when base is Null
  */
+[[noreturn]]
 inline void SetElemEmptyish(tv_lval base) {
   detail::raiseFalseyPromotion(base);
+  not_reached();
 }
 
 /**
@@ -1528,8 +1536,10 @@ void SetRange(
 /**
  * SetNewElem when base is Null
  */
+[[noreturn]]
 inline void SetNewElemEmptyish(tv_lval base) {
   detail::raiseFalseyPromotion(base);
+  not_reached();
 }
 
 /**
@@ -1557,8 +1567,9 @@ inline void SetNewElemBoolean(tv_lval base, TypedValue* value) {
 /**
  * SetNewElem when base is a String
  */
+[[noreturn]]
 inline void SetNewElemString(tv_lval base) {
-  if (!val(base).pstr->size()) return SetNewElemEmptyish(base);
+  if (!val(base).pstr->size()) SetNewElemEmptyish(base);
   raise_error("[] operator not supported for strings");
 }
 
@@ -1709,6 +1720,7 @@ inline void SetNewElem(tv_lval base, TypedValue* value) {
 /**
  * SetOpElem when base is Null
  */
+[[noreturn]]
 inline TypedValue SetOpElemEmptyish(tv_lval base) {
   detail::raiseFalseyPromotion(base);
   not_reached();
@@ -1839,6 +1851,7 @@ inline TypedValue SetOpElem(SetOpOp op, tv_lval base,
   unknownBaseType(type(base));
 }
 
+[[noreturn]]
 inline TypedValue SetOpNewElemEmptyish(tv_lval base) {
   detail::raiseFalseyPromotion(base);
   not_reached();
@@ -1934,6 +1947,7 @@ inline TypedValue IncDecBody(IncDecOp op, tv_lval fr) {
   }
 }
 
+[[noreturn]]
 inline TypedValue IncDecElemEmptyish(tv_lval base) {
   detail::raiseFalseyPromotion(base);
   not_reached();
@@ -2021,6 +2035,7 @@ inline TypedValue IncDecElem(IncDecOp op, tv_lval base, TypedValue key) {
   unknownBaseType(type(base));
 }
 
+[[noreturn]]
 inline TypedValue IncDecNewElemEmptyish(tv_lval base) {
   detail::raiseFalseyPromotion(base);
   not_reached();

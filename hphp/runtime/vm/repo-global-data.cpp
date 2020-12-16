@@ -53,6 +53,8 @@ std::string show(const Repo::GlobalData& gd) {
   SHOW(IsVecNotices);
   SHOW(IsCompatibleClsMethType);
   SHOW(ArrayProvenance);
+  SHOW(RaiseClassConversionWarning);
+  SHOW(RaiseClsMethConversionWarning);
   SHOW(StrictArrayFillKeys);
 #undef SHOW
   return out;

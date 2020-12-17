@@ -1,30 +1,18 @@
 File "closures_implicit.php", line 11, characters 24-40:
 This call is not allowed because its coeffects are incompatible with the context (Typing[4390])
   File "closures_implicit.php", line 8, characters 23-24:
-  From this declaration, the context of this function body provides the capability Rx
+  From this declaration, the context of this function body provides the capability set {Rx, WriteProperty}
   File "closures_implicit.php", line 6, characters 28-35:
-  But the function being called requires the capability set {AccessStaticVariable, Output, WriteProperty}
-File "closures_implicit.php", line 19, characters 5-16:
-This call is not allowed because its coeffects are incompatible with the context (Typing[4390])
-  File "", line 0, characters 0-0:
-  From this declaration, the context of this function body provides the capability set {AccessStaticVariable, Output, WriteProperty}
-  File "closures_implicit.php", line 8, characters 23-24:
-  But the function being called requires the capability Rx
-File "closures_implicit.php", line 23, characters 28-39:
-This call is not allowed because its coeffects are incompatible with the context (Typing[4390])
-  File "", line 0, characters 0-0:
-  From this declaration, the context of this function body provides the capability set {AccessStaticVariable, Output, WriteProperty}
-  File "closures_implicit.php", line 22, characters 19-20:
-  But the function being called requires the capability Rx
+  But the function being called requires the capability nothing
 File "closures_implicit.php", line 28, characters 10-21:
 This call is not allowed because its coeffects are incompatible with the context (Typing[4390])
   File "closures_implicit.php", line 26, characters 37-43:
   From this declaration, the context of this function body provides the capability NonDet
   File "closures_implicit.php", line 8, characters 23-24:
-  But the function being called requires the capability Rx
+  But the function being called requires the capability set {Rx, WriteProperty}
 File "closures_implicit.php", line 32, characters 12-37:
 This call is not allowed because its coeffects are incompatible with the context (Typing[4390])
   File "closures_implicit.php", line 30, characters 6-7:
-  From this declaration, the context of this function body provides the capability Rx
+  From this declaration, the context of this function body provides the capability set {Rx, WriteProperty}
   File "closures_implicit.php", line 26, characters 37-43:
   But the function being called requires the capability NonDet

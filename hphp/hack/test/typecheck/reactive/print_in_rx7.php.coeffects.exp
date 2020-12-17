@@ -1,4 +1,4 @@
 File "print_in_rx7.php", line 10, characters 5-8:
 `echo` or `print` builtin requires the capability Output, which is not provided by the context. (Typing[4401])
   File "print_in_rx7.php", line 8, characters 23-32:
-  The local (enclosing) context provides the capability RxShallow
+  The local (enclosing) context provides the capability set {RxShallow, WriteProperty}

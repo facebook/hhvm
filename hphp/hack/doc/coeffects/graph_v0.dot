@@ -6,7 +6,7 @@ digraph G {
 
     context [shape="rect", color=lightsteelblue1, style=filled];
     context -> Cap1 [label="alias", style=dashed, color=blue];
-    context -> Cap2 [label="unsafe alias", color=red];
+    context -> Cap2 [label="unsafe alias", style=dotted, color=red];
 
     intersect_context [shape="rect", color=lightsteelblue1, style=filled];
     intersect_context -> Cap3 [label="alias to (Cap3 & Cap4)", style=dashed, color=blue];
@@ -14,18 +14,53 @@ digraph G {
   };
 
   // contexts
-  "defaults" [shape="rect", color=orange, style=filled];
+  "defaults" [shape="rect", color=orange, style=filled, label="defaults = nothing"];
+
+  "local"           [shape="rect", color=lightsteelblue1, style=filled];
+  "rx"              [shape="rect", color=lightsteelblue1, style=filled];
+  "rx_local"        [shape="rect", color=lightsteelblue1, style=filled];
+  "rx_shallow"      [shape="rect", color=lightsteelblue1, style=filled];
 
   // capabilities
-  "WriteProperty";
   "AccessStaticVariable";
-  "IO";
+  "Output";
+  "WriteProperty";
+
+  "RxLocal" -> "RxShallow"
+  "RxShallow" -> "Rx"
 
   // safe arrows
-  "defaults" -> "WriteProperty" [color="blue", style="dashed"];
-  "defaults" -> "AccessStaticVariable" [color="blue", style="dashed"];
-  "defaults" -> "IO" [color="blue", style="dashed"];
+  "defaults" -> "WriteProperty"        [color=blue, style=dashed];
+  "defaults" -> "AccessStaticVariable" [color=blue, style=dashed];
+  "defaults" -> "Output"               [color=blue, style=dashed];
+
+  "local" -> "WriteProperty" [color=blue, style=dashed];
+
+  "rx" -> "WriteProperty"    [color=blue, style=dashed];
+  "rx_local" -> "rx_shallow" [color=blue, style=dashed];
+  "rx_shallow" -> "rx"       [color=blue, style=dashed];
+
+  // unsafe arrows
+  // note: defaults=nothing already connects defaults to everything!
+  "rx_local" -> "defaults"   [color=red, style=dotted];
+  "rx_shallow" -> "RxLocal"  [color=red, style=dotted];
+
+  subgraph cluster_rx {
+    "rx" -> "Rx" [color=blue, style=dashed];
+  };
+  subgraph cluster_rxl {
+    "rx_local" -> "RxLocal" [color=blue, style=dashed];
+  };
+  subgraph cluster_rxs {
+    "rx_shallow" -> "RxShallow" [color=blue, style=dashed];
+  };
+
+  // cosmetic changes
+  "defaults" -> "(any capability)" [label="...", color=blue, style=dashed]
+  dummy1 [ style=invis ]
+  "rx_local" -> dummy1 [ style=invis ]
+  dummy1 -> "defaults" [ style=invis ]
 
   // makes arrows point bottom to top
-  rankdir = "BT"
+  rankdir = BT
 }

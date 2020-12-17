@@ -17,26 +17,28 @@
  */
 <<file:__EnableUnstableFeatures('union_intersection_type_hints')>>
 
+/**
+* This namespace provides a mapping between user-facing contexts
+* and a set of capabilities that determine the operations allowed (semantics).
+* Contexts have snake-case name and appear in user code (syntax).
+* Capabilities are modeled as a series of sealed interfaces:
+* - extends clause that lists all other capabilities that are subsumed,
+*   i.e., automatically present with the subtyped capability
+*/
 namespace HH\Contexts {
-  /**
-   * This namespace provides a mapping between user-facing contexts
-   * and a set of capabilities irrelevant to the user. The latter is
-   * modeled as a series of interfaces, each with:
-   * - a lowercase name (so that mapping is syntactical, avoiding extra logic)
-   * - extends clause that lists all other capabilities that are subsumed,
-   *   i.e., automatically present in the corresponding context
-   */
 
   /**
    * The default, normally unannotated context. This is currently hardcoded in
    * Typing_make_type.default_capability for performance reasons. The alias is
    * still present so that it may be directly used as [defaults]
    */
-  type defaults = (
-    \HH\Capabilities\AccessStaticVariable &
+  type defaults = nothing; // an infinite set of all capabilities
+  // TODO(coeffects) after implementing lower bounds on const ctx/type, do:
+  /* = (
     \HH\Capabilities\WriteProperty &
+    \HH\Capabilities\AccessStaticVariable &
     \HH\Capabilities\Output
-  );
+  ); */
 
   type cipp_global = (\HH\Capabilities\CippGlobal & \HH\Capabilities\AccessStaticVariable & \HH\Capabilities\Output);
   // type cipp<T> = (\HH\Capabilities\Cipp<T> & cipp_global);
@@ -46,9 +48,11 @@ namespace HH\Contexts {
 
   type output = \HH\Capabilities\Output;
 
-  type rx = \HH\Capabilities\Rx;
+  type local = \HH\Capabilities\WriteProperty;
+
+  type rx = (\HH\Capabilities\Rx & \HH\Capabilities\WriteProperty);
   // type rx_shallow = (\HH\Capabilities\RxShallow & rx);
-  type rx_shallow = \HH\Capabilities\RxShallow;
+  type rx_shallow = (\HH\Capabilities\RxShallow & \HH\Capabilities\WriteProperty);
   // type rx_local = (\HH\Capabilities\RxLocal & rx_shallow);
-  type rx_local = \HH\Capabilities\RxLocal;
+  type rx_local = (\HH\Capabilities\RxLocal & \HH\Capabilities\WriteProperty);
 }

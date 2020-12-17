@@ -178,7 +178,9 @@ let simple_variadic_splat r ty =
              d_kind = SplatUnpack;
            } ))
 
-let default_capability =
+let default_capability : locl_ty = nothing Reason.Rnone
+
+(* ^ TODO(coeffects) after implementing lower bounds on const ctx/type, do:
   intersection
     Reason.Rnone
     [
@@ -189,3 +191,4 @@ let default_capability =
       class_type Reason.Rnone Naming_special_names.Capabilities.writeProperty [];
       class_type Reason.Rnone Naming_special_names.Capabilities.output [];
     ]
+ *)

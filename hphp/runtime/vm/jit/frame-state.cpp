@@ -582,6 +582,9 @@ void FrameStateMgr::updateMInstr(const IRInstruction* inst) {
       not_reached();
     }();
 
+    // Skip locations that disagree with our source on type.
+    if (!oldType.derefIfPtr().maybe(baseTmp->type().deref())) return;
+
     if (maxType <= oldType) {
       // Drop the value and don't bother with precise effects.
       return setType(l, oldType);

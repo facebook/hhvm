@@ -7,6 +7,10 @@
  *)
 
 val direct_decl_parse_and_cache :
+  ?decl_hash:bool ->
   Provider_context.t ->
   Relative_path.t ->
-  ((string * Shallow_decl_defs.decl) list * FileInfo.mode option) option
+  ( (string * Shallow_decl_defs.decl) list
+  * FileInfo.mode option
+  * Int64.t option )
+  option

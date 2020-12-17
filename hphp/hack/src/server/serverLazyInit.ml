@@ -1164,7 +1164,7 @@ let post_saved_state_initialization
         match (info1, info2) with
         | (Some x, Some y) ->
           (match (x.FileInfo.hash, y.FileInfo.hash) with
-          | (Some x, Some y) -> OpaqueDigest.equal x y
+          | (Some x, Some y) -> Int64.equal x y
           | _ -> false)
         | _ -> false)
       dirty_files

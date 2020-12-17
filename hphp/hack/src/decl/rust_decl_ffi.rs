@@ -22,8 +22,17 @@ pub unsafe extern "C" fn hh_parse_decls_and_mode_ffi(
     filename_ptr: usize,
     text_ptr: usize,
     ns_map_ptr: usize,
+    include_hash: usize,
 ) -> usize {
-    fn inner(filename_ptr: usize, text_ptr: usize, ns_map_ptr: usize) -> usize {
+    fn inner(
+        filename_ptr: usize,
+        text_ptr: usize,
+        ns_map_ptr: usize,
+        include_hash: usize,
+    ) -> usize {
+        // SAFETY: We trust we've been handed a valid, immutable OCaml value
+        let include_hash = unsafe { bool::from_ocaml(include_hash).unwrap() };
+
         let make_retryable = move || {
             move |stack_limit: &StackLimit, _nonmain_stack_size: Option<usize>| {
                 // SAFETY: the OCaml garbage collector must not run as long as text_ptr
@@ -41,7 +50,14 @@ pub unsafe extern "C" fn hh_parse_decls_and_mode_ffi(
 
                 let arena = Bump::new();
 
-                let r = parse_decls_and_mode(filename, &text, &ns_map, &arena, Some(stack_limit));
+                let (decls, mode) =
+                    parse_decls_and_mode(filename, &text, &ns_map, &arena, Some(stack_limit));
+
+                let hash = if include_hash {
+                    Some(Int64(position_insensitive_hash(&decls) as i64))
+                } else {
+                    None
+                };
 
                 // SAFETY: We immediately hand this pointer to the OCaml runtime.
                 // The use of UnsafeOcamlPtr is necessary here because we cannot return
@@ -49,7 +65,7 @@ pub unsafe extern "C" fn hh_parse_decls_and_mode_ffi(
                 // this function scope. Instead, we convert the decls to OCaml
                 // ourselves, and return the pointer (the converted OCaml value does not
                 // borrow the arena).
-                unsafe { ocamlrep_ocamlpool::to_ocaml(&r) }
+                unsafe { ocamlrep_ocamlpool::to_ocaml(&(decls, mode, hash)) }
             }
         };
 
@@ -84,7 +100,7 @@ pub unsafe extern "C" fn hh_parse_decls_and_mode_ffi(
             }
         }
     }
-    ocamlrep_ocamlpool::catch_unwind(|| inner(filename_ptr, text_ptr, ns_map_ptr))
+    ocamlrep_ocamlpool::catch_unwind(|| inner(filename_ptr, text_ptr, ns_map_ptr, include_hash))
 }
 
 #[no_mangle]

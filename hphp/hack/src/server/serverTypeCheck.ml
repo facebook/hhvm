@@ -320,10 +320,12 @@ let parsing genv env to_check ~stop_at_errors profiling =
   let get_next =
     MultiWorker.next genv.workers (Relative_path.Set.elements disk_files)
   in
+  let ctx = Provider_utils.ctx_from_server_env env in
   let (fast, errors, failed_parsing) =
     CgroupProfiler.collect_cgroup_stats ~profiling ~stage:"parsing" @@ fun () ->
-    Parsing_service.go genv.workers ide_files ~get_next env.popt ~trace:true
+    Parsing_service.go ctx genv.workers ide_files ~get_next env.popt ~trace:true
   in
+
   SearchServiceRunner.update_fileinfo_map
     (Naming_table.create fast)
     SearchUtils.TypeChecker;

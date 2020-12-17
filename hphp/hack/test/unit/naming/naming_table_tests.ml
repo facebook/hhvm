@@ -55,7 +55,7 @@ let files =
   |});
   ]
 
-let write_and_parse_test_files () =
+let write_and_parse_test_files ctx =
   let files =
     List.map files ~f:(fun (fn, contents) ->
         (Relative_path.from_root ~suffix:fn, contents))
@@ -67,6 +67,7 @@ let write_and_parse_test_files () =
       Disk.write_file ~file:(Path.to_string fn) ~contents);
   let (file_infos, errors, failed_parsing) =
     Parsing_service.go
+      ctx
       None
       Relative_path.Set.empty
       ~get_next:(MultiWorker.next None (List.map files ~f:fst))
@@ -103,8 +104,18 @@ let run_naming_table_test f =
             sample_rate = 0.0;
           }
       in
+      let popt = ParserOptions.default in
+      let tcopt = TypecheckerOptions.default in
+      let deps_mode = Typing_deps_mode.SQLiteMode in
+      let ctx =
+        Provider_context.empty_for_tool
+          ~popt
+          ~tcopt
+          ~backend:(Provider_backend.get ())
+          ~deps_mode
+      in
       let (_ : SharedMem.handle) = SharedMem.init config ~num_workers:0 in
-      let unbacked_naming_table = write_and_parse_test_files () in
+      let unbacked_naming_table = write_and_parse_test_files ctx in
       let db_name = Path.to_string (Path.concat path "naming_table.sqlite") in
       let save_results = Naming_table.save unbacked_naming_table db_name in
       Asserter.Int_asserter.assert_equals
@@ -112,9 +123,6 @@ let run_naming_table_test f =
         Naming_sqlite.(save_results.files_added + save_results.symbols_added)
         "Expected to add eight rows (four files and four symbols)";
 
-      let popt = ParserOptions.default in
-      let tcopt = TypecheckerOptions.default in
-      let deps_mode = Typing_deps_mode.SQLiteMode in
       let ctx_for_sqlite_load =
         Provider_context.empty_for_test ~popt ~tcopt ~deps_mode
       in
@@ -123,13 +131,6 @@ let run_naming_table_test f =
       in
 
       Provider_backend.set_local_memory_backend_with_defaults ();
-      let ctx =
-        Provider_context.empty_for_tool
-          ~popt
-          ~tcopt
-          ~backend:(Provider_backend.get ())
-          ~deps_mode
-      in
       (* load_from_sqlite will call set_naming_db_path for the ctx it's given, but
       here is a fresh ctx with a fresh backend so we have to set it again. *)
       Db_path_provider.set_naming_db_path

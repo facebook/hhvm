@@ -76,14 +76,14 @@ let get_file_contents ctx filename =
     Some (Full_fidelity_source_text.text source_text)
   | None -> File_provider.get_contents filename
 
-let direct_decl_parse_and_cache ctx file =
+let direct_decl_parse_and_cache ?(decl_hash = false) ctx file =
   match get_file_contents ctx file with
   | None -> None
   | Some contents ->
     let popt = Provider_context.get_popt ctx in
     let ns_map = ParserOptions.auto_namespace_map popt in
-    let (decls, mode) =
-      Direct_decl_parser.parse_decls_and_mode_ffi file contents ns_map
+    let (decls, mode, hash) =
+      Direct_decl_parser.parse_decls_and_mode_ffi file contents ns_map decl_hash
     in
     let deregister_php_stdlib =
       Relative_path.is_hhi (Relative_path.prefix file)
@@ -121,4 +121,4 @@ let direct_decl_parse_and_cache ctx file =
             | name_and_decl -> Some name_and_decl)
     in
     cache_decls ctx decls;
-    Some (decls, mode)
+    Some (decls, mode, hash)

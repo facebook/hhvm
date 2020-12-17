@@ -112,3 +112,15 @@ let column_str stmt idx = to_str_exn (Sqlite3.column stmt idx)
 let column_blob stmt idx = to_blob_exn (Sqlite3.column stmt idx)
 
 let column_int64 stmt idx = to_int64_exn (Sqlite3.column stmt idx)
+
+let optional f g stmt idx =
+  let data = f stmt idx in
+  match data with
+  | Sqlite3.Data.NULL -> None
+  | _ -> Some (g data)
+
+let column_str_option = optional Sqlite3.column to_str_exn
+
+let column_blob_option = optional Sqlite3.column to_blob_exn
+
+let column_int64_option = optional Sqlite3.column to_int64_exn

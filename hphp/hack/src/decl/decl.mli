@@ -7,9 +7,8 @@
  *
  *)
 
-val name_and_declare_types_program :
+val nast_to_decls :
   Direct_decl_parser.decls ->
-  sh:SharedMem.uses ->
   Provider_context.t ->
   Nast.program ->
   Direct_decl_parser.decls

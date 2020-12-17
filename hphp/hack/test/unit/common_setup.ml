@@ -63,8 +63,17 @@ let setup ~(sqlite : bool) (tcopt : GlobalOptions.t) : setup =
   (* Parsing produces the file infos that the naming table module can use
     to construct the forward naming table (files-to-symbols) *)
   let popt = ParserOptions.default in
+  let deps_mode = Typing_deps_mode.SQLiteMode in
+  let ctx =
+    Provider_context.empty_for_tool
+      ~popt
+      ~tcopt
+      ~backend:(Provider_backend.get ())
+      ~deps_mode
+  in
   let (file_infos, _errors, _failed_parsing) =
     Parsing_service.go
+      ctx
       None
       Relative_path.Set.empty
       ~get_next:(MultiWorker.next None [foo_path; bar_path])
@@ -74,14 +83,6 @@ let setup ~(sqlite : bool) (tcopt : GlobalOptions.t) : setup =
   let naming_table = Naming_table.create file_infos in
   (* Construct the reverse naming table (symbols-to-files) *)
   let fast = Naming_table.to_fast naming_table in
-  let deps_mode = Typing_deps_mode.SQLiteMode in
-  let ctx =
-    Provider_context.empty_for_tool
-      ~popt
-      ~tcopt
-      ~backend:(Provider_backend.get ())
-      ~deps_mode
-  in
   Relative_path.Map.iter
     fast
     ~f:(fun (name : Relative_path.t) (info : FileInfo.names) ->

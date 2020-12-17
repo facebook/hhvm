@@ -59,7 +59,7 @@ val pos_full : Pos.t * string -> id
 val get_pos_filename : pos -> Relative_path.t
 
 type t = {
-  hash: OpaqueDigest.t option;
+  hash: Int64.t option;
   file_mode: mode option;
   funs: id list;
   classes: id list;

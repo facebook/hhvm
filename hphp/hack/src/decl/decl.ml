@@ -30,9 +30,10 @@ let class_decl_if_missing
 
 let rec name_and_declare_types_program
     (acc : Direct_decl_parser.decls)
-    ~(sh : SharedMem.uses)
+    ~(sh : SharedMem.uses option)
     (ctx : Provider_context.t)
     (prog : Nast.program) : Direct_decl_parser.decls =
+  let with_sh f = Option.value_map ~default:() ~f:(fun sh -> f sh) sh in
   let open Aast in
   List.fold prog ~init:acc ~f:(fun acc def ->
       match def with
@@ -42,34 +43,42 @@ let rec name_and_declare_types_program
       | FileAttributes _ -> acc
       | Fun f ->
         let (name, decl) = Decl_nast.fun_naming_and_decl ctx f in
-        Decl_heap.Funs.add name decl;
+        with_sh (fun _ -> Decl_heap.Funs.add name decl);
         (name, Shallow_decl_defs.Fun decl) :: acc
       | Class c ->
-        class_decl_if_missing ~sh ctx c;
+        with_sh (fun sh -> class_decl_if_missing ~sh ctx c);
         let class_ = Shallow_classes_provider.decl ctx c in
         (snd class_.Shallow_decl_defs.sc_name, Shallow_decl_defs.Class class_)
         :: acc
       | RecordDef rd ->
         let (name, decl) = Decl_nast.record_def_naming_and_decl ctx rd in
-        Decl_heap.RecordDefs.add name decl;
+        with_sh (fun _ -> Decl_heap.RecordDefs.add name decl);
         (name, Shallow_decl_defs.Record decl) :: acc
       | Typedef typedef ->
         let (name, decl) = Decl_nast.typedef_naming_and_decl ctx typedef in
-        Decl_heap.Typedefs.add name decl;
+        with_sh (fun _ -> Decl_heap.Typedefs.add name decl);
         (name, Shallow_decl_defs.Typedef decl) :: acc
       | Stmt _ -> acc
       | Constant cst ->
         let (name, decl) = Decl_nast.const_naming_and_decl ctx cst in
-        Decl_heap.GConsts.add name decl;
+        with_sh (fun _ -> Decl_heap.GConsts.add name decl);
         let decl = Typing_defs.{ cd_pos = fst cst.cst_name; cd_type = decl } in
         (name, Shallow_decl_defs.Const decl) :: acc)
+
+let nast_to_decls
+    (acc : Direct_decl_parser.decls)
+    (ctx : Provider_context.t)
+    (prog : Nast.program) : Direct_decl_parser.decls =
+  name_and_declare_types_program acc None ctx prog
 
 let make_env
     ~(sh : SharedMem.uses) (ctx : Provider_context.t) (fn : Relative_path.t) :
     unit =
   if use_direct_decl_parser ctx then
     let (_
-          : ((string * Shallow_decl_defs.decl) list * FileInfo.mode option)
+          : ( (string * Shallow_decl_defs.decl) list
+            * FileInfo.mode option
+            * Int64.t option )
             option) =
       Direct_decl_utils.direct_decl_parse_and_cache ctx fn
     in
@@ -77,6 +86,6 @@ let make_env
   else
     let ast = Ast_provider.get_ast ctx fn in
     let (_ : Direct_decl_parser.decls) =
-      name_and_declare_types_program [] ~sh ctx ast
+      name_and_declare_types_program [] ~sh:(Some sh) ctx ast
     in
     ()

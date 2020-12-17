@@ -143,6 +143,7 @@ let rec core_type ?(seen_indirection = false) ct =
           "&'a std::path::Path"
         else
           "std::path::PathBuf"
+      | Ldot (Lident "Int64", "t") -> "isize"
       | id -> Convert_longident.longident_to_string id
     in
     let id =

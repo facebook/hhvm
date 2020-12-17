@@ -15,4 +15,8 @@ val parse_decls_ffi : Relative_path.t -> string -> ns_map -> decls
 val decls_hash : decls -> Int64.t
 
 val parse_decls_and_mode_ffi :
-  Relative_path.t -> string -> ns_map -> decls * FileInfo.mode option
+  Relative_path.t ->
+  string ->
+  ns_map ->
+  bool ->
+  decls * FileInfo.mode option * Int64.t option

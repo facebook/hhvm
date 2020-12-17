@@ -165,4 +165,8 @@
   (preprocess (pps visitors.ppx ppx_deriving.std)) ; See T41851208
   (libraries
     ast_provider
-    procs_procs))
+    decl
+    direct_decl_parser
+    heap_shared_mem
+    procs_procs
+    shallow_decl_defs))

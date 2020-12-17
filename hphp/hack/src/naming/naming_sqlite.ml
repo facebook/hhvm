@@ -296,7 +296,7 @@ module FileInfoTable = struct
       stmt_cache
       relative_path
       ~(type_checker_mode : FileInfo.mode option)
-      ~(decl_hash : OpaqueDigest.t option)
+      ~(decl_hash : Int64.t option)
       ~(classes : FileInfo.id list)
       ~(consts : FileInfo.id list)
       ~(funs : FileInfo.id list)
@@ -317,8 +317,7 @@ module FileInfoTable = struct
     in
     let decl_hash =
       match decl_hash with
-      | Some decl_hash ->
-        Sqlite3.Data.BLOB (OpaqueDigest.to_raw_contents decl_hash)
+      | Some decl_hash -> Sqlite3.Data.INT decl_hash
       | None -> Sqlite3.Data.NULL
     in
     let names_to_data_type names =
@@ -348,9 +347,7 @@ module FileInfoTable = struct
       let open Option in
       Int64.to_int (column_int64 stmt base_index) >>= FileInfo.mode_of_enum
     in
-    let hash =
-      OpaqueDigest.from_raw_contents (column_blob stmt (base_index + 1))
-    in
+    let hash = Some (column_int64 stmt (base_index + 1)) in
     let to_ids ~value ~name_type =
       match value with
       | Sqlite3.Data.TEXT s ->

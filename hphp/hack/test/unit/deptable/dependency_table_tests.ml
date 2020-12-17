@@ -51,7 +51,7 @@ let files =
   |});
   ]
 
-let write_and_parse_test_files () =
+let write_and_parse_test_files ctx =
   let files =
     List.map files ~f:(fun (fn, contents) ->
         (Relative_path.from_root ~suffix:fn, contents))
@@ -63,6 +63,7 @@ let write_and_parse_test_files () =
       Disk.write_file ~file:(Path.to_string fn) ~contents);
   let (file_infos, errors, failed_parsing) =
     Parsing_service.go
+      ctx
       None
       Relative_path.Set.empty
       ~get_next:(MultiWorker.next None (List.map files ~f:fst))
@@ -107,7 +108,7 @@ let run_test f =
           ~deps_mode:Typing_deps_mode.SQLiteMode
       in
 
-      let unbacked_naming_table = write_and_parse_test_files () in
+      let unbacked_naming_table = write_and_parse_test_files ctx in
       let db_name = Path.to_string (Path.concat path "naming_table.sqlite") in
       let save_results = Naming_table.save unbacked_naming_table db_name in
       Asserter.Int_asserter.assert_equals

@@ -21,7 +21,7 @@ let neutral = (Relative_path.Map.empty, Errors.empty, Relative_path.Set.empty)
  * error_files is Relative_path.Set.t of files that we failed to parse
  *)
 let process_parse_result
-    ?(ide = false) ~quick (acc, errorl, error_files) fn res popt =
+    ctx ?(ide = false) ~quick (acc, errorl, error_files) fn res popt =
   let (errorl', { Parser_return.file_mode; comments = _; ast; content }) =
     res
   in
@@ -61,7 +61,8 @@ let process_parse_result
     in
     Ast_provider.provide_ast_hint fn ast mode;
     let comments = None in
-    let hash = Some (Nast.generate_ast_decl_hash ast) in
+    let decls = Decl.nast_to_decls [] ctx ast in
+    let hash = Some (Direct_decl_parser.decls_hash decls) in
     let defs =
       {
         FileInfo.hash;
@@ -92,7 +93,7 @@ let process_parse_result
     (acc, errorl, error_files)
   )
 
-let parse ~quick ~show_all_errors popt acc fn =
+let parse ctx ~quick ~show_all_errors popt acc fn =
   if not @@ FindUtils.path_filter fn then
     acc
   else
@@ -100,7 +101,7 @@ let parse ~quick ~show_all_errors popt acc fn =
       Errors.do_with_context fn Errors.Parsing @@ fun () ->
       Full_fidelity_ast.defensive_from_file ~quick ~show_all_errors popt fn
     in
-    process_parse_result ~quick acc fn res popt
+    process_parse_result ctx ~quick acc fn res popt
 
 (* Merging the results when the operation is done in parallel *)
 let merge_parse (acc1, status1, files1) (acc2, status2, files2) =
@@ -108,19 +109,19 @@ let merge_parse (acc1, status1, files1) (acc2, status2, files2) =
     Errors.merge status1 status2,
     Relative_path.Set.union files1 files2 )
 
-let parse_files ?(quick = false) ?(show_all_errors = false) popt acc fnl =
-  List.fold_left fnl ~init:acc ~f:(parse ~quick ~show_all_errors popt)
+let parse_files ctx ?(quick = false) ?(show_all_errors = false) popt acc fnl =
+  List.fold_left fnl ~init:acc ~f:(parse ctx ~quick ~show_all_errors popt)
 
 let parse_parallel
-    ?(quick = false) ?(show_all_errors = false) workers get_next popt =
+    ctx ?(quick = false) ?(show_all_errors = false) workers get_next popt =
   MultiWorker.call
     workers
-    ~job:(parse_files ~quick ~show_all_errors popt)
+    ~job:(parse_files ctx ~quick ~show_all_errors popt)
     ~neutral
     ~merge:merge_parse
     ~next:get_next
 
-let parse_sequential ~quick ~show_all_errors fn content acc popt =
+let parse_sequential ctx ~quick ~show_all_errors fn content acc popt =
   if not @@ FindUtils.path_filter fn then
     acc
   else
@@ -145,7 +146,7 @@ let parse_sequential ~quick ~show_all_errors fn content acc popt =
             fn
             content)
     in
-    process_parse_result ~ide:true ~quick acc fn res popt
+    process_parse_result ctx ~ide:true ~quick acc fn res popt
 
 let log_parsing_results fast =
   Relative_path.(
@@ -156,6 +157,7 @@ let log_parsing_results fast =
 (* Main entry points *)
 (*****************************************************************************)
 let go
+    (ctx : Provider_context.t)
     ?(quick = false)
     ?(show_all_errors = false)
     (workers : MultiWorker.worker list option)
@@ -164,11 +166,11 @@ let go
     (popt : ParserOptions.t)
     ~(trace : bool) :
     FileInfo.t Relative_path.Map.t * Errors.t * Relative_path.Set.t =
-  let acc = parse_parallel ~quick ~show_all_errors workers get_next popt in
+  let acc = parse_parallel ctx ~quick ~show_all_errors workers get_next popt in
   let (fast, errorl, failed_parsing) =
     Relative_path.Set.fold files_set ~init:acc ~f:(fun fn acc ->
         let content = File_provider.get_ide_contents_unsafe fn in
-        parse_sequential ~quick ~show_all_errors fn content acc popt)
+        parse_sequential ctx ~quick ~show_all_errors fn content acc popt)
   in
   if trace then log_parsing_results fast;
   (fast, errorl, failed_parsing)

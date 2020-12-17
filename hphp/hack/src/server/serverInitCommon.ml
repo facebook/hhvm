@@ -52,8 +52,10 @@ let parsing
     | Some c -> ServerProgress.send_progress_to_monitor "parsing %d files" c
   end;
   let quick = lazy_parse in
+  let ctx = Provider_utils.ctx_from_server_env env in
   let (fast, errorl, _) =
     Parsing_service.go
+      ctx
       ~quick
       ~show_all_errors:true
       genv.workers

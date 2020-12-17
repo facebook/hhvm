@@ -7,6 +7,7 @@
  *
  *)
 val go :
+  Provider_context.t ->
   ?quick:bool ->
   ?show_all_errors:bool ->
   MultiWorker.worker list option ->

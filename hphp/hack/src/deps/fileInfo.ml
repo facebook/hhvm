@@ -87,12 +87,12 @@ type id = pos * string [@@deriving eq, show]
 (** The hash value of a decl AST.
   We use this to see if two versions of a file are "similar", i.e. their
   declarations only differ by position information.  *)
-type hash_type = OpaqueDigest.t option [@@deriving eq]
+type hash_type = Int64.t option [@@deriving eq]
 
 let pp_hash_type fmt hash =
   match hash with
   | None -> Format.fprintf fmt "None"
-  | Some hash -> Format.fprintf fmt "Some (%s)" (OpaqueDigest.to_hex hash)
+  | Some hash -> Format.fprintf fmt "Some (%s)" (Int64.to_string hash)
 
 (** The record produced by the parsing phase. *)
 type t = {
@@ -142,7 +142,7 @@ type names = {
 (** Data structure stored in the saved state *)
 type saved = {
   s_names: names;
-  s_hash: OpaqueDigest.t option;
+  s_hash: Int64.t option;
   s_mode: mode option;
 }
 

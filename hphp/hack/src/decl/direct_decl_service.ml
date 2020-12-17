@@ -10,10 +10,9 @@
 open Hh_prelude
 
 let decls_to_fileinfo
-    ((decls, file_mode) : Direct_decl_parser.decls * FileInfo.mode option) :
+    ((decls, file_mode, hash) :
+      Direct_decl_parser.decls * FileInfo.mode option * Int64.t option) :
     FileInfo.t =
-  (* TODO: Nast.generate_ast_decl_hash ignores pos, match it! *)
-  let hash = Some (Marshal.to_string decls [] |> OpaqueDigest.string) in
   let add acc (name, decl) =
     match decl with
     | Shallow_decl_defs.Class c ->
@@ -59,13 +58,15 @@ let parse_batch
     if not (FindUtils.path_filter fn) then
       acc
     else
-      match Direct_decl_utils.direct_decl_parse_and_cache ctx fn with
+      match
+        Direct_decl_utils.direct_decl_parse_and_cache ~decl_hash:true ctx fn
+      with
       | None -> acc
-      | Some decl_and_mode ->
+      | Some decl_and_mode_and_hash ->
         Relative_path.Map.add
           acc
           ~key:fn
-          ~data:(decls_to_fileinfo decl_and_mode)
+          ~data:(decls_to_fileinfo decl_and_mode_and_hash)
   in
   List.fold ~f:parse ~init:acc fnl
 

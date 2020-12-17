@@ -147,7 +147,7 @@ watchman_init_timeout = 1
         )
 
         self.assertTrue(
-            result1.returned_values.get_edges_added() == 0,
+            result1.returned_values.get_edges_added() > 0,
             "class_1 has no dependencies",
         )
 

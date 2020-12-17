@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<45d340fdb3b074aa9241b51b452e627a>>
+// @generated SignedSource<<e8a0f13efdb832d96588166a875c2049>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -114,7 +114,7 @@ pub struct Id(pub Pos, pub String);
 /// The hash value of a decl AST.
 /// We use this to see if two versions of a file are "similar", i.e. their
 /// declarations only differ by position information.
-pub type HashType = Option<opaque_digest::OpaqueDigest>;
+pub type HashType = Option<isize>;
 
 /// The record produced by the parsing phase.
 #[derive(
@@ -183,6 +183,6 @@ pub struct Names {
 )]
 pub struct Saved {
     pub names: Names,
-    pub hash: Option<opaque_digest::OpaqueDigest>,
+    pub hash: Option<isize>,
     pub mode: Option<Mode>,
 }

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<35af1544db1a5d7f6bb7bb9e0b7d9acd>>
+// @generated SignedSource<<a8529a2abb2191f4b4b2cfd4b0bff5d9>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -71,7 +71,7 @@ impl<'a> TrivialDrop for Id<'a> {}
 /// The hash value of a decl AST.
 /// We use this to see if two versions of a file are "similar", i.e. their
 /// declarations only differ by position information.
-pub type HashType<'a> = Option<&'a opaque_digest::OpaqueDigest<'a>>;
+pub type HashType<'a> = Option<isize>;
 
 /// The record produced by the parsing phase.
 #[derive(

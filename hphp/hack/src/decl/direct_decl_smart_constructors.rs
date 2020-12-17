@@ -150,7 +150,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
 
     /// If the given node is a name (i.e., an identifier or a qualified name),
     /// elaborate it in the current namespace and return Some.
-    fn elaborate_name(&self, name: Node<'a>) -> Option<Id<'a>> {
+    fn elaborate_into_current_ns(&self, name: Node<'a>) -> Option<Id<'a>> {
         match name {
             Node::Name(&(name, pos)) => Some(Id(pos, self.prefix_ns(name))),
             Node::XhpName(&(name, pos)) => Some(Id(pos, name)),
@@ -182,11 +182,11 @@ impl<'a> DirectDeclSmartConstructors<'a> {
         }
     }
 
-    fn rename_import(&self, node: Node<'a>) -> Option<Id<'a>> {
+    fn elaborate_id(&self, node: Node<'a>) -> Option<Id<'a>> {
         let Id(pos, name) = self.expect_name(node)?;
         Some(Id(
             pos,
-            self.prefix_ns(self.state.namespace_builder.rename_import(name)),
+            self.prefix_ns(self.state.namespace_builder.elaborate_id(name)),
         ))
     }
 
@@ -423,7 +423,7 @@ impl<'a> NamespaceBuilder<'a> {
         imports.insert(aliased_name, name);
     }
 
-    fn rename_import(&self, name: &'a str) -> &'a str {
+    fn elaborate_id(&self, name: &'a str) -> &'a str {
         if name.starts_with('\\') {
             return name;
         }
@@ -1027,7 +1027,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
             }
             Node::Token(t) if t.kind() == TokenKind::NullLiteral => aast::Expr_::Null,
             Node::Name(..) | Node::QualifiedName(..) => {
-                aast::Expr_::Id(self.alloc(self.elaborate_name(node)?))
+                aast::Expr_::Id(self.alloc(self.elaborate_into_current_ns(node)?))
             }
             _ => return None,
         };
@@ -1128,7 +1128,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                         "_" => Ty_::Terr,
                         _ => {
                             let name =
-                                self.prefix_ns(self.state.namespace_builder.rename_import(name));
+                                self.prefix_ns(self.state.namespace_builder.elaborate_id(name));
                             Ty_::Tapply(self.alloc((Id(pos, name), &[][..])))
                         }
                     }
@@ -1431,7 +1431,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                 Some(Id(pos, naming_special_names::members::__CONSTRUCT))
             }
             (true, _) => self.expect_name(header.name),
-            (false, _) => self.elaborate_name(header.name),
+            (false, _) => self.elaborate_into_current_ns(header.name),
         };
         let id = id_opt.unwrap_or(Id(self.get_pos(header.name), ""));
         let (params, properties, arity) = self.as_fun_params(header.param_list)?;
@@ -2087,7 +2087,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                     || self.state.previous_token_kind == TokenKind::Trait
                     || self.state.previous_token_kind == TokenKind::Interface
                 {
-                    if let Some(current_class_name) = self.elaborate_name(name) {
+                    if let Some(current_class_name) = self.elaborate_into_current_ns(name) {
                         self.state
                             .classish_name_builder
                             .lexed_name_after_classish_keyword(
@@ -2707,7 +2707,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                     self.hint_ty(pos, ty_)
                 }
                 _ => {
-                    let class_type = self.state.namespace_builder.rename_import(class_type);
+                    let class_type = self.state.namespace_builder.elaborate_id(class_type);
                     let class_type = if class_type.starts_with("\\") {
                         class_type
                     } else {
@@ -2735,7 +2735,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         fields: Self::R,
         right_brace: Self::R,
     ) -> Self::R {
-        let name = match self.elaborate_name(name) {
+        let name = match self.elaborate_into_current_ns(name) {
             Some(name) => name,
             None => return Node::Ignored(SK::RecordDeclaration),
         };
@@ -2743,7 +2743,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             name.1,
             self.alloc(typing_defs::RecordDefType {
                 name,
-                extends: self.elaborate_name(extends_opt),
+                extends: self.elaborate_into_current_ns(extends_opt),
                 fields: self.slice(fields.iter().filter_map(|node| match node {
                     Node::RecordField(&field) => Some(field),
                     _ => None,
@@ -2788,7 +2788,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         if name.is_ignored() {
             return Node::Ignored(SK::AliasDeclaration);
         }
-        let Id(pos, name) = match self.elaborate_name(name) {
+        let Id(pos, name) = match self.elaborate_into_current_ns(name) {
             Some(id) => id,
             None => return Node::Ignored(SK::AliasDeclaration),
         };
@@ -3145,7 +3145,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             }
             // Global consts.
             Node::List([Node::ConstInitializer(&(name, initializer))]) => {
-                let Id(pos, id) = match self.elaborate_name(name) {
+                let Id(pos, id) = match self.elaborate_into_current_ns(name) {
                     Some(id) => id,
                     None => return Node::Ignored(SK::ConstDeclaration),
                 };
@@ -3310,7 +3310,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         where_clause: Self::R,
         body: Self::R,
     ) -> Self::R {
-        let Id(pos, name) = match self.elaborate_name(name) {
+        let Id(pos, name) = match self.elaborate_into_current_ns(name) {
             Some(id) => id,
             None => return Node::Ignored(SK::ClassishDeclaration),
         };
@@ -3829,7 +3829,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         cases: Self::R,
         _right_brace: Self::R,
     ) -> Self::R {
-        let id = match self.elaborate_name(name) {
+        let id = match self.elaborate_into_current_ns(name) {
             Some(id) => id,
             None => return Node::Ignored(SK::EnumDeclaration),
         };
@@ -3945,7 +3945,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         elements: Self::R,
         _right_brace: Self::R,
     ) -> Self::R {
-        let name = match self.elaborate_name(name) {
+        let name = match self.elaborate_into_current_ns(name) {
             Some(name) => name,
             None => return Node::Ignored(SyntaxKind::EnumClassDeclaration),
         };
@@ -4205,7 +4205,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             self.prim_ty(aast::Tprim::Tstring, id.0)
         } else {
             self.make_apply(
-                Id(id.0, self.state.namespace_builder.rename_import(id.1)),
+                Id(id.0, self.state.namespace_builder.elaborate_id(id.1)),
                 targ,
                 self.merge_positions(classname, gt),
             )
@@ -4219,7 +4219,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         value: Self::R,
     ) -> Self::R {
         let pos = self.merge_positions(class_name, value);
-        let Id(class_name_pos, class_name_str) = match self.rename_import(class_name) {
+        let Id(class_name_pos, class_name_str) = match self.elaborate_id(class_name) {
             Some(id) => id,
             None => return Node::Ignored(SK::ScopeResolutionExpression),
         };
@@ -4331,7 +4331,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         let name = if unqualified_name.1.starts_with("__") {
             unqualified_name
         } else {
-            match self.elaborate_name(name) {
+            match self.elaborate_into_current_ns(name) {
                 Some(name) => name,
                 None => return Node::Ignored(SK::ConstructorCall),
             }
@@ -4344,7 +4344,8 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                     (_, "class"),
                 )),
             )) => {
-                let name = self.elaborate_name(Node::Name(self.alloc((pos, class_name))))?;
+                let name =
+                    self.elaborate_into_current_ns(Node::Name(self.alloc((pos, class_name))))?;
                 Some(ClassNameParam { name, full_pos })
             }
             _ => None,
@@ -4693,7 +4694,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             Some(id) => id,
             None => return Node::Ignored(SK::VectorTypeSpecifier),
         };
-        let id = Id(id.0, self.state.namespace_builder.rename_import(id.1));
+        let id = Id(id.0, self.state.namespace_builder.elaborate_id(id.1));
         self.make_apply(id, hint, self.get_pos(right_angle))
     }
 
@@ -4708,7 +4709,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             Some(id) => id,
             None => return Node::Ignored(SK::DictionaryTypeSpecifier),
         };
-        let id = Id(id.0, self.state.namespace_builder.rename_import(id.1));
+        let id = Id(id.0, self.state.namespace_builder.elaborate_id(id.1));
         self.make_apply(id, type_arguments, self.get_pos(right_angle))
     }
 
@@ -4724,7 +4725,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             Some(id) => id,
             None => return Node::Ignored(SK::KeysetTypeSpecifier),
         };
-        let id = Id(id.0, self.state.namespace_builder.rename_import(id.1));
+        let id = Id(id.0, self.state.namespace_builder.elaborate_id(id.1));
         self.make_apply(id, hint, self.get_pos(right_angle))
     }
 

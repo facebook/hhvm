@@ -2,7 +2,7 @@
 <<file: __EnableUnstableFeatures('coeffects_provisional')>>
 
 <<__Pure>>
-function pure(): void {
+function pure()[]: void {
   FooClass::$foo += 1;
   echo 'bar';
   $f = new FooClass();
@@ -12,7 +12,7 @@ function pure(): void {
 }
 
 <<__Rx>>
-function rx(): void {
+function rx()[rx]: void {
   FooClass::$foo += 1;
   echo 'bar';
   $f = new FooClass();

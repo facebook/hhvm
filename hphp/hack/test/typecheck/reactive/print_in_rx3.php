@@ -2,7 +2,7 @@
 <<file: __EnableUnstableFeatures('coeffects_provisional')>>
 
 <<__RxShallow>>
-function f(): void {
+function f()[rx_shallow]: void {
   // should be error
   print 1;
 }

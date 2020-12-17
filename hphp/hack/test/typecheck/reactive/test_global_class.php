@@ -7,6 +7,6 @@ class GlobalClassName {
 }
 
 <<__Rx>>
-function foo(): void {
+function foo()[rx]: void {
   $y = GlobalClassName::$x + 1;
 }

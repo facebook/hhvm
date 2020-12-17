@@ -1,4 +1,4 @@
 File "print_in_rx9.php", line 10, characters 3-6:
 Reactive functions can only call other reactive functions. (Typing[4200])
-  File "print_in_rx9.php", line 6, characters 8-43:
+  File "print_in_rx9.php", line 6, characters 8-53:
   This function is normal.

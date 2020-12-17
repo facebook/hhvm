@@ -673,9 +673,10 @@ let check =
               if SN.Superglobals.is_superglobal local_id then
                 Errors.superglobal_in_reactive_context p local_id
             | (_, Class_get _) ->
-              Errors.CoeffectEnforcedOp.static_property_access
-                (get_position expr);
-
+              if not (TypecheckerOptions.local_coeffects (Env.get_tcopt env))
+              then
+                Errors.CoeffectEnforcedOp.static_property_access
+                  (get_position expr);
               (* dive into subnodes *)
               super#on_expr (env, ctx) expr
             | (_, This) when ctx.disallow_this ->
@@ -735,7 +736,9 @@ let check =
               super#on_expr (env, ctx) expr
             | (_, Call ((_, Id (p, f)), _, _, None))
               when String.equal f SN.SpecialFunctions.echo ->
-              Errors.CoeffectEnforcedOp.output p;
+              if not (TypecheckerOptions.local_coeffects (Env.get_tcopt env))
+              then
+                Errors.CoeffectEnforcedOp.output p;
               super#on_expr (env, ctx) expr
             | (_, Call (f, _, _, _)) ->
               enforce_mutable_call env expr;

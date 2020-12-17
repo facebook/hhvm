@@ -287,6 +287,8 @@ bool CurlResource::setOption(long option, const Variant& value) {
     ret = setStringListOption(option, value);
   } else if (isNonCurlOption(option)) {
     ret = setNonCurlOption(option, value);
+  } else if (isBlobOption(option)) {
+    ret = setBlobOption(option, value.toString());
   } else if (option == CURLOPT_POSTFIELDS) {
     ret = setPostFieldsOption(value);
   } else if (option == CURLOPT_SHARE) {
@@ -609,6 +611,9 @@ bool CurlResource::isStringFilePathOption(long option) {
     case CURLOPT_PROXY_CRLFILE:
     case CURLOPT_PROXY_SSLCERT:
 #endif
+#if LIBCURL_VERSION_NUM >= 0x074700 /* Available since 7.71.0 */
+    case CURLOPT_PROXY_ISSUERCERT:
+#endif
       return true;
     default:
       return false;
@@ -807,6 +812,35 @@ bool CurlResource::setNullableStringOption(long option, const Variant& value) {
   }
 
   return m_error_no == CURLE_OK;
+}
+
+bool CurlResource::isBlobOption(long option) {
+#if LIBCURL_VERSION_NUM >= 0x074700 /* Available since 7.71.0 */
+  switch (option) {
+  case CURLOPT_SSLCERT_BLOB:
+  case CURLOPT_SSLKEY_BLOB:
+  case CURLOPT_PROXY_SSLCERT_BLOB:
+  case CURLOPT_PROXY_SSLKEY_BLOB:
+  case CURLOPT_ISSUERCERT_BLOB:
+  case CURLOPT_PROXY_ISSUERCERT_BLOB:
+    return true;
+  }
+#endif
+  return false;
+}
+
+bool CurlResource::setBlobOption(long option, const String& value) {
+#if LIBCURL_VERSION_NUM >= 0x074700 /* Available since 7.71.0 */
+  assertx(isBlobOption(option));
+  struct curl_blob blob;
+  blob.data = (void *)value.data();
+  blob.len = value.size();
+  blob.flags = CURL_BLOB_COPY;
+  m_error_no = curl_easy_setopt(m_cp, (CURLoption)option, &blob);
+  return m_error_no == CURLE_OK;
+#else
+  return false;
+#endif
 }
 
 bool CurlResource::setPostFieldsOption(const Variant& value) {

@@ -1310,7 +1310,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "data": {
                                 "fullname": "isValid",
                                 "filename": "${hhi_path}/BuiltinEnum.hhi",
-                                "line": 49,
+                                "line": 51,
                                 "char": 32,
                                 "base_class": "\\Elsa",
                             },
@@ -1327,7 +1327,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "data": {
                                 "fullname": "getValues",
                                 "filename": "${hhi_path}/BuiltinEnum.hhi",
-                                "line": 34,
+                                "line": 36,
                                 "char": 32,
                                 "base_class": "\\Elsa",
                             },
@@ -1344,7 +1344,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "data": {
                                 "fullname": "getNames",
                                 "filename": "${hhi_path}/BuiltinEnum.hhi",
-                                "line": 43,
+                                "line": 45,
                                 "char": 32,
                                 "base_class": "\\Elsa",
                             },
@@ -1361,7 +1361,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "data": {
                                 "fullname": "coerce",
                                 "filename": "${hhi_path}/BuiltinEnum.hhi",
-                                "line": 56,
+                                "line": 58,
                                 "char": 32,
                                 "base_class": "\\Elsa",
                             },
@@ -1378,7 +1378,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "data": {
                                 "fullname": "assertAll",
                                 "filename": "${hhi_path}/BuiltinEnum.hhi",
-                                "line": 70,
+                                "line": 72,
                                 "char": 32,
                                 "base_class": "\\Elsa",
                             },
@@ -1395,7 +1395,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "data": {
                                 "fullname": "assert",
                                 "filename": "${hhi_path}/BuiltinEnum.hhi",
-                                "line": 63,
+                                "line": 65,
                                 "char": 32,
                                 "base_class": "\\Elsa",
                             },
@@ -1440,7 +1440,7 @@ class TestLsp(TestCase[LspTestDriver]):
                     },
                     "data": {
                         "filename": "${hhi_path}/BuiltinEnum.hhi",
-                        "line": 49,
+                        "line": 51,
                         "char": 32,
                     },
                 },
@@ -1464,7 +1464,7 @@ class TestLsp(TestCase[LspTestDriver]):
                     },
                     "data": {
                         "filename": "${hhi_path}/BuiltinEnum.hhi",
-                        "line": 49,
+                        "line": 51,
                         "char": 32,
                     },
                 },
@@ -2580,7 +2580,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "data": {
                                 "fullname": "isValid",
                                 "filename": "${hhi_path}/BuiltinEnum.hhi",
-                                "line": 49,
+                                "line": 51,
                                 "char": 32,
                                 "base_class": "\\Elsa",
                             },
@@ -2597,7 +2597,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "data": {
                                 "fullname": "getValues",
                                 "filename": "${hhi_path}/BuiltinEnum.hhi",
-                                "line": 34,
+                                "line": 36,
                                 "char": 32,
                                 "base_class": "\\Elsa",
                             },
@@ -2614,7 +2614,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "data": {
                                 "fullname": "getNames",
                                 "filename": "${hhi_path}/BuiltinEnum.hhi",
-                                "line": 43,
+                                "line": 45,
                                 "char": 32,
                                 "base_class": "\\Elsa",
                             },
@@ -2631,7 +2631,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "data": {
                                 "fullname": "coerce",
                                 "filename": "${hhi_path}/BuiltinEnum.hhi",
-                                "line": 56,
+                                "line": 58,
                                 "char": 32,
                                 "base_class": "\\Elsa",
                             },
@@ -2648,7 +2648,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "data": {
                                 "fullname": "assertAll",
                                 "filename": "${hhi_path}/BuiltinEnum.hhi",
-                                "line": 70,
+                                "line": 72,
                                 "char": 32,
                                 "base_class": "\\Elsa",
                             },
@@ -2665,7 +2665,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "data": {
                                 "fullname": "assert",
                                 "filename": "${hhi_path}/BuiltinEnum.hhi",
-                                "line": 63,
+                                "line": 65,
                                 "char": 32,
                                 "base_class": "\\Elsa",
                             },

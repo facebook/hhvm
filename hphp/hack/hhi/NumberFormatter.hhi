@@ -7,6 +7,9 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  */
+
+<<file: __EnableUnstableFeatures('coeffects_provisional')>>
+
 class NumberFormatter {
 
   const PATTERN_DECIMAL                    = 0 ;

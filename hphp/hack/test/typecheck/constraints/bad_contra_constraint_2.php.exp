@@ -1,12 +1,12 @@
 File "bad_contra_constraint_2.php", line 25, characters 21-34:
 Invalid argument (Typing[4110])
-File "bad_contra_constraint_2.php", line 17, characters 52-57:
-Expected `string`
-File "bad_contra_constraint_2.php", line 19, characters 20-24:
-But got `mixed`
-File "collections/interfaces.hhi", line 865, characters 61-62:
-  via this generic `Tv`
-File "rx/interfaces.hhi", line 382, characters 36-37:
-  via this generic `Tv`
-File "rx/interfaces.hhi", line 35, characters 63-64:
-  via this generic `Tv`
+  File "bad_contra_constraint_2.php", line 17, characters 52-57:
+  Expected `string`
+  File "bad_contra_constraint_2.php", line 19, characters 20-24:
+  But got `mixed`
+  File "collections/interfaces.hhi", line 867, characters 61-62:
+    via this generic `Tv`
+  File "rx/interfaces.hhi", line 384, characters 36-37:
+    via this generic `Tv`
+  File "rx/interfaces.hhi", line 37, characters 63-64:
+    via this generic `Tv`

@@ -8,6 +8,8 @@
  *
  */
 
+<<file: __EnableUnstableFeatures('coeffects_provisional')>>
+
 namespace HH {
 
 // The functions in this file are defined in HHVM and known to the

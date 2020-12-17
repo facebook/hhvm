@@ -8,6 +8,8 @@
  *
  */
 
+<<file: __EnableUnstableFeatures('coeffects_provisional')>>
+
 const int PHP_URL_SCHEME = 0;
 const int PHP_URL_HOST = 1;
 const int PHP_URL_PORT = 2;

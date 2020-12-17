@@ -14,6 +14,8 @@
  * YOU SHOULD NEVER INCLUDE THIS FILE ANYWHERE!!!
  */
 
+<<file: __EnableUnstableFeatures('coeffects_provisional')>>
+
 namespace {
 
 <<__PHPStdLib, __Pure>>

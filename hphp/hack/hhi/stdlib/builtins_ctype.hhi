@@ -8,6 +8,8 @@
  *
  */
 
+<<file: __EnableUnstableFeatures('coeffects_provisional')>>
+
 <<__PHPStdLib, __Pure>>
 function ctype_alnum($text) { }
 <<__PHPStdLib, __Pure>>

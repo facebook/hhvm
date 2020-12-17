@@ -8,6 +8,8 @@
  *
  */
 
+<<file: __EnableUnstableFeatures('coeffects_provisional')>>
+
 <<__PHPStdLib>>
 function preg_grep(string $pattern, varray_or_darray $input, int $flags = 0);
 <<__PHPStdLib, __Pure>>

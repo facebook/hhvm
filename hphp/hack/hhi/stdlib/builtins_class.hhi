@@ -8,6 +8,8 @@
  *
  */
 
+<<file: __EnableUnstableFeatures('coeffects_provisional')>>
+
 namespace {
 <<__PHPStdLib>>
 function get_declared_classes();

@@ -8,6 +8,8 @@
  *
  */
 
+<<file: __EnableUnstableFeatures('coeffects_provisional')>>
+
 const int HTML_SPECIALCHARS = 0;
 const int HTML_ENTITIES = 1;
 

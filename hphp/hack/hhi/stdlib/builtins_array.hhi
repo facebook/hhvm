@@ -8,6 +8,8 @@
  *
  */
 
+<<file: __EnableUnstableFeatures('coeffects_provisional')>>
+
 // flags for array_change_key_case()
 const int CASE_LOWER = 0;
 const int CASE_UPPER = 0;

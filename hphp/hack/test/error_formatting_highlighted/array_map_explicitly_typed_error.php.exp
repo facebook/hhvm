@@ -25,8 +25,8 @@ array_map_explicitly_typed_error.php:8:5
         9 |     vec[2,3]);
        10 |   return $x[0];
 
-stdlib/builtins_array.hhi:121:31
-[3]   121 | No source found
+stdlib/builtins_array.hhi:123:31
+[3]   123 | No source found
 
 Typing[4110] Some elements in this collection are incompatible [1]
 -> Expected string [2]
@@ -43,7 +43,7 @@ array_map_explicitly_typed_error.php:8:5
         9 |     vec[2,3]);
        10 |   return $x[0];
 
-stdlib/builtins_array.hhi:121:31
-[3]   121 | No source found
+stdlib/builtins_array.hhi:123:31
+[3]   123 | No source found
 
 3 errors found.

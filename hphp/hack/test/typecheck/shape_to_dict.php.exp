@@ -12,5 +12,5 @@ File "shape_to_dict.php", line 25, characters 10-54:
 Invalid return type (Typing[4110])
   File "shape_to_dict.php", line 24, characters 22-40:
   Expected `darray<string, num>`
-  File "Shapes.hhi", line 69, characters 6-26:
+  File "Shapes.hhi", line 71, characters 6-26:
   But got `dict<string, num>`

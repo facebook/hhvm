@@ -8,6 +8,8 @@
  *
  */
 
+<<file: __EnableUnstableFeatures('coeffects_provisional')>>
+
 const int ZLIB_ENCODING_RAW = 0;
 const int ZLIB_ENCODING_GZIP = 0;
 const int ZLIB_ENCODING_DEFLATE = 0;

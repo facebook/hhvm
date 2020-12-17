@@ -1,8 +1,8 @@
 File "map_lambda_bad_pos.php", line 6, characters 23-46:
 Invalid argument (Typing[4110])
-File "map_lambda_bad_pos.php", line 6, characters 24-26:
-Expected `int`
-File "map_lambda_bad_pos.php", line 4, characters 19-24:
-But got `string`
-File "collections/Map.hhi", line 216, characters 64-65:
-  via this generic `Tk`
+  File "map_lambda_bad_pos.php", line 6, characters 24-26:
+  Expected `int`
+  File "map_lambda_bad_pos.php", line 4, characters 19-24:
+  But got `string`
+  File "collections/Map.hhi", line 218, characters 64-65:
+    via this generic `Tk`

@@ -8,6 +8,8 @@
  *
  */
 
+<<file: __EnableUnstableFeatures('coeffects_provisional')>>
+
 const int JSON_ERROR_NONE = 0;
 const int JSON_ERROR_DEPTH = 1;
 const int JSON_ERROR_STATE_MISMATCH = 2;

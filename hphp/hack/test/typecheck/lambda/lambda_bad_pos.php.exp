@@ -14,5 +14,5 @@ Invalid return type (Typing[4323])
     via this generic `Tv`
   File "interfaces.hhi", line 118, characters 84-85:
     via this generic `Tv`
-  File "rx/interfaces.hhi", line 35, characters 63-64:
+  File "rx/interfaces.hhi", line 37, characters 63-64:
     via this generic `Tv`

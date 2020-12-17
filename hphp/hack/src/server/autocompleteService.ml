@@ -390,9 +390,7 @@ let visitor =
     method! on_Class_get env cid mid in_parens =
       match mid with
       | Tast.CGstring p -> autocomplete_static_member env cid p
-      | Tast.CGexpr _ ->
-        ();
-        super#on_Class_get env cid mid in_parens
+      | Tast.CGexpr _ -> super#on_Class_get env cid mid in_parens
 
     method! on_Class_const env cid mid =
       autocomplete_static_member env cid mid;

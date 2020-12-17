@@ -2793,7 +2793,7 @@ let unset_nonidx_in_strict pos msgs =
     ( pos,
       "In `strict` mode, `unset` is banned except on dynamic, "
       ^ "darray, keyset, or dict indexing" )
-    ([] @ msgs)
+    msgs
 
 let unpacking_disallowed_builtin_function pos name =
   let name = strip_ns name in
@@ -3846,7 +3846,7 @@ let null_container p null_witness =
     ( p,
       "You are trying to access an element of this container"
       ^ " but the container could be `null`. " )
-    ([] @ null_witness)
+    null_witness
 
 let option_mixed pos =
   add

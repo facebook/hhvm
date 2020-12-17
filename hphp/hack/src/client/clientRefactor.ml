@@ -209,14 +209,10 @@ let go
     | "Method" ->
       let befores = Str.split (Str.regexp "::") before in
       if List.length befores <> 2 then
-        failwith "Before string should be of the format class::method"
-      else
-        ();
+        failwith "Before string should be of the format class::method";
       let afters = Str.split (Str.regexp "::") after in
       if List.length afters <> 2 then
-        failwith "After string should be of the format class::method"
-      else
-        ();
+        failwith "After string should be of the format class::method";
       let before_class = List.hd_exn befores in
       let before_method = List.hd_exn (List.tl_exn befores) in
       let after_class = List.hd_exn afters in

@@ -52,7 +52,6 @@ module Make (Ord : Set.OrderedType) = struct
     arr.(j) <- tmp
 
   and __bubble_up arr index =
-    if index = 0 then ();
     let pindex = (index - 1) / 2 in
     match (arr.(index), arr.(pindex)) with
     | (None, _)

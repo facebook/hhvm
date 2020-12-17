@@ -60,8 +60,6 @@ let test_ImmQueue () =
   match x with
   | Some _ -> failwith "expected none"
   | None ->
-    ();
-
     let queue =
       ImmQueue.push (ImmQueue.push (ImmQueue.push ImmQueue.empty 1) 2) 3
     in

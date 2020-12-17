@@ -21,8 +21,14 @@ use ocamlrep_derive::{FromOcamlRep, FromOcamlRepIn, ToOcamlRep};
     Serialize
 )]
 pub struct FilePosLarge {
+    /// line number. Starts at 1.
     lnum: usize,
+    /// character number of the beginning of line of this position.
+    /// The column number is therefore cnum - bol
+    /// Starts at 0
     bol: usize,
+    /// character number. Count starts at beginning of file, not at beginning of line.
+    /// Starts at 0.
     cnum: usize,
 }
 

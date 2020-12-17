@@ -7,6 +7,7 @@
  *
  *)
 
+(* See documentation in mli file *)
 type t = {
   pos_lnum: int;
   pos_bol: int;

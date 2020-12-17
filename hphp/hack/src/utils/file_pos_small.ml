@@ -36,7 +36,7 @@ let bol_bits = 30
 
 let mask bits = (1 lsl bits) - 1
 
-let mask_by bits x = x land mask bits
+let mask_by ~bits x = x land mask bits
 
 let max_column = mask column_bits
 
@@ -52,19 +52,19 @@ let beg_of_line (pos : t) =
   if is_dummy pos then
     0
   else
-    mask_by bol_bits (pos lsr (line_bits + column_bits))
+    mask_by ~bits:bol_bits (pos lsr (line_bits + column_bits))
 
 let line (pos : t) =
   if is_dummy pos then
     0
   else
-    mask_by line_bits (pos lsr column_bits)
+    mask_by ~bits:line_bits (pos lsr column_bits)
 
 let column (pos : t) =
   if is_dummy pos then
     -1
   else
-    mask_by column_bits pos
+    mask_by ~bits:column_bits pos
 
 let bol_line_col_unchecked bol line col =
   if col < 0 then
@@ -89,9 +89,6 @@ let beg_of_file = bol_line_col_unchecked 0 1 0
 
 (* constructors *)
 
-let of_line_column_offset ~line ~column ~offset =
-  bol_line_col (offset - column) line column
-
 let of_lexing_pos lp =
   bol_line_col
     lp.Lexing.pos_bol
@@ -115,7 +112,9 @@ let line_column_offset t = (line t, column t, offset t)
 
 let line_beg_offset t = (line t, beg_of_line t, offset t)
 
-let set_column c p = bol_line_col_unchecked (beg_of_line p) (line p) c
+let set_column_unchecked c p = bol_line_col_unchecked (beg_of_line p) (line p) c
+
+let set_column c p = bol_line_col (beg_of_line p) (line p) c
 
 let to_lexing_pos pos_fname t =
   {

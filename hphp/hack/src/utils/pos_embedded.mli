@@ -39,13 +39,24 @@ val end_line : 'a pos -> int
 
 val end_line_column : 'a pos -> int * int
 
-(* This returns a closed interval that's incorrect for multi-line spans. *)
+(** Return line number, beginning of line character number and character number of start position. *)
+val line_beg_offset : t -> int * int * int
+
+(** For spans over just one line, return the line number, start column and end column.
+    This returns a closed interval.
+    Undefined for multi-line spans. *)
 val info_pos : 'a pos -> int * int * int
 
-(* This returns a closed interval. *)
+(** Return start line, end line, start column and end column.
+    This returns a closed interval. *)
 val info_pos_extended : 'a pos -> int * int * int * int
 
+(** Return start character number and end character number. *)
 val info_raw : 'a pos -> int * int
+
+(** Return start line, start column, end line and end column.
+    This returns a half-open interval. *)
+val destruct_range : 'a pos -> int * int * int * int
 
 val length : 'a pos -> int
 
@@ -66,8 +77,6 @@ val json : absolute -> Hh_json.json
 
 (* This returns a half-open interval. *)
 val multiline_json : absolute -> Hh_json.json
-
-val line_beg_offset : t -> int * int * int
 
 val inside : 'a pos -> int -> int -> bool
 
@@ -112,9 +121,6 @@ val to_relative : absolute -> t
 val to_relative_string : t -> string pos
 
 val get_text_from_pos : content:string -> 'a pos -> string
-
-(* This returns a half-open interval. *)
-val destruct_range : 'a pos -> int * int * int * int
 
 (* Advance the ending position by one character *)
 val advance_one : 'a pos -> 'a pos

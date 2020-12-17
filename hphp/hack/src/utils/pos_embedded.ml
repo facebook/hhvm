@@ -76,7 +76,7 @@ let rec filename p =
   | Pos_large { pos_file; _ } -> pos_file
   | Pos_from_reason p -> filename p
 
-(* This returns a closed interval that's incorrect for multi-line spans. *)
+(** This returns a closed interval that's incorrect for multi-line spans. *)
 let rec info_pos p =
   match p with
   | Pos_small { pos_start; pos_end; _ } ->
@@ -405,7 +405,7 @@ let rec first_char_of_line p =
   else
     match p with
     | Pos_small { pos_start; pos_end = _; pos_file } ->
-      let start = File_pos_small.set_column 0 pos_start in
+      let start = File_pos_small.set_column_unchecked 0 pos_start in
       Pos_small { pos_start = start; pos_end = start; pos_file }
     | Pos_large { pos_start; pos_end = _; pos_file } ->
       let start = File_pos_large.set_column 0 pos_start in
@@ -444,14 +444,14 @@ let destruct_range (p : 'a pos) : int * int * int * int =
 let rec advance_one (p : 'a pos) : 'a pos =
   match p with
   | Pos_small { pos_file; pos_start; pos_end } ->
-    Pos_small
-      {
-        pos_file;
-        pos_start;
-        pos_end =
-          (let column = File_pos_small.column pos_end in
-           File_pos_small.set_column (column + 1) pos_end);
-      }
+    let end_column = File_pos_small.column pos_end in
+    (match File_pos_small.set_column (end_column + 1) pos_end with
+    | Some pos_end -> Pos_small { pos_file; pos_start; pos_end }
+    | None ->
+      let pos_start = small_to_large_file_pos pos_start in
+      let pos_end = small_to_large_file_pos pos_end in
+      let pos_end = File_pos_large.set_column (end_column + 1) pos_end in
+      Pos_large { pos_file; pos_start; pos_end })
   | Pos_large { pos_file; pos_start; pos_end } ->
     Pos_large
       {
@@ -469,15 +469,18 @@ let rec advance_one (p : 'a pos) : 'a pos =
 let rec shrink_by_one_char_both_sides (p : 'a pos) : 'a pos =
   match p with
   | Pos_small { pos_file; pos_start; pos_end } ->
-    let new_pos_start =
-      let column = File_pos_small.column pos_start in
-      File_pos_small.set_column (column + 1) pos_start
-    in
-    let new_pos_end =
+    let pos_end =
       let column = File_pos_small.column pos_end in
-      File_pos_small.set_column (column - 1) pos_end
+      File_pos_small.set_column_unchecked (column - 1) pos_end
     in
-    Pos_small { pos_file; pos_start = new_pos_start; pos_end = new_pos_end }
+    let start_column = File_pos_small.column pos_start in
+    (match File_pos_small.set_column (start_column + 1) pos_start with
+    | None ->
+      let pos_start = small_to_large_file_pos pos_start in
+      let pos_start = File_pos_large.set_column (start_column + 1) pos_start in
+      let pos_end = small_to_large_file_pos pos_end in
+      Pos_large { pos_file; pos_start; pos_end }
+    | Some pos_start -> Pos_small { pos_file; pos_start; pos_end })
   | Pos_large { pos_file; pos_start; pos_end } ->
     let new_pos_start =
       let column = File_pos_large.column pos_start in

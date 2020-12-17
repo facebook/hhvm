@@ -83,9 +83,9 @@ private:
   uint8_t sizeIndex() const;
   Value* rawData();
   const Value* rawData() const;
-  Value& valueRefUnchecked(uint32_t idx);
-  const Value& valueRefUnchecked(uint32_t idx) const;
-  TypedValue typedValueUnchecked(uint32_t idx) const;
+  Value& valueRefUnchecked(size_t idx);
+  const Value& valueRefUnchecked(size_t idx) const;
+  TypedValue typedValueUnchecked(size_t idx) const;
   MonotypeVec* prepareForInsert();
   MonotypeVec* copyHelper(uint8_t newSizeIndex, bool incRef) const;
   MonotypeVec* copy() const;

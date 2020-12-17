@@ -418,15 +418,15 @@ const Value* MonotypeVec::rawData() const {
   return const_cast<MonotypeVec*>(this)->rawData();
 }
 
-Value& MonotypeVec::valueRefUnchecked(uint32_t idx) {
+Value& MonotypeVec::valueRefUnchecked(size_t idx) {
   return rawData()[idx];
 }
 
-const Value& MonotypeVec::valueRefUnchecked(uint32_t idx) const {
+const Value& MonotypeVec::valueRefUnchecked(size_t idx) const {
   return const_cast<MonotypeVec*>(this)->valueRefUnchecked(idx);
 }
 
-TypedValue MonotypeVec::typedValueUnchecked(uint32_t idx) const {
+TypedValue MonotypeVec::typedValueUnchecked(size_t idx) const {
   return make_tv_of_type(valueRefUnchecked(idx), type());
 }
 

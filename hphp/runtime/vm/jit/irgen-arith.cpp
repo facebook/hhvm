@@ -1950,17 +1950,7 @@ void emitDiv(IRGS& env) {
     },
     [&] {
       hint(env, Block::Hint::Unlikely);
-
-      // PHP5 results in false; we side exit since the type of the result
-      // has now dramatically changed.
-      if (RuntimeOption::EvalForbidDivisionByZero) {
-        gen(env, ThrowDivisionByZeroException);
-      } else {
-        auto const msg = cns(env, s_DIVISION_BY_ZERO.get());
-        gen(env, RaiseWarning, msg);
-        push(env, cns(env, false));
-        gen(env, Jmp, makeExit(env, nextSrcKey(env)));
-        }
+      gen(env, ThrowDivisionByZeroException);
       }
   );
 
@@ -2023,19 +2013,7 @@ void emitMod(IRGS& env) {
     },
     [&] {
       hint(env, Block::Hint::Unlikely);
-
-      if (RuntimeOption::EvalForbidDivisionByZero) {
-        gen(env, ThrowDivisionByZeroException);
-      } else {
-        // Make progress before side-exiting to the next instruction: raise a
-        // warning and push false.
-        auto const msg = cns(env, s_DIVISION_BY_ZERO.get());
-        gen(env, RaiseWarning, msg);
-        decRef(env, btr);
-        decRef(env, btl);
-        push(env, cns(env, false));
-        gen(env, Jmp, makeExit(env, nextSrcKey(env)));
-      }
+      gen(env, ThrowDivisionByZeroException);
     }
   );
 

@@ -249,11 +249,7 @@ struct Mul {
 struct Div {
   TypedValue operator()(int64_t t, int64_t u) const {
     if (UNLIKELY(u == 0)) {
-      if (RuntimeOption::EvalForbidDivisionByZero) {
-        SystemLib::throwDivisionByZeroExceptionObject();
-      }
-      raise_warning(Strings::DIVISION_BY_ZERO);
-      return make_tv<KindOfBoolean>(false);
+      SystemLib::throwDivisionByZeroExceptionObject();
     }
 
     // Avoid SIGFPE when dividing the miniumum respresentable integer
@@ -272,11 +268,7 @@ struct Div {
     TypedValue
   >::type operator()(T t, U u) const {
     if (UNLIKELY(u == 0)) {
-      if (RuntimeOption::EvalForbidDivisionByZero) {
-        SystemLib::throwDivisionByZeroExceptionObject();
-      }
-      raise_warning(Strings::DIVISION_BY_ZERO);
-      return make_tv<KindOfBoolean>(false);
+      SystemLib::throwDivisionByZeroExceptionObject();
     }
     return make_dbl(t / u);
   }
@@ -679,12 +671,7 @@ TypedValue tvMod(TypedValue c1, TypedValue c2) {
   auto const i1 = tvToInt(c1);
   auto const i2 = tvToInt(c2);
   if (UNLIKELY(i2 == 0)) {
-    if (RuntimeOption::EvalForbidDivisionByZero) {
-      SystemLib::throwDivisionByZeroExceptionObject();
-    } else {
-      raise_warning(Strings::DIVISION_BY_ZERO);
-      return make_tv<KindOfBoolean>(false);
-    }
+    SystemLib::throwDivisionByZeroExceptionObject();
   }
 
   // This is to avoid SIGFPE in the case of INT64_MIN % -1.

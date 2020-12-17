@@ -204,5 +204,5 @@ final class ExternalThreadEventWaitHandle<+T> extends WaitableWaitHandle<T> {
 }
 
 <<__Pure>>
-function is_class(<<__MaybeMutable>> mixed $arg): bool;
+function is_class(<<__MaybeMutable>> mixed $arg)[]: bool;
 } // namespace HH

@@ -12,7 +12,7 @@
 
 namespace HH {
 <<__Pure>>
-function dynamic_fun(string $func_name): dynamic;
+function dynamic_fun(string $func_name)[]: dynamic;
 <<__Pure>>
-function dynamic_class_meth(string $cls_name, string $meth_name): dynamic;
+function dynamic_class_meth(string $cls_name, string $meth_name)[]: dynamic;
 }

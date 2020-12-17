@@ -34,6 +34,6 @@ function idx<Tk as arraykey, Tv>(
   ?KeyedContainer<Tk, Tv> $collection,
   ?Tk $index,
   $default = null,
-) {}
+)[] {}
 
 }

@@ -24,17 +24,17 @@ interface Throwable {
   // Documented as 'int' in PHP docs, but not actually guaranteed;
   // subclasses (e.g. PDO) can do what they want.
   <<__Pure, __MaybeMutable>>
-  public function getCode(): mixed;
+  public function getCode()[]: mixed;
   <<__Pure, __MaybeMutable>>
-  public function getFile(): string;
+  public function getFile()[]: string;
   <<__Pure, __MaybeMutable>>
-  public function getLine(): int;
+  public function getLine()[]: int;
   <<__Pure, __MaybeMutable>>
-  public function getTrace(): Container<mixed>;
+  public function getTrace()[]: Container<mixed>;
   <<__Pure, __MaybeMutable>>
-  public function getTraceAsString(): string;
+  public function getTraceAsString()[]: string;
   <<__Pure, __MaybeMutable>>
-  public function getPrevious(): ?Throwable;
+  public function getPrevious()[]: ?Throwable;
   public function __toString(): string;
   public function toString(): string;
 }
@@ -51,23 +51,23 @@ class Error implements Throwable {
     string $message = "",
     int $code = 0,
     ?Throwable $previous = null,
-  );
+  )[];
   <<__Pure, __MaybeMutable>>
-  final public function getMessage(): string;
+  final public function getMessage()[]: string;
   <<__Pure, __MaybeMutable>>
-  final public function getPrevious(): ?Throwable;
+  final public function getPrevious()[]: ?Throwable;
   <<__Pure, __MaybeMutable>>
-  final public function getCode(): mixed;
+  final public function getCode()[]: mixed;
   <<__Pure, __MaybeMutable>>
-  final public function getFile(): string;
+  final public function getFile()[]: string;
   <<__Pure, __MaybeMutable>>
-  final public function getLine(): int;
+  final public function getLine()[]: int;
   <<__Pure, __MaybeMutable>>
-  final public function getTrace(): varray<mixed>;
+  final public function getTrace()[]: varray<mixed>;
   <<__Pure, __MaybeMutable>>
-  final public function getTraceUntagged(): varray<mixed>;
+  final public function getTraceUntagged()[]: varray<mixed>;
   <<__Pure, __MaybeMutable>>
-  final public function getTraceAsString(): string;
+  final public function getTraceAsString()[]: string;
   public function __toString(): string;
   public function toString(): string;
   final private function __clone(): void;
@@ -92,26 +92,26 @@ class Exception implements Throwable {
     protected string $message = '',
     int $code = 0,
     protected ?Exception $previous = null,
-  );
+  )[];
   <<__Pure, __OnlyRxIfImpl(HH\Rx\Exception::class), __MaybeMutable>>
-  public function getMessage(): string;
+  public function getMessage()[]: string;
   <<__Pure, __MaybeMutable>>
-  final public function getPrevious(): ?Exception;
+  final public function getPrevious()[]: ?Exception;
   <<__Pure, __Mutable>>
-  public final function setPrevious(Exception $previous): void;
+  public final function setPrevious(Exception $previous)[]: void;
   <<__Pure, __MaybeMutable>>
-  public function getCode(): int;
+  public function getCode()[]: int;
   <<__Pure, __MaybeMutable>>
-  final public function getFile(): string;
+  final public function getFile()[]: string;
   <<__Pure, __MaybeMutable>>
-  final public function getLine(): int;
+  final public function getLine()[]: int;
   <<__Pure, __MaybeMutable>>
-  final public function getTrace(): varray<mixed>;
+  final public function getTrace()[]: varray<mixed>;
   <<__Pure, __MaybeMutable>>
-  final public function getTraceUntagged(): varray<mixed>;
+  final public function getTraceUntagged()[]: varray<mixed>;
   final protected function __prependTrace(Container<mixed> $trace): void;
   <<__Pure, __MaybeMutable>>
-  final public function getTraceAsString(): string;
+  final public function getTraceAsString()[]: string;
   public function __toString(): string;
   public function toString(): string;
   final private function __clone(): void;
@@ -129,9 +129,9 @@ class ErrorException extends Exception {
     string $filename = '' /* __FILE__ */,
     int $lineno = 0 /* __LINE__ */,
     ?Exception $previous = null
-  );
+  )[];
   <<__Pure, __MaybeMutable>>
-  public final function getSeverity(): int;
+  public final function getSeverity()[]: int;
 }
 
 class LogicException extends Exception {}

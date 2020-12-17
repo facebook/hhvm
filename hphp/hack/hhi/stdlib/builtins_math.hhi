@@ -34,93 +34,93 @@ const M_LNPI = 1.14472988584940017414;
 const M_EULER = 0.57721566490153286061;
 
 <<__PHPStdLib, __Pure>>
-function pi();
+function pi()[];
 <<__PHPStdLib, __Pure>>
-function min($value, ...$args);
+function min($value, ...$args)[];
 <<__PHPStdLib, __Pure>>
-function max($value, ...$args);
+function max($value, ...$args)[];
 <<__PHPStdLib, __Pure>>
-function abs($number);
+function abs($number)[];
 <<__PHPStdLib, __Pure>>
-function is_finite(float $val);
+function is_finite(float $val)[];
 <<__PHPStdLib, __Pure>>
-function is_infinite(float $val);
+function is_infinite(float $val)[];
 <<__PHPStdLib, __Pure>>
-function is_nan(float $val): bool;
+function is_nan(float $val)[]: bool;
 <<__PHPStdLib, __Pure>>
-function ceil($value);
+function ceil($value)[];
 <<__PHPStdLib, __Pure>>
-function floor($value): float;
+function floor($value)[]: float;
 <<__PHPStdLib, __Pure>>
-function round($val, int $precision = 0, int $mode = 1);
+function round($val, int $precision = 0, int $mode = 1)[];
 <<__PHPStdLib, __Pure>>
-function deg2rad(float $number);
+function deg2rad(float $number)[];
 <<__PHPStdLib, __Pure>>
-function rad2deg(float $number);
+function rad2deg(float $number)[];
 <<__PHPStdLib, __Pure>>
-function decbin($number);
+function decbin($number)[];
 <<__PHPStdLib, __Pure>>
-function decoct($number);
+function decoct($number)[];
 <<__PHPStdLib, __Pure>>
-function bindec($binary_string);
+function bindec($binary_string)[];
 <<__PHPStdLib, __Pure>>
-function hexdec($hex_string);
+function hexdec($hex_string)[];
 <<__PHPStdLib, __Pure>>
-function octdec($octal_string);
+function octdec($octal_string)[];
 <<__PHPStdLib, __Pure>>
-function base_convert($number, int $frombase, int $tobase);
+function base_convert($number, int $frombase, int $tobase)[];
 <<__PHPStdLib, __Pure>>
-function pow($base, $exp);
+function pow($base, $exp)[];
 <<__PHPStdLib, __Pure>>
-function exp(float $arg);
+function exp(float $arg)[];
 <<__PHPStdLib, __Pure>>
-function expm1(float $arg);
+function expm1(float $arg)[];
 <<__PHPStdLib, __Pure>>
-function log10(float $arg);
+function log10(float $arg)[];
 <<__PHPStdLib, __Pure>>
-function log1p(float $number);
+function log1p(float $number)[];
 <<__PHPStdLib, __Pure>>
-function log(float $arg, float $base = 0.0);
+function log(float $arg, float $base = 0.0)[];
 <<__PHPStdLib, __Pure>>
-function cos(float $arg);
+function cos(float $arg)[];
 <<__PHPStdLib, __Pure>>
-function cosh(float $arg);
+function cosh(float $arg)[];
 <<__PHPStdLib, __Pure>>
-function sin(float $arg);
+function sin(float $arg)[];
 <<__PHPStdLib, __Pure>>
-function sinh(float $arg);
+function sinh(float $arg)[];
 <<__PHPStdLib, __Pure>>
-function tan(float $arg);
+function tan(float $arg)[];
 <<__PHPStdLib, __Pure>>
-function tanh(float $arg);
+function tanh(float $arg)[];
 <<__PHPStdLib, __Pure>>
-function acos(float $arg);
+function acos(float $arg)[];
 <<__PHPStdLib, __Pure>>
-function acosh(float $arg);
+function acosh(float $arg)[];
 <<__PHPStdLib, __Pure>>
-function asin(float $arg);
+function asin(float $arg)[];
 <<__PHPStdLib, __Pure>>
-function asinh(float $arg);
+function asinh(float $arg)[];
 <<__PHPStdLib, __Pure>>
-function atan(float $arg);
+function atan(float $arg)[];
 <<__PHPStdLib, __Pure>>
-function atanh(float $arg);
+function atanh(float $arg)[];
 <<__PHPStdLib, __Pure>>
-function atan2(float $y, float $x);
+function atan2(float $y, float $x)[];
 <<__PHPStdLib, __Pure>>
-function hypot(float $x, float $y);
+function hypot(float $x, float $y)[];
 <<__PHPStdLib, __Pure>>
-function fmod(float $x, float $y);
+function fmod(float $x, float $y)[];
 <<__PHPStdLib, __Pure>>
-function sqrt(float $arg);
+function sqrt(float $arg)[];
 <<__PHPStdLib, __Pure>>
-function getrandmax();
+function getrandmax()[];
 <<__PHPStdLib, __NonRx('Randomness')>>
 function srand($seed = null);
 <<__PHPStdLib, __NonRx('Randomness')>>
 function rand(int $min = 0, $max = -1 /* getrandmax */ );
 <<__PHPStdLib, __Pure>>
-function mt_getrandmax();
+function mt_getrandmax()[];
 <<__PHPStdLib, __NonRx('Randomness')>>
 function mt_srand($seed = null);
 <<__PHPStdLib, __NonRx('Randomness')>>
@@ -128,4 +128,4 @@ function mt_rand(int $min = 0, $max = -1 /* mt_getrandmax */ );
 <<__PHPStdLib, __NonRx('Randomness')>>
 function lcg_value();
 <<__PHPStdLib, __Pure>>
-function intdiv(int $numerator, int $denominator): int;
+function intdiv(int $numerator, int $denominator)[]: int;

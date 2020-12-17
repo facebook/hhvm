@@ -35,11 +35,11 @@ const SETPROFILE_FLAGS_THIS_OBJECT__MAY_BREAK = 32;
 const int PREG_FB__PRIVATE__HSL_IMPL = (1 << 29);
 
 <<__PHPStdLib, __Pure>>
-function fb_serialize($thing, int $options = 0);
+function fb_serialize($thing, int $options = 0)[];
 <<__PHPStdLib>>
 function fb_unserialize($thing, inout $success, int $options = 0);
 <<__PHPStdLib, __Pure>>
-function fb_compact_serialize($thing);
+function fb_compact_serialize($thing)[];
 <<__PHPStdLib>>
 function fb_compact_unserialize($thing, inout $success, inout $errcode);
 <<__PHPStdLib>>
@@ -51,9 +51,9 @@ function fb_rename_function(string $orig_func_name, string $new_func_name);
 <<__PHPStdLib>>
 function fb_utf8ize(inout $input);
 <<__PHPStdLib, __Pure>>
-function fb_utf8_strlen(string $input);
+function fb_utf8_strlen(string $input)[];
 <<__PHPStdLib, __Pure>>
-function fb_utf8_substr(string $str, int $start, int $length = PHP_INT_MAX);
+function fb_utf8_substr(string $str, int $start, int $length = PHP_INT_MAX)[];
 <<__PHPStdLib>>
 function fb_get_code_coverage(bool $flush);
 <<__PHPStdLib>>

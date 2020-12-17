@@ -20,60 +20,60 @@
 // in fact act as special expression subtypes within the runtime
 namespace {
 <<__Pure>>
-function isset(<<__MaybeMutable>> $x): bool;
+function isset(<<__MaybeMutable>> $x)[]: bool;
 <<__Pure>>
-function unset(<<__MaybeMutable>> $x): void;
+function unset(<<__MaybeMutable>> $x)[]: void;
 //
 <<__PHPStdLib, __Pure>>
-function array_fill<T>(int $start_index, int $num, T $value): varray_or_darray<T>;
+function array_fill<T>(int $start_index, int $num, T $value)[]: varray_or_darray<T>;
 // TODO make non-nullable once Thrift files are fixed
 <<__PHPStdLib, __Pure>>
-function chr(int $ascii): string;
+function chr(int $ascii)[]: string;
 <<__PHPStdLib, __Pure>>
-function count(<<__MaybeMutable>> mixed $x, int $mode = COUNT_NORMAL): int; // count takes Countable or array. We'll need to hardcode this...
+function count(<<__MaybeMutable>> mixed $x, int $mode = COUNT_NORMAL)[]: int; // count takes Countable or array. We'll need to hardcode this...
 <<__PHPStdLib, __Pure>>
-function dechex(int $number): string;
+function dechex(int $number)[]: string;
 <<__PHPStdLib, __Pure>>
-function implode(string $glue, <<__MaybeMutable>> $pieces): string; // could be Container<Stringish>
+function implode(string $glue, <<__MaybeMutable>> $pieces)[]: string; // could be Container<Stringish>
 <<__PHPStdLib, __Pure>>
-function explode(string $delimiter, string $str, int $limit = 0x7FFFFFFF): varray<string>; // : array<string> & false for '' delimiter
+function explode(string $delimiter, string $str, int $limit = 0x7FFFFFFF)[]: varray<string>; // : array<string> & false for '' delimiter
 }
 
 namespace HH {
 <<__Pure>>
-function is_vec(<<__MaybeMutable>> mixed $arg): bool;
+function is_vec(<<__MaybeMutable>> mixed $arg)[]: bool;
 <<__Pure>>
-function is_dict(<<__MaybeMutable>> mixed $arg): bool;
+function is_dict(<<__MaybeMutable>> mixed $arg)[]: bool;
 <<__Pure>>
-function is_keyset(<<__MaybeMutable>> mixed $arg): bool;
+function is_keyset(<<__MaybeMutable>> mixed $arg)[]: bool;
 
 /**
  * @returns True if `$arg` is a `varray`, `darray`, `dict`, `vec`, or `keyset`.
  * Otherwise returns false.
  */
 <<__Pure>>
-function is_any_array(<<__MaybeMutable>> mixed $arg): bool;
+function is_any_array(<<__MaybeMutable>> mixed $arg)[]: bool;
 }
 
 namespace {
 <<__PHPStdLib, __Pure>>
-function ord(string $string): int;
+function ord(string $string)[]: int;
 <<__PHPStdLib>>
 function strip_tags(string $str, string $allowable_tags = ''): string;
 
 <<__PHPStdLib, __Pure>>
-function intval($v, int $base = 10): int;
+function intval($v, int $base = 10)[]: int;
 <<__PHPStdLib, __Pure>>
-function doubleval($v): float;
+function doubleval($v)[]: float;
 <<__PHPStdLib, __Pure>>
-function floatval($v): float;
+function floatval($v)[]: float;
 <<__PHPStdLib, __Pure>>
-function strval($v): string;
+function strval($v)[]: string;
 <<__PHPStdLib, __Pure>>
-function boolval($v): bool;
+function boolval($v)[]: bool;
 
 <<__PHPStdLib, __Pure>>
-function get_class_constants(string $class_name): darray<string, mixed>;
+function get_class_constants(string $class_name)[]: darray<string, mixed>;
 
 // the return value is an instance with class $class
 // do **not** use this in your code, call newv() instead
@@ -141,16 +141,16 @@ namespace HH {
   function clear_instance_memoization($obj) : bool;
 
   <<__Pure>>
-  function is_list_like(<<__MaybeMutable>> mixed $arg): bool;
+  function is_list_like(<<__MaybeMutable>> mixed $arg)[]: bool;
   <<__Pure>>
-  function is_class_meth(<<__MaybeMutable>> mixed $arg): bool;
+  function is_class_meth(<<__MaybeMutable>> mixed $arg)[]: bool;
   <<__Pure>>
-  function is_meth_caller(<<__MaybeMutable>> mixed $arg): bool;
+  function is_meth_caller(<<__MaybeMutable>> mixed $arg)[]: bool;
   <<__Pure>>
-  function is_fun(<<__MaybeMutable>> mixed $arg): bool;
+  function is_fun(<<__MaybeMutable>> mixed $arg)[]: bool;
 
   <<__Pure>>
-  function set_frame_metadata(mixed $metadata): void;
+  function set_frame_metadata(mixed $metadata)[]: void;
 
   // Code coverage
   function enable_per_file_coverage(keyset<string> $files): void;

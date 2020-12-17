@@ -13,13 +13,13 @@
 <<__PHPStdLib>>
 function hash(string $algo, string $data, bool $raw_output = false);
 <<__PHPStdLib, __Pure>>
-function hash_algos();
+function hash_algos()[];
 <<__PHPStdLib>>
 function hash_init(string $algo, int $options = 0, string $key = "");
 <<__PHPStdLib>>
 function hash_copy(resource $algo) { }
 <<__PHPStdLib, __Pure>>
-function hash_equals(string $known_string, string $user_string);
+function hash_equals(string $known_string, string $user_string)[];
 <<__PHPStdLib>>
 function hash_file(string $algo, string $filename, bool $raw_output = false);
 <<__PHPStdLib>>
@@ -37,8 +37,8 @@ function hash_update_stream($context, $handle, int $length = -1);
 <<__PHPStdLib>>
 function hash_update(resource $context, string $data);
 <<__PHPStdLib, __Pure>>
-function furchash_hphp_ext(string $key, int $len, int $nPart);
+function furchash_hphp_ext(string $key, int $len, int $nPart)[];
 <<__PHPStdLib, __Pure>>
-function furchash_hphp_ext_supported();
+function furchash_hphp_ext_supported()[];
 <<__PHPStdLib, __Pure>>
-function hphp_murmurhash(string $key, int $len, int $seed);
+function hphp_murmurhash(string $key, int $len, int $seed)[];

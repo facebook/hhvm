@@ -86,6 +86,6 @@ function xml_get_error_code(resource $parser);
 <<__PHPStdLib>>
 function xml_error_string(int $code);
 <<__PHPStdLib, __Pure>>
-function utf8_decode(string $data);
+function utf8_decode(string $data)[];
 <<__PHPStdLib, __Pure>>
-function utf8_encode(string $data);
+function utf8_encode(string $data)[];

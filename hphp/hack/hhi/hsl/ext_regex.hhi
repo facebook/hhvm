@@ -56,7 +56,7 @@ namespace HH\Lib\_Private\_Regex {
     string $haystack,
     \HH\Lib\Regex\Pattern<T> $pattern,
     inout int $offset,
-  ): (?T, ?int);
+  )[]: (?T, ?int);
 
   /**
    * Tries to match $pattern in $haystack, replacing any matches with
@@ -70,5 +70,5 @@ namespace HH\Lib\_Private\_Regex {
     string $haystack,
     \HH\Lib\Regex\Pattern<\HH\Lib\Regex\Match> $pattern,
     string $replacement,
-  ): (?string, ?int);
+  )[]: (?string, ?int);
 }

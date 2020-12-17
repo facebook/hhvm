@@ -183,7 +183,7 @@ function inst_meth($inst, string $meth_name); // becomes:
 function invariant(
   $condition, // e.g. is_int($x) or ($y instanceof SomeClass)
   FormatString<\PlainSprintf> $f, ...$f_args
-): void; // becomes:
+)[]: void; // becomes:
 // if (!(<condition>)) { // an Exception is thrown
 //   invariant_violation('sprintf format: %s', 'string', ...);
 // }

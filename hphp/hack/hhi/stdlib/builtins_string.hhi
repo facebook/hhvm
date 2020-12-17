@@ -34,29 +34,29 @@ const int LC_TIME = 2;
 const string HPHP_TRIM_CHARLIST = "\n\r\t\013\000 ";
 
 <<__PHPStdLib, __Pure>>
-function addcslashes(string $str, string $charlist);
+function addcslashes(string $str, string $charlist)[];
 <<__PHPStdLib, __Pure>>
-function stripcslashes(string $str);
+function stripcslashes(string $str)[];
 <<__PHPStdLib, __Pure>>
-function addslashes(string $str);
+function addslashes(string $str)[];
 <<__PHPStdLib, __Pure>>
-function stripslashes(string $str);
+function stripslashes(string $str)[];
 <<__PHPStdLib, __Pure>>
-function bin2hex(string $str);
+function bin2hex(string $str)[];
 <<__PHPStdLib>>
 function hex2bin(string $str);
 <<__PHPStdLib, __Pure>>
-function nl2br(string $str);
+function nl2br(string $str)[];
 <<__PHPStdLib, __Pure>>
-function quotemeta(string $str);
+function quotemeta(string $str)[];
 <<__PHPStdLib>>
 function str_shuffle(string $str);
 <<__PHPStdLib, __Pure>>
-function strrev(string $str);
+function strrev(string $str)[];
 <<__PHPStdLib, __Pure>>
-function strtolower(string $str);
+function strtolower(string $str)[];
 <<__PHPStdLib, __Pure>>
-function strtoupper(string $str);
+function strtoupper(string $str)[];
 <<__PHPStdLib>>
 function ucfirst(string $str);
 <<__PHPStdLib>>
@@ -64,19 +64,19 @@ function lcfirst(string $str);
 <<__PHPStdLib>>
 function ucwords(string $str, string $delimiters = " \t\r\n\f\v");
 <<__PHPStdLib, __Pure>>
-function trim(string $str, string $charlist = HPHP_TRIM_CHARLIST)/*: string*/;
+function trim(string $str, string $charlist = HPHP_TRIM_CHARLIST)[]/*: string*/;
 <<__PHPStdLib, __Pure>>
-function ltrim(string $str, string $charlist = HPHP_TRIM_CHARLIST)/*: string*/;
+function ltrim(string $str, string $charlist = HPHP_TRIM_CHARLIST)[]/*: string*/;
 <<__PHPStdLib, __Pure>>
-function rtrim(string $str, string $charlist = HPHP_TRIM_CHARLIST)/*: string*/;
+function rtrim(string $str, string $charlist = HPHP_TRIM_CHARLIST)[]/*: string*/;
 <<__PHPStdLib, __Pure>>
-function chop(string $str, string $charlist = HPHP_TRIM_CHARLIST);
+function chop(string $str, string $charlist = HPHP_TRIM_CHARLIST)[];
 <<__Deprecated('Use implode().'), __PHPStdLib, __Pure>>
-function join($glue, $pieces = null);
+function join($glue, $pieces = null)[];
 <<__PHPStdLib, __Pure>>
-function str_split(string $str, int $split_length = 1);
+function str_split(string $str, int $split_length = 1)[];
 <<__PHPStdLib, __Pure>>
-function chunk_split(string $body, int $chunklen = 76, string $end = "\r\n");
+function chunk_split(string $body, int $chunklen = 76, string $end = "\r\n")[];
 <<__PHPStdLib>>
 function strtok(string $str, $token = null);
 /**
@@ -94,7 +94,7 @@ function strtok(string $str, $token = null);
 <<__PHPStdLib>>
 function str_getcsv(string $input, string $delimiter = ",", string $enclosure = "\"", string $escape = "\\"): varray<?string>;
 <<__PHPStdLib, __Pure>>
-function str_replace($search, $replace, $subject);
+function str_replace($search, $replace, $subject)[];
 <<__PHPStdLib>>
 function str_replace_with_count($search, $replace, $subject, inout $count);
 <<__PHPStdLib>> // not pure: uses global locale for capitalization
@@ -102,13 +102,13 @@ function str_ireplace($search, $replace, $subject);
 <<__PHPStdLib>>
 function str_ireplace_with_count($search, $replace, $subject, inout $count);
 <<__PHPStdLib, __Pure>>
-function substr_replace($str, $replacement, $start, $length = 0x7FFFFFFF);
+function substr_replace($str, $replacement, $start, $length = 0x7FFFFFFF)[];
 <<__PHPStdLib, __Pure>>
-function substr(string $str, int $start, int $length = 0x7FFFFFFF);
+function substr(string $str, int $start, int $length = 0x7FFFFFFF)[];
 <<__PHPStdLib, __Pure>>
-function str_pad(string $input, int $pad_length, string $pad_string = " ", int $pad_type = STR_PAD_RIGHT);
+function str_pad(string $input, int $pad_length, string $pad_string = " ", int $pad_type = STR_PAD_RIGHT)[];
 <<__PHPStdLib, __Pure>>
-function str_repeat(string $input, int $multiplier);
+function str_repeat(string $input, int $multiplier)[];
 <<__PHPStdLib>>
 function wordwrap(string $str, int $width = 75, string $wordbreak = "\n", bool $cut = false);
 <<__PHPStdLib>>
@@ -120,27 +120,27 @@ function htmlspecialchars_decode(string $str, int $quote_style = ENT_COMPAT): st
 <<__PHPStdLib>>
 function htmlspecialchars(string $str, int $quote_style = ENT_COMPAT, string $charset = "ISO-8859-1", bool $double_encode = true): string;
 <<__PHPStdLib, __Pure>>
-function quoted_printable_encode(string $str);
+function quoted_printable_encode(string $str)[];
 <<__PHPStdLib, __Pure>>
-function quoted_printable_decode(string $str);
+function quoted_printable_decode(string $str)[];
 <<__PHPStdLib, __Pure>>
-function convert_uudecode(string $data);
+function convert_uudecode(string $data)[];
 <<__PHPStdLib, __Pure>>
-function convert_uuencode(string $data);
+function convert_uuencode(string $data)[];
 <<__PHPStdLib, __Pure>>
-function str_rot13(string $str);
+function str_rot13(string $str)[];
 <<__PHPStdLib, __Pure>>
-function crc32(string $str);
+function crc32(string $str)[];
 <<__PHPStdLib>>
 function crypt(string $str, string $salt = "");
 <<__PHPStdLib, __Pure>>
-function md5(string $str, bool $raw_output = false);
+function md5(string $str, bool $raw_output = false)[];
 <<__PHPStdLib, __Pure>>
-function sha1(string $str, bool $raw_output = false);
+function sha1(string $str, bool $raw_output = false)[];
 <<__PHPStdLib, __Pure>>
-function strtr(string $str, $from, $to = null);
+function strtr(string $str, $from, $to = null)[];
 <<__PHPStdLib, __Pure>>
-function convert_cyr_string(string $str, string $from, string $to);
+function convert_cyr_string(string $str, string $from, string $to)[];
 <<__PHPStdLib>>
 function get_html_translation_table(int $table = 0, int $quote_style = ENT_COMPAT);
 <<__PHPStdLib>>
@@ -156,65 +156,65 @@ function nl_langinfo(int $item);
 <<__PHPStdLib>>
 function vprintf($format, $args);
 <<__PHPStdLib, __Pure>>
-function vsprintf($format, $args);
+function vsprintf($format, $args)[];
 <<__Pure>>
-function sscanf(string $str, string $format);
+function sscanf(string $str, string $format)[];
 <<__PHPStdLib>>
 function money_format(string $format, float $number);
 <<__PHPStdLib, __Pure>>
-function number_format(float $number, int $decimals = 0, $dec_point = ".", $thousands_sep = ",");
+function number_format(float $number, int $decimals = 0, $dec_point = ".", $thousands_sep = ",")[];
 <<__PHPStdLib, __Pure>>
-function strcmp(string $str1, string $str2);
+function strcmp(string $str1, string $str2)[];
 <<__PHPStdLib, __Pure>>
-function strncmp(string $str1, string $str2, int $len);
+function strncmp(string $str1, string $str2, int $len)[];
 <<__PHPStdLib, __Pure>>
-function strnatcmp(string $str1, string $str2);
+function strnatcmp(string $str1, string $str2)[];
 <<__PHPStdLib, __Pure>>
-function strcasecmp(string $str1, string $str2);
+function strcasecmp(string $str1, string $str2)[];
 <<__PHPStdLib, __Pure>>
-function strncasecmp(string $str1, string $str2, int $len);
+function strncasecmp(string $str1, string $str2, int $len)[];
 <<__PHPStdLib, __Pure>>
-function strnatcasecmp(string $str1, string $str2);
+function strnatcasecmp(string $str1, string $str2)[];
 <<__PHPStdLib, __Pure>>
-function strcoll(string $str1, string $str2);
+function strcoll(string $str1, string $str2)[];
 <<__PHPStdLib, __Pure>>
-function substr_compare(string $main_str, string $str, int $offset, int $length = PHP_INT_MAX, bool $case_insensitivity = false);
+function substr_compare(string $main_str, string $str, int $offset, int $length = PHP_INT_MAX, bool $case_insensitivity = false)[];
 <<__PHPStdLib, __Pure>>
-function strchr(string $haystack, $needle);
+function strchr(string $haystack, $needle)[];
 <<__PHPStdLib, __Pure>>
-function strrchr(string $haystack, $needle);
+function strrchr(string $haystack, $needle)[];
 <<__PHPStdLib, __Pure>>
-function strstr(string $haystack, $needle, bool $before_needle = false);
+function strstr(string $haystack, $needle, bool $before_needle = false)[];
 <<__PHPStdLib, __Pure>>
-function stristr(string $haystack, $needle, bool $before_needle = false);
+function stristr(string $haystack, $needle, bool $before_needle = false)[];
 <<__PHPStdLib, __Pure>>
-function strpbrk(string $haystack, string $char_list);
+function strpbrk(string $haystack, string $char_list)[];
 <<__PHPStdLib, __Pure>>
-function strpos(string $haystack, $needle, int $offset = 0);
+function strpos(string $haystack, $needle, int $offset = 0)[];
 <<__PHPStdLib, __Pure>>
-function stripos(string $haystack, $needle, int $offset = 0);
+function stripos(string $haystack, $needle, int $offset = 0)[];
 <<__PHPStdLib, __Pure>>
-function strrpos(string $haystack, $needle, int $offset = 0);
+function strrpos(string $haystack, $needle, int $offset = 0)[];
 <<__PHPStdLib, __Pure>>
-function strripos(string $haystack, $needle, int $offset = 0);
+function strripos(string $haystack, $needle, int $offset = 0)[];
 <<__PHPStdLib, __Pure>>
-function substr_count(string $haystack, string $needle, int $offset = 0, int $length = 0x7FFFFFFF);
+function substr_count(string $haystack, string $needle, int $offset = 0, int $length = 0x7FFFFFFF)[];
 <<__PHPStdLib, __Pure>>
-function strspn(string $str1, string $str2, int $start = 0, int $length = 0x7FFFFFFF);
+function strspn(string $str1, string $str2, int $start = 0, int $length = 0x7FFFFFFF)[];
 <<__PHPStdLib, __Pure>>
-function strcspn(string $str1, string $str2, int $start = 0, int $length = 0x7FFFFFFF);
+function strcspn(string $str1, string $str2, int $start = 0, int $length = 0x7FFFFFFF)[];
 <<__PHPStdLib, __Pure>>
-function strlen(string $vstr): int;
+function strlen(string $vstr)[]: int;
 <<__PHPStdLib, __Pure>>
-function count_chars(string $str, int $mode = 0);
+function count_chars(string $str, int $mode = 0)[];
 <<__PHPStdLib, __Pure>>
-function str_word_count(string $str, int $format = 0, string $charlist = "");
+function str_word_count(string $str, int $format = 0, string $charlist = "")[];
 <<__PHPStdLib, __Pure>>
-function levenshtein(string $str1, string $str2, int $cost_ins = 1, int $cost_rep = 1, int $cost_del = 1);
+function levenshtein(string $str1, string $str2, int $cost_ins = 1, int $cost_rep = 1, int $cost_del = 1)[];
 <<__PHPStdLib>>
 function similar_text(string $first, string $second, inout $percent);
 <<__PHPStdLib, __Pure>>
-function soundex(string $str);
+function soundex(string $str)[];
 <<__PHPStdLib, __Pure>>
-function metaphone(string $str, int $phones = 0);
+function metaphone(string $str, int $phones = 0)[];
 function parse_str(string $str, inout $arr);

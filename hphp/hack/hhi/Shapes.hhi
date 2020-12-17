@@ -38,7 +38,7 @@ abstract final class Shapes {
     ?shape(...) $shape,
     arraykey $index,
     $default = null,
-  );
+  )[];
 
   /**
    * Check if a field in shape exists.
@@ -48,7 +48,7 @@ abstract final class Shapes {
   public static function keyExists(
     shape(...) $shape,
     arraykey $index
-  ): bool;
+  )[]: bool;
 
   /**
    * Removes the $index field from the $shape (passed in as an inout argument).
@@ -58,17 +58,17 @@ abstract final class Shapes {
   public static function removeKey<T as shape(...)>(
     inout T $shape,
     arraykey $index
-  ): void;
+  )[]: void;
 
   <<__Pure>>
   public static function toArray(
     shape(...) $shape
-  ): darray<arraykey, mixed>;
+  )[]: darray<arraykey, mixed>;
 
   <<__Pure>>
   public static function toDict(
     shape(...) $shape
-  ): dict<arraykey, mixed>;
+  )[]: dict<arraykey, mixed>;
 
   /**
    * Returns the value of the field $index of $shape,
@@ -79,7 +79,7 @@ abstract final class Shapes {
   public static function at(
     shape(...) $shape,
     arraykey $index,
-  );
+  )[];
 
 }
 

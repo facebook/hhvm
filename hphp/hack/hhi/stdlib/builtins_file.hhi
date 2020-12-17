@@ -149,7 +149,7 @@ function link(string $target, string $link);
 <<__PHPStdLib>>
 function symlink(string $target, string $link);
 <<__PHPStdLib, __Pure>>
-function basename(string $path, string $suffix = "");
+function basename(string $path, string $suffix = "")[];
 <<__PHPStdLib>>
 function fnmatch(string $pattern, string $filename, int $flags = 0);
 <<__PHPStdLib>>
@@ -219,7 +219,7 @@ function mkdir(string $pathname, int $mode = 0777, bool $recursive = false, $con
 <<__PHPStdLib>>
 function rmdir(string $dirname, $context = null);
 <<__PHPStdLib, __Pure>>
-function dirname(string $path);
+function dirname(string $path)[];
 <<__PHPStdLib>>
 function getcwd();
 <<__PHPStdLib>>

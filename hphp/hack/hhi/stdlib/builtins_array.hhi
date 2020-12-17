@@ -55,24 +55,24 @@ const int UCOL_NUMERIC_COLLATION = 0;
 const int TAG_PROVENANCE_HERE_DONT_WARN_ON_OBJECTS = 0;
 
 <<__PHPStdLib, __Pure>>
-function array_change_key_case<Tv>(<<__MaybeMutable>> KeyedContainer<arraykey, Tv> $input, int $upper = CASE_LOWER): darray<arraykey, Tv>;
+function array_change_key_case<Tv>(<<__MaybeMutable>> KeyedContainer<arraykey, Tv> $input, int $upper = CASE_LOWER)[]: darray<arraykey, Tv>;
 /** inner container will be a varray or darray depending on $preserve_keys */
 <<__PHPStdLib, __Pure>>
-function array_chunk<Tv>(<<__MaybeMutable>> Container<Tv> $input, int $size, bool $preserve_keys = false): varray<Container<int>>;
+function array_chunk<Tv>(<<__MaybeMutable>> Container<Tv> $input, int $size, bool $preserve_keys = false)[]: varray<Container<int>>;
 <<__PHPStdLib, __Pure>>
-function array_combine<Tv1 as arraykey, Tv2>(<<__MaybeMutable>> Container<Tv1> $keys, <<__MaybeMutable>> Container<Tv2> $values): darray<Tv1, Tv2>;
+function array_combine<Tv1 as arraykey, Tv2>(<<__MaybeMutable>> Container<Tv1> $keys, <<__MaybeMutable>> Container<Tv2> $values)[]: darray<Tv1, Tv2>;
 <<__PHPStdLib, __Pure>>
-function array_count_values<Tv as arraykey>(Container<Tv> $input): darray<Tv, int>;
+function array_count_values<Tv as arraykey>(Container<Tv> $input)[]: darray<Tv, int>;
 <<__PHPStdLib, __Pure>>
 function array_column<Tv>(
   <<__MaybeMutable>> Container<KeyedContainer<arraykey, Tv>> $array,
   ?arraykey $column_key,
-): varray_or_darray<Tv>;
+)[]: varray_or_darray<Tv>;
 <<__PHPStdLib, __Pure>>
 function array_fill_keys<Tk as arraykey, Tv>(
   <<__MaybeMutable>> Container<Tk> $keys,
   Tv $value,
-): darray<Tk, Tv>;
+)[]: darray<Tk, Tv>;
 /*
  * Calls to array_filter are rewritten depending on the type
  * of argument to have one of the following signatures:
@@ -89,13 +89,13 @@ function array_fill_keys<Tk as arraykey, Tv>(
 <<__PHPStdLib>>
 function array_filter<Tv>(Container<Tv> $input, ?(function(Tv):bool) $callback = null);
 <<__PHPStdLib, __Pure>>
-function array_flip(<<__MaybeMutable>> $trans);
+function array_flip(<<__MaybeMutable>> $trans)[];
 <<__PHPStdLib, __Pure>>
-function key_exists($key, <<__MaybeMutable>> $search);
+function key_exists($key, <<__MaybeMutable>> $search)[];
 <<__PHPStdLib, __Pure>>
 function array_keys<Tk as arraykey>(
   <<__MaybeMutable>> KeyedContainer<Tk, mixed> $input,
-): varray<Tk>;
+)[]: varray<Tk>;
 /**
  * array_map signature is rewritten based on the arity of the call:
  *
@@ -122,13 +122,13 @@ function array_keys<Tk as arraykey>(
 <<__PHPStdLib>>
 function array_map($callback, $arr1, ...$args);
 <<__PHPStdLib, __Pure>>
-function array_merge_recursive($array1, ...$args);
+function array_merge_recursive($array1, ...$args)[];
 <<__PHPStdLib, __Pure>>
-function array_merge($array1, ...$args);
+function array_merge($array1, ...$args)[];
 <<__PHPStdLib, __Pure>>
-function array_replace_recursive($array1, ...$args);
+function array_replace_recursive($array1, ...$args)[];
 <<__PHPStdLib, __Pure>>
-function array_replace($array1, ...$args);
+function array_replace($array1, ...$args)[];
 <<__PHPStdLib>>
 function array_multisort1(
   inout mixed $arg1,
@@ -202,23 +202,23 @@ function array_multisort9(
   inout mixed $arg9,
 );
 <<__PHPStdLib, __Pure>>
-function array_pad(<<__MaybeMutable>> $input, int $pad_size, $pad_value);
+function array_pad(<<__MaybeMutable>> $input, int $pad_size, $pad_value)[];
 <<__PHPStdLib, __Pure, __AtMostRxAsArgs>>
-function array_pop(<<__OnlyRxIfImpl(AnyArray::class)>> inout $array);
+function array_pop(<<__OnlyRxIfImpl(AnyArray::class)>> inout $array)[];
 <<__PHPStdLib, __Pure, __AtMostRxAsArgs>>
-function array_push(<<__OnlyRxIfImpl(AnyArray::class)>> inout $array, $var, ...$args);
+function array_push(<<__OnlyRxIfImpl(AnyArray::class)>> inout $array, $var, ...$args)[];
 <<__PHPStdLib>>
 function array_rand($input, int $num_req = 1);
 <<__PHPStdLib>>
 function array_reduce($input, $callback, $initial = null);
 <<__PHPStdLib, __Pure>>
-function array_reverse(<<__MaybeMutable>> $array, bool $preserve_keys = false);
+function array_reverse(<<__MaybeMutable>> $array, bool $preserve_keys = false)[];
 <<__PHPStdLib, __Pure>>
-function array_search($needle, <<__MaybeMutable>> $haystack, bool $strict = false);
+function array_search($needle, <<__MaybeMutable>> $haystack, bool $strict = false)[];
 <<__PHPStdLib, __Pure, __AtMostRxAsArgs>>
-function array_shift(<<__OnlyRxIfImpl(AnyArray::class)>> inout $array);
+function array_shift(<<__OnlyRxIfImpl(AnyArray::class)>> inout $array)[];
 <<__PHPStdLib, __Pure>>
-function array_slice(<<__MaybeMutable>> $array, int $offset, $length = null, bool $preserve_keys = false);
+function array_slice(<<__MaybeMutable>> $array, int $offset, $length = null, bool $preserve_keys = false)[];
 <<__PHPStdLib>>
 function array_splice(
   inout mixed $input,
@@ -227,28 +227,28 @@ function array_splice(
   mixed $replacement = null,
 );
 <<__PHPStdLib, __Pure>>
-function array_unique(<<__MaybeMutable>> $array, int $sort_flags = 2);
+function array_unique(<<__MaybeMutable>> $array, int $sort_flags = 2)[];
 <<__PHPStdLib, __Pure, __AtMostRxAsArgs>>
-function array_unshift(<<__OnlyRxIfImpl(AnyArray::class)>> inout $array, $var, ...$args);
+function array_unshift(<<__OnlyRxIfImpl(AnyArray::class)>> inout $array, $var, ...$args)[];
 <<__PHPStdLib, __Pure>>
-function array_values<Tv>(<<__MaybeMutable>> Container<Tv> $input): varray<Tv>;
+function array_values<Tv>(<<__MaybeMutable>> Container<Tv> $input)[]: varray<Tv>;
 <<__PHPStdLib>>
 function shuffle(inout $array);
 <<__Deprecated('Use count(), it does the same thing as sizeof() in PHP and '.
   'doesn\'t suggest that it\'s counting bytes.'), __PHPStdLib, __Pure>>
-function sizeof(<<__MaybeMutable>> $var);
+function sizeof(<<__MaybeMutable>> $var)[];
 <<__PHPStdLib>>
 function hphp_get_iterator($iterable);
 <<__PHPStdLib, __Pure>>
-function in_array($needle, <<__MaybeMutable>> $haystack, bool $strict = false);
+function in_array($needle, <<__MaybeMutable>> $haystack, bool $strict = false)[];
 <<__PHPStdLib, __Pure>>
-function range($low, $high, $step = 1);
+function range($low, $high, $step = 1)[];
 <<__PHPStdLib, __Pure>>
-function array_diff($array1, $array2, ...$args);
+function array_diff($array1, $array2, ...$args)[];
 <<__PHPStdLib>>
 function array_udiff($array1, $array2, $data_compare_func, ...$args);
 <<__PHPStdLib, __Pure>>
-function array_diff_assoc($array1, $array2, ...$args);
+function array_diff_assoc($array1, $array2, ...$args)[];
 <<__PHPStdLib>>
 function array_diff_uassoc($array1, $array2, $key_compare_func, ...$args);
 <<__PHPStdLib>>
@@ -256,15 +256,15 @@ function array_udiff_assoc($array1, $array2, $data_compare_func, ...$args);
 <<__PHPStdLib>>
 function array_udiff_uassoc($array1, $array2, $data_compare_func, $key_compare_func, ...$args);
 <<__PHPStdLib, __Pure>>
-function array_diff_key($array1, $array2, ...$args);
+function array_diff_key($array1, $array2, ...$args)[];
 <<__PHPStdLib>>
 function array_diff_ukey($array1, $array2, $key_compare_func, ...$args);
 <<__PHPStdLib, __Pure>>
-function array_intersect($array1, $array2, ...$args);
+function array_intersect($array1, $array2, ...$args)[];
 <<__PHPStdLib>>
 function array_uintersect($array1, $array2, $data_compare_func, ...$args);
 <<__PHPStdLib, __Pure>>
-function array_intersect_assoc($array1, $array2, ...$args);
+function array_intersect_assoc($array1, $array2, ...$args)[];
 <<__PHPStdLib>>
 function array_intersect_uassoc($array1, $array2, $key_compare_func, ...$args);
 <<__PHPStdLib>>
@@ -272,7 +272,7 @@ function array_uintersect_assoc($array1, $array2, $data_compare_func, ...$args);
 <<__PHPStdLib>>
 function array_uintersect_uassoc($array1, $array2, $data_compare_func, $key_compare_func, ...$args);
 <<__PHPStdLib, __Pure>>
-function array_intersect_key($array1, $array2, ...$args);
+function array_intersect_key($array1, $array2, ...$args)[];
 <<__PHPStdLib>>
 function array_intersect_ukey($array1, $array2, $key_compare_func, ...$args);
 <<__PHPStdLib>>

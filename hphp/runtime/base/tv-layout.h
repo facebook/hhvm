@@ -276,7 +276,7 @@ struct iterator_impl {
     , m_value(value) {}
 
   TypedValue operator*() const {
-    return TypedValue{*m_value, *m_type};
+    return make_tv_of_type(*m_value, *m_type);
   }
 
   operator tv_val_t() const {
@@ -495,7 +495,7 @@ struct Tv7Up : public LayoutBase<Tv7Up,
       Value* val = reinterpret_cast<Value*>(types) + 1;
 
       auto const decRef = [](uint64_t ts, Value* val) {
-        tvDecRefCountable(TypedValue{*val, static_cast<DataType>(ts)});
+        tvDecRefCountable(make_tv_of_type(*val, static_cast<DataType>(ts)));
       };
 
       if (ts & kRefCountedBit) decRef(ts, val);

@@ -427,7 +427,7 @@ const Value& MonotypeVec::valueRefUnchecked(uint32_t idx) const {
 }
 
 TypedValue MonotypeVec::typedValueUnchecked(uint32_t idx) const {
-  return { valueRefUnchecked(idx), type() };
+  return make_tv_of_type(valueRefUnchecked(idx), type());
 }
 
 uint8_t MonotypeVec::sizeIndex() const {
@@ -778,11 +778,7 @@ ArrayData* MonotypeVec::Pop(MonotypeVec* madIn, Variant& value) {
   }
 
   auto const newSize = mad->size() - 1;
-  TypedValue tv;
-  tv.m_data = mad->valueRefUnchecked(newSize);
-  tv.m_type = mad->type();
-  value = Variant::wrap(tv);
-  tvDecRefGen(tv);
+  value = Variant::attach(mad->typedValueUnchecked(newSize));
   mad->m_size = newSize;
 
   return mad;

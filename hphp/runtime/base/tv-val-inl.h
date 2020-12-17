@@ -98,7 +98,7 @@ template<bool is_const, typename tag_t>
 TypedValue tv_val<is_const, tag_t>::tv() const {
   // Explicitly drop m_aux, since users of tv_val shouldn't care about it.
   assertx(is_set());
-  return TypedValue{val(), type()};
+  return make_tv_of_type(val(), type());
 }
 
 template<bool is_const, typename tag_t>

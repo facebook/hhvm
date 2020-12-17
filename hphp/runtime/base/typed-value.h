@@ -348,6 +348,10 @@ typename std::enable_if<
   return ret;
 }
 
+inline TypedValue make_tv_of_type(Value value, DataType dt) {
+  return TypedValue { value, dt };
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 /*

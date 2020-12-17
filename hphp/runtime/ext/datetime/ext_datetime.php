@@ -218,7 +218,7 @@ class DateTimeZone {
    * @param string $timezone
    *
    */
-  <<__Native>>
+  <<__Native, __Pure>>
   public function __construct(string $timezone): void;
 
   /**
@@ -227,7 +227,7 @@ class DateTimeZone {
    * @return array - Array containing location information about timezone.
    *
    */
-  <<__Native>>
+  <<__Native, __Pure>>
   public function getLocation(): darray;
 
   /**
@@ -236,7 +236,7 @@ class DateTimeZone {
    * @return string - One of timezones.
    *
    */
-  <<__Native>>
+  <<__Native, __Pure>>
   public function getName(): string;
 
   /**
@@ -251,7 +251,7 @@ class DateTimeZone {
    *   failure.
    *
    */
-  <<__Native>>
+  <<__Native, __Pure>>
   public function getOffset(DateTimeInterface $datetime): mixed;
 
   /**
@@ -259,7 +259,7 @@ class DateTimeZone {
    *   array with all transitions on success or FALSE on failure.
    *
    */
-  <<__Native>>
+  <<__Native, __Pure>>
   public function getTransitions(int $timestamp_begin = PHP_INT_MIN,
                           int $timestamp_end = PHP_INT_MAX): mixed;
 
@@ -267,7 +267,7 @@ class DateTimeZone {
    * @return array - Returns array on success or FALSE on failure.
    *
    */
-  <<__Native>>
+  <<__Native, __Pure>>
   public static function listAbbreviations(): darray;
 
   /**
@@ -278,11 +278,11 @@ class DateTimeZone {
    * @return mixed - Returns array on success or FALSE on failure.
    *
    */
-  <<__Native>>
+  <<__Native, __Pure>>
   public static function listIdentifiers(int $what = 2047,
                                   string $country = ""): mixed;
 
-  <<__Native>>
+  <<__Native, __Pure>>
   public function __debugInfo(): darray;
 }
 

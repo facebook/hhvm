@@ -98,6 +98,10 @@ Note rust's ord, eq, partial ord, and partial eq. Rust (which took these ideas f
 
 ## Unresolved Questions (in addition to the currently inline ones above)
 
+For opt-in structural equality, what if I have a non-opted-in parent class? By opting in do I also opt it's fields in to being inspected? What about traits?
+
+Should switches always use pointer equality on objects? This seems very relevant to enum classes.
+
 How do function pointers work? And are you guaranteed to get the same pointer for two different calls
 
 Does structural equality on well-formed IEquatable classes always work?

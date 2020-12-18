@@ -58,7 +58,7 @@ type context = {
 type result =
   | Missing of (unit -> unit)
   | Exact of locl_ty
-  | Abstract of string * string list * locl_ty option
+  | Abstract of string * string list * TySet.t
 
 let make_reason env id root r =
   Reason.Rtypeconst (r, id, Typing_print.error env root, get_reason root)
@@ -158,13 +158,13 @@ let create_root_from_type_constant ctx env root (_class_pos, class_name) class_
         if Cls.final class_ || Option.is_none ctx.base then
           (env, Exact ty)
         else
-          (env, make_abstract env (Some ty))
+          (env, make_abstract env (TySet.singleton ty))
       (* Abstract type constants with constraint *)
       | { ttc_constraint = Some cstr; _ } ->
         let (env, cstr) = Phase.localize ~ety_env env cstr in
-        (env, make_abstract env (Some cstr))
+        (env, make_abstract env (TySet.singleton cstr))
       (* Abstract type constant without constraint. *)
-      | _ -> (env, make_abstract env None)))
+      | _ -> (env, make_abstract env TySet.empty)))
 
 (* Cheap intersection operation. Do not call Typing_intersection.intersect
  * as this calls into subtype which in turn calls into expand_with_env below
@@ -196,34 +196,15 @@ let rec union_results err rl =
   | r1 :: rl ->
     let r2 = union_results err rl in
 
-    (* Union is defined iff both are defined *)
+    (* Union is defined iff both are defined concretely *)
     (match (r1, r2) with
     | (Missing err, _)
     | (_, Missing err) ->
       Missing err
     (* In essence, this says (C | D)::TP = (C::TP) | (D::TP) *)
     | (Exact ty1, Exact ty2) -> Exact (union ty1 ty2)
-    | (Abstract (id1, ids1, tyopt1), Abstract (id2, ids2, tyopt2))
-      when String.equal id1 id2 && List.equal String.equal ids1 ids2 ->
-      (* Take the union of the bounds on abstract type constants *)
-      let tyopt =
-        match (tyopt1, tyopt2) with
-        | (None, _)
-        | (_, None) ->
-          None
-        | (Some ty1, Some ty2) -> Some (union ty1 ty2)
-      in
-      Abstract (id1, ids1, tyopt)
-    (* If paths don't match, regard the type constant as missing *)
-    | (Abstract _, Abstract _) -> Missing err
-    | (Abstract (id, ids, tyopt), Exact ty)
-    | (Exact ty, Abstract (id, ids, tyopt)) ->
-      Abstract
-        ( id,
-          ids,
-          match tyopt with
-          | None -> None
-          | Some bound -> Some (union ty bound) ))
+    (* We don't support projecting through any other kind of union *)
+    | _ -> Missing err)
 
 (* Given the results of projecting a type constant from types t1, ..., tn,
  * determine the result of projecting a type constant from type (t1 & ... & tn).
@@ -241,27 +222,9 @@ let rec intersect_results err rl =
       r
     (* In essence, we're saying (C & D)::TP = (C::TP) & (D::TP) *)
     | (Exact ty1, Exact ty2) -> Exact (intersect ty1 ty2)
-    | (Abstract (id1, ids1, tyopt1), Abstract (id2, ids2, tyopt2))
-      when String.equal id1 id2 && List.equal String.equal ids1 ids2 ->
-      (* For abstract type constants, take the intersection of the bounds *)
-      let tyopt =
-        match (tyopt1, tyopt2) with
-        | (None, None) -> None
-        | (Some ty, None)
-        | (None, Some ty) ->
-          Some ty
-        | (Some ty1, Some ty2) -> Some (intersect ty1 ty2)
-      in
-      Abstract (id1, ids1, tyopt)
-    (* The strategy here is to take the last result. It is necessary for
-         poor reasons, unfortunately. Because `type_of_result` bogusly uses
-         `Env.add_upper_bound_global`, local type refinement information can
-         leak outside its scope. To remain consistent with the previous
-         version of the type access algorithm wrt this bug, we pick the last
-         result. See T59317869.
-         The test test/typecheck/tconst/type_refinement_stress.php monitors
-         the situation here. *)
-    | (Abstract _, Abstract _) -> r2
+    (* Here, we merge the bounds on abstract type constants. Effectively this is intersection. *)
+    | (Abstract (id1, ids1, tyl1), Abstract (_id2, _ids2, tyl2)) ->
+      Abstract (id1, ids1, TySet.union tyl1 tyl2)
     (* Exact type overrides abstract type: the bound on abstract type will be checked
     * against the exact type at implementation site. *)
     | (Abstract _, Exact ty)
@@ -280,9 +243,12 @@ let rec type_of_result ~ignore_errors ctx env root res =
       let reason = make_reason env id root Reason.Rnone in
       let ty = MakeType.generic reason generic_name in
       let env =
-        Option.fold bnd ~init:env ~f:(fun env bnd ->
+        TySet.fold
+          (fun bnd env ->
             (* TODO(T59317869): play well with flow sensitivity *)
             Env.add_upper_bound_global env generic_name bnd)
+          bnd
+          env
       in
       (env, ty)
   in
@@ -291,7 +257,7 @@ let rec type_of_result ~ignore_errors ctx env root res =
   | Abstract (name, name' :: namel, bnd) ->
     let res' = Abstract (name', namel, bnd) in
     let (env, ty) = type_of_result ~ignore_errors ctx env root res' in
-    type_with_bound env false name (Some ty)
+    type_with_bound env false name (TySet.singleton ty)
   | Abstract (name, [], bnd) ->
     type_with_bound env ctx.abstract_as_tyvar name bnd
   | Missing err ->

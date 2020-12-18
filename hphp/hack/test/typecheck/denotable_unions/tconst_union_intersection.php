@@ -41,14 +41,11 @@ function test1<T as (IMissing & IBoundedJ)>(T $x):J {
   return $x->get();
 }
 
-// Currently we use the last conjunct, to be sound
-// Future recasting of type constant projects will avoid this issue
-function test2<T as (IBoundedJ & IUnbounded)>(T $x):mixed {
+function test2<T as (IBoundedJ & IUnbounded)>(T $x):J {
   return $x->get();
 }
 
-// Ditto
-function test3<T as (IBoundedJ & IBoundedK)>(T $x):K {
+function test3<T as (IBoundedJ & IBoundedK)>(T $x):(J & K) {
   return $x->get();
 }
 

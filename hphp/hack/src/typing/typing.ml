@@ -1108,39 +1108,42 @@ and catch catchctx env (sid, exn_lvar, b) =
 
 and as_expr env ty1 pe e =
   let env = Env.open_tyvars env pe in
-  (fun (env, expected_ty, tk, tv) ->
-    let rec distribute_union env ty =
-      let (env, ty) = Env.expand_type env ty in
-      match get_node ty with
-      | Tunion tyl -> List.fold tyl ~init:env ~f:distribute_union
-      | _ ->
-        if SubType.is_sub_type_for_union env ty (MakeType.dynamic Reason.Rnone)
-        then
-          let env = SubType.sub_type env ty tk Errors.unify_error in
-          let env = SubType.sub_type env ty tv Errors.unify_error in
-          env
-        else
-          let ur = Reason.URforeach in
-          Type.sub_type pe ur env ty expected_ty Errors.unify_error
-    in
-    let env = distribute_union env ty1 in
-    let env = Env.set_tyvar_variance env expected_ty in
-    (Typing_solver.close_tyvars_and_solve env Errors.unify_error, tk, tv))
-  @@
   let (env, tv) = Env.fresh_type env pe in
-  match e with
-  | As_v _ ->
-    let tk = MakeType.mixed Reason.Rnone in
-    (env, MakeType.traversable (Reason.Rforeach pe) tv, tk, tv)
-  | As_kv _ ->
-    let (env, tk) = Env.fresh_type env pe in
-    (env, MakeType.keyed_traversable (Reason.Rforeach pe) tk tv, tk, tv)
-  | Await_as_v _ ->
-    let tk = MakeType.mixed Reason.Rnone in
-    (env, MakeType.async_iterator (Reason.Rasyncforeach pe) tv, tk, tv)
-  | Await_as_kv _ ->
-    let (env, tk) = Env.fresh_type env pe in
-    (env, MakeType.async_keyed_iterator (Reason.Rasyncforeach pe) tk tv, tk, tv)
+  let (env, expected_ty, tk, tv) =
+    match e with
+    | As_v _ ->
+      let tk = MakeType.mixed Reason.Rnone in
+      (env, MakeType.traversable (Reason.Rforeach pe) tv, tk, tv)
+    | As_kv _ ->
+      let (env, tk) = Env.fresh_type env pe in
+      (env, MakeType.keyed_traversable (Reason.Rforeach pe) tk tv, tk, tv)
+    | Await_as_v _ ->
+      let tk = MakeType.mixed Reason.Rnone in
+      (env, MakeType.async_iterator (Reason.Rasyncforeach pe) tv, tk, tv)
+    | Await_as_kv _ ->
+      let (env, tk) = Env.fresh_type env pe in
+      ( env,
+        MakeType.async_keyed_iterator (Reason.Rasyncforeach pe) tk tv,
+        tk,
+        tv )
+  in
+  let rec distribute_union env ty =
+    let (env, ty) = Env.expand_type env ty in
+    match get_node ty with
+    | Tunion tyl -> List.fold tyl ~init:env ~f:distribute_union
+    | _ ->
+      if SubType.is_sub_type_for_union env ty (MakeType.dynamic Reason.Rnone)
+      then
+        let env = SubType.sub_type env ty tk Errors.unify_error in
+        let env = SubType.sub_type env ty tv Errors.unify_error in
+        env
+      else
+        let ur = Reason.URforeach in
+        Type.sub_type pe ur env ty expected_ty Errors.unify_error
+  in
+  let env = distribute_union env ty1 in
+  let env = Env.set_tyvar_variance env expected_ty in
+  (Typing_solver.close_tyvars_and_solve env Errors.unify_error, tk, tv)
 
 and bind_as_expr env p ty1 ty2 aexpr =
   let check_reassigned_mutable env te =
@@ -2546,20 +2549,32 @@ and expr_
       { (Phase.env_with_self env) with from_class = Some CIstatic }
     in
     let (env, hint_ty) = Phase.localize_hint ~ety_env env hint in
+    let enable_sound_dynamic =
+      TypecheckerOptions.enable_sound_dynamic env.genv.tcopt
+    in
+    let is_dyn = Typing_utils.is_dynamic env hint_ty in
+    ( if enable_sound_dynamic && is_dyn then
+      let (_ : env * locl_ty) =
+        ( SubType.sub_type
+            ~allow_subtype_of_dynamic:true
+            env
+            expr_ty
+            hint_ty
+            Errors.unify_error,
+          hint_ty )
+      in
+      () );
     let (env, hint_ty) =
-      if Typing_utils.is_dynamic env hint_ty then
-        if TypecheckerOptions.enable_sound_dynamic env.genv.tcopt then
-          (SubType.sub_type env expr_ty hint_ty Errors.unify_error, hint_ty)
-        else
-          let env =
-            if is_instance_var e then
-              let (env, ivar) = get_instance_var env e in
-              set_local env ivar hint_ty
-            else
-              env
-          in
-          (env, hint_ty)
-      else if is_nullable then
+      if is_dyn && not enable_sound_dynamic then
+        let env =
+          if is_instance_var e then
+            let (env, ivar) = get_instance_var env e in
+            set_local env ivar hint_ty
+          else
+            env
+        in
+        (env, hint_ty)
+      else if is_nullable && not is_dyn then
         let (env, hint_ty) = refine_type env (fst e) expr_ty hint_ty in
         (env, MakeType.nullable_locl (Reason.Rwitness p) hint_ty)
       else if is_instance_var e then

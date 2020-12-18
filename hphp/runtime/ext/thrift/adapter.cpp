@@ -34,6 +34,9 @@ const StaticString
   s_toThrift("toThrift");
 
 Variant applyAdapter(Variant value, Class& adapter, const String& methodName) {
+  if (value.isNull()) {
+    return value;
+  }
   const auto method = adapter.lookupMethod(methodName.get());
   if (!method) {
     thrift_error(folly::sformat("adapter method {}::{}() doesn't exist",

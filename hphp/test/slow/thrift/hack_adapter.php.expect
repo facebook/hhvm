@@ -1,5 +1,5 @@
 --- binary ---
-object(OuterStruct) (3) {
+object(OuterStruct) (4) {
   ["value"]=>
   string(2) "42"
   ["nested"]=>
@@ -18,9 +18,11 @@ object(OuterStruct) (3) {
       string(2) "-1"
     }
   }
+  ["unset"]=>
+  NULL
 }
 string(32) "3773f6721bceccbc1eae35d64309f78d"
-object(OuterStruct) (3) {
+object(OuterStruct) (4) {
   ["value"]=>
   string(2) "42"
   ["nested"]=>
@@ -39,8 +41,10 @@ object(OuterStruct) (3) {
       string(2) "-1"
     }
   }
+  ["unset"]=>
+  NULL
 }
-object(OuterStructNoAdapter) (3) {
+object(OuterStructNoAdapter) (4) {
   ["value"]=>
   int(42)
   ["nested"]=>
@@ -59,9 +63,11 @@ object(OuterStructNoAdapter) (3) {
       int(-1)
     }
   }
+  ["unset"]=>
+  NULL
 }
 --- compact ---
-object(OuterStruct) (3) {
+object(OuterStruct) (4) {
   ["value"]=>
   string(2) "42"
   ["nested"]=>
@@ -80,9 +86,11 @@ object(OuterStruct) (3) {
       string(2) "-1"
     }
   }
+  ["unset"]=>
+  NULL
 }
 string(32) "cf4e0cab24c0706eeed0f090d2fd86af"
-object(OuterStruct) (3) {
+object(OuterStruct) (4) {
   ["value"]=>
   string(2) "42"
   ["nested"]=>
@@ -101,8 +109,10 @@ object(OuterStruct) (3) {
       string(2) "-1"
     }
   }
+  ["unset"]=>
+  NULL
 }
-object(OuterStructNoAdapter) (3) {
+object(OuterStructNoAdapter) (4) {
   ["value"]=>
   int(42)
   ["nested"]=>
@@ -121,4 +131,6 @@ object(OuterStructNoAdapter) (3) {
       int(-1)
     }
   }
+  ["unset"]=>
+  NULL
 }

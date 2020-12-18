@@ -25,10 +25,10 @@ class HackStruct {
 class StringToIntPrimitiveAdapter {
   const type THackType = string;
 
-  public static function toThrift(?string $hack_value): ?int {
+  public static function toThrift(string $hack_value): int {
     return (int)$hack_value;
   }
-  public static function fromThrift(?int $thrift_value): ?string {
+  public static function fromThrift(int $thrift_value): string {
     return (string)$thrift_value;
   }
 }
@@ -68,10 +68,17 @@ class OuterStruct {
       ],
       'format' => 'harray',
     ],
+    4 => darray[
+      'var' => 'unset',
+      'type' => \TType::STRUCT,
+      'class' => ThriftStruct::class,
+      'adapter' => StringToIntStructAdapter::class,
+    ],
   ];
   public ?StringToIntPrimitiveAdapter::THackType $value = null;
   public ?StringToIntStructAdapter::THackType $nested = null;
   public ?vec<StringToIntStructAdapter::THackType> $vec = null;
+  public ?StringToIntStructAdapter::THackType $unset = null;
   public function __construct() {}
 }
 
@@ -99,10 +106,16 @@ class OuterStructNoAdapter {
       ],
       'format' => 'harray',
     ],
+    4 => darray[
+      'var' => 'unset',
+      'type' => \TType::STRUCT,
+      'class' => ThriftStruct::class
+    ],
   ];
   public ?int $value = null;
   public ?ThriftStruct $nested = null;
   public ?vec<ThriftStruct> $vec = null;
+  public ?ThriftStruct $unset = null;
   public function __construct() {}
 }
 

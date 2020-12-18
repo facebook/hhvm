@@ -1,0 +1,20 @@
+type_structure:
+{"kind":24,"generic_types":[{"kind":4},{"kind":2}]}
+{"kind":25,"generic_types":[{"kind":1}]}
+{"kind":26,"generic_types":[{"kind":3}]}
+{"kind":14,"fields":{"a":{"kind":1},"b":{"kind":4}}}
+{"kind":10,"elem_types":[{"kind":1},{"kind":4}]}
+
+Reflection: Methods:
+d_: HH\darray<HH\string, HH\bool>
+v_: HH\varray<HH\int>
+dv: HH\varray_or_darray<HH\float>
+sh: HH\shape(?'a'=>HH\int, ?'b'=>HH\string)
+tu: (HH\int, HH\string)
+
+Reflection: TypeConstants:
+D_: HH\darray<HH\string, HH\bool> =>  {"kind":24,"generic_types":[{"kind":4},{"kind":2}]}
+V_: HH\varray<HH\int> =>  {"kind":25,"generic_types":[{"kind":1}]}
+DV: HH\varray_or_darray<HH\float> =>  {"kind":26,"generic_types":[{"kind":3}]}
+SH: HH\shape('a'=>HH\int, 'b'=>HH\string) =>  {"kind":14,"fields":{"a":{"kind":1},"b":{"kind":4}}}
+TU: (HH\int, HH\string) =>  {"kind":10,"elem_types":[{"kind":1},{"kind":4}]}

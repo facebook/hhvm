@@ -124,7 +124,8 @@ VariableSerializer::getKind(const ArrayData* arr) const {
     always_assert(false);
   }();
 
-  auto const serializesLegacyBit = getType() == Type::Internal ||
+  auto const serializesLegacyBit =
+    getType() == Type::Internal || getType() == Type::APCSerialize ||
     (getType() == Type::Serialize && m_serializeProvenanceAndLegacy);
 
   if (serializesLegacyBit && arr->isLegacyArray()) {

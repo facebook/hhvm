@@ -1125,7 +1125,8 @@ void optimize_end_catch(Global& env, IRInstruction& inst,
   };
 
   auto const original = inst.extra<EndCatchData>();
-  if (original->mode != EndCatchData::CatchMode::LocalsDecRefd) {
+  if (RuntimeOption::EvalHHIRGenerateAsserts &&
+      original->mode != EndCatchData::CatchMode::LocalsDecRefd) {
     block->insert(block->iteratorTo(&inst),
       env.unit.gen(DbgCheckLocalsDecRefd, inst.bcctx(), inst.src(0)));
   }

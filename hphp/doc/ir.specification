@@ -1696,11 +1696,6 @@ To string conversions:
   the relevant activation record. This instruction may not occur in an inlined
   call.
 
-| DbgCheckLocalsDecRefd, ND, S(FramePtr), NF
-
-  In debug builds, if LocalsDecRefd flag is set on S0, causes runtime failure by
-  emitting a trap instruction. Otherwise, this instruction does nothing.
-
 9. Stores
 
 | StClsInitElem<idx>, ND, S(PtrToClsInitCell) S(Cell), NF
@@ -1754,22 +1749,6 @@ To string conversions:
 
   Load the address of the storage for out parameter `index` provided by the
   callee (the address will be a location on the callee stack).
-
-| DbgTrashStk<offset>, ND, S(StkPtr), NF
-
-  For debugging purposes.  Store kTVTrashJITStk to the stack slot pointed to
-  by S0, at a given offset (in cells).
-
-| DbgTrashFrame<offset>, ND, S(StkPtr), NF
-
-  For debugging purposes.  Store kTVTrashJITFrame to kNumActRecCells stack
-  slots starting at the offset (in cells), and going toward higher memory
-  addresses.
-
-| DbgTrashMem, ND, S(MemToCell), NF
-
-  For debugging purposes.  Store kTVTrashJITHeap to a heap slot pointed to by
-  S0.
 
 | RecordReifiedGenericsAndGetTSList, DVArr, SVArr, CRc
 
@@ -2553,6 +2532,27 @@ To string conversions:
 
   Assert that the func on the srckey is the current function in Frame S0.
   If the assertion fails, execution is aborted via a hardware exception.
+
+| DbgCheckLocalsDecRefd, ND, S(FramePtr), NF
+
+  In debug builds, if LocalsDecRefd flag is set on S0, causes runtime failure by
+  emitting a trap instruction. Otherwise, this instruction does nothing.
+
+| DbgTrashStk<offset>, ND, S(StkPtr), NF
+
+  For debugging purposes.  Store kTVTrashJITStk to the stack slot pointed to
+  by S0, at a given offset (in cells).
+
+| DbgTrashFrame<offset>, ND, S(StkPtr), NF
+
+  For debugging purposes.  Store kTVTrashJITFrame to kNumActRecCells stack
+  slots starting at the offset (in cells), and going toward higher memory
+  addresses.
+
+| DbgTrashMem, ND, S(MemToCell), NF
+
+  For debugging purposes.  Store kTVTrashJITHeap to a heap slot pointed to by
+  S0.
 
 | RBTraceEntry, ND, NA, NF
 

@@ -182,7 +182,6 @@ void cgStFrameFunc(IRLS& env, const IRInstruction* inst) {
 }
 
 void cgDbgCheckLocalsDecRefd(IRLS& env, const IRInstruction* inst) {
-  if (!debug) return;
   auto& v = vmain(env);
   auto const fp = srcLoc(env, inst, 0).reg();
   auto const callOffAndFlags = v.makeReg();

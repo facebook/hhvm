@@ -3555,6 +3555,12 @@ SSATmp* simplifyCheckClsMethFunc(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
+SSATmp* simplifyArrayUnmarkLegacyShallow(
+    State& env, const IRInstruction* inst) {
+  auto const input = inst->src(0);
+  return !RO::EvalHackArrDVArrs && input->isA(TVec|TDict) ? input : nullptr;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
@@ -3781,6 +3787,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
       X(RaiseErrorOnInvalidIsAsExpressionType)
       X(LdFrameCls)
       X(CheckClsMethFunc)
+      X(ArrayUnmarkLegacyShallow)
 #undef X
       default: break;
     }

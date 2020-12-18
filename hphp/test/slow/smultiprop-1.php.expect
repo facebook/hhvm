@@ -1,0 +1,7 @@
+vec(1) {
+  int(17)
+}
+vec(1) {
+  object(Foo) (0) {
+  }
+}

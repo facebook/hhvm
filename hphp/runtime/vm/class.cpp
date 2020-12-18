@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/autoload-handler.h"
 #include "hphp/runtime/base/collections.h"
@@ -189,6 +190,11 @@ void Class::PropInitVec::push_back(const TypedValue& v) {
 // Class.
 
 namespace {
+
+bool shouldUsePersistentHandles(Class* cls) {
+  return (!SystemLib::s_inited || RuntimeOption::RepoAuthoritative) &&
+    cls->verifyPersistent();
+}
 
 /*
  * Load used traits of PreClass `preClass', and append the trait Class*'s to
@@ -476,6 +482,13 @@ void Class::destroy() {
     }
   }
 
+  if (m_sPropOptimizationEnabled) {
+    rds::unbind(
+      rds::SMultiPropCache{this},
+      getSPropOptimizationData()->m_sPropHandles.handle()
+    );
+  }
+
   Treadmill::enqueue(
     [this] {
       releaseRefs();
@@ -500,7 +513,18 @@ Class::~Class() {
     for (unsigned i = 0, n = numStaticProperties(); i < n; ++i) {
       m_sPropCache[i].~Link();
     }
-    vm_sized_free(m_sPropCache, numStaticProperties() * sizeof(*m_sPropCache));
+    if (m_sPropOptimizationEnabled) {
+      vm_sized_free(
+        const_cast<TypedValue*>(getNonPersistentSPropValues()),
+        sPropValuesOffset() +
+        numStaticProperties() * sizeof(*m_sPropCache)
+      );
+    } else {
+      vm_sized_free(
+        m_sPropCache,
+        numStaticProperties() * sizeof(*m_sPropCache)
+      );
+    }
   }
 
   for (auto i = size_t{}, n = numMethods(); i < n; i++) {
@@ -864,35 +888,45 @@ void Class::initSProps() const {
 
   initSPropHandles();
 
-  // Perform scalar inits.
-  for (Slot slot = 0, n = m_staticProperties.size(); slot < n; ++slot) {
-    auto const& sProp = m_staticProperties[slot];
-    // TODO(T61738946): We can remove the temporary here once we no longer
-    // coerce class_meth types.
-    auto val = sProp.val;
+  if (m_sPropOptimizationEnabled) {
+    auto const optimizationData = getSPropOptimizationData();
 
-    if ((sProp.cls == this && !m_sPropCache[slot].isPersistent()) ||
-        sProp.attrs & AttrLSB) {
-      if (RuntimeOption::EvalCheckPropTypeHints > 0 &&
-          !(sProp.attrs & (AttrInitialSatisfiesTC|AttrSystemInitialValue)) &&
-          sProp.val.m_type != KindOfUninit) {
-        if (sProp.typeConstraint.isCheckable()) {
-          sProp.typeConstraint.verifyStaticProperty(
-            &val,
-            this,
-            sProp.cls,
-            sProp.name
-          );
-        }
-        if (RuntimeOption::EvalEnforceGenericsUB > 0) {
-          for (auto const& ub : sProp.ubs) {
-            if (ub.isCheckable()) {
-              ub.verifyStaticProperty(&val, this, sProp.cls, sProp.name);
+    memcpy16_inline(
+      optimizationData->m_sPropHandles.get(),
+      getNonPersistentSPropValues(),
+      sizeof(StaticPropData) * optimizationData->m_numNonPersistentPropHandles
+    );
+  } else {
+    // Perform scalar inits.
+    for (Slot slot = 0, n = m_staticProperties.size(); slot < n; ++slot) {
+      auto const& sProp = m_staticProperties[slot];
+      // TODO(T61738946): We can remove the temporary here once we no longer
+      // coerce class_meth types.
+      auto val = sProp.val;
+
+      if ((sProp.cls == this && !m_sPropCache[slot].isPersistent()) ||
+          sProp.attrs & AttrLSB) {
+        if (RuntimeOption::EvalCheckPropTypeHints > 0 &&
+            !(sProp.attrs & (AttrInitialSatisfiesTC|AttrSystemInitialValue)) &&
+            sProp.val.m_type != KindOfUninit) {
+          if (sProp.typeConstraint.isCheckable()) {
+            sProp.typeConstraint.verifyStaticProperty(
+              &val,
+              this,
+              sProp.cls,
+              sProp.name
+            );
+          }
+          if (RuntimeOption::EvalEnforceGenericsUB > 0) {
+            for (auto const& ub : sProp.ubs) {
+              if (ub.isCheckable()) {
+                ub.verifyStaticProperty(&val, this, sProp.cls, sProp.name);
+              }
             }
           }
         }
+        m_sPropCache[slot]->val = val;
       }
-      m_sPropCache[slot]->val = val;
     }
   }
 
@@ -1097,16 +1131,19 @@ void Class::initSPropHandles() const {
           reinterpret_cast<const StaticPropData*>(&sProp.val)
         );
       } else {
-        propHandle.bind(
-          rds::Mode::Local,
-          rds::SPropCache{this, slot}
-        );
+        allPersistentHandles = false;
+        if (!m_sPropOptimizationEnabled) {
+          propHandle.bind(
+            rds::Mode::Local,
+            rds::SPropCache{this, slot}
+          );
+        }
       }
     } else {
       auto const realSlot = sProp.cls->lookupSProp(sProp.name);
       propHandle = sProp.cls->m_sPropCache[realSlot];
     }
-    if (!propHandle.isPersistent()) {
+    if (allPersistentHandles && !propHandle.isPersistent()) {
       allPersistentHandles = false;
     }
   }
@@ -1305,7 +1342,6 @@ Class::PropValLookup Class::getSPropIgnoreLateInit(
   if (debug) {
     auto const& decl = m_staticProperties[lookup.slot];
     auto const lateInit = bool(decl.attrs & AttrLateInit);
-
     always_assert(
       sProp && (sProp->m_type != KindOfUninit || lateInit) &&
       "Static property initialization failed to initialize a property."
@@ -2464,6 +2500,133 @@ void Class::sortOwnPropsInitVec(uint32_t first, uint32_t past,
   }
 }
 
+size_t Class::sPropValuesOffset() const {
+  assertx(m_sPropOptimizationEnabled);
+  auto const numNonPersistentSProps =
+    getSPropOptimizationData()->m_numNonPersistentPropHandles;
+  return (
+    numNonPersistentSProps * sizeof(TypedValue) +
+    sizeof(NonPersistentSPropOptimizationData)
+  );
+}
+
+const TypedValue* Class::getNonPersistentSPropValues() const {
+  assertx(m_sPropOptimizationEnabled);
+  return reinterpret_cast<TypedValue*>(
+    reinterpret_cast<char*>(m_sPropCache) - sPropValuesOffset()
+  );
+}
+
+const NonPersistentSPropOptimizationData* Class::getSPropOptimizationData() const {
+  assertx(m_sPropOptimizationEnabled);
+  return reinterpret_cast<NonPersistentSPropOptimizationData*>(
+    reinterpret_cast<char*>(m_sPropCache) -
+    sizeof(NonPersistentSPropOptimizationData)
+  );
+}
+
+void Class::setupSProps() {
+  bool usePersistentHandles = shouldUsePersistentHandles(this);
+
+  // determine if this class should have the optimization enabled
+  Slot numNonPersistentPropHandles = 0;
+  bool allNonPersistentSPropsSatisfyInitialTC = true;
+  auto const n = m_staticProperties.size();
+
+  m_sPropOptimizationEnabled = false;
+
+  if (!n) {
+    return;
+  }
+
+  for (Slot slot = 0; slot < n; ++slot) {
+    auto const& sProp = m_staticProperties[slot];
+
+    if (sProp.cls == this || (sProp.attrs & AttrLSB)) {
+      if (!(usePersistentHandles && (sProp.attrs & AttrPersistent))) {
+        if (!(sProp.attrs & (AttrInitialSatisfiesTC|AttrSystemInitialValue))) {
+          allNonPersistentSPropsSatisfyInitialTC = false;
+          break;
+        }
+        ++numNonPersistentPropHandles;
+      }
+    }
+  }
+
+  m_sPropOptimizationEnabled =
+    allNonPersistentSPropsSatisfyInitialTC &&
+    numNonPersistentPropHandles != 0;
+
+  using LinkT = std::remove_pointer<decltype(m_sPropCache)>::type;
+  if (m_sPropOptimizationEnabled) {
+    /*
+     * First, if we're optimizing, pre-allocate space before m_sPropCache
+     * to store optimization data. If not then only allocate space
+     * for the sProp cache array.
+     */
+    auto numBytesBeforeSPropCachePtr =
+      numNonPersistentPropHandles * sizeof(TypedValue) +
+      sizeof(NonPersistentSPropOptimizationData);
+    auto ptr = reinterpret_cast<char*>(
+      vm_malloc(
+        numBytesBeforeSPropCachePtr +
+        n * sizeof(LinkT)
+      )
+    );
+    m_sPropCache = reinterpret_cast<LinkT*>(ptr + numBytesBeforeSPropCachePtr);
+  } else {
+    m_sPropCache = reinterpret_cast<LinkT*>(vm_malloc(n * sizeof(LinkT)));
+  }
+  for (unsigned i = 0; i < n; ++i) {
+    new (&m_sPropCache[i]) LinkT;
+  }
+  if (m_sPropOptimizationEnabled) {
+    /*
+     * Now, we know we're optimizing, so block allocate the handle in RDS. This
+     * enables us to replace the loop with a single memcpy since the propHandles
+     * are contiguous and aligned with the typed values (which we're about to
+     * construct).
+     */
+    auto const optData =
+      const_cast<NonPersistentSPropOptimizationData*>(
+        getSPropOptimizationData()
+      );
+    auto const propHandles = rds::bind<StaticMultiPropData, rds::Mode::Local>(
+      rds::SMultiPropCache{this},
+      sizeof(StaticPropData) * (numNonPersistentPropHandles - 1)
+    );
+
+    optData->m_sPropHandles = propHandles;
+    optData->m_numNonPersistentPropHandles = numNonPersistentPropHandles;
+
+    TypedValue* nonPersistentPropValues =
+      const_cast<TypedValue*>(getNonPersistentSPropValues());
+    Slot ctr = 0;
+    for (Slot slot = 0; slot < n; ++slot) {
+      auto const& sProp = m_staticProperties[slot];
+
+      if (sProp.cls == this || (sProp.attrs & AttrLSB)) {
+        if (!(usePersistentHandles && (sProp.attrs & AttrPersistent))) {
+          auto const handle =
+            propHandles.handle() +
+            sizeof(StaticPropData) * ctr;
+          /*
+           * The prop handles (above) default to unallocated/unbound...
+           * This does an in-place reassignment to a sub-handle of
+           * propHandles, where the new hande is now bound.
+           */
+          new (&m_sPropCache[slot]) LinkT(handle);
+          /*
+           * Finally, we update the corresponding entry in the
+           * prop values array.
+           */
+          nonPersistentPropValues[ctr++] = sProp.val;
+        }
+      }
+    }
+  }
+}
+
 void Class::setProperties() {
   int numInaccessible = 0;
   PropMap::Builder curPropMap;
@@ -2816,13 +2979,7 @@ void Class::setProperties() {
   }
   m_slotIndex = slotQuickIndex;
 
-  if (unsigned n = numStaticProperties()) {
-    using LinkT = std::remove_pointer<decltype(m_sPropCache)>::type;
-    m_sPropCache = static_cast<LinkT*>(vm_malloc(n * sizeof(LinkT)));
-    for (unsigned i = 0; i < n; ++i) {
-      new (&m_sPropCache[i]) LinkT;
-    }
-  }
+  setupSProps();
 
   m_declPropNumAccessible = m_declProperties.size() - numInaccessible;
 
@@ -4302,9 +4459,7 @@ void Class::importTraitMethods(MethodMapBuilder& builder) {
 namespace {
 
 void setupClass(Class* newClass, NamedEntity* nameList) {
-  bool const isPersistent =
-    (!SystemLib::s_inited || RuntimeOption::RepoAuthoritative) &&
-    newClass->verifyPersistent();
+  bool const isPersistent = shouldUsePersistentHandles(newClass);
   nameList->m_cachedClass.bind(
     isPersistent ? rds::Mode::Persistent : rds::Mode::Normal,
     rds::LinkName{"NEClass", newClass->name()}

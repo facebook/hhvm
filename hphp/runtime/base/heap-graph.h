@@ -23,6 +23,7 @@
 
 namespace HPHP {
 
+struct Class;
 struct HeapObject;
 
 // Graph representation of the heap. The heap consists of some objects
@@ -51,11 +52,13 @@ struct HeapGraph {
   struct Node {
     union {
       const void* ptr;
-      const HeapObject* h;
+      const Class* cls;    // only set for static props
+      const HeapObject* h; // only set for non-roots
     };
     size_t size;
     bool is_root;
     type_scan::Index tyindex;
+    uint32_t prop_slot;
     int first_out;
     int first_in; // first out-ptr and in-ptr, respectively
   };

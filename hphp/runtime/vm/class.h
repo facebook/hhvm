@@ -89,6 +89,14 @@ struct StaticPropData {
   TypedValue val;
 };
 
+/*
+ * Utility wrapper for an array of multiple, contiguously-allocated static
+ * properties. Allows distinguishing them via type_scan::Index.
+ */
+struct StaticMultiPropData {
+  TypedValue val;
+};
+
 enum class ClsCnsLookup {
   NoTypes,
   IncludeTypes,
@@ -118,6 +126,11 @@ using ObjectProps = std::conditional_t<
   tv_layout::Tv7Up,
   tv_layout::TvArray
 >;
+
+struct NonPersistentSPropOptimizationData {
+  rds::Link<StaticMultiPropData, rds::Mode::Local> m_sPropHandles;
+  uint32_t m_numNonPersistentPropHandles{0};
+};
 
 /*
  * Class represents the full definition of a user class in a given request
@@ -1644,6 +1657,11 @@ private:
   void checkPropTypeRedefinitions() const;
   void checkPropInitialValues() const;
 
+  const TypedValue* getNonPersistentSPropValues() const;
+  const NonPersistentSPropOptimizationData* getSPropOptimizationData() const;
+  void setupSProps();
+  size_t sPropValuesOffset() const;
+
   /////////////////////////////////////////////////////////////////////////////
   // Friendship.
 
@@ -1756,6 +1774,22 @@ private:
    * reinitialized.
    */
   mutable rds::Link<bool, rds::Mode::NonLocal> m_sPropCacheInit;
+
+/*
+ * Case 1: m_sPropOptimizationEnabled == false
+ *    m_sPropCache
+ *    v
+ *    | SProp link 1 | SProp link 2 | ... |
+ *
+ * Case 2: m_sPropOptimizationEnabled == true
+ *    | NonP SProp 1
+      | ....
+      | NonP SProp N
+      | NonPersistentSPropOptimizationData
+        m_sPropCache
+        v
+      | SProp 1 | SProp 2 | ... |
+ */
   mutable rds::Link<
     StaticPropData,
     rds::Mode::NonNormal
@@ -1814,7 +1848,9 @@ private:
    */
   mutable bool m_serialized : 1;
 
-  // NB: 7 bits available here (in USE_LOWPTR builds).
+  mutable bool m_sPropOptimizationEnabled : 1;
+
+  // NB: 6 bits available here (in USE_LOWPTR builds).
 
   ClassPtr m_parent;
 

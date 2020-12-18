@@ -330,11 +330,6 @@ void heapgraphCallback(Array fields, Array fields2, const Variant& callback) {
   vm_call_user_func(callback, params);
 }
 
-static bool isStaticProp(const HeapGraph::Node& node) {
-  return node.tyindex == type_scan::getIndexForScan<StaticPropData>() &&
-         type_scan::hasNonConservative();
-}
-
 static const StringData* header_name_strs[NumHeaderKinds];
 
 Array createPhpNode(HeapGraphContextPtr hgptr, int index) {
@@ -370,12 +365,10 @@ Array createPhpNode(HeapGraphContextPtr hgptr, int index) {
     if (auto cls = cnode.heap_object.cls) {
       node_arr.set(s_class, make_tv<KindOfPersistentString>(cls->name()));
     }
-  } else if (isStaticProp(node)) {
-    if (auto cls = cnode.sprop_cache.cls) {
-      auto& sprop = cls->staticProperties()[cnode.sprop_cache.slot];
-      node_arr.set(s_class, make_tv<KindOfPersistentString>(cls->name()));
-      node_arr.set(s_prop, make_tv<KindOfPersistentString>(sprop.name));
-    }
+  } else if (auto const cls = node.cls) {
+    auto const& sprop = cls->staticProperties()[node.prop_slot];
+    node_arr.set(s_class, make_tv<KindOfPersistentString>(cls->name()));
+    node_arr.set(s_prop, make_tv<KindOfPersistentString>(sprop.name));
   }
   return node_arr;
 }
@@ -452,18 +445,8 @@ Resource HHVM_FUNCTION(heapgraph_create, void) {
       auto obj = innerObj(node.h);
       cnode.heap_object.kind = node.h->kind();
       cnode.heap_object.cls = obj ? obj->getVMClass() : nullptr;
-    } else if (isStaticProp(node)) {
-      rds::Handle handle = rds::ptrToHandle<rds::Mode::Any>(node.ptr);
-      auto sym = rds::reverseLink(handle);
-      if (sym) {
-        cnode.sprop_cache = boost::get<rds::SPropCache>(sym.value());
-      } else {
-        cnode.sprop_cache = {nullptr, 0};
-      }
+      node.h = nullptr;
     }
-
-    // Nullify the pointers to be safe since this is a captured heap
-    node.h = nullptr;
   }
 
   auto hgcontext = req::make<HeapGraphContext>(std::move(hg));

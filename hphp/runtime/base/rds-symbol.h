@@ -132,8 +132,8 @@ struct Profile {
 /*
  * Static class properties in Mode::Local.
  */
-struct SPropCache { LowPtr<const Class> cls;
-                    Slot slot; };
+struct SPropCache { LowPtr<const Class> cls; Slot slot; };
+struct SMultiPropCache { LowPtr<const Class> cls; };
 
 struct StaticMemoValue { FuncId funcId; };
 struct StaticMemoCache { FuncId funcId; };
@@ -160,6 +160,7 @@ using Symbol = boost::variant<
   StaticMethodF,
   Profile,
   SPropCache,
+  SMultiPropCache,
   StaticMemoValue,
   StaticMemoCache,
   LSBMemoValue,

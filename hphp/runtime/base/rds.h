@@ -546,4 +546,3 @@ extern rds::Link<bool, Mode::Persistent> s_persistentTrue;
 }}
 
 #include "hphp/runtime/base/rds-inl.h"
-

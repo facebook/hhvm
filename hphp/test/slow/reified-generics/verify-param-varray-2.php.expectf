@@ -1,0 +1,6 @@
+yes
+yes
+yes
+yes
+
+Catchable fatal error: Argument 1 passed to f() must be an instance of HH\varray<int>, HH\keyset given in %s on line 9

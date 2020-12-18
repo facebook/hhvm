@@ -612,7 +612,8 @@ bool checkTypeStructureMatchesTVImpl(
     case TypeStructure::Kind::T_darray:
     case TypeStructure::Kind::T_varray:
     case TypeStructure::Kind::T_varray_or_darray:
-      return !isOrAsOp && is_php_array(&c1);
+      return !isOrAsOp && (RO::EvalHackArrDVArrs ? is_vec(&c1) || is_dict(&c1)
+                                                 : is_php_array(&c1));
 
     case TypeStructure::Kind::T_dict:
       return is_dict(&c1);

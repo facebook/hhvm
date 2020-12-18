@@ -5,4 +5,6 @@ function f<reify T>(T $x) { echo "yes\n"; }
 f<varray<int>>(varray[]);
 f<varray<int>>(darray[]);
 f<varray<int>>(vec[]);
+f<varray<int>>(dict[]);
+f<varray<int>>(keyset[]);
 }

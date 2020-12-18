@@ -743,9 +743,7 @@ struct json_parser {
     String key;
     Variant val;
   };
-  folly::fbvector<json_state> stack;
-  // check_non_safepoint_surprise() above will not trigger gc
-  TYPE_SCAN_IGNORE_FIELD(stack);
+  req::vector<json_state> stack;
   int top;
   int mark; // the watermark
   int depth;
@@ -814,7 +812,19 @@ struct json_parser {
   }
 };
 
+namespace {
+
 RDS_LOCAL(json_parser, s_json_parser);
+
+InitFiniNode r_shutdown(
+  [] {
+    // Ensure request memory is released
+    s_json_parser->stack = decltype(s_json_parser->stack){};
+  },
+  InitFiniNode::When::RequestFini
+);
+
+}
 
 // In Zend, the json_parser struct is publicly
 // accessible. Thus the fields could be accessed
@@ -1200,6 +1210,10 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
   // reasons, it only makes sense to expand if necessary and cycles are wasted
   // contracting. Calls with a depth other than default should be rare.
   if (depth > json->stack.size()) {
+    auto const newSize = sizeof(json_parser::json_state) * depth;
+    if (newSize > kMaxSmallSize && tl_heap->preAllocOOM(newSize)) {
+      check_non_safepoint_surprise();
+    }
     json->stack.resize(depth);
   }
   SCOPE_EXIT {

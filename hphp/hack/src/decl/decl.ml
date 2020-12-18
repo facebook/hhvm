@@ -74,16 +74,19 @@ let nast_to_decls
 let make_env
     ~(sh : SharedMem.uses) (ctx : Provider_context.t) (fn : Relative_path.t) :
     unit =
-  if use_direct_decl_parser ctx then
-    let (_
-          : ( (string * Shallow_decl_defs.decl) list
-            * FileInfo.mode option
-            * Int64.t option )
-            option) =
-      Direct_decl_utils.direct_decl_parse_and_cache ctx fn
-    in
-    ()
-  else
+  if use_direct_decl_parser ctx then (
+    match Direct_decl_utils.direct_decl_parse_and_cache ctx fn with
+    | None -> ()
+    | Some (decls, _mode, _hash) ->
+      if not (shallow_decl_enabled ctx) then
+        List.iter decls ~f:(function
+            | (name, Shallow_decl_defs.Class _) ->
+              let (_ : (_ * _) option) =
+                Decl_folded_class.class_decl_if_missing ~sh ctx name
+              in
+              ()
+            | _ -> ())
+  ) else
     let ast = Ast_provider.get_ast ctx fn in
     let (_ : Direct_decl_parser.decls) =
       name_and_declare_types_program [] ~sh:(Some sh) ctx ast

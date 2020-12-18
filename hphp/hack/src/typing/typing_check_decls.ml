@@ -213,6 +213,9 @@ and hint_ ~is_atom env p h_ =
   | Hshape { nsi_allows_unknown_fields = _; nsi_field_map } ->
     let compute_hint_for_shape_field_info { sfi_hint; _ } = hint env sfi_hint in
     List.iter ~f:compute_hint_for_shape_field_info nsi_field_map
+  | Hfun_context _ ->
+    (* TODO(coeffects): check if arg is a function type in the locals? *)
+    ()
 
 and check_happly ?(is_atom = false) unchecked_tparams env h =
   let pos = fst h in

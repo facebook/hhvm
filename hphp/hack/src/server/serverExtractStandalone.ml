@@ -462,6 +462,7 @@ let rec string_of_hint hint =
     Printf.sprintf "(%s)" (concat_map ~sep:" & " ~f:string_of_hint hints)
   | Hany -> extract_standalone_any
   | Herr -> extract_standalone_any
+  | Hfun_context name -> "ctx " ^ name
 
 let maybe_string_of_user_attribute { ua_name; ua_params } =
   let name = snd ua_name in

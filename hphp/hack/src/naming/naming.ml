@@ -599,6 +599,7 @@ and hint_
     in
     N.Hshape { N.nsi_allows_unknown_fields; nsi_field_map }
   | Aast.Hmixed -> N.Hmixed
+  | Aast.Hfun_context n -> N.Hfun_context n
   | Aast.Herr
   | Aast.Hany
   | Aast.Hnonnull

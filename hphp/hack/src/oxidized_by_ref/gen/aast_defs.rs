@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c4dd86214e5eefbacc441bee1f71d1fb>>
+// @generated SignedSource<<ef7a429116916b2d7ec42620ddeb1878>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -195,6 +195,7 @@ pub enum Hint_<'a> {
     Hnothing,
     Hunion(&'a [&'a Hint<'a>]),
     Hintersection(&'a [&'a Hint<'a>]),
+    HfunContext(&'a str),
 }
 impl<'a> TrivialDrop for Hint_<'a> {}
 

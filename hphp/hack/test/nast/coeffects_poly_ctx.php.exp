@@ -1,27 +1,56 @@
 [(Fun
-    { f_span = [5:1-7:19]; f_annotation = (); f_mode = Mstrict;
-      f_ret = ((), (Some ([7:12-16], (Hprim Tvoid))));
-      f_name = ([5:10-14], "\\poly"); f_tparams = [];
+    { f_span = [5:1-8:19]; f_annotation = (); f_mode = Mstrict;
+      f_ret = ((), (Some ([8:12-16], (Hprim Tvoid))));
+      f_name = ([5:10-14], "\\poly");
+      f_tparams =
+      [{ tp_variance = Invariant; tp_name = ([6:19-20], "Tctx$f");
+         tp_parameters = []; tp_constraints = []; tp_reified = Erased;
+         tp_user_attributes = [] };
+        { tp_variance = Invariant; tp_name = ([7:23-24], "Tctx$nf");
+          tp_parameters = []; tp_constraints = []; tp_reified = Erased;
+          tp_user_attributes = [] }
+        ];
       f_where_constraints = []; f_variadic = FVnonVariadic;
       f_params =
-      [{ param_annotation = [6:28-30];
+      [{ param_annotation = [6:29-31];
          param_type_hint =
          ((),
-          (Some ([6:3-27],
+          (Some ([6:3-28],
                  (Hfun
                     { hf_reactive_kind = FNonreactive;
                       hf_param_tys = [([6:14-17], (Hprim Tint))];
                       hf_param_kinds = [None]; hf_param_mutability = [None];
                       hf_variadic_ty = None;
-                      hf_ctxs = (Some ([6:18-20], []));
-                      hf_return_ty = ([6:22-26], (Hprim Tvoid));
+                      hf_ctxs =
+                      (Some ([6:18-21], [([6:19-20], (Hfun_context "$f"))]));
+                      hf_return_ty = ([6:23-27], (Hprim Tvoid));
                       hf_is_mutable_return = false }))));
-         param_is_variadic = false; param_pos = [6:28-30]; param_name = "$f";
+         param_is_variadic = false; param_pos = [6:29-31]; param_name = "$f";
          param_expr = None; param_callconv = None;
-         param_user_attributes = []; param_visibility = None }
+         param_user_attributes = []; param_visibility = None };
+        { param_annotation = [7:33-36];
+          param_type_hint =
+          ((),
+           (Some ([7:3-32],
+                  (Hoption
+                     ([7:4-32],
+                      (Hfun
+                         { hf_reactive_kind = FNonreactive;
+                           hf_param_tys = [([7:15-21], (Hprim Tstring))];
+                           hf_param_kinds = [None];
+                           hf_param_mutability = [None];
+                           hf_variadic_ty = None;
+                           hf_ctxs =
+                           (Some ([7:22-25],
+                                  [([7:23-24], (Hfun_context "$nf"))]));
+                           hf_return_ty = ([7:27-31], (Hprim Tbool));
+                           hf_is_mutable_return = false }))))));
+          param_is_variadic = false; param_pos = [7:33-36];
+          param_name = "$nf"; param_expr = None; param_callconv = None;
+          param_user_attributes = []; param_visibility = None }
         ];
-      f_ctxs = (Some ([7:2-10], [([7:3-9], Hmixed)]));
-      f_unsafe_ctxs = (Some ([7:2-10], [([7:3-9], Hmixed)]));
+      f_ctxs = (Some ([8:2-10], [([8:3-9], (Hfun_context "$f"))]));
+      f_unsafe_ctxs = (Some ([8:2-10], [([8:3-9], (Hfun_context "$f"))]));
       f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = Named };
       f_fun_kind = FSync; f_user_attributes = [];
       f_file_attributes =

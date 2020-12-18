@@ -971,6 +971,10 @@ where
                 }
                 Ok(*Self::soften_hint(&attrs, hint).1)
             }
+            FunctionCtxTypeSpecifier(c) => {
+                let ast::Id(_p, n) = Self::pos_name(&c.variable, env)?;
+                Ok(HfunContext(n))
+            }
             TypeConstant(c) => {
                 let child = Self::pos_name(&c.right_type, env)?;
                 match Self::p_hint_(&c.left_type, env)? {
@@ -3160,6 +3164,48 @@ where
         }
     }
 
+    // Rewrite `(function (tbar)[_]: t) $f` as `(function (tbar)[ctx $f]: t) $f`
+    // and add a non-denotable type parameter named "ctx$f"
+    fn rewrite_effect_polymorphism(
+        params: &mut Vec<ast::FunParam>,
+        tparams: &mut Vec<ast::Tparam>,
+    ) {
+        use ast::{Hint, Hint_, ReifyKind, Variance};
+
+        let mut rewrite_fun_ctx_hint = |ref mut hint: &mut Hint, name: &String| match *hint.1 {
+            Hint_::Hfun(ref mut hf) => {
+                if let Some(ast::Contexts(ref _p, ref mut hl)) = &mut hf.ctxs {
+                    if hl.len() == 1 {
+                        let h = &mut hl[0];
+                        if let Hint_::Happly(ast::Id(_, s), _) = &*h.1 {
+                            if s == "_" {
+                                *h.1 = Hint_::HfunContext(name.clone());
+                                tparams.push(ast::Tparam {
+                                    variance: Variance::Invariant,
+                                    name: ast::Id(h.0.clone(), "Tctx".to_string() + &name),
+                                    parameters: vec![],
+                                    constraints: vec![],
+                                    reified: ReifyKind::Erased,
+                                    user_attributes: vec![],
+                                })
+                            }
+                        }
+                    }
+                }
+            }
+            _ => {}
+        };
+
+        for param in params.iter_mut() {
+            if let Some(ref mut h) = param.type_hint.1 {
+                match *h.1 {
+                    Hint_::Hoption(ref mut h) => rewrite_fun_ctx_hint(h, &param.name),
+                    _ => rewrite_fun_ctx_hint(h, &param.name),
+                }
+            }
+        }
+    }
+
     fn p_fun_param_default_value(
         node: S<'a, T, V>,
         env: &mut Env<'a, TF>,
@@ -3223,8 +3269,11 @@ where
                     _ => (false, name),
                 };
                 let user_attributes = Self::p_user_attributes(attribute, env)?;
-                let hint = Self::mp_optional(Self::p_hint, type_, env)?
-                    .map(|h| Self::soften_hint(&user_attributes, h));
+                let pos = Self::p_pos(name, env);
+                let name = Self::text(name, env);
+                let hint = Self::mp_optional(Self::p_hint, type_, env)?;
+                let hint = hint.map(|h| Self::soften_hint(&user_attributes, h));
+
                 if is_variadic && !user_attributes.is_empty() {
                     Self::raise_parsing_error(
                         node,
@@ -3232,14 +3281,13 @@ where
                         &syntax_error::no_attributes_on_variadic_parameter,
                     );
                 }
-                let pos = Self::p_pos(name, env);
                 Ok(ast::FunParam {
                     annotation: pos.clone(),
                     type_hint: ast::TypeHint((), hint),
                     user_attributes,
                     is_variadic,
                     pos,
-                    name: Self::text(name, env),
+                    name,
                     expr: Self::p_fun_param_default_value(default_value, env)?,
                     callconv: Self::mp_optional(Self::p_param_kind, call_convention, env)?,
                     /* implicit field via constructor parameter.
@@ -3359,9 +3407,6 @@ where
                 use ast::{Hint, Hint_};
                 let hints = Self::could_map(
                     |n, e| match &n.children {
-                        FunctionCtxTypeSpecifier(_) => {
-                            Ok(Hint::new(Self::p_pos(n, e), Hint_::Hmixed))
-                        }
                         TypeConstant(c) => match &c.left_type.children {
                             Token(token) if token.kind() == TK::Variable => {
                                 Ok(Hint::new(Self::p_pos(n, e), Hint_::Hmixed))
@@ -3399,13 +3444,22 @@ where
                 }
                 let kinds = Self::p_kinds(modifiers, env)?;
                 let has_async = kinds.has(modifier::ASYNC);
-                let parameters = Self::could_map(Self::p_fun_param, parameter_list, env)?;
+                let mut type_parameters = Self::p_tparam_l(false, type_parameter_list, env)?;
+                let mut parameters = Self::could_map(Self::p_fun_param, parameter_list, env)?;
                 let (contexts, unsafe_contexts) = Self::p_contexts(contexts, env)?;
+                if let Some(ast::Contexts(ref _p, ref hl)) = contexts {
+                    if hl.iter().any(|c| match &*c.1 {
+                        ast::Hint_::HfunContext(_) => true,
+                        _ => false,
+                    }) {
+                        // only do transformation for higher order functions
+                        Self::rewrite_effect_polymorphism(&mut parameters, &mut type_parameters);
+                    }
+                }
                 let return_type = Self::mp_optional(Self::p_hint, type_, env)?;
                 let suspension_kind = Self::mk_suspension_kind_(has_async);
                 let name = Self::pos_name(name, env)?;
                 let constrs = Self::p_where_constraint(false, node, where_clause, env)?;
-                let type_parameters = Self::p_tparam_l(false, type_parameter_list, env)?;
                 Ok(FunHdr {
                     suspension_kind,
                     name,

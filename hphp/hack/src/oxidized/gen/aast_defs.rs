@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<9780d652941df779e176b50beb5493cf>>
+// @generated SignedSource<<bd12bb8dbbee5a58f1b28e6e1b95c3e9>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -281,6 +281,7 @@ pub enum Hint_ {
     Hnothing,
     Hunion(Vec<Hint>),
     Hintersection(Vec<Hint>),
+    HfunContext(String),
 }
 
 /// AST types such as Happly("int", []) are resolved to Hprim values

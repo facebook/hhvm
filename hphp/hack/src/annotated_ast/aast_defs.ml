@@ -135,6 +135,7 @@ and hint_ =
   | Hnothing
   | Hunion of hint list
   | Hintersection of hint list
+  | Hfun_context of string
 
 (** AST types such as Happly("int", []) are resolved to Hprim values *)
 and tprim =

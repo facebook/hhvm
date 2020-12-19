@@ -1,4 +1,4 @@
-Fatal error: Uncaught exception 'HH\InvariantException' with message 'Enum has overlapping values' in %s:10
+Fatal error: Uncaught exception 'HH\InvariantException' with message 'Enum Foo has overlapping values BAR and BAZ' in %s:10
 Stack trace:
 #0 (): HH\invariant_violation()
 #1 %s(10): HH\BuiltinEnum::getNames()

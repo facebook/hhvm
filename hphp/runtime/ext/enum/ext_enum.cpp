@@ -15,6 +15,7 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/array-provenance.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/builtin-functions.h"
@@ -33,16 +34,68 @@ static Array HHVM_STATIC_METHOD(BuiltinEnum, getValues) {
   return EnumCache::tagEnumWithProvenance(values->values);
 }
 
-const StaticString
-  s_invariant_violation("HH\\invariant_violation"),
-  s_overlappingErrorMessage("Enum has overlapping values");
+const StaticString s_invariant_violation("HH\\invariant_violation");
 
 static Array HHVM_STATIC_METHOD(BuiltinEnum, getNames) {
   const EnumValues* values = EnumCache::getValuesBuiltin(self_);
   if (values->names.size() != values->values.size()) {
+    // Figure out the names for the colliding enum values so we can
+    // provide them in the error message. Loop over the name -> value
+    // array, and look for any entries that do not map back to the
+    // same name in the value -> name array. The (different) names in
+    // the name -> value array and the value -> name array are the two
+    // offenders.
+    auto const [mismatch1, mismatch2] = [&] {
+      const StringData* mismatch1 = nullptr;
+      const StringData* mismatch2 = nullptr;
+      IterateKV(
+        values->values.get(),
+        [&] (TypedValue k, TypedValue v) {
+          assertx(isStringType(k.m_type));
+
+          // Handle key coercion manually
+          auto const converted = [&] {
+            int64_t num;
+            if (isStringType(v.m_type) &&
+                v.m_data.pstr->isStrictlyInteger(num)) {
+              return make_tv<KindOfInt64>(num);
+            } else if (isClassType(v.m_type)) {
+              return make_tv<KindOfPersistentString>(v.m_data.pclass->name());
+            } else if (isLazyClassType(v.m_type)) {
+              return make_tv<KindOfPersistentString>(
+                v.m_data.plazyclass.name()
+              );
+            }
+            return v;
+          }();
+
+          auto const name = values->names.lookup(converted);
+          assertx(isStringType(name.m_type));
+
+          if (!name.m_data.pstr->same(k.m_data.pstr)) {
+            mismatch1 = k.m_data.pstr;
+            mismatch2 = name.m_data.pstr;
+            return true;
+          }
+          return false;
+        }
+      );
+      assertx(mismatch1 && mismatch2);
+      return std::make_pair(mismatch1, mismatch2);
+    }();
+
     vm_call_user_func(
       Func::lookup(s_invariant_violation.get()),
-      make_vec_array(s_overlappingErrorMessage)
+      make_vec_array(
+        String{
+          folly::sformat(
+            "Enum {} has overlapping values {} and {}",
+            self_->name(),
+            mismatch1->slice(),
+            mismatch2->slice()
+          )
+        }
+      )
     );
   }
 

@@ -1,0 +1,5 @@
+Fatal error: Uncaught exception 'HH\InvariantException' with message 'Enum E has overlapping values NAME1 and NAME3' in %s:11
+Stack trace:
+#0 (): HH\invariant_violation()
+#1 %s(11): HH\BuiltinEnum::getNames()
+%a {main}

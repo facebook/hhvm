@@ -3,12 +3,14 @@
 namespace HH {
   abstract final class Shapes {
 
-    <<__Native, __Pure, __IsFoldable>>
+    <<__Pure, __IsFoldable>>
     public static function idx(
       ?darray $shape,
       arraykey $index,
       mixed $default = null,
-    ): mixed;
+    ) {
+      return idx($shape, $index, $default);
+    }
 
     <<__Pure>>
     public static function at(

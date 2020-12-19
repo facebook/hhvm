@@ -394,62 +394,6 @@ TypeOrReduced builtin_type_structure_classname(ISS& env, const php::Func* func,
   return TSStr;
 }
 
-TypeOrReduced builtin_shapes_idx(ISS& env, const php::Func* func,
-                                 const FCallArgs& fca) {
-  assertx(fca.numArgs() >= 2 && fca.numArgs() <= 3);
-  auto def = to_cell(getArg(env, func, fca, 2));
-  auto const key = getArg(env, func, fca, 1);
-  auto const base = getArg(env, func, fca, 0);
-  const auto optDArr = RuntimeOption::EvalHackArrDVArrs ? BOptDict : BOptArr;
-
-  if (!base.couldBe(optDArr) ||
-      !key.couldBe(BArrKeyCompat)) {
-    unreachable(env);
-    return TBottom;
-  }
-  if (!base.subtypeOf(optDArr) || !key.subtypeOf(BOptArrKeyCompat)) {
-    return NoReduced{};
-  }
-
-  auto mightThrow = is_opt(key);
-
-  if (base.subtypeOf(BNull)) {
-    if (!mightThrow) {
-      constprop(env);
-      effect_free(env);
-    }
-    return std::move(def);
-  }
-
-  auto const unoptBase = is_opt(base) ? unopt(base) : base;
-  auto const unoptKey = is_opt(key) ? unopt(key) : key;
-
-  auto elem = RuntimeOption::EvalHackArrDVArrs
-    ? dictish_elem(unoptBase, unoptKey, def)
-    : array_like_elem(unoptBase, unoptKey, def, true);
-  switch (elem.second) {
-    case ThrowMode::None:
-    case ThrowMode::MaybeMissingElement:
-    case ThrowMode::MissingElement:
-      break;
-    case ThrowMode::MaybeBadKey:
-      mightThrow = true;
-      break;
-    case ThrowMode::BadOperation:
-      always_assert(false);
-  }
-
-  if (!mightThrow) {
-    constprop(env);
-    effect_free(env);
-  }
-
-  auto res = elem.first;
-  if (is_opt(base)) res |= def;
-
-  return std::move(res);
-}
-
 #define SPECIAL_BUILTINS                                                \
   X(abs, abs)                                                           \
   X(ceil, ceil)                                                         \
@@ -468,7 +412,6 @@ TypeOrReduced builtin_shapes_idx(ISS& env, const php::Func* func,
   X(type_structure, HH\\type_structure)                                 \
   X(type_structure_no_throw, HH\\type_structure_no_throw)               \
   X(type_structure_classname, HH\\type_structure_classname)             \
-  X(shapes_idx, HH\\Shapes::idx)                                        \
 
 #define X(x, y)    const StaticString s_##x(#y);
   SPECIAL_BUILTINS

@@ -13,7 +13,7 @@ darray is tuple: false
 
 =====================================
 Builtin errors:
-Passing boolean to darray: idx() expects parameter 1 to be darray, boolean given
+Passing boolean to darray: __hhvm_intrinsics\dummy_darray_builtin() expects parameter 1 to be darray, boolean given
 Passing darray to boolean: json_decode() expects parameter 2 to be boolean, darray given
 
 =====================================

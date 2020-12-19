@@ -104,6 +104,7 @@ hphp/system/php/misc/fb_autoload_map.php
 hphp/system/php/misc/idx.php
 hphp/system/php/pdo/PDOException.php
 hphp/system/php/rx/mutable.php
+hphp/system/php/shapes/ext_shapes.php
 hphp/system/php/soap/SoapFault.php
 hphp/system/php/spl/datastructures/SplPriorityQueue.php
 hphp/system/php/spl/interfaces/SplObserver.php

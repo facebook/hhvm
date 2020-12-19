@@ -52,7 +52,7 @@ function test_as_is_shape_tuple() {
 function test_builtin_error_messages() {
   print("\n=====================================\nBuiltin errors:\n");
   print('Passing boolean to darray: ');
-  run(() ==> Shapes::idx(false, 17));
+  run(() ==> __hhvm_intrinsics\dummy_darray_builtin(false));
   print('Passing darray to boolean: ');
   run(() ==> json_decode('[]', darray[]));
 }

@@ -1031,62 +1031,6 @@ SSATmp* opt_class_meth_get_method(IRGS& env, const ParamPrep& params) {
   return nullptr;
 }
 
-SSATmp* opt_shapes_idx(IRGS& env, const ParamPrep& params) {
-  // We first check the number and types of each argument. If any check fails,
-  // we'll fall back to the native code which will raise an appropriate error.
-  auto const nparams = params.size();
-  if (nparams != 2 && nparams != 3) return nullptr;
-
-  // params[1] is an arraykey. We only optimize if it's narrowed to int or str.
-  auto const keyType = params[1].value->type();
-  if (!(keyType <= TInt || keyType <= TStr)) return nullptr;
-
-  // params[2] is an optional argument. If it's uninit, we convert it to null.
-  // We only optimize if we can distinguish between uninit and other types.
-  auto const defType = nparams == 3 ? params[2].value->type() : TUninit;
-  if (!(defType <= TUninit) && defType.maybe(TUninit)) return nullptr;
-  auto const def = defType <= TUninit ? cns(env, TInitNull) : params[2].value;
-
-  // params[0] is a ?darray, which may be a ?Dict or a ?DArr based on options.
-  auto const arrType = params[0].value->type();
-  if (!(RuntimeOption::EvalHackArrDVArrs ?
-        arrType <= TDict : arrType <= TDArr)) {
-    if (arrType <= TNull) {
-      gen(env, IncRef, def);
-      return def;
-    } else {
-      return nullptr;
-    }
-  }
-
-  // Do the array access, using array offset profiling to optimize it.
-  auto const arr = params[0].value;
-  auto const key = params[1].value;
-  // we might side-exit in profiledArrayAccess
-  env.irb->fs().incBCSPDepth(nparams);
-  auto const elm = profiledArrayAccess(
-    env, arr, key, MOpMode::None,
-    [&] (SSATmp* arr, SSATmp* key, SSATmp* pos) {
-      return gen(env, DictGetK, arr, key, pos);
-    },
-    [&] (SSATmp*) { return def; },
-    [&] (SSATmp* key, SizeHintData data) {
-      return gen(env, DictIdx, data, arr, key, def);
-    }
-  );
-  env.irb->fs().decBCSPDepth(nparams);
-
-  auto const finish = [&](SSATmp* val){
-    gen(env, IncRef, val);
-    return val;
-  };
-  return finish(profiledType(env, elm, [&] {
-    auto const cell = finish(elm);
-    params.decRefParams(env);
-    push(env, cell);
-  }));
-}
-
 const EnumValues* getEnumValues(IRGS& env, const ParamPrep& params) {
   if (RO::EvalArrayProvenance) return nullptr;
   if (!(params.ctx && params.ctx->hasConstVal(TCls))) return nullptr;
@@ -1214,7 +1158,6 @@ const hphp_fast_string_imap<OptEmitFn> s_opt_emit_fns{
   {"HH\\class_meth_get_class", opt_class_meth_get_class},
   {"HH\\class_meth_get_method", opt_class_meth_get_method},
   {"HH\\class_get_class_name", opt_class_get_class_name},
-  {"HH\\Shapes::idx", opt_shapes_idx},
   {"HH\\BuiltinEnum::getNames", opt_enum_names},
   {"HH\\BuiltinEnum::getValues", opt_enum_values},
   {"HH\\BuiltinEnum::coerce", opt_enum_coerce},
@@ -1228,7 +1171,6 @@ const hphp_fast_string_imap<OptEmitFn> s_opt_emit_fns{
 // (if any) we need a vanilla input for to generate optimized HHIR.
 
 const hphp_fast_string_imap<int> s_vanilla_params{
-  {"HH\\Shapes::idx", 0},
   {"HH\\Lib\\_Private\\Native\\first", 0},
   {"HH\\Lib\\_Private\\Native\\last", 0},
   {"HH\\Lib\\_Private\\Native\\first_key", 0},

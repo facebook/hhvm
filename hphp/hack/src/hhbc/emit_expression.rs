@@ -317,14 +317,11 @@ pub fn get_type_structure_for_hint(
         false,
     )?;
     let i = emit_adata::get_array_identifier(e, &tv);
-    Ok(wrap_array_mark_legacy(
-        e,
-        if hack_arr_dv_arrs(e.options()) {
-            instr::lit_const(InstructLitConst::Dict(i))
-        } else {
-            instr::lit_const(InstructLitConst::Array(i))
-        },
-    ))
+    Ok(if hack_arr_dv_arrs(e.options()) {
+        instr::lit_const(InstructLitConst::Dict(i))
+    } else {
+        instr::lit_const(InstructLitConst::Array(i))
+    })
 }
 
 pub struct Setrange {

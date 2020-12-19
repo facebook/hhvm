@@ -64,13 +64,13 @@ varray(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-** CAST: clsmeth -> varray
+** CAST: clsmeth -> v%s
 varray(2) {
   string(3) "Foo"
   string(3) "bar"
 }
 ** CAST: clsmeth -> HH\KeyedTraversable
-** CAST: clsmeth -> varray
+** CAST: clsmeth -> v%s
 string(3) "Foo"
 string(3) "bar"
 darray(2) {
@@ -145,13 +145,13 @@ varray(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-** CAST: clsmeth -> varray
+** CAST: clsmeth -> v%s
 varray(2) {
   string(3) "Foo"
   string(3) "bar"
 }
 ** CAST: clsmeth -> HH\KeyedTraversable
-** CAST: clsmeth -> varray
+** CAST: clsmeth -> v%s
 string(3) "Foo"
 string(3) "bar"
 darray(2) {
@@ -226,13 +226,13 @@ varray(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-** CAST: clsmeth -> varray
+** CAST: clsmeth -> v%s
 varray(2) {
   string(3) "Foo"
   string(3) "bar"
 }
 ** CAST: clsmeth -> HH\KeyedTraversable
-** CAST: clsmeth -> varray
+** CAST: clsmeth -> v%s
 string(3) "Foo"
 string(3) "bar"
 darray(2) {
@@ -307,13 +307,13 @@ varray(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-** CAST: clsmeth -> varray
+** CAST: clsmeth -> v%s
 varray(2) {
   string(3) "Foo"
   string(3) "bar"
 }
 ** CAST: clsmeth -> HH\KeyedTraversable
-** CAST: clsmeth -> varray
+** CAST: clsmeth -> v%s
 string(3) "Foo"
 string(3) "bar"
 darray(2) {
@@ -388,13 +388,13 @@ varray(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-** CAST: clsmeth -> varray
+** CAST: clsmeth -> v%s
 varray(2) {
   string(3) "Foo"
   string(3) "bar"
 }
 ** CAST: clsmeth -> HH\KeyedTraversable
-** CAST: clsmeth -> varray
+** CAST: clsmeth -> v%s
 string(3) "Foo"
 string(3) "bar"
 darray(2) {
@@ -469,13 +469,13 @@ varray(2) {
   string(3) "Foo"
   string(3) "bar"
 }
-** CAST: clsmeth -> varray
+** CAST: clsmeth -> v%s
 varray(2) {
   string(3) "Foo"
   string(3) "bar"
 }
 ** CAST: clsmeth -> HH\KeyedTraversable
-** CAST: clsmeth -> varray
+** CAST: clsmeth -> v%s
 string(3) "Foo"
 string(3) "bar"
 darray(2) {

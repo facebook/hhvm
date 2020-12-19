@@ -235,16 +235,11 @@ dict(5) {
   [0]=>
   int(1)
 }
-array_slice (0): darray(5) {
-  [0]=>
+array_slice (0): varray(5) {
   int(1)
-  [1]=>
   int(2)
-  [2]=>
   int(3)
-  [3]=>
   int(4)
-  [4]=>
   int(5)
 }
 array_slice (1): varray(4) {
@@ -408,16 +403,11 @@ dict(5) {
   [0]=>
   int(5)
 }
-array_slice (0): darray(5) {
-  [0]=>
+array_slice (0): varray(5) {
   int(5)
-  [1]=>
   int(4)
-  [2]=>
   int(3)
-  [3]=>
   int(2)
-  [4]=>
   int(1)
 }
 array_slice (1): varray(4) {
@@ -549,12 +539,9 @@ dict(3) {
   [0]=>
   string(1) "a"
 }
-array_slice (0): darray(3) {
-  [0]=>
+array_slice (0): varray(3) {
   string(1) "a"
-  [1]=>
   string(1) "b"
-  [2]=>
   string(1) "c"
 }
 array_slice (1): varray(2) {
@@ -700,14 +687,10 @@ dict(4) {
   [0]=>
   string(1) "b"
 }
-array_slice (0): darray(4) {
-  [0]=>
+array_slice (0): varray(4) {
   string(1) "b"
-  [1]=>
   string(1) "a"
-  [2]=>
   string(1) "a"
-  [3]=>
   string(1) "b"
 }
 array_slice (1): varray(3) {
@@ -806,8 +789,7 @@ dict(1) {
   [0]=>
   int(100)
 }
-array_slice (0): darray(1) {
-  [0]=>
+array_slice (0): varray(1) {
   int(100)
 }
 array_slice (1): darray(0) {

@@ -106,22 +106,30 @@ darray(2) {
   [1]=>
   int(2)
 }
+
+Notice: Hack Array Compat: triggered IntishCast for array_slice in %s/array_slice.php on line 38
 darray(2) {
   [12]=>
   int(1)
   [6]=>
   int(2)
 }
+
+Notice: Hack Array Compat: triggered IntishCast for array_slice in %s/array_slice.php on line 39
 darray(2) {
   [0]=>
   int(1)
   [1]=>
   int(2)
 }
+
+Notice: Hack Array Compat: triggered IntishCast for array_slice in %s/array_slice.php on line 41
 darray(1) {
   [6]=>
   int(2)
 }
+
+Notice: Hack Array Compat: triggered IntishCast for array_slice in %s/array_slice.php on line 42
 darray(2) {
   [0]=>
   int(1)

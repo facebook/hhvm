@@ -1,0 +1,12 @@
+
+Notice: Hack Array Compat: triggered IntishCast for array_slice in %s/array_slice.php on line 3
+darray(1) {
+  [1]=>
+  int(1)
+}
+
+Notice: Hack Array Compat: triggered IntishCast for array_slice in %s/array_slice.php on line 4
+darray(1) {
+  [1]=>
+  int(1)
+}

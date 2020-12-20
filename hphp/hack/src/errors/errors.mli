@@ -1061,8 +1061,6 @@ val inout_params_special : Pos.t -> unit
 
 val inout_params_memoize : Pos.t -> Pos.t -> unit
 
-val obj_set_reactive : Pos.t -> unit
-
 val inout_annotation_missing : Pos.t -> Pos.t -> unit
 
 val inout_annotation_unexpected : Pos.t -> Pos.t -> bool -> unit
@@ -1078,8 +1076,6 @@ val missing_xhp_required_attr : Pos.t -> string -> (Pos.t * string) list -> unit
 val nonreactive_function_call : Pos.t -> Pos.t -> string -> Pos.t option -> unit
 
 val nonpure_function_call : Pos.t -> Pos.t -> string -> unit
-
-val nonreactive_indexing : bool -> Pos.t -> unit
 
 val inout_argument_bad_expr : Pos.t -> unit
 
@@ -1231,8 +1227,6 @@ val reassign_mutable_this :
 
 val mutable_expression_as_multiple_mutable_arguments :
   Pos.t -> string -> Pos.t -> string -> unit
-
-val invalid_unset_target_rx : Pos.t -> unit
 
 val lateinit_with_default : Pos.t -> unit
 
@@ -1418,6 +1412,12 @@ module CoeffectEnforcedOp : sig
   val output : Pos.t -> unit
 
   val static_property_access : Pos.t -> unit
+
+  val nonreactive_indexing : bool -> Pos.t -> unit
+
+  val obj_set_reactive : Pos.t -> unit
+
+  val invalid_unset_target_rx : Pos.t -> unit
 end
 
 val abstract_function_pointer : string -> string -> Pos.t -> Pos.t -> unit

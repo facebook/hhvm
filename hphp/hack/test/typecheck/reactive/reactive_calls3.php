@@ -2,7 +2,7 @@
 <<file: __EnableUnstableFeatures('coeffects_provisional')>>
 
 <<__Rx>>
-function append(bool $x): void {
+function append(bool $x)[rx]: void {
   if ($x) {
     $y = Vector {};
   } else {

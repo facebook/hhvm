@@ -4074,6 +4074,28 @@ module CoeffectEnforcedOp = struct
       (Typing.err_code Typing.StaticPropertyInWrongContext)
       pos
       "Static property cannot be used in a reactive context."
+
+  let nonreactive_indexing is_append pos =
+    let msg =
+      if is_append then
+        "Cannot append to a Hack Collection object in a reactive context. Instead, use the `add` method."
+      else
+        "Cannot assign to element of Hack Collection object via `[]` in a reactive context. Instead, use the `set` method."
+    in
+    add (Typing.err_code Typing.NonreactiveIndexing) pos msg
+
+  let obj_set_reactive pos =
+    let msg =
+      "This object's property is being mutated (used as an lvalue)"
+      ^ "\nYou cannot set non-mutable object properties in reactive functions"
+    in
+    add (Typing.err_code Typing.ObjSetReactive) pos msg
+
+  let invalid_unset_target_rx pos =
+    add
+      (Typing.err_code Typing.InvalidUnsetTargetInRx)
+      pos
+      "Non-mutable argument for `unset` is not allowed in reactive functions."
 end
 
 (*****************************************************************************)
@@ -4657,28 +4679,6 @@ let rx_parameter_condition_mismatch
       ^ cond
       ^ " condition defined on matching parameter in function super type." )
     [(def_pos, "This is parameter declaration from the function super type.")]
-
-let nonreactive_indexing is_append pos =
-  let msg =
-    if is_append then
-      "Cannot append to a Hack Collection object in a reactive context. Instead, use the `add` method."
-    else
-      "Cannot assign to element of Hack Collection object via `[]` in a reactive context. Instead, use the `set` method."
-  in
-  add (Typing.err_code Typing.NonreactiveIndexing) pos msg
-
-let obj_set_reactive pos =
-  let msg =
-    "This object's property is being mutated (used as an lvalue)"
-    ^ "\nYou cannot set non-mutable object properties in reactive functions"
-  in
-  add (Typing.err_code Typing.ObjSetReactive) pos msg
-
-let invalid_unset_target_rx pos =
-  add
-    (Typing.err_code Typing.InvalidUnsetTargetInRx)
-    pos
-    "Non-mutable argument for `unset` is not allowed in reactive functions."
 
 let inout_argument_bad_type pos msgl =
   let msg =

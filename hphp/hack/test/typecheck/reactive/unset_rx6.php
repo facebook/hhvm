@@ -7,7 +7,7 @@ class A {
 }
 
 <<__Rx>>
-function f(<<__Mutable>>A $a): void {
+function f(<<__Mutable>>A $a)[rx]: void {
   // ERROR
   unset($a->obj->v);
 }

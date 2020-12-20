@@ -2,7 +2,7 @@
 <<file: __EnableUnstableFeatures('coeffects_provisional')>>
 
 <<__Rx>>
-function rx(): void {
+function rx()[rx]: void {
   $f = new FooClass();
   $f->bar++;
   ++$f->bar;

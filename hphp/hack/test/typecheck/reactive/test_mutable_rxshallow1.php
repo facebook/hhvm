@@ -6,7 +6,7 @@ class C {
 }
 
 <<__RxShallow>>
-function f(C $c): void {
+function f(C $c)[rx_shallow]: void {
   // not OK - RxShallow functions behave like reactive
   $c->v = 5;
 }

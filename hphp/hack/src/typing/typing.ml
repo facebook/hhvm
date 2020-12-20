@@ -2082,19 +2082,16 @@ and expr_
       | _ -> env
     in
     let env = might_throw env in
-    let (env, te, ty) =
-      check_call
-        ~is_using_clause
-        ~expected
-        ?in_await
-        env
-        p
-        e
-        explicit_targs
-        el
-        unpacked_element
-    in
-    (env, te, ty)
+    check_call
+      ~is_using_clause
+      ~expected
+      ?in_await
+      env
+      p
+      e
+      explicit_targs
+      el
+      unpacked_element
   | FunctionPointer (FP_id fid, targs) ->
     let (env, fty, targs) = fun_type_of_id env fid targs [] in
     let e = Aast.FunctionPointer (FP_id fid, targs) in
@@ -2123,41 +2120,51 @@ and expr_
       p
       (Aast.Binop (Ast_defs.QuestionQuestion, te1, te2))
       ty_result
-  (* For example, e1 += e2. This is typed and translated as if
-   * written e1 = e1 + e2.
-   * TODO TAST: is this right? e1 will get evaluated more than once
-   *)
-  | Binop (Ast_defs.Eq (Some op), e1, e2) ->
-    begin
-      match (op, snd e1) with
-      | (Ast_defs.QuestionQuestion, Class_get _) ->
-        Errors.experimental_feature
-          p
-          "null coalesce assignment operator with static properties";
-        expr_error env Reason.Rnone outer
-      | _ ->
-        let e_fake =
-          (p, Binop (Ast_defs.Eq None, e1, (p, Binop (op, e1, e2))))
-        in
-        let (env, te_fake, ty) = raw_expr env e_fake in
-        begin
-          match snd te_fake with
-          | Aast.Binop (_, te1, (_, Aast.Binop (_, _, te2))) ->
-            let te = Aast.Binop (Ast_defs.Eq (Some op), te1, te2) in
-            make_result env p te ty
-          | _ -> assert false
-        end
-    end
-  | Binop (Ast_defs.Eq None, e1, e2) ->
-    let (env, te2, ty2) = raw_expr env e2 in
-    let (env, te1, ty) = assign p env e1 ty2 in
-    let env =
-      if Env.env_local_reactive env then
-        Typing_mutability.handle_assignment_mutability env te1 (Some (snd te2))
-      else
-        env
+  | Binop (Ast_defs.Eq op_opt, e1, e2) ->
+    let make_result env p te ty =
+      let (env, te, ty) = make_result env p te ty in
+      let env = Typing_reactivity.check_assignment env te in
+      (env, te, ty)
     in
-    make_result env p (Aast.Binop (Ast_defs.Eq None, te1, te2)) ty
+    (match op_opt with
+    (* For example, e1 += e2. This is typed and translated as if
+     * written e1 = e1 + e2.
+     * TODO TAST: is this right? e1 will get evaluated more than once
+     *)
+    | Some op ->
+      begin
+        match (op, snd e1) with
+        | (Ast_defs.QuestionQuestion, Class_get _) ->
+          Errors.experimental_feature
+            p
+            "null coalesce assignment operator with static properties";
+          expr_error env Reason.Rnone outer
+        | _ ->
+          let e_fake =
+            (p, Binop (Ast_defs.Eq None, e1, (p, Binop (op, e1, e2))))
+          in
+          let (env, te_fake, ty) = raw_expr env e_fake in
+          begin
+            match snd te_fake with
+            | Aast.Binop (_, te1, (_, Aast.Binop (_, _, te2))) ->
+              let te = Aast.Binop (Ast_defs.Eq (Some op), te1, te2) in
+              make_result env p te ty
+            | _ -> assert false
+          end
+      end
+    | None ->
+      let (env, te2, ty2) = raw_expr env e2 in
+      let (env, te1, ty) = assign p env e1 ty2 in
+      let env =
+        if Env.env_local_reactive env then
+          Typing_mutability.handle_assignment_mutability
+            env
+            te1
+            (Some (snd te2))
+        else
+          env
+      in
+      make_result env p (Aast.Binop (Ast_defs.Eq None, te1, te2)) ty)
   | Binop (((Ast_defs.Ampamp | Ast_defs.Barbar) as bop), e1, e2) ->
     let c = Ast_defs.(equal_bop bop Ampamp) in
     let (env, te1, _) = expr env e1 in
@@ -2218,7 +2225,9 @@ and expr_
   | Unop (uop, e) ->
     let (env, te, ty) = raw_expr env e in
     let env = might_throw env in
-    Typing_arithmetic.unop p env uop te ty
+    let (env, tuop, ty) = Typing_arithmetic.unop p env uop te ty in
+    let env = Typing_reactivity.check_assignment env tuop in
+    (env, tuop, ty)
   | Eif (c, e1, e2) -> eif env ~expected ?in_await p c e1 e2
   | Class_const ((p, CI sid), pstr)
     when String.equal (snd pstr) "class" && Env.is_typedef env (snd sid) ->
@@ -4218,6 +4227,7 @@ and dispatch_call
   | Id ((_, pseudo_func) as id)
     when String.equal pseudo_func SN.PseudoFunctions.unset ->
     let (env, tel, _) = exprs env el in
+    let env = Typing_reactivity.check_unset_target env tel in
     if Option.is_some unpacked_element then
       Errors.unpacking_disallowed_builtin_function p pseudo_func;
     let checked_unset_error =
@@ -6478,6 +6488,16 @@ and condition_isset env = function
 and condition
     ?lhs_of_null_coalesce env tparamet ((((p, ty) as pty), e) as te : Tast.expr)
     =
+  begin
+    match e with
+    | Binop (Ast_defs.Eq _, te1, _) ->
+      Typing_reactivity.check_assignment_or_unset_target
+        ~is_assignment:true
+        ~append_pos_opt:p
+        env
+        te1
+    | _ -> ()
+  end;
   let condition = condition ?lhs_of_null_coalesce in
   match e with
   | Aast.True when not tparamet ->

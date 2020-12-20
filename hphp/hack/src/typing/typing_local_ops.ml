@@ -11,6 +11,16 @@ open Typing_defs_core
 open Typing_env_types
 module Env = Typing_env
 
+let check_local_capability (mk_required : env -> env * locl_ty) callback env =
+  (* gate the check behavior on coeffects TC option *)
+  if TypecheckerOptions.local_coeffects (Env.get_tcopt env) then
+    let available = Env.get_local env Typing_coeffects.local_capability_id in
+    let (env, required) = mk_required env in
+    Typing_subtype.sub_type_or_fail env available required (fun () ->
+        callback available required)
+  else
+    env
+
 let enforce_local_capability
     ?((* Run-time enforced ops must have the default as it's unfixmeable *)
     err_code = Error_codes.Typing.err_code Error_codes.Typing.OpCoeffects)
@@ -18,19 +28,16 @@ let enforce_local_capability
     (op : string)
     (op_pos : Pos.t)
     env =
-  (* gate the check behavior on coeffects TC option *)
-  if TypecheckerOptions.local_coeffects (Env.get_tcopt env) then
-    let available = Env.get_local env Typing_coeffects.local_capability_id in
-    let (env, required) = mk_required env in
-    Typing_subtype.sub_type_or_fail env available required (fun () ->
-        Errors.op_coeffect_error
-          ~locally_available:(Typing_print.coeffects env available)
-          ~available_pos:(Typing_defs.get_pos available)
-          ~required:(Typing_print.coeffects env required)
-          ~err_code
-          op
-          op_pos)
-  else
+  check_local_capability
+    mk_required
+    (fun available required ->
+      Errors.op_coeffect_error
+        ~locally_available:(Typing_print.coeffects env available)
+        ~available_pos:(Typing_defs.get_pos available)
+        ~required:(Typing_print.coeffects env required)
+        ~err_code
+        op
+        op_pos)
     env
 
 module Capabilities = struct

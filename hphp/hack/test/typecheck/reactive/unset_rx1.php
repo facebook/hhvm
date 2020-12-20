@@ -3,6 +3,6 @@
 
 // OK
 <<__Rx>>
-function f(int $a): void {
+function f(int $a)[rx]: void {
   unset($a);
 }

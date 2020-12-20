@@ -6,6 +6,6 @@ class Foo {
 }
 
 <<__Rx>>
-function test(Foo $x): void {
+function test(Foo $x)[rx]: void {
   $x->value[] = 5;
 }

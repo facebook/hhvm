@@ -4,7 +4,7 @@ class Foo {
   public function __construct(public int $val) {}
 }
 <<__RxLocal>>
-function test(Foo $x): void {
+function test(Foo $x)[rx_local]: void {
   // Calling non reactive functions is okay
   test2();
   // Setting properties is not

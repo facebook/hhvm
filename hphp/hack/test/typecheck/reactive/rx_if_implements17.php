@@ -10,7 +10,7 @@ class C {
 
 abstract class A {
   <<__RxShallow, __OnlyRxIfImpl(Rx1::class)>>
-  public function mayberx(C $c): int {
+  public function mayberx(C $c)[rx_shallow]: int {
     // error - conditionally reactive methods are still reactive
     $c->a = 5;
     return 1;

@@ -3692,7 +3692,16 @@ and new_object
   (env, tcid, tal, tel, typed_unpack_element, new_ty, ctor_fty)
 
 and attributes_check_def env kind attrs =
-  Typing_attributes.check_def env new_object kind attrs
+  (* TODO(coeffects) change to mixed after changing those constructors to pure *)
+  let defaults = MakeType.default_capability in
+  let (env, _) =
+    Typing_lenv.stash_and_do env (Env.all_continuations env) (fun env ->
+        let env =
+          fst @@ Typing_coeffects.register_capabilities env defaults defaults
+        in
+        (Typing_attributes.check_def env new_object kind attrs, ()))
+  in
+  env
 
 (** Get class infos for a class expression (e.g. `parent`, `self` or
     regular classnames) - which might resolve to a union or intersection

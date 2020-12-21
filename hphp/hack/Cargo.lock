@@ -484,7 +484,6 @@ version = "0.0.0"
 dependencies = [
  "bumpalo",
  "direct_decl_parser",
- "no_pos_hash",
  "ocamlrep",
  "oxidized",
  "oxidized_by_ref",

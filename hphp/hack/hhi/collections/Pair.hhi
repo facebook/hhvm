@@ -192,7 +192,7 @@ final class Pair<+Tv1, +Tv2> implements \ConstVector<mixed> {
    * @guide /hack/collections/examples
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function map<Tu>(<<__AtMostRxAsFunc>>(function(mixed)[_]: Tu) $callback)[ctx $callback]: ImmVector<Tu>;
+  public function map<Tu>(<<__AtMostRxAsFunc>>(function(mixed): Tu) $callback)[]: ImmVector<Tu>;
 
   /**
    * Returns an `ImmVector` containing the values after an operation has been
@@ -209,7 +209,7 @@ final class Pair<+Tv1, +Tv2> implements \ConstVector<mixed> {
    *           operation on the current `Pair`'s keys and values is applied.
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function mapWithKey<Tu>(<<__AtMostRxAsFunc>>(function(int, mixed)[_]: Tu) $callback)[ctx $callback]:
+  public function mapWithKey<Tu>(<<__AtMostRxAsFunc>>(function(int, mixed): Tu) $callback)[]:
     ImmVector<Tu>;
 
   /**
@@ -228,7 +228,7 @@ final class Pair<+Tv1, +Tv2> implements \ConstVector<mixed> {
    * @guide /hack/collections/examples
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function filter(<<__AtMostRxAsFunc>>(function(mixed)[_]: bool) $callback)[ctx $callback]: ImmVector<mixed>;
+  public function filter(<<__AtMostRxAsFunc>>(function(mixed): bool) $callback)[]: ImmVector<mixed>;
 
   /**
    * Returns an `ImmVector` containing the values of the current `Pair` that
@@ -246,7 +246,7 @@ final class Pair<+Tv1, +Tv2> implements \ConstVector<mixed> {
    *           `Pair`.
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function filterWithKey(<<__AtMostRxAsFunc>>(function(int, mixed)[_]: bool) $callback)[ctx $callback]:
+  public function filterWithKey(<<__AtMostRxAsFunc>>(function(int, mixed): bool) $callback)[]:
     ImmVector<mixed>;
 
   /**
@@ -295,7 +295,7 @@ final class Pair<+Tv1, +Tv2> implements \ConstVector<mixed> {
    *           until the callback returns `false`.
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function takeWhile(<<__AtMostRxAsFunc>>(function(mixed)[_]: bool) $fn)[ctx $callback]: ImmVector<mixed>;
+  public function takeWhile(<<__AtMostRxAsFunc>>(function(mixed): bool) $fn)[]: ImmVector<mixed>;
 
   /**
    * Returns an `ImmVector` containing the values after the `n`-th element of
@@ -327,7 +327,7 @@ final class Pair<+Tv1, +Tv2> implements \ConstVector<mixed> {
    *           starting after the callback returns `true`.
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function skipWhile(<<__AtMostRxAsFunc>>(function(mixed)[_]: bool) $fn)[ctx $callback]: ImmVector<mixed>;
+  public function skipWhile(<<__AtMostRxAsFunc>>(function(mixed): bool) $fn)[]: ImmVector<mixed>;
 
   /**
    * Returns a subset of the current `Pair` starting from a given key up to,

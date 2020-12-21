@@ -195,7 +195,7 @@ final class Map<Tk as arraykey, Tv> implements \MutableMap<Tk, Tv> {
    * @guide /hack/collections/examples
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function map<Tu>(<<__AtMostRxAsFunc>>(function(Tv)[_]: Tu) $callback)[ctx $callback]: Map<Tk, Tu>;
+  public function map<Tu>(<<__AtMostRxAsFunc>>(function(Tv): Tu) $callback)[]: Map<Tk, Tu>;
 
   /**
    * Returns a `Map` after an operation has been applied to each key and
@@ -215,7 +215,7 @@ final class Map<Tk as arraykey, Tv> implements \MutableMap<Tk, Tv> {
    *           on the current `Map`'s keys and values is applied.
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function mapWithKey<Tu>(<<__AtMostRxAsFunc>>(function(Tk, Tv)[_]: Tu) $callback)[ctx $callback]: Map<Tk, Tu>;
+  public function mapWithKey<Tu>(<<__AtMostRxAsFunc>>(function(Tk, Tv): Tu) $callback)[]: Map<Tk, Tu>;
 
   /**
    * Returns a `Map` containing the values of the current `Map` that meet
@@ -236,7 +236,7 @@ final class Map<Tk as arraykey, Tv> implements \MutableMap<Tk, Tv> {
    * @guide /hack/collections/examples
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function filter(<<__AtMostRxAsFunc>>(function(Tv)[_]: bool) $callback)[ctx $callback]: Map<Tk, Tv>;
+  public function filter(<<__AtMostRxAsFunc>>(function(Tv): bool) $callback)[]: Map<Tk, Tv>;
 
   /**
    * Returns a `Map` containing the values of the current `Map` that meet
@@ -257,7 +257,7 @@ final class Map<Tk as arraykey, Tv> implements \MutableMap<Tk, Tv> {
    *
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function filterWithKey(<<__AtMostRxAsFunc>>(function(Tk, Tv)[_]: bool) $callback)[ctx $callback]:
+  public function filterWithKey(<<__AtMostRxAsFunc>>(function(Tk, Tv): bool) $callback)[]:
     Map<Tk, Tv>;
 
   /**
@@ -308,7 +308,7 @@ final class Map<Tk as arraykey, Tv> implements \MutableMap<Tk, Tv> {
    *           the callback returns `false`.
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function takeWhile(<<__AtMostRxAsFunc>>(function(Tv)[_]: bool) $fn)[ctx $callback]: Map<Tk, Tv>;
+  public function takeWhile(<<__AtMostRxAsFunc>>(function(Tv): bool) $fn)[]: Map<Tk, Tv>;
 
   /**
    * Returns a `Map` containing the values after the `n`-th element of the
@@ -341,7 +341,7 @@ final class Map<Tk as arraykey, Tv> implements \MutableMap<Tk, Tv> {
    *           after the callback returns `true`.
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function skipWhile(<<__AtMostRxAsFunc>>(function(Tv)[_]: bool) $fn)[ctx $callback]: Map<Tk, Tv>;
+  public function skipWhile(<<__AtMostRxAsFunc>>(function(Tv): bool) $fn)[]: Map<Tk, Tv>;
 
   /**
    * Returns a subset of the current `Map` starting from a given key location

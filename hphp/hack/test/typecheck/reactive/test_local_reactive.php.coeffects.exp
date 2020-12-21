@@ -1,0 +1,5 @@
+File "test_local_reactive.php", line 11, characters 3-9:
+This object's property is being mutated (used as an lvalue)
+Setting non-mutable object properties requires the capability WriteProperty, which is not provided by the context. (Typing[4401])
+  File "test_local_reactive.php", line 7, characters 22-23:
+  The local (enclosing) context provides the capability set {}

@@ -12,7 +12,7 @@ function pure()[]: void {
 }
 
 <<__Rx>>
-function rx()[rx]: void {
+function rx()[]: void {
   FooClass::$foo += 1;
   echo 'bar';
   $f = new FooClass();

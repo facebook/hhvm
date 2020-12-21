@@ -6,7 +6,7 @@ class A {
 }
 
 <<__Rx>>
-function f(dict<int, A> $a)[rx]: void {
+function f(dict<int, A> $a)[]: void {
   // OK
   unset($a[0]);
 }

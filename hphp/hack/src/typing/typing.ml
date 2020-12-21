@@ -6516,16 +6516,6 @@ and condition_isset env = function
 and condition
     ?lhs_of_null_coalesce env tparamet ((((p, ty) as pty), e) as te : Tast.expr)
     =
-  begin
-    match e with
-    | Binop (Ast_defs.Eq _, te1, _) ->
-      Typing_reactivity.check_assignment_or_unset_target
-        ~is_assignment:true
-        ~append_pos_opt:p
-        env
-        te1
-    | _ -> ()
-  end;
   let condition = condition ?lhs_of_null_coalesce in
   match e with
   | Aast.True when not tparamet ->

@@ -2,7 +2,7 @@
 <<file: __EnableUnstableFeatures('coeffects_provisional')>>
 
 <<__Rx>>
-function f<Tv as arraykey>(bool $c, Tv $v)[rx]: mixed {
+function f<Tv as arraykey>(bool $c, Tv $v)[]: mixed {
   $result = varray[];
   if ($c) {
     $result[] = $v;

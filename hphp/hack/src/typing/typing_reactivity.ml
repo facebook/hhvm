@@ -593,7 +593,20 @@ let is_valid_append_target _env ty =
   | Tclass ((_, n), _, [_; _]) -> String.( <> ) n SN.Collections.cMap
   | _ -> true
 
-let check_assignment_or_unset_target ~is_assignment ?append_pos_opt env te1 =
+let check_assignment_or_unset_target
+    ~is_assignment
+    ?append_pos_opt
+    env
+    te1
+    capability_available
+    capability_required =
+  let fail =
+    Errors.op_coeffect_error
+      ~locally_available:(Typing_print.coeffects env capability_available)
+      ~available_pos:(Typing_defs.get_pos capability_available)
+      ~required:(Typing_print.coeffects env capability_required)
+      ~err_code:(Error_codes.Typing.err_code Error_codes.Typing.OpCoeffects)
+  in
   (* Check for modifying immutable objects *)
   let ((p, _), _) = te1 in
   let open Aast in
@@ -602,9 +615,14 @@ let check_assignment_or_unset_target ~is_assignment ?append_pos_opt env te1 =
   | Obj_get (e1, _, _, _) when expr_is_valid_borrowed_arg env e1 -> ()
   | Array_get (((_, ty1), _), i)
     when is_assignment && not (is_valid_append_target env ty1) ->
-    Errors.CoeffectEnforcedOp.nonreactive_indexing
-      (Option.is_none i)
-      (Option.value append_pos_opt ~default:p)
+    let is_append = Option.is_none i in
+    let msg_prefix =
+      if is_append then
+        "Appending to a Hack Collection object"
+      else
+        "Assigning to an element of a Hack Collection object via `[]`"
+    in
+    fail msg_prefix (Option.value append_pos_opt ~default:p)
   | Array_get (e1, _)
     when expr_is_valid_borrowed_arg env e1
          || is_valid_mutable_subscript_expression_target env e1 ->
@@ -615,9 +633,12 @@ let check_assignment_or_unset_target ~is_assignment ?append_pos_opt env te1 =
   | Obj_get _
   | Array_get _ ->
     if is_assignment then
-      Errors.CoeffectEnforcedOp.obj_set_reactive p
+      fail
+        ( "This object's property is being mutated (used as an lvalue)"
+        ^ "\nSetting non-mutable object properties" )
+        p
     else
-      Errors.CoeffectEnforcedOp.invalid_unset_target_rx p
+      fail "Non-mutable argument for `unset`" p
   | _ -> ()
 
 (* END logic from Typed AST check in basic_reactivity_check goes away *)
@@ -632,13 +653,12 @@ let check_assignment env ((append_pos_opt, _), te_) =
     | Aast.Binop (Eq _, te1, _) ->
       Typing_local_ops.(
         check_local_capability
-          Capabilities.(mk accessStaticVariable)
-          (fun _ _ ->
-            check_assignment_or_unset_target
-              ~is_assignment:true
-              ~append_pos_opt
-              env
-              te1)
+          Capabilities.(mk writeProperty)
+          (check_assignment_or_unset_target
+             ~is_assignment:true
+             ~append_pos_opt
+             env
+             te1)
           env)
     | _ -> env
 
@@ -648,9 +668,13 @@ let check_unset_target env tel =
   else
     Typing_local_ops.(
       check_local_capability
-        Capabilities.(mk accessStaticVariable)
-        (fun _ _ ->
-          List.iter
-            tel
-            ~f:(check_assignment_or_unset_target ~is_assignment:false env))
+        Capabilities.(mk writeProperty)
+        (fun available required ->
+          List.iter tel ~f:(fun te ->
+              check_assignment_or_unset_target
+                ~is_assignment:false
+                env
+                te
+                available
+                required))
         env)

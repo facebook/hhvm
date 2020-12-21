@@ -2,7 +2,7 @@
 <<file: __EnableUnstableFeatures('coeffects_provisional')>>
 
 <<__Rx>>
-function f(<<__Mutable>>Vector<string> $m)[rx]: void {
+function f(<<__Mutable>>Vector<string> $m)[]: void {
   // ERROR
   $m[0] = "42";
 }

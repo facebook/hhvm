@@ -1,3 +1,5 @@
 File "reactive_calls3.php", line 11, characters 3-6:
 This object's property is being mutated (used as an lvalue)
-You cannot set non-mutable object properties in reactive functions (Typing[4202])
+Setting non-mutable object properties requires the capability WriteProperty, which is not provided by the context. (Typing[4401])
+  File "reactive_calls3.php", line 5, characters 25-26:
+  The local (enclosing) context provides the capability set {}

@@ -7,7 +7,7 @@ class Test {
 }
 
 <<__Rx>>
-function foo(<<__Mutable>>Test $x, Test $y)[rx]: void {
+function foo(<<__Mutable>>Test $x, Test $y)[]: void {
   $x->val = 5;
   // error, y is not mutable
   $y->val = 4;

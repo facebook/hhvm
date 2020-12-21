@@ -6,6 +6,6 @@ class A {
 }
 
 <<__Rx>>
-function f(A $a)[rx]: void {
+function f(A $a)[]: void {
   $a->v[] = 1;
 }

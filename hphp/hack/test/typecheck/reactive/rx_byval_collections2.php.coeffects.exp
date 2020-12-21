@@ -1,0 +1,4 @@
+File "rx_byval_collections2.php", line 6, characters 3-14:
+Assigning to an element of a Hack Collection object via `[]` requires the capability WriteProperty, which is not provided by the context. (Typing[4401])
+  File "rx_byval_collections2.php", line 5, characters 37-38:
+  The local (enclosing) context provides the capability set {}

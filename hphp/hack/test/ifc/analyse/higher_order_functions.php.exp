@@ -10,11 +10,11 @@ Analyzing \apply:
   Deps: {}
   Constraints:
     [6:3-16]
-      anonymous_self < anonymous_ret, anonymous_exn_lump = exn_lump,
+      anonymous_self < ret'1, anonymous_exn_lump = exn_lump,
       anonymous_exn < exn, anonymous_exn < exn, anonymous_exn < pcjoin,
       pc < pcjoin, lit < $f'1, pcjoin < pc'1, $f'2 < anonymous_self,
-      $f < anonymous_ret, Exception_lump = anonymous_exn_lump,
-      Exception < anonymous_exn, anonymous_ret < ret, anonymous_exn < ret
+      $f < ret'1, Exception_lump = anonymous_exn_lump,
+      Exception < anonymous_exn, ret'1 < ret, anonymous_exn < ret
   Locals:
     { $f -> <pc'1, $f'2>(<$f'1>):
       <$f> [\Exception<Exception, Exception_lump>] }

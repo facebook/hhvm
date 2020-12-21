@@ -620,8 +620,8 @@ let call_special ~pos renv env args ret = function
   | StaticMethod ("\\HH\\Shapes", "idx") ->
     let (ty, key, def) =
       match args with
-      | [(ty, _); (_, key)] -> (ty, key, None)
-      | [(ty, _); (_, key); (def, _)] -> (ty, key, Some def)
+      | [(ty, _); (_, Some key)] -> (ty, key, None)
+      | [(ty, _); (_, Some key); (def, _)] -> (ty, key, Some def)
       | _ -> fail "incorrect arguments to Shapes::idx"
     in
     let key =
@@ -711,7 +711,7 @@ let call_regular ~pos renv env call_type name that_pty_opt args_pty ret_pty =
     let env = Env.acc env (fun acc -> call_constraint :: acc) in
     (env, ret_pty)
 
-let call ~pos renv env call_type that_pty_opt args ret_ty =
+let call ~pos renv env call_type that_pty_opt args ret_pty =
   let name =
     match call_type with
     | Cconstructor callable_name
@@ -719,7 +719,6 @@ let call ~pos renv env call_type that_pty_opt args ret_ty =
       Decl.callable_name_to_string callable_name
     | Clocal _ -> "anonymous"
   in
-  let ret_pty = Lift.ty ~prefix:(name ^ "_ret") renv ret_ty in
   let special =
     match call_type with
     | Cglobal (cn, _) -> call_special ~pos renv env args ret_pty cn
@@ -1090,7 +1089,7 @@ let rec expr ~pos renv (env : Env.expr_env) (((epos, ety), e) : Tast.expr) =
   let funargs env =
     let f env e =
       let (env, ty) = expr env e in
-      (env, (ty, e))
+      (env, (ty, Some e))
     in
     List.map_env env ~f
   in
@@ -1242,8 +1241,9 @@ let rec expr ~pos renv (env : Env.expr_env) (((epos, ety), e) : Tast.expr) =
   | A.Call (e, _type_args, args, _extra_args) ->
     let fty = Tast.get_type e in
     let (env, args_pty) = funargs env args in
+    let ret_pty = Lift.ty ~prefix:"ret" renv ety in
     let call env call_type this_pty =
-      call ~pos renv env call_type this_pty args_pty ety
+      call ~pos renv env call_type this_pty args_pty ret_pty
     in
     begin
       match e with
@@ -1304,6 +1304,29 @@ let rec expr ~pos renv (env : Env.expr_env) (((epos, ety), e) : Tast.expr) =
         in
         call env (Clocal ifc_fty) None
     end
+  | A.FunctionPointer (id, _) ->
+    let ty = Lift.ty renv ety in
+    let fty =
+      match ty with
+      | Tfun fty -> fty
+      | _ -> fail "FunctionPointer does not have a function type"
+    in
+    let ctype =
+      match id with
+      | A.FP_id (_, name) ->
+        let call_id = Decl.make_callable_name ~is_static:false None name in
+        Cglobal (call_id, ety)
+      | A.FP_class_const _ ->
+        (* TODO(T72024862): Handle late static binding *)
+        Errors.unknown_information_flow pos "late static binding";
+        Clocal fty
+    in
+    (* Act as though we are defining a lambda that wraps a call to the function
+        pointer. *)
+    let renv = { renv with re_gpc = fty.f_pc; re_exn = fty.f_exn } in
+    let args = List.map ~f:(fun t -> (t, None)) fty.f_args in
+    let (env, _ret_ty) = call ~pos renv env ctype None args fty.f_ret in
+    (env, ty)
   | A.Varray (_, exprs) -> cow_array_literal ~prefix:"varray" exprs
   | A.ValCollection
       (((A.Vec | A.Keyset | A.ImmSet | A.ImmVector) as kind), _, exprs) ->
@@ -1407,7 +1430,7 @@ let rec expr ~pos renv (env : Env.expr_env) (((epos, ety), e) : Tast.expr) =
             (Some c_name)
             Decl.construct_id
         in
-        let lty = T.mk (Typing_reason.Rnone, T.Tprim A.Tvoid) in
+        let lty = T.mk (Typing_reason.Rnone, T.Tprim A.Tvoid) |> Lift.ty renv in
         let (env, _) =
           call ~pos renv env (Cconstructor call_id) (Some obj_pty) args_pty lty
         in

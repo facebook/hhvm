@@ -25,12 +25,12 @@ Analyzing \constructor_with_default_omitted:
   Deps: { "\\C#__construct" }
   Constraints:
     [no pos]
-      {(this: \C<C, C_lump>)->\C#__construct<pcjoin, C#__construct_self>(<$x>): <C#__construct_ret> [\Exception<C#__construct_exn,
+      {(this: \C<C, C_lump>)->\C#__construct<pcjoin, C#__construct_self>(<$x>): <v> [\Exception<C#__construct_exn,
                                                                     C#__construct_exn_lump>]}
     [10:3-13]
-      C#__construct_self < C#__construct_ret,
-      C#__construct_exn_lump = exn_lump, C#__construct_exn < exn,
-      C#__construct_exn < exn, C#__construct_exn < pcjoin, pc < pcjoin
+      C#__construct_self < v, C#__construct_exn_lump = exn_lump,
+      C#__construct_exn < exn, C#__construct_exn < exn,
+      C#__construct_exn < pcjoin, pc < pcjoin
   Locals:
     { $x -> <$x> }
     pc: C#__construct_exn
@@ -47,12 +47,12 @@ Analyzing \constructor_with_default_supplied:
   Constraints:
     [no pos]
       {(this: \C<C, C_lump>)->\C#__construct<pcjoin, C#__construct_self>(<$x>,
-                                                                    <$y>): <C#__construct_ret> [\Exception<C#__construct_exn,
+                                                                    <$y>): <v> [\Exception<C#__construct_exn,
                                                                     C#__construct_exn_lump>]}
     [15:3-17]
-      C#__construct_self < C#__construct_ret,
-      C#__construct_exn_lump = exn_lump, C#__construct_exn < exn,
-      C#__construct_exn < exn, C#__construct_exn < pcjoin, pc < pcjoin
+      C#__construct_self < v, C#__construct_exn_lump = exn_lump,
+      C#__construct_exn < exn, C#__construct_exn < exn,
+      C#__construct_exn < pcjoin, pc < pcjoin
   Locals:
     { $x -> <$x>; $y -> <$y> }
     pc: C#__construct_exn
@@ -82,9 +82,9 @@ Analyzing \function_with_default_omitted:
   Deps: { "\\f" }
   Constraints:
     [no pos]
-      {\f<pcjoin, f_self>(<$x>): <f_ret> [\Exception<f_exn, f_exn_lump>]}
+      {\f<pcjoin, f_self>(<$x>): <ret'1> [\Exception<f_exn, f_exn_lump>]}
     [23:3-9]
-      f_self < f_ret, exn_lump = f_exn_lump, f_exn < exn, f_exn < exn,
+      f_self < ret'1, exn_lump = f_exn_lump, f_exn < exn, f_exn < exn,
       f_exn < pcjoin, pc < pcjoin
   Locals:
     { $x -> <$x> }

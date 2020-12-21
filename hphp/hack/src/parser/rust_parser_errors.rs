@@ -768,6 +768,15 @@ where
         }
     }
 
+    fn class_constructor_has_tparams(node: S<'a, Token, Value>) -> bool {
+        match &node.children {
+            FunctionDeclarationHeader(node) => {
+                node.name.is_construct() && !node.type_parameter_list.is_missing()
+            }
+            _ => false,
+        }
+    }
+
     // Don't allow a promoted parameter in a constructor if the class
     // already has a property with the same name. Return the clashing name found.
     fn class_constructor_param_promotion_clash(&self, node: S<'a, Token, Value>) -> Option<&str> {
@@ -1760,6 +1769,13 @@ where
                     node,
                     || errors::error2010,
                     function_parameter_list,
+                );
+
+                self.produce_error(
+                    |_, x| Self::class_constructor_has_tparams(x),
+                    node,
+                    || errors::no_generics_on_constructors,
+                    &x.type_parameter_list,
                 );
 
                 if let Some(clashing_name) = self.class_constructor_param_promotion_clash(node) {

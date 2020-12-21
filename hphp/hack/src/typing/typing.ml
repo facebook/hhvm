@@ -5703,11 +5703,30 @@ and call_construct p env class_ params el unpacked_element cid cid_ty =
           let ft =
             Typing_enforceability.compute_enforced_and_pessimize_fun_type env ft
           in
+          (* This creates type variables for non-denotable type parameters on constructors.
+           * These are notably different from the tparams on the class, which are handled
+           * at the top of this function. User-written type parameters on constructors
+           * are still a parse error. This is a no-op if ft.ft_tparams is empty. *)
+          let (env, implicit_constructor_targs) =
+            Phase.localize_targs
+              ~check_well_kinded:true
+              ~is_method:true
+              ~def_pos
+              ~use_pos:p
+              ~use_name:"constructor"
+              env
+              ft.ft_tparams
+              []
+          in
           let (env, ft) =
             Phase.(
               localize_ft
                 ~instantiation:
-                  { use_name = "constructor"; use_pos = p; explicit_targs = [] }
+                  {
+                    use_name = "constructor";
+                    use_pos = p;
+                    explicit_targs = implicit_constructor_targs;
+                  }
                 ~ety_env
                 ~def_pos
                 env

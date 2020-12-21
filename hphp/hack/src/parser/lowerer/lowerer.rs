@@ -12,8 +12,8 @@ use hh_autoimport_rust as hh_autoimport;
 use itertools::Either;
 use lint_rust::LintError;
 use naming_special_names_rust::{
-    classes as special_classes, literal, members as special_members, rx, special_functions,
-    special_idents, typehints as special_typehints, user_attributes as special_attrs,
+    classes as special_classes, literal, rx, special_functions, special_idents,
+    typehints as special_typehints, user_attributes as special_attrs,
 };
 use ocamlrep::rc::RcOc;
 use oxidized::{
@@ -4275,13 +4275,6 @@ where
                     _ => panic!(),
                 };
                 let hdr = Self::p_fun_hdr(header, env)?;
-                if hdr.name.1 == special_members::__CONSTRUCT && !hdr.type_parameters.is_empty() {
-                    Self::raise_parsing_error(
-                        header,
-                        env,
-                        &syntax_error::no_generics_on_constructors,
-                    );
-                }
                 let (mut member_init, mut member_def): (Vec<ast::Stmt>, Vec<ast::ClassVar>) = hdr
                     .parameters
                     .iter()

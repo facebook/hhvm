@@ -1743,6 +1743,7 @@ dependencies = [
  "bstr",
  "bumpalo",
  "escaper",
+ "fnv",
  "hh_autoimport_rust",
  "html_entities",
  "itertools",

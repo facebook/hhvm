@@ -103,12 +103,14 @@ and hint_ =
       (** This represents the use of a type const. Type consts are accessed like
        * regular consts in Hack, i.e.
        *
-       * [self | static | Class]::TypeConst
+       * [$x | self | static | Class]::TypeConst
        *
        * Class  => Happly "Class"
        * self   => Happly of the class of definition
        * static => Habstr ("static",
        *           Habstr ("this", (Constraint_as, Happly of class of definition)))
+       * $x     => Hvar "$x"
+       *
        * Type const access can be chained such as
        *
        * Class::TC1::TC2::TC3
@@ -136,6 +138,7 @@ and hint_ =
   | Hunion of hint list
   | Hintersection of hint list
   | Hfun_context of string
+  | Hvar of string
 
 (** AST types such as Happly("int", []) are resolved to Hprim values *)
 and tprim =

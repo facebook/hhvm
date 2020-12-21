@@ -216,6 +216,9 @@ and hint_ ~is_atom env p h_ =
   | Hfun_context _ ->
     (* TODO(coeffects): check if arg is a function type in the locals? *)
     ()
+  | Hvar _ ->
+    (* TODO(coeffects) *)
+    ()
 
 and check_happly ?(is_atom = false) unchecked_tparams env h =
   let pos = fst h in

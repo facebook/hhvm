@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<f46810aec5fe59f6a0a9ce229fa68a87>>
+// @generated SignedSource<<28afa7c50a62be9d45685f900b851c9b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -332,6 +332,9 @@ impl Hint_ {
     pub fn mk_hfun_context(p0: String) -> Self {
         Hint_::HfunContext(p0)
     }
+    pub fn mk_hvar(p0: String) -> Self {
+        Hint_::Hvar(p0)
+    }
     pub fn is_hoption(&self) -> bool {
         match self {
             Hint_::Hoption(..) => true,
@@ -470,6 +473,12 @@ impl Hint_ {
             _ => false,
         }
     }
+    pub fn is_hvar(&self) -> bool {
+        match self {
+            Hint_::Hvar(..) => true,
+            _ => false,
+        }
+    }
     pub fn as_hoption(&self) -> Option<&Hint> {
         match self {
             Hint_::Hoption(p0) => Some(p0),
@@ -563,6 +572,12 @@ impl Hint_ {
     pub fn as_hfun_context(&self) -> Option<&String> {
         match self {
             Hint_::HfunContext(p0) => Some(p0),
+            _ => None,
+        }
+    }
+    pub fn as_hvar(&self) -> Option<&String> {
+        match self {
+            Hint_::Hvar(p0) => Some(p0),
             _ => None,
         }
     }
@@ -662,6 +677,12 @@ impl Hint_ {
             _ => None,
         }
     }
+    pub fn as_hvar_mut(&mut self) -> Option<&mut String> {
+        match self {
+            Hint_::Hvar(p0) => Some(p0),
+            _ => None,
+        }
+    }
     pub fn as_hoption_into(self) -> Option<Hint> {
         match self {
             Hint_::Hoption(p0) => Some(p0),
@@ -755,6 +776,12 @@ impl Hint_ {
     pub fn as_hfun_context_into(self) -> Option<String> {
         match self {
             Hint_::HfunContext(p0) => Some(p0),
+            _ => None,
+        }
+    }
+    pub fn as_hvar_into(self) -> Option<String> {
+        match self {
+            Hint_::Hvar(p0) => Some(p0),
             _ => None,
         }
     }

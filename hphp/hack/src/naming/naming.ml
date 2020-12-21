@@ -574,6 +574,7 @@ and hint_
             Errors.invalid_type_access_root root;
             N.Herr
         end
+      | Aast.Hvar n -> N.Hvar n
       | _ ->
         Errors.internal_error
           pos
@@ -600,6 +601,7 @@ and hint_
     N.Hshape { N.nsi_allows_unknown_fields; nsi_field_map }
   | Aast.Hmixed -> N.Hmixed
   | Aast.Hfun_context n -> N.Hfun_context n
+  | Aast.Hvar n -> N.Hvar n
   | Aast.Herr
   | Aast.Hany
   | Aast.Hnonnull

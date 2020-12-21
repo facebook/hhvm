@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<bd12bb8dbbee5a58f1b28e6e1b95c3e9>>
+// @generated SignedSource<<75d5c6ca2b02c147b5ee449f83e9a8af>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -250,12 +250,14 @@ pub enum Hint_ {
     /// This represents the use of a type const. Type consts are accessed like
     /// regular consts in Hack, i.e.
     ///
-    /// [self | static | Class]::TypeConst
+    /// [$x | self | static | Class]::TypeConst
     ///
     /// Class  => Happly "Class"
     /// self   => Happly of the class of definition
     /// static => Habstr ("static",
     ///           Habstr ("this", (Constraint_as, Happly of class of definition)))
+    /// $x     => Hvar "$x"
+    ///
     /// Type const access can be chained such as
     ///
     /// Class::TC1::TC2::TC3
@@ -282,6 +284,7 @@ pub enum Hint_ {
     Hunion(Vec<Hint>),
     Hintersection(Vec<Hint>),
     HfunContext(String),
+    Hvar(String),
 }
 
 /// AST types such as Happly("int", []) are resolved to Hprim values

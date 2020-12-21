@@ -973,3 +973,24 @@ pub const fun_disabled: Error =
 
 pub const class_meth_disabled: Error =
     Cow::Borrowed("`class_meth()` is disabled; switch to first-class references like `C::bar<>`");
+
+pub fn ctx_var_invalid_parameter(param_name: &str) -> Error {
+    Cow::Owned(format!(
+        "Could not find parameter {} for dependent context",
+        param_name.to_string()
+    ))
+}
+
+pub fn ctx_var_missing_type_hint(param_name: &str) -> Error {
+    Cow::Owned(format!(
+        "Parameter {} used for dependent context must have a type hint",
+        param_name.to_string()
+    ))
+}
+
+pub fn ctx_var_invalid_type_hint(param_name: &str) -> Error {
+    Cow::Owned(format!(
+        "Type hint for parameter {} used for dependent context must be a class or a generic",
+        param_name.to_string()
+    ))
+}

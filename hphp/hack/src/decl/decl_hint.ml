@@ -158,6 +158,7 @@ and hint_ p env = function
   | Happly (id, argl) ->
     let argl = List.map argl (hint env) in
     Tapply (id, argl)
+  | Haccess ((_, Hvar n), [(_, id)]) -> Tgeneric ("T" ^ n ^ "@" ^ id, [])
   | Haccess (root_ty, ids) ->
     let root_ty = hint_ p env (snd root_ty) in
     let rec translate res ids =
@@ -196,6 +197,7 @@ and hint_ p env = function
     Tshape (shape_kind, fdm)
   | Hsoft (p, h_) -> hint_ p env h_
   | Hfun_context n -> Tgeneric ("Tctx" ^ n, [])
+  | Hvar n -> Tgeneric ("T" ^ n, [])
 
 and possibly_enforced_hint env h =
   (* Initially we assume that a type is not enforced at runtime.

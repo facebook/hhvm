@@ -38,7 +38,8 @@ let validate_classname (pos, hint) =
   | Aast.Hoption _
   | Aast.Hfun _
   | Aast.Hshape _
-  | Aast.Hfun_context _ ->
+  | Aast.Hfun_context _
+  | Aast.Hvar _ ->
     Errors.invalid_classname pos
 
 let rec check_hint env (pos, hint) =
@@ -85,7 +86,8 @@ let rec check_hint env (pos, hint) =
   | Aast.Hmixed
   | Aast.Hthis
   | Aast.Hnothing
-  | Aast.Hfun_context _ ->
+  | Aast.Hfun_context _
+  | Aast.Hvar _ ->
     ()
   | Aast.Hfun
       Aast.

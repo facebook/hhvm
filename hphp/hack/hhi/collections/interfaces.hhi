@@ -347,7 +347,7 @@ interface ConstVector<+Tv> extends ConstCollection<Tv>,
    * @guide /hack/collections/examples
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function map<Tu>(<<__AtMostRxAsFunc>>(function(Tv): Tu) $fn)[]: ConstVector<Tu>;
+  public function map<Tu>(<<__AtMostRxAsFunc>>(function(Tv)[_]: Tu) $fn)[ctx $fn]: ConstVector<Tu>;
   /**
    * Returns a `ConstVector` containing the values after an operation has been
    * applied to each key and value in the current `ConstVector`.
@@ -363,7 +363,7 @@ interface ConstVector<+Tv> extends ConstCollection<Tv>,
    *           operation on the current Vector's keys and values is applied.
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function mapWithKey<Tu>(<<__AtMostRxAsFunc>>(function(int, Tv): Tu) $fn)[]:
+  public function mapWithKey<Tu>(<<__AtMostRxAsFunc>>(function(int, Tv)[_]: Tu) $fn)[ctx $fn]:
     ConstVector<Tu>;
   /**
    * Returns a `ConstVector` containing the values of the current `ConstVector`
@@ -381,7 +381,7 @@ interface ConstVector<+Tv> extends ConstCollection<Tv>,
    * @guide /hack/collections/examples
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function filter(<<__AtMostRxAsFunc>>(function(Tv): bool) $fn)[]: ConstVector<Tv>;
+  public function filter(<<__AtMostRxAsFunc>>(function(Tv)[_]: bool) $fn)[ctx $fn]: ConstVector<Tv>;
   /**
    * Returns a `ConstVector` containing the values of the current `ConstVector`
    * that meet a supplied condition applied to its keys and values.
@@ -398,7 +398,7 @@ interface ConstVector<+Tv> extends ConstCollection<Tv>,
    *           `ConstVector`.
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function filterWithKey(<<__AtMostRxAsFunc>>(function(int, Tv): bool) $fn)[]:
+  public function filterWithKey(<<__AtMostRxAsFunc>>(function(int, Tv)[_]: bool) $fn)[ctx $fn]:
     ConstVector<Tv>;
   /**
    * Returns a `ConstVector` where each element is a `Pair` that combines the
@@ -450,7 +450,7 @@ interface ConstVector<+Tv> extends ConstCollection<Tv>,
    *           `ConstVector` up until the callback returns `false`.
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function takeWhile(<<__AtMostRxAsFunc>>(function(Tv): bool) $fn)[]: ConstVector<Tv>;
+  public function takeWhile(<<__AtMostRxAsFunc>>(function(Tv)[_]: bool) $fn)[ctx $fn]: ConstVector<Tv>;
   /**
    * Returns a `ConstVector` containing the values after the `n`-th element of
    * the current `ConstVector`.
@@ -484,7 +484,7 @@ interface ConstVector<+Tv> extends ConstCollection<Tv>,
    *           `ConstVector` starting after the callback returns `true`.
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function skipWhile(<<__AtMostRxAsFunc>>(function(Tv): bool) $fn)[]: ConstVector<Tv>;
+  public function skipWhile(<<__AtMostRxAsFunc>>(function(Tv)[_]: bool) $fn)[ctx $fn]: ConstVector<Tv>;
   /**
    * Returns a subset of the current `ConstVector` starting from a given key up
    * to, but not including, the element at the provided length from the starting
@@ -624,7 +624,7 @@ interface MutableVector<Tv> extends ConstVector<Tv>,
    * @guide /hack/collections/examples
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function map<Tu>(<<__AtMostRxAsFunc>>(function(Tv): Tu) $fn)[]: MutableVector<Tu>;
+  public function map<Tu>(<<__AtMostRxAsFunc>>(function(Tv)[_]: Tu) $fn)[ctx $fn]: MutableVector<Tu>;
   /**
    * Returns a `MutableVector` containing the values after an operation has been
    * applied to each key and value in the current `MutableVector`.
@@ -640,7 +640,7 @@ interface MutableVector<Tv> extends ConstVector<Tv>,
    *           operation on the current Vector's keys and values is applied.
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function mapWithKey<Tu>(<<__AtMostRxAsFunc>>(function(int, Tv): Tu) $fn)[]:
+  public function mapWithKey<Tu>(<<__AtMostRxAsFunc>>(function(int, Tv)[_]: Tu) $fn)[ctx $fn]:
     MutableVector<Tu>;
   /**
    * Returns a `MutableVector` containing the values of the current
@@ -658,7 +658,7 @@ interface MutableVector<Tv> extends ConstVector<Tv>,
    * @guide /hack/collections/examples
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function filter(<<__AtMostRxAsFunc>>(function(Tv): bool) $fn)[]: MutableVector<Tv>;
+  public function filter(<<__AtMostRxAsFunc>>(function(Tv)[_]: bool) $fn)[ctx $fn]: MutableVector<Tv>;
   /**
    * Returns a `MutableVector` containing the values of the current
    * `MutableVector` that meet a supplied condition applied to its keys and
@@ -677,7 +677,7 @@ interface MutableVector<Tv> extends ConstVector<Tv>,
    *
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function filterWithKey(<<__AtMostRxAsFunc>>(function(int, Tv): bool) $fn)[]:
+  public function filterWithKey(<<__AtMostRxAsFunc>>(function(int, Tv)[_]: bool) $fn)[ctx $fn]:
     MutableVector<Tv>;
   /**
    * Returns a `MutableVector` where each element is a `Pair` that combines the
@@ -729,7 +729,7 @@ interface MutableVector<Tv> extends ConstVector<Tv>,
    *           `MutableVector` up until the callback returns `false`.
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function takeWhile(<<__AtMostRxAsFunc>>(function(Tv): bool) $fn)[]: MutableVector<Tv>;
+  public function takeWhile(<<__AtMostRxAsFunc>>(function(Tv)[_]: bool) $fn)[ctx $fn]: MutableVector<Tv>;
   /**
    * Returns a `MutableVector` containing the values after the `n`-th element of
    * the current `MutableVector`.
@@ -763,7 +763,7 @@ interface MutableVector<Tv> extends ConstVector<Tv>,
    *           `MutableVector` starting after the callback returns `true`.
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function skipWhile(<<__AtMostRxAsFunc>>(function(Tv): bool) $fn)[]: MutableVector<Tv>;
+  public function skipWhile(<<__AtMostRxAsFunc>>(function(Tv)[_]: bool) $fn)[ctx $fn]: MutableVector<Tv>;
   /**
    * Returns a subset of the current `MutableVector` starting from a given key
    * up to, but not including, the element at the provided length from the
@@ -902,7 +902,7 @@ interface ConstMap<Tk as arraykey, +Tv> extends ConstCollection<Pair<Tk, Tv>>,
    * @guide /hack/collections/examples
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function map<Tu>(<<__AtMostRxAsFunc>>(function(Tv): Tu) $fn)[]: ConstMap<Tk, Tu>;
+  public function map<Tu>(<<__AtMostRxAsFunc>>(function(Tv)[_]: Tu) $fn)[ctx $fn]: ConstMap<Tk, Tu>;
   /**
    * Returns a `ConstMap` after an operation has been applied to each key and
    * value in the current `ConstMap`.
@@ -921,7 +921,7 @@ interface ConstMap<Tk as arraykey, +Tv> extends ConstCollection<Pair<Tk, Tv>>,
    *           operation on the current `ConstMap`'s keys and values is applied.
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function mapWithKey<Tu>(<<__AtMostRxAsFunc>>(function(Tk, Tv): Tu) $fn)[]:
+  public function mapWithKey<Tu>(<<__AtMostRxAsFunc>>(function(Tk, Tv)[_]: Tu) $fn)[ctx $fn]:
     ConstMap<Tk, Tu>;
   /**
    * Returns a `ConstMap` containing the values of the current `ConstMap` that
@@ -942,7 +942,7 @@ interface ConstMap<Tk as arraykey, +Tv> extends ConstCollection<Pair<Tk, Tv>>,
    * @guide /hack/collections/examples
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function filter(<<__AtMostRxAsFunc>>(function(Tv): bool) $fn)[]: ConstMap<Tk, Tv>;
+  public function filter(<<__AtMostRxAsFunc>>(function(Tv)[_]: bool) $fn)[ctx $fn]: ConstMap<Tk, Tv>;
   /**
    * Returns a `ConstMap` containing the values of the current `ConstMap` that
    * meet a supplied condition applied to its keys and values.
@@ -962,7 +962,7 @@ interface ConstMap<Tk as arraykey, +Tv> extends ConstCollection<Pair<Tk, Tv>>,
    *           `ConstMap`.
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function filterWithKey(<<__AtMostRxAsFunc>>(function(Tk, Tv): bool) $fn)[]:
+  public function filterWithKey(<<__AtMostRxAsFunc>>(function(Tk, Tv)[_]: bool) $fn)[ctx $fn]:
     ConstMap<Tk, Tv>;
   /**
    * Returns a `ConstMap` where each value is a `Pair` that combines the value
@@ -1015,7 +1015,7 @@ interface ConstMap<Tk as arraykey, +Tv> extends ConstCollection<Pair<Tk, Tv>>,
    *           up until the callback returns `false`.
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function takeWhile(<<__AtMostRxAsFunc>>(function(Tv): bool) $fn)[]: ConstMap<Tk, Tv>;
+  public function takeWhile(<<__AtMostRxAsFunc>>(function(Tv)[_]: bool) $fn)[ctx $fn]: ConstMap<Tk, Tv>;
   /**
    * Returns a `ConstMap` containing the values after the `n`-th element of the
    * current `ConstMap`.
@@ -1049,7 +1049,7 @@ interface ConstMap<Tk as arraykey, +Tv> extends ConstCollection<Pair<Tk, Tv>>,
    *           starting after the callback returns `true`.
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function skipWhile(<<__AtMostRxAsFunc>>(function(Tv): bool) $fn)[]: ConstMap<Tk, Tv>;
+  public function skipWhile(<<__AtMostRxAsFunc>>(function(Tv)[_]: bool) $fn)[ctx $fn]: ConstMap<Tk, Tv>;
   /**
    * Returns a subset of the current `ConstMap` starting from a given key
    * location up to, but not including, the element at the provided length from
@@ -1177,7 +1177,7 @@ interface MutableMap<Tk as arraykey, Tv> extends ConstMap<Tk, Tv>,
    * @guide /hack/collections/examples
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function map<Tu>(<<__AtMostRxAsFunc>>(function(Tv): Tu) $fn)[]: MutableMap<Tk, Tu>;
+  public function map<Tu>(<<__AtMostRxAsFunc>>(function(Tv)[_]: Tu) $fn)[ctx $fn]: MutableMap<Tk, Tu>;
   /**
    * Returns a `MutableMap` after an operation has been applied to each key and
    * value in the current `MutableMap`.
@@ -1197,7 +1197,7 @@ interface MutableMap<Tk as arraykey, Tv> extends ConstMap<Tk, Tv>,
    *           applied.
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function mapWithKey<Tu>(<<__AtMostRxAsFunc>>(function(Tk, Tv): Tu) $fn)[]:
+  public function mapWithKey<Tu>(<<__AtMostRxAsFunc>>(function(Tk, Tv)[_]: Tu) $fn)[ctx $fn]:
     MutableMap<Tk, Tu>;
   /**
    * Returns a `MutableMap` containing the values of the current `MutableMap`
@@ -1218,7 +1218,7 @@ interface MutableMap<Tk as arraykey, Tv> extends ConstMap<Tk, Tv>,
    * @guide /hack/collections/examples
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function filter(<<__AtMostRxAsFunc>>(function(Tv): bool) $fn)[]: MutableMap<Tk, Tv>;
+  public function filter(<<__AtMostRxAsFunc>>(function(Tv)[_]: bool) $fn)[ctx $fn]: MutableMap<Tk, Tv>;
   /**
    * Returns a `MutableMap` containing the values of the current `MutableMap`
    * that meet a supplied condition applied to its keys and values.
@@ -1238,7 +1238,7 @@ interface MutableMap<Tk as arraykey, Tv> extends ConstMap<Tk, Tv>,
    *           `MutableMap`.
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function filterWithKey(<<__AtMostRxAsFunc>>(function(Tk, Tv): bool) $fn)[]:
+  public function filterWithKey(<<__AtMostRxAsFunc>>(function(Tk, Tv)[_]: bool) $fn)[ctx $fn]:
     MutableMap<Tk, Tv>;
   /**
    * Returns a `MutableMap` where each value is a `Pair` that combines the
@@ -1291,7 +1291,7 @@ interface MutableMap<Tk as arraykey, Tv> extends ConstMap<Tk, Tv>,
    *           `MutableMap` up until the callback returns `false`.
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function takeWhile(<<__AtMostRxAsFunc>>(function(Tv): bool) $fn)[]: MutableMap<Tk, Tv>;
+  public function takeWhile(<<__AtMostRxAsFunc>>(function(Tv)[_]: bool) $fn)[ctx $fn]: MutableMap<Tk, Tv>;
   /**
    * Returns a `MutableMap` containing the values after the `n`-th element of
    * the current `MutableMap`.
@@ -1326,7 +1326,7 @@ interface MutableMap<Tk as arraykey, Tv> extends ConstMap<Tk, Tv>,
    *           `MutableMap` starting after the callback returns `true`.
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function skipWhile(<<__AtMostRxAsFunc>>(function(Tv): bool) $fn)[]: MutableMap<Tk, Tv>;
+  public function skipWhile(<<__AtMostRxAsFunc>>(function(Tv)[_]: bool) $fn)[ctx $fn]: MutableMap<Tk, Tv>;
   /**
    * Returns a subset of the current `MutableMap` starting from a given key
    * location up to, but not including, the element at the provided length from
@@ -1457,7 +1457,7 @@ interface ConstSet<+Tv as arraykey> extends ConstCollection<Tv>,
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   /* HH_FIXME[4110] explicitly not compatible with parent */
   /* HH_FIXME[4341] explicitly not compatible with parent */
-  public function map<Tu as arraykey>(<<__AtMostRxAsFunc>>(function(Tv): Tu) $fn)[]: ConstSet<Tu>;
+  public function map<Tu as arraykey>(<<__AtMostRxAsFunc>>(function(Tv)[_]: Tu) $fn)[ctx $fn]: ConstSet<Tu>;
   /**
    * Returns a `ConstSet` containing the values after an operation has been
    * applied to each "key" and value in the current Set.
@@ -1478,7 +1478,7 @@ interface ConstSet<+Tv as arraykey> extends ConstCollection<Tv>,
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   /* HH_FIXME[4110] explicitly not compatible with parent */
   /* HH_FIXME[4341] explicitly not compatible with parent */
-  public function mapWithKey<Tu as arraykey>(<<__AtMostRxAsFunc>>(function(arraykey, Tv): Tu) $fn)[]: ConstSet<Tu>;
+  public function mapWithKey<Tu as arraykey>(<<__AtMostRxAsFunc>>(function(arraykey, Tv)[_]: Tu) $fn)[ctx $fn]: ConstSet<Tu>;
   /**
    * Returns a `ConstSet` containing the values of the current `ConstSet` that
    * meet a supplied condition applied to each value.
@@ -1495,7 +1495,7 @@ interface ConstSet<+Tv as arraykey> extends ConstCollection<Tv>,
    * @guide /hack/collections/examples
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function filter(<<__AtMostRxAsFunc>>(function(Tv): bool) $fn)[]: ConstSet<Tv>;
+  public function filter(<<__AtMostRxAsFunc>>(function(Tv)[_]: bool) $fn)[ctx $fn]: ConstSet<Tv>;
   /**
    * Returns a `ConstSet` containing the values of the current `ConstSet` that
    * meet a supplied condition applied to its "keys" and values.
@@ -1514,7 +1514,7 @@ interface ConstSet<+Tv as arraykey> extends ConstCollection<Tv>,
    *           condition is applied to the values of the current `ConstSet`.
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function filterWithKey(<<__AtMostRxAsFunc>>(function(arraykey, Tv): bool) $fn)[]: ConstSet<Tv>;
+  public function filterWithKey(<<__AtMostRxAsFunc>>(function(arraykey, Tv)[_]: bool) $fn)[ctx $fn]: ConstSet<Tv>;
   /**
    * Returns a `ConstSet` where each value is a `Pair` that combines the value
    * of the current `ConstSet` and the provided `Traversable`.
@@ -1568,7 +1568,7 @@ interface ConstSet<+Tv as arraykey> extends ConstCollection<Tv>,
    *           up until the callback returns `false`.
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function takeWhile(<<__AtMostRxAsFunc>>(function(Tv): bool) $fn)[]: ConstSet<Tv>;
+  public function takeWhile(<<__AtMostRxAsFunc>>(function(Tv)[_]: bool) $fn)[ctx $fn]: ConstSet<Tv>;
   /**
    * Returns a `ConstSet` containing the values after the `n`-th element of the
    * current `ConstSet`.
@@ -1601,7 +1601,7 @@ interface ConstSet<+Tv as arraykey> extends ConstCollection<Tv>,
    *           starting after the callback returns `true`.
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function skipWhile(<<__AtMostRxAsFunc>>(function(Tv): bool) $fn)[]: ConstSet<Tv>;
+  public function skipWhile(<<__AtMostRxAsFunc>>(function(Tv)[_]: bool) $fn)[ctx $fn]: ConstSet<Tv>;
   /**
    * Returns a subset of the current `ConstSet` starting from a given key up
    * to, but not including, the element at the provided length from the
@@ -1739,7 +1739,7 @@ interface MutableSet<Tv as arraykey> extends ConstSet<Tv>,
    * @guide /hack/collections/examples
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function map<Tu as arraykey>(<<__AtMostRxAsFunc>>(function(Tv): Tu) $fn)[]: MutableSet<Tu>;
+  public function map<Tu as arraykey>(<<__AtMostRxAsFunc>>(function(Tv)[_]: Tu) $fn)[ctx $fn]: MutableSet<Tu>;
   /**
    * Returns a `MutableSet` containing the values after an operation has been
    * applied to each "key" and value in the current Set.
@@ -1758,7 +1758,7 @@ interface MutableSet<Tv as arraykey> extends ConstSet<Tv>,
    *           operation on the current `MutableSet`'s values is applied.
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function mapWithKey<Tu as arraykey>(<<__AtMostRxAsFunc>>(function(arraykey, Tv): Tu) $fn)[]: MutableSet<Tu>;
+  public function mapWithKey<Tu as arraykey>(<<__AtMostRxAsFunc>>(function(arraykey, Tv)[_]: Tu) $fn)[ctx $fn]: MutableSet<Tu>;
   /**
    * Returns a `MutableSet` containing the values of the current `MutableSet`
    * that meet a supplied condition applied to each value.
@@ -1775,7 +1775,7 @@ interface MutableSet<Tv as arraykey> extends ConstSet<Tv>,
    * @guide /hack/collections/examples
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function filter(<<__AtMostRxAsFunc>>(function(Tv): bool) $fn)[]: MutableSet<Tv>;
+  public function filter(<<__AtMostRxAsFunc>>(function(Tv)[_]: bool) $fn)[ctx $fn]: MutableSet<Tv>;
   /**
    * Returns a `MutableSet` containing the values of the current `MutableSet`
    * that meet a supplied condition applied to its "keys" and values.
@@ -1794,7 +1794,7 @@ interface MutableSet<Tv as arraykey> extends ConstSet<Tv>,
    *           condition is applied to the values of the current `MutableSet`.
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function filterWithKey(<<__AtMostRxAsFunc>>(function(arraykey, Tv): bool) $fn)[]:
+  public function filterWithKey(<<__AtMostRxAsFunc>>(function(arraykey, Tv)[_]: bool) $fn)[ctx $fn]:
     MutableSet<Tv>;
   /**
    * Returns a `MutableSet` where each value is a `Pair` that combines the
@@ -1848,7 +1848,7 @@ interface MutableSet<Tv as arraykey> extends ConstSet<Tv>,
    *           `MutableSet` up until the callback returns `false`.
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function takeWhile(<<__AtMostRxAsFunc>>(function(Tv): bool) $fn)[]: MutableSet<Tv>;
+  public function takeWhile(<<__AtMostRxAsFunc>>(function(Tv)[_]: bool) $fn)[ctx $fn]: MutableSet<Tv>;
   /**
    * Returns a `MutableSet` containing the values after the `n`-th element of
    * the current `MutableSet`.
@@ -1882,7 +1882,7 @@ interface MutableSet<Tv as arraykey> extends ConstSet<Tv>,
    *           `MutableSet` starting after the callback returns `true`.
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function skipWhile(<<__AtMostRxAsFunc>>(function(Tv): bool) $fn)[]: MutableSet<Tv>;
+  public function skipWhile(<<__AtMostRxAsFunc>>(function(Tv)[_]: bool) $fn)[ctx $fn]: MutableSet<Tv>;
   /**
    * Returns a subset of the current `MutableSet` starting from a given key up
    * to, but not including, the element at the provided length from the

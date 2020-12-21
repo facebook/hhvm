@@ -18,6 +18,7 @@ open Boundaries
 open Libhackfmt
 open Hackfmt_error
 open Ocaml_overrides
+open FindUtils
 
 type filename = string
 
@@ -505,6 +506,7 @@ let main
     let root = Path.make env.Env.root in
     read_stdin ()
     |> Parse_diff.go
+    |> List.filter ~f:(fun (rel_path, _intervals) -> is_hack rel_path)
     |> List.filter_map ~f:(fun (rel_path, intervals) ->
            (* We intentionally raise an exception here instead of printing a
             * message and moving on--if a file is missing, it may be a signal that

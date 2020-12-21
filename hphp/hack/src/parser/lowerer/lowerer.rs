@@ -3427,6 +3427,15 @@ where
         }
     }
 
+    fn p_context_list_to_intersection(
+        ctx_list: S<'a, T, V>,
+        env: &mut Env<'a, TF>,
+    ) -> Result<Option<ast::Hint>> {
+        Ok(Self::mp_optional(Self::p_contexts, &ctx_list, env)?
+            .and_then(|t| t.0)
+            .map(|t| ast::Hint::new(t.0, ast::Hint_::Hintersection(t.1))))
+    }
+
     fn p_fun_hdr(node: S<'a, T, V>, env: &mut Env<'a, TF>) -> Result<FunHdr> {
         match &node.children {
             FunctionDeclarationHeader(FunctionDeclarationHeaderChildren {
@@ -3992,7 +4001,64 @@ where
                     doc_comment: doc_comment_opt,
                 }))
             }
-            ContextConstDeclaration(_) => Ok(()), // TODO(coeffects) implement later
+            ContextConstDeclaration(c) => {
+                if !c.type_parameters.is_missing() {
+                    Self::raise_parsing_error(node, env, &syntax_error::tparams_in_tconst);
+                }
+                let name = Self::pos_name(&c.name, env)?;
+                let context = Self::p_context_list_to_intersection(&c.ctx_list, env)?;
+                let constraints = Self::could_map(
+                    |cstrnt, e: &mut Env<'a, TF>| match &cstrnt.children {
+                        Missing => Ok(None),
+                        TypeConstraint(c) => Self::p_context_list_to_intersection(&c.type_, e),
+                        _ => Self::missing_syntax("const ctx constraint", node, e),
+                    },
+                    &c.constraint,
+                    env,
+                )?;
+
+                // TODO(coeffects)
+                // so it turns out that type constant and context constant
+                // constraints super don't jive.
+                // 1. type constants allow only 1 constraint
+                // 2. type constants don't record the *type* of the constraint
+                // these both need to be fixed or we need to lower to something
+                // else in the meantime, just grab the first one if it exists
+                let constraint = constraints.into_iter().next().flatten();
+
+                let span = Self::p_pos(node, env);
+                let kinds = Self::p_kinds(&c.modifiers, env)?;
+                let has_abstract = kinds.has(modifier::ABSTRACT);
+                let (context, abstract_kind) = match (has_abstract, &constraint, &context) {
+                    (false, _, None) => {
+                        Self::raise_hh_error(
+                            env,
+                            NastCheck::not_abstract_without_typeconst(name.0.clone()),
+                        );
+                        (constraint.clone(), ast::TypeconstAbstractKind::TCConcrete)
+                    }
+                    (false, None, Some(_)) => (context, ast::TypeconstAbstractKind::TCConcrete),
+                    (false, Some(_), Some(_)) => {
+                        let errstr = "No partially abstract context constants";
+                        Self::raise_parsing_error(node, env, errstr);
+                        return Err(Error::Failwith(errstr.to_string()));
+                    }
+                    (true, _, None) => (
+                        context.clone(),
+                        ast::TypeconstAbstractKind::TCAbstract(context),
+                    ),
+                    (true, _, Some(_)) => (None, ast::TypeconstAbstractKind::TCAbstract(context)),
+                };
+                Ok(class.typeconsts.push(ast::ClassTypeconst {
+                    abstract_: abstract_kind,
+                    name,
+                    constraint,
+                    type_: context,
+                    user_attributes: vec![],
+                    span,
+                    doc_comment: doc_comment_opt,
+                }))
+            }
             PropertyDeclaration(c) => {
                 let user_attributes = Self::p_user_attributes(&c.attribute_spec, env)?;
                 let type_ = Self::mp_optional(Self::p_hint, &c.type_, env)?

@@ -28,7 +28,8 @@ function debug_curr_and_next_poly(RxIntIterator $it)[
 }
 
 class PureIntIterator implements RxIntIterator {
-  <<__Override>> const ctx C = [];
+  // TODO(coeffects): https://fburl.com/diffusion/xwrk6tns
+  // <<__Override>> const ctx C = [];
   function next()[]: int { return 0; }
 
   function has_next()[]: bool { return true; }

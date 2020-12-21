@@ -356,6 +356,11 @@ fn hint_to_type_constant_list(
             hint_to_type_constant_list(opts, tparams, targ_map, h)?,
         ]
         .concat(),
+        // TODO(coeffects) actually handle emission of context constants
+        Hintersection(_) => vec![(
+            TypedValue::String("kind".into()),
+            TypedValue::Int(get_kind_num(tparams, "HH\\mixed".into())),
+        )],
         _ => return Err(unrecoverable("Hints not available on the original AST")),
     })
 }

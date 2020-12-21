@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<46d7cb8a38b250f4c7c404ead25b16bb>>
+// @generated SignedSource<<d90dfd9677ec30279c8ddba3337a2600>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -371,6 +371,7 @@ impl<P: Params> Node<P> for ClassTypeconst<P::Ex, P::Fb, P::En, P::Hi> {
         self.user_attributes.accept(c, v)?;
         self.span.accept(c, v)?;
         self.doc_comment.accept(c, v)?;
+        self.is_ctx.accept(c, v)?;
         Ok(())
     }
 }

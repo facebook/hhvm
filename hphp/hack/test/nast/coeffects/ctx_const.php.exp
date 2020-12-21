@@ -12,15 +12,16 @@
          c_tconst_type =
          (Some ([6:17-21],
                 (Hintersection
-                   [([6:18-20], (Happly (([6:18-20], "\\io"), [])))])));
+                   [([6:18-20],
+                     (Happly (([6:18-20], "\\HH\\Contexts\\io"), [])))])));
          c_tconst_user_attributes = []; c_tconst_span = [6:3-22];
-         c_tconst_doc_comment = None };
+         c_tconst_doc_comment = None; c_tconst_is_ctx = true };
         { c_tconst_abstract = TCConcrete; c_tconst_name = ([7:14-16], "C1");
           c_tconst_constraint = None;
           c_tconst_type =
           (Some ([7:19-21], (Happly (([7:19-21], "\\IO"), []))));
           c_tconst_user_attributes = []; c_tconst_span = [7:3-22];
-          c_tconst_doc_comment = None }
+          c_tconst_doc_comment = None; c_tconst_is_ctx = false }
         ];
       c_vars = []; c_methods = []; c_attributes = []; c_xhp_children = [];
       c_xhp_attrs = [];

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<39897e36938eb46463f4f36ec7d88774>>
+// @generated SignedSource<<7b982cf93dc707dc38194b0b9b666979>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -1030,6 +1030,7 @@ pub struct ClassTypeconst<Ex, Fb, En, Hi> {
     pub user_attributes: Vec<UserAttribute<Ex, Fb, En, Hi>>,
     pub span: Pos,
     pub doc_comment: Option<DocComment>,
+    pub is_ctx: bool,
 }
 
 #[derive(

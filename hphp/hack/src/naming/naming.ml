@@ -1372,6 +1372,7 @@ and typeconst env t =
       c_tconst_user_attributes = attrs;
       c_tconst_span = t.Aast.c_tconst_span;
       c_tconst_doc_comment = t.Aast.c_tconst_doc_comment;
+      c_tconst_is_ctx = t.Aast.c_tconst_is_ctx;
     }
 
 and method_ genv m =

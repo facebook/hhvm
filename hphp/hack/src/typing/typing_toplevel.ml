@@ -1249,6 +1249,7 @@ and typeconst_def
       c_tconst_user_attributes;
       c_tconst_span;
       c_tconst_doc_comment;
+      c_tconst_is_ctx;
     } =
   begin
     match cls.c_kind with
@@ -1308,6 +1309,7 @@ and typeconst_def
       Aast.c_tconst_user_attributes = user_attributes;
       Aast.c_tconst_span;
       Aast.c_tconst_doc_comment;
+      Aast.c_tconst_is_ctx;
     } )
 
 (* This should agree with the set of expressions whose type can be inferred in

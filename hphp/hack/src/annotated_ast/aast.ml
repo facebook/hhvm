@@ -459,6 +459,7 @@ and ('ex, 'fb, 'en, 'hi) class_typeconst = {
   c_tconst_user_attributes: ('ex, 'fb, 'en, 'hi) user_attribute list;
   c_tconst_span: pos;
   c_tconst_doc_comment: doc_comment option;
+  c_tconst_is_ctx: bool;
 }
 
 and xhp_attr_info = { xai_tag: xhp_attr_tag option }

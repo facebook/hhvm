@@ -4116,6 +4116,7 @@ where
                     user_attributes,
                     span,
                     doc_comment: doc_comment_opt,
+                    is_ctx: false,
                 }))
             }
             ContextConstDeclaration(c) => {
@@ -4174,6 +4175,7 @@ where
                     user_attributes: vec![],
                     span,
                     doc_comment: doc_comment_opt,
+                    is_ctx: true,
                 }))
             }
             PropertyDeclaration(c) => {

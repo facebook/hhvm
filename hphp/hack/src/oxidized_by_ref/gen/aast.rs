@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<9b570b4902b27b16c9c41a19a98abf32>>
+// @generated SignedSource<<e09ccf33a7bd27edee4cea2f882d42ac>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -1119,6 +1119,7 @@ pub struct ClassTypeconst<'a, Ex, Fb, En, Hi> {
     pub user_attributes: &'a [&'a UserAttribute<'a, Ex, Fb, En, Hi>],
     pub span: &'a Pos<'a>,
     pub doc_comment: Option<&'a DocComment<'a>>,
+    pub is_ctx: bool,
 }
 impl<'a, Ex: TrivialDrop, Fb: TrivialDrop, En: TrivialDrop, Hi: TrivialDrop> TrivialDrop
     for ClassTypeconst<'a, Ex, Fb, En, Hi>

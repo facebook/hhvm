@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 
 interface IUseMemoize {
@@ -6,3 +6,7 @@ interface IUseMemoize {
   public function alwaysMemoize(): int;
 }
 
+<<__EntryPoint>>
+function main(): void {
+  echo "Done.\n";
+}

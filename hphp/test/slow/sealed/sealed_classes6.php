@@ -15,3 +15,7 @@ trait SomeOtherTrait {
 
 trait SomeOtherOtherTrait implements SomeSealedInteface {}
 
+<<__EntryPoint>>
+function main(): void {
+  echo "Done.\n";
+}

@@ -9,3 +9,7 @@ class Properties {
    public $same = true;
 }
 
+<<__EntryPoint>>
+function main(): void {
+  echo "Done.\n";
+}

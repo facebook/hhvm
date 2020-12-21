@@ -12,3 +12,7 @@ class C implements B {
   const FOO = 'DOH';
 }
 
+<<__EntryPoint>>
+function main(): void {
+  echo "Done.\n";
+}

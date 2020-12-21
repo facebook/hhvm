@@ -16,3 +16,7 @@ abstract class D extends C {
   abstract const X; // fatal!
 }
 
+<<__EntryPoint>>
+function main(): void {
+  echo "Done.\n";
+}

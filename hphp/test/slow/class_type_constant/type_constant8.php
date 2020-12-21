@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 interface I {
   abstract const type T;
@@ -14,3 +14,7 @@ class Incompat implements I {
   public function foo($t): void {}
 }
 
+<<__EntryPoint>>
+function main(): void {
+  echo "Done.\n";
+}

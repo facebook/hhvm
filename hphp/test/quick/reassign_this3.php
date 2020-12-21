@@ -5,3 +5,7 @@ class Foo {
   public function y($this){} // error
 }
 
+<<__EntryPoint>>
+function main(): void {
+  echo "Done.\n";
+}

@@ -11,3 +11,7 @@ class implem implements constr
     }
 }
 
+<<__EntryPoint>>
+function main(): void {
+  echo "Done.\n";
+}

@@ -14,3 +14,7 @@ class B extends IDunno {
   function x($z) { $z = 2; }
 }
 
+<<__EntryPoint>>
+function main(): void {
+  echo "Done.\n";
+}

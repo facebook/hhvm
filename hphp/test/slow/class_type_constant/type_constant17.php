@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 abstract class Base {
   abstract const type T;
@@ -7,3 +7,7 @@ abstract class Base {
 class Child extends Base {
 }
 
+<<__EntryPoint>>
+function main(): void {
+  echo "Done.\n";
+}

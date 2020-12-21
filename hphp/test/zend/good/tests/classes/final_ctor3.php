@@ -6,3 +6,7 @@ class B extends A {
     function A() { }
 }
 
+<<__EntryPoint>>
+function main(): void {
+  echo "Done.\n";
+}

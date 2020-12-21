@@ -97,3 +97,8 @@ const SCALAR_SHAPE3 = shape(
   'x' => 12,
   'foo' => 1.0
 );
+
+<<__EntryPoint>>
+function main(): void {
+  echo "Done.\n";
+}

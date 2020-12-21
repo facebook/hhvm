@@ -30,3 +30,8 @@ function h() {
   // zero arguments
   echo "%Lo";
 }
+
+<<__EntryPoint>>
+function main(): void {
+  echo "Done.\n";
+}

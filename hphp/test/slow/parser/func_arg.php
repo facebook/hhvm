@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 class A {
@@ -8,3 +8,7 @@ class A {
 
 }
 
+<<__EntryPoint>>
+function main(): void {
+  echo "Done.\n";
+}

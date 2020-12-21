@@ -26,3 +26,8 @@ class B {
     self(mapWithKey($x, inout $x));
   }
 }
+
+<<__EntryPoint>>
+function main(): void {
+  echo "Done.\n";
+}

@@ -11,3 +11,7 @@ class test extends base {
   public function __clone() {}
 }
 
+<<__EntryPoint>>
+function main(): void {
+  echo "Done.\n";
+}

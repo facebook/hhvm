@@ -4,3 +4,7 @@ class Sub implements ArrayAccess {
     }
 }
 
+<<__EntryPoint>>
+function main(): void {
+  echo "Done.\n";
+}

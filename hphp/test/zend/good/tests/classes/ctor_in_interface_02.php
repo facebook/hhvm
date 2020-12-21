@@ -27,3 +27,7 @@ class implem13 implements constr1, constr3
     }
 }
 
+<<__EntryPoint>>
+function main(): void {
+  echo "Done.\n";
+}

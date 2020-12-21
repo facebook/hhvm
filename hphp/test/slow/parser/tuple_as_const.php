@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 function get_int(): int {
@@ -9,3 +9,7 @@ class A {
   public function f((int, int)$mt = tuple(get_int(), get_int())): void{}
 }
 
+<<__EntryPoint>>
+function main(): void {
+  echo "Done.\n";
+}

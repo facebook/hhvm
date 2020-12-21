@@ -9,3 +9,8 @@ function __toString($res_str = varray[
 ], void $csv_list): third{
   md5( $count );
 }
+
+<<__EntryPoint>>
+function main(): void {
+  echo "Done.\n";
+}

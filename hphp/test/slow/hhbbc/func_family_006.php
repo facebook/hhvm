@@ -11,3 +11,7 @@ class D2 extends Base {
   public function foo(string $x, inout string $y) { return $x; }
 }
 
+<<__EntryPoint>>
+function main(): void {
+  echo "Done.\n";
+}

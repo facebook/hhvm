@@ -7,3 +7,8 @@ class Foo {
 class Bar extends Foo {
   function alpha(inout $one, $two, $three, inout $four) {}
 }
+
+<<__EntryPoint>>
+function main(): void {
+  echo "Done.\n";
+}

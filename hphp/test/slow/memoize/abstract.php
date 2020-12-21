@@ -5,3 +5,7 @@ abstract class foo {
   abstract protected static function bar();
 }
 
+<<__EntryPoint>>
+function main(): void {
+  echo "Done.\n";
+}

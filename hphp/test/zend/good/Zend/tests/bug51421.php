@@ -10,3 +10,7 @@ class Test extends TestInterface {
     public function __construct() {}
 }
 
+<<__EntryPoint>>
+function main(): void {
+  echo "Done.\n";
+}

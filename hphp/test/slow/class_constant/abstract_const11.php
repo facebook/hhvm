@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 interface I {
   abstract const FOO;
@@ -14,3 +14,7 @@ interface K {
 
 class D implements I, J, K {}
 
+<<__EntryPoint>>
+function main(): void {
+  echo "Done.\n";
+}

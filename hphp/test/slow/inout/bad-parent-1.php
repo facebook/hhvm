@@ -8,3 +8,7 @@ class C extends P {
   function foo($x) {}
 }
 
+<<__EntryPoint>>
+function main(): void {
+  echo "Done.\n";
+}

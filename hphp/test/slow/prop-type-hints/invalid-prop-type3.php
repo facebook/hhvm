@@ -5,3 +5,7 @@ class A {
   public callable $x;
 }
 
+<<__EntryPoint>>
+function main(): void {
+  echo "Done.\n";
+}

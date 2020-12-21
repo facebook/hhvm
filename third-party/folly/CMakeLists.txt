@@ -285,7 +285,6 @@ folly_check_source_compiles("
     }
 " FOLLY_HAVE_WEAK_SYMBOLS)
 
-folly_check_function_exists("memrchr" FOLLY_HAVE_MEMRCHR)
 folly_check_function_exists("preadv" FOLLY_HAVE_PREADV)
 folly_check_function_exists("pwritev" FOLLY_HAVE_PWRITEV)
 

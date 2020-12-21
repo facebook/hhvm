@@ -324,7 +324,7 @@ final class ImmVector<+Tv> implements \ConstVector<Tv> {
    * `ImmVector`; unlike `filter()`, where only values that meet a certain
    * criterion are included in the resulting `ImmVector`.
    *
-   * @param $callback - The callback containing the operation to apply to the
+   * @param $fn - The callback containing the operation to apply to the
    *                    current `ImmVector`'s values.
    *
    * @return - An `ImmVector` containing the results of applying a user-specified
@@ -333,7 +333,7 @@ final class ImmVector<+Tv> implements \ConstVector<Tv> {
    * @guide /hack/collections/examples
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function map<Tu>(<<__AtMostRxAsFunc>>(function(Tv): Tu) $callback)[]: ImmVector<Tu>;
+  public function map<Tu>(<<__AtMostRxAsFunc>>(function(Tv): Tu) $fn)[]: ImmVector<Tu>;
 
   /**
    * Returns an `ImmVector` containing the results of applying an operation to
@@ -344,7 +344,7 @@ final class ImmVector<+Tv> implements \ConstVector<Tv> {
    * key/value pairs meet a certain criterion are included in the resulting
    * `ImmVector`.
    *
-   * @param $callback - The callback containing the operation to apply to the
+   * @param $fn - The callback containing the operation to apply to the
    *                    current `ImmVector`'s key/value pairs.
    *
    * @return - An `ImmVector` containing the results of applying a
@@ -352,7 +352,7 @@ final class ImmVector<+Tv> implements \ConstVector<Tv> {
    *           `ImmVector` in turn.
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function mapWithKey<Tu>(<<__AtMostRxAsFunc>>(function(int, Tv): Tu) $callback)[]:
+  public function mapWithKey<Tu>(<<__AtMostRxAsFunc>>(function(int, Tv): Tu) $fn)[]:
     ImmVector<Tu>;
 
   /**
@@ -363,7 +363,7 @@ final class ImmVector<+Tv> implements \ConstVector<Tv> {
    * unlike `map()`, where a value is included for each value in the original
    * `ImmVector`.
    *
-   * @param $callback - The callback containing the condition to apply to the
+   * @param $fn - The callback containing the condition to apply to the
    *                    current `ImmVector` values.
    *
    * @return - An `ImmVector` containing the values after a user-specified
@@ -372,7 +372,7 @@ final class ImmVector<+Tv> implements \ConstVector<Tv> {
    * @guide /hack/collections/examples
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function filter(<<__AtMostRxAsFunc>>(function(Tv): bool) $callback)[]: ImmVector<Tv>;
+  public function filter(<<__AtMostRxAsFunc>>(function(Tv): bool) $fn)[]: ImmVector<Tv>;
 
   /**
    * Returns an `ImmVector` containing the values of the current `ImmVector`
@@ -382,7 +382,7 @@ final class ImmVector<+Tv> implements \ConstVector<Tv> {
    * satisfy the provided criterion; unlike `mapWithKey()`, which contains
    * results derived from every key/value pair in the original `ImmVector`.
    *
-   * @param $callback - The callback containing the condition to apply to the
+   * @param $fn - The callback containing the condition to apply to the
    *                    `ImmVector`'s key/value pairs. For each key/value pair,
    *                    the key is passed as the first parameter to the
    *                    callback, and the value is passed as the second
@@ -394,7 +394,7 @@ final class ImmVector<+Tv> implements \ConstVector<Tv> {
    *
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function filterWithKey(<<__AtMostRxAsFunc>>(function(int, Tv): bool) $callback)[]:
+  public function filterWithKey(<<__AtMostRxAsFunc>>(function(int, Tv): bool) $fn)[]:
     ImmVector<Tv>;
 
   /**

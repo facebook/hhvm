@@ -198,7 +198,7 @@ final class Set<Tv as arraykey> implements \MutableSet<Tv> {
    * Every value in the current `Set` is affected by a call to `map()`, unlike
    * `filter()` where only values that meet a certain criteria are affected.
    *
-   * @param $callback - The callback containing the operation to apply to the
+   * @param $fn - The callback containing the operation to apply to the
    *                    current `Set` values.
    *
    * @return - a `Set` containing the values after a user-specified operation
@@ -207,7 +207,7 @@ final class Set<Tv as arraykey> implements \MutableSet<Tv> {
    * @guide /hack/collections/examples
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function map<Tu as arraykey>(<<__AtMostRxAsFunc>>(function(Tv): Tu) $callback)[]: Set<Tu>;
+  public function map<Tu as arraykey>(<<__AtMostRxAsFunc>>(function(Tv): Tu) $fn)[]: Set<Tu>;
 
   /**
    * Returns a `Set` containing the values after an operation has been applied
@@ -220,14 +220,14 @@ final class Set<Tv as arraykey> implements \MutableSet<Tv> {
    * unlike `filterWithKey()` where only values that meet a certain criteria are
    * affected.
    *
-   * @param $callback - The callback containing the operation to apply to the
+   * @param $fn - The callback containing the operation to apply to the
    *                    current `Set` keys and values.
    *
    * @return - a `Set` containing the values after a user-specified operation
    *           on the current `Set`'s values is applied.
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function mapWithKey<Tu as arraykey>(<<__AtMostRxAsFunc>>(function(arraykey, Tv): Tu) $callback)[]: Set<Tu>;
+  public function mapWithKey<Tu as arraykey>(<<__AtMostRxAsFunc>>(function(arraykey, Tv): Tu) $fn)[]: Set<Tu>;
 
   /**
    * Returns a `Set` containing the values of the current `Set` that meet
@@ -236,7 +236,7 @@ final class Set<Tv as arraykey> implements \MutableSet<Tv> {
    * Only values that meet a certain criteria are affected by a call to
    * `filter()`, while all values are affected by a call to `map()`.
    *
-   * @param $callback - The callback containing the condition to apply to the
+   * @param $fn - The callback containing the condition to apply to the
    *                    current `Set` values.
    *
    * @return - a `Set` containing the values after a user-specified condition
@@ -245,7 +245,7 @@ final class Set<Tv as arraykey> implements \MutableSet<Tv> {
    * @guide /hack/collections/examples
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function filter(<<__AtMostRxAsFunc>>(function(Tv): bool) $callback)[]: Set<Tv>;
+  public function filter(<<__AtMostRxAsFunc>>(function(Tv): bool) $fn)[]: Set<Tv>;
 
   /**
    * Returns a `Set` containing the values of the current `Set` that meet
@@ -258,7 +258,7 @@ final class Set<Tv as arraykey> implements \MutableSet<Tv> {
    * `filterWithKey()`, while all values are affected by a call to
    * `mapWithKey()`.
    *
-   * @param $callback - The callback containing the condition to apply to the
+   * @param $fn - The callback containing the condition to apply to the
    *                    current `Set` keys and values.
    *
    * @return - a `Set` containing the values after a user-specified condition
@@ -266,7 +266,7 @@ final class Set<Tv as arraykey> implements \MutableSet<Tv> {
    *
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function filterWithKey(<<__AtMostRxAsFunc>>(function(arraykey, Tv): bool) $callback)[]: Set<Tv>;
+  public function filterWithKey(<<__AtMostRxAsFunc>>(function(arraykey, Tv): bool) $fn)[]: Set<Tv>;
 
   /**
    * Alters the current `Set` so that it only contains the values that meet a
@@ -278,13 +278,13 @@ final class Set<Tv as arraykey> implements \MutableSet<Tv> {
    * Future changes made to the current `Set` ARE reflected in the returned
    * `Set`, and vice-versa.
    *
-   * @param $callback - The callback containing the condition to apply to the
+   * @param $fn - The callback containing the condition to apply to the
    *                    current `Set` values.
    *
    * @return - Returns itself.
    */
   <<__Pure, __Mutable, __AtMostRxAsArgs, __ReturnsVoidToRx>>
-  public function retain(<<__AtMostRxAsFunc>>(function(Tv): bool) $callback)[]: Set<Tv>;
+  public function retain(<<__AtMostRxAsFunc>>(function(Tv): bool) $fn)[]: Set<Tv>;
 
   /**
    * Alters the current `Set` so that it only contains the values that meet a
@@ -299,13 +299,13 @@ final class Set<Tv as arraykey> implements \MutableSet<Tv> {
    * Future changes made to the current `Set` ARE reflected in the returned
    * `Set`, and vice-versa.
    *
-   * @param $callback - The callback containing the condition to apply to the
+   * @param $fn - The callback containing the condition to apply to the
    *                    current `Set` values.
    *
    * @return - Returns itself.
    */
   <<__Pure, __Mutable, __AtMostRxAsArgs, __ReturnsVoidToRx>>
-  public function retainWithKey(<<__AtMostRxAsFunc>>(function(arraykey, Tv): bool) $callback)[]: Set<Tv>;
+  public function retainWithKey(<<__AtMostRxAsFunc>>(function(arraykey, Tv): bool) $fn)[]: Set<Tv>;
 
   /**
    * Throws an exception unless the current `Set` or the `Traversable` is

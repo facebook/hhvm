@@ -183,7 +183,7 @@ final class Pair<+Tv1, +Tv2> implements \ConstVector<mixed> {
    * Every value in the current Pair is affected by a call to `map()`, unlike
    * `filter()` where only values that meet a certain criteria are affected.
    *
-   * @param $callback - The callback containing the operation to apply to the
+   * @param $fn - The callback containing the operation to apply to the
    *                    current `Pair` values.
    *
    * @return - an `ImmVector` containing the values after a user-specified
@@ -192,7 +192,7 @@ final class Pair<+Tv1, +Tv2> implements \ConstVector<mixed> {
    * @guide /hack/collections/examples
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function map<Tu>(<<__AtMostRxAsFunc>>(function(mixed): Tu) $callback)[]: ImmVector<Tu>;
+  public function map<Tu>(<<__AtMostRxAsFunc>>(function(mixed): Tu) $fn)[]: ImmVector<Tu>;
 
   /**
    * Returns an `ImmVector` containing the values after an operation has been
@@ -202,14 +202,14 @@ final class Pair<+Tv1, +Tv2> implements \ConstVector<mixed> {
    * `mapWithKey()`, unlike `filterWithKey()` where only values that meet a
    * certain criteria are affected.
    *
-   * @param $callback - The $allback containing the operation to apply to the
+   * @param $fn - The $allback containing the operation to apply to the
    *                    current `Pair` keys and values.
    *
    * @return - an `ImmVector` containing the values after a user-specified
    *           operation on the current `Pair`'s keys and values is applied.
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function mapWithKey<Tu>(<<__AtMostRxAsFunc>>(function(int, mixed): Tu) $callback)[]:
+  public function mapWithKey<Tu>(<<__AtMostRxAsFunc>>(function(int, mixed): Tu) $fn)[]:
     ImmVector<Tu>;
 
   /**
@@ -219,7 +219,7 @@ final class Pair<+Tv1, +Tv2> implements \ConstVector<mixed> {
    * Only values that meet a certain criteria are affected by a call to
    * `filter()`, while all values are affected by a call to `map()`.
    *
-   * @param $callback - The callback containing the condition to apply to the
+   * @param $fn - The callback containing the condition to apply to the
    *                    current `Pair` values.
    *
    * @return - an `ImmVector` containing the values after a user-specified
@@ -228,7 +228,7 @@ final class Pair<+Tv1, +Tv2> implements \ConstVector<mixed> {
    * @guide /hack/collections/examples
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function filter(<<__AtMostRxAsFunc>>(function(mixed): bool) $callback)[]: ImmVector<mixed>;
+  public function filter(<<__AtMostRxAsFunc>>(function(mixed): bool) $fn)[]: ImmVector<mixed>;
 
   /**
    * Returns an `ImmVector` containing the values of the current `Pair` that
@@ -238,7 +238,7 @@ final class Pair<+Tv1, +Tv2> implements \ConstVector<mixed> {
    * `filterWithKey()`, while all values are affected by a call to
    * `mapWithKey()`.
    *
-   * @param $callback - The callback containing the condition to apply to the
+   * @param $fn - The callback containing the condition to apply to the
    *                    current `Pair` keys and values.
    *
    * @return - an `ImmVector` containing the values after a user-specified
@@ -246,7 +246,7 @@ final class Pair<+Tv1, +Tv2> implements \ConstVector<mixed> {
    *           `Pair`.
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function filterWithKey(<<__AtMostRxAsFunc>>(function(int, mixed): bool) $callback)[]:
+  public function filterWithKey(<<__AtMostRxAsFunc>>(function(int, mixed): bool) $fn)[]:
     ImmVector<mixed>;
 
   /**

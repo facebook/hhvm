@@ -179,7 +179,7 @@ final class Vector<Tv> implements \MutableVector<Tv> {
    * unlike `filter()`, where only values that meet a certain criterion are
    * included in the resulting `Vector`.
    *
-   * @param $callback - The callback containing the operation to apply to the
+   * @param $fn - The callback containing the operation to apply to the
    *                    current `Vector`'s values.
    *
    * @return - A `Vector` containing the results of applying a user-specified
@@ -188,7 +188,7 @@ final class Vector<Tv> implements \MutableVector<Tv> {
    * @guide /hack/collections/examples
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function map<Tu>(<<__AtMostRxAsFunc>>(function(Tv): Tu) $callback)[]: Vector<Tu>;
+  public function map<Tu>(<<__AtMostRxAsFunc>>(function(Tv): Tu) $fn)[]: Vector<Tu>;
 
   /**
    * Returns a `Vector` containing the results of applying an operation to each
@@ -199,14 +199,14 @@ final class Vector<Tv> implements \MutableVector<Tv> {
    * key/value pairs meet a certain criterion are included in the resulting
    * `Vector`.
    *
-   * @param $callback - The callback containing the operation to apply to the
+   * @param $fn - The callback containing the operation to apply to the
    *                    current `Vector`'s key/value pairs.
    *
    * @return - A `Vector` containing the results of applying a user-specified
    *           operation to each key/value pair of the current `Vector` in turn.
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function mapWithKey<Tu>(<<__AtMostRxAsFunc>>(function(int, Tv): Tu) $callback)[]: Vector<Tu>;
+  public function mapWithKey<Tu>(<<__AtMostRxAsFunc>>(function(int, Tv): Tu) $fn)[]: Vector<Tu>;
 
   /**
    * Returns a `Vector` containing the values of the current `Vector` that meet
@@ -216,7 +216,7 @@ final class Vector<Tv> implements \MutableVector<Tv> {
    * unlike `map()`, where a value is included for each value in the original
    * `Vector`.
    *
-   * @param $callback - The callback containing the condition to apply to the
+   * @param $fn - The callback containing the condition to apply to the
    *                    `Vector` values.
    *
    * @return - A `Vector` containing the values after a user-specified condition
@@ -225,7 +225,7 @@ final class Vector<Tv> implements \MutableVector<Tv> {
    * @guide /hack/collections/examples
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function filter(<<__AtMostRxAsFunc>>(function(Tv): bool) $callback)[]: Vector<Tv>;
+  public function filter(<<__AtMostRxAsFunc>>(function(Tv): bool) $fn)[]: Vector<Tv>;
 
   /**
    * Returns a `Vector` containing the values of the current `Vector` that meet
@@ -235,7 +235,7 @@ final class Vector<Tv> implements \MutableVector<Tv> {
    * satisfy the provided criterion; unlike `mapWithKey()`, which contains
    * results derived from every key/value pair in the original `Vector`.
    *
-   * @param $callback - The callback containing the condition to apply to the
+   * @param $fn - The callback containing the condition to apply to the
    *                    `Vector`'s key/value pairs. For each key/value pair,
    *                    the key is passed as the first parameter to the
    *                    callback, and the value is passed as the second
@@ -247,7 +247,7 @@ final class Vector<Tv> implements \MutableVector<Tv> {
    *
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function filterWithKey(<<__AtMostRxAsFunc>>(function(int, Tv): bool) $callback)[]:
+  public function filterWithKey(<<__AtMostRxAsFunc>>(function(int, Tv): bool) $fn)[]:
     Vector<Tv>;
 
   /**

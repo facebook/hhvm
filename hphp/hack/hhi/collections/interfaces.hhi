@@ -372,7 +372,7 @@ interface ConstVector<+Tv> extends ConstCollection<Tv>,
    * Only values that meet a certain criteria are affected by a call to
    * `filter()`, while all values are affected by a call to `map()`.
    *
-   * @param $fn - The $callback containing the condition to apply to the
+   * @param $fn - The $fn containing the condition to apply to the
    *              `ConstVector` values.
    *
    * @return - a `ConstVector` containing the values after a user-specified
@@ -649,7 +649,7 @@ interface MutableVector<Tv> extends ConstVector<Tv>,
    * Only values that meet a certain criteria are affected by a call to
    * `filter()`, while all values are affected by a call to `map()`.
    *
-   * @param $fn - The $callback containing the condition to apply to the
+   * @param $fn - The $fn containing the condition to apply to the
    *              `MutableVector` values.
    *
    * @return - a `MutableVector` containing the values after a user-specified

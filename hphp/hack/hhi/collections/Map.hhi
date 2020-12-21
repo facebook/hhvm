@@ -186,7 +186,7 @@ final class Map<Tk as arraykey, Tv> implements \MutableMap<Tk, Tv> {
    * The keys will remain unchanged from the current `Map` to the returned
    * `Map`.
    *
-   * @param $callback - The callback containing the operation to apply to the
+   * @param $fn - The callback containing the operation to apply to the
    *                    current `Map` values.
    *
    * @return - a `Map` containing key/value pairs after a user-specified
@@ -195,7 +195,7 @@ final class Map<Tk as arraykey, Tv> implements \MutableMap<Tk, Tv> {
    * @guide /hack/collections/examples
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function map<Tu>(<<__AtMostRxAsFunc>>(function(Tv): Tu) $callback)[]: Map<Tk, Tu>;
+  public function map<Tu>(<<__AtMostRxAsFunc>>(function(Tv): Tu) $fn)[]: Map<Tk, Tu>;
 
   /**
    * Returns a `Map` after an operation has been applied to each key and
@@ -208,14 +208,14 @@ final class Map<Tk as arraykey, Tv> implements \MutableMap<Tk, Tv> {
    * The keys will remain unchanged from the current `Map` to the returned
    * `Map`. The keys are only used to help in the mapping operation.
    *
-   * @param $callback - The callback containing the operation to apply to the
+   * @param $fn - The callback containing the operation to apply to the
    *                    current `Map` keys and values.
    *
    * @return - a `Map` containing the values after a user-specified operation
    *           on the current `Map`'s keys and values is applied.
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function mapWithKey<Tu>(<<__AtMostRxAsFunc>>(function(Tk, Tv): Tu) $callback)[]: Map<Tk, Tu>;
+  public function mapWithKey<Tu>(<<__AtMostRxAsFunc>>(function(Tk, Tv): Tu) $fn)[]: Map<Tk, Tu>;
 
   /**
    * Returns a `Map` containing the values of the current `Map` that meet
@@ -227,7 +227,7 @@ final class Map<Tk as arraykey, Tv> implements \MutableMap<Tk, Tv> {
    * The keys associated with the current `Map` remain unchanged in the returned
    * `Map`.
    *
-   * @param $callback - The callback containing the condition to apply to the
+   * @param $fn - The callback containing the condition to apply to the
    *                    current `Map` values.
    *
    * @return - a `Map` containing the values after a user-specified condition
@@ -236,7 +236,7 @@ final class Map<Tk as arraykey, Tv> implements \MutableMap<Tk, Tv> {
    * @guide /hack/collections/examples
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function filter(<<__AtMostRxAsFunc>>(function(Tv): bool) $callback)[]: Map<Tk, Tv>;
+  public function filter(<<__AtMostRxAsFunc>>(function(Tv): bool) $fn)[]: Map<Tk, Tv>;
 
   /**
    * Returns a `Map` containing the values of the current `Map` that meet
@@ -249,7 +249,7 @@ final class Map<Tk as arraykey, Tv> implements \MutableMap<Tk, Tv> {
    * The keys associated with the current `Map` remain unchanged in the
    * returned `Map`; the keys will be used in the filtering process only.
    *
-   * @param $callback - The callback containing the condition to apply to the
+   * @param $fn - The callback containing the condition to apply to the
    *                    current `Map` keys and values.
    *
    * @return - a `Map` containing the values after a user-specified condition
@@ -257,7 +257,7 @@ final class Map<Tk as arraykey, Tv> implements \MutableMap<Tk, Tv> {
    *
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function filterWithKey(<<__AtMostRxAsFunc>>(function(Tk, Tv): bool) $callback)[]:
+  public function filterWithKey(<<__AtMostRxAsFunc>>(function(Tk, Tv): bool) $fn)[]:
     Map<Tk, Tv>;
 
   /**

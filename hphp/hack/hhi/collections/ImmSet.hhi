@@ -269,7 +269,7 @@ final class ImmSet<+Tv as arraykey> implements \ConstSet<Tv> {
    * unlike `filter()` where only values that meet a certain criteria are
    * affected.
    *
-   * @param $callback - The callback containing the operation to apply to the
+   * @param $fn - The callback containing the operation to apply to the
    *                    current `ImmSet` values.
    *
    * @return - a `ImmSet` containing the values after a user-specified operation
@@ -278,7 +278,7 @@ final class ImmSet<+Tv as arraykey> implements \ConstSet<Tv> {
    * @guide /hack/collections/examples
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function map<Tu as arraykey>(<<__AtMostRxAsFunc>>(function(Tv): Tu) $callback)[]: ImmSet<Tu>;
+  public function map<Tu as arraykey>(<<__AtMostRxAsFunc>>(function(Tv): Tu) $fn)[]: ImmSet<Tu>;
 
   /**
    * Returns an `ImmSet` containing the values after an operation has been
@@ -291,14 +291,14 @@ final class ImmSet<+Tv as arraykey> implements \ConstSet<Tv> {
    * `mapWithKey()`, unlike `filterWithKey()` where only values that meet a
    * certain criteria are affected.
    *
-   * @param $callback - The callback containing the operation to apply to the
+   * @param $fn - The callback containing the operation to apply to the
    *                    current `ImmSet` keys and values.
    *
    * @return - an `ImmSet` containing the values after a user-specified
    *           operation on the current `ImmSet`'s values is applied.
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function mapWithKey<Tu as arraykey>(<<__AtMostRxAsFunc>>(function(arraykey, Tv): Tu) $callback)[]: ImmSet<Tu>;
+  public function mapWithKey<Tu as arraykey>(<<__AtMostRxAsFunc>>(function(arraykey, Tv): Tu) $fn)[]: ImmSet<Tu>;
 
   /**
    * Returns an `ImmSet` containing the values of the current `ImmSet` that
@@ -307,7 +307,7 @@ final class ImmSet<+Tv as arraykey> implements \ConstSet<Tv> {
    * Only values that meet a certain criteria are affected by a call to
    * `filter()`, while all values are affected by a call to `map()`.
    *
-   * @param $callback - The callback containing the condition to apply to the
+   * @param $fn - The callback containing the condition to apply to the
    *                    current `ImmSet` values.
    *
    * @return - an `ImmSet` containing the values after a user-specified
@@ -316,7 +316,7 @@ final class ImmSet<+Tv as arraykey> implements \ConstSet<Tv> {
    * @guide /hack/collections/examples
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function filter(<<__AtMostRxAsFunc>>(function(Tv): bool) $callback)[]: ImmSet<Tv>;
+  public function filter(<<__AtMostRxAsFunc>>(function(Tv): bool) $fn)[]: ImmSet<Tv>;
 
   /**
    * Returns an `ImmSet` containing the values of the current `ImmSet` that
@@ -329,7 +329,7 @@ final class ImmSet<+Tv as arraykey> implements \ConstSet<Tv> {
    * `filterWithKey()`, while all values are affected by a call to
    * `mapWithKey()`.
    *
-   * @param $callback - The callback containing the condition to apply to the
+   * @param $fn - The callback containing the condition to apply to the
    *                    current `ImmSet` keys and values.
    *
    * @return - an `ImmSet` containing the values after a user-specified
@@ -337,7 +337,7 @@ final class ImmSet<+Tv as arraykey> implements \ConstSet<Tv> {
    *
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function filterWithKey(<<__AtMostRxAsFunc>>(function(arraykey, Tv): bool) $callback)[]:
+  public function filterWithKey(<<__AtMostRxAsFunc>>(function(arraykey, Tv): bool) $fn)[]:
     ImmSet<Tv>;
 
   /**

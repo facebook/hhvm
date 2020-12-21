@@ -154,7 +154,7 @@ final class ImmMap<Tk as arraykey, +Tv> implements \ConstMap<Tk, Tv> {
    *
    * The keys will remain unchanged from this `ImmMap` to the returned `ImmMap`.
    *
-   * @param $callback - The callback containing the operation to apply to the
+   * @param $fn - The callback containing the operation to apply to the
    *                    current `ImmMap` values.
    *
    * @return - an `ImmMap` containing key/value pairs after a user-specified
@@ -163,7 +163,7 @@ final class ImmMap<Tk as arraykey, +Tv> implements \ConstMap<Tk, Tv> {
    * @guide /hack/collections/examples
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function map<Tu>(<<__AtMostRxAsFunc>>(function(Tv): Tu) $callback)[]: ImmMap<Tk, Tu>;
+  public function map<Tu>(<<__AtMostRxAsFunc>>(function(Tv): Tu) $fn)[]: ImmMap<Tk, Tu>;
 
   /**
    * Returns an `ImmMap` after an operation has been applied to each key and
@@ -176,14 +176,14 @@ final class ImmMap<Tk as arraykey, +Tv> implements \ConstMap<Tk, Tv> {
    * The keys will remain unchanged from the current `ImmMap` to the returned
    * `ImmMap`. The keys are only used to help in the operation.
    *
-   * @param $callback - The callback containing the operation to apply to the
+   * @param $fn - The callback containing the operation to apply to the
    *                    current `ImmMap` keys and values.
    *
    * @return - an `ImmMap` containing the values after a user-specified
    *           operation on the current `ImmMap`'s keys and values is applied.
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function mapWithKey<Tu>(<<__AtMostRxAsFunc>>(function(Tk, Tv): Tu) $callback)[]:
+  public function mapWithKey<Tu>(<<__AtMostRxAsFunc>>(function(Tk, Tv): Tu) $fn)[]:
     ImmMap<Tk, Tu>;
 
   /**
@@ -196,7 +196,7 @@ final class ImmMap<Tk as arraykey, +Tv> implements \ConstMap<Tk, Tv> {
    * The keys associated with the current `ImmMap` remain unchanged in the
    * returned `Map`.
    *
-   * @param $callback - The callback containing the condition to apply to the
+   * @param $fn - The callback containing the condition to apply to the
    *                    current `ImmMap` values.
    *
    * @return - an `ImmMap` containing the values after a user-specified
@@ -205,7 +205,7 @@ final class ImmMap<Tk as arraykey, +Tv> implements \ConstMap<Tk, Tv> {
    * @guide /hack/collections/examples
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function filter(<<__AtMostRxAsFunc>>(function(Tv): bool) $callback)[]: ImmMap<Tk, Tv>;
+  public function filter(<<__AtMostRxAsFunc>>(function(Tv): bool) $fn)[]: ImmMap<Tk, Tv>;
 
   /**
    * Returns an `ImmMap` containing the values of the current `ImmMap` that
@@ -218,7 +218,7 @@ final class ImmMap<Tk as arraykey, +Tv> implements \ConstMap<Tk, Tv> {
    * The keys associated with the current `ImmMap` remain unchanged in the
    * returned `ImmMap`; the keys will be used in the filtering process only.
    *
-   * @param $callback - The callback containing the condition to apply to the
+   * @param $fn - The callback containing the condition to apply to the
    *                    current `ImmMap` keys and values.
    *
    * @return - an `ImmMap` containing the values after a user-specified
@@ -227,7 +227,7 @@ final class ImmMap<Tk as arraykey, +Tv> implements \ConstMap<Tk, Tv> {
    *
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function filterWithKey(<<__AtMostRxAsFunc>>(function(Tk, Tv): bool) $callback)[]:
+  public function filterWithKey(<<__AtMostRxAsFunc>>(function(Tk, Tv): bool) $fn)[]:
     ImmMap<Tk, Tv>;
 
   /**

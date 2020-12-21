@@ -1,0 +1,4 @@
+File "legacy_constant_initializer.php", line 4, characters 24-58:
+Variable `$#capability` is undefined, or not always defined. (Naming[2050])
+File "legacy_constant_initializer.php", line 5, characters 24-57:
+Variable `$#capability` is undefined, or not always defined. (Naming[2050])

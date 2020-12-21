@@ -3164,6 +3164,13 @@ and anon_check_param env param =
 
 and stash_conts_for_anon env p is_anon captured f =
   let captured =
+    if is_anon && TypecheckerOptions.any_coeffects (Env.get_tcopt env) then
+      Typing_coeffects.(
+        (Pos.none, local_capability_id) :: (Pos.none, capability_id) :: captured)
+    else
+      captured
+  in
+  let captured =
     if Env.is_local_defined env this then
       (Pos.none, this) :: captured
     else

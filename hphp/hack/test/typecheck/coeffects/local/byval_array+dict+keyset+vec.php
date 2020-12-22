@@ -1,5 +1,4 @@
 <?hh
-<<file: __EnableUnstableFeatures('coeffects_provisional')>>
 
 function ok(vec<int> $a, vec<vec<int>> $b)[]: void {
   $a[0] = 1;

@@ -1,16 +1,16 @@
+File "indexing_collections.php", line 8, characters 3-14:
+Assigning to an element of a Hack Collection object via `[]` requires the capability WriteProperty, which is not provided by the context. (Typing[4401])
+  File "indexing_collections.php", line 7, characters 2-3:
+  The local (enclosing) context provides the capability set {}
 File "indexing_collections.php", line 9, characters 3-14:
 Assigning to an element of a Hack Collection object via `[]` requires the capability WriteProperty, which is not provided by the context. (Typing[4401])
-  File "indexing_collections.php", line 8, characters 2-3:
+  File "indexing_collections.php", line 7, characters 2-3:
   The local (enclosing) context provides the capability set {}
-File "indexing_collections.php", line 10, characters 3-14:
+File "indexing_collections.php", line 17, characters 3-14:
 Assigning to an element of a Hack Collection object via `[]` requires the capability WriteProperty, which is not provided by the context. (Typing[4401])
-  File "indexing_collections.php", line 8, characters 2-3:
+  File "indexing_collections.php", line 16, characters 2-3:
   The local (enclosing) context provides the capability set {}
 File "indexing_collections.php", line 18, characters 3-14:
 Assigning to an element of a Hack Collection object via `[]` requires the capability WriteProperty, which is not provided by the context. (Typing[4401])
-  File "indexing_collections.php", line 17, characters 2-3:
-  The local (enclosing) context provides the capability set {}
-File "indexing_collections.php", line 19, characters 3-14:
-Assigning to an element of a Hack Collection object via `[]` requires the capability WriteProperty, which is not provided by the context. (Typing[4401])
-  File "indexing_collections.php", line 17, characters 2-3:
+  File "indexing_collections.php", line 16, characters 2-3:
   The local (enclosing) context provides the capability set {}

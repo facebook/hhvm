@@ -650,6 +650,7 @@ let parse_options () =
       ~tco_union_intersection_type_hints:!union_intersection_type_hints
       ~tco_coeffects:!call_coeffects
       ~tco_coeffects_local:!local_coeffects
+      ~po_enable_coeffects:true
       ~tco_like_casts:!like_casts
       ~tco_simple_pessimize:!simple_pessimize
       ~tco_complex_coercion:!complex_coercion

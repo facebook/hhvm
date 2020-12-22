@@ -1,10 +1,10 @@
-File "indexing_collections.php", line 9, characters 3-7:
+File "indexing_collections.php", line 8, characters 3-7:
 This object's property is being mutated (used as an lvalue)
 Setting non-mutable object properties requires the capability WriteProperty, which is not provided by the context. (Typing[4401])
-  File "indexing_collections.php", line 8, characters 2-3:
+  File "indexing_collections.php", line 7, characters 2-3:
   The local (enclosing) context provides the capability set {}
-File "indexing_collections.php", line 18, characters 3-7:
+File "indexing_collections.php", line 17, characters 3-7:
 This object's property is being mutated (used as an lvalue)
 Setting non-mutable object properties requires the capability WriteProperty, which is not provided by the context. (Typing[4401])
-  File "indexing_collections.php", line 17, characters 2-3:
+  File "indexing_collections.php", line 16, characters 2-3:
   The local (enclosing) context provides the capability set {}

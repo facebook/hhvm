@@ -1,5 +1,4 @@
 <?hh
-<<file: __EnableUnstableFeatures('coeffects_provisional')>>
 
 class A {
   public darray<string, int> $id_by_event = darray[];

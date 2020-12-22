@@ -1,8 +1,6 @@
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
-<<file: __EnableUnstableFeatures('coeffects_provisional')>>
-
 function default_context()[defaults]: void {}
 
 function rx_context()[rx]: void {

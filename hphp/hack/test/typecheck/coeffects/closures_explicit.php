@@ -1,8 +1,6 @@
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
-<<file: __EnableUnstableFeatures('coeffects_provisional')>>
-
 function rx_context()[rx]: void {
   $more_permissive = ()[rx, non_det] ==> {
     rx_context(); // ok

@@ -1,5 +1,4 @@
 <?hh // strict
-<<file: __EnableUnstableFeatures('coeffects_provisional')>>
 
 class NoCtor implements \HH\FunctionAttribute {
   public int $x = 42;

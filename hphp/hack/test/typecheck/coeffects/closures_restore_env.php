@@ -1,7 +1,5 @@
 <?hh
 
-<<file: __EnableUnstableFeatures('coeffects_provisional')>>
-
 function callee()[non_det]: void {}
 
 function good_caller()[non_det]: void {

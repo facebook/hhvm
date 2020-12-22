@@ -1,7 +1,5 @@
 <?hh
 
-<<file: __EnableUnstableFeatures('coeffects_provisional')>>
-
 function allowed()[\HH\Capabilities\Output]: void {
   echo("good");
   echo "good";

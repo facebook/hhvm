@@ -1,7 +1,5 @@
 <?hh
 
-<<file: __EnableUnstableFeatures('coeffects_provisional')>>
-
 function vec_map<Te>(
   vec<int> $v,
   (function (int)[Te]: int) $f

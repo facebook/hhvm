@@ -1,5 +1,4 @@
 <?hh
-<<file: __EnableUnstableFeatures('coeffects_provisional')>>
 
 class Obj {
   public function implicit_defaults_ctx(): void {

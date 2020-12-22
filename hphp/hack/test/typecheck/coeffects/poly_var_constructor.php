@@ -1,6 +1,5 @@
 <?hh
 
-<<file: __EnableUnstableFeatures('coeffects_provisional')>>
 abstract class A { abstract const type C; }
 
 class X extends A { const type C = int; }

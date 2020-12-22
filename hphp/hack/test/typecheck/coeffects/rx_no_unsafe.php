@@ -1,6 +1,4 @@
 <?hh
-<<file: __EnableUnstableFeatures('coeffects_provisional')>>
-
 // see hhi/coeffect/contexts.hhi for mapping to capabilities
 
 function non_rx_fn()[defaults]: void {

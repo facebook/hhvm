@@ -1,8 +1,6 @@
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
-<<file: __EnableUnstableFeatures('coeffects_provisional')>>
-
 function at_least_rx((function()[rx]: void) $f)[]: void {}
 
 function ok_rx()[rx]: (function()[rx]: void) {

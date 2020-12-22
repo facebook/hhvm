@@ -1,5 +1,5 @@
-File "byval_collection_unresolved.php", line 22, characters 3-12:
+File "byval_collection_unresolved.php", line 21, characters 3-12:
 This object's property is being mutated (used as an lvalue)
 Setting non-mutable object properties requires the capability WriteProperty, which is not provided by the context. (Typing[4401])
-  File "byval_collection_unresolved.php", line 15, characters 46-47:
+  File "byval_collection_unresolved.php", line 14, characters 46-47:
   The local (enclosing) context provides the capability set {}

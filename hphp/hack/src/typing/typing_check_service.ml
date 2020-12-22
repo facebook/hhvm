@@ -228,9 +228,9 @@ let process_file
     (errors : Errors.t)
     (file : check_file_computation) : process_file_results =
   let fn = file.path in
-  let (err, ast) = Ast_provider.get_ast_with_error ~full:true ctx fn in
-  if not (Errors.is_empty err) then
-    { errors = err; deferred_decls = [] }
+  let (errors', ast) = Ast_provider.get_ast_with_error ~full:true ctx fn in
+  if not (Errors.is_empty errors') then
+    { errors = Errors.merge errors' errors; deferred_decls = [] }
   else
     let opts =
       {
@@ -508,7 +508,7 @@ let process_files
           let (_ : Decl_provider.class_decl option) =
             Decl_provider.get_class ctx class_name
           in
-          (Errors.empty, [], ProcessFilesTally.incr_decls tally)
+          (errors, [], ProcessFilesTally.incr_decls tally)
         | Prefetch paths ->
           Vfs.prefetch paths;
           (errors, [], ProcessFilesTally.incr_prefetches tally)

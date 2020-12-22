@@ -302,6 +302,12 @@ let rec fun_def ctx f :
         Typing.attributes_check_def env SN.AttributeKinds.fn f.f_user_attributes
       in
       let (env, file_attrs) = Typing.file_attributes env f.f_file_attributes in
+      let (env, cap_ty, unsafe_cap_ty) =
+        Typing.type_capability env f.f_ctxs f.f_unsafe_ctxs (fst f.f_name)
+      in
+      let (env, _) =
+        Typing_coeffects.register_capabilities env cap_ty unsafe_cap_ty
+      in
       let reactive =
         fun_reactivity env.decl_env f.f_user_attributes f.f_params
       in
@@ -378,12 +384,6 @@ let rec fun_def ctx f :
         Naming_attributes.mem
           SN.UserAttributes.uaDisableTypecheckerInternal
           f.f_user_attributes
-      in
-      let (env, cap_ty, unsafe_cap_ty) =
-        Typing.type_capability env f.f_ctxs f.f_unsafe_ctxs (fst f.f_name)
-      in
-      let (env, _) =
-        Typing_coeffects.register_capabilities env cap_ty unsafe_cap_ty
       in
       let (env, tb) =
         Typing.fun_ ~disable env return pos f.f_body f.f_fun_kind
@@ -467,6 +467,12 @@ and method_def env cls m =
           else
             None
         | x -> x
+      in
+      let (env, cap_ty, unsafe_cap_ty) =
+        Typing.type_capability env m.m_ctxs m.m_unsafe_ctxs (fst m.m_name)
+      in
+      let (env, _) =
+        Typing_coeffects.register_capabilities env cap_ty unsafe_cap_ty
       in
       let env = Env.set_env_reactive env reactive in
       let env = Env.set_fun_mutable env mut in
@@ -561,12 +567,6 @@ and method_def env cls m =
         Naming_attributes.mem
           SN.UserAttributes.uaDisableTypecheckerInternal
           m.m_user_attributes
-      in
-      let (env, cap_ty, unsafe_cap_ty) =
-        Typing.type_capability env m.m_ctxs m.m_unsafe_ctxs (fst m.m_name)
-      in
-      let (env, _) =
-        Typing_coeffects.register_capabilities env cap_ty unsafe_cap_ty
       in
       let (env, tb) =
         Typing.fun_

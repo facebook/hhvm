@@ -1,6 +1,2 @@
-File "construct_default_values2.php", line 12, characters 14-28:
-Variable `$#capability` is undefined, or not always defined. (Naming[2050])
-  File "construct_default_values2.php", line 11, characters 15-16:
-  Did you mean `$b` instead?
 File "construct_default_values2.php", line 12, characters 21-21:
 Read access to `$this->b` before initialization (Typing[4083])

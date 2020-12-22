@@ -2093,7 +2093,8 @@ let analyse_callable
     in
     Some res
   with IFCError (FlowInference s) ->
-    Format.printf "Analyzing %s:@.  Failure: %s@.@." name s;
+    if should_print ~user_mode:opts.opt_mode ~phase:Manalyse then
+      Format.printf "Analyzing %s:@.  Failure: %s@.@." name s;
     None
 
 let walk_tast opts decl_env ctx =

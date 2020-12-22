@@ -22,7 +22,16 @@ let options : options =
   }
 
 let catch_ifc_internal_errors pos f =
-  try f () with
+  try
+    Timeout.with_timeout
+      ~timeout:5
+      ~do_:(fun _ -> f ())
+      ~on_timeout:(fun _ ->
+        Hh_logger.log
+          "Timed out running IFC analysis on %s"
+          (Relative_path.suffix (Pos.filename pos));
+        Errors.ifc_internal_error pos "Timed out running IFC analysis")
+  with
   (* Solver exceptions*)
   | IFCError error ->
     Errors.ifc_internal_error pos (Ifc_pretty.ifc_error_to_string error)

@@ -28,6 +28,7 @@ type options = {
   from: string;
   gen_saved_ignore_type_errors: bool;
   ignore_hh_version: bool;
+  enable_ifc: bool;
   saved_state_ignore_hhconfig: bool;
   json_mode: bool;
   load_state_canary: bool;
@@ -73,6 +74,8 @@ module Messages = struct
   let dump_fanout = " dump fanout to stdout as JSON, then exit"
 
   let dynamic_view = " start with dynamic view for IDE files on by default."
+
+  let enable_ifc = " run IFC analysis on all files"
 
   let from = " so we know who's invoking - e.g. nuclide, vim, emacs, vscode"
 
@@ -153,6 +156,7 @@ let parse_options () : options =
   let custom_telemetry_data = ref [] in
   let dump_fanout = ref false in
   let dynamic_view = ref false in
+  let enable_ifc = ref false in
   let from = ref "" in
   let from_emacs = ref false in
   let from_hhclient = ref false in
@@ -208,6 +212,7 @@ let parse_options () : options =
       ("--daemon", Arg.Set should_detach, Messages.daemon);
       ("--dump-fanout", Arg.Set dump_fanout, Messages.dump_fanout);
       ("--dynamic-view", Arg.Set dynamic_view, Messages.dynamic_view);
+      ("--enable-ifc", Arg.Set enable_ifc, Messages.enable_ifc);
       ("--from-emacs", Arg.Set from_emacs, Messages.from_emacs);
       ("--from-hhclient", Arg.Set from_hhclient, Messages.from_hhclient);
       ("--from-vim", Arg.Set from_vim, Messages.from_vim);
@@ -329,6 +334,7 @@ let parse_options () : options =
     custom_telemetry_data = !custom_telemetry_data;
     dump_fanout = !dump_fanout;
     dynamic_view = !dynamic_view;
+    enable_ifc = !enable_ifc;
     from = !from;
     gen_saved_ignore_type_errors = !gen_saved_ignore_type_errors;
     ignore_hh_version = !ignore_hh;
@@ -364,6 +370,7 @@ let default_options ~root =
     custom_telemetry_data = [];
     dump_fanout = false;
     dynamic_view = false;
+    enable_ifc = false;
     from = "";
     gen_saved_ignore_type_errors = false;
     ignore_hh_version = false;
@@ -410,6 +417,8 @@ let custom_telemetry_data options = options.custom_telemetry_data
 let dump_fanout options = options.dump_fanout
 
 let dynamic_view options = options.dynamic_view
+
+let enable_ifc options = options.enable_ifc
 
 let from options = options.from
 
@@ -496,6 +505,7 @@ let to_string
       custom_telemetry_data;
       dump_fanout;
       dynamic_view;
+      enable_ifc;
       from;
       gen_saved_ignore_type_errors;
       ignore_hh_version;
@@ -602,6 +612,9 @@ let to_string
     ", ";
     "dynamic_view: ";
     string_of_bool dynamic_view;
+    ", ";
+    "enable_ifc: ";
+    string_of_bool enable_ifc;
     ", ";
     "from: ";
     from;

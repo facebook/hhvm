@@ -46,6 +46,8 @@ module type S = sig
 
   val dynamic_view : options -> bool
 
+  val enable_ifc : options -> bool
+
   val from : options -> string
 
   val gen_saved_ignore_type_errors : options -> bool

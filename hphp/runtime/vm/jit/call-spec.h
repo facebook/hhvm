@@ -190,11 +190,6 @@ const FuncType* get_func_type(Ret (*f)(Args...)) {
 }
 
 /*
- * Get the kind of the given subtype of TArr, if we know it statically.
- */
-folly::Optional<ArrayData::ArrayKind> getArrayKind(Type type);
-
-/*
  * Information about how to make different sorts of calls from the JIT.
  */
 struct CallSpec {
@@ -292,50 +287,6 @@ struct CallSpec {
 
   static CallSpec smashable(TCA fp) {
     return CallSpec { Kind::Smashable, fp };
-  }
-
-  /*
-   * A call to an ArrayData method with type `arrType` and function table `p',
-   * along with `fp`, the ArrayData generic dispatch method for the table `p`.
-   * We take `arrType` so we can devirtualize this call when its kind is known;
-   * otherwise, we'll emit a method call to `fp`. Example usage:
-   *
-   *   CallSpec::array(arr_type, &g_array_funcs.release, &ArrayData::release);
-   *
-   * The call mechanism assumes that the first argument to the direct calls is
-   * an ArrayData*, and that the rest of the arguments are parallel between the
-   * direct calls in `p` and the method `fp`.
-   *
-   * Note that we also load the ArrayData's kind and use it to make an indirect
-   * call to a method in `p` in the JIT; in fact, we used to emit such code.
-   * However, doing so is a branch miss loss (in particular, for set methods)
-   * over calling `fp`. We're not sure why, but here are two hypotheses:
-   *
-   *   1. BOLT can inline the likely virtual target into the function `fp`.
-   *   2. We may be save on indirect-call prediction cache with only one call.
-   *
-   * In any case, making this change looks like it's neutral to a small win in
-   * load tests, in addition to generating cleaner code.
-   */
-  template<class Ret, class... Args>
-  static CallSpec array(
-      const Type& arr_type,
-      Ret (*const (*p)[ArrayData::kNumKinds])(ArrayData*, Args...),
-      Ret (ArrayData::*fp)(Args...)) {
-    if (auto const kind = getArrayKind(arr_type)) {
-      return direct((*p)[*kind]);
-    }
-    return method(fp);
-  }
-  template<class Ret, class... Args>
-  static CallSpec array(
-      const Type& arr_type,
-      Ret (*const (*p)[ArrayData::kNumKinds])(const ArrayData*, Args...),
-      Ret (ArrayData::*fp)(Args...) const) {
-    if (auto const kind = getArrayKind(arr_type)) {
-      return direct((*p)[*kind]);
-    }
-    return method(fp);
   }
 
   /*

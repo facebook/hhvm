@@ -140,13 +140,4 @@ bool CallSpec::verifySignature(const CallDest& dest,
   return true;
 }
 
-folly::Optional<ArrayData::ArrayKind> getArrayKind(Type type) {
-  assertx(type <= TArr);
-  if (!allowBespokeArrayLikes() || type.arrSpec().vanilla()) {
-    if (type <= TVArr) return ArrayData::kPackedKind;
-    if (type <= TDArr) return ArrayData::kMixedKind;
-  }
-  return folly::none;
-}
-
 }}

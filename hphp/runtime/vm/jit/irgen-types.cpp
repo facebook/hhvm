@@ -1784,18 +1784,4 @@ void emitAssertRATStk(IRGS& env, uint32_t offset, RepoAuthType rat) {
 
 //////////////////////////////////////////////////////////////////////
 
-SSATmp* doDVArrChecks(IRGS& env, SSATmp* arr, Block* taken,
-                      const TypeConstraint& tc) {
-  assertx(tc.isPHPArray());
-  auto const type = [&]{
-    if (tc.isVArray()) return TVArr;
-    if (tc.isDArray()) return TDArr;
-    assertx(tc.isVArrayOrDArray());
-    return TVArr|TDArr;
-  }();
-  return gen(env, CheckType, type, taken, arr);
-}
-
-//////////////////////////////////////////////////////////////////////
-
 }}}

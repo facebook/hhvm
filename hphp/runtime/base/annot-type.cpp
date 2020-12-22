@@ -258,7 +258,7 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
       // it's not compatible, otherwise more checks are required
       return (isStringType(dt) || isArrayType(dt) || isVecType(dt) ||
               isFuncType(dt) || dt == KindOfObject || isClsMethType(dt) ||
-              isRFuncType(dt) || isRClsMethType(dt))
+              isRFuncType(dt) || isRClsMethType(dt) || isDictType(dt))
         ? AnnotAction::CallableCheck : AnnotAction::Fail;
     case AnnotMetaType::VArrOrDArr:
       assertx(!RO::EvalHackArrDVArrs);

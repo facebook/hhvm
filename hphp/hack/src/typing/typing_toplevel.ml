@@ -853,6 +853,18 @@ let class_type_param env ct =
   let (env, tparam_list) = List.map_env env ct Typing.type_param in
   (env, tparam_list)
 
+(* Some (legacy) special functions are allowed as class constant init.,
+   therefore treat them as pure and insert the matching capabilities. *)
+let expr_with_pure_coeffects env ?expected e =
+  let (env, (te, ty)) =
+    Typing_lenv.stash_and_do env (Env.all_continuations env) (fun env ->
+        let pure = MakeType.mixed Reason.Rnone in
+        let (env, _) = Typing_coeffects.register_capabilities env pure pure in
+        let (env, te, ty) = Typing.expr ?expected env e in
+        (env, (te, ty)))
+  in
+  (env, te, ty)
+
 let rec class_def ctx c =
   Counters.count Counters.Category.Typecheck @@ fun () ->
   Errors.run_with_span c.c_span @@ fun () ->
@@ -1361,7 +1373,9 @@ and class_const_def c env cc =
   let (env, eopt, ty) =
     match e with
     | Some e ->
-      let (env, te, ty') = Typing.expr ?expected:opt_expected env e in
+      let (env, te, ty') =
+        expr_with_pure_coeffects env ?expected:opt_expected e
+      in
       let env =
         Typing_coercion.coerce_type
           (fst id)
@@ -1423,7 +1437,7 @@ and class_var_def ~is_static cls env cv =
     match cv.cv_expr with
     | None -> (env, None)
     | Some e ->
-      let (env, te, ty) = Typing.expr ?expected env e in
+      let (env, te, ty) = expr_with_pure_coeffects env ?expected e in
       (* Check that the inferred type is a subtype of the expected type.
        * Eventually this will be the responsibility of `expr`
        *)
@@ -1505,7 +1519,7 @@ let gconst_def ctx cst =
         let expected =
           ExpectedTy.make_and_allow_coercion (fst hint) Reason.URhint dty
         in
-        Typing.expr ~expected env value
+        expr_with_pure_coeffects env ~expected value
       in
       let env =
         Typing_coercion.coerce_type
@@ -1523,7 +1537,7 @@ let gconst_def ctx cst =
         && Partial.should_check_error cst.cst_mode 2035
       then
         Errors.missing_typehint (fst cst.cst_name);
-      let (env, te, _value_type) = Typing.expr env value in
+      let (env, te, _value_type) = expr_with_pure_coeffects env value in
       (te, env)
   in
   {
@@ -1547,7 +1561,7 @@ let record_field env f =
   let expected = ExpectedTy.make p Reason.URhint cty in
   match e with
   | Some e ->
-    let (env, te, ty) = Typing.expr ~expected env e in
+    let (env, te, ty) = expr_with_pure_coeffects env ~expected e in
     let env =
       Typing_coercion.coerce_type
         p

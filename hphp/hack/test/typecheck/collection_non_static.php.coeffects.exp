@@ -1,4 +1,2 @@
 File "collection_non_static.php", line 8, characters 38-42:
 Invalid expression in constant initializer (Parsing[1002])
-File "collection_non_static.php", line 8, characters 38-42:
-Variable `$#capability` is undefined, or not always defined. (Naming[2050])

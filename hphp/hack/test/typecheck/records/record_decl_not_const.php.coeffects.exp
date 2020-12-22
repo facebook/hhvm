@@ -1,4 +1,2 @@
 File "record_decl_not_const.php", line 6, characters 11-15:
 Invalid expression in constant initializer (Parsing[1002])
-File "record_decl_not_const.php", line 6, characters 11-15:
-Variable `$#capability` is undefined, or not always defined. (Naming[2050])

@@ -2,7 +2,5 @@ File "custom_function.php", line 6, characters 24-28:
 Invalid expression in constant initializer (Parsing[1002])
 File "custom_function.php", line 10, characters 21-25:
 Invalid expression in constant initializer (Parsing[1002])
-File "custom_function.php", line 6, characters 24-28:
-Variable `$#capability` is undefined, or not always defined. (Naming[2050])
 File "custom_function.php", line 10, characters 21-25:
 Illegal constant value (Naming[2023])

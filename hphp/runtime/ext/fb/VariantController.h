@@ -20,8 +20,8 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/array-provenance.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/datatype.h"
-#include "hphp/runtime/base/runtime-error.h"
 
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/fb/FBSerialize/FBSerialize.h"
@@ -357,18 +357,15 @@ struct VariantControllerImpl {
      useful to instrument the serialization process if needed */
   ALWAYS_INLINE
   static void traceSerialization(const_variant_ref thing) {
-    if (LIKELY(!RuntimeOption::EvalArrayProvenance)) return;
-    if (HackArraysMode != VariantControllerHackArraysMode::ON &&
+    if constexpr (
+        HackArraysMode != VariantControllerHackArraysMode::ON &&
         HackArraysMode != VariantControllerHackArraysMode::ON_AND_KEYSET) {
       return;
     }
-    if (!thing.isArray()) return;
-    auto const ad = thing.getArrayData();
 
-    if (arrprov::arrayWantsTag(ad) &&
-        (thing.isVec() || ad->isVArray())) {
-      raise_array_serialization_notice(SerializationSite::FBSerialize,
-                                       thing.asCArrRef().get());
+    if (thing.isArray() && thing.getArrayData()->isVArray()) {
+      maybe_raise_array_serialization_notice(SerializationSite::FBSerialize,
+                                             thing.getArrayData());
     }
   }
 };

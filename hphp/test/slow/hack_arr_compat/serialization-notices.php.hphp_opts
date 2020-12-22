@@ -1,0 +1,4 @@
+-vRuntime.Eval.HackArrCompatNotices=1
+-vRuntime.Eval.HackArrCompatIsVecDictNotices=0
+-vRuntime.Eval.HackArrCompatSerializeNotices=0
+-vRuntime.Eval.RaiseArraySerializationNotices=1

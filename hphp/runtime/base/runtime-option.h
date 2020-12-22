@@ -1139,6 +1139,9 @@ struct RuntimeOption {
   F(bool, HackArrDVArrs, false)                                         \
   /* Raise a notice for `$dict is shape` and `$vec is tuple`. */        \
   F(bool, HackArrIsShapeTupleNotices, false)                            \
+  /* Notice on array serialization behavior, even if array provenance   \
+   * is disabled. If we see these notices, we're missing markings. */   \
+  F(bool, RaiseArraySerializationNotices, false)                        \
   /* Enable instrumentation and information in the repo for tracking    \
    * the source of vecs and dicts whose vec/dict-ness is observed       \
    * during program execution                                           \
@@ -1478,6 +1481,12 @@ inline bool isJitSerializing() {
 
 inline bool unitPrefetchingEnabled() {
   return RO::EvalUnitPrefetcherMaxThreads > 0;
+}
+
+inline bool raiseArraySerializationNotices() {
+  auto const without_provenance = RO::EvalHackArrCompatNotices &&
+                                  RO::EvalRaiseArraySerializationNotices;
+  return without_provenance || RO::EvalArrayProvenance;
 }
 
 uintptr_t lowArenaMinAddr();

@@ -106,10 +106,9 @@ inline bool is_string(const TypedValue* c) {
 // If we trace through call sites of the bare function, we'll find a number of
 // places where we're incorrectly losing provenance logs. Clean this up soon.
 inline void maybe_raise_array_serialization_notice(
-    SerializationSite site, const TypedValue* tv) {
-  assertx(isArrayLikeType(tv->m_type));
-  auto const ad = tv->m_data.parr;
-  if (arrprov::arrayWantsTag(ad)) {
+    SerializationSite site, const ArrayData* ad) {
+  assertx(ad->isDVArray());
+  if (raiseArraySerializationNotices()) {
     raise_array_serialization_notice(site, ad);
   }
 }
@@ -129,7 +128,8 @@ inline bool is_php_array(const TypedValue* c) {
   assertx(tvIsPlausible(*c));
 
   if (tvIsArray(c)) {
-    maybe_raise_array_serialization_notice(SerializationSite::IsArray, c);
+    maybe_raise_array_serialization_notice(
+        SerializationSite::IsArray, val(c).parr);
     return true;
   }
 
@@ -147,10 +147,7 @@ inline bool is_php_array(const TypedValue* c) {
 inline bool is_vec(const TypedValue* c) {
   assertx(tvIsPlausible(*c));
 
-  if (tvIsVec(c)) {
-    maybe_raise_array_serialization_notice(SerializationSite::IsVec, c);
-    return true;
-  }
+  if (tvIsVec(c)) return true;
 
   auto const hacLogging = [&](const char* msg) {
     if (RO::EvalHackArrCompatIsVecDictNotices) raise_hackarr_compat_notice(msg);
@@ -169,7 +166,8 @@ inline bool is_vec(const TypedValue* c) {
 
   if (tvIsArrayLike(c) && c->m_data.parr->isVArray()) {
     hacLogging(Strings::HACKARR_COMPAT_VARR_IS_VEC);
-    maybe_raise_array_serialization_notice(SerializationSite::IsVec, c);
+    maybe_raise_array_serialization_notice(
+        SerializationSite::IsVec, val(c).parr);
   }
   return false;
 }
@@ -177,17 +175,15 @@ inline bool is_vec(const TypedValue* c) {
 inline bool is_dict(const TypedValue* c) {
   assertx(tvIsPlausible(*c));
 
-  if (tvIsDict(c)) {
-    maybe_raise_array_serialization_notice(SerializationSite::IsDict, c);
-    return true;
-  }
+  if (tvIsDict(c)) return true;
 
   auto const hacLogging = [&](const char* msg) {
     if (RO::EvalHackArrCompatIsVecDictNotices) raise_hackarr_compat_notice(msg);
   };
   if (tvIsArrayLike(c) && c->m_data.parr->isDArray()) {
     hacLogging(Strings::HACKARR_COMPAT_DARR_IS_DICT);
-    maybe_raise_array_serialization_notice(SerializationSite::IsDict, c);
+    maybe_raise_array_serialization_notice(
+        SerializationSite::IsDict, val(c).parr);
   }
   return false;
 }

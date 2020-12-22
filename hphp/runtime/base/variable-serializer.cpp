@@ -1874,13 +1874,13 @@ void VariableSerializer::serializeArray(const ArrayData* arr,
 
   const bool isVectorData = arr->isVectorData();
 
-  if (arrprov::arrayWantsTag(arr) && !m_serializeProvenanceAndLegacy &&
+  if (arr->isDVArray() && !m_serializeProvenanceAndLegacy &&
       !m_forcePHPArrays && !m_forceHackArrays) {
     auto const source = [&]() -> folly::Optional<SerializationSite> {
       switch (getType()) {
       case VariableSerializer::Type::JSON:
         // json_encode only observes provenance on list-like darrays
-        return arr->isVecType() || arr->isVArray() || !isVectorData
+        return arr->isVArray() || !isVectorData
           ? folly::none
           : folly::make_optional(SerializationSite::JsonEncode);
       case VariableSerializer::Type::Serialize:
@@ -1893,7 +1893,7 @@ void VariableSerializer::serializeArray(const ArrayData* arr,
         return folly::none;
       }
     }();
-    if (source) raise_array_serialization_notice(*source, arr);
+    if (source) maybe_raise_array_serialization_notice(*source, arr);
   }
 
   if (arr->size() == 0 && LIKELY(!arrprov::arrayWantsTag(arr))) {

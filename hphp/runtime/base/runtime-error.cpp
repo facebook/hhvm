@@ -248,27 +248,6 @@ void raise_dynamically_sampled_notice(folly::StringPiece fmt, Args&& ... args) {
   raise_notice(str);
 }
 
-enum class ArrayType {
-  VArray,
-  DArray,
-  Vec,
-  Dict,
-  Other,
-  Count
-};
-
-const char* arrayTypeName(ArrayType ty) {
-  switch (ty) {
-  case ArrayType::VArray: return "varray";
-  case ArrayType::DArray: return "darray";
-  case ArrayType::Vec: return "vec";
-  case ArrayType::Dict: return "dict";
-  case ArrayType::Other: return "other";
-  default:
-    always_assert(false);
-  }
-}
-
 const char* srcName(SerializationSite src) {
   switch (src) {
   case SerializationSite::IsDict:             return "is_dict";
@@ -288,92 +267,45 @@ const char* srcName(SerializationSite src) {
   }
 }
 
-static auto constexpr num_pl_counters =
-  static_cast<size_t>(ArrayType::Count) *
-  static_cast<size_t>(SerializationSite::Count);
-static ServiceData::ExportedTimeSeries* s_provLoggingCounters[num_pl_counters];
-
-InitFiniNode s_initProvLoggingCounters([] {
-  for (size_t idx = 0; idx < num_pl_counters; idx++) {
-    constexpr size_t numArrayTypes = static_cast<size_t>(ArrayType::Count);
-    auto const at = static_cast<ArrayType>(idx % numArrayTypes);
-    auto const src = static_cast<SerializationSite>(idx / numArrayTypes);
-
-    s_provLoggingCounters[idx] = ServiceData::createTimeSeries(
-      folly::sformat("vm.provlogging.unsampled.{}.{}",
-                     arrayTypeName(at),
-                     srcName(src)),
-      {ServiceData::StatsType::COUNT}
-    );
-  }
-}, InitFiniNode::When::ProcessInit);
-
 } // namespace
 
 void raise_array_serialization_notice(SerializationSite src,
                                       const ArrayData* arr) {
-  assertx(RuntimeOption::EvalArrayProvenance);
+  assertx(arr->isDVArray());
+  assertx(raiseArraySerializationNotices());
+
   if (UNLIKELY(g_context.isNull())) return;
   if (arr->isLegacyArray()) return;
   if (UNLIKELY(g_context->getThrowAllErrors())) {
     throw Exception("Would have logged provenance");
   }
-  static auto knownCounter = ServiceData::createTimeSeries(
-    "vm.provlogging.known",
-    {ServiceData::StatsType::COUNT}
-  );
-  static decltype(knownCounter) unknownCounters[] = {
-    ServiceData::createTimeSeries("vm.provlogging.unknown.counted.nonempty",
-                                  {ServiceData::StatsType::COUNT}),
-    ServiceData::createTimeSeries("vm.provlogging.unknown.static.nonempty",
-                                  {ServiceData::StatsType::COUNT}),
-    ServiceData::createTimeSeries("vm.provlogging.unknown.counted.empty",
-                                  {ServiceData::StatsType::COUNT}),
-    ServiceData::createTimeSeries("vm.provlogging.unknown.static.empty",
-                                  {ServiceData::StatsType::COUNT}),
-  };
 
-  auto const counterFor = [&] (SerializationSite src, ArrayType at)
-    -> ServiceData::ExportedTimeSeries* {
-    auto const idx =
-      static_cast<size_t>(at) +
-      static_cast<size_t>(ArrayType::Count) * static_cast<size_t>(src);
+  const char* array_type = arr->isVArray() ? "varray" : "darray";
 
-    return s_provLoggingCounters[idx];
-  };
-
-  auto const arrayType = [&] {
-    if (arr->isVArray()) return ArrayType::VArray;
-    if (arr->isDArray()) return ArrayType::DArray;
-    if (arr->isVecType()) return ArrayType::Vec;
-    if (arr->isDictType()) return ArrayType::Dict;
-    return ArrayType::Other;
-  }();
-
-  counterFor(src, arrayType)->addValue(1);
-
-  auto const isEmpty = arr->empty();
-  auto const isStatic = arr->isStatic();
-  auto const isList = !isEmpty && arr->isVectorData();
-
-  static auto const sampl_threshold =
-    RAND_MAX / RuntimeOption::EvalLogArrayProvenanceSampleRatio;
-  if (std::rand() >= sampl_threshold) return;
-  auto const tag = arrprov::getTag(arr);
-  if (tag.concrete()) {
-    knownCounter->addValue(1);
-  } else {
-    auto const counterIdx = (isEmpty ? 2 : 0) + (isStatic ? 1 : 0);
-    unknownCounters[counterIdx]->addValue(1);
-  }
-
-  raise_dynamically_sampled_notice(
+  if (RO::EvalArrayProvenance) {
+    static auto const sampl_threshold =
+      RAND_MAX / RuntimeOption::EvalLogArrayProvenanceSampleRatio;
+    if (std::rand() >= sampl_threshold) return;
+    auto const tag = arrprov::getTag(arr);
+    auto const list = !arr->empty() && arr->isVectorData();
+    raise_dynamically_sampled_notice(
       "Observing {}{}{} in {} from {}",
-      isStatic ? "static " : "",
-      (isEmpty ? "empty " : isList ? "list-like " : "map-like "),
-      arrayTypeName(arrayType),
+      arr->isStatic() ? "static " : "",
+      (arr->empty() ? "empty " : list ? "list-like " : "map-like "),
+      array_type,
       srcName(src),
-      tag.toString());
+      tag.toString()
+    );
+  } else {
+    auto const list = !arr->empty() && arr->isVectorData();
+    raise_notice(
+      "Hack Array Compat: Observing %s%s%s in %s with provenance disabled",
+      arr->isStatic() ? "static " : "",
+      (arr->empty() ? "empty " : list ? "list-like " : "map-like "),
+      array_type,
+      srcName(src)
+    );
+  }
 }
 
 void raise_hack_arr_compat_cast_marked_array_notice(const ArrayData* ad) {

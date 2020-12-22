@@ -14,6 +14,7 @@ module Type = Typing_defs
 type ifc_error_ty =
   | LiftError of string
   | FlowInference of string
+[@@deriving show]
 
 exception IFCError of ifc_error_ty
 

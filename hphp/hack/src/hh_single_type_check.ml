@@ -1371,6 +1371,12 @@ let handle_mode
           (* get the backtrace before doing anything else to be sure
              to get the one corresponding to exc *)
           let backtrace = Stdlib.Printexc.get_backtrace () in
+          Stdlib.Printexc.register_printer (function
+              | Ifc_types.IFCError err ->
+                Some
+                  ( Printf.sprintf "IFCError(%s)"
+                  @@ Ifc_types.show_ifc_error_ty err )
+              | _ -> None);
           Printf.printf
             "Uncaught exception: %s\n%s"
             (Stdlib.Printexc.to_string exc)

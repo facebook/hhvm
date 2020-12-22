@@ -297,6 +297,24 @@ let rec obj_get_concrete_ty
                 r
                 on_error;
             default ()
+          | None when String.equal id_str SN.Members.__clone ->
+            (* Create a `public function __clone()[]: void {}` for classes that don't declare __clone *)
+            let ft =
+              {
+                ft_arity = Fstandard;
+                ft_tparams = [];
+                ft_where_constraints = [];
+                ft_params = [];
+                ft_implicit_params =
+                  { capability = CapTy (MakeType.intersection Reason.Rnone []) };
+                ft_ret =
+                  { et_type = MakeType.void Reason.Rnone; et_enforced = false };
+                ft_reactive = Pure None;
+                ft_flags = 0;
+                ft_ifc_decl = default_ifc_fun_decl;
+              }
+            in
+            (env, (mk (Reason.Rnone, Tfun ft), []))
           | None ->
             member_not_found env id_pos ~is_method class_info id_str r on_error;
             default ()

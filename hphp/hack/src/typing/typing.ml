@@ -1603,9 +1603,20 @@ and expr_
     make_result env p (make_expr th pairs) (make_ty k v)
   | Clone e ->
     let (env, te, ty) = expr env e in
-    (* Clone only works on objects; anything else fatals at runtime *)
-    let tobj = mk (Reason.Rwitness p, Tobject) in
-    let env = Type.sub_type p Reason.URclone env ty tobj Errors.unify_error in
+    (* Clone only works on objects; anything else fatals at runtime.
+     * Constructing a call `e`->__clone() checks that `e` is an object and
+     * checks coeffects on __clone *)
+    let clone_call =
+      ( p,
+        Call
+          ( ( p,
+              Obj_get (e, (p, Id (p, SN.Members.__clone)), OG_nullthrows, false)
+            ),
+            [],
+            [],
+            None ) )
+    in
+    let (env, _te, _ty) = expr env clone_call in
     make_result env p (Aast.Clone te) ty
   | This ->
     if Option.is_none (Env.get_self_ty env) then Errors.this_var_outside_class p;

@@ -333,7 +333,7 @@ final class ImmVector<+Tv> implements \ConstVector<Tv> {
    * @guide /hack/collections/examples
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function map<Tu>(<<__AtMostRxAsFunc>>(function(Tv): Tu) $fn)[]: ImmVector<Tu>;
+  public function map<Tu>(<<__AtMostRxAsFunc>>(function(Tv)[_]: Tu) $fn)[ctx $fn]: ImmVector<Tu>;
 
   /**
    * Returns an `ImmVector` containing the results of applying an operation to
@@ -352,7 +352,7 @@ final class ImmVector<+Tv> implements \ConstVector<Tv> {
    *           `ImmVector` in turn.
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function mapWithKey<Tu>(<<__AtMostRxAsFunc>>(function(int, Tv): Tu) $fn)[]:
+  public function mapWithKey<Tu>(<<__AtMostRxAsFunc>>(function(int, Tv)[_]: Tu) $fn)[ctx $fn]:
     ImmVector<Tu>;
 
   /**
@@ -372,7 +372,7 @@ final class ImmVector<+Tv> implements \ConstVector<Tv> {
    * @guide /hack/collections/examples
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function filter(<<__AtMostRxAsFunc>>(function(Tv): bool) $fn)[]: ImmVector<Tv>;
+  public function filter(<<__AtMostRxAsFunc>>(function(Tv)[_]: bool) $fn)[ctx $fn]: ImmVector<Tv>;
 
   /**
    * Returns an `ImmVector` containing the values of the current `ImmVector`
@@ -394,7 +394,7 @@ final class ImmVector<+Tv> implements \ConstVector<Tv> {
    *
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function filterWithKey(<<__AtMostRxAsFunc>>(function(int, Tv): bool) $fn)[]:
+  public function filterWithKey(<<__AtMostRxAsFunc>>(function(int, Tv)[_]: bool) $fn)[ctx $fn]:
     ImmVector<Tv>;
 
   /**
@@ -451,7 +451,7 @@ final class ImmVector<+Tv> implements \ConstVector<Tv> {
    *           until when the callback returns `false`.
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function takeWhile(<<__AtMostRxAsFunc>>(function(Tv): bool) $fn)[]: ImmVector<Tv>;
+  public function takeWhile(<<__AtMostRxAsFunc>>(function(Tv)[_]: bool) $fn)[ctx $fn]: ImmVector<Tv>;
 
   /**
    * Returns an `ImmVector` containing the values after the `$n`-th element of
@@ -492,7 +492,7 @@ final class ImmVector<+Tv> implements \ConstVector<Tv> {
    *           `false`.
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function skipWhile(<<__AtMostRxAsFunc>>(function(Tv): bool) $fn)[]: ImmVector<Tv>;
+  public function skipWhile(<<__AtMostRxAsFunc>>(function(Tv)[_]: bool) $fn)[ctx $fn]: ImmVector<Tv>;
 
   /**
    * Returns a subset of the current `ImmVector` starting from a given key up

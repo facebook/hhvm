@@ -278,7 +278,7 @@ final class ImmSet<+Tv as arraykey> implements \ConstSet<Tv> {
    * @guide /hack/collections/examples
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function map<Tu as arraykey>(<<__AtMostRxAsFunc>>(function(Tv): Tu) $fn)[]: ImmSet<Tu>;
+  public function map<Tu as arraykey>(<<__AtMostRxAsFunc>>(function(Tv)[_]: Tu) $fn)[ctx $fn]: ImmSet<Tu>;
 
   /**
    * Returns an `ImmSet` containing the values after an operation has been
@@ -298,7 +298,7 @@ final class ImmSet<+Tv as arraykey> implements \ConstSet<Tv> {
    *           operation on the current `ImmSet`'s values is applied.
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function mapWithKey<Tu as arraykey>(<<__AtMostRxAsFunc>>(function(arraykey, Tv): Tu) $fn)[]: ImmSet<Tu>;
+  public function mapWithKey<Tu as arraykey>(<<__AtMostRxAsFunc>>(function(arraykey, Tv)[_]: Tu) $fn)[ctx $fn]: ImmSet<Tu>;
 
   /**
    * Returns an `ImmSet` containing the values of the current `ImmSet` that
@@ -316,7 +316,7 @@ final class ImmSet<+Tv as arraykey> implements \ConstSet<Tv> {
    * @guide /hack/collections/examples
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function filter(<<__AtMostRxAsFunc>>(function(Tv): bool) $fn)[]: ImmSet<Tv>;
+  public function filter(<<__AtMostRxAsFunc>>(function(Tv)[_]: bool) $fn)[ctx $fn]: ImmSet<Tv>;
 
   /**
    * Returns an `ImmSet` containing the values of the current `ImmSet` that
@@ -337,7 +337,7 @@ final class ImmSet<+Tv as arraykey> implements \ConstSet<Tv> {
    *
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function filterWithKey(<<__AtMostRxAsFunc>>(function(arraykey, Tv): bool) $fn)[]:
+  public function filterWithKey(<<__AtMostRxAsFunc>>(function(arraykey, Tv)[_]: bool) $fn)[ctx $fn]:
     ImmSet<Tv>;
 
   /**
@@ -392,7 +392,7 @@ final class ImmSet<+Tv as arraykey> implements \ConstSet<Tv> {
    *           until the callback returns `false`.
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function takeWhile(<<__AtMostRxAsFunc>>(function(Tv): bool) $fn)[]: ImmSet<Tv>;
+  public function takeWhile(<<__AtMostRxAsFunc>>(function(Tv)[_]: bool) $fn)[ctx $fn]: ImmSet<Tv>;
 
   /**
    * Returns an `ImmSet` containing the values after the `n`-th element of the
@@ -427,7 +427,7 @@ final class ImmSet<+Tv as arraykey> implements \ConstSet<Tv> {
    *           starting after the callback returns `true`.
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function skipWhile(<<__AtMostRxAsFunc>>(function(Tv): bool) $fn)[]: ImmSet<Tv>;
+  public function skipWhile(<<__AtMostRxAsFunc>>(function(Tv)[_]: bool) $fn)[ctx $fn]: ImmSet<Tv>;
 
   /**
    * Returns a subset of the current `ImmSet` starting from a given key up to,

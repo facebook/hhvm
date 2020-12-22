@@ -188,7 +188,7 @@ final class Vector<Tv> implements \MutableVector<Tv> {
    * @guide /hack/collections/examples
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function map<Tu>(<<__AtMostRxAsFunc>>(function(Tv): Tu) $fn)[]: Vector<Tu>;
+  public function map<Tu>(<<__AtMostRxAsFunc>>(function(Tv)[_]: Tu) $fn)[ctx $fn]: Vector<Tu>;
 
   /**
    * Returns a `Vector` containing the results of applying an operation to each
@@ -206,7 +206,7 @@ final class Vector<Tv> implements \MutableVector<Tv> {
    *           operation to each key/value pair of the current `Vector` in turn.
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function mapWithKey<Tu>(<<__AtMostRxAsFunc>>(function(int, Tv): Tu) $fn)[]: Vector<Tu>;
+  public function mapWithKey<Tu>(<<__AtMostRxAsFunc>>(function(int, Tv)[_]: Tu) $fn)[ctx $fn]: Vector<Tu>;
 
   /**
    * Returns a `Vector` containing the values of the current `Vector` that meet
@@ -225,7 +225,7 @@ final class Vector<Tv> implements \MutableVector<Tv> {
    * @guide /hack/collections/examples
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function filter(<<__AtMostRxAsFunc>>(function(Tv): bool) $fn)[]: Vector<Tv>;
+  public function filter(<<__AtMostRxAsFunc>>(function(Tv)[_]: bool) $fn)[ctx $fn]: Vector<Tv>;
 
   /**
    * Returns a `Vector` containing the values of the current `Vector` that meet
@@ -247,7 +247,7 @@ final class Vector<Tv> implements \MutableVector<Tv> {
    *
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function filterWithKey(<<__AtMostRxAsFunc>>(function(int, Tv): bool) $fn)[]:
+  public function filterWithKey(<<__AtMostRxAsFunc>>(function(int, Tv)[_]: bool) $fn)[ctx $fn]:
     Vector<Tv>;
 
   /**
@@ -303,7 +303,7 @@ final class Vector<Tv> implements \MutableVector<Tv> {
    *           callback returns `false`.
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function takeWhile(<<__AtMostRxAsFunc>>(function(Tv): bool) $fn)[]: Vector<Tv>;
+  public function takeWhile(<<__AtMostRxAsFunc>>(function(Tv)[_]: bool) $fn)[ctx $fn]: Vector<Tv>;
 
   /**
    * Returns a `Vector` containing the values after the `$n`-th element of the
@@ -342,7 +342,7 @@ final class Vector<Tv> implements \MutableVector<Tv> {
    *           with the value for which the callback first returns `false`.
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function skipWhile(<<__AtMostRxAsFunc>>(function(Tv): bool) $fn)[]: Vector<Tv>;
+  public function skipWhile(<<__AtMostRxAsFunc>>(function(Tv)[_]: bool) $fn)[ctx $fn]: Vector<Tv>;
 
   /**
    * Returns a subset of the current `Vector` starting from a given key up to,

@@ -207,7 +207,7 @@ final class Set<Tv as arraykey> implements \MutableSet<Tv> {
    * @guide /hack/collections/examples
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function map<Tu as arraykey>(<<__AtMostRxAsFunc>>(function(Tv): Tu) $fn)[]: Set<Tu>;
+  public function map<Tu as arraykey>(<<__AtMostRxAsFunc>>(function(Tv)[_]: Tu) $fn)[ctx $fn]: Set<Tu>;
 
   /**
    * Returns a `Set` containing the values after an operation has been applied
@@ -227,7 +227,7 @@ final class Set<Tv as arraykey> implements \MutableSet<Tv> {
    *           on the current `Set`'s values is applied.
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function mapWithKey<Tu as arraykey>(<<__AtMostRxAsFunc>>(function(arraykey, Tv): Tu) $fn)[]: Set<Tu>;
+  public function mapWithKey<Tu as arraykey>(<<__AtMostRxAsFunc>>(function(arraykey, Tv)[_]: Tu) $fn)[ctx $fn]: Set<Tu>;
 
   /**
    * Returns a `Set` containing the values of the current `Set` that meet
@@ -245,7 +245,7 @@ final class Set<Tv as arraykey> implements \MutableSet<Tv> {
    * @guide /hack/collections/examples
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function filter(<<__AtMostRxAsFunc>>(function(Tv): bool) $fn)[]: Set<Tv>;
+  public function filter(<<__AtMostRxAsFunc>>(function(Tv)[_]: bool) $fn)[ctx $fn]: Set<Tv>;
 
   /**
    * Returns a `Set` containing the values of the current `Set` that meet
@@ -266,7 +266,7 @@ final class Set<Tv as arraykey> implements \MutableSet<Tv> {
    *
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function filterWithKey(<<__AtMostRxAsFunc>>(function(arraykey, Tv): bool) $fn)[]: Set<Tv>;
+  public function filterWithKey(<<__AtMostRxAsFunc>>(function(arraykey, Tv)[_]: bool) $fn)[ctx $fn]: Set<Tv>;
 
   /**
    * Alters the current `Set` so that it only contains the values that meet a
@@ -284,7 +284,7 @@ final class Set<Tv as arraykey> implements \MutableSet<Tv> {
    * @return - Returns itself.
    */
   <<__Pure, __Mutable, __AtMostRxAsArgs, __ReturnsVoidToRx>>
-  public function retain(<<__AtMostRxAsFunc>>(function(Tv): bool) $fn)[]: Set<Tv>;
+  public function retain(<<__AtMostRxAsFunc>>(function(Tv)[_]: bool) $fn)[ctx $fn]: Set<Tv>;
 
   /**
    * Alters the current `Set` so that it only contains the values that meet a
@@ -305,7 +305,7 @@ final class Set<Tv as arraykey> implements \MutableSet<Tv> {
    * @return - Returns itself.
    */
   <<__Pure, __Mutable, __AtMostRxAsArgs, __ReturnsVoidToRx>>
-  public function retainWithKey(<<__AtMostRxAsFunc>>(function(arraykey, Tv): bool) $fn)[]: Set<Tv>;
+  public function retainWithKey(<<__AtMostRxAsFunc>>(function(arraykey, Tv)[_]: bool) $fn)[ctx $fn]: Set<Tv>;
 
   /**
    * Throws an exception unless the current `Set` or the `Traversable` is
@@ -356,7 +356,7 @@ final class Set<Tv as arraykey> implements \MutableSet<Tv> {
    *           the callback returns `false`.
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function takeWhile(<<__AtMostRxAsFunc>>(function(Tv): bool) $fn)[]: Set<Tv>;
+  public function takeWhile(<<__AtMostRxAsFunc>>(function(Tv)[_]: bool) $fn)[ctx $fn]: Set<Tv>;
 
   /**
    * Returns a `Set` containing the values after the `n`-th element of the
@@ -389,7 +389,7 @@ final class Set<Tv as arraykey> implements \MutableSet<Tv> {
    *           after the callback returns `true`.
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function skipWhile(<<__AtMostRxAsFunc>>(function(Tv): bool) $fn)[]: Set<Tv>;
+  public function skipWhile(<<__AtMostRxAsFunc>>(function(Tv)[_]: bool) $fn)[ctx $fn]: Set<Tv>;
 
   /**
    * Returns a subset of the current `Set` starting from a given key up to, but

@@ -36,6 +36,7 @@
     runner
     test_added_parent
     test_capitalization
+    test_coeffects
     test_coverage_counts
     test_decl_decl
     test_delete_file
@@ -188,6 +189,11 @@
   (action (run ./test_all.exe getfundeps)))
 
 (alias
+  (name coeffects)
+  (deps test_all.exe)
+  (action (run ./test_all.exe coeffects)))
+
+(alias
   (name identify)
   (deps test_all.exe)
   (action (run ./test_all.exe identify)))
@@ -336,6 +342,7 @@
     (alias coverage_counts)
     (alias new_file)
     (alias capitalization)
+    (alias coeffects)
     (alias mixed_hack_hackpartial)
     (alias modify_file)
     (alias delete_file)

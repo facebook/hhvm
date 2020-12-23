@@ -41,6 +41,7 @@ let tests =
     ("ide/unsaved_changes", run Test_unsaved_changes.test);
     ("added_parent", run Test_added_parent.test);
     ("capitalization", run Test_capitalization.test);
+    ("coeffects", run Test_coeffects.test);
     ("coverage_counts", run Test_coverage_counts.test);
     ("coverage_levels_checked", run Test_coverage_levels_checked.test);
     ("coverage_levels_multi", run Test_coverage_levels_multi.test);

@@ -308,7 +308,7 @@ let visitor =
 
     method! on_fun_ env fun_ =
       let acc = process_fun_id ~is_declaration:true fun_.Aast.f_name in
-      self#plus acc (super#on_fun_ env fun_)
+      self#plus acc (super#on_fun_ env { fun_ with Aast.f_unsafe_ctxs = None })
 
     method! on_typedef env typedef =
       let acc = process_class_id ~is_declaration:true typedef.Aast.t_name in
@@ -339,7 +339,7 @@ let visitor =
 
     method! on_method_ env m =
       method_name := Some (m.Aast.m_name, m.Aast.m_static);
-      let acc = super#on_method_ env m in
+      let acc = super#on_method_ env { m with Aast.m_unsafe_ctxs = None } in
       method_name := None;
       acc
 

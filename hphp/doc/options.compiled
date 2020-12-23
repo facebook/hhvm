@@ -86,7 +86,6 @@ flood error logs.
     # E_USER_WARNING, E_NOTICE, and E_USER_NOTICE are supported.
     UpgradeLevel = 0 (default)
     CallUserHandlerOnFatals = false
-    NoInfiniteRecursionDetection = false
     NoticeFrequency = 1    # 1 out of these many notices to log
     WarningFrequency = 1   # 1 out of these many warnings to log
   }

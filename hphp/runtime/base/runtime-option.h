@@ -236,7 +236,6 @@ struct RuntimeOption {
   static bool AllowRunAsRoot; // Allow running hhvm as root.
 
   static int  MaxSerializedStringSize;
-  static bool NoInfiniteRecursionDetection;
   static bool AssertEmitted;
   static int64_t NoticeFrequency; // output 1 out of NoticeFrequency notices
   static int64_t WarningFrequency;

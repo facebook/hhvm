@@ -174,11 +174,9 @@ void RequestInfo::onSessionExit() {
 //////////////////////////////////////////////////////////////////////
 
 void raise_infinite_recursion_error() {
-  if (!RuntimeOption::NoInfiniteRecursionDetection) {
-    // Reset profiler otherwise it might recurse further causing segfault.
-    RI().m_profiler = nullptr;
-    raise_error("infinite recursion detected");
-  }
+  // Reset profiler otherwise it might recurse further causing segfault.
+  RI().m_profiler = nullptr;
+  raise_error("infinite recursion detected");
 }
 
 NEVER_INLINE void* stack_top_ptr_conservative() {

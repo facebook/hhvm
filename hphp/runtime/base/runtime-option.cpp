@@ -520,7 +520,6 @@ std::string RuntimeOption::ServerUser;
 std::vector<std::string> RuntimeOption::TzdataSearchPaths;
 
 int RuntimeOption::MaxSerializedStringSize = 64 * 1024 * 1024; // 64MB
-bool RuntimeOption::NoInfiniteRecursionDetection = false;
 bool RuntimeOption::AssertEmitted = true;
 int64_t RuntimeOption::NoticeFrequency = 1;
 int64_t RuntimeOption::WarningFrequency = 1;
@@ -1643,8 +1642,6 @@ void RuntimeOption::Load(
                  config, "ErrorHandling.ThrowExceptionOnBadMethodCall", true);
     Config::Bind(LogNativeStackOnOOM, ini,
                  config, "ErrorHandling.LogNativeStackOnOOM", false);
-    Config::Bind(NoInfiniteRecursionDetection, ini,
-                 config, "ErrorHandling.NoInfiniteRecursionDetection");
     Config::Bind(NoticeFrequency, ini, config, "ErrorHandling.NoticeFrequency",
                  1);
     Config::Bind(WarningFrequency, ini, config,

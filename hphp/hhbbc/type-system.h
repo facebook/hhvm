@@ -920,7 +920,7 @@ private:
   friend Type loosen_interfaces(Type);
   friend Type loosen_staticness(Type);
   friend Type loosen_aggregate_staticness(Type);
-  friend Type loosen_dvarrayness(Type);
+  friend Type loosen_arraylike(Type);
   friend Type loosen_provenance(Type);
   friend Type loosen_values(Type);
   friend Type loosen_array_values(Type);
@@ -1780,11 +1780,11 @@ Type loosen_staticness(Type);
 Type loosen_aggregate_staticness(Type);
 
 /*
- * Discard any specific knowledge about whether the type is a d/varray. Force
- * any type which might contain any sub-types of VArr or DArr to contain Arr,
+ * Force any type which might contain any sub-types of ArrLike to contain
+ * ArrLike,
  * while keeping the same staticness and emptiness information.
  */
-Type loosen_dvarrayness(Type);
+Type loosen_arraylike(Type);
 
 /*
  * Discard any specific provenance tag on this type and any sub-arrays

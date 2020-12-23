@@ -4911,11 +4911,11 @@ Type loosen_staticness(Type t) {
   return t;
 }
 
-Type loosen_dvarrayness(Type t) {
+Type loosen_arraylike(Type t) {
   auto const check = [&] (trep a) {
     if (t.bits() & a) t.m_bits |= a;
   };
-  if (t.couldBe(BArr) && t.m_dataTag == DataTag::ArrLikeVal) {
+  if (t.couldBe(BArrLike) && t.m_dataTag == DataTag::ArrLikeVal) {
     // We need to drop any static array from the type because TArr unions cannot
     // have one. Turn it into the equivalent Packed or Map data.
     if (t.m_data.aval->empty()) {
@@ -4935,10 +4935,10 @@ Type loosen_dvarrayness(Type t) {
       );
     }
   }
-  check(BSArrE);
-  check(BCArrE);
-  check(BSArrN);
-  check(BCArrN);
+  check(BSArrLikeE);
+  check(BCArrLikeE);
+  check(BSArrLikeN);
+  check(BCArrLikeN);
   return t;
 }
 

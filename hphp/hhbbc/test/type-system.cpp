@@ -2743,35 +2743,50 @@ TEST(Type, AddNonEmptiness) {
   }
 }
 
-TEST(Type, LoosenDVArrayness) {
+TEST(Type, LoosenArrayLike) {
   auto const program = make_test_program();
   Index index{ program.get() };
 
   for (auto const& t : all_with_waithandles(index)) {
-    if (t.subtypeOfAny(TOptVArr, TOptDArr, TOptVArrCompat) && t != TInitNull) {
+    if (t.subtypeOfAny(TOptArrLike, TOptArrLikeCompat) &&
+        t != TInitNull) {
       continue;
     }
-    EXPECT_EQ(loosen_dvarrayness(t), t);
+    EXPECT_EQ(loosen_arraylike(t), t);
   }
 
   std::vector<std::pair<Type, Type>> tests = {
-    { TSVArrE, TSArrE },
-    { TSVArrN, TSArrN },
-    { TSVArr,  TSArr },
-    { TVArrE,  TArrE },
-    { TVArrN,  TArrN },
-    { TVArr,   TArr },
+    { TSVArrE, TSArrLikeE },
+    { TSVArrN, TSArrLikeN },
+    { TSVArr,  TSArrLike },
+    { TVArrE,  TArrLikeE },
+    { TVArrN,  TArrLikeN },
+    { TVArr,   TArrLike },
 
-    { TSDArrE, TSArrE },
-    { TSDArrN, TSArrN },
-    { TSDArr,  TSArr },
-    { TDArrE,  TArrE },
-    { TDArrN,  TArrN },
-    { TDArr,   TArr }
+    { TSVecE, TSArrLikeE },
+    { TSVecN, TSArrLikeN },
+    { TSVec,  TSArrLike },
+    { TVecE,  TArrLikeE },
+    { TVecN,  TArrLikeN },
+    { TVec,   TArrLike },
+
+    { TSDArrE, TSArrLikeE },
+    { TSDArrN, TSArrLikeN },
+    { TSDArr,  TSArrLike },
+    { TDArrE,  TArrLikeE },
+    { TDArrN,  TArrLikeN },
+    { TDArr,   TArrLike },
+
+    { TSDictE, TSArrLikeE },
+    { TSDictN, TSArrLikeN },
+    { TSDict,  TSArrLike },
+    { TDictE,  TArrLikeE },
+    { TDictN,  TArrLikeN },
+    { TDict,   TArrLike }
   };
   for (auto const& p : tests) {
-    EXPECT_EQ(loosen_dvarrayness(p.first), p.second);
-    EXPECT_EQ(loosen_dvarrayness(opt(p.first)), opt(p.second));
+    EXPECT_EQ(loosen_arraylike(p.first), p.second);
+    EXPECT_EQ(loosen_arraylike(opt(p.first)), opt(p.second));
   }
 }
 

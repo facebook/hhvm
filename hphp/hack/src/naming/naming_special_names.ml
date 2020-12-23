@@ -64,7 +64,8 @@ module Classes = struct
 
   let cEnumMember = "\\HH\\EnumMember"
 
-  let cExprTree = "\\ExprTree"
+  (* Classes that can be spliced into ExpressionTrees *)
+  let cSpliceable = "\\Spliceable"
 end
 
 module Collections = struct

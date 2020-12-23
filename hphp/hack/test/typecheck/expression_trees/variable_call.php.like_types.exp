@@ -1,4 +1,4 @@
 File "variable_call.php", line 7, characters 10-14:
-Expected `ExprTree<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
+Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
   File "variable_call.php", line 32, characters 5-45:
   But got `dynamic` because it is an unenforceable type

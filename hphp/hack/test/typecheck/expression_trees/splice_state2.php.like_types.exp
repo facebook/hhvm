@@ -1,9 +1,9 @@
 File "splice_state2.php", line 21, characters 7-26:
-Expected `ExprTree<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
+Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
   File "splice_state2.php", line 12, characters 25-53:
   But got `dynamic` because it is an unenforceable type
 File "splice_state2.php", line 23, characters 7-24:
-Expected `ExprTree<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
+Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
   File "splice_state2.php", line 12, characters 25-53:
   But got `dynamic` because it is an unenforceable type
 File "splice_state2.php", line 23, characters 14-22:

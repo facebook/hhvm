@@ -154,7 +154,7 @@ class Code {
   public function splice<T>(
     ?ExprPos $_,
     string $_key,
-    ExprTree<Code, Code::TAst, T> $_,
+    Spliceable<Code, Code::TAst, T> $_,
   ): Code::TAst {
     throw new Exception();
   }
@@ -165,14 +165,23 @@ class Code {
   }
 }
 
-final class ExprTree<TVisitor, TResult, +TInfer>{
+interface Spliceable<TVisitor, TResult, +TInfer> {
+  public function visit(TVisitor $v): TResult;
+}
+
+final class ExprTree<TVisitor, TResult, +TInfer>
+  implements Spliceable<TVisitor, TResult, TInfer> {
   public function __construct(
     private ?ExprPos $pos,
     private string $filepath,
     private dict<string, mixed> $spliced_values,
-    private (function(TVisitor): TResult) $x,
+    private (function(TVisitor): TResult) $ast,
     private (function(): TInfer) $err,
   ) {}
+
+  public function visit(TVisitor $v): TResult {
+    return ($this->ast)($v);
+  }
 }
 
 final class ExprPos {

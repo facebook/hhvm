@@ -1,48 +1,48 @@
 File "comparison_operators.php", line 7, characters 5-5:
-Expected `ExprTree<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
+Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
   File "comparison_operators.php", line 23, characters 6-43:
   But got `dynamic` because it is an unenforceable type
 File "comparison_operators.php", line 7, characters 9-9:
-Expected `ExprTree<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
+Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
   File "comparison_operators.php", line 23, characters 6-43:
   But got `dynamic` because it is an unenforceable type
 File "comparison_operators.php", line 8, characters 5-5:
-Expected `ExprTree<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
+Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
   File "comparison_operators.php", line 23, characters 6-43:
   But got `dynamic` because it is an unenforceable type
 File "comparison_operators.php", line 8, characters 10-10:
-Expected `ExprTree<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
+Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
   File "comparison_operators.php", line 23, characters 6-43:
   But got `dynamic` because it is an unenforceable type
 File "comparison_operators.php", line 9, characters 5-5:
-Expected `ExprTree<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
+Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
   File "comparison_operators.php", line 23, characters 6-43:
   But got `dynamic` because it is an unenforceable type
 File "comparison_operators.php", line 9, characters 9-9:
-Expected `ExprTree<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
+Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
   File "comparison_operators.php", line 23, characters 6-43:
   But got `dynamic` because it is an unenforceable type
 File "comparison_operators.php", line 10, characters 5-5:
-Expected `ExprTree<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
+Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
   File "comparison_operators.php", line 23, characters 6-43:
   But got `dynamic` because it is an unenforceable type
 File "comparison_operators.php", line 10, characters 10-10:
-Expected `ExprTree<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
+Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
   File "comparison_operators.php", line 23, characters 6-43:
   But got `dynamic` because it is an unenforceable type
 File "comparison_operators.php", line 11, characters 5-5:
-Expected `ExprTree<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
+Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
   File "comparison_operators.php", line 23, characters 6-43:
   But got `dynamic` because it is an unenforceable type
 File "comparison_operators.php", line 11, characters 11-11:
-Expected `ExprTree<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
+Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
   File "comparison_operators.php", line 23, characters 6-43:
   But got `dynamic` because it is an unenforceable type
 File "comparison_operators.php", line 12, characters 5-5:
-Expected `ExprTree<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
+Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
   File "comparison_operators.php", line 23, characters 6-43:
   But got `dynamic` because it is an unenforceable type
 File "comparison_operators.php", line 12, characters 11-11:
-Expected `ExprTree<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
+Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
   File "comparison_operators.php", line 23, characters 6-43:
   But got `dynamic` because it is an unenforceable type

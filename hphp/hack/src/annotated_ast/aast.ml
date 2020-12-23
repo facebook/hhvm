@@ -9,8 +9,12 @@
 
 include Aast_defs
 
+(* Ensure that doc comments are always on a separate line by
+   requiring a lot of padding for inline doc comments. *)
+[@@@ocamlformat "doc-comments-padding=80"]
+
 (** Aast.program represents the top-level definitions in a Hack program.
- ex: Expression annotation type (when typechecking, the inferred dtype)
+ ex: Expression annotation type (when typechecking, the inferred type)
  fb: Function body tag (e.g. has naming occurred)
  en: Environment (tracking state inside functions and classes)
  hi: Hint annotation (when typechecking it will be the localized type hint or the
@@ -53,39 +57,133 @@ and ('ex, 'fb, 'en, 'hi) stmt = pos * ('ex, 'fb, 'en, 'hi) stmt_
 
 and ('ex, 'fb, 'en, 'hi) stmt_ =
   | Fallthrough
+      (** Marker for a switch statement that falls through.
+
+          // FALLTHROUGH *)
   | Expr of ('ex, 'fb, 'en, 'hi) expr
+      (** Standalone expression.
+
+          1 + 2; *)
   | Break
+      (** Break inside a loop or switch statement.
+
+          break; *)
   | Continue
+      (** Continue inside a loop or switch statement.
+
+          continue; *)
   | Throw of ('ex, 'fb, 'en, 'hi) expr
+      (** Throw an exception.
+
+          throw $foo; *)
   | Return of ('ex, 'fb, 'en, 'hi) expr option
+      (** Return, with an optional value.
+
+          return;
+          return $foo; *)
   | Awaitall of
-      (lid option * ('ex, 'fb, 'en, 'hi) expr) list * ('ex, 'fb, 'en, 'hi) block
+      (* Temporaries assigned when running awaits. *)
+      (lid option * ('ex, 'fb, 'en, 'hi) expr) list
+      * (* Block assigning temporary to relevant locals. *)
+      ('ex, 'fb, 'en, 'hi) block
+      (** Concurrent block. All the await expressions are awaited at the
+          same time, similar to genva().
+
+          We store the desugared form. In the below example, the list is:
+          [('__tmp$1', f()), (__tmp$2, g()), (None, h())]
+          and the block assigns the temporary variables back to the locals.
+          { $foo = __tmp$1; $bar = __tmp$2; }
+
+          concurrent {
+            $foo = await f();
+            $bar = await g();
+            await h();
+          } *)
   | If of
       ('ex, 'fb, 'en, 'hi) expr
       * ('ex, 'fb, 'en, 'hi) block
       * ('ex, 'fb, 'en, 'hi) block
+      (** If statement.
+
+          if ($foo) { ... } else { ... } *)
   | Do of ('ex, 'fb, 'en, 'hi) block * ('ex, 'fb, 'en, 'hi) expr
+      (** Do-while loop.
+
+          do {
+            bar();
+          } while($foo) *)
   | While of ('ex, 'fb, 'en, 'hi) expr * ('ex, 'fb, 'en, 'hi) block
+      (** While loop.
+
+          while ($foo) {
+            bar();
+          } *)
   | Using of ('ex, 'fb, 'en, 'hi) using_stmt
+      (** Initialize a value that is automatically disposed of.
+
+          using $foo = bar(); // disposed at the end of the function
+          using ($foo = bar(), $baz = quux()) {} // disposed after the block *)
   | For of
       ('ex, 'fb, 'en, 'hi) expr list
       * ('ex, 'fb, 'en, 'hi) expr option
       * ('ex, 'fb, 'en, 'hi) expr list
       * ('ex, 'fb, 'en, 'hi) block
+      (** For loop. The initializer and increment parts can include
+          multiple comma-separated statements. The termination condition is
+          optional.
+
+          for ($i = 0; $i < 100; $i++) { ... }
+          for ($x = 0, $y = 0; ; $x++, $y++) { ... } *)
   | Switch of ('ex, 'fb, 'en, 'hi) expr * ('ex, 'fb, 'en, 'hi) case list
-  (* Dropped the Pos.t option *)
+      (** Switch statement.
+
+          switch ($foo) {
+            case X:
+              bar();
+              break;
+            default:
+              baz();
+              break;
+          } *)
   | Foreach of
       ('ex, 'fb, 'en, 'hi) expr
       * ('ex, 'fb, 'en, 'hi) as_expr
       * ('ex, 'fb, 'en, 'hi) block
+      (** For-each loop.
+
+          foreach ($items as $item) { ... }
+          foreach ($items as $key => value) { ... }
+          foreach ($items await as $item) { ... } // AsyncIterator<_>
+          foreach ($items await as $key => value) { ... } // AsyncKeyedIterator<_> *)
   | Try of
       ('ex, 'fb, 'en, 'hi) block
       * ('ex, 'fb, 'en, 'hi) catch list
       * ('ex, 'fb, 'en, 'hi) block
+      (** Try statement, with catch blocks and a finally block.
+
+          try {
+            foo();
+          } catch (SomeException $e) {
+            bar();
+          } finally {
+            baz();
+          } *)
   | Noop
+      (** No-op, the empty statement.
+
+          if ($foo) {} // the else is Noop here *)
   | Block of ('ex, 'fb, 'en, 'hi) block
+      (** Block, a list of statements in curly braces.
+
+          { $foo = 42; } *)
   | Markup of pstring
+      (** The mode tag at the beginning of a file.
+          TODO: this really belongs in def.
+
+          <?hh *)
   | AssertEnv of env_annot * 'ex local_id_map
+      (** Used in IFC to track type inference environments. Not user
+          denotable. *)
 
 and env_annot =
   | Join
@@ -106,15 +204,52 @@ and ('ex, 'fb, 'en, 'hi) as_expr =
 
 and ('ex, 'fb, 'en, 'hi) block = ('ex, 'fb, 'en, 'hi) stmt list
 
-(* This is not in AST *)
 and ('ex, 'fb, 'en, 'hi) class_id = 'ex * ('ex, 'fb, 'en, 'hi) class_id_
 
+(** Class ID, used in things like instantiation and static property access. *)
 and ('ex, 'fb, 'en, 'hi) class_id_ =
   | CIparent
+      (** The class ID of the parent of the lexically scoped class.
+
+          In a trait, it is the parent class ID of the using class.
+
+          parent::some_meth()
+          parent::$prop = 1;
+          new parent(); *)
   | CIself
+      (** The class ID of the lexically scoped class.
+
+          In a trait, it is the class ID of the using class.
+
+          self::some_meth()
+          self::$prop = 1;
+          new self(); *)
   | CIstatic
+      (** The class ID of the late static bound class.
+
+          https://www.php.net/manual/en/language.oop5.late-static-bindings.php
+
+          In a trait, it is the late static bound class ID of the using class.
+
+          static::some_meth()
+          static::$prop = 1;
+          new static(); *)
   | CIexpr of ('ex, 'fb, 'en, 'hi) expr
+      (** Dynamic class name.
+
+          TODO: Syntactically this can only be an Lvar/This/Lplacehodller.
+          We should use lid rather than expr.
+
+          // Assume $d has type dynamic.
+          $d::some_meth();
+          $d::$prop = 1;
+          new $d(); *)
   | CI of sid
+      (** Explicit class name. This is the common case.
+
+          Foop::some_meth()
+          Foo::$prop = 1;
+          new Foo(); *)
 
 and ('ex, 'fb, 'en, 'hi) expr = 'ex * ('ex, 'fb, 'en, 'hi) expr_
 
@@ -136,108 +271,356 @@ and ('ex, 'fb, 'en, 'hi) expr_ =
   | Darray of
       ('hi targ * 'hi targ) option
       * (('ex, 'fb, 'en, 'hi) expr * ('ex, 'fb, 'en, 'hi) expr) list
+      (** darray literal.
+
+          darray['x' => 0, 'y' => 1]
+          darray<string, int>['x' => 0, 'y' => 1] *)
   | Varray of 'hi targ option * ('ex, 'fb, 'en, 'hi) expr list
+      (** varray literal.
+
+          varray['hello', 'world']
+          varray<string>['hello', 'world'] *)
   | Shape of (Ast_defs.shape_field_name * ('ex, 'fb, 'en, 'hi) expr) list
+      (** Shape literal.
+
+          shape('x' => 1, 'y' => 2) *)
   | ValCollection of vc_kind * 'hi targ option * ('ex, 'fb, 'en, 'hi) expr list
-      (** TODO: T38184446 Consolidate collections in AAST *)
+      (** Collection literal for indexable structures.
+
+           Vector {1, 2}
+           ImmVector {}
+           Set<string> {'foo', 'bar'}
+           vec[1, 2]
+           keyset[] *)
   | KeyValCollection of
       kvc_kind * ('hi targ * 'hi targ) option * ('ex, 'fb, 'en, 'hi) field list
-      (** TODO: T38184446 Consolidate collections in AAST *)
+      (** Collection literal for key-value structures.
+
+          dict['x' => 1, 'y' => 2]
+          Map<int, string> {}
+          ImmMap {} *)
   | Null
+      (** Null literal.
+
+          null *)
   | This
+      (** The local variable representing the current class instance.
+
+          $this *)
   | True
+      (** Boolean literal.
+
+          true *)
   | False
+      (** Boolean literal.
+
+          false *)
   | Omitted
+      (** The empty expression.
+
+          list(, $y) = vec[1, 2] // Omitted is the first expression inside list() *)
   | Id of sid
+      (** An identifier. Used for method names and global constants.
+
+          SOME_CONST
+          $x->foo() // id: "foo" *)
   | Lvar of lid
+      (** Local variable.
+
+          $foo *)
   | Dollardollar of lid
+      (** The extra variable in a pipe expression.
+
+          $$ *)
   | Clone of ('ex, 'fb, 'en, 'hi) expr
+      (** Clone expression.
+
+          clone $foo *)
   | Array_get of ('ex, 'fb, 'en, 'hi) expr * ('ex, 'fb, 'en, 'hi) expr option
+      (** Array indexing.
+
+          $foo[]
+          $foo[$bar] *)
   | Obj_get of
       ('ex, 'fb, 'en, 'hi) expr
       * ('ex, 'fb, 'en, 'hi) expr
       * og_null_flavor
-      * (* is prop call *) bool
-  (* This flag can only ever be true when the expression is in a call
-     position. If the expression is not in a call position it will
-     always be false. If in a call position then:
-     - `false` => `$x->foo(...)` (object method call);
-     - `true` => `($x->foo)(...)` (function call through an object property).
-   *)
+      * (* is_prop_call *) bool
+      (** Instance property or method access.  is_prop_call is always
+          false, except when inside a call is accessing a property.
+
+          $foo->bar // (Obj_get false) property access
+          $foo->bar() // (Call (Obj_get false)) method call
+          ($foo->bar)() // (Call (Obj_get true)) call lambda stored in property
+          $foo?->bar // nullsafe access *)
   | Class_get of
       ('ex, 'fb, 'en, 'hi) class_id
       * ('ex, 'fb, 'en, 'hi) class_get_expr
-      * (* is prop call *) bool
-  (* This flag can only ever be true when the expression is in a call
-     position. If the expression is not in a call position it will
-     always be false. If in a call position then:
-     - `false` => `Foo::bar(...)` (static method call);
-     - `true` => `(Foo::$bar)(...)` (function call through a static property).
-   *)
+      * (* is_prop_call *) bool
+      (** Static property access.
+
+          Foo::$bar
+          $some_classname::$bar
+          Foo::${$bar} // only in partial mode *)
   | Class_const of ('ex, 'fb, 'en, 'hi) class_id * pstring
+      (** Class constant or static method call. As a standalone expression,
+          this is a class constant. Inside a Call node, this is a static
+          method call.
+
+          This is not ambiguous, because constants are not allowed to
+          contain functions.
+
+          Foo::some_const
+          Foo::some_meth() // Call (Class_get) *)
   | Call of
-      ('ex, 'fb, 'en, 'hi) expr
       (* function *)
-      * 'hi targ list
-      (* explicit type annotations *)
-      * ('ex, 'fb, 'en, 'hi) expr list
-      (* positional args *)
-      * ('ex, 'fb, 'en, 'hi) expr option (* unpacked arg *)
+      ('ex, 'fb, 'en, 'hi) expr
+      * (* explicit type annotations *)
+      'hi targ list
+      * (* positional args *)
+      ('ex, 'fb, 'en, 'hi) expr list
+      * (* unpacked arg *)
+      ('ex, 'fb, 'en, 'hi) expr option
+      (** Function or method call.
+
+          foo()
+          $x()
+          foo<int>(1, 2, ...$rest)
+          $x->foo()
+
+          async { return 1; }
+          // lowered to:
+          (async () ==> { return 1; })() *)
   | FunctionPointer of ('ex, 'fb, 'en, 'hi) function_ptr_id * 'hi targ list
+      (** A reference to a function or method.
+
+          foo_fun<>
+          FooCls::meth<int> *)
   | Int of string
+      (** Integer literal.
+
+          42
+          0123 // octal
+          0xBEEF // hexadecimal
+          0b11111111 // binary *)
   | Float of string
+      (** Float literal.
+
+          1.0
+          1.2e3
+          7E-10 *)
   | String of byte_string
+      (** String literal.
+
+          "foo"
+          'foo'
+
+          <<<DOC
+          foo
+          DOC
+
+          <<<'DOC'
+          foo
+          DOC *)
   | String2 of ('ex, 'fb, 'en, 'hi) expr list
+      (** Interpolated string literal.
+
+          "hello $foo $bar"
+
+          <<<DOC
+          hello $foo $bar
+          DOC *)
   | PrefixedString of string * ('ex, 'fb, 'en, 'hi) expr
+      (** Prefixed string literal. Only used for regular expressions.
+
+          re"foo" *)
   | Yield of ('ex, 'fb, 'en, 'hi) afield
+      (** Yield expression. The enclosing function should have an Iterator
+          return type.
+
+          yield $foo // enclosing function returns an Iterator
+          yield $foo => $bar // enclosing function returns a KeyedIterator *)
   | Yield_break
+      (** Yield break, terminating the current generator. This behaves like
+          return; but is more explicit, and ensures the function is treated
+          as a generator.
+
+          TODO: this is only permitted in a statement position, so it
+          should be in stmt.
+
+          yield break; *)
   | Await of ('ex, 'fb, 'en, 'hi) expr
+      (** Await expression.
+
+          await $foo *)
   | List of ('ex, 'fb, 'en, 'hi) expr list
+      (** List expression, only used in destructuring. Allows any arbitrary
+          lvalue as a subexpression. May also nest.
+
+          Note that tuple(1, 2) is lowered to a Call, but naming converts it to a List.
+          TODO: Define a separate AAST node for tuple.
+
+          list($x, $y) = vec[1, 2];
+          list(, $y) = vec[1, 2]; // skipping items
+          list(list($x)) = vec[vec[1]]; // nesting
+          list($v[0], $x[], $y->foo) = $blah; *)
   | Cast of hint * ('ex, 'fb, 'en, 'hi) expr
+      (** Cast expression, converting a value to a different type. Only
+          primitive types are supported in the hint position.
+
+          (int)$foo
+          (string)$foo *)
   | Unop of Ast_defs.uop * ('ex, 'fb, 'en, 'hi) expr
+      (** Unary operator.
+
+          !$foo
+          -$foo
+          +$foo *)
   | Binop of
       Ast_defs.bop * ('ex, 'fb, 'en, 'hi) expr * ('ex, 'fb, 'en, 'hi) expr
+      (** Binary operator.
+
+          $foo + $bar *)
   | Pipe of lid * ('ex, 'fb, 'en, 'hi) expr * ('ex, 'fb, 'en, 'hi) expr
-      (** The lid is the ID of the $$ that is implicitly declared by this pipe. *)
+      (** Pipe expression. The lid is the ID of the $$ that is implicitly
+          declared by this pipe.
+
+          See also Dollardollar.
+
+          $foo |> bar() // equivalent: bar($foo)
+          $foo |> bar(1, $$) // equivalent: bar(1, $foo) *)
   | Eif of
       ('ex, 'fb, 'en, 'hi) expr
       * ('ex, 'fb, 'en, 'hi) expr option
       * ('ex, 'fb, 'en, 'hi) expr
+      (** Ternary operator, or elvis operator.
+
+          $foo ? $bar : $baz // ternary
+          $foo ?: $baz // elvis *)
   | Is of ('ex, 'fb, 'en, 'hi) expr * hint
+      (** Is operator.
+
+          $foo is SomeType *)
   | As of ('ex, 'fb, 'en, 'hi) expr * hint * (* is nullable *) bool
+      (** As operator.
+
+          $foo as int
+          $foo ?as int *)
   | New of
       ('ex, 'fb, 'en, 'hi) class_id
       * 'hi targ list
       * ('ex, 'fb, 'en, 'hi) expr list
       * ('ex, 'fb, 'en, 'hi) expr option
-      * 'ex (* constructor *)
+      * (* constructor *)
+      'ex
+      (** Instantiation.
+
+          new Foo(1, 2);
+          new Foo<int, T>();
+          new Foo('blah', ...$rest); *)
   | Record of sid * (('ex, 'fb, 'en, 'hi) expr * ('ex, 'fb, 'en, 'hi) expr) list
+      (** Record literal.
+
+          MyRecord['x' => $foo, 'y' => $bar] *)
   | Efun of ('ex, 'fb, 'en, 'hi) fun_ * lid list
+      (** PHP-style lambda. Does not capture variables unless explicitly
+          specified.
+
+          Mnemonic: 'expanded lambda', since we can desugar Lfun to Efun.
+
+          function($x) { return $x; }
+          function(int $x): int { return $x; }
+          function($x) use ($y) { return $y; }
+          function($x): int use ($y, $z) { return $x + $y + $z; } *)
   | Lfun of ('ex, 'fb, 'en, 'hi) fun_ * lid list
+      (** Hack lambda. Captures variables automatically.
+
+          $x ==> $x
+          (int $x): int ==> $x + $other
+          ($x, $y) ==> { return $x + $y; } *)
   | Xml of
       sid
       * ('ex, 'fb, 'en, 'hi) xhp_attribute list
       * ('ex, 'fb, 'en, 'hi) expr list
+      (** XHP expression. May contain interpolated expressions.
+
+          <foo x="hello" y={$foo}>hello {$bar}</foo> *)
   | Callconv of Ast_defs.param_kind * ('ex, 'fb, 'en, 'hi) expr
+      (** Explicit calling convention, used for inout. Inout supports any lvalue.
+
+          TODO: This could be a flag on parameters in Call.
+
+          foo(inout $x[0]) *)
   | Import of import_flavor * ('ex, 'fb, 'en, 'hi) expr
+      (** Include or require expression.
+
+          require('foo.php')
+          require_once('foo.php')
+          include('foo.php')
+          include_once('foo.php') *)
   | Collection of
       sid * 'hi collection_targ option * ('ex, 'fb, 'en, 'hi) afield list
-      (** TODO: T38184446 Consolidate collections in AAST *)
+      (** Collection literal.
+
+          TODO: T38184446 this is redundant with ValCollection/KeyValCollection.
+     
+          Vector {} *)
   | ExpressionTree of ('ex, 'fb, 'en, 'hi) expression_tree
-  (* None of these constructors exist in the AST *)
+      (** Expression tree literal. Expression trees are not evaluated at
+          runtime, but desugared to an expression representing the code.
+
+          Foo`1 + bar()`
+          Foo`$x ==> $x * ${$value}` // splicing $value *)
   | Lplaceholder of pos
+      (** Placeholder local variable.
+
+          $_ *)
   | Fun_id of sid
+      (** Global function reference.
+
+          fun('foo') *)
   | Method_id of ('ex, 'fb, 'en, 'hi) expr * pstring
+      (** Instance method reference on a specific instance.
+
+          TODO: This is only created in naming, and ought to happen in
+          lowering or be removed. The emitter just sees a normal Call.
+
+          inst_meth($f, 'some_meth') // equivalent: $f->some_meth<> *)
   | Method_caller of sid * pstring
-      (** meth_caller('Class name', 'method name') *)
+      (** Instance method reference that can be called with an instance.
+
+          meth_caller(FooClass::class, 'some_meth')
+          meth_caller('FooClass', 'some_meth')
+
+          These examples are equivalent to:
+
+          (FooClass $f, ...$args) ==> $f->some_meth(...$args) *)
   | Smethod_id of ('ex, 'fb, 'en, 'hi) class_id * pstring
+      (** Static method reference.
+
+          class_meth('FooClass', 'some_static_meth')
+          // equivalent: FooClass::some_static_meth<> *)
   | Pair of
       ('hi targ * 'hi targ) option
       * ('ex, 'fb, 'en, 'hi) expr
       * ('ex, 'fb, 'en, 'hi) expr
+      (** Pair literal.
+
+          Pair {$foo, $bar} *)
   | ET_Splice of ('ex, 'fb, 'en, 'hi) expr
+      (** Expression tree splice expression. Only valid inside an
+          expression tree literal (backticks).
+
+          ${$foo} *)
   | EnumAtom of string
+      (** Enum atom used for enum classes.
+
+          #field_name *)
   | Any
+      (** Placeholder for expressions that aren't understood by parts of
+          the toolchain.
+
+          TODO: Remove. *)
 
 and ('ex, 'fb, 'en, 'hi) class_get_expr =
   | CGstring of pstring
@@ -274,13 +657,18 @@ and ('ex, 'fb, 'en, 'hi) fun_param = {
   param_visibility: visibility option;
 }
 
-(** does function take varying number of args? *)
+(** Does this function/method take a variable number of arguments? *)
 and ('ex, 'fb, 'en, 'hi) fun_variadicity =
   | FVvariadicArg of ('ex, 'fb, 'en, 'hi) fun_param
-      (** PHP5.6 ...$args finishes the func declaration *)
+      (** Named variadic argument.
+
+      function foo(int ...$args): void {} *)
   | FVellipsis of pos
-      (** HH ... finishes the declaration; deprecate for ...$args? *)
-  | FVnonVariadic  (** standard non variadic function *)
+      (** Unnamed variaidic argument. Partial mode only.
+
+          function foo(...): void {} *)
+  | FVnonVariadic
+      (** Function is not variadic, takes an exact number of arguments. *)
 
 and ('ex, 'fb, 'en, 'hi) fun_ = {
   f_span: pos;

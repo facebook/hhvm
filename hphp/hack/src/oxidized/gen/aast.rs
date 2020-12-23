@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<7b982cf93dc707dc38194b0b9b666979>>
+// @generated SignedSource<<8cfa2bb0c9e79822166b7ad79b8f139d>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -23,7 +23,7 @@ pub use aast_defs::*;
 pub use doc_comment::DocComment;
 
 /// Aast.program represents the top-level definitions in a Hack program.
-/// ex: Expression annotation type (when typechecking, the inferred dtype)
+/// ex: Expression annotation type (when typechecking, the inferred type)
 /// fb: Function body tag (e.g. has naming occurred)
 /// en: Environment (tracking state inside functions and classes)
 /// hi: Hint annotation (when typechecking it will be the localized type hint or the
@@ -61,18 +61,53 @@ pub struct Stmt<Ex, Fb, En, Hi>(pub Pos, pub Stmt_<Ex, Fb, En, Hi>);
     ToOcamlRep
 )]
 pub enum Stmt_<Ex, Fb, En, Hi> {
+    /// Marker for a switch statement that falls through.
+    ///
+    /// // FALLTHROUGH
     Fallthrough,
+    /// Standalone expression.
+    ///
+    /// 1 + 2;
     Expr(Box<Expr<Ex, Fb, En, Hi>>),
+    /// Break inside a loop or switch statement.
+    ///
+    /// break;
     Break,
+    /// Continue inside a loop or switch statement.
+    ///
+    /// continue;
     Continue,
+    /// Throw an exception.
+    ///
+    /// throw $foo;
     Throw(Box<Expr<Ex, Fb, En, Hi>>),
+    /// Return, with an optional value.
+    ///
+    /// return;
+    /// return $foo;
     Return(Box<Option<Expr<Ex, Fb, En, Hi>>>),
+    /// Concurrent block. All the await expressions are awaited at the
+    /// same time, similar to genva().
+    ///
+    /// We store the desugared form. In the below example, the list is:
+    /// [('__tmp$1', f()), (__tmp$2, g()), (None, h())]
+    /// and the block assigns the temporary variables back to the locals.
+    /// { $foo = __tmp$1; $bar = __tmp$2; }
+    ///
+    /// concurrent {
+    /// $foo = await f();
+    /// $bar = await g();
+    /// await h();
+    /// }
     Awaitall(
         Box<(
             Vec<(Option<Lid>, Expr<Ex, Fb, En, Hi>)>,
             Block<Ex, Fb, En, Hi>,
         )>,
     ),
+    /// If statement.
+    ///
+    /// if ($foo) { ... } else { ... }
     If(
         Box<(
             Expr<Ex, Fb, En, Hi>,
@@ -80,9 +115,29 @@ pub enum Stmt_<Ex, Fb, En, Hi> {
             Block<Ex, Fb, En, Hi>,
         )>,
     ),
+    /// Do-while loop.
+    ///
+    /// do {
+    /// bar();
+    /// } while($foo)
     Do(Box<(Block<Ex, Fb, En, Hi>, Expr<Ex, Fb, En, Hi>)>),
+    /// While loop.
+    ///
+    /// while ($foo) {
+    /// bar();
+    /// }
     While(Box<(Expr<Ex, Fb, En, Hi>, Block<Ex, Fb, En, Hi>)>),
+    /// Initialize a value that is automatically disposed of.
+    ///
+    /// using $foo = bar(); // disposed at the end of the function
+    /// using ($foo = bar(), $baz = quux()) {} // disposed after the block
     Using(Box<UsingStmt<Ex, Fb, En, Hi>>),
+    /// For loop. The initializer and increment parts can include
+    /// multiple comma-separated statements. The termination condition is
+    /// optional.
+    ///
+    /// for ($i = 0; $i < 100; $i++) { ... }
+    /// for ($x = 0, $y = 0; ; $x++, $y++) { ... }
     For(
         Box<(
             Vec<Expr<Ex, Fb, En, Hi>>,
@@ -91,7 +146,23 @@ pub enum Stmt_<Ex, Fb, En, Hi> {
             Block<Ex, Fb, En, Hi>,
         )>,
     ),
+    /// Switch statement.
+    ///
+    /// switch ($foo) {
+    /// case X:
+    /// bar();
+    /// break;
+    /// default:
+    /// baz();
+    /// break;
+    /// }
     Switch(Box<(Expr<Ex, Fb, En, Hi>, Vec<Case<Ex, Fb, En, Hi>>)>),
+    /// For-each loop.
+    ///
+    /// foreach ($items as $item) { ... }
+    /// foreach ($items as $key => value) { ... }
+    /// foreach ($items await as $item) { ... } // AsyncIterator<_>
+    /// foreach ($items await as $key => value) { ... } // AsyncKeyedIterator<_>
     Foreach(
         Box<(
             Expr<Ex, Fb, En, Hi>,
@@ -99,6 +170,15 @@ pub enum Stmt_<Ex, Fb, En, Hi> {
             Block<Ex, Fb, En, Hi>,
         )>,
     ),
+    /// Try statement, with catch blocks and a finally block.
+    ///
+    /// try {
+    /// foo();
+    /// } catch (SomeException $e) {
+    /// bar();
+    /// } finally {
+    /// baz();
+    /// }
     Try(
         Box<(
             Block<Ex, Fb, En, Hi>,
@@ -106,9 +186,21 @@ pub enum Stmt_<Ex, Fb, En, Hi> {
             Block<Ex, Fb, En, Hi>,
         )>,
     ),
+    /// No-op, the empty statement.
+    ///
+    /// if ($foo) {} // the else is Noop here
     Noop,
+    /// Block, a list of statements in curly braces.
+    ///
+    /// { $foo = 42; }
     Block(Block<Ex, Fb, En, Hi>),
+    /// The mode tag at the beginning of a file.
+    /// TODO: this really belongs in def.
+    ///
+    /// <?hh
     Markup(Box<Pstring>),
+    /// Used in IFC to track type inference environments. Not user
+    /// denotable.
     AssertEnv(Box<(EnvAnnot, LocalIdMap<Ex>)>),
 }
 
@@ -194,6 +286,7 @@ pub type Block<Ex, Fb, En, Hi> = Vec<Stmt<Ex, Fb, En, Hi>>;
 )]
 pub struct ClassId<Ex, Fb, En, Hi>(pub Ex, pub ClassId_<Ex, Fb, En, Hi>);
 
+/// Class ID, used in things like instantiation and static property access.
 #[derive(
     Clone,
     Debug,
@@ -209,10 +302,47 @@ pub struct ClassId<Ex, Fb, En, Hi>(pub Ex, pub ClassId_<Ex, Fb, En, Hi>);
     ToOcamlRep
 )]
 pub enum ClassId_<Ex, Fb, En, Hi> {
+    /// The class ID of the parent of the lexically scoped class.
+    ///
+    /// In a trait, it is the parent class ID of the using class.
+    ///
+    /// parent::some_meth()
+    /// parent::$prop = 1;
+    /// new parent();
     CIparent,
+    /// The class ID of the lexically scoped class.
+    ///
+    /// In a trait, it is the class ID of the using class.
+    ///
+    /// self::some_meth()
+    /// self::$prop = 1;
+    /// new self();
     CIself,
+    /// The class ID of the late static bound class.
+    ///
+    /// https://www.php.net/manual/en/language.oop5.late-static-bindings.php
+    ///
+    /// In a trait, it is the late static bound class ID of the using class.
+    ///
+    /// static::some_meth()
+    /// static::$prop = 1;
+    /// new static();
     CIstatic,
+    /// Dynamic class name.
+    ///
+    /// TODO: Syntactically this can only be an Lvar/This/Lplacehodller.
+    /// We should use lid rather than expr.
+    ///
+    /// // Assume $d has type dynamic.
+    /// $d::some_meth();
+    /// $d::$prop = 1;
+    /// new $d();
     CIexpr(Expr<Ex, Fb, En, Hi>),
+    /// Explicit class name. This is the common case.
+    ///
+    /// Foop::some_meth()
+    /// Foo::$prop = 1;
+    /// new Foo();
     CI(Sid),
 }
 
@@ -305,17 +435,38 @@ pub struct ExpressionTree<Ex, Fb, En, Hi> {
     ToOcamlRep
 )]
 pub enum Expr_<Ex, Fb, En, Hi> {
+    /// darray literal.
+    ///
+    /// darray['x' => 0, 'y' => 1]
+    /// darray<string, int>['x' => 0, 'y' => 1]
     Darray(
         Box<(
             Option<(Targ<Hi>, Targ<Hi>)>,
             Vec<(Expr<Ex, Fb, En, Hi>, Expr<Ex, Fb, En, Hi>)>,
         )>,
     ),
+    /// varray literal.
+    ///
+    /// varray['hello', 'world']
+    /// varray<string>['hello', 'world']
     Varray(Box<(Option<Targ<Hi>>, Vec<Expr<Ex, Fb, En, Hi>>)>),
+    /// Shape literal.
+    ///
+    /// shape('x' => 1, 'y' => 2)
     Shape(Vec<(ast_defs::ShapeFieldName, Expr<Ex, Fb, En, Hi>)>),
-    /// TODO: T38184446 Consolidate collections in AAST
+    /// Collection literal for indexable structures.
+    ///
+    /// Vector {1, 2}
+    /// ImmVector {}
+    /// Set<string> {'foo', 'bar'}
+    /// vec[1, 2]
+    /// keyset[]
     ValCollection(Box<(VcKind, Option<Targ<Hi>>, Vec<Expr<Ex, Fb, En, Hi>>)>),
-    /// TODO: T38184446 Consolidate collections in AAST
+    /// Collection literal for key-value structures.
+    ///
+    /// dict['x' => 1, 'y' => 2]
+    /// Map<int, string> {}
+    /// ImmMap {}
     KeyValCollection(
         Box<(
             KvcKind,
@@ -323,16 +474,55 @@ pub enum Expr_<Ex, Fb, En, Hi> {
             Vec<Field<Ex, Fb, En, Hi>>,
         )>,
     ),
+    /// Null literal.
+    ///
+    /// null
     Null,
+    /// The local variable representing the current class instance.
+    ///
+    /// $this
     This,
+    /// Boolean literal.
+    ///
+    /// true
     True,
+    /// Boolean literal.
+    ///
+    /// false
     False,
+    /// The empty expression.
+    ///
+    /// list(, $y) = vec[1, 2] // Omitted is the first expression inside list()
     Omitted,
+    /// An identifier. Used for method names and global constants.
+    ///
+    /// SOME_CONST
+    /// $x->foo() // id: "foo"
     Id(Box<Sid>),
+    /// Local variable.
+    ///
+    /// $foo
     Lvar(Box<Lid>),
+    /// The extra variable in a pipe expression.
+    ///
+    /// $$
     Dollardollar(Box<Lid>),
+    /// Clone expression.
+    ///
+    /// clone $foo
     Clone(Box<Expr<Ex, Fb, En, Hi>>),
+    /// Array indexing.
+    ///
+    /// $foo[]
+    /// $foo[$bar]
     ArrayGet(Box<(Expr<Ex, Fb, En, Hi>, Option<Expr<Ex, Fb, En, Hi>>)>),
+    /// Instance property or method access.  is_prop_call is always
+    /// false, except when inside a call is accessing a property.
+    ///
+    /// $foo->bar // (Obj_get false) property access
+    /// $foo->bar() // (Call (Obj_get false)) method call
+    /// ($foo->bar)() // (Call (Obj_get true)) call lambda stored in property
+    /// $foo?->bar // nullsafe access
     ObjGet(
         Box<(
             Expr<Ex, Fb, En, Hi>,
@@ -341,8 +531,32 @@ pub enum Expr_<Ex, Fb, En, Hi> {
             bool,
         )>,
     ),
+    /// Static property access.
+    ///
+    /// Foo::$bar
+    /// $some_classname::$bar
+    /// Foo::${$bar} // only in partial mode
     ClassGet(Box<(ClassId<Ex, Fb, En, Hi>, ClassGetExpr<Ex, Fb, En, Hi>, bool)>),
+    /// Class constant or static method call. As a standalone expression,
+    /// this is a class constant. Inside a Call node, this is a static
+    /// method call.
+    ///
+    /// This is not ambiguous, because constants are not allowed to
+    /// contain functions.
+    ///
+    /// Foo::some_const
+    /// Foo::some_meth() // Call (Class_get)
     ClassConst(Box<(ClassId<Ex, Fb, En, Hi>, Pstring)>),
+    /// Function or method call.
+    ///
+    /// foo()
+    /// $x()
+    /// foo<int>(1, 2, ...$rest)
+    /// $x->foo()
+    ///
+    /// async { return 1; }
+    /// // lowered to:
+    /// (async () ==> { return 1; })()
     Call(
         Box<(
             Expr<Ex, Fb, En, Hi>,
@@ -351,21 +565,107 @@ pub enum Expr_<Ex, Fb, En, Hi> {
             Option<Expr<Ex, Fb, En, Hi>>,
         )>,
     ),
+    /// A reference to a function or method.
+    ///
+    /// foo_fun<>
+    /// FooCls::meth<int>
     FunctionPointer(Box<(FunctionPtrId<Ex, Fb, En, Hi>, Vec<Targ<Hi>>)>),
+    /// Integer literal.
+    ///
+    /// 42
+    /// 0123 // octal
+    /// 0xBEEF // hexadecimal
+    /// 0b11111111 // binary
     Int(String),
+    /// Float literal.
+    ///
+    /// 1.0
+    /// 1.2e3
+    /// 7E-10
     Float(String),
+    /// String literal.
+    ///
+    /// "foo"
+    /// 'foo'
+    ///
+    /// <<<DOC
+    /// foo
+    /// DOC
+    ///
+    /// <<<'DOC'
+    /// foo
+    /// DOC
     String(bstr::BString),
+    /// Interpolated string literal.
+    ///
+    /// "hello $foo $bar"
+    ///
+    /// <<<DOC
+    /// hello $foo $bar
+    /// DOC
     String2(Vec<Expr<Ex, Fb, En, Hi>>),
+    /// Prefixed string literal. Only used for regular expressions.
+    ///
+    /// re"foo"
     PrefixedString(Box<(String, Expr<Ex, Fb, En, Hi>)>),
+    /// Yield expression. The enclosing function should have an Iterator
+    /// return type.
+    ///
+    /// yield $foo // enclosing function returns an Iterator
+    /// yield $foo => $bar // enclosing function returns a KeyedIterator
     Yield(Box<Afield<Ex, Fb, En, Hi>>),
+    /// Yield break, terminating the current generator. This behaves like
+    /// return; but is more explicit, and ensures the function is treated
+    /// as a generator.
+    ///
+    /// TODO: this is only permitted in a statement position, so it
+    /// should be in stmt.
+    ///
+    /// yield break;
     YieldBreak,
+    /// Await expression.
+    ///
+    /// await $foo
     Await(Box<Expr<Ex, Fb, En, Hi>>),
+    /// List expression, only used in destructuring. Allows any arbitrary
+    /// lvalue as a subexpression. May also nest.
+    ///
+    /// Note that tuple(1, 2) is lowered to a Call, but naming converts it to a List.
+    /// TODO: Define a separate AAST node for tuple.
+    ///
+    /// list($x, $y) = vec[1, 2];
+    /// list(, $y) = vec[1, 2]; // skipping items
+    /// list(list($x)) = vec[vec[1]]; // nesting
+    /// list($v[0], $x[], $y->foo) = $blah;
     List(Vec<Expr<Ex, Fb, En, Hi>>),
+    /// Cast expression, converting a value to a different type. Only
+    /// primitive types are supported in the hint position.
+    ///
+    /// (int)$foo
+    /// (string)$foo
     Cast(Box<(Hint, Expr<Ex, Fb, En, Hi>)>),
+    /// Unary operator.
+    ///
+    /// !$foo
+    /// -$foo
+    /// +$foo
     Unop(Box<(ast_defs::Uop, Expr<Ex, Fb, En, Hi>)>),
+    /// Binary operator.
+    ///
+    /// $foo + $bar
     Binop(Box<(ast_defs::Bop, Expr<Ex, Fb, En, Hi>, Expr<Ex, Fb, En, Hi>)>),
-    /// The lid is the ID of the $$ that is implicitly declared by this pipe.
+    /// Pipe expression. The lid is the ID of the $$ that is implicitly
+    /// declared by this pipe.
+    ///
+    /// See also Dollardollar.
+    ///
+    /// $foo |> bar() // equivalent: bar($foo)
+    /// $foo |> bar(1, $$) // equivalent: bar(1, $foo)
     Pipe(Box<(Lid, Expr<Ex, Fb, En, Hi>, Expr<Ex, Fb, En, Hi>)>),
+    /// Ternary operator, or elvis operator.
+    ///
+    /// $foo ? $bar : $baz // ternary
+    /// $foo ?: $baz // elvis
     Eif(
         Box<(
             Expr<Ex, Fb, En, Hi>,
@@ -373,8 +673,20 @@ pub enum Expr_<Ex, Fb, En, Hi> {
             Expr<Ex, Fb, En, Hi>,
         )>,
     ),
+    /// Is operator.
+    ///
+    /// $foo is SomeType
     Is(Box<(Expr<Ex, Fb, En, Hi>, Hint)>),
+    /// As operator.
+    ///
+    /// $foo as int
+    /// $foo ?as int
     As(Box<(Expr<Ex, Fb, En, Hi>, Hint, bool)>),
+    /// Instantiation.
+    ///
+    /// new Foo(1, 2);
+    /// new Foo<int, T>();
+    /// new Foo('blah', ...$rest);
     New(
         Box<(
             ClassId<Ex, Fb, En, Hi>,
@@ -384,9 +696,29 @@ pub enum Expr_<Ex, Fb, En, Hi> {
             Ex,
         )>,
     ),
+    /// Record literal.
+    ///
+    /// MyRecord['x' => $foo, 'y' => $bar]
     Record(Box<(Sid, Vec<(Expr<Ex, Fb, En, Hi>, Expr<Ex, Fb, En, Hi>)>)>),
+    /// PHP-style lambda. Does not capture variables unless explicitly
+    /// specified.
+    ///
+    /// Mnemonic: 'expanded lambda', since we can desugar Lfun to Efun.
+    ///
+    /// function($x) { return $x; }
+    /// function(int $x): int { return $x; }
+    /// function($x) use ($y) { return $y; }
+    /// function($x): int use ($y, $z) { return $x + $y + $z; }
     Efun(Box<(Fun_<Ex, Fb, En, Hi>, Vec<Lid>)>),
+    /// Hack lambda. Captures variables automatically.
+    ///
+    /// $x ==> $x
+    /// (int $x): int ==> $x + $other
+    /// ($x, $y) ==> { return $x + $y; }
     Lfun(Box<(Fun_<Ex, Fb, En, Hi>, Vec<Lid>)>),
+    /// XHP expression. May contain interpolated expressions.
+    ///
+    /// <foo x="hello" y={$foo}>hello {$bar}</foo>
     Xml(
         Box<(
             Sid,
@@ -394,17 +726,63 @@ pub enum Expr_<Ex, Fb, En, Hi> {
             Vec<Expr<Ex, Fb, En, Hi>>,
         )>,
     ),
+    /// Explicit calling convention, used for inout. Inout supports any lvalue.
+    ///
+    /// TODO: This could be a flag on parameters in Call.
+    ///
+    /// foo(inout $x[0])
     Callconv(Box<(ast_defs::ParamKind, Expr<Ex, Fb, En, Hi>)>),
+    /// Include or require expression.
+    ///
+    /// require('foo.php')
+    /// require_once('foo.php')
+    /// include('foo.php')
+    /// include_once('foo.php')
     Import(Box<(ImportFlavor, Expr<Ex, Fb, En, Hi>)>),
-    /// TODO: T38184446 Consolidate collections in AAST
+    /// Collection literal.
+    ///
+    /// TODO: T38184446 this is redundant with ValCollection/KeyValCollection.
+    ///
+    /// Vector {}
     Collection(Box<(Sid, Option<CollectionTarg<Hi>>, Vec<Afield<Ex, Fb, En, Hi>>)>),
+    /// Expression tree literal. Expression trees are not evaluated at
+    /// runtime, but desugared to an expression representing the code.
+    ///
+    /// Foo`1 + bar()`
+    /// Foo`$x ==> $x * ${$value}` // splicing $value
     ExpressionTree(Box<ExpressionTree<Ex, Fb, En, Hi>>),
+    /// Placeholder local variable.
+    ///
+    /// $_
     Lplaceholder(Box<Pos>),
+    /// Global function reference.
+    ///
+    /// fun('foo')
     FunId(Box<Sid>),
+    /// Instance method reference on a specific instance.
+    ///
+    /// TODO: This is only created in naming, and ought to happen in
+    /// lowering or be removed. The emitter just sees a normal Call.
+    ///
+    /// inst_meth($f, 'some_meth') // equivalent: $f->some_meth<>
     MethodId(Box<(Expr<Ex, Fb, En, Hi>, Pstring)>),
-    /// meth_caller('Class name', 'method name')
+    /// Instance method reference that can be called with an instance.
+    ///
+    /// meth_caller(FooClass::class, 'some_meth')
+    /// meth_caller('FooClass', 'some_meth')
+    ///
+    /// These examples are equivalent to:
+    ///
+    /// (FooClass $f, ...$args) ==> $f->some_meth(...$args)
     MethodCaller(Box<(Sid, Pstring)>),
+    /// Static method reference.
+    ///
+    /// class_meth('FooClass', 'some_static_meth')
+    /// // equivalent: FooClass::some_static_meth<>
     SmethodId(Box<(ClassId<Ex, Fb, En, Hi>, Pstring)>),
+    /// Pair literal.
+    ///
+    /// Pair {$foo, $bar}
     Pair(
         Box<(
             Option<(Targ<Hi>, Targ<Hi>)>,
@@ -412,8 +790,19 @@ pub enum Expr_<Ex, Fb, En, Hi> {
             Expr<Ex, Fb, En, Hi>,
         )>,
     ),
+    /// Expression tree splice expression. Only valid inside an
+    /// expression tree literal (backticks).
+    ///
+    /// ${$foo}
     ETSplice(Box<Expr<Ex, Fb, En, Hi>>),
+    /// Enum atom used for enum classes.
+    ///
+    /// #field_name
     EnumAtom(String),
+    /// Placeholder for expressions that aren't understood by parts of
+    /// the toolchain.
+    ///
+    /// TODO: Remove.
     Any,
 }
 
@@ -553,7 +942,7 @@ pub struct FunParam<Ex, Fb, En, Hi> {
     pub visibility: Option<Visibility>,
 }
 
-/// does function take varying number of args?
+/// Does this function/method take a variable number of arguments?
 #[derive(
     Clone,
     Debug,
@@ -569,11 +958,15 @@ pub struct FunParam<Ex, Fb, En, Hi> {
     ToOcamlRep
 )]
 pub enum FunVariadicity<Ex, Fb, En, Hi> {
-    /// PHP5.6 ...$args finishes the func declaration
+    /// Named variadic argument.
+    ///
+    /// function foo(int ...$args): void {}
     FVvariadicArg(FunParam<Ex, Fb, En, Hi>),
-    /// HH ... finishes the declaration; deprecate for ...$args?
+    /// Unnamed variaidic argument. Partial mode only.
+    ///
+    /// function foo(...): void {}
     FVellipsis(Pos),
-    /// standard non variadic function
+    /// Function is not variadic, takes an exact number of arguments.
     FVnonVariadic,
 }
 

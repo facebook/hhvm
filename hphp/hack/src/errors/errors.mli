@@ -1395,6 +1395,9 @@ val call_coeffect_error :
   Pos.t ->
   unit
 
+val coeffect_subtyping_error :
+  Pos.t -> string -> Pos.t -> string -> typing_error_callback -> unit
+
 val op_coeffect_error :
   locally_available:string ->
   available_pos:Pos.t ->

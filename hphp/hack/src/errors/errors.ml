@@ -5270,6 +5270,16 @@ let enum_inclusion_not_enum
       ^ " which is not an enum" )
     []
 
+(* This is meant for subtyping functions with incompatible coeffects, i.e.
+ * (function ()[io]: void) </: (function ()[]: void) *)
+let coeffect_subtyping_error
+    pos_expected cap_expected pos_got cap_got (on_error : typing_error_callback)
+    =
+  on_error
+    ~code:(Typing.err_code Typing.SubtypeCoeffects)
+    (pos_expected, "Expected a function that requires " ^ cap_expected)
+    [(pos_got, "But got a function that requires " ^ cap_got)]
+
 let call_coeffect_error
     ~available_incl_unsafe ~available_pos ~required ~required_pos call_pos =
   add_list

@@ -673,6 +673,7 @@ module Typing = struct
     | IFCPolicyMismatch [@value 4400]
     | OpCoeffects [@value 4401]
     | ImplementsDynamic [@value 4402] (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
+    | SubtypeCoeffects [@value 4403]
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum

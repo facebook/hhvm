@@ -929,7 +929,7 @@ private:
   friend Type add_nonemptiness(Type);
   friend Type assert_emptiness(Type);
   friend Type assert_nonemptiness(Type);
-  friend Type set_trep(Type&, trep);
+  friend Type set_trep(Type, trep);
   friend Type remove_uninit(Type t);
   friend Type to_cell(Type t);
   friend bool inner_types_might_raise(const Type& t1, const Type& t2);

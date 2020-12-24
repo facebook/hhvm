@@ -2450,20 +2450,18 @@ Type project_data(Type t, trep bits) {
 
 Type remove_counted(Type t) {
   auto const isStatic = [] (const Type& t) {
-    return (t.bits() & BUnc) == t.bits();
+    return t.subtypeOf(BUnc);
   };
   auto const isCounted = [] (const Type& t) {
-    return (t.bits() & BUnc) == BBottom;
+    return !t.couldBe(BUnc);
   };
   auto const strip = [&] {
     t.m_bits &= BUnc;
     assertx(isPredefined(t.bits()));
     return t;
   };
-  auto const nothing = [&] {
-    auto ret = t.bits() & BSArrLikeE;
-    if (is_opt(t)) ret |= BInitNull;
-    return Type { ret };
+  auto const nothing = [&] (trep bits = BArrLikeN) {
+    return Type { trep(t.m_bits & (BUnc & ~bits)) };
   };
 
   switch (t.m_dataTag) {
@@ -2476,7 +2474,7 @@ Type remove_counted(Type t) {
     case DataTag::ArrLikeVal:
       return strip();
     case DataTag::Obj:
-      return nothing();
+      return nothing(BBottom);
     case DataTag::ArrLikePackedN: {
       if (isStatic(t.m_data.packedn->type)) return strip();
       if (isCounted(t.m_data.packedn->type)) return nothing();

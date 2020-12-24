@@ -32,4 +32,4 @@ let register_capabilities env (cap_ty : locl_ty) (unsafe_cap_ty : locl_ty) =
 let get_type capability =
   match capability with
   | CapTy cap -> cap
-  | CapDefaults _p -> Typing_make_type.default_capability
+  | CapDefaults p -> Typing_make_type.default_capability p

@@ -179,7 +179,7 @@ let simple_variadic_splat r ty =
              d_kind = SplatUnpack;
            } ))
 
-let default_capability : locl_ty = nothing Reason.Rnone
+let default_capability p : locl_ty = nothing (Reason.Rdefault_capability p)
 
 (* ^ TODO(coeffects) after implementing lower bounds on const ctx/type, do:
   intersection

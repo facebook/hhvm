@@ -180,12 +180,12 @@ SSATmp* callImpl(IRGS& env, SSATmp* callee, const FCallArgs& fca,
   // TODO: extend hhbc with bitmap of passed generics, or even better, use one
   // stack value per generic argument and extend hhbc with their count
   auto const genericsBitmap = [&] {
-    if (!fca.hasGenerics()) return uint32_t{0};
+    if (!fca.hasGenerics()) return uint16_t{0};
     auto const type = RuntimeOption::EvalHackArrDVArrs ? TVec : TVArr;
     auto const generics = topC(env);
     // Do not bother calculating the bitmap using a C++ helper if generics are
     // not statically known, as the prologue already has the same logic.
-    if (!generics->hasConstVal(type)) return uint32_t{0};
+    if (!generics->hasConstVal(type)) return uint16_t{0};
     auto const genericsArr = generics->arrLikeVal();
     return getGenericsBitmap(genericsArr);
   }();

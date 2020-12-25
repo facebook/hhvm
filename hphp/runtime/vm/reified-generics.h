@@ -63,7 +63,7 @@ void checkClassReifiedGenericMismatch(
   const ArrayData* reified_generics
 );
 
-uint32_t getGenericsBitmap(const ArrayData* generics);
+uint16_t getGenericsBitmap(const ArrayData* generics);
 
 // Returns whether all the generics in the given ReifiedGenericsInfo are denoted
 // as soft

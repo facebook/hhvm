@@ -178,10 +178,10 @@ void checkClassReifiedGenericMismatch(
   );
 }
 
-uint32_t getGenericsBitmap(const ArrayData* generics) {
+uint16_t getGenericsBitmap(const ArrayData* generics) {
   assertx(generics);
   if (generics->size() > 15) return 0;
-  auto bitmap = 1;
+  uint16_t bitmap = 1;
   IterateV(
     generics,
     [&](TypedValue v) {

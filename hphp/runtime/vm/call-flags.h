@@ -48,7 +48,7 @@ struct CallFlags {
   };
 
   CallFlags(bool hasGenerics, bool isDynamicCall, bool asyncEagerReturn,
-            Offset callOffset, uint32_t genericsBitmap) {
+            Offset callOffset, uint16_t genericsBitmap) {
     auto const callOffsetBits = (uint64_t)callOffset << Flags::CallOffsetStart;
     assertx((callOffsetBits >> Flags::GenericsBitmapStart) == 0);
     assertx(hasGenerics || genericsBitmap == 0);

@@ -40,6 +40,10 @@ inline CoeffectAttr& operator|=(CoeffectAttr& a, const CoeffectAttr& b) {
   return (a = CoeffectAttr((uint16_t)a | (uint16_t)b));
 }
 
+inline CoeffectAttr& operator&=(CoeffectAttr& a, const CoeffectAttr& b) {
+  return (a = CoeffectAttr((uint16_t)a & (uint16_t)b));
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 enum class RxLevel : uint8_t {
@@ -89,7 +93,6 @@ constexpr bool funcAttrIsPure(CoeffectAttr a) {
   return static_cast<uint16_t>(a) & CEAttrRxLevel2;
 }
 
-bool rxEnforceCallsInLevel(RxLevel level);
 RxLevel rxRequiredCalleeLevel(RxLevel level);
 
 ///////////////////////////////////////////////////////////////////////////////

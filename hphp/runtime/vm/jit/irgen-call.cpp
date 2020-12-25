@@ -146,8 +146,6 @@ void emitCallerRxChecksKnown(IRGS& env, const Func* callee) {
   assertx(callee);
   if (RuntimeOption::EvalPureEnforceCalls <= 0) return;
   auto const callerLevel = curRxLevel(env);
-  if (!rxEnforceCallsInLevel(callerLevel)) return;
-
   auto const minReqCalleeLevel = rxRequiredCalleeLevel(callerLevel);
   if (callee->rxLevel() >= minReqCalleeLevel) return;
   gen(env, RaiseRxCallViolation, fp(env), cns(env, callee));
@@ -159,8 +157,6 @@ void emitCallerRxChecksUnknown(IRGS& env, SSATmp* callee) {
   assertx(!callee->hasConstVal());
   if (RuntimeOption::EvalPureEnforceCalls <= 0) return;
   auto const callerLevel = curRxLevel(env);
-  if (!rxEnforceCallsInLevel(callerLevel)) return;
-
   ifThen(
     env,
     [&] (Block* taken) {

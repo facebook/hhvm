@@ -1,0 +1,2 @@
+-vRuntime.Eval.RxEnforceCalls=1
+-vRuntime.Eval.PureEnforceCalls=1

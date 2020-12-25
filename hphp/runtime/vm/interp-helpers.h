@@ -152,8 +152,6 @@ inline bool callerRxChecks(const ActRec* caller, const Func* callee) {
   // Conditional reactivity is not tracked yet, so assume the caller has minimum
   // and the callee has maximum possible level of reactivity.
   auto const callerLevel = caller->rxMinLevel();
-  if (!rxEnforceCallsInLevel(callerLevel)) return true;
-
   auto const minReqCalleeLevel = rxRequiredCalleeLevel(callerLevel);
   if (LIKELY(callee->rxLevel() >= minReqCalleeLevel)) return true;
   raiseRxCallViolation(caller, callee);

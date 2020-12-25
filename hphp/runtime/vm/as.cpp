@@ -2301,6 +2301,11 @@ Attr parse_attribute_list(AsmState& as, AttrContext ctx,
   if (coeffectAttrs && *coeffectAttrs != CEAttrNone) {
     if (funcAttrIsAnyRx(*coeffectAttrs)) ret |= AttrRxBody;
     if (funcAttrIsPure(*coeffectAttrs)) ret |= AttrPureBody;
+    if (RO::EvalPureEnforceCalls <= 0) {
+      *coeffectAttrs = CEAttrNone;
+    } else if (RO::EvalRxEnforceCalls <= 0) {
+      *coeffectAttrs &= CoeffectAttr(~(CEAttrRxLevel0 | CEAttrRxLevel1));
+    }
   }
   return Attr(ret);
 }

@@ -1312,6 +1312,8 @@ std::string mangleUnitSha1(const std::string& fileSha1,
     + (RuntimeOption::EvalArrayProvenance ? '1' : '0')
     + (RuntimeOption::EvalAllowHhas ? '1' : '0')
     + std::to_string(RuntimeOption::EvalEnforceGenericsUB)
+    + std::to_string(RuntimeOption::EvalPureEnforceCalls)
+    + std::to_string(RuntimeOption::EvalRxEnforceCalls)
     + (RuntimeOption::EvalEmitMethCallerFuncPointers ? '1' : '0')
     + std::to_string(RuntimeOption::EvalAssemblerMaxScalarSize)
     + std::to_string(RuntimeOption::EvalEmitClassPointers)

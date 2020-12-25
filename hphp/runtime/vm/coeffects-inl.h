@@ -51,20 +51,11 @@ inline const char* rxLevelToString(RxLevel level) {
   not_reached();
 }
 
-inline bool rxEnforceCallsInLevel(RxLevel level) {
-  assertx(RuntimeOption::EvalPureEnforceCalls > 0);
-  if (RuntimeOption::EvalRxEnforceCalls > 0) {
-    return level >= RxLevel::Shallow;
-  } else {
-    return level >= RxLevel::Pure;
-  }
-}
-
 inline RxLevel rxRequiredCalleeLevel(RxLevel level) {
-  assertx(rxEnforceCallsInLevel(level));
+  assertx(RO::EvalPureEnforceCalls > 0);
   switch (level) {
     case RxLevel::None:
-    case RxLevel::Local:   not_reached();
+    case RxLevel::Local:   return RxLevel::None;
     case RxLevel::Shallow: return RxLevel::Local;
     case RxLevel::Rx:      return RxLevel::Rx;
     case RxLevel::Pure:    return RxLevel::Pure;

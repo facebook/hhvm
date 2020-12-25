@@ -22,12 +22,12 @@ rx -> pure: ok
 Warning: Call to non-reactive 'non_rx' from pure 'pure' violates purity constraints. in %s/rx/call_enforcement_pure_soft.php on line 24
 pure -> non_rx: ok
 
-Warning: Call to local reactive 'rx_local' from pure 'pure' violates purity constraints. in %s/rx/call_enforcement_pure_soft.php on line 24
+Warning: Call to non-reactive 'rx_local' from pure 'pure' violates purity constraints. in %s/rx/call_enforcement_pure_soft.php on line 24
 pure -> rx_local: ok
 
-Warning: Call to shallow reactive 'rx_shallow' from pure 'pure' violates purity constraints. in %s/rx/call_enforcement_pure_soft.php on line 24
+Warning: Call to non-reactive 'rx_shallow' from pure 'pure' violates purity constraints. in %s/rx/call_enforcement_pure_soft.php on line 24
 pure -> rx_shallow: ok
 
-Warning: Call to reactive 'rx' from pure 'pure' violates purity constraints. in %s/rx/call_enforcement_pure_soft.php on line 24
+Warning: Call to non-reactive 'rx' from pure 'pure' violates purity constraints. in %s/rx/call_enforcement_pure_soft.php on line 24
 pure -> rx: ok
 pure -> pure: ok

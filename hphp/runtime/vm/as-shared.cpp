@@ -73,7 +73,9 @@ constexpr bool supported(ContextMask mask, AttrContext a) {
   X(AttrNoReifiedInit,            C,       "noreifiedinit");        \
   X(AttrIsMethCaller,             F,       "is_meth_caller");       \
   X(AttrNoContext,                F,       "no_context");           \
-  X(AttrEnumClass,                C,       "enum_class");
+  X(AttrEnumClass,                C,       "enum_class");           \
+  X(AttrRxBody,                   F,       "rx_body");              \
+  X(AttrPureBody,                 F,       "pure_body");
   /* */
 
 #define HHAS_TYPE_FLAGS                                     \

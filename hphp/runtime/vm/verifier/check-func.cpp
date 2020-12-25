@@ -1916,12 +1916,12 @@ bool FuncChecker::checkExnEdge(State cur, Op op, Block* b) {
 bool FuncChecker::checkBlock(State& cur, Block* b) {
   bool ok = true;
   auto const verify_rx = (RuntimeOption::EvalRxVerifyBody > 0) &&
-                         funcAttrIsAnyRx(m_func->coeffectAttrs) &&
+                         (m_func->attrs & AttrRxBody) &&
                          // defer this to next check
-                         !funcAttrIsPure(m_func->coeffectAttrs) &&
+                         !(m_func->attrs & AttrPureBody) &&
                          !m_func->isRxDisabled;
   auto const verify_pure = (RuntimeOption::EvalPureVerifyBody > 0) &&
-                            funcAttrIsPure(m_func->coeffectAttrs);
+                           (m_func->attrs & AttrPureBody);
   if (m_errmode == kVerbose) {
     std::cout << blockToString(b, m_graph, m_func) << std::endl;
   }

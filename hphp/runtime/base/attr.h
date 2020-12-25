@@ -115,6 +115,8 @@ enum Attr {
   // not extended, or on a method that no extending class defines the method.
   AttrNoOverride           = (1u << 13), //    X  |          |    X    //
                                          //       |          |         //
+  AttrRxBody               = (1u << 14), //    X  |          |         //
+  AttrPureBody             = (1u << 15), //    X  |          |         //
   // Indicates that the function, class or static property can be loaded
   // once and then persisted across all requests. |          |         //
   AttrPersistent           = (1u << 18), //    X  |    X     |    X    //

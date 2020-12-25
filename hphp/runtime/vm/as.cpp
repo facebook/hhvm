@@ -2298,6 +2298,10 @@ Attr parse_attribute_list(AsmState& as, AttrContext ctx,
     as.error("unrecognized attribute `" + word + "' in this context");
   }
   as.in.expect(']');
+  if (coeffectAttrs && *coeffectAttrs != CEAttrNone) {
+    if (funcAttrIsAnyRx(*coeffectAttrs)) ret |= AttrRxBody;
+    if (funcAttrIsPure(*coeffectAttrs)) ret |= AttrPureBody;
+  }
   return Attr(ret);
 }
 
@@ -2596,8 +2600,8 @@ void parse_function_flags(AsmState& as) {
       as.fe->isPairGenerator = true;
     } else if (flag == "isRxDisabled") {
       // this relies on attributes being parsed before flags
-      if (!funcAttrIsAnyRx(as.fe->coeffectAttrs) ||
-          funcAttrIsPure(as.fe->coeffectAttrs)) {
+      if (!(as.fe->attrs & AttrRxBody) ||
+          (as.fe->attrs & AttrPureBody)) {
         as.error("isRxDisabled on non-rx func");
       }
       as.fe->isRxDisabled = true;

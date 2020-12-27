@@ -5093,6 +5093,12 @@ Type loosen_likeness(Type t) {
 
   if (t.couldBe(BCls | BLazyCls)) t = union_of(std::move(t), TUncStrLike);
 
+  return t;
+}
+
+Type loosen_likeness_recursively(Type t) {
+  t = loosen_likeness(std::move(t));
+
   switch (t.m_dataTag) {
   case DataTag::None:
   case DataTag::Str:
@@ -5109,38 +5115,38 @@ Type loosen_likeness(Type t) {
   case DataTag::Obj:
     if (t.m_data.dobj.whType) {
       auto whType = t.m_data.dobj.whType.mutate();
-      *whType = loosen_likeness(std::move(*whType));
+      *whType = loosen_likeness_recursively(std::move(*whType));
     }
     break;
 
   case DataTag::ArrLikePacked: {
     auto& packed = *t.m_data.packed.mutate();
     for (auto& e : packed.elems) {
-      e = loosen_likeness(std::move(e));
+      e = loosen_likeness_recursively(std::move(e));
     }
     break;
   }
 
   case DataTag::ArrLikePackedN: {
     auto& packed = *t.m_data.packedn.mutate();
-    packed.type = loosen_likeness(std::move(packed.type));
+    packed.type = loosen_likeness_recursively(std::move(packed.type));
     break;
   }
 
   case DataTag::ArrLikeMap: {
     auto& map = *t.m_data.map.mutate();
     for (auto it = map.map.begin(); it != map.map.end(); it++) {
-      map.map.update(it, loosen_likeness(it->second));
+      map.map.update(it, loosen_likeness_recursively(it->second));
     }
-    map.optKey = loosen_likeness(std::move(map.optKey));
-    map.optVal = loosen_likeness(std::move(map.optVal));
+    map.optKey = loosen_likeness_recursively(std::move(map.optKey));
+    map.optVal = loosen_likeness_recursively(std::move(map.optVal));
     break;
   }
 
   case DataTag::ArrLikeMapN: {
     auto& map = *t.m_data.mapn.mutate();
-    map.key = loosen_likeness(std::move(map.key));
-    map.val = loosen_likeness(std::move(map.val));
+    map.key = loosen_likeness_recursively(std::move(map.key));
+    map.val = loosen_likeness_recursively(std::move(map.val));
     break;
   }
   }
@@ -5150,8 +5156,10 @@ Type loosen_likeness(Type t) {
 Type loosen_all(Type t) {
   return loosen_staticness(
     loosen_emptiness(
-      loosen_values(
-        loosen_likeness(std::move(t))
+      loosen_likeness(
+        loosen_values(
+          std::move(t)
+        )
       )
     )
   );

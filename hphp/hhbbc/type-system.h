@@ -926,6 +926,7 @@ private:
   friend Type loosen_array_values(Type);
   friend Type loosen_emptiness(Type);
   friend Type loosen_likeness(Type);
+  friend Type loosen_likeness_recursively(Type);
   friend Type add_nonemptiness(Type);
   friend Type assert_emptiness(Type);
   friend Type assert_nonemptiness(Type);
@@ -1824,6 +1825,15 @@ Type loosen_emptiness(Type t);
  * TVArrLike or TVecLike.
  */
 Type loosen_likeness(Type t);
+
+/*
+ * Like loosen_likeness, but operates recursively on any specialized
+ * data present. This is usually not what you want. Note that
+ * loosen_likeness can transform a TClsMeth into an array. If TClsMeth
+ * is uncounted, this can result in a non-static type inside a static
+ * array. Call loosen_staticness before this to avoid that.
+ */
+Type loosen_likeness_recursively(Type t);
 
 /*
  * Loosens staticness, emptiness, and values from the type. This forces a type

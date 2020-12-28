@@ -1339,16 +1339,16 @@ module FakeMembers = struct
 end
 
 (*****************************************************************************)
-(* Sets up/cleans up the environment when typing an anonymous function. *)
+(* Sets up/cleans up the environment when typing anonymous function / lambda *)
 (*****************************************************************************)
 
-let anon anon_lenv env f =
+let closure lenv env f =
   (* Setting up the environment. *)
   let old_lenv = env.lenv in
   let old_return = get_return env in
   let old_params = get_params env in
   let outer_fun_kind = get_fn_kind env in
-  let env = { env with lenv = anon_lenv } in
+  let env = { env with lenv } in
   (* Typing *)
   let (env, ret) = f env in
   (* Cleaning up the environment. *)

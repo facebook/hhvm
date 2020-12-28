@@ -2675,7 +2675,9 @@ and expr_
       let old_reactivity = env_reactivity env in
       let env = Env.set_env_reactive env reactivity in
       let ft = { ft with ft_reactive = reactivity } in
-      let (env, (tefun, ty, ft)) = anon_make ?ret_ty env p f ft idl is_anon in
+      let (env, (tefun, ty, ft)) =
+        closure_make ?ret_ty env p f ft idl is_anon
+      in
       let env = Env.set_env_reactive env old_reactivity in
       let inferred_ty =
         mk
@@ -3063,9 +3065,9 @@ and xhp_attribute_exprs env cid attrl =
   (env, List.rev typed_attrl, List.rev attr_ptyl)
 
 (*****************************************************************************)
-(* Anonymous functions. *)
+(* Anonymous functions & lambdas. *)
 (*****************************************************************************)
-and anon_bind_param params (env, t_params) ty : env * Tast.fun_param list =
+and closure_bind_param params (env, t_params) ty : env * Tast.fun_param list =
   match !params with
   | [] ->
     (* This code cannot be executed normally, because the arity is wrong
@@ -3113,7 +3115,7 @@ and anon_bind_param params (env, t_params) ty : env * Tast.fun_param list =
       let (env, t_param) = bind_param env (ty, param) in
       (env, t_params @ [t_param]))
 
-and anon_bind_variadic env vparam variadic_ty =
+and closure_bind_variadic env vparam variadic_ty =
   let (env, ty, pos) =
     match hint_of_type_hint vparam.param_type_hint with
     | None ->
@@ -3143,7 +3145,7 @@ and anon_bind_variadic env vparam variadic_ty =
   let (env, t_variadic) = bind_param env (ty, vparam) in
   (env, t_variadic)
 
-and anon_bind_opt_param env param : env =
+and closure_bind_opt_param env param : env =
   match param.param_expr with
   | None ->
     let ty = Typing_utils.mk_tany env param.param_pos in
@@ -3155,7 +3157,7 @@ and anon_bind_opt_param env param : env =
     let (env, _) = bind_param env (ty, param) in
     env
 
-and anon_check_param env param =
+and closure_check_param env param =
   match hint_of_type_hint param.param_type_hint with
   | None -> env
   | Some hty ->
@@ -3173,7 +3175,7 @@ and anon_check_param env param =
     in
     env
 
-and stash_conts_for_anon env p is_anon captured f =
+and stash_conts_for_closure env p is_anon captured f =
   let captured =
     if is_anon && TypecheckerOptions.any_coeffects (Env.get_tcopt env) then
       Typing_coeffects.(
@@ -3214,12 +3216,12 @@ and stash_conts_for_anon env p is_anon captured f =
       in
       f env)
 
-(* Make a type-checking function for an anonymous function. *)
+(* Make a type-checking function for an anonymous function or lambda. *)
 (* Here ret_ty should include Awaitable wrapper *)
 (* TODO: ?el is never set; so we need to fix variadic use of lambda *)
-and anon_make ?el ?ret_ty env lambda_pos f ft idl is_anon =
+and closure_make ?el ?ret_ty env lambda_pos f ft idl is_anon =
   let nb = Nast.assert_named_body f.f_body in
-  Env.anon env.lenv env (fun env ->
+  Env.closure env.lenv env (fun env ->
       (* Extract capabilities from AAST and add them to the environment *)
       let (env, capability) =
         match (f.f_ctxs, f.f_unsafe_ctxs) with
@@ -3242,7 +3244,7 @@ and anon_make ?el ?ret_ty env lambda_pos f ft idl is_anon =
       let ft =
         { ft with ft_implicit_params = { capability = CapTy capability } }
       in
-      stash_conts_for_anon env lambda_pos is_anon idl (fun env ->
+      stash_conts_for_closure env lambda_pos is_anon idl (fun env ->
           let env = Env.clear_params env in
           let make_variadic_arg env varg tyl =
             let remaining_types =
@@ -3268,7 +3270,9 @@ and anon_make ?el ?ret_ty env lambda_pos f ft idl is_anon =
             in
             let r = Reason.Rvar_param varg.param_pos in
             let union = Tunion (tyl @ remaining_types) in
-            let (env, t_param) = anon_bind_variadic env varg (mk (r, union)) in
+            let (env, t_param) =
+              closure_bind_variadic env varg (mk (r, union))
+            in
             (env, Aast.FVvariadicArg t_param)
           in
           let (env, t_variadic) =
@@ -3282,12 +3286,16 @@ and anon_make ?el ?ret_ty env lambda_pos f ft idl is_anon =
           let params = ref f.f_params in
           let (env, t_params) =
             List.fold_left
-              ~f:(anon_bind_param params)
+              ~f:(closure_bind_param params)
               ~init:(env, [])
               (List.map ft.ft_params (fun x -> x.fp_type.et_type))
           in
-          let env = List.fold_left ~f:anon_bind_opt_param ~init:env !params in
-          let env = List.fold_left ~f:anon_check_param ~init:env f.f_params in
+          let env =
+            List.fold_left ~f:closure_bind_opt_param ~init:env !params
+          in
+          let env =
+            List.fold_left ~f:closure_check_param ~init:env f.f_params
+          in
           let env =
             match el with
             | None ->
@@ -3363,7 +3371,7 @@ and anon_make ?el ?ret_ty env lambda_pos f ft idl is_anon =
           in
           let local_tpenv = Env.get_tpenv env in
           (* Outer pipe variables aren't available in closures. Note that
-           * locals are restored by Env.anon after processing the closure
+           * locals are restored by Env.closure after processing the closure
            *)
           let env =
             Env.unset_local
@@ -3419,10 +3427,10 @@ and anon_make ?el ?ret_ty env lambda_pos f ft idl is_anon =
           let env = Env.set_tyvar_variance env ty in
           (env, (te, hret, ft))
           (* stash_conts_for_anon *))
-      (* Env.anon *))
+      (* Env.closure *))
 
 (*****************************************************************************)
-(* End of anonymous functions. *)
+(* End of anonymous functions & lambdas. *)
 (*****************************************************************************)
 
 (*****************************************************************************)

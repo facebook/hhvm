@@ -426,7 +426,7 @@ val env_with_locals : env -> Typing_per_cont_env.t -> env
 
 val reinitialize_locals : env -> env
 
-val anon : local_env -> env -> (env -> env * 'a) -> env * 'a
+val closure : local_env -> env -> (env -> env * 'a) -> env * 'a
 
 val in_try : env -> (env -> env * 'a) -> env * 'a
 

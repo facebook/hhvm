@@ -307,10 +307,10 @@ interface MapAccess<Tk as arraykey, Tv> extends ConstMapAccess<Tk, Tv>,
  * @guide /hack/collections/interfaces
  */
 <<__Sealed(ImmVector::class, MutableVector::class, Pair::class)>>
-interface ConstVector<+Tv> extends ConstCollection<Tv>,
+interface ConstVector<+Tv> extends KeyedContainer<int, Tv>,
+                                   ConstCollection<Tv>,
                                    ConstIndexAccess<int, Tv>,
-                                   HH\Rx\KeyedIterable<int, Tv>,
-                                   KeyedContainer<int, Tv> {
+                                   HH\Rx\KeyedIterable<int, Tv> {
   /**
    * Returns a `ConstVector` containing the values of the current
    * `ConstVector`. Essentially a copy of the current `ConstVector`.
@@ -862,10 +862,10 @@ interface MutableVector<Tv> extends ConstVector<Tv>,
  * @guide /hack/collections/interfaces
  */
 <<__Sealed(ImmMap::class, MutableMap::class)>>
-interface ConstMap<Tk as arraykey, +Tv> extends ConstCollection<Pair<Tk, Tv>>,
+interface ConstMap<Tk as arraykey, +Tv> extends KeyedContainer<Tk, Tv>,
+                                    ConstCollection<Pair<Tk, Tv>>,
                                     ConstMapAccess<Tk, Tv>,
-                                    HH\Rx\KeyedIterable<Tk, Tv>,
-                                    KeyedContainer<Tk, Tv> {
+                                    HH\Rx\KeyedIterable<Tk, Tv> {
   /**
    * Returns a `ConstVector` containing the values of the current `ConstMap`.
    *
@@ -1412,10 +1412,10 @@ interface MutableMap<Tk as arraykey, Tv> extends ConstMap<Tk, Tv>,
  * @guide /hack/collections/interfaces
  */
 <<__Sealed(ImmSet::class, MutableSet::class)>>
-interface ConstSet<+Tv as arraykey> extends ConstCollection<Tv>,
+interface ConstSet<+Tv as arraykey> extends KeyedContainer<Tv, Tv>,
+                                ConstCollection<Tv>,
                                 ConstSetAccess<Tv>,
-                                HH\Rx\KeyedIterable<arraykey, Tv>,
-                                KeyedContainer<Tv, Tv> {
+                                HH\Rx\KeyedIterable<arraykey, Tv> {
   /**
    * Returns a `ConstVector` containing the values of the current `ConstSet`.
    *

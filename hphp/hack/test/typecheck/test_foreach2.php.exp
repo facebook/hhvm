@@ -8,9 +8,9 @@ Invalid return type (Typing[4110])
     via this generic `Tv`
   File "collections/interfaces.hhi", line 1138, characters 63-64:
     via this generic `Tv`
-  File "collections/interfaces.hhi", line 867, characters 61-62:
+  File "collections/interfaces.hhi", line 865, characters 68-69:
     via this generic `Tv`
-  File "rx/interfaces.hhi", line 384, characters 36-37:
+  File "interfaces.hhi", line 120, characters 99-100:
     via this generic `Tv`
   File "rx/interfaces.hhi", line 37, characters 63-64:
     via this generic `Tv`

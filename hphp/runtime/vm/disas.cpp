@@ -538,13 +538,13 @@ std::string opt_type_info(const StringData *userType,
 }
 
 std::string opt_attrs(AttrContext ctx, Attr attrs,
-                      CoeffectAttr coeffectAttrs = CEAttrNone,
+                      StaticCoeffects staticCoeffects = CEAttrNone,
                       const UserAttributeMap* userAttrs = nullptr,
                       bool needPrefix = true) {
   auto str = folly::trimWhitespace(folly::sformat(
                "{} {} {}",
                attrs_to_string(ctx, attrs),
-               attrs_to_string(ctx, coeffectAttrs),
+               attrs_to_string(ctx, staticCoeffects),
                user_attrs(userAttrs))).str();
   if (!str.empty()) {
     str = folly::sformat("{}[{}]", needPrefix ? " " : "", str);
@@ -630,7 +630,7 @@ void print_func(Output& out, const Func* func) {
 
   out.fmtln(".function{}{}{} {}{}({}){}{{",
     opt_ubs(finfo.ubs),
-    opt_attrs(AttrContext::Func, func->attrs(), func->coeffectAttrs(),
+    opt_attrs(AttrContext::Func, func->attrs(), func->staticCoeffects(),
                                  &func->userAttributes()),
     format_line_pair(func),
     opt_type_info(func->returnUserType(), func->returnTypeConstraint()),
@@ -690,7 +690,7 @@ void print_method(Output& out, const Func* func) {
   out.fmtln(".method{}{}{}{} {}{}({}){}{{",
     opt_shadowed_tparams(),
     opt_ubs(finfo.ubs),
-    opt_attrs(AttrContext::Func, func->attrs(), func->coeffectAttrs(),
+    opt_attrs(AttrContext::Func, func->attrs(), func->staticCoeffects(),
                                  &func->userAttributes()),
     format_line_pair(func),
     opt_type_info(func->returnUserType(), func->returnTypeConstraint()),

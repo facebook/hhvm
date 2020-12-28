@@ -35,14 +35,14 @@ void pretty_print(const FuncEmitter* fe, std::ostream& out) {
   if (fe->pce() != nullptr) {
     out << "Method";
     Func::print_attrs(out, fe->attrs);
-    Func::print_attrs(out, fe->coeffectAttrs);
+    Func::print_attrs(out, fe->staticCoeffects);
     if (fe->isMemoizeWrapper) out << " (memoize_wrapper)";
     if (fe->isMemoizeWrapperLSB) out << " (memoize_wrapper_lsb)";
     out << ' ' << fe->pce()->name()->data() << "::" << fe->name->data();
   } else {
     out << "Function";
     Func::print_attrs(out, fe->attrs);
-    Func::print_attrs(out, fe->coeffectAttrs);
+    Func::print_attrs(out, fe->staticCoeffects);
     if (fe->isMemoizeWrapper) out << " (memoize_wrapper)";
     if (fe->isMemoizeWrapperLSB) out << " (memoize_wrapper_lsb)";
     out << ' ' << fe->name->data();

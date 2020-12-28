@@ -21,15 +21,15 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-inline CoeffectAttr rxAttrsFromAttrString(const std::string& a) {
+inline StaticCoeffects rxAttrsFromAttrString(const std::string& a) {
   if (a == "rx_local")               return rxMakeAttr(RxLevel::Local);
   if (a == "rx_shallow")             return rxMakeAttr(RxLevel::Shallow);
   if (a == "rx")                     return rxMakeAttr(RxLevel::Rx);
   if (a == "pure")                   return rxMakeAttr(RxLevel::Pure);
-  return static_cast<CoeffectAttr>(0);
+  return static_cast<StaticCoeffects>(0);
 }
 
-inline const char* rxAttrsToAttrString(CoeffectAttr attrs) {
+inline const char* rxAttrsToAttrString(StaticCoeffects attrs) {
   switch (rxLevelFromAttr(attrs)) {
     case RxLevel::None:    return nullptr;
     case RxLevel::Local:   return "rx_local";

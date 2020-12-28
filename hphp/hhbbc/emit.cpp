@@ -1136,7 +1136,7 @@ void emit_finish_func(EmitUnitState& state, FuncEmitter& fe,
   fe.isRxDisabled = func.isRxDisabled;
   fe.hasParamsWithMultiUBs = func.hasParamsWithMultiUBs;
   fe.hasReturnWithMultiUBs = func.hasReturnWithMultiUBs;
-  fe.coeffectAttrs = func.coeffectAttrs;
+  fe.staticCoeffects = func.staticCoeffects;
 
   for (auto& rule : func.coeffectRules) fe.coeffectRules.push_back(rule);
 

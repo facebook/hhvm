@@ -257,7 +257,7 @@ void cgLdFuncRxLevel(IRLS& env, const IRInstruction* inst) {
   static_assert(CEAttrRxLevel2 == (1u << 2), "");
   auto const attrs = v.makeReg();
   auto const shifted = v.makeReg();
-  v << loadzlq{func[Func::coeffectAttrsOff()], attrs};
+  v << loadzlq{func[Func::staticCoeffectsOff()], attrs};
   v << shrqi{kRxAttrShift, attrs, shifted, v.makeReg()};
   v << andqi{int32_t(kRxLevelMask), shifted, dst, v.makeReg()};
 }

@@ -285,7 +285,7 @@ struct Func : FuncBase {
   LSString name;
   SrcInfo srcInfo;
   Attr attrs;
-  CoeffectAttr coeffectAttrs;
+  StaticCoeffects staticCoeffects;
 
   /*
    * Parameters and locals.

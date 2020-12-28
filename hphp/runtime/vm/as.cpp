@@ -2264,7 +2264,7 @@ void parse_user_attribute(AsmState& as,
  */
 Attr parse_attribute_list(AsmState& as, AttrContext ctx,
                           UserAttributeMap* userAttrs = nullptr,
-                          CoeffectAttr* coeffectAttrs = nullptr) {
+                          StaticCoeffects* staticCoeffects = nullptr) {
   as.in.skipWhitespace();
   int ret = AttrNone;
   if (as.in.peek() != '[') return Attr(ret);
@@ -2289,22 +2289,22 @@ Attr parse_attribute_list(AsmState& as, AttrContext ctx,
     auto const rxAttrs = rxAttrsFromAttrString(word);
     if (rxAttrs != 0) {
       if (seen_rxl) as.error("multiple rx attributes");
-      if (!coeffectAttrs) as.error("invalid position for rx attribute");
+      if (!staticCoeffects) as.error("invalid position for rx attribute");
       seen_rxl = true;
-      *coeffectAttrs |= rxAttrs;
+      *staticCoeffects |= rxAttrs;
       continue;
     }
 
     as.error("unrecognized attribute `" + word + "' in this context");
   }
   as.in.expect(']');
-  if (coeffectAttrs && *coeffectAttrs != CEAttrNone) {
-    if (funcAttrIsAnyRx(*coeffectAttrs)) ret |= AttrRxBody;
-    if (funcAttrIsPure(*coeffectAttrs)) ret |= AttrPureBody;
+  if (staticCoeffects && *staticCoeffects != CEAttrNone) {
+    if (funcAttrIsAnyRx(*staticCoeffects)) ret |= AttrRxBody;
+    if (funcAttrIsPure(*staticCoeffects)) ret |= AttrPureBody;
     if (RO::EvalPureEnforceCalls <= 0) {
-      *coeffectAttrs = CEAttrNone;
+      *staticCoeffects = CEAttrNone;
     } else if (RO::EvalRxEnforceCalls <= 0) {
-      *coeffectAttrs &= CoeffectAttr(~(CEAttrRxLevel0 | CEAttrRxLevel1));
+      *staticCoeffects &= StaticCoeffects(~(CEAttrRxLevel0 | CEAttrRxLevel1));
     }
   }
   return Attr(ret);
@@ -2708,9 +2708,9 @@ void parse_function(AsmState& as) {
   auto const ubs = parse_ubs(as);
 
   UserAttributeMap userAttrs;
-  CoeffectAttr coeffectAttrs = CEAttrNone;
+  StaticCoeffects staticCoeffects = CEAttrNone;
   Attr attrs = parse_attribute_list(as, AttrContext::Func,
-                                    &userAttrs, &coeffectAttrs);
+                                    &userAttrs, &staticCoeffects);
 
   if (!SystemLib::s_inited) {
     attrs |= AttrUnique | AttrPersistent | AttrBuiltin;
@@ -2728,7 +2728,7 @@ void parse_function(AsmState& as) {
 
   as.fe = as.ue->newFuncEmitter(makeStaticString(name));
   as.fe->init(line0, line1, as.ue->bcPos(), attrs, nullptr);
-  as.fe->coeffectAttrs = coeffectAttrs;
+  as.fe->staticCoeffects = staticCoeffects;
 
   auto currUBs = getRelevantUpperBounds(retTypeInfo.second, ubs, {}, {});
   auto const hasReifiedGenerics =
@@ -2769,9 +2769,9 @@ void parse_method(AsmState& as, const UpperBoundMap& class_ubs) {
   auto const ubs = parse_ubs(as);
 
   UserAttributeMap userAttrs;
-  CoeffectAttr coeffectAttrs = CEAttrNone;
+  StaticCoeffects staticCoeffects = CEAttrNone;
   Attr attrs = parse_attribute_list(as, AttrContext::Func,
-                                    &userAttrs, &coeffectAttrs);
+                                    &userAttrs, &staticCoeffects);
 
   if (!SystemLib::s_inited) attrs |= AttrBuiltin;
 
@@ -2793,7 +2793,7 @@ void parse_method(AsmState& as, const UpperBoundMap& class_ubs) {
   as.fe = as.ue->newMethodEmitter(sname, as.pce);
   as.pce->addMethod(as.fe);
   as.fe->init(line0, line1, as.ue->bcPos(), attrs, nullptr);
-  as.fe->coeffectAttrs = coeffectAttrs;
+  as.fe->staticCoeffects = staticCoeffects;
 
   auto const hasReifiedGenerics =
     userAttrs.find(s___Reified.get()) != userAttrs.end() ||

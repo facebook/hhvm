@@ -22,7 +22,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-enum CoeffectAttr : uint16_t {
+enum StaticCoeffects : uint16_t {
   CEAttrNone = 0,
   // The RxLevel attrs are used to encode the maximum level of reactivity
   // of a function.
@@ -31,17 +31,17 @@ enum CoeffectAttr : uint16_t {
   CEAttrRxLevel2         = (1u << 2),
 };
 
-constexpr CoeffectAttr operator|(CoeffectAttr a, CoeffectAttr b) {
-  return CoeffectAttr((uint16_t)a | (uint16_t)b);
+constexpr StaticCoeffects operator|(StaticCoeffects a, StaticCoeffects b) {
+  return StaticCoeffects((uint16_t)a | (uint16_t)b);
 }
 
 
-inline CoeffectAttr& operator|=(CoeffectAttr& a, const CoeffectAttr& b) {
-  return (a = CoeffectAttr((uint16_t)a | (uint16_t)b));
+inline StaticCoeffects& operator|=(StaticCoeffects& a, const StaticCoeffects& b) {
+  return (a = StaticCoeffects((uint16_t)a | (uint16_t)b));
 }
 
-inline CoeffectAttr& operator&=(CoeffectAttr& a, const CoeffectAttr& b) {
-  return (a = CoeffectAttr((uint16_t)a & (uint16_t)b));
+inline StaticCoeffects& operator&=(StaticCoeffects& a, const StaticCoeffects& b) {
+  return (a = StaticCoeffects((uint16_t)a & (uint16_t)b));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -69,27 +69,27 @@ constexpr uint16_t kRxLevelMask = 7u;
 static_assert(kRxAttrMask >> kRxAttrShift == kRxLevelMask, "");
 
 
-constexpr RxLevel rxLevelFromAttr(CoeffectAttr attrs) {
+constexpr RxLevel rxLevelFromAttr(StaticCoeffects attrs) {
   return static_cast<RxLevel>(
     (static_cast<uint16_t>(attrs) >> kRxAttrShift) & kRxLevelMask
   );
 }
 
-constexpr CoeffectAttr rxMakeAttr(RxLevel level) {
+constexpr StaticCoeffects rxMakeAttr(RxLevel level) {
   return
-    static_cast<CoeffectAttr>(static_cast<uint16_t>(level) << kRxAttrShift);
+    static_cast<StaticCoeffects>(static_cast<uint16_t>(level) << kRxAttrShift);
 }
 
-CoeffectAttr rxAttrsFromAttrString(const std::string& a);
-const char* rxAttrsToAttrString(CoeffectAttr a);
+StaticCoeffects rxAttrsFromAttrString(const std::string& a);
+const char* rxAttrsToAttrString(StaticCoeffects a);
 
 const char* rxLevelToString(RxLevel r);
 
-constexpr bool funcAttrIsAnyRx(CoeffectAttr a) {
+constexpr bool funcAttrIsAnyRx(StaticCoeffects a) {
   return static_cast<uint16_t>(a) & kRxAttrMask;
 }
 
-constexpr bool funcAttrIsPure(CoeffectAttr a) {
+constexpr bool funcAttrIsPure(StaticCoeffects a) {
   return static_cast<uint16_t>(a) & CEAttrRxLevel2;
 }
 

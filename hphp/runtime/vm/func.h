@@ -880,7 +880,7 @@ struct Func final {
    * Get the system and coeffect attributes of the function.
    */
   Attr attrs() const;
-  CoeffectAttr coeffectAttrs() const;
+  StaticCoeffects staticCoeffects() const;
 
   /*
    * Get the user-declared attributes of the function.
@@ -1066,7 +1066,7 @@ struct Func final {
    * Print function attributes to out.
    */
   static void print_attrs(std::ostream& out, Attr attrs);
-  static void print_attrs(std::ostream& out, CoeffectAttr attrs);
+  static void print_attrs(std::ostream& out, StaticCoeffects attrs);
 
 
   /////////////////////////////////////////////////////////////////////////////
@@ -1096,7 +1096,7 @@ struct Func final {
   // Having public setters here should be avoided, so try not to add any.
 
   void setAttrs(Attr attrs);
-  void setCoeffectAttrs(CoeffectAttr attrs);
+  void setStaticCoeffects(StaticCoeffects attrs);
   void setBaseCls(Class* baseCls);
   void setFuncHandle(rds::Link<LowPtr<Func>, rds::Mode::NonLocal> l);
   void setHasPrivateAncestor(bool b);
@@ -1118,7 +1118,7 @@ struct Func final {
     return offsetof(Func, m_##f);       \
   }
   OFF(attrs)
-  OFF(coeffectAttrs)
+  OFF(staticCoeffects)
   OFF(name)
   OFF(maxStackCells)
   OFF(maybeIntercepted)
@@ -1570,7 +1570,7 @@ private:
   bool m_hasForeignThis : 1;
   bool m_registeredInDataMap : 1;
   // 2 free bits
-  CoeffectAttr m_coeffectAttrs{CEAttrNone};
+  StaticCoeffects m_staticCoeffects{CEAttrNone};
   int16_t m_maxStackCells{0};
   uint64_t m_inoutBitVal{0};
   Unit* const m_unit;

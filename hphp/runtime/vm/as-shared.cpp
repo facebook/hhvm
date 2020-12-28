@@ -107,7 +107,7 @@ std::string attrs_to_string(AttrContext ctx, Attr attrs) {
   return from(attrs_to_vec(ctx, attrs)) | unsplit<std::string>(" ");
 }
 
-std::vector<std::string> attrs_to_vec(AttrContext ctx, CoeffectAttr attrs) {
+std::vector<std::string> attrs_to_vec(AttrContext ctx, StaticCoeffects attrs) {
   std::vector<std::string> vec;
   if (auto const rxAttrString = rxAttrsToAttrString(attrs)) {
     vec.push_back(rxAttrString);
@@ -115,7 +115,7 @@ std::vector<std::string> attrs_to_vec(AttrContext ctx, CoeffectAttr attrs) {
   return vec;
 }
 
-std::string attrs_to_string(AttrContext ctx, CoeffectAttr attrs) {
+std::string attrs_to_string(AttrContext ctx, StaticCoeffects attrs) {
   using namespace folly::gen;
   return from(attrs_to_vec(ctx, attrs)) | unsplit<std::string>(" ");
 }

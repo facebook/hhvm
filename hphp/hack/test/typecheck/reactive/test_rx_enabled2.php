@@ -3,7 +3,7 @@
 
 <<__Rx>>
 function f1(): int {
-  if (HH\Rx\IS_ENABLED) {
+  if (Rx\IS_ENABLED) {
     return rx();
   } else {
     return nonrx();
@@ -12,14 +12,14 @@ function f1(): int {
 
 <<__Rx>>
 function f2(): int {
-  return HH\Rx\IS_ENABLED ? rx() : nonrx();
+  return Rx\IS_ENABLED ? rx() : nonrx();
 }
 
 
 // ======== RxShallow ========
 <<__RxShallow>>
 function f3(): int {
-  if (HH\Rx\IS_ENABLED) {
+  if (Rx\IS_ENABLED) {
     return rx() + rxshallow();
   } else {
     return nonrx();
@@ -28,13 +28,13 @@ function f3(): int {
 
 <<__RxShallow>>
 function f4(): int {
-  return HH\Rx\IS_ENABLED ? rx() + rxshallow() : nonrx();
+  return Rx\IS_ENABLED ? rx() + rxshallow() : nonrx();
 }
 
 // ======== RxLocal ========
 <<__RxLocal>>
 function f5(): int {
-  if (HH\Rx\IS_ENABLED) {
+  if (Rx\IS_ENABLED) {
     return rx();
   } else {
     return nonrx();
@@ -43,24 +43,24 @@ function f5(): int {
 
 <<__RxLocal>>
 function f6(): int {
-  return HH\Rx\IS_ENABLED ? rx() : nonrx();
+  return Rx\IS_ENABLED ? rx() : nonrx();
 }
 
 <<__Rx>>
 function f7(): int {
-  invariant(HH\Rx\IS_ENABLED, "Host with Rx support expected.");
+  invariant(Rx\IS_ENABLED, "Host with Rx support expected.");
   return rx();
 }
 
 <<__Rx>>
 function f8(): int {
-  invariant(!HH\Rx\IS_ENABLED, "Host with Rx support not expected.");
+  invariant(!Rx\IS_ENABLED, "Host with Rx support not expected.");
   return nonrx();
 }
 
 <<__Rx>>
 function f9(): int {
-  if (HH\Rx\IS_ENABLED) {
+  if (Rx\IS_ENABLED) {
     return 0;
   }
   return nonrx();
@@ -68,7 +68,7 @@ function f9(): int {
 
 <<__Rx>>
 function f10(): int {
-  if (!HH\Rx\IS_ENABLED) {
+  if (!Rx\IS_ENABLED) {
     return nonrx();
   }
   return rx();

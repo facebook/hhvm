@@ -711,14 +711,13 @@ module HH = struct
 end
 
 module Rx = struct
+  let is_enabled = "\\HH\\Rx\\IS_ENABLED"
+
   let freeze = "\\HH\\Rx\\freeze"
 
   let mutable_ = "\\HH\\Rx\\mutable"
 
   let cTraversable = "\\HH\\Rx\\Traversable"
-
-  let is_enabled v =
-    String.equal v "\\HH\\Rx\\IS_ENABLED" || String.equal v "\\Rx\\IS_ENABLED"
 
   let cKeyedTraversable = "\\HH\\Rx\\KeyedTraversable"
 

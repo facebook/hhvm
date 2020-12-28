@@ -24,7 +24,7 @@ abstract class Factory {
 
   <<__RxShallow, __OnlyRxIfImpl(IRxFactory::class)>>
   final public static function get(): this::TLoader {
-    if (HH\Rx\IS_ENABLED) {
+    if (Rx\IS_ENABLED) {
       return static::__getLoader();
     } else {
       if (static::$getLoader === null) {

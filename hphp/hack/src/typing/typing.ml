@@ -6574,7 +6574,7 @@ and condition
         Ast_defs.Eqeqeq
     in
     condition env (not tparamet) (pty, Aast.Binop (op, e1, e2))
-  | Aast.Id (_, s) when SN.Rx.is_enabled s ->
+  | Aast.Id (_, s) when String.equal s SN.Rx.is_enabled ->
     (* when Rx\IS_ENABLED is false - switch env to non-reactive *)
     let env =
       if not tparamet then

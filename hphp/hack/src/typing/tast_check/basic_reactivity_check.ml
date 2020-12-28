@@ -142,7 +142,7 @@ let check_non_rx =
 
     method! on_expr env expr =
       match snd expr with
-      | Id (p, n) when SN.Rx.is_enabled n ->
+      | Id (p, n) when String.equal SN.Rx.is_enabled n ->
         Errors.rx_enabled_in_non_rx_context p
       | _ -> super#on_expr env expr
   end
@@ -569,7 +569,7 @@ let check =
       else
         match b.fb_ast with
         | [(_, If (((p, _), Id (_, c)), then_stmt, else_stmt))]
-          when SN.Rx.is_enabled c ->
+          when String.equal SN.Rx.is_enabled c ->
           (match ctx.reactivity with
           | Pure _
           | MaybeReactive (Pure _)

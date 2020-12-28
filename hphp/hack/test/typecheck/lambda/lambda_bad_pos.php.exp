@@ -8,11 +8,11 @@ Invalid return type (Typing[4323])
   Expected `arraykey`
   File "lambda_bad_pos.php", line 25, characters 22-22:
   But got `C`
-  File "hackarray.hhi", line 23, characters 52-52:
+  File "hackarray.hhi", line 27, characters 52-52:
     via this generic `T`
-  File "hackarray.hhi", line 19, characters 77-78:
+  File "hackarray.hhi", line 21, characters 77-78:
     via this generic `Tv`
-  File "interfaces.hhi", line 120, characters 99-100:
+  File "interfaces.hhi", line 125, characters 99-100:
     via this generic `Tv`
   File "rx/interfaces.hhi", line 37, characters 63-64:
     via this generic `Tv`

@@ -6,11 +6,11 @@ Invalid return type (Typing[4110])
   But got `int`
   File "collections/Map.hhi", line 56, characters 60-61:
     via this generic `Tk`
-  File "collections/interfaces.hhi", line 1138, characters 59-60:
+  File "collections/interfaces.hhi", line 1139, characters 59-60:
     via this generic `Tk`
-  File "collections/interfaces.hhi", line 865, characters 64-65:
+  File "collections/interfaces.hhi", line 866, characters 64-65:
     via this generic `Tk`
-  File "interfaces.hhi", line 120, characters 95-96:
+  File "interfaces.hhi", line 125, characters 95-96:
     via this generic `Tk`
   File "rx/interfaces.hhi", line 37, characters 59-60:
     via this generic `Tk`

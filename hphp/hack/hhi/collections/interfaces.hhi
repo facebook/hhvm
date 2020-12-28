@@ -15,6 +15,7 @@ namespace {
  */
 <<__Sealed(Collection::class, ConstMap::class, ConstSet::class, ConstVector::class)>>
 interface ConstCollection<+Te> extends HH\Rx\Countable {
+  const ctx CMut = [local];
   /**
    * Is the collection empty?
    *

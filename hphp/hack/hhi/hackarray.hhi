@@ -8,6 +8,8 @@
  *
  */
 
+<<file: __EnableUnstableFeatures('coeffects_provisional')>>
+
 namespace HH {
 
 /**
@@ -16,7 +18,9 @@ namespace HH {
  * Arrays (varray, darray).
  */
 <<__Sealed(dict::class, keyset::class, vec::class)>>
-abstract class AnyArray<+Tk as arraykey, +Tv> implements KeyedContainer<Tk, Tv>, \XHPChild {}
+abstract class AnyArray<+Tk as arraykey, +Tv> implements KeyedContainer<Tk, Tv>, \XHPChild {
+  const ctx CMut = [];
+}
 
 abstract final class dict<+Tk as arraykey, +Tv> extends AnyArray<Tk, Tv> {}
 abstract final class keyset<+T as arraykey> extends AnyArray<T, T> {}

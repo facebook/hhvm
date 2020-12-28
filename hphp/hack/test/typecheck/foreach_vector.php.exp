@@ -6,13 +6,13 @@ Typing error (Typing[4110])
   But got `Foo`
   File "collections/Vector.hhi", line 47, characters 50-51:
     via this generic `Tv`
-  File "collections/interfaces.hhi", line 587, characters 49-50:
+  File "collections/interfaces.hhi", line 588, characters 49-50:
     via this generic `Tv`
-  File "collections/interfaces.hhi", line 310, characters 56-57:
+  File "collections/interfaces.hhi", line 311, characters 56-57:
     via this generic `Tv`
-  File "interfaces.hhi", line 120, characters 66-67:
+  File "interfaces.hhi", line 125, characters 66-67:
     via this generic `Tv`
-  File "interfaces.hhi", line 93, characters 53-54:
+  File "interfaces.hhi", line 95, characters 53-54:
     via this generic `Tv`
   File "rx/interfaces.hhi", line 28, characters 52-53:
     via this generic `Tv`

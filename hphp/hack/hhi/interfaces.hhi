@@ -44,7 +44,9 @@ namespace HH {
   \SplHeap::class,
   \HH\Rx\Traversable::class
 )>>
-interface Traversable<+Tv> {}
+interface Traversable<+Tv> {
+  abstract const ctx C = [defaults];
+}
 
 /**
  * Represents an entity that can be iterated over using `foreach`, allowing
@@ -90,7 +92,10 @@ interface KeyedTraversable<+Tk, +Tv> extends Traversable<Tv> {}
  * @guide /hack/collections/interfaces
  */
 <<__Sealed(KeyedContainer::class)>>
-interface Container<+Tv> extends \HH\Rx\Traversable<Tv> {}
+interface Container<+Tv> extends \HH\Rx\Traversable<Tv> {
+  const ctx C = [];
+  abstract const ctx CMut;
+}
 
 /**
  * Represents an entity that can be iterated over using `foreach`, allowing
@@ -859,6 +864,7 @@ namespace HH {
   */
 <<__HipHopSpecific>>
 interface IMemoizeParam {
+  abstract const ctx C = [defaults];
    /**
    * Serialize this object to a string that can be used as a
    * dictionary key to differentiate instances of this class.
@@ -875,6 +881,7 @@ namespace {
   */
 <<__HipHopSpecific>>
 interface IDisposable {
+  abstract const ctx C = [defaults];
   /**
    * This method is invoked exactly once at the end of the scope of the
    * using statement, unless the program terminates with a fatal error.
@@ -887,6 +894,7 @@ interface IDisposable {
   */
 <<__HipHopSpecific>>
 interface IAsyncDisposable {
+  abstract const ctx C = [defaults];
   /**
    * This method is invoked exactly once at the end of the scope of the
    * await using statement, unless the program terminates with a fatal error.

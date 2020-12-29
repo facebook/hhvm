@@ -2477,10 +2477,21 @@ fn emit_special_function(
         }
         ("HH\\fun", _) => {
             if fun_and_clsmeth_disabled {
-                Err(emit_fatal::raise_fatal_parse(
-                    pos,
-                    "`fun()` is disabled; switch to first-class references like `foo<>`",
-                ))
+                match args {
+                    [tast::Expr(_, tast::Expr_::String(func_name))] => {
+                        Err(emit_fatal::raise_fatal_parse(
+                            pos,
+                            format!(
+                                "`fun()` is disabled; switch to first-class references like `{}<>`",
+                                func_name
+                            ),
+                        ))
+                    }
+                    _ => Err(emit_fatal::raise_fatal_runtime(
+                        pos,
+                        "Constant string expected in fun()",
+                    )),
+                }
             } else if nargs != 1 {
                 Err(emit_fatal::raise_fatal_runtime(
                     pos,

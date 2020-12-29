@@ -968,8 +968,17 @@ pub const splice_outside_et: Error =
 
 pub const invalid_enum_class_enumerator: Error = Cow::Borrowed("Invalid enum class constant");
 
-pub const fun_disabled: Error =
-    Cow::Borrowed("`fun()` is disabled; switch to first-class references like `foo<>`");
+pub fn fun_disabled(func_name: &str) -> Error {
+    Cow::Owned(format!(
+        "`fun()` is disabled; switch to first-class references like `{}<>`",
+        func_name
+            .trim_end_matches('\'')
+            .trim_start_matches('\'')
+            .to_string()
+    ))
+}
+
+pub const fun_requires_const_string: Error = Cow::Borrowed("Constant string expected in fun()");
 
 pub const class_meth_disabled: Error =
     Cow::Borrowed("`class_meth()` is disabled; switch to first-class references like `C::bar<>`");

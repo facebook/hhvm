@@ -3315,8 +3315,16 @@ where
                 if self.text(recv) == Self::strip_hh_ns(sn::autoimported_functions::FUN_)
                     && fun_and_clsmeth_disabled
                 {
-                    self.errors
-                        .push(Self::make_error_from_node(recv, errors::fun_disabled))
+                    let mut arg_node_list = Self::syntax_to_list_no_separators(arg_list);
+                    match arg_node_list.next() {
+                        Some(name) if arg_node_list.count() == 0 => self.errors.push(
+                            Self::make_error_from_node(recv, errors::fun_disabled(self.text(name))),
+                        ),
+                        _ => self.errors.push(Self::make_error_from_node(
+                            recv,
+                            errors::fun_requires_const_string,
+                        )),
+                    }
                 }
 
                 if self.text(recv) == Self::strip_hh_ns(sn::autoimported_functions::CLASS_METH)

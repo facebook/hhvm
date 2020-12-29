@@ -2749,14 +2749,8 @@ std::uniform_int_distribution<int> s_stressDist(1,7);
  */
 void allocateSpillSpace(Vunit& unit, const VxlsContext& ctx,
                         SpillInfo& spi) {
-  if (RuntimeOption::EvalHHIRStressSpill && ctx.abi.canSpill) {
-    auto extra = s_stressDist(s_stressRand);
-    FTRACE(1, "StressSpill on; adding {} extra slots\n", extra);
-    spi.used_spill_slots += extra;
-  }
   if (spi.used_spill_slots == 0) return;
   Timer t(Timer::vasm_reg_alloc_spill, unit.log_entry);
-  always_assert(ctx.abi.canSpill);
 
   // Make sure we always allocate spill space in multiples of 16 bytes, to keep
   // alignment straightforward.

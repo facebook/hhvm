@@ -116,8 +116,7 @@ const Abi trace_abi {
   kSIMDUnreserved,
   kSIMDReserved,
   kCalleeSaved,
-  kSF,
-  true
+  kSF
 };
 
 const Abi prologue_abi {
@@ -126,8 +125,7 @@ const Abi prologue_abi {
   trace_abi.simd() & kPrologueRegs,
   trace_abi.simd() - kPrologueRegs,
   trace_abi.calleeSaved & kPrologueRegs,
-  trace_abi.sf,
-  false
+  trace_abi.sf
 };
 
 const Abi cross_trace_abi {
@@ -136,8 +134,7 @@ const Abi cross_trace_abi {
   trace_abi.simd() & kScratchCrossTraceRegs,
   trace_abi.simd() - kScratchCrossTraceRegs,
   trace_abi.calleeSaved & kScratchCrossTraceRegs,
-  trace_abi.sf,
-  false
+  trace_abi.sf
 };
 
 const Abi helper_abi {
@@ -146,8 +143,7 @@ const Abi helper_abi {
   kSIMDHelperRegs,
   trace_abi.simd() - kSIMDHelperRegs,
   trace_abi.calleeSaved,
-  trace_abi.sf,
-  false
+  trace_abi.sf
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -110,8 +110,7 @@ const Abi trace_abi {
   kXMMUnreserved,
   kXMMReserved,
   kCalleeSaved,
-  kSF,
-  true,
+  kSF
 };
 
 const Abi cross_trace_abi {
@@ -120,8 +119,7 @@ const Abi cross_trace_abi {
   trace_abi.simd() & kScratchCrossTraceRegs,
   trace_abi.simd() - kScratchCrossTraceRegs,
   trace_abi.calleeSaved & kScratchCrossTraceRegs,
-  trace_abi.sf,
-  false
+  trace_abi.sf
 };
 
 const Abi helper_abi {
@@ -130,9 +128,7 @@ const Abi helper_abi {
   kXMMHelperRegs,
   trace_abi.simd() - kXMMHelperRegs,
   trace_abi.calleeSaved,
-  trace_abi.sf,
-  false
-
+  trace_abi.sf
 };
 
 constexpr PhysReg gp_args[] = {

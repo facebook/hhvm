@@ -223,6 +223,12 @@ struct State {
   jit::vector<VregSet> uses;
   jit::vector<VregSet> gens;
 
+  // Tracks if the stack pointer has been recorded upon entry to the block.
+  // Built during initial calculate_liveness, and used by the spiller to
+  // establish if spilling is allowed.
+  BlockSet spRecordedIn{};
+  BlockSet spRecordedOut{};
+
   // All physical registers (including ignored), which have a def in a
   // block
   jit::vector<RegSet> physDefs;
@@ -924,6 +930,8 @@ void calculate_liveness(State& state, const BlockSet* changed = nullptr) {
     assertx(state.gens.size() == unit.blocks.size());
     assertx(state.physDefs.size() == unit.blocks.size());
     assertx(state.physChangedBefore.size() == unit.blocks.size());
+    assertx(state.spRecordedIn.size() == unit.blocks.size());
+    assertx(state.spRecordedOut.size() == unit.blocks.size());
     assertx(changed->size() == unit.blocks.size());
   } else {
     state.liveIn.resize(unit.blocks.size());
@@ -933,13 +941,17 @@ void calculate_liveness(State& state, const BlockSet* changed = nullptr) {
     state.gens.resize(unit.blocks.size());
     state.physDefs.resize(unit.blocks.size());
     state.physChangedBefore.resize(unit.blocks.size());
+    state.spRecordedIn.resize(unit.blocks.size());
+    state.spRecordedOut.resize(unit.blocks.size());
   }
 
-  auto const processBlock = [&] (Vblock& block,
+  auto const processBlock = [&] (Vlabel b,
                                  VregSet& g,
                                  VregSet& k,
                                  VregSet& u,
-                                 RegSet& r) {
+                                 RegSet& r,
+                                 bool& spRecorded) {
+    auto& block = unit.blocks[b];
     for (auto& inst : boost::adaptors::reverse(block.code)) {
       auto const& defs = defs_set_cached(state, inst);
       auto const& uses = uses_set_cached(state, inst);
@@ -948,6 +960,11 @@ void calculate_liveness(State& state, const BlockSet* changed = nullptr) {
       g -= defs;
       g |= uses;
       u |= uses;
+      if (inst.op == Vinstr::recordbasenativesp) {
+        assert_flog(!spRecorded, "Block B{} {} initiailizes native SP, "
+                    "but already initialized.", b, show(unit, inst));
+        spRecorded = true;
+      }
     }
     g -= state.flags;
     k -= state.flags;
@@ -964,21 +981,31 @@ void calculate_liveness(State& state, const BlockSet* changed = nullptr) {
       auto& k = state.defs[b];
       auto& u = state.uses[b];
       auto& r = state.physDefs[b];
+      bool spRecorded = state.spRecordedIn[b];
       g.reset();
       k.reset();
       u.reset();
       r = RegSet{};
-      processBlock(unit.blocks[b], g, k, u, r);
+      processBlock(b, g, k, u, r, spRecorded);
+      state.spRecordedOut[b] = spRecorded;
+      for (auto const succ : succs(unit.blocks[b])) {
+        state.spRecordedIn[succ] = spRecorded;
+      }
     } else if (debug) {
       VregSet g;
       VregSet k;
       VregSet u;
       RegSet r;
-      processBlock(unit.blocks[b], g, k, u, r);
+      bool spRecorded = state.spRecordedIn[b];
+      processBlock(b, g, k, u, r, spRecorded);
       always_assert(g == state.gens[b]);
       always_assert(k == state.defs[b]);
       always_assert(u == state.uses[b]);
       always_assert(r == state.physDefs[b]);
+      always_assert(state.spRecordedOut[b] == spRecorded);
+      for (auto const succ : succs(unit.blocks[b])) {
+        always_assert(state.spRecordedIn[succ] == spRecorded);
+      }
     }
 
     state.liveIn[b].reset();
@@ -4060,10 +4087,11 @@ SpillWeightAt spill_weight_at(State&,
 
 struct SpillerState {
   // Default state is no Vregs are live
-  explicit SpillerState(State& state)
+  SpillerState(State& state, bool spRecordedIn)
     : gp{size_t(state.gpUnreserved.size())}
     , simd{size_t(state.simdUnreserved.size())}
     , state{&state}
+    , spRecorded{spRecordedIn}
   {}
 
   // We track the Vreg state separately for each register class.
@@ -4075,6 +4103,7 @@ struct SpillerState {
   PerClass gp;
   PerClass simd;
   State* state;
+  bool spRecorded;
 
   // Given a Vreg, return the per-class state appropriate for that Vreg (or
   // nullptr if untracked). This lets code manipulate the state generically
@@ -4277,7 +4306,7 @@ struct SpillerState {
   bool checkInvariants(Vlabel b, size_t instIdx) const {
     auto const impl = [&] (const PerClass& per) {
       // If we can't spill, we should never have a Vreg in memory.
-      always_assert(IMPLIES(!state->abi.canSpill, per.inMem.none()));
+      always_assert(IMPLIES(!spRecorded, per.inMem.none()));
       // We should never have more un-spilled Vregs than there are physical
       // registers for the class (except before a call to spill()).
       always_assert(per.inReg.size() <= per.numRegs);
@@ -4882,7 +4911,7 @@ size_t setup_initial_spiller_state(State& state,
                                    SpillerResults& results,
                                    const SpillingNeededPerBlock& spilling) {
   auto& unit = state.unit;
-  SpillerState initial{state};
+  SpillerState initial{state, state.spRecordedIn[b]};
 
   const VregList* phiDefs = nullptr;
   if (unit.blocks[b].code.front().op == Vinstr::phidef) {
@@ -5335,8 +5364,8 @@ size_t process_phijmp_spills(State& state,
 
   // We have to spill. Make sure we can.
   always_assert_flog(
-    IMPLIES(!state.abi.canSpill, spills.none()),
-    "Trying to spill for {} in {} when not allowed "
+    IMPLIES(!spiller.spRecorded, spills.none()),
+    "Trying to spill for {} in {} when not allowed (sp not recorded) "
     "(Spills: {})",
     show(state.unit, phijmp),
     b,
@@ -5635,8 +5664,8 @@ ProcessCopyResults process_copy_spills(State& state,
 
   // We have to spill. Make sure we can.
   always_assert_flog(
-    IMPLIES(!state.abi.canSpill, spills.none()),
-    "Trying to spill for {} in {} when not allowed "
+    IMPLIES(!spiller.spRecorded, spills.none()),
+    "Trying to spill for {} in {} when not allowed (sp not recorded) "
     "(Spills: {})",
     show(state.unit, unit.blocks[b].code[instIdx]),
     b,
@@ -6155,8 +6184,8 @@ size_t process_inst_spills(State& state,
 
   // Make sure we can spill.
   always_assert_flog(
-    IMPLIES(!state.abi.canSpill, spills.none() && reloads.none()),
-    "Trying to spill/reload for {} in {} when not allowed "
+    IMPLIES(!spiller.spRecorded, spills.none() && reloads.none()),
+    "Trying to spill/reload for {} in {} when not allowed (sp not recorded) "
     "(Spills: {}, Reloads: {})",
     show(state.unit, inst),
     b,
@@ -6270,6 +6299,10 @@ void process_spills_skip(const State& state,
       s->inReg.add(r);
     }
   }
+
+  // Since we jumped to the end of the block without processing update the
+  // spRecorded state to the block out state.
+  spiller.spRecorded = state.spRecordedOut[b];
 }
 
 // Run the spiller logic on an instruction which we've determined
@@ -6351,6 +6384,10 @@ SpillerResults process_spills(State& state,
         assertx(spiller.checkInvariants(b, instIdx));
 
         auto& inst = unit.blocks[b].code[instIdx];
+
+        if (inst.op == Vinstr::recordbasenativesp) {
+          spiller.spRecorded = true;
+        }
 
         // If this instruction cannot cause any spills, and it does
         // not use any spilled registers, we can process it more
@@ -7390,7 +7427,7 @@ void fixup_spill_mismatches(State& state, SpillerResults& results) {
 
       always_assert(
         IMPLIES(
-          !state.abi.canSpill,
+          !state.spRecordedIn[succ],
           mismatch.spills.none() && mismatch.reloads.none()
         )
       );
@@ -10872,8 +10909,7 @@ SPOffsets calculate_sp_offsets(const State& state) {
     for (size_t i = 0; i < block.code.size(); i++) {
       auto const& inst = block.code[i];
       if (inst.op == Vinstr::recordbasenativesp) {
-        assert_flog(!spOffset, "Block B{} Instr {} initiailizes native SP, "
-                    "but already initialized.", b, i);
+        assertx(!spOffset);
         spOffset = 0;
       } else if (spOffset) {
         *spOffset += sp_change(state, inst);
@@ -11229,10 +11265,11 @@ jit::vector<SPAdjustLiveness> find_spill_liveness_impl(const State& state,
         if (inst.op == Vinstr::recordbasenativesp) spRecorded = true;
         if (!is_spill_inst(inst)) continue;
         live.begin = i;
-        always_assert_flog(spRecorded, "Trying to spill before allowed. "
-                           "Spill space is being allocated due to a spill at "
-                           "B{} Instr {}, but the base native sp is not yet "
-                           "recorded.", b, i);
+        // This should be caught earlier when the spill occurs.
+        assert_flog(spRecorded, "Trying to spill before allowed. "
+                    "Spill space is being allocated due to a spill at "
+                    "B{} Instr {}, but the base native sp is not yet "
+                    "recorded.", b, i);
         break;
       }
     } else {
@@ -11622,7 +11659,6 @@ void lower_spills(State& state) {
   auto const spillSpace =
     state.numSpillSlots * 8 + state.numWideSpillSlots * 16;
 
-  assertx(IMPLIES(!state.abi.canSpill, spillSpace == 0));
   assertx((spillSpace % 16) == 0);
 
   // Common case, no spills.

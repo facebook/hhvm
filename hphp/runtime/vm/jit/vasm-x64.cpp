@@ -1223,7 +1223,7 @@ void optimizeX64(Vunit& unit, const Abi& abi, bool regalloc) {
 
   assertx(checkWidths(unit));
 
-  if (unit.context && !isProfiling(unit.context->kind) && abi.canSpill &&
+  if (unit.context && unit.context->kind == TransKind::Optimize &&
       RuntimeOption::EvalProfBranchSampleFreq > 0) {
     // Even when branch profiling is on, we still only want to profile
     // non-profiling translations of PHP functions.  We also require that we

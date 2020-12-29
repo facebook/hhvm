@@ -32,7 +32,6 @@ struct Abi {
   RegSet simdReserved;   // reserved floating point / simd 128-bit registers
   RegSet calleeSaved;    // callee-saved (gp and simd)
   RegSet sf;             // status flags
-  bool   canSpill;       // are we allowed to spill values to the stack?
 
   // convenience methods
   RegSet reserved() const { return gpReserved | simdReserved; }

@@ -1086,8 +1086,6 @@ val nonreactive_call_from_shallow :
 
 val illegal_destructor : Pos.t -> unit
 
-val rx_enabled_in_non_rx_context : Pos.t -> unit
-
 val ambiguous_lambda : Pos.t -> (Pos.t * string) list -> unit
 
 val ellipsis_strict_mode :
@@ -1415,6 +1413,8 @@ module CoeffectEnforcedOp : sig
   val output : Pos.t -> unit
 
   val static_property_access : Pos.t -> unit
+
+  val rx_enabled_in_non_rx_context : Pos.t -> unit
 
   val nonreactive_indexing : bool -> Pos.t -> unit
 

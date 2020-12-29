@@ -57,3 +57,6 @@ let enforce_static_property_access =
 
 let enforce_output =
   enforce_local_capability Capabilities.(mk output) "`echo` or `print` builtin"
+
+let enforce_rx_is_enabled =
+  enforce_local_capability Capabilities.(mk rx) ("`" ^ SN.Rx.is_enabled ^ "`")

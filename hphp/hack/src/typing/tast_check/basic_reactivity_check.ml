@@ -143,7 +143,8 @@ let check_non_rx =
     method! on_expr env expr =
       match snd expr with
       | Id (p, n) when String.equal SN.Rx.is_enabled n ->
-        Errors.rx_enabled_in_non_rx_context p
+        if not @@ TypecheckerOptions.local_coeffects (Env.get_tcopt env) then
+          Errors.CoeffectEnforcedOp.rx_enabled_in_non_rx_context p
       | _ -> super#on_expr env expr
   end
 
@@ -574,7 +575,9 @@ let check =
           | Pure _
           | MaybeReactive (Pure _)
           | RxVar (Some (Pure _)) ->
-            Errors.rx_enabled_in_non_rx_context p;
+            if not @@ TypecheckerOptions.local_coeffects (Env.get_tcopt env)
+            then
+              Errors.CoeffectEnforcedOp.rx_enabled_in_non_rx_context p;
             List.iter b.fb_ast (self#on_stmt (env, ctx))
           | _ ->
             List.iter then_stmt (self#on_stmt (env, ctx));

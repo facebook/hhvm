@@ -1,7 +1,7 @@
 <?hh // strict
 <<file: __EnableUnstableFeatures('coeffects_provisional')>>
 
-function f(): int {
+function f()[local]: int {
   if (Rx\IS_ENABLED) {
     return rx();
   } else {
@@ -10,7 +10,7 @@ function f(): int {
 }
 
 <<__Rx>>
-function rx(): int {
+function rx()[rx]: int {
   return 1;
 }
 

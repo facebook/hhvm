@@ -2,12 +2,12 @@
 <<file: __EnableUnstableFeatures('coeffects_provisional')>>
 
 <<__Rx>>
-function f(): void {
+function f()[rx]: void {
   nonrx(); // should error
 }
 
 <<__Rx>>
-function rx(): void {
+function rx()[rx]: void {
 }
 
 function nonrx(): void {

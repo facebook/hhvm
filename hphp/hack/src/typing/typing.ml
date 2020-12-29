@@ -6574,10 +6574,18 @@ and condition
         Ast_defs.Eqeqeq
     in
     condition env (not tparamet) (pty, Aast.Binop (op, e1, e2))
-  | Aast.Id (_, s) when String.equal s SN.Rx.is_enabled ->
+  | Aast.Id (p, s) when String.equal s SN.Rx.is_enabled ->
     (* when Rx\IS_ENABLED is false - switch env to non-reactive *)
     let env =
       if not tparamet then
+        let env =
+          if TypecheckerOptions.any_coeffects (Env.get_tcopt env) then
+            let env = Typing_local_ops.enforce_rx_is_enabled p env in
+            let defaults = MakeType.default_capability Pos.none in
+            fst @@ Typing_coeffects.register_capabilities env defaults defaults
+          else
+            env
+        in
         Env.set_env_reactive env Nonreactive
       else
         env

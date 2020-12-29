@@ -4,5 +4,5 @@ File "test_rx_enabled6.php", line 15, characters 7-19:
 `\HH\Rx\IS_ENABLED` can only be used in reactive functions. (Typing[4220])
 File "test_rx_enabled6.php", line 26, characters 9-21:
 `\HH\Rx\IS_ENABLED` can only be used in reactive functions. (Typing[4220])
-File "test_rx_enabled6.php", line 31, characters 9-21:
+File "test_rx_enabled6.php", line 33, characters 9-21:
 `\HH\Rx\IS_ENABLED` can only be used in reactive functions. (Typing[4220])

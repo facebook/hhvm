@@ -2,7 +2,7 @@
 <<file: __EnableUnstableFeatures('coeffects_provisional')>>
 
 <<__Pure>>
-function f(): int {
+function f()[]: int {
   if (Rx\IS_ENABLED) {
     return rx();
   } else {
@@ -11,7 +11,7 @@ function f(): int {
 }
 
 <<__Pure, __AtMostRxAsArgs>>
-function f2(<<__AtMostRxAsFunc>> (function(): void) $fn): void {
+function f2(<<__AtMostRxAsFunc>> (function()[_]: void) $fn)[ctx $fn]: void {
   if (Rx\IS_ENABLED) {
     $fn();
   } else {
@@ -27,18 +27,19 @@ class TestClass {
   }
 
   <<__Pure, __OnlyRxIfImpl(IFoo::class), __AtMostRxAsArgs>>
-  public function f3(<<__AtMostRxAsFunc>> (function(): void) $fn): void {
+  public function f3(
+    <<__AtMostRxAsFunc>> (function()[_]: void) $fn,
+  )[ctx $fn]: void {
     if (Rx\IS_ENABLED) {
       $fn();
     } else {
       $fn();
     }
   }
-
 }
 
 <<__Pure>>
-function rx(): int {
+function rx()[]: int {
   return 1;
 }
 

@@ -4075,6 +4075,12 @@ module CoeffectEnforcedOp = struct
       pos
       "Static property cannot be used in a reactive context."
 
+  let rx_enabled_in_non_rx_context pos =
+    add
+      (Typing.err_code Typing.RxEnabledInNonRxContext)
+      pos
+      "`\\HH\\Rx\\IS_ENABLED` can only be used in reactive functions."
+
   let nonreactive_indexing is_append pos =
     let msg =
       if is_append then
@@ -4663,12 +4669,6 @@ let nonreactive_call_from_shallow pos decl_pos callee_reactivity cause_pos_opt =
               "This argument caused function to be " ^ callee_reactivity ^ "."
             );
           ]) )
-
-let rx_enabled_in_non_rx_context pos =
-  add
-    (Typing.err_code Typing.RxEnabledInNonRxContext)
-    pos
-    "`\\HH\\Rx\\IS_ENABLED` can only be used in reactive functions."
 
 let rx_parameter_condition_mismatch
     cond pos def_pos (on_error : typing_error_callback) =

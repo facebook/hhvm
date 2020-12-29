@@ -1554,6 +1554,7 @@ dependencies = [
  "oxidized",
  "regex",
  "runtime",
+ "rx_rust",
  "thiserror",
 ]
 

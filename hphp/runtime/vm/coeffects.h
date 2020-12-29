@@ -80,8 +80,8 @@ constexpr StaticCoeffects rxMakeAttr(RxLevel level) {
     static_cast<StaticCoeffects>(static_cast<uint16_t>(level) << kRxAttrShift);
 }
 
-StaticCoeffects rxAttrsFromAttrString(const std::string& a);
-const char* rxAttrsToAttrString(StaticCoeffects a);
+StaticCoeffects coeffectFromName(const std::string&);
+const char* coeffectToString(StaticCoeffects);
 
 const char* rxLevelToString(RxLevel r);
 

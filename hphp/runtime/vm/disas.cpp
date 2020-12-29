@@ -424,6 +424,9 @@ void print_func_directives(Output& out, const FuncInfo& finfo) {
     }
     out.fmtln(".declvars {};", folly::join(" ", locals));
   }
+  if (auto const coeffect = coeffectToString(func->staticCoeffects())) {
+    out.fmtln(".static_coeffects {};", coeffect);
+  }
   if (func->hasCoeffectRules()) {
     for (auto const& rule : func->getCoeffectRules()) {
       out.fmtln(rule.getDirectiveString());
@@ -542,9 +545,8 @@ std::string opt_attrs(AttrContext ctx, Attr attrs,
                       const UserAttributeMap* userAttrs = nullptr,
                       bool needPrefix = true) {
   auto str = folly::trimWhitespace(folly::sformat(
-               "{} {} {}",
+               "{} {}",
                attrs_to_string(ctx, attrs),
-               attrs_to_string(ctx, staticCoeffects),
                user_attrs(userAttrs))).str();
   if (!str.empty()) {
     str = folly::sformat("{}[{}]", needPrefix ? " " : "", str);

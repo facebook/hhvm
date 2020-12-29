@@ -21,7 +21,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-inline StaticCoeffects rxAttrsFromAttrString(const std::string& a) {
+inline StaticCoeffects coeffectFromName(const std::string& a) {
   if (a == "rx_local")               return rxMakeAttr(RxLevel::Local);
   if (a == "rx_shallow")             return rxMakeAttr(RxLevel::Shallow);
   if (a == "rx")                     return rxMakeAttr(RxLevel::Rx);
@@ -29,8 +29,8 @@ inline StaticCoeffects rxAttrsFromAttrString(const std::string& a) {
   return static_cast<StaticCoeffects>(0);
 }
 
-inline const char* rxAttrsToAttrString(StaticCoeffects attrs) {
-  switch (rxLevelFromAttr(attrs)) {
+inline const char* coeffectToString(StaticCoeffects coeffects) {
+  switch (rxLevelFromAttr(coeffects)) {
     case RxLevel::None:    return nullptr;
     case RxLevel::Local:   return "rx_local";
     case RxLevel::Shallow: return "rx_shallow";

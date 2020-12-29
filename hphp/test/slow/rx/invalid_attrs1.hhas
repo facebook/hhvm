@@ -1,4 +1,0 @@
-.function [rx rx_local] foo() {
-  Null
-  RetC
-}

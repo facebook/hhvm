@@ -51,6 +51,7 @@ use ocaml_helper::escaped;
 use oxidized::{ast, ast_defs, doc_comment::DocComment, local_id, pos::Pos};
 use regex::Regex;
 use runtime::TypedValue;
+use rx_rust as rx;
 use write::*;
 
 use std::{
@@ -435,7 +436,9 @@ fn print_fun_def<W: Write>(
     }
     w.write(" ")?;
     braces(w, |w| {
-        ctx.block(w, |c, w| print_body(c, w, body, &fun_def.attributes))?;
+        ctx.block(w, |c, w| {
+            print_body(c, w, body, &fun_def.attributes, fun_def.rx_level)
+        })?;
         newline(w)
     })?;
 
@@ -832,7 +835,9 @@ fn print_method_def<W: Write>(
     }
     w.write(" ")?;
     braces(w, |w| {
-        ctx.block(w, |c, w| print_body(c, w, body, &method_def.attributes))?;
+        ctx.block(w, |c, w| {
+            print_body(c, w, body, &method_def.attributes, method_def.rx_level)
+        })?;
         newline(w)?;
         w.write("  ")
     })
@@ -846,9 +851,6 @@ fn print_method_attrs<W: Write>(
     use hhas_attribute::*;
     let user_attrs = &m.attributes;
     let mut special_attrs = vec![];
-    if let Ok(attr) = m.rx_level.try_into() {
-        special_attrs.push(attr);
-    }
     if has_provenance_skip_frame(user_attrs) {
         special_attrs.push("prov_skip_frame")
     }
@@ -1122,6 +1124,7 @@ fn print_body<W: Write>(
     w: &mut W,
     body: &HhasBody,
     attrs: &Vec<HhasAttribute>,
+    rx_level: rx::Level,
 ) -> Result<(), W::Error> {
     print_doc_comment(ctx, w, &body.doc_comment)?;
     if body.is_memoize_wrapper {
@@ -1146,6 +1149,16 @@ fn print_body<W: Write>(
                 quotes(w, |w| w.write(escaper::escape(var)))
             }
         })?;
+        w.write(";")?;
+    }
+    if let Ok(level) = rx_level.try_into() {
+        let level_str: &str = level;
+        // TODO: static coeffects should be a space separated list of
+        // all coeffects
+        // TODO: refactor rx_level to be static coeffect list instead
+        ctx.newline(w)?;
+        w.write(".static_coeffects ")?;
+        w.write(level_str)?;
         w.write(";")?;
     }
     for i in body.rx_cond_rx_of_arg.iter() {
@@ -3243,9 +3256,6 @@ fn print_fun_attrs<W: Write>(
     use hhas_attribute::*;
     let user_attrs = &f.attributes;
     let mut special_attrs = vec![];
-    if let Ok(attr) = f.rx_level.try_into() {
-        special_attrs.push(attr);
-    }
     if has_meth_caller(user_attrs) {
         special_attrs.push("builtin");
         special_attrs.push("is_meth_caller");

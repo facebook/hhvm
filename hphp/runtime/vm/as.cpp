@@ -1886,9 +1886,9 @@ void parse_static_coeffects(AsmState& as) {
   if (funcAttrIsAnyRx(as.fe->staticCoeffects)) as.fe->attrs |= AttrRxBody;
   if (funcAttrIsPure(as.fe->staticCoeffects)) as.fe->attrs |= AttrPureBody;
   if (!coeffectsCallEnforcementLevel()) {
-    as.fe->staticCoeffects = CEAttrNone;
+    as.fe->staticCoeffects = SCDefault;
   } else if (!rxCallEnforcementLevel()) {
-    as.fe->staticCoeffects &= StaticCoeffects(~(CEAttrRxLevel0 | CEAttrRxLevel1));
+    as.fe->staticCoeffects &= StaticCoeffects(~(SCRx0 | SCRx1));
   }
 }
 

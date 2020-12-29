@@ -23,12 +23,10 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 enum StaticCoeffects : uint16_t {
-  CEAttrNone = 0,
-  // The RxLevel attrs are used to encode the maximum level of reactivity
-  // of a function.
-  CEAttrRxLevel0         = (1u << 0),
-  CEAttrRxLevel1         = (1u << 1),
-  CEAttrRxLevel2         = (1u << 2),
+  SCDefault = 0,
+  SCRx0     = (1u << 0),
+  SCRx1     = (1u << 1),
+  SCPure    = (1u << 2),
 };
 
 constexpr StaticCoeffects operator|(StaticCoeffects a, StaticCoeffects b) {
@@ -57,14 +55,14 @@ enum class RxLevel : uint8_t {
 constexpr int kRxAttrShift = 0;
 #define ASSERT_LEVEL(attr, rl) \
   static_assert(static_cast<RxLevel>(attr >> kRxAttrShift) == RxLevel::rl, "")
-ASSERT_LEVEL(CEAttrRxLevel0, Local);
-ASSERT_LEVEL(CEAttrRxLevel1, Shallow);
-ASSERT_LEVEL((CEAttrRxLevel0 | CEAttrRxLevel1), Rx);
-ASSERT_LEVEL(CEAttrRxLevel2, Pure);
+ASSERT_LEVEL(SCRx0, Local);
+ASSERT_LEVEL(SCRx1, Shallow);
+ASSERT_LEVEL((SCRx0 | SCRx1), Rx);
+ASSERT_LEVEL(SCPure, Pure);
 #undef ASSERT_LEVEL
 
 constexpr uint16_t kRxAttrMask =
-  CEAttrRxLevel0 | CEAttrRxLevel1 | CEAttrRxLevel2;
+  SCRx0 | SCRx1 | SCPure;
 constexpr uint16_t kRxLevelMask = 7u;
 static_assert(kRxAttrMask >> kRxAttrShift == kRxLevelMask, "");
 
@@ -90,7 +88,7 @@ constexpr bool funcAttrIsAnyRx(StaticCoeffects a) {
 }
 
 constexpr bool funcAttrIsPure(StaticCoeffects a) {
-  return static_cast<uint16_t>(a) & CEAttrRxLevel2;
+  return static_cast<uint16_t>(a) & SCPure;
 }
 
 RxLevel rxRequiredCalleeLevel(RxLevel level);

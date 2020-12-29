@@ -1570,7 +1570,7 @@ private:
   bool m_hasForeignThis : 1;
   bool m_registeredInDataMap : 1;
   // 2 free bits
-  StaticCoeffects m_staticCoeffects{CEAttrNone};
+  StaticCoeffects m_staticCoeffects{SCDefault};
   int16_t m_maxStackCells{0};
   uint64_t m_inoutBitVal{0};
   Unit* const m_unit;

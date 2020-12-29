@@ -2113,9 +2113,10 @@ To string conversions:
 
 | RaiseRxCallViolation, ND, S(FramePtr) S(Func), NF
 
-  Depending on the setting of the `RxEnforceCalls` runtime option, either raise
-  a warning or throw an exception indicating that the caller specified by S0
-  was violating reactivity constraints when calling the callee specified by S1.
+  Depending on the setting of the `CoeffectEnforcementLevels` runtime option,
+  either raise a warning or throw an exception indicating that the caller
+  specified by S0 was violating reactivity constraints when calling the callee
+  specified by S1.
 
 | RaiseStrToClassNotice, ND, S(Str), NF
 

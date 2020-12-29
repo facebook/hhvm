@@ -283,7 +283,7 @@ void raiseTooManyArgumentsPrologue(const Func* func, ArrayData* unpackArgs) {
 //////////////////////////////////////////////////////////////////////
 
 void raiseRxCallViolation(const ActRec* caller, const Func* callee) {
-  assertx(RuntimeOption::EvalPureEnforceCalls > 0);
+  assertx(coeffectsCallEnforcementLevel());
   auto const callerIsPure = caller->func()->rxLevel() == RxLevel::Pure;
   auto const errMsg = folly::sformat(
     "Call to {} '{}' from {} '{}' violates {} constraints.",
@@ -293,8 +293,8 @@ void raiseRxCallViolation(const ActRec* caller, const Func* callee) {
     caller->func()->fullName()->data(),
     callerIsPure ? "purity" : "reactivity"
   );
-  if (RuntimeOption::EvalRxEnforceCalls >= 2 ||
-      (callerIsPure && RuntimeOption::EvalPureEnforceCalls >= 2)) {
+  if (rxCallEnforcementLevel() >= 2 ||
+      (callerIsPure && coeffectsCallEnforcementLevel() >= 2)) {
     SystemLib::throwBadMethodCallExceptionObject(errMsg);
   } else {
     raise_warning(errMsg);

@@ -52,6 +52,8 @@ struct IniSettingMap;
 
 constexpr int kDefaultInitialStaticStringTableSize = 500000;
 
+using StringToIntMap = std::unordered_map<std::string, int>;
+
 enum class JitSerdesMode {
   // NB: if changing the encoding here, make sure to update isJitSerializing()
   // and isJitDeserializing() as needed.
@@ -1247,8 +1249,11 @@ struct RuntimeOption {
    * 2 - Throw exception                                                \
    */                                                                   \
   F(int32_t, ForbidUnserializeIncompleteClass, 0)                       \
-  F(int32_t, RxEnforceCalls, 0)                                         \
-  F(int32_t, PureEnforceCalls, 0)                                       \
+  /*                                                                    \
+   * Map from coeffect name to enforcement level                        \
+   * e.g. {'pure' => 2, 'rx' => 1}                                      \
+   */                                                                   \
+  F(StringToIntMap, CoeffectEnforcementLevels, {})                      \
   /*                                                                    \
    * 0 - Nothing                                                        \
    * 1 - Warn                                                           \
@@ -1489,6 +1494,11 @@ inline bool raiseArraySerializationNotices() {
 }
 
 uintptr_t lowArenaMinAddr();
+
+///////////////////////////////////////////////////////////////////////////////
+
+uint32_t coeffectsCallEnforcementLevel();
+uint32_t rxCallEnforcementLevel();
 
 ///////////////////////////////////////////////////////////////////////////////
 }

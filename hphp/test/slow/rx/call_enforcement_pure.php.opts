@@ -1,1 +1,1 @@
--vEval.PureEnforceCalls=2
+-vEval.CoeffectEnforcementLevels.pure=2

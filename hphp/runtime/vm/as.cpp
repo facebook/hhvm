@@ -2301,9 +2301,9 @@ Attr parse_attribute_list(AsmState& as, AttrContext ctx,
   if (staticCoeffects && *staticCoeffects != CEAttrNone) {
     if (funcAttrIsAnyRx(*staticCoeffects)) ret |= AttrRxBody;
     if (funcAttrIsPure(*staticCoeffects)) ret |= AttrPureBody;
-    if (RO::EvalPureEnforceCalls <= 0) {
+    if (!coeffectsCallEnforcementLevel()) {
       *staticCoeffects = CEAttrNone;
-    } else if (RO::EvalRxEnforceCalls <= 0) {
+    } else if (!rxCallEnforcementLevel()) {
       *staticCoeffects &= StaticCoeffects(~(CEAttrRxLevel0 | CEAttrRxLevel1));
     }
   }

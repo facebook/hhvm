@@ -1,2 +1,2 @@
--vRuntime.Eval.RxEnforceCalls=1
--vRuntime.Eval.PureEnforceCalls=1
+-vRuntime.Eval.CoeffectEnforcementLevels.rx=1
+-vRuntime.Eval.CoeffectEnforcementLevels.pure=1

@@ -1193,6 +1193,26 @@ std::map<std::string, std::string> RuntimeOption::CustomSettings;
 
 ///////////////////////////////////////////////////////////////////////////////
 
+namespace {
+constexpr char s_coeffectsPure[] = "pure";
+constexpr char s_coeffectsRx[] = "rx";
+} // namespace
+
+uint32_t coeffectsCallEnforcementLevel() {
+  auto const it = RO::EvalCoeffectEnforcementLevels.find(s_coeffectsPure);
+  if (it == RO::EvalCoeffectEnforcementLevels.end()) return 0;
+  return it->second;
+}
+
+uint32_t rxCallEnforcementLevel() {
+  if (!coeffectsCallEnforcementLevel()) return 0;
+  auto const it = RO::EvalCoeffectEnforcementLevels.find(s_coeffectsRx);
+  if (it == RO::EvalCoeffectEnforcementLevels.end()) return 0;
+  return it->second;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 static void setResourceLimit(int resource, const IniSetting::Map& ini,
                              const Hdf& rlimit, const char* nodeName) {
   if (!Config::GetString(ini, rlimit, nodeName).empty()) {
@@ -2851,10 +2871,18 @@ void RuntimeOption::Load(
     RuntimeOption::EvalJitForceVMRegSync = true;
   }
 
-  // we need to maintain an invariant that PureEnforceCalls >= RxEnforceCalls...
-  // We can't be stricter on rx than on pure, as that would break rx assumptions
-  RuntimeOption::EvalPureEnforceCalls = std::max(
-    RuntimeOption::EvalPureEnforceCalls, RuntimeOption::EvalRxEnforceCalls);
+  // Coeffects
+
+  // Purity enforcement must be at least as strong as the highest level of
+  // enforcement otherwise the whole coeffect system breaks
+  auto highestLevel = 0;
+
+  for (auto const [name, level] : RO::EvalCoeffectEnforcementLevels) {
+    highestLevel = std::max(highestLevel, level);
+  }
+  auto const [it, inserted] =
+    RO::EvalCoeffectEnforcementLevels.insert({s_coeffectsPure, highestLevel});
+  if (!inserted) it->second = highestLevel;
   RuntimeOption::EvalPureVerifyBody = std::max(
     RuntimeOption::EvalPureVerifyBody, RuntimeOption::EvalRxVerifyBody);
 

@@ -1880,7 +1880,7 @@ TEST(Type, DictPacked1) {
   auto const a1 = dict_packed({ival(2), TSStr, TInt});
   auto const a2 = dict_packed({TInt,    TStr,  TInitCell});
   auto const s1 = sdict_packed({ival(2), TSStr, TInt});
-  auto const s2 = sdict_packed({TInt,    TStr,  TInitCell});
+  auto const s2 = sdict_packed({TInt,    TSStr,  TInitUnc});
 
   for (auto& a : { a1, s1, a2, s2 }) {
     EXPECT_TRUE(a.subtypeOf(BDict));
@@ -1918,7 +1918,7 @@ TEST(Type, OptDictPacked1) {
   auto const a1 = opt(dict_packed({ival(2), TSStr, TInt}));
   auto const a2 = opt(dict_packed({TInt,    TStr,  TInitCell}));
   auto const s1 = opt(sdict_packed({ival(2), TSStr, TInt}));
-  auto const s2 = opt(sdict_packed({TInt,    TStr,  TInitCell}));
+  auto const s2 = opt(sdict_packed({TInt,    TSStr,  TInitUnc}));
 
   for (auto& a : { a1, s1, a2, s2 }) {
     EXPECT_TRUE(a.subtypeOrNull(BDict));
@@ -2070,7 +2070,7 @@ TEST(Type, DictPackedN) {
   EXPECT_FALSE(sn2.couldBe(sn1));
   EXPECT_FALSE(sn1.couldBe(sn2));
 
-  auto const sn3 = sdict_packedn(TInitCell);
+  auto const sn3 = sdict_packedn(TInitUnc);
   EXPECT_TRUE(sn1.couldBe(sn3));
   EXPECT_TRUE(sn2.couldBe(sn3));
   EXPECT_TRUE(sn3.couldBe(sn1));
@@ -2166,10 +2166,10 @@ TEST(Type, DictMapN) {
   EXPECT_FALSE(dict_n(TSStr, TInt).couldBe(dict_val(test_empty_dict())));
 
   EXPECT_TRUE(sdict_packedn(TInt).couldBe(sdict_n(TInt, TInt)));
-  EXPECT_FALSE(sdict_packedn(TInt).couldBe(sdict_n(TInt, TObj)));
+  EXPECT_FALSE(sdict_packedn(TInt).couldBe(dict_n(TInt, TObj)));
 
   EXPECT_TRUE(tstruct.couldBe(sdict_n(TSStr, TInt)));
-  EXPECT_FALSE(tstruct.couldBe(sdict_n(TSStr, TObj)));
+  EXPECT_FALSE(tstruct.couldBe(dict_n(TSStr, TObj)));
 }
 
 TEST(Type, DictEquivalentRepresentations) {
@@ -2254,17 +2254,17 @@ TEST(Type, DictIntersections) {
   auto const tstruct5      = sdict_map(test_map_e);
 
   auto test_map_f          = MapElems{};
-  test_map_f[tv(s_A)]      = TArrKey;
+  test_map_f[tv(s_A)]      = TUncArrKey;
   test_map_f[tv(s_B)]      = TInt;
   auto const tstruct6      = sdict_map(test_map_f);
 
   auto test_map_g          = MapElems{};
-  test_map_g[tv(s_A)]      = TStr;
-  test_map_g[tv(s_B)]      = TArrKey;
+  test_map_g[tv(s_A)]      = TSStr;
+  test_map_g[tv(s_B)]      = TUncArrKey;
   auto const tstruct7      = sdict_map(test_map_g);
 
   auto test_map_h          = MapElems{};
-  test_map_h[tv(s_A)]      = TStr;
+  test_map_h[tv(s_A)]      = TSStr;
   test_map_h[tv(s_B)]      = TInt;
   auto const tstruct8      = sdict_map(test_map_h);
 

@@ -2711,15 +2711,9 @@ bool Type::checkInvariants() const {
   DEBUG_ONLY auto const isDict = subtypeOrNull(BDict);
 
   DEBUG_ONLY auto const keyBits =
-    subtypeOrNull(BSArrLike) ? BUncArrKeyCompat : BArrKeyCompat;
-  DEBUG_ONLY auto const valBits = isKeyset ? BArrKeyCompat : BInitCell;
-
-  /*
-   * TODO(#3696042): for static arrays, we could enforce that all
-   * inner-types are also static (this may would require changes to
-   * things like union_of to ensure that we never promote an inner
-   * type to a counted type).
-   */
+    subtypeOf(BUnc) ? BUncArrKey : BArrKey;
+  DEBUG_ONLY auto const valBits = isKeyset ? keyBits :
+    subtypeOf(BUnc) ? BInitUnc : BInitCell;
 
   switch (m_dataTag) {
   case DataTag::None:   break;

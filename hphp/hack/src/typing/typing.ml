@@ -1606,17 +1606,22 @@ and expr_
     (* Clone only works on objects; anything else fatals at runtime.
      * Constructing a call `e`->__clone() checks that `e` is an object and
      * checks coeffects on __clone *)
-    let clone_call =
-      ( p,
-        Call
-          ( ( p,
-              Obj_get (e, (p, Id (p, SN.Members.__clone)), OG_nullthrows, false)
-            ),
-            [],
-            [],
-            None ) )
+    let (env, (tfty, _tal)) =
+      TOG.obj_get
+        ~obj_pos:(fst e)
+        ~is_method:true
+        ~nullsafe:None
+        ~coerce_from_ty:None
+        ~explicit_targs:[]
+        env
+        ty
+        (CIexpr e)
+        (p, SN.Members.__clone)
+        Errors.unify_error
     in
-    let (env, _te, _ty) = expr env clone_call in
+    let (env, (_tel, _typed_unpack_element, _ty)) =
+      call ~expected:None p env tfty [] None
+    in
     make_result env p (Aast.Clone te) ty
   | This ->
     if Option.is_none (Env.get_self_ty env) then Errors.this_var_outside_class p;

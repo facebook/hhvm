@@ -25,12 +25,11 @@ use hhas_pos_rust::Span;
 use hhas_property_rust::HhasProperty;
 use hhas_type_const::HhasTypeConstant;
 use hhas_xhp_attribute_rust::HhasXhpAttribute;
-use hhbc_ast_rust::{FcallArgs, FcallFlags, SpecialClsRef};
+use hhbc_ast_rust::{FatalOp, FcallArgs, FcallFlags, SpecialClsRef};
 use hhbc_id_rust::r#const;
 use hhbc_id_rust::{self as hhbc_id, class, method, prop, Id};
 use hhbc_string_utils_rust as string_utils;
 use instruction_sequence_rust::{instr, InstrSeq, Result};
-use label_rust as label;
 use naming_special_names_rust as special_names;
 use options::HhvmFlags;
 use oxidized::{
@@ -658,67 +657,44 @@ pub fn emit_class<'a>(emitter: &mut Emitter, ast_class: &'a tast::Class_) -> Res
                     ref initializer_instrs,
                     ..
                 },
-            | {
-                initializer_instrs
-                    .as_ref()
-                    .map(|instrs| (name, emitter.label_gen_mut().next_regular(), instrs))
-            },
+            | { initializer_instrs.as_ref().map(|instrs| (name, instrs)) },
         )
         .collect();
     let cinit_method = if initialized_constants.is_empty() {
         None
     } else {
-        fn make_cinit_instrs(
+        fn make_cinit_cond_instrs(
             e: &mut Emitter,
-            return_label: label::Label,
             pos: &Pos,
-            consts: &[(&r#const::Type, label::Label, &InstrSeq)],
+            consts: &[(&r#const::Type, &InstrSeq)],
         ) -> InstrSeq {
             match consts {
                 [] => InstrSeq::gather(vec![
-                    instr::label(return_label),
-                    emit_pos::emit_pos(pos),
-                    instr::retc(),
+                    instr::string("Could not find initializer for "),
+                    instr::cgetl(local::Type::Named("$constName".into())),
+                    instr::string(" in 86cinit"),
+                    instr::concatn(3),
+                    instr::fatal(FatalOp::Runtime),
                 ]),
-                [(_, label, instrs)] => InstrSeq::gather(vec![
-                    instr::label(label.clone()),
-                    (*instrs).clone(),
-                    make_cinit_instrs(e, return_label, pos, &[]),
-                ]),
-                [(_, label, instrs), cs @ ..] => InstrSeq::gather(vec![
-                    instr::label(label.clone()),
-                    (*instrs).clone(),
-                    emit_pos::emit_pos(pos),
-                    instr::jmp(return_label.clone()),
-                    make_cinit_instrs(e, return_label, pos, cs),
-                ]),
+                [(name, consequence_instr), cs @ ..] => {
+                    let alternative_label = e.label_gen_mut().next_regular();
+                    InstrSeq::gather(vec![
+                        instr::string((*name).to_raw_string()),
+                        instr::cgetl(local::Type::Named("$constName".into())),
+                        instr::eq(),
+                        emit_pos::emit_pos(pos),
+                        instr::jmpz(alternative_label.clone()),
+                        (*consequence_instr).clone(),
+                        emit_pos::emit_pos(pos),
+                        instr::retc(),
+                        instr::label(alternative_label),
+                        make_cinit_cond_instrs(e, pos, cs),
+                    ])
+                }
             }
         }
-        let return_label = emitter.label_gen_mut().next_regular();
-
-        let body_instrs = if initialized_constants.len() > 1 {
-            let cases: Vec<(String, label::Label)> = initialized_constants
-                .iter()
-                .map(|(c, l, _)| ((*c).to_raw_string().into(), l.clone()))
-                .collect();
-            InstrSeq::gather(vec![
-                instr::cgetl(local::Type::Named("$constName".into())),
-                instr::sswitch(cases),
-                make_cinit_instrs(
-                    emitter,
-                    return_label,
-                    &ast_class.span,
-                    &initialized_constants[..],
-                ),
-            ])
-        } else {
-            make_cinit_instrs(
-                emitter,
-                return_label,
-                &ast_class.span,
-                &initialized_constants[..],
-            )
-        };
+        let body_instrs =
+            { make_cinit_cond_instrs(emitter, &ast_class.span, &initialized_constants[..]) };
         let instrs = emit_pos::emit_pos_then(&ast_class.span, body_instrs);
         let params = vec![HhasParam {
             name: "$constName".to_string(),

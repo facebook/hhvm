@@ -709,7 +709,6 @@ dependencies = [
  "hhbc_id_rust",
  "hhbc_string_utils_rust",
  "instruction_sequence_rust",
- "label_rust",
  "naming_special_names_rust",
  "options",
  "oxidized",

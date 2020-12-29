@@ -20,8 +20,6 @@ let deregister_php_stdlib = GlobalOptions.po_deregister_php_stdlib
 
 let disallow_toplevel_requires = GlobalOptions.po_disallow_toplevel_requires
 
-let allow_goto = GlobalOptions.po_allow_goto
-
 let default = GlobalOptions.default
 
 let disable_nontoplevel_declarations =

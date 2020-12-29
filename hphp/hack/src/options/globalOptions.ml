@@ -34,7 +34,6 @@ type t = {
   po_disallow_toplevel_requires: bool;
   po_disable_nontoplevel_declarations: bool;
   po_disable_static_closures: bool;
-  po_allow_goto: bool;
   po_allow_unstable_features: bool;
   tco_log_inference_constraints: bool;
   tco_disallow_array_typehint: bool;
@@ -214,7 +213,6 @@ let default =
     po_deregister_php_stdlib = false;
     po_disable_nontoplevel_declarations = false;
     po_disable_static_closures = true;
-    po_allow_goto = false;
     po_allow_unstable_features = false;
     tco_log_inference_constraints = false;
     tco_disallow_array_typehint = false;
@@ -307,7 +305,6 @@ let make
     ?(po_disable_nontoplevel_declarations =
       default.po_disable_nontoplevel_declarations)
     ?(po_disable_static_closures = default.po_disable_static_closures)
-    ?(po_allow_goto = default.po_allow_goto)
     ?(tco_log_inference_constraints = default.tco_log_inference_constraints)
     ?(tco_experimental_features = default.tco_experimental_features)
     ?(tco_migration_flags = default.tco_migration_flags)
@@ -462,7 +459,6 @@ let make
     po_disallow_toplevel_requires;
     po_disable_nontoplevel_declarations;
     po_disable_static_closures;
-    po_allow_goto;
     po_allow_unstable_features;
     tco_log_inference_constraints;
     tco_disallow_array_typehint;
@@ -601,8 +597,6 @@ let po_disable_nontoplevel_declarations t =
   t.po_disable_nontoplevel_declarations
 
 let po_disable_static_closures t = t.po_disable_static_closures
-
-let po_allow_goto t = t.po_allow_goto
 
 let tco_log_inference_constraints t = t.tco_log_inference_constraints
 

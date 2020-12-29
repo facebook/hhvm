@@ -78,8 +78,6 @@ type t = {
   po_disable_nontoplevel_declarations: bool;
   (* Flag to disable PHP's static closures *)
   po_disable_static_closures: bool;
-  (* Flag to enable PHP's `goto` operator *)
-  po_allow_goto: bool;
   (* Allows enabling unstable features via the __EnableUnstableFeatures attribute *)
   po_allow_unstable_features: bool;
   (* Print types of size bigger than 1000 after performing a type union. *)
@@ -301,7 +299,6 @@ val make :
   ?po_disallow_toplevel_requires:bool ->
   ?po_disable_nontoplevel_declarations:bool ->
   ?po_disable_static_closures:bool ->
-  ?po_allow_goto:bool ->
   ?tco_log_inference_constraints:bool ->
   ?tco_experimental_features:SSet.t ->
   ?tco_migration_flags:SSet.t ->
@@ -459,8 +456,6 @@ val po_disallow_toplevel_requires : t -> bool
 val po_disable_nontoplevel_declarations : t -> bool
 
 val po_disable_static_closures : t -> bool
-
-val po_allow_goto : t -> bool
 
 val po_codegen : t -> bool
 

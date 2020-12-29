@@ -95,7 +95,6 @@ let test () =
     GlobalOptions.make
       ~po_auto_namespace_map:[("ShortName", "HH\\LongName\\ShortName")]
       ~po_deregister_php_stdlib:true
-      ~po_allow_goto:false
       ~tco_unsafe_rx:false
       ()
   in

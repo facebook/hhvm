@@ -226,7 +226,6 @@ let parse_options () =
   let const_static_props = ref false in
   let disable_legacy_attribute_syntax = ref false in
   let const_attribute = ref false in
-  let disallow_goto = ref false in
   let const_default_func_args = ref false in
   let const_default_lambda_args = ref false in
   let disallow_silence = ref false in
@@ -496,9 +495,6 @@ let parse_options () =
         Arg.Set disable_legacy_attribute_syntax,
         " Disable the legacy <<...>> user attribute syntax" );
       ("--const-attribute", Arg.Set const_attribute, " Allow __Const attribute");
-      ( "--disallow-goto",
-        Arg.Set disallow_goto,
-        " Forbid the goto operator and goto labels in the parser" );
       ( "--const-default-func-args",
         Arg.Set const_default_func_args,
         " Statically check default function arguments are constant initializers"
@@ -668,7 +664,6 @@ let parse_options () =
       ~tco_gi_reinfer_types:!reinfer_types
       ~po_disable_legacy_attribute_syntax:!disable_legacy_attribute_syntax
       ~tco_const_attribute:!const_attribute
-      ~po_allow_goto:(not !disallow_goto)
       ~po_const_default_func_args:!const_default_func_args
       ~po_const_default_lambda_args:!const_default_lambda_args
       ~po_disallow_silence:!disallow_silence

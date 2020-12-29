@@ -255,6 +255,7 @@ let parse_options () =
   let enable_sound_dynamic = ref false in
   let disallow_hash_comments = ref false in
   let disallow_fun_and_cls_meth_pseudo_funcs = ref false in
+  let use_direct_decl_parser = ref false in
   let options =
     [
       ( "--ifc",
@@ -605,6 +606,9 @@ let parse_options () =
       ( "--disallow-fun-and-cls-meth-pseudo-funcs",
         Arg.Set disallow_fun_and_cls_meth_pseudo_funcs,
         "Disable parsing of fun() and class_meth()." );
+      ( "--use-direct-decl-parser",
+        Arg.Set use_direct_decl_parser,
+        "Use direct decl parser" );
     ]
   in
   let options = Arg.align ~limit:25 options in
@@ -698,6 +702,7 @@ let parse_options () =
           ["/"]
         else
           [] )
+      ~tco_use_direct_decl_parser:!use_direct_decl_parser
       ()
   in
   Errors.allowed_fixme_codes_strict :=

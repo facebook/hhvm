@@ -117,8 +117,8 @@ type t = {
   po_disallow_hash_comments: bool;
   po_disallow_fun_and_cls_meth_pseudo_funcs: bool;
   tco_use_direct_decl_parser: bool;
-  tco_ifc_enabled: bool;
   po_enable_coeffects: bool;
+  tco_ifc_enabled: string list;
 }
 [@@deriving eq, show]
 
@@ -297,8 +297,8 @@ let default =
     po_disallow_hash_comments = false;
     po_disallow_fun_and_cls_meth_pseudo_funcs = false;
     tco_use_direct_decl_parser = false;
-    tco_ifc_enabled = false;
     po_enable_coeffects = false;
+    tco_ifc_enabled = [];
   }
 
 let make
@@ -429,8 +429,8 @@ let make
     ?(po_disallow_fun_and_cls_meth_pseudo_funcs =
       default.po_disallow_fun_and_cls_meth_pseudo_funcs)
     ?(tco_use_direct_decl_parser = default.tco_use_direct_decl_parser)
-    ?(tco_ifc_enabled = default.tco_ifc_enabled)
     ?(po_enable_coeffects = default.po_enable_coeffects)
+    ?(tco_ifc_enabled = default.tco_ifc_enabled)
     () =
   {
     tco_experimental_features;
@@ -542,8 +542,8 @@ let make
     po_disallow_hash_comments;
     po_disallow_fun_and_cls_meth_pseudo_funcs;
     tco_use_direct_decl_parser;
-    tco_ifc_enabled;
     po_enable_coeffects;
+    tco_ifc_enabled;
   }
 
 let tco_experimental_feature_enabled t s =
@@ -665,7 +665,8 @@ let tco_local_coeffects t = t.tco_coeffects_local
 
 let ifc_enabled t = t.tco_ifc_enabled
 
-let enable_ifc t = { t with tco_ifc_enabled = true }
+(* Fully enable IFC on the tcopt *)
+let enable_ifc t = { t with tco_ifc_enabled = ["/"] }
 
 let tco_like_casts t = t.tco_like_casts
 

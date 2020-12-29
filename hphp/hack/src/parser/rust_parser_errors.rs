@@ -436,8 +436,14 @@ where
                 parser_options.tco_union_intersection_type_hints
             }
             UnstableFeatures::ClassLevelWhere => parser_options.po_enable_class_level_where_clauses,
-            UnstableFeatures::IFC => parser_options.tco_ifc_enabled,
             UnstableFeatures::CoeffectsProvisional => parser_options.po_enable_coeffects,
+            UnstableFeatures::IFC => {
+                let file_path = format!("/{}", self.env.text.source_text().file_path().path_str());
+                parser_options
+                    .tco_ifc_enabled
+                    .iter()
+                    .any(|prefix| file_path.find(prefix) == Some(0))
+            }
             _ => false,
         } || self.env.context.active_unstable_features.contains(feature);
         if !enabled {

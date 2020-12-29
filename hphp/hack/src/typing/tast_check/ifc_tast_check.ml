@@ -117,9 +117,15 @@ let handle_fun
         return
       |> check_errors_from_callable_result)
 
-let should_run_ifc tcopt =
+let ifc_enabled_on_file tcopt file =
+  let ifc_enabled_paths = TypecheckerOptions.ifc_enabled tcopt in
+  let path = "/" ^ Relative_path.suffix file in
+  List.exists ifc_enabled_paths ~f:(fun prefix ->
+      String_utils.string_starts_with path prefix)
+
+let should_run_ifc tcopt file =
   match
-    ( TypecheckerOptions.ifc_enabled tcopt,
+    ( ifc_enabled_on_file tcopt file,
       TypecheckerOptions.experimental_feature_enabled
         tcopt
         TypecheckerOptions.experimental_infer_flows )
@@ -136,14 +142,14 @@ let handler =
     inherit Tast_visitor.handler_base
 
     method! at_class_ env c =
-      if should_run_ifc (Tast_env.get_tcopt env) then
+      if should_run_ifc (Tast_env.get_tcopt env) (Tast_env.get_file env) then
         let ctx : Provider_context.t = Tast_env.get_ctx env in
         let (_, classname) = c.c_name in
         let methods = c.c_methods in
         List.iter ~f:(handle_method classname ctx) methods
 
     method! at_fun_def env f =
-      if should_run_ifc (Tast_env.get_tcopt env) then
+      if should_run_ifc (Tast_env.get_tcopt env) (Tast_env.get_file env) then
         let ctx : Provider_context.t = Tast_env.get_ctx env in
         handle_fun ctx f
   end

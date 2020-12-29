@@ -698,7 +698,11 @@ let parse_options () =
       ~po_disallow_hash_comments:!disallow_hash_comments
       ~po_disallow_fun_and_cls_meth_pseudo_funcs:
         !disallow_fun_and_cls_meth_pseudo_funcs
-      ~tco_ifc_enabled:is_ifc_mode
+      ~tco_ifc_enabled:
+        ( if is_ifc_mode then
+          ["/"]
+        else
+          [] )
       ()
   in
   Errors.allowed_fixme_codes_strict :=

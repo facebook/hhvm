@@ -28,7 +28,7 @@ type options = {
   from: string;
   gen_saved_ignore_type_errors: bool;
   ignore_hh_version: bool;
-  enable_ifc: bool;
+  enable_ifc: string list;
   saved_state_ignore_hhconfig: bool;
   json_mode: bool;
   load_state_canary: bool;
@@ -75,7 +75,8 @@ module Messages = struct
 
   let dynamic_view = " start with dynamic view for IDE files on by default."
 
-  let enable_ifc = " run IFC analysis on all files"
+  let enable_ifc =
+    " run IFC analysis on any file whose path is prefixed by the argument (format: comma separated list of path prefixes)"
 
   let from = " so we know who's invoking - e.g. nuclide, vim, emacs, vscode"
 
@@ -156,7 +157,7 @@ let parse_options () : options =
   let custom_telemetry_data = ref [] in
   let dump_fanout = ref false in
   let dynamic_view = ref false in
-  let enable_ifc = ref false in
+  let enable_ifc = ref [] in
   let from = ref "" in
   let from_emacs = ref false in
   let from_hhclient = ref false in
@@ -193,6 +194,7 @@ let parse_options () : options =
   let set_wait fd = waiting_client := Some (Handle.wrap_handle fd) in
   let set_with_saved_state s = with_saved_state := Some s in
   let set_write_symbol_info s = write_symbol_info := Some s in
+  let set_enable_ifc s = enable_ifc := String_utils.split ',' s in
   let set_from s = from := s in
   let options =
     [
@@ -212,7 +214,7 @@ let parse_options () : options =
       ("--daemon", Arg.Set should_detach, Messages.daemon);
       ("--dump-fanout", Arg.Set dump_fanout, Messages.dump_fanout);
       ("--dynamic-view", Arg.Set dynamic_view, Messages.dynamic_view);
-      ("--enable-ifc", Arg.Set enable_ifc, Messages.enable_ifc);
+      ("--enable-ifc", Arg.String set_enable_ifc, Messages.enable_ifc);
       ("--from-emacs", Arg.Set from_emacs, Messages.from_emacs);
       ("--from-hhclient", Arg.Set from_hhclient, Messages.from_hhclient);
       ("--from-vim", Arg.Set from_vim, Messages.from_vim);
@@ -370,7 +372,7 @@ let default_options ~root =
     custom_telemetry_data = [];
     dump_fanout = false;
     dynamic_view = false;
-    enable_ifc = false;
+    enable_ifc = [];
     from = "";
     gen_saved_ignore_type_errors = false;
     ignore_hh_version = false;
@@ -589,6 +591,9 @@ let to_string
            ~f:(fun (key, value) -> Printf.sprintf "%s=%s" key value)
            config )
   in
+  let enable_ifc_str =
+    Printf.sprintf "[%s]" (String.concat ~sep:"," enable_ifc)
+  in
   let custom_telemetry_data_str =
     custom_telemetry_data
     |> List.map ~f:(fun (column, value) -> Printf.sprintf "%s=%s" column value)
@@ -614,7 +619,7 @@ let to_string
     string_of_bool dynamic_view;
     ", ";
     "enable_ifc: ";
-    string_of_bool enable_ifc;
+    enable_ifc_str;
     ", ";
     "from: ";
     from;

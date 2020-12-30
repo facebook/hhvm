@@ -531,6 +531,21 @@ module StdlibFunctions = struct
   let is_dict_or_darray = "\\HH\\is_dict_or_darray"
 
   let is_vec_or_varray = "\\HH\\is_vec_or_varray"
+
+  (* All Id funcions that Typing.dispatch_call handles specially *)
+  let special_dispatch =
+    String.Hash_set.of_list
+      ~growth_allowed:false
+      [
+        SpecialFunctions.echo;
+        PseudoFunctions.isset;
+        PseudoFunctions.unset;
+        array_filter;
+        type_structure;
+        array_map;
+      ]
+
+  let needs_special_dispatch x = Hash_set.mem special_dispatch x
 end
 
 module Typehints = struct

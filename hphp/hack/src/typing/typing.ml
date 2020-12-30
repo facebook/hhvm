@@ -4272,143 +4272,37 @@ and dispatch_call
     if is_return_disposable_fun_type env fty && not is_using_clause then
       Errors.invalid_new_disposable p
   in
-  match fun_expr with
-  (* Special function `echo` *)
-  | Id ((p, pseudo_func) as id)
-    when String.equal pseudo_func SN.SpecialFunctions.echo ->
-    let (env, tel, _) = exprs ~accept_using_var:true env el in
-    make_call_special env id tel (MakeType.void (Reason.Rwitness p))
-  (* Special function `isset` *)
-  | Id ((_, pseudo_func) as id)
-    when String.equal pseudo_func SN.PseudoFunctions.isset ->
-    let (env, tel, _) =
-      exprs ~accept_using_var:true ~check_defined:false env el
-    in
-    if Option.is_some unpacked_element then
-      Errors.unpacking_disallowed_builtin_function p pseudo_func;
-    make_call_special_from_def env id tel MakeType.bool
-  (* Special function `unset` *)
-  | Id ((_, pseudo_func) as id)
-    when String.equal pseudo_func SN.PseudoFunctions.unset ->
-    let (env, tel, _) = exprs env el in
-    let env = Typing_reactivity.check_unset_target env tel in
-    if Option.is_some unpacked_element then
-      Errors.unpacking_disallowed_builtin_function p pseudo_func;
-    let checked_unset_error =
-      if Partial.should_check_error (Env.get_mode env) 4135 then
-        Errors.unset_nonidx_in_strict
-      else
-        fun _ _ ->
-      ()
-    in
-    let env =
-      match (el, unpacked_element) with
-      | ([(_, Array_get ((_, Class_const _), Some _))], None)
-        when Partial.should_check_error (Env.get_mode env) 4011 ->
-        Errors.const_mutation p Pos.none "";
-        env
-      | ([(_, Array_get (ea, Some _))], None) ->
-        let (env, _te, ty) = expr env ea in
-        let r = Reason.Rwitness p in
-        let tmixed = MakeType.mixed r in
-        let super =
-          mk
-            ( Reason.Rnone,
-              Tunion
-                [
-                  MakeType.dynamic r;
-                  MakeType.dict r tmixed tmixed;
-                  MakeType.keyset r tmixed;
-                  MakeType.darray r tmixed tmixed;
-                ] )
-        in
-        SubType.sub_type_or_fail env ty super (fun () ->
-            checked_unset_error
-              p
-              (Reason.to_string
-                 ("This is " ^ Typing_print.error ~ignore_dynamic:true env ty)
-                 (get_reason ty)))
-      | _ ->
-        checked_unset_error p [];
-        env
-    in
-    (match el with
-    | [(p, Obj_get (_, _, OG_nullsafe, _))] ->
-      Errors.nullsafe_property_write_context p;
-      make_call_special_from_def env id tel (TUtils.terr env)
-    | _ -> make_call_special_from_def env id tel MakeType.void)
-  (* Special function `array_filter` *)
-  | Id ((_, array_filter) as id)
-    when String.equal array_filter SN.StdlibFunctions.array_filter
-         && (not (List.is_empty el))
-         && Option.is_none unpacked_element ->
-    (* dispatch the call to typecheck the arguments *)
+  let dispatch_id env ((_, x) as id) =
     let (env, fty, tal) = fun_type_of_id env id explicit_targs el in
-    let (env, (tel, typed_unpack_element, res)) =
+    check_disposable_in_return env fty;
+    let (env, (tel, typed_unpack_element, ty)) =
       call ~expected p env fty el unpacked_element
     in
-    (* but ignore the result and overwrite it with custom return type *)
-    let x = List.hd_exn el in
-    let (env, _tx, ty) = expr env x in
-    let explain_array_filter ty =
-      map_reason ty ~f:(fun r -> Reason.Rarray_filter (p, r))
-    in
-    let get_value_type env tv =
-      let (env, tv) =
-        if List.length el > 1 then
-          (env, tv)
-        else
-          Typing_solver.non_null env p tv
-      in
-      (env, explain_array_filter tv)
-    in
-    let rec get_array_filter_return_type env ty =
-      let (env, ety) = Env.expand_type env ty in
-      match deref ety with
-      | (r, Tvarray tv) ->
-        let (env, tv) = get_value_type env tv in
-        (env, MakeType.varray r tv)
-      | (r, Tunion tyl) ->
-        let (env, tyl) = List.map_env env tyl get_array_filter_return_type in
-        Typing_union.union_list env r tyl
-      | (r, Tintersection tyl) ->
-        let (env, tyl) = List.map_env env tyl get_array_filter_return_type in
-        Inter.intersect_list env r tyl
-      | (r, Tany _) -> (env, mk (r, Typing_utils.tany env))
-      | (r, Terr) -> (env, TUtils.terr env r)
-      | (r, _) ->
-        let (env, tk) = Env.fresh_type env p in
-        let (env, tv) = Env.fresh_type env p in
-        Errors.try_
-          (fun () ->
-            let keyed_container_type =
-              MakeType.keyed_container Reason.Rnone tk tv
-            in
-            let env =
-              SubType.sub_type env ety keyed_container_type Errors.unify_error
-            in
-            let (env, tv) = get_value_type env tv in
-            (env, MakeType.darray r (explain_array_filter tk) tv))
-          (fun _ ->
-            Errors.try_
-              (fun () ->
-                let container_type = MakeType.container Reason.Rnone tv in
-                let env =
-                  SubType.sub_type env ety container_type Errors.unify_error
-                in
-                let (env, tv) = get_value_type env tv in
-                ( env,
-                  MakeType.darray
-                    r
-                    (explain_array_filter (MakeType.arraykey r))
-                    tv ))
-              (fun _ -> (env, res)))
-    in
-    let (env, rty) = get_array_filter_return_type env ty in
-    let fty =
-      map_ty fty ~f:(function
-          | Tfun ft -> Tfun { ft with ft_ret = MakeType.unenforced rty }
-          | ty -> ty)
+    let is_mutable = String.equal x SN.Rx.mutable_ in
+    let is_move = String.equal x SN.Rx.move in
+    let is_freeze = String.equal x SN.Rx.freeze in
+    (* error when rx builtins are used in non-reactive context *)
+    if not (Env.env_local_reactive env) then
+      if is_mutable then
+        Errors.mutable_in_nonreactive_context p
+      else if is_move then
+        Errors.move_in_nonreactive_context p
+      else if is_freeze then
+        Errors.freeze_in_nonreactive_context p;
+
+    (* ban unpacking when calling builtings *)
+    if (is_mutable || is_move || is_freeze) && Option.is_some unpacked_element
+    then
+      Errors.unpacking_disallowed_builtin_function p x;
+
+    (* adjust env for Rx\freeze or Rx\move calls *)
+    let env =
+      if is_freeze then
+        Typing_mutability.freeze_local p env tel
+      else if is_move then
+        Typing_mutability.move_local p env tel
+      else
+        env
     in
     make_call
       env
@@ -4416,300 +4310,9 @@ and dispatch_call
       tal
       tel
       typed_unpack_element
-      rty
-  (* Special function `type_structure` *)
-  | Id (p, type_structure)
-    when String.equal type_structure SN.StdlibFunctions.type_structure
-         && Int.equal (List.length el) 2
-         && Option.is_none unpacked_element ->
-    (match el with
-    | [e1; e2] ->
-      (match e2 with
-      | (p, String cst) ->
-        (* find the class constant implicitly defined by the typeconst *)
-        let cid =
-          match e1 with
-          | (_, Class_const (cid, (_, x)))
-          | (_, Class_get (cid, CGstring (_, x), _))
-            when String.equal x SN.Members.mClass ->
-            cid
-          | _ -> (fst e1, CIexpr e1)
-        in
-        class_const ~incl_tc:true env p (cid, (p, cst))
-      | _ ->
-        Errors.illegal_type_structure p "second argument is not a string";
-        expr_error env (Reason.Rwitness p) e)
-    | _ -> assert false)
-  (* Special function `array_map` *)
-  | Id ((_, array_map) as x)
-    when String.equal array_map SN.StdlibFunctions.array_map
-         && (not (List.is_empty el))
-         && Option.is_none unpacked_element ->
-    (* This uses the arity to determine a signature for array_map. But there
-     * is more: for two-argument use of array_map, we specialize the return
-     * type to the collection that's passed in, below. *)
-    let (env, fty, tal) = fun_type_of_id env x explicit_targs el in
-    let (env, fty) = Env.expand_type env fty in
-    let r_fty = get_reason fty in
-    (*
-        Takes a Container type and returns a function that can "pack" a type
-        into an array of appropriate shape, preserving the key type, i.e.:
-        array                 -> f, where f R = array
-        array<X>              -> f, where f R = array<R>
-        array<X, Y>           -> f, where f R = array<X, R>
-        Vector<X>             -> f  where f R = array<R>
-        KeyedContainer<X, Y>  -> f, where f R = array<X, R>
-        Container<X>          -> f, where f R = array<arraykey, R>
-        X                     -> f, where f R = Y
-      *)
-    let rec build_output_container env (x : locl_ty) :
-        env * (env -> locl_ty -> env * locl_ty) =
-      let (env, x) = Env.expand_type env x in
-      match deref x with
-      | (r, Tvarray _) -> (env, (fun env tr -> (env, MakeType.varray r tr)))
-      | (r, Tany _) -> (env, (fun env _ -> (env, mk (r, Typing_utils.tany env))))
-      | (r, Terr) -> (env, (fun env _ -> (env, TUtils.terr env r)))
-      | (r, Tunion tyl) ->
-        let (env, builders) = List.map_env env tyl build_output_container in
-        ( env,
-          fun env tr ->
-            let (env, tyl) =
-              List.map_env env builders (fun env f -> f env tr)
-            in
-            Typing_union.union_list env r tyl )
-      | (r, Tintersection tyl) ->
-        let (env, builders) = List.map_env env tyl build_output_container in
-        ( env,
-          fun env tr ->
-            let (env, tyl) =
-              List.map_env env builders (fun env f -> f env tr)
-            in
-            Typing_intersection.intersect_list env r tyl )
-      | (r, _) ->
-        let (env, tk) = Env.fresh_type env p in
-        let (env, tv) = Env.fresh_type env p in
-        let try_vector env =
-          let vector_type = MakeType.const_vector r_fty tv in
-          let env = SubType.sub_type env x vector_type Errors.unify_error in
-          (env, (fun env tr -> (env, MakeType.varray r tr)))
-        in
-        let try_keyed_container env =
-          let keyed_container_type = MakeType.keyed_container r_fty tk tv in
-          let env =
-            SubType.sub_type env x keyed_container_type Errors.unify_error
-          in
-          (env, (fun env tr -> (env, MakeType.darray r tk tr)))
-        in
-        let try_container env =
-          let container_type = MakeType.container r_fty tv in
-          let env = SubType.sub_type env x container_type Errors.unify_error in
-          ( env,
-            (fun env tr -> (env, MakeType.darray r (MakeType.arraykey r) tr)) )
-        in
-        let (env, tr) =
-          Errors.try_
-            (fun () -> try_vector env)
-            (fun _ ->
-              Errors.try_
-                (fun () -> try_keyed_container env)
-                (fun _ ->
-                  Errors.try_
-                    (fun () -> try_container env)
-                    (fun _ ->
-                      (env, (fun env _ -> (env, Typing_utils.mk_tany env p))))))
-        in
-        (env, tr)
-    in
-    let (env, fty) =
-      match (deref fty, el) with
-      | ((_, Tfun funty), [_; x]) ->
-        let (env, _tx, x) = expr env x in
-        let (env, output_container) = build_output_container env x in
-        begin
-          match get_varray_inst funty.ft_ret.et_type with
-          | None -> (env, fty)
-          | Some elem_ty ->
-            let (env, elem_ty) = output_container env elem_ty in
-            let ft_ret = MakeType.unenforced elem_ty in
-            (env, mk (r_fty, Tfun { funty with ft_ret }))
-        end
-      | _ -> (env, fty)
-    in
-    let (env, (tel, typed_unpack_element, ty)) =
-      call ~expected p env fty el None
-    in
-    make_call
-      env
-      (Tast.make_typed_expr fpos fty (Aast.Id x))
-      tal
-      tel
-      typed_unpack_element
       ty
-  (* Special function `Shapes::idx` *)
-  | Class_const (((_, CI (_, shapes)) as class_id), ((_, idx) as method_id))
-    when String.equal shapes SN.Shapes.cShapes && String.equal idx SN.Shapes.idx
-    ->
-    overload_function
-      p
-      env
-      class_id
-      method_id
-      el
-      unpacked_element
-      (fun env fty res el ->
-        match el with
-        | [shape; field] ->
-          let (env, _ts, shape_ty) = expr env shape in
-          Typing_shapes.idx
-            env
-            shape_ty
-            field
-            None
-            ~expr_pos:p
-            ~fun_pos:(get_reason fty)
-            ~shape_pos:(fst shape)
-        | [shape; field; default] ->
-          let (env, _ts, shape_ty) = expr env shape in
-          let (env, _td, default_ty) = expr env default in
-          Typing_shapes.idx
-            env
-            shape_ty
-            field
-            (Some (fst default, default_ty))
-            ~expr_pos:p
-            ~fun_pos:(get_reason fty)
-            ~shape_pos:(fst shape)
-        | _ -> (env, res))
-  (* Special function `Shapes::at` *)
-  | Class_const (((_, CI (_, shapes)) as class_id), ((_, at) as method_id))
-    when String.equal shapes SN.Shapes.cShapes && String.equal at SN.Shapes.at
-    ->
-    overload_function
-      p
-      env
-      class_id
-      method_id
-      el
-      unpacked_element
-      (fun env _fty res el ->
-        match el with
-        | [shape; field] ->
-          let (env, _te, shape_ty) = expr env shape in
-          Typing_shapes.at env ~expr_pos:p ~shape_pos:(fst shape) shape_ty field
-        | _ -> (env, res))
-  (* Special function `Shapes::keyExists` *)
-  | Class_const
-      (((_, CI (_, shapes)) as class_id), ((_, key_exists) as method_id))
-    when String.equal shapes SN.Shapes.cShapes
-         && String.equal key_exists SN.Shapes.keyExists ->
-    overload_function
-      p
-      env
-      class_id
-      method_id
-      el
-      unpacked_element
-      (fun env fty res el ->
-        match el with
-        | [shape; field] ->
-          let (env, _te, shape_ty) = expr env shape in
-          (* try accessing the field, to verify existence, but ignore
-           * the returned type and keep the one coming from function
-           * return type hint *)
-          let (env, _) =
-            Typing_shapes.idx
-              env
-              shape_ty
-              field
-              None
-              ~expr_pos:p
-              ~fun_pos:(get_reason fty)
-              ~shape_pos:(fst shape)
-          in
-          (env, res)
-        | _ -> (env, res))
-  (* Special function `Shapes::removeKey` *)
-  | Class_const
-      (((_, CI (_, shapes)) as class_id), ((_, remove_key) as method_id))
-    when String.equal shapes SN.Shapes.cShapes
-         && String.equal remove_key SN.Shapes.removeKey ->
-    overload_function
-      p
-      env
-      class_id
-      method_id
-      el
-      unpacked_element
-      (fun env _ res el ->
-        match el with
-        | [shape; field] ->
-          begin
-            match shape with
-            | (_, Lvar (_, lvar))
-            | (_, Callconv (Ast_defs.Pinout, (_, Lvar (_, lvar)))) ->
-              let (env, _te, shape_ty) = expr env shape in
-              let (env, shape_ty) =
-                Typing_shapes.remove_key p env shape_ty field
-              in
-              let env = set_valid_rvalue p env lvar shape_ty in
-              (env, res)
-            | _ ->
-              Errors.invalid_shape_remove_key (fst shape);
-              (env, res)
-          end
-        | _ -> (env, res))
-  (* Special function `Shapes::toArray` *)
-  | Class_const (((_, CI (_, shapes)) as class_id), ((_, to_array) as method_id))
-    when String.equal shapes SN.Shapes.cShapes
-         && String.equal to_array SN.Shapes.toArray ->
-    overload_function
-      p
-      env
-      class_id
-      method_id
-      el
-      unpacked_element
-      (fun env _ res el ->
-        match el with
-        | [shape] ->
-          let (env, _te, shape_ty) = expr env shape in
-          Typing_shapes.to_array env p shape_ty res
-        | _ -> (env, res))
-  (* Special function `Shapes::toDict` *)
-  | Class_const (((_, CI (_, shapes)) as class_id), ((_, to_array) as method_id))
-    when String.equal shapes SN.Shapes.cShapes
-         && String.equal to_array SN.Shapes.toDict ->
-    overload_function
-      p
-      env
-      class_id
-      method_id
-      el
-      unpacked_element
-      (fun env _ res el ->
-        match el with
-        | [shape] ->
-          let (env, _te, shape_ty) = expr env shape in
-          Typing_shapes.to_dict env p shape_ty res
-        | _ -> (env, res))
-  (* Special function `parent::__construct` *)
-  | Class_const ((pos, CIparent), ((_, construct) as id))
-    when String.equal construct SN.Members.__construct ->
-    let (env, tel, typed_unpack_element, ty, pty, ctor_fty) =
-      call_parent_construct p env el unpacked_element
-    in
-    make_call
-      env
-      (Tast.make_typed_expr
-         fpos
-         ctor_fty
-         (Aast.Class_const (((pos, pty), Aast.CIparent), id)))
-      [] (* tal: no type arguments to constructor *)
-      tel
-      typed_unpack_element
-      ty
-  (* Calling parent / class method *)
-  | Class_const ((pos, e1), m) ->
+  in
+  let dispatch_class_const env (pos, e1) m =
     let (env, _tal, tcid, ty1) =
       static_class_id
         ~check_constraints:(not (Nast.equal_class_id_ e1 CIparent))
@@ -4791,6 +4394,459 @@ and dispatch_call
       tel
       typed_unpack_element
       ty
+  in
+  match fun_expr with
+  (* Special top-level function *)
+  | Id ((pos, x) as id) when SN.StdlibFunctions.needs_special_dispatch x ->
+    begin
+      match x with
+      (* Special function `echo` *)
+      | echo when String.equal echo SN.SpecialFunctions.echo ->
+        let (env, tel, _) = exprs ~accept_using_var:true env el in
+        make_call_special env id tel (MakeType.void (Reason.Rwitness pos))
+      (* Special function `isset` *)
+      | isset when String.equal isset SN.PseudoFunctions.isset ->
+        let (env, tel, _) =
+          exprs ~accept_using_var:true ~check_defined:false env el
+        in
+        if Option.is_some unpacked_element then
+          Errors.unpacking_disallowed_builtin_function p isset;
+        make_call_special_from_def env id tel MakeType.bool
+      (* Special function `unset` *)
+      | unset when String.equal unset SN.PseudoFunctions.unset ->
+        let (env, tel, _) = exprs env el in
+        let env = Typing_reactivity.check_unset_target env tel in
+        if Option.is_some unpacked_element then
+          Errors.unpacking_disallowed_builtin_function p unset;
+        let checked_unset_error =
+          if Partial.should_check_error (Env.get_mode env) 4135 then
+            Errors.unset_nonidx_in_strict
+          else
+            fun _ _ ->
+          ()
+        in
+        let env =
+          match (el, unpacked_element) with
+          | ([(_, Array_get ((_, Class_const _), Some _))], None)
+            when Partial.should_check_error (Env.get_mode env) 4011 ->
+            Errors.const_mutation p Pos.none "";
+            env
+          | ([(_, Array_get (ea, Some _))], None) ->
+            let (env, _te, ty) = expr env ea in
+            let r = Reason.Rwitness p in
+            let tmixed = MakeType.mixed r in
+            let super =
+              mk
+                ( Reason.Rnone,
+                  Tunion
+                    [
+                      MakeType.dynamic r;
+                      MakeType.dict r tmixed tmixed;
+                      MakeType.keyset r tmixed;
+                      MakeType.darray r tmixed tmixed;
+                    ] )
+            in
+            SubType.sub_type_or_fail env ty super (fun () ->
+                checked_unset_error
+                  p
+                  (Reason.to_string
+                     ( "This is "
+                     ^ Typing_print.error ~ignore_dynamic:true env ty )
+                     (get_reason ty)))
+          | _ ->
+            checked_unset_error p [];
+            env
+        in
+        (match el with
+        | [(p, Obj_get (_, _, OG_nullsafe, _))] ->
+          Errors.nullsafe_property_write_context p;
+          make_call_special_from_def env id tel (TUtils.terr env)
+        | _ -> make_call_special_from_def env id tel MakeType.void)
+      (* Special function `array_filter` *)
+      | array_filter
+        when String.equal array_filter SN.StdlibFunctions.array_filter
+             && (not (List.is_empty el))
+             && Option.is_none unpacked_element ->
+        (* dispatch the call to typecheck the arguments *)
+        let (env, fty, tal) = fun_type_of_id env id explicit_targs el in
+        let (env, (tel, typed_unpack_element, res)) =
+          call ~expected p env fty el unpacked_element
+        in
+        (* but ignore the result and overwrite it with custom return type *)
+        let x = List.hd_exn el in
+        let (env, _tx, ty) = expr env x in
+        let explain_array_filter ty =
+          map_reason ty ~f:(fun r -> Reason.Rarray_filter (p, r))
+        in
+        let get_value_type env tv =
+          let (env, tv) =
+            if List.length el > 1 then
+              (env, tv)
+            else
+              Typing_solver.non_null env p tv
+          in
+          (env, explain_array_filter tv)
+        in
+        let rec get_array_filter_return_type env ty =
+          let (env, ety) = Env.expand_type env ty in
+          match deref ety with
+          | (r, Tvarray tv) ->
+            let (env, tv) = get_value_type env tv in
+            (env, MakeType.varray r tv)
+          | (r, Tunion tyl) ->
+            let (env, tyl) =
+              List.map_env env tyl get_array_filter_return_type
+            in
+            Typing_union.union_list env r tyl
+          | (r, Tintersection tyl) ->
+            let (env, tyl) =
+              List.map_env env tyl get_array_filter_return_type
+            in
+            Inter.intersect_list env r tyl
+          | (r, Tany _) -> (env, mk (r, Typing_utils.tany env))
+          | (r, Terr) -> (env, TUtils.terr env r)
+          | (r, _) ->
+            let (env, tk) = Env.fresh_type env p in
+            let (env, tv) = Env.fresh_type env p in
+            Errors.try_
+              (fun () ->
+                let keyed_container_type =
+                  MakeType.keyed_container Reason.Rnone tk tv
+                in
+                let env =
+                  SubType.sub_type
+                    env
+                    ety
+                    keyed_container_type
+                    Errors.unify_error
+                in
+                let (env, tv) = get_value_type env tv in
+                (env, MakeType.darray r (explain_array_filter tk) tv))
+              (fun _ ->
+                Errors.try_
+                  (fun () ->
+                    let container_type = MakeType.container Reason.Rnone tv in
+                    let env =
+                      SubType.sub_type env ety container_type Errors.unify_error
+                    in
+                    let (env, tv) = get_value_type env tv in
+                    ( env,
+                      MakeType.darray
+                        r
+                        (explain_array_filter (MakeType.arraykey r))
+                        tv ))
+                  (fun _ -> (env, res)))
+        in
+        let (env, rty) = get_array_filter_return_type env ty in
+        let fty =
+          map_ty fty ~f:(function
+              | Tfun ft -> Tfun { ft with ft_ret = MakeType.unenforced rty }
+              | ty -> ty)
+        in
+        make_call
+          env
+          (Tast.make_typed_expr fpos fty (Aast.Id id))
+          tal
+          tel
+          typed_unpack_element
+          rty
+      (* Special function `type_structure` *)
+      | type_structure
+        when String.equal type_structure SN.StdlibFunctions.type_structure
+             && Int.equal (List.length el) 2
+             && Option.is_none unpacked_element ->
+        (match el with
+        | [e1; e2] ->
+          (match e2 with
+          | (p, String cst) ->
+            (* find the class constant implicitly defined by the typeconst *)
+            let cid =
+              match e1 with
+              | (_, Class_const (cid, (_, x)))
+              | (_, Class_get (cid, CGstring (_, x), _))
+                when String.equal x SN.Members.mClass ->
+                cid
+              | _ -> (fst e1, CIexpr e1)
+            in
+            class_const ~incl_tc:true env p (cid, (p, cst))
+          | _ ->
+            Errors.illegal_type_structure pos "second argument is not a string";
+            expr_error env (Reason.Rwitness pos) e)
+        | _ -> assert false)
+      (* Special function `array_map` *)
+      | array_map
+        when String.equal array_map SN.StdlibFunctions.array_map
+             && (not (List.is_empty el))
+             && Option.is_none unpacked_element ->
+        (* This uses the arity to determine a signature for array_map. But there
+         * is more: for two-argument use of array_map, we specialize the return
+         * type to the collection that's passed in, below. *)
+        let (env, fty, tal) = fun_type_of_id env id explicit_targs el in
+        let (env, fty) = Env.expand_type env fty in
+        let r_fty = get_reason fty in
+        (*
+          Takes a Container type and returns a function that can "pack" a type
+          into an array of appropriate shape, preserving the key type, i.e.:
+          array                 -> f, where f R = array
+          array<X>              -> f, where f R = array<R>
+          array<X, Y>           -> f, where f R = array<X, R>
+          Vector<X>             -> f  where f R = array<R>
+          KeyedContainer<X, Y>  -> f, where f R = array<X, R>
+          Container<X>          -> f, where f R = array<arraykey, R>
+          X                     -> f, where f R = Y
+        *)
+        let rec build_output_container env (x : locl_ty) :
+            env * (env -> locl_ty -> env * locl_ty) =
+          let (env, x) = Env.expand_type env x in
+          match deref x with
+          | (r, Tvarray _) -> (env, (fun env tr -> (env, MakeType.varray r tr)))
+          | (r, Tany _) ->
+            (env, (fun env _ -> (env, mk (r, Typing_utils.tany env))))
+          | (r, Terr) -> (env, (fun env _ -> (env, TUtils.terr env r)))
+          | (r, Tunion tyl) ->
+            let (env, builders) = List.map_env env tyl build_output_container in
+            ( env,
+              fun env tr ->
+                let (env, tyl) =
+                  List.map_env env builders (fun env f -> f env tr)
+                in
+                Typing_union.union_list env r tyl )
+          | (r, Tintersection tyl) ->
+            let (env, builders) = List.map_env env tyl build_output_container in
+            ( env,
+              fun env tr ->
+                let (env, tyl) =
+                  List.map_env env builders (fun env f -> f env tr)
+                in
+                Typing_intersection.intersect_list env r tyl )
+          | (r, _) ->
+            let (env, tk) = Env.fresh_type env p in
+            let (env, tv) = Env.fresh_type env p in
+            let try_vector env =
+              let vector_type = MakeType.const_vector r_fty tv in
+              let env = SubType.sub_type env x vector_type Errors.unify_error in
+              (env, (fun env tr -> (env, MakeType.varray r tr)))
+            in
+            let try_keyed_container env =
+              let keyed_container_type = MakeType.keyed_container r_fty tk tv in
+              let env =
+                SubType.sub_type env x keyed_container_type Errors.unify_error
+              in
+              (env, (fun env tr -> (env, MakeType.darray r tk tr)))
+            in
+            let try_container env =
+              let container_type = MakeType.container r_fty tv in
+              let env =
+                SubType.sub_type env x container_type Errors.unify_error
+              in
+              ( env,
+                (fun env tr -> (env, MakeType.darray r (MakeType.arraykey r) tr))
+              )
+            in
+            let (env, tr) =
+              Errors.try_
+                (fun () -> try_vector env)
+                (fun _ ->
+                  Errors.try_
+                    (fun () -> try_keyed_container env)
+                    (fun _ ->
+                      Errors.try_
+                        (fun () -> try_container env)
+                        (fun _ ->
+                          (env, (fun env _ -> (env, Typing_utils.mk_tany env p))))))
+            in
+            (env, tr)
+        in
+        let (env, fty) =
+          match (deref fty, el) with
+          | ((_, Tfun funty), [_; x]) ->
+            let (env, _tx, x) = expr env x in
+            let (env, output_container) = build_output_container env x in
+            begin
+              match get_varray_inst funty.ft_ret.et_type with
+              | None -> (env, fty)
+              | Some elem_ty ->
+                let (env, elem_ty) = output_container env elem_ty in
+                let ft_ret = MakeType.unenforced elem_ty in
+                (env, mk (r_fty, Tfun { funty with ft_ret }))
+            end
+          | _ -> (env, fty)
+        in
+        let (env, (tel, typed_unpack_element, ty)) =
+          call ~expected p env fty el None
+        in
+        make_call
+          env
+          (Tast.make_typed_expr fpos fty (Aast.Id id))
+          tal
+          tel
+          typed_unpack_element
+          ty
+      | _ -> dispatch_id env id
+    end
+  (* Special Shapes:: function *)
+  | Class_const (((_, CI (_, shapes)) as class_id), ((_, x) as method_id))
+    when String.equal shapes SN.Shapes.cShapes ->
+    begin
+      match x with
+      (* Special function `Shapes::idx` *)
+      | idx when String.equal idx SN.Shapes.idx ->
+        overload_function
+          p
+          env
+          class_id
+          method_id
+          el
+          unpacked_element
+          (fun env fty res el ->
+            match el with
+            | [shape; field] ->
+              let (env, _ts, shape_ty) = expr env shape in
+              Typing_shapes.idx
+                env
+                shape_ty
+                field
+                None
+                ~expr_pos:p
+                ~fun_pos:(get_reason fty)
+                ~shape_pos:(fst shape)
+            | [shape; field; default] ->
+              let (env, _ts, shape_ty) = expr env shape in
+              let (env, _td, default_ty) = expr env default in
+              Typing_shapes.idx
+                env
+                shape_ty
+                field
+                (Some (fst default, default_ty))
+                ~expr_pos:p
+                ~fun_pos:(get_reason fty)
+                ~shape_pos:(fst shape)
+            | _ -> (env, res))
+      (* Special function `Shapes::at` *)
+      | at when String.equal at SN.Shapes.at ->
+        overload_function
+          p
+          env
+          class_id
+          method_id
+          el
+          unpacked_element
+          (fun env _fty res el ->
+            match el with
+            | [shape; field] ->
+              let (env, _te, shape_ty) = expr env shape in
+              Typing_shapes.at
+                env
+                ~expr_pos:p
+                ~shape_pos:(fst shape)
+                shape_ty
+                field
+            | _ -> (env, res))
+      (* Special function `Shapes::keyExists` *)
+      | key_exists when String.equal key_exists SN.Shapes.keyExists ->
+        overload_function
+          p
+          env
+          class_id
+          method_id
+          el
+          unpacked_element
+          (fun env fty res el ->
+            match el with
+            | [shape; field] ->
+              let (env, _te, shape_ty) = expr env shape in
+              (* try accessing the field, to verify existence, but ignore
+            * the returned type and keep the one coming from function
+            * return type hint *)
+              let (env, _) =
+                Typing_shapes.idx
+                  env
+                  shape_ty
+                  field
+                  None
+                  ~expr_pos:p
+                  ~fun_pos:(get_reason fty)
+                  ~shape_pos:(fst shape)
+              in
+              (env, res)
+            | _ -> (env, res))
+      (* Special function `Shapes::removeKey` *)
+      | remove_key when String.equal remove_key SN.Shapes.removeKey ->
+        overload_function
+          p
+          env
+          class_id
+          method_id
+          el
+          unpacked_element
+          (fun env _ res el ->
+            match el with
+            | [shape; field] ->
+              begin
+                match shape with
+                | (_, Lvar (_, lvar))
+                | (_, Callconv (Ast_defs.Pinout, (_, Lvar (_, lvar)))) ->
+                  let (env, _te, shape_ty) = expr env shape in
+                  let (env, shape_ty) =
+                    Typing_shapes.remove_key p env shape_ty field
+                  in
+                  let env = set_valid_rvalue p env lvar shape_ty in
+                  (env, res)
+                | _ ->
+                  Errors.invalid_shape_remove_key (fst shape);
+                  (env, res)
+              end
+            | _ -> (env, res))
+      (* Special function `Shapes::toArray` *)
+      | to_array when String.equal to_array SN.Shapes.toArray ->
+        overload_function
+          p
+          env
+          class_id
+          method_id
+          el
+          unpacked_element
+          (fun env _ res el ->
+            match el with
+            | [shape] ->
+              let (env, _te, shape_ty) = expr env shape in
+              Typing_shapes.to_array env p shape_ty res
+            | _ -> (env, res))
+      (* Special function `Shapes::toDict` *)
+      | to_dict when String.equal to_dict SN.Shapes.toDict ->
+        overload_function
+          p
+          env
+          class_id
+          method_id
+          el
+          unpacked_element
+          (fun env _ res el ->
+            match el with
+            | [shape] ->
+              let (env, _te, shape_ty) = expr env shape in
+              Typing_shapes.to_dict env p shape_ty res
+            | _ -> (env, res))
+      | _ -> dispatch_class_const env class_id method_id
+    end
+  (* Special function `parent::__construct` *)
+  | Class_const ((pos, CIparent), ((_, construct) as id))
+    when String.equal construct SN.Members.__construct ->
+    let (env, tel, typed_unpack_element, ty, pty, ctor_fty) =
+      call_parent_construct p env el unpacked_element
+    in
+    make_call
+      env
+      (Tast.make_typed_expr
+         fpos
+         ctor_fty
+         (Aast.Class_const (((pos, pty), Aast.CIparent), id)))
+      [] (* tal: no type arguments to constructor *)
+      tel
+      typed_unpack_element
+      ty
+  (* Calling parent / class method *)
+  | Class_const (class_id, m) -> dispatch_class_const env class_id m
   (* Call instance method *)
   | Obj_get (e1, (pos_id, Id m), nullflavor, false)
     when not (TypecheckerOptions.method_call_inference (Env.get_tcopt env)) ->
@@ -4975,45 +5031,7 @@ and dispatch_call
       tel
       typed_unpack_element
       ty
-  | Id ((_, id) as x) ->
-    let (env, fty, tal) = fun_type_of_id env x explicit_targs el in
-    check_disposable_in_return env fty;
-    let (env, (tel, typed_unpack_element, ty)) =
-      call ~expected p env fty el unpacked_element
-    in
-    let is_mutable = String.equal id SN.Rx.mutable_ in
-    let is_move = String.equal id SN.Rx.move in
-    let is_freeze = String.equal id SN.Rx.freeze in
-    (* error when rx builtins are used in non-reactive context *)
-    if not (Env.env_local_reactive env) then
-      if is_mutable then
-        Errors.mutable_in_nonreactive_context p
-      else if is_move then
-        Errors.move_in_nonreactive_context p
-      else if is_freeze then
-        Errors.freeze_in_nonreactive_context p;
-
-    (* ban unpacking when calling builtings *)
-    if (is_mutable || is_move || is_freeze) && Option.is_some unpacked_element
-    then
-      Errors.unpacking_disallowed_builtin_function p id;
-
-    (* adjust env for Rx\freeze or Rx\move calls *)
-    let env =
-      if is_freeze then
-        Typing_mutability.freeze_local p env tel
-      else if is_move then
-        Typing_mutability.move_local p env tel
-      else
-        env
-    in
-    make_call
-      env
-      (Tast.make_typed_expr fpos fty (Aast.Id x))
-      tal
-      tel
-      typed_unpack_element
-      ty
+  | Id id -> dispatch_id env id
   | _ ->
     let (env, te, fty) = expr env e in
     let (env, fty) =

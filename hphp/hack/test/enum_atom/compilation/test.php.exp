@@ -122,11 +122,9 @@
   .const B = uninit;
   .method {}{} [private static no_injection] (16,19) 86cinit($constName) {
     .srcloc 16:1,19:82;
-    String "A"
     CGetL $constName
-    Eq
-    .srcloc 16:1,19:82;
-    JmpZ L0
+    SSwitch <"A":L0 -:L1>
+  L0:
     .srcloc 17:3,17:27;
     NewObjD "HH\\EnumMember"
     Dup
@@ -148,13 +146,8 @@
     PopC
     LockObj
     .srcloc 16:1,19:82;
-    RetC
-  L0:
-    String "B"
-    CGetL $constName
-    Eq
-    .srcloc 16:1,19:82;
-    JmpZ L1
+    Jmp L2
+  L1:
     .srcloc 18:3,18:33;
     NewObjD "HH\\EnumMember"
     Dup
@@ -170,14 +163,9 @@
     FCallCtor <LockWhileUnwinding> 2 1 "00" - "" ""
     PopC
     LockObj
+  L2:
     .srcloc 16:1,19:82;
     RetC
-  L1:
-    String "Could not find initializer for "
-    CGetL $constName
-    String " in 86cinit"
-    ConcatN 3
-    Fatal Runtime
   }
 }
 
@@ -210,12 +198,6 @@
   .enum_ty <"I" extended_hint>;
   .const C = uninit;
   .method {}{} [private static no_injection] (25,27) 86cinit($constName) {
-    .srcloc 25:1,27:62;
-    String "C"
-    CGetL $constName
-    Eq
-    .srcloc 25:1,27:62;
-    JmpZ L0
     .srcloc 26:3,26:31;
     NewObjD "HH\\EnumMember"
     Dup
@@ -238,12 +220,6 @@
     LockObj
     .srcloc 25:1,27:62;
     RetC
-  L0:
-    String "Could not find initializer for "
-    CGetL $constName
-    String " in 86cinit"
-    ConcatN 3
-    Fatal Runtime
   }
 }
 

@@ -4,15 +4,11 @@ File "using_bad.php", line 20, characters 29-30:
 Local variable already used in `using` statement (Typing[4178])
 File "using_bad.php", line 26, characters 9-10:
 Local variable already used in `using` statement (Typing[4178])
-File "using_bad.php", line 29, characters 15-31:
-Using cannot be used on non-disposable expression (Typing[4110])
-File "using_bad.php", line 29, characters 15-31:
-Expected `IDisposable` because it was assigned in a `using` clause
-File "using_bad.php", line 29, characters 19-29:
-But got `AsyncHandle`
-File "using_bad.php", line 33, characters 20-31:
-Using cannot be used on non-disposable expression (Typing[4110])
-File "using_bad.php", line 33, characters 20-31:
-Expected `IAsyncDisposable` because it was assigned in a `using` clause
-File "using_bad.php", line 33, characters 24-29:
-But got `Handle`
+File "using_bad.php", line 29, characters 10-31:
+This expression is used in a `using` clause so it must have type `\IDisposable` (Typing[4110])
+  File "using_bad.php", line 29, characters 10-31:
+  No instance method `__dispose` in `AsyncHandle`
+File "using_bad.php", line 33, characters 15-31:
+This expression is used in a `using` clause with await so it must have type `\IAsyncDisposable` (Typing[4110])
+  File "using_bad.php", line 33, characters 15-31:
+  No instance method `__disposeAsync` in `Handle`

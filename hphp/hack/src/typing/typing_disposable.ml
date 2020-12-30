@@ -10,7 +10,6 @@
 (* Typing code concerned with disposable types. *)
 
 open Hh_prelude
-open Typing_defs
 module Env = Typing_env
 module MakeType = Typing_make_type
 module Cls = Decl_provider.Class
@@ -57,16 +56,3 @@ let enforce_is_disposable env hint =
           Errors.must_extend_disposable p
     end
   | _ -> ()
-
-(* Ensure that `ty` is a subtype of IDisposable (for `using`) or
- * IAsyncDisposable (for `await using`)
- *)
-let enforce_is_disposable_type env has_await pos ty =
-  let class_name =
-    if has_await then
-      SN.Classes.cIAsyncDisposable
-    else
-      SN.Classes.cIDisposable
-  in
-  let disposable_ty = MakeType.class_type (Reason.Rusing pos) class_name [] in
-  Typing_ops.sub_type pos Reason.URusing env ty disposable_ty Errors.unify_error

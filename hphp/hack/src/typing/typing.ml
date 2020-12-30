@@ -452,6 +452,34 @@ and set_local ?(is_using_clause = false) env (pos, x) ty =
   else
     env
 
+(* Ensure that `ty` is a subtype of IDisposable (for `using`) or
+ * IAsyncDisposable (for `await using`)
+ *)
+and has_dispose_method env has_await p e ty =
+  let meth =
+    if has_await then
+      SN.Members.__disposeAsync
+    else
+      SN.Members.__dispose
+  in
+  let (env, (tfty, _tal)) =
+    TOG.obj_get
+      ~obj_pos:(fst e)
+      ~is_method:true
+      ~nullsafe:None
+      ~coerce_from_ty:None
+      ~explicit_targs:[]
+      env
+      ty
+      (CIexpr e)
+      (p, meth)
+      (Errors.using_error p has_await)
+  in
+  let (env, (_tel, _typed_unpack_element, _ty)) =
+    call ~expected:None p env tfty [] None
+  in
+  env
+
 (* Check an individual component in the expression `e` in the
  * `using (e) { ... }` statement.
  * This consists of either
@@ -466,9 +494,7 @@ and check_using_expr has_await env ((pos, content) as using_clause) =
   (* Simple assignment to local of form `$lvar = e` *)
   | Binop (Ast_defs.Eq None, (lvar_pos, Lvar lvar), e) ->
     let (env, te, ty) = expr ~is_using_clause:true env e in
-    let env =
-      Typing_disposable.enforce_is_disposable_type env has_await (fst e) ty
-    in
+    let env = has_dispose_method env has_await pos e ty in
     let env = set_local ~is_using_clause:true env lvar ty in
     (* We are assigning a new value to the local variable, so we need to
      * generate a new expression id
@@ -488,9 +514,7 @@ and check_using_expr has_await env ((pos, content) as using_clause) =
     let (env, typed_using_clause, ty) =
       expr ~is_using_clause:true env using_clause
     in
-    let env =
-      Typing_disposable.enforce_is_disposable_type env has_await pos ty
-    in
+    let env = has_dispose_method env has_await pos using_clause ty in
     (env, (typed_using_clause, []))
 
 (* Check the using clause e in

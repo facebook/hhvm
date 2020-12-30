@@ -3692,6 +3692,22 @@ let xhp_attribute_does_not_match_hint =
 let record_init_value_does_not_match_hint =
   maybe_unify_error Typing.RecordInitValueDoesNotMatchHint
 
+let using_error pos has_await ?code:_ msg _list =
+  let (note, cls) =
+    if has_await then
+      (" with await", Naming_special_names.Classes.cIAsyncDisposable)
+    else
+      ("", Naming_special_names.Classes.cIDisposable)
+  in
+  add_list
+    (Typing.err_code Typing.UnifyError)
+    ( pos,
+      Printf.sprintf
+        "This expression is used in a `using` clause%s so it must have type `%s`"
+        note
+        cls )
+    [msg]
+
 let elt_type_to_string = function
   | `Method -> "method"
   | `Property -> "property"

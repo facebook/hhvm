@@ -563,6 +563,8 @@ val xhp_attribute_does_not_match_hint : typing_error_callback
 
 val record_init_value_does_not_match_hint : typing_error_callback
 
+val using_error : Pos.t -> bool -> typing_error_callback
+
 val static_redeclared_as_dynamic :
   Pos.t -> Pos.t -> string -> elt_type:[ `Method | `Property ] -> unit
 

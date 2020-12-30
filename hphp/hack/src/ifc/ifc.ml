@@ -1434,8 +1434,7 @@ let rec expr ~pos renv (env : Env.expr_env) (((epos, ety), e) : Tast.expr) =
         let (env, _) =
           call ~pos renv env (Cconstructor call_id) (Some obj_pty) args_pty lty
         in
-        let pty = Lift.ty ~prefix:"constr" renv ety in
-        (env, pty)
+        (env, obj_pty)
       | _ -> fail "unhandled method call on %a" Pp.ptype obj_pty
     end
   | A.Efun (fun_, captured_ids)

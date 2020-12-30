@@ -1,0 +1,8 @@
+object(stdClass) (1) {
+  ["testAttr"]=>
+  int(17)
+}
+object(stdClass) (1) {
+  ["testAttr"]=>
+  int(0)
+}

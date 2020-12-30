@@ -1588,7 +1588,7 @@ static int model_to_xml_object(xmlNodePtr node, sdlContentModelPtr model,
       }
       enc = model->u_element->encode;
       if ((model->max_occurs == -1 || model->max_occurs > 1) &&
-          isArrayType(type(data)) &&
+          isArrayLikeType(type(data)) &&
           val(data).parr->isVectorData()) {
         for (ArrayIter iter(val(data).parr); iter; ++iter) {
           Variant val = iter.second();
@@ -1675,7 +1675,7 @@ static int model_to_xml_object(xmlNodePtr node, sdlContentModelPtr model,
     if (type(data) != KindOfUninit) {
       enc = get_conversion(XSD_ANYXML);
       if ((model->max_occurs == -1 || model->max_occurs > 1) &&
-          isArrayType(type(data)) &&
+          isArrayLikeType(type(data)) &&
           val(data).parr->isVectorData()) {
         for (ArrayIter iter(val(data).parr); iter; ++iter) {
           master_to_xml(enc, iter.second(), style, node);

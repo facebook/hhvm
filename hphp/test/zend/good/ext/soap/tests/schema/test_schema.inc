@@ -1,12 +1,28 @@
 <?hh
 
+class LocalSoapClient extends SoapClient {
+  static $input = null;
 
-function test($input) {
+  function __construct($wsdl) {
+    parent::__construct($wsdl);
+    $this->server = new SoapServer($wsdl);
+    $this->server->addFunction('test');
+  }
 
-	ZendGoodExtSoapTestsSchemaTestSchemaInc::$val = $input;
+  function __dorequest($request, $location, $action, $version, $one_way = 0) {
+    ob_start();
+    $this->server->handle($request);
+    $response = ob_get_contents();
+    ob_end_clean();
+    return $response;
+  }
 }
 
-function test_schema($schema,$type,$param,$style="rpc",$use="encoded", $attributeFormDefault='',$features=0) {
+function test($input) {
+  LocalSoapClient::$input = $input;
+}
+
+function test_schema($schema, $type, $param) {
 
 $wsdl  = <<<EOF
 <definitions name="InteropTest"
@@ -19,14 +35,14 @@ $wsdl  = <<<EOF
     targetNamespace="http://test-uri/"
     >
   <types>
-  <schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://test-uri/" $attributeFormDefault>
-   <xsd:import namespace="http://schemas.xmlsoap.org/soap/encoding/" />
-   <xsd:import namespace="http://schemas.xmlsoap.org/wsdl/" />
-  	$schema
+  <schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://test-uri/">
+    <xsd:import namespace="http://schemas.xmlsoap.org/soap/encoding/" />
+    <xsd:import namespace="http://schemas.xmlsoap.org/wsdl/" />
+    $schema
   </schema>
   </types>
   <message name="testMessage">
-  	<part name="testParam" $type/>
+  	<part name="testParam" type="tns:$type"/>
   </message>
 	<portType name="testPortType">
 		<operation name="test">
@@ -36,9 +52,9 @@ $wsdl  = <<<EOF
 	<binding name="testBinding" type="testPortType">
 		<soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
 		<operation name="test">
-			<soap:operation soapAction="#test" style="$style"/>
+			<soap:operation soapAction="#test" style="rpc"/>
 			<input>
-				<soap:body use="$use" namespace="http://test-uri/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+				<soap:body use="encoding" namespace="http://test-uri/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
 			</input>
 		</operation>
 	</binding>
@@ -50,31 +66,14 @@ $wsdl  = <<<EOF
 </definitions>
 EOF;
 
-  $fname = __SystemLib\hphp_test_tmppath('wsdl');
-  $f = fopen($fname,"w");
-  fwrite($f,$wsdl);
+  $filename = __SystemLib\hphp_test_tmppath('wsdl');
+  $f = fopen($filename, 'w');
+  fwrite($f, $wsdl);
   fclose($f);
-  ini_set("soap.wsdl_cache_enabled",0);
-  $x = new SoapClient($fname, darray["trace"=>1,"exceptions"=>0,"features"=>$features]);
-  $y = new SoapServer($fname, darray["features"=>$features]);
-	$y->addFunction("test");
-  unlink($fname);
+  ini_set('soap.wsdl_cache_enabled', 0);
+  $client = new LocalSoapClient($filename);
+  unlink($filename);
 
-  $x->__soapcall('test', varray[$param]);
-  $xml = xml_parser_create();
-  $req = $x->__getlastrequest();
-  if ($style == "rpc") {
-    $HTTP_RAW_POST_DATA = $req;
-    ob_start();
-    $y->handle($HTTP_RAW_POST_DATA);
-    ob_end_clean();
-    echo $req;
-    var_dump(ZendGoodExtSoapTestsSchemaTestSchemaInc::$val);
-  } else {
-    echo $req;
-  }
-}
-
-abstract final class ZendGoodExtSoapTestsSchemaTestSchemaInc {
-  public static $val;
+  $client->__soapcall('test', varray[$param]);
+  var_dump(LocalSoapClient::$input);
 }

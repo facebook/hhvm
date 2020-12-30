@@ -118,12 +118,20 @@ static ArrayData* markLegacyRecursiveHelper(ArrayData* ad, bool legacy) {
   return val(result).parr;
 }
 
-static ArrayData* tagProvenanceHelper(ArrayData* ad, int64_t flags) {
+static ArrayData* tagProvenanceArrLike(ArrayData* ad, int64_t flags) {
   auto const tv = make_array_like_tv(ad);
   auto const result = arrprov::tagTvRecursively(tv, flags);
   decRefArr(ad);
   assertx(tvIsArrayLike(result));
   return val(result).parr;
+}
+
+static ObjectData* tagProvenanceObject(ObjectData* od, int64_t flags) {
+  auto const tv = make_tv<KindOfObject>(od);
+  auto const result = arrprov::tagTvRecursively(tv, flags);
+  decRefObj(od);
+  assertx(tvIsObject(result));
+  return val(result).pobj;
 }
 
 void markLegacyShallow(IRLS& env, const IRInstruction* inst, bool legacy) {
@@ -160,7 +168,9 @@ void cgArrayUnmarkLegacyRecursive(IRLS& env, const IRInstruction* inst) {
 
 void cgTagProvenanceHere(IRLS& env, const IRInstruction* inst) {
   auto const args = argGroup(env, inst).ssa(0).ssa(1);
-  auto const target = CallSpec::direct(tagProvenanceHelper);
+  auto const target = inst->src(0)->isA(TArrLike)
+    ? CallSpec::direct(tagProvenanceArrLike)
+    : CallSpec::direct(tagProvenanceObject);
   cgCallHelper(vmain(env), env, target, callDest(env, inst),
                SyncOptions::Sync, args);
 }

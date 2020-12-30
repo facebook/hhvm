@@ -3302,10 +3302,11 @@ fields of that struct for holding intermediate values.
   The recursive variants traverse through the array-like's transitive elements
   but stop traversal at any non-array-like.
 
-| TagProvenanceHere, DModified(0), S(Vec,Dict,VArr,DArr) S(Int), CRc|PRc|LA
+| TagProvenanceHere, DModified(0), S(Obj,Vec,Dict,VArr,DArr) S(Int), CRc|PRc|LA
 
-  Tag the dvarray S0 with provenance information, using flags S1, skipping
-  over any stack frames with ProvenanceSkipFrame annotations.
+  Recursively tag any dvarrays contained within the array or collection rooted
+  at S0 with provenance information, using flags S1. When computing a tag, we
+  skip over any stack frames with ProvenanceSkipFrame annotations.
 
 
 18. Exception/unwinding support

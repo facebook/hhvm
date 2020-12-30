@@ -2356,13 +2356,26 @@ void emitTagProvenanceHere(IRGS& env) {
     PUNT(TagProvenanceHere-ValueMustBeKnown);
   }
 
-
-  if (!value->isA(TVec|TDict|TVArr|TDArr)) {
+  if (!value->isA(TObj|TVec|TDict|TVArr|TDArr)) {
     discard(env);
     return;
   }
 
-  auto const result = gen(env, TagProvenanceHere, value, flags);
+  auto const result = [&]{
+    if (!value->isA(TObj)) return gen(env, TagProvenanceHere, value, flags);
+
+    return cond(
+      env,
+      [&](Block* taken) {
+        namespace F = arrprov::TagTVFlags;
+        auto const flag = cns(env, F::TAG_PROVENANCE_HERE_MUTATE_COLLECTIONS);
+        auto const test = gen(env, AndInt, flags, flag);
+        gen(env, JmpZero, taken, test);
+      },
+      [&]{ return gen(env, TagProvenanceHere, value, flags); },
+      [&]{ return value; }
+    );
+  }();
 
   discard(env, 2);
   push(env, result);

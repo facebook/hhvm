@@ -2308,11 +2308,6 @@ bool merge_xinits(Attr attr,
     ITRACE(5, "merge_xinits: adding {}::{} to method table\n",
            xinit->cls->name, xinit->name);
     assertx(&empty == &xinit);
-    DEBUG_ONLY auto res = cinfo->methods.emplace(
-      xinit->name,
-      MethTabEntry { xinit.get(), xinit->attrs, false, true }
-    );
-    assertx(res.second);
     clones.push_back(std::move(xinit));
   }
 
@@ -2428,6 +2423,13 @@ void flatten_traits(ClassNamingEnv& env, ClassInfo* cinfo) {
       std::move(cls->methods.back()) : nullptr;
     if (cinit) cls->methods.pop_back();
     for (auto& clone : clones) {
+      if (is_special_method_name(clone->name)) {
+        DEBUG_ONLY auto res = cinfo->methods.emplace(
+          clone->name,
+          MethTabEntry { clone.get(), clone->attrs, false, true }
+        );
+        assertx(res.second);
+      }
       ITRACE(5, "  - meth {}\n", clone->name);
       cinfo->methods.find(clone->name)->second.func = clone.get();
       cls->methods.push_back(std::move(clone));

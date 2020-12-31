@@ -2553,7 +2553,14 @@ void Class::setupSProps() {
     }
   }
 
+  // We can't use this optimization in sandbox mode yet, because we use data
+  // on this Class to symbolize HeapGraph root nodes (see heap-graph.cpp),
+  // and in sandbox mode, the Class may be destroyed.
+  //
+  // Symbolization for singleton StaticPropData nodes is probably also broken,
+  // but not in a way that causes assertion failures. We must audit both.
   m_sPropOptimizationEnabled =
+    RO::RepoAuthoritative &&
     allNonPersistentSPropsSatisfyInitialTC &&
     numNonPersistentPropHandles != 0;
 

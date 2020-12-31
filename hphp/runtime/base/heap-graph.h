@@ -50,15 +50,10 @@ struct HeapGraph {
   };
   static constexpr auto NumPtrKinds = 3;
   struct Node {
-    union {
-      const void* ptr;
-      const Class* cls;    // only set for static props
-      const HeapObject* h; // only set for non-roots
-    };
+    const HeapObject* h; // nullptr for roots
     size_t size;
     bool is_root;
     type_scan::Index tyindex;
-    uint32_t prop_slot;
     int first_out;
     int first_in; // first out-ptr and in-ptr, respectively
   };

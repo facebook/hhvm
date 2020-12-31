@@ -18,14 +18,9 @@ EOD
 
 function visit_root($node) {
   if (!isset($node['type'])) return;
-  if ($node['type'] === 'HPHP::StaticPropData') {
-    echo $node['type'].' ';
-    if (isset($node['class'])) {
-      echo $node['class'].'::'.$node['prop'];
-    } else {
-      echo 'dead';
-    }
-    echo "\n";
+  if ($node['type'] === 'HPHP::StaticPropData' ||
+      $node['type'] === 'HPHP::StaticMultiPropData') {
+    // TODO(kshaunak): Clean up and exclude dead static props correctly.
   }
 }
 <<__EntryPoint>>

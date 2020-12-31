@@ -84,9 +84,6 @@ using LinkTable = tbb::concurrent_hash_map<
 >;
 LinkTable s_linkTable;
 
-using RevLinkTable = tbb::concurrent_hash_map<Handle,Symbol>;
-RevLinkTable s_handleTable;
-
 __thread std::atomic<bool> s_hasFullInit{false};
 
 //////////////////////////////////////////////////////////////////////
@@ -360,16 +357,11 @@ Handle bindImpl(Symbol key, Mode mode, size_t sizeBytes,
   recordRds(handle, sizeBytes, key);
 
   LinkTable::const_accessor insert_acc;
-  // insert_acc lives until after s_handleTable is updated
   if (!s_linkTable.insert(
         insert_acc,
         LinkTable::value_type(key, {handle, safe_cast<uint32_t>(sizeBytes)}))) {
     always_assert(0);
   }
-  if (type_scan::hasScanner(tyIndex)) {
-    s_handleTable.insert(std::make_pair(handle, key));
-  }
-
   return handle;
 }
 
@@ -417,7 +409,6 @@ void bindOnLinkImpl(std::atomic<Handle>& handle,
 void unbind(Symbol key, Handle handle) {
   Guard g(s_allocMutex);
   s_linkTable.erase(key);
-  s_handleTable.erase(handle);
 }
 
 using namespace detail;
@@ -720,14 +711,6 @@ void recordRds(Handle h, size_t size, const Symbol& sym) {
 std::vector<void*> allTLBases() {
   Guard g(s_tlBaseListLock);
   return s_tlBaseList;
-}
-
-folly::Optional<Symbol> reverseLink(Handle handle) {
-  decltype(s_handleTable)::const_accessor acc;
-  if (s_handleTable.find(acc, handle)) {
-    return acc->second;
-  }
-  return folly::none;
 }
 
 namespace {

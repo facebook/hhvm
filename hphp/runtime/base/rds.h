@@ -424,8 +424,6 @@ Link<T,M> alloc();
 size_t allocBit();
 bool testAndSetBit(size_t bit);
 
-folly::Optional<Symbol> reverseLink(Handle handle);
-
 //////////////////////////////////////////////////////////////////////
 
 /*

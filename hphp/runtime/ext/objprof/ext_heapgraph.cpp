@@ -365,10 +365,6 @@ Array createPhpNode(HeapGraphContextPtr hgptr, int index) {
     if (auto cls = cnode.heap_object.cls) {
       node_arr.set(s_class, make_tv<KindOfPersistentString>(cls->name()));
     }
-  } else if (auto const cls = node.cls) {
-    auto const& sprop = cls->staticProperties()[node.prop_slot];
-    node_arr.set(s_class, make_tv<KindOfPersistentString>(cls->name()));
-    node_arr.set(s_prop, make_tv<KindOfPersistentString>(sprop.name));
   }
   return node_arr;
 }

@@ -61,14 +61,11 @@ size_t addPtr(HeapGraph& g, int from, int to, HeapGraph::PtrKind kind,
 /*
  * Add a single root node, using the type scanner to find edges out of it.
  */
-void addRootNodeImpl(HeapGraph& g, const PtrMap<const HeapObject*>& blocks,
-                     type_scan::Scanner& scanner,
-                     const void* h, size_t size, type_scan::Index ty,
-                     const Class* cls = nullptr, Slot slot = kInvalidSlot) {
+void addRootNode(HeapGraph& g, const PtrMap<const HeapObject*>& blocks,
+                 type_scan::Scanner& scanner,
+                 const void* h, size_t size, type_scan::Index ty) {
   auto from = g.nodes.size();
-  g.nodes.push_back(
-    HeapGraph::Node{cls, size, true, ty, slot, -1, -1}
-  );
+  g.nodes.push_back(HeapGraph::Node{nullptr, size, true, ty, -1, -1});
   g.root_nodes.push_back(from);
   scanner.scanByIndex(ty, h, size);
   scanner.finish(
@@ -102,69 +99,6 @@ void addRootNodeImpl(HeapGraph& g, const PtrMap<const HeapObject*>& blocks,
       }
     }
   );
-}
-
-/*
- * We'd like to annotate static prop root nodes with the class and prop name
- * associated with them. To do so, we have to reverse the RDS links that are
- * bound get the target location `h` in memory.
- *
- * As an optimization, we may bind a single link for multiple static props so
- * that the props are in a contiguous array. We have to reverse "multi-prop"
- * bindings here as well, which means that one call to addRootNode may result
- * in multiple root nodes being added.
- */
-void addRootNode(HeapGraph& g, const PtrMap<const HeapObject*>& blocks,
-                 type_scan::Scanner& scanner,
-                 const void* h, size_t size, type_scan::Index ty) {
-  if (type_scan::hasNonConservative()) {
-    auto const kStaticPropData =
-      type_scan::getIndexForScan<StaticPropData>();
-    auto const kStaticMultiPropData =
-      type_scan::getIndexForScan<StaticMultiPropData>();
-
-    if (ty == kStaticPropData) {
-      auto const handle = rds::ptrToHandle<rds::Mode::Any>(h);
-      if (auto const symbol = rds::reverseLink(handle)) {
-        auto const sprop = boost::get<rds::SPropCache>(symbol.value());
-        auto const cls = sprop.cls;
-        // If this class's props haven't been initialized for this request,
-        // then we can exclude them from the heapgraph altogether.
-        if (cls->needsInitSProps()) return;
-        addRootNodeImpl(g, blocks, scanner, h, size, ty, sprop.cls, sprop.slot);
-        return;
-      }
-    } else if (ty == kStaticMultiPropData) {
-      auto const handle = rds::ptrToHandle<rds::Mode::Any>(h);
-      if (auto const symbol = rds::reverseLink(handle)) {
-        auto const multi = boost::get<rds::SMultiPropCache>(symbol.value());
-        auto const cls = multi.cls;
-
-        // If this class's props haven't been initialized for this request,
-        // then we can exclude them from the heapgraph altogether.
-        if (cls->needsInitSProps()) return;
-
-        // Look for properties that fall in this "multi-prop" RDS allocation.
-        // Create a separate root node for each one of them.
-        auto const n = cls->numStaticProperties();
-        auto matched = 0;
-        for (auto slot = 0; slot < n; slot++) {
-          auto const sub = cls->sPropHandle(slot);
-          if (!(handle <= sub && sub < handle + size)) continue;
-
-          auto const ptr = reinterpret_cast<const char*>(h) + sub - handle;
-          addRootNodeImpl(g, blocks, scanner, ptr, sizeof(StaticPropData),
-                          kStaticPropData, cls, slot);
-          matched += sizeof(StaticPropData);
-        }
-
-        always_assert(matched == size);
-        return;
-      }
-    }
-  }
-
-  addRootNodeImpl(g, blocks, scanner, h, size, ty);
 }
 
 } // anon namespace
@@ -217,9 +151,7 @@ HeapGraph makeHeapGraph(bool include_free) {
         ty = type_scan::kIndexUnknown;
         break;
     }
-    g.nodes.push_back(
-      HeapGraph::Node{h, size, false, ty, kInvalidSlot, -1, -1}
-    );
+    g.nodes.push_back(HeapGraph::Node{h, size, false, ty, -1, -1});
   });
 
   // find root nodes

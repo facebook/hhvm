@@ -247,21 +247,6 @@ void cgIsClsDynConstructible(IRLS& env, const IRInstruction* inst) {
   v << setcc{CC_NZ, sf, dst};
 }
 
-void cgLdFuncRxLevel(IRLS& env, const IRInstruction* inst) {
-  auto const func = srcLoc(env, inst, 0).reg();
-  auto const dst = dstLoc(env, inst, 0).reg();
-  auto& v = vmain(env);
-
-  static_assert(SCRx0 == (1u << 0), "");
-  static_assert(SCRx1 == (1u << 1), "");
-  static_assert(SCPure == (1u << 2), "");
-  auto const attrs = v.makeReg();
-  auto const shifted = v.makeReg();
-  v << loadzlq{func[Func::staticCoeffectsOff()], attrs};
-  v << shrqi{kRxAttrShift, attrs, shifted, v.makeReg()};
-  v << andqi{int32_t(kRxLevelMask), shifted, dst, v.makeReg()};
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 void cgLdClsFromClsMeth(IRLS& env, const IRInstruction* inst) {

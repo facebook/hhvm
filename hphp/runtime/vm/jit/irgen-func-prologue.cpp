@@ -272,6 +272,38 @@ void emitCalleeImplicitContextChecks(IRGS& env, const Func* callee) {
   );
 }
 
+void emitCalleeCoeffectChecks(IRGS& env, const Func* callee,
+                              SSATmp* callFlags) {
+  assertx(callee);
+  assertx(callFlags);
+
+  if (!CoeffectsConfig::enabled()) return;
+  auto const requiredCoeffects =
+    convertToRequiredCoeffects(callee->staticCoeffects());
+
+  if (callFlags->hasConstVal(TInt)) {
+    auto const providedCoeffects =
+      CallFlags(callFlags->intVal()).coeffects();
+    if (LIKELY(requiredCoeffects >= providedCoeffects)) return;
+    gen(env, RaiseRxCallViolation, FuncData{callee}, fp(env));
+    return;
+  }
+  ifThen(
+    env,
+    [&] (Block* taken) {
+      auto const providedCoeffects =
+        gen(env, Lshr, callFlags, cns(env, CallFlags::CoeffectsStart));
+      auto const cond =
+        gen(env, GteInt, cns(env, requiredCoeffects), providedCoeffects);
+      gen(env, JmpZero, taken, cond);
+    },
+    [&] {
+      hint(env, Block::Hint::Unlikely);
+      gen(env, RaiseRxCallViolation, FuncData{callee}, fp(env));
+    }
+  );
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 namespace {
@@ -316,6 +348,7 @@ void emitCalleeChecks(IRGS& env, const Func* callee, uint32_t argc,
   emitCalleeGenericsChecks(env, callee, callFlags, false);
   emitCalleeArgumentArityChecks(env, callee, argc);
   emitCalleeDynamicCallChecks(env, callee, callFlags);
+  emitCalleeCoeffectChecks(env, callee, callFlags);
   emitCalleeImplicitContextChecks(env, callee);
 
   // Emit early stack overflow check if necessary.

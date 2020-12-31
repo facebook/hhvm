@@ -241,6 +241,7 @@ void beginInlining(IRGS& env,
   emitCalleeGenericsChecks(env, target, callFlags, fca.hasGenerics());
   emitCalleeDynamicCallChecks(env, target, callFlags);
   emitCalleeImplicitContextChecks(env, target);
+  emitCalleeCoeffectChecks(env, target, callFlags);
   emitInitFuncInputs(env, target, numArgsInclUnpack);
 
   auto const closure = target->isClosureBody()

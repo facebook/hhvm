@@ -753,7 +753,6 @@ bool opcodeMayRaise(Opcode opc) {
   case LdFuncFromRFunc:
   case LdFuncName:
   case LdFuncNumParams:
-  case LdFuncRxLevel:
   case LdFuncVecLen:
   case LdGenericsFromRClsMeth:
   case LdGenericsFromRFunc:

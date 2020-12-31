@@ -332,13 +332,6 @@ SSATmp* simplifyIsClsDynConstructible(State& env, const IRInstruction* inst) {
     : nullptr;
 }
 
-SSATmp* simplifyLdFuncRxLevel(State& env, const IRInstruction* inst) {
-  auto const funcTmp = inst->src(0);
-  return funcTmp->hasConstVal(TFunc)
-    ? cns(env, funcTmp->funcVal()->rxLevel())
-    : nullptr;
-}
-
 SSATmp* simplifyLdCls(State& env, const IRInstruction* inst) {
   if (inst->src(0)->inst()->is(LdClsName)) return inst->src(0)->inst()->src(0);
   return nullptr;
@@ -3678,7 +3671,6 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
       X(MethodExists)
       X(FuncHasAttr)
       X(IsClsDynConstructible)
-      X(LdFuncRxLevel)
       X(LdObjClass)
       X(LdObjInvoke)
       X(Mov)

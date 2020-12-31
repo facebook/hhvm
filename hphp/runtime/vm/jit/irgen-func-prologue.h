@@ -46,6 +46,9 @@ void emitCalleeGenericsChecks(IRGS& env, const Func* callee, SSATmp* callFlags,
 void emitCalleeDynamicCallChecks(IRGS& env, const Func* callee,
                                 SSATmp* callFlags);
 
+void emitCalleeCoeffectChecks(IRGS& env, const Func* callee,
+                              SSATmp* callFlags);
+
 void emitCalleeImplicitContextChecks(IRGS& env, const Func* callee);
 
 void emitInitFuncInputs(IRGS& env, const Func* callee, uint32_t argc);

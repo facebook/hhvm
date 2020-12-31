@@ -49,22 +49,21 @@ const char* rxLevelToString(RxLevel level) {
   not_reached();
 }
 
-RxLevel rxRequiredCalleeLevel(RxLevel level) {
-  assertx(CoeffectsConfig::enabled());
-  switch (level) {
-    case RxLevel::None:
-    case RxLevel::Local:   return RxLevel::None;
-    case RxLevel::Shallow: return RxLevel::Local;
-    case RxLevel::Rx:      return RxLevel::Rx;
-    case RxLevel::Pure:    return RxLevel::Pure;
-  }
-  not_reached();
-}
-
 RuntimeCoeffects convertToAmbientCoeffects(const StaticCoeffects coeffects) {
   switch (rxLevelFromAttr(coeffects)) {
     case RxLevel::None:
     case RxLevel::Local:   return RCDefault;
+    case RxLevel::Shallow: return RCRxShallow;
+    case RxLevel::Rx:      return RCRx;
+    case RxLevel::Pure:    return RCPure;
+  }
+  not_reached();
+}
+
+RuntimeCoeffects convertToRequiredCoeffects(const StaticCoeffects coeffects) {
+  switch (rxLevelFromAttr(coeffects)) {
+    case RxLevel::None:    return RCDefault;
+    case RxLevel::Local:
     case RxLevel::Shallow: return RCRxShallow;
     case RxLevel::Rx:      return RCRx;
     case RxLevel::Pure:    return RCPure;

@@ -3633,6 +3633,7 @@ bool doFCall(CallFlags callFlags, const Func* func, uint32_t numArgsInclUnpack,
   calleeArgumentArityChecks(func, numArgsInclUnpack);
   calleeDynamicCallChecks(func, callFlags.isDynamicCall());
   calleeImplicitContextChecks(func);
+  calleeCoeffectChecks(func, callFlags);
   initFuncInputs(func, numArgsInclUnpack);
 
   ar->m_sfp = vmfp();
@@ -3697,7 +3698,6 @@ void fcallImpl(PC origpc, PC& pc, const FCallArgs& fca, const Func* func,
                Ctx&& ctx, bool logAsDynamicCall = true) {
   if (fca.enforceInOut()) callerInOutChecks(func, fca);
   if (dynamic && logAsDynamicCall) callerDynamicCallChecks(func);
-  callerRxChecks(vmfp(), func);
   checkStack(vmStack(), func, 0);
 
   auto const numArgsInclUnpack = [&] {

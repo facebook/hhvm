@@ -98,9 +98,8 @@ constexpr bool funcAttrIsPure(StaticCoeffects a) {
   return static_cast<uint16_t>(a) & SCPure;
 }
 
-RxLevel rxRequiredCalleeLevel(RxLevel level);
-
 RuntimeCoeffects convertToAmbientCoeffects(const StaticCoeffects);
+RuntimeCoeffects convertToRequiredCoeffects(const StaticCoeffects);
 
 ///////////////////////////////////////////////////////////////////////////////
 

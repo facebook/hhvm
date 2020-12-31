@@ -271,7 +271,6 @@ bool canDCE(IRInstruction* inst) {
   case FuncHasAttr:
   case IsFunReifiedGenericsMatched:
   case IsClsDynConstructible:
-  case LdFuncRxLevel:
   case StrictlyIntegerConv:
   case GetMemoKeyScalar:
   case LookupSPropSlot:

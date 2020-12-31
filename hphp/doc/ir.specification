@@ -1327,10 +1327,6 @@ To string conversions:
 
   Tests for Class::m_attrCopy & AttrDynamicallyConstructible.
 
-| LdFuncRxLevel, D(Int), S(Func), NF
-
-  Returns the value of func->rxLevel().
-
 | LdClsFromClsMeth, D(Cls), S(ClsMeth), NF
 
   Load the Class* of the ClsMethDataRef in S0.
@@ -2111,12 +2107,12 @@ To string conversions:
   raise a warning or throw an exception indicating that the class specified in
   S0 was constructed dynamically (and should not be).
 
-| RaiseRxCallViolation, ND, S(FramePtr) S(Func), NF
+| RaiseRxCallViolation<func>, ND, S(FramePtr), NF
 
   Depending on the setting of the `CoeffectEnforcementLevels` runtime option,
   either raise a warning or throw an exception indicating that the caller
   specified by S0 was violating reactivity constraints when calling the callee
-  specified by S1.
+  specified by func.
 
 | RaiseStrToClassNotice, ND, S(Str), NF
 

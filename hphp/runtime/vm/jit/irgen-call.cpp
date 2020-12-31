@@ -140,40 +140,6 @@ void emitCallerDynamicCallChecksUnknown(IRGS& env, SSATmp* callee) {
   }
 }
 
-} // namespace
-
-void emitCallerRxChecksKnown(IRGS& env, const Func* callee) {
-  assertx(callee);
-  if (!CoeffectsConfig::enabled()) return;
-  auto const callerLevel = curRxLevel(env);
-  auto const minReqCalleeLevel = rxRequiredCalleeLevel(callerLevel);
-  if (callee->rxLevel() >= minReqCalleeLevel) return;
-  gen(env, RaiseRxCallViolation, fp(env), cns(env, callee));
-}
-
-namespace {
-
-void emitCallerRxChecksUnknown(IRGS& env, SSATmp* callee) {
-  assertx(!callee->hasConstVal());
-  if (!CoeffectsConfig::enabled()) return;
-  auto const callerLevel = curRxLevel(env);
-  ifThen(
-    env,
-    [&] (Block* taken) {
-      auto const minReqCalleeLevel = rxRequiredCalleeLevel(callerLevel);
-      auto const calleeLevel = gen(env, LdFuncRxLevel, callee);
-      auto const lt = gen(env, LtInt, calleeLevel, cns(env, minReqCalleeLevel));
-      gen(env, JmpNZero, taken, lt);
-    },
-    [&] {
-      hint(env, Block::Hint::Unlikely);
-      gen(env, RaiseRxCallViolation, fp(env), callee);
-    }
-  );
-}
-
-//////////////////////////////////////////////////////////////////////
-
 SSATmp* callImpl(IRGS& env, SSATmp* callee, const FCallArgs& fca,
                  SSATmp* objOrClass, bool skipRepack, bool dynamicCall,
                  bool asyncEagerReturn) {
@@ -334,8 +300,6 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
   if (dynamicCall && !suppressDynCallCheck) {
     emitCallerDynamicCallChecksKnown(env, callee);
   }
-  emitCallerRxChecksKnown(env, callee);
-
   auto const doCall = [&](const FCallArgs& fca, bool skipRepack) {
     assertx(
       !skipRepack ||
@@ -435,7 +399,6 @@ void prepareAndCallUnknown(IRGS& env, SSATmp* callee, const FCallArgs& fca,
   if (dynamicCall && !suppressDynCallCheck) {
     emitCallerDynamicCallChecksUnknown(env, callee);
   }
-  emitCallerRxChecksUnknown(env, callee);
 
   // We may have updated the stack, make sure Call opcode can set up its Catch.
   updateMarker(env);

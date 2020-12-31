@@ -265,7 +265,7 @@ static CallMap s_callMap {
     {RaiseTooManyArg,    raiseTooManyArgumentsPrologue, DNone, SSync,
                            {extra(&FuncData::func), {SSA, 0}}},
     {RaiseRxCallViolation, raiseRxCallViolation,
-                          DNone, SSync, {{SSA, 0}, {SSA, 1}}},
+                          DNone, SSync, {{SSA, 0}, extra(&FuncData::func)}},
     {ThrowInvalidOperation, throw_invalid_operation_exception,
                           DNone, SSync, {{SSA, 0}}},
     {ThrowCallReifiedFunctionWithoutGenerics,

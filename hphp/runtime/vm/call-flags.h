@@ -64,6 +64,8 @@ struct CallFlags {
       ((uint64_t)coeffects << Flags::CoeffectsStart);
   }
 
+  explicit CallFlags(uint64_t bits) : m_bits(bits) {}
+
   bool hasGenerics() const { return m_bits & (1 << Flags::HasGenerics); }
   bool isDynamicCall() const { return m_bits & (1 << Flags::IsDynamicCall); }
   bool asyncEagerReturn() const {

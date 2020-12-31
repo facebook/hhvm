@@ -490,6 +490,13 @@ private:
    */
   void releaseRefs();
 
+  /*
+   * Unbind any static prop RDS handles. Doing so before destroying a Class is
+   * necessary because we identify and dedupe these handles by a Symbol that
+   * includes the Class* as part of the key.
+   */
+  void releaseSProps();
+
 public:
   /*
    * Whether this class has been logically destroyed, but needed to be

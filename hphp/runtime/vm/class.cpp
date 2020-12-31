@@ -191,9 +191,16 @@ void Class::PropInitVec::push_back(const TypedValue& v) {
 
 namespace {
 
-bool shouldUsePersistentHandles(Class* cls) {
-  return (!SystemLib::s_inited || RuntimeOption::RepoAuthoritative) &&
-    cls->verifyPersistent();
+template <typename T, rds::Mode M>
+void unbindLink(rds::Link<T, M>* link, rds::Symbol symbol) {
+  if (!link->bound()) return;
+  rds::unbind(symbol, link->handle());
+  *link = rds::Link<T, M>();
+}
+
+bool shouldUsePersistentHandles(const Class* cls) {
+  return (!SystemLib::s_inited || RO::RepoAuthoritative) &&
+         cls->verifyPersistent();
 }
 
 /*
@@ -469,25 +476,7 @@ void Class::destroy() {
   auto const pcls = m_preClass.get();
   pcls->namedEntity()->removeClass(this);
 
-  if (m_sPropCache) {
-    // Other threads find this class via rds::s_handleTable.
-    // Remove our sprop entries before the treadmill delay.
-    for (Slot i = 0, n = numStaticProperties(); i < n; ++i) {
-      if (m_staticProperties[i].cls == this) {
-        auto const &link = m_sPropCache[i];
-        if (link.bound()) {
-          rds::unbind(rds::SPropCache{this, i}, link.handle());
-        }
-      }
-    }
-  }
-
-  if (m_sPropOptimizationEnabled) {
-    rds::unbind(
-      rds::SMultiPropCache{this},
-      getSPropOptimizationData()->m_sPropHandles.handle()
-    );
-  }
+  releaseSProps();
 
   Treadmill::enqueue(
     [this] {
@@ -507,7 +496,8 @@ void Class::atomicRelease() {
 }
 
 Class::~Class() {
-  releaseRefs(); // must be called for Func-nulling side effects
+  releaseRefs();   // must be called for Func-nulling side effects
+  releaseSProps(); // must be called to avoid RDS Symbol collisions
 
   if (m_sPropCache) {
     for (unsigned i = 0, n = numStaticProperties(); i < n; ++i) {
@@ -634,6 +624,31 @@ void Class::releaseRefs() {
       }
     }
     xtra->m_clonesWithThisScope.clear();
+  }
+}
+
+void Class::releaseSProps() {
+  if (!m_sPropCache) return;
+
+  auto init = &m_sPropCacheInit;
+  if (init->bound() && rds::isNormalHandle(init->handle())) {
+    auto const symbol = rds::LinkName{"PropCacheInit", name()};
+    unbindLink(init, symbol);
+  }
+
+  for (Slot i = 0, n = numStaticProperties(); i < n; ++i) {
+    auto const& sProp = m_staticProperties[i];
+    if (sProp.cls == this || (sProp.attrs & AttrLSB)) {
+      unbindLink(&m_sPropCache[i], rds::SPropCache{this, i});
+    }
+  }
+
+  if (m_sPropOptimizationEnabled) {
+    auto const optData =
+      const_cast<NonPersistentSPropOptimizationData*>(
+        getSPropOptimizationData()
+      );
+    unbindLink(&optData->m_sPropHandles, rds::SMultiPropCache{this});
   }
 }
 
@@ -1157,10 +1172,8 @@ void Class::initSPropHandles() const {
     // of them.
     m_sPropCacheInit = rds::s_persistentTrue;
   } else {
-    m_sPropCacheInit.bind(
-      rds::Mode::Normal,
-      rds::LinkName{"PropCacheInit", name()}
-    );
+    auto const symbol = rds::LinkName{"PropCacheInit", name()};
+    m_sPropCacheInit.bind(rds::Mode::Normal, symbol);
   }
   rds::recordRds(m_sPropCacheInit.handle(),
                  sizeof(bool), "SPropCacheInit", name()->slice());

@@ -148,7 +148,7 @@ inline void calleeDynamicCallChecks(const Func* func, bool dynamicCall,
  * an exception.
  */
 inline bool callerRxChecks(const ActRec* caller, const Func* callee) {
-  if (!coeffectsCallEnforcementLevel()) return true;
+  if (!CoeffectsConfig::enabled()) return true;
   // Conditional reactivity is not tracked yet, so assume the caller has minimum
   // and the callee has maximum possible level of reactivity.
   auto const callerLevel = caller->rxMinLevel();

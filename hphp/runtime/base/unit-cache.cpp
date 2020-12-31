@@ -1274,11 +1274,6 @@ char mangleExtension(const folly::StringPiece fileName) {
 std::string mangleUnitSha1(const std::string& fileSha1,
                            const folly::StringPiece fileName,
                            const RepoOptions& opts) {
-  std::string coeffects;
-  for (auto const [name, level] : RO::EvalCoeffectEnforcementLevels) {
-    coeffects += name + std::to_string(level);
-  }
-
   std::string t = fileSha1 + '\0'
     + repoSchemaId().toString()
     + (RuntimeOption::EnableClassLevelWhereClauses ? '1' : '0')
@@ -1321,7 +1316,7 @@ std::string mangleUnitSha1(const std::string& fileSha1,
     + std::to_string(RuntimeOption::EvalAssemblerMaxScalarSize)
     + std::to_string(RuntimeOption::EvalEmitClassPointers)
     + (RuntimeOption::EvalFoldLazyClassKeys ? '1' : '0')
-    + coeffects
+    + CoeffectsConfig::mangle()
     + opts.cacheKeySha1().toString()
     + mangleExtension(fileName)
     + mangleUnitPHP7Options()

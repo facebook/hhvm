@@ -52,7 +52,7 @@ inline const char* rxLevelToString(RxLevel level) {
 }
 
 inline RxLevel rxRequiredCalleeLevel(RxLevel level) {
-  assertx(coeffectsCallEnforcementLevel());
+  assertx(CoeffectsConfig::enabled());
   switch (level) {
     case RxLevel::None:
     case RxLevel::Local:   return RxLevel::None;

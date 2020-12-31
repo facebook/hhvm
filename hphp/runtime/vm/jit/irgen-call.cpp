@@ -144,7 +144,7 @@ void emitCallerDynamicCallChecksUnknown(IRGS& env, SSATmp* callee) {
 
 void emitCallerRxChecksKnown(IRGS& env, const Func* callee) {
   assertx(callee);
-  if (!coeffectsCallEnforcementLevel()) return;
+  if (!CoeffectsConfig::enabled()) return;
   auto const callerLevel = curRxLevel(env);
   auto const minReqCalleeLevel = rxRequiredCalleeLevel(callerLevel);
   if (callee->rxLevel() >= minReqCalleeLevel) return;
@@ -155,7 +155,7 @@ namespace {
 
 void emitCallerRxChecksUnknown(IRGS& env, SSATmp* callee) {
   assertx(!callee->hasConstVal());
-  if (!coeffectsCallEnforcementLevel()) return;
+  if (!CoeffectsConfig::enabled()) return;
   auto const callerLevel = curRxLevel(env);
   ifThen(
     env,

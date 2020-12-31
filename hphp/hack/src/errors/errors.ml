@@ -4118,6 +4118,12 @@ module CoeffectEnforcedOp = struct
       (Typing.err_code Typing.InvalidUnsetTargetInRx)
       pos
       "Non-mutable argument for `unset` is not allowed in reactive functions."
+
+  let non_awaited_awaitable_in_rx pos =
+    add
+      (Typing.err_code Typing.NonawaitedAwaitableInReactiveContext)
+      pos
+      "This value has `Awaitable` type. `Awaitable` typed values in reactive code must be immediately `await`ed."
 end
 
 (*****************************************************************************)
@@ -4797,12 +4803,6 @@ let returns_void_to_rx_function_as_non_expression_statement pos fpos =
       "Cannot use result of function annotated with `<<__ReturnsVoidToRx>>` in reactive context"
     )
     [(fpos, "This is function declaration.")]
-
-let non_awaited_awaitable_in_rx pos =
-  add
-    (Typing.err_code Typing.NonawaitedAwaitableInReactiveContext)
-    pos
-    "This value has `Awaitable` type. `Awaitable` typed values in reactive code must be immediately `await`ed."
 
 let shapes_key_exists_always_true pos1 name pos2 =
   add_list

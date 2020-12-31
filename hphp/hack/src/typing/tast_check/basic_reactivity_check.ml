@@ -604,7 +604,9 @@ let check =
           match (get_node ty, expr) with
           | (Tclass ((_, cls), _, _), (_, (Call _ | Pipe _)))
             when String.equal cls SN.Classes.cAwaitable ->
-            Errors.non_awaited_awaitable_in_rx (get_position expr)
+            if not (TypecheckerOptions.local_coeffects (Env.get_tcopt env)) then
+              Errors.CoeffectEnforcedOp.non_awaited_awaitable_in_rx
+                (get_position expr)
           | _ -> () );
         let ctx =
           if ctx.allow_mutable_locals then

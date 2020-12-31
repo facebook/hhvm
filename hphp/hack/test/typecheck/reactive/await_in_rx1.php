@@ -2,12 +2,12 @@
 <<file: __EnableUnstableFeatures('coeffects_provisional')>>
 
 <<__Rx>>
-async function f(): Awaitable<int> {
+async function f()[rx]: Awaitable<int> {
   return 1;
 }
 
 <<__Rx>>
-async function g(): Awaitable<void> {
+async function g()[rx]: Awaitable<void> {
   // error
   $a = f();
   $b = await $a;

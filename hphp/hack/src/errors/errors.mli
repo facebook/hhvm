@@ -1140,8 +1140,6 @@ val return_void_to_rx_mismatch :
 val returns_void_to_rx_function_as_non_expression_statement :
   Pos.t -> Pos.t -> unit
 
-val non_awaited_awaitable_in_rx : Pos.t -> unit
-
 val shapes_key_exists_always_true : Pos.t -> string -> Pos.t -> unit
 
 val shapes_key_exists_always_false :
@@ -1423,6 +1421,8 @@ module CoeffectEnforcedOp : sig
   val obj_set_reactive : Pos.t -> unit
 
   val invalid_unset_target_rx : Pos.t -> unit
+
+  val non_awaited_awaitable_in_rx : Pos.t -> unit
 end
 
 val abstract_function_pointer : string -> string -> Pos.t -> Pos.t -> unit

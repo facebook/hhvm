@@ -487,8 +487,18 @@ let get_adjusted_return_type env receiver_info ret_ty =
     try_substitute_type_with_condition env cond_fty.ft_ret.et_type ret_ty
     |> Option.value ~default:(env, ret_ty)
 
+let check_awaitable_immediately_awaited env ty pos ~allow_awaitable =
+  if allow_awaitable then
+    env
+  else
+    let (_, ty') = Env.expand_type env ty in
+    match get_node ty' with
+    | Tclass ((_, cls), _, _) when String.equal cls SN.Classes.cAwaitable ->
+      Typing_local_ops.enforce_awaitable_immediately_awaited pos env
+    | _ -> env
+
 (* TODO(coeffects) rewrite below after basic_reactivity_check goes away *)
-(* BEGIN logic from Typed AST check in basic_reactivity_check goes away *)
+(* BEGIN logic from Typed AST check in basic_reactivity_check *)
 
 let expr_is_valid_owned_arg e : bool =
   let open Aast in
@@ -641,7 +651,7 @@ let check_assignment_or_unset_target
       fail "Non-mutable argument for `unset`" p
   | _ -> ()
 
-(* END logic from Typed AST check in basic_reactivity_check goes away *)
+(* END logic from Typed AST check in basic_reactivity_check *)
 
 let check_assignment env ((append_pos_opt, _), te_) =
   if TypecheckerOptions.unsafe_rx (Env.get_tcopt env) then

@@ -14,14 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VM_RX_INL_H_
-#error "rx-inl.h should only be included by rx.h"
-#endif
+#include "hphp/runtime/vm/coeffects.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-inline StaticCoeffects coeffectFromName(const std::string& a) {
+StaticCoeffects coeffectFromName(const std::string& a) {
   if (a == "rx_local")               return rxMakeAttr(RxLevel::Local);
   if (a == "rx_shallow")             return rxMakeAttr(RxLevel::Shallow);
   if (a == "rx")                     return rxMakeAttr(RxLevel::Rx);
@@ -29,7 +27,7 @@ inline StaticCoeffects coeffectFromName(const std::string& a) {
   return static_cast<StaticCoeffects>(0);
 }
 
-inline const char* coeffectToString(StaticCoeffects coeffects) {
+const char* coeffectToString(StaticCoeffects coeffects) {
   switch (rxLevelFromAttr(coeffects)) {
     case RxLevel::None:    return nullptr;
     case RxLevel::Local:   return "rx_local";
@@ -40,7 +38,7 @@ inline const char* coeffectToString(StaticCoeffects coeffects) {
   not_reached();
 }
 
-inline const char* rxLevelToString(RxLevel level) {
+const char* rxLevelToString(RxLevel level) {
   switch (level) {
     case RxLevel::None:    return "non-reactive";
     case RxLevel::Local:   return "local reactive";
@@ -51,7 +49,7 @@ inline const char* rxLevelToString(RxLevel level) {
   not_reached();
 }
 
-inline RxLevel rxRequiredCalleeLevel(RxLevel level) {
+RxLevel rxRequiredCalleeLevel(RxLevel level) {
   assertx(CoeffectsConfig::enabled());
   switch (level) {
     case RxLevel::None:
@@ -59,6 +57,17 @@ inline RxLevel rxRequiredCalleeLevel(RxLevel level) {
     case RxLevel::Shallow: return RxLevel::Local;
     case RxLevel::Rx:      return RxLevel::Rx;
     case RxLevel::Pure:    return RxLevel::Pure;
+  }
+  not_reached();
+}
+
+RuntimeCoeffects convertToAmbientCoeffects(const StaticCoeffects coeffects) {
+  switch (rxLevelFromAttr(coeffects)) {
+    case RxLevel::None:
+    case RxLevel::Local:   return RCDefault;
+    case RxLevel::Shallow: return RCRxShallow;
+    case RxLevel::Rx:      return RCRx;
+    case RxLevel::Pure:    return RCPure;
   }
   not_reached();
 }

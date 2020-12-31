@@ -797,6 +797,7 @@ struct CallData : IRExtraData {
                     uint32_t numOut,
                     Offset callOffset,
                     uint16_t genericsBitmap,
+                    RuntimeCoeffects coeffects,
                     bool hasGenerics,
                     bool hasUnpack,
                     bool skipRepack,
@@ -808,6 +809,7 @@ struct CallData : IRExtraData {
     , numOut(numOut)
     , callOffset(callOffset)
     , genericsBitmap(genericsBitmap)
+    , coeffects(coeffects)
     , hasGenerics(hasGenerics)
     , hasUnpack(hasUnpack)
     , skipRepack(skipRepack)
@@ -839,6 +841,7 @@ struct CallData : IRExtraData {
   uint32_t numOut;     // number of values returned via stack from the callee
   Offset callOffset;   // offset from func->base()
   uint16_t genericsBitmap;
+  RuntimeCoeffects coeffects;
   bool hasGenerics;
   bool hasUnpack;
   bool skipRepack;

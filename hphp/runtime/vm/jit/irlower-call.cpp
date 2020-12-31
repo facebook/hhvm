@@ -88,7 +88,8 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
     extra->dynamicCall,
     extra->asyncEagerReturn,
     extra->callOffset,
-    extra->genericsBitmap
+    extra->genericsBitmap,
+    extra->coeffects
   );
 
   v << copy{v.cns(callFlags.value()), r_php_call_flags()};

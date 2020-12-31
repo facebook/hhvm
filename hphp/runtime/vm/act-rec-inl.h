@@ -155,6 +155,11 @@ inline RxLevel ActRec::rxMinLevel() const {
   return func()->rxLevel();
 }
 
+inline RuntimeCoeffects ActRec::coeffects() const {
+  if (func()->hasCoeffectRules()) return RCDefault;
+  return convertToAmbientCoeffects(func()->staticCoeffects());
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }

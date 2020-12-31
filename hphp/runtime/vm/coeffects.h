@@ -29,6 +29,13 @@ enum StaticCoeffects : uint16_t {
   SCPure    = (1u << 2),
 };
 
+enum RuntimeCoeffects : uint16_t {
+  RCDefault   = 0,
+  RCRxShallow = 1,
+  RCRx        = 2,
+  RCPure      = 3,
+};
+
 constexpr StaticCoeffects operator|(StaticCoeffects a, StaticCoeffects b) {
   return StaticCoeffects((uint16_t)a | (uint16_t)b);
 }
@@ -45,11 +52,11 @@ inline StaticCoeffects& operator&=(StaticCoeffects& a, const StaticCoeffects& b)
 ///////////////////////////////////////////////////////////////////////////////
 
 enum class RxLevel : uint8_t {
-  None               = 0,
-  Local              = 1,
-  Shallow            = 2,
-  Rx                 = 3,
-  Pure               = 4,
+  None    = 0,
+  Local   = 1,
+  Shallow = 2,
+  Rx      = 3,
+  Pure    = 4,
 };
 
 constexpr int kRxAttrShift = 0;
@@ -92,6 +99,8 @@ constexpr bool funcAttrIsPure(StaticCoeffects a) {
 }
 
 RxLevel rxRequiredCalleeLevel(RxLevel level);
+
+RuntimeCoeffects convertToAmbientCoeffects(const StaticCoeffects);
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -176,8 +185,3 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-
-#define incl_HPHP_VM_RX_INL_H_
-#include "hphp/runtime/vm/coeffects-inl.h"
-#undef incl_HPHP_VM_RX_INL_H_
-

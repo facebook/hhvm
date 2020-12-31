@@ -260,6 +260,11 @@ struct ActRec {
   RxLevel rxMinLevel() const;
 
   /*
+   * Returns the ambient coeffects of the function
+   */
+  RuntimeCoeffects coeffects() const;
+
+  /*
    * address to teleport the return value after destroying this actrec.
    */
   TypedValue* retSlot() {

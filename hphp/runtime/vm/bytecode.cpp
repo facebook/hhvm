@@ -3722,7 +3722,8 @@ void fcallImpl(PC origpc, PC& pc, const FCallArgs& fca, const Func* func,
     dynamic,
     fca.asyncEagerOffset != kInvalidOffset && func->supportsAsyncEagerReturn(),
     Offset(origpc - vmfp()->func()->entry()),
-    0  // generics bitmap not used by interpreter
+    0,  // generics bitmap not used by interpreter
+    vmfp()->coeffects()
   );
 
   doFCall(callFlags, func, numArgsInclUnpack, takeCtx(std::forward<Ctx>(ctx)),

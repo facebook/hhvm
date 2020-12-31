@@ -84,9 +84,18 @@ inline Offset nextBcOff(const IRGS& env) {
 }
 
 inline RxLevel curRxLevel(const IRGS& env) {
+  assertx(curFunc(env));
   // Pessimize enforcements for conditional reactivity, as it is not tracked yet
   if (curFunc(env)->hasCoeffectRules()) return RxLevel::None;
   return curFunc(env)->rxLevel();
+}
+
+inline RuntimeCoeffects curCoeffects(const IRGS& env) {
+  assertx(curFunc(env));
+  // Pessimize enforcements in presence of coeffect rules,
+  // as it is not tracked yet
+  if (curFunc(env)->hasCoeffectRules()) return RCDefault;
+  return convertToAmbientCoeffects(curFunc(env)->staticCoeffects());
 }
 
 //////////////////////////////////////////////////////////////////////

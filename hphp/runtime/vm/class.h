@@ -127,9 +127,12 @@ using ObjectProps = std::conditional_t<
   tv_layout::TvArray
 >;
 
-struct NonPersistentSPropOptimizationData {
-  rds::Link<StaticMultiPropData, rds::Mode::Local> m_sPropHandles;
-  uint32_t m_numNonPersistentPropHandles{0};
+// As an optimization, we put multiple static props in a single RDS allocation
+// to speed up initialization and improve cache locality. Persistent props are
+// not included here - they get separate, persistent RDS handles.
+struct StaticMultiPropCache {
+  rds::Link<StaticMultiPropData, rds::Mode::Local> link;
+  uint32_t count;
 };
 
 /*
@@ -1664,10 +1667,13 @@ private:
   void checkPropTypeRedefinitions() const;
   void checkPropInitialValues() const;
 
-  const TypedValue* getNonPersistentSPropValues() const;
-  const NonPersistentSPropOptimizationData* getSPropOptimizationData() const;
+  size_t getStaticMultiPropValuesOffset() const;
+  const TypedValue* getStaticMultiPropValues() const;
+  const StaticMultiPropCache* getStaticMultiPropCache() const;
+  TypedValue* mutStaticMultiPropValues();
+  StaticMultiPropCache* mutStaticMultiPropCache();
+
   void setupSProps();
-  size_t sPropValuesOffset() const;
 
   /////////////////////////////////////////////////////////////////////////////
   // Friendship.
@@ -1783,19 +1789,25 @@ private:
   mutable rds::Link<bool, rds::Mode::NonLocal> m_sPropCacheInit;
 
 /*
- * Case 1: m_sPropOptimizationEnabled == false
- *    m_sPropCache
- *    v
- *    | SProp link 1 | SProp link 2 | ... |
+ * We may store data for the static multi-prop optimization inline before
+ * the static prop link array, as below. (Persistent props won't appear in the
+ * multi-prop initial values list; they don't need per-request initialization.)
+ *
+ * Case 1: m_useStaticMultiPropCache == false
+ *
+ *    m_sPropCache -> | rds::Link: StaticProp 0
+ *                    | rds::Link: StaticProp 1
+ *                    ...
  *
  * Case 2: m_sPropOptimizationEnabled == true
- *    | NonP SProp 1
-      | ....
-      | NonP SProp N
-      | NonPersistentSPropOptimizationData
-        m_sPropCache
-        v
-      | SProp 1 | SProp 2 | ... |
+ *
+ *                    | TypedValue: multi-prop initial value 0
+ *                    | TypedValue: multi-prop initial value 1
+ *                    ...
+ *                    | StaticMultiPropCache
+ *    m_sPropCache -> | rds::Link: StaticProp 0
+ *                    | rds::Link: StaticProp 1
+ *                    ...
  */
   mutable rds::Link<
     StaticPropData,
@@ -1855,7 +1867,7 @@ private:
    */
   mutable bool m_serialized : 1;
 
-  mutable bool m_sPropOptimizationEnabled : 1;
+  mutable bool m_useStaticMultiPropCache : 1;
 
   // NB: 6 bits available here (in USE_LOWPTR builds).
 

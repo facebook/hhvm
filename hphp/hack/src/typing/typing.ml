@@ -1284,12 +1284,14 @@ and lvalues env el =
     let (env, tel, tyl) = lvalues env el in
     (env, te :: tel, ty :: tyl)
 
-and is_pseudo_function s =
-  String.equal s SN.PseudoFunctions.hh_show
-  || String.equal s SN.PseudoFunctions.hh_show_env
-  || String.equal s SN.PseudoFunctions.hh_log_level
-  || String.equal s SN.PseudoFunctions.hh_force_solve
-  || String.equal s SN.PseudoFunctions.hh_loop_forever
+(* These functions invoke special printing functions for Typing_env. They do not
+ * appear in user code, but we still check top level function calls against their
+ * names. *)
+and typing_env_pseudofunctions =
+  SN.PseudoFunctions.(
+    String.Hash_set.of_list
+      ~growth_allowed:false
+      [hh_show; hh_show_env; hh_log_level; hh_force_solve; hh_loop_forever])
 
 and loop_forever env =
   (* forever = up to 10 minutes, to avoid accidentally stuck processes *)
@@ -2120,8 +2122,8 @@ and expr_
         ty2
     in
     make_result env p (Aast.Array_get (te1, Some te2)) ty
-  | Call ((pos_id, Id ((_, s) as id)), [], el, None) when is_pseudo_function s
-    ->
+  | Call ((pos_id, Id ((_, s) as id)), [], el, None)
+    when Hash_set.mem typing_env_pseudofunctions s ->
     let (env, tel, tys) = exprs ~accept_using_var:true env el in
     let env =
       if String.equal s SN.PseudoFunctions.hh_show then (

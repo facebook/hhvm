@@ -1834,6 +1834,26 @@ let coeffects env ty =
   in
 
   try
+    let (env, ty) = Typing_env.expand_type env ty in
+    let ty =
+      match deref ty with
+      | (r, Tvar v) ->
+        (* We are interested in the upper bounds because coeffects are parameters (contravariant).
+         * Similar to Typing_subtype.describe_ty_super, we ignore Tvars appearing in bounds *)
+        let upper_bounds =
+          ITySet.elements (Typing_env.get_tyvar_upper_bounds env v)
+          |> List.filter_map ~f:(function
+                 | LoclType lty ->
+                   (match deref lty with
+                   | (_, Tvar _) -> None
+                   | _ -> Some lty)
+                 | ConstraintType _ -> None)
+        in
+        (match upper_bounds with
+        | [] -> raise (UndesugarableCoeffect ty)
+        | _ -> Typing_make_type.intersection r upper_bounds)
+      | _ -> ty
+    in
     match desugar_simple_intersection ty with
     | [cap] -> "the capability " ^ cap
     | caps ->

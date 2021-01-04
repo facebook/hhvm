@@ -478,12 +478,26 @@ struct ClassInfo {
    */
   CompactVector<const ClassInfo*> includedEnums;
 
+  struct ConstIndex {
+    php::Const operator*() const {
+      return cls->constants[idx];
+    }
+    const php::Const* operator->() const {
+      return get();
+    }
+    const php::Const* get() const {
+      return &cls->constants[idx];
+    }
+    const php::Class* cls;
+    uint32_t idx;
+  };
+
   /*
-   * A (case-sensitive) map from class constant name to the php::Const
-   * that it came from.  This map is flattened across the inheritance
-   * hierarchy.
+   * A (case-sensitive) map from class constant name to the php::Class* and
+   * index into the constants vector that it came from. This map is flattened
+   * across the inheritance hierarchy.
    */
-  hphp_fast_map<SString,const php::Const*> clsConstants;
+  hphp_fast_map<SString, ConstIndex> clsConstants;
 
   /*
    * A vector of the used traits, in class order, mirroring the
@@ -1494,31 +1508,35 @@ bool build_class_constants(BuildClsInfo& info,
     FTRACE(2, "Removing NoOverride on {}::{}\n", c->cls->name, c->name);
     const_cast<php::Const*>(c)->isNoOverride = false;
   };
-  for (auto& c : rparent->cls->constants) {
-    auto& cptr = info.rleaf->clsConstants[c.name];
-    if (!cptr) {
-      cptr = &c;
+
+  for (uint32_t idx = 0; idx < rparent->cls->constants.size(); idx++) {
+    auto const& c = rparent->cls->constants[idx];
+    auto const& c_idx = info.rleaf->clsConstants.find(c.name);
+    if (c_idx == end(info.rleaf->clsConstants)) {
+      info.rleaf->clsConstants[c.name] = ClassInfo::ConstIndex {rparent->cls, idx};
       continue;
     }
 
-    // Same constant (from an interface via two different paths) is ok
-    if (cptr->cls == rparent->cls) continue;
+    auto const& existing = c_idx->second;
 
-    if (cptr->isTypeconst != c.isTypeconst) {
+    // Same constant (from an interface via two different paths) is ok
+    if (existing->cls == rparent->cls) continue;
+
+    if (existing->isTypeconst != c.isTypeconst) {
       ITRACE(2,
              "build_cls_info_rec failed for `{}' because `{}' was defined by "
              "`{}' as a {}constant and by `{}' as a {}constant\n",
              info.rleaf->cls->name, c.name,
              rparent->cls->name, c.isTypeconst ? "type " : "",
-             cptr->cls->name, cptr->isTypeconst ? "type " : "");
+             existing->cls->name, existing->isTypeconst ? "type " : "");
       return false;
     }
 
     // Ignore abstract constants
     if (!c.val) continue;
 
-    if (cptr->val) {
-      // Constants from interfaces implemented by traits silently lose
+    if (existing->val) {
+      // Constants from traits silently lose
       if (fromTrait) {
         removeNoOverride(&c);
         continue;
@@ -1531,13 +1549,14 @@ bool build_class_constants(BuildClsInfo& info,
                "build_cls_info_rec failed for `{}' because "
                "`{}' was defined by both `{}' and `{}'\n",
                info.rleaf->cls->name, c.name,
-               rparent->cls->name, cptr->cls->name);
+               rparent->cls->name, existing->cls->name);
         return false;
       }
     }
 
-    removeNoOverride(cptr);
-    cptr = &c;
+    removeNoOverride(existing.get());
+    info.rleaf->clsConstants[c.name].cls = rparent->cls;
+    info.rleaf->clsConstants[c.name].idx = idx;
   }
   return true;
 }
@@ -5326,7 +5345,7 @@ const php::Const* Index::lookup_class_const_ptr(Context ctx,
       add_dependency(*m_data, cinit, ctx, Dep::ClsConst);
       return nullptr;
     }
-    return it->second;
+    return it->second.get();
   }
   return nullptr;
 }

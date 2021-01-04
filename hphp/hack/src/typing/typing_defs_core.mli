@@ -20,7 +20,7 @@ type ce_visibility =
 type ifc_fun_decl =
   | FDPolicied of string option
   | FDInferFlows
-[@@deriving eq]
+[@@deriving eq, ord]
 
 val default_ifc_fun_decl : ifc_fun_decl
 

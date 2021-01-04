@@ -454,6 +454,20 @@ let decl_ty_con_ordinal ty_ =
   | Tunion _ -> 20
   | Tintersection _ -> 21
 
+let reactivity_ordinal r =
+  match r with
+  | Nonreactive -> 0
+  | CippGlobal -> 1
+  | CippRx -> 2
+  | Local _ -> 3
+  | Shallow _ -> 4
+  | Reactive _ -> 5
+  | Pure _ -> 6
+  | MaybeReactive _ -> 7
+  | RxVar _ -> 8
+  | Cipp _ -> 9
+  | CippLocal _ -> 10
+
 (* Compare two types syntactically, ignoring reason information and other
  * small differences that do not affect type inference behaviour. This
  * comparison function can be used to construct tree-based sets of types,
@@ -462,8 +476,6 @@ let decl_ty_con_ordinal ty_ =
  * aliases.
  * But if ty_compare ty1 ty2 = 0, then the types must not be distinguishable
  * by any typing rules.
- *
- * TODO(T52611361): Make this comparison exhaustive on ty1 to remove the _ catchall
  *)
 let rec ty__compare ?(normalize_lists = false) ty_1 ty_2 =
   let rec ty__compare ty_1 ty_2 =
@@ -532,26 +544,216 @@ let rec ty__compare ?(normalize_lists = false) ty_1 ty_2 =
       end
     | (Tvar v1, Tvar v2) -> compare v1 v2
     | (Tunapplied_alias n1, Tunapplied_alias n2) -> String.compare n1 n2
-    | _ -> ty_con_ordinal ty_1 - ty_con_ordinal ty_2
+    | (Taccess (ty1, id1), Taccess (ty2, id2)) ->
+      begin
+        match ty_compare ty1 ty2 with
+        | 0 -> String.compare (snd id1) (snd id2)
+        | n -> n
+      end
+    | (Tnonnull, Tnonnull) -> 0
+    | (Tdynamic, Tdynamic) -> 0
+    | (Tobject, Tobject) -> 0
+    | (Terr, Terr) -> 0
+    | ( ( Tprim _ | Toption _ | Tvarray _ | Tdarray _ | Tvarray_or_darray _
+        | Tfun _ | Tintersection _ | Tunion _ | Ttuple _ | Tgeneric _
+        | Tnewtype _ | Tdependent _ | Tclass _ | Tshape _ | Tvar _
+        | Tunapplied_alias _ | Tnonnull | Tdynamic | Terr | Tobject | Taccess _
+        | Tany _ ),
+        _ )
+    | ( _,
+        ( Tprim _ | Toption _ | Tvarray _ | Tdarray _ | Tvarray_or_darray _
+        | Tfun _ | Tintersection _ | Tunion _ | Ttuple _ | Tgeneric _
+        | Tnewtype _ | Tdependent _ | Tclass _ | Tshape _ | Tvar _
+        | Tunapplied_alias _ | Tnonnull | Tdynamic | Terr | Tobject | Taccess _
+        | Tany _ ) ) ->
+      ty_con_ordinal ty_1 - ty_con_ordinal ty_2
   and shape_field_type_compare sft1 sft2 =
-    match ty_compare sft1.sft_ty sft2.sft_ty with
-    | 0 -> Bool.compare sft1.sft_optional sft2.sft_optional
+    let { sft_ty = ty1; sft_optional = optional1 } = sft1 in
+    let { sft_ty = ty2; sft_optional = optional2 } = sft2 in
+    match ty_compare ty1 ty2 with
+    | 0 -> Bool.compare optional1 optional2
     | n -> n
-  and tfun_compare fty1 fty2 =
-    match possibly_enforced_ty_compare fty1.ft_ret fty2.ft_ret with
+  and user_attribute_compare ua1 ua2 =
+    let { ua_name = name1; ua_classname_params = classname_params1 } = ua1 in
+    let { ua_name = name2; ua_classname_params = classname_params2 } = ua2 in
+    match String.compare (snd name1) (snd name2) with
+    | 0 -> List.compare String.compare classname_params1 classname_params2
+    | n -> n
+  and user_attributes_compare ual1 ual2 =
+    List.compare user_attribute_compare ual1 ual2
+  and tparam_compare tp1 tp2 =
+    let {
+      (* Type parameters on functions are always marked invariant *)
+      tp_variance = _;
+      tp_name = name1;
+      tp_tparams = tparams1;
+      tp_constraints = constraints1;
+      tp_reified = reified1;
+      tp_user_attributes = user_attributes1;
+    } =
+      tp1
+    in
+    let {
+      tp_variance = _;
+      tp_name = name2;
+      tp_tparams = tparams2;
+      tp_constraints = constraints2;
+      tp_reified = reified2;
+      tp_user_attributes = user_attributes2;
+    } =
+      tp2
+    in
+    match String.compare (snd name1) (snd name2) with
     | 0 ->
       begin
-        match ft_params_compare fty1.ft_params fty2.ft_params with
+        match tparams_compare tparams1 tparams2 with
+        | 0 ->
+          begin
+            match constraints_compare constraints1 constraints2 with
+            | 0 ->
+              begin
+                match
+                  user_attributes_compare user_attributes1 user_attributes2
+                with
+                | 0 -> Aast_defs.compare_reify_kind reified1 reified2
+                | n -> n
+              end
+            | n -> n
+          end
+        | n -> n
+      end
+    | n -> n
+  and tparams_compare tpl1 tpl2 = List.compare tparam_compare tpl1 tpl2
+  and constraints_compare cl1 cl2 = List.compare constraint_compare cl1 cl2
+  and constraint_compare (ck1, ty1) (ck2, ty2) =
+    match Ast_defs.compare_constraint_kind ck1 ck2 with
+    | 0 -> ty_compare ty1 ty2
+    | n -> n
+  and where_constraint_compare (ty1a, ck1, ty1b) (ty2a, ck2, ty2b) =
+    match Ast_defs.compare_constraint_kind ck1 ck2 with
+    | 0 ->
+      begin
+        match ty_compare ty1a ty2a with
+        | 0 -> ty_compare ty1b ty2b
+        | n -> n
+      end
+    | n -> n
+  and where_constraints_compare cl1 cl2 =
+    List.compare where_constraint_compare cl1 cl2
+  (* We match every field rather than using field selection syntax. This guards against future additions to function type elements *)
+  and tfun_compare fty1 fty2 =
+    let {
+      ft_ret = ret1;
+      ft_params = params1;
+      ft_arity = arity1;
+      ft_reactive = reactive1;
+      ft_flags = flags1;
+      ft_implicit_params = implicit_params1;
+      ft_ifc_decl = ifc_decl1;
+      ft_tparams = tparams1;
+      ft_where_constraints = where_constraints1;
+    } =
+      fty1
+    in
+    let {
+      ft_ret = ret2;
+      ft_params = params2;
+      ft_arity = arity2;
+      ft_reactive = reactive2;
+      ft_flags = flags2;
+      ft_implicit_params = implicit_params2;
+      ft_ifc_decl = ifc_decl2;
+      ft_tparams = tparams2;
+      ft_where_constraints = where_constraints2;
+    } =
+      fty2
+    in
+    match possibly_enforced_ty_compare ret1 ret2 with
+    | 0 ->
+      begin
+        match ft_params_compare params1 params2 with
         | 0 ->
           (* Explicit polymorphic equality. Need to write equality on
            * locl_ty by hand if we want to make a specialized one
            *)
-          Poly.compare
-            (fty1.ft_arity, fty1.ft_reactive, fty1.ft_flags)
-            (fty2.ft_arity, fty2.ft_reactive, fty2.ft_flags)
+          begin
+            match ft_arity_compare arity1 arity2 with
+            | 0 ->
+              begin
+                match tparams_compare tparams1 tparams2 with
+                | 0 ->
+                  begin
+                    match
+                      where_constraints_compare
+                        where_constraints1
+                        where_constraints2
+                    with
+                    | 0 ->
+                      begin
+                        match Int.compare flags1 flags2 with
+                        | 0 ->
+                          let { capability = capability1 } = implicit_params1 in
+                          let { capability = capability2 } = implicit_params2 in
+                          begin
+                            match
+                              capability_compare capability1 capability2
+                            with
+                            | 0 ->
+                              begin
+                                match
+                                  compare_ifc_fun_decl ifc_decl1 ifc_decl2
+                                with
+                                | 0 -> reactivity_compare reactive1 reactive2
+                                | n -> n
+                              end
+                            | n -> n
+                          end
+                        | n -> n
+                      end
+                    | n -> n
+                  end
+                | n -> n
+              end
+            | n -> n
+          end
         | n -> n
       end
     | n -> n
+  and ft_arity_compare a1 a2 =
+    match (a1, a2) with
+    | (Fstandard, Fstandard) -> 0
+    | (Fstandard, Fvariadic _) -> -1
+    | (Fvariadic _, Fstandard) -> 1
+    | (Fvariadic p1, Fvariadic p2) -> ft_param_compare ~normalize_lists p1 p2
+  and capability_compare cap1 cap2 =
+    match (cap1, cap2) with
+    | (CapDefaults _, CapDefaults _) -> 0
+    | (CapDefaults _, CapTy _) -> -1
+    | (CapTy _, CapDefaults _) -> 1
+    | (CapTy ty1, CapTy ty2) -> ty_compare ty1 ty2
+  and reactivity_compare r1 r2 =
+    match (r1, r2) with
+    | (Nonreactive, Nonreactive)
+    | (CippGlobal, CippGlobal)
+    | (CippRx, CippRx) ->
+      0
+    | (Local opt_ty1, Local opt_ty2)
+    | (Shallow opt_ty1, Shallow opt_ty2)
+    | (Reactive opt_ty1, Reactive opt_ty2)
+    | (Pure opt_ty1, Pure opt_ty2) ->
+      (* TODO T82455489: proper decl compare. Poly.compare will be position sensitive *)
+      Option.compare Poly.compare opt_ty1 opt_ty2
+    | (MaybeReactive r1, MaybeReactive r2) -> reactivity_compare r1 r2
+    | (RxVar opt_r1, RxVar opt_r2) ->
+      Option.compare reactivity_compare opt_r1 opt_r2
+    | (Cipp opt_s1, Cipp opt_s2)
+    | (CippLocal opt_s1, CippLocal opt_s2) ->
+      Option.compare String.compare opt_s1 opt_s2
+    | ( ( Nonreactive | CippGlobal | CippRx | Local _ | Shallow _ | Reactive _
+        | Pure _ | MaybeReactive _ | RxVar _ | Cipp _ | CippLocal _ ),
+        ( Nonreactive | CippGlobal | CippRx | Local _ | Shallow _ | Reactive _
+        | Pure _ | MaybeReactive _ | RxVar _ | Cipp _ | CippLocal _ ) ) ->
+      reactivity_ordinal r1 - reactivity_ordinal r2
   and ty_compare ty1 ty2 = ty__compare (get_node ty1) (get_node ty2) in
   ty__compare ty_1 ty_2
 
@@ -572,20 +774,15 @@ and possibly_enforced_ty_compare ?(normalize_lists = false) ety1 ety2 =
   | 0 -> Bool.compare ety1.et_enforced ety2.et_enforced
   | n -> n
 
+and ft_param_compare ?(normalize_lists = false) param1 param2 =
+  match
+    possibly_enforced_ty_compare ~normalize_lists param1.fp_type param2.fp_type
+  with
+  | 0 -> Int.compare param1.fp_flags param2.fp_flags
+  | n -> n
+
 and ft_params_compare ?(normalize_lists = false) params1 params2 =
-  let rec ft_params_compare params1 params2 =
-    List.compare ft_param_compare params1 params2
-  and ft_param_compare param1 param2 =
-    match
-      possibly_enforced_ty_compare
-        ~normalize_lists
-        param1.fp_type
-        param2.fp_type
-    with
-    | 0 -> Int.compare param1.fp_flags param2.fp_flags
-    | n -> n
-  in
-  ft_params_compare params1 params2
+  List.compare (ft_param_compare ~normalize_lists) params1 params2
 
 let tyl_equal tyl1 tyl2 = Int.equal 0 @@ tyl_compare ~sort:false tyl1 tyl2
 

@@ -148,7 +148,7 @@ DataType is_numeric_string(const char *str, int length, int64_t *lval,
 
   if (type == KindOfInt64) {
     if (digits == MAX_LENGTH_OF_LONG - 1) {
-      int cmp = strcmp(&ptr[-digits], long_min_digits);
+      int cmp = strncmp(&ptr[-digits], long_min_digits, digits);
       if (!(cmp < 0 || (cmp == 0 && *str == '-'))) {
         if (dval) {
           *dval = strtod(str, nullptr);

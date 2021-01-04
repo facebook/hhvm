@@ -58,83 +58,75 @@ static_assert(
   "Performance is sensitive to sizeof(ArrayData)."
   " Make sure you changed it with good reason and then update this assert.");
 
-struct ScalarHash {
-  size_t operator()(const ArrayData* arr) const {
-    return hash(arr);
-  }
-  size_t operator()(const ArrayData* ad1, const ArrayData* ad2) const {
-    return equal(ad1, ad2);
-  }
-  size_t hash(const ArrayData* arr) const {
-    if (arr == s_cachedHash.first) return s_cachedHash.second;
-    return raw_hash(arr);
-  }
-  size_t raw_hash(const ArrayData* arr, arrprov::Tag tag = {}) const {
-    auto ret = uint64_t{arr->kind()};
-    ret |= (uint64_t{arr->isLegacyArray()} << 32);
+size_t hashArrayPortion(const ArrayData* arr) {
+  assertx(arr->isVanilla());
 
-    if (RuntimeOption::EvalArrayProvenance) {
-      if (!tag.valid()) tag = arrprov::getTag(arr);
-      if (tag.valid()) ret = folly::hash::hash_combine(ret, tag.hash());
-    }
-    IterateKV(
-      arr,
-      [&](TypedValue k, TypedValue v) {
-        assertx(!isRefcountedType(k.m_type) ||
-                (k.m_type == KindOfString && k.m_data.pstr->isStatic()));
-        assertx(!isRefcountedType(v.m_type));
-        ret = folly::hash::hash_combine(
-          ret,
-          static_cast<int>(k.m_type), k.m_data.num,
-          static_cast<int>(v.m_type));
-        switch (v.m_type) {
-          case KindOfNull:
-            break;
-          case KindOfBoolean:
-          case KindOfInt64:
-          case KindOfDouble:
-          case KindOfPersistentString:
-          case KindOfPersistentDArray:
-          case KindOfPersistentVArray:
-          case KindOfPersistentVec:
-          case KindOfPersistentDict:
-          case KindOfPersistentKeyset:
-          case KindOfLazyClass:
-            ret = folly::hash::hash_combine(ret, v.m_data.num);
-            break;
-          case KindOfUninit:
-          case KindOfString:
-          case KindOfDArray:
-          case KindOfVArray:
-          case KindOfVec:
-          case KindOfDict:
-          case KindOfKeyset:
-          case KindOfObject:
-          case KindOfResource:
-          case KindOfRFunc:
-          case KindOfFunc:
-          case KindOfClass:
-          case KindOfClsMeth:
-          case KindOfRClsMeth:
-          case KindOfRecord:
-            always_assert(false);
-        }
+  auto hash = folly::hash::hash_128_to_64(arr->kind(), arr->isLegacyArray());
+
+  IterateKV(
+    arr,
+    [&](TypedValue k, TypedValue v) {
+      assertx(tvIsString(k) || tvIsInt(k));
+      assertx(IMPLIES(tvIsString(k), val(k).pstr->isStatic()));
+      hash = folly::hash::hash_combine(
+        hash,
+        dt_with_persistence(k.m_type),
+        k.m_data.num,
+        v.m_type
+      );
+      switch (v.m_type) {
+        case KindOfNull:
+          break;
+        case KindOfBoolean:
+        case KindOfInt64:
+        case KindOfDouble:
+        case KindOfPersistentString:
+        case KindOfPersistentDArray:
+        case KindOfPersistentVArray:
+        case KindOfPersistentVec:
+        case KindOfPersistentDict:
+        case KindOfPersistentKeyset:
+          hash = folly::hash::hash_combine(hash, v.m_data.num);
+          break;
+        case KindOfLazyClass:
+          assertx(v.m_data.plazyclass.name()->isStatic());
+          hash = folly::hash::hash_combine(
+            hash,
+            (uintptr_t)v.m_data.plazyclass.name()
+          );
+          break;
+        case KindOfUninit:
+        case KindOfString:
+        case KindOfDArray:
+        case KindOfVArray:
+        case KindOfVec:
+        case KindOfDict:
+        case KindOfKeyset:
+        case KindOfObject:
+        case KindOfResource:
+        case KindOfRFunc:
+        case KindOfFunc:
+        case KindOfClass:
+        case KindOfClsMeth:
+        case KindOfRClsMeth:
+        case KindOfRecord:
+          always_assert(false);
       }
-    );
-    return ret;
-  }
-  bool equal(const ArrayData* ad1, const ArrayData* ad2) const {
-    if (ad1 == ad2) return true;
-    if (ad1->size() != ad2->size()) return false;
-    if (!ArrayData::dvArrayEqual(ad1, ad2)) return false;
-    if (ad1->isHackArrayType()) {
-      if (!ad2->isHackArrayType()) return false;
-      if (ad1->kind() != ad2->kind()) return false;
-    } else if (ad2->isHackArrayType()) {
-      return false;
     }
+  );
+  return hash;
+}
 
-    auto check = [] (const TypedValue& tv1, const TypedValue& tv2) {
+bool compareArrayPortion(const ArrayData* ad1, const ArrayData* ad2) {
+  assertx(ad1->isVanilla());
+  assertx(ad2->isVanilla());
+
+  if (ad1 == ad2) return true;
+  if (ad1->kind() != ad2->kind()) return false;
+  if (ad1->size() != ad2->size()) return false;
+  if (ad1->isLegacyArray() != ad2->isLegacyArray()) return false;
+
+  auto const check = [] (const TypedValue& tv1, const TypedValue& tv2) {
       if (tv1.m_type != tv2.m_type) {
         // String keys from arrays might be KindOfString, even when
         // the StringData is static.
@@ -142,46 +134,104 @@ struct ScalarHash {
           return false;
         }
         assertx(tv1.m_data.pstr->isStatic());
+        assertx(tv2.m_data.pstr->isStatic());
       }
       if (isNullType(tv1.m_type)) return true;
       return tv1.m_data.num == tv2.m_data.num;
     };
 
-    bool equal = true;
-    ArrayIter iter2{ad2};
-    IterateKV(
-      ad1,
-      [&](TypedValue k, TypedValue v) {
-        if (!check(k, *iter2.first().asTypedValue()) ||
-            !check(v, iter2.secondVal())) {
-          equal = false;
-          return true;
-        }
-        ++iter2;
-        return false;
+  auto equal = true;
+  ArrayIter iter2{ad2};
+  IterateKV(
+    ad1,
+    [&](TypedValue k, TypedValue v) {
+      if (!check(k, *iter2.first().asTypedValue()) ||
+          !check(v, iter2.secondVal())) {
+        equal = false;
+        return true;
       }
-    );
-    return equal;
+      ++iter2;
+      return false;
+    }
+  );
+  return equal;
+}
+
+struct ScalarHashNoProv {
+  size_t operator()(ArrayData* arr) const {
+    return s_cachedHash.first == arr
+      ? s_cachedHash.second
+      : hashArrayPortion(arr);
+  }
+  bool operator()(ArrayData* arr1, ArrayData* arr2) const {
+    return compareArrayPortion(arr1, arr2);
   }
 };
 
-using ArrayDataMap = tbb::concurrent_unordered_set<ArrayData*,
-                                                   ScalarHash,
-                                                   ScalarHash>;
-ArrayDataMap s_arrayDataMap;
+struct ScalarHashProv {
+  size_t operator()(const std::pair<ArrayData*, arrprov::Tag>& p) const {
+    assertx(IMPLIES(p.second.valid(), arrprov::arrayWantsTag(p.first)));
+    return folly::hash::hash_combine(
+      p.first == s_cachedHash.first
+        ? s_cachedHash.second
+        : hashArrayPortion(p.first),
+      p.second.hash()
+    );
+  }
+  bool operator()(const std::pair<ArrayData*, arrprov::Tag>& p1,
+                  const std::pair<ArrayData*, arrprov::Tag>& p2) const {
+    assertx(p1.first->isVanilla());
+    assertx(p2.first->isVanilla());
+    assertx(IMPLIES(p1.second.valid(), arrprov::arrayWantsTag(p1.first)));
+    assertx(IMPLIES(p2.second.valid(), arrprov::arrayWantsTag(p2.first)));
+
+    // NB: The arrprov::Tag here might not match the one inside the
+    // ArrayData because one of the arrays might be the one we're
+    // trying to lookup with (and thus has its old tag).
+    if (p1.second != p2.second) return false;
+    return compareArrayPortion(p1.first, p2.first);
+  }
+};
+
+using ArrayDataMapNoProv = tbb::concurrent_unordered_set<
+  ArrayData*,
+  ScalarHashNoProv,
+  ScalarHashNoProv
+>;
+ArrayDataMapNoProv s_arrayDataMapNoProv;
+
+using ArrayDataMapProv = tbb::concurrent_unordered_set<
+  std::pair<ArrayData*, arrprov::Tag>,
+  ScalarHashProv,
+  ScalarHashProv
+>;
+ArrayDataMapProv s_arrayDataMapProv;
 
 }
 
 size_t loadedStaticArrayCount() {
-  return s_arrayDataMap.size();
+  return RO::EvalArrayProvenance
+    ? s_arrayDataMapProv.size()
+    : s_arrayDataMapNoProv.size();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void ArrayData::GetScalarArray(ArrayData** parr, arrprov::Tag tag) {
+template <bool ArrayProv>
+ALWAYS_INLINE
+void ArrayData::GetScalarArrayImpl(ArrayData** parr, arrprov::Tag tag) {
+  assertx(IMPLIES(!ArrayProv, !tag.valid()));
+
   auto const base = *parr;
-  auto const requested_tag = RO::EvalArrayProvenance && tag.valid();
-  if (base->isStatic() && LIKELY(!requested_tag)) return;
+  assertx(IMPLIES(tag.valid(), arrprov::arrayWantsTag(base)));
+
+  auto const oldTag = ArrayProv
+    ? arrprov::getTag(base)
+    : arrprov::Tag{};
+  assertx(IMPLIES(oldTag.valid(), arrprov::arrayWantsTag(base)));
+
+  auto const newTag = tag.valid() ? tag : oldTag;
+  if (base->isStatic() && LIKELY(newTag == oldTag)) return;
 
   auto const arr = [&]{
     if (base->isVanilla()) return base;
@@ -190,16 +240,18 @@ void ArrayData::GetScalarArray(ArrayData** parr, arrprov::Tag tag) {
     return *parr;
   }();
 
-  auto replace = [&] (ArrayData* rep) {
+  auto const replace = [&] (ArrayData* rep) {
+    assertx(IMPLIES(ArrayProv, arrprov::getTag(rep) == newTag));
     *parr = rep;
     decRefArr(arr);
     s_cachedHash.first = nullptr;
   };
 
-  if (arr->empty() && LIKELY(!requested_tag)) {
-    return replace([&]{
-      auto const legacy = arr->isLegacyArray();
-      switch (arr->toDataType()) {
+  if (arr->empty() && !newTag.valid()) {
+    return replace(
+      [&]{
+        auto const legacy = arr->isLegacyArray();
+        switch (arr->toDataType()) {
         case KindOfVArray:
           return legacy ? staticEmptyMarkedVArray() : staticEmptyVArray();
         case KindOfDArray:
@@ -212,28 +264,40 @@ void ArrayData::GetScalarArray(ArrayData** parr, arrprov::Tag tag) {
           return staticEmptyKeysetArray();
         default:
           always_assert(false);
-      }
-    }());
+        }
+      }()
+    );
   }
 
   arr->onSetEvalScalar();
 
   s_cachedHash.first = arr;
-  s_cachedHash.second = ScalarHash{}.raw_hash(arr, tag);
+  s_cachedHash.second = hashArrayPortion(arr);
 
-  // See documentation for `tl_tag_override`.
-  auto it = s_arrayDataMap.find(arr);
-  if (it != s_arrayDataMap.end()) return replace(*it);
+  auto const lookup = [&] (ArrayData* a) -> ArrayData* {
+    if (ArrayProv) {
+      if (auto const it = s_arrayDataMapProv.find({a, newTag});
+          it != s_arrayDataMapProv.end()) {
+        return it->first;
+      }
+      return nullptr;
+    } else {
+      if (auto const it = s_arrayDataMapNoProv.find(a);
+          it != s_arrayDataMapNoProv.end()) {
+        return *it;
+      }
+      return nullptr;
+    }
+  };
+
+  if (auto const a = lookup(arr)) return replace(a);
 
   static std::array<std::mutex, 128> s_mutexes;
-
-  std::lock_guard<std::mutex> g {
-    s_mutexes[
-      s_cachedHash.second % s_mutexes.size()
-    ]
+  std::lock_guard<std::mutex> g{
+    s_mutexes[s_cachedHash.second % s_mutexes.size()]
   };
-  it = s_arrayDataMap.find(arr);
-  if (it != s_arrayDataMap.end()) return replace(*it);
+
+  if (auto const a = lookup(arr)) return replace(a);
 
   // We should clear the sampled bit in the new static array regardless of
   // whether the input array was sampled, because specializing the input is
@@ -241,17 +305,40 @@ void ArrayData::GetScalarArray(ArrayData** parr, arrprov::Tag tag) {
   auto const ad = arr->copyStatic();
   ad->m_aux16 &= ~kSampledArray;
   assertx(ad->isStatic());
+  if (newTag.valid()) arrprov::setTagForStatic(ad, newTag);
 
   // TODO(T68458896): allocSize rounds up to size class, which we shouldn't do.
   MemoryStats::LogAlloc(AllocKind::StaticArray, allocSize(ad));
 
   s_cachedHash.first = ad;
-  assertx(ScalarHash{}.raw_hash(ad, tag) == s_cachedHash.second);
-  auto const DEBUG_ONLY inserted = s_arrayDataMap.insert(ad).second;
-  assertx(inserted);
+  assertx(hashArrayPortion(ad) == s_cachedHash.second);
 
-  if (tag.valid()) arrprov::setTag(ad, tag);
+  if (ArrayProv) {
+    auto const DEBUG_ONLY inserted =
+      s_arrayDataMapProv.insert({ad, newTag}).second;
+    assertx(inserted);
+  } else {
+    auto const DEBUG_ONLY inserted =
+      s_arrayDataMapNoProv.insert(ad).second;
+    assertx(inserted);
+  }
   return replace(ad);
+}
+
+ALWAYS_INLINE
+void ArrayData::GetScalarArrayNoProv(ArrayData** parr) {
+  return GetScalarArrayImpl<false>(parr, arrprov::Tag{});
+}
+
+NEVER_INLINE
+void ArrayData::GetScalarArrayProv(ArrayData** parr, arrprov::Tag tag) {
+  return GetScalarArrayImpl<true>(parr, tag);
+}
+
+void ArrayData::GetScalarArray(ArrayData** parr, arrprov::Tag tag) {
+  if (UNLIKELY(RO::EvalArrayProvenance)) return GetScalarArrayProv(parr, tag);
+  assertx(!tag.valid());
+  return GetScalarArrayNoProv(parr);
 }
 
 ArrayData* ArrayData::GetScalarArray(Array&& arr) {

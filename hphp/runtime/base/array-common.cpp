@@ -125,7 +125,7 @@ ArrayData* castObjToDArray(ObjectData* obj) {
   assertx(!RuntimeOption::EvalHackArrDVArrs);
   return castObjToArrayLikeImpl(
     obj,
-    Array::CreateDArray,
+    []{ return Array::CreateDArray(); },
     [](const Array& arr) { return arr.toDArray(); },
     [](Array& arr, ArrayIter& iter) { arr.set(iter.first(), iter.second()); },
     "Non-iterable object to darray conversion"

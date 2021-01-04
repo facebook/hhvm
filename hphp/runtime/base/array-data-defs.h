@@ -223,6 +223,7 @@ inline ArrayData* ArrayData::pop(Variant& value) {
 }
 
 inline void ArrayData::onSetEvalScalar() {
+  if (isStatic()) return;
   return g_array_funcs.onSetEvalScalar[kind()](this);
 }
 
@@ -368,4 +369,3 @@ inline ArrayData* ArrayData::remove(const Variant& k) {
 ///////////////////////////////////////////////////////////////////////////////
 
 }
-

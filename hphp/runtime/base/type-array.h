@@ -104,8 +104,8 @@ public:
     return Array(ArrayData::CreateVArray(), NoIncRef{});
   }
 
-  static Array CreateDArray() {
-    return Array(ArrayData::CreateDArray(), NoIncRef{});
+  static Array CreateDArray(arrprov::Tag tag = {}) {
+    return Array(ArrayData::CreateDArray(tag), NoIncRef{});
   }
 
   /////////////////////////////////////////////////////////////////////////////

@@ -108,7 +108,7 @@ struct Tag {
   int32_t line() const;
 
   /* Unique key usable for hashing. */
-  uint64_t hash() const;
+  uint64_t hash() const { return m_id; }
 
   /* Return true if this tag is not default-constructed. */
   bool valid() const { return *this != Tag{}; }
@@ -135,8 +135,12 @@ struct Tag {
 
   operator bool() const { return concrete(); }
 
-  bool operator==(const Tag& other) const;
-  bool operator!=(const Tag& other) const;
+  bool operator==(const Tag& other) const {
+    return m_id == other.m_id;
+  }
+  bool operator!=(const Tag& other) const {
+    return m_id != other.m_id;
+  }
 
   std::string toString() const;
 
@@ -159,6 +163,7 @@ private:
   friend void setTag(ArrayData* a, Tag tag);
   friend void setTag(APCArray* a, Tag tag);
   friend void setTag(AsioExternalThreadEvent* ev, Tag tag);
+  friend void setTagForStatic(ArrayData* a, Tag tag);
 
   friend void clearTag(ArrayData* ad);
   friend void clearTag(APCArray* a);
@@ -273,11 +278,18 @@ Tag getTag(const APCArray* a);
 Tag getTag(const AsioExternalThreadEvent* ev);
 
 /*
- * Set the provenance tag for `a` to `tag`.
+ * Set the provenance tag for `a` to `tag`. The ArrayData* must be
+ * non-static.
  */
 void setTag(ArrayData* a, Tag tag);
 void setTag(APCArray* a, Tag tag);
 void setTag(AsioExternalThreadEvent* ev, Tag tag);
+
+/*
+ * Like setTag(), but for static arrays. Only meant for use in
+ * GetScalarArray.
+ */
+void setTagForStatic(ArrayData* a, Tag tag);
 
 /*
  * Clear a tag for a released array---only call this if the array is henceforth
@@ -349,4 +361,3 @@ TypedValue markTvShallow(TypedValue in, bool legacy);
 ///////////////////////////////////////////////////////////////////////////////
 
 }}
-

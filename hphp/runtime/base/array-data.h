@@ -653,6 +653,14 @@ private:
 
   /////////////////////////////////////////////////////////////////////////////
 
+  template<bool>
+  static void GetScalarArrayImpl(ArrayData**, arrprov::Tag);
+
+  static void GetScalarArrayNoProv(ArrayData**);
+  static void GetScalarArrayProv(ArrayData**, arrprov::Tag);
+
+  /////////////////////////////////////////////////////////////////////////////
+
 protected:
   friend struct BespokeArray;
   friend struct PackedArray;

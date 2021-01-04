@@ -203,8 +203,16 @@ const EnumValues* EnumCache::loadEnumValues(
   // based on the actual PC by the reflection methods that access this cache.
   if (RO::EvalArrayProvenance) {
     auto const tag = arrprov::Tag::LargeEnum(klass->name());
-    arrprov::setTag(names.get(), tag);
-    arrprov::setTag(values.get(), tag);
+    if (names->isStatic()) {
+      names = Array::attach(arrprov::tagStaticArr(names.get(), tag));
+    } else {
+      arrprov::setTag(names.get(), tag);
+    }
+    if (values->isStatic()) {
+      values = Array::attach(arrprov::tagStaticArr(values.get(), tag));
+    } else {
+      arrprov::setTag(values.get(), tag);
+    }
   }
 
   // If we saw dynamic constants we cannot cache the enum values across requests

@@ -1222,11 +1222,7 @@ Array VariableUnserializer::unserializeArray() {
 
   if (size == 0) {
     expectChar('}');
-    auto arr =  m_forceDArrays || type() == Type::Serialize
-      ? Array::CreateDArray()
-      : Array::Create();
-    if (provTag) arrprov::setTag(arr.get(), provTag);
-    return arr;
+    return Array::CreateDArray(provTag);
   }
   // For large arrays, do a naive pre-check for OOM.
   auto const allocsz = MixedArray::computeAllocBytesFromMaxElms(size);

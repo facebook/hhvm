@@ -185,16 +185,6 @@ int32_t Tag::line() const {
   }
   return -1;
 }
-uint64_t Tag::hash() const {
-  return m_id;
-}
-
-bool Tag::operator==(const Tag& other) const {
-  return m_id == other.m_id;
-}
-bool Tag::operator!=(const Tag& other) const {
-  return m_id != other.m_id;
-}
 
 std::string Tag::toString() const {
   switch (kind()) {
@@ -299,38 +289,8 @@ Tag Tag::get(const AsioExternalThreadEvent* a) {
   return it->second;
 }
 
-namespace {
-
-/*
- * Used to override the provenance tag reported for ArrayData*'s in a given
- * thread.
- *
- * This is pretty hacky, but it's only used for one specific purpose: for
- * obtaining a copy of a static array which has specific provenance.
- *
- * The static array cache is set up to distinguish arrays by provenance tag.
- * However, it's a tbb::concurrent_hash_set, which we can't jam a tag into.
- * Instead, its hash and equal functions look up the provenance tag of an array
- * in order to allow for multiple identical static arrays with different source
- * tags.
- *
- * As a result, there's no real way to thread a tag into the lookups and
- * inserts of the hash set.  We could pass in tagged temporary empty arrays,
- * but we don't want to keep allocating those.  We could keep one around for
- * each thread... but that's pretty much the moral equivalent of doing things
- * this way:
- *
- * So instead, we have a thread-local tag that is only "active" when we're
- * trying to retrieve or create a specifically tagged copy of a static array,
- * which facilitates the desired behavior in the static array cache.
- */
-thread_local folly::Optional<Tag> tl_tag_override = folly::none;
-
-} // namespace
-
 Tag getTag(const ArrayData* ad) {
   assertx(RO::EvalArrayProvenance);
-  if (tl_tag_override) return *tl_tag_override;
   // We ensure that arrays that don't want a tag have an invalid tag set.
   return Tag::get(ad);
 }
@@ -350,6 +310,7 @@ Tag getTag(const AsioExternalThreadEvent* ev) {
 void setTag(ArrayData* ad, Tag tag) {
   assertx(RO::EvalArrayProvenance);
   assertx(tag.valid());
+  assertx(!ad->isStatic());
   if (!arrayWantsTag(ad)) return;
   Tag::set(ad, tag);
 }
@@ -366,6 +327,14 @@ void setTag(AsioExternalThreadEvent* ev, Tag tag) {
   assertx(tag.valid());
   if (!arrayWantsTag(ev)) return;
   Tag::set(ev, tag);
+}
+
+void setTagForStatic(ArrayData* ad, Tag tag) {
+  assertx(RO::EvalArrayProvenance);
+  assertx(tag.valid());
+  assertx(ad->isStatic());
+  if (!arrayWantsTag(ad)) return;
+  Tag::set(ad, tag);
 }
 
 void clearTag(ArrayData* ad) {
@@ -402,9 +371,6 @@ ArrayData* tagStaticArr(ArrayData* ad, Tag tag /* = {} */) {
 
   if (!tag.valid()) tag = tagFromPC();
   if (!tag.valid()) return ad;
-
-  tl_tag_override = tag;
-  SCOPE_EXIT { tl_tag_override = folly::none; };
 
   ArrayData::GetScalarArray(&ad, tag);
   return ad;

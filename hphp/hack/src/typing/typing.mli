@@ -65,3 +65,16 @@ val type_capability :
   Aast.contexts option ->
   Pos.t ->
   Typing_env_types.env * Typing_defs.locl_ty * Typing_defs.locl_ty
+
+val call :
+  expected:Typing_helpers.ExpectedTy.t option ->
+  ?method_call_info:Typing_reactivity.method_call_info ->
+  ?nullsafe:Pos.t option ->
+  ?in_await:Typing_reason.t ->
+  Pos.t ->
+  Typing_env_types.env ->
+  Typing_defs.locl_ty ->
+  Nast.expr list ->
+  Nast.expr option ->
+  Typing_env_types.env
+  * (Tast.expr list * Tast.expr option * Typing_defs.locl_ty)

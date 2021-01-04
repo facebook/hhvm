@@ -111,6 +111,8 @@ module Collections = struct
 end
 
 module Members = struct
+  let mGetInstanceKey = "getInstanceKey"
+
   let mClass = "class"
 
   let __construct = "__construct"

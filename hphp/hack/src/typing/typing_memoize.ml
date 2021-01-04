@@ -16,7 +16,7 @@ module SubType = Typing_subtype
 module MakeType = Typing_make_type
 
 let check_param : env -> Nast.fun_param -> unit =
- fun env { param_type_hint; param_pos; _ } ->
+ fun env { param_type_hint; param_pos; param_name; _ } ->
   let error ty =
     let ty_str = Typing_print.error env ty in
     let msgl = Reason.to_string ("This is " ^ ty_str) (get_reason ty) in
@@ -86,14 +86,21 @@ let check_param : env -> Nast.fun_param -> unit =
       if is_container then
         check_memoizable env type_param
       else
-        let r = get_reason ty in
-        let memoizable_type =
-          MakeType.class_type r SN.Classes.cIMemoizeParam []
+        let (env, (tfty, _tal)) =
+          Typing_object_get.obj_get
+            ~obj_pos:param_pos
+            ~is_method:true
+            ~nullsafe:None
+            ~coerce_from_ty:None
+            ~explicit_targs:[]
+            env
+            ty
+            (CIexpr
+               (param_pos, Lvar (param_pos, Local_id.make_unscoped param_name)))
+            (p, SN.Members.mGetInstanceKey)
+            (fun ?code:_ _ _ -> error ty)
         in
-        if Typing_solver.is_sub_type env ty memoizable_type then
-          ()
-        else
-          error ty
+        ignore (Typing.call ~expected:None p env tfty [] None)
     | Tunapplied_alias _ ->
       Typing_defs.error_Tunapplied_alias_in_illegal_context ()
     | Taccess _ -> ()

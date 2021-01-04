@@ -5,7 +5,7 @@
 abstract class MyClass {
   public abstract static function bar(
     ExampleContext $_,
-  ): ExprTree<Code, Code::TAst, (function(ExampleString): ExampleInt)>;
+  ): Awaitable<ExprTree<Code, Code::TAst, (function(ExampleString): ExampleInt)>>;
 
   public function test(): void {
     $fun_call = Code`static::bar("baz")`;
@@ -44,7 +44,7 @@ class Code {
   // Symbols
   public static function symbol<T>(
     string $_,
-    (function(ExampleContext): ExprTree<Code, Code::TAst, T>) $_,
+    (function(ExampleContext): Awaitable<ExprTree<Code, Code::TAst, T>>) $_,
   ): ExprTree<Code, Code::TAst, T> {
     throw new Exception();
   }

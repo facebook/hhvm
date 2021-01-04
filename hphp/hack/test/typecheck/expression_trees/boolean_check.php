@@ -2,15 +2,15 @@
 
 <<file:__EnableUnstableFeatures('expression_trees')>>
 
-function nullable_bool(
+async function nullable_bool(
   ExampleContext $_,
-): ExprTree<Code, Code::TAst, (function(): ?ExampleBool)> {
+): Awaitable<ExprTree<Code, Code::TAst, (function(): ?ExampleBool)>> {
   throw new Exception();
 }
 
-function a_bool(
+async function a_bool(
   ExampleContext $_,
-): ExprTree<Code, Code::TAst, (function(): ExampleBool)> {
+): Awaitable<ExprTree<Code, Code::TAst, (function(): ExampleBool)>> {
   throw new Exception();
 }
 
@@ -99,7 +99,7 @@ class Code {
   // Symbols
   public static function symbol<T>(
     string $_,
-    (function(ExampleContext): ExprTree<Code, Code::TAst, T>) $_,
+    (function(ExampleContext): Awaitable<ExprTree<Code, Code::TAst, T>>) $_,
   ): ExprTree<Code, Code::TAst, T> {
     throw new Exception();
   }

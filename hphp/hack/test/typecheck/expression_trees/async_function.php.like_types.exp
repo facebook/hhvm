@@ -1,0 +1,8 @@
+File "async_function.php", line 17, characters 22-28:
+Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
+  File "async_function.php", line 16, characters 8-28:
+  But got `dynamic`
+File "async_function.php", line 22, characters 8-18:
+Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree (Typing[4110])
+  File "async_function.php", line 58, characters 6-34:
+  But got `dynamic` because it is an unenforceable type

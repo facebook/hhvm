@@ -2,14 +2,14 @@
 
 <<file:__EnableUnstableFeatures('expression_trees')>>
 
-function bar(
+async function bar(
   ExampleContext $_,
-): ExprTree<Code, Code::TAst, (function(): void)> {
+): Awaitable<ExprTree<Code, Code::TAst, (function(): void)>> {
   throw new Exception();
 }
-function baz(
+async function baz(
   ExampleContext $_,
-): ExprTree<Code, Code::TAst, (function(ExampleInt): void)> {
+): Awaitable<ExprTree<Code, Code::TAst, (function(ExampleInt): void)>> {
   throw new Exception();
 }
 
@@ -50,7 +50,7 @@ class Code {
   // Symbols
   public static function symbol<T>(
     string $_,
-    (function(ExampleContext): ExprTree<Code, Code::TAst, T>) $_,
+    (function(ExampleContext): Awaitable<ExprTree<Code, Code::TAst, T>>) $_,
   ): ExprTree<Code, Code::TAst, T> {
     throw new Exception();
   }

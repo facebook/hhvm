@@ -426,12 +426,12 @@ Type typeOpToType(IsTypeOp op) {
 SSATmp* isScalarImpl(IRGS& env, SSATmp* val) {
   // The simplifier works fine when val has a known DataType, but do some
   // checks first in case val has a type like {Int|Str}.
-  auto const scalar = TBool | TInt | TDbl | TStr;
+  auto const scalar = TBool | TInt | TDbl | TStr | TCls | TLazyCls;
   if (val->isA(scalar)) return cns(env, true);
   if (!val->type().maybe(scalar)) return cns(env, false);
 
   SSATmp* result = nullptr;
-  for (auto t : {TBool, TInt, TDbl, TStr}) {
+  for (auto t : {TBool, TInt, TDbl, TStr, TCls, TLazyCls}) {
     auto const is_t = gen(env, ConvBoolToInt, gen(env, IsType, t, val));
     result = result ? gen(env, OrInt, result, is_t) : is_t;
   }

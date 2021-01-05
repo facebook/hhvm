@@ -3632,8 +3632,8 @@ bool doFCall(CallFlags callFlags, const Func* func, uint32_t numArgsInclUnpack,
   calleeGenericsChecks(func, callFlags.hasGenerics());
   calleeArgumentArityChecks(func, numArgsInclUnpack);
   calleeDynamicCallChecks(func, callFlags.isDynamicCall());
-  calleeImplicitContextChecks(func);
   calleeCoeffectChecks(func, callFlags);
+  calleeImplicitContextChecks(func);
   initFuncInputs(func, numArgsInclUnpack);
 
   ar->m_sfp = vmfp();

@@ -253,25 +253,6 @@ void emitCalleeDynamicCallChecks(IRGS& env, const Func* callee,
   );
 }
 
-void emitCalleeImplicitContextChecks(IRGS& env, const Func* callee) {
-  if (!RO::EvalEnableImplicitContext || !callee->hasNoContextAttr()) return;
-  ifElse(
-    env,
-    [&] (Block* taken) {
-      gen(env, CheckImplicitContextNull, taken);
-    },
-    [&] {
-      hint(env, Block::Hint::Unlikely);
-      auto const str = folly::to<std::string>(
-        "Function ",
-        callee->fullName()->data(),
-        " has implicit context but is marked with __NoContext");
-      auto const msg = cns(env, makeStaticString(str));
-      gen(env, ThrowInvalidOperation, msg);
-    }
-  );
-}
-
 void emitCalleeCoeffectChecks(IRGS& env, const Func* callee,
                               SSATmp* callFlags) {
   assertx(callee);
@@ -299,6 +280,25 @@ void emitCalleeCoeffectChecks(IRGS& env, const Func* callee,
     [&] {
       hint(env, Block::Hint::Unlikely);
       gen(env, RaiseRxCallViolation, FuncData{callee}, fp(env));
+    }
+  );
+}
+
+void emitCalleeImplicitContextChecks(IRGS& env, const Func* callee) {
+  if (!RO::EvalEnableImplicitContext || !callee->hasNoContextAttr()) return;
+  ifElse(
+    env,
+    [&] (Block* taken) {
+      gen(env, CheckImplicitContextNull, taken);
+    },
+    [&] {
+      hint(env, Block::Hint::Unlikely);
+      auto const str = folly::to<std::string>(
+        "Function ",
+        callee->fullName()->data(),
+        " has implicit context but is marked with __NoContext");
+      auto const msg = cns(env, makeStaticString(str));
+      gen(env, ThrowInvalidOperation, msg);
     }
   );
 }

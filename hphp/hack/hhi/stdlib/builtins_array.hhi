@@ -52,7 +52,7 @@ const int UCOL_STRENGTH = 0;
 const int UCOL_HIRAGANA_QUATERNARY_MODE = 0;
 const int UCOL_NUMERIC_COLLATION = 0;
 
-const int TAG_PROVENANCE_HERE_DONT_WARN_ON_OBJECTS = 0;
+const int TAG_PROVENANCE_HERE_MUTATE_COLLECTIONS = 0;
 
 <<__PHPStdLib, __Pure>>
 function array_change_key_case<Tv>(<<__MaybeMutable>> KeyedContainer<arraykey, Tv> $input, int $upper = CASE_LOWER)[]: darray<arraykey, Tv>;

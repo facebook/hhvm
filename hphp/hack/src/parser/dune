@@ -80,7 +80,6 @@
    lexable_trivia_sig
    lexable_token_sig
    lexable_positioned_token_sig
-   minimal_parser
    positioned_parser
    positioned_syntax_sig
    syntax_sig

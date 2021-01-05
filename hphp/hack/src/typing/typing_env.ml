@@ -748,7 +748,13 @@ let get_enum env x =
   | Some (ClassResult tc) when Option.is_some (Cls.enum_type tc) -> Some tc
   | _ -> None
 
-let is_enum env x = Option.is_some (get_enum env x)
+let is_enum env x =
+  match get_enum env x with
+  | Some cls ->
+    (match Cls.enum_type cls with
+    | Some enum_type -> not enum_type.te_enum_class
+    | None -> false (* we know this is impossible due to get_enum *))
+  | None -> false
 
 let is_enum_class env x =
   match get_enum env x with

@@ -1035,8 +1035,22 @@ impl<'a> DirectDeclSmartConstructors<'a> {
         Some(self.alloc(aast::Expr(pos, expr_)))
     }
 
+    fn node_to_non_ret_ty(&self, node: Node<'a>) -> Option<&'a Ty<'a>> {
+        self.node_to_ty_(node, false)
+    }
+
     fn node_to_ty(&self, node: Node<'a>) -> Option<&'a Ty<'a>> {
+        self.node_to_ty_(node, true)
+    }
+
+    fn node_to_ty_(&self, node: Node<'a>, allow_non_ret_ty: bool) -> Option<&'a Ty<'a>> {
         match node {
+            Node::Ty(Ty(reason, Ty_::Tprim(aast::Tprim::Tvoid))) if !allow_non_ret_ty => {
+                Some(self.alloc(Ty(reason, Ty_::Terr)))
+            }
+            Node::Ty(Ty(reason, Ty_::Tprim(aast::Tprim::Tnoreturn))) if !allow_non_ret_ty => {
+                Some(self.alloc(Ty(reason, Ty_::Terr)))
+            }
             Node::Ty(ty) => Some(ty),
             Node::Expr(expr) => {
                 fn expr_to_ty<'a>(arena: &'a Bump, expr: &'a nast::Expr<'a>) -> Option<Ty_<'a>> {
@@ -3587,7 +3601,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                     } else {
                         strip_dollar_prefix(name)
                     };
-                    let ty = self.node_to_ty(hint);
+                    let ty = self.node_to_non_ret_ty(hint);
                     let needs_init = if self.state.file_mode == Mode::Mdecl {
                         false
                     } else {

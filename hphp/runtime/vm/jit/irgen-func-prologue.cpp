@@ -278,8 +278,7 @@ void emitCalleeCoeffectChecks(IRGS& env, const Func* callee,
   assertx(callFlags);
 
   if (!CoeffectsConfig::enabled()) return;
-  auto const requiredCoeffects =
-    convertToRequiredCoeffects(callee->staticCoeffects());
+  auto const requiredCoeffects = callee->staticCoeffects().toRequired();
 
   if (callFlags->hasConstVal(TInt)) {
     auto const providedCoeffects =

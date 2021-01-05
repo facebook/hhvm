@@ -19,16 +19,16 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-StaticCoeffects coeffectFromName(const std::string& a) {
-  if (a == "rx_local")               return rxMakeAttr(RxLevel::Local);
-  if (a == "rx_shallow")             return rxMakeAttr(RxLevel::Shallow);
-  if (a == "rx")                     return rxMakeAttr(RxLevel::Rx);
-  if (a == "pure")                   return rxMakeAttr(RxLevel::Pure);
-  return static_cast<StaticCoeffects>(0);
+StaticCoeffects StaticCoeffects::fromName(const std::string& a) {
+  if (a == "rx_local")   return {RxLevel::Local};
+  if (a == "rx_shallow") return {RxLevel::Shallow};
+  if (a == "rx")         return {RxLevel::Rx};
+  if (a == "pure")       return {RxLevel::Pure};
+  return StaticCoeffects::none();
 }
 
-const char* coeffectToString(StaticCoeffects coeffects) {
-  switch (rxLevelFromAttr(coeffects)) {
+const char* StaticCoeffects::toString() const {
+  switch (m_data) {
     case RxLevel::None:    return nullptr;
     case RxLevel::Local:   return "rx_local";
     case RxLevel::Shallow: return "rx_shallow";
@@ -38,8 +38,8 @@ const char* coeffectToString(StaticCoeffects coeffects) {
   not_reached();
 }
 
-const char* rxLevelToString(RxLevel level) {
-  switch (level) {
+const char* StaticCoeffects::toUserDisplayString() const {
+  switch (m_data) {
     case RxLevel::None:    return "non-reactive";
     case RxLevel::Local:   return "local reactive";
     case RxLevel::Shallow: return "shallow reactive";
@@ -49,8 +49,8 @@ const char* rxLevelToString(RxLevel level) {
   not_reached();
 }
 
-RuntimeCoeffects convertToAmbientCoeffects(const StaticCoeffects coeffects) {
-  switch (rxLevelFromAttr(coeffects)) {
+RuntimeCoeffects StaticCoeffects::toAmbient() const {
+  switch (m_data) {
     case RxLevel::None:
     case RxLevel::Local:   return RCDefault;
     case RxLevel::Shallow: return RCRxShallow;
@@ -60,8 +60,8 @@ RuntimeCoeffects convertToAmbientCoeffects(const StaticCoeffects coeffects) {
   not_reached();
 }
 
-RuntimeCoeffects convertToRequiredCoeffects(const StaticCoeffects coeffects) {
-  switch (rxLevelFromAttr(coeffects)) {
+RuntimeCoeffects StaticCoeffects::toRequired() const {
+  switch (m_data) {
     case RxLevel::None:    return RCDefault;
     case RxLevel::Local:
     case RxLevel::Shallow: return RCRxShallow;

@@ -552,10 +552,6 @@ inline bool Func::isResumable() const {
 ///////////////////////////////////////////////////////////////////////////////
 // Coeffects.
 
-inline RxLevel Func::rxLevel() const {
-  return rxLevelFromAttr(m_staticCoeffects);
-}
-
 inline bool Func::isRxDisabled() const {
   return shared()->m_allFlags.m_isRxDisabled;
 }

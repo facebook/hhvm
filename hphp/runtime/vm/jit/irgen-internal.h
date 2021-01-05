@@ -88,7 +88,7 @@ inline RuntimeCoeffects curCoeffects(const IRGS& env) {
   // Pessimize enforcements in presence of coeffect rules,
   // as it is not tracked yet
   if (curFunc(env)->hasCoeffectRules()) return RCDefault;
-  return convertToAmbientCoeffects(curFunc(env)->staticCoeffects());
+  return curFunc(env)->staticCoeffects().toAmbient();
 }
 
 //////////////////////////////////////////////////////////////////////

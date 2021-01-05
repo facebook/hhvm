@@ -252,12 +252,6 @@ struct ActRec {
   void trashThis();
 
   /////////////////////////////////////////////////////////////////////////////
-  /*
-   * Get the minimum possible effective level of reactivity.
-   *
-   * Doesn't return precise level as conditional reactivity is not tracked yet.
-   */
-  RxLevel rxMinLevel() const;
 
   /*
    * Returns the ambient coeffects of the function

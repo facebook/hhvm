@@ -284,12 +284,18 @@ void raiseTooManyArgumentsPrologue(const Func* func, ArrayData* unpackArgs) {
 
 void raiseRxCallViolation(const ActRec* caller, const Func* callee) {
   assertx(CoeffectsConfig::enabled());
-  auto const callerIsPure = caller->func()->rxLevel() == RxLevel::Pure;
+  auto const callerIsPure = caller->func()->staticCoeffects().isPure();
+  auto const callerCoeffects = [&] {
+    if (caller->func()->hasCoeffectRules()) {
+      return StaticCoeffects::none();
+    }
+    return caller->func()->staticCoeffects();
+  }();
   auto const errMsg = folly::sformat(
     "Call to {} '{}' from {} '{}' violates {} constraints.",
-    rxLevelToString(callee->rxLevel()),
+    callee->staticCoeffects().toUserDisplayString(),
     callee->fullName()->data(),
-    rxLevelToString(caller->rxMinLevel()),
+    callerCoeffects.toUserDisplayString(),
     caller->func()->fullName()->data(),
     callerIsPure ? "purity" : "reactivity"
   );

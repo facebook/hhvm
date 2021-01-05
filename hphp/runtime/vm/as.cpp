@@ -1870,6 +1870,19 @@ void parse_declvars(AsmState& as) {
   as.in.expectWs(';');
 }
 
+StaticCoeffects coeffectFromName(AsmState& as, std::string name) {
+  auto const coeffect = StaticCoeffects::fromName(name);
+
+  if (coeffect.isAnyRx()) as.fe->attrs |= AttrRxBody;
+  if (coeffect.isPure()) as.fe->attrs |= AttrPureBody;
+
+  if (!CoeffectsConfig::enabled() ||
+      (!CoeffectsConfig::rxEnforcementLevel() && coeffect.isAnyRx())) {
+    return StaticCoeffects::none();
+  }
+  return coeffect;
+}
+
 /*
  * directive-static_coeffects : coeffect-name* ';'
  *                            ;
@@ -1879,17 +1892,9 @@ void parse_static_coeffects(AsmState& as) {
     as.in.skipWhitespace();
     std::string name;
     if (!as.in.readword(name)) break;
-    as.fe->staticCoeffects |= coeffectFromName(name);
+    as.fe->staticCoeffects |= coeffectFromName(as, name);
   }
   as.in.expectWs(';');
-
-  if (funcAttrIsAnyRx(as.fe->staticCoeffects)) as.fe->attrs |= AttrRxBody;
-  if (funcAttrIsPure(as.fe->staticCoeffects)) as.fe->attrs |= AttrPureBody;
-  if (!CoeffectsConfig::enabled()) {
-    as.fe->staticCoeffects = SCDefault;
-  } else if (!CoeffectsConfig::rxEnforcementLevel()) {
-    as.fe->staticCoeffects &= StaticCoeffects(~(SCRx0 | SCRx1));
-  }
 }
 
 /*

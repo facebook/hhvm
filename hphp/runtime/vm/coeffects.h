@@ -21,14 +21,6 @@
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
-
-enum StaticCoeffects : uint16_t {
-  SCDefault = 0,
-  SCRx0     = (1u << 0),
-  SCRx1     = (1u << 1),
-  SCPure    = (1u << 2),
-};
-
 enum RuntimeCoeffects : uint16_t {
   RCDefault   = 0,
   RCRxShallow = 1,
@@ -36,70 +28,54 @@ enum RuntimeCoeffects : uint16_t {
   RCPure      = 3,
 };
 
-constexpr StaticCoeffects operator|(StaticCoeffects a, StaticCoeffects b) {
-  return StaticCoeffects((uint16_t)a | (uint16_t)b);
-}
+struct StaticCoeffects {
+  enum class RxLevel : uint16_t {
+    None    = 0,
+    Local   = 1,
+    Shallow = 2,
+    Rx      = 3,
+    Pure    = 4,
+  };
 
+  bool isPure() const {
+    return m_data == RxLevel::Pure;
+  }
 
-inline StaticCoeffects& operator|=(StaticCoeffects& a, const StaticCoeffects& b) {
-  return (a = StaticCoeffects((uint16_t)a | (uint16_t)b));
-}
+  bool isAnyRx() const {
+    return m_data == RxLevel::Local ||
+           m_data == RxLevel::Shallow ||
+           m_data == RxLevel::Rx;
+  }
 
-inline StaticCoeffects& operator&=(StaticCoeffects& a, const StaticCoeffects& b) {
-  return (a = StaticCoeffects((uint16_t)a & (uint16_t)b));
-}
+  const char* toString() const;
+  const char* toUserDisplayString() const;
 
-///////////////////////////////////////////////////////////////////////////////
+  RuntimeCoeffects toAmbient() const;
+  RuntimeCoeffects toRequired() const;
 
-enum class RxLevel : uint8_t {
-  None    = 0,
-  Local   = 1,
-  Shallow = 2,
-  Rx      = 3,
-  Pure    = 4,
+  static StaticCoeffects fromName(const std::string&);
+
+  static StaticCoeffects none() { return {RxLevel::None}; }
+  static StaticCoeffects pure() { return {RxLevel::Pure}; }
+
+  // This operator is equivalent to & of [coeffectA & coeffectB]
+  StaticCoeffects& operator|=(const StaticCoeffects& o) {
+    m_data = std::max(m_data, o.m_data);
+    return *this;
+  }
+
+  template<class SerDe>
+  void serde(SerDe& sd) {
+    sd(m_data);
+  }
+
+private:
+  StaticCoeffects(RxLevel level) : m_data(level) {}
+  RxLevel m_data;
 };
 
-constexpr int kRxAttrShift = 0;
-#define ASSERT_LEVEL(attr, rl) \
-  static_assert(static_cast<RxLevel>(attr >> kRxAttrShift) == RxLevel::rl, "")
-ASSERT_LEVEL(SCRx0, Local);
-ASSERT_LEVEL(SCRx1, Shallow);
-ASSERT_LEVEL((SCRx0 | SCRx1), Rx);
-ASSERT_LEVEL(SCPure, Pure);
-#undef ASSERT_LEVEL
-
-constexpr uint16_t kRxAttrMask =
-  SCRx0 | SCRx1 | SCPure;
-constexpr uint16_t kRxLevelMask = 7u;
-static_assert(kRxAttrMask >> kRxAttrShift == kRxLevelMask, "");
-
-
-constexpr RxLevel rxLevelFromAttr(StaticCoeffects attrs) {
-  return static_cast<RxLevel>(
-    (static_cast<uint16_t>(attrs) >> kRxAttrShift) & kRxLevelMask
-  );
-}
-
-constexpr StaticCoeffects rxMakeAttr(RxLevel level) {
-  return
-    static_cast<StaticCoeffects>(static_cast<uint16_t>(level) << kRxAttrShift);
-}
-
-StaticCoeffects coeffectFromName(const std::string&);
-const char* coeffectToString(StaticCoeffects);
-
-const char* rxLevelToString(RxLevel r);
-
-constexpr bool funcAttrIsAnyRx(StaticCoeffects a) {
-  return static_cast<uint16_t>(a) & kRxAttrMask;
-}
-
-constexpr bool funcAttrIsPure(StaticCoeffects a) {
-  return static_cast<uint16_t>(a) & SCPure;
-}
-
-RuntimeCoeffects convertToAmbientCoeffects(const StaticCoeffects);
-RuntimeCoeffects convertToRequiredCoeffects(const StaticCoeffects);
+static_assert(sizeof(StaticCoeffects) == sizeof(uint16_t), "");
+static_assert(sizeof(StaticCoeffects) == sizeof(RuntimeCoeffects), "");
 
 ///////////////////////////////////////////////////////////////////////////////
 

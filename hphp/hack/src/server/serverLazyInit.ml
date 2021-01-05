@@ -836,7 +836,11 @@ let write_symbol_info_init
   let index_paths = env.swriteopt.symbol_write_index_paths in
   let files =
     if List.length index_paths > 0 then
-      List.map index_paths (fun path -> Relative_path.from_root ~suffix:path)
+      List.fold index_paths ~init:[] ~f:(fun acc path ->
+          if Sys.file_exists path then
+            Relative_path.from_root ~suffix:path :: acc
+          else
+            acc)
     else
       let fast = Naming_table.to_fast env.naming_table in
       let failed_parsing = Errors.get_failed_files env.errorl Errors.Parsing in

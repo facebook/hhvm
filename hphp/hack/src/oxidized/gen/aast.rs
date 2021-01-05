@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<8cfa2bb0c9e79822166b7ad79b8f139d>>
+// @generated SignedSource<<5d2dc3b80e0fa4f31c851dccbe2be784>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -544,8 +544,14 @@ pub enum Expr_<Ex, Fb, En, Hi> {
     /// This is not ambiguous, because constants are not allowed to
     /// contain functions.
     ///
-    /// Foo::some_const
-    /// Foo::some_meth() // Call (Class_get)
+    /// Foo::some_const // Class_const
+    /// Foo::someStaticMeth() // Call (Class_const)
+    ///
+    /// This syntax is used for both static and instance methods when
+    /// calling the implementation on the superclass.
+    ///
+    /// parent::someStaticMeth()
+    /// parent::someInstanceMeth()
     ClassConst(Box<(ClassId<Ex, Fb, En, Hi>, Pstring)>),
     /// Function or method call.
     ///

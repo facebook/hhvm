@@ -370,8 +370,14 @@ and ('ex, 'fb, 'en, 'hi) expr_ =
           This is not ambiguous, because constants are not allowed to
           contain functions.
 
-          Foo::some_const
-          Foo::some_meth() // Call (Class_get) *)
+          Foo::some_const // Class_const
+          Foo::someStaticMeth() // Call (Class_const)
+
+          This syntax is used for both static and instance methods when
+          calling the implementation on the superclass.
+
+          parent::someStaticMeth()
+          parent::someInstanceMeth() *)
   | Call of
       (* function *)
       ('ex, 'fb, 'en, 'hi) expr

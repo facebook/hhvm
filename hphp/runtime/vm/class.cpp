@@ -2797,9 +2797,9 @@ void Class::setProperties() {
         attrSetter(prop.attrs,
                    preProp->attrs() & AttrSystemInitialValue,
                    AttrSystemInitialValue);
-        if (preProp->attrs() & AttrInitialSatisfiesTC) {
-          prop.attrs |= AttrInitialSatisfiesTC;
-        }
+        attrSetter(prop.attrs,
+                   preProp->attrs() & AttrInitialSatisfiesTC,
+                   AttrInitialSatisfiesTC);
 
         checkPrePropVal(prop, preProp);
         auto index = slotIndex[slot];

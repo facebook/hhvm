@@ -772,8 +772,10 @@ ALWAYS_INLINE void setOutputLocal(TypedValue tv, TypedValue* out) {
 // we have the base, but we only dec-ref it when non-local iters hit the end.
 //
 // The result is false (= 0) if iteration is done, or true (= 1) otherwise.
-template<bool Local>
-int64_t iter_next_packed_pointer(Iter* it, TypedValue* valOut, ArrayData* arr) {
+template<bool HasKey, bool Local>
+int64_t iter_next_packed_pointer(
+    Iter* it, TypedValue* valOut, TypedValue* keyOut, ArrayData* arr) {
+  always_assert(!HasKey);
   auto& iter = *unwrap(it);
   auto const elm = iter.m_packed_elm + 1;
   if (elm == iter.m_packed_end) {
@@ -889,58 +891,6 @@ int64_t iter_next_packed_impl(Iter* it, TypedValue* valOut,
 
 }
 
-int64_t iterNextArrayPacked(Iter* it, TypedValue* valOut) {
-  TRACE(2, "iterNextArrayPacked: I %p\n", it);
-  auto const ad = const_cast<ArrayData*>(unwrap(it)->getArrayData());
-  return iter_next_packed_impl<false, false>(it, valOut, nullptr, ad);
-}
-
-int64_t literNextArrayPacked(Iter* it, TypedValue* valOut, ArrayData* ad) {
-  TRACE(2, "literNextArrayPacked: I %p\n", it);
-  return iter_next_packed_impl<false, true>(it, valOut, nullptr, ad);
-}
-
-int64_t iterNextKArrayPacked(Iter* it,
-                             TypedValue* valOut,
-                             TypedValue* keyOut) {
-  TRACE(2, "iterNextKArrayPacked: I %p\n", it);
-  auto const ad = const_cast<ArrayData*>(unwrap(it)->getArrayData());
-  return iter_next_packed_impl<true, false>(it, valOut, keyOut, ad);
-}
-
-int64_t literNextKArrayPacked(Iter* it,
-                              TypedValue* valOut,
-                              TypedValue* keyOut,
-                              ArrayData* ad) {
-  TRACE(2, "literNextKArrayPacked: I %p\n", it);
-  return iter_next_packed_impl<true, true>(it, valOut, keyOut, ad);
-}
-
-int64_t iterNextArrayMixed(Iter* it, TypedValue* valOut) {
-  TRACE(2, "iterNextArrayMixed: I %p\n", it);
-  auto const ad = const_cast<ArrayData*>(unwrap(it)->getArrayData());
-  return iter_next_mixed_impl<false, false>(it, valOut, nullptr, ad);
-}
-
-int64_t literNextArrayMixed(Iter* it, TypedValue* valOut, ArrayData* ad) {
-  TRACE(2, "literNextArrayMixed: I %p\n", it);
-  return iter_next_mixed_impl<false, true>(it, valOut, nullptr, ad);
-}
-
-int64_t iterNextKArrayMixed(Iter* it, TypedValue* valOut, TypedValue* keyOut) {
-  TRACE(2, "iterNextKArrayMixed: I %p\n", it);
-  auto const ad = const_cast<ArrayData*>(unwrap(it)->getArrayData());
-  return iter_next_mixed_impl<true, false>(it, valOut, keyOut, ad);
-}
-
-int64_t literNextKArrayMixed(Iter* it,
-                             TypedValue* valOut,
-                             TypedValue* keyOut,
-                             ArrayData* ad) {
-  TRACE(2, "literNextKArrayMixed: I %p\n", it);
-  return iter_next_mixed_impl<true, true>(it, valOut, keyOut, ad);
-}
-
 int64_t iterNextArray(Iter* it, TypedValue* valOut) {
   TRACE(2, "iterNextArray: I %p\n", it);
   return iter_next_cold(it, valOut, nullptr);
@@ -976,48 +926,39 @@ int64_t literNextKObject(Iter*, TypedValue*, TypedValue*, ArrayData*) {
   always_assert(false);
 }
 
-int64_t iterNextArrayPackedPointer(Iter* it, TypedValue* valOut) {
-  TRACE(2, "iterNextArrayPackedPointer: I %p\n", it);
-  auto const ad = const_cast<ArrayData*>(unwrap(it)->getArrayData());
-  return iter_next_packed_pointer<false>(it, valOut, ad);
-}
+/*
+ * This macro takes a name (e.g. ArrayPacked) and a helper that's templated
+ * on <bool HasKey, bool Local> (e.g. iter_next_packed_impl) and produces the
+ * four helpers that we'll call from the iter_next dispatch methods below.
+ */
+#define VTABLE_METHODS(name, fn)                                         \
+  int64_t iterNext##name(Iter* it, TypedValue* valOut) {                 \
+    TRACE(2, "iterNext" #name ": I %p\n", it);                           \
+    auto const ad = const_cast<ArrayData*>(unwrap(it)->getArrayData());  \
+    return fn<false, false>(it, valOut, nullptr, ad);                    \
+  }                                                                      \
+  int64_t literNext##name(Iter* it, TypedValue* valOut, ArrayData* ad) { \
+    TRACE(2, "literNext" #name ": I %p\n", it);                          \
+    return fn<false, true>(it, valOut, nullptr, ad);                     \
+  }                                                                      \
+  int64_t iterNextK##name(                                               \
+      Iter* it, TypedValue* valOut, TypedValue* keyOut) {                \
+    TRACE(2, "iterNextK" #name ": I %p\n", it);                          \
+    auto const ad = const_cast<ArrayData*>(unwrap(it)->getArrayData());  \
+    return fn<true, false>(it, valOut, keyOut, ad);                      \
+  }                                                                      \
+  int64_t literNextK##name(                                              \
+      Iter* it, TypedValue* valOut, TypedValue* keyOut, ArrayData* ad) { \
+    TRACE(2, "literNextK" #name ": I %p\n", it);                         \
+    return fn<true, true>(it, valOut, keyOut, ad);                       \
+  }                                                                      \
 
-int64_t iterNextKArrayPackedPointer(Iter* it, TypedValue* valOut, TypedValue* keyOut) {
-  always_assert(false);
-}
+VTABLE_METHODS(ArrayPacked,        iter_next_packed_impl);
+VTABLE_METHODS(ArrayMixed,         iter_next_mixed_impl);
+VTABLE_METHODS(ArrayPackedPointer, iter_next_packed_pointer);
+VTABLE_METHODS(ArrayMixedPointer,  iter_next_mixed_pointer);
 
-int64_t literNextArrayPackedPointer(Iter* it, TypedValue* valOut, ArrayData* ad) {
-  TRACE(2, "literNextArrayPackedPointer: I %p\n", it);
-  return iter_next_packed_pointer<true>(it, valOut, ad);
-}
-
-int64_t literNextKArrayPackedPointer(Iter* it, TypedValue* valOut,
-                                     TypedValue* keyOut, ArrayData* ad) {
-  always_assert(false);
-}
-
-int64_t iterNextArrayMixedPointer(Iter* it, TypedValue* valOut) {
-  TRACE(2, "iterNextArrayMixedPointer: I %p\n", it);
-  auto const ad = const_cast<ArrayData*>(unwrap(it)->getArrayData());
-  return iter_next_mixed_pointer<false, false>(it, valOut, nullptr, ad);
-}
-
-int64_t iterNextKArrayMixedPointer(Iter* it, TypedValue* valOut, TypedValue* keyOut) {
-  TRACE(2, "iterNextKArrayMixedPointer: I %p\n", it);
-  auto const ad = const_cast<ArrayData*>(unwrap(it)->getArrayData());
-  return iter_next_mixed_pointer<true, false>(it, valOut, keyOut, ad);
-}
-
-int64_t literNextArrayMixedPointer(Iter* it, TypedValue* valOut, ArrayData* ad) {
-  TRACE(2, "literNextArrayMixedPointer: I %p\n", it);
-  return iter_next_mixed_pointer<false, true>(it, valOut, nullptr, ad);
-}
-
-int64_t literNextKArrayMixedPointer(Iter* it, TypedValue* valOut,
-                                    TypedValue* keyOut, ArrayData* ad) {
-  TRACE(2, "literNextKArrayMixedPointer: I %p\n", it);
-  return iter_next_mixed_pointer<true, true>(it, valOut, keyOut, ad);
-}
+#undef VTABLE_METHODS
 
 using IterNextHelper  = int64_t (*)(Iter*, TypedValue*);
 using IterNextKHelper = int64_t (*)(Iter*, TypedValue*, TypedValue*);

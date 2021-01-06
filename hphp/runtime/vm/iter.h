@@ -292,10 +292,12 @@ private:
   template<IterTypeOp Type>
   friend int64_t new_iter_array_key(Iter*, ArrayData*, TypedValue*,
                                     TypedValue*);
-  template<bool Local>
-  friend int64_t iter_next_packed_pointer(Iter*, TypedValue*, ArrayData*);
   template<bool HasKey, bool Local>
-  friend int64_t iter_next_mixed_pointer(Iter*, TypedValue*, TypedValue*, ArrayData*);
+  friend int64_t iter_next_packed_pointer(
+    Iter*, TypedValue*, TypedValue*, ArrayData*);
+  template<bool HasKey, bool Local>
+  friend int64_t iter_next_mixed_pointer(
+    Iter*, TypedValue*, TypedValue*, ArrayData*);
 
   template <bool incRef = true>
   void arrInit(const ArrayData* arr);

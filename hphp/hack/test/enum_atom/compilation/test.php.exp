@@ -187,6 +187,7 @@
     RetC
   }
   .method {}{} [protected no_injection] (21,23) 86reifiedinit(<"HH\\varray" "HH\\varray" > $__typestructures) {
+    .srcloc 21:1,23:85;
     NullUninit
     NullUninit
     Array @A_1

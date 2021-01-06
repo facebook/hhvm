@@ -416,7 +416,8 @@ fn emit_reified_init_method<'a>(
             default_value: None,
         }];
 
-        let instrs = emit_reified_init_body(emitter, env, num_reified, ast_class)?;
+        let body_instrs = emit_reified_init_body(emitter, env, num_reified, ast_class)?;
+        let instrs = emit_pos::emit_pos_then(&ast_class.span, body_instrs);
         Ok(Some(make_86method(
             emitter,
             string_utils::reified::INIT_METH_NAME.into(),

@@ -153,7 +153,7 @@ inline bool calleeCoeffectChecks(const Func* callee, const CallFlags flags) {
   // Coeffect rules are not tracked yet, so assume the callee has a more
   // permissive context than it would otherwise have with coeffect rules
   auto const requiredCoeffects = callee->staticCoeffects().toRequired();
-  if (LIKELY(requiredCoeffects >= providedCoeffects)) return true;
+  if (LIKELY(providedCoeffects.canCall(requiredCoeffects))) return true;
   raiseRxCallViolation(vmfp(), callee);
   return false;
 }

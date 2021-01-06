@@ -16,20 +16,42 @@
 
 #pragma once
 
-#include "hphp/runtime/base/attr.h"
 #include "hphp/runtime/vm/class.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
-enum RuntimeCoeffects : uint16_t {
-  RCDefault   = 0,
-  RCRxShallow = 1,
-  RCRx        = 2,
-  RCPure      = 3,
+struct RuntimeCoeffects {
+  enum Level : uint16_t {
+    Default   = 0,
+    RxShallow = 1,
+    Rx        = 2,
+    Pure      = 3,
+  };
+
+  explicit RuntimeCoeffects(Level level) : m_data(level) {}
+
+  static RuntimeCoeffects none() {
+    return RuntimeCoeffects{Level::Default};
+  }
+
+  static RuntimeCoeffects fromValue(uint16_t value) {
+    return RuntimeCoeffects{static_cast<Level>(value)};
+  }
+
+  uint16_t value() const { return m_data; }
+
+  // Checks whether provided coeffects in `this` can call
+  // required coeffects in `o`
+  bool canCall(const RuntimeCoeffects& o) const {
+    return m_data <= o.m_data;
+  }
+
+private:
+  Level m_data;
 };
 
 struct StaticCoeffects {
-  enum class RxLevel : uint16_t {
+  enum class Level : uint16_t {
     None    = 0,
     Local   = 1,
     Shallow = 2,
@@ -38,13 +60,13 @@ struct StaticCoeffects {
   };
 
   bool isPure() const {
-    return m_data == RxLevel::Pure;
+    return m_data == Level::Pure;
   }
 
   bool isAnyRx() const {
-    return m_data == RxLevel::Local ||
-           m_data == RxLevel::Shallow ||
-           m_data == RxLevel::Rx;
+    return m_data == Level::Local ||
+           m_data == Level::Shallow ||
+           m_data == Level::Rx;
   }
 
   const char* toString() const;
@@ -55,8 +77,8 @@ struct StaticCoeffects {
 
   static StaticCoeffects fromName(const std::string&);
 
-  static StaticCoeffects none() { return {RxLevel::None}; }
-  static StaticCoeffects pure() { return {RxLevel::Pure}; }
+  static StaticCoeffects none() { return StaticCoeffects{Level::None}; }
+  static StaticCoeffects pure() { return StaticCoeffects{Level::Pure}; }
 
   // This operator is equivalent to & of [coeffectA & coeffectB]
   StaticCoeffects& operator|=(const StaticCoeffects& o) {
@@ -70,8 +92,8 @@ struct StaticCoeffects {
   }
 
 private:
-  StaticCoeffects(RxLevel level) : m_data(level) {}
-  RxLevel m_data;
+  explicit StaticCoeffects(Level level) : m_data(level) {}
+  Level m_data;
 };
 
 static_assert(sizeof(StaticCoeffects) == sizeof(uint16_t), "");

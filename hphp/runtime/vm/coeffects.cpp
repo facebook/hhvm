@@ -20,53 +20,56 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 StaticCoeffects StaticCoeffects::fromName(const std::string& a) {
-  if (a == "rx_local")   return {RxLevel::Local};
-  if (a == "rx_shallow") return {RxLevel::Shallow};
-  if (a == "rx")         return {RxLevel::Rx};
-  if (a == "pure")       return {RxLevel::Pure};
+  using SC = StaticCoeffects;
+  if (a == "rx_local")   return SC{Level::Local};
+  if (a == "rx_shallow") return SC{Level::Shallow};
+  if (a == "rx")         return SC{Level::Rx};
+  if (a == "pure")       return SC{Level::Pure};
   return StaticCoeffects::none();
 }
 
 const char* StaticCoeffects::toString() const {
   switch (m_data) {
-    case RxLevel::None:    return nullptr;
-    case RxLevel::Local:   return "rx_local";
-    case RxLevel::Shallow: return "rx_shallow";
-    case RxLevel::Rx:      return "rx";
-    case RxLevel::Pure:    return "pure";
+    case Level::None:    return nullptr;
+    case Level::Local:   return "rx_local";
+    case Level::Shallow: return "rx_shallow";
+    case Level::Rx:      return "rx";
+    case Level::Pure:    return "pure";
   }
   not_reached();
 }
 
 const char* StaticCoeffects::toUserDisplayString() const {
   switch (m_data) {
-    case RxLevel::None:    return "non-reactive";
-    case RxLevel::Local:   return "local reactive";
-    case RxLevel::Shallow: return "shallow reactive";
-    case RxLevel::Rx:      return "reactive";
-    case RxLevel::Pure:    return "pure";
+    case Level::None:    return "non-reactive";
+    case Level::Local:   return "local reactive";
+    case Level::Shallow: return "shallow reactive";
+    case Level::Rx:      return "reactive";
+    case Level::Pure:    return "pure";
   }
   not_reached();
 }
 
 RuntimeCoeffects StaticCoeffects::toAmbient() const {
+  using RC = RuntimeCoeffects;
   switch (m_data) {
-    case RxLevel::None:
-    case RxLevel::Local:   return RCDefault;
-    case RxLevel::Shallow: return RCRxShallow;
-    case RxLevel::Rx:      return RCRx;
-    case RxLevel::Pure:    return RCPure;
+    case Level::None:
+    case Level::Local:   return RC{RC::Level::Default};
+    case Level::Shallow: return RC{RC::Level::RxShallow};
+    case Level::Rx:      return RC{RC::Level::Rx};
+    case Level::Pure:    return RC{RC::Level::Pure};
   }
   not_reached();
 }
 
 RuntimeCoeffects StaticCoeffects::toRequired() const {
+  using RC = RuntimeCoeffects;
   switch (m_data) {
-    case RxLevel::None:    return RCDefault;
-    case RxLevel::Local:
-    case RxLevel::Shallow: return RCRxShallow;
-    case RxLevel::Rx:      return RCRx;
-    case RxLevel::Pure:    return RCPure;
+    case Level::None:    return RC{RC::Level::Default};
+    case Level::Local:
+    case Level::Shallow: return RC{RC::Level::RxShallow};
+    case Level::Rx:      return RC{RC::Level::Rx};
+    case Level::Pure:    return RC{RC::Level::Pure};
   }
   not_reached();
 }

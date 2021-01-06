@@ -264,7 +264,7 @@ void emitCalleeCoeffectChecks(IRGS& env, const Func* callee,
   if (callFlags->hasConstVal(TInt)) {
     auto const providedCoeffects =
       CallFlags(callFlags->intVal()).coeffects();
-    if (LIKELY(requiredCoeffects >= providedCoeffects)) return;
+    if (LIKELY(providedCoeffects.canCall(requiredCoeffects))) return;
     gen(env, RaiseRxCallViolation, FuncData{callee}, fp(env));
     return;
   }
@@ -274,7 +274,7 @@ void emitCalleeCoeffectChecks(IRGS& env, const Func* callee,
       auto const providedCoeffects =
         gen(env, Lshr, callFlags, cns(env, CallFlags::CoeffectsStart));
       auto const cond =
-        gen(env, GteInt, cns(env, requiredCoeffects), providedCoeffects);
+        gen(env, GteInt, cns(env, requiredCoeffects.value()), providedCoeffects);
       gen(env, JmpZero, taken, cond);
     },
     [&] {

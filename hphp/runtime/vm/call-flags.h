@@ -61,7 +61,7 @@ struct CallFlags {
       ((asyncEagerReturn ? 1 : 0) << Flags::AsyncEagerReturn) |
       callOffsetBits |
       ((uint64_t)genericsBitmap << Flags::GenericsBitmapStart) |
-      ((uint64_t)coeffects << Flags::CoeffectsStart);
+      ((uint64_t)coeffects.value() << Flags::CoeffectsStart);
   }
 
   explicit CallFlags(uint64_t bits) : m_bits(bits) {}
@@ -77,7 +77,7 @@ struct CallFlags {
   int64_t value() const { return static_cast<int64_t>(m_bits); }
 
   RuntimeCoeffects coeffects() const {
-    return static_cast<RuntimeCoeffects>((uint16_t)(m_bits >> CoeffectsStart));
+    return RuntimeCoeffects::fromValue((uint16_t)(m_bits >> CoeffectsStart));
   }
 
 private:

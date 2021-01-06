@@ -151,7 +151,7 @@ inline void ActRec::trashThis() {
 /////////////////////////////////////////////////////////////////////////////
 
 inline RuntimeCoeffects ActRec::coeffects() const {
-  if (func()->hasCoeffectRules()) return RCDefault;
+  if (func()->hasCoeffectRules()) return RuntimeCoeffects::none();
   return func()->staticCoeffects().toAmbient();
 }
 

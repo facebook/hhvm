@@ -226,7 +226,8 @@ void beginInlining(IRGS& env,
   auto const numArgsInclUnpack = fca.numArgs + (fca.hasUnpack() ? 1U : 0U);
 
   // For cost calculation, use the most permissive coeffect
-  auto const coeffects = curFunc(env) ? curCoeffects(env) : RCDefault;
+  auto const coeffects =
+    curFunc(env) ? curCoeffects(env) : RuntimeCoeffects::none();
 
   auto const callFlags = cns(env, CallFlags(
     fca.hasGenerics(),

@@ -734,7 +734,7 @@ void throwAsTypeStructExceptionHelper(ArrayData* a, TypedValue c) {
     throwTypeStructureDoesNotMatchTVException(
       givenType, expectedType, errorKey);
   }
-  raise_error("Invalid bytecode sequence: Instruction must throw");
+  always_assert(false && "Invalid bytecode sequence: Instruction must throw");
 }
 
 ArrayData* errorOnIsAsExpressionInvalidTypesHelper(ArrayData* a) {

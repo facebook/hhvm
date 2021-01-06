@@ -1785,7 +1785,7 @@ OPTBLD_INLINE void iopThrowAsTypeStructException() {
     throwTypeStructureDoesNotMatchTVException(
       givenType, expectedType, errorKey);
   }
-  raise_error("Invalid bytecode sequence: Instruction must throw");
+  always_assert(false && "Invalid bytecode sequence: Instruction must throw");
 }
 
 OPTBLD_INLINE void iopCombineAndResolveTypeStruct(uint32_t n) {

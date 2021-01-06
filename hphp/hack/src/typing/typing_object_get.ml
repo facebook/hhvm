@@ -257,9 +257,12 @@ let rec obj_get_concrete_ty
         let old_member_info = Env.get_member is_method env class_info id_str in
         let self_id = Option.value (Env.get_self_id env) ~default:"" in
         let (member_info, shadowed) =
-          if Cls.has_ancestor class_info self_id then
+          if
+            Cls.has_ancestor class_info self_id
+            || Cls.requires_ancestor class_info self_id
+          then
             (* We look up the current context to see if there is a field/method with
-        * private visibility. If there is one, that one takes precedence *)
+             * private visibility. If there is one, that one takes precedence *)
             match Env.get_self_class env with
             | None -> (old_member_info, false)
             | Some self_class ->

@@ -1,0 +1,12 @@
+File "require_extends_private_access.php", line 30, characters 9-16:
+No instance method `privatef` in `I` (Typing[4053])
+  File "require_extends_private_access.php", line 10, characters 19-25:
+  Did you mean `publicf` instead?
+  File "require_extends_private_access.php", line 29, characters 25-25:
+  This is why I think it is an object of type I
+  File "require_extends_private_access.php", line 4, characters 11-11:
+  Declaration of `I` is here
+File "require_extends_private_access.php", line 33, characters 9-16:
+You cannot access this member (Typing[4112])
+  File "require_extends_private_access.php", line 9, characters 20-27:
+  This member is private

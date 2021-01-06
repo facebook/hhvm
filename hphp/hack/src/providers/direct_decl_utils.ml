@@ -82,8 +82,16 @@ let direct_decl_parse_and_cache ?(decl_hash = false) ctx file =
   | Some contents ->
     let popt = Provider_context.get_popt ctx in
     let ns_map = ParserOptions.auto_namespace_map popt in
+    let disable_xhp_element_mangling =
+      ParserOptions.disable_xhp_element_mangling popt
+    in
     let (decls, mode, hash) =
-      Direct_decl_parser.parse_decls_and_mode_ffi file contents ns_map decl_hash
+      Direct_decl_parser.parse_decls_and_mode_ffi
+        disable_xhp_element_mangling
+        file
+        contents
+        ns_map
+        decl_hash
     in
     let deregister_php_stdlib =
       Relative_path.is_hhi (Relative_path.prefix file)

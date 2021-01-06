@@ -60,6 +60,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
     pub fn new(
         src: &SourceText<'a>,
         file_mode: Mode,
+        disable_xhp_element_mangling: bool,
         auto_namespace_map: &'a NamespaceMap,
         arena: &'a Bump,
     ) -> Self {
@@ -67,6 +68,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
             state: State::new(
                 IndexedSourceText::new(src.clone()),
                 file_mode,
+                disable_xhp_element_mangling,
                 auto_namespace_map,
                 arena,
             ),
@@ -153,7 +155,14 @@ impl<'a> DirectDeclSmartConstructors<'a> {
     fn elaborate_into_current_ns(&self, name: Node<'a>) -> Option<Id<'a>> {
         match name {
             Node::Name(&(name, pos)) => Some(Id(pos, self.prefix_ns(name))),
-            Node::XhpName(&(name, pos)) => Some(Id(pos, name)),
+            Node::XhpName(&(name, pos)) => Some(Id(
+                pos,
+                if self.state.disable_xhp_element_mangling {
+                    replace_colon(self.state.arena, name)
+                } else {
+                    name
+                },
+            )),
             Node::QualifiedName(&(parts, pos)) => {
                 let namespace = self.state.namespace_builder.current_namespace();
                 Some(self.qualified_name_from_parts(namespace, parts, pos))
@@ -229,6 +238,18 @@ fn prefix_colon<'a>(arena: &'a Bump, name: &str) -> &'a str {
     s.push(':');
     s.push_str(name);
     s.into_bump_str()
+}
+
+fn replace_colon<'a>(arena: &'a Bump, name: &'a str) -> &'a str {
+    if name.contains(':') {
+        let mut s = String::with_capacity_in(name.len(), arena);
+        for c in name.chars() {
+            if c == ':' { s.push('\\') } else { s.push(c) }
+        }
+        s.into_bump_str()
+    } else {
+        name
+    }
 }
 
 fn concat<'a>(arena: &'a Bump, str1: &str, str2: &str) -> &'a str {
@@ -510,6 +531,7 @@ pub struct State<'a> {
     pub source_text: IndexedSourceText<'a>,
     pub arena: &'a bumpalo::Bump,
     pub decls: Decls<'a>,
+    pub disable_xhp_element_mangling: bool,
     filename: &'a RelativePath<'a>,
     file_mode: Mode,
     namespace_builder: Rc<NamespaceBuilder<'a>>,
@@ -523,6 +545,7 @@ impl<'a> State<'a> {
     pub fn new(
         source_text: IndexedSourceText<'a>,
         file_mode: Mode,
+        disable_xhp_element_mangling: bool,
         auto_namespace_map: &'a NamespaceMap,
         arena: &'a Bump,
     ) -> State<'a> {
@@ -535,6 +558,7 @@ impl<'a> State<'a> {
             arena,
             filename: arena.alloc(filename),
             file_mode,
+            disable_xhp_element_mangling,
             decls: Decls::empty(),
             namespace_builder: Rc::new(NamespaceBuilder::new_in(auto_namespace_map, arena)),
             classish_name_builder: ClassishNameBuilder::new(),
@@ -1141,8 +1165,13 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                         }
                         "_" => Ty_::Terr,
                         _ => {
-                            let name =
-                                self.prefix_ns(self.state.namespace_builder.elaborate_id(name));
+                            let name = self.state.namespace_builder.elaborate_id(name);
+                            let name = if self.state.disable_xhp_element_mangling {
+                                replace_colon(self.state.arena, name)
+                            } else {
+                                name
+                            };
+                            let name = self.prefix_ns(name);
                             Ty_::Tapply(self.alloc((Id(pos, name), &[][..])))
                         }
                     }

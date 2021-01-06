@@ -19,12 +19,14 @@ use stack_limit::{StackLimit, KI, MI, STACK_SLACK_1K};
 
 #[no_mangle]
 pub unsafe extern "C" fn hh_parse_decls_and_mode_ffi(
+    disable_xhp_element_mangling: usize,
     filename_ptr: usize,
     text_ptr: usize,
     ns_map_ptr: usize,
     include_hash: usize,
 ) -> usize {
     fn inner(
+        disable_xhp_element_mangling: usize,
         filename_ptr: usize,
         text_ptr: usize,
         ns_map_ptr: usize,
@@ -32,6 +34,10 @@ pub unsafe extern "C" fn hh_parse_decls_and_mode_ffi(
     ) -> usize {
         // SAFETY: We trust we've been handed a valid, immutable OCaml value
         let include_hash = unsafe { bool::from_ocaml(include_hash).unwrap() };
+
+        // SAFETY: We trust we've been handed a valid, immutable OCaml value
+        let disable_xhp_element_mangling =
+            unsafe { bool::from_ocaml(disable_xhp_element_mangling).unwrap() };
 
         let make_retryable = move || {
             move |stack_limit: &StackLimit, _nonmain_stack_size: Option<usize>| {
@@ -50,8 +56,14 @@ pub unsafe extern "C" fn hh_parse_decls_and_mode_ffi(
 
                 let arena = Bump::new();
 
-                let (decls, mode) =
-                    parse_decls_and_mode(filename, &text, &ns_map, &arena, Some(stack_limit));
+                let (decls, mode) = parse_decls_and_mode(
+                    disable_xhp_element_mangling,
+                    filename,
+                    &text,
+                    &ns_map,
+                    &arena,
+                    Some(stack_limit),
+                );
 
                 let hash = if include_hash {
                     Some(Int64(position_insensitive_hash(&decls) as i64))
@@ -73,7 +85,7 @@ pub unsafe extern "C" fn hh_parse_decls_and_mode_ffi(
             // Not always printing warning here because this would fail some HHVM tests
             if atty::is(atty::Stream::Stderr) || std::env::var_os("HH_TEST_MODE").is_some() {
                 eprintln!(
-                    "[hrust] warning: hh_compile exceeded stack of {} KiB on: {:?}",
+                    "[hrust] warning: direct_decl_parser exceeded stack of {} KiB on: {:?}",
                     (stack_size_tried - STACK_SLACK_1K(stack_size_tried)) / KI,
                     // SAFETY: We trust we've been handed a valid, immutable OCaml value
                     unsafe { RelativePath::from_ocaml(filename_ptr).unwrap() },
@@ -100,7 +112,15 @@ pub unsafe extern "C" fn hh_parse_decls_and_mode_ffi(
             }
         }
     }
-    ocamlrep_ocamlpool::catch_unwind(|| inner(filename_ptr, text_ptr, ns_map_ptr, include_hash))
+    ocamlrep_ocamlpool::catch_unwind(|| {
+        inner(
+            disable_xhp_element_mangling,
+            filename_ptr,
+            text_ptr,
+            ns_map_ptr,
+            include_hash,
+        )
+    })
 }
 
 #[no_mangle]

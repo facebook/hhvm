@@ -25,7 +25,13 @@ pub fn parse_script<'a>(
 ) -> (Node<'a>, Vec<SyntaxError>, State<'a>, Option<Mode>) {
     let (_, mode_opt) = parse_mode(source);
     let mode = mode_opt.unwrap_or(Mode::Mpartial);
-    let sc = DirectDeclSmartConstructors::new(&source, mode, auto_namespace_map, arena);
+    let sc = DirectDeclSmartConstructors::new(
+        &source,
+        mode,
+        env.disable_xhp_element_mangling,
+        auto_namespace_map,
+        arena,
+    );
     let mut parser = Parser::new(&source, env, sc);
     let root = parser.parse_script(stack_limit);
     let errors = parser.errors();

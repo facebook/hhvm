@@ -9,9 +9,15 @@
 open Hh_prelude
 open Direct_decl_parser
 
-let popt ~auto_namespace_map ~enable_xhp_class_modifier =
+let popt
+    ~auto_namespace_map ~enable_xhp_class_modifier ~disable_xhp_element_mangling
+    =
   let po = ParserOptions.default in
-  let po = ParserOptions.with_disable_xhp_element_mangling po false in
+  let po =
+    ParserOptions.with_disable_xhp_element_mangling
+      po
+      disable_xhp_element_mangling
+  in
   let po = ParserOptions.with_auto_namespace_map po auto_namespace_map in
   let po =
     ParserOptions.with_enable_xhp_class_modifier po enable_xhp_class_modifier
@@ -84,7 +90,12 @@ let compare_decls ctx fn text =
   let legacy_decls_str = show_decls (List.rev legacy_decls) ^ "\n" in
   let popt = Provider_context.get_popt ctx in
   let auto_namespace_map = ParserOptions.auto_namespace_map popt in
-  let decls = parse_decls_ffi fn text auto_namespace_map in
+  let disable_xhp_element_mangling =
+    ParserOptions.disable_xhp_element_mangling popt
+  in
+  let decls =
+    parse_decls_ffi disable_xhp_element_mangling fn text auto_namespace_map
+  in
   let decls_str = show_decls (List.rev decls) ^ "\n" in
   let matched = String.equal decls_str legacy_decls_str in
   if matched then
@@ -132,6 +143,7 @@ let () =
   let set_expect_extension s = expect_extension := s in
   let auto_namespace_map = ref [] in
   let enable_xhp_class_modifier = ref false in
+  let disable_xhp_element_mangling = ref false in
   Arg.parse
     [
       ( "--compare-direct-decl-parser",
@@ -154,6 +166,9 @@ let () =
         Arg.Set enable_xhp_class_modifier,
         "Enable the XHP class modifier, xhp class name {} will define an xhp class."
       );
+      ( "--disable-xhp-element-mangling",
+        Arg.Set disable_xhp_element_mangling,
+        "." );
     ]
     set_file
     usage;
@@ -179,7 +194,13 @@ let () =
         let file = Path.make file in
         let auto_namespace_map = !auto_namespace_map in
         let enable_xhp_class_modifier = !enable_xhp_class_modifier in
-        let popt = popt ~auto_namespace_map ~enable_xhp_class_modifier in
+        let disable_xhp_element_mangling = !disable_xhp_element_mangling in
+        let popt =
+          popt
+            ~auto_namespace_map
+            ~enable_xhp_class_modifier
+            ~disable_xhp_element_mangling
+        in
         let ctx = init (Path.dirname file) popt in
         let file = Relative_path.(create Root (Path.to_string file)) in
         let files = Multifile.file_to_file_list file in

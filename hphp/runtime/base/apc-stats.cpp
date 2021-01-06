@@ -318,7 +318,7 @@ const StaticString s_keysSize("keys_size");
 const StaticString s_primedInFileSize("primed_in_file_size");
 const StaticString s_primeLiveSize("primed_live_size");
 const StaticString s_pendingDeleteSize("pending_delete_size");
-const StaticString s_uncountedEntries("uncounted_entires");
+const StaticString s_uncountedEntries("uncounted_entries");
 const StaticString s_uncountedBlocks("uncounted_blocks");
 
 void APCStats::collectStats(std::map<const StringData*, int64_t>& stats) const {

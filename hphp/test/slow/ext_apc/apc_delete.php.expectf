@@ -1,0 +1,1 @@
+Fatal error: apc_delete(): apc_delete argument may not be an object in %s/apc_delete.php on line %d

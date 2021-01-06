@@ -120,7 +120,6 @@ void initialize_apc() {
 
 //////////////////////////////////////////////////////////////////////
 
-const StaticString s_delete("delete");
 const StaticString s_internal_preload("__apc_internal_preload");
 
 extern void const_load();
@@ -534,19 +533,10 @@ Variant HHVM_FUNCTION(apc_delete,
     }
     return init.toVariant();
   } else if (key.is(KindOfObject)) {
-    if (!key.getObjectData()->getVMClass()->
-         classof(SystemLib::s_APCIteratorClass)) {
-      raise_error(
-        "apc_delete(): apc_delete object argument must be instance"
-        " of APCIterator"
-      );
-      return false;
-    }
-    const Func* method =
-      SystemLib::s_APCIteratorClass->lookupMethod(s_delete.get());
-    return Variant::attach(
-      g_context->invokeFuncFew(method, key.getObjectData())
+    raise_error(
+      "apc_delete(): apc_delete argument may not be an object"
     );
+    return false;
   }
 
   return apc_store().eraseKey(key.toString());

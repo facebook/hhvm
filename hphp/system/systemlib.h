@@ -61,7 +61,6 @@ namespace HPHP { namespace SystemLib {
   x(LazyKeyedIterableView)                      \
   x(CURLFile)                                   \
   x(__PHP_Incomplete_Class)                     \
-  x(APCIterator)                                \
   x(DivisionByZeroException)
 
 #define SYSTEMLIB_HH_CLASSES(x) \

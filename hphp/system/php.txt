@@ -86,7 +86,6 @@ hphp/system/php/async/vectors.ns.php
 hphp/system/php/array_filter.php
 hphp/system/php/array_map.php
 hphp/system/php/array_reduce.php
-hphp/system/php/apc/APCIterator.php
 hphp/system/php/asio/InvalidOperationException.php
 hphp/system/php/async/EntryPoint.ns.php
 hphp/system/php/curl/CURLFile.php

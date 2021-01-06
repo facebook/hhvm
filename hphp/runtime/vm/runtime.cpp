@@ -284,7 +284,6 @@ void raiseTooManyArgumentsPrologue(const Func* func, ArrayData* unpackArgs) {
 
 void raiseRxCallViolation(const ActRec* caller, const Func* callee) {
   assertx(CoeffectsConfig::enabled());
-  auto const callerIsPure = caller->func()->staticCoeffects().isPure();
   auto const callerCoeffects = [&] {
     if (caller->func()->hasCoeffectRules()) {
       return StaticCoeffects::none();
@@ -292,13 +291,13 @@ void raiseRxCallViolation(const ActRec* caller, const Func* callee) {
     return caller->func()->staticCoeffects();
   }();
   auto const errMsg = folly::sformat(
-    "Call to {} '{}' from {} '{}' violates {} constraints.",
-    callee->staticCoeffects().toUserDisplayString(),
+    "Call to {}() requires [{}] coeffects but {}() provided [{}]",
     callee->fullName()->data(),
-    callerCoeffects.toUserDisplayString(),
+    callee->staticCoeffects().toStringForUserDisplay(),
     caller->func()->fullName()->data(),
-    callerIsPure ? "purity" : "reactivity"
+    callerCoeffects.toStringForUserDisplay()
   );
+  auto const callerIsPure = caller->func()->staticCoeffects().isPure();
   if (CoeffectsConfig::rxEnforcementLevel() >= 2 ||
       (callerIsPure && CoeffectsConfig::pureEnforcementLevel() >= 2)) {
     SystemLib::throwBadMethodCallExceptionObject(errMsg);

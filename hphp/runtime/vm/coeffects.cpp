@@ -39,13 +39,15 @@ const char* StaticCoeffects::toString() const {
   not_reached();
 }
 
-const char* StaticCoeffects::toUserDisplayString() const {
+// TODO: Move this function to RuntimeCoeffects once we start emitting errors
+// from provided and required coeffects
+const std::string StaticCoeffects::toStringForUserDisplay() const {
   switch (m_data) {
-    case Level::None:    return "non-reactive";
-    case Level::Local:   return "local reactive";
-    case Level::Shallow: return "shallow reactive";
-    case Level::Rx:      return "reactive";
-    case Level::Pure:    return "pure";
+    case Level::None:    return "defaults";
+    case Level::Local:   return "rx_local";
+    case Level::Shallow: return "rx_shallow";
+    case Level::Rx:      return "rx";
+    case Level::Pure:    return "";
   }
   not_reached();
 }

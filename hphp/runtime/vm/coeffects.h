@@ -70,7 +70,7 @@ struct StaticCoeffects {
   }
 
   const char* toString() const;
-  const char* toUserDisplayString() const;
+  const std::string toStringForUserDisplay() const;
 
   RuntimeCoeffects toAmbient() const;
   RuntimeCoeffects toRequired() const;

@@ -13,7 +13,11 @@ open Typing_env_types
 module MakeType = Typing_make_type
 
 (*
-* These are the main coercion functions.
+* These are the main coercion functions. Roughly, coercion should be used over
+* subtyping in places where a particular type that could be dynamic is
+* required, like parameters and returns.
+*
+* The old dynamic uses the following ideas:
 *
 * There are only a few coercion (~>) rules, documented in hphp/hack/doc/type_system/hack_typing.ott.
 *
@@ -32,20 +36,47 @@ module MakeType = Typing_make_type
 * useful to the user for error messages. In the cases where we do not want to
 * sub_type, it suffices to do nothing.
 *
-* Roughly, coercion should be used over subtyping in places where a particular
-* type that could be dynamic is required, like parameters and returns.
+*
+* The experimental sound dynamic (--enable-sound-dynamic-type) works
+* differently because it is not always safe to coerce a type to dynamic.
+* The canonical example of something that it is not safe to coerce to dynamic,
+* is a Box<T> with a property T, get, and set functions.
+* The following leads to putting a string into a Box<int>
+* $b = new Box<int>(1); // $b : Box<int>
+* $d = $b;
+* $d as dynamic;   // $d : dynamic & Box<int>
+* $d->set("a");    // fine to call set on $d since it is dynamic
+* $b->get();       // returns "a", but the type is int.
+*
 *)
 
 (* does coercion, including subtyping *)
 let coerce_type_impl
     env ty_have ty_expect (on_error : Errors.typing_error_callback) =
   if TypecheckerOptions.enable_sound_dynamic env.genv.tcopt then
-    Typing_utils.sub_type
-      ~allow_subtype_of_dynamic:true
+    if
+      ty_expect.et_enforced
+      && Typing_utils.is_sub_type_for_union
+           ~allow_subtype_of_dynamic:false
+           env
+           (MakeType.dynamic Reason.Rnone)
+           ty_have
+    then
+      (* t1 ~> t2 if t2 is enforced and t1 <: dynamic, without having to
+       * coerce t1 to dynamic, e.g., t1 = dynamic or t1 = dynamic | C, but
+       * not t1 = C and C implements dynamic
+       *)
       env
-      ty_have
-      ty_expect.et_type
-      on_error
+    else
+      (* Otherwise check subtyping, but do allow things to be coerced to
+       * dynamic
+       *)
+      Typing_utils.sub_type
+        ~allow_subtype_of_dynamic:true
+        env
+        ty_have
+        ty_expect.et_type
+        on_error
   else
     let complex_coercion =
       TypecheckerOptions.complex_coercion (Typing_env.get_tcopt env)

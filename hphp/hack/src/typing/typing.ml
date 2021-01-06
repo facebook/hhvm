@@ -5976,6 +5976,49 @@ and call
               Errors.unify_error
         in
         match deref efty with
+        | (r, Tdynamic) when TCO.enable_sound_dynamic (Env.get_tcopt env) ->
+          let ty = MakeType.dynamic (Reason.Rdynamic_call pos) in
+          let el =
+            (* Need to check that the type of the unpacked_element can be,
+             * coerced to dynamic, just like all of the other arguments, in addition
+             * to the check below in call_untyped_unpack, that it is unpackable.
+             * We don't need to unpack and check each type because a tuple is
+             * coercible iff it's constituent types are. *)
+            Option.value_map ~f:(fun u -> el @ [u]) ~default:el unpacked_element
+          in
+          let _expected_arg_ty = ExpectedTy.make pos Reason.URparam ty in
+          let (env, tel) =
+            List.map_env env el (fun env elt ->
+                let (env, te, e_ty) =
+                  expr (*~expected:expected_arg_ty*) env elt
+                in
+                let env =
+                  match elt with
+                  | (_, Callconv (Ast_defs.Pinout, e1)) ->
+                    let (env, _te, _ty) =
+                      assign_ (fst e1) Reason.URparam_inout env e1 efty
+                    in
+                    env
+                  | _ -> env
+                in
+                let env =
+                  Typing_coercion.coerce_type
+                    pos
+                    Reason.URnone
+                    env
+                    e_ty
+                    {
+                      Typing_defs_core.et_type = ty;
+                      Typing_defs_core.et_enforced = false;
+                    }
+                    Errors.unify_error
+                in
+                (env, te))
+          in
+          let env =
+            call_untyped_unpack env (Reason.to_pos r) unpacked_element
+          in
+          (env, (tel, None, ty))
         | (r, ((Tprim Tnull | Tdynamic | Terr | Tany _ | Tunion []) as ty))
           when match ty with
                | Tprim Tnull -> Option.is_some nullsafe

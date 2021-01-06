@@ -1,0 +1,18 @@
+File "meth_call.bad.php", line 7, characters 3-16:
+Typing error (Typing[4110])
+  File "meth_call.bad.php", line 7, characters 3-16:
+  Expected `dynamic`, the result of calling a `dynamic` type as a function
+  File "meth_call.bad.php", line 7, characters 13-13:
+  But got `C`
+File "meth_call.bad.php", line 8, characters 3-11:
+Typing error (Typing[4110])
+  File "meth_call.bad.php", line 8, characters 3-11:
+  Expected `dynamic`, the result of calling a `dynamic` type as a function
+  File "meth_call.bad.php", line 6, characters 12-12:
+  But got `C`
+File "meth_call.bad.php", line 9, characters 3-16:
+Typing error (Typing[4110])
+  File "meth_call.bad.php", line 9, characters 3-16:
+  Expected `dynamic`, the result of calling a `dynamic` type as a function
+  File "meth_call.bad.php", line 6, characters 12-12:
+  But got `C`

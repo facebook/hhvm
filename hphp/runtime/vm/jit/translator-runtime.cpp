@@ -798,6 +798,11 @@ ArrayData* loadClsTypeCnsHelper(
   return typeCns.m_data.parr;
 }
 
+void raiseCoeffectsCallViolationHelper(const ActRec* caller, const Func* callee,
+                                       uint64_t rawFlags) {
+  raiseCoeffectsCallViolation(caller, callee, CallFlags(rawFlags));
+}
+
 void throwOOBException(TypedValue base, TypedValue key) {
   if (isArrayLikeType(base.m_type)) {
     throwOOBArrayKeyException(key, base.m_data.parr);

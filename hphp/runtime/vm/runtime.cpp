@@ -282,27 +282,24 @@ void raiseTooManyArgumentsPrologue(const Func* func, ArrayData* unpackArgs) {
 
 //////////////////////////////////////////////////////////////////////
 
-void raiseRxCallViolation(const ActRec* caller, const Func* callee) {
+void raiseCoeffectsCallViolation(const ActRec* caller, const Func* callee,
+                                 const CallFlags flags) {
   assertx(CoeffectsConfig::enabled());
-  auto const callerCoeffects = [&] {
-    if (caller->func()->hasCoeffectRules()) {
-      return StaticCoeffects::none();
-    }
-    return caller->func()->staticCoeffects();
-  }();
+  auto const provided = flags.coeffects();
+  auto const required = callee->staticCoeffects().toRequired();
   auto const errMsg = folly::sformat(
     "Call to {}() requires [{}] coeffects but {}() provided [{}]",
     callee->fullName()->data(),
-    callee->staticCoeffects().toStringForUserDisplay(),
+    required.toString(),
     caller->func()->fullName()->data(),
-    callerCoeffects.toStringForUserDisplay()
+    provided.toString()
   );
-  auto const callerIsPure = caller->func()->staticCoeffects().isPure();
-  if (CoeffectsConfig::rxEnforcementLevel() >= 2 ||
-      (callerIsPure && CoeffectsConfig::pureEnforcementLevel() >= 2)) {
-    SystemLib::throwBadMethodCallExceptionObject(errMsg);
-  } else {
+
+  assertx(!provided.canCall(required));
+  if (provided.canCallWithWarning(required)) {
     raise_warning(errMsg);
+  } else {
+    SystemLib::throwBadMethodCallExceptionObject(errMsg);
   }
 }
 

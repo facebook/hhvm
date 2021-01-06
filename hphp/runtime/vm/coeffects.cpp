@@ -19,6 +19,16 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+const std::string RuntimeCoeffects::toString() const {
+  switch (m_data) {
+    case Level::Default:   return "defaults";
+    case Level::RxShallow: return "rx_shallow";
+    case Level::Rx:        return "rx";
+    case Level::Pure:      return "";
+  }
+  not_reached();
+}
+
 StaticCoeffects StaticCoeffects::fromName(const std::string& a) {
   using SC = StaticCoeffects;
   if (a == "rx_local")   return SC{Level::Local};
@@ -35,19 +45,6 @@ const char* StaticCoeffects::toString() const {
     case Level::Shallow: return "rx_shallow";
     case Level::Rx:      return "rx";
     case Level::Pure:    return "pure";
-  }
-  not_reached();
-}
-
-// TODO: Move this function to RuntimeCoeffects once we start emitting errors
-// from provided and required coeffects
-const std::string StaticCoeffects::toStringForUserDisplay() const {
-  switch (m_data) {
-    case Level::None:    return "defaults";
-    case Level::Local:   return "rx_local";
-    case Level::Shallow: return "rx_shallow";
-    case Level::Rx:      return "rx";
-    case Level::Pure:    return "";
   }
   not_reached();
 }

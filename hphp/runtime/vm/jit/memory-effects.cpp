@@ -1838,7 +1838,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdClsCtor:
     return may_load_store(AEmpty, AEmpty);
 
-  case RaiseRxCallViolation:
+  case RaiseCoeffectsCallViolation:
     return may_load_store(AFFunc{inst.src(0)}, AEmpty);
 
   case LdClsPropAddrOrNull:   // may run 86{s,p}init, which can autoload

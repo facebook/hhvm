@@ -189,6 +189,8 @@ ArrayData* loadClsTypeCnsHelper(
   bool no_throw_on_undefined
 );
 
+void raiseCoeffectsCallViolationHelper(const ActRec*, const Func*, uint64_t);
+
 [[noreturn]] void throwOOBException(TypedValue base, TypedValue key);
 [[noreturn]] void invalidArrayKeyHelper(const ArrayData* ad, TypedValue key);
 

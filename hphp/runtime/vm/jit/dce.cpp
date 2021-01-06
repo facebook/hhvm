@@ -523,7 +523,7 @@ bool canDCE(IRInstruction* inst) {
   case RaiseHackArrCompatNotice:
   case RaiseForbiddenDynCall:
   case RaiseForbiddenDynConstruct:
-  case RaiseRxCallViolation:
+  case RaiseCoeffectsCallViolation:
   case RaiseStrToClassNotice:
   case CheckClsMethFunc:
   case CheckClsReifiedGenericMismatch:

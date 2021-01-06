@@ -1721,7 +1721,7 @@ X(LdObjMethodD,                 OptClassData);
 X(ThrowMissingArg,              FuncArgData);
 X(RaiseClsMethPropConvertNotice,RaiseClsMethPropConvertNoticeData);
 X(RaiseTooManyArg,              FuncData);
-X(RaiseRxCallViolation,         FuncData);
+X(RaiseCoeffectsCallViolation,  FuncData);
 X(ThrowParamInOutMismatch,      ParamData);
 X(ThrowParamInOutMismatchRange, CheckInOutsData);
 X(ThrowParameterWrongType,      FuncArgTypeData);

@@ -413,13 +413,13 @@ bool opcodeMayRaise(Opcode opc) {
   case PropX:
   case RaiseArraySerializeNotice:
   case RaiseClsMethPropConvertNotice:
+  case RaiseCoeffectsCallViolation:
   case RaiseError:
   case RaiseErrorOnInvalidIsAsExpressionType:
   case RaiseForbiddenDynCall:
   case RaiseForbiddenDynConstruct:
   case RaiseHackArrCompatNotice:
   case RaiseNotice:
-  case RaiseRxCallViolation:
   case RaiseStrToClassNotice:
   case RaiseTooManyArg:
   case RaiseUndefProp:

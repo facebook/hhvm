@@ -40,10 +40,20 @@ struct RuntimeCoeffects {
 
   uint16_t value() const { return m_data; }
 
+  const std::string toString() const;
+
   // Checks whether provided coeffects in `this` can call
   // required coeffects in `o`
   bool canCall(const RuntimeCoeffects& o) const {
     return m_data <= o.m_data;
+  }
+
+  bool canCallWithWarning(const RuntimeCoeffects& o) const {
+    if (canCall(o)) return true;
+
+    auto callerIsPure = m_data == Level::Pure;
+    return (CoeffectsConfig::rxEnforcementLevel() < 2) &&
+           (!callerIsPure || CoeffectsConfig::pureEnforcementLevel() < 2);
   }
 
 private:
@@ -70,7 +80,6 @@ struct StaticCoeffects {
   }
 
   const char* toString() const;
-  const std::string toStringForUserDisplay() const;
 
   RuntimeCoeffects toAmbient() const;
   RuntimeCoeffects toRequired() const;

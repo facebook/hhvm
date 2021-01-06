@@ -2107,12 +2107,12 @@ To string conversions:
   raise a warning or throw an exception indicating that the class specified in
   S0 was constructed dynamically (and should not be).
 
-| RaiseRxCallViolation<func>, ND, S(FramePtr), NF
+| RaiseCoeffectsCallViolation<func>, ND, S(FramePtr) S(Int), NF
 
   Depending on the setting of the `CoeffectEnforcementLevels` runtime option,
   either raise a warning or throw an exception indicating that the caller
-  specified by S0 was violating reactivity constraints when calling the callee
-  specified by func.
+  specified by S0 was violating coeffects enforcement when calling the callee
+  specified by func. S1 is used to pass the coeffects provided by the caller.
 
 | RaiseStrToClassNotice, ND, S(Str), NF
 

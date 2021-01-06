@@ -48,6 +48,21 @@ module MakeType = Typing_make_type
 * $d->set("a");    // fine to call set on $d since it is dynamic
 * $b->get();       // returns "a", but the type is int.
 *
+* Coercing from dynamic happens when the expected type will be enforced by
+* hhvm, in this case, if whatever happens to be in the dynamic isn't of the
+* expected type execution will not continue. Hence,
+* t1 ~> t2 if t2 is enforced and t1 <: dynamic, without having to
+* coerce t1 to dynamic, e.g., t1 = dynamic or t1 = dynamic | C, but
+* not t1 = C and C implements dynamic. The latter restriction ensures that
+* static type errors are generated where nothing in the program explicitly
+* coerces anything to dynamic.
+*
+* Coercion to dynamic happens in the sub-typing algorithm where it is allowed
+* to conclude that C <: dynamic if C implements dynamic. Again, we don't want
+* sub-typing to always be able to deduce this, only when we might be checking
+* a sub-typing relationship where the super-type could contain a programmer
+* supplied dynamic.
+*
 *)
 
 (* does coercion, including subtyping *)
@@ -56,21 +71,10 @@ let coerce_type_impl
   if TypecheckerOptions.enable_sound_dynamic env.genv.tcopt then
     if
       ty_expect.et_enforced
-      && Typing_utils.is_sub_type_for_union
-           ~allow_subtype_of_dynamic:false
-           env
-           (MakeType.dynamic Reason.Rnone)
-           ty_have
+      && Typing_utils.is_sub_type_for_coercion env ty_have ty_expect.et_type
     then
-      (* t1 ~> t2 if t2 is enforced and t1 <: dynamic, without having to
-       * coerce t1 to dynamic, e.g., t1 = dynamic or t1 = dynamic | C, but
-       * not t1 = C and C implements dynamic
-       *)
       env
     else
-      (* Otherwise check subtyping, but do allow things to be coerced to
-       * dynamic
-       *)
       Typing_utils.sub_type
         ~allow_subtype_of_dynamic:true
         env

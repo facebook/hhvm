@@ -622,7 +622,8 @@ and method_def env cls m =
         (* 2. check if the return type is coercible *)
         if
           not
-            (Typing_subtype.is_sub_type_for_coercion
+            (Typing_subtype.is_sub_type_for_union
+               ~allow_subtype_of_dynamic:true
                env
                locl_ty
                (mk (Reason.Rnone, Tdynamic)))

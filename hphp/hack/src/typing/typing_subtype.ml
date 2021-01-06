@@ -1266,11 +1266,23 @@ and simplify_subtype_i
             (* This should have been caught already in the naming phase *)
             valid env
           | Some class_sub ->
+            let class_name = Cls.name class_sub in
             if Cls.get_implements_dynamic class_sub then
               valid env
-            else if String.equal (Cls.name class_sub) SN.Collections.cVec then
+            else if String.equal class_name SN.Collections.cKeyset then
+              (* No need to check the argument since it's an arraykey *)
+              valid env
+            else if String.equal class_name SN.Collections.cVec then
               match tyargs with
               | [tyarg] -> simplify_subtype ~subtype_env tyarg ty_super env
+              | _ ->
+                (* This ill-formed type should have been caught earlier *)
+                valid env
+            else if String.equal class_name SN.Collections.cDict then
+              match tyargs with
+              | [_tykey; tyval] ->
+                (* No need to check the key argument since it's an arraykey *)
+                simplify_subtype ~subtype_env tyval ty_super env
               | _ ->
                 (* This ill-formed type should have been caught earlier *)
                 valid env
@@ -3343,7 +3355,7 @@ and is_sub_type_for_coercion env ty1 ty2 =
     ~ignore_generic_params:false
     ~no_top_bottom:false
     ~treat_dynamic_as_bottom:true
-    ~allow_subtype_of_dynamic:true
+    ~allow_subtype_of_dynamic:false
     env
     ty1
     ty2
@@ -3807,6 +3819,7 @@ let set_fun_refs () =
     sub_type_with_dynamic_as_bottom;
   Typing_utils.add_constraint_ref := add_constraint;
   Typing_utils.is_sub_type_ref := is_sub_type;
+  Typing_utils.is_sub_type_for_coercion_ref := is_sub_type_for_coercion;
   Typing_utils.is_sub_type_for_union_ref := is_sub_type_for_union;
   Typing_utils.is_sub_type_for_union_i_ref := is_sub_type_for_union_i;
   Typing_utils.is_sub_type_ignore_generic_params_ref :=

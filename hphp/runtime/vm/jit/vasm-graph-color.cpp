@@ -5037,6 +5037,10 @@ size_t setup_initial_spiller_state(State& state,
       for (auto const r : state.liveIn[b]) {
         auto initialState = initial.forReg(r);
         if (!initialState) continue;
+        if (r.isPhys()) {
+          initialState->inReg.add(r);
+          continue;
+        }
 
         // The penalty for assuming this Vreg is in a physical register
         // versus the penalty for assuming it is spilled.

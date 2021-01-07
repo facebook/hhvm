@@ -195,10 +195,14 @@ struct FactsStore : public AutoloadMap {
     const String& baseType, const Variant& filters) = 0;
 
   /**
-   * Return all types decorated with the given attribute, as a
-   * keyset<classname<mixed>>.
+   * Return all types decorated with the given attribute.
    */
   virtual Array getTypesWithAttribute(const String& type) = 0;
+
+  /**
+   * Return all type aliases decorated with the given attribute.
+   */
+  virtual Array getTypeAliasesWithAttribute(const String& type) = 0;
 
   /**
    * Return all attributes decorating the given type.

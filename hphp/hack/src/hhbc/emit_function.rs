@@ -90,7 +90,7 @@ pub fn emit_function<'a>(e: &mut Emitter, f: &'a tast::Fun_) -> Result<Vec<HhasF
         scope.push_item(ScopeItem::Function(ast_scope::Fun::new_ref(&f)));
     }
 
-    let coeffects = HhasCoeffects::from_ast(&f.user_attributes);
+    let coeffects = HhasCoeffects::from_ast(&f.user_attributes, &f.ctxs);
     let (ast_body, rx_body) = {
         if !coeffects.is_any_rx() {
             (&f.body.ast, false)

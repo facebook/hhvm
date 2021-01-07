@@ -134,7 +134,7 @@ pub fn from_ast<'a>(
             .get(&class_name)
             .unwrap_or(&class.namespace),
     );
-    let mut coeffects = HhasCoeffects::from_ast(&method.user_attributes);
+    let mut coeffects = HhasCoeffects::from_ast(&method.user_attributes, &method.ctxs);
     if coeffects.get_static_coeffects().is_empty() && is_closure_body {
         coeffects = emitter
             .emit_state()

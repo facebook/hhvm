@@ -18,10 +18,12 @@ pub enum Ctx {
     Rx,
 
     // Cipp hierarchy
-    //CippLocal,
-    //CippShallow,
-    //Cipp,
-    //CippGlobal,
+    CippLocal,
+    CippShallow,
+    Cipp,
+    CippGlobal,
+
+    // Pure
     Pure,
 }
 
@@ -33,6 +35,10 @@ impl fmt::Display for Ctx {
             RxLocal => write!(f, "rx_local"),
             RxShallow => write!(f, "rx_shallow"),
             Rx => write!(f, "rx"),
+            CippLocal => write!(f, "cipp_local"),
+            CippShallow => write!(f, "cipp_shallow"),
+            Cipp => write!(f, "cipp"),
+            CippGlobal => write!(f, "cipp_global"),
             Pure => write!(f, "pure"),
         }
     }
@@ -63,6 +69,7 @@ impl HhasCoeffects {
 
     pub fn from_ast<Ex, Fb, En, Hi>(
         ast_attrs: impl AsRef<[a::UserAttribute<Ex, Fb, En, Hi>]>,
+        _ctxs: &Option<a::Contexts>,
     ) -> Self {
         let mut static_coeffects = vec![];
         let mut is_any_rx = false;

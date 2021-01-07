@@ -183,16 +183,17 @@ impl<'a> Scope<'a> {
     }
 
     pub fn coeffects_of_scope(&self) -> HhasCoeffects {
-        fn from_uas(user_attrs: &[ast::UserAttribute]) -> HhasCoeffects {
-            HhasCoeffects::from_ast(user_attrs)
-        }
         for scope_item in self.iter() {
             match scope_item {
                 ScopeItem::Class(_) => {
                     return HhasCoeffects::default();
                 }
-                ScopeItem::Method(m) => return from_uas(m.get_user_attributes()),
-                ScopeItem::Function(f) => return from_uas(f.get_user_attributes()),
+                ScopeItem::Method(m) => {
+                    return HhasCoeffects::from_ast(m.get_user_attributes(), m.get_ctxs());
+                }
+                ScopeItem::Function(f) => {
+                    return HhasCoeffects::from_ast(f.get_user_attributes(), f.get_ctxs());
+                }
                 ScopeItem::Lambda(Lambda { coeffects, .. })
                 | ScopeItem::LongLambda(LongLambda { coeffects, .. })
                     if !coeffects.get_static_coeffects().is_empty() =>

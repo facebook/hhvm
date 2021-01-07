@@ -1,5 +1,5 @@
 File "await_in_pure_comprehensive.php", line 11, characters 45-59:
-Was expecting an `Awaitable` return type hint (Typing[4174])
+`async` functions must have an `Awaitable` return type. (Parsing[1002])
 File "await_in_pure_comprehensive.php", line 12, characters 10-18:
 Not immediately `await`ing `Awaitable`-typed values requires the capability AccessStaticVariable, which is not provided by the context. (Typing[4401])
   File "await_in_pure_comprehensive.php", line 11, characters 41-42:

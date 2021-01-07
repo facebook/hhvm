@@ -1,2 +1,2 @@
 File "async_hint2.php", line 5, characters 39-41:
-Was expecting an `Awaitable` return type hint (Typing[4174])
+`async` functions must have an `Awaitable` return type. (Parsing[1002])

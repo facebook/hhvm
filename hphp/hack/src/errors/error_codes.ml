@@ -444,7 +444,7 @@ module Typing = struct
     (* | CoroutineCallOutsideOfSuspend [@value 4171] *)
     | FunctionIsNotCoroutine [@value 4172]
     | CoroutinnessMismatch [@value 4173]
-    | ExpectingAwaitableReturnTypeHint [@value 4174]
+    (* | ExpectingAwaitableReturnTypeHint [@value 4174] *)
     (* | ReffinessInvariantDEPRECATED [@value 4175] *)
     | DollardollarLvalue [@value 4176]
     (* | StaticMethodOnInterfaceDEPRECATED [@value 4177] *)

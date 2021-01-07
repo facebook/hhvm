@@ -1,2 +1,2 @@
 File "async_function_explicit_return_type_error.php", line 16, characters 36-36:
-Was expecting an `Awaitable` return type hint (Typing[4174])
+`async` functions must have an `Awaitable` return type. (Parsing[1002])

@@ -1,5 +1,5 @@
 <?hh // strict
 
-async function f(): void {
+async function f(): Awaitable<void> {
   await 42;
 }

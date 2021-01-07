@@ -1,0 +1,4 @@
+File "function_async_lambda_bad.php", line 6, characters 18-20:
+`async` functions must have an `Awaitable` return type. (Parsing[1002])
+File "function_async_lambda_bad.php", line 10, characters 26-28:
+`async` functions must have an `Awaitable` return type. (Parsing[1002])

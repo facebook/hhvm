@@ -1,5 +1,7 @@
 File "function_abstract_bad.php", line 4, characters 7-14:
 Top-level functions cannot be declared `abstract` (Parsing[1002])
+File "function_abstract_bad.php", line 4, characters 32-35:
+`async` functions must have an `Awaitable` return type. (Parsing[1002])
 File "function_abstract_bad.php", line 4, characters 25-27:
 Invalid return type (Typing[4336])
   File "function_abstract_bad.php", line 4, characters 25-27:
@@ -12,5 +14,3 @@ Invalid return type (Typing[4336])
   Expected `void`
   File "function_abstract_bad.php", line 4, characters 25-27:
   But got `Awaitable<void>` because this function does not always return a value
-File "function_abstract_bad.php", line 4, characters 32-35:
-Was expecting an `Awaitable` return type hint (Typing[4174])

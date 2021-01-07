@@ -399,6 +399,10 @@ pub fn instanceof_new_unknown_node(msg: &str) -> Error {
         msg.to_string(),
     ))
 }
+pub const invalid_async_return_hint: Error =
+    Cow::Borrowed("`async` functions must have an `Awaitable` return type.");
+pub const invalid_awaitable_arity: Error =
+    Cow::Borrowed("`Awaitable<_>` takes exactly one type argument.");
 pub const invalid_await_use: Error = Cow::Borrowed("`await` cannot be used as an expression");
 pub const toplevel_await_use: Error =
     Cow::Borrowed("`await` cannot be used in a toplevel statement");

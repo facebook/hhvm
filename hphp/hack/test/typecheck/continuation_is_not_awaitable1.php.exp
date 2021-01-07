@@ -1,5 +1,5 @@
 File "continuation_is_not_awaitable1.php", line 12, characters 23-47:
-Was expecting an `Awaitable` return type hint (Typing[4174])
+`async` functions must have an `Awaitable` return type. (Parsing[1002])
 File "continuation_is_not_awaitable1.php", line 13, characters 10-12:
 Invalid return type (Typing[4110])
   File "continuation_is_not_awaitable1.php", line 12, characters 23-47:

@@ -1,2 +1,2 @@
-File "async_hint1.php", line 4, characters 30-32:
+File "function_await_alias.php", line 6, characters 23-33:
 `async` functions must have an `Awaitable` return type. (Parsing[1002])

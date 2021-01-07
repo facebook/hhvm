@@ -341,8 +341,6 @@ val expecting_type_hint_variadic : Pos.t -> unit
 
 val expecting_return_type_hint : Pos.t -> unit
 
-val expecting_awaitable_return_type_hint : Pos.t -> unit
-
 val field_kinds : Pos.t -> Pos.t -> unit
 
 val unbound_name_typing : Pos.t -> string -> unit

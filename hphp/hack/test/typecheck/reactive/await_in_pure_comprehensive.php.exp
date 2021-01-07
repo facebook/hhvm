@@ -1,5 +1,5 @@
 File "await_in_pure_comprehensive.php", line 11, characters 45-59:
-Was expecting an `Awaitable` return type hint (Typing[4174])
+`async` functions must have an `Awaitable` return type. (Parsing[1002])
 File "await_in_pure_comprehensive.php", line 12, characters 10-18:
 This value has `Awaitable` type. `Awaitable` typed values in reactive code must be immediately `await`ed. (Typing[4248])
 File "await_in_pure_comprehensive.php", line 41, characters 14-184:

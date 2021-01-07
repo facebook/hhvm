@@ -2498,12 +2498,6 @@ let expecting_return_type_hint p =
     p
     "Was expecting a return type hint"
 
-let expecting_awaitable_return_type_hint p =
-  add
-    (Typing.err_code Typing.ExpectingAwaitableReturnTypeHint)
-    p
-    "Was expecting an `Awaitable` return type hint"
-
 let duplicate_using_var pos =
   add
     (Typing.err_code Typing.DuplicateUsingVar)

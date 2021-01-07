@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<47420593d224e913c0dd1f5666f320d0>>
+// @generated SignedSource<<f2f40512b69dff25f53ebd03ca211f0d>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -369,7 +369,6 @@ pub enum Typing {
     NullableCast = 4167,
     FunctionIsNotCoroutine = 4172,
     CoroutinnessMismatch = 4173,
-    ExpectingAwaitableReturnTypeHint = 4174,
     DollardollarLvalue = 4176,
     DuplicateUsingVar = 4178,
     IllegalDisposable = 4179,

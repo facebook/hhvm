@@ -5531,6 +5531,7 @@ where
         self.lval_errors(node);
 
         match &node.children {
+            // todo: lambda
             LambdaExpression(_) | AwaitableCreationExpression(_) | AnonymousFunction(_) => {
                 let prev_is_in_concurrent_block = self.is_in_concurrent_block;
                 // reset is_in_concurrent_block for functions

@@ -157,7 +157,6 @@ and static_prop env cv =
   }
 
 let method_type env m =
-  check_params m.m_params;
   let reactivity = fun_reactivity env m.m_user_attributes in
   let mut = get_param_mutability m.m_user_attributes in
   let ifc_decl = find_policied_attribute m.m_user_attributes in

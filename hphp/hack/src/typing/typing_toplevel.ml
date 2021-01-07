@@ -435,6 +435,7 @@ let rec fun_def ctx f :
 and method_def env cls m =
   Errors.run_with_span m.m_span @@ fun () ->
   with_timeout env m.m_name ~do_:(fun env ->
+      Decl_fun_utils.check_params m.m_params;
       let initial_env = env in
       (* reset the expression dependent display ids for each method body *)
       Reason.expr_display_id_map := IMap.empty;

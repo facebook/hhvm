@@ -988,8 +988,9 @@ void in(ISS& env, const bc::NewKeysetArray& op) {
   auto bad = false;
   auto mayThrow = false;
   for (auto i = uint32_t{0}; i < op.arg1; ++i) {
-    auto k = disect_strict_key(popC(env));
-    mayThrow |= k.mayThrow;
+    auto const promotion = promote_classlike_to_key(popC(env));
+    auto const k = disect_strict_key(promotion.first);
+    mayThrow |= k.mayThrow || (promotion.second == Promotion::YesMightThrow);
     if (k.type == TBottom) {
       bad = true;
       useMap = false;
@@ -1017,7 +1018,9 @@ void in(ISS& env, const bc::NewKeysetArray& op) {
 
 void in(ISS& env, const bc::AddElemC& /*op*/) {
   auto const v = topC(env, 0);
-  auto const k = topC(env, 1);
+  auto const promotion = promote_classlike_to_key(topC(env, 1));
+  auto const k = promotion.first;
+  auto const promoteMayThrow = (promotion.second == Promotion::YesMightThrow);
 
   auto inTy = (env.state.stack.end() - 3).unspecialize();
 
@@ -1028,7 +1031,7 @@ void in(ISS& env, const bc::AddElemC& /*op*/) {
     return folly::none;
   }(std::move(inTy));
 
-  if (outTy && !outTy->second && will_reduce(env)) {
+  if (outTy && !outTy->second && !promoteMayThrow && will_reduce(env)) {
     if (!env.trackedElems.empty() &&
         env.trackedElems.back().depth + 3 == env.state.stack.size()) {
       auto const handled = [&] {
@@ -1065,7 +1068,7 @@ void in(ISS& env, const bc::AddElemC& /*op*/) {
 
   if (outTy->first.subtypeOf(BBottom)) {
     unreachable(env);
-  } else if (!outTy->second) {
+  } else if (!outTy->second && !promoteMayThrow) {
     effect_free(env);
     constprop(env);
   }
@@ -2477,8 +2480,8 @@ void in(ISS& env, const bc::ClassGetTS& op) {
 
 void in(ISS& env, const bc::AKExists& /*op*/) {
   auto const base = popC(env);
-  auto const key  = popC(env);
-
+  auto const promotion = promote_classlike_to_key(popC(env));
+  auto const key = promotion.first;
   // Bases other than array-like or object will raise a warning and return
   // false.
   if (!base.couldBeAny(TArr, TVec, TDict, TKeyset, TObj)) {
@@ -2490,6 +2493,7 @@ void in(ISS& env, const bc::AKExists& /*op*/) {
   // us capture more cases.
   auto const finish = [&] (const Type& t, bool mayThrow) {
     if (base.couldBe(BInitNull)) return push(env, union_of(t, TFalse));
+    mayThrow |= (promotion.second == Promotion::YesMightThrow);
     if (!mayThrow) {
       constprop(env);
       effect_free(env);
@@ -5197,7 +5201,8 @@ namespace {
 
 void idxImpl(ISS& env, bool arraysOnly) {
   auto const def  = popC(env);
-  auto const key  = popC(env);
+  auto const promotion = promote_classlike_to_key(popC(env));
+  auto const key = promotion.first;
   auto const base = popC(env);
 
   if (key.subtypeOf(BInitNull)) {
@@ -5215,6 +5220,7 @@ void idxImpl(ISS& env, bool arraysOnly) {
     // A null base will raise if we're ArrayIdx. For Idx, it will silently
     // return the default value.
     auto const baseMaybeNull = base.couldBe(BInitNull);
+    canThrow |= (promotion.second == Promotion::YesMightThrow);
     if (!canThrow && (!arraysOnly || !baseMaybeNull)) {
       constprop(env);
       effect_free(env);

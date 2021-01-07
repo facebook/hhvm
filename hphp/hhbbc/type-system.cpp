@@ -5267,35 +5267,6 @@ Type assert_nonemptiness(Type t) {
 
 //////////////////////////////////////////////////////////////////////
 
-folly::Optional<ArrKey> maybe_class_func_key(const Type& keyTy, bool strict) {
-  if (keyTy.subtypeOf(TNull)) return {};
-
-  auto ret = ArrKey{};
-  // TODO: T70712990: Specialize HHBBC types for lazy classes
-  if (keyTy.subtypeOf(BOptCls | BOptLazyCls)) {
-    ret.mayThrow = true;
-    if (keyTy.subtypeOf(BCls)) {
-      if (keyTy.strictSubtypeOf(TCls)) {
-        auto cname = dcls_of(keyTy).cls.name();
-        ret.s = cname;
-        ret.type = sval(cname);
-      } else {
-        ret.type = TStr;
-      }
-      return ret;
-    }
-    ret.type = TUncArrKey;
-    return ret;
-  } else if (keyTy.couldBe(BOptCls | BOptLazyCls)) {
-    ret.mayThrow = true;
-    if (strict) ret.type = keyTy.couldBe(BCStr) ? TArrKey : TUncArrKey;
-    else        ret.type = TInitCell;
-    return ret;
-  }
-
-  return {};
-}
-
 /*
  * For known strings that are strictly integers, we'll set both the known
  * integer and string keys, so generally the int case should be checked first
@@ -5315,8 +5286,6 @@ folly::Optional<ArrKey> maybe_class_func_key(const Type& keyTy, bool strict) {
 
 ArrKey disect_array_key_legacy(const Type& keyTy) {
   auto ret = ArrKey{};
-
-  if (auto const r = maybe_class_func_key(keyTy, false)) return *r;
 
   if (keyTy.subtypeOf(BOptInt)) {
     if (keyTy.subtypeOf(BInt)) {
@@ -6825,8 +6794,6 @@ std::pair<Type,bool> array_like_newelem(Type arr,
 ArrKey disect_strict_key(const Type& keyTy) {
   auto ret = ArrKey{};
 
-  if (auto const r = maybe_class_func_key(keyTy, true)) return *r;
-
   if (!keyTy.couldBe(BArrKey)) {
     ret.type = TBottom;
     ret.mayThrow = true;
@@ -6925,7 +6892,10 @@ keyset_set(Type keyset, const Type&, const Type&) {
 std::pair<Type,bool> keyset_newelem(Type keyset, const Type& val) {
   assertx(keyset.subtypeOf(BOptKeyset));
   assertx(!keyset.subtypeOf(BInitNull));
-  return array_like_newelem_impl(std::move(keyset), val, ProvTag::Top);
+  auto const [promotedVal, promotion] = promote_classlike_to_key(val);
+  auto const [elem, mayThrow] =
+    array_like_newelem_impl(std::move(keyset), promotedVal, ProvTag::Top);
+  return {elem, mayThrow || (promotion == Promotion::YesMightThrow)};
 }
 
 //////////////////////////////////////////////////////////////////////

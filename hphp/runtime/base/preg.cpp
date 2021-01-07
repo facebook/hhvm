@@ -1417,10 +1417,8 @@ static Variant php_pcre_replace(const String& pattern, const String& subject,
   }
   const pcre_cache_entry* pce = accessor.get();
   if (pce->preg_options & PREG_REPLACE_EVAL) {
-    throw Exception(
-      "preg_replace(): Support for the /e modifier has been removed, use "
-      "preg_replace_callback instead"
-    );
+    raise_error("preg_replace(): Support for the /e modifier has been removed, use "
+                "preg_replace_callback instead");
   }
 
   int size_offsets;

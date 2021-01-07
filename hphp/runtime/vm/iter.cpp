@@ -30,9 +30,15 @@
 #include "hphp/runtime/base/packed-array-defs.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
+#include "hphp/runtime/base/bespoke/monotype-vec.h"
+
 namespace HPHP {
 
 TRACE_SET_MOD(runtime);
+
+//////////////////////////////////////////////////////////////////////
+
+namespace {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -40,14 +46,20 @@ TRACE_SET_MOD(runtime);
 static_assert(sizeof(IterImpl) == 32, "");
 static_assert(sizeof(Iter) == 32, "");
 
-//////////////////////////////////////////////////////////////////////
-
 const StaticString
   s_rewind("rewind"),
   s_valid("valid"),
   s_next("next"),
   s_key("key"),
   s_current("current");
+
+bool isMonotypeVec(const BespokeArray* bad) {
+  return bespoke::isMonotypeVecLayout(bad->layoutIndex());
+}
+
+//////////////////////////////////////////////////////////////////////
+
+}
 
 //////////////////////////////////////////////////////////////////////
 
@@ -123,6 +135,9 @@ bool IterImpl::checkInvariants(const ArrayData* ad /* = nullptr */) const {
   } else if (m_nextHelperIdx == IterNextIndex::ArrayMixedPointer) {
     assertx(arr->hasVanillaMixedLayout());
     assertx(arr->size() == MixedArray::asMixed(arr)->iterLimit());
+  } else if (m_nextHelperIdx == IterNextIndex::MonotypeVec) {
+    assertx(!arr->isVanilla());
+    assertx(isMonotypeVec(BespokeArray::asBespoke(arr)));
   } else {
     // We'd like to assert the converse, too: a packed or mixed array should
     // a next helper that makes use of its layout. However, this condition
@@ -401,15 +416,20 @@ NEVER_INLINE void clearOutputLocal(TypedValue* local) {
 // These methods all return false (= 0) to signify that iteration is over.
 
 NEVER_INLINE int64_t iter_next_free_packed(Iter* iter, ArrayData* arr) {
-  assertx(arr->hasVanillaPackedLayout());
   PackedArray::Release(arr);
   iter->kill();
   return 0;
 }
 
 NEVER_INLINE int64_t iter_next_free_mixed(Iter* iter, ArrayData* arr) {
-  assertx(arr->hasVanillaMixedLayout());
   MixedArray::Release(arr);
+  iter->kill();
+  return 0;
+}
+
+NEVER_INLINE int64_t iter_next_free_monotype_vec(
+    Iter* iter, bespoke::MonotypeVec* mad) {
+  bespoke::MonotypeVec::Release(mad);
   iter->kill();
   return 0;
 }
@@ -472,6 +492,18 @@ int64_t new_iter_array(Iter* dest, ArrayData* ad, TypedValue* valOut) {
   // we do not need to adjust the refcount.
   auto& aiter = *unwrap(dest);
   aiter.m_data = Local ? nullptr : ad;
+
+  if (BaseConst && !ad->isVanilla()) {
+    auto const bad = BespokeArray::asBespoke(ad);
+    if (isMonotypeVec(bad)) {
+      aiter.m_pos = 0;
+      aiter.m_end = size;
+      aiter.setArrayNext(IterNextIndex::MonotypeVec);
+      auto const mad = bespoke::MonotypeVec::As(ad);
+      tvDup(bespoke::MonotypeVec::GetPosVal(mad, 0), *valOut);
+      return 1;
+    }
+  }
 
   if (LIKELY(ad->hasVanillaPackedLayout())) {
     if (BaseConst) {
@@ -545,13 +577,25 @@ int64_t new_iter_array_key(Iter*       dest,
   auto& aiter = *unwrap(dest);
   aiter.m_data = Local ? nullptr : ad;
 
+  if (BaseConst && !ad->isVanilla()) {
+    auto const bad = BespokeArray::asBespoke(ad);
+    if (isMonotypeVec(bad)) {
+      aiter.m_pos = 0;
+      aiter.m_end = size;
+      aiter.setArrayNext(IterNextIndex::MonotypeVec);
+      auto const mad = bespoke::MonotypeVec::As(ad);
+      tvDup(bespoke::MonotypeVec::GetPosVal(mad, 0), *valOut);
+      tvCopy(make_tv<KindOfInt64>(0), *keyOut);
+      return 1;
+    }
+  }
+
   if (ad->hasVanillaPackedLayout()) {
     aiter.m_pos = 0;
     aiter.m_end = size;
     aiter.setArrayNext(IterNextIndex::ArrayPacked);
     tvDup(PackedArray::GetPosVal(ad, 0), *valOut);
-    keyOut->m_type = KindOfInt64;
-    keyOut->m_data.num = 0;
+    tvCopy(make_tv<KindOfInt64>(0), *keyOut);
     return 1;
   }
 
@@ -821,6 +865,36 @@ int64_t iter_next_mixed_pointer(Iter* it, TypedValue* valOut,
 
 namespace {
 
+// "virtual" method implementation of *IterNext* for ArrayPacked iterators.
+// Since we know the array is packed, we just need to increment the position
+// and do a bounds check. The key is the position; for the value, we index.
+//
+// HasKey is true for key-value iters. HasKey is true iff keyOut != nullptr.
+// See iter.h for the meaning of a "local" iterator. At this point,
+// we have the base, but we only dec-ref it when non-local iters hit the end.
+//
+// The result is false (= 0) if iteration is done, or true (= 1) otherwise.
+template<bool HasKey, bool Local>
+int64_t iter_next_packed_impl(Iter* it, TypedValue* valOut,
+                              TypedValue* keyOut, ArrayData* ad) {
+  auto& iter = *unwrap(it);
+  assertx(PackedArray::checkInvariants(ad));
+
+  ssize_t pos = iter.getPos() + 1;
+  if (UNLIKELY(pos == iter.getEnd())) {
+    if (!Local && ad->decReleaseCheck()) {
+      return iter_next_free_packed(it, ad);
+    }
+    iter.kill();
+    return 0;
+  }
+
+  iter.setPos(pos);
+  setOutputLocal(PackedArray::GetPosVal(ad, pos), valOut);
+  if constexpr (HasKey) setOutputLocal(make_tv<KindOfInt64>(pos), keyOut);
+  return 1;
+}
+
 // "virtual" method implementation of *IterNext* for ArrayMixed iterators.
 // Since we know the array is mixed, we can do "while (elm[pos].isTombstone())"
 // inline here, and we can use MixedArray helpers to extract the key and value.
@@ -859,32 +933,25 @@ int64_t iter_next_mixed_impl(Iter* it, TypedValue* valOut,
   return 1;
 }
 
-// "virtual" method implementation of *IterNext* for ArrayPacked iterators.
-// Since we know the array is packed, we just need to increment the position
-// and do a bounds check. The key is the position; for the value, we index.
-//
-// HasKey is true for key-value iters. HasKey is true iff keyOut != nullptr.
-// See iter.h for the meaning of a "local" iterator. At this point,
-// we have the base, but we only dec-ref it when non-local iters hit the end.
-//
-// The result is false (= 0) if iteration is done, or true (= 1) otherwise.
+// "virtual" method implementation of *IterNext* for MonotypeVec iterators.
+// See iter_next_packed_impl for docs for template args and return value.
 template<bool HasKey, bool Local>
-int64_t iter_next_packed_impl(Iter* it, TypedValue* valOut,
-                              TypedValue* keyOut, ArrayData* ad) {
+int64_t iter_next_monotype_vec(Iter* it, TypedValue* valOut,
+                               TypedValue* keyOut, ArrayData* ad) {
   auto& iter = *unwrap(it);
-  assertx(PackedArray::checkInvariants(ad));
+  auto const mad = bespoke::MonotypeVec::As(ad);
 
   ssize_t pos = iter.getPos() + 1;
   if (UNLIKELY(pos == iter.getEnd())) {
-    if (!Local && ad->decReleaseCheck()) {
-      return iter_next_free_packed(it, ad);
+    if (!Local && mad->decReleaseCheck()) {
+      return iter_next_free_monotype_vec(it, mad);
     }
     iter.kill();
     return 0;
   }
 
   iter.setPos(pos);
-  setOutputLocal(PackedArray::GetPosVal(ad, pos), valOut);
+  setOutputLocal(bespoke::MonotypeVec::GetPosVal(mad, pos), valOut);
   if constexpr (HasKey) setOutputLocal(make_tv<KindOfInt64>(pos), keyOut);
   return 1;
 }
@@ -957,6 +1024,7 @@ VTABLE_METHODS(ArrayPacked,        iter_next_packed_impl);
 VTABLE_METHODS(ArrayMixed,         iter_next_mixed_impl);
 VTABLE_METHODS(ArrayPackedPointer, iter_next_packed_pointer);
 VTABLE_METHODS(ArrayMixedPointer,  iter_next_mixed_pointer);
+VTABLE_METHODS(MonotypeVec,        iter_next_monotype_vec);
 
 #undef VTABLE_METHODS
 
@@ -972,6 +1040,7 @@ const IterNextHelper g_iterNextHelpers[] = {
   &iterNextObject,
   &iterNextArrayPackedPointer,
   &iterNextArrayMixedPointer,
+  &iterNextMonotypeVec,
 };
 
 const IterNextKHelper g_iterNextKHelpers[] = {
@@ -981,6 +1050,7 @@ const IterNextKHelper g_iterNextKHelpers[] = {
   &iter_next_cold, // iterNextKObject
   &iterNextKArrayPackedPointer,
   &iterNextKArrayMixedPointer,
+  &iterNextKMonotypeVec,
 };
 
 const LIterNextHelper g_literNextHelpers[] = {
@@ -990,6 +1060,7 @@ const LIterNextHelper g_literNextHelpers[] = {
   &literNextObject,
   &literNextArrayPackedPointer,
   &literNextArrayMixedPointer,
+  &literNextMonotypeVec,
 };
 
 const LIterNextKHelper g_literNextKHelpers[] = {
@@ -999,6 +1070,7 @@ const LIterNextKHelper g_literNextKHelpers[] = {
   &literNextKObject,
   &literNextKArrayPackedPointer,
   &literNextKArrayMixedPointer,
+  &literNextKMonotypeVec,
 };
 
 int64_t iter_next_ind(Iter* iter, TypedValue* valOut) {

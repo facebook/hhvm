@@ -54,6 +54,9 @@ enum class IterNextIndex : uint8_t {
   //   - Fox MixedArrays, we only use it when the base is free of tombstones.
   ArrayPackedPointer,
   ArrayMixedPointer,
+
+  // Helpers specific to bespoke array-likes.
+  MonotypeVec,
 };
 
 // For iterator specialization, we pack all the information we need to generate

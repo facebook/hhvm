@@ -21,7 +21,6 @@
 #include "hphp/runtime/base/bespoke/entry-types.h"
 #include "hphp/runtime/base/bespoke/layout.h"
 #include "hphp/runtime/base/typed-value.h"
-#include "hphp/runtime/vm/srckey.h"
 
 /*
  * MonotypeDict<Key> can represent dicts and darrays with a fixed Key type and

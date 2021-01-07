@@ -2105,6 +2105,8 @@ dependencies = [
  "ocamlrep_derive",
  "pretty_assertions",
  "serde",
+ "strum",
+ "strum_macros",
 ]
 
 [[package]]

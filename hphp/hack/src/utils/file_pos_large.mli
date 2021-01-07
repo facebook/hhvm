@@ -26,6 +26,8 @@ type t = {
 
 val pp : Format.formatter -> t -> unit
 
+val show : t -> string
+
 val compare : t -> t -> int
 
 val dummy : t

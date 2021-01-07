@@ -123,3 +123,11 @@ let to_lexing_pos pos_fname t =
     Lexing.pos_bol = beg_of_line t;
     Lexing.pos_cnum = offset t;
   }
+
+let as_large_pos p =
+  let (lnum, col, bol) = line_column_beg p in
+  File_pos_large.of_lnum_bol_cnum lnum bol (bol + col)
+
+let of_large_pos : File_pos_large.t -> t option =
+ fun { File_pos_large.pos_bol; pos_cnum; pos_lnum } ->
+  of_lnum_bol_cnum ~pos_lnum ~pos_bol ~pos_cnum

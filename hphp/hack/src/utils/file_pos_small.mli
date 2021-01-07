@@ -46,3 +46,7 @@ val set_column_unchecked : int -> t -> t
 val set_column : int -> t -> t option
 
 val to_lexing_pos : string -> t -> Lexing.position
+
+val as_large_pos : t -> File_pos_large.t
+
+val of_large_pos : File_pos_large.t -> t option

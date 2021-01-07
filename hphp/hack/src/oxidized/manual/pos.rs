@@ -9,8 +9,11 @@ use ocamlrep::rc::RcOc;
 use ocamlrep_derive::{FromOcamlRep, FromOcamlRepIn, ToOcamlRep};
 use serde::{Deserialize, Serialize};
 
+use crate::file_pos::FilePos;
 use crate::file_pos_large::FilePosLarge;
 use crate::file_pos_small::FilePosSmall;
+use crate::pos_span_raw::PosSpanRaw;
+use crate::pos_span_tiny::PosSpanTiny;
 use crate::relative_path::{Prefix, RelativePath};
 
 #[derive(
@@ -34,6 +37,10 @@ enum PosImpl {
         start: Box<FilePosLarge>,
         end: Box<FilePosLarge>,
     },
+    Tiny {
+        file: RcOc<RelativePath>,
+        span: PosSpanTiny,
+    },
     FromReason(Box<PosImpl>),
 }
 
@@ -56,18 +63,15 @@ pub type PosR<'a> = &'a Pos;
 impl Pos {
     pub fn make_none() -> Self {
         // TODO: shiqicao make NONE static, lazy_static doesn't allow Rc
-        Pos(PosImpl::Small {
+        Pos(PosImpl::Tiny {
             file: RcOc::new(RelativePath::make(Prefix::Dummy, PathBuf::from(""))),
-            start: FilePosSmall::make_dummy(),
-            end: FilePosSmall::make_dummy(),
+            span: PosSpanTiny::make_dummy(),
         })
     }
 
     pub fn is_none(&self) -> bool {
         match self {
-            Pos(PosImpl::Small {
-                file, start, end, ..
-            }) => start.is_dummy() && end.is_dummy() && file.is_empty(),
+            Pos(PosImpl::Tiny { file, span }) => span.is_dummy() && file.is_empty(),
             _ => false,
         }
     }
@@ -78,10 +82,53 @@ impl Pos {
         line0 != 1 || char0 != 1 || line1 != 1 || char1 != 1
     }
 
-    pub fn filename(&self) -> &RelativePath {
+    fn from_raw_span(file: RcOc<RelativePath>, span: PosSpanRaw) -> Self {
+        if let Some(span) = PosSpanTiny::make(&span.start, &span.end) {
+            return Pos(Tiny { file, span });
+        }
+        let (lnum, bol, cnum) = span.start.line_beg_offset();
+        if let Some(start) = FilePosSmall::from_lnum_bol_cnum(lnum, bol, cnum) {
+            let (lnum, bol, cnum) = span.end.line_beg_offset();
+            if let Some(end) = FilePosSmall::from_lnum_bol_cnum(lnum, bol, cnum) {
+                return Pos(Small { file, start, end });
+            }
+        }
+        Pos(Large {
+            file,
+            start: Box::new(span.start),
+            end: Box::new(span.end),
+        })
+    }
+
+    fn to_raw_span(&self) -> PosSpanRaw {
         match &self.0 {
-            Small { file, .. } => &file,
-            Large { file, .. } => &file,
+            Tiny { span, .. } => span.to_raw_span(),
+            &Small { start, end, .. } => PosSpanRaw {
+                start: start.into(),
+                end: end.into(),
+            },
+            Large { start, end, .. } => PosSpanRaw {
+                start: **start,
+                end: **end,
+            },
+            FromReason(_p) => unimplemented!(),
+        }
+    }
+
+    pub fn filename(&self) -> &RelativePath {
+        self.filename_rc_ref()
+    }
+
+    fn filename_rc_ref(&self) -> &RcOc<RelativePath> {
+        match &self.0 {
+            Small { file, .. } | Large { file, .. } | Tiny { file, .. } => &file,
+            FromReason(_p) => unimplemented!(),
+        }
+    }
+
+    fn into_filename(self) -> RcOc<RelativePath> {
+        match self.0 {
+            Small { file, .. } | Large { file, .. } | Tiny { file, .. } => file,
             FromReason(_p) => unimplemented!(),
         }
     }
@@ -105,6 +152,10 @@ impl Pos {
         match &self.0 {
             Small { start, end, .. } => compute(start, end),
             Large { start, end, .. } => compute(start.as_ref(), end.as_ref()),
+            Tiny { span, .. } => {
+                let PosSpanRaw { start, end } = span.to_raw_span();
+                compute(&start, &end)
+            }
             FromReason(_p) => unimplemented!(),
         }
     }
@@ -114,6 +165,7 @@ impl Pos {
         let line_end = match &self.0 {
             Small { end, .. } => end.line_column_beg(),
             Large { end, .. } => (*end).line_column_beg(),
+            Tiny { span, .. } => span.to_raw_span().end.line_column_beg(),
             FromReason(_p) => unimplemented!(),
         }
         .0;
@@ -128,6 +180,7 @@ impl Pos {
         match &self.0 {
             Small { start, .. } => start.line(),
             Large { start, .. } => start.line(),
+            Tiny { span, .. } => span.start_line(),
             FromReason(_p) => unimplemented!(),
         }
     }
@@ -139,26 +192,19 @@ impl Pos {
     ) -> Self {
         let (start_line, start_bol, start_cnum) = start;
         let (end_line, end_bol, end_cnum) = end;
-        let start = FilePosSmall::from_lnum_bol_cnum(start_line, start_bol, start_cnum);
-        let end = FilePosSmall::from_lnum_bol_cnum(end_line, end_bol, end_cnum);
-        match (start, end) {
-            (Some(start), Some(end)) => Pos(Small { file, start, end }),
-            _ => {
-                let start = Box::new(FilePosLarge::from_lnum_bol_cnum(
-                    start_line, start_bol, start_cnum,
-                ));
-                let end = Box::new(FilePosLarge::from_lnum_bol_cnum(
-                    end_line, end_bol, end_cnum,
-                ));
-                Pos(Large { file, start, end })
-            }
-        }
+        let start = FilePosLarge::from_lnum_bol_cnum(start_line, start_bol, start_cnum);
+        let end = FilePosLarge::from_lnum_bol_cnum(end_line, end_bol, end_cnum);
+        Self::from_raw_span(file, PosSpanRaw { start, end })
     }
 
     pub fn to_start_and_end_lnum_bol_cnum(&self) -> ((usize, usize, usize), (usize, usize, usize)) {
         match &self.0 {
             Small { start, end, .. } => (start.line_beg_offset(), end.line_beg_offset()),
             Large { start, end, .. } => (start.line_beg_offset(), end.line_beg_offset()),
+            Tiny { span, .. } => {
+                let PosSpanRaw { start, end } = span.to_raw_span();
+                (start.line_beg_offset(), end.line_beg_offset())
+            }
             FromReason(_p) => unimplemented!(),
         }
     }
@@ -170,52 +216,19 @@ impl Pos {
         cols: Range<usize>,
         start_offset: usize,
     ) -> Self {
-        let start = FilePosSmall::from_line_column_offset(line, cols.start, start_offset);
-        let end = FilePosSmall::from_line_column_offset(
+        let start = FilePosLarge::from_line_column_offset(line, cols.start, start_offset);
+        let end = FilePosLarge::from_line_column_offset(
             line,
             cols.end,
             start_offset + (cols.end - cols.start),
         );
-        match (start, end) {
-            (Some(start), Some(end)) => Pos(Small { file, start, end }),
-            _ => {
-                let start = Box::new(FilePosLarge::from_line_column_offset(
-                    line,
-                    cols.start,
-                    start_offset,
-                ));
-                let end = Box::new(FilePosLarge::from_line_column_offset(
-                    line,
-                    cols.end,
-                    start_offset + (cols.end - cols.start),
-                ));
-                Pos(Large { file, start, end })
-            }
-        }
-    }
-
-    fn small_to_large_file_pos(p: &FilePosSmall) -> FilePosLarge {
-        let (lnum, col, bol) = p.line_column_beg();
-        FilePosLarge::from_lnum_bol_cnum(lnum, bol, bol + col)
+        Self::from_raw_span(file, PosSpanRaw { start, end })
     }
 
     pub fn btw_nocheck(x1: Self, x2: Self) -> Self {
-        let inner = match (x1.0, x2.0) {
-            (Small { file, start, .. }, Small { end, .. }) => Small { file, start, end },
-            (Large { file, start, .. }, Large { end, .. }) => Large { file, start, end },
-            (Small { file, start, .. }, Large { end, .. }) => Large {
-                file,
-                start: Box::new(Self::small_to_large_file_pos(&start)),
-                end,
-            },
-            (Large { file, start, .. }, Small { end, .. }) => Large {
-                file,
-                start,
-                end: Box::new(Self::small_to_large_file_pos(&end)),
-            },
-            _ => unimplemented!(),
-        };
-        Pos(inner)
+        let start = x1.to_raw_span().start;
+        let end = x2.to_raw_span().end;
+        Self::from_raw_span(x1.into_filename(), PosSpanRaw { start, end })
     }
 
     pub fn btw(x1: &Self, x2: &Self) -> Result<Self, String> {
@@ -244,116 +257,45 @@ impl Pos {
                 + " and "
                 + &x2.filename().to_string());
         }
-        match (&x1.0, &x2.0) {
-            (
-                Small {
-                    file,
-                    start: start1,
-                    end: end1,
-                },
-                Small {
-                    file: _,
-                    start: start2,
-                    end: end2,
-                },
-            ) => {
-                let start = if start1.is_dummy() {
-                    start2
-                } else if start2.is_dummy() {
-                    start1
-                } else if start1.offset() < start2.offset() {
-                    start1
-                } else {
-                    start2
-                };
-                let end = if end1.is_dummy() {
-                    end2
-                } else if end2.is_dummy() {
-                    end1
-                } else if end1.offset() < end2.offset() {
-                    end2
-                } else {
-                    end1
-                };
-                Ok(Pos(Small {
-                    file: file.clone(),
-                    start: *start,
-                    end: *end,
-                }))
-            }
-            (
-                Large {
-                    file,
-                    start: start1,
-                    end: end1,
-                },
-                Large {
-                    file: _,
-                    start: start2,
-                    end: end2,
-                },
-            ) => {
-                let start = if start1.is_dummy() {
-                    start2
-                } else if start2.is_dummy() {
-                    start1
-                } else if start1.offset() < start2.offset() {
-                    start1
-                } else {
-                    start2
-                };
-                let end = if end1.is_dummy() {
-                    end2
-                } else if end2.is_dummy() {
-                    end1
-                } else if end1.offset() < end2.offset() {
-                    end2
-                } else {
-                    end1
-                };
-                Ok(Pos(Large {
-                    file: file.clone(),
-                    start: Box::new(*start.clone()),
-                    end: Box::new(*end.clone()),
-                }))
-            }
-            (Small { file, start, end }, Large { .. }) => Self::merge(
-                &Pos(Large {
-                    file: file.clone(),
-                    start: Box::new(Self::small_to_large_file_pos(&start)),
-                    end: Box::new(Self::small_to_large_file_pos(&end)),
-                }),
-                x2,
-            ),
-            (Large { .. }, Small { file, start, end }) => Self::merge(
-                x1,
-                &Pos(Large {
-                    file: file.clone(),
-                    start: Box::new(Self::small_to_large_file_pos(&start)),
-                    end: Box::new(Self::small_to_large_file_pos(&end)),
-                }),
-            ),
-            _ => unimplemented!(),
-        }
+
+        let span1 = x1.to_raw_span();
+        let span2 = x2.to_raw_span();
+
+        let start = if span1.start.is_dummy() {
+            span2.start
+        } else if span2.start.is_dummy() {
+            span1.start
+        } else if span1.start.offset() < span2.start.offset() {
+            span1.start
+        } else {
+            span2.start
+        };
+
+        let end = if span1.end.is_dummy() {
+            span2.end
+        } else if span2.end.is_dummy() {
+            span1.end
+        } else if span1.end.offset() < span2.end.offset() {
+            span2.end
+        } else {
+            span1.end
+        };
+
+        Ok(Self::from_raw_span(
+            RcOc::clone(x1.filename_rc_ref()),
+            PosSpanRaw { start, end },
+        ))
     }
 
     pub fn last_char(&self) -> Cow<Self> {
         if self.is_none() {
             Cow::Borrowed(self)
         } else {
-            Cow::Owned(Pos(match &self.0 {
-                Small { file, end, .. } => Small {
-                    file: file.clone(),
-                    start: *end,
-                    end: *end,
-                },
-                Large { file, end, .. } => Large {
-                    file: file.clone(),
-                    start: end.clone(),
-                    end: end.clone(),
-                },
-                FromReason(_p) => unimplemented!(),
-            }))
+            let end = self.to_raw_span().end;
+            Cow::Owned(Self::from_raw_span(
+                RcOc::clone(self.filename_rc_ref()),
+                PosSpanRaw { start: end, end },
+            ))
         }
     }
 
@@ -361,25 +303,11 @@ impl Pos {
         if self.is_none() {
             Cow::Borrowed(self)
         } else {
-            Cow::Owned(Pos(match &self.0 {
-                Small { file, start, .. } => {
-                    let start = start.with_column(0);
-                    Small {
-                        file: file.clone(),
-                        start,
-                        end: start,
-                    }
-                }
-                Large { file, start, .. } => {
-                    let start = start.with_column(0);
-                    Large {
-                        file: file.clone(),
-                        start: Box::new(start),
-                        end: Box::new(start),
-                    }
-                }
-                FromReason(_p) => unimplemented!(),
-            }))
+            let start = self.to_raw_span().start.with_column(0);
+            Cow::Owned(Self::from_raw_span(
+                RcOc::clone(self.filename_rc_ref()),
+                PosSpanRaw { start, end: start },
+            ))
         }
     }
 
@@ -387,6 +315,7 @@ impl Pos {
         match &self.0 {
             Small { end, .. } => end.offset(),
             Large { end, .. } => end.offset(),
+            Tiny { span, .. } => span.end_character_number(),
             FromReason(_p) => unimplemented!(),
         }
     }
@@ -395,6 +324,7 @@ impl Pos {
         match &self.0 {
             Small { start, .. } => start.offset(),
             Large { start, .. } => start.offset(),
+            Tiny { span, .. } => span.start_character_number(),
             FromReason(_p) => unimplemented!(),
         }
     }
@@ -424,6 +354,10 @@ impl std::fmt::Display for Pos {
             Large {
                 file, start, end, ..
             } => do_fmt(f, file, &**start, &**end),
+            Tiny { file, span } => {
+                let PosSpanRaw { start, end } = span.to_raw_span();
+                do_fmt(f, file, &start, &end)
+            }
             FromReason(_p) => unimplemented!(),
         }
     }
@@ -484,26 +418,6 @@ impl no_pos_hash::NoPosHash for Pos {
     fn hash<H: std::hash::Hasher>(&self, _state: &mut H) {}
 }
 
-// TODO(hrust) eventually move this into a separate file used by Small & Large
-trait FilePos {
-    fn offset(&self) -> usize;
-    fn line_column_beg(&self) -> (usize, usize, usize);
-}
-macro_rules! impl_file_pos {
-    ($type: ty) => {
-        impl FilePos for $type {
-            fn offset(&self) -> usize {
-                (*self).offset()
-            }
-            fn line_column_beg(&self) -> (usize, usize, usize) {
-                (*self).line_column_beg()
-            }
-        }
-    };
-}
-impl_file_pos!(FilePosSmall);
-impl_file_pos!(FilePosLarge);
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -518,7 +432,7 @@ mod tests {
     }
 
     #[test]
-    fn test() {
+    fn test_pos() {
         assert_eq!(Pos::make_none().is_none(), true);
         assert_eq!(
             Pos::from_lnum_bol_cnum(
@@ -541,7 +455,7 @@ mod tests {
     }
 
     #[test]
-    fn test_string() {
+    fn test_pos_string() {
         assert_eq!(
             Pos::make_none().string().to_string(),
             r#"File "", line 0, characters 0-0:"#
@@ -556,7 +470,7 @@ mod tests {
     }
 
     #[test]
-    fn test_merge() {
+    fn test_pos_merge() {
         let test = |name, (exp_start, exp_end), ((fst_start, fst_end), (snd_start, snd_end))| {
             assert_eq!(
                 Ok(make_pos("a", exp_start, exp_end)),

@@ -5,21 +5,12 @@
 
 use serde::{Deserialize, Serialize};
 
-use ocamlrep_derive::{FromOcamlRep, FromOcamlRepIn, ToOcamlRep};
+use ocamlrep::{FromOcamlRep, FromOcamlRepIn, ToOcamlRep};
 
-#[derive(
-    Copy,
-    Clone,
-    Debug,
-    Deserialize,
-    Eq,
-    Hash,
-    FromOcamlRep,
-    FromOcamlRepIn,
-    ToOcamlRep,
-    PartialEq,
-    Serialize
-)]
+use crate::file_pos::FilePos;
+use crate::file_pos_small::FilePosSmall;
+
+#[derive(Copy, Clone, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
 pub struct FilePosLarge {
     /// line number. Starts at 1.
     lnum: usize,
@@ -41,6 +32,11 @@ const DUMMY: FilePosLarge = FilePosLarge {
 };
 
 impl FilePosLarge {
+    #[inline]
+    pub const fn make_dummy() -> Self {
+        DUMMY
+    }
+
     #[inline]
     pub fn is_dummy(self) -> bool {
         self == DUMMY
@@ -72,11 +68,6 @@ impl FilePosLarge {
     }
 
     // accessors
-
-    #[inline]
-    pub const fn offset(self) -> usize {
-        self.cnum
-    }
 
     #[inline]
     pub const fn line(self) -> usize {
@@ -113,11 +104,6 @@ impl FilePosLarge {
     }
 
     #[inline]
-    pub const fn line_column_beg(self) -> (usize, usize, usize) {
-        (self.lnum, self.cnum - self.bol, self.bol)
-    }
-
-    #[inline]
     pub const fn line_column_offset(self) -> (usize, usize, usize) {
         (self.lnum, self.cnum - self.bol, self.cnum)
     }
@@ -125,6 +111,18 @@ impl FilePosLarge {
     #[inline]
     pub const fn line_beg_offset(self) -> (usize, usize, usize) {
         (self.lnum, self.bol, self.cnum)
+    }
+}
+
+impl FilePos for FilePosLarge {
+    #[inline]
+    fn offset(&self) -> usize {
+        self.cnum
+    }
+
+    #[inline]
+    fn line_column_beg(&self) -> (usize, usize, usize) {
+        (self.lnum, self.cnum - self.bol, self.bol)
     }
 }
 
@@ -137,5 +135,45 @@ impl Ord for FilePosLarge {
 impl PartialOrd for FilePosLarge {
     fn partial_cmp(&self, other: &FilePosLarge) -> Option<std::cmp::Ordering> {
         Some(self.cmp(other))
+    }
+}
+
+impl From<FilePosSmall> for FilePosLarge {
+    fn from(pos: FilePosSmall) -> Self {
+        let (lnum, bol, cnum) = pos.line_beg_offset();
+        Self::from_lnum_bol_cnum(lnum, bol, cnum)
+    }
+}
+
+impl ToOcamlRep for FilePosLarge {
+    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&self, alloc: &'a A) -> ocamlrep::OpaqueValue<'a> {
+        let mut block = alloc.block_with_size(3);
+        alloc.set_field(&mut block, 0, alloc.add(&self.lnum));
+        alloc.set_field(&mut block, 1, alloc.add(&self.bol));
+        alloc.set_field(&mut block, 2, alloc.add(&(self.cnum as isize)));
+        block.build()
+    }
+}
+
+impl FromOcamlRep for FilePosLarge {
+    fn from_ocamlrep(value: ocamlrep::Value<'_>) -> Result<Self, ocamlrep::FromError> {
+        let block = ocamlrep::from::expect_tuple(value, 3)?;
+        let lnum = ocamlrep::from::field(block, 0)?;
+        let bol = ocamlrep::from::field(block, 1)?;
+        let cnum: isize = ocamlrep::from::field(block, 2)?;
+        Ok(Self {
+            lnum,
+            bol,
+            cnum: cnum as usize,
+        })
+    }
+}
+
+impl<'a> FromOcamlRepIn<'a> for FilePosLarge {
+    fn from_ocamlrep_in(
+        value: ocamlrep::Value<'_>,
+        _alloc: &'a ocamlrep::Bump,
+    ) -> Result<Self, ocamlrep::FromError> {
+        Self::from_ocamlrep(value)
     }
 }

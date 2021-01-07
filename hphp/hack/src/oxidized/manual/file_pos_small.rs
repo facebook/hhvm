@@ -8,6 +8,8 @@ use std::fmt;
 use ocamlrep::{FromOcamlRep, FromOcamlRepIn, ToOcamlRep};
 use serde::{Deserialize, Serialize};
 
+use crate::file_pos::FilePos;
+
 // Three values packed into one 64-bit integer:
 //
 //    6         5         4         3         2         1         0
@@ -130,11 +132,6 @@ impl FilePosSmall {
     // accessors
 
     #[inline]
-    pub fn offset(self) -> usize {
-        self.beg_of_line() + self.column()
-    }
-
-    #[inline]
     pub fn line_beg(self) -> (usize, usize) {
         (self.line(), self.beg_of_line())
     }
@@ -142,11 +139,6 @@ impl FilePosSmall {
     #[inline]
     pub fn line_column(self) -> (usize, usize) {
         (self.line(), self.column())
-    }
-
-    #[inline]
-    pub fn line_column_beg(self) -> (usize, usize, usize) {
-        (self.line(), self.column(), self.beg_of_line())
     }
 
     #[inline]
@@ -165,6 +157,18 @@ impl FilePosSmall {
             None => FilePosSmall(DUMMY),
             Some(pos) => pos,
         }
+    }
+}
+
+impl FilePos for FilePosSmall {
+    #[inline]
+    fn offset(&self) -> usize {
+        self.beg_of_line() + self.column()
+    }
+
+    #[inline]
+    fn line_column_beg(&self) -> (usize, usize, usize) {
+        (self.line(), self.column(), self.beg_of_line())
     }
 }
 

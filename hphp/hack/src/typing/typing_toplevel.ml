@@ -1093,37 +1093,63 @@ and class_def_ env c tc =
     Typing_solver.solve_all_unsolved_tyvars env Errors.bad_class_typevar
   in
 
-  let check_parent_implement_dynamic env child =
-    let parents =
-      (* for now, interfaces and traits are ignored *)
-      child.c_extends
+  ( if TypecheckerOptions.enable_sound_dynamic (Provider_context.get_tcopt ctx)
+  then
+    let parent_names =
+      List.filter_map
+        (c.c_extends @ c.c_uses @ c.c_implements)
+        (function
+          | (_, Happly ((_, name), _)) -> Some name
+          | _ -> None)
     in
-    List.iter parents (function
-        | (_, Happly ((_, name), _)) ->
+    let error_parent_implements_dynamic parent f =
+      Errors.parent_implements_dynamic
+        (fst c.c_name)
+        (snd c.c_name, c.c_kind)
+        (Cls.name parent, Cls.kind parent)
+        f
+    in
+    List.iter parent_names (fun name ->
+        match Env.get_class_dep env name with
+        | Some parent_type ->
           begin
-            match Env.get_class_dep env name with
-            | Some parent_type ->
+            match Cls.kind parent_type with
+            | Ast_defs.Cnormal
+            | Ast_defs.Cabstract ->
               if
                 not
                   (Bool.equal
                      (Cls.get_implements_dynamic parent_type)
                      c.c_implements_dynamic)
               then
-                Errors.parent_implements_dynamic
-                  (fst child.c_name)
-                  (snd child.c_name)
-                  (Cls.name parent_type)
+                error_parent_implements_dynamic
+                  parent_type
                   c.c_implements_dynamic
-            | None -> ()
+            | Ast_defs.Ctrait ->
+              if
+                c.c_implements_dynamic
+                && not (Cls.get_implements_dynamic parent_type)
+              then
+                error_parent_implements_dynamic parent_type true
+            | Ast_defs.Cinterface ->
+              if
+                (not c.c_implements_dynamic)
+                && Cls.get_implements_dynamic parent_type
+              then
+                error_parent_implements_dynamic parent_type false
+              else if
+                Ast_defs.is_c_interface c.c_kind
+                && not
+                     (Bool.equal
+                        (Cls.get_implements_dynamic parent_type)
+                        c.c_implements_dynamic)
+              then
+                error_parent_implements_dynamic
+                  parent_type
+                  c.c_implements_dynamic
+            | _ -> ()
           end
-        | _ -> ())
-  in
-  if TypecheckerOptions.enable_sound_dynamic (Provider_context.get_tcopt ctx)
-  then
-    (* two well-formedness checks are required: *)
-    (*  - a class that does not implements dynamic cannot extends a class that implement dynamic *)
-    (*  - if the superclass implements dynamic, then the class itself should implement dynamic *)
-    check_parent_implement_dynamic env c;
+        | None -> ()) );
 
   ( {
       Aast.c_span = c.c_span;

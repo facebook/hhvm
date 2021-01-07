@@ -1,0 +1,2 @@
+File "trait_1.bad.php", line 7, characters 7-7:
+Class C cannot implement dynamic because it uses trait T which does not (Typing[4402])

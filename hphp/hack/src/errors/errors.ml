@@ -5475,23 +5475,49 @@ let ifc_internal_error pos reason =
     )
 
 let parent_implements_dynamic
-    pos class_name parent_name class_implements_dynamic =
-  let class_name = strip_ns class_name in
+    pos
+    (child_name, child_kind)
+    (parent_name, parent_kind)
+    child_implements_dynamic =
+  let kind_to_strings = function
+    | Ast_defs.Cabstract
+    | Ast_defs.Cnormal ->
+      ("class ", "implement ")
+    | Ast_defs.Ctrait -> ("trait ", "implement ")
+    | Ast_defs.Cinterface -> ("interface ", "extend ")
+    | Ast_defs.Cenum -> (* cannot happen *) ("", "")
+  in
+  let kinds_to_use child_kind parent_kind =
+    match (child_kind, parent_kind) with
+    | (_, Ast_defs.Cabstract)
+    | (_, Ast_defs.Cnormal) ->
+      "extends "
+    | (_, Ast_defs.Ctrait) -> "uses "
+    | (Ast_defs.Cinterface, Ast_defs.Cinterface) -> "extends "
+    | (_, Ast_defs.Cinterface) -> "implements "
+    | (_, _) -> ""
+  in
+  let child_name = strip_ns child_name in
+  let (child_kind_s, action) = kind_to_strings child_kind in
   let parent_name = strip_ns parent_name in
+  let (parent_kind_s, _) = kind_to_strings parent_kind in
   add
     (Typing.err_code Typing.ImplementsDynamic)
     pos
-    ( "Class "
-    ^ class_name
-    ^ ( if class_implements_dynamic then
+    ( String.capitalize child_kind_s
+    ^ child_name
+    ^ ( if child_implements_dynamic then
         " cannot "
       else
         " must " )
-    ^ "implement dynamic because it extends class "
+    ^ action
+    ^ "dynamic because it "
+    ^ kinds_to_use child_kind parent_kind
+    ^ parent_kind_s
     ^ parent_name
     ^ " which does"
     ^
-    if class_implements_dynamic then
+    if child_implements_dynamic then
       " not"
     else
       "" )

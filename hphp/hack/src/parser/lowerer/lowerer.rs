@@ -4797,13 +4797,16 @@ where
                 let name = Self::pos_name(&c.name, env)?;
                 *env.cls_reified_generics() = HashSet::new();
                 let tparams = Self::p_tparam_l(true, &c.type_parameters, env)?;
-                let extends = Self::could_map(Self::p_hint, &c.extends_list, env)?;
-                *env.parent_maybe_reified() = match extends.first().map(|h| h.1.as_ref()) {
-                    Some(ast::Hint_::Happly(_, hl)) => !hl.is_empty(),
-                    _ => false,
+                let class_kind = match Self::token_kind(&c.keyword) {
+                    Some(TK::Class) if kinds.has(modifier::ABSTRACT) => ast::ClassKind::Cabstract,
+                    Some(TK::Class) => ast::ClassKind::Cnormal,
+                    Some(TK::Interface) => ast::ClassKind::Cinterface,
+                    Some(TK::Trait) => ast::ClassKind::Ctrait,
+                    Some(TK::Enum) => ast::ClassKind::Cenum,
+                    _ => Self::missing_syntax("class kind", &c.keyword, env)?,
                 };
-                let (implements, implements_dynamic) = Self::could_map_filter(
-                    |node, env| -> Result<Option<ast::Hint>> {
+                let filter_dynamic =
+                    |node: S<'a, T, V>, env: &mut Env<'a, TF>| -> Result<Option<ast::Hint>> {
                         match Self::p_hint(node, env) {
                             Err(e) => Err(e),
                             Ok(h) => match &*h.1 {
@@ -4817,21 +4820,30 @@ where
                                 _ => Ok(Some(h)),
                             },
                         }
-                    },
-                    &c.implements_list,
-                    env,
-                )?;
+                    };
+                let (extends, extends_dynamic) = match class_kind {
+                    ast::ClassKind::Cinterface if env.parser_options.tco_enable_sound_dynamic => {
+                        Self::could_map_filter(filter_dynamic, &c.extends_list, env)?
+                    }
+                    _ => (Self::could_map(Self::p_hint, &c.extends_list, env)?, false),
+                };
+                *env.parent_maybe_reified() = match extends.first().map(|h| h.1.as_ref()) {
+                    Some(ast::Hint_::Happly(_, hl)) => !hl.is_empty(),
+                    _ => false,
+                };
+                let (implements, implements_dynamic) =
+                    if env.parser_options.tco_enable_sound_dynamic {
+                        Self::could_map_filter(filter_dynamic, &c.implements_list, env)?
+                    } else {
+                        (
+                            Self::could_map(Self::p_hint, &c.implements_list, env)?,
+                            false,
+                        )
+                    };
+
                 let where_constraints = Self::p_where_constraint(true, node, &c.where_clause, env)?;
                 let namespace = Self::mk_empty_ns_env(env);
                 let span = Self::p_pos(node, env);
-                let class_kind = match Self::token_kind(&c.keyword) {
-                    Some(TK::Class) if kinds.has(modifier::ABSTRACT) => ast::ClassKind::Cabstract,
-                    Some(TK::Class) => ast::ClassKind::Cnormal,
-                    Some(TK::Interface) => ast::ClassKind::Cinterface,
-                    Some(TK::Trait) => ast::ClassKind::Ctrait,
-                    Some(TK::Enum) => ast::ClassKind::Cenum,
-                    _ => Self::missing_syntax("class kind", &c.keyword, env)?,
-                };
                 let mut class_ = ast::Class_ {
                     span,
                     annotation: (),
@@ -4850,7 +4862,7 @@ where
                     xhp_category: None,
                     reqs: vec![],
                     implements,
-                    implements_dynamic,
+                    implements_dynamic: implements_dynamic || extends_dynamic,
                     where_constraints,
                     consts: vec![],
                     typeconsts: vec![],

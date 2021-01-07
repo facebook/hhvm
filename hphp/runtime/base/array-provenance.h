@@ -323,16 +323,16 @@ constexpr int64_t TAG_PROVENANCE_HERE_MUTATE_COLLECTIONS = 1;
 }
 
 /*
- * Recursively tag the given TypedValue, tagging it (if necessary), and if it is
- * an array-like, recursively tagging of its values (if necessary).
+ * Recursively tag the given TypedValue, tagging it (if necessary), and if it
+ * is an array-like, recursively tagging its values (if necessary).
  *
  * This function will tag values within, say, a dict, even if it doesn't tag the
  * dict itself. This behavior is important because it allows us to implement
  * provenance for (nested) static arrays in ProvenanceSkipFrame functions.
  *
  * The only other type that can contain nested arrays are objects. This function
- * does NOT tag through objects; instead, it raises notices that it found them.
- * (It will emit at most one notice per call.)
+ * stops at objects, unless you use the TAG_PROVENANCE_HERE_MUTATE_COLLECTIONS
+ * flag in which case it'll (recursively) tag collections values.
  *
  * This method will return a new TypedValue or modify and inc-ref `in`.
  */
@@ -340,12 +340,12 @@ TypedValue tagTvRecursively(TypedValue in, int64_t flags = 0);
 
 /*
  * Recursively mark/unmark the given TV as being a legacy array.
- * This function has the same recursive behavior as tagTvRecursively,
- * except that in addition to raising a notice on encountering an object,
- * it will also raise (up to one) notice on encountering a vec or dict.
  *
- * The extra notice is needed because we won't be able to distinguish between
- * vecs and varrays, or between dicts and darrays, post the HAM flag flip.
+ * This function will recurse through array-like values. It will always stop
+ * at objects, including collections.
+ *
+ * Attempting to mark a vec or dict pre-HADVAs triggers notices. We'll warn
+ * at most once per call since extra notices hurt performance for no benefit.
  *
  * This method will return a new TypedValue or modify and inc-ref `in`.
  */
@@ -354,9 +354,20 @@ TypedValue markTvRecursively(TypedValue in, bool legacy);
 /*
  * Mark/unmark the given TV as being a legacy array.
  *
+ * Attempting to mark a vec or dict pre-HADVAs triggers notices.
+ *
  * This method will return a new TypedValue or modify and inc-ref `in`.
  */
 TypedValue markTvShallow(TypedValue in, bool legacy);
+
+/*
+ * Mark/unmark the given TV up to a fixed depth. You probably don't want to
+ * use this helper, but we need it for certain constrained cases (mainly for
+ * backtrace arrays, which are varrays-of-darrays-of-arbitrary-values).
+ *
+ * A depth of 0 means no user-provided limit. A depth of 1 is "markTvShallow".
+ */
+TypedValue markTvToDepth(TypedValue in, bool legacy, uint32_t depth);
 
 ///////////////////////////////////////////////////////////////////////////////
 

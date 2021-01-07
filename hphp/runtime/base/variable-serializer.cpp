@@ -1766,7 +1766,8 @@ void VariableSerializer::serializeResource(const ResourceData* res) {
   } else if (auto trace = dynamic_cast<const CompactTrace*>(res)) {
     auto const trace_array = Variant(trace->extract());
     auto const raw = *trace_array.asTypedValue();
-    auto const marked = Variant::attach(arrprov::markTvRecursively(raw, true));
+    // We use a depth of 2 because backtrace arrays are varrays-of-darrays.
+    auto const marked = Variant::attach(arrprov::markTvToDepth(raw, true, 2));
     serializeArray(marked.toArray().get());
   } else {
     serializeResourceImpl(res);

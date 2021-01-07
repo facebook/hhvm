@@ -459,11 +459,13 @@ static auto const kMaxMutationStackDepth = 512;
 using IgnoreCollections = bool;
 using MutateCollections = req::fast_map<HeapObject*, ArrayData*>;
 
+// NOTE: Setting a max_depth of 0 means that there's no user-provided limit.
+// (We'll still stop at kMaxMutationStackDepth above for performance reasons.)
 template <typename Mutation, typename Collections = IgnoreCollections>
 struct MutationState {
   Mutation& mutation;
   const char* function_name;
-  bool recursive = true;
+  uint32_t max_depth = 0;
   bool raised_stack_notice = false;
   Collections visited{};
 };
@@ -550,7 +552,7 @@ ArrayData* apply_mutation_to_array(ArrayData* in, State& state,
   // Apply the mutation to the top-level array.
   cow |= in->cowCheck();
   auto result = state.mutation(in, cow);
-  if (!state.recursive) {
+  if (state.max_depth == depth + 1) {
     FTRACE(1, "Depth {}: {} {}\n", depth, result ? "copy" : "reuse", in);
     return result;
   }
@@ -680,7 +682,7 @@ ArrayData* apply_mutation(TypedValue tv, State& state,
   return apply_mutation_ignore_collections(tv, state, cow, depth);
 }
 
-TypedValue markTvImpl(TypedValue in, bool legacy, bool recursive) {
+TypedValue markTvImpl(TypedValue in, bool legacy, uint32_t depth) {
   // Closure state: whether or not we've raised notices for array-likes.
   auto raised_hack_array_notice = false;
   auto raised_non_hack_array_notice = false;
@@ -729,11 +731,11 @@ TypedValue markTvImpl(TypedValue in, bool legacy, bool recursive) {
   auto const ad = [&] {
     if (legacy) {
       auto state = MutationState<decltype(mark_tv)>{
-        mark_tv, "array_mark_legacy", recursive};
+        mark_tv, "array_mark_legacy", depth};
       return apply_mutation(in, state);
     } else {
       auto state = MutationState<decltype(unmark_tv)>{
-        unmark_tv, "array_unmark_legacy", recursive};
+        unmark_tv, "array_unmark_legacy", depth};
       return apply_mutation(in, state);
     }
   }();
@@ -775,11 +777,15 @@ TypedValue tagTvRecursively(TypedValue in, int64_t flags) {
 }
 
 TypedValue markTvRecursively(TypedValue in, bool legacy) {
-  return markTvImpl(in, legacy, /*recursive=*/true);
+  return markTvImpl(in, legacy, 0);
 }
 
 TypedValue markTvShallow(TypedValue in, bool legacy) {
-  return markTvImpl(in, legacy, /*recursive=*/false);
+  return markTvImpl(in, legacy, 1);
+}
+
+TypedValue markTvToDepth(TypedValue in, bool legacy, uint32_t depth) {
+  return markTvImpl(in, legacy, depth);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

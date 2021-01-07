@@ -396,7 +396,8 @@ void throwable_mark_array(const ObjectData* throwable, Array& props) {
   if (!tvIsArrayLike(base)) return;
 
   auto const incref = Variant::wrap(base);
-  auto const marked = Variant::attach(arrprov::markTvRecursively(base, true));
+  // We use a depth of 2 because backtrace arrays are varrays-of-darrays.
+  auto const marked = Variant::attach(arrprov::markTvToDepth(base, true, 2));
   props.set(name, marked);
 }
 

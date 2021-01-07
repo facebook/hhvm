@@ -229,6 +229,15 @@ TCA emit_bindaddr_stub(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
 TCA emit_retranslate_opt_stub(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
                               FPInvOffset spOff, SrcKey sk);
 
+/*
+ * Emit a stub which syncs vmsp and vmpc and then calls
+ * resumeHelperNoTranslate. Call are smashed to this when we know we
+ * can no longer create new translations. The address of the stub is
+ * returned if successful, nullptr otherwise (the creation can fail if
+ * there's no space in the TC for it).
+ */
+TCA emit_interp_no_translate_stub(FPInvOffset spOff, SrcKey sk);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -347,4 +356,3 @@ static_assert(sizeof(ReqInfo) == 0x30,
 }}}
 
 #include "hphp/runtime/vm/jit/service-requests-inl.h"
-

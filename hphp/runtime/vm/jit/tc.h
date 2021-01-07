@@ -311,9 +311,11 @@ void freeProfCode();
 SrcRec* findSrcRec(SrcKey sk);
 
 /*
- * Create a SrcRec for sk with an sp offset of spOff.
+ * Create a SrcRec for sk with an sp offset of spOff. If checkLength
+ * is true, then false will be returned if there's not enough space
+ * for any stubs. Otherwise true will be returned.
  */
-void createSrcRec(SrcKey sk, FPInvOffset spOff);
+bool createSrcRec(SrcKey sk, FPInvOffset spOff, bool checkLength = false);
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -536,12 +538,16 @@ void recordJump(TCA toSmash, SrcRec* sr);
  * new address was written into the TC.
  */
 TCA bindJmp(TCA toSmash, SrcKey destSk, bool& smashed);
+TCA bindJmpToStub(TCA toSmash, TCA oldTarget, TCA stub,
+                  SrcKey destSk, bool& smashed);
 
 /*
  * Insert the address for branches to destSk at toSmash. Upon return, the value
  * of smashed indicates whether an address was written into the TC.
  */
 TCA bindAddr(TCA toSmash, SrcKey destSk, bool& smashed);
+TCA bindAddrToStub(TCA toSmash, TCA oldTarget, TCA stub,
+                   SrcKey destSk, bool& smashed);
 
 /*
  * Bind a call to start at toSmash, where start is the prologue for callee, when

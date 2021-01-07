@@ -243,7 +243,7 @@ TranslationResult::Scope shouldTranslate(SrcKey sk, TransKind kind) {
       case TransKind::OptPrologue:
       case TransKind::Optimize:
         if (code().hotEnabled()) return shouldTranslateNoSizeLimit(sk, kind);
-        return TranslationResult::Scope::Process;
+        break;
       default:
         break;
     }

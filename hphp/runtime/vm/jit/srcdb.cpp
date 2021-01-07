@@ -191,6 +191,19 @@ void SrcRec::newTranslation(TransLoc loc,
   m_tailFallbackJumps.swap(tailBranches);
 }
 
+/*
+ * Smash the fallbacks to a particular stub (not a translation). Used
+ * to smash all of the fallback jumps to resumeHelperNoTranslate when
+ * we stop translating.
+ */
+void SrcRec::smashFallbacksToStub(TCA stub) {
+  assertx(stub);
+  auto srLock = writelock();
+  TRACE(1, "SrcRec(%p)::smashFallbacksToStub @%p, ", this, stub);
+  for (auto& br : m_tailFallbackJumps) br.patch(stub);
+  m_tailFallbackJumps.clear();
+}
+
 void SrcRec::relocate(RelocationInfo& rel) {
   tc::assertOwnsCodeLock();
 

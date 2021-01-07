@@ -90,6 +90,48 @@ TCA bindJmp(TCA toSmash, SrcKey destSk, bool& smashed) {
   return tDest;
 }
 
+TCA bindJmpToStub(TCA toSmash, TCA oldTarget, TCA stub,
+                  SrcKey destSk, bool& smashed) {
+  auto const sr = srcDB().find(destSk);
+  always_assert(sr);
+  auto srLock = sr->writelock();
+
+  auto const isJcc = [&] {
+    switch (arch()) {
+      case Arch::X64: {
+        x64::DecodedInstruction di(toSmash);
+        return (di.isBranch() && !di.isJmp());
+      }
+
+      case Arch::ARM: {
+        auto instr = reinterpret_cast<vixl::Instruction*>(toSmash);
+        return instr->IsCondBranchImm();
+      }
+
+      case Arch::PPC64:
+        ppc64_asm::DecodedInstruction di(toSmash);
+        return di.isBranch(ppc64_asm::AllowCond::OnlyCond);
+    }
+    not_reached();
+  }();
+
+  // Return if already smashed.  Note that smashableXxTarget returns nullptr
+  // when the target was smashed if the XX was able to be optimized in place
+  // (so that it doesn't look like a smashable XX anymore).
+  if (isJcc) {
+    auto const target = smashableJccTarget(toSmash);
+    if (!target || target != oldTarget) return nullptr;
+    smashJcc(toSmash, stub);
+  } else {
+    auto const target = smashableJmpTarget(toSmash);
+    if (!target || target != oldTarget) return nullptr;
+    smashJmp(toSmash, stub);
+  }
+
+  smashed = true;
+  return stub;
+}
+
 TCA bindAddr(TCA toSmash, SrcKey destSk, bool& smashed) {
   auto const sr = srcDB().find(destSk);
   always_assert(sr);
@@ -109,6 +151,20 @@ TCA bindAddr(TCA toSmash, SrcKey destSk, bool& smashed) {
   sr->chainFrom(IncomingBranch::addr(addr));
   smashed = true;
   return tDest;
+}
+
+TCA bindAddrToStub(TCA toSmash, TCA oldTarget, TCA stub,
+                   SrcKey destSk, bool& smashed) {
+  auto const sr = srcDB().find(destSk);
+  always_assert(sr);
+  auto srLock = sr->writelock();
+
+  auto addr = reinterpret_cast<TCA*>(toSmash);
+  assert_address_is_atomically_accessible(addr);
+  if (*addr != oldTarget) return nullptr;
+  *addr = stub;
+  smashed = true;
+  return stub;
 }
 
 void bindCall(TCA toSmash, TCA start, Func* callee, int nArgs) {
@@ -141,7 +197,10 @@ void bindCall(TCA toSmash, TCA start, Func* callee, int nArgs) {
 
     // It's possible that the callee prologue was reset before we acquired the
     // lock. Make sure we have the right one.
-    start = mcgen::getFuncPrologue(callee, nArgs).addr();
+    auto const trans = mcgen::getFuncPrologue(callee, nArgs);
+    start = trans.isProcessPersistentFailure()
+      ? tc::ustubs().fcallHelperNoTranslateThunk
+      : trans.addr();
 
     // Do these checks again with the lock.
     if (start == nullptr || !smashableCallTarget(toSmash) ||

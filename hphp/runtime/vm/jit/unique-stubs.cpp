@@ -1417,6 +1417,14 @@ void emitInterpReq(Vout& v, SrcKey sk, FPInvOffset spOff) {
   v << jmpi{tc::ustubs().interpHelper, arg_regs(1)};
 }
 
+void emitInterpReqNoTranslate(Vout& v, SrcKey sk, FPInvOffset spOff) {
+  if (sk.resumeMode() == ResumeMode::None) {
+    v << lea{rvmfp()[-cellsToBytes(spOff.offset)], rvmsp()};
+  }
+  v << store{v.cns(sk.pc()), rvmtl()[rds::kVmpcOff]};
+  v << jmpi{tc::ustubs().interpHelperNoTranslate, arg_regs(1)};
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }}

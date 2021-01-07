@@ -181,17 +181,43 @@ TranslationResult getTranslation(SrcKey sk) {
  * Runtime service handler that patches a jmp to the translation of u:dest from
  * toSmash.
  */
-TranslationResult bindJmp(TCA toSmash, SrcKey destSk,
-                          ServiceRequest req, bool& smashed) {
+TranslationResult bindJmp(TCA toSmash,
+                          SrcKey destSk,
+                          FPInvOffset spOff,
+                          ServiceRequest req,
+                          TCA oldStub,
+                          bool& smashed) {
   auto const result = getTranslation(destSk);
-  if (!result.addr()) return result;
+  if (!result.addr()) {
+    if (result.isProcessPersistentFailure()) {
+      // If we couldn't make a new translation, and we won't be able
+      // to make any new translations for the remainder of the process
+      // lifetime, we can just burn in a call to
+      // handleResumeNoTranslate.
+      if (auto const stub = emit_interp_no_translate_stub(spOff, destSk)) {
+        // We still need to create a SrcRec (if one doesn't already
+        // exist) to manage the locking correctly. This can fail.
+        if (!tc::createSrcRec(destSk, liveSpOff(), true)) return result;
+        if (req == REQ_BIND_ADDR) {
+          tc::bindAddrToStub(toSmash, oldStub, stub, destSk, smashed);
+        } else {
+          assertx(req == REQ_BIND_JMP);
+          tc::bindJmpToStub(toSmash, oldStub, stub, destSk, smashed);
+        }
+      }
+    }
+    return result;
+  }
 
   if (req == REQ_BIND_ADDR) {
     if (auto const addr = tc::bindAddr(toSmash, destSk, smashed)) {
       return TranslationResult{addr};
     }
-  } else if (auto const addr = tc::bindJmp(toSmash, destSk, smashed)) {
-    return TranslationResult{addr};
+  } else {
+    assertx(req == REQ_BIND_JMP);
+    if (auto const addr = tc::bindJmp(toSmash, destSk, smashed)) {
+      return TranslationResult{addr};
+    }
   }
 
   return TranslationResult::failTransiently();
@@ -249,7 +275,8 @@ TCA handleServiceRequest(ReqInfo& info) noexcept {
     case REQ_BIND_ADDR: {
       auto const toSmash = info.args[0].tca;
       sk = SrcKey::fromAtomicInt(info.args[1].sk);
-      transResult = bindJmp(toSmash, sk, info.req, smashed);
+      transResult =
+        bindJmp(toSmash, sk, liveSpOff(), info.req, info.stub, smashed);
       break;
     }
 
@@ -351,7 +378,18 @@ TCA handleBindCall(TCA toSmash, Func* func, int32_t numArgs) {
   TRACE(2, "bindCall immutably %s -> %p\n",
         func->fullName()->data(), trans.addr());
 
-  if (trans.addr()) {
+  if (trans.isProcessPersistentFailure()) {
+    // We can't get a translation for this and we can't create any new
+    // ones any longer. Smash the call site with a stub which will
+    // interp the prologue, then run resumeHelperNoTranslate.
+    tc::bindCall(
+      toSmash,
+      tc::ustubs().fcallHelperNoTranslateThunk,
+      func,
+      numArgs
+    );
+    return tc::ustubs().fcallHelperNoTranslateThunk;
+  } else if (trans.addr()) {
     // Using start is racy but bindCall will recheck the start address after
     // acquiring a lock on the ProfTransRec
     tc::bindCall(toSmash, trans.addr(), func, numArgs);
@@ -375,6 +413,8 @@ TCA handleResume(bool interpFirst) {
   tl_regState = VMRegState::CLEAN;
 
   auto sk = liveSK();
+  FTRACE(2, "handleResume: sk: {}\n", showShort(sk));
+
   TCA start;
   if (interpFirst) {
     start = nullptr;
@@ -433,6 +473,7 @@ TCA handleResumeNoTranslate(bool interpFirst) {
   tl_regState = VMRegState::CLEAN;
 
   auto sk = liveSK();
+  FTRACE(2, "handleResumeNoTranslate: sk: {}\n", showShort(sk));
 
   auto const find = [&] () -> TCA {
     if (auto const sr = tc::findSrcRec(sk)) {

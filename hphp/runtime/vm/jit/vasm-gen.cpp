@@ -92,80 +92,95 @@ Vout& Vasm::out(AreaIndex area) {
 Vauto::~Vauto() {
   tracing::Block _{"vauto-finish", [&] { return traceProps(unit()); }};
 
-  for (auto& b : unit().blocks) {
-    if (!b.code.empty()) {
-      // Found at least one nonempty block.  Finish up.
+  try {
+    for (auto& b : unit().blocks) {
+      if (!b.code.empty()) {
+        // Found at least one nonempty block.  Finish up.
+        if (!main().closed()) main() << fallthru{};
+        if (!cold().closed()) cold() << fallthru{};
+
+        // Prevent spurious printir traces.
+        Trace::Bump bumper{Trace::printir, 10};
+
+        CodeBlock mainTmp, coldTmp;
+        auto text = [&] {
+            if (m_relocate) {
+              auto& cold = m_text.cold().code;
+              if (cold.canEmit(0x10000)) {
+                mainTmp.init(cold.frontier() + 0x8000,
+                             cold.toDestAddress(cold.frontier() + 0x8000),
+                             0x4000,
+                             "vauto main tmp");
+                coldTmp.init(cold.frontier() + 0xc000,
+                             cold.toDestAddress(cold.frontier() + 0xc000),
+                             0x4000,
+                             "vauto cold tmp");
+                return Vtext(mainTmp, coldTmp, m_text.data());
+              }
+              m_relocate = false;
+            }
+            return std::move(m_text);
+          }();
+
+        SCOPE_ASSERT_DETAIL("vasm unit") { return show(unit()); };
+        auto const abi = jit::abi(m_kind);
+        switch (arch()) {
+          case Arch::X64:
+            optimizeX64(unit(), abi, true /* regalloc */);
+            emitX64(unit(), text, m_fixups, nullptr);
+            break;
+          case Arch::ARM:
+            optimizeARM(unit(), abi, true /* regalloc */);
+            emitARM(unit(), text, m_fixups, nullptr);
+            break;
+          case Arch::PPC64:
+            optimizePPC64(unit(), abi, true /* regalloc */);
+            emitPPC64(unit(), text, m_fixups, nullptr);
+            break;
+        }
+
+        if (m_relocate) {
+          tc::relocateTranslation(
+            nullptr,
+            mainTmp, m_text.main().code, m_text.main().code.frontier(),
+            coldTmp, m_text.cold().code, m_text.cold().code.frontier(),
+            coldTmp, coldTmp.frontier(),
+            nullptr, m_fixups);
+        }
+        return;
+      }
+    }
+
+    if (unit().padding) {
+      // Force emission due to padding
       if (!main().closed()) main() << fallthru{};
       if (!cold().closed()) cold() << fallthru{};
 
-      // Prevent spurious printir traces.
-      Trace::Bump bumper{Trace::printir, 10};
-
-      CodeBlock mainTmp, coldTmp;
-      auto text = [&] {
-        if (m_relocate) {
-          auto& cold = m_text.cold().code;
-          if (cold.canEmit(0x10000)) {
-            mainTmp.init(cold.frontier() + 0x8000,
-                         cold.toDestAddress(cold.frontier() + 0x8000),
-                         0x4000,
-                         "vauto main tmp");
-            coldTmp.init(cold.frontier() + 0xc000,
-                         cold.toDestAddress(cold.frontier() + 0xc000),
-                         0x4000,
-                         "vauto cold tmp");
-            return Vtext(mainTmp, coldTmp, m_text.data());
-          }
-          m_relocate = false;
-        }
-        return std::move(m_text);
-      }();
-
-      SCOPE_ASSERT_DETAIL("vasm unit") { return show(unit()); };
-      auto const abi = jit::abi(m_kind);
       switch (arch()) {
         case Arch::X64:
-          optimizeX64(unit(), abi, true /* regalloc */);
-          emitX64(unit(), text, m_fixups, nullptr);
+          emitX64(unit(), m_text, m_fixups, nullptr);
           break;
         case Arch::ARM:
-          optimizeARM(unit(), abi, true /* regalloc */);
-          emitARM(unit(), text, m_fixups, nullptr);
+          emitARM(unit(), m_text, m_fixups, nullptr);
           break;
         case Arch::PPC64:
-          optimizePPC64(unit(), abi, true /* regalloc */);
-          emitPPC64(unit(), text, m_fixups, nullptr);
+          emitPPC64(unit(), m_text, m_fixups, nullptr);
           break;
       }
-
-      if (m_relocate) {
-        tc::relocateTranslation(
-          nullptr,
-          mainTmp, m_text.main().code, m_text.main().code.frontier(),
-          coldTmp, m_text.cold().code, m_text.cold().code.frontier(),
-          coldTmp, coldTmp.frontier(),
-          nullptr, m_fixups);
-      }
-      return;
     }
-  }
 
-  if (unit().padding) {
-    // Force emission due to padding
-    if (!main().closed()) main() << fallthru{};
-    if (!cold().closed()) cold() << fallthru{};
-
-    switch (arch()) {
-      case Arch::X64:
-        emitX64(unit(), m_text, m_fixups, nullptr);
-        break;
-      case Arch::ARM:
-        emitARM(unit(), m_text, m_fixups, nullptr);
-        break;
-      case Arch::PPC64:
-        emitPPC64(unit(), m_text, m_fixups, nullptr);
-        break;
+    if (m_wasFull) *m_wasFull = false;
+  } catch (const DataBlockFull& full) {
+    if (!m_wasFull) {
+      // Dtors are noexcept, so we cannot let DataBlockFull escape from
+      // here.
+      always_assert_flog(
+        false,
+        "Data block full in ~Vauto: {}",
+        full.what()
+      );
     }
+    *m_wasFull = true;
   }
 }
 

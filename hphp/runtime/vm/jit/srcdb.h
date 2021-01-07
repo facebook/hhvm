@@ -209,6 +209,7 @@ struct SrcRec final {
   void removeIncomingBranchesInRange(TCA start, TCA frontier);
   void newTranslation(TransLoc newStart,
                       GrowableVector<IncomingBranch>& inProgressTailBranches);
+  void smashFallbacksToStub(TCA stub);
   void replaceOldTranslations();
   size_t numTrans() const {
     auto srLock = readlock();
@@ -301,4 +302,3 @@ private:
 
 ////////////////////////////////////////////////////////////////////////////////
 }}
-

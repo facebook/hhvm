@@ -22,6 +22,7 @@
 #include "hphp/runtime/vm/jit/stack-offsets.h"
 #include "hphp/runtime/vm/jit/stub-alloc.h"
 #include "hphp/runtime/vm/jit/tc.h"
+#include "hphp/runtime/vm/jit/tc-internal.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/unique-stubs.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
@@ -220,6 +221,49 @@ TCA emit_retranslate_opt_stub(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
     REQ_RETRANSLATE_OPT,
     sk.toAtomicInt()
   );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+namespace {
+std::atomic<bool> s_fullForStub{false};
+}
+
+TCA emit_interp_no_translate_stub(FPInvOffset spOff, SrcKey sk) {
+  FTRACE(2, "interp_no_translate_stub @{} {}\n", showShort(sk), spOff.offset);
+
+  // No point on trying to emit if we already failed once.
+  if (s_fullForStub.load(std::memory_order_relaxed)) {
+    FTRACE(4, "  no space for {}, bailing\n", showShort(sk));
+    return nullptr;
+  }
+
+  tracing::Pause _p;
+  tracing::Block _{"emit-interp-no-translate-stub"};
+
+  auto codeLock = tc::lockCode();
+  auto metaLock = tc::lockMetadata();
+
+  auto view = tc::code().view();
+  auto& cb = view.frozen();
+  auto& data = view.data();
+
+  auto const start = vwrap(
+    cb,
+    data,
+    [&] (Vout& v) { emitInterpReqNoTranslate(v, sk, spOff); },
+    false,
+    true /* nullOnFull */
+  );
+
+  // We passed true to nullOnFull, so if the TC was out of space, we
+  // just get a nullptr address.
+  if (!start) {
+    FTRACE(4, "  ran out of space while making stub for {}\n", showShort(sk));
+    s_fullForStub.store(true, std::memory_order_relaxed);
+  }
+  FTRACE(4, "  emitted stub {} for {}\n", start, showShort(sk));
+  return start;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

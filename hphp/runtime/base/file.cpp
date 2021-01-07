@@ -800,6 +800,7 @@ Array File::readCSV(int64_t length /* = 0 */,
     }
     if (*tmp == enclosure_char) {
       bptr = tmp;
+      inc_len = (bptr < limit);
     }
 
     if (first_field && bptr == line_end) {

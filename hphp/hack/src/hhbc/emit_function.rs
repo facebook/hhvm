@@ -11,6 +11,7 @@ use emit_body_rust::{self as emit_body};
 use emit_memoize_helpers_rust as emit_memoize_helpers;
 use env::emitter::Emitter;
 use hhas_attribute_rust::{self as hhas_attribute, HhasAttribute};
+use hhas_coeffects::HhasCoeffects;
 use hhas_function_rust::{self as hhas_function, HhasFunction};
 use hhas_pos_rust::Span;
 use hhbc_id_rust::{self as hhbc_id, Id};
@@ -19,7 +20,6 @@ use naming_special_names_rust::user_attributes as ua;
 use ocamlrep::rc::RcOc;
 use options::HhvmFlags;
 use oxidized::{ast as tast, ast_defs};
-use rx_rust as rx;
 
 use itertools::Either;
 
@@ -90,12 +90,12 @@ pub fn emit_function<'a>(e: &mut Emitter, f: &'a tast::Fun_) -> Result<Vec<HhasF
         scope.push_item(ScopeItem::Function(ast_scope::Fun::new_ref(&f)));
     }
 
-    let rx_level = rx::Level::from_ast(&f.user_attributes).unwrap_or(rx::Level::NonRx);
+    let coeffects = HhasCoeffects::from_ast(&f.user_attributes);
     let (ast_body, rx_body) = {
-        if let rx::Level::NonRx | rx::Level::Pure = rx_level {
+        if !coeffects.is_any_rx() {
             (&f.body.ast, false)
         } else {
-            match rx::halves_of_is_enabled_body(&f.body) {
+            match hhas_coeffects::halves_of_is_enabled_body(&f.body) {
                 Some((enabled_body, disabled_body)) => {
                     if e.options().hhvm.flags.contains(HhvmFlags::RX_IS_ENABLED) {
                         (enabled_body, true)
@@ -164,7 +164,7 @@ pub fn emit_function<'a>(e: &mut Emitter, f: &'a tast::Fun_) -> Result<Vec<HhasF
         attributes: attrs,
         name: name.into(),
         span: Span::from_pos(&f.span),
-        rx_level,
+        coeffects,
         body,
         flags,
     };

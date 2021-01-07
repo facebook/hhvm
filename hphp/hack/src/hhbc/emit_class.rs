@@ -18,6 +18,7 @@ use emit_xhp_rust as emit_xhp;
 use env::{emitter::Emitter, local, Env};
 use hhas_attribute_rust as hhas_attribute;
 use hhas_class_rust::{HhasClass, HhasClassFlags, TraitReqKind};
+use hhas_coeffects::HhasCoeffects;
 use hhas_constant_rust::{self as hhas_constant, HhasConstant};
 use hhas_method_rust::{HhasMethod, HhasMethodFlags};
 use hhas_param_rust::HhasParam;
@@ -39,7 +40,6 @@ use oxidized::{
     pos::Pos,
 };
 use runtime::TypedValue;
-use rx_rust as rx;
 
 use std::collections::BTreeMap;
 
@@ -81,7 +81,7 @@ fn make_86method<'a>(
     flags.set(HhasMethodFlags::IS_STATIC, is_static);
 
     let attributes = vec![];
-    let rx_level = rx::Level::NonRx;
+    let coeffects = HhasCoeffects::default();
 
     let method_decl_vars = vec![];
     let method_return_type = None;
@@ -110,7 +110,7 @@ fn make_86method<'a>(
         name,
         flags,
         span,
-        rx_level,
+        coeffects,
         visibility,
     })
 }

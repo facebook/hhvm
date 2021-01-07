@@ -12,6 +12,7 @@ use emit_pos_rust::emit_pos_then;
 use env::{emitter::Emitter, local, Env};
 use hhas_attribute_rust::deprecation_info;
 use hhas_body_rust::HhasBody;
+use hhas_coeffects::HhasCoeffects;
 use hhas_method_rust::{HhasMethod, HhasMethodFlags};
 use hhas_param_rust::HhasParam;
 use hhas_pos_rust::Span;
@@ -25,7 +26,6 @@ use ocamlrep::rc::RcOc;
 use options::{HhvmFlags, Options};
 use oxidized::{ast as T, pos::Pos};
 use runtime::TypedValue;
-use rx_rust as rx;
 
 use std::convert::TryInto;
 
@@ -133,7 +133,7 @@ fn make_memoize_wrapper_method<'a>(
     let is_async = method.fun_kind.is_fasync();
     // __Memoize is not allowed on lambdas, so we never need to inherit the rx
     // level from the declaring scope when we're in a Memoize wrapper
-    let rx_level = rx::Level::from_ast(&method.user_attributes).unwrap_or(rx::Level::NonRx);
+    let coeffects = HhasCoeffects::from_ast(&method.user_attributes);
     let is_reified = method
         .tparams
         .iter()
@@ -153,7 +153,7 @@ fn make_memoize_wrapper_method<'a>(
         method_id: &name,
         flags: arg_flags,
     };
-    env.with_rx_body(!rx_level.is_non_rx());
+    env.with_rx_body(coeffects.is_any_rx_or_pure());
     let body = emit_memoize_wrapper_body(emitter, env, &mut args)?;
     let mut flags = HhasMethodFlags::empty();
     flags.set(HhasMethodFlags::IS_STATIC, method.static_);
@@ -167,7 +167,7 @@ fn make_memoize_wrapper_method<'a>(
         name,
         body,
         span: Span::from_pos(&method.span),
-        rx_level,
+        coeffects,
         flags,
     })
 }

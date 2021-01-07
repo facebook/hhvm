@@ -3,8 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use hhas_coeffects::HhasCoeffects;
 use oxidized::{ast, file_info, pos::Pos};
-use rx_rust as rx;
 
 use itertools::Either;
 use std::rc::Rc;
@@ -13,13 +13,13 @@ use std::rc::Rc;
 pub struct LongLambda {
     pub is_static: bool,
     pub is_async: bool,
-    pub rx_level: Option<rx::Level>,
+    pub coeffects: HhasCoeffects,
 }
 
 #[derive(Clone, Debug)]
 pub struct Lambda {
     pub is_async: bool,
-    pub rx_level: Option<rx::Level>,
+    pub coeffects: HhasCoeffects,
 }
 
 #[derive(Clone, Debug)]

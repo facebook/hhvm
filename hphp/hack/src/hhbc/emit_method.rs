@@ -11,6 +11,7 @@ use emit_native_opcode_rust as emit_native_opcode;
 use env::emitter::Emitter;
 use global_state::LazyState;
 use hhas_attribute_rust as hhas_attribute;
+use hhas_coeffects::HhasCoeffects;
 use hhas_method_rust::{HhasMethod, HhasMethodFlags};
 use hhas_pos_rust::Span;
 use hhbc_id_rust::method;
@@ -20,7 +21,6 @@ use naming_special_names_rust::{special_idents, user_attributes};
 use ocamlrep::rc::RcOc;
 use options::{HhvmFlags, Options};
 use oxidized::ast as T;
-use rx_rust as rx;
 
 use itertools::Either;
 use std::borrow::Cow;
@@ -124,7 +124,7 @@ pub fn from_ast<'a>(
     if is_closure_body {
         scope.items.push(ScopeItem::Lambda(Lambda {
             is_async,
-            rx_level: None,
+            coeffects: HhasCoeffects::default(),
         }))
     };
     let namespace = RcOc::clone(
@@ -134,35 +134,32 @@ pub fn from_ast<'a>(
             .get(&class_name)
             .unwrap_or(&class.namespace),
     );
-    let rx_level = rx::Level::from_ast(&method.user_attributes).unwrap_or_else(|| {
-        if is_closure_body {
-            emitter
-                .emit_state()
-                .get_lambda_rx_of_scope(&class.name.1, &method.name.1)
-        } else {
-            rx::Level::NonRx
-        }
-    });
-    let (ast_body_block, is_rx_body, rx_disabled) =
-        if let rx::Level::NonRx | rx::Level::Pure = rx_level {
-            (&method.body.ast, false, false)
-        } else {
-            match rx::halves_of_is_enabled_body(&method.body) {
-                None => (&method.body.ast, true, false),
-                Some((enabled_body, disabled_body)) => {
-                    if emitter
-                        .options()
-                        .hhvm
-                        .flags
-                        .contains(options::HhvmFlags::RX_IS_ENABLED)
-                    {
-                        (enabled_body, true, false)
-                    } else {
-                        (disabled_body, false, true)
-                    }
+    let mut coeffects = HhasCoeffects::from_ast(&method.user_attributes);
+    if coeffects.get_static_coeffects().is_empty() && is_closure_body {
+        coeffects = emitter
+            .emit_state()
+            .get_lambda_coeffects_of_scope(&class.name.1, &method.name.1)
+            .clone()
+    }
+    let (ast_body_block, is_rx_body, rx_disabled) = if !coeffects.is_any_rx() {
+        (&method.body.ast, false, false)
+    } else {
+        match hhas_coeffects::halves_of_is_enabled_body(&method.body) {
+            None => (&method.body.ast, true, false),
+            Some((enabled_body, disabled_body)) => {
+                if emitter
+                    .options()
+                    .hhvm
+                    .flags
+                    .contains(options::HhvmFlags::RX_IS_ENABLED)
+                {
+                    (enabled_body, true, false)
+                } else {
+                    (disabled_body, false, true)
                 }
             }
-        };
+        }
+    };
     let (body, is_generator, is_pair_generator) = if is_native_opcode_impl {
         (
             emit_native_opcode::emit_body(
@@ -246,7 +243,7 @@ pub fn from_ast<'a>(
         name,
         body,
         span,
-        rx_level,
+        coeffects,
         flags,
     })
 }

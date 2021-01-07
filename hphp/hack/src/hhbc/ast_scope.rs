@@ -6,12 +6,12 @@
 mod ast_scope_item;
 pub use ast_scope_item::*;
 
+use hhas_coeffects::HhasCoeffects;
 use oxidized::{
     ast,
     ast_defs::{FunKind, Id},
     pos::Pos,
 };
-use rx_rust as rx;
 
 #[derive(Clone, Default, Debug)]
 pub struct Scope<'a> {
@@ -182,31 +182,27 @@ impl<'a> Scope<'a> {
         self.items.last().map_or(false, &ScopeItem::is_in_lambda)
     }
 
-    pub fn rx_of_scope(&self) -> rx::Level {
-        fn from_uas(user_attrs: &[ast::UserAttribute]) -> rx::Level {
-            rx::Level::from_ast(user_attrs).unwrap_or(rx::Level::NonRx)
+    pub fn coeffects_of_scope(&self) -> HhasCoeffects {
+        fn from_uas(user_attrs: &[ast::UserAttribute]) -> HhasCoeffects {
+            HhasCoeffects::from_ast(user_attrs)
         }
         for scope_item in self.iter() {
             match scope_item {
                 ScopeItem::Class(_) => {
-                    return rx::Level::NonRx;
+                    return HhasCoeffects::default();
                 }
                 ScopeItem::Method(m) => return from_uas(m.get_user_attributes()),
                 ScopeItem::Function(f) => return from_uas(f.get_user_attributes()),
-                ScopeItem::Lambda(Lambda {
-                    rx_level: Some(ref rl),
-                    ..
-                })
-                | ScopeItem::LongLambda(LongLambda {
-                    rx_level: Some(ref rl),
-                    ..
-                }) => {
-                    return *rl;
+                ScopeItem::Lambda(Lambda { coeffects, .. })
+                | ScopeItem::LongLambda(LongLambda { coeffects, .. })
+                    if !coeffects.get_static_coeffects().is_empty() =>
+                {
+                    return coeffects.clone();
                 }
                 _ => {}
             }
         }
-        rx::Level::NonRx
+        HhasCoeffects::default()
     }
 
     pub fn has_function_attribute(&self, attr_name: impl AsRef<str>) -> bool {

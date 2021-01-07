@@ -11,4 +11,4 @@ path = "main.rs"
 
 [dependencies]
 names = { path = "sqlite" }
-structopt = "0.3.7"
+structopt = "0.3.21"

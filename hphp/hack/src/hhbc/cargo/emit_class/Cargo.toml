@@ -24,6 +24,7 @@ emit_xhp_rust = { path = "../emit_xhp" }
 env = { path = "../env" }
 hhas_attribute_rust = { path = "../hhas_attribute" }
 hhas_class_rust = { path = "../hhas_class" }
+hhas_coeffects = { path = "../hhas_coeffects" }
 hhas_constant_rust = { path = "../hhas_constant" }
 hhas_method_rust = { path = "../hhas_method" }
 hhas_param_rust = { path = "../hhas_param" }
@@ -41,4 +42,3 @@ naming_special_names_rust = { path = "../../../naming" }
 options = { path = "../options" }
 oxidized = { path = "../../../oxidized" }
 runtime = { path = "../runtime" }
-rx_rust = { path = "../rx" }

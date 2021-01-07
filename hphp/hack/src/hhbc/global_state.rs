@@ -4,10 +4,11 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use env::{emitter::Emitter, SMap, SSet, UniqueIdBuilder};
+use hhas_coeffects::HhasCoeffects;
+use lazy_static::lazy_static;
 use ocamlrep::rc::RcOc;
 use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
 use oxidized::{ast_defs::ClassKind, namespace_env::Env as NamespaceEnv};
-use rx_rust as rx;
 
 #[derive(Debug, FromOcamlRep, ToOcamlRep, Clone)]
 pub struct ClosureEnclosingClassInfo {
@@ -33,7 +34,7 @@ pub struct GlobalState {
     pub closure_enclosing_classes: SMap<ClosureEnclosingClassInfo>,
     pub functions_with_finally: SSet,
     pub function_to_labels_map: SMap<SMap<bool>>,
-    pub lambda_rx_of_scope: SMap<rx::Level>,
+    pub lambda_coeffects_of_scope: SMap<HhasCoeffects>,
 }
 
 impl GlobalState {
@@ -41,12 +42,18 @@ impl GlobalState {
         Box::new(GlobalState::default())
     }
 
-    pub fn get_lambda_rx_of_scope(&self, class_name: &str, meth_name: &str) -> rx::Level {
+    pub fn get_lambda_coeffects_of_scope(
+        &self,
+        class_name: &str,
+        meth_name: &str,
+    ) -> &HhasCoeffects {
+        lazy_static! {
+            static ref DEFAULT_HHAS_COEFFECTS: HhasCoeffects = HhasCoeffects::default();
+        }
         let key = UniqueIdBuilder::new().method(class_name, meth_name);
-        *self
-            .lambda_rx_of_scope
+        self.lambda_coeffects_of_scope
             .get(&key)
-            .unwrap_or(&rx::Level::NonRx)
+            .unwrap_or(&DEFAULT_HHAS_COEFFECTS)
     }
 
     pub fn get_closure_enclosing_class(

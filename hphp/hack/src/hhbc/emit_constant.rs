@@ -7,6 +7,7 @@ use core_utils_rust as utils;
 use emit_body_rust as emit_body;
 use emit_type_hint_rust::{self as emit_type_hint, Kind};
 use env::{emitter::Emitter, Env};
+use hhas_coeffects::HhasCoeffects;
 use hhas_constant_rust::{self as hhas_constant, HhasConstant};
 use hhas_function_rust::{self as hhas_function, HhasFunction};
 use hhas_pos_rust::Span;
@@ -14,7 +15,6 @@ use hhbc_id_rust::{r#const, function, Id};
 use hhbc_string_utils_rust::strip_global_ns;
 use instruction_sequence_rust::{instr, InstrSeq, Result};
 use oxidized::ast as tast;
-use rx_rust as rx;
 
 fn emit_constant_cinit<'a>(
     e: &mut Emitter,
@@ -64,7 +64,7 @@ fn emit_constant_cinit<'a>(
                 name: original_id.into(),
                 body,
                 span: Span::from_pos(&constant.span),
-                rx_level: rx::Level::NonRx,
+                coeffects: HhasCoeffects::default(),
                 flags: hhas_function::Flags::NO_INJECTION,
             })
         })

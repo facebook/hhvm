@@ -10,7 +10,8 @@ path = "../../global_state.rs"
 
 [dependencies]
 env = { path = "../env" }
+hhas_coeffects = { path = "../hhas_coeffects" }
 ocamlrep = { path = "../../../ocamlrep" }
 ocamlrep_derive = { path = "../../../ocamlrep_derive" }
 oxidized = { path = "../../../oxidized" }
-rx_rust = { path = "../rx" }
+lazy_static = "1.0"

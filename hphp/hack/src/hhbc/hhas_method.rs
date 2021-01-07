@@ -5,10 +5,10 @@
 
 use hhas_attribute_rust::HhasAttribute;
 use hhas_body_rust::HhasBody;
+use hhas_coeffects::HhasCoeffects;
 use hhas_pos_rust as hhas_pos;
 use hhbc_id_rust::method;
 use oxidized::aast_defs::Visibility;
-use rx_rust as rx;
 
 extern crate bitflags;
 use bitflags::bitflags;
@@ -20,7 +20,7 @@ pub struct HhasMethod<'id> {
     pub name: method::Type<'id>,
     pub body: HhasBody<'id>,
     pub span: hhas_pos::Span,
-    pub rx_level: rx::Level,
+    pub coeffects: HhasCoeffects,
     pub flags: HhasMethodFlags,
 }
 

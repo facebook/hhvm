@@ -25,6 +25,7 @@ use hhas_adata_rust::{
 use hhas_attribute_rust::{self as hhas_attribute, HhasAttribute};
 use hhas_body_rust::HhasBody;
 use hhas_class_rust::{self as hhas_class, HhasClass};
+use hhas_coeffects::HhasCoeffects;
 use hhas_constant_rust::HhasConstant;
 use hhas_function_rust::HhasFunction;
 use hhas_method_rust::{HhasMethod, HhasMethodFlags};
@@ -51,12 +52,9 @@ use ocaml_helper::escaped;
 use oxidized::{ast, ast_defs, doc_comment::DocComment, local_id, pos::Pos};
 use regex::Regex;
 use runtime::TypedValue;
-use rx_rust as rx;
 use write::*;
 
-use std::{
-    borrow::Cow, collections::BTreeSet, convert::TryInto, io::Write as _, path::Path, write,
-};
+use std::{borrow::Cow, collections::BTreeSet, io::Write as _, path::Path, write};
 
 pub mod context {
     use crate::write::*;
@@ -437,7 +435,7 @@ fn print_fun_def<W: Write>(
     w.write(" ")?;
     braces(w, |w| {
         ctx.block(w, |c, w| {
-            print_body(c, w, body, &fun_def.attributes, fun_def.rx_level)
+            print_body(c, w, body, &fun_def.attributes, &fun_def.coeffects)
         })?;
         newline(w)
     })?;
@@ -836,7 +834,7 @@ fn print_method_def<W: Write>(
     w.write(" ")?;
     braces(w, |w| {
         ctx.block(w, |c, w| {
-            print_body(c, w, body, &method_def.attributes, method_def.rx_level)
+            print_body(c, w, body, &method_def.attributes, &method_def.coeffects)
         })?;
         newline(w)?;
         w.write("  ")
@@ -1124,7 +1122,7 @@ fn print_body<W: Write>(
     w: &mut W,
     body: &HhasBody,
     attrs: &Vec<HhasAttribute>,
-    rx_level: rx::Level,
+    coeffects: &HhasCoeffects,
 ) -> Result<(), W::Error> {
     print_doc_comment(ctx, w, &body.doc_comment)?;
     if body.is_memoize_wrapper {
@@ -1151,14 +1149,10 @@ fn print_body<W: Write>(
         })?;
         w.write(";")?;
     }
-    if let Ok(level) = rx_level.try_into() {
-        let level_str: &str = level;
-        // TODO: static coeffects should be a space separated list of
-        // all coeffects
-        // TODO: refactor rx_level to be static coeffect list instead
+    if let Some(static_coeffects) = HhasCoeffects::static_coeffects_to_string(&coeffects) {
         ctx.newline(w)?;
         w.write(".static_coeffects ")?;
-        w.write(level_str)?;
+        w.write(static_coeffects)?;
         w.write(";")?;
     }
     for i in body.rx_cond_rx_of_arg.iter() {

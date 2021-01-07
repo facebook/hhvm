@@ -18,6 +18,7 @@ emit_native_opcode_rust = { path = "../emit_native_opcode" }
 env = { path = "../env" }
 global_state = { path = "../global_state" }
 hhas_attribute_rust = { path = "../hhas_attribute" }
+hhas_coeffects = { path = "../hhas_coeffects" }
 hhas_method_rust = { path = "../hhas_method" }
 hhas_pos_rust = { path = "../hhas_pos" }
 hhbc_id_rust = { path = "../hhbc_id" }
@@ -27,5 +28,4 @@ naming_special_names_rust = { path = "../../../naming" }
 ocamlrep = { path = "../../../ocamlrep" }
 options = { path = "../options" }
 oxidized = { path = "../../../oxidized" }
-rx_rust = { path = "../rx" }
 itertools = "0.8"

@@ -10,6 +10,7 @@ use emit_param_rust as emit_param;
 use emit_pos_rust::emit_pos_then;
 use env::{emitter::Emitter, local, Env};
 use hhas_body_rust::HhasBody;
+use hhas_coeffects::HhasCoeffects;
 use hhas_function_rust::{Flags as HhasFunctionFlags, HhasFunction};
 use hhas_param_rust::HhasParam;
 use hhas_pos_rust::Span;
@@ -22,7 +23,6 @@ use ocamlrep::rc::RcOc;
 use options::{HhvmFlags, Options, RepoFlags};
 use oxidized::{ast as T, pos::Pos};
 use runtime::TypedValue;
-use rx_rust as rx;
 
 pub(crate) fn is_interceptable(opts: &Options) -> bool {
     opts.hhvm
@@ -74,8 +74,8 @@ pub(crate) fn emit_wrapper_function<'a>(
         f.fun_kind.is_fasync(),
         is_reified,
     )?;
-    let rx_level = rx::Level::from_ast(&f.user_attributes).unwrap_or(rx::Level::NonRx);
-    env.with_rx_body(!rx_level.is_non_rx());
+    let coeffects = HhasCoeffects::from_ast(&f.user_attributes);
+    env.with_rx_body(coeffects.is_any_rx_or_pure());
     let body = make_wrapper_body(
         emitter,
         env,
@@ -95,7 +95,7 @@ pub(crate) fn emit_wrapper_function<'a>(
         name: original_id,
         body,
         span: Span::from_pos(&f.span),
-        rx_level,
+        coeffects,
         flags,
     })
 }

@@ -14,6 +14,7 @@ use decl_vars_rust as decl_vars;
 use emit_fatal_rust as emit_fatal;
 use env::emitter::Emitter;
 use global_state::{ClosureEnclosingClassInfo, GlobalState, LazyState};
+use hhas_coeffects::HhasCoeffects;
 use hhbc_id::class;
 use hhbc_id_rust as hhbc_id;
 use hhbc_string_utils_rust as string_utils;
@@ -31,7 +32,6 @@ use oxidized::{
     relative_path::{Prefix, RelativePath},
     s_map::SMap,
 };
-use rx_rust as rx;
 use std::path::PathBuf;
 use unique_list_rust::UniqueList;
 
@@ -153,20 +153,23 @@ impl<'a> Env<'a> {
 
     fn with_lambda(&mut self, fd: &Fun_) -> Result<()> {
         let is_async = fd.fun_kind.is_async();
-        let rx_level = rx::Level::from_ast(&fd.user_attributes);
+        let coeffects = HhasCoeffects::from_ast(&fd.user_attributes);
 
-        let lambda = Lambda { is_async, rx_level };
+        let lambda = Lambda {
+            is_async,
+            coeffects,
+        };
         self.with_function_like(ScopeItem::Lambda(lambda), true, fd)
     }
 
     fn with_longlambda(&mut self, is_static: bool, fd: &Fun_) -> Result<()> {
         let is_async = fd.fun_kind.is_async();
-        let rx_level = rx::Level::from_ast(&fd.user_attributes);
+        let coeffects = HhasCoeffects::from_ast(&fd.user_attributes);
 
         let long_lambda = LongLambda {
             is_static,
             is_async,
-            rx_level,
+            coeffects,
         };
         self.with_function_like(ScopeItem::LongLambda(long_lambda), true, fd)
     }
@@ -273,16 +276,16 @@ impl State {
         &mut self,
         key: String,
         fun: PerFunctionState,
-        rx_of_scope: rx::Level,
+        coeffects_of_scope: HhasCoeffects,
     ) {
         if fun.has_finally {
             self.global_state.functions_with_finally.insert(key.clone());
         }
 
-        if rx_of_scope != rx::Level::NonRx {
+        if !coeffects_of_scope.get_static_coeffects().is_empty() {
             self.global_state
-                .lambda_rx_of_scope
-                .insert(key, rx_of_scope);
+                .lambda_coeffects_of_scope
+                .insert(key, coeffects_of_scope);
         }
     }
 
@@ -625,7 +628,7 @@ fn convert_lambda<'a>(
     let captured_vars = st.captured_vars.clone();
     let captured_generics = st.captured_generics.clone();
     let old_function_state = st.current_function_state.clone();
-    let rx_of_scope = env.scope.rx_of_scope();
+    let coeffects_of_scope = env.scope.coeffects_of_scope();
     st.enter_lambda();
     if let Some(user_vars) = &use_vars_opt {
         for aast_defs::Lid(p, id) in user_vars.iter() {
@@ -766,7 +769,7 @@ fn convert_lambda<'a>(
     st.record_function_state(
         env::get_unique_id_for_method(&cd.name.1, &cd.methods.first().unwrap().name.1),
         function_state,
-        rx_of_scope,
+        coeffects_of_scope,
     );
     // back to using env instead of lambda_env here
 
@@ -1088,7 +1091,7 @@ impl<'ast, 'a> VisitorMut<'ast> for ClosureConvertVisitor<'a> {
         self.state.record_function_state(
             env::get_unique_id_for_method(cls.get_name_str(), &md.name.1),
             function_state,
-            rx::Level::NonRx,
+            HhasCoeffects::default(),
         );
         visit_mut(self, &mut env, &mut md.params)
     }
@@ -1117,7 +1120,7 @@ impl<'ast, 'a> VisitorMut<'ast> for ClosureConvertVisitor<'a> {
                 self.state.record_function_state(
                     env::get_unique_id_for_function(&x.name.1),
                     function_state,
-                    rx::Level::NonRx,
+                    HhasCoeffects::default(),
                 );
                 visit_mut(self, &mut env, &mut x.params)?;
                 visit_mut(self, &mut env, &mut x.user_attributes)
@@ -1633,7 +1636,7 @@ pub fn convert_toplevel_prog(e: &mut Emitter, defs: &mut Program) -> Result<()> 
     visitor.state.record_function_state(
         env::get_unique_id_for_main(),
         visitor.state.current_function_state.clone(),
-        rx::Level::NonRx,
+        HhasCoeffects::default(),
     );
     hoist_toplevel_functions(&mut new_defs);
     let named_fun_defs = visitor

@@ -835,6 +835,28 @@ pub mod rx {
     }
 }
 
+pub mod coeffects {
+    pub const DEFAULTS: &str = "defaults";
+
+    pub const RX_LOCAL: &str = "rx_local";
+
+    pub const RX_SHALLOW: &str = "rx_shallow";
+
+    pub const RX: &str = "rx";
+
+    pub const LOCAL: &str = "local";
+
+    pub const CIPP_LOCAL: &str = "cipp_local";
+
+    pub const CIPP_SHALLOW: &str = "cipp_shallow";
+
+    pub const CIPP_GLOBAL: &str = "cipp_global";
+
+    pub const CIPP: &str = "cipp";
+
+    pub const PURE: &str = "pure";
+}
+
 pub mod shapes {
     pub const SHAPES: &str = "\\HH\\Shapes";
 

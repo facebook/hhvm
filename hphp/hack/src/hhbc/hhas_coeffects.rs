@@ -3,9 +3,14 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use naming_special_names_rust::{self as sn, user_attributes::*};
+use hhbc_string_utils_rust::strip_ns;
+use naming_special_names_rust::{self as sn, coeffects as c, user_attributes as attr};
 use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
-use oxidized::{aast as a, ast_defs};
+use oxidized::{
+    aast as a,
+    aast_defs::{Hint, Hint_},
+    ast_defs::Id,
+};
 use std::fmt;
 
 #[derive(Debug, Clone, Copy, PartialEq, ToOcamlRep, FromOcamlRep)]
@@ -16,6 +21,7 @@ pub enum Ctx {
     RxLocal,
     RxShallow,
     Rx,
+    Local,
 
     // Cipp hierarchy
     CippLocal,
@@ -31,15 +37,16 @@ impl fmt::Display for Ctx {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         use Ctx::*;
         match self {
-            Defaults => write!(f, "defaults"),
-            RxLocal => write!(f, "rx_local"),
-            RxShallow => write!(f, "rx_shallow"),
-            Rx => write!(f, "rx"),
-            CippLocal => write!(f, "cipp_local"),
-            CippShallow => write!(f, "cipp_shallow"),
-            Cipp => write!(f, "cipp"),
-            CippGlobal => write!(f, "cipp_global"),
-            Pure => write!(f, "pure"),
+            Defaults => write!(f, "{}", c::DEFAULTS),
+            RxLocal => write!(f, "{}", c::RX_LOCAL),
+            RxShallow => write!(f, "{}", c::RX_SHALLOW),
+            Rx => write!(f, "{}", c::RX),
+            Local => write!(f, "{}", c::LOCAL),
+            CippLocal => write!(f, "{}", c::CIPP_LOCAL),
+            CippShallow => write!(f, "{}", c::CIPP_SHALLOW),
+            Cipp => write!(f, "{}", c::CIPP),
+            CippGlobal => write!(f, "{}", c::CIPP_GLOBAL),
+            Pure => write!(f, "{}", c::PURE),
         }
     }
 }
@@ -69,36 +76,56 @@ impl HhasCoeffects {
 
     pub fn from_ast<Ex, Fb, En, Hi>(
         ast_attrs: impl AsRef<[a::UserAttribute<Ex, Fb, En, Hi>]>,
-        _ctxs: &Option<a::Contexts>,
+        ctxs_opt: &Option<a::Contexts>,
     ) -> Self {
         let mut static_coeffects = vec![];
         let mut is_any_rx = false;
         let mut is_pure = false;
 
-        let ast_attrs = ast_attrs.as_ref();
-        let attrs_contain = |name| ast_attrs.iter().any(|attr| attr.name.1 == name);
-
-        if attrs_contain(NON_RX) {
-            static_coeffects.push(Ctx::Defaults);
-        }
-        if attrs_contain(LOCAL_REACTIVE) {
-            is_any_rx = true;
-            static_coeffects.push(Ctx::RxLocal);
-        }
-        if attrs_contain(SHALLOW_REACTIVE) {
-            is_any_rx = true;
-            static_coeffects.push(Ctx::RxShallow);
-        }
-        if attrs_contain(REACTIVE) {
-            is_any_rx = true;
-            static_coeffects.push(Ctx::Rx);
-        }
-        if attrs_contain(PURE) {
-            is_pure = true;
-            static_coeffects.push(Ctx::Pure);
+        // From attributes
+        for attr in ast_attrs.as_ref() {
+            match attr.name.1.as_str() {
+                attr::NON_RX => static_coeffects.push(Ctx::Defaults),
+                attr::LOCAL_REACTIVE => static_coeffects.push(Ctx::RxLocal),
+                attr::SHALLOW_REACTIVE => static_coeffects.push(Ctx::RxShallow),
+                attr::REACTIVE => static_coeffects.push(Ctx::Rx),
+                attr::PURE => static_coeffects.push(Ctx::Pure),
+                _ => {}
+            }
+            match attr.name.1.as_str() {
+                attr::LOCAL_REACTIVE | attr::SHALLOW_REACTIVE | attr::REACTIVE => is_any_rx = true,
+                attr::PURE => is_pure = true,
+                _ => {}
+            }
         }
 
-        // TODO: Add coeffects from ctxs
+        // From coeffect syntax
+        if let Some(ctxs) = ctxs_opt {
+            if ctxs.1.is_empty() {
+                is_pure = true;
+                static_coeffects.push(Ctx::Pure);
+            }
+            for ctx in &ctxs.1 {
+                let Hint(_, h) = ctx;
+                if let Hint_::Happly(Id(_, id), _) = &**h {
+                    match strip_ns(id.as_str()) {
+                        c::DEFAULTS => static_coeffects.push(Ctx::Defaults),
+                        c::RX_LOCAL => static_coeffects.push(Ctx::RxLocal),
+                        c::RX_SHALLOW => static_coeffects.push(Ctx::RxShallow),
+                        c::RX => static_coeffects.push(Ctx::Rx),
+                        c::LOCAL => static_coeffects.push(Ctx::Local),
+                        c::CIPP_LOCAL => static_coeffects.push(Ctx::CippLocal),
+                        c::CIPP_SHALLOW => static_coeffects.push(Ctx::CippShallow),
+                        c::CIPP_GLOBAL => static_coeffects.push(Ctx::CippGlobal),
+                        c::CIPP => static_coeffects.push(Ctx::Cipp),
+                        _ => {}
+                    }
+                    if let c::RX_LOCAL | c::RX_SHALLOW | c::RX = strip_ns(id.as_str()) {
+                        is_any_rx = true;
+                    }
+                }
+            }
+        }
 
         Self {
             static_coeffects,
@@ -126,7 +153,7 @@ pub fn halves_of_is_enabled_body<Ex, Fb, En, Hi>(
     use a::*;
     if let [Stmt(_, Stmt_::If(if_))] = body.ast.as_slice() {
         if let (Expr(_, Expr_::Id(sid)), enabled, disabled) = &**if_ {
-            let ast_defs::Id(_, name) = &**sid;
+            let Id(_, name) = &**sid;
             return if name != sn::rx::IS_ENABLED {
                 None
             } else {

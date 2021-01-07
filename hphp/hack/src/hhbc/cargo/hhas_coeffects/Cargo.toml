@@ -9,6 +9,7 @@ include = ["../../hhas_coeffects.rs"]
 path = "../../hhas_coeffects.rs"
 
 [dependencies]
+hhbc_string_utils_rust = { path = "../string_utils" }
 naming_special_names_rust = { path = "../../../naming" }
 ocamlrep = { path = "../../../ocamlrep" }
 ocamlrep_derive = { path = "../../../ocamlrep_derive" }

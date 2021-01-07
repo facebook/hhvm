@@ -877,31 +877,6 @@ pub mod superglobals {
     }
 }
 
-pub mod ppl_functions {
-    use lazy_static::lazy_static;
-    use std::collections::HashSet;
-
-    pub static ALL_RESERVED: &[&str] = &[
-        "sample",
-        "\\sample",
-        "factor",
-        "\\factor",
-        "observe",
-        "\\observe",
-        "condition",
-        "\\condition",
-        "sample_model",
-        "\\sample_model",
-    ];
-
-    lazy_static! {
-        static ref ALL_RESERVED_SET: HashSet<&'static str> = ALL_RESERVED.iter().cloned().collect();
-    }
-    pub fn is_reserved(x: &str) -> bool {
-        ALL_RESERVED_SET.contains(x)
-    }
-}
-
 pub mod xhp {
     pub const PCDATA: &str = "pcdata";
     pub const ANY: &str = "any";

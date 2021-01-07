@@ -997,9 +997,30 @@ pub fn ctx_var_missing_type_hint(param_name: &str) -> Error {
     ))
 }
 
+pub fn ctx_var_variadic(param_name: &str) -> Error {
+    Cow::Owned(format!(
+        "Parameter {} used for dependent context cannot be variadic",
+        param_name.to_string()
+    ))
+}
+
 pub fn ctx_var_invalid_type_hint(param_name: &str) -> Error {
     Cow::Owned(format!(
         "Type hint for parameter {} used for dependent context must be a class or a generic",
         param_name.to_string()
+    ))
+}
+
+pub fn ctx_fun_invalid_type_hint(param_name: &str) -> Error {
+    Cow::Owned(format!(
+        "Type hint for parameter {} used for contextful function must be a function type hint whose context is exactly `[_]`, e.g. `(function (ts)[_]: t)`",
+        param_name.to_string()
+    ))
+}
+
+pub fn effect_polymorphic_memoized(kind: &str) -> Error {
+    Cow::Owned(format!(
+        "This {} cannot be memoized because it has a polymorphic context",
+        kind
     ))
 }

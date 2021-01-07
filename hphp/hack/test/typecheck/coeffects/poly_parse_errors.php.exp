@@ -1,0 +1,26 @@
+File "poly_parse_errors.php", line 4, characters 3-8:
+Could not find parameter $f for dependent context (Parsing[1002])
+File "poly_parse_errors.php", line 5, characters 3-4:
+Could not find parameter $g for dependent context (Parsing[1002])
+File "poly_parse_errors.php", line 9, characters 3-4:
+Parameter $f used for dependent context must have a type hint (Parsing[1002])
+File "poly_parse_errors.php", line 10, characters 3-4:
+Parameter $g used for dependent context must have a type hint (Parsing[1002])
+File "poly_parse_errors.php", line 18, characters 3-21:
+Type hint for parameter $g used for contextful function must be a function type hint whose context is exactly `[_]`, e.g. `(function (ts)[_]: t)` (Parsing[1002])
+File "poly_parse_errors.php", line 19, characters 15-16:
+Type hint for parameter $h used for contextful function must be a function type hint whose context is exactly `[_]`, e.g. `(function (ts)[_]: t)` (Parsing[1002])
+File "poly_parse_errors.php", line 20, characters 16-23:
+Type hint for parameter $j used for contextful function must be a function type hint whose context is exactly `[_]`, e.g. `(function (ts)[_]: t)` (Parsing[1002])
+File "poly_parse_errors.php", line 29, characters 3-9:
+Type hint for parameter $x used for dependent context must be a class or a generic (Parsing[1002])
+File "poly_parse_errors.php", line 30, characters 15-16:
+Parameter $y used for dependent context cannot be variadic (Parsing[1002])
+File "poly_parse_errors.php", line 36, characters 3-11:
+This function cannot be memoized because it has a polymorphic context (Parsing[1002])
+File "poly_parse_errors.php", line 40, characters 5-13:
+This method cannot be memoized because it has a polymorphic context (Parsing[1002])
+File "poly_parse_errors.php", line 9, characters 3-4:
+Was expecting a type hint (Typing[4032])
+File "poly_parse_errors.php", line 10, characters 3-4:
+Was expecting a type hint (Typing[4032])

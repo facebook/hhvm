@@ -5,7 +5,7 @@ function poly(
 )[ctx $f]: void {}
 
 function poly2(
-  (function (): void) $f,
+  (function ()[_]: void) $f,
   (function ()[defaults]: void) $g,
 )[ctx $f, output]: void {
   $f();

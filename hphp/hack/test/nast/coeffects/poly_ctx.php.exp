@@ -1,6 +1,6 @@
 [(Fun
-    { f_span = [5:1-8:19]; f_annotation = (); f_mode = Mstrict;
-      f_ret = ((), (Some ([8:12-16], (Hprim Tvoid))));
+    { f_span = [5:1-8:28]; f_annotation = (); f_mode = Mstrict;
+      f_ret = ((), (Some ([8:21-25], (Hprim Tvoid))));
       f_name = ([5:10-14], "\\poly");
       f_tparams =
       [{ tp_variance = Invariant; tp_name = ([6:19-20], "Tctx$f");
@@ -49,8 +49,14 @@
           param_name = "$nf"; param_expr = None; param_callconv = None;
           param_user_attributes = []; param_visibility = None }
         ];
-      f_ctxs = (Some ([8:2-10], [([8:3-9], (Hfun_context "$f"))]));
-      f_unsafe_ctxs = (Some ([8:2-10], [([8:3-9], (Hfun_context "$f"))]));
+      f_ctxs =
+      (Some ([8:2-19],
+             [([8:3-9], (Hfun_context "$f"));
+               ([8:11-18], (Hfun_context "$nf"))]));
+      f_unsafe_ctxs =
+      (Some ([8:2-19],
+             [([8:3-9], (Hfun_context "$f"));
+               ([8:11-18], (Hfun_context "$nf"))]));
       f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = Named };
       f_fun_kind = FSync; f_user_attributes = [];
       f_file_attributes =

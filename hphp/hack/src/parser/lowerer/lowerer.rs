@@ -3173,6 +3173,25 @@ where
         }
     }
 
+    fn has_polymorphic_context(contexts: &Option<ast::Contexts>) -> bool {
+        use ast::Hint_::{Haccess, HfunContext, Hvar};
+        if let Some(ast::Contexts(_, ref context_hints)) = contexts {
+            return context_hints.iter().any(|c| match *c.1 {
+                HfunContext(_) => true,
+                Haccess(ref root, _) => {
+                    if let Hvar(_) = *root.1 {
+                        true
+                    } else {
+                        false
+                    }
+                }
+                _ => false,
+            });
+        } else {
+            false
+        }
+    }
+
     fn rewrite_effect_polymorphism(
         env: &mut Env<'a, TF>,
         params: &mut Vec<ast::FunParam>,
@@ -3182,24 +3201,11 @@ where
     ) {
         use ast::{Hint, Hint_, ReifyKind, Variance};
         use Hint_::{Haccess, Happly, HfunContext, Hvar};
-        if contexts.is_none() {
+
+        if !Self::has_polymorphic_context(contexts) {
             return;
         }
         let ast::Contexts(ref _p, ref context_hints) = contexts.as_ref().unwrap();
-        let has_polymorphic_context = context_hints.iter().any(|c| match &*c.1 {
-            HfunContext(_) => true,
-            Haccess(ref root, _) => {
-                if let Hvar(_) = *root.1 {
-                    true
-                } else {
-                    false
-                }
-            }
-            _ => false,
-        });
-        if !has_polymorphic_context {
-            return;
-        }
         let tp = |name, v| ast::Tparam {
             variance: Variance::Invariant,
             name,
@@ -3209,54 +3215,94 @@ where
             user_attributes: vec![],
         };
 
-        let rewrite_fun_ctx_hint =
-            |ref mut hint: &mut Hint, tparams: &mut Vec<ast::Tparam>, name: &str| match *hint.1 {
-                Hint_::Hfun(ref mut hf) => {
-                    if let Some(ast::Contexts(ref _p, ref mut hl)) = &mut hf.ctxs {
-                        if let [ref mut h] = *hl.as_mut_slice() {
-                            if let Hint_::Happly(ast::Id(_, s), _) = &*h.1 {
-                                if s == "_" {
-                                    *h.1 = Hint_::HfunContext(name.to_string());
-                                    tparams.push(tp(
-                                        ast::Id(h.0.clone(), "Tctx".to_string() + name),
-                                        vec![],
-                                    ));
+        // For polymorphic context with form `ctx $f`
+        // require that `(function (ts)[_]: t) $f` exists
+        // rewrite as `(function (ts)[ctx $f]: t) $f`
+        // add a type parameter named "Tctx$f"
+        let rewrite_fun_ctx =
+            |env: &mut Env<'a, TF>, tparams: &mut Vec<ast::Tparam>, hint: &mut Hint, name: &str| {
+                let mut invalid = |p| {
+                    Self::raise_parsing_error_pos(
+                        p,
+                        env,
+                        &syntax_error::ctx_fun_invalid_type_hint(name),
+                    )
+                };
+                match *hint.1 {
+                    Hint_::Hfun(ref mut hf) => {
+                        if let Some(ast::Contexts(ref p, ref mut hl)) = &mut hf.ctxs {
+                            if let [ref mut h] = *hl.as_mut_slice() {
+                                if let Hint_::Happly(ast::Id(ref pos, s), _) = &*h.1 {
+                                    if s == "_" {
+                                        *h.1 = Hint_::HfunContext(name.to_string());
+                                        tparams.push(tp(
+                                            ast::Id(h.0.clone(), "Tctx".to_string() + name),
+                                            vec![],
+                                        ));
+                                    } else {
+                                        invalid(pos);
+                                    }
+                                } else {
+                                    invalid(p);
                                 }
+                            } else {
+                                invalid(p);
                             }
+                        } else {
+                            invalid(&hint.0);
                         }
                     }
+                    _ => {}
                 }
-                _ => {}
             };
 
-        // Rewrite `(function (tbar)[_]: t) $f` as `(function (tbar)[ctx $f]: t) $f`
-        // and add a non-denotable type parameter named "ctx$f"
-        for param in params.iter_mut() {
-            if let Some(ref mut param_hint) = param.type_hint.1 {
-                match *param_hint.1 {
-                    Hint_::Hoption(ref mut h) => rewrite_fun_ctx_hint(h, tparams, &param.name),
-                    _ => rewrite_fun_ctx_hint(param_hint, tparams, &param.name),
-                }
-            }
-        }
-
-        let rewrite_param_hint = |
+        // For polymorphic context with form `$g::C`
+        // if $g's type is not a type parameter
+        //   add one named "T$g" constrained by $g's type
+        //   replace $g's type hint
+        // let Tg denote $g's final type (must be a type parameter).
+        // add a type parameter "T$g@C"
+        // add a where constraint T$g@C = Tg :: C
+        let rewrite_arg_ctx = |
             env: &mut Env<'a, TF>,
-            hint: &mut Hint,
             tparams: &mut Vec<ast::Tparam>,
-            pos: &Pos,
+            where_constraints: &mut Vec<ast::WhereConstraintHint>,
+            hint: &mut Hint,
+            param_pos: &Pos,
             name: &str,
+            context_pos: &Pos,
+            cst: &ast::Id,
         | match *hint.1 {
             Happly(ast::Id(_, ref type_name), _) => {
                 if !tparams.iter().any(|h| h.name.1 == *type_name) {
                     // If the parameter is X $g, create tparam `T$g as X` and replace $g's type hint
-                    let id = ast::Id(pos.clone(), "T".to_string() + name);
+                    let id = ast::Id(param_pos.clone(), "T".to_string() + name);
                     tparams.push(tp(
                         id.clone(),
                         vec![(ast::ConstraintKind::ConstraintAs, hint.clone())],
                     ));
-                    *hint = ast::Hint::new(pos.clone(), Happly(id, vec![]));
+                    *hint = ast::Hint::new(param_pos.clone(), Happly(id, vec![]));
                 };
+                let right = ast::Hint::new(
+                    context_pos.clone(),
+                    Haccess(hint.clone(), vec![cst.clone()]),
+                );
+                let left_id = ast::Id(
+                    context_pos.clone(),
+                    // IMPORTANT: using `::` here will not work, because
+                    // Typing_taccess constructs its own fake type parameter
+                    // for the Taccess with `::`. So, if the two type parameters
+                    // are named `Tprefix` and `Tprefix::Const`, the latter
+                    // will collide with the one generated for `Tprefix`::Const
+                    "T".to_string() + name + "@" + &cst.1,
+                );
+                tparams.push(tp(left_id.clone(), vec![]));
+                let left = ast::Hint::new(context_pos.clone(), Happly(left_id, vec![]));
+                where_constraints.push(ast::WhereConstraintHint(
+                    left,
+                    ast::ConstraintKind::ConstraintEq,
+                    right,
+                ))
             }
             _ => Self::raise_parsing_error_pos(
                 &hint.0,
@@ -3265,75 +3311,91 @@ where
             ),
         };
 
-        // For each context $g::C
-        // Get $g's type. If the type is not a type parameter, add one called
-        // "T$g" constrained by $g's type and replace $g's type hint.
-        // Add a type parameter "T$g@C".
-        // Let Tg denote $g's final type (must be a type parameter). Add a where constraint
-        // T$g@C = Tg :: C
         let mut hint_by_param: std::collections::HashMap<
             &str,
-            (&mut Option<ast::Hint>, &Pos),
+            (&mut Option<ast::Hint>, &Pos, aast::IsVariadic),
             std::hash::BuildHasherDefault<fnv::FnvHasher>,
         > = fnv::FnvHashMap::default();
         for param in params.iter_mut() {
-            hint_by_param.insert(param.name.as_ref(), (&mut param.type_hint.1, &param.pos));
+            hint_by_param.insert(
+                param.name.as_ref(),
+                (&mut param.type_hint.1, &param.pos, param.is_variadic),
+            );
         }
+
+
         for context_hint in context_hints {
-            if let Haccess(ref root, ref csts) = *context_hint.1 {
-                if let Hvar(ref name) = *root.1 {
-                    if let [ref cst] = *csts.as_slice() {
-                        if let Some((hint_opt, param_pos)) = hint_by_param.get_mut::<str>(name) {
-                            if let Some(ref mut param_hint) = hint_opt {
-                                let right_root = match *param_hint.1 {
-                                    Hint_::Hoption(ref mut h) => {
-                                        rewrite_param_hint(env, h, tparams, param_pos, name);
-                                        h
+            match *context_hint.1 {
+                HfunContext(ref name) => match hint_by_param.get_mut::<str>(name) {
+                    Some((hint_opt, param_pos, _is_variadic)) => match hint_opt {
+                        Some(ref mut param_hint) => match *param_hint.1 {
+                            Hint_::Hoption(ref mut h) => rewrite_fun_ctx(env, tparams, h, name),
+                            _ => rewrite_fun_ctx(env, tparams, param_hint, name),
+                        },
+                        None => Self::raise_parsing_error_pos(
+                            param_pos,
+                            env,
+                            &syntax_error::ctx_var_missing_type_hint(name),
+                        ),
+                    },
+
+                    None => Self::raise_parsing_error_pos(
+                        &context_hint.0,
+                        env,
+                        &syntax_error::ctx_var_invalid_parameter(name),
+                    ),
+                },
+                Haccess(ref root, ref csts) => {
+                    if let Hvar(ref name) = *root.1 {
+                        match hint_by_param.get_mut::<str>(name) {
+                            Some((hint_opt, param_pos, is_variadic)) => {
+                                if *is_variadic {
+                                    Self::raise_parsing_error_pos(
+                                        param_pos,
+                                        env,
+                                        &syntax_error::ctx_var_variadic(name),
+                                    )
+                                } else {
+                                    match hint_opt {
+                                        Some(ref mut param_hint) => match *param_hint.1 {
+                                            Hint_::Hoption(ref mut h) => rewrite_arg_ctx(
+                                                env,
+                                                tparams,
+                                                where_constraints,
+                                                h,
+                                                param_pos,
+                                                name,
+                                                &context_hint.0,
+                                                &csts[0],
+                                            ),
+                                            _ => rewrite_arg_ctx(
+                                                env,
+                                                tparams,
+                                                where_constraints,
+                                                param_hint,
+                                                param_pos,
+                                                name,
+                                                &context_hint.0,
+                                                &csts[0],
+                                            ),
+                                        },
+                                        None => Self::raise_parsing_error_pos(
+                                            param_pos,
+                                            env,
+                                            &syntax_error::ctx_var_missing_type_hint(name),
+                                        ),
                                     }
-                                    _ => {
-                                        rewrite_param_hint(
-                                            env, param_hint, tparams, param_pos, name,
-                                        );
-                                        param_hint
-                                    }
-                                };
-                                let right = ast::Hint::new(
-                                    context_hint.0.clone(),
-                                    Haccess(right_root.clone(), vec![cst.clone()]),
-                                );
-                                let left_id = ast::Id(
-                                    context_hint.0.clone(),
-                                    // IMPORTANT: using `::` here will not work, because
-                                    // Typing_taccess constructs its own fake type parameter
-                                    // for the Taccess with `::`. So, if the two type parameters
-                                    // are named `Tprefix` and `Tprefix::Const`, the latter
-                                    // will collide with the one generated for `Tprefix`::Const
-                                    "T".to_string() + &name + "@" + &cst.1,
-                                );
-                                tparams.push(tp(left_id.clone(), vec![]));
-                                let left =
-                                    ast::Hint::new(context_hint.0.clone(), Happly(left_id, vec![]));
-                                where_constraints.push(ast::WhereConstraintHint(
-                                    left,
-                                    ast::ConstraintKind::ConstraintEq,
-                                    right,
-                                ))
-                            } else {
-                                Self::raise_parsing_error_pos(
-                                    param_pos,
-                                    env,
-                                    &syntax_error::ctx_var_missing_type_hint(name),
-                                )
+                                }
                             }
-                        } else {
-                            Self::raise_parsing_error_pos(
+                            None => Self::raise_parsing_error_pos(
                                 &root.0,
                                 env,
                                 &syntax_error::ctx_var_invalid_parameter(name),
-                            )
+                            ),
                         }
                     }
                 }
+                _ => {}
             }
         }
     }
@@ -4298,6 +4360,12 @@ where
                 let is_abstract = kinds.has(modifier::ABSTRACT);
                 let is_external = !is_abstract && c.function_body.is_external();
                 let user_attributes = Self::p_user_attributes(&c.attribute, env)?;
+                Self::check_effect_polymorphic_memoized(
+                    &hdr.contexts,
+                    &user_attributes,
+                    "method",
+                    env,
+                );
                 let method = ast::Method_ {
                     span: Self::p_fun_pos(node, env),
                     annotation: (),
@@ -4643,6 +4711,26 @@ where
         }
     }
 
+    fn check_effect_polymorphic_memoized(
+        contexts: &Option<ast::Contexts>,
+        user_attributes: &[aast::UserAttribute<Pos, (), (), ()>],
+        kind: &str,
+        env: &mut Env<'a, TF>,
+    ) {
+        if Self::has_polymorphic_context(contexts) {
+            if let Some(u) = user_attributes
+                .iter()
+                .find(|u| u.name.1 == naming_special_names_rust::user_attributes::MEMOIZE)
+            {
+                Self::raise_parsing_error_pos(
+                    &u.name.0,
+                    env,
+                    &syntax_error::effect_polymorphic_memoized(kind),
+                )
+            }
+        }
+    }
+
     fn p_def(node: S<'a, T, V>, env: &mut Env<'a, TF>) -> Result<Vec<ast::Def>> {
         let doc_comment_opt = Self::extract_docblock(node, env);
         match &node.children {
@@ -4661,6 +4749,12 @@ where
                     Self::mp_yielding(&Self::p_function_body, body, env)?
                 };
                 let user_attributes = Self::p_user_attributes(attribute_spec, env)?;
+                Self::check_effect_polymorphic_memoized(
+                    &hdr.contexts,
+                    &user_attributes,
+                    "function",
+                    env,
+                );
                 let variadic = Self::determine_variadicity(&hdr.parameters);
                 let ret = ast::TypeHint((), hdr.return_type);
                 Ok(vec![ast::Def::mk_fun(ast::Fun_ {

@@ -476,7 +476,7 @@ void joinWorkerThreads() {
   }
 }
 
-TCA retranslate(TransArgs args, const RegionContext& ctx) {
+TranslationResult retranslate(TransArgs args, const RegionContext& ctx) {
   ARRPROV_USE_POISONED_LOCATION();
   VMProtect _;
 
@@ -497,10 +497,12 @@ TCA retranslate(TransArgs args, const RegionContext& ctx) {
   tracing::Pause _p;
 
   translator.translate();
-  if (!translator.translateSuccess()) return nullptr;
+  if (!translator.translateSuccess()) {
+    return TranslationResult::failTransiently();
+  }
 
   translator.relocate();
-  return translator.publish();
+  return TranslationResult{translator.publish()};
 }
 
 bool retranslateOpt(FuncId funcId) {

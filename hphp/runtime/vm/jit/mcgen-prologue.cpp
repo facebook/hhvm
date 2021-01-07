@@ -105,7 +105,10 @@ bool regeneratePrologue(TransID prologueTransId, tc::FuncMetaInfo& info) {
       translator.translate(info.tcBuf.view());
       info.add(std::move(translatorPtr));
     } else {
-      if (!translator.shouldTranslate(/* noSizeLimit = */ true)) return false;
+      if (translator.shouldTranslate(true) !=
+          TranslationResult::Scope::Success) {
+        return false;
+      }
       translator.translate();
       if (translator.translateSuccess()) {
         translator.relocate();
@@ -216,7 +219,7 @@ bool regeneratePrologues(Func* func, tc::FuncMetaInfo& info) {
   return emittedAnyDVInit && includedBody;
 }
 
-TCA getFuncPrologue(Func* func, int nPassed) {
+TranslationResult getFuncPrologue(Func* func, int nPassed) {
   ARRPROV_USE_POISONED_LOCATION();
   VMProtect _;
 
@@ -229,10 +232,12 @@ TCA getFuncPrologue(Func* func, int nPassed) {
   if (tcAddr) return *tcAddr;
 
   translator.translate();
-  if (!translator.translateSuccess()) return nullptr;
+  if (!translator.translateSuccess()) {
+    return TranslationResult::failTransiently();
+  }
 
   translator.relocate();
-  return translator.publish();
+  return TranslationResult{translator.publish()};
 }
 
 }}}

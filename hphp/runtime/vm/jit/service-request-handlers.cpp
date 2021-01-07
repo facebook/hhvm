@@ -112,47 +112,55 @@ const StaticString s_AlwaysInterp("__ALWAYS_INTERP");
  * If a translation for this SrcKey already exists it will be returned. The kind
  * of translation created will be selected based on the SrcKey specified.
  */
-TCA getTranslation(SrcKey sk) {
+TranslationResult getTranslation(SrcKey sk) {
   sk.func()->validate();
 
   if (!RID().getJit()) {
     SKTRACE(2, sk, "punting because jit was disabled\n");
-    return nullptr;
+    return TranslationResult::failTransiently();
   }
 
   if (auto const sr = tc::findSrcRec(sk)) {
     if (auto const tca = sr->getTopTranslation()) {
       SKTRACE(2, sk, "getTranslation: found %p\n", tca);
-      return tca;
+      return TranslationResult{tca};
     }
   }
 
   if (UNLIKELY(RID().isJittingDisabled())) {
     SKTRACE(2, sk, "punting because jitting code was disabled\n");
-    return nullptr;
+    return TranslationResult::failTransiently();
   }
 
   if (UNLIKELY(!RO::RepoAuthoritative && sk.unit()->isCoverageEnabled())) {
     assertx(RO::EvalEnablePerFileCoverage);
     SKTRACE(2, sk, "punting because per file code coverage is enabled\n");
-    return nullptr;
+    return TranslationResult::failTransiently();
   }
 
   if (UNLIKELY(!RO::EvalHHIRAlwaysInterpIgnoreHint &&
                sk.func()->userAttributes().count(s_AlwaysInterp.get()))) {
     SKTRACE(2, sk,
             "punting because function is annotated with __ALWAYS_INTERP\n");
-    return nullptr;
+    return TranslationResult::failTransiently();
   }
 
   auto args = TransArgs{sk};
   args.kind = tc::profileFunc(args.sk.func()) ?
     TransKind::Profile : TransKind::Live;
 
-  if (!tc::shouldTranslate(args.sk, args.kind)) return nullptr;
+  if (auto const s = tc::shouldTranslate(args.sk, args.kind);
+      s != TranslationResult::Scope::Success) {
+    return TranslationResult{s};
+  }
 
   LeaseHolder writer(sk.func(), args.kind);
-  if (!writer || !tc::shouldTranslate(sk, args.kind)) return nullptr;
+  if (!writer) return TranslationResult::failTransiently();
+
+  if (auto const s = tc::shouldTranslate(args.sk, args.kind);
+      s != TranslationResult::Scope::Success) {
+    return TranslationResult{s};
+  }
 
   tc::createSrcRec(sk, liveSpOff());
 
@@ -160,10 +168,13 @@ TCA getTranslation(SrcKey sk) {
     // Handle extremely unlikely race; someone may have just added the first
     // translation for this SrcRec while we did a non-blocking wait on the
     // write lease in createSrcRec().
-    return tca;
+    return TranslationResult{tca};
   }
 
-  return mcgen::retranslate(args, getContext(args.sk, args.kind == TransKind::Profile));
+  return mcgen::retranslate(
+    args,
+    getContext(args.sk, args.kind == TransKind::Profile)
+  );
 }
 
 /*
@@ -171,7 +182,7 @@ TCA getTranslation(SrcKey sk) {
  * toSmash.
  */
 TCA bindJmp(TCA toSmash, SrcKey destSk, ServiceRequest req, bool& smashed) {
-  auto tDest = getTranslation(destSk);
+  auto tDest = getTranslation(destSk).addr();
   if (!tDest) return nullptr;
 
   if (req == REQ_BIND_ADDR) {
@@ -199,7 +210,7 @@ TCA getFuncBody(const Func* func) {
     tca = tc::ustubs().resumeHelper;
   } else {
     SrcKey sk(func, func->base(), ResumeMode::None);
-    tca = getTranslation(sk);
+    tca = getTranslation(sk).addr();
   }
 
   if (tca) const_cast<Func*>(func)->setFuncBody(tca);
@@ -235,7 +246,7 @@ TCA handleServiceRequest(ReqInfo& info) noexcept {
       INC_TPC(retranslate);
       sk = SrcKey{ liveFunc(), info.args[0].offset, liveResumeMode() };
       auto const context = getContext(sk, tc::profileFunc(sk.func()));
-      start = mcgen::retranslate(TransArgs{sk}, context);
+      start = mcgen::retranslate(TransArgs{sk}, context).addr();
       SKTRACE(2, sk, "retranslated @%p\n", start);
       break;
     }
@@ -294,7 +305,7 @@ TCA handleServiceRequest(ReqInfo& info) noexcept {
              func->fullName()->data(),
              destFunc->fullName()->data());
       sk = liveSK();
-      start = getTranslation(sk);
+      start = getTranslation(sk).addr();
       break;
     }
   }
@@ -321,7 +332,7 @@ TCA handleServiceRequest(ReqInfo& info) noexcept {
 
 TCA handleBindCall(TCA toSmash, Func* func, int32_t numArgs) {
   TRACE(2, "bindCall %s, numArgs %d\n", func->fullName()->data(), numArgs);
-  TCA start = mcgen::getFuncPrologue(func, numArgs);
+  TCA start = mcgen::getFuncPrologue(func, numArgs).addr();
   TRACE(2, "bindCall immutably %s -> %p\n", func->fullName()->data(), start);
 
   if (start) {
@@ -352,7 +363,7 @@ TCA handleResume(bool interpFirst) {
     start = nullptr;
     INC_TPC(interp_bb_force);
   } else {
-    start = getTranslation(sk);
+    start = getTranslation(sk).addr();
   }
 
   vmJitReturnAddr() = nullptr;
@@ -376,7 +387,7 @@ TCA handleResume(bool interpFirst) {
 
       assertx(vmpc());
       sk = liveSK();
-      start = getTranslation(sk);
+      start = getTranslation(sk).addr();
     }
   }
 

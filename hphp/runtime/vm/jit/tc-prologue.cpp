@@ -80,15 +80,18 @@ int PrologueTranslator::paramIndexHelper(const Func* f, int passed) {
   return passed <= numParams ? passed : numParams + 1;
 }
 
-folly::Optional<TCA> PrologueTranslator::getCached() {
-  if (UNLIKELY(RuntimeOption::EvalFailJitPrologs)) return nullptr;
+folly::Optional<TranslationResult> PrologueTranslator::getCached() {
+  if (UNLIKELY(RuntimeOption::EvalFailJitPrologs)) {
+    return TranslationResult::failTransiently();
+  }
+
   auto const paramIdx = paramIndex();
   TCA prologue = (TCA)func->getPrologue(paramIdx);
   if (prologue != ustubs().fcallHelperThunk) {
     TRACE(1, "cached prologue %s(%d) -> cached %p\n",
           func->fullName()->data(), paramIdx, prologue);
     assertx(isValidCodeAddress(prologue));
-    return prologue;
+    return TranslationResult{prologue};
   }
   return folly::none;
 }

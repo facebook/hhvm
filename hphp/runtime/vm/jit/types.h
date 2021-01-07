@@ -25,6 +25,7 @@
 #include "hphp/runtime/vm/jit/containers.h"
 
 #include "hphp/util/assertions.h"
+#include "hphp/util/compact-tagged-ptrs.h"
 #include "hphp/util/hash-set.h"
 
 namespace HPHP { namespace jit {
@@ -226,6 +227,37 @@ inline folly::Optional<AreaIndex> nameToAreaIndex(const std::string name) {
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
+ * Encapsulates a TCA for a translation, or a "scope" for the failure
+ * to produce one. The scope is a bound for how long the failure is
+ * expected to persistent.
+ */
+struct TranslationResult {
+  enum class Scope : uint16_t {
+    Success,   // Have a TCA
+    Transient, // Transient failure. The next attempt might succeed.
+    Request,   // Attempts will fail until the next request at least.
+    Process    // Attempts will fail for the remainder of the process
+               // lifetime.
+  };
+
+  explicit TranslationResult(TCA tca)
+    : m_ptr{Scope::Success, tca} { assertx(tca); }
+  explicit TranslationResult(Scope s)
+    : m_ptr{s, nullptr} { assertx(s != Scope::Success); }
+
+  static TranslationResult failTransiently() {
+    return TranslationResult{Scope::Transient};
+  }
+
+  TCA addr() const { return m_ptr.ptr(); }
+  Scope scope() const { return m_ptr.tag(); }
+private:
+  CompactTaggedPtr<unsigned char, Scope> m_ptr;
+};
+
+///////////////////////////////////////////////////////////////////////////////
+
+/*
  * Some data structures are accessed often enough from translated code that we
  * have shortcuts for getting offsets into them.
  */
@@ -269,4 +301,3 @@ inline std::string show(const Reason &r) {
 }
 
 }}
-

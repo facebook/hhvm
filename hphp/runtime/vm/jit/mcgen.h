@@ -71,7 +71,7 @@ namespace mcgen {
 /*
  * Look up or translate a func prologue or func body.
  */
-TCA getFuncPrologue(Func* func, int nPassed);
+TranslationResult getFuncPrologue(Func* func, int nPassed);
 
 /*
  * Create a live or profile retranslation based on args.
@@ -79,7 +79,7 @@ TCA getFuncPrologue(Func* func, int nPassed);
  * Will return null if the write-lease could not be obtained or a translation
  * could not be generated.
  */
-TCA retranslate(TransArgs args, const RegionContext& ctx);
+TranslationResult retranslate(TransArgs args, const RegionContext& ctx);
 
 /*
  * Regionize and optimize the given function using profile data.
@@ -142,4 +142,3 @@ bool dumpTCAnnotation(TransKind transKind);
 int getActiveWorker();
 
 }}}
-

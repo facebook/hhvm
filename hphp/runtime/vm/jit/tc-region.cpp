@@ -675,13 +675,13 @@ void RegionTranslator::computeKind() {
   }
 }
 
-folly::Optional<TCA> RegionTranslator::getCached() {
+folly::Optional<TranslationResult> RegionTranslator::getCached() {
   auto const srcRec = srcDB().find(sk);
   auto const numTrans = srcRec->numTrans();
   if (prevNumTranslations != -1 && prevNumTranslations != numTrans) {
     // A new translation was generated before we grabbed the lock.  Force
     // execution to rerun through the retranslation chain.
-    return srcRec->getTopTranslation();
+    return TranslationResult{srcRec->getTopTranslation()};
   }
   prevNumTranslations = numTrans;
   // Check for potential interp anchor translation
@@ -689,11 +689,11 @@ folly::Optional<TCA> RegionTranslator::getCached() {
     if (numTrans > RuntimeOption::EvalJitMaxProfileTranslations) {
       always_assert(numTrans ==
                     RuntimeOption::EvalJitMaxProfileTranslations + 1);
-      return srcRec->getTopTranslation();
+      return TranslationResult{srcRec->getTopTranslation()};
     }
   } else if (numTrans > RuntimeOption::EvalJitMaxTranslations) {
     always_assert(numTrans == RuntimeOption::EvalJitMaxTranslations + 1);
-    return srcRec->getTopTranslation();
+    return TranslationResult{srcRec->getTopTranslation()};
   }
   return folly::none;
 }

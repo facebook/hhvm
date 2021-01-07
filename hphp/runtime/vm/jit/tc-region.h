@@ -47,7 +47,7 @@ struct RegionTranslator final : Translator {
     return ret;
   }
   void computeKind() override;
-  folly::Optional<TCA> getCached() override;
+  folly::Optional<TranslationResult> getCached() override;
   void resetCached() override;
   void smashBackup() override {}
   Annotations* getAnnotations() override { return &annotations; }
@@ -57,4 +57,3 @@ struct RegionTranslator final : Translator {
 };
 
 }}}
-

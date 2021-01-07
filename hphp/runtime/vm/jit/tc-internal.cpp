@@ -143,30 +143,50 @@ using SrcKeyCounters = tbb::concurrent_hash_map<SrcKey, uint32_t,
 
 static SrcKeyCounters s_sk_counters;
 
-bool shouldTranslateNoSizeLimit(SrcKey sk, TransKind kind) {
+static RDS_LOCAL_NO_CHECK(bool, s_jittingTimeLimitExceeded);
+
+TranslationResult::Scope shouldTranslateNoSizeLimit(SrcKey sk, TransKind kind) {
   // If we've hit Eval.JitGlobalTranslationLimit, then we stop translating.
-  if (!canTranslate()) {
-    return false;
+  if (!canTranslate()) return TranslationResult::Scope::Process;
+
+  if (*s_jittingTimeLimitExceeded) return TranslationResult::Scope::Request;
+
+  auto const maxTransTime = RuntimeOption::EvalJitMaxRequestTranslationTime;
+  if (maxTransTime >= 0 && RuntimeOption::ServerExecutionMode()) {
+    auto const transCounter = Timer::CounterValue(Timer::mcg_translate);
+    if (transCounter.wall_time_elapsed >= maxTransTime) {
+      if (Trace::moduleEnabledRelease(Trace::mcg, 1)) {
+        Trace::traceRelease("Skipping translation. "
+                            "Time budget of %" PRId64 " exceeded. "
+                            "%" PRId64 "us elapsed. "
+                            "%" PRId64 " translations completed\n",
+                            maxTransTime,
+                            transCounter.wall_time_elapsed,
+                            transCounter.count);
+      }
+      *s_jittingTimeLimitExceeded = true;
+      return TranslationResult::Scope::Request;
+    }
   }
 
   auto const func = sk.func();
 
   // Do not translate functions from units marked as interpret-only.
   if (func->unit()->isInterpretOnly()) {
-    return false;
+    return TranslationResult::Scope::Transient;
   }
 
   // Refuse to JIT Live translations if Eval.JitPGOOnly is enabled.
   if (RuntimeOption::EvalJitPGOOnly &&
       (kind == TransKind::Live || kind == TransKind::LivePrologue)) {
-    return false;
+    return TranslationResult::Scope::Transient;
   }
 
   // Refuse to JIT Live / Profile translations for a function until
   // Eval.JitLiveThreshold / Eval.JitProfileThreshold is hit.
-  const bool isLive = kind == TransKind::Live ||
+  auto const isLive = kind == TransKind::Live ||
                       kind == TransKind::LivePrologue;
-  const bool isProf = kind == TransKind::Profile ||
+  auto const isProf = kind == TransKind::Profile ||
                       kind == TransKind::ProfPrologue;
   if (isLive || isProf) {
     uint32_t skCount = 1;
@@ -181,74 +201,65 @@ bool shouldTranslateNoSizeLimit(SrcKey sk, TransKind kind) {
       if (!s_func_counters.insert(acc, {func->getFuncId(), 1})) ++acc->second;
       auto const funcThreshold = isLive ? RuntimeOption::EvalJitLiveThreshold
                                         : RuntimeOption::EvalJitProfileThreshold;
-      if (acc->second < funcThreshold) return false;
+      if (acc->second < funcThreshold) {
+        return TranslationResult::Scope::Transient;
+      }
     }
-    if (skCount < RuntimeOption::EvalJitSrcKeyThreshold) return false;
+    if (skCount < RuntimeOption::EvalJitSrcKeyThreshold) {
+      return TranslationResult::Scope::Transient;
+    }
   }
 
-  return true;
+  return TranslationResult::Scope::Success;
 }
 
 static std::atomic_flag s_did_log = ATOMIC_FLAG_INIT;
 static std::atomic<bool> s_TCisFull{false};
 
-bool shouldTranslate(SrcKey sk, TransKind kind) {
-  if (s_TCisFull.load(std::memory_order_relaxed) ||
-      !shouldTranslateNoSizeLimit(sk, kind)) {
-    return false;
+TranslationResult::Scope shouldTranslate(SrcKey sk, TransKind kind) {
+  if (s_TCisFull.load(std::memory_order_relaxed)) {
+    return TranslationResult::Scope::Process;
   }
 
-  const auto serverMode = RuntimeOption::ServerExecutionMode();
-  const auto maxTransTime = RuntimeOption::EvalJitMaxRequestTranslationTime;
-  const auto transCounter = Timer::CounterValue(Timer::mcg_translate);
-
-  if (serverMode && maxTransTime >= 0 &&
-      transCounter.wall_time_elapsed >= maxTransTime) {
-
-    if (Trace::moduleEnabledRelease(Trace::mcg, 1)) {
-      Trace::traceRelease("Skipping translation. "
-                          "Time budget of %" PRId64 " exceeded. "
-                          "%" PRId64 "us elapsed. "
-                          "%" PRId64 " translations completed\n",
-                          maxTransTime,
-                          transCounter.wall_time_elapsed,
-                          transCounter.count);
-    }
-    return false;
+  if (*s_jittingTimeLimitExceeded) {
+    return TranslationResult::Scope::Request;
   }
 
   auto const main_under = code().main().used() < CodeCache::AMaxUsage;
   auto const cold_under = code().cold().used() < CodeCache::AColdMaxUsage;
   auto const froz_under = code().frozen().used() < CodeCache::AFrozenMaxUsage;
 
-  // Otherwise, follow the Eval.JitAMaxUsage limits.
-  if (main_under && cold_under && froz_under) return true;
+  if (main_under && cold_under && froz_under) {
+    return shouldTranslateNoSizeLimit(sk, kind);
+  }
 
-  // We use cold and frozen for all kinds of translations, but we allow PGO
-  // translations past the limit for main if there's still space in code.hot.
+  // We use cold and frozen for all kinds of translations, but we
+  // allow PGO translations past the limit for main if there's still
+  // space in code.hot.
   if (cold_under && froz_under) {
     switch (kind) {
       case TransKind::ProfPrologue:
       case TransKind::Profile:
       case TransKind::OptPrologue:
       case TransKind::Optimize:
-        return code().hotEnabled();
+        if (code().hotEnabled()) return shouldTranslateNoSizeLimit(sk, kind);
+        return TranslationResult::Scope::Process;
       default:
         break;
     }
   }
 
-  // Set a flag so we quickly bail from trying to generate new translations next
-  // time.
+  // Set a flag so we quickly bail from trying to generate new
+  // translations next time.
   s_TCisFull.store(true, std::memory_order_relaxed);
   Treadmill::enqueue([] { s_sk_counters.clear(); });
 
   if (main_under && !s_did_log.test_and_set() &&
       RuntimeOption::EvalProfBranchSampleFreq == 0) {
-    // If we ran out of TC space in cold or frozen but not in main, something
-    // unexpected is happening and we should take note of it.  We skip this
-    // logging if TC branch profiling is on, since it fills up code and frozen
-    // at a much higher rate.
+    // If we ran out of TC space in cold or frozen but not in main,
+    // something unexpected is happening and we should take note of
+    // it. We skip this logging if TC branch profiling is on, since
+    // it fills up code and frozen at a much higher rate.
     if (!cold_under) {
       logPerfWarning("cold_full", 1, [] (StructuredLogEntry&) {});
     }
@@ -256,7 +267,8 @@ bool shouldTranslate(SrcKey sk, TransKind kind) {
       logPerfWarning("frozen_full", 1, [] (StructuredLogEntry&) {});
     }
   }
-  return false;
+
+  return TranslationResult::Scope::Process;
 }
 
 bool newTranslation() {
@@ -307,6 +319,7 @@ void requestInit() {
   assertx(!g_unwind_rds.isInit());
   memset(g_unwind_rds.get(), 0, sizeof(UnwindRDS));
   g_unwind_rds.markInit();
+  *s_jittingTimeLimitExceeded.getCheck() = false;
 }
 
 void requestExit() {
@@ -499,7 +512,8 @@ Translator::Translator(SrcKey sk, TransKind kind)
 
 Translator::~Translator() = default;
 
-folly::Optional<TCA> Translator::acquireLeaseAndRequisitePaperwork() {
+folly::Optional<TranslationResult>
+Translator::acquireLeaseAndRequisitePaperwork() {
   computeKind();
 
   // Avoid a race where we would create a Live translation while
@@ -518,7 +532,7 @@ folly::Optional<TCA> Translator::acquireLeaseAndRequisitePaperwork() {
     return true;
   };
   if (!shouldEmitLiveTranslation()) {
-    return nullptr;
+    return TranslationResult::failTransiently();
   }
 
   if (auto const p = getCached()) return *p;
@@ -527,28 +541,31 @@ folly::Optional<TCA> Translator::acquireLeaseAndRequisitePaperwork() {
   // execution mode (eg. interpreter) by returning a nullptr
   // translation address.
   m_lease.emplace(sk.func(), kind);
-  if (!(*m_lease)) return nullptr;
+  if (!(*m_lease)) return TranslationResult::failTransiently();
   computeKind();  // Recompute the kind in case we are no longer profiling.
-  if (!m_lease->checkKind(kind)) return nullptr;
+  if (!m_lease->checkKind(kind)) return TranslationResult::failTransiently();
 
   // Check again if we can emit live translations for the given
   // func now that we have the lock.
   if (!shouldEmitLiveTranslation()) {
-    return nullptr;
+    return TranslationResult::failTransiently();
   }
 
-  if (!shouldTranslate()) return nullptr;
+  if (auto const s = shouldTranslate();
+      s != TranslationResult::Scope::Success) {
+    return TranslationResult{s};
+  }
 
   if (UNLIKELY(RID().isJittingDisabled())) {
     TRACE(2, "punting because jitting code was disabled\n");
-    return nullptr;
+    return TranslationResult::failTransiently();
   }
 
   // Check for cached one last time since we have all the locks now.
   return getCached();
 }
 
-bool Translator::shouldTranslate(bool noSizeLimit) {
+TranslationResult::Scope Translator::shouldTranslate(bool noSizeLimit) {
   if (kind == TransKind::Invalid) computeKind();
   if (noSizeLimit) {
     return shouldTranslateNoSizeLimit(sk, kind);

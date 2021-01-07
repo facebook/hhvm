@@ -141,7 +141,7 @@ void bindCall(TCA toSmash, TCA start, Func* callee, int nArgs) {
 
     // It's possible that the callee prologue was reset before we acquired the
     // lock. Make sure we have the right one.
-    start = mcgen::getFuncPrologue(callee, nArgs);
+    start = mcgen::getFuncPrologue(callee, nArgs).addr();
 
     // Do these checks again with the lock.
     if (start == nullptr || !smashableCallTarget(toSmash) ||

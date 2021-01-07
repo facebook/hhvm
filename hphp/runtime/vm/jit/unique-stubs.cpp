@@ -257,6 +257,10 @@ bool fcallHelper(CallFlags callFlags, Func* func, uint32_t numArgsInclUnpack,
   });
 }
 
+TCA getFuncPrologueHelper(Func* func, int nPassed) {
+  return mcgen::getFuncPrologue(func, nPassed).addr();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 TCA emitFuncPrologueRedispatch(CodeBlock& cb, DataBlock& data) {
@@ -442,7 +446,7 @@ TCA emitFCallHelperThunk(CodeBlock& main, CodeBlock& cold, DataBlock& data,
     {
       PhysRegSaver prs{v, r_php_call_flags()|r_php_call_ctx()};
       v << vcall{
-        CallSpec::direct(mcgen::getFuncPrologue),
+        CallSpec::direct(getFuncPrologueHelper),
         v.makeVcallArgs({{func, numArgs}}),
         v.makeTuple({target}),
         Fixup::none(),

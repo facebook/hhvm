@@ -860,21 +860,35 @@ to be produced by hh_server
   in
   let exits = Term.default_exits in
 
+  let incremental =
+    let doc =
+      "Use the provided dependency graph as a base. Build a new dependency graph"
+      ^ " by adding the edges in EDGES_DIR to this graph."
+    in
+    value
+    & opt (some string) None
+    & info ["incremental"] ~doc ~docv:"INCREMENTAL_HHDG"
+  in
+
   let edges_dir =
     let doc =
       "A directory containing the .bin files with all the edges."
       ^ " The files should just contain a sequence of pairs of big-endian"
       ^ " encoded 64-bit hashes."
     in
-    required & opt (some string) None & info ["edges-dir"] ~doc ~docv:"CURSOR"
+    required
+    & opt (some string) None
+    & info ["edges-dir"] ~doc ~docv:"EDGES_DIR"
   in
   let output =
     let doc = "Where to put the 64-bit dependency graph." in
     required & opt (some string) None & info ["output"] ~doc ~docv:"OUTPUT"
   in
-  let run edges_dir output = Lwt_main.run (mode_build ~edges_dir ~output) in
+  let run incremental edges_dir output =
+    Lwt_main.run (mode_build ~incremental ~edges_dir ~output)
+  in
   Term.
-    ( const run $ edges_dir $ output,
+    ( const run $ incremental $ edges_dir $ output,
       info "build" ~doc ~sdocs:Manpage.s_common_options ~man ~exits )
 
 let mode_dep_graph_stats = Dep_graph_stats.go
@@ -906,6 +920,42 @@ Calculate a bunch of statistics for a given 64-bit dependency graph.
     ( const run $ dep_graph,
       info "dep-graph-stats" ~doc ~sdocs:Manpage.s_common_options ~man ~exits )
 
+let mode_dep_graph_is_subgraph = Dep_graph_is_subgraph.go
+
+let dep_graph_is_subgraph_subcommand =
+  let open Cmdliner in
+  let open Cmdliner.Arg in
+  let doc = "Check whether SUB is a subgraph of SUPER" in
+  let man =
+    [
+      `S Manpage.s_description;
+      `P
+        (String.strip
+           {|
+Check whether a 64-bit dependency graph is a subgraph of an other graph.
+|});
+    ]
+  in
+  let exits = Term.default_exits in
+
+  let dep_graph_sub =
+    let doc = "Path to smallest 64-bit dependency graph." in
+    required & opt (some string) None & info ["sub"] ~doc ~docv:"SUB"
+  in
+  let dep_graph_super =
+    let doc = "Path to largest 64-bit dependency graph." in
+    required & opt (some string) None & info ["super"] ~doc ~docv:"SUPER"
+  in
+  let run sub super = Lwt_main.run (mode_dep_graph_is_subgraph ~sub ~super) in
+  Term.
+    ( const run $ dep_graph_sub $ dep_graph_super,
+      info
+        "dep-graph-is-subgraph"
+        ~doc
+        ~sdocs:Manpage.s_common_options
+        ~man
+        ~exits )
+
 let default_subcommand =
   let open Cmdliner in
   let sdocs = Manpage.s_common_options in
@@ -922,6 +972,7 @@ let () =
       calculate_errors_subcommand;
       clean_subcommand;
       debug_subcommand;
+      dep_graph_is_subgraph_subcommand;
       dep_graph_stats_subcommand;
       query_subcommand;
       query_path_subcommand;

@@ -1311,11 +1311,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "hh_fanout_dep_graph_is_subgraph_rust"
+version = "0.0.0"
+dependencies = [
+ "depgraph",
+ "env_logger",
+ "log",
+ "ocamlrep_ocamlpool",
+]
+
+[[package]]
 name = "hh_fanout_dep_graph_stats_rust"
 version = "0.0.0"
 dependencies = [
  "depgraph",
  "env_logger",
+ "json",
  "log",
  "ocamlrep_ocamlpool",
 ]
@@ -1671,6 +1682,12 @@ checksum = "6a27d435371a2fa5b6d2b028a74bbdb1234f308da363226a2854ca3ff8ba7055"
 dependencies = [
  "wasm-bindgen",
 ]
+
+[[package]]
+name = "json"
+version = "0.12.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "078e285eafdfb6c4b434e0d31e8cfcb5115b651496faca5749b88fafd4f23bfd"
 
 [[package]]
 name = "label_rewriter_rust"

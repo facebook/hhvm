@@ -13,14 +13,14 @@ impl Dep {
     }
 
     pub fn is_class(self) -> bool {
-        self.0 & (1 << 62) != 0
+        (self.0 & 1) != 0
     }
 
     pub fn class_to_extends(self) -> Option<Self> {
         if !self.is_class() {
             None
         } else {
-            Some(Dep(self.0 & ((1 << 62) - 1)))
+            Some(Dep(self.0 & (!1)))
         }
     }
 }

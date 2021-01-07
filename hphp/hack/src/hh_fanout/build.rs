@@ -12,6 +12,8 @@ use std::io::{BufReader, BufWriter, Read};
 use std::path::Path;
 use std::{fs, io};
 
+use depgraph::dep::Dep;
+use depgraph::reader::{DepGraph, DepGraphOpener};
 use depgraph::writer::{DepGraphWriter, HashListIndex};
 use ocamlrep_ocamlpool::ocaml_ffi;
 
@@ -173,7 +175,26 @@ impl Edges {
     }
 }
 
-fn main(new_edges_dir: OsString, output: OsString) -> io::Result<()> {
+/// Extend a collection of edges by adding all edges from the given
+/// dependency graph.
+fn extend_edges_from_dep_graph(all_edges: &Edges, graph: &DepGraph<'_>) {
+    let all_hashes = graph.all_hashes();
+
+    all_hashes.par_iter().for_each(|dependency| {
+        let dependency = Dep::new(*dependency);
+        if let Some(hash_list) = graph.hash_list_for(dependency) {
+            for dependent in graph.hash_list_hashes(hash_list) {
+                all_edges.register(dependent.into(), dependency.into());
+            }
+        }
+    });
+}
+
+fn main(
+    incremental: Option<OsString>,
+    new_edges_dir: OsString,
+    output: OsString,
+) -> io::Result<()> {
     env_logger::init_from_env(
         env_logger::Env::default().filter_or(env_logger::DEFAULT_FILTER_ENV, "info"),
     );
@@ -190,10 +211,34 @@ fn main(new_edges_dir: OsString, output: OsString) -> io::Result<()> {
 
     info!("Discovered {} files with edges", new_edges_dir.count());
     let all_edges = new_edges_dir.read_all_edges()?;
-    info!("All files loaded");
+    info!(
+        "All binary files loaded ({} unique edges)",
+        all_edges.count_edges()
+    );
 
-    info!("Read {} unique hashes", all_edges.count_hashes());
-    info!("Read {} edges", all_edges.count_edges());
+    match incremental {
+        None => info!("Not reading in edges from previous dependency graph (incremental=None)"),
+        Some(incremental) => {
+            info!(
+                "Reading in edges from previous dependency graph at {:?}",
+                incremental
+            );
+            let old_dep_graph_opener = DepGraphOpener::from_path(&incremental)?;
+            let old_dep_graph = old_dep_graph_opener.open().unwrap();
+            extend_edges_from_dep_graph(&all_edges, &old_dep_graph);
+            info!("Done reading in old edges");
+        }
+    }
+
+
+    info!(
+        "Building graph with {} unique hashes",
+        all_edges.count_hashes()
+    );
+    info!(
+        "            ... and {} unique edges",
+        all_edges.count_edges()
+    );
 
     info!("Converting to structured edges");
     let structured_edges = all_edges.structured_edges();
@@ -225,7 +270,11 @@ fn main(new_edges_dir: OsString, output: OsString) -> io::Result<()> {
 }
 
 ocaml_ffi! {
-  fn hh_fanout_build_main(new_edges_dir: OsString, output: OsString) {
-    main(new_edges_dir, output).unwrap();
+  fn hh_fanout_build_main(
+    incremental: Option<OsString>,
+    new_edges_dir: OsString,
+    output: OsString,
+  ) {
+    main(incremental, new_edges_dir, output).unwrap();
   }
 }

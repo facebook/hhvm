@@ -5,10 +5,9 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
+external hh_fanout_dep_graph_is_subgraph_main : string -> string -> unit
+  = "hh_fanout_dep_graph_is_subgraph_main"
 
-external hh_fanout_build_main : string option -> string -> string -> unit
-  = "hh_fanout_build_main"
-
-let go ~incremental ~edges_dir ~output =
-  hh_fanout_build_main incremental edges_dir output;
+let go ~sub ~super =
+  hh_fanout_dep_graph_is_subgraph_main sub super;
   Lwt.return_unit

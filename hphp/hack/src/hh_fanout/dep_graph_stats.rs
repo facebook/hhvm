@@ -43,10 +43,13 @@ fn main(dep_graph: OsString) {
     }
     let num_unique_hash_lists = all_hash_list_pointers.len();
 
-    println!("Unique hashes: {}", num_unique_hashes);
-    println!("Total edges: {}", num_total_edges);
-    println!("Unique hash lists: {}", num_unique_hash_lists);
-    println!("Stored edges: {}", num_stored_edges);
+    let obj = json::object! {
+        unique_hashes: num_unique_hashes,
+        total_edges: num_total_edges,
+        unique_hash_lists: num_unique_hash_lists,
+        stored_edges: num_stored_edges,
+    };
+    println!("{}", json::stringify_pretty(obj, 4));
 }
 
 ocaml_ffi! {

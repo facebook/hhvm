@@ -331,21 +331,26 @@ let rec obj_get_concrete_ty
             let mem_pos = get_pos member_ in
             ( if shadowed then
               match old_member_info with
-              | Some { ce_visibility = old_vis; ce_type = (lazy old_member); _ }
-                ->
-                let old_mem_pos = get_pos old_member in
+              | Some
+                  {
+                    ce_visibility = old_vis;
+                    ce_type = (lazy old_member);
+                    ce_origin;
+                    _;
+                  } ->
                 begin
                   match class_id with
-                  | CIexpr (_, This) when String.equal (snd x) self_id -> ()
+                  | CIexpr (_, This) -> ()
                   | _ ->
-                    Errors.ambiguous_object_access
-                      id_pos
-                      id_str
-                      mem_pos
-                      (TUtils.string_of_visibility old_vis)
-                      old_mem_pos
-                      self_id
-                      (snd x)
+                    if not (String.equal member_ce.ce_origin ce_origin) then
+                      Errors.ambiguous_object_access
+                        id_pos
+                        id_str
+                        (get_pos member_)
+                        (TUtils.string_of_visibility old_vis)
+                        (get_pos old_member)
+                        self_id
+                        (snd x)
                 end
               | _ -> () );
             TVis.check_obj_access ~use_pos:id_pos ~def_pos:mem_pos env vis;

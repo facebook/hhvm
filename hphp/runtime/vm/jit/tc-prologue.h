@@ -42,6 +42,7 @@ struct PrologueTranslator final : Translator {
   int paramIndex() const;
   folly::Optional<TranslationResult> getCached() override;
   void resetCached() override;
+  void setCachedForProcessFail() override;
   void smashBackup() override;
   static int paramIndexHelper(const Func*, int);
 private:

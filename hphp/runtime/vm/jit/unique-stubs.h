@@ -142,6 +142,7 @@ struct UniqueStubs {
    * @context:  func prologue
    */
   TCA fcallHelperThunk;
+  TCA fcallHelperNoTranslateThunk;
 
   /*
    * Call EventHook::onFunctionCall() and handle the case where it requests
@@ -257,6 +258,7 @@ struct UniqueStubs {
    * @context:  func body
    */
   TCA resumeHelper;
+  TCA resumeHelperNoTranslate;
 
   /*
    * Like resumeHelper, but interpret a basic block first to ensure we make
@@ -272,6 +274,7 @@ struct UniqueStubs {
    */
   TCA interpHelper;
   TCA interpHelperSyncedPC;
+  TCA interpHelperNoTranslate;
 
   /*
    * Stubs for each bytecode with the CF flag, which InterpOne the bytecode and

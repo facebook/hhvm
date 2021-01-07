@@ -113,6 +113,7 @@ struct Translator {
 
   virtual folly::Optional<TranslationResult> getCached() = 0;
   virtual void resetCached() = 0;
+  virtual void setCachedForProcessFail() = 0;
   virtual void smashBackup() = 0;
 
   // Returns a TCA for already translated code if found, this can be nullptr if

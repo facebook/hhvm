@@ -248,9 +248,21 @@ struct TranslationResult {
   static TranslationResult failTransiently() {
     return TranslationResult{Scope::Transient};
   }
+  static TranslationResult failForProcess() {
+    return TranslationResult{Scope::Process};
+  }
 
   TCA addr() const { return m_ptr.ptr(); }
   Scope scope() const { return m_ptr.tag(); }
+
+  bool isRequestPersistentFailure() const {
+    auto const s = scope();
+    return s == Scope::Request || s == Scope::Process;
+  }
+  bool isProcessPersistentFailure() const {
+    return scope() == Scope::Process;
+  }
+
 private:
   CompactTaggedPtr<unsigned char, Scope> m_ptr;
 };

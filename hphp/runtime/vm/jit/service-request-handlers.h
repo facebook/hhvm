@@ -62,6 +62,7 @@ TCA handleBindCall(TCA toSmash, Func* func, int32_t numArgs);
  * limit for a SrcKey.
  */
 TCA handleResume(bool interpFirst);
+TCA handleResumeNoTranslate(bool interpFirst);
 
 /*
  * Look up (or create) the translation for the body of func.
@@ -69,4 +70,3 @@ TCA handleResume(bool interpFirst);
 TCA getFuncBody(const Func* func);
 
 }}}
-

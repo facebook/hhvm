@@ -236,8 +236,8 @@ uint32_t fcallRepackHelper(CallFlags callFlags, const Func* func,
   });
 }
 
-bool fcallHelper(CallFlags callFlags, Func* func, uint32_t numArgsInclUnpack,
-                 void* ctx, TCA savedRip) {
+bool fcallHelper(CallFlags callFlags, Func* func,
+                 uint32_t numArgsInclUnpack, void* ctx, TCA savedRip) {
   assert_native_stack_aligned();
   assertx(numArgsInclUnpack <= func->numNonVariadicParams() + 1);
   auto const hasUnpack = numArgsInclUnpack == func->numNonVariadicParams() + 1;
@@ -427,8 +427,9 @@ TCA emitFuncPrologueRedispatchUnpack(CodeBlock& main, CodeBlock& cold,
   return start;
 }
 
-TCA emitFCallHelperThunk(CodeBlock& main, CodeBlock& cold, DataBlock& data,
-                         UniqueStubs& us) {
+TCA emitFCallHelperThunkImpl(CodeBlock& main, CodeBlock& cold,
+                             DataBlock& data, UniqueStubs& us,
+                             bool translate) {
   alignJmpTarget(main);
   CGMeta meta;
 
@@ -441,27 +442,29 @@ TCA emitFCallHelperThunk(CodeBlock& main, CodeBlock& cold, DataBlock& data,
     v << copy{r_php_call_func(), func};
     v << copy{r_php_call_num_args(), numArgs};
 
-    // Try to JIT the prologue first.
-    auto const target = v.makeReg();
-    {
-      PhysRegSaver prs{v, r_php_call_flags()|r_php_call_ctx()};
-      v << vcall{
-        CallSpec::direct(getFuncPrologueHelper),
-        v.makeVcallArgs({{func, numArgs}}),
-        v.makeTuple({target}),
-        Fixup::none(),
-        DestType::SSA
-      };
-    }
+    if (translate) {
+      // Try to JIT the prologue first.
+      auto const target = v.makeReg();
+      {
+        PhysRegSaver prs{v, r_php_call_flags()|r_php_call_ctx()};
+        v << vcall{
+          CallSpec::direct(getFuncPrologueHelper),
+          v.makeVcallArgs({{func, numArgs}}),
+          v.makeTuple({target}),
+          Fixup::none(),
+          DestType::SSA
+        };
+      }
 
-    auto const targetSF = v.makeReg();
-    v << testq{target, target, targetSF};
-    ifThen(v, CC_NZ, targetSF, [&] (Vout& v) {
-      // Restore all inputs and call the resolved prologue.
-      v << copy{func, r_php_call_func()};
-      v << copy{numArgs, r_php_call_num_args()};
-      v << tailcallstubr{target, php_call_regs(true)};
-    });
+      auto const targetSF = v.makeReg();
+      v << testq{target, target, targetSF};
+      ifThen(v, CC_NZ, targetSF, [&] (Vout& v) {
+          // Restore all inputs and call the resolved prologue.
+          v << copy{func, r_php_call_func()};
+          v << copy{numArgs, r_php_call_num_args()};
+          v << tailcallstubr{target, php_call_regs(true)};
+        });
+    }
 
     auto const flags = v.makeReg();
     auto const ctx = v.makeReg();
@@ -504,11 +507,23 @@ TCA emitFCallHelperThunk(CodeBlock& main, CodeBlock& cold, DataBlock& data,
     // context, so convert the context first. Note that the VM registers are
     // not synced yet, but that's fine as resumeHelper operates on TLS data.
     v << stubtophp{};
-    v << jmpi{us.resumeHelper, RegSet(rvmtl())};
+    v << jmpi{
+      translate ? us.resumeHelper : us.resumeHelperNoTranslate,
+      RegSet(rvmtl())
+    };
   });
 
   meta.process(nullptr);
   return start;
+}
+
+TCA emitFCallHelperThunk(CodeBlock& main, CodeBlock& cold,
+                               DataBlock& data, UniqueStubs& us) {
+  return emitFCallHelperThunkImpl(main, cold, data, us, true);
+}
+TCA emitFCallHelperNoTranslateThunk(CodeBlock& main, CodeBlock& cold,
+                         DataBlock& data, UniqueStubs& us) {
+  return emitFCallHelperThunkImpl(main, cold, data, us, false);
 }
 
 TCA emitFunctionEnterHelper(CodeBlock& main, CodeBlock& cold,
@@ -720,6 +735,8 @@ struct ResumeHelperEntryPoints {
   TCA resumeHelper;
   TCA handleResume;
   TCA reenterTC;
+  TCA resumeHelperNoTranslate;
+  TCA handleResumeNoTranslate;
 };
 
 ResumeHelperEntryPoints emitResumeHelpers(CodeBlock& cb, DataBlock& data) {
@@ -748,6 +765,20 @@ ResumeHelperEntryPoints emitResumeHelpers(CodeBlock& cb, DataBlock& data) {
     v << jmpr{target, php_return_regs()};
   });
 
+  rh.resumeHelperNoTranslate = vwrap(cb, data, [] (Vout& v) {
+    v << ldimmb{0, rarg(0)};
+    v << fallthru{arg_regs(1)};
+  });
+
+  rh.handleResumeNoTranslate = vwrap(cb, data, [&] (Vout& v) {
+    loadVmfp(v);
+
+    auto const handler =
+      reinterpret_cast<TCA>(svcreq::handleResumeNoTranslate);
+    v << call{handler};
+    v << jmpi{rh.reenterTC, RegSet{rret()}};
+  });
+
   return rh;
 }
 
@@ -758,6 +789,7 @@ TCA emitResumeInterpHelpers(CodeBlock& cb, DataBlock& data, UniqueStubs& us,
   rh = emitResumeHelpers(cb, data);
 
   us.resumeHelper = rh.resumeHelper;
+  us.resumeHelperNoTranslate = rh.resumeHelperNoTranslate;
 
   us.interpHelper = vwrap(cb, data, [] (Vout& v) {
     v << store{rarg(0), rvmtl()[rds::kVmpcOff]};
@@ -766,6 +798,11 @@ TCA emitResumeInterpHelpers(CodeBlock& cb, DataBlock& data, UniqueStubs& us,
     storeVMRegs(v);
     v << ldimmb{1, rarg(0)};
     v << jmpi{rh.handleResume, RegSet(rarg(0))};
+  });
+  us.interpHelperNoTranslate = vwrap(cb, data, [&] (Vout& v) {
+    storeVMRegs(v);
+    v << ldimmb{1, rarg(0)};
+    v << jmpi{rh.handleResumeNoTranslate, RegSet(rarg(1))};
   });
 
   return us.resumeHelper;
@@ -1277,6 +1314,9 @@ void UniqueStubs::emitAll(CodeCache& code, Debug::DebugInfo& dbg) {
   ADD(fcallHelperThunk,
       view,
       emitFCallHelperThunk(cold, frozen, data, *this));
+  ADD(fcallHelperNoTranslateThunk,
+      view,
+      emitFCallHelperNoTranslateThunk(cold, frozen, data, *this));
 #undef ADD
 
   emitAllResumable(code, dbg);

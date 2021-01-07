@@ -49,6 +49,7 @@ struct RegionTranslator final : Translator {
   void computeKind() override;
   folly::Optional<TranslationResult> getCached() override;
   void resetCached() override;
+  void setCachedForProcessFail() override {}
   void smashBackup() override {}
   Annotations* getAnnotations() override { return &annotations; }
   void gen() override;

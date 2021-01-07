@@ -87,6 +87,9 @@ folly::Optional<TranslationResult> PrologueTranslator::getCached() {
 
   auto const paramIdx = paramIndex();
   TCA prologue = (TCA)func->getPrologue(paramIdx);
+  if (prologue == tc::ustubs().fcallHelperNoTranslateThunk) {
+    return TranslationResult::failForProcess();
+  }
   if (prologue != ustubs().fcallHelperThunk) {
     TRACE(1, "cached prologue %s(%d) -> cached %p\n",
           func->fullName()->data(), paramIdx, prologue);
@@ -98,6 +101,13 @@ folly::Optional<TranslationResult> PrologueTranslator::getCached() {
 
 void PrologueTranslator::resetCached() {
   func->resetPrologue(paramIndex());
+}
+
+void PrologueTranslator::setCachedForProcessFail() {
+  TRACE(2, "funcPrologue %s(%d) setting prologue %p\n",
+        func->fullName()->data(), nPassed,
+        tc::ustubs().fcallHelperNoTranslateThunk);
+  func->setPrologue(paramIndex(), tc::ustubs().fcallHelperNoTranslateThunk);
 }
 
 void PrologueTranslator::smashBackup() {

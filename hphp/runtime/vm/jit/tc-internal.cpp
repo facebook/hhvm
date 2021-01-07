@@ -553,6 +553,7 @@ Translator::acquireLeaseAndRequisitePaperwork() {
 
   if (auto const s = shouldTranslate();
       s != TranslationResult::Scope::Success) {
+    if (s == TranslationResult::Scope::Process) setCachedForProcessFail();
     return TranslationResult{s};
   }
 

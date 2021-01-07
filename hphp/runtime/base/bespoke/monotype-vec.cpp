@@ -78,8 +78,16 @@ StaticVec s_emptyMonotypeVArrayMarked;
 
 static_assert(sizeof(DataType) == 1);
 constexpr LayoutIndex kBaseLayoutIndex = {1 << 9};
-auto const s_monotypeVecVtable = fromArray<MonotypeVec>();
-auto const s_emptyMonotypeVecVtable = fromArray<EmptyMonotypeVec>();
+
+const LayoutFunctions* monotypeVecVtable() {
+  static auto const result = fromArray<MonotypeVec>();
+  return &result;
+}
+
+const LayoutFunctions* emptyMonotypeVecVtable() {
+  static auto const result = fromArray<EmptyMonotypeVec>();
+  return &result;
+}
 
 constexpr DataType kEmptyDataType = static_cast<DataType>(1);
 constexpr DataType kAbstractDataTypeMask = static_cast<DataType>(0x80);
@@ -945,7 +953,9 @@ LayoutIndex EmptyOrMonotypeVecLayout::Index(DataType type) {
 
 EmptyMonotypeVecLayout::EmptyMonotypeVecLayout()
   : ConcreteLayout(
-      Index(), "MonotypeVec<Empty>", &s_emptyMonotypeVecVtable,
+      Index(),
+      "MonotypeVec<Empty>",
+      emptyMonotypeVecVtable(),
       {getAllEmptyOrMonotypeVecLayouts()})
 {}
 
@@ -957,7 +967,7 @@ MonotypeVecLayout::MonotypeVecLayout(DataType type)
   : ConcreteLayout(
       Index(type),
       folly::sformat("MonotypeVec<{}>", tname(type)),
-      &s_monotypeVecVtable,
+      monotypeVecVtable(),
       {getMonotypeParentLayout(type)})
   , m_fixedType(type)
 {}

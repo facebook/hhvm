@@ -60,10 +60,26 @@ std::aligned_storage<sizeof(EmptyMonotypeDict), 16>::type s_emptyDArray;
 std::aligned_storage<sizeof(EmptyMonotypeDict), 16>::type s_emptyMarkedDict;
 std::aligned_storage<sizeof(EmptyMonotypeDict), 16>::type s_emptyMarkedDArray;
 
-auto const empty_vtable      = fromArray<EmptyMonotypeDict>();
-auto const int_vtable        = fromArray<MonotypeDict<int64_t>>();
-auto const str_vtable        = fromArray<MonotypeDict<StringData*>>();
-auto const static_str_vtable = fromArray<MonotypeDict<StaticStrPtr>>();
+
+const LayoutFunctions* emptyVtable() {
+  static auto const result = fromArray<EmptyMonotypeDict>();
+  return &result;
+}
+
+const LayoutFunctions* intVtable() {
+  static auto const result = fromArray<MonotypeDict<int64_t>>();
+  return &result;
+}
+
+const LayoutFunctions* strVtable() {
+  static auto const result = fromArray<MonotypeDict<StringData*>>();
+  return &result;
+}
+
+const LayoutFunctions* staticStrVtable() {
+  static auto const result = fromArray<MonotypeDict<StaticStrPtr>>();
+  return &result;
+}
 
 constexpr DataType kEmptyDataType = static_cast<DataType>(1);
 constexpr DataType kAbstractDataTypeMask = static_cast<DataType>(0x80);
@@ -97,9 +113,9 @@ constexpr LayoutIndex getStaticStrLayoutIndex(DataType type) {
 
 const LayoutFunctions* getVtableForKeyTypes(KeyTypes kt) {
   switch (kt) {
-    case KeyTypes::Ints:          return &int_vtable;
-    case KeyTypes::Strings:       return &str_vtable;
-    case KeyTypes::StaticStrings: return &static_str_vtable;
+    case KeyTypes::Ints:          return intVtable();
+    case KeyTypes::Strings:       return strVtable();
+    case KeyTypes::StaticStrings: return staticStrVtable();
     default: always_assert(false);
   }
 }
@@ -1538,7 +1554,7 @@ LayoutIndex EmptyOrMonotypeDictLayout::Index(KeyTypes kt, DataType type) {
 
 EmptyMonotypeDictLayout::EmptyMonotypeDictLayout()
   : ConcreteLayout(
-      Index(), "MonotypeDict<Empty>", &empty_vtable,
+      Index(), "MonotypeDict<Empty>", emptyVtable(),
       {getAllEmptyOrMonotypeDictLayouts()})
 {}
 

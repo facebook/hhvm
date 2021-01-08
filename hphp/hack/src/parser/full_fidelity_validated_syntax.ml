@@ -892,25 +892,19 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   and validate_enum_class_enumerator : enum_class_enumerator validator = function
   | { Syntax.syntax = Syntax.EnumClassEnumerator x; value = v } -> v,
     { enum_class_enumerator_semicolon = validate_token x.enum_class_enumerator_semicolon
-    ; enum_class_enumerator_right_paren = validate_token x.enum_class_enumerator_right_paren
     ; enum_class_enumerator_initial_value = validate_expression x.enum_class_enumerator_initial_value
-    ; enum_class_enumerator_left_paren = validate_token x.enum_class_enumerator_left_paren
-    ; enum_class_enumerator_right_angle = validate_token x.enum_class_enumerator_right_angle
-    ; enum_class_enumerator_type = validate_specifier x.enum_class_enumerator_type
-    ; enum_class_enumerator_left_angle = validate_token x.enum_class_enumerator_left_angle
+    ; enum_class_enumerator_equal = validate_token x.enum_class_enumerator_equal
     ; enum_class_enumerator_name = validate_token x.enum_class_enumerator_name
+    ; enum_class_enumerator_type = validate_specifier x.enum_class_enumerator_type
     }
   | s -> validation_fail (Some SyntaxKind.EnumClassEnumerator) s
   and invalidate_enum_class_enumerator : enum_class_enumerator invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.EnumClassEnumerator
-      { enum_class_enumerator_name = invalidate_token x.enum_class_enumerator_name
-      ; enum_class_enumerator_left_angle = invalidate_token x.enum_class_enumerator_left_angle
-      ; enum_class_enumerator_type = invalidate_specifier x.enum_class_enumerator_type
-      ; enum_class_enumerator_right_angle = invalidate_token x.enum_class_enumerator_right_angle
-      ; enum_class_enumerator_left_paren = invalidate_token x.enum_class_enumerator_left_paren
+      { enum_class_enumerator_type = invalidate_specifier x.enum_class_enumerator_type
+      ; enum_class_enumerator_name = invalidate_token x.enum_class_enumerator_name
+      ; enum_class_enumerator_equal = invalidate_token x.enum_class_enumerator_equal
       ; enum_class_enumerator_initial_value = invalidate_expression x.enum_class_enumerator_initial_value
-      ; enum_class_enumerator_right_paren = invalidate_token x.enum_class_enumerator_right_paren
       ; enum_class_enumerator_semicolon = invalidate_token x.enum_class_enumerator_semicolon
       }
     ; Syntax.value = v

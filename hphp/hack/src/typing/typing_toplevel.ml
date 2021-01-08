@@ -944,7 +944,7 @@ and class_def_ env c tc =
     List.iter (Cls.smethods tc) (check_override ~is_static:true)
   );
   check_enum_includes env c;
-  let (pc, _) = c.c_name in
+  let (pc, c_name) = c.c_name in
   let (req_extends, req_implements) = split_reqs c in
   let extends = List.map c.c_extends (Decl_hint.hint env.decl_env) in
   let implements = List.map c.c_implements (Decl_hint.hint env.decl_env) in
@@ -975,7 +975,7 @@ and class_def_ env c tc =
   let impl = extends @ implements @ uses in
   let env =
     Phase.localize_and_add_ast_generic_parameters_and_where_constraints
-      (fst c.c_name)
+      pc
       env
       c.c_tparams
       c.c_where_constraints
@@ -1063,7 +1063,10 @@ and class_def_ env c tc =
   let (env, typed_typeconsts) =
     List.map_env env c.c_typeconsts (typeconst_def c)
   in
-  let (env, consts) = List.map_env env c.c_consts (class_const_def c) in
+  let in_enum_class = Env.is_enum_class env c_name in
+  let (env, consts) =
+    List.map_env env c.c_consts (class_const_def ~in_enum_class c)
+  in
   let (typed_consts, const_types) = List.unzip consts in
   let env = Typing_enum.enum_class_check env tc c.c_consts const_types in
   let typed_constructor = class_constr_def env tc constructor in
@@ -1365,7 +1368,7 @@ and is_literal_expr e =
   | Unop ((Ast_defs.Uminus | Ast_defs.Uplus), (_, (Int _ | Float _))) -> true
   | _ -> false
 
-and class_const_def c env cc =
+and class_const_def ~in_enum_class c env cc =
   let { cc_type = h; cc_id = id; cc_expr = e; _ } = cc in
   begin
     match c.c_kind with
@@ -1392,15 +1395,46 @@ and class_const_def c env cc =
       let ty = Decl_hint.hint env.decl_env h in
       let ty = Typing_enforceability.compute_enforced_ty env ty in
       let (env, ty) = Phase.localize_possibly_enforced_with_self env ty in
+      (* Removing the HH\MemberOf wrapper in case of enum classes so the
+       * following call to expr_* has the right expected type
+       *)
+      let opt_ty =
+        if in_enum_class then
+          match get_node ty.et_type with
+          | Tnewtype (memberof, [_; et_type], _)
+            when String.equal memberof SN.Classes.cMemberOf ->
+            { ty with et_type }
+          | _ -> ty
+        else
+          ty
+      in
       ( env,
         ty,
-        Some (ExpectedTy.make_and_allow_coercion (fst id) Reason.URhint ty) )
+        Some (ExpectedTy.make_and_allow_coercion (fst id) Reason.URhint opt_ty)
+      )
   in
   let (env, eopt, ty) =
     match e with
     | Some e ->
       let (env, te, ty') =
         expr_with_pure_coeffects env ?expected:opt_expected e
+      in
+      (* If we are checking an enum class, wrap ty' into the right
+       * HH\MemberOf<class name, ty'> alias
+       *)
+      let (te, ty') =
+        if in_enum_class then
+          match deref ty.et_type with
+          | (r, Tnewtype (memberof, [enum_name; _], _))
+            when String.equal memberof SN.Classes.cMemberOf ->
+            let lift r ty = mk (r, Tnewtype (memberof, [enum_name; ty], ty)) in
+            let ((p, te_ty), te) = te in
+            let te = ((p, lift (get_reason te_ty) te_ty), te) in
+            let ty' = lift r ty' in
+            (te, ty')
+          | _ -> (te, ty')
+        else
+          (te, ty')
       in
       let env =
         Typing_coercion.coerce_type

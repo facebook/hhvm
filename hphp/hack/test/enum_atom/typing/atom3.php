@@ -6,15 +6,15 @@ class Box<T> {
 }
 
 enum class Foo: mixed {
-  Str<Box<string>>(new Box('zuck'));
+   Box<string> Str = new Box('zuck');
 }
 
 class UseFoo {
   public function input<T>(
-    <<__Atom>> HH\EnumMember<Foo, Box<T>> $atom, T $x
+    <<__Atom>> HH\MemberOf<Foo, Box<T>> $atom, T $x
   ): void {}
-  public function output<T>(<<__Atom>> HH\EnumMember<Foo, Box<T>> $atom): T {
-    return $atom->data()->x;
+  public function output<T>(<<__Atom>> HH\MemberOf<Foo, Box<T>> $atom): T {
+    return $atom->x;
   }
 }
 

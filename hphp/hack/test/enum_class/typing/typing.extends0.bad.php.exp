@@ -1,8 +1,8 @@
 File "typing.extends0.bad.php", line 45, characters 16-19:
 Invalid argument (Typing[4110])
-  File "typing.extends0.bad.php", line 40, characters 3-3:
+  File "typing.extends0.bad.php", line 40, characters 13-13:
   Expected `F`
-  File "typing.extends0.bad.php", line 35, characters 29-29:
+  File "typing.extends0.bad.php", line 35, characters 27-27:
   But got `E`
-  File "typing.extends0.bad.php", line 35, characters 29-29:
-  This type argument to `HH\EnumMember` only allows supertypes (it is contravariant)
+  File "typing.extends0.bad.php", line 35, characters 27-27:
+  This type argument to `HH\MemberOf` only allows supertypes (it is contravariant)

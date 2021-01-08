@@ -83,7 +83,13 @@ const enumname<arraykey> BUILTIN_ENUM = BuiltinEnum::class;
  */
 
 /**
- * Base helper class for the enum class feature
+ * Wrapper for enum class
+ */
+newtype MemberOf<-TEnumClass, +TType> as TType = TType;
+
+/**
+ * Base helper class for the enum class feature, if sane switch semantic is
+ * needed.
  */
 final class EnumMember<-TPhantom, +T> {
   /* TODO(T77095784) How to make it private ? */

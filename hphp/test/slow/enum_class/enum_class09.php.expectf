@@ -9,5 +9,3 @@ Testing F's getValues()
 A = zuck
 B = 42
 C = 3.14
-Testing ->name()
-F::C->name() = C

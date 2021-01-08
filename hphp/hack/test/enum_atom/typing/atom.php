@@ -17,11 +17,11 @@ class Box implements I {
 }
 
 enum class EE : I {
-  A<Box>(new Box(42));
+   Box A = new Box(42);
 }
 
-function ff(<<__Atom>> HH\EnumMember<EE, Box> $x) : int {
-  return $x->data()->x;
+function ff(<<__Atom>> HH\MemberOf<EE, Box> $z) : int {
+  return $z->x;
 }
 
 <<__EntryPoint>>
@@ -31,8 +31,9 @@ function main(): void {
 }
 
 class C {}
+
 function wrong_upper_bound<reify T as C>(
-    <<__Atom>> HH\EnumMember<T, Box> $x
+    <<__Atom>> HH\MemberOf<T, Box> $w
   ): mixed {
-  return $x->data()->x;
+  return $w->x;
 }

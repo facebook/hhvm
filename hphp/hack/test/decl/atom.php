@@ -1,18 +1,22 @@
 <?hh
 <<file:__EnableUnstableFeatures('enum_atom', 'enum_class')>>
 
+/* The file is missing definitions of I and Box on purpose, to make
+ * the decl output less noisy
+ */
+
 enum class EE : I {
-  A<Box>(new Box(42));
+  Box A = new Box(42);
 }
 
 enum class FF : I extends EE {
-  C<Box>(new Box(0));
+  Box C = new Box(0);
 }
 
 enum class Foo: mixed {
-  Str<Box<string>>(new Box('zuck'));
+   Box<string> Str = new Box('zuck');
 }
 
-function ff(<<__Atom>> HH\EnumMember<EE, Box> $x) : int {
-  return $x->data()->x;
+function ff(<<__Atom>> HH\MemberOf<EE, Box> $x) : int {
+  return $x->x;
 }

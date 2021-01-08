@@ -236,7 +236,7 @@ module SymbolInformation = struct
     | Object [@value 19]
     | Key [@value 20]
     | Null [@value 21]
-    | EnumMember [@value 22]
+    | MemberOf [@value 22]
     | Struct [@value 23]
   [@@deriving enum]
 
@@ -781,7 +781,7 @@ module Completion = struct
     | File [@value 17]
     | Reference [@value 18]
     | Folder [@value 19]
-    | EnumMember [@value 20]
+    | MemberOf [@value 20]
     | Constant [@value 21]
     | Struct [@value 22]
     | Event [@value 23]

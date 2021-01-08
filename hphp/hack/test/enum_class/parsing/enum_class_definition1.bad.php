@@ -9,5 +9,5 @@ class Box<T> implements ExBox {
 }
 
 enum class E: ExBox {
-  A<Box<string>>;
+  Box<string> A;
 }

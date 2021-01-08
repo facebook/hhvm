@@ -4,7 +4,7 @@
 
 .adata A_0 = """Y:3:{s:4:\"kind\";i:101;s:9:\"classname\";s:3:\"Box\";s:13:\"generic_types\";y:1:{Y:1:{s:4:\"kind\";i:4;}}}""";
 .adata A_1 = """Y:2:{s:4:\"kind\";i:13;s:4:\"name\";s:1:\"_\";}""";
-.adata A_2 = """Y:3:{s:4:\"kind\";i:101;s:9:\"classname\";s:13:\"HH\\EnumMember\";s:13:\"generic_types\";y:2:{Y:3:{s:4:\"kind\";i:102;s:9:\"root_name\";s:7:\"HH\\this\";s:11:\"access_list\";y:1:{s:5:\"TEnum\";}}Y:3:{s:4:\"kind\";i:101;s:9:\"classname\";s:3:\"Box\";s:13:\"generic_types\";y:1:{Y:2:{s:4:\"kind\";i:13;s:4:\"name\";s:1:\"_\";}}}}}""";
+.adata A_2 = """Y:3:{s:4:\"kind\";i:101;s:9:\"classname\";s:11:\"HH\\MemberOf\";s:13:\"generic_types\";y:2:{Y:3:{s:4:\"kind\";i:102;s:9:\"root_name\";s:7:\"HH\\this\";s:11:\"access_list\";y:1:{s:5:\"TEnum\";}}Y:3:{s:4:\"kind\";i:101;s:9:\"classname\";s:3:\"Box\";s:13:\"generic_types\";y:1:{Y:2:{s:4:\"kind\";i:13;s:4:\"name\";s:1:\"_\";}}}}}""";
 .adata A_3 = """Y:3:{s:4:\"kind\";i:102;s:9:\"root_name\";s:7:\"HH\\this\";s:11:\"access_list\";y:1:{s:5:\"TEnum\";}}""";
 
 .function {} ["__EntryPoint"("""y:0:{}""")] (60,68) <"HH\\void" N > main() {
@@ -121,52 +121,32 @@
   .const A = uninit;
   .const B = uninit;
   .method {}{} [private static no_injection] (16,19) 86cinit($constName) {
-    .srcloc 16:1,19:82;
+    .srcloc 16:1,19:84;
     CGetL $constName
     SSwitch <"A":L0 "B":L1 -:L2>
   L0:
-    .srcloc 17:3,17:27;
-    NewObjD "HH\\EnumMember"
-    Dup
-    NullUninit
-    .srcloc 17:3,17:3;
-    String "A"
-    .srcloc 17:15,17:25;
+    .srcloc 17:17,17:27;
     NewObjD "Box"
     Dup
     NullUninit
-    .srcloc 17:23,17:24;
+    .srcloc 17:25,17:26;
     Int 42
-    .srcloc 17:15,17:25;
+    .srcloc 17:17,17:27;
     FCallCtor <LockWhileUnwinding> 1 1 "0" - "" ""
     PopC
     LockObj
-    .srcloc 17:3,17:27;
-    FCallCtor <LockWhileUnwinding> 2 1 "00" - "" ""
-    PopC
-    LockObj
-    .srcloc 16:1,19:82;
+    .srcloc 16:1,19:84;
     RetC
   L1:
-    .srcloc 18:3,18:33;
-    NewObjD "HH\\EnumMember"
-    Dup
-    NullUninit
-    .srcloc 18:3,18:3;
-    String "B"
-    .srcloc 18:18,18:31;
+    .srcloc 18:20,18:33;
     NullUninit
     NullUninit
-    .srcloc 18:18,18:31;
+    .srcloc 18:20,18:33;
     FCallClsMethodD <> 0 1 "" - "" "" "HBox" "String"
-    .srcloc 18:3,18:33;
-    FCallCtor <LockWhileUnwinding> 2 1 "00" - "" ""
-    PopC
-    LockObj
-    .srcloc 16:1,19:82;
+    .srcloc 16:1,19:84;
     RetC
   L2:
-    .srcloc 16:1,19:82;
+    .srcloc 16:1,19:84;
     String "Could not find initializer for "
     CGetL $constName
     String " in 86cinit"
@@ -205,34 +185,24 @@
   .enum_ty <"I" extended_hint>;
   .const C = uninit;
   .method {}{} [private static no_injection] (25,27) 86cinit($constName) {
-    .srcloc 25:1,27:62;
+    .srcloc 25:1,27:63;
     CGetL $constName
     SSwitch <"C":L0 -:L1>
   L0:
-    .srcloc 26:3,26:31;
-    NewObjD "HH\\EnumMember"
-    Dup
-    NullUninit
-    .srcloc 26:3,26:3;
-    String "C"
-    .srcloc 26:16,26:29;
+    .srcloc 26:18,26:31;
     NewObjD "BBox"
     Dup
     NullUninit
-    .srcloc 26:25,26:28;
+    .srcloc 26:27,26:30;
     Double 3.1400000000000001
-    .srcloc 26:16,26:29;
+    .srcloc 26:18,26:31;
     FCallCtor <LockWhileUnwinding> 1 1 "0" - "" ""
     PopC
     LockObj
-    .srcloc 26:3,26:31;
-    FCallCtor <LockWhileUnwinding> 2 1 "00" - "" ""
-    PopC
-    LockObj
-    .srcloc 25:1,27:62;
+    .srcloc 25:1,27:63;
     RetC
   L1:
-    .srcloc 25:1,27:62;
+    .srcloc 25:1,27:63;
     String "Could not find initializer for "
     CGetL $constName
     String " in 86cinit"
@@ -243,24 +213,19 @@
 
 .class {} [abstract] Controller (29,50) {
   .const TEnum isType;
-  .method {}{} [public static] (33,35) <"T" "T" extended_hint type_var> get(<"HH\\EnumMember<HH\\this::TEnum, Box<T>>" "HH\\EnumMember" > $enum) {
-    .srcloc 33:5,35:103;
+  .method {}{} [public static] (33,35) <"T" "T" extended_hint type_var> get(<"HH\\MemberOf<HH\\this::TEnum, Box<T>>" "HH\\MemberOf" > $enum) {
+    .srcloc 33:5,35:93;
     Array @A_2
     VerifyParamTypeTS $enum
-    .srcloc 34:12,34:16;
-    CGetL $enum
-    NullUninit
-    .srcloc 34:12,34:24;
-    FCallObjMethodD <> 0 1 "" - "" "" NullThrows "data"
-    .srcloc 34:12,34:24;
-    BaseC 0 Warn
-    QueryM 1 CGet PT:"data"
-    .srcloc 34:5,34:31;
+    .srcloc 34:12,34:22;
+    BaseL $enum Warn
+    QueryM 0 CGet PT:"data"
+    .srcloc 34:5,34:23;
     VerifyRetTypeC
     RetC
   }
-  .method {}{} [public static] (38,41) <"HH\\void" N > show(<"HH\\EnumMember<HH\\this::TEnum, Box<T>>" "HH\\EnumMember" > $enum) {
-    .srcloc 38:5,41:119;
+  .method {}{} [public static] (38,41) <"HH\\void" N > show(<"HH\\MemberOf<HH\\this::TEnum, Box<T>>" "HH\\MemberOf" > $enum) {
+    .srcloc 38:5,41:117;
     Array @A_2
     VerifyParamTypeTS $enum
     .srcloc 39:10,39:27;
@@ -285,7 +250,7 @@
     RetC
   }
   .method {}{} [public static] (44,49) <"HH\\void" N > show_atom(["__Atom"("""y:0:{}""")]<"HH\\string" "HH\\string" > $enum) {
-    .srcloc 44:5,49:146;
+    .srcloc 44:5,49:144;
     Array @A_2
     VerifyParamTypeTS $enum
     Array @A_3
@@ -300,7 +265,7 @@
     PopL $enum
     Jmp L1
   L0:
-    .srcloc 45:31,45:34;
+    .srcloc 45:29,45:32;
     String "Type constant does not resolve to a class"
     Fatal Runtime
   L1:

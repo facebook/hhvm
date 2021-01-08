@@ -1080,8 +1080,8 @@ and enum_ env enum_name e =
   let new_base = hint env old_base in
   let bound =
     if is_enum_class then
-      (* Turn the base type of the enum class into EnumMember<E, base> *)
-      let elt = (pos, SN.Classes.cEnumMember) in
+      (* Turn the base type of the enum class into MemberOf<E, base> *)
+      let elt = (pos, SN.Classes.cMemberOf) in
       let h = (pos, Happly (elt, [enum_hint; old_base])) in
       hint env h
     else
@@ -1246,13 +1246,10 @@ and class_prop_non_static env ?(const = None) cv =
   }
 
 and check_constant_expression env ~in_enum_class (pos, e) =
-  match e with
-  | Aast.New _ when in_enum_class ->
-    (* TODO(T77095784) sync with HHVM to see what restrictions we should check
-     * for
-     *)
+  if not in_enum_class then
+    check_constant_expr env (pos, e)
+  else
     true
-  | _ -> check_constant_expr env (pos, e)
 
 and check_constant_expr env (pos, e) =
   match e with

@@ -621,22 +621,16 @@ module WithToken(Token: TokenType) = struct
          let acc = f acc enum_class_right_brace in
          acc
       | EnumClassEnumerator {
-        enum_class_enumerator_name;
-        enum_class_enumerator_left_angle;
         enum_class_enumerator_type;
-        enum_class_enumerator_right_angle;
-        enum_class_enumerator_left_paren;
+        enum_class_enumerator_name;
+        enum_class_enumerator_equal;
         enum_class_enumerator_initial_value;
-        enum_class_enumerator_right_paren;
         enum_class_enumerator_semicolon;
       } ->
-         let acc = f acc enum_class_enumerator_name in
-         let acc = f acc enum_class_enumerator_left_angle in
          let acc = f acc enum_class_enumerator_type in
-         let acc = f acc enum_class_enumerator_right_angle in
-         let acc = f acc enum_class_enumerator_left_paren in
+         let acc = f acc enum_class_enumerator_name in
+         let acc = f acc enum_class_enumerator_equal in
          let acc = f acc enum_class_enumerator_initial_value in
-         let acc = f acc enum_class_enumerator_right_paren in
          let acc = f acc enum_class_enumerator_semicolon in
          acc
       | RecordDeclaration {
@@ -2435,22 +2429,16 @@ module WithToken(Token: TokenType) = struct
         enum_class_right_brace;
       ]
       | EnumClassEnumerator {
-        enum_class_enumerator_name;
-        enum_class_enumerator_left_angle;
         enum_class_enumerator_type;
-        enum_class_enumerator_right_angle;
-        enum_class_enumerator_left_paren;
+        enum_class_enumerator_name;
+        enum_class_enumerator_equal;
         enum_class_enumerator_initial_value;
-        enum_class_enumerator_right_paren;
         enum_class_enumerator_semicolon;
       } -> [
-        enum_class_enumerator_name;
-        enum_class_enumerator_left_angle;
         enum_class_enumerator_type;
-        enum_class_enumerator_right_angle;
-        enum_class_enumerator_left_paren;
+        enum_class_enumerator_name;
+        enum_class_enumerator_equal;
         enum_class_enumerator_initial_value;
-        enum_class_enumerator_right_paren;
         enum_class_enumerator_semicolon;
       ]
       | RecordDeclaration {
@@ -4250,22 +4238,16 @@ module WithToken(Token: TokenType) = struct
         "enum_class_right_brace";
       ]
       | EnumClassEnumerator {
-        enum_class_enumerator_name;
-        enum_class_enumerator_left_angle;
         enum_class_enumerator_type;
-        enum_class_enumerator_right_angle;
-        enum_class_enumerator_left_paren;
+        enum_class_enumerator_name;
+        enum_class_enumerator_equal;
         enum_class_enumerator_initial_value;
-        enum_class_enumerator_right_paren;
         enum_class_enumerator_semicolon;
       } -> [
-        "enum_class_enumerator_name";
-        "enum_class_enumerator_left_angle";
         "enum_class_enumerator_type";
-        "enum_class_enumerator_right_angle";
-        "enum_class_enumerator_left_paren";
+        "enum_class_enumerator_name";
+        "enum_class_enumerator_equal";
         "enum_class_enumerator_initial_value";
-        "enum_class_enumerator_right_paren";
         "enum_class_enumerator_semicolon";
       ]
       | RecordDeclaration {
@@ -6133,23 +6115,17 @@ module WithToken(Token: TokenType) = struct
           enum_class_right_brace;
         }
       | (SyntaxKind.EnumClassEnumerator, [
-          enum_class_enumerator_name;
-          enum_class_enumerator_left_angle;
           enum_class_enumerator_type;
-          enum_class_enumerator_right_angle;
-          enum_class_enumerator_left_paren;
+          enum_class_enumerator_name;
+          enum_class_enumerator_equal;
           enum_class_enumerator_initial_value;
-          enum_class_enumerator_right_paren;
           enum_class_enumerator_semicolon;
         ]) ->
         EnumClassEnumerator {
-          enum_class_enumerator_name;
-          enum_class_enumerator_left_angle;
           enum_class_enumerator_type;
-          enum_class_enumerator_right_angle;
-          enum_class_enumerator_left_paren;
+          enum_class_enumerator_name;
+          enum_class_enumerator_equal;
           enum_class_enumerator_initial_value;
-          enum_class_enumerator_right_paren;
           enum_class_enumerator_semicolon;
         }
       | (SyntaxKind.RecordDeclaration, [
@@ -8195,23 +8171,17 @@ module WithToken(Token: TokenType) = struct
         make syntax value
 
       let make_enum_class_enumerator
-        enum_class_enumerator_name
-        enum_class_enumerator_left_angle
         enum_class_enumerator_type
-        enum_class_enumerator_right_angle
-        enum_class_enumerator_left_paren
+        enum_class_enumerator_name
+        enum_class_enumerator_equal
         enum_class_enumerator_initial_value
-        enum_class_enumerator_right_paren
         enum_class_enumerator_semicolon
       =
         let syntax = EnumClassEnumerator {
-          enum_class_enumerator_name;
-          enum_class_enumerator_left_angle;
           enum_class_enumerator_type;
-          enum_class_enumerator_right_angle;
-          enum_class_enumerator_left_paren;
+          enum_class_enumerator_name;
+          enum_class_enumerator_equal;
           enum_class_enumerator_initial_value;
-          enum_class_enumerator_right_paren;
           enum_class_enumerator_semicolon;
         } in
         let value = ValueBuilder.value_from_syntax syntax in

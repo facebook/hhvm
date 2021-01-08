@@ -215,13 +215,10 @@ let schema : schema_node list =
       aggregates = [];
       fields =
         [
-          ("name", Token);
-          ("left_angle", Token);
           ("type", Aggregate Specifier);
-          ("right_angle", Token);
-          ("left_paren", Token);
+          ("name", Token);
+          ("equal", Token);
           ("initial_value", Aggregate Expression);
-          ("right_paren", Token);
           ("semicolon", Token);
         ];
     };

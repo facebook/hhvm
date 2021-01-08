@@ -109,8 +109,8 @@ impl<'src> SmartConstructors for DirectDeclSmartConstructors<'src> {
         <Self as FlattenSmartConstructors<'src, State<'src>>>::make_enum_class_declaration(self, attribute_spec, enum_keyword, class_keyword, name, colon, base, extends, extends_list, left_brace, elements, right_brace)
     }
 
-    fn make_enum_class_enumerator(&mut self, name: Self::R, left_angle: Self::R, type_: Self::R, right_angle: Self::R, left_paren: Self::R, initial_value: Self::R, right_paren: Self::R, semicolon: Self::R) -> Self::R {
-        <Self as FlattenSmartConstructors<'src, State<'src>>>::make_enum_class_enumerator(self, name, left_angle, type_, right_angle, left_paren, initial_value, right_paren, semicolon)
+    fn make_enum_class_enumerator(&mut self, type_: Self::R, name: Self::R, equal: Self::R, initial_value: Self::R, semicolon: Self::R) -> Self::R {
+        <Self as FlattenSmartConstructors<'src, State<'src>>>::make_enum_class_enumerator(self, type_, name, equal, initial_value, semicolon)
     }
 
     fn make_record_declaration(&mut self, attribute_spec: Self::R, modifier: Self::R, keyword: Self::R, name: Self::R, extends_keyword: Self::R, extends_opt: Self::R, left_brace: Self::R, fields: Self::R, right_brace: Self::R) -> Self::R {

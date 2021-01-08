@@ -6,5 +6,5 @@ Invalid argument (Typing[4323])
   `TBox` is a constrained type parameter
   File "typing3.bad.php", line 35, characters 39-42:
   Expected `IBox`
-  File "typing3.bad.php", line 32, characters 6-13:
+  File "typing3.bad.php", line 32, characters 4-11:
   But got `Box<int>`

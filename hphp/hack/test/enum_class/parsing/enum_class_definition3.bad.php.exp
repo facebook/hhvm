@@ -1,6 +1,4 @@
-(16,7)-(16,7) An opening angle bracket `<` is expected here.
-(16,14)-(16,14) A closing angle bracket `>` is expected here.
-(16,14)-(16,14) A left parenthesis `(` is expected here.
+(16,3)-(16,6) A type specifier is expected here.
+(16,14)-(16,14) An equals sign `=` is expected here.
 (16,15)-(17,1) An expression is expected here.
-(16,15)-(17,1) A right parenthesis `)` is expected here.
 (16,15)-(17,1) A semicolon `;` is expected here.

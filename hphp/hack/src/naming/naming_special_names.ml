@@ -62,7 +62,7 @@ module Classes = struct
 
   let cIAsyncDisposable = "\\IAsyncDisposable"
 
-  let cEnumMember = "\\HH\\EnumMember"
+  let cMemberOf = "\\HH\\MemberOf"
 
   (* Classes that can be spliced into ExpressionTrees *)
   let cSpliceable = "\\Spliceable"

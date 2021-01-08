@@ -10,5 +10,5 @@ class Box<T> implements ExBox {
 
 enum class E: ExBox {
   // a single initializer is needed here.
-  A<Box<string>>(new Box('bli'), 'some other arg');
+   Box<string> A = new Box('bli'), 'some other arg';
 }

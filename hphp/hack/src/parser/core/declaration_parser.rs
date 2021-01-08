@@ -2381,28 +2381,22 @@ where
     fn parse_enum_class_enumerator(&mut self) -> S::R {
         // SPEC
         // enum-class-enumerator:
-        //   name < type-specifier > ( expression ) ;
+        //   type-specifier name = expression ;
         // Taken from parse_enumerator:
         // TODO: We must allow TRUE to be a legal enum member name; here we allow
         // any keyword.  Consider making this more strict.
-        let name = self.require_name_allow_all_keywords();
-        let left_angle = self.require_left_angle();
         let ty = self.parse_type_specifier(/*allow_var*/ false, /*allow_attr*/ true);
-        let right_angle = self.require_right_angle();
-        let left_paren = self.require_left_paren();
+        let name = self.require_name_allow_all_keywords();
+        let equal_ = self.require_equal();
         let initial_value = self.parse_expression();
-        let right_paren = self.require_right_paren();
         let semicolon = self.require_semicolon();
         S!(
             make_enum_class_enumerator,
             self,
-            name,
-            left_angle,
             ty,
-            right_angle,
-            left_paren,
+            name,
+            equal_,
             initial_value,
-            right_paren,
             semicolon
         )
     }

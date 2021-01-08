@@ -10,5 +10,5 @@ class Box<T> implements ExBox {
 
 // only types without free parameters are allowed
 enum class E : Box<T> {
-  A<Box<string>>(new Box('zuck'));
+   Box<string> A = new Box('zuck');
 }

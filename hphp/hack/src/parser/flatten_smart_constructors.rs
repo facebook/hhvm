@@ -149,11 +149,11 @@ pub trait FlattenSmartConstructors<'src, State>
         }
     }
 
-    fn make_enum_class_enumerator(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R, arg5: Self::R, arg6: Self::R, arg7: Self::R) -> Self::R {
-        if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) && Self::is_zero(&arg4) && Self::is_zero(&arg5) && Self::is_zero(&arg6) && Self::is_zero(&arg7) {
+    fn make_enum_class_enumerator(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R) -> Self::R {
+        if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) && Self::is_zero(&arg4) {
           Self::zero(SyntaxKind::EnumClassEnumerator)
         } else {
-          self.flatten(SyntaxKind::EnumClassEnumerator, vec!(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7))
+          self.flatten(SyntaxKind::EnumClassEnumerator, vec!(arg0, arg1, arg2, arg3, arg4))
         }
     }
 

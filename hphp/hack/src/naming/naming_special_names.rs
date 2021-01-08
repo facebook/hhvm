@@ -65,7 +65,7 @@ pub mod classes {
 
     pub const IASYNC_DISPOSABLE: &str = "\\IAsyncDisposable";
 
-    pub const ENUM_MEMBER: &str = "\\HH\\EnumMember";
+    pub const MEMBER_OF: &str = "\\HH\\MemberOf";
 }
 
 pub mod collections {

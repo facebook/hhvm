@@ -5412,7 +5412,7 @@ let atom_invalid_parameter pos =
       "Attribute "
       ^ Naming_special_names.UserAttributes.uaAtom
       ^ " is only allowed on "
-      ^ Naming_special_names.Classes.cEnumMember )
+      ^ Naming_special_names.Classes.cMemberOf )
     []
 
 let atom_invalid_parameter_in_enum_class pos =
@@ -5423,7 +5423,7 @@ let atom_invalid_parameter_in_enum_class pos =
       ^ Naming_special_names.UserAttributes.uaAtom
       ^ ", only type parameters bounded by enum classes and "
       ^ "enum classes are allowed as the first parameters of "
-      ^ Naming_special_names.Classes.cEnumMember )
+      ^ Naming_special_names.Classes.cMemberOf )
     []
 
 let atom_invalid_generic pos name =

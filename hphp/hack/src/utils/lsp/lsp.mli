@@ -150,7 +150,7 @@ module SymbolInformation : sig
     | Object [@value 19]
     | Key [@value 20]
     | Null [@value 21]
-    | EnumMember [@value 22]
+    | MemberOf [@value 22]
     | Struct [@value 23]
   [@@deriving enum]
 
@@ -541,7 +541,7 @@ module Completion : sig
     | File (* 17 *)
     | Reference (* 18 *)
     | Folder (* 19 *)
-    | EnumMember (* 20 *)
+    | MemberOf (* 20 *)
     | Constant (* 21 *)
     | Struct (* 22 *)
     | Event (* 23 *)

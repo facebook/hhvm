@@ -102,13 +102,10 @@ module type Syntax_S = sig
     ; enum_class_right_brace                             : t
     }
   | EnumClassEnumerator               of
-    { enum_class_enumerator_name                         : t
-    ; enum_class_enumerator_left_angle                   : t
-    ; enum_class_enumerator_type                         : t
-    ; enum_class_enumerator_right_angle                  : t
-    ; enum_class_enumerator_left_paren                   : t
+    { enum_class_enumerator_type                         : t
+    ; enum_class_enumerator_name                         : t
+    ; enum_class_enumerator_equal                        : t
     ; enum_class_enumerator_initial_value                : t
-    ; enum_class_enumerator_right_paren                  : t
     ; enum_class_enumerator_semicolon                    : t
     }
   | RecordDeclaration                 of
@@ -1067,7 +1064,7 @@ module type Syntax_S = sig
   val make_enum_declaration : t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t
   val make_enumerator : t -> t -> t -> t -> t
   val make_enum_class_declaration : t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t
-  val make_enum_class_enumerator : t -> t -> t -> t -> t -> t -> t -> t -> t
+  val make_enum_class_enumerator : t -> t -> t -> t -> t -> t
   val make_record_declaration : t -> t -> t -> t -> t -> t -> t -> t -> t -> t
   val make_record_field : t -> t -> t -> t -> t
   val make_alias_declaration : t -> t -> t -> t -> t -> t -> t -> t -> t

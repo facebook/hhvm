@@ -2,15 +2,15 @@ File "typing5.bad.php", line 12, characters 22-22:
 Unbound name: `T` (Naming[2049])
 File "typing5.bad.php", line 12, characters 22-22:
 Unbound name: `T` (an object type) (Naming[2049])
-File "typing5.bad.php", line 13, characters 3-3:
+File "typing5.bad.php", line 13, characters 16-16:
 Constant does not match the type of the enum it is in (Typing[4328])
   File "typing5.bad.php", line 12, characters 22-22:
   Expected `T`
   File "typing5.bad.php", line 12, characters 22-22:
   This type argument to `ExBox` must match exactly (it is invariant)
-  File "typing5.bad.php", line 13, characters 9-14:
+  File "typing5.bad.php", line 13, characters 8-13:
   But got `string`
-  File "typing5.bad.php", line 13, characters 9-14:
+  File "typing5.bad.php", line 13, characters 8-13:
   This type argument to `Box` must match exactly (it is invariant)
   File "typing5.bad.php", line 7, characters 31-31:
     via this generic `T`

@@ -1,7 +1,4 @@
-(13,32)-(13,32) A right parenthesis `)` is expected here.
-(13,32)-(13,32) A semicolon `;` is expected here.
-(13,32)-(13,32) A name is expected here.
-(13,32)-(13,32) An opening angle bracket `<` is expected here.
-(13,32)-(13,33) A type specifier is expected here.
-(13,34)-(13,34) A closing angle bracket `>` is expected here.
-(13,34)-(13,34) A left parenthesis `(` is expected here.
+(13,34)-(13,34) A semicolon `;` is expected here.
+(13,34)-(13,35) A type specifier is expected here.
+(13,36)-(13,36) A name is expected here.
+(13,36)-(13,36) An equals sign `=` is expected here.

@@ -2,18 +2,20 @@
 <<file:__EnableUnstableFeatures('enum_atom', 'enum_class')>>
 
 interface I {}
-class C implements I {}
+class C implements I {
+  public function __construct(public string $name) {}
+}
 
 enum class E : I {
-  A<C>(new C());
+   C A = new C("A");
 }
 
-function show(HH\EnumMember<E, C> $enum) : void {
-  echo $enum->name();
+function show(HH\MemberOf<E, C> $enum) : void {
+  echo $enum->name;
 }
 
-function show_atom(<<__Atom>>HH\EnumMember<E, C> $enum): void {
-  echo $enum->name();
+function show_atom(<<__Atom>>HH\MemberOf<E, C> $enum): void {
+  echo $enum->name;
 }
 
 <<__EntryPoint>>

@@ -10,7 +10,7 @@ class Box<T> implements ExBox<T> {
 
 // only types without parameters are allowed
 enum class F : ExBox<T> {
-  A<Box<string>>(new Box('zuck'));
+   Box<string> A = new Box('zuck');
 }
 
 // dynamic is not allwed

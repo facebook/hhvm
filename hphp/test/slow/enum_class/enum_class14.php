@@ -6,10 +6,10 @@ class Box<T> implements IBox {
   public function __construct(public T $data) {}
 }
 enum class E : IBox {
-  A<Box<string>>(new Box("world"));
+   Box<string> A = new Box("world");
 }
 function f<T>(<<__Atom>> E $elt) : T {
-  return $elt->data()->data;
+  return $elt->data;
 }
 
 <<__EntryPoint>>

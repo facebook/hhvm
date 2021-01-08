@@ -13,7 +13,7 @@ type t = {
   base: Typing_defs.decl_ty;
       (** Underlying type of the enum, e.g. int or string.
           For subclasses of Enum, this is the type parameter of Enum.
-          For enum classes, this is HH\EnumMember<E, I>. *)
+          For enum classes, this is HH\MemberOf<E, I>. *)
   type_: Typing_defs.decl_ty;
       (** Type containing the enum name.
           For subclasses of Enum, this is also the type parameter of Enum. *)

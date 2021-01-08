@@ -295,13 +295,10 @@ pub struct EnumClassDeclarationChildren<'a, T, V> {
 
 #[derive(Debug, Clone)]
 pub struct EnumClassEnumeratorChildren<'a, T, V> {
-    pub name: Syntax<'a, T, V>,
-    pub left_angle: Syntax<'a, T, V>,
     pub type_: Syntax<'a, T, V>,
-    pub right_angle: Syntax<'a, T, V>,
-    pub left_paren: Syntax<'a, T, V>,
+    pub name: Syntax<'a, T, V>,
+    pub equal: Syntax<'a, T, V>,
     pub initial_value: Syntax<'a, T, V>,
-    pub right_paren: Syntax<'a, T, V>,
     pub semicolon: Syntax<'a, T, V>,
 }
 

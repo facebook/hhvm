@@ -14,8 +14,8 @@ abstract final class HBox {
 }
 
 enum class E : I {
-  A<Box<int>>(new Box(42));
-  B<Box<string>>(HBox::String());
+   Box<int> A = new Box(42);
+   Box<string> B = HBox::String();
 }
 
 class BBox<T> extends Box<T> {
@@ -23,26 +23,26 @@ class BBox<T> extends Box<T> {
 }
 
 enum class F : I extends E {
-  C<BBox<num>>(new BBox(3.14));
+   BBox<num> C = new BBox(3.14);
 }
 
 abstract class Controller {
   abstract const type TEnum as E;
 
   public static
-    function get<T>(HH\EnumMember<this::TEnum, Box<T>> $enum) : T {
-    return $enum->data()->data;
+    function get<T>(HH\MemberOf<this::TEnum, Box<T>> $enum) : T {
+    return $enum->data;
   }
 
   public static
-    function show<T>(HH\EnumMember<this::TEnum, Box<T>> $enum) : void {
+    function show<T>(HH\MemberOf<this::TEnum, Box<T>> $enum) : void {
     echo static::get($enum);
     echo "\n";
   }
 
   public static
     function show_atom<T>(
-      <<__Atom>>HH\EnumMember<this::TEnum, Box<T>> $enum
+      <<__Atom>>HH\MemberOf<this::TEnum, Box<T>> $enum
     ) : void {
     echo static::get($enum);
     echo "\n";

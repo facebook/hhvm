@@ -10,5 +10,5 @@ class Box<T> implements ExBox {
 
 enum class E : ExBox {
   // wrong initializer
-  A<Box<string>>(new Box(42));
+   Box<string> A = new Box(42);
 }

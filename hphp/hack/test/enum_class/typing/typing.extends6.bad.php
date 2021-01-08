@@ -15,8 +15,8 @@ class IBox extends Box<int> {
 }
 
 enum class E: ExBox {
-  A<Box<string>>(new Box('zuck'));
-  B<IBox>(new IBox(42));
+   Box<string> A = new Box('zuck');
+   IBox B = new IBox(42);
 }
 
 enum NormalEnum : int includes E {

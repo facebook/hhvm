@@ -14,5 +14,5 @@ trait MyTrait {
 enum class E: ExBox {
   // Cannot use a trait inside an enum class
   use MyTrait;
-  A<Box<string>>(new Box('bli'));
+   Box<string> A = new Box('bli');
 }

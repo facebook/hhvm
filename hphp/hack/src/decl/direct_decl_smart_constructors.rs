@@ -4001,7 +4001,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             let enum_class_ty_ = Ty_::Tapply(self.alloc((name, &[])));
             let enum_class_ty = self.alloc(Ty(self.alloc(Reason::hint(pos)), enum_class_ty_));
             let elt_ty_ = Ty_::Tapply(self.alloc((
-                Id(pos, "\\HH\\EnumMember"),
+                Id(pos, "\\HH\\MemberOf"),
                 bumpalo::vec![in self.state.arena; enum_class_ty, base].into_bump_slice(),
             )));
             let elt_ty = self.alloc(Ty(self.alloc(Reason::hint(pos)), elt_ty_));
@@ -4081,13 +4081,10 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
 
     fn make_enum_class_enumerator(
         &mut self,
-        name: Self::R,
-        _left_angle: Self::R,
         type_: Self::R,
-        _right_angle: Self::R,
-        _left_paren: Self::R,
+        name: Self::R,
+        _equal: Self::R,
         _initial_value: Self::R,
-        _right_paren: Self::R,
         _semicolon: Self::R,
     ) -> Self::R {
         let name = match self.expect_name(name) {
@@ -4105,7 +4102,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         let enum_class_ty_ = Ty_::Tapply(self.alloc((Id(pos, class_name.0), &[])));
         let enum_class_ty = self.alloc(Ty(self.alloc(Reason::hint(pos)), enum_class_ty_));
         let type_ = Ty_::Tapply(self.alloc((
-            Id(pos, "\\HH\\EnumMember"),
+            Id(pos, "\\HH\\MemberOf"),
             bumpalo::vec![in self.state.arena; enum_class_ty, type_].into_bump_slice(),
         )));
         let type_ = self.alloc(Ty(self.alloc(Reason::hint(pos)), type_));

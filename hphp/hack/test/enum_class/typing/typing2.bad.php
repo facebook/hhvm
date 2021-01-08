@@ -27,13 +27,13 @@ abstract final class Helper {
 
 // Enum Class user code
 enum class E: ExBox {
-  A<Box<string>>(new Box('bli'));
-  B<IBox>(Helper::ibox());
-  B2<Box<int>>(new Box(42));
+   Box<string> A = new Box('bli');
+   IBox B = Helper::ibox();
+   Box<int> B2 = new Box(42);
 }
 
-function generic<TEnum as E, T>(HH\EnumMember<TEnum, Box<T>> $param): T {
-  return $param->data()->data;
+function generic<TEnum as E, T>(HH\MemberOf<TEnum, Box<T>> $param): T {
+  return $param->data;
 }
 
 function testit2(): void {

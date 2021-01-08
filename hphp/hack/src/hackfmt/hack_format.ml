@@ -2484,24 +2484,18 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
         ]
     | Syntax.EnumClassEnumerator
         {
-          enum_class_enumerator_name = name;
-          enum_class_enumerator_left_angle = left_angle;
           enum_class_enumerator_type = type_;
-          enum_class_enumerator_right_angle = right_angle;
-          enum_class_enumerator_left_paren = left_paren;
+          enum_class_enumerator_name = name;
+          enum_class_enumerator_equal = equal_;
           enum_class_enumerator_initial_value = initial_value;
-          enum_class_enumerator_right_paren = right_paren;
           enum_class_enumerator_semicolon = semicolon;
         } ->
       Concat
         [
-          t env name;
-          t env left_angle;
           t env type_;
-          t env right_angle;
-          t env left_paren;
+          t env name;
+          t env equal_;
           t env initial_value;
-          t env right_paren;
           t env semicolon;
           Newline;
         ]

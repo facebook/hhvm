@@ -1,8 +1,4 @@
-(12,4)-(12,4) An opening angle bracket `<` is expected here.
-(12,4)-(12,5) A type specifier is expected here.
-(12,5)-(13,1) A closing angle bracket `>` is expected here.
-(12,5)-(13,1) A left parenthesis `(` is expected here.
-(13,2)-(14,1) An expression is expected here.
-(13,2)-(14,1) A right parenthesis `)` is expected here.
-(13,2)-(14,1) A semicolon `;` is expected here.
-(13,2)-(14,1) A right brace `}` is expected here.
+(12,4)-(12,4) A name is expected here.
+(12,4)-(12,4) An equals sign `=` is expected here.
+(12,5)-(13,1) An expression is expected here.
+(12,5)-(13,1) A semicolon `;` is expected here.

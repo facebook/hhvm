@@ -27,20 +27,20 @@ abstract final class Helper {
 
 // Enum Class user code
 enum class E: ExBox {
-  A<Box<string>>(new Box('bli'));
-  B<IBox>(Helper::ibox());
-  B2<Box<int>>(new Box(42));
+   Box<string> A = new Box('bli');
+   IBox B = Helper::ibox();
+   Box<int> B2 = new Box(42);
 }
 
 enum class F: ExBox extends E {
-  C<Box<num>>(new Box(3.14));
+   Box<num> C = new Box(3.14);
 }
 
 abstract class Base {
   abstract const type TEnum as E;
 
-  public function get<T>(HH\EnumMember<this::TEnum, Box<T>> $param): T {
-    return $param->data()->data;
+  public function get<T>(HH\MemberOf<this::TEnum, Box<T>> $param): T {
+    return $param->data;
   }
 
   public static function dictGen(): dict<string, ExBox> {
@@ -48,7 +48,7 @@ abstract class Base {
     $ts = type_structure(static::class, 'TEnum');
     $cls = $ts['classname'];
     foreach ($cls::getValues() as $key => $elt) {
-      $dict[$key] = $elt->data();
+      $dict[$key] = $elt;
     }
     return $dict;
   }

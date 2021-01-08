@@ -426,6 +426,7 @@ struct Vgen {
     a.extsb(i.d, i.d);
   }
   void emit(const loadtql& i) { X(lwz, Reg64(i.d),  i.s); }
+  void emit(const loadzwq& i) { X(lhz,  i.d,        i.s); }
   void emit(const loadzlq& i) { X(lwz,  i.d,        i.s); }
   void emit(const storeb& i)  { X(stb,  Reg64(i.s), i.m); }
   void emit(const storel& i)  { X(stw,  Reg64(i.s), i.m); }

@@ -111,6 +111,7 @@ struct RegRIP {
 inline Reg8 rbyte(Reg32 r)     { return Reg8(int(r)); }
 inline Reg8 rbyte(Reg64 r)     { return Reg8(int(r)); }
 inline Reg16 r16(Reg8 r)       { return Reg16(int(r)); }
+inline Reg16 r16(Reg32 r)      { return Reg16(int(r)); }
 inline Reg32 r32(Reg8 r)       { return Reg32(int(r)); }
 inline Reg32 r32(Reg16 r)      { return Reg32(int(r)); }
 inline Reg32 r32(Reg32 r)      { return r; }
@@ -646,6 +647,7 @@ public:
 
   virtual void movq(Immed64 imm, Reg64 r)       = 0;
   virtual void loadzbl(MemoryRef m, Reg32 r)    = 0;
+  virtual void loadzwl(MemoryRef m, Reg32 r)    = 0;
   virtual void movzbl(Reg8 src, Reg32 dest)     = 0;
   virtual void movsbl(Reg8 src, Reg32 dest)     = 0;
   virtual void movzwl(Reg16 src, Reg32 dest)    = 0;

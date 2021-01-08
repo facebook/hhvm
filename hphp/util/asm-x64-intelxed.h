@@ -182,6 +182,8 @@ public:
   // exactly the same as movzbl but takes an extra byte.
   void loadzbl(MemoryRef m, Reg32 r)        { xedInstrMR(XED_ICLASS_MOVZX,
                                                          m, r, sz::byte); }
+  void loadzwl(MemoryRef m, Reg32 r)        { xedInstrMR(XED_ICLASS_MOVZX,
+                                                         m, r, sz::word); }
   void movzbl(Reg8 src, Reg32 dest)         { xedInstrRR(XED_ICLASS_MOVZX,
                                                          src, dest); }
   void movsbl(Reg8 src, Reg32 dest)         { xedInstrRR(XED_ICLASS_MOVSX,

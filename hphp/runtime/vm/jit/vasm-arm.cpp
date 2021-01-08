@@ -350,6 +350,7 @@ struct Vgen {
   void emit(const loadzbq& i) { a->Ldrb(W(i.d), M(i.s)); }
   void emit(const loadsbq& i) { a->Ldrsb(X(i.d), M(i.s)); }
   void emit(const loadsbl& i) { a->Ldrsb(W(i.d), M(i.s)); }
+  void emit(const loadzwq& i) { a->Ldrh(W(i.d), M(i.s)); }
   void emit(const loadzlq& i) { a->Ldr(W(i.d), M(i.s)); }
   void emit(const movb& i) { if (i.d != i.s) a->Mov(W(i.d), W(i.s)); }
   void emit(const movw& i) { if (i.d != i.s) a->Mov(W(i.d), W(i.s)); }

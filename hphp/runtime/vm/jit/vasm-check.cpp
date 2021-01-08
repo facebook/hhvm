@@ -409,6 +409,14 @@ checkWidths(const Vunit& unit, const jit::vector<Vlabel>& blocks) {
                   std::is_same<decltype(inst.loadzbq_.d),Vreg64>::value,
                   "loadzbq should write a quad\n");
                   break;
+            case Vinstr::loadzwq:
+              static_assert(
+                  std::is_same<decltype(inst.loadzwq_.s),Vptr16>::value,
+                  "loadzwq should load a word\n");
+              static_assert(
+                  std::is_same<decltype(inst.loadzwq_.d),Vreg64>::value,
+                  "loadzwq should write a quad\n");
+                  break;
             case Vinstr::loadzlq:
               static_assert(
                   std::is_same<decltype(inst.loadzlq_.s),Vptr32>::value,

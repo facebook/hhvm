@@ -348,15 +348,18 @@ namespace {
 
 constexpr uint8_t kArrSize = 16;
 constexpr uint8_t kElmSize = 16;
-constexpr uint8_t kIndexSize = 2;
+constexpr uint8_t kIndexSize = 4;
+
+// The initial capacity of 6 elms and 8 hash indices fits into 128 bytes.
+// NOTE: We count the array header as one of the "elements", so the smallest
+// MonotypeDict has capacity 5, and when we grow, that number doubles + 1.
+static_assert(kArrSize == kElmSize);
 
 constexpr size_t kMinNumElms = 6;
 constexpr size_t kMinNumIndices = 8;
 constexpr uint8_t kMinSizeIndex = 7;
 
-constexpr size_t kMaxNumElms = 0xc000;
-constexpr size_t kMinSize = kArrSize +
-                            kElmSize * kMinNumElms +
+constexpr size_t kMinSize = kElmSize * kMinNumElms +
                             kIndexSize * kMinNumIndices;
 
 constexpr bool isValidSizeIndex(uint8_t index) {
@@ -369,7 +372,6 @@ constexpr size_t scaleBySizeIndex(size_t base, uint8_t index) {
   return base << ((index - kMinSizeIndex) / kSizeClassesPerDoubling);
 }
 
-static_assert(kMaxNumElms % kMinNumElms == 0);
 static_assert(scaleBySizeIndex(1, kMinSizeIndex) == 1);
 static_assert(kSizeIndex2Size[kMinSizeIndex] == kMinSize);
 
@@ -475,10 +477,9 @@ bool keysEqual(Key a, Key b) {
 template <typename Key>
 uint8_t MonotypeDict<Key>::ComputeSizeIndex(size_t size) {
   assertx(0 < size);
-  assertx(size <= kMaxNumElms);
   auto capacity = kMinNumElms;
   auto result = kMinSizeIndex;
-  while (capacity < size) {
+  while (capacity <= size) {
     capacity *= 2;
     result += kSizeClassesPerDoubling;
   }
@@ -512,7 +513,6 @@ MonotypeDict<Key>* MonotypeDict<Key>::MakeReserve(
 template <typename Key>
 MonotypeDict<Key>* MonotypeDict<Key>::MakeFromVanilla(
     ArrayData* ad, DataType dt) {
-  assertx(ad->size() <= kMaxNumElms);
   assertx(ad->hasVanillaMixedLayout());
   auto const kind = ad->isDArray() ? HeaderKind::BespokeDArray
                                    : HeaderKind::BespokeDict;
@@ -654,8 +654,10 @@ ArrayData* MonotypeDict<Key>::removeImpl(Key key) {
   index = kTombstoneIndex;
   mad->m_extra_lo16++;
   mad->m_size--;
-  return mad;
+
+  return mad->compactIfNeeded(mad != this);
 }
+
 template <typename Key>
 arr_lval MonotypeDict<Key>::lvalDispatch(int64_t k) {
   return LvalInt(this, k);
@@ -696,8 +698,7 @@ arr_lval MonotypeDict<Key>::elemImpl(Key key, K k, bool throwOnMissing) {
 template <typename Key> template <bool Move, typename K>
 ArrayData* MonotypeDict<Key>::setImpl(Key key, K k, TypedValue v) {
   auto const dt = type();
-  if (key == getTombstone<Key>() || used() == kMaxNumElms ||
-      !equivDataTypes(dt, v.type())) {
+  if (key == getTombstone<Key>() || !equivDataTypes(dt, v.type())) {
     auto const ad = escalateWithCapacity(size() + 1);
     auto const result = ad->set(k, v);
     assertx(ad == result);
@@ -884,6 +885,46 @@ MonotypeDict<Key>* MonotypeDict<Key>::prepareForInsert() {
 }
 
 template <typename Key>
+MonotypeDict<Key>* MonotypeDict<Key>::compactIfNeeded(bool free) {
+  assertx(!cowCheck());
+
+  // The zombie flag is in the m_tombstones slot, so when we hit our physical
+  // limit on the number of tombstones, isZombie() will be true.
+  auto const target = std::max(2 * size(), kMinNumElms - 1);
+  auto const shrink = tombstones() > target;
+  if (!shrink && !isZombie()) return this;
+
+  // Either we're going to operate in place (in which case we still have to
+  // clear the hash table), or we'll move values to a newly-allocated dict.
+  auto const result = [&]{
+    if (!shrink) { initHash(); return this; }
+    return MakeReserve(m_kind, isLegacyArray(), target, type());
+  }();
+
+  auto cur = 0;
+  auto const data = result->elms();
+  forEachElm([&](auto i, auto elm) {
+    auto const target = &data[cur];
+    if (target != elm) *target = *elm;
+    *result->findForAdd(getHash(elm->key)).index = cur;
+    cur++;
+  });
+
+  if (shrink) {
+    if (free) {
+      tl_heap->objFreeIndex(this, sizeIndex());
+    } else {
+      setZombie();
+    }
+  }
+
+  result->m_size = cur;
+  result->m_extra_lo16 = 0;
+  assertx(result->checkInvariants());
+  return result;
+}
+
+template <typename Key>
 MonotypeDict<Key>* MonotypeDict<Key>::resize(uint8_t index, bool copy) {
   auto const mem = tl_heap->objMallocIndex(index);
   auto const ad = reinterpret_cast<MonotypeDict<Key>*>(mem);
@@ -1019,7 +1060,7 @@ uint8_t MonotypeDict<Key>::sizeIndex() const {
 
 template <typename Key>
 size_t MonotypeDict<Key>::numElms() const {
-  return scaleBySizeIndex(kMinNumElms, sizeIndex());
+  return scaleBySizeIndex(kMinNumElms, sizeIndex()) - 1;
 }
 
 template <typename Key>
@@ -1595,7 +1636,6 @@ bool isMonotypeDictLayout(LayoutIndex index) {
 
 BespokeArray* MakeMonotypeDictFromVanilla(
     ArrayData* ad, DataType dt, KeyTypes kt) {
-  if (ad->size() > kMaxNumElms) return nullptr;
   switch (kt) {
     case KeyTypes::Ints:
       return MonotypeDict<int64_t>::MakeFromVanilla(ad, dt);

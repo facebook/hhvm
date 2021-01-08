@@ -42,10 +42,8 @@
  * which typically causes escalation. For strings, the tombstone is nullptr;
  * for ints, it's std::numeric_limits<int64_t>::min().
  *
- * TODO(kshaunak): we should escalate from static-string-keys to string-keys.
- *
  * The layout of MonotypeDict<Key> is the same for all Key types. The smallest
- * monodict has a capacity of 6 elements in 128 bytes (compare to the smallest
+ * monodict has a capacity of 5 elements in 128 bytes (compare to the smallest
  * MixedArray: 3 elements in 120 rounding up to 128 bytes):
  *
  *  16-byte ArrayData header:
@@ -59,15 +57,18 @@
  *      2-byte m_tombstones field
  *      2-byte bespoke::LayoutIndex
  *          (low byte stores the DataType!)
- *  6x16-byte MixedArray<Key>::Elm
+ *  5x16-byte MixedArray<Key>::Elm
  *      8-byte Key
  *      8-byte Value
- *  8x2-byte MixedArray<Key>::Index
+ *  8x4-byte MixedArray<Key>::Index
  *      (hash table indices into the Elm array)
  *
+ * When we double the array size, we always have space for one extra element
+ * because the header is fixed (so the capacity goes: 5, 11, 23, 47, etc.)
+ *
  * As we can see, MonotypeDict is very tightly packed. As a consequence of its
- * design, it can only store up to 1 << 16 elements, and escalates to vanilla
- * when it hits this capacity bound.
+ * design, it can only store up to 1 << 16 tombstones - it shrinks when we are
+ * at that limit and we remove another element.
  *
  * We have some basic logic in MonotypeDict to maintain the layout above - see
  * sizeIndex(), used(), numElms(), numIndices(), and elmAtIndex(). They just
@@ -168,7 +169,7 @@ struct MonotypeDict : BespokeArray {
 #undef X
 
 private:
-  using Index = uint16_t;
+  using Index = uint32_t;
   using Self = MonotypeDict<Key>;
   struct Elm { Key key; Value val; };
 
@@ -211,6 +212,7 @@ private:
   void initHash();
   MonotypeDict* copy();
   MonotypeDict* prepareForInsert();
+  MonotypeDict* compactIfNeeded(bool free);
   MonotypeDict* resize(uint8_t index, bool copy);
   ArrayData* escalateWithCapacity(size_t capacity) const;
 
@@ -273,7 +275,6 @@ struct MonotypeDictLayout : public ConcreteLayout {
 
 bool isMonotypeDictLayout(LayoutIndex index);
 
-// Returns nullptr on failure (e.g. on exceeding the max MonotypeDict size).
 BespokeArray* MakeMonotypeDictFromVanilla(ArrayData*, DataType, KeyTypes);
 
 }}

@@ -6,6 +6,8 @@ File "poly_parse_errors.php", line 9, characters 3-4:
 Parameter $f used for dependent context must have a type hint (Parsing[1002])
 File "poly_parse_errors.php", line 10, characters 3-4:
 Parameter $g used for dependent context must have a type hint (Parsing[1002])
+File "poly_parse_errors.php", line 17, characters 3-5:
+Type hint for parameter $f used for contextful function must be a function type hint whose context is exactly `[_]`, e.g. `(function (ts)[_]: t)` (Parsing[1002])
 File "poly_parse_errors.php", line 18, characters 3-21:
 Type hint for parameter $g used for contextful function must be a function type hint whose context is exactly `[_]`, e.g. `(function (ts)[_]: t)` (Parsing[1002])
 File "poly_parse_errors.php", line 19, characters 15-16:

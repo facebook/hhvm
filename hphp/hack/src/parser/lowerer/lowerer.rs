@@ -3252,7 +3252,7 @@ where
                             invalid(&hint.0);
                         }
                     }
-                    _ => {}
+                    _ => invalid(&hint.0)
                 }
             };
 

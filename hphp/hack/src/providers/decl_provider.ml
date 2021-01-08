@@ -217,6 +217,7 @@ let get_fun
           |> List.find_map ~f:(function
                  | (name, Shallow_decl_defs.Fun decl)
                    when String.equal fun_name name ->
+                   record_fun name;
                    Some decl
                  | _ -> None)
         else
@@ -239,6 +240,7 @@ let get_fun
             |> List.find_map ~f:(function
                    | (name, Shallow_decl_defs.Fun decl)
                      when String.equal fun_name name ->
+                     record_fun name;
                      Some decl
                    | _ -> None)
           else
@@ -279,6 +281,7 @@ let get_typedef
           |> List.find_map ~f:(function
                  | (name, Shallow_decl_defs.Typedef decl)
                    when String.equal typedef_name name ->
+                   record_typedef name;
                    Some decl
                  | _ -> None)
         else
@@ -302,6 +305,7 @@ let get_typedef
             |> List.find_map ~f:(function
                    | (name, Shallow_decl_defs.Typedef decl)
                      when String.equal typedef_name name ->
+                     record_typedef name;
                      Some decl
                    | _ -> None)
           else
@@ -342,6 +346,7 @@ let get_record_def
           |> List.find_map ~f:(function
                  | (name, Shallow_decl_defs.Record decl)
                    when String.equal record_name name ->
+                   record_record_def name;
                    Some decl
                  | _ -> None)
         else
@@ -365,6 +370,7 @@ let get_record_def
             |> List.find_map ~f:(function
                    | (name, Shallow_decl_defs.Record decl)
                      when String.equal record_name name ->
+                     record_record_def name;
                      Some decl
                    | _ -> None)
           else
@@ -406,6 +412,7 @@ let get_gconst
           |> List.find_map ~f:(function
                  | (name, Shallow_decl_defs.Const decl)
                    when String.equal gconst_name name ->
+                   record_const name;
                    Some decl.Typing_defs.cd_type
                  | _ -> None)
         else
@@ -429,6 +436,7 @@ let get_gconst
             |> List.find_map ~f:(function
                    | (name, Shallow_decl_defs.Const decl)
                      when String.equal gconst_name name ->
+                     record_const name;
                      Some decl.Typing_defs.cd_type
                    | _ -> None)
           else

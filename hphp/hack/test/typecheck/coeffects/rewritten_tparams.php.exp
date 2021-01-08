@@ -1,0 +1,10 @@
+File "rewritten_tparams.php", line 7, characters 3-12:
+`echo` or `print` builtin requires the capability Output, which is not provided by the context. (Typing[4401])
+  File "rewritten_tparams.php", line 6, characters 2-16:
+  The local (enclosing) context provides the capability set {$v::C, ctx $f}
+File "rewritten_tparams.php", line 11, characters 10-11:
+Invalid return type (Typing[4110])
+  File "rewritten_tparams.php", line 10, characters 33-35:
+  Expected `int`
+  File "rewritten_tparams.php", line 10, characters 21-22:
+  But got `vec<int>`

@@ -349,6 +349,32 @@ module Full = struct
     | Tintersection tyl -> Concat [text "&"; ttuple k tyl]
     | Tshape (shape_kind, fdm) -> tshape k to_doc shape_kind fdm
 
+  (* For a given type parameter, construct a list of its constraints *)
+  let get_constraints_on_tparam env tparam =
+    let kind_opt = Env.get_pos_and_kind_of_generic env tparam in
+    match kind_opt with
+    | None -> []
+    | Some (_pos, kind) ->
+      (* Use the names of the parameters themselves to present bounds
+         depending on other parameters *)
+      let param_names = Type_parameter_env.get_parameter_names kind in
+      let params =
+        List.map param_names (fun name ->
+            Typing_make_type.generic Reason.none name)
+      in
+      let lower = Env.get_lower_bounds env tparam params in
+      let upper = Env.get_upper_bounds env tparam params in
+      let equ = Env.get_equal_bounds env tparam params in
+      (* If we have an equality we can ignore the other bounds *)
+      if not (TySet.is_empty equ) then
+        List.map (TySet.elements equ) (fun ty ->
+            (tparam, Ast_defs.Constraint_eq, ty))
+      else
+        List.map (TySet.elements lower) (fun ty ->
+            (tparam, Ast_defs.Constraint_super, ty))
+        @ List.map (TySet.elements upper) (fun ty ->
+              (tparam, Ast_defs.Constraint_as, ty))
+
   let rec locl_ty : _ -> _ -> _ -> locl_ty -> Doc.t =
    fun to_doc st env ty ->
     let (r, x) = deref ty in
@@ -419,6 +445,25 @@ module Full = struct
         match exact with
         | Exact when !debug_mode -> Concat [text "exact"; Space; d]
         | _ -> d
+      end
+    | Tgeneric (s, []) when String.contains s '$' ->
+      begin
+        (* Saves a call to is_prefix then chop_prefix_exn *)
+        match String.chop_prefix ~prefix:"Tctx" s with
+        | Some var -> (* Tctx$f *) to_doc ("ctx " ^ var)
+        | None ->
+          begin
+            match String.rsplit2 s '@' with
+            | Some (tvar, cst) ->
+              (* T$x@C *) to_doc (String.drop_prefix tvar 1 ^ "::" ^ cst)
+            | None ->
+              (* T$x *)
+              begin
+                match get_constraints_on_tparam env s with
+                | [(_, Ast_defs.Constraint_as, ty)] -> locl_ty to_doc st env ty
+                | _ -> (* this case shouldn't occur *) to_doc s
+              end
+          end
       end
     | Tunapplied_alias s
     | Tnewtype (s, [], _)
@@ -593,32 +638,6 @@ module Full = struct
     match ty with
     | LoclType ty -> locl_ty to_doc st env ty
     | ConstraintType ty -> constraint_type to_doc st env ty
-
-  (* For a given type parameter, construct a list of its constraints *)
-  let get_constraints_on_tparam env tparam =
-    let kind_opt = Env.get_pos_and_kind_of_generic env tparam in
-    match kind_opt with
-    | None -> []
-    | Some (_pos, kind) ->
-      (* Use the names of the parameters themselves to present bounds
-         depending on other parameters *)
-      let param_names = Type_parameter_env.get_parameter_names kind in
-      let params =
-        List.map param_names (fun name ->
-            Typing_make_type.generic Reason.none name)
-      in
-      let lower = Env.get_lower_bounds env tparam params in
-      let upper = Env.get_upper_bounds env tparam params in
-      let equ = Env.get_equal_bounds env tparam params in
-      (* If we have an equality we can ignore the other bounds *)
-      if not (TySet.is_empty equ) then
-        List.map (TySet.elements equ) (fun ty ->
-            (tparam, Ast_defs.Constraint_eq, ty))
-      else
-        List.map (TySet.elements lower) (fun ty ->
-            (tparam, Ast_defs.Constraint_super, ty))
-        @ List.map (TySet.elements upper) (fun ty ->
-              (tparam, Ast_defs.Constraint_as, ty))
 
   let to_string ~ty to_doc env x =
     ty to_doc ISet.empty env x

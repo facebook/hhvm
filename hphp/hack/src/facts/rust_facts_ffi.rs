@@ -7,12 +7,12 @@
 use facts_rust as facts;
 use hhbc_string_utils_rust::without_xhp_mangling;
 use ocamlrep::{bytes_from_ocamlrep, ptr::UnsafeOcamlPtr};
-use ocamlrep_ocamlpool::ocaml_ffi_no_panic;
+use ocamlrep_ocamlpool::ocaml_ffi;
 use oxidized::relative_path::RelativePath;
 
 use facts::facts_parser::*;
 
-ocaml_ffi_no_panic! {
+ocaml_ffi! {
     fn extract_as_json_ffi(
         flags: i32,
         filename: RelativePath,

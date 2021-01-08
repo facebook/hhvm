@@ -210,49 +210,6 @@ pub unsafe fn copy_slab_into_ocaml_heap(slab: ocamlrep::slab::SlabReader<'_>) ->
 }
 
 #[macro_export]
-macro_rules! ocaml_ffi_no_panic_fn {
-    (fn $name:ident($($param:ident: $ty:ty),+  $(,)?) -> $ret:ty $code:block) => {
-        #[no_mangle]
-        pub unsafe extern "C" fn $name ($($param: usize,)*) -> usize {
-            fn inner($($param: $ty,)*) -> $ret { $code }
-            use $crate::FromOcamlRep;
-            $(let $param = <$ty>::from_ocaml($param).unwrap();)*
-            let result = inner($($param,)*);
-            $crate::to_ocaml(&result)
-        }
-    };
-
-    (fn $name:ident() -> $ret:ty $code:block) => {
-        #[no_mangle]
-        pub unsafe extern "C" fn $name (_unit: usize) -> usize {
-            fn inner() -> $ret { $code }
-            let result = inner();
-            $crate::to_ocaml(&result)
-        }
-    };
-
-    (fn $name:ident($($param:ident: $ty:ty),*  $(,)?) $code:block) => {
-        $crate::ocaml_ffi_no_panic_fn! {
-            fn $name($($param: $ty),*) -> () $code
-        }
-    };
-}
-
-/// For perf-sensitive use cases that cannot pay the cost of catch_unwind.
-///
-/// Take care that the function body, the parameters' implementations of
-/// `OcamlRep::from_ocamlrep`, and the return type's implementation of
-/// `OcamlRep::to_ocamlrep` do not panic.
-#[macro_export]
-macro_rules! ocaml_ffi_no_panic {
-    ($(fn $name:ident($($param:ident: $ty:ty),*  $(,)?) $(-> $ret:ty)? $code:block)*) => {
-        $($crate::ocaml_ffi_no_panic_fn! {
-            fn $name($($param: $ty),*) $(-> $ret)* $code
-        })*
-    };
-}
-
-#[macro_export]
 macro_rules! ocaml_ffi_fn {
     (fn $name:ident($($param:ident: $ty:ty),+  $(,)?) -> $ret:ty $code:block) => {
         #[no_mangle]

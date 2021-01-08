@@ -24,3 +24,6 @@ external rust_from_text_ffi :
   rust_output_config ->
   Full_fidelity_source_text.t ->
   (unit, string) result = "compile_from_text_ffi"
+
+external desugar_and_print_expr_trees : rust_env -> unit
+  = "desugar_and_print_expr_trees"

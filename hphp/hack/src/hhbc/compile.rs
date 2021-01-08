@@ -2,6 +2,9 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+
+pub mod dump_expr_tree;
+
 use aast_parser::{
     rust_aast_parser_types::{Env as AastEnv, Result as AastResult},
     AastParser, Error as AastError,
@@ -292,7 +295,7 @@ fn create_parser_options(opts: &Options) -> ParserOptions {
 /// parse_file returns either error(Left) or ast(Right)
 /// - Left((Position, message, is_runtime_error))
 /// - Right(ast)
-fn parse_file(
+pub fn parse_file(
     opts: &Options,
     stack_limit: &StackLimit,
     source_text: SourceText,
@@ -368,4 +371,23 @@ fn parse_file(
 fn time<T>(f: impl FnOnce() -> T) -> (T, f64) {
     let (r, t) = profile_rust::time(f);
     (r, t.as_secs_f64())
+}
+
+pub fn expr_to_string_lossy<S: AsRef<str>>(env: &Env<S>, expr: &Tast::Expr) -> String {
+    let opts =
+        Options::from_configs(&env.config_jsons, &env.config_list).expect("Malformed options");
+
+    let mut emitter = Emitter::new(
+        opts,
+        env.flags.contains(EnvFlags::IS_SYSTEMLIB),
+        env.flags.contains(EnvFlags::FOR_DEBUGGER_EVAL),
+    );
+    let ctx = Context::new(
+        &mut emitter,
+        Some(&env.filepath),
+        env.flags.contains(EnvFlags::DUMP_SYMBOL_REFS),
+        env.flags.contains(EnvFlags::IS_SYSTEMLIB),
+    );
+
+    hhbc_hhas_rust::expr_to_string_lossy(ctx, expr)
 }

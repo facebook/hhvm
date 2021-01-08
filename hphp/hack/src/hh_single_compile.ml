@@ -47,6 +47,8 @@ type options = {
   (* below are used during Rust porting *)
   disable_toplevel_elaboration: bool;
   include_header: bool;
+  (* Experimental *)
+  dump_desugared_expression_trees: bool;
 }
 
 type message_handler = Hh_json.json -> string -> unit
@@ -120,6 +122,7 @@ let parse_options () =
   let for_debugger_eval = ref false in
   let disable_toplevel_elaboration = ref false in
   let include_header = ref false in
+  let dump_desugared_expression_trees = ref false in
   let usage =
     P.sprintf "Usage: hh_single_compile (%s) filename\n" Sys.argv.(0)
   in
@@ -171,6 +174,10 @@ let parse_options () =
       ( "--include-header",
         Arg.Unit (fun () -> include_header := true),
         "Include JSON header" );
+      ( "--dump-desugared-expression-trees",
+        Arg.Unit (fun () -> dump_desugared_expression_trees := true),
+        "Print the source code with expression tree literals desugared. Best effort debugging tool."
+      );
     ]
   in
   let options = Arg.align ~limit:25 options in
@@ -213,6 +220,7 @@ let parse_options () =
     for_debugger_eval = !for_debugger_eval;
     disable_toplevel_elaboration = !disable_toplevel_elaboration;
     include_header = !include_header;
+    dump_desugared_expression_trees = !dump_desugared_expression_trees;
   }
 
 let fail_daemon file error =
@@ -492,6 +500,37 @@ let process_single_source_unit
       log_fail compiler_options filename exc ~stack;
     handle_exception filename exc
 
+let desugar_and_print_expr_trees
+    ~config_jsons ~compiler_options (filename : string) : unit =
+  let rel_path = Relative_path.create Relative_path.Dummy filename in
+  let env =
+    Compile_ffi.
+      {
+        re_filepath = rel_path;
+        re_config_jsons = List.rev config_jsons;
+        re_config_list = compiler_options.config_list;
+        re_flags =
+          ( ( if is_file_path_for_evaled_code rel_path then
+              2
+            else
+              0 )
+          lor ( if compiler_options.for_debugger_eval then
+                4
+              else
+                0 )
+          lor ( if compiler_options.dump_symbol_refs then
+                8
+              else
+                0 )
+          lor
+          if compiler_options.disable_toplevel_elaboration then
+            16
+          else
+            0 );
+      }
+  in
+  Compile_ffi.desugar_and_print_expr_trees env
+
 let decl_and_run_mode compiler_options =
   Hh_json.(
     Access.(
@@ -743,7 +782,15 @@ let decl_and_run_mode compiler_options =
             "%s is a directory, directory is not supported."
             compiler_options.filename
         else
-          List.iter filenames (process_single_file output_file)))
+          let process_fn =
+            if compiler_options.dump_desugared_expression_trees then
+              desugar_and_print_expr_trees
+                ~config_jsons:(get_config_jsons ())
+                ~compiler_options
+            else
+              process_single_file output_file
+          in
+          List.iter filenames process_fn))
 
 let main_hack opts =
   let start_time = Unix.gettimeofday () in

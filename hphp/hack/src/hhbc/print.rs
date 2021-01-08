@@ -90,6 +90,7 @@ pub mod context {
         pub path: Option<&'a RelativePath>,
 
         dump_symbol_refs: bool,
+        pub dump_lambdas: bool,
         indent: Indent,
         is_system_lib: bool,
     }
@@ -105,6 +106,7 @@ pub mod context {
                 emitter,
                 path,
                 dump_symbol_refs,
+                dump_lambdas: false,
                 indent: Indent::new(),
                 is_system_lib,
             }
@@ -2956,13 +2958,34 @@ fn print_expr<W: Write>(
             })
         }
         E_::Omitted => Ok(()),
-        E_::Lfun(_) => Err(Error::fail(
-            "expected Lfun to be converted to Efun during closure conversion print_expr",
-        )),
+        E_::Lfun(lfun) => {
+            if ctx.dump_lambdas {
+                let fun_ = &lfun.0;
+                paren(w, |w| {
+                    paren(w, |w| {
+                        concat_by(w, ", ", &fun_.params, |w, param| {
+                            print_fparam(ctx, w, env, param)
+                        })
+                    })?;
+                    w.write(" ==> ")?;
+                    print_block_(ctx, w, env, &fun_.body.ast, None)
+                })
+            } else {
+                Err(Error::fail(
+                    "expected Lfun to be converted to Efun during closure conversion print_expr",
+                ))
+            }
+        }
         E_::Callconv(_) => Err(Error::fail("illegal default value")),
-        _ => Err(Error::fail(
-            "TODO Unimplemented: We are missing a lot of cases in the case match. Delete this catchall",
-        )),
+        E_::ETSplice(splice) => {
+            w.write("${")?;
+            print_expr(ctx, w, env, splice)?;
+            w.write("}")
+        }
+        _ => Err(Error::fail(format!(
+            "TODO Unimplemented: Cannot print: {:?}",
+            expr
+        ))),
     }
 }
 
@@ -3453,4 +3476,27 @@ fn print_record_def<W: Write>(
         ctx.newline(w)
     })?;
     newline(w)
+}
+
+/// Convert an `Expr` to a `String` of the equivalent source code.
+///
+/// This is a debugging tool abusing a printer written for bytecode
+/// emission. It does not support all Hack expressions, and panics
+/// on unsupported syntax.
+///
+/// If you have an `Expr` with positions, you are much better off
+/// getting the source code at those positions rather than using this.
+pub fn expr_to_string_lossy(mut ctx: Context, expr: &ast::Expr) -> String {
+    ctx.dump_lambdas = true;
+
+    let env = ExprEnv {
+        codegen_env: None,
+        is_xhp: false,
+    };
+    let mut escaped_src = String::new();
+    print_expr(&mut ctx, &mut escaped_src, &env, expr).expect("Printing failed");
+
+    let bs = escaper::unescape_double(&escaped_src).expect("Unescaping failed");
+    let s = String::from_utf8_lossy(&bs);
+    s.to_string()
 }

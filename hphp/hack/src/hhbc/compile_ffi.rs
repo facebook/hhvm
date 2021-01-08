@@ -141,3 +141,9 @@ fn print_output(
     writer.flush()?;
     Ok(())
 }
+
+ocamlrep_ocamlpool::ocaml_ffi! {
+  fn desugar_and_print_expr_trees(env: compile::Env<OcamlStr>) {
+    compile::dump_expr_tree::desugar_and_print(&env);
+  }
+}

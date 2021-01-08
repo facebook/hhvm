@@ -3,7 +3,7 @@
 name = "compile_rust"
 edition = "2018"
 version = "0.0.0"
-include = ["../../compile.rs"]
+include = ["../../compile.rs", "../../dump_expr_tree.rs"]
 
 [lib]
 path = "../../compile.rs"

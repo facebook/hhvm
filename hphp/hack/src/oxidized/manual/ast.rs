@@ -42,6 +42,7 @@ pub type CollectionTarg = aast::CollectionTarg<Hi>;
 pub type Def = aast::Def<Ex, Fb, En, Hi>;
 pub type Expr = aast::Expr<Ex, Fb, En, Hi>;
 pub type Expr_ = aast::Expr_<Ex, Fb, En, Hi>;
+pub type ExpressionTree = aast::ExpressionTree<Ex, Fb, En, Hi>;
 pub type Field = aast::Field<Ex, Fb, En, Hi>;
 pub type FileAttribute = aast::FileAttribute<Ex, Fb, En, Hi>;
 pub type Fun_ = aast::Fun_<Ex, Fb, En, Hi>;

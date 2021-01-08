@@ -417,7 +417,7 @@ let query_notifier genv env query_kind start_time =
  * The above doesn't apply in presence of interruptions / cancellations -
  * it's possible for client to request current recheck to be stopped.
  *)
-let rec recheck_until_no_changes_left acc genv env select_outcome profiling =
+let rec recheck_until_no_changes_left acc genv env select_outcome =
   let start_time = Unix.gettimeofday () in
   (* this is telemetry for the current batch, i.e. iteration: *)
   let telemetry =
@@ -549,6 +549,7 @@ let rec recheck_until_no_changes_left acc genv env select_outcome profiling =
       else
         ServerTypeCheck.Full_check
     in
+    let check_kind_str = ServerTypeCheck.check_kind_to_string check_kind in
     let env = { env with can_interrupt = not lazy_check } in
     let needed_full_init = env.init_env.why_needed_full_init in
     let old_errorl = Errors.get_error_list env.errorl in
@@ -556,13 +557,12 @@ let rec recheck_until_no_changes_left acc genv env select_outcome profiling =
     (* HERE'S WHERE WE DO THE HEAVY WORK! **)
     let telemetry =
       telemetry
-      |> Telemetry.string_
-           ~key:"check_kind"
-           ~value:(ServerTypeCheck.check_kind_to_string check_kind)
+      |> Telemetry.string_ ~key:"check_kind" ~value:check_kind_str
       |> Telemetry.duration ~key:"type_check_start" ~start_time
     in
     let (env, res, type_check_telemetry) =
-      ServerTypeCheck.type_check genv env check_kind start_time profiling
+      CgroupProfiler.profile_memory ~event:(`Recheck check_kind_str)
+      @@ ServerTypeCheck.type_check genv env check_kind start_time
     in
     let telemetry =
       telemetry
@@ -611,7 +611,7 @@ let rec recheck_until_no_changes_left acc genv env select_outcome profiling =
     then
       (acc, env)
     else
-      recheck_until_no_changes_left acc genv env select_outcome profiling
+      recheck_until_no_changes_left acc genv env select_outcome
 
 let new_serve_iteration_id () = Random_id.short_string ()
 
@@ -754,12 +754,11 @@ let serve_one_iteration genv env client_provider =
    * Except: this might be stopped early in some cases, e.g. IDE checks. *)
   let t_start_recheck = Unix.gettimeofday () in
   let (stats, env) =
-    CgroupProfiler.profile_memory ~event:`Recheck
-    @@ recheck_until_no_changes_left
-         (empty_recheck_loop_stats ~recheck_id)
-         genv
-         env
-         selected_client
+    recheck_until_no_changes_left
+      (empty_recheck_loop_stats ~recheck_id)
+      genv
+      env
+      selected_client
   in
   let t_done_recheck = Unix.gettimeofday () in
   let did_work = stats.total_rechecked_count > 0 in
@@ -820,7 +819,8 @@ let serve_one_iteration genv env client_provider =
       "RECHECK_END (recheck_id %s):\n%s"
       recheck_id
       (Telemetry.to_string telemetry);
-    CgroupProfiler.print_summary_memory_table ~event:`Recheck
+    (* we're only interested in full check data *)
+    CgroupProfiler.print_summary_memory_table ~event:(`Recheck "Full_check")
   end;
 
   let env =
@@ -1112,9 +1112,8 @@ let serve genv env in_fds =
          ~value:"serve_due_to_disabled_typecheck_after_init"
   in
   let typecheck_telemetry = Telemetry.create () in
-  if Option.is_none env.init_env.why_needed_full_init then (
-    finalize_init env.init_env typecheck_telemetry init_telemetry
-  );
+  if Option.is_none env.init_env.why_needed_full_init then
+    finalize_init env.init_env typecheck_telemetry init_telemetry;
 
   let env = setup_interrupts env client_provider in
   let env = ref env in

@@ -15,7 +15,7 @@ open Ocaml_overrides
 module Cmd = ServerCommandLwt
 module Rpc = ServerCommandTypes
 module SyntaxTree =
-  Full_fidelity_syntax_tree.WithSyntax (Full_fidelity_minimal_syntax)
+  Full_fidelity_syntax_tree.WithSyntax (Full_fidelity_positioned_syntax)
 
 module SaveStateResultPrinter = ClientResultPrinter.Make (struct
   type t = SaveStateServiceTypes.save_state_result

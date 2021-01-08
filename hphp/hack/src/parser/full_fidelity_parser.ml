@@ -65,10 +65,6 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
   include WithSmartConstructors (SC)
 end
 
-module SourceText = Full_fidelity_source_text
-module Syntax = Full_fidelity_minimal_syntax
-module Parser = WithSyntax (Syntax)
-
 let parse_mode = Rust_parser_ffi.parse_mode
 
 let () = Rust_parser_ffi.init ()

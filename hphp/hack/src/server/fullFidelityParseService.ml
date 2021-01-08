@@ -8,7 +8,7 @@
  *)
 
 module SyntaxTree =
-  Full_fidelity_syntax_tree.WithSyntax (Full_fidelity_minimal_syntax)
+  Full_fidelity_syntax_tree.WithSyntax (Full_fidelity_positioned_syntax)
 
 (* Entry Point *)
 let go filename =

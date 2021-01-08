@@ -15,7 +15,6 @@ module Printf = OcamlPrintf
 
 module SourceText = Full_fidelity_source_text
 module SyntaxError = Full_fidelity_syntax_error
-module MinimalSyntax = Full_fidelity_minimal_syntax
 module PositionedSyntax = Full_fidelity_positioned_syntax
 module EditablePositionedSyntax = Full_fidelity_editable_positioned_syntax
 module Env = Full_fidelity_parser_env
@@ -402,7 +401,6 @@ let parse_args () =
     ignore_lid = !ignore_lid;
   }
 
-module MinimalTest = Runner (WithSyntax (MinimalSyntax))
 module PositionedTest_ = WithSyntax (PositionedSyntax)
 module PositionedTest = Runner (PositionedTest_)
 module CoroutineTest__ = WithSyntax (PositionedSyntax)

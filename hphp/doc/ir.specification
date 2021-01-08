@@ -3052,15 +3052,18 @@ fields of that struct for holding intermediate values.
 
   Escalate the bespoke array S0 to a vanilla array for the reason S1.
 
-| LdMonotypeDictEnd, D(Int), SMonotypeDict, NF
+| LdMonotypeDictTombstones, D(Int), SMonotypeDict, NF
+
+  Returns the number of tombstones in the given MonotypeDict's value array.
+  The MonotypeDict's IterEnd is equal to its size plus its tombstone count.
 
 | LdMonotypeDictKey, DBespokePosKey, SMonotypeDict S(Int), NF
 
 | LdMonotypeDictVal, DBespokePosVal, SMonotypeDict S(Int), NF
 
-  Specializations of BespokeIterEnd, BespokeIterGetKey, and BespokeIterGetVal
-  for when the base is a monotype dict. The GetKey and GetVal ops require that
-  S1 is a valid iterator position for S0.
+  Specializations of BespokeIterGetKey and BespokeIterGetVal for when the base
+  is a monotype dict. The GetKey and GetVal ops require that S1 is a valid
+  iterator position for S0.
 
 | LdMonotypeVecElem, DBespokeElem, SMonotypeVec S(Int), NF
 

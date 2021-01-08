@@ -3151,7 +3151,9 @@ SSATmp* simplifyBespokeIterEnd(State& env, const IRInstruction* inst) {
   }
 
   if (arr->isA(TDArr|TDict) && arr->type().arrSpec().monotype()) {
-    return gen(env, LdMonotypeDictEnd, arr);
+    auto const size = gen(env, CountDict, arr);
+    auto const tombstones = gen(env, LdMonotypeDictTombstones, arr);
+    return gen(env, AddInt, size, tombstones);
   }
 
   return nullptr;
@@ -3206,12 +3208,13 @@ SSATmp* simplifyBespokeIterGetVal(State& env, const IRInstruction* inst) {
 
 // Simplify layout-specific bespoke helpers.
 
-SSATmp* simplifyLdMonotypeDictEnd(State& env, const IRInstruction* inst) {
+SSATmp* simplifyLdMonotypeDictTombstones(
+    State& env, const IRInstruction* inst) {
   auto const type = inst->src(0)->type();
 
   if (type.hasConstVal()) {
-    auto const end = type.arrLikeVal()->iter_end();
-    return cns(env, end);
+    auto const arr = type.arrLikeVal();
+    return cns(env, arr->iter_end() - arr->size());
   }
 
   return nullptr;
@@ -3677,7 +3680,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
       X(BespokeIterEnd)
       X(BespokeIterGetKey)
       X(BespokeIterGetVal)
-      X(LdMonotypeDictEnd)
+      X(LdMonotypeDictTombstones)
       X(LdMonotypeDictKey)
       X(LdMonotypeDictVal)
       X(LdMonotypeVecElem)

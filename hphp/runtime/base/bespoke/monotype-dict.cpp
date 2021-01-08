@@ -182,6 +182,7 @@ EmptyMonotypeDict* EmptyMonotypeDict::GetDArray(bool legacy) {
 bool EmptyMonotypeDict::checkInvariants() const {
   assertx(isStatic());
   assertx(m_size == 0);
+  assertx(m_extra_lo16 == 0);
   assertx(isDArray() || isDictType());
   assertx(layoutIndex() == getEmptyLayoutIndex());
   return true;
@@ -651,6 +652,7 @@ ArrayData* MonotypeDict<Key>::removeImpl(Key key) {
   tvDecRefGen(make_tv_of_type(elm->val, type()));
   elm->key = getTombstone<Key>();
   index = kTombstoneIndex;
+  mad->m_extra_lo16++;
   mad->m_size--;
   return mad;
 }
@@ -726,7 +728,6 @@ ArrayData* MonotypeDict<Key>::setImpl(Key key, K k, TypedValue v) {
     incRefKey(key);
     *update.index = safe_cast<Index>(result->used());
     *result->elmAtIndex(*update.index) = { key, v.val() };
-    result->m_extra_lo16++;
     result->m_size++;
   }
   if constexpr (Move) {
@@ -796,9 +797,9 @@ template <typename Key> template <typename ElmFn>
 void MonotypeDict<Key>::forEachElm(ElmFn e) const {
   auto const limit = used();
   if (m_size == limit) {
-      for (auto i = 0; i < limit; i++) {
-        e(i, elmAtIndex(i));
-      }
+    for (auto i = 0; i < limit; i++) {
+      e(i, elmAtIndex(i));
+    }
   } else {
     for (auto i = 0; i < limit; i++) {
       auto const elm = elmAtIndex(i);
@@ -923,7 +924,7 @@ MonotypeDict<Key>* MonotypeDict<Key>::resize(uint8_t index, bool copy) {
 template <typename Key>
 ArrayData* MonotypeDict<Key>::escalateWithCapacity(size_t capacity) const {
   assertx(capacity >= size());
-  auto const space = capacity - size() + used();
+  auto const space = capacity + tombstones();
   auto ad = isDictType() ? MixedArray::MakeReserveDict(space)
                          : MixedArray::MakeReserveDArray(space);
   ad->setLegacyArrayInPlace(isLegacyArray());
@@ -1003,6 +1004,11 @@ DataType MonotypeDict<Key>::type() const {
 
 template <typename Key>
 uint32_t MonotypeDict<Key>::used() const {
+  return size() + tombstones();
+}
+
+template <typename Key>
+uint32_t MonotypeDict<Key>::tombstones() const {
   return m_extra_lo16;
 }
 
@@ -1517,6 +1523,7 @@ DATATYPES
   auto const init = [&](EmptyMonotypeDict* ad, HeaderKind kind, bool legacy) {
     ad->initHeader_16(kind, StaticValue, legacy ? kLegacyArray : 0);
     ad->setLayoutIndex(getEmptyLayoutIndex());
+    ad->m_extra_lo16 = 0;
     ad->m_size = 0;
   };
   init(GetDict(false), HeaderKind::BespokeDict, false);

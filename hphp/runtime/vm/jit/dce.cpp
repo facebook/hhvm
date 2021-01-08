@@ -195,7 +195,7 @@ bool canDCE(IRInstruction* inst) {
   case LdFuncName:
   case LdMethCallerName:
   case LdStrLen:
-  case LdMonotypeDictEnd:
+  case LdMonotypeDictTombstones:
   case LdMonotypeDictKey:
   case LdMonotypeDictVal:
   case LdMonotypeVecElem:

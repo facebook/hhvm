@@ -56,7 +56,7 @@
  *          1-byte aux bits
  *          1-byte size index
  *      4-byte m_size field
- *      2-byte m_used field
+ *      2-byte m_tombstones field
  *      2-byte bespoke::LayoutIndex
  *          (low byte stores the DataType!)
  *  6x16-byte MixedArray<Key>::Elm
@@ -92,15 +92,8 @@
  * records the first tombstone index so that it can re-use this index if the
  * element is missing. Add additionally skips key equality checks.
  *
- * In the hash table, the number of non-empty indices (valid and tombstone)
- * is always bounded by m_used. We can prove this invariant inductively. Set
- * with a new key adds a valid key but increments m_used. Set with an old key
- * has no effect. Remove converts a valid key to a tombstone (no change to
- * the count of non-empty indices) and does not change m_used.
- *
- * Because m_used <= numElms(), and because numElms() < numIndices(), there is
- * always an empty index in the hash table. We use this property to simplify
- * the termination condition for find.
+ * Because numElms() < numIndices(), there is always an empty index in the hash
+ * table. We use this property to simplify the termination condition for find.
  *
  * After building up all this machinery, the array data operations are mostly
  * careful invocations of find, plus refcounting.
@@ -155,10 +148,10 @@ struct MonotypeDict : BespokeArray {
   static constexpr size_t elmValOffset() {
     return offsetof(Elm, val);
   }
-  static constexpr size_t usedOffset() {
+  static constexpr size_t tombstonesOffset() {
     return offsetof(Self, m_extra_lo16);
   }
-  static constexpr size_t usedSize() {
+  static constexpr size_t tombstonesSize() {
     return sizeof(m_extra_lo16);
   }
   static constexpr size_t typeOffset() {
@@ -230,6 +223,7 @@ private:
 
   DataType type() const;
   uint32_t used() const;
+  uint32_t tombstones() const;
   uint8_t sizeIndex() const;
   size_t numElms() const;
   size_t numIndices() const;

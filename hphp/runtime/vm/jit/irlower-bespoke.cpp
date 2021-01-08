@@ -295,16 +295,11 @@ Vptr ptrToMonotypeDictElm(Vout& v, Vreg rarr, Vreg rpos, Type pos, size_t off) {
 }
 }
 
-void cgLdMonotypeDictEnd(IRLS& env, const IRInstruction* inst) {
-  static_assert(MonotypeDict::usedSize() == 2);
-
+void cgLdMonotypeDictTombstones(IRLS& env, const IRInstruction* inst) {
+  static_assert(MonotypeDict::tombstonesSize() == 2);
   auto const rarr = srcLoc(env, inst, 0).reg();
   auto const used = dstLoc(env, inst, 0).reg();
-
-  auto& v = vmain(env);
-  auto const tmp = v.makeReg();
-  v << loadw{rarr[MonotypeDict::usedOffset()], tmp};
-  v << movzwq{tmp, used};
+  vmain(env) << loadzwq{rarr[MonotypeDict::tombstonesOffset()], used};
 }
 
 void cgLdMonotypeDictKey(IRLS& env, const IRInstruction* inst) {

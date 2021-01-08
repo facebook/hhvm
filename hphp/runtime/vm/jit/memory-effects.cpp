@@ -1251,7 +1251,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
 
   case DictFirstKey:
   case DictLastKey:
-  case LdMonotypeDictEnd:
+  case LdMonotypeDictTombstones:
   case LdMonotypeDictKey:
     return may_load_store(AEmpty, AEmpty);
 

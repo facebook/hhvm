@@ -11,4 +11,5 @@ path = "lib.rs"
 [dependencies]
 ocamlpool_rust = { path = "../utils/ocamlpool_rust" }
 ocamlrep = { path = "../ocamlrep" }
+bumpalo = { version = "3.2.1", features = ["collections"] }
 ocaml = "0.8"

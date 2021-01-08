@@ -1,0 +1,6 @@
+File "tyvars1.php", line 8, characters 3-18:
+This call is not allowed because its coeffects are incompatible with the context (Typing[4390])
+  File "tyvars1.php", line 7, characters 17-22:
+  From this declaration, the context of this function body provides the capability Output
+  File "tyvars1.php", line 11, characters 70-87:
+  But the function being called requires the capability set {Output, WriteProperty}

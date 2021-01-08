@@ -1815,6 +1815,19 @@ let coeffects env ty =
   let exception Defaults in
   let rec desugar_simple_intersection (ty : locl_ty) : string list =
     match snd @@ deref ty with
+    | Tvar v ->
+      (* We are interested in the upper bounds because coeffects are parameters (contravariant).
+       * Similar to Typing_subtype.describe_ty_super, we ignore Tvars appearing in bounds *)
+      let upper_bounds =
+        ITySet.elements (Typing_env.get_tyvar_upper_bounds env v)
+        |> List.filter_map ~f:(function
+               | LoclType lty ->
+                 (match deref lty with
+                 | (_, Tvar _) -> None
+                 | _ -> Some lty)
+               | ConstraintType _ -> None)
+      in
+      List.concat_map ~f:desugar_simple_intersection upper_bounds
     | Tintersection tyl -> List.concat_map ~f:desugar_simple_intersection tyl
     | Tunion [] ->
       (* TODO(coeffects) delete this special case when defaults is no longer equal to nothing *)
@@ -1858,7 +1871,9 @@ let coeffects env ty =
     | [cap] -> "the capability " ^ cap
     | caps ->
       "the capability set {"
-      ^ (caps |> List.sort ~compare:String.compare |> String.concat ~sep:", ")
+      ^ ( caps
+        |> List.dedup_and_sort ~compare:String.compare
+        |> String.concat ~sep:", " )
       ^ "}"
   with
   | UndesugarableCoeffect _ -> to_string ty

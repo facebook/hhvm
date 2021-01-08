@@ -1094,6 +1094,20 @@ SSATmp* cmpIntImpl(State& env,
     return cns(env, cmpOp(opc, true, true));
   }
 
+  // Arithmetic optimization
+  if (opc == EqInt || opc == NeqInt) {
+    if (left->inst()->is(AddInt)) {
+      auto const add = left->inst();
+      if (add->src(0) == right) return gen(env, opc, cns(env, 0), add->src(1));
+      if (add->src(1) == right) return gen(env, opc, cns(env, 0), add->src(0));
+    }
+    if (right->inst()->is(AddInt)) {
+      auto const add = right->inst();
+      if (add->src(0) == left) return gen(env, opc, cns(env, 0), add->src(1));
+      if (add->src(1) == left) return gen(env, opc, cns(env, 0), add->src(0));
+    }
+  }
+
   if (left->hasConstVal()) {
     // If both operands are constants, constant-fold them. Otherwise, move the
     // constant over to the right.

@@ -194,6 +194,7 @@ struct ImageMemoryAlloc final : RequestEventHandler {
 , int ln
 #endif
   ) {
+    assertx(ptr);
     size_t size;
     void *sizePtr = (char *)ptr - sizeof(size);
     memcpy(&size, sizePtr, sizeof(size));
@@ -7216,6 +7217,8 @@ static int exif_process_IFD_in_TIFF(image_info_type *ImageInfo,
                 if (!ImageInfo->Thumbnail.data) {
                   ImageInfo->Thumbnail.data =
                     (char *)IM_MALLOC(ImageInfo->Thumbnail.size);
+                  CHECK_ALLOC_R(ImageInfo->Thumbnail.data,
+                                ImageInfo->Thumbnail.size, 0);
                   ImageInfo->infile->seek(ImageInfo->Thumbnail.offset,
                                           SEEK_SET);
                   String str =

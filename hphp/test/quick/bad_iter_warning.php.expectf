@@ -1,4 +1,5 @@
 start iter loop
 
-Warning: Invalid argument supplied for foreach() in %s on line 6
-end iter loop
+Fatal error: Uncaught exception 'InvalidForeachArgumentException' with message 'Invalid argument supplied for foreach()' in %s:7
+Stack trace:
+%A

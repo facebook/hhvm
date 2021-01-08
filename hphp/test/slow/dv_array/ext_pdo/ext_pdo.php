@@ -2,10 +2,15 @@
 
 function VS($x, $y) {
   var_dump($x === $y);
-  if ($x !== $y) { echo "Failed: $y\n"; echo "Got: $x\n";
-                   var_dump(debug_backtrace()); }
+  if ($x !== $y) {
+    echo "Failed: $y\n";
+    echo "Got: $x\n";
+    var_dump(debug_backtrace());
+  }
 }
-function VERIFY($x) { VS($x != false, true); }
+function VERIFY($x) {
+  VS($x != false, true);
+}
 
 function createSqliteTestTable($tmp_sqllite) {
   unlink($tmp_sqllite);
@@ -26,7 +31,7 @@ class MyStatement extends PDOStatement {
 }
 
 function on_fetch($data) {
-  return $data . '_foobar';
+  return $data.'_foobar';
 }
 <<__EntryPoint>>
 function entrypoint_ext_pdo(): void {
@@ -93,8 +98,14 @@ function entrypoint_ext_pdo(): void {
     include 'ext_pdo.inc';
 
     //Test object fetching
-    foreach ($dbh->query("select * from foo", PDO::FETCH_CLASS,
-                         'MyShadyObject', NULL) as $row) {
+    foreach (
+      $dbh->query(
+        "select * from foo",
+        PDO::FETCH_CLASS,
+        'MyShadyObject',
+        NULL,
+      ) as $row
+    ) {
       var_dump($row);
     }
 
@@ -105,20 +116,25 @@ function entrypoint_ext_pdo(): void {
 
     //Test fetching into an object
     $object = new stdClass();
-    foreach ($dbh->query("select * from foo", PDO::FETCH_INTO, $object) as $row) {
+    foreach (
+      $dbh->query("select * from foo", PDO::FETCH_INTO, $object) as $row
+    ) {
 
     }
 
-    //Test bad function calls
-    foreach ($dbh->query("select * from foo", PDO::FETCH_INTO) as $row) {
 
+    try {
+      //Test bad function calls
+      foreach ($dbh->query("select * from foo", PDO::FETCH_INTO) as $row) {
+      }
+    } catch (InvalidForeachArgumentException $e) {
+      var_dump($e->getMessage());
     }
-
     unset($vstmt);
 
     //Test setAttribute with ATTR_STATEMENT_CLASS. Set it to our own class
     var_dump(
-      $dbh->setAttribute(PDO::ATTR_STATEMENT_CLASS, varray['MyStatement'])
+      $dbh->setAttribute(PDO::ATTR_STATEMENT_CLASS, varray['MyStatement']),
     );
     $vstmt = $dbh->query("select * from foo", PDO::FETCH_COLUMN, 0);
     var_dump(get_class($vstmt));
@@ -126,8 +142,9 @@ function entrypoint_ext_pdo(): void {
 
     //Then reset to PDOStatement. Zend allows the class name to be explicitly set
     //to PDOStatement.
-    var_dump($dbh->setAttribute(PDO::ATTR_STATEMENT_CLASS,
-                                varray['PDOStatement']));
+    var_dump(
+      $dbh->setAttribute(PDO::ATTR_STATEMENT_CLASS, varray['PDOStatement']),
+    );
     $vstmt = $dbh->query("select * from foo", PDO::FETCH_COLUMN, 0);
     var_dump(get_class($vstmt));
 

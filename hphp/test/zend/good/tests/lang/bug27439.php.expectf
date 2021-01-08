@@ -1,10 +1,7 @@
 123
-Notice: Undefined property: test::$foobar in %s/bug27439.php on line 32
-
-Warning: Invalid argument supplied for foreach() in %s/bug27439.php on line 32
-
-Warning: Invalid argument supplied for foreach() in %s/bug27439.php on line 36
-
-Warning: Invalid argument supplied for foreach() in %s/bug27439.php on line 44
+Notice: Undefined property: test::$foobar in %s/bug27439.php on line 33
+string(39) "Invalid argument supplied for foreach()"
+string(39) "Invalid argument supplied for foreach()"
+string(39) "Invalid argument supplied for foreach()"
 123
 ===DONE===

@@ -1,5 +1,5 @@
 
-Warning: Invalid argument supplied for foreach() in %s/sxe_003.php on line 32
+string(39) "Invalid argument supplied for foreach()"
 ===RESET===
 bool(true)
 string(5) "elem1"

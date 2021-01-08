@@ -1,5 +1,5 @@
-
 Notice: Undefined variable: a in %s/foreach_undefined.php on line 3
 
-Warning: Invalid argument supplied for foreach() in %s/foreach_undefined.php on line 3
-Done
+Fatal error: Uncaught exception 'InvalidForeachArgumentException' with message 'Invalid argument supplied for foreach()' in %s:3
+Stack trace:
+%A

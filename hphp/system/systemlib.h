@@ -61,7 +61,8 @@ namespace HPHP { namespace SystemLib {
   x(LazyKeyedIterableView)                      \
   x(CURLFile)                                   \
   x(__PHP_Incomplete_Class)                     \
-  x(DivisionByZeroException)
+  x(DivisionByZeroException)                    \
+  x(InvalidForeachArgumentException)
 
 #define SYSTEMLIB_HH_CLASSES(x) \
   x(Traversable)                \
@@ -153,7 +154,7 @@ void throwSoapFaultObject(const Variant& code,
                           const Variant& detail = uninit_variant,
                           const Variant& name = uninit_variant,
                           const Variant& header = uninit_variant);
-
+[[noreturn]] void throwInvalidForeachArgumentExceptionObject();
 
 /**
  * Register a persistent unit to be re-merged (in non-repo mode)

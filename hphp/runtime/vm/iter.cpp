@@ -272,8 +272,7 @@ bool Iter::init(TypedValue* base) {
   // Get more easy cases out of the way: non-objects are not iterable.
   // For these cases, we warn and branch to done.
   if (!isObjectType(base->m_type)) {
-    raise_warning("Invalid argument supplied for foreach()");
-    return false;
+    SystemLib::throwInvalidForeachArgumentExceptionObject();
   }
 
   if (base->m_data.pobj->isCollection()) {

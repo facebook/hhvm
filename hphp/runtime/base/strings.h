@@ -133,6 +133,8 @@ constexpr char ARRAY_MARK_LEGACY_VEC[] = "array_mark_legacy() called on vec";
 constexpr char ARRAY_MARK_LEGACY_DICT[] = "array_mark_legacy() called on dict";
 constexpr char NONEXHAUSTIVE_SWITCH[] =
   "The switch statement failed to match any of the cases";
+constexpr char INVALID_ARGUMENT_FOREACH[] =
+  "Invalid argument supplied for foreach()";
 
 } // namespace Strings
 } // namespace HPHP

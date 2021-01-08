@@ -190,6 +190,11 @@ Object AllocDivisionByZeroExceptionObject() {
                                      Strings::DIVISION_BY_ZERO);
 }
 
+Object AllocInvalidForeachArgumentExceptionObject() {
+  return createAndConstructThrowable(s_InvalidForeachArgumentExceptionClass,
+                                     Strings::INVALID_ARGUMENT_FOREACH);
+}
+
 Object AllocSoapFaultObject(const Variant& code,
                                  const Variant& message,
                                  const Variant& actor /* = uninit_variant */,
@@ -286,6 +291,10 @@ void throwSoapFaultObject(const Variant& code,
   throw_object(Object{AllocSoapFaultObject(code, message,
                                     actor, detail,
                                     name, header)});
+}
+
+void throwInvalidForeachArgumentExceptionObject() {
+  throw_object(AllocInvalidForeachArgumentExceptionObject());
 }
 
 #define ALLOC_OBJECT_STUB(name)                                         \

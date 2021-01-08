@@ -52,8 +52,7 @@ vec(2) {
 }
 
 Warning: SQLSTATE[HY000]: General error: fetch mode requires the object parameter in %s/ext_pdo/ext_pdo.php on line %d
-
-Warning: Invalid argument supplied for foreach() in %s/ext_pdo/ext_pdo.php on line %d
+string(39) "Invalid argument supplied for foreach()"
 bool(true)
 string(11) "MyStatement"
 bool(true)

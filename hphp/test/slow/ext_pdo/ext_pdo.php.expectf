@@ -48,8 +48,7 @@ object(MyShadyObject) (1) {
 }
 
 Warning: SQLSTATE[HY000]: General error: fetch mode requires the object parameter in %sext_pdo/ext_pdo.php on line %d
-
-Warning: Invalid argument supplied for foreach() in %sext_pdo/ext_pdo.php on line %d
+string(39) "Invalid argument supplied for foreach()"
 bool(true)
 string(11) "MyStatement"
 bool(true)

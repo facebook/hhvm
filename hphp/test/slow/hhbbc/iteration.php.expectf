@@ -5,16 +5,10 @@ int(4)
 int(3)
 int(3)
 int(0)
-
-Warning: Invalid argument supplied for foreach() in %s/iteration.php on line 110
-int(0)
+string(39) "Invalid argument supplied for foreach()"
 int(10)
-
-Warning: Invalid argument supplied for foreach() in %s/iteration.php on line 126
+string(39) "Invalid argument supplied for foreach()"
 int(0)
-int(0)
-
-Warning: Invalid argument supplied for foreach() in %s/iteration.php on line 142
-int(0)
+string(39) "Invalid argument supplied for foreach()"
 int(0)
 int(6)

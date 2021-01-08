@@ -2,5 +2,6 @@ SimpleXMLElement Object
 (
 )
 
-Warning: Invalid argument supplied for foreach() in %s/bug38347.php on line 6
-Done
+Fatal error: Uncaught exception 'InvalidForeachArgumentException' with message 'Invalid argument supplied for foreach()' in %s/bug38347.php:6
+Stack trace:
+%A

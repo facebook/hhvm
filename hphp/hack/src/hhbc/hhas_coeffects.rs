@@ -70,7 +70,7 @@ impl HhasCoeffects {
                 .iter()
                 .map(|c| c.to_string())
                 .collect::<Vec<String>>()
-                .join(", "),
+                .join(" "),
         )
     }
 

@@ -74,6 +74,7 @@ module FullFidelityParseArgs = struct
     enable_xhp_class_modifier: bool;
     disallow_hash_comments: bool;
     disallow_fun_and_cls_meth_pseudo_funcs: bool;
+    enable_coeffects: bool;
   }
 
   let make
@@ -113,7 +114,8 @@ module FullFidelityParseArgs = struct
       allow_unstable_features
       enable_xhp_class_modifier
       disallow_hash_comments
-      disallow_fun_and_cls_meth_pseudo_funcs =
+      disallow_fun_and_cls_meth_pseudo_funcs
+      enable_coeffects =
     {
       full_fidelity_json;
       full_fidelity_dot;
@@ -152,6 +154,7 @@ module FullFidelityParseArgs = struct
       enable_xhp_class_modifier;
       disallow_hash_comments;
       disallow_fun_and_cls_meth_pseudo_funcs;
+      enable_coeffects;
     }
 
   let parse_args () =
@@ -207,6 +210,7 @@ module FullFidelityParseArgs = struct
     let enable_xhp_class_modifier = ref false in
     let disallow_hash_comments = ref false in
     let disallow_fun_and_cls_meth_pseudo_funcs = ref false in
+    let enable_coeffects = ref false in
     let options =
       [
         (* modes *)
@@ -352,6 +356,9 @@ No errors are filtered out."
         ( "--disallow-fun-and-cls-meth-pseudo-funcs",
           Arg.Set disallow_fun_and_cls_meth_pseudo_funcs,
           "Disables parsing of fun() and class_meth()" );
+        ( "--enable-coeffects",
+          Arg.Set enable_coeffects,
+          "Allows parsing coeffect syntax" );
       ]
     in
     Arg.parse options push_file usage;
@@ -409,6 +416,7 @@ No errors are filtered out."
       !enable_xhp_class_modifier
       !disallow_hash_comments
       !disallow_fun_and_cls_meth_pseudo_funcs
+      !enable_coeffects
 end
 
 open FullFidelityParseArgs
@@ -504,6 +512,7 @@ let handle_existing_file args filename =
       popt
       args.disallow_fun_and_cls_meth_pseudo_funcs
   in
+  let popt = ParserOptions.with_enable_coeffects popt args.enable_coeffects in
   (* Parse with the full fidelity parser *)
   let file = Relative_path.create Relative_path.Dummy filename in
   let source_text = SourceText.from_file file in

@@ -137,6 +137,9 @@ let disallow_fun_and_cls_meth_pseudo_funcs =
 let with_disallow_fun_and_cls_meth_pseudo_funcs po b =
   { po with GlobalOptions.po_disallow_fun_and_cls_meth_pseudo_funcs = b }
 
+let with_enable_coeffects po b =
+  { po with GlobalOptions.po_enable_coeffects = b }
+
 let enable_coeffects = GlobalOptions.po_enable_coeffects
 
 let make

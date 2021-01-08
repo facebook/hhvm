@@ -48,6 +48,7 @@ unsafe fn parser_options_from_ocaml_only_for_parser_errors(
     let po_allow_unstable_features = bool::from_ocaml(*ocaml_opts.add(18)).unwrap();
     let po_disallow_hash_comments = bool::from_ocaml(*ocaml_opts.add(19)).unwrap();
     let po_disallow_fun_and_cls_meth_pseudo_funcs = bool::from_ocaml(*ocaml_opts.add(20)).unwrap();
+    let po_enable_coeffects = bool::from_ocaml(*ocaml_opts.add(21)).unwrap();
 
     parser_options.po_disable_lval_as_an_expression = po_disable_lval_as_an_expression;
     parser_options.po_disable_legacy_soft_typehints = po_disable_legacy_soft_typehints;
@@ -68,6 +69,7 @@ unsafe fn parser_options_from_ocaml_only_for_parser_errors(
     parser_options.po_disallow_hash_comments = po_disallow_hash_comments;
     parser_options.po_disallow_fun_and_cls_meth_pseudo_funcs =
         po_disallow_fun_and_cls_meth_pseudo_funcs;
+    parser_options.po_enable_coeffects = po_enable_coeffects;
     (parser_options, (hhvm_compat_mode, hhi_mode, codegen))
 }
 

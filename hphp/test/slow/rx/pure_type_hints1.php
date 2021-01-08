@@ -11,7 +11,7 @@ function returnspure(): Pure<(function(): int)> {
 }
 
 class A {
-  <<__Pure, __Mutable>>
+  <<__Pure>>
   public function f(): void {
   }
 }
@@ -32,7 +32,7 @@ function g(): void {
   pure(<<__Pure>>() ==> 1);
   pure(returnspure());
 
-  f(<<__Pure>>(<<__Mutable>> A $a) ==> {},
-    <<__Pure>>(<<__MaybeMutable>> A $a) ==> {},
-    <<__Pure>>(<<__OwnedMutable>> A $a) ==> {});
+  f(<<__Pure>>(A $a) ==> {},
+    <<__Pure>>(A $a) ==> {},
+    <<__Pure>>(A $a) ==> {});
 }

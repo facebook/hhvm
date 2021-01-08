@@ -3,7 +3,7 @@
 class Foo {
   private int $bar = 0;
 
-  <<__Rx, __MutableReturn>>
+  <<__Rx>>
   public static function get(): Foo {
     return new Foo();
   }
@@ -13,7 +13,7 @@ class Foo {
     return $this->bar;
   }
 
-  <<__Rx, __Mutable>>
+  <<__Rx>>
   public function setBar(int $bar): void {
     $this->bar = $bar;
   }

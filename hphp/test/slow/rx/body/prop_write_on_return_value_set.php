@@ -1,6 +1,6 @@
 <?hh
 
-<<__Rx, __MutableReturn>>
+<<__Rx>>
 function returns_object() {
   return new stdClass();
 }

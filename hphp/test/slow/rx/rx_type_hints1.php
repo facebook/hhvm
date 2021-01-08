@@ -21,7 +21,7 @@ function returnsrx(): Rx<(function(): int)> {
 }
 
 class A {
-  <<__Rx, __Mutable>>
+  <<__Rx>>
   public function f(): void {
   }
 }
@@ -45,7 +45,7 @@ function g(): void {
   local(() ==> 1);
   rx(returnsrx());
 
-  f(<<__Rx>>(<<__Mutable>> A $a) ==> {},
-    <<__Rx>>(<<__MaybeMutable>> A $a) ==> {},
-    <<__Rx>>(<<__OwnedMutable>> A $a) ==> {});
+  f(<<__Rx>>(A $a) ==> {},
+    <<__Rx>>(A $a) ==> {},
+    <<__Rx>>(A $a) ==> {});
 }

@@ -1602,8 +1602,8 @@ LayoutIndex EmptyOrMonotypeDictLayout::Index(KeyTypes kt, DataType type) {
 
 EmptyMonotypeDictLayout::EmptyMonotypeDictLayout()
   : ConcreteLayout(
-      Index(), "MonotypeDict<Empty>", emptyVtable(),
-      {getAllEmptyOrMonotypeDictLayouts()})
+      Index(), "MonotypeDict<Empty>",
+      {getAllEmptyOrMonotypeDictLayouts()}, emptyVtable())
 {}
 
 LayoutIndex EmptyMonotypeDictLayout::Index() {
@@ -1614,8 +1614,8 @@ MonotypeDictLayout::MonotypeDictLayout(KeyTypes kt, DataType type)
   : ConcreteLayout(
       Index(kt, type),
       folly::sformat("MonotypeDict<{},{}>", show(kt), tname(type)),
-      getVtableForKeyTypes(kt),
-      {getMonotypeParentLayout(kt, type)})
+      {getMonotypeParentLayout(kt, type)},
+      getVtableForKeyTypes(kt))
   , m_keyType(kt)
   , m_valType(type)
 {}

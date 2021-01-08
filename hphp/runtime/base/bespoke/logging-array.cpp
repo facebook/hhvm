@@ -179,8 +179,8 @@ void LoggingArray::InitializeLayouts() {
   auto const index = Layout::ReserveIndices(1);
   always_assert(index == kLayoutIndex);
   static auto const s_vtable = fromArray<LoggingArray>();
-  new ConcreteLayout(index, "LoggingLayout", &s_vtable,
-                     {AbstractLayout::GetBespokeTopIndex()});
+  new ConcreteLayout(index, "LoggingLayout",
+                     {AbstractLayout::GetBespokeTopIndex()}, &s_vtable);
 }
 
 bespoke::LayoutIndex LoggingArray::GetLayoutIndex() {

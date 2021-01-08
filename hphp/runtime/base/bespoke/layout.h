@@ -304,6 +304,7 @@ struct Layout {
   const std::string& describe() const { return m_description; }
   std::string dumpInformation() const;
   virtual bool isConcrete() const { return false; }
+  const LayoutFunctions* vtable() const { return m_vtable; }
 
   /*
    * In order to support efficient layout type tests in the JIT, we let
@@ -361,7 +362,8 @@ struct Layout {
   MaskAndCompare maskAndCompare() const;
 
 protected:
-  Layout(LayoutIndex index, std::string description, LayoutSet parents);
+  Layout(LayoutIndex index, std::string description, LayoutSet parents,
+         const LayoutFunctions* vtable);
 
 private:
   bool checkInvariants() const;
@@ -376,25 +378,27 @@ private:
   static Initializer s_initializer;
   struct BFSWalker;
 
+  struct DescendantOrdering;
+  struct AncestorOrdering;
+
   LayoutIndex m_index;
   size_t m_topoIndex;
   std::string m_description;
-  const LayoutFunctions* m_vtable;
   LayoutSet m_parents;
   LayoutSet m_children;
   std::vector<Layout*> m_descendants;
   std::vector<Layout*> m_ancestors;
   MaskAndCompare m_maskAndCompare;
-
-  struct DescendantOrdering;
-  struct AncestorOrdering;
+protected:
+  const LayoutFunctions* m_vtable;
 };
 
 /*
  * An abstract bespoke layout, providing precious little on top of Layout.
  */
 struct AbstractLayout : public Layout {
-  AbstractLayout(LayoutIndex index, std::string description, LayoutSet parents);
+  AbstractLayout(LayoutIndex index, std::string description, LayoutSet parents,
+                 const LayoutFunctions* vtable = nullptr);
   virtual ~AbstractLayout() {}
 
   static void InitializeLayouts();
@@ -409,16 +413,12 @@ struct AbstractLayout : public Layout {
  */
 struct ConcreteLayout : public Layout {
   ConcreteLayout(LayoutIndex index, std::string description,
-                 const LayoutFunctions* vtable, LayoutSet parents);
+                 LayoutSet parents, const LayoutFunctions* vtable);
   virtual ~ConcreteLayout() {}
 
-  const LayoutFunctions* vtable() const { return m_vtable; }
   bool isConcrete() const override { return true; }
 
   static const ConcreteLayout* FromConcreteIndex(LayoutIndex index);
-
-private:
-  const LayoutFunctions* m_vtable;
 };
 
 }}

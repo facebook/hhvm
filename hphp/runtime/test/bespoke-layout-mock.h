@@ -29,7 +29,7 @@ namespace testing {
 struct MockLayout : public Layout {
   MockLayout(const std::string& description, LayoutSet&& parents,
              LayoutIndex idx, bool concrete)
-    : Layout(idx, description, std::move(parents))
+    : Layout(idx, description, std::move(parents), nullptr)
     , m_concrete(concrete)
   {}
 

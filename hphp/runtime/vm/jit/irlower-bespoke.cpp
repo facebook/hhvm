@@ -87,10 +87,12 @@ static TypedValue getStr(const ArrayData* ad, const StringData* key) {
   [&]{                                                                    \
     auto const layout = Type.arrSpec().layout();                          \
     if (layout.bespoke()) {                                               \
-      if (auto const concrete = layout.concreteLayout()) {                \
-        return CallSpec::direct(concrete->vtable()->fn##Fn);              \
+      auto const vtable = layout.bespokeLayout()->vtable();               \
+      if (vtable->fn##Fn) {                                               \
+        return CallSpec::direct(vtable->fn##Fn);                          \
+      } else {                                                            \
+        return CallSpec::direct(BespokeArray::Fn);                        \
       }                                                                   \
-      return CallSpec::direct(BespokeArray::Fn);                          \
     }                                                                     \
     if (layout.vanilla()) {                                               \
       if (arr <= (TVArr|TVec))  return CallSpec::direct(PackedArray::Fn); \
@@ -208,8 +210,9 @@ void cgBespokeIterGetVal(IRLS& env, const IRInstruction* inst) {
 void cgBespokeEscalateToVanilla(IRLS& env, const IRInstruction* inst) {
   auto const target = [&] {
     auto const layout = inst->src(0)->type().arrSpec().layout();
-    if (auto const concrete = layout.concreteLayout()) {
-      return CallSpec::direct(concrete->vtable()->fnEscalateToVanilla);
+    auto const vtable = layout.bespokeLayout()->vtable();
+    if (vtable->fnEscalateToVanilla) {
+      return CallSpec::direct(vtable->fnEscalateToVanilla);
     } else {
       return CallSpec::direct(BespokeArray::ToVanilla);
     }
@@ -237,9 +240,11 @@ void cgBespokeElem(IRLS& env, const IRInstruction* inst) {
     // Bespoke arrays always have specific Elem helper functions.
     if (layout.bespoke()) {
       args.ssa(2);
-      if (auto const concrete = layout.concreteLayout()) {
-        return key->isA(TStr) ? CallSpec::direct(concrete->vtable()->fnElemStr)
-                              : CallSpec::direct(concrete->vtable()->fnElemInt);
+      auto const vtable = layout.bespokeLayout()->vtable();
+      if (key->isA(TStr) && vtable->fnElemStr) {
+        return CallSpec::direct(vtable->fnElemStr);
+      } else if (key->isA(TInt) && vtable->fnElemInt) {
+        return CallSpec::direct(vtable->fnElemInt);
       } else {
         return key->isA(TStr) ? CallSpec::direct(BespokeArray::ElemStr)
                               : CallSpec::direct(BespokeArray::ElemInt);

@@ -230,12 +230,7 @@ let download_and_load_state_exn
     ServerPrecheckedFiles.should_use genv.options genv.local_config
   in
   let naming_table_saved_state_future =
-    (* TODO(hverr): Support manifold naming table in 64-bit mode *)
-    if
-      ServerLocalConfig.(
-        genv.local_config.enable_naming_table_fallback
-        && not genv.local_config.load_state_natively_64bit)
-    then begin
+    if genv.local_config.ServerLocalConfig.enable_naming_table_fallback then begin
       Hh_logger.log "Starting naming table download.";
       let loader_future =
         State_loader_futures.load

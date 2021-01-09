@@ -87,7 +87,7 @@ void AccessLogFileData::registerWriter(const std::string& handle,
 }
 
 AccessLog::~AccessLog() {
-  signal(SIGCHLD, SIG_DFL);
+  fini();
 }
 
 void AccessLog::init(const std::string &defaultFormat,
@@ -141,6 +141,15 @@ void AccessLog::init(const std::string &format,
     writer->init(username, m_fGetThreadData);
     m_files.push_back(writer);
   }
+}
+
+void AccessLog::fini() {
+  if (!m_initialized) return;
+  Lock l(m_lock);
+  flushAllWriters();
+  m_files.clear();
+  m_defaultWriter.reset();
+  m_initialized = false;
 }
 
 void AccessLog::log(Transport *transport, const VirtualHost *vhost) {

@@ -64,6 +64,7 @@ struct AccessLog {
   explicit AccessLog(GetThreadDataFunc f) :
     m_initialized(false), m_fGetThreadData(f) {}
   ~AccessLog();
+
   void init(const std::string &defaultFormat,
             std::vector<AccessLogFileData> &files,
             const std::string &username);
@@ -77,6 +78,7 @@ struct AccessLog {
   void clearThreadLog();
   void onNewRequest();
   void flushAllWriters();
+  void fini();
 private:
   bool m_initialized;
   Mutex m_lock;
@@ -108,4 +110,3 @@ protected:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

@@ -1102,9 +1102,9 @@ static int start_server(const std::string &username, int xhprof) {
      username);
   SCOPE_EXIT {
     Logger::FlushAll();
-    HttpRequestHandler::GetAccessLog().flushAllWriters();
-    AdminRequestHandler::GetAccessLog().flushAllWriters();
-    RPCRequestHandler::GetAccessLog().flushAllWriters();
+    HttpRequestHandler::GetAccessLog().fini();
+    AdminRequestHandler::GetAccessLog().fini();
+    RPCRequestHandler::GetAccessLog().fini();
   };
 
   if (RuntimeOption::ServerInternalWarmupThreads > 0) {

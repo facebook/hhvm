@@ -21,47 +21,6 @@
           c_tconst_name = ([7:22-24], "C2"); c_tconst_constraint = None;
           c_tconst_type = None; c_tconst_user_attributes = [];
           c_tconst_span = [7:3-32]; c_tconst_doc_comment = None;
-          c_tconst_is_ctx = true };
-        { c_tconst_abstract = (TCAbstract None);
-          c_tconst_name = ([8:22-24], "C3");
-          c_tconst_constraint =
-          (Some ([8:28-38],
-                 (Hintersection
-                    [([8:29-31],
-                      (Happly (([8:29-31], "\\HH\\Contexts\\io"), [])));
-                      ([8:33-37],
-                       (Happly (([8:33-37], "\\HH\\Contexts\\rand"), [])))
-                      ])));
-          c_tconst_type = None; c_tconst_user_attributes = [];
-          c_tconst_span = [8:3-39]; c_tconst_doc_comment = None;
-          c_tconst_is_ctx = true };
-        { c_tconst_abstract =
-          (TCAbstract
-             (Some ([9:52-56],
-                    (Hintersection
-                       [([9:53-55],
-                         (Happly (([9:53-55], "\\HH\\Contexts\\io"), [])))]))));
-          c_tconst_name = ([9:22-24], "C4");
-          c_tconst_constraint =
-          (Some ([9:31-41],
-                 (Hintersection
-                    [([9:32-34],
-                      (Happly (([9:32-34], "\\HH\\Contexts\\io"), [])));
-                      ([9:36-40],
-                       (Happly (([9:36-40], "\\HH\\Contexts\\rand"), [])))
-                      ])));
-          c_tconst_type = None; c_tconst_user_attributes = [];
-          c_tconst_span = [9:3-57]; c_tconst_doc_comment = None;
-          c_tconst_is_ctx = true };
-        { c_tconst_abstract = (TCAbstract None);
-          c_tconst_name = ([10:22-24], "C5");
-          c_tconst_constraint =
-          (Some ([10:28-32],
-                 (Hintersection
-                    [([10:29-31],
-                      (Happly (([10:29-31], "\\HH\\Contexts\\io"), [])))])));
-          c_tconst_type = None; c_tconst_user_attributes = [];
-          c_tconst_span = [10:3-52]; c_tconst_doc_comment = None;
           c_tconst_is_ctx = true }
         ];
       c_vars = []; c_methods = []; c_attributes = []; c_xhp_children = [];

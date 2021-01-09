@@ -4187,52 +4187,35 @@ where
                 }
                 let name = Self::pos_name(&c.name, env)?;
                 let context = Self::p_context_list_to_intersection(&c.ctx_list, env)?;
-                let constraints = Self::could_map(
-                    |cstrnt, e: &mut Env<'a, TF>| match &cstrnt.children {
-                        Missing => Ok(None),
-                        TypeConstraint(c) => Self::p_context_list_to_intersection(&c.type_, e),
-                        _ => Self::missing_syntax("const ctx constraint", node, e),
-                    },
-                    &c.constraint,
-                    env,
-                )?;
-
-                // TODO(coeffects)
-                // so it turns out that type constant and context constant
-                // constraints super don't jive.
-                // 1. type constants allow only 1 constraint
-                // 2. type constants don't record the *type* of the constraint
-                // these both need to be fixed or we need to lower to something
-                // else in the meantime, just grab the first one if it exists
-                let constraint = constraints.into_iter().next().flatten();
-
+                if !c.constraint.is_missing() && env.is_typechecker() {
+                    Self::raise_parsing_error(
+                        &c.constraint,
+                        env,
+                        "Constraints on ctx constants are not allowed",
+                    );
+                }
                 let span = Self::p_pos(node, env);
                 let kinds = Self::p_kinds(&c.modifiers, env)?;
                 let has_abstract = kinds.has(modifier::ABSTRACT);
-                let (context, abstract_kind) = match (has_abstract, &constraint, &context) {
-                    (false, _, None) => {
+                let (context, abstract_kind) = match (has_abstract, &context) {
+                    (false, None) => {
                         Self::raise_hh_error(
                             env,
                             NastCheck::not_abstract_without_typeconst(name.0.clone()),
                         );
-                        (constraint.clone(), ast::TypeconstAbstractKind::TCConcrete)
+                        (None, ast::TypeconstAbstractKind::TCConcrete)
                     }
-                    (false, None, Some(_)) => (context, ast::TypeconstAbstractKind::TCConcrete),
-                    (false, Some(_), Some(_)) => {
-                        let errstr = "No partially abstract context constants";
-                        Self::raise_parsing_error(node, env, errstr);
-                        return Err(Error::Failwith(errstr.to_string()));
-                    }
-                    (true, _, None) => (
+                    (false, Some(_)) => (context, ast::TypeconstAbstractKind::TCConcrete),
+                    (true, None) => (
                         context.clone(),
                         ast::TypeconstAbstractKind::TCAbstract(context),
                     ),
-                    (true, _, Some(_)) => (None, ast::TypeconstAbstractKind::TCAbstract(context)),
+                    (true, Some(_)) => (None, ast::TypeconstAbstractKind::TCAbstract(context)),
                 };
                 Ok(class.typeconsts.push(ast::ClassTypeconst {
                     abstract_: abstract_kind,
                     name,
-                    constraint,
+                    constraint: None,
                     type_: context,
                     user_attributes: vec![],
                     span,

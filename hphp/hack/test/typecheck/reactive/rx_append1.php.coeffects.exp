@@ -2,3 +2,5 @@ File "rx_append1.php", line 6, characters 3-10:
 Appending to a Hack Collection object requires the capability WriteProperty, which is not provided by the context. (Typing[4401])
   File "rx_append1.php", line 5, characters 27-28:
   The local (enclosing) context provides the capability set {}
+  File "coeffect/contexts.hhi", line 28, characters 1-23:
+  Contexts are defined here

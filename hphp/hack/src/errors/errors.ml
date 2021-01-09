@@ -5290,6 +5290,18 @@ let coeffect_subtyping_error
     (pos_expected, "Expected a function that requires " ^ cap_expected)
     [(pos_got, "But got a function that requires " ^ cap_got)]
 
+let context_definitions_msg =
+  (* Notes:
+   * - magic numbers are inteded to provide a nicer IDE experience,
+   * - a Pos is constructed in order to make the link to contexts.hhi clickable
+   *)
+  let path = Relative_path.(create Dummy "coeffect/contexts.hhi") in
+  ( Pos.make_from_lnum_bol_cnum
+      ~pos_file:path
+      ~pos_start:(28, 0, 0)
+      ~pos_end:(28, 0, 23),
+    "Contexts are defined here" )
+
 let call_coeffect_error
     ~available_incl_unsafe ~available_pos ~required ~required_pos call_pos =
   add_list
@@ -5302,6 +5314,7 @@ let call_coeffect_error
         "From this declaration, the context of this function body provides "
         ^ available_incl_unsafe );
       (required_pos, "But the function being called requires " ^ required);
+      context_definitions_msg;
     ]
 
 let op_coeffect_error
@@ -5314,6 +5327,7 @@ let op_coeffect_error
     [
       ( available_pos,
         "The local (enclosing) context provides " ^ locally_available );
+      context_definitions_msg;
     ]
 
 let abstract_function_pointer cname meth_name call_pos decl_pos =

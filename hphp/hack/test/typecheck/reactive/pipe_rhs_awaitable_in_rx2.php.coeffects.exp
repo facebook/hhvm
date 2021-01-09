@@ -2,6 +2,8 @@ File "pipe_rhs_awaitable_in_rx2.php", line 12, characters 3-18:
 Not immediately `await`ing `Awaitable`-typed values requires the capability AccessStaticVariable, which is not provided by the context. (Typing[4401])
   File "pipe_rhs_awaitable_in_rx2.php", line 10, characters 20-21:
   The local (enclosing) context provides the capability set {Rx, WriteProperty}
+  File "coeffect/contexts.hhi", line 28, characters 1-23:
+  Contexts are defined here
 File "pipe_rhs_awaitable_in_rx2.php", line 12, characters 3-18:
 This expression is of type `Awaitable`, but it's either being discarded or used in a dangerous way before being awaited (Typing[4015])
   File "pipe_rhs_awaitable_in_rx2.php", line 5, characters 37-50:

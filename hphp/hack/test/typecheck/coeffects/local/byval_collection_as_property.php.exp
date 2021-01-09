@@ -3,13 +3,19 @@ This object's property is being mutated (used as an lvalue)
 Setting non-mutable object properties requires the capability WriteProperty, which is not provided by the context. (Typing[4401])
   File "byval_collection_as_property.php", line 16, characters 39-40:
   The local (enclosing) context provides the capability set {}
+  File "coeffect/contexts.hhi", line 28, characters 1-23:
+  Contexts are defined here
 File "byval_collection_as_property.php", line 19, characters 7-36:
 This object's property is being mutated (used as an lvalue)
 Setting non-mutable object properties requires the capability WriteProperty, which is not provided by the context. (Typing[4401])
   File "byval_collection_as_property.php", line 16, characters 39-40:
   The local (enclosing) context provides the capability set {}
+  File "coeffect/contexts.hhi", line 28, characters 1-23:
+  Contexts are defined here
 File "byval_collection_as_property.php", line 31, characters 3-31:
 This object's property is being mutated (used as an lvalue)
 Setting non-mutable object properties requires the capability WriteProperty, which is not provided by the context. (Typing[4401])
   File "byval_collection_as_property.php", line 30, characters 20-21:
   The local (enclosing) context provides the capability set {}
+  File "coeffect/contexts.hhi", line 28, characters 1-23:
+  Contexts are defined here

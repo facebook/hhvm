@@ -2,11 +2,17 @@ File "test_rx_enabled6.php", line 6, characters 7-19:
 `\HH\Rx\IS_ENABLED` requires the capability Rx, which is not provided by the context. (Typing[4401])
   File "test_rx_enabled6.php", line 5, characters 13-14:
   The local (enclosing) context provides the capability set {}
+  File "coeffect/contexts.hhi", line 28, characters 1-23:
+  Contexts are defined here
 File "test_rx_enabled6.php", line 15, characters 7-19:
 `\HH\Rx\IS_ENABLED` requires the capability Rx, which is not provided by the context. (Typing[4401])
   File "test_rx_enabled6.php", line 14, characters 61-67:
   The local (enclosing) context provides the capability ctx $fn
+  File "coeffect/contexts.hhi", line 28, characters 1-23:
+  Contexts are defined here
 File "test_rx_enabled6.php", line 33, characters 9-21:
 `\HH\Rx\IS_ENABLED` requires the capability Rx, which is not provided by the context. (Typing[4401])
   File "test_rx_enabled6.php", line 32, characters 5-11:
   The local (enclosing) context provides the capability ctx $fn
+  File "coeffect/contexts.hhi", line 28, characters 1-23:
+  Contexts are defined here

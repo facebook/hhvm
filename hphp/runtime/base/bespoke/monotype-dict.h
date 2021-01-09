@@ -214,7 +214,7 @@ private:
   MonotypeDict* prepareForInsert();
   MonotypeDict* compactIfNeeded(bool free);
   MonotypeDict* resize(uint8_t index, bool copy);
-  ArrayData* escalateWithCapacity(size_t capacity) const;
+  ArrayData* escalateWithCapacity(size_t capacity, const char* reason) const;
 
   Elm* elms();
   const Elm* elms() const;

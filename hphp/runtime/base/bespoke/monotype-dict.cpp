@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/bespoke-array.h"
+#include "hphp/runtime/base/bespoke/escalation-logging.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/memory-manager-defs.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
@@ -197,6 +198,7 @@ void EmptyMonotypeDict::Scan(const Self* ad, type_scan::Scanner& scanner) {
 }
 ArrayData* EmptyMonotypeDict::EscalateToVanilla(
     const Self* ad, const char* reason) {
+  logEscalateToVanilla(ad, reason);
   auto const legacy = ad->isLegacyArray();
   return ad->isDictType()
     ? (legacy ? staticEmptyMarkedDictArray() : staticEmptyDictArray())
@@ -699,7 +701,7 @@ template <typename Key> template <bool Move, typename K>
 ArrayData* MonotypeDict<Key>::setImpl(Key key, K k, TypedValue v) {
   auto const dt = type();
   if (key == getTombstone<Key>() || !equivDataTypes(dt, v.type())) {
-    auto const ad = escalateWithCapacity(size() + 1);
+    auto const ad = escalateWithCapacity(size() + 1, __func__);
     auto const result = ad->set(k, v);
     assertx(ad == result);
     if constexpr (Move) {
@@ -963,8 +965,11 @@ MonotypeDict<Key>* MonotypeDict<Key>::resize(uint8_t index, bool copy) {
 }
 
 template <typename Key>
-ArrayData* MonotypeDict<Key>::escalateWithCapacity(size_t capacity) const {
+ArrayData* MonotypeDict<Key>::escalateWithCapacity(
+    size_t capacity, const char* reason) const {
   assertx(capacity >= size());
+  logEscalateToVanilla(this, reason);
+
   auto const space = capacity + tombstones();
   auto ad = isDictType() ? MixedArray::MakeReserveDict(space)
                          : MixedArray::MakeReserveDArray(space);
@@ -1097,7 +1102,7 @@ void MonotypeDict<Key>::Scan(const Self* mad, type_scan::Scanner& scanner) {
 template <typename Key>
 ArrayData* MonotypeDict<Key>::EscalateToVanilla(
     const Self* mad, const char* reason) {
-  return mad->escalateWithCapacity(mad->size());
+  return mad->escalateWithCapacity(mad->size(), reason);
 }
 
 template <typename Key>
@@ -1388,7 +1393,7 @@ ArrayData* MonotypeDict<Key>::ToHackArr(Self* madIn, bool copy) {
 
 template <typename Key>
 ArrayData* MonotypeDict<Key>::PreSort(Self* mad, SortFunction sf) {
-  return mad->escalateWithCapacity(mad->size());
+  return mad->escalateWithCapacity(mad->size(), sortFunctionName(sf));
 }
 
 // Some sort types can change the keys of a dict or darray.

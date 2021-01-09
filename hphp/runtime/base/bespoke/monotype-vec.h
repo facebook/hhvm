@@ -91,7 +91,7 @@ private:
   MonotypeVec* copy() const;
   MonotypeVec* grow();
   DataType type() const;
-  ArrayData* escalateWithCapacity(size_t capacity) const;
+  ArrayData* escalateWithCapacity(size_t capacity, const char* reason) const;
   bool checkInvariants() const;
 
   friend EmptyMonotypeVec;

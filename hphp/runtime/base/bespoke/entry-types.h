@@ -45,7 +45,7 @@ enum class ValueTypes : uint8_t {
 };
 
 struct EntryTypes {
-  static EntryTypes ForArray(ArrayData* ad);
+  static EntryTypes ForArray(const ArrayData* ad);
 
   EntryTypes(KeyTypes keyTypes, ValueTypes valueTypes,
              DataType valueDatatype)

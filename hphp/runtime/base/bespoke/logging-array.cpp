@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/bespoke-array.h"
+#include "hphp/runtime/base/bespoke/escalation-logging.h"
 #include "hphp/runtime/base/bespoke/logging-profile.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/memory-manager-defs.h"
@@ -267,6 +268,7 @@ void LoggingArray::Scan(const LoggingArray* lad, type_scan::Scanner& scanner) {
 ArrayData* LoggingArray::EscalateToVanilla(
     const LoggingArray* lad, const char* reason) {
   logEvent(lad, ArrayOp::EscalateToVanilla, makeStaticString(reason));
+  logEscalateToVanilla(lad, reason);
   auto const wrapped = lad->wrapped;
   wrapped->incRefCount();
   return wrapped;

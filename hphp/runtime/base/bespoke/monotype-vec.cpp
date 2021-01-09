@@ -18,6 +18,7 @@
 #include "hphp/runtime/base/bespoke/monotype-vec.h"
 
 #include "hphp/runtime/base/bespoke/entry-types.h"
+#include "hphp/runtime/base/bespoke/escalation-logging.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
@@ -187,6 +188,7 @@ void EmptyMonotypeVec::Scan(const EmptyMonotypeVec* ead, type_scan::Scanner&) {
 
 ArrayData* EmptyMonotypeVec::EscalateToVanilla(const EmptyMonotypeVec* ead,
                                                const char* reason) {
+  logEscalateToVanilla(ead, reason);
   auto const legacy = ead->isLegacyArray();
   return ead->isVecType()
     ? (legacy ? staticEmptyMarkedVec() : staticEmptyVec())
@@ -509,8 +511,11 @@ MonotypeVec* MonotypeVec::prepareForInsert() {
  * current array and the specified capacity. The new array will match the
  * MonotypeVec in size, contents, and legacy bit status.
  */
-ArrayData* MonotypeVec::escalateWithCapacity(size_t capacity) const {
+ArrayData* MonotypeVec::escalateWithCapacity(
+    size_t capacity, const char* reason) const {
   assertx(capacity >= size());
+  logEscalateToVanilla(this, reason);
+
   auto const ad = isVecType() ? PackedArray::MakeReserveVec(capacity)
                               : PackedArray::MakeReserveVArray(capacity);
   for (uint32_t i = 0; i < size(); i++) {
@@ -569,7 +574,7 @@ void MonotypeVec::Scan(const MonotypeVec* mad, type_scan::Scanner& scan) {
 
 ArrayData* MonotypeVec::EscalateToVanilla(const MonotypeVec* mad,
                                           const char* reason) {
-  return mad->escalateWithCapacity(mad->size());
+  return mad->escalateWithCapacity(mad->size(), reason);
 }
 
 void MonotypeVec::ConvertToUncounted(MonotypeVec* madIn,
@@ -774,7 +779,7 @@ template <bool Move>
 ArrayData* MonotypeVec::appendImpl(TypedValue v) {
   auto const dt = type();
   if (dt != KindOfUninit && !equivDataTypes(dt, v.type())) {
-    auto const ad = escalateWithCapacity(size() + 1);
+    auto const ad = escalateWithCapacity(size() + 1, __func__);
     auto const result = PackedArray::Append(ad, v);
     assertx(ad == result);
     return result;
@@ -839,7 +844,7 @@ ArrayData* MonotypeVec::ToHackArr(MonotypeVec* madIn, bool copy) {
 }
 
 ArrayData* MonotypeVec::PreSort(MonotypeVec* mad, SortFunction sf) {
-  return mad->escalateWithCapacity(mad->size());
+  return mad->escalateWithCapacity(mad->size(), sortFunctionName(sf));
 }
 
 ArrayData* MonotypeVec::PostSort(MonotypeVec* mad, ArrayData* vad) {

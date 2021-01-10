@@ -38,7 +38,6 @@ enum Parser {
     Aast,
     Positioned,
     PositionedByRef,
-    Minimal,
     DirectDecl,
 }
 
@@ -92,10 +91,6 @@ fn parse_file(parser: Parser, filepath: PathBuf) -> anyhow::Result<()> {
                 Parser::Positioned => {
                     let (_, _, _) =
                         positioned_parser::parse_script(&source_text, env, Some(stack_limit));
-                }
-                Parser::Minimal => {
-                    let (_, _, _) =
-                        minimal_parser::parse_script(&source_text, env, Some(stack_limit));
                 }
                 Parser::DirectDecl => {
                     let arena = bumpalo::Bump::new();

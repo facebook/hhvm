@@ -841,13 +841,13 @@ module Coeffects = struct
 
   let local_capability = "$#local_capability"
 
-  let contexts = "HH\\Contexts"
+  let contexts = "\\HH\\Contexts"
 
   let unsafe_contexts = contexts ^ "\\Unsafe"
 end
 
 module Capabilities = struct
-  let defaults = "\\HH\\Contexts\\defaults"
+  let defaults = Coeffects.contexts ^ "\\defaults"
 
   let prefix = "\\HH\\Capabilities\\"
 

@@ -99,6 +99,20 @@ let handle_special_calls env call =
     Call (id, targs, [(p1, String cl); meth], unpacked_element)
   | _ -> call
 
+let contexts_ns =
+  Namespace_env.
+    {
+      empty_with_default with
+      ns_name = Some (Utils.strip_ns SN.Coeffects.contexts);
+    }
+
+let unsafe_contexts_ns =
+  Namespace_env.
+    {
+      empty_with_default with
+      ns_name = Some (Utils.strip_ns SN.Coeffects.unsafe_contexts);
+    }
+
 class ['a, 'b, 'c, 'd] generic_elaborator =
   object (self)
     inherit [_] Aast.endo as super
@@ -111,11 +125,6 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
 
     method on_'hi _ hi = hi
 
-    method private with_ns env ns =
-      let open Namespace_env in
-      let namespace = { empty_with_default with ns_name = Some ns } in
-      { env with namespace }
-
     (* Namespaces were already precomputed by ElaborateDefs
      * The following functions just set the namespace env correctly
      *)
@@ -126,7 +135,7 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
 
     method! on_class_typeconst env tc =
       if tc.c_tconst_is_ctx then
-        super#on_class_typeconst (self#with_ns env SN.Coeffects.contexts) tc
+        super#on_class_typeconst { env with namespace = contexts_ns } tc
       else
         super#on_class_typeconst env tc
 
@@ -142,9 +151,9 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
       super#on_fun_def env f
 
     method! on_fun_ env f =
-      let ctx_env = self#with_ns env SN.Coeffects.contexts in
+      let ctx_env = { env with namespace = contexts_ns } in
       let f_ctxs = Option.map ~f:(super#on_contexts ctx_env) f.f_ctxs in
-      let unsafe_ctx_env = self#with_ns env SN.Coeffects.unsafe_contexts in
+      let unsafe_ctx_env = { env with namespace = unsafe_contexts_ns } in
       let f_unsafe_ctxs =
         Option.map ~f:(super#on_contexts unsafe_ctx_env) f.f_unsafe_ctxs
       in
@@ -152,9 +161,9 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
 
     method! on_method_ env m =
       let env = extend_tparams env m.m_tparams in
-      let ctx_env = self#with_ns env SN.Coeffects.contexts in
+      let ctx_env = { env with namespace = contexts_ns } in
       let m_ctxs = Option.map ~f:(super#on_contexts ctx_env) m.m_ctxs in
-      let unsafe_ctx_env = self#with_ns env SN.Coeffects.unsafe_contexts in
+      let unsafe_ctx_env = { env with namespace = unsafe_contexts_ns } in
       let m_unsafe_ctxs =
         Option.map ~f:(super#on_contexts unsafe_ctx_env) m.m_unsafe_ctxs
       in
@@ -336,7 +345,7 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
       | _ -> super#on_hint_ env h
 
     method! on_hint_fun env hf =
-      let ctx_env = self#with_ns env SN.Coeffects.contexts in
+      let ctx_env = { env with namespace = contexts_ns } in
       let hf_ctxs = Option.map ~f:(super#on_contexts ctx_env) hf.hf_ctxs in
       { (super#on_hint_fun env hf) with hf_ctxs }
 

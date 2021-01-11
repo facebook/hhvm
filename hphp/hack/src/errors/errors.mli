@@ -1472,3 +1472,5 @@ val parent_implements_dynamic :
   unit
 
 val method_is_not_dynamically_callable : Pos.t -> string -> string -> unit
+
+val immutable_local : Pos.t -> unit

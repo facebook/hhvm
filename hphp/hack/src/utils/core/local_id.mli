@@ -46,6 +46,10 @@ val make : int -> string -> t
 
 val tmp : unit -> t
 
+val is_immutable : int -> bool
+
+val make_immutable : int -> int
+
 module Set : module type of Set.Make (S)
 
 module Map : module type of WrappedMap.Make (S)

@@ -225,7 +225,7 @@ val next_cont_opt : env -> Typing_per_cont_env.per_cont_entry option
 
 val all_continuations : env -> Typing_continuations.t list
 
-val set_local : env -> Local_id.t -> locl_ty -> Pos.t -> env
+val set_local : ?immutable:bool -> env -> Local_id.t -> locl_ty -> Pos.t -> env
 
 val is_using_var : env -> Local_id.t -> bool
 

@@ -285,6 +285,16 @@ let merge_decl_header_with_hints ~params ~ret ~variadic decl_header env =
   in
   (ret_decl_ty, params_decl_ty, variadicity_decl_ty)
 
+(* Checking this with List.exists will be a single op in the vast majority of cases (empty) *)
+let get_ctx_vars ctxs =
+  Option.value_map
+    ~f:(fun (_, cs) ->
+      List.filter_map cs ~f:(function
+          | (_, Haccess ((_, Hvar n), _)) -> Some n
+          | _ -> None))
+    ~default:[]
+    ctxs
+
 let rec fun_def ctx f :
     (Tast.fun_def * Typing_inference_env.t_global_with_pos) option =
   Counters.count Counters.Category.Typecheck @@ fun () ->
@@ -357,9 +367,14 @@ let rec fun_def ctx f :
       let check_has_hint p t = check_param_has_hint env p t partial_callback in
       List.iter2_exn ~f:check_has_hint f.f_params param_tys;
       Typing_memoize.check_function env f;
+      let params_need_immutable = get_ctx_vars f.f_ctxs in
       let (env, typed_params) =
         let bind_param_and_check env param =
-          let (env, fun_param) = Typing.bind_param env param in
+          let name = (snd param).param_name in
+          let immutable =
+            List.exists ~f:(String.equal name) params_need_immutable
+          in
+          let (env, fun_param) = Typing.bind_param ~immutable env param in
           (env, fun_param)
         in
         List.map_env
@@ -541,9 +556,14 @@ and method_def env cls m =
       let param_fn p t = check_param_has_hint env p t partial_callback in
       List.iter2_exn ~f:param_fn m.m_params param_tys;
       Typing_memoize.check_method env m;
+      let params_need_immutable = get_ctx_vars m.m_ctxs in
       let (env, typed_params) =
         let bind_param_and_check env param =
-          let (env, fun_param) = Typing.bind_param env param in
+          let name = (snd param).param_name in
+          let immutable =
+            List.exists ~f:(String.equal name) params_need_immutable
+          in
+          let (env, fun_param) = Typing.bind_param ~immutable env param in
           (env, fun_param)
         in
         List.map_env

@@ -1,0 +1,2 @@
+File "using.php", line 8, characters 10-11:
+This variable cannot be reassigned because it is used for a dependent context (Typing[4404])

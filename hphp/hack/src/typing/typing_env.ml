@@ -1037,7 +1037,7 @@ let set_local_ env x ty =
  * that the local currently has, and an expression_id generated from
  * the last assignment to this local.
  *)
-let set_local env x new_type pos =
+let set_local ?(immutable = false) env x new_type pos =
   let new_type =
     match get_node new_type with
     | Tunion [ty] -> ty
@@ -1050,6 +1050,12 @@ let set_local env x new_type pos =
       match LID.Map.find_opt x next_cont.LEnvC.local_types with
       | None -> Ident.tmp ()
       | Some (_, _, y) -> y
+    in
+    let expr_id =
+      if immutable then
+        LID.make_immutable expr_id
+      else
+        expr_id
     in
     let local = (new_type, pos, expr_id) in
     set_local_ env x local
@@ -1202,6 +1208,7 @@ let set_local_expr_id env x new_eid =
       match LID.Map.find_opt x next_cont.LEnvC.local_types with
       | Some (type_, pos, eid)
         when not (Typing_local_types.equal_expression_id eid new_eid) ->
+        if LID.is_immutable eid then Errors.immutable_local pos;
         let local = (type_, pos, new_eid) in
         let per_cont_env = LEnvC.add_to_cont C.Next x local per_cont_env in
         let env = { env with lenv = { env.lenv with per_cont_env } } in

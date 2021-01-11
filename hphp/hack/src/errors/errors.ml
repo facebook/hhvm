@@ -5541,6 +5541,13 @@ let method_is_not_dynamically_callable pos method_name class_name =
     ^ method_name
     ^ " is not dynamically callable" )
 
+let immutable_local pos =
+  add
+    (Typing.err_code Typing.ImmutableLocal)
+    pos
+    (* TODO: generalize this error message in the future for arbitrary immutable locals *)
+    "This variable cannot be reassigned because it is used for a dependent context"
+
 (*****************************************************************************)
 (* Printing *)
 (*****************************************************************************)

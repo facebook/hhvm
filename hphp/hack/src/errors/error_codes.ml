@@ -674,6 +674,7 @@ module Typing = struct
     | OpCoeffects [@value 4401]
     | ImplementsDynamic [@value 4402] (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
     | SubtypeCoeffects [@value 4403]
+    | ImmutableLocal [@value 4404]
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum

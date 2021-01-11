@@ -254,7 +254,7 @@ let set_tcopt_unstable_features env { fa_user_attributes; _ } =
  * is specified, then union with Tany. (So it's as though we did a conditional
  * assignment of the default expression to the parameter).
  * Set the type of the parameter in the locals environment *)
-let rec bind_param env (ty1, param) =
+let rec bind_param env ?(immutable = false) (ty1, param) =
   let (env, param_te, ty1) =
     match param.param_expr with
     | None -> (env, None, ty1)
@@ -321,7 +321,7 @@ let rec bind_param env (ty1, param) =
   in
   let mode = get_param_mode param.param_callconv in
   let id = Local_id.make_unscoped param.param_name in
-  let env = Env.set_local env id ty1 param.param_pos in
+  let env = Env.set_local ~immutable env id ty1 param.param_pos in
   let env = Env.set_param env id (ty1, param.param_pos, mode) in
   let env =
     if has_accept_disposable_attribute param then
@@ -1130,7 +1130,8 @@ and catch catchctx env (sid, exn_lvar, b) =
     static_class_id ~check_constraints:false ety_p env [] cid
   in
   let env = coerce_to_throwable ety_p env ety in
-  let env = set_local env exn_lvar ety in
+  let (p, x) = exn_lvar in
+  let env = set_valid_rvalue p env x ety in
   let (env, tb) = block env b in
   (env, (env.lenv, (sid, exn_lvar, tb)))
 
@@ -3978,6 +3979,13 @@ and assign p env e1 ty2 : _ * Tast.expr * Tast.ty =
   assign_ p Reason.URassign env e1 ty2
 
 and is_hack_collection env ty =
+  (* TODO(like types) This fails if a collection is used as a parameter under
+   * pessimization, because ~Vector<int> </: ConstCollection<mixed>. This is the
+   * test we use to see whether to update the expression id for expressions
+   * $vector[0] = $x and $vector[] = $x. If this is false, the receiver is assumed
+   * to be a Hack array which are COW. This approximation breaks down in the presence
+   * of dynamic. It is unclear whether we should change an expression id if the
+   * receiver is dynamic. *)
   Typing_solver.is_sub_type
     env
     ty
@@ -7292,7 +7300,7 @@ and update_array_type ?lhs_of_null_coalesce p env e1 valkind =
       | (_, Lvar (_, x)) ->
         (* type_mapper has updated the type in ty1 typevars, but we
              need to update the local variable type too *)
-        let env = set_valid_rvalue p env x ty1 in
+        let env = set_local env (p, x) ty1 in
         (env, te1, ty1)
       | _ -> (env, te1, ty1)
     end

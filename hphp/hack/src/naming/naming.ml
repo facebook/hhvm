@@ -365,7 +365,19 @@ and unwrap_mutability p =
 
 and contexts env ctxs =
   let (pos, hl) = ctxs in
-  let hl = List.map ~f:(hint env) hl in
+  let hl =
+    List.map
+      ~f:(fun h ->
+        match h with
+        | (p, Aast.Happly ((_, wildcard), []))
+          when String.equal wildcard SN.Typehints.wildcard ->
+          (* More helpful wildcard error for coeffects. We expect all valid
+           * wildcard hints to be transformed into Hfun_context *)
+          Errors.invalid_wildcard_context p;
+          (p, N.Herr)
+        | _ -> hint env h)
+      hl
+  in
   (pos, hl)
 
 and hfun env reactivity hl kl variadic_hint ctxs h =

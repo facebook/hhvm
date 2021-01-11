@@ -1685,6 +1685,12 @@ let self_in_non_final_function_pointer pos cido meth_name =
     ( "Cannot use `self::` in a function pointer in a non-final class due to class context ambiguity. "
     ^ suggestion )
 
+let invalid_wildcard_context pos =
+  add
+    (Naming.err_code Naming.InvalidWildcardContext)
+    pos
+    "A wildcard can only be used as a context when it is the sole context of a callable parameter in a higher-order function. The parameter must also be referenced with `ctx` in the higher-order function's context list, e.g. `function hof((function ()[_]: void) $f)[ctx $f]: void {}`"
+
 (*****************************************************************************)
 (* Init check errors *)
 (*****************************************************************************)

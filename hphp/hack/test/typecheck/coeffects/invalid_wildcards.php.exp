@@ -1,0 +1,4 @@
+File "invalid_wildcards.php", line 3, characters 14-14:
+A wildcard can only be used as a context when it is the sole context of a callable parameter in a higher-order function. The parameter must also be referenced with `ctx` in the higher-order function's context list, e.g. `function hof((function ()[_]: void) $f)[ctx $f]: void {}` (Naming[2117])
+File "invalid_wildcards.php", line 5, characters 27-27:
+A wildcard can only be used as a context when it is the sole context of a callable parameter in a higher-order function. The parameter must also be referenced with `ctx` in the higher-order function's context list, e.g. `function hof((function ()[_]: void) $f)[ctx $f]: void {}` (Naming[2117])

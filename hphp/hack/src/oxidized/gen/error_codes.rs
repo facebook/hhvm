@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<2bd7b7a8d1c163f5554114db5fafc1f3>>
+// @generated SignedSource<<bf50a9bd8ff0364baca2fc725aa6225b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -137,6 +137,7 @@ pub enum Naming {
     ClassMethNonFinalCLASS = 2114,
     WildcardTypeParamDisallowed = 2115,
     CallingAssert = 2116,
+    InvalidWildcardContext = 2117,
 }
 impl TrivialDrop for Naming {}
 

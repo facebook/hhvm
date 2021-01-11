@@ -1006,6 +1006,7 @@ functor
           ~interrupt
           ~memory_cap
           ~check_info:(get_check_info genv env)
+          ~profiling
       in
       log_if_diag_subscribe_changed
         "type_checking.go_with_interrupt"

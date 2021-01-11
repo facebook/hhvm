@@ -460,7 +460,13 @@ let process_files
     in
     match progress.remaining with
     | [] -> (errors, progress, tally, heap_mb, max_heap_mb)
-    | _ when exit_now -> (errors, progress, tally, heap_mb, max_heap_mb)
+    | _ when exit_now ->
+      let cgroup_stats = CGroup.get_stats () in
+      (match cgroup_stats with
+      | Error _ -> ()
+      | Ok { CGroup.total; _ } ->
+        Measure.sample "worker_cgroup_total" (float_of_int total));
+      (errors, progress, tally, heap_mb, max_heap_mb)
     | fn :: fns ->
       let (errors, deferred, tally) =
         match fn with
@@ -956,7 +962,8 @@ let go_with_interrupt
     (fnl : Relative_path.t list)
     ~(interrupt : 'a MultiWorker.interrupt_config)
     ~(memory_cap : int option)
-    ~(check_info : check_info) :
+    ~(check_info : check_info)
+    ~(profiling : CgroupProfiler.Profiling.t) :
     (Errors.t, Delegate.state, Telemetry.t, 'a) job_result =
   let opts = Provider_context.get_tcopt ctx in
   let sample_rate = GlobalOptions.tco_typecheck_sample_rate opts in
@@ -1027,6 +1034,14 @@ let go_with_interrupt
     end
   in
   Typing_deps.register_discovered_dep_edges typing_result.dep_edges;
+  let cgroup_total_max =
+    Base.Option.value ~default:0.0 (Measure.get_max "worker_cgroup_total")
+  in
+  CgroupProfiler.Profiling.record_stats
+    ~profiling
+    ~stage:"type check"
+    ~metric:"cgroup_total"
+    ~value:cgroup_total_max;
 
   if check_info.profile_log then
     Hh_logger.log
@@ -1057,6 +1072,7 @@ let go_with_interrupt
   (typing_result.errors, delegate_state, telemetry, env, cancelled_fnl)
 
 let go
+    ?(profiling : CgroupProfiler.Profiling.t = CgroupProfiler.Profiling.empty)
     (ctx : Provider_context.t)
     (workers : MultiWorker.worker list option)
     (delegate_state : Delegate.state)
@@ -1077,6 +1093,7 @@ let go
       ~interrupt
       ~memory_cap
       ~check_info
+      ~profiling
   in
   assert (List.is_empty cancelled);
   (res, delegate_state, telemetry)

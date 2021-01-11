@@ -46,6 +46,7 @@ val process_file :
   process_file_results
 
 val go :
+  ?profiling:CgroupProfiler.Profiling.t ->
   Provider_context.t ->
   MultiWorker.worker list option ->
   Typing_service_delegate.state ->
@@ -66,6 +67,7 @@ val go_with_interrupt :
   interrupt:'a MultiWorker.interrupt_config ->
   memory_cap:int option ->
   check_info:Typing_service_types.check_info ->
+  profiling:CgroupProfiler.Profiling.t ->
   (Errors.t, Typing_service_delegate.state, Telemetry.t, 'a) job_result
 
 module TestMocking : sig

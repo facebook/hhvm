@@ -94,6 +94,7 @@ let test () =
       ~interrupt
       ~memory_cap:None
       ~check_info
+      ~profiling:CgroupProfiler.Profiling.empty
   in
   (* Assert that we got the errors in bar2 only... *)
   Test.assert_errors errors expected_errors;

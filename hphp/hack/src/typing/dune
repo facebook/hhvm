@@ -249,6 +249,7 @@
     typing_check_utils)
   (libraries
     biglist
+    cgroup
     core_kernel
     decl_counters
     decl_service

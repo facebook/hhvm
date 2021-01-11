@@ -9,6 +9,8 @@
 module Profiling : sig
   type t
 
+  val empty : t
+
   val record_stats :
     stage:string -> metric:string -> value:float -> profiling:t -> unit
 end

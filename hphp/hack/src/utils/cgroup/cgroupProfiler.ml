@@ -22,6 +22,8 @@ module Profiling = struct
 
   and t = profiling ref
 
+  let empty = ref { event = ""; stages_rev = []; results = SMap.empty }
+
   let get_stage_result_map ~(stage : string) (profiling : t) : result =
     match SMap.find_opt stage !profiling.results with
     | None ->

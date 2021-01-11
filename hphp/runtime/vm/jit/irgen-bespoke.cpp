@@ -941,7 +941,8 @@ void emitProfileArrLikeProps(IRGS& env) {
 }
 
 bool specializeSource(IRGS& env, SrcKey sk) {
-  if (env.context.kind != TransKind::Optimize) return false;
+  auto const kind = env.context.kind;
+  if (kind != TransKind::Live && kind != TransKind::Optimize) return false;
 
   auto const op = sk.op();
   if (isArrLikeConstructorOp(op) || isArrLikeCastOp(op)) {

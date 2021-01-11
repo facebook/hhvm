@@ -316,6 +316,8 @@ struct Func final {
   Class* baseCls() const;
   Class* implCls() const;
 
+  int sn() const;
+
   /*
    * The function's short name (e.g., foo).
    */
@@ -1207,7 +1209,7 @@ private:
    * Properties shared by all clones of a Func.
    */
   struct SharedData : AtomicCountable {
-    SharedData(PreClass* preClass, Offset base, Offset past,
+    SharedData(PreClass* preClass, Offset base, Offset past, int sn,
                int line1, int line2, bool isPhpLeafFn,
                const StringData* docComment);
     ~SharedData();
@@ -1236,7 +1238,7 @@ private:
     EHEntVec m_ehtab;
 
     /*
-     * Up to 32 bits.
+     * Up to 16 bits.
      */
     union Flags {
       struct {
@@ -1256,13 +1258,13 @@ private:
         bool m_hasReturnWithMultiUBs : true;
         bool m_hasCoeffectRules : true;
       };
-      uint32_t m_allFlags;
+      uint16_t m_allFlags;
     };
-    static_assert(sizeof(Flags) == sizeof(uint32_t));
+    static_assert(sizeof(Flags) == sizeof(uint16_t));
 
     Flags m_allFlags;
 
-    // 16 bits of padding here in LOWPTR builds
+    uint16_t m_sn;
 
     LowStringPtr m_retUserType;
     UserAttributeMap m_userAttributes;
@@ -1314,6 +1316,7 @@ private:
     CoeffectRules m_coeffectRules;
     Offset m_past;  // Only read if SharedData::m_pastDelta is kSmallDeltaLimit
     int m_line2;    // Only read if SharedData::m_line2 is kSmallDeltaLimit
+    int m_sn;       // Only read if SharedData::m_sn is kSmallDeltaLimit
     int64_t m_dynCallSampleRate;
   };
 

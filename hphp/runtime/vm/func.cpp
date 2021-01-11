@@ -729,7 +729,7 @@ void Func::prettyPrintInstruction(std::ostream& out, Offset offset) const {
 // SharedData.
 
 Func::SharedData::SharedData(PreClass* preClass, Offset base, Offset past,
-                             int line1, int line2, bool isPhpLeafFn,
+                             int sn, int line1, int line2, bool isPhpLeafFn,
                              const StringData* docComment)
   : m_base(base)
   , m_preClass(preClass)
@@ -759,6 +759,7 @@ Func::SharedData::SharedData(PreClass* preClass, Offset base, Offset past,
 
   m_pastDelta = std::min<uint32_t>(past - base, kSmallDeltaLimit);
   m_line2Delta = std::min<uint32_t>(line2 - line1, kSmallDeltaLimit);
+  m_sn = std::min<uint32_t>(sn, kSmallDeltaLimit);
 }
 
 Func::SharedData::~SharedData() {

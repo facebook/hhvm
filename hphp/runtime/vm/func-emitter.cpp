@@ -180,6 +180,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
     isNative ||
     line2 - line1 >= Func::kSmallDeltaLimit ||
     past - base >= Func::kSmallDeltaLimit ||
+    m_sn >= Func::kSmallDeltaLimit ||
     hasReifiedGenerics ||
     hasParamsWithMultiUBs ||
     hasReturnWithMultiUBs ||
@@ -188,9 +189,9 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
 
   f->m_shared.reset(
     needsExtendedSharedData
-      ? new Func::ExtendedSharedData(preClass, base, past, line1, line2,
+      ? new Func::ExtendedSharedData(preClass, base, past, m_sn, line1, line2,
                                      !containsCalls, docComment)
-      : new Func::SharedData(preClass, base, past,
+      : new Func::SharedData(preClass, base, past, m_sn,
                              line1, line2, !containsCalls, docComment)
   );
 
@@ -200,6 +201,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
     ex->m_allFlags.m_hasExtendedSharedData = true;
     ex->m_arFuncPtr = nullptr;
     ex->m_nativeFuncPtr = nullptr;
+    ex->m_sn = m_sn;
     ex->m_line2 = line2;
     ex->m_past = past;
     ex->m_dynCallSampleRate = dynCallSampleRate.value_or(-1);

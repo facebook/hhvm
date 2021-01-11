@@ -229,6 +229,16 @@ inline const StringData* Func::filename() const {
   return name;
 }
 
+inline int Func::sn() const {
+  auto const sd = shared();
+  auto small = sd->m_sn;
+  if (UNLIKELY(small == kSmallDeltaLimit)) {
+    assertx(extShared());
+    return static_cast<const ExtendedSharedData*>(sd)->m_sn;
+  }
+  return small;
+}
+
 inline int Func::line1() const {
   return shared()->m_line1;
 }

@@ -1792,9 +1792,11 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case DbgAssertFunc:
   case ProfileCall:
   case ProfileMethod:
+    return may_load_store(AEmpty, AEmpty);
+
   case LogArrayReach:
   case LogGuardFailure:
-    return may_load_store(AEmpty, AEmpty);
+    return may_load_store(AHeapAny, AEmpty);
 
   // Some that touch memory we might care about later, but currently don't:
   case ColIsEmpty:

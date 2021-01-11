@@ -1242,11 +1242,15 @@ and simplify_subtype_i
         | (_, Tintersection _)
         | (_, Tgeneric _) ->
           default_subtype env
-        | (_, Toption ty)
         | (_, Tdarray (_, ty))
         | (_, Tvarray ty)
         | (_, Tvarray_or_darray (_, ty)) ->
           simplify_subtype ~subtype_env ty ty_super env
+        | (_, Toption ty) ->
+          (match deref ty with
+          (* Special case mixed <: dynamic for better error message *)
+          | (_, Tnonnull) -> invalid_env env
+          | _ -> simplify_subtype ~subtype_env ty ty_super env)
         | (_, Ttuple tyl) ->
           List.fold_left
             ~init:(env, TL.valid)

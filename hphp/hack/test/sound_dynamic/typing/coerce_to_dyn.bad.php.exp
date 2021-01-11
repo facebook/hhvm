@@ -9,7 +9,7 @@ Invalid argument (Typing[4110])
   File "coerce_to_dyn.bad.php", line 5, characters 12-18:
   Expected `dynamic`
   File "coerce_to_dyn.bad.php", line 7, characters 20-24:
-  But got `nonnull`
+  But got `mixed`
 File "coerce_to_dyn.bad.php", line 11, characters 5-6:
 Invalid argument (Typing[4110])
   File "coerce_to_dyn.bad.php", line 5, characters 12-18:

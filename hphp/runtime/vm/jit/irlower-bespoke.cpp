@@ -16,7 +16,7 @@
 
 #include "hphp/runtime/vm/jit/irlower-bespoke.h"
 
-#include "hphp/runtime/base/bespoke/layout.h"
+#include "hphp/runtime/base/bespoke/escalation-logging.h"
 #include "hphp/runtime/base/bespoke/layout.h"
 #include "hphp/runtime/base/bespoke/logging-profile.h"
 #include "hphp/runtime/base/bespoke/monotype-dict.h"
@@ -35,12 +35,30 @@ namespace HPHP { namespace jit { namespace irlower {
 
 //////////////////////////////////////////////////////////////////////////////
 
+namespace {
+static void logGuardFailure(TypedValue tv, uint16_t layout, uint64_t sk) {
+  assertx(tvIsArrayLike(tv));
+  auto const al = ArrayLayout::FromUint16(layout);
+  bespoke::logGuardFailure(val(tv).parr, al, SrcKey(sk));
+}
+}
+
 void cgLogArrayReach(IRLS& env, const IRInstruction* inst) {
   auto const data = inst->extra<LogArrayReach>();
 
   auto& v = vmain(env);
   auto const args = argGroup(env, inst).imm(data->profile).ssa(0);
   auto const target = CallSpec::method(&bespoke::SinkProfile::update);
+  cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
+}
+
+void cgLogGuardFailure(IRLS& env, const IRInstruction* inst) {
+  auto const layout = inst->typeParam().arrSpec().layout().toUint16();
+  auto const sk = inst->marker().sk().toAtomicInt();
+
+  auto& v = vmain(env);
+  auto const args = argGroup(env, inst).typedValue(0).imm(layout).imm(sk);
+  auto const target = CallSpec::direct(logGuardFailure);
   cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
 }
 

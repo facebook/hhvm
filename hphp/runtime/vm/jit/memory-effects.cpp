@@ -1793,6 +1793,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ProfileCall:
   case ProfileMethod:
   case LogArrayReach:
+  case LogGuardFailure:
     return may_load_store(AEmpty, AEmpty);
 
   // Some that touch memory we might care about later, but currently don't:

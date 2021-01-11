@@ -51,16 +51,16 @@ void logEscalation(const ArrayData* ad, SrcKey sk,
   entry.setStr("types", EntryTypes::ForArray(ad).toString());
   entry.setStr("layout", jit::ArrayLayout::FromArray(ad).describe());
 
-  StructuredLog::log("hhvm_kshaunak_scratch", entry);
+  StructuredLog::log("hhvm_bespoke_escalations", entry);
 }
 
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
-void logGuardFailure(const ArrayData* ad, LayoutIndex expected, SrcKey sk) {
-  if (StructuredLog::coinflip(RO::EvalBespokeEscalationSampleRate)) return;
-  auto const reason = jit::ArrayLayout(expected).describe();
+void logGuardFailure(const ArrayData* ad, jit::ArrayLayout layout, SrcKey sk) {
+  if (!StructuredLog::coinflip(RO::EvalBespokeEscalationSampleRate)) return;
+  auto const reason = layout.describe();
   logEscalation(ad, sk, "GuardFailure", reason.data());
 }
 

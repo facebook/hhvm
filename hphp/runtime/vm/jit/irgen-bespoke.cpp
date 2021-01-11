@@ -772,7 +772,23 @@ ArrayLayout guardToLayout(IRGS& env, SrcKey sk, Location loc, Type type) {
       assertx(type.arrSpec().vanilla() || type.arrSpec().bespoke());
       return type.arrSpec().layout();
     }
-    checkType(env, loc, target, bcOff(env));
+    if (RO::EvalBespokeEscalationSampleRate) {
+      ifThen(
+        env,
+        [&](Block* taken) {
+          env.irb->setGuardFailBlock(taken);
+          checkType(env, loc, target, bcOff(env));
+          env.irb->resetGuardFailBlock();
+        },
+        [&]{
+          auto const arr = loadLocation(env, loc);
+          gen(env, LogGuardFailure, target, arr);
+          gen(env, Jmp, makeExit(env, curSrcKey(env)));
+        }
+      );
+    } else {
+      checkType(env, loc, target, bcOff(env));
+    }
     return layout;
   }
   return type.arrSpec().layout();

@@ -810,6 +810,7 @@ bool opcodeMayRaise(Opcode opc) {
   case LIterNextK:
   case LockObj:
   case LogArrayReach:
+  case LogGuardFailure:
   case LookupClsRDS:
   case LookupSPropSlot:
   case Lshr:

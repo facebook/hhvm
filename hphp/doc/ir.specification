@@ -1444,6 +1444,11 @@ To string conversions:
   If the supplied array is a LoggingArray, log the current tracelet and SrcKey
   for use during specialization.
 
+| LogGuardFailure<T>, ND, S(ArrLike), LA
+
+  Log that we failed to guard input S0 to the given type. Useful for catching
+  performance bugs in bespoke layout selection, but may have more general use.
+
 | NewDArray, DDArr, C(Int), PRc
 
   Allocate a new dict-like array with the expected capacity S0.

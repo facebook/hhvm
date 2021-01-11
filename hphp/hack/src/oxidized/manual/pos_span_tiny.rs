@@ -4,6 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use std::cmp::Ordering;
+use std::fmt;
 use strum::IntoEnumIterator;
 use strum_macros::EnumIter;
 
@@ -85,7 +86,7 @@ impl Field {
 ///
 /// Fields are variants of Field.t, and the number of bits for each field
 /// are given by Field.nbits.
-#[derive(Copy, Clone, Eq, PartialEq, Debug, Deserialize, Hash, Serialize)]
+#[derive(Copy, Clone, Eq, PartialEq, Deserialize, Hash, Serialize)]
 pub struct PosSpanTiny(usize);
 
 const DUMMY: usize = usize::max_value();
@@ -381,5 +382,18 @@ mod test {
                 assert_eq!(end, end_);
             }
         }
+    }
+}
+
+impl fmt::Debug for PosSpanTiny {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(
+            f,
+            "PosSpanTiny {{ from {}:{} to {}:{} }}",
+            self.start_line(),
+            self.start_column(),
+            self.end_line(),
+            self.end_column()
+        )
     }
 }

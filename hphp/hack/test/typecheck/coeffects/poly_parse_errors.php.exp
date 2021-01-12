@@ -22,6 +22,10 @@ File "poly_parse_errors.php", line 36, characters 3-11:
 This function cannot be memoized because it has a polymorphic context (Parsing[1002])
 File "poly_parse_errors.php", line 40, characters 5-13:
 This method cannot be memoized because it has a polymorphic context (Parsing[1002])
+File "poly_parse_errors.php", line 45, characters 12-19:
+A lambda cannot have polymorphic context (Parsing[1002])
+File "poly_parse_errors.php", line 46, characters 12-18:
+A lambda cannot have polymorphic context (Parsing[1002])
 File "poly_parse_errors.php", line 9, characters 3-4:
 Was expecting a type hint (Typing[4032])
 File "poly_parse_errors.php", line 10, characters 3-4:

@@ -40,3 +40,8 @@ class C {
   <<__Memoize>>
   public function memo(vec<int> $v)[$v::C]: void {}
 }
+
+function lambdas(): void {
+  $x = ($f)[ctx $f] ==> {};
+  $y = ($a)[$a::C] ==> {};
+}

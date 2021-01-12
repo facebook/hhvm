@@ -1028,3 +1028,6 @@ pub fn effect_polymorphic_memoized(kind: &str) -> Error {
         kind
     ))
 }
+
+pub const lambda_effect_polymorphic: Error =
+    Cow::Borrowed("A lambda cannot have polymorphic context");

@@ -1534,11 +1534,19 @@ where
             LambdaExpression(c) => {
                 let suspension_kind = Self::mk_suspension_kind(&c.async_);
                 let (params, (ctxs, unsafe_ctxs), ret) = match &c.signature.children {
-                    LambdaSignature(c) => (
-                        Self::could_map(Self::p_fun_param, &c.parameters, env)?,
-                        Self::p_contexts(&c.contexts, env)?,
-                        Self::mp_optional(Self::p_hint, &c.type_, env)?,
-                    ),
+                    LambdaSignature(c) => {
+                        let params = Self::could_map(Self::p_fun_param, &c.parameters, env)?;
+                        let (ctxs, unsafe_ctxs) = Self::p_contexts(&c.contexts, env)?;
+                        if Self::has_polymorphic_context(&ctxs) {
+                            Self::raise_parsing_error(
+                                &c.contexts,
+                                env,
+                                &syntax_error::lambda_effect_polymorphic,
+                            );
+                        }
+                        let ret = Self::mp_optional(Self::p_hint, &c.type_, env)?;
+                        (params, (ctxs, unsafe_ctxs), ret)
+                    }
                     Token(_) => {
                         let ast::Id(p, n) = Self::pos_name(&c.signature, env)?;
                         (
@@ -1559,6 +1567,7 @@ where
                     }
                     _ => Self::missing_syntax("lambda signature", &c.signature, env)?,
                 };
+
                 let (body, yield_) = if !c.body.is_compound_statement() {
                     Self::mp_yielding(Self::p_function_body, &c.body, env)?
                 } else {

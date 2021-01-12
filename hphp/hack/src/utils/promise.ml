@@ -17,4 +17,6 @@ module type S = sig
 
   (** Returns a new promise generated from the results of the given one. *)
   val bind : 'value t -> ('value -> 'next_value t) -> 'next_value t
+
+  val both : 'a t -> 'b t -> ('a * 'b) t
 end

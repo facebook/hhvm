@@ -116,9 +116,13 @@ module Jget = struct
 
   let array_exn = get_exn array_opt
 
+  (** obj_exn lifts the result into the "json option" monad *)
   let obj_exn json key = Some (get_exn obj_opt json key)
 
-  (* obj_exn lifts the result into the "json option" monad *)
+  let string_array_exn json key =
+    array_exn json key
+    |> List.map ~f:(fun opt -> Option.value_exn opt)
+    |> List.map ~f:Hh_json.get_string_exn
 end
 
 module Jprint = struct

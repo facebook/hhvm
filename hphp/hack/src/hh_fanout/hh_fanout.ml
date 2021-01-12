@@ -99,10 +99,9 @@ let load_saved_state ~(env : env) ~(setup_result : setup_result) :
           (Printf.sprintf
              "Failed to load naming-table saved-state, and saved-state files were not manually provided on command-line: %s"
              (Saved_state_loader.debug_details_of_error load_error))
-      | Ok { Saved_state_loader.saved_state_info; changed_files; _ } ->
+      | Ok { Saved_state_loader.main_artifacts; changed_files; _ } ->
         Lwt.return
-          ( saved_state_info
-              .Saved_state_loader.Naming_table_info.naming_table_path,
+          ( main_artifacts.Saved_state_loader.Naming_table_info.naming_table_path,
             changed_files ))
   and (dep_table_path, errors_path, dep_table_changed_files) =
     match env.dep_table_path with
@@ -118,12 +117,14 @@ let load_saved_state ~(env : env) ~(setup_result : setup_result) :
       Lwt.return (dep_table_path, errors_path, [])
     | None ->
       let%lwt dep_table_saved_state =
+        (* TODO(hverr): Support 64-bit *)
         State_loader_lwt.load
           ~watchman_opts:
             Saved_state_loader.Watchman_options.
               { root = env.root; sockname = env.watchman_sockname }
           ~ignore_hh_version:env.ignore_hh_version
-          ~saved_state_type:Saved_state_loader.Naming_and_dep_table
+          ~saved_state_type:
+            (Saved_state_loader.Naming_and_dep_table { is_64bit = false })
       in
       (match dep_table_saved_state with
       | Error load_error ->
@@ -131,12 +132,11 @@ let load_saved_state ~(env : env) ~(setup_result : setup_result) :
           (Printf.sprintf
              "Failed to load dep-table saved-state, and saved-state files were not manually provided on command-line: %s"
              (Saved_state_loader.debug_details_of_error load_error))
-      | Ok { Saved_state_loader.saved_state_info; changed_files; _ } ->
+      | Ok { Saved_state_loader.main_artifacts; changed_files; _ } ->
+        let open Saved_state_loader.Naming_and_dep_table_info in
         Lwt.return
-          ( saved_state_info
-              .Saved_state_loader.Naming_and_dep_table_info.dep_table_path,
-            saved_state_info
-              .Saved_state_loader.Naming_and_dep_table_info.errors_path,
+          ( main_artifacts.dep_table_path,
+            main_artifacts.errors_path,
             changed_files ))
   in
   let changed_files =

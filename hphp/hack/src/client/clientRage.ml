@@ -418,7 +418,7 @@ let rage_www_errors (env : env) : string Lwt.t =
     Lwt.return
       ("hh check failure\n" ^ Lwt_utils.Process_failure.to_string failure)
 
-let rage_saved_state (env : env) : (string * string) list Lwt.t =
+let rage_saved_state ~is_64bit (env : env) : (string * string) list Lwt.t =
   let watchman_opts =
     { Saved_state_loader.Watchman_options.root = env.root; sockname = None }
   in
@@ -442,10 +442,10 @@ let rage_saved_state (env : env) : (string * string) list Lwt.t =
       | Error () -> Lwt.return_error "timeout"
       | Ok
           (Ok
-            ( { Saved_state_loader.saved_state_info; changed_files; _ },
-              telemetry )) ->
+            ({ Saved_state_loader.main_artifacts; changed_files; _ }, telemetry))
+        ->
         Lwt.return_ok
-          ( saved_state_info,
+          ( main_artifacts,
             Printf.sprintf
               "%s\n\n%s\n"
               ( List.map changed_files ~f:Relative_path.suffix
@@ -481,7 +481,7 @@ let rage_saved_state (env : env) : (string * string) list Lwt.t =
   in
 
   let%lwt regular_saved_state =
-    saved_state_check Saved_state_loader.Naming_and_dep_table
+    saved_state_check (Saved_state_loader.Naming_and_dep_table { is_64bit })
   in
   let regular_saved_state =
     match regular_saved_state with
@@ -489,10 +489,11 @@ let rage_saved_state (env : env) : (string * string) list Lwt.t =
     | Ok (result, s) ->
       let open Saved_state_loader.Naming_and_dep_table_info in
       Printf.sprintf
-        "naming_table: %s\ndeptable: %s\nhot_decls: %s\n\n%s"
+        "naming_table: %s\ndeptable: %s\nhot_decls: (%s, %s)\n\n%s"
         (path_to_string result.naming_table_path)
         (path_to_string result.dep_table_path)
-        (path_to_string result.hot_decls_path)
+        (path_to_string result.legacy_hot_decls_path)
+        (path_to_string result.shallow_hot_decls_path)
         s
   in
   Lwt.return
@@ -706,7 +707,18 @@ let main (env : env) : Exit_status.t Lwt.t =
 
   (* Saved state *)
   eprintf "Checking saved-states";
-  let%lwt saved_state_items = rage_saved_state env in
+  let load_state_natively_64bit =
+    match hash_and_config with
+    | Error _ -> false
+    | Ok (_hash, config) ->
+      Config_file.Getters.bool_
+        "load_state_natively_64bit"
+        ~default:false
+        config
+  in
+  let%lwt saved_state_items =
+    rage_saved_state ~is_64bit:load_state_natively_64bit env
+  in
   List.iter saved_state_items ~f:add;
 
   (* Experiments *)

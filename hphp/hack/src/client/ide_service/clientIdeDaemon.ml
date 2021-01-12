@@ -249,13 +249,17 @@ let load_saved_state
           (* Test hook, for tests that want to get messages in before init *)
           Lwt.return_ok
             {
-              Saved_state_loader.saved_state_info =
+              Saved_state_loader.main_artifacts =
                 {
                   Saved_state_loader.Naming_table_info.naming_table_path =
                     naming_table_load_info.path;
                 };
+              additional_info = ();
               changed_files;
               manifold_path = "<not provided>";
+              corresponding_rev = "<not provided>";
+              mergebase_rev = "<not provided>";
+              is_cached = true;
             }
         | None ->
           let%lwt result =
@@ -268,10 +272,10 @@ let load_saved_state
           Lwt.return result
       in
       match result with
-      | Ok { Saved_state_loader.saved_state_info; changed_files; _ } ->
+      | Ok { Saved_state_loader.main_artifacts; changed_files; _ } ->
         let path =
           Path.to_string
-            saved_state_info
+            main_artifacts
               .Saved_state_loader.Naming_table_info.naming_table_path
         in
         log "[saved-state] Loading naming-table... %s" path;

@@ -7,7 +7,7 @@
  *)
 
 type saved_state_type =
-  | Naming_and_dep_table
+  | Naming_and_dep_table of { is_64bit: bool }
   | Naming_table
 
 type env = {

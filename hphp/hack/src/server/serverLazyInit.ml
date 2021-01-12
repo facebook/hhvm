@@ -80,9 +80,11 @@ let merge_saved_state_futures
     (genv : genv)
     (ctx : Provider_context.t)
     (dependency_table_saved_state_future :
-      (State_loader.native_load_result, State_loader.error) result Future.t)
+      (State_loader.native_load_result, load_state_error) result Future.t)
     (naming_table_saved_state_future :
-      ( Saved_state_loader.Naming_table_info.t Saved_state_loader.load_result
+      ( ( Saved_state_loader.Naming_table_info.main_artifacts,
+          Saved_state_loader.Naming_table_info.additional_info )
+        Saved_state_loader.load_result
         option,
         string )
       result
@@ -100,7 +102,7 @@ let merge_saved_state_futures
       let exn = Exception.to_exn e in
       let stack = Utils.Callstack (Exception.get_backtrace_string e) in
       Error (Load_state_unhandled_exception { exn; stack })
-    | Ok (Error error) -> Error (Load_state_loader_failure error)
+    | Ok (Error error) -> Error error
     | Ok (Ok result) ->
       let ( downloaded_naming_table_path,
             naming_table_manifold_path,
@@ -111,15 +113,19 @@ let merge_saved_state_futures
             (Ok
               (Some
                 {
-                  Saved_state_loader.saved_state_info;
+                  Saved_state_loader.main_artifacts;
+                  additional_info = ();
                   changed_files;
                   manifold_path;
+                  corresponding_rev = _;
+                  mergebase_rev = _;
+                  is_cached = _;
                 })) ->
           let (_ : float) =
             Hh_logger.log_duration "Finished downloading naming table." t
           in
           let path =
-            saved_state_info
+            main_artifacts
               .Saved_state_loader.Naming_table_info.naming_table_path
           in
           (Some (Path.to_string path), Some manifold_path, changed_files)
@@ -254,16 +260,96 @@ let download_and_load_state_exn
       Future.of_value (Ok None)
   in
   let dependency_table_saved_state_future :
-      (State_loader.native_load_result, State_loader.error) result Future.t =
-    State_loader.mk_state_future
-      ~config:genv.local_config.SLC.state_loader_timeouts
-      ~load_64bit:genv.local_config.SLC.load_state_natively_64bit
-      ?saved_state_handle
-      ~config_hash:(ServerConfig.config_hash genv.config)
-      root
-      ~ignore_hh_version
-      ~ignore_hhconfig
-      ~use_prechecked_files
+      (State_loader.native_load_result, load_state_error) result Future.t =
+    if
+      genv.local_config.ServerLocalConfig.load_state_natively_64bit
+      || genv.local_config.ServerLocalConfig.enable_devx_dependency_graph
+         && Option.is_none saved_state_handle
+    then begin
+      Hh_logger.log "Downloading dependency graph from DevX infra";
+      let loader_future =
+        State_loader_futures.load
+          ~watchman_opts:
+            Saved_state_loader.Watchman_options.{ root; sockname = None }
+          ~ignore_hh_version
+          ~saved_state_type:
+            (Saved_state_loader.Naming_and_dep_table
+               {
+                 is_64bit =
+                   genv.local_config.ServerLocalConfig.load_state_natively_64bit;
+               })
+        |> Future.with_timeout ~timeout:60
+      in
+      let loader_future =
+        Future.continue_with loader_future @@ function
+        | Error e -> Error (Load_state_saved_state_loader_failure e)
+        | Ok v -> Ok v
+      in
+      let ( >>= ) :
+          ('a, 'err) result Future.t ->
+          ('a -> ('b, 'err) result Future.t) ->
+          ('b, 'err) result Future.t =
+       fun res f ->
+        Future.continue_with_future res (function
+            | Ok r -> f r
+            | Error e -> Future.of_value (Error e))
+      in
+      loader_future >>= fun load_result ->
+      let open Saved_state_loader in
+      let open Saved_state_loader.Naming_and_dep_table_info in
+      (* TODO(hverr): This conversion should be removed once we fully
+         deprecate the legacy dependency graph downlaoder. *)
+      let legacy_result =
+        {
+          State_loader.naming_table_path =
+            Path.to_string load_result.main_artifacts.naming_table_path;
+          corresponding_rev = Hg.Hg_rev load_result.corresponding_rev;
+          mergebase_rev = load_result.additional_info.mergebase_global_rev;
+          mergebase = Future.of_value (Some load_result.mergebase_rev);
+          is_cached = load_result.is_cached;
+          state_distance = 0;
+          deptable_fn = Path.to_string load_result.main_artifacts.dep_table_path;
+          deptable_is_64bit = load_result.additional_info.dep_table_is_64bit;
+          dirty_files =
+            Future.continue_with
+              load_result.additional_info.dirty_files_promise
+              (fun { master_changes; local_changes } ->
+                State_loader.
+                  {
+                    master_changes = Relative_path.Set.elements master_changes;
+                    local_changes = Relative_path.Set.elements local_changes;
+                  });
+          hot_decls_paths =
+            State_loader.
+              {
+                legacy_hot_decls_path =
+                  Path.to_string
+                    load_result.main_artifacts.legacy_hot_decls_path;
+                shallow_hot_decls_path =
+                  Path.to_string
+                    load_result.main_artifacts.shallow_hot_decls_path;
+              };
+          errors_path = Path.to_string load_result.main_artifacts.errors_path;
+        }
+      in
+      Future.of_value (Ok legacy_result)
+    end else begin
+      Hh_logger.log "Falling back on legacy dependency graph downloader";
+      let load_result =
+        State_loader.mk_state_future
+          ~config:genv.local_config.SLC.state_loader_timeouts
+          ~load_64bit:genv.local_config.SLC.load_state_natively_64bit
+          ?saved_state_handle
+          ~config_hash:(ServerConfig.config_hash genv.config)
+          root
+          ~ignore_hh_version
+          ~ignore_hhconfig
+          ~use_prechecked_files
+      in
+      Future.continue_with load_result @@ function
+      | Error e -> Error (Load_state_loader_failure e)
+      | Ok v -> Ok v
+    end
   in
   merge_saved_state_futures
     genv

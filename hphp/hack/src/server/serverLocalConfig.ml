@@ -512,6 +512,8 @@ type t = {
   (* Enables the reverse naming table to fall back to SQLite for queries. *)
   naming_sqlite_path: string option;
   enable_naming_table_fallback: bool;
+  (* Download dependency graph from DevX infra. *)
+  enable_devx_dependency_graph: bool;
   (* Selects a search provider for autocomplete and symbol search *)
   symbolindex_search_provider: string;
   symbolindex_quiet: bool;
@@ -608,6 +610,7 @@ let default =
     remote_transport_channel = None;
     naming_sqlite_path = None;
     enable_naming_table_fallback = false;
+    enable_devx_dependency_graph = false;
     symbolindex_search_provider = "SqliteIndex";
     symbolindex_quiet = false;
     symbolindex_file = None;
@@ -1016,6 +1019,13 @@ let load_ fn ~silent ~current_version overrides =
       ~current_version
       config
   in
+  let enable_devx_dependency_graph =
+    bool_if_min_version
+      "enable_devx_dependency_graph"
+      ~default:default.enable_devx_dependency_graph
+      ~current_version
+      config
+  in
   let naming_sqlite_path =
     if enable_naming_table_fallback then
       string_opt "naming_sqlite_path" config
@@ -1164,6 +1174,7 @@ let load_ fn ~silent ~current_version overrides =
     remote_transport_channel;
     naming_sqlite_path;
     enable_naming_table_fallback;
+    enable_devx_dependency_graph;
     symbolindex_search_provider;
     symbolindex_quiet;
     symbolindex_file;

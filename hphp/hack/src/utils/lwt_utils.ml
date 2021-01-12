@@ -254,4 +254,6 @@ module Promise = struct
   let map e f = Lwt.map f e
 
   let bind = Lwt.bind
+
+  let both = Lwt.both
 end

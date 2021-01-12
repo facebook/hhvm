@@ -10,6 +10,8 @@
 type load_state_error =
   (* an error reported by mk_state_future for downloading saved-state *)
   | Load_state_loader_failure of State_loader.error
+  (* an error reported when downloading saved-state through [Saved_state_loader] *)
+  | Load_state_saved_state_loader_failure of Saved_state_loader.load_error
   (* an error fetching list of dirty files from hg *)
   | Load_state_dirty_files_failure of Future.error
   (* either the downloader or hg-dirty-files took too long *)
@@ -49,6 +51,20 @@ let load_state_error_to_verbose_string (err : load_state_error) :
   let open State_loader in
   match err with
   | Load_state_loader_failure err -> State_loader.error_string_verbose err
+  | Load_state_saved_state_loader_failure err ->
+    (* TODO(hverr): Construct verbose errors with all fields properly set *)
+    {
+      message =
+        Printf.sprintf
+          ( "Could not load saved-state from DevX infrastructure. "
+          ^^ "The underlying error message was: %s\n\n"
+          ^^ "The accompanying debug details are: %s" )
+          (Saved_state_loader.long_user_message_of_error err)
+          (Saved_state_loader.debug_details_of_error err);
+      auto_retry = false;
+      stack = Utils.Callstack "";
+      environment = None;
+    }
   | Load_state_dirty_files_failure error ->
     let Future.{ message; stack; environment } =
       Future.error_to_string_verbose error

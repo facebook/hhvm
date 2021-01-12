@@ -432,4 +432,12 @@ module Promise = struct
   let map = continue_with
 
   let bind = continue_with_future
+
+  let both a b =
+    merge a b @@ fun a b ->
+    match (a, b) with
+    | (Error e, _)
+    | (_, Error e) ->
+      Error e
+    | (Ok a, Ok b) -> Ok (a, b)
 end

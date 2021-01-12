@@ -1130,7 +1130,7 @@ invocations of `hh` faster.|}
       Sys.argv.(0)
   in
   let valid_types_message =
-    "Valid values are: naming-and-dep-table, naming-table"
+    "Valid values are: naming-and-dep-table, naming-and-dep-table-64bit, naming-table"
   in
 
   let from = ref "" in
@@ -1177,7 +1177,9 @@ invocations of `hh` faster.|}
       Printf.printf "The '--type' option is required. %s\n" valid_types_message;
       exit 2
     | Some "naming-and-dep-table" ->
-      ClientDownloadSavedState.Naming_and_dep_table
+      ClientDownloadSavedState.Naming_and_dep_table { is_64bit = false }
+    | Some "naming-and-dep-table-64bit" ->
+      ClientDownloadSavedState.Naming_and_dep_table { is_64bit = true }
     | Some "naming-table" -> ClientDownloadSavedState.Naming_table
     | Some saved_state_type ->
       Printf.printf

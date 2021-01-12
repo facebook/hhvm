@@ -66,11 +66,10 @@ let find_saved_symbolindex ~(ignore_hh_version : bool) :
            ~saved_state_type:Saved_state_loader.Symbol_index)
     in
     match res with
-    | Ok { Saved_state_loader.saved_state_info; _ } ->
+    | Ok { Saved_state_loader.main_artifacts; _ } ->
       Ok
         (Path.to_string
-           saved_state_info
-             .Saved_state_loader.Symbol_index_info.symbol_index_path)
+           main_artifacts.Saved_state_loader.Symbol_index_info.symbol_index_path)
     | Error load_error ->
       Error (Saved_state_loader.long_user_message_of_error load_error)
   with _ -> Error "Exception searching for saved state"

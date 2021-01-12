@@ -67,7 +67,7 @@ interface OutputCollection<-Te> {
    * @return - The updated collection itself.
    */
   <<__Pure, __Mutable, __ReturnsVoidToRx>>
-  public function add(Te $e)[]: this;
+  public function add(Te $e)[local]: this;
   /**
    * For every element in the provided `Traversable`, append a value into the
    * current collection.
@@ -81,7 +81,7 @@ interface OutputCollection<-Te> {
    * @return - Returns itself.
    */
   <<__Pure, __Mutable, __AtMostRxAsArgs, __ReturnsVoidToRx>>
-  public function addAll(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> ?Traversable<Te> $traversable)[]: this;
+  public function addAll(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> ?Traversable<Te> $traversable)[local]: this;
 }
 
 } // namespace
@@ -106,7 +106,7 @@ interface Collection<Te> extends \ConstCollection<Te>,
    * Removes all items from the collection.
    */
   <<__Pure, __Mutable, __ReturnsVoidToRx>>
-  public function clear()[];
+  public function clear()[local];
 }
 
 } // namespace HH
@@ -152,7 +152,7 @@ interface SetAccess<Tm as arraykey> extends ConstSetAccess<Tm> {
    * @return - Returns itself.
    */
   <<__Pure, __Mutable, __ReturnsVoidToRx>>
-  public function remove(Tm $m)[]: this;
+  public function remove(Tm $m)[local]: this;
 }
 
 /**
@@ -231,7 +231,7 @@ interface IndexAccess<Tk, Tv> extends ConstIndexAccess<Tk, Tv> {
    * @return - Returns itself.
    */
   <<__Pure, __Mutable, __ReturnsVoidToRx>>
-  public function set(Tk $k, Tv $v)[]: this;
+  public function set(Tk $k, Tv $v)[local]: this;
   /**
    * For every element in the provided `Traversable`, stores a value into the
    * current collection associated with each key, overwriting the previous value
@@ -250,7 +250,7 @@ interface IndexAccess<Tk, Tv> extends ConstIndexAccess<Tk, Tv> {
    * @return - Returns itself.
    */
   <<__Pure, __Mutable, __AtMostRxAsArgs, __ReturnsVoidToRx>>
-  public function setAll(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\KeyedTraversable::class)>> ?KeyedTraversable<Tk, Tv> $traversable)[]: this;
+  public function setAll(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\KeyedTraversable::class)>> ?KeyedTraversable<Tk, Tv> $traversable)[local]: this;
   /**
    * Removes the specified key (and associated value) from the current
    * collection.
@@ -266,7 +266,7 @@ interface IndexAccess<Tk, Tv> extends ConstIndexAccess<Tk, Tv> {
    * @return - Returns itself.
    */
   <<__Pure, __Mutable, __ReturnsVoidToRx>>
-  public function removeKey(Tk $k)[]: this;
+  public function removeKey(Tk $k)[local]: this;
 }
 
 /**

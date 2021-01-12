@@ -8,10 +8,12 @@
  *
  */
 
+<<file: __EnableUnstableFeatures('coeffects_provisional')>>
+
 <<__PHPStdLib>>
 function spl_classes();
-<<__PHPStdLib>>
-function spl_object_hash($obj);
+<<__PHPStdLib, __Pure>>
+function spl_object_hash($obj)[];
 <<__PHPStdLib>>
 function hphp_object_pointer($obj);
 <<__PHPStdLib>>

@@ -62,7 +62,6 @@ HHAS2b
         count = 0
         lines = ["1\n", "2\n", "3\n"]
 
-        # pyre-fixme[53]: Captured variable `count` is not annotated.
         def count_ignored(_) -> None:
             nonlocal count
             count += 1

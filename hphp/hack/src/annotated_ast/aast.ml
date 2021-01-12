@@ -569,7 +569,7 @@ and ('ex, 'fb, 'en, 'hi) expr_ =
       (** Collection literal.
 
           TODO: T38184446 this is redundant with ValCollection/KeyValCollection.
-     
+
           Vector {} *)
   | ExpressionTree of ('ex, 'fb, 'en, 'hi) expression_tree
       (** Expression tree literal. Expression trees are not evaluated at

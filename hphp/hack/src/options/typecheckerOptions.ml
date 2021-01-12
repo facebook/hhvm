@@ -110,6 +110,8 @@ let local_coeffects = GlobalOptions.tco_local_coeffects
 
 let any_coeffects t = call_coeffects t || local_coeffects t
 
+let strict_contexts = GlobalOptions.tco_strict_contexts
+
 let enable_ifc = GlobalOptions.enable_ifc
 
 let ifc_enabled = GlobalOptions.ifc_enabled

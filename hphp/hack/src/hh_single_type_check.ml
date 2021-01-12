@@ -206,6 +206,7 @@ let parse_options () =
   let union_intersection_type_hints = ref false in
   let call_coeffects = ref false in
   let local_coeffects = ref false in
+  let strict_contexts = ref true in
   let like_casts = ref false in
   let simple_pessimize = ref 0.0 in
   let complex_coercion = ref false in
@@ -284,6 +285,9 @@ let parse_options () =
       );
       ("--call-coeffects", Arg.Set call_coeffects, "Turns on call coeffects");
       ("--local-coeffects", Arg.Set local_coeffects, "Turns on local coeffects");
+      ( "--no-strict-contexts",
+        Arg.Unit (fun () -> strict_contexts := false),
+        "Do not enforce contexts to be defined within Contexts namespace" );
       ("--colour", Arg.Unit (set_mode Color), " Produce colour output");
       ("--color", Arg.Unit (set_mode Color), " Produce color output");
       ("--coverage", Arg.Unit (set_mode Coverage), " Produce coverage output");
@@ -648,6 +652,7 @@ let parse_options () =
       ~tco_shallow_class_decl:!shallow_class_decl
       ~tco_like_type_hints:!like_type_hints
       ~tco_union_intersection_type_hints:!union_intersection_type_hints
+      ~tco_strict_contexts:!strict_contexts
       ~tco_coeffects:!call_coeffects
       ~tco_coeffects_local:!local_coeffects
       ~po_enable_coeffects:true

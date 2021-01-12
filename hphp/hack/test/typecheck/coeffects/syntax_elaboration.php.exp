@@ -1,8 +1,0 @@
-File "syntax_elaboration.php", line 16, characters 43-55:
-Unbound name: `HH\Contexts\Unsafe\WriteProperty` (Naming[2049])
-File "syntax_elaboration.php", line 16, characters 43-55:
-Unbound name: `HH\Contexts\WriteProperty` (Naming[2049])
-File "syntax_elaboration.php", line 31, characters 34-53:
-Unbound name: `HH\Contexts\AccessStaticVariable` (Naming[2049])
-File "syntax_elaboration.php", line 31, characters 34-53:
-Unbound name: `HH\Contexts\Unsafe\AccessStaticVariable` (Naming[2049])

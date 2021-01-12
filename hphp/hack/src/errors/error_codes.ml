@@ -264,7 +264,8 @@ module NastCheck = struct
     | VariadicMemoize [@value 3086]
     | AbstractMethodMemoize [@value 3087]
     | InstancePropertyInAbstractFinalClass [@value 3088]
-    | DynamicallyCallableReified [@value 3089] (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
+    | DynamicallyCallableReified [@value 3089]
+    | IllegalContext [@value 3090] (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum

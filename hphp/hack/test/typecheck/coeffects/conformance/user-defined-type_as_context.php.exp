@@ -1,0 +1,16 @@
+File "user-defined-type_as_context.php", line 4, characters 43-47:
+Unbound name: `HH\Contexts\Clazz` (Naming[2049])
+File "user-defined-type_as_context.php", line 4, characters 43-47:
+Unbound name: `HH\Contexts\Unsafe\Clazz` (Naming[2049])
+File "user-defined-type_as_context.php", line 7, characters 47-51:
+Unbound name: `HH\Contexts\Iface` (Naming[2049])
+File "user-defined-type_as_context.php", line 7, characters 47-51:
+Unbound name: `HH\Contexts\Unsafe\Iface` (Naming[2049])
+File "user-defined-type_as_context.php", line 10, characters 34-38:
+Unbound name: `HH\Contexts\Clazz` (Naming[2049])
+File "user-defined-type_as_context.php", line 10, characters 34-38:
+Unbound name: `HH\Contexts\Unsafe\Clazz` (Naming[2049])
+File "user-defined-type_as_context.php", line 11, characters 38-42:
+Unbound name: `HH\Contexts\Iface` (Naming[2049])
+File "user-defined-type_as_context.php", line 11, characters 38-42:
+Unbound name: `HH\Contexts\Unsafe\Iface` (Naming[2049])

@@ -2101,6 +2101,28 @@ let switch_multiple_default pos =
     pos
     "There can be only one `default` case in `switch`"
 
+let context_definitions_msg =
+  (* Notes:
+   * - magic numbers are inteded to provide a nicer IDE experience,
+   * - a Pos is constructed in order to make the link to contexts.hhi clickable
+   *)
+  let path = Relative_path.(create Dummy "coeffect/contexts.hhi") in
+  ( Pos.make_from_lnum_bol_cnum
+      ~pos_file:path
+      ~pos_start:(28, 0, 0)
+      ~pos_end:(28, 0, 23),
+    "Contexts are defined here" )
+
+let illegal_context pos name =
+  add_list
+    NastCheck.(err_code IllegalContext)
+    ( pos,
+      "Illegal context: "
+      ^ (name |> Markdown_lite.md_codify)
+      ^ "\nCannot use a context defined outside namespace "
+      ^ Naming_special_names.Coeffects.contexts )
+    [context_definitions_msg]
+
 (*****************************************************************************)
 (* Nast terminality *)
 (*****************************************************************************)
@@ -5295,18 +5317,6 @@ let coeffect_subtyping_error
     ~code:(Typing.err_code Typing.SubtypeCoeffects)
     (pos_expected, "Expected a function that requires " ^ cap_expected)
     [(pos_got, "But got a function that requires " ^ cap_got)]
-
-let context_definitions_msg =
-  (* Notes:
-   * - magic numbers are inteded to provide a nicer IDE experience,
-   * - a Pos is constructed in order to make the link to contexts.hhi clickable
-   *)
-  let path = Relative_path.(create Dummy "coeffect/contexts.hhi") in
-  ( Pos.make_from_lnum_bol_cnum
-      ~pos_file:path
-      ~pos_start:(28, 0, 0)
-      ~pos_end:(28, 0, 23),
-    "Contexts are defined here" )
 
 let call_coeffect_error
     ~available_incl_unsafe ~available_pos ~required ~required_pos call_pos =

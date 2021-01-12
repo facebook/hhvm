@@ -26,6 +26,20 @@ let show_func_body_ann = function
 let pp_func_body_ann fmt fba =
   Format.pp_print_string fmt (show_func_body_ann fba)
 
+let show_tprim =
+  Naming_special_names.Typehints.(
+    function
+    | Tnull -> null
+    | Tvoid -> void
+    | Tint -> int
+    | Tbool -> bool
+    | Tfloat -> float
+    | Tstring -> string
+    | Tnum -> num
+    | Tresource -> resource
+    | Tarraykey -> arraykey
+    | Tnoreturn -> noreturn)
+
 type program = (Pos.t, func_body_ann, unit, unit) Aast.program [@@deriving show]
 
 type def = (Pos.t, func_body_ann, unit, unit) Aast.def

@@ -24,8 +24,14 @@ function fun_explicit_defaults_ctx()[defaults]: void {
   fun_implicit_defaults_ctx();
 }
 
-function fully_qualified_cap_good()[
+function fully_qualified_but_wrong_ns()[
   \HH\Capabilities\AccessStaticVariable
 ]: void {}
 
 function namespaceless_cap_bad()[AccessStaticVariable]: void {}
+
+function fully_qualified_but_right_ns()[
+  \HH\Contexts\local
+]: void {}
+
+function toplevel_lowercase_typename_bad()[int]: void {}

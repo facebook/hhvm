@@ -161,6 +161,9 @@ type t = {
   tco_coeffects: bool;
   (* Enables checking of coeffects for local operations (not calls) *)
   tco_coeffects_local: bool;
+  (* Internal (for tests-only): whether any type can appear in a context list
+   * or only types defined in the appropriate Context namespace *)
+  tco_strict_contexts: bool;
   (* Enables like casts *)
   tco_like_casts: bool;
   (* A simpler form of pessimization, only wraps the outermost type in like
@@ -345,6 +348,7 @@ val make :
   ?tco_union_intersection_type_hints:bool ->
   ?tco_coeffects:bool ->
   ?tco_coeffects_local:bool ->
+  ?tco_strict_contexts:bool ->
   ?tco_like_casts:bool ->
   ?tco_simple_pessimize:float ->
   ?tco_complex_coercion:bool ->
@@ -530,6 +534,8 @@ val tco_union_intersection_type_hints : t -> bool
 val tco_call_coeffects : t -> bool
 
 val tco_local_coeffects : t -> bool
+
+val tco_strict_contexts : t -> bool
 
 val ifc_enabled : t -> string list
 

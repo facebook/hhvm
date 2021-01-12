@@ -1425,6 +1425,8 @@ module CoeffectEnforcedOp : sig
   val non_awaited_awaitable_in_rx : Pos.t -> unit
 end
 
+val illegal_context : Pos.t -> string -> unit
+
 val abstract_function_pointer : string -> string -> Pos.t -> Pos.t -> unit
 
 val unnecessary_attribute :

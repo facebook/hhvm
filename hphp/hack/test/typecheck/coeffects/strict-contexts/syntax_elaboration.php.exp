@@ -1,0 +1,23 @@
+File "syntax_elaboration.php", line 16, characters 43-55:
+Unbound name: `HH\Contexts\Unsafe\WriteProperty` (Naming[2049])
+File "syntax_elaboration.php", line 16, characters 43-55:
+Unbound name: `HH\Contexts\WriteProperty` (Naming[2049])
+File "syntax_elaboration.php", line 31, characters 34-53:
+Unbound name: `HH\Contexts\AccessStaticVariable` (Naming[2049])
+File "syntax_elaboration.php", line 31, characters 34-53:
+Unbound name: `HH\Contexts\Unsafe\AccessStaticVariable` (Naming[2049])
+File "syntax_elaboration.php", line 13, characters 5-34:
+Illegal context: `\HH\Capabilities\WriteProperty`
+Cannot use a context defined outside namespace \HH\Contexts (NastCheck[3090])
+  File "coeffect/contexts.hhi", line 28, characters 1-23:
+  Contexts are defined here
+File "syntax_elaboration.php", line 28, characters 3-39:
+Illegal context: `\HH\Capabilities\AccessStaticVariable`
+Cannot use a context defined outside namespace \HH\Contexts (NastCheck[3090])
+  File "coeffect/contexts.hhi", line 28, characters 1-23:
+  Contexts are defined here
+File "syntax_elaboration.php", line 37, characters 44-46:
+Illegal context: `int`
+Cannot use a context defined outside namespace \HH\Contexts (NastCheck[3090])
+  File "coeffect/contexts.hhi", line 28, characters 1-23:
+  Contexts are defined here

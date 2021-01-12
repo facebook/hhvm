@@ -26,8 +26,8 @@ let create () : t = empty
 let to_json (telemetry : t) : Hh_json.json =
   Hh_json.JSON_Object (List.rev telemetry)
 
-let to_string (telemetry : t) : string =
-  to_json telemetry |> Hh_json.json_to_string
+let to_string ?(pretty = false) (telemetry : t) : string =
+  to_json telemetry |> Hh_json.json_to_string ~pretty
 
 let string_
     ?(truncate : int option) ~(key : string) ~(value : string) (telemetry : t) :

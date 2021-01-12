@@ -10,7 +10,7 @@ type t [@@deriving show]
 
 val create : unit -> t
 
-val to_string : t -> string
+val to_string : ?pretty:bool -> t -> string
 
 val to_json : t -> Hh_json.json
 

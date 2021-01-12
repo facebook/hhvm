@@ -116,6 +116,8 @@ val prepend_root : string -> string
 
 val errors_to_string : Pos.absolute Errors.error_ list -> string
 
+val print_telemetries : ServerEnv.env -> unit
+
 (* Helpers for asserting things *)
 
 val fail : string -> unit

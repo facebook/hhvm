@@ -485,6 +485,12 @@ let errors_to_string buf x =
   List.iter x ~f:(fun error ->
       Printf.bprintf buf "%s\n" (Errors.to_string error))
 
+let print_telemetries env =
+  Printf.eprintf "\n==Telementries==\n";
+  List.iter
+    ServerEnv.(env.last_recheck_loop_stats.per_batch_telemetry)
+    ~f:(fun t -> Printf.eprintf "%s\n" (Telemetry.to_string ~pretty:true t))
+
 let assert_errors errors expected =
   let buf = Buffer.create 1024 in
   Errors.get_error_list errors

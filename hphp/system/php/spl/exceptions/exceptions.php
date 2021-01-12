@@ -162,3 +162,8 @@ final class UndefinedPropertyException extends LogicException {}
  * Exception thrown when attempting to use a previously undeclared variable.
  */
 final class UndefinedVariableException extends LogicException {}
+
+/**
+ * Exception thrown when attempting to access a property on a non-object.
+ */
+final class AccessPropertyOnNonObjectException extends LogicException {}

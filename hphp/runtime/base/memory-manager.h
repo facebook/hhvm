@@ -673,7 +673,7 @@ struct MemoryManager {
   static size_t computeSize2Index(size_t size);
   static size_t lookupSmallSize2Index(size_t size);
   static size_t size2Index(size_t size);
-  static size_t sizeIndex2Size(size_t index);
+  static constexpr size_t sizeIndex2Size(size_t index);
 
   /////////////////////////////////////////////////////////////////////////////
   // Cleanup.

@@ -191,7 +191,7 @@ inline size_t MemoryManager::size2Index(size_t size) {
   return computeSize2Index(size);
 }
 
-inline size_t MemoryManager::sizeIndex2Size(size_t index) {
+inline constexpr size_t MemoryManager::sizeIndex2Size(size_t index) {
   return kSizeIndex2Size[index];
 }
 

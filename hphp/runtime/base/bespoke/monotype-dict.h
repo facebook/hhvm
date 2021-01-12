@@ -231,6 +231,8 @@ private:
   size_t numIndices() const;
   void setZombie();
   bool isZombie() const;
+
+  friend EmptyMonotypeDict;
 };
 
 struct TopMonotypeDictLayout : public AbstractLayout {

@@ -656,14 +656,14 @@ let load_state
     List.map local_changes ~f:(fun x ->
         Relative_path.create_detect_prefix (root ^ x))
   in
-  let saved_state_fn = saved_state_dir ^ "/" ^ saved_state_filename in
+  let naming_table_path = saved_state_dir ^ "/" ^ saved_state_filename in
   let deptable_fn = saved_state_dir ^ "/" ^ saved_state_filename ^ ".sql" in
   (* TODO(hverr): Figure out 64-bit *)
   let deptable_is_64bit = false in
   let load_state_approach =
     ServerInit.Precomputed
       {
-        ServerArgs.saved_state_fn;
+        ServerArgs.naming_table_path;
         (* in Precomputed scenario, base revision should only be used in logging,
          * which is irrelevant in tests *)
         corresponding_base_revision = "-1";

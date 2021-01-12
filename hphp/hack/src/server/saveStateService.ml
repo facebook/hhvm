@@ -54,20 +54,23 @@ let partition_error_files_tf
   in
   (fold_error_files errors_in_phases_t, fold_error_files errors_in_phases_f)
 
-let load_class_decls ~(shallow_decls : bool) ~(base_filename : string) : unit =
+let load_class_decls
+    ~(shallow_decls : bool) ~(hot_decls_paths : State_loader.hot_decls_paths) :
+    unit =
   let start_t = Unix.gettimeofday () in
   Hh_logger.log "Begin loading class declarations";
+  let State_loader.{ legacy_hot_decls_path; shallow_hot_decls_path } =
+    hot_decls_paths
+  in
   try
     let (filename, num_classes) =
       if shallow_decls then
-        let shallow_filename = get_shallow_decls_filename base_filename in
-        ( shallow_filename,
-          load_contents_unsafe shallow_filename
+        ( shallow_hot_decls_path,
+          load_contents_unsafe shallow_hot_decls_path
           |> Decl_export.restore_shallow_decls )
       else
-        let legacy_filename = get_legacy_decls_filename base_filename in
-        ( legacy_filename,
-          load_contents_unsafe legacy_filename
+        ( legacy_hot_decls_path,
+          load_contents_unsafe legacy_hot_decls_path
           |> Decl_export.restore_legacy_decls )
     in
     let msg =
@@ -85,8 +88,10 @@ let load_saved_state
     ~(load_decls : bool)
     ~(shallow_decls : bool)
     ~(naming_table_fallback_path : string option)
-    (ctx : Provider_context.t)
-    (saved_state_filename : string) : Naming_table.t * saved_state_errors =
+    ~(naming_table_path : string)
+    ~(hot_decls_paths : State_loader.hot_decls_paths)
+    ~(errors_path : string)
+    (ctx : Provider_context.t) : Naming_table.t * saved_state_errors =
   let old_naming_table =
     match naming_table_fallback_path with
     | Some nt_path ->
@@ -101,22 +106,20 @@ let load_saved_state
              nt_path);
       Naming_table.load_from_sqlite ctx nt_path
     | None ->
-      let chan = In_channel.create ~binary:true saved_state_filename in
+      let chan = In_channel.create ~binary:true naming_table_path in
       let (old_saved : Naming_table.saved_state_info) =
         Marshal.from_channel chan
       in
-      Sys_utils.close_in_no_fail saved_state_filename chan;
+      Sys_utils.close_in_no_fail naming_table_path chan;
       Naming_table.from_saved old_saved
   in
-  let errors_filename = get_errors_filename saved_state_filename in
   let (old_errors : saved_state_errors) =
-    if not (Sys.file_exists errors_filename) then
+    if not (Sys.file_exists errors_path) then
       []
     else
-      Marshal.from_channel (In_channel.create ~binary:true errors_filename)
+      Marshal.from_channel (In_channel.create ~binary:true errors_path)
   in
-  if load_decls then
-    load_class_decls ~shallow_decls ~base_filename:saved_state_filename;
+  if load_decls then load_class_decls ~shallow_decls ~hot_decls_paths;
 
   (old_naming_table, old_errors)
 

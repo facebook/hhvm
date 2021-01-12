@@ -213,7 +213,7 @@ let parse_saved_state_json (json, _keytrace) =
     let changes = array_to_path_list changes in
     return
       {
-        saved_state_fn = state;
+        naming_table_path = state;
         corresponding_base_revision = for_base_rev;
         deptable_fn = deptable;
         deptable_is_64bit;
@@ -259,3 +259,12 @@ let get_saved_state_spec (v : string option) :
             blob
         in
         Error message))
+
+let legacy_hot_decls_path_for_target_info { naming_table_path; _ } =
+  naming_table_path ^ ".decls"
+
+let shallow_hot_decls_path_for_target_info { naming_table_path; _ } =
+  naming_table_path ^ ".shallowdecls"
+
+let errors_path_for_target_info { naming_table_path; _ } =
+  naming_table_path ^ ".err"

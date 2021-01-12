@@ -150,10 +150,12 @@ let merge_saved_state_futures
       let (old_naming_table, old_errors) =
         SaveStateService.load_saved_state
           ctx
-          result.State_loader.saved_state_fn
+          ~naming_table_path:result.State_loader.naming_table_path
           ~naming_table_fallback_path
           ~load_decls
           ~shallow_decls
+          ~hot_decls_paths:result.State_loader.hot_decls_paths
+          ~errors_path:result.State_loader.errors_path
       in
       let t = Unix.time () in
       (match result.State_loader.dirty_files |> Future.get ~timeout:200 with
@@ -165,10 +167,10 @@ let merge_saved_state_futures
         let dirty_local_files = Relative_path.Set.of_list dirty_local_files in
         Ok
           {
-            saved_state_fn = result.State_loader.saved_state_fn;
+            naming_table_fn = result.State_loader.naming_table_path;
             deptable_fn = result.State_loader.deptable_fn;
             deptable_is_64bit = result.State_loader.deptable_is_64bit;
-            naming_table_fn = naming_table_fallback_path;
+            naming_table_fallback_fn = naming_table_fallback_path;
             corresponding_rev = result.State_loader.corresponding_rev;
             mergebase_rev = result.State_loader.mergebase_rev;
             mergebase = result.State_loader.mergebase;
@@ -271,7 +273,7 @@ let use_precomputed_state_exn
     (info : ServerArgs.saved_state_target_info)
     (profiling : CgroupProfiler.Profiling.t) : loaded_info =
   let {
-    ServerArgs.saved_state_fn;
+    ServerArgs.naming_table_path;
     corresponding_base_revision;
     deptable_fn;
     deptable_is_64bit;
@@ -295,21 +297,33 @@ let use_precomputed_state_exn
   let load_decls = genv.local_config.SLC.load_decls_from_saved_state in
   let shallow_decls = genv.local_config.SLC.shallow_class_decl in
   let naming_table_fallback_path = get_naming_table_fallback_path genv None in
+  let hot_decls_paths =
+    State_loader.
+      {
+        legacy_hot_decls_path =
+          ServerArgs.legacy_hot_decls_path_for_target_info info;
+        shallow_hot_decls_path =
+          ServerArgs.shallow_hot_decls_path_for_target_info info;
+      }
+  in
+  let errors_path = ServerArgs.errors_path_for_target_info info in
   let (old_naming_table, old_errors) =
     CgroupProfiler.collect_cgroup_stats ~profiling ~stage:"load saved state"
     @@ fun () ->
     SaveStateService.load_saved_state
       ctx
-      saved_state_fn
+      ~naming_table_path
       ~naming_table_fallback_path
       ~load_decls
       ~shallow_decls
+      ~hot_decls_paths
+      ~errors_path
   in
   {
-    saved_state_fn;
+    naming_table_fn = naming_table_path;
     deptable_fn;
     deptable_is_64bit;
-    naming_table_fn = naming_table_fallback_path;
+    naming_table_fallback_fn = naming_table_fallback_path;
     corresponding_rev =
       Hg.Global_rev (int_of_string corresponding_base_revision);
     mergebase_rev = None;
@@ -357,7 +371,7 @@ let naming_from_saved_state
     (ctx : Provider_context.t)
     (old_naming_table : Naming_table.t)
     (parsing_files : Relative_path.Set.t)
-    (naming_table_fn : string option)
+    (naming_table_fallback_fn : string option)
     (t : float)
     ~(profiling : CgroupProfiler.Profiling.t) : float =
   CgroupProfiler.collect_cgroup_stats
@@ -366,7 +380,7 @@ let naming_from_saved_state
   @@ fun () ->
   (* If we're falling back to SQLite we don't need to explicitly do a naming
      pass, but if we're not then we do. *)
-  match naming_table_fn with
+  match naming_table_fallback_fn with
   | Some _ ->
     (* Set the SQLite fallback path for the reverse naming table, then block out all entries in
       any dirty files to make sure we properly handle file deletes. *)
@@ -1005,7 +1019,7 @@ let post_saved_state_initialization
   let trace = genv.local_config.SLC.trace_parsing in
   let hg_aware = genv.local_config.SLC.hg_aware in
   let {
-    naming_table_fn;
+    naming_table_fallback_fn;
     dirty_naming_files;
     dirty_local_files;
     dirty_master_files;
@@ -1015,7 +1029,7 @@ let post_saved_state_initialization
     old_errors;
     deptable_fn;
     deptable_is_64bit;
-    saved_state_fn = _;
+    naming_table_fn = _;
     corresponding_rev = _;
     state_distance = _;
     naming_table_manifold_path;
@@ -1124,7 +1138,7 @@ let post_saved_state_initialization
       ctx
       old_naming_table
       parsing_files
-      naming_table_fn
+      naming_table_fallback_fn
       t
       ~profiling
   in

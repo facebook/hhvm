@@ -14,7 +14,7 @@ module Types = struct
     deptable_fn: string;
     deptable_is_64bit: bool;
     prechecked_changes: Relative_path.t list;
-    saved_state_fn: string;
+    naming_table_path: string;
   }
 
   (* The idea of a file range necessarily means that the hypothetical list
@@ -53,4 +53,10 @@ module type S = sig
 
   val get_saved_state_spec :
     string option -> (saved_state_target_info option, string) result
+
+  val legacy_hot_decls_path_for_target_info : saved_state_target_info -> string
+
+  val shallow_hot_decls_path_for_target_info : saved_state_target_info -> string
+
+  val errors_path_for_target_info : saved_state_target_info -> string
 end

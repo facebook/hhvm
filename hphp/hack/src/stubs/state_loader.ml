@@ -1,5 +1,10 @@
+type hot_decls_paths = {
+  legacy_hot_decls_path: string;
+  shallow_hot_decls_path: string;
+}
+
 type native_load_result = {
-  saved_state_fn: string;
+  naming_table_path: string;
   corresponding_rev: Hg.rev;
   mergebase_rev: Hg.global_rev option;
   mergebase: Hg.hg_rev option Future.t;
@@ -8,6 +13,8 @@ type native_load_result = {
   deptable_fn: string;
   deptable_is_64bit: bool;
   dirty_files: (Relative_path.t list * Relative_path.t list) Future.t;
+  hot_decls_paths: hot_decls_paths;
+  errors_path: string;
 }
 
 type saved_state_handle = {

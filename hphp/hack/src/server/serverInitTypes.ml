@@ -80,10 +80,10 @@ let load_state_error_to_verbose_string (err : load_state_error) :
 type files_changed_while_parsing = Relative_path.Set.t
 
 type loaded_info = {
-  saved_state_fn: string;
+  naming_table_fn: string;
   deptable_fn: string;
   deptable_is_64bit: bool;
-  naming_table_fn: string option;
+  naming_table_fallback_fn: string option;
   corresponding_rev: Hg.rev;
   mergebase_rev: Hg.global_rev option;
   mergebase: Hg.hg_rev option Future.t;

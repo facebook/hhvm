@@ -101,6 +101,11 @@ struct LoggingProfileKey {
     return folly::sformat("NewObjD \"{}\"", cls->name());
   }
 
+  size_t stableHash() const {
+    if (slot == kInvalidSlot) return SrcKey::StableHasher()(sk);
+    return cls->stableHash() ^ slot;
+  }
+
   union {
     SrcKey sk;
     const Class* cls;

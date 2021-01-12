@@ -172,6 +172,7 @@ std::string symbol_kind(const Symbol&);
 std::string symbol_rep(const Symbol&);
 bool symbol_eq(const Symbol&, const Symbol&);
 size_t symbol_hash(const Symbol&);
+size_t symbol_stable_hash(const Symbol&);
 
 ///////////////////////////////////////////////////////////////////////////////
 

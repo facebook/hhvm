@@ -453,8 +453,10 @@ public:
 
   /*
    * Hash the Type as a bitfield.
+   * stableHash() will return a consistent value across HHVM restarts.
    */
   size_t hash() const;
+  size_t stableHash() const;
 
   /*
    * Stringify the Type.

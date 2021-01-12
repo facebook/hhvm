@@ -142,6 +142,7 @@ struct IRSPRelOffset {
   int32_t offset;
 
   bool operator==(IRSPRelOffset o) const { return offset == o.offset; }
+  bool operator!=(IRSPRelOffset o) const { return offset != o.offset; }
 
   IRSPRelOffset operator+(int32_t d) const { return IRSPRelOffset{offset + d}; }
   IRSPRelOffset operator-(int32_t d) const { return IRSPRelOffset{offset - d}; }

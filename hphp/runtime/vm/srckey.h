@@ -45,6 +45,7 @@ struct SrcKey : private boost::totally_ordered<SrcKey> {
   using AtomicInt = uint64_t;
 
   struct Hasher;
+  struct StableHasher;
   struct TbbHashCompare;
 
   /*
@@ -188,6 +189,18 @@ private:
 struct SrcKey::Hasher {
   size_t operator()(SrcKey sk) const {
     return hash_int64(sk.toAtomicInt());
+  }
+};
+
+struct SrcKey::StableHasher {
+  size_t operator()(SrcKey sk) const {
+    return folly::hash::hash_combine(
+      sk.func()->stableHash(),
+      sk.offset(),
+      sk.resumeMode(),
+      sk.prologue(),
+      sk.hasThis()
+    );
   }
 };
 

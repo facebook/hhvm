@@ -159,6 +159,7 @@ struct RecordDesc : AtomicCountable {
   const StringData* name()       const { return m_preRec->name(); }
   Attr attrs()                   const { return m_preRec->attrs(); }
   const StringData* parentName() const { return m_preRec->parentName();  }
+  size_t stableHash()            const;
 
   /*
    * Whether this record is uniquely named across the codebase.

@@ -601,6 +601,11 @@ public:
   Class* parent() const;
 
   /*
+   * A hash for this class that will remain constant across process restarts.
+   */
+  size_t stableHash() const;
+
+  /*
    * Uncounted String names of this class and of its parent.
    */
   StrNR nameStr() const;

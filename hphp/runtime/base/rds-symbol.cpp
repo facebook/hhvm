@@ -171,6 +171,9 @@ struct SymbolEq : boost::static_visitor<bool> {
 };
 
 struct SymbolHash : boost::static_visitor<size_t> {
+  // NOTE: Any hash functions that are not stable across HHVM
+  // restarts should be overridden with an appropriate hash in
+  // SymbolStableHash below.
   size_t operator()(LinkName k) const {
     return folly::hash::hash_combine(
       std::string{k.type}, k.name->hash());
@@ -231,6 +234,34 @@ struct SymbolHash : boost::static_visitor<size_t> {
   }
 };
 
+struct SymbolStableHash : SymbolHash {
+  using SymbolHash::operator();
+  size_t operator()(SPropCache k) const {
+    return folly::hash::hash_combine(
+      k.cls->stableHash(), k.slot
+    );
+  }
+  size_t operator()(StaticMemoValue k) const {
+    return Func::fromFuncId(k.funcId)->stableHash();
+  }
+  size_t operator()(StaticMemoCache k) const {
+    return Func::fromFuncId(k.funcId)->stableHash();
+  }
+  size_t operator()(LSBMemoValue k) const {
+    return folly::hash::hash_combine(
+      k.cls->stableHash(), Func::fromFuncId(k.funcId)->stableHash()
+    );
+  }
+  size_t operator()(LSBMemoCache k) const {
+    return folly::hash::hash_combine(
+      k.cls->stableHash(), Func::fromFuncId(k.funcId)->stableHash()
+    );
+  }
+  size_t operator()(TSCache k) const {
+    return Func::fromFuncId(k.funcId)->stableHash();
+  }
+};
+
 }
 
 std::string symbol_kind(const Symbol& sym) {
@@ -244,6 +275,9 @@ bool symbol_eq(const Symbol& sym1, const Symbol& sym2) {
 }
 size_t symbol_hash(const Symbol& sym) {
   return boost::apply_visitor(SymbolHash(), sym);
+}
+size_t symbol_stable_hash(const Symbol& sym) {
+  return boost::apply_visitor(SymbolStableHash(), sym);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -48,9 +48,10 @@ std::string NewStructData::show() const {
 
 namespace {
 
-FOLLY_CREATE_MEMBER_INVOKER(invoke_hash,   hash);
-FOLLY_CREATE_MEMBER_INVOKER(invoke_equals, equals);
-FOLLY_CREATE_MEMBER_INVOKER(invoke_clone,  clone);
+FOLLY_CREATE_MEMBER_INVOKER(invoke_hash,       hash);
+FOLLY_CREATE_MEMBER_INVOKER(invoke_stableHash, stableHash);
+FOLLY_CREATE_MEMBER_INVOKER(invoke_equals,     equals);
+FOLLY_CREATE_MEMBER_INVOKER(invoke_clone,      clone);
 
 /*
  * dispatchExtra translates from runtime values for the Opcode enum
@@ -116,6 +117,18 @@ size_t hashExtraImpl(IRExtraData*) {
 
 template<class T>
 std::enable_if_t<
+  std::is_invocable_v<invoke_stableHash, T const&>,
+  size_t
+> stableHashExtraImpl(T* t) { return t->stableHash(); }
+size_t stableHashExtraImpl(IRExtraData*) {
+  // This probably means we tried to hash an IRInstruction with extra data that
+  // had no hash function.
+  always_assert(!"attempted to hash extra data that didn't "
+    "provide a hash function");
+}
+
+template<class T>
+std::enable_if_t<
   std::is_invocable_v<invoke_equals, T const&, T const&>,
   bool
 > equalsExtraImpl(T* t, IRExtraData* o) {
@@ -142,6 +155,7 @@ template<class T>
 std::string showExtraImpl(const T* extra) { return extra->show(); }
 
 MAKE_DISPATCHER(HashDispatcher, size_t, hashExtraImpl);
+MAKE_DISPATCHER(StableHashDispatcher, size_t, stableHashExtraImpl);
 MAKE_DISPATCHER(EqualsDispatcher, bool, equalsExtraImpl);
 MAKE_DISPATCHER(CloneDispatcher, IRExtraData*, cloneExtraImpl);
 MAKE_DISPATCHER(ShowDispatcher, std::string, showExtraImpl);
@@ -152,6 +166,11 @@ MAKE_DISPATCHER(ShowDispatcher, std::string, showExtraImpl);
 
 size_t hashExtra(Opcode opc, const IRExtraData* data) {
   return dispatchExtra<size_t,HashDispatcher>(
+    opc, const_cast<IRExtraData*>(data));
+}
+
+size_t stableHashExtra(Opcode opc, const IRExtraData* data) {
+  return dispatchExtra<size_t,StableHashDispatcher>(
     opc, const_cast<IRExtraData*>(data));
 }
 

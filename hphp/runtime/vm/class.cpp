@@ -732,6 +732,16 @@ Class::Avail Class::avail(Class*& parent,
 
 
 ///////////////////////////////////////////////////////////////////////////////
+// Basic info.
+
+size_t Class::stableHash() const {
+  return folly::hash::hash_combine(
+    name()->hashStatic(),
+    preClass()->unit()->sn()
+  );
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // Ancestry.
 
 const Class* Class::commonAncestor(const Class* cls) const {

@@ -78,6 +78,14 @@ void PreRecordDesc::checkDefaultValueType(
   if (tc.isCheckable()) tc.verifyRecField(&val, m_name, field.name());
 }
 
+
+size_t RecordDesc::stableHash() const {
+  return folly::hash::hash_combine(
+    name()->hashStatic(),
+    unit()->sn()
+  );
+}
+
 void RecordDesc::atomicRelease() {
   assertx(!m_cachedRecordDesc.bound());
   assertx(!getCount());

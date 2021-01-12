@@ -160,6 +160,14 @@ inline StrNR Func::nameStr() const {
   return StrNR(m_name);
 }
 
+inline size_t Func::stableHash() const {
+  return folly::hash::hash_combine(
+    name()->hashStatic(),
+    cls() ? cls()->name()->hashStatic() : 0,
+    unit()->sn()
+  );
+}
+
 inline const StringData* Func::fullName() const {
   if (m_fullName == nullptr) return m_name;
   if (UNLIKELY((intptr_t)m_fullName.get() == kNeedsFullName)) {

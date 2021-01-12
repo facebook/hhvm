@@ -151,6 +151,8 @@ struct TypeConstraint {
   TypeConstraint(const TypeConstraint&) = default;
   TypeConstraint& operator=(const TypeConstraint&) = default;
 
+  bool operator==(const TypeConstraint& o) const;
+
   void resolveType(AnnotType t, bool nullable) {
     assertx(m_type == AnnotType::Object);
     auto flags = m_flags | Flags::Resolved;

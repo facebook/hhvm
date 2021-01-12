@@ -325,6 +325,11 @@ struct Func final {
   StrNR nameStr() const;
 
   /*
+   * A hash for this func that will remain constant across process restarts.
+   */
+  size_t stableHash() const;
+
+  /*
    * The function's fully class-qualified, name (e.g., C::foo).
    */
   const StringData* fullName() const;

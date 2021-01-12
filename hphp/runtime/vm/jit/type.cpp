@@ -350,6 +350,13 @@ enum TypeKey : uint8_t {
   RecSub,
   RecExact,
 };
+
+TypeKey getTypeKey(const Type& t) {
+  return t.hasConstVal() ? TypeKey::Const :
+    t.clsSpec() ? (t.clsSpec().exact() ? TypeKey::ClsExact : TypeKey::ClsSub) :
+    t.recSpec() ? (t.recSpec().exact() ? TypeKey::RecExact : TypeKey::RecSub) :
+    t.arrSpec() ? TypeKey::ArrSpec : TypeKey::None;
+}
 }
 
 void Type::serialize(ProfDataSerializer& ser) const {
@@ -366,11 +373,7 @@ void Type::serialize(ProfDataSerializer& ser) const {
   Type t = *this;
   if (t.maybe(TNullptr)) t = t - TNullptr;
 
-  auto const key = m_hasConstVal ? TypeKey::Const :
-    t.clsSpec() ? (t.clsSpec().exact() ? TypeKey::ClsExact : TypeKey::ClsSub) :
-    t.recSpec() ? (t.recSpec().exact() ? TypeKey::RecExact : TypeKey::RecSub) :
-    t.arrSpec() ? TypeKey::ArrSpec : TypeKey::None;
-
+  auto const key = getTypeKey(t);
   write_raw(ser, key);
 
   if (key == TypeKey::Const) {
@@ -466,6 +469,60 @@ Type Type::deserialize(ProfDataDeserializer& ser) {
   }();
   ITRACE_MOD(Trace::hhbc, 2, "Type: {}\n", ret.toString());
   return ret;
+}
+
+size_t Type::stableHash() const {
+  // Base hash
+  auto const hash = hash_int64_pair(
+    m_bits.hash(),
+    ((static_cast<uint64_t>(m_ptr) << sizeof(m_mem) * CHAR_BIT) |
+     static_cast<uint64_t>(m_mem)) ^ m_hasConstVal
+  );
+
+  // Specialization data
+  Type t = *this;
+  auto const key = getTypeKey(t);
+  auto const extra = [&] () -> size_t {
+    if (key == TypeKey::Const) {
+      if (t <= TCls) return t.m_clsVal->stableHash();
+      if (t <= TLazyCls) return t.m_lclsVal.name()->hashStatic();
+      if (t <= TFunc) return t.m_funcVal->stableHash();
+      if (t <= TStaticStr) return t.m_strVal->hashStatic();
+      if (t < TArrLike) {
+        return internal_serialize(
+          VarNR(const_cast<ArrayData*>(t.m_arrVal))
+        ).get()->hash();
+      }
+      if (use_lowptr && (t <= TClsMeth)) {
+        auto const cls = t.m_clsmethVal->getCls();
+        auto const func = t.m_clsmethVal->getFunc();
+        return (cls ? cls->stableHash() : 0 ) ^ (func ? func->stableHash() : 0);
+      }
+      if (t.subtypeOfAny(TBool, TInt, TDbl)) return t.m_extra;
+    }
+    if (key == TypeKey::ClsSub || key == TypeKey::ClsExact) {
+      auto const cls = t.clsSpec().cls();
+      return cls ? cls->stableHash() : 0;
+    }
+    if (key == TypeKey::RecSub || key == TypeKey::RecExact) {
+      auto const rec = t.recSpec().rec();
+      return rec ? rec->stableHash() : 0;
+    }
+    if (key == TypeKey::ArrSpec) {
+      auto const spec = t.arrSpec();
+      return folly::hash::hash_combine(
+        spec.layout().toUint16(),
+        spec.type() ? spec.type()->id() : 0
+      );
+    }
+    return 0;
+  }();
+
+  return folly::hash::hash_combine(
+    hash,
+    key,
+    extra
+  );
 }
 
 ///////////////////////////////////////////////////////////////////////////////

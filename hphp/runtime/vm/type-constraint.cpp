@@ -74,6 +74,13 @@ void TypeConstraint::init() {
         this, m_namedEntity.get());
 }
 
+bool TypeConstraint::operator==(const TypeConstraint& o) const {
+  // The named entity is defined based on the m_typeName and is redundant to
+  // include in the equality operation.
+  return m_flags == o.m_flags && m_type == o.m_type &&
+         m_typeName == o.m_typeName;
+}
+
 std::string TypeConstraint::displayName(const Class* context /*= nullptr*/,
                                         bool extra /* = false */) const {
   const StringData* tn = typeName();

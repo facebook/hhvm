@@ -43,9 +43,5 @@ let fetch_saved_state ~load_64bit:_ ~cache_limit:_ ~config:_ ~config_hash:_ _ =
   raise Not_supported
 
 let mk_state_future
-    ~config:_
-    ~use_canary:_
-    ?saved_state_handle:_
-    ~config_hash:_
-    ~use_prechecked_files:_ =
+    ~config:_ ?saved_state_handle:_ ~config_hash:_ ~use_prechecked_files:_ =
   raise Not_supported

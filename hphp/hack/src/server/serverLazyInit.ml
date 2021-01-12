@@ -205,7 +205,6 @@ let merge_saved_state_futures
   wait_until_ready future
 
 let download_and_load_state_exn
-    ~(use_canary : bool)
     ~(target : ServerMonitorUtils.target_saved_state option)
     ~(genv : ServerEnv.genv)
     ~(ctx : Provider_context.t)
@@ -252,7 +251,6 @@ let download_and_load_state_exn
       (State_loader.native_load_result, State_loader.error) result Future.t =
     State_loader.mk_state_future
       ~config:genv.local_config.SLC.state_loader_timeouts
-      ~use_canary
       ~load_64bit:genv.local_config.SLC.load_state_natively_64bit
       ?saved_state_handle
       ~config_hash:(ServerConfig.config_hash genv.config)
@@ -1247,15 +1245,10 @@ let saved_state_init
       match load_state_approach with
       | Precomputed info ->
         Ok (use_precomputed_state_exn genv ctx info profiling)
-      | Load_state_natively use_canary ->
-        download_and_load_state_exn ~use_canary ~target:None ~genv ~ctx ~root
+      | Load_state_natively ->
+        download_and_load_state_exn ~target:None ~genv ~ctx ~root
       | Load_state_natively_with_target target ->
-        download_and_load_state_exn
-          ~use_canary:false
-          ~target:(Some target)
-          ~genv
-          ~ctx
-          ~root
+        download_and_load_state_exn ~target:(Some target) ~genv ~ctx ~root
     in
     state_result
   in

@@ -1130,8 +1130,7 @@ let serve genv env in_fds =
  *    to use Informant_induced_mini_state_target, targeting the saved-state it had previously!
  * 5. If "hh_server --with-mini-state", then load the one specified there!
  * 6. If hh.conf lacks "load_state_natively_v4", then don't load it
- * 7. If "hh_server --load_state_canary", then load it! but by commit hash rather than public svn
- * 8. Otherwise, load it normally!
+ * 7. Otherwise, load it normally!
  *)
 let resolve_init_approach genv : ServerInit.init_approach * string =
   match
@@ -1181,8 +1180,7 @@ let resolve_init_approach genv : ServerInit.init_approach * string =
       | (true, None) ->
         (* Use native loading only if the config specifies a load script,
          * and the local config prefers native. *)
-        let use_canary = ServerArgs.load_state_canary genv.options in
-        ( ServerInit.Saved_state_init (ServerInit.Load_state_natively use_canary),
+        ( ServerInit.Saved_state_init ServerInit.Load_state_natively,
           "Load_state_natively" )
     )
 

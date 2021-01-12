@@ -22,7 +22,7 @@ type load_state_error =
 
 type load_state_approach =
   | Precomputed of ServerArgs.saved_state_target_info
-  | Load_state_natively of bool
+  | Load_state_natively
   | Load_state_natively_with_target of ServerMonitorUtils.target_saved_state
 
 type remote_init = {

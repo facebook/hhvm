@@ -18,6 +18,7 @@
 #include <atomic>
 #include <cassert>
 #include <cstdio>
+#include <map>
 #include <mutex>
 #include <vector>
 
@@ -83,6 +84,13 @@ using LinkTable = tbb::concurrent_hash_map<
   HashCompare
 >;
 LinkTable s_linkTable;
+
+struct RevLinkEntry {
+  uint32_t size;
+  Symbol sym;
+};
+using RevLinkTable = std::map<Handle,RevLinkEntry>;
+RevLinkTable s_handleTable;
 
 __thread std::atomic<bool> s_hasFullInit{false};
 
@@ -357,11 +365,15 @@ Handle bindImpl(Symbol key, Mode mode, size_t sizeBytes,
   recordRds(handle, sizeBytes, key);
 
   LinkTable::const_accessor insert_acc;
+  // insert_acc is held until after s_handleTable is updated
   if (!s_linkTable.insert(
         insert_acc,
         LinkTable::value_type(key, {handle, safe_cast<uint32_t>(sizeBytes)}))) {
     always_assert(0);
   }
+  s_handleTable.emplace(handle, RevLinkEntry {
+    safe_cast<uint32_t>(sizeBytes), key
+  });
   return handle;
 }
 
@@ -409,6 +421,7 @@ void bindOnLinkImpl(std::atomic<Handle>& handle,
 void unbind(Symbol key, Handle handle) {
   Guard g(s_allocMutex);
   s_linkTable.erase(key);
+  s_handleTable.erase(handle);
 }
 
 using namespace detail;
@@ -711,6 +724,14 @@ void recordRds(Handle h, size_t size, const Symbol& sym) {
 std::vector<void*> allTLBases() {
   Guard g(s_tlBaseListLock);
   return s_tlBaseList;
+}
+
+folly::Optional<Symbol> reverseLink(Handle handle) {
+  Guard g(s_allocMutex);
+  auto const it = s_handleTable.lower_bound(handle);
+  if (it == s_handleTable.end()) return folly::none;
+  if (it->first + it->second.size < handle) return folly::none;
+  return it->second.sym;
 }
 
 namespace {

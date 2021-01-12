@@ -258,7 +258,7 @@ struct Link {
    * Ensure this Link is bound to an RDS allocation.
    *
    * Allocation is atomic and idempotent.  This ensures that only one thread
-   * allocates the handle, and (in the cast of persistent handles) that the
+   * allocates the handle, and (in the case of persistent handles) that the
    * value is initialized as part of the operation.  The effect is that other
    * threads only ever see an unbound handle or a bound handle with a valid
    * value.
@@ -423,6 +423,8 @@ Link<T,M> alloc();
  */
 size_t allocBit();
 bool testAndSetBit(size_t bit);
+
+folly::Optional<Symbol> reverseLink(Handle handle);
 
 //////////////////////////////////////////////////////////////////////
 

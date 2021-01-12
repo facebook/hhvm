@@ -3554,11 +3554,13 @@ and et_splice env p e =
 (*****************************************************************************)
 and type_capability env ctxs unsafe_ctxs default_pos =
   let cc = Decl_hint.aast_contexts_to_decl_capability in
-  let (env, cap_ty) =
+  let (decl_pos, (env, cap_ty)) =
     match cc env.decl_env ctxs default_pos with
-    | CapTy ty -> Phase.localize_with_self env ty
-    | CapDefaults p -> (env, MakeType.default_capability p)
+    | CapTy ty -> (get_pos ty, Phase.localize_with_self env ty)
+    | CapDefaults p -> (p, (env, MakeType.default_capability p))
   in
+  if TypecheckerOptions.strict_contexts (Env.get_tcopt env) then
+    Typing_coeffects.validate_capability env decl_pos cap_ty;
   let (env, unsafe_cap_ty) =
     match cc env.decl_env unsafe_ctxs default_pos with
     | CapTy ty -> Phase.localize_with_self env ty

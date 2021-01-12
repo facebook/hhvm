@@ -1,0 +1,5 @@
+File "invalid_aliased_type.php", line 5, characters 24-30:
+Illegal context: `int`
+Cannot use a context defined outside namespace \HH\Contexts (NastCheck[3090])
+  File "coeffect/contexts.hhi", line 28, characters 1-23:
+  Contexts are defined here

@@ -8,6 +8,7 @@
  *)
 
 open Typing_defs_core
+open Hh_prelude
 module Env = Typing_env
 
 let capability_id = Local_id.make_unscoped SN.Coeffects.capability
@@ -33,3 +34,17 @@ let get_type capability =
   match capability with
   | CapTy cap -> cap
   | CapDefaults p -> Typing_make_type.default_capability p
+
+let rec validate_capability env pos ty =
+  match get_node ty with
+  | Tintersection tys -> List.iter ~f:(validate_capability env pos) tys
+  | Tclass ((_, n), _, _) when String.is_prefix ~prefix:SN.Capabilities.prefix n
+    ->
+    ()
+  | Tgeneric (_, []) -> (* Covered by Illegal_name_check *) ()
+  | Tunion [] -> ()
+  | Toption t ->
+    (match get_node t with
+    | Tnonnull -> ()
+    | _ -> Errors.illegal_context pos (Typing_print.full env ty))
+  | _ -> Errors.illegal_context pos (Typing_print.full env ty)

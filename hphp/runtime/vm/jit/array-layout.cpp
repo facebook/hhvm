@@ -220,6 +220,24 @@ ArrayData* ArrayLayout::apply(ArrayData* ad) const {
 
 //////////////////////////////////////////////////////////////////////////////
 
+ArrayLayout ArrayLayout::appendType(Type val) const {
+  if (vanilla()) return ArrayLayout::Vanilla();
+  if (isBasicSort(sort)) return ArrayLayout::Top();
+  return bespokeLayout()->appendType(val);
+}
+
+ArrayLayout ArrayLayout::removeType(Type key) const {
+  if (vanilla()) return ArrayLayout::Vanilla();
+  if (isBasicSort(sort)) return ArrayLayout::Top();
+  return bespokeLayout()->removeType(key);
+}
+
+ArrayLayout ArrayLayout::setType(Type key, Type val) const {
+  if (vanilla()) return ArrayLayout::Vanilla();
+  if (isBasicSort(sort)) return ArrayLayout::Top();
+  return bespokeLayout()->setType(key, val);
+}
+
 std::pair<Type, bool> ArrayLayout::elemType(Type key) const {
   if (isBasicSort(sort)) return {TInitCell, false};
   return bespokeLayout()->elemType(key);

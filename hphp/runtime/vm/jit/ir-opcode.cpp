@@ -58,6 +58,8 @@ TRACE_SET_MOD(hhir);
 #define DVecElem       HasDest
 #define DDictElem      HasDest
 #define DModified(n)   HasDest
+#define DArrLikeSet    HasDest
+#define DArrLikeAppend HasDest
 #define DKeysetElem    HasDest
 #define DBespokeElemLval  HasDest
 #define DVecKey           HasDest

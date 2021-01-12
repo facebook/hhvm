@@ -3018,13 +3018,13 @@ fields of that struct for holding intermediate values.
   If the key is missing in the array, we'll use S2 to determine what to do.
   If S2 is true, we'll throw; else, we'll return an immutable lval to null.
 
-| BespokeSet, DModified(0), SKnownArrLike S(Int,Str) S(Cell), LA|PRc|CRc
+| BespokeSet, DArrLikeSet, SKnownArrLike S(Int,Str) S(Cell), LA|PRc|CRc
 
   Set element with key S1 in the array S0, which may have an arbitrary layout.
   This op has SetMove semantics; it consumes a refcount on the input array and
   produces one on the output, and does no refcounting to the value S2.
 
-| BespokeAppend, DModified(0), SKnownArrLike S(Cell), LA|PRc|CRc
+| BespokeAppend, DArrLikeAppend, SKnownArrLike S(Cell), LA|PRc|CRc
 
   Set element with key S1 in the array S0, which may have an arbitrary layout.
   This op has AppendMove semantics; it consumes a refcount on the input array

@@ -525,6 +525,34 @@ Type loggingArrLikeReturn(const IRInstruction* inst) {
   return arr.unspecialize();
 }
 
+Type arrLikeSetReturn(const IRInstruction* inst) {
+  assertx(inst->is(BespokeSet));
+  auto const arr = inst->src(0)->type();
+  auto const key = inst->src(1)->type();
+  auto const val = inst->src(2)->type();
+
+  assertx(arr <= TArrLike);
+  assertx(arr.isKnownDataType());
+  assertx(key.subtypeOfAny(TInt, TStr));
+  auto const base = arr.modified() & TCounted;
+  auto const layout = arr.arrSpec().layout().setType(key, val);
+  return base.narrowToLayout(layout);
+}
+
+Type arrLikeAppendReturn(const IRInstruction* inst) {
+  assertx(inst->is(BespokeAppend));
+  auto const arr = inst->src(0)->type();
+  auto const val = inst->src(1)->type();
+
+  assertx(arr <= TArrLike);
+  assertx(arr.isKnownDataType());
+  auto const base = arr <= TKeyset
+    ? (arr | TCountedKeyset)
+    : (arr.modified() & TCounted);
+  auto const layout = arr.arrSpec().layout().appendType(val);
+  return base.narrowToLayout(layout);
+}
+
 // Is this instruction an array cast that always results in a layout change?
 // Such casts are guaranteed to return vanilla arrays.
 bool isNontrivialArrayCast(const IRInstruction* inst) {
@@ -598,6 +626,8 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #define DLastKey          return arrFirstLastReturn(inst, false, true);
 #define DLoggingArrLike   return loggingArrLikeReturn(inst);
 #define DModified(n)      return inst->src(n)->type().modified();
+#define DArrLikeSet       return arrLikeSetReturn(inst);
+#define DArrLikeAppend    return arrLikeAppendReturn(inst);
 #define DVArr return checkLayoutFlags(RO::EvalHackArrDVArrs ? TVec : TVArr);
 #define DDArr return checkLayoutFlags(RO::EvalHackArrDVArrs ? TDict : TDArr);
 #define DStaticDArr     return (TStaticDict | TStaticArr) & [&]{ DDArr }();

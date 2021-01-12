@@ -363,8 +363,8 @@ inline Type Type::dropConstVal() const {
   assertx(ptrKind() == Ptr::Elem || !isUnion());
   auto const result = Type(m_bits, ptrKind(), memKind());
 
-  if (*this <= TArrLike && arrLikeVal()->isVanilla()) {
-    return result.narrowToVanilla();
+  if (*this <= TArrLike) {
+    return Type(result, ArraySpec(ArrayLayout::FromArray(m_arrVal)));
   }
   return result;
 }

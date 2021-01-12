@@ -1490,7 +1490,7 @@ Type applicableKeyType(KeyTypes kt) {
   not_reached();
 }
 
-Type resKeyType(KeyTypes kt) {
+Type resultKeyType(KeyTypes kt) {
   switch (kt) {
     case KeyTypes::Empty:
       return TBottom;
@@ -1505,6 +1505,48 @@ Type resKeyType(KeyTypes kt) {
   }
   not_reached();
 }
+
+ArrayLayout setTypeImpl(KeyTypes kt, DataType dt, Type key, Type val) {
+  if (!key.maybe(TInt|TStr))  return ArrayLayout::Bottom();
+  if (!val.maybe(TInitCell))  return ArrayLayout::Bottom();
+  if (!key.isKnownDataType()) return ArrayLayout::Top();
+  if (!val.isKnownDataType()) return ArrayLayout::Top();
+
+  auto const keyType = [&]{
+    switch (kt) {
+      case KeyTypes::StaticStrings:
+        if (key <= TStaticStr) return KeyTypes::StaticStrings;
+        /* fallthrough */
+      case KeyTypes::Strings:
+        return key <= TStr ? KeyTypes::Strings : KeyTypes::Any;
+      case KeyTypes::Ints:
+        return key <= TInt ? KeyTypes::Ints : KeyTypes::Any;
+      default:
+        always_assert(false);
+    }
+  }();
+  if (keyType == KeyTypes::Any) return ArrayLayout::Vanilla();
+
+  auto const base = val.toDataType();
+  if (!equivDataTypes(base, dt)) return ArrayLayout::Vanilla();
+
+  auto const valType = base == dt ? base : dt_with_rc(base);
+  return ArrayLayout(MonotypeDictLayout::Index(keyType, valType));
+}
+}
+
+// TopMonotypeDictLayout(KeyType)
+
+ArrayLayout TopMonotypeDictLayout::appendType(Type val) const {
+  return ArrayLayout::Top();
+}
+
+ArrayLayout TopMonotypeDictLayout::removeType(Type key) const {
+  return ArrayLayout(this);
+}
+
+ArrayLayout TopMonotypeDictLayout::setType(Type key, Type val) const {
+  return ArrayLayout::Top();
 }
 
 std::pair<Type, bool> TopMonotypeDictLayout::elemType(Type key) const {
@@ -1514,11 +1556,67 @@ std::pair<Type, bool> TopMonotypeDictLayout::elemType(Type key) const {
 
 std::pair<Type, bool> TopMonotypeDictLayout::firstLastType(
     bool isFirst, bool isKey) const {
-  return {isKey ? resKeyType(m_keyType) : TInitCell, false};
+  return {isKey ? resultKeyType(m_keyType) : TInitCell, false};
 }
 
 Type TopMonotypeDictLayout::iterPosType(Type pos, bool isKey) const {
-  return isKey ? resKeyType(m_keyType) : TInitCell;
+  return isKey ? resultKeyType(m_keyType) : TInitCell;
+}
+
+// EmptyOrMonotypeDictLayout(KeyType, ValType)
+
+ArrayLayout EmptyOrMonotypeDictLayout::appendType(Type val) const {
+  return setType(TInt, val);
+}
+
+ArrayLayout EmptyOrMonotypeDictLayout::removeType(Type key) const {
+  return ArrayLayout(this);
+}
+
+ArrayLayout EmptyOrMonotypeDictLayout::setType(Type key, Type val) const {
+  auto const result = setTypeImpl(m_keyType, m_valType, key, val);
+  return result == ArrayLayout::Vanilla() ? ArrayLayout::Top() : result;
+}
+
+std::pair<Type, bool> EmptyOrMonotypeDictLayout::elemType(Type key) const {
+  auto const validKey = key.maybe(applicableKeyType(m_keyType));
+  return {validKey ? Type(m_valType) : TBottom, false};
+}
+
+std::pair<Type, bool> EmptyOrMonotypeDictLayout::firstLastType(
+    bool isFirst, bool isKey) const {
+  return {isKey ? resultKeyType(m_keyType) : Type(m_valType), false};
+}
+
+Type EmptyOrMonotypeDictLayout::iterPosType(Type pos, bool isKey) const {
+  return isKey ? resultKeyType(m_keyType) : Type(m_valType);
+}
+
+// EmptyMonotypeDictLayout()
+
+ArrayLayout EmptyMonotypeDictLayout::appendType(Type val) const {
+  return setType(TInt, val);
+}
+
+ArrayLayout EmptyMonotypeDictLayout::removeType(Type key) const {
+  return ArrayLayout(this);
+}
+
+ArrayLayout EmptyMonotypeDictLayout::setType(Type key, Type val) const {
+  if (!key.maybe(TInt|TStr))  return ArrayLayout::Bottom();
+  if (!val.maybe(TInitCell))  return ArrayLayout::Bottom();
+  if (!key.isKnownDataType()) return ArrayLayout::Bespoke();
+
+  auto const kt = [&]{
+    if (key <= TStaticStr) return KeyTypes::StaticStrings;
+    if (key <= TStr)       return KeyTypes::Strings;
+    if (key <= TInt)       return KeyTypes::Ints;
+    always_assert(false);
+  }();
+
+  return val.isKnownDataType()
+    ? ArrayLayout(MonotypeDictLayout::Index(kt, val.toDataType()))
+    : ArrayLayout(TopMonotypeDictLayout::Index(kt));
 }
 
 std::pair<Type, bool> EmptyMonotypeDictLayout::elemType(Type key) const {
@@ -1534,18 +1632,18 @@ Type EmptyMonotypeDictLayout::iterPosType(Type pos, bool isKey) const {
   return TBottom;
 }
 
-std::pair<Type, bool> EmptyOrMonotypeDictLayout::elemType(Type key) const {
-  auto const validKey = key.maybe(applicableKeyType(m_keyType));
-  return {validKey ? Type(m_valType) : TBottom, false};
+// MonotypeDictLayout(KeyType, ValType)
+
+ArrayLayout MonotypeDictLayout::appendType(Type val) const {
+  return setType(TInt, val);
 }
 
-std::pair<Type, bool> EmptyOrMonotypeDictLayout::firstLastType(
-    bool isFirst, bool isKey) const {
-  return {isKey ? resKeyType(m_keyType) : Type(m_valType), false};
+ArrayLayout MonotypeDictLayout::removeType(Type key) const {
+  return ArrayLayout(this);
 }
 
-Type EmptyOrMonotypeDictLayout::iterPosType(Type pos, bool isKey) const {
-  return isKey ? resKeyType(m_keyType) : Type(m_valType);
+ArrayLayout MonotypeDictLayout::setType(Type key, Type val) const {
+  return setTypeImpl(m_keyType, m_valType, key, val);
 }
 
 std::pair<Type, bool> MonotypeDictLayout::elemType(Type key) const {
@@ -1555,11 +1653,11 @@ std::pair<Type, bool> MonotypeDictLayout::elemType(Type key) const {
 
 std::pair<Type, bool> MonotypeDictLayout::firstLastType(
     bool isFirst, bool isKey) const {
-  return {isKey ? resKeyType(m_keyType) : Type(m_valType), false};
+  return {isKey ? resultKeyType(m_keyType) : Type(m_valType), false};
 }
 
 Type MonotypeDictLayout::iterPosType(Type pos, bool isKey) const {
-  return isKey ? resKeyType(m_keyType) : Type(m_valType);
+  return isKey ? resultKeyType(m_keyType) : Type(m_valType);
 }
 
 //////////////////////////////////////////////////////////////////////////////

@@ -73,17 +73,11 @@ SSATmp* emitElem(IRGS& env, SSATmp* arr, SSATmp* key, bool throwOnMissing) {
 }
 
 SSATmp* emitSet(IRGS& env, SSATmp* arr, SSATmp* key, SSATmp* val) {
-  auto const result = gen(env, BespokeSet, arr, key, val);
-  return gen(env, AssertType, TCounted, result);
+  return gen(env, BespokeSet, arr, key, val);
 }
 
 SSATmp* emitAppend(IRGS& env, SSATmp* arr, SSATmp* val) {
-  auto const result = gen(env, BespokeAppend, arr, val);
-  if (arr->type().maybe(TKeyset)) {
-    return gen(env, AssertType, arr->type() | TCountedKeyset, result);
-  } else {
-    return gen(env, AssertType, TCounted, result);
-  }
+  return gen(env, BespokeAppend, arr, val);
 }
 
 SSATmp* emitEscalateToVanilla(

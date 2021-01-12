@@ -40,7 +40,6 @@ namespace HPHP { namespace bespoke {
 //////////////////////////////////////////////////////////////////////////////
 
 using namespace jit;
-using namespace jit::irgen;
 
 namespace {
 
@@ -620,6 +619,18 @@ struct Layout::Initializer {
 Layout::Initializer Layout::s_initializer;
 
 //////////////////////////////////////////////////////////////////////////////
+
+ArrayLayout Layout::appendType(Type val) const {
+  return ArrayLayout::Top();
+}
+
+ArrayLayout Layout::removeType(Type key) const {
+  return ArrayLayout::Top();
+}
+
+ArrayLayout Layout::setType(Type key, Type val) const {
+  return ArrayLayout::Top();
+}
 
 std::pair<Type, bool> Layout::elemType(Type key) const {
   return {TInitCell, false};

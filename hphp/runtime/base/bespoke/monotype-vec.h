@@ -117,6 +117,10 @@ private:
 struct EmptyMonotypeVecLayout : public ConcreteLayout {
   EmptyMonotypeVecLayout();
   static LayoutIndex Index();
+
+  ArrayLayout appendType(Type val) const override;
+  ArrayLayout removeType(Type key) const override;
+  ArrayLayout setType(Type key, Type val) const override;
   std::pair<Type, bool> elemType(Type key) const override;
   std::pair<Type, bool> firstLastType(bool isFirst, bool isKey) const override;
   Type iterPosType(Type pos, bool isKey) const override;
@@ -125,6 +129,10 @@ struct EmptyMonotypeVecLayout : public ConcreteLayout {
 struct MonotypeVecLayout : public ConcreteLayout {
   explicit MonotypeVecLayout(DataType type);
   static LayoutIndex Index(DataType type);
+
+  ArrayLayout appendType(Type val) const override;
+  ArrayLayout removeType(Type key) const override;
+  ArrayLayout setType(Type key, Type val) const override;
   std::pair<Type, bool> elemType(Type key) const override;
   std::pair<Type, bool> firstLastType(bool isFirst, bool isKey) const override;
   Type iterPosType(Type pos, bool isKey) const override;
@@ -135,19 +143,13 @@ struct MonotypeVecLayout : public ConcreteLayout {
 struct EmptyOrMonotypeVecLayout : public AbstractLayout {
   explicit EmptyOrMonotypeVecLayout(DataType type);
   static LayoutIndex Index(DataType type);
+
+  ArrayLayout appendType(Type val) const override;
+  ArrayLayout removeType(Type key) const override;
+  ArrayLayout setType(Type key, Type val) const override;
   std::pair<Type, bool> elemType(Type key) const override;
   std::pair<Type, bool> firstLastType(bool isFirst, bool isKey) const override;
   Type iterPosType(Type pos, bool isKey) const override;
-  const MonotypeVecLayout* getNonEmptyLayout() const {
-    auto const layout =
-      Layout::FromIndex(MonotypeVecLayout::Index(m_fixedType));
-    if (debug) {
-      auto const mlayout = dynamic_cast<const MonotypeVecLayout*>(layout);
-      assertx(mlayout != nullptr);
-      return mlayout;
-    }
-    return static_cast<const MonotypeVecLayout*>(layout);
-  }
 
   DataType m_fixedType;
 };

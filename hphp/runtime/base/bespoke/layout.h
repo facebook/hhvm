@@ -20,23 +20,12 @@
 #include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/req-tiny-vector.h"
 #include "hphp/runtime/vm/hhbc.h"
+#include "hphp/runtime/vm/jit/array-layout.h"
 #include "hphp/util/type-scan.h"
 
 #include <set>
 
-namespace HPHP {
-
-namespace jit {
-
-struct SSATmp;
-struct Block;
-struct Type;
-
-namespace irgen { struct IRGS; }
-
-} // namespace jit
-
-namespace bespoke {
+namespace HPHP { namespace bespoke {
 
 void logBespokeDispatch(const ArrayData* ad, const char* fn);
 
@@ -330,7 +319,26 @@ struct Layout {
 
   ///////////////////////////////////////////////////////////////////////////
 
+  using ArrayLayout = jit::ArrayLayout;
   using Type = jit::Type;
+
+  /*
+   * Returns the most specific layout known for the result of appending a val
+   * of type `val` to an array with this layout.
+   */
+  virtual ArrayLayout appendType(Type val) const;
+
+  /*
+   * Returns the most specific layout known for the result of removing a key
+   * of type `key` from an array with this layout.
+   */
+  virtual ArrayLayout removeType(Type key) const;
+
+  /*
+   * Returns the most specific layout known for the result of setting a key
+   * of type `key` to a val of type `val` for an array with this layout.
+   */
+  virtual ArrayLayout setType(Type key, Type val) const;
 
   /*
    * Returns the most specific type known for the element at the given key for

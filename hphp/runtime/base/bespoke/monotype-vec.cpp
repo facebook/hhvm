@@ -135,7 +135,6 @@ LayoutIndex getMonotypeParentLayout(DataType dt) {
   if (!hasPersistentFlavor(dt) || isRefcountedType(dt)) {
     return EmptyOrMonotypeVecLayout::Index(dt_modulo_persistence(dt));
   }
-
   return MonotypeVecLayout::Index(dt_modulo_persistence(dt));
 }
 
@@ -862,7 +861,38 @@ ArrayData* MonotypeVec::SetLegacyArray(MonotypeVec* madIn,
 
 //////////////////////////////////////////////////////////////////////////////
 
+namespace {
 using namespace jit;
+
+ArrayLayout setTypeImpl(DataType dt, Type key, Type val) {
+  if (!key.maybe(TInt))       return ArrayLayout::Bottom();
+  if (!val.maybe(TInitCell))  return ArrayLayout::Bottom();
+  if (!val.isKnownDataType()) return ArrayLayout::Top();
+
+  auto const base = val.toDataType();
+  if (!equivDataTypes(base, dt)) return ArrayLayout::Vanilla();
+
+  auto const valType = base == dt ? base : dt_with_rc(base);
+  return ArrayLayout(MonotypeVecLayout::Index(valType));
+}
+}
+
+// EmptyMonotypeVecLayout()
+
+ArrayLayout EmptyMonotypeVecLayout::appendType(Type val) const {
+  if (!val.maybe(TInitCell)) return ArrayLayout::Bottom();
+  return val.isKnownDataType()
+    ? ArrayLayout(MonotypeVecLayout::Index(val.toDataType()))
+    : ArrayLayout(TopMonotypeVecLayout::Index());
+}
+
+ArrayLayout EmptyMonotypeVecLayout::removeType(Type key) const {
+  return ArrayLayout(this);
+}
+
+ArrayLayout EmptyMonotypeVecLayout::setType(Type key, Type val) const {
+  return ArrayLayout::Bottom();
+}
 
 std::pair<Type, bool> EmptyMonotypeVecLayout::elemType(Type key) const {
   return {TBottom, false};
@@ -875,6 +905,20 @@ std::pair<Type, bool> EmptyMonotypeVecLayout::firstLastType(
 
 Type EmptyMonotypeVecLayout::iterPosType(Type pos, bool isKey) const {
   return TBottom;
+}
+
+// MonotypeVecLayout(ValType)
+
+ArrayLayout MonotypeVecLayout::appendType(Type val) const {
+  return setType(TInt, val);
+}
+
+ArrayLayout MonotypeVecLayout::removeType(Type key) const {
+  return ArrayLayout(this);
+}
+
+ArrayLayout MonotypeVecLayout::setType(Type key, Type val) const {
+  return setTypeImpl(m_fixedType, key, val);
 }
 
 std::pair<Type, bool> MonotypeVecLayout::elemType(Type key) const {
@@ -890,6 +934,20 @@ Type MonotypeVecLayout::iterPosType(Type pos, bool isKey) const {
   return isKey ? TInt : Type(m_fixedType);
 }
 
+// EmptyOrMonotypeVecLayout(ValType)
+
+ArrayLayout EmptyOrMonotypeVecLayout::appendType(Type val) const {
+  return setType(TInt, val);
+}
+
+ArrayLayout EmptyOrMonotypeVecLayout::removeType(Type key) const {
+  return ArrayLayout(this);
+}
+
+ArrayLayout EmptyOrMonotypeVecLayout::setType(Type key, Type val) const {
+  auto const result = setTypeImpl(m_fixedType, key, val);
+  return result == ArrayLayout::Vanilla() ? ArrayLayout::Top() : result;
+}
 
 std::pair<Type, bool> EmptyOrMonotypeVecLayout::elemType(Type key) const {
   return {Type(m_fixedType), false};

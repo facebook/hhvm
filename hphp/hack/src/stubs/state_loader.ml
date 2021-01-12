@@ -1,3 +1,8 @@
+type dirty_files = {
+  master_changes: Relative_path.t list;
+  local_changes: Relative_path.t list;
+}
+
 type hot_decls_paths = {
   legacy_hot_decls_path: string;
   shallow_hot_decls_path: string;
@@ -12,7 +17,7 @@ type native_load_result = {
   state_distance: int;
   deptable_fn: string;
   deptable_is_64bit: bool;
-  dirty_files: (Relative_path.t list * Relative_path.t list) Future.t;
+  dirty_files: dirty_files Future.t;
   hot_decls_paths: hot_decls_paths;
   errors_path: string;
 }

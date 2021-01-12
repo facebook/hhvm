@@ -160,7 +160,11 @@ let merge_saved_state_futures
       let t = Unix.time () in
       (match result.State_loader.dirty_files |> Future.get ~timeout:200 with
       | Error error -> Error (Load_state_dirty_files_failure error)
-      | Ok (dirty_master_files, dirty_local_files) ->
+      | Ok
+          {
+            State_loader.master_changes = dirty_master_files;
+            local_changes = dirty_local_files;
+          } ->
         let () = HackEventLogger.state_loader_dirty_files t in
         let dirty_naming_files = Relative_path.Set.of_list dirty_naming_files in
         let dirty_master_files = Relative_path.Set.of_list dirty_master_files in

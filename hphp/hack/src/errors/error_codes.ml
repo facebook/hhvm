@@ -44,7 +44,7 @@ module Parsing = struct
     (* | UnterminatedCommentDEPRECATED [@value 1004] *)
     (* | UnterminatedXhpCommentDEPRECATED [@value 1005] *)
     (* | CallTimePassByReferenceDEPRECATED [@value 1006] *)
-    | XhpParsingError [@value 1007] (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
+    | XhpParsingError [@value 1007]
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum
@@ -168,7 +168,7 @@ module Naming = struct
     | ClassMethNonFinalCLASS [@value 2114]
     | WildcardTypeParamDisallowed [@value 2115]
     | CallingAssert [@value 2116]
-    | InvalidWildcardContext [@value 2117] (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
+    | InvalidWildcardContext [@value 2117]
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum
@@ -265,7 +265,7 @@ module NastCheck = struct
     | AbstractMethodMemoize [@value 3087]
     | InstancePropertyInAbstractFinalClass [@value 3088]
     | DynamicallyCallableReified [@value 3089]
-    | IllegalContext [@value 3090] (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
+    | IllegalContext [@value 3090]
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum
@@ -674,7 +674,7 @@ module Typing = struct
     | IFCExternalContravariant [@value 4399]
     | IFCPolicyMismatch [@value 4400]
     | OpCoeffects [@value 4401]
-    | ImplementsDynamic [@value 4402] (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
+    | ImplementsDynamic [@value 4402]
     | SubtypeCoeffects [@value 4403]
     | ImmutableLocal [@value 4404]
   [@@deriving enum, show { with_path = false }]

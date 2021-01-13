@@ -25,7 +25,7 @@ pub mod type_parser;
 // are re-exported here so that consumers do not need to be made aware of the data-code split.
 pub use parser_core_types::{
     compact_token, compact_trivia, indexed_source_text, lexable_token, lexable_trivia,
-    minimal_syntax, minimal_token, minimal_trivia, parser_env, positioned_syntax, positioned_token,
+    minimal_token, minimal_trivia, parser_env, positioned_syntax, positioned_token,
     positioned_trivia, source_text, syntax, syntax_by_ref, syntax_error, syntax_kind, syntax_trait,
     token_factory, token_kind, trivia_kind,
 };

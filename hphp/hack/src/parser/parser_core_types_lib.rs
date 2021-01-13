@@ -20,7 +20,6 @@ pub mod compact_trivia;
 pub mod indexed_source_text;
 pub mod lexable_token;
 pub mod lexable_trivia;
-pub mod minimal_syntax;
 pub mod minimal_token;
 pub mod minimal_trivia;
 pub mod parser_env;

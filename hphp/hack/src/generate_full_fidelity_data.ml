@@ -1258,94 +1258,6 @@ end
 
 (* GenerateFFRustSmartConstructors *)
 
-module GenerateFFRustMinimalSmartConstructors = struct
-  let to_constructor_methods x =
-    let args = List.mapi x.fields ~f:(fun i _ -> sprintf "arg%d: Self::R" i) in
-    let args = String.concat ~sep:", " args in
-    let fwd_args = List.mapi x.fields ~f:(fun i _ -> sprintf "arg%d" i) in
-    let fwd_args = String.concat ~sep:", " fwd_args in
-    sprintf
-      "    fn make_%s(&mut self, %s) -> Self::R {
-        <Self as SyntaxSmartConstructors<MinimalSyntax, SimpleTokenFactoryImpl<MinimalToken>, NoState>>::make_%s(self, %s)
-    }\n\n"
-      x.type_name
-      args
-      x.type_name
-      fwd_args
-
-  let minimal_smart_constructors_template : string =
-    make_header CStyle ""
-    ^ "
-use parser_core_types::{
-  minimal_syntax::MinimalSyntax,
-  minimal_token::MinimalToken,
-  token_factory::SimpleTokenFactoryImpl,
-};
-use smart_constructors::{NoState, SmartConstructors};
-use syntax_smart_constructors::SyntaxSmartConstructors;
-
-#[derive(Clone)]
-pub struct MinimalSmartConstructors {
-  dummy_state: NoState,
-  token_factory: SimpleTokenFactoryImpl<MinimalToken>,
-}
-
-impl MinimalSmartConstructors {
-    pub fn new() -> Self {
-        MinimalSmartConstructors {
-            dummy_state: NoState,
-            token_factory: SimpleTokenFactoryImpl::new(),
-        }
-    }
-}
-
-impl<'src> SyntaxSmartConstructors<MinimalSyntax, SimpleTokenFactoryImpl<MinimalToken>, NoState>
-    for MinimalSmartConstructors
-{}
-
-impl<'src> SmartConstructors for MinimalSmartConstructors {
-    type TF = SimpleTokenFactoryImpl<MinimalToken>;
-    type State = NoState;
-    type R = MinimalSyntax;
-
-    fn state_mut(&mut self) -> &mut Self::State {
-        &mut self.dummy_state
-    }
-
-    fn into_state(self) -> Self::State {
-      self.dummy_state
-    }
-
-    fn token_factory(&mut self) -> &mut Self::TF {
-        &mut self.token_factory
-    }
-
-    fn make_missing(&mut self, offset: usize) -> Self::R {
-        <Self as SyntaxSmartConstructors<MinimalSyntax, SimpleTokenFactoryImpl<MinimalToken>, NoState>>::make_missing(self, offset)
-    }
-
-    fn make_token(&mut self, offset: MinimalToken) -> Self::R {
-        <Self as SyntaxSmartConstructors<MinimalSyntax, SimpleTokenFactoryImpl<MinimalToken>, NoState>>::make_token(self, offset)
-    }
-
-    fn make_list(&mut self, lst: Vec<Self::R>, offset: usize) -> Self::R {
-        <Self as SyntaxSmartConstructors<MinimalSyntax, SimpleTokenFactoryImpl<MinimalToken>, NoState>>::make_list(self, lst, offset)
-    }
-
-CONSTRUCTOR_METHODS}
-"
-
-  let minimal_smart_constructors =
-    Full_fidelity_schema.make_template_file
-      ~transformations:
-        [{ pattern = "CONSTRUCTOR_METHODS"; func = to_constructor_methods }]
-      ~filename:(full_fidelity_path_prefix ^ "minimal_smart_constructors.rs")
-      ~template:minimal_smart_constructors_template
-      ()
-end
-
-(* GenerateFFRustMinimalSmartConstructors *)
-
 module GenerateFFRustPositionedSmartConstructors = struct
   let to_constructor_methods x =
     let args = List.mapi x.fields ~f:(fun i _ -> sprintf "arg%d: Self::R" i) in
@@ -3248,7 +3160,6 @@ let templates =
     GenerateFFJSONSchema.full_fidelity_json_schema;
     GenerateFFSmartConstructors.full_fidelity_smart_constructors;
     GenerateFFRustSmartConstructors.full_fidelity_smart_constructors;
-    GenerateFFRustMinimalSmartConstructors.minimal_smart_constructors;
     GenerateFFRustPositionedSmartConstructors.positioned_smart_constructors;
     GenerateFFRustVerifySmartConstructors.verify_smart_constructors;
     GenerateFFSyntaxSmartConstructors.full_fidelity_syntax_smart_constructors;

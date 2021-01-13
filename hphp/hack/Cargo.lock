@@ -1835,26 +1835,17 @@ dependencies = [
 name = "minimal_parser"
 version = "0.0.0"
 dependencies = [
- "minimal_smart_constructors",
  "parser",
-]
-
-[[package]]
-name = "minimal_smart_constructors"
-version = "0.0.0"
-dependencies = [
- "parser_core_types",
- "smart_constructors",
- "syntax_smart_constructors",
 ]
 
 [[package]]
 name = "mode_parser"
 version = "0.0.0"
 dependencies = [
- "minimal_parser",
+ "bumpalo",
  "oxidized",
  "parser_core_types",
+ "positioned_by_ref_parser",
 ]
 
 [[package]]

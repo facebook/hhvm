@@ -64,3 +64,13 @@ pub fn parse_script<'src, 'arena>(
     let sc_state = parser.into_sc_state();
     (root, errors, sc_state)
 }
+
+pub fn parse_header_only<'src, 'arena>(
+    env: ParserEnv,
+    arena: &'arena Bump,
+    source: &SourceText<'src>,
+) -> Option<Syntax<'arena>> {
+    let tf = TokenFactory { arena };
+    let sc = WithKind::new(SmartConstructors::new(State { arena }, tf));
+    Parser::parse_header_only(env, source, sc)
+}

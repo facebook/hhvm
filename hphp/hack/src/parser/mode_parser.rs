@@ -4,11 +4,16 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use bumpalo::Bump;
 use oxidized::file_info::Mode;
 use parser_core_types::{
     parser_env::ParserEnv,
     source_text::SourceText,
-    syntax::{self, SyntaxVariant},
+    syntax_by_ref::{
+        syntax::Syntax,
+        syntax_variant_generated::{self as syntax, SyntaxVariant},
+    },
+    syntax_trait::SyntaxTrait,
 };
 
 pub enum Language {
@@ -37,24 +42,27 @@ fn fallback_to_file_extension(text: &SourceText) -> (Language, Option<Mode>) {
 // for open-source projects, which may need Hack and PHP files to coexist in the
 // same directory.
 pub fn parse_mode(text: &SourceText) -> (Language, Option<Mode>) {
-    if let Some(header) = minimal_parser::parse_header_only(ParserEnv::default(), text) {
-        match header.syntax {
+    let bump = Bump::new();
+    if let Some(header) =
+        positioned_by_ref_parser::parse_header_only(ParserEnv::default(), &bump, text)
+    {
+        match header.children {
             SyntaxVariant::MarkupSection(section_children) => {
-                match *section_children {
+                match section_children {
                     syntax::MarkupSectionChildren {
-                        markup_hashbang: hashbang,
-                        markup_suffix:
-                            syntax::Syntax {
-                                syntax: SyntaxVariant::MarkupSuffix(suffix_children),
+                        hashbang,
+                        suffix:
+                            Syntax {
+                                children: SyntaxVariant::MarkupSuffix(suffix_children),
                                 ..
                             },
                         ..
                     } => {
                         let syntax::MarkupSuffixChildren {
-                            markup_suffix_less_than_question: ltq,
-                            markup_suffix_name: name,
+                            less_than_question: ltq,
+                            name,
                         } = *suffix_children;
-                        match &name.syntax {
+                        match &name.children {
                             // <?, <?php or <?anything_else except <?hh
                             SyntaxVariant::Missing => (Language::PHP, None),
                             // <?hh optionally followed by // mode
@@ -62,8 +70,8 @@ pub fn parse_mode(text: &SourceText) -> (Language, Option<Mode>) {
                                 if text.file_path().has_extension("hhi") {
                                     (Language::Hack, Some(Mode::Mdecl))
                                 } else {
-                                    let skip_length = hashbang.value.full_width
-                                        + ltq.value.full_width
+                                    let skip_length = hashbang.full_width()
+                                        + ltq.full_width()
                                         + name.leading_width()
                                         + name.width();
                                     let s =
@@ -90,10 +98,9 @@ pub fn parse_mode(text: &SourceText) -> (Language, Option<Mode>) {
                     }
                     // Parsed a hashbang, but no <? markup. Use file extension here.
                     syntax::MarkupSectionChildren {
-                        markup_hashbang: _,
-                        markup_suffix:
-                            syntax::Syntax {
-                                syntax: SyntaxVariant::Missing,
+                        suffix:
+                            Syntax {
+                                children: SyntaxVariant::Missing,
                                 ..
                             },
                         ..

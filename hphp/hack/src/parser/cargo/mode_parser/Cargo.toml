@@ -9,6 +9,7 @@ include = ["../../mode_parser.rs"]
 path = "../../mode_parser.rs"
 
 [dependencies]
-minimal_parser = { path = "../../api/cargo/minimal_parser" }
 oxidized = { path = "../../../oxidized" }
 parser_core_types = { path = "../core_types" }
+positioned_by_ref_parser = { path = "../../api/cargo/positioned_by_ref_parser" }
+bumpalo = { version = "3.2.1", features = ["collections"] }

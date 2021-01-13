@@ -18,18 +18,10 @@
 //!   optimization where it doesn't store all (rarely used) trivia information in its version of
 //!   `PositionedSyntax`, instead calling back to this parser on demand
 
-use minimal_smart_constructors::MinimalSmartConstructors;
 use parser::{
-    lexer::Lexer, minimal_syntax::MinimalSyntax, minimal_token::MinimalToken,
-    minimal_trivia::MinimalTrivium, parser::Parser, parser_env::ParserEnv,
-    smart_constructors_wrappers::WithKind, source_text::SourceText,
-    token_factory::SimpleTokenFactoryImpl,
+    lexer::Lexer, minimal_token::MinimalToken, minimal_trivia::MinimalTrivium,
+    source_text::SourceText, token_factory::SimpleTokenFactoryImpl,
 };
-
-pub fn parse_header_only<'a>(env: ParserEnv, source: &SourceText<'a>) -> Option<MinimalSyntax> {
-    let sc = WithKind::new(MinimalSmartConstructors::new());
-    Parser::parse_header_only(env, source, sc)
-}
 
 fn trivia_lexer<'a>(
     source_text: &SourceText<'a>,

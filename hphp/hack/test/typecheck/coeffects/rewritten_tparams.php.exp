@@ -3,7 +3,7 @@ File "rewritten_tparams.php", line 7, characters 3-12:
   File "rewritten_tparams.php", line 6, characters 2-16:
   The local (enclosing) context provides the capability set {$v::C, ctx $f}
   File "coeffect/contexts.hhi", line 28, characters 1-23:
-  Contexts are defined here
+  Hack provides a list of supported contexts here
 File "rewritten_tparams.php", line 11, characters 10-11:
 Invalid return type (Typing[4110])
   File "rewritten_tparams.php", line 10, characters 33-35:

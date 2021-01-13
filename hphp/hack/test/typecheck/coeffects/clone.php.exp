@@ -5,4 +5,4 @@ This call is not allowed because its coeffects are incompatible with the context
   File "clone.php", line 5, characters 29-31:
   But the function being called requires the capability int
   File "coeffect/contexts.hhi", line 28, characters 1-23:
-  Contexts are defined here
+  Hack provides a list of supported contexts here

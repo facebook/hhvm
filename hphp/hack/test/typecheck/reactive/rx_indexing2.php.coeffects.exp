@@ -3,4 +3,4 @@ Assigning to an element of a Hack Collection object via `[]` requires the capabi
   File "rx_indexing2.php", line 5, characters 30-31:
   The local (enclosing) context provides the capability set {}
   File "coeffect/contexts.hhi", line 28, characters 1-23:
-  Contexts are defined here
+  Hack provides a list of supported contexts here

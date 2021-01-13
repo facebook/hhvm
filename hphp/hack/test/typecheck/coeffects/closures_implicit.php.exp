@@ -5,7 +5,7 @@ This call is not allowed because its coeffects are incompatible with the context
   File "closures_implicit.php", line 4, characters 28-35:
   But the function being called requires the default capability set {AccessStaticVariable, Output, WriteProperty}
   File "coeffect/contexts.hhi", line 28, characters 1-23:
-  Contexts are defined here
+  Hack provides a list of supported contexts here
 File "closures_implicit.php", line 26, characters 10-21:
 This call is not allowed because its coeffects are incompatible with the context (Typing[4390])
   File "closures_implicit.php", line 24, characters 37-43:
@@ -13,7 +13,7 @@ This call is not allowed because its coeffects are incompatible with the context
   File "closures_implicit.php", line 6, characters 23-24:
   But the function being called requires the capability set {Rx, WriteProperty}
   File "coeffect/contexts.hhi", line 28, characters 1-23:
-  Contexts are defined here
+  Hack provides a list of supported contexts here
 File "closures_implicit.php", line 30, characters 12-37:
 This call is not allowed because its coeffects are incompatible with the context (Typing[4390])
   File "closures_implicit.php", line 28, characters 6-7:
@@ -21,4 +21,4 @@ This call is not allowed because its coeffects are incompatible with the context
   File "closures_implicit.php", line 24, characters 37-43:
   But the function being called requires the capability NonDet
   File "coeffect/contexts.hhi", line 28, characters 1-23:
-  Contexts are defined here
+  Hack provides a list of supported contexts here

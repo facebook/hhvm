@@ -2111,7 +2111,7 @@ let context_definitions_msg =
       ~pos_file:path
       ~pos_start:(28, 0, 0)
       ~pos_end:(28, 0, 23),
-    "Contexts are defined here" )
+    "Hack provides a list of supported contexts here" )
 
 let illegal_context pos name =
   add_list

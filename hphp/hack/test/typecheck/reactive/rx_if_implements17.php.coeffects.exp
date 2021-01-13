@@ -4,4 +4,4 @@ Setting non-mutable object properties requires the capability WriteProperty, whi
   File "rx_if_implements17.php", line 13, characters 32-33:
   The local (enclosing) context provides the capability set {}
   File "coeffect/contexts.hhi", line 28, characters 1-23:
-  Contexts are defined here
+  Hack provides a list of supported contexts here

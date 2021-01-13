@@ -5,7 +5,7 @@ This call is not allowed because its coeffects are incompatible with the context
   File "closures_explicit.php", line 5, characters 24-36:
   But the function being called requires the capability set {NonDet, Rx, WriteProperty}
   File "coeffect/contexts.hhi", line 28, characters 1-23:
-  Contexts are defined here
+  Hack provides a list of supported contexts here
 File "closures_explicit.php", line 11, characters 5-16:
 This call is not allowed because its coeffects are incompatible with the context (Typing[4390])
   File "closures_explicit.php", line 9, characters 24-25:
@@ -13,7 +13,7 @@ This call is not allowed because its coeffects are incompatible with the context
   File "closures_explicit.php", line 4, characters 23-24:
   But the function being called requires the capability set {Rx, WriteProperty}
   File "coeffect/contexts.hhi", line 28, characters 1-23:
-  Contexts are defined here
+  Hack provides a list of supported contexts here
 File "closures_explicit.php", line 17, characters 5-22:
 This call is not allowed because its coeffects are incompatible with the context (Typing[4390])
   File "closures_explicit.php", line 14, characters 28-29:
@@ -21,7 +21,7 @@ This call is not allowed because its coeffects are incompatible with the context
   File "closures_explicit.php", line 5, characters 24-36:
   But the function being called requires the capability set {NonDet, Rx, WriteProperty}
   File "coeffect/contexts.hhi", line 28, characters 1-23:
-  Contexts are defined here
+  Hack provides a list of supported contexts here
 File "closures_explicit.php", line 23, characters 14-39:
 This call is not allowed because its coeffects are incompatible with the context (Typing[4390])
   File "closures_explicit.php", line 23, characters 6-7:
@@ -29,7 +29,7 @@ This call is not allowed because its coeffects are incompatible with the context
   File "closures_explicit.php", line 21, characters 37-43:
   But the function being called requires the capability NonDet
   File "coeffect/contexts.hhi", line 28, characters 1-23:
-  Contexts are defined here
+  Hack provides a list of supported contexts here
 File "closures_explicit.php", line 36, characters 7-25:
 This call is not allowed because its coeffects are incompatible with the context (Typing[4390])
   File "closures_explicit.php", line 33, characters 19-20:
@@ -37,7 +37,7 @@ This call is not allowed because its coeffects are incompatible with the context
   File "closures_explicit.php", line 29, characters 26-32:
   But the function being called requires the capability NonDet
   File "coeffect/contexts.hhi", line 28, characters 1-23:
-  Contexts are defined here
+  Hack provides a list of supported contexts here
 File "closures_explicit.php", line 39, characters 7-18:
 This call is not allowed because its coeffects are incompatible with the context (Typing[4390])
   File "closures_explicit.php", line 38, characters 7-8:
@@ -45,7 +45,7 @@ This call is not allowed because its coeffects are incompatible with the context
   File "closures_explicit.php", line 27, characters 19-20:
   But the function being called requires the capability set {Rx, WriteProperty}
   File "coeffect/contexts.hhi", line 28, characters 1-23:
-  Contexts are defined here
+  Hack provides a list of supported contexts here
 File "closures_explicit.php", line 40, characters 7-16:
 This call is not allowed because its coeffects are incompatible with the context (Typing[4390])
   File "closures_explicit.php", line 38, characters 7-8:
@@ -53,7 +53,7 @@ This call is not allowed because its coeffects are incompatible with the context
   File "closures_explicit.php", line 33, characters 19-20:
   But the function being called requires the capability set {Rx, WriteProperty}
   File "coeffect/contexts.hhi", line 28, characters 1-23:
-  Contexts are defined here
+  Hack provides a list of supported contexts here
 File "closures_explicit.php", line 45, characters 7-25:
 This call is not allowed because its coeffects are incompatible with the context (Typing[4390])
   File "closures_explicit.php", line 38, characters 7-8:
@@ -61,4 +61,4 @@ This call is not allowed because its coeffects are incompatible with the context
   File "closures_explicit.php", line 29, characters 26-32:
   But the function being called requires the capability NonDet
   File "coeffect/contexts.hhi", line 28, characters 1-23:
-  Contexts are defined here
+  Hack provides a list of supported contexts here

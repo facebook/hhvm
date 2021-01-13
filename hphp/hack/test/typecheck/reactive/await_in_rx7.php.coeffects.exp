@@ -3,13 +3,13 @@ Not immediately `await`ing `Awaitable`-typed values requires the capability Acce
   File "await_in_rx7.php", line 9, characters 20-21:
   The local (enclosing) context provides the capability set {Rx, WriteProperty}
   File "coeffect/contexts.hhi", line 28, characters 1-23:
-  Contexts are defined here
+  Hack provides a list of supported contexts here
 File "await_in_rx7.php", line 11, characters 20-22:
 Not immediately `await`ing `Awaitable`-typed values requires the capability AccessStaticVariable, which is not provided by the context. (Typing[4401])
   File "await_in_rx7.php", line 9, characters 20-21:
   The local (enclosing) context provides the capability set {Rx, WriteProperty}
   File "coeffect/contexts.hhi", line 28, characters 1-23:
-  Contexts are defined here
+  Hack provides a list of supported contexts here
 File "await_in_rx7.php", line 12, characters 14-21:
 This call is not allowed because its coeffects are incompatible with the context (Typing[4390])
   File "await_in_rx7.php", line 9, characters 20-21:
@@ -17,4 +17,4 @@ This call is not allowed because its coeffects are incompatible with the context
   File "hh_single_type_check_magic.hhi", line 3, characters 16-19:
   But the function being called requires the default capability set {AccessStaticVariable, Output, WriteProperty}
   File "coeffect/contexts.hhi", line 28, characters 1-23:
-  Contexts are defined here
+  Hack provides a list of supported contexts here

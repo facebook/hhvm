@@ -3,7 +3,7 @@ File "test_rx_enabled1.php", line 5, characters 7-19:
   File "test_rx_enabled1.php", line 4, characters 14-18:
   The local (enclosing) context provides the capability WriteProperty
   File "coeffect/contexts.hhi", line 28, characters 1-23:
-  Contexts are defined here
+  Hack provides a list of supported contexts here
 File "test_rx_enabled1.php", line 6, characters 12-15:
 This call is not allowed because its coeffects are incompatible with the context (Typing[4390])
   File "test_rx_enabled1.php", line 4, characters 14-18:
@@ -11,4 +11,4 @@ This call is not allowed because its coeffects are incompatible with the context
   File "test_rx_enabled1.php", line 13, characters 15-16:
   But the function being called requires the capability set {Rx, WriteProperty}
   File "coeffect/contexts.hhi", line 28, characters 1-23:
-  Contexts are defined here
+  Hack provides a list of supported contexts here

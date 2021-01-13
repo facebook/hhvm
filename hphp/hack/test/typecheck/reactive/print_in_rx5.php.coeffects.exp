@@ -3,4 +3,4 @@ File "print_in_rx5.php", line 10, characters 5-11:
   File "print_in_rx5.php", line 8, characters 23-24:
   The local (enclosing) context provides the capability set {Rx, WriteProperty}
   File "coeffect/contexts.hhi", line 28, characters 1-23:
-  Contexts are defined here
+  Hack provides a list of supported contexts here

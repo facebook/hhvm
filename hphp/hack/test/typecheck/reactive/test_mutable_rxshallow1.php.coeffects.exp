@@ -4,4 +4,4 @@ Setting non-mutable object properties requires the capability WriteProperty, whi
   File "test_mutable_rxshallow1.php", line 9, characters 17-18:
   The local (enclosing) context provides the capability set {}
   File "coeffect/contexts.hhi", line 28, characters 1-23:
-  Contexts are defined here
+  Hack provides a list of supported contexts here

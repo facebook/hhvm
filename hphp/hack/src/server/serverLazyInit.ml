@@ -262,9 +262,8 @@ let download_and_load_state_exn
   let dependency_table_saved_state_future :
       (State_loader.native_load_result, load_state_error) result Future.t =
     if
-      genv.local_config.ServerLocalConfig.load_state_natively_64bit
-      || genv.local_config.ServerLocalConfig.enable_devx_dependency_graph
-         && Option.is_none saved_state_handle
+      genv.local_config.ServerLocalConfig.enable_devx_dependency_graph
+      && Option.is_none saved_state_handle
     then begin
       Hh_logger.log "Downloading dependency graph from DevX infra";
       let loader_future =

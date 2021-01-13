@@ -13,7 +13,7 @@ let test_small _ =
   let line = 30 in
   let bol = 2349 in
   let start_cnum = 2398 in
-  let end_cnum = 2496 in
+  let end_cnum = 2450 in
   let pos_start =
     { File_pos_large.pos_lnum = line; pos_bol = bol; pos_cnum = start_cnum }
   in

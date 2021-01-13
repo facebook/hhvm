@@ -43,17 +43,17 @@ enum Field {
 
 impl Field {
     /// These numbers were obtained by gathering statistics on the positions in the decl heap
-    /// for a www run as per december 2020. They should allow to encode about 99% of positions.
+    /// for a large code base run as per december 2020. They should allow to encode about 99% of positions.
     ///
     /// /!\ Always make sure the total is 63, due to OCaml reserving 1 bit.
     fn nbits(self) -> usize {
         match self {
-            Self::StartBeginningOfLine => 25,
-            Self::StartLineNumber => 15,
-            Self::StartColumnNumber => 15,
+            Self::StartBeginningOfLine => 21,
+            Self::StartLineNumber => 16,
+            Self::StartColumnNumber => 20,
             Self::BeginningOfLineIncrement => 0,
             Self::LineNumberIncrement => 0,
-            Self::ColumnNumberIncrement => 8,
+            Self::ColumnNumberIncrement => 6,
         }
     }
 
@@ -240,7 +240,7 @@ mod test {
         let line = 30;
         let bol = 2349;
         let start_cnum = 2398;
-        let end_cnum = 2496;
+        let end_cnum = 2450;
         let start = FilePosLarge::from_lnum_bol_cnum(line, bol, start_cnum);
         let end = FilePosLarge::from_lnum_bol_cnum(line, bol, end_cnum);
         match PosSpanTiny::make(&start, &end) {

@@ -48,15 +48,15 @@ module Field = struct
   let max_field : int = max
 
   (* These numbers were obtained by gathering statistics on the positions in the decl heap
-   * for a www run as per december 2020. They should allow to encode about 99% of positions. *)
+   * for a large code base run as per december 2020. They should allow to encode about 99% of positions. *)
   (* /!\ Always make sure the total is 63, due to OCaml reserving 1 bit. *)
   let nbits : t -> int = function
-    | Start_beginning_of_line -> 25
-    | Start_line_number -> 15
-    | Start_column_number -> 15
+    | Start_beginning_of_line -> 21
+    | Start_line_number -> 16
+    | Start_column_number -> 20
     | Beginning_of_line_increment -> 0
     | Line_number_increment -> 0
-    | Column_number_increment -> 8
+    | Column_number_increment -> 6
 
   let left_most =
     match of_enum min_field with

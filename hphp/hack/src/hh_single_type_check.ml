@@ -164,6 +164,9 @@ let print_errors_if_present (errors : Errors.error list) =
         Printf.printf "  %s\n" err_output)
   )
 
+let comma_string_to_iset (s : string) : ISet.t =
+  Str.split (Str.regexp ", *") s |> List.map ~f:int_of_string |> ISet.of_list
+
 let parse_options () =
   let fn_ref = ref [] in
   let usage = Printf.sprintf "Usage: %s filename\n" Sys.argv.(0) in
@@ -247,10 +250,10 @@ let parse_options () =
   let disable_hh_ignore_error = ref false in
   let enable_systemlib_annotations = ref false in
   let enable_higher_kinded_types = ref false in
-  let allowed_fixme_codes_strict = ref ISet.empty in
-  let allowed_fixme_codes_partial = ref ISet.empty in
-  let codes_not_raised_partial = ref ISet.empty in
-  let allowed_decl_fixme_codes = ref ISet.empty in
+  let allowed_fixme_codes_strict = ref None in
+  let allowed_fixme_codes_partial = ref None in
+  let codes_not_raised_partial = ref None in
+  let allowed_decl_fixme_codes = ref None in
   let method_call_inference = ref false in
   let report_pos_from_reason = ref false in
   let enable_sound_dynamic = ref false in
@@ -563,35 +566,20 @@ let parse_options () =
         "Enable support for higher-kinded types" );
       ( "--allowed-fixme-codes-strict",
         Arg.String
-          (fun s ->
-            allowed_fixme_codes_strict :=
-              Str.split (Str.regexp ", *") s
-              |> List.map ~f:int_of_string
-              |> ISet.of_list),
+          (fun s -> allowed_fixme_codes_strict := Some (comma_string_to_iset s)),
         "List of fixmes that are allowed in strict mode." );
       ( "--allowed-fixme-codes-partial",
         Arg.String
           (fun s ->
-            allowed_fixme_codes_partial :=
-              Str.split (Str.regexp ", *") s
-              |> List.map ~f:int_of_string
-              |> ISet.of_list),
+            allowed_fixme_codes_partial := Some (comma_string_to_iset s)),
         "List of fixmes that are allowed in partial mode." );
       ( "--codes-not-raised-partial",
         Arg.String
-          (fun s ->
-            codes_not_raised_partial :=
-              Str.split (Str.regexp ", *") s
-              |> List.map ~f:int_of_string
-              |> ISet.of_list),
+          (fun s -> codes_not_raised_partial := Some (comma_string_to_iset s)),
         "List of error codes that are not raised in partial mode." );
       ( "--allowed-decl-fixme-codes",
         Arg.String
-          (fun s ->
-            allowed_decl_fixme_codes :=
-              Str.split (Str.regexp ", *") s
-              |> List.map ~f:int_of_string
-              |> ISet.of_list),
+          (fun s -> allowed_decl_fixme_codes := Some (comma_string_to_iset s)),
         "List of fixmes that are allowed in declarations." );
       ( "--method-call-inference",
         Arg.Set method_call_inference,
@@ -641,9 +629,12 @@ let parse_options () =
       ?po_auto_namespace_map:!auto_namespace_map
       ?tco_disallow_byref_dynamic_calls:!disallow_byref_dynamic_calls
       ?tco_disallow_byref_calls:!disallow_byref_calls
-      ~allowed_fixme_codes_strict:!allowed_fixme_codes_strict
-      ~allowed_fixme_codes_partial:!allowed_fixme_codes_partial
-      ~codes_not_raised_partial:!codes_not_raised_partial
+      ~allowed_fixme_codes_strict:
+        (Option.value !allowed_fixme_codes_strict ~default:ISet.empty)
+      ~allowed_fixme_codes_partial:
+        (Option.value !allowed_fixme_codes_partial ~default:ISet.empty)
+      ~codes_not_raised_partial:
+        (Option.value !codes_not_raised_partial ~default:ISet.empty)
       ?tco_disallow_invalid_arraykey_constraint:
         !disallow_invalid_arraykey_constraint
       ?tco_disallow_trait_reuse:!disallow_trait_reuse
@@ -694,7 +685,8 @@ let parse_options () =
       ~po_disable_hh_ignore_error:!disable_hh_ignore_error
       ~tco_enable_systemlib_annotations:!enable_systemlib_annotations
       ~tco_higher_kinded_types:!enable_higher_kinded_types
-      ~po_allowed_decl_fixme_codes:!allowed_decl_fixme_codes
+      ~po_allowed_decl_fixme_codes:
+        (Option.value !allowed_decl_fixme_codes ~default:ISet.empty)
       ~po_allow_unstable_features:true
       ~tco_method_call_inference:!method_call_inference
       ~tco_report_pos_from_reason:!report_pos_from_reason

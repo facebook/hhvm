@@ -5564,6 +5564,13 @@ let immutable_local pos =
     (* TODO: generalize this error message in the future for arbitrary immutable locals *)
     "This variable cannot be reassigned because it is used for a dependent context"
 
+let enum_classes_reserved_syntax pos =
+  add
+    (Typing.err_code Typing.EnumClassesReservedSyntax)
+    pos
+    ( "This syntax is reserved for the Enum Classes feature.\n"
+    ^ "Enable it with the enable_enum_classes option in .hhconfig" )
+
 (*****************************************************************************)
 (* Printing *)
 (*****************************************************************************)

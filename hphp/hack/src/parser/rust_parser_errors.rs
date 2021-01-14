@@ -81,7 +81,6 @@ enum UnstableFeatures {
     ExpressionTrees,
     CoeffectsProvisional,
     EnumSupertyping,
-    EnumClass,
     EnumAtom,
     IFC,
 }
@@ -5640,9 +5639,6 @@ where
                 Token(_) => self.check_can_use_feature(node, &UnstableFeatures::EnumSupertyping),
                 _ => {}
             },
-            EnumClassDeclaration(_) | EnumClassEnumerator(_) => {
-                self.check_can_use_feature(node, &UnstableFeatures::EnumClass)
-            }
             EnumAtomExpression(_) => self.check_can_use_feature(node, &UnstableFeatures::EnumAtom),
             OldAttributeSpecification(x) => {
                 let attributes_string = self.text(&x.attributes);

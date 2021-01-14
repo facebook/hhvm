@@ -119,6 +119,7 @@ impl Default for GlobalOptions {
             tco_use_direct_decl_parser: false,
             po_enable_coeffects: false,
             tco_ifc_enabled: vec![],
+            tco_enable_enum_classes: false,
         }
     }
 }

@@ -1,5 +1,5 @@
 <?hh
-<<file:__EnableUnstableFeatures('enum_atom', 'enum_class')>>
+<<file:__EnableUnstableFeatures('enum_atom')>>
 
 enum E : int as int {
   A = 42;

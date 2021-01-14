@@ -1,4 +1,4 @@
-(13,34)-(13,34) A semicolon `;` is expected here.
-(13,34)-(13,35) A type specifier is expected here.
-(13,36)-(13,36) A name is expected here.
-(13,36)-(13,36) An equals sign `=` is expected here.
+(12,34)-(12,34) A semicolon `;` is expected here.
+(12,34)-(12,35) A type specifier is expected here.
+(12,36)-(12,36) A name is expected here.
+(12,36)-(12,36) An equals sign `=` is expected here.

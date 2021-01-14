@@ -1,3 +1,3 @@
-(12,16)-(12,16) An equals sign `=` is expected here.
-(12,17)-(13,1) An expression is expected here.
-(12,17)-(13,1) A semicolon `;` is expected here.
+(11,16)-(11,16) An equals sign `=` is expected here.
+(11,17)-(12,1) An expression is expected here.
+(11,17)-(12,1) A semicolon `;` is expected here.

@@ -1,6 +1,5 @@
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
-<<file: __EnableUnstableFeatures('enum_class')>>
 
 // User code
 function expect_int(int $_): void {}

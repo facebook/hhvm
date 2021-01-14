@@ -10,8 +10,10 @@ open Hh_prelude
 open Direct_decl_parser
 
 let popt
-    ~auto_namespace_map ~enable_xhp_class_modifier ~disable_xhp_element_mangling
-    =
+    ~auto_namespace_map
+    ~enable_xhp_class_modifier
+    ~disable_xhp_element_mangling
+    ~enable_enum_classes =
   let po = ParserOptions.default in
   let po =
     ParserOptions.with_disable_xhp_element_mangling
@@ -22,6 +24,7 @@ let popt
   let po =
     ParserOptions.with_enable_xhp_class_modifier po enable_xhp_class_modifier
   in
+  let po = ParserOptions.with_enable_enum_classes po enable_enum_classes in
   po
 
 let init root popt : Provider_context.t =
@@ -144,6 +147,7 @@ let () =
   let auto_namespace_map = ref [] in
   let enable_xhp_class_modifier = ref false in
   let disable_xhp_element_mangling = ref false in
+  let enable_enum_classes = ref false in
   Arg.parse
     [
       ( "--compare-direct-decl-parser",
@@ -169,6 +173,9 @@ let () =
       ( "--disable-xhp-element-mangling",
         Arg.Set disable_xhp_element_mangling,
         "." );
+      ( "--enable-enum-classes",
+        Arg.Set enable_enum_classes,
+        "Enable the enum classes extension." );
     ]
     set_file
     usage;
@@ -195,11 +202,13 @@ let () =
         let auto_namespace_map = !auto_namespace_map in
         let enable_xhp_class_modifier = !enable_xhp_class_modifier in
         let disable_xhp_element_mangling = !disable_xhp_element_mangling in
+        let enable_enum_classes = !enable_enum_classes in
         let popt =
           popt
             ~auto_namespace_map
             ~enable_xhp_class_modifier
             ~disable_xhp_element_mangling
+            ~enable_enum_classes
         in
         let ctx = init (Path.dirname file) popt in
         let file = Relative_path.(create Root (Path.to_string file)) in

@@ -294,6 +294,8 @@ type t = {
     (a list containing the empty string would denote all files,
     an empty list denotes no files) *)
   tco_ifc_enabled: string list;
+  (* Enables the enum class extension *)
+  tco_enable_enum_classes: bool;
 }
 [@@deriving eq, show]
 
@@ -408,6 +410,7 @@ val make :
   ?tco_use_direct_decl_parser:bool ->
   ?po_enable_coeffects:bool ->
   ?tco_ifc_enabled:string list ->
+  ?tco_enable_enum_classes:bool ->
   unit ->
   t
 
@@ -660,3 +663,5 @@ val po_disallow_hash_comments : t -> bool
 val po_disallow_fun_and_cls_meth_pseudo_funcs : t -> bool
 
 val tco_use_direct_decl_parser : t -> bool
+
+val tco_enable_enum_classes : t -> bool

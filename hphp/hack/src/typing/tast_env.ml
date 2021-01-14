@@ -307,3 +307,5 @@ let set_allow_wildcards env =
 let get_allow_wildcards env = env.Typing_env_types.allow_wildcards
 
 let condition_type_matches = Typing_reactivity.condition_type_matches
+
+let is_enum_class env c = Typing_env.is_enum_class env c

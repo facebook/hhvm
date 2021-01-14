@@ -260,6 +260,7 @@ let parse_options () =
   let disallow_hash_comments = ref false in
   let disallow_fun_and_cls_meth_pseudo_funcs = ref false in
   let use_direct_decl_parser = ref false in
+  let enable_enum_classes = ref false in
   let options =
     [
       ( "--ifc",
@@ -601,6 +602,9 @@ let parse_options () =
       ( "--use-direct-decl-parser",
         Arg.Set use_direct_decl_parser,
         "Use direct decl parser" );
+      ( "--enable-enum-classes",
+        Arg.Set enable_enum_classes,
+        "Enable the enum classes extension." );
     ]
   in
   let options = Arg.align ~limit:25 options in
@@ -700,6 +704,7 @@ let parse_options () =
         else
           [] )
       ~tco_use_direct_decl_parser:!use_direct_decl_parser
+      ~tco_enable_enum_classes:!enable_enum_classes
       ()
   in
   Errors.allowed_fixme_codes_strict :=

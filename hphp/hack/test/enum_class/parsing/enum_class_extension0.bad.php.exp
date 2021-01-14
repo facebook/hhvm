@@ -1,5 +1,5 @@
-(30,21)-(30,21) A left brace `{` is expected here.
-(30,21)-(30,29) A type specifier is expected here.
-(30,32)-(30,32) An equals sign `=` is expected here.
-(30,33)-(31,1) An expression is expected here.
-(30,33)-(31,1) A semicolon `;` is expected here.
+(29,21)-(29,21) A left brace `{` is expected here.
+(29,21)-(29,29) A type specifier is expected here.
+(29,32)-(29,32) An equals sign `=` is expected here.
+(29,33)-(30,1) An expression is expected here.
+(29,33)-(30,1) A semicolon `;` is expected here.

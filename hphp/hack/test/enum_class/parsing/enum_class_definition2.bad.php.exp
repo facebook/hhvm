@@ -1,4 +1,4 @@
-(12,4)-(12,4) A name is expected here.
-(12,4)-(12,4) An equals sign `=` is expected here.
-(12,5)-(13,1) An expression is expected here.
-(12,5)-(13,1) A semicolon `;` is expected here.
+(11,4)-(11,4) A name is expected here.
+(11,4)-(11,4) An equals sign `=` is expected here.
+(11,5)-(12,1) An expression is expected here.
+(11,5)-(12,1) A semicolon `;` is expected here.

@@ -13,10 +13,15 @@ function foo() {
 
   return $c;
 }
-<<__EntryPoint>> function main(): void {
-$x = foo();
-while ($x) {
-  var_dump($x->tagName);
-  $x = $x->parentNode;
-}
+<<__EntryPoint>>
+function main(): void {
+  $x = foo();
+  while ($x) {
+    try {
+      var_dump($x->tagName);
+    } catch (UndefinedPropertyException $e) {
+      var_dump($e->getMessage());
+    }
+    $x = $x->parentNode;
+  }
 }

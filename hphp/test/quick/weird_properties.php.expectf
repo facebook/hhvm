@@ -1,7 +1,2 @@
-
-Notice: Undefined property: stdClass::$0 in %s on line 9
-
-
-Notice: Undefined property: stdClass::$0 in %s on line 9
-
-done
+string(32) "Undefined property: stdClass::$0"
+string(32) "Undefined property: stdClass::$0"

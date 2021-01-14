@@ -27,20 +27,25 @@ class D {
     var_dump($this);
   }
 }
-<<__EntryPoint>> function main() {
-$d = new D;
-// unset all properties
-$d->unsetall();
-// Prop for visible, accessible property
-var_dump($d->y);
-// PropU for visible, accessible property
-unset($d->y);
-// SetProp for visible, accessible properties
-$d->setprop();
-// SetOpProp
-$d->unsetall();
-$d->setopprop();
-// IncDecProp
-$d->unsetall();
-$d->incdecprop();
+<<__EntryPoint>>
+function main() {
+  $d = new D;
+  // unset all properties
+  $d->unsetall();
+  // Prop for visible, accessible property
+  try {
+    var_dump($d->y);
+  } catch (UndefinedPropertyException $e) {
+    var_dump($e->getMessage());
+  }
+  // PropU for visible, accessible property
+  unset($d->y);
+  // SetProp for visible, accessible properties
+  $d->setprop();
+  // SetOpProp
+  $d->unsetall();
+  $d->setopprop();
+  // IncDecProp
+  $d->unsetall();
+  $d->incdecprop();
 }

@@ -1,6 +1,4 @@
 varray(1) {
   string(4) "test"
 }
-
-Notice: Undefined property: A::$arr in %s/test/slow/unset/1111.php on line 12
-NULL
+string(27) "Undefined property: A::$arr"

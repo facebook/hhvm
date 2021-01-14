@@ -1,3 +1,5 @@
 Out of bounds varray access: invalid index 123
 
-Notice: Undefined property: stdClass::$flubb in %s on line 10
+Fatal error: Uncaught exception 'UndefinedPropertyException' with message 'Undefined property: stdClass::$flubb' in %s/undefined-index.php:10
+Stack trace:
+%A

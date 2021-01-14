@@ -6,13 +6,9 @@ object(F) (2) {
   string(5) "snoot"
 }
 int(12)
-
-Notice: Undefined property: F::$foo in %s on line 10
-NULL
+string(27) "Undefined property: F::$foo"
 string(5) "snoot"
-
-Notice: Undefined property: F::$bart in %s on line 10
-NULL
+string(28) "Undefined property: F::$bart"
 object(F) (0) {
 }
 ------------------------
@@ -21,7 +17,6 @@ foo
 foo
 Test end
 string(4) "set1"
-
-Notice: Undefined property: c2::$declprop in %s on line 50
+string(33) "Undefined property: c2::$declprop"
 NULL
 string(4) "set2"

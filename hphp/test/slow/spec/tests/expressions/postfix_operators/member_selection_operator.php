@@ -1,61 +1,65 @@
 <?hh
 
-class Point
-{
-    private $x;
-    private $y;
+class Point {
+  private $x;
+  private $y;
 
-    public function getX()      { return $this->x; }
-    public function setX($x)    { $this->x = $x;   }
-    public function getY()      { return $this->y; }
-    public function setY($y)    { $this->y = $y;   }
+  public function getX() {
+    return $this->x;
+  }
+  public function setX($x) {
+    $this->x = $x;
+  }
+  public function getY() {
+    return $this->y;
+  }
+  public function setY($y) {
+    $this->y = $y;
+  }
 
-    public function __construct($x = 0, $y = 0)
-    {
-        $name = "x";
-        $this->$name = $x;  // member name as the value of a string is permitted
-//      $this->"x" = $x;    // string literal not allowed, however
-//      $this->x = $x;
-        $this->y = $y;
-    }
+  public function __construct($x = 0, $y = 0) {
+    $name = "x";
+    $this->$name = $x; // member name as the value of a string is permitted
+    //      $this->"x" = $x;    // string literal not allowed, however
+    //      $this->x = $x;
+    $this->y = $y;
+  }
 
-    public function move($x, $y)
-    {
-        $this->x = $x;
-        $this->y = $y;
-    }
+  public function move($x, $y) {
+    $this->x = $x;
+    $this->y = $y;
+  }
 
-    public function translate($x, $y)
-    {
-        $this->x += $x;
-        $this->y += $y;
-    }
+  public function translate($x, $y) {
+    $this->x += $x;
+    $this->y += $y;
+  }
 
-    public function __toString()
-    {
-        return '(' . $this->x . ',' . $this->y . ')';
-    }
+  public function __toString() {
+    return '('.$this->x.','.$this->y.')';
+  }
 
-    public $piProp = 555;
-    public static function psf() { return 123; }
-    public static $psProp = 999;
-    const MYPI = 3.14159;
+  public $piProp = 555;
+  public static function psf() {
+    return 123;
+  }
+  public static $psProp = 999;
+  const MYPI = 3.14159;
 }
 
 // use multiple ->s
 
-class K
-{
-    public $prop;
-    public function __construct(L $p1)
-    {
-        $this->prop = $p1;
-    }
+class K {
+  public $prop;
+  public function __construct(L $p1) {
+    $this->prop = $p1;
+  }
 }
 
-class L
-{
-    public function f() { echo "Hello from f\n"; }
+class L {
+  public function f() {
+    echo "Hello from f\n";
+  }
 }
 <<__EntryPoint>>
 function entrypoint_member_selection_operator(): void {
@@ -81,26 +85,37 @@ function entrypoint_member_selection_operator(): void {
   $p1->color = "red"; // turned into $p1->__set("color", "red");
   var_dump($p1);
 
-  $c = $p1->color;    // turned into $c = $p1->__get("color");
+  $c = $p1->color; // turned into $c = $p1->__get("color");
   var_dump($c);
   //*/
 
-  var_dump($p1->piProp);  // okay to access instance property via instance
+  var_dump($p1->piProp); // okay to access instance property via instance
   //var_dump($p1->psf());     // not okay to access static method via instance
   //var_dump(($p1->psf)());   // doesn't parse
   //var_dump($p1->psf);       // so no surprise this won't work
-  var_dump($p1->psProp);  // Not okay. Strict Standards: Accessing static property
-                          // Point::$psProp as non static
-                          // Notice: Undefined property: Point::$psProp
-                          // NULL
-  var_dump($p1->MYPI);    // Not okay. Notice: Undefined property: Point::$MYPI
-                          // NULL
+
+  // Not okay. Strict Standards: Accessing static property
+  // Point::$psProp as non static
+  // Fatal: Undefined property: Point::$psProp
+  try {
+    var_dump($p1->psProp);
+  } catch (UndefinedPropertyException $e) {
+    var_dump($e->getMessage());
+  }
+  // Not okay. Fatal: Undefined property: Point::$MYPI
+  try {
+    var_dump($p1->MYPI);
+  } catch (UndefinedPropertyException $e) {
+    var_dump($e->getMessage());
+  }
 
 
   //var_dump(Point::piProp);// Fatal error: Undefined class constant 'piProp'
   var_dump(Point::psf()); // okay to access static method via class
-  var_dump(Point::$psProp);// okay to access static property via class, but leading $ needed!!
-  var_dump(Point::MYPI);  // okay to access const via class
+  var_dump(
+    Point::$psProp,
+  ); // okay to access static property via class, but leading $ needed!!
+  var_dump(Point::MYPI); // okay to access const via class
 
   $k = new K(new L);
   $k->prop->f();

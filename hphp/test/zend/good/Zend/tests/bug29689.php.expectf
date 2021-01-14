@@ -1,7 +1,6 @@
 foo: foo foo2
-bar: bar 
-Notice: %s
-
+bar: bar
+string(30) "Undefined property: bar::$foo2"
 ---baz--
 foo: foo foo2
 bar: baz baz2

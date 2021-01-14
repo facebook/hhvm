@@ -26,13 +26,14 @@ class test {
     foreach ($this->array as $foo) {
       echo $foo;
     }
+    echo "\n";
   }
 
   public function case2() {
     try {
       foreach ($this->foobar as $foo)
         ;
-    } catch (InvalidForeachArgumentException $e) {
+    } catch (UndefinedPropertyException $e) {
       var_dump($e->getMessage());
     }
   }

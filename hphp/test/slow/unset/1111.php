@@ -9,5 +9,9 @@ function main() {
   $obj->arr = varray['test'];
   var_dump($obj->arr);
   unset($obj->arr);
-  var_dump($obj->arr);
+  try {
+    var_dump($obj->arr);
+  } catch (UndefinedPropertyException $e) {
+    var_dump($e->getMessage());
+  }
 }

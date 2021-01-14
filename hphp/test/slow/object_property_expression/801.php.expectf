@@ -1,7 +1,7 @@
-Notice: Undefined property: Z::$priv in %s/test/slow/object_property_expression/801.php on line 8
+string(28) "Undefined property: Z::$priv"
 object(Z) (1) {
   ["priv":"Y":private]=>
   NULL
 }
 
-Fatal error: Cannot access private property Y::$priv in %s/test/slow/object_property_expression/801.php on line 8
+Fatal error: Cannot access private property Y::$priv in %s/test/slow/object_property_expression/801.php on line %d

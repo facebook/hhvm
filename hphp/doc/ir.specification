@@ -2042,9 +2042,9 @@ To string conversions:
 
   Raise a notice for an uninitialized local variable.
 
-| RaiseUndefProp, ND, S(Obj) CStr, NF
+| RaiseUndefProp, ND, S(Obj) CStr, T
 
-  Raise a notice for an undefined property named S1 on the class of S0.
+  Raises a fatal for an undefined property named S1 on the class of S0.
 
 | RaiseTooManyArg<func>, ND, S(VArr,Vec), CRc|LA
 

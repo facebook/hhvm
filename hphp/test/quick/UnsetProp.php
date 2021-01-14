@@ -7,7 +7,11 @@ class F {
 function t($o, $memb) {
   var_dump($o->$memb);
   unset($o->$memb);
-  var_dump($o->$memb);
+  try {
+    var_dump($o->$memb);
+  } catch (UndefinedPropertyException $e) {
+    var_dump($e->getMessage());
+  }
 }
 
 function u() {
@@ -15,13 +19,13 @@ function u() {
   $obj = new F;
   $obj->foo = $x;
   foreach ($obj as $k => $_) {
-    echo $k . "\n";
+    echo $k."\n";
   }
   echo "------------------------\n";
   $obj = new F;
   $obj->foo = $y++;
   foreach ($obj as $k => $_) {
-    echo $k . "\n";
+    echo $k."\n";
   }
 }
 
@@ -45,9 +49,12 @@ function main() {
 }
 
 
-
 function getprop($o) {
-  return $o->declprop;
+  try {
+    return $o->declprop;
+  } catch (UndefinedPropertyException $e) {
+    var_dump($e->getMessage());
+  }
 }
 function setprop($o, $v) {
   $o->declprop = $v;
@@ -65,7 +72,8 @@ function main2() {
   setprop($o, 'set2');
   var_dump(getprop($o));
 }
-<<__EntryPoint>> function main_entry(): void {
-main();
-main2();
+<<__EntryPoint>>
+function main_entry(): void {
+  main();
+  main2();
 }

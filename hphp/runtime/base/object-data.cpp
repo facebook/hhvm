@@ -418,8 +418,10 @@ Variant ObjectData::o_get(const String& propName, bool error /* = true */,
   }
 
   if (error) {
-    raise_notice("Undefined property: %s::$%s", getClassName().data(),
-                 propName.data());
+    SystemLib::throwUndefinedPropertyExceptionObject(
+       folly::sformat("Undefined property: {}::${}",
+                      getClassName().data(),
+                      propName.data()));
   }
 
   return uninit_null();
@@ -1533,8 +1535,10 @@ void ObjectData::raiseAbstractClassError(Class* cls) {
 }
 
 void ObjectData::raiseUndefProp(const StringData* key) const {
-  raise_notice("Undefined property: %s::$%s",
-               m_cls->name()->data(), key->data());
+  SystemLib::throwUndefinedPropertyExceptionObject(
+    folly::sformat("Undefined property: {}::${}",
+                   m_cls->name()->data(),
+                   key->data()));
 }
 
 void ObjectData::raiseCreateDynamicProp(const StringData* key) const {

@@ -1,5 +1,4 @@
 string(9) "old value"
 string(9) "new value"
-
-Notice: Undefined property: c::$fakeprop in %s/properties-dynamic.php on line 8
+string(32) "Undefined property: c::$fakeprop"
 NULL

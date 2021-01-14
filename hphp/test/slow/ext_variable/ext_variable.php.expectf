@@ -74,7 +74,5 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
-
-Notice: Undefined property: stdClass::$name in %s/test/slow/ext_variable/ext_variable.php on line 129
-bool(true)
+string(35) "Undefined property: stdClass::$name"
 bool(true)

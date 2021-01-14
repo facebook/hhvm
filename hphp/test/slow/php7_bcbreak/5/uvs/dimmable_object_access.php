@@ -10,5 +10,9 @@ function entrypoint_dimmable_object_access(): void {
 
   $bar = 'someprop';
 
-  var_dump($foo->$bar['baz']);
+  try {
+    var_dump($foo->$bar['baz']);
+  } catch (UndefinedPropertyException $e) {
+    var_dump($e->getMessage());
+  }
 }

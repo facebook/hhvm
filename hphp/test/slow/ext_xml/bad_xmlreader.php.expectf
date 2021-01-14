@@ -1,3 +1,1 @@
-
-Notice: Undefined property: XMLReader::$attributes in %s on line %d
-bool(true)
+string(42) "Undefined property: XMLReader::$attributes"

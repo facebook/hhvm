@@ -2,9 +2,7 @@ Read class constant.
 string(5) "hello"
 
 Fail to read class constant from instance.
-
-Notice: %s
-NULL
+string(36) "Undefined property: aclass::$myConst"
 
 Class constant not visible in object var_dump.
 object(aclass) (0) {

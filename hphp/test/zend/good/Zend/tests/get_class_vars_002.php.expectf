@@ -10,10 +10,6 @@ darray(3) {
   ["cc"]=>
   int(6)
 }
-
-Notice: %s
-
-Notice: %s
 int(1)
-NULL
-NULL
+string(25) "Undefined property: C::$b"
+string(25) "Undefined property: C::$c"

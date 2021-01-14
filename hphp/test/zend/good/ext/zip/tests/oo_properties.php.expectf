@@ -2,10 +2,7 @@ zip->status (0):
 	isset(): 1
 zip->numFiles (4):
 	isset(): 1
-
-Notice: %s
-zip->bogus (0):
-	isset(): 0
+string(38) "Undefined property: ZipArchive::$bogus"
 zip->status (0):
 	isset(): 1
 zip->numFiles (5):

@@ -1,6 +1,5 @@
 123
-Notice: Undefined property: test::$foobar in %s/bug27439.php on line 33
-string(39) "Invalid argument supplied for foreach()"
+string(33) "Undefined property: test::$foobar"
 string(39) "Invalid argument supplied for foreach()"
 string(39) "Invalid argument supplied for foreach()"
 123

@@ -1,15 +1,14 @@
 <?hh
 
 
-
-
-
 class A {
   private $a = 1;
   public function __sleep() {
     return SerializationPrivateProperties::$g;
   }
-  public function seta($a) { $this->a = $a; }
+  public function seta($a) {
+    $this->a = $a;
+  }
 }
 class B extends A {
   public function __sleep() {
@@ -26,7 +25,11 @@ class B extends A {
     $u = unserialize($s);
     var_dump($u);
     if ($p) {
-      var_dump($u->$p);
+      try {
+        var_dump($u->$p);
+      } catch (UndefinedPropertyException $e) {
+        var_dump($e->getMessage());
+      }
     }
   }
 }

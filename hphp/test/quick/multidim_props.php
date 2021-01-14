@@ -11,11 +11,12 @@ class A {
     $this->x = $this;
   }
   function bar() {
-    $y = $this->x->x->x->x->x;
-    baz(inout $y);
-    $y = $this->x->x->x->x->x;
-    baz(inout $y);
-
+    try {
+      $y = $this->x->x;
+      baz(inout $y);
+    } catch (UndefinedPropertyException $e) {
+      var_dump($e->getMessage());
+    }
   }
 
   public function what() {
@@ -26,7 +27,8 @@ class A {
   }
 }
 
-<<__EntryPoint>> function foo(): void {
+<<__EntryPoint>>
+function foo(): void {
   $x = new A();
   $x->what();
   $x->what();

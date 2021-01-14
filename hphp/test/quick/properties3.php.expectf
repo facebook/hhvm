@@ -1,6 +1,4 @@
-
-Notice: Undefined property: D::$y in %s/test/quick/properties3.php on line %d
-NULL
+string(25) "Undefined property: D::$y"
 object(D) (2) {
   ["x":"D":private]=>
   int(1)

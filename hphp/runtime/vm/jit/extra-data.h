@@ -1096,6 +1096,7 @@ struct CallData : IRExtraData {
       hasGenerics
         ? folly::sformat(",hasGenerics({})", genericsBitmap)
         : std::string{},
+      ",[", coeffects.toString(), "]",
       hasUnpack ? ",unpack" : "",
       skipRepack ? ",skipRepack" : "",
       dynamicCall ? ",dynamicCall" : "",
@@ -1114,7 +1115,8 @@ struct CallData : IRExtraData {
       std::hash<uint32_t>()(numArgs),
       std::hash<uint32_t>()(numOut),
       std::hash<Offset>()(callOffset),
-      std::hash<uint32_t>()(genericsBitmap),
+      std::hash<uint16_t>()(genericsBitmap),
+      std::hash<uint16_t>()(coeffects.value()),
       std::hash<uint8_t>()(
         hasGenerics << 5 |
         hasUnpack << 4 |
@@ -1132,6 +1134,7 @@ struct CallData : IRExtraData {
            numOut == o.numOut &&
            callOffset == o.callOffset &&
            genericsBitmap == o.genericsBitmap &&
+           coeffects.value() == o.coeffects.value() &&
            hasGenerics == o.hasGenerics &&
            hasUnpack == o.hasUnpack &&
            skipRepack == o.skipRepack &&

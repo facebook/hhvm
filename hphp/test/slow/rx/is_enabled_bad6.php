@@ -1,7 +1,6 @@
 <?hh
 
-<<__Pure>>
-function test() {
+function test()[] {
   if (Rx\IS_ENABLED) {
     return 0;
   } else {

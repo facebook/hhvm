@@ -19,8 +19,7 @@ function rx($fn) {
   if ($fn) $fn(null);
 }
 
-<<__Pure>>
-function pure($fn) {
+function pure($fn)[] {
   if ($fn) $fn(null);
 }
 

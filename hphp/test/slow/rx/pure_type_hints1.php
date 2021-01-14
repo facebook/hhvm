@@ -1,18 +1,15 @@
 <?hh
 
-<<__Pure>>
-function pure(Pure<(function(): int)> $a): int {
+function pure(Pure<(function(): int)> $a)[]: int {
   return $a();
 }
 
-<<__Pure>>
-function returnspure(): Pure<(function(): int)> {
+function returnspure()[]: Pure<(function(): int)> {
   return () ==> 1;
 }
 
 class A {
-  <<__Pure>>
-  public function f(): void {
+  public function f()[]: void {
   }
 }
 
@@ -29,10 +26,10 @@ function f(
 
 <<__RxLocal, __EntryPoint>>
 function g(): void {
-  pure(<<__Pure>>() ==> 1);
+  pure(()[] ==> 1);
   pure(returnspure());
 
-  f(<<__Pure>>(A $a) ==> {},
-    <<__Pure>>(A $a) ==> {},
-    <<__Pure>>(A $a) ==> {});
+  f((A $a)[] ==> {},
+    (A $a)[] ==> {},
+    (A $a)[] ==> {});
 }

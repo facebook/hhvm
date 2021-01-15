@@ -122,10 +122,7 @@
                     "trailing":[],
                     "line_number":3
                   }
-                },
-                "constructor_call_left_paren":{"kind":"missing"},
-                "constructor_call_argument_list":{"kind":"missing"},
-                "constructor_call_right_paren":{"kind":"missing"}
+                }
               }
             }
           },
@@ -232,7 +229,6 @@
                     "line_number":4
                   }
                 },
-                "constructor_call_argument_list":{"kind":"missing"},
                 "constructor_call_right_paren":{
                   "kind":"token",
                   "token":{
@@ -335,14 +331,10 @@
                     "trailing":[{"kind":"whitespace","text":" ","offset":94,"width":1}],
                     "line_number":5
                   }
-                },
-                "constructor_call_left_paren":{"kind":"missing"},
-                "constructor_call_argument_list":{"kind":"missing"},
-                "constructor_call_right_paren":{"kind":"missing"}
+                }
               }
             }
-          },
-          "expression_statement_semicolon":{"kind":"missing"}
+          }
         },
         {
           "kind":"expression_statement",
@@ -362,8 +354,7 @@
                 "line_number":5
               }
             }
-          },
-          "expression_statement_semicolon":{"kind":"missing"}
+          }
         },
         {
           "kind":"expression_statement",
@@ -510,8 +501,7 @@
                             "line_number":6
                           }
                         }
-                      },
-                      "list_separator":{"kind":"missing"}
+                      }
                     }
                   ]
                 },
@@ -617,10 +607,7 @@
                     "trailing":[],
                     "line_number":7
                   }
-                },
-                "constructor_call_left_paren":{"kind":"missing"},
-                "constructor_call_argument_list":{"kind":"missing"},
-                "constructor_call_right_paren":{"kind":"missing"}
+                }
               }
             }
           },
@@ -758,7 +745,6 @@
                     "line_number":8
                   }
                 },
-                "constructor_call_argument_list":{"kind":"missing"},
                 "constructor_call_right_paren":{
                   "kind":"token",
                   "token":{
@@ -900,8 +886,7 @@
                             "line_number":9
                           }
                         }
-                      },
-                      "list_separator":{"kind":"missing"}
+                      }
                     }
                   ]
                 },
@@ -1079,8 +1064,7 @@
                             "line_number":10
                           }
                         }
-                      },
-                      "list_separator":{"kind":"missing"}
+                      }
                     }
                   ]
                 },
@@ -1258,8 +1242,7 @@
                             "line_number":11
                           }
                         }
-                      },
-                      "list_separator":{"kind":"missing"}
+                      }
                     }
                   ]
                 },
@@ -1463,8 +1446,7 @@
                             "line_number":12
                           }
                         }
-                      },
-                      "list_separator":{"kind":"missing"}
+                      }
                     }
                   ]
                 },
@@ -1673,8 +1655,7 @@
                             "line_number":13
                           }
                         }
-                      },
-                      "list_separator":{"kind":"missing"}
+                      }
                     }
                   ]
                 },
@@ -1819,8 +1800,7 @@
                             "line_number":14
                           }
                         }
-                      },
-                      "list_separator":{"kind":"missing"}
+                      }
                     }
                   ]
                 },
@@ -1966,8 +1946,7 @@
                                 "line_number":15
                               }
                             }
-                          },
-                          "list_separator":{"kind":"missing"}
+                          }
                         }
                       ]
                     },
@@ -2022,8 +2001,7 @@
                             "line_number":15
                           }
                         }
-                      },
-                      "list_separator":{"kind":"missing"}
+                      }
                     }
                   ]
                 },
@@ -2148,7 +2126,6 @@
                         "line_number":16
                       }
                     },
-                    "function_call_type_args":{"kind":"missing"},
                     "function_call_left_paren":{
                       "kind":"token",
                       "token":{
@@ -2163,7 +2140,6 @@
                         "line_number":16
                       }
                     },
-                    "function_call_argument_list":{"kind":"missing"},
                     "function_call_right_paren":{
                       "kind":"token",
                       "token":{
@@ -2229,8 +2205,7 @@
                             "line_number":16
                           }
                         }
-                      },
-                      "list_separator":{"kind":"missing"}
+                      }
                     }
                   ]
                 },
@@ -2408,8 +2383,7 @@
                               "line_number":17
                             }
                           }
-                        },
-                        "list_separator":{"kind":"missing"}
+                        }
                       }
                     ]
                   },
@@ -2471,5 +2445,5 @@
     }
   },
   "program_text":"<?hh // strict\n\n$p1 = new Point;     // error2038\n$p1 = new Point();  // legal\n$p1 = new Point 12, 34;  // error2038, among others\n$p1 = new Point(12);   // legal\n$p1 = new RReeaallllyyLLoonnggNNaammee;   // error2038\n$p1 = new $PointClassVar->$pointClassName();  // legal\n$p1 = new 'Point'(12);  // not a class-type-designator\n$p1 = new Point::Point(12);  // not a class-type-designator\n$p1 = new Point::$pointVar(12);  // legal\n$p1 = new Point::Point::$pointVar(12);  // not a class-type-designator\n$p1 = new Point::$pointVar::$pointVar(12);  // legal\n$p1 = new $point(12); // legal\n$p1 = new Point<int>(12); // legal\n$p1 = new (function_that_returns_class_name())(12); // legal\n$p1 = \"Point\" |> new $$(12); // legal\n",
-  "version":"2020-10-15-0001"
+  "version":"2021-01-05-0001"
 }

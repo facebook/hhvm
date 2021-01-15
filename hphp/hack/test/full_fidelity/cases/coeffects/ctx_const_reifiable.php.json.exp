@@ -155,8 +155,7 @@
                               "line_number":2
                             }
                           }
-                        },
-                        "list_separator":{"kind":"missing"}
+                        }
                       }
                     ]
                   },
@@ -174,8 +173,7 @@
                       "line_number":2
                     }
                   }
-                },
-                "list_separator":{"kind":"missing"}
+                }
               }
             ]
           },
@@ -196,7 +194,6 @@
         },
         {
           "kind":"classish_declaration",
-          "classish_attribute":{"kind":"missing"},
           "classish_modifiers":{
             "kind":"list",
             "elements":[
@@ -216,7 +213,6 @@
               }
             ]
           },
-          "classish_xhp":{"kind":"missing"},
           "classish_keyword":{
             "kind":"token",
             "token":{
@@ -245,12 +241,6 @@
               "line_number":4
             }
           },
-          "classish_type_parameters":{"kind":"missing"},
-          "classish_extends_keyword":{"kind":"missing"},
-          "classish_extends_list":{"kind":"missing"},
-          "classish_implements_keyword":{"kind":"missing"},
-          "classish_implements_list":{"kind":"missing"},
-          "classish_where_clause":{"kind":"missing"},
           "classish_body":{
             "kind":"classish_body",
             "classish_body_left_brace":{
@@ -333,7 +323,6 @@
                       "line_number":5
                     }
                   },
-                  "context_const_type_parameters":{"kind":"missing"},
                   "context_const_constraint":{
                     "kind":"list",
                     "elements":[
@@ -390,8 +379,7 @@
                                       "line_number":5
                                     }
                                   }
-                                },
-                                "list_separator":{"kind":"missing"}
+                                }
                               }
                             ]
                           },
@@ -413,8 +401,6 @@
                       }
                     ]
                   },
-                  "context_const_equal":{"kind":"missing"},
-                  "context_const_ctx_list":{"kind":"missing"},
                   "context_const_semicolon":{
                     "kind":"token",
                     "token":{
@@ -469,5 +455,5 @@
     }
   },
   "program_text":"<?hh\n<<file: __EnableUnstableFeatures('coeffects_provisional')>>\n\nabstract class Base {\n  <<__Reifiable>> abstract const ctx C super [output];\n}\n",
-  "version":"2020-12-14-0001"
+  "version":"2021-01-05-0001"
 }

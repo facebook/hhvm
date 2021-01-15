@@ -86,14 +86,7 @@
                 "trailing":[{"kind":"whitespace","text":" ","offset":146,"width":1}],
                 "line_number":6
               }
-            },
-            "namespace_name":{"kind":"missing"}
-          },
-          "namespace_body":{
-            "kind":"namespace_body",
-            "namespace_left_brace":{"kind":"missing"},
-            "namespace_declarations":{"kind":"missing"},
-            "namespace_right_brace":{"kind":"missing"}
+            }
           }
         },
         {
@@ -113,8 +106,7 @@
                 "trailing":[{"kind":"whitespace","text":" ","offset":156,"width":1}],
                 "line_number":6
               }
-            },
-            "namespace_name":{"kind":"missing"}
+            }
           },
           "namespace_body":{
             "kind":"namespace_body",
@@ -132,7 +124,6 @@
                 "line_number":6
               }
             },
-            "namespace_declarations":{"kind":"missing"},
             "namespace_right_brace":{
               "kind":"token",
               "token":{
@@ -170,5 +161,5 @@
     }
   },
   "program_text":"<?hh\n\n// namespace should not be allowed to be the name of a namespace\n// This checks for case sensitivity. Should still not be allowed\n\nnamespace Namespace {}\n",
-  "version":"2020-06-23-0001"
+  "version":"2021-01-05-0001"
 }

@@ -54,9 +54,6 @@
         },
         {
           "kind":"classish_declaration",
-          "classish_attribute":{"kind":"missing"},
-          "classish_modifiers":{"kind":"missing"},
-          "classish_xhp":{"kind":"missing"},
           "classish_keyword":{
             "kind":"token",
             "token":{
@@ -94,12 +91,6 @@
               "line_number":12
             }
           },
-          "classish_type_parameters":{"kind":"missing"},
-          "classish_extends_keyword":{"kind":"missing"},
-          "classish_extends_list":{"kind":"missing"},
-          "classish_implements_keyword":{"kind":"missing"},
-          "classish_implements_list":{"kind":"missing"},
-          "classish_where_clause":{"kind":"missing"},
           "classish_body":{
             "kind":"classish_body",
             "classish_body_left_brace":{
@@ -121,7 +112,6 @@
               "elements":[
                 {
                   "kind":"methodish_declaration",
-                  "methodish_attribute":{"kind":"missing"},
                   "methodish_function_decl_header":{
                     "kind":"function_declaration_header",
                     "function_modifiers":{
@@ -171,7 +161,6 @@
                         "line_number":13
                       }
                     },
-                    "function_type_parameter_list":{"kind":"missing"},
                     "function_left_paren":{
                       "kind":"token",
                       "token":{
@@ -193,10 +182,6 @@
                           "kind":"list_item",
                           "list_item":{
                             "kind":"parameter_declaration",
-                            "parameter_attribute":{"kind":"missing"},
-                            "parameter_visibility":{"kind":"missing"},
-                            "parameter_call_convention":{"kind":"missing"},
-                            "parameter_type":{"kind":"missing"},
                             "parameter_name":{
                               "kind":"token",
                               "token":{
@@ -210,10 +195,8 @@
                                 "trailing":[],
                                 "line_number":13
                               }
-                            },
-                            "parameter_default_value":{"kind":"missing"}
-                          },
-                          "list_separator":{"kind":"missing"}
+                            }
+                          }
                         }
                       ]
                     },
@@ -231,7 +214,6 @@
                         "line_number":13
                       }
                     },
-                    "function_contexts":{"kind":"missing"},
                     "function_colon":{
                       "kind":"token",
                       "token":{
@@ -262,8 +244,7 @@
                           "line_number":13
                         }
                       }
-                    },
-                    "function_where_clause":{"kind":"missing"}
+                    }
                   },
                   "methodish_function_body":{
                     "kind":"compound_statement",
@@ -407,8 +388,7 @@
                                           "line_number":14
                                         }
                                       }
-                                    },
-                                    "list_separator":{"kind":"missing"}
+                                    }
                                   }
                                 ]
                               },
@@ -490,8 +470,7 @@
                         "line_number":15
                       }
                     }
-                  },
-                  "methodish_semicolon":{"kind":"missing"}
+                  }
                 }
               ]
             },
@@ -532,5 +511,5 @@
     }
   },
   "program_text":"<?hh\n/**\n * Copyright (c) 2014, Facebook, Inc.\n * All rights reserved.\n *\n * This source code is licensed under the MIT license found in the\n * LICENSE file in the \"hack\" directory of this source tree.\n *\n *\n */\n\nclass X {\n  public function f($x): void {\n    list($_, $this, $y) = $x;\n  }\n}\n",
-  "version":"2020-12-14-0001"
+  "version":"2021-01-05-0001"
 }

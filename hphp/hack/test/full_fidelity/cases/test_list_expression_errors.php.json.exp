@@ -112,7 +112,6 @@
               }
             }
           },
-          "foreach_await_keyword":{"kind":"missing"},
           "foreach_as":{
             "kind":"token",
             "token":{
@@ -127,8 +126,6 @@
               "line_number":4
             }
           },
-          "foreach_key":{"kind":"missing"},
-          "foreach_arrow":{"kind":"missing"},
           "foreach_value":{
             "kind":"list_expression",
             "list_keyword":{
@@ -214,8 +211,7 @@
                         "line_number":4
                       }
                     }
-                  },
-                  "list_separator":{"kind":"missing"}
+                  }
                 }
               ]
             },
@@ -264,7 +260,6 @@
                 "line_number":4
               }
             },
-            "compound_statements":{"kind":"missing"},
             "compound_right_brace":{
               "kind":"token",
               "token":{
@@ -448,8 +443,7 @@
                                   "line_number":8
                                 }
                               }
-                            },
-                            "list_separator":{"kind":"missing"}
+                            }
                           }
                         ]
                       },
@@ -467,8 +461,7 @@
                           "line_number":8
                         }
                       }
-                    },
-                    "list_separator":{"kind":"missing"}
+                    }
                   }
                 ]
               },
@@ -590,7 +583,6 @@
               }
             }
           },
-          "foreach_await_keyword":{"kind":"missing"},
           "foreach_as":{
             "kind":"token",
             "token":{
@@ -605,8 +597,6 @@
               "line_number":11
             }
           },
-          "foreach_key":{"kind":"missing"},
-          "foreach_arrow":{"kind":"missing"},
           "foreach_value":{
             "kind":"list_expression",
             "list_keyword":{
@@ -727,8 +717,7 @@
                                 "line_number":11
                               }
                             }
-                          },
-                          "list_separator":{"kind":"missing"}
+                          }
                         }
                       ]
                     },
@@ -746,8 +735,7 @@
                         "line_number":11
                       }
                     }
-                  },
-                  "list_separator":{"kind":"missing"}
+                  }
                 }
               ]
             },
@@ -796,7 +784,6 @@
                 "line_number":11
               }
             },
-            "compound_statements":{"kind":"missing"},
             "compound_right_brace":{
               "kind":"token",
               "token":{
@@ -877,8 +864,7 @@
                           "line_number":15
                         }
                       }
-                    },
-                    "list_separator":{"kind":"missing"}
+                    }
                   }
                 ]
               },
@@ -983,7 +969,6 @@
                 "elements":[
                   {
                     "kind":"list_item",
-                    "list_item":{"kind":"missing"},
                     "list_separator":{
                       "kind":"token",
                       "token":{
@@ -1001,7 +986,6 @@
                   },
                   {
                     "kind":"list_item",
-                    "list_item":{"kind":"missing"},
                     "list_separator":{
                       "kind":"token",
                       "token":{
@@ -1053,7 +1037,6 @@
                   },
                   {
                     "kind":"list_item",
-                    "list_item":{"kind":"missing"},
                     "list_separator":{
                       "kind":"token",
                       "token":{
@@ -1068,11 +1051,6 @@
                         "line_number":16
                       }
                     }
-                  },
-                  {
-                    "kind":"list_item",
-                    "list_item":{"kind":"missing"},
-                    "list_separator":{"kind":"missing"}
                   }
                 ]
               },
@@ -1234,8 +1212,7 @@
                             "line_number":18
                           }
                         }
-                      },
-                      "list_separator":{"kind":"missing"}
+                      }
                     }
                   ]
                 },
@@ -1320,7 +1297,6 @@
                 "line_number":20
               }
             },
-            "function_call_type_args":{"kind":"missing"},
             "function_call_left_paren":{
               "kind":"token",
               "token":{
@@ -1425,8 +1401,7 @@
                                 "line_number":20
                               }
                             }
-                          },
-                          "list_separator":{"kind":"missing"}
+                          }
                         }
                       ]
                     },
@@ -1444,8 +1419,7 @@
                         "line_number":20
                       }
                     }
-                  },
-                  "list_separator":{"kind":"missing"}
+                  }
                 }
               ]
             },
@@ -1538,8 +1512,7 @@
                           "line_number":21
                         }
                       }
-                    },
-                    "list_separator":{"kind":"missing"}
+                    }
                   }
                 ]
               },
@@ -1664,8 +1637,7 @@
                           "line_number":22
                         }
                       }
-                    },
-                    "list_separator":{"kind":"missing"}
+                    }
                   }
                 ]
               },
@@ -1737,10 +1709,8 @@
         },
         {
           "kind":"function_declaration",
-          "function_attribute_spec":{"kind":"missing"},
           "function_declaration_header":{
             "kind":"function_declaration_header",
-            "function_modifiers":{"kind":"missing"},
             "function_keyword":{
               "kind":"token",
               "token":{
@@ -1769,7 +1739,6 @@
                 "line_number":24
               }
             },
-            "function_type_parameter_list":{"kind":"missing"},
             "function_left_paren":{
               "kind":"token",
               "token":{
@@ -1784,7 +1753,6 @@
                 "line_number":24
               }
             },
-            "function_parameter_list":{"kind":"missing"},
             "function_right_paren":{
               "kind":"token",
               "token":{
@@ -1799,7 +1767,6 @@
                 "line_number":24
               }
             },
-            "function_contexts":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
               "token":{
@@ -1885,8 +1852,7 @@
                           "line_number":24
                         }
                       }
-                    },
-                    "list_separator":{"kind":"missing"}
+                    }
                   }
                 ]
               },
@@ -1904,8 +1870,7 @@
                   "line_number":24
                 }
               }
-            },
-            "function_where_clause":{"kind":"missing"}
+            }
           },
           "function_body":{
             "kind":"compound_statement",
@@ -2027,8 +1992,7 @@
                                 "line_number":25
                               }
                             }
-                          },
-                          "list_separator":{"kind":"missing"}
+                          }
                         }
                       ]
                     },
@@ -2110,5 +2074,5 @@
     }
   },
   "program_text":"<?hh // strict\n\n// legal because 'list' can be the value clause of a foreach\nforeach($array as list($odd, $even)){\n}\n\n// legal because 'list' can be the operand to a list destructuring\nlist($a, list($b, $c)) = $vector;\n\n// legal because nested destructuring, and use as value clause, are both legal\nforeach($array as list($odd, list($even))){\n}\n\n// legal because used as left side of simple assignment\nlist($a) = $vector;\nlist(,,$a,,) = $vector;\n// legal because simple assignment is right-associative\n$x = list($whatever) = $whatever;\n\nfoo(list($a, $b)); // error 2040\nlist(2) + 3; // error 2040\nlist(2) % 3; // error 2040\n\nfunction foo(): (int, int) {\n  return list(1, 2); // error, list can only be used as an lvar\n}\n",
-  "version":"2020-12-14-0001"
+  "version":"2021-01-05-0001"
 }

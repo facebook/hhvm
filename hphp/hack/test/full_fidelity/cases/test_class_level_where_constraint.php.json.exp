@@ -54,9 +54,6 @@
         },
         {
           "kind":"classish_declaration",
-          "classish_attribute":{"kind":"missing"},
-          "classish_modifiers":{"kind":"missing"},
-          "classish_xhp":{"kind":"missing"},
           "classish_keyword":{
             "kind":"token",
             "token":{
@@ -117,9 +114,6 @@
                   "kind":"list_item",
                   "list_item":{
                     "kind":"type_parameter",
-                    "type_attribute_spec":{"kind":"missing"},
-                    "type_reified":{"kind":"missing"},
-                    "type_variance":{"kind":"missing"},
                     "type_name":{
                       "kind":"token",
                       "token":{
@@ -133,11 +127,8 @@
                         "trailing":[],
                         "line_number":12
                       }
-                    },
-                    "type_param_params":{"kind":"missing"},
-                    "type_constraints":{"kind":"missing"}
-                  },
-                  "list_separator":{"kind":"missing"}
+                    }
+                  }
                 }
               ]
             },
@@ -156,10 +147,6 @@
               }
             }
           },
-          "classish_extends_keyword":{"kind":"missing"},
-          "classish_extends_list":{"kind":"missing"},
-          "classish_implements_keyword":{"kind":"missing"},
-          "classish_implements_list":{"kind":"missing"},
           "classish_where_clause":{
             "kind":"where_clause",
             "where_clause_keyword":{
@@ -231,8 +218,7 @@
                         }
                       }
                     }
-                  },
-                  "list_separator":{"kind":"missing"}
+                  }
                 }
               ]
             }
@@ -253,7 +239,6 @@
                 "line_number":12
               }
             },
-            "classish_body_elements":{"kind":"missing"},
             "classish_body_right_brace":{
               "kind":"token",
               "token":{
@@ -291,5 +276,5 @@
     }
   },
   "program_text":"<?hh\n/**\n * Copyright (c) 2014, Facebook, Inc.\n * All rights reserved.\n *\n * This source code is licensed under the MIT license found in the\n * LICENSE file in the \"hack\" directory of this source tree.\n *\n *\n */\n\nclass A <T> where T as num {}\n",
-  "version":"2020-06-23-0001"
+  "version":"2021-01-05-0001"
 }

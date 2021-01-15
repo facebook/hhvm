@@ -106,7 +106,6 @@
               "elements":[
                 {
                   "kind":"const_declaration",
-                  "const_modifiers":{"kind":"missing"},
                   "const_keyword":{
                     "kind":"token",
                     "token":{
@@ -121,7 +120,6 @@
                       "line_number":4
                     }
                   },
-                  "const_type_specifier":{"kind":"missing"},
                   "const_declarators":{
                     "kind":"list",
                     "elements":[
@@ -177,8 +175,7 @@
                               }
                             }
                           }
-                        },
-                        "list_separator":{"kind":"missing"}
+                        }
                       }
                     ]
                   },
@@ -252,7 +249,6 @@
                 "kind":"list_item",
                 "list_item":{
                   "kind":"namespace_use_clause",
-                  "namespace_use_clause_kind":{"kind":"missing"},
                   "namespace_use_name":{
                     "kind":"qualified_name",
                     "qualified_name_parts":{
@@ -304,8 +300,7 @@
                               "trailing":[{"kind":"whitespace","text":" ","offset":63,"width":1}],
                               "line_number":7
                             }
-                          },
-                          "list_separator":{"kind":"missing"}
+                          }
                         }
                       ]
                     }
@@ -338,8 +333,7 @@
                       "line_number":7
                     }
                   }
-                },
-                "list_separator":{"kind":"missing"}
+                }
               }
             ]
           },
@@ -395,7 +389,6 @@
                 "kind":"list_item",
                 "list_item":{
                   "kind":"namespace_use_clause",
-                  "namespace_use_clause_kind":{"kind":"missing"},
                   "namespace_use_name":{
                     "kind":"qualified_name",
                     "qualified_name_parts":{
@@ -447,8 +440,7 @@
                               "trailing":[{"kind":"whitespace","text":" ","offset":88,"width":1}],
                               "line_number":8
                             }
-                          },
-                          "list_separator":{"kind":"missing"}
+                          }
                         }
                       ]
                     }
@@ -481,8 +473,7 @@
                       "line_number":8
                     }
                   }
-                },
-                "list_separator":{"kind":"missing"}
+                }
               }
             ]
           },
@@ -538,7 +529,6 @@
                 "kind":"list_item",
                 "list_item":{
                   "kind":"namespace_use_clause",
-                  "namespace_use_clause_kind":{"kind":"missing"},
                   "namespace_use_name":{
                     "kind":"qualified_name",
                     "qualified_name_parts":{
@@ -590,8 +580,7 @@
                               "trailing":[{"kind":"whitespace","text":" ","offset":113,"width":1}],
                               "line_number":9
                             }
-                          },
-                          "list_separator":{"kind":"missing"}
+                          }
                         }
                       ]
                     }
@@ -624,8 +613,7 @@
                       "line_number":9
                     }
                   }
-                },
-                "list_separator":{"kind":"missing"}
+                }
               }
             ]
           },
@@ -681,7 +669,6 @@
                 "kind":"list_item",
                 "list_item":{
                   "kind":"namespace_use_clause",
-                  "namespace_use_clause_kind":{"kind":"missing"},
                   "namespace_use_name":{
                     "kind":"qualified_name",
                     "qualified_name_parts":{
@@ -733,8 +720,7 @@
                               "trailing":[{"kind":"whitespace","text":" ","offset":138,"width":1}],
                               "line_number":10
                             }
-                          },
-                          "list_separator":{"kind":"missing"}
+                          }
                         }
                       ]
                     }
@@ -767,8 +753,7 @@
                       "line_number":10
                     }
                   }
-                },
-                "list_separator":{"kind":"missing"}
+                }
               }
             ]
           },
@@ -824,7 +809,6 @@
                 "kind":"list_item",
                 "list_item":{
                   "kind":"namespace_use_clause",
-                  "namespace_use_clause_kind":{"kind":"missing"},
                   "namespace_use_name":{
                     "kind":"qualified_name",
                     "qualified_name_parts":{
@@ -876,8 +860,7 @@
                               "trailing":[{"kind":"whitespace","text":" ","offset":164,"width":1}],
                               "line_number":12
                             }
-                          },
-                          "list_separator":{"kind":"missing"}
+                          }
                         }
                       ]
                     }
@@ -910,8 +893,7 @@
                       "line_number":12
                     }
                   }
-                },
-                "list_separator":{"kind":"missing"}
+                }
               }
             ]
           },
@@ -951,5 +933,5 @@
     }
   },
   "program_text":"<?hh\n\nnamespace consts {\n  const x = \"x\";\n}\n\nuse const consts\\x as a;\nuse const consts\\x as b;\nuse const consts\\x as c;\nuse const consts\\x as d;\n\nuse const consts\\x as a;\n",
-  "version":"2020-06-23-0001"
+  "version":"2021-01-05-0001"
 }

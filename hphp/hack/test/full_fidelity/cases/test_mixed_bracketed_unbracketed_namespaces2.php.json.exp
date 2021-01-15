@@ -105,7 +105,6 @@
                 "line_number":2
               }
             },
-            "namespace_declarations":{"kind":"missing"},
             "namespace_right_brace":{
               "kind":"token",
               "token":{
@@ -222,7 +221,6 @@
                 "line_number":4
               }
             },
-            "namespace_declarations":{"kind":"missing"},
             "namespace_right_brace":{
               "kind":"token",
               "token":{
@@ -432,5 +430,5 @@
     }
   },
   "program_text":"<?hh // strict\nnamespace foo {}\nnamespace bar;\nnamespace blah {}\nnamespace blah2;\n\nnamespace outer {\n  namespace inner;\n}\n",
-  "version":"2020-06-23-0001"
+  "version":"2021-01-05-0001"
 }

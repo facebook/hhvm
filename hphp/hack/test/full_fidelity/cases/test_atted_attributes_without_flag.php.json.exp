@@ -84,15 +84,12 @@
                 "line_number":3
               }
             }
-          },
-          "expression_statement_semicolon":{"kind":"missing"}
+          }
         },
         {
           "kind":"function_declaration",
-          "function_attribute_spec":{"kind":"missing"},
           "function_declaration_header":{
             "kind":"function_declaration_header",
-            "function_modifiers":{"kind":"missing"},
             "function_keyword":{
               "kind":"token",
               "token":{
@@ -121,7 +118,6 @@
                 "line_number":4
               }
             },
-            "function_type_parameter_list":{"kind":"missing"},
             "function_left_paren":{
               "kind":"token",
               "token":{
@@ -136,7 +132,6 @@
                 "line_number":4
               }
             },
-            "function_parameter_list":{"kind":"missing"},
             "function_right_paren":{
               "kind":"token",
               "token":{
@@ -151,7 +146,6 @@
                 "line_number":4
               }
             },
-            "function_contexts":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
               "token":{
@@ -182,8 +176,7 @@
                   "line_number":4
                 }
               }
-            },
-            "function_where_clause":{"kind":"missing"}
+            }
           },
           "function_body":{
             "kind":"compound_statement",
@@ -201,7 +194,6 @@
                 "line_number":4
               }
             },
-            "compound_statements":{"kind":"missing"},
             "compound_right_brace":{
               "kind":"token",
               "token":{
@@ -239,5 +231,5 @@
     }
   },
   "program_text":"<?hh\n\n@TestAttribute\nfunction f(): void {}\n",
-  "version":"2020-12-14-0001"
+  "version":"2021-01-05-0001"
 }

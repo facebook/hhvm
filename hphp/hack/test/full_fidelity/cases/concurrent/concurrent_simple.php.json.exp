@@ -54,7 +54,6 @@
         },
         {
           "kind":"function_declaration",
-          "function_attribute_spec":{"kind":"missing"},
           "function_declaration_header":{
             "kind":"function_declaration_header",
             "function_modifiers":{
@@ -104,7 +103,6 @@
                 "line_number":3
               }
             },
-            "function_type_parameter_list":{"kind":"missing"},
             "function_left_paren":{
               "kind":"token",
               "token":{
@@ -119,7 +117,6 @@
                 "line_number":3
               }
             },
-            "function_parameter_list":{"kind":"missing"},
             "function_right_paren":{
               "kind":"token",
               "token":{
@@ -134,7 +131,6 @@
                 "line_number":3
               }
             },
-            "function_contexts":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
               "token":{
@@ -202,8 +198,7 @@
                             "line_number":3
                           }
                         }
-                      },
-                      "list_separator":{"kind":"missing"}
+                      }
                     }
                   ]
                 },
@@ -222,8 +217,7 @@
                   }
                 }
               }
-            },
-            "function_where_clause":{"kind":"missing"}
+            }
           },
           "function_body":{
             "kind":"compound_statement",
@@ -346,7 +340,6 @@
                                     "line_number":5
                                   }
                                 },
-                                "function_call_type_args":{"kind":"missing"},
                                 "function_call_left_paren":{
                                   "kind":"token",
                                   "token":{
@@ -361,7 +354,6 @@
                                     "line_number":5
                                   }
                                 },
-                                "function_call_argument_list":{"kind":"missing"},
                                 "function_call_right_paren":{
                                   "kind":"token",
                                   "token":{
@@ -428,7 +420,6 @@
                                   "line_number":6
                                 }
                               },
-                              "function_call_type_args":{"kind":"missing"},
                               "function_call_left_paren":{
                                 "kind":"token",
                                 "token":{
@@ -443,7 +434,6 @@
                                   "line_number":6
                                 }
                               },
-                              "function_call_argument_list":{"kind":"missing"},
                               "function_call_right_paren":{
                                 "kind":"token",
                                 "token":{
@@ -532,5 +522,5 @@
     }
   },
   "program_text":"<?hh\n\nasync function foo(): Awaitable<void> {\n  concurrent {\n    $x = await genx();\n    await geny();\n  }\n}\n",
-  "version":"2020-12-14-0001"
+  "version":"2021-01-05-0001"
 }

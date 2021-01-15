@@ -58,9 +58,6 @@
         },
         {
           "kind":"classish_declaration",
-          "classish_attribute":{"kind":"missing"},
-          "classish_modifiers":{"kind":"missing"},
-          "classish_xhp":{"kind":"missing"},
           "classish_keyword":{
             "kind":"token",
             "token":{
@@ -98,12 +95,6 @@
               "line_number":4
             }
           },
-          "classish_type_parameters":{"kind":"missing"},
-          "classish_extends_keyword":{"kind":"missing"},
-          "classish_extends_list":{"kind":"missing"},
-          "classish_implements_keyword":{"kind":"missing"},
-          "classish_implements_list":{"kind":"missing"},
-          "classish_where_clause":{"kind":"missing"},
           "classish_body":{
             "kind":"classish_body",
             "classish_body_left_brace":{
@@ -161,12 +152,8 @@
                                 "trailing":[],
                                 "line_number":5
                               }
-                            },
-                            "constructor_call_left_paren":{"kind":"missing"},
-                            "constructor_call_argument_list":{"kind":"missing"},
-                            "constructor_call_right_paren":{"kind":"missing"}
-                          },
-                          "list_separator":{"kind":"missing"}
+                            }
+                          }
                         }
                       ]
                     },
@@ -241,10 +228,8 @@
                               "trailing":[],
                               "line_number":5
                             }
-                          },
-                          "property_initializer":{"kind":"missing"}
-                        },
-                        "list_separator":{"kind":"missing"}
+                          }
+                        }
                       }
                     ]
                   },
@@ -301,12 +286,8 @@
                                 "trailing":[],
                                 "line_number":6
                               }
-                            },
-                            "constructor_call_left_paren":{"kind":"missing"},
-                            "constructor_call_argument_list":{"kind":"missing"},
-                            "constructor_call_right_paren":{"kind":"missing"}
-                          },
-                          "list_separator":{"kind":"missing"}
+                            }
+                          }
                         }
                       ]
                     },
@@ -416,8 +397,7 @@
                               }
                             }
                           }
-                        },
-                        "list_separator":{"kind":"missing"}
+                        }
                       }
                     ]
                   },
@@ -474,12 +454,8 @@
                                 "trailing":[],
                                 "line_number":7
                               }
-                            },
-                            "constructor_call_left_paren":{"kind":"missing"},
-                            "constructor_call_argument_list":{"kind":"missing"},
-                            "constructor_call_right_paren":{"kind":"missing"}
-                          },
-                          "list_separator":{"kind":"missing"}
+                            }
+                          }
                         }
                       ]
                     },
@@ -554,8 +530,7 @@
                               "trailing":[],
                               "line_number":7
                             }
-                          },
-                          "property_initializer":{"kind":"missing"}
+                          }
                         },
                         "list_separator":{
                           "kind":"token",
@@ -624,8 +599,7 @@
                               }
                             }
                           }
-                        },
-                        "list_separator":{"kind":"missing"}
+                        }
                       }
                     ]
                   },
@@ -646,7 +620,6 @@
                 },
                 {
                   "kind":"const_declaration",
-                  "const_modifiers":{"kind":"missing"},
                   "const_keyword":{
                     "kind":"token",
                     "token":{
@@ -698,10 +671,8 @@
                               "trailing":[],
                               "line_number":8
                             }
-                          },
-                          "constant_declarator_initializer":{"kind":"missing"}
-                        },
-                        "list_separator":{"kind":"missing"}
+                          }
+                        }
                       }
                     ]
                   },
@@ -722,7 +693,6 @@
                 },
                 {
                   "kind":"const_declaration",
-                  "const_modifiers":{"kind":"missing"},
                   "const_keyword":{
                     "kind":"token",
                     "token":{
@@ -809,8 +779,7 @@
                               }
                             }
                           }
-                        },
-                        "list_separator":{"kind":"missing"}
+                        }
                       }
                     ]
                   },
@@ -831,7 +800,6 @@
                 },
                 {
                   "kind":"const_declaration",
-                  "const_modifiers":{"kind":"missing"},
                   "const_keyword":{
                     "kind":"token",
                     "token":{
@@ -883,8 +851,7 @@
                               "trailing":[],
                               "line_number":10
                             }
-                          },
-                          "constant_declarator_initializer":{"kind":"missing"}
+                          }
                         },
                         "list_separator":{
                           "kind":"token",
@@ -953,8 +920,7 @@
                               }
                             }
                           }
-                        },
-                        "list_separator":{"kind":"missing"}
+                        }
                       }
                     ]
                   },
@@ -1012,5 +978,5 @@
     }
   },
   "program_text":"<?hh // strict\n// Copyright 2004-present Facebook. All Rights Reserved.\n\nclass A {\n  <<__Const>> static int $o;\n  <<__Const>> static int $p = 6;\n  <<__Const>> static int $m, $l = 5;\n  const int P;\n  const int M = 7;\n  const int N, O = 7;\n}\n",
-  "version":"2020-06-23-0001"
+  "version":"2021-01-05-0001"
 }

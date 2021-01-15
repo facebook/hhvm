@@ -54,10 +54,8 @@
         },
         {
           "kind":"function_declaration",
-          "function_attribute_spec":{"kind":"missing"},
           "function_declaration_header":{
             "kind":"function_declaration_header",
-            "function_modifiers":{"kind":"missing"},
             "function_keyword":{
               "kind":"token",
               "token":{
@@ -86,7 +84,6 @@
                 "line_number":2
               }
             },
-            "function_type_parameter_list":{"kind":"missing"},
             "function_left_paren":{
               "kind":"token",
               "token":{
@@ -101,7 +98,6 @@
                 "line_number":2
               }
             },
-            "function_parameter_list":{"kind":"missing"},
             "function_right_paren":{
               "kind":"token",
               "token":{
@@ -115,11 +111,7 @@
                 "trailing":[{"kind":"whitespace","text":" ","offset":19,"width":1}],
                 "line_number":2
               }
-            },
-            "function_contexts":{"kind":"missing"},
-            "function_colon":{"kind":"missing"},
-            "function_type":{"kind":"missing"},
-            "function_where_clause":{"kind":"missing"}
+            }
           },
           "function_body":{
             "kind":"compound_statement",
@@ -302,17 +294,11 @@
                 "trailing":[{"kind":"end_of_line","text":"\n","offset":42,"width":1}],
                 "line_number":7
               }
-            },
-            "conditional_colon":{"kind":"missing"},
-            "conditional_alternative":{"kind":"missing"}
-          },
-          "expression_statement_semicolon":{"kind":"missing"}
+            }
+          }
         },
         {
           "kind":"classish_declaration",
-          "classish_attribute":{"kind":"missing"},
-          "classish_modifiers":{"kind":"missing"},
-          "classish_xhp":{"kind":"missing"},
           "classish_keyword":{
             "kind":"token",
             "token":{
@@ -341,12 +327,6 @@
               "line_number":8
             }
           },
-          "classish_type_parameters":{"kind":"missing"},
-          "classish_extends_keyword":{"kind":"missing"},
-          "classish_extends_list":{"kind":"missing"},
-          "classish_implements_keyword":{"kind":"missing"},
-          "classish_implements_list":{"kind":"missing"},
-          "classish_where_clause":{"kind":"missing"},
           "classish_body":{
             "kind":"classish_body",
             "classish_body_left_brace":{
@@ -368,7 +348,6 @@
               "elements":[
                 {
                   "kind":"methodish_declaration",
-                  "methodish_attribute":{"kind":"missing"},
                   "methodish_function_decl_header":{
                     "kind":"function_declaration_header",
                     "function_modifiers":{
@@ -418,7 +397,6 @@
                         "line_number":9
                       }
                     },
-                    "function_type_parameter_list":{"kind":"missing"},
                     "function_left_paren":{
                       "kind":"token",
                       "token":{
@@ -433,7 +411,6 @@
                         "line_number":9
                       }
                     },
-                    "function_parameter_list":{"kind":"missing"},
                     "function_right_paren":{
                       "kind":"token",
                       "token":{
@@ -448,7 +425,6 @@
                         "line_number":9
                       }
                     },
-                    "function_contexts":{"kind":"missing"},
                     "function_colon":{
                       "kind":"token",
                       "token":{
@@ -479,8 +455,7 @@
                           "line_number":9
                         }
                       }
-                    },
-                    "function_where_clause":{"kind":"missing"}
+                    }
                   },
                   "methodish_function_body":{
                     "kind":"compound_statement",
@@ -565,8 +540,7 @@
                         "line_number":11
                       }
                     }
-                  },
-                  "methodish_semicolon":{"kind":"missing"}
+                  }
                 }
               ]
             },
@@ -607,5 +581,5 @@
     }
   },
   "program_text":"<?hh\nfunction foo() {\n  $a = 1;\n}\n?>\n\n<?hh\nclass foo {\n  public function bar(): int {\n    return 5;\n  }\n}\n",
-  "version":"2020-12-14-0001"
+  "version":"2021-01-05-0001"
 }

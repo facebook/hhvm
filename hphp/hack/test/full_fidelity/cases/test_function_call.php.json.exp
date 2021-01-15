@@ -54,10 +54,8 @@
         },
         {
           "kind":"function_declaration",
-          "function_attribute_spec":{"kind":"missing"},
           "function_declaration_header":{
             "kind":"function_declaration_header",
-            "function_modifiers":{"kind":"missing"},
             "function_keyword":{
               "kind":"token",
               "token":{
@@ -86,7 +84,6 @@
                 "line_number":2
               }
             },
-            "function_type_parameter_list":{"kind":"missing"},
             "function_left_paren":{
               "kind":"token",
               "token":{
@@ -101,7 +98,6 @@
                 "line_number":2
               }
             },
-            "function_parameter_list":{"kind":"missing"},
             "function_right_paren":{
               "kind":"token",
               "token":{
@@ -115,11 +111,7 @@
                 "trailing":[{"kind":"whitespace","text":" ","offset":17,"width":1}],
                 "line_number":2
               }
-            },
-            "function_contexts":{"kind":"missing"},
-            "function_colon":{"kind":"missing"},
-            "function_type":{"kind":"missing"},
-            "function_where_clause":{"kind":"missing"}
+            }
           },
           "function_body":{
             "kind":"compound_statement",
@@ -158,7 +150,6 @@
                         "line_number":3
                       }
                     },
-                    "function_call_type_args":{"kind":"missing"},
                     "function_call_left_paren":{
                       "kind":"token",
                       "token":{
@@ -194,8 +185,7 @@
                                 "line_number":3
                               }
                             }
-                          },
-                          "list_separator":{"kind":"missing"}
+                          }
                         }
                       ]
                     },
@@ -249,7 +239,6 @@
                           "line_number":4
                         }
                       },
-                      "function_call_type_args":{"kind":"missing"},
                       "function_call_left_paren":{
                         "kind":"token",
                         "token":{
@@ -264,7 +253,6 @@
                           "line_number":4
                         }
                       },
-                      "function_call_argument_list":{"kind":"missing"},
                       "function_call_right_paren":{
                         "kind":"token",
                         "token":{
@@ -344,7 +332,6 @@
                           "line_number":5
                         }
                       },
-                      "function_call_type_args":{"kind":"missing"},
                       "function_call_left_paren":{
                         "kind":"token",
                         "token":{
@@ -359,7 +346,6 @@
                           "line_number":5
                         }
                       },
-                      "function_call_argument_list":{"kind":"missing"},
                       "function_call_right_paren":{
                         "kind":"token",
                         "token":{
@@ -461,5 +447,5 @@
     }
   },
   "program_text":"<?hh\nfunction f() {\n  g($a);\n  h() -> d;\n  f() + 1;\n}\n",
-  "version":"2020-12-14-0001"
+  "version":"2021-01-05-0001"
 }

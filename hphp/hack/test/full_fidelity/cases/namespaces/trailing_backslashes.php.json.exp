@@ -54,10 +54,8 @@
         },
         {
           "kind":"function_declaration",
-          "function_attribute_spec":{"kind":"missing"},
           "function_declaration_header":{
             "kind":"function_declaration_header",
-            "function_modifiers":{"kind":"missing"},
             "function_keyword":{
               "kind":"token",
               "token":{
@@ -96,7 +94,6 @@
                 "line_number":5
               }
             },
-            "function_type_parameter_list":{"kind":"missing"},
             "function_left_paren":{
               "kind":"token",
               "token":{
@@ -111,7 +108,6 @@
                 "line_number":5
               }
             },
-            "function_parameter_list":{"kind":"missing"},
             "function_right_paren":{
               "kind":"token",
               "token":{
@@ -126,7 +122,6 @@
                 "line_number":5
               }
             },
-            "function_contexts":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
               "token":{
@@ -157,8 +152,7 @@
                   "line_number":5
                 }
               }
-            },
-            "function_where_clause":{"kind":"missing"}
+            }
           },
           "function_body":{
             "kind":"compound_statement",
@@ -288,7 +282,6 @@
                             "line_number":6
                           }
                         },
-                        "constructor_call_argument_list":{"kind":"missing"},
                         "constructor_call_right_paren":{
                           "kind":"token",
                           "token":{
@@ -431,7 +424,6 @@
                           ]
                         }
                       },
-                      "function_call_type_args":{"kind":"missing"},
                       "function_call_left_paren":{
                         "kind":"token",
                         "token":{
@@ -446,7 +438,6 @@
                           "line_number":8
                         }
                       },
-                      "function_call_argument_list":{"kind":"missing"},
                       "function_call_right_paren":{
                         "kind":"token",
                         "token":{
@@ -641,5 +632,5 @@
     }
   },
   "program_text":"<?hh\n\n// Qualified names should not have trailing backslashes\n\nfunction test(): void {\n  $x = new Foospace\\();\n\n  $y = Foospace\\bar\\();\n\n  $z = Foo\\::class;\n}\n",
-  "version":"2020-12-14-0001"
+  "version":"2021-01-05-0001"
 }

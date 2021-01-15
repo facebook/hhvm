@@ -54,7 +54,6 @@
         },
         {
           "kind":"classish_declaration",
-          "classish_attribute":{"kind":"missing"},
           "classish_modifiers":{
             "kind":"list",
             "elements":[
@@ -74,7 +73,6 @@
               }
             ]
           },
-          "classish_xhp":{"kind":"missing"},
           "classish_keyword":{
             "kind":"token",
             "token":{
@@ -103,12 +101,6 @@
               "line_number":3
             }
           },
-          "classish_type_parameters":{"kind":"missing"},
-          "classish_extends_keyword":{"kind":"missing"},
-          "classish_extends_list":{"kind":"missing"},
-          "classish_implements_keyword":{"kind":"missing"},
-          "classish_implements_list":{"kind":"missing"},
-          "classish_where_clause":{"kind":"missing"},
           "classish_body":{
             "kind":"classish_body",
             "classish_body_left_brace":{
@@ -166,12 +158,8 @@
                                 "trailing":[],
                                 "line_number":4
                               }
-                            },
-                            "constructor_call_left_paren":{"kind":"missing"},
-                            "constructor_call_argument_list":{"kind":"missing"},
-                            "constructor_call_right_paren":{"kind":"missing"}
-                          },
-                          "list_separator":{"kind":"missing"}
+                            }
+                          }
                         }
                       ]
                     },
@@ -251,7 +239,6 @@
                       "line_number":5
                     }
                   },
-                  "type_const_type_parameters":{"kind":"missing"},
                   "type_const_type_constraint":{
                     "kind":"type_constraint",
                     "constraint_keyword":{
@@ -286,8 +273,6 @@
                       }
                     }
                   },
-                  "type_const_equal":{"kind":"missing"},
-                  "type_const_type_specifier":{"kind":"missing"},
                   "type_const_semicolon":{
                     "kind":"token",
                     "token":{
@@ -305,7 +290,6 @@
                 },
                 {
                   "kind":"type_const_declaration",
-                  "type_const_attribute_spec":{"kind":"missing"},
                   "type_const_modifiers":{
                     "kind":"list",
                     "elements":[
@@ -370,7 +354,6 @@
                       "line_number":7
                     }
                   },
-                  "type_const_type_parameters":{"kind":"missing"},
                   "type_const_type_constraint":{
                     "kind":"type_constraint",
                     "constraint_keyword":{
@@ -405,8 +388,6 @@
                       }
                     }
                   },
-                  "type_const_equal":{"kind":"missing"},
-                  "type_const_type_specifier":{"kind":"missing"},
                   "type_const_semicolon":{
                     "kind":"token",
                     "token":{
@@ -463,12 +444,8 @@
                                 "trailing":[],
                                 "line_number":9
                               }
-                            },
-                            "constructor_call_left_paren":{"kind":"missing"},
-                            "constructor_call_argument_list":{"kind":"missing"},
-                            "constructor_call_right_paren":{"kind":"missing"}
-                          },
-                          "list_separator":{"kind":"missing"}
+                            }
+                          }
                         }
                       ]
                     },
@@ -487,7 +464,6 @@
                       }
                     }
                   },
-                  "type_const_modifiers":{"kind":"missing"},
                   "type_const_keyword":{
                     "kind":"token",
                     "token":{
@@ -530,8 +506,6 @@
                       "line_number":10
                     }
                   },
-                  "type_const_type_parameters":{"kind":"missing"},
-                  "type_const_type_constraint":{"kind":"missing"},
                   "type_const_equal":{
                     "kind":"token",
                     "token":{
@@ -580,8 +554,6 @@
                 },
                 {
                   "kind":"type_const_declaration",
-                  "type_const_attribute_spec":{"kind":"missing"},
-                  "type_const_modifiers":{"kind":"missing"},
                   "type_const_keyword":{
                     "kind":"token",
                     "token":{
@@ -627,8 +599,6 @@
                       "line_number":12
                     }
                   },
-                  "type_const_type_parameters":{"kind":"missing"},
-                  "type_const_type_constraint":{"kind":"missing"},
                   "type_const_equal":{
                     "kind":"token",
                     "token":{
@@ -714,5 +684,5 @@
     }
   },
   "program_text":"<?hh\n\nabstract class C {\n  <<__Enforceable>>\n  abstract const type T as num;\n\n  abstract const type Tu as num;\n\n  <<__Enforceable>>\n  const type Tv = int;\n\n  const type Tw = int;\n}\n",
-  "version":"2020-06-23-0001"
+  "version":"2021-01-05-0001"
 }

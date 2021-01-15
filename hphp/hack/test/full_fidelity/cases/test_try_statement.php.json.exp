@@ -54,10 +54,8 @@
         },
         {
           "kind":"function_declaration",
-          "function_attribute_spec":{"kind":"missing"},
           "function_declaration_header":{
             "kind":"function_declaration_header",
-            "function_modifiers":{"kind":"missing"},
             "function_keyword":{
               "kind":"token",
               "token":{
@@ -86,7 +84,6 @@
                 "line_number":2
               }
             },
-            "function_type_parameter_list":{"kind":"missing"},
             "function_left_paren":{
               "kind":"token",
               "token":{
@@ -101,7 +98,6 @@
                 "line_number":2
               }
             },
-            "function_parameter_list":{"kind":"missing"},
             "function_right_paren":{
               "kind":"token",
               "token":{
@@ -115,11 +111,7 @@
                 "trailing":[],
                 "line_number":2
               }
-            },
-            "function_contexts":{"kind":"missing"},
-            "function_colon":{"kind":"missing"},
-            "function_type":{"kind":"missing"},
-            "function_where_clause":{"kind":"missing"}
+            }
           },
           "function_body":{
             "kind":"compound_statement",
@@ -521,5 +513,5 @@
     }
   },
   "program_text":"<?hh\nfunction f(){\n  try {\n    $a++;\n  }\n  catch (Bar $a){\n    $b;\n  }\n  finally {\n    $c;\n  }\n}\n",
-  "version":"2020-12-14-0001"
+  "version":"2021-01-05-0001"
 }

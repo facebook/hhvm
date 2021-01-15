@@ -155,8 +155,7 @@
                               "line_number":2
                             }
                           }
-                        },
-                        "list_separator":{"kind":"missing"}
+                        }
                       }
                     ]
                   },
@@ -174,8 +173,7 @@
                       "line_number":2
                     }
                   }
-                },
-                "list_separator":{"kind":"missing"}
+                }
               }
             ]
           },
@@ -196,10 +194,8 @@
         },
         {
           "kind":"function_declaration",
-          "function_attribute_spec":{"kind":"missing"},
           "function_declaration_header":{
             "kind":"function_declaration_header",
-            "function_modifiers":{"kind":"missing"},
             "function_keyword":{
               "kind":"token",
               "token":{
@@ -228,7 +224,6 @@
                 "line_number":4
               }
             },
-            "function_type_parameter_list":{"kind":"missing"},
             "function_left_paren":{
               "kind":"token",
               "token":{
@@ -243,7 +238,6 @@
                 "line_number":4
               }
             },
-            "function_parameter_list":{"kind":"missing"},
             "function_right_paren":{
               "kind":"token",
               "token":{
@@ -258,7 +252,6 @@
                 "line_number":4
               }
             },
-            "function_contexts":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
               "token":{
@@ -289,8 +282,7 @@
                   "line_number":4
                 }
               }
-            },
-            "function_where_clause":{"kind":"missing"}
+            }
           },
           "function_body":{
             "kind":"compound_statement",
@@ -348,9 +340,6 @@
                     },
                     "binary_right_operand":{
                       "kind":"anonymous_function",
-                      "anonymous_attribute_spec":{"kind":"missing"},
-                      "anonymous_static_keyword":{"kind":"missing"},
-                      "anonymous_async_keyword":{"kind":"missing"},
                       "anonymous_function_keyword":{
                         "kind":"token",
                         "token":{
@@ -379,7 +368,6 @@
                           "line_number":5
                         }
                       },
-                      "anonymous_parameters":{"kind":"missing"},
                       "anonymous_right_paren":{
                         "kind":"token",
                         "token":{
@@ -431,8 +419,7 @@
                                     "line_number":5
                                   }
                                 }
-                              },
-                              "list_separator":{"kind":"missing"}
+                              }
                             }
                           ]
                         },
@@ -512,7 +499,6 @@
                             "line_number":5
                           }
                         },
-                        "anonymous_use_variables":{"kind":"missing"},
                         "anonymous_use_right_paren":{
                           "kind":"token",
                           "token":{
@@ -737,9 +723,6 @@
                     },
                     "binary_right_operand":{
                       "kind":"anonymous_function",
-                      "anonymous_attribute_spec":{"kind":"missing"},
-                      "anonymous_static_keyword":{"kind":"missing"},
-                      "anonymous_async_keyword":{"kind":"missing"},
                       "anonymous_function_keyword":{
                         "kind":"token",
                         "token":{
@@ -768,7 +751,6 @@
                           "line_number":8
                         }
                       },
-                      "anonymous_parameters":{"kind":"missing"},
                       "anonymous_right_paren":{
                         "kind":"token",
                         "token":{
@@ -820,8 +802,7 @@
                                     "line_number":8
                                   }
                                 }
-                              },
-                              "list_separator":{"kind":"missing"}
+                              }
                             }
                           ]
                         },
@@ -840,8 +821,6 @@
                           }
                         }
                       },
-                      "anonymous_colon":{"kind":"missing"},
-                      "anonymous_type":{"kind":"missing"},
                       "anonymous_use":{
                         "kind":"anonymous_function_use_clause",
                         "anonymous_use_keyword":{
@@ -890,8 +869,7 @@
                                   "trailing":[],
                                   "line_number":8
                                 }
-                              },
-                              "list_separator":{"kind":"missing"}
+                              }
                             }
                           ]
                         },
@@ -1048,9 +1026,6 @@
                     },
                     "binary_right_operand":{
                       "kind":"anonymous_function",
-                      "anonymous_attribute_spec":{"kind":"missing"},
-                      "anonymous_static_keyword":{"kind":"missing"},
-                      "anonymous_async_keyword":{"kind":"missing"},
                       "anonymous_function_keyword":{
                         "kind":"token",
                         "token":{
@@ -1079,7 +1054,6 @@
                           "line_number":9
                         }
                       },
-                      "anonymous_parameters":{"kind":"missing"},
                       "anonymous_right_paren":{
                         "kind":"token",
                         "token":{
@@ -1131,8 +1105,7 @@
                                     "line_number":9
                                   }
                                 }
-                              },
-                              "list_separator":{"kind":"missing"}
+                              }
                             }
                           ]
                         },
@@ -1230,8 +1203,7 @@
                                   "trailing":[],
                                   "line_number":9
                                 }
-                              },
-                              "list_separator":{"kind":"missing"}
+                              }
                             }
                           ]
                         },
@@ -1390,5 +1362,5 @@
     }
   },
   "program_text":"<?hh\n<<file: __EnableUnstableFeatures('coeffects_provisional')>>\n\nfunction anons_with_ctx_list(): void {\n  $anon_no_use = function()[defaults]: int use () { return 0; };\n\n  $x = 1;\n  $anon_no_ret = function()[defaults] use ($ret) { return $x; };\n  $anon = function()[defaults]: int use ($ret) { return $x; };\n}\n",
-  "version":"2020-12-14-0001"
+  "version":"2021-01-05-0001"
 }

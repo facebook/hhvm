@@ -83,7 +83,6 @@
                 "line_number":4
               }
             },
-            "function_call_type_args":{"kind":"missing"},
             "function_call_left_paren":{
               "kind":"token",
               "token":{
@@ -119,8 +118,7 @@
                         "line_number":4
                       }
                     }
-                  },
-                  "list_separator":{"kind":"missing"}
+                  }
                 }
               ]
             },
@@ -218,8 +216,7 @@
                           "line_number":5
                         }
                       }
-                    },
-                    "list_separator":{"kind":"missing"}
+                    }
                   }
                 ]
               },
@@ -273,8 +270,7 @@
                         "line_number":5
                       }
                     }
-                  },
-                  "list_separator":{"kind":"missing"}
+                  }
                 }
               ]
             },
@@ -335,7 +331,6 @@
                 "line_number":6
               }
             },
-            "function_call_type_args":{"kind":"missing"},
             "function_call_left_paren":{
               "kind":"token",
               "token":{
@@ -453,7 +448,6 @@
                         "line_number":6
                       }
                     },
-                    "tuple_expression_items":{"kind":"missing"},
                     "tuple_expression_right_paren":{
                       "kind":"token",
                       "token":{
@@ -468,8 +462,7 @@
                         "line_number":6
                       }
                     }
-                  },
-                  "list_separator":{"kind":"missing"}
+                  }
                 }
               ]
             },
@@ -530,7 +523,6 @@
                 "line_number":7
               }
             },
-            "function_call_type_args":{"kind":"missing"},
             "function_call_left_paren":{
               "kind":"token",
               "token":{
@@ -662,8 +654,7 @@
                         "line_number":7
                       }
                     }
-                  },
-                  "list_separator":{"kind":"missing"}
+                  }
                 }
               ]
             },
@@ -724,7 +715,6 @@
                 "line_number":8
               }
             },
-            "function_call_type_args":{"kind":"missing"},
             "function_call_left_paren":{
               "kind":"token",
               "token":{
@@ -831,8 +821,7 @@
                                   "line_number":8
                                 }
                               }
-                            },
-                            "list_separator":{"kind":"missing"}
+                            }
                           }
                         ]
                       },
@@ -865,7 +854,6 @@
                         "line_number":8
                       }
                     },
-                    "function_call_argument_list":{"kind":"missing"},
                     "function_call_right_paren":{
                       "kind":"token",
                       "token":{
@@ -880,8 +868,7 @@
                         "line_number":8
                       }
                     }
-                  },
-                  "list_separator":{"kind":"missing"}
+                  }
                 }
               ]
             },
@@ -1012,8 +999,7 @@
                             "line_number":9
                           }
                         }
-                      },
-                      "list_separator":{"kind":"missing"}
+                      }
                     }
                   ]
                 },
@@ -1067,8 +1053,7 @@
                           "line_number":9
                         }
                       }
-                    },
-                    "list_separator":{"kind":"missing"}
+                    }
                   }
                 ]
               },
@@ -1191,8 +1176,7 @@
                             "line_number":11
                           }
                         }
-                      },
-                      "list_separator":{"kind":"missing"}
+                      }
                     }
                   ]
                 },
@@ -1225,7 +1209,6 @@
                   "line_number":11
                 }
               },
-              "function_call_argument_list":{"kind":"missing"},
               "function_call_right_paren":{
                 "kind":"token",
                 "token":{
@@ -1345,8 +1328,7 @@
                             "line_number":12
                           }
                         }
-                      },
-                      "list_separator":{"kind":"missing"}
+                      }
                     }
                   ]
                 },
@@ -1379,7 +1361,6 @@
                   "line_number":12
                 }
               },
-              "function_call_argument_list":{"kind":"missing"},
               "function_call_right_paren":{
                 "kind":"token",
                 "token":{
@@ -1499,8 +1480,7 @@
                             "line_number":13
                           }
                         }
-                      },
-                      "list_separator":{"kind":"missing"}
+                      }
                     }
                   ]
                 },
@@ -1554,8 +1534,7 @@
                           "line_number":13
                         }
                       }
-                    },
-                    "list_separator":{"kind":"missing"}
+                    }
                   }
                 ]
               },
@@ -1678,8 +1657,7 @@
                             "line_number":14
                           }
                         }
-                      },
-                      "list_separator":{"kind":"missing"}
+                      }
                     }
                   ]
                 },
@@ -1767,8 +1745,7 @@
                           "line_number":14
                         }
                       }
-                    },
-                    "list_separator":{"kind":"missing"}
+                    }
                   }
                 ]
               },
@@ -1922,8 +1899,7 @@
                             "line_number":15
                           }
                         }
-                      },
-                      "list_separator":{"kind":"missing"}
+                      }
                     }
                   ]
                 },
@@ -1956,7 +1932,6 @@
                   "line_number":15
                 }
               },
-              "function_call_argument_list":{"kind":"missing"},
               "function_call_right_paren":{
                 "kind":"token",
                 "token":{
@@ -2107,8 +2082,7 @@
                             "line_number":16
                           }
                         }
-                      },
-                      "list_separator":{"kind":"missing"}
+                      }
                     }
                   ]
                 },
@@ -2162,8 +2136,7 @@
                           "line_number":16
                         }
                       }
-                    },
-                    "list_separator":{"kind":"missing"}
+                    }
                   }
                 ]
               },
@@ -2317,8 +2290,7 @@
                             "line_number":17
                           }
                         }
-                      },
-                      "list_separator":{"kind":"missing"}
+                      }
                     }
                   ]
                 },
@@ -2406,8 +2378,7 @@
                           "line_number":17
                         }
                       }
-                    },
-                    "list_separator":{"kind":"missing"}
+                    }
                   }
                 ]
               },
@@ -2460,7 +2431,6 @@
                 "line_number":18
               }
             },
-            "function_call_type_args":{"kind":"missing"},
             "function_call_left_paren":{
               "kind":"token",
               "token":{
@@ -2533,8 +2503,7 @@
                                   "line_number":18
                                 }
                               }
-                            },
-                            "list_separator":{"kind":"missing"}
+                            }
                           }
                         ]
                       },
@@ -2567,7 +2536,6 @@
                         "line_number":18
                       }
                     },
-                    "function_call_argument_list":{"kind":"missing"},
                     "function_call_right_paren":{
                       "kind":"token",
                       "token":{
@@ -2582,8 +2550,7 @@
                         "line_number":18
                       }
                     }
-                  },
-                  "list_separator":{"kind":"missing"}
+                  }
                 }
               ]
             },
@@ -2635,7 +2602,6 @@
                 "line_number":19
               }
             },
-            "function_call_type_args":{"kind":"missing"},
             "function_call_left_paren":{
               "kind":"token",
               "token":{
@@ -2708,8 +2674,7 @@
                                   "line_number":19
                                 }
                               }
-                            },
-                            "list_separator":{"kind":"missing"}
+                            }
                           }
                         ]
                       },
@@ -2763,8 +2728,7 @@
                                 "line_number":19
                               }
                             }
-                          },
-                          "list_separator":{"kind":"missing"}
+                          }
                         }
                       ]
                     },
@@ -2782,8 +2746,7 @@
                         "line_number":19
                       }
                     }
-                  },
-                  "list_separator":{"kind":"missing"}
+                  }
                 }
               ]
             },
@@ -2835,7 +2798,6 @@
                 "line_number":20
               }
             },
-            "function_call_type_args":{"kind":"missing"},
             "function_call_left_paren":{
               "kind":"token",
               "token":{
@@ -2908,8 +2870,7 @@
                                   "line_number":20
                                 }
                               }
-                            },
-                            "list_separator":{"kind":"missing"}
+                            }
                           }
                         ]
                       },
@@ -2997,8 +2958,7 @@
                                 "line_number":20
                               }
                             }
-                          },
-                          "list_separator":{"kind":"missing"}
+                          }
                         }
                       ]
                     },
@@ -3016,8 +2976,7 @@
                         "line_number":20
                       }
                     }
-                  },
-                  "list_separator":{"kind":"missing"}
+                  }
                 }
               ]
             },
@@ -3136,8 +3095,7 @@
                             "line_number":21
                           }
                         }
-                      },
-                      "list_separator":{"kind":"missing"}
+                      }
                     }
                   ]
                 },
@@ -3170,7 +3128,6 @@
                   "line_number":21
                 }
               },
-              "function_call_argument_list":{"kind":"missing"},
               "function_call_right_paren":{
                 "kind":"token",
                 "token":{
@@ -3657,8 +3614,7 @@
                               "line_number":26
                             }
                           }
-                        },
-                        "list_separator":{"kind":"missing"}
+                        }
                       }
                     ]
                   },
@@ -3691,7 +3647,6 @@
                     "line_number":26
                   }
                 },
-                "function_call_argument_list":{"kind":"missing"},
                 "function_call_right_paren":{
                   "kind":"token",
                   "token":{
@@ -3841,8 +3796,7 @@
                           "line_number":27
                         }
                       }
-                    },
-                    "list_separator":{"kind":"missing"}
+                    }
                   }
                 ]
               },
@@ -3968,8 +3922,7 @@
                                       "line_number":27
                                     }
                                   }
-                                },
-                                "list_separator":{"kind":"missing"}
+                                }
                               }
                             ]
                           },
@@ -4002,7 +3955,6 @@
                             "line_number":27
                           }
                         },
-                        "function_call_argument_list":{"kind":"missing"},
                         "function_call_right_paren":{
                           "kind":"token",
                           "token":{
@@ -4081,8 +4033,7 @@
                         }
                       }
                     }
-                  },
-                  "list_separator":{"kind":"missing"}
+                  }
                 }
               ]
             },
@@ -4237,8 +4188,7 @@
                               "line_number":28
                             }
                           }
-                        },
-                        "list_separator":{"kind":"missing"}
+                        }
                       }
                     ]
                   },
@@ -4292,8 +4242,7 @@
                             "line_number":28
                           }
                         }
-                      },
-                      "list_separator":{"kind":"missing"}
+                      }
                     }
                   ]
                 },
@@ -4477,8 +4426,7 @@
                           "line_number":29
                         }
                       }
-                    },
-                    "list_separator":{"kind":"missing"}
+                    }
                   }
                 ]
               },
@@ -4635,8 +4583,7 @@
                                       "line_number":29
                                     }
                                   }
-                                },
-                                "list_separator":{"kind":"missing"}
+                                }
                               }
                             ]
                           },
@@ -4690,8 +4637,7 @@
                                     "line_number":29
                                   }
                                 }
-                              },
-                              "list_separator":{"kind":"missing"}
+                              }
                             }
                           ]
                         },
@@ -4773,8 +4719,7 @@
                         }
                       }
                     }
-                  },
-                  "list_separator":{"kind":"missing"}
+                  }
                 }
               ]
             },
@@ -4900,8 +4845,7 @@
                                 "line_number":30
                               }
                             }
-                          },
-                          "list_separator":{"kind":"missing"}
+                          }
                         }
                       ]
                     },
@@ -5024,8 +4968,7 @@
                             "line_number":30
                           }
                         }
-                      },
-                      "list_separator":{"kind":"missing"}
+                      }
                     }
                   ]
                 },
@@ -5112,8 +5055,7 @@
                             "line_number":30
                           }
                         }
-                      },
-                      "list_separator":{"kind":"missing"}
+                      }
                     }
                   ]
                 },
@@ -5146,7 +5088,6 @@
                   "line_number":30
                 }
               },
-              "function_call_argument_list":{"kind":"missing"},
               "function_call_right_paren":{
                 "kind":"token",
                 "token":{
@@ -5260,8 +5201,7 @@
                             "line_number":30
                           }
                         }
-                      },
-                      "list_separator":{"kind":"missing"}
+                      }
                     }
                   ]
                 },
@@ -5294,7 +5234,6 @@
                   "line_number":30
                 }
               },
-              "function_call_argument_list":{"kind":"missing"},
               "function_call_right_paren":{
                 "kind":"token",
                 "token":{
@@ -5347,5 +5286,5 @@
     }
   },
   "program_text":"<?hh // strict\n\n// ficticious functions with size-discernable names\nf('hi'); // normal function call w/o generics\nfo<string>('hello'); // annotated function call\nfoo(0 < 0, tuple()); // not generics annotated, but seems so a little\nfooo(Bar < 0, 10 > Qux); // certainly not annotated, but hard to tell\nfoooo(bar<int,string>()); // annotated inside an argument list\n42 * ba<string>('hello');\n\n$x ?? foo<bar>();\n42 * foo<bar>();\n42 * foo<bar>($x);\n42 * foo<bar>($x, $y);\n42 * x::foo<bar>();\n42 * x::foo<bar>($x);\n42 * x::foo<bar>($x, $y);\nbaz(foo<baz>());\nbaz(foo<baz>($x));\nbaz(foo<baz>($x, $y));\nfoo<bar<baz>();\n42 * foo < 90;\n42 * foo < 90 + 50;\n42 * foo < 90 === true;\n\n$f === foo<bar>() ? 1 : 2;\nfoo<bar>($f === foo<bar>() ? 1 : 2);\n$f === x::foo<bar>(1) ? 1 : 2;\nx::foo<bar>($f === x::foo<bar>(1) ? 1 : 2);\n$f === Vector<int>{1,2,3} ? foo<bar>() : x::foo<bar>();\n",
-  "version":"2020-10-13-0001"
+  "version":"2021-01-05-0001"
 }

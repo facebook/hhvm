@@ -58,9 +58,6 @@
         },
         {
           "kind":"classish_declaration",
-          "classish_attribute":{"kind":"missing"},
-          "classish_modifiers":{"kind":"missing"},
-          "classish_xhp":{"kind":"missing"},
           "classish_keyword":{
             "kind":"token",
             "token":{
@@ -98,12 +95,6 @@
               "line_number":4
             }
           },
-          "classish_type_parameters":{"kind":"missing"},
-          "classish_extends_keyword":{"kind":"missing"},
-          "classish_extends_list":{"kind":"missing"},
-          "classish_implements_keyword":{"kind":"missing"},
-          "classish_implements_list":{"kind":"missing"},
-          "classish_where_clause":{"kind":"missing"},
           "classish_body":{
             "kind":"classish_body",
             "classish_body_left_brace":{
@@ -125,7 +116,6 @@
               "elements":[
                 {
                   "kind":"const_declaration",
-                  "const_modifiers":{"kind":"missing"},
                   "const_keyword":{
                     "kind":"token",
                     "token":{
@@ -212,8 +202,7 @@
                               }
                             }
                           }
-                        },
-                        "list_separator":{"kind":"missing"}
+                        }
                       }
                     ]
                   },
@@ -234,7 +223,6 @@
                 },
                 {
                   "kind":"property_declaration",
-                  "property_attribute_spec":{"kind":"missing"},
                   "property_modifiers":{
                     "kind":"list",
                     "elements":[
@@ -435,8 +423,7 @@
                               }
                             }
                           }
-                        },
-                        "list_separator":{"kind":"missing"}
+                        }
                       }
                     ]
                   },
@@ -457,7 +444,6 @@
                 },
                 {
                   "kind":"const_declaration",
-                  "const_modifiers":{"kind":"missing"},
                   "const_keyword":{
                     "kind":"token",
                     "token":{
@@ -653,8 +639,7 @@
                               }
                             }
                           }
-                        },
-                        "list_separator":{"kind":"missing"}
+                        }
                       }
                     ]
                   },
@@ -675,7 +660,6 @@
                 },
                 {
                   "kind":"methodish_declaration",
-                  "methodish_attribute":{"kind":"missing"},
                   "methodish_function_decl_header":{
                     "kind":"function_declaration_header",
                     "function_modifiers":{
@@ -728,7 +712,6 @@
                         "line_number":9
                       }
                     },
-                    "function_type_parameter_list":{"kind":"missing"},
                     "function_left_paren":{
                       "kind":"token",
                       "token":{
@@ -743,7 +726,6 @@
                         "line_number":9
                       }
                     },
-                    "function_parameter_list":{"kind":"missing"},
                     "function_right_paren":{
                       "kind":"token",
                       "token":{
@@ -758,7 +740,6 @@
                         "line_number":9
                       }
                     },
-                    "function_contexts":{"kind":"missing"},
                     "function_colon":{
                       "kind":"token",
                       "token":{
@@ -789,8 +770,7 @@
                           "line_number":9
                         }
                       }
-                    },
-                    "function_where_clause":{"kind":"missing"}
+                    }
                   },
                   "methodish_function_body":{
                     "kind":"compound_statement",
@@ -848,8 +828,6 @@
                             },
                             "binary_right_operand":{
                               "kind":"lambda_expression",
-                              "lambda_attribute_spec":{"kind":"missing"},
-                              "lambda_async":{"kind":"missing"},
                               "lambda_signature":{
                                 "kind":"lambda_signature",
                                 "lambda_left_paren":{
@@ -873,9 +851,6 @@
                                       "kind":"list_item",
                                       "list_item":{
                                         "kind":"parameter_declaration",
-                                        "parameter_attribute":{"kind":"missing"},
-                                        "parameter_visibility":{"kind":"missing"},
-                                        "parameter_call_convention":{"kind":"missing"},
                                         "parameter_type":{
                                           "kind":"simple_type_specifier",
                                           "simple_type_specifier":{
@@ -1050,8 +1025,7 @@
                                             }
                                           }
                                         }
-                                      },
-                                      "list_separator":{"kind":"missing"}
+                                      }
                                     }
                                   ]
                                 },
@@ -1069,7 +1043,6 @@
                                     "line_number":10
                                   }
                                 },
-                                "lambda_contexts":{"kind":"missing"},
                                 "lambda_colon":{
                                   "kind":"token",
                                   "token":{
@@ -1132,7 +1105,6 @@
                                     "line_number":10
                                   }
                                 },
-                                "compound_statements":{"kind":"missing"},
                                 "compound_right_brace":{
                                   "kind":"token",
                                   "token":{
@@ -1181,8 +1153,7 @@
                         "line_number":11
                       }
                     }
-                  },
-                  "methodish_semicolon":{"kind":"missing"}
+                  }
                 }
               ]
             },
@@ -1223,5 +1194,5 @@
     }
   },
   "program_text":"<?hh // strict\n// Copyright 2004-present Facebook. All Rights Reserved.\n\nclass A {\n  const string S = \"hello\";\n  public string $s = \"${A::S}\";\n  const string S1 = \"${A::S}\";\n\n  public function test(): void {\n    $_ = (string $p = \"${A::S}\"): void ==> {};\n  }\n}\n",
-  "version":"2020-12-14-0001"
+  "version":"2021-01-05-0001"
 }

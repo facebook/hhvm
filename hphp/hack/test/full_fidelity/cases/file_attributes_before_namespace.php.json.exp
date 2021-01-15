@@ -138,7 +138,6 @@
                       "line_number":3
                     }
                   },
-                  "constructor_call_argument_list":{"kind":"missing"},
                   "constructor_call_right_paren":{
                     "kind":"token",
                     "token":{
@@ -153,8 +152,7 @@
                       "line_number":3
                     }
                   }
-                },
-                "list_separator":{"kind":"missing"}
+                }
               }
             ]
           },
@@ -222,7 +220,6 @@
                 "line_number":5
               }
             },
-            "namespace_declarations":{"kind":"missing"},
             "namespace_right_brace":{
               "kind":"token",
               "token":{
@@ -260,5 +257,5 @@
     }
   },
   "program_text":"<?hh // strict\n\n<<file: MyAttribute()>>\n\nnamespace Foo { }\n",
-  "version":"2020-06-23-0001"
+  "version":"2021-01-05-0001"
 }

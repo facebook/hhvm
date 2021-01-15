@@ -54,7 +54,6 @@
         },
         {
           "kind":"function_declaration",
-          "function_attribute_spec":{"kind":"missing"},
           "function_declaration_header":{
             "kind":"function_declaration_header",
             "function_modifiers":{
@@ -104,7 +103,6 @@
                 "line_number":3
               }
             },
-            "function_type_parameter_list":{"kind":"missing"},
             "function_left_paren":{
               "kind":"token",
               "token":{
@@ -119,7 +117,6 @@
                 "line_number":3
               }
             },
-            "function_parameter_list":{"kind":"missing"},
             "function_right_paren":{
               "kind":"token",
               "token":{
@@ -134,7 +131,6 @@
                 "line_number":3
               }
             },
-            "function_contexts":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
               "token":{
@@ -202,8 +198,7 @@
                             "line_number":3
                           }
                         }
-                      },
-                      "list_separator":{"kind":"missing"}
+                      }
                     }
                   ]
                 },
@@ -222,8 +217,7 @@
                   }
                 }
               }
-            },
-            "function_where_clause":{"kind":"missing"}
+            }
           },
           "function_body":{
             "kind":"compound_statement",
@@ -360,7 +354,6 @@
                                 "line_number":4
                               }
                             },
-                            "function_call_type_args":{"kind":"missing"},
                             "function_call_left_paren":{
                               "kind":"token",
                               "token":{
@@ -375,7 +368,6 @@
                                 "line_number":4
                               }
                             },
-                            "function_call_argument_list":{"kind":"missing"},
                             "function_call_right_paren":{
                               "kind":"token",
                               "token":{
@@ -602,7 +594,6 @@
                                 "line_number":5
                               }
                             },
-                            "function_call_type_args":{"kind":"missing"},
                             "function_call_left_paren":{
                               "kind":"token",
                               "token":{
@@ -617,7 +608,6 @@
                                 "line_number":5
                               }
                             },
-                            "function_call_argument_list":{"kind":"missing"},
                             "function_call_right_paren":{
                               "kind":"token",
                               "token":{
@@ -751,7 +741,6 @@
                           }
                         }
                       },
-                      "function_call_type_args":{"kind":"missing"},
                       "function_call_left_paren":{
                         "kind":"token",
                         "token":{
@@ -803,7 +792,6 @@
                                     "line_number":6
                                   }
                                 },
-                                "function_call_type_args":{"kind":"missing"},
                                 "function_call_left_paren":{
                                   "kind":"token",
                                   "token":{
@@ -818,7 +806,6 @@
                                     "line_number":6
                                   }
                                 },
-                                "function_call_argument_list":{"kind":"missing"},
                                 "function_call_right_paren":{
                                   "kind":"token",
                                   "token":{
@@ -834,8 +821,7 @@
                                   }
                                 }
                               }
-                            },
-                            "list_separator":{"kind":"missing"}
+                            }
                           }
                         ]
                       },
@@ -1002,7 +988,6 @@
                                   "line_number":7
                                 }
                               },
-                              "function_call_type_args":{"kind":"missing"},
                               "function_call_left_paren":{
                                 "kind":"token",
                                 "token":{
@@ -1017,7 +1002,6 @@
                                   "line_number":7
                                 }
                               },
-                              "function_call_argument_list":{"kind":"missing"},
                               "function_call_right_paren":{
                                 "kind":"token",
                                 "token":{
@@ -1213,7 +1197,6 @@
                                   "line_number":8
                                 }
                               },
-                              "function_call_type_args":{"kind":"missing"},
                               "function_call_left_paren":{
                                 "kind":"token",
                                 "token":{
@@ -1228,7 +1211,6 @@
                                   "line_number":8
                                 }
                               },
-                              "function_call_argument_list":{"kind":"missing"},
                               "function_call_right_paren":{
                                 "kind":"token",
                                 "token":{
@@ -1408,7 +1390,6 @@
                                 "line_number":9
                               }
                             },
-                            "function_call_type_args":{"kind":"missing"},
                             "function_call_left_paren":{
                               "kind":"token",
                               "token":{
@@ -1423,7 +1404,6 @@
                                 "line_number":9
                               }
                             },
-                            "function_call_argument_list":{"kind":"missing"},
                             "function_call_right_paren":{
                               "kind":"token",
                               "token":{
@@ -1588,7 +1568,6 @@
                                 "line_number":10
                               }
                             },
-                            "function_call_type_args":{"kind":"missing"},
                             "function_call_left_paren":{
                               "kind":"token",
                               "token":{
@@ -1603,7 +1582,6 @@
                                 "line_number":10
                               }
                             },
-                            "function_call_argument_list":{"kind":"missing"},
                             "function_call_right_paren":{
                               "kind":"token",
                               "token":{
@@ -1737,7 +1715,6 @@
                                 "line_number":11
                               }
                             },
-                            "function_call_type_args":{"kind":"missing"},
                             "function_call_left_paren":{
                               "kind":"token",
                               "token":{
@@ -1752,7 +1729,6 @@
                                 "line_number":11
                               }
                             },
-                            "function_call_argument_list":{"kind":"missing"},
                             "function_call_right_paren":{
                               "kind":"token",
                               "token":{
@@ -1931,7 +1907,6 @@
                                 "line_number":12
                               }
                             },
-                            "function_call_type_args":{"kind":"missing"},
                             "function_call_left_paren":{
                               "kind":"token",
                               "token":{
@@ -1946,7 +1921,6 @@
                                 "line_number":12
                               }
                             },
-                            "function_call_argument_list":{"kind":"missing"},
                             "function_call_right_paren":{
                               "kind":"token",
                               "token":{
@@ -2125,7 +2099,6 @@
                                 "line_number":13
                               }
                             },
-                            "function_call_type_args":{"kind":"missing"},
                             "function_call_left_paren":{
                               "kind":"token",
                               "token":{
@@ -2140,7 +2113,6 @@
                                 "line_number":13
                               }
                             },
-                            "function_call_argument_list":{"kind":"missing"},
                             "function_call_right_paren":{
                               "kind":"token",
                               "token":{
@@ -2319,7 +2291,6 @@
                                 "line_number":14
                               }
                             },
-                            "function_call_type_args":{"kind":"missing"},
                             "function_call_left_paren":{
                               "kind":"token",
                               "token":{
@@ -2334,7 +2305,6 @@
                                 "line_number":14
                               }
                             },
-                            "function_call_argument_list":{"kind":"missing"},
                             "function_call_right_paren":{
                               "kind":"token",
                               "token":{
@@ -2513,7 +2483,6 @@
                                 "line_number":15
                               }
                             },
-                            "function_call_type_args":{"kind":"missing"},
                             "function_call_left_paren":{
                               "kind":"token",
                               "token":{
@@ -2528,7 +2497,6 @@
                                 "line_number":15
                               }
                             },
-                            "function_call_argument_list":{"kind":"missing"},
                             "function_call_right_paren":{
                               "kind":"token",
                               "token":{
@@ -2707,7 +2675,6 @@
                                 "line_number":16
                               }
                             },
-                            "function_call_type_args":{"kind":"missing"},
                             "function_call_left_paren":{
                               "kind":"token",
                               "token":{
@@ -2722,7 +2689,6 @@
                                 "line_number":16
                               }
                             },
-                            "function_call_argument_list":{"kind":"missing"},
                             "function_call_right_paren":{
                               "kind":"token",
                               "token":{
@@ -2901,7 +2867,6 @@
                                 "line_number":17
                               }
                             },
-                            "function_call_type_args":{"kind":"missing"},
                             "function_call_left_paren":{
                               "kind":"token",
                               "token":{
@@ -2916,7 +2881,6 @@
                                 "line_number":17
                               }
                             },
-                            "function_call_argument_list":{"kind":"missing"},
                             "function_call_right_paren":{
                               "kind":"token",
                               "token":{
@@ -3095,7 +3059,6 @@
                                 "line_number":18
                               }
                             },
-                            "function_call_type_args":{"kind":"missing"},
                             "function_call_left_paren":{
                               "kind":"token",
                               "token":{
@@ -3110,7 +3073,6 @@
                                 "line_number":18
                               }
                             },
-                            "function_call_argument_list":{"kind":"missing"},
                             "function_call_right_paren":{
                               "kind":"token",
                               "token":{
@@ -3289,7 +3251,6 @@
                                 "line_number":19
                               }
                             },
-                            "function_call_type_args":{"kind":"missing"},
                             "function_call_left_paren":{
                               "kind":"token",
                               "token":{
@@ -3304,7 +3265,6 @@
                                 "line_number":19
                               }
                             },
-                            "function_call_argument_list":{"kind":"missing"},
                             "function_call_right_paren":{
                               "kind":"token",
                               "token":{
@@ -3483,7 +3443,6 @@
                                 "line_number":20
                               }
                             },
-                            "function_call_type_args":{"kind":"missing"},
                             "function_call_left_paren":{
                               "kind":"token",
                               "token":{
@@ -3498,7 +3457,6 @@
                                 "line_number":20
                               }
                             },
-                            "function_call_argument_list":{"kind":"missing"},
                             "function_call_right_paren":{
                               "kind":"token",
                               "token":{
@@ -3677,7 +3635,6 @@
                                 "line_number":21
                               }
                             },
-                            "function_call_type_args":{"kind":"missing"},
                             "function_call_left_paren":{
                               "kind":"token",
                               "token":{
@@ -3692,7 +3649,6 @@
                                 "line_number":21
                               }
                             },
-                            "function_call_argument_list":{"kind":"missing"},
                             "function_call_right_paren":{
                               "kind":"token",
                               "token":{
@@ -3871,7 +3827,6 @@
                                 "line_number":22
                               }
                             },
-                            "function_call_type_args":{"kind":"missing"},
                             "function_call_left_paren":{
                               "kind":"token",
                               "token":{
@@ -3886,7 +3841,6 @@
                                 "line_number":22
                               }
                             },
-                            "function_call_argument_list":{"kind":"missing"},
                             "function_call_right_paren":{
                               "kind":"token",
                               "token":{
@@ -4065,7 +4019,6 @@
                                 "line_number":23
                               }
                             },
-                            "function_call_type_args":{"kind":"missing"},
                             "function_call_left_paren":{
                               "kind":"token",
                               "token":{
@@ -4080,7 +4033,6 @@
                                 "line_number":23
                               }
                             },
-                            "function_call_argument_list":{"kind":"missing"},
                             "function_call_right_paren":{
                               "kind":"token",
                               "token":{
@@ -4259,7 +4211,6 @@
                                 "line_number":24
                               }
                             },
-                            "function_call_type_args":{"kind":"missing"},
                             "function_call_left_paren":{
                               "kind":"token",
                               "token":{
@@ -4274,7 +4225,6 @@
                                 "line_number":24
                               }
                             },
-                            "function_call_argument_list":{"kind":"missing"},
                             "function_call_right_paren":{
                               "kind":"token",
                               "token":{
@@ -4451,7 +4401,6 @@
                               "line_number":25
                             }
                           },
-                          "function_call_type_args":{"kind":"missing"},
                           "function_call_left_paren":{
                             "kind":"token",
                             "token":{
@@ -4466,7 +4415,6 @@
                               "line_number":25
                             }
                           },
-                          "function_call_argument_list":{"kind":"missing"},
                           "function_call_right_paren":{
                             "kind":"token",
                             "token":{
@@ -4614,7 +4562,6 @@
                               "line_number":26
                             }
                           },
-                          "function_call_type_args":{"kind":"missing"},
                           "function_call_left_paren":{
                             "kind":"token",
                             "token":{
@@ -4650,8 +4597,7 @@
                                       "line_number":26
                                     }
                                   }
-                                },
-                                "list_separator":{"kind":"missing"}
+                                }
                               }
                             ]
                           },
@@ -4772,7 +4718,6 @@
                             "line_number":27
                           }
                         },
-                        "function_call_type_args":{"kind":"missing"},
                         "function_call_left_paren":{
                           "kind":"token",
                           "token":{
@@ -4825,8 +4770,7 @@
                                     }
                                   }
                                 }
-                              },
-                              "list_separator":{"kind":"missing"}
+                              }
                             }
                           ]
                         },
@@ -4980,7 +4924,6 @@
                                   "line_number":28
                                 }
                               },
-                              "function_call_type_args":{"kind":"missing"},
                               "function_call_left_paren":{
                                 "kind":"token",
                                 "token":{
@@ -5016,8 +4959,7 @@
                                           "line_number":28
                                         }
                                       }
-                                    },
-                                    "list_separator":{"kind":"missing"}
+                                    }
                                   }
                                 ]
                               },
@@ -5216,7 +5158,6 @@
                                   "line_number":29
                                 }
                               },
-                              "function_call_type_args":{"kind":"missing"},
                               "function_call_left_paren":{
                                 "kind":"token",
                                 "token":{
@@ -5231,7 +5172,6 @@
                                   "line_number":29
                                 }
                               },
-                              "function_call_argument_list":{"kind":"missing"},
                               "function_call_right_paren":{
                                 "kind":"token",
                                 "token":{
@@ -5380,8 +5320,7 @@
                               }
                             }
                           }
-                        },
-                        "list_separator":{"kind":"missing"}
+                        }
                       }
                     ]
                   },
@@ -5447,7 +5386,6 @@
                             "line_number":30
                           }
                         },
-                        "function_call_type_args":{"kind":"missing"},
                         "function_call_left_paren":{
                           "kind":"token",
                           "token":{
@@ -5462,7 +5400,6 @@
                             "line_number":30
                           }
                         },
-                        "function_call_argument_list":{"kind":"missing"},
                         "function_call_right_paren":{
                           "kind":"token",
                           "token":{
@@ -5529,8 +5466,7 @@
                               "line_number":30
                             }
                           }
-                        },
-                        "list_separator":{"kind":"missing"}
+                        }
                       }
                     ]
                   },
@@ -5564,7 +5500,6 @@
                         "line_number":30
                       }
                     },
-                    "compound_statements":{"kind":"missing"},
                     "compound_right_brace":{
                       "kind":"token",
                       "token":{
@@ -5666,8 +5601,7 @@
                               }
                             }
                           }
-                        },
-                        "list_separator":{"kind":"missing"}
+                        }
                       }
                     ]
                   },
@@ -5769,7 +5703,6 @@
                                   "line_number":31
                                 }
                               },
-                              "function_call_type_args":{"kind":"missing"},
                               "function_call_left_paren":{
                                 "kind":"token",
                                 "token":{
@@ -5784,7 +5717,6 @@
                                   "line_number":31
                                 }
                               },
-                              "function_call_argument_list":{"kind":"missing"},
                               "function_call_right_paren":{
                                 "kind":"token",
                                 "token":{
@@ -5815,8 +5747,7 @@
                               "line_number":31
                             }
                           }
-                        },
-                        "list_separator":{"kind":"missing"}
+                        }
                       }
                     ]
                   },
@@ -5850,7 +5781,6 @@
                         "line_number":31
                       }
                     },
-                    "compound_statements":{"kind":"missing"},
                     "compound_right_brace":{
                       "kind":"token",
                       "token":{
@@ -5929,7 +5859,6 @@
                           "line_number":32
                         }
                       },
-                      "function_call_type_args":{"kind":"missing"},
                       "function_call_left_paren":{
                         "kind":"token",
                         "token":{
@@ -5944,7 +5873,6 @@
                           "line_number":32
                         }
                       },
-                      "function_call_argument_list":{"kind":"missing"},
                       "function_call_right_paren":{
                         "kind":"token",
                         "token":{
@@ -5991,7 +5919,6 @@
                         "line_number":32
                       }
                     },
-                    "compound_statements":{"kind":"missing"},
                     "compound_right_brace":{
                       "kind":"token",
                       "token":{
@@ -6040,7 +5967,6 @@
                         "line_number":33
                       }
                     },
-                    "compound_statements":{"kind":"missing"},
                     "compound_right_brace":{
                       "kind":"token",
                       "token":{
@@ -6116,7 +6042,6 @@
                           "line_number":33
                         }
                       },
-                      "function_call_type_args":{"kind":"missing"},
                       "function_call_left_paren":{
                         "kind":"token",
                         "token":{
@@ -6131,7 +6056,6 @@
                           "line_number":33
                         }
                       },
-                      "function_call_argument_list":{"kind":"missing"},
                       "function_call_right_paren":{
                         "kind":"token",
                         "token":{
@@ -6243,7 +6167,6 @@
                               "line_number":34
                             }
                           },
-                          "function_call_type_args":{"kind":"missing"},
                           "function_call_left_paren":{
                             "kind":"token",
                             "token":{
@@ -6258,7 +6181,6 @@
                               "line_number":34
                             }
                           },
-                          "function_call_argument_list":{"kind":"missing"},
                           "function_call_right_paren":{
                             "kind":"token",
                             "token":{
@@ -6372,7 +6294,6 @@
                               "line_number":35
                             }
                           },
-                          "function_call_type_args":{"kind":"missing"},
                           "function_call_left_paren":{
                             "kind":"token",
                             "token":{
@@ -6387,7 +6308,6 @@
                               "line_number":35
                             }
                           },
-                          "function_call_argument_list":{"kind":"missing"},
                           "function_call_right_paren":{
                             "kind":"token",
                             "token":{
@@ -6501,7 +6421,6 @@
                               "line_number":36
                             }
                           },
-                          "function_call_type_args":{"kind":"missing"},
                           "function_call_left_paren":{
                             "kind":"token",
                             "token":{
@@ -6516,7 +6435,6 @@
                               "line_number":36
                             }
                           },
-                          "function_call_argument_list":{"kind":"missing"},
                           "function_call_right_paren":{
                             "kind":"token",
                             "token":{
@@ -6630,7 +6548,6 @@
                               "line_number":37
                             }
                           },
-                          "function_call_type_args":{"kind":"missing"},
                           "function_call_left_paren":{
                             "kind":"token",
                             "token":{
@@ -6645,7 +6562,6 @@
                               "line_number":37
                             }
                           },
-                          "function_call_argument_list":{"kind":"missing"},
                           "function_call_right_paren":{
                             "kind":"token",
                             "token":{
@@ -6792,7 +6708,6 @@
                                 "line_number":38
                               }
                             },
-                            "function_call_type_args":{"kind":"missing"},
                             "function_call_left_paren":{
                               "kind":"token",
                               "token":{
@@ -6807,7 +6722,6 @@
                                 "line_number":38
                               }
                             },
-                            "function_call_argument_list":{"kind":"missing"},
                             "function_call_right_paren":{
                               "kind":"token",
                               "token":{
@@ -6969,7 +6883,6 @@
                                 "line_number":39
                               }
                             },
-                            "function_call_type_args":{"kind":"missing"},
                             "function_call_left_paren":{
                               "kind":"token",
                               "token":{
@@ -6984,7 +6897,6 @@
                                 "line_number":39
                               }
                             },
-                            "function_call_argument_list":{"kind":"missing"},
                             "function_call_right_paren":{
                               "kind":"token",
                               "token":{
@@ -7065,7 +6977,6 @@
                         "line_number":40
                       }
                     },
-                    "function_call_type_args":{"kind":"missing"},
                     "function_call_left_paren":{
                       "kind":"token",
                       "token":{
@@ -7149,7 +7060,6 @@
                                       "line_number":40
                                     }
                                   },
-                                  "function_call_type_args":{"kind":"missing"},
                                   "function_call_left_paren":{
                                     "kind":"token",
                                     "token":{
@@ -7164,7 +7074,6 @@
                                       "line_number":40
                                     }
                                   },
-                                  "function_call_argument_list":{"kind":"missing"},
                                   "function_call_right_paren":{
                                     "kind":"token",
                                     "token":{
@@ -7196,8 +7105,7 @@
                                 }
                               }
                             }
-                          },
-                          "list_separator":{"kind":"missing"}
+                          }
                         }
                       ]
                     },
@@ -7270,5 +7178,5 @@
     }
   },
   "program_text":"<?hh\n\nasync function foo(): Awaitable<void> {\n  $x = 1 ? (await genx()) : 2;\n  $x = 1 ? 2 : (await genx());\n  $x = $y?->foo(await genx());\n  $x = (false && (await genx()));\n  $x = (true || (await genx()));\n  $x = true ?: (await genx());\n  $x = $y ?? (await genx());\n  $x[(await genx())] = 42;\n  $x[(await genx())] += 42;\n  $x[(await genx())] -= 42;\n  $x[(await genx())] *= 42;\n  $x[(await genx())] /= 42;\n  $x[(await genx())] **= 42;\n  $x[(await genx())] .= 42;\n  $x[(await genx())] %= 42;\n  $x[(await genx())] ^= 42;\n  $x[(await genx())] |= 42;\n  $x[(await genx())] &= 42;\n  $x[(await genx())] <<= 42;\n  $x[(await genx())] >>= 42;\n  $x[(await genx())] ??= 42;\n  $x ??= (await genx());\n  $x = true |> await f($$);\n  $x = 42 |> f(await $$);\n  $x = true |> (await f(42)) + $$;\n  $x = (await (await genx()));\n  for ($i = 0; (await genx()); 43) {}\n  for ($i = 0; 42; (await genx())) {}\n  while (await genx()) {}\n  do {} while (await genx());\n  require (await genx());\n  require_once (await genx());\n  include (await genx());\n  include_once (await genx());\n  ++$a[(await genx())];\n  --$a[(await genx())];\n  foo(inout (await genx()));\n}\n",
-  "version":"2020-12-14-0001"
+  "version":"2021-01-05-0001"
 }

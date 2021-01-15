@@ -107,7 +107,6 @@
                   "line_number":3
                 }
               },
-              "function_call_type_args":{"kind":"missing"},
               "function_call_left_paren":{
                 "kind":"token",
                 "token":{
@@ -122,7 +121,6 @@
                   "line_number":3
                 }
               },
-              "function_call_argument_list":{"kind":"missing"},
               "function_call_right_paren":{
                 "kind":"token",
                 "token":{
@@ -138,8 +136,7 @@
                 }
               }
             }
-          },
-          "expression_statement_semicolon":{"kind":"missing"}
+          }
         },
         {
           "kind":"expression_statement",
@@ -223,8 +220,7 @@
                   }
                 }
               }
-            },
-            "subscript_right_bracket":{"kind":"missing"}
+            }
           },
           "expression_statement_semicolon":{
             "kind":"token",
@@ -373,8 +369,7 @@
                 "line_number":4
               }
             }
-          },
-          "expression_statement_semicolon":{"kind":"missing"}
+          }
         },
         {
           "kind":"expression_statement",
@@ -594,8 +589,7 @@
                 "line_number":6
               }
             }
-          },
-          "expression_statement_semicolon":{"kind":"missing"}
+          }
         },
         {
           "kind":"expression_statement",
@@ -615,7 +609,6 @@
                 "line_number":6
               }
             },
-            "function_call_type_args":{"kind":"missing"},
             "function_call_left_paren":{
               "kind":"token",
               "token":{
@@ -630,7 +623,6 @@
                 "line_number":6
               }
             },
-            "function_call_argument_list":{"kind":"missing"},
             "function_call_right_paren":{
               "kind":"token",
               "token":{
@@ -714,8 +706,7 @@
                 "line_number":7
               }
             }
-          },
-          "expression_statement_semicolon":{"kind":"missing"}
+          }
         },
         {
           "kind":"expression_statement",
@@ -835,8 +826,7 @@
                 "line_number":8
               }
             }
-          },
-          "expression_statement_semicolon":{"kind":"missing"}
+          }
         },
         {
           "kind":"expression_statement",
@@ -890,7 +880,6 @@
                 }
               }
             },
-            "function_call_type_args":{"kind":"missing"},
             "function_call_left_paren":{
               "kind":"token",
               "token":{
@@ -905,7 +894,6 @@
                 "line_number":8
               }
             },
-            "function_call_argument_list":{"kind":"missing"},
             "function_call_right_paren":{
               "kind":"token",
               "token":{
@@ -989,8 +977,7 @@
                 "line_number":9
               }
             }
-          },
-          "expression_statement_semicolon":{"kind":"missing"}
+          }
         },
         {
           "kind":"expression_statement",
@@ -1127,8 +1114,7 @@
                 "line_number":10
               }
             }
-          },
-          "expression_statement_semicolon":{"kind":"missing"}
+          }
         },
         {
           "kind":"expression_statement",
@@ -1259,8 +1245,7 @@
                 "line_number":11
               }
             }
-          },
-          "expression_statement_semicolon":{"kind":"missing"}
+          }
         },
         {
           "kind":"expression_statement",
@@ -1377,8 +1362,7 @@
                 "line_number":12
               }
             }
-          },
-          "expression_statement_semicolon":{"kind":"missing"}
+          }
         },
         {
           "kind":"expression_statement",
@@ -1484,8 +1468,7 @@
                 "line_number":13
               }
             }
-          },
-          "expression_statement_semicolon":{"kind":"missing"}
+          }
         },
         {
           "kind":"expression_statement",
@@ -1538,7 +1521,6 @@
                   "line_number":13
                 }
               },
-              "constructor_call_argument_list":{"kind":"missing"},
               "constructor_call_right_paren":{
                 "kind":"token",
                 "token":{
@@ -1623,8 +1605,7 @@
                 "line_number":14
               }
             }
-          },
-          "expression_statement_semicolon":{"kind":"missing"}
+          }
         },
         {
           "kind":"expression_statement",
@@ -1800,7 +1781,6 @@
                   "line_number":15
                 }
               },
-              "function_call_type_args":{"kind":"missing"},
               "function_call_left_paren":{
                 "kind":"token",
                 "token":{
@@ -1870,7 +1850,6 @@
                           }
                         }
                       },
-                      "function_call_type_args":{"kind":"missing"},
                       "function_call_left_paren":{
                         "kind":"token",
                         "token":{
@@ -1885,7 +1864,6 @@
                           "line_number":15
                         }
                       },
-                      "function_call_argument_list":{"kind":"missing"},
                       "function_call_right_paren":{
                         "kind":"token",
                         "token":{
@@ -1900,8 +1878,7 @@
                           "line_number":15
                         }
                       }
-                    },
-                    "list_separator":{"kind":"missing"}
+                    }
                   }
                 ]
               },
@@ -1991,7 +1968,6 @@
                   "line_number":16
                 }
               },
-              "function_call_type_args":{"kind":"missing"},
               "function_call_left_paren":{
                 "kind":"token",
                 "token":{
@@ -2058,7 +2034,6 @@
                           }
                         }
                       },
-                      "function_call_type_args":{"kind":"missing"},
                       "function_call_left_paren":{
                         "kind":"token",
                         "token":{
@@ -2156,8 +2131,7 @@
                                   "line_number":16
                                 }
                               }
-                            },
-                            "list_separator":{"kind":"missing"}
+                            }
                           }
                         ]
                       },
@@ -2175,8 +2149,7 @@
                           "line_number":16
                         }
                       }
-                    },
-                    "list_separator":{"kind":"missing"}
+                    }
                   }
                 ]
               },
@@ -2266,7 +2239,6 @@
                   "line_number":17
                 }
               },
-              "function_call_type_args":{"kind":"missing"},
               "function_call_left_paren":{
                 "kind":"token",
                 "token":{
@@ -2339,13 +2311,11 @@
                                   "trailing":[],
                                   "line_number":17
                                 }
-                              },
-                              "list_separator":{"kind":"missing"}
+                              }
                             }
                           ]
                         }
                       },
-                      "function_call_type_args":{"kind":"missing"},
                       "function_call_left_paren":{
                         "kind":"token",
                         "token":{
@@ -2432,8 +2402,7 @@
                                   }
                                 }
                               }
-                            },
-                            "list_separator":{"kind":"missing"}
+                            }
                           }
                         ]
                       },
@@ -2451,8 +2420,7 @@
                           "line_number":17
                         }
                       }
-                    },
-                    "list_separator":{"kind":"missing"}
+                    }
                   }
                 ]
               },
@@ -2512,5 +2480,5 @@
     }
   },
   "program_text":"<?hh // strict\n\n$f = &() ==> { $x = 5; return $x; }; // error\n$x = &$foo->bar?->baz; // error\n$f = &$x; // error\n$f = &my_func(); // error\n$f = &$x->member; // error\n$f = &$x->method(); // error\n$f = &$xs[$x]; // error\n$f = &${name}; // error\n$f = &self::$mySelfThing; // error\n$f = &$$s; // error\n$f = &new C(); // error\n$y = &$$$$$$x; // error\n$x = &($foo->bar()); // error\n$x = &(Arrays::slice(self::NORMALIZED_REQUIRED_COLUMN_NAMES, 0)); // error\n$x = &(PHP\\array_slice($app_alerts_array, -1)); // error\n",
-  "version":"2020-12-02-0001"
+  "version":"2021-01-05-0001"
 }

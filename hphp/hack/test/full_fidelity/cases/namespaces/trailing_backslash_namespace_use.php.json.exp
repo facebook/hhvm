@@ -159,7 +159,6 @@
                 "kind":"list_item",
                 "list_item":{
                   "kind":"namespace_use_clause",
-                  "namespace_use_clause_kind":{"kind":"missing"},
                   "namespace_use_name":{
                     "kind":"qualified_name",
                     "qualified_name_parts":{
@@ -198,11 +197,8 @@
                         }
                       ]
                     }
-                  },
-                  "namespace_use_as":{"kind":"missing"},
-                  "namespace_use_alias":{"kind":"missing"}
-                },
-                "list_separator":{"kind":"missing"}
+                  }
+                }
               }
             ]
           },
@@ -256,5 +252,5 @@
     }
   },
   "program_text":"<?hh\n\n// Namespace group use clauses should not have trailing backslashes\n// Prefix of namespace group use is okay to have trailing backslash\n\nuse namespace A\\{B\\};\n",
-  "version":"2020-06-23-0001"
+  "version":"2021-01-05-0001"
 }

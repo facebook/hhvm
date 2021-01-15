@@ -155,8 +155,7 @@
                               "line_number":3
                             }
                           }
-                        },
-                        "list_separator":{"kind":"missing"}
+                        }
                       }
                     ]
                   },
@@ -174,8 +173,7 @@
                       "line_number":3
                     }
                   }
-                },
-                "list_separator":{"kind":"missing"}
+                }
               }
             ]
           },
@@ -196,10 +194,8 @@
         },
         {
           "kind":"function_declaration",
-          "function_attribute_spec":{"kind":"missing"},
           "function_declaration_header":{
             "kind":"function_declaration_header",
-            "function_modifiers":{"kind":"missing"},
             "function_keyword":{
               "kind":"token",
               "token":{
@@ -228,7 +224,6 @@
                 "line_number":5
               }
             },
-            "function_type_parameter_list":{"kind":"missing"},
             "function_left_paren":{
               "kind":"token",
               "token":{
@@ -243,7 +238,6 @@
                 "line_number":5
               }
             },
-            "function_parameter_list":{"kind":"missing"},
             "function_right_paren":{
               "kind":"token",
               "token":{
@@ -258,7 +252,6 @@
                 "line_number":5
               }
             },
-            "function_contexts":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
               "token":{
@@ -289,8 +282,7 @@
                   "line_number":5
                 }
               }
-            },
-            "function_where_clause":{"kind":"missing"}
+            }
           },
           "function_body":{
             "kind":"compound_statement",
@@ -374,8 +366,7 @@
                         "line_number":6
                       }
                     }
-                  },
-                  "expression_statement_semicolon":{"kind":"missing"}
+                  }
                 },
                 {
                   "kind":"expression_statement",
@@ -395,8 +386,7 @@
                         "line_number":6
                       }
                     }
-                  },
-                  "expression_statement_semicolon":{"kind":"missing"}
+                  }
                 },
                 {
                   "kind":"expression_statement",
@@ -468,5 +458,5 @@
     }
   },
   "program_text":"<?hh\n\n<<file:__EnableUnstableFeatures('expression_trees')>>\n\nfunction test(): void {\n  Code`Code`4``;\n}\n",
-  "version":"2020-12-14-0001"
+  "version":"2021-01-05-0001"
 }

@@ -54,10 +54,8 @@
         },
         {
           "kind":"function_declaration",
-          "function_attribute_spec":{"kind":"missing"},
           "function_declaration_header":{
             "kind":"function_declaration_header",
-            "function_modifiers":{"kind":"missing"},
             "function_keyword":{
               "kind":"token",
               "token":{
@@ -86,7 +84,6 @@
                 "line_number":2
               }
             },
-            "function_type_parameter_list":{"kind":"missing"},
             "function_left_paren":{
               "kind":"token",
               "token":{
@@ -108,10 +105,6 @@
                   "kind":"list_item",
                   "list_item":{
                     "kind":"parameter_declaration",
-                    "parameter_attribute":{"kind":"missing"},
-                    "parameter_visibility":{"kind":"missing"},
-                    "parameter_call_convention":{"kind":"missing"},
-                    "parameter_type":{"kind":"missing"},
                     "parameter_name":{
                       "kind":"token",
                       "token":{
@@ -125,10 +118,8 @@
                         "trailing":[],
                         "line_number":2
                       }
-                    },
-                    "parameter_default_value":{"kind":"missing"}
-                  },
-                  "list_separator":{"kind":"missing"}
+                    }
+                  }
                 }
               ]
             },
@@ -145,11 +136,7 @@
                 "trailing":[{"kind":"whitespace","text":" ","offset":21,"width":1}],
                 "line_number":2
               }
-            },
-            "function_contexts":{"kind":"missing"},
-            "function_colon":{"kind":"missing"},
-            "function_type":{"kind":"missing"},
-            "function_where_clause":{"kind":"missing"}
+            }
           },
           "function_body":{
             "kind":"compound_statement",
@@ -238,10 +225,8 @@
         },
         {
           "kind":"function_declaration",
-          "function_attribute_spec":{"kind":"missing"},
           "function_declaration_header":{
             "kind":"function_declaration_header",
-            "function_modifiers":{"kind":"missing"},
             "function_keyword":{
               "kind":"token",
               "token":{
@@ -270,7 +255,6 @@
                 "line_number":5
               }
             },
-            "function_type_parameter_list":{"kind":"missing"},
             "function_left_paren":{
               "kind":"token",
               "token":{
@@ -285,7 +269,6 @@
                 "line_number":5
               }
             },
-            "function_parameter_list":{"kind":"missing"},
             "function_right_paren":{
               "kind":"token",
               "token":{
@@ -300,7 +283,6 @@
                 "line_number":5
               }
             },
-            "function_contexts":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
               "token":{
@@ -331,8 +313,7 @@
                   "line_number":5
                 }
               }
-            },
-            "function_where_clause":{"kind":"missing"}
+            }
           },
           "function_body":{
             "kind":"compound_statement",
@@ -400,9 +381,6 @@
                     },
                     "binary_right_operand":{
                       "kind":"anonymous_function",
-                      "anonymous_attribute_spec":{"kind":"missing"},
-                      "anonymous_static_keyword":{"kind":"missing"},
-                      "anonymous_async_keyword":{"kind":"missing"},
                       "anonymous_function_keyword":{
                         "kind":"token",
                         "token":{
@@ -438,10 +416,6 @@
                             "kind":"list_item",
                             "list_item":{
                               "kind":"parameter_declaration",
-                              "parameter_attribute":{"kind":"missing"},
-                              "parameter_visibility":{"kind":"missing"},
-                              "parameter_call_convention":{"kind":"missing"},
-                              "parameter_type":{"kind":"missing"},
                               "parameter_name":{
                                 "kind":"token",
                                 "token":{
@@ -455,10 +429,8 @@
                                   "trailing":[],
                                   "line_number":7
                                 }
-                              },
-                              "parameter_default_value":{"kind":"missing"}
-                            },
-                            "list_separator":{"kind":"missing"}
+                              }
+                            }
                           }
                         ]
                       },
@@ -476,10 +448,6 @@
                           "line_number":7
                         }
                       },
-                      "anonymous_ctx_list":{"kind":"missing"},
-                      "anonymous_colon":{"kind":"missing"},
-                      "anonymous_type":{"kind":"missing"},
-                      "anonymous_use":{"kind":"missing"},
                       "anonymous_body":{
                         "kind":"compound_statement",
                         "compound_left_brace":{
@@ -496,7 +464,6 @@
                             "line_number":7
                           }
                         },
-                        "compound_statements":{"kind":"missing"},
                         "compound_right_brace":{
                           "kind":"token",
                           "token":{
@@ -660,9 +627,7 @@
                             "line_number":8
                           }
                         }
-                      },
-                      "xhp_body":{"kind":"missing"},
-                      "xhp_close":{"kind":"missing"}
+                      }
                     }
                   },
                   "expression_statement_semicolon":{
@@ -709,9 +674,6 @@
         },
         {
           "kind":"classish_declaration",
-          "classish_attribute":{"kind":"missing"},
-          "classish_modifiers":{"kind":"missing"},
-          "classish_xhp":{"kind":"missing"},
           "classish_keyword":{
             "kind":"token",
             "token":{
@@ -740,12 +702,6 @@
               "line_number":10
             }
           },
-          "classish_type_parameters":{"kind":"missing"},
-          "classish_extends_keyword":{"kind":"missing"},
-          "classish_extends_list":{"kind":"missing"},
-          "classish_implements_keyword":{"kind":"missing"},
-          "classish_implements_list":{"kind":"missing"},
-          "classish_where_clause":{"kind":"missing"},
           "classish_body":{
             "kind":"classish_body",
             "classish_body_left_brace":{
@@ -767,7 +723,6 @@
               "elements":[
                 {
                   "kind":"property_declaration",
-                  "property_attribute_spec":{"kind":"missing"},
                   "property_modifiers":{
                     "kind":"list",
                     "elements":[
@@ -787,7 +742,6 @@
                       }
                     ]
                   },
-                  "property_type":{"kind":"missing"},
                   "property_declarators":{
                     "kind":"list",
                     "elements":[
@@ -843,8 +797,7 @@
                               }
                             }
                           }
-                        },
-                        "list_separator":{"kind":"missing"}
+                        }
                       }
                     ]
                   },
@@ -874,7 +827,6 @@
                 },
                 {
                   "kind":"property_declaration",
-                  "property_attribute_spec":{"kind":"missing"},
                   "property_modifiers":{
                     "kind":"list",
                     "elements":[
@@ -966,8 +918,7 @@
                               }
                             }
                           }
-                        },
-                        "list_separator":{"kind":"missing"}
+                        }
                       }
                     ]
                   },
@@ -1029,5 +980,5 @@
     }
   },
   "program_text":"<?hh\nfunction foo($a) {\n  return $a;\n}\nfunction bar() : void {\n  // No error; the annotations are not required on anonymous functions.\n  $x = function($b) { };\n  $y = <foo:bar:blah baz-abc=\"123\"/>; // no error on well-formed XHP\n}\nclass C\n{\n  public $x = 123; // no error; type annotation is optional\n  public int $y = 456; // no error\n}\n",
-  "version":"2020-12-14-0001"
+  "version":"2021-01-05-0001"
 }

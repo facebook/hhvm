@@ -70,7 +70,6 @@
                 "line_number":3
               }
             },
-            "function_call_type_args":{"kind":"missing"},
             "function_call_left_paren":{
               "kind":"token",
               "token":{
@@ -92,8 +91,6 @@
                   "kind":"list_item",
                   "list_item":{
                     "kind":"lambda_expression",
-                    "lambda_attribute_spec":{"kind":"missing"},
-                    "lambda_async":{"kind":"missing"},
                     "lambda_signature":{
                       "kind":"lambda_signature",
                       "lambda_left_paren":{
@@ -117,10 +114,6 @@
                             "kind":"list_item",
                             "list_item":{
                               "kind":"parameter_declaration",
-                              "parameter_attribute":{"kind":"missing"},
-                              "parameter_visibility":{"kind":"missing"},
-                              "parameter_call_convention":{"kind":"missing"},
-                              "parameter_type":{"kind":"missing"},
                               "parameter_name":{
                                 "kind":"decorated_expression",
                                 "decorated_expression_decorator":{
@@ -151,8 +144,7 @@
                                     "line_number":3
                                   }
                                 }
-                              },
-                              "parameter_default_value":{"kind":"missing"}
+                              }
                             },
                             "list_separator":{
                               "kind":"token",
@@ -173,10 +165,6 @@
                             "kind":"list_item",
                             "list_item":{
                               "kind":"parameter_declaration",
-                              "parameter_attribute":{"kind":"missing"},
-                              "parameter_visibility":{"kind":"missing"},
-                              "parameter_call_convention":{"kind":"missing"},
-                              "parameter_type":{"kind":"missing"},
                               "parameter_name":{
                                 "kind":"token",
                                 "token":{
@@ -190,10 +178,8 @@
                                   "trailing":[],
                                   "line_number":3
                                 }
-                              },
-                              "parameter_default_value":{"kind":"missing"}
-                            },
-                            "list_separator":{"kind":"missing"}
+                              }
+                            }
                           }
                         ]
                       },
@@ -210,10 +196,7 @@
                           "trailing":[{"kind":"whitespace","text":" ","offset":21,"width":1}],
                           "line_number":3
                         }
-                      },
-                      "lambda_contexts":{"kind":"missing"},
-                      "lambda_colon":{"kind":"missing"},
-                      "lambda_type":{"kind":"missing"}
+                      }
                     },
                     "lambda_arrow":{
                       "kind":"token",
@@ -245,7 +228,6 @@
                           "line_number":3
                         }
                       },
-                      "compound_statements":{"kind":"missing"},
                       "compound_right_brace":{
                         "kind":"token",
                         "token":{
@@ -261,8 +243,7 @@
                         }
                       }
                     }
-                  },
-                  "list_separator":{"kind":"missing"}
+                  }
                 }
               ]
             },
@@ -314,7 +295,6 @@
                 "line_number":5
               }
             },
-            "function_call_type_args":{"kind":"missing"},
             "function_call_left_paren":{
               "kind":"token",
               "token":{
@@ -336,8 +316,6 @@
                   "kind":"list_item",
                   "list_item":{
                     "kind":"lambda_expression",
-                    "lambda_attribute_spec":{"kind":"missing"},
-                    "lambda_async":{"kind":"missing"},
                     "lambda_signature":{
                       "kind":"lambda_signature",
                       "lambda_left_paren":{
@@ -361,9 +339,6 @@
                             "kind":"list_item",
                             "list_item":{
                               "kind":"parameter_declaration",
-                              "parameter_attribute":{"kind":"missing"},
-                              "parameter_visibility":{"kind":"missing"},
-                              "parameter_call_convention":{"kind":"missing"},
                               "parameter_type":{
                                 "kind":"simple_type_specifier",
                                 "simple_type_specifier":{
@@ -411,8 +386,7 @@
                                     "line_number":5
                                   }
                                 }
-                              },
-                              "parameter_default_value":{"kind":"missing"}
+                              }
                             },
                             "list_separator":{
                               "kind":"token",
@@ -433,9 +407,6 @@
                             "kind":"list_item",
                             "list_item":{
                               "kind":"parameter_declaration",
-                              "parameter_attribute":{"kind":"missing"},
-                              "parameter_visibility":{"kind":"missing"},
-                              "parameter_call_convention":{"kind":"missing"},
                               "parameter_type":{
                                 "kind":"simple_type_specifier",
                                 "simple_type_specifier":{
@@ -466,10 +437,8 @@
                                   "trailing":[],
                                   "line_number":5
                                 }
-                              },
-                              "parameter_default_value":{"kind":"missing"}
-                            },
-                            "list_separator":{"kind":"missing"}
+                              }
+                            }
                           }
                         ]
                       },
@@ -486,10 +455,7 @@
                           "trailing":[{"kind":"whitespace","text":" ","offset":55,"width":1}],
                           "line_number":5
                         }
-                      },
-                      "lambda_contexts":{"kind":"missing"},
-                      "lambda_colon":{"kind":"missing"},
-                      "lambda_type":{"kind":"missing"}
+                      }
                     },
                     "lambda_arrow":{
                       "kind":"token",
@@ -521,7 +487,6 @@
                           "line_number":5
                         }
                       },
-                      "compound_statements":{"kind":"missing"},
                       "compound_right_brace":{
                         "kind":"token",
                         "token":{
@@ -537,8 +502,7 @@
                         }
                       }
                     }
-                  },
-                  "list_separator":{"kind":"missing"}
+                  }
                 }
               ]
             },
@@ -590,7 +554,6 @@
                 "line_number":7
               }
             },
-            "function_call_type_args":{"kind":"missing"},
             "function_call_left_paren":{
               "kind":"token",
               "token":{
@@ -612,8 +575,6 @@
                   "kind":"list_item",
                   "list_item":{
                     "kind":"lambda_expression",
-                    "lambda_attribute_spec":{"kind":"missing"},
-                    "lambda_async":{"kind":"missing"},
                     "lambda_signature":{
                       "kind":"lambda_signature",
                       "lambda_left_paren":{
@@ -637,8 +598,6 @@
                             "kind":"list_item",
                             "list_item":{
                               "kind":"variadic_parameter",
-                              "variadic_parameter_call_convention":{"kind":"missing"},
-                              "variadic_parameter_type":{"kind":"missing"},
                               "variadic_parameter_ellipsis":{
                                 "kind":"token",
                                 "token":{
@@ -673,10 +632,6 @@
                             "kind":"list_item",
                             "list_item":{
                               "kind":"parameter_declaration",
-                              "parameter_attribute":{"kind":"missing"},
-                              "parameter_visibility":{"kind":"missing"},
-                              "parameter_call_convention":{"kind":"missing"},
-                              "parameter_type":{"kind":"missing"},
                               "parameter_name":{
                                 "kind":"token",
                                 "token":{
@@ -690,10 +645,8 @@
                                   "trailing":[],
                                   "line_number":7
                                 }
-                              },
-                              "parameter_default_value":{"kind":"missing"}
-                            },
-                            "list_separator":{"kind":"missing"}
+                              }
+                            }
                           }
                         ]
                       },
@@ -710,10 +663,7 @@
                           "trailing":[{"kind":"whitespace","text":" ","offset":79,"width":1}],
                           "line_number":7
                         }
-                      },
-                      "lambda_contexts":{"kind":"missing"},
-                      "lambda_colon":{"kind":"missing"},
-                      "lambda_type":{"kind":"missing"}
+                      }
                     },
                     "lambda_arrow":{
                       "kind":"token",
@@ -745,7 +695,6 @@
                           "line_number":7
                         }
                       },
-                      "compound_statements":{"kind":"missing"},
                       "compound_right_brace":{
                         "kind":"token",
                         "token":{
@@ -761,8 +710,7 @@
                         }
                       }
                     }
-                  },
-                  "list_separator":{"kind":"missing"}
+                  }
                 }
               ]
             },
@@ -814,7 +762,6 @@
                 "line_number":9
               }
             },
-            "function_call_type_args":{"kind":"missing"},
             "function_call_left_paren":{
               "kind":"token",
               "token":{
@@ -836,8 +783,6 @@
                   "kind":"list_item",
                   "list_item":{
                     "kind":"lambda_expression",
-                    "lambda_attribute_spec":{"kind":"missing"},
-                    "lambda_async":{"kind":"missing"},
                     "lambda_signature":{
                       "kind":"lambda_signature",
                       "lambda_left_paren":{
@@ -861,9 +806,6 @@
                             "kind":"list_item",
                             "list_item":{
                               "kind":"parameter_declaration",
-                              "parameter_attribute":{"kind":"missing"},
-                              "parameter_visibility":{"kind":"missing"},
-                              "parameter_call_convention":{"kind":"missing"},
                               "parameter_type":{
                                 "kind":"simple_type_specifier",
                                 "simple_type_specifier":{
@@ -911,8 +853,7 @@
                                     "line_number":9
                                   }
                                 }
-                              },
-                              "parameter_default_value":{"kind":"missing"}
+                              }
                             },
                             "list_separator":{
                               "kind":"token",
@@ -944,10 +885,7 @@
                           "trailing":[{"kind":"whitespace","text":" ","offset":106,"width":1}],
                           "line_number":9
                         }
-                      },
-                      "lambda_contexts":{"kind":"missing"},
-                      "lambda_colon":{"kind":"missing"},
-                      "lambda_type":{"kind":"missing"}
+                      }
                     },
                     "lambda_arrow":{
                       "kind":"token",
@@ -979,7 +917,6 @@
                           "line_number":9
                         }
                       },
-                      "compound_statements":{"kind":"missing"},
                       "compound_right_brace":{
                         "kind":"token",
                         "token":{
@@ -995,8 +932,7 @@
                         }
                       }
                     }
-                  },
-                  "list_separator":{"kind":"missing"}
+                  }
                 }
               ]
             },
@@ -1048,7 +984,6 @@
                 "line_number":11
               }
             },
-            "function_call_type_args":{"kind":"missing"},
             "function_call_left_paren":{
               "kind":"token",
               "token":{
@@ -1070,9 +1005,6 @@
                   "kind":"list_item",
                   "list_item":{
                     "kind":"anonymous_function",
-                    "anonymous_attribute_spec":{"kind":"missing"},
-                    "anonymous_static_keyword":{"kind":"missing"},
-                    "anonymous_async_keyword":{"kind":"missing"},
                     "anonymous_function_keyword":{
                       "kind":"token",
                       "token":{
@@ -1108,9 +1040,6 @@
                           "kind":"list_item",
                           "list_item":{
                             "kind":"parameter_declaration",
-                            "parameter_attribute":{"kind":"missing"},
-                            "parameter_visibility":{"kind":"missing"},
-                            "parameter_call_convention":{"kind":"missing"},
                             "parameter_type":{
                               "kind":"simple_type_specifier",
                               "simple_type_specifier":{
@@ -1158,8 +1087,7 @@
                                   "line_number":11
                                 }
                               }
-                            },
-                            "parameter_default_value":{"kind":"missing"}
+                            }
                           },
                           "list_separator":{
                             "kind":"token",
@@ -1180,9 +1108,6 @@
                           "kind":"list_item",
                           "list_item":{
                             "kind":"parameter_declaration",
-                            "parameter_attribute":{"kind":"missing"},
-                            "parameter_visibility":{"kind":"missing"},
-                            "parameter_call_convention":{"kind":"missing"},
                             "parameter_type":{
                               "kind":"simple_type_specifier",
                               "simple_type_specifier":{
@@ -1213,10 +1138,8 @@
                                 "trailing":[],
                                 "line_number":11
                               }
-                            },
-                            "parameter_default_value":{"kind":"missing"}
-                          },
-                          "list_separator":{"kind":"missing"}
+                            }
+                          }
                         }
                       ]
                     },
@@ -1234,7 +1157,6 @@
                         "line_number":11
                       }
                     },
-                    "anonymous_ctx_list":{"kind":"missing"},
                     "anonymous_colon":{
                       "kind":"token",
                       "token":{
@@ -1266,7 +1188,6 @@
                         }
                       }
                     },
-                    "anonymous_use":{"kind":"missing"},
                     "anonymous_body":{
                       "kind":"compound_statement",
                       "compound_left_brace":{
@@ -1283,7 +1204,6 @@
                           "line_number":11
                         }
                       },
-                      "compound_statements":{"kind":"missing"},
                       "compound_right_brace":{
                         "kind":"token",
                         "token":{
@@ -1299,8 +1219,7 @@
                         }
                       }
                     }
-                  },
-                  "list_separator":{"kind":"missing"}
+                  }
                 }
               ]
             },
@@ -1352,7 +1271,6 @@
                 "line_number":13
               }
             },
-            "function_call_type_args":{"kind":"missing"},
             "function_call_left_paren":{
               "kind":"token",
               "token":{
@@ -1374,9 +1292,6 @@
                   "kind":"list_item",
                   "list_item":{
                     "kind":"anonymous_function",
-                    "anonymous_attribute_spec":{"kind":"missing"},
-                    "anonymous_static_keyword":{"kind":"missing"},
-                    "anonymous_async_keyword":{"kind":"missing"},
                     "anonymous_function_keyword":{
                       "kind":"token",
                       "token":{
@@ -1412,10 +1327,6 @@
                           "kind":"list_item",
                           "list_item":{
                             "kind":"parameter_declaration",
-                            "parameter_attribute":{"kind":"missing"},
-                            "parameter_visibility":{"kind":"missing"},
-                            "parameter_call_convention":{"kind":"missing"},
-                            "parameter_type":{"kind":"missing"},
                             "parameter_name":{
                               "kind":"decorated_expression",
                               "decorated_expression_decorator":{
@@ -1446,8 +1357,7 @@
                                   "line_number":13
                                 }
                               }
-                            },
-                            "parameter_default_value":{"kind":"missing"}
+                            }
                           },
                           "list_separator":{
                             "kind":"token",
@@ -1468,9 +1378,6 @@
                           "kind":"list_item",
                           "list_item":{
                             "kind":"parameter_declaration",
-                            "parameter_attribute":{"kind":"missing"},
-                            "parameter_visibility":{"kind":"missing"},
-                            "parameter_call_convention":{"kind":"missing"},
                             "parameter_type":{
                               "kind":"simple_type_specifier",
                               "simple_type_specifier":{
@@ -1501,10 +1408,8 @@
                                 "trailing":[],
                                 "line_number":13
                               }
-                            },
-                            "parameter_default_value":{"kind":"missing"}
-                          },
-                          "list_separator":{"kind":"missing"}
+                            }
+                          }
                         }
                       ]
                     },
@@ -1522,7 +1427,6 @@
                         "line_number":13
                       }
                     },
-                    "anonymous_ctx_list":{"kind":"missing"},
                     "anonymous_colon":{
                       "kind":"token",
                       "token":{
@@ -1554,7 +1458,6 @@
                         }
                       }
                     },
-                    "anonymous_use":{"kind":"missing"},
                     "anonymous_body":{
                       "kind":"compound_statement",
                       "compound_left_brace":{
@@ -1571,7 +1474,6 @@
                           "line_number":13
                         }
                       },
-                      "compound_statements":{"kind":"missing"},
                       "compound_right_brace":{
                         "kind":"token",
                         "token":{
@@ -1587,8 +1489,7 @@
                         }
                       }
                     }
-                  },
-                  "list_separator":{"kind":"missing"}
+                  }
                 }
               ]
             },
@@ -1640,7 +1541,6 @@
                 "line_number":15
               }
             },
-            "function_call_type_args":{"kind":"missing"},
             "function_call_left_paren":{
               "kind":"token",
               "token":{
@@ -1662,9 +1562,6 @@
                   "kind":"list_item",
                   "list_item":{
                     "kind":"anonymous_function",
-                    "anonymous_attribute_spec":{"kind":"missing"},
-                    "anonymous_static_keyword":{"kind":"missing"},
-                    "anonymous_async_keyword":{"kind":"missing"},
                     "anonymous_function_keyword":{
                       "kind":"token",
                       "token":{
@@ -1700,8 +1597,6 @@
                           "kind":"list_item",
                           "list_item":{
                             "kind":"variadic_parameter",
-                            "variadic_parameter_call_convention":{"kind":"missing"},
-                            "variadic_parameter_type":{"kind":"missing"},
                             "variadic_parameter_ellipsis":{
                               "kind":"token",
                               "token":{
@@ -1736,9 +1631,6 @@
                           "kind":"list_item",
                           "list_item":{
                             "kind":"parameter_declaration",
-                            "parameter_attribute":{"kind":"missing"},
-                            "parameter_visibility":{"kind":"missing"},
-                            "parameter_call_convention":{"kind":"missing"},
                             "parameter_type":{
                               "kind":"simple_type_specifier",
                               "simple_type_specifier":{
@@ -1769,10 +1661,8 @@
                                 "trailing":[],
                                 "line_number":15
                               }
-                            },
-                            "parameter_default_value":{"kind":"missing"}
-                          },
-                          "list_separator":{"kind":"missing"}
+                            }
+                          }
                         }
                       ]
                     },
@@ -1790,7 +1680,6 @@
                         "line_number":15
                       }
                     },
-                    "anonymous_ctx_list":{"kind":"missing"},
                     "anonymous_colon":{
                       "kind":"token",
                       "token":{
@@ -1822,7 +1711,6 @@
                         }
                       }
                     },
-                    "anonymous_use":{"kind":"missing"},
                     "anonymous_body":{
                       "kind":"compound_statement",
                       "compound_left_brace":{
@@ -1839,7 +1727,6 @@
                           "line_number":15
                         }
                       },
-                      "compound_statements":{"kind":"missing"},
                       "compound_right_brace":{
                         "kind":"token",
                         "token":{
@@ -1855,8 +1742,7 @@
                         }
                       }
                     }
-                  },
-                  "list_separator":{"kind":"missing"}
+                  }
                 }
               ]
             },
@@ -1908,7 +1794,6 @@
                 "line_number":17
               }
             },
-            "function_call_type_args":{"kind":"missing"},
             "function_call_left_paren":{
               "kind":"token",
               "token":{
@@ -1930,8 +1815,6 @@
                   "kind":"list_item",
                   "list_item":{
                     "kind":"lambda_expression",
-                    "lambda_attribute_spec":{"kind":"missing"},
-                    "lambda_async":{"kind":"missing"},
                     "lambda_signature":{
                       "kind":"lambda_signature",
                       "lambda_left_paren":{
@@ -1955,8 +1838,6 @@
                             "kind":"list_item",
                             "list_item":{
                               "kind":"parameter_declaration",
-                              "parameter_attribute":{"kind":"missing"},
-                              "parameter_visibility":{"kind":"missing"},
                               "parameter_call_convention":{
                                 "kind":"token",
                                 "token":{
@@ -2018,10 +1899,8 @@
                                     "line_number":17
                                   }
                                 }
-                              },
-                              "parameter_default_value":{"kind":"missing"}
-                            },
-                            "list_separator":{"kind":"missing"}
+                              }
+                            }
                           }
                         ]
                       },
@@ -2038,10 +1917,7 @@
                           "trailing":[{"kind":"whitespace","text":" ","offset":263,"width":1}],
                           "line_number":17
                         }
-                      },
-                      "lambda_contexts":{"kind":"missing"},
-                      "lambda_colon":{"kind":"missing"},
-                      "lambda_type":{"kind":"missing"}
+                      }
                     },
                     "lambda_arrow":{
                       "kind":"token",
@@ -2073,7 +1949,6 @@
                           "line_number":17
                         }
                       },
-                      "compound_statements":{"kind":"missing"},
                       "compound_right_brace":{
                         "kind":"token",
                         "token":{
@@ -2089,8 +1964,7 @@
                         }
                       }
                     }
-                  },
-                  "list_separator":{"kind":"missing"}
+                  }
                 }
               ]
             },
@@ -2142,7 +2016,6 @@
                 "line_number":19
               }
             },
-            "function_call_type_args":{"kind":"missing"},
             "function_call_left_paren":{
               "kind":"token",
               "token":{
@@ -2164,9 +2037,6 @@
                   "kind":"list_item",
                   "list_item":{
                     "kind":"anonymous_function",
-                    "anonymous_attribute_spec":{"kind":"missing"},
-                    "anonymous_static_keyword":{"kind":"missing"},
-                    "anonymous_async_keyword":{"kind":"missing"},
                     "anonymous_function_keyword":{
                       "kind":"token",
                       "token":{
@@ -2202,8 +2072,6 @@
                           "kind":"list_item",
                           "list_item":{
                             "kind":"parameter_declaration",
-                            "parameter_attribute":{"kind":"missing"},
-                            "parameter_visibility":{"kind":"missing"},
                             "parameter_call_convention":{
                               "kind":"token",
                               "token":{
@@ -2265,10 +2133,8 @@
                                   "line_number":19
                                 }
                               }
-                            },
-                            "parameter_default_value":{"kind":"missing"}
-                          },
-                          "list_separator":{"kind":"missing"}
+                            }
+                          }
                         }
                       ]
                     },
@@ -2286,7 +2152,6 @@
                         "line_number":19
                       }
                     },
-                    "anonymous_ctx_list":{"kind":"missing"},
                     "anonymous_colon":{
                       "kind":"token",
                       "token":{
@@ -2318,7 +2183,6 @@
                         }
                       }
                     },
-                    "anonymous_use":{"kind":"missing"},
                     "anonymous_body":{
                       "kind":"compound_statement",
                       "compound_left_brace":{
@@ -2335,7 +2199,6 @@
                           "line_number":19
                         }
                       },
-                      "compound_statements":{"kind":"missing"},
                       "compound_right_brace":{
                         "kind":"token",
                         "token":{
@@ -2351,8 +2214,7 @@
                         }
                       }
                     }
-                  },
-                  "list_separator":{"kind":"missing"}
+                  }
                 }
               ]
             },
@@ -2407,5 +2269,5 @@
     }
   },
   "program_text":"<?hh\n\nfoo((...$x, $y) ==> {});\n\nfoo((int ...$x, int $y) ==> {});\n\nfoo((..., $y) ==> {});\n\nfoo((int ...$x,) ==> {});\n\nfoo(function (int ...$x, int $y): void {});\n\nfoo(function (...$x, int $y): void {});\n\nfoo(function (..., int $y): void {});\n\nfoo((inout int ...$x) ==> {});\n\nfoo(function (inout int ...$x): void {});\n",
-  "version":"2020-12-14-0001"
+  "version":"2021-01-05-0001"
 }

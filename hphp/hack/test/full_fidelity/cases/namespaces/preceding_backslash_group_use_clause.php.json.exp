@@ -78,7 +78,6 @@
               "line_number":5
             }
           },
-          "namespace_group_use_kind":{"kind":"missing"},
           "namespace_group_use_prefix":{
             "kind":"qualified_name",
             "qualified_name_parts":{
@@ -139,7 +138,6 @@
                 "kind":"list_item",
                 "list_item":{
                   "kind":"namespace_use_clause",
-                  "namespace_use_clause_kind":{"kind":"missing"},
                   "namespace_use_name":{
                     "kind":"qualified_name",
                     "qualified_name_parts":{
@@ -147,7 +145,6 @@
                       "elements":[
                         {
                           "kind":"list_item",
-                          "list_item":{"kind":"missing"},
                           "list_separator":{
                             "kind":"token",
                             "token":{
@@ -178,14 +175,11 @@
                               "trailing":[],
                               "line_number":5
                             }
-                          },
-                          "list_separator":{"kind":"missing"}
+                          }
                         }
                       ]
                     }
-                  },
-                  "namespace_use_as":{"kind":"missing"},
-                  "namespace_use_alias":{"kind":"missing"}
+                  }
                 },
                 "list_separator":{
                   "kind":"token",
@@ -206,7 +200,6 @@
                 "kind":"list_item",
                 "list_item":{
                   "kind":"namespace_use_clause",
-                  "namespace_use_clause_kind":{"kind":"missing"},
                   "namespace_use_name":{
                     "kind":"qualified_name",
                     "qualified_name_parts":{
@@ -214,7 +207,6 @@
                       "elements":[
                         {
                           "kind":"list_item",
-                          "list_item":{"kind":"missing"},
                           "list_separator":{
                             "kind":"token",
                             "token":{
@@ -245,14 +237,11 @@
                               "trailing":[],
                               "line_number":5
                             }
-                          },
-                          "list_separator":{"kind":"missing"}
+                          }
                         }
                       ]
                     }
-                  },
-                  "namespace_use_as":{"kind":"missing"},
-                  "namespace_use_alias":{"kind":"missing"}
+                  }
                 },
                 "list_separator":{
                   "kind":"token",
@@ -273,7 +262,6 @@
                 "kind":"list_item",
                 "list_item":{
                   "kind":"namespace_use_clause",
-                  "namespace_use_clause_kind":{"kind":"missing"},
                   "namespace_use_name":{
                     "kind":"token",
                     "token":{
@@ -287,11 +275,8 @@
                       "trailing":[],
                       "line_number":5
                     }
-                  },
-                  "namespace_use_as":{"kind":"missing"},
-                  "namespace_use_alias":{"kind":"missing"}
-                },
-                "list_separator":{"kind":"missing"}
+                  }
+                }
               }
             ]
           },
@@ -345,5 +330,5 @@
     }
   },
   "program_text":"<?hh\n\n// The clauses in namespace use should not have preceding backslashes\n\nuse NS1\\{\\C, \\D, E};\n",
-  "version":"2020-06-23-0001"
+  "version":"2021-01-05-0001"
 }

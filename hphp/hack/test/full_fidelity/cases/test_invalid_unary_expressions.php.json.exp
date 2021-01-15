@@ -174,7 +174,6 @@
                     "line_number":4
                   }
                 },
-                "function_call_type_args":{"kind":"missing"},
                 "function_call_left_paren":{
                   "kind":"token",
                   "token":{
@@ -189,7 +188,6 @@
                     "line_number":4
                   }
                 },
-                "function_call_argument_list":{"kind":"missing"},
                 "function_call_right_paren":{
                   "kind":"token",
                   "token":{
@@ -257,5 +255,5 @@
     }
   },
   "program_text":"<?hh // strict\n\n$-$y;\n$(foo());\n",
-  "version":"2020-06-23-0001"
+  "version":"2021-01-05-0001"
 }

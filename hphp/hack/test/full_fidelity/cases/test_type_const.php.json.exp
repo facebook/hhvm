@@ -54,9 +54,6 @@
         },
         {
           "kind":"classish_declaration",
-          "classish_attribute":{"kind":"missing"},
-          "classish_modifiers":{"kind":"missing"},
-          "classish_xhp":{"kind":"missing"},
           "classish_keyword":{
             "kind":"token",
             "token":{
@@ -85,12 +82,6 @@
               "line_number":2
             }
           },
-          "classish_type_parameters":{"kind":"missing"},
-          "classish_extends_keyword":{"kind":"missing"},
-          "classish_extends_list":{"kind":"missing"},
-          "classish_implements_keyword":{"kind":"missing"},
-          "classish_implements_list":{"kind":"missing"},
-          "classish_where_clause":{"kind":"missing"},
           "classish_body":{
             "kind":"classish_body",
             "classish_body_left_brace":{
@@ -112,8 +103,6 @@
               "elements":[
                 {
                   "kind":"type_const_declaration",
-                  "type_const_attribute_spec":{"kind":"missing"},
-                  "type_const_modifiers":{"kind":"missing"},
                   "type_const_keyword":{
                     "kind":"token",
                     "token":{
@@ -156,8 +145,6 @@
                       "line_number":3
                     }
                   },
-                  "type_const_type_parameters":{"kind":"missing"},
-                  "type_const_type_constraint":{"kind":"missing"},
                   "type_const_equal":{
                     "kind":"token",
                     "token":{
@@ -206,8 +193,6 @@
                 },
                 {
                   "kind":"type_const_declaration",
-                  "type_const_attribute_spec":{"kind":"missing"},
-                  "type_const_modifiers":{"kind":"missing"},
                   "type_const_keyword":{
                     "kind":"token",
                     "token":{
@@ -250,7 +235,6 @@
                       "line_number":4
                     }
                   },
-                  "type_const_type_parameters":{"kind":"missing"},
                   "type_const_type_constraint":{
                     "kind":"type_constraint",
                     "constraint_keyword":{
@@ -370,5 +354,5 @@
     }
   },
   "program_text":"<?hh\nclass C {\n  const type T1 = int;\n  const type T2 as T1 = T1;\n}\n",
-  "version":"2020-06-23-0001"
+  "version":"2021-01-05-0001"
 }

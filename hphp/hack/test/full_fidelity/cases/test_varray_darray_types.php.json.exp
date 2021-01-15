@@ -58,7 +58,6 @@
         },
         {
           "kind":"classish_declaration",
-          "classish_attribute":{"kind":"missing"},
           "classish_modifiers":{
             "kind":"list",
             "elements":[
@@ -78,7 +77,6 @@
               }
             ]
           },
-          "classish_xhp":{"kind":"missing"},
           "classish_keyword":{
             "kind":"token",
             "token":{
@@ -107,12 +105,6 @@
               "line_number":2
             }
           },
-          "classish_type_parameters":{"kind":"missing"},
-          "classish_extends_keyword":{"kind":"missing"},
-          "classish_extends_list":{"kind":"missing"},
-          "classish_implements_keyword":{"kind":"missing"},
-          "classish_implements_list":{"kind":"missing"},
-          "classish_where_clause":{"kind":"missing"},
           "classish_body":{
             "kind":"classish_body",
             "classish_body_left_brace":{
@@ -268,7 +260,6 @@
                                         }
                                       }
                                     },
-                                    "darray_trailing_comma":{"kind":"missing"},
                                     "darray_right_angle":{
                                       "kind":"token",
                                       "token":{
@@ -283,8 +274,7 @@
                                         "line_number":3
                                       }
                                     }
-                                  },
-                                  "list_separator":{"kind":"missing"}
+                                  }
                                 }
                               ]
                             },
@@ -303,8 +293,7 @@
                               }
                             }
                           }
-                        },
-                        "list_separator":{"kind":"missing"}
+                        }
                       }
                     ]
                   },
@@ -428,7 +417,6 @@
                                         }
                                       }
                                     },
-                                    "varray_trailing_comma":{"kind":"missing"},
                                     "varray_right_angle":{
                                       "kind":"token",
                                       "token":{
@@ -443,8 +431,7 @@
                                         "line_number":4
                                       }
                                     }
-                                  },
-                                  "list_separator":{"kind":"missing"}
+                                  }
                                 }
                               ]
                             },
@@ -463,8 +450,7 @@
                               }
                             }
                           }
-                        },
-                        "list_separator":{"kind":"missing"}
+                        }
                       }
                     ]
                   },
@@ -522,5 +508,5 @@
     }
   },
   "program_text":"<?hh // strict\nfinal class VarrayDarrayTypesTest {\n  use DarrayTrait<darray<string,string>>;\n  use VarrayTrait<varray<string>>;\n}\n",
-  "version":"2020-06-23-0001"
+  "version":"2021-01-05-0001"
 }

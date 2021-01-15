@@ -119,8 +119,7 @@
                   "trailing":[{"kind":"whitespace","text":" ","offset":15,"width":1}],
                   "line_number":3
                 }
-              },
-              "binary_right_operand":{"kind":"missing"}
+              }
             }
           },
           "expression_statement_semicolon":{
@@ -205,8 +204,7 @@
                   "trailing":[{"kind":"whitespace","text":" ","offset":27,"width":1}],
                   "line_number":4
                 }
-              },
-              "binary_right_operand":{"kind":"missing"}
+              }
             }
           },
           "expression_statement_semicolon":{
@@ -291,8 +289,7 @@
                   "trailing":[{"kind":"whitespace","text":" ","offset":38,"width":1}],
                   "line_number":5
                 }
-              },
-              "binary_right_operand":{"kind":"missing"}
+              }
             }
           },
           "expression_statement_semicolon":{
@@ -331,5 +328,5 @@
     }
   },
   "program_text":"<?hh\n\n$x = $y + ;\n$x = $y < ;\n$x = 0 - ;\n",
-  "version":"2020-06-23-0001"
+  "version":"2021-01-05-0001"
 }

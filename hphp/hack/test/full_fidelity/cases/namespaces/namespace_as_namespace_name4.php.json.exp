@@ -86,14 +86,7 @@
                 "trailing":[{"kind":"whitespace","text":" ","offset":146,"width":1}],
                 "line_number":6
               }
-            },
-            "namespace_name":{"kind":"missing"}
-          },
-          "namespace_body":{
-            "kind":"namespace_body",
-            "namespace_left_brace":{"kind":"missing"},
-            "namespace_declarations":{"kind":"missing"},
-            "namespace_right_brace":{"kind":"missing"}
+            }
           }
         },
         {
@@ -153,8 +146,7 @@
                           "trailing":[{"kind":"whitespace","text":" ","offset":160,"width":1}],
                           "line_number":6
                         }
-                      },
-                      "list_separator":{"kind":"missing"}
+                      }
                     }
                   ]
                 }
@@ -174,7 +166,6 @@
                 "line_number":6
               }
             },
-            "collection_literal_initializers":{"kind":"missing"},
             "collection_literal_right_brace":{
               "kind":"token",
               "token":{
@@ -189,8 +180,7 @@
                 "line_number":6
               }
             }
-          },
-          "expression_statement_semicolon":{"kind":"missing"}
+          }
         },
         {
           "kind":"end_of_file",
@@ -213,5 +203,5 @@
     }
   },
   "program_text":"<?hh\n\n// namespace should not be allowed to be the name of a namespace\n// This checks for case sensitivity. Should still not be allowed\n\nnamespace namespace\\Foo {}\n",
-  "version":"2020-06-23-0001"
+  "version":"2021-01-05-0001"
 }

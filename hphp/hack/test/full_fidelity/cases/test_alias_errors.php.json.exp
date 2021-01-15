@@ -58,7 +58,6 @@
         },
         {
           "kind":"alias_declaration",
-          "alias_attribute_spec":{"kind":"missing"},
           "alias_keyword":{
             "kind":"token",
             "token":{
@@ -87,7 +86,6 @@
               "line_number":2
             }
           },
-          "alias_generic_parameter":{"kind":"missing"},
           "alias_constraint":{
             "kind":"type_constraint",
             "constraint_keyword":{
@@ -174,7 +172,6 @@
         },
         {
           "kind":"alias_declaration",
-          "alias_attribute_spec":{"kind":"missing"},
           "alias_keyword":{
             "kind":"token",
             "token":{
@@ -203,7 +200,6 @@
               "line_number":3
             }
           },
-          "alias_generic_parameter":{"kind":"missing"},
           "alias_constraint":{
             "kind":"type_constraint",
             "constraint_keyword":{
@@ -290,7 +286,6 @@
         },
         {
           "kind":"alias_declaration",
-          "alias_attribute_spec":{"kind":"missing"},
           "alias_keyword":{
             "kind":"token",
             "token":{
@@ -319,8 +314,6 @@
               "line_number":4
             }
           },
-          "alias_generic_parameter":{"kind":"missing"},
-          "alias_constraint":{"kind":"missing"},
           "alias_equal":{
             "kind":"token",
             "token":{
@@ -392,5 +385,5 @@
     }
   },
   "program_text":"<?hh //strict\ntype foo as bar = blah; // error\nnewtype foo2 as bar2 = blah2; // legal\ntype foo3 = blah3; // legal\n",
-  "version":"2020-06-23-0001"
+  "version":"2021-01-05-0001"
 }

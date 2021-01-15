@@ -84,8 +84,7 @@
               "trailing":[],
               "line_number":5
             }
-          },
-          "expression_statement_semicolon":{"kind":"missing"}
+          }
         },
         {
           "kind":"expression_statement",
@@ -102,8 +101,7 @@
               "trailing":[{"kind":"whitespace","text":" ","offset":28,"width":1}],
               "line_number":5
             }
-          },
-          "expression_statement_semicolon":{"kind":"missing"}
+          }
         },
         {
           "kind":"expression_statement",
@@ -139,9 +137,6 @@
             },
             "binary_right_operand":{
               "kind":"anonymous_function",
-              "anonymous_attribute_spec":{"kind":"missing"},
-              "anonymous_static_keyword":{"kind":"missing"},
-              "anonymous_async_keyword":{"kind":"missing"},
               "anonymous_function_keyword":{
                 "kind":"token",
                 "token":{
@@ -170,7 +165,6 @@
                   "line_number":6
                 }
               },
-              "anonymous_parameters":{"kind":"missing"},
               "anonymous_right_paren":{
                 "kind":"token",
                 "token":{
@@ -185,7 +179,6 @@
                   "line_number":6
                 }
               },
-              "anonymous_ctx_list":{"kind":"missing"},
               "anonymous_colon":{
                 "kind":"token",
                 "token":{
@@ -217,7 +210,6 @@
                   }
                 }
               },
-              "anonymous_use":{"kind":"missing"},
               "anonymous_body":{
                 "kind":"compound_statement",
                 "compound_left_brace":{
@@ -234,7 +226,6 @@
                     "line_number":6
                   }
                 },
-                "compound_statements":{"kind":"missing"},
                 "compound_right_brace":{
                   "kind":"token",
                   "token":{
@@ -251,8 +242,7 @@
                 }
               }
             }
-          },
-          "expression_statement_semicolon":{"kind":"missing"}
+          }
         },
         {
           "kind":"end_of_file",
@@ -275,5 +265,5 @@
     }
   },
   "program_text":"<?hh\n\n@Attr1\n@Attr2\n<<Attr3, Attr4>>\nfunction f(): void {}\n",
-  "version":"2020-12-09-0001"
+  "version":"2021-01-05-0001"
 }

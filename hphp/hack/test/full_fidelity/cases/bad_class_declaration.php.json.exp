@@ -54,9 +54,6 @@
         },
         {
           "kind":"classish_declaration",
-          "classish_attribute":{"kind":"missing"},
-          "classish_modifiers":{"kind":"missing"},
-          "classish_xhp":{"kind":"missing"},
           "classish_keyword":{
             "kind":"token",
             "token":{
@@ -71,7 +68,6 @@
               "line_number":3
             }
           },
-          "classish_name":{"kind":"missing"},
           "classish_type_parameters":{
             "kind":"type_parameters",
             "type_parameters_left_angle":{
@@ -95,9 +91,6 @@
                   "kind":"list_item",
                   "list_item":{
                     "kind":"type_parameter",
-                    "type_attribute_spec":{"kind":"missing"},
-                    "type_reified":{"kind":"missing"},
-                    "type_variance":{"kind":"missing"},
                     "type_name":{
                       "kind":"token",
                       "token":{
@@ -111,11 +104,8 @@
                         "trailing":[],
                         "line_number":3
                       }
-                    },
-                    "type_param_params":{"kind":"missing"},
-                    "type_constraints":{"kind":"missing"}
-                  },
-                  "list_separator":{"kind":"missing"}
+                    }
+                  }
                 }
               ]
             },
@@ -134,14 +124,8 @@
               }
             }
           },
-          "classish_extends_keyword":{"kind":"missing"},
-          "classish_extends_list":{"kind":"missing"},
-          "classish_implements_keyword":{"kind":"missing"},
-          "classish_implements_list":{"kind":"missing"},
-          "classish_where_clause":{"kind":"missing"},
           "classish_body":{
             "kind":"classish_body",
-            "classish_body_left_brace":{"kind":"missing"},
             "classish_body_elements":{
               "kind":"list",
               "elements":[
@@ -252,5 +236,5 @@
     }
   },
   "program_text":"<?hh\n\nclass <this>should extends fail {}\n",
-  "version":"2020-06-23-0001"
+  "version":"2021-01-05-0001"
 }

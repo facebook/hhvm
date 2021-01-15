@@ -70,7 +70,6 @@
                 "line_number":3
               }
             },
-            "function_call_type_args":{"kind":"missing"},
             "function_call_left_paren":{
               "kind":"token",
               "token":{
@@ -222,14 +221,11 @@
                         }
                       }
                     }
-                  },
-                  "list_separator":{"kind":"missing"}
+                  }
                 }
               ]
-            },
-            "function_call_right_paren":{"kind":"missing"}
-          },
-          "expression_statement_semicolon":{"kind":"missing"}
+            }
+          }
         },
         {
           "kind":"expression_statement",
@@ -538,5 +534,5 @@
     }
   },
   "program_text":"<?hh\n\nvar_dump(@@@@!!@ & @&-+@!@@@~~@@ 42 + 1);\n",
-  "version":"2020-10-15-0001"
+  "version":"2021-01-05-0001"
 }

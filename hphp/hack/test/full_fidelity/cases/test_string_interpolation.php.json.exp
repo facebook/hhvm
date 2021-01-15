@@ -103,7 +103,6 @@
                   "line_number":3
                 }
               },
-              "darray_intrinsic_explicit_type":{"kind":"missing"},
               "darray_intrinsic_left_bracket":{
                 "kind":"token",
                 "token":{
@@ -173,8 +172,7 @@
                           }
                         }
                       }
-                    },
-                    "list_separator":{"kind":"missing"}
+                    }
                   }
                 ]
               },
@@ -227,7 +225,6 @@
                 "line_number":4
               }
             },
-            "function_call_type_args":{"kind":"missing"},
             "function_call_left_paren":{
               "kind":"token",
               "token":{
@@ -575,8 +572,7 @@
                         }
                       ]
                     }
-                  },
-                  "list_separator":{"kind":"missing"}
+                  }
                 }
               ]
             },
@@ -631,5 +627,5 @@
     }
   },
   "program_text":"<?hh\n\n$a = darray['x'=>'foo'];\nvar_dump(\"AAA ${a['x']} $a[x] {$a['x']} BBB\");\n",
-  "version":"2020-06-30-0000"
+  "version":"2021-01-05-0001"
 }

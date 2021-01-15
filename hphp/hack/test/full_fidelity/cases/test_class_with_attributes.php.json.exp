@@ -90,10 +90,7 @@
                         "trailing":[],
                         "line_number":2
                       }
-                    },
-                    "constructor_call_left_paren":{"kind":"missing"},
-                    "constructor_call_argument_list":{"kind":"missing"},
-                    "constructor_call_right_paren":{"kind":"missing"}
+                    }
                   },
                   "list_separator":{
                     "kind":"token",
@@ -145,7 +142,6 @@
                         "line_number":2
                       }
                     },
-                    "constructor_call_argument_list":{"kind":"missing"},
                     "constructor_call_right_paren":{
                       "kind":"token",
                       "token":{
@@ -160,8 +156,7 @@
                         "line_number":2
                       }
                     }
-                  },
-                  "list_separator":{"kind":"missing"}
+                  }
                 }
               ]
             },
@@ -180,8 +175,6 @@
               }
             }
           },
-          "classish_modifiers":{"kind":"missing"},
-          "classish_xhp":{"kind":"missing"},
           "classish_keyword":{
             "kind":"token",
             "token":{
@@ -210,7 +203,6 @@
               "line_number":2
             }
           },
-          "classish_type_parameters":{"kind":"missing"},
           "classish_extends_keyword":{
             "kind":"token",
             "token":{
@@ -246,8 +238,7 @@
                       "line_number":2
                     }
                   }
-                },
-                "list_separator":{"kind":"missing"}
+                }
               }
             ]
           },
@@ -286,12 +277,10 @@
                       "line_number":2
                     }
                   }
-                },
-                "list_separator":{"kind":"missing"}
+                }
               }
             ]
           },
-          "classish_where_clause":{"kind":"missing"},
           "classish_body":{
             "kind":"classish_body",
             "classish_body_left_brace":{
@@ -308,7 +297,6 @@
                 "line_number":2
               }
             },
-            "classish_body_elements":{"kind":"missing"},
             "classish_body_right_brace":{
               "kind":"token",
               "token":{
@@ -346,5 +334,5 @@
     }
   },
   "program_text":"<?hh\n<<a, b() >> class C extends B implements I {}\n",
-  "version":"2020-06-23-0001"
+  "version":"2021-01-05-0001"
 }

@@ -58,9 +58,6 @@
         },
         {
           "kind":"classish_declaration",
-          "classish_attribute":{"kind":"missing"},
-          "classish_modifiers":{"kind":"missing"},
-          "classish_xhp":{"kind":"missing"},
           "classish_keyword":{
             "kind":"token",
             "token":{
@@ -98,12 +95,6 @@
               "line_number":4
             }
           },
-          "classish_type_parameters":{"kind":"missing"},
-          "classish_extends_keyword":{"kind":"missing"},
-          "classish_extends_list":{"kind":"missing"},
-          "classish_implements_keyword":{"kind":"missing"},
-          "classish_implements_list":{"kind":"missing"},
-          "classish_where_clause":{"kind":"missing"},
           "classish_body":{
             "kind":"classish_body",
             "classish_body_left_brace":{
@@ -125,10 +116,8 @@
               "elements":[
                 {
                   "kind":"methodish_declaration",
-                  "methodish_attribute":{"kind":"missing"},
                   "methodish_function_decl_header":{
                     "kind":"function_declaration_header",
-                    "function_modifiers":{"kind":"missing"},
                     "function_keyword":{
                       "kind":"token",
                       "token":{
@@ -180,9 +169,6 @@
                             "kind":"list_item",
                             "list_item":{
                               "kind":"type_parameter",
-                              "type_attribute_spec":{"kind":"missing"},
-                              "type_reified":{"kind":"missing"},
-                              "type_variance":{"kind":"missing"},
                               "type_name":{
                                 "kind":"token",
                                 "token":{
@@ -196,11 +182,8 @@
                                   "trailing":[],
                                   "line_number":5
                                 }
-                              },
-                              "type_param_params":{"kind":"missing"},
-                              "type_constraints":{"kind":"missing"}
-                            },
-                            "list_separator":{"kind":"missing"}
+                              }
+                            }
                           }
                         ]
                       },
@@ -233,7 +216,6 @@
                         "line_number":5
                       }
                     },
-                    "function_parameter_list":{"kind":"missing"},
                     "function_right_paren":{
                       "kind":"token",
                       "token":{
@@ -248,9 +230,6 @@
                         "line_number":5
                       }
                     },
-                    "function_contexts":{"kind":"missing"},
-                    "function_colon":{"kind":"missing"},
-                    "function_type":{"kind":"missing"},
                     "function_where_clause":{
                       "kind":"where_clause",
                       "where_clause_keyword":{
@@ -291,7 +270,6 @@
                                   }
                                 }
                               },
-                              "where_constraint_operator":{"kind":"missing"},
                               "where_constraint_right_type":{
                                 "kind":"error",
                                 "error_error":{
@@ -309,8 +287,7 @@
                                   }
                                 }
                               }
-                            },
-                            "list_separator":{"kind":"missing"}
+                            }
                           }
                         ]
                       }
@@ -332,12 +309,10 @@
                         "line_number":6
                       }
                     }
-                  },
-                  "methodish_semicolon":{"kind":"missing"}
+                  }
                 }
               ]
-            },
-            "classish_body_right_brace":{"kind":"missing"}
+            }
           }
         },
         {
@@ -361,5 +336,5 @@
     }
   },
   "program_text":"<?hh // strict\n// Copyright 2004-present Facebook. All Rights Reserved.\n\ninterface A {\n    function f<T>() where T\n",
-  "version":"2020-12-14-0001"
+  "version":"2021-01-05-0001"
 }

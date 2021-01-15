@@ -58,7 +58,6 @@
         },
         {
           "kind":"alias_declaration",
-          "alias_attribute_spec":{"kind":"missing"},
           "alias_keyword":{
             "kind":"token",
             "token":{
@@ -110,9 +109,6 @@
                   "kind":"list_item",
                   "list_item":{
                     "kind":"type_parameter",
-                    "type_attribute_spec":{"kind":"missing"},
-                    "type_reified":{"kind":"missing"},
-                    "type_variance":{"kind":"missing"},
                     "type_name":{
                       "kind":"token",
                       "token":{
@@ -126,11 +122,8 @@
                         "trailing":[],
                         "line_number":3
                       }
-                    },
-                    "type_param_params":{"kind":"missing"},
-                    "type_constraints":{"kind":"missing"}
-                  },
-                  "list_separator":{"kind":"missing"}
+                    }
+                  }
                 }
               ]
             },
@@ -149,7 +142,6 @@
               }
             }
           },
-          "alias_constraint":{"kind":"missing"},
           "alias_equal":{
             "kind":"token",
             "token":{
@@ -198,7 +190,6 @@
         },
         {
           "kind":"alias_declaration",
-          "alias_attribute_spec":{"kind":"missing"},
           "alias_keyword":{
             "kind":"token",
             "token":{
@@ -227,8 +218,6 @@
               "line_number":4
             }
           },
-          "alias_generic_parameter":{"kind":"missing"},
-          "alias_constraint":{"kind":"missing"},
           "alias_equal":{
             "kind":"token",
             "token":{
@@ -277,7 +266,6 @@
         },
         {
           "kind":"alias_declaration",
-          "alias_attribute_spec":{"kind":"missing"},
           "alias_keyword":{
             "kind":"token",
             "token":{
@@ -329,9 +317,6 @@
                   "kind":"list_item",
                   "list_item":{
                     "kind":"type_parameter",
-                    "type_attribute_spec":{"kind":"missing"},
-                    "type_reified":{"kind":"missing"},
-                    "type_variance":{"kind":"missing"},
                     "type_name":{
                       "kind":"token",
                       "token":{
@@ -345,11 +330,8 @@
                         "trailing":[],
                         "line_number":5
                       }
-                    },
-                    "type_param_params":{"kind":"missing"},
-                    "type_constraints":{"kind":"missing"}
-                  },
-                  "list_separator":{"kind":"missing"}
+                    }
+                  }
                 }
               ]
             },
@@ -368,7 +350,6 @@
               }
             }
           },
-          "alias_constraint":{"kind":"missing"},
           "alias_equal":{
             "kind":"token",
             "token":{
@@ -417,7 +398,6 @@
         },
         {
           "kind":"alias_declaration",
-          "alias_attribute_spec":{"kind":"missing"},
           "alias_keyword":{
             "kind":"token",
             "token":{
@@ -469,9 +449,6 @@
                   "kind":"list_item",
                   "list_item":{
                     "kind":"type_parameter",
-                    "type_attribute_spec":{"kind":"missing"},
-                    "type_reified":{"kind":"missing"},
-                    "type_variance":{"kind":"missing"},
                     "type_name":{
                       "kind":"token",
                       "token":{
@@ -485,9 +462,7 @@
                         "trailing":[],
                         "line_number":6
                       }
-                    },
-                    "type_param_params":{"kind":"missing"},
-                    "type_constraints":{"kind":"missing"}
+                    }
                   },
                   "list_separator":{
                     "kind":"token",
@@ -508,9 +483,6 @@
                   "kind":"list_item",
                   "list_item":{
                     "kind":"type_parameter",
-                    "type_attribute_spec":{"kind":"missing"},
-                    "type_reified":{"kind":"missing"},
-                    "type_variance":{"kind":"missing"},
                     "type_name":{
                       "kind":"token",
                       "token":{
@@ -524,11 +496,8 @@
                         "trailing":[],
                         "line_number":6
                       }
-                    },
-                    "type_param_params":{"kind":"missing"},
-                    "type_constraints":{"kind":"missing"}
-                  },
-                  "list_separator":{"kind":"missing"}
+                    }
+                  }
                 }
               ]
             },
@@ -547,7 +516,6 @@
               }
             }
           },
-          "alias_constraint":{"kind":"missing"},
           "alias_equal":{
             "kind":"token",
             "token":{
@@ -596,7 +564,6 @@
         },
         {
           "kind":"alias_declaration",
-          "alias_attribute_spec":{"kind":"missing"},
           "alias_keyword":{
             "kind":"token",
             "token":{
@@ -648,9 +615,6 @@
                   "kind":"list_item",
                   "list_item":{
                     "kind":"type_parameter",
-                    "type_attribute_spec":{"kind":"missing"},
-                    "type_reified":{"kind":"missing"},
-                    "type_variance":{"kind":"missing"},
                     "type_name":{
                       "kind":"token",
                       "token":{
@@ -664,9 +628,7 @@
                         "trailing":[],
                         "line_number":7
                       }
-                    },
-                    "type_param_params":{"kind":"missing"},
-                    "type_constraints":{"kind":"missing"}
+                    }
                   },
                   "list_separator":{
                     "kind":"token",
@@ -687,9 +649,6 @@
                   "kind":"list_item",
                   "list_item":{
                     "kind":"type_parameter",
-                    "type_attribute_spec":{"kind":"missing"},
-                    "type_reified":{"kind":"missing"},
-                    "type_variance":{"kind":"missing"},
                     "type_name":{
                       "kind":"token",
                       "token":{
@@ -703,11 +662,8 @@
                         "trailing":[],
                         "line_number":7
                       }
-                    },
-                    "type_param_params":{"kind":"missing"},
-                    "type_constraints":{"kind":"missing"}
-                  },
-                  "list_separator":{"kind":"missing"}
+                    }
+                  }
                 }
               ]
             },
@@ -726,7 +682,6 @@
               }
             }
           },
-          "alias_constraint":{"kind":"missing"},
           "alias_equal":{
             "kind":"token",
             "token":{
@@ -794,5 +749,5 @@
     }
   },
   "program_text":"<?hh // strict\n\ntype T1<T> = T2;\ntype T2 = T2;\ntype T3<T> = T3;\ntype T4<T, T> = T;\ntype T5<int, T> = T;\n",
-  "version":"2020-06-23-0001"
+  "version":"2021-01-05-0001"
 }

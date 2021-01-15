@@ -54,10 +54,8 @@
         },
         {
           "kind":"function_declaration",
-          "function_attribute_spec":{"kind":"missing"},
           "function_declaration_header":{
             "kind":"function_declaration_header",
-            "function_modifiers":{"kind":"missing"},
             "function_keyword":{
               "kind":"token",
               "token":{
@@ -86,7 +84,6 @@
                 "line_number":2
               }
             },
-            "function_type_parameter_list":{"kind":"missing"},
             "function_left_paren":{
               "kind":"token",
               "token":{
@@ -101,7 +98,6 @@
                 "line_number":2
               }
             },
-            "function_parameter_list":{"kind":"missing"},
             "function_right_paren":{
               "kind":"token",
               "token":{
@@ -115,11 +111,7 @@
                 "trailing":[{"kind":"whitespace","text":" ","offset":19,"width":1}],
                 "line_number":2
               }
-            },
-            "function_contexts":{"kind":"missing"},
-            "function_colon":{"kind":"missing"},
-            "function_type":{"kind":"missing"},
-            "function_where_clause":{"kind":"missing"}
+            }
           },
           "function_body":{
             "kind":"compound_statement",
@@ -395,7 +387,6 @@
                                 }
                               ]
                             },
-                            "switch_section_statements":{"kind":"missing"},
                             "switch_section_fallthrough":{
                               "kind":"switch_fallthrough",
                               "fallthrough_keyword":{
@@ -510,8 +501,7 @@
                                   }
                                 }
                               ]
-                            },
-                            "switch_section_fallthrough":{"kind":"missing"}
+                            }
                           }
                         ]
                       },
@@ -530,7 +520,6 @@
                         }
                       }
                     },
-                    "if_elseif_clauses":{"kind":"missing"},
                     "if_else_clause":{
                       "kind":"else_clause",
                       "else_keyword":{
@@ -930,8 +919,7 @@
                         }
                       }
                     ]
-                  },
-                  "if_else_clause":{"kind":"missing"}
+                  }
                 }
               ]
             },
@@ -972,5 +960,5 @@
     }
   },
   "program_text":"<?hh\nfunction foo() {\n  if ($a)\n    if ($b)\n      switch ($c) {\n        case 123: fallthrough; // fallthrough parsed but not yet supported\n        default: break;\n      }\n    else\n      return $d;\n  elseif($e)\n    do {\n      while($f)\n        throw $g;\n      continue;\n    } while ($h);\n}\n",
-  "version":"2020-12-14-0001"
+  "version":"2021-01-05-0001"
 }

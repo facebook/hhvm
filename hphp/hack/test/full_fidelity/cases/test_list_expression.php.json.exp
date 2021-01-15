@@ -54,10 +54,8 @@
         },
         {
           "kind":"function_declaration",
-          "function_attribute_spec":{"kind":"missing"},
           "function_declaration_header":{
             "kind":"function_declaration_header",
-            "function_modifiers":{"kind":"missing"},
             "function_keyword":{
               "kind":"token",
               "token":{
@@ -86,7 +84,6 @@
                 "line_number":2
               }
             },
-            "function_type_parameter_list":{"kind":"missing"},
             "function_left_paren":{
               "kind":"token",
               "token":{
@@ -108,9 +105,6 @@
                   "kind":"list_item",
                   "list_item":{
                     "kind":"parameter_declaration",
-                    "parameter_attribute":{"kind":"missing"},
-                    "parameter_visibility":{"kind":"missing"},
-                    "parameter_call_convention":{"kind":"missing"},
                     "parameter_type":{
                       "kind":"simple_type_specifier",
                       "simple_type_specifier":{
@@ -141,10 +135,8 @@
                         "trailing":[],
                         "line_number":2
                       }
-                    },
-                    "parameter_default_value":{"kind":"missing"}
-                  },
-                  "list_separator":{"kind":"missing"}
+                    }
+                  }
                 }
               ]
             },
@@ -161,11 +153,7 @@
                 "trailing":[],
                 "line_number":2
               }
-            },
-            "function_contexts":{"kind":"missing"},
-            "function_colon":{"kind":"missing"},
-            "function_type":{"kind":"missing"},
-            "function_where_clause":{"kind":"missing"}
+            }
           },
           "function_body":{
             "kind":"compound_statement",
@@ -275,8 +263,7 @@
                                   "line_number":3
                                 }
                               }
-                            },
-                            "list_separator":{"kind":"missing"}
+                            }
                           }
                         ]
                       },
@@ -500,8 +487,7 @@
                                           "line_number":4
                                         }
                                       }
-                                    },
-                                    "list_separator":{"kind":"missing"}
+                                    }
                                   }
                                 ]
                               },
@@ -519,8 +505,7 @@
                                   "line_number":4
                                 }
                               }
-                            },
-                            "list_separator":{"kind":"missing"}
+                            }
                           }
                         ]
                       },
@@ -625,7 +610,6 @@
                         "elements":[
                           {
                             "kind":"list_item",
-                            "list_item":{"kind":"missing"},
                             "list_separator":{
                               "kind":"token",
                               "token":{
@@ -643,7 +627,6 @@
                           },
                           {
                             "kind":"list_item",
-                            "list_item":{"kind":"missing"},
                             "list_separator":{
                               "kind":"token",
                               "token":{
@@ -695,7 +678,6 @@
                           },
                           {
                             "kind":"list_item",
-                            "list_item":{"kind":"missing"},
                             "list_separator":{
                               "kind":"token",
                               "token":{
@@ -710,11 +692,6 @@
                                 "line_number":5
                               }
                             }
-                          },
-                          {
-                            "kind":"list_item",
-                            "list_item":{"kind":"missing"},
-                            "list_separator":{"kind":"missing"}
                           }
                         ]
                       },
@@ -828,5 +805,5 @@
     }
   },
   "program_text":"<?hh\nfunction f(Bar $vector){\n  list($a, $b) = $vector;\n  list($a, list($b, $c)) = $vector;\n  list(,,$a,,) = $vector; // Missing binders should be `$_`-style ignores.\n}\n",
-  "version":"2020-12-14-0001"
+  "version":"2021-01-05-0001"
 }

@@ -106,7 +106,6 @@
               "elements":[
                 {
                   "kind":"const_declaration",
-                  "const_modifiers":{"kind":"missing"},
                   "const_keyword":{
                     "kind":"token",
                     "token":{
@@ -121,7 +120,6 @@
                       "line_number":3
                     }
                   },
-                  "const_type_specifier":{"kind":"missing"},
                   "const_declarators":{
                     "kind":"list",
                     "elements":[
@@ -177,8 +175,7 @@
                               }
                             }
                           }
-                        },
-                        "list_separator":{"kind":"missing"}
+                        }
                       }
                     ]
                   },
@@ -252,7 +249,6 @@
                 "kind":"list_item",
                 "list_item":{
                   "kind":"namespace_use_clause",
-                  "namespace_use_clause_kind":{"kind":"missing"},
                   "namespace_use_name":{
                     "kind":"qualified_name",
                     "qualified_name_parts":{
@@ -304,8 +300,7 @@
                               "trailing":[{"kind":"whitespace","text":" ","offset":61,"width":1}],
                               "line_number":5
                             }
-                          },
-                          "list_separator":{"kind":"missing"}
+                          }
                         }
                       ]
                     }
@@ -338,8 +333,7 @@
                       "line_number":5
                     }
                   }
-                },
-                "list_separator":{"kind":"missing"}
+                }
               }
             ]
           },
@@ -395,7 +389,6 @@
                 "kind":"list_item",
                 "list_item":{
                   "kind":"namespace_use_clause",
-                  "namespace_use_clause_kind":{"kind":"missing"},
                   "namespace_use_name":{
                     "kind":"qualified_name",
                     "qualified_name_parts":{
@@ -447,8 +440,7 @@
                               "trailing":[{"kind":"whitespace","text":" ","offset":86,"width":1}],
                               "line_number":6
                             }
-                          },
-                          "list_separator":{"kind":"missing"}
+                          }
                         }
                       ]
                     }
@@ -481,8 +473,7 @@
                       "line_number":6
                     }
                   }
-                },
-                "list_separator":{"kind":"missing"}
+                }
               }
             ]
           },
@@ -522,5 +513,5 @@
     }
   },
   "program_text":"<?hh\nnamespace consts {\n  const x = \"x\";\n}\nuse const consts\\x as A;\nuse const consts\\x as a;\n",
-  "version":"2020-06-23-0001"
+  "version":"2021-01-05-0001"
 }

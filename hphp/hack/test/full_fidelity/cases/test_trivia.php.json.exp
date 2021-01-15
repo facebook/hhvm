@@ -58,10 +58,8 @@
         },
         {
           "kind":"function_declaration",
-          "function_attribute_spec":{"kind":"missing"},
           "function_declaration_header":{
             "kind":"function_declaration_header",
-            "function_modifiers":{"kind":"missing"},
             "function_keyword":{
               "kind":"token",
               "token":{
@@ -100,7 +98,6 @@
                 "line_number":8
               }
             },
-            "function_type_parameter_list":{"kind":"missing"},
             "function_left_paren":{
               "kind":"token",
               "token":{
@@ -122,9 +119,6 @@
                   "kind":"list_item",
                   "list_item":{
                     "kind":"parameter_declaration",
-                    "parameter_attribute":{"kind":"missing"},
-                    "parameter_visibility":{"kind":"missing"},
-                    "parameter_call_convention":{"kind":"missing"},
                     "parameter_type":{
                       "kind":"dictionary_type_specifier",
                       "dictionary_type_keyword":{
@@ -256,10 +250,8 @@
                         "trailing":[],
                         "line_number":8
                       }
-                    },
-                    "parameter_default_value":{"kind":"missing"}
-                  },
-                  "list_separator":{"kind":"missing"}
+                    }
+                  }
                 }
               ]
             },
@@ -277,7 +269,6 @@
                 "line_number":8
               }
             },
-            "function_contexts":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
               "token":{
@@ -409,8 +400,7 @@
                   "line_number":11
                 }
               }
-            },
-            "function_where_clause":{"kind":"missing"}
+            }
           },
           "function_body":{
             "kind":"compound_statement",
@@ -523,5 +513,5 @@
     }
   },
   "program_text":"<?hh // strict\n\n/**\n * Test case with various trivia such as end of line, fixme, whitespace\n * and comments\n */\n\nfunction foo(dict<int,Plain,> $x): dict<\n  int,\n  Plain,\n> {\n  /* HH_FIXME: Some fixme */\n  return $x;\n}\n",
-  "version":"2020-12-14-0001"
+  "version":"2021-01-05-0001"
 }

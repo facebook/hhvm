@@ -75,6 +75,7 @@ module FullFidelityParseArgs = struct
     disallow_hash_comments: bool;
     disallow_fun_and_cls_meth_pseudo_funcs: bool;
     enable_coeffects: bool;
+    ignore_missing_json: bool;
   }
 
   let make
@@ -115,7 +116,8 @@ module FullFidelityParseArgs = struct
       enable_xhp_class_modifier
       disallow_hash_comments
       disallow_fun_and_cls_meth_pseudo_funcs
-      enable_coeffects =
+      enable_coeffects
+      ignore_missing_json =
     {
       full_fidelity_json;
       full_fidelity_dot;
@@ -155,6 +157,7 @@ module FullFidelityParseArgs = struct
       disallow_hash_comments;
       disallow_fun_and_cls_meth_pseudo_funcs;
       enable_coeffects;
+      ignore_missing_json;
     }
 
   let parse_args () =
@@ -211,6 +214,7 @@ module FullFidelityParseArgs = struct
     let disallow_hash_comments = ref false in
     let disallow_fun_and_cls_meth_pseudo_funcs = ref false in
     let enable_coeffects = ref false in
+    let ignore_missing_json = ref false in
     let options =
       [
         (* modes *)
@@ -359,6 +363,9 @@ No errors are filtered out."
         ( "--enable-coeffects",
           Arg.Set enable_coeffects,
           "Allows parsing coeffect syntax" );
+        ( "--ignore-missing-json",
+          Arg.Set ignore_missing_json,
+          "Ignore missing nodes in JSON ouput" );
       ]
     in
     Arg.parse options push_file usage;
@@ -417,6 +424,7 @@ No errors are filtered out."
       !disallow_hash_comments
       !disallow_fun_and_cls_meth_pseudo_funcs
       !enable_coeffects
+      !ignore_missing_json
 end
 
 open FullFidelityParseArgs
@@ -604,7 +612,9 @@ let handle_existing_file args filename =
     | None -> ()
   end;
   ( if args.full_fidelity_json then
-    let json = SyntaxTree.to_json syntax_tree in
+    let json =
+      SyntaxTree.to_json ~ignore_missing:args.ignore_missing_json syntax_tree
+    in
     let str = Hh_json.json_to_string json ~pretty:args.pretty_print_json in
     Printf.printf "%s\n" str );
   ( if args.full_fidelity_text_json then

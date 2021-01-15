@@ -1031,7 +1031,7 @@ module type Syntax_S = sig
     ParserOptions.ffi_t ->
     Full_fidelity_syntax_error.t list
   val has_leading_trivia : TriviaKind.t -> Token.t -> bool
-  val to_json : ?with_value:bool -> t -> Hh_json.json
+  val to_json : ?with_value:bool -> ?ignore_missing:bool -> t -> Hh_json.json
   val extract_text : t -> string option
   val is_in_body : t -> int -> bool
   val syntax_node_to_list : t -> t list

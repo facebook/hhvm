@@ -58,10 +58,8 @@
         },
         {
           "kind":"function_declaration",
-          "function_attribute_spec":{"kind":"missing"},
           "function_declaration_header":{
             "kind":"function_declaration_header",
-            "function_modifiers":{"kind":"missing"},
             "function_keyword":{
               "kind":"token",
               "token":{
@@ -113,9 +111,6 @@
                     "kind":"list_item",
                     "list_item":{
                       "kind":"type_parameter",
-                      "type_attribute_spec":{"kind":"missing"},
-                      "type_reified":{"kind":"missing"},
-                      "type_variance":{"kind":"missing"},
                       "type_name":{
                         "kind":"token",
                         "token":{
@@ -153,9 +148,6 @@
                               "kind":"list_item",
                               "list_item":{
                                 "kind":"type_parameter",
-                                "type_attribute_spec":{"kind":"missing"},
-                                "type_reified":{"kind":"missing"},
-                                "type_variance":{"kind":"missing"},
                                 "type_name":{
                                   "kind":"token",
                                   "token":{
@@ -169,11 +161,8 @@
                                     "trailing":[],
                                     "line_number":3
                                   }
-                                },
-                                "type_param_params":{"kind":"missing"},
-                                "type_constraints":{"kind":"missing"}
-                              },
-                              "list_separator":{"kind":"missing"}
+                                }
+                              }
                             }
                           ]
                         },
@@ -191,14 +180,11 @@
                             "line_number":3
                           }
                         }
-                      },
-                      "type_constraints":{"kind":"missing"}
-                    },
-                    "list_separator":{"kind":"missing"}
+                      }
+                    }
                   }
                 ]
-              },
-              "type_parameters_right_angle":{"kind":"missing"}
+              }
             },
             "function_left_paren":{
               "kind":"token",
@@ -214,7 +200,6 @@
                 "line_number":3
               }
             },
-            "function_parameter_list":{"kind":"missing"},
             "function_right_paren":{
               "kind":"token",
               "token":{
@@ -229,7 +214,6 @@
                 "line_number":3
               }
             },
-            "function_contexts":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
               "token":{
@@ -260,8 +244,7 @@
                   "line_number":3
                 }
               }
-            },
-            "function_where_clause":{"kind":"missing"}
+            }
           },
           "function_body":{
             "kind":"compound_statement",
@@ -279,7 +262,6 @@
                 "line_number":3
               }
             },
-            "compound_statements":{"kind":"missing"},
             "compound_right_brace":{
               "kind":"token",
               "token":{
@@ -317,5 +299,5 @@
     }
   },
   "program_text":"<?hh // strict\n\nfunction test1<T1<X>() : void {\n}\n",
-  "version":"2020-12-14-0001"
+  "version":"2021-01-05-0001"
 }

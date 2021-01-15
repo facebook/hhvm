@@ -125,7 +125,8 @@
     --full-fidelity-json
     --pretty-print-json
     --allow-unstable-features
-    --disallow-hash-comments)))
+    --disallow-hash-comments
+    --ignore-missing-json)))
 
 (alias
     (name runtest)

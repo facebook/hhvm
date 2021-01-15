@@ -54,10 +54,8 @@
         },
         {
           "kind":"function_declaration",
-          "function_attribute_spec":{"kind":"missing"},
           "function_declaration_header":{
             "kind":"function_declaration_header",
-            "function_modifiers":{"kind":"missing"},
             "function_keyword":{
               "kind":"token",
               "token":{
@@ -86,7 +84,6 @@
                 "line_number":2
               }
             },
-            "function_type_parameter_list":{"kind":"missing"},
             "function_left_paren":{
               "kind":"token",
               "token":{
@@ -101,7 +98,6 @@
                 "line_number":2
               }
             },
-            "function_parameter_list":{"kind":"missing"},
             "function_right_paren":{
               "kind":"token",
               "token":{
@@ -115,11 +111,7 @@
                 "trailing":[{"kind":"whitespace","text":" ","offset":18,"width":1}],
                 "line_number":2
               }
-            },
-            "function_contexts":{"kind":"missing"},
-            "function_colon":{"kind":"missing"},
-            "function_type":{"kind":"missing"},
-            "function_where_clause":{"kind":"missing"}
+            }
           },
           "function_body":{
             "kind":"compound_statement",
@@ -177,7 +169,6 @@
                     },
                     "binary_right_operand":{
                       "kind":"awaitable_creation_expression",
-                      "awaitable_attribute_spec":{"kind":"missing"},
                       "awaitable_async":{
                         "kind":"token",
                         "token":{
@@ -208,7 +199,6 @@
                             "line_number":3
                           }
                         },
-                        "compound_statements":{"kind":"missing"},
                         "compound_right_brace":{
                           "kind":"token",
                           "token":{
@@ -280,7 +270,6 @@
                       "kind":"binary_expression",
                       "binary_left_operand":{
                         "kind":"awaitable_creation_expression",
-                        "awaitable_attribute_spec":{"kind":"missing"},
                         "awaitable_async":{
                           "kind":"token",
                           "token":{
@@ -311,7 +300,6 @@
                               "line_number":4
                             }
                           },
-                          "compound_statements":{"kind":"missing"},
                           "compound_right_brace":{
                             "kind":"token",
                             "token":{
@@ -446,7 +434,6 @@
                       },
                       "binary_right_operand":{
                         "kind":"awaitable_creation_expression",
-                        "awaitable_attribute_spec":{"kind":"missing"},
                         "awaitable_async":{
                           "kind":"token",
                           "token":{
@@ -477,7 +464,6 @@
                               "line_number":5
                             }
                           },
-                          "compound_statements":{"kind":"missing"},
                           "compound_right_brace":{
                             "kind":"token",
                             "token":{
@@ -550,7 +536,6 @@
                       "kind":"binary_expression",
                       "binary_left_operand":{
                         "kind":"awaitable_creation_expression",
-                        "awaitable_attribute_spec":{"kind":"missing"},
                         "awaitable_async":{
                           "kind":"token",
                           "token":{
@@ -581,7 +566,6 @@
                               "line_number":6
                             }
                           },
-                          "compound_statements":{"kind":"missing"},
                           "compound_right_brace":{
                             "kind":"token",
                             "token":{
@@ -614,7 +598,6 @@
                       },
                       "binary_right_operand":{
                         "kind":"awaitable_creation_expression",
-                        "awaitable_attribute_spec":{"kind":"missing"},
                         "awaitable_async":{
                           "kind":"token",
                           "token":{
@@ -645,7 +628,6 @@
                               "line_number":6
                             }
                           },
-                          "compound_statements":{"kind":"missing"},
                           "compound_right_brace":{
                             "kind":"token",
                             "token":{
@@ -716,7 +698,6 @@
                     },
                     "binary_right_operand":{
                       "kind":"awaitable_creation_expression",
-                      "awaitable_attribute_spec":{"kind":"missing"},
                       "awaitable_async":{
                         "kind":"token",
                         "token":{
@@ -889,7 +870,6 @@
                     },
                     "binary_right_operand":{
                       "kind":"awaitable_creation_expression",
-                      "awaitable_attribute_spec":{"kind":"missing"},
                       "awaitable_async":{
                         "kind":"token",
                         "token":{
@@ -962,7 +942,6 @@
                                   "kind":"binary_expression",
                                   "binary_left_operand":{
                                     "kind":"awaitable_creation_expression",
-                                    "awaitable_attribute_spec":{"kind":"missing"},
                                     "awaitable_async":{
                                       "kind":"token",
                                       "token":{
@@ -993,7 +972,6 @@
                                           "line_number":11
                                         }
                                       },
-                                      "compound_statements":{"kind":"missing"},
                                       "compound_right_brace":{
                                         "kind":"token",
                                         "token":{
@@ -1131,5 +1109,5 @@
     }
   },
   "program_text":"<?hh\nfunction f () {\n  $a = async {};\n  $a = async {} + 1;\n  $a = 1 + async {};\n  $a = async {} + async {};\n  $a = async {\n    $a = 1;\n  };\n  $a = async {\n    $b = async {} + 1;\n  };\n}\n",
-  "version":"2020-12-14-0001"
+  "version":"2021-01-05-0001"
 }

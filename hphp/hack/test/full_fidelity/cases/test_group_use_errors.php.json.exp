@@ -110,9 +110,6 @@
               "elements":[
                 {
                   "kind":"classish_declaration",
-                  "classish_attribute":{"kind":"missing"},
-                  "classish_modifiers":{"kind":"missing"},
-                  "classish_xhp":{"kind":"missing"},
                   "classish_keyword":{
                     "kind":"token",
                     "token":{
@@ -141,12 +138,6 @@
                       "line_number":4
                     }
                   },
-                  "classish_type_parameters":{"kind":"missing"},
-                  "classish_extends_keyword":{"kind":"missing"},
-                  "classish_extends_list":{"kind":"missing"},
-                  "classish_implements_keyword":{"kind":"missing"},
-                  "classish_implements_list":{"kind":"missing"},
-                  "classish_where_clause":{"kind":"missing"},
                   "classish_body":{
                     "kind":"classish_body",
                     "classish_body_left_brace":{
@@ -163,7 +154,6 @@
                         "line_number":4
                       }
                     },
-                    "classish_body_elements":{"kind":"missing"},
                     "classish_body_right_brace":{
                       "kind":"token",
                       "token":{
@@ -182,9 +172,6 @@
                 },
                 {
                   "kind":"classish_declaration",
-                  "classish_attribute":{"kind":"missing"},
-                  "classish_modifiers":{"kind":"missing"},
-                  "classish_xhp":{"kind":"missing"},
                   "classish_keyword":{
                     "kind":"token",
                     "token":{
@@ -213,12 +200,6 @@
                       "line_number":5
                     }
                   },
-                  "classish_type_parameters":{"kind":"missing"},
-                  "classish_extends_keyword":{"kind":"missing"},
-                  "classish_extends_list":{"kind":"missing"},
-                  "classish_implements_keyword":{"kind":"missing"},
-                  "classish_implements_list":{"kind":"missing"},
-                  "classish_where_clause":{"kind":"missing"},
                   "classish_body":{
                     "kind":"classish_body",
                     "classish_body_left_brace":{
@@ -235,7 +216,6 @@
                         "line_number":5
                       }
                     },
-                    "classish_body_elements":{"kind":"missing"},
                     "classish_body_right_brace":{
                       "kind":"token",
                       "token":{
@@ -338,7 +318,6 @@
                       "line_number":9
                     }
                   },
-                  "namespace_group_use_kind":{"kind":"missing"},
                   "namespace_group_use_prefix":{
                     "kind":"qualified_name",
                     "qualified_name_parts":{
@@ -346,7 +325,6 @@
                       "elements":[
                         {
                           "kind":"list_item",
-                          "list_item":{"kind":"missing"},
                           "list_separator":{
                             "kind":"token",
                             "token":{
@@ -377,8 +355,7 @@
                               "trailing":[{"kind":"whitespace","text":" ","offset":97,"width":1}],
                               "line_number":9
                             }
-                          },
-                          "list_separator":{"kind":"missing"}
+                          }
                         }
                       ]
                     }
@@ -404,7 +381,6 @@
                         "kind":"list_item",
                         "list_item":{
                           "kind":"namespace_use_clause",
-                          "namespace_use_clause_kind":{"kind":"missing"},
                           "namespace_use_name":{
                             "kind":"token",
                             "token":{
@@ -418,9 +394,7 @@
                               "trailing":[],
                               "line_number":9
                             }
-                          },
-                          "namespace_use_as":{"kind":"missing"},
-                          "namespace_use_alias":{"kind":"missing"}
+                          }
                         },
                         "list_separator":{
                           "kind":"token",
@@ -441,7 +415,6 @@
                         "kind":"list_item",
                         "list_item":{
                           "kind":"namespace_use_clause",
-                          "namespace_use_clause_kind":{"kind":"missing"},
                           "namespace_use_name":{
                             "kind":"token",
                             "token":{
@@ -455,11 +428,8 @@
                               "trailing":[{"kind":"whitespace","text":" ","offset":104,"width":1}],
                               "line_number":9
                             }
-                          },
-                          "namespace_use_as":{"kind":"missing"},
-                          "namespace_use_alias":{"kind":"missing"}
-                        },
-                        "list_separator":{"kind":"missing"}
+                          }
+                        }
                       }
                     ]
                   },
@@ -578,7 +548,6 @@
                       "line_number":13
                     }
                   },
-                  "namespace_group_use_kind":{"kind":"missing"},
                   "namespace_group_use_prefix":{
                     "kind":"qualified_name",
                     "qualified_name_parts":{
@@ -586,7 +555,6 @@
                       "elements":[
                         {
                           "kind":"list_item",
-                          "list_item":{"kind":"missing"},
                           "list_separator":{
                             "kind":"token",
                             "token":{
@@ -684,9 +652,7 @@
                               "trailing":[],
                               "line_number":13
                             }
-                          },
-                          "namespace_use_as":{"kind":"missing"},
-                          "namespace_use_alias":{"kind":"missing"}
+                          }
                         },
                         "list_separator":{
                           "kind":"token",
@@ -707,7 +673,6 @@
                         "kind":"list_item",
                         "list_item":{
                           "kind":"namespace_use_clause",
-                          "namespace_use_clause_kind":{"kind":"missing"},
                           "namespace_use_name":{
                             "kind":"token",
                             "token":{
@@ -721,11 +686,8 @@
                               "trailing":[{"kind":"whitespace","text":" ","offset":155,"width":1}],
                               "line_number":13
                             }
-                          },
-                          "namespace_use_as":{"kind":"missing"},
-                          "namespace_use_alias":{"kind":"missing"}
-                        },
-                        "list_separator":{"kind":"missing"}
+                          }
+                        }
                       }
                     ]
                   },
@@ -844,7 +806,6 @@
                       "line_number":17
                     }
                   },
-                  "namespace_group_use_kind":{"kind":"missing"},
                   "namespace_group_use_prefix":{
                     "kind":"qualified_name",
                     "qualified_name_parts":{
@@ -852,7 +813,6 @@
                       "elements":[
                         {
                           "kind":"list_item",
-                          "list_item":{"kind":"missing"},
                           "list_separator":{
                             "kind":"token",
                             "token":{
@@ -950,9 +910,7 @@
                               "trailing":[],
                               "line_number":17
                             }
-                          },
-                          "namespace_use_as":{"kind":"missing"},
-                          "namespace_use_alias":{"kind":"missing"}
+                          }
                         },
                         "list_separator":{
                           "kind":"token",
@@ -1000,11 +958,8 @@
                               "trailing":[{"kind":"whitespace","text":" ","offset":211,"width":1}],
                               "line_number":17
                             }
-                          },
-                          "namespace_use_as":{"kind":"missing"},
-                          "namespace_use_alias":{"kind":"missing"}
-                        },
-                        "list_separator":{"kind":"missing"}
+                          }
+                        }
                       }
                     ]
                   },
@@ -1123,7 +1078,6 @@
                       "line_number":21
                     }
                   },
-                  "namespace_group_use_kind":{"kind":"missing"},
                   "namespace_group_use_prefix":{
                     "kind":"qualified_name",
                     "qualified_name_parts":{
@@ -1131,7 +1085,6 @@
                       "elements":[
                         {
                           "kind":"list_item",
-                          "list_item":{"kind":"missing"},
                           "list_separator":{
                             "kind":"token",
                             "token":{
@@ -1202,7 +1155,6 @@
                         "kind":"list_item",
                         "list_item":{
                           "kind":"namespace_use_clause",
-                          "namespace_use_clause_kind":{"kind":"missing"},
                           "namespace_use_name":{
                             "kind":"token",
                             "token":{
@@ -1216,9 +1168,7 @@
                               "trailing":[],
                               "line_number":21
                             }
-                          },
-                          "namespace_use_as":{"kind":"missing"},
-                          "namespace_use_alias":{"kind":"missing"}
+                          }
                         },
                         "list_separator":{
                           "kind":"token",
@@ -1239,7 +1189,6 @@
                         "kind":"list_item",
                         "list_item":{
                           "kind":"namespace_use_clause",
-                          "namespace_use_clause_kind":{"kind":"missing"},
                           "namespace_use_name":{
                             "kind":"token",
                             "token":{
@@ -1253,11 +1202,8 @@
                               "trailing":[{"kind":"whitespace","text":" ","offset":255,"width":1}],
                               "line_number":21
                             }
-                          },
-                          "namespace_use_as":{"kind":"missing"},
-                          "namespace_use_alias":{"kind":"missing"}
-                        },
-                        "list_separator":{"kind":"missing"}
+                          }
+                        }
                       }
                     ]
                   },
@@ -1376,7 +1322,6 @@
                       "line_number":25
                     }
                   },
-                  "namespace_use_kind":{"kind":"missing"},
                   "namespace_use_clauses":{
                     "kind":"list",
                     "elements":[
@@ -1384,7 +1329,6 @@
                         "kind":"list_item",
                         "list_item":{
                           "kind":"namespace_use_clause",
-                          "namespace_use_clause_kind":{"kind":"missing"},
                           "namespace_use_name":{
                             "kind":"qualified_name",
                             "qualified_name_parts":{
@@ -1392,7 +1336,6 @@
                               "elements":[
                                 {
                                   "kind":"list_item",
-                                  "list_item":{"kind":"missing"},
                                   "list_separator":{
                                     "kind":"token",
                                     "token":{
@@ -1423,16 +1366,12 @@
                                       "trailing":[],
                                       "line_number":25
                                     }
-                                  },
-                                  "list_separator":{"kind":"missing"}
+                                  }
                                 }
                               ]
                             }
-                          },
-                          "namespace_use_as":{"kind":"missing"},
-                          "namespace_use_alias":{"kind":"missing"}
-                        },
-                        "list_separator":{"kind":"missing"}
+                          }
+                        }
                       }
                     ]
                   },
@@ -1537,7 +1476,6 @@
                       "line_number":29
                     }
                   },
-                  "namespace_use_kind":{"kind":"missing"},
                   "namespace_use_clauses":{
                     "kind":"list",
                     "elements":[
@@ -1545,7 +1483,6 @@
                         "kind":"list_item",
                         "list_item":{
                           "kind":"namespace_use_clause",
-                          "namespace_use_clause_kind":{"kind":"missing"},
                           "namespace_use_name":{
                             "kind":"qualified_name",
                             "qualified_name_parts":{
@@ -1553,7 +1490,6 @@
                               "elements":[
                                 {
                                   "kind":"list_item",
-                                  "list_item":{"kind":"missing"},
                                   "list_separator":{
                                     "kind":"token",
                                     "token":{
@@ -1584,8 +1520,7 @@
                                       "trailing":[{"kind":"whitespace","text":" ","offset":327,"width":1}],
                                       "line_number":29
                                     }
-                                  },
-                                  "list_separator":{"kind":"missing"}
+                                  }
                                 }
                               ]
                             }
@@ -1603,10 +1538,8 @@
                               "trailing":[{"kind":"whitespace","text":" ","offset":330,"width":1}],
                               "line_number":29
                             }
-                          },
-                          "namespace_use_alias":{"kind":"missing"}
-                        },
-                        "list_separator":{"kind":"missing"}
+                          }
+                        }
                       }
                     ]
                   },
@@ -1732,7 +1665,6 @@
                         "kind":"list_item",
                         "list_item":{
                           "kind":"namespace_use_clause",
-                          "namespace_use_clause_kind":{"kind":"missing"},
                           "namespace_use_name":{
                             "kind":"qualified_name",
                             "qualified_name_parts":{
@@ -1740,7 +1672,6 @@
                               "elements":[
                                 {
                                   "kind":"list_item",
-                                  "list_item":{"kind":"missing"},
                                   "list_separator":{
                                     "kind":"token",
                                     "token":{
@@ -1802,14 +1733,11 @@
                                       "trailing":[],
                                       "line_number":33
                                     }
-                                  },
-                                  "list_separator":{"kind":"missing"}
+                                  }
                                 }
                               ]
                             }
-                          },
-                          "namespace_use_as":{"kind":"missing"},
-                          "namespace_use_alias":{"kind":"missing"}
+                          }
                         },
                         "list_separator":{
                           "kind":"token",
@@ -1830,7 +1758,6 @@
                         "kind":"list_item",
                         "list_item":{
                           "kind":"namespace_use_clause",
-                          "namespace_use_clause_kind":{"kind":"missing"},
                           "namespace_use_name":{
                             "kind":"qualified_name",
                             "qualified_name_parts":{
@@ -1838,7 +1765,6 @@
                               "elements":[
                                 {
                                   "kind":"list_item",
-                                  "list_item":{"kind":"missing"},
                                   "list_separator":{
                                     "kind":"token",
                                     "token":{
@@ -1900,16 +1826,12 @@
                                       "trailing":[],
                                       "line_number":33
                                     }
-                                  },
-                                  "list_separator":{"kind":"missing"}
+                                  }
                                 }
                               ]
                             }
-                          },
-                          "namespace_use_as":{"kind":"missing"},
-                          "namespace_use_alias":{"kind":"missing"}
-                        },
-                        "list_separator":{"kind":"missing"}
+                          }
+                        }
                       }
                     ]
                   },
@@ -2035,7 +1957,6 @@
                       "elements":[
                         {
                           "kind":"list_item",
-                          "list_item":{"kind":"missing"},
                           "list_separator":{
                             "kind":"token",
                             "token":{
@@ -2106,7 +2027,6 @@
                         "kind":"list_item",
                         "list_item":{
                           "kind":"namespace_use_clause",
-                          "namespace_use_clause_kind":{"kind":"missing"},
                           "namespace_use_name":{
                             "kind":"token",
                             "token":{
@@ -2120,9 +2040,7 @@
                               "trailing":[],
                               "line_number":37
                             }
-                          },
-                          "namespace_use_as":{"kind":"missing"},
-                          "namespace_use_alias":{"kind":"missing"}
+                          }
                         },
                         "list_separator":{
                           "kind":"token",
@@ -2143,7 +2061,6 @@
                         "kind":"list_item",
                         "list_item":{
                           "kind":"namespace_use_clause",
-                          "namespace_use_clause_kind":{"kind":"missing"},
                           "namespace_use_name":{
                             "kind":"token",
                             "token":{
@@ -2157,11 +2074,8 @@
                               "trailing":[{"kind":"whitespace","text":" ","offset":432,"width":1}],
                               "line_number":37
                             }
-                          },
-                          "namespace_use_as":{"kind":"missing"},
-                          "namespace_use_alias":{"kind":"missing"}
-                        },
-                        "list_separator":{"kind":"missing"}
+                          }
+                        }
                       }
                     ]
                   },
@@ -2233,5 +2147,5 @@
     }
   },
   "program_text":"<?hh //strict\n\nnamespace foo {\n    class C { }\n    class D { }\n}\n\nnamespace illegal1 {\n  use \\foo { C, D };\n}\n\nnamespace illegal2 {\n  use \\foo\\ { type C, D };\n}\n\nnamespace illegal3 {\n  use \\foo\\ { type C, type D };\n}\n\nnamespace legal1 {\n  use \\foo\\ { C, D };\n}\n\nnamespace legal2 {\n  use \\foo;\n}\n\nnamespace illegal4 {\n  use \\foo as false;\n}\n\nnamespace legal3 {\n  use type \\foo\\C, \\foo\\D;\n}\n\nnamespace legal4 {\n  use type \\foo\\ { C, D };\n}\n",
-  "version":"2020-10-15-0001"
+  "version":"2021-01-05-0001"
 }

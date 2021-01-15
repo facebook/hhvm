@@ -90,12 +90,8 @@
                         "trailing":[],
                         "line_number":2
                       }
-                    },
-                    "constructor_call_left_paren":{"kind":"missing"},
-                    "constructor_call_argument_list":{"kind":"missing"},
-                    "constructor_call_right_paren":{"kind":"missing"}
-                  },
-                  "list_separator":{"kind":"missing"}
+                    }
+                  }
                 }
               ]
             },
@@ -173,9 +169,6 @@
               }
             }
           },
-          "enum_type":{"kind":"missing"},
-          "enum_includes_keyword":{"kind":"missing"},
-          "enum_includes_list":{"kind":"missing"},
           "enum_left_brace":{
             "kind":"token",
             "token":{
@@ -355,5 +348,5 @@
     }
   },
   "program_text":"<?hh\n<<Foo>> enum fruit : int { Apple = 1; TRUE = 2; }\n",
-  "version":"2020-08-17-0000"
+  "version":"2021-01-05-0001"
 }

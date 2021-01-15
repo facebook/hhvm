@@ -54,10 +54,8 @@
         },
         {
           "kind":"function_declaration",
-          "function_attribute_spec":{"kind":"missing"},
           "function_declaration_header":{
             "kind":"function_declaration_header",
-            "function_modifiers":{"kind":"missing"},
             "function_keyword":{
               "kind":"token",
               "token":{
@@ -86,7 +84,6 @@
                 "line_number":3
               }
             },
-            "function_type_parameter_list":{"kind":"missing"},
             "function_left_paren":{
               "kind":"token",
               "token":{
@@ -101,7 +98,6 @@
                 "line_number":3
               }
             },
-            "function_parameter_list":{"kind":"missing"},
             "function_right_paren":{
               "kind":"token",
               "token":{
@@ -116,7 +112,6 @@
                 "line_number":3
               }
             },
-            "function_contexts":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
               "token":{
@@ -147,8 +142,7 @@
                   "line_number":3
                 }
               }
-            },
-            "function_where_clause":{"kind":"missing"}
+            }
           },
           "function_body":{
             "kind":"compound_statement",
@@ -969,8 +963,7 @@
                         "line_number":14
                       }
                     }
-                  },
-                  "expression_statement_semicolon":{"kind":"missing"}
+                  }
                 },
                 {
                   "kind":"expression_statement",
@@ -1706,8 +1699,7 @@
                                   "trailing":[],
                                   "line_number":21
                                 }
-                              },
-                              "list_separator":{"kind":"missing"}
+                              }
                             }
                           ]
                         }
@@ -1834,8 +1826,7 @@
                                   "trailing":[],
                                   "line_number":22
                                 }
-                              },
-                              "list_separator":{"kind":"missing"}
+                              }
                             }
                           ]
                         }
@@ -2335,8 +2326,7 @@
                         "line_number":32
                       }
                     }
-                  },
-                  "expression_statement_semicolon":{"kind":"missing"}
+                  }
                 },
                 {
                   "kind":"expression_statement",
@@ -3072,8 +3062,7 @@
                                   "trailing":[],
                                   "line_number":39
                                 }
-                              },
-                              "list_separator":{"kind":"missing"}
+                              }
                             }
                           ]
                         }
@@ -3200,8 +3189,7 @@
                                   "trailing":[],
                                   "line_number":40
                                 }
-                              },
-                              "list_separator":{"kind":"missing"}
+                              }
                             }
                           ]
                         }
@@ -3329,5 +3317,5 @@
     }
   },
   "program_text":"<?hh\n\nfunction f() : void {\n  $x = \"It\";\n  $y = \"worst\";\n  $z = f\"{$x} was the {$y} of times\";\n  $w = re\"blah blah\";\n  $a = re\"\";\n  // Consistent with `aks-A124jk12jhd()`; Parses as `aks` minus prefixed string\n  $a0 = aks-A124jk12jhd\"sosdk!nwekje@\";\n  // Parses as prefixed string\n  $a1 = aksA124jkhgf12jhdddsljs\"sosdk!nwekje@\";\n  // Parser error; `re!interpolator` is not a name\n  $a2 = re!interpolator\"Hello\";\n  $b = re\"//\";\n  $b0 = aaaaaa\"aaaaaa\";\n  $c = re\"/(.?)/\";\n  $d = re\"/.*/\";\n  $e = $c.$d;\n  $f = re\"//\".re\"//\";\n  $g = Regex\\re\"//\";\n  $h = Foo\\FooInterpolator\"\";\n\n  // Single quotes\n  $w = re'blah blah';\n  $a = re'';\n  // Consistent with `aks-A124jk12jhd()`; Parses as `aks` minus prefixed string\n  $a0 = aks-A124jk12jhd'sosdk!nwekje@';\n  // Parses as prefixed string\n  $a1 = aksA124jkhgf12jhdddsljs'sosdk!nwekje@';\n  // Parser error; `re!interpolator` is not a name\n  $a2 = re!interpolator'Hello';\n  $b = re'//';\n  $b0 = aaaaaa'aaaaaa';\n  $c = re'/(.?)/';\n  $d = re'/.*/';\n  $e = $c.$d;\n  $f = re'//'.re'//';\n  $g = Regex\\re'//';\n  $h = Foo\\FooInterpolator'';\n\n  // TODO(T19708752): Enable qualified names as prefixes\n  // $i = \\HH\\Lib\\Private\\Foo\\FooInterpolator\"\";\n  // $j = Private\\Foo\\FooInterpolator\"\";\n  // $h0 = Foo\\FooInterpolator\"hello$firstname{$lastname}, goodbye\";\n  // $i0 = \\HH\\Lib\\Private\\Foo\\FooInterpolator\"hello$x, goodbye\";\n  // $j0 = Private\\Foo\\FooInterpolator\"hello$x, goodbye\";\n}\n",
-  "version":"2020-12-14-0001"
+  "version":"2021-01-05-0001"
 }

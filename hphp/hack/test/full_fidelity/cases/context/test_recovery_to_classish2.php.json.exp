@@ -54,9 +54,6 @@
         },
         {
           "kind":"classish_declaration",
-          "classish_attribute":{"kind":"missing"},
-          "classish_modifiers":{"kind":"missing"},
-          "classish_xhp":{"kind":"missing"},
           "classish_keyword":{
             "kind":"token",
             "token":{
@@ -131,12 +128,6 @@
               "line_number":11
             }
           },
-          "classish_type_parameters":{"kind":"missing"},
-          "classish_extends_keyword":{"kind":"missing"},
-          "classish_extends_list":{"kind":"missing"},
-          "classish_implements_keyword":{"kind":"missing"},
-          "classish_implements_list":{"kind":"missing"},
-          "classish_where_clause":{"kind":"missing"},
           "classish_body":{
             "kind":"classish_body",
             "classish_body_left_brace":{
@@ -162,15 +153,11 @@
                 "line_number":11
               }
             },
-            "classish_body_elements":{"kind":"list","elements":[{"kind":"missing"}]},
-            "classish_body_right_brace":{"kind":"missing"}
+            "classish_body_elements":{"kind":"list","elements":[]}
           }
         },
         {
           "kind":"classish_declaration",
-          "classish_attribute":{"kind":"missing"},
-          "classish_modifiers":{"kind":"missing"},
-          "classish_xhp":{"kind":"missing"},
           "classish_keyword":{
             "kind":"token",
             "token":{
@@ -202,12 +189,6 @@
               "line_number":13
             }
           },
-          "classish_type_parameters":{"kind":"missing"},
-          "classish_extends_keyword":{"kind":"missing"},
-          "classish_extends_list":{"kind":"missing"},
-          "classish_implements_keyword":{"kind":"missing"},
-          "classish_implements_list":{"kind":"missing"},
-          "classish_where_clause":{"kind":"missing"},
           "classish_body":{
             "kind":"classish_body",
             "classish_body_left_brace":{
@@ -224,7 +205,6 @@
                 "line_number":13
               }
             },
-            "classish_body_elements":{"kind":"missing"},
             "classish_body_right_brace":{
               "kind":"token",
               "token":{
@@ -265,8 +245,7 @@
               ],
               "line_number":16
             }
-          },
-          "expression_statement_semicolon":{"kind":"missing"}
+          }
         },
         {
           "kind":"end_of_file",
@@ -289,5 +268,5 @@
     }
   },
   "program_text":"<?hh\n\n// This test simply exists to demonstrate a suboptimal case of error recovery\n// in the FFP. If you break this test, it doesn't necessarily mean you've done\n// anything wrong, since the FFP never behaved ideally on this code.\n\n// Ideally, this code would produce an error indicating that nested classes are\n// forbidden. But right now, the FFP assumes the programmer did *not* intend\n// to nest classes, and throws the errors commented below.\n\nclass C1 { // missing right brace\n\n  class C2 {\n  }\n\n} // missing expression, missing semicolon\n",
-  "version":"2020-06-23-0001"
+  "version":"2021-01-05-0001"
 }

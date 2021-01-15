@@ -54,7 +54,6 @@
         },
         {
           "kind":"classish_declaration",
-          "classish_attribute":{"kind":"missing"},
           "classish_modifiers":{
             "kind":"list",
             "elements":[
@@ -74,7 +73,6 @@
               }
             ]
           },
-          "classish_xhp":{"kind":"missing"},
           "classish_keyword":{
             "kind":"token",
             "token":{
@@ -103,12 +101,6 @@
               "line_number":3
             }
           },
-          "classish_type_parameters":{"kind":"missing"},
-          "classish_extends_keyword":{"kind":"missing"},
-          "classish_extends_list":{"kind":"missing"},
-          "classish_implements_keyword":{"kind":"missing"},
-          "classish_implements_list":{"kind":"missing"},
-          "classish_where_clause":{"kind":"missing"},
           "classish_body":{
             "kind":"classish_body",
             "classish_body_left_brace":{
@@ -130,7 +122,6 @@
               "elements":[
                 {
                   "kind":"methodish_declaration",
-                  "methodish_attribute":{"kind":"missing"},
                   "methodish_function_decl_header":{
                     "kind":"function_declaration_header",
                     "function_modifiers":{
@@ -282,7 +273,6 @@
                         "line_number":6
                       }
                     },
-                    "function_type_parameter_list":{"kind":"missing"},
                     "function_left_paren":{
                       "kind":"token",
                       "token":{
@@ -297,7 +287,6 @@
                         "line_number":6
                       }
                     },
-                    "function_parameter_list":{"kind":"missing"},
                     "function_right_paren":{
                       "kind":"token",
                       "token":{
@@ -311,13 +300,8 @@
                         "trailing":[],
                         "line_number":6
                       }
-                    },
-                    "function_contexts":{"kind":"missing"},
-                    "function_colon":{"kind":"missing"},
-                    "function_type":{"kind":"missing"},
-                    "function_where_clause":{"kind":"missing"}
+                    }
                   },
-                  "methodish_function_body":{"kind":"missing"},
                   "methodish_semicolon":{
                     "kind":"token",
                     "token":{
@@ -335,7 +319,6 @@
                 },
                 {
                   "kind":"methodish_declaration",
-                  "methodish_attribute":{"kind":"missing"},
                   "methodish_function_decl_header":{
                     "kind":"function_declaration_header",
                     "function_modifiers":{
@@ -416,7 +399,6 @@
                         "line_number":8
                       }
                     },
-                    "function_type_parameter_list":{"kind":"missing"},
                     "function_left_paren":{
                       "kind":"token",
                       "token":{
@@ -431,7 +413,6 @@
                         "line_number":8
                       }
                     },
-                    "function_parameter_list":{"kind":"missing"},
                     "function_right_paren":{
                       "kind":"token",
                       "token":{
@@ -445,13 +426,8 @@
                         "trailing":[],
                         "line_number":8
                       }
-                    },
-                    "function_contexts":{"kind":"missing"},
-                    "function_colon":{"kind":"missing"},
-                    "function_type":{"kind":"missing"},
-                    "function_where_clause":{"kind":"missing"}
+                    }
                   },
-                  "methodish_function_body":{"kind":"missing"},
                   "methodish_semicolon":{
                     "kind":"token",
                     "token":{
@@ -506,5 +482,5 @@
     }
   },
   "program_text":"<?hh\n\nabstract class C {\n  // For now, methods are allowed to have all the possible modifiers, so this\n  // verifies that we only get errors about the way they're being combined\n  abstract final static private protected public async function f();\n\n  abstract abstract public function g();\n}\n",
-  "version":"2020-12-14-0001"
+  "version":"2021-01-05-0001"
 }

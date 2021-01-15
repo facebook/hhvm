@@ -850,9 +850,11 @@ pub mod coeffects {
 
     pub const CIPP_SHALLOW: &str = "cipp_shallow";
 
-    pub const CIPP_GLOBAL: &str = "cipp_global";
-
     pub const CIPP: &str = "cipp";
+
+    pub const CIPP_OF: &str = "cipp_of";
+
+    pub const CIPP_GLOBAL: &str = "cipp_global";
 
     pub const PURE: &str = "pure";
 }

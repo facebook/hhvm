@@ -117,7 +117,7 @@ impl HhasCoeffects {
                         c::CIPP_LOCAL => static_coeffects.push(Ctx::CippLocal),
                         c::CIPP_SHALLOW => static_coeffects.push(Ctx::CippShallow),
                         c::CIPP_GLOBAL => static_coeffects.push(Ctx::CippGlobal),
-                        c::CIPP => static_coeffects.push(Ctx::Cipp),
+                        c::CIPP | c::CIPP_OF => static_coeffects.push(Ctx::Cipp),
                         _ => {}
                     }
                     if let c::RX_LOCAL | c::RX_SHALLOW | c::RX = strip_ns(id.as_str()) {

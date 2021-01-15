@@ -69,6 +69,13 @@ type options = {
   verbosity: int;
 }
 
+(** If the user passed --root, then all pathnames have to be canonicalized.
+The fact of whether they passed --root is kind of stored inside Relative_path
+global variables: the Relative_path.(path_of_prefix Root) is either "/"
+if they failed to pass something, or the thing that they passed. *)
+let use_canonical_filenames () =
+  not (String.equal "/" (Relative_path.path_of_prefix Relative_path.Root))
+
 (* Canonical builtins from our hhi library *)
 let hhi_builtins = Hhi.get_raw_hhi_contents ()
 
@@ -110,7 +117,13 @@ let print_error format ?(oc = stderr) l =
     | Errors.Raw -> (fun e -> Errors.to_string e)
     | Errors.Highlighted -> Highlighted_error_formatter.to_string
   in
-  Out_channel.output_string oc (formatter (Errors.to_absolute_for_test l))
+  let absolute_errors =
+    if use_canonical_filenames () then
+      Errors.to_absolute l
+    else
+      Errors.to_absolute_for_test l
+  in
+  Out_channel.output_string oc (formatter absolute_errors)
 
 let write_error_list format errors oc max_errors =
   let (shown_errors, dropped_errors) =
@@ -2071,7 +2084,15 @@ let decl_and_run_mode
             ~key:(Relative_path.create Relative_path.Hhi f)
             ~data:src)
   in
-  let files = List.map ~f:(Relative_path.create Relative_path.Dummy) files in
+  let files =
+    if use_canonical_filenames () then
+      files
+      |> List.map ~f:Sys_utils.realpath
+      |> List.map ~f:(fun s -> Option.value_exn s)
+      |> List.map ~f:Relative_path.create_detect_prefix
+    else
+      files |> List.map ~f:(Relative_path.create Relative_path.Dummy)
+  in
   let files_contents =
     List.fold
       files
@@ -2136,8 +2157,15 @@ let decl_and_run_mode
       ~tcopt
       ~deps_mode:Typing_deps_mode.SQLiteMode
   in
-  ignore naming_table_path;
-  (* TODO(ljw): use naming_table_path *)
+  (* We make the following call for the side-effect of updating ctx's "naming-table fallback"
+  so it will look in the sqlite database for names it doesn't know.
+  This function returns the forward naming table, but we don't care about that;
+  it's only needed for tools that process file changes, to know in the event
+  of a file-change which old symbols used to be defined in the file. *)
+  let _naming_table_for_root : Naming_table.t option =
+    Option.map naming_table_path ~f:(fun path ->
+        Naming_table.load_from_sqlite ctx path)
+  in
   let (errors, files_info) = parse_name_and_decl ctx to_decl in
   handle_mode
     mode
@@ -2171,9 +2199,7 @@ let main_hack
   in
   Tempfile.with_tempdir (fun hhi_root ->
       Hhi.set_hhi_root_for_unit_test hhi_root;
-      ignore root;
-      (* TODO(ljw): use root *)
-      Relative_path.set_path_prefix Relative_path.Root (Path.make "/");
+      Relative_path.set_path_prefix Relative_path.Root root;
       Relative_path.set_path_prefix Relative_path.Hhi hhi_root;
       Relative_path.set_path_prefix Relative_path.Tmp (Path.make "tmp");
       decl_and_run_mode opts tcopt hhi_root naming_table sienv;

@@ -205,7 +205,7 @@ void Unit::operator delete(void* p, size_t /*sz*/) {
 ///////////////////////////////////////////////////////////////////////////////
 // Code locations.
 
-int Unit::getLineNumber(Offset pc) const {
+int Unit::getLineNumberHelper(Offset pc) const {
   if (UNLIKELY(m_repoId == RepoIdInvalid)) {
     auto const lineTable = SourceLocation::getLineTable(this);
     return lineTable ? SourceLocation::getLineNumber(*lineTable, pc) : -1;
@@ -264,25 +264,6 @@ int Unit::getLineNumber(Offset pc) const {
   }
 }
 
-bool Unit::getSourceLoc(Offset pc, SourceLoc& sLoc) const {
-  auto const& sourceLocTable = SourceLocation::getLocTable(this);
-  return SourceLocation::getLoc(sourceLocTable, pc, sLoc);
-}
-
-bool Unit::getOffsetRange(Offset pc, OffsetRange& range) const {
-  OffsetRangeVec offsets;
-  auto line = getLineNumber(pc);
-  getOffsetRanges(line, offsets);
-
-  for (auto offset: offsets) {
-    if (pc >= offset.base && pc < offset.past) {
-      range = offset;
-      return true;
-    }
-  }
-  return false;
-}
-
 bool Unit::getOffsetRanges(int line, OffsetRangeVec& offsets) const {
   assertx(offsets.size() == 0);
   auto map = SourceLocation::getLineToOffsetRangeVecMap(this);
@@ -337,10 +318,9 @@ void Unit::clearCoverage() {
   assertx(isCoverageEnabled());
   m_coverage->reset();
 }
-void Unit::recordCoverage(Offset off) {
+void Unit::recordCoverage(int line) {
   assertx(isCoverageEnabled());
 
-  auto const line = getLineNumber(off);
   if (line == -1) return;
 
   if (m_coverage->size() <= line) m_coverage->resize(line + 1);

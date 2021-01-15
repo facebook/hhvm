@@ -756,7 +756,7 @@ std::string Stack::toString(const ActRec* fp, int offset,
   auto func = fp->func();
   os << prefix << "=== Stack at "
      << unit->filepath()->data() << ":"
-     << unit->getLineNumber(func->offsetOf(vmpc()))
+     << func->getLineNumber(func->offsetOf(vmpc()))
      << " func " << func->fullName()->data() << " ===\n";
 
   toStringFrame(os, fp, offset, m_top, prefix);
@@ -5406,7 +5406,7 @@ void PrintTCCallerInfo() {
 
   fprintf(stderr, "Called from TC address %p\n", rip);
   std::cerr << u->filepath()->data() << ':'
-            << u->getLineNumber(f->offsetOf(vmpc())) << '\n';
+            << f->getLineNumber(f->offsetOf(vmpc())) << '\n';
 }
 
 // thread-local cached coverage info
@@ -5414,18 +5414,21 @@ static __thread Unit* s_prev_unit;
 static __thread int s_prev_line;
 
 void recordCodeCoverage(PC /*pc*/) {
-  Unit* unit = vmfp()->func()->unit();
+  auto const func = vmfp()->func();
+  Unit* unit = func->unit();
   assertx(unit != nullptr);
   if (unit == SystemLib::s_hhas_unit) {
     return;
   }
 
   if (!RO::RepoAuthoritative && RO::EvalEnablePerFileCoverage) {
-    if (unit->isCoverageEnabled()) unit->recordCoverage(pcOff());
+    if (unit->isCoverageEnabled()) {
+      unit->recordCoverage(func->getLineNumber(pcOff()));
+    }
     return;
   }
 
-  int line = unit->getLineNumber(pcOff());
+  int line = func->getLineNumber(pcOff());
   assertx(line != -1);
 
   if (unit != s_prev_unit || line != s_prev_line) {

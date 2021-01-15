@@ -75,7 +75,7 @@ void AsyncFlowStepper::setup() {
 
   auto const pc = vmpc();
   SourceLoc source_loc;
-  if (!unit->getSourceLoc(func->offsetOf(pc), source_loc)) {
+  if (!func->getSourceLoc(func->offsetOf(pc), source_loc)) {
     TRACE(5, "Could not grab the current line number\n");
     return;
   }

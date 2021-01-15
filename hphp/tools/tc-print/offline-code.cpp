@@ -452,7 +452,7 @@ TCRangeInfo OfflineCode::getRangeInfo(const TransBCMapping& transBCMap,
       if (lineNum != -1) rangeInfo.lineNum = lineNum;
     } else {
       auto const func = currUnit->getFunc(sk.offset());
-      auto const lineNum = currUnit->getLineNumber(sk.offset());
+      auto const lineNum = func->getLineNumber(sk.offset());
       rangeInfo.func = func;
       rangeInfo.instrStr = instrToString(func->at(sk.offset()), func);
       if (lineNum != -1) rangeInfo.lineNum = lineNum;

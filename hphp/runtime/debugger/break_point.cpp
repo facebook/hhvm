@@ -139,7 +139,7 @@ void InterruptSite::Initialize(ActRec *fp) {
   auto const unit = m_func->unit();
   bail_on(!unit);
   m_file = String(StrNR{unit->filepath()});
-  if (unit->getSourceLoc(m_offset, m_sourceLoc)) {
+  if (m_func->getSourceLoc(m_offset, m_sourceLoc)) {
     m_line0 = m_sourceLoc.line0;
     m_char0 = m_sourceLoc.char0;
     m_line1 = m_sourceLoc.line1;

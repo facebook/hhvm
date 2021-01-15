@@ -702,7 +702,7 @@ void Func::prettyPrint(std::ostream& out, const PrintOpts& opts) const {
     int prevLineNum = -1;
     while (it < &bc[stopOffset]) {
       if (opts.showLines) {
-        int lineNum = unit()->getLineNumber(offsetOf(it));
+        int lineNum = getLineNumber(offsetOf(it));
         if (lineNum != prevLineNum) {
           out << "  // line " << lineNum << std::endl;
           prevLineNum = lineNum;
@@ -916,6 +916,32 @@ void Func::bind(Func *func) {
     ne->setUniqueFunc(func);
   }
   func->setFuncHandle(ne->m_cachedFunc);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Code locations.
+
+int Func::getLineNumber(Offset offset) const {
+  return unit()->getLineNumberHelper(offset);
+}
+
+bool Func::getSourceLoc(Offset offset, SourceLoc& sLoc) const {
+  auto const& sourceLocTable = SourceLocation::getLocTable(unit());
+  return SourceLocation::getLoc(sourceLocTable, offset, sLoc);
+}
+
+bool Func::getOffsetRange(Offset offset, OffsetRange& range) const {
+  OffsetRangeVec offsets;
+  auto line = getLineNumber(offset);
+  unit()->getOffsetRanges(line, offsets);
+
+  for (auto o: offsets) {
+    if (offset >= o.base && offset < o.past) {
+      range = o;
+      return true;
+    }
+  }
+  return false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

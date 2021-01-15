@@ -759,7 +759,7 @@ void maybe_output_prof_trans_rec_trace(
       }
     }
     folly::dynamic profTransRecProfile = folly::dynamic::object;
-    profTransRecProfile["end_line_nunber"] = unit->getLineNumber(profTransRec->lastBcOff());
+    profTransRecProfile["end_line_nunber"] = func->getLineNumber(profTransRec->lastBcOff());
     profTransRecProfile["file_path"] = filePath;
     profTransRecProfile["function_name"] = sk.func()->fullName()->data();
     profTransRecProfile["profile"] = folly::dynamic::object("profileType", "ProfTransRec");
@@ -907,7 +907,7 @@ void maybe_output_target_profile_trace(
         targetProfileInfo["profile_raw_name"] = name->toCppString();
         targetProfileInfo["profile"] = prof.value().toDynamic();
         targetProfileInfo["file_path"] = filePath;
-        targetProfileInfo["line_number"] = unit->getLineNumber(pt.bcOff);
+        targetProfileInfo["line_number"] = func->getLineNumber(pt.bcOff);
         targetProfileInfo["function_name"] = func->fullName()->data();
         HPHP::Trace::traceRelease("json:%s\n", folly::toJson(targetProfileInfo).c_str());
       }

@@ -371,21 +371,8 @@ public:
    *
    * Return -1 if not found.
    */
-  int getLineNumber(Offset pc) const;
+  int getLineNumberHelper(Offset pc) const;
 
-  /*
-   * Get the SourceLoc corresponding to `pc'.
-   *
-   * Return false if not found, else true.
-   */
-  bool getSourceLoc(Offset pc, SourceLoc& sLoc) const;
-
-  /*
-   * Get the Offset range(s) corresponding to `pc' or `line'.
-   *
-   * Return false if not found, else true.
-   */
-  bool getOffsetRange(Offset pc, OffsetRange& range) const;
   bool getOffsetRanges(int line, OffsetRangeVec& offsets) const;
 
   /*
@@ -424,9 +411,9 @@ public:
   void clearCoverage();
 
   /*
-   * Record that the bytecode at off was covered.
+   * Record that the line was covered.
    */
-  void recordCoverage(Offset off);
+  void recordCoverage(int line);
 
   /*
    * Generate a vec array where each entry is an integer indicating a covered

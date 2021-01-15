@@ -131,7 +131,7 @@ void phpDebuggerOpcodeHook(const unsigned char* pc) {
 
   // If we are no longer on the active line breakpoint, clear it
   int active_line = req_data.getActiveLineBreak();
-  int line = unit->getLineNumber(func->offsetOf(pc));
+  int line = func->getLineNumber(func->offsetOf(pc));
   if (UNLIKELY(active_line != -1 && active_line != line)) {
     req_data.clearActiveLineBreak();
   }
@@ -288,7 +288,7 @@ void phpDebuggerExceptionHandlerHook() noexcept {
         return;
       }
       const auto pc = vmpc();
-      auto line = unit->getLineNumber(func->offsetOf(pc));
+      auto line = func->getLineNumber(func->offsetOf(pc));
       getDebuggerHook()->onNextBreak(unit, line);
       return;
     }
@@ -393,7 +393,7 @@ void phpDebuggerStepIn() {
   // bytecode-source mapping.
   int line;
   SourceLoc source_loc;
-  if (unit->getSourceLoc(func->offsetOf(pc), source_loc)) {
+  if (func->getSourceLoc(func->offsetOf(pc), source_loc)) {
     line = source_loc.line1;
   } else {
     TRACE(5, "Could not grab the current line number\n");
@@ -589,7 +589,7 @@ String getCurrentFilePath(int* pLine) {
   auto const func = vmfp()->func();
   auto const unit = func->unit();
   if (pLine != nullptr) {
-    *pLine = unit->getLineNumber(func->offsetOf(pc));
+    *pLine = func->getLineNumber(func->offsetOf(pc));
   }
   auto const filepath = const_cast<StringData*>(unit->filepath());
   return File::TranslatePath(String(filepath));

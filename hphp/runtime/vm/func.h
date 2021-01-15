@@ -1511,6 +1511,30 @@ public:
   }
 
   /////////////////////////////////////////////////////////////////////////////
+  // Code locations.                                                    [const]
+
+  /*
+   * Get the line number corresponding to `offset'.
+   *
+   * Return -1 if not found.
+   */
+  int getLineNumber(Offset offset) const;
+
+  /*
+   * Get the SourceLoc corresponding to `offset'.
+   *
+   * Return false if not found, else true.
+   */
+  bool getSourceLoc(Offset offset, SourceLoc& sLoc) const;
+
+  /*
+   * Get the Offset range(s) corresponding to `offset'.
+   *
+   * Return false if not found, else true.
+   */
+  bool getOffsetRange(Offset offset, OffsetRange& range) const;
+
+  /////////////////////////////////////////////////////////////////////////////
   // Constants.
 
 private:

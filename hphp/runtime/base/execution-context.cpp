@@ -1192,12 +1192,12 @@ StringData* ExecutionContext::getContainingFileName() {
 int ExecutionContext::getLine() {
   VMRegAnchor _;
   ActRec* ar = vmfp();
-  Unit* unit = ar ? ar->func()->unit() : nullptr;
-  Offset pc = unit ? pcOff() : 0;
+  auto func = ar ? ar->func() : nullptr;
+  Offset pc = func ? pcOff() : 0;
   if (ar == nullptr) return -1;
   if (ar->skipFrame()) ar = getPrevVMStateSkipFrame(ar, &pc);
-  if (ar == nullptr || (unit = ar->func()->unit()) == nullptr) return -1;
-  return unit->getLineNumber(pc);
+  if (ar == nullptr || (func = ar->func()) == nullptr) return -1;
+  return func->getLineNumber(pc);
 }
 
 ActRec* ExecutionContext::getFrameAtDepthForDebuggerUnsafe(int frameDepth) {

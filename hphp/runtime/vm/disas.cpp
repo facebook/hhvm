@@ -512,7 +512,7 @@ void print_func_body(Output& out, const FuncInfo& finfo) {
     }
 
     SourceLoc newLoc;
-    finfo.unit->getSourceLoc(off, newLoc);
+    finfo.func->getSourceLoc(off, newLoc);
     if (!(newLoc == srcLoc)) {
       print_srcloc(out, newLoc);
       srcLoc = newLoc;

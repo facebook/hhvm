@@ -130,7 +130,7 @@ Tag::Tag(const Func* func, Offset offset) {
   // Builtins have empty filenames, so use the unit; else use func->filename
   // in order to resolve the original filenames of flattened traits.
   auto const unit = func->unit();
-  *this = Known(getFilename(func, unit), unit->getLineNumber(offset));
+  *this = Known(getFilename(func, unit), func->getLineNumber(offset));
 }
 
 Tag Tag::Param(const Func* func, int32_t param) {
@@ -139,7 +139,7 @@ Tag Tag::Param(const Func* func, int32_t param) {
   assertx(func->fullName());
   auto const unit = func->unit();
   auto const file = getFilename(func, unit);
-  auto const line = unit->getLineNumber(func->base());
+  auto const line = func->getLineNumber(func->base());
   auto const text = folly::to<std::string>(
       "param ", param, " of ", func->fullName()->data(), " at ", file->data());
   return Tag::Param(makeStaticString(text), line);

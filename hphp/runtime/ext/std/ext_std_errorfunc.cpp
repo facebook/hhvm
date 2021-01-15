@@ -100,7 +100,7 @@ Array HHVM_FUNCTION(hphp_debug_caller_info) {
     }
     if (fp->func()->name()->isame(s_call_user_func.get())) return false;
     if (fp->func()->name()->isame(s_call_user_func_array.get())) return false;
-    auto const line = fp->func()->unit()->getLineNumber(pc);
+    auto const line = fp->func()->getLineNumber(pc);
     if (line == -1) return false;
     auto const cls = fp->func()->cls();
     auto const path = fp->func()->originalFilename() ?

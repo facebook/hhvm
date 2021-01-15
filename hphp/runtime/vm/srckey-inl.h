@@ -141,7 +141,7 @@ inline PC SrcKey::pc() const {
 
 inline int SrcKey::lineNumber() const {
   if (prologue()) return func()->line1();
-  return unit()->getLineNumber(offset());
+  return func()->getLineNumber(offset());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

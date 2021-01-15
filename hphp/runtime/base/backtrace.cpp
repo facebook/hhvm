@@ -398,7 +398,7 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
 
       DArrayInit frame(btArgs.m_parserFrame ? 4 : 2);
       frame.set(s_file, Variant{const_cast<StringData*>(func->filename())});
-      frame.set(s_line, func->unit()->getLineNumber(curFrm.pc));
+      frame.set(s_line, func->getLineNumber(curFrm.pc));
       if (btArgs.m_parserFrame) {
         frame.set(s_function, s_include);
         frame.set(s_args,
@@ -431,7 +431,7 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
 
       assertx(prevFile != nullptr);
       frame.set(s_file, Variant{const_cast<StringData*>(prevFile)});
-      frame.set(s_line, prevFunc->unit()->getLineNumber(prev.pc));
+      frame.set(s_line, prevFunc->getLineNumber(prev.pc));
     }
 
     // Check for include.
@@ -709,15 +709,16 @@ Array CompactTraceData::extract() const {
     auto const prev = idx < m_frames.size() - 1 ? &m_frames[idx + 1] : nullptr;
     DArrayInit frame(6);
     if (prev && !prev->func->isBuiltin()) {
-      auto const prevUnit = prev->func->unit();
+      auto const prevFunc = prev->func;
+      auto const prevUnit = prevFunc->unit();
       auto prevFile = prevUnit->filepath();
-      if (prev->func->originalFilename()) {
-        prevFile = prev->func->originalFilename();
+      if (prevFunc->originalFilename()) {
+        prevFile = prevFunc->originalFilename();
       }
 
       auto const prevPc = prev->prevPc;
       frame.set(s_file, StrNR(prevFile).asString());
-      frame.set(s_line, prevUnit->getLineNumber(prevPc));
+      frame.set(s_line, prevFunc->getLineNumber(prevPc));
     }
 
     auto const f = m_frames[idx].func;

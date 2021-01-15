@@ -2101,12 +2101,19 @@ let switch_multiple_default pos =
     pos
     "There can be only one `default` case in `switch`"
 
-let context_definitions_msg =
+let context_definitions_msg () =
   (* Notes:
+   * - needs to be a thunk because path_of_prefix resolves a reference that is populated at runtime
+   *   - points to the hh_server tmp hhi directory
    * - magic numbers are inteded to provide a nicer IDE experience,
    * - a Pos is constructed in order to make the link to contexts.hhi clickable
    *)
-  let path = Relative_path.(create Dummy "coeffect/contexts.hhi") in
+  let path =
+    Relative_path.(
+      let path = Path.concat (Path.make (path_of_prefix Hhi)) "coeffect/contexts.hhi" in
+      create Hhi (Path.to_string path)
+    )
+  in
   ( Pos.make_from_lnum_bol_cnum
       ~pos_file:path
       ~pos_start:(28, 0, 0)
@@ -2121,7 +2128,7 @@ let illegal_context pos name =
       ^ (name |> Markdown_lite.md_codify)
       ^ "\nCannot use a context defined outside namespace "
       ^ Naming_special_names.Coeffects.contexts )
-    [context_definitions_msg]
+    [context_definitions_msg ()]
 
 (*****************************************************************************)
 (* Nast terminality *)
@@ -5330,7 +5337,7 @@ let call_coeffect_error
         "From this declaration, the context of this function body provides "
         ^ available_incl_unsafe );
       (required_pos, "But the function being called requires " ^ required);
-      context_definitions_msg;
+      context_definitions_msg ();
     ]
 
 let op_coeffect_error
@@ -5343,7 +5350,7 @@ let op_coeffect_error
     [
       ( available_pos,
         "The local (enclosing) context provides " ^ locally_available );
-      context_definitions_msg;
+      context_definitions_msg ();
     ]
 
 let abstract_function_pointer cname meth_name call_pos decl_pos =

@@ -2,7 +2,7 @@
 
 function mixed_context(
   (function()[_]: void) $f,
-)[non_det, ctx $f]: void {
+)[local, ctx $f]: void {
   $f();
 }
 

@@ -10,8 +10,8 @@ function disallowed0()[]: void {
   echo "bad - pure context";
 }
 
-function disallowed2()[non_det]: void {
-  echo 42; // bad: non_det does not include IO
+function disallowed2()[local]: void {
+  echo 42; // bad: local does not include IO
 }
 
 function allowed_by_default(): void {

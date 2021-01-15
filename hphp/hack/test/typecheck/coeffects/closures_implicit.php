@@ -21,13 +21,13 @@ function implicit_context(): void {
   $default_lambda = () ==> $rx_lambda(); // ok
 }
 
-function nondeterministic_context()[non_det]: void {
-  // the lambda should be typed as having non_det capability, not defaults
+function cipp_context()[output]: void {
+  // the lambda should be typed as having Output capability, not defaults
   () ==> rx_context(); // error
 
   ()[rx] ==> {
-    // the type-checker shouldn't close over the non_det capability
-    () ==> nondeterministic_context(); // error FIXME(coeffects)
+    // the type-checker shouldn't close over the output capability
+    () ==> cipp_context(); // error FIXME(coeffects)
 
     () ==> rx_context(); // ok (since rx is in the enclosing scope / inherited)
   };

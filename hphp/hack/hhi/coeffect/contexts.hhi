@@ -40,11 +40,26 @@ namespace HH\Contexts {
     \HH\Capabilities\Output
   ); */
 
-  type cipp_global = (\HH\Capabilities\CippGlobal & \HH\Capabilities\AccessStaticVariable & \HH\Capabilities\Output);
-  // type cipp<T> = (\HH\Capabilities\Cipp<T> & cipp_global);
-  type cipp<T> = (\HH\Capabilities\Cipp<T> & \HH\Capabilities\AccessStaticVariable & \HH\Capabilities\Output);
-
-  type non_det = \HH\Capabilities\NonDet;
+  // TODO(cipp): deal with not giving it WriteProperty (or some other mechanism of turning on IFC)
+  type cipp_global = (
+    \HH\Capabilities\AccessStaticVariable &
+    \HH\Capabilities\Output &
+    \HH\Capabilities\WriteProperty
+  );
+  // type cipp = (\HH\Capabilities\Cipp & cipp_global);
+  type cipp = (
+    \HH\Capabilities\Cipp &
+    \HH\Capabilities\AccessStaticVariable &
+    \HH\Capabilities\Output &
+    \HH\Capabilities\WriteProperty
+  );
+  // type cipp_of<T> = (\HH\Capabilities\Cipp_of<T> & cipp);
+  type cipp_of<T> = (
+    \HH\Capabilities\Cipp_of<T> &
+    \HH\Capabilities\AccessStaticVariable &
+    \HH\Capabilities\Output &
+    \HH\Capabilities\WriteProperty
+  );
 
   type output = \HH\Capabilities\Output;
 

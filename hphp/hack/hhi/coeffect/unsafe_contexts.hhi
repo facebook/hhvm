@@ -28,9 +28,8 @@ namespace HH\Contexts\Unsafe {
   // = \HH\Capabilities\RxLocal
 
   type cipp_global = mixed;
-  type cipp<T> = mixed;
-
-  type non_det = mixed;
+  type cipp_of<T> = mixed;
+  type cipp = mixed;
 
   type output = mixed;
 

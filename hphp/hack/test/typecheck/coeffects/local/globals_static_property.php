@@ -16,7 +16,7 @@ function f_allowed()[\HH\Capabilities\AccessStaticVariable]: int {
   return C::$x; // ok
 }
 
-function f_banned()[non_det]: int {
+function f_banned()[local]: int {
   $l_allowed = ()[\HH\Capabilities\AccessStaticVariable] ==> C::$x; // ok
   return C::$x; // error
 }

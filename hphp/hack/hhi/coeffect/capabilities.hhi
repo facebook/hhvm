@@ -31,13 +31,10 @@
  * a subtype of the callee's capability type.
  */
 namespace HH\Capabilities {
-  <<__Sealed(Cipp::class)>>
-  interface CippGlobal {}
+  <<__Sealed(Cipp_of::class)>>
+  interface Cipp {}
   <<__Sealed()>>
-  interface Cipp<T> extends CippGlobal {}
-
-  <<__Sealed()>>
-  interface NonDet {}
+  interface Cipp_of<T> extends Cipp {}
 
   <<__Sealed()>>
   interface AccessStaticVariable {}

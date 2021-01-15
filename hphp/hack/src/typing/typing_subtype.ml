@@ -28,8 +28,70 @@ module ShapeMap = Nast.ShapeMap
 module ShapeSet = Ast_defs.ShapeSet
 module Nast = Aast
 
+(* We maintain a "visited" set for subtype goals. We do this only
+ * for goals of the form T <: t or t <: T where T is a generic parameter,
+ * as this is the more common case.
+ * T83096774: work out how to do this *efficiently* for all subtype goals.
+ *
+ * Here's a non-trivial example (assuming a contravariant type Contra).
+ * Under assumption T <: Contra<Contra<T>> show T <: Contra<T>.
+ * This leads to cycle of implications
+ *    T <: Contra<T> =>
+ *    Contra<Contra<T>> <: Contra<T> =>
+ *    T <: Contra<T>
+ * at which point we are back at the original goal.
+ *
+ * Note that it's not enough to just keep a set of visited generic parameters,
+ * else we would reject good code e.g. consider
+ *   class C extends B implements Contra<B>
+ * Now under assumption T <: C show T <: Contra<T>
+ * This leads to cycle of implications
+ *   T <: Contra<T> =>
+ *   C <: Contra<T> =>
+ *   Contra<B> <: Contra<T> =>
+ *   T <: B =>     // DO NOT REJECT here just because we've visited T before!
+ *   C <: B => done.
+ *
+ * We represent the visited set as a map from generic parameters
+ * to pairs of sets of types, such that an entry T := ({t1,...,tm},{u1,...,un})
+ * represents a set of goals
+ *   T <: u1, ..., t <: un , t1 <: T, ..., tn <: T
+ *)
+module VisitedGoals = struct
+  type t = (ITySet.t * ITySet.t) SMap.t
+
+  let empty : t = SMap.empty
+
+  (* Return None if (name <: ty) is already present, otherwise return Some v'
+   * where v' has the pair added
+   *)
+  let try_add_visited_generic_sub v name ty =
+    match SMap.find_opt name v with
+    | None -> Some (SMap.add name (ITySet.empty, ITySet.singleton ty) v)
+    | Some (lower, upper) ->
+      if ITySet.mem ty upper then
+        None
+      else
+        Some (SMap.add name (lower, ITySet.add ty upper) v)
+
+  (* Return None if (ty <: name) is already present, otherwise return Some v'
+   * where v' has the pair added
+   *)
+  let try_add_visited_generic_super v ty name =
+    match SMap.find_opt name v with
+    | None -> Some (SMap.add name (ITySet.singleton ty, ITySet.empty) v)
+    | Some (lower, upper) ->
+      if ITySet.mem ty lower then
+        None
+      else
+        Some (SMap.add name (ITySet.add ty lower, upper) v)
+end
+
 type subtype_env = {
-  seen_generic_params: SSet.t option;
+  (* If set, finish as soon as we see a goal of the form T <: t or t <: T for generic parameter T *)
+  ignore_generic_params: bool;
+  (* If above is not set, maintain a visited goal set *)
+  visited: VisitedGoals.t;
   no_top_bottom: bool;
   treat_dynamic_as_bottom: bool;
   (* Used with global flag --enable-sound-dynamic-type, allow_subtype_of_dynamic
@@ -38,27 +100,20 @@ type subtype_env = {
   on_error: Errors.typing_error_callback;
 }
 
-let empty_seen = Some SSet.empty
-
 let make_subtype_env
-    ?(seen_generic_params = empty_seen)
+    ?(ignore_generic_params = false)
     ?(no_top_bottom = false)
     ?(treat_dynamic_as_bottom = false)
     ?(allow_subtype_of_dynamic = false)
     on_error =
   {
-    seen_generic_params;
+    ignore_generic_params;
+    visited = VisitedGoals.empty;
     no_top_bottom;
     treat_dynamic_as_bottom;
     allow_subtype_of_dynamic;
     on_error;
   }
-
-let add_seen_generic subtype_env name =
-  match subtype_env.seen_generic_params with
-  | Some seen ->
-    { subtype_env with seen_generic_params = Some (SSet.add name seen) }
-  | None -> subtype_env
 
 type reactivity_extra_info = {
   method_info: (* method_name *) (string * (* is_static *) bool) option;
@@ -419,15 +474,21 @@ and default_subtype
         | (_, Tgeneric (name_sub, tyargs)) ->
           (* TODO(T69551141) handle type arguments. right now, just passin tyargs to
              Env.get_upper_bounds *)
-          (match subtype_env.seen_generic_params with
-          | None -> default env
-          | Some seen ->
+          ( if subtype_env.ignore_generic_params then
+            default env
+          else
             (* If we've seen this type parameter before then we must have gone
              * round a cycle so we fail
              *)
-            if SSet.mem name_sub seen then
-              invalid ~fail env
-            else
+            match
+              VisitedGoals.try_add_visited_generic_sub
+                subtype_env.visited
+                name_sub
+                ty_super
+            with
+            | None -> invalid ~fail env
+            | Some new_visited ->
+              let subtype_env = { subtype_env with visited = new_visited } in
               (* If the generic is actually an expression dependent type,
                 we need to update this_ty
               *)
@@ -440,7 +501,6 @@ and default_subtype
                 else
                   this_ty
               in
-              let subtype_env = add_seen_generic subtype_env name_sub in
               (* Otherwise, we collect all the upper bounds ("as" constraints) on
                 the generic parameter, and check each of these in turn against
                 ty_super until one of them succeeds
@@ -479,7 +539,7 @@ and default_subtype
               env
               |> try_bounds
                    (Typing_set.elements
-                      (Env.get_upper_bounds env name_sub tyargs)))
+                      (Env.get_upper_bounds env name_sub tyargs)) )
           |> (* Turn error into a generic error about the type parameter *)
           if_unsat (invalid ~fail)
         | (_, Tdynamic) when subtype_env.treat_dynamic_as_bottom -> valid env
@@ -536,7 +596,7 @@ and default_subtype
  *   C <: J              ==>  Unsat _
  * (Assuming we have T <: D in tpenv, and class D implements I)
  *   vec<T> <: vec<I>    ==>  True
- * This last one would be left as T <: I if seen_generic_params is None
+ * This last one would be left as T <: I if subtype_env.ignore_generic_params=true
  *)
 and simplify_subtype_i
     ~(subtype_env : subtype_env)
@@ -935,7 +995,7 @@ and simplify_subtype_i
       | LoclType lty_sub ->
         (match deref lty_sub with
         | (_, (Tunion _ | Terr | Tvar _)) -> default_subtype env
-        | (_, Tgeneric _) when Option.is_none subtype_env.seen_generic_params ->
+        | (_, Tgeneric _) when subtype_env.ignore_generic_params ->
           default_subtype env
         (* Num is not atomic: it is equivalent to int|float. The rule below relies
          * on ty_sub not being a union e.g. consider num <: arraykey | float, so
@@ -1033,8 +1093,7 @@ and simplify_subtype_i
           (* We do not want to decompose Toption for these cases *)
           | ((_, (Tvar _ | Tunion _ | Tintersection _)), _) ->
             default_subtype env
-          | ((_, Tgeneric _), _)
-            when Option.is_none subtype_env.seen_generic_params ->
+          | ((_, Tgeneric _), _) when subtype_env.ignore_generic_params ->
             (* TODO(T69551141) handle type arguments ? *)
             default_subtype env
           (* If t1 <: ?t2 and t1 is an abstract type constrained as t1',
@@ -1164,16 +1223,21 @@ and simplify_subtype_i
         | Terr ->
           default_subtype env
         | _ ->
-          (match subtype_env.seen_generic_params with
-          | None -> default env
-          | Some seen ->
+          if subtype_env.ignore_generic_params then
+            default env
+          else (
             (* If we've seen this type parameter before then we must have gone
              * round a cycle so we fail
              *)
-            if SSet.mem name_super seen then
-              invalid_env env
-            else
-              let subtype_env = add_seen_generic subtype_env name_super in
+            match
+              VisitedGoals.try_add_visited_generic_super
+                subtype_env.visited
+                ety_sub
+                name_super
+            with
+            | None -> invalid_env env
+            | Some new_visited ->
+              let subtype_env = { subtype_env with visited = new_visited } in
               (* Collect all the lower bounds ("super" constraints) on the
                * generic parameter, and check ty_sub against each of them in turn
                * until one of them succeeds *)
@@ -1190,7 +1254,8 @@ and simplify_subtype_i
               |> try_bounds
                    (Typing_set.elements
                       (Env.get_lower_bounds env name_super tyargs_super))
-              |> if_unsat invalid_env)))
+              |> if_unsat invalid_env
+          )))
     | (_, Tnonnull) ->
       (match ety_sub with
       | ConstraintType cty ->
@@ -3308,17 +3373,12 @@ and is_sub_type_alt_i
   let (_env, prop) =
     simplify_subtype_i
       ~subtype_env:
-        {
-          seen_generic_params =
-            ( if ignore_generic_params then
-              None
-            else
-              empty_seen );
-          no_top_bottom;
-          treat_dynamic_as_bottom;
-          allow_subtype_of_dynamic;
-          on_error = Errors.unify_error_at pos;
-        }
+        (make_subtype_env
+           ~ignore_generic_params
+           ~no_top_bottom
+           ~treat_dynamic_as_bottom
+           ~allow_subtype_of_dynamic
+           (Errors.unify_error_at pos))
       ~this_ty
       (* It is weird that this can cause errors, but I am wary to discard them.
        * Using the generic unify_error to maintain current behavior. *)
@@ -3611,7 +3671,7 @@ let rec decompose_subtype
     ty_super;
   let (env, prop) =
     simplify_subtype
-      ~subtype_env:(make_subtype_env ~seen_generic_params:None on_error)
+      ~subtype_env:(make_subtype_env ~ignore_generic_params:true on_error)
       ~this_ty:None
       ty_sub
       ty_super

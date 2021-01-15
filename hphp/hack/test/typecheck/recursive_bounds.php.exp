@@ -1,0 +1,6 @@
+File "recursive_bounds.php", line 11, characters 10-11:
+Invalid return type (Typing[4110])
+  File "recursive_bounds.php", line 10, characters 44-52:
+  Expected `Contra<T>`
+  File "recursive_bounds.php", line 10, characters 38-38:
+  But got `T`

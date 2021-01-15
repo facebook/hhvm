@@ -863,6 +863,16 @@ where
         Self::make(syntax, value)
     }
 
+    fn make_yield_break_statement(_: &C, yield_break_keyword: Self, yield_break_break: Self, yield_break_semicolon: Self) -> Self {
+        let syntax = SyntaxVariant::YieldBreakStatement(Box::new(YieldBreakStatementChildren {
+            yield_break_keyword,
+            yield_break_break,
+            yield_break_semicolon,
+        }));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
+        Self::make(syntax, value)
+    }
+
     fn make_throw_statement(_: &C, throw_keyword: Self, throw_expression: Self, throw_semicolon: Self) -> Self {
         let syntax = SyntaxVariant::ThrowStatement(Box::new(ThrowStatementChildren {
             throw_keyword,
@@ -2488,6 +2498,13 @@ where
                 let acc = f(return_semicolon, acc);
                 acc
             },
+            SyntaxVariant::YieldBreakStatement(x) => {
+                let YieldBreakStatementChildren { yield_break_keyword, yield_break_break, yield_break_semicolon } = *x;
+                let acc = f(yield_break_keyword, acc);
+                let acc = f(yield_break_break, acc);
+                let acc = f(yield_break_semicolon, acc);
+                acc
+            },
             SyntaxVariant::ThrowStatement(x) => {
                 let ThrowStatementChildren { throw_keyword, throw_expression, throw_semicolon } = *x;
                 let acc = f(throw_keyword, acc);
@@ -3281,6 +3298,7 @@ where
             SyntaxVariant::CaseLabel {..} => SyntaxKind::CaseLabel,
             SyntaxVariant::DefaultLabel {..} => SyntaxKind::DefaultLabel,
             SyntaxVariant::ReturnStatement {..} => SyntaxKind::ReturnStatement,
+            SyntaxVariant::YieldBreakStatement {..} => SyntaxKind::YieldBreakStatement,
             SyntaxVariant::ThrowStatement {..} => SyntaxKind::ThrowStatement,
             SyntaxVariant::BreakStatement {..} => SyntaxKind::BreakStatement,
             SyntaxVariant::ContinueStatement {..} => SyntaxKind::ContinueStatement,
@@ -3918,6 +3936,12 @@ where
                  return_semicolon: ts.pop().unwrap(),
                  return_expression: ts.pop().unwrap(),
                  return_keyword: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::YieldBreakStatement, 3) => SyntaxVariant::YieldBreakStatement(Box::new(YieldBreakStatementChildren {
+                 yield_break_semicolon: ts.pop().unwrap(),
+                 yield_break_break: ts.pop().unwrap(),
+                 yield_break_keyword: ts.pop().unwrap(),
                  
              })),
              (SyntaxKind::ThrowStatement, 3) => SyntaxVariant::ThrowStatement(Box::new(ThrowStatementChildren {
@@ -5154,6 +5178,13 @@ pub struct ReturnStatementChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+pub struct YieldBreakStatementChildren<T, V> {
+    pub yield_break_keyword: Syntax<T, V>,
+    pub yield_break_break: Syntax<T, V>,
+    pub yield_break_semicolon: Syntax<T, V>,
+}
+
+#[derive(Debug, Clone)]
 pub struct ThrowStatementChildren<T, V> {
     pub throw_keyword: Syntax<T, V>,
     pub throw_expression: Syntax<T, V>,
@@ -5943,6 +5974,7 @@ pub enum SyntaxVariant<T, V> {
     CaseLabel(Box<CaseLabelChildren<T, V>>),
     DefaultLabel(Box<DefaultLabelChildren<T, V>>),
     ReturnStatement(Box<ReturnStatementChildren<T, V>>),
+    YieldBreakStatement(Box<YieldBreakStatementChildren<T, V>>),
     ThrowStatement(Box<ThrowStatementChildren<T, V>>),
     BreakStatement(Box<BreakStatementChildren<T, V>>),
     ContinueStatement(Box<ContinueStatementChildren<T, V>>),
@@ -6818,6 +6850,15 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                         0 => Some(&x.return_keyword),
                     1 => Some(&x.return_expression),
                     2 => Some(&x.return_semicolon),
+                        _ => None,
+                    }
+                })
+            },
+            YieldBreakStatement(x) => {
+                get_index(3).and_then(|index| { match index {
+                        0 => Some(&x.yield_break_keyword),
+                    1 => Some(&x.yield_break_break),
+                    2 => Some(&x.yield_break_semicolon),
                         _ => None,
                     }
                 })

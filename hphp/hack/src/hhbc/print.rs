@@ -2915,7 +2915,6 @@ fn print_expr<W: Write>(
             w.write("await ")?;
             print_expr(ctx, w, env, e)
         }
-        E_::YieldBreak => w.write("return"),
         E_::Import(i) => {
             print_import_flavor(w, &i.0)?;
             w.write(" ")?;

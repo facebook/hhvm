@@ -869,6 +869,16 @@ where
         Self::make(syntax, value)
     }
 
+    fn make_yield_break_statement(ctx: &C, keyword: Self, break_: Self, semicolon: Self) -> Self {
+        let syntax = SyntaxVariant::YieldBreakStatement(ctx.get_arena().alloc(YieldBreakStatementChildren {
+            keyword,
+            break_,
+            semicolon,
+        }));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
+        Self::make(syntax, value)
+    }
+
     fn make_throw_statement(ctx: &C, keyword: Self, expression: Self, semicolon: Self) -> Self {
         let syntax = SyntaxVariant::ThrowStatement(ctx.get_arena().alloc(ThrowStatementChildren {
             keyword,

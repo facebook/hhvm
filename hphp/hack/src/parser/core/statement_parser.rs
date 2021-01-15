@@ -207,6 +207,15 @@ where
             TokenKind::Break => self.parse_break_statement(),
             TokenKind::Continue => self.parse_continue_statement(),
             TokenKind::Return => self.parse_return_statement(),
+            TokenKind::Yield => {
+                match self.peek_token_kind_with_lookahead(1) {
+                    // yield break;
+                    TokenKind::Break => self.parse_yield_break_statement(),
+                    // yield;
+                    // yield some_expression;
+                    _ => self.parse_expression_statement(),
+                }
+            }
             TokenKind::Throw => self.parse_throw_statement(),
             TokenKind::LeftBrace => self.parse_compound_statement(),
             TokenKind::Static => self.parse_expression_statement(),
@@ -926,6 +935,20 @@ where
         let semi_token = self.require_semicolon();
         S!(make_throw_statement, self, throw_token, expr, semi_token)
     }
+
+    fn parse_yield_break_statement(&mut self) -> S::R {
+        let yield_token = self.assert_token(TokenKind::Yield);
+        let break_token = self.assert_token(TokenKind::Break);
+        let semi_token = self.require_semicolon();
+        S!(
+            make_yield_break_statement,
+            self,
+            yield_token,
+            break_token,
+            semi_token
+        )
+    }
+
     fn parse_default_label(&mut self) -> S::R {
         //
         // See comments under parse_switch_statement for the grammar.

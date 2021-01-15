@@ -752,6 +752,7 @@ module Visitor_DEPRECATED = struct
         | Continue -> this#on_continue acc
         | Throw e -> this#on_throw acc e
         | Return eopt -> this#on_return acc eopt
+        | Yield_break -> this#on_yield_break acc
         | If (e, b1, b2) -> this#on_if acc e b1 b2
         | Do (b, e) -> this#on_do acc b e
         | While (e, b) -> this#on_while acc e b
@@ -790,7 +791,6 @@ module Visitor_DEPRECATED = struct
         | Method_id (expr, pstr) -> this#on_method_id acc expr pstr
         | Method_caller (sid, pstr) -> this#on_method_caller acc sid pstr
         | Smethod_id (cid, pstr) -> this#on_smethod_id acc cid pstr
-        | Yield_break -> this#on_yield_break acc
         | Yield e -> this#on_yield acc e
         | Await e -> this#on_await acc e
         | List el -> this#on_list acc el

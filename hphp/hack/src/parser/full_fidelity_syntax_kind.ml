@@ -96,6 +96,7 @@ type t =
   | CaseLabel
   | DefaultLabel
   | ReturnStatement
+  | YieldBreakStatement
   | ThrowStatement
   | BreakStatement
   | ContinueStatement
@@ -273,6 +274,7 @@ let to_string kind =
   | CaseLabel                         -> "case_label"
   | DefaultLabel                      -> "default_label"
   | ReturnStatement                   -> "return_statement"
+  | YieldBreakStatement               -> "yield_break_statement"
   | ThrowStatement                    -> "throw_statement"
   | BreakStatement                    -> "break_statement"
   | ContinueStatement                 -> "continue_statement"

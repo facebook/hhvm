@@ -101,6 +101,7 @@ pub enum SyntaxVariant<'a, T, V> {
     CaseLabel(&'a CaseLabelChildren<'a, T, V>),
     DefaultLabel(&'a DefaultLabelChildren<'a, T, V>),
     ReturnStatement(&'a ReturnStatementChildren<'a, T, V>),
+    YieldBreakStatement(&'a YieldBreakStatementChildren<'a, T, V>),
     ThrowStatement(&'a ThrowStatementChildren<'a, T, V>),
     BreakStatement(&'a BreakStatementChildren<'a, T, V>),
     ContinueStatement(&'a ContinueStatementChildren<'a, T, V>),
@@ -807,6 +808,13 @@ pub struct DefaultLabelChildren<'a, T, V> {
 pub struct ReturnStatementChildren<'a, T, V> {
     pub keyword: Syntax<'a, T, V>,
     pub expression: Syntax<'a, T, V>,
+    pub semicolon: Syntax<'a, T, V>,
+}
+
+#[derive(Debug, Clone)]
+pub struct YieldBreakStatementChildren<'a, T, V> {
+    pub keyword: Syntax<'a, T, V>,
+    pub break_: Syntax<'a, T, V>,
     pub semicolon: Syntax<'a, T, V>,
 }
 

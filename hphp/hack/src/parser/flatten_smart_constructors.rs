@@ -645,6 +645,14 @@ pub trait FlattenSmartConstructors<'src, State>
         }
     }
 
+    fn make_yield_break_statement(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R) -> Self::R {
+        if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) {
+          Self::zero(SyntaxKind::YieldBreakStatement)
+        } else {
+          self.flatten(SyntaxKind::YieldBreakStatement, vec!(arg0, arg1, arg2))
+        }
+    }
+
     fn make_throw_statement(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R) -> Self::R {
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) {
           Self::zero(SyntaxKind::ThrowStatement)

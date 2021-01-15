@@ -357,6 +357,10 @@ impl<'src> SmartConstructors for DirectDeclSmartConstructors<'src> {
         <Self as FlattenSmartConstructors<'src, State<'src>>>::make_return_statement(self, keyword, expression, semicolon)
     }
 
+    fn make_yield_break_statement(&mut self, keyword: Self::R, break_: Self::R, semicolon: Self::R) -> Self::R {
+        <Self as FlattenSmartConstructors<'src, State<'src>>>::make_yield_break_statement(self, keyword, break_, semicolon)
+    }
+
     fn make_throw_statement(&mut self, keyword: Self::R, expression: Self::R, semicolon: Self::R) -> Self::R {
         <Self as FlattenSmartConstructors<'src, State<'src>>>::make_throw_statement(self, keyword, expression, semicolon)
     }

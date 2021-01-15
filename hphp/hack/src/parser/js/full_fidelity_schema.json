@@ -1,6 +1,6 @@
 { "description" :
   "@generated JSON schema of the Hack Full Fidelity Parser AST",
-  "version" : "2021-01-05-0001",
+  "version" : "2021-01-14-0001",
   "trivia" : [
     { "trivia_kind_name" : "WhiteSpace",
       "trivia_type_name" : "whitespace" },
@@ -1197,6 +1197,15 @@
       "fields" : [
         { "field_name" : "keyword" },
         { "field_name" : "expression" },
+        { "field_name" : "semicolon" }
+      ] },
+    { "kind_name" : "YieldBreakStatement",
+      "type_name" : "yield_break_statement",
+      "description" : "yield_break_statement",
+      "prefix" : "yield_break",
+      "fields" : [
+        { "field_name" : "keyword" },
+        { "field_name" : "break" },
         { "field_name" : "semicolon" }
       ] },
     { "kind_name" : "ThrowStatement",

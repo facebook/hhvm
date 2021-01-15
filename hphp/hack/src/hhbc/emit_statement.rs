@@ -94,8 +94,8 @@ fn set_bytes_kind(name: &str) -> Option<Setrange> {
 pub fn emit_stmt(e: &mut Emitter, env: &mut Env, stmt: &tast::Stmt) -> Result {
     let pos = &stmt.0;
     match &stmt.1 {
+        a::Stmt_::YieldBreak => Ok(InstrSeq::gather(vec![instr::null(), emit_return(e, env)?])),
         a::Stmt_::Expr(e_) => match &e_.1 {
-            a::Expr_::YieldBreak => Ok(InstrSeq::gather(vec![instr::null(), emit_return(e, env)?])),
             a::Expr_::Await(a) => Ok(InstrSeq::gather(vec![
                 emit_await(e, env, &e_.0, a)?,
                 instr::popc(),
@@ -1436,8 +1436,7 @@ pub fn emit_dropthrough_return(e: &mut Emitter, env: &mut Env) -> Result {
 
 pub fn emit_final_stmt(e: &mut Emitter, env: &mut Env, stmt: &tast::Stmt) -> Result {
     match &stmt.1 {
-        a::Stmt_::Throw(_) | a::Stmt_::Return(_) => emit_stmt(e, env, stmt),
-        a::Stmt_::Expr(expr) if expr.1.is_yield_break() => emit_stmt(e, env, stmt),
+        a::Stmt_::Throw(_) | a::Stmt_::Return(_) | a::Stmt_::YieldBreak => emit_stmt(e, env, stmt),
         a::Stmt_::Block(stmts) => emit_final_stmts(e, env, stmts),
         _ => {
             let ret = emit_dropthrough_return(e, env)?;

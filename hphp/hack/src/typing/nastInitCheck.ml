@@ -414,6 +414,7 @@ and stmt env acc st =
       acc
     else
       raise (InitReturn acc)
+  | Yield_break -> S.Top
   | Return (Some x) ->
     let acc = expr acc x in
     if are_all_init env acc then
@@ -566,7 +567,6 @@ and expr_ env acc p e =
   | PrefixedString _ ->
     acc
   | Yield e -> afield acc e
-  | Yield_break -> acc
   | Await e -> expr acc e
   | List _ ->
     (* List is always an lvalue *)

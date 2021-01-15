@@ -608,6 +608,11 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; return_expression                                  : t
     ; return_semicolon                                   : t
     }
+  | YieldBreakStatement               of
+    { yield_break_keyword                                : t
+    ; yield_break_break                                  : t
+    ; yield_break_semicolon                              : t
+    }
   | ThrowStatement                    of
     { throw_keyword                                      : t
     ; throw_expression                                   : t
@@ -1172,6 +1177,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | TLDForeach                      of foreach_statement
   | TLDSwitchFallthrough            of switch_fallthrough
   | TLDReturn                       of return_statement
+  | TLDYieldBreak                   of yield_break_statement
   | TLDThrow                        of throw_statement
   | TLDBreak                        of break_statement
   | TLDContinue                     of continue_statement
@@ -1282,6 +1288,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | StmtSwitch                       of switch_statement
   | StmtSwitchFallthrough            of switch_fallthrough
   | StmtReturn                       of return_statement
+  | StmtYieldBreak                   of yield_break_statement
   | StmtThrow                        of throw_statement
   | StmtBreak                        of break_statement
   | StmtContinue                     of continue_statement
@@ -1864,6 +1871,11 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { return_keyword: Token.t value
     ; return_expression: expression option value
     ; return_semicolon: Token.t option value
+    }
+  and yield_break_statement =
+    { yield_break_keyword: Token.t value
+    ; yield_break_break: Token.t value
+    ; yield_break_semicolon: Token.t value
     }
   and throw_statement =
     { throw_keyword: Token.t value

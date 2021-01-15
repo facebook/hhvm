@@ -1927,9 +1927,7 @@ where
                 {
                     Self::raise_parsing_error(node, env, &syntax_error::invalid_yield);
                 }
-                if Self::text_str(&c.operand, env) == "break" {
-                    Ok(E_::YieldBreak)
-                } else if c.operand.is_missing() {
+                if c.operand.is_missing() {
                     Ok(E_::mk_yield(ast::Afield::AFvalue(E::new(pos, E_::Null))))
                 } else {
                     Ok(E_::mk_yield(Self::p_afield(&c.operand, env)?))
@@ -2273,9 +2271,9 @@ where
             }
             Darray(_) | Varray(_) | Shape(_) | Collection(_) | Record(_) | Null | True | False
             | Id(_) | Clone(_) | ClassConst(_) | Int(_) | Float(_) | PrefixedString(_)
-            | String(_) | String2(_) | Yield(_) | YieldBreak | Await(_) | Cast(_) | Unop(_)
-            | Binop(_) | Eif(_) | New(_) | Efun(_) | Lfun(_) | Xml(_) | Import(_) | Pipe(_)
-            | Callconv(_) | Is(_) | As(_) => raise("Invalid lvalue"),
+            | String(_) | String2(_) | Yield(_) | Await(_) | Cast(_) | Unop(_) | Binop(_)
+            | Eif(_) | New(_) | Efun(_) | Lfun(_) | Xml(_) | Import(_) | Pipe(_) | Callconv(_)
+            | Is(_) | As(_) => raise("Invalid lvalue"),
             _ => {}
         }
     }
@@ -2878,6 +2876,7 @@ where
                     Self::lift_awaits_in_statement(f, node, env)
                 }
             }
+            YieldBreakStatement(_) => Ok(ast::Stmt::new(pos, ast::Stmt_::mk_yield_break())),
             EchoStatement(c) => {
                 let f = |e: &mut Env<'a, TF>| -> Result<ast::Stmt> {
                     let echo = match &c.keyword.children {

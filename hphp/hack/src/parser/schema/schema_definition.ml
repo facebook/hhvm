@@ -1101,6 +1101,15 @@ let schema : schema_node list =
         ];
     };
     {
+      kind_name = "YieldBreakStatement";
+      type_name = "yield_break_statement";
+      func_name = "yield_break_statement";
+      description = "yield_break_statement";
+      prefix = "yield_break";
+      aggregates = [TopLevelDeclaration; Statement];
+      fields = [("keyword", Token); ("break", Token); ("semicolon", Token)];
+    };
+    {
       kind_name = "ThrowStatement";
       type_name = "throw_statement";
       func_name = "throw_statement";

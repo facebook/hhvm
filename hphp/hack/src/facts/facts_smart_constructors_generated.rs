@@ -357,6 +357,10 @@ impl<'src> SmartConstructors for FactsSmartConstructors<'src> {
         <Self as FlattenSmartConstructors<'src, HasScriptContent<'src>>>::make_return_statement(self, arg0, arg1, arg2)
     }
 
+    fn make_yield_break_statement(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R) -> Self::R {
+        <Self as FlattenSmartConstructors<'src, HasScriptContent<'src>>>::make_yield_break_statement(self, arg0, arg1, arg2)
+    }
+
     fn make_throw_statement(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R) -> Self::R {
         <Self as FlattenSmartConstructors<'src, HasScriptContent<'src>>>::make_throw_statement(self, arg0, arg1, arg2)
     }

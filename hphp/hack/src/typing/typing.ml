@@ -619,6 +619,9 @@ and stmt_ env pos st =
     (env, Aast.Fallthrough)
   | Noop -> (env, Aast.Noop)
   | AssertEnv _ -> (env, Aast.Noop)
+  | Yield_break ->
+    let env = LEnv.move_and_merge_next_in_cont env C.Exit in
+    (env, Aast.Yield_break)
   | Expr e ->
     let (env, te, _) = expr env e in
     let env =
@@ -2484,8 +2487,6 @@ and expr_
     let env = might_throw env in
     let te2 = Tast.make_typed_expr pos ty te2 in
     make_result env p (Aast.Obj_get (te1, te2, nullflavor, in_parens)) ty
-  | Yield_break ->
-    make_result env p Aast.Yield_break (Typing_utils.mk_tany env p)
   | Yield af ->
     let (env, (taf, opt_key, value)) = array_field ~allow_awaitable env af in
     let (env, send) = Env.fresh_type env p in

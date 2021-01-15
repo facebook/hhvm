@@ -109,6 +109,7 @@ pub trait SmartConstructors: Clone {
     fn make_case_label(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> Self::R;
     fn make_default_label(&mut self, arg0 : Self::R, arg1 : Self::R) -> Self::R;
     fn make_return_statement(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> Self::R;
+    fn make_yield_break_statement(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> Self::R;
     fn make_throw_statement(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> Self::R;
     fn make_break_statement(&mut self, arg0 : Self::R, arg1 : Self::R) -> Self::R;
     fn make_continue_statement(&mut self, arg0 : Self::R, arg1 : Self::R) -> Self::R;

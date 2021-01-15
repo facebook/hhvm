@@ -1583,6 +1583,7 @@ and stmt env (pos, st) =
     | Aast.Continue -> Aast.Continue
     | Aast.Throw e -> N.Throw (expr env e)
     | Aast.Return e -> N.Return (Option.map e (expr env))
+    | Aast.Yield_break -> N.Yield_break
     | Aast.Awaitall (el, b) -> awaitall_stmt env el b
     | Aast.If (e, b1, b2) -> if_stmt env e b1 b2
     | Aast.Do (b, e) -> do_stmt env b e
@@ -2096,7 +2097,6 @@ and expr_ env p (e : Nast.expr_) =
     N.FunctionPointer
       (N.FP_class_const (make_class_id env x1, x2), targl env p targs)
   | Aast.FunctionPointer _ -> N.Any
-  | Aast.Yield_break -> N.Yield_break
   | Aast.Yield e -> N.Yield (afield env e)
   | Aast.Await e -> N.Await (expr env e)
   | Aast.List el -> N.List (exprl env el)

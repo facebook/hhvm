@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ad7e634179318d01d4669e6e202b4c15>>
+// @generated SignedSource<<bc9e8311168443178ac49f610859d2c7>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -87,6 +87,12 @@ pub enum Stmt_<'a, Ex, Fb, En, Hi> {
     /// return;
     /// return $foo;
     Return(Option<&'a Expr<'a, Ex, Fb, En, Hi>>),
+    /// Yield break, terminating the current generator. This behaves like
+    /// return; but is more explicit, and ensures the function is treated
+    /// as a generator.
+    ///
+    /// yield break;
+    YieldBreak,
     /// Concurrent block. All the await expressions are awaited at the
     /// same time, similar to genva().
     ///
@@ -653,15 +659,6 @@ pub enum Expr_<'a, Ex, Fb, En, Hi> {
     /// yield $foo // enclosing function returns an Iterator
     /// yield $foo => $bar // enclosing function returns a KeyedIterator
     Yield(&'a Afield<'a, Ex, Fb, En, Hi>),
-    /// Yield break, terminating the current generator. This behaves like
-    /// return; but is more explicit, and ensures the function is treated
-    /// as a generator.
-    ///
-    /// TODO: this is only permitted in a statement position, so it
-    /// should be in stmt.
-    ///
-    /// yield break;
-    YieldBreak,
     /// Await expression.
     ///
     /// await $foo

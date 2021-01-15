@@ -1704,6 +1704,26 @@ where
       Self { syntax, value }
     }
 
+    fn make_yield_break_statement(ctx: &C, arg0: Self, arg1: Self, arg2: Self) -> Self {
+      let children = &[
+          arg0.value, 
+          arg1.value, 
+          arg2.value
+      ];
+      let value = V::from_values(children.iter());
+      let syntax = Self::make(
+          ctx,
+          SyntaxKind::YieldBreakStatement,
+          &value,
+          &[
+              arg0.syntax, 
+              arg1.syntax, 
+              arg2.syntax
+          ],
+      );
+      Self { syntax, value }
+    }
+
     fn make_throw_statement(ctx: &C, arg0: Self, arg1: Self, arg2: Self) -> Self {
       let children = &[
           arg0.value, 

@@ -139,6 +139,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | Syntax.ForeachStatement _ -> tag validate_foreach_statement (fun x -> TLDForeach x) x
     | Syntax.SwitchFallthrough _ -> tag validate_switch_fallthrough (fun x -> TLDSwitchFallthrough x) x
     | Syntax.ReturnStatement _ -> tag validate_return_statement (fun x -> TLDReturn x) x
+    | Syntax.YieldBreakStatement _ -> tag validate_yield_break_statement (fun x -> TLDYieldBreak x) x
     | Syntax.ThrowStatement _ -> tag validate_throw_statement (fun x -> TLDThrow x) x
     | Syntax.BreakStatement _ -> tag validate_break_statement (fun x -> TLDBreak x) x
     | Syntax.ContinueStatement _ -> tag validate_continue_statement (fun x -> TLDContinue x) x
@@ -175,6 +176,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | TLDForeach                      thing -> invalidate_foreach_statement              (value, thing)
     | TLDSwitchFallthrough            thing -> invalidate_switch_fallthrough             (value, thing)
     | TLDReturn                       thing -> invalidate_return_statement               (value, thing)
+    | TLDYieldBreak                   thing -> invalidate_yield_break_statement          (value, thing)
     | TLDThrow                        thing -> invalidate_throw_statement                (value, thing)
     | TLDBreak                        thing -> invalidate_break_statement                (value, thing)
     | TLDContinue                     thing -> invalidate_continue_statement             (value, thing)
@@ -386,6 +388,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | Syntax.SwitchStatement _ -> tag validate_switch_statement (fun x -> StmtSwitch x) x
     | Syntax.SwitchFallthrough _ -> tag validate_switch_fallthrough (fun x -> StmtSwitchFallthrough x) x
     | Syntax.ReturnStatement _ -> tag validate_return_statement (fun x -> StmtReturn x) x
+    | Syntax.YieldBreakStatement _ -> tag validate_yield_break_statement (fun x -> StmtYieldBreak x) x
     | Syntax.ThrowStatement _ -> tag validate_throw_statement (fun x -> StmtThrow x) x
     | Syntax.BreakStatement _ -> tag validate_break_statement (fun x -> StmtBreak x) x
     | Syntax.ContinueStatement _ -> tag validate_continue_statement (fun x -> StmtContinue x) x
@@ -412,6 +415,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | StmtSwitch                       thing -> invalidate_switch_statement               (value, thing)
     | StmtSwitchFallthrough            thing -> invalidate_switch_fallthrough             (value, thing)
     | StmtReturn                       thing -> invalidate_return_statement               (value, thing)
+    | StmtYieldBreak                   thing -> invalidate_yield_break_statement          (value, thing)
     | StmtThrow                        thing -> invalidate_throw_statement                (value, thing)
     | StmtBreak                        thing -> invalidate_break_statement                (value, thing)
     | StmtContinue                     thing -> invalidate_continue_statement             (value, thing)
@@ -2044,6 +2048,22 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
       { return_keyword = invalidate_token x.return_keyword
       ; return_expression = invalidate_option_with (invalidate_expression) x.return_expression
       ; return_semicolon = invalidate_option_with (invalidate_token) x.return_semicolon
+      }
+    ; Syntax.value = v
+    }
+  and validate_yield_break_statement : yield_break_statement validator = function
+  | { Syntax.syntax = Syntax.YieldBreakStatement x; value = v } -> v,
+    { yield_break_semicolon = validate_token x.yield_break_semicolon
+    ; yield_break_break = validate_token x.yield_break_break
+    ; yield_break_keyword = validate_token x.yield_break_keyword
+    }
+  | s -> validation_fail (Some SyntaxKind.YieldBreakStatement) s
+  and invalidate_yield_break_statement : yield_break_statement invalidator = fun (v, x) ->
+    { Syntax.syntax =
+      Syntax.YieldBreakStatement
+      { yield_break_keyword = invalidate_token x.yield_break_keyword
+      ; yield_break_break = invalidate_token x.yield_break_break
+      ; yield_break_semicolon = invalidate_token x.yield_break_semicolon
       }
     ; Syntax.value = v
     }

@@ -1098,8 +1098,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                         | Id(_) | Import(_) | Is(_) | KeyValCollection(_) | Lfun(_) | List(_)
                         | Lplaceholder(_) | Lvar(_) | MethodCaller(_) | MethodId(_) | New(_)
                         | ObjGet(_) | Omitted | Pair(_) | Pipe(_) | Record(_) | Shape(_)
-                        | SmethodId(_) | ValCollection(_) | Varray(_) | Xml(_) | Yield(_)
-                        | YieldBreak => None,
+                        | SmethodId(_) | ValCollection(_) | Varray(_) | Xml(_) | Yield(_) => None,
                     }
                 }
 

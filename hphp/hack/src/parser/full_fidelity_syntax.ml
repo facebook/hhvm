@@ -135,6 +135,7 @@ module WithToken(Token: TokenType) = struct
       | CaseLabel                         _ -> SyntaxKind.CaseLabel
       | DefaultLabel                      _ -> SyntaxKind.DefaultLabel
       | ReturnStatement                   _ -> SyntaxKind.ReturnStatement
+      | YieldBreakStatement               _ -> SyntaxKind.YieldBreakStatement
       | ThrowStatement                    _ -> SyntaxKind.ThrowStatement
       | BreakStatement                    _ -> SyntaxKind.BreakStatement
       | ContinueStatement                 _ -> SyntaxKind.ContinueStatement
@@ -322,6 +323,7 @@ module WithToken(Token: TokenType) = struct
     let is_case_label                           = has_kind SyntaxKind.CaseLabel
     let is_default_label                        = has_kind SyntaxKind.DefaultLabel
     let is_return_statement                     = has_kind SyntaxKind.ReturnStatement
+    let is_yield_break_statement                = has_kind SyntaxKind.YieldBreakStatement
     let is_throw_statement                      = has_kind SyntaxKind.ThrowStatement
     let is_break_statement                      = has_kind SyntaxKind.BreakStatement
     let is_continue_statement                   = has_kind SyntaxKind.ContinueStatement
@@ -1343,6 +1345,15 @@ module WithToken(Token: TokenType) = struct
          let acc = f acc return_keyword in
          let acc = f acc return_expression in
          let acc = f acc return_semicolon in
+         acc
+      | YieldBreakStatement {
+        yield_break_keyword;
+        yield_break_break;
+        yield_break_semicolon;
+      } ->
+         let acc = f acc yield_break_keyword in
+         let acc = f acc yield_break_break in
+         let acc = f acc yield_break_semicolon in
          acc
       | ThrowStatement {
         throw_keyword;
@@ -3152,6 +3163,15 @@ module WithToken(Token: TokenType) = struct
         return_expression;
         return_semicolon;
       ]
+      | YieldBreakStatement {
+        yield_break_keyword;
+        yield_break_break;
+        yield_break_semicolon;
+      } -> [
+        yield_break_keyword;
+        yield_break_break;
+        yield_break_semicolon;
+      ]
       | ThrowStatement {
         throw_keyword;
         throw_expression;
@@ -4960,6 +4980,15 @@ module WithToken(Token: TokenType) = struct
         "return_keyword";
         "return_expression";
         "return_semicolon";
+      ]
+      | YieldBreakStatement {
+        yield_break_keyword;
+        yield_break_break;
+        yield_break_semicolon;
+      } -> [
+        "yield_break_keyword";
+        "yield_break_break";
+        "yield_break_semicolon";
       ]
       | ThrowStatement {
         throw_keyword;
@@ -6907,6 +6936,16 @@ module WithToken(Token: TokenType) = struct
           return_keyword;
           return_expression;
           return_semicolon;
+        }
+      | (SyntaxKind.YieldBreakStatement, [
+          yield_break_keyword;
+          yield_break_break;
+          yield_break_semicolon;
+        ]) ->
+        YieldBreakStatement {
+          yield_break_keyword;
+          yield_break_break;
+          yield_break_semicolon;
         }
       | (SyntaxKind.ThrowStatement, [
           throw_keyword;
@@ -9146,6 +9185,19 @@ module WithToken(Token: TokenType) = struct
           return_keyword;
           return_expression;
           return_semicolon;
+        } in
+        let value = ValueBuilder.value_from_syntax syntax in
+        make syntax value
+
+      let make_yield_break_statement
+        yield_break_keyword
+        yield_break_break
+        yield_break_semicolon
+      =
+        let syntax = YieldBreakStatement {
+          yield_break_keyword;
+          yield_break_break;
+          yield_break_semicolon;
         } in
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value

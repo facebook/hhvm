@@ -1655,17 +1655,9 @@ where
     fn parse_yield_expression(&mut self) -> S::R {
         // SPEC:
         // yield  array-element-initializer
-        // TODO: Hack allows "yield break".
-        // TODO: Should this be its own production, or can it be a yield expression?
-        // TODO: Is this an expression or a statement?
-        // TODO: Add it to the specification.
         //
         let yield_kw = self.assert_token(TokenKind::Yield);
         match self.peek_token_kind() {
-            TokenKind::Break => {
-                let break_kw = self.assert_token(TokenKind::Break);
-                S!(make_yield_expression, self, yield_kw, break_kw)
-            }
             TokenKind::Semicolon => {
                 let missing = S!(make_missing, self, self.pos());
                 S!(make_yield_expression, self, yield_kw, missing)

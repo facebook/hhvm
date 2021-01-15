@@ -1338,6 +1338,13 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           return_semicolon = semi;
         } ->
       transform_keyword_expression_statement env kw expr semi
+    | Syntax.YieldBreakStatement
+        {
+          yield_break_keyword = kw;
+          yield_break_break = y;
+          yield_break_semicolon = semi;
+        } ->
+      Concat [t env kw; Space; t env y; t env semi]
     | Syntax.ThrowStatement
         { throw_keyword = kw; throw_expression = expr; throw_semicolon = semi }
       ->

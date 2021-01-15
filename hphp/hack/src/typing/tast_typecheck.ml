@@ -178,6 +178,7 @@ let rec check_stmt env (stmt : ETast.stmt) (gamma : gamma) : delta =
     let gamma2 = refine cond false gamma in
     let delta2 = check_block env block2 gamma2 in
     union env delta1 delta2
+  | Yield_break
   | Do _
   | While _
   | For _

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<e28ff1dd978e8a394dbcfd56291cd0a4>>
+// @generated SignedSource<<1d400406262ab37e4821522308c20b01>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -29,6 +29,9 @@ impl<Ex, Fb, En, Hi> Stmt_<Ex, Fb, En, Hi> {
     }
     pub fn mk_return(p0: Option<Expr<Ex, Fb, En, Hi>>) -> Self {
         Stmt_::Return(Box::new(p0))
+    }
+    pub fn mk_yield_break() -> Self {
+        Stmt_::YieldBreak
     }
     pub fn mk_awaitall(
         p0: Vec<(Option<Lid>, Expr<Ex, Fb, En, Hi>)>,
@@ -122,6 +125,12 @@ impl<Ex, Fb, En, Hi> Stmt_<Ex, Fb, En, Hi> {
     pub fn is_return(&self) -> bool {
         match self {
             Stmt_::Return(..) => true,
+            _ => false,
+        }
+    }
+    pub fn is_yield_break(&self) -> bool {
+        match self {
+            Stmt_::YieldBreak => true,
             _ => false,
         }
     }
@@ -1005,9 +1014,6 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
     pub fn mk_yield(p0: Afield<Ex, Fb, En, Hi>) -> Self {
         Expr_::Yield(Box::new(p0))
     }
-    pub fn mk_yield_break() -> Self {
-        Expr_::YieldBreak
-    }
     pub fn mk_await(p0: Expr<Ex, Fb, En, Hi>) -> Self {
         Expr_::Await(Box::new(p0))
     }
@@ -1264,12 +1270,6 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
     pub fn is_yield(&self) -> bool {
         match self {
             Expr_::Yield(..) => true,
-            _ => false,
-        }
-    }
-    pub fn is_yield_break(&self) -> bool {
-        match self {
-            Expr_::YieldBreak => true,
             _ => false,
         }
     }

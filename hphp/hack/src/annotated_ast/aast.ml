@@ -81,6 +81,12 @@ and ('ex, 'fb, 'en, 'hi) stmt_ =
 
           return;
           return $foo; *)
+  | Yield_break
+      (** Yield break, terminating the current generator. This behaves like
+          return; but is more explicit, and ensures the function is treated
+          as a generator.
+
+          yield break; *)
   | Awaitall of
       (* Temporaries assigned when running awaits. *)
       (lid option * ('ex, 'fb, 'en, 'hi) expr) list
@@ -446,15 +452,6 @@ and ('ex, 'fb, 'en, 'hi) expr_ =
 
           yield $foo // enclosing function returns an Iterator
           yield $foo => $bar // enclosing function returns a KeyedIterator *)
-  | Yield_break
-      (** Yield break, terminating the current generator. This behaves like
-          return; but is more explicit, and ensures the function is treated
-          as a generator.
-
-          TODO: this is only permitted in a statement position, so it
-          should be in stmt.
-
-          yield break; *)
   | Await of ('ex, 'fb, 'en, 'hi) expr
       (** Await expression.
 

@@ -299,6 +299,9 @@ where S: SmartConstructors<State = State>,
     fn make_return_statement(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> Self::R {
         compose(SyntaxKind::ReturnStatement, self.s.make_return_statement(arg0.1, arg1.1, arg2.1))
     }
+    fn make_yield_break_statement(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> Self::R {
+        compose(SyntaxKind::YieldBreakStatement, self.s.make_yield_break_statement(arg0.1, arg1.1, arg2.1))
+    }
     fn make_throw_statement(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> Self::R {
         compose(SyntaxKind::ThrowStatement, self.s.make_throw_statement(arg0.1, arg1.1, arg2.1))
     }

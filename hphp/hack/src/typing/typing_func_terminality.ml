@@ -65,14 +65,10 @@ let static_meth_is_noreturn env ci meth_id =
       (get_static_meth (Typing_env.get_ctx env) class_name (snd meth_id))
   | None -> false
 
-let typed_expression_exits ((_, ty), e) =
-  match e with
-  | Yield_break -> true
-  | _ -> is_type_no_return (get_node ty)
+let typed_expression_exits ((_, ty), _e) = is_type_no_return (get_node ty)
 
 let expression_exits env (_, e) =
   match e with
-  | Yield_break -> true
   | Call ((_, Id (_, fun_name)), _, _, _) ->
     funopt_is_noreturn @@ get_fun (Typing_env.get_ctx env) fun_name
   | Call ((_, Class_const ((_, ci), meth_id)), _, _, _) ->

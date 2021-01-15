@@ -261,8 +261,17 @@ let parse_options () =
   let disallow_fun_and_cls_meth_pseudo_funcs = ref false in
   let use_direct_decl_parser = ref false in
   let enable_enum_classes = ref false in
+  let naming_table = ref None in
+  let root = ref None in
+  let sharedmem_config = ref SharedMem.default_config in
   let options =
     [
+      ( "--naming-table",
+        Arg.String (fun s -> naming_table := Some s),
+        "Naming table, to look up undefined symbols; needs --root" );
+      ( "--root",
+        Arg.String (fun s -> root := Some s),
+        "Root for where to look up undefined symbols; needs --naming-table" );
       ( "--ifc",
         Arg.Tuple [Arg.String (fun m -> ifc_mode := m); Arg.String set_ifc],
         " Run the flow analysis" );
@@ -315,7 +324,7 @@ let parse_options () =
       ("--lint", Arg.Unit (set_mode Lint), " Produce lint errors");
       ( "--no-builtins",
         Arg.Set no_builtins,
-        " Don't use builtins (e.g. ConstSet)" );
+        " Don't use builtins (e.g. ConstSet); implied by --root" );
       ( "--out-extension",
         Arg.String (fun s -> out_extension := s),
         "output file extension (default .out)" );
@@ -620,6 +629,39 @@ let parse_options () =
     | _ -> false
   in
 
+  (* --root implies certain things... *)
+  let root =
+    match !root with
+    | None -> Path.make "/" (* if none specified, we use this dummy *)
+    | Some root ->
+      if Option.is_none !naming_table then
+        failwith "--root needs --naming-table";
+      (* builtins are already provided by project at --root, so we shouldn't provide our own *)
+      no_builtins := true;
+      (* Following will throw an exception if .hhconfig not found *)
+      let (_config_hash, config) =
+        Config_file.parse_hhconfig
+          ~silent:true
+          (Filename.concat root Config_file.file_path_relative_to_repo_root)
+      in
+      (* We will pick up values from .hhconfig, unless they've been overridden at the command-line. *)
+      if Option.is_none !auto_namespace_map then
+        auto_namespace_map :=
+          SMap.find_opt "auto_namespace_map" config
+          |> Option.map ~f:ServerConfig.convert_auto_namespace_to_map;
+      if Option.is_none !allowed_fixme_codes_strict then
+        allowed_fixme_codes_strict :=
+          SMap.find_opt "allowed_fixme_codes_strict" config
+          |> Option.map ~f:comma_string_to_iset;
+      sharedmem_config :=
+        ServerConfig.make_sharedmem_config
+          config
+          (ServerArgs.default_options root)
+          ServerLocalConfig.default;
+      (* Path.make canonicalizes it, i.e. resolves symlinks *)
+      Path.make root
+  in
+
   let tcopt =
     GlobalOptions.make
       ?po_disable_array_typehint:(Some false)
@@ -768,7 +810,10 @@ let parse_options () =
       out_extension = !out_extension;
       verbosity = !verbosity;
     },
-    sienv )
+    sienv,
+    root,
+    !naming_table,
+    !sharedmem_config )
 
 (* Make readable test output *)
 let replace_color input =
@@ -1992,6 +2037,7 @@ let decl_and_run_mode
     }
     (popt : TypecheckerOptions.t)
     (hhi_root : Path.t)
+    (naming_table_path : string option)
     (sienv : SearchUtils.si_env) : unit =
   Ident.track_names := true;
   let builtins =
@@ -2090,6 +2136,8 @@ let decl_and_run_mode
       ~tcopt
       ~deps_mode:Typing_deps_mode.SQLiteMode
   in
+  ignore naming_table_path;
+  (* TODO(ljw): use naming_table_path *)
   let (errors, files_info) = parse_name_and_decl ctx to_decl in
   handle_mode
     mode
@@ -2108,20 +2156,27 @@ let decl_and_run_mode
     sienv
     ~verbosity
 
-let main_hack ({ tcopt; _ } as opts) (sienv : SearchUtils.si_env) : unit =
+let main_hack
+    ({ tcopt; _ } as opts)
+    (sienv : SearchUtils.si_env)
+    (root : Path.t)
+    (naming_table : string option)
+    (sharedmem_config : SharedMem.config) : unit =
   (* TODO: We should have a per file config *)
   Sys_utils.signal Sys.sigusr1 (Sys.Signal_handle Typing.debug_print_last_pos);
   EventLogger.init_fake ();
 
   let (_handle : SharedMem.handle) =
-    SharedMem.init ~num_workers:0 SharedMem.default_config
+    SharedMem.init ~num_workers:0 sharedmem_config
   in
   Tempfile.with_tempdir (fun hhi_root ->
       Hhi.set_hhi_root_for_unit_test hhi_root;
+      ignore root;
+      (* TODO(ljw): use root *)
       Relative_path.set_path_prefix Relative_path.Root (Path.make "/");
       Relative_path.set_path_prefix Relative_path.Hhi hhi_root;
       Relative_path.set_path_prefix Relative_path.Tmp (Path.make "tmp");
-      decl_and_run_mode opts tcopt hhi_root sienv;
+      decl_and_run_mode opts tcopt hhi_root naming_table sienv;
       TypingLogger.flush_buffers ())
 
 (* command line driver *)
@@ -2134,5 +2189,13 @@ let () =
        it breaks the testsuite where the output is compared to the
        expected one (i.e. in given file without CRLF). *)
     Out_channel.set_binary_mode stdout true;
-  let (options, sienv) = parse_options () in
-  Unix.handle_unix_error main_hack options sienv
+  let (options, sienv, root, naming_table, sharedmem_config) =
+    parse_options ()
+  in
+  Unix.handle_unix_error
+    main_hack
+    options
+    sienv
+    root
+    naming_table
+    sharedmem_config

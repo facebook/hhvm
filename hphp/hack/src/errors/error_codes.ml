@@ -677,7 +677,7 @@ module Typing = struct
     | ImplementsDynamic [@value 4402]
     | SubtypeCoeffects [@value 4403]
     | ImmutableLocal [@value 4404]
-    | EnumClassesReservedSyntax [@value 4405] (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
+    | EnumClassesReservedSyntax [@value 4405]
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum

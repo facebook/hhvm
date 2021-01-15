@@ -78,10 +78,6 @@ type enumname<T> = classname<BuiltinEnum<T>>;
 
 const enumname<arraykey> BUILTIN_ENUM = BuiltinEnum::class;
 
-/* Experimental section for Enum Classes. This is bound to evolve with
- * the HIP process.
- */
-
 /**
  * Wrapper for enum class
  */
@@ -91,16 +87,9 @@ newtype MemberOf<-TEnumClass, +TType> as TType = TType;
  * Base helper class for the enum class feature, if sane switch semantic is
  * needed.
  */
-final class EnumMember<-TPhantom, +T> {
-  /* TODO(T77095784) How to make it private ? */
-  public function __construct(private string $name, private T $data) {}
+final class SwitchableClass<+T> {
+  public function __construct(private T $data) {}
 
-  <<__Pure>>
-  public function name()[]: string {
-    return $this->name;
-  }
-
-  /* TODO(T77095784) ask if this can be inlined/optimized */
   <<__Pure>>
   public function data()[]: T {
     return $this->data;
@@ -110,7 +99,7 @@ final class EnumMember<-TPhantom, +T> {
 /**
  * BuiltinEnumClass contains the utility methods provided by enum classes.
  * Under the hood, an enum class Foo : Bar will extend
- * BuiltinEnumClass<HH\EnumMember<this, Bar>>.
+ * BuiltinEnumClass<HH\MemberOf<this, Bar>>.
  *
  * HHVM provides a native implementation for this class. The PHP class
  * definition below is not actually used at run time; it is simply

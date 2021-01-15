@@ -78,7 +78,7 @@ type enumname<T> = classname<BuiltinEnum<T>>;
 /**
  * BuiltinEnumClass contains the utility methods provided by enum classes.
  * Under the hood, an enum class Foo : Bar will extend
- * BuiltinEnumClass<HH\EnumMember<this, Bar>>.
+ * BuiltinEnumClass<HH\MemberOf<this, Bar>>.
  *
  * HHVM provides a native implementation for this class. The PHP class
  * definition below is not actually used at run time; it is simply

@@ -3554,6 +3554,11 @@ and et_splice env p e =
 (* End expression trees *)
 (*****************************************************************************)
 and type_capability env ctxs unsafe_ctxs default_pos =
+  (* No need to repeat the following check (saves time) for unsafe_ctx
+    because it's synthetic and well-kinded by construction *)
+  Option.iter ctxs ~f:(fun (_pos, hl) ->
+      List.iter hl (Typing_kinding.Simple.check_well_kinded_hint env));
+
   let cc = Decl_hint.aast_contexts_to_decl_capability in
   let (decl_pos, (env, cap_ty)) =
     match cc env.decl_env ctxs default_pos with

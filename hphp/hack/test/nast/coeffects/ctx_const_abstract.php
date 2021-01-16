@@ -1,7 +1,5 @@
 <?hh
 
-<<file: __EnableUnstableFeatures('coeffects_provisional')>>
-
 abstract class CWithConst {
   abstract const ctx C1; // bare abstract
   abstract const ctx C2 = [io]; // abstract with default

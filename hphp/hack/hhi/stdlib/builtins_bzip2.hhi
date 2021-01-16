@@ -8,8 +8,6 @@
  *
  */
 
-<<file: __EnableUnstableFeatures('coeffects_provisional')>>
-
 <<__PHPStdLib>>
 function bzclose(resource $bz);
 <<__PHPStdLib>>

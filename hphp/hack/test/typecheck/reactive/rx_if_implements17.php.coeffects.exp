@@ -1,7 +1,7 @@
-File "rx_if_implements17.php", line 15, characters 5-9:
+File "rx_if_implements17.php", line 13, characters 5-9:
 This object's property is being mutated (used as an lvalue)
 Setting non-mutable object properties requires the capability WriteProperty, which is not provided by the context. (Typing[4401])
-  File "rx_if_implements17.php", line 13, characters 32-33:
+  File "rx_if_implements17.php", line 11, characters 32-33:
   The local (enclosing) context provides the capability set {}
   File "coeffect/contexts.hhi", line 28, characters 1-23:
   Hack provides a list of supported contexts here

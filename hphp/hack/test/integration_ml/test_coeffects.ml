@@ -81,11 +81,10 @@ let identify_tests =
 let test () =
   let root = "/" in
   let hhconfig_filename = Filename.concat root ".hhconfig" in
-  let hhconfig_contents = "enable_coeffects_syntax = true" in
   let files = [("source.php", source)] in
 
   Relative_path.set_path_prefix Relative_path.Root (Path.make root);
-  TestDisk.set hhconfig_filename hhconfig_contents;
+  TestDisk.set hhconfig_filename "";
   let hhconfig_path =
     Relative_path.create Relative_path.Root hhconfig_filename
   in

@@ -1,8 +1,8 @@
-File "mutable_as_hint3.php", line 19, characters 5-28:
+File "mutable_as_hint3.php", line 17, characters 5-28:
 Invalid argument (Typing[4263])
-  File "mutable_as_hint3.php", line 11, characters 33-33:
+  File "mutable_as_hint3.php", line 9, characters 33-33:
   Incompatible mutabilities:
-  File "mutable_as_hint3.php", line 11, characters 33-33:
+  File "mutable_as_hint3.php", line 9, characters 33-33:
   This parameter is mutable
-  File "mutable_as_hint3.php", line 19, characters 16-17:
+  File "mutable_as_hint3.php", line 17, characters 16-17:
   This parameter is immutable

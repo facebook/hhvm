@@ -1,6 +1,4 @@
 <?hh // strict
-<<file: __EnableUnstableFeatures('coeffects_provisional')>>
-
 class MyClass {
   <<__Pure>>
   final public static function bar(): bool { return true; }

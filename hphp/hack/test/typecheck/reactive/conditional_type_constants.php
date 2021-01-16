@@ -1,5 +1,4 @@
 <?hh
-<<file: __EnableUnstableFeatures('coeffects_provisional')>>
 class MyConditionalClassBase {}
 class MyConditionalClass extends MyConditionalClassBase {}
 class MyRxConditionalClass extends MyConditionalClassBase {}

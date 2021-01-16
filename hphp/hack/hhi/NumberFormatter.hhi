@@ -8,8 +8,6 @@
  *
  */
 
-<<file: __EnableUnstableFeatures('coeffects_provisional')>>
-
 class NumberFormatter {
 
   const PATTERN_DECIMAL                    = 0 ;

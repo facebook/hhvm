@@ -1,6 +1,4 @@
 <?hh //strict
-<<file: __EnableUnstableFeatures('coeffects_provisional')>>
-
 function normal(string $s): int {
   return 1;
 }

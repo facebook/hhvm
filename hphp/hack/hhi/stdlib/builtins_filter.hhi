@@ -8,8 +8,6 @@
 *
 */
 
-<<file: __EnableUnstableFeatures('coeffects_provisional')>>
-
 const int FILTER_FLAG_NONE = 0;
 const int FILTER_REQUIRE_SCALAR = 0;
 const int FILTER_REQUIRE_ARRAY = 0;

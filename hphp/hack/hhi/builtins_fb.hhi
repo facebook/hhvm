@@ -1,7 +1,5 @@
 <?hh   /* -*- php -*- */
 
-<<file: __EnableUnstableFeatures('coeffects_provisional')>>
-
 namespace {
 const FB_UNSERIALIZE_NONSTRING_VALUE = 0;
 const FB_UNSERIALIZE_UNEXPECTED_END = 0;

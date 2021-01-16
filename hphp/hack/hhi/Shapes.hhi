@@ -8,8 +8,6 @@
  *
  */
 
-<<file: __EnableUnstableFeatures('coeffects_provisional')>>
-
 namespace HH {
 
 abstract final class Shapes {

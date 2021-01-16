@@ -1,6 +1,4 @@
 <?hh // strict
-<<file: __EnableUnstableFeatures('coeffects_provisional')>>
-
 class GlobalClassName {
   public static int $x = 0;
 

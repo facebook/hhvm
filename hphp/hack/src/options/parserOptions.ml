@@ -137,11 +137,6 @@ let disallow_fun_and_cls_meth_pseudo_funcs =
 let with_disallow_fun_and_cls_meth_pseudo_funcs po b =
   { po with GlobalOptions.po_disallow_fun_and_cls_meth_pseudo_funcs = b }
 
-let with_enable_coeffects po b =
-  { po with GlobalOptions.po_enable_coeffects = b }
-
-let enable_coeffects = GlobalOptions.po_enable_coeffects
-
 let make
     ~auto_namespace_map
     ~codegen
@@ -169,8 +164,7 @@ let make
     ~disable_array
     ~disable_array_typehint
     ~disallow_hash_comments
-    ~disallow_fun_and_cls_meth_pseudo_funcs
-    ~enable_coeffects =
+    ~disallow_fun_and_cls_meth_pseudo_funcs =
   GlobalOptions.
     {
       default with
@@ -202,13 +196,11 @@ let make
       po_disallow_hash_comments = disallow_hash_comments;
       po_disallow_fun_and_cls_meth_pseudo_funcs =
         disallow_fun_and_cls_meth_pseudo_funcs;
-      po_enable_coeffects = enable_coeffects;
     }
 
 (* Changes here need to be synchronized with rust_parser_errors_ffi.rs *)
 type ffi_t =
   bool
-  * bool
   * bool
   * bool
   * bool
@@ -251,5 +243,4 @@ let to_rust_ffi_t po ~hhvm_compat_mode ~hhi_mode ~codegen =
     disable_array_typehint po,
     allow_unstable_features po,
     disallow_hash_comments po,
-    disallow_fun_and_cls_meth_pseudo_funcs po,
-    enable_coeffects po )
+    disallow_fun_and_cls_meth_pseudo_funcs po )

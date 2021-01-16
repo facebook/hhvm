@@ -1,4 +1,4 @@
-File "parse_missing_reactivity3.php", line 5, characters 3-22:
+File "parse_missing_reactivity3.php", line 3, characters 3-22:
 `__OnlyRxIfImpl` and `__AtMostRxAsArgs` annotations cannot be used without `__Pure`, `__Rx`, `__RxShallow`, or `__RxLocal`. (Parsing[1002])
-File "parse_missing_reactivity3.php", line 5, characters 5-20:
+File "parse_missing_reactivity3.php", line 3, characters 5-20:
 Function or method annotated with `<<__AtMostRxAsArgs>>` attribute should have at least one parameter with `<<__AtMostRxAsFunc>>` or `<<__OnlyRxIfImpl>>` annotations. (NastCheck[3064])

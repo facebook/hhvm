@@ -1,6 +1,4 @@
 <?hh
-<<file: __EnableUnstableFeatures('coeffects_provisional')>>
-
 interface Rx {
   <<__Rx>>
   public function foo(): this;

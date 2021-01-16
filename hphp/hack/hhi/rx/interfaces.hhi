@@ -8,8 +8,6 @@
  *
  */
 
-<<file: __EnableUnstableFeatures('coeffects_provisional')>>
-
 /**
  * This file provides type information for some of hack's reactive interfaces
  *

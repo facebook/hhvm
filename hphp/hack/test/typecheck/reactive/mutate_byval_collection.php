@@ -1,5 +1,4 @@
 <?hh // strict
-<<file: __EnableUnstableFeatures('coeffects_provisional')>>
 <<__RxLocal>>
 function test_function1(darray<string, mixed> $arr): void {
   // OK

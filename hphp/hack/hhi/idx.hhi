@@ -8,8 +8,6 @@
  *
  */
 
-<<file: __EnableUnstableFeatures('coeffects_provisional')>>
-
 namespace HH {
 
 // NB: the typechecker relies on the exact format of this signature and rewrites

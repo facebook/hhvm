@@ -1,6 +1,4 @@
 <?hh
-<<file: __EnableUnstableFeatures('coeffects_provisional')>>
-
 interface PureIterator {
   abstract const ctx Tc super [];
 }

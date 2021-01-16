@@ -1,5 +1,4 @@
 <?hh // strict
-<<file: __EnableUnstableFeatures('coeffects_provisional')>>
 <<__Rx>>
 function test(): Rx<(function(): int)> {
   $x = <<__Rx>> function() {

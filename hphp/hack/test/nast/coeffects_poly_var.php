@@ -1,7 +1,5 @@
 <?hh
 
-<<file: __EnableUnstableFeatures('coeffects_provisional')>>
-
 function poly<Texplicit as D>(
   C $change, // Type hint replaced with T$change
   ?C $nchange, // Type hint replaced with ?T$nchange

@@ -1,4 +1,4 @@
-File "rx_mutable7.php", line 21, characters 3-7:
+File "rx_mutable7.php", line 19, characters 3-7:
 Cannot call mutable function on immutable expression (Typing[4214])
-  File "rx_mutable7.php", line 7, characters 19-19:
+  File "rx_mutable7.php", line 5, characters 19-19:
   This function is marked `<<__Mutable>>`, so it has a mutable `$this`.

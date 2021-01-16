@@ -8,8 +8,6 @@
  *
  */
 
-<<file: __EnableUnstableFeatures('coeffects_provisional')>>
-
 interface Reflector {
   <<__Pure, __MaybeMutable>>
   public function __toString()[];

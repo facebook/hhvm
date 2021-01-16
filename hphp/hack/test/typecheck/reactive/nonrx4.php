@@ -1,6 +1,4 @@
 <?hh
-<<file: __EnableUnstableFeatures('coeffects_provisional')>>
-
 // OK
 async function f(): Awaitable<void> {
   $a = <<__NonRx>>() ==> 1;

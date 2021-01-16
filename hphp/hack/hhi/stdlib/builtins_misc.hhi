@@ -8,8 +8,6 @@
  *
  */
 
-<<file: __EnableUnstableFeatures('coeffects_provisional')>>
-
 namespace HH {
 function server_warmup_status(): string;
 function execution_context(): string;

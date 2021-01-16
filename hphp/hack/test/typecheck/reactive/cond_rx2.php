@@ -1,6 +1,4 @@
 <?hh
-<<file: __EnableUnstableFeatures('coeffects_provisional')>>
-
 class Foo {}
 <<__RxShallow>>
 function some_third_func(<<__OwnedMutable>>Foo $foo, bool $cond): void {

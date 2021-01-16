@@ -1,6 +1,4 @@
 <?hh
-<<file: __EnableUnstableFeatures('coeffects_provisional')>>
-
 <<__Pure>>
 async function gen_int(int $x = 0)[]: Awaitable<int> { return 0; }
 

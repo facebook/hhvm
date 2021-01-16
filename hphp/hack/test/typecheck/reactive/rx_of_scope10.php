@@ -1,6 +1,4 @@
 <?hh
-<<file: __EnableUnstableFeatures('coeffects_provisional')>>
-
 class A {
   <<__RxLocal>>
   public function f(int $a): void {

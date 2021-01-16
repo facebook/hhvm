@@ -1,4 +1,4 @@
-File "test_rx_enabled3.php", line 6, characters 3-9:
+File "test_rx_enabled3.php", line 4, characters 3-9:
 Reactive functions can only call other reactive functions. (Typing[4200])
-  File "test_rx_enabled3.php", line 13, characters 10-14:
+  File "test_rx_enabled3.php", line 11, characters 10-14:
   This function is normal.

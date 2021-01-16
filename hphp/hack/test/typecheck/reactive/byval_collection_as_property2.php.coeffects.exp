@@ -1,7 +1,7 @@
-File "byval_collection_as_property2.php", line 10, characters 7-27:
+File "byval_collection_as_property2.php", line 9, characters 7-27:
 This object's property is being mutated (used as an lvalue)
 Setting non-mutable object properties requires the capability WriteProperty, which is not provided by the context. (Typing[4401])
-  File "byval_collection_as_property2.php", line 7, characters 47-48:
+  File "byval_collection_as_property2.php", line 6, characters 47-48:
   The local (enclosing) context provides the capability set {}
   File "coeffect/contexts.hhi", line 28, characters 1-23:
   Hack provides a list of supported contexts here

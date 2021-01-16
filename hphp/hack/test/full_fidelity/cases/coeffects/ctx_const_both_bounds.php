@@ -1,6 +1,4 @@
 <?hh
-<<file: __EnableUnstableFeatures('coeffects_provisional')>>
-
 abstract class AtLeastRxShallowButImpureIterator {
   abstract const ctx C super [rx_shallow] as [rx] = [rx];
 

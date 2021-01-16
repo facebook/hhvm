@@ -117,7 +117,6 @@ type t = {
   po_disallow_hash_comments: bool;
   po_disallow_fun_and_cls_meth_pseudo_funcs: bool;
   tco_use_direct_decl_parser: bool;
-  po_enable_coeffects: bool;
   tco_ifc_enabled: string list;
   tco_enable_enum_classes: bool;
 }
@@ -298,7 +297,6 @@ let default =
     po_disallow_hash_comments = false;
     po_disallow_fun_and_cls_meth_pseudo_funcs = false;
     tco_use_direct_decl_parser = false;
-    po_enable_coeffects = false;
     tco_ifc_enabled = [];
     tco_enable_enum_classes = false;
   }
@@ -431,7 +429,6 @@ let make
     ?(po_disallow_fun_and_cls_meth_pseudo_funcs =
       default.po_disallow_fun_and_cls_meth_pseudo_funcs)
     ?(tco_use_direct_decl_parser = default.tco_use_direct_decl_parser)
-    ?(po_enable_coeffects = default.po_enable_coeffects)
     ?(tco_ifc_enabled = default.tco_ifc_enabled)
     ?(tco_enable_enum_classes = default.tco_enable_enum_classes)
     () =
@@ -545,7 +542,6 @@ let make
     po_disallow_hash_comments;
     po_disallow_fun_and_cls_meth_pseudo_funcs;
     tco_use_direct_decl_parser;
-    po_enable_coeffects;
     tco_ifc_enabled;
     tco_enable_enum_classes;
   }
@@ -766,8 +762,6 @@ let po_disable_xhp_children_declarations t =
   t.po_disable_xhp_children_declarations
 
 let po_enable_enum_classes t = t.po_enable_enum_classes
-
-let po_enable_coeffects t = t.po_enable_coeffects
 
 let po_disable_modes t = t.po_disable_modes
 

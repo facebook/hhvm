@@ -1,6 +1,4 @@
 <?hh
-<<file: __EnableUnstableFeatures('coeffects_provisional')>>
-
 // OK
 <<__Rx>>
 function f(<<__OwnedMutable>> A $a): void {

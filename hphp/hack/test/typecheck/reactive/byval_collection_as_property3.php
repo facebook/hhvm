@@ -1,5 +1,4 @@
 <?hh // strict
-<<file: __EnableUnstableFeatures('coeffects_provisional')>>
 class A {
   protected darray<string, varray<int>> $events = darray[];
 

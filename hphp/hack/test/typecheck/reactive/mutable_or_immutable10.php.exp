@@ -1,4 +1,4 @@
-File "mutable_or_immutable10.php", line 16, characters 10-14:
+File "mutable_or_immutable10.php", line 14, characters 10-14:
 Cannot call mutable function on maybe mutable value. (Typing[4262])
-  File "mutable_or_immutable10.php", line 8, characters 19-19:
+  File "mutable_or_immutable10.php", line 6, characters 19-19:
   This function is not marked as `<<__MaybeMutable>>`.

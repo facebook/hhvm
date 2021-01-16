@@ -1,6 +1,6 @@
-File "mayberx11.php", line 12, characters 19-20:
+File "mayberx11.php", line 10, characters 19-20:
 Invalid argument (Typing[4203])
-  File "mayberx11.php", line 5, characters 19-39:
+  File "mayberx11.php", line 3, characters 19-39:
   This function is reactive.
-  File "mayberx11.php", line 10, characters 39-55:
+  File "mayberx11.php", line 8, characters 39-55:
   This function is normal.

@@ -1,6 +1,4 @@
 <?hh
-<<file: __EnableUnstableFeatures('coeffects_provisional')>>
-
 interface IRxSomeBaseClass {}
 class SomeBaseClass {
   <<__Rx, __OnlyRxIfImpl(IRxSomeBaseClass::class)>>

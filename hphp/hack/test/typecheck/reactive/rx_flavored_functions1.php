@@ -1,6 +1,4 @@
 <?hh // strict
-<<file: __EnableUnstableFeatures('coeffects_provisional')>>
-
 <<__RxShallow>>
 function f1(RxShallow<(function(): int)> $f): int {
   // OK

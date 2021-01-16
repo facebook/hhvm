@@ -2,23 +2,23 @@ File "typing.extends5.bad.php", line 25, characters 12-12:
 Class `F` does not correctly implement all required members  (Typing[4340])
   File "typing.extends5.bad.php", line 25, characters 29-38:
   Some members are incompatible with those declared in type `NormalEnum`
-  File "BuiltinEnum.hhi", line 117, characters 32-40:
+  File "BuiltinEnum.hhi", line 115, characters 32-40:
   The method `getValues` is not compatible with the overridden method
   File "typing.extends5.bad.php", line 21, characters 6-15:
   Expected `NormalEnum`
-  File "BuiltinEnum.hhi", line 36, characters 62-62:
+  File "BuiltinEnum.hhi", line 34, characters 62-62:
     via this generic `T`
   File "typing.extends5.bad.php", line 25, characters 15-19:
   But got `ExBox`
-  File "BuiltinEnum.hhi", line 84, characters 42-46:
+  File "BuiltinEnum.hhi", line 82, characters 42-46:
     via this generic `TType`
 File "typing.extends5.bad.php", line 25, characters 12-12:
 Class `F` does not correctly implement all required members  (Typing[4340])
   File "typing.extends5.bad.php", line 25, characters 29-38:
   Some members are incompatible with those declared in type `NormalEnum`
-  File "BuiltinEnum.hhi", line 117, characters 32-40:
+  File "BuiltinEnum.hhi", line 115, characters 32-40:
   You cannot override this method
-  File "BuiltinEnum.hhi", line 36, characters 32-40:
+  File "BuiltinEnum.hhi", line 34, characters 32-40:
   It was declared as final
 File "typing.extends5.bad.php", line 25, characters 12-12:
 Enum F includes enum NormalEnum but their base types are incompatible (Typing[4388])

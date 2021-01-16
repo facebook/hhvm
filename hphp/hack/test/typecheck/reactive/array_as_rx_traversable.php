@@ -1,6 +1,4 @@
 <?hh // strict
-<<file: __EnableUnstableFeatures('coeffects_provisional')>>
-
 <<__Rx>>
 function f1(\HH\Rx\Traversable<int> $coll): void {
 }

@@ -1,8 +1,8 @@
-File "owned_mutable12.php", line 13, characters 19-19:
+File "owned_mutable12.php", line 11, characters 19-19:
 The method `f` is not compatible with the overridden method (Typing[4341])
-  File "owned_mutable12.php", line 6, characters 37-38:
+  File "owned_mutable12.php", line 4, characters 37-38:
   Incompatible mutabilities:
-  File "owned_mutable12.php", line 6, characters 37-38:
+  File "owned_mutable12.php", line 4, characters 37-38:
   This parameter is mutable
-  File "owned_mutable12.php", line 13, characters 42-43:
+  File "owned_mutable12.php", line 11, characters 42-43:
   This parameter is owned mutable

@@ -1,5 +1,4 @@
 <?hh
-<<file: __EnableUnstableFeatures('coeffects_provisional')>>
 final class TestMutableReturn {
 
   <<__RxShallow, __MutableReturn>>

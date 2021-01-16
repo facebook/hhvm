@@ -79,7 +79,6 @@ enum UnstableFeatures {
     UnionIntersectionTypeHints,
     ClassLevelWhere,
     ExpressionTrees,
-    CoeffectsProvisional,
     EnumSupertyping,
     EnumAtom,
     IFC,
@@ -435,7 +434,6 @@ where
                 parser_options.tco_union_intersection_type_hints
             }
             UnstableFeatures::ClassLevelWhere => parser_options.po_enable_class_level_where_clauses,
-            UnstableFeatures::CoeffectsProvisional => parser_options.po_enable_coeffects,
             UnstableFeatures::IFC => {
                 let file_path = format!("/{}", self.env.text.source_text().file_path().path_str());
                 parser_options
@@ -5625,9 +5623,6 @@ where
         match &node.children {
             UnionTypeSpecifier(_) | IntersectionTypeSpecifier(_) => {
                 self.check_can_use_feature(node, &UnstableFeatures::UnionIntersectionTypeHints)
-            }
-            Contexts(_) => {
-                self.check_can_use_feature(node, &UnstableFeatures::CoeffectsProvisional)
             }
             ClassishDeclaration(x) => match &x.where_clause.children {
                 WhereClause(_) => {

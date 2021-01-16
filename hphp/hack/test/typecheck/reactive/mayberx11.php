@@ -1,6 +1,4 @@
 <?hh // strict
-<<file: __EnableUnstableFeatures('coeffects_provisional')>>
-
 <<__RxLocal>>
 function mayberx1(Rx<(function(): int)> $a): int {
   return $a() + 1;

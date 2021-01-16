@@ -289,7 +289,6 @@ type t = {
   po_disallow_fun_and_cls_meth_pseudo_funcs: bool;
   (* Enable use of the direct decl parser for parsing type signatures. *)
   tco_use_direct_decl_parser: bool;
-  po_enable_coeffects: bool;
   (* Enable ifc on the specified list of path prefixes
     (a list containing the empty string would denote all files,
     an empty list denotes no files) *)
@@ -408,7 +407,6 @@ val make :
   ?po_disallow_hash_comments:bool ->
   ?po_disallow_fun_and_cls_meth_pseudo_funcs:bool ->
   ?tco_use_direct_decl_parser:bool ->
-  ?po_enable_coeffects:bool ->
   ?tco_ifc_enabled:string list ->
   ?tco_enable_enum_classes:bool ->
   unit ->
@@ -635,8 +633,6 @@ val po_disable_xhp_element_mangling : t -> bool
 val po_disable_xhp_children_declarations : t -> bool
 
 val po_enable_enum_classes : t -> bool
-
-val po_enable_coeffects : t -> bool
 
 val po_disable_modes : t -> bool
 

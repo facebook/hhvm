@@ -1,6 +1,4 @@
 <?hh
-<<file: __EnableUnstableFeatures('coeffects_provisional')>>
-
 // OK
 <<__NonRx("never rx")>>
 function f(): void {

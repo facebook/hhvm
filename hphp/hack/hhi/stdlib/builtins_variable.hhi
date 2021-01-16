@@ -8,8 +8,6 @@
  *
  */
 
-<<file: __EnableUnstableFeatures('coeffects_provisional')>>
-
 namespace {
 <<__PHPStdLib, __Pure>>
 function is_bool($var)[]: bool;

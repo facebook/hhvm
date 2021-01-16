@@ -1,5 +1,4 @@
 <?hh // strict
-<<file: __EnableUnstableFeatures('coeffects_provisional')>>
 interface A {
   <<__Rx, __Mutable>>
   public function f(): void;

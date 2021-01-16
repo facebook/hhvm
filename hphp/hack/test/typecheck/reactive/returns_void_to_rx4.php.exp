@@ -1,6 +1,6 @@
-File "returns_void_to_rx4.php", line 13, characters 19-19:
+File "returns_void_to_rx4.php", line 12, characters 19-19:
 The method `f` is not compatible with the overridden method (Typing[4341])
-  File "returns_void_to_rx4.php", line 13, characters 19-19:
+  File "returns_void_to_rx4.php", line 12, characters 19-19:
   This is marked `<<__ReturnsVoidToRx>>`.
-  File "returns_void_to_rx4.php", line 5, characters 19-19:
+  File "returns_void_to_rx4.php", line 4, characters 19-19:
   This is not marked `<<__ReturnsVoidToRx>>`.

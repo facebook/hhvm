@@ -1,6 +1,6 @@
-File "parse_multiple8.php", line 4, characters 1-14:
+File "parse_multiple8.php", line 2, characters 1-14:
 Only one of following annotations is allowed: `__Pure`, `__Rx`, `__RxShallow`, `__RxLocal`, `__NonRx`, `__Cipp`, `__CippLocal`, `__CippGlobal`. (Parsing[1002])
-File "parse_multiple8.php", line 4, characters 9-12:
+File "parse_multiple8.php", line 2, characters 9-12:
 You cannot reuse the attribute `__Rx` (Naming[2062])
-  File "parse_multiple8.php", line 4, characters 3-6:
+  File "parse_multiple8.php", line 2, characters 3-6:
   `__Rx` was already used here

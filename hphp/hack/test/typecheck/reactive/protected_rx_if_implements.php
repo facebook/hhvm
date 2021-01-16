@@ -1,6 +1,4 @@
 <?hh // strict
-<<file: __EnableUnstableFeatures('coeffects_provisional')>>
-
 interface Rx {
   <<__Rx>>
   protected function f(): int;

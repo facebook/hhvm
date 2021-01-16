@@ -1,6 +1,4 @@
 <?hh // strict
-<<file: __EnableUnstableFeatures('coeffects_provisional')>>
-
 interface IRxMyParent {
   <<__Rx, __MutableReturn>>
   public function foo(): Foo;

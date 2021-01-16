@@ -14,8 +14,6 @@
  * YOU SHOULD NEVER INCLUDE THIS FILE ANYWHERE!!!
  */
 
-<<file: __EnableUnstableFeatures('coeffects_provisional')>>
-
 namespace {
 
 final class Generator<+Tk, +Tv, -Ts> implements KeyedIterator<Tk, Tv> {

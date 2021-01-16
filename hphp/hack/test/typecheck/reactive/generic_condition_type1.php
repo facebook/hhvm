@@ -1,6 +1,4 @@
 <?hh // strict
-<<file: __EnableUnstableFeatures('coeffects_provisional')>>
-
 interface IRxMyParent<T> {
   <<__Rx>>
   public function foo(T $a): void;

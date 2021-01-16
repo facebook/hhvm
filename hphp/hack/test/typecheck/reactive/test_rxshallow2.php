@@ -1,6 +1,4 @@
 <?hh //strict
-<<file: __EnableUnstableFeatures('coeffects_provisional')>>
-
 function nonrx(): int {
   return 1;
 }

@@ -1,6 +1,4 @@
 <?hh // strict
-<<file: __EnableUnstableFeatures('coeffects_provisional')>>
-
 interface Rx1 {
   <<__RxShallow>>
   protected function get(): int;

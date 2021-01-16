@@ -8,8 +8,6 @@
  *
  */
 
-<<file: __EnableUnstableFeatures('coeffects_provisional')>>
-
 <<__PHPStdLib, __Pure>>
 function lz4_compress(string $uncompressed, bool $high = false)[]: mixed;
 <<__PHPStdLib, __Pure>>

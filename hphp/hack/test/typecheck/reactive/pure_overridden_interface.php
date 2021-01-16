@@ -1,6 +1,4 @@
 <?hh
-<<file: __EnableUnstableFeatures('coeffects_provisional')>>
-
 interface IPure {
   <<__Pure>>
   public function pure(): void;

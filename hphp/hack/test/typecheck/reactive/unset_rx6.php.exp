@@ -1,2 +1,2 @@
-File "unset_rx6.php", line 12, characters 9-18:
+File "unset_rx6.php", line 10, characters 9-18:
 Non-mutable argument for `unset` is not allowed in reactive functions. (Typing[4270])

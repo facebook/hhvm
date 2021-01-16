@@ -8,8 +8,6 @@
  *
  */
 
-<<file: __EnableUnstableFeatures('coeffects_provisional')>>
-
 const int DNS_A = 1;
 const int DNS_A6 = 16777216;
 const int DNS_AAAA = 134217728;

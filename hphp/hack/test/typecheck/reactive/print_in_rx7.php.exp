@@ -1,2 +1,2 @@
-File "print_in_rx7.php", line 10, characters 5-8:
+File "print_in_rx7.php", line 8, characters 5-8:
 `echo` or `print` are not allowed in reactive functions. (Typing[4226])

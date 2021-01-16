@@ -1,76 +1,64 @@
 [(Fun
-    { f_span = [5:1-8:28]; f_annotation = (); f_mode = Mstrict;
-      f_ret = ((), (Some ([8:21-25], (Hprim Tvoid))));
-      f_name = ([5:10-14], "\\poly");
+    { f_span = [3:1-6:28]; f_annotation = (); f_mode = Mstrict;
+      f_ret = ((), (Some ([6:21-25], (Hprim Tvoid))));
+      f_name = ([3:10-14], "\\poly");
       f_tparams =
-      [{ tp_variance = Invariant; tp_name = ([6:19-20], "Tctx$f");
+      [{ tp_variance = Invariant; tp_name = ([4:19-20], "Tctx$f");
          tp_parameters = []; tp_constraints = []; tp_reified = Erased;
          tp_user_attributes = [] };
-        { tp_variance = Invariant; tp_name = ([7:23-24], "Tctx$nf");
+        { tp_variance = Invariant; tp_name = ([5:23-24], "Tctx$nf");
           tp_parameters = []; tp_constraints = []; tp_reified = Erased;
           tp_user_attributes = [] }
         ];
       f_where_constraints = []; f_variadic = FVnonVariadic;
       f_params =
-      [{ param_annotation = [6:29-31];
+      [{ param_annotation = [4:29-31];
          param_type_hint =
          ((),
-          (Some ([6:3-28],
+          (Some ([4:3-28],
                  (Hfun
                     { hf_reactive_kind = FNonreactive;
-                      hf_param_tys = [([6:14-17], (Hprim Tint))];
+                      hf_param_tys = [([4:14-17], (Hprim Tint))];
                       hf_param_kinds = [None]; hf_param_mutability = [None];
                       hf_variadic_ty = None;
                       hf_ctxs =
-                      (Some ([6:18-21], [([6:19-20], (Hfun_context "$f"))]));
-                      hf_return_ty = ([6:23-27], (Hprim Tvoid));
+                      (Some ([4:18-21], [([4:19-20], (Hfun_context "$f"))]));
+                      hf_return_ty = ([4:23-27], (Hprim Tvoid));
                       hf_is_mutable_return = false }))));
-         param_is_variadic = false; param_pos = [6:29-31]; param_name = "$f";
+         param_is_variadic = false; param_pos = [4:29-31]; param_name = "$f";
          param_expr = None; param_callconv = None;
          param_user_attributes = []; param_visibility = None };
-        { param_annotation = [7:33-36];
+        { param_annotation = [5:33-36];
           param_type_hint =
           ((),
-           (Some ([7:3-32],
+           (Some ([5:3-32],
                   (Hoption
-                     ([7:4-32],
+                     ([5:4-32],
                       (Hfun
                          { hf_reactive_kind = FNonreactive;
-                           hf_param_tys = [([7:15-21], (Hprim Tstring))];
+                           hf_param_tys = [([5:15-21], (Hprim Tstring))];
                            hf_param_kinds = [None];
                            hf_param_mutability = [None];
                            hf_variadic_ty = None;
                            hf_ctxs =
-                           (Some ([7:22-25],
-                                  [([7:23-24], (Hfun_context "$nf"))]));
-                           hf_return_ty = ([7:27-31], (Hprim Tbool));
+                           (Some ([5:22-25],
+                                  [([5:23-24], (Hfun_context "$nf"))]));
+                           hf_return_ty = ([5:27-31], (Hprim Tbool));
                            hf_is_mutable_return = false }))))));
-          param_is_variadic = false; param_pos = [7:33-36];
+          param_is_variadic = false; param_pos = [5:33-36];
           param_name = "$nf"; param_expr = None; param_callconv = None;
           param_user_attributes = []; param_visibility = None }
         ];
       f_ctxs =
-      (Some ([8:2-19],
-             [([8:3-9], (Hfun_context "$f"));
-               ([8:11-18], (Hfun_context "$nf"))]));
+      (Some ([6:2-19],
+             [([6:3-9], (Hfun_context "$f"));
+               ([6:11-18], (Hfun_context "$nf"))]));
       f_unsafe_ctxs =
-      (Some ([8:2-19],
-             [([8:3-9], (Hfun_context "$f"));
-               ([8:11-18], (Hfun_context "$nf"))]));
+      (Some ([6:2-19],
+             [([6:3-9], (Hfun_context "$f"));
+               ([6:11-18], (Hfun_context "$nf"))]));
       f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = Named };
-      f_fun_kind = FSync; f_user_attributes = [];
-      f_file_attributes =
-      [{ fa_user_attributes =
-         [{ ua_name = ([3:9-33], "__EnableUnstableFeatures");
-            ua_params = [([3:34-57], (String "coeffects_provisional"))] }
-           ];
-         fa_namespace =
-         { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
-           ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;
-           ns_const_uses = <opaque>; ns_name = None; ns_auto_ns_map = [];
-           ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
-         }
-        ];
+      f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
       f_external = false;
       f_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;

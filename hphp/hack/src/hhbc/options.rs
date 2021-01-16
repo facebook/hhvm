@@ -272,7 +272,6 @@ prefixed_flags!(
     DISABLE_ARRAY_TYPEHINT,
     DISABLE_ARRAY,
     RUST_EMITTER,
-    ENABLE_COEFFECTS,
 );
 impl Default for LangFlags {
     fn default() -> LangFlags {
@@ -743,9 +742,6 @@ mod tests {
   "hhvm.hack.lang.enable_class_level_where_clauses": {
     "global_value": false
   },
-  "hhvm.hack.lang.enable_coeffects": {
-    "global_value": false
-  },
   "hhvm.hack.lang.enable_coroutines": {
     "global_value": true
   },
@@ -1179,6 +1175,5 @@ bitflags! {
         const DISALLOW_HASH_COMMENTS = 1 << 56;
         const DISALLOW_FUN_AND_CLS_METH_PSEUDO_FUNCS = 1 << 57;
         const FOLD_LAZY_CLASS_KEYS = 1 << 58;
-        const ENABLE_COEFFECTS = 1 << 59;
     }
 }

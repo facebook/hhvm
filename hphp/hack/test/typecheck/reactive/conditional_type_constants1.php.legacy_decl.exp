@@ -1,12 +1,12 @@
-File "conditional_type_constants1.php", line 40, characters 3-269:
+File "conditional_type_constants1.php", line 38, characters 3-269:
 There is an error somewhere in this definition. However the type checker reports that the error is elsewhere. This is a bug in the type checker. Please run `hh rage` and post the link in https://fb.workplace.com/groups/hackforhiphop/. (Typing[4352])
-  File "conditional_type_constants1.php", line 35, characters 45-51:
+  File "conditional_type_constants1.php", line 33, characters 45-51:
   An abstract type constant is not allowed in this position.
-  File "conditional_type_constants1.php", line 24, characters 23-29:
+  File "conditional_type_constants1.php", line 22, characters 23-29:
   `TLoader` is abstract here.
-File "conditional_type_constants1.php", line 42, characters 21-40:
+File "conditional_type_constants1.php", line 40, characters 21-40:
 Cannot invoke conditionally reactive function in reactive context, because at least one reactivity condition is not met. (Typing[4237])
-  File "conditional_type_constants1.php", line 42, characters 21-33:
+  File "conditional_type_constants1.php", line 40, characters 21-33:
   Receiver type must be a subtype of `\IRxValueLoader<_>`, now `this::TLoader#\IRxValueFactory::TLoader`.
-  File "conditional_type_constants1.php", line 9, characters 19-21:
+  File "conditional_type_constants1.php", line 7, characters 19-21:
   This is the function declaration

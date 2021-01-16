@@ -1,6 +1,4 @@
 <?hh
-<<file: __EnableUnstableFeatures('coeffects_provisional')>>
-
 interface I1 {
   <<__RxShallow>>
   public function f(): void;

@@ -1,6 +1,4 @@
 <?hh // strict
-<<file: __EnableUnstableFeatures('coeffects_provisional')>>
-
 class A {
   public ?bool $foo;
   <<__Rx, __Mutable, __ReturnsVoidToRx>>

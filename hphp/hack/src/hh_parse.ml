@@ -74,7 +74,6 @@ module FullFidelityParseArgs = struct
     enable_xhp_class_modifier: bool;
     disallow_hash_comments: bool;
     disallow_fun_and_cls_meth_pseudo_funcs: bool;
-    enable_coeffects: bool;
     ignore_missing_json: bool;
   }
 
@@ -116,7 +115,6 @@ module FullFidelityParseArgs = struct
       enable_xhp_class_modifier
       disallow_hash_comments
       disallow_fun_and_cls_meth_pseudo_funcs
-      enable_coeffects
       ignore_missing_json =
     {
       full_fidelity_json;
@@ -156,7 +154,6 @@ module FullFidelityParseArgs = struct
       enable_xhp_class_modifier;
       disallow_hash_comments;
       disallow_fun_and_cls_meth_pseudo_funcs;
-      enable_coeffects;
       ignore_missing_json;
     }
 
@@ -213,7 +210,6 @@ module FullFidelityParseArgs = struct
     let enable_xhp_class_modifier = ref false in
     let disallow_hash_comments = ref false in
     let disallow_fun_and_cls_meth_pseudo_funcs = ref false in
-    let enable_coeffects = ref false in
     let ignore_missing_json = ref false in
     let options =
       [
@@ -360,9 +356,6 @@ No errors are filtered out."
         ( "--disallow-fun-and-cls-meth-pseudo-funcs",
           Arg.Set disallow_fun_and_cls_meth_pseudo_funcs,
           "Disables parsing of fun() and class_meth()" );
-        ( "--enable-coeffects",
-          Arg.Set enable_coeffects,
-          "Allows parsing coeffect syntax" );
         ( "--ignore-missing-json",
           Arg.Set ignore_missing_json,
           "Ignore missing nodes in JSON ouput" );
@@ -423,7 +416,6 @@ No errors are filtered out."
       !enable_xhp_class_modifier
       !disallow_hash_comments
       !disallow_fun_and_cls_meth_pseudo_funcs
-      !enable_coeffects
       !ignore_missing_json
 end
 
@@ -520,7 +512,6 @@ let handle_existing_file args filename =
       popt
       args.disallow_fun_and_cls_meth_pseudo_funcs
   in
-  let popt = ParserOptions.with_enable_coeffects popt args.enable_coeffects in
   (* Parse with the full fidelity parser *)
   let file = Relative_path.create Relative_path.Dummy filename in
   let source_text = SourceText.from_file file in

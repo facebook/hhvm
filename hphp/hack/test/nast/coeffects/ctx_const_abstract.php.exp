@@ -1,26 +1,26 @@
 [(Class
-    { c_span = [5:1-11:2]; c_annotation = (); c_mode = Mstrict;
+    { c_span = [3:1-9:2]; c_annotation = (); c_mode = Mstrict;
       c_final = false; c_is_xhp = false; c_has_xhp_keyword = false;
-      c_kind = Cabstract; c_name = ([5:16-26], "\\CWithConst");
+      c_kind = Cabstract; c_name = ([3:16-26], "\\CWithConst");
       c_tparams = []; c_extends = []; c_uses = []; c_use_as_alias = [];
       c_insteadof_alias = []; c_xhp_attr_uses = []; c_xhp_category = None;
       c_reqs = []; c_implements = []; c_implements_dynamic = false;
       c_where_constraints = []; c_consts = [];
       c_typeconsts =
       [{ c_tconst_abstract = (TCAbstract None);
-         c_tconst_name = ([6:22-24], "C1"); c_tconst_constraint = None;
+         c_tconst_name = ([4:22-24], "C1"); c_tconst_constraint = None;
          c_tconst_type = None; c_tconst_user_attributes = [];
-         c_tconst_span = [6:3-25]; c_tconst_doc_comment = None;
+         c_tconst_span = [4:3-25]; c_tconst_doc_comment = None;
          c_tconst_is_ctx = true };
         { c_tconst_abstract =
           (TCAbstract
-             (Some ([7:27-31],
+             (Some ([5:27-31],
                     (Hintersection
-                       [([7:28-30],
-                         (Happly (([7:28-30], "\\HH\\Contexts\\io"), [])))]))));
-          c_tconst_name = ([7:22-24], "C2"); c_tconst_constraint = None;
+                       [([5:28-30],
+                         (Happly (([5:28-30], "\\HH\\Contexts\\io"), [])))]))));
+          c_tconst_name = ([5:22-24], "C2"); c_tconst_constraint = None;
           c_tconst_type = None; c_tconst_user_attributes = [];
-          c_tconst_span = [7:3-32]; c_tconst_doc_comment = None;
+          c_tconst_span = [5:3-32]; c_tconst_doc_comment = None;
           c_tconst_is_ctx = true }
         ];
       c_vars = []; c_methods = []; c_attributes = []; c_xhp_children = [];
@@ -30,18 +30,6 @@
         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;
         ns_const_uses = <opaque>; ns_name = None; ns_auto_ns_map = [];
         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      c_user_attributes = [];
-      c_file_attributes =
-      [{ fa_user_attributes =
-         [{ ua_name = ([3:9-33], "__EnableUnstableFeatures");
-            ua_params = [([3:34-57], (String "coeffects_provisional"))] }
-           ];
-         fa_namespace =
-         { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
-           ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;
-           ns_const_uses = <opaque>; ns_name = None; ns_auto_ns_map = [];
-           ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
-         }
-        ];
-      c_enum = None; c_doc_comment = None; c_emit_id = None })
+      c_user_attributes = []; c_file_attributes = []; c_enum = None;
+      c_doc_comment = None; c_emit_id = None })
   ]

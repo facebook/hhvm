@@ -1,6 +1,4 @@
 <?hh
-<<file: __EnableUnstableFeatures('coeffects_provisional')>>
-
 function anons_with_ctx_list(): void {
   $anon_no_use = function()[defaults]: int use () { return 0; };
 

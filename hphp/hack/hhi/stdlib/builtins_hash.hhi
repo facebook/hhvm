@@ -8,8 +8,6 @@
  *
  */
 
-<<file: __EnableUnstableFeatures('coeffects_provisional')>>
-
 <<__PHPStdLib>>
 function hash(string $algo, string $data, bool $raw_output = false);
 <<__PHPStdLib, __Pure>>

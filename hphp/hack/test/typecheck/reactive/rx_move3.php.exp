@@ -1,6 +1,6 @@
-File "rx_move3.php", line 10, characters 12-13:
+File "rx_move3.php", line 8, characters 12-13:
 Invalid argument (Typing[4260])
-  File "rx_move3.php", line 14, characters 33-34:
+  File "rx_move3.php", line 12, characters 33-34:
   This parameter is marked with `<<__OwnedMutable>>`
-  File "rx_move3.php", line 10, characters 12-13:
+  File "rx_move3.php", line 8, characters 12-13:
   Owned mutable locals used as argument should be passed via `Rx\move` function

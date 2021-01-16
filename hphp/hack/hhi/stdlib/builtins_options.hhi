@@ -8,8 +8,6 @@
  *
  */
 
-<<file: __EnableUnstableFeatures('coeffects_provisional')>>
-
 const int CLOCK_MONOTONIC = 1;
 const int CLOCK_PROCESS_CPUTIME_ID = 2;
 const int CLOCK_REALTIME = 0;

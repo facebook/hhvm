@@ -1,6 +1,4 @@
 <?hh // strict
-<<file: __EnableUnstableFeatures('coeffects_provisional')>>
-
 <<__RxLocal>>
 function rxlocal()[rx_local]: void {
   print 1; // ERROR

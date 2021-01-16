@@ -705,7 +705,6 @@ let parse_options () =
       ~tco_strict_contexts:!strict_contexts
       ~tco_coeffects:!call_coeffects
       ~tco_coeffects_local:!local_coeffects
-      ~po_enable_coeffects:true
       ~tco_like_casts:!like_casts
       ~tco_simple_pessimize:!simple_pessimize
       ~tco_complex_coercion:!complex_coercion

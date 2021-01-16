@@ -1,5 +1,4 @@
 <?hh // strict
-<<file: __EnableUnstableFeatures('coeffects_provisional')>>
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 interface IRx {

@@ -1,6 +1,4 @@
 <?hh
-<<file: __EnableUnstableFeatures('coeffects_provisional')>>
-
 <<__Rx, __AtMostRxAsArgs>>
 function my_test_function(
    <<__OnlyRxIfImpl(HH\Rx\Traversable::class)>> ?Traversable<mixed> $_

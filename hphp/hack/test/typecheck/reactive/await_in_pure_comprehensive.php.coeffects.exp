@@ -1,38 +1,38 @@
-File "await_in_pure_comprehensive.php", line 11, characters 45-59:
+File "await_in_pure_comprehensive.php", line 9, characters 45-59:
 `async` functions must have an `Awaitable` return type. (Parsing[1002])
-File "await_in_pure_comprehensive.php", line 12, characters 10-18:
+File "await_in_pure_comprehensive.php", line 10, characters 10-18:
 Not immediately `await`ing `Awaitable`-typed values requires the capability AccessStaticVariable, which is not provided by the context. (Typing[4401])
-  File "await_in_pure_comprehensive.php", line 11, characters 41-42:
+  File "await_in_pure_comprehensive.php", line 9, characters 41-42:
   The local (enclosing) context provides the capability set {}
   File "coeffect/contexts.hhi", line 28, characters 1-23:
   Hack provides a list of supported contexts here
-File "await_in_pure_comprehensive.php", line 41, characters 14-184:
+File "await_in_pure_comprehensive.php", line 39, characters 14-184:
 Not immediately `await`ing `Awaitable`-typed values requires the capability AccessStaticVariable, which is not provided by the context. (Typing[4401])
-  File "await_in_pure_comprehensive.php", line 29, characters 22-23:
+  File "await_in_pure_comprehensive.php", line 27, characters 22-23:
   The local (enclosing) context provides the capability set {}
   File "coeffect/contexts.hhi", line 28, characters 1-23:
   Hack provides a list of supported contexts here
-File "await_in_pure_comprehensive.php", line 48, characters 5-28:
+File "await_in_pure_comprehensive.php", line 46, characters 5-28:
 Not immediately `await`ing `Awaitable`-typed values requires the capability AccessStaticVariable, which is not provided by the context. (Typing[4401])
-  File "await_in_pure_comprehensive.php", line 29, characters 22-23:
+  File "await_in_pure_comprehensive.php", line 27, characters 22-23:
   The local (enclosing) context provides the capability set {}
   File "coeffect/contexts.hhi", line 28, characters 1-23:
   Hack provides a list of supported contexts here
-File "await_in_pure_comprehensive.php", line 48, characters 19-27:
+File "await_in_pure_comprehensive.php", line 46, characters 19-27:
 Not immediately `await`ing `Awaitable`-typed values requires the capability AccessStaticVariable, which is not provided by the context. (Typing[4401])
-  File "await_in_pure_comprehensive.php", line 29, characters 22-23:
+  File "await_in_pure_comprehensive.php", line 27, characters 22-23:
   The local (enclosing) context provides the capability set {}
   File "coeffect/contexts.hhi", line 28, characters 1-23:
   Hack provides a list of supported contexts here
-File "await_in_pure_comprehensive.php", line 49, characters 5-13:
+File "await_in_pure_comprehensive.php", line 47, characters 5-13:
 Not immediately `await`ing `Awaitable`-typed values requires the capability AccessStaticVariable, which is not provided by the context. (Typing[4401])
-  File "await_in_pure_comprehensive.php", line 29, characters 22-23:
+  File "await_in_pure_comprehensive.php", line 27, characters 22-23:
   The local (enclosing) context provides the capability set {}
   File "coeffect/contexts.hhi", line 28, characters 1-23:
   Hack provides a list of supported contexts here
-File "await_in_pure_comprehensive.php", line 60, characters 37-45:
+File "await_in_pure_comprehensive.php", line 58, characters 37-45:
 Not immediately `await`ing `Awaitable`-typed values requires the capability AccessStaticVariable, which is not provided by the context. (Typing[4401])
-  File "await_in_pure_comprehensive.php", line 29, characters 22-23:
+  File "await_in_pure_comprehensive.php", line 27, characters 22-23:
   The local (enclosing) context provides the capability set {}
   File "coeffect/contexts.hhi", line 28, characters 1-23:
   Hack provides a list of supported contexts here

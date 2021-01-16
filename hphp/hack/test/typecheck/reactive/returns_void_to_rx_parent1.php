@@ -1,6 +1,4 @@
 <?hh
-<<file: __EnableUnstableFeatures('coeffects_provisional')>>
-
 class Foo {
   <<__Rx, __ReturnsVoidToRx>>
   public function test(): this {

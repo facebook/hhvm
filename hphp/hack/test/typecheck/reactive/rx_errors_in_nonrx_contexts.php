@@ -1,5 +1,4 @@
 <?hh
-<<file: __EnableUnstableFeatures('coeffects_provisional')>>
 class A {
   public function __construct(public int $a) {}
 

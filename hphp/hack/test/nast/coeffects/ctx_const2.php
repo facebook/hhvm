@@ -1,6 +1,5 @@
 <?hh
 
-<<file: __EnableUnstableFeatures('coeffects_provisional')>>
 <<file: __EnableUnstableFeatures('union_intersection_types')>>
 
 class CWithConst {

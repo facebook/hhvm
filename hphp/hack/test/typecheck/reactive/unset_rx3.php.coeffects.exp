@@ -1,6 +1,6 @@
-File "unset_rx3.php", line 11, characters 9-13:
+File "unset_rx3.php", line 9, characters 9-13:
 Non-mutable argument for `unset` requires the capability WriteProperty, which is not provided by the context. (Typing[4401])
-  File "unset_rx3.php", line 9, characters 17-18:
+  File "unset_rx3.php", line 7, characters 17-18:
   The local (enclosing) context provides the capability set {}
   File "coeffect/contexts.hhi", line 28, characters 1-23:
   Hack provides a list of supported contexts here

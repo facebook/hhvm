@@ -1,5 +1,4 @@
 <?hh
-<<file: __EnableUnstableFeatures('coeffects_provisional')>>
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
 <<__Rx, __AtMostRxAsArgs>>

@@ -1,6 +1,6 @@
-File "mutable_args_to_ctor2.php", line 20, characters 15-16:
+File "mutable_args_to_ctor2.php", line 18, characters 15-16:
 Invalid argument (Typing[4215])
-  File "mutable_args_to_ctor2.php", line 12, characters 47-48:
+  File "mutable_args_to_ctor2.php", line 10, characters 47-48:
   This parameter is marked mutable
-  File "mutable_args_to_ctor2.php", line 20, characters 15-16:
+  File "mutable_args_to_ctor2.php", line 18, characters 15-16:
   But this expression is not

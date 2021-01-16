@@ -1,6 +1,4 @@
 <?hh // strict
-<<file: __EnableUnstableFeatures('coeffects_provisional')>>
-
 // OK
 <<__Rx, __AtMostRxAsArgs>>
 function mayberx(<<__AtMostRxAsFunc>>(function(): int) $a): int {

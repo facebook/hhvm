@@ -8,8 +8,6 @@
  *
  */
 
-<<file: __EnableUnstableFeatures('coeffects_provisional')>>
-
 /* HH_FIXME[4110] */
 const resource STDIN = 0;
 /* HH_FIXME[4110] */

@@ -1,6 +1,4 @@
 <?hh // strict
-<<file: __EnableUnstableFeatures('coeffects_provisional')>>
-
 interface IObj {
   <<__Rx, __OnlyRxIfImpl(IRxObj::class)>>
   public function foo(): int;

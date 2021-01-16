@@ -1,10 +1,10 @@
-File "conditional_reactivity1.php", line 21, characters 8-87:
+File "conditional_reactivity1.php", line 20, characters 8-87:
 Cannot invoke conditionally reactive function in reactive context, because at least one reactivity condition is not met. (Typing[4237])
-  File "conditional_reactivity1.php", line 17, characters 3-24:
+  File "conditional_reactivity1.php", line 16, characters 3-24:
   Argument type must be a subtype of `\HH\Rx\KeyedTraversable<_, _>`, now `~\HH\KeyedContainer<Tk, Tv>`.
-  File "conditional_reactivity1.php", line 4, characters 10-21:
+  File "conditional_reactivity1.php", line 3, characters 10-21:
   This is the function declaration
-File "conditional_reactivity1.php", line 23, characters 32-49:
+File "conditional_reactivity1.php", line 22, characters 32-49:
 Reactive functions can only call other reactive functions. (Typing[4200])
-  File "conditional_reactivity1.php", line 18, characters 23-57:
+  File "conditional_reactivity1.php", line 17, characters 23-57:
   This function is normal.

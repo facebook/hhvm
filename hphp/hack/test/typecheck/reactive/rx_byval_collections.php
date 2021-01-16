@@ -1,6 +1,4 @@
 <?hh // strict
-<<file: __EnableUnstableFeatures('coeffects_provisional')>>
-
 <<__Rx>>
 function f(vec<int> $a, vec<vec<int>> $b)[]: void {
   $a[0] = 1;

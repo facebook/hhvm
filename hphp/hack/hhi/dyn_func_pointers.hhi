@@ -8,8 +8,6 @@
  *
  */
 
-<<file: __EnableUnstableFeatures('coeffects_provisional')>>
-
 namespace HH {
 <<__Pure>>
 function dynamic_fun(string $func_name)[]: dynamic;

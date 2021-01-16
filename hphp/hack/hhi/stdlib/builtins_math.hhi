@@ -8,8 +8,6 @@
  *
  */
 
-<<file: __EnableUnstableFeatures('coeffects_provisional')>>
-
 const PHP_ROUND_HALF_UP = 1;
 const PHP_ROUND_HALF_DOWN = 2;
 const PHP_ROUND_HALF_EVEN = 3;

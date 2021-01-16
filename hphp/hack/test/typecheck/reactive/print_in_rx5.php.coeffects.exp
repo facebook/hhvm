@@ -1,6 +1,6 @@
-File "print_in_rx5.php", line 10, characters 5-11:
+File "print_in_rx5.php", line 8, characters 5-11:
 `echo` or `print` builtin requires the capability Output, which is not provided by the context. (Typing[4401])
-  File "print_in_rx5.php", line 8, characters 23-24:
+  File "print_in_rx5.php", line 6, characters 23-24:
   The local (enclosing) context provides the capability set {Rx, WriteProperty}
   File "coeffect/contexts.hhi", line 28, characters 1-23:
   Hack provides a list of supported contexts here

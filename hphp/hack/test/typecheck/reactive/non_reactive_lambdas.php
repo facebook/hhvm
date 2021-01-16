@@ -1,6 +1,4 @@
 <?hh // strict
-<<file: __EnableUnstableFeatures('coeffects_provisional')>>
-
 // OK
 function nonReact0(): void {
   $lambda = (Vector<int> $x) ==> {

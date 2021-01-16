@@ -1,6 +1,6 @@
-File "rx_if_implements21.php", line 14, characters 19-31:
+File "rx_if_implements21.php", line 12, characters 19-31:
 The method `condshallowrx` is not compatible with the overridden method (Typing[4341])
-  File "rx_if_implements21.php", line 8, characters 28-40:
+  File "rx_if_implements21.php", line 6, characters 28-40:
   This function is conditionally shallow reactive (condition type: \Rx1).
-  File "rx_if_implements21.php", line 14, characters 19-31:
+  File "rx_if_implements21.php", line 12, characters 19-31:
   This function is local reactive.

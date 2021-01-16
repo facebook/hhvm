@@ -1,6 +1,4 @@
 <?hh // strict
-<<file: __EnableUnstableFeatures('coeffects_provisional')>>
-
 class A {
   <<__Rx, __MaybeMutable>>
   public function f(<<__Mutable>>A $a): void {

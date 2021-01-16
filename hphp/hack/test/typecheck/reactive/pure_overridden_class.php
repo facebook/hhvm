@@ -1,6 +1,4 @@
 <?hh
-<<file: __EnableUnstableFeatures('coeffects_provisional')>>
-
 class Base {
   <<__Pure>>
   public function pure(): void {}

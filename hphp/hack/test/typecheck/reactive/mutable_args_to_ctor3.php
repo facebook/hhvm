@@ -1,6 +1,4 @@
 <?hh
-<<file: __EnableUnstableFeatures('coeffects_provisional')>>
-
 <<__ConsistentConstruct>>
 class A {
   <<__Rx>>

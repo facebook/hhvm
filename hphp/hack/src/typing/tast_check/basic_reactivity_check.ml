@@ -463,7 +463,6 @@ type ctx = {
   allow_awaitable: bool;
   disallow_this: bool;
   is_expr_statement: bool;
-  is_locallable_pass: bool;
   allow_mutable_locals: bool;
 }
 
@@ -473,12 +472,8 @@ let new_ctx reactivity =
     allow_awaitable = false;
     disallow_this = false;
     is_expr_statement = false;
-    is_locallable_pass = false;
     allow_mutable_locals = true;
   }
-
-let new_ctx_for_is_locallable_pass reactivity =
-  { (new_ctx reactivity) with is_locallable_pass = true }
 
 let allow_awaitable ctx =
   if ctx.allow_awaitable then
@@ -705,15 +700,7 @@ let check =
               in
               let env = Tast_env.restore_fun_env env f in
               let (env, ctx) =
-                if ctx.is_locallable_pass then
-                  match
-                    get_reactivity_from_user_attributes f.f_user_attributes
-                  with
-                  | Some rx ->
-                    (Env.set_env_reactive env rx, set_reactivity ctx rx)
-                  | None -> (env, ctx)
-                else
-                  (env, set_reactivity ctx (Env.env_reactivity env))
+                (env, set_reactivity ctx (Env.env_reactivity env))
               in
               self#handle_body env ctx f.f_body
             | ( _,

@@ -324,20 +324,6 @@ let parse_check_args cmd =
           end,
         " (mode) for each entry in input list get list of function dependencies [file:line:character list]"
       );
-      ( "--fun-is-locallable-at-pos-batch",
-        Arg.Rest
-          begin
-            fun position ->
-            set_mode
-              ~validate:false
-              (match !mode with
-              | None -> MODE_FUN_IS_LOCALLABLE_AT_POS_BATCH [position]
-              | Some (MODE_FUN_IS_LOCALLABLE_AT_POS_BATCH positions) ->
-                MODE_FUN_IS_LOCALLABLE_AT_POS_BATCH (position :: positions)
-              | _ -> raise (Arg.Bad "only a single mode should be specified"))
-          end,
-        " (mode) for each entry in input list checks if function at position can be made RxLocal [file:line:character list]"
-      );
       ( "--gen-hot-classes-file",
         Arg.Tuple
           [

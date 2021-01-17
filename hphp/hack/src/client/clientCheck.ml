@@ -476,13 +476,6 @@ let main (args : client_check_env) : Exit_status.t Lwt.t =
       in
       List.iter responses print_endline;
       Lwt.return (Exit_status.No_error, telemetry)
-    | MODE_FUN_IS_LOCALLABLE_AT_POS_BATCH positions ->
-      let positions = parse_positions positions in
-      let%lwt (responses, telemetry) =
-        rpc args @@ Rpc.FUN_IS_LOCALLABLE_BATCH positions
-      in
-      List.iter responses print_endline;
-      Lwt.return (Exit_status.No_error, telemetry)
     | MODE_AUTO_COMPLETE ->
       let content = Sys_utils.read_stdin_to_string () in
       let%lwt (results, telemetry) =

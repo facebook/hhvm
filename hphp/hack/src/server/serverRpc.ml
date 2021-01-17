@@ -473,9 +473,6 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     let tcopt = { tcopt with GlobalOptions.tco_dynamic_view = dynamic_view } in
     let env = { env with tcopt } in
     (env, ServerFunDepsBatch.go genv.workers positions env)
-  | FUN_IS_LOCALLABLE_BATCH positions ->
-    let env = { env with tcopt = env.ServerEnv.tcopt } in
-    (env, ServerFunIsLocallableBatch.go genv.workers positions env)
   | LIST_FILES_WITH_ERRORS -> (env, ServerEnv.list_files env)
   | FILE_DEPENDENTS filenames ->
     let files = ServerFileDependents.go genv env filenames in

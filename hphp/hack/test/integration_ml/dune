@@ -55,7 +55,6 @@
     test_infer_type
     test_interrupt
     test_interrupt2
-    test_isfunlocallable
     test_lazy_decl_idempotence
     test_mixed_hack_hackpartial
     test_modify_file
@@ -197,11 +196,6 @@
   (name identify)
   (deps test_all.exe)
   (action (run ./test_all.exe identify)))
-
-(alias
-  (name isfunlocallable)
-  (deps test_all.exe)
-  (action (run ./test_all.exe isfunlocallable)))
 
 (alias
   (name server_hover)
@@ -354,7 +348,6 @@
     (alias infer_type)
     (alias getfundeps)
     (alias identify)
-    (alias isfunlocallable)
     (alias server_hover)
     (alias failed_naming)
     (alias gconst_file)

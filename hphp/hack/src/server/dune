@@ -141,7 +141,6 @@
     serverAutoComplete
     serverFindLocals
     serverFunDepsBatch
-    serverFunIsLocallableBatch
     serverGlobalState
     serverIdentifyFunction
     serverRxApiShared

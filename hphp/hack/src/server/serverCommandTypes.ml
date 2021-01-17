@@ -327,7 +327,6 @@ type _ t =
   | NO_PRECHECKED_FILES : unit t
   | GEN_HOT_CLASSES : int -> string t
   | FUN_DEPS_BATCH : (string * int * int) list * bool -> string list t
-  | FUN_IS_LOCALLABLE_BATCH : (string * int * int) list -> string list t
   | LIST_FILES_WITH_ERRORS : string list t
   | FILE_DEPENDENTS : string list -> string list t
   | IDENTIFY_TYPES : labelled_file * int * int -> (Pos.absolute * string) list t

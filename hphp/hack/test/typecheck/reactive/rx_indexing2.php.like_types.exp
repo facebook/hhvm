@@ -1,3 +1,7 @@
 File "rx_indexing2.php", line 5, characters 3-7:
 This object's property is being mutated (used as an lvalue)
-You cannot set non-mutable object properties in reactive functions (Typing[4202])
+Setting non-mutable object properties requires the capability WriteProperty, which is not provided by the context. (Typing[4401])
+  File "rx_indexing2.php", line 3, characters 30-31:
+  The local (enclosing) context provides the capability set {}
+  File "coeffect/contexts.hhi", line 28, characters 1-23:
+  Hack provides a list of supported contexts here

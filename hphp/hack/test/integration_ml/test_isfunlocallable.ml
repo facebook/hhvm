@@ -195,10 +195,7 @@ let tests : ((string * int * int) * string) list =
     );
     ( (fst f2, 2, 10),
       {|
-    {"position":{"file":"/f2.php","line":2,"character":10},
-    "result":false,"errors":[{"message":[
-    {"descr":"This value has `Awaitable` type. `Awaitable` typed values in reactive code must be immediately `await`ed.",
-    "path":"/f2.php","line":3,"start":8,"end":16,"code":4248}]}]}
+    {"position":{"file":"/f2.php","line":2,"character":10},"result":true}
   |}
     );
     ( (fst f3, 2, 10),
@@ -225,12 +222,7 @@ let tests : ((string * int * int) * string) list =
     );
     ( (fst f6, 2, 10),
       {|
-    {"position":{"file":"/f6.php","line":2,"character":10},
-    "result":false,"errors":[{"message":[{
-      "descr":"Cannot assign to element of Hack Collection object via `[]` in a reactive context. Instead, use the `set` method.",
-      "path":"/f6.php","line":3,"start":3,"end":20,"code":4201}]},{"message":[{
-      "descr":"Cannot append to a Hack Collection object in a reactive context. Instead, use the `add` method.",
-      "path":"/f6.php","line":4,"start":3,"end":19,"code":4201}]}]}
+    {"position":{"file":"/f6.php","line":2,"character":10},"result":true}
   |}
     );
     ( (fst f7, 2, 10),
@@ -250,18 +242,12 @@ let tests : ((string * int * int) * string) list =
     );
     ( (fst f9, 2, 10),
       {|
-    {"position":{"file":"/f9.php","line":2,"character":10},
-    "result":false,"errors":[{"message":[{
-      "descr":"Static property cannot be used in a reactive context.",
-      "path":"/f9.php","line":3,"start":3,"end":10,"code":4228}]}]}
+    {"position":{"file":"/f9.php","line":2,"character":10},"result":true}
   |}
     );
     ( (fst f10, 2, 10),
       {|
-    {"position":{"file":"/f10.php","line":2,"character":10},
-    "result":false,"errors":[{"message":[{
-      "descr":"This object's property is being mutated (used as an lvalue)\nYou cannot set non-mutable object properties in reactive functions",
-      "path":"/f10.php","line":4,"start":3,"end":7,"code":4202}]}]}
+    {"position":{"file":"/f10.php","line":2,"character":10},"result":true}
   |}
     );
     ( (fst f11, 3, 19),

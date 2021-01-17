@@ -1,9 +1,16 @@
-Typing[4226] echo or print are not allowed in reactive functions. [1]
+Typing[4401] echo or print builtin requires the capability Output, which is not provided by the context. [1]
+-> The local (enclosing) context provides the capability set {Rx, WriteProperty} [2]
+-> Hack provides a list of supported contexts here [3]
 
 print_in_reactive_function.php:6:3
-    4 | function f(): void {
-    5 |   // should be error
-[1] 6 |   print 1;
-    7 | }
+     2 | 
+     3 | <<__Rx>>
+[2]  4 | function f()[rx]: void {
+     5 |   // should be error
+[1]  6 |   print 1;
+     7 | }
+
+coeffect/contexts.hhi:28:1
+[3] 28 | No source found
 
 1 error found.

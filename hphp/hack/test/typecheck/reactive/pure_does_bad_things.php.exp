@@ -1,14 +1,38 @@
-File "pure_does_bad_things.php", line 4, characters 3-16:
-Static property cannot be used in a reactive context. (Typing[4228])
+File "pure_does_bad_things.php", line 4, characters 13-16:
+Static property access requires the capability AccessStaticVariable, which is not provided by the context. (Typing[4401])
+  File "pure_does_bad_things.php", line 3, characters 16-17:
+  The local (enclosing) context provides the capability set {}
+  File "coeffect/contexts.hhi", line 28, characters 1-23:
+  Hack provides a list of supported contexts here
 File "pure_does_bad_things.php", line 5, characters 3-6:
-`echo` or `print` are not allowed in reactive functions. (Typing[4226])
+`echo` or `print` builtin requires the capability Output, which is not provided by the context. (Typing[4401])
+  File "pure_does_bad_things.php", line 3, characters 16-17:
+  The local (enclosing) context provides the capability set {}
+  File "coeffect/contexts.hhi", line 28, characters 1-23:
+  Hack provides a list of supported contexts here
 File "pure_does_bad_things.php", line 7, characters 3-9:
 This object's property is being mutated (used as an lvalue)
-You cannot set non-mutable object properties in reactive functions (Typing[4202])
-File "pure_does_bad_things.php", line 14, characters 3-16:
-Static property cannot be used in a reactive context. (Typing[4228])
+Setting non-mutable object properties requires the capability WriteProperty, which is not provided by the context. (Typing[4401])
+  File "pure_does_bad_things.php", line 3, characters 16-17:
+  The local (enclosing) context provides the capability set {}
+  File "coeffect/contexts.hhi", line 28, characters 1-23:
+  Hack provides a list of supported contexts here
+File "pure_does_bad_things.php", line 14, characters 13-16:
+Static property access requires the capability AccessStaticVariable, which is not provided by the context. (Typing[4401])
+  File "pure_does_bad_things.php", line 13, characters 14-15:
+  The local (enclosing) context provides the capability set {}
+  File "coeffect/contexts.hhi", line 28, characters 1-23:
+  Hack provides a list of supported contexts here
 File "pure_does_bad_things.php", line 15, characters 3-6:
-`echo` or `print` are not allowed in reactive functions. (Typing[4226])
+`echo` or `print` builtin requires the capability Output, which is not provided by the context. (Typing[4401])
+  File "pure_does_bad_things.php", line 13, characters 14-15:
+  The local (enclosing) context provides the capability set {}
+  File "coeffect/contexts.hhi", line 28, characters 1-23:
+  Hack provides a list of supported contexts here
 File "pure_does_bad_things.php", line 17, characters 3-9:
 This object's property is being mutated (used as an lvalue)
-You cannot set non-mutable object properties in reactive functions (Typing[4202])
+Setting non-mutable object properties requires the capability WriteProperty, which is not provided by the context. (Typing[4401])
+  File "pure_does_bad_things.php", line 13, characters 14-15:
+  The local (enclosing) context provides the capability set {}
+  File "coeffect/contexts.hhi", line 28, characters 1-23:
+  Hack provides a list of supported contexts here

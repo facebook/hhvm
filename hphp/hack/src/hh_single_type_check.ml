@@ -220,8 +220,8 @@ let parse_options () =
   let out_extension = ref ".out" in
   let like_type_hints = ref false in
   let union_intersection_type_hints = ref false in
-  let call_coeffects = ref false in
-  let local_coeffects = ref false in
+  let call_coeffects = ref true in
+  let local_coeffects = ref true in
   let strict_contexts = ref true in
   let like_casts = ref false in
   let simple_pessimize = ref 0.0 in
@@ -309,8 +309,12 @@ let parse_options () =
         Arg.Unit (set_mode Ffp_autocomplete),
         " Produce autocomplete suggestions using the full-fidelity parse tree"
       );
-      ("--call-coeffects", Arg.Set call_coeffects, "Turns on call coeffects");
-      ("--local-coeffects", Arg.Set local_coeffects, "Turns on local coeffects");
+      ( "--no-call-coeffects",
+        Arg.Unit (fun () -> call_coeffects := false),
+        "Turns off call coeffects" );
+      ( "--no-local-coeffects",
+        Arg.Unit (fun () -> local_coeffects := false),
+        "Turns off local coeffects" );
       ( "--no-strict-contexts",
         Arg.Unit (fun () -> strict_contexts := false),
         "Do not enforce contexts to be defined within Contexts namespace" );

@@ -1,2 +1,6 @@
-File "test_global_class.php", line 9, characters 8-26:
-Static property cannot be used in a reactive context. (Typing[4228])
+File "test_global_class.php", line 9, characters 25-26:
+Static property access requires the capability AccessStaticVariable, which is not provided by the context. (Typing[4401])
+  File "test_global_class.php", line 8, characters 16-17:
+  The local (enclosing) context provides the capability set {Rx, WriteProperty}
+  File "coeffect/contexts.hhi", line 28, characters 1-23:
+  Hack provides a list of supported contexts here

@@ -1,3 +1,7 @@
 File "test_obj_set2.php", line 8, characters 3-11:
 This object's property is being mutated (used as an lvalue)
-You cannot set non-mutable object properties in reactive functions (Typing[4202])
+Setting non-mutable object properties requires the capability WriteProperty, which is not provided by the context. (Typing[4401])
+  File "test_obj_set2.php", line 7, characters 22-23:
+  The local (enclosing) context provides the capability set {}
+  File "coeffect/contexts.hhi", line 28, characters 1-23:
+  Hack provides a list of supported contexts here

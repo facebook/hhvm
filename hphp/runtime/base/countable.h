@@ -164,7 +164,8 @@ ALWAYS_INLINE bool Countable::checkCount() const {
   if (one_bit_refcount) {
     return m_count == OneReference || m_count == MultiReference;
   }
-
+  // If this assertion fails, it indicates a double-free. Check it separately.
+  assertx(m_count < RefCountMaxRealistic);
   return m_count >= 1;
 }
 

@@ -859,9 +859,22 @@ ocaml_ffi! {
     }
 
     fn hh_dep_set_union(s1: Custom<DepSet>, s2: Custom<DepSet>) -> Custom<DepSet> {
-        let s1 = s1.clone();
-        let s2 = s2.clone();
-        Custom::from(s1.union(s2).into())
+        // OrdSet's implementation of union is `O(|rhs| * log |lhs| )`. This is
+        // in contrast to OCaml's `O(|lhs| + |rhs|)`, and poses a problem when
+        // both `|lhs|` and `|rhs|` are large.
+        //
+        // However, it seems that for our purposes, most often either `|s1|` or `|s2|`
+        // is very small.
+        let s1_len = s1.len();
+        let s2_len = s2.len();
+        let (left, right) = if s1_len > s2_len {
+            (s1, s2)
+        } else {
+            (s2, s1)
+        };
+        let left = left.clone();
+        let right = right.clone();
+        Custom::from(left.union(right).into())
     }
 
     fn hh_dep_set_inter(s1: Custom<DepSet>, s2: Custom<DepSet>) -> Custom<DepSet> {

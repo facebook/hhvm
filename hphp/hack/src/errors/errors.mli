@@ -121,6 +121,107 @@ val phase_of_string : string -> phase option
 
 val name_context_to_string : name_context -> string
 
+val to_json : Pos.absolute error_ -> Hh_json.json
+
+val convert_errors_to_string :
+  ?include_filename:bool -> error list -> string list
+
+val combining_sort : 'a list -> f:('a -> string) -> 'a list
+
+val to_string : Pos.absolute error_ -> string
+
+val format_summary :
+  format -> 'a error_ list -> int -> int option -> string option
+
+val try_ : (unit -> 'a) -> (error -> 'a) -> 'a
+
+val try_with_error : (unit -> 'a) -> (unit -> 'a) -> 'a
+
+(* The type of collections of errors *)
+type t [@@deriving eq]
+
+(** Return the list of errors caused by the function passed as parameter
+    along with its result. *)
+val do_ : (unit -> 'a) -> t * 'a
+
+(** Return the list of errors caused by the function passed as parameter
+    along with its result.
+    The phase parameter determine the phase of the returned errors. *)
+val do_with_context : Relative_path.t -> phase -> (unit -> 'a) -> t * 'a
+
+val run_in_context : Relative_path.t -> phase -> (unit -> 'a) -> 'a
+
+(** Turn on lazy decl mode for the duration of the closure.
+    This runs without returning the original state,
+    since we collect it later in do_with_lazy_decls_ *)
+val run_in_decl_mode : Relative_path.t -> (unit -> 'a) -> 'a
+
+(* Run this function with span for the definition being checked.
+ * This is used to check that the primary position for errors is not located
+ * outside the span of the definition.
+ *)
+val run_with_span : Pos.t -> (unit -> 'a) -> 'a
+
+(** ignore errors produced by function passed in argument. *)
+val ignore_ : (unit -> 'a) -> 'a
+
+val try_when : (unit -> 'a) -> when_:(unit -> bool) -> do_:(error -> unit) -> 'a
+
+val has_no_errors : (unit -> 'a) -> bool
+
+val currently_has_errors : unit -> bool
+
+val to_absolute : error -> Pos.absolute error_
+
+val to_absolute_for_test : error -> Pos.absolute error_
+
+val merge : t -> t -> t
+
+val merge_into_current : t -> unit
+
+val incremental_update_set :
+  old:t -> new_:t -> rechecked:Relative_path.Set.t -> phase -> t
+
+val incremental_update_map :
+  old:t -> new_:t -> rechecked:'a Relative_path.Map.t -> phase -> t
+
+val empty : t
+
+val is_empty : t -> bool
+
+val count : t -> int
+
+val get_error_list : t -> error list
+
+val get_sorted_error_list : t -> error list
+
+val from_error_list : error list -> t
+
+val iter_error_list : (error -> unit) -> t -> unit
+
+val fold_errors :
+  ?phase:phase -> t -> init:'a -> f:(Relative_path.t -> error -> 'a -> 'a) -> 'a
+
+val fold_errors_in :
+  ?phase:phase ->
+  t ->
+  source:Relative_path.t ->
+  init:'a ->
+  f:(error -> 'a -> 'a) ->
+  'a
+
+val get_failed_files : t -> phase -> Relative_path.Set.t
+
+val sort : error list -> error list
+
+val get_applied_fixmes : t -> applied_fixme list
+
+(***************************************
+ *                                     *
+ *       Specific errors               *
+ *                                     *
+ ***************************************)
+
 val internal_error : Pos.t -> string -> unit
 
 val unimplemented_feature : Pos.t -> string -> unit
@@ -893,101 +994,6 @@ val invalid_disposable_return_hint : Pos.t -> string -> unit
 val invalid_return_disposable : Pos.t -> unit
 
 val invalid_switch_case_value_type : Pos.t -> string -> string -> unit
-
-val to_json : Pos.absolute error_ -> Hh_json.json
-
-val convert_errors_to_string :
-  ?include_filename:bool -> error list -> string list
-
-val combining_sort : 'a list -> f:('a -> string) -> 'a list
-
-val to_string : Pos.absolute error_ -> string
-
-val format_summary :
-  format -> 'a error_ list -> int -> int option -> string option
-
-val try_ : (unit -> 'a) -> (error -> 'a) -> 'a
-
-val try_with_error : (unit -> 'a) -> (unit -> 'a) -> 'a
-
-(* The type of collections of errors *)
-type t [@@deriving eq]
-
-(** Return the list of errors caused by the function passed as parameter
-    along with its result. *)
-val do_ : (unit -> 'a) -> t * 'a
-
-(** Return the list of errors caused by the function passed as parameter
-    along with its result.
-    The phase parameter determine the phase of the returned errors. *)
-val do_with_context : Relative_path.t -> phase -> (unit -> 'a) -> t * 'a
-
-val run_in_context : Relative_path.t -> phase -> (unit -> 'a) -> 'a
-
-(** Turn on lazy decl mode for the duration of the closure.
-    This runs without returning the original state,
-    since we collect it later in do_with_lazy_decls_ *)
-val run_in_decl_mode : Relative_path.t -> (unit -> 'a) -> 'a
-
-(* Run this function with span for the definition being checked.
- * This is used to check that the primary position for errors is not located
- * outside the span of the definition.
- *)
-val run_with_span : Pos.t -> (unit -> 'a) -> 'a
-
-(** ignore errors produced by function passed in argument. *)
-val ignore_ : (unit -> 'a) -> 'a
-
-val try_when : (unit -> 'a) -> when_:(unit -> bool) -> do_:(error -> unit) -> 'a
-
-val has_no_errors : (unit -> 'a) -> bool
-
-val currently_has_errors : unit -> bool
-
-val to_absolute : error -> Pos.absolute error_
-
-val to_absolute_for_test : error -> Pos.absolute error_
-
-val merge : t -> t -> t
-
-val merge_into_current : t -> unit
-
-val incremental_update_set :
-  old:t -> new_:t -> rechecked:Relative_path.Set.t -> phase -> t
-
-val incremental_update_map :
-  old:t -> new_:t -> rechecked:'a Relative_path.Map.t -> phase -> t
-
-val empty : t
-
-val is_empty : t -> bool
-
-val count : t -> int
-
-val get_error_list : t -> error list
-
-val get_sorted_error_list : t -> error list
-
-val from_error_list : error list -> t
-
-val iter_error_list : (error -> unit) -> t -> unit
-
-val fold_errors :
-  ?phase:phase -> t -> init:'a -> f:(Relative_path.t -> error -> 'a -> 'a) -> 'a
-
-val fold_errors_in :
-  ?phase:phase ->
-  t ->
-  source:Relative_path.t ->
-  init:'a ->
-  f:(error -> 'a -> 'a) ->
-  'a
-
-val get_failed_files : t -> phase -> Relative_path.Set.t
-
-val sort : error list -> error list
-
-val get_applied_fixmes : t -> applied_fixme list
 
 val too_few_type_arguments : Pos.t -> unit
 

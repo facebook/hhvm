@@ -1,10 +1,10 @@
 darray(2) {
-  ["%s"]=>
+  ["/:systemlib.phpfb"]=>
   darray(1) {
-    [181]=>
+    [192]=>
     int(1)
   }
-  ["%s"]=>
+  ["%s/coverage.php"]=>
   darray(4) {
     [3]=>
     int(1)
@@ -17,10 +17,10 @@ darray(2) {
   }
 }
 darray(3) {
-  ["%s"]=>
+  ["/:systemlib.phpstd_variable"]=>
   int(1)
-  ["%s"]=>
-  int(1)
-  ["%s"]=>
+  ["/:systemlib.phpfb"]=>
+  int(2)
+  ["%s/coverage.php"]=>
   int(5)
 }

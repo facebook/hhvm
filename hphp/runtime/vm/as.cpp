@@ -2758,7 +2758,8 @@ void parse_function(AsmState& as) {
 
   as.in.expectWs('{');
 
-  as.srcLoc = Location::Range{-1,-1,-1,-1};
+  // Until we get a .srcloc we attribute the code to the whole function
+  as.srcLoc = Location::Range{line0, -1, line1, -1};
   parse_function_body(as);
 }
 
@@ -2825,7 +2826,8 @@ void parse_method(AsmState& as, const UpperBoundMap& class_ubs) {
 
   as.in.expectWs('{');
 
-  as.srcLoc = Location::Range{-1,-1,-1,-1};
+  // Until we get a .srcloc we attribute the code to the whole function
+  as.srcLoc = Location::Range{line0, -1, line1, -1};
   parse_function_body(as);
 }
 

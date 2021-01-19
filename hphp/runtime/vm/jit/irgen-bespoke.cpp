@@ -966,8 +966,7 @@ void handleBespokeInputs(IRGS& env, const NormalizedInstruction& ni,
 
   auto const type = env.irb->typeOf(*loc, DataTypeGeneric);
   assertx(type <= TArrLike);
-  if (type.isKnownDataType() &&
-      !arrayTypeCouldBeBespoke(type.toDataType())) {
+  if (type.isKnownDataType() && !arrayTypeCouldBeBespoke(type.toDataType())) {
     assertTypeLocation(env, *loc, TVanillaArrLike);
     return emitVanilla(env);
   }

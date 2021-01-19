@@ -784,6 +784,8 @@ void specializeIterInit(IRGS& env, Offset doneOffset,
   // Use bespoke profiling (if enabled) to choose a layout.
   auto const layout = [&]{
     if (!allowBespokeArrayLikes()) return ArrayLayout::Vanilla();
+    auto const dt = getArrType(iter_type).toDataType();
+    if (!arrayTypeCouldBeBespoke(dt)) return ArrayLayout::Vanilla();
     return bespoke::layoutForSink(env.profTransIDs, curSrcKey(env));
   }();
   iter_type.bespoke = layout.bespoke();

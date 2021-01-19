@@ -47,25 +47,45 @@ StaticString s_ColFromArray("ColFromArray");
 // additional ops around them to produce better types. All of the mutating
 // helpers here consume a ref on the input and produce one on the output.
 
-SSATmp* emitGet(IRGS& env, SSATmp* arr, SSATmp* key, Block* taken) {
+template <typename Finish>
+SSATmp* emitProfiledGet(
+    IRGS& env, SSATmp* arr, SSATmp* key, Block* taken, Finish finish,
+    bool profiled = true) {
   auto const result = [&]{
     if (arr->isA(TVArr|TVec)) {
       gen(env, CheckVecBounds, taken, arr, key);
       auto const data = BespokeGetData { BespokeGetData::KeyState::Present };
-      return gen(env, BespokeGet, data, arr, key);
+      auto const val = gen(env, BespokeGet, data, arr, key);
+      return profiled ? profiledType(env, val, [&] { finish(val); })
+                      : val;
     } else {
       auto const data = BespokeGetData { BespokeGetData::KeyState::Unknown };
       auto const val = gen(env, BespokeGet, data, arr, key);
-      gen(env, CheckType, TInitCell, taken, val);
+      auto const pval = [&] {
+        if (!profiled) return val;
+
+        // We prefer to test the profiledType first, as this will rule out
+        // TUninit when we have profiledType information. In this case, the
+        // latter test will be optimized out.
+        return profiledType(env, val, [&] {
+          gen(env, CheckType, TInitCell, taken, val);
+          finish(val);
+        });
+      }();
+
+      gen(env, CheckType, TInitCell, taken, pval);
       // TODO(mcolavita): this is here because we can lose constval information
       // when unioning with TUninit.
       auto resultType =
         arrLikeElemType(arr->type(), key->type(), curClass(env));
-      return gen(env, AssertType, resultType.first, val);
+      return gen(env, AssertType, resultType.first, pval);
     }
   }();
-  // TODO(kshaunak): We should also pull in TypeProfile information here.
   return result;
+}
+
+SSATmp* emitGet(IRGS& env, SSATmp* arr, SSATmp* key, Block* taken) {
+  return emitProfiledGet(env, arr, key, taken, [&](SSATmp*) {}, false);
 }
 
 SSATmp* emitElem(IRGS& env, SSATmp* arr, SSATmp* key, bool throwOnMissing) {
@@ -253,7 +273,7 @@ SSATmp* emitIsset(IRGS& env, SSATmp* key) {
   );
 }
 
-SSATmp* emitGetElem(IRGS& env, SSATmp* key, bool quiet) {
+SSATmp* emitGetElem(IRGS& env, SSATmp* key, bool quiet, uint32_t nDiscard) {
   auto const baseType = env.irb->fs().mbase().type;
   auto const base = extractBase(env);
 
@@ -271,7 +291,11 @@ SSATmp* emitGetElem(IRGS& env, SSATmp* key, bool quiet) {
   return cond(
     env,
     [&](Block* taken) {
-      return emitGet(env, base, key, taken);
+      auto const finish = [&](SSATmp* val) {
+        gen(env, IncRef, val);
+        mFinalImpl(env, nDiscard, val);
+      };
+      return emitProfiledGet(env, base, key, taken, finish);
     },
     [&](SSATmp* val) {
       gen(env, IncRef, val);
@@ -296,9 +320,9 @@ void emitBespokeQueryM(
     switch (query) {
       case QueryMOp::InOut:
       case QueryMOp::CGet:
-        return emitGetElem(env, key, false);
+        return emitGetElem(env, key, false, nDiscard);
       case QueryMOp::CGetQuiet:
-        return emitGetElem(env, key, true);
+        return emitGetElem(env, key, true, nDiscard);
       case QueryMOp::Isset:
         return emitIsset(env, key);
     }
@@ -337,20 +361,16 @@ void emitBespokeIdx(IRGS& env) {
     return;
   }
 
-  cond(
+  auto const res = cond(
     env,
     [&](Block* taken) {
       return emitGet(env, base, key, taken);
     },
-    [&](SSATmp* val) {
-      finish(val);
-      return nullptr;
-    },
-    [&] {
-      finish(def);
-      return nullptr;
-    }
+    [&](SSATmp* val) { return val; },
+    [&] { return def; }
   );
+  auto const pres = profiledType(env, res, [&] { finish(res); });
+  finish(pres);
 }
 
 void emitBespokeAKExists(IRGS& env) {
@@ -402,8 +422,9 @@ SSATmp* baseValueToLval(IRGS& env, SSATmp* base) {
   return gen(env, ConvPtrToLval, temp);
 }
 
-SSATmp* bespokeElemImpl(IRGS& env,
-                        MOpMode mode, Type baseType, SSATmp* key) {
+template <typename Finish>
+SSATmp* bespokeElemImpl(
+    IRGS& env, MOpMode mode, Type baseType, SSATmp* key, Finish finish) {
   auto const base = extractBase(env);
   auto const baseLval = gen(env, LdMBase, TLvalToCell);
   auto const needsLval = mode == MOpMode::Unset || mode == MOpMode::Define;
@@ -431,7 +452,9 @@ SSATmp* bespokeElemImpl(IRGS& env,
     return cond(
       env,
       [&](Block* taken) {
-        return emitGet(env, base, key, taken);
+        return emitProfiledGet(env, base, key, taken, [&](SSATmp* val) {
+          finish(baseValueToLval(env, val));
+        });
       },
       [&](SSATmp* val) {
         return baseValueToLval(env, val);
@@ -451,9 +474,9 @@ void emitBespokeDim(IRGS& env, MOpMode mode, MemberKey mk) {
   assertx(mcodeIsElem(mk.mcode));
 
   auto const baseType = env.irb->fs().mbase().type;
-  auto const val = bespokeElemImpl(env, mode, baseType, key);
-
-  stMBase(env, val);
+  auto const finish = [&](SSATmp* val) { stMBase(env, val); };
+  auto const val = bespokeElemImpl(env, mode, baseType, key, finish);
+  finish(val);
 }
 
 void emitBespokeAddElemC(IRGS& env) {
@@ -557,57 +580,6 @@ void emitBespokeClassGetTS(IRGS& env) {
   push(env, cns(env, TInitNull));
 }
 
-void emitBespokeShapesIdx(IRGS& env, uint32_t numArgs) {
-  if (numArgs != 2 && numArgs != 3) PUNT(Bespoke-ShapesIdx-BadArgs);
-
-  auto const def = [&] {
-    if (numArgs < 3) return cns(env, TInitNull);
-
-    auto const defVal = popC(env);
-    auto const defType = defVal->type();
-    if (!(defType <= TUninit) && defType.maybe(TUninit)) {
-      PUNT(Bespoke-ShapesIdx-BadDefault);
-    }
-    return defType <= TUninit ? cns(env, TInitNull) : defVal;
-  }();
-
-  auto const key = popC(env);
-  if (!key->type().subtypeOfAny(TInt, TStr)) {
-    PUNT(Bespoke-ShapesIdx-BadKey);
-  }
-
-  auto const arr = popC(env);
-  auto const arrType = arr->type();
-  if (!(arrType <= (RuntimeOption::EvalHackArrDVArrs ? TDict : TDArr))) {
-    if (arrType <= TNull) {
-      decRef(env, key);
-      push(env, def);
-      return;
-    } else {
-      PUNT(Bespoke-ShapesIdx-BadVal);
-    }
-  }
-
-  auto const res = cond(
-    env,
-    [&] (Block* taken) {
-      return emitGet(env, arr, key, taken);
-    },
-    [&] (SSATmp* val) {
-      gen(env, IncRef, val);
-      decRef(env, def);
-      return val;
-    },
-    [&] {
-      return def;
-    }
-  );
-
-  decRef(env, key);
-  decRef(env, arr);
-  push(env, res);
-}
-
 template <bool isFirst, bool isKey>
 void emitBespokeFirstLast(IRGS& env, uint32_t numArgs) {
   if (numArgs != 1) PUNT(Bespoke-FirstLast-BadArgs);
@@ -642,7 +614,6 @@ void emitBespokeFirstLast(IRGS& env, uint32_t numArgs) {
 
 using BespokeOptEmitFn = void (*)(IRGS&, uint32_t);
 const hphp_fast_string_imap<BespokeOptEmitFn> s_bespoke_builtin_impls{
-  {"HH\\Shapes::idx", emitBespokeShapesIdx},
   {"HH\\Lib\\_Private\\Native\\first", emitBespokeFirstLast<true, false>},
   {"HH\\Lib\\_Private\\Native\\last", emitBespokeFirstLast<false, false>},
   {"HH\\Lib\\_Private\\Native\\first_key", emitBespokeFirstLast<true, true>},

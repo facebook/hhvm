@@ -123,7 +123,7 @@ ArrayData* maybeMakeLoggingArray(ArrayData* ad, LoggingProfile* profile) {
     return ad;
   }
 
-  if (!arrayTypeMaybeBespoke(ad->toDataType())) {
+  if (!arrayTypeCouldBeBespoke(ad->toDataType())) {
     FTRACE(5, "Skipping logging for ineligible array type.\n");
     return ad;
   }

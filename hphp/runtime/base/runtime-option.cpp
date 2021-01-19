@@ -2834,12 +2834,12 @@ void RuntimeOption::Load(
   // we JIT checks for these types as well. We support JIT-ing these checks
   // even if there are no runtime bespokes as way to test our guard logic.
   if (RO::EvalBespokeArrayLikeMode == 0) {
-    specializeVanillaDestructors();
     bespoke::setLoggingEnabled(false);
   } else {
     auto const log = !isJitDeserializing();
     bespoke::setLoggingEnabled(log);
   }
+  specializeVanillaDestructors();
 
   // Hack Array Compats
 

@@ -152,12 +152,15 @@ RawDestructor g_destructors[] = {
 };
 
 void specializeVanillaDestructors() {
-  using Dtor = RawDestructor;
-  g_destructors[typeToDestrIdx(KindOfVArray)] = (Dtor)&PackedArray::Release;
-  g_destructors[typeToDestrIdx(KindOfDArray)] = (Dtor)&MixedArray::Release;
-  g_destructors[typeToDestrIdx(KindOfVec)] = (Dtor)&PackedArray::Release;
-  g_destructors[typeToDestrIdx(KindOfDict)] = (Dtor)&MixedArray::Release;
-  g_destructors[typeToDestrIdx(KindOfKeyset)] = (Dtor)&SetArray::Release;
+  auto const specialize = [](auto const type, auto const destructor) {
+    if (allowBespokeArrayLikes() && arrayTypeCouldBeBespoke(type)) return;
+    g_destructors[typeToDestrIdx(type)] = (RawDestructor)destructor;
+  };
+  specialize(KindOfVArray, &PackedArray::Release);
+  specialize(KindOfDArray, &MixedArray::Release);
+  specialize(KindOfVec,    &PackedArray::Release);
+  specialize(KindOfDict,   &MixedArray::Release);
+  specialize(KindOfKeyset, &SetArray::Release);
 }
 
 #define IMPLEMENT_SET(argType, setOp)                     \

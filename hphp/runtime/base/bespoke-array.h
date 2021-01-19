@@ -33,7 +33,8 @@ inline bool shouldTestBespokeArrayLikes() {
   return RO::EvalBespokeArrayLikeMode == 1;
 }
 
-inline bool arrayTypeMaybeBespoke(DataType t) {
+inline bool arrayTypeCouldBeBespoke(DataType t) {
+  assertx(allowBespokeArrayLikes());
   return shouldTestBespokeArrayLikes() || !isKeysetType(t);
 }
 

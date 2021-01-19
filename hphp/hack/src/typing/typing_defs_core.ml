@@ -273,18 +273,28 @@ and _ ty_ =
            type Foo2 = ...
          that simply doesn't require type arguments. *)
   | Tnewtype : string * locl_ty list * locl_ty -> locl_phase ty_
-      (** The type of an opaque type (e.g. a "newtype" outside of the file where it
-       * was defined) or enum. They are "opaque", which means that they only unify with
-       * themselves. However, it is possible to have a constraint that allows us to
-       * relax this. For example:
+      (** The type of an opaque type or enum. Outside their defining files or
+       * when they represent enums, they are "opaque", which means that they
+       * only unify with themselves. Within a file, uses of newtypes are
+       * expanded to their definitions (unless the newtype is an enum).
        *
-       *   newtype my_type as int = ...
+       * However, it is possible to have a constraint that allows us to relax
+       * opaqueness. For example:
+       *
+       *   newtype MyType as int = ...
+       *
+       * or
+       *
+       *   enum MyType: int as int { ... }
        *
        * Outside of the file where the type was defined, this translates to:
        *
-       *   Tnewtype ((pos, "my_type"), [], Tprim Tint)
+       *   Tnewtype ((pos, "MyType"), [], Tprim Tint)
        *
-       * Which means that my_type is abstract, but is subtype of int as well.
+       * which means that MyType is abstract, but is a subtype of int as well.
+       * When the constraint is omitted, the third parameter is set to mixed.
+       *
+       * The second parameter is the list of type arguments to the type.
        *)
   | Tdependent : dependent_type * locl_ty -> locl_phase ty_
       (** see dependent_type *)

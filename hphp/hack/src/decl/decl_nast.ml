@@ -38,7 +38,6 @@ and fun_decl (ctx : Provider_context.t) (f : Nast.fun_) : Typing_defs.fun_elt =
 
 and fun_decl_in_env (env : Decl_env.env) ~(is_lambda : bool) (f : Nast.fun_) :
     Typing_defs.fun_elt =
-  check_params f.f_params;
   let reactivity = fun_reactivity env f.f_user_attributes in
   let ifc_decl = find_policied_attribute f.f_user_attributes in
   let returns_mutable = fun_returns_mutable f.f_user_attributes in

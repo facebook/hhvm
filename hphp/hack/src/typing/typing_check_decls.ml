@@ -105,6 +105,7 @@ let check_atom_on_param env pos dty lty =
   | _ -> Errors.atom_invalid_parameter pos
 
 let rec fun_ tenv f =
+  Decl_fun_utils.check_params f.f_params;
   let env = { typedef_tparams = []; tenv } in
   let (p, _) = f.f_name in
   (* Add type parameters to typing environment and localize the bounds

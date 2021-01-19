@@ -22,6 +22,10 @@ enum E4: string as string {
   CONST4 = "b";
 }
 
+function test_enum_type(E4 $e) : void {
+  d($e);
+}
+
 function test_prim(bool $b, int $i, float $f, num $n, string $s, arraykey $ak)
   : void {
   d($b);

@@ -558,7 +558,9 @@ and default_subtype
       begin
         match deref lty_sub with
         | (_, Tvar _) when subtype_env.treat_dynamic_as_bottom ->
-          (env, TL.Coerce (lty_sub, lty_super))
+          (env, TL.Coerce (TL.CoerceFromDynamic, lty_sub, lty_super))
+        | (_, Tvar _) when subtype_env.allow_subtype_of_dynamic ->
+          (env, TL.Coerce (TL.CoerceToDynamic, lty_sub, lty_super))
         | (_, Tnewtype (_, _, ty)) ->
           simplify_subtype ~subtype_env ~this_ty ty lty_super env
         | (_, Tdependent (_, ty)) ->
@@ -938,7 +940,9 @@ and simplify_subtype_i
             &&& simplify_subtype ~subtype_env ~this_ty ty_null ty_super)
         | (_, Tvar var_sub) when Ident.equal var_sub var_super -> valid env
         | _ when subtype_env.treat_dynamic_as_bottom ->
-          (env, TL.Coerce (ty_sub, ty_super))
+          (env, TL.Coerce (TL.CoerceFromDynamic, ty_sub, ty_super))
+        | _ when subtype_env.allow_subtype_of_dynamic ->
+          (env, TL.Coerce (TL.CoerceToDynamic, ty_sub, ty_super))
         | _ -> default env))
     | (_, Tintersection tyl) ->
       (match ety_sub with
@@ -3122,7 +3126,12 @@ and sub_type
  * in tyl we have ty_sub <: ty.
  *)
 and add_tyvar_upper_bound_and_close
-    ~treat_dynamic_as_bottom (env, prop) var ty on_error =
+    ~treat_dynamic_as_bottom
+    ~allow_subtype_of_dynamic
+    (env, prop)
+    var
+    ty
+    on_error =
   let upper_bounds_before = Env.get_tyvar_upper_bounds env var in
   let env =
     Env.add_tyvar_upper_bound_and_update_variances
@@ -3150,7 +3159,10 @@ and add_tyvar_upper_bound_and_close
             let (env, prop2) =
               simplify_subtype_i
                 ~subtype_env:
-                  (make_subtype_env ~treat_dynamic_as_bottom on_error)
+                  (make_subtype_env
+                     ~treat_dynamic_as_bottom
+                     ~allow_subtype_of_dynamic
+                     on_error)
                 lower_bound
                 upper_bound
                 env
@@ -3168,7 +3180,12 @@ and add_tyvar_upper_bound_and_close
  * simplify_subtype to produce a subtype proposition.
  *)
 and add_tyvar_lower_bound_and_close
-    ~treat_dynamic_as_bottom (env, prop) var ty on_error =
+    ~treat_dynamic_as_bottom
+    ~allow_subtype_of_dynamic
+    (env, prop)
+    var
+    ty
+    on_error =
   let lower_bounds_before = Env.get_tyvar_lower_bounds env var in
   let env =
     Env.add_tyvar_lower_bound_and_update_variances
@@ -3196,7 +3213,10 @@ and add_tyvar_lower_bound_and_close
             let (env, prop2) =
               simplify_subtype_i
                 ~subtype_env:
-                  (make_subtype_env ~treat_dynamic_as_bottom on_error)
+                  (make_subtype_env
+                     ~treat_dynamic_as_bottom
+                     ~allow_subtype_of_dynamic
+                     on_error)
                 lower_bound
                 upper_bound
                 env
@@ -3248,6 +3268,7 @@ and props_to_env env remain props on_error =
           let (env, prop1) =
             add_tyvar_upper_bound_and_close
               ~treat_dynamic_as_bottom:false
+              ~allow_subtype_of_dynamic:false
               (valid env)
               var_sub
               ty_super
@@ -3256,6 +3277,7 @@ and props_to_env env remain props on_error =
           let (env, prop2) =
             add_tyvar_lower_bound_and_close
               ~treat_dynamic_as_bottom:false
+              ~allow_subtype_of_dynamic:false
               (valid env)
               var_super
               ty_sub
@@ -3266,6 +3288,7 @@ and props_to_env env remain props on_error =
           let (env, prop) =
             add_tyvar_upper_bound_and_close
               ~treat_dynamic_as_bottom:false
+              ~allow_subtype_of_dynamic:false
               (valid env)
               var
               ty_super
@@ -3276,6 +3299,7 @@ and props_to_env env remain props on_error =
           let (env, prop) =
             add_tyvar_lower_bound_and_close
               ~treat_dynamic_as_bottom:false
+              ~allow_subtype_of_dynamic:false
               (valid env)
               var
               ty_sub
@@ -3284,13 +3308,19 @@ and props_to_env env remain props on_error =
           props_to_env env remain (prop :: props) on_error
         | _ -> props_to_env env (prop :: remain) props on_error
       end
-    | TL.Coerce (ty_sub, ty_super) ->
+    | TL.Coerce (cd, ty_sub, ty_super) ->
+      let (treat_dynamic_as_bottom, allow_subtype_of_dynamic) =
+        match cd with
+        | TL.CoerceToDynamic -> (false, true)
+        | TL.CoerceFromDynamic -> (true, false)
+      in
       begin
         match (get_node ty_sub, get_node ty_super) with
         | (Tvar var_sub, Tvar var_super) ->
           let (env, prop1) =
             add_tyvar_upper_bound_and_close
-              ~treat_dynamic_as_bottom:true
+              ~treat_dynamic_as_bottom
+              ~allow_subtype_of_dynamic
               (valid env)
               var_sub
               (LoclType ty_super)
@@ -3298,7 +3328,8 @@ and props_to_env env remain props on_error =
           in
           let (env, prop2) =
             add_tyvar_lower_bound_and_close
-              ~treat_dynamic_as_bottom:true
+              ~treat_dynamic_as_bottom
+              ~allow_subtype_of_dynamic
               (valid env)
               var_super
               (LoclType ty_sub)
@@ -3308,7 +3339,8 @@ and props_to_env env remain props on_error =
         | (Tvar var, _) ->
           let (env, prop) =
             add_tyvar_upper_bound_and_close
-              ~treat_dynamic_as_bottom:true
+              ~treat_dynamic_as_bottom
+              ~allow_subtype_of_dynamic
               (valid env)
               var
               (LoclType ty_super)
@@ -3318,7 +3350,8 @@ and props_to_env env remain props on_error =
         | (_, Tvar var) ->
           let (env, prop) =
             add_tyvar_lower_bound_and_close
-              ~treat_dynamic_as_bottom:true
+              ~treat_dynamic_as_bottom
+              ~allow_subtype_of_dynamic
               (valid env)
               var
               (LoclType ty_sub)

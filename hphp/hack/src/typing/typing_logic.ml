@@ -10,19 +10,20 @@
 open Hh_prelude
 open Typing_defs
 
-(* Logical proposition about types *)
+type coercion_direction =
+  | CoerceToDynamic
+  | CoerceFromDynamic
+
+(* See comment in .mli file *)
 type subtype_prop =
-  | Coerce of locl_ty * locl_ty
+  | Coerce of coercion_direction * locl_ty * locl_ty
   | IsSubtype of internal_type * internal_type
-      (** IsSubtype(ty1,ty2) if ty1 is a subtype of ty2, written ty1 <: ty2 *)
-  | Conj of subtype_prop list  (** Conjunction. Conj [] means "true" *)
+  | Conj of subtype_prop list
   | Disj of (unit -> unit) * subtype_prop list
-      (** Disjunction. Disj f [] means "false".  The error message function f
-   * wraps the error that should be produced in this case. *)
 
 let rec equal_subtype_prop p1 p2 =
   match (p1, p2) with
-  | (Coerce (ty1, ty1'), Coerce (ty2, ty2')) ->
+  | (Coerce (_, ty1, ty1'), Coerce (_, ty2, ty2')) ->
     ty_equal ty1 ty2 && ty_equal ty1' ty2'
   | (IsSubtype (ty1, ty1'), IsSubtype (ty2, ty2')) ->
     equal_internal_type ty1 ty2 && equal_internal_type ty1' ty2'

@@ -1475,7 +1475,7 @@ let replace_var_by_ty_in_prop prop v ty =
           ty2
       in
       TL.IsSubtype (ty1, ty2)
-    | TL.Coerce (ty1, ty2) ->
+    | TL.Coerce (cd, ty1, ty2) ->
       let ty1 =
         if is_var_v ty1 v then
           ty
@@ -1488,7 +1488,7 @@ let replace_var_by_ty_in_prop prop v ty =
         else
           ty2
       in
-      TL.Coerce (ty1, ty2)
+      TL.Coerce (cd, ty1, ty2)
     | TL.Disj (f, props) ->
       let props = List.map props ~f:replace in
       TL.Disj (f, props)

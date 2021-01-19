@@ -193,7 +193,7 @@ end = struct
     let (m, rep2) = get_rep v2 m in
     set_rep rep1 rep2 m
 
-  (* Test equality of the mathematical object represented by the two given maps, 
+  (* Test equality of the mathematical object represented by the two given maps,
   i.e. modulo path compression and choice of the representative. *)
   let equal m1 m2 =
     let vars1 = IMap.keys m1 |> ISet.of_list in
@@ -717,7 +717,7 @@ let rec prop_to_env_cc (acc : prop_to_env_acc) (prop : TL.subtype_prop) :
     prop_to_env_acc =
   match prop with
   | TL.IsSubtype (ty_sub, ty_super) -> is_sub_prop_to_env_cc acc ty_sub ty_super
-  | TL.Coerce (_ty_sub, _ty_super) ->
+  | TL.Coerce (_cd, _ty_sub, _ty_super) ->
     (* For global inference, for now, we don't do coercion. *)
     assert false
   | TL.Conj props -> conj_prop_to_env_cc acc props
@@ -1052,7 +1052,7 @@ let get_cc_variance env cc (rep : Rep.t) : env * variance =
   let env = ISet.fold (fun v env -> set_variance env v variance) vars env in
   (env, variance)
 
-(** Find a type within the constraints for v which is the smallest possible, 
+(** Find a type within the constraints for v which is the smallest possible,
     usually the union of lower bounds. *)
 let find_small_type env v =
   let bounds = Env.get_tyvar_lower_bounds env v in
@@ -1096,7 +1096,7 @@ let rec solve_down v (env, cc, deps) ~make_on_error =
     in
     (env, cc, deps)
 
-(** Find a type within the constraints for v which is the largest possible, 
+(** Find a type within the constraints for v which is the largest possible,
     usually the intersection of upper bounds. *)
 let find_large_type env v =
   let bounds = Env.get_tyvar_upper_bounds env v in

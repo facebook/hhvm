@@ -26,16 +26,15 @@ type t =
   | IgnoreError
   | FallThrough
   | ExtraTokenError
-
-  [@@deriving show, enum, eq]
+[@@deriving show, enum, eq]
 
 let to_string kind =
   match kind with
-  | WhiteSpace        -> "whitespace"
-  | EndOfLine         -> "end_of_line"
-  | DelimitedComment  -> "delimited_comment"
+  | WhiteSpace -> "whitespace"
+  | EndOfLine -> "end_of_line"
+  | DelimitedComment -> "delimited_comment"
   | SingleLineComment -> "single_line_comment"
-  | FixMe             -> "fix_me"
-  | IgnoreError       -> "ignore_error"
-  | FallThrough       -> "fall_through"
-  | ExtraTokenError   -> "extra_token_error"
+  | FixMe -> "fix_me"
+  | IgnoreError -> "ignore_error"
+  | FallThrough -> "fall_through"
+  | ExtraTokenError -> "extra_token_error"

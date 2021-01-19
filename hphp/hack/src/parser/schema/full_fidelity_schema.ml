@@ -242,11 +242,51 @@ let generate_string template =
   in
   result
 
-let generate_file template =
-  let file = open_out template.filename in
+let format_ocaml src path : string =
+  (* Write the string to a temporary file. *)
+  let tmp_filename = Filename.temp_file "" (Filename.basename path) in
+
+  let open Core_kernel in
+  let file = Out_channel.create tmp_filename in
+  Printf.fprintf file "%s" src;
+  Out_channel.close file;
+
+  let ocamlformat_path =
+    Option.value
+      (Sys.getenv_opt "OCAMLFORMAT_PATH")
+      ~default:"../tools/third-party/ocamlformat/ocamlformat"
+  in
+
+  (* Run ocamlformat on the file. *)
+  let cmd =
+    Printf.sprintf "%s -i --name=%s %s" ocamlformat_path path tmp_filename
+  in
+  ignore (Sys.command cmd);
+
+  (* Read the formatted file, then delete it. *)
+  let res =
+    In_channel.with_file tmp_filename ~f:(fun channel ->
+        In_channel.input_all channel)
+  in
+  Sys.remove tmp_filename;
+  res
+
+let generate_formatted_string (template : template_file) : string =
+  let open Core_kernel in
   let s = generate_string template in
+  let has_suffix s = String.is_suffix template.filename ~suffix:s in
+  if has_suffix ".ml" || has_suffix ".mli" then
+    format_ocaml s template.filename
+  else
+    s
+
+let generate_file (template : template_file) : unit =
+  let open Core_kernel in
+  let filename = template.filename in
+  let file = Out_channel.create filename in
+  let s = generate_formatted_string template in
   Printf.fprintf file "%s" s;
-  close_out file
+  Out_channel.close file
 
 module GenerateFFJSONSchema = struct
   let to_json_trivia { trivia_kind; trivia_text } =

@@ -25,9 +25,13 @@ module ParserEnv = Full_fidelity_parser_env
 module type SmartConstructors_S = sig
   module Token : Lexable_token_sig.LexableToken_S
 
-  type t (* state *) [@@deriving show]
+  type t [@@deriving show]
 
-  type r (* smart constructor return type *) [@@deriving show]
+  (* state *)
+
+  type r [@@deriving show]
+
+  (* smart constructor return type *)
 
   val rust_parse :
     Full_fidelity_source_text.t ->

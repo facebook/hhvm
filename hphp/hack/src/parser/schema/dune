@@ -15,4 +15,4 @@
     full_fidelity_schema)
   (libraries
     parser_schema_def)
-  (flags (:standard -w @a-29-50)))
+  (flags (:standard -w @a-29-44-50)))

@@ -12,7 +12,7 @@ let verify_file template =
   let result = really_input_string file (in_channel_length file) in
   close_in file;
 
-  let expected = generate_string template in
+  let expected = generate_formatted_string template in
   if result <> expected then (
     Printf.printf
       "Run `buck run hphp/hack/src:generate_full_fidelity` and include changed files in your commit\n";

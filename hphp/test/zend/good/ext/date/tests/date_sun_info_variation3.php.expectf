@@ -2,19 +2,19 @@
 
 -- Iteration 1 --
 
-Warning: date_sun_info() expects parameter 3 to be double, integer given in %s/zend/good/ext/date/tests/date_sun_info_variation3.php on line 73
+Warning: date_sun_info() expects parameter 3 to be double, integer given in %s/zend/good/ext/date/tests/date_sun_info_variation3.php on line %d
 
 -- Iteration 2 --
 
-Warning: date_sun_info() expects parameter 3 to be double, integer given in %s/zend/good/ext/date/tests/date_sun_info_variation3.php on line 73
+Warning: date_sun_info() expects parameter 3 to be double, integer given in %s/zend/good/ext/date/tests/date_sun_info_variation3.php on line %d
 
 -- Iteration 3 --
 
-Warning: date_sun_info() expects parameter 3 to be double, integer given in %s/zend/good/ext/date/tests/date_sun_info_variation3.php on line 73
+Warning: date_sun_info() expects parameter 3 to be double, integer given in %s/zend/good/ext/date/tests/date_sun_info_variation3.php on line %d
 
 -- Iteration 4 --
 
-Warning: date_sun_info() expects parameter 3 to be double, integer given in %s/zend/good/ext/date/tests/date_sun_info_variation3.php on line 73
+Warning: date_sun_info() expects parameter 3 to be double, integer given in %s/zend/good/ext/date/tests/date_sun_info_variation3.php on line %d
 
 -- Iteration 5 --
 darray(9) {
@@ -128,61 +128,53 @@ darray(9) {
 
 -- Iteration 10 --
 
-Warning: date_sun_info() expects parameter 3 to be double, null given in %s/zend/good/ext/date/tests/date_sun_info_variation3.php on line 73
+Warning: date_sun_info() expects parameter 3 to be double, null given in %s/zend/good/ext/date/tests/date_sun_info_variation3.php on line %d
 
 -- Iteration 11 --
 
-Warning: date_sun_info() expects parameter 3 to be double, null given in %s/zend/good/ext/date/tests/date_sun_info_variation3.php on line 73
+Warning: date_sun_info() expects parameter 3 to be double, null given in %s/zend/good/ext/date/tests/date_sun_info_variation3.php on line %d
 
 -- Iteration 12 --
 
-Warning: date_sun_info() expects parameter 3 to be double, boolean given in %s/zend/good/ext/date/tests/date_sun_info_variation3.php on line 73
+Warning: date_sun_info() expects parameter 3 to be double, boolean given in %s/zend/good/ext/date/tests/date_sun_info_variation3.php on line %d
 
 -- Iteration 13 --
 
-Warning: date_sun_info() expects parameter 3 to be double, boolean given in %s/zend/good/ext/date/tests/date_sun_info_variation3.php on line 73
+Warning: date_sun_info() expects parameter 3 to be double, boolean given in %s/zend/good/ext/date/tests/date_sun_info_variation3.php on line %d
 
 -- Iteration 14 --
 
-Warning: date_sun_info() expects parameter 3 to be double, boolean given in %s/zend/good/ext/date/tests/date_sun_info_variation3.php on line 73
+Warning: date_sun_info() expects parameter 3 to be double, boolean given in %s/zend/good/ext/date/tests/date_sun_info_variation3.php on line %d
 
 -- Iteration 15 --
 
-Warning: date_sun_info() expects parameter 3 to be double, boolean given in %s/zend/good/ext/date/tests/date_sun_info_variation3.php on line 73
+Warning: date_sun_info() expects parameter 3 to be double, boolean given in %s/zend/good/ext/date/tests/date_sun_info_variation3.php on line %d
 
 -- Iteration 16 --
 
-Warning: date_sun_info() expects parameter 3 to be double, string given in %s/zend/good/ext/date/tests/date_sun_info_variation3.php on line 73
+Warning: date_sun_info() expects parameter 3 to be double, string given in %s/zend/good/ext/date/tests/date_sun_info_variation3.php on line %d
 
 -- Iteration 17 --
 
-Warning: date_sun_info() expects parameter 3 to be double, string given in %s/zend/good/ext/date/tests/date_sun_info_variation3.php on line 73
+Warning: date_sun_info() expects parameter 3 to be double, string given in %s/zend/good/ext/date/tests/date_sun_info_variation3.php on line %d
 
 -- Iteration 18 --
 
-Warning: date_sun_info() expects parameter 3 to be double, varray given in %s/zend/good/ext/date/tests/date_sun_info_variation3.php on line 73
+Warning: date_sun_info() expects parameter 3 to be double, varray given in %s/zend/good/ext/date/tests/date_sun_info_variation3.php on line %d
 
 -- Iteration 19 --
 
-Warning: date_sun_info() expects parameter 3 to be double, string given in %s/zend/good/ext/date/tests/date_sun_info_variation3.php on line 73
+Warning: date_sun_info() expects parameter 3 to be double, string given in %s/zend/good/ext/date/tests/date_sun_info_variation3.php on line %d
 
 -- Iteration 20 --
 
-Warning: date_sun_info() expects parameter 3 to be double, string given in %s/zend/good/ext/date/tests/date_sun_info_variation3.php on line 73
+Warning: date_sun_info() expects parameter 3 to be double, string given in %s/zend/good/ext/date/tests/date_sun_info_variation3.php on line %d
 
 -- Iteration 21 --
 
-Warning: date_sun_info() expects parameter 3 to be double, string given in %s/zend/good/ext/date/tests/date_sun_info_variation3.php on line 73
+Warning: date_sun_info() expects parameter 3 to be double, string given in %s/zend/good/ext/date/tests/date_sun_info_variation3.php on line %d
 
 -- Iteration 22 --
 
-Warning: date_sun_info() expects parameter 3 to be double, null given in %s/zend/good/ext/date/tests/date_sun_info_variation3.php on line 73
-
--- Iteration 23 --
-
-Warning: date_sun_info() expects parameter 3 to be double, null given in %s/zend/good/ext/date/tests/date_sun_info_variation3.php on line 73
-
--- Iteration 24 --
-
-Warning: date_sun_info() expects parameter 3 to be double, resource given in %s/zend/good/ext/date/tests/date_sun_info_variation3.php on line 73
+Warning: date_sun_info() expects parameter 3 to be double, resource given in %s/zend/good/ext/date/tests/date_sun_info_variation3.php on line %d
 ===Done===

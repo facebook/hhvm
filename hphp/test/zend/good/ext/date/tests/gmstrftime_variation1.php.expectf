@@ -2,117 +2,117 @@
 
 --int 0--
 
-Warning: gmstrftime() expects parameter 1 to be string, integer given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line 89
+Warning: gmstrftime() expects parameter 1 to be string, integer given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line %d
 
-Warning: gmstrftime() expects parameter 1 to be string, integer given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line 90
+Warning: gmstrftime() expects parameter 1 to be string, integer given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line %d
 
 --int 1--
 
-Warning: gmstrftime() expects parameter 1 to be string, integer given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line 89
+Warning: gmstrftime() expects parameter 1 to be string, integer given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line %d
 
-Warning: gmstrftime() expects parameter 1 to be string, integer given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line 90
+Warning: gmstrftime() expects parameter 1 to be string, integer given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line %d
 
 --int 12345--
 
-Warning: gmstrftime() expects parameter 1 to be string, integer given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line 89
+Warning: gmstrftime() expects parameter 1 to be string, integer given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line %d
 
-Warning: gmstrftime() expects parameter 1 to be string, integer given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line 90
+Warning: gmstrftime() expects parameter 1 to be string, integer given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line %d
 
 --int -12345--
 
-Warning: gmstrftime() expects parameter 1 to be string, integer given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line 89
+Warning: gmstrftime() expects parameter 1 to be string, integer given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line %d
 
-Warning: gmstrftime() expects parameter 1 to be string, integer given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line 90
+Warning: gmstrftime() expects parameter 1 to be string, integer given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line %d
 
 --float 10.5--
 
-Warning: gmstrftime() expects parameter 1 to be string, double given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line 89
+Warning: gmstrftime() expects parameter 1 to be string, double given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line %d
 
-Warning: gmstrftime() expects parameter 1 to be string, double given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line 90
+Warning: gmstrftime() expects parameter 1 to be string, double given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line %d
 
 --float -10.5--
 
-Warning: gmstrftime() expects parameter 1 to be string, double given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line 89
+Warning: gmstrftime() expects parameter 1 to be string, double given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line %d
 
-Warning: gmstrftime() expects parameter 1 to be string, double given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line 90
+Warning: gmstrftime() expects parameter 1 to be string, double given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line %d
 
---float 12.3456789000e10--
+--float 12.345678%d00e10--
 
-Warning: gmstrftime() expects parameter 1 to be string, double given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line 89
+Warning: gmstrftime() expects parameter 1 to be string, double given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line %d
 
-Warning: gmstrftime() expects parameter 1 to be string, double given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line 90
+Warning: gmstrftime() expects parameter 1 to be string, double given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line %d
 
---float -12.3456789000e10--
+--float -12.345678%d00e10--
 
-Warning: gmstrftime() expects parameter 1 to be string, double given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line 89
+Warning: gmstrftime() expects parameter 1 to be string, double given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line %d
 
-Warning: gmstrftime() expects parameter 1 to be string, double given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line 90
+Warning: gmstrftime() expects parameter 1 to be string, double given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line %d
 
 --float .5--
 
-Warning: gmstrftime() expects parameter 1 to be string, double given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line 89
+Warning: gmstrftime() expects parameter 1 to be string, double given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line %d
 
-Warning: gmstrftime() expects parameter 1 to be string, double given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line 90
+Warning: gmstrftime() expects parameter 1 to be string, double given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line %d
 
 --empty array--
 
-Warning: gmstrftime() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line 89
+Warning: gmstrftime() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line %d
 
-Warning: gmstrftime() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line 90
+Warning: gmstrftime() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line %d
 
 --int indexed array--
 
-Warning: gmstrftime() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line 89
+Warning: gmstrftime() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line %d
 
-Warning: gmstrftime() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line 90
+Warning: gmstrftime() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line %d
 
 --associative array--
 
-Warning: gmstrftime() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line 89
+Warning: gmstrftime() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line %d
 
-Warning: gmstrftime() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line 90
+Warning: gmstrftime() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line %d
 
 --nested arrays--
 
-Warning: gmstrftime() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line 89
+Warning: gmstrftime() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line %d
 
-Warning: gmstrftime() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line 90
+Warning: gmstrftime() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line %d
 
 --uppercase NULL--
 
-Warning: gmstrftime() expects parameter 1 to be string, null given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line 89
+Warning: gmstrftime() expects parameter 1 to be string, null given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line %d
 
-Warning: gmstrftime() expects parameter 1 to be string, null given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line 90
+Warning: gmstrftime() expects parameter 1 to be string, null given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line %d
 
 --lowercase null--
 
-Warning: gmstrftime() expects parameter 1 to be string, null given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line 89
+Warning: gmstrftime() expects parameter 1 to be string, null given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line %d
 
-Warning: gmstrftime() expects parameter 1 to be string, null given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line 90
+Warning: gmstrftime() expects parameter 1 to be string, null given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line %d
 
 --lowercase true--
 
-Warning: gmstrftime() expects parameter 1 to be string, boolean given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line 89
+Warning: gmstrftime() expects parameter 1 to be string, boolean given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line %d
 
-Warning: gmstrftime() expects parameter 1 to be string, boolean given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line 90
+Warning: gmstrftime() expects parameter 1 to be string, boolean given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line %d
 
 --lowercase false--
 
-Warning: gmstrftime() expects parameter 1 to be string, boolean given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line 89
+Warning: gmstrftime() expects parameter 1 to be string, boolean given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line %d
 
-Warning: gmstrftime() expects parameter 1 to be string, boolean given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line 90
+Warning: gmstrftime() expects parameter 1 to be string, boolean given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line %d
 
 --uppercase TRUE--
 
-Warning: gmstrftime() expects parameter 1 to be string, boolean given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line 89
+Warning: gmstrftime() expects parameter 1 to be string, boolean given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line %d
 
-Warning: gmstrftime() expects parameter 1 to be string, boolean given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line 90
+Warning: gmstrftime() expects parameter 1 to be string, boolean given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line %d
 
 --uppercase FALSE--
 
-Warning: gmstrftime() expects parameter 1 to be string, boolean given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line 89
+Warning: gmstrftime() expects parameter 1 to be string, boolean given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line %d
 
-Warning: gmstrftime() expects parameter 1 to be string, boolean given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line 90
+Warning: gmstrftime() expects parameter 1 to be string, boolean given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line %d
 
 --empty string DQ--
 bool(false)
@@ -124,25 +124,13 @@ bool(false)
 
 --instance of classWithToString--
 
-Warning: gmstrftime() expects parameter 1 to be string, object given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line 89
+Warning: gmstrftime() expects parameter 1 to be string, object given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line %d
 
-Warning: gmstrftime() expects parameter 1 to be string, object given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line 90
+Warning: gmstrftime() expects parameter 1 to be string, object given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line %d
 
 --instance of classWithoutToString--
 
-Warning: gmstrftime() expects parameter 1 to be string, object given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line 89
+Warning: gmstrftime() expects parameter 1 to be string, object given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line %d
 
-Warning: gmstrftime() expects parameter 1 to be string, object given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line 90
-
---undefined var--
-
-Warning: gmstrftime() expects parameter 1 to be string, null given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line 89
-
-Warning: gmstrftime() expects parameter 1 to be string, null given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line 90
-
---unset var--
-
-Warning: gmstrftime() expects parameter 1 to be string, null given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line 89
-
-Warning: gmstrftime() expects parameter 1 to be string, null given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line 90
+Warning: gmstrftime() expects parameter 1 to be string, object given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line %d
 ===DONE===

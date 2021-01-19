@@ -2,31 +2,31 @@
 
 --float 10.5--
 
-Warning: idate() expects parameter 2 to be integer, double given in %s/idate_variation2.php on line 98
+Warning: idate() expects parameter 2 to be integer, double given in %s/idate_variation2.php on line %d
 
 --float -10.5--
 
-Warning: idate() expects parameter 2 to be integer, double given in %s/idate_variation2.php on line 98
+Warning: idate() expects parameter 2 to be integer, double given in %s/idate_variation2.php on line %d
 
 --float .5--
 
-Warning: idate() expects parameter 2 to be integer, double given in %s/idate_variation2.php on line 98
+Warning: idate() expects parameter 2 to be integer, double given in %s/idate_variation2.php on line %d
 
 --empty array--
 
-Warning: idate() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/idate_variation2.php on line 98
+Warning: idate() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/idate_variation2.php on line %d
 
 --int indexed array--
 
-Warning: idate() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/idate_variation2.php on line 98
+Warning: idate() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/idate_variation2.php on line %d
 
 --associative array--
 
-Warning: idate() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/idate_variation2.php on line 98
+Warning: idate() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/idate_variation2.php on line %d
 
 --nested arrays--
 
-Warning: idate() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/idate_variation2.php on line 98
+Warning: idate() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/idate_variation2.php on line %d
 
 --uppercase NULL--
 bool(true)
@@ -36,55 +36,49 @@ bool(true)
 
 --lowercase true--
 
-Warning: idate() expects parameter 2 to be integer, boolean given in %s/idate_variation2.php on line 98
+Warning: idate() expects parameter 2 to be integer, boolean given in %s/idate_variation2.php on line %d
 
 --lowercase false--
 
-Warning: idate() expects parameter 2 to be integer, boolean given in %s/idate_variation2.php on line 98
+Warning: idate() expects parameter 2 to be integer, boolean given in %s/idate_variation2.php on line %d
 
 --uppercase TRUE--
 
-Warning: idate() expects parameter 2 to be integer, boolean given in %s/idate_variation2.php on line 98
+Warning: idate() expects parameter 2 to be integer, boolean given in %s/idate_variation2.php on line %d
 
 --uppercase FALSE--
 
-Warning: idate() expects parameter 2 to be integer, boolean given in %s/idate_variation2.php on line 98
+Warning: idate() expects parameter 2 to be integer, boolean given in %s/idate_variation2.php on line %d
 
 --empty string DQ--
 
-Warning: idate() expects parameter 2 to be integer, string given in %s/idate_variation2.php on line 98
+Warning: idate() expects parameter 2 to be integer, string given in %s/idate_variation2.php on line %d
 
 --empty string SQ--
 
-Warning: idate() expects parameter 2 to be integer, string given in %s/idate_variation2.php on line 98
+Warning: idate() expects parameter 2 to be integer, string given in %s/idate_variation2.php on line %d
 
 --string DQ--
 
-Warning: idate() expects parameter 2 to be integer, string given in %s/idate_variation2.php on line 98
+Warning: idate() expects parameter 2 to be integer, string given in %s/idate_variation2.php on line %d
 
 --string SQ--
 
-Warning: idate() expects parameter 2 to be integer, string given in %s/idate_variation2.php on line 98
+Warning: idate() expects parameter 2 to be integer, string given in %s/idate_variation2.php on line %d
 
 --mixed case string--
 
-Warning: idate() expects parameter 2 to be integer, string given in %s/idate_variation2.php on line 98
+Warning: idate() expects parameter 2 to be integer, string given in %s/idate_variation2.php on line %d
 
 --heredoc--
 
-Warning: idate() expects parameter 2 to be integer, string given in %s/idate_variation2.php on line 98
+Warning: idate() expects parameter 2 to be integer, string given in %s/idate_variation2.php on line %d
 
 --instance of classWithToString--
 
-Warning: idate() expects parameter 2 to be integer, object given in %s/idate_variation2.php on line 98
+Warning: idate() expects parameter 2 to be integer, object given in %s/idate_variation2.php on line %d
 
 --instance of classWithoutToString--
 
-Warning: idate() expects parameter 2 to be integer, object given in %s/idate_variation2.php on line 98
-
---undefined var--
-bool(true)
-
---unset var--
-bool(true)
+Warning: idate() expects parameter 2 to be integer, object given in %s/idate_variation2.php on line %d
 ===DONE===

@@ -359,39 +359,14 @@ let get_concrete_supertypes env ty =
             env
             acc
             (TySet.elements (Env.get_upper_bounds env n targs) @ tyl)
-      | Tunion tyl' ->
-        let tys = TySet.of_list tyl' in
-        begin
-          match TySet.elements tys with
-          | [ty] -> iter seen env acc (ty :: tyl)
-          | _ -> iter seen env (TySet.add ty acc) tyl
-        end
+      | Tintersection tyl' -> iter seen env acc (tyl' @ tyl)
       | _ -> iter seen env (TySet.add ty acc) tyl)
   in
   let (env, resl) = iter SSet.empty env TySet.empty [ty] in
   (env, TySet.elements resl)
 
-(* Try running function on each concrete supertype in turn. Return all
- * successful results
- *)
-let try_over_concrete_supertypes env ty f =
-  let (env, tyl) = get_concrete_supertypes env ty in
-  (* If there is just a single result then don't swallow errors *)
-  match tyl with
-  | [ty] -> [f env ty]
-  | _ ->
-    let rec iter_over_types env resl tyl =
-      match tyl with
-      | [] -> resl
-      | ty :: tyl ->
-        Errors.try_
-          (fun () -> iter_over_types env (f env ty :: resl) tyl)
-          (fun _ -> iter_over_types env resl tyl)
-    in
-    iter_over_types env [] tyl
-
 (** Run a function on an intersection represented by a list of types.
-    Similarly to try_over_concrete_supertypes, we stay liberal with errors:
+    We stay liberal with errors:
     discard the result of any run which has produced an error.
     If all runs have produced an error, gather all errors and results and add errors. *)
 let run_on_intersection :

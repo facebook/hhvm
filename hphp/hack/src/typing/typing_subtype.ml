@@ -2093,14 +2093,15 @@ and simplify_subtype_has_member
             Typing_object_get.obj_get
               ~obj_pos:(Reason.to_pos r)
               ~is_method
+              ~inst_meth:false
               ~coerce_from_ty:None
               ~nullsafe
               ~explicit_targs
+              ~class_id
+              ~member_id:name
+              ~on_error:subtype_env.on_error
               env
-              ty_sub
-              class_id
-              name
-              subtype_env.on_error)
+              ty_sub)
       in
       let prop =
         if Errors.is_empty errors then

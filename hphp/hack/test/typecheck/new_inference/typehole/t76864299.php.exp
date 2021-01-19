@@ -1,0 +1,6 @@
+File "t76864299.php", line 10, characters 10-11:
+Invalid return type (Typing[4110])
+  File "t76864299.php", line 6, characters 30-30:
+  Expected `T`
+  File "t76864299.php", line 6, characters 23-23:
+  But got `J`

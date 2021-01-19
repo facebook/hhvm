@@ -2,6 +2,8 @@ File "this_anon_bad.php", line 34, characters 11-19:
 Invalid argument (Typing[4110])
   File "this_anon_bad.php", line 21, characters 13-17:
   Expected `this`
+  File "this_anon_bad.php", line 14, characters 41-44:
+    via this generic `this`
   File "this_anon_bad.php", line 34, characters 15-17:
   But got `Foo`
   File "this_anon_bad.php", line 13, characters 7-9:

@@ -466,14 +466,15 @@ and has_dispose_method env has_await p e ty =
     TOG.obj_get
       ~obj_pos:(fst e)
       ~is_method:true
+      ~inst_meth:false
       ~nullsafe:None
       ~coerce_from_ty:None
       ~explicit_targs:[]
+      ~class_id:(CIexpr e)
+      ~member_id:(p, meth)
+      ~on_error:(Errors.using_error p has_await)
       env
       ty
-      (CIexpr e)
-      (p, meth)
-      (Errors.using_error p has_await)
   in
   let (env, (_tel, _typed_unpack_element, _ty)) =
     call ~expected:None p env tfty [] None
@@ -1679,14 +1680,15 @@ and expr_
       TOG.obj_get
         ~obj_pos:(fst e)
         ~is_method:true
+        ~inst_meth:false
         ~nullsafe:None
         ~coerce_from_ty:None
         ~explicit_targs:[]
+        ~class_id:(CIexpr e)
+        ~member_id:(p, SN.Members.__clone)
+        ~on_error:Errors.unify_error
         env
         ty
-        (CIexpr e)
-        (p, SN.Members.__clone)
-        Errors.unify_error
     in
     let (env, (_tel, _typed_unpack_element, _ty)) =
       call ~expected:None p env tfty [] None
@@ -1778,20 +1780,18 @@ and expr_
      *)
     let (env, te, ty1) = expr env instance in
     let (env, (result, _tal)) =
-      TOG.obj_get_
+      TOG.obj_get
         ~inst_meth:true
         ~obj_pos:p
         ~is_method:true
         ~nullsafe:None
         ~coerce_from_ty:None
-        ~is_nonnull:false
         ~explicit_targs:[]
+        ~class_id:(CIexpr instance)
+        ~member_id:meth
+        ~on_error:Errors.unify_error
         env
         ty1
-        (CIexpr instance)
-        meth
-        (fun x -> x)
-        Errors.unify_error
     in
     let (env, result) =
       Env.FakeMembers.check_instance_invalid env instance (snd meth) result
@@ -1834,13 +1834,14 @@ and expr_
           ~obj_pos:pos
           ~is_method:true
           ~nullsafe:None
+          ~inst_meth:false
           ~coerce_from_ty:None
           ~explicit_targs:[]
+          ~class_id:(CI (pos, class_name))
+          ~member_id:meth_name
+          ~on_error:Errors.unify_error
           env
           local_obj_ty
-          (CI (pos, class_name))
-          meth_name
-          Errors.unify_error
       in
       let (env, fty) = Env.expand_type env fty in
       (match deref fty with
@@ -3006,14 +3007,15 @@ and expr_
                 TOG.obj_get
                   ~obj_pos:(fst sid)
                   ~is_method:false
+                  ~inst_meth:false
                   ~nullsafe:None
                   ~coerce_from_ty:None
                   ~explicit_targs:[]
+                  ~class_id:cid
+                  ~member_id:namepstr
+                  ~on_error:Errors.unify_error
                   env
                   obj
-                  cid
-                  namepstr
-                  Errors.unify_error
               in
               let ureason = Reason.URxhp (Cls.name class_info, snd namepstr) in
               Typing_coercion.coerce_type
@@ -4053,13 +4055,14 @@ and assign_ p ur env e1 ty2 =
         ~obj_pos:(fst obj)
         ~is_method:false
         ~nullsafe
+        ~inst_meth:false
         ~coerce_from_ty:(Some (p, ur, ty2))
         ~explicit_targs:[]
+        ~class_id:(CIexpr e1)
+        ~member_id:m
+        ~on_error:Errors.unify_error
         env
         obj_ty
-        (CIexpr e1)
-        m
-        Errors.unify_error
     in
     let te1 =
       Tast.make_typed_expr
@@ -4428,23 +4431,20 @@ and dispatch_call
       else
         (* parent::nonStaticFunc() is really weird. It's calling a method
          * defined on the parent class, but $this is still the child class.
-         * We can deal with this by hijacking the continuation that
-         * calculates the SN.Typehints.this type *)
-        let k_lhs _ = this_ty in
-        TOG.obj_get_
+         *)
+        TOG.obj_get
           ~inst_meth:false
           ~is_method:true
           ~nullsafe:None
           ~obj_pos:pos
           ~coerce_from_ty:None
-          ~is_nonnull:false
           ~explicit_targs:[]
+          ~class_id:e1
+          ~member_id:m
+          ~on_error:Errors.unify_error
+          ~parent_ty:ty1
           env
-          ty1
-          e1
-          m
-          k_lhs
-          Errors.unify_error
+          this_ty
     in
     check_disposable_in_return env fty;
     let ty =
@@ -4941,14 +4941,15 @@ and dispatch_call
       TOG.obj_get
         ~obj_pos:(fst e1)
         ~is_method:true
+        ~inst_meth:false
         ~nullsafe:(Option.map ~f:(fun p -> Reason.Rnullsafe_op p) nullsafe)
         ~coerce_from_ty:None
         ~explicit_targs
+        ~class_id:(CIexpr e1)
+        ~member_id:m
+        ~on_error:Errors.unify_error
         env
         ty1
-        (CIexpr e1)
-        m
-        Errors.unify_error
     in
     check_disposable_in_return env tfty;
     let (env, (tel, typed_unpack_element, ty)) =
@@ -5978,576 +5979,542 @@ and call
     env * (Tast.expr list * Tast.expr option * locl_ty) =
   let expr = expr ~allow_awaitable:(*?*) false in
   let exprs = exprs ~allow_awaitable:(*?*) false in
-  let resl =
-    TUtils.try_over_concrete_supertypes env fty (fun env fty ->
-        let (env, efty) =
-          if TypecheckerOptions.method_call_inference (Env.get_tcopt env) then
-            Env.expand_type env fty
-          else
-            Typing_solver.expand_type_and_solve
-              ~description_of_expected:"a function value"
-              env
-              pos
-              fty
-              Errors.unify_error
-        in
-        match deref efty with
-        | (r, Tdynamic) when TCO.enable_sound_dynamic (Env.get_tcopt env) ->
-          let ty = MakeType.dynamic (Reason.Rdynamic_call pos) in
-          let el =
-            (* Need to check that the type of the unpacked_element can be,
-             * coerced to dynamic, just like all of the other arguments, in addition
-             * to the check below in call_untyped_unpack, that it is unpackable.
-             * We don't need to unpack and check each type because a tuple is
-             * coercible iff it's constituent types are. *)
-            Option.value_map ~f:(fun u -> el @ [u]) ~default:el unpacked_element
-          in
-          let _expected_arg_ty = ExpectedTy.make pos Reason.URparam ty in
-          let (env, tel) =
-            List.map_env env el (fun env elt ->
-                let (env, te, e_ty) =
-                  expr (*~expected:expected_arg_ty*) env elt
-                in
-                let env =
-                  match elt with
-                  | (_, Callconv (Ast_defs.Pinout, e1)) ->
-                    let (env, _te, _ty) =
-                      assign_ (fst e1) Reason.URparam_inout env e1 efty
-                    in
-                    env
-                  | _ -> env
-                in
-                let env =
-                  Typing_coercion.coerce_type
-                    pos
-                    Reason.URnone
-                    env
-                    e_ty
-                    {
-                      Typing_defs_core.et_type = ty;
-                      Typing_defs_core.et_enforced = false;
-                    }
-                    Errors.unify_error
-                in
-                (env, te))
-          in
-          let env =
-            call_untyped_unpack env (Reason.to_pos r) unpacked_element
-          in
-          (env, (tel, None, ty))
-        | (r, ((Tprim Tnull | Tdynamic | Terr | Tany _ | Tunion []) as ty))
-          when match ty with
-               | Tprim Tnull -> Option.is_some nullsafe
-               | _ -> true ->
-          let el =
-            Option.value_map ~f:(fun u -> el @ [u]) ~default:el unpacked_element
-          in
-          let expected_arg_ty =
-            (* Note: We ought to be using 'mixed' here *)
-            ExpectedTy.make pos Reason.URparam (Typing_utils.mk_tany env pos)
-          in
-          let (env, tel) =
-            List.map_env env el (fun env elt ->
-                let (env, te, ty) = expr ~expected:expected_arg_ty env elt in
-                let env =
-                  if TCO.global_inference (Env.get_tcopt env) then
-                    match get_node efty with
-                    | Terr
-                    | Tany _
-                    | Tdynamic ->
-                      Typing_coercion.coerce_type
-                        pos
-                        Reason.URparam
-                        env
-                        ty
-                        (MakeType.unenforced efty)
-                        Errors.unify_error
-                    | _ -> env
-                  else
-                    env
-                in
-                let env =
-                  match elt with
-                  | (_, Callconv (Ast_defs.Pinout, e1)) ->
-                    let (env, _te, _ty) =
-                      assign_ (fst e1) Reason.URparam_inout env e1 efty
-                    in
-                    env
-                  | _ -> env
-                in
-                (env, te))
-          in
-          let env =
-            call_untyped_unpack env (Reason.to_pos r) unpacked_element
-          in
-          let ty =
-            match ty with
-            | Tprim Tnull -> mk (r, Tprim Tnull)
-            | Tdynamic -> MakeType.dynamic (Reason.Rdynamic_call pos)
-            | Terr
-            | Tany _ ->
-              Typing_utils.mk_tany env pos
-            | Tunion []
-            | _ (* _ should not happen! *) ->
-              mk (r, Tunion [])
-          in
-          (env, (tel, None, ty))
-        | (_, Tunion [ty]) ->
-          call ~expected ~nullsafe ?in_await pos env ty el unpacked_element
-        | (r, Tunion tyl) ->
-          let (env, resl) =
-            List.map_env env tyl (fun env ty ->
-                call
-                  ~expected
-                  ~nullsafe
-                  ?in_await
-                  pos
-                  env
-                  ty
-                  el
-                  unpacked_element)
-          in
-          let retl = List.map resl ~f:(fun (_, _, x) -> x) in
-          let (env, ty) = Union.union_list env r retl in
-          (* We shouldn't be picking arbitrarily for the TAST here, as TAST checks
-           * depend on the types inferred. Here's we're preserving legacy behaviour
-           * by picking the last one.
-           * TODO: don't do this, instead use subtyping to push unions
-           * through function types
-           *)
-          let (tel, typed_unpack_element, _) = List.hd_exn (List.rev resl) in
-          (env, (tel, typed_unpack_element, ty))
-        | (r, Tintersection tyl) ->
-          let (env, resl) =
-            TUtils.run_on_intersection env tyl ~f:(fun env ty ->
-                call
-                  ~expected
-                  ~nullsafe
-                  ?in_await
-                  pos
-                  env
-                  ty
-                  el
-                  unpacked_element)
-          in
-          let retl = List.map resl ~f:(fun (_, _, x) -> x) in
-          let (env, ty) = Inter.intersect_list env r retl in
-          (* We shouldn't be picking arbitrarily for the TAST here, as TAST checks
-           * depend on the types inferred. Here we're preserving legacy behaviour
-           * by picking the last one.
-           * TODO: don't do this, instead use subtyping to push intersections
-           * through function types
-           *)
-          let (tel, typed_unpack_element, _) = List.hd_exn (List.rev resl) in
-          (env, (tel, typed_unpack_element, ty))
-        | (r2, Tfun ft) ->
-          (* Typing of format string functions. It is dependent on the arguments (el)
-           * so it cannot be done earlier.
-           *)
-          let pos_def = Reason.to_pos r2 in
-          let (env, ft) = Typing_exts.retype_magic_func env ft el in
-          let (env, var_param) = variadic_param env ft in
-          (* Force subtype with expected result *)
-          let env =
-            check_expected_ty "Call result" env ft.ft_ret.et_type expected
-          in
-          let env = Env.set_tyvar_variance env ft.ft_ret.et_type in
-          let is_lambda e =
-            match snd e with
-            | Efun _
-            | Lfun _ ->
-              true
-            | _ -> false
-          in
-          let get_next_param_info paraml =
-            match paraml with
-            | param :: paraml -> (false, Some param, paraml)
-            | [] -> (true, var_param, paraml)
-          in
-          (* TODO: We're using plain String at the moment, until we
-           * introduce actual atom notation (#A instead of "A")
-           *)
-          let expand_atom_in_enum env enum_name atom_name =
-            let cls = Env.get_class env enum_name in
-            match cls with
-            | Some cls ->
-              (match Env.get_const env cls atom_name with
-              | Some const_def ->
-                let dty = const_def.cc_type in
-                let (env, lty) = Phase.localize_with_self env dty in
-                let hi = (pos, lty) in
-                let te = (hi, EnumAtom atom_name) in
-                (env, Some (te, lty))
-              | None ->
-                Errors.atom_unknown pos atom_name enum_name;
-                (env, None))
-            | None -> (env, None)
-          in
-          let check_arg env ((pos, arg) as e) opt_param ~is_variadic =
-            match opt_param with
-            | Some param ->
-              (* First check if __Atom is used *)
-              let (env, atom_type) =
-                let is_atom = get_fp_is_atom param in
-                let ety = param.fp_type.et_type in
-                match arg with
-                | EnumAtom atom_name when is_atom ->
-                  (match get_node ety with
-                  | Tnewtype (name, [ty_enum; _ty_interface], _)
-                    when String.equal name SN.Classes.cMemberOf ->
-                    (match get_node ty_enum with
-                    | Tclass ((_, enum_name), _, _)
-                      when Env.is_enum_class env enum_name ->
-                      expand_atom_in_enum env enum_name atom_name
-                    | Tgeneric (name, _) ->
-                      let upper_bounds =
-                        Typing_utils.collect_enum_class_upper_bounds env name
-                      in
-                      (* To avoid ambiguity, we only support the case where
-                       * there is a single upper bound that is an EnumClass.
-                       * We might want to relax that later (e.g. with  the
-                       * support for intersections.
-                       * See Typing_check_decls.check_atom_on_param.
-                       *)
-                      if SSet.cardinal upper_bounds = 1 then
-                        let enum_name = SSet.choose upper_bounds in
-                        expand_atom_in_enum env enum_name atom_name
-                      else
-                        (env, None)
-                    | _ ->
-                      (* Already reported, see Typing_check_decls *)
-                      (env, None))
-                  | _ ->
-                    (* Already reported, see Typing_check_decls *)
-                    (env, None))
-                | Class_const _ when is_atom ->
-                  Errors.atom_invalid_argument pos;
-                  (env, None)
-                | _ -> (env, None)
-              in
-              let (env, te, ty) =
-                match atom_type with
-                | Some (te, ty) -> (env, te, ty)
-                | None ->
-                  let expected =
-                    ExpectedTy.make_and_allow_coercion
-                      pos
-                      Reason.URparam
-                      param.fp_type
-                  in
-                  expr
-                    ~accept_using_var:(get_fp_accept_disposable param)
-                    ~expected
-                    env
-                    e
-              in
-              let env = call_param env param (e, ty) ~is_variadic in
-              (env, Some (te, ty))
-            | None ->
-              let expected =
-                ExpectedTy.make
-                  pos
-                  Reason.URparam
-                  (Typing_utils.mk_tany env pos)
-              in
-              let (env, te, ty) = expr ~expected env e in
-              (env, Some (te, ty))
-          in
-          let set_tyvar_variance_from_lambda_param env opt_param =
-            match opt_param with
-            | Some param ->
-              let rec set_params_variance env ty =
-                let (env, ty) = Env.expand_type env ty in
-                match get_node ty with
-                | Tunion [ty] -> set_params_variance env ty
-                | Toption ty -> set_params_variance env ty
-                | Tfun { ft_params; ft_ret; _ } ->
-                  let env =
-                    List.fold
-                      ~init:env
-                      ~f:(fun env param ->
-                        Env.set_tyvar_variance env param.fp_type.et_type)
-                      ft_params
-                  in
-                  Env.set_tyvar_variance env ft_ret.et_type ~flip:true
-                | _ -> env
-              in
-              set_params_variance env param.fp_type.et_type
-            | None -> env
-          in
-          (* Given an expected function type ft, check types for the non-unpacked
-           * arguments. Don't check lambda expressions if check_lambdas=false *)
-          let rec check_args check_lambdas env el paraml =
-            match el with
-            (* We've got an argument *)
-            | (e, opt_result) :: el ->
-              (* Pick up next parameter type info *)
-              let (is_variadic, opt_param, paraml) =
-                get_next_param_info paraml
-              in
-              let (env, one_result) =
-                match (check_lambdas, is_lambda e) with
-                | (false, false)
-                | (true, true) ->
-                  check_arg env e opt_param ~is_variadic
-                | (false, true) ->
-                  let env =
-                    set_tyvar_variance_from_lambda_param env opt_param
-                  in
-                  (env, opt_result)
-                | (true, false) -> (env, opt_result)
-              in
-              let (env, rl, paraml) = check_args check_lambdas env el paraml in
-              (env, (e, one_result) :: rl, paraml)
-            | [] -> (env, [], paraml)
-          in
-          (* Same as above, but checks the types of the implicit arguments, which are
-           * read from the context *)
-          let check_implicit_args env =
-            let capability =
-              Typing_coeffects.get_type ft.ft_implicit_params.capability
-            in
-            if not (TypecheckerOptions.call_coeffects (Env.get_tcopt env)) then
-              env
-            else
-              let env_capability =
-                Env.get_local_check_defined
-                  env
-                  (pos, Typing_coeffects.capability_id)
-              in
-              Type.sub_type
-                pos
-                Reason.URnone
-                env
-                env_capability
-                capability
-                (fun ?code:_c _ _ ->
-                  Errors.call_coeffect_error
-                    pos
-                    ~available_incl_unsafe:
-                      (Typing_print.coeffects env env_capability)
-                    ~available_pos:(Typing_defs.get_pos env_capability)
-                    ~required_pos:(Typing_defs.get_pos capability)
-                    ~required:(Typing_print.coeffects env capability))
-          in
-
-          (* First check the non-lambda arguments. For generic functions, this
-           * is likely to resolve type variables to concrete types *)
-          let rl = List.map el (fun e -> (e, None)) in
-          let (env, rl, _) = check_args false env rl ft.ft_params in
-          (* Now check the lambda arguments, hopefully with type variables resolved *)
-          let (env, rl, paraml) = check_args true env rl ft.ft_params in
-          (* We expect to see results for all arguments after this second pass *)
-          let get_param opt =
-            match opt with
-            | Some x -> x
-            | None -> failwith "missing parameter in check_args"
-          in
-          let (tel, tys) =
-            let l = List.map rl (fun (_, opt) -> get_param opt) in
-            List.unzip l
-          in
-          let env = check_implicit_args env in
-          let env = TR.check_call env method_call_info pos r2 ft tys in
-          let (env, typed_unpack_element, arity, did_unpack) =
-            match unpacked_element with
-            | None -> (env, None, List.length el, false)
-            | Some e ->
-              (* Now that we're considering an splat (Some e) we need to construct a type that
-               * represents the remainder of the function's parameters. `paraml` represents those
-               * remaining parameters, and the variadic parameter is stored in `var_param`. For example, given
-               *
-               * function f(int $i, string $j, float $k = 3.14, mixed ...$m): void {}
-               * function g((string, float, bool) $t): void {
-               *   f(3, ...$t);
-               * }
-               *
-               * the constraint type we want is splat([#1], [opt#2], #3).
-               *)
-              let (consumed, required_params, optional_params) =
-                split_remaining_params_required_optional ft paraml
-              in
-              let (env, (d_required, d_optional, d_variadic)) =
-                generate_splat_type_vars
-                  env
-                  (fst e)
-                  required_params
-                  optional_params
-                  var_param
-              in
-              let destructure_ty =
-                ConstraintType
-                  (mk_constraint_type
-                     ( Reason.Runpack_param (fst e, pos_def, consumed),
-                       Tdestructure
-                         {
-                           d_required;
-                           d_optional;
-                           d_variadic;
-                           d_kind = SplatUnpack;
-                         } ))
-              in
-              let (env, te, ty) = expr env e in
-              (* Populate the type variables from the expression in the splat *)
-              let env =
-                Type.sub_type_i
-                  (fst e)
-                  Reason.URparam
-                  env
-                  (LoclType ty)
-                  destructure_ty
-                  Errors.unify_error
-              in
-              (* Use the type variables for the remaining parameters *)
-              let env =
-                List.fold2_exn
-                  ~init:env
-                  d_required
-                  required_params
-                  ~f:(fun env elt param ->
-                    call_param env param (e, elt) ~is_variadic:false)
-              in
-              let env =
-                List.fold2_exn
-                  ~init:env
-                  d_optional
-                  optional_params
-                  ~f:(fun env elt param ->
-                    call_param env param (e, elt) ~is_variadic:false)
-              in
-              let env =
-                Option.map2 d_variadic var_param ~f:(fun v vp ->
-                    call_param env vp (e, v) ~is_variadic:true)
-                |> Option.value ~default:env
-              in
-              ( env,
-                Some te,
-                List.length el + List.length d_required,
-                Option.is_some d_variadic )
-          in
-          (* If we unpacked an array, we don't check arity exactly. Since each
-           * unpacked array consumes 1 or many parameters, it is nonsensical to say
-           * that not enough args were passed in (so we don't do the min check).
-           *)
-          let () = check_arity ~did_unpack pos pos_def ft arity in
-          (* Variadic params cannot be inout so we can stop early *)
-          let env = wfold_left2 inout_write_back env ft.ft_params el in
-          let (env, ret_ty) =
-            TR.get_adjusted_return_type env method_call_info ft.ft_ret.et_type
-          in
-          (env, (tel, typed_unpack_element, ret_ty))
-        | (r, Tvar _)
-          when TypecheckerOptions.method_call_inference (Env.get_tcopt env) ->
-          (*
-            Typecheck calls with unresolved function type by constructing a
-            suitable function type from the arguments and invoking subtyping.
-          *)
-          let (env, typed_el, type_of_el) =
-            exprs ~accept_using_var:true env el
-          in
-          let (env, typed_unpacked_element, type_of_unpacked_element) =
-            match unpacked_element with
-            | Some unpacked ->
-              let (env, typed_unpacked, type_of_unpacked) =
-                expr ~accept_using_var:true env unpacked
-              in
-              (env, Some typed_unpacked, Some type_of_unpacked)
-            | None -> (env, None, None)
-          in
-          let mk_function_supertype
-              env pos (type_of_el, type_of_unpacked_element) =
-            let mk_fun_param ty =
-              let flags =
-                (* Keep supertype as permissive as possible: *)
-                make_fp_flags
-                  ~mode:FPnormal (* TODO: deal with `inout` parameters *)
-                  ~accept_disposable:false (* TODO: deal with disposables *)
-                  ~mutability:(Some Param_maybe_mutable)
-                  ~has_default:false
-                  ~ifc_external:false
-                  ~ifc_can_call:false
-                  ~is_atom:false
-              in
-              {
-                fp_pos = pos;
-                fp_name = None;
-                fp_type = MakeType.enforced ty;
-                fp_rx_annotation = None;
-                fp_flags = flags;
-              }
-            in
-            let ft_arity =
-              match type_of_unpacked_element with
-              | Some type_of_unpacked ->
-                let fun_param = mk_fun_param type_of_unpacked in
-                Fvariadic fun_param
-              | None -> Fstandard
-            in
-            (* TODO: ensure `ft_params`/`ft_where_constraints` don't affect subtyping *)
-            let ft_tparams = [] in
-            let ft_where_constraints = [] in
-            let ft_params = List.map ~f:mk_fun_param type_of_el in
-            let ft_implicit_params =
-              {
-                capability =
-                  CapDefaults pos
-                  (* TODO(coeffects) should this be a different type? *);
-              }
-            in
-            let (env, return_ty) = Env.fresh_type env pos in
-            let return_ty =
-              match in_await with
-              | None -> return_ty
-              | Some r -> MakeType.awaitable r return_ty
-            in
-            let ft_ret = MakeType.enforced return_ty in
-            (* A non-reactive supertype is most permissive: *)
-            let ft_reactive = Nonreactive in
-            let ft_flags =
-              (* Keep supertype as permissive as possible: *)
-              make_ft_flags
-                Ast_defs.FSync (* `FSync` fun can still return `Awaitable<_>` *)
-                (Some Param_maybe_mutable)
-                ~return_disposable:false (* TODO: deal with disposable return *)
-                ~returns_mutable:false
-                ~returns_void_to_rx:false
-            in
-            let ft_ifc_decl = Typing_defs_core.default_ifc_fun_decl in
-            let fun_locl_type =
-              {
-                ft_arity;
-                ft_tparams;
-                ft_where_constraints;
-                ft_params;
-                ft_implicit_params;
-                ft_ret;
-                ft_reactive;
-                ft_flags;
-                ft_ifc_decl;
-              }
-            in
-            let fun_type = mk (r, Tfun fun_locl_type) in
-            let env = Env.set_tyvar_variance env fun_type in
-            (env, fun_type, return_ty)
-          in
-          let (env, fun_type, return_ty) =
-            mk_function_supertype env pos (type_of_el, type_of_unpacked_element)
-          in
-          let env =
-            Type.sub_type pos Reason.URnone env efty fun_type Errors.unify_error
-          in
-          (env, (typed_el, typed_unpacked_element, return_ty))
-        | _ ->
-          bad_call env pos efty;
-          let env = call_untyped_unpack env (get_pos efty) unpacked_element in
-          (env, ([], None, err_witness env pos)))
-  in
-  match resl with
-  | [res] -> res
-  | _ ->
+  let (env, tyl) = TUtils.get_concrete_supertypes env fty in
+  if List.is_empty tyl then begin
     bad_call env pos fty;
     let env = call_untyped_unpack env (get_pos fty) unpacked_element in
     (env, ([], None, err_witness env pos))
+  end else
+    let (env, fty) =
+      Typing_intersection.intersect_list env (get_reason fty) tyl
+    in
+    let (env, efty) =
+      if TypecheckerOptions.method_call_inference (Env.get_tcopt env) then
+        Env.expand_type env fty
+      else
+        Typing_solver.expand_type_and_solve
+          ~description_of_expected:"a function value"
+          env
+          pos
+          fty
+          Errors.unify_error
+    in
+    match deref efty with
+    | (r, Tdynamic) when TCO.enable_sound_dynamic (Env.get_tcopt env) ->
+      let ty = MakeType.dynamic (Reason.Rdynamic_call pos) in
+      let el =
+        (* Need to check that the type of the unpacked_element can be,
+         * coerced to dynamic, just like all of the other arguments, in addition
+         * to the check below in call_untyped_unpack, that it is unpackable.
+         * We don't need to unpack and check each type because a tuple is
+         * coercible iff it's constituent types are. *)
+        Option.value_map ~f:(fun u -> el @ [u]) ~default:el unpacked_element
+      in
+      let _expected_arg_ty = ExpectedTy.make pos Reason.URparam ty in
+      let (env, tel) =
+        List.map_env env el (fun env elt ->
+            let (env, te, e_ty) = expr (*~expected:expected_arg_ty*) env elt in
+            let env =
+              match elt with
+              | (_, Callconv (Ast_defs.Pinout, e1)) ->
+                let (env, _te, _ty) =
+                  assign_ (fst e1) Reason.URparam_inout env e1 efty
+                in
+                env
+              | _ -> env
+            in
+            let env =
+              Typing_coercion.coerce_type
+                pos
+                Reason.URnone
+                env
+                e_ty
+                {
+                  Typing_defs_core.et_type = ty;
+                  Typing_defs_core.et_enforced = false;
+                }
+                Errors.unify_error
+            in
+            (env, te))
+      in
+      let env = call_untyped_unpack env (Reason.to_pos r) unpacked_element in
+      (env, (tel, None, ty))
+    | (r, ((Tprim Tnull | Tdynamic | Terr | Tany _ | Tunion []) as ty))
+      when match ty with
+           | Tprim Tnull -> Option.is_some nullsafe
+           | _ -> true ->
+      let el =
+        Option.value_map ~f:(fun u -> el @ [u]) ~default:el unpacked_element
+      in
+      let expected_arg_ty =
+        (* Note: We ought to be using 'mixed' here *)
+        ExpectedTy.make pos Reason.URparam (Typing_utils.mk_tany env pos)
+      in
+      let (env, tel) =
+        List.map_env env el (fun env elt ->
+            let (env, te, ty) = expr ~expected:expected_arg_ty env elt in
+            let env =
+              if TCO.global_inference (Env.get_tcopt env) then
+                match get_node efty with
+                | Terr
+                | Tany _
+                | Tdynamic ->
+                  Typing_coercion.coerce_type
+                    pos
+                    Reason.URparam
+                    env
+                    ty
+                    (MakeType.unenforced efty)
+                    Errors.unify_error
+                | _ -> env
+              else
+                env
+            in
+            let env =
+              match elt with
+              | (_, Callconv (Ast_defs.Pinout, e1)) ->
+                let (env, _te, _ty) =
+                  assign_ (fst e1) Reason.URparam_inout env e1 efty
+                in
+                env
+              | _ -> env
+            in
+            (env, te))
+      in
+      let env = call_untyped_unpack env (Reason.to_pos r) unpacked_element in
+      let ty =
+        match ty with
+        | Tprim Tnull -> mk (r, Tprim Tnull)
+        | Tdynamic -> MakeType.dynamic (Reason.Rdynamic_call pos)
+        | Terr
+        | Tany _ ->
+          Typing_utils.mk_tany env pos
+        | Tunion []
+        | _ (* _ should not happen! *) ->
+          mk (r, Tunion [])
+      in
+      (env, (tel, None, ty))
+    | (_, Tunion [ty]) ->
+      call ~expected ~nullsafe ?in_await pos env ty el unpacked_element
+    | (r, Tunion tyl) ->
+      let (env, resl) =
+        List.map_env env tyl (fun env ty ->
+            call ~expected ~nullsafe ?in_await pos env ty el unpacked_element)
+      in
+      let retl = List.map resl ~f:(fun (_, _, x) -> x) in
+      let (env, ty) = Union.union_list env r retl in
+      (* We shouldn't be picking arbitrarily for the TAST here, as TAST checks
+       * depend on the types inferred. Here's we're preserving legacy behaviour
+       * by picking the last one.
+       * TODO: don't do this, instead use subtyping to push unions
+       * through function types
+       *)
+      let (tel, typed_unpack_element, _) = List.hd_exn (List.rev resl) in
+      (env, (tel, typed_unpack_element, ty))
+    | (r, Tintersection tyl) ->
+      let (env, resl) =
+        TUtils.run_on_intersection env tyl ~f:(fun env ty ->
+            call ~expected ~nullsafe ?in_await pos env ty el unpacked_element)
+      in
+      let retl = List.map resl ~f:(fun (_, _, x) -> x) in
+      let (env, ty) = Inter.intersect_list env r retl in
+      (* We shouldn't be picking arbitrarily for the TAST here, as TAST checks
+       * depend on the types inferred. Here we're preserving legacy behaviour
+       * by picking the last one.
+       * TODO: don't do this, instead use subtyping to push intersections
+       * through function types
+       *)
+      let (tel, typed_unpack_element, _) = List.hd_exn (List.rev resl) in
+      (env, (tel, typed_unpack_element, ty))
+    | (r2, Tfun ft) ->
+      (* Typing of format string functions. It is dependent on the arguments (el)
+       * so it cannot be done earlier.
+       *)
+      let pos_def = Reason.to_pos r2 in
+      let (env, ft) = Typing_exts.retype_magic_func env ft el in
+      let (env, var_param) = variadic_param env ft in
+      (* Force subtype with expected result *)
+      let env =
+        check_expected_ty "Call result" env ft.ft_ret.et_type expected
+      in
+      let env = Env.set_tyvar_variance env ft.ft_ret.et_type in
+      let is_lambda e =
+        match snd e with
+        | Efun _
+        | Lfun _ ->
+          true
+        | _ -> false
+      in
+      let get_next_param_info paraml =
+        match paraml with
+        | param :: paraml -> (false, Some param, paraml)
+        | [] -> (true, var_param, paraml)
+      in
+      (* TODO: We're using plain String at the moment, until we
+       * introduce actual atom notation (#A instead of "A")
+       *)
+      let expand_atom_in_enum env enum_name atom_name =
+        let cls = Env.get_class env enum_name in
+        match cls with
+        | Some cls ->
+          (match Env.get_const env cls atom_name with
+          | Some const_def ->
+            let dty = const_def.cc_type in
+            let (env, lty) = Phase.localize_with_self env dty in
+            let hi = (pos, lty) in
+            let te = (hi, EnumAtom atom_name) in
+            (env, Some (te, lty))
+          | None ->
+            Errors.atom_unknown pos atom_name enum_name;
+            (env, None))
+        | None -> (env, None)
+      in
+      let check_arg env ((pos, arg) as e) opt_param ~is_variadic =
+        match opt_param with
+        | Some param ->
+          (* First check if __Atom is used *)
+          let (env, atom_type) =
+            let is_atom = get_fp_is_atom param in
+            let ety = param.fp_type.et_type in
+            match arg with
+            | EnumAtom atom_name when is_atom ->
+              (match get_node ety with
+              | Tnewtype (name, [ty_enum; _ty_interface], _)
+                when String.equal name SN.Classes.cMemberOf ->
+                (match get_node ty_enum with
+                | Tclass ((_, enum_name), _, _)
+                  when Env.is_enum_class env enum_name ->
+                  expand_atom_in_enum env enum_name atom_name
+                | Tgeneric (name, _) ->
+                  let upper_bounds =
+                    Typing_utils.collect_enum_class_upper_bounds env name
+                  in
+                  (* To avoid ambiguity, we only support the case where
+                   * there is a single upper bound that is an EnumClass.
+                   * We might want to relax that later (e.g. with  the
+                   * support for intersections.
+                   * See Typing_check_decls.check_atom_on_param.
+                   *)
+                  if SSet.cardinal upper_bounds = 1 then
+                    let enum_name = SSet.choose upper_bounds in
+                    expand_atom_in_enum env enum_name atom_name
+                  else
+                    (env, None)
+                | _ ->
+                  (* Already reported, see Typing_check_decls *)
+                  (env, None))
+              | _ ->
+                (* Already reported, see Typing_check_decls *)
+                (env, None))
+            | Class_const _ when is_atom ->
+              Errors.atom_invalid_argument pos;
+              (env, None)
+            | _ -> (env, None)
+          in
+          let (env, te, ty) =
+            match atom_type with
+            | Some (te, ty) -> (env, te, ty)
+            | None ->
+              let expected =
+                ExpectedTy.make_and_allow_coercion
+                  pos
+                  Reason.URparam
+                  param.fp_type
+              in
+              expr
+                ~accept_using_var:(get_fp_accept_disposable param)
+                ~expected
+                env
+                e
+          in
+          let env = call_param env param (e, ty) ~is_variadic in
+          (env, Some (te, ty))
+        | None ->
+          let expected =
+            ExpectedTy.make pos Reason.URparam (Typing_utils.mk_tany env pos)
+          in
+          let (env, te, ty) = expr ~expected env e in
+          (env, Some (te, ty))
+      in
+      let set_tyvar_variance_from_lambda_param env opt_param =
+        match opt_param with
+        | Some param ->
+          let rec set_params_variance env ty =
+            let (env, ty) = Env.expand_type env ty in
+            match get_node ty with
+            | Tunion [ty] -> set_params_variance env ty
+            | Toption ty -> set_params_variance env ty
+            | Tfun { ft_params; ft_ret; _ } ->
+              let env =
+                List.fold
+                  ~init:env
+                  ~f:(fun env param ->
+                    Env.set_tyvar_variance env param.fp_type.et_type)
+                  ft_params
+              in
+              Env.set_tyvar_variance env ft_ret.et_type ~flip:true
+            | _ -> env
+          in
+          set_params_variance env param.fp_type.et_type
+        | None -> env
+      in
+      (* Given an expected function type ft, check types for the non-unpacked
+       * arguments. Don't check lambda expressions if check_lambdas=false *)
+      let rec check_args check_lambdas env el paraml =
+        match el with
+        (* We've got an argument *)
+        | (e, opt_result) :: el ->
+          (* Pick up next parameter type info *)
+          let (is_variadic, opt_param, paraml) = get_next_param_info paraml in
+          let (env, one_result) =
+            match (check_lambdas, is_lambda e) with
+            | (false, false)
+            | (true, true) ->
+              check_arg env e opt_param ~is_variadic
+            | (false, true) ->
+              let env = set_tyvar_variance_from_lambda_param env opt_param in
+              (env, opt_result)
+            | (true, false) -> (env, opt_result)
+          in
+          let (env, rl, paraml) = check_args check_lambdas env el paraml in
+          (env, (e, one_result) :: rl, paraml)
+        | [] -> (env, [], paraml)
+      in
+      (* Same as above, but checks the types of the implicit arguments, which are
+       * read from the context *)
+      let check_implicit_args env =
+        let capability =
+          Typing_coeffects.get_type ft.ft_implicit_params.capability
+        in
+        if not (TypecheckerOptions.call_coeffects (Env.get_tcopt env)) then
+          env
+        else
+          let env_capability =
+            Env.get_local_check_defined env (pos, Typing_coeffects.capability_id)
+          in
+          Type.sub_type
+            pos
+            Reason.URnone
+            env
+            env_capability
+            capability
+            (fun ?code:_c _ _ ->
+              Errors.call_coeffect_error
+                pos
+                ~available_incl_unsafe:
+                  (Typing_print.coeffects env env_capability)
+                ~available_pos:(Typing_defs.get_pos env_capability)
+                ~required_pos:(Typing_defs.get_pos capability)
+                ~required:(Typing_print.coeffects env capability))
+      in
+
+      (* First check the non-lambda arguments. For generic functions, this
+       * is likely to resolve type variables to concrete types *)
+      let rl = List.map el (fun e -> (e, None)) in
+      let (env, rl, _) = check_args false env rl ft.ft_params in
+      (* Now check the lambda arguments, hopefully with type variables resolved *)
+      let (env, rl, paraml) = check_args true env rl ft.ft_params in
+      (* We expect to see results for all arguments after this second pass *)
+      let get_param opt =
+        match opt with
+        | Some x -> x
+        | None -> failwith "missing parameter in check_args"
+      in
+      let (tel, tys) =
+        let l = List.map rl (fun (_, opt) -> get_param opt) in
+        List.unzip l
+      in
+      let env = check_implicit_args env in
+      let env = TR.check_call env method_call_info pos r2 ft tys in
+      let (env, typed_unpack_element, arity, did_unpack) =
+        match unpacked_element with
+        | None -> (env, None, List.length el, false)
+        | Some e ->
+          (* Now that we're considering an splat (Some e) we need to construct a type that
+           * represents the remainder of the function's parameters. `paraml` represents those
+           * remaining parameters, and the variadic parameter is stored in `var_param`. For example, given
+           *
+           * function f(int $i, string $j, float $k = 3.14, mixed ...$m): void {}
+           * function g((string, float, bool) $t): void {
+           *   f(3, ...$t);
+           * }
+           *
+           * the constraint type we want is splat([#1], [opt#2], #3).
+           *)
+          let (consumed, required_params, optional_params) =
+            split_remaining_params_required_optional ft paraml
+          in
+          let (env, (d_required, d_optional, d_variadic)) =
+            generate_splat_type_vars
+              env
+              (fst e)
+              required_params
+              optional_params
+              var_param
+          in
+          let destructure_ty =
+            ConstraintType
+              (mk_constraint_type
+                 ( Reason.Runpack_param (fst e, pos_def, consumed),
+                   Tdestructure
+                     {
+                       d_required;
+                       d_optional;
+                       d_variadic;
+                       d_kind = SplatUnpack;
+                     } ))
+          in
+          let (env, te, ty) = expr env e in
+          (* Populate the type variables from the expression in the splat *)
+          let env =
+            Type.sub_type_i
+              (fst e)
+              Reason.URparam
+              env
+              (LoclType ty)
+              destructure_ty
+              Errors.unify_error
+          in
+          (* Use the type variables for the remaining parameters *)
+          let env =
+            List.fold2_exn
+              ~init:env
+              d_required
+              required_params
+              ~f:(fun env elt param ->
+                call_param env param (e, elt) ~is_variadic:false)
+          in
+          let env =
+            List.fold2_exn
+              ~init:env
+              d_optional
+              optional_params
+              ~f:(fun env elt param ->
+                call_param env param (e, elt) ~is_variadic:false)
+          in
+          let env =
+            Option.map2 d_variadic var_param ~f:(fun v vp ->
+                call_param env vp (e, v) ~is_variadic:true)
+            |> Option.value ~default:env
+          in
+          ( env,
+            Some te,
+            List.length el + List.length d_required,
+            Option.is_some d_variadic )
+      in
+      (* If we unpacked an array, we don't check arity exactly. Since each
+       * unpacked array consumes 1 or many parameters, it is nonsensical to say
+       * that not enough args were passed in (so we don't do the min check).
+       *)
+      let () = check_arity ~did_unpack pos pos_def ft arity in
+      (* Variadic params cannot be inout so we can stop early *)
+      let env = wfold_left2 inout_write_back env ft.ft_params el in
+      let (env, ret_ty) =
+        TR.get_adjusted_return_type env method_call_info ft.ft_ret.et_type
+      in
+      (env, (tel, typed_unpack_element, ret_ty))
+    | (r, Tvar _)
+      when TypecheckerOptions.method_call_inference (Env.get_tcopt env) ->
+      (*
+            Typecheck calls with unresolved function type by constructing a
+            suitable function type from the arguments and invoking subtyping.
+          *)
+      let (env, typed_el, type_of_el) = exprs ~accept_using_var:true env el in
+      let (env, typed_unpacked_element, type_of_unpacked_element) =
+        match unpacked_element with
+        | Some unpacked ->
+          let (env, typed_unpacked, type_of_unpacked) =
+            expr ~accept_using_var:true env unpacked
+          in
+          (env, Some typed_unpacked, Some type_of_unpacked)
+        | None -> (env, None, None)
+      in
+      let mk_function_supertype env pos (type_of_el, type_of_unpacked_element) =
+        let mk_fun_param ty =
+          let flags =
+            (* Keep supertype as permissive as possible: *)
+            make_fp_flags
+              ~mode:FPnormal (* TODO: deal with `inout` parameters *)
+              ~accept_disposable:false (* TODO: deal with disposables *)
+              ~mutability:(Some Param_maybe_mutable)
+              ~has_default:false
+              ~ifc_external:false
+              ~ifc_can_call:false
+              ~is_atom:false
+          in
+          {
+            fp_pos = pos;
+            fp_name = None;
+            fp_type = MakeType.enforced ty;
+            fp_rx_annotation = None;
+            fp_flags = flags;
+          }
+        in
+        let ft_arity =
+          match type_of_unpacked_element with
+          | Some type_of_unpacked ->
+            let fun_param = mk_fun_param type_of_unpacked in
+            Fvariadic fun_param
+          | None -> Fstandard
+        in
+        (* TODO: ensure `ft_params`/`ft_where_constraints` don't affect subtyping *)
+        let ft_tparams = [] in
+        let ft_where_constraints = [] in
+        let ft_params = List.map ~f:mk_fun_param type_of_el in
+        let ft_implicit_params =
+          {
+            capability =
+              CapDefaults pos
+              (* TODO(coeffects) should this be a different type? *);
+          }
+        in
+        let (env, return_ty) = Env.fresh_type env pos in
+        let return_ty =
+          match in_await with
+          | None -> return_ty
+          | Some r -> MakeType.awaitable r return_ty
+        in
+        let ft_ret = MakeType.enforced return_ty in
+        (* A non-reactive supertype is most permissive: *)
+        let ft_reactive = Nonreactive in
+        let ft_flags =
+          (* Keep supertype as permissive as possible: *)
+          make_ft_flags
+            Ast_defs.FSync (* `FSync` fun can still return `Awaitable<_>` *)
+            (Some Param_maybe_mutable)
+            ~return_disposable:false (* TODO: deal with disposable return *)
+            ~returns_mutable:false
+            ~returns_void_to_rx:false
+        in
+        let ft_ifc_decl = Typing_defs_core.default_ifc_fun_decl in
+        let fun_locl_type =
+          {
+            ft_arity;
+            ft_tparams;
+            ft_where_constraints;
+            ft_params;
+            ft_implicit_params;
+            ft_ret;
+            ft_reactive;
+            ft_flags;
+            ft_ifc_decl;
+          }
+        in
+        let fun_type = mk (r, Tfun fun_locl_type) in
+        let env = Env.set_tyvar_variance env fun_type in
+        (env, fun_type, return_ty)
+      in
+      let (env, fun_type, return_ty) =
+        mk_function_supertype env pos (type_of_el, type_of_unpacked_element)
+      in
+      let env =
+        Type.sub_type pos Reason.URnone env efty fun_type Errors.unify_error
+      in
+      (env, (typed_el, typed_unpacked_element, return_ty))
+    | _ ->
+      bad_call env pos efty;
+      let env = call_untyped_unpack env (get_pos efty) unpacked_element in
+      (env, ([], None, err_witness env pos))
 
 and split_remaining_params_required_optional ft remaining_params =
   (* Same example as above

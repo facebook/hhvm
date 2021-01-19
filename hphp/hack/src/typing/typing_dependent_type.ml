@@ -24,6 +24,9 @@ module ExprDepTy = struct
     let eid = Ident.tmp () in
     (Reason.ERexpr eid, Dep_Expr eid)
 
+  (* Convert a class_id into a "dependent kind" (dep). This later informs the make_with_dep_kind function
+   * how to translate a type suitable for substituting for `this` in a method signature.
+   *)
   let from_cid env reason cid =
     let pos = Reason.to_pos reason in
     let (pos, expr_dep_reason, dep) =
@@ -83,8 +86,8 @@ module ExprDepTy = struct
    * More specific details are explained inline
    *)
   (****************************************************************************)
-  let make env ~cid ty =
-    let (r_dep_ty, dep_ty) = from_cid env (get_reason ty) cid in
+  let make_with_dep_kind env dep_kind ty =
+    let (r_dep_ty, dep_ty) = dep_kind in
     let apply env ty =
       let dep_ty =
         match dep_ty with
@@ -95,8 +98,8 @@ module ExprDepTy = struct
       (env, mk (r_dep_ty, Tdependent (dep_ty, ty)))
     in
     let rec make env ty =
-      let (env, ety) = Env.expand_type env ty in
-      match deref ety with
+      let (env, ty) = Env.expand_type env ty in
+      match deref ty with
       | (_, Tclass (_, Exact, _)) -> (env, ty)
       | (_, Tclass (((_, x) as c), Nonexact, tyl)) ->
         let class_ = Env.get_class env x in
@@ -152,4 +155,7 @@ module ExprDepTy = struct
         (env, ty)
     in
     make env ty
+
+  let make env ~cid ty =
+    make_with_dep_kind env (from_cid env (get_reason ty) cid) ty
 end

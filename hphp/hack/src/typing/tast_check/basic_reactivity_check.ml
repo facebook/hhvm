@@ -79,7 +79,7 @@ let rec is_byval_collection_or_string_or_any_type env ty =
   in
 
   let (_, tl) = Tast_env.get_concrete_supertypes env ty in
-  List.for_all tl ~f:check
+  List.exists tl ~f:check
 
 let rec is_valid_mutable_subscript_expression_target env v =
   match v with

@@ -9,7 +9,6 @@
 
 open Hh_prelude
 open Common
-open Aast
 open Tast
 open Typing_defs
 open Utils
@@ -190,20 +189,28 @@ let rec obj_get_concrete_ty
     ~is_method
     ~coerce_from_ty
     ?(explicit_targs = [])
+    ~this_ty
+    ~dep_kind
+    ~is_parent_call
     env
     concrete_ty
-    class_id
     (id_pos, id_str)
-    k_lhs
     on_error =
   let default () = (env, (Typing_utils.mk_tany env id_pos, [])) in
-  let mk_ety_env r class_info x e paraml =
-    let this_ty = k_lhs (mk (r, Tclass (x, e, paraml))) in
+  (* We will substitute `this` in the function signature with `this_ty`. But first,
+   * transform it according to the dependent kind dep_kind that was derived from the
+   * class_id in the original call to obj_get. See Typing_dependent_type.ml for
+   * more details.
+   *)
+  let (env, this_ty) =
+    Typing_dependent_type.ExprDepTy.make_with_dep_kind env dep_kind this_ty
+  in
+  let mk_ety_env class_info paraml =
     {
       type_expansions = [];
       this_ty;
       substs = TUtils.make_locl_subst_for_class_tparams class_info paraml;
-      from_class = Some class_id;
+      from_class = None;
       quiet = true;
       on_error;
     }
@@ -211,9 +218,9 @@ let rec obj_get_concrete_ty
   let read_context = Option.is_none coerce_from_ty in
   let (env, concrete_ty) = Env.expand_type env concrete_ty in
   match deref concrete_ty with
-  | (r, Tclass (x, exact, paraml)) ->
+  | (r, Tclass (x, _, paraml)) ->
     let get_member_from_constraints env class_info =
-      let ety_env = mk_ety_env r class_info x exact paraml in
+      let ety_env = mk_ety_env class_info paraml in
       let upper_bounds = Cls.upper_bounds_on_this class_info in
       let (env, upper_bounds) =
         List.map_env env upper_bounds ~f:(fun env up ->
@@ -222,7 +229,7 @@ let rec obj_get_concrete_ty
       let (env, inter_ty) =
         Inter.intersect_list env (Reason.Rwitness id_pos) upper_bounds
       in
-      obj_get_
+      obj_get_inner
         ~inst_meth
         ~is_method
         ~nullsafe:None
@@ -230,11 +237,12 @@ let rec obj_get_concrete_ty
         ~explicit_targs
         ~coerce_from_ty
         ~is_nonnull:true
+        ~this_ty
+        ~is_parent_call
+        ~dep_kind
         env
         inter_ty
-        class_id
         (id_pos, id_str)
-        k_lhs
         on_error
     in
     begin
@@ -339,8 +347,8 @@ let rec obj_get_concrete_ty
                     _;
                   } ->
                 begin
-                  match class_id with
-                  | CIexpr (_, This) -> ()
+                  match get_node this_ty with
+                  | Tdependent (DTthis, _) -> ()
                   | _ ->
                     if not (String.equal member_ce.ce_origin ce_origin) then
                       Errors.ambiguous_object_access
@@ -355,13 +363,10 @@ let rec obj_get_concrete_ty
               | _ -> () );
             TVis.check_obj_access ~use_pos:id_pos ~def_pos:mem_pos env vis;
             TVis.check_deprecated ~use_pos:id_pos ~def_pos:mem_pos ce_deprecated;
-            if
-              Nast.equal_class_id_ class_id CIparent
-              && get_ce_abstract member_ce
-            then
+            if is_parent_call && get_ce_abstract member_ce then
               Errors.parent_abstract_call id_str id_pos mem_pos;
             let member_decl_ty = Typing_enum.member_type env member_ce in
-            let ety_env = mk_ety_env r class_info x exact paraml in
+            let ety_env = mk_ety_env class_info paraml in
             let (env, member_ty, tal, et_enforced) =
               match deref member_decl_ty with
               | (r, Tfun ft) when is_method ->
@@ -398,7 +403,8 @@ let rec obj_get_concrete_ty
                       env
                       ft)
                 in
-                (env, mk (r, Tfun ft), explicit_targs, false)
+                let ft_ty = mk (r, Tfun ft) in
+                (env, ft_ty, explicit_targs, false)
               | _ ->
                 let is_xhp_attr = Option.is_some (get_ce_xhp_attr member_ce) in
                 let { et_type; et_enforced } =
@@ -499,18 +505,19 @@ and nullable_obj_get
     ~explicit_targs
     ~coerce_from_ty
     ~is_nonnull
+    ~this_ty
+    ~is_parent_call
+    ~dep_kind
     env
     ety1
-    cid
     ((id_pos, id_str) as id)
-    k_lhs
     on_error
     ~read_context
     ty =
   match nullsafe with
   | Some r_null ->
     let (env, (method_, tal)) =
-      obj_get_
+      obj_get_inner
         ~inst_meth
         ~obj_pos
         ~is_method
@@ -518,11 +525,12 @@ and nullable_obj_get
         ~explicit_targs
         ~coerce_from_ty
         ~is_nonnull
+        ~this_ty
+        ~is_parent_call
+        ~dep_kind
         env
         ty
-        cid
         id
-        k_lhs
         on_error
     in
     let (env, ty) =
@@ -570,8 +578,20 @@ and nullable_obj_get
       err ~is_method id_str id_pos (Reason.to_string "This can be null" r));
     (env, (TUtils.terr env (get_reason ety1), []))
 
-(* k_lhs takes the type of the object receiver *)
-and obj_get_
+(* Helper method for obj_get that decomposes the type ty1.
+ * The additional parameter this_ty represents the type that will be substitued
+ * for `this` in the method signature.
+ *
+ * If ty1 is an intersection type, we distribute the member access through the
+ * conjuncts but maintain the intersection type for this_ty. For example,
+ * a call on (T & I & J) will recurse on T, I and J but with this_ty = (T & I & J),
+ * so that we don't "lose" information when substituting for `this`.
+ *
+ * In contrast, if ty1 is a union type, we recurse on the disjuncts but pass these
+ * through to this_ty, as the member access must be valid for each disjunct
+ * separately. Likewise for nullables (special case of union).
+ *)
+and obj_get_inner
     ~inst_meth
     ~is_method
     ~nullsafe
@@ -579,11 +599,12 @@ and obj_get_
     ~coerce_from_ty
     ~is_nonnull
     ~explicit_targs
+    ~this_ty
+    ~is_parent_call
+    ~dep_kind
     env
     ty1
-    cid
     ((id_pos, id_str) as id)
-    k_lhs
     on_error =
   let (env, ety1) =
     if is_method then
@@ -614,11 +635,12 @@ and obj_get_
       ~explicit_targs
       ~coerce_from_ty
       ~is_nonnull
+      ~this_ty:ty
+      ~is_parent_call
+      ~dep_kind
       env
       ety1
-      cid
       id
-      k_lhs
       on_error
       ~read_context
       ty
@@ -630,7 +652,7 @@ and obj_get_
   | (r, Tunion tyl) ->
     let (env, resultl) =
       List.map_env env tyl (fun env ty ->
-          obj_get_
+          obj_get_inner
             ~inst_meth
             ~obj_pos
             ~is_method
@@ -638,11 +660,12 @@ and obj_get_
             ~explicit_targs
             ~coerce_from_ty
             ~is_nonnull
+            ~this_ty:ty
+            ~is_parent_call
+            ~dep_kind
             env
             ty
-            cid
             id
-            k_lhs
             on_error)
     in
     (* TODO: decide what to do about methods with differing generic arity.
@@ -665,7 +688,7 @@ and obj_get_
     in
     let (env, resultl) =
       TUtils.run_on_intersection env tyl ~f:(fun env ty ->
-          obj_get_
+          obj_get_inner
             ~inst_meth
             ~obj_pos
             ~is_method
@@ -673,11 +696,12 @@ and obj_get_
             ~explicit_targs
             ~coerce_from_ty
             ~is_nonnull
+            ~this_ty
+            ~is_parent_call
+            ~dep_kind
             env
             ty
-            cid
             id
-            k_lhs
             on_error)
     in
     (* TODO: decide what to do about methods with differing generic arity.
@@ -690,9 +714,14 @@ and obj_get_
     let tyl = List.map ~f:fst resultl in
     let (env, ty) = Inter.intersect_list env r tyl in
     (env, (ty, tal))
-  | (p', Tdependent (dep, ty)) ->
-    let k_lhs' ty = k_lhs (mk (p', Tdependent (dep, ty))) in
-    obj_get_
+  | (r, Tdependent (dep, ty)) ->
+    let dep_kind =
+      ( r,
+        match dep with
+        | DTexpr id -> Typing_dependent_type.ExprDepTy.Dep_Expr id
+        | DTthis -> Typing_dependent_type.ExprDepTy.Dep_This )
+    in
+    obj_get_inner
       ~inst_meth
       ~obj_pos
       ~is_method
@@ -700,14 +729,15 @@ and obj_get_
       ~explicit_targs
       ~coerce_from_ty
       ~is_nonnull
+      ~this_ty
+      ~is_parent_call
+      ~dep_kind
       env
       ty
-      cid
       id
-      k_lhs'
       on_error
   | (_, Tnewtype (_, _, ty)) ->
-    obj_get_
+    obj_get_inner
       ~inst_meth
       ~obj_pos
       ~is_method
@@ -715,11 +745,12 @@ and obj_get_
       ~explicit_targs
       ~coerce_from_ty
       ~is_nonnull
+      ~this_ty
+      ~is_parent_call
+      ~dep_kind
       env
       ty
-      cid
       id
-      k_lhs
       on_error
   | (r, Tgeneric _) ->
     let (env, tyl) = TUtils.get_concrete_supertypes env ety1 in
@@ -746,8 +777,7 @@ and obj_get_
         else
           (env, ty)
       in
-      let k_lhs' _ty = ety1 in
-      obj_get_
+      obj_get_inner
         ~inst_meth
         ~obj_pos
         ~is_method
@@ -755,11 +785,12 @@ and obj_get_
         ~explicit_targs
         ~coerce_from_ty
         ~is_nonnull
+        ~this_ty
+        ~is_parent_call
+        ~dep_kind
         env
         ty
-        cid
         id
-        k_lhs'
         on_error
   | (_, Toption ty) -> nullable_obj_get ~read_context ty
   | (r, Tprim Tnull) ->
@@ -779,11 +810,12 @@ and obj_get_
       ~is_method
       ~explicit_targs
       ~coerce_from_ty
+      ~this_ty
+      ~is_parent_call
+      ~dep_kind
       env
       ety1
-      cid
       id
-      k_lhs
       on_error
 
 (* Look up the type of the property or method id in the type ty1 of the
@@ -797,40 +829,41 @@ and obj_get_
  * of the property id in each Ci and the results are collected into an
  * unresolved type.
  *
- * The extra flexibility offered by the functional argument k is used in two
- * places:
- *
- *   (1) when type-checking method calls: if the receiver has an unresolved
- *   type, then we need to type-check the method call with each possible
- *   receiver type and collect the results into an unresolved type;
- *
- *   (2) when type-checking assignments to properties: if the receiver has
- *   an unresolved type, then we need to check that the right hand side
- *   value can be assigned to the property id for each of the possible types
- *   of the receiver.
  *)
 let obj_get
     ~obj_pos
     ~is_method
+    ~inst_meth
     ~nullsafe
     ~coerce_from_ty
     ~explicit_targs
+    ~class_id
+    ~member_id
+    ~on_error
+    ?parent_ty
     env
-    ty1
-    cid
-    id
-    on_error =
-  obj_get_
-    ~inst_meth:false
+    ty =
+  let dep_kind =
+    Typing_dependent_type.ExprDepTy.from_cid env (get_reason ty) class_id
+  in
+  let ty1 =
+    match parent_ty with
+    | Some ty -> ty
+    | None -> ty
+  in
+  let is_parent_call = Nast.equal_class_id_ class_id Aast.CIparent in
+  obj_get_inner
+    ~inst_meth
     ~is_method
     ~nullsafe
     ~obj_pos
     ~explicit_targs
     ~coerce_from_ty
     ~is_nonnull:false
+    ~is_parent_call
+    ~this_ty:ty
+    ~dep_kind
     env
     ty1
-    cid
-    id
-    (fun x -> x)
+    member_id
     on_error

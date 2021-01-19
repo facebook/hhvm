@@ -90,15 +90,17 @@ let check_param : env -> Nast.fun_param -> unit =
           Typing_object_get.obj_get
             ~obj_pos:param_pos
             ~is_method:true
+            ~inst_meth:false
             ~nullsafe:None
             ~coerce_from_ty:None
             ~explicit_targs:[]
+            ~class_id:
+              (CIexpr
+                 (param_pos, Lvar (param_pos, Local_id.make_unscoped param_name)))
+            ~member_id:(p, SN.Members.mGetInstanceKey)
+            ~on_error:(fun ?code:_ _ _ -> error ty)
             env
             ty
-            (CIexpr
-               (param_pos, Lvar (param_pos, Local_id.make_unscoped param_name)))
-            (p, SN.Members.mGetInstanceKey)
-            (fun ?code:_ _ _ -> error ty)
         in
         ignore (Typing.call ~expected:None p env tfty [] None)
     | Tunapplied_alias _ ->

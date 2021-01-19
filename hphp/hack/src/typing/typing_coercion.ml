@@ -76,7 +76,7 @@ let coerce_type_impl
       env
     else
       Typing_utils.sub_type
-        ~allow_subtype_of_dynamic:true
+        ~coerce:(Some Typing_logic.CoerceToDynamic)
         env
         ty_have
         ty_expect.et_type

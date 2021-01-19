@@ -642,7 +642,7 @@ and method_def env cls m =
         if
           not
             (Typing_subtype.is_sub_type_for_union
-               ~allow_subtype_of_dynamic:true
+               ~coerce:(Some Typing_logic.CoerceToDynamic)
                env
                locl_ty
                (mk (Reason.Rnone, Tdynamic)))

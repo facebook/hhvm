@@ -2663,7 +2663,7 @@ and expr_
     ( if enable_sound_dynamic && is_dyn then
       let (_ : env * locl_ty) =
         ( SubType.sub_type
-            ~allow_subtype_of_dynamic:true
+            ~coerce:(Some Typing_logic.CoerceToDynamic)
             env
             expr_ty
             hint_ty

@@ -194,21 +194,9 @@ let rec union env ty1 ty2 =
   @@
   if ty_equal ty1 ty2 then
     (env, ty1)
-  else if
-    Typing_utils.is_sub_type_for_union
-      ~allow_subtype_of_dynamic:false
-      env
-      ty1
-      ty2
-  then
+  else if Typing_utils.is_sub_type_for_union ~coerce:None env ty1 ty2 then
     (env, ty2)
-  else if
-    Typing_utils.is_sub_type_for_union
-      ~allow_subtype_of_dynamic:false
-      env
-      ty2
-      ty1
-  then
+  else if Typing_utils.is_sub_type_for_union ~coerce:None env ty2 ty1 then
     (env, ty1)
   else
     let r = union_reason r1 r2 in
@@ -224,21 +212,9 @@ and simplify_union env ty1 ty2 r =
   @@
   if ty_equal ty1 ty2 then
     (env, Some ty1)
-  else if
-    Typing_utils.is_sub_type_for_union
-      ~allow_subtype_of_dynamic:false
-      env
-      ty1
-      ty2
-  then
+  else if Typing_utils.is_sub_type_for_union ~coerce:None env ty1 ty2 then
     (env, Some ty2)
-  else if
-    Typing_utils.is_sub_type_for_union
-      ~allow_subtype_of_dynamic:false
-      env
-      ty2
-      ty1
-  then
+  else if Typing_utils.is_sub_type_for_union ~coerce:None env ty2 ty1 then
     (env, Some ty1)
   else
     simplify_union_ env ty1 ty2 r
@@ -584,21 +560,9 @@ let simplify_unions env ?on_tyvar ty =
 
 let rec union_i env r ty1 lty2 =
   let ty2 = LoclType lty2 in
-  if
-    Typing_utils.is_sub_type_for_union_i
-      ~allow_subtype_of_dynamic:false
-      env
-      ty1
-      ty2
-  then
+  if Typing_utils.is_sub_type_for_union_i ~coerce:None env ty1 ty2 then
     (env, ty2)
-  else if
-    Typing_utils.is_sub_type_for_union_i
-      ~allow_subtype_of_dynamic:false
-      env
-      ty2
-      ty1
-  then
+  else if Typing_utils.is_sub_type_for_union_i ~coerce:None env ty2 ty1 then
     (env, ty1)
   else
     let (env, ty) =

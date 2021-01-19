@@ -35,7 +35,7 @@ let expand_typedef x = !expand_typedef_ref x
 
 type sub_type =
   env ->
-  ?allow_subtype_of_dynamic:bool ->
+  ?coerce:Typing_logic.coercion_direction option ->
   locl_ty ->
   locl_ty ->
   Errors.typing_error_callback ->
@@ -76,15 +76,19 @@ let (is_sub_type_for_coercion_ref : is_sub_type_type ref) =
 let is_sub_type_for_coercion x = !is_sub_type_for_coercion_ref x
 
 let (is_sub_type_for_union_ref :
-      (env -> ?allow_subtype_of_dynamic:bool -> locl_ty -> locl_ty -> bool) ref)
-    =
+      (env ->
+      ?coerce:Typing_logic.coercion_direction option ->
+      locl_ty ->
+      locl_ty ->
+      bool)
+      ref) =
   ref (not_implemented "is_sub_type_for_union")
 
 let is_sub_type_for_union x = !is_sub_type_for_union_ref x
 
 let (is_sub_type_for_union_i_ref :
       (env ->
-      ?allow_subtype_of_dynamic:bool ->
+      ?coerce:Typing_logic.coercion_direction option ->
       internal_type ->
       internal_type ->
       bool)
@@ -417,9 +421,8 @@ let run_on_intersection :
 (*****************************************************************************)
 let is_dynamic env ty =
   let dynamic = MakeType.dynamic Reason.Rnone in
-  is_sub_type_for_union ~allow_subtype_of_dynamic:false env dynamic ty
-  && not (is_mixed env ty)
-  || is_sub_type_for_union ~allow_subtype_of_dynamic:false env ty dynamic
+  (is_sub_type_for_union ~coerce:None env dynamic ty && not (is_mixed env ty))
+  || is_sub_type_for_union ~coerce:None env ty dynamic
      && not (is_nothing env ty)
 
 (*****************************************************************************)

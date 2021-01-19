@@ -115,32 +115,17 @@ the resulting type is no greater in size than the trivial `Tintersection [ty1; t
 let rec intersect env ~r ty1 ty2 =
   let (env, ty1) = Env.expand_type env ty1 in
   let (env, ty2) = Env.expand_type env ty2 in
-  if Utils.is_sub_type_for_union ~allow_subtype_of_dynamic:false env ty1 ty2
-  then
+  if Utils.is_sub_type_for_union ~coerce:None env ty1 ty2 then
     (env, ty1)
-  else if
-    Utils.is_sub_type_for_union ~allow_subtype_of_dynamic:false env ty2 ty1
-  then
+  else if Utils.is_sub_type_for_union ~coerce:None env ty2 ty1 then
     (env, ty2)
   else
     let (env, non_ty2) = non env Reason.none ty2 Utils.ApproxDown in
-    if
-      Utils.is_sub_type_for_union
-        ~allow_subtype_of_dynamic:false
-        env
-        ty1
-        non_ty2
-    then
+    if Utils.is_sub_type_for_union ~coerce:None env ty1 non_ty2 then
       (env, MkType.nothing r)
     else
       let (env, non_ty1) = non env Reason.none ty1 Utils.ApproxDown in
-      if
-        Utils.is_sub_type_for_union
-          ~allow_subtype_of_dynamic:false
-          env
-          ty2
-          non_ty1
-      then
+      if Utils.is_sub_type_for_union ~coerce:None env ty2 non_ty1 then
         (env, MkType.nothing r)
       else
         let (env, ty1) = decompose_atomic env ty1 in
@@ -350,12 +335,9 @@ let intersect env ~r ty1 ty2 =
 
 let rec intersect_i env r ty1 lty2 =
   let ty2 = LoclType lty2 in
-  if Utils.is_sub_type_for_union_i ~allow_subtype_of_dynamic:false env ty1 ty2
-  then
+  if Utils.is_sub_type_for_union_i ~coerce:None env ty1 ty2 then
     (env, ty1)
-  else if
-    Utils.is_sub_type_for_union_i ~allow_subtype_of_dynamic:false env ty2 ty1
-  then
+  else if Utils.is_sub_type_for_union_i ~coerce:None env ty2 ty1 then
     (env, ty2)
   else
     let (env, ty) =

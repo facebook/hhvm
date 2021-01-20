@@ -15,9 +15,6 @@ class sample  {
 echo "*** Testing exif_tagname() : different types for index argument ***\n";
 // initialize all required variables
 
-// get an unset variable
-$unset_var = 'string_val';
-unset($unset_var);
 
 // Defining resource
 $file_handle = fopen(__FILE__, 'r');
@@ -54,12 +51,6 @@ $values =  varray [
   // empty string
   "",
   '',
-
-  // undefined variable
-  $undefined_var,
-
-  // unset variable
-  $unset_var,
 
   // objects
   new sample(),

@@ -196,6 +196,16 @@
     (pps lwt_ppx ppx_deriving.std)))
 
 (library
+  (name rage_stubs)
+  (wrapped false)
+  (modules clientRage)
+  (libraries
+    utils_exit
+    utils_core)
+  (preprocess
+    (pps lwt_ppx ppx_deriving.std)))
+
+(library
   (name extra_rage)
   (wrapped false)
   (modules extra_rage)

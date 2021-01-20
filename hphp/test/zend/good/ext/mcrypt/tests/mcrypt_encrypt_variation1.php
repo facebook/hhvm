@@ -36,9 +36,6 @@ function entrypoint_mcrypt_encrypt_variation1(): void {
   $mode = MCRYPT_MODE_ECB;
   $iv = b'string_val';
 
-  //get an unset variable
-  $unset_var = 10;
-  unset ($unset_var);
 
   // heredoc string
   $heredoc = <<<EOT
@@ -92,11 +89,7 @@ EOT;
         'instance of classWithToString' => new classWithToString(),
         'instance of classWithoutToString' => new classWithoutToString(),
 
-        // undefined data
-        'undefined var' => @$undefined_var,
 
-        // unset data
-        'unset var' => @$unset_var,
 
         // resource variable
         'resource' => $fp      

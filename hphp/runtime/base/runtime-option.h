@@ -137,7 +137,7 @@ struct RepoOptions {
 
 private:
   RepoOptions() = default;
-  explicit RepoOptions(const char* file);
+  explicit RepoOptions(const char* str, const char* file);
 
   void filterNamespaces();
   void initDefaults(const Hdf& hdf, const IniSettingMap& ini);

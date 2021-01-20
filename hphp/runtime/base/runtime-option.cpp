@@ -31,6 +31,7 @@
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/base/memory-manager.h"
+#include "hphp/runtime/base/plain-file.h"
 #include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/tv-refcount.h"
@@ -217,10 +218,23 @@ struct CachedRepoOptions {
   mutable std::atomic<RepoOptions*> options{nullptr};
 };
 
+struct RepoOptionCacheKey {
+  bool wrapped;
+  std::string filename;
+};
+struct RepoOptionCacheKeyCompare {
+  bool equal(const RepoOptionCacheKey& k1, const RepoOptionCacheKey& k2) const {
+    return k1.wrapped == k2.wrapped && k1.filename == k2.filename;
+  }
+  size_t hash(const RepoOptionCacheKey& k) const {
+    return std::hash<bool>()(k.wrapped) ^
+           hash_string_cs_unsafe(k.filename.c_str(), k.filename.size());
+  }
+};
 using RepoOptionCache = tbb::concurrent_hash_map<
-  std::string,
+  RepoOptionCacheKey,
   CachedRepoOptions,
-  stringHashCompare
+  RepoOptionCacheKeyCompare
 >;
 RepoOptionCache s_repoOptionCache;
 
@@ -253,6 +267,32 @@ const RepoOptions& RepoOptions::forFile(const char* path) {
   std::string fpath{path};
   if (boost::starts_with(fpath, "/:")) return defaults();
 
+  // Wrap filesystem accesses if needed to proxy info from cli server client.
+  Stream::Wrapper* wrapper = nullptr;
+  if (get_cli_ucred()) {
+    wrapper = Stream::getWrapperFromURI(path);
+    if (wrapper && !wrapper->isNormalFileStream()) wrapper = nullptr;
+  }
+  auto const wrapped_lstat = [&](const char* path, struct stat* st) {
+    if (wrapper) return wrapper->lstat(path, st);
+    return lstat(path, st);
+  };
+
+  auto const wrapped_open = [&](const char* path) -> folly::Optional<String> {
+    if (wrapper) {
+      if (auto const file = wrapper->open(path, "r", 0, nullptr)) {
+        return file->read();
+      }
+      return folly::none;
+    }
+
+    auto const fd = open(path, O_RDONLY);
+    if (fd < 0) return folly::none;
+    auto file = req::make<PlainFile>(fd);
+    return file->read();
+
+  };
+
   auto const isParentOf = [] (const std::string& p1, const std::string& p2) {
     return boost::starts_with(
       boost::filesystem::path{p2},
@@ -273,7 +313,7 @@ const RepoOptions& RepoOptions::forFile(const char* path) {
 
       if (isParentOf(opts->path(), fpath)) {
         struct stat st;
-        if (lstat(opts->path().data(), &st) == 0) {
+        if (wrapped_lstat(opts->path().data(), &st) == 0) {
           if (!CachedRepoOptions::isChanged(opts, st)) return *opts;
         }
       }
@@ -289,7 +329,9 @@ const RepoOptions& RepoOptions::forFile(const char* path) {
     if (auto const opts = rpathAcc->second.fetch(st)) {
       return opts;
     }
-    RepoOptions newOpts{path.data()};
+    auto const contents = wrapped_open(path.data());
+    if (!contents) return nullptr;
+    RepoOptions newOpts{ contents->data(), path.data()};
     newOpts.m_stat = st;
     return rpathAcc->second.update(std::move(newOpts));
   };
@@ -297,8 +339,9 @@ const RepoOptions& RepoOptions::forFile(const char* path) {
   auto const test = [&] (const std::string& path) -> const RepoOptions* {
     struct stat st;
     RepoOptionCache::const_accessor rpathAcc;
-    if (!s_repoOptionCache.find(rpathAcc, path)) return nullptr;
-    if (lstat(path.data(), &st) != 0) {
+    const RepoOptionCacheKey key {(bool)wrapper, path};
+    if (!s_repoOptionCache.find(rpathAcc, key)) return nullptr;
+    if (wrapped_lstat(path.data(), &st) != 0) {
       s_repoOptionCache.erase(rpathAcc);
       return nullptr;
     }
@@ -332,9 +375,10 @@ const RepoOptions& RepoOptions::forFile(const char* path) {
 
   walkDirTree(fpath, [&] (const std::string& path) {
     struct stat st;
-    if (lstat(path.data(), &st) != 0) return false;
+    if (wrapped_lstat(path.data(), &st) != 0) return false;
     RepoOptionCache::const_accessor rpathAcc;
-    s_repoOptionCache.insert(rpathAcc, path);
+    const RepoOptionCacheKey key {(bool)wrapper, path};
+    s_repoOptionCache.insert(rpathAcc, key);
     ret = set(rpathAcc, path, st);
     return true;
   });
@@ -412,9 +456,10 @@ void RepoOptions::filterNamespaces() {
   }
 }
 
-RepoOptions::RepoOptions(const char* file) : m_path(file) {
+RepoOptions::RepoOptions(const char* str, const char* file) : m_path(file) {
   always_assert(s_init);
-  Hdf config{file};
+  Hdf config{};
+  config.fromString(str);
   Hdf parserConfig = config["Parser"];
 
 #define N(_, n, ...) hdfExtract(parserConfig, #n, n, s_defaults.n);

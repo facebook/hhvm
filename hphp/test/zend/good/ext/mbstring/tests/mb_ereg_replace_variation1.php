@@ -20,9 +20,6 @@ $replacement = 'string_val';
 $string = 'string_val';
 $option = '';
 
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
 
 // heredoc string
 $heredoc = <<<EOT
@@ -67,11 +64,7 @@ $inputs = varray[
        // object data
 /*21*/ new classA(),
 
-       // undefined data
-/*22*/ @$undefined_var,
 
-       // unset data
-/*23*/ @$unset_var,
 
 ];
 

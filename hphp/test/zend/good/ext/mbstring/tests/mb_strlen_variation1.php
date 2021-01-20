@@ -21,9 +21,6 @@ echo "*** Testing mb_strlen() : usage variations ***\n";
 // Initialise function arguments not being substituted
 $encoding = 'utf-8';
 
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
 
 // heredoc string
 $heredoc = b<<<EOT
@@ -71,14 +68,10 @@ $inputs = varray[
        // object data
 /*21*/ new classA(),
 
-       // undefined data
-/*22*/ @$undefined_var,
 
-       // unset data
-/*23*/ @$unset_var,
 
        // resource variable
-/*24*/ $fp
+/*22*/ $fp
 ];
 
 // loop through each element of $inputs to check the behavior of mb_strlen()

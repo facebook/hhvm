@@ -35,9 +35,6 @@ function entrypoint_mb_strrchr_variation2(): void {
   $part = true;
   $encoding = 'utf-8';
 
-  //get an unset variable
-  $unset_var = 10;
-  unset ($unset_var);
 
   // heredoc string
   $heredoc = b<<<EOT
@@ -91,11 +88,7 @@ EOT;
         'instance of classWithToString' => new classWithToString(),
         'instance of classWithoutToString' => new classWithoutToString(),
 
-        // undefined data
-        'undefined var' => @$undefined_var,
 
-        // unset data
-        'unset var' => @$unset_var,
 
         // resource variable
         'resource' => $fp      

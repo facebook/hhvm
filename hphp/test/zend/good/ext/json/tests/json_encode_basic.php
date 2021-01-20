@@ -9,10 +9,6 @@ class sample  {
 <<__EntryPoint>> function main(): void {
 echo "*** Testing json_encode() : basic functionality ***\n";
 
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
-
 // get a resource variable
 $fp = fopen(__FILE__, "r");
 
@@ -64,17 +60,11 @@ $inputs =  varray [
 /*22*/ "",
        '',
 
-       // undefined data
-/*24*/ @$undefined_var,
-
-       // unset data
-/*25*/ @$unset_var,
-
        // resource variable
-/*26*/ $fp,
+/*23*/ $fp,
 
       // object variable
-/*27*/ $obj
+/*24*/ $obj
 
 ];
 

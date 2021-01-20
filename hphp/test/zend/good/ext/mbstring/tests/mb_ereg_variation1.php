@@ -21,9 +21,6 @@ echo "*** Testing mb_ereg() : usage variations ***\n";
 // Initialise function arguments not being substituted (if any)
 $string = 'string value';
 
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
 
 // heredoc string
 $heredoc = <<<EOT

@@ -23,9 +23,6 @@ $needle = 'string_val';
 $offset = 0;
 $encoding = 'utf-8';
 
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
 
 // heredoc string
 $heredoc = <<<EOT
@@ -73,14 +70,10 @@ $inputs = varray[
        // object data
 /*21*/ new classA(),
 
-       // undefined data
-/*22*/ @$undefined_var,
 
-       // unset data
-/*23*/ @$unset_var,
 
        // resource variable
-/*24*/ $fp
+/*22*/ $fp
 ];
 
 // loop through each element of $inputs to check the behavior of mb_strpos()

@@ -20,10 +20,6 @@ $pattern = '[a-k]';
 $replacement = '1';
 $string = 'string_val';
 
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
-
 // heredoc string
 $heredoc = <<<EOT
 UTF-8
@@ -70,14 +66,8 @@ $inputs = varray[
        // object data
 /*21*/ new classA(),
 
-       // undefined data
-/*22*/ @$undefined_var,
-
-       // unset data
-/*23*/ @$unset_var,
-
        // resource variable
-/*24*/ $fp
+/*22*/ $fp
 ];
 
 // loop through each element of the array for pattern

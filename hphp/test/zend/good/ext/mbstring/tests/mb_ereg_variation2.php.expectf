@@ -106,16 +106,6 @@ NULL
 
 -- Iteration 22 --
 
-Warning: mb_ereg() expects parameter 2 to be string, null given in %s/zend/good/ext/mbstring/tests/mb_ereg_variation2.php on line %d
-NULL
-
--- Iteration 23 --
-
-Warning: mb_ereg() expects parameter 2 to be string, null given in %s/zend/good/ext/mbstring/tests/mb_ereg_variation2.php on line %d
-NULL
-
--- Iteration 24 --
-
 Warning: mb_ereg() expects parameter 2 to be string, resource given in %s/zend/good/ext/mbstring/tests/mb_ereg_variation2.php on line %d
 NULL
 Done
